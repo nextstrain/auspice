@@ -6,6 +6,8 @@ The current repo is very much a work-in-progress. We recommend that you use [nex
 
 ## Auspice
 
+*Definition: Observation by an augur, ie a prophetic sign.*
+
 *Auspice* is the web app that gives an interactive display of inferences produced by *augur* pipeline.
 
 ## License and copyright
