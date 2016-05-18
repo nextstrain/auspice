@@ -42,7 +42,7 @@ class ComponentName extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <Flex style={styles.container} justifyContent="space-between">
+      <Flex style={styles.container} justifyContent="center">
         <a href="http://www.fredhutch.org/">
           <img width="125" src="/images/fred-hutch-logo-small.png"/>
         </a>
