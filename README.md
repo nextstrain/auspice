@@ -4,6 +4,13 @@ The nextstrain project is an attempt to make flexible informatic pipelines and v
 
 The current repo is very much a work-in-progress. We recommend that you use [nextflu](https://github.com/blab/nextflu) instead for current applications. At some point, this repo will takeover from the nextflu repo.
 
+## Getting started
+
+`$ git clone ... `
+`$ cd ... `
+`$ npm install `
+`$ npm start `
+
 ## Auspice
 
 *Definition: Observation by an augur, ie a prophetic sign.*
