@@ -7,6 +7,10 @@ import _ from "lodash";
 // import {Link} from "react-router";
 // import Awesome from "react-fontawesome";
 import Flex from "./framework/flex";
+import Header from "./header";
+import Controls from "./controls";
+import Tree from "./tree";
+import Footer from "./footer";
 
 
 @connect((state) => {
@@ -34,16 +38,30 @@ class App extends React.Component {
   }
   static defaultProps = {
     // foo: "bar"
-    virus: {
-      name: "[virus not loaded]"
-    }
+
   }
 
   render() {
     return (
-      <Flex alignItems="flex-start" style={{height: "100%"}}>
-        <p> nextstrain </p>
-        <p> Real-time tracking of {this.props.virus.name} virus evolution </p>
+      <Flex
+        justifyContent="space-between"
+        alignItems="flex-start"
+        direction="column"
+        style={{
+          height: "100%",
+          margin: 40
+        }}>
+        <Header/>
+        <Flex
+          style={{
+            width: "100%"
+          }}
+          wrap="wrap"
+          justifyContent="space-between">
+          <Controls/>
+          <Tree/>
+        </Flex>
+        <Footer/>
       </Flex>
     );
   }

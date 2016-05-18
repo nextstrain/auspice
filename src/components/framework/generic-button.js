@@ -9,7 +9,7 @@ class Button extends React.Component {
   }
   static defaultProps = {
     style: {
-      backgroundColor: "orange",
+      backgroundColor: "rgb(130,130,130)",
       color: "white"
     }
   }
