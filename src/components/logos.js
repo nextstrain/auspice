@@ -33,13 +33,16 @@ class ComponentName extends React.Component {
     return {
       base: {
 
+      },
+      container: {
+        marginTop: 20
       }
     };
   }
   render() {
     const styles = this.getStyles();
     return (
-      <Flex justifyContent="space-between">
+      <Flex style={styles.container} justifyContent="space-between">
         <a href="http://www.fredhutch.org/">
           <img width="125" src="/images/fred-hutch-logo-small.png"/>
         </a>
