@@ -6,7 +6,6 @@ import { Router, Route, Link, IndexRoute, browserHistory } from 'react-router';
 // React Redux
 import { Provider, connect } from 'react-redux';
 // Redux Devtools
-import { DevTools, DebugPanel, LogMonitor } from 'redux-devtools/lib/react';
 
 import configureStore from "./store";
 
@@ -24,9 +23,6 @@ class Root extends React.Component {
             <Route path="/" component={App}/>
           </Router>
         </Provider>
-        <DebugPanel top right bottom>
-          <DevTools store={store} visibleOnLoad={false} monitor={LogMonitor} />
-        </DebugPanel>
       </div>
     );
   }
