@@ -14,6 +14,28 @@ app.use(require("webpack-dev-middleware")(compiler, {
 
 app.use(require("webpack-hot-middleware")(compiler));
 
+app.get("/Zika_meta", function(req, res) {
+  request("http://nextstrain.org/data/Zika_meta.json", function(err,r) {
+    if (err) {console.log('error getting data', err)}
+    // console.log(r.toJSON())
+    res.send(r.toJSON());
+  });
+});
+
+app.get("/Zika_tree", function(req, res) {
+  request("http://nextstrain.org/data/Zika_tree.json", function(err,r) {
+    if (err) {console.log('error getting data', err)}
+    res.send(r.toJSON());
+  });
+});
+
+app.get("/Zika_sequences", function(req, res) {
+  request("http://nextstrain.org/data/Zika_sequences.json", function(err,r) {
+    if (err) {console.log('error getting data', err)}
+    res.send(r.toJSON());
+  });
+});
+
 app.get("*", function(req, res) {
   res.sendFile(path.join(__dirname, "index.html"));
 });
