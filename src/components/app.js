@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-// import {  } from "../actions";
+import { populateMetadataStore, populateTreeStore, populateSequencesStore } from "../actions";
 
 import Radium from "radium";
 import _ from "lodash";
@@ -12,10 +12,15 @@ import Controls from "./controls";
 import Tree from "./tree";
 import Footer from "./footer";
 
+const toState = (state) => {
+  return {
+    metadata: state.metadata,
+    tree: state.tree,
+    sequences: state.sequences
+  }
+}
 
-@connect((state) => {
-  return state.user;
-})
+@connect(toState)
 @Radium
 class App extends React.Component {
   constructor(props) {
@@ -40,8 +45,13 @@ class App extends React.Component {
     // foo: "bar"
 
   }
-
+  componentDidMount() {
+    this.props.dispatch(populateMetadataStore());
+    this.props.dispatch(populateTreeStore());
+    this.props.dispatch(populateSequencesStore());
+  }
   render() {
+    console.log('props', this.props)
     return (
       <Flex
         justifyContent="space-between"
