@@ -12,15 +12,15 @@ import Controls from "./controls";
 import Tree from "./tree";
 import Footer from "./footer";
 
-const toState = (state) => {
+const returnStateNeeded = (fullStateTree) => {
   return {
-    metadata: state.metadata,
-    tree: state.tree,
-    sequences: state.sequences
+    metadata: fullStateTree.metadata,
+    tree: fullStateTree.tree,
+    sequences: fullStateTree.sequences
   }
 }
 
-@connect(toState)
+@connect(returnStateNeeded)
 @Radium
 class App extends React.Component {
   constructor(props) {
@@ -51,7 +51,6 @@ class App extends React.Component {
     this.props.dispatch(populateSequencesStore());
   }
   render() {
-    console.log('props', this.props)
     return (
       <Flex
         justifyContent="space-between"
