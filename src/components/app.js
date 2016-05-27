@@ -1,6 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
-import { populateMetadataStore, populateTreeStore, populateSequencesStore } from "../actions";
+import {
+  populateMetadataStore,
+  populateTreeStore,
+  populateSequencesStore,
+  populateFrequenciesStore
+} from "../actions";
 
 import Radium from "radium";
 import _ from "lodash";
@@ -49,6 +54,7 @@ class App extends React.Component {
     this.props.dispatch(populateMetadataStore());
     this.props.dispatch(populateTreeStore());
     this.props.dispatch(populateSequencesStore());
+    this.props.dispatch(populateFrequenciesStore());
   }
   render() {
     return (

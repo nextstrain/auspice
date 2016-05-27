@@ -7,6 +7,9 @@ export const TREE_FETCH_ERROR = "TREE_FETCH_ERROR";
 export const REQUEST_SEQUENCES = "REQUEST_SEQUENCES";
 export const RECEIVE_SEQUENCES = "RECEIVE_SEQUENCES";
 export const SEQUENCES_FETCH_ERROR = "SEQUENCES_FETCH_ERROR";
+export const REQUEST_FREQUENCIES = "REQUEST_FREQUENCIES";
+export const RECEIVE_FREQUENCIES = "RECEIVE_FREQUENCIES";
+export const FREQUENCIES_FETCH_ERROR = "FREQUENCIES_FETCH_ERROR";
 
 /* request metadata */
 
@@ -80,7 +83,7 @@ export const populateTreeStore = () => {
   };
 };
 
-/* request foo */
+/* request sequences */
 
 const requestSequences = () => {
   return {
@@ -112,6 +115,42 @@ export const populateSequencesStore = () => {
     return fetchSequences().then((res) => res.json()).then(
       (json) => dispatch(receiveSequences(json.body)),
       (err) => dispatch(sequencesFetchError(err))
+    );
+  };
+};
+
+/* request frequencies */
+
+const requestFrequencies = () => {
+  return {
+    type: REQUEST_FREQUENCIES
+  };
+};
+
+const receiveFrequencies = (data) => {
+  return {
+    type: RECEIVE_FREQUENCIES,
+    data: data
+  };
+};
+
+const frequenciesFetchError = (err) => {
+  return {
+    type: FREQUENCIES_FETCH_ERROR,
+    data: err
+  };
+};
+
+const fetchFrequencies = () => {
+  return fetch("/Zika_frequencies");
+};
+
+export const populateFrequenciesStore = () => {
+  return (dispatch) => {
+    dispatch(requestFrequencies());
+    return fetchFrequencies().then((res) => res.json()).then(
+      (json) => dispatch(receiveFrequencies(json.body)),
+      (err) => dispatch(frequenciesFetchError(err))
     );
   };
 };
