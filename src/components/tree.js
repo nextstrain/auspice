@@ -54,6 +54,22 @@ class Tree extends React.Component {
         this.props.style
       ]}>
         <p> tree </p>
+        <div id="date-input"></div>
+        <div id="legend-title"></div>
+        <div id="legend"></div>
+        <div id="coloring"></div>
+        <div id="gt-color"></div>
+        <div id="branchlabels"></div>
+        <div id="region"></div>
+        <div id="search"></div>
+        <div id="straininput"></div>
+        <div id="bp-ac"></div>
+        <div id="bp-input"></div>
+        <div id="searchinputclear"></div>
+        <div id="reset"> </div>
+        <div className="treeplot-container" id="treeplot-container"></div>
+        <div id="updated"></div>
+        <div id="commit"></div>
         <svg id="treemap"> </svg>
       </div>
     );
