@@ -34,6 +34,7 @@
   },
   "dependencies": {
     "color": "^0.7.3",
+    "d3": "^3.5.17",
     "highlight.js": "^8.9.1",
     "history": "^1.12.5",
     "lodash": "^3.10.1",
