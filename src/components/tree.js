@@ -37,7 +37,11 @@ class Tree extends React.Component {
     // foo: "bar"
   }
   componentDidMount() {
-    visualization()
+    visualization(
+      this.props.tree.tree,
+      this.props.sequences.sequences,
+      this.props.frequencies.frequencies
+    )
   }
   getStyles() {
     return {
@@ -54,6 +58,9 @@ class Tree extends React.Component {
         this.props.style
       ]}>
         <p> tree </p>
+        <div className="d3-tip se"/>
+        <div className="d3-tip e"/>
+        <div className="d3-tip"/>
         <div id="date-input"></div>
         <div id="legend-title"></div>
         <div id="legend"></div>

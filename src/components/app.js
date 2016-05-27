@@ -21,7 +21,8 @@ const returnStateNeeded = (fullStateTree) => {
   return {
     metadata: fullStateTree.metadata,
     tree: fullStateTree.tree,
-    sequences: fullStateTree.sequences
+    sequences: fullStateTree.sequences,
+    frequencies: fullStateTree.frequencies
   }
 }
 
@@ -56,6 +57,17 @@ class App extends React.Component {
     this.props.dispatch(populateSequencesStore());
     this.props.dispatch(populateFrequenciesStore());
   }
+  drawTreeIfData() {
+    const p = this.props;
+    if(
+      p.metadata.metadata &&
+      p.tree.tree &&
+      p.sequences.sequences &&
+      p.frequencies.frequencies
+    ) {
+      return <Tree/>
+    }
+  }
   render() {
     return (
       <Flex
@@ -74,7 +86,7 @@ class App extends React.Component {
           wrap="wrap"
           justifyContent="space-between">
           <Controls/>
-          <Tree/>
+          {this.drawTreeIfData()}
         </Flex>
         <Footer/>
       </Flex>
