@@ -10,6 +10,55 @@ export const visualization = (root, sequences, frequencies, vaccineStrains) => {
 **********************************
 *********************************/
 
+/*
+
+	this is a bypass to get Zika working now (in part because it loads quickly for dev).
+	we'll pass in vaccineStrains this for H3N2 & others with metadata and serums
+
+*/
+var file_prefix = "Zika_";
+var	vaccineChoice = {};
+var vaccineStrains = Object.keys(vaccineChoice);
+var reference_viruses= {};
+var branch_labels=false;
+var restrictTo = {"region": "all"};
+var time_window = 3.0;
+var full_data_time_window = 1.5;
+var time_ticks=[2013.0, 2013.5, 2014.0, 2014.5, 2015.0, 2015.5, 2016.0];
+var dfreq_dn = 2;
+var LBItime_window = 0.5;
+var LBItau = 0.0005;
+var regions = [
+["french_polynesia",   "#3E58CF"],
+["american_samoa",	   "#426FCE"],
+["china",			   "#4784C8"],
+["brazil",  		   "#72B485"],
+["colombia",  		   "#81BA72"],
+["venezuela",          "#92BC63"],
+["suriname",  		   "#A4BE56"],
+["guatemala",  		   "#B6BD4C"],
+["haiti",  			   "#C6B944"],
+["martinique",  	   "#D4B13F"],
+["puerto_rico",  	   "#DEA63B"],
+["mexico",             "#E59637"],
+["dominican_republic", "#E67E33"],
+["panama",             "#E4632E"]
+];
+// Asia: "#3E58CF", "#426FCE", "#4784C8", "#4F96BC"
+// Americas: "#72B485", "#81BA72", "#92BC63", "#A4BE56", "#B6BD4C", "#C6B944", "#D4B13F", "#DEA63B", "#E59637", "#E67E33", "#E4632E"
+var mutType = 'nuc';
+var default_gene = 'nuc';
+var plot_frequencies = false;
+/*
+
+	end bypass
+
+*/
+
+
+
+console.log("strains", vaccineStrains)
+
 var genericDomain = [0,0.111,0.222,0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];
 var path = '/data/';
 var tip_labels = true;
