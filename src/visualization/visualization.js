@@ -70,7 +70,7 @@ if (typeof globalDate == 'undefined') {
     var globalDate = new Date();
 }
 
-var nodes, tips, rootNode, links, vaccines, sera;
+var width, height, nodes, tips, rootNode, links, vaccines, sera;
 
 var nDisplayTips, displayRoot;
 if (document.getElementById("gtspec") != null){
