@@ -16,6 +16,7 @@ export const visualization = (root, sequences, frequencies, vaccineStrains) => {
 	we'll load and pass in vaccineStrains metadata for H3N2 & others with metadata and sera
 
 */
+var date_select = true;
 var file_prefix = "Zika_";
 var	vaccineChoice = {};
 var vaccineStrains = Object.keys(vaccineChoice);
