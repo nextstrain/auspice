@@ -23,8 +23,8 @@ const returnStateNeeded = (fullStateTree) => {
     tree: fullStateTree.tree,
     sequences: fullStateTree.sequences,
     frequencies: fullStateTree.frequencies
-  }
-}
+  };
+};
 
 @connect(returnStateNeeded)
 @Radium
@@ -59,14 +59,18 @@ class App extends React.Component {
   }
   drawTreeIfData() {
     const p = this.props;
-    if(
+    let markup;
+
+    if (
       p.metadata.metadata &&
       p.tree.tree &&
       p.sequences.sequences &&
       p.frequencies.frequencies
     ) {
-      return <Tree/>
+      markup = (<Tree/>);
     }
+
+    return markup
   }
   render() {
     return (
