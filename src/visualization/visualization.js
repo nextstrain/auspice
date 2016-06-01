@@ -13,7 +13,7 @@ export const visualization = (root, sequences, frequencies, vaccineStrains) => {
 /*
 
 	this is a bypass to get Zika working now (in part because it loads quickly for dev).
-	we'll pass in vaccineStrains this for H3N2 & others with metadata and serums
+	we'll load and pass in vaccineStrains metadata for H3N2 & others with metadata and sera
 
 */
 var file_prefix = "Zika_";
