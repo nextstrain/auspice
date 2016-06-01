@@ -1,6 +1,4 @@
-import d3 from "d3";
-
-export const visualization = () => {
+export const visualization = (root, sequences, frequencies, vaccineStrains) => {
 
 /*********************************
 **********************************
@@ -62,17 +60,17 @@ var fitnessColorDomain = genericDomain.map(function(d){return Math.round(100*((d
 var time_step;
 
 
-d3.json(path + file_prefix + "meta.json", function(error, json) {
-    if (error) return console.warn(error);
-    d3.select("#updated").text(json['updated']);
-    commit_id = json['commit'];
-    short_id = commit_id.substring(0, 6);
-    d3.select("#commit")
-        .append("a")
-        .attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
-        .text(short_id);
+// d3.json(path + file_prefix + "meta.json", function(error, json) {
+//     if (error) return console.warn(error);
+    // d3.select("#updated").text(json['updated']);
+    // commit_id = json['commit'];
+    // short_id = commit_id.substring(0, 6);
+    // d3.select("#commit")
+    //     .append("a")
+    //     .attr("href", "http://github.com/blab/nextflu/commit/" + commit_id)
+    //     .text(short_id);
 
-});
+// });
 
 /*********************************
 **********************************
@@ -2044,9 +2042,9 @@ function addBranchLabels(){
 }
 
 
-d3.json(path + file_prefix + "tree.json", function(error, root) {
+// d3.json(path + file_prefix + "tree.json", function(error, root) {
 
-	if (error) return console.warn(error);
+	// if (error) return console.warn(error);
 
 	nodes = tree.nodes(root);
 	links = tree.links(nodes);
@@ -2442,12 +2440,12 @@ d3.json(path + file_prefix + "tree.json", function(error, root) {
 	d3.select("#svgexport")
 		.on("click", exportTreeSVG);
 
-});
+// });
 
-d3.json(path + file_prefix + "sequences.json", function(error, json) {
-	if (error) return console.warn(error);
-	cladeToSeq=json;
-});
+// d3.json(path + file_prefix + "sequences.json", function(error, sequences) {
+	// if (error) return console.warn(error);
+	cladeToSeq=sequences;
+// });
 
 
 /*********************************
@@ -2640,9 +2638,9 @@ var gt_chart = c3.generate({
 	}
 });
 
-d3.json(path + file_prefix + "frequencies.json", function(error, json){
-	console.log(error);
-	frequencies = json;
+// d3.json(path + file_prefix + "frequencies.json", function(error, json){
+	// console.log(error);
+	// frequencies = json;
 	pivots= frequencies["mutations"]["global"]["pivots"].map(function (d) {return Math.round(parseFloat(d)*100)/100;});
 	var ticks = [Math.round(pivots[0])];
 	var tick_step = Math.round((pivots[pivots.length-1]-pivots[0])/6*10)/10;
@@ -2794,7 +2792,7 @@ d3.json(path + file_prefix + "frequencies.json", function(error, json){
 			saveAs(blob,'frequencies.tsv');
 		});
 	make_gt_chart(parse_gt_string(document.getElementById("gtspec").value));
-});
+// });
 
 /*********************************
 **********************************
