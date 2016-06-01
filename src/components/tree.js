@@ -40,7 +40,8 @@ class Tree extends React.Component {
     visualization(
       this.props.tree.tree,
       this.props.sequences.sequences,
-      this.props.frequencies.frequencies
+      this.props.frequencies.frequencies,
+      null /* todo: this is vaccineStrains */
     )
   }
   getStyles() {
