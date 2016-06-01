@@ -76,11 +76,12 @@ class Tree extends React.Component {
         <div id="bp-ac"></div>
         <div id="bp-input"></div>
         <div id="searchinputclear"></div>
-        <div id="reset"> </div>
+        <div id="reset"></div>
+        <div className="freqplot-container"></div>
         <div className="treeplot-container" id="treeplot-container"></div>
         <div id="updated"></div>
         <div id="commit"></div>
-        <svg id="treemap"> </svg>
+        <svg id="treeplot"> </svg>
       </div>
     );
   }
