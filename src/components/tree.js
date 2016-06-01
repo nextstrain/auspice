@@ -65,7 +65,9 @@ class Tree extends React.Component {
         <div id="date-input"></div>
         <div id="legend-title"></div>
         <div id="legend"></div>
-        <div id="coloring"></div>
+        <select id="coloring">
+          <option value="region"> geographic region </option>
+        </select>
         <div id="gt-color"></div>
         <div id="branchlabels"></div>
         <div id="region"></div>
