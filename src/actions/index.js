@@ -41,7 +41,7 @@ export const populateMetadataStore = () => {
   return (dispatch) => {
     dispatch(requestMetadata());
     return fetchMetadata().then((res) => res.json()).then(
-      (json) => dispatch(receiveMetadata(json.body)),
+      (json) => dispatch(receiveMetadata(JSON.parse(json.body))),
       (err) => dispatch(metadataFetchError(err))
     );
   };
@@ -77,7 +77,7 @@ export const populateTreeStore = () => {
   return (dispatch) => {
     dispatch(requestTree());
     return fetchTree().then((res) => res.json()).then(
-      (json) => dispatch(receiveTree(json.body)),
+      (json) => dispatch(receiveTree(JSON.parse(json.body))),
       (err) => dispatch(treeFetchError(err))
     );
   };
@@ -113,7 +113,7 @@ export const populateSequencesStore = () => {
   return (dispatch) => {
     dispatch(requestSequences());
     return fetchSequences().then((res) => res.json()).then(
-      (json) => dispatch(receiveSequences(json.body)),
+      (json) => dispatch(receiveSequences(JSON.parse(json.body))),
       (err) => dispatch(sequencesFetchError(err))
     );
   };
@@ -149,7 +149,7 @@ export const populateFrequenciesStore = () => {
   return (dispatch) => {
     dispatch(requestFrequencies());
     return fetchFrequencies().then((res) => res.json()).then(
-      (json) => dispatch(receiveFrequencies(json.body)),
+      (json) => dispatch(receiveFrequencies(JSON.parse(json.body))),
       (err) => dispatch(frequenciesFetchError(err))
     );
   };
