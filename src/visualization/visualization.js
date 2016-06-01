@@ -2403,7 +2403,7 @@ function addBranchLabels(){
 		dragend();
 	}
 
-	for (rt in restrictTo){
+	for (var rt in restrictTo){
 		var tmp = document.getElementById(rt);
 		if (tmp!=null){
 			restrictTo[rt] = tmp.value;
@@ -2470,7 +2470,7 @@ function addBranchLabels(){
 
 
 	// add clade labels
-	clades = rootNode["clade_annotations"];
+	let clades = rootNode["clade_annotations"];
 	if (typeof clades != "undefined"){
 		console.log(clades);
 		var clade_annotations = treeplot.selectAll('.annotation')
