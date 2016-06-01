@@ -96,7 +96,13 @@ var legend = d3.select("#legend")
 	.attr("width", 280)
 	.attr("height", 100);
 
+/*
+	there is a bypass in the tree component - this is hardcoded to region
+*/
 var colorBy = document.getElementById("coloring").value;
+/*
+	end bypass
+*/
 var colorScale;
 var serumSymbol = '\uf0fe';
 var epiColorDomain = genericDomain;
