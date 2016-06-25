@@ -70,7 +70,7 @@ class App extends React.Component {
       markup = (<Tree/>);
     }
 
-    return markup
+    return markup;
   }
   render() {
     return (
@@ -79,7 +79,7 @@ class App extends React.Component {
         alignItems="flex-start"
         direction="column"
         style={{
-          height: "100%",
+          height: 1100,
           margin: 40
         }}>
         <Header/>
