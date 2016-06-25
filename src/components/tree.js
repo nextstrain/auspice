@@ -5,6 +5,9 @@ import Radium from 'radium';
 import { connect } from 'react-redux';
 // import { FOO } from '../actions';
 import { visualization } from "../visualization/visualization";
+import d3 from "d3";
+import Link from "./tree-link";
+import Node from "./tree-node";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -37,12 +40,12 @@ class Tree extends React.Component {
     // foo: "bar"
   }
   componentDidMount() {
-    visualization(
-      this.props.tree.tree,
-      this.props.sequences.sequences,
-      this.props.frequencies.frequencies,
-      null /* todo: this is vaccineStrains */
-    )
+    // visualization(
+    //   this.props.tree.tree,
+    //   this.props.sequences.sequences,
+    //   this.props.frequencies.frequencies,
+    //   null /* todo: this is vaccineStrains */
+    // )
   }
   getStyles() {
     return {
@@ -51,8 +54,45 @@ class Tree extends React.Component {
       }
     };
   }
+  treePlotHeight (width) {
+    return 400 + 0.30 * width;
+  }
+  drawNodes(nodes) {
+    const nodeComponents = nodes.map((node, index) => {
+      return (
+        <Node
+          key={index}
+          k={index}
+          hasChildren={node.children ? true : false}
+          name={node.name}
+          x={node.x}
+          y={node.y}/>
+      );
+    });
+    return nodeComponents;
+  }
+  drawLinks(links) {
+    const linkComponents = links.map((link, index) => {
+      return (
+        <Link
+          datum={link}
+          key={index} />
+      );
+    });
+    return linkComponents;
+  }
   render() {
+
+    /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
+    const width = 1000;
+
+    const tree = d3.layout.tree()
+      .size([this.treePlotHeight(width), width]);
+    const nodes = tree.nodes(this.props.tree.tree);
+    const links = tree.links(nodes);
+
     const styles = this.getStyles();
+
     return (
       <div style={[
         styles.base,
@@ -81,7 +121,16 @@ class Tree extends React.Component {
         <div className="treeplot-container" id="treeplot-container"></div>
         <div id="updated"></div>
         <div id="commit"></div>
-        <svg id="treeplot"> </svg>
+        <svg
+          height={this.treePlotHeight(width)}
+          width={width}
+          id="treeplot"
+          style={{
+            border: "1px solid rgb(130,130,130)"
+          }}>
+          {this.drawNodes(nodes)}
+          {this.drawLinks(links)}
+        </svg>
       </div>
     );
   }
