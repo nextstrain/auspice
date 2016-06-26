@@ -8,6 +8,7 @@ import { visualization } from "../visualization/visualization";
 import d3 from "d3";
 import Link from "./tree-link";
 import Node from "./tree-node";
+import { processNodes } from "../util/processNodes";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -23,8 +24,18 @@ const returnStateNeeded = (fullStateTree) => {
 class Tree extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
+      /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
+      const width = 1000;
 
+      const tree = d3.layout.tree()
+        .size([this.treePlotHeight(width), width]);
+      const nodes = processNodes(tree.nodes(props.tree.tree))
+      const links = tree.links(nodes);
+
+    this.state = {
+      width: width,
+      nodes: nodes,
+      links: links
     };
   }
   static propTypes = {
@@ -82,17 +93,7 @@ class Tree extends React.Component {
     return linkComponents;
   }
   render() {
-
-    /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
-    const width = 1000;
-
-    const tree = d3.layout.tree()
-      .size([this.treePlotHeight(width), width]);
-    const nodes = tree.nodes(this.props.tree.tree);
-    const links = tree.links(nodes);
-
     const styles = this.getStyles();
-
     return (
       <div style={[
         styles.base,
@@ -122,14 +123,14 @@ class Tree extends React.Component {
         <div id="updated"></div>
         <div id="commit"></div>
         <svg
-          height={this.treePlotHeight(width)}
-          width={width}
+          height={this.treePlotHeight(this.state.width)}
+          width={this.state.width}
           id="treeplot"
           style={{
             border: "1px solid rgb(130,130,130)"
           }}>
-          {this.drawNodes(nodes)}
-          {this.drawLinks(links)}
+          {this.drawNodes(this.state.nodes)}
+          {/*this.drawLinks(this.state.links) */}
         </svg>
       </div>
     );
