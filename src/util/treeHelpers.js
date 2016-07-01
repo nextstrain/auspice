@@ -9,6 +9,9 @@
 *********************************/
 
 export const gatherTips = (node, tips) => {
+
+  const rootNode = nodes[0];
+
   if (typeof node.children !== "undefined") {
     for (let i = 0, c = node.children.length; i < c; i++) {
       gatherTips(node.children[i], tips);
@@ -109,6 +112,7 @@ export const calcTipCounts = (node) => {
   } else if (node.current) {
     node.tipCount = 1;
   }
+  // console.log("node has children so iterate", node.tipCount, "number of children", node.children && node.children.length, node.current)
 };
 
 /**
@@ -199,7 +203,9 @@ export const calcLBI = (node, allnodes) => {
 };
 
 export const adjust_freq_by_date = (nodes, rootNode) => {
-  nodes.forEach((d) => {
-    d.frequency = (d.tipCount) / rootNode.tipCount;
+  // console.log("all nodes and root node", nodes, rootNode)
+  return nodes.map((d) => {
+    // console.log("tipcount & rootnodeTipcount", d.tipCount, rootNode.tipCount)
+    // d.frequency = (d.tipCount) / rootNode.tipCount;
   });
 };
