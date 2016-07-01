@@ -1,6 +1,6 @@
 import React from 'react';
 import Radium from 'radium';
-// import _ from 'lodash';
+import _ from 'lodash';
 // import Flex from './framework/flex';
 import { connect } from 'react-redux';
 // import { FOO } from '../actions';
@@ -26,16 +26,27 @@ class Tree extends React.Component {
     super(props);
       /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
       const width = 1000;
+      const margin = 20;
 
       const tree = d3.layout.tree()
         .size([this.treePlotHeight(width), width]);
       const nodes = processNodes(tree.nodes(props.tree.tree))
       const links = tree.links(nodes);
 
+      const xValues = nodes.map((d) => {
+        return +d.xvalue;
+      });
+
+      const yValues = nodes.map((d) => {
+        return +d.yvalue;
+      });
+
     this.state = {
       width: width,
       nodes: nodes,
-      links: links
+      links: links,
+      xScale: d3.scale.linear().domain([d3.min(xValues), d3.max(xValues)]).range([margin, width - margin]),
+      yScale: d3.scale.linear().domain([d3.min(yValues), d3.max(yValues)]).range([margin, this.treePlotHeight(width) - margin])
     };
   }
   static propTypes = {
@@ -76,8 +87,8 @@ class Tree extends React.Component {
           k={index}
           hasChildren={node.children ? true : false}
           name={node.name}
-          x={node.x}
-          y={node.y}/>
+          x={this.state.xScale(node.xvalue)}
+          y={this.state.yScale(node.yvalue)}/>
       );
     });
     return nodeComponents;
@@ -86,6 +97,8 @@ class Tree extends React.Component {
     const linkComponents = links.map((link, index) => {
       return (
         <Link
+          xscale={this.state.xScale}
+          yscale={this.state.yScale}
           datum={link}
           key={index} />
       );
@@ -94,6 +107,7 @@ class Tree extends React.Component {
   }
   render() {
     const styles = this.getStyles();
+    console.log("tree state", this.state)
     return (
       <div style={[
         styles.base,
@@ -130,7 +144,7 @@ class Tree extends React.Component {
             border: "1px solid rgb(130,130,130)"
           }}>
           {this.drawNodes(this.state.nodes)}
-          {/*this.drawLinks(this.state.links) */}
+          {this.drawLinks(this.state.links)}
         </svg>
       </div>
     );

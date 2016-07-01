@@ -335,13 +335,7 @@ if (typeof rootNode.rb !== "undefined") { initColorDomain("rb", receptorBindingC
 date_init();
 tree_init();
 
-const xValues = nodes.map((d) => {
-  return +d.xvalue;
-});
 
-const yValues = nodes.map((d) => {
-  return +d.yvalue;
-});
 
 let clade_freq_event;
 
@@ -431,8 +425,5 @@ if (typeof clades !== "undefined") {
       return d[0];
     });
 }
-const xScale = d3.scale.linear()
-  .domain([d3.min(xValues), d3.max(xValues)]);
-const yScale = d3.scale.linear()
-  .domain([d3.min(yValues), d3.max(yValues)]);
+
 resize();
