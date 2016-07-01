@@ -41,12 +41,12 @@ class TreeLink extends React.Component {
     return d3.scale.sqrt().domain([0, 1]).range([1, 10]);
   }
   branchPoints (d) {
-    const freqScale = this.setupFreqScale();
-
-    const mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
-    return (d.source.x - mod).toString() + "," + d.source.y.toString() + " "
-      + (d.source.x - mod).toString() + "," + d.target.y.toString() + " "
-      + (d.target.x).toString() + "," + d.target.y.toString();
+    // const freqScale = this.setupFreqScale();
+    const mod = 0;
+    // const mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
+    return (this.props.xscale(d.source.xvalue) - mod).toString() + "," + this.props.yscale(d.source.yvalue).toString() + " "
+      + (this.props.xscale(d.source.xvalue) - mod).toString() + "," + this.props.yscale(d.target.yvalue).toString() + " "
+      + (this.props.xscale(d.target.xvalue)).toString() + "," + this.props.yscale(d.target.yvalue).toString();
   };
   render() {
     const styles = this.getStyles();
