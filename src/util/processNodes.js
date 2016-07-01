@@ -9,7 +9,7 @@ export const processNodes = (nodes) => {
 
   // treeHelpers.calcNodeAges(globals.time_window);
   // colorByTrait();
-  treeHelpers.adjust_freq_by_date(nodes, rootNode);
+  var nodesWithFrequencyAdded = treeHelpers.adjust_freq_by_date(nodes, rootNode);
 
   return nodes;
 
