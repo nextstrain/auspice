@@ -37,7 +37,7 @@ class TreeNode extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-    	<g transform={"translate(" + this.props.y + "," + this.props.x + ")"}>
+    	<g transform={"translate(" + this.props.x + "," + this.props.y + ")"}>
     		<circle r={this.props.hasChildren ? 1 : 3} />
       	<text
           	dx={this.props.hasChildren ? -8 : 8}
