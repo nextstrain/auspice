@@ -5,10 +5,7 @@ import Radium from 'radium';
 // import { connect } from 'react-redux';
 // import { FOO } from '../actions';
 import Button from "./framework/generic-button";
-import DateSlider from "./controls/date_slider";
-import ColorLegend from "./controls/color_legend";
-import ColorByInputs from "./controls/color_by_inputs";
-import SearchStrainsInput from "./controls/search_strains_inputs";
+
 
 // @connect(state => {
 //   return state.FOO;
@@ -47,10 +44,6 @@ class Controls extends React.Component {
         styles.base,
         this.props.style
       ]}>
-        <DateSlider/>
-        <ColorLegend/>
-        <ColorByInputs/>
-        <SearchStrainsInput/>
         <Button> Reset Layout </Button>
       </div>
     );
