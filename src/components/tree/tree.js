@@ -4,18 +4,20 @@ import _ from 'lodash';
 // import Flex from './framework/flex';
 import { connect } from 'react-redux';
 // import { FOO } from '../actions';
-import { visualization } from "../visualization/visualization";
+import { visualization } from "../../visualization/visualization";
 import d3 from "d3";
-import Link from "./tree-link";
-import Node from "./tree-node";
-import { processNodes } from "../util/processNodes";
+import Link from "./branch";
+import Node from "./node";
+import { processNodes } from "../../util/processNodes";
+import BranchLabel from "./branch-label";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
     metadata: fullStateTree.metadata,
     tree: fullStateTree.tree,
     sequences: fullStateTree.sequences,
-    frequencies: fullStateTree.frequencies
+    frequencies: fullStateTree.frequencies,
+    controls: fullStateTree.controls
   }
 }
 
@@ -26,7 +28,7 @@ class Tree extends React.Component {
     super(props);
       /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
       const width = 1000;
-      const margin = 20;
+      const margin = 60;
 
       const tree = d3.layout.tree()
         .size([this.treePlotHeight(width), width]);
@@ -76,7 +78,7 @@ class Tree extends React.Component {
       }
     };
   }
-  treePlotHeight (width) {
+  treePlotHeight(width) {
     return 400 + 0.30 * width;
   }
   drawNodes(nodes) {
@@ -85,6 +87,10 @@ class Tree extends React.Component {
         <Node
           key={index}
           k={index}
+          node={node}
+          nuc_muts={node.nuc_muts}
+          showBranchLabels={this.props.controls.showBranchLabels}
+          strain={node.strain}
           hasChildren={node.children ? true : false}
           name={node.name}
           x={this.state.xScale(node.xvalue)}
@@ -105,46 +111,34 @@ class Tree extends React.Component {
     });
     return linkComponents;
   }
+  drawBranchLabels(nodes) {
+    const branchComponents = nodes.map((node, index) => {
+      if (node.children) {
+        return (
+          <BranchLabel
+            key={index}
+            x={this.state.xScale(node.xvalue)}
+            y={this.state.yScale(node.yvalue)}/>
+        );
+      }
+    });
+    return branchComponents;
+  }
   render() {
     const styles = this.getStyles();
-    console.log("tree state", this.state)
     return (
       <div style={[
         styles.base,
         this.props.style
       ]}>
-        <p> tree </p>
-        <div className="d3-tip se"/>
-        <div className="d3-tip e"/>
-        <div className="d3-tip"/>
-        <div id="date-input"></div>
-        <div id="legend-title"></div>
-        <div id="legend"></div>
-        <select id="coloring">
-          <option value="region"> geographic region </option>
-        </select>
-        <div id="gt-color"></div>
-        <div id="branchlabels"></div>
-        <div id="region"></div>
-        <div id="search"></div>
-        <div id="straininput"></div>
-        <div id="bp-ac"></div>
-        <div id="bp-input"></div>
-        <div id="searchinputclear"></div>
-        <div id="reset"></div>
-        <div className="freqplot-container"></div>
-        <div className="treeplot-container" id="treeplot-container"></div>
-        <div id="updated"></div>
-        <div id="commit"></div>
         <svg
           height={this.treePlotHeight(this.state.width)}
           width={this.state.width}
           id="treeplot"
           style={{
-            border: "1px solid rgb(130,130,130)"
           }}>
-          {this.drawNodes(this.state.nodes)}
           {this.drawLinks(this.state.links)}
+          {this.drawNodes(this.state.nodes)}
         </svg>
       </div>
     );

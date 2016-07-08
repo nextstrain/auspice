@@ -39,12 +39,9 @@ class BranchLabel extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <div style={[
-        styles.base,
-        this.props.style
-      ]}>
-        {"BranchLabel"}
-      </div>
+      <text
+        x={this.props.x}
+        y={this.props.y}> allo :D </text>
     );
   }
 }

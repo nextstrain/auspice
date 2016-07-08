@@ -34,20 +34,34 @@ class TreeNode extends React.Component {
       }
     };
   }
+  getNodeText() {
+    let nodeText = "";
+    if (this.props.strain) {
+      nodeText = this.props.strain
+    } else if (this.props.hasChildren && this.props.showBranchLabels) {
+      nodeText = this.props.nuc_muts
+    }
+
+    return nodeText;
+  }
   render() {
     const styles = this.getStyles();
     return (
-    	<g transform={"translate(" + this.props.x + "," + this.props.y + ")"}>
-    		<circle r={this.props.hasChildren ? 1 : 3} />
-      	<text
-          	dx={this.props.hasChildren ? -8 : 8}
-          	dy={3}
-            style={{"fontFamily": "Helvetica", "fontSize": "10px"}}
-          	textAnchor={this.props.hasChildren ? "end" : "start"}>
-      		{this.props.name}
-      	</text>
-    	</g>
-  	)
+      <g transform={"translate(" + this.props.x + "," + this.props.y + ")"}>
+        <circle r={this.props.hasChildren ? 0 : 3} />
+        <text
+          dx={this.props.hasChildren ? -6 : 6}
+          dy={this.props.hasChildren ? -2 : 3}
+            style={{
+              fontFamily: "Helvetica",
+              fontSize: 8,
+              fontWeight: 300
+            }}
+          textAnchor={this.props.hasChildren ? "end" : "start"}>
+          {this.getNodeText()}
+        </text>
+      </g>
+    )
   }
 }
 

@@ -1,17 +1,16 @@
 import React from 'react';
 import Radium from 'radium';
 // import _ from 'lodash';
-// import Flex from './framework/flex';
+import Flex from '../framework/flex';
 // import { connect } from 'react-redux';
 // import { FOO } from '../actions';
-import Button from "./framework/generic-button";
 
 
 // @connect(state => {
 //   return state.FOO;
 // })
 @Radium
-class Controls extends React.Component {
+class ComponentName extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -34,20 +33,31 @@ class Controls extends React.Component {
     return {
       base: {
 
+      },
+      container: {
+        marginTop: 20
       }
     };
   }
   render() {
     const styles = this.getStyles();
     return (
-      <div style={[
-        styles.base,
-        this.props.style
-      ]}>
-        <Button> Reset Layout </Button>
-      </div>
+      <Flex style={styles.container} justifyContent="center">
+        <a href="http://www.fredhutch.org/">
+          <img width="125" src="/images/fred-hutch-logo-small.png"/>
+        </a>
+        <a href="http://www.eb.tuebingen.mpg.de/">
+          <img width="60" src="/images/max-planck-logo-small.png"/>
+        </a>
+        <a href="https://www.nih.gov/">
+          <img width="52" src="/images/nih-logo-small.png"/>
+        </a>
+        <a href="https://erc.europa.eu/">
+          <img width="60" src="/images/erc-logo-small.png"/>
+        </a>
+      </Flex>
     );
   }
 }
 
-export default Controls;
+export default ComponentName;

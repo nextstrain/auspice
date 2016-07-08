@@ -6,12 +6,11 @@ import d3 from "d3";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
 
-
 // @connect(state => {
 //   return state.FOO;
 // })
 @Radium
-class TreeLink extends React.Component {
+class Branch extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -40,7 +39,8 @@ class TreeLink extends React.Component {
   setupFreqScale() {
     return d3.scale.sqrt().domain([0, 1]).range([1, 10]);
   }
-  branchPoints (d) {
+  branchPoints () {
+    const d = this.props.datum
     // const freqScale = this.setupFreqScale();
     const mod = 0;
     // const mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
@@ -50,10 +50,11 @@ class TreeLink extends React.Component {
   };
   render() {
     const styles = this.getStyles();
+    const d = this.props.datum
 
     return (
       <polyline
-        points={this.branchPoints(this.props.datum)}
+        points={this.branchPoints()}
         style={{
           fill: "none",
           stroke: "darkgrey",
@@ -63,8 +64,11 @@ class TreeLink extends React.Component {
   }
 }
 
-export default TreeLink;
+export default Branch;
 
+// <BranchLabel
+//   x={this.props.xscale(d.source.xvalue)}
+//   y={this.props.yscale(d.source.yvalue)}/>
 // let link = treeplot.selectAll(".link")
 //   .data(links)
 //   .enter().append("polyline")

@@ -12,10 +12,10 @@ import _ from "lodash";
 // import {Link} from "react-router";
 // import Awesome from "react-fontawesome";
 import Flex from "./framework/flex";
-import Header from "./header";
-import Controls from "./controls";
-import Tree from "./tree";
-import Footer from "./footer";
+import Header from "./framework/header";
+import Controls from "./controls/controls";
+import Tree from "./tree/tree";
+import Footer from "./framework/footer";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
