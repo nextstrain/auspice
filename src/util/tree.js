@@ -5,19 +5,6 @@ export const reference_viruses = {};
 
 var vaccineStrains = Object.keys(vaccineChoice);
 
-const genericDomain = [
-  0,
-  0.111,
-  0.222,
-  0.333,
-  0.444,
-  0.555,
-  0.666,
-  0.777,
-  0.888,
-  1.0
-];
-
 const path = "/data/";
 const tip_labels = true;
 
@@ -66,21 +53,8 @@ let colorBy = document.getElementById("coloring").value;
   end bypass
 */
 
-let colorScale;
 const serumSymbol = "\uf0fe";
-const epiColorDomain = genericDomain;
-const nonEpiColorDomain = genericDomain;
-const rbsColorDomain = genericDomain;
-let dateColorDomain = genericDomain;
-const HIColorDomain = genericDomain.map((d) => {
-  return Math.round(100 * (d * 3.6)) / 100;
-});
-const dfreqColorDomain = genericDomain.map((d) => {
-  return Math.round(100 * (0.2 + d * 1.8)) / 100;
-});
-const fitnessColorDomain = genericDomain.map((d) => {
-  return Math.round(100 * ((d - 0.5) * 16.0)) / 100;
-});
+
 
 
 /* time_step and freq_ii was in tree init */
