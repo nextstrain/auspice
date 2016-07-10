@@ -58,7 +58,11 @@ class Tree extends React.Component {
     routes: React.PropTypes.array,
     /* component api */
     style: React.PropTypes.object,
-    // foo: React.PropTypes.string
+    controls: React.PropTypes.object,
+    metadata: React.PropTypes.object,
+    tree: React.PropTypes.object,
+    sequences: React.PropTypes.object,
+    frequencies: React.PropTypes.object
   }
   static defaultProps = {
     // foo: "bar"
