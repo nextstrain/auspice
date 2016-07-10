@@ -1,10 +1,10 @@
-import React from 'react';
-import Radium from 'radium';
-import _ from 'lodash';
+import React from "react";
+import Radium from "radium";
+// import _ from "lodash";
 // import Flex from './framework/flex';
-import { connect } from 'react-redux';
-// import { FOO } from '../actions';
-import { visualization } from "../../visualization/visualization";
+import { connect } from "react-redux";
+// import { FOO } from "../actions";
+// import { visualization } from "../../visualization/visualization";
 import d3 from "d3";
 import Link from "./branch";
 import Node from "./node";
@@ -18,37 +18,41 @@ const returnStateNeeded = (fullStateTree) => {
     sequences: fullStateTree.sequences,
     frequencies: fullStateTree.frequencies,
     controls: fullStateTree.controls
-  }
-}
+  };
+};
 
 @connect(returnStateNeeded)
 @Radium
 class Tree extends React.Component {
   constructor(props) {
     super(props);
-      /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
-      const width = 1000;
-      const margin = 60;
+    /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
+    const width = 1000;
+    const margin = 60;
 
-      const tree = d3.layout.tree()
-        .size([this.treePlotHeight(width), width]);
-      const nodes = processNodes(tree.nodes(props.tree.tree))
-      const links = tree.links(nodes);
+    const tree = d3.layout.tree()
+      .size([this.treePlotHeight(width), width]);
+    const nodes = processNodes(tree.nodes(props.tree.tree));
+    const links = tree.links(nodes);
 
-      const xValues = nodes.map((d) => {
-        return +d.xvalue;
-      });
+    const xValues = nodes.map((d) => {
+      return +d.xvalue;
+    });
 
-      const yValues = nodes.map((d) => {
-        return +d.yvalue;
-      });
+    const yValues = nodes.map((d) => {
+      return +d.yvalue;
+    });
 
     this.state = {
-      width: width,
-      nodes: nodes,
-      links: links,
-      xScale: d3.scale.linear().domain([d3.min(xValues), d3.max(xValues)]).range([margin, width - margin]),
-      yScale: d3.scale.linear().domain([d3.min(yValues), d3.max(yValues)]).range([margin, this.treePlotHeight(width) - margin])
+      width,
+      nodes,
+      links,
+      xScale: d3.scale.linear()
+                      .domain([d3.min(xValues), d3.max(xValues)])
+                      .range([margin, width - margin]),
+      yScale: d3.scale.linear()
+                      .domain([d3.min(yValues), d3.max(yValues)])
+                      .range([margin, this.treePlotHeight(width) - margin])
     };
   }
   static propTypes = {
