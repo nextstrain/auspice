@@ -1,7 +1,7 @@
 import Radium from "radium";
 import React from "react";
 import Color from "color";
-import globals from "../../globals";
+import globalStyles from "../../globalStyles";
 
 @Radium
 class Button extends React.Component {
@@ -10,7 +10,7 @@ class Button extends React.Component {
   }
   static defaultProps = {
     style: {
-      backgroundColor: globals.darkerGrey,
+      backgroundColor: globalStyles.darkerGrey,
       color: "white"
     }
   }
