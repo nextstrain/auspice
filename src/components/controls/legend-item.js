@@ -1,5 +1,6 @@
 import React from "react";
 import Radium from "radium";
+import titleCase from "title-case";
 // import d3 from "d3";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
@@ -43,8 +44,8 @@ class LegendItem extends React.Component {
     };
   }
   createLabelText(d) {
-    // Richard - is this regex supposed to transform to caps and remove camel?
-    let label = d.toString().replace(/([a-z])([A-Z])/g, "$1 $2").replace(/,/g, ", ");
+    // We assume that label text arrives either Properly Formatted or as snake_case or as CamelCase
+    let label = titleCase(d.toString());
     if (this.props.dFreq) {
       label += "\u00D7";
     }
