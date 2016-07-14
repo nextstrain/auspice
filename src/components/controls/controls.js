@@ -2,14 +2,19 @@ import React from 'react';
 import Radium from 'radium';
 // import _ from 'lodash';
 import Flex from '../framework/flex';
-// import { connect } from 'react-redux';
+import { connect } from 'react-redux';
 // import { FOO } from '../actions';
 import Button from "../framework/generic-button";
 import ToggleBranchLabels from "./toggle-branch-labels";
+import Legend from "./legend";
 
-// @connect(state => {
-//   return state.FOO;
-// })
+const returnStateNeeded = (fullStateTree) => {
+  return {
+    controls: fullStateTree.controls
+  };
+};
+
+@connect(returnStateNeeded)
 @Radium
 class Controls extends React.Component {
   constructor(props) {
@@ -65,6 +70,7 @@ class Controls extends React.Component {
         <div className="treeplot-container" id="treeplot-container"></div>
         <div id="updated"></div>
         <div id="commit"></div>
+        <Legend {...this.props}/>
         <select id="coloring">
           <option value="region"> geographic region </option>
         </select>
