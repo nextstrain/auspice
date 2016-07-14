@@ -106,8 +106,8 @@ class Tree extends React.Component {
     });
     return nodeComponents;
   }
-  drawLinks(links) {
-    const linkComponents = links.map((link, index) => {
+  drawBranches(links) {
+    const branchComponents = links.map((link, index) => {
       return (
         <Link
           xscale={this.state.xScale}
@@ -116,10 +116,10 @@ class Tree extends React.Component {
           key={index} />
       );
     });
-    return linkComponents;
+    return branchComponents;
   }
   drawBranchLabels(nodes) {
-    const branchComponents = nodes.map((node, index) => {
+    const branchLabelComponents = nodes.map((node, index) => {
       if (node.children) {
         return (
           <BranchLabel
@@ -129,7 +129,7 @@ class Tree extends React.Component {
         );
       }
     });
-    return branchComponents;
+    return branchLabelComponents;
   }
   render() {
     const styles = this.getStyles();
@@ -144,7 +144,7 @@ class Tree extends React.Component {
           id="treeplot"
           style={{
           }}>
-          {this.drawLinks(this.state.links)}
+          {this.drawBranches(this.state.links)}
           {this.drawNodes(this.state.nodes)}
         </svg>
       </div>
