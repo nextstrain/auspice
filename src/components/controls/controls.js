@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import Button from "../framework/generic-button";
 import ToggleBranchLabels from "./toggle-branch-labels";
 import Legend from "./legend";
+import ColorBy from "./color-by";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -51,6 +52,7 @@ class Controls extends React.Component {
         alignItems="flex-start"
         style={{
         }}>
+        <p> Phylogeny </p>
         <div className="d3-tip se"/>
         <div className="d3-tip e"/>
         <div className="d3-tip"/>
@@ -71,9 +73,7 @@ class Controls extends React.Component {
         <div id="updated"></div>
         <div id="commit"></div>
         <Legend {...this.props}/>
-        <select id="coloring">
-          <option value="region"> geographic region </option>
-        </select>
+        <ColorBy {...this.props}/>
         <ToggleBranchLabels/>
         <Button> Reset Layout </Button>
       </Flex>
