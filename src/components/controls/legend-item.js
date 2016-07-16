@@ -5,6 +5,7 @@ import titleCase from "title-case";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
+import { LEGEND_ITEM_MOUSEENTER, LEGEND_ITEM_MOUSELEAVE } from "../../actions/controls";
 
 @connect()
 @Radium
@@ -60,10 +61,10 @@ class LegendItem extends React.Component {
       <g
         transform={this.props.transform}
         onMouseEnter={() => {
-          this.props.dispatch({ type: "LEGEND_ITEM_MOUSEENTER", data: this.props.label });
+          this.props.dispatch({ type: LEGEND_ITEM_MOUSEENTER, data: this.props.label });
         }}
         onMouseLeave={() => {
-          this.props.dispatch({ type: "LEGEND_ITEM_MOUSELEAVE" });
+          this.props.dispatch({ type: LEGEND_ITEM_MOUSELEAVE });
         }}>
         <rect
           style={{strokeWidth: 2}}

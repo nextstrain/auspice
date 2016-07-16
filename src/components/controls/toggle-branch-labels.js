@@ -3,7 +3,7 @@ import Radium from "radium";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
-import { toggleBranchLabels } from "../../actions/controls";
+import { TOGGLE_BRANCH_LABELS } from "../../actions/controls";
 
 
 @connect()
@@ -35,7 +35,7 @@ class ToggleBranchLabels extends React.Component {
     };
   }
   handleCheckboxClick() {
-    this.props.dispatch(toggleBranchLabels());
+    this.props.dispatch({type: TOGGLE_BRANCH_LABELS});
   }
   render() {
     const styles = this.getStyles();
