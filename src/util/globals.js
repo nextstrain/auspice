@@ -33,6 +33,19 @@ export const dfreqColorDomain = genericDomain.map((d) => {
 export const fitnessColorDomain = genericDomain.map((d) => {
   return Math.round(100 * ((d - 0.5) * 16.0)) / 100;
 });
+export const dHIScale = d3.scale.linear()
+  .domain([0, 1])
+  .range([2.0, 4.5]);
+
+export const freqScale = d3.scale.sqrt()
+  .domain([0, 1])
+  .range([1, 10]);
+
+export const distanceScale = d3.scale.sqrt()
+  .domain([3, 20])
+  .range([9, 3])
+  .clamp([true]);
+
 export const colors = [
   [],
   ["#8EBC66"],
