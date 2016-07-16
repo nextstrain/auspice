@@ -4,13 +4,9 @@ import titleCase from "title-case";
 // import d3 from "d3";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
+import { connect } from "react-redux";
 
-
-// @connect(state => {
-//   return state.FOO;
-// })
+@connect()
 @Radium
 class LegendItem extends React.Component {
   constructor(props) {
@@ -21,7 +17,7 @@ class LegendItem extends React.Component {
   }
   static propTypes = {
     /* react */
-    // dispatch: React.PropTypes.func,
+    dispatch: React.PropTypes.func,
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
@@ -30,7 +26,9 @@ class LegendItem extends React.Component {
     legendSpacing: React.PropTypes.number,
     rectFill: React.PropTypes.string,
     rectStroke: React.PropTypes.string,
-    transform: React.PropTypes.string
+    transform: React.PropTypes.string,
+    dFreq: React.PropTypes.bool,
+    label: React.PropTypes.string
   }
   static defaultProps = {
     // foo: "bar"
@@ -45,16 +43,28 @@ class LegendItem extends React.Component {
   }
   createLabelText(d) {
     // We assume that label text arrives either Properly Formatted or as snake_case or as CamelCase
-    let label = titleCase(d.toString());
+    let label = "";
+    // d was undefined in some cases, Honduras thing, may not need conditional after fixed
+    if (d) {
+      label = titleCase(d.toString());
+    }
+
     if (this.props.dFreq) {
       label += "\u00D7";
     }
     return label;
   }
   render() {
-    const styles = this.getStyles();
+    const label = this.createLabelText(this.props.label);
     return (
-      <g transform={this.props.transform}>
+      <g
+        transform={this.props.transform}
+        onMouseEnter={() => {
+          this.props.dispatch({ type: "LEGEND_ITEM_MOUSEENTER", data: this.props.label });
+        }}
+        onMouseLeave={() => {
+          this.props.dispatch({ type: "LEGEND_ITEM_MOUSELEAVE" });
+        }}>
         <rect
           style={{strokeWidth: 2}}
           width={this.props.legendRectSize}
@@ -64,48 +74,36 @@ class LegendItem extends React.Component {
         <text
           x={this.props.legendRectSize + this.props.legendSpacing + 5}
           y={this.props.legendRectSize - this.props.legendSpacing}
-          style={{fontSize: 12}}>{this.createLabelText(this.props.label)}</text>
+          style={{fontSize: 12}}>{label}</text>
       </g>
     );
   }
 }
 
 export default LegendItem;
+
+
+
+
+
 /*
-tmp_leg.append("rect")
-  .on("mouseover", (leg) => {
-    treeplot.selectAll(".tip") //highlight all tips corresponding to legend
-      .filter((d) => { return legend_match(leg, d); })
-      .attr("r", (d) => { return tipRadius(d) * 1.7; })
-      .style("fill", (t) => {
-        return d3.rgb(tipFillColor(t)).brighter();
-      });
-  })
-  .on("mouseout", (leg) => {
-    treeplot.selectAll(".tip") //undo highlight
-      .filter((d) => { return legend_match(leg, d);})
-      .attr("r", (d) => { return tipRadius(d); })
-      .style("fill", (t) => {
-        return d3.rgb(tipFillColor(t));
-      });
-  });
-
-
-  // .on("mouseover", (leg) => {
-  //   treeplot.selectAll(".tip")
-  //     .filter((d) => {return legend_match(leg, d);})
-  //     .attr("r", (d) => {return tipRadius(d) * 1.7;})
-  //     .style("fill", (t) => {
-  //       return d3.rgb(tipFillColor(t)).brighter();
-  //     });
-  // })
-  // .on("mouseout", (leg) => {
-  //   treeplot.selectAll(".tip")
-  //     .filter((d) => {return legend_match(leg, d);})
-  //     .attr("r", (d) => {return tipRadius(d); })
-  //     .style("fill", (t) => {
-  //       return d3.rgb(tipFillColor(t));
-  //     });
-  // });
+// THIS IS FROM LEGEND ITEM - execute based on control value for hover on legend
+// .on("mouseover", (leg) => {
+//   treeplot.selectAll(".tip")
+//     .filter((d) => {return legend_match(leg, d);})
+//     .attr("r", (d) => {return tipRadius(d) * 1.7;})
+//     .style("fill", (t) => {
+//       return d3.rgb(tipFillColor(t)).brighter();
+//     });
+// })
+// .on("mouseout", (leg) => {
+//   treeplot.selectAll(".tip")
+//     .filter((d) => {return legend_match(leg, d);})
+//     .attr("r", (d) => {return tipRadius(d); })
+//     .style("fill", (t) => {
+//       return d3.rgb(tipFillColor(t));
+//     });
+// });
+// END FROM LEGEND ITEM
 
   */
