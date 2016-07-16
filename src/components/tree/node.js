@@ -1,8 +1,9 @@
-import React from 'react';
-import Radium from 'radium';
+import React from "react";
+import Radium from "radium";
 // import _ from 'lodash';
 // import { connect } from 'react-redux';
 // import { FOO } from '../actions';
+import * as globals from "../../util/globals";
 
 // @connect(state => {
 //   return state.FOO;
@@ -22,35 +23,80 @@ class TreeNode extends React.Component {
     routes: React.PropTypes.array,
     /* component api */
     style: React.PropTypes.object,
+    controls: React.PropTypes.object,
+    strain: React.PropTypes.string,
+    hasChildren: React.PropTypes.bool,
+    nuc_muts: React.PropTypes.string,
+    showBranchLabels: React.PropTypes.bool,
+    node: React.PropTypes.object
     // foo: React.PropTypes.string
   }
   static defaultProps = {
     // foo: "bar"
   }
-  getStyles() {
-    return {
-      base: {
 
-      }
-    };
-  }
   getNodeText() {
     let nodeText = "";
     if (this.props.strain) {
-      nodeText = this.props.strain
+      nodeText = this.props.strain;
     } else if (this.props.hasChildren && this.props.showBranchLabels) {
-      nodeText = this.props.nuc_muts
+      nodeText = this.props.nuc_muts;
     }
 
     return nodeText;
   }
+  determineLegendMatch(node) {
+    const colorBy = this.props.controls.colorBy;
+    const c = this.props.controls;
+    // construct a dictionary that maps a legend entry to the preceding interval
+    let bool;
+    // equates a tip and a legend element
+    // exact match is required for categorical qunantities such as genotypes, regions
+    // continuous variables need to fall into the interal (lower_bound[leg], leg]
+    if (
+      (colorBy === "lbi") ||
+      (colorBy === "date") ||
+      (colorBy === "dfreq") ||
+      (colorBy === "HI_dist") ||
+      (colorBy === "cHI")
+    ) {
+      bool = (node.coloring <= c.legendBoundsMap.upper_bound[c.selectedLegendItem]) &&
+        (node.coloring > c.legendBoundsMap.lower_bound[c.selectedLegendItem]);
+    } else {
+      bool = node[this.props.controls.colorBy] === c.selectedLegendItem;
+    }
+    return bool;
+  }
+  tipRadius(node) {
+    if (
+      typeof node.pred_distance !== "undefined" &&
+      this.props.controls.colorBy === "fitness"
+    ) {
+      return globals.distanceScale(node.pred_distance);
+    } else {
+      return globals.tipRadius;
+    }
+  }
+  chooseTipRadius(node) {
+    let r;
+
+    if (this.determineLegendMatch(node)) {
+      r = this.tipRadius(node) *
+        globals.tipRadiusOnLegendMatchMultiplier;
+    } else {
+      r = this.tipRadius(node, this.props.controls.colorBy);
+    }
+    return r;
+  }
   render() {
-    const styles = this.getStyles();
     return (
       <g transform={"translate(" + this.props.x + "," + this.props.y + ")"}>
         <circle
           fill={this.props.fill}
-          r={this.props.hasChildren ? 0 : 3} />
+          r={
+            this.props.hasChildren ?
+              globals.nonTipNodeRadius :
+              this.chooseTipRadius(this.props.node)} />
         <text
           dx={this.props.hasChildren ? -6 : 6}
           dy={this.props.hasChildren ? -2 : 3}
