@@ -17,6 +17,14 @@ const Controls = (state = {
     return Object.assign({}, state, {
       showBranchLabels: !state.showBranchLabels
     });
+  case types.LEGEND_ITEM_MOUSEENTER:
+    return Object.assign({}, state, {
+      selectedLegendItem: action.data
+    });
+  case types.LEGEND_ITEM_MOUSELEAVE:
+    return Object.assign({}, state, {
+      selectedLegendItem: null
+    });
   default:
     return state;
   }
