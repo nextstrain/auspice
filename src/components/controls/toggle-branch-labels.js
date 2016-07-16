@@ -30,7 +30,7 @@ class ToggleBranchLabels extends React.Component {
   getStyles() {
     return {
       base: {
-
+        marginBottom: 20
       }
     };
   }
@@ -40,9 +40,9 @@ class ToggleBranchLabels extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <label>
+      <label style={styles.base}>
         <input onChange={this.handleCheckboxClick.bind(this)} type="checkbox"/>
-        branch labels
+        <span> branch labels</span>
       </label>
     );
   }
