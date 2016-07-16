@@ -74,13 +74,8 @@ class App extends React.Component {
   }
   render() {
     return (
-      <Flex
-        justifyContent="space-between"
-        alignItems="flex-start"
-        direction="column"
-        style={{
-          height: 1100,
-          margin: 40
+      <div style={{
+          margin: "0px 20px"
         }}>
         <Header/>
         <Flex
@@ -88,12 +83,13 @@ class App extends React.Component {
             width: "100%"
           }}
           wrap="wrap"
+          alignItems="flex-start"
           justifyContent="space-between">
           <Controls/>
           {this.drawTreeIfData()}
         </Flex>
         <Footer/>
-      </Flex>
+      </div>
     );
   }
 }
