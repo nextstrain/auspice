@@ -21,6 +21,9 @@ export const rbsColorDomain = genericDomain;
 export const dateColorDomain = genericDomain;
 export const legendRectSize = 15;
 export const legendSpacing = 4;
+export const nonTipNodeRadius = 0;
+export const tipRadius = 4;
+export const tipRadiusOnLegendMatchMultiplier = 1.7;
 export const HIColorDomain = genericDomain.map((d) => {
   return Math.round(100 * (d * 3.6)) / 100;
 });
