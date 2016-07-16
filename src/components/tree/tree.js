@@ -93,6 +93,7 @@ class Tree extends React.Component {
     const nodeComponents = nodes.map((node, index) => {
       return (
         <Node
+          controls={this.props.controls}
           node={node}
           key={index}
           fill={this.props.controls.colorScale(node[this.props.controls.colorBy])}
