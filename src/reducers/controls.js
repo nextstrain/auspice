@@ -1,13 +1,19 @@
 import * as types from "../actions/controls";
-import * as globals from "../util/globals"
+import * as globals from "../util/globals";
 import getColorScale from "../util/getColorScale";
-
+import createLegendMatchBound from "../util/createLegendMatchBounds";
 
 const Controls = (state = {
   dateRange: null,
   colorBy: globals.defaultColorBy,
   colorScale: getColorScale(globals.defaultColorBy),
+  /*
+    we don't actually need to have legendBoundsMap default if regions will always be the
+    default colorBy. this is saftey in case we change that.
+  */
+  legendBoundsMap: createLegendMatchBound(getColorScale(globals.defaultColorBy)),
   showBranchLabels: false,
+  selectedLegendItem: null,
   region: null,
   search: null,
   strain: null
