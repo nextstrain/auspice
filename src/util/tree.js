@@ -84,26 +84,7 @@ nDisplayTips = displayRoot.fullTipCount;
 **********************************
 *********************************/
 
-const dHIScale = d3.scale.linear()
-  .domain([0, 1])
-  .range([2.0, 4.5]);
 
-const freqScale = d3.scale.sqrt()
-  .domain([0, 1])
-  .range([1, 10]);
-
-const distanceScale = d3.scale.sqrt()
-  .domain([3, 20])
-  .range([9, 3])
-  .clamp([true]);
-
-const tipRadius = (d) => {
-  if (typeof d.pred_distance !== "undefined" && colorBy === "fitness") {
-    return distanceScale(d.pred_distance);
-  } else {
-    return 4.0;
-  }
-};
 
 const left_margin = 10;
 let right_margin = 10;
