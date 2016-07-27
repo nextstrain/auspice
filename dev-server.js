@@ -15,7 +15,7 @@ app.use(require("webpack-dev-middleware")(compiler, {
 app.use(require("webpack-hot-middleware")(compiler));
 
 app.get("/Zika_meta", function(req, res) {
-  request("http://nextstrain.org/data/Zika_meta.json", function(err,r) {
+  request("http://flu.tuebingen.mpg.de/data/H3N2_1985to2016_meta.json", function(err,r) {
     if (err) {console.log('error getting data', err)}
     // console.log(r.toJSON())
     res.send(r.toJSON());
@@ -23,21 +23,21 @@ app.get("/Zika_meta", function(req, res) {
 });
 
 app.get("/Zika_tree", function(req, res) {
-  request("http://nextstrain.org/data/Zika_tree.json", function(err,r) {
+  request("http://flu.tuebingen.mpg.de/data/H3N2_1985to2016_tree.json", function(err,r) {
     if (err) {console.log('error getting data', err)}
     res.send(r.toJSON());
   });
 });
 
 app.get("/Zika_sequences", function(req, res) {
-  request("http://nextstrain.org/data/Zika_sequences.json", function(err,r) {
+  request("http://flu.tuebingen.mpg.de/data/H3N2_1985to2016_sequences.json", function(err,r) {
     if (err) {console.log('error getting data', err)}
     res.send(r.toJSON());
   });
 });
 
 app.get("/Zika_frequencies", function(req, res) {
-  request("http://nextstrain.org/data/Zika_frequencies.json", function(err,r) {
+  request("http://flu.tuebingen.mpg.de/data/H3N2_1985to2016_frequencies.json", function(err,r) {
     if (err) {console.log('error getting data', err)}
     res.send(r.toJSON());
   });
