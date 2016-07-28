@@ -10,8 +10,6 @@
 
 export const gatherTips = (node, tips) => {
 
-  const rootNode = nodes[0];
-
   if (typeof node.children !== "undefined") {
     for (let i = 0, c = node.children.length; i < c; i++) {
       gatherTips(node.children[i], tips);
