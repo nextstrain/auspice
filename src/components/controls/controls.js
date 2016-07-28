@@ -8,6 +8,7 @@ import Button from "../framework/generic-button";
 import ToggleBranchLabels from "./toggle-branch-labels";
 import Legend from "./legend";
 import ColorBy from "./color-by";
+import Search from "./search";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -75,6 +76,7 @@ class Controls extends React.Component {
         <Legend {...this.props}/>
         <ColorBy {...this.props}/>
         <ToggleBranchLabels/>
+        <Search/>
         <Button> Reset Layout </Button>
       </Flex>
     );
