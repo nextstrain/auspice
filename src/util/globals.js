@@ -1,3 +1,6 @@
+/* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
+export const width = 1000;
+export const margin = 60;
 export const defaultColorBy = "region";
 export const date_select = true;
 export const file_prefix = "Zika_";
