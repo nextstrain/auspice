@@ -2,13 +2,11 @@ import React from "react";
 import Radium from "radium";
 import d3 from "d3";
 // import _ from "lodash";
-// import Flex from "./framework/flex";
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
+import { connect } from "react-redux";
+import { BRANCH_MOUSEENTER, BRANCH_MOUSELEAVE } from "../../actions/controls";
 
-// @connect(state => {
-//   return state.FOO;
-// })
+
+@connect()
 @Radium
 class Branch extends React.Component {
   constructor(props) {
@@ -19,15 +17,20 @@ class Branch extends React.Component {
   }
   static propTypes = {
     /* react */
-    // dispatch: React.PropTypes.func,
+    dispatch: React.PropTypes.func,
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
     style: React.PropTypes.object,
-    // foo: React.PropTypes.string
+    branchStrokeWidth: React.PropTypes.number,
+    branchStrokeColor: React.PropTypes.string,
+    xscale: React.PropTypes.func,
+    yscale: React.PropTypes.func,
+    datum: React.PropTypes.object
   }
   static defaultProps = {
-    // foo: "bar"
+    branchStrokeWidth: 4,
+    branchStrokeColor: "darkgrey"
   }
   getStyles() {
     return {
@@ -39,26 +42,48 @@ class Branch extends React.Component {
   setupFreqScale() {
     return d3.scale.sqrt().domain([0, 1]).range([1, 10]);
   }
-  branchPoints () {
-    const d = this.props.datum
+  branchPoints() {
     // const freqScale = this.setupFreqScale();
-    const mod = 0;
     // const mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
-    return (this.props.xscale(d.source.xvalue) - mod).toString() + "," + this.props.yscale(d.source.yvalue).toString() + " "
-      + (this.props.xscale(d.source.xvalue) - mod).toString() + "," + this.props.yscale(d.target.yvalue).toString() + " "
-      + (this.props.xscale(d.target.xvalue)).toString() + "," + this.props.yscale(d.target.yvalue).toString();
-  };
-  render() {
-    const styles = this.getStyles();
-    const d = this.props.datum
 
+    const d = this.props.datum;
+    const mod = 0;
+
+    return (this.props.xscale(d.source.xvalue) - mod).toString() +
+      "," +
+      this.props.yscale(d.source.yvalue).toString() +
+      " " +
+      (this.props.xscale(d.source.xvalue) - mod).toString() +
+      "," +
+      this.props.yscale(d.target.yvalue).toString() +
+      " " +
+      (this.props.xscale(d.target.xvalue)).toString() +
+      "," +
+      this.props.yscale(d.target.yvalue).toString();
+  }
+  render() {
     return (
       <polyline
         points={this.branchPoints()}
+        onMouseEnter={() => {
+          this.props.dispatch({
+            type: BRANCH_MOUSEENTER,
+            /*
+              send the source and target nodes in the action,
+              use x and y values in them to place tooltip
+            */
+            data: this.props.datum
+          });
+        }}
+        onMouseLeave={() => {
+          this.props.dispatch({ type: BRANCH_MOUSELEAVE });
+        }}
         style={{
+          stroke: this.props.branchStrokeColor,
+          strokeWidth: this.props.branchStrokeWidth,
+          strokeLinejoin: "round",
           fill: "none",
-          stroke: "darkgrey",
-          strokeWidth: ".4px"
+          cursor: "pointer"
         }}></polyline>
     );
   }
@@ -66,19 +91,8 @@ class Branch extends React.Component {
 
 export default Branch;
 
-// <BranchLabel
-//   x={this.props.xscale(d.source.xvalue)}
-//   y={this.props.yscale(d.source.yvalue)}/>
-// let link = treeplot.selectAll(".link")
-//   .data(links)
-//   .enter().append("polyline")
-//   .attr("class", "link")
-//   .style("stroke-width", branchStrokeWidth)
-//   .style("stroke", branchStrokeColor)
-//   .style("stroke-linejoin", "round")
-//   .style("cursor", "pointer")
-//   .style("fill", "none")
-//   .on("mouseover", (d) => {
+
+//   .on("mouseover", (d) => { /* todo */
 //     if ((colorBy !== "genotype") & (typeof addClade !== "undefined")) {
 //       clade_freq_event = setTimeout(addClade, 1000, d);
 //     }
