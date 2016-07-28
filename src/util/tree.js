@@ -84,8 +84,6 @@ nDisplayTips = displayRoot.fullTipCount;
 **********************************
 *********************************/
 
-
-
 const left_margin = 10;
 let right_margin = 10;
 const bottom_margin = 10;
@@ -273,7 +271,6 @@ links = tree.links(nodes);
 let tree_legend;
 rootNode = nodes[0];
 displayRoot = rootNode;
-tips = gatherTips(rootNode, []);
 vaccines = getVaccines(tips);
 if (typeof getSera == "function") {
   sera = getSera(tips);
@@ -355,15 +352,6 @@ d3.select("#reset")
 d3.select("#treeplot")
   .on("dblclick", resetLayout);
 
-
-const mc = autocomplete(document.getElementById("straininput"))
-  .keys(tips)
-  .dataField("strain")
-  .placeHolder("search strains...")
-  .width(800)
-  .height(500)
-  .onSelected(highlightStrainSearch)
-  .render();
 
 
 // add clade labels
