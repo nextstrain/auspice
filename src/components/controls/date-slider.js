@@ -14,7 +14,40 @@ class DateSlider extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      dateValues = nodes.filter((d) => {
+        return (typeof d.date === 'string') & (typeof vaccineChoice[d.strain] === "undefined") & (typeof reference_viruses[d.strain] === "undefined");
+      }).map((d) => {
+        return new Date(d.date);
+      });
 
+      let time_back = 1.0;
+      if (typeof time_window !== "undefined") {
+        time_back = time_window;
+      }
+      if (typeof fullDataTimeWindow !== "undefined") {
+        time_back = fullDataTimeWindow;
+      }
+
+      var earliestDate = new Date(globalDate);
+      earliestDate.setDate(earliestDate.getDate() - (time_back * 365.25));
+
+      dateScale = d3.time.scale()
+        .domain([earliestDate, globalDate])
+        .range([5, 205])
+        .clamp([true]);
+
+      niceDateScale = d3.time.scale()
+        .domain([earliestDate, globalDate])
+        .range([5, 205])
+        .clamp([true])
+        .nice(d3.time.month);
+
+      counterData = {};
+      counterData.date = globalDate;
+      counterData.x = dateScale(globalDate);
+      const startDate = new Date(globalDate);
+      startDate.setDate(startDate.getDate() - (time_window * 365.25));
+      counterData.x2 = dateScale(startDate);
     };
   }
   static propTypes = {
@@ -50,62 +83,6 @@ class DateSlider extends React.Component {
 }
 
 export default DateSlider;
-
-/*
-
-propTypes: {
-    // You can declare that a prop is a specific JS primitive. By default, these
-    // are all optional.
-    optionalArray: React.PropTypes.array,
-    optionalBool: React.PropTypes.bool,
-    optionalFunc: React.PropTypes.func,
-    optionalNumber: React.PropTypes.number,
-    optionalObject: React.PropTypes.object,
-    optionalString: React.PropTypes.string,
-
-    // Anything that can be rendered: numbers, strings, elements or an array
-    // (or fragment) containing these types.
-    optionalNode: React.PropTypes.node,
-
-    // A React element.
-    optionalElement: React.PropTypes.element,
-
-    // You can also declare that a prop is an instance of a class. This uses
-    // JS's instanceof operator.
-    optionalMessage: React.PropTypes.instanceOf(Message),
-
-    // You can ensure that your prop is limited to specific values by treating
-    // it as an enum.
-    optionalEnum: React.PropTypes.oneOf(['News', 'Photos']),
-
-    // An object that could be one of many types
-    optionalUnion: React.PropTypes.oneOfType([
-      React.PropTypes.string,
-      React.PropTypes.number,
-      React.PropTypes.instanceOf(Message)
-    ]),
-
-    // An array of a certain type
-    optionalArrayOf: React.PropTypes.arrayOf(React.PropTypes.number),
-
-    // An object with property values of a certain type
-    optionalObjectOf: React.PropTypes.objectOf(React.PropTypes.number),
-
-    // An object taking on a particular shape
-    optionalObjectWithShape: React.PropTypes.shape({
-      color: React.PropTypes.string,
-      fontSize: React.PropTypes.number
-    }),
-
-    // You can chain any of the above with `isRequired` to make sure a warning
-    // is shown if the prop isn't provided.
-    requiredFunc: React.PropTypes.func.isRequired,
-
-    // A value of any data type
-    requiredAny: React.PropTypes.any.isRequired,
-
-*/
-
 
 /*********************************
 **********************************
@@ -318,41 +295,7 @@ const dragend = () => {
 };
 
 const date_init = () => {
-  nodes.forEach((d) => { d.dateval = new Date(d.date); });
-  dateValues = nodes.filter((d) => {
-    return (typeof d.date === 'string') & (typeof vaccineChoice[d.strain] === "undefined") & (typeof reference_viruses[d.strain] === "undefined");
-  }).map((d) => {
-    return new Date(d.date);
-  });
 
-  let time_back = 1.0;
-  if (typeof time_window !== "undefined") {
-    time_back = time_window;
-  }
-  if (typeof fullDataTimeWindow !== "undefined") {
-    time_back = fullDataTimeWindow;
-  }
-
-  var earliestDate = new Date(globalDate);
-  earliestDate.setDate(earliestDate.getDate() - (time_back * 365.25));
-
-  dateScale = d3.time.scale()
-    .domain([earliestDate, globalDate])
-    .range([5, 205])
-    .clamp([true]);
-
-  niceDateScale = d3.time.scale()
-    .domain([earliestDate, globalDate])
-    .range([5, 205])
-    .clamp([true])
-    .nice(d3.time.month);
-
-  counterData = {};
-  counterData.date = globalDate;
-  counterData.x = dateScale(globalDate);
-  const startDate = new Date(globalDate);
-  startDate.setDate(startDate.getDate() - (time_window * 365.25));
-  counterData.x2 = dateScale(startDate);
 
   d3.select("#date-input")
     .attr("width", 240)
