@@ -8,8 +8,9 @@ import { connect } from "react-redux";
 import d3 from "d3";
 import Link from "./branch";
 import Node from "./node";
+import Tooltip from "./tooltip";
 import { processNodes } from "../../util/processNodes";
-import BranchLabel from "./branch-label";
+import * as globals from "../../util/globals";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -26,12 +27,9 @@ const returnStateNeeded = (fullStateTree) => {
 class Tree extends React.Component {
   constructor(props) {
     super(props);
-    /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
-    const width = 1000;
-    const margin = 60;
 
     const tree = d3.layout.tree()
-      .size([this.treePlotHeight(width), width]);
+      .size([this.treePlotHeight(globals.width), globals.width]);
     const nodes = processNodes(tree.nodes(props.tree.tree));
     const links = tree.links(nodes);
 
@@ -44,15 +42,15 @@ class Tree extends React.Component {
     });
 
     this.state = {
-      width,
+      width: globals.width,
       nodes,
       links,
       xScale: d3.scale.linear()
                       .domain([d3.min(xValues), d3.max(xValues)])
-                      .range([margin, width - margin]),
+                      .range([globals.margin, globals.width - globals.margin]),
       yScale: d3.scale.linear()
                       .domain([d3.min(yValues), d3.max(yValues)])
-                      .range([margin, this.treePlotHeight(width) - margin])
+                      .range([globals.margin, this.treePlotHeight(globals.width) - globals.margin])
     };
   }
   static propTypes = {
@@ -119,18 +117,14 @@ class Tree extends React.Component {
     });
     return branchComponents;
   }
-  drawBranchLabels(nodes) {
-    const branchLabelComponents = nodes.map((node, index) => {
-      if (node.children) {
-        return (
-          <BranchLabel
-            key={index}
-            x={this.state.xScale(node.xvalue)}
-            y={this.state.yScale(node.yvalue)}/>
-        );
-      }
-    });
-    return branchLabelComponents;
+  drawTooltip(node, type) {
+    return (
+      <Tooltip
+        type={type}
+        node={node}
+        x={this.state.xScale(node.xvalue)}
+        y={this.state.yScale(node.yvalue)}/>
+    )
   }
   render() {
     const styles = this.getStyles();
@@ -147,6 +141,16 @@ class Tree extends React.Component {
           }}>
           {this.drawBranches(this.state.links)}
           {this.drawNodes(this.state.nodes)}
+          {
+            this.props.controls.selectedBranch ?
+            this.drawTooltip(this.props.controls.selectedBranch.target, "branch") :
+            null
+          }
+          {
+            this.props.controls.selectedNode ?
+            this.drawTooltip(this.props.controls.selectedNode, "node") :
+            null
+          }
         </svg>
       </div>
     );

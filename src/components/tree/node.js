@@ -1,13 +1,12 @@
 import React from "react";
 import Radium from "radium";
 // import _ from 'lodash';
-// import { connect } from 'react-redux';
+import { connect } from 'react-redux';
 // import { FOO } from '../actions';
 import * as globals from "../../util/globals";
+import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
 
-// @connect(state => {
-//   return state.FOO;
-// })
+@connect()
 @Radium
 class TreeNode extends React.Component {
   constructor(props) {
@@ -36,10 +35,23 @@ class TreeNode extends React.Component {
   }
 
   getNodeText() {
+    /*
+      this is a bit of trickiness. we'll see if it's too clever.
+      if a node is a tip, we show the strain, and if it's not, we
+      append a branch label (but only if show branch label is checked),
+      and the placement of the branch label is based on the
+      position of the node.
+
+      What we're doing here is overloading the idea of node text
+      to also include branch label, rather than making that its
+      own thing.
+    */
     let nodeText = "";
     if (this.props.strain) {
+      /* this is a tip label */
       nodeText = this.props.strain;
     } else if (this.props.hasChildren && this.props.showBranchLabels) {
+      /* this is a branch label */
       nodeText = this.props.nuc_muts;
     }
 
@@ -90,7 +102,21 @@ class TreeNode extends React.Component {
   }
   render() {
     return (
-      <g transform={"translate(" + this.props.x + "," + this.props.y + ")"}>
+      <g
+        onMouseEnter={() => {
+          this.props.dispatch({
+            type: NODE_MOUSEENTER,
+            /*
+              send the source and target nodes in the action,
+              use x and y values in them to place tooltip
+            */
+            data: this.props.node
+          });
+        }}
+        onMouseLeave={() => {
+          this.props.dispatch({ type: NODE_MOUSELEAVE });
+        }}
+        transform={"translate(" + this.props.x + "," + this.props.y + ")"}>
         <circle
           fill={this.props.fill}
           r={
@@ -135,7 +161,6 @@ export default TreeNode;
 //   .style("fill", tipFillColor)
 //   .style("stroke", tipStrokeColor);
 
-
 // const serumCircles = treeplot.selectAll(".serum") /* bug does this need to be stored or just executed? */
 //   .data(sera)
 //   .enter()
@@ -165,3 +190,28 @@ export default TreeNode;
 //     .style("fill", "#555555")
 //     .text(() => { return "\uf00d"; })
 //     .style("cursor", "default");
+
+// const addBranchLabels = () => {
+//   /* bug mutations is not necessary just execute treeplot.selectAll */
+//   const mutations = treeplot.selectAll(".branchLabel")
+//     .data(nodes)
+//     .enter()
+//     .append("text")
+//     .attr("class", "branchLabel")
+//     .style("font-size", branchLabelSize)
+//     .style("text-anchor", "end")
+//     .text(branchLabelText)
+//     .style("visibility", "hidden");
+// };
+
+
+// d3.select("#branchlabels")
+//   .on("change", (d) => {
+//     branchLabels = document.getElementById("branchlabels").checked;
+//     treeplot.selectAll(".branchLabel").data(nodes)
+//       .text(branchLabelText)
+//       .style("visibility", (branchLabels) ? "visible" : "hidden");
+//     treeplot.selectAll(".annotation").data(clades)
+//       .style("visibility", (branchLabels) ? "hidden" : "visible");
+//   });
+//

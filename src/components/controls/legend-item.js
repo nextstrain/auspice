@@ -82,29 +82,3 @@ class LegendItem extends React.Component {
 }
 
 export default LegendItem;
-
-
-
-
-
-/*
-// THIS IS FROM LEGEND ITEM - execute based on control value for hover on legend
-// .on("mouseover", (leg) => {
-//   treeplot.selectAll(".tip")
-//     .filter((d) => {return legend_match(leg, d);})
-//     .attr("r", (d) => {return tipRadius(d) * 1.7;})
-//     .style("fill", (t) => {
-//       return d3.rgb(tipFillColor(t)).brighter();
-//     });
-// })
-// .on("mouseout", (leg) => {
-//   treeplot.selectAll(".tip")
-//     .filter((d) => {return legend_match(leg, d);})
-//     .attr("r", (d) => {return tipRadius(d); })
-//     .style("fill", (t) => {
-//       return d3.rgb(tipFillColor(t));
-//     });
-// });
-// END FROM LEGEND ITEM
-
-  */

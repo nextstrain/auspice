@@ -14,6 +14,8 @@ const Controls = (state = {
   legendBoundsMap: createLegendMatchBound(getColorScale(globals.defaultColorBy)),
   showBranchLabels: false,
   selectedLegendItem: null,
+  selectedBranch: null,
+  selectedNode: null,
   region: null,
   search: null,
   strain: null
@@ -30,6 +32,23 @@ const Controls = (state = {
   case types.LEGEND_ITEM_MOUSELEAVE:
     return Object.assign({}, state, {
       selectedLegendItem: null
+    });
+  case types.BRANCH_MOUSEENTER:
+    return Object.assign({}, state, {
+      selectedBranch: action.data
+    });
+  case types.BRANCH_MOUSELEAVE:
+    return Object.assign({}, state, {
+      selectedBranch: null
+    });
+  case types.NODE_MOUSEENTER:
+    console.log(action)
+    return Object.assign({}, state, {
+      selectedNode: action.data
+    });
+  case types.NODE_MOUSELEAVE:
+    return Object.assign({}, state, {
+      selectedNode: null
     });
   default:
     return state;
