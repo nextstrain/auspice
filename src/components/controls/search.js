@@ -29,7 +29,7 @@ class SearchStrains extends React.Component {
     routes: React.PropTypes.array,
     /* component api */
     style: React.PropTypes.object,
-    tips: React.PropTypes.object
+    tips: React.PropTypes.array
     // foo: React.PropTypes.string
   }
   static defaultProps = {
@@ -55,6 +55,7 @@ class SearchStrains extends React.Component {
     const inputLength = inputValue.length;
 
     return inputLength === 0 ? [] : this.props.tips.filter((tip) =>
+      /* implement fuzzy search here to check for internal substring match */
       tip.strain.toLowerCase().slice(0, inputLength) === inputValue
     );
   }

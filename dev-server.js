@@ -43,6 +43,20 @@ app.get("/Zika_frequencies", function(req, res) {
   });
 });
 
+// app.get("/:virus/:strain/:timeperiod/:resource", function(req, res) {
+//   request(
+//     "http://nextstrain.org/data/" +
+//     req.params.virus +
+//     req.params.strain +
+//     req.params.timeperiod || "" +
+//     req.params.resource +
+//     ".json",
+//     (err,r) => {
+//       if (err) {console.log('error getting data', err)}
+//       res.send(r.toJSON());
+//   });
+// });
+
 app.get("*", function(req, res) {
   res.sendFile(path.join(__dirname, "index.html"));
 });

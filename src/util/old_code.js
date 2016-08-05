@@ -199,7 +199,6 @@
   };
 
   const date_init = () => {
-    nodes.forEach((d) => { d.dateval = new Date(d.date); });
     dateValues = nodes.filter((d) => {
       return (typeof d.date === 'string') & (typeof vaccineChoice[d.strain] === "undefined") & (typeof reference_viruses[d.strain] === "undefined");
     }).map((d) => {

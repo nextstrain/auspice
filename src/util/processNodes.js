@@ -6,6 +6,7 @@ export const processNodes = (nodes) => {
   treeHelpers.calcFullTipCounts(rootNode);
   treeHelpers.calcBranchLength(rootNode);
   treeHelpers.calcTipCounts(rootNode);
+  treeHelpers.calcDates(nodes);
 
   // treeHelpers.calcNodeAges(globals.time_window);
   // colorByTrait();

@@ -31,6 +31,11 @@ export const getVaccines = (tips) => {
   return v;
 };
 
+export const calcDates = (nodes) => {
+  nodes.forEach((d) => {
+    d.dateval = new Date(d.date);
+  });
+};
 
 export const calcNodeAges = (tw) => {
   tips.forEach((d) => {
