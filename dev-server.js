@@ -15,7 +15,11 @@ app.use(require("webpack-dev-middleware")(compiler, {
 app.use(require("webpack-hot-middleware")(compiler));
 
 app.get("/Zika_meta", function(req, res) {
-  request("http://nextstrain.org/data/Zika_meta.json", function(err,r) {
+  request({
+    method: "get",
+    uri: "http://nextstrain.org/data/Zika_meta.json",
+    gzip: true
+  }, function(err,r) {
     if (err) {console.log('error getting data', err)}
     // console.log(r.toJSON())
     res.send(r.toJSON());
@@ -23,25 +27,51 @@ app.get("/Zika_meta", function(req, res) {
 });
 
 app.get("/Zika_tree", function(req, res) {
-  request("http://nextstrain.org/data/Zika_tree.json", function(err,r) {
+  request({
+    method: "get",
+    uri: "http://nextstrain.org/data/Zika_tree.json",
+    gzip: true
+  }, function(err,r) {
     if (err) {console.log('error getting data', err)}
     res.send(r.toJSON());
   });
 });
 
 app.get("/Zika_sequences", function(req, res) {
-  request("http://nextstrain.org/data/Zika_sequences.json", function(err,r) {
+  request({
+    method: "get",
+    uri: "http://nextstrain.org/data/Zika_sequences.json",
+    gzip: true
+  }, function(err,r) {
     if (err) {console.log('error getting data', err)}
     res.send(r.toJSON());
   });
 });
 
 app.get("/Zika_frequencies", function(req, res) {
-  request("http://nextstrain.org/data/Zika_frequencies.json", function(err,r) {
+  request({
+    method: "get",
+    uri: "http://nextstrain.org/data/Zika_frequencies.json",
+    gzip: true
+  }, function(err,r) {
     if (err) {console.log('error getting data', err)}
     res.send(r.toJSON());
   });
 });
+
+// app.get("/:virus/:strain/:timeperiod/:resource", function(req, res) {
+//   request(
+//     "http://nextstrain.org/data/" +
+//     req.params.virus +
+//     req.params.strain +
+//     req.params.timeperiod || "" +
+//     req.params.resource +
+//     ".json",
+//     (err,r) => {
+//       if (err) {console.log('error getting data', err)}
+//       res.send(r.toJSON());
+//   });
+// });
 
 app.get("*", function(req, res) {
   res.sendFile(path.join(__dirname, "index.html"));
