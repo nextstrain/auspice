@@ -29,8 +29,11 @@ class Branch extends React.Component {
     datum: React.PropTypes.object
   }
   static defaultProps = {
-    branchStrokeWidth: 4,
+    branchStrokeWidth: 1,
     branchStrokeColor: "darkgrey"
+  }
+  shouldComponentUpdate() {
+    return false;
   }
   getStyles() {
     return {
