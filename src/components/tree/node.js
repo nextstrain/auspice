@@ -6,7 +6,14 @@ import { connect } from 'react-redux';
 import * as globals from "../../util/globals";
 import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
 
-@connect()
+const returnStateNeeded = (fullStateTree) => {
+  return {
+    selectedLegendItem: fullStateTree.controls.selectedLegendItem,
+    colorBy: fullStateTree.controls.colorBy
+  };
+};
+
+@connect(returnStateNeeded)
 @Radium
 class TreeNode extends React.Component {
   constructor(props) {
@@ -27,13 +34,44 @@ class TreeNode extends React.Component {
     hasChildren: React.PropTypes.bool,
     nuc_muts: React.PropTypes.string,
     showBranchLabels: React.PropTypes.bool,
-    node: React.PropTypes.object
+    node: React.PropTypes.object,
+    colorBy: React.PropTypes.string
     // foo: React.PropTypes.string
   }
   static defaultProps = {
     // foo: "bar"
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    /*
+      If nextProps.selectedLegendItem is null, nothing is selected b/c mouseout.
+      This means that and we want to check the present, not future state for match with this.props.selectedLegendItem.
+      If it was a match on last render, we need to rerender, so that it goes back to default tip radius.
 
+      DUPLICATION WARNING: this should be refactored so that it doesn't duplicate the code below in determineLegendMatch
+      ultimately determineLegendMatch should take an argument.
+    */
+    const _selectedLegendItem = nextProps.selectedLegendItem || this.props.selectedLegendItem;
+
+    if (this.props.hasChildren) {
+      /* nodes without children are never visible, so will not update */
+      return false;
+    } else if (
+      /* special cases */
+      (nextProps.colorBy === "lbi") ||
+      (nextProps.colorBy === "date") ||
+      (nextProps.colorBy === "dfreq") ||
+      (nextProps.colorBy === "HI_dist") ||
+      (nextProps.colorBy === "cHI")
+    ) {
+      return (nextProps.node.coloring <= nextProps.controls.legendBoundsMap.upper_bound[_selectedLegendItem]) &&
+        (nextProps.node.coloring > nextProps.controls.legendBoundsMap.lower_bound[_selectedLegendItem]);
+    } else {
+      /* default accessor */
+      // some of the legend items don't trigger any nodes. why? mismatch capitalizations of same regions?
+      // if (nextProps.node[nextProps.colorBy] !== _selectedLegendItem) { console.log(_selectedLegendItem) }
+      return nextProps.node[nextProps.colorBy] === _selectedLegendItem;
+    }
+  }
   getNodeText() {
     /*
       this is a bit of trickiness. we'll see if it's too clever.
@@ -57,7 +95,8 @@ class TreeNode extends React.Component {
 
     return nodeText;
   }
-  determineLegendMatch(node) {
+  determineLegendMatch() {
+    const node = this.props.node;
     const colorBy = this.props.controls.colorBy;
     const c = this.props.controls;
     // construct a dictionary that maps a legend entry to the preceding interval
@@ -79,7 +118,8 @@ class TreeNode extends React.Component {
     }
     return bool;
   }
-  tipRadius(node) {
+  tipRadius() {
+    const node = this.props.node;
     if (
       typeof node.pred_distance !== "undefined" &&
       this.props.controls.colorBy === "fitness"
@@ -89,18 +129,25 @@ class TreeNode extends React.Component {
       return globals.tipRadius;
     }
   }
-  chooseTipRadius(node) {
-    let r;
+  chooseTipRadius() {
 
-    if (this.determineLegendMatch(node)) {
-      r = this.tipRadius(node) *
+    if (!this.props.selectedLegendItem) {
+      return this.tipRadius()
+    }
+
+    let r;
+    const node = this.props.node;
+
+    if (this.determineLegendMatch()) {
+      r = this.tipRadius() *
         globals.tipRadiusOnLegendMatchMultiplier;
     } else {
-      r = this.tipRadius(node, this.props.controls.colorBy);
+      r = this.tipRadius();
     }
     return r;
   }
   render() {
+    console.log('node renders')
     return (
       <g
         onMouseEnter={() => {
@@ -122,24 +169,27 @@ class TreeNode extends React.Component {
           r={
             this.props.hasChildren ?
               globals.nonTipNodeRadius :
-              this.chooseTipRadius(this.props.node)} />
-        <text
-          dx={this.props.hasChildren ? -6 : 6}
-          dy={this.props.hasChildren ? -2 : 3}
-            style={{
-              fontFamily: "Helvetica",
-              fontSize: 8,
-              fontWeight: 300
-            }}
-          textAnchor={this.props.hasChildren ? "end" : "start"}>
-          {this.getNodeText()}
-        </text>
+              this.chooseTipRadius()} />
+
       </g>
     )
   }
 }
 
 export default TreeNode;
+
+// <text
+//   dx={this.props.hasChildren ? -6 : 6}
+//   dy={this.props.hasChildren ? -2 : 3}
+//     style={{
+//       fontFamily: "Helvetica",
+//       fontSize: 8,
+//       fontWeight: 300
+//     }}
+//   textAnchor={this.props.hasChildren ? "end" : "start"}>
+//   {this.getNodeText()}
+// </text>
+
 
 // if ((typeof tip_labels !== "undefined") && (tip_labels)) {
 //   treeplot.selectAll(".tipLabel").data(tips)

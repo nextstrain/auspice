@@ -92,6 +92,7 @@ class Tree extends React.Component {
       return (
         <Node
           controls={this.props.controls}
+          index={index}
           node={node}
           key={index}
           fill={this.props.controls.colorScale(node[this.props.controls.colorBy])}
