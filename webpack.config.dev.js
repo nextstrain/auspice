@@ -14,6 +14,12 @@ module.exports = {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
+    // perf test on nodes - remove this line to get warnings back.
+    new webpack.DefinePlugin({
+      "process.env": {
+        "NODE_ENV": JSON.stringify("production")
+      }
+    }),
     new webpack.NoErrorsPlugin()
   ],
   module: {
