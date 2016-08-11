@@ -1,15 +1,17 @@
 import React from "react";
 import Radium from "radium";
-// import _ from 'lodash';
-import { connect } from 'react-redux';
-// import { FOO } from '../actions';
+// import _ from "lodash";
+import { connect } from "react-redux";
 import * as globals from "../../util/globals";
 import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
     selectedLegendItem: fullStateTree.controls.selectedLegendItem,
-    colorBy: fullStateTree.controls.colorBy
+    colorBy: fullStateTree.controls.colorBy,
+    colorScale: fullStateTree.controls.colorScale,
+    showBranchLabels: fullStateTree.controls.showBranchLabels,
+    legendBoundsMap: fullStateTree.controls.legendBoundsMap
   };
 };
 
@@ -29,14 +31,11 @@ class TreeNode extends React.Component {
     routes: React.PropTypes.array,
     /* component api */
     style: React.PropTypes.object,
-    controls: React.PropTypes.object,
-    strain: React.PropTypes.string,
-    hasChildren: React.PropTypes.bool,
-    nuc_muts: React.PropTypes.string,
     showBranchLabels: React.PropTypes.bool,
     node: React.PropTypes.object,
+    xScale: React.PropTypes.func,
+    yScale: React.PropTypes.func,
     colorBy: React.PropTypes.string
-    // foo: React.PropTypes.string
   }
   static defaultProps = {
     // foo: "bar"
@@ -52,24 +51,27 @@ class TreeNode extends React.Component {
     */
     const _selectedLegendItem = nextProps.selectedLegendItem || this.props.selectedLegendItem;
 
-    if (this.props.hasChildren) {
+    if (this.props.node.children) {
       /* nodes without children are never visible, so will not update */
       return false;
-    } else if (
-      /* special cases */
-      (nextProps.colorBy === "lbi") ||
-      (nextProps.colorBy === "date") ||
-      (nextProps.colorBy === "dfreq") ||
-      (nextProps.colorBy === "HI_dist") ||
-      (nextProps.colorBy === "cHI")
-    ) {
-      return (nextProps.node.coloring <= nextProps.controls.legendBoundsMap.upper_bound[_selectedLegendItem]) &&
-        (nextProps.node.coloring > nextProps.controls.legendBoundsMap.lower_bound[_selectedLegendItem]);
-    } else {
+    }
+    // else if (
+    //   /* special cases */
+    //   (nextProps.colorBy === "lbi") ||
+    //   (nextProps.colorBy === "date") ||
+    //   (nextProps.colorBy === "dfreq") ||
+    //   (nextProps.colorBy === "HI_dist") ||
+    //   (nextProps.colorBy === "cHI")
+    // ) {
+    //   return (nextProps.node.coloring <= nextProps.legendBoundsMap.upper_bound[_selectedLegendItem]) &&
+    //     (nextProps.node.coloring > nextProps.legendBoundsMap.lower_bound[_selectedLegendItem]);
+    // }
+    else {
+      return true; /* loop over all nodes is sure to remove stale mouseover state, maybe fast enough with prod react*/
       /* default accessor */
       // some of the legend items don't trigger any nodes. why? mismatch capitalizations of same regions?
       // if (nextProps.node[nextProps.colorBy] !== _selectedLegendItem) { console.log(_selectedLegendItem) }
-      return nextProps.node[nextProps.colorBy] === _selectedLegendItem;
+      // return nextProps.node[nextProps.colorBy] === _selectedLegendItem;
     }
   }
   getNodeText() {
@@ -88,17 +90,20 @@ class TreeNode extends React.Component {
     if (this.props.strain) {
       /* this is a tip label */
       nodeText = this.props.strain;
-    } else if (this.props.hasChildren && this.props.showBranchLabels) {
+    } else if (this.props.node.children && this.props.showBranchLabels) {
       /* this is a branch label */
-      nodeText = this.props.nuc_muts;
+      nodeText = this.props.node.nuc_muts;
     }
 
     return nodeText;
   }
   determineLegendMatch() {
-    const node = this.props.node;
-    const colorBy = this.props.controls.colorBy;
-    const c = this.props.controls;
+    const {
+      node,
+      colorBy,
+      selectedLegendItem,
+      legendBoundsMap
+    } = this.props;
     // construct a dictionary that maps a legend entry to the preceding interval
     let bool;
     // equates a tip and a legend element
@@ -111,10 +116,10 @@ class TreeNode extends React.Component {
       (colorBy === "HI_dist") ||
       (colorBy === "cHI")
     ) {
-      bool = (node.coloring <= c.legendBoundsMap.upper_bound[c.selectedLegendItem]) &&
-        (node.coloring > c.legendBoundsMap.lower_bound[c.selectedLegendItem]);
+      bool = (node.coloring <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
+        (node.coloring > legendBoundsMap.lower_bound[selectedLegendItem]);
     } else {
-      bool = node[this.props.controls.colorBy] === c.selectedLegendItem;
+      bool = node[colorBy] === selectedLegendItem;
     }
     return bool;
   }
@@ -122,7 +127,7 @@ class TreeNode extends React.Component {
     const node = this.props.node;
     if (
       typeof node.pred_distance !== "undefined" &&
-      this.props.controls.colorBy === "fitness"
+      this.props.colorBy === "fitness"
     ) {
       return globals.distanceScale(node.pred_distance);
     } else {
@@ -147,7 +152,6 @@ class TreeNode extends React.Component {
     return r;
   }
   render() {
-    console.log('node renders')
     return (
       <g
         onMouseEnter={() => {
@@ -163,16 +167,23 @@ class TreeNode extends React.Component {
         onMouseLeave={() => {
           this.props.dispatch({ type: NODE_MOUSELEAVE });
         }}
-        transform={"translate(" + this.props.x + "," + this.props.y + ")"}>
+
+      transform={
+        "translate(" +
+        this.props.xScale(this.props.node.xvalue) +
+        "," +
+        this.props.yScale(this.props.node.yvalue) +
+        ")"
+      }>
         <circle
-          fill={this.props.fill}
+          fill={this.props.colorScale(this.props.node[this.props.colorBy])}
           r={
-            this.props.hasChildren ?
+            this.props.node.children ?
               globals.nonTipNodeRadius :
               this.chooseTipRadius()} />
 
       </g>
-    )
+    );
   }
 }
 
