@@ -137,7 +137,7 @@ class TreeNode extends React.Component {
   chooseTipRadius() {
 
     if (!this.props.selectedLegendItem) {
-      return this.tipRadius()
+      return this.tipRadius();
     }
 
     let r;
