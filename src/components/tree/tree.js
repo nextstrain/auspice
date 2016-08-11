@@ -88,23 +88,17 @@ class Tree extends React.Component {
     return 400 + 0.30 * width;
   }
   drawNodes(nodes) {
-    const nodeComponents = nodes.map((node, index) => {
+    return nodes.map((node, index) => {
       return (
         <Node
-          controls={this.props.controls}
           index={index}
           node={node}
           key={index}
-          fill={this.props.controls.colorScale(node[this.props.controls.colorBy])}
-          nuc_muts={node.nuc_muts}
-          showBranchLabels={this.props.controls.showBranchLabels}
           strain={node.strain}
-          hasChildren={node.children ? true : false}
-          x={this.state.xScale(node.xvalue)}
-          y={this.state.yScale(node.yvalue)}/>
+          xScale={this.state.xScale}
+          yScale={this.state.yScale}/>
       );
     });
-    return nodeComponents;
   }
   drawBranches(links) {
     const branchComponents = links.map((link, index) => {
