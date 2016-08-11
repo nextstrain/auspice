@@ -54,8 +54,8 @@ class App extends React.Component {
   componentDidMount() {
     this.props.dispatch(populateMetadataStore());
     this.props.dispatch(populateTreeStore());
-    this.props.dispatch(populateSequencesStore());
-    this.props.dispatch(populateFrequenciesStore());
+    // this.props.dispatch(populateSequencesStore());
+    // this.props.dispatch(populateFrequenciesStore());
   }
   drawTreeIfData() {
     const p = this.props;
@@ -63,9 +63,9 @@ class App extends React.Component {
 
     if (
       p.metadata.metadata &&
-      p.tree.tree &&
-      p.sequences.sequences &&
-      p.frequencies.frequencies
+      p.tree.tree
+      // p.sequences.sequences &&
+      // p.frequencies.frequencies
     ) {
       markup = (<Tree/>);
     }
