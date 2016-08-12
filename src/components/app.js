@@ -52,10 +52,11 @@ class App extends React.Component {
 
   }
   componentDidMount() {
-    this.props.dispatch(populateMetadataStore());
-    this.props.dispatch(populateTreeStore());
-    // this.props.dispatch(populateSequencesStore());
-    // this.props.dispatch(populateFrequenciesStore());
+    const query = this.props.location.query;
+    this.props.dispatch(populateMetadataStore(query));
+    this.props.dispatch(populateTreeStore(query));
+    this.props.dispatch(populateSequencesStore(query));
+    this.props.dispatch(populateFrequenciesStore(query));
   }
   drawTreeIfData() {
     const p = this.props;
@@ -73,6 +74,7 @@ class App extends React.Component {
     return markup;
   }
   render() {
+
     return (
       <div style={{
           margin: "0px 20px"

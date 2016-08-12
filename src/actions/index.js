@@ -33,14 +33,24 @@ const metadataFetchError = (err) => {
   };
 };
 
-const fetchMetadata = () => {
-  return fetch("/Zika_meta");
+const fetchMetadata = (q) => {
+  /*
+    this will resolve to something like:
+    /data/flu/h3n2/3y.meta.json
+  */
+  return fetch(
+    "http://nextstrain.org/data/" +
+    q.virus + "/" +
+    (q.strain ? q.strain + "/" : "") +
+    (q.timeperiod ? q.timeperiod + "/" : "") +
+    "meta.json"
+  );
 };
 
-export const populateMetadataStore = () => {
+export const populateMetadataStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestMetadata());
-    return fetchMetadata().then((res) => res.json()).then(
+    return fetchMetadata(queryParams).then((res) => res.json()).then(
       (json) => dispatch(receiveMetadata(JSON.parse(json.body))),
       (err) => dispatch(metadataFetchError(err))
     );
@@ -69,14 +79,20 @@ const treeFetchError = (err) => {
   };
 };
 
-const fetchTree = () => {
-  return fetch("/Zika_tree");
+const fetchTree = (q) => {
+  return fetch(
+    "/data/" +
+    q.virus +
+    q.strain || "" +
+    q.timeperiod || "" +
+    "tree.json"
+  );
 };
 
-export const populateTreeStore = () => {
+export const populateTreeStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestTree());
-    return fetchTree().then((res) => res.json()).then(
+    return fetchTree(queryParams).then((res) => res.json()).then(
       (json) => dispatch(receiveTree(JSON.parse(json.body))),
       (err) => dispatch(treeFetchError(err))
     );
@@ -105,14 +121,20 @@ const sequencesFetchError = (err) => {
   };
 };
 
-const fetchSequences = () => {
-  return fetch("/Zika_sequences");
+const fetchSequences = (q) => {
+  return fetch(
+    "/data/" +
+    q.virus +
+    q.strain || "" +
+    q.timeperiod || "" +
+    "sequences.json"
+  );
 };
 
-export const populateSequencesStore = () => {
+export const populateSequencesStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestSequences());
-    return fetchSequences().then((res) => res.json()).then(
+    return fetchSequences(queryParams).then((res) => res.json()).then(
       (json) => dispatch(receiveSequences(JSON.parse(json.body))),
       (err) => dispatch(sequencesFetchError(err))
     );
@@ -141,14 +163,20 @@ const frequenciesFetchError = (err) => {
   };
 };
 
-const fetchFrequencies = () => {
-  return fetch("/Zika_frequencies");
+const fetchFrequencies = (q) => {
+  return fetch(
+    "/data/" +
+    q.virus +
+    q.strain || "" +
+    q.timeperiod || "" +
+    "frequencies.json"
+  );
 };
 
-export const populateFrequenciesStore = () => {
+export const populateFrequenciesStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestFrequencies());
-    return fetchFrequencies().then((res) => res.json()).then(
+    return fetchFrequencies(queryParams).then((res) => res.json()).then(
       (json) => dispatch(receiveFrequencies(JSON.parse(json.body))),
       (err) => dispatch(frequenciesFetchError(err))
     );
