@@ -1,3 +1,20 @@
+export const viruses = {
+  list: ["Flu", "Zika", "Ebola"],
+  Flu: {
+    strains: ["H3N2", "H1N1pdm", "Vic", "Yam"],
+    H3N2: [3, 6, 12],
+    H1N1pdm: [3, 6, 12],
+    Vic: [3, 6, 12],
+    Yam: [3, 6, 12]
+  },
+  Zika: {
+    strains: null
+  },
+  Ebola: {
+    strains: null
+  }
+};
+
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
 export const width = 1000;
 export const margin = 60;
