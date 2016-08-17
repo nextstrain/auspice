@@ -6,6 +6,7 @@ import {
   populateSequencesStore,
   populateFrequenciesStore
 } from "../actions";
+import ChooseVirus from "./controls/choose-virus";
 
 import Radium from "radium";
 import _ from "lodash";
@@ -80,6 +81,7 @@ class App extends React.Component {
           margin: "0px 20px"
         }}>
         <Header/>
+        <ChooseVirus {...this.props.location}/>
         <Flex
           style={{
             width: "100%"
