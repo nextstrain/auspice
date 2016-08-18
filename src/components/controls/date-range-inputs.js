@@ -4,6 +4,7 @@ import Radium from "radium";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
+import { withRouter } from "react-router";
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import _ from 'lodash';
@@ -43,25 +44,34 @@ class DateRangeInputs extends React.Component {
   updateDateRange(ref, m) {
     let newRange;
     if (ref === 'date_start') {
-      newRange = {strainMin: m.toDate(), strainMax: this.props.userMax};
+      newRange = { strainMinDate: m.toDate(), strainMaxDate: this.props.userMax };
     } else {
-      newRange = {strainMin: this.props.userMin, strainMax: m.toDate()};
+      newRange = { strainMinDate: this.props.userMin, strainMaxDate: m.toDate() };
     }
     // this.props.dispatch();
   }
-
+  createQueryParams(newRange) {
+    return Object.assign({}, this.props.query, {
+      selectedMinDate: newRange.min,
+      selectedMaxDate: newRange.max
+    });
+  }
   // {values} is an array of unix timestamps
   // [timestampStart, timestampEnd]
   updateSlider(values) {
-    const newRange = {userMin: new Date(values[0]), userMax: new Date(values[1])};
+    const newRange = {min: values[0], max: values[1]};
     // set url
-
+    this.props.router.push({
+      pathname: this.props.pathname,
+      query: this.createQueryParams(newRange)
+    })
+    // fire action to do async here
     // send action
     // this.props.dispatch();
   }
 
   render() {
-
+    /* strainMinDate is the dataset, selectedMinDate is the user option */
     return (
       <div>
         <Slider
@@ -83,7 +93,7 @@ class DateRangeInputs extends React.Component {
   }
 }
 
-export default DateRangeInputs;
+export default withRouter(DateRangeInputs);
 
 
 // dateValues = nodes.filter((d) => {
