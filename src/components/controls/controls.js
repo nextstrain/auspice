@@ -9,6 +9,7 @@ import ToggleBranchLabels from "./toggle-branch-labels";
 import Legend from "./legend";
 import ColorBy from "./color-by";
 import Search from "./search";
+import DateRangeInputs from "./date-range-inputs";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -54,6 +55,7 @@ class Controls extends React.Component {
         style={{
         }}>
         <p> Phylogeny </p>
+        <DateRangeInputs/>
         <div className="d3-tip se"/>
         <div className="d3-tip e"/>
         <div className="d3-tip"/>
