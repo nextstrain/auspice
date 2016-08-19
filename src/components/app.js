@@ -85,7 +85,7 @@ class App extends React.Component {
           wrap="wrap"
           alignItems="flex-start"
           justifyContent="space-between">
-          <Controls/>
+          <Controls {...this.props}/>
           {this.drawTreeIfData()}
         </Flex>
         <Footer/>

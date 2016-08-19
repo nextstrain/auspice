@@ -55,7 +55,7 @@ class Controls extends React.Component {
         style={{
         }}>
         <p> Phylogeny </p>
-        <DateRangeInputs/>
+        <DateRangeInputs {...this.props}/>
         <div className="d3-tip se"/>
         <div className="d3-tip e"/>
         <div className="d3-tip"/>
