@@ -170,20 +170,7 @@ const serumVisibility = () => {
   return (colorBy === "HI_dist") ? "visible" : "hidden";
 };
 
-const tipVisibility = (d) => {
-  if ((d.diff < 0 || d.diff > time_window) & (date_select === true)) {
-    return "hidden";
-  }
-  for (const k in restrictTo) {
-    if (d[k] !== restrictTo[k] && restrictTo[k] !== "all") {
-      return "hidden";
-    }
-  }
-  if ((colorBy === "HI_dist") && (HImodel === "measured") && (d.HI_dist_meas === "NaN")) {
-    return "hidden";
-  }
-  return "visible";
-};
+
 
 const branchPoints = (d) => {
   const mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);

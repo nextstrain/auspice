@@ -90,8 +90,26 @@ class TreeNode extends React.Component {
     }
   }
   chooseTipRadius(node) {
-    let r;
 
+    /*
+    old date match code
+
+    if ((d.diff < 0 || d.diff > time_window) & (date_select === true)) {
+      return "hidden";
+    }
+    for (const k in restrictTo) {
+      if (d[k] !== restrictTo[k] && restrictTo[k] !== "all") {
+        return "hidden";
+      }
+    }
+    if ((colorBy === "HI_dist") && (HImodel === "measured") && (d.HI_dist_meas === "NaN")) {
+      return "hidden";
+    }
+    return "visible";
+    */
+
+    let r;
+    // determine date match
     if (this.determineLegendMatch(node)) {
       r = this.tipRadius(node) *
         globals.tipRadiusOnLegendMatchMultiplier;
@@ -101,6 +119,7 @@ class TreeNode extends React.Component {
     return r;
   }
   render() {
+    console.log('node',this.props.node.date)
     return (
       <g
         onMouseEnter={() => {
