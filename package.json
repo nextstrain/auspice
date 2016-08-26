@@ -39,6 +39,7 @@
     "history": "^1.12.5",
     "lodash": "4.13.1",
     "moment": "^2.14.1",
+    "moment-range": "^2.2.0",
     "radium": "^0.14.2",
     "react": "^0.14.0",
     "react-autosuggest": "^3.9.0",
