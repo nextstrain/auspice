@@ -67,7 +67,7 @@ class App extends React.Component {
       p.sequences.sequences &&
       p.frequencies.frequencies
     ) {
-      markup = (<Tree/>);
+      markup = (<Tree {...this.props.location}/>);
     }
 
     return markup;
