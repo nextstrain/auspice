@@ -9,11 +9,7 @@ const path = "/data/";
 const tip_labels = true;
 
 let cladeToSeq = {};
-let globalDate;
 
-if (typeof globalDate === "undefined") {
-  globalDate = new Date();
-}
 
 // let width, height, nodes, tips, rootNode, links, vaccines, sera;
 
