@@ -11,6 +11,8 @@ import Node from "./node";
 import Tooltip from "./tooltip";
 import { processNodes } from "../../util/processNodes";
 import * as globals from "../../util/globals";
+import moment from "moment";
+import "moment-range";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -88,12 +90,17 @@ class Tree extends React.Component {
     return 400 + 0.30 * width;
   }
   drawNodes(nodes) {
+    const range = moment().range(
+      new Date(+this.props.query.dmin),
+      new Date(+this.props.query.dmax)
+    )
     const nodeComponents = nodes.map((node, index) => {
       return (
         <Node
           controls={this.props.controls}
           node={node}
           key={index}
+          dateRange={range}
           fill={this.props.controls.colorScale(node[this.props.controls.colorBy])}
           nuc_muts={node.nuc_muts}
           showBranchLabels={this.props.controls.showBranchLabels}

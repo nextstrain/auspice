@@ -42,7 +42,6 @@ const Controls = (state = {
       selectedBranch: null
     });
   case types.NODE_MOUSEENTER:
-    console.log(action)
     return Object.assign({}, state, {
       selectedNode: action.data
     });
