@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 // import { FOO } from '../actions';
 import * as globals from "../../util/globals";
 import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
+import moment from "moment";
 
 @connect()
 @Radium
@@ -79,7 +80,8 @@ class TreeNode extends React.Component {
     }
     return bool;
   }
-  tipRadius(node) {
+  checkColorBy(node) {
+    /* move this logic into the main chooseTipRadius function */
     if (
       typeof node.pred_distance !== "undefined" &&
       this.props.controls.colorBy === "fitness"
@@ -90,36 +92,29 @@ class TreeNode extends React.Component {
     }
   }
   chooseTipRadius(node) {
+    /* if it's not a tip, or if it is out of date range return 0 */
+    if (this.props.hasChildren) {
+      return globals.nonTipNodeRadius;
+    }
 
-    /*
-    old date match code
+    const inRange = this.props.dateRange.contains(
+      moment(node.date.replace(/XX/g, "01"), "YYYY-MM-DD")
+    );
 
-    if ((d.diff < 0 || d.diff > time_window) & (date_select === true)) {
-      return "hidden";
+    if (!inRange) {
+      return globals.nonTipNodeRadius;
     }
-    for (const k in restrictTo) {
-      if (d[k] !== restrictTo[k] && restrictTo[k] !== "all") {
-        return "hidden";
-      }
-    }
-    if ((colorBy === "HI_dist") && (HImodel === "measured") && (d.HI_dist_meas === "NaN")) {
-      return "hidden";
-    }
-    return "visible";
-    */
 
     let r;
-    // determine date match
+    /* see if it's currently selected, make it big */
     if (this.determineLegendMatch(node)) {
-      r = this.tipRadius(node) *
-        globals.tipRadiusOnLegendMatchMultiplier;
-    } else {
-      r = this.tipRadius(node, this.props.controls.colorBy);
+      r = this.checkColorBy(node) * globals.tipRadiusOnLegendMatchMultiplier;
+    } else /* default */ {
+      r = this.checkColorBy(node, this.props.controls.colorBy);
     }
     return r;
   }
   render() {
-    console.log('node',this.props.node.date)
     return (
       <g
         onMouseEnter={() => {
@@ -138,10 +133,7 @@ class TreeNode extends React.Component {
         transform={"translate(" + this.props.x + "," + this.props.y + ")"}>
         <circle
           fill={this.props.fill}
-          r={
-            this.props.hasChildren ?
-              globals.nonTipNodeRadius :
-              this.chooseTipRadius(this.props.node)} />
+          r={this.chooseTipRadius(this.props.node)} />
         <text
           dx={this.props.hasChildren ? -6 : 6}
           dy={this.props.hasChildren ? -2 : 3}
@@ -159,6 +151,71 @@ class TreeNode extends React.Component {
 }
 
 export default TreeNode;
+
+
+
+/*
+
+dateValues = nodes.filter((d) => {
+  return (typeof d.date === 'string') & (typeof vaccineChoice[d.strain] === "undefined") & (typeof reference_viruses[d.strain] === "undefined");
+}).map((d) => {
+  return new Date(d.date);
+});
+
+*/
+
+/*
+  // Vaccine
+
+  treeplot.selectAll(".vaccine")
+    .style("visibility", (dd) => {
+      const date = new Date(dd.choice);
+      const oneYear = 365.25 * 24 * 60 * 60 * 1000; // days*hours*minutes*seconds*milliseconds
+      const diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+
+      if (diffYears > 0) {
+        return "visible";
+      } else {
+        return "hidden";
+      }
+    });
+
+  treeplot.selectAll(".vaccine")
+    .style("visibility", (dd) => {
+      const date = new Date(dd.choice);
+
+      const diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
+
+      if (diffYears > 0) {
+        return "visible";
+      } else {
+        return "hidden";
+      }
+    });
+*/
+
+/*
+// this used to be in nodeAges function
+
+for (let k in restrictTo) {
+  if (d[k] !== restrictTo[k] && restrictTo[k] !== "all") {
+    d.current = false;
+  }
+}
+
+// old date match code
+
+
+for (const k in restrictTo) {
+  if (d[k] !== restrictTo[k] && restrictTo[k] !== "all") {
+    return "hidden";
+  }
+}
+if ((colorBy === "HI_dist") && (HImodel === "measured") && (d.HI_dist_meas === "NaN")) {
+  return "hidden";
+}
+return "visible";
+*/
 
 // if ((typeof tip_labels !== "undefined") && (tip_labels)) {
 //   treeplot.selectAll(".tipLabel").data(tips)
