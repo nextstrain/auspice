@@ -39,7 +39,7 @@ const fetchMetadata = (q) => {
     /data/flu/h3n2/3y.meta.json
   */
   return fetch(
-    "http://nextstrain.org/data/" +
+    "http://nextstrain.s3-website-us-east-1.amazonaws.com/data/" +
     q.virus + "_" +
     (q.strain ? q.strain + "_" : "") +
     (q.timeperiod ? q.timeperiod + "_" : "") +
@@ -81,7 +81,7 @@ const treeFetchError = (err) => {
 
 const fetchTree = (q) => {
   return fetch(
-    "/data/" +
+    "http://nextstrain.s3-website-us-east-1.amazonaws.com/data/" +
     q.virus + "_" +
     (q.strain ? q.strain + "_" : "") +
     (q.timeperiod ? q.timeperiod + "_" : "") +
@@ -123,7 +123,7 @@ const sequencesFetchError = (err) => {
 
 const fetchSequences = (q) => {
   return fetch(
-    "/data/" +
+    "http://nextstrain.s3-website-us-east-1.amazonaws.com/data/" +
     q.virus + "_" +
     (q.strain ? q.strain + "_" : "") +
     (q.timeperiod ? q.timeperiod + "_" : "") +
@@ -165,7 +165,7 @@ const frequenciesFetchError = (err) => {
 
 const fetchFrequencies = (q) => {
   return fetch(
-    "/data/" +
+    "http://nextstrain.s3-website-us-east-1.amazonaws.com/data/" +
     q.virus + "_" +
     (q.strain ? q.strain + "_" : "") +
     (q.timeperiod ? q.timeperiod + "_" : "") +
