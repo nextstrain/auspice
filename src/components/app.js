@@ -19,16 +19,16 @@ import Tree from "./tree/tree";
 import Footer from "./framework/footer";
 import shouldFetchDataset from "../util/shouldFetchDataset";
 
-const returnStateNeeded = (fullStateTree) => {
-  return {
-    metadata: fullStateTree.metadata,
-    tree: fullStateTree.tree,
-    sequences: fullStateTree.sequences,
-    frequencies: fullStateTree.frequencies
-  };
-};
+// const returnStateNeeded = (fullStateTree) => {
+//   return {
+//     metadata: fullStateTree.metadata,
+//     tree: fullStateTree.tree,
+//     sequences: fullStateTree.sequences,
+//     frequencies: fullStateTree.frequencies
+//   };
+// };
 
-@connect(returnStateNeeded)
+@connect()
 @Radium
 class App extends React.Component {
   constructor(props) {
@@ -56,12 +56,12 @@ class App extends React.Component {
   componentDidMount() {
     this.maybeFetchDataset()
   }
-  componentWillUpdate() {
+  componentDidUpdate() {
     this.maybeFetchDataset()
   }
   maybeFetchDataset() {
-
     const query = this.props.location.query;
+    console.log(shouldFetchDataset(query))
     if (shouldFetchDataset(query)) {
       this.props.dispatch(populateMetadataStore(query));
       this.props.dispatch(populateTreeStore(query));
@@ -73,14 +73,14 @@ class App extends React.Component {
     const p = this.props;
     let markup;
 
-    if (
-      p.metadata.metadata &&
-      p.tree.tree
-      // p.sequences.sequences &&
-      // p.frequencies.frequencies
-    ) {
-      markup = (<Tree/>);
-    }
+    // if (
+    //   p.metadata.metadata &&
+    //   p.tree.tree
+    //   // p.sequences.sequences &&
+    //   // p.frequencies.frequencies
+    // ) {
+    //   markup = (<Tree/>);
+    // }
 
     return markup;
   }
