@@ -53,6 +53,7 @@ class ChooseVirusSelect extends React.Component {
     const styles = this.getStyles();
     return (
       <select
+
         style={{marginRight: 20}}
         onChange={(e) => {
           if (e.target.value === this.props.title) { return }
@@ -62,13 +63,12 @@ class ChooseVirusSelect extends React.Component {
           })
           // fire action to do async here
         }}>
-        <option> {this.props.title} </option>
+        <option key={"titleOption"}> {this.props.title} </option>
         {
-          this.props.options.map((option) => {
-            console.log("option", typeof this.props.query[this.props.queryParamAccessor], typeof option)
+          this.props.options.map((option, i) => {
             return (
               /* ie., this.props.query[virus] === flu -- leave this fuzzy == for duration */
-              <option selected={this.props.query[this.props.queryParamAccessor] == option}>
+              <option key={i} selected={this.props.query[this.props.queryParamAccessor] == option}>
                 {option}
               </option>
             )
