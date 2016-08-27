@@ -19,15 +19,6 @@ import Tree from "./tree/tree";
 import Footer from "./framework/footer";
 import shouldFetchDataset from "../util/shouldFetchDataset";
 
-// const returnStateNeeded = (fullStateTree) => {
-//   return {
-//     metadata: fullStateTree.metadata,
-//     tree: fullStateTree.tree,
-//     sequences: fullStateTree.sequences,
-//     frequencies: fullStateTree.frequencies
-//   };
-// };
-
 @connect()
 @Radium
 class App extends React.Component {
@@ -69,21 +60,6 @@ class App extends React.Component {
       this.props.dispatch(populateFrequenciesStore(query));
     }
   }
-  drawTreeIfData() {
-    const p = this.props;
-    let markup;
-
-    // if (
-    //   p.metadata.metadata &&
-    //   p.tree.tree
-    //   // p.sequences.sequences &&
-    //   // p.frequencies.frequencies
-    // ) {
-    //   markup = (<Tree/>);
-    // }
-
-    return markup;
-  }
   render() {
     console.log('app', this.props)
     return (
@@ -100,7 +76,7 @@ class App extends React.Component {
           alignItems="flex-start"
           justifyContent="space-between">
           <Controls/>
-          {this.drawTreeIfData()}
+          <Tree/>
         </Flex>
         <Footer/>
       </div>
