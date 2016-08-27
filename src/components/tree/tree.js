@@ -25,34 +25,6 @@ const returnStateNeeded = (fullStateTree) => {
 @connect(returnStateNeeded)
 @Radium
 class Tree extends React.Component {
-  constructor(props) {
-    super(props);
-
-    const tree = d3.layout.tree()
-      .size([this.treePlotHeight(globals.width), globals.width]);
-    const nodes = processNodes(tree.nodes(props.tree.tree));
-    const links = tree.links(nodes);
-
-    const xValues = nodes.map((d) => {
-      return +d.xvalue;
-    });
-
-    const yValues = nodes.map((d) => {
-      return +d.yvalue;
-    });
-
-    this.state = {
-      width: globals.width,
-      nodes,
-      links,
-      xScale: d3.scale.linear()
-                      .domain([d3.min(xValues), d3.max(xValues)])
-                      .range([globals.margin, globals.width - globals.margin]),
-      yScale: d3.scale.linear()
-                      .domain([d3.min(yValues), d3.max(yValues)])
-                      .range([globals.margin, this.treePlotHeight(globals.width) - globals.margin])
-    };
-  }
   static propTypes = {
     /* react */
     // dispatch: React.PropTypes.func,
@@ -121,13 +93,44 @@ class Tree extends React.Component {
         y={this.state.yScale(node.yvalue)}/>
     )
   }
-  render() {
-    const styles = this.getStyles();
-    return (
-      <div style={[
-        styles.base,
-        this.props.style
-      ]}>
+  setupTree() {
+    const tree = d3.layout.tree()
+      .size([this.treePlotHeight(globals.width), globals.width]);
+    const nodes = processNodes(tree.nodes(props.tree.tree));
+    const links = tree.links(nodes);
+
+    const xValues = nodes.map((d) => {
+      return +d.xvalue;
+    });
+
+    const yValues = nodes.map((d) => {
+      return +d.yvalue;
+    });
+
+    this.setState({
+      width: globals.width,
+      nodes,
+      links,
+      xScale: d3.scale.linear()
+                      .domain([d3.min(xValues), d3.max(xValues)])
+                      .range([globals.margin, globals.width - globals.margin]),
+      yScale: d3.scale.linear()
+                      .domain([d3.min(yValues), d3.max(yValues)])
+                      .range([globals.margin, this.treePlotHeight(globals.width) - globals.margin])
+    })
+  }
+  drawTreeIfData() {
+    // is it NEW data? have we drawn this tree yet? setupTree()
+    const p = this.props;
+    let markup;
+
+    if (
+      p.metadata.metadata &&
+      p.tree.tree
+      // p.sequences.sequences &&
+      // p.frequencies.frequencies
+    ) {
+      markup = (
         <svg
           height={this.treePlotHeight(this.state.width)}
           width={this.state.width}
@@ -147,6 +150,19 @@ class Tree extends React.Component {
             null
           }
         </svg>
+      );
+    }
+
+    return markup;
+  }
+  render() {
+    const styles = this.getStyles();
+    return (
+      <div style={[
+        styles.base,
+        this.props.style
+      ]}>
+        {this.drawTreeIfData()}
       </div>
     );
   }
