@@ -17,6 +17,7 @@ import Header from "./framework/header";
 import Controls from "./controls/controls";
 import Tree from "./tree/tree";
 import Footer from "./framework/footer";
+import shouldFetchDataset from "../util/shouldFetchDataset";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -53,11 +54,20 @@ class App extends React.Component {
 
   }
   componentDidMount() {
+    this.maybeFetchDataset()
+  }
+  componentWillUpdate() {
+    this.maybeFetchDataset()
+  }
+  maybeFetchDataset() {
+
     const query = this.props.location.query;
-    this.props.dispatch(populateMetadataStore(query));
-    this.props.dispatch(populateTreeStore(query));
-    this.props.dispatch(populateSequencesStore(query));
-    this.props.dispatch(populateFrequenciesStore(query));
+    if (shouldFetchDataset(query)) {
+      this.props.dispatch(populateMetadataStore(query));
+      this.props.dispatch(populateTreeStore(query));
+      this.props.dispatch(populateSequencesStore(query));
+      this.props.dispatch(populateFrequenciesStore(query));
+    }
   }
   drawTreeIfData() {
     const p = this.props;
@@ -75,7 +85,7 @@ class App extends React.Component {
     return markup;
   }
   render() {
-
+    console.log('app', this.props)
     return (
       <div style={{
           margin: "0px 20px"
