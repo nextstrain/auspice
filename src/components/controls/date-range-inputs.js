@@ -50,7 +50,6 @@ class DateRangeInputs extends React.Component {
   }
   updateDateRange(ref, m) {
     let newRange;
-    console.log(m)
     if (ref === 'date_min') {
       newRange = { min: m.valueOf(), max: this.props.location.query.dmax || moment().valueOf() /* present */ };
     } else {

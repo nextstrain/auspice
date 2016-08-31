@@ -115,7 +115,6 @@ class TreeNode extends React.Component {
     return r;
   }
   render() {
-    console.log(this.props.node)
     return (
       <g
         onMouseEnter={() => {
