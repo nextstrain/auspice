@@ -14,6 +14,8 @@ import * as globals from "../../util/globals";
 import moment from "moment";
 import "moment-range";
 
+import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
+
 const returnStateNeeded = (fullStateTree) => {
   return {
     metadata: fullStateTree.metadata,
@@ -44,6 +46,8 @@ class Tree extends React.Component {
     });
 
     this.state = {
+      value: ViewerHelper.getDefaultValue(),
+      tool: "zoom",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
       width: globals.width,
       nodes,
       links,
@@ -133,6 +137,15 @@ class Tree extends React.Component {
         y={this.state.yScale(node.yvalue)}/>
     )
   }
+  handleChange(event) {
+    console.log('scaleFactor', event.scaleFactor);
+
+    this.setState({value: event.value});
+  }
+
+  handleClick(event){
+    console.log('click', event.x, event.y, event.originalEvent);
+  }
   render() {
     const styles = this.getStyles();
     return (
@@ -140,25 +153,33 @@ class Tree extends React.Component {
         styles.base,
         this.props.style
       ]}>
-        <svg
-          height={this.treePlotHeight(this.state.width)}
+        <Viewer
           width={this.state.width}
-          id="treeplot"
-          style={{
-          }}>
-          {this.drawBranches(this.state.links)}
-          {this.drawNodes(this.state.nodes)}
-          {
-            this.props.controls.selectedBranch ?
-            this.drawTooltip(this.props.controls.selectedBranch.target, "branch") :
-            null
-          }
-          {
-            this.props.controls.selectedNode ?
-            this.drawTooltip(this.props.controls.selectedNode, "node") :
-            null
-          }
-        </svg>
+          height={this.treePlotHeight(this.state.width)}
+          value={this.state.value}
+          tool={this.state.tool}
+          onChange={this.handleChange.bind(this)}
+          onClick={this.handleClick.bind(this)}>
+          <svg
+            width={this.state.width}
+            height={this.treePlotHeight(this.state.width)}
+            id="treeplot"
+            style={{
+            }}>
+            {this.drawBranches(this.state.links)}
+            {this.drawNodes(this.state.nodes)}
+            {
+              this.props.controls.selectedBranch ?
+              this.drawTooltip(this.props.controls.selectedBranch.target, "branch") :
+              null
+            }
+            {
+              this.props.controls.selectedNode ?
+              this.drawTooltip(this.props.controls.selectedNode, "node") :
+              null
+            }
+          </svg>
+        </Viewer>
       </div>
     );
   }
