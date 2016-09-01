@@ -5,6 +5,7 @@ import Radium from "radium";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
 import {VictoryLine} from "victory";
+import * as globals from "../../utils/globals";
 
 @connect(state => {
   return state.frequencies;
@@ -36,14 +37,15 @@ class Frequencies extends React.Component {
       }
     };
   }
-  createDate() {
-    
-  }
   drawFrequencies() {
     return (
       <VictoryLine
-        scale={{x: "date", y: "linear"}}
-        data={this.createData()}/>
+        width={globals.width}
+        data={
+          this.props.frequencies["global_HA1:159F"].map((frequency, i) => {
+            return {x: this.props.pivots[i], y: frequency}
+          })
+        }/>
     )
   }
   render() {
