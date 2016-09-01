@@ -15,7 +15,8 @@ const Frequencies = (state = {
     return Object.assign({}, state, {
       loading: false,
       error: null,
-      frequencies: action.data
+      frequencies: action.data,
+      pivots: action.data["pivots"]
     });
   case types.FREQUENCIES_FETCH_ERROR:
     return Object.assign({}, state, {

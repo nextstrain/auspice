@@ -37,7 +37,11 @@ app.get("/Zika_sequences", function(req, res) {
 });
 
 app.get("/Zika_frequencies", function(req, res) {
-  request("http://flu.tuebingen.mpg.de/data/H3N2_1985to2016_frequencies.json", function(err,r) {
+  request({
+    method: "get",
+    uri: "http://dev.nextflu.org/data/h3n2_3y_frequencies.json",
+    gzip: true
+  }, function(err,r) {
     if (err) {console.log('error getting data', err)}
     res.send(r.toJSON());
   });

@@ -15,6 +15,7 @@ import _ from "lodash";
 import Flex from "./framework/flex";
 import Header from "./framework/header";
 import Controls from "./controls/controls";
+import Frequencies from "./charts/frequencies";
 import Tree from "./tree/tree";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
@@ -88,7 +89,8 @@ class App extends React.Component {
           alignItems="flex-start"
           justifyContent="space-between">
           <Controls {...this.props}/>
-          <Tree {...this.props.location}/>
+          {this.drawTreeIfData()}
+          <Frequencies/>
         </Flex>
         <Footer/>
       </div>
