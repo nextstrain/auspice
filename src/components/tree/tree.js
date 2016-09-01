@@ -25,6 +25,12 @@ const returnStateNeeded = (fullStateTree) => {
 @connect(returnStateNeeded)
 @Radium
 class Tree extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      
+    };
+  }
   static propTypes = {
     /* react */
     // dispatch: React.PropTypes.func,
@@ -38,9 +44,6 @@ class Tree extends React.Component {
     sequences: React.PropTypes.object,
     frequencies: React.PropTypes.object
   }
-  static defaultProps = {
-    // foo: "bar"
-  }
   componentDidMount() {
     // visualization(
     //   this.props.tree.tree,
@@ -49,12 +52,36 @@ class Tree extends React.Component {
     //   null /* todo: this is vaccineStrains */
     // )
   }
-  getStyles() {
-    return {
-      base: {
+  componentDidUpdate(nextProps) {
+    if (newVirus(this.props, nextProps)) {
+      this.setupTree()
+    }
+  }
+  setupTree() {
+    const tree = d3.layout.tree()
+      .size([this.treePlotHeight(globals.width), globals.width]);
+    const nodes = processNodes(tree.nodes(props.tree.tree));
+    const links = tree.links(nodes);
 
-      }
-    };
+    const xValues = nodes.map((d) => {
+      return +d.xvalue;
+    });
+
+    const yValues = nodes.map((d) => {
+      return +d.yvalue;
+    });
+
+    this.setState({
+      width: globals.width,
+      nodes,
+      links,
+      xScale: d3.scale.linear()
+                      .domain([d3.min(xValues), d3.max(xValues)])
+                      .range([globals.margin, globals.width - globals.margin]),
+      yScale: d3.scale.linear()
+                      .domain([d3.min(yValues), d3.max(yValues)])
+                      .range([globals.margin, this.treePlotHeight(globals.width) - globals.margin])
+    })
   }
   treePlotHeight(width) {
     return 400 + 0.30 * width;
@@ -92,32 +119,6 @@ class Tree extends React.Component {
         x={this.state.xScale(node.xvalue)}
         y={this.state.yScale(node.yvalue)}/>
     )
-  }
-  setupTree() {
-    const tree = d3.layout.tree()
-      .size([this.treePlotHeight(globals.width), globals.width]);
-    const nodes = processNodes(tree.nodes(props.tree.tree));
-    const links = tree.links(nodes);
-
-    const xValues = nodes.map((d) => {
-      return +d.xvalue;
-    });
-
-    const yValues = nodes.map((d) => {
-      return +d.yvalue;
-    });
-
-    this.setState({
-      width: globals.width,
-      nodes,
-      links,
-      xScale: d3.scale.linear()
-                      .domain([d3.min(xValues), d3.max(xValues)])
-                      .range([globals.margin, globals.width - globals.margin]),
-      yScale: d3.scale.linear()
-                      .domain([d3.min(yValues), d3.max(yValues)])
-                      .range([globals.margin, this.treePlotHeight(globals.width) - globals.margin])
-    })
   }
   drawTreeIfData() {
     // is it NEW data? have we drawn this tree yet? setupTree()
@@ -158,10 +159,7 @@ class Tree extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <div style={[
-        styles.base,
-        this.props.style
-      ]}>
+      <div>
         {this.drawTreeIfData()}
       </div>
     );
