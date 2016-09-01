@@ -61,6 +61,7 @@
     "redux-thunk": "^1.0.0",
     "request": "^2.65.0",
     "title-case": "^2.1.0",
+    "victory": "^0.11.0",
     "victory-axis": "^1.5.1",
     "victory-bar": "^2.4.4",
     "victory-chart": "^2.0.1",

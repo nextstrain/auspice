@@ -14,6 +14,7 @@ import _ from "lodash";
 import Flex from "./framework/flex";
 import Header from "./framework/header";
 import Controls from "./controls/controls";
+import Frequencies from "./charts/frequencies";
 import Tree from "./tree/tree";
 import Footer from "./framework/footer";
 
@@ -87,6 +88,7 @@ class App extends React.Component {
           justifyContent="space-between">
           <Controls {...this.props}/>
           {this.drawTreeIfData()}
+          <Frequencies/>
         </Flex>
         <Footer/>
       </div>
