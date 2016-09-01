@@ -51,7 +51,7 @@ export const populateMetadataStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestMetadata());
     return fetchMetadata(queryParams).then((res) => res.json()).then(
-      (json) => dispatch(receiveMetadata(JSON.parse(json.body))),
+      (json) => dispatch(receiveMetadata(json)),
       (err) => dispatch(metadataFetchError(err))
     );
   };
@@ -93,7 +93,7 @@ export const populateTreeStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestTree());
     return fetchTree(queryParams).then((res) => res.json()).then(
-      (json) => dispatch(receiveTree(JSON.parse(json.body))),
+      (json) => dispatch(receiveTree(json)),
       (err) => dispatch(treeFetchError(err))
     );
   };
@@ -135,7 +135,7 @@ export const populateSequencesStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestSequences());
     return fetchSequences(queryParams).then((res) => res.json()).then(
-      (json) => dispatch(receiveSequences(JSON.parse(json.body))),
+      (json) => dispatch(receiveSequences(json)),
       (err) => dispatch(sequencesFetchError(err))
     );
   };
@@ -177,7 +177,7 @@ export const populateFrequenciesStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestFrequencies());
     return fetchFrequencies(queryParams).then((res) => res.json()).then(
-      (json) => dispatch(receiveFrequencies(JSON.parse(json.body))),
+      (json) => dispatch(receiveFrequencies(json)),
       (err) => dispatch(frequenciesFetchError(err))
     );
   };
