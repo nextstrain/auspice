@@ -43,11 +43,14 @@ class Tree extends React.Component {
     const yValues = nodes.map((d) => {
       return +d.yvalue;
     });
+    const nNodes = nodes.filter((d) => { return typeof d.children==="undefined";}).length;
 
     this.state = {
       width: globals.width,
       nodes,
       links,
+      nNodes,
+      remove_me: 0,
       xScale: d3.scale.linear()
                       .domain([d3.min(xValues), d3.max(xValues)])
                       .range([globals.margin, globals.width - globals.margin]),
@@ -95,11 +98,29 @@ class Tree extends React.Component {
       new Date(+this.props.query.dmin),
       new Date(+this.props.query.dmax)
     )
+    function xVal(node, layout, scale, xScale, nNodes){
+      var x = (scale=='time') ? xScale(node.xvalue) : xScale(node.tvalue / 300);
+      if (layout=='rectangular'){
+        return x;
+      }else if(layout=='radial'){
+        var theta = 6.283*node.yvalue/nNodes;
+        return Math.sin(theta)*x*0.3+500;
+      }
+    }
+    function yVal(node, layout, scale, xScale, yScale, nNodes){
+      if (layout=='rectangular'){
+        return yScale(node.yvalue);
+      }else if(layout=='radial'){
+        var x = (scale=='time') ? xScale(node.xvalue) : xScale(node.tvalue / 300);
+        var theta = 6.283*node.yvalue/nNodes;
+        return Math.cos(theta)*x*0.3+500;
+      }
+    }
     const nodeComponents = nodes.map((node, index) => {
-      return (
+     return (
         <VictoryAnimation duration={1000} key={index} data={{
-            x: this.state.remove_me ? this.state.xScale(node.xvalue) : this.state.xScale(node.tvalue / 300),
-            y: this.state.yScale(node.yvalue)
+            x: xVal(node, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.nNodes),
+            y: yVal(node, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.yScale, this.state.nNodes)
           }}>
           {(props) => {
             return (
@@ -121,13 +142,31 @@ class Tree extends React.Component {
     return nodeComponents;
   }
   drawBranches(links) {
+    function xVal(node, layout, scale, xScale, nNodes){
+      var x = (scale=='time') ? xScale(node.xvalue) : xScale(node.tvalue / 300);
+      if (layout=='rectangular'){
+        return x;
+      }else if(layout=='radial'){
+        var theta = 6.283*node.yvalue/nNodes;
+        return Math.sin(theta)*x*0.3+500;
+      }
+    }
+    function yVal(node, layout, scale, xScale, yScale, nNodes){
+      if (layout=='rectangular'){
+        return yScale(node.yvalue);
+      }else if(layout=='radial'){
+        var x = (scale=='time') ? xScale(node.xvalue) : xScale(node.tvalue / 300);
+        var theta = 6.283*node.yvalue/nNodes;
+        return Math.cos(theta)*x*0.3+500;
+      }
+    }
     const branchComponents = links.map((link, index) => {
       return (
         <VictoryAnimation duration={1000} key={index} data={{
-            target_x: this.state.remove_me ? this.state.xScale(link.target.xvalue) : this.state.xScale(link.target.tvalue / 300),
-            target_y: this.state.yScale(link.target.yvalue),
-            source_x: this.state.remove_me ? this.state.xScale(link.source.xvalue) : this.state.xScale(link.source.tvalue / 300),
-            source_y: this.state.yScale(link.source.yvalue),
+            target_x: xVal(link.target, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.nNodes),
+            target_y: yVal(link.target, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.yScale, this.state.nNodes),
+            source_x: xVal(link.source, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.nNodes),
+            source_y: yVal(link.source, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.yScale, this.state.nNodes),
         }}>
         {(props) => {
           return (
@@ -157,7 +196,7 @@ class Tree extends React.Component {
         this.props.style
       ]}>
         <svg
-          onClick={() => { this.setState({remove_me: !this.state.remove_me}) }}
+          onClick={() => { this.setState({remove_me: this.state.remove_me+1}) }}
           height={this.treePlotHeight(this.state.width)}
           width={this.state.width}
           id="treeplot"
