@@ -46,7 +46,6 @@ class Branch extends React.Component {
     // const freqScale = this.setupFreqScale();
     // const mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
 
-    const d = this.props.datum;
     const mod = 0;
 
     return (this.props.xscale(d.parent.xvalue) - mod).toString() +

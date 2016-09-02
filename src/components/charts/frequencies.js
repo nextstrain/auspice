@@ -5,7 +5,7 @@ import Radium from "radium";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
 import {VictoryLine} from "victory";
-import * as globals from "../../utils/globals";
+import * as globals from "../../util/globals";
 
 @connect(state => {
   return state.frequencies;

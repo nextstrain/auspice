@@ -115,12 +115,12 @@ class TreeNode extends React.Component {
       (colorBy === "date") ||
       (colorBy === "dfreq") ||
       (colorBy === "HI_dist") ||
-      (colorBy === "cHI")
+      (colorBy === "cTiter")
     ) {
       bool = (node.coloring <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
         (node.coloring > legendBoundsMap.lower_bound[selectedLegendItem]);
     } else {
-      bool = node[colorBy] === selectedLegendItem;
+      bool = node.attr[this.props.controls.colorBy] === c.selectedLegendItem;
     }
     return bool;
   }
@@ -199,6 +199,17 @@ class TreeNode extends React.Component {
     );
   }
 }
+// <text
+//   dx={this.props.hasChildren ? -6 : 6}
+//   dy={this.props.hasChildren ? -2 : 3}
+//   style={{
+//     fontFamily: "Helvetica",
+//     fontSize: 8,
+//     fontWeight: 300
+//   }}
+//   textAnchor={this.props.hasChildren ? "end" : "start"}>
+//   {this.getNodeText()}
+// </text>
 
 export default TreeNode;
 
