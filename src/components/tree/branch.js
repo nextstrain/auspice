@@ -42,7 +42,7 @@ class Branch extends React.Component {
   setupFreqScale() {
     return d3.scale.sqrt().domain([0, 1]).range([1, 10]);
   }
-  branchPoints() {
+  branchPoint() {
     // const freqScale = this.setupFreqScale();
     // const mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
 
