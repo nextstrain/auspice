@@ -71,12 +71,12 @@ class TreeNode extends React.Component {
       (colorBy === "date") ||
       (colorBy === "dfreq") ||
       (colorBy === "HI_dist") ||
-      (colorBy === "cHI")
+      (colorBy === "cTiter")
     ) {
       bool = (node.coloring <= c.legendBoundsMap.upper_bound[c.selectedLegendItem]) &&
         (node.coloring > c.legendBoundsMap.lower_bound[c.selectedLegendItem]);
     } else {
-      bool = node[this.props.controls.colorBy] === c.selectedLegendItem;
+      bool = node.attr[this.props.controls.colorBy] === c.selectedLegendItem;
     }
     return bool;
   }
@@ -98,7 +98,7 @@ class TreeNode extends React.Component {
     }
 
     const inRange = this.props.dateRange.contains(
-      moment(node.date.replace(/XX/g, "01"), "YYYY-MM-DD")
+      moment(node.attr.date.replace(/XX/g, "01"), "YYYY-MM-DD")
     );
 
     if (!inRange) {
@@ -134,21 +134,21 @@ class TreeNode extends React.Component {
         <circle
           fill={this.props.fill}
           r={this.chooseTipRadius(this.props.node)} />
-        <text
-          dx={this.props.hasChildren ? -6 : 6}
-          dy={this.props.hasChildren ? -2 : 3}
-            style={{
-              fontFamily: "Helvetica",
-              fontSize: 8,
-              fontWeight: 300
-            }}
-          textAnchor={this.props.hasChildren ? "end" : "start"}>
-          {this.getNodeText()}
-        </text>
       </g>
     )
   }
 }
+// <text
+//   dx={this.props.hasChildren ? -6 : 6}
+//   dy={this.props.hasChildren ? -2 : 3}
+//   style={{
+//     fontFamily: "Helvetica",
+//     fontSize: 8,
+//     fontWeight: 300
+//   }}
+//   textAnchor={this.props.hasChildren ? "end" : "start"}>
+//   {this.getNodeText()}
+// </text>
 
 export default TreeNode;
 

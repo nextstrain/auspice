@@ -29,7 +29,7 @@ app.get("/Zika_meta", function(req, res) {
 app.get("/Zika_tree", function(req, res) {
   request({
     method: "get",
-    uri: "http://nextstrain.org/data/Zika_tree.json",
+    uri: "http://dev.nextflu.org/data/h3n2_6y_tree.json",
     gzip: true
   }, function(err,r) {
     if (err) {console.log('error getting data', err)}
@@ -40,7 +40,7 @@ app.get("/Zika_tree", function(req, res) {
 app.get("/Zika_sequences", function(req, res) {
   request({
     method: "get",
-    uri: "http://nextstrain.org/data/Zika_sequences.json",
+    uri: "http://dev.nextflu.org/data/h3n2_6y_sequences.json",
     gzip: true
   }, function(err,r) {
     if (err) {console.log('error getting data', err)}
@@ -51,7 +51,7 @@ app.get("/Zika_sequences", function(req, res) {
 app.get("/Zika_frequencies", function(req, res) {
   request({
     method: "get",
-    uri: "http://dev.nextflu.org/data/h3n2_3y_frequencies.json",
+    uri: "http://dev.nextflu.org/data/h3n2_6y_frequencies.json",
     gzip: true
   }, function(err,r) {
     if (err) {console.log('error getting data', err)}

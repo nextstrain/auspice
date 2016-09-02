@@ -13,6 +13,7 @@ import { processNodes } from "../../util/processNodes";
 import * as globals from "../../util/globals";
 import moment from "moment";
 import "moment-range";
+import {VictoryAnimation} from "victory";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -96,18 +97,25 @@ class Tree extends React.Component {
     )
     const nodeComponents = nodes.map((node, index) => {
       return (
-        <Node
-          controls={this.props.controls}
-          node={node}
-          key={index}
-          dateRange={range}
-          fill={this.props.controls.colorScale(node[this.props.controls.colorBy])}
-          nuc_muts={node.nuc_muts}
-          showBranchLabels={this.props.controls.showBranchLabels}
-          strain={node.strain}
-          hasChildren={node.children ? true : false}
-          x={this.state.xScale(node.xvalue)}
-          y={this.state.yScale(node.yvalue)}/>
+        <VictoryAnimation duration={1000} key={index} data={{
+            x: this.state.remove_me ? this.state.xScale(node.xvalue) : this.state.xScale(node.tvalue / 300),
+            y: this.state.yScale(node.yvalue)
+          }}>
+          {(props) => {
+            return (
+              <Node
+                {...this.props} {...props} animate={null}
+                controls={this.props.controls}
+                node={node}
+                dateRange={range}
+                fill={this.props.controls.colorScale(node.attr[this.props.controls.colorBy])}
+                nuc_muts={node.nuc_muts}
+                showBranchLabels={this.props.controls.showBranchLabels}
+                strain={node.strain}
+                hasChildren={node.children ? true : false}/>
+            )
+          }}
+        </VictoryAnimation>
       );
     });
     return nodeComponents;
@@ -115,11 +123,19 @@ class Tree extends React.Component {
   drawBranches(links) {
     const branchComponents = links.map((link, index) => {
       return (
-        <Link
-          xscale={this.state.xScale}
-          yscale={this.state.yScale}
-          datum={link}
-          key={index} />
+        <VictoryAnimation duration={1000} key={index} data={{
+            target_x: this.state.remove_me ? this.state.xScale(link.target.xvalue) : this.state.xScale(link.target.tvalue / 300),
+            target_y: this.state.yScale(link.target.yvalue),
+            source_x: this.state.remove_me ? this.state.xScale(link.source.xvalue) : this.state.xScale(link.source.tvalue / 300),
+            source_y: this.state.yScale(link.source.yvalue),
+        }}>
+        {(props) => {
+          return (
+            <Link
+              {...this.props} {...props} animate={null}
+              key={index} />
+           );}}
+      </VictoryAnimation>
       );
     });
     return branchComponents;
@@ -141,6 +157,7 @@ class Tree extends React.Component {
         this.props.style
       ]}>
         <svg
+          onClick={() => { this.setState({remove_me: !this.state.remove_me}) }}
           height={this.treePlotHeight(this.state.width)}
           width={this.state.width}
           id="treeplot"
