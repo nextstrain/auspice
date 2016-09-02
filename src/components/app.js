@@ -4,7 +4,8 @@ import {
   populateMetadataStore,
   populateTreeStore,
   populateSequencesStore,
-  populateFrequenciesStore
+  populateFrequenciesStore,
+  populateEntropyStore
 } from "../actions";
 
 import Radium from "radium";
@@ -15,6 +16,7 @@ import Flex from "./framework/flex";
 import Header from "./framework/header";
 import Controls from "./controls/controls";
 import Frequencies from "./charts/frequencies";
+import Entropy from "./charts/entropy";
 import Tree from "./tree/tree";
 import Footer from "./framework/footer";
 
@@ -23,7 +25,8 @@ const returnStateNeeded = (fullStateTree) => {
     metadata: fullStateTree.metadata,
     tree: fullStateTree.tree,
     sequences: fullStateTree.sequences,
-    frequencies: fullStateTree.frequencies
+    frequencies: fullStateTree.frequencies,
+    entropy: fullStateTree.entropy
   };
 };
 
@@ -57,7 +60,9 @@ class App extends React.Component {
     this.props.dispatch(populateTreeStore());
     this.props.dispatch(populateSequencesStore());
     this.props.dispatch(populateFrequenciesStore());
+    this.props.dispatch(populateEntropyStore());
   }
+
   drawTreeIfData() {
     const p = this.props;
     let markup;
@@ -70,7 +75,7 @@ class App extends React.Component {
     ) {
       markup = (<Tree {...this.props.location}/>);
     }
-
+    console.log(this.props);
     return markup;
   }
   render() {
@@ -89,6 +94,7 @@ class App extends React.Component {
           <Controls {...this.props}/>
           {this.drawTreeIfData()}
           <Frequencies/>
+          <Entropy/>
         </Flex>
         <Footer/>
       </div>

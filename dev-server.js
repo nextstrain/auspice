@@ -59,6 +59,18 @@ app.get("/Zika_frequencies", function(req, res) {
   });
 });
 
+app.get("/Zika_entropy", function(req, res) {
+  request({
+    method: "get",
+    uri: "http://dev.nextflu.org/data/h3n2_6y_entropy.json",
+    gzip: true
+  }, function(err,r) {
+    if (err) {console.log('error getting data', err)}
+    res.send(r.toJSON());
+  });
+});
+
+
 // app.get("/:virus/:strain/:timeperiod/:resource", function(req, res) {
 //   request(
 //     "http://nextstrain.org/data/" +
