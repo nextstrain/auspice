@@ -4,7 +4,8 @@ import {
   populateMetadataStore,
   populateTreeStore,
   populateSequencesStore,
-  populateFrequenciesStore
+  populateFrequenciesStore,
+  populateEntropyStore
 } from "../actions";
 import ChooseVirus from "./controls/choose-virus";
 
@@ -16,6 +17,7 @@ import Flex from "./framework/flex";
 import Header from "./framework/header";
 import Controls from "./controls/controls";
 import Frequencies from "./charts/frequencies";
+import Entropy from "./charts/entropy";
 import Tree from "./tree/tree";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
@@ -91,6 +93,7 @@ class App extends React.Component {
           <Controls {...this.props}/>
           {this.drawTreeIfData()}
           <Frequencies/>
+          <Entropy/>
         </Flex>
         <Footer/>
       </div>
