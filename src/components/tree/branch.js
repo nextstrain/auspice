@@ -42,23 +42,38 @@ class Branch extends React.Component {
   setupFreqScale() {
     return d3.scale.sqrt().domain([0, 1]).range([1, 10]);
   }
-  branchPoint() {
+  branchPoints() {
     // const freqScale = this.setupFreqScale();
     // const mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
 
     const mod = 0;
-
-    return (this.props.source_x - mod).toString() +
-      "," +
-      this.props.source_y.toString() +
-      " " +
-      (this.props.source_x - mod).toString() +
-      "," +
-      this.props.target_y.toString() +
-      " " +
-      (this.props.target_x).toString() +
-      "," +
-      this.props.target_y.toString();
+    if (this.props.layout=='rectangular'){
+      return (this.props.source_x - mod).toString() +
+        "," +
+        this.props.source_y.toString() +
+        " " +
+        (this.props.source_x - mod).toString() +
+        "," +
+        this.props.target_y.toString() +
+        " " +
+        (this.props.target_x).toString() +
+        "," +
+        this.props.target_y.toString();
+    }else if (this.props.layout=='radial'){
+      var rinner = Math.sqrt((this.props.source_x-this.props.center)**2 + (this.props.source_y-this.props.center)**2);
+      var router = Math.sqrt((this.props.target_x-this.props.center)**2 + (this.props.target_y-this.props.center)**2);
+      return (this.props.source_x).toString() +
+        "," +
+        this.props.source_y.toString() +
+        " " +
+        ((this.props.target_x-this.props.center)*rinner/router+this.props.center).toString() +
+        "," +
+        ((this.props.target_y-this.props.center)*rinner/router+this.props.center).toString() +
+        " " +
+        (this.props.target_x).toString() +
+        "," +
+        this.props.target_y.toString();
+    }
   }
   render() {
     return (
