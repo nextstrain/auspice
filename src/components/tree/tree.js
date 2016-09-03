@@ -95,29 +95,11 @@ class Tree extends React.Component {
       new Date(+this.props.query.dmin),
       new Date(+this.props.query.dmax)
     )
-    function xVal(node, layout, scale, xScale, nNodes){
-      var x = (scale=='time') ? xScale(node.xvalue) : xScale(node.tvalue / 300);
-      if (layout=='rectangular'){
-        return x;
-      }else if(layout=='radial'){
-        var theta = 6.283*node.yvalue/nNodes;
-        return Math.sin(theta)*x*0.3+500;
-      }
-    }
-    function yVal(node, layout, scale, xScale, yScale, nNodes){
-      if (layout=='rectangular'){
-        return yScale(node.yvalue);
-      }else if(layout=='radial'){
-        var x = (scale=='time') ? xScale(node.xvalue) : xScale(node.tvalue / 300);
-        var theta = 6.283*node.yvalue/nNodes;
-        return Math.cos(theta)*x*0.3+500;
-      }
-    }
     const nodeComponents = nodes.map((node, index) => {
      return (
         <VictoryAnimation duration={1000} key={index} data={{
-            x: xVal(node, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.nNodes),
-            y: yVal(node, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.yScale, this.state.nNodes)
+            x: this.xVal(node, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time"),
+            y: this.yVal(node, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time")
           }}>
           {(props) => {
             return (
@@ -139,31 +121,15 @@ class Tree extends React.Component {
     return nodeComponents;
   }
   drawBranches(links) {
-    function xVal(node, layout, scale, xScale, nNodes){
-      var x = (scale=='time') ? xScale(node.xvalue) : xScale(node.tvalue / 300);
-      if (layout=='rectangular'){
-        return x;
-      }else if(layout=='radial'){
-        var theta = 6.283*node.yvalue/nNodes;
-        return Math.sin(theta)*x*0.3+500;
-      }
-    }
-    function yVal(node, layout, scale, xScale, yScale, nNodes){
-      if (layout=='rectangular'){
-        return yScale(node.yvalue);
-      }else if(layout=='radial'){
-        var x = (scale=='time') ? xScale(node.xvalue) : xScale(node.tvalue / 300);
-        var theta = 6.283*node.yvalue/nNodes;
-        return Math.cos(theta)*x*0.3+500;
-      }
-    }
     const branchComponents = links.map((link, index) => {
       return (
         <VictoryAnimation duration={1000} key={index} data={{
-            target_x: xVal(link.target, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.nNodes),
-            target_y: yVal(link.target, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.yScale, this.state.nNodes),
-            source_x: xVal(link.source, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.nNodes),
-            source_y: yVal(link.source, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time", this.state.xScale, this.state.yScale, this.state.nNodes),
+            target_x: this.xVal(link.target, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time"),
+            target_y: this.yVal(link.target, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time"),
+            source_x: this.xVal(link.source, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time"),
+            source_y: this.yVal(link.source, (this.state.remove_me%2)?"radial":"rectangular", (this.state.remove_me%3)?"mutation":"time"),
+            layout: (this.state.remove_me%2)?"radial":"rectangular",
+            center:this.state.center,
         }}>
         {(props) => {
           return (
