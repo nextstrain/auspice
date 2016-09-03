@@ -48,37 +48,42 @@ class Branch extends React.Component {
 
     const mod = 0;
     if (this.props.layout=='rectangular'){
-      return (this.props.source_x - mod).toString() +
-        "," +
+      return 'M'+(this.props.source_x - mod).toString() +
+        " " +
         this.props.source_y.toString() +
-        " " +
+        " L " +
         (this.props.source_x - mod).toString() +
-        "," +
-        this.props.target_y.toString() +
         " " +
+        this.props.target_y.toString() +
+        " L " +
         (this.props.target_x).toString() +
-        "," +
+        " " +
         this.props.target_y.toString();
     }else if (this.props.layout=='radial'){
       var rinner = Math.sqrt((this.props.source_x-this.props.center)**2 + (this.props.source_y-this.props.center)**2);
       var router = Math.sqrt((this.props.target_x-this.props.center)**2 + (this.props.target_y-this.props.center)**2);
-      return (this.props.source_x).toString() +
-        "," +
+      var tmp_d = 'M '+(this.props.source_x).toString() +
+        "  " +
         this.props.source_y.toString() +
+        " A " +
+        rinner.toString() +
         " " +
+        rinner.toString() +
+        " 0 0 1 " +
         ((this.props.target_x-this.props.center)*rinner/router+this.props.center).toString() +
-        "," +
-        ((this.props.target_y-this.props.center)*rinner/router+this.props.center).toString() +
         " " +
-        (this.props.target_x).toString() +
-        "," +
+        ((this.props.target_y-this.props.center)*rinner/router+this.props.center).toString() +
+        " L " +
+        this.props.target_x.toString() +
+        " " +
         this.props.target_y.toString();
+      return tmp_d;
     }
   }
   render() {
     return (
-      <polyline
-        points={this.branchPoints()}
+      <path
+        d={this.branchPoints()}
         onMouseEnter={() => {
           this.props.dispatch({
             type: BRANCH_MOUSEENTER,
@@ -98,7 +103,7 @@ class Branch extends React.Component {
           strokeLinejoin: "round",
           fill: "none",
           cursor: "pointer"
-        }}></polyline>
+        }}></path>
     );
   }
 }
