@@ -9,7 +9,7 @@ import d3 from "d3";
 import Link from "./branch";
 import Node from "./node";
 import Tooltip from "./tooltip";
-import { processNodes } from "../../util/processNodes";
+import { processNodes, calcLayouts,  mapToCoordinates } from "../../util/processNodes";
 import * as globals from "../../util/globals";
 import moment from "moment";
 import "moment-range";
@@ -34,6 +34,8 @@ class Tree extends React.Component {
     const tree = d3.layout.tree()
       .size([this.treePlotHeight(globals.width), globals.width]);
     const nodes = processNodes(tree.nodes(props.tree.tree));
+    calcLayouts(nodes);
+    console.log('nodes with geometry', nodes);
     const links = tree.links(nodes);
 
     const xValues = nodes.map((d) => {

@@ -14,3 +14,58 @@ export const processNodes = (nodes) => {
   return nodes;
 
 };
+
+const rectangularLayout = (node, distanceMeasure) => {
+    return {'xVal':(distanceMeasure=='div')?node.xvalue:node.attr[distanceMeasure], 'yVal':node.yvalue};
+};
+
+const vsDateLayout = (node, distanceMeasure) => {
+    return {'xVal':node.attr['num_date'], 'yVal':node.attr[distanceMeasure]};
+};
+
+const radialLayout = (node, distanceMeasure, nTips) => {
+    var circleFraction = 0.95;
+    var radius = (distanceMeasure=='div')?node.xvalue:node.attr[distanceMeasure];
+    var angle = circleFraction*2*Math.PI*node.yvalue/nTips;
+    return {'xVal':radius*Math.sin(angle), 'yVal':radius*Math.cos(angle)};
+};
+
+/* Calculate layout geometry for radial and rectangular layouts
+ * nodes: array of nodes for which x/y coordinates are to be calculated
+ * nTips: total number of tips  (optional)
+ * distanceMeasures: the different types of distances used to measure
+                     distances on the tree (date, mutations, etc) (optional)
+*/
+export const calcLayouts = (nodes, nTips, distanceMeasures) => {
+    if (typeof distanceMeasures==='undefined'){
+        distanceMeasures = globals.defaultDistanceMeasures;
+    }
+    if (typeof nTips==='undefined'){
+        nTips = nodes.filter((d) => {return !d.hasChildren;} ).length;
+    }
+    nodes.forEach( (node, ni) => {
+        node.geometry = {};
+        distanceMeasures.forEach((distanceMeasure, di) => {
+            node.geometry[distanceMeasure]={};
+            node.geometry[distanceMeasure]['rectangular'] = rectangularLayout(node, distanceMeasure);
+            node.geometry[distanceMeasure]['radial'] = radialLayout(node, distanceMeasure, nTips);
+            node.geometry[distanceMeasure]['vsDate'] = vsDateLayout(node, distanceMeasure);
+        });
+    });
+};
+
+
+/* Map the precomputed geometries to the coordinates in the SVG
+ * nodes: array of nodes for which x/y coordinates are to be mapped
+ * xScale: map of tree layout to coordinate space
+ * yScale: map of tree layout to coordinate space
+ * layout: type of layout to use (radial vs rectangular)
+ * distanceMeasure: data type used to determine tree distances (date, mutations, etc)
+*/
+export const mapToCoordinates = (nodes, xScale, yScale, layout, distanceMeasure) => {
+    nodes.forEach( (node, ni) => {
+        node.geometry[distanceMeasure][layout]['x'] = xScales(node.geometry[distanceMeasure][layout]['xVal']);
+        node.geometry[distanceMeasure][layout]['y'] = yScales(node.geometry[distanceMeasure][layout]['yVal']);
+    });
+}
+
