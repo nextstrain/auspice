@@ -6,7 +6,10 @@ import { connect } from "react-redux";
 // import { FOO } from "../actions";
 // import { visualization } from "../../visualization/visualization";
 import d3 from "d3";
-import { processNodes } from "../../util/processNodes";
+import Link from "./branch";
+import Node from "./node";
+import Tooltip from "./tooltip";
+import { processNodes, calcLayouts,  mapToCoordinates } from "../../util/processNodes";
 import * as globals from "../../util/globals";
 import moment from "moment";
 import "moment-range";
@@ -24,6 +27,8 @@ const returnStateNeeded = (fullStateTree) => {
 class Tree extends React.Component {
   constructor(props) {
     super(props);
+    calcLayouts(nodes);
+    const nNodes = nodes.filter((d) => { return typeof d.children==="undefined";}).length;
     this.state = {
       okToDraw: false
     };
