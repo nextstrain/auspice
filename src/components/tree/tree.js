@@ -28,7 +28,7 @@ class Tree extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      
+
     };
   }
   static propTypes = {
@@ -156,8 +156,7 @@ class Tree extends React.Component {
 
     return markup;
   }
-  render() {
-    const styles = this.getStyles();
+  render() { 
     return (
       <div>
         {this.drawTreeIfData()}

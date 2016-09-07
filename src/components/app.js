@@ -52,8 +52,9 @@ class App extends React.Component {
   }
   maybeFetchDataset() {
     const query = this.props.location.query;
-    console.log(shouldFetchDataset(query))
-    if (shouldFetchDataset(query)) {
+    const config = shouldFetchDataset(this.props.params.splat);
+    console.log(config);
+    if (config.valid){
       this.props.dispatch(populateMetadataStore(query));
       this.props.dispatch(populateTreeStore(query));
       this.props.dispatch(populateSequencesStore(query));
@@ -77,6 +78,7 @@ class App extends React.Component {
           justifyContent="space-between">
           <Controls/>
           <Tree/>
+
         </Flex>
         <Footer/>
       </div>

@@ -1,18 +1,15 @@
-export const viruses = {
-  list: ["Flu", "Zika", "Ebola"],
-  Flu: {
-    strains: ["H3N2", "H1N1pdm", "Vic", "Yam"],
-    H3N2: [3, 6, 12],
-    H1N1pdm: [3, 6, 12],
-    Vic: [3, 6, 12],
-    Yam: [3, 6, 12]
-  },
-  Zika: {
-    strains: null
-  },
-  Ebola: {
-    strains: null
-  }
+// datasets json: object of list (to ensure order) of list (to be flexible)
+// until terminated by an empty list indicating that no further datasets
+// resolution are made
+export const datasets = {
+  virus: [
+    {flu: [{lineage: [{H3N2:     [{duration:[{'3y':[]}, {'6y':[]}, {'12y':[]}]}]},
+                      {H1N1pdm:  [{duration:[{'3y':[]}, {'6y':[]}, {'12y':[]}]}]},
+                      {Yam:      [{duration:[{'3y':[]}, {'6y':[]}, {'12y':[]}]}]},
+                      {Vic:      [{duration:[{'3y':[]}, {'6y':[]}, {'12y':[]}]}]}]}]},
+    {ebola:[]},
+    {zika:[]}
+  ]
 };
 
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
