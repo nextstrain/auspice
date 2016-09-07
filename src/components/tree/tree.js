@@ -156,7 +156,7 @@ class Tree extends React.Component {
 
     return markup;
   }
-  render() { 
+  render() {
     return (
       <div>
         {this.drawTreeIfData()}

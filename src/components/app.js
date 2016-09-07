@@ -54,6 +54,7 @@ class App extends React.Component {
     const query = this.props.location.query;
     const config = shouldFetchDataset(this.props.params.splat);
     console.log(config);
+    this.setState({'dataset':config['dataset'], 'item':config['item']});
     var tmp_levels = Object.keys(config['dataset']).map((d) => config['dataset'][d]);
     tmp_levels.sort((x,y) => x[0]>y[0]);
     const data_path = tmp_levels.map(function(d){return d[1];}).join('_');
