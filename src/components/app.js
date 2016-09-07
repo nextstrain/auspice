@@ -54,11 +54,18 @@ class App extends React.Component {
     const query = this.props.location.query;
     const config = shouldFetchDataset(this.props.params.splat);
     console.log(config);
+    var tmp_levels = Object.keys(config['path']).map((d) => config['path'][d]);
+    tmp_levels.sort((x,y) => x[1]>y[1]);
+    const data_path = tmp_levels.map(function(d){return d[0];}).join('_');
+    console.log('tmp_levels',tmp_levels);
+    console.log('data_path',data_path);
+    console.log('goit here');
     if (config.valid){
-      this.props.dispatch(populateMetadataStore(query));
-      this.props.dispatch(populateTreeStore(query));
-      this.props.dispatch(populateSequencesStore(query));
-      this.props.dispatch(populateFrequenciesStore(query));
+      console.log('got here');
+      this.props.dispatch(populateMetadataStore(data_path));
+      this.props.dispatch(populateTreeStore(data_path));
+      this.props.dispatch(populateSequencesStore(data_path));
+      this.props.dispatch(populateFrequenciesStore(data_path));
     }
   }
   render() {

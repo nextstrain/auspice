@@ -40,10 +40,7 @@ const fetchMetadata = (q) => {
   */
   return fetch(
     "http://nextstrain.org/data/" +
-    q.virus + "_" +
-    (q.strain ? q.strain + "_" : "") +
-    (q.timeperiod ? q.timeperiod + "_" : "") +
-    "meta.json"
+    q+"_meta.json"
   );
 };
 
@@ -82,10 +79,7 @@ const treeFetchError = (err) => {
 const fetchTree = (q) => {
   return fetch(
     "http://nextstrain.org/data/" +
-    q.virus + "_" +
-    (q.strain ? q.strain + "_" : "") +
-    (q.timeperiod ? q.timeperiod + "_" : "") +
-    "tree.json"
+      q + "_tree.json"
   );
 };
 
@@ -124,10 +118,7 @@ const sequencesFetchError = (err) => {
 const fetchSequences = (q) => {
   return fetch(
     "http://nextstrain.org/data/" +
-    q.virus + "_" +
-    (q.strain ? q.strain + "_" : "") +
-    (q.timeperiod ? q.timeperiod + "_" : "") +
-    "sequences.json"
+      q + "_sequences.json"
   );
 };
 
@@ -166,10 +157,7 @@ const frequenciesFetchError = (err) => {
 const fetchFrequencies = (q) => {
   return fetch(
     "http://nextstrain.org/data/" +
-    q.virus + "_" +
-    (q.strain ? q.strain + "_" : "") +
-    (q.timeperiod ? q.timeperiod + "_" : "") +
-    "frequencies.json"
+      q + "_frequencies.json"
   );
 };
 

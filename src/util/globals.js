@@ -6,9 +6,9 @@ export const datasets = {
     {flu: [{lineage: [{H3N2:     [{duration:[{'3y':[]}, {'6y':[]}, {'12y':[]}]}]},
                       {H1N1pdm:  [{duration:[{'3y':[]}, {'6y':[]}, {'12y':[]}]}]},
                       {Yam:      [{duration:[{'3y':[]}, {'6y':[]}, {'12y':[]}]}]},
-                      {Vic:      [{duration:[{'3y':[]}, {'6y':[]}, {'12y':[]}]}]}]}]},
-    {ebola:[]},
-    {zika:[]}
+                      {Vic:      [{duration:[{'3y':[]}, {'6y':[]}, {'12y':[]}]}]}]}],
+    ebola:[],
+    Zika:[]}
   ]
 };
 
