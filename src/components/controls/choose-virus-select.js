@@ -38,7 +38,9 @@ class ChooseVirusSelect extends React.Component {
   }
   createPath(e) {
     console.log('createPath:',this.props.choice_tree);
-    return this.props.choice_tree.join('/') +'/'+ e.target.value;
+    let p = (this.props.choice_tree.length>0)?'/':'';
+    p+=this.props.choice_tree.join('/') +'/'+ e.target.value;
+    return p;
   }
   render() {
     const styles = this.getStyles();
@@ -48,9 +50,13 @@ class ChooseVirusSelect extends React.Component {
         style={{marginRight: 20}}
         onChange={(e) => {
           if (e.target.value === this.props.title) { return }
-          console.log('virus-select:',this.createPath(e));
-          Object.assign(this.props.router, {pathname:this.createPath(e)});
-          console.log('virus-select', this.props);
+          console.log('virus-select:',this.createPath(e), this.props.router);
+          this.props.router.push({
+            pathname:this.createPath(e)
+          })
+          console.log('virus-select2:',this.createPath(e), this.props.router);
+          // Object.assign(this.props.router, {pathname:this.createPath(e)});
+          console.log('virus-select3', this.props);
           // fire action to do async here
         }}>
         <option key={"titleOption"}> {this.props.title} </option>

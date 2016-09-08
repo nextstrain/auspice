@@ -43,16 +43,16 @@ class ChooseVirus extends React.Component {
     let options=['default'];
     let selectors = [];
     let level = datasets;
-    let tmppath = (this.props.pathname[0]=='/')?this.props.pathname.substring(1):this.props.pathname;
+    let tmppath = (this.props.location.pathname[0]=='/')?this.props.location.pathname.substring(1):this.props.location.pathname;
     tmppath = (tmppath[tmppath.length-1]=='/')?tmppath.substring(0,tmppath.length-1):tmppath;
     const config = parseParams(tmppath)['dataset']
     const fields = Object.keys(config).sort( (a,b) => config[a][0]>config[b][0]);
     const choices = fields.map((d) => config[d][1]);
-    console.log('control:', this.props, fields, choices);
+    // console.log('control:', this.props, fields, choices);
     for (let vi=0; vi<fields.length; vi++){
       if (choices[vi]){
         options = Object.keys(level[fields[vi]]).filter((d) => d!='default');
-        console.log(fields[vi], choices[vi], options, choices.slice(0,vi+1));
+        // console.log(fields[vi], choices[vi], options, choices.slice(0,vi+1));
         selectors.push((
           <div style={[
             styles.base,
@@ -69,7 +69,7 @@ class ChooseVirus extends React.Component {
         level = level[fields[vi]][choices[vi]];
       }
     }
-    console.log(selectors);
+    // console.log(selectors);
     return (
       <div>
         {selectors}

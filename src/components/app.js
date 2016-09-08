@@ -18,6 +18,7 @@ import Controls from "./controls/controls";
 import Tree from "./tree/tree";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
+import { withRouter } from 'react-router';
 
 @connect()
 @Radium
@@ -51,18 +52,19 @@ class App extends React.Component {
     this.maybeFetchDataset()
   }
   maybeFetchDataset() {
-    const query = this.props.location.query;
-    const config = parseParams(this.props.params.splat);
-    if (config['incomplete']){
-      //trigger route change to augmented complete path with default params
-    }
-    console.log(config);
-    this.setState({'dataset':config['dataset'], 'item':config['item']});
-    var tmp_levels = Object.keys(config['dataset']).map((d) => config['dataset'][d]);
+    const parsedParams = parseParams(this.props.params.splat);
+    console.log(parsedParams);
+    // this.setState({'dataset':parsedParams['dataset'], 'item':parsedParams['item']});
+    var tmp_levels = Object.keys(parsedParams['dataset']).map((d) => parsedParams['dataset'][d]);
     tmp_levels.sort((x,y) => x[0]>y[0]);
     const data_path = tmp_levels.map(function(d){return d[1];}).join('_');
-    console.log('maybeFetchDataset:', config, data_path);
-    if (config.valid){
+    console.log('maybeFetchDataset:', parsedParams, data_path);
+    if (parsedParams.incomplete){
+      console.log('maybeFetchDataset',parsedParams.fullsplat);
+      const prefix=(parsedParams.fullsplat[0]=='/')?"":"/";
+      this.props.router.push({pathname:prefix+parsedParams.fullsplat});
+    }
+    if (parsedParams.valid){
       this.props.dispatch(populateMetadataStore(data_path));
       this.props.dispatch(populateTreeStore(data_path));
       this.props.dispatch(populateSequencesStore(data_path));
@@ -76,7 +78,7 @@ class App extends React.Component {
           margin: "0px 20px"
         }}>
         <Header/>
-        <ChooseVirus {...this.props.location}/>
+        <ChooseVirus {...this.props}/>
         <Flex
           style={{
             width: "100%"
@@ -94,4 +96,4 @@ class App extends React.Component {
   }
 }
 
-export default App;
+export default withRouter(App);

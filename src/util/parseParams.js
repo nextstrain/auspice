@@ -1,7 +1,12 @@
 import {datasets} from "./globals";
 
 const parseParams = (path) => {
-  let params = path.split('/');
+let params;
+  if (path.length) {
+    params = path.split("/");
+  } else {
+    params = [];
+  }
   let confLevel = datasets;
   let config={};
   let ii, elemType,elem;
@@ -10,6 +15,7 @@ const parseParams = (path) => {
   config['incomplete']=false; //this will be set to true if defaults are used
   config['dataset']={};
   console.log(path);
+  console.log('params', params, confLevel);
   // loop through the split path elements and the datasets nested config
   // and assign the fields in the config to corresponding elements of
   // the path string.0
