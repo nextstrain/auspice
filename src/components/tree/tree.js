@@ -53,9 +53,9 @@ class Tree extends React.Component {
     // )
   }
   componentDidUpdate(nextProps) {
-    if (newVirus(this.props, nextProps)) {
-      this.setupTree()
-    }
+    // if (newVirus(this.props, nextProps)) {
+    //   this.setupTree()
+    // }
   }
   setupTree() {
     const tree = d3.layout.tree()

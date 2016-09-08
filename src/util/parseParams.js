@@ -1,11 +1,13 @@
 import {datasets} from "./globals";
 
 const parseParams = (path) => {
-  var params = path.split('/');
-  var confLevel = datasets;
-  var config={};
-  var ii, elemType,elem;
+  let params = path.split('/');
+  let confLevel = datasets;
+  let config={};
+  let ii, elemType,elem;
+  let fullsplat = path;
   config['valid']=true; //this will be set to false if unkown specs are encountered
+  config['incomplete']=false; //this will be set to true if defaults are used
   config['dataset']={};
   console.log(path);
   // loop through the split path elements and the datasets nested config
@@ -42,11 +44,14 @@ const parseParams = (path) => {
         console.log('no default set')
         return config;
     }else{
+      config['incomplete']=true;
+      fullsplat+='/'+elem;
       config['dataset'][elemType] = [ii, elem];
       confLevel = confLevel[elemType][elem];
     }
     ii++;
   }
+  config['fullsplat']=fullsplat;
   return config;
 };
 

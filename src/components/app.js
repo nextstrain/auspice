@@ -53,6 +53,9 @@ class App extends React.Component {
   maybeFetchDataset() {
     const query = this.props.location.query;
     const config = parseParams(this.props.params.splat);
+    if (config['incomplete']){
+      //trigger route change to augmented complete path with default params
+    }
     console.log(config);
     this.setState({'dataset':config['dataset'], 'item':config['item']});
     var tmp_levels = Object.keys(config['dataset']).map((d) => config['dataset'][d]);
