@@ -14,8 +14,6 @@ let params;
   config['valid']=true; //this will be set to false if unkown specs are encountered
   config['incomplete']=false; //this will be set to true if defaults are used
   config['dataset']={};
-  console.log(path);
-  console.log('params', params, confLevel);
   // loop through the split path elements and the datasets nested config
   // and assign the fields in the config to corresponding elements of
   // the path string.0

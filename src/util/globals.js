@@ -12,7 +12,7 @@ export const datasets={
         'default':'h3n2',
         }
       },
-    'zika':{},
+    'Zika':{},
     'ebola':{},
     'default':'flu'
   }
