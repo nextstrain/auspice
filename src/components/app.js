@@ -63,6 +63,17 @@ class App extends React.Component {
       console.log('maybeFetchDataset',parsedParams.fullsplat);
       const prefix=(parsedParams.fullsplat[0]=='/')?"":"/";
       this.props.router.push({pathname:prefix+parsedParams.fullsplat});
+  drawTreeIfData() {
+    const p = this.props;
+    let markup;
+
+    if (
+      p.metadata.metadata &&
+      p.tree.tree &&
+      p.sequences.sequences &&
+      p.frequencies.frequencies
+    ) {
+      markup = (<Tree {...this.props.location}/>);
     }
     if (parsedParams.valid){
       this.props.dispatch(populateMetadataStore(data_path));
@@ -87,8 +98,7 @@ class App extends React.Component {
           alignItems="flex-start"
           justifyContent="space-between">
           <Controls/>
-          <Tree/>
-
+          {this.drawTreeIfData()}
         </Flex>
         <Footer/>
       </div>

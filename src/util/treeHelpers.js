@@ -37,25 +37,6 @@ export const calcDates = (nodes) => {
   });
 };
 
-export const calcNodeAges = (tw) => {
-  tips.forEach((d) => {
-    const date = new Date(d.date.replace(/XX/g, "01"));
-    const oneYear = 365.25 * 24 * 60 * 60 * 1000; // days*hours*minutes*seconds*milliseconds
-    const diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
-    d.diff = diffYears;
-    if (d.diff > 0 && d.diff < tw) {
-      d.current = true;
-    } else {
-      d.current = false;
-    }
-    for (let k in restrictTo) {
-      if (d[k] !== restrictTo[k] && restrictTo[k] !== "all") {
-        d.current = false;
-      }
-    }
-  });
-};
-
 export const minimumAttribute = (node, attr, min) => {
   if (typeof node.children !== "undefined") {
     for (let i = 0, c = node.children.length; i < c; i++) {

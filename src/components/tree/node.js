@@ -4,6 +4,7 @@ import Radium from "radium";
 import { connect } from "react-redux";
 import * as globals from "../../util/globals";
 import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
+import moment from "moment";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -123,8 +124,8 @@ class TreeNode extends React.Component {
     }
     return bool;
   }
-  tipRadius() {
-    const node = this.props.node;
+  checkColorBy(node) {
+    /* move this logic into the main chooseTipRadius function */
     if (
       typeof node.pred_distance !== "undefined" &&
       this.props.colorBy === "fitness"
@@ -134,20 +135,26 @@ class TreeNode extends React.Component {
       return globals.tipRadius;
     }
   }
-  chooseTipRadius() {
+  chooseTipRadius(node) {
+    /* if it's not a tip, or if it is out of date range return 0 */
+    if (this.props.hasChildren) {
+      return globals.nonTipNodeRadius;
+    }
 
-    if (!this.props.selectedLegendItem) {
-      return this.tipRadius();
+    const inRange = this.props.dateRange.contains(
+      moment(node.date.replace(/XX/g, "01"), "YYYY-MM-DD")
+    );
+
+    if (!inRange) {
+      return globals.nonTipNodeRadius;
     }
 
     let r;
-    const node = this.props.node;
-
-    if (this.determineLegendMatch()) {
-      r = this.tipRadius() *
-        globals.tipRadiusOnLegendMatchMultiplier;
-    } else {
-      r = this.tipRadius();
+    /* see if it's currently selected, make it big */
+    if (this.determineLegendMatch(node)) {
+      r = this.checkColorBy(node) * globals.tipRadiusOnLegendMatchMultiplier;
+    } else /* default */ {
+      r = this.checkColorBy(node, this.props.controls.colorBy);
     }
     return r;
   }

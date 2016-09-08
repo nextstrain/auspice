@@ -8,7 +8,6 @@ export const processNodes = (nodes) => {
   treeHelpers.calcTipCounts(rootNode);
   treeHelpers.calcDates(nodes);
 
-  // treeHelpers.calcNodeAges(globals.time_window);
   // colorByTrait();
   var nodesWithFrequencyAdded = treeHelpers.adjust_freq_by_date(nodes, rootNode);
 
