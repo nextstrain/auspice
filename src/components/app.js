@@ -17,7 +17,7 @@ import Header from "./framework/header";
 import Controls from "./controls/controls";
 import Tree from "./tree/tree";
 import Footer from "./framework/footer";
-import shouldFetchDataset from "../util/shouldFetchDataset";
+import parseParams from "../util/parseParams";
 
 @connect()
 @Radium
@@ -52,7 +52,7 @@ class App extends React.Component {
   }
   maybeFetchDataset() {
     const query = this.props.location.query;
-    const config = shouldFetchDataset(this.props.params.splat);
+    const config = parseParams(this.props.params.splat);
     console.log(config);
     this.setState({'dataset':config['dataset'], 'item':config['item']});
     var tmp_levels = Object.keys(config['dataset']).map((d) => config['dataset'][d]);

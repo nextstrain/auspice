@@ -1,12 +1,13 @@
 import {datasets} from "./globals";
 
-const shouldFetchDataset = (path) => {
+const parseParams = (path) => {
   var params = path.split('/');
   var confLevel = datasets;
   var config={};
   var ii, elemType,elem;
   config['valid']=true; //this will be set to false if unkown specs are encountered
   config['dataset']={};
+  console.log(path);
   // loop through the split path elements and the datasets nested config
   // and assign the fields in the config to corresponding elements of
   // the path string.0
@@ -49,4 +50,4 @@ const shouldFetchDataset = (path) => {
   return config;
 };
 
-export default shouldFetchDataset;
+export default parseParams;

@@ -36,18 +36,9 @@ class ChooseVirusSelect extends React.Component {
       }
     };
   }
-  createQueryParams(e) {
-    if (this.props.queryParamAccessor === "virus") {
-      return {virus: e.target.value}
-    } else {
-      return Object.assign({}, this.props.query, {
-        [this.props.queryParamAccessor]: e.target.value
-      })
-    }
-
-    Object.assign({}, this.props.query, {
-      [this.props.queryParamAccessor]: e.target.value // ie., strain: H3N2 virus: Zika
-    })
+  createPath(e) {
+    console.log('createPath:',this.props.choice_tree);
+    return this.props.choice_tree.join('/') +'/'+ e.target.value;
   }
   render() {
     const styles = this.getStyles();
@@ -57,10 +48,9 @@ class ChooseVirusSelect extends React.Component {
         style={{marginRight: 20}}
         onChange={(e) => {
           if (e.target.value === this.props.title) { return }
-          this.props.router.push({
-            pathname: this.props.pathname,
-            query: this.createQueryParams(e)
-          })
+          console.log('virus-select:',this.createPath(e));
+          Object.assign(this.props.router, {pathname:this.createPath(e)});
+          console.log('virus-select', this.props);
           // fire action to do async here
         }}>
         <option key={"titleOption"}> {this.props.title} </option>
@@ -68,7 +58,7 @@ class ChooseVirusSelect extends React.Component {
           this.props.options.map((option, i) => {
             return (
               /* ie., this.props.query[virus] === flu -- leave this fuzzy == for duration */
-              <option key={i} selected={this.props.query[this.props.queryParamAccessor] == option}>
+              <option key={i} selected={this.props.selected == option}>
                 {option}
               </option>
             )
