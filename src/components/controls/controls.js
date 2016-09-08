@@ -10,6 +10,8 @@ import Legend from "./legend";
 import ColorBy from "./color-by";
 import Search from "./search";
 import DateRangeInputs from "./date-range-inputs";
+import ChooseLayout from "./choose-layout";
+
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -54,6 +56,11 @@ class Controls extends React.Component {
         alignItems="flex-start"
         style={{
         }}>
+
+        <ChooseLayout style={{color: "blue"}}/>
+
+
+
         <p> Phylogeny </p>
         <DateRangeInputs {...this.props}/>
         <div className="d3-tip se"/>
