@@ -20,7 +20,16 @@ import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
 import { withRouter } from 'react-router';
 
-@connect()
+const returnStateNeeded = (fullStateTree) => {
+  return {
+    metadata: fullStateTree.metadata,
+    tree: fullStateTree.tree,
+    sequences: fullStateTree.sequences,
+    frequencies: fullStateTree.frequencies
+  };
+};
+
+@connect(returnStateNeeded)
 @Radium
 class App extends React.Component {
   constructor(props) {
@@ -58,23 +67,21 @@ class App extends React.Component {
     var tmp_levels = Object.keys(parsedParams['dataset']).map((d) => parsedParams['dataset'][d]);
     tmp_levels.sort((x,y) => x[0]>y[0]);
     const data_path = tmp_levels.map(function(d){return d[1];}).join('_');
-    console.log('maybeFetchDataset:', parsedParams, data_path);
     if (parsedParams.incomplete) {
-      console.log('maybeFetchDataset',parsedParams.fullsplat);
       const prefix=(parsedParams.fullsplat[0]=='/')?"":"/";
       this.props.router.push({pathname:prefix+parsedParams.fullsplat});
     }
-    if (parsedParams.valid) {
+    if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
       this.props.dispatch(populateMetadataStore(data_path));
       this.props.dispatch(populateTreeStore(data_path));
       this.props.dispatch(populateSequencesStore(data_path));
       this.props.dispatch(populateFrequenciesStore(data_path));
+      this.setState({latestValidParams: parsedParams.fullsplat});
     }
   }
   drawTreeIfData() {
     const p = this.props;
     let markup;
-
     if (
       p.metadata.metadata &&
       p.tree.tree &&
@@ -85,7 +92,6 @@ class App extends React.Component {
     }
   }
   render() {
-    console.log('app', this.props)
     return (
       <div style={{
           margin: "0px 20px"
@@ -99,7 +105,7 @@ class App extends React.Component {
           wrap="wrap"
           alignItems="flex-start"
           justifyContent="space-between">
-          <Controls/>
+          <Controls {...this.props}/>
           {this.drawTreeIfData()}
         </Flex>
         <Footer/>
