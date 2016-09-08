@@ -59,10 +59,18 @@ class App extends React.Component {
     tmp_levels.sort((x,y) => x[0]>y[0]);
     const data_path = tmp_levels.map(function(d){return d[1];}).join('_');
     console.log('maybeFetchDataset:', parsedParams, data_path);
-    if (parsedParams.incomplete){
+    if (parsedParams.incomplete) {
       console.log('maybeFetchDataset',parsedParams.fullsplat);
       const prefix=(parsedParams.fullsplat[0]=='/')?"":"/";
       this.props.router.push({pathname:prefix+parsedParams.fullsplat});
+    }
+    if (parsedParams.valid) {
+      this.props.dispatch(populateMetadataStore(data_path));
+      this.props.dispatch(populateTreeStore(data_path));
+      this.props.dispatch(populateSequencesStore(data_path));
+      this.props.dispatch(populateFrequenciesStore(data_path));
+    }
+  }
   drawTreeIfData() {
     const p = this.props;
     let markup;
@@ -74,12 +82,6 @@ class App extends React.Component {
       p.frequencies.frequencies
     ) {
       markup = (<Tree {...this.props.location}/>);
-    }
-    if (parsedParams.valid){
-      this.props.dispatch(populateMetadataStore(data_path));
-      this.props.dispatch(populateTreeStore(data_path));
-      this.props.dispatch(populateSequencesStore(data_path));
-      this.props.dispatch(populateFrequenciesStore(data_path));
     }
   }
   render() {
