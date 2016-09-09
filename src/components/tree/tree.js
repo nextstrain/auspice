@@ -27,7 +27,7 @@ class Tree extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      okToDraw: false
+      okToDraw: false,
       value: ViewerHelper.getDefaultValue(),
       tool: "zoom",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
     };
@@ -95,16 +95,24 @@ class Tree extends React.Component {
   }
   createSvgAndNodes() {
     return (
-      <svg
+      <Viewer
         width={this.state.width}
         height={this.treePlotHeight(this.state.width)}
-        id="treeplot">
-        <Nodes
-          query={this.props.query}
-          nodes={this.state.nodes}
-          xScale={this.state.xScale}
-          yScale={this.state.yScale}/>
-      </svg>
+        value={this.state.value}
+        tool={this.state.tool}
+        onChange={this.handleChange.bind(this)}
+        onClick={this.handleClick.bind(this)}>
+        <svg
+          width={this.state.width}
+          height={this.treePlotHeight(this.state.width)}
+          id="treeplot">
+          <Nodes
+            query={this.props.query}
+            nodes={this.state.nodes}
+            xScale={this.state.xScale}
+            yScale={this.state.yScale}/>
+        </svg>
+      </Viewer>
     )
   }
   handleChange(event) {
@@ -123,16 +131,8 @@ class Tree extends React.Component {
       3. otherwise just have components rerender because for instance colorby changed
     */
     return (
-        <Viewer
-          width={this.state.width}
-          height={this.treePlotHeight(this.state.width)}
-          value={this.state.value}
-          tool={this.state.tool}
-          onChange={this.handleChange.bind(this)}
-          onClick={this.handleClick.bind(this)}>
-        </Viewer>
-        {this.state.okToDraw ? this.createSvgAndNodes() : "We don't have tree data yet [spinner]"}
       <div>
+        {this.state.okToDraw ? this.createSvgAndNodes() : "We don't have tree data yet [spinner]"}
       </div>
     );
   }
