@@ -141,9 +141,16 @@ class TreeNode extends React.Component {
       return globals.nonTipNodeRadius;
     }
 
-    const inRange = this.props.dateRange.contains(
-      moment(node.attr.date.replace(/XX/g, "01"), "YYYY-MM-DD")
-    );
+    let inRange;
+    if (typeof node.attr==="undefined"){
+      inRange = this.props.dateRange.contains(
+        moment(node.date.replace(/XX/g, "01"), "YYYY-MM-DD")
+      );
+    }else{
+      inRange = this.props.dateRange.contains(
+        moment(node.attr.date.replace(/XX/g, "01"), "YYYY-MM-DD")
+      );
+    }
 
     if (!inRange) {
       return globals.nonTipNodeRadius;
@@ -183,7 +190,7 @@ class TreeNode extends React.Component {
         ")"
       }>
         <circle
-          fill={this.props.colorScale(this.props.node[this.props.colorBy])}
+          fill={this.props.colorScale(this.props.node.attr[this.props.colorBy])}
           r={
             this.props.node.children ?
               globals.nonTipNodeRadius :

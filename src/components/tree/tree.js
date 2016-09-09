@@ -45,7 +45,6 @@ class Tree extends React.Component {
     // is it NEW data? have we drawn this tree yet? setupTree()
     if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
       this.setupTree();
-      console.log('drawTreeIfData', this.state);
       return;
     }
   }
@@ -53,7 +52,6 @@ class Tree extends React.Component {
     // is it NEW data? have we drawn this tree yet? setupTree()
     if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
       this.setupTree();
-      console.log('drawTreeIfData', this.state);
       return;
     }
   }
@@ -91,32 +89,34 @@ class Tree extends React.Component {
   treePlotHeight(width) {
     return 400 + 0.30 * width;
   }
+  createSvgAndNodes() {
+    return (
+      <svg
+        width={this.state.width}
+        height={this.treePlotHeight(this.state.width)}
+        id="treeplot">
+        <Nodes
+          query={this.props.query}
+          nodes={this.state.nodes}
+          xScale={this.state.xScale}
+          yScale={this.state.yScale}/>
+      </svg>
+    )
+  }
   render() {
     /*
       1. if we just loaded a new dataset, run setup tree,
       2. otherwise if we just rescaled, run updatescales,
       3. otherwise just have components rerender because for instance colorby changed
     */
-    console.log('props tree', this.props)
     return (
       <div>
-        <svg
-          width={this.state.width}
-          height={this.treePlotHeight(this.state.width)}
-          id="treeplot">
-        {
-          this.state.okToDraw ?
-            <Nodes
-              query={this.props.query}
-              nodes={this.state.nodes}
-              xScale={this.state.xScale}
-              yScale={this.state.yScale}/> :
-              "We don't have tree data yet [spinner]"
-        }
-        </svg>
+        {this.state.okToDraw ? this.createSvgAndNodes() : "We don't have tree data yet [spinner]"}
       </div>
     );
   }
 }
+
+
 
 export default Tree;

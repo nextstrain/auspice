@@ -32,9 +32,6 @@ class Branch extends React.Component {
     branchStrokeWidth: 1,
     branchStrokeColor: "darkgrey"
   }
-  shouldComponentUpdate() {
-    return false;
-  }
   getStyles() {
     return {
       base: {
