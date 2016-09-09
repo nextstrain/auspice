@@ -29,7 +29,7 @@ class Branch extends React.Component {
     datum: React.PropTypes.object
   }
   static defaultProps = {
-    branchStrokeWidth: 4,
+    branchStrokeWidth: 1,
     branchStrokeColor: "darkgrey"
   }
   getStyles() {
@@ -49,17 +49,17 @@ class Branch extends React.Component {
     const d = this.props.datum;
     const mod = 0;
 
-    return (this.props.xscale(d.source.xvalue) - mod).toString() +
+    return (this.props.xscale(d.parent.xvalue) - mod).toString() +
       "," +
-      this.props.yscale(d.source.yvalue).toString() +
+      this.props.yscale(d.parent.yvalue).toString() +
       " " +
-      (this.props.xscale(d.source.xvalue) - mod).toString() +
+      (this.props.xscale(d.parent.xvalue) - mod).toString() +
       "," +
-      this.props.yscale(d.target.yvalue).toString() +
+      this.props.yscale(d.yvalue).toString() +
       " " +
-      (this.props.xscale(d.target.xvalue)).toString() +
+      (this.props.xscale(d.xvalue)).toString() +
       "," +
-      this.props.yscale(d.target.yvalue).toString();
+      this.props.yscale(d.yvalue).toString();
   }
   render() {
     return (

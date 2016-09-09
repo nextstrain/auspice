@@ -1,3 +1,24 @@
+// datasets json: object of list (to ensure order) of list (to be flexible)
+// until terminated by an empty list indicating that no further datasets
+// resolution are made
+export const datasets={
+  'virus':{
+    'flu':{
+      'lineages':{
+        'h3n2':     {'duration':{'3y':{}, '6y':{}, '12y':{}, 'default':'3y'}},
+        'h1n1pdm':  {'duration':{'3y':{}, '6y':{}, '12y':{}, 'default':'3y'}},
+        'Vic':      {'duration':{'3y':{}, '6y':{}, '12y':{}, 'default':'3y'}},
+        'Yam':      {'duration':{'3y':{}, '6y':{}, '12y':{}, 'default':'3y'}},
+        'default':'h3n2',
+        }
+      },
+    'Zika':{},
+    'ebola':{},
+    'default':'flu'
+  }
+}
+
+
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
 export const width = 1000;
 export const margin = 60;

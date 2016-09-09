@@ -6,6 +6,7 @@ import {
   populateSequencesStore,
   populateFrequenciesStore
 } from "../actions";
+import ChooseVirus from "./controls/choose-virus";
 
 import Radium from "radium";
 import _ from "lodash";
@@ -16,17 +17,10 @@ import Header from "./framework/header";
 import Controls from "./controls/controls";
 import Tree from "./tree/tree";
 import Footer from "./framework/footer";
+import parseParams from "../util/parseParams";
+import { withRouter } from 'react-router';
 
-const returnStateNeeded = (fullStateTree) => {
-  return {
-    metadata: fullStateTree.metadata,
-    tree: fullStateTree.tree,
-    sequences: fullStateTree.sequences,
-    frequencies: fullStateTree.frequencies
-  };
-};
-
-@connect(returnStateNeeded)
+@connect()
 @Radium
 class App extends React.Component {
   constructor(props) {
@@ -52,25 +46,32 @@ class App extends React.Component {
 
   }
   componentDidMount() {
-    this.props.dispatch(populateMetadataStore());
-    this.props.dispatch(populateTreeStore());
-    this.props.dispatch(populateSequencesStore());
-    this.props.dispatch(populateFrequenciesStore());
+    this.maybeFetchDataset()
   }
-  drawTreeIfData() {
-    const p = this.props;
-    let markup;
-
-    if (
-      p.metadata.metadata &&
-      p.tree.tree &&
-      p.sequences.sequences &&
-      p.frequencies.frequencies
-    ) {
-      markup = (<Tree {...this.props.location}/>);
+  componentDidUpdate() {
+    this.maybeFetchDataset()
+  }
+  maybeFetchDataset() {
+    if (this.state.latestValidParams === this.props.params.splat) {
+      return;
     }
 
-    return markup;
+    const parsedParams = parseParams(this.props.params.splat);
+    // this.setState({'dataset':parsedParams['dataset'], 'item':parsedParams['item']});
+    var tmp_levels = Object.keys(parsedParams['dataset']).map((d) => parsedParams['dataset'][d]);
+    tmp_levels.sort((x,y) => x[0]>y[0]);
+    const data_path = tmp_levels.map(function(d){return d[1];}).join('_');
+    if (parsedParams.incomplete) {
+      const prefix=(parsedParams.fullsplat[0]=='/')?"":"/";
+      this.props.router.push({pathname:prefix+parsedParams.fullsplat});
+    }
+    if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
+      this.props.dispatch(populateMetadataStore(data_path));
+      this.props.dispatch(populateTreeStore(data_path));
+      this.props.dispatch(populateSequencesStore(data_path));
+      this.props.dispatch(populateFrequenciesStore(data_path));
+      this.setState({latestValidParams: parsedParams.fullsplat});
+    }
   }
   render() {
     return (
@@ -78,6 +79,7 @@ class App extends React.Component {
           margin: "0px 20px"
         }}>
         <Header/>
+        <ChooseVirus {...this.props}/>
         <Flex
           style={{
             width: "100%"
@@ -86,7 +88,7 @@ class App extends React.Component {
           alignItems="flex-start"
           justifyContent="space-between">
           <Controls {...this.props}/>
-          {this.drawTreeIfData()}
+          <Tree {...this.props.location}/>
         </Flex>
         <Footer/>
       </div>
@@ -94,4 +96,4 @@ class App extends React.Component {
   }
 }
 
-export default App;
+export default withRouter(App);

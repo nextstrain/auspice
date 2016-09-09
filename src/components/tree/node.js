@@ -1,13 +1,22 @@
 import React from "react";
 import Radium from "radium";
-// import _ from 'lodash';
-import { connect } from 'react-redux';
-// import { FOO } from '../actions';
+// import _ from "lodash";
+import { connect } from "react-redux";
 import * as globals from "../../util/globals";
 import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
 import moment from "moment";
 
-@connect()
+const returnStateNeeded = (fullStateTree) => {
+  return {
+    selectedLegendItem: fullStateTree.controls.selectedLegendItem,
+    colorBy: fullStateTree.controls.colorBy,
+    colorScale: fullStateTree.controls.colorScale,
+    showBranchLabels: fullStateTree.controls.showBranchLabels,
+    legendBoundsMap: fullStateTree.controls.legendBoundsMap
+  };
+};
+
+@connect(returnStateNeeded)
 @Radium
 class TreeNode extends React.Component {
   constructor(props) {
@@ -23,18 +32,49 @@ class TreeNode extends React.Component {
     routes: React.PropTypes.array,
     /* component api */
     style: React.PropTypes.object,
-    controls: React.PropTypes.object,
-    strain: React.PropTypes.string,
-    hasChildren: React.PropTypes.bool,
-    nuc_muts: React.PropTypes.string,
     showBranchLabels: React.PropTypes.bool,
-    node: React.PropTypes.object
-    // foo: React.PropTypes.string
+    node: React.PropTypes.object,
+    xScale: React.PropTypes.func,
+    yScale: React.PropTypes.func,
+    colorBy: React.PropTypes.string
   }
   static defaultProps = {
     // foo: "bar"
   }
+  shouldComponentUpdate(nextProps, nextState) {
+    /*
+      If nextProps.selectedLegendItem is null, nothing is selected b/c mouseout.
+      This means that and we want to check the present, not future state for match with this.props.selectedLegendItem.
+      If it was a match on last render, we need to rerender, so that it goes back to default tip radius.
 
+      DUPLICATION WARNING: this should be refactored so that it doesn't duplicate the code below in determineLegendMatch
+      ultimately determineLegendMatch should take an argument.
+    */
+    const _selectedLegendItem = nextProps.selectedLegendItem || this.props.selectedLegendItem;
+
+    if (this.props.node.children) {
+      /* nodes without children are never visible, so will not update */
+      return false;
+    }
+    // else if (
+    //   /* special cases */
+    //   (nextProps.colorBy === "lbi") ||
+    //   (nextProps.colorBy === "date") ||
+    //   (nextProps.colorBy === "dfreq") ||
+    //   (nextProps.colorBy === "HI_dist") ||
+    //   (nextProps.colorBy === "cHI")
+    // ) {
+    //   return (nextProps.node.coloring <= nextProps.legendBoundsMap.upper_bound[_selectedLegendItem]) &&
+    //     (nextProps.node.coloring > nextProps.legendBoundsMap.lower_bound[_selectedLegendItem]);
+    // }
+    else {
+      return true; /* loop over all nodes is sure to remove stale mouseover state, maybe fast enough with prod react*/
+      /* default accessor */
+      // some of the legend items don't trigger any nodes. why? mismatch capitalizations of same regions?
+      // if (nextProps.node[nextProps.colorBy] !== _selectedLegendItem) { console.log(_selectedLegendItem) }
+      // return nextProps.node[nextProps.colorBy] === _selectedLegendItem;
+    }
+  }
   getNodeText() {
     /*
       this is a bit of trickiness. we'll see if it's too clever.
@@ -51,16 +91,20 @@ class TreeNode extends React.Component {
     if (this.props.strain) {
       /* this is a tip label */
       nodeText = this.props.strain;
-    } else if (this.props.hasChildren && this.props.showBranchLabels) {
+    } else if (this.props.node.children && this.props.showBranchLabels) {
       /* this is a branch label */
-      nodeText = this.props.nuc_muts;
+      nodeText = this.props.node.nuc_muts;
     }
 
     return nodeText;
   }
-  determineLegendMatch(node) {
-    const colorBy = this.props.controls.colorBy;
-    const c = this.props.controls;
+  determineLegendMatch() {
+    const {
+      node,
+      colorBy,
+      selectedLegendItem,
+      legendBoundsMap
+    } = this.props;
     // construct a dictionary that maps a legend entry to the preceding interval
     let bool;
     // equates a tip and a legend element
@@ -73,10 +117,10 @@ class TreeNode extends React.Component {
       (colorBy === "HI_dist") ||
       (colorBy === "cHI")
     ) {
-      bool = (node.coloring <= c.legendBoundsMap.upper_bound[c.selectedLegendItem]) &&
-        (node.coloring > c.legendBoundsMap.lower_bound[c.selectedLegendItem]);
+      bool = (node.coloring <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
+        (node.coloring > legendBoundsMap.lower_bound[selectedLegendItem]);
     } else {
-      bool = node[this.props.controls.colorBy] === c.selectedLegendItem;
+      bool = node[colorBy] === selectedLegendItem;
     }
     return bool;
   }
@@ -84,7 +128,7 @@ class TreeNode extends React.Component {
     /* move this logic into the main chooseTipRadius function */
     if (
       typeof node.pred_distance !== "undefined" &&
-      this.props.controls.colorBy === "fitness"
+      this.props.colorBy === "fitness"
     ) {
       return globals.distanceScale(node.pred_distance);
     } else {
@@ -97,9 +141,16 @@ class TreeNode extends React.Component {
       return globals.nonTipNodeRadius;
     }
 
-    const inRange = this.props.dateRange.contains(
-      moment(node.date.replace(/XX/g, "01"), "YYYY-MM-DD")
-    );
+    let inRange;
+    if (typeof node.attr==="undefined"){
+      inRange = this.props.dateRange.contains(
+        moment(node.date.replace(/XX/g, "01"), "YYYY-MM-DD")
+      );
+    }else{
+      inRange = this.props.dateRange.contains(
+        moment(node.attr.date.replace(/XX/g, "01"), "YYYY-MM-DD")
+      );
+    }
 
     if (!inRange) {
       return globals.nonTipNodeRadius;
@@ -115,7 +166,6 @@ class TreeNode extends React.Component {
     return r;
   }
   render() {
-    console.log(this.props.node)
     return (
       <g
         onMouseEnter={() => {
@@ -131,92 +181,39 @@ class TreeNode extends React.Component {
         onMouseLeave={() => {
           this.props.dispatch({ type: NODE_MOUSELEAVE });
         }}
-        transform={"translate(" + this.props.x + "," + this.props.y + ")"}>
+
+      transform={
+        "translate(" +
+        this.props.xScale(this.props.node.xvalue) +
+        "," +
+        this.props.yScale(this.props.node.yvalue) +
+        ")"
+      }>
         <circle
-          fill={this.props.fill}
-          r={this.chooseTipRadius(this.props.node)} />
-        <text
-          dx={this.props.hasChildren ? -6 : 6}
-          dy={this.props.hasChildren ? -2 : 3}
-            style={{
-              fontFamily: "Helvetica",
-              fontSize: 8,
-              fontWeight: 300
-            }}
-          textAnchor={this.props.hasChildren ? "end" : "start"}>
-          {this.getNodeText()}
-        </text>
+          fill={this.props.colorScale(this.props.node.attr[this.props.colorBy])}
+          r={
+            this.props.node.children ?
+              globals.nonTipNodeRadius :
+              this.chooseTipRadius(this.props.node)} />
       </g>
-    )
+    );
   }
 }
 
 export default TreeNode;
 
+// <text
+//   dx={this.props.hasChildren ? -6 : 6}
+//   dy={this.props.hasChildren ? -2 : 3}
+//     style={{
+//       fontFamily: "Helvetica",
+//       fontSize: 8,
+//       fontWeight: 300
+//     }}
+//   textAnchor={this.props.hasChildren ? "end" : "start"}>
+//   {this.getNodeText()}
+// </text>
 
-
-/*
-
-dateValues = nodes.filter((d) => {
-  return (typeof d.date === 'string') & (typeof vaccineChoice[d.strain] === "undefined") & (typeof reference_viruses[d.strain] === "undefined");
-}).map((d) => {
-  return new Date(d.date);
-});
-
-*/
-
-/*
-  // Vaccine
-
-  treeplot.selectAll(".vaccine")
-    .style("visibility", (dd) => {
-      const date = new Date(dd.choice);
-      const oneYear = 365.25 * 24 * 60 * 60 * 1000; // days*hours*minutes*seconds*milliseconds
-      const diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
-
-      if (diffYears > 0) {
-        return "visible";
-      } else {
-        return "hidden";
-      }
-    });
-
-  treeplot.selectAll(".vaccine")
-    .style("visibility", (dd) => {
-      const date = new Date(dd.choice);
-
-      const diffYears = (globalDate.getTime() - date.getTime()) / oneYear;
-
-      if (diffYears > 0) {
-        return "visible";
-      } else {
-        return "hidden";
-      }
-    });
-*/
-
-/*
-// this used to be in nodeAges function
-
-for (let k in restrictTo) {
-  if (d[k] !== restrictTo[k] && restrictTo[k] !== "all") {
-    d.current = false;
-  }
-}
-
-// old date match code
-
-
-for (const k in restrictTo) {
-  if (d[k] !== restrictTo[k] && restrictTo[k] !== "all") {
-    return "hidden";
-  }
-}
-if ((colorBy === "HI_dist") && (HImodel === "measured") && (d.HI_dist_meas === "NaN")) {
-  return "hidden";
-}
-return "visible";
-*/
 
 // if ((typeof tip_labels !== "undefined") && (tip_labels)) {
 //   treeplot.selectAll(".tipLabel").data(tips)
