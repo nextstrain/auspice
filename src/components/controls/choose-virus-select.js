@@ -9,6 +9,12 @@ import { withRouter } from 'react-router';
 // @connect(state => {
 //   return state.FOO;
 // })
+
+/*
+ * implements a selector that
+ * (i) knows about the upstream choices and
+ * (ii) resets the route upon change
+ */
 @Radium
 class ChooseVirusSelect extends React.Component {
   constructor(props) {
@@ -36,34 +42,32 @@ class ChooseVirusSelect extends React.Component {
       }
     };
   }
+
+  // assembles a new path from the upstream choices and the new selection
+  // downstream choices will be set to defaults in parseParams
   createPath(e) {
-    console.log('createPath:',this.props.choice_tree);
     let p = (this.props.choice_tree.length>0)?'/':'';
     p+=this.props.choice_tree.join('/') +'/'+ e.target.value;
     return p;
   }
+
   render() {
     const styles = this.getStyles();
     return (
+      // the selector below resets the path by router.push({pathname:new_path})
+      // the currently selected option is passed down as this.props.selected
       <select
-
         style={{marginRight: 20}}
         onChange={(e) => {
           if (e.target.value === this.props.title) { return }
-          console.log('virus-select:',this.createPath(e), this.props.router);
           this.props.router.push({
             pathname:this.createPath(e)
           })
-          console.log('virus-select2:',this.createPath(e), this.props.router);
-          // Object.assign(this.props.router, {pathname:this.createPath(e)});
-          console.log('virus-select3', this.props);
-          // fire action to do async here
         }}>
         <option key={"titleOption"}> {this.props.title} </option>
         {
           this.props.options.map((option, i) => {
             return (
-              /* ie., this.props.query[virus] === flu -- leave this fuzzy == for duration */
               <option key={i} selected={this.props.selected == option}>
                 {option}
               </option>
@@ -75,4 +79,5 @@ class ChooseVirusSelect extends React.Component {
   }
 }
 
+// export witht the "power" to reset the route
 export default withRouter(ChooseVirusSelect);
