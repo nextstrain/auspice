@@ -9,7 +9,7 @@ import { connect } from "react-redux";
 import Branch from "./branch";
 import Node from "./node";
 import Tooltip from "./tooltip";
-import VictoryAnimation from "victory"
+import {VictoryAnimation} from "victory";
 
 @connect((state) => {
   return {controls: state.controls};
@@ -93,7 +93,6 @@ class Nodes extends React.Component {
   }
 
   drawBranches(nodes) {
-    console.log('drawBranches',this.props);
     const branchComponents = nodes.map((node, index) => {
       return (
         <VictoryAnimation duration={1000} key={index} data={{

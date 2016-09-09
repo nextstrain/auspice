@@ -184,9 +184,9 @@ class TreeNode extends React.Component {
 
       transform={
         "translate(" +
-        this.props.xScale(this.props.node.xvalue) +
+        this.props.x +
         "," +
-        this.props.yScale(this.props.node.yvalue) +
+        this.props.y +
         ")"
       }>
         <circle

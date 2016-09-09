@@ -65,7 +65,7 @@ class Branch extends React.Component {
         "  " +
         this.props.source_y.toString() +
         " A " +
-        this.pros.r_x.toString() +
+        this.props.r_x.toString() +
         " " +
         this.props.r_y.toString() +
         " 0 0 1 " +
