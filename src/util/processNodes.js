@@ -16,18 +16,27 @@ export const processNodes = (nodes) => {
 };
 
 const rectangularLayout = (node, distanceMeasure) => {
-    return {'xVal':(distanceMeasure=='div')?node.xvalue:node.attr[distanceMeasure], 'yVal':node.yvalue};
+    return {'xVal':(distanceMeasure=='div')?node.xvalue:node.attr[distanceMeasure],
+            'yVal':node.yvalue,
+            'xValMidpoint':(distanceMeasure=='div')?node.parent.xvalue:node.parent.attr[distanceMeasure],
+            'yValMidpoint':node.yvalue
+            };
 };
 
 const vsDateLayout = (node, distanceMeasure) => {
-    return {'xVal':node.attr['num_date'], 'yVal':node.attr[distanceMeasure]};
+    return {'xVal':node.attr['num_date'], 'yVal':node.attr[distanceMeasure],
+            'xValMidpoint':node.attr['num_date'], 'yValMidpoint':node.attr[distanceMeasure]
+           };
 };
 
 const radialLayout = (node, distanceMeasure, nTips) => {
     var circleFraction = 0.95;
     var radius = (distanceMeasure=='div')?node.xvalue:node.attr[distanceMeasure];
+    var parent_radius = (distanceMeasure=='div')?node.parent.xvalue:node.parent.attr[distanceMeasure];
     var angle = circleFraction*2*Math.PI*node.yvalue/nTips;
-    return {'xVal':radius*Math.sin(angle), 'yVal':radius*Math.cos(angle)};
+    return {'xVal':radius*Math.sin(angle), 'yVal':radius*Math.cos(angle),
+            'xValMidpoint':radius*Math.sin(angle), 'yValMidpoint':radius*Math.cos(angle),
+            'radius':radius,'radius_inner':parent_radius, 'angle':angle};
 };
 
 /* Calculate layout geometry for radial and rectangular layouts
@@ -36,7 +45,7 @@ const radialLayout = (node, distanceMeasure, nTips) => {
  * distanceMeasures: the different types of distances used to measure
                      distances on the tree (date, mutations, etc) (optional)
 */
-export const calcLayouts = (nodes, nTips, distanceMeasures) => {
+export const calcLayouts = (nodes, distanceMeasures, nTips) => {
     if (typeof distanceMeasures==='undefined'){
         distanceMeasures = globals.defaultDistanceMeasures;
     }

@@ -48,17 +48,6 @@ class Branch extends React.Component {
 
     const mod = 0;
 
-    return (this.props.xscale(d.parent.xvalue) - mod).toString() +
-      "," +
-      this.props.yscale(d.parent.yvalue).toString() +
-      " " +
-      (this.props.xscale(d.parent.xvalue) - mod).toString() +
-      "," +
-      this.props.yscale(d.yvalue).toString() +
-      " " +
-      (this.props.xscale(d.xvalue)).toString() +
-      "," +
-      this.props.yscale(d.yvalue).toString();
     if (this.props.layout=='rectangular'){
       return 'M'+(this.props.source_x - mod).toString() +
         " " +
@@ -72,15 +61,13 @@ class Branch extends React.Component {
         " " +
         this.props.target_y.toString();
     }else if (this.props.layout=='radial'){
-      var rinner = Math.sqrt((this.props.source_x-this.props.center)**2 + (this.props.source_y-this.props.center)**2);
-      var router = Math.sqrt((this.props.target_x-this.props.center)**2 + (this.props.target_y-this.props.center)**2);
       var tmp_d = 'M '+(this.props.source_x).toString() +
         "  " +
         this.props.source_y.toString() +
         " A " +
-        rinner.toString() +
+        this.pros.r_x.toString() +
         " " +
-        rinner.toString() +
+        this.props.r_y.toString() +
         " 0 0 1 " +
         ((this.props.target_x-this.props.center)*rinner/router+this.props.center).toString() +
         " " +

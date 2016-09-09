@@ -93,7 +93,7 @@ class TreeNode extends React.Component {
       nodeText = this.props.strain;
     } else if (this.props.node.children && this.props.showBranchLabels) {
       /* this is a branch label */
-      nodeText = this.props.node.nuc_muts;
+      nodeText = this.props.node.muts.join(',');
     }
 
     return nodeText;

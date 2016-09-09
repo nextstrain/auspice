@@ -9,6 +9,7 @@ import { connect } from "react-redux";
 import Branch from "./branch";
 import Node from "./node";
 import Tooltip from "./tooltip";
+import VictoryAnimation from "victory"
 
 @connect((state) => {
   return {controls: state.controls};
@@ -27,52 +28,104 @@ class Nodes extends React.Component {
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
+    style: React.PropTypes.object
     // foo: React.PropTypes.string
   }
   static defaultProps = {
     // foo: "bar"
   }
+  xVal(node, distanceMeasure, layout){
+    return this.props.xScale(node.geometry[distanceMeasure][layout].xVal);
+  }
+  yVal(node, distanceMeasure, layout){
+    return this.props.yScale(node.geometry[distanceMeasure][layout].yVal);
+  }
+  xMidpoint(node, distanceMeasure, layout){
+    return this.props.xScale(node.geometry[distanceMeasure][layout].xValMidpoint);
+  }
+  yMidpoint(node, distanceMeasure, layout){
+    return this.props.yScale(node.geometry[distanceMeasure][layout].yValMidpoint);
+  }
+  r_x(node, distanceMeasure, layout){
+    if ("layout"==="radial"){
+      return this.props.xScale(node.geometry[distanceMeasure][layout].radius_inner);
+    }else{
+      return 0;
+    }
+  }
+  r_y(node, distanceMeasure, layout){
+    if ("layout"==="radial"){
+      return this.props.yScale(node.geometry[distanceMeasure][layout].radius_inner);
+    }else{
+      return 0;
+    }
+  }
+
   drawNodes(nodes) {
     const range = moment().range(
       new Date(+this.props.query.dmin),
       new Date(+this.props.query.dmax)
     )
-    return nodes.map((node, index) => {
+    const nodeComponents = nodes.map((node, index) => {
       return (
-        <Node
-          index={index}
-          node={node}
-          key={index}
-          dateRange={range}
-          fill={this.props.controls.colorScale(node[this.props.controls.colorBy])}
-          nuc_muts={node.nuc_muts}
-          showBranchLabels={this.props.controls.showBranchLabels}
-          strain={node.strain}
-          xScale={this.props.xScale}
-          yScale={this.props.yScale}/>
-      );
+        <VictoryAnimation duration={1000} key={index} data={{
+          x: this.xVal(node, this.props.distanceMeasure, this.props.layout),
+          y: this.yVal(node, this.props.distanceMeasure, this.props.layout)
+        }}>
+        {(props) => {
+          return (
+            <Node
+              index={index}
+              node={node}
+              key={index}
+              dateRange={range}
+              fill={this.props.controls.colorScale(node[this.props.controls.colorBy])}
+              showBranchLabels={this.props.controls.showBranchLabels}
+              strain={node.strain}
+              hasChildren={node.children ? true : false}
+            />
+          )
+        }}
+      </VictoryAnimation>
+     );
     });
+    return nodeComponents;
   }
+
   drawBranches(nodes) {
+    console.log('drawBranches',this.props);
     const branchComponents = nodes.map((node, index) => {
       return (
-        <Branch
-          xscale={this.props.xScale}
-          yscale={this.props.yScale}
-          datum={node}
-          key={index} />
+        <VictoryAnimation duration={1000} key={index} data={{
+            target_x:   this.xVal(node, this.props.distanceMeasure, this.props.layout),
+            target_y:   this.yVal(node, this.props.distanceMeasure, this.props.layout),
+            midpoint_x: this.xMidpoint(node.parent, this.props.distanceMeasure, this.props.layout),
+            midpoint_y: this.yMidpoint(node.parent, this.props.distanceMeasure, this.props.layout),
+            source_x:   this.xVal(node.parent, this.props.distanceMeasure, this.props.layout),
+            source_y:   this.yVal(node.parent, this.props.distanceMeasure, this.props.layout),
+            r_x: this.r_x(node.parent, this.props.distanceMeasure, this.props.layout),
+            r_y: this.r_y(node.parent, this.props.distanceMeasure, this.props.layout),
+            layout: this.props.layout,
+        }}>
+        {(props) => {
+          return (
+            <Branch
+              {...this.props} {...props} animate={null}
+              key={index} />
+           );}}
+      </VictoryAnimation>
       );
     });
     return branchComponents;
   }
+
   drawTooltip(node, type) {
     return (
       <Tooltip
         type={type}
         node={node}
-        x={this.props.xScale(node.xvalue)}
-        y={this.props.yScale(node.yvalue)}/>
+        x={this.xVal(node, this.state.distanceMeasure, this.state.layout)}
+        y={this.yVal(node, this.state.distanceMeasure, this.state.layout)}/>
     )
   }
   render() {
