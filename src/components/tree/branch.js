@@ -53,9 +53,9 @@ class Branch extends React.Component {
         " " +
         this.props.source_y.toString() +
         " L " +
-        (this.props.source_x - mod).toString() +
+        (this.props.midpoint_x - mod).toString() +
         " " +
-        this.props.target_y.toString() +
+        this.props.midpoint_y.toString() +
         " L " +
         (this.props.target_x).toString() +
         " " +
@@ -69,9 +69,9 @@ class Branch extends React.Component {
         " " +
         this.props.r_y.toString() +
         " 0 0 1 " +
-        ((this.props.target_x-this.props.center)*rinner/router+this.props.center).toString() +
+        this.props.midpoint_x.toString() +
         " " +
-        ((this.props.target_y-this.props.center)*rinner/router+this.props.center).toString() +
+        this.props.midpoint_y.toString() +
         " L " +
         this.props.target_x.toString() +
         " " +

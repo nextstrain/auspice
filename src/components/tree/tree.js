@@ -65,11 +65,17 @@ class Tree extends React.Component {
       nodes: nodes,
       branches: branches,
       width: globals.width,
+//      xScale: d3.scale.linear()
+//                      .domain([d3.min(xValues), d3.max(xValues)])
+//                      .range([globals.margin, globals.width - globals.margin]),
+//      yScale: d3.scale.linear()
+//                      .domain([d3.min(yValues), d3.max(yValues)])
+//                      .range([globals.margin, this.treePlotHeight(globals.width) - globals.margin])
       xScale: d3.scale.linear()
-                      .domain([d3.min(xValues), d3.max(xValues)])
+                      .domain([-d3.max(xValues), d3.max(xValues)])
                       .range([globals.margin, globals.width - globals.margin]),
       yScale: d3.scale.linear()
-                      .domain([d3.min(yValues), d3.max(yValues)])
+                      .domain([-d3.max(xValues), d3.max(xValues)])
                       .range([globals.margin, this.treePlotHeight(globals.width) - globals.margin])
     });
   }
@@ -97,7 +103,7 @@ class Tree extends React.Component {
           nodes={this.state.nodes}
           xScale={this.state.xScale}
           yScale={this.state.yScale}
-          layout="rectangular"
+          layout="radial"
           distanceMeasure="div"
         />
       </svg>

@@ -98,8 +98,8 @@ class Nodes extends React.Component {
         <VictoryAnimation duration={1000} key={index} data={{
             target_x:   this.xVal(node, this.props.distanceMeasure, this.props.layout),
             target_y:   this.yVal(node, this.props.distanceMeasure, this.props.layout),
-            midpoint_x: this.xMidpoint(node.parent, this.props.distanceMeasure, this.props.layout),
-            midpoint_y: this.yMidpoint(node.parent, this.props.distanceMeasure, this.props.layout),
+            midpoint_x: this.xMidpoint(node, this.props.distanceMeasure, this.props.layout),
+            midpoint_y: this.yMidpoint(node, this.props.distanceMeasure, this.props.layout),
             source_x:   this.xVal(node.parent, this.props.distanceMeasure, this.props.layout),
             source_y:   this.yVal(node.parent, this.props.distanceMeasure, this.props.layout),
             r_x: this.r_x(node.parent, this.props.distanceMeasure, this.props.layout),

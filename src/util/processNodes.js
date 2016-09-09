@@ -33,9 +33,10 @@ const radialLayout = (node, distanceMeasure, nTips) => {
     var circleFraction = 0.95;
     var radius = (distanceMeasure=='div')?node.xvalue:node.attr[distanceMeasure];
     var parent_radius = (distanceMeasure=='div')?node.parent.xvalue:node.parent.attr[distanceMeasure];
-    var angle = circleFraction*2*Math.PI*node.yvalue/nTips;
+    var angle = circleFraction*2.0*Math.PI*node.yvalue/nTips;
     return {'xVal':radius*Math.sin(angle), 'yVal':radius*Math.cos(angle),
-            'xValMidpoint':radius*Math.sin(angle), 'yValMidpoint':radius*Math.cos(angle),
+            'xValMidpoint':parent_radius*Math.sin(angle),
+            'yValMidpoint':parent_radius*Math.cos(angle),
             'radius':radius,'radius_inner':parent_radius, 'angle':angle};
 };
 
