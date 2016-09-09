@@ -17,12 +17,15 @@ const Tree = (state = {
   case types.RECEIVE_TREE:
     let tips = [];
     gatherTips(action.data, tips)
-
+    const dmin = d3.min(tips.map((d) => d.attr.num_date))
+    const dmax = d3.max(tips.map((d) => d.attr.num_date))
     return Object.assign({}, state, {
       loading: false,
       error: null,
+      dateRange: [dmin, dmax],
       tree: action.data,
-      tips: tips
+      tips: tips,
+      datasetGuid: Math.floor(Math.random() * 100000000000)
     });
   case types.TREE_FETCH_ERROR:
     return Object.assign({}, state, {
