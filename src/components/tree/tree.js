@@ -12,6 +12,8 @@ import moment from "moment";
 import "moment-range";
 import Nodes from "./nodes";
 
+import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
+
 const returnStateNeeded = (fullStateTree) => {
   return {
     tree: fullStateTree.tree,
@@ -25,7 +27,9 @@ class Tree extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      okToDraw: false
+      okToDraw: false,
+      value: ViewerHelper.getDefaultValue(),
+      tool: "zoom",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
     };
   }
   static propTypes = {
@@ -91,17 +95,34 @@ class Tree extends React.Component {
   }
   createSvgAndNodes() {
     return (
-      <svg
+      <Viewer
         width={this.state.width}
         height={this.treePlotHeight(this.state.width)}
-        id="treeplot">
-        <Nodes
-          query={this.props.query}
-          nodes={this.state.nodes}
-          xScale={this.state.xScale}
-          yScale={this.state.yScale}/>
-      </svg>
+        value={this.state.value}
+        tool={this.state.tool}
+        onChange={this.handleChange.bind(this)}
+        onClick={this.handleClick.bind(this)}>
+        <svg
+          width={this.state.width}
+          height={this.treePlotHeight(this.state.width)}
+          id="treeplot">
+          <Nodes
+            query={this.props.query}
+            nodes={this.state.nodes}
+            xScale={this.state.xScale}
+            yScale={this.state.yScale}/>
+        </svg>
+      </Viewer>
     )
+  }
+  handleChange(event) {
+    console.log('scaleFactor', event.scaleFactor);
+
+    this.setState({value: event.value});
+  }
+
+  handleClick(event){
+    console.log('click', event.x, event.y, event.originalEvent);
   }
   render() {
     /*
