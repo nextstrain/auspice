@@ -142,7 +142,7 @@ class TreeNode extends React.Component {
     }
 
     const inRange = this.props.dateRange.contains(
-      moment(node.date.replace(/XX/g, "01"), "YYYY-MM-DD")
+      moment(node.attr.date.replace(/XX/g, "01"), "YYYY-MM-DD")
     );
 
     if (!inRange) {
@@ -187,8 +187,7 @@ class TreeNode extends React.Component {
           r={
             this.props.node.children ?
               globals.nonTipNodeRadius :
-              this.chooseTipRadius()} />
-
+              this.chooseTipRadius(this.props.node)} />
       </g>
     );
   }

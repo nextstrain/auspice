@@ -6,21 +6,16 @@ import { connect } from "react-redux";
 // import { FOO } from "../actions";
 // import { visualization } from "../../visualization/visualization";
 import d3 from "d3";
-import Link from "./branch";
-import Node from "./node";
-import Tooltip from "./tooltip";
 import { processNodes } from "../../util/processNodes";
 import * as globals from "../../util/globals";
 import moment from "moment";
 import "moment-range";
+import Nodes from "./nodes";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
-    metadata: fullStateTree.metadata,
     tree: fullStateTree.tree,
-    sequences: fullStateTree.sequences,
-    frequencies: fullStateTree.frequencies,
-    controls: fullStateTree.controls
+    controls: fullStateTree.controls,
   };
 };
 
@@ -30,7 +25,7 @@ class Tree extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-
+      okToDraw: false
     };
   }
   static propTypes = {
@@ -47,24 +42,22 @@ class Tree extends React.Component {
     frequencies: React.PropTypes.object
   }
   componentDidMount() {
-    // visualization(
-    //   this.props.tree.tree,
-    //   this.props.sequences.sequences,
-    //   this.props.frequencies.frequencies,
-    //   null /* todo: this is vaccineStrains */
-    // )
+    // is it NEW data? have we drawn this tree yet? setupTree()
+    if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
+      this.setupTree();
+      console.log('drawTreeIfData', this.state);
+      return;
+    }
   }
-  componentDidUpdate(nextProps) {
-    // if (newVirus(this.props, nextProps)) {
-    //   this.setupTree()
-    // }
+  componentDidUpdate() {
+    // is it NEW data? have we drawn this tree yet? setupTree()
+    if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
+      this.setupTree();
+      console.log('drawTreeIfData', this.state);
+      return;
+    }
   }
-  setupTree() {
-    const tree = d3.layout.tree()
-      .size([this.treePlotHeight(globals.width), globals.width]);
-    const nodes = processNodes(tree.nodes(props.tree.tree));
-    const links = tree.links(nodes);
-
+  updateScales(nodes, branches) {
     const xValues = nodes.map((d) => {
       return +d.xvalue;
     });
@@ -74,102 +67,53 @@ class Tree extends React.Component {
     });
 
     this.setState({
+      okToDraw: true,
+      currentDatasetGuid: this.props.tree.datasetGuid,
+      nodes: nodes,
+      branches: branches,
       width: globals.width,
-      nodes,
-      links,
       xScale: d3.scale.linear()
                       .domain([d3.min(xValues), d3.max(xValues)])
                       .range([globals.margin, globals.width - globals.margin]),
       yScale: d3.scale.linear()
                       .domain([d3.min(yValues), d3.max(yValues)])
                       .range([globals.margin, this.treePlotHeight(globals.width) - globals.margin])
-    })
+    });
+  }
+  setupTree() {
+    const tree = d3.layout.tree()
+      .size([this.treePlotHeight(globals.width), globals.width]);
+    const nodes = processNodes(tree.nodes(this.props.tree.tree));
+    nodes[0].parent = nodes[0];
+    const branches = tree.links(nodes);
+    this.updateScales(nodes, branches);
   }
   treePlotHeight(width) {
     return 400 + 0.30 * width;
   }
-  drawNodes(nodes) {
-    const range = moment().range(
-      new Date(+this.props.query.dmin),
-      new Date(+this.props.query.dmax)
-    )
-    return nodes.map((node, index) => {
-      return (
-        <Node
-          index={index}
-          node={node}
-          key={index}
-          dateRange={range}
-          fill={this.props.controls.colorScale(node[this.props.controls.colorBy])}
-          nuc_muts={node.nuc_muts}
-          showBranchLabels={this.props.controls.showBranchLabels}
-          strain={node.strain}
-          xScale={this.state.xScale}
-          yScale={this.state.yScale}/>
-      );
-    });
-  }
-  drawBranches(links) {
-    const branchComponents = links.map((link, index) => {
-      return (
-        <Link
-          xscale={this.state.xScale}
-          yscale={this.state.yScale}
-          datum={link}
-          key={index} />
-      );
-    });
-    return branchComponents;
-  }
-  drawTooltip(node, type) {
-    return (
-      <Tooltip
-        type={type}
-        node={node}
-        x={this.state.xScale(node.xvalue)}
-        y={this.state.yScale(node.yvalue)}/>
-    )
-  }
-  drawTreeIfData() {
-    // is it NEW data? have we drawn this tree yet? setupTree()
-    const p = this.props;
-    let markup;
-
-    if (
-      p.metadata.metadata &&
-      p.tree.tree
-      // p.sequences.sequences &&
-      // p.frequencies.frequencies
-    ) {
-      markup = (
-        <svg
-          height={this.treePlotHeight(this.state.width)}
-          width={this.state.width}
-          id="treeplot"
-          style={{
-          }}>
-          {this.drawBranches(this.state.links)}
-          {this.drawNodes(this.state.nodes)}
-          {
-            this.props.controls.selectedBranch ?
-            this.drawTooltip(this.props.controls.selectedBranch.target, "branch") :
-            null
-          }
-          {
-            this.props.controls.selectedNode ?
-            this.drawTooltip(this.props.controls.selectedNode, "node") :
-            null
-          }
-        </svg>
-      );
-    }
-
-    return markup;
-  }
   render() {
+    /*
+      1. if we just loaded a new dataset, run setup tree,
+      2. otherwise if we just rescaled, run updatescales,
+      3. otherwise just have components rerender because for instance colorby changed
+    */
+    console.log('props tree', this.props)
     return (
       <div>
-        {this.drawTreeIfData()}
+        <svg
+          width={this.state.width}
+          height={this.treePlotHeight(this.state.width)}
+          id="treeplot">
+        {
+          this.state.okToDraw ?
+            <Nodes
+              query={this.props.query}
+              nodes={this.state.nodes}
+              xScale={this.state.xScale}
+              yScale={this.state.yScale}/> :
+              "We don't have tree data yet [spinner]"
+        }
+        </svg>
       </div>
     );
   }

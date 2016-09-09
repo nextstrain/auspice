@@ -20,16 +20,7 @@ import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
 import { withRouter } from 'react-router';
 
-const returnStateNeeded = (fullStateTree) => {
-  return {
-    metadata: fullStateTree.metadata,
-    tree: fullStateTree.tree,
-    sequences: fullStateTree.sequences,
-    frequencies: fullStateTree.frequencies
-  };
-};
-
-@connect(returnStateNeeded)
+@connect()
 @Radium
 class App extends React.Component {
   constructor(props) {
@@ -61,8 +52,11 @@ class App extends React.Component {
     this.maybeFetchDataset()
   }
   maybeFetchDataset() {
+    if (this.state.latestValidParams === this.props.params.splat) {
+      return;
+    }
+
     const parsedParams = parseParams(this.props.params.splat);
-    console.log(parsedParams);
     // this.setState({'dataset':parsedParams['dataset'], 'item':parsedParams['item']});
     var tmp_levels = Object.keys(parsedParams['dataset']).map((d) => parsedParams['dataset'][d]);
     tmp_levels.sort((x,y) => x[0]>y[0]);
@@ -77,18 +71,6 @@ class App extends React.Component {
       this.props.dispatch(populateSequencesStore(data_path));
       this.props.dispatch(populateFrequenciesStore(data_path));
       this.setState({latestValidParams: parsedParams.fullsplat});
-    }
-  }
-  drawTreeIfData() {
-    const p = this.props;
-    let markup;
-    if (
-      p.metadata.metadata &&
-      p.tree.tree &&
-      p.sequences.sequences &&
-      p.frequencies.frequencies
-    ) {
-      markup = (<Tree {...this.props.location}/>);
     }
   }
   render() {
@@ -106,7 +88,7 @@ class App extends React.Component {
           alignItems="flex-start"
           justifyContent="space-between">
           <Controls {...this.props}/>
-          {this.drawTreeIfData()}
+          <Tree {...this.props.location}/>
         </Flex>
         <Footer/>
       </div>

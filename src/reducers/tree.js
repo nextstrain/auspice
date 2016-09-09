@@ -22,7 +22,8 @@ const Tree = (state = {
       loading: false,
       error: null,
       tree: action.data,
-      tips: tips
+      tips: tips,
+      datasetGuid: Math.floor(Math.random() * 100000000000)
     });
   case types.TREE_FETCH_ERROR:
     return Object.assign({}, state, {
