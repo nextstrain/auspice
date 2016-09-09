@@ -75,12 +75,11 @@ class Nodes extends React.Component {
         y={this.props.yScale(node.yvalue)}/>
     )
   }
-
   render() {
     return (
       <g>
-        {this.drawNodes(this.props.nodes)}
         {this.drawBranches(this.props.nodes)}
+        {this.drawNodes(this.props.nodes)}
       </g>
     );
   }
