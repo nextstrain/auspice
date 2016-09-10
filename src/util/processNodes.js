@@ -10,6 +10,7 @@ export const processNodes = (nodes) => {
 
   // colorByTrait();
   var nodesWithFrequencyAdded = treeHelpers.adjust_freq_by_date(nodes, rootNode);
+  nodes.forEach( (d) => d.hasChildren = typeof d.children!=="undefined" );
 
   return nodes;
 
@@ -30,14 +31,18 @@ const vsDateLayout = (node, distanceMeasure) => {
 };
 
 const radialLayout = (node, distanceMeasure, nTips) => {
-    var circleFraction = 0.95;
-    var radius = (distanceMeasure=='div')?node.xvalue:node.attr[distanceMeasure];
-    var parent_radius = (distanceMeasure=='div')?node.parent.xvalue:node.parent.attr[distanceMeasure];
-    var angle = circleFraction*2.0*Math.PI*node.yvalue/nTips;
+    const circleFraction = 0.95;
+    const radius = (distanceMeasure=='div')?node.xvalue:node.attr[distanceMeasure];
+    const parentRadius = (distanceMeasure=='div')?node.parent.xvalue:node.parent.attr[distanceMeasure];
+    const angle = circleFraction*2.0*Math.PI*node.yvalue/nTips;
+    const parentAngle = circleFraction*2.0*Math.PI*node.parent.yvalue/nTips;
+    const leftRight = node.yvalue>node.parent.yvalue;
+    const smallBigArc = Math.abs(angle - parentAngle)>Math.Pi*0.5;
     return {'xVal':radius*Math.sin(angle), 'yVal':radius*Math.cos(angle),
-            'xValMidpoint':parent_radius*Math.sin(angle),
-            'yValMidpoint':parent_radius*Math.cos(angle),
-            'radius':radius,'radius_inner':parent_radius, 'angle':angle};
+            'xValMidpoint':parentRadius*Math.sin(angle),
+            'yValMidpoint':parentRadius*Math.cos(angle),
+            'radius':radius,'radiusInner':parentRadius,
+            'angle':angle, 'smallBigArc':smallBigArc, 'leftRight':leftRight};
 };
 
 /* Calculate layout geometry for radial and rectangular layouts

@@ -47,15 +47,29 @@ class Nodes extends React.Component {
     return this.props.yScale(node.geometry[distanceMeasure][layout].yValMidpoint);
   }
   r_x(node, distanceMeasure, layout){
-    if ("layout"==="radial"){
-      return this.props.xScale(node.geometry[distanceMeasure][layout].radius_inner);
+    if (this.props.layout==="radial"){
+      return this.props.xScale(node.geometry[distanceMeasure][layout].radiusInner) - this.props.xScale(0);
     }else{
       return 0;
     }
   }
   r_y(node, distanceMeasure, layout){
-    if ("layout"==="radial"){
-      return this.props.yScale(node.geometry[distanceMeasure][layout].radius_inner);
+    if (this.props.layout==="radial"){
+      return this.props.yScale(node.geometry[distanceMeasure][layout].radiusInner) - this.props.yScale(0);
+    }else{
+      return 0;
+    }
+  }
+  smallBigArc(node, distanceMeasure, layout){
+    if (this.props.layout==="radial"){
+      return node.geometry[distanceMeasure][layout].smallBigArc;
+    }else{
+      return 0;
+    }
+  }
+  leftRight(node, distanceMeasure, layout){
+    if (this.props.layout==="radial"){
+      return node.geometry[distanceMeasure][layout].leftRight;
     }else{
       return 0;
     }
@@ -75,13 +89,15 @@ class Nodes extends React.Component {
         {(props) => {
           return (
             <Node
-              index={index}
+              {...this.props} {...props} animate={null}
+              key={index}
               node={node}
               key={index}
               dateRange={range}
               fill={this.props.controls.colorScale(node[this.props.controls.colorBy])}
               showBranchLabels={this.props.controls.showBranchLabels}
               strain={node.strain}
+              r={3}
               hasChildren={node.children ? true : false}
             />
           )
@@ -93,6 +109,7 @@ class Nodes extends React.Component {
   }
 
   drawBranches(nodes) {
+    console.log('drawBranches',this.props.layout);
     const branchComponents = nodes.map((node, index) => {
       return (
         <VictoryAnimation duration={1000} key={index} data={{
@@ -102,9 +119,11 @@ class Nodes extends React.Component {
             midpoint_y: this.yMidpoint(node, this.props.distanceMeasure, this.props.layout),
             source_x:   this.xVal(node.parent, this.props.distanceMeasure, this.props.layout),
             source_y:   this.yVal(node.parent, this.props.distanceMeasure, this.props.layout),
-            r_x: this.r_x(node.parent, this.props.distanceMeasure, this.props.layout),
-            r_y: this.r_y(node.parent, this.props.distanceMeasure, this.props.layout),
-            layout: this.props.layout,
+            r_x: this.r_x(node, this.props.distanceMeasure, this.props.layout),
+            r_y: this.r_y(node, this.props.distanceMeasure, this.props.layout),
+            smallBigArc: this.smallBigArc(node, this.props.distanceMeasure, this.props.layout),
+            leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.layout),
+            layout: this.props.layout
         }}>
         {(props) => {
           return (
@@ -124,7 +143,8 @@ class Nodes extends React.Component {
         type={type}
         node={node}
         x={this.xVal(node, this.state.distanceMeasure, this.state.layout)}
-        y={this.yVal(node, this.state.distanceMeasure, this.state.layout)}/>
+        y={this.yVal(node, this.state.distanceMeasure, this.state.layout)}
+      />
     )
   }
   render() {

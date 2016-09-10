@@ -38,15 +38,20 @@ class Frequencies extends React.Component {
     };
   }
   drawFrequencies() {
-    return (
-      <VictoryLine
-        width={globals.width}
-        data={
-          this.props.frequencies["global_HA1:159F"].map((frequency, i) => {
-            return {x: this.props.pivots[i], y: frequency}
-          })
-        }/>
-    )
+      if (this.props.frequencies['global_HA1:159F']) {
+        return (
+          <VictoryLine
+            width={globals.width}
+            data={
+                this.props.frequencies["global_HA1:159F"].map((frequency, i) => {
+                  return {x: this.props.pivots[i], y: frequency}
+                })
+            }
+          />
+        )
+      } else {
+        return "still no data";
+      }
   }
   render() {
     const styles = this.getStyles();

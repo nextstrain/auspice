@@ -58,6 +58,15 @@ class Tree extends React.Component {
     const yValues = nodes.map((d) => {
       return +d.yvalue;
     });
+    const xScale = d3.scale.linear().range([globals.margin, globals.width - globals.margin]);
+    const yScale = d3.scale.linear().range([globals.margin, this.treePlotHeight(globals.width) - globals.margin]);
+    if (this.props.layout==='radial'){
+      xScale.domain([-d3.max(xValues), d3.max(xValues)]);
+      yScale.domain([-d3.max(xValues), d3.max(xValues)]);
+    } else {
+      xScale.domain([0, d3.max(xValues)]);
+      yScale.domain([0, d3.max(yValues)]);
+    }
 
     this.setState({
       okToDraw: true,
@@ -65,18 +74,8 @@ class Tree extends React.Component {
       nodes: nodes,
       branches: branches,
       width: globals.width,
-//      xScale: d3.scale.linear()
-//                      .domain([d3.min(xValues), d3.max(xValues)])
-//                      .range([globals.margin, globals.width - globals.margin]),
-//      yScale: d3.scale.linear()
-//                      .domain([d3.min(yValues), d3.max(yValues)])
-//                      .range([globals.margin, this.treePlotHeight(globals.width) - globals.margin])
-      xScale: d3.scale.linear()
-                      .domain([-d3.max(xValues), d3.max(xValues)])
-                      .range([globals.margin, globals.width - globals.margin]),
-      yScale: d3.scale.linear()
-                      .domain([-d3.max(xValues), d3.max(xValues)])
-                      .range([globals.margin, this.treePlotHeight(globals.width) - globals.margin])
+      xScale: xScale,
+      yScale: yScale
     });
   }
   setupTree() {
@@ -103,7 +102,7 @@ class Tree extends React.Component {
           nodes={this.state.nodes}
           xScale={this.state.xScale}
           yScale={this.state.yScale}
-          layout="radial"
+          layout={this.props.layout}
           distanceMeasure="div"
         />
       </svg>

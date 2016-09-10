@@ -43,12 +43,9 @@ class Branch extends React.Component {
     return d3.scale.sqrt().domain([0, 1]).range([1, 10]);
   }
   branchPoints() {
-    // const freqScale = this.setupFreqScale();
-    // const mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
-
     const mod = 0;
 
-    if (this.props.layout=='rectangular'){
+    if (this.props.layout==="rectangular"){
       return 'M'+(this.props.source_x - mod).toString() +
         " " +
         this.props.source_y.toString() +
@@ -60,7 +57,7 @@ class Branch extends React.Component {
         (this.props.target_x).toString() +
         " " +
         this.props.target_y.toString();
-    }else if (this.props.layout=='radial'){
+    }else if (this.props.layout==="radial"){
       var tmp_d = 'M '+(this.props.source_x).toString() +
         "  " +
         this.props.source_y.toString() +
@@ -68,7 +65,7 @@ class Branch extends React.Component {
         this.props.r_x.toString() +
         " " +
         this.props.r_y.toString() +
-        " 0 0 1 " +
+        " 0 " + (this.props.smallBigArc?"1 ":"0 ") +  (this.props.leftRight?"0 ":"1 ") +
         this.props.midpoint_x.toString() +
         " " +
         this.props.midpoint_y.toString() +

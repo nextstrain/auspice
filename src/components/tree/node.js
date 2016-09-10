@@ -190,11 +190,8 @@ class TreeNode extends React.Component {
         ")"
       }>
         <circle
-          fill={this.props.colorScale(this.props.node.attr[this.props.colorBy])}
-          r={
-            this.props.node.children ?
-              globals.nonTipNodeRadius :
-              this.chooseTipRadius(this.props.node)} />
+          fill={this.props.fill}
+          r={ this.props.r } />
       </g>
     );
   }
