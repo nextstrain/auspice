@@ -50,7 +50,7 @@ class Tree extends React.Component {
       return;
     }
   }
-  updateScales(nodes, branches) {
+  updateScales(nodes) {
     const xValues = nodes.map((d) => {
       return +d.xvalue;
     });
@@ -60,7 +60,7 @@ class Tree extends React.Component {
     });
     const xScale = d3.scale.linear().range([globals.margin, globals.width - globals.margin]);
     const yScale = d3.scale.linear().range([globals.margin, this.treePlotHeight(globals.width) - globals.margin]);
-    if (this.props.layout==='radial'){
+    if (this.props.layout === "radial") {
       xScale.domain([-d3.max(xValues), d3.max(xValues)]);
       yScale.domain([-d3.max(xValues), d3.max(xValues)]);
     } else {
@@ -72,7 +72,6 @@ class Tree extends React.Component {
       okToDraw: true,
       currentDatasetGuid: this.props.tree.datasetGuid,
       nodes: nodes,
-      branches: branches,
       width: globals.width,
       xScale: xScale,
       yScale: yScale
@@ -84,8 +83,7 @@ class Tree extends React.Component {
     const nodes = processNodes(tree.nodes(this.props.tree.tree));
     nodes[0].parent = nodes[0];
     calcLayouts(nodes, ["div", "num_date"]);
-    const branches = tree.links(nodes);
-    this.updateScales(nodes, branches);
+    this.updateScales(nodes);
   }
   treePlotHeight(width) {
     return 400 + 0.30 * width;

@@ -21,7 +21,7 @@ import Entropy from "./charts/entropy";
 import Tree from "./tree/tree";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
-import { withRouter } from 'react-router';
+import { withRouter } from "react-router";
 
 @connect()
 @Radium
@@ -41,7 +41,7 @@ class App extends React.Component {
     error: React.PropTypes.object,
     loading: React.PropTypes.bool,
     user: React.PropTypes.object,
-    routes: React.PropTypes.array,
+    routes: React.PropTypes.array
     // foo: React.PropTypes.string
   }
   static defaultProps = {
@@ -49,10 +49,10 @@ class App extends React.Component {
 
   }
   componentDidMount() {
-    this.maybeFetchDataset()
+    this.maybeFetchDataset();
   }
   componentDidUpdate() {
-    this.maybeFetchDataset()
+    this.maybeFetchDataset();
   }
   maybeFetchDataset() {
     if (this.state.latestValidParams === this.props.params.splat) {
@@ -61,11 +61,11 @@ class App extends React.Component {
 
     const parsedParams = parseParams(this.props.params.splat);
     // this.setState({'dataset':parsedParams['dataset'], 'item':parsedParams['item']});
-    var tmp_levels = Object.keys(parsedParams['dataset']).map((d) => parsedParams['dataset'][d]);
-    tmp_levels.sort((x,y) => x[0]>y[0]);
-    const data_path = tmp_levels.map(function(d){return d[1];}).join('_');
+    const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);
+    tmp_levels.sort((x, y) => x[0] > y[0]);
+    const data_path = tmp_levels.map( function (d) {return d[1];}).join("_");
     if (parsedParams.incomplete) {
-      const prefix=(parsedParams.fullsplat[0]=='/')?"":"/";
+      const prefix = (parsedParams.fullsplat[0] === "/") ? "" : "/";
       this.props.router.push({pathname:prefix+parsedParams.fullsplat});
     }
     if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
@@ -89,11 +89,12 @@ class App extends React.Component {
           }}
           wrap="wrap"
           alignItems="flex-start"
-          justifyContent="space-between">
+          justifyContent="space-between"
+        >
           <Controls {...this.props}/>
           <Tree
             {...this.props.location}
-            layout="radial"
+            layout="rectangular"
           />
           <Frequencies/>
           <Entropy/>

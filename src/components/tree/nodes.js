@@ -34,33 +34,33 @@ class Nodes extends React.Component {
   static defaultProps = {
     // foo: "bar"
   }
-  xVal(node, distanceMeasure, layout){
+  xVal(node, distanceMeasure, layout) {
     return this.props.xScale(node.geometry[distanceMeasure][layout].xVal);
   }
-  yVal(node, distanceMeasure, layout){
+  yVal(node, distanceMeasure, layout) {
     return this.props.yScale(node.geometry[distanceMeasure][layout].yVal);
   }
-  xMidpoint(node, distanceMeasure, layout){
+  xMidpoint(node, distanceMeasure, layout) {
     return this.props.xScale(node.geometry[distanceMeasure][layout].xValMidpoint);
   }
-  yMidpoint(node, distanceMeasure, layout){
+  yMidpoint(node, distanceMeasure, layout) {
     return this.props.yScale(node.geometry[distanceMeasure][layout].yValMidpoint);
   }
-  r_x(node, distanceMeasure, layout){
+  r_x(node, distanceMeasure, layout) {
     if (this.props.layout==="radial"){
       return this.props.xScale(node.geometry[distanceMeasure][layout].radiusInner) - this.props.xScale(0);
     }else{
       return 0;
     }
   }
-  r_y(node, distanceMeasure, layout){
+  r_y(node, distanceMeasure, layout) {
     if (this.props.layout==="radial"){
       return this.props.yScale(node.geometry[distanceMeasure][layout].radiusInner) - this.props.yScale(0);
     }else{
       return 0;
     }
   }
-  smallBigArc(node, distanceMeasure, layout){
+  smallBigArc(node, distanceMeasure, layout) {
     if (this.props.layout==="radial"){
       return node.geometry[distanceMeasure][layout].smallBigArc;
     }else{
@@ -109,7 +109,6 @@ class Nodes extends React.Component {
   }
 
   drawBranches(nodes) {
-    console.log('drawBranches',this.props.layout);
     const branchComponents = nodes.map((node, index) => {
       return (
         <VictoryAnimation duration={1000} key={index} data={{
