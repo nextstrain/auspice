@@ -57,15 +57,16 @@ class ChooseLayout extends React.Component {
     };
   }
   componentDidMount() {
-    // set query param with rectangle default if it doesn't exist
+    if (!this.props.location.query.l) {
+      this.setLayoutQueryParam("rectangular")
+    }
   }
 
   setLayoutQueryParam(title) {
-    console.log(title)
-    // this.props.router.push({
-    //   pathname: this.props.location.pathname,
-    //   query: Object.assign({}, this.props.location.query, {l: title})
-    // });
+    this.props.router.push({
+      pathname: this.props.location.pathname,
+      query: Object.assign({}, this.props.location.query, {l: title})
+    });
   }
   render() {
     const styles = this.getStyles();
