@@ -57,9 +57,7 @@ class Controls extends React.Component {
         style={{
         }}>
 
-        <ChooseLayout style={{color: "blue"}}/>
-
-
+        <ChooseLayout {...this.props}/>
 
         <p> Phylogeny </p>
         <DateRangeInputs {...this.props}/>

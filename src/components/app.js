@@ -92,10 +92,7 @@ class App extends React.Component {
           justifyContent="space-between"
         >
           <Controls {...this.props}/>
-          <Tree
-            {...this.props.location}
-            layout="rectangular"
-          />
+          <Tree {...this.props.location}/>
           <Frequencies/>
           <Entropy/>
         </Flex>

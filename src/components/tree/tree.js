@@ -60,7 +60,7 @@ class Tree extends React.Component {
     });
     const xScale = d3.scale.linear().range([globals.margin, globals.width - globals.margin]);
     const yScale = d3.scale.linear().range([globals.margin, this.treePlotHeight(globals.width) - globals.margin]);
-    if (this.props.layout === "radial") {
+    if (this.props.query.l === "radial") {
       xScale.domain([-d3.max(xValues), d3.max(xValues)]);
       yScale.domain([-d3.max(xValues), d3.max(xValues)]);
     } else {
@@ -100,7 +100,7 @@ class Tree extends React.Component {
           nodes={this.state.nodes}
           xScale={this.state.xScale}
           yScale={this.state.yScale}
-          layout={this.props.layout}
+          layout={this.props.query.l}
           distanceMeasure="div"
         />
       </svg>

@@ -47,30 +47,30 @@ class Nodes extends React.Component {
     return this.props.yScale(node.geometry[distanceMeasure][layout].yValMidpoint);
   }
   r_x(node, distanceMeasure, layout) {
-    if (this.props.layout==="radial"){
+    if (layout === "radial") {
       return this.props.xScale(node.geometry[distanceMeasure][layout].radiusInner) - this.props.xScale(0);
-    }else{
+    } else {
       return 0;
     }
   }
   r_y(node, distanceMeasure, layout) {
-    if (this.props.layout==="radial"){
+    if (layout === "radial") {
       return this.props.yScale(node.geometry[distanceMeasure][layout].radiusInner) - this.props.yScale(0);
-    }else{
+    } else {
       return 0;
     }
   }
   smallBigArc(node, distanceMeasure, layout) {
-    if (this.props.layout==="radial"){
+    if (layout === "radial") {
       return node.geometry[distanceMeasure][layout].smallBigArc;
-    }else{
+    } else {
       return 0;
     }
   }
-  leftRight(node, distanceMeasure, layout){
-    if (this.props.layout==="radial"){
+  leftRight(node, distanceMeasure, layout) {
+    if (layout === "radial") {
       return node.geometry[distanceMeasure][layout].leftRight;
-    }else{
+    } else {
       return 0;
     }
   }
@@ -83,8 +83,8 @@ class Nodes extends React.Component {
     const nodeComponents = nodes.map((node, index) => {
       return (
         <VictoryAnimation duration={1000} key={index} data={{
-          x: this.xVal(node, this.props.distanceMeasure, this.props.layout),
-          y: this.yVal(node, this.props.distanceMeasure, this.props.layout)
+          x: this.xVal(node, this.props.distanceMeasure, this.props.query.l),
+          y: this.yVal(node, this.props.distanceMeasure, this.props.query.l)
         }}>
         {(props) => {
           return (
@@ -112,17 +112,17 @@ class Nodes extends React.Component {
     const branchComponents = nodes.map((node, index) => {
       return (
         <VictoryAnimation duration={1000} key={index} data={{
-            target_x:   this.xVal(node, this.props.distanceMeasure, this.props.layout),
-            target_y:   this.yVal(node, this.props.distanceMeasure, this.props.layout),
-            midpoint_x: this.xMidpoint(node, this.props.distanceMeasure, this.props.layout),
-            midpoint_y: this.yMidpoint(node, this.props.distanceMeasure, this.props.layout),
-            source_x:   this.xVal(node.parent, this.props.distanceMeasure, this.props.layout),
-            source_y:   this.yVal(node.parent, this.props.distanceMeasure, this.props.layout),
-            r_x: this.r_x(node, this.props.distanceMeasure, this.props.layout),
-            r_y: this.r_y(node, this.props.distanceMeasure, this.props.layout),
-            smallBigArc: this.smallBigArc(node, this.props.distanceMeasure, this.props.layout),
-            leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.layout),
-            layout: this.props.layout
+            target_x:   this.xVal(node, this.props.distanceMeasure, this.props.query.l),
+            target_y:   this.yVal(node, this.props.distanceMeasure, this.props.query.l),
+            midpoint_x: this.xMidpoint(node, this.props.distanceMeasure, this.props.query.l),
+            midpoint_y: this.yMidpoint(node, this.props.distanceMeasure, this.props.query.l),
+            source_x:   this.xVal(node.parent, this.props.distanceMeasure, this.props.query.l),
+            source_y:   this.yVal(node.parent, this.props.distanceMeasure, this.props.query.l),
+            r_x: this.r_x(node, this.props.distanceMeasure, this.props.query.l),
+            r_y: this.r_y(node, this.props.distanceMeasure, this.props.query.l),
+            smallBigArc: this.smallBigArc(node, this.props.distanceMeasure, this.props.query.l),
+            leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.query.l),
+            layout: this.props.query.l
         }}>
         {(props) => {
           return (
@@ -141,8 +141,8 @@ class Nodes extends React.Component {
       <Tooltip
         type={type}
         node={node}
-        x={this.xVal(node, this.state.distanceMeasure, this.state.layout)}
-        y={this.yVal(node, this.state.distanceMeasure, this.state.layout)}
+        x={this.xVal(node, this.state.distanceMeasure, this.props.query.l)}
+        y={this.yVal(node, this.state.distanceMeasure, this.props.query.l)}
       />
     )
   }
