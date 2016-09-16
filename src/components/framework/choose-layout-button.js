@@ -31,22 +31,13 @@ class ChooseLayoutButton extends React.Component {
   }
   getStyles() {
     return {
-      base: {
-        border: 0,
-        backgroundColor: "red",
-        color: "white"
-      }
+
     };
   }
   render() {
     const styles = this.getStyles();
     return (
-      <button style={[
-        styles.base,
-        this.props.style
-      ]}>
-        {this.props.icon} {this.props.title}
-      </button>
+
     );
   }
 }
