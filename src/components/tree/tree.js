@@ -27,7 +27,7 @@ class Tree extends React.Component {
     this.state = {
       okToDraw: false,
       value: ViewerHelper.getDefaultValue(),
-      tool: "zoom",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
+      tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
     };
   }
   static propTypes = {
@@ -117,13 +117,13 @@ class Tree extends React.Component {
     )
   }
   handleChange(event) {
-    console.log('scaleFactor', event.scaleFactor);
+    // console.log('scaleFactor', event.scaleFactor);
 
     this.setState({value: event.value});
   }
 
   handleClick(event){
-    console.log('click', event.x, event.y, event.originalEvent);
+    // console.log('click', event.x, event.y, event.originalEvent);
   }
   render() {
     /*

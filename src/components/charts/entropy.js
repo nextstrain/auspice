@@ -38,7 +38,6 @@ class Entropy extends React.Component {
     };
   }
   drawEntropy() {
-    console.log('Drawing entropy');
     return (
       <VictoryChart width={globals.width}>
         <VictoryBar
@@ -49,7 +48,6 @@ class Entropy extends React.Component {
       )
   }
   render() {
-    console.log('in entropy render', this.props.entropy);
     const styles = this.getStyles();
     return (
       <div style={[
