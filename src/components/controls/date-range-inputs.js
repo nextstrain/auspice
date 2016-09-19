@@ -43,7 +43,7 @@ class DateRangeInputs extends React.Component {
   // called after either <DatePicker /> changes
 
   createQueryParams(newRange) {
-    return Object.assign({}, this.props.query, {
+    return Object.assign({}, this.props.location.query, {
       dmin: newRange.min,
       dmax: newRange.max
     });
@@ -65,8 +65,9 @@ class DateRangeInputs extends React.Component {
     // [timestampStart, timestampEnd]
     const newRange = {min: values[0], max: values[1]};
     // set url
+
     this.props.router.push({
-      pathname: this.props.pathname,
+      pathname: this.props.location.pathname,
       query: this.createQueryParams(newRange)
     });
   }

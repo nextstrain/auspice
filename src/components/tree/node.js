@@ -121,7 +121,7 @@ class TreeNode extends React.Component {
       bool = (node.coloring <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
         (node.coloring > legendBoundsMap.lower_bound[selectedLegendItem]);
     } else {
-      bool = node.attr[this.props.controls.colorBy] === c.selectedLegendItem;
+      bool = node.attr[this.props.controls.colorBy] === this.props.selectedLegendItem;
     }
     return bool;
   }
@@ -147,7 +147,7 @@ class TreeNode extends React.Component {
       inRange = this.props.dateRange.contains(
         moment(node.date.replace(/XX/g, "01"), "YYYY-MM-DD")
       );
-    }else{
+    } else {
       inRange = this.props.dateRange.contains(
         moment(node.attr.date.replace(/XX/g, "01"), "YYYY-MM-DD")
       );
@@ -192,7 +192,10 @@ class TreeNode extends React.Component {
       }>
         <circle
           fill={this.props.fill}
-          r={ this.props.hasChildren ? 0.5*this.props.r:this.props.r } />
+          r={
+            this.props.node.children ?
+              globals.nonTipNodeRadius :
+              this.chooseTipRadius(this.props.node)} />
       </g>
     );
   }

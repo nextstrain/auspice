@@ -93,14 +93,14 @@ class Tree extends React.Component {
     return 400 + 0.30 * width;
   }
   createSvgAndNodes() {
+    // <Viewer
+    //   width={this.state.width}
+    //   height={this.treePlotHeight(this.state.width)}
+    //   value={this.state.value}
+    //   tool={this.state.tool}
+    //   onChange={this.handleChange.bind(this)}
+    //   onClick={this.handleClick.bind(this)}>
     return (
-      <Viewer
-        width={this.state.width}
-        height={this.treePlotHeight(this.state.width)}
-        value={this.state.value}
-        tool={this.state.tool}
-        onChange={this.handleChange.bind(this)}
-        onClick={this.handleClick.bind(this)}>
         <svg
           width={this.state.width}
           height={this.treePlotHeight(this.state.width)}
@@ -113,8 +113,8 @@ class Tree extends React.Component {
             xScale={this.state.xScale}
             yScale={this.state.yScale}/>
         </svg>
-      </Viewer>
     )
+  // </Viewer>
   }
   handleChange(event) {
     // console.log('scaleFactor', event.scaleFactor);

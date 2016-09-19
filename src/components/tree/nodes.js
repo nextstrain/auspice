@@ -92,12 +92,10 @@ class Nodes extends React.Component {
               {...this.props} {...props} animate={null}
               key={index}
               node={node}
-              key={index}
               dateRange={range}
-              fill={this.props.controls.colorScale(node[this.props.controls.colorBy])}
+              fill={this.props.controls.colorScale(node.attr[this.props.controls.colorBy])}
               showBranchLabels={this.props.controls.showBranchLabels}
-              strain={node.strain}
-              r={3}
+              strain={node.attr.strain}
               hasChildren={node.children ? true : false}
             />
           )
