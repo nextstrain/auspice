@@ -42,7 +42,6 @@ class TreeNode extends React.Component {
     // foo: "bar"
   }
   shouldComponentUpdate(nextProps, nextState) {
-    return true;
     /*
       If nextProps.selectedLegendItem is null, nothing is selected b/c mouseout.
       This means that and we want to check the present, not future state for match with this.props.selectedLegendItem.
@@ -51,12 +50,12 @@ class TreeNode extends React.Component {
       DUPLICATION WARNING: this should be refactored so that it doesn't duplicate the code below in determineLegendMatch
       ultimately determineLegendMatch should take an argument.
     */
-    //const _selectedLegendItem = nextProps.selectedLegendItem || this.props.selectedLegendItem;
+    const _selectedLegendItem = nextProps.selectedLegendItem || this.props.selectedLegendItem;
 
-    //if (this.props.hasChildren) {
+    if (this.props.node.children) {
       /* nodes without children are never visible, so will not update */
-    //  return false;
-    //}
+      return false;
+    }
     // else if (
     //   /* special cases */
     //   (nextProps.colorBy === "lbi") ||
@@ -68,13 +67,13 @@ class TreeNode extends React.Component {
     //   return (nextProps.node.coloring <= nextProps.legendBoundsMap.upper_bound[_selectedLegendItem]) &&
     //     (nextProps.node.coloring > nextProps.legendBoundsMap.lower_bound[_selectedLegendItem]);
     // }
-    //else {
-    //  return true; /* loop over all nodes is sure to remove stale mouseover state, maybe fast enough with prod react*/
+    else {
+      return true; /* loop over all nodes is sure to remove stale mouseover state, maybe fast enough with prod react*/
       /* default accessor */
       // some of the legend items don't trigger any nodes. why? mismatch capitalizations of same regions?
       // if (nextProps.node[nextProps.colorBy] !== _selectedLegendItem) { console.log(_selectedLegendItem) }
       // return nextProps.node[nextProps.colorBy] === _selectedLegendItem;
-    //}
+    }
   }
   getNodeText() {
     /*
@@ -94,7 +93,7 @@ class TreeNode extends React.Component {
       nodeText = this.props.strain;
     } else if (this.props.node.children && this.props.showBranchLabels) {
       /* this is a branch label */
-      nodeText = this.props.node.muts.join(',');
+      nodeText = this.props.node.nuc_muts;
     }
 
     return nodeText;
@@ -116,12 +115,12 @@ class TreeNode extends React.Component {
       (colorBy === "date") ||
       (colorBy === "dfreq") ||
       (colorBy === "HI_dist") ||
-      (colorBy === "cTiter")
+      (colorBy === "cHI")
     ) {
       bool = (node.coloring <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
         (node.coloring > legendBoundsMap.lower_bound[selectedLegendItem]);
     } else {
-      bool = node.attr[this.props.controls.colorBy] === this.props.selectedLegendItem;
+      bool = node[colorBy] === selectedLegendItem;
     }
     return bool;
   }
@@ -147,7 +146,7 @@ class TreeNode extends React.Component {
       inRange = this.props.dateRange.contains(
         moment(node.date.replace(/XX/g, "01"), "YYYY-MM-DD")
       );
-    } else {
+    }else{
       inRange = this.props.dateRange.contains(
         moment(node.attr.date.replace(/XX/g, "01"), "YYYY-MM-DD")
       );
@@ -185,13 +184,13 @@ class TreeNode extends React.Component {
 
       transform={
         "translate(" +
-        this.props.x +
+        this.props.xScale(this.props.node.xvalue) +
         "," +
-        this.props.y +
+        this.props.yScale(this.props.node.yvalue) +
         ")"
       }>
         <circle
-          fill={this.props.fill}
+          fill={this.props.colorScale(this.props.node.attr[this.props.colorBy])}
           r={
             this.props.node.children ?
               globals.nonTipNodeRadius :
@@ -200,17 +199,6 @@ class TreeNode extends React.Component {
     );
   }
 }
-// <text
-//   dx={this.props.hasChildren ? -6 : 6}
-//   dy={this.props.hasChildren ? -2 : 3}
-//   style={{
-//     fontFamily: "Helvetica",
-//     fontSize: 8,
-//     fontWeight: 300
-//   }}
-//   textAnchor={this.props.hasChildren ? "end" : "start"}>
-//   {this.getNodeText()}
-// </text>
 
 export default TreeNode;
 

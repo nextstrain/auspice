@@ -6,16 +6,16 @@ import { connect } from "react-redux";
 // import { FOO } from "../actions";
 // import { visualization } from "../../visualization/visualization";
 import d3 from "d3";
-import { processNodes, calcLayouts } from "../../util/processNodes";
+import { processNodes } from "../../util/processNodes";
 import * as globals from "../../util/globals";
+import moment from "moment";
+import "moment-range";
 import Nodes from "./nodes";
-
-import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 
 const returnStateNeeded = (fullStateTree) => {
   return {
     tree: fullStateTree.tree,
-    controls: fullStateTree.controls
+    controls: fullStateTree.controls,
   };
 };
 
@@ -25,9 +25,7 @@ class Tree extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      okToDraw: false,
-      value: ViewerHelper.getDefaultValue(),
-      tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
+      okToDraw: false
     };
   }
   static propTypes = {
@@ -38,7 +36,10 @@ class Tree extends React.Component {
     /* component api */
     style: React.PropTypes.object,
     controls: React.PropTypes.object,
-    tree: React.PropTypes.object
+    metadata: React.PropTypes.object,
+    tree: React.PropTypes.object,
+    sequences: React.PropTypes.object,
+    frequencies: React.PropTypes.object
   }
   componentDidMount() {
     // is it NEW data? have we drawn this tree yet? setupTree()
@@ -54,7 +55,7 @@ class Tree extends React.Component {
       return;
     }
   }
-  updateScales(nodes) {
+  updateScales(nodes, branches) {
     const xValues = nodes.map((d) => {
       return +d.xvalue;
     });
@@ -62,23 +63,19 @@ class Tree extends React.Component {
     const yValues = nodes.map((d) => {
       return +d.yvalue;
     });
-    const xScale = d3.scale.linear().range([globals.margin, globals.width - globals.margin]);
-    const yScale = d3.scale.linear().range([globals.margin, this.treePlotHeight(globals.width) - globals.margin]);
-    if (this.props.query.l === "radial") {
-      xScale.domain([-d3.max(xValues), d3.max(xValues)]);
-      yScale.domain([-d3.max(xValues), d3.max(xValues)]);
-    } else {
-      xScale.domain([0, d3.max(xValues)]);
-      yScale.domain([0, d3.max(yValues)]);
-    }
 
     this.setState({
       okToDraw: true,
       currentDatasetGuid: this.props.tree.datasetGuid,
       nodes: nodes,
+      branches: branches,
       width: globals.width,
-      xScale: xScale,
-      yScale: yScale
+      xScale: d3.scale.linear()
+                      .domain([d3.min(xValues), d3.max(xValues)])
+                      .range([globals.margin, globals.width - globals.margin]),
+      yScale: d3.scale.linear()
+                      .domain([d3.min(yValues), d3.max(yValues)])
+                      .range([globals.margin, this.treePlotHeight(globals.width) - globals.margin])
     });
   }
   setupTree() {
@@ -86,44 +83,25 @@ class Tree extends React.Component {
       .size([this.treePlotHeight(globals.width), globals.width]);
     const nodes = processNodes(tree.nodes(this.props.tree.tree));
     nodes[0].parent = nodes[0];
-    calcLayouts(nodes, ["div", "num_date"]);
-    this.updateScales(nodes);
+    const branches = tree.links(nodes);
+    this.updateScales(nodes, branches);
   }
   treePlotHeight(width) {
     return 400 + 0.30 * width;
   }
   createSvgAndNodes() {
-    // <Viewer
-    //   width={this.state.width}
-    //   height={this.treePlotHeight(this.state.width)}
-    //   value={this.state.value}
-    //   tool={this.state.tool}
-    //   onChange={this.handleChange.bind(this)}
-    //   onClick={this.handleClick.bind(this)}>
     return (
-        <svg
-          width={this.state.width}
-          height={this.treePlotHeight(this.state.width)}
-          id="treeplot">
-          <Nodes
-            query={this.props.query}
-            nodes={this.state.nodes}
-            layout={this.props.query.l}
-            distanceMeasure="div"
-            xScale={this.state.xScale}
-            yScale={this.state.yScale}/>
-        </svg>
+      <svg
+        width={this.state.width}
+        height={this.treePlotHeight(this.state.width)}
+        id="treeplot">
+        <Nodes
+          query={this.props.query}
+          nodes={this.state.nodes}
+          xScale={this.state.xScale}
+          yScale={this.state.yScale}/>
+      </svg>
     )
-  // </Viewer>
-  }
-  handleChange(event) {
-    // console.log('scaleFactor', event.scaleFactor);
-
-    this.setState({value: event.value});
-  }
-
-  handleClick(event){
-    // console.log('click', event.x, event.y, event.originalEvent);
   }
   render() {
     /*
@@ -138,6 +116,7 @@ class Tree extends React.Component {
     );
   }
 }
+
 
 
 export default Tree;

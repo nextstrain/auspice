@@ -53,13 +53,11 @@ class ChooseVirusSelect extends React.Component {
 
   render() {
     const styles = this.getStyles();
-    // the selector below resets the path by router.push({pathname:new_path})
-    // the currently selected option is passed down as this.props.selected
-    // 9/19/2016: https://facebook.github.io/react/docs/forms.html#why-select-value
     return (
+      // the selector below resets the path by router.push({pathname:new_path})
+      // the currently selected option is passed down as this.props.selected
       <select
         style={{marginRight: 20}}
-        value={this.props.selected}
         onChange={(e) => {
           if (e.target.value === this.props.title) { return }
           this.props.router.push({
@@ -70,7 +68,7 @@ class ChooseVirusSelect extends React.Component {
         {
           this.props.options.map((option, i) => {
             return (
-              <option key={i}>
+              <option key={i} selected={this.props.selected == option}>
                 {option}
               </option>
             )

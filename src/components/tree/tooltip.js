@@ -46,8 +46,8 @@ class Tooltip extends React.Component {
     //     }
     //   }
     // } else
-    if ((typeof d.muts !== "undefined") && (globals.mutType == "nuc") && (d.muts.length)) {
-      let tmp_muts = d.muts;
+    if ((typeof d.nuc_muts !== "undefined") && (globals.mutType == "nuc") && (d.nuc_muts.length)) {
+      let tmp_muts = d.nuc_muts.split(",");
       const nmuts = tmp_muts.length;
       tmp_muts = tmp_muts.slice(0, Math.min(10, nmuts));
       string += tmp_muts.join(", ");

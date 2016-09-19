@@ -34,6 +34,9 @@ class Header extends React.Component {
   }
   getStyles() {
     return {
+      base: {
+
+      },
       nextstrain: {
         fontSize: 76,
         margin: 0
@@ -43,7 +46,10 @@ class Header extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <div>
+      <div style={[
+        styles.base,
+        this.props.style
+      ]}>
         <p style={styles.nextstrain}> nextstrain </p>
         <p> Real-time tracking of {this.props.virus.name} virus evolution </p>
       </div>

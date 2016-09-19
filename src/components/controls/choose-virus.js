@@ -66,7 +66,7 @@ class ChooseVirus extends React.Component {
         // pull options from the current level of the dataset hierarchy, ignore 'default'
         const options = Object.keys(level[fields[vi]]).filter((d) => d!='default');
         selectors.push((
-          <div key={vi} style={[
+          <div style={[
             styles.base,
             this.props.style
             ]}>

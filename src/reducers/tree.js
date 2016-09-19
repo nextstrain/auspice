@@ -15,10 +15,10 @@ const Tree = (state = {
       error: null
     });
   case types.RECEIVE_TREE:
-    const tips = [];
-    gatherTips(action.data, tips);
-    const dmin = d3.min(tips.map((d) => (typeof d.attr !== "undefined")?d.attr.num_date:1900));
-    const dmax = d3.max(tips.map((d) => (typeof d.attr !== "undefined")?d.attr.num_date:2020));
+    let tips = [];
+    gatherTips(action.data, tips)
+    const dmin = d3.min(tips.map((d) => d.attr.num_date))
+    const dmax = d3.max(tips.map((d) => d.attr.num_date))
     return Object.assign({}, state, {
       loading: false,
       error: null,
