@@ -48,7 +48,7 @@
     "react-fontawesome": "^0.3.3",
     "react-redux": "^4.0.0",
     "react-svg-pan-zoom": "^1.4.0",
-    "react-router": "2.4.0",
+    "react-router": "2.6.0",
     "react-tap-event-plugin": "^0.2.1",
     "redux": "^3.0.2",
     "redux-devtools": "^2.1.5",
