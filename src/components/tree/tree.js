@@ -97,18 +97,6 @@ class Tree extends React.Component {
       <Viewer
         width={this.state.width}
         height={this.treePlotHeight(this.state.width)}
-        id="treeplot"
-      >
-        <Nodes
-          query={this.props.query}
-          nodes={this.state.nodes}
-          xScale={this.state.xScale}
-          yScale={this.state.yScale}
-          layout={this.props.query.l}
-          distanceMeasure="div"
-        />
-      </svg>
-    );
         value={this.state.value}
         tool={this.state.tool}
         onChange={this.handleChange.bind(this)}
@@ -120,6 +108,8 @@ class Tree extends React.Component {
           <Nodes
             query={this.props.query}
             nodes={this.state.nodes}
+            layout={this.props.query.l}
+            distanceMeasure="div"
             xScale={this.state.xScale}
             yScale={this.state.yScale}/>
         </svg>
