@@ -1,24 +1,24 @@
 import * as types from "../actions";
 
-const Frequencies = (state = {
+const Entropy = (state = {
   loading: false,
-  frequencies: null,
+  entropy: null,
   error: null
 }, action) => {
   switch (action.type) {
-  case types.REQUEST_FREQUENCIES:
+  case types.REQUEST_ENTROPY:
     return Object.assign({}, state, {
       loading: true,
       error: null
     });
-  case types.RECEIVE_FREQUENCIES:
+  case types.RECEIVE_ENTROPY:
+    console.log('RECEIVE_ENTROPY:',action.data);
     return Object.assign({}, state, {
       loading: false,
       error: null,
-      frequencies: action.data,
-      pivots: action.data["pivots"]
+      entropy: action.data,
     });
-  case types.FREQUENCIES_FETCH_ERROR:
+  case types.ENTROPY_FETCH_ERROR:
     return Object.assign({}, state, {
       loading: false,
       error: action.data
@@ -28,4 +28,4 @@ const Frequencies = (state = {
   }
 };
 
-export default Frequencies;
+export default Entropy;

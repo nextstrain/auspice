@@ -43,28 +43,43 @@ class Branch extends React.Component {
     return d3.scale.sqrt().domain([0, 1]).range([1, 10]);
   }
   branchPoints() {
-    // const freqScale = this.setupFreqScale();
-    // const mod = 0.5 * freqScale(d.target.frequency) - freqScale(0);
-
-    const d = this.props.datum;
     const mod = 0;
 
-    return (this.props.xscale(d.parent.xvalue) - mod).toString() +
-      "," +
-      this.props.yscale(d.parent.yvalue).toString() +
-      " " +
-      (this.props.xscale(d.parent.xvalue) - mod).toString() +
-      "," +
-      this.props.yscale(d.yvalue).toString() +
-      " " +
-      (this.props.xscale(d.xvalue)).toString() +
-      "," +
-      this.props.yscale(d.yvalue).toString();
+    if (this.props.layout==="rectangular"){
+      return 'M'+(this.props.source_x - mod).toString() +
+        " " +
+        this.props.source_y.toString() +
+        " L " +
+        (this.props.midpoint_x - mod).toString() +
+        " " +
+        this.props.midpoint_y.toString() +
+        " L " +
+        (this.props.target_x).toString() +
+        " " +
+        this.props.target_y.toString();
+    }else if (this.props.layout==="radial"){
+      var tmp_d = 'M '+(this.props.source_x).toString() +
+        "  " +
+        this.props.source_y.toString() +
+        " A " +
+        this.props.r_x.toString() +
+        " " +
+        this.props.r_y.toString() +
+        " 0 " + (this.props.smallBigArc?"1 ":"0 ") +  (this.props.leftRight?"0 ":"1 ") +
+        this.props.midpoint_x.toString() +
+        " " +
+        this.props.midpoint_y.toString() +
+        " L " +
+        this.props.target_x.toString() +
+        " " +
+        this.props.target_y.toString();
+      return tmp_d;
+    }
   }
   render() {
     return (
-      <polyline
-        points={this.branchPoints()}
+      <path
+        d={this.branchPoints()}
         onMouseEnter={() => {
           this.props.dispatch({
             type: BRANCH_MOUSEENTER,
@@ -84,7 +99,7 @@ class Branch extends React.Component {
           strokeLinejoin: "round",
           fill: "none",
           cursor: "pointer"
-        }}></polyline>
+        }}></path>
     );
   }
 }
