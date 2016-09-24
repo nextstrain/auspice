@@ -57,6 +57,7 @@ class ChooseLayout extends React.Component {
     };
   }
   componentDidMount() {
+    // Richard move to algo that checks for url validity
     if (!this.props.location.query.l) {
       this.setLayoutQueryParam("rectangular")
     }

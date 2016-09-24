@@ -40,21 +40,48 @@ class Tree extends React.Component {
     controls: React.PropTypes.object,
     tree: React.PropTypes.object
   }
-  componentDidMount() {
-    // is it NEW data? have we drawn this tree yet? setupTree()
+  componentWillMount() {
     if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
-      this.setupTree();
-      return;
+      const nodes = this.setupTree();
+      const scales = this.updateScales(nodes);
+      this.setState({
+        okToDraw: true,
+        currentDatasetGuid: this.props.tree.datasetGuid,
+        nodes: nodes,
+        width: globals.width,
+        xScale: scales.xScale,
+        yScale: scales.yScale
+      });
     }
   }
-  componentDidUpdate() {
+  componentWillReceiveProps(nextProps) {
     // is it NEW data? have we drawn this tree yet? setupTree()
+    console.log('will receive props in tree', this.state.currentDatasetGuid, this.props.tree.datasetGuid, this.props)
     if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
-      this.setupTree();
+      const nodes = this.setupTree();
+      const scales = this.updateScales(nodes, nextProps.query.l);
+      this.setState({
+        okToDraw: true,
+        currentDatasetGuid: this.props.tree.datasetGuid,
+        nodes: nodes,
+        width: globals.width,
+        xScale: scales.xScale,
+        yScale: scales.yScale
+      });
       return;
+    } else if (nextProps.query.l !== this.props.query.l) {
+      const scales = this.updateScales(this.state.nodes, nextProps.query.l);
+      this.setState({
+        xScale: scales.xScale,
+        yScale: scales.yScale
+      });
     }
   }
-  updateScales(nodes) {
+  updateScales(nodes, layout) {
+    if (!layout) {
+      const layout = "rectangular";
+    }
+
     const xValues = nodes.map((d) => {
       return +d.xvalue;
     });
@@ -62,9 +89,15 @@ class Tree extends React.Component {
     const yValues = nodes.map((d) => {
       return +d.yvalue;
     });
+
     const xScale = d3.scale.linear().range([globals.margin, globals.width - globals.margin]);
-    const yScale = d3.scale.linear().range([globals.margin, this.treePlotHeight(globals.width) - globals.margin]);
-    if (this.props.query.l === "radial") {
+    const yScale = d3.scale.linear().range([
+      globals.margin,
+      this.treePlotHeight(globals.width) - globals.margin
+    ]);
+
+    console.log(layout)
+    if (layout === "radial") {
       xScale.domain([-d3.max(xValues), d3.max(xValues)]);
       yScale.domain([-d3.max(xValues), d3.max(xValues)]);
     } else {
@@ -72,14 +105,11 @@ class Tree extends React.Component {
       yScale.domain([0, d3.max(yValues)]);
     }
 
-    this.setState({
-      okToDraw: true,
-      currentDatasetGuid: this.props.tree.datasetGuid,
-      nodes: nodes,
-      width: globals.width,
-      xScale: xScale,
-      yScale: yScale
-    });
+    return {
+      xScale,
+      yScale
+    };
+
   }
   setupTree() {
     const tree = d3.layout.tree()
@@ -87,7 +117,7 @@ class Tree extends React.Component {
     const nodes = processNodes(tree.nodes(this.props.tree.tree));
     nodes[0].parent = nodes[0];
     calcLayouts(nodes, ["div", "num_date"]);
-    this.updateScales(nodes);
+    return nodes;
   }
   treePlotHeight(width) {
     return 400 + 0.30 * width;
@@ -131,6 +161,7 @@ class Tree extends React.Component {
       2. otherwise if we just rescaled, run updatescales,
       3. otherwise just have components rerender because for instance colorby changed
     */
+    console.log('tree', this.props)
     return (
       <div>
         {this.state.okToDraw ? this.createSvgAndNodes() : "We don't have tree data yet [spinner]"}
