@@ -31,10 +31,10 @@ const vsDateLayout = (node, distanceMeasure) => {
            };
 };
 
-const radialLayout = (node, distanceMeasure, nTips) => {
+const radialLayout = (node, distanceMeasure, nTips, rootVal) => {
     const circleFraction = 0.95;
-    const radius = (distanceMeasure=='div')?node.xvalue:node.attr[distanceMeasure];
-    const parentRadius = (distanceMeasure=='div')?node.parent.xvalue:node.parent.attr[distanceMeasure];
+    const radius = (distanceMeasure=='div')?node.xvalue:(node.attr[distanceMeasure]-rootVal);
+    const parentRadius = (distanceMeasure=='div')?node.parent.xvalue:(node.parent.attr[distanceMeasure]-rootVal);
     const angle = circleFraction*2.0*Math.PI*node.yvalue/nTips;
     const parentAngle = circleFraction*2.0*Math.PI*node.parent.yvalue/nTips;
     const leftRight = node.yvalue>node.parent.yvalue;
@@ -62,9 +62,10 @@ export const calcLayouts = (nodes, distanceMeasures, nTips) => {
     nodes.forEach( (node, ni) => {
         node.geometry = {};
         distanceMeasures.forEach((distanceMeasure, di) => {
+            const rootVal = (distanceMeasure === "div") ? nodes[0].xvalue : nodes[0].attr[distanceMeasure];
             node.geometry[distanceMeasure]={};
             node.geometry[distanceMeasure]['rectangular'] = rectangularLayout(node, distanceMeasure);
-            node.geometry[distanceMeasure]['radial'] = radialLayout(node, distanceMeasure, nTips);
+            node.geometry[distanceMeasure]['radial'] = radialLayout(node, distanceMeasure, nTips, rootVal);
             node.geometry[distanceMeasure]['vsDate'] = vsDateLayout(node, distanceMeasure);
         });
     });
