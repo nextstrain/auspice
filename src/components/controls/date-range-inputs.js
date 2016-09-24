@@ -4,9 +4,9 @@ import Radium from "radium";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
-import { withRouter } from "react-router";
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
+import queryString from "query-string";
 import _ from 'lodash';
 
 import Slider from './slider';
@@ -40,14 +40,20 @@ class DateRangeInputs extends React.Component {
     };
   }
 
-  // called after either <DatePicker /> changes
+  setDateQueryParam(newRange) {
+    const tmp_path = this.props.location.pathname
+    const prefix = (tmp_path===""||tmp_path[0]==="/")?"":"/";
+    const suffix= (tmp_path.length&&tmp_path[tmp_path.length-1]!=="/")?"/?":"?"
 
-  createQueryParams(newRange) {
-    return Object.assign({}, this.props.location.query, {
-      dmin: newRange.min,
-      dmax: newRange.max
-    });
+    const newQuery = Object.assign({}, this.props.location.query, {dmin: newRange.min, dmax:newRange.max});
+    // https://www.npmjs.com/package/query-string
+    const url = prefix + this.props.location.pathname + suffix + queryString.stringify(newQuery);
+    console.log("setDateQueryParam", url, this.props.location.pathname,prefix);
+    window.history.pushState({}, '', url);
+    this.props.changeRoute(this.props.location.pathname, newQuery);
   }
+
+
   updateDateRange(ref, m) {
     let newRange;
     if (ref === 'date_min') {
@@ -55,21 +61,13 @@ class DateRangeInputs extends React.Component {
     } else {
       newRange = { min: this.props.location.query.dmin || moment().subtract(12, "years").valueOf(), max: m.valueOf() };
     }
-    this.props.router.push({
-      pathname: this.props.pathname,
-      query: this.createQueryParams(newRange)
-    });
+    this.setDateQueryParam(newRange);
   }
   updateSlider(values) {
     // {values} is an array of unix timestamps
     // [timestampStart, timestampEnd]
     const newRange = {min: values[0], max: values[1]};
-    // set url
-
-    this.props.router.push({
-      pathname: this.props.location.pathname,
-      query: this.createQueryParams(newRange)
-    });
+    this.setDateQueryParam(newRange);
   }
   render() {
     /*
@@ -142,7 +140,7 @@ class DateRangeInputs extends React.Component {
   }
 }
 
-export default withRouter(DateRangeInputs);
+export default DateRangeInputs;
 
 /*********************************
 **********************************
