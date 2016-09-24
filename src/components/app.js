@@ -71,29 +71,32 @@ class App extends React.Component {
     this.maybeFetchDataset();
   }
   maybeFetchDataset() {
-    // Richard please take a look at the necessity for this second check adding "/", seems to require it.
-    if (this.state.latestValidParams === this.state.location.pathname ||  this.state.latestValidParams === this.state.location.pathname + "/") {
+    if (this.state.latestValidParams === this.state.location.pathname) {
       return;
     }
 
     const parsedParams = parseParams(this.state.location.pathname);
-    // this.setState({'dataset':parsedParams['dataset'], 'item':parsedParams['item']});
     const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);
     tmp_levels.sort((x, y) => x[0] > y[0]);
     const data_path = tmp_levels.map( function (d) {return d[1];}).join("_");
     if (parsedParams.incomplete) {
-      const prefix = (parsedParams.fullsplat[0] === "/") ? "" : "/";
-      // Richard take a look - this doesn't work as it should (ie., if incomplete), check parseParams function?
-      window.history.pushState({}, '', prefix+parsedParams.fullsplat)
-      // call changeRoute function
+        this.setVirusPath(parsedParams.fullsplat);
     }
     if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
+      console.log("attempting to load",data_path);
       this.props.dispatch(populateMetadataStore(data_path));
       this.props.dispatch(populateTreeStore(data_path));
       this.props.dispatch(populateSequencesStore(data_path));
       this.props.dispatch(populateFrequenciesStore(data_path));
       this.setState({latestValidParams: parsedParams.fullsplat});
     }
+  }
+  setVirusPath(newPath) {
+    const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
+    const suffix = (newPath.length && newPath[newPath.length-1] !== "/") ? "/?" : "?";
+    const url = prefix + newPath + suffix + queryString.stringify(this.state.location.query);
+    window.history.pushState({}, "", url);
+    this.changeRoute(newPath, this.state.location.query);
   }
   changeRoute(pathname, query) {
     this.setState({

@@ -46,14 +46,6 @@ class ChooseVirus extends React.Component {
     };
   }
 
-  setVirusPath(newPath) {
-    const prefix = (newPath===""||newPath[0]==="/")?"":"/";
-    const suffix= (newPath.length&&newPath[newPath.length-1]!=="/")?"/?":"?"
-    const url = prefix + newPath + suffix + queryString.stringify(this.props.location.query);
-    console.log("setVirusPath", url);
-    window.history.pushState({}, '', url);
-    this.props.changeRoute(newPath, this.props.location.query);
-  }
 
   render() {
     const styles = this.getStyles();
@@ -68,10 +60,6 @@ class ChooseVirus extends React.Component {
     const fields = Object.keys(paramFields).sort( (a,b) => paramFields[a][0]>paramFields[b][0]);
     // the current choices: [flu, h3n2, 3y]
     const choices = fields.map((d) => paramFields[d][1]);
-    console.log("virus-selected render",params);
-    if (params.incomplete){
-      this.setVirusPath(params.fullsplat);
-    }
     // make a selector for each of the fields
     let selectors = [];   // list to contain the different data set selectors
     let level = datasets; // pointer used to move through the hierarchy -- currently at the top level of datasets

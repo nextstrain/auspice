@@ -45,20 +45,18 @@ class ChooseVirusSelect extends React.Component {
   // assembles a new path from the upstream choices and the new selection
   // downstream choices will be set to defaults in parseParams
   createPath(e) {
-    let p = (this.props.choice_tree.length>0)?'/':'';
-    p+=this.props.choice_tree.join('/') +'/'+ e.target.value;
+    let p = (this.props.choice_tree.length > 0) ? "/" : "";
+    p += this.props.choice_tree.join("/") +"/"+ e.target.value;
     return p;
   }
 
   setVirusPath(newPath) {
-    const prefix = (newPath===""||newPath[0]==="/")?"":"/";
-    const suffix= (newPath.length&&newPath[newPath.length-1]!=="/")?"/?":"?"
+    const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
+    const suffix = (newPath.length && newPath[newPath.length-1] !== "/") ? "/?" : "?";
     const url = prefix + newPath + suffix + queryString.stringify(this.props.location.query);
-    console.log("setVirusPath", url);
-    window.history.pushState({}, '', url);
+    window.history.pushState({}, "", url);
     this.props.changeRoute(newPath, this.props.location.query);
   }
-
 
   render() {
     const styles = this.getStyles();
