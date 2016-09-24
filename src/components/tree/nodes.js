@@ -83,8 +83,8 @@ class Nodes extends React.Component {
     const nodeComponents = nodes.map((node, index) => {
       return (
         <VictoryAnimation duration={1000} key={index} data={{
-          x: this.xVal(node, this.props.query.m, this.props.query.l),
-          y: this.yVal(node, this.props.query.m, this.props.query.l)
+          x: this.xVal(node, this.props.distanceMeasure, this.props.layout),
+          y: this.yVal(node, this.props.distanceMeasure, this.props.layout)
         }}>
         {(props) => {
           return (
@@ -110,17 +110,16 @@ class Nodes extends React.Component {
     const branchComponents = nodes.map((node, index) => {
       return (
         <VictoryAnimation duration={1000} key={index} data={{
-            target_x:   this.xVal(node, this.props.query.m, this.props.query.l),
-            target_y:   this.yVal(node, this.props.query.m, this.props.query.l),
-            midpoint_x: this.xMidpoint(node, this.props.query.m, this.props.query.l),
-            midpoint_y: this.yMidpoint(node, this.props.query.m, this.props.query.l),
-            source_x:   this.xVal(node.parent, this.props.query.m, this.props.query.l),
-            source_y:   this.yVal(node.parent, this.props.query.m, this.props.query.l),
-            r_x: this.r_x(node, this.props.query.m, this.props.query.l),
-            r_y: this.r_y(node, this.props.query.m, this.props.query.l),
-            smallBigArc: this.smallBigArc(node, this.props.query.m, this.props.query.l),
-            leftRight: this.leftRight(node, this.props.query.m, this.props.query.l),
-            layout: this.props.query.l
+            target_x:   this.xVal(node, this.props.distanceMeasure, this.props.layout),
+            target_y:   this.yVal(node, this.props.distanceMeasure, this.props.layout),
+            midpoint_x: this.xMidpoint(node, this.props.distanceMeasure, this.props.layout),
+            midpoint_y: this.yMidpoint(node, this.props.distanceMeasure, this.props.layout),
+            source_x:   this.xVal(node.parent, this.props.distanceMeasure, this.props.layout),
+            source_y:   this.yVal(node.parent, this.props.distanceMeasure, this.props.layout),
+            r_x: this.r_x(node, this.props.distanceMeasure, this.props.layout),
+            r_y: this.r_y(node, this.props.distanceMeasure, this.props.layout),
+            smallBigArc: this.smallBigArc(node, this.props.distanceMeasure, this.props.layout),
+            leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.layout),
         }}>
         {(props) => {
           return (
