@@ -54,6 +54,8 @@ class App extends React.Component {
   }
   componentDidMount() {
     console.log('registering')
+    // when the user hits the back button or forward, let us know so we can setstate again
+    // all of the other intentional route changes we will manually setState
     window.addEventListener('popstate', (a,b,c) => {
       console.log('popstate', a,b,c)
       this.setState({
@@ -83,6 +85,7 @@ class App extends React.Component {
       const prefix = (parsedParams.fullsplat[0] === "/") ? "" : "/";
       // Richard take a look - this doesn't work as it should (ie., if incomplete), check parseParams function?
       window.history.pushState({}, '', prefix+parsedParams.fullsplat)
+      // call changeRoute function
     }
     if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
       this.props.dispatch(populateMetadataStore(data_path));

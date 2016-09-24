@@ -6,7 +6,6 @@ import Flex from "../framework/flex";
 // import { FOO } from "../actions";
 import RectangleTreeLayout from "../framework/svg-tree-layout-rectangle";
 import RadialTreeLayout from "../framework/svg-tree-layout-radial";
-import { withRouter } from "react-router";
 import queryString from "query-string";
 
 // @connect(state => {
@@ -65,6 +64,7 @@ class ChooseLayout extends React.Component {
 
   setLayoutQueryParam(title) {
     const newQuery = Object.assign({}, this.props.location.query, {l: title});
+    // https://www.npmjs.com/package/query-string
     const url = "/" + this.props.location.pathname + "/?" + queryString.stringify(newQuery);
     window.history.pushState({}, '', url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
@@ -92,4 +92,4 @@ class ChooseLayout extends React.Component {
   }
 }
 
-export default withRouter(ChooseLayout);
+export default ChooseLayout;
