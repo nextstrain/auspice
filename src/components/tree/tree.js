@@ -59,7 +59,7 @@ class Tree extends React.Component {
     console.log('will receive props in tree', this.state.currentDatasetGuid, this.props.tree.datasetGuid, this.props)
     if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
       const nodes = this.setupTree();
-      const scales = this.updateScales(nodes, nextProps.query.l);
+      const scales = this.updateScales(nodes, nextProps.query.l, nextProps.query.m);
       this.setState({
         okToDraw: true,
         currentDatasetGuid: this.props.tree.datasetGuid,
@@ -69,26 +69,31 @@ class Tree extends React.Component {
         yScale: scales.yScale
       });
       return;
-    } else if (this.state.currentDatasetGuid && nextProps.query.l !== this.props.query.l) {
-      const scales = this.updateScales(this.state.nodes, nextProps.query.l);
+    } else if (this.state.currentDatasetGuid
+              && (nextProps.query.l !== this.props.query.l
+                  || nextProps.query.m !== this.props.query.m) ) {
+      const scales = this.updateScales(this.state.nodes, nextProps.query.l, nextProps.query.m);
       this.setState({
         xScale: scales.xScale,
         yScale: scales.yScale
       });
     }
   }
-  updateScales(nodes, layout) {
+  updateScales(nodes, layout, distanceMeasure) {
     if (!layout) {
       const layout = "rectangular";
     }
-
-    const xValues = nodes.map((d) => {
-      return +d.xvalue;
+    if (!distanceMeasure) {
+      const layout = "div";
+    }
+    const xValues = nodes.map((node) => {
+      return +node.geometry[distanceMeasure][layout].xVal;
     });
 
-    const yValues = nodes.map((d) => {
-      return +d.yvalue;
+    const yValues = nodes.map((node) => {
+      return +node.geometry[distanceMeasure][layout].yVal;
     });
+    console.log("making scales", layout, distanceMeasure, xValues, yValues);
 
     const xScale = d3.scale.linear().range([globals.margin, globals.width - globals.margin]);
     const yScale = d3.scale.linear().range([
@@ -101,8 +106,8 @@ class Tree extends React.Component {
       xScale.domain([-d3.max(xValues), d3.max(xValues)]);
       yScale.domain([-d3.max(xValues), d3.max(xValues)]);
     } else {
-      xScale.domain([0, d3.max(xValues)]);
-      yScale.domain([0, d3.max(yValues)]);
+      xScale.domain([d3.min(xValues), d3.max(xValues)]);
+      yScale.domain([d3.min(yValues), d3.max(yValues)]);
     }
 
     return {
@@ -139,7 +144,7 @@ class Tree extends React.Component {
             query={this.props.query}
             nodes={this.state.nodes}
             layout={this.props.query.l}
-            distanceMeasure="div"
+            distanceMeasure={this.props.query.m}
             xScale={this.state.xScale}
             yScale={this.state.yScale}/>
         </svg>

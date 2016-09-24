@@ -20,7 +20,6 @@ import Entropy from "./charts/entropy";
 import Tree from "./tree/tree";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
-import { withRouter } from "react-router";
 import queryString from "query-string";
 
 @connect()
@@ -93,7 +92,7 @@ class App extends React.Component {
   }
   setVirusPath(newPath) {
     const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
-    const suffix = (newPath.length && newPath[newPath.length-1] !== "/") ? "/?" : "?";
+    const suffix = (newPath.length && newPath[newPath.length - 1] !== "/") ? "/?" : "?";
     const url = prefix + newPath + suffix + queryString.stringify(this.state.location.query);
     window.history.pushState({}, "", url);
     this.changeRoute(newPath, this.state.location.query);
@@ -129,4 +128,4 @@ class App extends React.Component {
   }
 }
 
-export default withRouter(App);
+export default App;
