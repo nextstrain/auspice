@@ -21,6 +21,7 @@ import Tree from "./tree/tree";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
 import { withRouter } from "react-router";
+import queryString from "query-string";
 
 @connect()
 @Radium
@@ -28,7 +29,11 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      sidebarOpen: false
+      sidebarOpen: false,
+      location: {
+        pathname: window.location.pathname.slice(1, -1),
+        query: queryString.parse(window.location.search)
+      }
       // sidebarDocked: true,
     };
   }
@@ -54,18 +59,20 @@ class App extends React.Component {
     this.maybeFetchDataset();
   }
   maybeFetchDataset() {
-    if (this.state.latestValidParams === this.props.params.splat) {
+    // Richard please take a look at the necessity for this second check adding "/", seems to require it.
+    if (this.state.latestValidParams === this.state.location.pathname ||  this.state.latestValidParams === this.state.location.pathname + "/") {
       return;
     }
 
-    const parsedParams = parseParams(this.props.params.splat);
+    const parsedParams = parseParams(this.state.location.pathname);
     // this.setState({'dataset':parsedParams['dataset'], 'item':parsedParams['item']});
     const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);
     tmp_levels.sort((x, y) => x[0] > y[0]);
     const data_path = tmp_levels.map( function (d) {return d[1];}).join("_");
     if (parsedParams.incomplete) {
       const prefix = (parsedParams.fullsplat[0] === "/") ? "" : "/";
-      this.props.router.push({pathname:prefix+parsedParams.fullsplat});
+      // Richard take a look - this doesn't work as it should (ie., if incomplete), check parseParams function?
+      window.history.pushState({}, '', prefix+parsedParams.fullsplat)
     }
     if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
       this.props.dispatch(populateMetadataStore(data_path));
