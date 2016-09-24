@@ -1,10 +1,10 @@
 import React from "react";
 import Radium from "radium";
+import queryString from "query-string";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
-import { withRouter } from 'react-router';
 
 // @connect(state => {
 //   return state.FOO;
@@ -29,8 +29,7 @@ class ChooseVirusSelect extends React.Component {
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
-    // foo: React.PropTypes.string
+    style: React.PropTypes.object
   }
   static defaultProps = {
     // foo: "bar"
@@ -51,6 +50,16 @@ class ChooseVirusSelect extends React.Component {
     return p;
   }
 
+  setVirusPath(newPath) {
+    const prefix = (newPath===""||newPath[0]==="/")?"":"/";
+    const suffix= (newPath.length&&newPath[newPath.length-1]!=="/")?"/?":"?"
+    const url = prefix + newPath + suffix + queryString.stringify(this.props.location.query);
+    console.log("setVirusPath", url);
+    window.history.pushState({}, '', url);
+    this.props.changeRoute(newPath, this.props.location.query);
+  }
+
+
   render() {
     const styles = this.getStyles();
     // the selector below resets the path by router.push({pathname:new_path})
@@ -62,9 +71,7 @@ class ChooseVirusSelect extends React.Component {
         value={this.props.selected}
         onChange={(e) => {
           if (e.target.value === this.props.title) { return }
-          this.props.router.push({
-            pathname:this.createPath(e)
-          })
+            this.setVirusPath(this.createPath(e));
         }}>
         <option key={"titleOption"}> {this.props.title} </option>
         {
@@ -82,4 +89,4 @@ class ChooseVirusSelect extends React.Component {
 }
 
 // export witht the "power" to reset the route
-export default withRouter(ChooseVirusSelect);
+export default ChooseVirusSelect;

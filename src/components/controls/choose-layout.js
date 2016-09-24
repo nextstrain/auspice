@@ -1,7 +1,7 @@
 import React from "react";
 import Radium from "radium";
 // import _ from "lodash";
-import Flex from "../framework/flex";
+//import Flex from "../framework/flex";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
 import RectangleTreeLayout from "../framework/svg-tree-layout-rectangle";
@@ -59,14 +59,19 @@ class ChooseLayout extends React.Component {
   componentDidMount() {
     // Richard move to algo that checks for url validity
     if (!this.props.location.query.l) {
-      this.setLayoutQueryParam("rectangular")
+      this.setLayoutQueryParam("rectangular");
     }
   }
 
   setLayoutQueryParam(title) {
+    const tmp_path = this.props.location.pathname
+    const prefix = (tmp_path===""||tmp_path[0]==="/")?"":"/";
+    const suffix= (tmp_path.length&&tmp_path[tmp_path.length-1]!=="/")?"/?":"?"
+
     const newQuery = Object.assign({}, this.props.location.query, {l: title});
     // https://www.npmjs.com/package/query-string
-    const url = "/" + this.props.location.pathname + "/?" + queryString.stringify(newQuery);
+    const url = prefix + this.props.location.pathname + suffix + queryString.stringify(newQuery);
+    console.log("setLayoutQueryParam", url, this.props.location.pathname,prefix);
     window.history.pushState({}, '', url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
   }

@@ -69,7 +69,7 @@ class Tree extends React.Component {
         yScale: scales.yScale
       });
       return;
-    } else if (nextProps.query.l !== this.props.query.l) {
+    } else if (this.state.currentDatasetGuid && nextProps.query.l !== this.props.query.l) {
       const scales = this.updateScales(this.state.nodes, nextProps.query.l);
       this.setState({
         xScale: scales.xScale,

@@ -7,6 +7,7 @@ import Radium from "radium";
 import { datasets } from "../../util/globals";
 import ChooseVirusSelect from "./choose-virus-select";
 import parseParams from "../../util/parseParams";
+import queryString from "query-string";
 
 // @connect(state => {
 //   return state.FOO;
@@ -45,6 +46,15 @@ class ChooseVirus extends React.Component {
     };
   }
 
+  setVirusPath(newPath) {
+    const prefix = (newPath===""||newPath[0]==="/")?"":"/";
+    const suffix= (newPath.length&&newPath[newPath.length-1]!=="/")?"/?":"?"
+    const url = prefix + newPath + suffix + queryString.stringify(this.props.location.query);
+    console.log("setVirusPath", url);
+    window.history.pushState({}, '', url);
+    this.props.changeRoute(newPath, this.props.location.query);
+  }
+
   render() {
     const styles = this.getStyles();
 
@@ -52,25 +62,30 @@ class ChooseVirus extends React.Component {
     let tmppath = (this.props.location.pathname[0]=='/')?this.props.location.pathname.substring(1):this.props.location.pathname;
     tmppath = (tmppath[tmppath.length-1]=='/')?tmppath.substring(0,tmppath.length-1):tmppath;
     // analyse the current route in order to adjust the dataset selection choices
-    const parsedParams = parseParams(tmppath)['dataset']
+    const params = parseParams(tmppath);
+    const paramFields = params.dataset;
     // names of the different selectors in the current hierarchy: [virus, lineage, duration]
-    const fields = Object.keys(parsedParams).sort( (a,b) => parsedParams[a][0]>parsedParams[b][0]);
+    const fields = Object.keys(paramFields).sort( (a,b) => paramFields[a][0]>paramFields[b][0]);
     // the current choices: [flu, h3n2, 3y]
-    const choices = fields.map((d) => parsedParams[d][1]);
-
+    const choices = fields.map((d) => paramFields[d][1]);
+    console.log("virus-selected render",params);
+    if (params.incomplete){
+      this.setVirusPath(params.fullsplat);
+    }
     // make a selector for each of the fields
     let selectors = [];   // list to contain the different data set selectors
     let level = datasets; // pointer used to move through the hierarchy -- currently at the top level of datasets
     for (let vi=0; vi<fields.length; vi++){
       if (choices[vi]){
         // pull options from the current level of the dataset hierarchy, ignore 'default'
-        const options = Object.keys(level[fields[vi]]).filter((d) => d!='default');
+        const options = Object.keys(level[fields[vi]]).filter((d) => d!=="default");
         selectors.push((
           <div key={vi} style={[
             styles.base,
             this.props.style
             ]}>
             <ChooseVirusSelect
+              {...this.props}
               title={"Choose "+fields[vi]}
               query={this.props.query}
               choice_tree={choices.slice(0,vi)}
