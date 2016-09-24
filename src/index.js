@@ -53,15 +53,16 @@ class Root extends React.Component {
     return (
       <div>
         <Provider store={store}>
-          <Router history={browserHistory}>
-            <Route path="/*" component={App}/>
-
-          </Router>
+          <App/>
         </Provider>
       </div>
     );
   }
 }
+// <Router history={browserHistory}>
+//   <Route path="/*" component={App}/>
+//
+// </Router>
 // <Route path="/:l1" component={App}/>
 // <Route path="/:l1/:l2" component={App}/>
 // <Route path="/:l1/:l2/:l3" component={App}/>

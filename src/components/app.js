@@ -96,8 +96,8 @@ class App extends React.Component {
           alignItems="flex-start"
           justifyContent="space-between"
         >
-          <Controls {...this.props}/>
-          <Tree {...this.props.location}/>
+          <Controls location={this.state.location}/>
+          <Tree query={this.state.location.query}/>
           <Frequencies/>
           <Entropy/>
         </Flex>
