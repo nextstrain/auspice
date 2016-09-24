@@ -56,12 +56,12 @@ class App extends React.Component {
     console.log('registering')
     window.addEventListener('popstate', (a,b,c) => {
       console.log('popstate', a,b,c)
-      // this.setState({
-      //   location: {
-      //     pathname: window.location.pathname.slice(1, -1),
-      //     query: queryString.parse(window.location.search)
-      //   }
-      // })
+      this.setState({
+        location: {
+          pathname: window.location.pathname.slice(1, -1),
+          query: queryString.parse(window.location.search)
+        }
+      })
     })
     this.maybeFetchDataset();
   }
@@ -92,11 +92,17 @@ class App extends React.Component {
       this.setState({latestValidParams: parsedParams.fullsplat});
     }
   }
+  changeRoute(pathname, query) {
+    this.setState({
+      location: {
+        pathname,
+        query
+      }
+    });
+  }
   render() {
     return (
-      <div style={{
-          margin: "0px 20px"
-        }}>
+      <div style={{margin: "0px 20px"}}>
         <Header/>
         <Flex
           style={{
@@ -106,7 +112,7 @@ class App extends React.Component {
           alignItems="flex-start"
           justifyContent="space-between"
         >
-          <Controls location={this.state.location}/>
+          <Controls changeRoute={this.changeRoute.bind(this)} location={this.state.location}/>
           <Tree query={this.state.location.query}/>
           <Frequencies/>
           <Entropy/>
