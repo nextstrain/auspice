@@ -67,6 +67,7 @@ class ChooseLayout extends React.Component {
     const newQuery = Object.assign({}, this.props.location.query, {l: title});
     const url = "/" + this.props.location.pathname + "/?" + queryString.stringify(newQuery);
     window.history.pushState({}, '', url);
+    // setState here.
   }
   render() {
     const styles = this.getStyles();

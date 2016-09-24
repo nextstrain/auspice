@@ -53,6 +53,16 @@ class App extends React.Component {
 
   }
   componentDidMount() {
+    console.log('registering')
+    window.addEventListener('popstate', (a,b,c) => {
+      console.log('popstate', a,b,c)
+      // this.setState({
+      //   location: {
+      //     pathname: window.location.pathname.slice(1, -1),
+      //     query: queryString.parse(window.location.search)
+      //   }
+      // })
+    })
     this.maybeFetchDataset();
   }
   componentDidUpdate() {
