@@ -54,10 +54,14 @@ class Tree extends React.Component {
       });
     }
   }
+
   componentWillReceiveProps(nextProps) {
     // is it NEW data? have we drawn this tree yet? setupTree()
     console.log('will receive props in tree', this.state.currentDatasetGuid, this.props.tree.datasetGuid, this.props)
-    if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
+    if (!this.props.tree.datasetGuid){
+      console.log("no data yet");
+      this.setState({okToDraw: false});
+    } else if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
       const nodes = this.setupTree();
       const scales = this.updateScales(nodes, nextProps.query.l, nextProps.query.m);
       this.setState({
@@ -79,13 +83,12 @@ class Tree extends React.Component {
       });
     }
   }
-  updateScales(nodes, layout, distanceMeasure) {
-    if (!layout) {
-      const layout = "rectangular";
-    }
-    if (!distanceMeasure) {
-      const layout = "div";
-    }
+
+  updateScales(nodes, layout_in, distanceMeasure_in) {
+    const layout = (layout_in)?layout_in:"rectangular";
+    const distanceMeasure = (distanceMeasure_in)?distanceMeasure_in:"div";
+    console.log("Making scales:",layout, distanceMeasure);
+
     const xValues = nodes.map((node) => {
       return +node.geometry[distanceMeasure][layout].xVal;
     });
@@ -93,7 +96,6 @@ class Tree extends React.Component {
     const yValues = nodes.map((node) => {
       return +node.geometry[distanceMeasure][layout].yVal;
     });
-    console.log("making scales", layout, distanceMeasure, xValues, yValues);
 
     const xScale = d3.scale.linear().range([globals.margin, globals.width - globals.margin]);
     const yScale = d3.scale.linear().range([
@@ -101,7 +103,6 @@ class Tree extends React.Component {
       this.treePlotHeight(globals.width) - globals.margin
     ]);
 
-    console.log(layout)
     if (layout === "radial") {
       xScale.domain([-d3.max(xValues), d3.max(xValues)]);
       yScale.domain([-d3.max(xValues), d3.max(xValues)]);
@@ -116,6 +117,7 @@ class Tree extends React.Component {
     };
 
   }
+
   setupTree() {
     const tree = d3.layout.tree()
       .size([this.treePlotHeight(globals.width), globals.width]);
@@ -124,9 +126,11 @@ class Tree extends React.Component {
     calcLayouts(nodes, ["div", "num_date"]);
     return nodes;
   }
+
   treePlotHeight(width) {
     return 400 + 0.30 * width;
   }
+
   createSvgAndNodes() {
     // <Viewer
     //   width={this.state.width}
@@ -143,8 +147,8 @@ class Tree extends React.Component {
           <Nodes
             query={this.props.query}
             nodes={this.state.nodes}
-            layout={this.props.query.l}
-            distanceMeasure={this.props.query.m}
+            layout={(this.props.query.l)?this.props.query.l:"rectangular"}
+            distanceMeasure={(this.props.query.m)?this.props.query.m:"div"}
             xScale={this.state.xScale}
             yScale={this.state.yScale}/>
         </svg>

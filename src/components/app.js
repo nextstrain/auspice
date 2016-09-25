@@ -82,12 +82,11 @@ class App extends React.Component {
         this.setVirusPath(parsedParams.fullsplat);
     }
     if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
-      console.log("attempting to load",data_path);
+      console.log("attempting to load, need to nuke old Guid",data_path);
       this.props.dispatch(populateMetadataStore(data_path));
       this.props.dispatch(populateTreeStore(data_path));
       this.props.dispatch(populateSequencesStore(data_path));
       this.props.dispatch(populateFrequenciesStore(data_path));
-      this.setState({latestValidParams: parsedParams.fullsplat});
     }
   }
   setVirusPath(newPath) {
