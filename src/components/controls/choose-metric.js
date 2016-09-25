@@ -4,6 +4,11 @@ import queryString from "query-string";
 import TimeTree from "../framework/svg-time-tree";
 import MutationTree from "../framework/svg-mutation-tree";
 
+
+/*
+ * implements a pair of buttons the toggle between timetree and divergence tree
+ * copied from chose-layout
+ */
 @Radium
 class ChooseMetric extends React.Component {
   constructor(props) {
@@ -17,7 +22,7 @@ class ChooseMetric extends React.Component {
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
+    style: React.PropTypes.object
     // foo: React.PropTypes.string
   }
   static defaultProps = {
@@ -58,14 +63,14 @@ class ChooseMetric extends React.Component {
 
   setMetricQueryParam(title) {
     const tmp_path = this.props.location.pathname;
-    const prefix = (tmp_path === "" || tmp_path[0] === "/" ) ? "" : "/";
-    const suffix= (tmp_path.length && tmp_path[tmp_path.length-1] !== "/" ) ? "/?" : "?";
+    const prefix = (tmp_path === "" || tmp_path[0] === "/") ? "" : "/";
+    const suffix = (tmp_path.length && tmp_path[tmp_path.length - 1] !== "/") ? "/?" : "?";
 
     const newQuery = Object.assign({}, this.props.location.query, {m: title});
     // https://www.npmjs.com/package/query-string
     const url = prefix + this.props.location.pathname + suffix + queryString.stringify(newQuery);
-    console.log("setMetricQueryParam", url, this.props.location.pathname,prefix);
-    window.history.pushState({}, '', url);
+    console.log("setMetricQueryParam", url, this.props.location.pathname, prefix);
+    window.history.pushState({}, "", url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
   }
 
@@ -76,14 +81,16 @@ class ChooseMetric extends React.Component {
         <button
           key={1}
           style={styles.button}
-          onClick={() => { this.setMetricQueryParam("div"); }}>
+          onClick={() => { this.setMetricQueryParam("div"); }}
+        >
           <MutationTree width={25} stroke="rgb(130,130,130)"/>
           <span style={styles.title}> {"div"} </span>
         </button>
         <button
           key={2}
           style={styles.button}
-          onClick={() => { this.setMetricQueryParam("num_date"); }}>
+          onClick={() => { this.setMetricQueryParam("num_date"); }}
+        >
           <TimeTree width={25} stroke="rgb(130,130,130)"/>
           <span style={styles.title}> {"num_date"} </span>
         </button>

@@ -26,7 +26,7 @@ class DateRangeInputs extends React.Component {
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
+    style: React.PropTypes.object
     // foo: React.PropTypes.string
   }
   static defaultProps = {
@@ -42,24 +42,29 @@ class DateRangeInputs extends React.Component {
 
   setDateQueryParam(newRange) {
     const tmp_path = this.props.location.pathname
-    const prefix = (tmp_path===""||tmp_path[0]==="/")?"":"/";
-    const suffix= (tmp_path.length&&tmp_path[tmp_path.length-1]!=="/")?"/?":"?"
+    const prefix = (tmp_path === "" || tmp_path[0] === "/") ? "" : "/";
+    const suffix = (tmp_path.length && tmp_path[tmp_path.length - 1] !== "/") ? "/?" : "?";
 
-    const newQuery = Object.assign({}, this.props.location.query, {dmin: newRange.min, dmax:newRange.max});
+    const newQuery = Object.assign({}, this.props.location.query,
+                                   {dmin: newRange.min, dmax:newRange.max});
     // https://www.npmjs.com/package/query-string
-    const url = prefix + this.props.location.pathname + suffix + queryString.stringify(newQuery);
+    const url = (prefix + this.props.location.pathname
+                 + suffix + queryString.stringify(newQuery));
     console.log("setDateQueryParam", url, this.props.location.pathname,prefix);
-    window.history.pushState({}, '', url);
+    window.history.pushState({}, "", url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
   }
 
 
   updateDateRange(ref, m) {
     let newRange;
-    if (ref === 'date_min') {
-      newRange = { min: m.valueOf(), max: this.props.location.query.dmax || moment().valueOf() /* present */ };
+    if (ref === "date_min") {
+      newRange = { min: m.valueOf(), max: (this.props.location.query.dmax
+                                           || moment().valueOf()) /* present */ };
     } else {
-      newRange = { min: this.props.location.query.dmin || moment().subtract(12, "years").valueOf(), max: m.valueOf() };
+      newRange = { min: (this.props.location.query.dmin
+                        || moment().subtract(12, "years").valueOf()),
+                   max: m.valueOf() };
     }
     this.setDateQueryParam(newRange);
   }
@@ -113,8 +118,12 @@ class DateRangeInputs extends React.Component {
     const absoluteMax = moment().valueOf(); // present
     const selectedMin = +this.props.location.query.dmin || absoluteMin;
     const selectedMax = +this.props.location.query.dmax || absoluteMax;
-    const datePickerMin = this.props.location.query.dmin ? moment(+this.props.location.query.dmin) : moment(absoluteMin);
-    const datePickerMax = this.props.location.query.dmax ? moment(+this.props.location.query.dmax) : moment(absoluteMax);
+    const datePickerMin = (this.props.location.query.dmin
+                           ? moment(+this.props.location.query.dmin)
+                           : moment(absoluteMin));
+    const datePickerMax = (this.props.location.query.dmax
+                           ? moment(+this.props.location.query.dmax)
+                           : moment(absoluteMax));
     return (
       <div>
         <Slider
@@ -131,10 +140,12 @@ class DateRangeInputs extends React.Component {
         */}
         <DatePicker
           selected={datePickerMin}
-          onChange={this.updateDateRange.bind(this, 'date_min')} />
+          onChange={this.updateDateRange.bind(this, "date_min")}
+        />
         <DatePicker
           selected={datePickerMax}
-          onChange={this.updateDateRange.bind(this, 'date_max')} />
+          onChange={this.updateDateRange.bind(this, "date_max")}
+        />
       </div>
     );
   }

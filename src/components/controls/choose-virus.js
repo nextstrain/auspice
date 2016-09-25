@@ -7,7 +7,6 @@ import Radium from "radium";
 import { datasets } from "../../util/globals";
 import ChooseVirusSelect from "./choose-virus-select";
 import parseParams from "../../util/parseParams";
-import queryString from "query-string";
 
 // @connect(state => {
 //   return state.FOO;
@@ -32,7 +31,7 @@ class ChooseVirus extends React.Component {
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
+    style: React.PropTypes.object
     // foo: React.PropTypes.string
   }
   static defaultProps = {
@@ -51,34 +50,39 @@ class ChooseVirus extends React.Component {
     const styles = this.getStyles();
 
     // remove starting or trailing slashes from path
-    let tmppath = (this.props.location.pathname[0]=='/')?this.props.location.pathname.substring(1):this.props.location.pathname;
-    tmppath = (tmppath[tmppath.length-1]=='/')?tmppath.substring(0,tmppath.length-1):tmppath;
+    let tmppath = ((this.props.location.pathname[0] === "/")
+                    ? this.props.location.pathname.substring(1)
+                    : this.props.location.pathname);
+    tmppath = ((tmppath[tmppath.length - 1] === "/")
+                ? tmppath.substring(0, tmppath.length - 1)
+                : tmppath);
     // analyse the current route in order to adjust the dataset selection choices
     const params = parseParams(tmppath);
     const paramFields = params.dataset;
     // names of the different selectors in the current hierarchy: [virus, lineage, duration]
-    const fields = Object.keys(paramFields).sort( (a,b) => paramFields[a][0]>paramFields[b][0]);
+    const fields = Object.keys(paramFields).sort((a, b) => paramFields[a][0] > paramFields[b][0]);
     // the current choices: [flu, h3n2, 3y]
     const choices = fields.map((d) => paramFields[d][1]);
     // make a selector for each of the fields
-    let selectors = [];   // list to contain the different data set selectors
+    const selectors = [];   // list to contain the different data set selectors
     let level = datasets; // pointer used to move through the hierarchy -- currently at the top level of datasets
-    for (let vi=0; vi<fields.length; vi++){
+    for (let vi = 0; vi < fields.length; vi++) {
       if (choices[vi]){
         // pull options from the current level of the dataset hierarchy, ignore 'default'
-        const options = Object.keys(level[fields[vi]]).filter((d) => d!=="default");
+        const options = Object.keys(level[fields[vi]]).filter((d) => d !== "default");
         selectors.push((
           <div key={vi} style={[
             styles.base,
             this.props.style
-            ]}>
+          ]}>
             <ChooseVirusSelect
               {...this.props}
               title={"Choose "+fields[vi]}
               query={this.props.query}
-              choice_tree={choices.slice(0,vi)}
+              choice_tree={choices.slice(0, vi)}
               selected = {choices[vi]}
-              options={options}/>
+              options={options}
+            />
             </div>
           ));
         // move to the next level in the data set hierarchy

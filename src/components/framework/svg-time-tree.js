@@ -1,6 +1,7 @@
 import React from "react";
 import Radium from "radium";
 
+//TODO: implement proper button
 @Radium
 class TimeTree extends React.Component {
   constructor(props) {
@@ -15,7 +16,7 @@ class TimeTree extends React.Component {
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
+    style: React.PropTypes.object
     // foo: React.PropTypes.string
   }
   static defaultProps = {
@@ -25,14 +26,16 @@ class TimeTree extends React.Component {
   }
   getStyles() {
     return {
-      stroke: this.props.stroke,
+      stroke: this.props.stroke
     };
   }
   render() {
     const styles = this.getStyles();
     return (
       <svg width={this.props.width} height={this.props.width} viewBox="14 14 25 26" >
-        <g id="Group" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd" transform="translate(15.000000, 15.000000)">
+        <g id="Group" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd"
+          transform="translate(15.000000, 15.000000)"
+        >
           <text text="T"></text>
         </g>
       </svg>

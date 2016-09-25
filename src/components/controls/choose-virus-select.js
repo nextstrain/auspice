@@ -46,20 +46,19 @@ class ChooseVirusSelect extends React.Component {
   // downstream choices will be set to defaults in parseParams
   createPath(e) {
     let p = (this.props.choice_tree.length > 0) ? "/" : "";
-    p += this.props.choice_tree.join("/") +"/"+ e.target.value;
+    p += this.props.choice_tree.join("/") + "/" + e.target.value;
     return p;
   }
 
   setVirusPath(newPath) {
     const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
-    const suffix = (newPath.length && newPath[newPath.length-1] !== "/") ? "/?" : "?";
+    const suffix = (newPath.length && newPath[newPath.length - 1] !== "/") ? "/?" : "?";
     const url = prefix + newPath + suffix + queryString.stringify(this.props.location.query);
     window.history.pushState({}, "", url);
     this.props.changeRoute(newPath, this.props.location.query);
   }
 
   render() {
-    const styles = this.getStyles();
     // the selector below resets the path by router.push({pathname:new_path})
     // the currently selected option is passed down as this.props.selected
     // 9/19/2016: https://facebook.github.io/react/docs/forms.html#why-select-value
@@ -70,15 +69,15 @@ class ChooseVirusSelect extends React.Component {
         onChange={(e) => {
           if (e.target.value === this.props.title) { return }
             this.setVirusPath(this.createPath(e));
-        }}>
+        }}
+      >
         <option key={"titleOption"}> {this.props.title} </option>
         {
           this.props.options.map((option, i) => {
             return (
               <option key={i}>
                 {option}
-              </option>
-            )
+              </option>);
           })
         }
       </select>
@@ -86,5 +85,4 @@ class ChooseVirusSelect extends React.Component {
   }
 }
 
-// export witht the "power" to reset the route
 export default ChooseVirusSelect;
