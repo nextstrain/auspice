@@ -4,6 +4,7 @@ import Radium from "radium";
 import { connect } from "react-redux";
 import * as globals from "../../util/globals";
 import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
+import { BRANCH_MOUSEENTER, BRANCH_MOUSELEAVE } from "../../actions/controls";
 import moment from "moment";
 
 const returnStateNeeded = (fullStateTree) => {
@@ -34,48 +35,18 @@ class TreeNode extends React.Component {
     style: React.PropTypes.object,
     showBranchLabels: React.PropTypes.bool,
     node: React.PropTypes.object,
-    xScale: React.PropTypes.func,
-    yScale: React.PropTypes.func,
-    colorBy: React.PropTypes.string
+    fill: React.PropTypes.string,
+    tipRadius: React.PropTypes.number,
+    branchStrokeWidth: React.PropTypes.number,
+    branchStrokeColor: React.PropTypes.string,
   }
   static defaultProps = {
     // foo: "bar"
   }
   shouldComponentUpdate(nextProps, nextState) {
     return true;
-    /*
-      If nextProps.selectedLegendItem is null, nothing is selected b/c mouseout.
-      This means that and we want to check the present, not future state for match with this.props.selectedLegendItem.
-      If it was a match on last render, we need to rerender, so that it goes back to default tip radius.
-
-      DUPLICATION WARNING: this should be refactored so that it doesn't duplicate the code below in determineLegendMatch
-      ultimately determineLegendMatch should take an argument.
-    */
-    //const _selectedLegendItem = nextProps.selectedLegendItem || this.props.selectedLegendItem;
-
-    //if (this.props.hasChildren) {
-      /* nodes without children are never visible, so will not update */
-    //  return false;
-    //}
-    // else if (
-    //   /* special cases */
-    //   (nextProps.colorBy === "lbi") ||
-    //   (nextProps.colorBy === "date") ||
-    //   (nextProps.colorBy === "dfreq") ||
-    //   (nextProps.colorBy === "HI_dist") ||
-    //   (nextProps.colorBy === "cHI")
-    // ) {
-    //   return (nextProps.node.coloring <= nextProps.legendBoundsMap.upper_bound[_selectedLegendItem]) &&
-    //     (nextProps.node.coloring > nextProps.legendBoundsMap.lower_bound[_selectedLegendItem]);
-    // }
-    //else {
-    //  return true; /* loop over all nodes is sure to remove stale mouseover state, maybe fast enough with prod react*/
-      /* default accessor */
-      // some of the legend items don't trigger any nodes. why? mismatch capitalizations of same regions?
-      // if (nextProps.node[nextProps.colorBy] !== _selectedLegendItem) { console.log(_selectedLegendItem) }
-      // return nextProps.node[nextProps.colorBy] === _selectedLegendItem;
-    //}
   }
+
   getNodeText() {
     /*
       this is a bit of trickiness. we'll see if it's too clever.
@@ -99,118 +70,91 @@ class TreeNode extends React.Component {
 
     return nodeText;
   }
-  determineLegendMatch() {
-    const {
-      node,
-      colorBy,
-      selectedLegendItem,
-      legendBoundsMap
-    } = this.props;
-    // construct a dictionary that maps a legend entry to the preceding interval
-    let bool;
-    // equates a tip and a legend element
-    // exact match is required for categorical qunantities such as genotypes, regions
-    // continuous variables need to fall into the interal (lower_bound[leg], leg]
-    if (
-      (colorBy === "lbi") ||
-      (colorBy === "date") ||
-      (colorBy === "dfreq") ||
-      (colorBy === "HI_dist") ||
-      (colorBy === "cTiter")
-    ) {
-      bool = (node.coloring <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
-        (node.coloring > legendBoundsMap.lower_bound[selectedLegendItem]);
-    } else {
-      bool = node.attr[this.props.controls.colorBy] === this.props.selectedLegendItem;
-    }
-    return bool;
-  }
-  checkColorBy(node) {
-    /* move this logic into the main chooseTipRadius function */
-    if (
-      typeof node.pred_distance !== "undefined" &&
-      this.props.colorBy === "fitness"
-    ) {
-      return globals.distanceScale(node.pred_distance);
-    } else {
-      return globals.tipRadius;
+
+  branchPoints() {
+    const mod = 0;
+
+    if (this.props.layout==="rectangular"){
+      return 'M'+(this.props.source_x - mod).toString() +
+        " " +
+        this.props.source_y.toString() +
+        " L " +
+        (this.props.midpoint_x - mod).toString() +
+        " " +
+        this.props.midpoint_y.toString() +
+        " L " +
+        (this.props.x).toString() +
+        " " +
+        this.props.y.toString();
+    }else if (this.props.layout==="radial"){
+      var tmp_d = 'M '+(this.props.source_x).toString() +
+        "  " +
+        this.props.source_y.toString() +
+        " A " +
+        this.props.r_x.toString() +
+        " " +
+        this.props.r_y.toString() +
+        " 0 " + (this.props.smallBigArc?"1 ":"0 ") +  (this.props.leftRight?"0 ":"1 ") +
+        this.props.midpoint_x.toString() +
+        " " +
+        this.props.midpoint_y.toString() +
+        " L " +
+        this.props.x.toString() +
+        " " +
+        this.props.y.toString();
+      return tmp_d;
     }
   }
-  chooseTipRadius(node) {
-    /* if it's not a tip, or if it is out of date range return 0 */
-    if (this.props.hasChildren) {
-      return globals.nonTipNodeRadius;
-    }
 
-    let inRange;
-    if (typeof node.attr==="undefined"){
-      inRange = this.props.dateRange.contains(
-        moment(node.date.replace(/XX/g, "01"), "YYYY-MM-DD")
-      );
-    } else {
-      inRange = this.props.dateRange.contains(
-        moment(node.attr.date.replace(/XX/g, "01"), "YYYY-MM-DD")
-      );
-    }
 
-    if (!inRange) {
-      return globals.nonTipNodeRadius;
-    }
-
-    let r;
-    /* see if it's currently selected, make it big */
-    if (this.determineLegendMatch(node)) {
-      r = this.checkColorBy(node) * globals.tipRadiusOnLegendMatchMultiplier;
-    } else /* default */ {
-      r = this.checkColorBy(node, this.props.controls.colorBy);
-    }
-    return r;
-  }
   render() {
     return (
-      <g
+      <g>
+        <circle
+          onMouseEnter={() => {
+            this.props.dispatch({
+              type: NODE_MOUSEENTER,
+              /*
+                send the source and target nodes in the action,
+                use x and y values in them to place tooltip
+              */
+              data: this.props.node
+            });
+          }}
+          onMouseLeave={() => {
+            this.props.dispatch({ type: NODE_MOUSELEAVE });
+          }}
+          fill={this.props.fill}
+          r={this.props.tipRadius}
+          cx={this.props.x}
+          cy={this.props.y}
+        />
+      <path
+        d={this.branchPoints()}
         onMouseEnter={() => {
           this.props.dispatch({
-            type: NODE_MOUSEENTER,
+            type: BRANCH_MOUSEENTER,
             /*
               send the source and target nodes in the action,
               use x and y values in them to place tooltip
             */
-            data: this.props.node
+            data: this.props.datum
           });
         }}
         onMouseLeave={() => {
-          this.props.dispatch({ type: NODE_MOUSELEAVE });
+          this.props.dispatch({ type: BRANCH_MOUSELEAVE });
         }}
-
-      transform={
-        "translate(" +
-        this.props.x +
-        "," +
-        this.props.y +
-        ")"
-      }>
-        <circle
-          fill={this.props.fill}
-          r={
-            this.props.node.children ?
-              globals.nonTipNodeRadius :
-              this.chooseTipRadius(this.props.node)} />
-      </g>
+        style={{
+          stroke: this.props.branchStrokeColor,
+          strokeWidth: this.props.branchStrokeWidth,
+          strokeLinejoin: "round",
+          fill: "none",
+          cursor: "pointer"
+        }}></path>
+       </g>
     );
   }
 }
-// <text
-//   dx={this.props.hasChildren ? -6 : 6}
-//   dy={this.props.hasChildren ? -2 : 3}
-//   style={{
-//     fontFamily: "Helvetica",
-//     fontSize: 8,
-//     fontWeight: 300
-//   }}
-//   textAnchor={this.props.hasChildren ? "end" : "start"}>
-//   {this.getNodeText()}
-// </text>
 
 export default TreeNode;
 

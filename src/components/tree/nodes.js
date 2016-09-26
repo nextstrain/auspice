@@ -84,7 +84,15 @@ class Nodes extends React.Component {
       return (
         <VictoryAnimation duration={1000} key={index} data={{
           x: this.xVal(node, this.props.distanceMeasure, this.props.layout),
-          y: this.yVal(node, this.props.distanceMeasure, this.props.layout)
+          y: this.yVal(node, this.props.distanceMeasure, this.props.layout),
+          midpoint_x: this.xMidpoint(node, this.props.distanceMeasure, this.props.layout),
+          midpoint_y: this.yMidpoint(node, this.props.distanceMeasure, this.props.layout),
+          source_x:   this.xVal(node.parent, this.props.distanceMeasure, this.props.layout),
+          source_y:   this.yVal(node.parent, this.props.distanceMeasure, this.props.layout),
+          r_x: this.r_x(node, this.props.distanceMeasure, this.props.layout),
+          r_y: this.r_y(node, this.props.distanceMeasure, this.props.layout),
+          smallBigArc: this.smallBigArc(node, this.props.distanceMeasure, this.props.layout),
+          leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.layout)
         }}>
         {(props) => {
           return (
@@ -97,6 +105,9 @@ class Nodes extends React.Component {
               showBranchLabels={this.props.controls.showBranchLabels}
               strain={node.attr.strain}
               hasChildren={node.children ? true : false}
+              tipRadius={node.children ? 0 : 4}
+              branchStrokeColor={"#CCC"}
+              branchStrokeWdith={1}
             />
           )
         }}
@@ -106,47 +117,19 @@ class Nodes extends React.Component {
     return nodeComponents;
   }
 
-  drawBranches(nodes) {
-    const branchComponents = nodes.map((node, index) => {
-      return (
-        <VictoryAnimation duration={1000} key={index} data={{
-            target_x:   this.xVal(node, this.props.distanceMeasure, this.props.layout),
-            target_y:   this.yVal(node, this.props.distanceMeasure, this.props.layout),
-            midpoint_x: this.xMidpoint(node, this.props.distanceMeasure, this.props.layout),
-            midpoint_y: this.yMidpoint(node, this.props.distanceMeasure, this.props.layout),
-            source_x:   this.xVal(node.parent, this.props.distanceMeasure, this.props.layout),
-            source_y:   this.yVal(node.parent, this.props.distanceMeasure, this.props.layout),
-            r_x: this.r_x(node, this.props.distanceMeasure, this.props.layout),
-            r_y: this.r_y(node, this.props.distanceMeasure, this.props.layout),
-            smallBigArc: this.smallBigArc(node, this.props.distanceMeasure, this.props.layout),
-            leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.layout),
-        }}>
-        {(props) => {
-          return (
-            <Branch
-              {...this.props} {...props} animate={null}
-              key={index} />
-           );}}
-      </VictoryAnimation>
-      );
-    });
-    return branchComponents;
-  }
-
   drawTooltip(node, type) {
     return (
       <Tooltip
         type={type}
         node={node}
-        x={this.xVal(node, this.state.distanceMeasure, this.props.query.l)}
-        y={this.yVal(node, this.state.distanceMeasure, this.props.query.l)}
+        x={this.xVal(node, this.state.distanceMeasure, this.props.layout)}
+        y={this.yVal(node, this.state.distanceMeasure, this.props.layout)}
       />
     )
   }
   render() {
     return (
       <g>
-        {this.drawBranches(this.props.nodes)}
         {this.drawNodes(this.props.nodes)}
       </g>
     );
@@ -154,24 +137,3 @@ class Nodes extends React.Component {
 }
 
 export default Nodes;
-//
-// drawTreeIfData() {
-//   let markup;
-//
-//     markup = (
-
-//         {this.drawBranches(this.state.branches)}
-//         {this.drawNodes(this.state.nodes)}
-//         {
-//           this.props.controls.selectedBranch ?
-//           this.drawTooltip(this.props.controls.selectedBranch.target, "branch") :
-//           null
-//         }
-//         {
-//           this.props.controls.selectedNode ?
-//           this.drawTooltip(this.props.controls.selectedNode, "node") :
-//           null
-//         }
-//     );
-//     return markup;
-// }
