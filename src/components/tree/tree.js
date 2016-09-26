@@ -131,6 +131,26 @@ class Tree extends React.Component {
     return 400 + 0.30 * width;
   }
 
+  tipRadius (node){
+    return 2 + node.clade%4;
+  }
+
+  nodeColor(node){
+    if (node.clade%10){
+      return this.props.controls.colorScale(node.attr[this.props.controls.colorBy]);
+    }else{
+      return "CCC";
+    }
+  }
+
+  branchStrokeWidth(node){
+    return 1+node.clade%3;
+  }
+
+  branchStrokeColor(node){
+    return this.props.controls.colorScale(node.attr[this.props.controls.colorBy]);
+  }
+
   createSvgAndNodes() {
     // <Viewer
     //   width={this.state.width}
@@ -150,7 +170,12 @@ class Tree extends React.Component {
             layout={(this.props.query.l)?this.props.query.l:"rectangular"}
             distanceMeasure={(this.props.query.m)?this.props.query.m:"div"}
             xScale={this.state.xScale}
-            yScale={this.state.yScale}/>
+            yScale={this.state.yScale}
+            tipRadius={this.tipRadius}
+            nodeColor={this.nodeColor.bind(this)}
+            branchStrokeWidth={this.branchStrokeWidth}
+            branchStrokeColor={this.branchStrokeColor.bind(this)}
+          />
         </svg>
     )
   // </Viewer>

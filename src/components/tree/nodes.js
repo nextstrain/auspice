@@ -6,7 +6,6 @@ import "moment-range";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
-import Branch from "./branch";
 import Node from "./node";
 import Tooltip from "./tooltip";
 import {VictoryAnimation} from "victory";
@@ -31,9 +30,7 @@ class Nodes extends React.Component {
     style: React.PropTypes.object
     // foo: React.PropTypes.string
   }
-  static defaultProps = {
-    // foo: "bar"
-  }
+
   xVal(node, distanceMeasure, layout) {
     return this.props.xScale(node.geometry[distanceMeasure][layout].xVal);
   }
@@ -101,13 +98,14 @@ class Nodes extends React.Component {
               key={index}
               node={node}
               dateRange={range}
-              fill={this.props.controls.colorScale(node.attr[this.props.controls.colorBy])}
+              fill={this.props.nodeColor ? this.props.nodeColor(node) : "CCC"}
               showBranchLabels={this.props.controls.showBranchLabels}
               strain={node.attr.strain}
               hasChildren={node.children ? true : false}
-              tipRadius={node.children ? 0 : 4}
-              branchStrokeColor={"#CCC"}
-              branchStrokeWdith={1}
+              tipRadius={this.props.tipRadius ? this.props.tipRadius(node) : (node.children ? 0 : 4) }
+              branchStrokeColor={this.props.branchStrokeColor ? this.props.branchStrokeColor(node) : "CCC"}
+              branchStrokeWidth={this.props.branchStrokeWidth ? this.props.branchStrokeWidth(node) : 2}
+              nodeStyle={this.props.nodeStyle ? this.props.nodeStyle(node) : "circle"}
             />
           )
         }}

@@ -106,11 +106,56 @@ class TreeNode extends React.Component {
     }
   }
 
+  nodeSVG(){
+    if (!this.props.nodeStyle || this.props.nodeStyle === "circle"){
+      return (
+        <circle
+          fill={this.props.fill}
+          r={this.props.tipRadius}
+          cx={this.props.x}
+          cy={this.props.y}
+        />
+      );
+    }else if (this.props.nodeStyle === "rect"){
+      return (
+        <rect
+          fill={this.props.fill}
+          width= {2*this.props.tipRadius}
+          height={2*this.props.tipRadius}
+          x={this.props.x}
+          y={this.props.y}
+        />
+      );
+    }
+  }
 
   render() {
     return (
       <g>
-        <circle
+        <path
+          d={this.branchPoints()}
+          onMouseEnter={() => {
+            this.props.dispatch({
+              type: BRANCH_MOUSEENTER,
+              /*
+                send the source and target nodes in the action,
+                use x and y values in them to place tooltip
+              */
+              data: this.props.datum
+            });
+          }}
+          onMouseLeave={() => {
+            this.props.dispatch({ type: BRANCH_MOUSELEAVE });
+          }}
+          style={{
+            stroke: this.props.branchStrokeColor,
+            strokeWidth: this.props.branchStrokeWidth,
+            strokeLinejoin: "round",
+            fill: "none",
+            cursor: "pointer"
+          }}>
+        </path>
+        <g>
           onMouseEnter={() => {
             this.props.dispatch({
               type: NODE_MOUSEENTER,
@@ -124,34 +169,9 @@ class TreeNode extends React.Component {
           onMouseLeave={() => {
             this.props.dispatch({ type: NODE_MOUSELEAVE });
           }}
-          fill={this.props.fill}
-          r={this.props.tipRadius}
-          cx={this.props.x}
-          cy={this.props.y}
-        />
-      <path
-        d={this.branchPoints()}
-        onMouseEnter={() => {
-          this.props.dispatch({
-            type: BRANCH_MOUSEENTER,
-            /*
-              send the source and target nodes in the action,
-              use x and y values in them to place tooltip
-            */
-            data: this.props.datum
-          });
-        }}
-        onMouseLeave={() => {
-          this.props.dispatch({ type: BRANCH_MOUSELEAVE });
-        }}
-        style={{
-          stroke: this.props.branchStrokeColor,
-          strokeWidth: this.props.branchStrokeWidth,
-          strokeLinejoin: "round",
-          fill: "none",
-          cursor: "pointer"
-        }}></path>
-       </g>
+        {this.nodeSVG()}
+        </g>
+      </g>
     );
   }
 }
