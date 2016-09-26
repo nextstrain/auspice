@@ -17,7 +17,7 @@ import Header from "./framework/header";
 import Controls from "./controls/controls";
 import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
-import Tree from "./tree/tree";
+import TreeView from "./tree/treeView";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
 import queryString from "query-string";
@@ -117,7 +117,7 @@ class App extends React.Component {
           justifyContent="space-between"
         >
           <Controls changeRoute={this.changeRoute.bind(this)} location={this.state.location}/>
-          <Tree query={this.state.location.query}/>
+          <TreeView query={this.state.location.query}/>
           <Frequencies/>
           <Entropy/>
         </Flex>

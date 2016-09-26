@@ -6,14 +6,16 @@ import * as globals from "../../util/globals";
 import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
 import { BRANCH_MOUSEENTER, BRANCH_MOUSELEAVE } from "../../actions/controls";
 import moment from "moment";
+import Tip from "./tip";
+import Tooltip from "./tooltip";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
     selectedLegendItem: fullStateTree.controls.selectedLegendItem,
+    legendBoundsMap: fullStateTree.controls.legendBoundsMap,
     colorBy: fullStateTree.controls.colorBy,
     colorScale: fullStateTree.controls.colorScale,
     showBranchLabels: fullStateTree.controls.showBranchLabels,
-    legendBoundsMap: fullStateTree.controls.legendBoundsMap
   };
 };
 
@@ -70,7 +72,12 @@ class TreeNode extends React.Component {
 
     return nodeText;
   }
-
+  branchStrokeWidth() {
+    return 1 + this.props.node.clade % 3;
+  }
+  branchStrokeColor() {
+    return this.props.colorScale(this.props.node.attr[this.props.colorBy]);
+  }
   branchPoints() {
     const mod = 0;
 
@@ -106,29 +113,6 @@ class TreeNode extends React.Component {
     }
   }
 
-  nodeSVG(){
-    if (!this.props.nodeStyle || this.props.nodeStyle === "circle"){
-      return (
-        <circle
-          fill={this.props.fill}
-          r={this.props.tipRadius}
-          cx={this.props.x}
-          cy={this.props.y}
-        />
-      );
-    }else if (this.props.nodeStyle === "rect"){
-      return (
-        <rect
-          fill={this.props.fill}
-          width= {2*this.props.tipRadius}
-          height={2*this.props.tipRadius}
-          x={this.props.x}
-          y={this.props.y}
-        />
-      );
-    }
-  }
-
   render() {
     return (
       <g>
@@ -148,8 +132,8 @@ class TreeNode extends React.Component {
             this.props.dispatch({ type: BRANCH_MOUSELEAVE });
           }}
           style={{
-            stroke: this.props.branchStrokeColor,
-            strokeWidth: this.props.branchStrokeWidth,
+            stroke: this.branchStrokeColor(),
+            strokeWidth: this.branchStrokeWidth(),
             strokeLinejoin: "round",
             fill: "none",
             cursor: "pointer"
@@ -169,7 +153,7 @@ class TreeNode extends React.Component {
           onMouseLeave={() => {
             this.props.dispatch({ type: NODE_MOUSELEAVE });
           }}
-        {this.nodeSVG()}
+        <Tip {...this.props}/>
         </g>
       </g>
     );
@@ -177,6 +161,18 @@ class TreeNode extends React.Component {
 }
 
 export default TreeNode;
+
+
+// drawTooltip(node, type) {
+//   return (
+//     <Tooltip
+//       type={type}
+//       node={node}
+//       x={this.xVal(node, this.state.distanceMeasure, this.props.layout)}
+//       y={this.yVal(node, this.state.distanceMeasure, this.props.layout)}
+//     />
+//   )
+// }
 
 // <text
 //   dx={this.props.hasChildren ? -6 : 6}
