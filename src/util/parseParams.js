@@ -9,7 +9,7 @@ import {datasets} from "./globals";
 const parseParams = (path) => {
   let params; // split path at '/', if path === "", set params to []
   if (path.length) {
-    params = path.split("/");
+    params = path.split("/").filter( (d) => d !== "");
   } else {
     params = [];
   }

@@ -12,6 +12,7 @@ import Search from "./search";
 import DateRangeInputs from "./date-range-inputs";
 import ChooseLayout from "./choose-layout";
 import ChooseVirus from "./choose-virus";
+import ChooseMetric from "./choose-metric";
 
 
 const returnStateNeeded = (fullStateTree) => {
@@ -60,6 +61,7 @@ class Controls extends React.Component {
         }}>
         <ChooseVirus {...this.props}/>
         <ChooseLayout {...this.props}/>
+        <ChooseMetric {...this.props}/>
         <p> Phylogeny </p>
         <DateRangeInputs {...this.props}/>
         <div className="d3-tip se"/>

@@ -1,18 +1,16 @@
 import React from "react";
 import Radium from "radium";
-// import _ from "lodash";
-//import Flex from "../framework/flex";
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
-import RectangleTreeLayout from "../framework/svg-tree-layout-rectangle";
-import RadialTreeLayout from "../framework/svg-tree-layout-radial";
 import queryString from "query-string";
+import TimeTree from "../framework/svg-time-tree";
+import MutationTree from "../framework/svg-mutation-tree";
 
-// @connect(state => {
-//   return state.FOO;
-// })
+
+/*
+ * implements a pair of buttons the toggle between timetree and divergence tree
+ * copied from chose-layout
+ */
 @Radium
-class ChooseLayout extends React.Component {
+class ChooseMetric extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -24,7 +22,7 @@ class ChooseLayout extends React.Component {
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
+    style: React.PropTypes.object
     // foo: React.PropTypes.string
   }
   static defaultProps = {
@@ -59,22 +57,23 @@ class ChooseLayout extends React.Component {
   componentDidMount() {
     // Richard move to algo that checks for url validity
     if (!this.props.location.query.l) {
-      this.setLayoutQueryParam("rectangular");
+      this.setMetricQueryParam("div");
     }
   }
 
-  setLayoutQueryParam(title) {
-    const tmp_path = this.props.location.pathname
-    const prefix = (tmp_path===""||tmp_path[0]==="/")?"":"/";
-    const suffix= (tmp_path.length&&tmp_path[tmp_path.length-1]!=="/")?"/?":"?"
+  setMetricQueryParam(title) {
+    const tmp_path = this.props.location.pathname;
+    const prefix = (tmp_path === "" || tmp_path[0] === "/") ? "" : "/";
+    const suffix = (tmp_path.length && tmp_path[tmp_path.length - 1] !== "/") ? "/?" : "?";
 
-    const newQuery = Object.assign({}, this.props.location.query, {l: title});
+    const newQuery = Object.assign({}, this.props.location.query, {m: title});
     // https://www.npmjs.com/package/query-string
     const url = prefix + this.props.location.pathname + suffix + queryString.stringify(newQuery);
-    console.log("setLayoutQueryParam", url, this.props.location.pathname,prefix);
-    window.history.pushState({}, '', url);
+    console.log("setMetricQueryParam", url, this.props.location.pathname, prefix);
+    window.history.pushState({}, "", url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
   }
+
   render() {
     const styles = this.getStyles();
     return (
@@ -82,20 +81,22 @@ class ChooseLayout extends React.Component {
         <button
           key={1}
           style={styles.button}
-          onClick={() => { this.setLayoutQueryParam("rectangular"); }}>
-          <RectangleTreeLayout width={25} stroke="rgb(130,130,130)"/>
-          <span style={styles.title}> {"rectangular"} </span>
+          onClick={() => { this.setMetricQueryParam("div"); }}
+        >
+          <MutationTree width={25} stroke="rgb(130,130,130)"/>
+          <span style={styles.title}> {"div"} </span>
         </button>
         <button
           key={2}
           style={styles.button}
-          onClick={() => { this.setLayoutQueryParam("radial"); }}>
-          <RadialTreeLayout width={25} stroke="rgb(130,130,130)"/>
-          <span style={styles.title}> {"radial"} </span>
+          onClick={() => { this.setMetricQueryParam("num_date"); }}
+        >
+          <TimeTree width={25} stroke="rgb(130,130,130)"/>
+          <span style={styles.title}> {"num_date"} </span>
         </button>
       </div>
     );
   }
 }
 
-export default ChooseLayout;
+export default ChooseMetric;

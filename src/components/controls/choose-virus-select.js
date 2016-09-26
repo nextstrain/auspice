@@ -1,10 +1,10 @@
 import React from "react";
 import Radium from "radium";
+import queryString from "query-string";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
-import { withRouter } from 'react-router';
 
 // @connect(state => {
 //   return state.FOO;
@@ -29,8 +29,7 @@ class ChooseVirusSelect extends React.Component {
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
-    // foo: React.PropTypes.string
+    style: React.PropTypes.object
   }
   static defaultProps = {
     // foo: "bar"
@@ -46,13 +45,20 @@ class ChooseVirusSelect extends React.Component {
   // assembles a new path from the upstream choices and the new selection
   // downstream choices will be set to defaults in parseParams
   createPath(e) {
-    let p = (this.props.choice_tree.length>0)?'/':'';
-    p+=this.props.choice_tree.join('/') +'/'+ e.target.value;
+    let p = (this.props.choice_tree.length > 0) ? "/" : "";
+    p += this.props.choice_tree.join("/") + "/" + e.target.value;
     return p;
   }
 
+  setVirusPath(newPath) {
+    const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
+    const suffix = (newPath.length && newPath[newPath.length - 1] !== "/") ? "/?" : "?";
+    const url = prefix + newPath + suffix + queryString.stringify(this.props.location.query);
+    window.history.pushState({}, "", url);
+    this.props.changeRoute(newPath, this.props.location.query);
+  }
+
   render() {
-    const styles = this.getStyles();
     // the selector below resets the path by router.push({pathname:new_path})
     // the currently selected option is passed down as this.props.selected
     // 9/19/2016: https://facebook.github.io/react/docs/forms.html#why-select-value
@@ -62,18 +68,16 @@ class ChooseVirusSelect extends React.Component {
         value={this.props.selected}
         onChange={(e) => {
           if (e.target.value === this.props.title) { return }
-          this.props.router.push({
-            pathname:this.createPath(e)
-          })
-        }}>
+            this.setVirusPath(this.createPath(e));
+        }}
+      >
         <option key={"titleOption"}> {this.props.title} </option>
         {
           this.props.options.map((option, i) => {
             return (
               <option key={i}>
                 {option}
-              </option>
-            )
+              </option>);
           })
         }
       </select>
@@ -81,5 +85,4 @@ class ChooseVirusSelect extends React.Component {
   }
 }
 
-// export witht the "power" to reset the route
-export default withRouter(ChooseVirusSelect);
+export default ChooseVirusSelect;
