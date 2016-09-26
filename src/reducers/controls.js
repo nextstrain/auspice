@@ -6,10 +6,13 @@ import createLegendMatchBound from "../util/createLegendMatchBounds";
 const Controls = (state = {
   dateRange: null,
   colorBy: globals.defaultColorBy,
+  continuous: false,
   colorScale: getColorScale(globals.defaultColorBy),
   /*
     we don't actually need to have legendBoundsMap default if regions will always be the
     default colorBy. this is saftey in case we change that.
+    continuous in state is to be true whenever the color scale is continuous
+    as opposed to discrete/categorical. we need a legendBoundsMap in the former, not the latter
   */
   legendBoundsMap: createLegendMatchBound(getColorScale(globals.defaultColorBy)),
   showBranchLabels: false,

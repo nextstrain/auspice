@@ -131,8 +131,34 @@ class Tree extends React.Component {
     return 400 + 0.30 * width;
   }
 
+  determineLegendMatch(node) {
+    const {
+      colorBy,
+      continuous,
+      selectedLegendItem,
+      legendBoundsMap
+    } = this.props.controls;
+    // construct a dictionary that maps a legend entry to the preceding interval
+    let bool;
+    // equates a tip and a legend element
+    // exact match is required for categorical qunantities such as genotypes, regions
+    // continuous variables need to fall into the interal (lower_bound[leg], leg]
+    if (continuous) {
+      bool = (node.attr[colorBy] <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
+        (node.attr[colorBy] > legendBoundsMap.lower_bound[selectedLegendItem]);
+    } else {
+      bool = node.attr[colorBy] === selectedLegendItem;
+    }
+    return bool;
+  }
+
+
   tipRadius (node){
-    return 2 + node.clade%4;
+    if (this.determineLegendMatch(node)){
+      return 6;
+    }else{
+      return 3;
+    }
   }
 
   nodeColor(node){
@@ -171,7 +197,7 @@ class Tree extends React.Component {
             distanceMeasure={(this.props.query.m)?this.props.query.m:"div"}
             xScale={this.state.xScale}
             yScale={this.state.yScale}
-            tipRadius={this.tipRadius}
+            tipRadius={this.tipRadius.bind(this)}
             nodeColor={this.nodeColor.bind(this)}
             branchStrokeWidth={this.branchStrokeWidth}
             branchStrokeColor={this.branchStrokeColor.bind(this)}
