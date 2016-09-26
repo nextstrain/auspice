@@ -9,6 +9,11 @@ import { connect } from "react-redux";
 import Branch from "./branch";
 import {VictoryAnimation} from "victory";
 
+
+/*
+ * Tree creates all TreeNodes of the tree, which consist of branches and tips.
+ * Tree assignes the desired locations to all TreeNodes
+*/
 @connect((state) => {
   return {controls: state.controls};
 })
@@ -101,8 +106,6 @@ class Tree extends React.Component {
               showBranchLabels={this.props.controls.showBranchLabels}
               strain={node.attr.strain}
               hasChildren={node.children ? true : false}
-              tipRadius={this.props.tipRadius ? this.props.tipRadius(node) : (node.children ? 0 : 4) }
-              branchStrokeColor={this.props.branchStrokeColor ? this.props.branchStrokeColor(node) : "CCC"}
             />
           )
         }}

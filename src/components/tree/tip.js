@@ -5,6 +5,12 @@ import Radium from "radium";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
 
+
+/*
+ * Tip defines the appearance of the leafs or tips in the tree.
+ *
+*/
+
 @Radium
 class Tip extends React.Component {
   constructor(props) {
@@ -32,12 +38,51 @@ class Tip extends React.Component {
       }
     };
   }
+
+  determineLegendMatch() {
+    const {
+      colorBy,
+      continuous,
+      selectedLegendItem,
+      legendBoundsMap
+    } = this.props;
+    // construct a dictionary that maps a legend entry to the preceding interval
+    let bool;
+    // equates a tip and a legend element
+    // exact match is required for categorical qunantities such as genotypes, regions
+    // continuous variables need to fall into the interal (lower_bound[leg], leg]
+    if (continuous) {
+      bool = (this.props.node.attr[colorBy] <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
+        (this.props.node.attr[colorBy] > legendBoundsMap.lower_bound[selectedLegendItem]);
+    } else {
+      bool = this.props.node.attr[colorBy] === selectedLegendItem;
+    }
+    return bool;
+  }
+
+
+  tipRadius(){
+    if (this.determineLegendMatch()){
+      return 6;
+    }else{
+      return 3;
+    }
+  }
+
+  tipColor(){
+    if (this.props.node.clade%10){
+      return this.props.colorScale(this.props.node.attr[this.props.colorBy]);
+    }else{
+      return "CCC";
+    }
+  }
+
   getTip() {
     if (!this.props.node.hasChildren) {
       return (
         <circle
-          fill={this.props.fill}
-          r={this.props.tipRadius}
+          fill={this.tipColor()}
+          r={this.tipRadius()}
           cx={this.props.x}
           cy={this.props.y}
         />
@@ -45,9 +90,9 @@ class Tip extends React.Component {
     } else {
       return (
         <rect
-          fill={this.props.fill}
-          width= {2*this.props.tipRadius}
-          height={2*this.props.tipRadius}
+          fill={this.tipColor()}
+          width= {2*this.tipRadius()}
+          height={2*this.tipRadius()}
           x={this.props.x}
           y={this.props.y}
         />

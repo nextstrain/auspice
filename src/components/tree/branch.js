@@ -19,6 +19,13 @@ const returnStateNeeded = (fullStateTree) => {
   };
 };
 
+/*
+ * A TreeNode draws the path leading to the node and instantiates
+ * Tip attached to its end. TreeNode determines the apprearance and
+ * behavior of the path.
+*/
+
+
 @connect(returnStateNeeded)
 @Radium
 class TreeNode extends React.Component {
