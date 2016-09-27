@@ -1,5 +1,6 @@
 import React from "react";
 import Radium from "radium";
+import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
 // import { connect } from "react-redux";
@@ -61,19 +62,28 @@ class Tip extends React.Component {
   }
 
 
-  tipRadius(){
-    if (this.determineLegendMatch()){
+  tipRadius() {
+    if (this.determineLegendMatch()) {
       return 6;
-    }else{
+    } else {
       return 3;
     }
   }
 
-  tipColor(){
-    if (this.props.node.clade%10){
+  tipColor() {
+    if (this.props.node.clade % 10) {
       return this.props.colorScale(this.props.node.attr[this.props.colorBy]);
-    }else{
+    } else {
       return "CCC";
+    }
+  }
+
+  tipVisibility() {
+    if (this.props.node.attr.num_date >= this.props.query.dmin
+        && this.props.node.attr.num_date < this.props.query.dmax) {
+      return "visible";
+    } else {
+      return "hidden";
     }
   }
 
@@ -81,6 +91,7 @@ class Tip extends React.Component {
     if (!this.props.node.hasChildren) {
       return (
         <circle
+          visibility = {this.tipVisibility()}
           fill={this.tipColor()}
           r={this.tipRadius()}
           cx={this.props.x}
@@ -90,6 +101,7 @@ class Tip extends React.Component {
     } else {
       return (
         <rect
+          visibility = {this.tipVisibility()}
           fill={this.tipColor()}
           width= {2*this.tipRadius()}
           height={2*this.tipRadius()}
@@ -99,10 +111,24 @@ class Tip extends React.Component {
       );
     }
   }
+
   render() {
     const styles = this.getStyles();
     return (
       <g>
+        onMouseEnter={() => {
+          this.props.dispatch({
+            type: NODE_MOUSEENTER,
+            /*
+              send the source and target nodes in the action,
+              use x and y values in them to place tooltip
+            */
+            data: this.props.node
+          });
+        }}
+        onMouseLeave={() => {
+          this.props.dispatch({ type: NODE_MOUSELEAVE });
+        }}
         {this.getTip()}
       </g>
     );

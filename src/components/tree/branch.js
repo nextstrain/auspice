@@ -3,7 +3,6 @@ import Radium from "radium";
 // import _ from "lodash";
 import { connect } from "react-redux";
 import * as globals from "../../util/globals";
-import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
 import { BRANCH_MOUSEENTER, BRANCH_MOUSELEAVE } from "../../actions/controls";
 import moment from "moment";
 import Tip from "./tip";
@@ -79,12 +78,19 @@ class TreeNode extends React.Component {
 
     return nodeText;
   }
+
   branchStrokeWidth() {
-    return 1 + this.props.node.clade % 3;
+    return 2;
   }
+
   branchStrokeColor() {
-    return this.props.colorScale(this.props.node.attr[this.props.colorBy]);
+    if (this.props.node.attr[this.props.colorBy]) {
+      return this.props.colorScale(this.props.node.attr[this.props.colorBy]);
+    }else{
+      return "CCC";
+    }
   }
+
   branchPoints() {
     const mod = 0;
 
@@ -146,22 +152,7 @@ class TreeNode extends React.Component {
             cursor: "pointer"
           }}>
         </path>
-        <g>
-          onMouseEnter={() => {
-            this.props.dispatch({
-              type: NODE_MOUSEENTER,
-              /*
-                send the source and target nodes in the action,
-                use x and y values in them to place tooltip
-              */
-              data: this.props.node
-            });
-          }}
-          onMouseLeave={() => {
-            this.props.dispatch({ type: NODE_MOUSELEAVE });
-          }}
         <Tip {...this.props}/>
-        </g>
       </g>
     );
   }

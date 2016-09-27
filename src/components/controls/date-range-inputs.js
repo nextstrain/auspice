@@ -40,6 +40,17 @@ class DateRangeInputs extends React.Component {
     };
   }
 
+  numericDate(secSinceUnix) {
+    const res = 1970 + (secSinceUnix / 365.25 / 24 / 3600 / 1000);
+    console.log("numericDate", res);
+    return res;
+  }
+
+  numericToUnix(numdate) {
+    const res = (numdate -1970) * 365.25 * 24 * 3600 * 1000;
+    return res;
+  }
+
   setDateQueryParam(newRange) {
     const tmp_path = this.props.location.pathname
     const prefix = (tmp_path === "" || tmp_path[0] === "/") ? "" : "/";
@@ -59,12 +70,12 @@ class DateRangeInputs extends React.Component {
   updateDateRange(ref, m) {
     let newRange;
     if (ref === "date_min") {
-      newRange = { min: m.valueOf(), max: (this.props.location.query.dmax
-                                           || moment().valueOf()) /* present */ };
+      newRange = { min: this.numericDate(m.valueOf()),
+                   max: (this.props.location.query.dmax || this.numericDate(moment().valueOf())) /* present */ };
     } else {
       newRange = { min: (this.props.location.query.dmin
-                        || moment().subtract(12, "years").valueOf()),
-                   max: m.valueOf() };
+                        || this.numericDate(moment().subtract(12, "years").valueOf())),
+                   max: this.numericDate(m.valueOf()) };
     }
     this.setDateQueryParam(newRange);
   }
@@ -114,16 +125,16 @@ class DateRangeInputs extends React.Component {
 
     /* strainMinDate is the dataset, selectedMinDate is the user option */
     /* abstract these dates into the reducer so they come in as props and are global state */
-    const absoluteMin = moment().subtract(12, "years").valueOf(); // replace 12 with duration
-    const absoluteMax = moment().valueOf(); // present
+    const absoluteMin = this.numericDate(moment().subtract(12, "years").valueOf()); // replace 12 with duration
+    const absoluteMax = this.numericDate(moment().valueOf()); // present
     const selectedMin = +this.props.location.query.dmin || absoluteMin;
     const selectedMax = +this.props.location.query.dmax || absoluteMax;
     const datePickerMin = (this.props.location.query.dmin
-                           ? moment(+this.props.location.query.dmin)
-                           : moment(absoluteMin));
+                           ? moment(this.numericToUnix(+this.props.location.query.dmin))
+                           : moment(this.numericToUnix(absoluteMin)));
     const datePickerMax = (this.props.location.query.dmax
-                           ? moment(+this.props.location.query.dmax)
-                           : moment(absoluteMax));
+                           ? moment(this.numericToUnix(+this.props.location.query.dmax))
+                           : moment(this.numericToUnix(absoluteMax)));
     return (
       <div>
         <Slider
