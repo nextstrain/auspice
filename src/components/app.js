@@ -32,7 +32,9 @@ class App extends React.Component {
       location: {
         pathname: window.location.pathname.slice(1, -1),
         query: queryString.parse(window.location.search)
-      }
+      },
+      colorOptions: {"region":{"key":"region", "legendTitle":"Region", "menuItem":"region", "type":"discrete"},
+                     "numdate":{"key":"numdate", "legendTitle":"Sampling date", "menuItem":"date", "type":"continuous"}}
       // sidebarDocked: true,
     };
   }
@@ -61,7 +63,7 @@ class App extends React.Component {
         location: {
           pathname: window.location.pathname.slice(1, -1),
           query: queryString.parse(window.location.search)
-        }
+        },
       })
     })
     this.maybeFetchDataset();
@@ -105,6 +107,7 @@ class App extends React.Component {
     });
   }
   render() {
+    console.log("appstate:", this.state);
     return (
       <div style={{margin: "0px 20px"}}>
         <Header/>
@@ -116,7 +119,10 @@ class App extends React.Component {
           alignItems="flex-start"
           justifyContent="space-between"
         >
-          <Controls changeRoute={this.changeRoute.bind(this)} location={this.state.location}/>
+          <Controls changeRoute={this.changeRoute.bind(this)}
+                    location={this.state.location}
+                    colorOptions={this.state.colorOptions}
+          />
           <TreeView query={this.state.location.query}/>
           <Frequencies/>
           <Entropy/>
