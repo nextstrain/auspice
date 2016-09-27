@@ -83,7 +83,7 @@ class Controls extends React.Component {
         <div className="treeplot-container" id="treeplot-container"></div>
         <div id="updated"></div>
         <div id="commit"></div>
-        <Legend {...this.props}/>
+        <Legend {...this.props} query={this.props.location.query}/>
         <ColorBy {...this.props}/>
         <ToggleBranchLabels/>
         <Search/>

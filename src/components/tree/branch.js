@@ -12,7 +12,6 @@ const returnStateNeeded = (fullStateTree) => {
   return {
     selectedLegendItem: fullStateTree.controls.selectedLegendItem,
     legendBoundsMap: fullStateTree.controls.legendBoundsMap,
-    colorBy: fullStateTree.controls.colorBy,
     colorScale: fullStateTree.controls.colorScale,
     showBranchLabels: fullStateTree.controls.showBranchLabels,
   };
@@ -84,8 +83,8 @@ class TreeNode extends React.Component {
   }
 
   branchStrokeColor() {
-    if (this.props.node.attr[this.props.colorBy]) {
-      return this.props.colorScale(this.props.node.attr[this.props.colorBy]);
+    if (this.props.node.attr[this.props.query.colorBy]) {
+      return this.props.colorScale(this.props.node.attr[this.props.query.colorBy]);
     }else{
       return "CCC";
     }

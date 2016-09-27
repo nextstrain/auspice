@@ -72,7 +72,7 @@ class Tip extends React.Component {
 
   tipColor() {
     if (this.props.node.clade % 10) {
-      return this.props.colorScale(this.props.node.attr[this.props.colorBy]);
+      return this.props.colorScale(this.props.node.attr[this.props.query.colorBy]);
     } else {
       return "CCC";
     }
