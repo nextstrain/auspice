@@ -4,6 +4,7 @@ import Radium from "radium";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
+import { defaultDateSliderFraction, defaultDateRange } from "../../util/globals";
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import queryString from "query-string";
@@ -125,9 +126,10 @@ class DateRangeInputs extends React.Component {
 
     /* strainMinDate is the dataset, selectedMinDate is the user option */
     /* abstract these dates into the reducer so they come in as props and are global state */
-    const absoluteMin = this.numericDate(moment().subtract(12, "years").valueOf()); // replace 12 with duration
+    const absoluteMin = this.numericDate(moment().subtract(defaultDateRange, "years").valueOf()); // replace 12 with duration
     const absoluteMax = this.numericDate(moment().valueOf()); // present
-    const selectedMin = +this.props.location.query.dmin || absoluteMin;
+    const selectedMin = (+this.props.location.query.dmin
+                         || this.numericDate(moment().subtract(defaultDateRange*defaultDateSliderFraction, "years").valueOf()));
     const selectedMax = +this.props.location.query.dmax || absoluteMax;
     const datePickerMin = (this.props.location.query.dmin
                            ? moment(this.numericToUnix(+this.props.location.query.dmin))
@@ -135,6 +137,11 @@ class DateRangeInputs extends React.Component {
     const datePickerMax = (this.props.location.query.dmax
                            ? moment(this.numericToUnix(+this.props.location.query.dmax))
                            : moment(this.numericToUnix(absoluteMax)));
+
+    if (!(this.props.location.query.dmax && this.props.location.query.dmin) ){
+      this.setDateQueryParam({"min":selectedMin, "max":selectedMax});
+      return null;
+    }
     return (
       <div>
         <Slider

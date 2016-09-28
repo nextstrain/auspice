@@ -21,6 +21,7 @@ import TreeView from "./tree/treeView";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
 import queryString from "query-string";
+import {colorOptions} from "../util/globals"
 
 @connect()
 @Radium
@@ -33,8 +34,6 @@ class App extends React.Component {
         pathname: window.location.pathname.slice(1, -1),
         query: queryString.parse(window.location.search)
       },
-      colorOptions: {"region":{"key":"region", "legendTitle":"Region", "menuItem":"region", "type":"discrete"},
-                     "numdate":{"key":"numdate", "legendTitle":"Sampling date", "menuItem":"date", "type":"continuous"}}
       // sidebarDocked: true,
     };
   }
@@ -121,7 +120,7 @@ class App extends React.Component {
         >
           <Controls changeRoute={this.changeRoute.bind(this)}
                     location={this.state.location}
-                    colorOptions={this.state.colorOptions}
+                    colorOptions={colorOptions}
           />
           <TreeView query={this.state.location.query}/>
           <Frequencies/>

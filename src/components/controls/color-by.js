@@ -1,6 +1,7 @@
 import React from "react";
 import Radium from "radium";
 import queryString from "query-string";
+import { defaultColorBy } from "../../util/globals";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
 // import { connect } from "react-redux";
@@ -53,6 +54,11 @@ class ColorBy extends React.Component {
     };
   }
   render() {
+    if (!this.props.location.query.colorBy) {
+      console.log("setting default colorby", defaultColorBy);
+      this.setColorBy(defaultColorBy);
+      return null;
+    }
     const styles = this.getStyles();
     console.log("colorBy", this.props);
     const colorOptions = Object.keys(this.props.colorOptions).map( (cOpt) =>

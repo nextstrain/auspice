@@ -5,8 +5,9 @@ import Radium from "radium";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
 import d3 from "d3";
-import { legendRectSize, legendSpacing } from "../../util/globals";
+import { legendRectSize, legendSpacing, defaultColorBy } from "../../util/globals";
 import LegendItem from "./legend-item";
+
 
 // @connect(state => {
 //   return state.FOO;
@@ -36,7 +37,7 @@ class Legend extends React.Component {
   chooseLegendTitle() {
     let legendTitle = "";
     console.log("Legend:", this.props);
-    const colorBy = this.props.query.colorBy;
+    const colorBy = (this.props.query.colorBy) ? this.props.query.colorBy : defaultColorBy;
     return this.props.colorOptions[colorBy].legendTitle;
   }
 
