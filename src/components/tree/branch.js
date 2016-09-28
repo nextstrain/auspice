@@ -151,7 +151,7 @@ class TreeNode extends React.Component {
             cursor: "pointer"
           }}>
         </path>
-        <Tip {...this.props}/>
+        <Tip {...this.props} colorBy={this.props.query.colorBy}/>
       </g>
     );
   }
