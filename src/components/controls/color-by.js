@@ -1,15 +1,17 @@
 import React from "react";
 import Radium from "radium";
 import queryString from "query-string";
-import { defaultColorBy } from "../../util/globals";
+import { defaultColorBy, genericDomain, colors } from "../../util/globals";
+import { connect } from "react-redux";
+import { CHANGE_COLORBY } from "../../actions/controls";
+import * as scales from "../../util/colorScales";
+
 // import _ from "lodash";
 // import Flex from "./framework/flex";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
 
-// @connect(state => {
-//   return state.FOO;
-// })
+@connect()
 @Radium
 class ColorBy extends React.Component {
   constructor(props) {
@@ -31,6 +33,43 @@ class ColorBy extends React.Component {
     // foo: "bar"
   }
 
+  getColorScale(colorBy) {
+    let colorScale;
+    let continuous=false;
+    if (colorBy === "ep") {
+      colorScale = scales.epitopeColorScale;
+    } else if (colorBy === "ne") {
+      colorScale = scales.nonepitopeColorScale;
+    } else if (colorBy === "rb") {
+      colorScale = scales.receptorBindingColorScale;
+    } else if (colorBy === "lbi") {
+      colorScale = scales.lbiColorScale;
+      // todo, discuss
+      // adjust_coloring_by_date();
+      continuous = true;
+    } else if (colorBy === "dfreq") {
+      colorScale = scales.dfreqColorScale;
+      continuous = true;
+    } else if (colorBy === "region") {
+      colorScale = scales.regionColorScale;
+    } else if (colorBy === "cHI") {
+      colorScale = scales.cHIColorScale;
+      continuous = true;
+    } else if (colorBy === "num_date") {
+      const offset = +this.props.location.query.dmin;
+      const range = +this.props.location.query.dmax - offset;
+      const dateColorScale = d3.scale.linear()
+        .domain(genericDomain.map((d) => offset + d * range))
+        .range(colors[10]);
+      colorScale = dateColorScale;
+      continuous = true;
+    } else if (colorBy === "fitness") {
+      colorScale = scales.fitnessColorScale;
+      continuous = true;
+    }
+    return {"scale": colorScale, "continuous": continuous};
+  }
+
   setColorBy(colorBy) {
     const tmp_path = this.props.location.pathname
     const prefix = (tmp_path === "" || tmp_path[0] === "/") ? "" : "/";
@@ -44,6 +83,7 @@ class ColorBy extends React.Component {
     console.log("setColorBy", url, this.props.location.pathname,prefix);
     window.history.pushState({}, "", url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
+    this.props.dispatch({ type: CHANGE_COLORBY, data: {"colorBy": colorBy, "colorScale": this.getColorScale(colorBy)}});
   }
 
   getStyles() {

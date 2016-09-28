@@ -13,7 +13,8 @@ const returnStateNeeded = (fullStateTree) => {
     selectedLegendItem: fullStateTree.controls.selectedLegendItem,
     legendBoundsMap: fullStateTree.controls.legendBoundsMap,
     colorScale: fullStateTree.controls.colorScale,
-    showBranchLabels: fullStateTree.controls.showBranchLabels,
+    continuousColor: fullStateTree.controls.continuousColor,
+    showBranchLabels: fullStateTree.controls.showBranchLabels
   };
 };
 

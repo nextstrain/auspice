@@ -20,7 +20,7 @@ export const datasets={
 
 export const colorOptions = {
     "region":{"key":"region", "legendTitle":"Region", "menuItem":"region", "type":"discrete"},
-    "numdate":{"key":"numdate", "legendTitle":"Sampling date", "menuItem":"date", "type":"continuous"}
+    "num_date":{"key":"num_date", "legendTitle":"Sampling date", "menuItem":"date", "type":"continuous"}
   }
 
 

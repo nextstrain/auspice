@@ -43,7 +43,6 @@ class Tip extends React.Component {
   determineLegendMatch() {
     const {
       colorBy,
-      continuous,
       selectedLegendItem,
       legendBoundsMap
     } = this.props;
@@ -52,7 +51,7 @@ class Tip extends React.Component {
     // equates a tip and a legend element
     // exact match is required for categorical qunantities such as genotypes, regions
     // continuous variables need to fall into the interal (lower_bound[leg], leg]
-    if (continuous) {
+    if (this.props.controls.continuousColor) {
       bool = (this.props.node.attr[colorBy] <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
         (this.props.node.attr[colorBy] > legendBoundsMap.lower_bound[selectedLegendItem]);
     } else {

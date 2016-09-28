@@ -15,6 +15,7 @@ const Controls = (state = {
     as opposed to discrete/categorical. we need a legendBoundsMap in the former, not the latter
   */
   legendBoundsMap: createLegendMatchBound(getColorScale(globals.defaultColorBy)),
+  continuousColor: false,
   showBranchLabels: false,
   selectedLegendItem: null,
   selectedBranch: null,
@@ -24,6 +25,12 @@ const Controls = (state = {
   strain: null
 }, action) => {
   switch (action.type) {
+  case types.CHANGE_COLORBY:
+    return Object.assign({}, state, {
+      colorBy: action.data.colorBy,
+      colorScale: action.data.colorScale.scale,
+      continuousColor: action.data.colorScale.continuous
+    });
   case types.TOGGLE_BRANCH_LABELS:
     return Object.assign({}, state, {
       showBranchLabels: !state.showBranchLabels

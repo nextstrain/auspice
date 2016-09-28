@@ -179,7 +179,6 @@ class TreeView extends React.Component {
       2. otherwise if we just rescaled, run updatescales,
       3. otherwise just have components rerender because for instance colorby changed
     */
-    console.log('tree', this.props)
     return (
       <div>
         {this.state.okToDraw ? this.createTree() : "We don't have tree data yet [spinner]"}
