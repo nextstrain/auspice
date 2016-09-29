@@ -2,7 +2,6 @@ import * as globals from "./globals";
 import getColorScale from "./getColorScale";
 
 const createLegendMatchBound = (colorScale) => {
-
   const lower_bound = {};
   const upper_bound = {};
   lower_bound[colorScale.domain()[0]] = globals.reallySmallNumber;

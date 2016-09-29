@@ -33,15 +33,27 @@ class ColorBy extends React.Component {
     // foo: "bar"
   }
 
+  genericScale(cmin,cmax){
+    const offset = +cmin;
+    const range = cmax-cmin;
+    const tmpColorScale = d3.scale.linear()
+      .domain(genericDomain.map((d) => offset + d * range))
+      .range(colors[10]);
+    return tmpColorScale;
+  }
+
   getColorScale(colorBy) {
     let colorScale;
     let continuous=false;
     if (colorBy === "ep") {
-      colorScale = scales.epitopeColorScale;
+      colorScale = this.genericScale(0, 15);
+      continuous = true;
     } else if (colorBy === "ne") {
-      colorScale = scales.nonepitopeColorScale;
+      colorScale = this.genericScale(0, 25);
+      continuous = true;
     } else if (colorBy === "rb") {
-      colorScale = scales.receptorBindingColorScale;
+      colorScale = this.genericScale(0, 6);
+      continuous = true;
     } else if (colorBy === "lbi") {
       colorScale = scales.lbiColorScale;
       // todo, discuss
@@ -56,12 +68,7 @@ class ColorBy extends React.Component {
       colorScale = scales.cHIColorScale;
       continuous = true;
     } else if (colorBy === "num_date") {
-      const offset = +this.props.location.query.dmin;
-      const range = +this.props.location.query.dmax - offset;
-      const dateColorScale = d3.scale.linear()
-        .domain(genericDomain.map((d) => offset + d * range))
-        .range(colors[10]);
-      colorScale = dateColorScale;
+      colorScale = this.genericScale(this.props.location.query.dmin, this.props.location.query.dmax);
       continuous = true;
     } else if (colorBy === "fitness") {
       colorScale = scales.fitnessColorScale;
@@ -102,7 +109,9 @@ class ColorBy extends React.Component {
     const styles = this.getStyles();
     console.log("colorBy", this.props);
     const colorOptions = Object.keys(this.props.colorOptions).map( (cOpt) =>
-                              <option value={ cOpt }> { this.props.colorOptions[cOpt].menuItem } </option> );
+                              <option value={ cOpt } >
+                                { this.props.colorOptions[cOpt].menuItem }
+                              </option> );
 
     return (
       <div style={styles.base}>
