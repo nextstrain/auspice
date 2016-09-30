@@ -6,7 +6,7 @@ import "moment-range";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
-import Branch from "./branch";
+import TreeNode from "./treeNode";
 import {VictoryAnimation} from "victory";
 
 
@@ -97,7 +97,7 @@ class Tree extends React.Component {
         }}>
         {(props) => {
           return (
-            <Branch
+            <TreeNode
               {...this.props} {...props} animate={null}
               key={index}
               node={node}
