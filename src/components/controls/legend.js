@@ -5,8 +5,9 @@ import Radium from "radium";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
 import d3 from "d3";
-import { legendRectSize, legendSpacing } from "../../util/globals";
+import { legendRectSize, legendSpacing, defaultColorBy } from "../../util/globals";
 import LegendItem from "./legend-item";
+
 
 // @connect(state => {
 //   return state.FOO;
@@ -35,39 +36,10 @@ class Legend extends React.Component {
   }
   chooseLegendTitle() {
     let legendTitle = "";
-    const colorBy = this.props.controls.colorBy
-
-    if (colorBy === "ep") {
-      legendTitle = "Epitope mutations";
-    } else if (colorBy === "ne") {
-      legendTitle = "Non-epitope mutations";
-    } else if (colorBy === "rb") {
-      legendTitle = "Receptor binding mutations";
-    } else if (colorBy === "lbi") {
-      legendTitle = "Local branching index";
-    } else if (colorBy === "region") {
-      legendTitle = "Region";
-    } else if (colorBy === "genotype") {
-      legendTitle = "Genotype";
-    } else if (colorBy === "date") {
-      legendTitle = "Date";
-    } else if (colorBy === "cHI") {
-      legendTitle = "log<sub>2</sub> titer distance from root";
-    } else if (colorBy === "HI_dist") {
-      legendTitle = "log<sub>2</sub> titer distance from " + focusNode.strain;
-    } else if (colorBy === "dfreq") {
-      const tmp_nmonth = Math.round(12 * dfreq_dn * time_step);
-      let tmp_text = "Freq. change (" + tmp_nmonth + " month";
-      if (tmp_nmonth > 1) {
-        tmp_text += "s";
-      }
-      legendTitle = tmp_text + ")";
-    } else if (colorBy === "fitness") {
-      legendTitle = "Relative fitness";
-    }
-
-    return legendTitle;
+    const colorBy = (this.props.location.query.colorBy) ? this.props.location.query.colorBy : defaultColorBy;
+    return this.props.colorOptions[colorBy].legendTitle;
   }
+
   getSVGHeight() {
     return Math.ceil(this.props.controls.colorScale.domain().length / 2) *
       (legendRectSize + legendSpacing) + legendSpacing || 100;

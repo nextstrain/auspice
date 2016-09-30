@@ -1,33 +1,28 @@
 import React from "react";
 import Radium from "radium";
+import moment from "moment";
+import "moment-range";
 // import _ from "lodash";
-// import Flex from './framework/flex';
+// import Flex from "./framework/flex";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
-// import { visualization } from "../../visualization/visualization";
-import d3 from "d3";
-import { processNodes, calcLayouts } from "../../util/processNodes";
-import * as globals from "../../util/globals";
-import Nodes from "./nodes";
+import TreeNode from "./treeNode";
+import {VictoryAnimation} from "victory";
 
-import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 
-const returnStateNeeded = (fullStateTree) => {
-  return {
-    tree: fullStateTree.tree,
-    controls: fullStateTree.controls
-  };
-};
-
-@connect(returnStateNeeded)
+/*
+ * Tree creates all TreeNodes of the tree, which consist of branches and tips.
+ * Tree assignes the desired locations to all TreeNodes
+*/
+@connect((state) => {
+  return {controls: state.controls};
+})
 @Radium
 class Tree extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      okToDraw: false,
-      value: ViewerHelper.getDefaultValue(),
-      tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
+
     };
   }
   static propTypes = {
@@ -36,148 +31,96 @@ class Tree extends React.Component {
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
-    controls: React.PropTypes.object,
-    tree: React.PropTypes.object
-  }
-  componentWillMount() {
-    if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
-      const nodes = this.setupTree();
-      const scales = this.updateScales(nodes);
-      this.setState({
-        okToDraw: true,
-        currentDatasetGuid: this.props.tree.datasetGuid,
-        nodes: nodes,
-        width: globals.width,
-        xScale: scales.xScale,
-        yScale: scales.yScale
-      });
-    }
+    style: React.PropTypes.object
+    // foo: React.PropTypes.string
   }
 
-  componentWillReceiveProps(nextProps) {
-    // is it NEW data? have we drawn this tree yet? setupTree()
-    console.log('will receive props in tree', this.state.currentDatasetGuid, this.props.tree.datasetGuid, this.props)
-    if (!this.props.tree.datasetGuid){
-      console.log("no data yet");
-      this.setState({okToDraw: false});
-    } else if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
-      const nodes = this.setupTree();
-      const scales = this.updateScales(nodes, nextProps.query.l, nextProps.query.m);
-      this.setState({
-        okToDraw: true,
-        currentDatasetGuid: this.props.tree.datasetGuid,
-        nodes: nodes,
-        width: globals.width,
-        xScale: scales.xScale,
-        yScale: scales.yScale
-      });
-      return;
-    } else if (this.state.currentDatasetGuid
-              && (nextProps.query.l !== this.props.query.l
-                  || nextProps.query.m !== this.props.query.m) ) {
-      const scales = this.updateScales(this.state.nodes, nextProps.query.l, nextProps.query.m);
-      this.setState({
-        xScale: scales.xScale,
-        yScale: scales.yScale
-      });
-    }
+  xVal(node, distanceMeasure, layout) {
+    return this.props.xScale(node.geometry[distanceMeasure][layout].xVal);
   }
-
-  updateScales(nodes, layout_in, distanceMeasure_in) {
-    const layout = (layout_in)?layout_in:"rectangular";
-    const distanceMeasure = (distanceMeasure_in)?distanceMeasure_in:"div";
-    console.log("Making scales:",layout, distanceMeasure);
-
-    const xValues = nodes.map((node) => {
-      return +node.geometry[distanceMeasure][layout].xVal;
-    });
-
-    const yValues = nodes.map((node) => {
-      return +node.geometry[distanceMeasure][layout].yVal;
-    });
-
-    const xScale = d3.scale.linear().range([globals.margin, globals.width - globals.margin]);
-    const yScale = d3.scale.linear().range([
-      globals.margin,
-      this.treePlotHeight(globals.width) - globals.margin
-    ]);
-
+  yVal(node, distanceMeasure, layout) {
+    return this.props.yScale(node.geometry[distanceMeasure][layout].yVal);
+  }
+  xMidpoint(node, distanceMeasure, layout) {
+    return this.props.xScale(node.geometry[distanceMeasure][layout].xValMidpoint);
+  }
+  yMidpoint(node, distanceMeasure, layout) {
+    return this.props.yScale(node.geometry[distanceMeasure][layout].yValMidpoint);
+  }
+  r_x(node, distanceMeasure, layout) {
     if (layout === "radial") {
-      xScale.domain([-d3.max(xValues), d3.max(xValues)]);
-      yScale.domain([-d3.max(xValues), d3.max(xValues)]);
+      return this.props.xScale(node.geometry[distanceMeasure][layout].radiusInner) - this.props.xScale(0);
     } else {
-      xScale.domain([d3.min(xValues), d3.max(xValues)]);
-      yScale.domain([d3.min(yValues), d3.max(yValues)]);
+      return 0;
     }
-
-    return {
-      xScale,
-      yScale
-    };
-
+  }
+  r_y(node, distanceMeasure, layout) {
+    if (layout === "radial") {
+      return this.props.yScale(node.geometry[distanceMeasure][layout].radiusInner) - this.props.yScale(0);
+    } else {
+      return 0;
+    }
+  }
+  smallBigArc(node, distanceMeasure, layout) {
+    if (layout === "radial") {
+      return node.geometry[distanceMeasure][layout].smallBigArc;
+    } else {
+      return 0;
+    }
+  }
+  leftRight(node, distanceMeasure, layout) {
+    if (layout === "radial") {
+      return node.geometry[distanceMeasure][layout].leftRight;
+    } else {
+      return 0;
+    }
   }
 
-  setupTree() {
-    const tree = d3.layout.tree()
-      .size([this.treePlotHeight(globals.width), globals.width]);
-    const nodes = processNodes(tree.nodes(this.props.tree.tree));
-    nodes[0].parent = nodes[0];
-    calcLayouts(nodes, ["div", "num_date"]);
-    return nodes;
-  }
-
-  treePlotHeight(width) {
-    return 400 + 0.30 * width;
-  }
-
-  createSvgAndNodes() {
-    // <Viewer
-    //   width={this.state.width}
-    //   height={this.treePlotHeight(this.state.width)}
-    //   value={this.state.value}
-    //   tool={this.state.tool}
-    //   onChange={this.handleChange.bind(this)}
-    //   onClick={this.handleClick.bind(this)}>
-    return (
-        <svg
-          width={this.state.width}
-          height={this.treePlotHeight(this.state.width)}
-          id="treeplot">
-          <Nodes
-            query={this.props.query}
-            nodes={this.state.nodes}
-            layout={(this.props.query.l)?this.props.query.l:"rectangular"}
-            distanceMeasure={(this.props.query.m)?this.props.query.m:"div"}
-            xScale={this.state.xScale}
-            yScale={this.state.yScale}/>
-        </svg>
+  drawBranches(nodes) {
+    const range = moment().range(
+      new Date(+this.props.query.dmin),
+      new Date(+this.props.query.dmax)
     )
-  // </Viewer>
+    const branchComponents = nodes.map((node, index) => {
+      return (
+        <VictoryAnimation duration={1000} key={index} data={{
+          x: this.xVal(node, this.props.distanceMeasure, this.props.layout),
+          y: this.yVal(node, this.props.distanceMeasure, this.props.layout),
+          midpoint_x: this.xMidpoint(node, this.props.distanceMeasure, this.props.layout),
+          midpoint_y: this.yMidpoint(node, this.props.distanceMeasure, this.props.layout),
+          source_x:   this.xVal(node.parent, this.props.distanceMeasure, this.props.layout),
+          source_y:   this.yVal(node.parent, this.props.distanceMeasure, this.props.layout),
+          r_x: this.r_x(node, this.props.distanceMeasure, this.props.layout),
+          r_y: this.r_y(node, this.props.distanceMeasure, this.props.layout),
+          smallBigArc: this.smallBigArc(node, this.props.distanceMeasure, this.props.layout),
+          leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.layout)
+        }}>
+        {(props) => {
+          return (
+            <TreeNode
+              {...this.props} {...props} animate={null}
+              key={index}
+              node={node}
+              dateRange={range}
+              showBranchLabels={this.props.controls.showBranchLabels}
+              strain={node.attr.strain}
+              hasChildren={node.children ? true : false}
+            />
+          )
+        }}
+      </VictoryAnimation>
+     );
+    });
+    return branchComponents;
   }
-  handleChange(event) {
-    // console.log('scaleFactor', event.scaleFactor);
 
-    this.setState({value: event.value});
-  }
-
-  handleClick(event){
-    // console.log('click', event.x, event.y, event.originalEvent);
-  }
   render() {
-    /*
-      1. if we just loaded a new dataset, run setup tree,
-      2. otherwise if we just rescaled, run updatescales,
-      3. otherwise just have components rerender because for instance colorby changed
-    */
-    console.log('tree', this.props)
     return (
-      <div>
-        {this.state.okToDraw ? this.createSvgAndNodes() : "We don't have tree data yet [spinner]"}
-      </div>
+      <g>
+        {this.drawBranches(this.props.nodes)}
+      </g>
     );
   }
 }
-
 
 export default Tree;

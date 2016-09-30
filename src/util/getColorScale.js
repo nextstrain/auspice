@@ -1,8 +1,11 @@
 import * as scales from "./colorScales";
+import { genericDomain, colors } from "./globals";
 
 const getColorScale = (colorBy) => {
 
-  let colorScale;
+  let colorScale = d3.scale.linear()
+    .domain(genericDomain)
+    .range(colors[10]);
 
   if (colorBy === "ep") {
     colorScale = scales.epitopeColorScale;
@@ -20,8 +23,9 @@ const getColorScale = (colorBy) => {
     colorScale = scales.regionColorScale;
   } else if (colorBy === "cHI") {
     colorScale = scales.cHIColorScale;
-  } else if (colorBy === "date") {
-    colorScale = scales.dateColorScale;
+  } else if (colorBy === "num_date") {
+
+    colorScale.domain(genericDomain.map((d) => Math.round(offset + range*d)));
   } else if (colorBy === "fitness") {
     colorScale = scales.fitnessColorScale;
   }

@@ -17,10 +17,11 @@ import Header from "./framework/header";
 import Controls from "./controls/controls";
 import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
-import Tree from "./tree/tree";
+import TreeView from "./tree/treeView";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
 import queryString from "query-string";
+import {colorOptions} from "../util/globals"
 
 @connect()
 @Radium
@@ -32,7 +33,7 @@ class App extends React.Component {
       location: {
         pathname: window.location.pathname.slice(1, -1),
         query: queryString.parse(window.location.search)
-      }
+      },
       // sidebarDocked: true,
     };
   }
@@ -61,7 +62,7 @@ class App extends React.Component {
         location: {
           pathname: window.location.pathname.slice(1, -1),
           query: queryString.parse(window.location.search)
-        }
+        },
       })
     })
     this.maybeFetchDataset();
@@ -116,8 +117,11 @@ class App extends React.Component {
           alignItems="flex-start"
           justifyContent="space-between"
         >
-          <Controls changeRoute={this.changeRoute.bind(this)} location={this.state.location}/>
-          <Tree query={this.state.location.query}/>
+          <Controls changeRoute={this.changeRoute.bind(this)}
+                    location={this.state.location}
+                    colorOptions={colorOptions}
+          />
+          <TreeView query={this.state.location.query}/>
           <Frequencies/>
           <Entropy/>
         </Flex>
