@@ -69,12 +69,10 @@ class TreeView extends React.Component {
       console.log("no data yet");
       this.setState({okToDraw: false});
     } else if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
-      const nodes = this.setupTree();
-      const scales = this.updateScales(nodes, nextProps.query.l, nextProps.query.m);
+      const scales = this.updateScales(nextProps.tree.nodes, nextProps.query.l, nextProps.query.m);
       this.setState({
         okToDraw: true,
         currentDatasetGuid: this.props.tree.datasetGuid,
-        nodes: nodes,
         width: globals.width,
         xScale: scales.xScale,
         yScale: scales.yScale
@@ -125,15 +123,6 @@ class TreeView extends React.Component {
 
   }
 
-  setupTree() {
-    const tree = d3.layout.tree()
-      .size([this.treePlotHeight(globals.width), globals.width]);
-    const nodes = processNodes(tree.nodes(this.props.tree.tree));
-    nodes[0].parent = nodes[0];
-    calcLayouts(nodes, ["div", "num_date"]);
-    return nodes;
-  }
-
   treePlotHeight(width) {
     return 400 + 0.30 * width;
   }
@@ -154,7 +143,7 @@ class TreeView extends React.Component {
           id="treeplot">
           <Tree
             query={this.props.query}
-            nodes={this.state.nodes}
+            nodes={this.props.tree.nodes}
             layout={(this.props.query.l)?this.props.query.l:"rectangular"}
             distanceMeasure={(this.props.query.m)?this.props.query.m:"div"}
             xScale={this.state.xScale}
