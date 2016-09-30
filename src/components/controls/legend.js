@@ -41,11 +41,11 @@ class Legend extends React.Component {
   }
 
   getSVGHeight() {
-    return Math.ceil(this.props.controls.colorScale.domain().length / 2) *
+    return Math.ceil(this.props.colorScale.scale.domain().length / 2) *
       (legendRectSize + legendSpacing) + legendSpacing || 100;
   }
   getTransformationForLegendItem(i) {
-    const count = this.props.controls.colorScale.domain().length;
+    const count = this.props.colorScale.scale.domain().length;
     const stack = Math.ceil(count / 2);
     const fromRight = Math.floor(i / stack);
     const fromTop = (i % stack);
@@ -54,15 +54,15 @@ class Legend extends React.Component {
     return "translate(" + horz + "," + vert + ")";
   }
   createLegendItems() {
-    let legendItems = this.props.controls.colorScale.domain().map((d, i) => {
+    let legendItems = this.props.colorScale.scale.domain().map((d, i) => {
       return (
         <LegendItem
           legendRectSize={legendRectSize}
           legendSpacing={legendSpacing}
-          rectFill={d3.rgb(this.props.controls.colorScale(d)).brighter([0.35]).toString()}
-          rectStroke={d3.rgb(this.props.controls.colorScale(d)).toString()}
+          rectFill={d3.rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
+          rectStroke={d3.rgb(this.props.colorScale.scale(d)).toString()}
           transform={this.getTransformationForLegendItem(i)}
-          dFreq={this.props.controls.colorBy === "dfreq"}
+          dFreq={this.props.colorScale.colorBy === "dfreq"}
           key={i}
           label={d}
           index={i}/>

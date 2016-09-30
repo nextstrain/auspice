@@ -11,10 +11,6 @@ import Tooltip from "./tooltip";
 const returnStateNeeded = (fullStateTree) => {
   return {
     selectedLegendItem: fullStateTree.controls.selectedLegendItem,
-    legendBoundsMap: fullStateTree.controls.legendBoundsMap,
-    colorScale: fullStateTree.controls.colorScale,
-    continuousColor: fullStateTree.controls.continuousColor,
-    showBranchLabels: fullStateTree.controls.showBranchLabels
   };
 };
 
@@ -84,8 +80,8 @@ class TreeNode extends React.Component {
   }
 
   branchStrokeColor() {
-    if (this.props.node.attr[this.props.query.colorBy]) {
-      return this.props.colorScale(this.props.node.attr[this.props.query.colorBy]);
+    if (this.props.node.attr[this.props.colorScale.colorBy]) {
+      return this.props.colorScale.scale(this.props.node.attr[this.props.colorScale.colorBy]);
     }else{
       return "CCC";
     }
@@ -152,7 +148,7 @@ class TreeNode extends React.Component {
             cursor: "pointer"
           }}>
         </path>
-        <Tip {...this.props} colorBy={this.props.query.colorBy}/>
+        <Tip {...this.props}/>
       </g>
     );
   }

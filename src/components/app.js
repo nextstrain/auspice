@@ -21,6 +21,9 @@ import TreeView from "./tree/treeView";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
 import queryString from "query-string";
+import createLegendMatchBound from "../util/createLegendMatchBounds";
+import getColorScale from "../util/getColorScale";
+
 import {colorOptions} from "../util/globals"
 
 @connect()
@@ -31,9 +34,15 @@ class App extends React.Component {
     this.state = {
       sidebarOpen: false,
       location: {
-        pathname: window.location.pathname.slice(1, -1),
+        pathname: window.location.pathname,
         query: queryString.parse(window.location.search)
       },
+      colorScale:{
+        colorBy: null,
+        scale: null,
+        legendBoundsMap: null,
+        continuous: null,
+      }
       // sidebarDocked: true,
     };
   }
@@ -97,6 +106,17 @@ class App extends React.Component {
     window.history.pushState({}, "", url);
     this.changeRoute(newPath, this.state.location.query);
   }
+
+  updateColorScale(colorBy) {
+    const cScale = getColorScale(colorBy, this.state);
+    this.setState( {colorScale: {
+      colorBy: colorBy,
+      scale: cScale.scale,
+      continuous: cScale.continuous,
+      legendBoundsMap: createLegendMatchBound(cScale.scale)
+    }});
+  }
+
   changeRoute(pathname, query) {
     this.setState({
       location: {
@@ -104,7 +124,11 @@ class App extends React.Component {
         query
       }
     });
+    if (query.colorBy){
+      this.updateColorScale(query.colorBy);
+    }
   }
+
   render() {
     return (
       <div style={{margin: "0px 20px"}}>
@@ -120,8 +144,11 @@ class App extends React.Component {
           <Controls changeRoute={this.changeRoute.bind(this)}
                     location={this.state.location}
                     colorOptions={colorOptions}
+                    colorScale={this.state.colorScale}
           />
-          <TreeView query={this.state.location.query}/>
+          <TreeView location={this.state.location}
+                    colorScale={this.state.colorScale}
+          />
           <Frequencies/>
           <Entropy/>
         </Flex>

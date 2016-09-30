@@ -41,17 +41,15 @@ class Tip extends React.Component {
   }
 
   determineLegendMatch() {
-    const {
-      colorBy,
-      selectedLegendItem,
-      legendBoundsMap
-    } = this.props;
+    const selectedLegendItem = this.props.selectedLegendItem;
+    const colorBy = this.props.colorScale.colorBy;
+    const legendBoundsMap = this.props.colorScale.legendBoundsMap;
     // construct a dictionary that maps a legend entry to the preceding interval
     let bool;
     // equates a tip and a legend element
     // exact match is required for categorical qunantities such as genotypes, regions
     // continuous variables need to fall into the interal (lower_bound[leg], leg]
-    if (this.props.controls.continuousColor) {
+    if (this.props.colorScale.continuous) {
       bool = (this.props.node.attr[colorBy] <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
         (this.props.node.attr[colorBy] > legendBoundsMap.lower_bound[selectedLegendItem]);
     } else {
@@ -71,15 +69,15 @@ class Tip extends React.Component {
 
   tipColor() {
     if (this.props.node.clade % 10) {
-      return this.props.colorScale(this.props.node.attr[this.props.query.colorBy]);
+      return this.props.colorScale.scale(this.props.node.attr[this.props.colorScale.colorBy]);
     } else {
       return "CCC";
     }
   }
 
   tipVisibility() {
-    if (this.props.node.attr.num_date >= this.props.query.dmin
-        && this.props.node.attr.num_date < this.props.query.dmax) {
+    if (this.props.node.attr.num_date >= this.props.location.query.dmin
+        && this.props.node.attr.num_date < this.props.location.query.dmax) {
       return "visible";
     } else {
       return "hidden";

@@ -15,7 +15,7 @@ import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 const returnStateNeeded = (fullStateTree) => {
   return {
     tree: fullStateTree.tree,
-    controls: fullStateTree.controls
+    controls: fullStateTree.controls,
   };
 };
 
@@ -69,7 +69,7 @@ class TreeView extends React.Component {
       console.log("no data yet");
       this.setState({okToDraw: false});
     } else if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
-      const scales = this.updateScales(nextProps.tree.nodes, nextProps.query.l, nextProps.query.m);
+      const scales = this.updateScales(nextProps.tree.nodes, nextProps.location.query.l, nextProps.location.query.m);
       this.setState({
         okToDraw: true,
         currentDatasetGuid: this.props.tree.datasetGuid,
@@ -79,9 +79,9 @@ class TreeView extends React.Component {
       });
       return;
     } else if (this.state.currentDatasetGuid
-              && (nextProps.query.l !== this.props.query.l
-                  || nextProps.query.m !== this.props.query.m) ) {
-      const scales = this.updateScales(this.state.nodes, nextProps.query.l, nextProps.query.m);
+              && (nextProps.location.query.l !== this.props.location.query.l
+                  || nextProps.location.query.m !== this.props.location.query.m) ) {
+      const scales = this.updateScales(this.state.nodes, nextProps.location.query.l, nextProps.location.query.m);
       this.setState({
         xScale: scales.xScale,
         yScale: scales.yScale
@@ -142,10 +142,11 @@ class TreeView extends React.Component {
           height={this.treePlotHeight(this.state.width)}
           id="treeplot">
           <Tree
-            query={this.props.query}
+            colorScale={this.props.colorScale}
+            location={this.props.location}
             nodes={this.props.tree.nodes}
-            layout={(this.props.query.l)?this.props.query.l:"rectangular"}
-            distanceMeasure={(this.props.query.m)?this.props.query.m:"div"}
+            layout={(this.props.location.query.l)?this.props.location.query.l:"rectangular"}
+            distanceMeasure={(this.props.location.query.m)?this.props.location.query.m:"div"}
             xScale={this.state.xScale}
             yScale={this.state.yScale}
           />

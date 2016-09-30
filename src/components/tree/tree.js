@@ -78,8 +78,8 @@ class Tree extends React.Component {
 
   drawBranches(nodes) {
     const range = moment().range(
-      new Date(+this.props.query.dmin),
-      new Date(+this.props.query.dmax)
+      new Date(+this.props.location.query.dmin),
+      new Date(+this.props.location.query.dmax)
     )
     const branchComponents = nodes.map((node, index) => {
       return (
