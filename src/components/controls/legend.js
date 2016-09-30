@@ -36,8 +36,7 @@ class Legend extends React.Component {
   }
   chooseLegendTitle() {
     let legendTitle = "";
-    console.log("Legend:", this.props);
-    const colorBy = (this.props.query.colorBy) ? this.props.query.colorBy : defaultColorBy;
+    const colorBy = (this.props.location.query.colorBy) ? this.props.location.query.colorBy : defaultColorBy;
     return this.props.colorOptions[colorBy].legendTitle;
   }
 

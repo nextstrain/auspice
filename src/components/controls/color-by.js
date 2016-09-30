@@ -87,7 +87,6 @@ class ColorBy extends React.Component {
     // https://www.npmjs.com/package/query-string
     const url = (prefix + this.props.location.pathname
                  + suffix + queryString.stringify(newQuery));
-    console.log("setColorBy", url, this.props.location.pathname,prefix);
     window.history.pushState({}, "", url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
     this.props.dispatch({ type: CHANGE_COLORBY, data: {"colorBy": colorBy, "colorScale": this.getColorScale(colorBy)}});
@@ -102,12 +101,10 @@ class ColorBy extends React.Component {
   }
   render() {
     if (!this.props.location.query.colorBy) {
-      console.log("setting default colorby", defaultColorBy);
       this.setColorBy(defaultColorBy);
       return null;
     }
     const styles = this.getStyles();
-    console.log("colorBy", this.props);
     const colorOptions = Object.keys(this.props.colorOptions).map( (cOpt) =>
                               <option value={ cOpt } >
                                 { this.props.colorOptions[cOpt].menuItem }

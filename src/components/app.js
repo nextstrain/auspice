@@ -106,7 +106,6 @@ class App extends React.Component {
     });
   }
   render() {
-    console.log("appstate:", this.state);
     return (
       <div style={{margin: "0px 20px"}}>
         <Header/>
