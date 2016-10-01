@@ -46,7 +46,7 @@ class App extends React.Component {
         colorBy: null,
         scale: null,
         legendBoundsMap: null,
-        continuous: null,
+        continuous: null
       }
       // sidebarDocked: true,
     };
@@ -67,18 +67,17 @@ class App extends React.Component {
 
   }
   componentDidMount() {
-    console.log('registering')
+    console.log('registering');
     // when the user hits the back button or forward, let us know so we can setstate again
     // all of the other intentional route changes we will manually setState
-    window.addEventListener('popstate', (a,b,c) => {
-      console.log('popstate', a,b,c)
+    window.addEventListener("popstate", (a, b, c) => {
       this.setState({
         location: {
           pathname: window.location.pathname.slice(1, -1),
           query: queryString.parse(window.location.search)
-        },
-      })
-    })
+        }
+      });
+    });
     this.maybeFetchDataset();
   }
   componentDidUpdate() {
@@ -92,18 +91,18 @@ class App extends React.Component {
     const parsedParams = parseParams(this.state.location.pathname);
     const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);
     tmp_levels.sort((x, y) => x[0] > y[0]);
-    const data_path = tmp_levels.map( function (d) {return d[1];}).join("_");
-    console.log("maybeFetchDataset",data_path,this.state.latestValidParams, parsedParams.fullsplat);
+    // make prefix for data files with fields joined by _ instead of / as in URL
+    const data_path = tmp_levels.map((d) => d[1]).join("_");
     if (parsedParams.incomplete) {
-        this.setVirusPath(parsedParams.fullsplat);
+      this.setVirusPath(parsedParams.fullsplat);
     }
     if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
-      console.log("attempting to load, need to nuke old Guid",data_path,this.state.latestValidParams, parsedParams.fullsplat);
+      console.log("attempting to load ", data_path, "prev: ", this.state.latestValidParams);
       this.props.dispatch(populateMetadataStore(data_path));
       this.props.dispatch(populateTreeStore(data_path));
       this.props.dispatch(populateSequencesStore(data_path));
       this.props.dispatch(populateFrequenciesStore(data_path));
-      this.setState({latestValidParams:parsedParams.fullsplat});
+      this.setState({latestValidParams: parsedParams.fullsplat});
     }
   }
   setVirusPath(newPath) {
@@ -116,12 +115,14 @@ class App extends React.Component {
 
   updateColorScale(colorBy) {
     const cScale = getColorScale(colorBy, this.props);
-    this.setState( {colorScale: {
-      colorBy: colorBy,
-      scale: cScale.scale,
-      continuous: cScale.continuous,
-      legendBoundsMap: createLegendMatchBound(cScale.scale)
-    }});
+    this.setState({
+      colorScale: {
+        colorBy: colorBy,
+        scale: cScale.scale,
+        continuous: cScale.continuous,
+        legendBoundsMap: createLegendMatchBound(cScale.scale)
+      }
+    });
   }
 
   changeRoute(pathname, query) {
@@ -131,7 +132,7 @@ class App extends React.Component {
         query
       }
     });
-    if (query.colorBy){
+    if (query.colorBy) {
       this.updateColorScale(query.colorBy);
     }
   }
