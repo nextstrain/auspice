@@ -23,12 +23,14 @@ import parseParams from "../util/parseParams";
 import queryString from "query-string";
 import createLegendMatchBound from "../util/createLegendMatchBounds";
 import getColorScale from "../util/getColorScale";
+import { parseGenotype }  from "../util/getGenotype";
 
 import {colorOptions} from "../util/globals"
 
 const returnStateNeeded = (fullStateTree) => {
   return {
     tree: fullStateTree.tree,
+    sequences: fullStateTree.sequences,
   };
 };
 @connect(returnStateNeeded)
@@ -114,13 +116,16 @@ class App extends React.Component {
   }
 
   updateColorScale(colorBy) {
-    const cScale = getColorScale(colorBy, this.props);
+    const cScale = getColorScale(colorBy, this.props.tree, this.props.sequences);
+    const cBy = colorBy.split(":")[0];
+    console.log("updateColorScale", cBy, cScale);
     this.setState({
       colorScale: {
-        colorBy: colorBy,
+        colorBy: cBy,
         scale: cScale.scale,
         continuous: cScale.continuous,
-        legendBoundsMap: createLegendMatchBound(cScale.scale)
+        legendBoundsMap: createLegendMatchBound(cScale.scale),
+        genotype: parseGenotype(colorBy)
       }
     });
   }

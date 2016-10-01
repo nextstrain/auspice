@@ -51,7 +51,8 @@ class ColorBy extends React.Component {
   }
 
   setGenotypeColorBy(genotype) {
-    this.setColorBy("gt:" + genotype);
+    //this.setColorBy("gt:" + genotype);
+    this.setColorBy("gt:HA1_159");
   }
 
   extraInput(colorBy) {

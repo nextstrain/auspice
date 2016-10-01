@@ -1,5 +1,6 @@
 import * as scales from "./colorScales";
-import { genericDomain, colors } from "./globals";
+import { genericDomain, colors, genotypeColors } from "./globals";
+import { parseGenotype, getGenotype } from "./getGenotype"
 import d3 from "d3";
 
 const genericScale = (cmin, cmax) => {
@@ -41,24 +42,34 @@ const discreteAttributeScale = (nodes, attr) => {
   return d3.scale.ordinal().domain(domain);
 };
 
-const getColorScale = (colorBy, tree) => {
+const getColorScale = (colorBy, tree, sequences) => {
   const cScaleTypes = {ep: "integer", ne: "integer", rb: "integer",
                        lbi: "continuous", fitness: "continuous", num_date: "continuous",
                        region: "discrete", country: "discrete"};
   let colorScale;
   let continuous = false;
-  if (colorBy === "region") {
+  if (colorBy.slice(0,2) === "gt"){
+    const gt = parseGenotype(colorBy);
+    const stateCount = {};
+    tree.nodes.forEach((n) => (stateCount[getGenotype(gt[0][0], gt[0][1], n, sequences.sequences)]
+                           ? stateCount[getGenotype(gt[0][0], gt[0][1], n,   sequences.sequences)] += 1
+                           : stateCount[getGenotype(gt[0][0], gt[0][1], n,   sequences.sequences)] = 1));
+    const domain = Object.keys(stateCount);
+    domain.sort((a, b) => stateCount[a] > stateCount[b]);
+    colorScale = d3.scale.ordinal().domain(domain).range(genotypeColors);
+  }
+  else if (colorBy === "region") {
     continuous = false;
     colorScale = scales.regionColorScale;
   } else if (cScaleTypes[colorBy] === "continuous") {
     continuous = true;
-    colorScale = minMaxAttributeScale(tree.tree.nodes, colorBy);
+    colorScale = minMaxAttributeScale(tree.nodes, colorBy);
   } else if (cScaleTypes[colorBy] === "integer") {
     continuous = true;
-    colorScale = integerAttributeScale(tree.tree.nodes, colorBy);
+    colorScale = integerAttributeScale(tree.nodes, colorBy);
   } else if (cScaleTypes[colorBy] === "discrete") {
     continuous = false;
-    colorScale = discreteAttributeScale(tree.tree.nodes, colorBy);
+    colorScale = discreteAttributeScale(tree.nodes, colorBy);
   } else {
     continuous = true;
     colorScale = genericScale(0, 1);

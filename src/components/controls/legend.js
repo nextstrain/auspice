@@ -37,7 +37,11 @@ class Legend extends React.Component {
   chooseLegendTitle() {
     let legendTitle = "";
     const colorBy = (this.props.location.query.colorBy) ? this.props.location.query.colorBy : defaultColorBy;
-    return this.props.colorOptions[colorBy].legendTitle;
+    if (this.props.colorOptions[colorBy]){
+      return this.props.colorOptions[colorBy].legendTitle;
+    } else {
+      return "WhatEver";
+    }
   }
 
   getSVGHeight() {

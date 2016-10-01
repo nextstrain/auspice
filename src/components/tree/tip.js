@@ -1,5 +1,6 @@
 import React from "react";
 import Radium from "radium";
+import { getGenotype } from "../../util/getGenotype";
 import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
@@ -68,10 +69,16 @@ class Tip extends React.Component {
   }
 
   tipColor() {
-    if (this.props.node.clade % 10) {
-      return this.props.colorScale.scale(this.props.node.attr[this.props.colorScale.colorBy]);
+    if (this.props.colorScale.colorBy === "gt") {
+      if (this.props.sequences){
+        return this.props.colorScale.scale(getGenotype(this.props.colorScale.genotype[0][0],
+                                                       this.props.colorScale.genotype[0][1],
+                                                       this.props.node, this.props.sequences));
+      } else {
+        return "AAA";
+      }
     } else {
-      return "CCC";
+      return this.props.colorScale.scale(this.props.node.attr[this.props.colorScale.colorBy]);
     }
   }
 
