@@ -50,9 +50,18 @@ class ColorBy extends React.Component {
     // });
   }
 
-  extraInput(colorBy){
-    if (colorBy === "genotype"){
-      return (<genotypeInput/>);
+  setGenotypeColorBy(genotype) {
+    this.setColorBy("gt:" + genotype);
+  }
+
+  extraInput(colorBy) {
+    if (colorBy === "gt") {
+      console.log("extraInput");
+      return (
+        <input type="text" placeholder="HA1 position"
+               onChange={(e) => this.setGenotypeColorBy(e.target.value)}
+        />
+      );
     } else {
       return null;
     }
@@ -82,9 +91,9 @@ class ColorBy extends React.Component {
         <span> Color by </span>
         <select id="coloring"
           onChange={(e) => {
-            if (e.target.value === this.props.title) { return }
-              this.setColorBy(e.target.value);
-          }}>
+            if (e.target.value !== this.props.title) {this.setColorBy(e.target.value);}
+          }}
+        >
           {colorOptions}
         </select>
         <div>

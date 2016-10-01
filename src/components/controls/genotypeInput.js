@@ -8,8 +8,8 @@ import { connect } from "react-redux";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
 
-@connect()
-@Radium
+//@connect()
+//@Radium
 class genotypeInput extends React.Component {
   constructor(props) {
     super(props);
@@ -53,8 +53,12 @@ class genotypeInput extends React.Component {
     };
   }
   render() {
+    console.log("genotypeInput", this.props);
     return (
-      <input default="HA1:159"/>
+      <div>
+      GENOTYPE
+      <input type="text" placeholder="HA1 position"/>
+      </div>
     );
   }
 }
