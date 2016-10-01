@@ -1,10 +1,7 @@
 import React from "react";
 import Radium from "radium";
 import queryString from "query-string";
-import { defaultColorBy, genericDomain, colors } from "../../util/globals";
 import { connect } from "react-redux";
-import * as scales from "../../util/colorScales";
-import genotypeInput from "./genotypeInput";
 
 // import _ from "lodash";
 // import Flex from "./framework/flex";
@@ -13,7 +10,7 @@ import genotypeInput from "./genotypeInput";
 
 @connect()
 @Radium
-class ColorBy extends React.Component {
+class genotypeInput extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -26,8 +23,6 @@ class ColorBy extends React.Component {
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
-    // foo: React.PropTypes.string
   }
   static defaultProps = {
     // foo: "bar"
@@ -50,14 +45,6 @@ class ColorBy extends React.Component {
     // });
   }
 
-  extraInput(colorBy){
-    if (colorBy === "genotype"){
-      return (<genotypeInput/>);
-    } else {
-      return null;
-    }
-  }
-
   getStyles() {
     return {
       base: {
@@ -66,33 +53,10 @@ class ColorBy extends React.Component {
     };
   }
   render() {
-    if (!this.props.location.query.colorBy) {
-      this.setColorBy(defaultColorBy);
-      return null;
-    }
-    const currentColorBy = this.props.location.query.colorBy;
-    const styles = this.getStyles();
-    const colorOptions = Object.keys(this.props.colorOptions).map( (cOpt) =>
-                              <option value={ cOpt } selected={cOpt === currentColorBy ? "selected" : null}>
-                                { this.props.colorOptions[cOpt].menuItem }
-                              </option> );
-
     return (
-      <div style={styles.base}>
-        <span> Color by </span>
-        <select id="coloring"
-          onChange={(e) => {
-            if (e.target.value === this.props.title) { return }
-              this.setColorBy(e.target.value);
-          }}>
-          {colorOptions}
-        </select>
-        <div>
-        {this.extraInput(currentColorBy)}
-        </div>
-      </div>
+      <input default="HA1:159"/>
     );
   }
 }
 
-export default ColorBy;
+export default genotypeInput;

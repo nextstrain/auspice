@@ -43,17 +43,16 @@ class DateRangeInputs extends React.Component {
 
   numericDate(secSinceUnix) {
     const res = 1970 + (secSinceUnix / 365.25 / 24 / 3600 / 1000);
-    console.log("numericDate", res);
     return res;
   }
 
   numericToUnix(numdate) {
-    const res = (numdate -1970) * 365.25 * 24 * 3600 * 1000;
+    const res = (numdate - 1970) * 365.25 * 24 * 3600 * 1000;
     return res;
   }
 
   setDateQueryParam(newRange) {
-    const tmp_path = this.props.location.pathname
+    const tmp_path = this.props.location.pathname;
     const prefix = (tmp_path === "" || tmp_path[0] === "/") ? "" : "/";
     const suffix = (tmp_path.length && tmp_path[tmp_path.length - 1] !== "/") ? "/?" : "?";
 
@@ -62,7 +61,6 @@ class DateRangeInputs extends React.Component {
     // https://www.npmjs.com/package/query-string
     const url = (prefix + this.props.location.pathname
                  + suffix + queryString.stringify(newQuery));
-    console.log("setDateQueryParam", url, this.props.location.pathname,prefix);
     window.history.pushState({}, "", url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
   }

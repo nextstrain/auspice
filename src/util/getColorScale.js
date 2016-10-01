@@ -2,49 +2,69 @@ import * as scales from "./colorScales";
 import { genericDomain, colors } from "./globals";
 import d3 from "d3";
 
-const genericScale = (cmin,cmax) => {
+const genericScale = (cmin, cmax) => {
   const offset = +cmin;
-  const range = cmax-cmin;
+  const range = cmax - cmin;
   const tmpColorScale = d3.scale.linear()
     .domain(genericDomain.map((d) => offset + d * range))
     .range(colors[10]);
   return tmpColorScale;
-}
+};
 
-const getColorScale = (colorBy, currentState) => {
+
+const minMaxAttributeScale = (nodes, attr) => {
+  const maxAttr = d3.max(nodes.map((n) => n.attr[attr]));
+  const minAttr = d3.min(nodes.map((n) => n.attr[attr]));
+  return genericScale(minAttr, maxAttr);
+};
+
+const integerAttributeScale = (nodes, attr) => {
+  const maxAttr = d3.max(nodes.map((n) => n.attr[attr]));
+  const minAttr = d3.min(nodes.map((n) => n.attr[attr]));
+  const nStates = maxAttr - minAttr;
+  if (nStates < 11) {
+    const domain = [];
+    for (let i = minAttr; i <= maxAttr; i++) { domain.push(i); }
+    return d3.scale.linear().domain(domain).range(colors[maxAttr - minAttr]);
+  } else {
+    return genericScale(minAttr, maxAttr);
+  }
+};
+
+const discreteAttributeScale = (nodes, attr) => {
+  const stateCount = {};
+  nodes.forEach((n) => (stateCount[n.attr[attr]]
+                         ? stateCount[n.attr[attr]] += 1
+                         : stateCount[n.attr[attr]] = 1));
+  const domain = Object.keys(stateCount);
+  domain.sort((a, b) => stateCount[a] > stateCount[b]);
+  return d3.scale.ordinal().domain(domain);
+};
+
+const getColorScale = (colorBy, tree) => {
+  const cScaleTypes = {ep: "integer", ne: "integer", rb: "integer",
+                       lbi: "continuous", fitness: "continuous", num_date: "continuous",
+                       region: "discrete", country: "discrete"};
   let colorScale;
-  let continuous=false;
-  if (colorBy === "ep") {
-    colorScale = genericScale(0, 15);
-    continuous = true;
-  } else if (colorBy === "ne") {
-    colorScale = genericScale(0, 25);
-    continuous = true;
-  } else if (colorBy === "rb") {
-    colorScale = genericScale(0, 6);
-    continuous = true;
-  } else if (colorBy === "lbi") {
-    colorScale = scales.lbiColorScale;
-    // todo, discuss
-    // adjust_coloring_by_date();
-    continuous = true;
-  } else if (colorBy === "dfreq") {
-    colorScale = scales.dfreqColorScale;
-    continuous = true;
-  } else if (colorBy === "region") {
+  let continuous = false;
+  if (colorBy === "region") {
+    continuous = false;
     colorScale = scales.regionColorScale;
-  } else if (colorBy === "cHI") {
-    colorScale = scales.cHIColorScale;
+  } else if (cScaleTypes[colorBy] === "continuous") {
     continuous = true;
-  } else if (colorBy === "num_date") {
-    colorScale = genericScale(2012,2017);
+    colorScale = minMaxAttributeScale(tree.tree.nodes, colorBy);
+  } else if (cScaleTypes[colorBy] === "integer") {
     continuous = true;
-  } else if (colorBy === "fitness") {
-    colorScale = scales.fitnessColorScale;
+    colorScale = integerAttributeScale(tree.tree.nodes, colorBy);
+  } else if (cScaleTypes[colorBy] === "discrete") {
+    continuous = false;
+    colorScale = discreteAttributeScale(tree.tree.nodes, colorBy);
+  } else {
     continuous = true;
+    colorScale = genericScale(0, 1);
   }
   return {"scale": colorScale, "continuous": continuous};
-}
+};
 
 
 export default getColorScale;

@@ -15,7 +15,7 @@ import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 const returnStateNeeded = (fullStateTree) => {
   return {
     tree: fullStateTree.tree,
-    controls: fullStateTree.controls,
+    controls: fullStateTree.controls
   };
 };
 
@@ -49,7 +49,6 @@ class TreeView extends React.Component {
   }
   componentWillMount() {
     if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
-      const nodes = this.setupTree();
       const scales = this.updateScales(nodes);
       this.setState({
         okToDraw: true,
@@ -63,26 +62,18 @@ class TreeView extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    // is it NEW data? have we drawn this tree yet? setupTree()
-    console.log('will receive props in tree', this.state.currentDatasetGuid, this.props.tree.datasetGuid, this.props)
-    if (!this.props.tree.datasetGuid){
+    // Do we have a tree to draw? if yes, check whether it needs to be redrawn
+    if (!(nextProps.tree.datasetGuid && nextProps.tree.nodes)){
       console.log("no data yet");
       this.setState({okToDraw: false});
-    } else if (this.state.currentDatasetGuid !== this.props.tree.datasetGuid) {
+    } else if ((nextProps.tree.datasetGuid !== this.props.tree.datasetGuid)
+               || (nextProps.location.query.l !== this.props.location.query.l)
+               || (nextProps.location.query.m !== this.props.location.query.m)) {
       const scales = this.updateScales(nextProps.tree.nodes, nextProps.location.query.l, nextProps.location.query.m);
       this.setState({
         okToDraw: true,
-        currentDatasetGuid: this.props.tree.datasetGuid,
+        currentDatasetGuid: nextProps.tree.datasetGuid,
         width: globals.width,
-        xScale: scales.xScale,
-        yScale: scales.yScale
-      });
-      return;
-    } else if (this.state.currentDatasetGuid
-              && (nextProps.location.query.l !== this.props.location.query.l
-                  || nextProps.location.query.m !== this.props.location.query.m) ) {
-      const scales = this.updateScales(this.state.nodes, nextProps.location.query.l, nextProps.location.query.m);
-      this.setState({
         xScale: scales.xScale,
         yScale: scales.yScale
       });
@@ -90,9 +81,8 @@ class TreeView extends React.Component {
   }
 
   updateScales(nodes, layout_in, distanceMeasure_in) {
-    const layout = (layout_in)?layout_in:"rectangular";
-    const distanceMeasure = (distanceMeasure_in)?distanceMeasure_in:"div";
-    console.log("Making scales:",layout, distanceMeasure);
+    const layout = (layout_in) ? layout_in : "rectangular";
+    const distanceMeasure = (distanceMeasure_in) ? distanceMeasure_in : "div";
 
     const xValues = nodes.map((node) => {
       return +node.geometry[distanceMeasure][layout].xVal;

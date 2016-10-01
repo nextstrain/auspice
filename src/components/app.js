@@ -26,7 +26,12 @@ import getColorScale from "../util/getColorScale";
 
 import {colorOptions} from "../util/globals"
 
-@connect()
+const returnStateNeeded = (fullStateTree) => {
+  return {
+    tree: fullStateTree.tree,
+  };
+};
+@connect(returnStateNeeded)
 @Radium
 class App extends React.Component {
   constructor(props) {
@@ -88,15 +93,17 @@ class App extends React.Component {
     const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);
     tmp_levels.sort((x, y) => x[0] > y[0]);
     const data_path = tmp_levels.map( function (d) {return d[1];}).join("_");
+    console.log("maybeFetchDataset",data_path,this.state.latestValidParams, parsedParams.fullsplat);
     if (parsedParams.incomplete) {
         this.setVirusPath(parsedParams.fullsplat);
     }
     if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
-      console.log("attempting to load, need to nuke old Guid",data_path);
+      console.log("attempting to load, need to nuke old Guid",data_path,this.state.latestValidParams, parsedParams.fullsplat);
       this.props.dispatch(populateMetadataStore(data_path));
       this.props.dispatch(populateTreeStore(data_path));
       this.props.dispatch(populateSequencesStore(data_path));
       this.props.dispatch(populateFrequenciesStore(data_path));
+      this.setState({latestValidParams:parsedParams.fullsplat});
     }
   }
   setVirusPath(newPath) {
@@ -108,7 +115,7 @@ class App extends React.Component {
   }
 
   updateColorScale(colorBy) {
-    const cScale = getColorScale(colorBy, this.state);
+    const cScale = getColorScale(colorBy, this.props);
     this.setState( {colorScale: {
       colorBy: colorBy,
       scale: cScale.scale,
