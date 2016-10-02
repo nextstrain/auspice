@@ -4,6 +4,7 @@ import queryString from "query-string";
 import { defaultColorBy, genericDomain, colors } from "../../util/globals";
 import { connect } from "react-redux";
 import * as scales from "../../util/colorScales";
+import { parseGenotype } from "../../util/getGenotype";
 import genotypeInput from "./genotypeInput";
 
 // import _ from "lodash";
@@ -11,7 +12,13 @@ import genotypeInput from "./genotypeInput";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
 
-@connect()
+const returnStateNeeded = (fullStateTree) => {
+  return {
+    geneLength: fullStateTree.sequences.geneLength
+  };
+};
+
+@connect(returnStateNeeded)
 @Radium
 class ColorBy extends React.Component {
   constructor(props) {
@@ -34,6 +41,12 @@ class ColorBy extends React.Component {
   }
 
   setColorBy(colorBy) {
+    if (colorBy.slice(0,2) !== "Xgt") {
+      this.setColorByQuery(colorBy);
+    }
+  }
+
+  setColorByQuery(colorBy) {
     const tmp_path = this.props.location.pathname
     const prefix = (tmp_path === "" || tmp_path[0] === "/") ? "" : "/";
     const suffix = (tmp_path.length && tmp_path[tmp_path.length - 1] !== "/") ? "/?" : "?";
@@ -52,11 +65,15 @@ class ColorBy extends React.Component {
 
   setGenotypeColorBy(genotype) {
     //this.setColorBy("gt:" + genotype);
-    this.setColorBy("gt:HA1_159");
+    if (parseGenotype("gt-" + genotype, this.props.geneLength)) {
+      this.setColorByQuery("gt-" + genotype);
+    } else {
+      return null;
+    }
   }
 
   extraInput(colorBy) {
-    if (colorBy === "gt") {
+    if (true) { //colorBy === "gt") {
       console.log("extraInput");
       return (
         <input type="text" placeholder="HA1 position"

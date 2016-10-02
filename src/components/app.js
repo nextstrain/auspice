@@ -125,7 +125,7 @@ class App extends React.Component {
         scale: cScale.scale,
         continuous: cScale.continuous,
         legendBoundsMap: createLegendMatchBound(cScale.scale),
-        genotype: parseGenotype(colorBy)
+        genotype: parseGenotype(colorBy, this.props.sequences.geneLength)
       }
     });
   }

@@ -45,6 +45,7 @@ class Tip extends React.Component {
     const selectedLegendItem = this.props.selectedLegendItem;
     const colorBy = this.props.colorScale.colorBy;
     const legendBoundsMap = this.props.colorScale.legendBoundsMap;
+    const genotype = this.props.colorScale.genotype;
     // construct a dictionary that maps a legend entry to the preceding interval
     let bool;
     // equates a tip and a legend element
@@ -54,7 +55,11 @@ class Tip extends React.Component {
       bool = (this.props.node.attr[colorBy] <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
         (this.props.node.attr[colorBy] > legendBoundsMap.lower_bound[selectedLegendItem]);
     } else {
-      bool = this.props.node.attr[colorBy] === selectedLegendItem;
+      if (colorBy.slice(0,3) === "gt-") {
+        bool = getGenotype(genotype[0][0], genotype[0][1], this.props.node, this.props.sequences) === selectedLegendItem;
+      } else {
+        bool = this.props.node.attr[colorBy] === selectedLegendItem;
+      }
     }
     return bool;
   }
@@ -69,7 +74,7 @@ class Tip extends React.Component {
   }
 
   tipColor() {
-    if (this.props.colorScale.colorBy === "gt") {
+    if (this.props.colorScale.colorBy.slice(0,3) === "gt-") {
       if (this.props.sequences){
         return this.props.colorScale.scale(getGenotype(this.props.colorScale.genotype[0][0],
                                                        this.props.colorScale.genotype[0][1],

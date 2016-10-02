@@ -48,15 +48,17 @@ const getColorScale = (colorBy, tree, sequences) => {
                        region: "discrete", country: "discrete"};
   let colorScale;
   let continuous = false;
-  if (colorBy.slice(0,2) === "gt"){
-    const gt = parseGenotype(colorBy);
-    const stateCount = {};
-    tree.nodes.forEach((n) => (stateCount[getGenotype(gt[0][0], gt[0][1], n, sequences.sequences)]
-                           ? stateCount[getGenotype(gt[0][0], gt[0][1], n,   sequences.sequences)] += 1
-                           : stateCount[getGenotype(gt[0][0], gt[0][1], n,   sequences.sequences)] = 1));
-    const domain = Object.keys(stateCount);
-    domain.sort((a, b) => stateCount[a] > stateCount[b]);
-    colorScale = d3.scale.ordinal().domain(domain).range(genotypeColors);
+  if (colorBy.slice(0, 2) === "gt" && parseGenotype(colorBy, sequences.geneLength)){
+    const gt = parseGenotype(colorBy, sequences.geneLength);
+    if (gt) {
+      const stateCount = {};
+      tree.nodes.forEach((n) => (stateCount[getGenotype(gt[0][0], gt[0][1], n, sequences.sequences)]
+                             ? stateCount[getGenotype(gt[0][0], gt[0][1], n,   sequences.sequences)] += 1
+                             : stateCount[getGenotype(gt[0][0], gt[0][1], n,   sequences.sequences)] = 1));
+      const domain = Object.keys(stateCount);
+      domain.sort((a, b) => stateCount[a] > stateCount[b]);
+      colorScale = d3.scale.ordinal().domain(domain).range(genotypeColors);
+    }
   }
   else if (colorBy === "region") {
     continuous = false;
