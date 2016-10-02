@@ -17,6 +17,7 @@ import Header from "./framework/header";
 import Controls from "./controls/controls";
 import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
+import Map from "./map/map";
 import TreeView from "./tree/treeView";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
@@ -276,9 +277,10 @@ class App extends React.Component {
                     distanceMeasure={this.state.location.query.m || "div"}
                     datasetGuid={this.props.tree.datasetGuid}
           />
-          <Frequencies/>
-          <Entropy/>
         </Flex>
+        <Frequencies/>
+        <Entropy/>
+        <Map/>
         <Footer/>
       </div>
     );
