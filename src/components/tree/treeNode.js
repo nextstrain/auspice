@@ -83,7 +83,7 @@ class TreeNode extends React.Component {
 
   branchStrokeColor() {
     if (this.props.colorScale.colorBy.slice(0,3) === "gt-") {
-      if (this.props.sequences){
+      if (this.props.sequences && this.props.colorScale.genotype){
         return this.props.colorScale.scale(getGenotype(this.props.colorScale.genotype[0][0],
                                                        this.props.colorScale.genotype[0][1],
                                                        this.props.node, this.props.sequences));

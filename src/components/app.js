@@ -72,15 +72,17 @@ class App extends React.Component {
     console.log('registering');
     // when the user hits the back button or forward, let us know so we can setstate again
     // all of the other intentional route changes we will manually setState
+    const tmpQuery = queryString.parse(window.location.search);
     window.addEventListener("popstate", (a, b, c) => {
       this.setState({
         location: {
           pathname: window.location.pathname.slice(1, -1),
-          query: queryString.parse(window.location.search)
+          query: tmpQuery
         }
       });
     });
     this.maybeFetchDataset();
+    this.updateColorScale( tmpQuery.colorBy || "region" );
   }
   componentDidUpdate() {
     this.maybeFetchDataset();
@@ -117,6 +119,10 @@ class App extends React.Component {
 
   updateColorScale(colorBy) {
     const cScale = getColorScale(colorBy, this.props.tree, this.props.sequences);
+    let gts = null;
+    if (colorBy.slice(0,3) === "gt-" && this.props.sequences.geneLength) {
+      gts = parseGenotype(colorBy, this.props.sequences.geneLength);
+    }
     const cBy = colorBy.split(":")[0];
     console.log("updateColorScale", cBy, cScale);
     this.setState({
@@ -125,7 +131,7 @@ class App extends React.Component {
         scale: cScale.scale,
         continuous: cScale.continuous,
         legendBoundsMap: createLegendMatchBound(cScale.scale),
-        genotype: parseGenotype(colorBy, this.props.sequences.geneLength)
+        genotype: gts
       }
     });
   }

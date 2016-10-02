@@ -48,7 +48,13 @@ const getColorScale = (colorBy, tree, sequences) => {
                        region: "discrete", country: "discrete"};
   let colorScale;
   let continuous = false;
-  if (colorBy.slice(0, 2) === "gt" && parseGenotype(colorBy, sequences.geneLength)){
+  // genotype coloring
+  console.log("getColorScale", colorBy, tree, sequences);
+  if (!(tree.nodes && sequences.geneLength)) {
+    console.log("going for dummy cscale");
+    continuous = true;
+    colorScale = genericScale(0, 1);
+  } else if (colorBy.slice(0, 2) === "gt" && parseGenotype(colorBy, sequences.geneLength)) {
     const gt = parseGenotype(colorBy, sequences.geneLength);
     if (gt) {
       const stateCount = {};
@@ -59,8 +65,7 @@ const getColorScale = (colorBy, tree, sequences) => {
       domain.sort((a, b) => stateCount[a] > stateCount[b]);
       colorScale = d3.scale.ordinal().domain(domain).range(genotypeColors);
     }
-  }
-  else if (colorBy === "region") {
+  } else if (colorBy === "region") {
     continuous = false;
     colorScale = scales.regionColorScale;
   } else if (cScaleTypes[colorBy] === "continuous") {

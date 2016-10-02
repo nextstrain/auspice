@@ -45,7 +45,11 @@ class Legend extends React.Component {
   }
 
   getSVGHeight() {
-    return Math.ceil(this.props.colorScale.scale.domain().length / 2) *
+    let nItems = 10;
+    if (this.props.colorScale.scale) {
+      nItems = this.props.colorScale.scale.domain().length;
+    }
+    return Math.ceil(nItems / 2) *
       (legendRectSize + legendSpacing) + legendSpacing || 100;
   }
   getTransformationForLegendItem(i) {
@@ -58,20 +62,24 @@ class Legend extends React.Component {
     return "translate(" + horz + "," + vert + ")";
   }
   createLegendItems() {
-    let legendItems = this.props.colorScale.scale.domain().map((d, i) => {
-      return (
-        <LegendItem
-          legendRectSize={legendRectSize}
-          legendSpacing={legendSpacing}
-          rectFill={d3.rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
-          rectStroke={d3.rgb(this.props.colorScale.scale(d)).toString()}
-          transform={this.getTransformationForLegendItem(i)}
-          dFreq={this.props.colorScale.colorBy === "dfreq"}
-          key={i}
-          label={d}
-          index={i}/>
-      );
-    });
+    let legendItems = [];
+    if (this.props.colorScale.scale) {
+      legendItems = this.props.colorScale.scale.domain().map((d, i) => {
+        return (
+          <LegendItem
+            legendRectSize={legendRectSize}
+            legendSpacing={legendSpacing}
+            rectFill={d3.rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
+            rectStroke={d3.rgb(this.props.colorScale.scale(d)).toString()}
+            transform={this.getTransformationForLegendItem(i)}
+            dFreq={this.props.colorScale.colorBy === "dfreq"}
+            key={i}
+            label={d}
+            index={i}
+          />
+        );
+      });
+    }
     return legendItems;
   }
   getStyles() {
