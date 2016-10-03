@@ -2,13 +2,13 @@ import React from "react";
 import Radium from "radium";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
-// import { connect } from "react-redux";
+import { connect } from "react-redux";
 // import { FOO } from "../actions";
 
 
-// @connect(state => {
-//   return state.FOO;
-// })
+@connect(state => {
+  return state.tree
+})
 @Radium
 class Map extends React.Component {
   constructor(props) {
@@ -48,6 +48,8 @@ class Map extends React.Component {
         .openPopup();
   }
   render() {
+    this.props.nodes.map((n) => {console.log(n.attr.country)})
+
     const styles = this.getStyles();
     return (
       <div id="map" style={[
