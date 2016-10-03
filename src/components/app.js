@@ -23,7 +23,7 @@ import parseParams from "../util/parseParams";
 import queryString from "query-string";
 import createLegendMatchBound from "../util/createLegendMatchBounds";
 import getColorScale from "../util/getColorScale";
-import { parseGenotype }  from "../util/getGenotype";
+import { parseGenotype, getGenotype }  from "../util/getGenotype";
 
 import {colorOptions} from "../util/globals"
 
@@ -117,22 +117,36 @@ class App extends React.Component {
     this.changeRoute(newPath, this.state.location.query);
   }
 
+  getTipColorAttribute(node, cScale) {
+    if (cScale.colorBy.slice(0,3) === "gt-") {
+        return getGenotype(cScale.genotype[0][0],
+                                  cScale.genotype[0][1],
+                                  node, this.props.sequences.sequences);
+    } else {
+      return node.attr[cScale.colorBy];
+    };
+  }
+
   updateColorScale(colorBy) {
     const cScale = getColorScale(colorBy, this.props.tree, this.props.sequences);
     let gts = null;
     if (colorBy.slice(0,3) === "gt-" && this.props.sequences.geneLength) {
       gts = parseGenotype(colorBy, this.props.sequences.geneLength);
     }
-    const cBy = colorBy.split(":")[0];
-    console.log("updateColorScale", cBy, cScale);
+    cScale.colorBy = colorBy;
+    cScale.legendBoundsMap = createLegendMatchBound(cScale.scale);
+    cScale.genotype = gts;
+    console.log("updateColorScale", colorBy, cScale);
+    let nodeColorAttr=null;
+    let nodeColor=null;
+    if (this.props.tree.nodes){
+      nodeColorAttr = this.props.tree.nodes.map((n) => this.getTipColorAttribute(n, cScale));
+      nodeColor = nodeColorAttr.map((n) => cScale.scale(n));
+    }
     this.setState({
-      colorScale: {
-        colorBy: cBy,
-        scale: cScale.scale,
-        continuous: cScale.continuous,
-        legendBoundsMap: createLegendMatchBound(cScale.scale),
-        genotype: gts
-      }
+      colorScale: cScale,
+      nodeColor: nodeColor,
+      nodeColorAttr: nodeColorAttr,
     });
   }
 
@@ -165,7 +179,9 @@ class App extends React.Component {
                     colorOptions={colorOptions}
                     colorScale={this.state.colorScale}
           />
-          <TreeView location={this.state.location}
+          <TreeView nodeColorAttr={this.state.nodeColorAttr}
+                    nodeColor={this.state.nodeColor}
+                    location={this.state.location}
                     colorScale={this.state.colorScale}
           />
           <Frequencies/>

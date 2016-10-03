@@ -101,6 +101,8 @@ class Tree extends React.Component {
               {...this.props} {...props} animate={null}
               key={index}
               node={node}
+              nodeColor={this.props.nodeColor[index]}
+              nodeColorAttr={this.props.nodeColorAttr[index]}
               dateRange={range}
               showBranchLabels={this.props.controls.showBranchLabels}
               strain={node.attr.strain}

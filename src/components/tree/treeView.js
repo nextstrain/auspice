@@ -133,6 +133,8 @@ class TreeView extends React.Component {
           id="treeplot">
           <Tree
             colorScale={this.props.colorScale}
+            nodeColor={this.props.nodeColor}
+            nodeColorAttr={this.props.nodeColorAttr}
             location={this.props.location}
             nodes={this.props.tree.nodes}
             layout={(this.props.location.query.l)?this.props.location.query.l:"rectangular"}
