@@ -68,6 +68,8 @@ class App extends React.Component {
     // foo: "bar"
 
   }
+  componentWillReceiveProps(nextProps) {
+  }
   componentDidMount() {
     console.log('registering');
     // when the user hits the back button or forward, let us know so we can setstate again
@@ -82,10 +84,13 @@ class App extends React.Component {
       });
     });
     this.maybeFetchDataset();
-    this.updateColorScale( tmpQuery.colorBy || "region" );
+    this.updateColorScale(tmpQuery.colorBy || "region");
   }
   componentDidUpdate() {
     this.maybeFetchDataset();
+    if (!this.state.nodeColor && this.props.tree.nodes) {
+      this.updateColorScale(this.state.location.query.colorBy || "region");
+    }
   }
   maybeFetchDataset() {
     if (this.state.latestValidParams === this.state.location.pathname) {
