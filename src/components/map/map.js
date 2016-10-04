@@ -29,14 +29,9 @@ class Map extends React.Component {
   static defaultProps = {
     // foo: "bar"
   }
-  getStyles() {
-    return {
-      base: {
-        height: 300
-      }
-    };
-  }
+
   componentDidMount() {
+    // setupMap()
     var map = L.map('map').setView([51.505, -0.09], 13);
 
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
@@ -48,15 +43,8 @@ class Map extends React.Component {
         .openPopup();
   }
   render() {
-    this.props.nodes.map((n) => {console.log(n.attr.country)})
-
-    const styles = this.getStyles();
     return (
-      <div id="map" style={[
-        styles.base,
-        this.props.style
-      ]}>
-        {"Map"}
+      <div style={{height: 300}} id="map">
       </div>
     );
   }
