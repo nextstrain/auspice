@@ -67,6 +67,7 @@ class ColorBy extends React.Component {
     //this.setColorBy("gt:" + genotype);
     if (parseGenotype("gt-" + genotype, this.props.geneLength)) {
       this.setColorByQuery("gt-" + genotype);
+      //NEED TO SET MENU TO GENOTYPE
     } else {
       return null;
     }
@@ -74,7 +75,6 @@ class ColorBy extends React.Component {
 
   extraInput(colorBy) {
     if (true) { //colorBy === "gt") {
-      console.log("extraInput");
       return (
         <input type="text" placeholder="HA1 position"
                onChange={(e) => this.setGenotypeColorBy(e.target.value)}

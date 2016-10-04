@@ -1,4 +1,5 @@
 import * as scales from "./colorScales";
+import createLegendMatchBound from "./createLegendMatchBounds";
 import { genericDomain, colors, genotypeColors } from "./globals";
 import { parseGenotype, getGenotype } from "./getGenotype"
 import d3 from "d3";
@@ -48,13 +49,13 @@ const getColorScale = (colorBy, tree, sequences) => {
                        region: "discrete", country: "discrete"};
   let colorScale;
   let continuous = false;
-  // genotype coloring
-  console.log("getColorScale", colorBy, tree, sequences);
+
   if (!(tree.nodes && sequences.geneLength)) {
-    console.log("going for dummy cscale");
+    // make a dummy color scale before the tree is in place
     continuous = true;
     colorScale = genericScale(0, 1);
   } else if (colorBy.slice(0, 2) === "gt" && parseGenotype(colorBy, sequences.geneLength)) {
+    // genotype coloring
     const gt = parseGenotype(colorBy, sequences.geneLength);
     if (gt) {
       const stateCount = {};
@@ -81,7 +82,8 @@ const getColorScale = (colorBy, tree, sequences) => {
     continuous = true;
     colorScale = genericScale(0, 1);
   }
-  return {"scale": colorScale, "continuous": continuous};
+  return {"scale": colorScale, "continuous": continuous, "colorBy": colorBy,
+          "legendBoundsMap": createLegendMatchBound(colorScale)};
 };
 
 

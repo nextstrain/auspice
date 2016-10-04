@@ -21,7 +21,6 @@ import TreeView from "./tree/treeView";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
 import queryString from "query-string";
-import createLegendMatchBound from "../util/createLegendMatchBounds";
 import getColorScale from "../util/getColorScale";
 import { parseGenotype, getGenotype }  from "../util/getGenotype";
 
@@ -75,21 +74,23 @@ class App extends React.Component {
     // when the user hits the back button or forward, let us know so we can setstate again
     // all of the other intentional route changes we will manually setState
     const tmpQuery = queryString.parse(window.location.search);
+    this.maybeFetchDataset();
+    const cScale = this.updateColorScale(tmpQuery.colorBy || "region");
     window.addEventListener("popstate", (a, b, c) => {
       this.setState({
         location: {
           pathname: window.location.pathname.slice(1, -1),
           query: tmpQuery
-        }
+        },
+        colorScale: cScale
       });
     });
-    this.maybeFetchDataset();
-    this.updateColorScale(tmpQuery.colorBy || "region");
   }
   componentDidUpdate() {
     this.maybeFetchDataset();
     if (!this.state.nodeColor && this.props.tree.nodes) {
-      this.updateColorScale(this.state.location.query.colorBy || "region");
+      const cScale = this.updateColorScale(this.state.location.query.colorBy || "region");
+      this.setState(cScale);
     }
   }
   maybeFetchDataset() {
@@ -114,6 +115,7 @@ class App extends React.Component {
       this.setState({latestValidParams: parsedParams.fullsplat});
     }
   }
+
   setVirusPath(newPath) {
     const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
     const suffix = (newPath.length && newPath[newPath.length - 1] !== "/") ? "/?" : "?";
@@ -138,33 +140,27 @@ class App extends React.Component {
     if (colorBy.slice(0,3) === "gt-" && this.props.sequences.geneLength) {
       gts = parseGenotype(colorBy, this.props.sequences.geneLength);
     }
-    cScale.colorBy = colorBy;
-    cScale.legendBoundsMap = createLegendMatchBound(cScale.scale);
     cScale.genotype = gts;
-    console.log("updateColorScale", colorBy, cScale);
     let nodeColorAttr=null;
     let nodeColor=null;
     if (this.props.tree.nodes){
       nodeColorAttr = this.props.tree.nodes.map((n) => this.getTipColorAttribute(n, cScale));
       nodeColor = nodeColorAttr.map((n) => cScale.scale(n));
     }
-    this.setState({
+    return {
       colorScale: cScale,
       nodeColor: nodeColor,
       nodeColorAttr: nodeColorAttr,
-    });
+    };
   }
 
   changeRoute(pathname, query) {
-    this.setState({
-      location: {
-        pathname,
-        query
-      }
-    });
+    let new_colorData = {};
+//    if (!this.state.nodeColor || (query.colorBy !== this.state.colorScale.colorBy)) {
     if (query.colorBy) {
-      this.updateColorScale(query.colorBy);
+      new_colorData = this.updateColorScale(query.colorBy);
     }
+    this.setState(Object.assign({location:{query, pathname}}, new_colorData));
   }
 
   render() {

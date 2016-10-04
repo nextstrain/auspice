@@ -71,8 +71,8 @@ class Tip extends React.Component {
   }
 
   tipVisibility() {
-    if (this.props.node.attr.num_date >= this.props.location.query.dmin
-        && this.props.node.attr.num_date < this.props.location.query.dmax) {
+    if (this.props.node.attr.num_date >= this.props.dateRange[0]
+        && this.props.node.attr.num_date < this.props.dateRange[1]) {
       return "visible";
     } else {
       return "hidden";

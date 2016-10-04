@@ -93,20 +93,24 @@ class Tree extends React.Component {
           r_x: this.r_x(node, this.props.distanceMeasure, this.props.layout),
           r_y: this.r_y(node, this.props.distanceMeasure, this.props.layout),
           smallBigArc: this.smallBigArc(node, this.props.distanceMeasure, this.props.layout),
-          leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.layout)
+          leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.layout),
+          nodeColor: this.props.nodeColor[index]
         }}>
         {(props) => {
           return (
             <TreeNode
-              {...this.props} {...props} animate={null}
+              {...props} animate={null}
               key={index}
               node={node}
-              nodeColor={this.props.nodeColor[index]}
               nodeColorAttr={this.props.nodeColorAttr[index]}
               dateRange={range}
               showBranchLabels={this.props.controls.showBranchLabels}
+              dateRange={[this.props.location.query.dmin, this.props.location.query.dmax]}
+              colorScale={this.props.colorScale}
               strain={node.attr.strain}
               hasChildren={node.children ? true : false}
+              layout={this.props.layout}
+              distanceMeasure={this.props.distanceMeasure}
             />
           )
         }}

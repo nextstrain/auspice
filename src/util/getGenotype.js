@@ -10,7 +10,6 @@ const genPosParser = (gt) => {
 export const parseGenotype = (colorBy, geneLength) => {
   const gt = colorBy.split("-");
   if (gt.length < 2) {
-    console.log("parseGenotype", colorBy, "incomplete");
     return null;
   } else {
     const positions = gt[1].split(";");
@@ -20,10 +19,8 @@ export const parseGenotype = (colorBy, geneLength) => {
                                               && /^[0-9]+$/.test(d[1])
                                               && (+d[1] <= geneLength[d[0]])));
     if (valid_pos.length) {
-      console.log("parseGenotype", colorBy, valid_pos);
       return valid_pos;
     } else {
-      console.log("parseGenotype", colorBy, "invalid");
       return null;
     }
   }
