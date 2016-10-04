@@ -22,14 +22,14 @@ import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
 import queryString from "query-string";
 import getColorScale from "../util/getColorScale";
-import { parseGenotype, getGenotype }  from "../util/getGenotype";
-
-import {colorOptions} from "../util/globals"
+import { parseGenotype, getGenotype } from "../util/getGenotype";
+import {colorOptions} from "../util/globals";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
     tree: fullStateTree.tree,
     sequences: fullStateTree.sequences,
+    selectedLegendItem: fullStateTree.controls.selectedLegendItem
   };
 };
 @connect(returnStateNeeded)
@@ -48,7 +48,7 @@ class App extends React.Component {
         scale: null,
         legendBoundsMap: null,
         continuous: null
-      }
+      },
       // sidebarDocked: true,
     };
   }
@@ -67,8 +67,14 @@ class App extends React.Component {
     // foo: "bar"
 
   }
+
+  /******************************************
+   * LIFECYLCE METHODS
+   *****************************************/
+
   componentWillReceiveProps(nextProps) {
   }
+
   componentDidMount() {
     console.log('registering');
     // when the user hits the back button or forward, let us know so we can setstate again
@@ -86,6 +92,7 @@ class App extends React.Component {
       });
     });
   }
+
   componentDidUpdate() {
     this.maybeFetchDataset();
     if (!this.state.nodeColor && this.props.tree.nodes) {
@@ -93,6 +100,7 @@ class App extends React.Component {
       this.setState(cScale);
     }
   }
+
   maybeFetchDataset() {
     if (this.state.latestValidParams === this.state.location.pathname) {
       return;
@@ -116,6 +124,9 @@ class App extends React.Component {
     }
   }
 
+  /******************************************
+   * HANDLE QUERY PARAM CHANGES AND ASSOCIATED STATE UPDATES
+   *****************************************/
   setVirusPath(newPath) {
     const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
     const suffix = (newPath.length && newPath[newPath.length - 1] !== "/") ? "/?" : "?";
@@ -154,6 +165,25 @@ class App extends React.Component {
     };
   }
 
+  tipVisibility() {
+    let upperLimit = +this.state.location.query.dmax;
+    let lowerLimit = +this.state.location.query.dmin;
+    if (!upperLimit) {
+      upperLimit = 1000000000000;
+    }
+    if (!lowerLimit) {
+      lowerLimit = -1000000000000;
+    }
+    if (this.props.tree.nodes){
+      return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
+                                       && d.attr.num_date < upperLimit)
+                                          ? "visible" : "hidden");
+    } else {
+      return "visible";
+    }
+  }
+
+
   changeRoute(pathname, query) {
     let new_colorData = {};
 //    if (!this.state.nodeColor || (query.colorBy !== this.state.colorScale.colorBy)) {
@@ -163,6 +193,39 @@ class App extends React.Component {
     this.setState(Object.assign({location:{query, pathname}}, new_colorData));
   }
 
+  /******************************************
+   * HOVER EVENTS
+   *****************************************/
+  determineLegendMatch(selectedLegendItem, nodeAttr, legendBoundsMap) {
+    let bool;
+    // equates a tip and a legend element
+    // exact match is required for categorical qunantities such as genotypes, regions
+    // continuous variables need to fall into the interal (lower_bound[leg], leg]
+    if (legendBoundsMap) {
+      bool = (nodeAttr <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
+             (nodeAttr > legendBoundsMap.lower_bound[selectedLegendItem]);
+    } else {
+      bool = nodeAttr === selectedLegendItem;
+    }
+    return bool;
+  }
+
+  tipRadii() {
+    const selItem = this.props.selectedLegendItem;
+    if (selItem && this.state.nodeColorAttr){
+      const legendMap = this.state.colorScale.continuous
+                        ? this.state.colorScale.legendBoundsMap : false;
+      return this.state.nodeColorAttr.map((d) => this.determineLegendMatch(selItem, d, legendMap) ? 6 : 3);
+    } else if (this.state.nodeColorAttr) {
+      return this.state.nodeColorAttr.map((d) => 3);
+    } else {
+      return null;
+    }
+  }
+
+  /******************************************
+   * RENDER
+   *****************************************/
   render() {
     return (
       <div style={{margin: "0px 20px"}}>
@@ -180,10 +243,14 @@ class App extends React.Component {
                     colorOptions={colorOptions}
                     colorScale={this.state.colorScale}
           />
-          <TreeView nodeColorAttr={this.state.nodeColorAttr}
+          <TreeView nodes={this.props.tree.nodes}
+                    nodeColorAttr={this.state.nodeColorAttr}
                     nodeColor={this.state.nodeColor}
-                    location={this.state.location}
-                    colorScale={this.state.colorScale}
+                    tipRadii={this.tipRadii()}
+                    tipVisibility={this.tipVisibility()}
+                    layout={this.state.location.query.l || "rectangular"}
+                    distanceMeasure={this.state.location.query.m || "div"}
+                    datasetGuid={this.props.tree.datasetGuid}
           />
           <Frequencies/>
           <Entropy/>

@@ -2,26 +2,16 @@ import React from "react";
 import Radium from "radium";
 // import _ from "lodash";
 import { connect } from "react-redux";
-import * as globals from "../../util/globals";
 import { BRANCH_MOUSEENTER, BRANCH_MOUSELEAVE } from "../../actions/controls";
-import moment from "moment";
 import Tip from "./tip";
 import Tooltip from "./tooltip";
-
-const returnStateNeeded = (fullStateTree) => {
-  return {
-    selectedLegendItem: fullStateTree.controls.selectedLegendItem,
-  };
-};
 
 /*
  * A TreeNode draws the path leading to the node and instantiates
  * Tip attached to its end. TreeNode determines the apprearance and
  * behavior of the path.
 */
-
-
-@connect(returnStateNeeded)
+@connect()
 @Radium
 class TreeNode extends React.Component {
   constructor(props) {
@@ -47,6 +37,7 @@ class TreeNode extends React.Component {
   static defaultProps = {
     // foo: "bar"
   }
+
   shouldComponentUpdate(nextProps, nextState) {
     return true;
   }
