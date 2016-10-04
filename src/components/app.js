@@ -280,7 +280,7 @@ class App extends React.Component {
         </Flex>
         <Frequencies/>
         <Entropy/>
-        <Map/>
+        <Map justGotNewDatasetRenderNewMap={false}/>
         <Footer/>
       </div>
     );
