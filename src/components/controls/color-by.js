@@ -5,7 +5,6 @@ import { defaultColorBy, genericDomain, colors } from "../../util/globals";
 import { connect } from "react-redux";
 import * as scales from "../../util/colorScales";
 import { parseGenotype } from "../../util/getGenotype";
-import genotypeInput from "./genotypeInput";
 
 // import _ from "lodash";
 // import Flex from "./framework/flex";
@@ -24,7 +23,8 @@ class ColorBy extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-
+      selected: "region",
+      colorBy: "region"
     };
   }
   static propTypes = {
@@ -40,9 +40,20 @@ class ColorBy extends React.Component {
     // foo: "bar"
   }
 
+  componentWillMount() {
+    const currentColorBy = this.props.location.query.colorBy;
+    if (currentColorBy){
+      this.setState({selected:currentColorBy});
+    }
+  }
+
   setColorBy(colorBy) {
-    if (colorBy.slice(0,2) !== "Xgt") {
+    if (colorBy.slice(0,2) !== "gt") {
       this.setColorByQuery(colorBy);
+      this.setState({"selected":colorBy, "colorBy":colorBy});
+    } else {
+      // don't update colorby yet, genotype still needs to be specified
+      this.setState({"selected":colorBy});
     }
   }
 
@@ -58,23 +69,21 @@ class ColorBy extends React.Component {
                  + suffix + queryString.stringify(newQuery));
     window.history.pushState({}, "", url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
-    // this.props.dispatch({ type: CHANGE_COLORBY,
-      // data: {"colorBy": colorBy}
-    // });
   }
 
   setGenotypeColorBy(genotype) {
-    //this.setColorBy("gt:" + genotype);
     if (parseGenotype("gt-" + genotype, this.props.geneLength)) {
+      // We got a valid genotype, set query params and state
       this.setColorByQuery("gt-" + genotype);
-      //NEED TO SET MENU TO GENOTYPE
+      this.setState({"selected":"gt", "colorBy":"gt-" + genotype});
     } else {
+      // we don't have a valud genotype, don't update anything yet
       return null;
     }
   }
 
-  extraInput(colorBy) {
-    if (true) { //colorBy === "gt") {
+  genotypeInput() {
+    if (this.state.selected === "gt") {
       return (
         <input type="text" placeholder="HA1 position"
                onChange={(e) => this.setGenotypeColorBy(e.target.value)}
@@ -97,10 +106,10 @@ class ColorBy extends React.Component {
       this.setColorBy(defaultColorBy);
       return null;
     }
-    const currentColorBy = this.props.location.query.colorBy;
+    console.log("colorByState", this.state);
     const styles = this.getStyles();
     const colorOptions = Object.keys(this.props.colorOptions).map( (cOpt) =>
-                              <option value={ cOpt } selected={cOpt === currentColorBy ? "selected" : null}>
+                              <option value={ cOpt } selected={cOpt === this.state.selected ? true : false}>
                                 { this.props.colorOptions[cOpt].menuItem }
                               </option> );
 
@@ -108,14 +117,12 @@ class ColorBy extends React.Component {
       <div style={styles.base}>
         <span> Color by </span>
         <select id="coloring"
-          onChange={(e) => {
-            if (e.target.value !== this.props.title) {this.setColorBy(e.target.value);}
-          }}
+          onChange={(e) => {this.setColorBy(e.target.value);}}
         >
           {colorOptions}
         </select>
         <div>
-        {this.extraInput(currentColorBy)}
+          {this.genotypeInput()}
         </div>
       </div>
     );
