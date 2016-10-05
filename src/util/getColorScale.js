@@ -50,21 +50,26 @@ const getColorScale = (colorBy, tree, sequences) => {
   let colorScale;
   let continuous = false;
 
-  if (!(tree.nodes && sequences.geneLength)) {
+  if (!tree.nodes) {
     // make a dummy color scale before the tree is in place
     continuous = true;
     colorScale = genericScale(0, 1);
-  } else if (colorBy.slice(0, 2) === "gt" && parseGenotype(colorBy, sequences.geneLength)) {
-    // genotype coloring
-    const gt = parseGenotype(colorBy, sequences.geneLength);
-    if (gt) {
-      const stateCount = {};
-      tree.nodes.forEach((n) => (stateCount[getGenotype(gt[0][0], gt[0][1], n, sequences.sequences)]
-                             ? stateCount[getGenotype(gt[0][0], gt[0][1], n,   sequences.sequences)] += 1
-                             : stateCount[getGenotype(gt[0][0], gt[0][1], n,   sequences.sequences)] = 1));
-      const domain = Object.keys(stateCount);
-      domain.sort((a, b) => stateCount[a] > stateCount[b]);
-      colorScale = d3.scale.ordinal().domain(domain).range(genotypeColors);
+  } else if (colorBy.slice(0, 2) === "gt") {
+    if (!sequences.geneLength) {
+      continuous = true;
+      colorScale = genericScale(0, 1);
+    } else if (parseGenotype(colorBy, sequences.geneLength)) {
+      // genotype coloring
+      const gt = parseGenotype(colorBy, sequences.geneLength);
+      if (gt) {
+        const stateCount = {};
+        tree.nodes.forEach((n) => (stateCount[getGenotype(gt[0][0], gt[0][1], n, sequences.sequences)]
+                               ? stateCount[getGenotype(gt[0][0], gt[0][1], n,   sequences.sequences)] += 1
+                               : stateCount[getGenotype(gt[0][0], gt[0][1], n,   sequences.sequences)] = 1));
+        const domain = Object.keys(stateCount);
+        domain.sort((a, b) => stateCount[a] > stateCount[b]);
+        colorScale = d3.scale.ordinal().domain(domain).range(genotypeColors);
+      }
     }
   } else if (colorBy === "region") {
     continuous = false;

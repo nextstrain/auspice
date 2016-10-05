@@ -186,8 +186,8 @@ class App extends React.Component {
 
   changeRoute(pathname, query) {
     let new_colorData = {};
-//    if (!this.state.nodeColor || (query.colorBy !== this.state.colorScale.colorBy)) {
-    if (query.colorBy) {
+    //only update colorScales and nodeColors when changed
+    if (query.colorBy && (query.colorBy !== this.state.colorScale.colorBy)) {
       new_colorData = this.updateColorScale(query.colorBy);
     }
     this.setState(Object.assign({location:{query, pathname}}, new_colorData));

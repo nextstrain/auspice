@@ -77,7 +77,7 @@ class ColorBy extends React.Component {
       this.setColorByQuery("gt-" + genotype);
       this.setState({"selected":"gt", "colorBy":"gt-" + genotype});
     } else {
-      // we don't have a valud genotype, don't update anything yet
+      // we don't have a valid genotype, don't update anything yet
       return null;
     }
   }
@@ -106,7 +106,6 @@ class ColorBy extends React.Component {
       this.setColorBy(defaultColorBy);
       return null;
     }
-    console.log("colorByState", this.state);
     const styles = this.getStyles();
     const colorOptions = Object.keys(this.props.colorOptions).map( (cOpt) =>
                               <option value={ cOpt } selected={cOpt === this.state.selected ? true : false}>
