@@ -32,19 +32,32 @@ class Map extends React.Component {
 
   componentDidMount() {
     // setupMap()
-    var map = L.map('map').setView([51.505, -0.09], 13);
+    var map = L.map('map', {
+      center: [0,0],
+      zoom: 2
+    })
 
     L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    L.marker([51.5, -0.09]).addTo(map)
-        .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-        .openPopup();
+    this.setState({map})
+
   }
+  addAllTipsToMap() {
+    this.props.nodes.map((n) => {
+      if (!n.children) {
+        L.marker([n.attr.latitude, n.attr.longitude]).addTo(this.state.map)
+        // .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
+        // .openPopup();
+      }
+    })
+  }
+
   render() {
+    if (this.props.nodes && this.state.map) { this.addAllTipsToMap() }
     return (
-      <div style={{height: 300, width: 500, marginTop: 40, marginBottom: 40}} id="map">
+      <div style={{height: 500, width: 1000, marginTop: 40, marginBottom: 40}} id="map">
       </div>
     );
   }
