@@ -44,7 +44,7 @@ class App extends React.Component {
         pathname: window.location.pathname,
         query: queryString.parse(window.location.search)
       },
-      colorScale:{
+      colorScale: {
         colorBy: null,
         scale: null,
         legendBoundsMap: null,
@@ -77,7 +77,6 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    console.log('registering');
     // when the user hits the back button or forward, let us know so we can setstate again
     // all of the other intentional route changes we will manually setState
     const tmpQuery = queryString.parse(window.location.search);
@@ -116,7 +115,6 @@ class App extends React.Component {
       this.setVirusPath(parsedParams.fullsplat);
     }
     if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
-      console.log("attempting to load ", data_path, "prev: ", this.state.latestValidParams);
       this.props.dispatch(populateMetadataStore(data_path));
       this.props.dispatch(populateTreeStore(data_path));
       this.props.dispatch(populateSequencesStore(data_path));
@@ -256,7 +254,7 @@ class App extends React.Component {
         </Flex>
         <Frequencies/>
         <Entropy/>
-        <Map justGotNewDatasetRenderNewMap={false}/>
+        <Map nodes={this.props.tree.nodes} justGotNewDatasetRenderNewMap={false}/>
         <Footer/>
       </div>
     );
