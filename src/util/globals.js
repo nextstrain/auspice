@@ -125,3 +125,235 @@ export const regions = [
   ["dominican_republic", "#E67E33"],
   ["panama", "#E4632E"]
 ];
+
+export const filterOptions = {
+ "geographic location": {
+  "southeast_asia": {
+   "count": 3,
+   "subcats": {
+    "thailand": {
+     "count": 1,
+     "subcats": {
+      "unknown": {
+       "count": 1,
+       "subcats": {}
+      }
+     }
+    },
+    "singapore": {
+     "count": 2,
+     "subcats": {
+      "unknown": {
+       "count": 2,
+       "subcats": {}
+      }
+     }
+    }
+   }
+  },
+  "china": {
+   "count": 7,
+   "subcats": {
+    "china": {
+     "count": 7,
+     "subcats": {
+      "unknown": {
+       "count": 7,
+       "subcats": {}
+      }
+     }
+    }
+   }
+  },
+  "oceania": {
+   "count": 19,
+   "subcats": {
+    "american_samoa": {
+     "count": 3,
+     "subcats": {
+      "unknown": {
+       "count": 3,
+       "subcats": {}
+      }
+     }
+    },
+    "tonga": {
+     "count": 1,
+     "subcats": {
+      "unknown": {
+       "count": 1,
+       "subcats": {}
+      }
+     }
+    },
+    "french_polynesia": {
+     "count": 15,
+     "subcats": {
+      "unknown": {
+       "count": 15,
+       "subcats": {}
+      }
+     }
+    }
+   }
+  },
+  "south_america": {
+   "count": 98,
+   "subcats": {
+    "brazil": {
+     "count": 70,
+     "subcats": {
+      "unknown": {
+       "count": 70,
+       "subcats": {}
+      }
+     }
+    },
+    "suriname": {
+     "count": 5,
+     "subcats": {
+      "unknown": {
+       "count": 5,
+       "subcats": {}
+      }
+     }
+    },
+    "french_guiana": {
+     "count": 9,
+     "subcats": {
+      "unknown": {
+       "count": 9,
+       "subcats": {}
+      }
+     }
+    },
+    "colombia": {
+     "count": 10,
+     "subcats": {
+      "unknown": {
+       "count": 10,
+       "subcats": {}
+      }
+     }
+    },
+    "venezuela": {
+     "count": 2,
+     "subcats": {
+      "unknown": {
+       "count": 2,
+       "subcats": {}
+      }
+     }
+    },
+    "ecuador": {
+     "count": 2,
+     "subcats": {
+      "unknown": {
+       "count": 2,
+       "subcats": {}
+      }
+     }
+    }
+   }
+  },
+  "north_america": {
+   "count": 65,
+   "subcats": {
+    "honduras": {
+     "count": 9,
+     "subcats": {
+      "unknown": {
+       "count": 9,
+       "subcats": {}
+      }
+     }
+    },
+    "dominican_republic": {
+     "count": 10,
+     "subcats": {
+      "unknown": {
+       "count": 10,
+       "subcats": {}
+      }
+     }
+    },
+    "usa": {
+     "count": 24,
+     "subcats": {
+      "unknown": {
+       "count": 24,
+       "subcats": {}
+      }
+     }
+    },
+    "mexico": {
+     "count": 7,
+     "subcats": {
+      "unknown": {
+       "count": 7,
+       "subcats": {}
+      }
+     }
+    },
+    "panama": {
+     "count": 4,
+     "subcats": {
+      "unknown": {
+       "count": 4,
+       "subcats": {}
+      }
+     }
+    },
+    "puerto_rico": {
+     "count": 3,
+     "subcats": {
+      "unknown": {
+       "count": 3,
+       "subcats": {}
+      }
+     }
+    },
+    "guatemala": {
+     "count": 3,
+     "subcats": {
+      "unknown": {
+       "count": 3,
+       "subcats": {}
+      }
+     }
+    },
+    "martinique": {
+     "count": 2,
+     "subcats": {
+      "unknown": {
+       "count": 2,
+       "subcats": {}
+      }
+     }
+    },
+    "haiti": {
+     "count": 2,
+     "subcats": {
+      "unknown": {
+       "count": 2,
+       "subcats": {}
+      }
+     }
+    },
+    "guadeloupe": {
+     "count": 1,
+     "subcats": {
+      "unknown": {
+       "count": 1,
+       "subcats": {}
+      }
+     }
+    }
+   }
+  }
+ }
+};
+
+//const filterAbbr = [["geo", "geographic location"]];
+export const filterAbbrFwd = {"geo":"geographic location"};
+export const filterAbbrRev = {"geographic location":"geo"};

@@ -13,6 +13,7 @@ import DateRangeInputs from "./date-range-inputs";
 import ChooseLayout from "./choose-layout";
 import ChooseVirus from "./choose-virus";
 import ChooseMetric from "./choose-metric";
+import ChooseFilter from "./choose-filter";
 
 
 const returnStateNeeded = (fullStateTree) => {
@@ -85,6 +86,7 @@ class Controls extends React.Component {
         <div id="commit"></div>
         <Legend {...this.props}/>
         <ColorBy {...this.props}/>
+        <ChooseFilter {...this.props}/>
         <ToggleBranchLabels/>
         <Search/>
         <Button> Reset Layout </Button>
