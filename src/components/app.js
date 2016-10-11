@@ -185,11 +185,17 @@ class App extends React.Component {
 
 
   changeRoute(pathname, query) {
+    const prefix = (pathname === "" || pathname[0] === "/") ? "" : "/";
+    const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/?" : "?";
+    const url = prefix + pathname + suffix + queryString.stringify(query);
+    window.history.pushState({}, "", url);
+
     let new_colorData = {};
     //only update colorScales and nodeColors when changed
     if (query.colorBy && (query.colorBy !== this.state.colorScale.colorBy)) {
       new_colorData = this.updateColorScale(query.colorBy);
     }
+    console.log(pathname, query);
     this.setState(Object.assign({location:{query, pathname}}, new_colorData));
   }
 

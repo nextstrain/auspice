@@ -56,6 +56,7 @@ class ChooseLayout extends React.Component {
       }
     };
   }
+
   componentDidMount() {
     // Richard move to algo that checks for url validity
     if (!this.props.location.query.l) {
@@ -64,17 +65,10 @@ class ChooseLayout extends React.Component {
   }
 
   setLayoutQueryParam(title) {
-    const tmp_path = this.props.location.pathname
-    const prefix = (tmp_path===""||tmp_path[0]==="/")?"":"/";
-    const suffix= (tmp_path.length&&tmp_path[tmp_path.length-1]!=="/")?"/?":"?"
-
     const newQuery = Object.assign({}, this.props.location.query, {l: title});
-    // https://www.npmjs.com/package/query-string
-    const url = prefix + this.props.location.pathname + suffix + queryString.stringify(newQuery);
-    console.log("setLayoutQueryParam", url, this.props.location.pathname,prefix);
-    window.history.pushState({}, '', url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
   }
+
   render() {
     const styles = this.getStyles();
     return (

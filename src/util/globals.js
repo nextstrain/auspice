@@ -355,5 +355,5 @@ export const filterOptions = {
 };
 
 //const filterAbbr = [["geo", "geographic location"]];
-export const filterAbbrFwd = {"geo":"geographic location"};
-export const filterAbbrRev = {"geographic location":"geo"};
+export const filterAbbrFwd = {"geo":"geographic location", "all":"all"};
+export const filterAbbrRev = {"geographic location":"geo", "all":"all"};

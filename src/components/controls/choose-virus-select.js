@@ -51,10 +51,6 @@ class ChooseVirusSelect extends React.Component {
   }
 
   setVirusPath(newPath) {
-    const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
-    const suffix = (newPath.length && newPath[newPath.length - 1] !== "/") ? "/?" : "?";
-    const url = prefix + newPath + suffix + queryString.stringify(this.props.location.query);
-    window.history.pushState({}, "", url);
     this.props.changeRoute(newPath, this.props.location.query);
   }
 

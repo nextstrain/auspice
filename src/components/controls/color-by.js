@@ -1,6 +1,5 @@
 import React from "react";
 import Radium from "radium";
-import queryString from "query-string";
 import { defaultColorBy, genericDomain, colors } from "../../util/globals";
 import { connect } from "react-redux";
 import * as scales from "../../util/colorScales";
@@ -58,16 +57,8 @@ class ColorBy extends React.Component {
   }
 
   setColorByQuery(colorBy) {
-    const tmp_path = this.props.location.pathname
-    const prefix = (tmp_path === "" || tmp_path[0] === "/") ? "" : "/";
-    const suffix = (tmp_path.length && tmp_path[tmp_path.length - 1] !== "/") ? "/?" : "?";
-
     const newQuery = Object.assign({}, this.props.location.query,
                                    {colorBy: colorBy});
-    // https://www.npmjs.com/package/query-string
-    const url = (prefix + this.props.location.pathname
-                 + suffix + queryString.stringify(newQuery));
-    window.history.pushState({}, "", url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
   }
 
