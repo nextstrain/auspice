@@ -1,6 +1,6 @@
 import React from "react";
 import Radium from "radium";
-// import _ from "lodash";
+import _ from "lodash";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
@@ -42,13 +42,26 @@ class Map extends React.Component {
 
   }
   addAllTipsToMap() {
-    // this.props.nodes
-    this.props.nodes.map((n) => {
-      if (!n.children) {
+    const aggregatedLocations = {};
+    this.props.nodes.forEach((n) => {
+      if (n.children) { return }
+      if (aggregatedLocations[n.attr.latitude + "/" + n.attr.longitude]) {
+        // if we haven't added this pair, add it
+        aggregatedLocations[n.attr.latitude + "/" + n.attr.longitude]++
+      } else {
+        aggregatedLocations[n.attr.latitude + "/" + n.attr.longitude] = 1
+      }
+    })
 
-        L.circleMarker([n.attr.latitude, n.attr.longitude], {
+    console.log(aggregatedLocations)
+
+    _.forOwn(aggregatedLocations, (value, key) => {
+
+        const latlong = key.split("/")
+
+        L.circleMarker([latlong[0], latlong[1]], {
           stroke:	false,
-          radius: 2,
+          radius: value,
           // color: ""
           // weight:	5	Stroke width in pixels.
           // opacity:	0.5	Stroke opacity.
@@ -57,7 +70,6 @@ class Map extends React.Component {
           // fillOpacity:
         }).addTo(this.state.map)
 
-      }
     });
   }
 
