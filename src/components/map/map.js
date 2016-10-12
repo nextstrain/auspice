@@ -14,17 +14,14 @@ class Map extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-
+      tips: false,
+      map: null
     };
   }
   static propTypes = {
     /* react */
     // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object,
-    // foo: React.PropTypes.string
+    nodes: React.PropTypes.array
   }
   static defaultProps = {
     // foo: "bar"
@@ -48,14 +45,17 @@ class Map extends React.Component {
     this.props.nodes.map((n) => {
       if (!n.children) {
         L.marker([n.attr.latitude, n.attr.longitude]).addTo(this.state.map)
-        // .bindPopup('A pretty CSS3 popup.<br> Easily customizable.')
-        // .openPopup();
+
       }
-    })
+    });
   }
 
   render() {
-    if (this.props.nodes && this.state.map) { this.addAllTipsToMap() }
+    if (this.props.nodes && this.state.map && !this.state.tips) {
+      this.addAllTipsToMap();
+      // don't redraw
+      this.setState({tips: true});
+    }
     return (
       <div style={{height: 500, width: 1000, marginTop: 40, marginBottom: 40}} id="map">
       </div>
