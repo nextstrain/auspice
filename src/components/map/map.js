@@ -42,9 +42,20 @@ class Map extends React.Component {
 
   }
   addAllTipsToMap() {
+    // this.props.nodes
     this.props.nodes.map((n) => {
       if (!n.children) {
-        L.marker([n.attr.latitude, n.attr.longitude]).addTo(this.state.map)
+
+        L.circleMarker([n.attr.latitude, n.attr.longitude], {
+          stroke:	false,
+          radius: 2,
+          // color: ""
+          // weight:	5	Stroke width in pixels.
+          // opacity:	0.5	Stroke opacity.
+          // fill:
+          fillColor: "rgb(255,0,0)"
+          // fillOpacity:
+        }).addTo(this.state.map)
 
       }
     });
@@ -53,7 +64,7 @@ class Map extends React.Component {
   render() {
     if (this.props.nodes && this.state.map && !this.state.tips) {
       this.addAllTipsToMap();
-      // don't redraw
+      // don't redraw - need to seperately handle virus change redraw
       this.setState({tips: true});
     }
     return (
