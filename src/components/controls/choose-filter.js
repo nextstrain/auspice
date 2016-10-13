@@ -67,7 +67,8 @@ class ChooseFilter extends React.Component {
       if (filters[vi]) {
         // pull options from the current level of the dataset hierarchy, ignore 'default'
         const options = Object.keys(level).filter((d) => d !== "name");
-        if (options.length>1 || vi === 0) {
+        const counts = options.map( (d) => level[d].count);
+        if (options.length > 1 || vi === 0) {
           fields.push(level.name);
           selectors.push((
             <div key={vi} style={[
@@ -80,6 +81,7 @@ class ChooseFilter extends React.Component {
                 filterTree={filters.slice(0, vi)}
                 selected = {filters[vi]}
                 options={options}
+                counts={counts}
                 fields={fields}
               />
               </div>

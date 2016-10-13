@@ -70,7 +70,7 @@ class RecursiveFilter extends React.Component {
         value={this.props.selected}
         onChange={(e) => {
           if (e.target.value === this.props.title) {
-            this.setFilterQuery(this.props.filterTree);
+            this.setFilterQuery(this.props.filterTree, this.props.fields);
           } else {
             this.setFilterQuery(this.props.filterTree.concat(e.target.value)
                                 .map((d) => filterAbbrRev[d]||d),
@@ -82,8 +82,11 @@ class RecursiveFilter extends React.Component {
         {
           this.props.options.map((option, i) => {
             return (
-              <option key={i} selected={(option === this.props.selected) ? "selected" : ""}>
-                {option}
+              <option key={i}
+                      selected={(option === this.props.selected) ? "selected" : ""}
+                      value={option}
+              >
+                {option + (this.props.counts[i] ? " (" + this.props.counts[i] + ")" : "")}
               </option>);
           })
         }
