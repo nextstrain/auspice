@@ -128,10 +128,12 @@ export const regions = [
 
 export const filterOptions = {
  "geographic location": {
+  "name": "region",
   "southeast_asia": {
    "count": 3,
    "subcats": {
-    "thailand": {
+     "name":"country",
+     "thailand": {
      "count": 1,
      "subcats": {
       "unknown": {
@@ -154,6 +156,7 @@ export const filterOptions = {
   "china": {
    "count": 7,
    "subcats": {
+    "name":"country",
     "china": {
      "count": 7,
      "subcats": {
@@ -168,6 +171,7 @@ export const filterOptions = {
   "oceania": {
    "count": 19,
    "subcats": {
+    "name":"country",
     "american_samoa": {
      "count": 3,
      "subcats": {
@@ -200,6 +204,7 @@ export const filterOptions = {
   "south_america": {
    "count": 98,
    "subcats": {
+    "name":"country",
     "brazil": {
      "count": 70,
      "subcats": {
@@ -259,6 +264,7 @@ export const filterOptions = {
   "north_america": {
    "count": 65,
    "subcats": {
+     "name":"country",
     "honduras": {
      "count": 9,
      "subcats": {

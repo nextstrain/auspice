@@ -1,7 +1,7 @@
 import React from "react";
 import Radium from "radium";
 import queryString from "query-string";
-import { filterAbbrRev } from "../../util/globals";
+import { filterAbbrRev,filterAbbrFwd } from "../../util/globals";
 
 // import _ from "lodash";
 // import Flex from "./framework/flex";
@@ -44,11 +44,19 @@ class RecursiveFilter extends React.Component {
     };
   }
 
-  setFilterQuery(filters) {
-    console.log("setFilterQuery", filters);
+  makeQueryString(filters, fields){
+    let tmp_str = filters[0];
+    for (let ii=0; ii<fields.length; ii+=1){
+      if (ii && filters[ii]){
+        tmp_str = tmp_str + "-" + fields[ii] + "." + filters[ii];
+      }
+    }
+    return tmp_str;
+  }
+
+  setFilterQuery(filters, fields) {
     const newQuery = Object.assign({}, this.props.location.query,
-                        {"filter":filters.filter((d) => ((typeof d !== "undefined") && d.length)).join("-")});
-    console.log(newQuery, this.props.location.pathname);
+                        {"filter":this.makeQueryString(filters, fields)});
     this.props.changeRoute(this.props.location.pathname, newQuery);
   }
 
@@ -56,7 +64,6 @@ class RecursiveFilter extends React.Component {
     // the selector below resets the path by router.push({pathname:new_path})
     // the currently selected option is passed down as this.props.selected
     // 9/19/2016: https://facebook.github.io/react/docs/forms.html#why-select-value
-    console.log(this.props.filterTree, this.props.options);
     return (
       <select
         style={{marginRight: 20}}
@@ -65,7 +72,9 @@ class RecursiveFilter extends React.Component {
           if (e.target.value === this.props.title) {
             this.setFilterQuery(this.props.filterTree);
           } else {
-            this.setFilterQuery(this.props.filterTree.concat([filterAbbrRev[e.target.value]||e.target.value]));
+            this.setFilterQuery(this.props.filterTree.concat(e.target.value)
+                                .map((d) => filterAbbrRev[d]||d),
+                                this.props.fields);
           }
         }}
       >

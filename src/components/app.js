@@ -165,7 +165,12 @@ class App extends React.Component {
     };
   }
 
-  tipVisibility() {
+  parseFilterQuery(query) {
+    const tmp = query.split("-").map( (d) => d.split("."));
+    return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1] )};
+  }
+
+  tipVisibility(filters) {
     let upperLimit = +this.state.location.query.dmax;
     let lowerLimit = +this.state.location.query.dmin;
     if (!upperLimit) {
@@ -175,9 +180,23 @@ class App extends React.Component {
       lowerLimit = -1000000000000;
     }
     if (this.props.tree.nodes){
-      return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
-                                       && d.attr.num_date < upperLimit)
-                                          ? "visible" : "hidden");
+      const tmp = this.parseFilterQuery(this.state.location.query.filter || "");
+      const filter_pairs = [];
+      for (let ii=1; ii<tmp["filters"].length; ii+=1) {
+        if (tmp.filters[ii] && tmp.fields[ii]){
+          filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
+        }
+      }
+      if (filter_pairs.length){
+        return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
+                                         && d.attr.num_date < upperLimit
+                                         && filter_pairs.every((x) => d.attr[x[0]] === x[1]))
+                                           ? "visible" : "hidden");
+      } else {
+        return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
+                                         && d.attr.num_date < upperLimit)
+                                            ? "visible" : "hidden");
+      }
     } else {
       return "visible";
     }
@@ -195,7 +214,6 @@ class App extends React.Component {
     if (query.colorBy && (query.colorBy !== this.state.colorScale.colorBy)) {
       new_colorData = this.updateColorScale(query.colorBy);
     }
-    console.log(pathname, query);
     this.setState(Object.assign({location:{query, pathname}}, new_colorData));
   }
 

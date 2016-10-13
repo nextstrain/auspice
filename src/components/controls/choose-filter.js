@@ -41,8 +41,9 @@ class ChooseFilter extends React.Component {
     };
   }
 
-  parseQuery(query) {
-    return query.split("-");
+  parseFilterQuery(query) {
+    const tmp = query.split("-").map( (d) => d.split("."));
+    return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1] )};
   }
 
 
@@ -56,17 +57,18 @@ class ChooseFilter extends React.Component {
     //const fields = Object.keys(paramFields).sort((a, b) => paramFields[a][0] > paramFields[b][0]);
     // the current filters: [flu, h3n2, 3y]
     //const filters = fields.map((d) => paramFields[d][1]);
-    const filters = this.parseQuery(filterQuery).map((d) => filterAbbrFwd[d] || d );
+    const filters = this.parseFilterQuery(filterQuery).filters.map((d) => filterAbbrFwd[d] || d );
     if (filters[filters.length-1] !== "all") { filters.push("all"); }
-    console.log(filterQuery, filters);
     // make a selector for each of the fields
     const selectors = [];   // list to contain the different data set selectors
     let level = filterOptions; // pointer used to move through the hierarchy -- currently at the top level of datasets
+    const fields = [];
     for (let vi = 0; vi < filters.length; vi++) {
       if (filters[vi]) {
         // pull options from the current level of the dataset hierarchy, ignore 'default'
-        const options = Object.keys(level).filter((d) => d !== "default");
+        const options = Object.keys(level).filter((d) => d !== "name");
         if (options.length>1 || vi === 0) {
+          fields.push(level.name);
           selectors.push((
             <div key={vi} style={[
               styles.base,
@@ -78,6 +80,7 @@ class ChooseFilter extends React.Component {
                 filterTree={filters.slice(0, vi)}
                 selected = {filters[vi]}
                 options={options}
+                fields={fields}
               />
               </div>
             ));
@@ -90,12 +93,12 @@ class ChooseFilter extends React.Component {
         } else {
           break;
         }
-        console.log(filters[vi], level);
       }
     }
     // return a list of selectors in the order of the data set hierarchy
     return (
       <div>
+        Filter by:
         {selectors}
       </div>
       );
