@@ -45,6 +45,7 @@ class Map extends React.Component {
     const aggregatedLocations = {};
     this.props.nodes.forEach((n) => {
       if (n.children) { return }
+      // look up geo1 geo2 geo3 do lat longs differ
       if (aggregatedLocations[n.attr.latitude + "/" + n.attr.longitude]) {
         // if we haven't added this pair, add it
         aggregatedLocations[n.attr.latitude + "/" + n.attr.longitude]++
