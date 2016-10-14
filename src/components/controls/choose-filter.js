@@ -1,6 +1,6 @@
 import React from "react";
 import Radium from "radium";
-import { filterOptions, filterAbbrFwd } from "../../util/globals";
+import { filterAbbrFwd } from "../../util/globals";
 import RecursiveFilter from "./recursive_filter";
 import parseParams from "../../util/parseParams";
 
@@ -53,21 +53,24 @@ class ChooseFilter extends React.Component {
     // pull out filter query
     let filterQuery = this.props.location.query.filter || "all";
 
-    // names of the different selectors in the current hierarchy: [virus, lineage, duration]
-    //const fields = Object.keys(paramFields).sort((a, b) => paramFields[a][0] > paramFields[b][0]);
-    // the current filters: [flu, h3n2, 3y]
-    //const filters = fields.map((d) => paramFields[d][1]);
+    // names of the current filters, i.e. [geo, north_america, mexico]
     const filters = this.parseFilterQuery(filterQuery).filters.map((d) => filterAbbrFwd[d] || d );
     if (filters[filters.length-1] !== "all") { filters.push("all"); }
-    // make a selector for each of the fields
-    const selectors = [];   // list to contain the different data set selectors
-    let level = filterOptions; // pointer used to move through the hierarchy -- currently at the top level of datasets
+
+    // pointer used to move through the hierarchy if filters -- currently at the top level
+    let level = this.props.filterOptions;
+    // fields will hold the accessor keys of the filter options in node.attr
+    // those will be fed into query along with the choices
     const fields = [];
+    // list to contain the pull-down menus for the different filters
+    const selectors = [];
     for (let vi = 0; vi < filters.length; vi++) {
       if (filters[vi]) {
-        // pull options from the current level of the dataset hierarchy, ignore 'default'
+        // pull options from the current level of the filter hierarchy, ignore 'name'
         const options = Object.keys(level).filter((d) => d !== "name");
+        // memorize the number of items corresponding to each option
         const counts = options.map( (d) => level[d].count);
+        // in case options exist, make a drop down menu
         if (options.length > 1 || vi === 0) {
           fields.push(level.name);
           selectors.push((
@@ -84,10 +87,10 @@ class ChooseFilter extends React.Component {
                 counts={counts}
                 fields={fields}
               />
-              </div>
-            ));
+            </div>
+          ));
         }
-        // move to the next level in the data set hierarchy
+        // move to the next level in the filter hierarchy
         if (vi === 0){
           level = level[filters[vi]];
         } else if (level[filters[vi]]) {

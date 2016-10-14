@@ -3,15 +3,6 @@ import Radium from "radium";
 import queryString from "query-string";
 import { filterAbbrRev,filterAbbrFwd } from "../../util/globals";
 
-// import _ from "lodash";
-// import Flex from "./framework/flex";
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
-
-// @connect(state => {
-//   return state.FOO;
-// })
-
 /*
  * implements a selector that
  * (i) knows about the upstream choices and
@@ -45,7 +36,9 @@ class RecursiveFilter extends React.Component {
   }
 
   makeQueryString(filters, fields){
+    // the first item specifies the filter type (not really necessary)
     let tmp_str = filters[0];
+    // all other filters are appended as key.value separated by dashes
     for (let ii=0; ii<fields.length; ii+=1){
       if (ii && filters[ii]){
         tmp_str = tmp_str + "-" + fields[ii] + "." + filters[ii];
@@ -55,6 +48,7 @@ class RecursiveFilter extends React.Component {
   }
 
   setFilterQuery(filters, fields) {
+    // push new query into chanceRoute
     const newQuery = Object.assign({}, this.props.location.query,
                         {"filter":this.makeQueryString(filters, fields)});
     this.props.changeRoute(this.props.location.pathname, newQuery);
