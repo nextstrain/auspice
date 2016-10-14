@@ -20,7 +20,7 @@ import ChooseFilter from "./choose-filter";
 const returnStateNeeded = (fullStateTree) => {
   return {
     controls: fullStateTree.controls,
-    filterOptions: fullStateTree.metadata.metadata.controls,
+    filterOptions: fullStateTree.metadata.controls,
   };
 };
 
