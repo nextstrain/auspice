@@ -38,14 +38,30 @@ class Entropy extends React.Component {
     };
   }
   drawEntropy() {
+    const amino_acid_charts = [];
+    for (let prot in this.props.entropy) {
+      if (prot !== "nuc") {
+        amino_acid_charts.push(
+          <VictoryBar
+            style={{data: {fill: globals.genotypeColors[amino_acid_charts.length%10], width:2}}}
+            data={this.props.entropy[prot]['val'].map((s, i) => {return {x: this.props.entropy[prot]['pos'][i], y: s}})}
+          />
+          );
+      }
+    }
     return (
+      <div>
       <VictoryChart width={globals.width}>
         <VictoryBar
-          style={{data: {fill: "lightgrey"}}}
-          data={this.props.entropy['HA1']['val'].map((s, i) => {return {x: this.props.entropy['HA1']['pos'][i], y: s}})}
+          style={{data: {fill: "lightgrey", "width":2}}}
+          data={this.props.entropy['nuc']['val'].map((s, i) => {return {x: this.props.entropy['nuc']['pos'][i], y: s}})}
         />
       </VictoryChart>
-      )
+     <VictoryChart width={globals.width}>
+       {amino_acid_charts}
+     </VictoryChart>
+     </div>
+    );
   }
   render() {
     const styles = this.getStyles();
