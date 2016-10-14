@@ -38,7 +38,6 @@ class Frequencies extends React.Component {
     };
   }
   drawFrequencies() {
-    console.log("drawFrequencies",this.props);
     const key = this.props.genotype
                 ? this.props.genotype[0]+"_" + this.props.genotype[1] + ":" + this.props.genotype[2]
                 : "global_HA1:159F"
@@ -50,7 +49,6 @@ class Frequencies extends React.Component {
       const key = this.props.genotype
                   ? this.props.genotype+states[si]
                   : "not found";
-      console.log(key);
       if (key !== "not found" && this.props.frequencies[key]){
         traj.push(
           <VictoryLine
@@ -64,7 +62,6 @@ class Frequencies extends React.Component {
         );
       }
     }
-    console.log(traj);
     return (
       <VictoryChart>
         {traj}
