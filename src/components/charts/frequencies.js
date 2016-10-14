@@ -4,7 +4,7 @@ import Radium from "radium";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
-import {VictoryLine} from "victory";
+import {VictoryLine, VictoryChart} from "victory";
 import * as globals from "../../util/globals";
 
 @connect(state => {
@@ -25,10 +25,10 @@ class Frequencies extends React.Component {
     routes: React.PropTypes.array,
     /* component api */
     style: React.PropTypes.object,
-    // foo: React.PropTypes.string
+    genotype: React.PropTypes.string,
   }
   static defaultProps = {
-    // foo: "bar"
+    genotype:["global", "HA1", "159F"]
   }
   getStyles() {
     return {
@@ -38,20 +38,38 @@ class Frequencies extends React.Component {
     };
   }
   drawFrequencies() {
-      if (this.props.frequencies['global_HA1:159F']) {
-        return (
+    console.log("drawFrequencies",this.props);
+    const key = this.props.genotype
+                ? this.props.genotype[0]+"_" + this.props.genotype[1] + ":" + this.props.genotype[2]
+                : "global_HA1:159F"
+    const traj = [];
+    const states = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
+                         "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
+                         "W", "X", "Y", "Z", "-", "*"];
+    for (let si=0; si<states.length; si+=1){
+      const key = this.props.genotype
+                  ? this.props.genotype+states[si]
+                  : "not found";
+      console.log(key);
+      if (key !== "not found" && this.props.frequencies[key]){
+        traj.push(
           <VictoryLine
             width={globals.width}
             data={
-                this.props.frequencies["global_HA1:159F"].map((frequency, i) => {
+                this.props.frequencies[key].map((frequency, i) => {
                   return {x: this.props.pivots[i], y: frequency}
                 })
             }
           />
-        )
-      } else {
-        return "still no data";
+        );
       }
+    }
+    console.log(traj);
+    return (
+      <VictoryChart>
+        {traj}
+      </VictoryChart>
+    );
   }
   render() {
     const styles = this.getStyles();

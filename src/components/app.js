@@ -217,6 +217,16 @@ class App extends React.Component {
     this.setState(Object.assign({location:{query, pathname}}, new_colorData));
   }
 
+  currentFrequencies() {
+    let freq = "";
+    if (this.state.location.query.colorBy && this.state.location.query.colorBy.slice(0,3) === "gt-") {
+      const gt = this.state.location.query.colorBy.slice(3).split("_");
+      freq = "global_" + gt[0] + ":" + gt[1];
+    }
+    console.log("currentFrequencies",freq, this.state.location.query.colorBy);
+    return freq;
+  }
+
   /******************************************
    * HOVER EVENTS
    *****************************************/
@@ -277,7 +287,7 @@ class App extends React.Component {
                     datasetGuid={this.props.tree.datasetGuid}
           />
         </Flex>
-        <Frequencies/>
+        <Frequencies genotype={this.currentFrequencies()}/>
         <Entropy/>
         <Map nodes={this.props.tree.nodes} justGotNewDatasetRenderNewMap={false}/>
         <Footer/>
