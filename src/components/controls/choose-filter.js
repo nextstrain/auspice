@@ -42,8 +42,8 @@ class ChooseFilter extends React.Component {
   }
 
   parseFilterQuery(query) {
-    const tmp = query.split("-").map( (d) => d.split("."));
-    return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1] )};
+    const tmp = query.split("-").map((d) => d.split("."));
+    return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length - 1] )};
   }
 
 

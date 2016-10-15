@@ -39,11 +39,11 @@ const metadataFetchError = (err) => {
 const fetchMetadata = (q) => {
   /*
     this will resolve to something like:
-    /data/flu/h3n2/3y.meta.json
+    /data/flu_h3n2_3y_meta.json
   */
   return fetch(
     "http://nextstrain.org/data/" +
-    q+"_meta.json"
+    q + "_meta.json"
   );
 };
 

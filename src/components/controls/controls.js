@@ -3,7 +3,6 @@ import Radium from 'radium';
 // import _ from 'lodash';
 import Flex from '../framework/flex';
 import { connect } from 'react-redux';
-import { filterOptions } from "../../util/globals";
 // import { FOO } from '../actions';
 import Button from "../framework/generic-button";
 import ToggleBranchLabels from "./toggle-branch-labels";
@@ -20,7 +19,7 @@ import ChooseFilter from "./choose-filter";
 const returnStateNeeded = (fullStateTree) => {
   return {
     controls: fullStateTree.controls,
-    filterOptions: fullStateTree.metadata.controls,
+    metadata: fullStateTree.metadata,
   };
 };
 
@@ -88,7 +87,10 @@ class Controls extends React.Component {
         <div id="commit"></div>
         <Legend {...this.props}/>
         <ColorBy {...this.props}/>
-        <ChooseFilter {...this.props} filterOptions={this.props.filterOptions || filterOptions}/>
+        {(this.props.metadata.metadata
+           ? <ChooseFilter {...this.props} filterOptions={this.props.metadata.metadata.controls}/>
+           : "")
+        }
         <ToggleBranchLabels/>
         <Search/>
         <Button> Reset Layout </Button>
