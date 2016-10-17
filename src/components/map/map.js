@@ -6,8 +6,11 @@ import { connect } from "react-redux";
 // import { FOO } from "../actions";
 
 
-@connect(state => {
-  return state.tree
+@connect((state) => {
+  return {
+    tree: state.tree.tree,
+    metadata: state.metadata.metadata
+  };
 })
 @Radium
 class Map extends React.Component {
@@ -44,39 +47,74 @@ class Map extends React.Component {
   addAllTipsToMap() {
     const aggregatedLocations = {};
     this.props.nodes.forEach((n) => {
-      if (n.children) { return }
+      if (n.children) { return; }
       // look up geo1 geo2 geo3 do lat longs differ
-      if (aggregatedLocations[n.attr.latitude + "/" + n.attr.longitude]) {
-        // if we haven't added this pair, add it
-        aggregatedLocations[n.attr.latitude + "/" + n.attr.longitude]++
+      if (aggregatedLocations[n.attr.country]) {
+        aggregatedLocations[n.attr.country]++;
       } else {
-        aggregatedLocations[n.attr.latitude + "/" + n.attr.longitude] = 1
+        // if we haven't added this pair, add it
+        aggregatedLocations[n.attr.country] = 1;
       }
-    })
-
-    console.log(aggregatedLocations)
+    });
 
     _.forOwn(aggregatedLocations, (value, key) => {
-
-        const latlong = key.split("/")
-
-        L.circleMarker([latlong[0], latlong[1]], {
-          stroke:	false,
-          radius: value,
-          // color: ""
-          // weight:	5	Stroke width in pixels.
-          // opacity:	0.5	Stroke opacity.
-          // fill:
-          fillColor: "rgb(255,0,0)"
-          // fillOpacity:
-        }).addTo(this.state.map)
-
+      L.circleMarker([
+        this.props.metadata.geo.country[key].latitude,
+        this.props.metadata.geo.country[key].longitude
+      ], {
+        stroke:	false,
+        radius: value,
+        // color: ""
+        // weight:	5	Stroke width in pixels.
+        // opacity:	0.5	Stroke opacity.
+        // fill:
+        fillColor: "rgb(255,0,0)"
+        // fillOpacity:
+      }).addTo(this.state.map)
     });
   }
+  addTransmissionEventsToMap() {
+    const transmissions = {};
+    const geo = this.props.metadata.geo;
 
+    this.props.nodes.forEach((parent) => {
+      if (!parent.children) { return; }
+      // if (parent.attr.country !== "brazil") { return; } // remove me, example filter
+      parent.children.forEach((child) => {
+        if (parent.attr.country === child.attr.country) { return; }
+        // look up in transmissions dictionary
+        if (transmissions[parent.attr.country + "/" + child.attr.country]) {
+          transmissions[parent.attr.country + "/" + child.attr.country]++;
+        } else {
+          // we don't have it, add it
+          transmissions[parent.attr.country + "/" + child.attr.country] = 1;
+        }
+      });
+    });
+
+    _.forOwn(transmissions, (value, key) => {
+      // L.polyline(latlngs, {color: 'red'}).addTo(this.state.map);
+      const countries = key.split("/");
+
+      L.polyline([
+        [geo.country[countries[0]].latitude, geo.country[countries[0]].longitude],
+        [geo.country[countries[1]].latitude, geo.country[countries[1]].longitude]
+      ], {
+        // stroke:	value,
+        // radius: value,
+        color: "rgb(255,0,0)",
+        weight:	value	/* Stroke width in pixels.*/
+        // opacity:	0.5	Stroke opacity.
+        // fill:
+        // fillColor: "rgb(255,0,0)"
+        // fillOpacity:
+      }).addTo(this.state.map)
+    });
+  }
   render() {
     if (this.props.nodes && this.state.map && !this.state.tips) {
       this.addAllTipsToMap();
+      this.addTransmissionEventsToMap();
       // don't redraw - need to seperately handle virus change redraw
       this.setState({tips: true});
     }
