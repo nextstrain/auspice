@@ -1,9 +1,9 @@
 import React from "react";
 import Radium from "radium";
 import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
+import { connect } from "react-redux";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
-// import { connect } from "react-redux";
 // import { FOO } from "../actions";
 
 
@@ -11,7 +11,7 @@ import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
  * Tip defines the appearance of the leafs or tips in the tree.
  *
 */
-
+@connect()
 @Radium
 class Tip extends React.Component {
   constructor(props) {
@@ -27,7 +27,7 @@ class Tip extends React.Component {
     routes: React.PropTypes.array,
     /* component api */
     style: React.PropTypes.object,
-    node: React.PropTypes.object,
+    node: React.PropTypes.object
   }
   static defaultProps = {
     // foo: "bar"
@@ -40,59 +40,13 @@ class Tip extends React.Component {
     };
   }
 
-  determineLegendMatch() {
-    const {
-      colorBy,
-      selectedLegendItem,
-      legendBoundsMap
-    } = this.props;
-    // construct a dictionary that maps a legend entry to the preceding interval
-    let bool;
-    // equates a tip and a legend element
-    // exact match is required for categorical qunantities such as genotypes, regions
-    // continuous variables need to fall into the interal (lower_bound[leg], leg]
-    if (this.props.controls.continuousColor) {
-      bool = (this.props.node.attr[colorBy] <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
-        (this.props.node.attr[colorBy] > legendBoundsMap.lower_bound[selectedLegendItem]);
-    } else {
-      bool = this.props.node.attr[colorBy] === selectedLegendItem;
-    }
-    return bool;
-  }
-
-
-  tipRadius() {
-    if (this.determineLegendMatch()) {
-      return 6;
-    } else {
-      return 3;
-    }
-  }
-
-  tipColor() {
-    if (this.props.node.clade % 10) {
-      return this.props.colorScale(this.props.node.attr[this.props.query.colorBy]);
-    } else {
-      return "CCC";
-    }
-  }
-
-  tipVisibility() {
-    if (this.props.node.attr.num_date >= this.props.query.dmin
-        && this.props.node.attr.num_date < this.props.query.dmax) {
-      return "visible";
-    } else {
-      return "hidden";
-    }
-  }
-
   getTip() {
     if (!this.props.node.hasChildren) {
       return (
         <circle
-          visibility = {this.tipVisibility()}
-          fill={this.tipColor()}
-          r={this.tipRadius()}
+          visibility = {this.props.tipVisibility}
+          fill = {this.props.nodeColor}
+          r={this.props.tipRadius}
           cx={this.props.x}
           cy={this.props.y}
         />
@@ -100,10 +54,10 @@ class Tip extends React.Component {
     } else {
       return (
         <rect
-          visibility = {this.tipVisibility()}
-          fill={this.tipColor()}
-          width= {2*this.tipRadius()}
-          height={2*this.tipRadius()}
+          visibility = {this.props.tipVisibility}
+          fill={this.props.nodeColor}
+          width= {2 * this.props.tipRadius}
+          height={2 * this.props.tipRadius}
           x={this.props.x}
           y={this.props.y}
         />

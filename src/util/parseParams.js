@@ -1,7 +1,7 @@
 import {datasets} from "./globals";
 
 /*
- * utility function that akes a string (splat as in flu/h3n2/3y)
+ * utility function that takes a string (splat as in flu/h3n2/3y)
  * parses it, and compares it against the datasets json to determine
  * whether that string specifies a valid and complete dataset
  * incomplete path are augmented with defaults

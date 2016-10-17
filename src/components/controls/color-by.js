@@ -1,23 +1,29 @@
 import React from "react";
 import Radium from "radium";
-import queryString from "query-string";
 import { defaultColorBy, genericDomain, colors } from "../../util/globals";
 import { connect } from "react-redux";
-import { CHANGE_COLORBY } from "../../actions/controls";
 import * as scales from "../../util/colorScales";
+import { parseGenotype } from "../../util/getGenotype";
 
 // import _ from "lodash";
 // import Flex from "./framework/flex";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
 
-@connect()
+const returnStateNeeded = (fullStateTree) => {
+  return {
+    geneLength: fullStateTree.sequences.geneLength
+  };
+};
+
+@connect(returnStateNeeded)
 @Radium
 class ColorBy extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-
+      selected: "region",
+      colorBy: "region"
     };
   }
   static propTypes = {
@@ -33,63 +39,50 @@ class ColorBy extends React.Component {
     // foo: "bar"
   }
 
-  genericScale(cmin,cmax){
-    const offset = +cmin;
-    const range = cmax-cmin;
-    const tmpColorScale = d3.scale.linear()
-      .domain(genericDomain.map((d) => offset + d * range))
-      .range(colors[10]);
-    return tmpColorScale;
-  }
-
-  getColorScale(colorBy) {
-    let colorScale;
-    let continuous=false;
-    if (colorBy === "ep") {
-      colorScale = this.genericScale(0, 15);
-      continuous = true;
-    } else if (colorBy === "ne") {
-      colorScale = this.genericScale(0, 25);
-      continuous = true;
-    } else if (colorBy === "rb") {
-      colorScale = this.genericScale(0, 6);
-      continuous = true;
-    } else if (colorBy === "lbi") {
-      colorScale = scales.lbiColorScale;
-      // todo, discuss
-      // adjust_coloring_by_date();
-      continuous = true;
-    } else if (colorBy === "dfreq") {
-      colorScale = scales.dfreqColorScale;
-      continuous = true;
-    } else if (colorBy === "region") {
-      colorScale = scales.regionColorScale;
-    } else if (colorBy === "cHI") {
-      colorScale = scales.cHIColorScale;
-      continuous = true;
-    } else if (colorBy === "num_date") {
-      colorScale = this.genericScale(this.props.location.query.dmin, this.props.location.query.dmax);
-      continuous = true;
-    } else if (colorBy === "fitness") {
-      colorScale = scales.fitnessColorScale;
-      continuous = true;
+  componentWillMount() {
+    const currentColorBy = this.props.location.query.colorBy;
+    if (currentColorBy){
+      this.setState({selected:currentColorBy});
     }
-    return {"scale": colorScale, "continuous": continuous};
   }
 
   setColorBy(colorBy) {
-    const tmp_path = this.props.location.pathname
-    const prefix = (tmp_path === "" || tmp_path[0] === "/") ? "" : "/";
-    const suffix = (tmp_path.length && tmp_path[tmp_path.length - 1] !== "/") ? "/?" : "?";
+    if (colorBy.slice(0,2) !== "gt") {
+      this.setColorByQuery(colorBy);
+      this.setState({"selected":colorBy, "colorBy":colorBy});
+    } else {
+      // don't update colorby yet, genotype still needs to be specified
+      this.setState({"selected":colorBy});
+    }
+  }
 
+  setColorByQuery(colorBy) {
     const newQuery = Object.assign({}, this.props.location.query,
                                    {colorBy: colorBy});
-    // https://www.npmjs.com/package/query-string
-    const url = (prefix + this.props.location.pathname
-                 + suffix + queryString.stringify(newQuery));
-    window.history.pushState({}, "", url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
-    this.props.dispatch({ type: CHANGE_COLORBY, data: {"colorBy": colorBy, "colorScale": this.getColorScale(colorBy)}});
+  }
+
+  setGenotypeColorBy(genotype) {
+    if (parseGenotype("gt-" + genotype, this.props.geneLength)) {
+      // We got a valid genotype, set query params and state
+      this.setColorByQuery("gt-" + genotype);
+      this.setState({"selected":"gt", "colorBy":"gt-" + genotype});
+    } else {
+      // we don't have a valid genotype, don't update anything yet
+      return null;
+    }
+  }
+
+  genotypeInput() {
+    if (this.state.selected === "gt") {
+      return (
+        <input type="text" placeholder="HA1 position"
+               onChange={(e) => this.setGenotypeColorBy(e.target.value)}
+        />
+      );
+    } else {
+      return null;
+    }
   }
 
   getStyles() {
@@ -106,7 +99,7 @@ class ColorBy extends React.Component {
     }
     const styles = this.getStyles();
     const colorOptions = Object.keys(this.props.colorOptions).map( (cOpt) =>
-                              <option value={ cOpt } >
+                              <option value={ cOpt } selected={cOpt === this.state.selected ? true : false}>
                                 { this.props.colorOptions[cOpt].menuItem }
                               </option> );
 
@@ -114,12 +107,13 @@ class ColorBy extends React.Component {
       <div style={styles.base}>
         <span> Color by </span>
         <select id="coloring"
-          onChange={(e) => {
-            if (e.target.value === this.props.title) { return }
-              this.setColorBy(e.target.value);
-          }}>
+          onChange={(e) => {this.setColorBy(e.target.value);}}
+        >
           {colorOptions}
         </select>
+        <div>
+          {this.genotypeInput()}
+        </div>
       </div>
     );
   }

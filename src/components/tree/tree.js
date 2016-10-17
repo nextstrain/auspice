@@ -4,7 +4,7 @@ import moment from "moment";
 import "moment-range";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
-import { connect } from "react-redux";
+//import { connect } from "react-redux";
 // import { FOO } from "../actions";
 import TreeNode from "./treeNode";
 import {VictoryAnimation} from "victory";
@@ -14,9 +14,6 @@ import {VictoryAnimation} from "victory";
  * Tree creates all TreeNodes of the tree, which consist of branches and tips.
  * Tree assignes the desired locations to all TreeNodes
 */
-@connect((state) => {
-  return {controls: state.controls};
-})
 @Radium
 class Tree extends React.Component {
   constructor(props) {
@@ -77,10 +74,6 @@ class Tree extends React.Component {
   }
 
   drawBranches(nodes) {
-    const range = moment().range(
-      new Date(+this.props.query.dmin),
-      new Date(+this.props.query.dmax)
-    )
     const branchComponents = nodes.map((node, index) => {
       return (
         <VictoryAnimation duration={1000} key={index} data={{
@@ -93,20 +86,25 @@ class Tree extends React.Component {
           r_x: this.r_x(node, this.props.distanceMeasure, this.props.layout),
           r_y: this.r_y(node, this.props.distanceMeasure, this.props.layout),
           smallBigArc: this.smallBigArc(node, this.props.distanceMeasure, this.props.layout),
-          leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.layout)
+          leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.layout),
+          nodeColor: this.props.nodeColor[index],
+          tipRadius: this.props.tipRadii[index]
         }}>
         {(props) => {
           return (
             <TreeNode
-              {...this.props} {...props} animate={null}
+              {...props} animate={null}
               key={index}
               node={node}
-              dateRange={range}
-              showBranchLabels={this.props.controls.showBranchLabels}
+              nodeColorAttr={this.props.nodeColorAttr[index]}
+              tipVisibility={this.props.tipVisibility[index]}
+              showBranchLabels={this.props.showBranchLabels}
               strain={node.attr.strain}
               hasChildren={node.children ? true : false}
+              layout={this.props.layout}
+              distanceMeasure={this.props.distanceMeasure}
             />
-          )
+          );
         }}
       </VictoryAnimation>
      );

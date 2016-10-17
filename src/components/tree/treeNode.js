@@ -2,30 +2,16 @@ import React from "react";
 import Radium from "radium";
 // import _ from "lodash";
 import { connect } from "react-redux";
-import * as globals from "../../util/globals";
 import { BRANCH_MOUSEENTER, BRANCH_MOUSELEAVE } from "../../actions/controls";
-import moment from "moment";
 import Tip from "./tip";
 import Tooltip from "./tooltip";
-
-const returnStateNeeded = (fullStateTree) => {
-  return {
-    selectedLegendItem: fullStateTree.controls.selectedLegendItem,
-    legendBoundsMap: fullStateTree.controls.legendBoundsMap,
-    colorScale: fullStateTree.controls.colorScale,
-    continuousColor: fullStateTree.controls.continuousColor,
-    showBranchLabels: fullStateTree.controls.showBranchLabels
-  };
-};
 
 /*
  * A TreeNode draws the path leading to the node and instantiates
  * Tip attached to its end. TreeNode determines the apprearance and
  * behavior of the path.
 */
-
-
-@connect(returnStateNeeded)
+@connect()
 @Radium
 class TreeNode extends React.Component {
   constructor(props) {
@@ -51,6 +37,7 @@ class TreeNode extends React.Component {
   static defaultProps = {
     // foo: "bar"
   }
+
   shouldComponentUpdate(nextProps, nextState) {
     return true;
   }
@@ -84,11 +71,7 @@ class TreeNode extends React.Component {
   }
 
   branchStrokeColor() {
-    if (this.props.node.attr[this.props.query.colorBy]) {
-      return this.props.colorScale(this.props.node.attr[this.props.query.colorBy]);
-    }else{
-      return "CCC";
-    }
+    return this.props.nodeColor;
   }
 
   branchPoints() {
@@ -152,7 +135,7 @@ class TreeNode extends React.Component {
             cursor: "pointer"
           }}>
         </path>
-        <Tip {...this.props} colorBy={this.props.query.colorBy}/>
+        <Tip {...this.props}/>
       </g>
     );
   }

@@ -17,13 +17,23 @@ import Header from "./framework/header";
 import Controls from "./controls/controls";
 import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
+import Map from "./map/map";
 import TreeView from "./tree/treeView";
 import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
 import queryString from "query-string";
-import {colorOptions} from "../util/globals"
+import getColorScale from "../util/getColorScale";
+import { parseGenotype, getGenotype } from "../util/getGenotype";
+import {colorOptions} from "../util/globals";
 
-@connect()
+const returnStateNeeded = (fullStateTree) => {
+  return {
+    tree: fullStateTree.tree,
+    sequences: fullStateTree.sequences,
+    selectedLegendItem: fullStateTree.controls.selectedLegendItem
+  };
+};
+@connect(returnStateNeeded)
 @Radium
 class App extends React.Component {
   constructor(props) {
@@ -31,8 +41,14 @@ class App extends React.Component {
     this.state = {
       sidebarOpen: false,
       location: {
-        pathname: window.location.pathname.slice(1, -1),
+        pathname: window.location.pathname,
         query: queryString.parse(window.location.search)
+      },
+      colorScale: {
+        colorBy: null,
+        scale: null,
+        legendBoundsMap: null,
+        continuous: null
       },
       // sidebarDocked: true,
     };
@@ -52,24 +68,39 @@ class App extends React.Component {
     // foo: "bar"
 
   }
+
+  /******************************************
+   * LIFECYLCE METHODS
+   *****************************************/
+
+  componentWillReceiveProps(nextProps) {
+  }
+
   componentDidMount() {
-    console.log('registering')
     // when the user hits the back button or forward, let us know so we can setstate again
     // all of the other intentional route changes we will manually setState
-    window.addEventListener('popstate', (a,b,c) => {
-      console.log('popstate', a,b,c)
+    const tmpQuery = queryString.parse(window.location.search);
+    this.maybeFetchDataset();
+    const cScale = this.updateColorScale(tmpQuery.colorBy || "region");
+    window.addEventListener("popstate", (a, b, c) => {
       this.setState({
         location: {
           pathname: window.location.pathname.slice(1, -1),
-          query: queryString.parse(window.location.search)
+          query: tmpQuery
         },
-      })
-    })
-    this.maybeFetchDataset();
+        colorScale: cScale
+      });
+    });
   }
+
   componentDidUpdate() {
     this.maybeFetchDataset();
+    if (!this.state.nodeColor && this.props.tree.nodes) {
+      const cScale = this.updateColorScale(this.state.location.query.colorBy || "region");
+      this.setState(cScale);
+    }
   }
+
   maybeFetchDataset() {
     if (this.state.latestValidParams === this.state.location.pathname) {
       return;
@@ -78,18 +109,24 @@ class App extends React.Component {
     const parsedParams = parseParams(this.state.location.pathname);
     const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);
     tmp_levels.sort((x, y) => x[0] > y[0]);
-    const data_path = tmp_levels.map( function (d) {return d[1];}).join("_");
+    // make prefix for data files with fields joined by _ instead of / as in URL
+    const data_path = tmp_levels.map((d) => d[1]).join("_");
     if (parsedParams.incomplete) {
-        this.setVirusPath(parsedParams.fullsplat);
+      this.setVirusPath(parsedParams.fullsplat);
     }
     if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
-      console.log("attempting to load, need to nuke old Guid",data_path);
       this.props.dispatch(populateMetadataStore(data_path));
       this.props.dispatch(populateTreeStore(data_path));
       this.props.dispatch(populateSequencesStore(data_path));
       this.props.dispatch(populateFrequenciesStore(data_path));
+      this.props.dispatch(populateEntropyStore(data_path));
+      this.setState({latestValidParams: parsedParams.fullsplat});
     }
   }
+
+  /******************************************
+   * HANDLE QUERY PARAM CHANGES AND ASSOCIATED STATE UPDATES
+   *****************************************/
   setVirusPath(newPath) {
     const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
     const suffix = (newPath.length && newPath[newPath.length - 1] !== "/") ? "/?" : "?";
@@ -97,14 +134,131 @@ class App extends React.Component {
     window.history.pushState({}, "", url);
     this.changeRoute(newPath, this.state.location.query);
   }
-  changeRoute(pathname, query) {
-    this.setState({
-      location: {
-        pathname,
-        query
-      }
-    });
+
+  getTipColorAttribute(node, cScale) {
+    if (cScale.colorBy.slice(0,3) === "gt-") {
+        return getGenotype(cScale.genotype[0][0],
+                                  cScale.genotype[0][1],
+                                  node, this.props.sequences.sequences);
+    } else {
+      return node.attr[cScale.colorBy];
+    };
   }
+
+  updateColorScale(colorBy) {
+    const cScale = getColorScale(colorBy, this.props.tree, this.props.sequences);
+    let gts = null;
+    if (colorBy.slice(0,3) === "gt-" && this.props.sequences.geneLength) {
+      gts = parseGenotype(colorBy, this.props.sequences.geneLength);
+    }
+    cScale.genotype = gts;
+    let nodeColorAttr=null;
+    let nodeColor=null;
+    if (this.props.tree.nodes){
+      nodeColorAttr = this.props.tree.nodes.map((n) => this.getTipColorAttribute(n, cScale));
+      nodeColor = nodeColorAttr.map((n) => cScale.scale(n));
+    }
+    return {
+      colorScale: cScale,
+      nodeColor: nodeColor,
+      nodeColorAttr: nodeColorAttr,
+    };
+  }
+
+  parseFilterQuery(query) {
+    const tmp = query.split("-").map( (d) => d.split("."));
+    return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1] )};
+  }
+
+  tipVisibility(filters) {
+    let upperLimit = +this.state.location.query.dmax;
+    let lowerLimit = +this.state.location.query.dmin;
+    if (!upperLimit) {
+      upperLimit = 1000000000000;
+    }
+    if (!lowerLimit) {
+      lowerLimit = -1000000000000;
+    }
+    if (this.props.tree.nodes){
+      const tmp = this.parseFilterQuery(this.state.location.query.filter || "");
+      const filter_pairs = [];
+      for (let ii=1; ii<tmp["filters"].length; ii+=1) {
+        if (tmp.filters[ii] && tmp.fields[ii]){
+          filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
+        }
+      }
+      if (filter_pairs.length){
+        return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
+                                         && d.attr.num_date < upperLimit
+                                         && filter_pairs.every((x) => d.attr[x[0]] === x[1]))
+                                           ? "visible" : "hidden");
+      } else {
+        return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
+                                         && d.attr.num_date < upperLimit)
+                                            ? "visible" : "hidden");
+      }
+    } else {
+      return "visible";
+    }
+  }
+
+
+  changeRoute(pathname, query) {
+    const prefix = (pathname === "" || pathname[0] === "/") ? "" : "/";
+    const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/?" : "?";
+    const url = prefix + pathname + suffix + queryString.stringify(query);
+    window.history.pushState({}, "", url);
+
+    let new_colorData = {};
+    //only update colorScales and nodeColors when changed
+    if (query.colorBy && (query.colorBy !== this.state.colorScale.colorBy)) {
+      new_colorData = this.updateColorScale(query.colorBy);
+    }
+    this.setState(Object.assign({location:{query, pathname}}, new_colorData));
+  }
+
+  currentFrequencies() {
+    let freq = "";
+    if (this.state.location.query.colorBy && this.state.location.query.colorBy.slice(0,3) === "gt-") {
+      const gt = this.state.location.query.colorBy.slice(3).split("_");
+      freq = "global_" + gt[0] + ":" + gt[1];
+    }
+    return freq;
+  }
+
+  /******************************************
+   * HOVER EVENTS
+   *****************************************/
+  determineLegendMatch(selectedLegendItem, nodeAttr, legendBoundsMap) {
+    let bool;
+    // equates a tip and a legend element
+    // exact match is required for categorical qunantities such as genotypes, regions
+    // continuous variables need to fall into the interal (lower_bound[leg], leg]
+    if (legendBoundsMap) {
+      bool = (nodeAttr <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
+             (nodeAttr > legendBoundsMap.lower_bound[selectedLegendItem]);
+    } else {
+      bool = nodeAttr === selectedLegendItem;
+    }
+    return bool;
+  }
+
+  tipRadii() {
+    const selItem = this.props.selectedLegendItem;
+    if (selItem && this.state.nodeColorAttr){
+      const legendMap = this.state.colorScale.continuous
+                        ? this.state.colorScale.legendBoundsMap : false;
+      return this.state.nodeColorAttr.map((d) => this.determineLegendMatch(selItem, d, legendMap) ? 6 : 3);
+    } else if (this.state.nodeColorAttr) {
+      return this.state.nodeColorAttr.map((d) => 3);
+    } else {
+      return null;
+    }
+  }
+
+  /******************************************
+   * RENDER
+   *****************************************/
   render() {
     return (
       <div style={{margin: "0px 20px"}}>
@@ -120,11 +274,21 @@ class App extends React.Component {
           <Controls changeRoute={this.changeRoute.bind(this)}
                     location={this.state.location}
                     colorOptions={colorOptions}
+                    colorScale={this.state.colorScale}
           />
-          <TreeView query={this.state.location.query}/>
-          <Frequencies/>
-          <Entropy/>
+          <TreeView nodes={this.props.tree.nodes}
+                    nodeColorAttr={this.state.nodeColorAttr}
+                    nodeColor={this.state.nodeColor}
+                    tipRadii={this.tipRadii()}
+                    tipVisibility={this.tipVisibility()}
+                    layout={this.state.location.query.l || "rectangular"}
+                    distanceMeasure={this.state.location.query.m || "div"}
+                    datasetGuid={this.props.tree.datasetGuid}
+          />
         </Flex>
+        <Frequencies genotype={this.currentFrequencies()}/>
+        <Entropy/>
+        <Map nodes={this.props.tree.nodes} justGotNewDatasetRenderNewMap={false}/>
         <Footer/>
       </div>
     );

@@ -173,7 +173,6 @@ export const populateFrequenciesStore = (queryParams) => {
   };
 };
 
-
 /* request entropyes */
 const requestEntropy = () => {
   return {
@@ -182,7 +181,6 @@ const requestEntropy = () => {
 };
 
 const receiveEntropy = (data) => {
-  console.log('ENTROPY:',data);
   return {
     type: RECEIVE_ENTROPY,
     data: data
@@ -196,16 +194,16 @@ const entropyFetchError = (err) => {
   };
 };
 
-const fetchEntropy = () => {
-  return fetch("/Zika_entropy");
+const fetchEntropy = (q) => {
+  return fetch("http://nextstrain.org/data/" +
+      q + "_entropy.json");
 };
 
-export const populateEntropyStore = () => {
-  console.log('in populateEntropyStore');
+export const populateEntropyStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestEntropy());
-    return fetchEntropy().then((res) => res.json()).then(
-      (json) => dispatch(receiveEntropy(JSON.parse(json.body))),
+    return fetchEntropy(queryParams).then((res) => res.json()).then(
+      (json) => dispatch(receiveEntropy(json)),
       (err) => dispatch(entropyFetchError(err))
     );
   };

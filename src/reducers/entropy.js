@@ -12,7 +12,6 @@ const Entropy = (state = {
       error: null
     });
   case types.RECEIVE_ENTROPY:
-    console.log('RECEIVE_ENTROPY:',action.data);
     return Object.assign({}, state, {
       loading: false,
       error: null,
