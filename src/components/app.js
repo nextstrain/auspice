@@ -289,11 +289,11 @@ class App extends React.Component {
         </Flex>
         <Frequencies genotype={this.currentFrequencies()}/>
         <Entropy/>
+        <Map nodes={this.props.tree.nodes} justGotNewDatasetRenderNewMap={false}/>
         <Footer/>
       </div>
     );
   }
 }
 
-//        <Map nodes={this.props.tree.nodes} justGotNewDatasetRenderNewMap={false}/>
 export default App;
