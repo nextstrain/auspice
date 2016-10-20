@@ -223,7 +223,6 @@ class App extends React.Component {
       const gt = this.state.location.query.colorBy.slice(3).split("_");
       freq = "global_" + gt[0] + ":" + gt[1];
     }
-    console.log("currentFrequencies",freq, this.state.location.query.colorBy);
     return freq;
   }
 
