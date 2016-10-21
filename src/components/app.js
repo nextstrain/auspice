@@ -31,7 +31,7 @@ const returnStateNeeded = (fullStateTree) => {
     tree: fullStateTree.tree,
     sequences: fullStateTree.sequences,
     sidebarOpen: false,
-    sidebarDocked: false
+    sidebarDocked: false,
     metadata: fullStateTree.metadata,
     selectedLegendItem: fullStateTree.controls.selectedLegendItem
   };
