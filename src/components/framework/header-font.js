@@ -1,6 +1,7 @@
 import React from "react";
 import Radium from "radium";
 // import Flex from "./framework/flex";
+import globalStyles from "../../globalStyles";
 
 @Radium
 class HeaderFont extends React.Component {
@@ -17,7 +18,7 @@ class HeaderFont extends React.Component {
   getStyles() {
     return {
       base: {
-        fontFamily: "aw-conqueror-sans, sans-serif",
+        fontFamily: globalStyles.sans,
         fontSize: this.props.size === "large" ? 76 : 28,
         lineHeight: "68px",
         letterSpacing: -1.8,

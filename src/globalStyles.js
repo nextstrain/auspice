@@ -1,8 +1,7 @@
-const styles = {
-
+const globalStyles = {
   lighterGrey: "rgb(200, 200, 200)",
-  darkerGrey: "rgb(100,100,100)"
-
+  darkerGrey: "rgb(100,100,100)",
+  sans: "aw-conqueror-sans, sans-serif"
 };
 
-export default styles;
+export default globalStyles;
