@@ -30,6 +30,7 @@ const returnStateNeeded = (fullStateTree) => {
   return {
     tree: fullStateTree.tree,
     sequences: fullStateTree.sequences,
+    metadata: fullStateTree.metadata,
     selectedLegendItem: fullStateTree.controls.selectedLegendItem
   };
 };
@@ -167,7 +168,7 @@ class App extends React.Component {
 
   parseFilterQuery(query) {
     const tmp = query.split("-").map( (d) => d.split("."));
-    return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1] )};
+    return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1].split(',') )};
   }
 
   tipVisibility(filters) {
@@ -180,17 +181,21 @@ class App extends React.Component {
       lowerLimit = -1000000000000;
     }
     if (this.props.tree.nodes){
-      const tmp = this.parseFilterQuery(this.state.location.query.filter || "");
       const filter_pairs = [];
-      for (let ii=1; ii<tmp["filters"].length; ii+=1) {
-        if (tmp.filters[ii] && tmp.fields[ii]){
-          filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
+      if (this.props.metadata){
+        for (const filter in this.props.metadata.metadata.controls){
+          const tmp = this.parseFilterQuery(this.state.location.query[filter] || "");
+          for (let ii=0; ii<tmp.filters.length; ii+=1) {
+            if (tmp.filters[ii] && tmp.fields[ii]){
+              filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
+            }
+          }
         }
       }
       if (filter_pairs.length){
         return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
                                          && d.attr.num_date < upperLimit
-                                         && filter_pairs.every((x) => d.attr[x[0]] === x[1]))
+                                         && filter_pairs.every((x) => x[1].indexOf(d.attr[x[0]])>-1))
                                            ? "visible" : "hidden");
       } else {
         return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit

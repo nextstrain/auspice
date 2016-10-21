@@ -1,6 +1,7 @@
 import React from "react";
 import Radium from "radium";
 import queryString from "query-string";
+import Select from 'react-select';
 import { filterAbbrRev,filterAbbrFwd } from "../../util/globals";
 
 /*
@@ -37,20 +38,22 @@ class RecursiveFilter extends React.Component {
 
   makeQueryString(filters, fields){
     // the first item specifies the filter type (not really necessary)
-    let tmp_str = filters[0];
+    const tmp_filter = [];
     // all other filters are appended as key.value separated by dashes
     for (let ii=0; ii<fields.length; ii+=1){
-      if (ii && filters[ii]){
-        tmp_str = tmp_str + "-" + fields[ii] + "." + filters[ii];
+      if (filters[ii] && filters[ii]){
+        tmp_filter.push(fields[ii] + "." + filters[ii]);
       }
     }
-    return tmp_str;
+    return tmp_filter.join('-');
   }
 
   setFilterQuery(filters, fields) {
-    // push new query into chanceRoute
-    const newQuery = Object.assign({}, this.props.location.query,
-                        {"filter":this.makeQueryString(filters, fields)});
+    const ft = this.props.filterType;
+    const filterQ = {};
+    filterQ[this.props.filterType] = this.makeQueryString(filters, fields);
+    // push new query into changeRoute
+    const newQuery = Object.assign({}, this.props.location.query, filterQ);
     this.props.changeRoute(this.props.location.pathname, newQuery);
   }
 
@@ -58,33 +61,26 @@ class RecursiveFilter extends React.Component {
     // the selector below resets the path by router.push({pathname:new_path})
     // the currently selected option is passed down as this.props.selected
     // 9/19/2016: https://facebook.github.io/react/docs/forms.html#why-select-value
+    const options = [];
+    for (let i=0; i<this.props.options.length; i++){
+      options.push({value:this.props.options[i],
+                    label:this.props.options[i] + (this.props.counts[i] ? " (" + this.props.counts[i] + ")" : "")}
+                  );
+    }
     return (
-      <select
-        style={{marginRight: 20}}
-        value={this.props.selected}
+      <Select
+        style={{width:200}}
+        name="form-field-name"
+        value={this.state.selection}
+        multi={true}
+        options={options}
         onChange={(e) => {
-          if (e.target.value === this.props.title) {
-            this.setFilterQuery(this.props.filterTree, this.props.fields);
-          } else {
-            this.setFilterQuery(this.props.filterTree.concat(e.target.value)
+            this.setFilterQuery(this.props.filterTree.concat(e.map((d) => d["value"]).join(','))
                                 .map((d) => filterAbbrRev[d]||d),
                                 this.props.fields);
-          }
+            this.setState({selection:e});
         }}
-      >
-        <option key={"titleOption"}> {this.props.title} </option>
-        {
-          this.props.options.map((option, i) => {
-            return (
-              <option key={i}
-                      selected={(option === this.props.selected) ? "selected" : ""}
-                      value={option}
-              >
-                {option + (this.props.counts[i] ? " (" + this.props.counts[i] + ")" : "")}
-              </option>);
-          })
-        }
-      </select>
+      />
     );
   }
 }

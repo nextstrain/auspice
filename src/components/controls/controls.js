@@ -13,7 +13,7 @@ import DateRangeInputs from "./date-range-inputs";
 import ChooseLayout from "./choose-layout";
 import ChooseVirus from "./choose-virus";
 import ChooseMetric from "./choose-metric";
-import ChooseFilter from "./choose-filter";
+import AllFilters from "./all-filter";
 
 
 const returnStateNeeded = (fullStateTree) => {
@@ -52,7 +52,6 @@ class Controls extends React.Component {
     };
   }
   render() {
-    const styles = this.getStyles();
     return (
       <Flex
         direction="column"
@@ -87,10 +86,7 @@ class Controls extends React.Component {
         <div id="commit"></div>
         <Legend {...this.props}/>
         <ColorBy {...this.props}/>
-        {(this.props.metadata.metadata
-           ? <ChooseFilter {...this.props} filterOptions={this.props.metadata.metadata.controls}/>
-           : "")
-        }
+        <AllFilters {...this.props} />
         <ToggleBranchLabels/>
         <Search/>
         <Button> Reset Layout </Button>
