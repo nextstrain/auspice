@@ -3,7 +3,6 @@ import Radium from 'radium';
 // import _ from 'lodash';
 import Flex from '../framework/flex';
 import { connect } from 'react-redux';
-import { filterOptions } from "../../util/globals";
 // import { FOO } from '../actions';
 import Button from "../framework/generic-button";
 import ToggleBranchLabels from "./toggle-branch-labels";
@@ -13,13 +12,13 @@ import DateRangeInputs from "./date-range-inputs";
 import ChooseLayout from "./choose-layout";
 import ChooseVirus from "./choose-virus";
 import ChooseMetric from "./choose-metric";
-import ChooseFilter from "./choose-filter";
+import AllFilters from "./all-filter";
 
 
 const returnStateNeeded = (fullStateTree) => {
   return {
     controls: fullStateTree.controls,
-    filterOptions: fullStateTree.metadata.controls,
+    metadata: fullStateTree.metadata,
   };
 };
 
@@ -52,7 +51,6 @@ class Controls extends React.Component {
     };
   }
   render() {
-    const styles = this.getStyles();
     return (
       <Flex
         direction="column"
@@ -86,7 +84,7 @@ class Controls extends React.Component {
         <div id="updated"></div>
         <div id="commit"></div>
         <ColorBy {...this.props}/>
-        <ChooseFilter {...this.props} filterOptions={this.props.filterOptions || filterOptions}/>
+        <AllFilters {...this.props} />
         <ToggleBranchLabels/>
         <Search/>
         <Button> Reset Layout </Button>
