@@ -9,27 +9,30 @@ import {
 } from "../actions";
 
 import Radium from "radium";
-import _ from "lodash";
-// import {Link} from "react-router";
-// import Awesome from "react-fontawesome";
 import Flex from "./framework/flex";
 import Header from "./framework/header";
+import Footer from "./framework/footer";
+import Background from "./framework/background";
+
 import Controls from "./controls/controls";
 import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
 import Map from "./map/map";
 import TreeView from "./tree/treeView";
-import Footer from "./framework/footer";
 import parseParams from "../util/parseParams";
 import queryString from "query-string";
 import getColorScale from "../util/getColorScale";
 import { parseGenotype, getGenotype } from "../util/getGenotype";
 import {colorOptions} from "../util/globals";
+import Sidebar from "react-sidebar";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
     tree: fullStateTree.tree,
     sequences: fullStateTree.sequences,
+    sidebarOpen: false,
+    sidebarDocked: false
+    metadata: fullStateTree.metadata,
     selectedLegendItem: fullStateTree.controls.selectedLegendItem
   };
 };
@@ -74,6 +77,12 @@ class App extends React.Component {
    *****************************************/
 
   componentWillReceiveProps(nextProps) {
+  }
+
+  componentWillMount() {
+    var mql = window.matchMedia(`(min-width: 800px)`);
+    mql.addListener(this.mediaQueryChanged.bind(this));
+    this.setState({mql: mql, sidebarDocked: mql.matches});
   }
 
   componentDidMount() {
@@ -167,7 +176,7 @@ class App extends React.Component {
 
   parseFilterQuery(query) {
     const tmp = query.split("-").map( (d) => d.split("."));
-    return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1] )};
+    return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1].split(',') )};
   }
 
   tipVisibility(filters) {
@@ -180,17 +189,21 @@ class App extends React.Component {
       lowerLimit = -1000000000000;
     }
     if (this.props.tree.nodes){
-      const tmp = this.parseFilterQuery(this.state.location.query.filter || "");
       const filter_pairs = [];
-      for (let ii=1; ii<tmp["filters"].length; ii+=1) {
-        if (tmp.filters[ii] && tmp.fields[ii]){
-          filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
+      if (this.props.metadata){
+        for (const filter in this.props.metadata.metadata.controls){
+          const tmp = this.parseFilterQuery(this.state.location.query[filter] || "");
+          for (let ii=0; ii<tmp.filters.length; ii+=1) {
+            if (tmp.filters[ii] && tmp.fields[ii]){
+              filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
+            }
+          }
         }
       }
       if (filter_pairs.length){
         return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
                                          && d.attr.num_date < upperLimit
-                                         && filter_pairs.every((x) => d.attr[x[0]] === x[1]))
+                                         && filter_pairs.every((x) => x[1].indexOf(d.attr[x[0]])>-1))
                                            ? "visible" : "hidden");
       } else {
         return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
@@ -255,44 +268,64 @@ class App extends React.Component {
       return null;
     }
   }
+  /******************************************
+   * SIDEBAR
+   *****************************************/
+
+  onSetSidebarOpen(open) {
+    this.setState({sidebarOpen: open});
+  }
+
+  mediaQueryChanged() {
+    this.setState({sidebarDocked: this.state.mql.matches});
+  }
 
   /******************************************
    * RENDER
    *****************************************/
   render() {
+    var sidebarContent = <b>Sidebar content</b>;
+
     return (
-      <div style={{margin: "0px 20px"}}>
-        <Header/>
-        <Flex
-          style={{
-            width: "100%"
-          }}
-          wrap="wrap"
-          alignItems="flex-start"
-          justifyContent="space-between"
-        >
-          <Controls changeRoute={this.changeRoute.bind(this)}
-                    location={this.state.location}
-                    colorOptions={colorOptions}
-                    colorScale={this.state.colorScale}
-          />
+      <Sidebar sidebar={<Controls changeRoute={this.changeRoute.bind(this)}
+          location={this.state.location}
+          colorOptions={colorOptions}
+          colorScale={this.state.colorScale}/>}
+        open={this.state.sidebarOpen}
+        docked={this.state.sidebarDocked}
+        onSetOpen={this.onSetSidebarOpen}>
+        <Background>
+          <Header/>
+          <Flex
+            style={{
+              width: "100%"
+            }}
+            wrap="wrap"
+            alignItems="flex-start"
+            justifyContent="space-between"
+          >
           <TreeView nodes={this.props.tree.nodes}
-                    nodeColorAttr={this.state.nodeColorAttr}
-                    nodeColor={this.state.nodeColor}
-                    tipRadii={this.tipRadii()}
-                    tipVisibility={this.tipVisibility()}
-                    layout={this.state.location.query.l || "rectangular"}
-                    distanceMeasure={this.state.location.query.m || "div"}
-                    datasetGuid={this.props.tree.datasetGuid}
+            nodeColorAttr={this.state.nodeColorAttr}
+            colorScale={this.state.colorScale}
+            nodeColor={this.state.nodeColor}
+            tipRadii={this.tipRadii()}
+            tipVisibility={this.tipVisibility()}
+            layout={this.state.location.query.l || "rectangular"}
+            distanceMeasure={this.state.location.query.m || "div"}
+            datasetGuid={this.props.tree.datasetGuid}
           />
-        </Flex>
-        <Frequencies genotype={this.currentFrequencies()}/>
-        <Entropy/>
-        <Map nodes={this.props.tree.nodes} justGotNewDatasetRenderNewMap={false}/>
-        <Footer/>
-      </div>
+          </Flex>
+          <Frequencies genotype={this.currentFrequencies()}/>
+          <Entropy/>
+          <Map nodes={this.props.tree.nodes} justGotNewDatasetRenderNewMap={false}/>
+        </Background>
+      </Sidebar>
     );
   }
 }
+
+
+// <Footer/>
+
 
 export default App;

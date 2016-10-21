@@ -4,6 +4,7 @@ import _ from "lodash";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
+import Card from "../framework/card";
 
 
 @connect((state) => {
@@ -34,7 +35,11 @@ class Map extends React.Component {
     // setupMap()
     var map = L.map('map', {
       center: [0,0],
-      zoom: 2
+      zoom: 2,
+      scrollWheelZoom: false,
+      minZoom: 2,
+      maxZoom: 9,
+
     })
 
     L.tileLayer('https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2l1MDRoMzg5MDEwbjJvcXBpNnUxMXdwbCJ9.PMqX7vgORuXLXxtI3wISjw', {
@@ -79,7 +84,7 @@ class Map extends React.Component {
 
     this.props.nodes.forEach((parent) => {
       if (!parent.children) { return; }
-      // if (parent.attr.country !== "brazil") { return; } // remove me, example filter
+      // if (parent.attr.country !== "china") { return; } // remove me, example filter
       parent.children.forEach((child) => {
         if (parent.attr.country === child.attr.country) { return; }
         // look up in transmissions dictionary
@@ -95,10 +100,19 @@ class Map extends React.Component {
     _.forOwn(transmissions, (value, key) => {
       // L.polyline(latlngs, {color: 'red'}).addTo(this.state.map);
       const countries = key.split("/");
+      let long0 = geo.country[countries[0]].longitude;
+      let long1 = geo.country[countries[1]].longitude;
+
+
+      // if (Math.abs(long0 - long1) > 100) {
+      //   return
+        // long0 = long0 + 360;
+        // long1 = long1 + 360;
+      // }
 
       L.polyline([
-        [geo.country[countries[0]].latitude, geo.country[countries[0]].longitude],
-        [geo.country[countries[1]].latitude, geo.country[countries[1]].longitude]
+        [geo.country[countries[0]].latitude, long0],
+        [geo.country[countries[1]].latitude, long1]
       ], {
         // stroke:	value,
         // radius: value,
@@ -119,8 +133,14 @@ class Map extends React.Component {
       this.setState({tips: true});
     }
     return (
-      <div style={{height: 500, width: 1000, marginTop: 40, marginBottom: 40}} id="map">
-      </div>
+      <Card title="Transmissions">
+        <div style={{
+            height: 400,
+            width: 800,
+            margin: 10
+          }} id="map">
+        </div>
+      </Card>
     );
   }
 }

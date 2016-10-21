@@ -1,14 +1,17 @@
 import React from 'react';
 import Radium from 'radium';
 // import _ from 'lodash';
-// import Flex from './framework/flex';
-// import { connect } from 'react-redux';
-// import { FOO } from '../actions';
+import Flex from './flex';
+import HeaderFont from "./header-font";
+import MonoFont from "./mono-font";
+import { connect } from "react-redux";
 
-
-// @connect(state => {
-//   return state.FOO;
-// })
+const returnStateNeeded = (fullStateTree) => {
+  return {
+    metadata: fullStateTree.metadata.metadata
+  };
+};
+@connect(returnStateNeeded)
 @Radium
 class Header extends React.Component {
   constructor(props) {
@@ -26,29 +29,25 @@ class Header extends React.Component {
     style: React.PropTypes.object,
     // foo: React.PropTypes.string
   }
-  static defaultProps = {
-    // foo: "bar"
-    virus: {
-      name: "[virus not loaded]"
-    }
-  }
-  getStyles() {
-    return {
-      nextstrain: {
-        fontSize: 76,
-        margin: 0
-      }
-    };
+
+  createTitle() {
+    const title = "nextstrain";
+    const colors = ["#4377CD", "#5097BA", "#63AC9A", "#7CB879", "#9ABE5C", "#B9BC4A", "#D4B13F", "#E49938", "#E67030", "#DE3C26"];
+
+    return title.split("").map((letter, i) => {
+      return (
+        <span style={{color: colors[i]}}>{letter}</span>
+      )
+    })
   }
   render() {
-    const styles = this.getStyles();
     return (
-      <div>
-        <p style={styles.nextstrain}> nextstrain </p>
-        <p> Real-time tracking of {this.props.virus.name} virus evolution </p>
-      </div>
+      <Flex>
+        <HeaderFont size="large"> {this.createTitle()} </HeaderFont>
+      </Flex>
     );
   }
 }
 
 export default Header;
+// <p> Real-time tracking of <MonoFont>this.props.metadata.virus = {this.props.metadata ? this.props.metadata.virus : "loading"}</MonoFont> virus evolution </p>
