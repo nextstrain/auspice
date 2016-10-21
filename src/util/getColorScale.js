@@ -74,6 +74,9 @@ const getColorScale = (colorBy, tree, sequences) => {
   } else if (colorBy === "region") {
     continuous = false;
     colorScale = scales.regionColorScale;
+  } else if (colorBy === "country") {
+      continuous = false;
+      colorScale = scales.countryColorScale;
   } else if (cScaleTypes[colorBy] === "continuous") {
     continuous = true;
     colorScale = minMaxAttributeScale(tree.nodes, colorBy);

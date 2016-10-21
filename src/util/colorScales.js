@@ -37,6 +37,10 @@ export const regionColorScale = d3.scale.ordinal()
   .domain(globals.regions.map((d) => { return d[0]; }))
   .range(globals.regions.map((d) => { return d[1]; }));
 
+  export const countryColorScale = d3.scale.ordinal()
+    .domain(globals.countries.map((d) => { return d[0]; }))
+    .range(globals.countries.map((d) => { return d[1]; }));
+
 export const dateColorScale = d3.scale.linear().clamp([true])
   .domain(globals.dateColorDomain)
   .range(globals.colors[10]);
