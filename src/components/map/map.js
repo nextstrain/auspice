@@ -4,6 +4,7 @@ import _ from "lodash";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
+import Card from "../framework/card";
 
 
 @connect((state) => {
@@ -35,6 +36,7 @@ class Map extends React.Component {
     var map = L.map('map', {
       center: [0,0],
       zoom: 2,
+      scrollWheelZoom: false,
       minZoom: 2,
       maxZoom: 9,
 
@@ -131,8 +133,14 @@ class Map extends React.Component {
       this.setState({tips: true});
     }
     return (
-      <div style={{height: 400, width: 1000, marginTop: 40, marginBottom: 40}} id="map">
-      </div>
+      <Card title="Transmissions">
+        <div style={{
+            height: 400,
+            width: 800,
+            margin: 10
+          }} id="map">
+        </div>
+      </Card>
     );
   }
 }

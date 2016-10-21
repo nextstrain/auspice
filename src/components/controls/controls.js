@@ -7,7 +7,6 @@ import { filterOptions } from "../../util/globals";
 // import { FOO } from '../actions';
 import Button from "../framework/generic-button";
 import ToggleBranchLabels from "./toggle-branch-labels";
-import Legend from "./legend";
 import ColorBy from "./color-by";
 import Search from "./search";
 import DateRangeInputs from "./date-range-inputs";
@@ -86,7 +85,6 @@ class Controls extends React.Component {
         <div className="treeplot-container" id="treeplot-container"></div>
         <div id="updated"></div>
         <div id="commit"></div>
-        <Legend {...this.props}/>
         <ColorBy {...this.props}/>
         <ChooseFilter {...this.props} filterOptions={this.props.filterOptions || filterOptions}/>
         <ToggleBranchLabels/>

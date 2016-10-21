@@ -9,6 +9,8 @@ import d3 from "d3";
 import { processNodes, calcLayouts } from "../../util/processNodes";
 import * as globals from "../../util/globals";
 import Tree from "./tree";
+import Card from "../framework/card";
+import Legend from "../controls/legend";
 
 import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 
@@ -117,10 +119,12 @@ class TreeView extends React.Component {
     //   onChange={this.handleChange.bind(this)}
     //   onClick={this.handleClick.bind(this)}>
     return (
+      <Card title="Phylogeny">
         <svg
           width={this.state.width}
           height={this.treePlotHeight(this.state.width)}
           id="treeplot">
+          <Legend colorScale={this.props.colorScale}/>
           <Tree
             nodes={this.props.nodes}
             nodeColor={this.props.nodeColor}
@@ -133,6 +137,7 @@ class TreeView extends React.Component {
             yScale={this.state.yScale}
           />
         </svg>
+      </Card>
     )
   // </Viewer>
   }

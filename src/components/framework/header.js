@@ -1,7 +1,7 @@
 import React from 'react';
 import Radium from 'radium';
 // import _ from 'lodash';
-// import Flex from './framework/flex';
+import Flex from './flex';
 import HeaderFont from "./header-font";
 import MonoFont from "./mono-font";
 import { connect } from "react-redux";
@@ -42,12 +42,12 @@ class Header extends React.Component {
   }
   render() {
     return (
-      <div>
+      <Flex>
         <HeaderFont size="large"> {this.createTitle()} </HeaderFont>
-        <p> Real-time tracking of <MonoFont>this.props.metadata.virus = {this.props.metadata ? this.props.metadata.virus : "loading"}</MonoFont> virus evolution </p>
-      </div>
+      </Flex>
     );
   }
 }
 
 export default Header;
+// <p> Real-time tracking of <MonoFont>this.props.metadata.virus = {this.props.metadata ? this.props.metadata.virus : "loading"}</MonoFont> virus evolution </p>

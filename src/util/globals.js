@@ -29,7 +29,7 @@ export const colorOptions = {
 
 
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
-export const width = 1000;
+export const width = 800;
 export const margin = 60;
 export const defaultColorBy = "region";
 export const defaultDateSliderFraction = 0.3;

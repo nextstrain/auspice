@@ -10,7 +10,7 @@ import LegendItem from "./legend-item";
 
 
 // @connect(state => {
-//   return state.FOO;
+//
 // })
 @Radium
 class Legend extends React.Component {
@@ -40,7 +40,7 @@ class Legend extends React.Component {
     if (this.props.colorOptions[colorBy]){
       return this.props.colorOptions[colorBy].legendTitle;
     } else {
-      return "WhatEver";
+      return "[* legend title absent]";
     }
   }
 
@@ -96,14 +96,17 @@ class Legend extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <div style={styles.container}>
-        <p>{this.chooseLegendTitle()}</p>
-      <svg style={styles.svg}>
+      <g>
         {this.createLegendItems()}
-      </svg>
-      </div>
+      </g>
     );
   }
 }
 
 export default Legend;
+
+// </svg>
+//   </div>
+//   <div style={styles.container}>
+//   <p>{this.chooseLegendTitle()}</p>
+// <svg style={styles.svg}>
