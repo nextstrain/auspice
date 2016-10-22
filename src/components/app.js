@@ -217,6 +217,7 @@ class App extends React.Component {
 
 
   changeRoute(pathname, query) {
+    pathname = pathname.replace("!/", ""); // needed to assist with S3 redirects
     const prefix = (pathname === "" || pathname[0] === "/") ? "" : "/";
     const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/?" : "?";
     const url = prefix + pathname + suffix + queryString.stringify(query);
