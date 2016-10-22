@@ -1,3 +1,5 @@
+import d3 from "d3";
+
 // datasets json: object of list (to ensure order) of list (to be flexible)
 // until terminated by an empty list indicating that no further datasets
 // resolution are made
