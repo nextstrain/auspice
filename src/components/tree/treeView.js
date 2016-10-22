@@ -9,6 +9,7 @@ import d3 from "d3";
 import { processNodes, calcLayouts } from "../../util/processNodes";
 import * as globals from "../../util/globals";
 import Tree from "./tree";
+import Grid from "./grid";
 import Card from "../framework/card";
 import Legend from "../controls/legend";
 
@@ -123,22 +124,30 @@ class TreeView extends React.Component {
         <svg
           width={this.state.width}
           height={this.treePlotHeight(this.state.width)}
-          id="treeplot">
-          <Legend colorScale={this.props.colorScale}/>
-          <Tree
-            nodes={this.props.nodes}
-            nodeColor={this.props.nodeColor}
-            nodeColorAttr={this.props.nodeColorAttr}
-            tipRadii={this.props.tipRadii}
-            tipVisibility={this.props.tipVisibility}
-            layout={this.props.layout}
-            distanceMeasure={this.props.distanceMeasure}
-            xScale={this.state.xScale}
-            yScale={this.state.yScale}
-          />
+          id="treeplot"
+        >
+         <Grid
+           layout={this.props.layout}
+           distanceMeasure={this.props.distanceMeasure}
+           xScale={this.state.xScale}
+           yScale={this.state.yScale}
+           nodes={this.props.nodes}
+         />
+         <Legend colorScale={this.props.colorScale}/>
+         <Tree
+           nodes={this.props.nodes}
+           nodeColor={this.props.nodeColor}
+           nodeColorAttr={this.props.nodeColorAttr}
+           tipRadii={this.props.tipRadii}
+           tipVisibility={this.props.tipVisibility}
+           layout={this.props.layout}
+           distanceMeasure={this.props.distanceMeasure}
+           xScale={this.state.xScale}
+           yScale={this.state.yScale}
+         />
         </svg>
       </Card>
-    )
+    );
   // </Viewer>
   }
 
