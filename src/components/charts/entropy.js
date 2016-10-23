@@ -50,18 +50,6 @@ class Entropy extends React.Component {
   }
 
   drawEntropy() {
-    // const amino_acid_charts = [];
-    // for (let prot in this.props.entropy) {
-    //   if (prot !== "nuc") {
-    //     amino_acid_charts.push(
-    //       <VictoryBar
-    //         style={{data: {fill: globals.genotypeColors[amino_acid_charts.length%10], width:2}}}
-    //         data={this.props.entropy[prot]['val'].map((s, i) => {return {x: this.props.entropy[prot]['pos'][i], y: s}})}
-    //       />
-    //       );
-    //   }
-    // }
-
     const entropyChartWidth = 900;
     const entropyChartHeight = 300;
     const bottomPadding = 30;
@@ -73,28 +61,89 @@ class Entropy extends React.Component {
     const entropyWithoutZeros = _.filter(entropy, (e) => {return e.y !== 0});
 
 
+    let aminoAcidEntropyWithoutZeros = [];
+    const annotations = [];
+    let aaCount=0;
+    for (let prot in this.props.entropy) {
+      if (prot !== "nuc") {
+        let tmpProt= this.props.entropy[prot];
+        aaCount+=1;
+        annotations.push({prot: prot,
+                          start: tmpProt['pos'][0],
+                          end: tmpProt['pos'][tmpProt['pos'].length-1],
+                          readingFrame: 1+tmpProt['pos'][0]%3,
+                          fill: globals.genotypeColors[aaCount%10],
+                         });
+        const tmpEntropy = tmpProt['val'].map(
+              (s, i) => {return {x: tmpProt['pos'][i],
+                                 y: s,
+                                 codon: tmpProt['codon'][i],
+                                 fill: globals.genotypeColors[aaCount%10],
+                                 prot: prot
+                                 }}
+            );
+        aminoAcidEntropyWithoutZeros = aminoAcidEntropyWithoutZeros.concat(tmpEntropy.filter((e) => e.y !== 0));
+      }
+    }
+
     const x = d3.scale.linear()
                     .domain([0, entropy.length]) // original array, since the x values are still mapped to that
                     .range([0, entropyChartWidth - rightPadding]);
 
+    const yMax = Math.max(_.maxBy(entropyWithoutZeros, 'y').y,
+                         _.maxBy(aminoAcidEntropyWithoutZeros, 'y').y);
     const y = d3.scale.linear()
-                    .domain([0, _.maxBy(entropyWithoutZeros, 'y').y]) // original array, since the x values are still mapped to that
-                    .range([0, entropyChartHeight]);
-
-
+                    .domain([-0.07, 1.2*yMax]) // original array, since the x values are still mapped to that
+                    .range([bottomPadding, entropyChartHeight]);
 
     return (
       <Card title={"Entropy"}>
         <svg width={entropyChartWidth} height={entropyChartHeight}>
+          {annotations.map((e) => {
+            return (
+              <g>
+              <rect
+                x={x(e.start) + leftPadding}
+                y={entropyChartHeight - y(-0.025*yMax*e.readingFrame)}
+                width={x(e.end)-x(e.start)}
+                height={12}
+                fill={e.fill}
+                stroke={e.fill}
+              />
+              <text
+                x={0.5*(x(e.start) + x(e.end)) + leftPadding}
+                y={entropyChartHeight - y(-0.025*yMax*e.readingFrame) + 10}
+                textAnchor={"middle"}
+                fontSize={10}
+                fill={"#444"}
+              >
+                {e.prot}
+              </text>
+              </g>
+            );
+          })}
           {entropyWithoutZeros.map((e) => {
             return (
               <rect
                 x={x(e.x) + leftPadding}
-                y={entropyChartHeight - bottomPadding - y(e.y)}
-                width="1.5" height={y(e.y)}
+                y={entropyChartHeight - y(e.y)}
+                width="1" height={y(e.y)-y(0)}
                 cursor={"pointer"}
                 onClick={() => {this.setColorByQuery("gt-nuc_" + (e.x + 1));}}
                 fill={"#CCC"}
+                stroke={"#CCC"}
+              />
+            );
+          })}
+          {aminoAcidEntropyWithoutZeros.map((e) => {
+            return (
+              <rect
+                x={x(e.x) + leftPadding}
+                y={entropyChartHeight - y(e.y)}
+                width="2.5" height={y(e.y)-y(0)}
+                cursor={"pointer"}
+                onClick={() => {this.setColorByQuery("gt-" + e.prot + "_" + (e.codon + 1));}}
+                fill={e.fill}
                 stroke={"#CCC"}
               />
             );
@@ -106,22 +155,24 @@ class Entropy extends React.Component {
               left: leftPadding, // cosmetic, 1px overhang, add +1 if persists
               right: 0 // this is confusing, but ok
             }}
-            domain={[0, _.maxBy(entropyWithoutZeros, 'x').x]}
+            domain={x.domain()}
             offsetY={bottomPadding}
             width={entropyChartWidth}
-            standalone={false}/>
-            <VictoryAxis
-              dependentAxis
-              padding={{
-                top: 0,
-                bottom: bottomPadding,
-                left: leftPadding, // cosmetic, 1px overhang, add +1 if persists
-                right: rightPadding / 2 // bug? why is that / 2 necessary...
-              }}
-              domain={[0, _.maxBy(entropyWithoutZeros, 'y').y]}
-              offsetY={bottomPadding}
-              width={entropyChartWidth}
-              standalone={false}/>
+            standalone={false}
+          />
+          <VictoryAxis
+            dependentAxis
+            padding={{
+              top: 0,
+              bottom: bottomPadding,
+              left: leftPadding, // cosmetic, 1px overhang, add +1 if persists
+              right: rightPadding / 2 // bug? why is that / 2 necessary...
+            }}
+            domain={y.domain()}
+            offsetY={bottomPadding}
+            width={entropyChartWidth}
+            standalone={false}
+          />
         </svg>
       </Card>
     );
