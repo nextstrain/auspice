@@ -8,6 +8,7 @@ import {VictoryAxis, VictoryChart, VictoryBar} from "victory";
 import * as globals from "../../util/globals";
 import Card from "../framework/card";
 import d3 from "d3";
+import { parseGenotype } from "../../util/getGenotype";
 
 @connect(state => {
   return state.entropy;
@@ -20,6 +21,7 @@ class Entropy extends React.Component {
 
     };
   }
+
   static propTypes = {
     /* react */
     // dispatch: React.PropTypes.func,
@@ -32,6 +34,7 @@ class Entropy extends React.Component {
   static defaultProps = {
     // foo: "bar"
   }
+
   getStyles() {
     return {
       base: {
@@ -39,6 +42,13 @@ class Entropy extends React.Component {
       }
     };
   }
+
+  setColorByQuery(colorBy) {
+    const newQuery = Object.assign({}, this.props.location.query,
+                                   {colorBy: colorBy});
+    this.props.changeRoute(this.props.location.pathname, newQuery);
+  }
+
   drawEntropy() {
     // const amino_acid_charts = [];
     // for (let prot in this.props.entropy) {
@@ -72,13 +82,22 @@ class Entropy extends React.Component {
                     .range([0, entropyChartHeight]);
 
 
+
     return (
       <Card title={"Entropy"}>
         <svg width={entropyChartWidth} height={entropyChartHeight}>
           {entropyWithoutZeros.map((e) => {
             return (
-              <rect x={x(e.x) + leftPadding} y={entropyChartHeight - bottomPadding - y(e.y)} width="1" height={y(e.y)}/>
-            )
+              <rect
+                x={x(e.x) + leftPadding}
+                y={entropyChartHeight - bottomPadding - y(e.y)}
+                width="1" height={y(e.y)}
+                cursor={"pointer"}
+                onClick={() => {this.setColorByQuery("gt-nuc_" + (e.x + 1));}}
+                fill={"#CCC"}
+                stroke={"#CCC"}
+              />
+            );
           })}
           <VictoryAxis
             padding={{

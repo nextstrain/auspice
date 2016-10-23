@@ -317,7 +317,10 @@ class App extends React.Component {
           />
           </Flex>
           <Frequencies genotype={this.currentFrequencies()}/>
-          <Entropy/>
+          <Entropy
+            changeRoute={this.changeRoute.bind(this)}
+            location={this.state.location}
+          />
           <Map nodes={this.props.tree.nodes} justGotNewDatasetRenderNewMap={false}/>
         </Background>
       </Sidebar>
