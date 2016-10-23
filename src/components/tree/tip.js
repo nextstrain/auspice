@@ -40,6 +40,14 @@ class Tip extends React.Component {
     };
   }
 
+  shouldComponentUpdate() {
+    if (!this.props.node.hasChildren) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   getTip() {
     if (!this.props.node.hasChildren) {
       return (

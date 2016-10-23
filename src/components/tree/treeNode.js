@@ -112,29 +112,6 @@ class TreeNode extends React.Component {
   render() {
     return (
       <g>
-        <path
-          d={this.branchPoints()}
-          onMouseEnter={() => {
-            this.props.dispatch({
-              type: BRANCH_MOUSEENTER,
-              /*
-                send the source and target nodes in the action,
-                use x and y values in them to place tooltip
-              */
-              data: this.props.datum
-            });
-          }}
-          onMouseLeave={() => {
-            this.props.dispatch({ type: BRANCH_MOUSELEAVE });
-          }}
-          style={{
-            stroke: this.branchStrokeColor(),
-            strokeWidth: this.branchStrokeWidth(),
-            strokeLinejoin: "round",
-            fill: "none",
-            cursor: "pointer"
-          }}>
-        </path>
         <Tip {...this.props}/>
       </g>
     );
