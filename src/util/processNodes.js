@@ -32,11 +32,12 @@ const vsDateLayout = (node, distanceMeasure) => {
 };
 
 const radialLayout = (node, distanceMeasure, nTips, rootVal) => {
-    const circleFraction = 0.95;
+    const circleFraction = -0.9;
+    const circleStart = Math.PI;
     const radius = (distanceMeasure=='div')?node.xvalue:(node.attr[distanceMeasure]-rootVal);
     const parentRadius = (distanceMeasure=='div')?node.parent.xvalue:(node.parent.attr[distanceMeasure]-rootVal);
-    const angle = circleFraction*2.0*Math.PI*node.yvalue/nTips;
-    const parentAngle = circleFraction*2.0*Math.PI*node.parent.yvalue/nTips;
+    const angle = circleStart + circleFraction*2.0*Math.PI*(nTips-node.yvalue)/nTips;
+    const parentAngle = circleStart + circleFraction*2.0*Math.PI*(nTips-node.parent.yvalue)/nTips;
     const leftRight = node.yvalue>node.parent.yvalue;
     const smallBigArc = Math.abs(angle - parentAngle)>Math.Pi*0.5;
     return {'xVal':radius*Math.sin(angle), 'yVal':radius*Math.cos(angle),

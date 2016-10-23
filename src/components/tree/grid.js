@@ -45,7 +45,7 @@ class Grid extends React.Component {
     const roundingLevel = Math.pow(10, logRange);
     const gridMin = Math.floor((xmin+offset)/roundingLevel)*roundingLevel;
     const gridPoints = [];
-    for (let ii = 0; ii < (xmax + offset - gridMin)/roundingLevel; ii++) {
+    for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+0.4; ii++) {
       if (gridMin + roundingLevel*ii>offset){
           gridPoints.push(gridMin + roundingLevel*ii);
       }
@@ -72,12 +72,11 @@ class Grid extends React.Component {
 
     const minorRoundingLevel = roundingLevel / (this.props.distanceMeasure === "div" ? 5 : 6);
     const minorGridPoints = [];
-    for (let ii = 0; ii < (xmax + offset - gridMin)/minorRoundingLevel; ii++) {
+    for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+3; ii++) {
       if (gridMin + minorRoundingLevel*ii>offset){
           minorGridPoints.push(gridMin + minorRoundingLevel*ii);
       }
     }
-    console.log("Grid", minorGridPoints);
     const minorGridLines = minorGridPoints.map((tick, index) => {
         return (
           <GridLine
@@ -97,6 +96,7 @@ class Grid extends React.Component {
           />
        );
     });
+    console.log("gridPoints", minorGridPoints, xmax, gridMin, offset, offset+xmax);
     return gridLines.concat(minorGridLines);
   }
 

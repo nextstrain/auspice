@@ -53,12 +53,13 @@ class GridLine extends React.Component {
      >
      </path>
      <text
+      textAnchor={this.props.layout==="rectangular" ? "start" : "end"}
       x={(this.props.layout==="rectangular")
-          ? this.props.x : this.props.cx }
+          ? this.props.x : this.props.cx - 5 }
       y={(this.props.layout==="rectangular")
           ? this.props.yScale.range()[1]+15
-          : this.props.y + 15 }
-      font-size={12}
+          : this.props.cy - (this.props.y - this.props.cy) }
+      fontSize={12}
      >
       {this.props.label}
      </text>

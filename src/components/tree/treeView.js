@@ -63,6 +63,7 @@ class TreeView extends React.Component {
                || (nextProps.layout !== this.props.layout)
                || (nextProps.distanceMeasure !== this.props.distanceMeasure)) {
       const scales = this.updateScales(nextProps.nodes, nextProps.layout, nextProps.distanceMeasure);
+      console.log("setting ok to draw");
       this.setState({
         okToDraw: true,
         currentDatasetGuid: nextProps.datasetGuid,
@@ -85,15 +86,16 @@ class TreeView extends React.Component {
       return +node.geometry[distanceMeasure][layout].yVal;
     });
 
+    const height = this.treePlotHeight(globals.width);
+    const minDim = ((globals.width<height) ? globals.width : height) - 2*globals.margin;
     const xScale = d3.scale.linear().range([globals.margin, globals.width - globals.margin]);
-    const yScale = d3.scale.linear().range([
-      globals.margin,
-      this.treePlotHeight(globals.width) - globals.margin
-    ]);
+    const yScale = d3.scale.linear().range([globals.margin, height - globals.margin ]);
 
     if (layout === "radial") {
       xScale.domain([-d3.max(xValues), d3.max(xValues)]);
       yScale.domain([-d3.max(xValues), d3.max(xValues)]);
+      xScale.range([globals.width - minDim - globals.margin, globals.width - globals.margin]);
+      yScale.range([height - minDim - globals.margin, height - globals.margin]);
     } else {
       xScale.domain([d3.min(xValues), d3.max(xValues)]);
       yScale.domain([d3.min(yValues), d3.max(yValues)]);
