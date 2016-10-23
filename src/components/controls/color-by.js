@@ -52,7 +52,7 @@ class ColorBy extends React.Component {
       this.setState({"selected":colorBy, "colorBy":colorBy});
     } else {
       // don't update colorby yet, genotype still needs to be specified
-      this.setState({"selected":colorBy});
+      this.setState({"selected":"gt"});
     }
   }
 
@@ -95,6 +95,9 @@ class ColorBy extends React.Component {
   render() {
     if (!this.props.location.query.colorBy) {
       this.setColorBy(defaultColorBy);
+      return null;
+    } else if (this.props.location.query.colorBy.slice(0,3) === "gt-" && this.state.selected !== "gt") {
+      this.setColorBy(this.props.location.query.colorBy);
       return null;
     }
     const styles = this.getStyles();

@@ -96,7 +96,6 @@ class Grid extends React.Component {
           />
        );
     });
-    console.log("gridPoints", minorGridPoints, xmax, gridMin, offset, offset+xmax);
     return gridLines.concat(minorGridLines);
   }
 

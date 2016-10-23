@@ -91,7 +91,7 @@ class Entropy extends React.Component {
               <rect
                 x={x(e.x) + leftPadding}
                 y={entropyChartHeight - bottomPadding - y(e.y)}
-                width="1" height={y(e.y)}
+                width="1.5" height={y(e.y)}
                 cursor={"pointer"}
                 onClick={() => {this.setColorByQuery("gt-nuc_" + (e.x + 1));}}
                 fill={"#CCC"}
