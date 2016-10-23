@@ -48,7 +48,7 @@ class Frequencies extends React.Component {
     const pivots = this.props.pivots;
     const x = d3.scale.linear()
                     .domain([pivots[0], pivots[pivots.length-1]]) // original array, since the x values are still mapped to that
-                    .range([leftPadding,leftPadding + frequencyChartWidth - rightPadding]);
+                    .range([leftPadding, frequencyChartWidth - rightPadding]);
 
     const y = d3.scale.linear()
                     .domain([0, 1.05]) // original array, since the x values are still mapped to that
@@ -89,7 +89,8 @@ class Frequencies extends React.Component {
           {
             legendItems.map((p,i) => {
             return (
-              <text fontSize={p.fontSize} fill={p.fill} textAnchor={"end"} x={x.range()[1]} y={(i+1)*18}>
+              <text fontSize={p.fontSize} fill={p.fill} textAnchor={"end"}
+                    x={x.range()[1]+rightPadding*0.9} y={(i+1)*18}>
                 {p.text}
               </text>
             );
@@ -99,7 +100,7 @@ class Frequencies extends React.Component {
               top: 0,
               bottom: 0,
               left: leftPadding, // cosmetic, 1px overhang, add +1 if persists
-              right: 0 // this is confusing, but ok
+              right: rightPadding // this is confusing, but ok
             }}
             domain={x.domain()}
             offsetY={bottomPadding}
@@ -113,7 +114,7 @@ class Frequencies extends React.Component {
               top: 0,
               bottom: bottomPadding,
               left: leftPadding, // cosmetic, 1px overhang, add +1 if persists
-              right: rightPadding / 2 // bug? why is that / 2 necessary...
+              right: rightPadding
             }}
             domain={y.domain()}
             offsetY={bottomPadding}

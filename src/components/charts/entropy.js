@@ -153,7 +153,7 @@ class Entropy extends React.Component {
               top: 0,
               bottom: 0,
               left: leftPadding, // cosmetic, 1px overhang, add +1 if persists
-              right: 0 // this is confusing, but ok
+              right: rightPadding // this is confusing, but ok
             }}
             domain={x.domain()}
             offsetY={bottomPadding}
