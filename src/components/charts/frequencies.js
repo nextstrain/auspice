@@ -55,6 +55,7 @@ class Frequencies extends React.Component {
                     .range([frequencyChartHeight-bottomPadding, 0]);
 
     const traj = [];
+    const legendItems = [];
     const states = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K",
                          "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
                          "W", "X", "Y", "Z", "-", "*"];
@@ -69,7 +70,9 @@ class Frequencies extends React.Component {
                           strokeWidth: 3,
                           stroke:globals.genotypeColors[tCount%10]
                         }
+        const new_legendItem = {text:key, fill:globals.genotypeColors[tCount%10], fontSize:14};
         traj.push(new_traj);
+        legendItems.push(new_legendItem)
         tCount++;
       }
     }
@@ -81,6 +84,14 @@ class Frequencies extends React.Component {
             traj.map((p) => {
             return (
               <path {...p}  fill={"none"} />
+            );
+          })}
+          {
+            legendItems.map((p,i) => {
+            return (
+              <text fontSize={p.fontSize} fill={p.fill} textAnchor={"end"} x={x.range()[1]} y={(i+1)*18}>
+                {p.text}
+              </text>
             );
           })}
           <VictoryAxis
