@@ -71,7 +71,7 @@ class Entropy extends React.Component {
         annotations.push({prot: prot,
                           start: tmpProt['pos'][0],
                           end: tmpProt['pos'][tmpProt['pos'].length-1],
-                          readingFrame: 1+tmpProt['pos'][0]%3,
+                          readingFrame: 1, //+tmpProt['pos'][0]%3,
                           fill: globals.genotypeColors[aaCount%10],
                          });
         const tmpEntropy = tmpProt['val'].map(
@@ -91,10 +91,10 @@ class Entropy extends React.Component {
                     .range([0, entropyChartWidth - rightPadding]);
 
     const yMax = Math.max(_.maxBy(entropyWithoutZeros, 'y').y,
-                         _.maxBy(aminoAcidEntropyWithoutZeros, 'y').y);
+                          _.maxBy(aminoAcidEntropyWithoutZeros, 'y').y);
     const y = d3.scale.linear()
                     .domain([-0.07, 1.2*yMax]) // original array, since the x values are still mapped to that
-                    .range([bottomPadding, entropyChartHeight]);
+                    .range([entropyChartHeight-bottomPadding, 0]);
 
     return (
       <Card title={"Entropy"}>
@@ -104,7 +104,7 @@ class Entropy extends React.Component {
               <g>
               <rect
                 x={x(e.start) + leftPadding}
-                y={entropyChartHeight - y(-0.025*yMax*e.readingFrame)}
+                y={y(-0.025*yMax*e.readingFrame)}
                 width={x(e.end)-x(e.start)}
                 height={12}
                 fill={e.fill}
@@ -112,7 +112,7 @@ class Entropy extends React.Component {
               />
               <text
                 x={0.5*(x(e.start) + x(e.end)) + leftPadding}
-                y={entropyChartHeight - y(-0.025*yMax*e.readingFrame) + 10}
+                y={y(-0.025*yMax*e.readingFrame) + 10}
                 textAnchor={"middle"}
                 fontSize={10}
                 fill={"#444"}
@@ -126,8 +126,8 @@ class Entropy extends React.Component {
             return (
               <rect
                 x={x(e.x) + leftPadding}
-                y={entropyChartHeight - y(e.y)}
-                width="1" height={y(e.y)-y(0)}
+                y={y(e.y)}
+                width="1" height={y(0) - y(e.y)}
                 cursor={"pointer"}
                 onClick={() => {this.setColorByQuery("gt-nuc_" + (e.x + 1));}}
                 fill={"#CCC"}
@@ -139,8 +139,8 @@ class Entropy extends React.Component {
             return (
               <rect
                 x={x(e.x) + leftPadding}
-                y={entropyChartHeight - y(e.y)}
-                width="2.5" height={y(e.y)-y(0)}
+                y={y(e.y)}
+                width="2.5" height={y(0) - y(e.y)}
                 cursor={"pointer"}
                 onClick={() => {this.setColorByQuery("gt-" + e.prot + "_" + (e.codon + 1));}}
                 fill={e.fill}

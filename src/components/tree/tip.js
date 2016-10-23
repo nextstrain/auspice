@@ -52,16 +52,7 @@ class Tip extends React.Component {
         />
       );
     } else {
-      return (
-        <rect
-          visibility = {this.props.tipVisibility}
-          fill={this.props.nodeColor}
-          width= {2 * this.props.tipRadius}
-          height={2 * this.props.tipRadius}
-          x={this.props.x}
-          y={this.props.y}
-        />
-      );
+      return null;
     }
   }
 
