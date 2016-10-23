@@ -190,7 +190,7 @@ class App extends React.Component {
     }
     if (this.props.tree.nodes){
       const filter_pairs = [];
-      if (this.props.metadata) {
+      if (this.props.metadata && this.props.metadata.metadata) {
         for (const filter in this.props.metadata.metadata.controls){ // possible race condition with tree?
           const tmp = this.parseFilterQuery(this.state.location.query[filter] || "");
           for (let ii=0; ii<tmp.filters.length; ii+=1) {

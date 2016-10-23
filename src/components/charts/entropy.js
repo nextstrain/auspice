@@ -4,7 +4,7 @@ import _ from "lodash";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
-import {VictoryAxis, VictoryChart, VictoryBar} from "victory";
+import {VictoryAxis} from "victory";
 import * as globals from "../../util/globals";
 import Card from "../framework/card";
 import d3 from "d3";
@@ -52,7 +52,7 @@ class Entropy extends React.Component {
   drawEntropy() {
     const entropyChartWidth = 900;
     const entropyChartHeight = 300;
-    const bottomPadding = 30;
+    const bottomPadding = 45;
     const leftPadding = 80;
     const rightPadding = 80;
 
@@ -88,22 +88,22 @@ class Entropy extends React.Component {
 
     const x = d3.scale.linear()
                     .domain([0, entropy.length]) // original array, since the x values are still mapped to that
-                    .range([0, entropyChartWidth - rightPadding]);
+                    .range([leftPadding, entropyChartWidth - rightPadding]);
 
     const yMax = Math.max(_.maxBy(entropyWithoutZeros, 'y').y,
                           _.maxBy(aminoAcidEntropyWithoutZeros, 'y').y);
     const y = d3.scale.linear()
-                    .domain([-0.07, 1.2*yMax]) // original array, since the x values are still mapped to that
+                    .domain([-0.11*yMax, 1.2*yMax]) // original array, since the x values are still mapped to that
                     .range([entropyChartHeight-bottomPadding, 0]);
 
     return (
-      <Card title={"Entropy"}>
+      <Card title={"Genetic Diversity"}>
         <svg width={entropyChartWidth} height={entropyChartHeight}>
           {annotations.map((e) => {
             return (
               <g>
               <rect
-                x={x(e.start) + leftPadding}
+                x={x(e.start)}
                 y={y(-0.025*yMax*e.readingFrame)}
                 width={x(e.end)-x(e.start)}
                 height={12}
@@ -111,7 +111,7 @@ class Entropy extends React.Component {
                 stroke={e.fill}
               />
               <text
-                x={0.5*(x(e.start) + x(e.end)) + leftPadding}
+                x={0.5*(x(e.start) + x(e.end)) }
                 y={y(-0.025*yMax*e.readingFrame) + 10}
                 textAnchor={"middle"}
                 fontSize={10}
@@ -125,7 +125,7 @@ class Entropy extends React.Component {
           {entropyWithoutZeros.map((e) => {
             return (
               <rect
-                x={x(e.x) + leftPadding}
+                x={x(e.x)}
                 y={y(e.y)}
                 width="1" height={y(0) - y(e.y)}
                 cursor={"pointer"}
@@ -138,7 +138,7 @@ class Entropy extends React.Component {
           {aminoAcidEntropyWithoutZeros.map((e) => {
             return (
               <rect
-                x={x(e.x) + leftPadding}
+                x={x(e.x)}
                 y={y(e.y)}
                 width="2.5" height={y(0) - y(e.y)}
                 cursor={"pointer"}
@@ -159,6 +159,7 @@ class Entropy extends React.Component {
             offsetY={bottomPadding}
             width={entropyChartWidth}
             standalone={false}
+            label={"Position"}
           />
           <VictoryAxis
             dependentAxis
@@ -176,18 +177,8 @@ class Entropy extends React.Component {
         </svg>
       </Card>
     );
-
-
-    // <VictoryChart width={globals.width}>
-    //   <VictoryBar
-    //     style={{data: {fill: "lightgrey", "width":2}}}
-    //     data={this.props.entropy['nuc']['val'].map((s, i) => {return {x: this.props.entropy['nuc']['pos'][i], y: s}})}
-    //     />
-    // </VictoryChart>
-    // <VictoryChart width={globals.width}>
-    //   {amino_acid_charts}
-    // </VictoryChart>
   }
+
   render() {
     const styles = this.getStyles();
     return (
