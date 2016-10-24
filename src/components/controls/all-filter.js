@@ -56,7 +56,6 @@ class AllFilters extends React.Component {
     }
     return (
       <div>
-        Filters:
         {filters}
       </div>
       );

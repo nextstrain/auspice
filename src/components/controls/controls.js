@@ -57,40 +57,52 @@ class Controls extends React.Component {
         justifyContent="flex-start"
         alignItems="flex-start"
         style={{
-          width: 200
+          width: 250,
+          padding: 20
         }}>
         <ChooseVirus {...this.props}/>
-        <ChooseLayout {...this.props}/>
-        <ChooseMetric {...this.props}/>
-        <p> Phylogeny </p>
         <DateRangeInputs {...this.props}/>
-        <div className="d3-tip se"/>
-        <div className="d3-tip e"/>
-        <div className="d3-tip"/>
-        <div id="date-input"></div>
-        <div id="legend-title"></div>
-        <div id="legend"></div>
-        <div id="gt-color"></div>
-        <div id="branchlabels"></div>
-        <div id="region"></div>
-        <div id="search"></div>
-        <div id="straininput"></div>
-        <div id="bp-ac"></div>
-        <div id="bp-input"></div>
-        <div id="searchinputclear"></div>
-        <div id="reset"></div>
-        <div className="freqplot-container"></div>
-        <div className="treeplot-container" id="treeplot-container"></div>
-        <div id="updated"></div>
-        <div id="commit"></div>
+
+        <p style={{fontWeight: 500, fontSize: 12}}>FILTERS</p>
         <ColorBy {...this.props}/>
         <AllFilters {...this.props} />
         <ToggleBranchLabels/>
         <Search/>
-        <Button> Reset Layout </Button>
+
+        <p style={{fontWeight: 500, fontSize: 12}}>TREE OPTIONS</p>
+        <p style={{fontWeight: 300, fontSize: 14, color: "rgb(67, 119, 205)", marginBottom: 0}}>Layout</p>
+        <ChooseLayout {...this.props}/>
+        <p style={{fontWeight: 300, fontSize: 14, color: "rgb(67, 119, 205)", marginBottom: 0}}>Scale</p>
+
+        <ChooseMetric {...this.props}/>
+
+        <p style={{fontWeight: 500, fontSize: 12}}>MAP OPTIONS</p>
+
       </Flex>
     );
   }
 }
 
 export default Controls;
+
+// <Button> Reset Filters </Button>
+
+// <div className="d3-tip se"/>
+// <div className="d3-tip e"/>
+// <div className="d3-tip"/>
+// <div id="date-input"></div>
+// <div id="legend-title"></div>
+// <div id="legend"></div>
+// <div id="gt-color"></div>
+// <div id="branchlabels"></div>
+// <div id="region"></div>
+// <div id="search"></div>
+// <div id="straininput"></div>
+// <div id="bp-ac"></div>
+// <div id="bp-input"></div>
+// <div id="searchinputclear"></div>
+// <div id="reset"></div>
+// <div className="freqplot-container"></div>
+// <div className="treeplot-container" id="treeplot-container"></div>
+// <div id="updated"></div>
+// <div id="commit"></div>
