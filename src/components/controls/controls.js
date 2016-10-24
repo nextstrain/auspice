@@ -61,6 +61,7 @@ class Controls extends React.Component {
           padding: 20
         }}>
         <ChooseVirus {...this.props}/>
+        <p style={{fontWeight: 500, fontSize: 12, marginBottom: 0}}>DATE RANGE</p>
         <DateRangeInputs {...this.props}/>
 
         <p style={{fontWeight: 500, fontSize: 12}}>FILTERS</p>

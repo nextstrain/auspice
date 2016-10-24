@@ -133,7 +133,7 @@ class DateRangeInputs extends React.Component {
       return null;
     }
     return (
-      <div>
+      <div style={{marginTop: 20}}>
         <Slider
           min={absoluteMin}
           max={absoluteMax}
