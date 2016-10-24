@@ -124,8 +124,13 @@ class Tree extends React.Component {
             visibility = {node.hasChildren ? "hidden" : "visible"}
             fill = "#777"
             r= "5.0"
-            cx={this.xVal(node, this.props.distanceMeasure, this.props.layout)}
-            cy={this.yVal(node, this.props.distanceMeasure, this.props.layout)}
+            cx="0.0"
+            cy="0.0"
+            style = {{
+              transition: "1s ease-in-out",
+              WebkitTransform: `translate3d(${this.xVal(node, this.props.distanceMeasure, this.props.layout)}px, ${this.yVal(node, this.props.distanceMeasure, this.props.layout)}px, 0)`,
+              transform: `translate3d(${this.xVal(node, this.props.distanceMeasure, this.props.layout)}px, ${this.yVal(node, this.props.distanceMeasure, this.props.layout)}px, 0)`
+            }}
           />
         );
         })}
