@@ -8,6 +8,7 @@ import "moment-range";
 // import { FOO } from "../actions";
 import TreeNode from "./treeNode";
 import {VictoryAnimation} from "victory";
+import {Motion, spring} from "react-motion";
 
 
 /*
@@ -114,19 +115,30 @@ class Tree extends React.Component {
 
   render() {
     // this.props.nodes.map((node, index) => {
-    //   console.log(node);
+    //   console.log(this.props);
     // });
     return (
       <g>
       {this.props.nodes.map((node, index) => {
         return (
-          <circle
-            visibility = {node.hasChildren ? "hidden" : "visible"}
-            fill = "#777"
-            r= "5.0"
-            cx={this.xVal(node, this.props.distanceMeasure, this.props.layout)}
-            cy={this.yVal(node, this.props.distanceMeasure, this.props.layout)}
-          />
+          <Motion style={{
+              x: spring(this.xVal(node, this.props.distanceMeasure, this.props.layout), {stiffness: 80, damping: 15}),
+              y: spring(this.yVal(node, this.props.distanceMeasure, this.props.layout), {stiffness: 80, damping: 15})
+            }}>
+            {({x,y}) =>
+              <circle
+                visibility = {this.props.tipVisibility[index]}
+                fill = "#777"
+                r = "5.0"
+                cx = "0.0"
+                cy = "0.0"
+                style = {{
+                  WebkitTransform: `translate3d(${x}px, ${y}px, 0)`,
+                  transform: `translate3d(${x}px, ${y}px, 0)`,
+                }}
+              />
+            }
+          </Motion>
         );
         })}
       </g>
