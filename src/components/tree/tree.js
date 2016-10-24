@@ -113,9 +113,22 @@ class Tree extends React.Component {
   }
 
   render() {
+    // this.props.nodes.map((node, index) => {
+    //   console.log(node);
+    // });
     return (
       <g>
-        {this.drawBranches(this.props.nodes)}
+      {this.props.nodes.map((node, index) => {
+        return (
+          <circle
+            visibility = {node.hasChildren ? "hidden" : "visible"}
+            fill = "#777"
+            r= "5.0"
+            cx={this.xVal(node, this.props.distanceMeasure, this.props.layout)}
+            cy={this.yVal(node, this.props.distanceMeasure, this.props.layout)}
+          />
+        );
+        })}
       </g>
     );
   }
