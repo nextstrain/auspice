@@ -7,7 +7,6 @@ import "moment-range";
 //import { connect } from "react-redux";
 // import { FOO } from "../actions";
 import TreeNode from "./treeNode";
-import {VictoryAnimation} from "victory";
 
 
 /*
@@ -76,38 +75,30 @@ class Tree extends React.Component {
   drawBranches(nodes) {
     const branchComponents = nodes.map((node, index) => {
       return (
-        <VictoryAnimation duration={1000} key={index} data={{
-          x: this.xVal(node, this.props.distanceMeasure, this.props.layout),
-          y: this.yVal(node, this.props.distanceMeasure, this.props.layout),
-          midpoint_x: this.xMidpoint(node, this.props.distanceMeasure, this.props.layout),
-          midpoint_y: this.yMidpoint(node, this.props.distanceMeasure, this.props.layout),
-          source_x:   this.xVal(node.parent, this.props.distanceMeasure, this.props.layout),
-          source_y:   this.yVal(node.parent, this.props.distanceMeasure, this.props.layout),
-          r_x: this.r_x(node, this.props.distanceMeasure, this.props.layout),
-          r_y: this.r_y(node, this.props.distanceMeasure, this.props.layout),
-          smallBigArc: this.smallBigArc(node, this.props.distanceMeasure, this.props.layout),
-          leftRight: this.leftRight(node, this.props.distanceMeasure, this.props.layout),
-          nodeColor: this.props.nodeColor[index],
-          tipRadius: this.props.tipRadii[index]
-        }}>
-        {(props) => {
-          return (
-            <TreeNode
-              {...props} animate={null}
-              key={index}
-              node={node}
-              nodeColorAttr={this.props.nodeColorAttr[index]}
-              tipVisibility={this.props.tipVisibility[index]}
-              showBranchLabels={this.props.showBranchLabels}
-              strain={node.attr.strain}
-              hasChildren={node.children ? true : false}
-              layout={this.props.layout}
-              distanceMeasure={this.props.distanceMeasure}
-            />
-          );
-        }}
-      </VictoryAnimation>
-     );
+        <TreeNode
+          key={index}
+          node={node}
+          x={this.xVal(node, this.props.distanceMeasure, this.props.layout)}
+          y={this.yVal(node, this.props.distanceMeasure, this.props.layout)}
+          midpoint_x={this.xMidpoint(node, this.props.distanceMeasure, this.props.layout)}
+          midpoint_y={this.yMidpoint(node, this.props.distanceMeasure, this.props.layout)}
+          source_x={this.xVal(node.parent, this.props.distanceMeasure, this.props.layout)}
+          source_y={this.yVal(node.parent, this.props.distanceMeasure, this.props.layout)}
+          r_x={this.r_x(node, this.props.distanceMeasure, this.props.layout)}
+          r_y={this.r_y(node, this.props.distanceMeasure, this.props.layout)}
+          smallBigArc={this.smallBigArc(node, this.props.distanceMeasure, this.props.layout)}
+          leftRight={this.leftRight(node, this.props.distanceMeasure, this.props.layout)}
+          nodeColor={this.props.nodeColor[index]}
+          tipRadius={this.props.tipRadii[index]}
+          nodeColorAttr={this.props.nodeColorAttr[index]}
+          tipVisibility={this.props.tipVisibility[index]}
+          showBranchLabels={this.props.showBranchLabels}
+          strain={node.attr.strain}
+          hasChildren={node.children ? true : false}
+          layout={this.props.layout}
+          distanceMeasure={this.props.distanceMeasure}
+        />
+      );
     });
     return branchComponents;
   }
