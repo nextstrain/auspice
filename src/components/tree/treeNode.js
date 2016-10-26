@@ -104,7 +104,7 @@ class TreeNode extends React.Component {
               strokeWidth: this.branchStrokeWidth(),
               strokeLinejoin: "round",
               fill: "none",
-              transition: "transform 1s ease-in-out",
+              transition: "transform 1200ms ease-in-out",
               perspective: "1000",
               willChange: "transform",
               transform: `translate3d(${this.props.source_x}px, ${this.props.source_y}px, 0)
@@ -119,7 +119,7 @@ class TreeNode extends React.Component {
               strokeWidth: this.branchStrokeWidth(),
               strokeLinejoin: "round",
               fill: "none",
-              transition: "1s ease-in-out",
+              transition: "transform 1200ms ease-in-out",
               perspective: "1000",
               willChange: "transform",
               transform: `translate3d(${this.props.midpoint_x}px, ${this.props.midpoint_y}px, 0)

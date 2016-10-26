@@ -50,7 +50,7 @@ class Tip extends React.Component {
           fill = {this.props.nodeColor}
           visibility = {this.props.tipVisibility}
           style = {{
-            transition: "transform 1s ease-in-out",
+            transition: "transform 1200ms ease-in-out",
             WebkitTransform: `translate3d(${this.props.x}px, ${this.props.y}px, 0)`,
             transform: `translate3d(${this.props.x}px, ${this.props.y}px, 0)`
           }}
