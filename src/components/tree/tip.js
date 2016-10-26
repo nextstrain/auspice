@@ -44,11 +44,16 @@ class Tip extends React.Component {
     if (!this.props.node.hasChildren) {
       return (
         <circle
-          visibility = {this.props.tipVisibility}
-          fill = {this.props.nodeColor}
+          cx="0"
+          cy="0"
           r={this.props.tipRadius}
-          cx={this.props.x}
-          cy={this.props.y}
+          fill = {this.props.nodeColor}
+          visibility = {this.props.tipVisibility}
+          style = {{
+            transition: "transform 1200ms ease-in-out",
+            WebkitTransform: `translate3d(${this.props.x}px, ${this.props.y}px, 0)`,
+            transform: `translate3d(${this.props.x}px, ${this.props.y}px, 0)`
+          }}
         />
       );
     } else {

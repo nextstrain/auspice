@@ -74,67 +74,60 @@ class TreeNode extends React.Component {
     return this.props.nodeColor;
   }
 
-  branchPoints() {
-    const mod = 0;
-
-    if (this.props.layout==="rectangular"){
-      return 'M'+(this.props.source_x - mod).toString() +
-        " " +
-        this.props.source_y.toString() +
-        " L " +
-        (this.props.midpoint_x - mod).toString() +
-        " " +
-        this.props.midpoint_y.toString() +
-        " L " +
-        (this.props.x).toString() +
-        " " +
-        this.props.y.toString();
-    }else if (this.props.layout==="radial"){
-      var tmp_d = 'M '+(this.props.source_x).toString() +
-        "  " +
-        this.props.source_y.toString() +
-        " A " +
-        this.props.r_x.toString() +
-        " " +
-        this.props.r_y.toString() +
-        " 0 " + (this.props.smallBigArc?"1 ":"0 ") +  (this.props.leftRight?"0 ":"1 ") +
-        this.props.midpoint_x.toString() +
-        " " +
-        this.props.midpoint_y.toString() +
-        " L " +
-        this.props.x.toString() +
-        " " +
-        this.props.y.toString();
-      return tmp_d;
-    }
-  }
-
   render() {
+    const delta_sm_x = this.props.source_x - this.props.midpoint_x;
+    const delta_sm_y = this.props.source_y - this.props.midpoint_y;
+    const length_sm =  Math.sqrt(delta_sm_x * delta_sm_x + delta_sm_y * delta_sm_y) + 0.5*this.branchStrokeWidth();
+    const theta_sm = Math.atan2(delta_sm_y, delta_sm_x) - Math.PI;
+    const delta_mt_x = this.props.midpoint_x - this.props.x;
+    const delta_mt_y = this.props.midpoint_y - this.props.y;
+    const length_mt =  Math.sqrt(delta_mt_x * delta_mt_x + delta_mt_y * delta_mt_y);
     return (
       <g>
-        <path
-          d={this.branchPoints()}
-          onMouseEnter={() => {
-            this.props.dispatch({
-              type: BRANCH_MOUSEENTER,
-              /*
-                send the source and target nodes in the action,
-                use x and y values in them to place tooltip
-              */
-              data: this.props.datum
-            });
+        <g onMouseEnter={() => {
+          this.props.dispatch({
+            type: BRANCH_MOUSEENTER,
+            /*
+              send the source and target nodes in the action,
+              use x and y values in them to place tooltip
+            */
+            data: this.props.datum
+          });
           }}
           onMouseLeave={() => {
             this.props.dispatch({ type: BRANCH_MOUSELEAVE });
-          }}
-          style={{
-            stroke: this.branchStrokeColor(),
-            strokeWidth: this.branchStrokeWidth(),
-            strokeLinejoin: "round",
-            fill: "none",
-            cursor: "pointer"
           }}>
-        </path>
+          <line
+            x1="0.0" y1="0.0" x2="1.0" y2="0.0"
+            style={{
+              stroke: this.branchStrokeColor(),
+              strokeWidth: this.branchStrokeWidth(),
+              strokeLinejoin: "round",
+              fill: "none",
+              transition: "transform 1200ms ease-in-out",
+              perspective: "1000",
+              willChange: "transform",
+              transform: `translate3d(${this.props.source_x}px, ${this.props.source_y}px, 0)
+                rotate(${theta_sm}rad)
+                scale(${length_sm}, 1)`
+            }}
+          />
+          <line
+            x1="0.0" y1="0.0" x2="1.0" y2="0.0"
+            style={{
+              stroke: this.branchStrokeColor(),
+              strokeWidth: this.branchStrokeWidth(),
+              strokeLinejoin: "round",
+              fill: "none",
+              transition: "transform 1200ms ease-in-out",
+              perspective: "1000",
+              willChange: "transform",
+              transform: `translate3d(${this.props.midpoint_x}px, ${this.props.midpoint_y}px, 0)
+                rotate(${this.props.theta_midpoint}rad)
+                scale(${length_mt}, 1)`
+            }}
+          />
+        </g>
         <Tip {...this.props}/>
       </g>
     );

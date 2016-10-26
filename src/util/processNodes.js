@@ -21,7 +21,8 @@ const rectangularLayout = (node, distanceMeasure) => {
     return {'xVal':(distanceMeasure=='div')?node.xvalue:node.attr[distanceMeasure],
             'yVal':node.yvalue,
             'xValMidpoint':(distanceMeasure=='div')?node.parent.xvalue:node.parent.attr[distanceMeasure],
-            'yValMidpoint':node.yvalue
+            'yValMidpoint':node.yvalue,
+            'thetaMidpoint':0
             };
 };
 
@@ -44,7 +45,8 @@ const radialLayout = (node, distanceMeasure, nTips, rootVal) => {
             'xValMidpoint':parentRadius*Math.sin(angle),
             'yValMidpoint':parentRadius*Math.cos(angle),
             'radius':radius,'radiusInner':parentRadius,
-            'angle':angle, 'smallBigArc':smallBigArc, 'leftRight':leftRight};
+            'angle':angle, 'thetaMidpoint':angle - 0.5*Math.PI,
+            'smallBigArc':smallBigArc, 'leftRight':leftRight};
 };
 
 /* Calculate layout geometry for radial and rectangular layouts
@@ -86,4 +88,3 @@ export const mapToCoordinates = (nodes, xScale, yScale, layout, distanceMeasure)
         node.geometry[distanceMeasure][layout]['y'] = yScales(node.geometry[distanceMeasure][layout]['yVal']);
     });
 }
-

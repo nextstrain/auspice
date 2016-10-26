@@ -127,6 +127,9 @@ class TreeView extends React.Component {
           width={this.state.width}
           height={this.treePlotHeight(this.state.width)}
           id="treeplot"
+          style={{
+            transform: "translate3d(0, 0, 0)" // force GPU compositing
+          }}
         >
          <Grid
            layout={this.props.layout}
