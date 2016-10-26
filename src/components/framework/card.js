@@ -30,7 +30,8 @@ class Card extends React.Component {
         margin: 12,
         boxShadow: "3px 3px 12px 2px rgba(217,217,217,0.85)",
         borderRadius: 4,
-        padding: 5
+        padding: 5,
+        position: "relative"
       },
       title: {
         fontFamily: globalStyles.sans,
