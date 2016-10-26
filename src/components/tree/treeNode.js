@@ -77,7 +77,7 @@ class TreeNode extends React.Component {
   render() {
     const delta_sm_x = this.props.source_x - this.props.midpoint_x;
     const delta_sm_y = this.props.source_y - this.props.midpoint_y;
-    const length_sm =  Math.sqrt(delta_sm_x * delta_sm_x + delta_sm_y * delta_sm_y);
+    const length_sm =  Math.sqrt(delta_sm_x * delta_sm_x + delta_sm_y * delta_sm_y) + 0.5*this.branchStrokeWidth();
     const theta_sm = Math.atan2(delta_sm_y, delta_sm_x) - Math.PI;
     const delta_mt_x = this.props.midpoint_x - this.props.x;
     const delta_mt_y = this.props.midpoint_y - this.props.y;

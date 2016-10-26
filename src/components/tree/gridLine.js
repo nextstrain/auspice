@@ -69,4 +69,3 @@ class GridLine extends React.Component {
 }
 
 export default GridLine;
-

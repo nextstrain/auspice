@@ -1,6 +1,5 @@
 import React from "react";
 import Radium from "radium";
-import {VictoryAnimation} from "victory";
 import GridLine from "./gridLine";
 
 /*
