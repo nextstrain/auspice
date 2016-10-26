@@ -82,41 +82,36 @@ class TreeNode extends React.Component {
     const delta_mt_x = this.props.midpoint_x - this.props.x;
     const delta_mt_y = this.props.midpoint_y - this.props.y;
     const length_mt =  Math.sqrt(delta_mt_x * delta_mt_x + delta_mt_y * delta_mt_y);
-    const theta_mt = Math.atan2(delta_mt_y, delta_mt_x) - Math.PI;
     return (
-      <g onMouseEnter={() => {
-        this.props.dispatch({
-          type: BRANCH_MOUSEENTER,
-          /*
-            send the source and target nodes in the action,
-            use x and y values in them to place tooltip
-          */
-          data: this.props.datum
-        });
-        }}
-        onMouseLeave={() => {
-          this.props.dispatch({ type: BRANCH_MOUSELEAVE });
-        }}>
-        <line
-          x1="0.0"
-          y1="0.0"
-          x2="1.0"
-          y2="0.0"
-          style={{
-            stroke: this.branchStrokeColor(),
-            strokeWidth: this.branchStrokeWidth(),
-            strokeLinejoin: "round",
-            fill: "none",
-            transition: "1s ease-in-out",
-            transform: `translate(${this.props.source_x}px, ${this.props.source_y}px)
-              rotate(${theta_sm}rad)
-              scale(${length_sm}, 1)`
-          }}/>
+      <g>
+        <g onMouseEnter={() => {
+          this.props.dispatch({
+            type: BRANCH_MOUSEENTER,
+            /*
+              send the source and target nodes in the action,
+              use x and y values in them to place tooltip
+            */
+            data: this.props.datum
+          });
+          }}
+          onMouseLeave={() => {
+            this.props.dispatch({ type: BRANCH_MOUSELEAVE });
+          }}>
           <line
-            x1="0.0"
-            y1="0.0"
-            x2="1.0"
-            y2="0.0"
+            x1="0.0" y1="0.0" x2="1.0" y2="0.0"
+            style={{
+              stroke: this.branchStrokeColor(),
+              strokeWidth: this.branchStrokeWidth(),
+              strokeLinejoin: "round",
+              fill: "none",
+              transition: "1s ease-in-out",
+              transform: `translate(${this.props.source_x}px, ${this.props.source_y}px)
+                rotate(${theta_sm}rad)
+                scale(${length_sm}, 1)`
+            }}
+          />
+          <line
+            x1="0.0" y1="0.0" x2="1.0" y2="0.0"
             style={{
               stroke: this.branchStrokeColor(),
               strokeWidth: this.branchStrokeWidth(),
@@ -124,27 +119,16 @@ class TreeNode extends React.Component {
               fill: "none",
               transition: "1s ease-in-out",
               transform: `translate(${this.props.midpoint_x}px, ${this.props.midpoint_y}px)
-                rotate(${theta_mt}rad)
+                rotate(${this.props.theta_midpoint}rad)
                 scale(${length_mt}, 1)`
-            }}/>
+            }}
+          />
+        </g>
         <Tip {...this.props}/>
       </g>
     );
   }
 }
-
-
-//   <line
-//     x1={this.props.midpoint_x}
-//     y1={this.props.midpoint_y}
-//     x2={this.props.x}
-//     y2={this.props.y}
-//     style={{
-//       stroke: this.branchStrokeColor(),
-//       strokeWidth: this.branchStrokeWidth(),
-//       strokeLinejoin: "round",
-//       fill: "none"
-//     }}/>
 
 export default TreeNode;
 

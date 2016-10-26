@@ -43,6 +43,9 @@ class Tree extends React.Component {
   yMidpoint(node, distanceMeasure, layout) {
     return this.props.yScale(node.geometry[distanceMeasure][layout].yValMidpoint);
   }
+  thetaMidpoint(node, distanceMeasure, layout) {
+    return -1*node.geometry[distanceMeasure][layout].thetaMidpoint;
+  }
   r_x(node, distanceMeasure, layout) {
     if (layout === "radial") {
       return this.props.xScale(node.geometry[distanceMeasure][layout].radiusInner) - this.props.xScale(0);
@@ -84,6 +87,7 @@ class Tree extends React.Component {
           midpoint_y={this.yMidpoint(node, this.props.distanceMeasure, this.props.layout)}
           source_x={this.xVal(node.parent, this.props.distanceMeasure, this.props.layout)}
           source_y={this.yVal(node.parent, this.props.distanceMeasure, this.props.layout)}
+          theta_midpoint={this.thetaMidpoint(node, this.props.distanceMeasure, this.props.layout)}
           r_x={this.r_x(node, this.props.distanceMeasure, this.props.layout)}
           r_y={this.r_y(node, this.props.distanceMeasure, this.props.layout)}
           smallBigArc={this.smallBigArc(node, this.props.distanceMeasure, this.props.layout)}
