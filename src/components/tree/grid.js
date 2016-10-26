@@ -7,7 +7,6 @@ import {slowTransitionDuration} from "../../util/globals";
  * Tree creates all TreeNodes of the tree, which consist of branches and tips.
  * Tree assignes the desired locations to all TreeNodes
 */
-@Radium
 class Grid extends React.Component {
   constructor(props) {
     super(props);

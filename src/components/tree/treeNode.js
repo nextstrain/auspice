@@ -12,7 +12,6 @@ import Tooltip from "./tooltip";
  * behavior of the path.
 */
 @connect()
-@Radium
 class TreeNode extends React.Component {
   constructor(props) {
     super(props);
