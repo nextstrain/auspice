@@ -43,7 +43,7 @@ class Grid extends React.Component {
         xScale: this.props.xScale,
         yScale: this.props.yScale
       });
-    }.bind(this), 500);
+    }.bind(this), 600);
   }
 
   xVal(tick, distanceMeasure, layout) {
@@ -125,7 +125,7 @@ class Grid extends React.Component {
     const opacity = this.state.faded ? "0" : "1"
     return (
       <g style={{
-        transition: "opacity 0.5s linear",
+        transition: "opacity 600ms linear",
         opacity: opacity
       }}>
        {this.drawGrid(this.state.distanceMeasure, this.state.layout, this.state.xScale, this.state.yScale)}
