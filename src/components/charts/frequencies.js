@@ -11,7 +11,6 @@ import Card from "../framework/card";
 @connect(state => {
   return state.frequencies;
 })
-@Radium
 class Frequencies extends React.Component {
   constructor(props) {
     super(props);
