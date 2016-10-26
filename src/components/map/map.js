@@ -39,12 +39,15 @@ class Map extends React.Component {
       scrollWheelZoom: false,
       minZoom: 2,
       maxZoom: 9,
+      zoomControl: false
 
     })
 
     L.tileLayer('https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2l1MDRoMzg5MDEwbjJvcXBpNnUxMXdwbCJ9.PMqX7vgORuXLXxtI3wISjw', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
+
+    L.control.zoom({position: "bottomright"}).addTo(map)
 
     this.setState({map})
 

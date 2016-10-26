@@ -11,7 +11,11 @@ class Grid extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-
+      faded: false,
+      distanceMeasure: this.props.distanceMeasure,
+      layout: this.props.layout,
+      xScale: this.props.xScale,
+      yScale: this.props.yScale
     };
   }
   static propTypes = {
@@ -23,19 +27,37 @@ class Grid extends React.Component {
     style: React.PropTypes.object
     // foo: React.PropTypes.string
   }
+
+  componentWillReceiveProps(nextProps) {
+    if (this.state.distanceMeasure != nextProps.distanceMeasure || this.state.layout != nextProps.layout) {
+      // console.log("faded: true");
+      this.setState({faded: true});
+    }
+    setTimeout(function() {
+      // console.log("faded: false");
+      this.setState({
+        faded: false,
+        distanceMeasure: this.props.distanceMeasure,
+        layout: this.props.layout,
+        xScale: this.props.xScale,
+        yScale: this.props.yScale
+      });
+    }.bind(this), 600);
+  }
+
   xVal(tick, distanceMeasure, layout) {
-    return this.props.xScale(tick);
+    return this.state.xScale(tick);
   }
   yVal(tick, distanceMeasure, layout) {
-    return this.props.yScale(tick);
+    return this.state.yScale(tick);
   }
 
 
-  drawGrid() {
-    const xmin = (this.props.xScale.domain()[0]>0)?this.props.xScale.domain()[0]:0.0;
-    const xmax = this.props.xScale.domain()[1];
+  drawGrid(distanceMeasure, layout, xScale, yScale) {
+    const xmin = (xScale.domain()[0]>0)?xScale.domain()[0]:0.0;
+    const xmax = xScale.domain()[1];
     let offset;
-    if (this.props.layout==="radial" && this.props.distanceMeasure==="num_date") {
+    if (layout==="radial" && distanceMeasure==="num_date") {
       offset = this.props.nodes[0].attr["num_date"];
     } else {
       offset = 0;
@@ -53,15 +75,15 @@ class Grid extends React.Component {
         return (
           <GridLine
             {...this.props}
-            x={this.xVal(tick-offset, this.props.distanceMeasure, this.props.layout)}
-            y={this.yVal(tick-offset, this.props.distanceMeasure, this.props.layout)}
-            cx={this.props.xScale(0)}
-            cy={this.props.yScale(0)}
-            rx={this.xVal(tick-offset, this.props.distanceMeasure, this.props.layout) - this.props.xScale(0)}
-            ry={this.yVal(tick-offset, this.props.distanceMeasure, this.props.layout) - this.props.yScale(0)}
+            x={this.xVal(tick-offset, distanceMeasure, layout)}
+            y={this.yVal(tick-offset, distanceMeasure, layout)}
+            cx={xScale(0)}
+            cy={yScale(0)}
+            rx={this.xVal(tick-offset, distanceMeasure, layout) - xScale(0)}
+            ry={this.yVal(tick-offset, distanceMeasure, layout) - yScale(0)}
             key={index}
-            layout={this.props.layout}
-            distanceMeasure={this.props.distanceMeasure}
+            layout={layout}
+            distanceMeasure={distanceMeasure}
             label={tick.toString()}
             width={2}
             stroke={'#CCC'}
@@ -69,7 +91,7 @@ class Grid extends React.Component {
        );
     });
 
-    const minorRoundingLevel = roundingLevel / (this.props.distanceMeasure === "div" ? 5 : 6);
+    const minorRoundingLevel = roundingLevel / (distanceMeasure === "div" ? 5 : 6);
     const minorGridPoints = [];
     for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+3; ii++) {
       if (gridMin + minorRoundingLevel*ii>offset){
@@ -80,15 +102,15 @@ class Grid extends React.Component {
         return (
           <GridLine
             {...this.props}
-            x={this.xVal(tick-offset, this.props.distanceMeasure, this.props.layout)}
-            y={this.yVal(tick-offset, this.props.distanceMeasure, this.props.layout)}
-            cx={this.props.xScale(0)}
-            cy={this.props.yScale(0)}
-            rx={this.xVal(tick-offset, this.props.distanceMeasure, this.props.layout) - this.props.xScale(0)}
-            ry={this.yVal(tick-offset, this.props.distanceMeasure, this.props.layout) - this.props.yScale(0)}
+            x={this.xVal(tick-offset, distanceMeasure, layout)}
+            y={this.yVal(tick-offset, distanceMeasure, layout)}
+            cx={xScale(0)}
+            cy={yScale(0)}
+            rx={this.xVal(tick-offset, distanceMeasure, layout) - xScale(0)}
+            ry={this.yVal(tick-offset, distanceMeasure, layout) - yScale(0)}
             key={index+gridLines.length}
-            layout={this.props.layout}
-            distanceMeasure={this.props.distanceMeasure}
+            layout={layout}
+            distanceMeasure={distanceMeasure}
             width={.5}
             stroke={'#AAA'}
             label={""}
@@ -99,9 +121,13 @@ class Grid extends React.Component {
   }
 
   render() {
+    const opacity = this.state.faded ? "0" : "1"
     return (
-      <g>
-       {this.drawGrid()}
+      <g style={{
+        transition: "opacity 600ms linear",
+        opacity: opacity
+      }}>
+       {this.drawGrid(this.state.distanceMeasure, this.state.layout, this.state.xScale, this.state.yScale)}
       </g>
     );
   }

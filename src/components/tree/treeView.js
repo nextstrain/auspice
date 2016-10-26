@@ -12,6 +12,9 @@ import Tree from "./tree";
 import Grid from "./grid";
 import Card from "../framework/card";
 import Legend from "../controls/legend";
+import ZoomOutIcon from "../framework/zoom-out-icon";
+import ZoomInIcon from "../framework/zoom-in-icon";
+import MoveIcon from "../framework/move-icon";
 
 import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 
@@ -28,6 +31,7 @@ class TreeView extends React.Component {
     this.state = {
       okToDraw: false,
       value: ViewerHelper.getDefaultValue(),
+      zoom: 1,
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
     };
   }
@@ -87,7 +91,7 @@ class TreeView extends React.Component {
     });
 
     const height = this.treePlotHeight(globals.width);
-    const minDim = ((globals.width<height) ? globals.width : height) - 2*globals.margin;
+    const minDim = ((globals.width<height) ? globals.width : height) - 2 * globals.margin;
     const xScale = d3.scale.linear().range([globals.margin, globals.width - globals.margin]);
     const yScale = d3.scale.linear().range([globals.margin, height - globals.margin ]);
 
@@ -114,50 +118,127 @@ class TreeView extends React.Component {
 
 
   createTree() {
-    // <Viewer
+    /* two svgs! one scales, one doesn't :) */
+    // <svg
+    //   style={{backgroundColor: "#FFFFFF"}}
     //   width={this.state.width}
     //   height={this.treePlotHeight(this.state.width)}
-    //   value={this.state.value}
-    //   tool={this.state.tool}
-    //   onChange={this.handleChange.bind(this)}
-    //   onClick={this.handleClick.bind(this)}>
+    //
+    //   >
+
+    //
     return (
       <Card title="Phylogeny">
-        <svg
-          width={this.state.width}
-          height={this.treePlotHeight(this.state.width)}
-          id="treeplot"
-          style={{
-            transform: "translate3d(0, 0, 0)" // force GPU compositing
-          }}
-        >
-         <Grid
-           layout={this.props.layout}
-           distanceMeasure={this.props.distanceMeasure}
-           xScale={this.state.xScale}
-           yScale={this.state.yScale}
-           nodes={this.props.nodes}
-         />
-         <Legend colorScale={this.props.colorScale}/>
-         <Tree
-           nodes={this.props.nodes}
-           nodeColor={this.props.nodeColor}
-           nodeColorAttr={this.props.nodeColorAttr}
-           tipRadii={this.props.tipRadii}
-           tipVisibility={this.props.tipVisibility}
-           layout={this.props.layout}
-           distanceMeasure={this.props.distanceMeasure}
-           xScale={this.state.xScale}
-           yScale={this.state.yScale}
-         />
-        </svg>
+          <p style={{position: "absolute", right: 50, bottom: 150, color: "red", fontWeight: 700 }}> {this.state.scaleFactor} </p>
+          <svg width={300} height={300}
+            style={{
+              position: "absolute", left: 13, top: 50, pointerEvents: "none",
+              transform: "translate3d(0, 0, 0)" // force GPU compositing
+          }}>
+            <Legend colorScale={this.props.colorScale}/>
+          </svg>
+          <Viewer
+            width={this.state.width}
+            height={this.treePlotHeight(this.state.width)}
+            value={this.state.value}
+            tool={this.state.tool}
+            detectPinch={false}
+            detectAutoPan={false}
+            background="#FFF"
+            onChange={this.handleChange.bind(this)}
+            onClick={this.handleClick.bind(this)}>
+            <svg style={{pointerEvents: "auto"}} width={this.state.width} height={this.treePlotHeight(this.state.width)} id="treeplot">
+              <Grid
+                layout={this.props.layout}
+                distanceMeasure={this.props.distanceMeasure}
+                xScale={this.state.xScale}
+                yScale={this.state.yScale}
+                nodes={this.props.nodes}
+              />
+              <Tree
+                nodes={this.props.nodes}
+                nodeColor={this.props.nodeColor}
+                nodeColorAttr={this.props.nodeColorAttr}
+                tipRadii={this.props.tipRadii}
+                tipVisibility={this.props.tipVisibility}
+                layout={this.props.layout}
+                distanceMeasure={this.props.distanceMeasure}
+                xScale={this.state.xScale}
+                yScale={this.state.yScale}
+              />
+            </svg>
+          </Viewer>
+          <svg width={50} height={130} style={{position: "absolute", right: 20, bottom: 20}}>
+              <defs>
+                <filter id="dropshadow" height="130%">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+                  <feOffset dx="2" dy="2" result="offsetblur"/>
+                  <feComponentTransfer>
+                    <feFuncA type="linear" slope="0.2"/>
+                  </feComponentTransfer>
+                  <feMerge>
+                    <feMergeNode/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+            <ZoomInIcon
+              handleClick={this.handleIconClick("zoom-in")}
+              active={true}
+              x={10}
+              y={50}
+              />
+            <ZoomOutIcon
+              handleClick={this.handleIconClick("zoom-out")}
+              active={true}
+              x={10}
+              y={90}
+              />
+          </svg>
       </Card>
     );
-  // </Viewer>
+    // <MoveIcon
+    //   handleClick={this.handleIconClick("pan")}
+    //   active={this.state.tool === "pan"}
+    //   x={10}
+    //   y={10}
+    //   />
   }
 
+  handleIconClick(tool) {
+    return () => {
+
+      console.log(tool)
+
+      let zoom;
+      if (tool === "zoom-in") {
+        zoom = this.state.zoom + .1;
+        console.log('zooming in', this.state.zoom, zoom)
+      } else {
+        zoom = this.state.zoom - .1;
+        console.log('zooming out', this.state.zoom, zoom)
+      }
+      let viewerX = this.state.width / 2;
+      let viewerY = this.treePlotHeight(this.state.width) / 2;
+      let nextValue = ViewerHelper.zoom(this.state.value, zoom, viewerX, viewerY);
+
+
+      this.setState({value: nextValue})
+    };
+  }
+
+  // handleZoomEvent(direction) {
+  //   return () => {
+  //     this.state.value.matrix
+  //
+  //     console.log(direction)
+  //   }
+  // }
+
   handleChange(event) {
+    // console.log(event.scaleFactor)
     // console.log('scaleFactor', event.scaleFactor);
+    // console.log(this.state, event.value, event)
     this.setState({value: event.value});
   }
 

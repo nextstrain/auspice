@@ -297,14 +297,6 @@ class App extends React.Component {
         onSetOpen={this.onSetSidebarOpen}>
         <Background>
           <Header/>
-          <Flex
-            style={{
-              width: "100%"
-            }}
-            wrap="wrap"
-            alignItems="flex-start"
-            justifyContent="space-between"
-          >
           <TreeView nodes={this.props.tree.nodes}
             nodeColorAttr={this.state.nodeColorAttr}
             colorScale={this.state.colorScale}
@@ -315,7 +307,6 @@ class App extends React.Component {
             distanceMeasure={this.state.location.query.m || "div"}
             datasetGuid={this.props.tree.datasetGuid}
           />
-          </Flex>
           <Frequencies genotype={this.currentFrequencies()}/>
           <Entropy
             changeRoute={this.changeRoute.bind(this)}

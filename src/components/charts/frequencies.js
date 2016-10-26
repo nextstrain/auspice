@@ -78,7 +78,6 @@ class Frequencies extends React.Component {
     }
 
     return (
-      <Card title={"Frequencies"}>
         <svg width={frequencyChartWidth} height={frequencyChartHeight}>
           {
             traj.map((p) => {
@@ -122,19 +121,15 @@ class Frequencies extends React.Component {
             standalone={false}
           />
         </svg>
-      </Card>
     );
   }
 
   render() {
     const styles = this.getStyles();
     return (
-      <div style={[
-        styles.base,
-        this.props.style
-      ]}>
+      <Card title={"Frequencies"}>
         {this.props.frequencies ? this.drawFrequencies() : "Waiting on freq data"}
-      </div>
+      </Card>
     );
   }
 }
