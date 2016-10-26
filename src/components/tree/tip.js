@@ -51,8 +51,8 @@ class Tip extends React.Component {
           visibility = {this.props.tipVisibility}
           style = {{
             transition: "1s ease-in-out",
-            WebkitTransform: `translate(${this.props.x}px, ${this.props.y}px)`,
-            transform: `translate(${this.props.x}px, ${this.props.y}px)`
+            WebkitTransform: `translate3d(${this.props.x}px, ${this.props.y}px, 0)`,
+            transform: `translate3d(${this.props.x}px, ${this.props.y}px, 0)`
           }}
         />
       );
