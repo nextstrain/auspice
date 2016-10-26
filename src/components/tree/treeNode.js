@@ -108,8 +108,8 @@ class TreeNode extends React.Component {
               perspective: "1000",
               willChange: "transform",
               transform: `translate3d(${this.props.source_x}px, ${this.props.source_y}px, 0)
-                rotate3d(0, 0, 1, ${theta_sm}rad)
-                scale3d(${length_sm}, 1, 0)`
+                rotate(${theta_sm}rad)
+                scale(${length_sm}, 1)`
             }}
           />
           <line
@@ -123,8 +123,8 @@ class TreeNode extends React.Component {
               perspective: "1000",
               willChange: "transform",
               transform: `translate3d(${this.props.midpoint_x}px, ${this.props.midpoint_y}px, 0)
-                rotate3d(0, 0, 1, ${this.props.theta_midpoint}rad)
-                scale3d(${length_mt}, 1, 0)`
+                rotate(${this.props.theta_midpoint}rad)
+                scale(${length_mt}, 1)`
             }}
           />
         </g>
