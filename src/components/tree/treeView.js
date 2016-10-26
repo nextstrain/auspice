@@ -31,7 +31,7 @@ class TreeView extends React.Component {
     this.state = {
       okToDraw: false,
       value: ViewerHelper.getDefaultValue(),
-      tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
+      tool: "none",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
     };
   }
   static propTypes = {
@@ -125,14 +125,20 @@ class TreeView extends React.Component {
     //
     //   >
 
-    // <Legend colorScale={this.props.colorScale}/>
+    //
     return (
       <Card title="Phylogeny">
+          <p style={{position: "absolute", right: 50, bottom: 150, color: "red", fontWeight: 700 }}> {this.state.scaleFactor} </p>
+          <svg width={300} height={300} style={{position: "absolute", left: 13, top: 50, pointerEvents: "none"}}>
+            <Legend colorScale={this.props.colorScale}/>
+          </svg>
           <Viewer
             width={this.state.width}
             height={this.treePlotHeight(this.state.width)}
             value={this.state.value}
             tool={this.state.tool}
+            detectPinch={false}
+            detectAutoPan={false}
             background="#FFF"
             onChange={this.handleChange.bind(this)}
             onClick={this.handleClick.bind(this)}>
@@ -173,16 +179,19 @@ class TreeView extends React.Component {
               </defs>
             <MoveIcon
               handleClick={this.handleIconClick("pan")}
+              active={this.state.tool === "pan"}
               x={10}
               y={10}
               />
             <ZoomInIcon
               handleClick={this.handleIconClick("zoom-in")}
+              active={this.state.tool === "zoom-in"}
               x={10}
               y={50}
               />
             <ZoomOutIcon
               handleClick={this.handleIconClick("zoom-out")}
+              active={this.state.tool === "zoom-out"}
               x={10}
               y={90}
               />
@@ -193,17 +202,31 @@ class TreeView extends React.Component {
 
   handleIconClick(tool) {
     return () => {
-      this.setState({ tool })
-    }
+      if (this.state.tool !== tool) {
+        this.setState({ tool });
+      } else {
+        this.setState({ tool: "none" });
+      }
+    };
   }
 
+  // handleZoomEvent(direction) {
+  //   return () => {
+  //     this.state.value.matrix
+  //
+  //     console.log(direction)
+  //   }
+  // }
+
   handleChange(event) {
+    // console.log(event.scaleFactor)
     // console.log('scaleFactor', event.scaleFactor);
-    this.setState({value: event.value});
+    // console.log(this.state, event.value, event)
+    this.setState({value: event.value, scaleFactor: event.scaleFactor});
   }
 
   handleClick(event){
-    console.log('click', event.x, event.y, event.originalEvent);
+    // console.log('click', event.x, event.y, event.originalEvent);
   }
 
   render() {
