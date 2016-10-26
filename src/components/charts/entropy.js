@@ -13,7 +13,6 @@ import { parseGenotype } from "../../util/getGenotype";
 @connect(state => {
   return state.entropy;
 })
-@Radium
 class Entropy extends React.Component {
   constructor(props) {
     super(props);

@@ -13,7 +13,6 @@ import _ from 'lodash';
 import Slider from './slider';
 
 @connect()
-@Radium
 class DateRangeInputs extends React.Component {
   constructor(props) {
     super(props);

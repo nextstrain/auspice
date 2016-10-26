@@ -12,7 +12,6 @@ import { connect } from "react-redux";
  *
 */
 @connect()
-@Radium
 class Tip extends React.Component {
   constructor(props) {
     super(props);
