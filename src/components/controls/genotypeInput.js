@@ -9,7 +9,6 @@ import { connect } from "react-redux";
 // import { FOO } from "../actions";
 
 //@connect()
-//@Radium
 class genotypeInput extends React.Component {
   constructor(props) {
     super(props);

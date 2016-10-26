@@ -15,7 +15,6 @@ import queryString from "query-string";
  * (i) knows about the upstream choices and
  * (ii) resets the route upon change
  */
-@Radium
 class ChooseVirusSelect extends React.Component {
   constructor(props) {
     super(props);

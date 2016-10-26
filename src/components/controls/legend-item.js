@@ -8,7 +8,6 @@ import { connect } from "react-redux";
 import { LEGEND_ITEM_MOUSEENTER, LEGEND_ITEM_MOUSELEAVE } from "../../actions/controls";
 
 @connect()
-@Radium
 class LegendItem extends React.Component {
   constructor(props) {
     super(props);
