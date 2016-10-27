@@ -3,6 +3,7 @@ import Radium from "radium";
 import queryString from "query-string";
 import Select from 'react-select';
 import { filterAbbrRev,filterAbbrFwd } from "../../util/globals";
+import _ from "lodash";
 
 /*
  * implements a selector that
@@ -36,10 +37,8 @@ class RecursiveFilter extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    if (nextProps.filterType !== this.props.filterType
-      || nextProps.options !== this.props.options
-      || nextProps.location !== this.props.location
-      || nextState.selection !== this.state.selection) {
+    if (!_.isEqual(nextProps.options, this.props.options)
+      || !_.isEqual(nextState.selection, this.state.selection)) {
       return true;
     } else {
       return false;
