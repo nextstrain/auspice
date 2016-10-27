@@ -35,6 +35,17 @@ class RecursiveFilter extends React.Component {
     };
   }
 
+  shouldComponentUpdate(nextProps, nextState) {
+    if (nextProps.filterType !== this.props.filterType
+      || nextProps.options !== this.props.options
+      || nextProps.location !== this.props.location
+      || nextState.selection !== this.state.selection) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   makeQueryString(filters, fields){
     // the first item specifies the filter type (not really necessary)
     const tmp_filter = [];
