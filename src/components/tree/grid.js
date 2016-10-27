@@ -1,7 +1,7 @@
 import React from "react";
 import Radium from "radium";
-import {VictoryAnimation} from "victory";
 import GridLine from "./gridLine";
+import {slowTransitionDuration} from "../../util/globals";
 
 /*
  * Tree creates all TreeNodes of the tree, which consist of branches and tips.
@@ -31,11 +31,9 @@ class Grid extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.state.distanceMeasure != nextProps.distanceMeasure || this.state.layout != nextProps.layout) {
-      // console.log("faded: true");
       this.setState({faded: true});
     }
     setTimeout(function() {
-      // console.log("faded: false");
       this.setState({
         faded: false,
         distanceMeasure: this.props.distanceMeasure,
@@ -43,7 +41,7 @@ class Grid extends React.Component {
         xScale: this.props.xScale,
         yScale: this.props.yScale
       });
-    }.bind(this), 600);
+    }.bind(this), 0.5*slowTransitionDuration);
   }
 
   xVal(tick, distanceMeasure, layout) {
@@ -122,10 +120,10 @@ class Grid extends React.Component {
   }
 
   render() {
-    const opacity = this.state.faded ? "0" : "1"
+    const opacity = this.state.faded ? "0" : "1";
     return (
       <g style={{
-        transition: "opacity 600ms linear",
+        transition: `opacity ${0.5*slowTransitionDuration}ms linear`,
         opacity: opacity
       }}>
        {this.drawGrid(this.state.distanceMeasure, this.state.layout, this.state.xScale, this.state.yScale)}
