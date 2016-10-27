@@ -71,7 +71,7 @@ class Tip extends React.Component {
             opacity: this.getOpacity(),
             transform: `translate3d(${this.props.x}px, ${this.props.y}px, 0)`,
             WebkitTransform: `translate3d(${this.props.x}px, ${this.props.y}px, 0)`,
-            transition: `transform ${slowTransitionDuration}ms ease-in-out,
+            transition: `transform ${mediumTransitionDuration}ms ease-in-out,
               opacity ${fastTransitionDuration}ms linear,
               stroke ${mediumTransitionDuration}ms linear,
               fill ${mediumTransitionDuration}ms linear`
