@@ -36,7 +36,15 @@ class Tip extends React.Component {
 
   shouldComponentUpdate(nextProps, nextState) {
     if (!this.props.node.hasChildren) {
-      return true;
+      if (_.isEqual(nextProps.tipVisibility, this.props.tipVisibility)
+          && _.isEqual(nextProps.nodeColor, this.props.nodeColor)
+          && _.isEqual(nextProps.tipRadius, this.props.tipRadius)
+          && _.isEqual(nextProps.x, this.props.x)
+          && _.isEqual(nextProps.y, this.props.y)) {
+        return false;
+      } else {
+        return true;
+      }
     } else {
       return false;
     }

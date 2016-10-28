@@ -38,7 +38,13 @@ class TreeNode extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return true;
+    if (_.isEqual(nextProps.nodeColor, this.props.nodeColor)
+        && _.isEqual(nextProps.x, this.props.x)
+        && _.isEqual(nextProps.y, this.props.y)) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   getNodeText() {
