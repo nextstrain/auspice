@@ -3,13 +3,13 @@ import Radium from "radium";
 import queryString from "query-string";
 import Select from 'react-select';
 import { filterAbbrRev,filterAbbrFwd } from "../../util/globals";
+import _ from "lodash";
 
 /*
  * implements a selector that
  * (i) knows about the upstream choices and
  * (ii) resets the route upon change
  */
-@Radium
 class RecursiveFilter extends React.Component {
   constructor(props) {
     super(props);
@@ -34,6 +34,15 @@ class RecursiveFilter extends React.Component {
 
       }
     };
+  }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (!_.isEqual(nextProps.options, this.props.options)
+      || !_.isEqual(nextState.selection, this.state.selection)) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   makeQueryString(filters, fields){

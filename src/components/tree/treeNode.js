@@ -12,7 +12,6 @@ import Tooltip from "./tooltip";
  * behavior of the path.
 */
 @connect()
-@Radium
 class TreeNode extends React.Component {
   constructor(props) {
     super(props);
@@ -39,7 +38,13 @@ class TreeNode extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    return true;
+    if (_.isEqual(nextProps.nodeColor, this.props.nodeColor)
+        && _.isEqual(nextProps.x, this.props.x)
+        && _.isEqual(nextProps.y, this.props.y)) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   getNodeText() {
@@ -135,7 +140,6 @@ class TreeNode extends React.Component {
             cursor: "pointer"
           }}>
         </path>
-        <Tip {...this.props}/>
       </g>
     );
   }

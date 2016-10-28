@@ -23,7 +23,7 @@ import parseParams from "../util/parseParams";
 import queryString from "query-string";
 import getColorScale from "../util/getColorScale";
 import { parseGenotype, getGenotype } from "../util/getGenotype";
-import {colorOptions} from "../util/globals";
+import {colorOptions, tipRadius, tipRadiusOnLegendMatchMultiplier} from "../util/globals";
 import Sidebar from "react-sidebar";
 
 const returnStateNeeded = (fullStateTree) => {
@@ -262,9 +262,9 @@ class App extends React.Component {
     if (selItem && this.state.nodeColorAttr){
       const legendMap = this.state.colorScale.continuous
                         ? this.state.colorScale.legendBoundsMap : false;
-      return this.state.nodeColorAttr.map((d) => this.determineLegendMatch(selItem, d, legendMap) ? 6 : 3);
+      return this.state.nodeColorAttr.map((d) => this.determineLegendMatch(selItem, d, legendMap) ? tipRadiusOnLegendMatchMultiplier*tipRadius : tipRadius);
     } else if (this.state.nodeColorAttr) {
-      return this.state.nodeColorAttr.map((d) => 3);
+      return this.state.nodeColorAttr.map((d) => tipRadius);
     } else {
       return null;
     }

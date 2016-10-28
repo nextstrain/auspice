@@ -2,6 +2,8 @@ import React from "react";
 import Radium from "radium";
 import { NODE_MOUSEENTER, NODE_MOUSELEAVE } from "../../actions/controls";
 import { connect } from "react-redux";
+import {slowTransitionDuration, mediumTransitionDuration, fastTransitionDuration} from "../../util/globals";
+import d3 from "d3";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
 // import { FOO } from "../actions";
@@ -12,7 +14,6 @@ import { connect } from "react-redux";
  *
 */
 @connect()
-@Radium
 class Tip extends React.Component {
   constructor(props) {
     super(props);
@@ -32,6 +33,23 @@ class Tip extends React.Component {
   static defaultProps = {
     // foo: "bar"
   }
+
+  shouldComponentUpdate(nextProps, nextState) {
+    if (!this.props.node.hasChildren) {
+      if (_.isEqual(nextProps.tipVisibility, this.props.tipVisibility)
+          && _.isEqual(nextProps.nodeColor, this.props.nodeColor)
+          && _.isEqual(nextProps.tipRadius, this.props.tipRadius)
+          && _.isEqual(nextProps.x, this.props.x)
+          && _.isEqual(nextProps.y, this.props.y)) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return false;
+    }
+  }
+
   getStyles() {
     return {
       base: {
@@ -40,15 +58,32 @@ class Tip extends React.Component {
     };
   }
 
+  getOpacity() {
+    return this.props.tipVisibility == "visible" ? 1 : 0;
+  }
+
+  getFillColor() {
+    	return d3.rgb(this.props.nodeColor).brighter([0.65]).toString();
+  }
+
   getTip() {
     if (!this.props.node.hasChildren) {
       return (
         <circle
-          visibility = {this.props.tipVisibility}
-          fill = {this.props.nodeColor}
-          r={this.props.tipRadius}
-          cx={this.props.x}
-          cy={this.props.y}
+          cx="0"
+          cy="0"
+          r={this.props.tipRadius}  // keeping this as r rather than scaling because of shared transition times with x,y pos
+          style = {{
+            stroke: this.props.nodeColor,
+            fill: this.getFillColor(),
+            opacity: this.getOpacity(),
+            transform: `translate3d(${this.props.x}px, ${this.props.y}px, 0)`,
+            WebkitTransform: `translate3d(${this.props.x}px, ${this.props.y}px, 0)`,
+            transition: `transform ${mediumTransitionDuration}ms ease-in-out,
+              opacity ${fastTransitionDuration}ms linear,
+              stroke ${mediumTransitionDuration}ms linear,
+              fill ${mediumTransitionDuration}ms linear`
+          }}
         />
       );
     } else {
