@@ -285,13 +285,15 @@ class App extends React.Component {
    * RENDER
    *****************************************/
   render() {
-    var sidebarContent = <b>Sidebar content</b>;
 
     return (
-      <Sidebar sidebar={<Controls changeRoute={this.changeRoute.bind(this)}
+      <Sidebar
+        sidebar={
+          <Controls changeRoute={this.changeRoute.bind(this)}
           location={this.state.location}
           colorOptions={colorOptions}
-          colorScale={this.state.colorScale}/>}
+          colorScale={this.state.colorScale}/>
+        }
         open={this.state.sidebarOpen}
         docked={this.state.sidebarDocked}
         onSetOpen={this.onSetSidebarOpen}>

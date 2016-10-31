@@ -1,7 +1,7 @@
 import React from "react";
 import Radium from "radium";
 // import { connect } from "react-redux";
-import globalStyles from "../../globalStyles";
+import {sans} from "../../globalStyles";
 
 @Radium
 class Card extends React.Component {
@@ -34,7 +34,7 @@ class Card extends React.Component {
         position: "relative"
       },
       title: {
-        fontFamily: globalStyles.sans,
+        fontFamily: sans,
         marginBottom: 0,
         marginLeft: 10,
         marginTop: 10,

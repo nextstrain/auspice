@@ -4,6 +4,8 @@ import { defaultColorBy, genericDomain, colors } from "../../util/globals";
 import { connect } from "react-redux";
 import * as scales from "../../util/colorScales";
 import { parseGenotype } from "../../util/getGenotype";
+import {sans, select} from "../../globalStyles";
+import SelectLabel from "../framework/select-label";
 
 // import _ from "lodash";
 // import Flex from "./framework/flex";
@@ -88,7 +90,7 @@ class ColorBy extends React.Component {
   getStyles() {
     return {
       base: {
-        marginBottom: 20
+        marginBottom: 10
       }
     };
   }
@@ -108,8 +110,8 @@ class ColorBy extends React.Component {
 
     return (
       <div style={styles.base}>
-        <span> Color by </span>
-        <select id="coloring"
+        <SelectLabel text="Color by"/>
+        <select style={select} id="coloring"
           onChange={(e) => {this.setColorBy(e.target.value);}}
         >
           {colorOptions}

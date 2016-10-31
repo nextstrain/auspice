@@ -5,6 +5,8 @@ import Flex from '../framework/flex';
 import { connect } from 'react-redux';
 // import { FOO } from '../actions';
 import Button from "../framework/generic-button";
+import SelectLabel from "../framework/select-label";
+import HeaderFont from "../framework/header-font";
 import ToggleBranchLabels from "./toggle-branch-labels";
 import ColorBy from "./color-by";
 import Search from "./search";
@@ -13,7 +15,7 @@ import ChooseLayout from "./choose-layout";
 import ChooseVirus from "./choose-virus";
 import ChooseMetric from "./choose-metric";
 import AllFilters from "./all-filter";
-
+import * as globals from "../../util/globals";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -25,59 +27,46 @@ const returnStateNeeded = (fullStateTree) => {
 @connect(returnStateNeeded)
 @Radium
 class Controls extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-
-    };
-  }
-  static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object,
-    // foo: React.PropTypes.string
-  }
-  static defaultProps = {
-    // foo: "bar"
-  }
   getStyles() {
     return {
-      base: {
-
-      }
+      heading: {
+        fontSize: 18,
+        letterSpacing: .4,
+        color: "rgb(150,150,150)"
+      },
     };
   }
   render() {
+    const styles = this.getStyles();
     return (
       <Flex
         direction="column"
         justifyContent="flex-start"
         alignItems="flex-start"
         style={{
-          width: 250,
-          padding: 20
+          width: globals.controlsWidth,
+          padding: "0px 20px 20px 20px"
         }}>
+
+        <HeaderFont style={styles.heading}>{"Dataset"}</HeaderFont>
         <ChooseVirus {...this.props}/>
-        <p style={{fontWeight: 500, fontSize: 12, marginBottom: 0}}>DATE RANGE</p>
+
+        <HeaderFont style={styles.heading}>{"Date Range"}</HeaderFont>
         <DateRangeInputs {...this.props}/>
 
-        <p style={{fontWeight: 500, fontSize: 12}}>FILTERS</p>
+        <HeaderFont style={styles.heading}>{"Filters"}</HeaderFont>
         <ColorBy {...this.props}/>
         <AllFilters {...this.props} />
         <ToggleBranchLabels/>
         <Search/>
 
-        <p style={{fontWeight: 500, fontSize: 12}}>TREE OPTIONS</p>
-        <p style={{fontWeight: 300, fontSize: 14, color: "rgb(67, 119, 205)", marginBottom: 0}}>Layout</p>
+        <HeaderFont style={styles.heading}>{"Tree Options"}</HeaderFont>
+        <SelectLabel text="Layout"/>
         <ChooseLayout {...this.props}/>
-        <p style={{fontWeight: 300, fontSize: 14, color: "rgb(67, 119, 205)", marginBottom: 0}}>Scale</p>
-
+        <SelectLabel text="x axis"/>
         <ChooseMetric {...this.props}/>
 
-        <p style={{fontWeight: 500, fontSize: 12}}>MAP OPTIONS</p>
+        <HeaderFont style={styles.heading}>{"Map Options"}</HeaderFont>
 
       </Flex>
     );

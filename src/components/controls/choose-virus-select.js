@@ -1,6 +1,7 @@
 import React from "react";
 import Radium from "radium";
 import queryString from "query-string";
+import {select} from "../../globalStyles";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
 // import { connect } from "react-redux";
@@ -60,7 +61,7 @@ class ChooseVirusSelect extends React.Component {
     // 9/19/2016: https://facebook.github.io/react/docs/forms.html#why-select-value
     return (
       <select
-        style={{marginRight: 20}}
+        style={select}
         value={this.props.selected}
         onChange={(e) => {
           if (e.target.value === this.props.title) { return }
