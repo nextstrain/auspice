@@ -3,7 +3,6 @@ import Radium from "radium";
 import queryString from "query-string";
 import Select from 'react-select';
 import { filterAbbrRev,filterAbbrFwd } from "../../util/globals";
-
 /*
  * implements a selector that
  * (i) knows about the upstream choices and
@@ -11,41 +10,17 @@ import { filterAbbrRev,filterAbbrFwd } from "../../util/globals";
  */
 @Radium
 class RecursiveFilter extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-
-    };
-  }
-  static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object
-  }
-  static defaultProps = {
-    // foo: "bar"
-  }
-  getStyles() {
-    return {
-      base: {
-
-      }
-    };
-  }
 
   makeQueryString(filters, fields){
     // the first item specifies the filter type (not really necessary)
     const tmp_filter = [];
     // all other filters are appended as key.value separated by dashes
-    for (let ii=0; ii<fields.length; ii+=1){
-      if (filters[ii] && filters[ii]){
+    for (let ii = 0; ii < fields.length; ii += 1) {
+      if (filters[ii] && filters[ii]) {
         tmp_filter.push(fields[ii] + "." + filters[ii]);
       }
     }
-    return tmp_filter.join('-');
+    return tmp_filter.join("-");
   }
 
   setFilterQuery(filters, fields) {
@@ -62,23 +37,27 @@ class RecursiveFilter extends React.Component {
     // the currently selected option is passed down as this.props.selected
     // 9/19/2016: https://facebook.github.io/react/docs/forms.html#why-select-value
     const options = [];
-    for (let i=0; i<this.props.options.length; i++){
-      options.push({value:this.props.options[i],
-                    label:this.props.options[i] + (this.props.counts[i] ? " (" + this.props.counts[i] + ")" : "")}
-                  );
+    for (let i = 0; i < this.props.options.length; i++) {
+      options.push({
+        value: this.props.options[i],
+        label: this.props.options[i] + (this.props.counts[i] ? " (" + this.props.counts[i] + ")" : "")
+      });
     }
     return (
       <Select
-        style={{width:200}}
+        style={{width:230}}
         name="form-field-name"
         value={this.state.selection}
         multi={true}
         options={options}
         onChange={(e) => {
-            this.setFilterQuery(this.props.filterTree.concat(e.map((d) => d["value"]).join(','))
-                                .map((d) => filterAbbrRev[d]||d),
-                                this.props.fields);
-            this.setState({selection:e});
+          this.setFilterQuery(
+            this.props.filterTree.concat(e.map((d) => d["value"])
+              .join(','))
+              .map((d) => filterAbbrRev[d] || d),
+            this.props.fields
+          );
+          this.setState({selection:e});
         }}
       />
     );

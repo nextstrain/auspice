@@ -47,11 +47,13 @@ class AllFilters extends React.Component {
     const styles = this.getStyles();
     const filters = [];
     if (this.props.metadata.metadata) {
-      for (let key in this.props.metadata.metadata.controls){
-        filters.push(<ChooseFilter {...this.props}
-                      filterOptions={this.props.metadata.metadata.controls[key]}
-                      filterType={key}
-                     />);
+      for (let key in this.props.metadata.metadata.controls) {
+        filters.push(
+          <ChooseFilter {...this.props}
+            filterOptions={this.props.metadata.metadata.controls[key]}
+            filterType={key}
+            />
+        );
       }
     }
     return (

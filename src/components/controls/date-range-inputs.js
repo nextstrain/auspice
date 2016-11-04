@@ -133,7 +133,8 @@ class DateRangeInputs extends React.Component {
       return null;
     }
     return (
-      <div style={{marginTop: 20}}>
+      <div>
+        <div style={{width: 250}}>
         <Slider
           min={absoluteMin}
           max={absoluteMax}
@@ -141,19 +142,22 @@ class DateRangeInputs extends React.Component {
           value={[selectedMin, selectedMax]}
           onChange={this.updateSlider.bind(this)}
           withBars />
+        </div>
         <div style={{height: 10}}> </div>
         {/*
           the CSS for this is in index.html
           docs: https://hacker0x01.github.io/react-datepicker/
         */}
-        <DatePicker
-          selected={datePickerMin}
-          onChange={this.updateDateRange.bind(this, "date_min")}
-        />
-        <DatePicker
-          selected={datePickerMax}
-          onChange={this.updateDateRange.bind(this, "date_max")}
-        />
+        <div style={{width: 250}}>
+          <DatePicker
+            selected={datePickerMin}
+            onChange={this.updateDateRange.bind(this, "date_min")}
+          />
+          <DatePicker
+            selected={datePickerMax}
+            onChange={this.updateDateRange.bind(this, "date_max")}
+          />
+        </div>
       </div>
     );
   }
