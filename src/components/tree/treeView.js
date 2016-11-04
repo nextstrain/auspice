@@ -207,8 +207,8 @@ class TreeView extends React.Component {
       var delay = function(myTree){
           var treeplot = d3.select("#treeplot");
           var tmp_tree = myTree;
-          treeplot.on("click", function(d){tmp_tree.updateDistance(tmp_tree.distance==="div"?"num_date":"div", 1000);});
-          //treeplot.on("click", function(d){tmp_tree.updateLayout(tmp_tree.layout==="radial"?"rectangular":"radial", 1000);});
+          // treeplot.on("click", function(d){tmp_tree.updateDistance(tmp_tree.distance==="div"?"num_date":"div", 1000);});
+          treeplot.on("click", function(d){tmp_tree.updateLayout(tmp_tree.layout==="radial"?"rectangular":"radial", 1000);});
           return function() {
             console.log("calling render", tmp_tree, myTree)
             tmp_tree.render(treeplot, "rectangular", "div");
