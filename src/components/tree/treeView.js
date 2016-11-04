@@ -116,6 +116,23 @@ class TreeView extends React.Component {
     return 400 + 0.30 * width;
   }
 
+  makeTree() {
+      console.log("MakeTree1",d3.select("#treeplot"));
+      var treeplot = d3.select("#treeplot");
+      var tip_labels = true, branch_labels=false;
+
+      var mutType='aa'; //mutations displayed in tooltip
+      console.log("MakeTree2");
+      treeplot.left_margin = 10;
+      treeplot.bottom_margin = 16;
+      treeplot.top_margin = 32;
+      if (branch_labels) {treeplot.top_margin +=15;}
+      treeplot.right_margin = 10;
+      console.log(treeplot);
+      console.log("MakeTree3", this.props.nodes[0]);
+      var myTree = PhyloTree(this.props.nodes[0], treeplot, d3.select('.treeplot-container'));
+      console.log("MakeTree4");
+  }
 
   createTree() {
     /* two svgs! one scales, one doesn't :) */
@@ -127,72 +144,6 @@ class TreeView extends React.Component {
     //   >
 
     //
-    return (
-      <Card title="Phylogeny">
-          <p style={{position: "absolute", right: 50, bottom: 150, color: "red", fontWeight: 700 }}> {this.state.scaleFactor} </p>
-          <svg width={300} height={300} style={{position: "absolute", left: 13, top: 50, pointerEvents: "none"}}>
-            <Legend colorScale={this.props.colorScale}/>
-          </svg>
-          <Viewer
-            width={this.state.width}
-            height={this.treePlotHeight(this.state.width)}
-            value={this.state.value}
-            tool={this.state.tool}
-            detectPinch={false}
-            detectAutoPan={false}
-            background="#FFF"
-            onChange={this.handleChange.bind(this)}
-            onClick={this.handleClick.bind(this)}>
-            <svg style={{pointerEvents: "auto"}} width={this.state.width} height={this.treePlotHeight(this.state.width)} id="treeplot">
-              <Grid
-                layout={this.props.layout}
-                distanceMeasure={this.props.distanceMeasure}
-                xScale={this.state.xScale}
-                yScale={this.state.yScale}
-                nodes={this.props.nodes}
-              />
-              <Tree
-                nodes={this.props.nodes}
-                nodeColor={this.props.nodeColor}
-                nodeColorAttr={this.props.nodeColorAttr}
-                tipRadii={this.props.tipRadii}
-                tipVisibility={this.props.tipVisibility}
-                layout={this.props.layout}
-                distanceMeasure={this.props.distanceMeasure}
-                xScale={this.state.xScale}
-                yScale={this.state.yScale}
-              />
-            </svg>
-          </Viewer>
-          <svg width={50} height={130} style={{position: "absolute", right: 20, bottom: 20}}>
-              <defs>
-                <filter id="dropshadow" height="130%">
-                  <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-                  <feOffset dx="2" dy="2" result="offsetblur"/>
-                  <feComponentTransfer>
-                    <feFuncA type="linear" slope="0.2"/>
-                  </feComponentTransfer>
-                  <feMerge>
-                    <feMergeNode/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
-            <ZoomInIcon
-              handleClick={this.handleIconClick("zoom-in")}
-              active={true}
-              x={10}
-              y={50}
-              />
-            <ZoomOutIcon
-              handleClick={this.handleIconClick("zoom-out")}
-              active={true}
-              x={10}
-              y={90}
-              />
-          </svg>
-      </Card>
-    );
     // <MoveIcon
     //   handleClick={this.handleIconClick("pan")}
     //   active={this.state.tool === "pan"}
@@ -248,9 +199,31 @@ class TreeView extends React.Component {
       2. otherwise if we just rescaled, run updatescales,
       3. otherwise just have components rerender because for instance colorby changed
     */
+    if (this.props.nodes) {
+      var nodes = this.props.nodes;
+      var myTree = new PhyloTree2(nodes[0]);
+
+      console.log(myTree.nodes);
+      var delay = function(myTree){
+          var treeplot = d3.select("#treeplot");
+          var tmp_tree = myTree;
+          treeplot.on("click", function(d){tmp_tree.updateDistance(tmp_tree.distance==="div"?"num_date":"div", 1000);});
+          //treeplot.on("click", function(d){tmp_tree.updateLayout(tmp_tree.layout==="radial"?"rectangular":"radial", 1000);});
+          return function() {
+            console.log("calling render", tmp_tree, myTree)
+            tmp_tree.render(treeplot, "rectangular", "div");
+          };
+      };
+      setTimeout(delay(myTree), 3000);
+    }
     return (
       <div>
-        {this.state.okToDraw ? this.createTree() : "We don't have tree data yet [spinner]"}
+        <Card title="Phylogeny">
+            <div class="treeplot-container">
+              <svg width={800} height={500} id="treeplot">
+              </svg>
+            </div>
+        </Card>
       </div>
     );
   }
