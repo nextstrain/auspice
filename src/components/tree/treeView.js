@@ -207,13 +207,6 @@ class TreeView extends React.Component {
       2. otherwise if we just rescaled, run updatescales,
       3. otherwise just have components rerender because for instance colorby changed
     */
-    // if (this.props.nodes){
-    //   var nodes = this.props.nodes;
-    //   var myTree = new PhyloTree(nodes[0]);
-//      console.log("call render");
-//      myTree.render(treeplot, "rectangular", "div");
-//    }
-//      tree:myTree,
     return (
       <div>
         <Card title="Phylogeny">
