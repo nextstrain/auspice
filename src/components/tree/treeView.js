@@ -15,7 +15,7 @@ import Legend from "../controls/legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
 import MoveIcon from "../framework/move-icon";
-
+import PhyloTree from "../../util/phyloTree";
 import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 
 
@@ -45,13 +45,26 @@ class TreeView extends React.Component {
     tree: React.PropTypes.object
   }
 
+  makeTree(nodes){
+    console.log("Did Mount", nodes, this.state);
+    if (nodes) {
+      var myTree = new PhyloTree(nodes[0]);
+      var treeplot = d3.select("#treeplot");
+      treeplot.on("click", function(d){myTree.updateDistance(myTree.distance==="div"?"num_date":"div", 1000);});
+      console.log("call render");
+      myTree.render(treeplot, "rectangular", "div");
+      return myTree;
+    }else{
+      return null;
+    }
+  }
+
   componentWillMount() {
     if (this.state.currentDatasetGuid !== this.props.datasetGuid) {
-      const scales = this.updateScales(nodes);
+      const scales = this.updateScales(this.props.nodes);
       this.setState({
         okToDraw: true,
         currentDatasetGuid: this.props.datasetGuid,
-        nodes: nodes,
         width: globals.width,
         xScale: scales.xScale,
         yScale: scales.yScale
@@ -61,6 +74,8 @@ class TreeView extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     // Do we have a tree to draw? if yes, check whether it needs to be redrawn
+    const dt=1000;
+    const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree) ? this.state.tree : this.makeTree(nextProps.nodes);
     if (!(nextProps.datasetGuid && nextProps.nodes)){
       this.setState({okToDraw: false});
     } else if ((nextProps.datasetGuid !== this.props.datasetGuid)
@@ -73,8 +88,19 @@ class TreeView extends React.Component {
         currentDatasetGuid: nextProps.datasetGuid,
         width: globals.width,
         xScale: scales.xScale,
-        yScale: scales.yScale
+        yScale: scales.yScale,
+        tree: tree
       });
+    }
+    if (tree){
+      console.log("reset layout", this.props.layout);
+      if (this.props.layout!==nextProps.layout){
+        tree.updateLayout(nextProps.layout, dt);
+      }
+      if (this.props.distanceMeasure!==nextProps.distanceMeasure){
+        tree.updateDistance(nextProps.distanceMeasure,dt);
+      }
+      tree.updateStyleArray(".tip2", "fill", nextProps.nodeColor, dt);
     }
   }
 
@@ -114,24 +140,6 @@ class TreeView extends React.Component {
 
   treePlotHeight(width) {
     return 400 + 0.30 * width;
-  }
-
-  makeTree() {
-      console.log("MakeTree1",d3.select("#treeplot"));
-      var treeplot = d3.select("#treeplot");
-      var tip_labels = true, branch_labels=false;
-
-      var mutType='aa'; //mutations displayed in tooltip
-      console.log("MakeTree2");
-      treeplot.left_margin = 10;
-      treeplot.bottom_margin = 16;
-      treeplot.top_margin = 32;
-      if (branch_labels) {treeplot.top_margin +=15;}
-      treeplot.right_margin = 10;
-      console.log(treeplot);
-      console.log("MakeTree3", this.props.nodes[0]);
-      var myTree = PhyloTree(this.props.nodes[0], treeplot, d3.select('.treeplot-container'));
-      console.log("MakeTree4");
   }
 
   createTree() {
@@ -199,23 +207,13 @@ class TreeView extends React.Component {
       2. otherwise if we just rescaled, run updatescales,
       3. otherwise just have components rerender because for instance colorby changed
     */
-    if (this.props.nodes) {
-      var nodes = this.props.nodes;
-      var myTree = new PhyloTree2(nodes[0]);
-
-      console.log(myTree.nodes);
-      var delay = function(myTree){
-          var treeplot = d3.select("#treeplot");
-          var tmp_tree = myTree;
-          treeplot.on("click", function(d){tmp_tree.updateDistance(tmp_tree.distance==="div"?"num_date":"div", 1000);});
-          //treeplot.on("click", function(d){tmp_tree.updateLayout(tmp_tree.layout==="radial"?"rectangular":"radial", 1000);});
-          return function() {
-            console.log("calling render", tmp_tree, myTree)
-            tmp_tree.render(treeplot, "rectangular", "div");
-          };
-      };
-      setTimeout(delay(myTree), 3000);
-    }
+    // if (this.props.nodes){
+    //   var nodes = this.props.nodes;
+    //   var myTree = new PhyloTree(nodes[0]);
+//      console.log("call render");
+//      myTree.render(treeplot, "rectangular", "div");
+//    }
+//      tree:myTree,
     return (
       <div>
         <Card title="Phylogeny">
