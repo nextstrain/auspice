@@ -50,8 +50,12 @@ class Card extends React.Component {
         this.props.style
       ]}>
         <p style={styles.title}> {this.props.title} </p>
-
-        {this.props.children}
+        <div style={{
+            display: "flex",
+            justifyContent: this.props.center ? "center" : "flex-start"
+          }}>
+          {this.props.children}
+        </div>
       </div>
     );
   }
