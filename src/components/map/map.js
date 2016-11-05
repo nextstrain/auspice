@@ -5,6 +5,8 @@ import _ from "lodash";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
 import Card from "../framework/card";
+import setupLeaflet from "../../util/leaflet";
+import setupLeafletPlugins from "../../util/leaflet-plugins";
 
 
 @connect((state) => {
@@ -30,17 +32,21 @@ class Map extends React.Component {
   static defaultProps = {
     // foo: "bar"
   }
-
   componentWillMount() {
     setupLeaflet();
   }
   componentDidMount() {
-    // setupMap()
     setupLeafletPlugins()
+
+    const southWest = L.latLng(-70, -180);
+    const northEast = L.latLng(90, 180);
+    const bounds = L.latLngBounds(southWest, northEast);
+
     var map = L.map('map', {
       center: [0,0],
       zoom: 2,
       scrollWheelZoom: false,
+      maxBounds: bounds,
       minZoom: 2,
       maxZoom: 9,
       zoomControl: false
@@ -48,7 +54,8 @@ class Map extends React.Component {
     })
 
     L.tileLayer('https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2l1MDRoMzg5MDEwbjJvcXBpNnUxMXdwbCJ9.PMqX7vgORuXLXxtI3wISjw', {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+        // noWrap: true
     }).addTo(map);
 
     L.control.zoom({position: "bottomright"}).addTo(map)
@@ -76,6 +83,7 @@ class Map extends React.Component {
       ], {
         stroke:	false,
         radius: value,
+
         // color: ""
         // weight:	5	Stroke width in pixels.
         // opacity:	0.5	Stroke opacity.
@@ -89,6 +97,7 @@ class Map extends React.Component {
     const transmissions = {};
     const geo = this.props.metadata.geo;
 
+    // count transmissions for line thickness
     this.props.nodes.forEach((parent) => {
       if (!parent.children) { return; }
       // if (parent.attr.country !== "china") { return; } // remove me, example filter
@@ -104,32 +113,55 @@ class Map extends React.Component {
       });
     });
 
+    // for each item in the object produced above, add a line
     _.forOwn(transmissions, (value, key) => {
-      // L.polyline(latlngs, {color: 'red'}).addTo(this.state.map);
+
+      // go from "brazil/cuba" to ["brazil", "cuba"]
       const countries = key.split("/");
+      // go from "brazil" to lat0 = -14.2350
       let long0 = geo.country[countries[0]].longitude;
       let long1 = geo.country[countries[1]].longitude;
+      let lat0 = geo.country[countries[0]].latitude;
+      let lat1 = geo.country[countries[1]].latitude;
 
+      // create new leaflet LatLong objects
+      const start = new L.LatLng(lat0, long0)
+      const end = new L.LatLng(lat1, long1)
 
-      // if (Math.abs(long0 - long1) > 100) {
-      //   return
-        // long0 = long0 + 360;
-        // long1 = long1 + 360;
-      // }
+      // remove me! temporary random colors in lieu of scale.
+      const randomColor = "#" + (Math.random().toString(16) + '0000000').slice(2, 8);
 
-      L.polyline([
-        [geo.country[countries[0]].latitude, long0],
-        [geo.country[countries[1]].latitude, long1]
-      ], {
+      // add a polyline to the map for current country pair iteratee
+      const geodesicPath = L.geodesic([[start,end]], {
         // stroke:	value,
         // radius: value,
-        color: "rgb(255,0,0)",
+        color: randomColor,
+        opacity: .5,
+        steps: 25,
         weight:	value	/* Stroke width in pixels.*/
         // opacity:	0.5	Stroke opacity.
         // fill:
-        // fillColor: "rgb(255,0,0)"
+        // fillColor: randomColor
         // fillOpacity:
       }).addTo(this.state.map)
+
+      // this decorator adds arrows to the lines.
+      // decorator docs: https://github.com/bbecquet/Leaflet.PolylineDecorator
+      L.polylineDecorator(geodesicPath._latlngs[0], {
+        patterns: [{
+          offset: 25,
+          repeat: 50,
+          symbol: L.Symbol.arrowHead({
+            pixelSize: 8,
+            pathOptions: {
+              fillOpacity: .5,
+              color: randomColor,
+              weight: 0
+            }
+          })
+        }]
+      }).addTo(this.state.map);
+
     });
   }
   render() {
@@ -139,11 +171,15 @@ class Map extends React.Component {
       // don't redraw - need to seperately handle virus change redraw
       this.setState({tips: true});
     }
+
+    // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
+    // viscosity bounds http://stackoverflow.com/questions/22155017/can-i-prevent-panning-leaflet-map-out-of-the-world-edge
+
     return (
-      <Card title="Transmissions">
+      <Card center title="Transmissions">
         <div style={{
-            height: 400,
-            width: 800,
+            height: 650,
+            width: 1028,
             margin: 10
           }} id="map">
         </div>
