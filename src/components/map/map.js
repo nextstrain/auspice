@@ -31,8 +31,12 @@ class Map extends React.Component {
     // foo: "bar"
   }
 
+  componentWillMount() {
+    setupLeaflet();
+  }
   componentDidMount() {
     // setupMap()
+    setupLeafletPlugins()
     var map = L.map('map', {
       center: [0,0],
       zoom: 2,
