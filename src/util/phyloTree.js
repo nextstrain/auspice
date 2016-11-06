@@ -158,6 +158,39 @@ PhyloTree.prototype.branches = function(){
 }
 
 
+PhyloTree.prototype.updateGeometryFade = function(dt){
+    this.svg.selectAll('.branch').filter(function (d) {return d.update;})
+        .transition().duration(dt*0.5)
+        .style("stroke", "#FFF");
+
+    const tipTrans = function(tmp_svg, tmp_dt){
+        const svg = tmp_svg;
+        return function(){
+            svg.selectAll('.tip2').filter(function (d) {return d.update;})
+                .transition().duration(tmp_dt)
+                .attr("cx", function(d){return d.xTip;})
+                .attr("cy", function(d){return d.yTip;});
+        };
+    };
+    setTimeout(tipTrans(this.svg, dt), 0.5*dt);
+
+
+    const flipBranches = function(tmp_svg){
+        const svg = tmp_svg;
+        return  function(){svg.selectAll('.branch').filter(function (d) {return d.update;})
+                              .attr("d", function(d){return d.branch;});};
+    };
+    setTimeout(flipBranches(this.svg), 0.5*dt);
+
+    const fadeBack = function(tmp_svg, tmp_dt){
+        const svg = tmp_svg;
+        return  function(d){svg.selectAll('.branch').filter(function (d) {return d.update;})
+                .transition().duration(0.5*tmp_dt)
+                .style("stroke",function (d) {return d.stroke||"#AAA";})};
+    };
+    setTimeout(fadeBack(this.svg, 0.2*dt),1.5*dt);
+};
+
 PhyloTree.prototype.updateGeometry = function(dt){
     this.svg.selectAll('.tip2').filter(function (d) {return d.update;})
         .transition().duration(dt)
@@ -167,7 +200,8 @@ PhyloTree.prototype.updateGeometry = function(dt){
     this.svg.selectAll('.branch').filter(function (d) {return d.update;})
         .transition().duration(dt)
         .attr("d", function(d){return d.branch;});
-}
+};
+
 
 PhyloTree.prototype.updateDistance = function(attr,dt){
     this.setDistance(attr);
@@ -179,7 +213,7 @@ PhyloTree.prototype.updateDistance = function(attr,dt){
 PhyloTree.prototype.updateLayout = function(layout,dt){
     this.setLayout(layout);
     this.mapToScreen();
-    this.updateGeometry(dt);
+    this.updateGeometryFade(dt);
 }
 
 PhyloTree.prototype.updateAttribute= function(treeElem, attr, callback, dt){

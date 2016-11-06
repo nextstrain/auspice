@@ -50,7 +50,8 @@ class TreeView extends React.Component {
     if (nodes) {
       var myTree = new PhyloTree(nodes[0]);
       var treeplot = d3.select("#treeplot");
-      treeplot.on("click", function(d){myTree.updateDistance(myTree.distance==="div"?"num_date":"div", 1000);});
+      //treeplot.on("click", function(d){myTree.updateDistance(myTree.distance==="div"?"num_date":"div", 1000);});
+      treeplot.on("click", function(d){myTree.updateLayout(myTree.layout==="rectangular"?"radial":"rectangular", 1000);});
       console.log("call render");
       myTree.render(treeplot, "rectangular", "div");
       return myTree;
@@ -75,7 +76,9 @@ class TreeView extends React.Component {
   componentWillReceiveProps(nextProps) {
     // Do we have a tree to draw? if yes, check whether it needs to be redrawn
     const dt=1000;
-    const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree) ? this.state.tree : this.makeTree(nextProps.nodes);
+    const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree)
+                  ? this.state.tree
+                  : this.makeTree(nextProps.nodes, this.layout, this.distance);
     if (!(nextProps.datasetGuid && nextProps.nodes)){
       this.setState({okToDraw: false});
     } else if ((nextProps.datasetGuid !== this.props.datasetGuid)
@@ -93,14 +96,15 @@ class TreeView extends React.Component {
       });
     }
     if (tree){
-      console.log("reset layout", this.props.layout);
+      tree.updateStyleArray(".tip2", "fill", nextProps.nodeColor, dt);
       if (this.props.layout!==nextProps.layout){
+        console.log("reset layout", this.props.layout, nextProps.layout);
         tree.updateLayout(nextProps.layout, dt);
       }
       if (this.props.distanceMeasure!==nextProps.distanceMeasure){
+        console.log("reset distance", this.props.distanceMeasure, nextProps.distanceMeasure);
         tree.updateDistance(nextProps.distanceMeasure,dt);
       }
-      tree.updateStyleArray(".tip2", "fill", nextProps.nodeColor, dt);
     }
   }
 
