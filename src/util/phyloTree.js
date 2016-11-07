@@ -130,11 +130,11 @@ PhyloTree.prototype.setScales = function(margins){
 }
 
 PhyloTree.prototype.tips = function(){
-    this.tipElements = this.svg.selectAll('.tip2')
+    this.tipElements = this.svg.selectAll('.tip')
         .data(this.nodes.filter(function (d){return d.terminal;}))
         .enter()
         .append("circle")
-        .attr("class", "tip2")
+        .attr("class", "tip")
         .attr("id", function(d){return d.n.clade;})
         .attr("cx", function(d){return d.xTip;})
         .attr("cy", function(d){return d.yTip;})
@@ -166,7 +166,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt){
     const tipTrans = function(tmp_svg, tmp_dt){
         const svg = tmp_svg;
         return function(){
-            svg.selectAll('.tip2').filter(function (d) {return d.update;})
+            svg.selectAll('.tip').filter(function (d) {return d.update;})
                 .transition().duration(tmp_dt)
                 .attr("cx", function(d){return d.xTip;})
                 .attr("cy", function(d){return d.yTip;});
@@ -192,7 +192,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt){
 };
 
 PhyloTree.prototype.updateGeometry = function(dt){
-    this.svg.selectAll('.tip2').filter(function (d) {return d.update;})
+    this.svg.selectAll('.tip').filter(function (d) {return d.update;})
         .transition().duration(dt)
         .attr("cx", function(d){return d.xTip;})
         .attr("cy", function(d){return d.yTip;});
@@ -280,9 +280,14 @@ PhyloTree.prototype.redrawStyle = function(treeElem, styleElem, dt){
         .style(styleElem, function(d){return d[styleElem];});
 }
 
+PhyloTree.prototype.clearSVG = function (){
+    this.svg.selectAll('.tip').remove();
+    this.svg.selectAll('.branch').remove();
+}
 
 PhyloTree.prototype.render = function(svg, layout, distance) {
     this.svg = svg;
+    this.clearSVG();
     this.setScales({left:10, right:100, top:10, bottom:10});
     this.setDistance(distance);
     this.setLayout(layout);

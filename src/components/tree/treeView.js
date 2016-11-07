@@ -96,7 +96,10 @@ class TreeView extends React.Component {
       });
     }
     if (tree){
-      tree.updateStyleArray(".tip2", "fill", nextProps.nodeColor, dt);
+      if (nextProps.nodeColor){
+        console.log(nextProps.nodeColor);
+        tree.updateStyleArray(".tip", "fill", nextProps.nodeColor, dt);
+      }
       if (this.props.layout!==nextProps.layout){
         console.log("reset layout", this.props.layout, nextProps.layout);
         tree.updateLayout(nextProps.layout, dt);
