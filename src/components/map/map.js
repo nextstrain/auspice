@@ -76,21 +76,23 @@ class Map extends React.Component {
       }
     });
 
+
+
     _.forOwn(aggregatedLocations, (value, key) => {
       L.circleMarker([
         this.props.metadata.geo.country[key].latitude,
         this.props.metadata.geo.country[key].longitude
       ], {
         stroke:	false,
-        radius: value,
+        radius: value * 2,
 
         // color: ""
         // weight:	5	Stroke width in pixels.
         // opacity:	0.5	Stroke opacity.
         // fill:
-        fillColor: "rgb(255,0,0)"
-        // fillOpacity:
-      }).addTo(this.state.map)
+        fillColor: this.props.colorScale(key),
+        fillOpacity: .6
+      }).addTo(this.state.map);
     });
   }
   addTransmissionEventsToMap() {
@@ -129,13 +131,12 @@ class Map extends React.Component {
       const end = new L.LatLng(lat1, long1)
 
       // remove me! temporary random colors in lieu of scale.
-      const randomColor = "#" + (Math.random().toString(16) + '0000000').slice(2, 8);
 
       // add a polyline to the map for current country pair iteratee
       const geodesicPath = L.geodesic([[start,end]], {
         // stroke:	value,
         // radius: value,
-        color: randomColor,
+        color: this.props.colorScale(countries[0]),
         opacity: .5,
         steps: 25,
         weight:	value	/* Stroke width in pixels.*/
@@ -155,7 +156,7 @@ class Map extends React.Component {
             pixelSize: 8,
             pathOptions: {
               fillOpacity: .5,
-              color: randomColor,
+              color: this.props.colorScale(countries[0]),
               weight: 0
             }
           })
@@ -164,8 +165,23 @@ class Map extends React.Component {
 
     });
   }
+  okToRender() {
+    /* this is going to expand, ie., do we have a new dataset, so breaking into a function */
+    let ok = false;
+
+    if (
+      this.props.nodes &&
+      this.state.map &&
+      !this.state.tips &&
+      this.props.colorScale
+    ) {
+      ok = true
+    }
+
+    return ok;
+  }
   render() {
-    if (this.props.nodes && this.state.map && !this.state.tips) {
+    if (this.okToRender()) {
       this.addAllTipsToMap();
       this.addTransmissionEventsToMap();
       // don't redraw - need to seperately handle virus change redraw
@@ -173,7 +189,6 @@ class Map extends React.Component {
     }
 
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
-    // viscosity bounds http://stackoverflow.com/questions/22155017/can-i-prevent-panning-leaflet-map-out-of-the-world-edge
 
     return (
       <Card center title="Transmissions">
