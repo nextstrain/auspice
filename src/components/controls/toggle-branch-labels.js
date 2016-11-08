@@ -7,6 +7,7 @@ import { TOGGLE_BRANCH_LABELS } from "../../actions/controls";
 
 
 @connect()
+@Radium
 class ToggleBranchLabels extends React.Component {
   constructor(props) {
     super(props);

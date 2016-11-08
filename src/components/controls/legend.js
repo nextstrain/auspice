@@ -12,6 +12,7 @@ import LegendItem from "./legend-item";
 // @connect(state => {
 //
 // })
+@Radium
 class Legend extends React.Component {
   constructor(props) {
     super(props);

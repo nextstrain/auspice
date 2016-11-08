@@ -11,6 +11,7 @@ import queryString from "query-string";
 // @connect(state => {
 //   return state.FOO;
 // })
+@Radium
 class ChooseLayout extends React.Component {
   constructor(props) {
     super(props);

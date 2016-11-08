@@ -23,6 +23,7 @@ const returnStateNeeded = (fullStateTree) => {
 };
 
 @connect(returnStateNeeded)
+@Radium
 class Controls extends React.Component {
   constructor(props) {
     super(props);

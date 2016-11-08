@@ -9,6 +9,7 @@ import Radium from "radium";
 // @connect(state => {
 //   return state.FOO;
 // })
+@Radium
 class FrequenciesGraph extends React.Component {
   constructor(props) {
     super(props);

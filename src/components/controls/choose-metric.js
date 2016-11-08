@@ -9,6 +9,7 @@ import MutationTree from "../framework/svg-mutation-tree";
  * implements a pair of buttons the toggle between timetree and divergence tree
  * copied from chose-layout
  */
+@Radium
 class ChooseMetric extends React.Component {
   constructor(props) {
     super(props);

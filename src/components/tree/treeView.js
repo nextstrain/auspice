@@ -24,6 +24,7 @@ import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
  * such that branches and tips are correctly placed.
  * will handle zooming
 */
+@Radium
 class TreeView extends React.Component {
   constructor(props) {
     super(props);

@@ -9,6 +9,7 @@ import Autosuggest from 'react-autosuggest';
 @connect(state => {
   return state.tree
 })
+@Radium
 class SearchStrains extends React.Component {
   constructor(props) {
     super();

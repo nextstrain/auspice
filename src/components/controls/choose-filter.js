@@ -13,6 +13,7 @@ import parseParams from "../../util/parseParams";
  * the dataset hierarchy is specified in a datasets.json, currently
  * in ../../util/globals
 */
+@Radium
 class ChooseFilter extends React.Component {
   constructor(props) {
     super(props);

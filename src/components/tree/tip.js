@@ -14,6 +14,7 @@ import d3 from "d3";
  *
 */
 @connect()
+@Radium
 class Tip extends React.Component {
   constructor(props) {
     super(props);
