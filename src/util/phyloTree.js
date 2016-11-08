@@ -130,7 +130,7 @@ PhyloTree.prototype.setScales = function(margins){
 };
 
 PhyloTree.prototype.tips = function(){
-    this.tipElements = this.svg.selectAll('.tip')
+    this.tipElements = this.svg.append("g").selectAll('.tip')
         .data(this.nodes.filter(function (d){return d.terminal;}))
         .enter()
         .append("circle")
@@ -145,7 +145,7 @@ PhyloTree.prototype.tips = function(){
 };
 
 PhyloTree.prototype.branches = function(){
-    this.branches = this.svg.selectAll('.branch')
+    this.branches = this.svg.append("g").selectAll('.branch')
         .data(this.nodes)
         .enter()
         .append("path")
