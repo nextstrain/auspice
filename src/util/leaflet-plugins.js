@@ -33,41 +33,47 @@ if (typeof Number.prototype.toDegrees == 'undefined') {
 var INTERSECT_LNG = 179.999;	// Lng used for intersection and wrap around on map edges
 
 L.Geodesic = L.Polyline.extend({
-    options: {
-	color:'blue',
-	steps: 10,
-	dash: 1,
+      options: {
+        color: 'blue',
+        steps: 10,
+        dash: 1,
         wrap: true
-    },
+      },
 
-    initialize: function (latlngs, options) {
-      this.options = this._merge_options(this.options, options);
-      this.datum = {};
-      this.datum.ellipsoid = { a: 6378137,     b: 6356752.3142,   f: 1/298.257223563 };	 // WGS-84
-      this._latlngs = (this.options.dash<1)?this._generate_GeodesicDashed(latlngs):this._generate_Geodesic(latlngs);
-      L.Polyline.prototype.initialize.call(this, this._latlngs, this.options);
-    },
+      initialize: function(latlngs, options) {
+        this.options = this._merge_options(this.options, options);
+        this.datum = {};
+        this.datum.ellipsoid = {
+          a: 6378137,
+          b: 6356752.3142,
+          f: 1 / 298.257223563
+        }; // WGS-84
+        this._latlngs = (this.options.dash < 1) ? this._generate_GeodesicDashed(latlngs) : this._generate_Geodesic(latlngs);
+        L.Polyline.prototype.initialize.call(this, this._latlngs, this.options);
+      },
 
-    setLatLngs: function (latlngs) {
-      this._latlngs = (this.options.dash<1)?this._generate_GeodesicDashed(latlngs):this._generate_Geodesic(latlngs);
-      L.Polyline.prototype.setLatLngs.call(this, this._latlngs);
-    },
+      setLatLngs: function(latlngs) {
+        this._latlngs = (this.options.dash < 1) ? this._generate_GeodesicDashed(latlngs) : this._generate_Geodesic(latlngs);
+        L.Polyline.prototype.setLatLngs.call(this, this._latlngs);
+      },
 
     /**
     * Calculates some statistic values of current geodesic multipolyline
     * @returns (Object} Object with several properties (e.g. overall distance)
     */
-    getStats: function () {
-      var obj={	distance: 0,
-		points: 0,
-		polygons: this._latlngs.length
-	      }, poly, points;
+    getStats: function() {
+      var obj = {
+          distance: 0,
+          points: 0,
+          polygons: this._latlngs.length
+        },
+        poly, points;
 
-      for(poly=0; poly<this._latlngs.length;poly++) {
-	obj.points+=this._latlngs[poly].length;
-	for(points=0;points<(this._latlngs[poly].length-1);points++) {
-	  obj.distance += this._vincenty_inverse(this._latlngs[poly][points], this._latlngs[poly][points+1]).distance;
-	}
+      for (poly = 0; poly < this._latlngs.length; poly++) {
+        obj.points += this._latlngs[poly].length;
+        for (points = 0; points < (this._latlngs[poly].length - 1); points++) {
+          obj.distance += this._vincenty_inverse(this._latlngs[poly][points], this._latlngs[poly][points + 1]).distance;
+        }
       }
       return obj;
     },
@@ -77,9 +83,14 @@ L.Geodesic = L.Polyline.extend({
     * @param {Object} center - geographic position
     * @param {number} radius - radius of the circle in meters
     */
-    createCircle: function (center, radius) {
-      var _geo = [], _geocnt=0;
-      var prev = {lat:0, lng:0, brg:0};//new L.LatLng(0, 0);
+    createCircle: function(center, radius) {
+      var _geo = [],
+        _geocnt = 0;
+      var prev = {
+        lat: 0,
+        lng: 0,
+        brg: 0
+      }; //new L.LatLng(0, 0);
       var s;
 
       _geo[_geocnt] = [];
@@ -87,32 +98,33 @@ L.Geodesic = L.Polyline.extend({
       var direct = this._vincenty_direct(L.latLng(center), 0, radius, this.options.wrap);
       prev = L.latLng(direct.lat, direct.lng);
       _geo[_geocnt].push(prev);
-      for(s=1; s<=this.options.steps; ) {
-	direct = this._vincenty_direct(L.latLng(center), 360/this.options.steps*s, radius, this.options.wrap);
-	var gp = L.latLng(direct.lat, direct.lng);
-	if(Math.abs(gp.lng-prev.lng) > 180) {
-	  var inverse = this._vincenty_inverse(prev, gp);
-	  var sec = this._intersection(prev, inverse.initialBearing, {lat: -89, lng:((gp.lng-prev.lng)>0)?-INTERSECT_LNG:INTERSECT_LNG}, 0);
-	  if(sec) {
-	    _geo[_geocnt].push(L.latLng(sec.lat, sec.lng));
-	    _geocnt++;
-	    _geo[_geocnt] = [];
-	    prev = L.latLng(sec.lat, -sec.lng);
-	    _geo[_geocnt].push(prev);
-	  }
-	  else {
-	    _geocnt++;
-	    _geo[_geocnt] = [];
-	    _geo[_geocnt].push(gp);
-	    prev = gp;
-	    s++;
-	  }
-	}
-	else {
-	  _geo[_geocnt].push(gp);
-	  prev = gp;
-	  s++;
-	}
+      for (s = 1; s <= this.options.steps;) {
+        direct = this._vincenty_direct(L.latLng(center), 360 / this.options.steps * s, radius, this.options.wrap);
+        var gp = L.latLng(direct.lat, direct.lng);
+        if (Math.abs(gp.lng - prev.lng) > 180) {
+          var inverse = this._vincenty_inverse(prev, gp);
+          var sec = this._intersection(prev, inverse.initialBearing, {
+            lat: -89,
+            lng: ((gp.lng - prev.lng) > 0) ? -INTERSECT_LNG : INTERSECT_LNG
+          }, 0);
+          if (sec) {
+            _geo[_geocnt].push(L.latLng(sec.lat, sec.lng));
+            _geocnt++;
+            _geo[_geocnt] = [];
+            prev = L.latLng(sec.lat, -sec.lng);
+            _geo[_geocnt].push(prev);
+          } else {
+            _geocnt++;
+            _geo[_geocnt] = [];
+            _geo[_geocnt].push(gp);
+            prev = gp;
+            s++;
+          }
+        } else {
+          _geo[_geocnt].push(gp);
+          prev = gp;
+          s++;
+        }
       }
 
       this._latlngs = _geo;
@@ -124,44 +136,47 @@ L.Geodesic = L.Polyline.extend({
     * @param {Object} latlngs - One or more polylines as an array. See Leaflet doc about Polyline
     * @returns (Object} An array of arrays of geographical points.
     */
-    _generate_Geodesic: function (latlngs) {
-      var _geo = [], _geocnt=0, s, poly, points;
-//      _geo = latlngs;		// bypass
+    _generate_Geodesic: function(latlngs) {
+      var _geo = [],
+        _geocnt = 0,
+        s, poly, points;
+      //      _geo = latlngs;		// bypass
 
-      for(poly=0; poly<latlngs.length;poly++) {
-	_geo[_geocnt] = [];
-	for(points=0;points<(latlngs[poly].length-1);points++) {
-	  var inverse = this._vincenty_inverse(L.latLng(latlngs[poly][points]), L.latLng(latlngs[poly][points+1]));
-	  var prev = L.latLng(latlngs[poly][points]);
-	  _geo[_geocnt].push(prev);
-	  for(s=1; s<=this.options.steps; ) {
-	    var direct = this._vincenty_direct(L.latLng(latlngs[poly][points]), inverse.initialBearing, inverse.distance/this.options.steps*s, this.options.wrap);
-	    var gp = L.latLng(direct.lat, direct.lng);
-	    if(Math.abs(gp.lng-prev.lng) > 180) {
-	      var sec = this._intersection(L.latLng(latlngs[poly][points]), inverse.initialBearing, {lat: -89, lng:((gp.lng-prev.lng)>0)?-INTERSECT_LNG:INTERSECT_LNG}, 0);
-	      if(sec) {
-		_geo[_geocnt].push(L.latLng(sec.lat, sec.lng));
-		_geocnt++;
-		_geo[_geocnt] = [];
-		prev = L.latLng(sec.lat, -sec.lng);
-		_geo[_geocnt].push(prev);
-	      }
-	      else {
-		_geocnt++;
-		_geo[_geocnt] = [];
-		_geo[_geocnt].push(gp);
-		prev = gp;
-		s++;
-	      }
-	    }
-	    else {
-	      _geo[_geocnt].push(gp);
-	      prev = gp;
-	      s++;
-	    }
-	  }
-	}
-	_geocnt++;
+      for (poly = 0; poly < latlngs.length; poly++) {
+        _geo[_geocnt] = [];
+        for (points = 0; points < (latlngs[poly].length - 1); points++) {
+          var inverse = this._vincenty_inverse(L.latLng(latlngs[poly][points]), L.latLng(latlngs[poly][points + 1]));
+          var prev = L.latLng(latlngs[poly][points]);
+          _geo[_geocnt].push(prev);
+          for (s = 1; s <= this.options.steps;) {
+            var direct = this._vincenty_direct(L.latLng(latlngs[poly][points]), inverse.initialBearing, inverse.distance / this.options.steps * s, this.options.wrap);
+            var gp = L.latLng(direct.lat, direct.lng);
+            if (Math.abs(gp.lng - prev.lng) > 180) {
+              var sec = this._intersection(L.latLng(latlngs[poly][points]), inverse.initialBearing, {
+                lat: -89,
+                lng: ((gp.lng - prev.lng) > 0) ? -INTERSECT_LNG : INTERSECT_LNG
+              }, 0);
+              if (sec) {
+                _geo[_geocnt].push(L.latLng(sec.lat, sec.lng));
+                _geocnt++;
+                _geo[_geocnt] = [];
+                prev = L.latLng(sec.lat, -sec.lng);
+                _geo[_geocnt].push(prev);
+              } else {
+                _geocnt++;
+                _geo[_geocnt] = [];
+                _geo[_geocnt].push(gp);
+                prev = gp;
+                s++;
+              }
+            } else {
+              _geo[_geocnt].push(gp);
+              prev = gp;
+              s++;
+            }
+          }
+        }
+        _geocnt++;
       }
       return _geo;
     },
@@ -172,47 +187,50 @@ L.Geodesic = L.Polyline.extend({
     * @param {Object} latlngs - One or more polylines as an array. See Leaflet doc about Polyline
     * @returns (Object} An array of arrays of geographical points.
     */
-    _generate_GeodesicDashed: function (latlngs) {
-      var _geo = [], _geocnt=0, s, poly, points;
-//      _geo = latlngs;		// bypass
+    _generate_GeodesicDashed: function(latlngs) {
+      var _geo = [],
+        _geocnt = 0,
+        s, poly, points;
+      //      _geo = latlngs;		// bypass
 
-      for(poly=0; poly<latlngs.length;poly++) {
-	_geo[_geocnt] = [];
-	for(points=0;points<(latlngs[poly].length-1);points++) {
-	  var inverse = this._vincenty_inverse(L.latLng(latlngs[poly][points]), L.latLng(latlngs[poly][points+1]));
-	  var prev = L.latLng(latlngs[poly][points]);
-	  _geo[_geocnt].push(prev);
-	  for(s=1; s<=this.options.steps; ) {
-	    var direct = this._vincenty_direct(L.latLng(latlngs[poly][points]), inverse.initialBearing, inverse.distance/this.options.steps*s-inverse.distance/this.options.steps*(1-this.options.dash), this.options.wrap);
-	    var gp = L.latLng(direct.lat, direct.lng);
-	    if(Math.abs(gp.lng-prev.lng) > 180) {
-	      var sec = this._intersection(L.latLng(latlngs[poly][points]), inverse.initialBearing, {lat: -89, lng:((gp.lng-prev.lng)>0)?-INTERSECT_LNG:INTERSECT_LNG}, 0);
-	      if(sec) {
-		_geo[_geocnt].push(L.latLng(sec.lat, sec.lng));
-		_geocnt++;
-		_geo[_geocnt] = [];
-		prev = L.latLng(sec.lat, -sec.lng);
-		_geo[_geocnt].push(prev);
-	      }
-	      else {
-		_geocnt++;
-		_geo[_geocnt] = [];
-		_geo[_geocnt].push(gp);
-		prev = gp;
-		s++;
-	      }
-	    }
-	    else {
-	      _geo[_geocnt].push(gp);
-	      _geocnt++;
-	      var direct2 = this._vincenty_direct(L.latLng(latlngs[poly][points]), inverse.initialBearing, inverse.distance/this.options.steps*s, this.options.wrap);
-	      _geo[_geocnt] = [];
-	      _geo[_geocnt].push(L.latLng(direct2.lat, direct2.lng));
-	      s++;
-	    }
-	  }
-	}
-	_geocnt++;
+      for (poly = 0; poly < latlngs.length; poly++) {
+        _geo[_geocnt] = [];
+        for (points = 0; points < (latlngs[poly].length - 1); points++) {
+          var inverse = this._vincenty_inverse(L.latLng(latlngs[poly][points]), L.latLng(latlngs[poly][points + 1]));
+          var prev = L.latLng(latlngs[poly][points]);
+          _geo[_geocnt].push(prev);
+          for (s = 1; s <= this.options.steps;) {
+            var direct = this._vincenty_direct(L.latLng(latlngs[poly][points]), inverse.initialBearing, inverse.distance / this.options.steps * s - inverse.distance / this.options.steps * (1 - this.options.dash), this.options.wrap);
+            var gp = L.latLng(direct.lat, direct.lng);
+            if (Math.abs(gp.lng - prev.lng) > 180) {
+              var sec = this._intersection(L.latLng(latlngs[poly][points]), inverse.initialBearing, {
+                lat: -89,
+                lng: ((gp.lng - prev.lng) > 0) ? -INTERSECT_LNG : INTERSECT_LNG
+              }, 0);
+              if (sec) {
+                _geo[_geocnt].push(L.latLng(sec.lat, sec.lng));
+                _geocnt++;
+                _geo[_geocnt] = [];
+                prev = L.latLng(sec.lat, -sec.lng);
+                _geo[_geocnt].push(prev);
+              } else {
+                _geocnt++;
+                _geo[_geocnt] = [];
+                _geo[_geocnt].push(gp);
+                prev = gp;
+                s++;
+              }
+            } else {
+              _geo[_geocnt].push(gp);
+              _geocnt++;
+              var direct2 = this._vincenty_direct(L.latLng(latlngs[poly][points]), inverse.initialBearing, inverse.distance / this.options.steps * s, this.options.wrap);
+              _geo[_geocnt] = [];
+              _geo[_geocnt].push(L.latLng(direct2.lat, direct2.lng));
+              s++;
+            }
+          }
+        }
+        _geocnt++;
       }
       return _geo;
     },
@@ -228,52 +246,59 @@ L.Geodesic = L.Polyline.extend({
     * @returns (Object} Object including point (destination point), finalBearing.
     */
 
-    _vincenty_direct : function (p1, initialBearing, distance, wrap) {
-      var φ1 = p1.lat.toRadians(), λ1 = p1.lng.toRadians();
+    _vincenty_direct: function(p1, initialBearing, distance, wrap) {
+      var φ1 = p1.lat.toRadians(),
+        λ1 = p1.lng.toRadians();
       var α1 = initialBearing.toRadians();
       var s = distance;
 
-      var a = this.datum.ellipsoid.a, b = this.datum.ellipsoid.b, f = this.datum.ellipsoid.f;
+      var a = this.datum.ellipsoid.a,
+        b = this.datum.ellipsoid.b,
+        f = this.datum.ellipsoid.f;
 
       var sinα1 = Math.sin(α1);
       var cosα1 = Math.cos(α1);
 
-      var tanU1 = (1-f) * Math.tan(φ1), cosU1 = 1 / Math.sqrt((1 + tanU1*tanU1)), sinU1 = tanU1 * cosU1;
+      var tanU1 = (1 - f) * Math.tan(φ1),
+        cosU1 = 1 / Math.sqrt((1 + tanU1 * tanU1)),
+        sinU1 = tanU1 * cosU1;
       var σ1 = Math.atan2(tanU1, cosα1);
       var sinα = cosU1 * sinα1;
-      var cosSqα = 1 - sinα*sinα;
-      var uSq = cosSqα * (a*a - b*b) / (b*b);
-      var A = 1 + uSq/16384*(4096+uSq*(-768+uSq*(320-175*uSq)));
-      var B = uSq/1024 * (256+uSq*(-128+uSq*(74-47*uSq)));
+      var cosSqα = 1 - sinα * sinα;
+      var uSq = cosSqα * (a * a - b * b) / (b * b);
+      var A = 1 + uSq / 16384 * (4096 + uSq * (-768 + uSq * (320 - 175 * uSq)));
+      var B = uSq / 1024 * (256 + uSq * (-128 + uSq * (74 - 47 * uSq)));
 
-      var σ = s / (b*A), σʹ, iterations = 0;
+      var σ = s / (b * A),
+        σʹ, iterations = 0;
       do {
-	  var cos2σM = Math.cos(2*σ1 + σ);
-	  var sinσ = Math.sin(σ);
-	  var cosσ = Math.cos(σ);
-	  var Δσ = B*sinσ*(cos2σM+B/4*(cosσ*(-1+2*cos2σM*cos2σM)-
-	      B/6*cos2σM*(-3+4*sinσ*sinσ)*(-3+4*cos2σM*cos2σM)));
-	  σʹ = σ;
-	  σ = s / (b*A) + Δσ;
-      } while (Math.abs(σ-σʹ) > 1e-12 && ++iterations);
+        var cos2σM = Math.cos(2 * σ1 + σ);
+        var sinσ = Math.sin(σ);
+        var cosσ = Math.cos(σ);
+        var Δσ = B * sinσ * (cos2σM + B / 4 * (cosσ * (-1 + 2 * cos2σM * cos2σM) -
+          B / 6 * cos2σM * (-3 + 4 * sinσ * sinσ) * (-3 + 4 * cos2σM * cos2σM)));
+        σʹ = σ;
+        σ = s / (b * A) + Δσ;
+      } while (Math.abs(σ - σʹ) > 1e-12 && ++iterations);
 
-      var x = sinU1*sinσ - cosU1*cosσ*cosα1;
-      var φ2 = Math.atan2(sinU1*cosσ + cosU1*sinσ*cosα1, (1-f)*Math.sqrt(sinα*sinα + x*x));
-      var λ = Math.atan2(sinσ*sinα1, cosU1*cosσ - sinU1*sinσ*cosα1);
-      var C = f/16*cosSqα*(4+f*(4-3*cosSqα));
-      var L = λ - (1-C) * f * sinα *
-	  (σ + C*sinσ*(cos2σM+C*cosσ*(-1+2*cos2σM*cos2σM)));
+      var x = sinU1 * sinσ - cosU1 * cosσ * cosα1;
+      var φ2 = Math.atan2(sinU1 * cosσ + cosU1 * sinσ * cosα1, (1 - f) * Math.sqrt(sinα * sinα + x * x));
+      var λ = Math.atan2(sinσ * sinα1, cosU1 * cosσ - sinU1 * sinσ * cosα1);
+      var C = f / 16 * cosSqα * (4 + f * (4 - 3 * cosSqα));
+      var L = λ - (1 - C) * f * sinα *
+        (σ + C * sinσ * (cos2σM + C * cosσ * (-1 + 2 * cos2σM * cos2σM)));
 
-      if(wrap)
-        var λ2 = (λ1+L+3*Math.PI)%(2*Math.PI) - Math.PI; // normalise to -180...+180
+      if (wrap)
+        var λ2 = (λ1 + L + 3 * Math.PI) % (2 * Math.PI) - Math.PI; // normalise to -180...+180
       else
-        var λ2 = (λ1+L); // do not normalize
+        var λ2 = (λ1 + L); // do not normalize
 
       var revAz = Math.atan2(sinα, -x);
 
-      return {lat: φ2.toDegrees(),
-	      lng: λ2.toDegrees(),
-	      finalBearing: revAz.toDegrees()
+      return {
+        lat: φ2.toDegrees(),
+        lng: λ2.toDegrees(),
+        finalBearing: revAz.toDegrees()
       };
     },
 
