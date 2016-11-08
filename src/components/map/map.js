@@ -76,8 +76,6 @@ class Map extends React.Component {
       }
     });
 
-
-
     _.forOwn(aggregatedLocations, (value, key) => {
       L.circleMarker([
         this.props.metadata.geo.country[key].latitude,
@@ -132,7 +130,10 @@ class Map extends React.Component {
 
       // remove me! temporary random colors in lieu of scale.
 
-      // add a polyline to the map for current country pair iteratee
+      /*
+        add a polyline to the map for current country pair iteratee
+        store the computation. access _latlngs to show where each segment is on the map
+      */
       const geodesicPath = L.geodesic([[start,end]], {
         // stroke:	value,
         // radius: value,
@@ -146,28 +147,42 @@ class Map extends React.Component {
         // fillOpacity:
       }).addTo(this.state.map)
 
+      console.log(geodesicPath)
+
+      if (geodesicPath._latlngs[0].length < 25) {
+        console.log(key, geodesicPath._latlngs[0].length)
+      }
+
       // this decorator adds arrows to the lines.
       // decorator docs: https://github.com/bbecquet/Leaflet.PolylineDecorator
-      L.polylineDecorator(geodesicPath._latlngs[0], {
-        patterns: [{
-          offset: 25,
-          repeat: 50,
-          symbol: L.Symbol.arrowHead({
-            pixelSize: 8,
-            pathOptions: {
-              fillOpacity: .5,
-              color: this.props.colorScale(countries[0]),
-              weight: 0
-            }
-          })
-        }]
-      }).addTo(this.state.map);
+      for (let i = 0; i < geodesicPath._latlngs.length; i++) {
+        L.polylineDecorator(geodesicPath._latlngs[i], {
+          patterns: [{
+            offset: 25,
+            repeat: 50,
+            symbol: L.Symbol.arrowHead({
+              pixelSize: 8,
+              pathOptions: {
+                fillOpacity: .5,
+                color: this.props.colorScale(countries[0]),
+                weight: 0
+              }
+            })
+          }]
+        }).addTo(this.state.map);
+      }
 
     });
   }
   okToRender() {
-    /* this is going to expand, ie., do we have a new dataset, so breaking into a function */
+    /* this is going to expand so breaking into a function */
+
     let ok = false;
+
+    /*
+      do we have a new dataset
+      is our dataset shorter than last time (filtered because of date slider or other control)
+    */
 
     if (
       this.props.nodes &&
