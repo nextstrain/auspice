@@ -153,6 +153,9 @@ class Map extends React.Component {
         console.log(key, geodesicPath._latlngs[0].length)
       }
 
+      /* this will need to be scaled if transmissions is high */
+      const arrowSizeMultiplier = value > 1 ? value * 2 : 0;
+
       // this decorator adds arrows to the lines.
       // decorator docs: https://github.com/bbecquet/Leaflet.PolylineDecorator
       for (let i = 0; i < geodesicPath._latlngs.length; i++) {
@@ -161,7 +164,7 @@ class Map extends React.Component {
             offset: 25,
             repeat: 50,
             symbol: L.Symbol.arrowHead({
-              pixelSize: 8,
+              pixelSize: 8 + arrowSizeMultiplier,
               pathOptions: {
                 fillOpacity: .5,
                 color: this.props.colorScale(countries[0]),
@@ -185,6 +188,7 @@ class Map extends React.Component {
     */
 
     if (
+      this.props.metadata &&
       this.props.nodes &&
       this.state.map &&
       !this.state.tips &&
@@ -199,7 +203,7 @@ class Map extends React.Component {
     if (this.okToRender()) {
       this.addAllTipsToMap();
       this.addTransmissionEventsToMap();
-      // don't redraw - need to seperately handle virus change redraw
+      // don't redraw on every rerender - need to seperately handle virus change redraw
       this.setState({tips: true});
     }
 
