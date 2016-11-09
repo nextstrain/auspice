@@ -259,7 +259,6 @@ class App extends React.Component {
   }
 
   tipRadii() {
-    console.log("tipRadii");
     const selItem = this.props.selectedLegendItem;
     if (selItem && this.state.nodeColorAttr){
       const legendMap = this.state.colorScale.continuous
