@@ -64,12 +64,22 @@ class TreeView extends React.Component {
     }
   }
 
+  componentDidMount(){
+    console.log("TreeView.componentDidMount");
+    const tree = (this.state.tree)
+                  ? this.state.tree
+                  : this.makeTree(this.props.nodes, this.props.layout, this.props.distance);
+      this.setState({
+        tree: tree
+      });
+  }
+
   componentWillReceiveProps(nextProps) {
     // Do we have a tree to draw? if yes, check whether it needs to be redrawn
     const dt=1000;
     const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree)
                   ? this.state.tree
-                  : this.makeTree(nextProps.nodes, this.layout, this.distance);
+                  : this.makeTree(nextProps.nodes, this.props.layout, this.props.distance);
     if (!(nextProps.datasetGuid && nextProps.nodes)){
       this.setState({okToDraw: false});
     } else if ((nextProps.datasetGuid !== this.props.datasetGuid)
@@ -213,11 +223,22 @@ class TreeView extends React.Component {
                        top: 50, pointerEvents: "none"}}>
             <Legend colorScale={this.props.colorScale}/>
           </svg>
+          <Viewer
+            width={this.state.width}
+            height={this.treePlotHeight(this.state.width)}
+            value={this.state.value}
+            tool={this.state.tool}
+            detectPinch={false}
+            detectAutoPan={false}
+            background="#FFF"
+            onChange={this.handleChange.bind(this)}
+            onClick={this.handleClick.bind(this)}>
             <svg style={{pointerEvents: "auto"}}
                  width={globals.width}
                  height={this.treePlotHeight(globals.width)}
                  id="treeplot">
             </svg>
+          </Viewer>
           <svg width={50} height={130}
                style={{position: "absolute", right: 20, bottom: 20}}>
               <defs>
