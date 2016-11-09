@@ -1,7 +1,7 @@
 import d3 from "d3";
 
 var PhyloTree = function (treeJson) {
-    console.log("instantiating tree");
+    console.log("PhyloTree: instantiating");
     this.tree = d3.layout.tree();
     this.nodes = this.tree.nodes(treeJson).map(function(d){return {n:d, x:0, y:0};});
     this.nodes[0].n.parent = this.nodes[0].n;
@@ -20,7 +20,7 @@ var PhyloTree = function (treeJson) {
 };
 
 PhyloTree.prototype.setDistance = function(attr){
-    console.log("distance", attr);
+    console.log("PhyloTree.setDistance", attr);
     if (typeof attr!=="undefined" && attr===this.distance){
         this.nodes.forEach(function(d){d.update=false});
         return;
@@ -77,8 +77,9 @@ PhyloTree.prototype.mapToScreen = function(){
     this.nodes.forEach(function(d){d.yTip = tmp_yScale(d.y)});
     this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
     this.nodes.forEach(function(d){d.yBase = tmp_yScale(d.py)});
+    console.log("PhyloTree.mapToScreen", this.layout,
+                "xScale domain", this.xScale.domain());
     if (this.layout==="rectangular"){
-        console.log("setLayout", "rectangular", this.xScale.domain());
         this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])});
         this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])});
         this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
@@ -87,7 +88,6 @@ PhyloTree.prototype.mapToScreen = function(){
                                                  " L "+d.xTip.toString()+","+d.cBarEnd.toString();})
     } else if (this.layout==="radial"){
         const offset = this.nodes[0].depth;
-        console.log("setLayout", "rectangular", this.xScale.domain());
         this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])});
         this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])});
         this.nodes.forEach(function(d){
@@ -286,17 +286,17 @@ PhyloTree.prototype.clearSVG = function (){
     this.svg.selectAll('.branch').remove();
 };
 
-PhyloTree.prototype.render = function(svg, layout, distance) {
+PhyloTree.prototype.render = function(svg, layout, distance, margins) {
     this.svg = svg;
+    console.log("PhyloTree.render");
     this.clearSVG();
-    this.setScales({left:10, right:100, top:10, bottom:10});
+    this.setScales(margins||{left:100, right:100, top:10, bottom:10});
     this.setDistance(distance);
     this.setLayout(layout);
     this.mapToScreen();
     this.branches();
     this.tips();
     this.updateGeometry(10);
-    console.log("render done");
 };
 
 export default PhyloTree;

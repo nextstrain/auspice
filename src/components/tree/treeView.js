@@ -1,15 +1,8 @@
 import React from "react";
 import Radium from "radium";
-// import _ from "lodash";
-// import Flex from './framework/flex';
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
-// import { visualization } from "../../visualization/visualization";
 import d3 from "d3";
-import { processNodes, calcLayouts } from "../../util/processNodes";
+import { processNodes } from "../../util/processNodes";
 import * as globals from "../../util/globals";
-import Tree from "./tree";
-import Grid from "./grid";
 import Card from "../framework/card";
 import Legend from "../controls/legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
@@ -46,14 +39,11 @@ class TreeView extends React.Component {
   }
 
   makeTree(nodes){
-    console.log("Did Mount", nodes, this.state);
+    console.log("TreeView.makeTree");
     if (nodes) {
       var myTree = new PhyloTree(nodes[0]);
       var treeplot = d3.select("#treeplot");
-      //treeplot.on("click", function(d){myTree.updateDistance(myTree.distance==="div"?"num_date":"div", 1000);});
-      treeplot.on("click", function(d){myTree.updateLayout(myTree.layout==="rectangular"?"radial":"rectangular", 1000);});
-      console.log("call render");
-      myTree.render(treeplot, "rectangular", "div");
+      myTree.render(treeplot, this.props.layout, this.props.distanceMeasure);
       return myTree;
     }else{
       return null;
@@ -63,6 +53,7 @@ class TreeView extends React.Component {
   componentWillMount() {
     if (this.state.currentDatasetGuid !== this.props.datasetGuid) {
       const scales = this.updateScales(this.props.nodes);
+      console.log("componentWillMount, width:", globals.width);
       this.setState({
         okToDraw: true,
         currentDatasetGuid: this.props.datasetGuid,
@@ -97,7 +88,6 @@ class TreeView extends React.Component {
     }
     if (tree){
       if (nextProps.nodeColor){
-        console.log(nextProps.nodeColor);
         tree.updateStyleArray(".tip", "fill", nextProps.nodeColor, dt);
       }
       if (this.props.layout!==nextProps.layout){
@@ -217,10 +207,45 @@ class TreeView extends React.Component {
     return (
       <div>
         <Card title="Phylogeny">
-            <div class="treeplot-container">
-              <svg width={800} height={500} id="treeplot">
-              </svg>
-            </div>
+          <p style={{position: "absolute", right: 50, bottom: 150, color: "red", fontWeight: 700 }}> {this.state.scaleFactor} </p>
+          <svg width={300} height={300}
+               style={{position: "absolute", left: 13,
+                       top: 50, pointerEvents: "none"}}>
+            <Legend colorScale={this.props.colorScale}/>
+          </svg>
+            <svg style={{pointerEvents: "auto"}}
+                 width={globals.width}
+                 height={this.treePlotHeight(globals.width)}
+                 id="treeplot">
+            </svg>
+          <svg width={50} height={130}
+               style={{position: "absolute", right: 20, bottom: 20}}>
+              <defs>
+                <filter id="dropshadow" height="130%">
+                  <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+                  <feOffset dx="2" dy="2" result="offsetblur"/>
+                  <feComponentTransfer>
+                    <feFuncA type="linear" slope="0.2"/>
+                  </feComponentTransfer>
+                  <feMerge>
+                    <feMergeNode/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+            <ZoomInIcon
+              handleClick={this.handleIconClick("zoom-in")}
+              active={true}
+              x={10}
+              y={50}
+              />
+            <ZoomOutIcon
+              handleClick={this.handleIconClick("zoom-out")}
+              active={true}
+              x={10}
+              y={90}
+              />
+          </svg>
         </Card>
       </div>
     );
