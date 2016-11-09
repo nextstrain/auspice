@@ -245,6 +245,7 @@ class App extends React.Component {
    *****************************************/
   determineLegendMatch(selectedLegendItem, nodeAttr, legendBoundsMap) {
     let bool;
+    console.log("determineLegendMatch");
     // equates a tip and a legend element
     // exact match is required for categorical qunantities such as genotypes, regions
     // continuous variables need to fall into the interal (lower_bound[leg], leg]
@@ -258,6 +259,7 @@ class App extends React.Component {
   }
 
   tipRadii() {
+    console.log("tipRadii");
     const selItem = this.props.selectedLegendItem;
     if (selItem && this.state.nodeColorAttr){
       const legendMap = this.state.colorScale.continuous
