@@ -19,6 +19,10 @@ var PhyloTree = function (treeJson) {
         });
 };
 
+
+/*
+ * calculate tree layout, scales, and updating of those
+ */
 PhyloTree.prototype.setDistance = function(attr){
     console.log("PhyloTree.setDistance", attr);
     if (typeof attr!=="undefined" && attr===this.distance){
@@ -129,35 +133,23 @@ PhyloTree.prototype.setScales = function(margins){
     this.yScale.range([margins["top"]||0, height - (margins["bottom"]||0)]);
 };
 
-PhyloTree.prototype.tips = function(){
-    this.tipElements = this.svg.append("g").selectAll('.tip')
-        .data(this.nodes.filter(function (d){return d.terminal;}))
-        .enter()
-        .append("circle")
-        .attr("class", "tip")
-        .attr("id", function(d){return d.n.clade;})
-        .attr("cx", function(d){return d.xTip;})
-        .attr("cy", function(d){return d.yTip;})
-        .attr("r", function(d){return d.r||5;})
-        .style("fill",function (d) {return d.fill||"#CCC";})
-        .style("stroke",function (d) {return d.stroke||"#AAA";})
-        .style("stroke-width", function(d){return d.strokeWidth||2;});
+PhyloTree.prototype.updateDistance = function(attr,dt){
+    this.setDistance(attr);
+    this.setLayout(this.layout);
+    this.mapToScreen();
+    this.updateGeometry(dt);
 };
 
-PhyloTree.prototype.branches = function(){
-    this.branches = this.svg.append("g").selectAll('.branch')
-        .data(this.nodes)
-        .enter()
-        .append("path")
-        .attr("class", "branch")
-        .attr("id", function(d){return d.n.clade;})
-        .attr("d", function(d){return d.branch;})
-        .style("stroke",function (d) {return d.stroke||"#AAA";})
-        .style("fill","none")
-        .style("stroke-width", function(d){return d.strokeWidth||2;});
+PhyloTree.prototype.updateLayout = function(layout,dt){
+    this.setLayout(layout);
+    this.mapToScreen();
+    this.updateGeometryFade(dt);
 };
 
 
+/*
+ * basic update of positions of elements in tree
+ */
 PhyloTree.prototype.updateGeometryFade = function(dt){
     this.svg.selectAll('.branch').filter(function (d) {return d.update;})
         .transition().duration(dt*0.5)
@@ -202,31 +194,12 @@ PhyloTree.prototype.updateGeometry = function(dt){
         .attr("d", function(d){return d.branch;});
 };
 
-
-PhyloTree.prototype.updateDistance = function(attr,dt){
-    this.setDistance(attr);
-    this.setLayout(this.layout);
-    this.mapToScreen();
-    this.updateGeometry(dt);
-};
-
-PhyloTree.prototype.updateLayout = function(layout,dt){
-    this.setLayout(layout);
-    this.mapToScreen();
-    this.updateGeometryFade(dt);
-};
-
+/*
+ * update tree element style of attributes
+ */
 PhyloTree.prototype.updateAttribute= function(treeElem, attr, callback, dt){
-    this.nodes.forEach(function(d){
-        const newAttr = callback(d);
-        if (newAttr===d[attr]){
-            d.update=false;
-        }else{
-            d[attr]=newAttr;
-            d.update=true;
-        }
-    });
-    this.redrawAttribute(treeElem, attr, dt);
+    this.updateAttributeArray(treeElem, attr,
+        this.nodes.map(function(d){return callback(d);}), dt);
 };
 
 PhyloTree.prototype.updateAttributeArray= function(treeElem, attr, attr_array, dt){
@@ -242,7 +215,6 @@ PhyloTree.prototype.updateAttributeArray= function(treeElem, attr, attr_array, d
     this.redrawAttribute(treeElem, attr, dt);
 };
 
-
 PhyloTree.prototype.redrawAttribute = function(treeElem, attr, dt){
     this.svg.selectAll(treeElem).filter(function (d) {return d.update;})
         .transition().duration(dt)
@@ -250,16 +222,8 @@ PhyloTree.prototype.redrawAttribute = function(treeElem, attr, dt){
 };
 
 PhyloTree.prototype.updateStyle= function(treeElem, styleElem, callback, dt){
-    this.nodes.forEach(function(d){
-        const newStyle = callback(d);
-        if (newStyle===d[styleElem]){
-            d.update=false;
-        }else{
-            d[styleElem]=newStyle;
-            d.update=true;
-        }
-    });
-    this.redrawStyle(treeElem, styleElem, dt);
+    this.updateStyleArray(treeElem, attr,
+        this.nodes.map(function(d){return callback(d);}), dt);
 };
 
 PhyloTree.prototype.updateStyleArray= function(treeElem, styleElem, style_array, dt){
@@ -281,14 +245,45 @@ PhyloTree.prototype.redrawStyle = function(treeElem, styleElem, dt){
         .style(styleElem, function(d){return d[styleElem];});
 };
 
+/*
+ * add and remove elements from tree, initial render
+ */
 PhyloTree.prototype.clearSVG = function (){
     this.svg.selectAll('.tip').remove();
     this.svg.selectAll('.branch').remove();
 };
 
+PhyloTree.prototype.tips = function(){
+    this.tipElements = this.svg.append("g").selectAll('.tip')
+        .data(this.nodes.filter(function (d){return d.terminal;}))
+        .enter()
+        .append("circle")
+        .attr("class", "tip")
+        .attr("id", function(d){return d.n.clade;})
+        .attr("cx", function(d){return d.xTip;})
+        .attr("cy", function(d){return d.yTip;})
+        .attr("r", function(d){return d.r||5;})
+        .style("fill",function (d) {return d.fill||"#CCC";})
+        .style("stroke",function (d) {return d.stroke||"#AAA";})
+        .style("stroke-width", function(d){return d.strokeWidth||2;});
+};
+
+PhyloTree.prototype.branches = function(){
+    this.branches = this.svg.append("g").selectAll('.branch')
+        .data(this.nodes)
+        .enter()
+        .append("path")
+        .attr("class", "branch")
+        .attr("id", function(d){return d.n.clade;})
+        .attr("d", function(d){return d.branch;})
+        .style("stroke",function (d) {return d.stroke||"#AAA";})
+        .style("fill","none")
+        .style("stroke-width", function(d){return d.strokeWidth||2;});
+};
+
 PhyloTree.prototype.render = function(svg, layout, distance, margins) {
     this.svg = svg;
-    console.log("PhyloTree.render");
+    console.log("PhyloTree.render", this.svg);
     this.clearSVG();
     this.setScales(margins||{left:100, right:100, top:10, bottom:10});
     this.setDistance(distance);
