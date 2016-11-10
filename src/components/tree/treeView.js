@@ -10,14 +10,14 @@ import ZoomInIcon from "../framework/zoom-in-icon";
 import MoveIcon from "../framework/move-icon";
 import PhyloTree from "../../util/phyloTree";
 import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
-import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration} from "../util/globals";
+import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration} from "../../util/globals";
 
-const arrayEquality = function(a,b){
+const arrayInEquality = function(a,b){
   if (a&&b){
     const eq = a.map((d,i)=>d!==b[i]);
     return eq.some((d)=>d);
   }else{
-    return false;
+    return true;
   }
 };
 
@@ -96,17 +96,20 @@ class TreeView extends React.Component {
     }
     if (tree){
       if (nextProps.nodeColor &&
-          arrayEquality(nextProps.nodeColor, this.props.nodeColor)){
+          arrayInEquality(nextProps.nodeColor,
+                         this.props.nodeColor)){
         console.log("updateColor", this.props.layout, nextProps.layout);
         tree.updateStyleArray(".tip", "fill", nextProps.nodeColor, fastTransitionDuration);
       }
-      if (nextProps.tipRadii&&
-          arrayEquality(nextProps.tipRadii, this.props.tipRadii)) {
+      if (nextProps.tipRadii &&
+          arrayInEquality(nextProps.tipRadii,
+                         this.props.tipRadii)) {
         console.log("updateRadii", this.props.layout, nextProps.layout);
         tree.updateAttributeArray(".tip", "r", nextProps.tipRadii, fastTransitionDuration);
       }
-      if (nextProps.tipVisibility&&
-          arrayEquality(nextProps.tipVisibility, this.props.tipVisibility)){
+      if (nextProps.tipVisibility &&
+          arrayInEquality(nextProps.tipVisibility,
+                         this.props.tipVisibility)) {
         console.log("updateVisibility");
         tree.updateStyleArray(".tip", "visibility", nextProps.tipVisibility, 0);
       }
