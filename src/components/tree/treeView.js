@@ -61,14 +61,11 @@ class TreeView extends React.Component {
 
   componentWillMount() {
     if (this.state.currentDatasetGuid !== this.props.datasetGuid) {
-      const scales = this.updateScales(this.props.nodes);
       console.log("componentWillMount, width:", globals.width);
       this.setState({
         okToDraw: true,
         currentDatasetGuid: this.props.datasetGuid,
         width: globals.width,
-        xScale: scales.xScale,
-        yScale: scales.yScale
       });
     }
   }
@@ -83,14 +80,11 @@ class TreeView extends React.Component {
     } else if ((nextProps.datasetGuid !== this.props.datasetGuid)
                || (nextProps.layout !== this.props.layout)
                || (nextProps.distanceMeasure !== this.props.distanceMeasure)) {
-      const scales = this.updateScales(nextProps.nodes, nextProps.layout, nextProps.distanceMeasure);
       console.log("setting ok to draw");
       this.setState({
         okToDraw: true,
         currentDatasetGuid: nextProps.datasetGuid,
         width: globals.width,
-        xScale: scales.xScale,
-        yScale: scales.yScale,
         tree: tree
       });
     }
@@ -124,60 +118,8 @@ class TreeView extends React.Component {
     }
   }
 
-  updateScales(nodes, layout_in, distanceMeasure_in) {
-    const layout = (layout_in) ? layout_in : "rectangular";
-    const distanceMeasure = (distanceMeasure_in) ? distanceMeasure_in : "div";
-
-    const xValues = nodes.map((node) => {
-      return +node.geometry[distanceMeasure][layout].xVal;
-    });
-
-    const yValues = nodes.map((node) => {
-      return +node.geometry[distanceMeasure][layout].yVal;
-    });
-
-    const height = this.treePlotHeight(globals.width);
-    const minDim = ((globals.width<height) ? globals.width : height) - 2 * globals.margin;
-    const xScale = d3.scale.linear().range([globals.margin, globals.width - globals.margin]);
-    const yScale = d3.scale.linear().range([globals.margin, height - globals.margin ]);
-
-    if (layout === "radial") {
-      xScale.domain([-d3.max(xValues), d3.max(xValues)]);
-      yScale.domain([-d3.max(xValues), d3.max(xValues)]);
-      xScale.range([globals.width - minDim - globals.margin, globals.width - globals.margin]);
-      yScale.range([height - minDim - globals.margin, height - globals.margin]);
-    } else {
-      xScale.domain([d3.min(xValues), d3.max(xValues)]);
-      yScale.domain([d3.min(yValues), d3.max(yValues)]);
-    }
-
-    return {
-      xScale,
-      yScale
-    };
-
-  }
-
   treePlotHeight(width) {
     return 400 + 0.30 * width;
-  }
-
-  createTree() {
-    /* two svgs! one scales, one doesn't :) */
-    // <svg
-    //   style={{backgroundColor: "#FFFFFF"}}
-    //   width={this.state.width}
-    //   height={this.treePlotHeight(this.state.width)}
-    //
-    //   >
-
-    //
-    // <MoveIcon
-    //   handleClick={this.handleIconClick("pan")}
-    //   active={this.state.tool === "pan"}
-    //   x={10}
-    //   y={10}
-    //   />
   }
 
   handleIconClick(tool) {
@@ -223,9 +165,8 @@ class TreeView extends React.Component {
 
   render() {
     /*
-      1. if we just loaded a new dataset, run setup tree,
-      2. otherwise if we just rescaled, run updatescales,
-      3. otherwise just have components rerender because for instance colorby changed
+      1. set up SVGs
+      2. tree will be added on props loading
     */
     return (
       <div>
