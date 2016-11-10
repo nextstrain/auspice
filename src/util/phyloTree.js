@@ -138,14 +138,111 @@ PhyloTree.prototype.updateDistance = function(attr,dt){
     this.setLayout(this.layout);
     this.mapToScreen();
     this.updateGeometry(dt);
+    this.addGrid(this.layout);
 };
 
 PhyloTree.prototype.updateLayout = function(layout,dt){
     this.setLayout(layout);
     this.mapToScreen();
     this.updateGeometryFade(dt);
+    this.addGrid(layout);
 };
 
+/*
+ * make grid
+ */
+PhyloTree.prototype.addGrid = function(layout) {
+    if (typeof layout==="undefined"){ layout=this.layout;}
+
+    this.svg.selectAll(".majorGrid").remove();
+    this.svg.selectAll(".minorGrid").remove();
+    this.svg.selectAll(".gridTick").remove();
+
+    this.majorGridWidth = 2;
+    this.minorGridWidth = 1;
+    this.gridColor="#AAA";
+
+    const xmin = (this.xScale.domain()[0]>0)?this.xScale.domain()[0]:0.0;
+    const xmax = this.xScale.domain()[1];
+    const offset = layout==="radial"?this.nodes[0].depth:0.0;
+
+    const gridline = function(xScale, yScale, layout){
+        return function(x){
+            const xPos = xScale(x-offset);
+            let tmp_d="";
+            if (layout==="rectangular"){
+              tmp_d = 'M'+xPos.toString() +
+                " " +
+                yScale.range()[0].toString() +
+                " L " +
+                xPos.toString() +
+                " " +
+                yScale.range()[1].toString();
+            }else if (layout==="radial"){
+              tmp_d = 'M '+xPos.toString() +
+                "  " +
+                yScale(0).toString() +
+                " A " +
+                (xPos - xScale(0)).toString() +
+                " " +
+                (yScale(x) - yScale(offset)).toString() +
+                " 0 1 0 " +
+                xPos.toString() +
+                " " +
+                (yScale(0)+0.001).toString();
+            }
+            return tmp_d;
+        };
+    };
+
+    const logRange = Math.floor(Math.log10(xmax - xmin));
+    const roundingLevel = Math.pow(10, logRange);
+    const gridMin = Math.floor((xmin+offset)/roundingLevel)*roundingLevel;
+    const gridPoints = [];
+    for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+0.4; ii++) {
+      if (gridMin + roundingLevel*ii>offset){
+          gridPoints.push(gridMin + roundingLevel*ii);
+      }
+    }
+
+    this.svg.selectAll('.majorGrid').data(gridPoints).enter()
+        .append("path")
+        .attr("d", gridline(this.xScale, this.yScale, layout))
+        .attr("class", "majorGrid")
+        .style("fill", "none")
+        .style("stroke",this.gridColor)
+        .style("stroke-width",this.majorGridWidth);
+
+    const xTextPos = function(xScale, layout){
+        return function(x){return layout==="rectangular" ? xScale(x) : xScale(0);};};
+    const yTextPos = function(yScale, layout){
+        return function(x){ return layout==="rectangular" ? yScale.range()[1]+18 : yScale(x-offset);};};
+    this.svg.selectAll('.gridTick').data(gridPoints).enter()
+        .append("text")
+        .text(function(d){return d.toString();})
+        .attr("class", "gridTick")
+        .style("font-size",12)
+        .style("fill",this.gridColor)
+        .style("text-anchor", this.layout==="rectangular" ? "start" : "end")
+        .attr("x", xTextPos(this.xScale, layout))
+        .attr("y", yTextPos(this.yScale, layout));
+
+    const minorRoundingLevel = roundingLevel / (this.distanceMeasure === "div" ? 5 : 6);
+    const minorGridPoints = [];
+    for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+3; ii++) {
+      if (gridMin + minorRoundingLevel*ii>offset){
+          minorGridPoints.push(gridMin + minorRoundingLevel*ii);
+      }
+    }
+    this.svg.selectAll('.minorGrid').data(minorGridPoints).enter()
+        .append("path")
+        .attr("d", gridline(this.xScale, this.yScale, layout))
+        .attr("class", "minorGrid")
+        .style("fill", "none")
+        .style("stroke",this.gridColor)
+        .style("stroke-width",this.minorGridWidth);
+
+};
 
 /*
  * basic update of positions of elements in tree
@@ -286,12 +383,13 @@ PhyloTree.prototype.render = function(svg, layout, distance, margins) {
     this.svg = svg;
     console.log("PhyloTree.render", this.svg);
     this.clearSVG();
-    this.setScales(margins||{left:100, right:100, top:10, bottom:10});
+    this.setScales(margins||{left:200, right:50, top:50, bottom:50});
     this.setDistance(distance);
     this.setLayout(layout);
     this.mapToScreen();
     this.branches();
     this.tips();
+    this.addGrid();
     this.updateGeometry(10);
 };
 
