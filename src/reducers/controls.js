@@ -23,7 +23,6 @@ const Controls = (state = {
       showBranchLabels: !state.showBranchLabels
     });
   case types.LEGEND_ITEM_MOUSEENTER:
-    console.log("LEGEND_ITEM_MOUSEENTER");
     return Object.assign({}, state, {
       selectedLegendItem: action.data
     });

@@ -61,7 +61,6 @@ class LegendItem extends React.Component {
       <g
         transform={this.props.transform}
         onMouseEnter={() => {
-          console.log("legendiTem.LEGEND_ITEM_MOUSEENTER");
           this.props.dispatch({ type: LEGEND_ITEM_MOUSEENTER,
                                 data: this.props.label });
         }}

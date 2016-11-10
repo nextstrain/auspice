@@ -240,6 +240,7 @@ PhyloTree.prototype.updateStyleArray= function(treeElem, styleElem, style_array,
 };
 
 PhyloTree.prototype.redrawStyle = function(treeElem, styleElem, dt){
+    console.log("redraw",this.nodes.filter(function (d) {return d.update;}).length);
     this.svg.selectAll(treeElem).filter(function (d) {return d.update;})
         .transition().duration(dt)
         .style(styleElem, function(d){return d[styleElem];});

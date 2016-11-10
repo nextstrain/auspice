@@ -10,6 +10,7 @@ import ZoomInIcon from "../framework/zoom-in-icon";
 import MoveIcon from "../framework/move-icon";
 import PhyloTree from "../../util/phyloTree";
 import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
+import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration} from "../util/globals";
 
 const arrayEquality = function(a,b){
   if (a&&b){
@@ -18,7 +19,7 @@ const arrayEquality = function(a,b){
   }else{
     return false;
   }
-}
+};
 
 /*
  * TreeView creates and SVG and scales according to layout
@@ -74,7 +75,6 @@ class TreeView extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     // Do we have a tree to draw? if yes, check whether it needs to be redrawn
-    const dt=1000;
     const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree)
                   ? this.state.tree
                   : this.makeTree(nextProps.nodes, this.layout, this.distance);
@@ -98,12 +98,12 @@ class TreeView extends React.Component {
       if (nextProps.nodeColor &&
           arrayEquality(nextProps.nodeColor, this.props.nodeColor)){
         console.log("updateColor", this.props.layout, nextProps.layout);
-        tree.updateStyleArray(".tip", "fill", nextProps.nodeColor, dt);
+        tree.updateStyleArray(".tip", "fill", nextProps.nodeColor, fastTransitionDuration);
       }
       if (nextProps.tipRadii&&
           arrayEquality(nextProps.tipRadii, this.props.tipRadii)) {
         console.log("updateRadii", this.props.layout, nextProps.layout);
-        tree.updateAttributeArray(".tip", "r", nextProps.tipRadii, dt);
+        tree.updateAttributeArray(".tip", "r", nextProps.tipRadii, fastTransitionDuration);
       }
       if (nextProps.tipVisibility&&
           arrayEquality(nextProps.tipVisibility, this.props.tipVisibility)){
@@ -112,11 +112,11 @@ class TreeView extends React.Component {
       }
       if (this.props.layout!==nextProps.layout){
         console.log("reset layout", this.props.layout, nextProps.layout);
-        tree.updateLayout(nextProps.layout, dt);
+        tree.updateLayout(nextProps.layout, slowTransitionDuration);
       }
       if (this.props.distanceMeasure!==nextProps.distanceMeasure){
         console.log("reset distance", this.props.distanceMeasure, nextProps.distanceMeasure);
-        tree.updateDistance(nextProps.distanceMeasure,dt);
+        tree.updateDistance(nextProps.distanceMeasure, slowTransitionDuration);
       }
     }
   }
@@ -230,7 +230,7 @@ class TreeView extends React.Component {
           <p style={{position: "absolute", right: 50, bottom: 150, color: "red", fontWeight: 700 }}> {this.state.scaleFactor} </p>
           <svg width={300} height={300}
                style={{position: "absolute", left: 13,
-                       top: 50, pointerEvents: "none"}}>
+                       top: 50}}>
             <Legend colorScale={this.props.colorScale}/>
           </svg>
             <svg style={{pointerEvents: "auto"}}
