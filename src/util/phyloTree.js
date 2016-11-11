@@ -160,6 +160,7 @@ PhyloTree.prototype.removeGrid = function () {
 }
 
 PhyloTree.prototype.addGrid = function(layout) {
+    console.log("adding grid");
     this.removeGrid();
     if (typeof layout==="undefined"){ layout=this.layout;}
 

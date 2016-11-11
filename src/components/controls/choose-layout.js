@@ -1,57 +1,21 @@
 import React from "react";
 import Radium from "radium";
-// import _ from "lodash";
-//import Flex from "../framework/flex";
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
 import RectangleTreeLayout from "../framework/svg-tree-layout-rectangle";
 import RadialTreeLayout from "../framework/svg-tree-layout-radial";
 import queryString from "query-string";
+import {materialButton} from "../../globalStyles";
 
-// @connect(state => {
-//   return state.FOO;
-// })
 @Radium
 class ChooseLayout extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-    };
-  }
-  static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object,
-    // foo: React.PropTypes.string
-  }
-  static defaultProps = {
-    // foo: "bar"
-  }
   getStyles() {
     return {
       container: {
-        marginTop: 20
-      },
-      button: {
-        border: "1px solid rgb(130,130,130)",
-        backgroundColor: "white",
-        borderRadius: 2,
-        color: "rgb(130,130,130)",
-        height: 40,
-        width: 140,
-        cursor: "pointer",
-        marginRight: 20,
-        ":hover": {
-          backgroundColor: "rgb(245,245,245)"
-        }
+        marginBottom: 10
       },
       title: {
         marginLeft: 7,
         position: "relative",
-        top: -5,
+        top: -7,
         fontWeight: 300
       }
     };
@@ -75,14 +39,14 @@ class ChooseLayout extends React.Component {
       <div style={styles.container}>
         <button
           key={1}
-          style={styles.button}
+          style={materialButton}
           onClick={() => { this.setLayoutQueryParam("rectangular"); }}>
           <RectangleTreeLayout width={25} stroke="rgb(130,130,130)"/>
           <span style={styles.title}> {"rectangular"} </span>
         </button>
         <button
           key={2}
-          style={styles.button}
+          style={materialButton}
           onClick={() => { this.setLayoutQueryParam("radial"); }}>
           <RadialTreeLayout width={25} stroke="rgb(130,130,130)"/>
           <span style={styles.title}> {"radial"} </span>

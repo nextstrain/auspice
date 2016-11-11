@@ -191,24 +191,24 @@ class App extends React.Component {
     if (this.props.tree.nodes){
       const filter_pairs = [];
       if (this.props.metadata && this.props.metadata.metadata) {
-        for (const filter in this.props.metadata.metadata.controls){ // possible race condition with tree?
+        for (const filter in this.props.metadata.metadata.controls) { // possible race condition with tree?
           const tmp = this.parseFilterQuery(this.state.location.query[filter] || "");
-          for (let ii=0; ii<tmp.filters.length; ii+=1) {
+          for (let ii = 0; ii < tmp.filters.length; ii += 1) {
             if (tmp.filters[ii] && tmp.fields[ii]){
               filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
             }
           }
         }
       }
-      if (filter_pairs.length){
+      if (filter_pairs.length) {
         return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
-                                         && d.attr.num_date < upperLimit
-                                         && filter_pairs.every((x) => x[1].indexOf(d.attr[x[0]])>-1))
-                                           ? "visible" : "hidden");
+          && d.attr.num_date < upperLimit
+          && filter_pairs.every((x) => x[1].indexOf(d.attr[x[0]])>-1))
+            ? "visible" : "hidden");
       } else {
         return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
-                                         && d.attr.num_date < upperLimit)
-                                            ? "visible" : "hidden");
+          && d.attr.num_date < upperLimit)
+            ? "visible" : "hidden");
       }
     } else {
       return "visible";
@@ -285,13 +285,15 @@ class App extends React.Component {
    * RENDER
    *****************************************/
   render() {
-    var sidebarContent = <b>Sidebar content</b>;
-
     return (
-      <Sidebar sidebar={<Controls changeRoute={this.changeRoute.bind(this)}
-          location={this.state.location}
-          colorOptions={colorOptions}
-          colorScale={this.state.colorScale}/>}
+      <Sidebar
+        sidebar={
+          <Controls changeRoute={this.changeRoute.bind(this)}
+            location={this.state.location}
+            colorOptions={this.props.metadata.color_options || colorOptions}
+            colorScale={this.state.colorScale}
+          />
+        }
         open={this.state.sidebarOpen}
         docked={this.state.sidebarDocked}
         onSetOpen={this.onSetSidebarOpen}>
@@ -312,7 +314,11 @@ class App extends React.Component {
             changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
           />
-          <Map nodes={this.props.tree.nodes} justGotNewDatasetRenderNewMap={false}/>
+          <Map
+            colorScale={this.state.colorScale.scale}
+            nodes={this.props.tree.nodes}
+            justGotNewDatasetRenderNewMap={false}
+          />
         </Background>
       </Sidebar>
     );

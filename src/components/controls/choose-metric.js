@@ -3,7 +3,7 @@ import Radium from "radium";
 import queryString from "query-string";
 import TimeTree from "../framework/svg-time-tree";
 import MutationTree from "../framework/svg-mutation-tree";
-
+import {materialButton} from "../../globalStyles";
 
 /*
  * implements a pair of buttons the toggle between timetree and divergence tree
@@ -11,43 +11,12 @@ import MutationTree from "../framework/svg-mutation-tree";
  */
 @Radium
 class ChooseMetric extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-    };
-  }
-  static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object
-    // foo: React.PropTypes.string
-  }
-  static defaultProps = {
-    // foo: "bar"
-  }
   getStyles() {
     return {
       container: {
-        marginTop: 20
-      },
-      button: {
-        border: "1px solid rgb(130,130,130)",
-        backgroundColor: "white",
-        borderRadius: 2,
-        color: "rgb(130,130,130)",
-        height: 40,
-        width: 140,
-        cursor: "pointer",
-        marginRight: 20,
-        ":hover": {
-          backgroundColor: "rgb(245,245,245)"
-        }
+        marginBottom: 10
       },
       title: {
-        marginLeft: 7,
         position: "relative",
         top: -5,
         fontWeight: 300
@@ -72,23 +41,23 @@ class ChooseMetric extends React.Component {
       <div style={styles.container}>
         <button
           key={1}
-          style={styles.button}
+          style={materialButton}
           onClick={() => { this.setMetricQueryParam("div"); }}
         >
-          <MutationTree width={25} stroke="rgb(130,130,130)"/>
-          <span style={styles.title}> {"div"} </span>
+          <span style={styles.title}> {"mutations"} </span>
         </button>
         <button
           key={2}
-          style={styles.button}
+          style={materialButton}
           onClick={() => { this.setMetricQueryParam("num_date"); }}
         >
-          <TimeTree width={25} stroke="rgb(130,130,130)"/>
-          <span style={styles.title}> {"num_date"} </span>
+          <span style={styles.title}> {"time"} </span>
         </button>
       </div>
     );
   }
 }
+// <TimeTree width={25} stroke="rgb(130,130,130)"/>
+// <MutationTree width={25} stroke="rgb(130,130,130)"/>
 
 export default ChooseMetric;

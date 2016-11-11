@@ -3,6 +3,7 @@ import Radium from "radium";
 import { filterAbbrFwd } from "../../util/globals";
 import RecursiveFilter from "./recursive_filter";
 import parseParams from "../../util/parseParams";
+import SelectLabel from "../framework/select-label";
 
 // @connect(state => {
 //   return state.FOO;
@@ -77,10 +78,7 @@ class ChooseFilter extends React.Component {
         if (options.length > 1 || vi === 0) {
           fields.push(level.name);
           selectors.push((
-            <div key={vi} style={[
-              styles.base,
-              this.props.style,
-            ]}>
+            <div key={vi} style={{marginBottom: 10}}>
               <RecursiveFilter
                 {...this.props}
                 title={"all"}
@@ -104,10 +102,10 @@ class ChooseFilter extends React.Component {
     // return a list of selectors in the order of the data set hierarchy
     return (
       <div>
-        {this.props.filterType}
+        <SelectLabel text={this.props.filterType}/>
         {selectors}
       </div>
-      );
+    );
   }
 }
 

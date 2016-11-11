@@ -5,6 +5,8 @@ import _ from "lodash";
 import { connect } from "react-redux";
 // import { FOO } from "../actions";
 import Card from "../framework/card";
+import setupLeaflet from "../../util/leaflet";
+import setupLeafletPlugins from "../../util/leaflet-plugins";
 
 
 @connect((state) => {
@@ -30,13 +32,21 @@ class Map extends React.Component {
   static defaultProps = {
     // foo: "bar"
   }
-
+  componentWillMount() {
+    setupLeaflet();
+  }
   componentDidMount() {
-    // setupMap()
+    setupLeafletPlugins()
+
+    const southWest = L.latLng(-70, -180);
+    const northEast = L.latLng(90, 180);
+    const bounds = L.latLngBounds(southWest, northEast);
+
     var map = L.map('map', {
       center: [0,0],
       zoom: 2,
       scrollWheelZoom: false,
+      maxBounds: bounds,
       minZoom: 2,
       maxZoom: 9,
       zoomControl: false
@@ -44,7 +54,8 @@ class Map extends React.Component {
     })
 
     L.tileLayer('https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2l1MDRoMzg5MDEwbjJvcXBpNnUxMXdwbCJ9.PMqX7vgORuXLXxtI3wISjw', {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+        // noWrap: true
     }).addTo(map);
 
     L.control.zoom({position: "bottomright"}).addTo(map)
@@ -71,20 +82,22 @@ class Map extends React.Component {
         this.props.metadata.geo.country[key].longitude
       ], {
         stroke:	false,
-        radius: value,
+        radius: value * 2,
+
         // color: ""
         // weight:	5	Stroke width in pixels.
         // opacity:	0.5	Stroke opacity.
         // fill:
-        fillColor: "rgb(255,0,0)"
-        // fillOpacity:
-      }).addTo(this.state.map)
+        fillColor: this.props.colorScale(key),
+        fillOpacity: .6
+      }).addTo(this.state.map);
     });
   }
   addTransmissionEventsToMap() {
     const transmissions = {};
     const geo = this.props.metadata.geo;
 
+    // count transmissions for line thickness
     this.props.nodes.forEach((parent) => {
       if (!parent.children) { return; }
       // if (parent.attr.country !== "china") { return; } // remove me, example filter
@@ -100,46 +113,107 @@ class Map extends React.Component {
       });
     });
 
+    // for each item in the object produced above, add a line
     _.forOwn(transmissions, (value, key) => {
-      // L.polyline(latlngs, {color: 'red'}).addTo(this.state.map);
+
+      // go from "brazil/cuba" to ["brazil", "cuba"]
       const countries = key.split("/");
+      // go from "brazil" to lat0 = -14.2350
       let long0 = geo.country[countries[0]].longitude;
       let long1 = geo.country[countries[1]].longitude;
+      let lat0 = geo.country[countries[0]].latitude;
+      let lat1 = geo.country[countries[1]].latitude;
 
+      // create new leaflet LatLong objects
+      const start = new L.LatLng(lat0, long0)
+      const end = new L.LatLng(lat1, long1)
 
-      // if (Math.abs(long0 - long1) > 100) {
-      //   return
-        // long0 = long0 + 360;
-        // long1 = long1 + 360;
-      // }
+      // remove me! temporary random colors in lieu of scale.
 
-      L.polyline([
-        [geo.country[countries[0]].latitude, long0],
-        [geo.country[countries[1]].latitude, long1]
-      ], {
+      /*
+        add a polyline to the map for current country pair iteratee
+        store the computation. access _latlngs to show where each segment is on the map
+      */
+      const geodesicPath = L.geodesic([[start,end]], {
         // stroke:	value,
         // radius: value,
-        color: "rgb(255,0,0)",
+        color: this.props.colorScale(countries[0]),
+        opacity: .5,
+        steps: 25,
         weight:	value	/* Stroke width in pixels.*/
         // opacity:	0.5	Stroke opacity.
         // fill:
-        // fillColor: "rgb(255,0,0)"
+        // fillColor: randomColor
         // fillOpacity:
       }).addTo(this.state.map)
+
+      console.log(geodesicPath)
+
+      if (geodesicPath._latlngs[0].length < 25) {
+        console.log(key, geodesicPath._latlngs[0].length)
+      }
+
+      /* this will need to be scaled if transmissions is high */
+      const arrowSizeMultiplier = value > 1 ? value * 2 : 0;
+
+      // this decorator adds arrows to the lines.
+      // decorator docs: https://github.com/bbecquet/Leaflet.PolylineDecorator
+      for (let i = 0; i < geodesicPath._latlngs.length; i++) {
+        L.polylineDecorator(geodesicPath._latlngs[i], {
+          patterns: [{
+            offset: 25,
+            repeat: 50,
+            symbol: L.Symbol.arrowHead({
+              pixelSize: 8 + arrowSizeMultiplier,
+              pathOptions: {
+                fillOpacity: .5,
+                color: this.props.colorScale(countries[0]),
+                weight: 0
+              }
+            })
+          }]
+        }).addTo(this.state.map);
+      }
+
     });
   }
+  okToRender() {
+    /* this is going to expand so breaking into a function */
+
+    let ok = false;
+
+    /*
+      do we have a new dataset
+      is our dataset shorter than last time (filtered because of date slider or other control)
+    */
+
+    if (
+      this.props.metadata &&
+      this.props.nodes &&
+      this.state.map &&
+      !this.state.tips &&
+      this.props.colorScale
+    ) {
+      ok = true
+    }
+
+    return ok;
+  }
   render() {
-    if (this.props.nodes && this.state.map && !this.state.tips) {
+    if (this.okToRender()) {
       this.addAllTipsToMap();
       this.addTransmissionEventsToMap();
-      // don't redraw - need to seperately handle virus change redraw
+      // don't redraw on every rerender - need to seperately handle virus change redraw
       this.setState({tips: true});
     }
+
+    // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
+
     return (
-      <Card title="Transmissions">
+      <Card center title="Transmissions">
         <div style={{
-            height: 400,
-            width: 800,
+            height: 650,
+            width: 1028,
             margin: 10
           }} id="map">
         </div>

@@ -1,7 +1,7 @@
 import React from "react";
 import Radium from "radium";
 // import Flex from "./framework/flex";
-import globalStyles from "../../globalStyles";
+import * as globalStyles from "../../globalStyles";
 
 @Radium
 class HeaderFont extends React.Component {

@@ -56,8 +56,7 @@ makeTree(nodes) {
     var myTree = new PhyloTree(nodes[0]);
     // https://facebook.github.io/react/docs/refs-and-the-dom.html
     var treeplot = d3.select(this.Viewer.ViewerDOM);
-    console.info('Line 48 in treeView: d3 elem from react ref, look at this Richard', treeplot);
-    myTree.render(treeplot, this.props.layout, this.props.distanceMeasure, {}, {grid:true});
+    myTree.render(treeplot, this.props.layout, this.props.distanceMeasure, {grid:true});
     return myTree;
   } else {
     return null;

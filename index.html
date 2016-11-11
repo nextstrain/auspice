@@ -615,22 +615,23 @@
 
       .react-datepicker__input-container {
         position: relative;
-        display: inline-block;
+        display: inline;
       }
 
       .react-datepicker__input-container {
         position: relative;
-        display: inline-block;
+        display: inline;
       }
 
       .react-datepicker__input-container input {
-        border-radius: 5px;
-        padding: 10px;
+        width: 30%;
+        font-family: "aw-conqueror-sans";
+        font-size: 14px;
+        border-radius: 3px;
+        padding: 10px 10px;
         border: 1px solid rgb(200,200,200);
         margin-right: 10px;
       }
-
-
 
       .react-datepicker__year-read-view {
         width: 50%;
@@ -769,7 +770,6 @@
           h=d.documentElement,t=setTimeout(function(){h.className=h.className.replace(/\bwf-loading\b/g,"")+" wf-inactive";},config.scriptTimeout),tk=d.createElement("script"),f=false,s=d.getElementsByTagName("script")[0],a;h.className+=" wf-loading";tk.src='//use.typekit.net/'+config.kitId+'.js';tk.async=true;tk.onload=tk.onreadystatechange=function(){a=this.readyState;if(f||a&&a!="complete"&&a!="loaded")return;f=true;clearTimeout(t);try{Typekit.load(config)}catch(e){}};s.parentNode.insertBefore(tk,s)
       })(document);
     </script>
-    <script src="https://unpkg.com/leaflet@1.0.1/dist/leaflet.js"></script>
 
     <script>
       /**
