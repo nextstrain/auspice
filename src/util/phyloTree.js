@@ -2,6 +2,7 @@ import d3 from "d3";
 
 var PhyloTree = function (treeJson) {
     console.log("PhyloTree: instantiating");
+    this.grid=false;
     this.tree = d3.layout.tree();
     this.nodes = this.tree.nodes(treeJson).map(function(d){return {n:d, x:0, y:0};});
     this.nodes[0].n.parent = this.nodes[0].n;
@@ -74,9 +75,9 @@ PhyloTree.prototype.mapToScreen = function(){
     const tmp_yScale=this.yScale;
     const tmp_xValues = this.nodes.map(function(d){return d.x});
     const tmp_yValues = this.nodes.map(function(d){return d.y});
+
     this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
     this.yScale.domain([d3.min(tmp_yValues), d3.max(tmp_yValues)]);
-
     this.nodes.forEach(function(d){d.xTip = tmp_xScale(d.x)});
     this.nodes.forEach(function(d){d.yTip = tmp_yScale(d.y)});
     this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
@@ -138,25 +139,29 @@ PhyloTree.prototype.updateDistance = function(attr,dt){
     this.setLayout(this.layout);
     this.mapToScreen();
     this.updateGeometry(dt);
-    this.addGrid(this.layout);
+    if (this.grid) this.addGrid(this.layout);
 };
 
 PhyloTree.prototype.updateLayout = function(layout,dt){
     this.setLayout(layout);
     this.mapToScreen();
     this.updateGeometryFade(dt);
-    this.addGrid(layout);
+    if (this.grid) this.addGrid(layout);
 };
 
 /*
  * make grid
  */
-PhyloTree.prototype.addGrid = function(layout) {
-    if (typeof layout==="undefined"){ layout=this.layout;}
-
+PhyloTree.prototype.removeGrid = function () {
     this.svg.selectAll(".majorGrid").remove();
     this.svg.selectAll(".minorGrid").remove();
     this.svg.selectAll(".gridTick").remove();
+    this.grid=false;
+}
+
+PhyloTree.prototype.addGrid = function(layout) {
+    this.removeGrid();
+    if (typeof layout==="undefined"){ layout=this.layout;}
 
     this.majorGridWidth = 2;
     this.minorGridWidth = 1;
@@ -241,7 +246,7 @@ PhyloTree.prototype.addGrid = function(layout) {
         .style("fill", "none")
         .style("stroke",this.gridColor)
         .style("stroke-width",this.minorGridWidth);
-
+    this.grid=true;
 };
 
 /*
@@ -379,17 +384,19 @@ PhyloTree.prototype.branches = function(){
         .style("stroke-width", function(d){return d.strokeWidth||2;});
 };
 
-PhyloTree.prototype.render = function(svg, layout, distance, margins) {
+PhyloTree.prototype.render = function(svg, layout, distance, options) {
     this.svg = svg;
     console.log("PhyloTree.render", this.svg);
     this.clearSVG();
-    this.setScales(margins||{left:200, right:50, top:50, bottom:50});
+    this.setScales(options.margins||{left:200, right:50, top:50, bottom:50});
     this.setDistance(distance);
     this.setLayout(layout);
     this.mapToScreen();
     this.branches();
     this.tips();
-    this.addGrid();
+    if (options && options.grid){
+        this.addGrid();
+    }
     this.updateGeometry(10);
 };
 
