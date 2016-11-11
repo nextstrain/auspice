@@ -1,7 +1,7 @@
 import d3 from "d3";
 
 var PhyloTree = function (treeJson) {
-    console.log("PhyloTree: instantiating");
+    // console.log("PhyloTree: instantiating");
     this.grid=false;
     this.tree = d3.layout.tree();
     this.nodes = this.tree.nodes(treeJson).map(function(d){return {n:d, x:0, y:0};});
@@ -25,7 +25,7 @@ var PhyloTree = function (treeJson) {
  * calculate tree layout, scales, and updating of those
  */
 PhyloTree.prototype.setDistance = function(attr){
-    console.log("PhyloTree.setDistance", attr);
+    // console.log("PhyloTree.setDistance", attr);
     if (typeof attr!=="undefined" && attr===this.distance){
         this.nodes.forEach(function(d){d.update=false});
         return;
@@ -82,8 +82,8 @@ PhyloTree.prototype.mapToScreen = function(){
     this.nodes.forEach(function(d){d.yTip = tmp_yScale(d.y)});
     this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
     this.nodes.forEach(function(d){d.yBase = tmp_yScale(d.py)});
-    console.log("PhyloTree.mapToScreen", this.layout,
-                "xScale domain", this.xScale.domain());
+    // console.log("PhyloTree.mapToScreen", this.layout,
+    //             "xScale domain", this.xScale.domain());
     if (this.layout==="rectangular"){
         this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])});
         this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])});
@@ -160,7 +160,7 @@ PhyloTree.prototype.removeGrid = function () {
 }
 
 PhyloTree.prototype.addGrid = function(layout) {
-    console.log("adding grid");
+    // console.log("adding grid");
     this.removeGrid();
     if (typeof layout==="undefined"){ layout=this.layout;}
 
@@ -383,7 +383,7 @@ PhyloTree.prototype.updateStyleArray= function(treeElem, styleElem, style_array,
 };
 
 PhyloTree.prototype.redrawStyle = function(treeElem, styleElem, dt){
-    console.log("redraw",this.nodes.filter(function (d) {return d.update;}).length);
+    // console.log("redraw",this.nodes.filter(function (d) {return d.update;}).length);
     this.svg.selectAll(treeElem).filter(function (d) {return d.update;})
         .transition().duration(dt)
         .style(styleElem, function(d){return d[styleElem];});
@@ -427,7 +427,7 @@ PhyloTree.prototype.branches = function(){
 
 PhyloTree.prototype.render = function(svg, layout, distance, options) {
     this.svg = svg;
-    console.log("PhyloTree.render", this.svg);
+    // console.log("PhyloTree.render", this.svg);
     this.clearSVG();
     this.setScales(options.margins||{left:200, right:50, top:50, bottom:50});
     this.setDistance(distance);

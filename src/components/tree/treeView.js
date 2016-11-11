@@ -65,7 +65,7 @@ makeTree(nodes) {
 
   componentWillMount() {
     if (this.state.currentDatasetGuid !== this.props.datasetGuid) {
-      console.log("componentWillMount, width:", globals.width);
+      // console.log("componentWillMount, width:", globals.width);
       this.setState({
         okToDraw: true,
         currentDatasetGuid: this.props.datasetGuid,
@@ -75,7 +75,7 @@ makeTree(nodes) {
   }
 
   componentDidMount(){
-    console.log("TreeView.componentDidMount");
+    // console.log("TreeView.componentDidMount");
 
     this.Viewer.fitToViewer();
 
@@ -97,7 +97,7 @@ makeTree(nodes) {
     } else if ((nextProps.datasetGuid !== this.props.datasetGuid)
                || (nextProps.layout !== this.props.layout)
                || (nextProps.distanceMeasure !== this.props.distanceMeasure)) {
-      console.log("setting ok to draw");
+      // console.log("setting ok to draw");
       this.setState({
         okToDraw: true,
         currentDatasetGuid: nextProps.datasetGuid,
@@ -111,7 +111,7 @@ makeTree(nodes) {
       if (nextProps.nodeColor &&
           arrayInEquality(nextProps.nodeColor,
                          this.props.nodeColor)){
-        console.log("updateColor", this.props.layout, nextProps.layout);
+        // console.log("updateColor", this.props.layout, nextProps.layout);
         styleToUpdate['fill'] = nextProps.nodeColor;
         tree.updateStyleArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration);
         styleToUpdate['stroke'] = nextProps.nodeColor.map(d=>d3.rgb(d).darker(0.7));
@@ -119,13 +119,13 @@ makeTree(nodes) {
       if (nextProps.tipRadii &&
           arrayInEquality(nextProps.tipRadii,
                          this.props.tipRadii)) {
-        console.log("updateRadii", this.props.layout, nextProps.layout);
+        // console.log("updateRadii", this.props.layout, nextProps.layout);
         attrToUpdate['r'] = nextProps.tipRadii;
       }
       if (nextProps.tipVisibility &&
           arrayInEquality(nextProps.tipVisibility,
                          this.props.tipVisibility)) {
-        console.log("updateVisibility");
+        // console.log("updateVisibility");
         styleToUpdate['visibility'] = nextProps.tipVisibility;
       }
       if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length){
@@ -133,11 +133,11 @@ makeTree(nodes) {
       }
 
       if (this.props.layout!==nextProps.layout){
-        console.log("reset layout", this.props.layout, nextProps.layout);
+        // console.log("reset layout", this.props.layout, nextProps.layout);
         tree.updateLayout(nextProps.layout, slowTransitionDuration);
       }
       if (this.props.distanceMeasure!==nextProps.distanceMeasure){
-        console.log("reset distance", this.props.distanceMeasure, nextProps.distanceMeasure);
+        // console.log("reset distance", this.props.distanceMeasure, nextProps.distanceMeasure);
         tree.updateDistance(nextProps.distanceMeasure, slowTransitionDuration);
       }
     }
@@ -156,10 +156,10 @@ makeTree(nodes) {
       let zoom;
       if (tool === "zoom-in") {
         zoom = this.state.zoom + .1;
-        console.log('zooming in', this.state.zoom, zoom)
+        // console.log('zooming in', this.state.zoom, zoom)
       } else {
         zoom = this.state.zoom - .1;
-        console.log('zooming out', this.state.zoom, zoom)
+        // console.log('zooming out', this.state.zoom, zoom)
       }
       let viewerX = this.state.width / 2;
       let viewerY = this.treePlotHeight(this.state.width) / 2;
@@ -186,7 +186,7 @@ makeTree(nodes) {
   }
 
   handleClick(event){
-    console.log('event', event)
+    // console.log('event', event)
     // console.log('click', event.x, event.y, event.originalEvent);
   }
 
