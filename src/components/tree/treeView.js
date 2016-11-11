@@ -88,24 +88,32 @@ class TreeView extends React.Component {
       });
     }
     if (tree){
+      const attrToUpdate ={};
+      const styleToUpdate ={};
       if (nextProps.nodeColor &&
           arrayInEquality(nextProps.nodeColor,
                          this.props.nodeColor)){
         console.log("updateColor", this.props.layout, nextProps.layout);
-        tree.updateStyleArray(".tip", "fill", nextProps.nodeColor, fastTransitionDuration);
+        styleToUpdate['fill'] = nextProps.nodeColor;
+        tree.updateStyleArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration);
+        styleToUpdate['stroke'] = nextProps.nodeColor.map(d=>d3.rgb(d).darker(0.7));
       }
       if (nextProps.tipRadii &&
           arrayInEquality(nextProps.tipRadii,
                          this.props.tipRadii)) {
         console.log("updateRadii", this.props.layout, nextProps.layout);
-        tree.updateAttributeArray(".tip", "r", nextProps.tipRadii, fastTransitionDuration);
+        attrToUpdate['r'] = nextProps.tipRadii;
       }
       if (nextProps.tipVisibility &&
           arrayInEquality(nextProps.tipVisibility,
                          this.props.tipVisibility)) {
         console.log("updateVisibility");
-        tree.updateStyleArray(".tip", "visibility", nextProps.tipVisibility, 0);
+        styleToUpdate['visibility'] = nextProps.tipVisibility;
       }
+      if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length){
+        tree.updateMultipleArray(".tip", attrToUpdate, styleToUpdate, fastTransitionDuration);
+      }
+
       if (this.props.layout!==nextProps.layout){
         console.log("reset layout", this.props.layout, nextProps.layout);
         tree.updateLayout(nextProps.layout, slowTransitionDuration);
@@ -116,6 +124,7 @@ class TreeView extends React.Component {
       }
     }
   }
+
 
   treePlotHeight(width) {
     return 400 + 0.30 * width;

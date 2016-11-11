@@ -214,6 +214,7 @@ PhyloTree.prototype.addGrid = function(layout) {
         .append("path")
         .attr("d", gridline(this.xScale, this.yScale, layout))
         .attr("class", "majorGrid")
+        .attr("z-index", 0)
         .style("fill", "none")
         .style("stroke",this.gridColor)
         .style("stroke-width",this.majorGridWidth);
@@ -243,6 +244,7 @@ PhyloTree.prototype.addGrid = function(layout) {
         .append("path")
         .attr("d", gridline(this.xScale, this.yScale, layout))
         .attr("class", "minorGrid")
+        .attr("z-index", 0)
         .style("fill", "none")
         .style("stroke",this.gridColor)
         .style("stroke-width",this.minorGridWidth);
@@ -299,7 +301,45 @@ PhyloTree.prototype.updateGeometry = function(dt){
 /*
  * update tree element style of attributes
  */
-PhyloTree.prototype.updateAttribute= function(treeElem, attr, callback, dt){
+PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) {
+    this.nodes.forEach(function (d,i){
+        d.update=false;
+        let newAttr;
+        for (var attr in attrs){
+            newAttr = attrs[attr][i];
+            if (newAttr!==d[attr]){
+                d[attr]=newAttr;
+                d.update = true;
+            }
+        }
+        let newStyle;
+        for (var prop in styles){
+            newStyle = styles[prop][i];
+            if (newStyle!==d[prop]){
+                d[prop]=newStyle;
+                d.update = true;
+            }
+        }
+    });
+    function update(attrToSet, stylesToSet){
+        return function(selection){
+            for (var i=0; i<stylesToSet.length; i+=1){
+                var prop = stylesToSet[i];
+                selection.style(prop, function(d){return d[prop];});
+            }
+            for (var i=0; i<attrToSet.length; i+=1){
+                var prop = attrToSet[i];
+                selection.attr(prop, function(d){return d[prop];});
+            }
+        };
+    };
+    this.svg.selectAll(treeElem).filter(function (d) {return d.update;})
+        .transition().duration(dt)
+        .call(update(Object.keys(attrs), Object.keys(styles)));
+
+};
+
+PhyloTree.prototype.updateAttribute = function(treeElem, attr, callback, dt){
     this.updateAttributeArray(treeElem, attr,
         this.nodes.map(function(d){return callback(d);}), dt);
 };
