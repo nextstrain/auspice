@@ -147,12 +147,6 @@ class Map extends React.Component {
         // fillOpacity:
       }).addTo(this.state.map)
 
-      console.log(geodesicPath)
-
-      if (geodesicPath._latlngs[0].length < 25) {
-        console.log(key, geodesicPath._latlngs[0].length)
-      }
-
       /* this will need to be scaled if transmissions is high */
       const arrowSizeMultiplier = value > 1 ? value * 2 : 0;
 
