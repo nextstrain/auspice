@@ -8,6 +8,8 @@ import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
 import MoveIcon from "../framework/move-icon";
 import PhyloTree from "../../util/phyloTree";
+import {ReactSVGPanZoom, fitToViewer} from "react-svg-pan-zoom";
+import ReactDOM from "react-dom"
 import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration} from "../../util/globals";
 
@@ -29,9 +31,11 @@ const arrayInEquality = function(a,b){
 class TreeView extends React.Component {
   constructor(props) {
     super(props);
+
+    this.Viewer = null;
+
     this.state = {
       okToDraw: false,
-      value: ViewerHelper.getDefaultValue(),
       zoom: 1,
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
     };
@@ -46,17 +50,19 @@ class TreeView extends React.Component {
     tree: React.PropTypes.object
   }
 
-  makeTree(nodes){
-    console.log("TreeView.makeTree");
-    if (nodes) {
-      var myTree = new PhyloTree(nodes[0]);
-      var treeplot = d3.select("#treeplot");
-      myTree.render(treeplot, this.props.layout, this.props.distanceMeasure,{"grid":true});
-      return myTree;
-    }else{
-      return null;
-    }
+makeTree(nodes) {
+  // console.log("TreeView.makeTree");
+  if (nodes) {
+    var myTree = new PhyloTree(nodes[0]);
+    // https://facebook.github.io/react/docs/refs-and-the-dom.html
+    var treeplot = d3.select(this.Viewer.ViewerDOM);
+    console.info('Line 48 in treeView: d3 elem from react ref, look at this Richard', treeplot);
+    myTree.render(treeplot, this.props.layout, this.props.distanceMeasure, {}, {grid:true});
+    return myTree;
+  } else {
+    return null;
   }
+}
 
   componentWillMount() {
     if (this.state.currentDatasetGuid !== this.props.datasetGuid) {
@@ -69,11 +75,24 @@ class TreeView extends React.Component {
     }
   }
 
+  componentDidMount(){
+    console.log("TreeView.componentDidMount");
+
+    this.Viewer.fitToViewer();
+
+    const tree = (this.state.tree)
+                  ? this.state.tree
+                  : this.makeTree(this.props.nodes, this.props.layout, this.props.distance);
+      this.setState({
+        tree: tree
+      });
+  }
+
   componentWillReceiveProps(nextProps) {
     // Do we have a tree to draw? if yes, check whether it needs to be redrawn
     const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree)
                   ? this.state.tree
-                  : this.makeTree(nextProps.nodes, this.layout, this.distance);
+                  : this.makeTree(nextProps.nodes, this.props.layout, this.props.distance);
     if (!(nextProps.datasetGuid && nextProps.nodes)){
       this.setState({okToDraw: false});
     } else if ((nextProps.datasetGuid !== this.props.datasetGuid)
@@ -160,14 +179,15 @@ class TreeView extends React.Component {
   //   }
   // }
 
-  handleChange(event) {
+  handleChange(value) {
     // console.log(event.scaleFactor)
     // console.log('scaleFactor', event.scaleFactor);
     // console.log(this.state, event.value, event)
-    this.setState({value: event.value});
+    this.setState({value});
   }
 
   handleClick(event){
+    console.log('event', event)
     // console.log('click', event.x, event.y, event.originalEvent);
   }
 
@@ -180,16 +200,28 @@ class TreeView extends React.Component {
       <div>
         <Card title="Phylogeny">
           <p style={{position: "absolute", right: 50, bottom: 150, color: "red", fontWeight: 700 }}> {this.state.scaleFactor} </p>
-          <svg width={300} height={300}
-               style={{position: "absolute", left: 13,
-                       top: 50}}>
-            <Legend colorScale={this.props.colorScale}/>
-          </svg>
+          <ReactSVGPanZoom
+            width={globals.width}
+            height={this.treePlotHeight(globals.width)}
+            ref={(Viewer) => {
+              // https://facebook.github.io/react/docs/refs-and-the-dom.html
+              this.Viewer = Viewer
+            }}
+            style={{border: "1px solid green"}}
+            value={this.state.value}
+            tool={this.state.tool}
+            detectWheel={false}
+            toolbarPosition={"none"}
+            detectAutoPan={false}
+            background={"#FFF"}
+            onChangeValue={this.handleChange.bind(this)}
+            onClick={this.handleClick.bind(this)}>
             <svg style={{pointerEvents: "auto"}}
-                 width={globals.width}
-                 height={this.treePlotHeight(globals.width)}
-                 id="treeplot">
+              width={globals.width}
+              height={this.treePlotHeight(globals.width)}
+              >
             </svg>
+          </ReactSVGPanZoom>
           <svg width={50} height={130}
                style={{position: "absolute", right: 20, bottom: 20}}>
               <defs>
@@ -217,6 +249,11 @@ class TreeView extends React.Component {
               x={10}
               y={90}
               />
+          </svg>
+          <svg width={300} height={300}
+               style={{position: "absolute", left: 13,
+                       top: 50}}>
+            <Legend colorScale={this.props.colorScale}/>
           </svg>
         </Card>
       </div>
