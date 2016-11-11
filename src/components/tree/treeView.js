@@ -197,7 +197,7 @@ makeTree(nodes) {
     */
     return (
       <div>
-        <Card title="Phylogeny">
+        <Card center title="Phylogeny">
           <p style={{position: "absolute", right: 50, bottom: 150, color: "red", fontWeight: 700 }}> {this.state.scaleFactor} </p>
           <ReactSVGPanZoom
             width={globals.width}
@@ -206,7 +206,6 @@ makeTree(nodes) {
               // https://facebook.github.io/react/docs/refs-and-the-dom.html
               this.Viewer = Viewer
             }}
-            style={{border: "1px solid green"}}
             value={this.state.value}
             tool={this.state.tool}
             detectWheel={false}
