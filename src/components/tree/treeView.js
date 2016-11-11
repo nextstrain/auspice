@@ -44,6 +44,7 @@ makeTree(nodes) {
   // console.log("TreeView.makeTree");
   if (nodes) {
     var myTree = new PhyloTree(nodes[0]);
+    // https://facebook.github.io/react/docs/refs-and-the-dom.html
     var treeplot = d3.select(this.Viewer.ViewerDOM);
     console.info('Line 48 in treeView: d3 elem from react ref, look at this Richard', treeplot)
     myTree.render(treeplot, this.props.layout, this.props.distanceMeasure);
@@ -234,6 +235,7 @@ makeTree(nodes) {
             width={globals.width}
             height={this.treePlotHeight(globals.width)}
             ref={(Viewer) => {
+              // https://facebook.github.io/react/docs/refs-and-the-dom.html
               this.Viewer = Viewer
             }}
             style={{border: "1px solid green"}}
