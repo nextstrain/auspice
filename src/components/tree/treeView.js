@@ -1,7 +1,6 @@
 import React from "react";
 import Radium from "radium";
 import d3 from "d3";
-import { processNodes } from "../../util/processNodes";
 import * as globals from "../../util/globals";
 import Card from "../framework/card";
 import Legend from "../controls/legend";
@@ -52,7 +51,7 @@ class TreeView extends React.Component {
     if (nodes) {
       var myTree = new PhyloTree(nodes[0]);
       var treeplot = d3.select("#treeplot");
-      myTree.render(treeplot, this.props.layout, this.props.distanceMeasure);
+      myTree.render(treeplot, this.props.layout, this.props.distanceMeasure,{"grid":true});
       return myTree;
     }else{
       return null;
