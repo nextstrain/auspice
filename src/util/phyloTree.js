@@ -169,12 +169,15 @@ PhyloTree.prototype.addGrid = function(layout) {
     this.gridColor="#AAA";
 
     const xmin = (this.xScale.domain()[0]>0)?this.xScale.domain()[0]:0.0;
-    const xmax = this.xScale.domain()[1];
+    const xmax = layout=="radial"
+                  ? d3.max([this.xScale.domain()[1], this.yScale.domain()[1],
+                            -this.xScale.domain()[0], -this.yScale.domain()[0]])
+                  : this.xScale.domain()[1];
     const offset = layout==="radial"?this.nodes[0].depth:0.0;
 
     const gridline = function(xScale, yScale, layout){
         return function(x){
-            const xPos = xScale(x-offset);
+            const xPos = xScale(x[0]-offset);
             let tmp_d="";
             if (layout==="rectangular"){
               tmp_d = 'M'+xPos.toString() +
@@ -191,7 +194,7 @@ PhyloTree.prototype.addGrid = function(layout) {
                 " A " +
                 (xPos - xScale(0)).toString() +
                 " " +
-                (yScale(x) - yScale(offset)).toString() +
+                (yScale(x[0]) - yScale(offset)).toString() +
                 " 0 1 0 " +
                 xPos.toString() +
                 " " +
@@ -205,9 +208,10 @@ PhyloTree.prototype.addGrid = function(layout) {
     const roundingLevel = Math.pow(10, logRange);
     const gridMin = Math.floor((xmin+offset)/roundingLevel)*roundingLevel;
     const gridPoints = [];
-    for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+0.8; ii++) {
-      if (gridMin + roundingLevel*ii>offset){
-          gridPoints.push(gridMin + roundingLevel*ii);
+    for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+5.8; ii++) {
+      const pos = gridMin + roundingLevel*ii;
+      if (pos>offset){
+          gridPoints.push([pos, pos-offset>xmax?"hidden":"visible"]);
       }
     }
 
@@ -219,30 +223,33 @@ PhyloTree.prototype.addGrid = function(layout) {
         .attr("class", "majorGrid")
         .attr("z-index", 0)
         .style("fill", "none")
+        .style("visibility", function (d){return d[1];})
         .style("stroke",this.gridColor)
         .style("stroke-width",this.majorGridWidth);
 
     const xTextPos = function(xScale, layout){
-        return function(x){return layout==="rectangular" ? xScale(x) : xScale(0);};};
+        return function(x){return layout==="rectangular" ? xScale(x[0]) : xScale(0);};};
     const yTextPos = function(yScale, layout){
-        return function(x){ return layout==="rectangular" ? yScale.range()[1]+18 : yScale(x-offset);};};
+        return function(x){ return layout==="rectangular" ? yScale.range()[1]+18 : yScale(x[0]-offset);};};
     const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
     gridLabels.exit().remove();
     gridLabels.enter().append("text");
     gridLabels
-        .text(function(d){return d.toString();})
+        .text(function(d){return d[0].toString();})
         .attr("class", "gridTick")
         .style("font-size",12)
         .style("fill",this.gridColor)
         .style("text-anchor", this.layout==="rectangular" ? "start" : "end")
+        .style("visibility", function (d){return d[1];})
         .attr("x", xTextPos(this.xScale, layout))
         .attr("y", yTextPos(this.yScale, layout));
 
     const minorRoundingLevel = roundingLevel / (this.distanceMeasure === "div" ? 5 : 6);
     const minorGridPoints = [];
-    for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+7; ii++) {
-      if (gridMin + minorRoundingLevel*ii>offset){
-          minorGridPoints.push(gridMin + minorRoundingLevel*ii);
+    for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+30; ii++) {
+      const pos = gridMin + minorRoundingLevel*ii;
+      if (pos>offset){
+          minorGridPoints.push([pos, pos-offset>xmax+minorRoundingLevel?"hidden":"visible"]);
       }
     }
     const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
@@ -253,6 +260,7 @@ PhyloTree.prototype.addGrid = function(layout) {
         .attr("class", "minorGrid")
         .attr("z-index", 0)
         .style("fill", "none")
+        .style("visibility", function (d){return d[1];})
         .style("stroke",this.gridColor)
         .style("stroke-width",this.minorGridWidth);
     this.grid=true;
