@@ -71,13 +71,21 @@ PhyloTree.prototype.radialLayout = function(){
 };
 
 PhyloTree.prototype.mapToScreen = function(){
-    const tmp_xScale=this.xScale;
-    const tmp_yScale=this.yScale;
+    this.setScales(this.options.margins||{left:50, right:50, top:50, bottom:50});
     const tmp_xValues = this.nodes.map(function(d){return d.x});
     const tmp_yValues = this.nodes.map(function(d){return d.y});
+    if (this.layout==="radial"){
+        const maxSpan = d3.max([-d3.min(tmp_xValues), d3.max(tmp_xValues),
+                                -d3.min(tmp_yValues), d3.max(tmp_yValues)]);
+        this.xScale.domain([-maxSpan, maxSpan]);
+        this.yScale.domain([-maxSpan, maxSpan]);
+    }else{
+        this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
+        this.yScale.domain([d3.min(tmp_yValues), d3.max(tmp_yValues)]);
+    }
 
-    this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
-    this.yScale.domain([d3.min(tmp_yValues), d3.max(tmp_yValues)]);
+    const tmp_xScale=this.xScale;
+    const tmp_yScale=this.yScale;
     this.nodes.forEach(function(d){d.xTip = tmp_xScale(d.x)});
     this.nodes.forEach(function(d){d.yTip = tmp_yScale(d.y)});
     this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
@@ -130,8 +138,20 @@ PhyloTree.prototype.setLayout = function(layout){
 PhyloTree.prototype.setScales = function(margins){
     const width = parseInt(this.svg.attr("width"), 10);
     const height = parseInt(this.svg.attr("height"), 10);
-    this.xScale.range([margins["left"]||0, width - (margins["right"]||0)]);
-    this.yScale.range([margins["top"]||0, height - (margins["bottom"]||0)]);
+    if (this.layout==="radial"){
+        //Force Square
+        const xExtend = width-(margins["left"]||0)-(margins["right"]||0);
+        const yExtend = height-(margins["top"]||0)-(margins["top"]||0);
+        const minExtend = d3.min([xExtend, yExtend]);
+        const xSlack = xExtend - minExtend;
+        const ySlack = yExtend - minExtend;
+        this.xScale.range([0.5*xSlack + margins["left"]||0, width  - 0.5*xSlack - (margins["right"]||0)]);
+        this.yScale.range([0.5*ySlack + margins["top"]||0,  height - 0.5*ySlack - (margins["bottom"]||0)]);
+
+    }else{
+        this.xScale.range([margins["left"]||0, width - (margins["right"]||0)]);
+        this.yScale.range([margins["top"]||0, height - (margins["bottom"]||0)]);
+    }
 };
 
 PhyloTree.prototype.updateDistance = function(attr,dt){
@@ -208,7 +228,7 @@ PhyloTree.prototype.addGrid = function(layout) {
     const roundingLevel = Math.pow(10, logRange);
     const gridMin = Math.floor((xmin+offset)/roundingLevel)*roundingLevel;
     const gridPoints = [];
-    for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+5.8; ii++) {
+    for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+10; ii++) {
       const pos = gridMin + roundingLevel*ii;
       if (pos>offset){
           gridPoints.push([pos, pos-offset>xmax?"hidden":"visible"]);
@@ -246,7 +266,7 @@ PhyloTree.prototype.addGrid = function(layout) {
 
     const minorRoundingLevel = roundingLevel / (this.distanceMeasure === "div" ? 5 : 6);
     const minorGridPoints = [];
-    for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+30; ii++) {
+    for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+50; ii++) {
       const pos = gridMin + minorRoundingLevel*ii;
       if (pos>offset){
           minorGridPoints.push([pos, pos-offset>xmax+minorRoundingLevel?"hidden":"visible"]);
@@ -441,9 +461,9 @@ PhyloTree.prototype.branches = function(){
 
 PhyloTree.prototype.render = function(svg, layout, distance, options) {
     this.svg = svg;
+    this.options = options;
     // console.log("PhyloTree.render", this.svg);
     this.clearSVG();
-    this.setScales(options.margins||{left:200, right:50, top:50, bottom:50});
     this.setDistance(distance);
     this.setLayout(layout);
     this.mapToScreen();
