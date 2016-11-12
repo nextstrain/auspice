@@ -51,6 +51,13 @@ class ChooseLayout extends React.Component {
           <RadialTreeLayout width={25} stroke="rgb(130,130,130)"/>
           <span style={styles.title}> {"radial"} </span>
         </button>
+        <button
+          key={3}
+          style={materialButton}
+          onClick={() => { this.setLayoutQueryParam("rootToTip"); }}>
+          <RadialTreeLayout width={25} stroke="rgb(130,130,130)"/>
+          <span style={styles.title}> {"root-to-tip"} </span>
+        </button>
       </div>
     );
   }

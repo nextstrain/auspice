@@ -285,12 +285,12 @@ class App extends React.Component {
    * RENDER
    *****************************************/
   render() {
-    return (
+      return (
       <Sidebar
         sidebar={
           <Controls changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
-            colorOptions={this.props.metadata.metadata.color_options || colorOptions}
+            colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || colorOptions) : color_options}
             colorScale={this.state.colorScale}
           />
         }

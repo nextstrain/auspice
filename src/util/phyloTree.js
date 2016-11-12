@@ -51,6 +51,16 @@ PhyloTree.prototype.rectangularLayout = function(){
     });
 };
 
+PhyloTree.prototype.timeVsRootToTip = function(){
+    this.setDistance("num_date");
+    this.nodes.forEach(function (d) {
+        d.y = d.n.attr["div"];
+        d.x = d.depth;
+        d.px = d.pDepth;
+        d.py = d.n.parent.attr["div"];
+    });
+};
+
 PhyloTree.prototype.radialLayout = function(){
     const nTips=this.numberOfTips;
     const offset = this.nodes[0].depth;
@@ -79,6 +89,9 @@ PhyloTree.prototype.mapToScreen = function(){
                                 -d3.min(tmp_yValues), d3.max(tmp_yValues)]);
         this.xScale.domain([-maxSpan, maxSpan]);
         this.yScale.domain([-maxSpan, maxSpan]);
+    }else if (this.layout==="rootToTip"){
+        this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
+        this.yScale.domain([d3.max(tmp_yValues), d3.min(tmp_yValues)]);
     }else{
         this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
         this.yScale.domain([d3.min(tmp_yValues), d3.max(tmp_yValues)]);
@@ -92,7 +105,10 @@ PhyloTree.prototype.mapToScreen = function(){
     this.nodes.forEach(function(d){d.yBase = tmp_yScale(d.py)});
     // console.log("PhyloTree.mapToScreen", this.layout,
     //             "xScale domain", this.xScale.domain());
-    if (this.layout==="rectangular"){
+    if (this.layout==="rootToTip"){
+        this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
+                                                 " L "+d.xTip.toString()+","+d.yTip.toString();})
+    } else if (this.layout==="rectangular"){
         this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])});
         this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])});
         this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
@@ -130,6 +146,8 @@ PhyloTree.prototype.setLayout = function(layout){
     }
     if (this.layout==="rectangular"){
         this.rectangularLayout();
+    } else if (this.layout==="rootToTip"){
+        this.timeVsRootToTip();
     } else if (this.layout==="radial"){
         this.radialLayout();
     }
@@ -199,7 +217,7 @@ PhyloTree.prototype.addGrid = function(layout) {
         return function(x){
             const xPos = xScale(x[0]-offset);
             let tmp_d="";
-            if (layout==="rectangular"){
+            if (layout==="rectangular" || layout==="rootToTip"){
               tmp_d = 'M'+xPos.toString() +
                 " " +
                 yScale.range()[0].toString() +
@@ -248,9 +266,9 @@ PhyloTree.prototype.addGrid = function(layout) {
         .style("stroke-width",this.majorGridWidth);
 
     const xTextPos = function(xScale, layout){
-        return function(x){return layout==="rectangular" ? xScale(x[0]) : xScale(0);};};
+        return function(x){return layout==="radial" ? xScale(0) :  xScale(x[0]);};};
     const yTextPos = function(yScale, layout){
-        return function(x){ return layout==="rectangular" ? yScale.range()[1]+18 : yScale(x[0]-offset);};};
+        return function(x){ return layout==="radial" ? yScale(x[0]-offset) :  yScale.range()[1]+18;};};
     const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
     gridLabels.exit().remove();
     gridLabels.enter().append("text");
@@ -259,7 +277,7 @@ PhyloTree.prototype.addGrid = function(layout) {
         .attr("class", "gridTick")
         .style("font-size",12)
         .style("fill",this.gridColor)
-        .style("text-anchor", this.layout==="rectangular" ? "start" : "end")
+        .style("text-anchor", this.layout==="radial" ? "end" : "start")
         .style("visibility", function (d){return d[1];})
         .attr("x", xTextPos(this.xScale, layout))
         .attr("y", yTextPos(this.yScale, layout));
