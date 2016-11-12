@@ -77,12 +77,27 @@ class App extends React.Component {
    *****************************************/
 
   componentWillReceiveProps(nextProps) {
+    const tmpQuery = queryString.parse(window.location.search);
+    const cScale = getColorScale(tmpQuery.colorBy, nextProps.tree, nextProps.sequences);
+    this.setState({
+      colorScale: cScale
+    });
   }
 
   componentWillMount() {
     var mql = window.matchMedia(`(min-width: 800px)`);
     mql.addListener(this.mediaQueryChanged.bind(this));
     this.setState({mql: mql, sidebarDocked: mql.matches});
+
+    const tmpQuery = queryString.parse(window.location.search);
+    const cScale = this.updateColorScale(tmpQuery.colorBy || "region");
+    this.setState({
+      location: {
+        pathname: window.location.pathname.slice(1, -1),
+        query: tmpQuery
+      },
+      colorScale: cScale.colorScale
+    });
   }
 
   componentDidMount() {
@@ -97,13 +112,17 @@ class App extends React.Component {
           pathname: window.location.pathname.slice(1, -1),
           query: tmpQuery
         },
-        colorScale: cScale
+        colorScale: cScale.colorScale
       });
     });
   }
 
   componentDidUpdate() {
     this.maybeFetchDataset();
+    if (!this.state.colorScale) {
+      const cScale = this.updateColorScale(this.state.location.query.colorBy || "region");
+      this.setState(cScale);
+    }
   }
 
   maybeFetchDataset() {
@@ -169,7 +188,7 @@ class App extends React.Component {
 
   nodeColor(){
     const cScale = this.state.colorScale;
-    if (this.props.tree.nodes && cScale){
+    if (this.props.tree.nodes && cScale && cScale.colorBy){
       const nodeColorAttr = this.props.tree.nodes.map((n) => this.getTipColorAttribute(n, cScale));
       return nodeColorAttr.map((n) => cScale.scale(n));
     }else{
@@ -289,7 +308,7 @@ class App extends React.Component {
         sidebar={
           <Controls changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
-            colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || colorOptions) : color_options}
+            colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || colorOptions) : colorOptions}
             colorScale={this.state.colorScale}
           />
         }
