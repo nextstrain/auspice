@@ -161,7 +161,7 @@ PhyloTree.prototype.removeGrid = function () {
 
 PhyloTree.prototype.addGrid = function(layout) {
     // console.log("adding grid");
-    this.removeGrid();
+    //this.removeGrid();
     if (typeof layout==="undefined"){ layout=this.layout;}
 
     this.majorGridWidth = 2;
@@ -205,14 +205,16 @@ PhyloTree.prototype.addGrid = function(layout) {
     const roundingLevel = Math.pow(10, logRange);
     const gridMin = Math.floor((xmin+offset)/roundingLevel)*roundingLevel;
     const gridPoints = [];
-    for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+0.4; ii++) {
+    for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+0.8; ii++) {
       if (gridMin + roundingLevel*ii>offset){
           gridPoints.push(gridMin + roundingLevel*ii);
       }
     }
 
-    this.svg.selectAll('.majorGrid').data(gridPoints).enter()
-        .append("path")
+    const majorGrid = this.svg.selectAll('.majorGrid').data(gridPoints);
+    majorGrid.exit().remove();
+    majorGrid.enter().append("path");
+    majorGrid
         .attr("d", gridline(this.xScale, this.yScale, layout))
         .attr("class", "majorGrid")
         .attr("z-index", 0)
@@ -224,8 +226,10 @@ PhyloTree.prototype.addGrid = function(layout) {
         return function(x){return layout==="rectangular" ? xScale(x) : xScale(0);};};
     const yTextPos = function(yScale, layout){
         return function(x){ return layout==="rectangular" ? yScale.range()[1]+18 : yScale(x-offset);};};
-    this.svg.selectAll('.gridTick').data(gridPoints).enter()
-        .append("text")
+    const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
+    gridLabels.exit().remove();
+    gridLabels.enter().append("text");
+    gridLabels
         .text(function(d){return d.toString();})
         .attr("class", "gridTick")
         .style("font-size",12)
@@ -236,13 +240,15 @@ PhyloTree.prototype.addGrid = function(layout) {
 
     const minorRoundingLevel = roundingLevel / (this.distanceMeasure === "div" ? 5 : 6);
     const minorGridPoints = [];
-    for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+3; ii++) {
+    for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+7; ii++) {
       if (gridMin + minorRoundingLevel*ii>offset){
           minorGridPoints.push(gridMin + minorRoundingLevel*ii);
       }
     }
-    this.svg.selectAll('.minorGrid').data(minorGridPoints).enter()
-        .append("path")
+    const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
+    minorGrid.exit().remove();
+    minorGrid.enter().append("path");
+    minorGrid
         .attr("d", gridline(this.xScale, this.yScale, layout))
         .attr("class", "minorGrid")
         .attr("z-index", 0)
@@ -433,11 +439,11 @@ PhyloTree.prototype.render = function(svg, layout, distance, options) {
     this.setDistance(distance);
     this.setLayout(layout);
     this.mapToScreen();
-    this.branches();
-    this.tips();
     if (options && options.grid){
         this.addGrid();
     }
+    this.branches();
+    this.tips();
     this.updateGeometry(10);
 };
 
