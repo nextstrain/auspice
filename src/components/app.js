@@ -104,10 +104,6 @@ class App extends React.Component {
 
   componentDidUpdate() {
     this.maybeFetchDataset();
-    if (!this.state.nodeColor && this.props.tree.nodes) {
-      const cScale = this.updateColorScale(this.state.location.query.colorBy || "region");
-      this.setState(cScale);
-    }
   }
 
   maybeFetchDataset() {
@@ -161,22 +157,24 @@ class App extends React.Component {
       gts = parseGenotype(colorBy, this.props.sequences.geneLength);
     }
     cScale.genotype = gts;
-    let nodeColorAttr=null;
-    let nodeColor=null;
-    if (this.props.tree.nodes){
-      nodeColorAttr = this.props.tree.nodes.map((n) => this.getTipColorAttribute(n, cScale));
-      nodeColor = nodeColorAttr.map((n) => cScale.scale(n));
-    }
     return {
       colorScale: cScale,
-      nodeColor: nodeColor,
-      nodeColorAttr: nodeColorAttr,
     };
   }
 
   parseFilterQuery(query) {
     const tmp = query.split("-").map( (d) => d.split("."));
     return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1].split(',') )};
+  }
+
+  nodeColor(){
+    const cScale = this.state.colorScale;
+    if (this.props.tree.nodes && cScale){
+      const nodeColorAttr = this.props.tree.nodes.map((n) => this.getTipColorAttribute(n, cScale));
+      return nodeColorAttr.map((n) => cScale.scale(n));
+    }else{
+      return null;
+    }
   }
 
   tipVisibility(filters) {
@@ -243,8 +241,9 @@ class App extends React.Component {
   /******************************************
    * HOVER EVENTS
    *****************************************/
-  determineLegendMatch(selectedLegendItem, nodeAttr, legendBoundsMap) {
+  determineLegendMatch(selectedLegendItem, node, legendBoundsMap) {
     let bool;
+    const nodeAttr = this.getTipColorAttribute(node, this.state.colorScale);
     // equates a tip and a legend element
     // exact match is required for categorical qunantities such as genotypes, regions
     // continuous variables need to fall into the interal (lower_bound[leg], leg]
@@ -259,12 +258,12 @@ class App extends React.Component {
 
   tipRadii() {
     const selItem = this.props.selectedLegendItem;
-    if (selItem && this.state.nodeColorAttr){
+    if (selItem && this.props.tree.nodes){
       const legendMap = this.state.colorScale.continuous
                         ? this.state.colorScale.legendBoundsMap : false;
-      return this.state.nodeColorAttr.map((d) => this.determineLegendMatch(selItem, d, legendMap) ? 6 : 3);
-    } else if (this.state.nodeColorAttr) {
-      return this.state.nodeColorAttr.map((d) => 3);
+      return this.props.tree.nodes.map((d) => this.determineLegendMatch(selItem, d, legendMap) ? 6 : 3);
+    } else if (this.props.tree.nodes) {
+      return this.props.tree.nodes.map((d) => 3);
     } else {
       return null;
     }
@@ -300,9 +299,8 @@ class App extends React.Component {
         <Background>
           <Header/>
           <TreeView nodes={this.props.tree.nodes}
-            nodeColorAttr={this.state.nodeColorAttr}
             colorScale={this.state.colorScale}
-            nodeColor={this.state.nodeColor}
+            nodeColor={this.nodeColor()}
             tipRadii={this.tipRadii()}
             tipVisibility={this.tipVisibility()}
             layout={this.state.location.query.l || "rectangular"}
