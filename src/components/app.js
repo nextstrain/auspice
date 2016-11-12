@@ -290,7 +290,7 @@ class App extends React.Component {
         sidebar={
           <Controls changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
-            colorOptions={this.props.metadata.color_options || colorOptions}
+            colorOptions={this.props.metadata.metadata.color_options || colorOptions}
             colorScale={this.state.colorScale}
           />
         }
