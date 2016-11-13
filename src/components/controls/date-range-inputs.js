@@ -12,6 +12,13 @@ import _ from 'lodash';
 
 import Slider from './slider';
 
+moment.updateLocale('en', {
+    longDateFormat : {
+        L: "DD/MM/YYYY",
+        l: "D/M/YYYY"
+    }
+});
+
 @connect()
 @Radium
 class DateRangeInputs extends React.Component {

@@ -127,9 +127,12 @@ class Frequencies extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
+      (this.props.metadata && this.props.metadata.panels.some((d)=>d==="frequencies"))
+      ?(
       <Card title={"Frequencies"}>
         {this.props.frequencies ? this.drawFrequencies() : "Waiting on freq data"}
-      </Card>
+      </Card>)
+      :null
     );
   }
 }

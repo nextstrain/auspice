@@ -77,12 +77,27 @@ class App extends React.Component {
    *****************************************/
 
   componentWillReceiveProps(nextProps) {
+    const tmpQuery = queryString.parse(window.location.search);
+    const cScale = getColorScale(tmpQuery.colorBy, nextProps.tree, nextProps.sequences);
+    this.setState({
+      colorScale: cScale
+    });
   }
 
   componentWillMount() {
     var mql = window.matchMedia(`(min-width: 800px)`);
     mql.addListener(this.mediaQueryChanged.bind(this));
     this.setState({mql: mql, sidebarDocked: mql.matches});
+
+    const tmpQuery = queryString.parse(window.location.search);
+    const cScale = this.updateColorScale(tmpQuery.colorBy || "region");
+    this.setState({
+      location: {
+        pathname: window.location.pathname.slice(1, -1),
+        query: tmpQuery
+      },
+      colorScale: cScale.colorScale
+    });
   }
 
   componentDidMount() {
@@ -97,14 +112,14 @@ class App extends React.Component {
           pathname: window.location.pathname.slice(1, -1),
           query: tmpQuery
         },
-        colorScale: cScale
+        colorScale: cScale.colorScale
       });
     });
   }
 
   componentDidUpdate() {
     this.maybeFetchDataset();
-    if (!this.state.nodeColor && this.props.tree.nodes) {
+    if (!this.state.colorScale) {
       const cScale = this.updateColorScale(this.state.location.query.colorBy || "region");
       this.setState(cScale);
     }
@@ -161,22 +176,24 @@ class App extends React.Component {
       gts = parseGenotype(colorBy, this.props.sequences.geneLength);
     }
     cScale.genotype = gts;
-    let nodeColorAttr=null;
-    let nodeColor=null;
-    if (this.props.tree.nodes){
-      nodeColorAttr = this.props.tree.nodes.map((n) => this.getTipColorAttribute(n, cScale));
-      nodeColor = nodeColorAttr.map((n) => cScale.scale(n));
-    }
     return {
       colorScale: cScale,
-      nodeColor: nodeColor,
-      nodeColorAttr: nodeColorAttr,
     };
   }
 
   parseFilterQuery(query) {
     const tmp = query.split("-").map( (d) => d.split("."));
     return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1].split(',') )};
+  }
+
+  nodeColor(){
+    const cScale = this.state.colorScale;
+    if (this.props.tree.nodes && cScale && cScale.colorBy){
+      const nodeColorAttr = this.props.tree.nodes.map((n) => this.getTipColorAttribute(n, cScale));
+      return nodeColorAttr.map((n) => cScale.scale(n));
+    }else{
+      return null;
+    }
   }
 
   tipVisibility(filters) {
@@ -243,8 +260,9 @@ class App extends React.Component {
   /******************************************
    * HOVER EVENTS
    *****************************************/
-  determineLegendMatch(selectedLegendItem, nodeAttr, legendBoundsMap) {
+  determineLegendMatch(selectedLegendItem, node, legendBoundsMap) {
     let bool;
+    const nodeAttr = this.getTipColorAttribute(node, this.state.colorScale);
     // equates a tip and a legend element
     // exact match is required for categorical qunantities such as genotypes, regions
     // continuous variables need to fall into the interal (lower_bound[leg], leg]
@@ -259,12 +277,12 @@ class App extends React.Component {
 
   tipRadii() {
     const selItem = this.props.selectedLegendItem;
-    if (selItem && this.state.nodeColorAttr){
+    if (selItem && this.props.tree.nodes){
       const legendMap = this.state.colorScale.continuous
                         ? this.state.colorScale.legendBoundsMap : false;
-      return this.state.nodeColorAttr.map((d) => this.determineLegendMatch(selItem, d, legendMap) ? 6 : 3);
-    } else if (this.state.nodeColorAttr) {
-      return this.state.nodeColorAttr.map((d) => 3);
+      return this.props.tree.nodes.map((d) => this.determineLegendMatch(selItem, d, legendMap) ? 6 : 3);
+    } else if (this.props.tree.nodes) {
+      return this.props.tree.nodes.map((d) => 3);
     } else {
       return null;
     }
@@ -285,12 +303,12 @@ class App extends React.Component {
    * RENDER
    *****************************************/
   render() {
-    return (
+      return (
       <Sidebar
         sidebar={
           <Controls changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
-            colorOptions={this.props.metadata.color_options || colorOptions}
+            colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || colorOptions) : colorOptions}
             colorScale={this.state.colorScale}
           />
         }
@@ -300,9 +318,8 @@ class App extends React.Component {
         <Background>
           <Header/>
           <TreeView nodes={this.props.tree.nodes}
-            nodeColorAttr={this.state.nodeColorAttr}
             colorScale={this.state.colorScale}
-            nodeColor={this.state.nodeColor}
+            nodeColor={this.nodeColor()}
             tipRadii={this.tipRadii()}
             tipVisibility={this.tipVisibility()}
             layout={this.state.location.query.l || "rectangular"}

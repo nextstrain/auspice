@@ -8,7 +8,6 @@ import d3 from "d3";
 import { legendRectSize, legendSpacing, defaultColorBy } from "../../util/globals";
 import LegendItem from "./legend-item";
 
-
 // @connect(state => {
 //
 // })

@@ -61,7 +61,8 @@ class LegendItem extends React.Component {
       <g
         transform={this.props.transform}
         onMouseEnter={() => {
-          this.props.dispatch({ type: LEGEND_ITEM_MOUSEENTER, data: this.props.label });
+          this.props.dispatch({ type: LEGEND_ITEM_MOUSEENTER,
+                                data: this.props.label });
         }}
         onMouseLeave={() => {
           this.props.dispatch({ type: LEGEND_ITEM_MOUSELEAVE });
