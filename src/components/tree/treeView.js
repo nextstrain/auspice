@@ -156,10 +156,7 @@ class TreeView extends React.Component {
   // }
 
   handleChange(value) {
-    // console.log(event.scaleFactor)
-    // console.log('scaleFactor', event.scaleFactor);
-    // console.log(this.state, event.value, event)
-    console.log(value)
+    // console.log(value)
   }
 
   handleClick(event){
@@ -175,7 +172,16 @@ class TreeView extends React.Component {
     return (
       <div>
         <Card center title="Phylogeny">
-          <p style={{position: "absolute", right: 50, bottom: 150, color: "red", fontWeight: 700 }}> {this.state.scaleFactor} </p>
+          <p
+            style={{
+              position: "absolute",
+              right: 50,
+              bottom: 150,
+              color: "red",
+              fontWeight: 700
+            }}>
+            {this.state.scaleFactor}
+          </p>
           <ReactSVGPanZoom
             width={globals.width}
             height={this.treePlotHeight(globals.width)}
