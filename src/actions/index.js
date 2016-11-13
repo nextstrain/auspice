@@ -41,10 +41,7 @@ const fetchMetadata = (q) => {
     this will resolve to something like:
     /data/flu_h3n2_3y_meta.json
   */
-  return fetch(
-    "http://nextstrain.org/data/" +
-    q + "_meta.json"
-  );
+  return fetch("/meta");
 };
 
 export const populateMetadataStore = (queryParams) => {
@@ -80,10 +77,7 @@ const treeFetchError = (err) => {
 };
 
 const fetchTree = (q) => {
-  return fetch(
-    "http://nextstrain.org/data/" +
-      q + "_tree.json"
-  );
+  return fetch("/tree");
 };
 
 export const populateTreeStore = (queryParams) => {
@@ -119,10 +113,7 @@ const sequencesFetchError = (err) => {
 };
 
 const fetchSequences = (q) => {
-  return fetch(
-    "http://nextstrain.org/data/" +
-      q + "_sequences.json"
-  );
+  return fetch("/sequences");
 };
 
 export const populateSequencesStore = (queryParams) => {
@@ -157,10 +148,7 @@ const frequenciesFetchError = (err) => {
 };
 
 const fetchFrequencies = (q) => {
-  return fetch(
-    "http://nextstrain.org/data/" +
-      q + "_frequencies.json"
-  );
+  return fetch("/frequencies");
 };
 
 export const populateFrequenciesStore = (queryParams) => {
@@ -195,8 +183,7 @@ const entropyFetchError = (err) => {
 };
 
 const fetchEntropy = (q) => {
-  return fetch("http://nextstrain.org/data/" +
-      q + "_entropy.json");
+  return fetch("/entropy");
 };
 
 export const populateEntropyStore = (queryParams) => {
