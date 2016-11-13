@@ -1,7 +1,6 @@
 import d3 from "d3";
 
 var PhyloTree = function (treeJson) {
-    // console.log("PhyloTree: instantiating");
     this.grid=false;
     this.tree = d3.layout.tree();
     this.nodes = this.tree.nodes(treeJson).map(function(d){return {n:d, x:0, y:0};});
@@ -25,13 +24,7 @@ var PhyloTree = function (treeJson) {
  * calculate tree layout, scales, and updating of those
  */
 PhyloTree.prototype.setDistance = function(attr){
-    // console.log("PhyloTree.setDistance", attr);
-    if (typeof attr!=="undefined" && attr===this.distance){
-        this.nodes.forEach(function(d){d.update=false});
-        return;
-    }else{
-        this.nodes.forEach(function(d){d.update=true});
-    }
+    this.nodes.forEach(function(d){d.update=true});
     if (typeof attr === "undefined"){
         this.distance = "div";
     } else {
@@ -103,18 +96,17 @@ PhyloTree.prototype.mapToScreen = function(){
     this.nodes.forEach(function(d){d.yTip = tmp_yScale(d.y)});
     this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
     this.nodes.forEach(function(d){d.yBase = tmp_yScale(d.py)});
-    // console.log("PhyloTree.mapToScreen", this.layout,
-    //             "xScale domain", this.xScale.domain());
+
     if (this.layout==="rootToTip"){
         this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
-                                                 " L "+d.xTip.toString()+","+d.yTip.toString();})
+                                                 " L "+d.xTip.toString()+","+d.yTip.toString();});
     } else if (this.layout==="rectangular"){
         this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])});
         this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])});
         this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
                                                  " L "+d.xTip.toString()+","+d.yTip.toString()+
                                                  " M "+d.xTip.toString()+","+d.cBarStart.toString()+
-                                                 " L "+d.xTip.toString()+","+d.cBarEnd.toString();})
+                                                 " L "+d.xTip.toString()+","+d.cBarEnd.toString();});
     } else if (this.layout==="radial"){
         const offset = this.nodes[0].depth;
         this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])});
@@ -198,8 +190,6 @@ PhyloTree.prototype.removeGrid = function () {
 }
 
 PhyloTree.prototype.addGrid = function(layout) {
-    // console.log("adding grid");
-    //this.removeGrid();
     if (typeof layout==="undefined"){ layout=this.layout;}
 
     this.majorGridWidth = 2;
@@ -310,7 +300,7 @@ PhyloTree.prototype.addGrid = function(layout) {
 PhyloTree.prototype.updateGeometryFade = function(dt){
     this.svg.selectAll('.branch').filter(function (d) {return d.update;})
         .transition().duration(dt*0.5)
-        .style("stroke", "#FFF");
+        .style("opacity", 0.0);
 
     const tipTrans = function(tmp_svg, tmp_dt){
         const svg = tmp_svg;
@@ -335,7 +325,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt){
         const svg = tmp_svg;
         return  function(d){svg.selectAll('.branch').filter(function (d) {return d.update;})
                 .transition().duration(0.5*tmp_dt)
-                .style("stroke",function (d) {return d.stroke||"#AAA";})};
+                .style("opacity",1.0)};
     };
     setTimeout(fadeBack(this.svg, 0.2*dt),1.5*dt);
 };
@@ -435,7 +425,6 @@ PhyloTree.prototype.updateStyleArray= function(treeElem, styleElem, style_array,
 };
 
 PhyloTree.prototype.redrawStyle = function(treeElem, styleElem, dt){
-    // console.log("redraw",this.nodes.filter(function (d) {return d.update;}).length);
     this.svg.selectAll(treeElem).filter(function (d) {return d.update;})
         .transition().duration(dt)
         .style(styleElem, function(d){return d[styleElem];});
@@ -480,7 +469,7 @@ PhyloTree.prototype.branches = function(){
 PhyloTree.prototype.render = function(svg, layout, distance, options) {
     this.svg = svg;
     this.options = options;
-    // console.log("PhyloTree.render", this.svg);
+
     this.clearSVG();
     this.setDistance(distance);
     this.setLayout(layout);
