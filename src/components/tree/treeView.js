@@ -12,6 +12,7 @@ import {ReactSVGPanZoom, fitToViewer} from "react-svg-pan-zoom";
 import ReactDOM from "react-dom"
 import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration} from "../../util/globals";
+import * as globalStyles from "../../globalStyles";
 
 const arrayInEquality = function(a,b){
   if (a&&b){
@@ -172,16 +173,68 @@ class TreeView extends React.Component {
     return (
       <div>
         <Card center title="Phylogeny">
-          <p
+          <svg
+            width={300}
+            height={250 /* this should be dynamically calculated by number of elements */}
             style={{
               position: "absolute",
-              right: 50,
-              bottom: 150,
-              color: "red",
-              fontWeight: 700
+              left: 13,
+              top: 45,
+              borderRadius: 10,
+              zIndex: 1000,
+              backgroundColor: "rgba(255,255,255,.85)"
             }}>
-            {this.state.scaleFactor}
-          </p>
+            <Legend colorScale={this.props.colorScale}/>
+          </svg>
+          <div
+            style={{
+              width: 260, /* equal to legend but account for padding */
+              position: "absolute",
+              left: 13,
+              top: 45 /* legend top offset */ + 250 /* legend height */ + 20 /* top padding */,
+              padding: "10px 20px 20px 20px",
+              borderRadius: 10,
+              zIndex: 1000,
+              pointerEvents: "none",
+              backgroundColor: "rgba(255,255,255,.85)"
+            }}>
+            <p style={{
+                fontFamily: globalStyles.sans,
+                fontSize: 14,
+                lineHeight: .8
+              }}>Frequency 90%</p>
+            <p style={{
+                fontFamily: globalStyles.sans,
+                fontSize: 14,
+                lineHeight: .8
+              }}>Mutations A100T</p>
+            <a
+              href="#"
+              style={{
+                fontFamily: globalStyles.sans,
+                fontSize: 14,
+                display: "block",
+                marginTop: 20,
+                textDecoration: "none",
+                pointerEvents: "auto",
+                lineHeight: .8
+              }}>
+              Filter to this clade
+            </a>
+            <a
+              href="#"
+              style={{
+                fontFamily: globalStyles.sans,
+                fontSize: 14,
+                display: "block",
+                marginTop: 20,
+                textDecoration: "none",
+                pointerEvents: "auto",
+                lineHeight: .8
+              }}>
+              Reset layout to this clade
+            </a>
+          </div>
           <ReactSVGPanZoom
             width={globals.width}
             height={this.treePlotHeight(globals.width)}
@@ -235,11 +288,7 @@ class TreeView extends React.Component {
               y={90}
               />
           </svg>
-          <svg width={300} height={300}
-               style={{position: "absolute", left: 13,
-                       top: 50}}>
-            <Legend colorScale={this.props.colorScale}/>
-          </svg>
+
         </Card>
       </div>
     );
