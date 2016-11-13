@@ -36,36 +36,24 @@ class TreeView extends React.Component {
 
     this.state = {
       okToDraw: false,
-      zoom: 1,
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
     };
   }
-  static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object,
-    tree: React.PropTypes.object
-  }
 
-makeTree(nodes) {
-  // console.log("TreeView.makeTree");
-  if (nodes) {
-    var myTree = new PhyloTree(nodes[0]);
-    // https://facebook.github.io/react/docs/refs-and-the-dom.html
-    var treeplot = d3.select(this.Viewer.ViewerDOM);
-    myTree.render(treeplot, this.props.layout, this.props.distanceMeasure, {grid:true});
-    return myTree;
-  } else {
-    return null;
+  makeTree(nodes) {
+    // console.log("TreeView.makeTree");
+    if (nodes && this.refs.d3TreeElement) {
+      var myTree = new PhyloTree(nodes[0]);
+      // https://facebook.github.io/react/docs/refs-and-the-dom.html
+      var treeplot = d3.select(this.refs.d3TreeElement);
+      myTree.render(treeplot, this.props.layout, this.props.distanceMeasure, {grid:true});
+      return myTree;
+    } else {
+      return null;
+    }
   }
-}
-
   componentWillMount() {
     if (this.state.currentDatasetGuid !== this.props.datasetGuid) {
-      // console.log("componentWillMount, width:", globals.width);
       this.setState({
         okToDraw: true,
         currentDatasetGuid: this.props.datasetGuid,
@@ -73,25 +61,18 @@ makeTree(nodes) {
       });
     }
   }
-
-  componentDidMount(){
-    // console.log("TreeView.componentDidMount");
-
+  componentDidMount() {
     this.Viewer.fitToViewer();
-
     const tree = (this.state.tree)
-                  ? this.state.tree
-                  : this.makeTree(this.props.nodes, this.props.layout, this.props.distance);
-      this.setState({
-        tree: tree
-      });
+      ? this.state.tree
+      : this.makeTree(this.props.nodes, this.props.layout, this.props.distance);
+    this.setState({tree: tree});
   }
-
   componentWillReceiveProps(nextProps) {
     // Do we have a tree to draw? if yes, check whether it needs to be redrawn
     const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree)
-                  ? this.state.tree
-                  : this.makeTree(nextProps.nodes, this.props.layout, this.props.distance);
+      ? this.state.tree
+      : this.makeTree(nextProps.nodes, this.props.layout, this.props.distance);
     if (!(nextProps.datasetGuid && nextProps.nodes)){
       this.setState({okToDraw: false});
     } else if ((nextProps.datasetGuid !== this.props.datasetGuid)
@@ -151,22 +132,18 @@ makeTree(nodes) {
   handleIconClick(tool) {
     return () => {
 
-      console.log(tool)
-
-      let zoom;
       if (tool === "zoom-in") {
-        zoom = this.state.zoom + .1;
+        this.Viewer.zoomOnViewerCenter(1.1);
         // console.log('zooming in', this.state.zoom, zoom)
       } else {
-        zoom = this.state.zoom - .1;
-        // console.log('zooming out', this.state.zoom, zoom)
+        this.Viewer.zoomOnViewerCenter(0.9);
       }
-      let viewerX = this.state.width / 2;
-      let viewerY = this.treePlotHeight(this.state.width) / 2;
-      let nextValue = ViewerHelper.zoom(this.state.value, zoom, viewerX, viewerY);
 
+      // const viewerX = this.state.width / 2;
+      // const viewerY = this.treePlotHeight(this.state.width) / 2;
+      // const nextValue = ViewerHelper.zoom(this.state.value, zoom, viewerX, viewerY);
 
-      this.setState({value: nextValue})
+      // this.setState({value: nextValue});
     };
   }
 
@@ -182,7 +159,7 @@ makeTree(nodes) {
     // console.log(event.scaleFactor)
     // console.log('scaleFactor', event.scaleFactor);
     // console.log(this.state, event.value, event)
-    this.setState({value});
+    console.log(value)
   }
 
   handleClick(event){
@@ -206,7 +183,6 @@ makeTree(nodes) {
               // https://facebook.github.io/react/docs/refs-and-the-dom.html
               this.Viewer = Viewer
             }}
-            value={this.state.value}
             tool={this.state.tool}
             detectWheel={false}
             toolbarPosition={"none"}
@@ -218,6 +194,11 @@ makeTree(nodes) {
               width={globals.width}
               height={this.treePlotHeight(globals.width)}
               >
+              <g
+                width={globals.width}
+                height={this.treePlotHeight(globals.width)}
+                ref="d3TreeElement">
+              </g>
             </svg>
           </ReactSVGPanZoom>
           <svg width={50} height={130}
