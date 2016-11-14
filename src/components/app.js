@@ -91,9 +91,11 @@ class App extends React.Component {
 
     const tmpQuery = queryString.parse(window.location.search);
     const cScale = this.updateColorScale(tmpQuery.colorBy || "region");
+    const pathname = window.location.pathname;
+    const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/" : "";
     this.setState({
       location: {
-        pathname: window.location.pathname.slice(1, -1),
+        pathname: pathname + suffix,
         query: tmpQuery
       },
       colorScale: cScale.colorScale
