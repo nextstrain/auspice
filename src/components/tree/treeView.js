@@ -13,6 +13,7 @@ import ReactDOM from "react-dom"
 import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration} from "../../util/globals";
 import * as globalStyles from "../../globalStyles";
+import InfoPanel from "./infoPanel";
 
 const arrayInEquality = function(a,b){
   if (a&&b){
@@ -40,19 +41,6 @@ class TreeView extends React.Component {
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
     };
   }
-
-  makeTree(nodes) {
-    // console.log("TreeView.makeTree");
-    if (nodes && this.refs.d3TreeElement) {
-      var myTree = new PhyloTree(nodes[0]);
-      // https://facebook.github.io/react/docs/refs-and-the-dom.html
-      var treeplot = d3.select(this.refs.d3TreeElement);
-      myTree.render(treeplot, this.props.layout, this.props.distanceMeasure, {grid:true});
-      return myTree;
-    } else {
-      return null;
-    }
-  }
   componentWillMount() {
     if (this.state.currentDatasetGuid !== this.props.datasetGuid) {
       this.setState({
@@ -74,57 +62,105 @@ class TreeView extends React.Component {
     const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree)
       ? this.state.tree
       : this.makeTree(nextProps.nodes, this.props.layout, this.props.distance);
-    if (!(nextProps.datasetGuid && nextProps.nodes)){
+    if (!(nextProps.datasetGuid && nextProps.nodes)) {
       this.setState({okToDraw: false});
-    } else if ((nextProps.datasetGuid !== this.props.datasetGuid)
-               || (nextProps.layout !== this.props.layout)
-               || (nextProps.distanceMeasure !== this.props.distanceMeasure)) {
+    } else if ((nextProps.datasetGuid !== this.props.datasetGuid) || (nextProps.layout !== this.props.layout) || (nextProps.distanceMeasure !== this.props.distanceMeasure)) {
       // console.log("setting ok to draw");
-      this.setState({
-        okToDraw: true,
-        currentDatasetGuid: nextProps.datasetGuid,
-        width: globals.width,
-        tree: tree
-      });
+      this.setState({okToDraw: true, currentDatasetGuid: nextProps.datasetGuid, width: globals.width, tree: tree});
     }
-    if (tree){
-      const attrToUpdate ={};
-      const styleToUpdate ={};
-      if (nextProps.nodeColor &&
-          arrayInEquality(nextProps.nodeColor,
-                         this.props.nodeColor)){
+    if (tree) {
+      const attrToUpdate = {};
+      const styleToUpdate = {};
+      if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
         // console.log("updateColor", this.props.layout, nextProps.layout);
         styleToUpdate['fill'] = nextProps.nodeColor;
         tree.updateStyleArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration);
-        styleToUpdate['stroke'] = nextProps.nodeColor.map(d=>d3.rgb(d).darker(0.7));
+        styleToUpdate['stroke'] = nextProps.nodeColor.map(d => d3.rgb(d).darker(0.7));
       }
-      if (nextProps.tipRadii &&
-          arrayInEquality(nextProps.tipRadii,
-                         this.props.tipRadii)) {
+      if (nextProps.tipRadii && arrayInEquality(nextProps.tipRadii, this.props.tipRadii)) {
         // console.log("updateRadii", this.props.layout, nextProps.layout);
         attrToUpdate['r'] = nextProps.tipRadii;
       }
-      if (nextProps.tipVisibility &&
-          arrayInEquality(nextProps.tipVisibility,
-                         this.props.tipVisibility)) {
+      if (nextProps.tipVisibility && arrayInEquality(nextProps.tipVisibility, this.props.tipVisibility)) {
         // console.log("updateVisibility");
         styleToUpdate['visibility'] = nextProps.tipVisibility;
       }
-      if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length){
+      if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
         tree.updateMultipleArray(".tip", attrToUpdate, styleToUpdate, fastTransitionDuration);
       }
 
-      if (this.props.layout!==nextProps.layout){
+      if (this.props.layout !== nextProps.layout) {
         // console.log("reset layout", this.props.layout, nextProps.layout);
         tree.updateLayout(nextProps.layout, slowTransitionDuration);
       }
-      if (this.props.distanceMeasure!==nextProps.distanceMeasure){
+      if (this.props.distanceMeasure !== nextProps.distanceMeasure) {
         // console.log("reset distance", this.props.distanceMeasure, nextProps.distanceMeasure);
         tree.updateDistance(nextProps.distanceMeasure, slowTransitionDuration);
       }
     }
   }
 
+  makeTree(nodes) {
+    // console.log("TreeView.makeTree");
+    if (nodes && this.refs.d3TreeElement) {
+      var myTree = new PhyloTree(nodes[0]);
+      // https://facebook.github.io/react/docs/refs-and-the-dom.html
+      var treeplot = d3.select(this.refs.d3TreeElement);
+      myTree.render(
+        treeplot,
+        this.props.layout,
+        this.props.distanceMeasure,
+        {
+          /* options */
+          grid: true
+        },
+        {
+          /* callbacks */
+          onTipHover: this.onTipHover.bind(this),
+          onTipClick: this.onTipClick.bind(this),
+          onBranchHover: this.onBranchHover.bind(this),
+          onBranchClick: this.onBranchClick.bind(this)
+        }
+      );
+      return myTree;
+    } else {
+      return null;
+    }
+  }
+
+  onTipHover(d) {
+    this.setState({
+      hovered: {
+        d,
+        type: "tip"
+      }
+    })
+  }
+  onTipClick(d) {
+    this.setState({
+      clicked: {
+        d,
+        type: "tip"
+      }
+    })
+  }
+  onBranchHover(d) {
+    console.log("branch hover", d)
+    this.setState({
+      hovered: {
+        d,
+        type: "branch"
+      }
+    })
+  }
+  onBranchClick(d) {
+    this.setState({
+      clicked: {
+        d,
+        type: "branch"
+      }
+    })
+  }
 
   treePlotHeight(width) {
     return 400 + 0.30 * width;
@@ -186,55 +222,7 @@ class TreeView extends React.Component {
             }}>
             <Legend colorScale={this.props.colorScale}/>
           </svg>
-          <div
-            style={{
-              width: 260, /* equal to legend but account for padding */
-              position: "absolute",
-              left: 13,
-              top: 45 /* legend top offset */ + 250 /* legend height */ + 20 /* top padding */,
-              padding: "10px 20px 20px 20px",
-              borderRadius: 10,
-              zIndex: 1000,
-              pointerEvents: "none",
-              backgroundColor: "rgba(255,255,255,.85)"
-            }}>
-            <p style={{
-                fontFamily: globalStyles.sans,
-                fontSize: 14,
-                lineHeight: .8
-              }}>Frequency 90%</p>
-            <p style={{
-                fontFamily: globalStyles.sans,
-                fontSize: 14,
-                lineHeight: .8
-              }}>Mutations A100T</p>
-            <a
-              href="#"
-              style={{
-                fontFamily: globalStyles.sans,
-                fontSize: 14,
-                display: "block",
-                marginTop: 20,
-                textDecoration: "none",
-                pointerEvents: "auto",
-                lineHeight: .8
-              }}>
-              Filter to this clade
-            </a>
-            <a
-              href="#"
-              style={{
-                fontFamily: globalStyles.sans,
-                fontSize: 14,
-                display: "block",
-                marginTop: 20,
-                textDecoration: "none",
-                pointerEvents: "auto",
-                lineHeight: .8
-              }}>
-              Reset layout to this clade
-            </a>
-          </div>
+          <InfoPanel hovered={this.state.hovered} clicked={this.state.clicked}/>
           <ReactSVGPanZoom
             width={globals.width}
             height={this.treePlotHeight(globals.width)}

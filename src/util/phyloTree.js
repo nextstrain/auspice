@@ -448,6 +448,9 @@ PhyloTree.prototype.tips = function(){
         .attr("cx", function(d){return d.xTip;})
         .attr("cy", function(d){return d.yTip;})
         .attr("r", function(d){return d.r||5;})
+        .on("mouseover", (d) => { this.callbacks.onTipHover(d) })
+        .on("click", (d) => { this.callbacks.onTipClick(d) })
+        .style("pointer-events", "auto")
         .style("fill",function (d) {return d.fill||"#CCC";})
         .style("stroke",function (d) {return d.stroke||"#AAA";})
         .style("stroke-width", function(d){return d.strokeWidth||2;});
@@ -461,14 +464,17 @@ PhyloTree.prototype.branches = function(){
         .attr("class", "branch")
         .attr("id", function(d){return d.n.clade;})
         .attr("d", function(d){return d.branch;})
+        .on("mouseover", (d) => { console.log("branch"); this.callbacks.onBranchHover(d) })
+        .on("click", (d) => { this.callbacks.onBranchClick(d) })
         .style("stroke",function (d) {return d.stroke||"#AAA";})
         .style("fill","none")
         .style("stroke-width", function(d){return d.strokeWidth||2;});
 };
 
-PhyloTree.prototype.render = function(svg, layout, distance, options) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks) {
     this.svg = svg;
     this.options = options;
+    this.callbacks = callbacks
 
     this.clearSVG();
     this.setDistance(distance);
