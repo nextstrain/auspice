@@ -2,6 +2,7 @@ import d3 from "d3";
 
 var PhyloTree = function (treeJson) {
     this.grid=false;
+    this.setDefaults();
     this.tree = d3.layout.tree();
     this.nodes = this.tree.nodes(treeJson).map(function(d){return {n:d, x:0, y:0};});
     this.nodes[0].n.parent = this.nodes[0].n;
@@ -21,6 +22,25 @@ var PhyloTree = function (treeJson) {
 
 
 /*
+ * set default values.
+ */
+PhyloTree.prototype.setDefaults = function () {
+    this.params = {
+        majorGridStroke: "#CCC",
+        majorGridWidth: 2,
+        minorGridStroke: "#DDD",
+        minorGridWidth: 1,
+        tickLabelSize: 10,
+        tickLabelFill: "#BBB",
+        minorTicksTimeTree: 3,
+        minorTicks: 4,
+        margins: {left:50, right:50, top:50, bottom:50},
+        showGrid: true,
+    };
+};
+
+
+/*
  * calculate tree layout, scales, and updating of those
  */
 PhyloTree.prototype.setDistance = function(attr){
@@ -31,8 +51,8 @@ PhyloTree.prototype.setDistance = function(attr){
         this.distance = attr;
     }
     const tmp_dist = this.distance;
-    this.nodes.forEach(function(d) {d.depth = d.n.attr[tmp_dist];})
-    this.nodes.forEach(function(d) {d.pDepth = d.n.parent.attr[tmp_dist];})
+    this.nodes.forEach(function(d) {d.depth = d.n.attr[tmp_dist];});
+    this.nodes.forEach(function(d) {d.pDepth = d.n.parent.attr[tmp_dist];});
 };
 
 PhyloTree.prototype.rectangularLayout = function(){
@@ -74,7 +94,7 @@ PhyloTree.prototype.radialLayout = function(){
 };
 
 PhyloTree.prototype.mapToScreen = function(){
-    this.setScales(this.options.margins||{left:50, right:50, top:50, bottom:50});
+    this.setScales(this.params.margins);
     const tmp_xValues = this.nodes.map(function(d){return d.x});
     const tmp_yValues = this.nodes.map(function(d){return d.y});
     if (this.layout==="radial"){
@@ -192,10 +212,6 @@ PhyloTree.prototype.removeGrid = function () {
 PhyloTree.prototype.addGrid = function(layout) {
     if (typeof layout==="undefined"){ layout=this.layout;}
 
-    this.majorGridWidth = 2;
-    this.minorGridWidth = 1;
-    this.gridColor="#AAA";
-
     const xmin = (this.xScale.domain()[0]>0)?this.xScale.domain()[0]:0.0;
     const xmax = layout=="radial"
                   ? d3.max([this.xScale.domain()[1], this.yScale.domain()[1],
@@ -252,8 +268,8 @@ PhyloTree.prototype.addGrid = function(layout) {
         .attr("z-index", 0)
         .style("fill", "none")
         .style("visibility", function (d){return d[1];})
-        .style("stroke",this.gridColor)
-        .style("stroke-width",this.majorGridWidth);
+        .style("stroke",this.params.majorGridStroke)
+        .style("stroke-width",this.params.majorGridWidth);
 
     const xTextPos = function(xScale, layout){
         return function(x){return layout==="radial" ? xScale(0) :  xScale(x[0]);};};
@@ -265,14 +281,16 @@ PhyloTree.prototype.addGrid = function(layout) {
     gridLabels
         .text(function(d){return d[0].toString();})
         .attr("class", "gridTick")
-        .style("font-size",12)
-        .style("fill",this.gridColor)
+        .style("font-size",this.params.tickLabelSize)
+        .style("fill",this.params.tickLabelFill)
         .style("text-anchor", this.layout==="radial" ? "end" : "start")
         .style("visibility", function (d){return d[1];})
         .attr("x", xTextPos(this.xScale, layout))
         .attr("y", yTextPos(this.yScale, layout));
 
-    const minorRoundingLevel = roundingLevel / (this.distanceMeasure === "div" ? 5 : 6);
+    const minorRoundingLevel = roundingLevel / (this.distanceMeasure === "num_date"
+                                                ? this.params.minorTicksTimeTree
+                                                : this.params.minorTicks);
     const minorGridPoints = [];
     for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+50; ii++) {
       const pos = gridMin + minorRoundingLevel*ii;
@@ -289,8 +307,8 @@ PhyloTree.prototype.addGrid = function(layout) {
         .attr("z-index", 0)
         .style("fill", "none")
         .style("visibility", function (d){return d[1];})
-        .style("stroke",this.gridColor)
-        .style("stroke-width",this.minorGridWidth);
+        .style("stroke",this.params.minorGridStroke)
+        .style("stroke-width",this.params.minorGridWidth);
     this.grid=true;
 };
 
@@ -468,13 +486,13 @@ PhyloTree.prototype.branches = function(){
 
 PhyloTree.prototype.render = function(svg, layout, distance, options) {
     this.svg = svg;
-    this.options = options;
+    this.params = Object.assign(this.params, options);
 
     this.clearSVG();
     this.setDistance(distance);
     this.setLayout(layout);
     this.mapToScreen();
-    if (options && options.grid){
+    if (this.params.showGrid){
         this.addGrid();
     }
     this.branches();

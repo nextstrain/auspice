@@ -46,7 +46,7 @@ class TreeView extends React.Component {
       var myTree = new PhyloTree(nodes[0]);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
       var treeplot = d3.select(this.refs.d3TreeElement);
-      myTree.render(treeplot, this.props.layout, this.props.distanceMeasure, {grid:true});
+      myTree.render(treeplot, this.props.layout, this.props.distanceMeasure, {showGrid:true});
       return myTree;
     } else {
       return null;
