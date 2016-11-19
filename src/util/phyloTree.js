@@ -26,6 +26,8 @@ var PhyloTree = function (treeJson) {
  */
 PhyloTree.prototype.setDefaults = function () {
     this.params = {
+        regressionStroke: "#CCC",
+        regressionWidth: 3,
         majorGridStroke: "#CCC",
         majorGridWidth: 2,
         minorGridStroke: "#DDD",
@@ -72,7 +74,39 @@ PhyloTree.prototype.timeVsRootToTip = function(){
         d.px = d.pDepth;
         d.py = d.n.parent.attr["div"];
     });
+    const nTips = this.numberOfTips;
+    const meanDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.y))/nTips;
+    const meanTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.depth))/nTips;
+    const covarTimeDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y-meanDiv)*(d.depth-meanTime)))/nTips;
+    const varTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-meanTime)*(d.depth-meanTime)))/nTips;
+    const slope = covarTimeDiv/varTime;
+    const intercept = meanDiv-meanTime*slope;
+    this.regression = {slope:slope, intercept: intercept};
 };
+
+PhyloTree.prototype.drawRegression = function(){
+    const leftY = this.yScale(this.regression.intercept+this.xScale.domain()[0]*this.regression.slope);
+    const rightY = this.yScale(this.regression.intercept+this.xScale.domain()[1]*this.regression.slope);
+
+    const path = "M "+this.xScale.range()[0].toString()+" "+leftY.toString()
+                +" L " + this.xScale.range()[1].toString()+" "+rightY.toString();
+    this.svg
+        .append("path")
+        .attr("d", path)
+        .attr("class", "regression")
+        .style("fill", "none")
+        .style("visibility", "visible")
+        .style("stroke",this.params.regressionStroke)
+        .style("stroke-width",this.params.regressionWidth);
+    this.svg
+        .append("text")
+        .text("rate estimate: "+this.regression.slope.toFixed(4)+'/year')
+        .attr("class", "regression")
+        .attr("x", this.xScale.range()[1]-200)
+        .attr("y", leftY)
+        .style("fill", this.params.regressionStroke)
+        .style("font-size",this.params.tickLabelSize);
+}
 
 PhyloTree.prototype.radialLayout = function(){
     const nTips=this.numberOfTips;
@@ -190,6 +224,8 @@ PhyloTree.prototype.updateDistance = function(attr,dt){
     this.mapToScreen();
     this.updateGeometry(dt);
     if (this.grid) this.addGrid(this.layout);
+    this.svg.selectAll(".regression").remove();
+    if (this.layout==="rootToTip") this.drawRegression();
 };
 
 PhyloTree.prototype.updateLayout = function(layout,dt){
@@ -197,6 +233,8 @@ PhyloTree.prototype.updateLayout = function(layout,dt){
     this.mapToScreen();
     this.updateGeometryFade(dt);
     if (this.grid) this.addGrid(layout);
+    this.svg.selectAll(".regression").remove();
+    if (layout==="rootToTip") this.drawRegression();
 };
 
 /*
@@ -213,6 +251,8 @@ PhyloTree.prototype.addGrid = function(layout) {
     if (typeof layout==="undefined"){ layout=this.layout;}
 
     const xmin = (this.xScale.domain()[0]>0)?this.xScale.domain()[0]:0.0;
+    const ymin = this.yScale.domain()[1];
+    const ymax = this.yScale.domain()[0];
     const xmax = layout=="radial"
                   ? d3.max([this.xScale.domain()[1], this.yScale.domain()[1],
                             -this.xScale.domain()[0], -this.yScale.domain()[0]])
@@ -255,7 +295,7 @@ PhyloTree.prototype.addGrid = function(layout) {
     for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+10; ii++) {
       const pos = gridMin + roundingLevel*ii;
       if (pos>offset){
-          gridPoints.push([pos, pos-offset>xmax?"hidden":"visible"]);
+          gridPoints.push([pos, pos-offset>xmax?"hidden":"visible", "x"]);
       }
     }
 
@@ -265,16 +305,43 @@ PhyloTree.prototype.addGrid = function(layout) {
     majorGrid
         .attr("d", gridline(this.xScale, this.yScale, layout))
         .attr("class", "majorGrid")
-        .attr("z-index", 0)
         .style("fill", "none")
         .style("visibility", function (d){return d[1];})
         .style("stroke",this.params.majorGridStroke)
         .style("stroke-width",this.params.majorGridWidth);
 
     const xTextPos = function(xScale, layout){
-        return function(x){return layout==="radial" ? xScale(0) :  xScale(x[0]);};};
+        return function(x){
+            if (x[2]==="x"){
+                return layout==="radial" ? xScale(0) :  xScale(x[0]);
+            }else{
+                return xScale.range()[1];
+            }
+        }
+    };
     const yTextPos = function(yScale, layout){
-        return function(x){ return layout==="radial" ? yScale(x[0]-offset) :  yScale.range()[1]+18;};};
+        return function(x){
+            if (x[2]==="x"){
+                return layout==="radial" ? yScale(x[0]-offset) :  yScale.range()[1]+18;
+            }else{
+                return yScale(x[0]);
+            }
+        }
+    };
+
+    if (this.layout==="rootToTip"){
+        const logRangeY = Math.floor(Math.log10(ymax - ymin));
+        const roundingLevelY = Math.pow(10, logRangeY);
+        const offsetY=0;
+        const gridMinY = Math.floor((ymin+offsetY)/roundingLevelY)*roundingLevelY;
+        for (let ii = 0; ii <= (ymax + offsetY - gridMinY)/roundingLevelY+10; ii++) {
+          const pos = gridMinY + roundingLevelY*ii;
+          if (pos>offsetY){
+              gridPoints.push([pos, pos-offsetY>ymax?"hidden":"visible","y"]);
+          }
+        }
+    }
+
     const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
     gridLabels.exit().remove();
     gridLabels.enter().append("text");
@@ -304,11 +371,12 @@ PhyloTree.prototype.addGrid = function(layout) {
     minorGrid
         .attr("d", gridline(this.xScale, this.yScale, layout))
         .attr("class", "minorGrid")
-        .attr("z-index", 0)
         .style("fill", "none")
         .style("visibility", function (d){return d[1];})
         .style("stroke",this.params.minorGridStroke)
         .style("stroke-width",this.params.minorGridWidth);
+
+
     this.grid=true;
 };
 
@@ -498,6 +566,8 @@ PhyloTree.prototype.render = function(svg, layout, distance, options) {
     this.branches();
     this.tips();
     this.updateGeometry(10);
+    this.svg.selectAll(".regression").remove();
+    if (layout==="rootToTip") this.drawRegression();
 };
 
 export default PhyloTree;

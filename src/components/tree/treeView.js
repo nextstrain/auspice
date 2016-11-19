@@ -72,7 +72,7 @@ class TreeView extends React.Component {
     // Do we have a tree to draw? if yes, check whether it needs to be redrawn
     const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree)
       ? this.state.tree
-      : this.makeTree(nextProps.nodes, this.props.layout, this.props.distance);
+      : this.makeTree(nextProps.nodes, nextProps.layout, nextProps.distance);
     if (!(nextProps.datasetGuid && nextProps.nodes)){
       this.setState({okToDraw: false});
     } else if ((nextProps.datasetGuid !== this.props.datasetGuid)
