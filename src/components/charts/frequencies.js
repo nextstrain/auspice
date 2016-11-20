@@ -6,7 +6,8 @@ import * as globals from "../../util/globals";
 import Card from "../framework/card";
 
 @connect(state => {
-  return state.frequencies;
+  return {frequencies: state.frequencies,
+         metadata: state.metadata};
 })
 @Radium
 class Frequencies extends React.Component {
@@ -42,7 +43,7 @@ class Frequencies extends React.Component {
     const bottomPadding = 45;
     const leftPadding = 80;
     const rightPadding = 80;
-    const pivots = this.props.pivots;
+    const pivots = this.props.frequencies.pivots;
     const x = d3.scale.linear()
                     .domain([pivots[0], pivots[pivots.length-1]]) // original array, since the x values are still mapped to that
                     .range([leftPadding, frequencyChartWidth - rightPadding]);
@@ -61,8 +62,8 @@ class Frequencies extends React.Component {
       const key = this.props.genotype
                   ? this.props.genotype+states[si]
                   : "not found";
-      if (key !== "not found" && this.props.frequencies[key]){
-        const vals = this.props.frequencies[key];
+      if (key !== "not found" && this.props.frequencies.frequencies[key]){
+        const vals = this.props.frequencies.frequencies[key];
         const new_traj = { d: ("M"+x(pivots[0]).toString()+" " + y(vals[0]).toString() + vals.map((v,i) => ["L", x(pivots[i]).toString(), y(v).toString()].join(" ")).join(" ")),
                           strokeWidth: 3,
                           stroke:globals.genotypeColors[tCount%10]
@@ -124,10 +125,10 @@ class Frequencies extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      (this.props.metadata && this.props.metadata.panels.some((d)=>d==="frequencies"))
+      (this.props.metadata && this.props.metadata.panels && this.props.metadata.panels.some((d)=>d==="frequencies"))
       ?(
       <Card title={"Frequencies"}>
-        {this.props.frequencies ? this.drawFrequencies() : "Waiting on freq data"}
+        {this.props.frequencies.frequencies ? this.drawFrequencies() : "Waiting on freq data"}
       </Card>)
       :null
     );
