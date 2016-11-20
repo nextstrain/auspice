@@ -1,6 +1,4 @@
 import React from 'react';
-import Radium from 'radium';
-// import _ from 'lodash';
 import Flex from './flex';
 import HeaderFont from "./header-font";
 import MonoFont from "./mono-font";
@@ -12,7 +10,6 @@ const returnStateNeeded = (fullStateTree) => {
   };
 };
 @connect(returnStateNeeded)
-@Radium
 class Header extends React.Component {
   constructor(props) {
     super(props);

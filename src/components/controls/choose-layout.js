@@ -1,12 +1,9 @@
 import React from "react";
-import Radium from "radium";
 import RectangleTreeLayout from "../framework/svg-tree-layout-rectangle";
 import RadialTreeLayout from "../framework/svg-tree-layout-radial";
 import UnrootedTreeLayout from "../framework/svg-tree-layout-unrooted";
-import queryString from "query-string";
 import {materialButton} from "../../globalStyles";
 
-@Radium
 class ChooseLayout extends React.Component {
   getStyles() {
     return {

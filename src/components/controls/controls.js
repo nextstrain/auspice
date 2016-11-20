@@ -1,10 +1,6 @@
-import React from 'react';
-import Radium from 'radium';
-// import _ from 'lodash';
-import Flex from '../framework/flex';
-import { connect } from 'react-redux';
-// import { FOO } from '../actions';
-import Button from "../framework/generic-button";
+import React from "react";
+import Flex from "../framework/flex";
+import { connect } from "react-redux";
 import SelectLabel from "../framework/select-label";
 import HeaderFont from "../framework/header-font";
 import ToggleBranchLabels from "./toggle-branch-labels";
@@ -20,12 +16,11 @@ import * as globals from "../../util/globals";
 const returnStateNeeded = (fullStateTree) => {
   return {
     controls: fullStateTree.controls,
-    metadata: fullStateTree.metadata,
+    metadata: fullStateTree.metadata
   };
 };
 
 @connect(returnStateNeeded)
-@Radium
 class Controls extends React.Component {
   getStyles() {
     return {

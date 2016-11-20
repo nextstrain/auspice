@@ -1,8 +1,6 @@
 import React from "react";
-import Radium from "radium";
 
 //TODO: implement proper button
-@Radium
 class TimeTree extends React.Component {
   constructor(props) {
     super(props);

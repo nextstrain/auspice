@@ -1,15 +1,5 @@
 import React from "react";
-import Radium from "radium";
-import queryString from "query-string";
-import { connect } from "react-redux";
 
-// import _ from "lodash";
-// import Flex from "./framework/flex";
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
-
-//@connect()
-//@Radium
 class genotypeInput extends React.Component {
   constructor(props) {
     super(props);
@@ -21,7 +11,7 @@ class genotypeInput extends React.Component {
     /* react */
     // dispatch: React.PropTypes.func,
     params: React.PropTypes.object,
-    routes: React.PropTypes.array,
+    routes: React.PropTypes.array
     /* component api */
   }
   static defaultProps = {
@@ -35,14 +25,11 @@ class genotypeInput extends React.Component {
 
     const newQuery = Object.assign({}, this.props.location.query,
                                    {colorBy: colorBy});
-    // https://www.npmjs.com/package/query-string
+
     const url = (prefix + this.props.location.pathname
                  + suffix + queryString.stringify(newQuery));
     window.history.pushState({}, "", url);
     this.props.changeRoute(this.props.location.pathname, newQuery);
-    // this.props.dispatch({ type: CHANGE_COLORBY,
-      // data: {"colorBy": colorBy}
-    // });
   }
 
   getStyles() {
@@ -53,7 +40,6 @@ class genotypeInput extends React.Component {
     };
   }
   render() {
-    console.log("genotypeInput", this.props);
     return (
       <div>
       GENOTYPE
