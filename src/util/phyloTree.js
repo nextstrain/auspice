@@ -75,13 +75,19 @@ PhyloTree.prototype.timeVsRootToTip = function(){
         d.py = d.n.parent.attr["div"];
     });
     const nTips = this.numberOfTips;
-    const meanDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.y))/nTips;
-    const meanTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.depth))/nTips;
-    const covarTimeDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y-meanDiv)*(d.depth-meanTime)))/nTips;
-    const varTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-meanTime)*(d.depth-meanTime)))/nTips;
-    const slope = covarTimeDiv/varTime;
-    const intercept = meanDiv-meanTime*slope;
+    const offset = this.nodes[0].depth;
+    // const meanDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.y))/nTips;
+    // const meanTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.depth))/nTips;
+    // const covarTimeDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y-meanDiv)*(d.depth-meanTime)))/nTips;
+    // const varTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-meanTime)*(d.depth-meanTime)))/nTips;
+    //const slope = covarTimeDiv/varTime;
+    //const intercept = meanDiv-meanTime*slope;
+    const XY = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y)*(d.depth-offset)))/nTips;
+    const secondMomentTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-offset)*(d.depth-offset)))/nTips;
+    const slope = XY/secondMomentTime;
+    const intercept = -offset*slope;
     this.regression = {slope:slope, intercept: intercept};
+    console.log(this.regression);
 };
 
 PhyloTree.prototype.drawRegression = function(){
