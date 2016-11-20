@@ -1,17 +1,8 @@
 import React from "react";
-import Radium from "radium";
-// import _ from "lodash";
-// import Flex from "./framework/flex";
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
 import d3 from "d3";
 import { legendRectSize, legendSpacing, defaultColorBy } from "../../util/globals";
 import LegendItem from "./legend-item";
 
-// @connect(state => {
-//
-// })
-@Radium
 class Legend extends React.Component {
   constructor(props) {
     super(props);
@@ -104,8 +95,3 @@ class Legend extends React.Component {
 
 export default Legend;
 
-// </svg>
-//   </div>
-//   <div style={styles.container}>
-//   <p>{this.chooseLegendTitle()}</p>
-// <svg style={styles.svg}>

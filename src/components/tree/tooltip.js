@@ -1,8 +1,6 @@
 import React from "react";
-import Radium from "radium";
 import * as globals from "../../util/globals";
 
-@Radium
 class Tooltip extends React.Component {
   constructor(props) {
     super(props);

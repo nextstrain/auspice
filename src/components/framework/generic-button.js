@@ -1,9 +1,7 @@
-import Radium from "radium";
 import React from "react";
 import Color from "color";
 import globalStyles from "../../globalStyles";
 
-@Radium
 class Button extends React.Component {
   static propTypes = {
     style: React.PropTypes.object

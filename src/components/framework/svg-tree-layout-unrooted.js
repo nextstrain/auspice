@@ -1,7 +1,5 @@
 import React from "react";
-import Radium from "radium";
 
-@Radium
 class RectangleTreeLayout extends React.Component {
   static defaultProps = {
     // foo: "bar"

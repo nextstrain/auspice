@@ -1,5 +1,4 @@
 import React from "react";
-import Radium from "radium";
 import d3 from "d3";
 import * as globals from "../../util/globals";
 import Card from "../framework/card";
@@ -27,7 +26,6 @@ const arrayInEquality = function(a,b){
  * such that branches and tips are correctly placed.
  * will handle zooming
 */
-@Radium
 class TreeView extends React.Component {
   constructor(props) {
     super(props);

@@ -1,6 +1,5 @@
 import React from "react";
 import Radium from "radium";
-// import Flex from "./framework/flex";
 
 @Radium
 class Background extends React.Component {

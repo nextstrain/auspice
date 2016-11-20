@@ -1,16 +1,9 @@
 import React from "react";
-import Radium from "radium";
-import { defaultColorBy, genericDomain, colors } from "../../util/globals";
+import { defaultColorBy } from "../../util/globals";
 import { connect } from "react-redux";
-import * as scales from "../../util/colorScales";
 import { parseGenotype } from "../../util/getGenotype";
-import {sans, select} from "../../globalStyles";
+import { select} from "../../globalStyles";
 import SelectLabel from "../framework/select-label";
-
-// import _ from "lodash";
-// import Flex from "./framework/flex";
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
 
 const returnStateNeeded = (fullStateTree) => {
   return {
@@ -19,7 +12,6 @@ const returnStateNeeded = (fullStateTree) => {
 };
 
 @connect(returnStateNeeded)
-@Radium
 class ColorBy extends React.Component {
   constructor(props) {
     super(props);

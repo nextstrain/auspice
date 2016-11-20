@@ -1,22 +1,9 @@
 import React from "react";
 import Radium from "radium";
-// import _ from "lodash";
-// import Flex from "./framework/flex";
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
 import { datasets } from "../../util/globals";
 import ChooseVirusSelect from "./choose-virus-select";
 import parseParams from "../../util/parseParams";
 
-// @connect(state => {
-//   return state.FOO;
-// })
-
-/*
- * this component implements a series of selectors to select datasets.
- * the dataset hierarchy is specified in a datasets.json, currently
- * in ../../util/globals
-*/
 @Radium
 class ChooseVirus extends React.Component {
   constructor(props) {

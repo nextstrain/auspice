@@ -1,21 +1,7 @@
 import React from "react";
 import Radium from "radium";
-import queryString from "query-string";
 import {select} from "../../globalStyles";
-// import _ from "lodash";
-// import Flex from "./framework/flex";
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
 
-// @connect(state => {
-//   return state.FOO;
-// })
-
-/*
- * implements a selector that
- * (i) knows about the upstream choices and
- * (ii) resets the route upon change
- */
 @Radium
 class ChooseVirusSelect extends React.Component {
   constructor(props) {
