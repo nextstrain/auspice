@@ -1,5 +1,34 @@
 import d3 from "d3";
 
+const addLeafCount = function (node) {
+    if (node.children) {
+        node.leafCount=0;
+        for (var i=0; i<node.children.length; i+=1){
+            addLeafCount(node.children[i]);
+            node.leafCount += node.children[i].leafCount;
+        }
+    } else {
+        node.leafCount=1;
+    }
+};
+
+const unrootedPlaceSubtree = function(node, nTips){
+    node.x = node.px+node.branchLength*Math.cos(node.tau + node.w*0.5);
+    node.y = node.py+node.branchLength*Math.sin(node.tau + node.w*0.5);
+    var eta = node.tau;
+    if (node.children){
+        for (var i=0; i<node.children.length; i+=1){
+            var ch = node.children[i];
+            ch.w = 2*Math.PI*ch.leafCount/nTips;
+            ch.tau = eta;
+            eta += ch.w;
+            ch.px = node.x;
+            ch.py = node.y;
+            unrootedPlaceSubtree(ch, nTips);
+        }
+    }
+};
+
 var PhyloTree = function (treeJson) {
     this.grid=false;
     this.setDefaults();
@@ -113,7 +142,7 @@ PhyloTree.prototype.drawRegression = function(){
         .attr("y", leftY)
         .style("fill", this.params.regressionStroke)
         .style("font-size",this.params.tickLabelSize);
-}
+};
 
 PhyloTree.prototype.radialLayout = function(){
     const nTips=this.numberOfTips;
@@ -131,6 +160,36 @@ PhyloTree.prototype.radialLayout = function(){
         d.yCBarEnd = (d.depth-offset)*Math.cos(angleCBar2);
         d.xCBarEnd = (d.depth-offset)*Math.sin(angleCBar2);
         d.smallBigArc = Math.abs(angleCBar2 - angleCBar1)>Math.Pi*0.5;
+    });
+};
+
+PhyloTree.prototype.unrootedLayout = function(){
+    const nTips=this.numberOfTips;
+    //postorder iteration to determine leaf count of every node
+    addLeafCount(this.nodes[0].n);
+    //calculate branch length from depth
+    this.nodes.forEach(function(d){d.n.branchLength = d.depth - d.pDepth;});
+    //preorder iteration to layout nodes
+    this.nodes[0].n.x = 0;
+    this.nodes[0].n.y = 0;
+    this.nodes[0].n.px = 0;
+    this.nodes[0].n.py = 0;
+    this.nodes[0].n.w = 2*Math.PI;
+    this.nodes[0].n.tau = 0;
+    var eta = 1.5*Math.PI;
+    for (var i=0; i<this.nodes[0].n.children.length; i+=1){
+        this.nodes[0].n.children[i].px=0;
+        this.nodes[0].n.children[i].py=0;
+        this.nodes[0].n.children[i].w = 2.0*Math.PI*this.nodes[0].n.children[i].leafCount/nTips;
+        this.nodes[0].n.children[i].tau = eta;
+        eta += this.nodes[0].n.children[i].w;
+        unrootedPlaceSubtree(this.nodes[0].n.children[i], nTips);
+    }
+    this.nodes.forEach(function(d){
+        d.x = d.n.x;
+        d.y = d.n.y;
+        d.px = d.n.px;
+        d.py = d.n.py;
     });
 };
 
@@ -158,7 +217,7 @@ PhyloTree.prototype.mapToScreen = function(){
     this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
     this.nodes.forEach(function(d){d.yBase = tmp_yScale(d.py)});
 
-    if (this.layout==="rootToTip"){
+    if (this.layout==="rootToTip" || this.layout==="unrooted"){
         this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
                                                  " L "+d.xTip.toString()+","+d.yTip.toString();});
     } else if (this.layout==="rectangular"){
@@ -203,6 +262,8 @@ PhyloTree.prototype.setLayout = function(layout){
         this.timeVsRootToTip();
     } else if (this.layout==="radial"){
         this.radialLayout();
+    } else if (this.layout==="unrooted"){
+        this.unrootedLayout();
     }
 };
 
