@@ -428,17 +428,17 @@ PhyloTree.prototype.updateGeometry = function(dt) {
     });
 };
 
-PhyloTree.prototype.updateSelectedBranchOrTip = function (oldSelected, newSelected, type) {
+PhyloTree.prototype.updateSelectedBranchOrTip = function (oldSelected, newSelected) {
 
-  console.log(newSelected)
-  // console.log(oldSelected, newSelected, kind)
+
+  console.log(oldSelected.d, newSelected.d)
   this.nodes.forEach((d, i) => {
     d.update = false;
     if (
-      d.branch === oldSelected.branch ||
-      d.branch === newSelected.branch ||
-      d.n.attr.strain === oldSelected.n.attr.strain ||
-      d.n.attr.strain === newSelected.n.attr.strain
+      d.branch === oldSelected.d.branch ||
+      d.branch === newSelected.d.branch ||
+      d.n.attr.strain === oldSelected.d.n.attr.strain ||
+      d.n.attr.strain === newSelected.d.n.attr.strain
     ) {
       d.update = true;
     }
@@ -453,20 +453,20 @@ PhyloTree.prototype.updateSelectedBranchOrTip = function (oldSelected, newSelect
         newSelected.branch isn't ever undefined,
         because d is the same object for branch and tip.
       */
-      return d.branch === newSelected.branch && type === ".branch" ? "2, 3" : "none";
+      return d.branch === newSelected.d.branch && newSelected.type === ".branch" ? "2, 3" : "none";
     });
 
   this.svg.selectAll(".tip").filter(function(d) {
       return d.update;
     })
     .style("stroke", function(d) {
-      return d.n.attr.strain === newSelected.n.attr.strain && type === ".tip" ? d.fill : "none";
+      return d.n.attr.strain === newSelected.d.n.attr.strain && newSelected.type === ".tip" ? d.fill : "none";
     })
     .style("stroke-dasharray", function(d) {
-      return d.n.attr.strain === newSelected.n.attr.strain && type === ".tip" ? "2, 2" : "none";
+      return d.n.attr.strain === newSelected.d.n.attr.strain && newSelected.type === ".tip" ? "2, 2" : "none";
     })
     .style("fill", function(d) {
-      return d.n.attr.strain === newSelected.n.attr.strain && type === ".tip" ? "white" : d.fill;
+      return d.n.attr.strain === newSelected.d.n.attr.strain && newSelected.type === ".tip" ? "white" : d.fill;
     });
 };
 

@@ -126,9 +126,8 @@ class TreeView extends React.Component {
       this.props.layout === nextProps.layout // this block interferes with layout transition otherwise
     ) {
       this.state.tree.updateSelectedBranchOrTip(
-        this.state.hovered.d, /* turn this one off */
-        nextState.hovered.d, /* turn this one on */
-        nextState.hovered.type
+        this.state.hovered, /* turn this one off */
+        nextState.hovered, /* turn this one on */
       );
     }
   }
