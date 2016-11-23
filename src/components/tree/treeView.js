@@ -120,10 +120,15 @@ class TreeView extends React.Component {
   }
 
   componentWillUpdate(nextProps, nextState) {
-    if (this.state.tree && this.state.hovered && this.state.hovered.type === ".branch") {
-      this.state.tree.updateSelectedBranch(
+    if (
+      this.state.tree &&
+      (this.state.hovered || this.state.clicked) &&
+      this.props.layout === nextProps.layout
+    ) {
+      this.state.tree.updateSelectedBranchOrTip(
         this.state.hovered.d, /* turn this one off */
-        nextState.hovered.d /* turn this one on */
+        nextState.hovered.d, /* turn this one on */
+        nextState.hovered.type
       );
     }
   }
@@ -261,6 +266,7 @@ class TreeView extends React.Component {
               // https://facebook.github.io/react/docs/refs-and-the-dom.html
               this.Viewer = Viewer
             }}
+            style={{cursor: "default"}}
             tool={this.state.tool}
             detectWheel={false}
             toolbarPosition={"none"}
@@ -275,6 +281,7 @@ class TreeView extends React.Component {
               <g
                 width={globals.width}
                 height={this.treePlotHeight(globals.width)}
+                style={{cursor: "default"}}
                 ref="d3TreeElement">
               </g>
             </svg>
@@ -307,7 +314,6 @@ class TreeView extends React.Component {
               y={90}
               />
           </svg>
-
         </Card>
       </div>
     );

@@ -428,13 +428,16 @@ PhyloTree.prototype.updateGeometry = function(dt) {
     });
 };
 
-PhyloTree.prototype.updateSelectedBranch = (oldSelected, newSelected, dt) => {
+PhyloTree.prototype.updateSelectedBranchOrTip = function (oldSelected, newSelected, type) {
 
-  this.branches.forEach((d, i) => {
+  console.log(newSelected)
+  this.nodes.forEach((d, i) => {
     d.update = false;
     if (
       d.branch === oldSelected.branch ||
-      d.branch === newSelected.branch
+      d.branch === newSelected.branch ||
+      d.n.attr.strain === oldSelected.n.attr.strain ||
+      d.n.attr.strain === newSelected.n.attr.strain
     ) {
       d.update = true;
     }
@@ -444,7 +447,25 @@ PhyloTree.prototype.updateSelectedBranch = (oldSelected, newSelected, dt) => {
       return d.update;
     })
     .style("stroke-dasharray", function(d) {
-      return d.branch === newSelected ? "5, 5" : "none";
+      /*
+        slightly confusing condition: "type === .branch"
+        newSelected.branch isn't ever undefined,
+        because d is the same object for branch and tip.
+      */
+      return d.branch === newSelected.branch && type === ".branch" ? "2, 3" : "none";
+    });
+
+  this.svg.selectAll(".tip").filter(function(d) {
+      return d.update;
+    })
+    .style("stroke", function(d) {
+      return d.n.attr.strain === newSelected.n.attr.strain && type === ".tip" ? d.fill : "none";
+    })
+    .style("stroke-dasharray", function(d) {
+      return d.n.attr.strain === newSelected.n.attr.strain && type === ".tip" ? "2, 2" : "none";
+    })
+    .style("fill", function(d) {
+      return d.n.attr.strain === newSelected.n.attr.strain && type === ".tip" ? "white" : d.fill;
     });
 };
 
@@ -593,7 +614,7 @@ PhyloTree.prototype.tips = function() {
       this.callbacks.onTipClick(d)
     })
     .style("pointer-events", "auto")
-    .style("cursor", "auto")
+    // .style("cursor", "default")
     .style("fill", function(d) {
       return d.fill || "#CCC";
     })
@@ -627,11 +648,11 @@ PhyloTree.prototype.branches = function(selected) {
     .style("stroke-dasharray", (d) => {
       let dasharray = "none";
       if (selected) {
-        console.log("selected", selected, "d", d)
+        // console.log("selected", selected, "d", d)
       }
       return dasharray
     })
-    .style("cursor", "auto")
+    // .style("cursor", "default")
     .style("stroke", function(d) {
       return d.stroke || "#AAA";
     })
