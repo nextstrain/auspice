@@ -431,6 +431,7 @@ PhyloTree.prototype.updateGeometry = function(dt) {
 PhyloTree.prototype.updateSelectedBranchOrTip = function (oldSelected, newSelected, type) {
 
   console.log(newSelected)
+  console.log(oldSelected, newSelected, kind)
   this.nodes.forEach((d, i) => {
     d.update = false;
     if (
