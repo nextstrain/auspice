@@ -123,7 +123,7 @@ class TreeView extends React.Component {
     if (
       this.state.tree &&
       (this.state.hovered || this.state.clicked) &&
-      this.props.layout === nextProps.layout
+      this.props.layout === nextProps.layout // this block interferes with layout transition otherwise
     ) {
       this.state.tree.updateSelectedBranchOrTip(
         this.state.hovered.d, /* turn this one off */
@@ -174,11 +174,13 @@ class TreeView extends React.Component {
     });
   }
   onTipClick(d) {
+    // if it's the same, deselect
     this.setState({
       clicked: {
         d,
         type: ".tip"
-      }
+      },
+      hovered: null
     });
   }
   onBranchHover(d) {
@@ -190,11 +192,13 @@ class TreeView extends React.Component {
     });
   }
   onBranchClick(d) {
+    // if it's the same, deselect
     this.setState({
       clicked: {
         d,
         type: ".branch"
-      }
+      },
+      hovered: null
     });
   }
 
