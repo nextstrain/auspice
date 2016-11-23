@@ -267,7 +267,7 @@ class TreeView extends React.Component {
             <Legend colorScale={this.props.colorScale}/>
           </svg>
           <InfoPanel
-            dismiss={this.infoPanelDismiss.bind(this)}
+            dismiss={this.infoPanelDismiss}
             hovered={this.state.hovered}
             clicked={this.state.clicked}/>
           <ReactSVGPanZoom

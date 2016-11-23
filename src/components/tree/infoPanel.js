@@ -40,18 +40,19 @@ const InfoPanel = ({hovered, clicked, dismiss}) => {
     textDecoration: "none",
     pointerEvents: "auto",
     lineHeight: .8
-  }
+  };
 
   const dismissStyle = {
-    fontFamily: globalStyles.sans,
-    fontSize: 12,
+    fontFamily: "Helvetica",
+    fontSize: 14,
+    fontWeight: 700,
     width: "100%",
     display: "block",
     textAlign: "right",
     pointerEvents: "auto",
     lineHeight: .8,
     cursor: "pointer"
-  }
+  };
 
   const mutations = (d) => {
 
@@ -85,7 +86,7 @@ const InfoPanel = ({hovered, clicked, dismiss}) => {
   const branch = (branch) => {
     return (
       <div style={container}>
-        <p style={dismissStyle} onClick={dismiss}> {clicked ? "dismiss" : null} </p>
+        {clicked ? <p style={dismissStyle} onClick={dismiss}>"X"</p> : null}
         { typeof branch.frequency !== "undefined" ? frequencies(branch.n) : null }
         <p style={muts}>Mutations: {mutations(branch.n)}</p>
         <a href="#" style={link}> Filter to this clade </a>
@@ -97,7 +98,7 @@ const InfoPanel = ({hovered, clicked, dismiss}) => {
   const tip = (tip) => {
     return (
       <div style={container}>
-        <p style={dismiss} onClick={dismiss}> {clicked ? "dismiss" : null} </p>
+        {clicked ? <p style={dismissStyle} onClick={dismiss}>"X"</p> : null}
         <p style={body}> {tip.n.attr.strain} </p>
         <p style={body}> {tip.n.attr.country} </p>
         <p style={body}> {tip.n.attr.date} </p>
