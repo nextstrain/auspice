@@ -4,6 +4,11 @@ var webpack = require("webpack");
 var config = require("./webpack.config.dev");
 var request = require("request");
 
+var Zika_meta = require("./data/zika_meta.json");
+var Zika_tree = require("./data/zika_tree.json");
+var Zika_entropy = require("./data/zika_entropy.json");
+var Zika_sequences = require("./data/zika_sequences.json");
+
 var app = express();
 var compiler = webpack(config);
 
@@ -14,56 +19,24 @@ app.use(require("webpack-dev-middleware")(compiler, {
 
 app.use(require("webpack-hot-middleware")(compiler));
 
-app.get("/Zika_meta", function(req, res) {
-  request("http://flu.tuebingen.mpg.de/data/H3N2_1985to2016_meta.json", function(err,r) {
-    if (err) {console.log('error getting data', err)}
-    // console.log(r.toJSON())
-    res.send(r.toJSON());
-  });
+app.get("/meta", function(req, res) {
+  res.send(Zika_meta);
 });
 
-app.get("/Zika_tree", function(req, res) {
-  request({
-    method: "get",
-    uri: "http://dev.nextflu.org/data/h3n2_6y_tree.json",
-    gzip: true
-  }, function(err,r) {
-    if (err) {console.log('error getting data', err)}
-    res.send(r.toJSON());
-  });
+app.get("/tree", function(req, res) {
+  res.send(Zika_tree);
 });
 
-app.get("/Zika_sequences", function(req, res) {
-  request({
-    method: "get",
-    uri: "http://dev.nextflu.org/data/h3n2_6y_sequences.json",
-    gzip: true
-  }, function(err,r) {
-    if (err) {console.log('error getting data', err)}
-    res.send(r.toJSON());
-  });
+app.get("/sequences", function(req, res) {
+  res.send(Zika_entropy);
 });
 
-app.get("/Zika_frequencies", function(req, res) {
-  request({
-    method: "get",
-    uri: "http://dev.nextflu.org/data/h3n2_6y_frequencies.json",
-    gzip: true
-  }, function(err,r) {
-    if (err) {console.log('error getting data', err)}
-    res.send(r.toJSON());
-  });
+app.get("/frequencies", function(req, res) {
+  res.send({});
 });
 
-app.get("/Zika_entropy", function(req, res) {
-  request({
-    method: "get",
-    uri: "http://dev.nextflu.org/data/h3n2_6y_entropy.json",
-    gzip: true
-  }, function(err,r) {
-    if (err) {console.log('error getting data', err)}
-    res.send(r.toJSON());
-  });
+app.get("/entropy", function(req, res) {
+  res.send(Zika_entropy);
 });
 
 
