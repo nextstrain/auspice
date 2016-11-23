@@ -237,6 +237,10 @@ class TreeView extends React.Component {
     // console.log('click', event.x, event.y, event.originalEvent);
   }
 
+  infoPanelDismiss() {
+    this.setState({clicked: null});
+  }
+
   render() {
     /*
       1. set up SVGs
@@ -258,7 +262,10 @@ class TreeView extends React.Component {
             }}>
             <Legend colorScale={this.props.colorScale}/>
           </svg>
-          <InfoPanel hovered={this.state.hovered} clicked={this.state.clicked}/>
+          <InfoPanel
+            dismiss={this.infoPanelDismiss.bind(this)}
+            hovered={this.state.hovered}
+            clicked={this.state.clicked}/>
           <ReactSVGPanZoom
             width={globals.width}
             height={this.treePlotHeight(globals.width)}
