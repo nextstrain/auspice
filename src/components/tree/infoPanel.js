@@ -2,7 +2,7 @@ import React from "react";
 import * as globalStyles from "../../globalStyles";
 import * as globals from "../../util/globals";
 
-const ComponentName = ({hovered, clicked}) => {
+const InfoPanel = ({hovered, clicked, dismiss}) => {
 
   /*
     node / branch
@@ -42,6 +42,17 @@ const ComponentName = ({hovered, clicked}) => {
     lineHeight: .8
   }
 
+  const dismissStyle = {
+    fontFamily: globalStyles.sans,
+    fontSize: 12,
+    width: "100%",
+    display: "block",
+    textAlign: "right",
+    pointerEvents: "auto",
+    lineHeight: .8,
+    cursor: "pointer"
+  }
+
   const mutations = (d) => {
 
     let string = "";
@@ -74,6 +85,7 @@ const ComponentName = ({hovered, clicked}) => {
   const branch = (branch) => {
     return (
       <div style={container}>
+        <p style={dismissStyle} onClick={dismiss}> {clicked ? "dismiss" : null} </p>
         { typeof branch.frequency !== "undefined" ? frequencies(branch.n) : null }
         <p style={muts}>Mutations: {mutations(branch.n)}</p>
         <a href="#" style={link}> Filter to this clade </a>
@@ -85,6 +97,7 @@ const ComponentName = ({hovered, clicked}) => {
   const tip = (tip) => {
     return (
       <div style={container}>
+        <p style={dismiss} onClick={dismiss}> {clicked ? "dismiss" : null} </p>
         <p style={body}> {tip.n.attr.strain} </p>
         <p style={body}> {tip.n.attr.country} </p>
         <p style={body}> {tip.n.attr.date} </p>
@@ -115,4 +128,4 @@ const ComponentName = ({hovered, clicked}) => {
   );
 };
 
-export default ComponentName;
+export default InfoPanel;
