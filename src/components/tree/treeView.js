@@ -119,6 +119,15 @@ class TreeView extends React.Component {
     }
   }
 
+  componentWillUpdate(nextProps, nextState) {
+    if (this.state.tree && this.state.hovered && this.state.hovered.type === ".branch") {
+      this.state.tree.updateSelectedBranch(
+        this.state.hovered.d, /* turn this one off */
+        nextState.hovered.d /* turn this one on */
+      );
+    }
+  }
+
   makeTree(nodes) {
     if (nodes && this.refs.d3TreeElement) {
       var myTree = new PhyloTree(nodes[0]);
@@ -155,7 +164,7 @@ class TreeView extends React.Component {
     this.setState({
       hovered: {
         d,
-        type: "tip"
+        type: ".tip"
       }
     });
   }
@@ -163,7 +172,7 @@ class TreeView extends React.Component {
     this.setState({
       clicked: {
         d,
-        type: "tip"
+        type: ".tip"
       }
     });
   }
@@ -171,7 +180,7 @@ class TreeView extends React.Component {
     this.setState({
       hovered: {
         d,
-        type: "branch"
+        type: ".branch"
       }
     });
   }
@@ -179,7 +188,7 @@ class TreeView extends React.Component {
     this.setState({
       clicked: {
         d,
-        type: "branch"
+        type: ".branch"
       }
     });
   }

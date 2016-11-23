@@ -428,12 +428,33 @@ PhyloTree.prototype.updateGeometry = function(dt) {
     });
 };
 
+PhyloTree.prototype.updateSelectedBranch = (oldSelected, newSelected, dt) => {
+
+  this.branches.forEach((d, i) => {
+    d.update = false;
+    if (
+      d.branch === oldSelected.branch ||
+      d.branch === newSelected.branch
+    ) {
+      d.update = true;
+    }
+  });
+
+  this.svg.selectAll(".branch").filter(function(d) {
+      return d.update;
+    })
+    .style("stroke-dasharray", function(d) {
+      return d.branch === newSelected ? "5, 5" : "none";
+    });
+};
+
 /*
  * update tree element style of attributes
  */
 PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) {
   this.nodes.forEach(function(d, i) {
     d.update = false;
+    /* note that this is not node.attr, but element attr such as <g width="100" vs style="" */
     let newAttr;
     for (var attr in attrs) {
       newAttr = attrs[attr][i];
@@ -455,6 +476,7 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
   function update(attrToSet, stylesToSet) {
     return function(selection) {
       for (var i = 0; i < stylesToSet.length; i += 1) {
+
         var prop = stylesToSet[i];
         selection.style(prop, function(d) {
           return d[prop];
@@ -622,7 +644,7 @@ PhyloTree.prototype.branches = function(selected) {
 PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, selected) {
   this.svg = svg;
   this.options = options;
-  this.callbacks = callbacks
+  this.callbacks = callbacks;
 
   this.clearSVG();
   this.setDistance(distance);

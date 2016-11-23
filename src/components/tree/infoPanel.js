@@ -95,10 +95,10 @@ const ComponentName = ({hovered, clicked}) => {
 
   const makeInfoPanel = () => {
     let panelContent;
-    if (hovered && hovered.type === "tip") {
+    if (hovered && hovered.type === ".tip") {
       panelContent = tip(hovered.d);
     }
-    if (hovered && hovered.type === "branch") {
+    if (hovered && hovered.type === ".branch") {
       panelContent = branch(hovered.d)
     }
     /*
