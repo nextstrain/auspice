@@ -1,5 +1,6 @@
 import React from "react";
 import * as globalStyles from "../../globalStyles";
+import * as globals from "../../util/globals";
 
 const ComponentName = ({hovered, clicked}) => {
 
@@ -25,6 +26,12 @@ const ComponentName = ({hovered, clicked}) => {
     lineHeight: .8
   };
 
+  const muts = {
+    fontFamily: globalStyles.sans,
+    fontSize: 14,
+    lineHeight: 1.6
+  };
+
   const link = {
     fontFamily: globalStyles.sans,
     fontSize: 14,
@@ -35,12 +42,40 @@ const ComponentName = ({hovered, clicked}) => {
     lineHeight: .8
   }
 
-  const branch = () => {
+  const mutations = (d) => {
+
+    let string = "";
+
+    if ((typeof d.muts !== "undefined") && (globals.mutType == "nuc") && (d.muts.length)) {
+      let tmp_muts = d.muts;
+      const nmuts = tmp_muts.length;
+      tmp_muts = tmp_muts.slice(0, Math.min(10, nmuts));
+      string += tmp_muts.join(", ");
+      if (nmuts>10) {
+        string+=" + "+ (nmuts-10) + " more";
+      }
+    }
+    if (typeof d.fitness !== "undefined") {
+      string += "Fitness: " + d.fitness.toFixed(3);
+    }
+    // string += "click to zoom into clade";
+
+    return string;
+  }
+
+  const frequencies = (d) => {
+    return (
+      <p style={body}>
+        "Frequency: " + (100 * d.frequency).toFixed(1) + "%";
+      </p>
+    )
+  }
+
+  const branch = (branch) => {
     return (
       <div style={container}>
-        <p> {hovered.n ? "branch" : "none"} </p>
-        <p style={body}>Frequency 90%</p>
-        <p style={body}>Mutations A100T</p>
+        { typeof branch.frequency !== "undefined" ? frequencies(branch.n) : null }
+        <p style={muts}>Mutations: {mutations(branch.n)}</p>
         <a href="#" style={link}> Filter to this clade </a>
         <a href="#" style={link}> Reset layout to this clade </a>
       </div>
@@ -48,10 +83,9 @@ const ComponentName = ({hovered, clicked}) => {
   };
 
   const tip = (tip) => {
-    console.log(tip)
     return (
       <div style={container}>
-        <p> {tip.n.attr.strain} </p>
+        <p style={body}> {tip.n.attr.strain} </p>
         <p style={body}> {tip.n.attr.country} </p>
         <p style={body}> {tip.n.attr.date} </p>
         <a href="#" style={link}> go to item page </a>
@@ -63,6 +97,9 @@ const ComponentName = ({hovered, clicked}) => {
     let panelContent;
     if (hovered && hovered.type === "tip") {
       panelContent = tip(hovered.d);
+    }
+    if (hovered && hovered.type === "branch") {
+      panelContent = branch(hovered.d)
     }
     /*
       show anything that is hovered, if nothing hovered, show anything that is clicked.

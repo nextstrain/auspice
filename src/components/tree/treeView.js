@@ -58,50 +58,68 @@ class TreeView extends React.Component {
     this.setState({tree: tree});
   }
   componentWillReceiveProps(nextProps) {
-    // Do we have a tree to draw? if yes, check whether it needs to be redrawn
+
+    /* Do we have a tree to draw? if yes, check whether it needs to be redrawn */
     const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree)
       ? this.state.tree
       : this.makeTree(nextProps.nodes, this.props.layout, this.props.distance);
+
+    /* if we don't have a dataset or nodes, don't draw */
     if (!(nextProps.datasetGuid && nextProps.nodes)) {
       this.setState({okToDraw: false});
-    } else if ((nextProps.datasetGuid !== this.props.datasetGuid) || (nextProps.layout !== this.props.layout) || (nextProps.distanceMeasure !== this.props.distanceMeasure)) {
-      // console.log("setting ok to draw");
-      this.setState({okToDraw: true, currentDatasetGuid: nextProps.datasetGuid, width: globals.width, tree: tree});
+    } else if (
+      /* if the dataset, layout or distance measure has changed, do book keeping & redraw */
+      (nextProps.datasetGuid !== this.props.datasetGuid) ||
+      (nextProps.layout !== this.props.layout) ||
+      (nextProps.distanceMeasure !== this.props.distanceMeasure)
+    ) {
+      this.setState({
+        okToDraw: true,
+        currentDatasetGuid: nextProps.datasetGuid,
+        width: globals.width,
+        tree: tree
+      });
     }
+
+    /* if we have a tree and we have new props, figure out what we need to update */
     if (tree) {
       const attrToUpdate = {};
       const styleToUpdate = {};
+
+      /* fill has changed */
       if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
-        // console.log("updateColor", this.props.layout, nextProps.layout);
         styleToUpdate['fill'] = nextProps.nodeColor;
         tree.updateStyleArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration);
-        styleToUpdate['stroke'] = nextProps.nodeColor.map(d => d3.rgb(d).darker(0.7));
+        styleToUpdate['stroke'] = nextProps.nodeColor.map((d) => {
+          d3.rgb(d).darker(0.7)
+        });
       }
+      /* tip radius has changed */
       if (nextProps.tipRadii && arrayInEquality(nextProps.tipRadii, this.props.tipRadii)) {
-        // console.log("updateRadii", this.props.layout, nextProps.layout);
         attrToUpdate['r'] = nextProps.tipRadii;
       }
+      /* tip visibility has changed, for instance because of date slider */
       if (nextProps.tipVisibility && arrayInEquality(nextProps.tipVisibility, this.props.tipVisibility)) {
         // console.log("updateVisibility");
         styleToUpdate['visibility'] = nextProps.tipVisibility;
       }
+
+      /* update style changes */
       if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
         tree.updateMultipleArray(".tip", attrToUpdate, styleToUpdate, fastTransitionDuration);
       }
-
+      /* swap layouts */
       if (this.props.layout !== nextProps.layout) {
-        // console.log("reset layout", this.props.layout, nextProps.layout);
         tree.updateLayout(nextProps.layout, slowTransitionDuration);
       }
+      /* change distance metrics */
       if (this.props.distanceMeasure !== nextProps.distanceMeasure) {
-        // console.log("reset distance", this.props.distanceMeasure, nextProps.distanceMeasure);
         tree.updateDistance(nextProps.distanceMeasure, slowTransitionDuration);
       }
     }
   }
 
   makeTree(nodes) {
-    // console.log("TreeView.makeTree");
     if (nodes && this.refs.d3TreeElement) {
       var myTree = new PhyloTree(nodes[0]);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
@@ -120,6 +138,11 @@ class TreeView extends React.Component {
           onTipClick: this.onTipClick.bind(this),
           onBranchHover: this.onBranchHover.bind(this),
           onBranchClick: this.onBranchClick.bind(this)
+        },
+        {
+          /* presently selected node / branch */
+          hovered: this.state.hovered,
+          clicked: this.state.clicked
         }
       );
       return myTree;
@@ -134,7 +157,7 @@ class TreeView extends React.Component {
         d,
         type: "tip"
       }
-    })
+    });
   }
   onTipClick(d) {
     this.setState({
@@ -142,16 +165,15 @@ class TreeView extends React.Component {
         d,
         type: "tip"
       }
-    })
+    });
   }
   onBranchHover(d) {
-    console.log("branch hover", d)
     this.setState({
       hovered: {
         d,
         type: "branch"
       }
-    })
+    });
   }
   onBranchClick(d) {
     this.setState({
@@ -159,7 +181,7 @@ class TreeView extends React.Component {
         d,
         type: "branch"
       }
-    })
+    });
   }
 
   treePlotHeight(width) {

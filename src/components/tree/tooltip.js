@@ -2,26 +2,7 @@ import React from "react";
 import Radium from "radium";
 import * as globals from "../../util/globals";
 
-@Radium
 class Tooltip extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-
-    };
-  }
-  static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object,
-    node: React.PropTypes.object.isRequired
-  }
-  static defaultProps = {
-    // foo: "bar"
-  }
   createText() {
     const d = this.props.node;
     let string = "";
