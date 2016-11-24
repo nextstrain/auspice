@@ -185,12 +185,14 @@ class TreeView extends React.Component {
   }
 
   onTipHover(d) {
-    this.setState({
-      hovered: {
-        d,
-        type: ".tip"
-      }
-    });
+    if (!this.state.clicked) {
+      this.setState({
+        hovered: {
+          d,
+          type: ".tip"
+        }
+      });
+    }
   }
   onTipClick(d) {
     // if it's the same, deselect
@@ -203,14 +205,17 @@ class TreeView extends React.Component {
     });
   }
   onBranchHover(d) {
-    this.setState({
-      hovered: {
-        d,
-        type: ".branch"
-      }
-    });
+    if (!this.state.clicked) {
+      this.setState({
+        hovered: {
+          d,
+          type: ".branch"
+        }
+      });
+    }
   }
   onBranchClick(d) {
+    // console.log('clicked', d)
     // if it's the same, deselect
     this.setState({
       clicked: {
