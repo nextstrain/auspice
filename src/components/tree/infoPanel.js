@@ -86,7 +86,7 @@ const InfoPanel = ({hovered, clicked, dismiss}) => {
   const branch = (branch) => {
     return (
       <div style={container}>
-        {clicked ? <p style={dismissStyle} onClick={dismiss}>"X"</p> : null}
+        {clicked ? <p style={dismissStyle} onClick={dismiss}>x</p> : null}
         { typeof branch.frequency !== "undefined" ? frequencies(branch.n) : null }
         <p style={muts}>Mutations: {mutations(branch.n)}</p>
         <a href="#" style={link}> Filter to this clade </a>
@@ -98,29 +98,38 @@ const InfoPanel = ({hovered, clicked, dismiss}) => {
   const tip = (tip) => {
     return (
       <div style={container}>
-        {clicked ? <p style={dismissStyle} onClick={dismiss}>"X"</p> : null}
+        {clicked ? <p style={dismissStyle} onClick={dismiss}>x</p> : null}
         <p style={body}> {tip.n.attr.strain} </p>
         <p style={body}> {tip.n.attr.country} </p>
         <p style={body}> {tip.n.attr.date} </p>
         <a href="#" style={link}> go to item page </a>
       </div>
-    )
-  }
+    );
+  };
 
   const makeInfoPanel = () => {
-    let panelContent;
-    if (hovered && hovered.type === ".tip") {
+    let panelContent = "Error, see infoPanel";
+
+    if (clicked && clicked.type === ".tip") {
+      panelContent = tip(clicked.d);
+    } else if (clicked && clicked.type === ".branch") {
+      panelContent = branch(clicked.d);
+    } else if (hovered && hovered.type === ".tip") {
       panelContent = tip(hovered.d);
+    } else if (hovered && hovered.type === ".branch") {
+      panelContent = branch(hovered.d);
     }
-    if (hovered && hovered.type === ".branch") {
-      panelContent = branch(hovered.d)
-    }
-    /*
-      show anything that is hovered, if nothing hovered, show anything that is clicked.
-      if nothing is clicked, return nothing.
-    */
+
     return panelContent;
   };
+
+  /*
+  neither
+  clicked
+    branch or tip
+  hovered
+    branch or tip
+  */
 
   return (
     <div>
