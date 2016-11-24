@@ -11,6 +11,8 @@ import {ReactSVGPanZoom, fitToViewer} from "react-svg-pan-zoom";
 import ReactDOM from "react-dom"
 import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration} from "../../util/globals";
+import * as globalStyles from "../../globalStyles";
+import InfoPanel from "./infoPanel";
 
 const arrayInEquality = function(a,b){
   if (a&&b){
@@ -37,19 +39,6 @@ class TreeView extends React.Component {
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
     };
   }
-
-  makeTree(nodes) {
-    // console.log("TreeView.makeTree");
-    if (nodes && this.refs.d3TreeElement) {
-      var myTree = new PhyloTree(nodes[0]);
-      // https://facebook.github.io/react/docs/refs-and-the-dom.html
-      var treeplot = d3.select(this.refs.d3TreeElement);
-      myTree.render(treeplot, this.props.layout, this.props.distanceMeasure, {showGrid:true});
-      return myTree;
-    } else {
-      return null;
-    }
-  }
   componentWillMount() {
     if (this.state.currentDatasetGuid !== this.props.datasetGuid) {
       this.setState({
@@ -67,16 +56,21 @@ class TreeView extends React.Component {
     this.setState({tree: tree});
   }
   componentWillReceiveProps(nextProps) {
-    // Do we have a tree to draw? if yes, check whether it needs to be redrawn
+
+    /* Do we have a tree to draw? if yes, check whether it needs to be redrawn */
     const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree)
       ? this.state.tree
-      : this.makeTree(nextProps.nodes, nextProps.layout, nextProps.distance);
-    if (!(nextProps.datasetGuid && nextProps.nodes)){
+      : this.makeTree(nextProps.nodes, this.props.layout, this.props.distance);
+
+    /* if we don't have a dataset or nodes, don't draw */
+    if (!(nextProps.datasetGuid && nextProps.nodes)) {
       this.setState({okToDraw: false});
-    } else if ((nextProps.datasetGuid !== this.props.datasetGuid)
-               || (nextProps.layout !== this.props.layout)
-               || (nextProps.distanceMeasure !== this.props.distanceMeasure)) {
-      // console.log("setting ok to draw");
+    } else if (
+      /* if the dataset, layout or distance measure has changed, do book keeping & redraw */
+      (nextProps.datasetGuid !== this.props.datasetGuid) ||
+      (nextProps.layout !== this.props.layout) ||
+      (nextProps.distanceMeasure !== this.props.distanceMeasure)
+    ) {
       this.setState({
         okToDraw: true,
         currentDatasetGuid: nextProps.datasetGuid,
@@ -84,44 +78,151 @@ class TreeView extends React.Component {
         tree: tree
       });
     }
-    if (tree){
-      const attrToUpdate ={};
-      const styleToUpdate ={};
-      if (nextProps.nodeColor &&
-          arrayInEquality(nextProps.nodeColor,
-                         this.props.nodeColor)){
-        // console.log("updateColor", this.props.layout, nextProps.layout);
+
+    /* if we have a tree and we have new props, figure out what we need to update */
+    if (tree) {
+      const attrToUpdate = {};
+      const styleToUpdate = {};
+
+      /* fill has changed */
+      if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
         styleToUpdate['fill'] = nextProps.nodeColor;
         tree.updateStyleArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration);
-        styleToUpdate['stroke'] = nextProps.nodeColor.map(d=>d3.rgb(d).darker(0.7));
+        styleToUpdate['stroke'] = nextProps.nodeColor.map((d) => {
+          d3.rgb(d).darker(0.7)
+        });
       }
-      if (nextProps.tipRadii &&
-          arrayInEquality(nextProps.tipRadii,
-                         this.props.tipRadii)) {
-        // console.log("updateRadii", this.props.layout, nextProps.layout);
+      /* tip radius has changed */
+      if (nextProps.tipRadii && arrayInEquality(nextProps.tipRadii, this.props.tipRadii)) {
         attrToUpdate['r'] = nextProps.tipRadii;
       }
-      if (nextProps.tipVisibility &&
-          arrayInEquality(nextProps.tipVisibility,
-                         this.props.tipVisibility)) {
+      /* tip visibility has changed, for instance because of date slider */
+      if (nextProps.tipVisibility && arrayInEquality(nextProps.tipVisibility, this.props.tipVisibility)) {
         // console.log("updateVisibility");
         styleToUpdate['visibility'] = nextProps.tipVisibility;
       }
-      if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length){
+
+      /* update style changes */
+      if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
         tree.updateMultipleArray(".tip", attrToUpdate, styleToUpdate, fastTransitionDuration);
       }
-
-      if (this.props.layout!==nextProps.layout){
-        // console.log("reset layout", this.props.layout, nextProps.layout);
+      /* swap layouts */
+      if (this.props.layout !== nextProps.layout) {
         tree.updateLayout(nextProps.layout, slowTransitionDuration);
       }
-      if (this.props.distanceMeasure!==nextProps.distanceMeasure){
-        // console.log("reset distance", this.props.distanceMeasure, nextProps.distanceMeasure);
+      /* change distance metrics */
+      if (this.props.distanceMeasure !== nextProps.distanceMeasure) {
         tree.updateDistance(nextProps.distanceMeasure, slowTransitionDuration);
       }
     }
   }
 
+  componentWillUpdate(nextProps, nextState) {
+    if (
+      this.state.tree &&
+      (this.state.hovered || this.state.clicked) &&
+      this.props.layout === nextProps.layout // this block interferes with layout transition otherwise
+    ) {
+      /* check whether or not the previously selected item was clicked */
+      if (this.state.clicked && nextState.clicked) { // was the previous item a click?
+        this.state.tree.updateSelectedBranchOrTip(
+          this.state.clicked, /* turn this one off */
+          nextState.clicked, /* turn this one on */
+        );
+      } else if (this.state.hovered && nextState.clicked) { // previously a hover, now a click
+        this.state.tree.updateSelectedBranchOrTip(
+          this.state.hovered,
+          nextState.clicked,
+        );
+      } else if (this.state.hovered && nextState.hovered) { // deselect the previously selected hover
+        this.state.tree.updateSelectedBranchOrTip(
+          this.state.hovered,
+          nextState.hovered,
+        );
+      }
+      // else if () {
+      //   // x clicked or clicked off will give a null value, so reset everything
+      //   this.state.tree.updateSelectedBranchOrTip(
+      //     null,
+      //     null
+      //   )
+      // }
+    }
+  }
+
+  makeTree(nodes) {
+    if (nodes && this.refs.d3TreeElement) {
+      var myTree = new PhyloTree(nodes[0]);
+      // https://facebook.github.io/react/docs/refs-and-the-dom.html
+      var treeplot = d3.select(this.refs.d3TreeElement);
+      myTree.render(
+        treeplot,
+        this.props.layout,
+        this.props.distanceMeasure,
+        {
+          /* options */
+          grid: true
+        },
+        {
+          /* callbacks */
+          onTipHover: this.onTipHover.bind(this),
+          onTipClick: this.onTipClick.bind(this),
+          onBranchHover: this.onBranchHover.bind(this),
+          onBranchClick: this.onBranchClick.bind(this)
+        },
+        {
+          /* presently selected node / branch */
+          hovered: this.state.hovered,
+          clicked: this.state.clicked
+        }
+      );
+      return myTree;
+    } else {
+      return null;
+    }
+  }
+
+  onTipHover(d) {
+    if (!this.state.clicked) {
+      this.setState({
+        hovered: {
+          d,
+          type: ".tip"
+        }
+      });
+    }
+  }
+  onTipClick(d) {
+    // if it's the same, deselect
+    this.setState({
+      clicked: {
+        d,
+        type: ".tip"
+      },
+      hovered: null
+    });
+  }
+  onBranchHover(d) {
+    if (!this.state.clicked) {
+      this.setState({
+        hovered: {
+          d,
+          type: ".branch"
+        }
+      });
+    }
+  }
+  onBranchClick(d) {
+    // console.log('clicked', d)
+    // if it's the same, deselect
+    this.setState({
+      clicked: {
+        d,
+        type: ".branch"
+      },
+      hovered: null
+    });
+  }
 
   treePlotHeight(width) {
     return 400 + 0.30 * width;
@@ -162,6 +263,10 @@ class TreeView extends React.Component {
     // console.log('click', event.x, event.y, event.originalEvent);
   }
 
+  infoPanelDismiss() {
+    this.setState({clicked: null});
+  }
+
   render() {
     /*
       1. set up SVGs
@@ -170,16 +275,23 @@ class TreeView extends React.Component {
     return (
       <div>
         <Card center title="Phylogeny">
-          <p
+          <svg
+            width={300}
+            height={250 /* this should be dynamically calculated by number of elements */}
             style={{
               position: "absolute",
-              right: 50,
-              bottom: 150,
-              color: "red",
-              fontWeight: 700
+              left: 13,
+              top: 45,
+              borderRadius: 10,
+              zIndex: 1000,
+              backgroundColor: "rgba(255,255,255,.85)"
             }}>
-            {this.state.scaleFactor}
-          </p>
+            <Legend colorScale={this.props.colorScale}/>
+          </svg>
+          <InfoPanel
+            dismiss={this.infoPanelDismiss.bind(this)}
+            hovered={this.state.hovered}
+            clicked={this.state.clicked}/>
           <ReactSVGPanZoom
             width={globals.width}
             height={this.treePlotHeight(globals.width)}
@@ -187,6 +299,7 @@ class TreeView extends React.Component {
               // https://facebook.github.io/react/docs/refs-and-the-dom.html
               this.Viewer = Viewer
             }}
+            style={{cursor: "default"}}
             tool={this.state.tool}
             detectWheel={false}
             toolbarPosition={"none"}
@@ -201,6 +314,7 @@ class TreeView extends React.Component {
               <g
                 width={globals.width}
                 height={this.treePlotHeight(globals.width)}
+                style={{cursor: "default"}}
                 ref="d3TreeElement">
               </g>
             </svg>
@@ -232,11 +346,6 @@ class TreeView extends React.Component {
               x={10}
               y={90}
               />
-          </svg>
-          <svg width={300} height={300}
-               style={{position: "absolute", left: 13,
-                       top: 50}}>
-            <Legend colorScale={this.props.colorScale}/>
           </svg>
         </Card>
       </div>

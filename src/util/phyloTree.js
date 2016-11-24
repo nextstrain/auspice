@@ -29,26 +29,34 @@ const unrootedPlaceSubtree = function(node, nTips){
     }
 };
 
-var PhyloTree = function (treeJson) {
-    this.grid=false;
-    this.setDefaults();
-    this.tree = d3.layout.tree();
-    this.nodes = this.tree.nodes(treeJson).map(function(d){return {n:d, x:0, y:0};});
-    this.nodes[0].n.parent = this.nodes[0].n;
-    this.xScale = d3.scale.linear();
-    this.yScale = d3.scale.linear();
-    this.numberOfTips = d3.max(this.nodes.map(function(d){return d.n.yvalue;}));
-    this.nodes.forEach(function(d){d.terminal = (typeof d.n.children === "undefined");});
-    this.nodes.forEach(function(d)
-        {
-            if (typeof d.n.children==="undefined"){
-                d.yRange = [d.n.yvalue, d.n.yvalue];
-            }else{
-                d.yRange = [d.n.children[0].yvalue, d.n.children[d.n.children.length-1].yvalue];
-            }
-        });
+var PhyloTree = function(treeJson) {
+  this.grid = false;
+  this.setDefaults();
+  this.tree = d3.layout.tree();
+  this.nodes = this.tree.nodes(treeJson).map(function(d) {
+    return {
+      n: d,
+      x: 0,
+      y: 0
+    };
+  });
+  this.nodes[0].n.parent = this.nodes[0].n;
+  this.xScale = d3.scale.linear();
+  this.yScale = d3.scale.linear();
+  this.numberOfTips = d3.max(this.nodes.map(function(d) {
+    return d.n.yvalue;
+  }));
+  this.nodes.forEach(function(d) {
+    d.terminal = (typeof d.n.children === "undefined");
+  });
+  this.nodes.forEach(function(d) {
+    if (typeof d.n.children === "undefined") {
+      d.yRange = [d.n.yvalue, d.n.yvalue];
+    } else {
+      d.yRange = [d.n.children[0].yvalue, d.n.children[d.n.children.length - 1].yvalue];
+    }
+  });
 };
-
 
 /*
  * set default values.
@@ -74,50 +82,56 @@ PhyloTree.prototype.setDefaults = function () {
 /*
  * calculate tree layout, scales, and updating of those
  */
-PhyloTree.prototype.setDistance = function(attr){
-    this.nodes.forEach(function(d){d.update=true});
-    if (typeof attr === "undefined"){
-        this.distance = "div";
-    } else {
-        this.distance = attr;
-    }
-    const tmp_dist = this.distance;
-    this.nodes.forEach(function(d) {d.depth = d.n.attr[tmp_dist];});
-    this.nodes.forEach(function(d) {d.pDepth = d.n.parent.attr[tmp_dist];});
+PhyloTree.prototype.setDistance = function(attr) {
+  this.nodes.forEach(function(d) {
+    d.update = true
+  });
+  if (typeof attr === "undefined") {
+    this.distance = "div";
+  } else {
+    this.distance = attr;
+  }
+  const tmp_dist = this.distance;
+  this.nodes.forEach(function(d) {
+    d.depth = d.n.attr[tmp_dist];
+  })
+  this.nodes.forEach(function(d) {
+    d.pDepth = d.n.parent.attr[tmp_dist];
+  })
 };
 
-PhyloTree.prototype.rectangularLayout = function(){
-    this.nodes.forEach(function (d) {
-        d.y = d.n.yvalue;
-        d.x = d.depth;
-        d.px = d.pDepth;
-        d.py = d.y;
-    });
+PhyloTree.prototype.rectangularLayout = function() {
+  this.nodes.forEach(function(d) {
+    d.y = d.n.yvalue;
+    d.x = d.depth;
+    d.px = d.pDepth;
+    d.py = d.y;
+  });
 };
 
 PhyloTree.prototype.timeVsRootToTip = function(){
-    this.setDistance("num_date");
-    this.nodes.forEach(function (d) {
-        d.y = d.n.attr["div"];
-        d.x = d.depth;
-        d.px = d.pDepth;
-        d.py = d.n.parent.attr["div"];
-    });
-    const nTips = this.numberOfTips;
-    // REGRESSION WITH FREE INTERCEPT
-    // const meanDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.y))/nTips;
-    // const meanTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.depth))/nTips;
-    // const covarTimeDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y-meanDiv)*(d.depth-meanTime)))/nTips;
-    // const varTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-meanTime)*(d.depth-meanTime)))/nTips;
-    //const slope = covarTimeDiv/varTime;
-    //const intercept = meanDiv-meanTime*slope;
-    // REGRESSION THROUGH ROOT
-    const offset = this.nodes[0].depth;
-    const XY = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y)*(d.depth-offset)))/nTips;
-    const secondMomentTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-offset)*(d.depth-offset)))/nTips;
-    const slope = XY/secondMomentTime;
-    const intercept = -offset*slope;
-    this.regression = {slope:slope, intercept: intercept};
+  this.setDistance("num_date");
+  this.nodes.forEach(function (d) {
+    d.y = d.n.attr["div"];
+    d.x = d.depth;
+    d.px = d.pDepth;
+    d.py = d.n.parent.attr["div"];
+  });
+  const nTips = this.numberOfTips;
+  // REGRESSION WITH FREE INTERCEPT
+  // const meanDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.y))/nTips;
+  // const meanTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.depth))/nTips;
+  // const covarTimeDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y-meanDiv)*(d.depth-meanTime)))/nTips;
+  // const varTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-meanTime)*(d.depth-meanTime)))/nTips;
+  //const slope = covarTimeDiv/varTime;
+  //const intercept = meanDiv-meanTime*slope;
+  // REGRESSION THROUGH ROOT
+  const offset = this.nodes[0].depth;
+  const XY = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y)*(d.depth-offset)))/nTips;
+  const secondMomentTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-offset)*(d.depth-offset)))/nTips;
+  const slope = XY/secondMomentTime;
+  const intercept = -offset*slope;
+  this.regression = {slope:slope, intercept: intercept};
 };
 
 PhyloTree.prototype.drawRegression = function(){
@@ -144,53 +158,54 @@ PhyloTree.prototype.drawRegression = function(){
         .style("font-size",this.params.tickLabelSize);
 };
 
-PhyloTree.prototype.radialLayout = function(){
-    const nTips=this.numberOfTips;
-    const offset = this.nodes[0].depth;
-    this.nodes.forEach(function (d) {
-        const angle = 2.0*0.95*Math.PI*d.n.yvalue/nTips;
-        const angleCBar1 = 2.0*0.95*Math.PI*d.yRange[0]/nTips;
-        const angleCBar2 = 2.0*0.95*Math.PI*d.yRange[1]/nTips;
-        d.y = (d.depth-offset)*Math.cos(angle);
-        d.x = (d.depth-offset)*Math.sin(angle);
-        d.py = d.y*(d.pDepth-offset)/(d.depth-offset);
-        d.px = d.x*(d.pDepth-offset)/(d.depth-offset);
-        d.yCBarStart = (d.depth-offset)*Math.cos(angleCBar1);
-        d.xCBarStart = (d.depth-offset)*Math.sin(angleCBar1);
-        d.yCBarEnd = (d.depth-offset)*Math.cos(angleCBar2);
-        d.xCBarEnd = (d.depth-offset)*Math.sin(angleCBar2);
-        d.smallBigArc = Math.abs(angleCBar2 - angleCBar1)>Math.Pi*0.5;
-    });
+PhyloTree.prototype.radialLayout = function() {
+  const nTips = this.numberOfTips;
+  const offset = this.nodes[0].depth;
+  this.nodes.forEach(function(d) {
+    const angle = 2.0 * 0.95 * Math.PI * d.n.yvalue / nTips;
+    const angleCBar1 = 2.0 * 0.95 * Math.PI * d.yRange[0] / nTips;
+    const angleCBar2 = 2.0 * 0.95 * Math.PI * d.yRange[1] / nTips;
+    d.y = (d.depth - offset) * Math.cos(angle);
+    d.x = (d.depth - offset) * Math.sin(angle);
+    d.py = d.y * (d.pDepth - offset) / (d.depth - offset);
+    d.px = d.x * (d.pDepth - offset) / (d.depth - offset);
+    d.yCBarStart = (d.depth - offset) * Math.cos(angleCBar1);
+    d.xCBarStart = (d.depth - offset) * Math.sin(angleCBar1);
+    d.yCBarEnd = (d.depth - offset) * Math.cos(angleCBar2);
+    d.xCBarEnd = (d.depth - offset) * Math.sin(angleCBar2);
+    d.smallBigArc = Math.abs(angleCBar2 - angleCBar1) > Math.Pi * 0.5;
+  });
 };
 
+
 PhyloTree.prototype.unrootedLayout = function(){
-    const nTips=this.numberOfTips;
-    //postorder iteration to determine leaf count of every node
-    addLeafCount(this.nodes[0].n);
-    //calculate branch length from depth
-    this.nodes.forEach(function(d){d.n.branchLength = d.depth - d.pDepth;});
-    //preorder iteration to layout nodes
-    this.nodes[0].n.x = 0;
-    this.nodes[0].n.y = 0;
-    this.nodes[0].n.px = 0;
-    this.nodes[0].n.py = 0;
-    this.nodes[0].n.w = 2*Math.PI;
-    this.nodes[0].n.tau = 0;
-    var eta = 1.5*Math.PI;
-    for (var i=0; i<this.nodes[0].n.children.length; i+=1){
-        this.nodes[0].n.children[i].px=0;
-        this.nodes[0].n.children[i].py=0;
-        this.nodes[0].n.children[i].w = 2.0*Math.PI*this.nodes[0].n.children[i].leafCount/nTips;
-        this.nodes[0].n.children[i].tau = eta;
-        eta += this.nodes[0].n.children[i].w;
-        unrootedPlaceSubtree(this.nodes[0].n.children[i], nTips);
-    }
-    this.nodes.forEach(function(d){
-        d.x = d.n.x;
-        d.y = d.n.y;
-        d.px = d.n.px;
-        d.py = d.n.py;
-    });
+  const nTips=this.numberOfTips;
+  //postorder iteration to determine leaf count of every node
+  addLeafCount(this.nodes[0].n);
+  //calculate branch length from depth
+  this.nodes.forEach(function(d){d.n.branchLength = d.depth - d.pDepth;});
+  //preorder iteration to layout nodes
+  this.nodes[0].n.x = 0;
+  this.nodes[0].n.y = 0;
+  this.nodes[0].n.px = 0;
+  this.nodes[0].n.py = 0;
+  this.nodes[0].n.w = 2*Math.PI;
+  this.nodes[0].n.tau = 0;
+  var eta = 1.5*Math.PI;
+  for (var i=0; i<this.nodes[0].n.children.length; i+=1){
+    this.nodes[0].n.children[i].px=0;
+    this.nodes[0].n.children[i].py=0;
+    this.nodes[0].n.children[i].w = 2.0*Math.PI*this.nodes[0].n.children[i].leafCount/nTips;
+    this.nodes[0].n.children[i].tau = eta;
+    eta += this.nodes[0].n.children[i].w;
+    unrootedPlaceSubtree(this.nodes[0].n.children[i], nTips);
+  }
+  this.nodes.forEach(function(d){
+    d.x = d.n.x;
+    d.y = d.n.y;
+    d.px = d.n.px;
+    d.py = d.n.py;
+  });
 };
 
 PhyloTree.prototype.mapToScreen = function(){
@@ -267,33 +282,33 @@ PhyloTree.prototype.setLayout = function(layout){
     }
 };
 
-PhyloTree.prototype.setScales = function(margins){
-    const width = parseInt(this.svg.attr("width"), 10);
-    const height = parseInt(this.svg.attr("height"), 10);
-    if (this.layout==="radial"){
-        //Force Square
-        const xExtend = width-(margins["left"]||0)-(margins["right"]||0);
-        const yExtend = height-(margins["top"]||0)-(margins["top"]||0);
-        const minExtend = d3.min([xExtend, yExtend]);
-        const xSlack = xExtend - minExtend;
-        const ySlack = yExtend - minExtend;
-        this.xScale.range([0.5*xSlack + margins["left"]||0, width  - 0.5*xSlack - (margins["right"]||0)]);
-        this.yScale.range([0.5*ySlack + margins["top"]||0,  height - 0.5*ySlack - (margins["bottom"]||0)]);
+PhyloTree.prototype.setScales = function(margins) {
+  const width = parseInt(this.svg.attr("width"), 10);
+  const height = parseInt(this.svg.attr("height"), 10);
+  if (this.layout === "radial") {
+    //Force Square
+    const xExtend = width - (margins["left"] || 0) - (margins["right"] || 0);
+    const yExtend = height - (margins["top"] || 0) - (margins["top"] || 0);
+    const minExtend = d3.min([xExtend, yExtend]);
+    const xSlack = xExtend - minExtend;
+    const ySlack = yExtend - minExtend;
+    this.xScale.range([0.5 * xSlack + margins["left"] || 0, width - 0.5 * xSlack - (margins["right"] || 0)]);
+    this.yScale.range([0.5 * ySlack + margins["top"] || 0, height - 0.5 * ySlack - (margins["bottom"] || 0)]);
 
-    }else{
-        this.xScale.range([margins["left"]||0, width - (margins["right"]||0)]);
-        this.yScale.range([margins["top"]||0, height - (margins["bottom"]||0)]);
-    }
+  } else {
+    this.xScale.range([margins["left"] || 0, width - (margins["right"] || 0)]);
+    this.yScale.range([margins["top"] || 0, height - (margins["bottom"] || 0)]);
+  }
 };
 
 PhyloTree.prototype.updateDistance = function(attr,dt){
-    this.setDistance(attr);
-    this.setLayout(this.layout);
-    this.mapToScreen();
-    this.updateGeometry(dt);
-    if (this.grid) this.addGrid(this.layout);
-    this.svg.selectAll(".regression").remove();
-    if (this.layout==="rootToTip") this.drawRegression();
+  this.setDistance(attr);
+  this.setLayout(this.layout);
+  this.mapToScreen();
+  this.updateGeometry(dt);
+  if (this.grid) this.addGrid(this.layout);
+  this.svg.selectAll(".regression").remove();
+  if (this.layout==="rootToTip") this.drawRegression();
 };
 
 PhyloTree.prototype.updateLayout = function(layout,dt){
@@ -308,334 +323,473 @@ PhyloTree.prototype.updateLayout = function(layout,dt){
 /*
  * make grid
  */
-PhyloTree.prototype.removeGrid = function () {
-    this.svg.selectAll(".majorGrid").remove();
-    this.svg.selectAll(".minorGrid").remove();
-    this.svg.selectAll(".gridTick").remove();
-    this.grid=false;
+PhyloTree.prototype.removeGrid = function() {
+  this.svg.selectAll(".majorGrid").remove();
+  this.svg.selectAll(".minorGrid").remove();
+  this.svg.selectAll(".gridTick").remove();
+  this.grid = false;
 }
 
 PhyloTree.prototype.addGrid = function(layout) {
-    if (typeof layout==="undefined"){ layout=this.layout;}
+  if (typeof layout==="undefined"){ layout=this.layout;}
 
-    const xmin = (this.xScale.domain()[0]>0)?this.xScale.domain()[0]:0.0;
-    const ymin = this.yScale.domain()[1];
-    const ymax = this.yScale.domain()[0];
-    const xmax = layout=="radial"
-                  ? d3.max([this.xScale.domain()[1], this.yScale.domain()[1],
-                            -this.xScale.domain()[0], -this.yScale.domain()[0]])
-                  : this.xScale.domain()[1];
-    const offset = layout==="radial"?this.nodes[0].depth:0.0;
+  const xmin = (this.xScale.domain()[0]>0)?this.xScale.domain()[0]:0.0;
+  const ymin = this.yScale.domain()[1];
+  const ymax = this.yScale.domain()[0];
+  const xmax = layout=="radial"
+                ? d3.max([this.xScale.domain()[1], this.yScale.domain()[1],
+                          -this.xScale.domain()[0], -this.yScale.domain()[0]])
+                : this.xScale.domain()[1];
+  const offset = layout==="radial"?this.nodes[0].depth:0.0;
 
-    const gridline = function(xScale, yScale, layout){
-        return function(x){
-            const xPos = xScale(x[0]-offset);
-            let tmp_d="";
-            if (layout==="rectangular" || layout==="rootToTip"){
-              tmp_d = 'M'+xPos.toString() +
-                " " +
-                yScale.range()[0].toString() +
-                " L " +
-                xPos.toString() +
-                " " +
-                yScale.range()[1].toString();
-            }else if (layout==="radial"){
-              tmp_d = 'M '+xPos.toString() +
-                "  " +
-                yScale(0).toString() +
-                " A " +
-                (xPos - xScale(0)).toString() +
-                " " +
-                (yScale(x[0]) - yScale(offset)).toString() +
-                " 0 1 0 " +
-                xPos.toString() +
-                " " +
-                (yScale(0)+0.001).toString();
-            }
-            return tmp_d;
-        };
-    };
-
-    const logRange = Math.floor(Math.log10(xmax - xmin));
-    const roundingLevel = Math.pow(10, logRange);
-    const gridMin = Math.floor((xmin+offset)/roundingLevel)*roundingLevel;
-    const gridPoints = [];
-    for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+10; ii++) {
-      const pos = gridMin + roundingLevel*ii;
-      if (pos>offset){
-          gridPoints.push([pos, pos-offset>xmax?"hidden":"visible", "x"]);
-      }
-    }
-
-    const majorGrid = this.svg.selectAll('.majorGrid').data(gridPoints);
-    majorGrid.exit().remove();
-    majorGrid.enter().append("path");
-    majorGrid
-        .attr("d", gridline(this.xScale, this.yScale, layout))
-        .attr("class", "majorGrid")
-        .style("fill", "none")
-        .style("visibility", function (d){return d[1];})
-        .style("stroke",this.params.majorGridStroke)
-        .style("stroke-width",this.params.majorGridWidth);
-
-    const xTextPos = function(xScale, layout){
-        return function(x){
-            if (x[2]==="x"){
-                return layout==="radial" ? xScale(0) :  xScale(x[0]);
-            }else{
-                return xScale.range()[1];
-            }
-        }
-    };
-    const yTextPos = function(yScale, layout){
-        return function(x){
-            if (x[2]==="x"){
-                return layout==="radial" ? yScale(x[0]-offset) :  yScale.range()[1]+18;
-            }else{
-                return yScale(x[0]);
-            }
-        }
-    };
-
-    if (this.layout==="rootToTip"){
-        const logRangeY = Math.floor(Math.log10(ymax - ymin));
-        const roundingLevelY = Math.pow(10, logRangeY);
-        const offsetY=0;
-        const gridMinY = Math.floor((ymin+offsetY)/roundingLevelY)*roundingLevelY;
-        for (let ii = 0; ii <= (ymax + offsetY - gridMinY)/roundingLevelY+10; ii++) {
-          const pos = gridMinY + roundingLevelY*ii;
-          if (pos>offsetY){
-              gridPoints.push([pos, pos-offsetY>ymax?"hidden":"visible","y"]);
+  const gridline = function(xScale, yScale, layout){
+      return function(x){
+          const xPos = xScale(x[0]-offset);
+          let tmp_d="";
+          if (layout==="rectangular" || layout==="rootToTip"){
+            tmp_d = 'M'+xPos.toString() +
+              " " +
+              yScale.range()[0].toString() +
+              " L " +
+              xPos.toString() +
+              " " +
+              yScale.range()[1].toString();
+          }else if (layout==="radial"){
+            tmp_d = 'M '+xPos.toString() +
+              "  " +
+              yScale(0).toString() +
+              " A " +
+              (xPos - xScale(0)).toString() +
+              " " +
+              (yScale(x[0]) - yScale(offset)).toString() +
+              " 0 1 0 " +
+              xPos.toString() +
+              " " +
+              (yScale(0)+0.001).toString();
           }
-        }
+          return tmp_d;
+      };
+  };
+
+  const logRange = Math.floor(Math.log10(xmax - xmin));
+  const roundingLevel = Math.pow(10, logRange);
+  const gridMin = Math.floor((xmin+offset)/roundingLevel)*roundingLevel;
+  const gridPoints = [];
+  for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+10; ii++) {
+    const pos = gridMin + roundingLevel*ii;
+    if (pos>offset){
+        gridPoints.push([pos, pos-offset>xmax?"hidden":"visible", "x"]);
     }
+  }
 
-    const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
-    gridLabels.exit().remove();
-    gridLabels.enter().append("text");
-    gridLabels
-        .text(function(d){return d[0].toString();})
-        .attr("class", "gridTick")
-        .style("font-size",this.params.tickLabelSize)
-        .style("fill",this.params.tickLabelFill)
-        .style("text-anchor", this.layout==="radial" ? "end" : "start")
-        .style("visibility", function (d){return d[1];})
-        .attr("x", xTextPos(this.xScale, layout))
-        .attr("y", yTextPos(this.yScale, layout));
+  const majorGrid = this.svg.selectAll('.majorGrid').data(gridPoints);
+  majorGrid.exit().remove();
+  majorGrid.enter().append("path");
+  majorGrid
+      .attr("d", gridline(this.xScale, this.yScale, layout))
+      .attr("class", "majorGrid")
+      .style("fill", "none")
+      .style("visibility", function (d){return d[1];})
+      .style("stroke",this.params.majorGridStroke)
+      .style("stroke-width",this.params.majorGridWidth);
 
-    const minorRoundingLevel = roundingLevel / (this.distanceMeasure === "num_date"
-                                                ? this.params.minorTicksTimeTree
-                                                : this.params.minorTicks);
-    const minorGridPoints = [];
-    for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+50; ii++) {
-      const pos = gridMin + minorRoundingLevel*ii;
-      if (pos>offset){
-          minorGridPoints.push([pos, pos-offset>xmax+minorRoundingLevel?"hidden":"visible"]);
+  const xTextPos = function(xScale, layout){
+      return function(x){
+          if (x[2]==="x"){
+              return layout==="radial" ? xScale(0) :  xScale(x[0]);
+          }else{
+              return xScale.range()[1];
+          }
       }
+  };
+  const yTextPos = function(yScale, layout){
+      return function(x){
+          if (x[2]==="x"){
+              return layout==="radial" ? yScale(x[0]-offset) :  yScale.range()[1]+18;
+          }else{
+              return yScale(x[0]);
+          }
+      }
+  };
+
+  if (this.layout==="rootToTip"){
+      const logRangeY = Math.floor(Math.log10(ymax - ymin));
+      const roundingLevelY = Math.pow(10, logRangeY);
+      const offsetY=0;
+      const gridMinY = Math.floor((ymin+offsetY)/roundingLevelY)*roundingLevelY;
+      for (let ii = 0; ii <= (ymax + offsetY - gridMinY)/roundingLevelY+10; ii++) {
+        const pos = gridMinY + roundingLevelY*ii;
+        if (pos>offsetY){
+            gridPoints.push([pos, pos-offsetY>ymax?"hidden":"visible","y"]);
+        }
+      }
+  }
+
+  const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
+  gridLabels.exit().remove();
+  gridLabels.enter().append("text");
+  gridLabels
+      .text(function(d){return d[0].toString();})
+      .attr("class", "gridTick")
+      .style("font-size",this.params.tickLabelSize)
+      .style("fill",this.params.tickLabelFill)
+      .style("text-anchor", this.layout==="radial" ? "end" : "start")
+      .style("visibility", function (d){return d[1];})
+      .attr("x", xTextPos(this.xScale, layout))
+      .attr("y", yTextPos(this.yScale, layout));
+
+  const minorRoundingLevel = roundingLevel / (this.distanceMeasure === "num_date"
+                                              ? this.params.minorTicksTimeTree
+                                              : this.params.minorTicks);
+  const minorGridPoints = [];
+  for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+50; ii++) {
+    const pos = gridMin + minorRoundingLevel*ii;
+    if (pos>offset){
+        minorGridPoints.push([pos, pos-offset>xmax+minorRoundingLevel?"hidden":"visible"]);
     }
-    const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
-    minorGrid.exit().remove();
-    minorGrid.enter().append("path");
-    minorGrid
-        .attr("d", gridline(this.xScale, this.yScale, layout))
-        .attr("class", "minorGrid")
-        .style("fill", "none")
-        .style("visibility", function (d){return d[1];})
-        .style("stroke",this.params.minorGridStroke)
-        .style("stroke-width",this.params.minorGridWidth);
+  }
+  const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
+  minorGrid.exit().remove();
+  minorGrid.enter().append("path");
+  minorGrid
+      .attr("d", gridline(this.xScale, this.yScale, layout))
+      .attr("class", "minorGrid")
+      .style("fill", "none")
+      .style("visibility", function (d){return d[1];})
+      .style("stroke",this.params.minorGridStroke)
+      .style("stroke-width",this.params.minorGridWidth);
 
-
-    this.grid=true;
+  this.grid=true;
 };
 
 /*
  * basic update of positions of elements in tree
  */
-PhyloTree.prototype.updateGeometryFade = function(dt){
-    this.svg.selectAll('.branch').filter(function (d) {return d.update;})
-        .transition().duration(dt*0.5)
-        .style("opacity", 0.0);
+PhyloTree.prototype.updateGeometryFade = function(dt) {
+  this.svg.selectAll('.branch').filter(function(d) {
+      return d.update;
+    })
+    .transition().duration(dt * 0.5)
+    .style("opacity", 0.0);
 
-    const tipTrans = function(tmp_svg, tmp_dt){
-        const svg = tmp_svg;
-        return function(){
-            svg.selectAll('.tip').filter(function (d) {return d.update;})
-                .transition().duration(tmp_dt)
-                .attr("cx", function(d){return d.xTip;})
-                .attr("cy", function(d){return d.yTip;});
-        };
+  const tipTrans = function(tmp_svg, tmp_dt) {
+    const svg = tmp_svg;
+    return function() {
+      svg.selectAll('.tip').filter(function(d) {
+          return d.update;
+        })
+        .transition().duration(tmp_dt)
+        .attr("cx", function(d) {
+          return d.xTip;
+        })
+        .attr("cy", function(d) {
+          return d.yTip;
+        });
     };
-    setTimeout(tipTrans(this.svg, dt), 0.5*dt);
+  };
+  setTimeout(tipTrans(this.svg, dt), 0.5 * dt);
 
 
-    const flipBranches = function(tmp_svg){
-        const svg = tmp_svg;
-        return  function(){svg.selectAll('.branch').filter(function (d) {return d.update;})
-                              .attr("d", function(d){return d.branch;});};
+  const flipBranches = function(tmp_svg) {
+    const svg = tmp_svg;
+    return function() {
+      svg.selectAll('.branch').filter(function(d) {
+          return d.update;
+        })
+        .attr("d", function(d) {
+          return d.branch;
+        });
     };
-    setTimeout(flipBranches(this.svg), 0.5*dt);
+  };
+  setTimeout(flipBranches(this.svg), 0.5 * dt);
 
-    const fadeBack = function(tmp_svg, tmp_dt){
-        const svg = tmp_svg;
-        return  function(d){svg.selectAll('.branch').filter(function (d) {return d.update;})
-                .transition().duration(0.5*tmp_dt)
-                .style("opacity",1.0)};
+  const fadeBack = function(tmp_svg, tmp_dt) {
+    const svg = tmp_svg;
+    return function(d) {
+      svg.selectAll('.branch').filter(function(d) {
+          return d.update;
+        })
+        .transition().duration(0.5 * tmp_dt)
+        .style("opacity", 1.0)
     };
-    setTimeout(fadeBack(this.svg, 0.2*dt),1.5*dt);
+  };
+  setTimeout(fadeBack(this.svg, 0.2 * dt), 1.5 * dt);
 };
 
-PhyloTree.prototype.updateGeometry = function(dt){
-    this.svg.selectAll('.tip').filter(function (d) {return d.update;})
-        .transition().duration(dt)
-        .attr("cx", function(d){return d.xTip;})
-        .attr("cy", function(d){return d.yTip;});
+PhyloTree.prototype.updateGeometry = function(dt) {
+  this.svg.selectAll('.tip').filter(function(d) {
+      return d.update;
+    })
+    .transition().duration(dt)
+    .attr("cx", function(d) {
+      return d.xTip;
+    })
+    .attr("cy", function(d) {
+      return d.yTip;
+    });
 
-    this.svg.selectAll('.branch').filter(function (d) {return d.update;})
-        .transition().duration(dt)
-        .attr("d", function(d){return d.branch;});
+  this.svg.selectAll('.branch').filter(function(d) {
+      return d.update;
+    })
+    .transition().duration(dt)
+    .attr("d", function(d) {
+      return d.branch;
+    });
+};
+
+PhyloTree.prototype.updateSelectedBranchOrTip = function (oldSelected, newSelected) {
+
+  /* this doesn't work for the first hover where oldSelected is null, todo cover that case */
+  this.nodes.forEach((d, i) => {
+    d.update = false; // reset
+    if (
+      d.branch === oldSelected.d.branch || // d was the previously selected branch
+      d.branch === newSelected.d.branch || // d is the currently selected branch
+      d.n.attr.strain === oldSelected.d.n.attr.strain || // d was the previously selected tip
+      d.n.attr.strain === newSelected.d.n.attr.strain // d is the currently selected tip
+    ) {
+      d.update = true; // we need to either make it dashed or reset it to solid
+    }
+  });
+
+  /* update branches and tips svg */
+  this.svg.selectAll(".branch").filter(function(d) {
+      return d.update;
+    })
+    .style("stroke-dasharray", function(d) {
+      /*
+        slightly confusing condition: "type === .branch"
+        newSelected.branch isn't ever undefined,
+        because d is the same object for branch and tip.
+      */
+      return d.branch === newSelected.d.branch && newSelected.type === ".branch" ? "2, 3" : "none";
+    });
+
+  this.svg.selectAll(".tip").filter(function(d) {
+      return d.update;
+    })
+    .style("stroke", function(d) {
+      // tip selected and tip matches
+      return newSelected.type === ".tip" && d.n.attr.strain === newSelected.d.n.attr.strain ? d.fill : "none";
+    })
+    .style("stroke-dasharray", function(d) {
+      return newSelected.type === ".tip" && d.n.attr.strain === newSelected.d.n.attr.strain ? "2, 2" : "none";
+    })
+    .style("fill", function(d) {
+      return newSelected.type === ".tip" && d.n.attr.strain === newSelected.d.n.attr.strain ? "white" : d.fill;
+    });
 };
 
 /*
  * update tree element style of attributes
  */
 PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) {
-    this.nodes.forEach(function (d,i){
-        d.update=false;
-        let newAttr;
-        for (var attr in attrs){
-            newAttr = attrs[attr][i];
-            if (newAttr!==d[attr]){
-                d[attr]=newAttr;
-                d.update = true;
-            }
-        }
-        let newStyle;
-        for (var prop in styles){
-            newStyle = styles[prop][i];
-            if (newStyle!==d[prop]){
-                d[prop]=newStyle;
-                d.update = true;
-            }
-        }
-    });
-    function update(attrToSet, stylesToSet){
-        return function(selection){
-            for (var i=0; i<stylesToSet.length; i+=1){
-                var prop = stylesToSet[i];
-                selection.style(prop, function(d){return d[prop];});
-            }
-            for (var i=0; i<attrToSet.length; i+=1){
-                var prop = attrToSet[i];
-                selection.attr(prop, function(d){return d[prop];});
-            }
-        };
+  this.nodes.forEach(function(d, i) {
+    d.update = false;
+    /* note that this is not node.attr, but element attr such as <g width="100" vs style="" */
+    let newAttr;
+    for (var attr in attrs) {
+      newAttr = attrs[attr][i];
+      if (newAttr !== d[attr]) {
+        d[attr] = newAttr;
+        d.update = true;
+      }
+    }
+    let newStyle;
+    for (var prop in styles) {
+      newStyle = styles[prop][i];
+      if (newStyle !== d[prop]) {
+        d[prop] = newStyle;
+        d.update = true;
+      }
+    }
+  });
+
+  function update(attrToSet, stylesToSet) {
+    return function(selection) {
+      for (var i = 0; i < stylesToSet.length; i += 1) {
+
+        var prop = stylesToSet[i];
+        selection.style(prop, function(d) {
+          return d[prop];
+        });
+      }
+      for (var i = 0; i < attrToSet.length; i += 1) {
+        var prop = attrToSet[i];
+        selection.attr(prop, function(d) {
+          return d[prop];
+        });
+      }
     };
-    this.svg.selectAll(treeElem).filter(function (d) {return d.update;})
-        .transition().duration(dt)
-        .call(update(Object.keys(attrs), Object.keys(styles)));
+  };
+  this.svg.selectAll(treeElem).filter(function(d) {
+      return d.update;
+    })
+    .transition().duration(dt)
+    .call(update(Object.keys(attrs), Object.keys(styles)));
 
 };
 
-PhyloTree.prototype.updateAttribute = function(treeElem, attr, callback, dt){
-    this.updateAttributeArray(treeElem, attr,
-        this.nodes.map(function(d){return callback(d);}), dt);
+PhyloTree.prototype.updateAttribute = function(treeElem, attr, callback, dt) {
+  this.updateAttributeArray(treeElem, attr,
+    this.nodes.map(function(d) {
+      return callback(d);
+    }), dt);
 };
 
-PhyloTree.prototype.updateAttributeArray= function(treeElem, attr, attr_array, dt){
-    this.nodes.forEach(function(d,i){
-        const newAttr = attr_array[i];
-        if (newAttr===d[attr]){
-            d.update=false;
-        }else{
-            d[attr]=newAttr;
-            d.update=true;
-        }
+PhyloTree.prototype.updateAttributeArray = function(treeElem, attr, attr_array, dt) {
+  this.nodes.forEach(function(d, i) {
+    const newAttr = attr_array[i];
+    if (newAttr === d[attr]) {
+      d.update = false;
+    } else {
+      d[attr] = newAttr;
+      d.update = true;
+    }
+  });
+  this.redrawAttribute(treeElem, attr, dt);
+};
+
+PhyloTree.prototype.redrawAttribute = function(treeElem, attr, dt) {
+  this.svg.selectAll(treeElem).filter(function(d) {
+      return d.update;
+    })
+    .transition().duration(dt)
+    .attr(attr, function(d) {
+      return d[attr];
     });
-    this.redrawAttribute(treeElem, attr, dt);
 };
 
-PhyloTree.prototype.redrawAttribute = function(treeElem, attr, dt){
-    this.svg.selectAll(treeElem).filter(function (d) {return d.update;})
-        .transition().duration(dt)
-        .attr(attr, function(d){return d[attr];});
+PhyloTree.prototype.updateStyle = function(treeElem, styleElem, callback, dt) {
+  this.updateStyleArray(treeElem, attr,
+    this.nodes.map(function(d) {
+      return callback(d);
+    }), dt);
 };
 
-PhyloTree.prototype.updateStyle= function(treeElem, styleElem, callback, dt){
-    this.updateStyleArray(treeElem, attr,
-        this.nodes.map(function(d){return callback(d);}), dt);
+PhyloTree.prototype.updateStyleArray = function(treeElem, styleElem, style_array, dt) {
+  this.nodes.forEach(function(d, i) {
+    const newStyle = style_array[i];
+    if (newStyle === d[styleElem]) {
+      d.update = false;
+    } else {
+      d[styleElem] = newStyle;
+      d.update = true;
+    }
+  });
+  this.redrawStyle(treeElem, styleElem, dt);
 };
 
-PhyloTree.prototype.updateStyleArray= function(treeElem, styleElem, style_array, dt){
-    this.nodes.forEach(function(d,i){
-        const newStyle = style_array[i];
-        if (newStyle===d[styleElem]){
-            d.update=false;
-        }else{
-            d[styleElem]=newStyle;
-            d.update=true;
-        }
+PhyloTree.prototype.redrawStyle = function(treeElem, styleElem, dt) {
+  this.svg.selectAll(treeElem).filter(function(d) {
+      return d.update;
+    })
+    .transition().duration(dt)
+    .style(styleElem, function(d) {
+      return d[styleElem];
     });
-    this.redrawStyle(treeElem, styleElem, dt);
-};
-
-PhyloTree.prototype.redrawStyle = function(treeElem, styleElem, dt){
-    this.svg.selectAll(treeElem).filter(function (d) {return d.update;})
-        .transition().duration(dt)
-        .style(styleElem, function(d){return d[styleElem];});
 };
 
 /*
  * add and remove elements from tree, initial render
  */
-PhyloTree.prototype.clearSVG = function (){
-    this.svg.selectAll('.tip').remove();
-    this.svg.selectAll('.branch').remove();
+PhyloTree.prototype.clearSVG = function() {
+  this.svg.selectAll('.tip').remove();
+  this.svg.selectAll('.branch').remove();
 };
 
-PhyloTree.prototype.tips = function(){
-    this.tipElements = this.svg.append("g").selectAll('.tip')
-        .data(this.nodes.filter(function (d){return d.terminal;}))
-        .enter()
-        .append("circle")
-        .attr("class", "tip")
-        .attr("id", function(d){return d.n.clade;})
-        .attr("cx", function(d){return d.xTip;})
-        .attr("cy", function(d){return d.yTip;})
-        .attr("r", function(d){return d.r||5;})
-        .style("fill",function (d) {return d.fill||"#CCC";})
-        .style("stroke",function (d) {return d.stroke||"#AAA";})
-        .style("stroke-width", function(d){return d.strokeWidth||2;});
+PhyloTree.prototype.tips = function() {
+  this.tipElements = this.svg.append("g").selectAll('.tip')
+    .data(this.nodes.filter(function(d) {
+      return d.terminal;
+    }))
+    .enter()
+    .append("circle")
+    .attr("class", "tip")
+    .attr("id", function(d) {
+      return d.n.clade;
+    })
+    .attr("cx", function(d) {
+      return d.xTip;
+    })
+    .attr("cy", function(d) {
+      return d.yTip;
+    })
+    .attr("r", function(d) {
+      return d.r || 5;
+    })
+    .on("mouseover", (d) => {
+      this.callbacks.onTipHover(d)
+    })
+    .on("click", (d) => {
+      this.callbacks.onTipClick(d)
+    })
+    .style("pointer-events", "auto")
+    // .style("cursor", "default")
+    .style("fill", function(d) {
+      return d.fill || "#CCC";
+    })
+    .style("stroke", function(d) {
+      return d.stroke || "#AAA";
+    })
+    .style("stroke-width", function(d) {
+      return d.strokeWidth || 2;
+    });
 };
 
-PhyloTree.prototype.branches = function(){
-    this.branches = this.svg.append("g").selectAll('.branch')
-        .data(this.nodes)
-        .enter()
-        .append("path")
-        .attr("class", "branch")
-        .attr("id", function(d){return d.n.clade;})
-        .attr("d", function(d){return d.branch;})
-        .style("stroke",function (d) {return d.stroke||"#AAA";})
-        .style("fill","none")
-        .style("stroke-width", function(d){return d.strokeWidth||2;});
+PhyloTree.prototype.branches = function(selected) {
+  this.branches = this.svg.append("g").selectAll('.branch')
+    .data(this.nodes)
+    .enter()
+    .append("path")
+    .attr("class", "branch")
+    .attr("id", function(d) {
+      return d.n.clade;
+    })
+    .attr("d", function(d) {
+      return d.branch;
+    })
+    .on("mouseover", (d) => {
+      this.callbacks.onBranchHover(d)
+    })
+    .on("click", (d) => {
+      this.callbacks.onBranchClick(d)
+    })
+    .style("pointer-events", "auto")
+    .style("stroke-dasharray", (d) => {
+      let dasharray = "none";
+      if (selected) {
+        // console.log("selected", selected, "d", d)
+      }
+      return dasharray
+    })
+    // .style("cursor", "default")
+    .style("stroke", function(d) {
+      return d.stroke || "#AAA";
+    })
+    .style("fill", "none")
+    .style("stroke-width", function(d) {
+      return d.strokeWidth || 2;
+    });
 };
 
-PhyloTree.prototype.render = function(svg, layout, distance, options) {
-    this.svg = svg;
-    this.params = Object.assign(this.params, options);
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, selected) {
+  this.svg = svg;
+  this.params = Object.assign(this.params, options);
+  this.callbacks = callbacks;
 
-    this.clearSVG();
-    this.setDistance(distance);
-    this.setLayout(layout);
-    this.mapToScreen();
-    if (this.params.showGrid){
-        this.addGrid();
-    }
-    this.branches();
-    this.tips();
-    this.updateGeometry(10);
-    this.svg.selectAll(".regression").remove();
-    if (layout==="rootToTip") this.drawRegression();
+  this.clearSVG();
+  this.setDistance(distance);
+  this.setLayout(layout);
+  this.mapToScreen();
+  if (this.params.showGrid){
+      this.addGrid();
+  }
+  this.branches(selected);
+  this.tips(selected);
+  this.updateGeometry(10);
+  this.svg.selectAll(".regression").remove();
+  if (layout==="rootToTip") this.drawRegression();
 };
 
 export default PhyloTree;
