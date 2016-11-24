@@ -125,10 +125,30 @@ class TreeView extends React.Component {
       (this.state.hovered || this.state.clicked) &&
       this.props.layout === nextProps.layout // this block interferes with layout transition otherwise
     ) {
-      this.state.tree.updateSelectedBranchOrTip(
-        this.state.hovered, /* turn this one off */
-        nextState.hovered, /* turn this one on */
-      );
+      /* check whether or not the previously selected item was clicked */
+      if (this.state.clicked && nextState.clicked) { // was the previous item a click?
+        this.state.tree.updateSelectedBranchOrTip(
+          this.state.clicked, /* turn this one off */
+          nextState.clicked, /* turn this one on */
+        );
+      } else if (this.state.hovered && nextState.clicked) { // previously a hover, now a click
+        this.state.tree.updateSelectedBranchOrTip(
+          this.state.hovered,
+          nextState.clicked,
+        );
+      } else if (this.state.hovered && nextState.hovered) { // deselect the previously selected hover
+        this.state.tree.updateSelectedBranchOrTip(
+          this.state.hovered,
+          nextState.hovered,
+        );
+      }
+      // else if () {
+      //   // x clicked or clicked off will give a null value, so reset everything
+      //   this.state.tree.updateSelectedBranchOrTip(
+      //     null,
+      //     null
+      //   )
+      // }
     }
   }
 
