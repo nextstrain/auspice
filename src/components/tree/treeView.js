@@ -291,6 +291,7 @@ class TreeView extends React.Component {
           </svg>
           <InfoPanel
             dismiss={this.infoPanelDismiss.bind(this)}
+            zoom={this.state.tree ? this.state.tree.zoomIntoClade.bind(this.state.tree) : null}
             hovered={this.state.hovered}
             clicked={this.state.clicked}/>
           <ReactSVGPanZoom

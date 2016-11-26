@@ -2,7 +2,7 @@ import React from "react";
 import * as globalStyles from "../../globalStyles";
 import * as globals from "../../util/globals";
 
-const InfoPanel = ({hovered, clicked, dismiss}) => {
+const InfoPanel = ({hovered, clicked, dismiss, zoom}) => {
 
   /*
     node / branch
@@ -88,6 +88,7 @@ const InfoPanel = ({hovered, clicked, dismiss}) => {
       <div style={container}>
         {clicked ? <p style={dismissStyle} onClick={dismiss}>x</p> : null}
         { typeof branch.frequency !== "undefined" ? frequencies(branch.n) : null }
+        <p style={link} onClick={function(d) {zoom(branch, globals.mediumTransitionDuration);}}>Zoom into Clade</p>
         <p style={muts}>Mutations: {mutations(branch.n)}</p>
         <a href="#" style={link}> Filter to this clade </a>
         <a href="#" style={link}> Reset layout to this clade </a>

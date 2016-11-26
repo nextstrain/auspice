@@ -1,32 +1,32 @@
 import d3 from "d3";
 
 const addLeafCount = function (node) {
-    if (node.children) {
+    if (node.terminal) {
+        node.leafCount=1;
+    }else{
         node.leafCount=0;
         for (var i=0; i<node.children.length; i+=1){
             addLeafCount(node.children[i]);
             node.leafCount += node.children[i].leafCount;
         }
-    } else {
-        node.leafCount=1;
     }
 };
 
 const unrootedPlaceSubtree = function(node, nTips){
-    node.x = node.px+node.branchLength*Math.cos(node.tau + node.w*0.5);
-    node.y = node.py+node.branchLength*Math.sin(node.tau + node.w*0.5);
-    var eta = node.tau;
-    if (node.children){
-        for (var i=0; i<node.children.length; i+=1){
-            var ch = node.children[i];
-            ch.w = 2*Math.PI*ch.leafCount/nTips;
-            ch.tau = eta;
-            eta += ch.w;
-            ch.px = node.x;
-            ch.py = node.y;
-            unrootedPlaceSubtree(ch, nTips);
-        }
-    }
+  node.x = node.px+node.branchLength*Math.cos(node.tau + node.w*0.5);
+  node.y = node.py+node.branchLength*Math.sin(node.tau + node.w*0.5);
+  var eta = node.tau;
+  if (!node.terminal){
+      for (var i=0; i<node.children.length; i+=1){
+          var ch = node.children[i];
+          ch.w = 2*Math.PI*ch.leafCount/nTips;
+          ch.tau = eta;
+          eta += ch.w;
+          ch.px = node.x;
+          ch.py = node.y;
+          unrootedPlaceSubtree(ch, nTips);
+      }
+  }
 };
 
 var PhyloTree = function(treeJson) {
@@ -47,13 +47,22 @@ var PhyloTree = function(treeJson) {
     return d.n.yvalue;
   }));
   this.nodes.forEach(function(d) {
+    d.inView=true;
+    d.n.shell = d; // a back link from the original node object to the wrapper
     d.terminal = (typeof d.n.children === "undefined");
   });
+  // remember the range of children subtending a node (i.e. the range of yvalues)
+  // and create children structure
   this.nodes.forEach(function(d) {
-    if (typeof d.n.children === "undefined") {
+    if (d.terminal) {
       d.yRange = [d.n.yvalue, d.n.yvalue];
+      d.children=null;
     } else {
       d.yRange = [d.n.children[0].yvalue, d.n.children[d.n.children.length - 1].yvalue];
+      d.children = [];
+      for (var i=0; i < d.n.children.length; i++){
+        d.children.push(d.n.children[i].shell);
+      }
     }
   });
 };
@@ -181,37 +190,56 @@ PhyloTree.prototype.radialLayout = function() {
 PhyloTree.prototype.unrootedLayout = function(){
   const nTips=this.numberOfTips;
   //postorder iteration to determine leaf count of every node
-  addLeafCount(this.nodes[0].n);
+  addLeafCount(this.nodes[0]);
   //calculate branch length from depth
-  this.nodes.forEach(function(d){d.n.branchLength = d.depth - d.pDepth;});
+  this.nodes.forEach(function(d){d.branchLength = d.depth - d.pDepth;});
   //preorder iteration to layout nodes
-  this.nodes[0].n.x = 0;
-  this.nodes[0].n.y = 0;
-  this.nodes[0].n.px = 0;
-  this.nodes[0].n.py = 0;
-  this.nodes[0].n.w = 2*Math.PI;
-  this.nodes[0].n.tau = 0;
+  this.nodes[0].x = 0;
+  this.nodes[0].y = 0;
+  this.nodes[0].px = 0;
+  this.nodes[0].py = 0;
+  this.nodes[0].w = 2*Math.PI;
+  this.nodes[0].tau = 0;
   var eta = 1.5*Math.PI;
-  for (var i=0; i<this.nodes[0].n.children.length; i+=1){
-    this.nodes[0].n.children[i].px=0;
-    this.nodes[0].n.children[i].py=0;
-    this.nodes[0].n.children[i].w = 2.0*Math.PI*this.nodes[0].n.children[i].leafCount/nTips;
-    this.nodes[0].n.children[i].tau = eta;
-    eta += this.nodes[0].n.children[i].w;
-    unrootedPlaceSubtree(this.nodes[0].n.children[i], nTips);
+  for (var i=0; i<this.nodes[0].children.length; i+=1){
+    this.nodes[0].children[i].px=0;
+    this.nodes[0].children[i].py=0;
+    this.nodes[0].children[i].w = 2.0*Math.PI*this.nodes[0].children[i].leafCount/nTips;
+    this.nodes[0].children[i].tau = eta;
+    eta += this.nodes[0].children[i].w;
+    unrootedPlaceSubtree(this.nodes[0].children[i], nTips);
   }
-  this.nodes.forEach(function(d){
-    d.x = d.n.x;
-    d.y = d.n.y;
-    d.px = d.n.px;
-    d.py = d.n.py;
-  });
+  // this.nodes.forEach(function(d){
+  //   d.x = d.n.x;
+  //   d.y = d.n.y;
+  //   d.px = d.n.px;
+  //   d.py = d.n.py;
+  // });
+};
+
+PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
+  this.nodes.forEach(function(d){d.inView=false});
+  const kidsVisible = function(node){
+    node.inView=true;
+    if (node.terminal){ return;}
+    else{
+      for (let i=0; i<node.children.length; i++){
+        kidsVisible(node.children[i]);
+      }
+    }
+  };
+  kidsVisible(clade);
+  this.mapToScreen();
+  this.updateGeometry(dt);
+  if (this.grid) this.addGrid(this.layout);
+  this.svg.selectAll(".regression").remove();
+  if (this.layout === "rootToTip") this.drawRegression();
 };
 
 PhyloTree.prototype.mapToScreen = function(){
     this.setScales(this.params.margins);
-    const tmp_xValues = this.nodes.map(function(d){return d.x});
-    const tmp_yValues = this.nodes.map(function(d){return d.y});
+    const tmp_xValues = this.nodes.filter((d)=>d.inView).map(function(d){return d.x});
+    const tmp_yValues = this.nodes.filter((d)=>d.inView).map(function(d){return d.y});
     if (this.layout==="radial"){
         const maxSpan = d3.max([-d3.min(tmp_xValues), d3.max(tmp_xValues),
                                 -d3.min(tmp_yValues), d3.max(tmp_yValues)]);
@@ -721,7 +749,6 @@ PhyloTree.prototype.tips = function() {
       this.callbacks.onTipClick(d)
     })
     .style("pointer-events", "auto")
-    // .style("cursor", "default")
     .style("fill", function(d) {
       return d.fill || "#CCC";
     })
@@ -734,7 +761,7 @@ PhyloTree.prototype.tips = function() {
     .style("cursor", "pointer");
 };
 
-PhyloTree.prototype.branches = function(selected) {
+PhyloTree.prototype.branches = function() {
   this.branches = this.svg.append("g").selectAll('.branch')
     .data(this.nodes)
     .enter()
@@ -753,14 +780,6 @@ PhyloTree.prototype.branches = function(selected) {
       this.callbacks.onBranchClick(d)
     })
     .style("pointer-events", "auto")
-    .style("stroke-dasharray", (d) => {
-      let dasharray = "none";
-      if (selected) {
-        // console.log("selected", selected, "d", d)
-      }
-      return dasharray
-    })
-    // .style("cursor", "default")
     .style("stroke", function(d) {
       return d.stroke || "#AAA";
     })
@@ -771,7 +790,7 @@ PhyloTree.prototype.branches = function(selected) {
     .style("cursor", "pointer");
 };
 
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, selected) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks) {
   this.svg = svg;
   this.params = Object.assign(this.params, options);
   this.callbacks = callbacks;
@@ -783,8 +802,8 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
   if (this.params.showGrid){
       this.addGrid();
   }
-  this.branches(selected);
-  this.tips(selected);
+  this.branches();
+  this.tips();
   this.updateGeometry(10);
   this.svg.selectAll(".regression").remove();
   if (layout==="rootToTip") this.drawRegression();
