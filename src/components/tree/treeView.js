@@ -118,6 +118,7 @@ class TreeView extends React.Component {
   }
 
   componentWillUpdate(nextProps, nextState) {
+    /* reconcile hover and click selections in tree */
     if (
       this.state.tree &&
       (this.state.hovered || this.state.clicked) &&
@@ -140,13 +141,13 @@ class TreeView extends React.Component {
           nextState.hovered,
         );
       }
-      // else if () {
-      //   // x clicked or clicked off will give a null value, so reset everything
-      //   this.state.tree.updateSelectedBranchOrTip(
-      //     null,
-      //     null
-      //   )
-      // }
+      else if (this.state.clicked && nextState.clicked === null) {
+        // x clicked or clicked off will give a null value, so reset everything to be safe
+        this.state.tree.updateSelectedBranchOrTip(
+          this.state.clicked,
+          null
+        )
+      }
     }
   }
 
@@ -264,7 +265,7 @@ class TreeView extends React.Component {
   }
 
   infoPanelDismiss() {
-    this.setState({clicked: null});
+    this.setState({clicked: null, hovered: null});
   }
 
   render() {
