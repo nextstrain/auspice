@@ -103,10 +103,10 @@ PhyloTree.prototype.setDistance = function(attr) {
   const tmp_dist = this.distance;
   this.nodes.forEach(function(d) {
     d.depth = d.n.attr[tmp_dist];
-  })
+  });
   this.nodes.forEach(function(d) {
     d.pDepth = d.n.parent.attr[tmp_dist];
-  })
+  });
 };
 
 PhyloTree.prototype.rectangularLayout = function() {
@@ -119,11 +119,10 @@ PhyloTree.prototype.rectangularLayout = function() {
 };
 
 PhyloTree.prototype.timeVsRootToTip = function(){
-  this.setDistance("num_date");
   this.nodes.forEach(function (d) {
     d.y = d.n.attr["div"];
-    d.x = d.depth;
-    d.px = d.pDepth;
+    d.x = d.n.attr["num_date"];
+    d.px = d.n.parent.attr["num_date"];
     d.py = d.n.parent.attr["div"];
   });
   const nTips = this.numberOfTips;
