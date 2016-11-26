@@ -730,7 +730,8 @@ PhyloTree.prototype.tips = function() {
     })
     .style("stroke-width", function(d) {
       return d.strokeWidth || 2;
-    });
+    })
+    .style("cursor", "pointer");
 };
 
 PhyloTree.prototype.branches = function(selected) {
@@ -766,7 +767,8 @@ PhyloTree.prototype.branches = function(selected) {
     .style("fill", "none")
     .style("stroke-width", function(d) {
       return d.strokeWidth || 2;
-    });
+    })
+    .style("cursor", "pointer");
 };
 
 PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, selected) {
