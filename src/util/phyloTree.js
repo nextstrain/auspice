@@ -537,47 +537,43 @@ PhyloTree.prototype.updateGeometry = function(dt) {
     });
 };
 
+PhyloTree.prototype.selectBranch = function(node) {
+  this.svg.select("#branch_"+node.n.clade)
+    .style("stroke-dasharray", function(d) {
+      return "2, 3";
+    });
+};
+
+PhyloTree.prototype.deSelectBranch = function(node) {
+  this.svg.select("#branch_"+node.n.clade)
+    .style("stroke-dasharray", function(d) {
+      return "none";
+    });
+};
+
+PhyloTree.prototype.selectTip = function(node) {
+  this.svg.select("#tip_"+node.n.clade)
+    .style("stroke", function(d) {return d.fill;})
+    .style("stroke-dasharray", function(d) {return "2, 2";})
+    .style("fill", function(d) { return "white";});
+};
+
+PhyloTree.prototype.deSelectTip = function(node) {
+  this.svg.select("#tip_"+node.n.clade)
+    .style("stroke", function(d) {return "none";})
+    .style("stroke-dasharray", function(d) {return "none";})
+    .style("fill", function(d) { return d.fill;});
+};
+
+
 PhyloTree.prototype.updateSelectedBranchOrTip = function (oldSelected, newSelected) {
+  if (oldSelected.d.n.clade !== newSelected.d.n.clade){
+    this.deSelectBranch(oldSelected.d);
+    if (newSelected.type===".branch") this.selectBranch(newSelected.d);
 
-  /* this doesn't work for the first hover where oldSelected is null, todo cover that case */
-  this.nodes.forEach((d, i) => {
-    d.update = false; // reset
-    if (
-      d.branch === oldSelected.d.branch || // d was the previously selected branch
-      d.branch === newSelected.d.branch || // d is the currently selected branch
-      d.n.attr.strain === oldSelected.d.n.attr.strain || // d was the previously selected tip
-      d.n.attr.strain === newSelected.d.n.attr.strain // d is the currently selected tip
-    ) {
-      d.update = true; // we need to either make it dashed or reset it to solid
-    }
-  });
-
-  /* update branches and tips svg */
-  this.svg.selectAll(".branch").filter(function(d) {
-      return d.update;
-    })
-    .style("stroke-dasharray", function(d) {
-      /*
-        slightly confusing condition: "type === .branch"
-        newSelected.branch isn't ever undefined,
-        because d is the same object for branch and tip.
-      */
-      return d.branch === newSelected.d.branch && newSelected.type === ".branch" ? "2, 3" : "none";
-    });
-
-  this.svg.selectAll(".tip").filter(function(d) {
-      return d.update;
-    })
-    .style("stroke", function(d) {
-      // tip selected and tip matches
-      return newSelected.type === ".tip" && d.n.attr.strain === newSelected.d.n.attr.strain ? d.fill : "none";
-    })
-    .style("stroke-dasharray", function(d) {
-      return newSelected.type === ".tip" && d.n.attr.strain === newSelected.d.n.attr.strain ? "2, 2" : "none";
-    })
-    .style("fill", function(d) {
-      return newSelected.type === ".tip" && d.n.attr.strain === newSelected.d.n.attr.strain ? "white" : d.fill;
-    });
+    this.deSelectTip(oldSelected.d);
+    if (newSelected.type===".tip") this.selectTip(newSelected.d);
+  }
 };
 
 /*
@@ -699,7 +695,7 @@ PhyloTree.prototype.clearSVG = function() {
 };
 
 PhyloTree.prototype.tips = function() {
-  this.tipElements = this.svg.append("g").selectAll('.tip')
+  this.tipElements = this.svg.append("g").selectAll(".tip")
     .data(this.nodes.filter(function(d) {
       return d.terminal;
     }))
@@ -707,7 +703,7 @@ PhyloTree.prototype.tips = function() {
     .append("circle")
     .attr("class", "tip")
     .attr("id", function(d) {
-      return d.n.clade;
+      return "tip_" + d.n.clade;
     })
     .attr("cx", function(d) {
       return d.xTip;
@@ -744,7 +740,7 @@ PhyloTree.prototype.branches = function(selected) {
     .append("path")
     .attr("class", "branch")
     .attr("id", function(d) {
-      return d.n.clade;
+      return "branch_" + d.n.clade;
     })
     .attr("d", function(d) {
       return d.branch;
