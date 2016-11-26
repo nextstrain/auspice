@@ -567,12 +567,12 @@ PhyloTree.prototype.deSelectTip = function(node) {
 
 
 PhyloTree.prototype.updateSelectedBranchOrTip = function (oldSelected, newSelected) {
-  if (oldSelected.d.n.clade !== newSelected.d.n.clade){
-    this.deSelectBranch(oldSelected.d);
-    if (newSelected.type===".branch") this.selectBranch(newSelected.d);
+  if (!newSelected || !newSelected || oldSelected.d.n.clade !== newSelected.d.n.clade){
+    if (oldSelected) this.deSelectBranch(oldSelected.d);
+    if (newSelected && newSelected.type===".branch") this.selectBranch(newSelected.d);
 
-    this.deSelectTip(oldSelected.d);
-    if (newSelected.type===".tip") this.selectTip(newSelected.d);
+    if (oldSelected) this.deSelectTip(oldSelected.d);
+    if (newSelected && newSelected.type===".tip") this.selectTip(newSelected.d);
   }
 };
 
