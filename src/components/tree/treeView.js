@@ -266,6 +266,7 @@ class TreeView extends React.Component {
 
   infoPanelDismiss() {
     this.setState({clicked: null, hovered: null});
+    this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
   }
 
   render() {

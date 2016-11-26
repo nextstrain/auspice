@@ -218,7 +218,7 @@ PhyloTree.prototype.unrootedLayout = function(){
 };
 
 PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
-  this.nodes.forEach(function(d){d.inView=false});
+  this.nodes.forEach(function(d){d.inView=false; d.update=true;});
   const kidsVisible = function(node){
     node.inView=true;
     if (node.terminal){ return;}
@@ -240,11 +240,16 @@ PhyloTree.prototype.mapToScreen = function(){
     this.setScales(this.params.margins);
     const tmp_xValues = this.nodes.filter((d)=>d.inView).map(function(d){return d.x});
     const tmp_yValues = this.nodes.filter((d)=>d.inView).map(function(d){return d.y});
-    if (this.layout==="radial"){
-        const maxSpan = d3.max([-d3.min(tmp_xValues), d3.max(tmp_xValues),
-                                -d3.min(tmp_yValues), d3.max(tmp_yValues)]);
-        this.xScale.domain([-maxSpan, maxSpan]);
-        this.yScale.domain([-maxSpan, maxSpan]);
+    if (this.layout==="radial" || this.layout==="unrooted") {
+        // const maxSpan = d3.max([-d3.min(tmp_xValues), d3.max(tmp_xValues),
+        //                         -d3.min(tmp_yValues), d3.max(tmp_yValues)]);
+        const minX = d3.min(tmp_xValues);
+        const minY = d3.min(tmp_yValues);
+        const spanX = d3.max(tmp_xValues)-minX;
+        const spanY = d3.max(tmp_yValues)-minY;
+        const maxSpan = d3.max([spanY, spanX]);
+        this.xScale.domain([minX, minX+maxSpan]);
+        this.yScale.domain([minY, minY+maxSpan]);
     }else if (this.layout==="rootToTip"){
         this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
         this.yScale.domain([d3.max(tmp_yValues), d3.min(tmp_yValues)]);
@@ -313,7 +318,7 @@ PhyloTree.prototype.setLayout = function(layout){
 PhyloTree.prototype.setScales = function(margins) {
   const width = parseInt(this.svg.attr("width"), 10);
   const height = parseInt(this.svg.attr("height"), 10);
-  if (this.layout === "radial") {
+  if (this.layout === "radial" || this.layout === "unrooted") {
     //Force Square
     const xExtend = width - (margins["left"] || 0) - (margins["right"] || 0);
     const yExtend = height - (margins["top"] || 0) - (margins["top"] || 0);
@@ -356,7 +361,7 @@ PhyloTree.prototype.removeGrid = function() {
   this.svg.selectAll(".minorGrid").remove();
   this.svg.selectAll(".gridTick").remove();
   this.grid = false;
-}
+};
 
 PhyloTree.prototype.addGrid = function(layout) {
   if (typeof layout==="undefined"){ layout=this.layout;}
@@ -516,7 +521,6 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
     };
   };
   setTimeout(tipTrans(this.svg, dt), 0.5 * dt);
-
 
   const flipBranches = function(tmp_svg) {
     const svg = tmp_svg;
