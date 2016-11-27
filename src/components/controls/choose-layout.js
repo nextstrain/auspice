@@ -2,6 +2,7 @@ import React from "react";
 import RectangleTreeLayout from "../framework/svg-tree-layout-rectangle";
 import RadialTreeLayout from "../framework/svg-tree-layout-radial";
 import UnrootedTreeLayout from "../framework/svg-tree-layout-unrooted";
+import RootToTipTreeLayout from "../framework/svg-tree-layout-rootToTip";
 import {materialButton} from "../../globalStyles";
 
 class ChooseLayout extends React.Component {
@@ -53,8 +54,8 @@ class ChooseLayout extends React.Component {
           key={3}
           style={materialButton}
           onClick={() => { this.setLayoutQueryParam("rootToTip"); }}>
-          <UnrootedTreeLayout width={25} stroke="rgb(130,130,130)"/>
-          <span style={styles.title}> {"rootToTip"} </span>
+          <RootToTipTreeLayout width={25} stroke="rgb(130,130,130)"/>
+          <span style={styles.title}> {"Mol.Clock"} </span>
         </button>
         <button
           key={4}

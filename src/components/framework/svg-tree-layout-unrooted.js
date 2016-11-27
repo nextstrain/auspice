@@ -1,6 +1,6 @@
 import React from "react";
 
-class RectangleTreeLayout extends React.Component {
+class UnrootedTreeLayout extends React.Component {
   static defaultProps = {
     // foo: "bar"
     stroke: "black",
@@ -53,4 +53,4 @@ class RectangleTreeLayout extends React.Component {
   }
 }
 
-export default RectangleTreeLayout;
+export default UnrootedTreeLayout;
