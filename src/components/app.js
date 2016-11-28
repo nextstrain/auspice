@@ -13,7 +13,7 @@ import Flex from "./framework/flex";
 import Header from "./framework/header";
 import Footer from "./framework/footer";
 import Background from "./framework/background";
-
+import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
 import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
@@ -300,6 +300,7 @@ class App extends React.Component {
     this.setState({sidebarDocked: this.state.mql.matches});
   }
 
+
   /******************************************
    * RENDER
    *****************************************/
@@ -317,19 +318,12 @@ class App extends React.Component {
         docked={this.state.sidebarDocked}
         onSetOpen={this.onSetSidebarOpen}>
         <Background>
-          <div
-            onClick={() => {
+          <ToggleSidebarTab
+            open={this.state.sidebarDocked}
+            handler={() => {
               this.setState({sidebarDocked: !this.state.sidebarDocked})
             }}
-            style={{
-              width: 15,
-              height: 55,
-              position: "fixed",
-              top: 5,
-              zIndex: 1001,
-              backgroundColor: "rgb(67, 119, 205)"
-            }}>
-          </div>
+          />
           <Header/>
           <TreeView nodes={this.props.tree.nodes}
             colorScale={this.state.colorScale}
