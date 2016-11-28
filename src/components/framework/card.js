@@ -30,6 +30,7 @@ class Card extends React.Component {
         boxShadow: "3px 3px 12px 2px rgba(217,217,217,0.85)",
         borderRadius: 4,
         padding: 5,
+        overflow: "hidden",
         position: "relative"
       },
       title: {
