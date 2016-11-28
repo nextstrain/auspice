@@ -13,7 +13,7 @@ import Flex from "./framework/flex";
 import Header from "./framework/header";
 import Footer from "./framework/footer";
 import Background from "./framework/background";
-
+import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
 import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
@@ -30,8 +30,6 @@ const returnStateNeeded = (fullStateTree) => {
   return {
     tree: fullStateTree.tree,
     sequences: fullStateTree.sequences,
-    sidebarOpen: false,
-    sidebarDocked: false,
     metadata: fullStateTree.metadata,
     selectedLegendItem: fullStateTree.controls.selectedLegendItem
   };
@@ -43,6 +41,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       sidebarOpen: false,
+      sidebarDocked: false,
       location: {
         pathname: window.location.pathname,
         query: queryString.parse(window.location.search)
@@ -301,6 +300,7 @@ class App extends React.Component {
     this.setState({sidebarDocked: this.state.mql.matches});
   }
 
+
   /******************************************
    * RENDER
    *****************************************/
@@ -318,6 +318,12 @@ class App extends React.Component {
         docked={this.state.sidebarDocked}
         onSetOpen={this.onSetSidebarOpen}>
         <Background>
+          <ToggleSidebarTab
+            open={this.state.sidebarDocked}
+            handler={() => {
+              this.setState({sidebarDocked: !this.state.sidebarDocked})
+            }}
+          />
           <Header/>
           <TreeView nodes={this.props.tree.nodes}
             colorScale={this.state.colorScale}
@@ -333,13 +339,11 @@ class App extends React.Component {
             changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
           />
-        {
           <Map
             colorScale={this.state.colorScale.scale}
             nodes={this.props.tree.nodes}
             justGotNewDatasetRenderNewMap={false}
           />
-        }
         </Background>
       </Sidebar>
     );
