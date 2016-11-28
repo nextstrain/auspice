@@ -30,8 +30,6 @@ const returnStateNeeded = (fullStateTree) => {
   return {
     tree: fullStateTree.tree,
     sequences: fullStateTree.sequences,
-    sidebarOpen: false,
-    sidebarDocked: false,
     metadata: fullStateTree.metadata,
     selectedLegendItem: fullStateTree.controls.selectedLegendItem
   };
@@ -43,6 +41,7 @@ class App extends React.Component {
     super(props);
     this.state = {
       sidebarOpen: false,
+      sidebarDocked: false,
       location: {
         pathname: window.location.pathname,
         query: queryString.parse(window.location.search)
@@ -318,6 +317,19 @@ class App extends React.Component {
         docked={this.state.sidebarDocked}
         onSetOpen={this.onSetSidebarOpen}>
         <Background>
+          <div
+            onClick={() => {
+              this.setState({sidebarDocked: !this.state.sidebarDocked})
+            }}
+            style={{
+              width: 15,
+              height: 55,
+              position: "fixed",
+              top: 5,
+              zIndex: 1001,
+              backgroundColor: "rgb(67, 119, 205)"
+            }}>
+          </div>
           <Header/>
           <TreeView nodes={this.props.tree.nodes}
             colorScale={this.state.colorScale}
@@ -333,13 +345,11 @@ class App extends React.Component {
             changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
           />
-        {
           <Map
             colorScale={this.state.colorScale.scale}
             nodes={this.props.tree.nodes}
             justGotNewDatasetRenderNewMap={false}
           />
-        }
         </Background>
       </Sidebar>
     );
