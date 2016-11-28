@@ -1,13 +1,7 @@
 import React from "react";
-import Radium from "radium";
-// import _ from "lodash";
-// import Flex from "./framework/flex";
-import { connect } from "react-redux";
-// import { FOO } from "../actions";
 import { defaultDateSliderFraction, defaultDateRange } from "../../util/globals";
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
-import queryString from "query-string";
 import _ from 'lodash';
 
 import Slider from './slider';
@@ -19,8 +13,6 @@ moment.updateLocale('en', {
     }
 });
 
-@connect()
-@Radium
 class DateRangeInputs extends React.Component {
   constructor(props) {
     super(props);

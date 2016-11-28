@@ -1,12 +1,10 @@
 import React from "react";
-import Radium from "radium";
 import RectangleTreeLayout from "../framework/svg-tree-layout-rectangle";
 import RadialTreeLayout from "../framework/svg-tree-layout-radial";
 import UnrootedTreeLayout from "../framework/svg-tree-layout-unrooted";
-import queryString from "query-string";
+import RootToTipTreeLayout from "../framework/svg-tree-layout-rootToTip";
 import {materialButton} from "../../globalStyles";
 
-@Radium
 class ChooseLayout extends React.Component {
   getStyles() {
     return {
@@ -56,6 +54,13 @@ class ChooseLayout extends React.Component {
           key={3}
           style={materialButton}
           onClick={() => { this.setLayoutQueryParam("rootToTip"); }}>
+          <RootToTipTreeLayout width={25} stroke="rgb(130,130,130)"/>
+          <span style={styles.title}> {"Mol.Clock"} </span>
+        </button>
+        <button
+          key={4}
+          style={materialButton}
+          onClick={() => { this.setLayoutQueryParam("unrooted"); }}>
           <UnrootedTreeLayout width={25} stroke="rgb(130,130,130)"/>
           <span style={styles.title}> {"unrooted"} </span>
         </button>

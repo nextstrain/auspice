@@ -1,8 +1,8 @@
 import React from "react";
 import Radium from "radium";
 import queryString from "query-string";
-import Select from 'react-select';
-import { filterAbbrRev,filterAbbrFwd } from "../../util/globals";
+import Select from "react-select";
+import { filterAbbrRev, filterAbbrFwd } from "../../util/globals";
 /*
  * implements a selector that
  * (i) knows about the upstream choices and

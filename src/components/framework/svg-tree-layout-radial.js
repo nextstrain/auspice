@@ -1,16 +1,6 @@
 import React from "react";
-import Radium from "radium";
-// import _ from "lodash";
-// import Flex from "./framework/flex";
-// import { connect } from "react-redux";
-// import { FOO } from "../actions";
 
-
-// @connect(state => {
-//   return state.FOO;
-// })
-@Radium
-class RectangleTreeLayout extends React.Component {
+class RadialTreeLayout extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -52,4 +42,4 @@ class RectangleTreeLayout extends React.Component {
   }
 }
 
-export default RectangleTreeLayout;
+export default RadialTreeLayout;

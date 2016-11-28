@@ -1,9 +1,6 @@
 import React from "react";
 import Radium from "radium";
 import titleCase from "title-case";
-// import d3 from "d3";
-// import _ from "lodash";
-// import Flex from "./framework/flex";
 import { connect } from "react-redux";
 import { LEGEND_ITEM_MOUSEENTER, LEGEND_ITEM_MOUSELEAVE } from "../../actions/controls";
 

@@ -1,6 +1,5 @@
 import React from "react";
 import Radium from "radium";
-// import Flex from "./framework/flex";
 import * as globalStyles from "../../globalStyles";
 
 @Radium

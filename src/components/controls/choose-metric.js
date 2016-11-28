@@ -1,6 +1,4 @@
 import React from "react";
-import Radium from "radium";
-import queryString from "query-string";
 import TimeTree from "../framework/svg-time-tree";
 import MutationTree from "../framework/svg-mutation-tree";
 import {materialButton} from "../../globalStyles";
@@ -9,7 +7,6 @@ import {materialButton} from "../../globalStyles";
  * implements a pair of buttons the toggle between timetree and divergence tree
  * copied from chose-layout
  */
-@Radium
 class ChooseMetric extends React.Component {
   getStyles() {
     return {
