@@ -342,25 +342,29 @@ class App extends React.Component {
             }}
           />
           <Header/>
-          <TreeView nodes={this.props.tree.nodes}
-            colorScale={this.state.colorScale}
-            nodeColor={this.nodeColor()}
-            tipRadii={this.tipRadii()}
-            tipVisibility={this.tipVisibility()}
-            layout={this.state.location.query.l || "rectangular"}
-            distanceMeasure={this.state.location.query.m || "div"}
-            datasetGuid={this.props.tree.datasetGuid}
-          />
-          <Frequencies genotype={this.currentFrequencies()}/>
-          <Entropy
-            changeRoute={this.changeRoute.bind(this)}
-            location={this.state.location}
-          />
-          <Map
-            colorScale={this.state.colorScale.scale}
-            nodes={this.props.tree.nodes}
-            justGotNewDatasetRenderNewMap={false}
-          />
+          <div style={{display: "flex"}}>
+            <TreeView nodes={this.props.tree.nodes}
+              colorScale={this.state.colorScale}
+              nodeColor={this.nodeColor()}
+              tipRadii={this.tipRadii()}
+              tipVisibility={this.tipVisibility()}
+              layout={this.state.location.query.l || "rectangular"}
+              distanceMeasure={this.state.location.query.m || "div"}
+              datasetGuid={this.props.tree.datasetGuid}
+            />
+          <div style={{display: "flex", flexDirection: "column"}}>
+              <Frequencies genotype={this.currentFrequencies()}/>
+              <Entropy
+                changeRoute={this.changeRoute.bind(this)}
+                location={this.state.location}
+              />
+              <Map
+                colorScale={this.state.colorScale.scale}
+                nodes={this.props.tree.nodes}
+                justGotNewDatasetRenderNewMap={false}
+              />
+            </div>
+          </div>
         </Background>
       </Sidebar>
     );

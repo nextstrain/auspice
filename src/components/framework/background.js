@@ -6,7 +6,8 @@ class Background extends React.Component {
   getStyles() {
     return {
       base: {
-        backgroundColor: "#F8F8F8"
+        backgroundColor: "#F8F8F8",
+        height: "100%"
       }
     };
   }
