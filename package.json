@@ -7,8 +7,9 @@
     "build:webpack": "NODE_ENV=production webpack --config webpack.config.js",
     "build": "npm run clean && npm run build:webpack",
     "start": "node dev-server.js",
-    "fetchAndBuildAndStart": "sh fetch_data.sh && npm run build && node server.js",
-    "lint": "eslint src"
+    "fetchAndStart": "sh fetch_data.sh && node server.js",
+    "lint": "eslint src",
+    "postinstall": "npm run build"
   },
   "author": "Trevor Bedford and Richard Neher",
   "license": "AGPL",

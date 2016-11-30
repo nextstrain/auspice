@@ -1,1 +1,1 @@
-web: npm run fetchAndBuildAndStart
+web: npm run fetchAndStart
