@@ -8,6 +8,7 @@ import {
   populateEntropyStore
 } from "../actions";
 
+import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
 import Flex from "./framework/flex";
 import Header from "./framework/header";
