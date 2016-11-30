@@ -35,6 +35,7 @@
   "dependencies": {
     "color": "^0.7.3",
     "d3": "^3.5.17",
+    "express": "^4.14.0",
     "history": "^1.12.5",
     "lodash": "4.16.4",
     "moment": "^2.14.1",
@@ -49,8 +50,8 @@
     "react-fontawesome": "^0.3.3",
     "react-redux": "^4.0.0",
     "react-router": "2.6.0",
-    "react-sidebar": "^2.2.1",
     "react-select": "^1.0.0-rc.2",
+    "react-sidebar": "^2.2.1",
     "react-svg-pan-zoom": "2.0.0",
     "react-tap-event-plugin": "^0.2.1",
     "react-throttle": "^0.3.0",
