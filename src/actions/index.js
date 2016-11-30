@@ -41,7 +41,10 @@ const fetchMetadata = (q) => {
     this will resolve to something like:
     /data/flu_h3n2_3y_meta.json
   */
-  return fetch("/meta");
+  return fetch(
+    "/data/" +
+    q + "_meta.json"
+  );
 };
 
 export const populateMetadataStore = (queryParams) => {
@@ -77,7 +80,10 @@ const treeFetchError = (err) => {
 };
 
 const fetchTree = (q) => {
-  return fetch("/tree");
+  return fetch(
+    "/data/" +
+      q + "_tree.json"
+  );
 };
 
 export const populateTreeStore = (queryParams) => {
@@ -113,7 +119,10 @@ const sequencesFetchError = (err) => {
 };
 
 const fetchSequences = (q) => {
-  return fetch("/sequences");
+  return fetch(
+    "/data/" +
+      q + "_sequences.json"
+  );
 };
 
 export const populateSequencesStore = (queryParams) => {
@@ -148,7 +157,10 @@ const frequenciesFetchError = (err) => {
 };
 
 const fetchFrequencies = (q) => {
-  return fetch("/frequencies");
+  return fetch(
+    "/data/" +
+      q + "_frequencies.json"
+  );
 };
 
 export const populateFrequenciesStore = (queryParams) => {
@@ -183,7 +195,8 @@ const entropyFetchError = (err) => {
 };
 
 const fetchEntropy = (q) => {
-  return fetch("/entropy");
+  return fetch("/data/" +
+      q + "_entropy.json");
 };
 
 export const populateEntropyStore = (queryParams) => {

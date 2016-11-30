@@ -16,7 +16,7 @@ export const datasets={
       },
     'zika':{},
     'ebola':{},
-    'default':'flu'
+    'default':'zika'
   }
 }
 
