@@ -2,7 +2,7 @@ var path = require("path");
 var express = require("express");
 
 var app = express();
-app.set('port', 4000);
+app.set('port', 8080);
 app.use('/data', express.static('data'))
 app.use('/dist', express.static('dist'))
 
