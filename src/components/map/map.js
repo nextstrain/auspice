@@ -49,8 +49,18 @@ class Map extends React.Component {
       maxBounds: bounds,
       minZoom: 2,
       maxZoom: 9,
-      zoomControl: false
-
+      zoomControl: false,
+      /* leaflet sleep see https://cliffcloud.github.io/Leaflet.Sleep/#summary */
+      // true by default, false if you want a wild map
+      sleep: true,
+      // time(ms) for the map to fall asleep upon mouseout
+      sleepTime: 750,
+      // time(ms) until map wakes on mouseover
+      wakeTime: 750,
+      // defines whether or not the user is prompted oh how to wake map
+      sleepNote: true,
+      // should hovering wake the map? (clicking always will)
+      hoverToWake: true
     })
 
     L.tileLayer('https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2l1MDRoMzg5MDEwbjJvcXBpNnUxMXdwbCJ9.PMqX7vgORuXLXxtI3wISjw', {
