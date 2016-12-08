@@ -12,7 +12,8 @@ import setupLeafletPlugins from "../../util/leaflet-plugins";
 @connect((state) => {
   return {
     tree: state.tree.tree,
-    metadata: state.metadata.metadata
+    metadata: state.metadata.metadata,
+    browserDimensions: state.browserDimensions.browserDimensions
   };
 })
 @Radium
@@ -204,6 +205,7 @@ class Map extends React.Component {
     return ok;
   }
   render() {
+      console.log('map state', this.props)
     if (this.okToRender()) {
       this.addAllTipsToMap();
       this.addTransmissionEventsToMap();

@@ -5,7 +5,8 @@ import {
   populateTreeStore,
   populateSequencesStore,
   populateFrequenciesStore,
-  populateEntropyStore
+  populateEntropyStore,
+  BROWSER_DIMENSIONS
 } from "../actions";
 
 import "whatwg-fetch"; // setup polyfill
@@ -117,6 +118,11 @@ class App extends React.Component {
         colorScale: cScale.colorScale
       });
     });
+
+    /* initial dimensions */
+    this.handleResize()
+    /* future resizes */
+    window.addEventListener('resize', this.handleResize.bind(this));
   }
 
   componentDidUpdate() {
@@ -125,6 +131,16 @@ class App extends React.Component {
       const cScale = this.updateColorScale(this.state.location.query.colorBy || "region");
       this.setState(cScale);
     }
+  }
+
+  handleResize() {
+    this.props.dispatch({
+      type: BROWSER_DIMENSIONS,
+      data: {
+        width: window.innerWidth,
+        height: window.innerHeight
+      }
+    })
   }
 
   maybeFetchDataset() {
