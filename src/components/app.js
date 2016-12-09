@@ -25,7 +25,7 @@ import parseParams from "../util/parseParams";
 import queryString from "query-string";
 import getColorScale from "../util/getColorScale";
 import { parseGenotype, getGenotype } from "../util/getGenotype";
-import {colorOptions} from "../util/globals";
+import {colorOptions, controlsHiddenWidth} from "../util/globals";
 import Sidebar from "react-sidebar";
 
 const returnStateNeeded = (fullStateTree) => {
@@ -86,7 +86,7 @@ class App extends React.Component {
   }
 
   componentWillMount() {
-    var mql = window.matchMedia(`(min-width: 800px)`);
+    var mql = window.matchMedia(`(min-width: ${controlsHiddenWidth}px)`);
     mql.addListener(this.mediaQueryChanged.bind(this));
     this.setState({mql: mql, sidebarDocked: mql.matches});
 

@@ -35,6 +35,7 @@ export const colorOptions = {
 export const width = 1126;
 export const margin = 60;
 export const controlsWidth = 250;
+export const controlsHiddenWidth = 800;
 export const defaultColorBy = "country";
 export const defaultDateSliderFraction = 0.3;
 export const defaultDateRange = 6;
