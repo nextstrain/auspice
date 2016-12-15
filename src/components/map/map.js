@@ -36,8 +36,17 @@ class Map extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     /* first time map */
-    if (this.props.browserDimensions && !this.state.map) {
+    if (
+      this.props.browserDimensions &&
+      !this.state.map
+    ) {
       this.createMap();
+    }
+
+    if (
+      this.props.browserDimensions.height !== prevProps.browserDimensions.height
+    ) {
+      // this may not be necessary. for the map, flexbox seems to do the thing. may recenter using leaflet.
     }
 
     if (
@@ -97,8 +106,8 @@ class Map extends React.Component {
     return (
       <div style={{
           height: this.props.browserDimensions.height - 85, /* 'just right', gets title & edges of card in view */
-          width: 1028,
-          margin: 10
+          width: 1000,
+          margin: 3
         }} id="map">
       </div>
     )
@@ -106,7 +115,6 @@ class Map extends React.Component {
   render() {
 
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
-
     return (
       <Card center title="Transmissions">
         {this.props.browserDimensions ? this.createMapDiv() : "Loading"}
