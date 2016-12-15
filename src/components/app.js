@@ -353,11 +353,11 @@ class App extends React.Component {
               datasetGuid={this.props.tree.datasetGuid}
             />
           <div style={{display: "flex", flexDirection: "column"}}>
-              <Frequencies genotype={this.currentFrequencies()}/>
+              {/*<Frequencies genotype={this.currentFrequencies()}/>
               <Entropy
                 changeRoute={this.changeRoute.bind(this)}
                 location={this.state.location}
-              />
+              />*/}
               <Map
                 colorScale={this.state.colorScale.scale}
                 nodes={this.props.tree.nodes}

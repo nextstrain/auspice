@@ -13,6 +13,7 @@ import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration} from "../../util/globals";
 import * as globalStyles from "../../globalStyles";
 import InfoPanel from "./infoPanel";
+import { connect } from "react-redux";
 
 const arrayInEquality = function(a,b){
   if (a&&b){
@@ -28,6 +29,13 @@ const arrayInEquality = function(a,b){
  * such that branches and tips are correctly placed.
  * will handle zooming
 */
+@connect((state) => {
+  return {
+    tree: state.tree.tree,
+    metadata: state.metadata.metadata,
+    browserDimensions: state.browserDimensions.browserDimensions
+  };
+})
 class TreeView extends React.Component {
   constructor(props) {
     super(props);
@@ -225,10 +233,6 @@ class TreeView extends React.Component {
     });
   }
 
-  treePlotHeight(width) {
-    return 400 + 0.30 * width;
-  }
-
   handleIconClick(tool) {
     return () => {
 
@@ -269,7 +273,28 @@ class TreeView extends React.Component {
     this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
   }
 
+  computeResponsiveWidth() {
+    // also do a check if sidebar is open. only subtract its width if it is.
+    if (this.props.browserDimensions && this.props.browserDimensions.width) {
+      // return this.props.browserDimensions.width - totalPadding;
+      return (this.props.browserDimensions.width / 2) - globals.totalHorizontalPadding;
+    } else {
+      return 1; // TODO move this check to one of the lifecycle methods
+    }
+  }
+
+  treePlotHeight(width) {
+    // return 400 + 0.30 * width;
+    if (this.props.browserDimensions && this.props.browserDimensions.height) {
+      return this.props.browserDimensions.height - globals.totalVerticalPadding;
+    } else {
+      return 1; // TODO move this check to one of the lifecycle methods
+    }
+  }
+
   render() {
+    let responsiveWidth = this.computeResponsiveWidth();
+
     /*
       1. set up SVGs
       2. tree will be added on props loading
@@ -296,8 +321,8 @@ class TreeView extends React.Component {
             hovered={this.state.hovered}
             clicked={this.state.clicked}/>
           <ReactSVGPanZoom
-            width={globals.width}
-            height={this.treePlotHeight(globals.width)}
+            width={responsiveWidth}
+            height={this.treePlotHeight(responsiveWidth)}
             ref={(Viewer) => {
               // https://facebook.github.io/react/docs/refs-and-the-dom.html
               this.Viewer = Viewer
@@ -311,12 +336,12 @@ class TreeView extends React.Component {
             onChangeValue={this.handleChange.bind(this)}
             onClick={this.handleClick.bind(this)}>
             <svg style={{pointerEvents: "auto"}}
-              width={globals.width}
-              height={this.treePlotHeight(globals.width)}
+              width={responsiveWidth}
+              height={this.treePlotHeight(responsiveWidth)}
               >
               <g
-                width={globals.width}
-                height={this.treePlotHeight(globals.width)}
+                width={responsiveWidth}
+                height={this.treePlotHeight(responsiveWidth)}
                 style={{cursor: "default"}}
                 ref="d3TreeElement">
               </g>

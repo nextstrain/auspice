@@ -8,7 +8,12 @@ import Card from "../framework/card";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
 import {addAllTipsToMap, addTransmissionEventsToMap} from "../../util/mapHelpers";
-import {colorOptions, controlsHiddenWidth} from "../../util/globals";
+import {
+  colorOptions,
+  controlsHiddenWidth,
+  totalVerticalPadding,
+  totalHorizontalPadding
+} from "../../util/globals";
 
 @connect((state) => {
   return {
@@ -44,6 +49,8 @@ class Map extends React.Component {
     }
 
     if (
+      prevProps.browserDimensions &&
+      prevProps.browserDimensions.height &&
       this.props.browserDimensions.height !== prevProps.browserDimensions.height
     ) {
       // this may not be necessary. for the map, flexbox seems to do the thing. may recenter using leaflet.
@@ -101,12 +108,11 @@ class Map extends React.Component {
     this.setState({map})
   }
 
-
   createMapDiv() {
     return (
       <div style={{
-          height: this.props.browserDimensions.height - 85, /* 'just right', gets title & edges of card in view */
-          width: 1000,
+          height: this.props.browserDimensions.height - totalVerticalPadding, /* 'just right', gets title & edges of card in view */
+          width: true /* check if we're in two column layout here */ ? (this.props.browserDimensions.width / 2) - totalHorizontalPadding : 1000,
           margin: 3
         }} id="map">
       </div>
