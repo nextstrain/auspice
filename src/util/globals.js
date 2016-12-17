@@ -30,17 +30,17 @@ export const colorOptions = {
     "gt":{"key":"genotype", "legendTitle":"Genotype", "menuItem":"genotype", "type":"discrete"}
   }
 
-
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
 export const width = 1126;
 export const margin = 60;
 export const controlsWidth = 250;
-export const totalVerticalPadding = 150; // this includes the header + space between the bottom and the card
-export const totalHorizontalPadding = 40;
-export const controlsHiddenWidth = 800;
+export const totalVerticalPadding = 160; // this includes the header + space between the bottom and the card
+export const controlsHiddenWidth = 2000;
+export const entropyChartHeight = 300;
 export const defaultColorBy = "country";
 export const defaultDateSliderFraction = 0.3;
 export const defaultDateRange = 6;
+export const maxMapWidth = 1000; /* just right for our default zoom level (which is also min) */
 export const date_select = true;
 export const file_prefix = "Zika_";
 export const branchLabels = false;

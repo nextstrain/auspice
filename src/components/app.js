@@ -11,6 +11,7 @@ import {
 
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
+import _ from "lodash";
 import Flex from "./framework/flex";
 import Header from "./framework/header";
 import Footer from "./framework/footer";
@@ -138,7 +139,8 @@ class App extends React.Component {
       type: BROWSER_DIMENSIONS,
       data: {
         width: window.innerWidth,
-        height: window.innerHeight
+        height: window.innerHeight,
+        docHeight: window.document.body.clientHeight /* background needs this because sidebar creates absolutely positioned container and blocks height 100% */
       }
     })
   }
@@ -344,6 +346,7 @@ class App extends React.Component {
           <Header/>
           <div style={{display: "flex"}}>
             <TreeView nodes={this.props.tree.nodes}
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               colorScale={this.state.colorScale}
               nodeColor={this.nodeColor()}
               tipRadii={this.tipRadii()}
@@ -353,15 +356,17 @@ class App extends React.Component {
               datasetGuid={this.props.tree.datasetGuid}
             />
           <div style={{display: "flex", flexDirection: "column"}}>
-              {/*<Frequencies genotype={this.currentFrequencies()}/>
+            <Map
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+              colorScale={this.state.colorScale.scale}
+              nodes={this.props.tree.nodes}
+              justGotNewDatasetRenderNewMap={false}
+              />
+              <Frequencies genotype={this.currentFrequencies()}/>
               <Entropy
+                sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
                 changeRoute={this.changeRoute.bind(this)}
                 location={this.state.location}
-              />*/}
-              <Map
-                colorScale={this.state.colorScale.scale}
-                nodes={this.props.tree.nodes}
-                justGotNewDatasetRenderNewMap={false}
               />
             </div>
           </div>

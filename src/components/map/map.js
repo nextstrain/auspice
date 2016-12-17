@@ -8,12 +8,8 @@ import Card from "../framework/card";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
 import {addAllTipsToMap, addTransmissionEventsToMap} from "../../util/mapHelpers";
-import {
-  colorOptions,
-  controlsHiddenWidth,
-  totalVerticalPadding,
-  totalHorizontalPadding
-} from "../../util/globals";
+import * as globals from "../../util/globals";
+import computeResponsive from "../../util/computeResponsive";
 
 @connect((state) => {
   return {
@@ -33,6 +29,7 @@ class Map extends React.Component {
   componentWillMount() {
     /* this sets up window.L */
     setupLeaflet();
+    console.log("why is this mounting multiple times")
   }
   componentDidMount() {
     /* this attaches several properties to window.L */
@@ -53,7 +50,7 @@ class Map extends React.Component {
       prevProps.browserDimensions.height &&
       this.props.browserDimensions.height !== prevProps.browserDimensions.height
     ) {
-      // this may not be necessary. for the map, flexbox seems to do the thing. may recenter using leaflet.
+      /* optionally clear and re-layout the map here */
     }
 
     if (
@@ -109,10 +106,16 @@ class Map extends React.Component {
   }
 
   createMapDiv() {
+    const responsive = computeResponsive({
+      horizontal: .5,
+      vertical: .666666,
+      browserDimensions: this.props.browserDimensions,
+      sidebar: this.props.sidebar
+    })
     return (
       <div style={{
-          height: this.props.browserDimensions.height - totalVerticalPadding, /* 'just right', gets title & edges of card in view */
-          width: true /* check if we're in two column layout here */ ? (this.props.browserDimensions.width / 2) - totalHorizontalPadding : 1000,
+          height: responsive.height,
+          width: responsive.width,
           margin: 3
         }} id="map">
       </div>
