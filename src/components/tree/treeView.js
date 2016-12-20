@@ -164,6 +164,19 @@ class TreeView extends React.Component {
     }
   }
 
+  componentDidUpdate(prevProps, prevState) {
+    console.log(prevProps.browserDimensions.height, this.props.browserDimensions.height )
+    if (
+      this.state.tree && /* tree exists */
+      prevProps.browserDimensions && /* it's not the first render, the listener is registered and width/height passed in */
+      this.props.browserDimensions &&
+      prevProps.browserDimensions.width !== this.props.browserDimensions.width || /* the browser dimensions have changed */
+      prevProps.browserDimensions.height !== this.props.browserDimensions.height
+    ) {
+      this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
+    }
+  }
+
   makeTree(nodes) {
     if (nodes && this.refs.d3TreeElement) {
       var myTree = new PhyloTree(nodes[0]);
@@ -280,7 +293,7 @@ class TreeView extends React.Component {
   createTreeMarkup() {
     const responsive = computeResponsive({
       horizontal: .5,
-      vertical: 1, 
+      vertical: 1,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar
     })

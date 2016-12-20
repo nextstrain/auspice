@@ -123,7 +123,13 @@ class App extends React.Component {
     /* initial dimensions */
     this.handleResize()
     /* future resizes */
-    window.addEventListener('resize', this.handleResize.bind(this));
+    window.addEventListener(
+      'resize',
+      _.throttle(this.handleResize.bind(this), 500, { /* fire every N milliseconds. Could also be _.debounce for 'wait until resize stops' */
+        leading: true,
+        trailing: true
+      }) /* invoke resize event at most twice per second to let redraws catch up */
+    );
   }
 
   componentDidUpdate() {
