@@ -292,7 +292,7 @@ class TreeView extends React.Component {
 
   createTreeMarkup() {
     const responsive = computeResponsive({
-      horizontal: .5,
+      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
       vertical: 1,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar
