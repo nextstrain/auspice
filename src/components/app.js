@@ -330,12 +330,13 @@ class App extends React.Component {
    * RENDER
    *****************************************/
   render() {
+    console.log(this.props.browserDimensions, globals.twoColumnBreakpoint)
       return (
       <Sidebar
         sidebar={
           <Controls changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
-            colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || colorOptions) : colorOptions}
+            colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || globals.colorOptions) : globals.colorOptions}
             colorScale={this.state.colorScale}
           />
         }
@@ -350,7 +351,10 @@ class App extends React.Component {
             }}
           />
           <Header/>
-          <div style={{display: "flex"}}>
+          <div style={{
+              display: "flex",
+              flexDirection: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? "row" : "column"
+            }}>
             <TreeView nodes={this.props.tree.nodes}
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               colorScale={this.state.colorScale}
@@ -361,13 +365,13 @@ class App extends React.Component {
               distanceMeasure={this.state.location.query.m || "div"}
               datasetGuid={this.props.tree.datasetGuid}
             />
-          <div style={{display: "flex", flexDirection: "column"}}>
-            <Map
-              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-              colorScale={this.state.colorScale.scale}
-              nodes={this.props.tree.nodes}
-              justGotNewDatasetRenderNewMap={false}
-              />
+            <div style={{display: "flex", flexDirection: "column"}}>
+              <Map
+                sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+                colorScale={this.state.colorScale.scale}
+                nodes={this.props.tree.nodes}
+                justGotNewDatasetRenderNewMap={false}
+                />
               <Frequencies genotype={this.currentFrequencies()}/>
               <Entropy
                 sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
