@@ -4,26 +4,6 @@ import { legendRectSize, legendSpacing, defaultColorBy } from "../../util/global
 import LegendItem from "./legend-item";
 
 class Legend extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-
-    };
-  }
-  static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object,
-    // foo: React.PropTypes.string
-    controls: React.PropTypes.object,
-    colorScale: React.PropTypes.func
-  }
-  static defaultProps = {
-
-  }
   chooseLegendTitle() {
     let legendTitle = "";
     const colorBy = (this.props.location.query.colorBy) ? this.props.location.query.colorBy : defaultColorBy;
@@ -94,4 +74,3 @@ class Legend extends React.Component {
 }
 
 export default Legend;
-

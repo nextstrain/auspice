@@ -85,9 +85,9 @@ class Entropy extends React.Component {
     return (
       <Card title={"Genetic Diversity"}>
         <svg width={entropyChartWidth} height={entropyChartHeight}>
-          {annotations.map((e) => {
+          {annotations.map((e, i) => {
             return (
-              <g>
+              <g key={i}>
               <rect
                 x={x(e.start)}
                 y={y(-0.025*yMax*e.readingFrame)}
@@ -108,9 +108,10 @@ class Entropy extends React.Component {
               </g>
             );
           })}
-          {entropyWithoutZeros.map((e) => {
+          {entropyWithoutZeros.map((e, i) => {
             return (
               <rect
+                key={i}
                 x={x(e.x)}
                 y={y(e.y)}
                 width="1" height={y(0) - y(e.y)}
@@ -121,9 +122,10 @@ class Entropy extends React.Component {
               />
             );
           })}
-          {aminoAcidEntropyWithoutZeros.map((e) => {
+          {aminoAcidEntropyWithoutZeros.map((e, i) => {
             return (
               <rect
+                key={i}
                 x={x(e.x)}
                 y={y(e.y)}
                 width="2.5" height={y(0) - y(e.y)}

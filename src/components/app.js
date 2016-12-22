@@ -26,7 +26,7 @@ import parseParams from "../util/parseParams";
 import queryString from "query-string";
 import getColorScale from "../util/getColorScale";
 import { parseGenotype, getGenotype } from "../util/getGenotype";
-import {colorOptions, controlsHiddenWidth} from "../util/globals";
+import * as globals from "../util/globals";
 import Sidebar from "react-sidebar";
 
 const returnStateNeeded = (fullStateTree) => {
@@ -87,7 +87,7 @@ class App extends React.Component {
   }
 
   componentWillMount() {
-    var mql = window.matchMedia(`(min-width: ${controlsHiddenWidth}px)`);
+    var mql = window.matchMedia(`(min-width: ${globals.controlsHiddenWidth}px)`);
     mql.addListener(this.mediaQueryChanged.bind(this));
     this.setState({mql: mql, sidebarDocked: mql.matches});
 
@@ -351,10 +351,6 @@ class App extends React.Component {
             }}
           />
           <Header/>
-          <div style={{
-              display: "flex",
-              flexDirection: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? "row" : "column"
-            }}>
             <TreeView nodes={this.props.tree.nodes}
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               colorScale={this.state.colorScale}
@@ -365,21 +361,18 @@ class App extends React.Component {
               distanceMeasure={this.state.location.query.m || "div"}
               datasetGuid={this.props.tree.datasetGuid}
             />
-            <div style={{display: "flex", flexDirection: "column"}}>
-              <Map
-                sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-                colorScale={this.state.colorScale.scale}
-                nodes={this.props.tree.nodes}
-                justGotNewDatasetRenderNewMap={false}
-                />
-              <Frequencies genotype={this.currentFrequencies()}/>
-              <Entropy
-                sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-                changeRoute={this.changeRoute.bind(this)}
-                location={this.state.location}
+            <Map
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+              colorScale={this.state.colorScale.scale}
+              nodes={this.props.tree.nodes}
+              justGotNewDatasetRenderNewMap={false}
               />
-            </div>
-          </div>
+            <Frequencies genotype={this.currentFrequencies()}/>
+            <Entropy
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+              changeRoute={this.changeRoute.bind(this)}
+              location={this.state.location}
+            />
         </Background>
       </Sidebar>
     );

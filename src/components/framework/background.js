@@ -1,6 +1,7 @@
 import React from "react";
 import Radium from "radium";
 
+/* add connect, browserDimensions & documentHeight here and use instead of 100% */
 @Radium
 class Background extends React.Component {
   getStyles() {

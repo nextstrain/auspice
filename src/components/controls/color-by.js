@@ -95,10 +95,10 @@ class ColorBy extends React.Component {
       return null;
     }
     const styles = this.getStyles();
-    const colorOptions = Object.keys(this.props.colorOptions).map( (cOpt) =>
-                              <option value={ cOpt } selected={cOpt === this.state.selected ? true : false}>
-                                { this.props.colorOptions[cOpt].menuItem }
-                              </option> );
+    const colorOptions = Object.keys(this.props.colorOptions).map((cOpt, i) =>
+      <option key={i} value={ cOpt } selected={cOpt === this.state.selected ? true : false}>
+        { this.props.colorOptions[cOpt].menuItem }
+      </option> );
 
     return (
       <div style={styles.base}>

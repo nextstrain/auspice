@@ -33,7 +33,7 @@ class Header extends React.Component {
 
     return title.split("").map((letter, i) => {
       return (
-        <span style={{color: colors[i]}}>{letter}</span>
+        <span key={i} style={{color: colors[i]}}>{letter}</span>
       )
     })
   }
