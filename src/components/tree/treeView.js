@@ -381,9 +381,9 @@ class TreeView extends React.Component {
       2. tree will be added on props loading
     */
     return (
-      <div>
+      <span>
         {this.props.browserDimensions ? this.createTreeMarkup() : null}
-      </div>
+      </span>
     );
   }
 }
