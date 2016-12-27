@@ -330,7 +330,6 @@ class App extends React.Component {
    * RENDER
    *****************************************/
   render() {
-    console.log(this.props.browserDimensions, globals.twoColumnBreakpoint)
       return (
       <Sidebar
         sidebar={
@@ -363,7 +362,7 @@ class App extends React.Component {
               datasetGuid={this.props.tree.datasetGuid}
             />
 
-            <div id="app_column_2">
+          <div style={{display: "inline-block"}} id="app_column_2">
             <Map
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               colorScale={this.state.colorScale.scale}
@@ -377,7 +376,7 @@ class App extends React.Component {
               location={this.state.location}
             />
           </div>
-          </div>
+        </div>
         </Background>
       </Sidebar>
     );

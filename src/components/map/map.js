@@ -107,8 +107,8 @@ class Map extends React.Component {
 
   createMapDiv() {
     const responsive = computeResponsive({
-      horizontal: .5,
-      vertical: .666666,
+      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+      vertical: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .667 : 1, /* if we are in single column, full height */
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar
     })

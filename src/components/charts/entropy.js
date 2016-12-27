@@ -31,7 +31,7 @@ class Entropy extends React.Component {
 
   drawEntropy() {
     const responsive = computeResponsive({
-      horizontal: .5,
+      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
       vertical: .3333333,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar
