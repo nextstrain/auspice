@@ -362,7 +362,7 @@ class App extends React.Component {
               distanceMeasure={this.state.location.query.m || "div"}
               datasetGuid={this.props.tree.datasetGuid}
             />
-            </div>
+
             <div id="app_column_2">
             <Map
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
@@ -376,6 +376,7 @@ class App extends React.Component {
               changeRoute={this.changeRoute.bind(this)}
               location={this.state.location}
             />
+          </div>
           </div>
         </Background>
       </Sidebar>
