@@ -8,6 +8,7 @@ class Card extends React.Component {
     return {
       base: {
         backgroundColor: "#FFFFFF",
+        display: "inline-block",
         margin: 12,
         boxShadow: "3px 3px 12px 2px rgba(217,217,217,0.85)",
         borderRadius: 4,
