@@ -299,8 +299,6 @@ class TreeView extends React.Component {
       extraPadding: 0
     })
 
-    console.log('tree width height', responsive)
-
     return (
       <Card center title="Phylogeny">
         <svg

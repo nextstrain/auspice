@@ -29,7 +29,6 @@ class Map extends React.Component {
   componentWillMount() {
     /* this sets up window.L */
     setupLeaflet();
-    console.log("why is this mounting multiple times")
   }
   componentDidMount() {
     /* this attaches several properties to window.L */
