@@ -40,7 +40,7 @@ const computeResponsive = ({
     console.log('res args', horizontal, vertical, browserDimensions, sidebar, split)
   }
 
-  const horizontalPadding = horizontal === 1 ? 75 : 60; /* could be more solid */
+  const horizontalPadding = horizontal === 1 ? 75 : 62; /* could be more solid */
   const headerFooterPadding = 300;
   const verticalPadding = 165;
 
