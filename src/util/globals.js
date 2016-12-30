@@ -31,17 +31,17 @@ export const colorOptions = {
   }
 
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
-export const width = 1126;
+export const width = 1126; /* no longer used */
 export const margin = 60;
 export const controlsWidth = 250;
 export const totalVerticalPadding = 160; // this includes the header + space between the bottom and the card (refactor.)
 export const controlsHiddenWidth = 800;
 export const entropyChartHeight = 300;
+export const twoColumnBreakpoint = 1400;
+export const maxMapWidth = 1000; /* just right for our default zoom level (which is also min) */
 export const defaultColorBy = "country";
 export const defaultDateSliderFraction = 0.3;
-export const twoColumnBreakpoint = 1200;
 export const defaultDateRange = 6;
-export const maxMapWidth = 1000; /* just right for our default zoom level (which is also min) */
 export const date_select = true;
 export const file_prefix = "Zika_";
 export const branchLabels = false;

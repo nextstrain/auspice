@@ -29,18 +29,25 @@ const computeResponsive = ({
   horizontal, /* multiplicative 1 (mobile, tablet, laptop) or .5 (2 column big monitor) */
   vertical, /* multiplicative .5 (if splitting with another pane) or 1 (if full height of browser window)*/
   browserDimensions, /* window.innerWidth & window.innerHeight as an object */
-  sidebar /* if open, subtract sidebar width from browser width? */
+  sidebar, /* if open, subtract sidebar width from browser width? */
+  split /* is the vertical space split between two panels, meaning we have to account for double vertical padding */
 }) => {
 
   let width = null;
   let height = null;
 
-  const horizontalPadding = horizontal === 1 ? 20 : 60; /* make this more solid */ 
+  if (split) {
+    console.log('res args', horizontal, vertical, browserDimensions, sidebar, split)
+  }
+
+  const horizontalPadding = horizontal === 1 ? 75 : 60; /* could be more solid */
+  const headerFooterPadding = 300;
+  const verticalPadding = 165;
 
   if (browserDimensions) {
     let controls = sidebar ? globals.controlsWidth : 0;
     width = (browserDimensions.width * horizontal) - (controls * horizontal) - horizontalPadding;
-    height = browserDimensions.height * vertical - 300;
+    height = browserDimensions.height * vertical - verticalPadding;
   }
 
   return {

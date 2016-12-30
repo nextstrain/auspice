@@ -32,7 +32,10 @@ class Card extends React.Component {
         styles.base,
         this.props.style
       ]}>
-        <p style={styles.title}> {this.props.title} </p>
+        <p style={[
+          styles.title,
+          this.props.titleStyles
+        ]}> {this.props.title} </p>
         <div style={{
             display: "flex",
             justifyContent: this.props.center ? "center" : "flex-start"

@@ -165,7 +165,6 @@ class TreeView extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    console.log(prevProps.browserDimensions.height, this.props.browserDimensions.height )
     if (
       this.state.tree && /* tree exists */
       prevProps.browserDimensions && /* it's not the first render, the listener is registered and width/height passed in */
@@ -295,8 +294,13 @@ class TreeView extends React.Component {
       horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
       vertical: 1,
       browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar
+      sidebar: this.props.sidebar,
+      split: false,
+      extraPadding: 0
     })
+
+    console.log('tree width height', responsive)
+
     return (
       <Card center title="Phylogeny">
         <svg
