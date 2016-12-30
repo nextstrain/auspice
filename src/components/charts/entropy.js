@@ -7,38 +7,19 @@ import * as globals from "../../util/globals";
 import Card from "../framework/card";
 import d3 from "d3";
 import { parseGenotype } from "../../util/getGenotype";
+import computeResponsive from "../../util/computeResponsive";
 
 @connect(state => {
-  return state.entropy;
+  return {
+    entropy: state.entropy.entropy,
+    browserDimensions: state.browserDimensions.browserDimensions
+  };
 })
 @Radium
 class Entropy extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
 
-    };
-  }
-
-  static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object,
-    // foo: React.PropTypes.string
-  }
-  static defaultProps = {
-    // foo: "bar"
-  }
-
-  getStyles() {
-    return {
-      base: {
-
-      }
-    };
+  componentWillUpdate(prevProps) {
+    /* check here to see if this.props.browserDimensions has changed and rerender */
   }
 
   setColorByQuery(colorBy) {
@@ -47,8 +28,16 @@ class Entropy extends React.Component {
     this.props.changeRoute(this.props.location.pathname, newQuery);
   }
 
+
   drawEntropy() {
-    const entropyChartWidth = 900;
+    const responsive = computeResponsive({
+      horizontal: 1,
+      vertical: .3333333,
+      browserDimensions: this.props.browserDimensions,
+      sidebar: this.props.sidebar
+    })
+
+    const entropyChartWidth = responsive.width;
     const entropyChartHeight = 300;
     const bottomPadding = 45;
     const leftPadding = 80;
@@ -57,7 +46,6 @@ class Entropy extends React.Component {
     const entropy = this.props.entropy['nuc']['val'].map((s, i) => {return {x: this.props.entropy['nuc']['pos'][i], y: s}});
 
     const entropyWithoutZeros = _.filter(entropy, (e) => {return e.y !== 0});
-
 
     let aminoAcidEntropyWithoutZeros = [];
     const annotations = [];
@@ -97,9 +85,9 @@ class Entropy extends React.Component {
     return (
       <Card title={"Genetic Diversity"}>
         <svg width={entropyChartWidth} height={entropyChartHeight}>
-          {annotations.map((e) => {
+          {annotations.map((e, i) => {
             return (
-              <g>
+              <g key={i}>
               <rect
                 x={x(e.start)}
                 y={y(-0.025*yMax*e.readingFrame)}
@@ -120,9 +108,10 @@ class Entropy extends React.Component {
               </g>
             );
           })}
-          {entropyWithoutZeros.map((e) => {
+          {entropyWithoutZeros.map((e, i) => {
             return (
               <rect
+                key={i}
                 x={x(e.x)}
                 y={y(e.y)}
                 width="1" height={y(0) - y(e.y)}
@@ -133,9 +122,10 @@ class Entropy extends React.Component {
               />
             );
           })}
-          {aminoAcidEntropyWithoutZeros.map((e) => {
+          {aminoAcidEntropyWithoutZeros.map((e, i) => {
             return (
               <rect
+                key={i}
                 x={x(e.x)}
                 y={y(e.y)}
                 width="2.5" height={y(0) - y(e.y)}
@@ -146,6 +136,7 @@ class Entropy extends React.Component {
               />
             );
           })}
+          {/* x axis */}
           <VictoryAxis
             padding={{
               top: 0,
@@ -159,6 +150,7 @@ class Entropy extends React.Component {
             standalone={false}
             label={"Position"}
           />
+          {/* y axis */}
           <VictoryAxis
             dependentAxis
             padding={{
@@ -169,7 +161,6 @@ class Entropy extends React.Component {
             }}
             domain={y.domain()}
             offsetY={bottomPadding}
-            width={entropyChartWidth}
             standalone={false}
           />
         </svg>
@@ -178,13 +169,9 @@ class Entropy extends React.Component {
   }
 
   render() {
-    const styles = this.getStyles();
     return (
-      <div style={[
-        styles.base,
-        this.props.style
-      ]}>
-        {this.props.entropy ? this.drawEntropy() : "Waiting on entropy data"}
+      <div>
+        {this.props.entropy && this.props.browserDimensions ? this.drawEntropy() : "Waiting on entropy data"}
       </div>
     );
   }

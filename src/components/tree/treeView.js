@@ -8,13 +8,15 @@ import ZoomInIcon from "../framework/zoom-in-icon";
 import MoveIcon from "../framework/move-icon";
 import PhyloTree from "../../util/phyloTree";
 import {ReactSVGPanZoom, fitToViewer} from "react-svg-pan-zoom";
-import ReactDOM from "react-dom"
+import ReactDOM from "react-dom";
 import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration} from "../../util/globals";
 import * as globalStyles from "../../globalStyles";
 import InfoPanel from "./infoPanel";
+import { connect } from "react-redux";
+import computeResponsive from "../../util/computeResponsive";
 
-const arrayInEquality = function(a,b){
+const arrayInEquality = function(a,b) {
   if (a&&b){
     const eq = a.map((d,i)=>d!==b[i]);
     return eq.some((d)=>d);
@@ -24,10 +26,17 @@ const arrayInEquality = function(a,b){
 };
 
 /*
- * TreeView creates and SVG and scales according to layout
+ * TreeView creates a (now responsive!) SVG & scales according to layout
  * such that branches and tips are correctly placed.
- * will handle zooming
+ * also handles zooming
 */
+@connect((state) => {
+  return {
+    tree: state.tree.tree,
+    metadata: state.metadata.metadata,
+    browserDimensions: state.browserDimensions.browserDimensions
+  };
+})
 class TreeView extends React.Component {
   constructor(props) {
     super(props);
@@ -48,14 +57,19 @@ class TreeView extends React.Component {
       });
     }
   }
-  componentDidMount() {
-    this.Viewer.fitToViewer();
-    const tree = (this.state.tree)
-      ? this.state.tree
-      : this.makeTree(this.props.nodes, this.props.layout, this.props.distance);
-    this.setState({tree: tree});
-  }
   componentWillReceiveProps(nextProps) {
+
+    /*
+      previously in componentDidMount, but we don't mount immediately anymore -
+      need to wait for browserDimensions
+    */
+    if (this.Viewer) {
+      this.Viewer.fitToViewer();
+      const tree = (this.state.tree)
+        ? this.state.tree
+        : this.makeTree(this.props.nodes, this.props.layout, this.props.distance);
+      this.setState({tree: tree});
+    }
 
     /* Do we have a tree to draw? if yes, check whether it needs to be redrawn */
     const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree)
@@ -116,7 +130,6 @@ class TreeView extends React.Component {
       }
     }
   }
-
   componentWillUpdate(nextProps, nextState) {
     /* reconcile hover and click selections in tree */
     if (
@@ -148,6 +161,18 @@ class TreeView extends React.Component {
           null
         )
       }
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    if (
+      this.state.tree && /* tree exists */
+      prevProps.browserDimensions && /* it's not the first render, the listener is registered and width/height passed in */
+      this.props.browserDimensions &&
+      prevProps.browserDimensions.width !== this.props.browserDimensions.width || /* the browser dimensions have changed */
+      prevProps.browserDimensions.height !== this.props.browserDimensions.height
+    ) {
+      this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
     }
   }
 
@@ -224,11 +249,6 @@ class TreeView extends React.Component {
       hovered: null
     });
   }
-
-  treePlotHeight(width) {
-    return 400 + 0.30 * width;
-  }
-
   handleIconClick(tool) {
     return () => {
 
@@ -269,89 +289,103 @@ class TreeView extends React.Component {
     this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
   }
 
+  createTreeMarkup() {
+    const responsive = computeResponsive({
+      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+      vertical: 1,
+      browserDimensions: this.props.browserDimensions,
+      sidebar: this.props.sidebar,
+      split: false,
+      extraPadding: 0
+    })
+
+    return (
+      <Card center title="Phylogeny">
+        <svg
+          width={300}
+          height={250 /* this should be dynamically calculated by number of elements */}
+          style={{
+            position: "absolute",
+            left: 13,
+            top: 45,
+            borderRadius: 10,
+            zIndex: 1000,
+            backgroundColor: "rgba(255,255,255,.85)"
+          }}>
+          <Legend colorScale={this.props.colorScale}/>
+        </svg>
+        <InfoPanel
+          dismiss={this.infoPanelDismiss.bind(this)}
+          zoom={this.state.tree ? this.state.tree.zoomIntoClade.bind(this.state.tree) : null}
+          hovered={this.state.hovered}
+          clicked={this.state.clicked}/>
+        <ReactSVGPanZoom
+          width={responsive ? responsive.width : 1}
+          height={responsive ? responsive.height : 1}
+          ref={(Viewer) => {
+            // https://facebook.github.io/react/docs/refs-and-the-dom.html
+            this.Viewer = Viewer
+          }}
+          style={{cursor: "default"}}
+          tool={this.state.tool}
+          detectWheel={false}
+          toolbarPosition={"none"}
+          detectAutoPan={false}
+          background={"#FFF"}
+          onChangeValue={this.handleChange.bind(this)}
+          onClick={this.handleClick.bind(this)}>
+          <svg style={{pointerEvents: "auto"}}
+            width={responsive.width}
+            height={responsive.height}
+            >
+            <g
+              width={responsive.width}
+              height={responsive.height}
+              style={{cursor: "default"}}
+              ref="d3TreeElement">
+            </g>
+          </svg>
+        </ReactSVGPanZoom>
+        <svg width={50} height={130}
+             style={{position: "absolute", right: 20, bottom: 20}}>
+            <defs>
+              <filter id="dropshadow" height="130%">
+                <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+                <feOffset dx="2" dy="2" result="offsetblur"/>
+                <feComponentTransfer>
+                  <feFuncA type="linear" slope="0.2"/>
+                </feComponentTransfer>
+                <feMerge>
+                  <feMergeNode/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+          <ZoomInIcon
+            handleClick={this.handleIconClick("zoom-in")}
+            active={true}
+            x={10}
+            y={50}
+            />
+          <ZoomOutIcon
+            handleClick={this.handleIconClick("zoom-out")}
+            active={true}
+            x={10}
+            y={90}
+            />
+        </svg>
+      </Card>
+    )
+  }
   render() {
     /*
       1. set up SVGs
       2. tree will be added on props loading
     */
     return (
-      <div>
-        <Card center title="Phylogeny">
-          <svg
-            width={300}
-            height={250 /* this should be dynamically calculated by number of elements */}
-            style={{
-              position: "absolute",
-              left: 13,
-              top: 45,
-              borderRadius: 10,
-              zIndex: 1000,
-              backgroundColor: "rgba(255,255,255,.85)"
-            }}>
-            <Legend colorScale={this.props.colorScale}/>
-          </svg>
-          <InfoPanel
-            dismiss={this.infoPanelDismiss.bind(this)}
-            zoom={this.state.tree ? this.state.tree.zoomIntoClade.bind(this.state.tree) : null}
-            hovered={this.state.hovered}
-            clicked={this.state.clicked}/>
-          <ReactSVGPanZoom
-            width={globals.width}
-            height={this.treePlotHeight(globals.width)}
-            ref={(Viewer) => {
-              // https://facebook.github.io/react/docs/refs-and-the-dom.html
-              this.Viewer = Viewer
-            }}
-            style={{cursor: "default"}}
-            tool={this.state.tool}
-            detectWheel={false}
-            toolbarPosition={"none"}
-            detectAutoPan={false}
-            background={"#FFF"}
-            onChangeValue={this.handleChange.bind(this)}
-            onClick={this.handleClick.bind(this)}>
-            <svg style={{pointerEvents: "auto"}}
-              width={globals.width}
-              height={this.treePlotHeight(globals.width)}
-              >
-              <g
-                width={globals.width}
-                height={this.treePlotHeight(globals.width)}
-                style={{cursor: "default"}}
-                ref="d3TreeElement">
-              </g>
-            </svg>
-          </ReactSVGPanZoom>
-          <svg width={50} height={130}
-               style={{position: "absolute", right: 20, bottom: 20}}>
-              <defs>
-                <filter id="dropshadow" height="130%">
-                  <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-                  <feOffset dx="2" dy="2" result="offsetblur"/>
-                  <feComponentTransfer>
-                    <feFuncA type="linear" slope="0.2"/>
-                  </feComponentTransfer>
-                  <feMerge>
-                    <feMergeNode/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
-            <ZoomInIcon
-              handleClick={this.handleIconClick("zoom-in")}
-              active={true}
-              x={10}
-              y={50}
-              />
-            <ZoomOutIcon
-              handleClick={this.handleIconClick("zoom-out")}
-              active={true}
-              x={10}
-              y={90}
-              />
-          </svg>
-        </Card>
-      </div>
+      <span>
+        {this.props.browserDimensions ? this.createTreeMarkup() : null}
+      </span>
     );
   }
 }

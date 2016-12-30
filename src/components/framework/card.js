@@ -4,37 +4,21 @@ import {sans} from "../../globalStyles";
 
 @Radium
 class Card extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-
-    };
-  }
-  static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object,
-    // foo: React.PropTypes.string
-  }
-  static defaultProps = {
-    // foo: "bar"
-  }
   getStyles() {
     return {
       base: {
         backgroundColor: "#FFFFFF",
+        display: "inline-block",
         margin: 12,
         boxShadow: "3px 3px 12px 2px rgba(217,217,217,0.85)",
         borderRadius: 4,
         padding: 5,
+        overflow: "hidden",
         position: "relative"
       },
       title: {
         fontFamily: sans,
-        marginBottom: 0,
+        marginBottom: 5,
         marginLeft: 10,
         marginTop: 10,
         fontWeight: 500,
@@ -48,7 +32,10 @@ class Card extends React.Component {
         styles.base,
         this.props.style
       ]}>
-        <p style={styles.title}> {this.props.title} </p>
+        <p style={[
+          styles.title,
+          this.props.titleStyles
+        ]}> {this.props.title} </p>
         <div style={{
             display: "flex",
             justifyContent: this.props.center ? "center" : "flex-start"

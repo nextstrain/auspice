@@ -5,11 +5,13 @@ import {
   populateTreeStore,
   populateSequencesStore,
   populateFrequenciesStore,
-  populateEntropyStore
+  populateEntropyStore,
+  BROWSER_DIMENSIONS
 } from "../actions";
 
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
+import _ from "lodash";
 import Flex from "./framework/flex";
 import Header from "./framework/header";
 import Footer from "./framework/footer";
@@ -24,7 +26,7 @@ import parseParams from "../util/parseParams";
 import queryString from "query-string";
 import getColorScale from "../util/getColorScale";
 import { parseGenotype, getGenotype } from "../util/getGenotype";
-import {colorOptions} from "../util/globals";
+import * as globals from "../util/globals";
 import Sidebar from "react-sidebar";
 
 const returnStateNeeded = (fullStateTree) => {
@@ -85,7 +87,7 @@ class App extends React.Component {
   }
 
   componentWillMount() {
-    var mql = window.matchMedia(`(min-width: 800px)`);
+    var mql = window.matchMedia(`(min-width: ${globals.controlsHiddenWidth}px)`);
     mql.addListener(this.mediaQueryChanged.bind(this));
     this.setState({mql: mql, sidebarDocked: mql.matches});
 
@@ -117,6 +119,17 @@ class App extends React.Component {
         colorScale: cScale.colorScale
       });
     });
+
+    /* initial dimensions */
+    this.handleResize()
+    /* future resizes */
+    window.addEventListener(
+      'resize',
+      _.throttle(this.handleResize.bind(this), 500, { /* fire every N milliseconds. Could also be _.debounce for 'wait until resize stops' */
+        leading: true,
+        trailing: true
+      }) /* invoke resize event at most twice per second to let redraws catch up */
+    );
   }
 
   componentDidUpdate() {
@@ -125,6 +138,17 @@ class App extends React.Component {
       const cScale = this.updateColorScale(this.state.location.query.colorBy || "region");
       this.setState(cScale);
     }
+  }
+
+  handleResize() {
+    this.props.dispatch({
+      type: BROWSER_DIMENSIONS,
+      data: {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        docHeight: window.document.body.clientHeight /* background needs this because sidebar creates absolutely positioned container and blocks height 100% */
+      }
+    })
   }
 
   maybeFetchDataset() {
@@ -311,7 +335,7 @@ class App extends React.Component {
         sidebar={
           <Controls changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
-            colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || colorOptions) : colorOptions}
+            colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || globals.colorOptions) : globals.colorOptions}
             colorScale={this.state.colorScale}
           />
         }
@@ -326,25 +350,28 @@ class App extends React.Component {
             }}
           />
           <Header/>
-          <TreeView nodes={this.props.tree.nodes}
-            colorScale={this.state.colorScale}
-            nodeColor={this.nodeColor()}
-            tipRadii={this.tipRadii()}
-            tipVisibility={this.tipVisibility()}
-            layout={this.state.location.query.l || "rectangular"}
-            distanceMeasure={this.state.location.query.m || "div"}
-            datasetGuid={this.props.tree.datasetGuid}
-          />
-          <Frequencies genotype={this.currentFrequencies()}/>
-          <Entropy
-            changeRoute={this.changeRoute.bind(this)}
-            location={this.state.location}
-          />
-          <Map
-            colorScale={this.state.colorScale.scale}
-            nodes={this.props.tree.nodes}
-            justGotNewDatasetRenderNewMap={false}
-          />
+            <TreeView nodes={this.props.tree.nodes}
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+              colorScale={this.state.colorScale}
+              nodeColor={this.nodeColor()}
+              tipRadii={this.tipRadii()}
+              tipVisibility={this.tipVisibility()}
+              layout={this.state.location.query.l || "rectangular"}
+              distanceMeasure={this.state.location.query.m || "div"}
+              datasetGuid={this.props.tree.datasetGuid}
+            />
+            <Map
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+              colorScale={this.state.colorScale.scale}
+              nodes={this.props.tree.nodes}
+              justGotNewDatasetRenderNewMap={false}
+              />
+            <Frequencies genotype={this.currentFrequencies()}/>
+            <Entropy
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+              changeRoute={this.changeRoute.bind(this)}
+              location={this.state.location}
+            />
         </Background>
       </Sidebar>
     );

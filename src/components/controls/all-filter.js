@@ -15,41 +15,14 @@ import parseParams from "../../util/parseParams";
 */
 @Radium
 class AllFilters extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-
-    };
-  }
-
-  static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object
-    // foo: React.PropTypes.string
-  }
-  static defaultProps = {
-    // foo: "bar"
-  }
-
-  getStyles() {
-    return {
-      base: {
-
-      }
-    };
-  }
 
   render() {
-    const styles = this.getStyles();
     const filters = [];
     if (this.props.metadata.metadata) {
       for (let key in this.props.metadata.metadata.controls) {
         filters.push(
           <ChooseFilter {...this.props}
+            key={key}
             filterOptions={this.props.metadata.metadata.controls[key]}
             filterType={key}
             />

@@ -5,6 +5,7 @@ import sequences from "./sequences";
 import frequencies from "./frequencies";
 import entropy from "./entropy";
 import controls from "./controls";
+import browserDimensions from "./browserDimensions";
 
 const rootReducer = combineReducers({
   metadata,
@@ -12,7 +13,8 @@ const rootReducer = combineReducers({
   sequences,
   frequencies,
   controls,
-  entropy
+  entropy,
+  browserDimensions
 });
 
 export default rootReducer;
