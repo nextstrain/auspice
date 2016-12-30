@@ -350,7 +350,6 @@ class App extends React.Component {
             }}
           />
           <Header/>
-            <div id="app_column_1">
             <TreeView nodes={this.props.tree.nodes}
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               colorScale={this.state.colorScale}
@@ -361,8 +360,6 @@ class App extends React.Component {
               distanceMeasure={this.state.location.query.m || "div"}
               datasetGuid={this.props.tree.datasetGuid}
             />
-
-          <div style={{display: "inline-block"}} id="app_column_2">
             <Map
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               colorScale={this.state.colorScale.scale}
@@ -375,8 +372,6 @@ class App extends React.Component {
               changeRoute={this.changeRoute.bind(this)}
               location={this.state.location}
             />
-          </div>
-        </div>
         </Background>
       </Sidebar>
     );
