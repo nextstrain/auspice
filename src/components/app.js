@@ -80,7 +80,8 @@ class App extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     const tmpQuery = queryString.parse(window.location.search);
-    const cScale = getColorScale(tmpQuery.colorBy, nextProps.tree, nextProps.sequences);
+    const cScale = getColorScale(tmpQuery.colorBy, nextProps.tree, nextProps.sequences,
+                                 this.props.metadata.metadata ? this.props.metadata.metadata.color_options : null);
     this.setState({
       colorScale: cScale
     });
@@ -196,7 +197,8 @@ class App extends React.Component {
   }
 
   updateColorScale(colorBy) {
-    const cScale = getColorScale(colorBy, this.props.tree, this.props.sequences);
+    const cScale = getColorScale(colorBy, this.props.tree, this.props.sequences,
+                                 this.props.metadata.metadata ? this.props.metadata.metadata.color_options : null);
     let gts = null;
     if (colorBy.slice(0,3) === "gt-" && this.props.sequences.geneLength) {
       gts = parseGenotype(colorBy, this.props.sequences.geneLength);

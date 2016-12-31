@@ -4,6 +4,10 @@ import titleCase from "title-case";
 import { connect } from "react-redux";
 import { LEGEND_ITEM_MOUSEENTER, LEGEND_ITEM_MOUSELEAVE } from "../../actions/controls";
 
+function isNumeric(n) {
+  return !isNaN(parseFloat(n)) && isFinite(n);
+}
+
 @connect()
 @Radium
 class LegendItem extends React.Component {
@@ -21,6 +25,11 @@ class LegendItem extends React.Component {
     // d was undefined in some cases, Honduras thing, may not need conditional after fixed
     if (d) {
       label = titleCase(d.toString());
+    }
+    if (isNumeric(d)){
+      const val = parseFloat(d);
+      const magnitude = Math.ceil(Math.log10(Math.abs(val)+1e-10));
+      label = val.toFixed(5-magnitude);
     }
 
     if (this.props.dFreq) {
