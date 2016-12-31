@@ -54,6 +54,7 @@ var PhyloTree = function(treeJson) {
   // remember the range of children subtending a node (i.e. the range of yvalues)
   // and create children structure
   this.nodes.forEach(function(d) {
+    d.parent = d.n.parent.shell;
     if (d.terminal) {
       d.yRange = [d.n.yvalue, d.n.yvalue];
       d.children=null;
@@ -227,6 +228,12 @@ PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
       }
     }
   };
+  // zooming into terminal node doesn't make sense, presumably the parent is meant
+  if (clade.terminal){
+    kidsVisible(clade.parent);
+  }else{
+    kidsVisible(clade);
+  }
   kidsVisible(clade);
   this.mapToScreen();
   this.updateGeometry(dt);
