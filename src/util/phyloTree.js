@@ -182,7 +182,7 @@ PhyloTree.prototype.radialLayout = function() {
     d.xCBarStart = (d.depth - offset) * Math.sin(angleCBar1);
     d.yCBarEnd = (d.depth - offset) * Math.cos(angleCBar2);
     d.xCBarEnd = (d.depth - offset) * Math.sin(angleCBar2);
-    d.smallBigArc = Math.abs(angleCBar2 - angleCBar1) > Math.Pi * 0.5;
+    d.smallBigArc = Math.abs(angleCBar2 - angleCBar1) > Math.PI * 1.0;
   });
 };
 
