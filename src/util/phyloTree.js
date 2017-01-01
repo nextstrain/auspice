@@ -276,7 +276,7 @@ PhyloTree.prototype.mapToScreen = function(){
     this.nodes.forEach(function(d){d.yTip = tmp_yScale(d.y)});
     this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
     this.nodes.forEach(function(d){d.yBase = tmp_yScale(d.py)});
-    if (this.nodes[0].conf && this.layout==="rectangular"){
+    if (this.params.confidence && this.layout==="rectangular"){
       this.nodes.forEach(function(d){d.xConf = [tmp_xScale(d.conf[0]), tmp_xScale(d.conf[1])];});
     }
 
@@ -290,7 +290,7 @@ PhyloTree.prototype.mapToScreen = function(){
                                                  " L "+d.xTip.toString()+","+d.yTip.toString()+
                                                  " M "+d.xTip.toString()+","+d.cBarStart.toString()+
                                                  " L "+d.xTip.toString()+","+d.cBarEnd.toString();});
-        if (this.nodes[0].conf){
+        if (this.params.confidence){
           this.nodes.forEach(function(d){d.confLine =" M "+d.xConf[0].toString()+","+d.yBase.toString()+
                                                    " L "+d.xConf[1].toString()+","+d.yTip.toString();});
         }
@@ -862,7 +862,9 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks)
   if (this.params.showGrid){
       this.addGrid();
   }
-  this.makeConfidence();
+  if (this.params.confidence){
+    this.makeConfidence();
+  }
   this.makeBranches();
   this.makeTips();
   this.updateGeometry(10);
