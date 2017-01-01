@@ -188,7 +188,8 @@ class TreeView extends React.Component {
         this.props.distanceMeasure,
         {
           /* options */
-          grid: true
+          grid: true,
+          confidence: true
         },
         {
           /* callbacks */
