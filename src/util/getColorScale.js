@@ -43,7 +43,7 @@ const discreteAttributeScale = (nodes, attr) => {
   return d3.scale.ordinal().domain(domain);
 };
 
-const getColorScale = (colorBy, tree, sequences) => {
+const getColorScale = (colorBy, tree, sequences, colorOptions) => {
   const cScaleTypes = {ep: "integer", ne: "integer", rb: "integer",
                        lbi: "continuous", fitness: "continuous", num_date: "continuous",
                        region: "discrete", country: "discrete"};
@@ -71,24 +71,28 @@ const getColorScale = (colorBy, tree, sequences) => {
         colorScale = d3.scale.ordinal().domain(domain).range(genotypeColors);
       }
     }
-  } else if (colorBy === "region") {
-    continuous = false;
-    colorScale = scales.regionColorScale;
-  } else if (colorBy === "country") {
-      continuous = false;
-      colorScale = scales.countryColorScale;
-  } else if (cScaleTypes[colorBy] === "continuous") {
-    continuous = true;
-    colorScale = minMaxAttributeScale(tree.nodes, colorBy);
-  } else if (cScaleTypes[colorBy] === "integer") {
-    continuous = true;
-    colorScale = integerAttributeScale(tree.nodes, colorBy);
-  } else if (cScaleTypes[colorBy] === "discrete") {
-    continuous = false;
-    colorScale = discreteAttributeScale(tree.nodes, colorBy);
+  } else if (colorOptions && colorOptions[colorBy]){
+    if (colorOptions[colorBy].color_map){
+        continuous=false;
+        colorScale = d3.scale.ordinal()
+          .domain(colorOptions[colorBy].color_map.map((d) => { return d[0]; }))
+          .range(colorOptions[colorBy].color_map.map((d) => { return d[1]; }));
+    }
+    else if (colorOptions && colorOptions[colorBy].type === "discrete") {
+     continuous = false;
+     colorScale = discreteAttributeScale(tree.nodes, colorBy);
+    }
+    else if (colorOptions && colorOptions[colorBy].type === "integer") {
+     continuous = false;
+     colorScale = integerAttributeScale(tree.nodes, colorBy);
+    }
+    else if (colorOptions && colorOptions[colorBy].type === "continuous") {
+     continuous = true;
+     colorScale = minMaxAttributeScale(tree.nodes, colorBy);
+    }
   } else {
     continuous = true;
-    colorScale = genericScale(0, 1);
+    colorScale = minMaxAttributeScale(tree.nodes, colorBy);
   }
   return {"scale": colorScale, "continuous": continuous, "colorBy": colorBy,
           "legendBoundsMap": createLegendMatchBound(colorScale)};

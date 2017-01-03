@@ -54,6 +54,7 @@ var PhyloTree = function(treeJson) {
   // remember the range of children subtending a node (i.e. the range of yvalues)
   // and create children structure
   this.nodes.forEach(function(d) {
+    d.parent = d.n.parent.shell;
     if (d.terminal) {
       d.yRange = [d.n.yvalue, d.n.yvalue];
       d.children=null;
@@ -103,6 +104,11 @@ PhyloTree.prototype.setDistance = function(attr) {
   const tmp_dist = this.distance;
   this.nodes.forEach(function(d) {
     d.depth = d.n.attr[tmp_dist];
+    if (d.n.attr[tmp_dist+"_confidence"]){
+      d.conf = d.n.attr[tmp_dist+"_confidence"];
+    }else{
+      d.conf = [d.depth, d.depth];
+    }
   });
   this.nodes.forEach(function(d) {
     d.pDepth = d.n.parent.attr[tmp_dist];
@@ -113,6 +119,7 @@ PhyloTree.prototype.rectangularLayout = function() {
   this.nodes.forEach(function(d) {
     d.y = d.n.yvalue;
     d.x = d.depth;
+    d.x_conf = d.conf;
     d.px = d.pDepth;
     d.py = d.y;
   });
@@ -181,7 +188,7 @@ PhyloTree.prototype.radialLayout = function() {
     d.xCBarStart = (d.depth - offset) * Math.sin(angleCBar1);
     d.yCBarEnd = (d.depth - offset) * Math.cos(angleCBar2);
     d.xCBarEnd = (d.depth - offset) * Math.sin(angleCBar2);
-    d.smallBigArc = Math.abs(angleCBar2 - angleCBar1) > Math.Pi * 0.5;
+    d.smallBigArc = Math.abs(angleCBar2 - angleCBar1) > Math.PI * 1.0;
   });
 };
 
@@ -227,6 +234,12 @@ PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
       }
     }
   };
+  // zooming into terminal node doesn't make sense, presumably the parent is meant
+  if (clade.terminal){
+    kidsVisible(clade.parent);
+  }else{
+    kidsVisible(clade);
+  }
   kidsVisible(clade);
   this.mapToScreen();
   this.updateGeometry(dt);
@@ -263,6 +276,9 @@ PhyloTree.prototype.mapToScreen = function(){
     this.nodes.forEach(function(d){d.yTip = tmp_yScale(d.y)});
     this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
     this.nodes.forEach(function(d){d.yBase = tmp_yScale(d.py)});
+    if (this.params.confidence && this.layout==="rectangular"){
+      this.nodes.forEach(function(d){d.xConf = [tmp_xScale(d.conf[0]), tmp_xScale(d.conf[1])];});
+    }
 
     if (this.layout==="rootToTip" || this.layout==="unrooted"){
         this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
@@ -274,6 +290,10 @@ PhyloTree.prototype.mapToScreen = function(){
                                                  " L "+d.xTip.toString()+","+d.yTip.toString()+
                                                  " M "+d.xTip.toString()+","+d.cBarStart.toString()+
                                                  " L "+d.xTip.toString()+","+d.cBarEnd.toString();});
+        if (this.params.confidence){
+          this.nodes.forEach(function(d){d.confLine =" M "+d.xConf[0].toString()+","+d.yBase.toString()+
+                                                   " L "+d.xConf[1].toString()+","+d.yTip.toString();});
+        }
     } else if (this.layout==="radial"){
         const offset = this.nodes[0].depth;
         this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])});
@@ -545,6 +565,13 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
     };
   };
   setTimeout(fadeBack(this.svg, 0.2 * dt), 1.5 * dt);
+
+  this.svg.selectAll('.conf')
+    .transition().duration(dt)
+    .attr("visibility", this.layout==="rectangular"?"visible":"hidden")
+    .attr("d", function(d) {
+      return d.confLine;
+    });
 };
 
 PhyloTree.prototype.updateGeometry = function(dt) {
@@ -565,6 +592,13 @@ PhyloTree.prototype.updateGeometry = function(dt) {
     .transition().duration(dt)
     .attr("d", function(d) {
       return d.branch;
+    });
+
+  this.svg.selectAll('.conf')
+    .transition().duration(dt)
+    .attr("visibility", this.layout==="rectangular"?"visible":"hidden")
+    .attr("d", function(d) {
+      return d.confLine;
     });
 };
 
@@ -725,7 +759,7 @@ PhyloTree.prototype.clearSVG = function() {
   this.svg.selectAll('.branch').remove();
 };
 
-PhyloTree.prototype.tips = function() {
+PhyloTree.prototype.makeTips = function() {
   this.tipElements = this.svg.append("g").selectAll(".tip")
     .data(this.nodes.filter(function(d) {
       return d.terminal;
@@ -764,7 +798,7 @@ PhyloTree.prototype.tips = function() {
     .style("cursor", "pointer");
 };
 
-PhyloTree.prototype.branches = function() {
+PhyloTree.prototype.makeBranches = function() {
   this.branches = this.svg.append("g").selectAll('.branch')
     .data(this.nodes)
     .enter()
@@ -793,6 +827,29 @@ PhyloTree.prototype.branches = function() {
     .style("cursor", "pointer");
 };
 
+PhyloTree.prototype.makeConfidence = function() {
+  this.confidence = this.svg.append("g").selectAll('.conf')
+    .data(this.nodes)
+    .enter()
+    .append("path")
+    .attr("class", "conf")
+    .attr("id", function(d) {
+      return "conf_" + d.n.clade;
+    })
+    .attr("d", function(d) {
+      return d.conf;
+    })
+    .style("stroke", function(d) {
+      return d.stroke || "#888";
+    })
+    .style("opacity", 0.5)
+    .style("fill", "none")
+    .style("stroke-width", function(d) {
+      return d.strokeWidth*2 || 4;
+    });
+};
+
+
 PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks) {
   this.svg = svg;
   this.params = Object.assign(this.params, options);
@@ -805,8 +862,11 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks)
   if (this.params.showGrid){
       this.addGrid();
   }
-  this.branches();
-  this.tips();
+  if (this.params.confidence){
+    this.makeConfidence();
+  }
+  this.makeBranches();
+  this.makeTips();
   this.updateGeometry(10);
   this.svg.selectAll(".regression").remove();
   if (layout==="rootToTip") this.drawRegression();

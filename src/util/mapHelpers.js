@@ -17,7 +17,7 @@ export const addAllTipsToMap = (nodes, metadata, colorScale, map) => {
       metadata.geo.country[key].longitude
     ], {
       stroke:	false,
-      radius: value * 2,
+      radius: 2 + Math.sqrt(value) * 4,
 
       // color: ""
       // weight:	5	Stroke width in pixels.

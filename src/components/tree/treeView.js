@@ -63,7 +63,8 @@ class TreeView extends React.Component {
       previously in componentDidMount, but we don't mount immediately anymore -
       need to wait for browserDimensions
     */
-    if (this.Viewer) {
+    const good_tree = (this.state.tree && (nextProps.datasetGuid === this.props.datasetGuid));
+    if (this.Viewer && !good_tree) {
       this.Viewer.fitToViewer();
       const tree = (this.state.tree)
         ? this.state.tree
@@ -72,7 +73,7 @@ class TreeView extends React.Component {
     }
 
     /* Do we have a tree to draw? if yes, check whether it needs to be redrawn */
-    const tree = ((nextProps.datasetGuid === this.props.datasetGuid) && this.state.tree)
+    const tree = good_tree
       ? this.state.tree
       : this.makeTree(nextProps.nodes, this.props.layout, this.props.distance);
 
@@ -187,7 +188,8 @@ class TreeView extends React.Component {
         this.props.distanceMeasure,
         {
           /* options */
-          grid: true
+          grid: true,
+          confidence: true
         },
         {
           /* callbacks */
