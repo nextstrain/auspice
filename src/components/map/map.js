@@ -23,7 +23,8 @@ class Map extends React.Component {
     super(props);
     this.state = {
       tips: false,
-      map: null
+      map: null,
+      datasetGuid: null
     };
   }
   componentWillMount() {
