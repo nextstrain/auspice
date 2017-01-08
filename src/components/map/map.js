@@ -42,15 +42,23 @@ class Map extends React.Component {
       this.props.browserDimensions &&
       !this.state.map
     ) {
+      console.info("creating map")
       this.createMap();
     }
 
     if (
-      prevProps.browserDimensions &&
-      prevProps.browserDimensions.height &&
-      this.props.browserDimensions.height !== prevProps.browserDimensions.height
+      this.state.map && // we have a map
+      prevProps.datasetGuid &&
+      this.props.datasetGuid &&
+      prevProps.datasetGuid !== this.props.datasetGuid // and the dataset has changed
     ) {
-      /* optionally clear and re-layout the map here */
+      console.info("removing map")
+      this.state.map.remove()
+      this.setState({
+        map: null,
+        tips: false
+      })
+
     }
 
     if (
@@ -60,10 +68,13 @@ class Map extends React.Component {
       this.props.nodes &&
       !this.state.tips /* we haven't already drawn tips */
     ) {
+      console.log('drawing tips & transmission')
       addAllTipsToMap(this.props.nodes, this.props.metadata, this.props.colorScale, this.state.map);
       addTransmissionEventsToMap(this.props.nodes, this.props.metadata, this.props.colorScale, this.state.map);
       // don't redraw on every rerender - need to seperately handle virus change redraw
-      this.setState({tips: true});
+      this.setState({
+        tips: true
+      });
     }
 
   }
