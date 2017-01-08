@@ -367,6 +367,7 @@ class App extends React.Component {
               colorScale={this.state.colorScale.scale}
               nodes={this.props.tree.nodes}
               justGotNewDatasetRenderNewMap={false}
+              datasetGuid={this.props.tree.datasetGuid}
               />
             <Frequencies genotype={this.currentFrequencies()}/>
             <Entropy
