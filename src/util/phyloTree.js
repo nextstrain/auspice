@@ -863,7 +863,7 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks)
       this.addGrid();
   }
   if (this.params.confidence){
-    this.makeConfidence();
+    // this.makeConfidence();
   }
   this.makeBranches();
   this.makeTips();

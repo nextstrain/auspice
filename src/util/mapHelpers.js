@@ -1,32 +1,64 @@
 export const addAllTipsToMap = (nodes, metadata, colorScale, map) => {
+
   const aggregatedLocations = {};
-  nodes.forEach((n) => {
-    if (n.children) { return; }
-    // look up geo1 geo2 geo3 do lat longs differ
-    if (aggregatedLocations[n.attr.country]) {
-      aggregatedLocations[n.attr.country]++;
-    } else {
-      // if we haven't added this pair, add it
-      aggregatedLocations[n.attr.country] = 1;
+
+  setTimeout(() => {
+    const mapSVG = d3.select("#map").select("svg").append("g");
+
+    const latLongs = [];
+
+    nodes.forEach((n) => {
+      if (n.children) { return; }
+      // look up geo1 geo2 geo3 do lat longs differ
+      if (aggregatedLocations[n.attr.country]) {
+        aggregatedLocations[n.attr.country]++;
+      } else {
+        // if we haven't added this pair, add it
+        aggregatedLocations[n.attr.country] = 1;
+      }
+    });
+
+    _.forOwn(aggregatedLocations, (value, key) => {
+      latLongs.push({
+        country: key, // Thailand:
+        total: value, // 20
+        coords: map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. */
+          new L.LatLng(
+            metadata.geo.country[key].latitude,
+            metadata.geo.country[key].longitude
+          )
+        )
+      });
+    });
+
+    const tips = mapSVG.selectAll("tips")
+      .data(latLongs)
+      .enter().append("circle")
+      .style("stroke", "none")
+      .style("fill-opacity", .6)
+      .style("fill", (d) => { return colorScale(d.country) })
+      .attr("r", (d) => { return 2 + Math.sqrt(d.total) * 4 });
+
+    const setTipCoords = () => {
+      console.log("tips inner", tips)
+
+      // tips.attr("cx", (d) => { return d.coords.x })
+      //   .attr("cy", (d) => { return d.coords.y })
+
+      tips.attr("transform",
+      (d) => {
+        return "translate(" +
+          d.coords.x + ","+
+          d.coords.y + ")";
+        }
+      )
     }
-  });
 
-  _.forOwn(aggregatedLocations, (value, key) => {
-    L.circleMarker([
-      metadata.geo.country[key].latitude,
-      metadata.geo.country[key].longitude
-    ], {
-      stroke:	false,
-      radius: 2 + Math.sqrt(value) * 4,
+    setTipCoords();
+    map.on("viewreset", setTipCoords);
 
-      // color: ""
-      // weight:	5	Stroke width in pixels.
-      // opacity:	0.5	Stroke opacity.
-      // fill:
-      fillColor: colorScale(key),
-      fillOpacity: .6
-    }).addTo(map);
-  });
+  }, 0) // end setTimout to wait for leaflet in the DOM
+
 }
 
 export const addTransmissionEventsToMap = (nodes, metadata, colorScale, map) => {
@@ -88,22 +120,22 @@ export const addTransmissionEventsToMap = (nodes, metadata, colorScale, map) => 
 
     // this decorator adds arrows to the lines.
     // decorator docs: https://github.com/bbecquet/Leaflet.PolylineDecorator
-    for (let i = 0; i < geodesicPath._latlngs.length; i++) {
-      L.polylineDecorator(geodesicPath._latlngs[i], {
-        patterns: [{
-          offset: 25,
-          repeat: 50,
-          symbol: L.Symbol.arrowHead({
-            pixelSize: 8 + arrowSizeMultiplier,
-            pathOptions: {
-              fillOpacity: .5,
-              color: colorScale(countries[0]),
-              weight: 0
-            }
-          })
-        }]
-      }).addTo(map);
-    }
+    // for (let i = 0; i < geodesicPath._latlngs.length; i++) {
+    //   L.polylineDecorator(geodesicPath._latlngs[i], {
+    //     patterns: [{
+    //       offset: 25,
+    //       repeat: 50,
+    //       symbol: L.Symbol.arrowHead({
+    //         pixelSize: 8 + arrowSizeMultiplier,
+    //         pathOptions: {
+    //           fillOpacity: .5,
+    //           color: colorScale(countries[0]),
+    //           weight: 0
+    //         }
+    //       })
+    //     }]
+    //   }).addTo(map);
+    // }
 
   });
 }
