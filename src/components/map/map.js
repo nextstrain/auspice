@@ -68,7 +68,6 @@ class Map extends React.Component {
       this.props.nodes &&
       !this.state.tips /* we haven't already drawn tips */
     ) {
-      console.log('drawing tips & transmission')
       addAllTipsToMap(this.props.nodes, this.props.metadata, this.props.colorScale, this.state.map);
       addTransmissionEventsToMap(this.props.nodes, this.props.metadata, this.props.colorScale, this.state.map);
       // don't redraw on every rerender - need to seperately handle virus change redraw
@@ -136,6 +135,19 @@ class Map extends React.Component {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
       <Card center title="Transmissions">
+        <div style={{
+            position: "absolute",
+            left: 20,
+            top: 0,
+            padding: 20,
+            borderRadius: 100,
+            width: 30,
+            height: 30,
+            fontSize: 28,
+            backgroundColor: "rgb(0,200,0)",
+            color: "white"
+          }}
+          onClick={this.props.handleAnimationPlay}> P </div>
         {this.props.browserDimensions ? this.createMapDiv() : "Loading"}
       </Card>
     );

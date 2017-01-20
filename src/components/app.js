@@ -45,6 +45,7 @@ class App extends React.Component {
     this.state = {
       sidebarOpen: false,
       sidebarDocked: false,
+      animation: null, /* this is for tree but  */
       location: {
         pathname: window.location.pathname,
         query: queryString.parse(window.location.search)
@@ -315,6 +316,11 @@ class App extends React.Component {
       return null;
     }
   }
+
+  handleAnimationPlayClicked() {
+    console.log('playing')
+  }
+
   /******************************************
    * SIDEBAR
    *****************************************/
