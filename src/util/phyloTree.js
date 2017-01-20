@@ -837,6 +837,7 @@ PhyloTree.prototype.makeConfidence = function() {
       return "conf_" + d.n.clade;
     })
     .attr("d", function(d) {
+      console.log(d.conf)
       return d.conf;
     })
     .style("stroke", function(d) {
@@ -845,10 +846,112 @@ PhyloTree.prototype.makeConfidence = function() {
     .style("opacity", 0.5)
     .style("fill", "none")
     .style("stroke-width", function(d) {
-      return d.strokeWidth*2 || 4;
+      return d.strokeWidth * 2 || 4;
     });
 };
 
+PhyloTree.prototype.makeTimeBar = function(layout) {
+  /*
+    code duplication warning - this has been adopted for animation from gridlines.
+    once animations is done, the overlapping parts should be properly abstracted.
+  */
+  if (typeof layout === "undefined"){ layout = this.layout;}
+
+  const xmin = (this.xScale.domain()[0] > 0) ? this.xScale.domain()[0] : 0.0;
+  const ymin = this.yScale.domain()[1];
+  const ymax = this.yScale.domain()[0];
+  const xmax = layout === "radial"
+                ? d3.max([this.xScale.domain()[1], this.yScale.domain()[1],
+                    -this.xScale.domain()[0], -this.yScale.domain()[0]])
+                : this.xScale.domain()[1];
+  const offset = layout === "radial" ? this.nodes[0].depth : 0.0;
+
+  const timeBarPathString = function(xScale, yScale, layout){
+    return (x) => {
+      const xPos = xScale(x - offset);
+      let tmp_d = "";
+      if (layout === "rectangular" || layout === "rootToTip"){
+        tmp_d = 'M' + xPos.toString() +
+          " " +
+          yScale.range()[0].toString() +
+          " L " +
+          xPos.toString() +
+          " " +
+          yScale.range()[1].toString();
+      } else if (layout === "radial") {
+        tmp_d = 'M ' + xPos.toString() +
+          "  " +
+          yScale(0).toString() +
+          " A " +
+          (xPos - xScale(0)).toString() +
+          " " +
+          (yScale(x[0]) - yScale(offset)).toString() +
+          " 0 1 0 " +
+          xPos.toString() +
+          " " +
+          (yScale(0) + 0.001).toString();
+      }
+      return tmp_d;
+    };
+  };
+
+  const timeBar = this.svg.append("path")
+    .attr("d", () => {
+      console.log ( timeBarPathString(this.xScale, this.yScale, layout)(.0004) )
+      return timeBarPathString(this.xScale, this.yScale, layout)(.0004)
+    })
+    .style("fill", "none")
+    .style("stroke", "red")
+    .style("stroke-width", 3);
+
+  // const xTextPos = function(xScale, layout){
+  //   return function(x) {
+  //     if (x[2] === "x") {
+  //       return layout === "radial" ? xScale(0) : xScale(x[0]);
+  //     } else {
+  //       return xScale.range()[1];
+  //     }
+  //   }
+  // };
+  //
+  // const yTextPos = function(yScale, layout){
+  //     return function(x){
+  //         if (x[2] === "x"){
+  //             return layout === "radial" ? yScale(x[0] - offset) :  yScale.range()[1]+18;
+  //         }else{
+  //             return yScale(x[0]);
+  //         }
+  //     }
+  // };
+  //
+  // if (this.layout==="rootToTip"){
+  //     const logRangeY = Math.floor(Math.log10(ymax - ymin));
+  //     const roundingLevelY = Math.pow(10, logRangeY);
+  //     const offsetY=0;
+  //     const gridMinY = Math.floor((ymin+offsetY)/roundingLevelY)*roundingLevelY;
+  //     for (let ii = 0; ii <= (ymax + offsetY - gridMinY)/roundingLevelY+10; ii++) {
+  //       const pos = gridMinY + roundingLevelY*ii;
+  //       if (pos>offsetY){
+  //           gridPoints.push([pos, pos-offsetY>ymax?"hidden":"visible","y"]);
+  //       }
+  //     }
+  // }
+  //
+  // const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
+  // gridLabels.exit().remove();
+  // gridLabels.enter().append("text");
+  // gridLabels
+  //     .text(function(d){return d[0].toString();})
+  //     .attr("class", "gridTick")
+  //     .style("font-size",this.params.tickLabelSize)
+  //     .style("fill",this.params.tickLabelFill)
+  //     .style("text-anchor", this.layout==="radial" ? "end" : "start")
+  //     .style("visibility", function (d){return d[1];})
+  //     .attr("x", xTextPos(this.xScale, layout))
+  //     .attr("y", yTextPos(this.yScale, layout));
+
+  this.timeBar=true;
+};
 
 PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks) {
   this.svg = svg;
@@ -868,8 +971,9 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks)
   this.makeBranches();
   this.makeTips();
   this.updateGeometry(10);
+  this.makeTimeBar();
   this.svg.selectAll(".regression").remove();
-  if (layout==="rootToTip") this.drawRegression();
+  if (layout === "rootToTip") this.drawRegression();
 };
 
 export default PhyloTree;
