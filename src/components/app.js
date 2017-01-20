@@ -6,7 +6,9 @@ import {
   populateSequencesStore,
   populateFrequenciesStore,
   populateEntropyStore,
-  BROWSER_DIMENSIONS
+  BROWSER_DIMENSIONS,
+  MAP_ANIMATION_TICK,
+  MAP_ANIMATION_END
 } from "../actions";
 
 import "whatwg-fetch"; // setup polyfill
@@ -45,7 +47,6 @@ class App extends React.Component {
     this.state = {
       sidebarOpen: false,
       sidebarDocked: false,
-      animation: null, /* this is for tree but  */
       location: {
         pathname: window.location.pathname,
         query: queryString.parse(window.location.search)
@@ -317,8 +318,36 @@ class App extends React.Component {
     }
   }
 
-  handleAnimationPlayClicked() {
-    console.log('playing')
+  /******************************************
+   * ANIMATE MAP (AND THAT LINE ON TREE)
+   *****************************************/
+  handleAnimationPlayClicked() { /* this will all probably go down into components/map/map.js */
+    this.animateMap();
+  }
+
+  animateMap() {
+    let start = null;
+
+      const step = (timestamp) => {
+        if (!start) start = timestamp;
+
+        let progress = timestamp - start;
+
+        this.props.dispatch({
+          type: MAP_ANIMATION_TICK,
+          data: {
+            progress
+          }
+        })
+
+        if (progress < globals.mapAnimationDurationInMilliseconds) {
+          window.requestAnimationFrame(step);
+        } else {
+          this.props.dispatch({ type: MAP_ANIMATION_END })
+        }
+      }
+
+      window.requestAnimationFrame(step);
   }
 
   /******************************************
@@ -368,13 +397,15 @@ class App extends React.Component {
               distanceMeasure={this.state.location.query.m || "div"}
               datasetGuid={this.props.tree.datasetGuid}
             />
-            <Map
+          <button onClick={this.handleAnimationPlayClicked.bind(this)}>Play map animation</button>
+          {/*<Map
+              handleAnimationPlay={this.handleAnimationPlayClicked.bind(this)}
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               colorScale={this.state.colorScale.scale}
               nodes={this.props.tree.nodes}
               justGotNewDatasetRenderNewMap={false}
               datasetGuid={this.props.tree.datasetGuid}
-              />
+              />*/}
             <Frequencies genotype={this.currentFrequencies()}/>
             <Entropy
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}

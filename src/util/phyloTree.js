@@ -1,4 +1,5 @@
 import d3 from "d3";
+import * as globals from "./globals";
 
 const addLeafCount = function (node) {
     if (node.terminal) {
@@ -383,22 +384,22 @@ PhyloTree.prototype.removeGrid = function() {
 };
 
 PhyloTree.prototype.addGrid = function(layout) {
-  if (typeof layout==="undefined"){ layout=this.layout;}
+  if (typeof layout === "undefined") { layout = this.layout;}
 
-  const xmin = (this.xScale.domain()[0]>0)?this.xScale.domain()[0]:0.0;
+  const xmin = (this.xScale.domain()[0] > 0) ? this.xScale.domain()[0] : 0.0;
   const ymin = this.yScale.domain()[1];
   const ymax = this.yScale.domain()[0];
-  const xmax = layout=="radial"
+  const xmax = layout === "radial"
                 ? d3.max([this.xScale.domain()[1], this.yScale.domain()[1],
                           -this.xScale.domain()[0], -this.yScale.domain()[0]])
                 : this.xScale.domain()[1];
-  const offset = layout==="radial"?this.nodes[0].depth:0.0;
+  const offset = layout === "radial" ? this.nodes[0].depth : 0.0;
 
   const gridline = function(xScale, yScale, layout){
       return function(x){
-          const xPos = xScale(x[0]-offset);
+          const xPos = xScale(x[0] - offset);
           let tmp_d="";
-          if (layout==="rectangular" || layout==="rootToTip"){
+          if (layout === "rectangular" || layout === "rootToTip") {
             tmp_d = 'M'+xPos.toString() +
               " " +
               yScale.range()[0].toString() +
@@ -406,8 +407,8 @@ PhyloTree.prototype.addGrid = function(layout) {
               xPos.toString() +
               " " +
               yScale.range()[1].toString();
-          }else if (layout==="radial"){
-            tmp_d = 'M '+xPos.toString() +
+          } else if (layout === "radial") {
+            tmp_d = 'M ' + xPos.toString() +
               "  " +
               yScale(0).toString() +
               " A " +
@@ -417,8 +418,9 @@ PhyloTree.prototype.addGrid = function(layout) {
               " 0 1 0 " +
               xPos.toString() +
               " " +
-              (yScale(0)+0.001).toString();
+              (yScale(0) + 0.001).toString();
           }
+          console.log("rrrrrrr", tmp_d)
           return tmp_d;
       };
   };
@@ -486,7 +488,7 @@ PhyloTree.prototype.addGrid = function(layout) {
       .style("font-size",this.params.tickLabelSize)
       .style("fill",this.params.tickLabelFill)
       .style("text-anchor", this.layout==="radial" ? "end" : "start")
-      .style("visibility", function (d){return d[1];})
+      .style("visibility", function (d){ return d[1]; })
       .attr("x", xTextPos(this.xScale, layout))
       .attr("y", yTextPos(this.yScale, layout));
 
@@ -539,7 +541,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
         });
     };
   };
-  setTimeout(tipTrans(this.svg, dt), 0.5 * dt);
+  setTimeout(tipTrans(this.svg, dt), 0.5 * dt); /* why do we need a setTimout here? */
 
   const flipBranches = function(tmp_svg) {
     const svg = tmp_svg;
@@ -568,7 +570,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
 
   this.svg.selectAll('.conf')
     .transition().duration(dt)
-    .attr("visibility", this.layout==="rectangular"?"visible":"hidden")
+    .attr("visibility", this.layout === "rectangular" ? "visible" : "hidden")
     .attr("d", function(d) {
       return d.confLine;
     });
@@ -866,8 +868,9 @@ PhyloTree.prototype.makeTimeBar = function(layout) {
                 : this.xScale.domain()[1];
   const offset = layout === "radial" ? this.nodes[0].depth : 0.0;
 
-  const timeBarPathString = function(xScale, yScale, layout){
+  this.timeBarPathString = function(xScale, yScale, layout){
     return (x) => {
+
       const xPos = xScale(x - offset);
       let tmp_d = "";
       if (layout === "rectangular" || layout === "rootToTip"){
@@ -885,73 +888,40 @@ PhyloTree.prototype.makeTimeBar = function(layout) {
           " A " +
           (xPos - xScale(0)).toString() +
           " " +
-          (yScale(x[0]) - yScale(offset)).toString() +
+          (yScale(x) - yScale(offset)).toString() +
           " 0 1 0 " +
           xPos.toString() +
           " " +
           (yScale(0) + 0.001).toString();
       }
+      console.log("it's radial! eeeeeeeee", tmp_d);
       return tmp_d;
     };
   };
 
-  const timeBar = this.svg.append("path")
+  this.timeBar = this.svg.append("path")
     .attr("d", () => {
-      console.log ( timeBarPathString(this.xScale, this.yScale, layout)(.0004) )
-      return timeBarPathString(this.xScale, this.yScale, layout)(.0004)
+      return this.timeBarPathString(this.xScale, this.yScale, layout)(xmin)
     })
     .style("fill", "none")
     .style("stroke", "red")
-    .style("stroke-width", 3);
+    .style("stroke-width", 2);
 
-  // const xTextPos = function(xScale, layout){
-  //   return function(x) {
-  //     if (x[2] === "x") {
-  //       return layout === "radial" ? xScale(0) : xScale(x[0]);
-  //     } else {
-  //       return xScale.range()[1];
-  //     }
-  //   }
-  // };
-  //
-  // const yTextPos = function(yScale, layout){
-  //     return function(x){
-  //         if (x[2] === "x"){
-  //             return layout === "radial" ? yScale(x[0] - offset) :  yScale.range()[1]+18;
-  //         }else{
-  //             return yScale(x[0]);
-  //         }
-  //     }
-  // };
-  //
-  // if (this.layout==="rootToTip"){
-  //     const logRangeY = Math.floor(Math.log10(ymax - ymin));
-  //     const roundingLevelY = Math.pow(10, logRangeY);
-  //     const offsetY=0;
-  //     const gridMinY = Math.floor((ymin+offsetY)/roundingLevelY)*roundingLevelY;
-  //     for (let ii = 0; ii <= (ymax + offsetY - gridMinY)/roundingLevelY+10; ii++) {
-  //       const pos = gridMinY + roundingLevelY*ii;
-  //       if (pos>offsetY){
-  //           gridPoints.push([pos, pos-offsetY>ymax?"hidden":"visible","y"]);
-  //       }
-  //     }
-  // }
-  //
-  // const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
-  // gridLabels.exit().remove();
-  // gridLabels.enter().append("text");
-  // gridLabels
-  //     .text(function(d){return d[0].toString();})
-  //     .attr("class", "gridTick")
-  //     .style("font-size",this.params.tickLabelSize)
-  //     .style("fill",this.params.tickLabelFill)
-  //     .style("text-anchor", this.layout==="radial" ? "end" : "start")
-  //     .style("visibility", function (d){return d[1];})
-  //     .attr("x", xTextPos(this.xScale, layout))
-  //     .attr("y", yTextPos(this.yScale, layout));
-
-  this.timeBar=true;
+  this.timeBarCreated = true;
 };
+
+PhyloTree.prototype.updateTimeBar = function (duration, progress, layout) {
+
+  if (typeof layout === "undefined"){ layout = this.layout;}
+
+  this.timeBar.attr("d", () => {
+    return this.timeBarPathString(
+      this.xScale.domain([0, duration + 1]), /* how long is this going */
+      this.yScale.domain([0, duration + 1]),
+      layout
+    )(progress) /* where are we now */
+  });
+}
 
 PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks) {
   this.svg = svg;

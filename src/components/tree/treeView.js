@@ -34,7 +34,8 @@ const arrayInEquality = function(a,b) {
   return {
     tree: state.tree.tree,
     metadata: state.metadata.metadata,
-    browserDimensions: state.browserDimensions.browserDimensions
+    browserDimensions: state.browserDimensions.browserDimensions,
+    map: state.map
   };
 })
 class TreeView extends React.Component {
@@ -132,6 +133,21 @@ class TreeView extends React.Component {
     }
   }
   componentWillUpdate(nextProps, nextState) {
+
+    // console.log('updating tree', this.state.tree, this.props.map)
+    if (
+      this.state.tree &&
+      this.props.layout &&
+      this.props.map &&
+      this.props.map.animating === true /* the map is in motion, move the bar across the tree */
+    ) {
+      this.state.tree.updateTimeBar(
+        globals.mapAnimationDurationInMilliseconds,
+        this.props.map.progress, /* where the requestAnimationFrame is at the moment */
+        this.props.layout
+      );
+    }
+
     /* reconcile hover and click selections in tree */
     if (
       this.state.tree &&

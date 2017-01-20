@@ -40,16 +40,14 @@ export const addAllTipsToMap = (nodes, metadata, colorScale, map) => {
       .attr("r", (d) => { return 2 + Math.sqrt(d.total) * 4 });
 
     const setTipCoords = () => {
-      console.log("tips inner", tips)
-
       // tips.attr("cx", (d) => { return d.coords.x })
       //   .attr("cy", (d) => { return d.coords.y })
 
       tips.attr("transform",
-      (d) => {
-        return "translate(" +
-          d.coords.x + ","+
-          d.coords.y + ")";
+        (d) => {
+          return "translate(" +
+            d.coords.x + ","+
+            d.coords.y + ")";
         }
       )
     }
@@ -60,6 +58,24 @@ export const addAllTipsToMap = (nodes, metadata, colorScale, map) => {
   }, 0) // end setTimout to wait for leaflet in the DOM
 
 }
+
+
+// var start = null;
+// var element = document.getElementById("SomeElementYouWantToAnimate");
+// element.style.position = 'absolute';
+//
+// function step(timestamp) {
+//   if (!start) start = timestamp;
+//   var progress = timestamp - start;
+//   element.style.left = Math.min(progress/10, 200) + "px";
+//   if (progress < 2000) {
+//     window.requestAnimationFrame(step);
+//   }
+// }
+//
+// window.requestAnimationFrame(step);
+
+
 
 export const addTransmissionEventsToMap = (nodes, metadata, colorScale, map) => {
   const transmissions = {};
