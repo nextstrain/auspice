@@ -2,7 +2,7 @@ var path = require('path');
 var webpack = require('webpack');
 
 module.exports = {
-  devtool: ['eval','sourcemap'],
+  devtool: 'eval-source-map',
   entry: [
     'webpack-hot-middleware/client',
     './src/index'
@@ -20,18 +20,16 @@ module.exports = {
         "NODE_ENV": JSON.stringify("dev")
       }
     }),
-    new webpack.NoErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin()
   ],
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
-        loaders: ['babel'],
+        use: ['babel-loader'],
         include: path.join(__dirname, 'src')
-      },
-      {
-        test: /\.json$/, loader: "json-loader"
       }
+      // JSON loader no longer needed (webpack 2)
     ]
   }
 };
