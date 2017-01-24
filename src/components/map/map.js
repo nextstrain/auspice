@@ -7,15 +7,20 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
-import {addAllTipsToMap, addTransmissionEventsToMap} from "../../util/mapHelpers";
+import {setupTipsAndTransmissions} from "../../util/mapHelpers";
 import * as globals from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
+import {
+  MAP_ANIMATION_TICK,
+  MAP_ANIMATION_END
+} from "../../actions";
 
 @connect((state) => {
   return {
     tree: state.tree.tree,
     metadata: state.metadata.metadata,
-    browserDimensions: state.browserDimensions.browserDimensions
+    browserDimensions: state.browserDimensions.browserDimensions,
+    map: state.map
   };
 })
 class Map extends React.Component {
@@ -24,7 +29,8 @@ class Map extends React.Component {
     this.state = {
       tips: false,
       map: null,
-      datasetGuid: null
+      datasetGuid: null,
+      responsive: null
     };
   }
   componentWillMount() {
@@ -36,7 +42,36 @@ class Map extends React.Component {
     setupLeafletPlugins();
   }
 
+  componentWillReceiveProps(nextProps) {
+    /*
+      React to browser width/height changes responsively
+      This is stored in state because it's used by both the map and the d3 overlay
+    */
+    if (
+      this.props.browserDimensions &&
+      (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
+      this.props.browserDimensions.height !== nextProps.browserDimensions.height)
+    ) {
+      const responsive = computeResponsive({
+        horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+        vertical: 1, /* if we are in single column, full height */
+        browserDimensions: nextProps.browserDimensions,
+        sidebar: nextProps.sidebar
+      })
+      this.setState({responsive})
+    } else if (!this.props.browserDimensions && nextProps.browserDimensions) { /* first time */
+      const responsive = computeResponsive({
+        horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+        vertical: 1, /* if we are in single column, full height */
+        browserDimensions: nextProps.browserDimensions,
+        sidebar: nextProps.sidebar
+      })
+      this.setState({responsive})
+    }
+  }
+
   componentDidUpdate(prevProps, prevState) {
+
     /* first time map */
     if (
       this.props.browserDimensions &&
@@ -66,10 +101,17 @@ class Map extends React.Component {
       this.state.map && /* we have already drawn the map */
       this.props.metadata && /* we have the data we need */
       this.props.nodes &&
+      this.state.responsive &&
       !this.state.tips /* we haven't already drawn tips */
     ) {
-      addAllTipsToMap(this.props.nodes, this.props.metadata, this.props.colorScale, this.state.map);
-      addTransmissionEventsToMap(this.props.nodes, this.props.metadata, this.props.colorScale, this.state.map);
+      setupTipsAndTransmissions(
+        this.props.nodes,
+        this.props.metadata,
+        this.props.colorScale,
+        this.state.map,
+        this.state.responsive,
+        this.handleAnimationPlayClicked.bind(this)
+      );
       // don't redraw on every rerender - need to seperately handle virus change redraw
       this.setState({
         tips: true
@@ -77,7 +119,9 @@ class Map extends React.Component {
     }
 
   }
-
+  /******************************************
+   * GET LEAFLET IN THE DOM
+   *****************************************/
   createMap() {
 
     const southWest = L.latLng(-70, -180);
@@ -110,44 +154,58 @@ class Map extends React.Component {
         // noWrap: true
     }).addTo(map);
 
-    L.control.zoom({position: "bottomright"}).addTo(map)
+    L.control.zoom({position: "bottomright"}).addTo(map);
 
-    this.setState({map})
+    this.setState({map});
   }
 
   createMapDiv() {
-    const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
-      vertical: 1, /* if we are in single column, full height */
-      browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar
-    })
     return (
       <div style={{
-          height: responsive.height,
-          width: responsive.width
+          height: this.state.responsive.height,
+          width: this.state.responsive.width
         }} id="map">
       </div>
     )
   }
-  render() {
+  /******************************************
+   * ANIMATE MAP (AND THAT LINE ON TREE)
+   *****************************************/
+  handleAnimationPlayClicked() { /* this will all probably go down into components/map/map.js */
+    this.animateMap();
+  }
 
+  animateMap() {
+    let start = null;
+
+      const step = (timestamp) => {
+        if (!start) start = timestamp;
+
+        let progress = timestamp - start;
+
+        this.props.dispatch({
+          type: MAP_ANIMATION_TICK,
+          data: {
+            progress
+          }
+        })
+
+        if (progress < globals.mapAnimationDurationInMilliseconds) {
+          window.requestAnimationFrame(step);
+        } else {
+          this.props.dispatch({ type: MAP_ANIMATION_END })
+        }
+      }
+
+      window.requestAnimationFrame(step);
+  }
+
+  render() {
+    // console.log('map sees', this.props.map)
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
+
     return (
       <Card center title="Transmissions">
-        <div style={{
-            position: "absolute",
-            left: 20,
-            top: 0,
-            padding: 20,
-            borderRadius: 100,
-            width: 30,
-            height: 30,
-            fontSize: 28,
-            backgroundColor: "rgb(0,200,0)",
-            color: "white"
-          }}
-          onClick={this.props.handleAnimationPlay}> P </div>
         {this.props.browserDimensions ? this.createMapDiv() : "Loading"}
       </Card>
     );
