@@ -420,7 +420,7 @@ PhyloTree.prototype.addGrid = function(layout) {
               " " +
               (yScale(0) + 0.001).toString();
           }
-          console.log("rrrrrrr", tmp_d)
+          // console.log("rrrrrrr", tmp_d)
           return tmp_d;
       };
   };
@@ -894,7 +894,7 @@ PhyloTree.prototype.makeTimeBar = function(layout) {
           " " +
           (yScale(0) + 0.001).toString();
       }
-      console.log("it's radial! eeeeeeeee", tmp_d);
+      // console.log("it's radial! eeeeeeeee", tmp_d);
       return tmp_d;
     };
   };
