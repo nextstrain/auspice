@@ -2,7 +2,7 @@ import * as types from "../actions";
 
 const Map = (state = {
   animating: false,
-  tick: null
+  progress: null
 }, action) => {
   switch (action.type) {
   // case types.ANIMATION_START:
@@ -12,6 +12,7 @@ const Map = (state = {
   case types.MAP_ANIMATION_END:
     return Object.assign({}, state, {
       animating: false,
+      progress: null
     });
   case types.MAP_ANIMATION_TICK:
     return Object.assign({}, state, {
