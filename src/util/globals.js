@@ -71,7 +71,7 @@ export const defaultDistanceMeasures = ["num_date", "div"];
 export const fastTransitionDuration = 300; // in milliseconds
 export const mediumTransitionDuration = 600; // in milliseconds
 export const slowTransitionDuration = 1200; // in milliseconds
-export const mapAnimationDurationInMilliseconds = 8000;
+export const mapAnimationDurationInMilliseconds = 5000;
 
 export const HIColorDomain = genericDomain.map((d) => {
   return Math.round(100 * (d * 3.6)) / 100;
