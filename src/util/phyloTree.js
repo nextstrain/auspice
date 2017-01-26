@@ -782,6 +782,9 @@ PhyloTree.prototype.makeTips = function() {
     .on("mouseover", (d) => {
       this.callbacks.onTipHover(d)
     })
+    .on("mouseout", () => {
+      this.callbacks.onBranchOrTipLeave()
+    })
     .on("click", (d) => {
       this.callbacks.onTipClick(d)
     })
@@ -812,6 +815,9 @@ PhyloTree.prototype.makeBranches = function() {
     })
     .on("mouseover", (d) => {
       this.callbacks.onBranchHover(d)
+    })
+    .on("mouseout", () => {
+      this.callbacks.onBranchOrTipLeave()
     })
     .on("click", (d) => {
       this.callbacks.onBranchClick(d)

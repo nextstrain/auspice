@@ -46,6 +46,8 @@ class TreeView extends React.Component {
     this.state = {
       okToDraw: false,
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
+      clicked: null,
+      hover: null
     };
   }
   componentWillMount() {
@@ -196,7 +198,8 @@ class TreeView extends React.Component {
           onTipHover: this.onTipHover.bind(this),
           onTipClick: this.onTipClick.bind(this),
           onBranchHover: this.onBranchHover.bind(this),
-          onBranchClick: this.onBranchClick.bind(this)
+          onBranchClick: this.onBranchClick.bind(this),
+          onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this)
         },
         {
           /* presently selected node / branch */
@@ -251,6 +254,13 @@ class TreeView extends React.Component {
       hovered: null
     });
   }
+  // mouse out from tip/branch
+  onBranchOrTipLeave(){
+    if (this.state.hovered) {
+      this.setState({hovered: null})
+    }
+  }
+
   handleIconClick(tool) {
     return () => {
 
