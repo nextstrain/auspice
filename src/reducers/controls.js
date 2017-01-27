@@ -15,7 +15,8 @@ const Controls = (state = {
   selectedNode: null,
   region: null,
   search: null,
-  strain: null
+  strain: null,
+  layout: "rectangular",
 }, action) => {
   switch (action.type) {
   case types.TOGGLE_BRANCH_LABELS:
@@ -45,6 +46,10 @@ const Controls = (state = {
   case types.NODE_MOUSELEAVE:
     return Object.assign({}, state, {
       selectedNode: null
+    });
+  case types.CHANGE_LAYOUT:
+    return Object.assign({}, state, {
+      layout: action.data
     });
   default:
     return state;

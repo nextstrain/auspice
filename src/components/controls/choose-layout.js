@@ -4,7 +4,11 @@ import RadialTreeLayout from "../framework/svg-tree-layout-radial";
 import UnrootedTreeLayout from "../framework/svg-tree-layout-unrooted";
 import RootToTipTreeLayout from "../framework/svg-tree-layout-rootToTip";
 import {materialButton} from "../../globalStyles";
+import { connect } from "react-redux";
+import { CHANGE_LAYOUT } from "../../actions/controls";
 
+
+@connect()
 class ChooseLayout extends React.Component {
   getStyles() {
     return {
@@ -39,30 +43,42 @@ class ChooseLayout extends React.Component {
         <button
           key={1}
           style={materialButton}
-          onClick={() => { this.setLayoutQueryParam("rectangular"); }}>
+          onClick={() => {
+            this.props.dispatch({ type: CHANGE_LAYOUT, data: "rectangular" });
+            this.setLayoutQueryParam("rectangular");
+          }}>
           <RectangleTreeLayout width={25} stroke="rgb(130,130,130)"/>
           <span style={styles.title}> {"rectangular"} </span>
         </button>
         <button
           key={2}
           style={materialButton}
-          onClick={() => { this.setLayoutQueryParam("radial"); }}>
+          onClick={() => {
+            this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });
+            this.setLayoutQueryParam("radial");
+          }}>
           <RadialTreeLayout width={25} stroke="rgb(130,130,130)"/>
           <span style={styles.title}> {"radial"} </span>
         </button>
         <button
           key={3}
           style={materialButton}
-          onClick={() => { this.setLayoutQueryParam("rootToTip"); }}>
-          <RootToTipTreeLayout width={25} stroke="rgb(130,130,130)"/>
-          <span style={styles.title}> {"Mol.Clock"} </span>
+          onClick={() => {
+            this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });
+            this.setLayoutQueryParam("unrooted");
+          }}>
+          <UnrootedTreeLayout width={25} stroke="rgb(130,130,130)"/>
+          <span style={styles.title}> {"unrooted"} </span>
         </button>
         <button
           key={4}
           style={materialButton}
-          onClick={() => { this.setLayoutQueryParam("unrooted"); }}>
-          <UnrootedTreeLayout width={25} stroke="rgb(130,130,130)"/>
-          <span style={styles.title}> {"unrooted"} </span>
+          onClick={() => {
+            this.props.dispatch({ type: CHANGE_LAYOUT, data: "rootToTip" });
+            this.setLayoutQueryParam("rootToTip");
+          }}>
+          <RootToTipTreeLayout width={25} stroke="rgb(130,130,130)"/>
+          <span style={styles.title}> {"clock"} </span>
         </button>
       </div>
     );
