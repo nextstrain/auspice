@@ -8,8 +8,7 @@ import Slider from './slider';
 
 moment.updateLocale('en', {
     longDateFormat : {
-        L: "DD/MM/YYYY",
-        l: "D/M/YYYY"
+        L: "YYYY-MM-DD"
     }
 });
 
