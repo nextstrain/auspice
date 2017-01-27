@@ -46,8 +46,8 @@ class App extends React.Component {
       sidebarOpen: false,
       sidebarDocked: false,
       location: {
-        pathname: window.location.pathname,
-        query: queryString.parse(window.location.search)
+        pathname: this.props.location.pathname,           // injected by react-router
+        query: this.props.location.query                  // injected by react-router
       },
       colorScale: {
         colorBy: null,
@@ -79,9 +79,16 @@ class App extends React.Component {
    *****************************************/
 
   componentWillReceiveProps(nextProps) {
-    const tmpQuery = queryString.parse(window.location.search);
-    const cScale = getColorScale(tmpQuery.colorBy, nextProps.tree, nextProps.sequences,
+    let cScale;
+    const tmpQuery = this.props.location.query;
+    if (tmpQuery.colorBy) {
+      cScale = getColorScale(tmpQuery.colorBy, nextProps.tree, nextProps.sequences,
                                  this.props.metadata.metadata ? this.props.metadata.metadata.color_options : null);
+    }
+    else {
+      cScale = getColorScale("country", nextProps.tree, nextProps.sequences,
+                                 this.props.metadata.metadata ? this.props.metadata.metadata.color_options : null);
+    }
     this.setState({
       colorScale: cScale
     });
@@ -92,9 +99,9 @@ class App extends React.Component {
     mql.addListener(this.mediaQueryChanged.bind(this));
     this.setState({mql: mql, sidebarDocked: mql.matches});
 
-    const tmpQuery = queryString.parse(window.location.search);
+    const tmpQuery = this.props.location.query;
     const cScale = this.updateColorScale(tmpQuery.colorBy || "region");
-    const pathname = window.location.pathname;
+    const pathname = this.props.location.pathname;
     const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/" : "";
     this.setState({
       location: {
@@ -108,13 +115,13 @@ class App extends React.Component {
   componentDidMount() {
     // when the user hits the back button or forward, let us know so we can setstate again
     // all of the other intentional route changes we will manually setState
-    const tmpQuery = queryString.parse(window.location.search);
+    const tmpQuery = this.props.location.query;
     this.maybeFetchDataset();
     const cScale = this.updateColorScale(tmpQuery.colorBy || "region");
     window.addEventListener("popstate", (a, b, c) => {
       this.setState({
         location: {
-          pathname: window.location.pathname.slice(1, -1),
+          pathname: this.props.location.pathname.slice(1, -1),
           query: tmpQuery
         },
         colorScale: cScale.colorScale
