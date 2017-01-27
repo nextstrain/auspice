@@ -630,16 +630,20 @@ PhyloTree.prototype.deSelectTip = function(node) {
     .style("fill", function(d) { return d.fill;});
 };
 
-
+/* eslint-disable no-unused-expressions */
+/* eslint-disable max-len */
 PhyloTree.prototype.updateSelectedBranchOrTip = function (oldSelected, newSelected) {
-  if (!newSelected || !newSelected || oldSelected.d.n.clade !== newSelected.d.n.clade){
-    if (oldSelected) this.deSelectBranch(oldSelected.d);
-    if (newSelected && newSelected.type===".branch") this.selectBranch(newSelected.d);
-
-    if (oldSelected) this.deSelectTip(oldSelected.d);
-    if (newSelected && newSelected.type===".tip") this.selectTip(newSelected.d);
+  if (oldSelected === null && newSelected !== null) { // mouse in
+    newSelected.type === ".branch" ? this.selectBranch(newSelected.d) : this.selectTip(newSelected.d);
+  } else if (oldSelected !== null && newSelected === null) { // mouse out
+    oldSelected.type === ".branch" ? this.deSelectBranch(oldSelected.d) : this.deSelectTip(oldSelected.d);
+  } else if (oldSelected.d.n.clade !== newSelected.d.n.clade) { // new click
+    oldSelected.type === ".branch" ? this.deSelectBranch(oldSelected.d) : this.deSelectTip(oldSelected.d);
+    newSelected.type === ".branch" ? this.selectBranch(newSelected.d) : this.selectTip(newSelected.d);
   }
 };
+/* eslint-enable no-unused-expressions */
+/* eslint-enable max-len */
 
 /*
  * update tree element style of attributes
