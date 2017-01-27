@@ -45,11 +45,9 @@
     "radium": "0.18.1",
     "react": "15.3.1",
     "react-autosuggest": "^3.9.0",
-    "react-codemirror": "^0.2.1",
     "react-datepicker": "^0.29.0",
     "react-dom": "^0.14.0",
     "react-fontawesome": "^0.3.3",
-    "react-grid-layout": "^0.13.9",
     "react-redux": "^4.0.0",
     "react-router": "2.6.0",
     "react-select": "^1.0.0-rc.2",
@@ -65,11 +63,6 @@
     "request": "^2.65.0",
     "title-case": "^2.1.0",
     "victory": "^0.11.0",
-    "victory-axis": "^1.5.1",
-    "victory-bar": "^2.4.4",
-    "victory-chart": "^2.0.1",
-    "victory-line": "^0.5.3",
-    "victory-pie": "^0.1.1",
     "whatwg-fetch": "^0.10.1"
   }
 }
