@@ -434,7 +434,9 @@ PhyloTree.prototype.addGrid = function(layout) {
     }
   }
 
-  const majorGrid = this.svg.selectAll('.majorGrid').data(gridPoints);
+  const majorGrid = this.gridGroup
+			    .selectAll('.majorGrid')
+			    .data(gridPoints);
   majorGrid.exit().remove();
   majorGrid.enter().append("path");
   majorGrid
@@ -477,7 +479,9 @@ PhyloTree.prototype.addGrid = function(layout) {
       }
   }
 
-  const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
+  const gridLabels = this.gridGroup
+			     .selectAll('.gridTick')
+			     .data(gridPoints);
   gridLabels.exit().remove();
   gridLabels.enter().append("text");
   gridLabels
@@ -500,7 +504,9 @@ PhyloTree.prototype.addGrid = function(layout) {
         minorGridPoints.push([pos, pos-offset>xmax+minorRoundingLevel?"hidden":"visible"]);
     }
   }
-  const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
+  const minorGrid = this.gridGroup
+			    .selectAll('.minorGrid')
+			    .data(minorGridPoints);
   minorGrid.exit().remove();
   minorGrid.enter().append("path");
   minorGrid
@@ -755,8 +761,9 @@ PhyloTree.prototype.redrawStyle = function(treeElem, styleElem, dt) {
  * add and remove elements from tree, initial render
  */
 PhyloTree.prototype.clearSVG = function() {
-  this.svg.selectAll('.tip').remove();
-  this.svg.selectAll('.branch').remove();
+  this.svg.selectAll("*").remove()
+  // this.svg.selectAll('.tip').remove();
+  // this.svg.selectAll('.branch').remove();
 };
 
 PhyloTree.prototype.makeTips = function() {
@@ -865,6 +872,7 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks)
   this.setDistance(distance);
   this.setLayout(layout);
   this.mapToScreen();
+  this.gridGroup = this.svg.append("g"); // the group holding all grid stuff
   if (this.params.showGrid){
       this.addGrid();
   }
