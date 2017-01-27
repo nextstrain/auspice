@@ -53,16 +53,16 @@ class ChooseLayout extends React.Component {
         <button
           key={3}
           style={materialButton}
-          onClick={() => { this.setLayoutQueryParam("rootToTip"); }}>
-          <RootToTipTreeLayout width={25} stroke="rgb(130,130,130)"/>
-          <span style={styles.title}> {"Mol.Clock"} </span>
+          onClick={() => { this.setLayoutQueryParam("unrooted"); }}>
+          <UnrootedTreeLayout width={25} stroke="rgb(130,130,130)"/>
+          <span style={styles.title}> {"unrooted"} </span>
         </button>
         <button
           key={4}
           style={materialButton}
-          onClick={() => { this.setLayoutQueryParam("unrooted"); }}>
-          <UnrootedTreeLayout width={25} stroke="rgb(130,130,130)"/>
-          <span style={styles.title}> {"unrooted"} </span>
+          onClick={() => { this.setLayoutQueryParam("rootToTip"); }}>
+          <RootToTipTreeLayout width={25} stroke="rgb(130,130,130)"/>
+          <span style={styles.title}> {"clock"} </span>
         </button>
       </div>
     );
