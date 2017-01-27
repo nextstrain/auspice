@@ -41,7 +41,7 @@ class ChooseMetric extends React.Component {
           style={materialButton}
           onClick={() => { this.setMetricQueryParam("div"); }}
         >
-          <span style={styles.title}> {"mutations"} </span>
+          <span style={styles.title}> {"divergence"} </span>
         </button>
         <button
           key={2}

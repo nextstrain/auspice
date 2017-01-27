@@ -52,7 +52,7 @@ class Controls extends React.Component {
         <HeaderFont style={styles.heading}>{"Tree Options"}</HeaderFont>
         <SelectLabel text="Layout"/>
         <ChooseLayout {...this.props}/>
-        <SelectLabel text="x axis"/>
+        <SelectLabel text="X axis"/>
         <ChooseMetric {...this.props}/>
 
         <HeaderFont style={styles.heading}>{"Filters"}</HeaderFont>
