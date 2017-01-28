@@ -850,7 +850,7 @@ PhyloTree.prototype.makeConfidence = function() {
       return "conf_" + d.n.clade;
     })
     .attr("d", function(d) {
-      return d.conf;
+      return d.confLine;
     })
     .style("stroke", function(d) {
       return d.stroke || "#888";
