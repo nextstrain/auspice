@@ -134,30 +134,39 @@ class TreeView extends React.Component {
     }
   }
   componentWillUpdate(nextProps, nextState) {
-    /* reconcile hover and click selections in tree */
+    /* reconcile hover and click selections in tree
+       that is, make branches / tips dashed or not...
+       updateSelectedBranchOrTip args: oldSelected, newSelected
+       where each is an object with attrs d (node) and type (branch/tip)
+       OR arguments could by falsey
+       That function checks whether the branch (eg) is the same (if so: no-op)
+    */
     if (
       this.state.tree &&
-      (this.state.hovered || this.state.clicked) &&
+      ((this.state.hovered || this.state.clicked) || (!this.state.hovered && nextState.hovered)) &&
       this.props.layout === nextProps.layout // this block interferes with layout transition otherwise
     ) {
       /* check whether or not the previously selected item was clicked */
-      if (this.state.clicked && nextState.clicked) { // was the previous item a click?
+      if (this.state.clicked && nextState.clicked) {
+	// console.log("click -> click");
         this.state.tree.updateSelectedBranchOrTip(
           this.state.clicked, /* turn this one off */
           nextState.clicked, /* turn this one on */
         );
-      } else if (this.state.hovered && nextState.clicked) { // previously a hover, now a click
+      } else if (!this.state.hovered && nextState.hovered) {
+	// console.log("not hovered -> hovered");
+        this.state.tree.updateSelectedBranchOrTip(
+	  null,
+	  nextState.hovered,
+        );
+      } else if (this.state.hovered && !nextState.hovered && !nextState.clicked) {
+	// console.log("hovered -> no longer hovered or clicked");
         this.state.tree.updateSelectedBranchOrTip(
           this.state.hovered,
-          nextState.clicked,
+	  null,
         );
-      } else if (this.state.hovered && nextState.hovered) { // deselect the previously selected hover
-        this.state.tree.updateSelectedBranchOrTip(
-          this.state.hovered,
-          nextState.hovered,
-        );
-      }
-      else if (this.state.clicked && nextState.clicked === null) {
+      } else if (this.state.clicked && nextState.clicked === null) {
+	// console.log("click -> noClick");
         // x clicked or clicked off will give a null value, so reset everything to be safe
         this.state.tree.updateSelectedBranchOrTip(
           this.state.clicked,
@@ -172,8 +181,8 @@ class TreeView extends React.Component {
       this.state.tree && /* tree exists */
       prevProps.browserDimensions && /* it's not the first render, the listener is registered and width/height passed in */
       this.props.browserDimensions &&
-      prevProps.browserDimensions.width !== this.props.browserDimensions.width || /* the browser dimensions have changed */
-      prevProps.browserDimensions.height !== this.props.browserDimensions.height
+      (prevProps.browserDimensions.width !== this.props.browserDimensions.width || /* the browser dimensions have changed */
+      prevProps.browserDimensions.height !== this.props.browserDimensions.height)
     ) {
       this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
     }
@@ -389,6 +398,8 @@ class TreeView extends React.Component {
       </Card>
     )
   }
+
+
   render() {
     /*
       1. set up SVGs
