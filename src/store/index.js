@@ -1,7 +1,7 @@
 import { createStore, applyMiddleware, compose } from "redux";
 import thunk from "redux-thunk";
-import { devTools } from 'redux-devtools';
-import createHistory from 'history/lib/createBrowserHistory';
+// import { devTools } from 'redux-devtools';
+// import createHistory from 'history/lib/createBrowserHistory';
 
 import rootReducer from "../reducers";
 

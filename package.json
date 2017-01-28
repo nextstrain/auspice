@@ -37,7 +37,6 @@
   "dependencies": {
     "color": "^0.7.3",
     "d3": "^3.5.17",
-    "history": "^1.12.5",
     "lodash": "4.16.4",
     "moment": "^2.14.1",
     "moment-range": "^2.2.0",
@@ -56,7 +55,6 @@
     "react-tap-event-plugin": "^0.2.1",
     "react-throttle": "^0.3.0",
     "redux": "^3.0.2",
-    "redux-devtools": "^2.1.5",
     "redux-logger": "^2.0.4",
     "redux-router": "^1.0.0-beta3",
     "redux-thunk": "^1.0.0",
