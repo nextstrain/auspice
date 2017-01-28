@@ -16,8 +16,12 @@ const Controls = (state = {
   region: null,
   search: null,
   strain: null,
-  layout: "rectangular",
-  distanceMeasure: "div"
+  layout: null,
+  distanceMeasure: null,
+  dateMin: null,
+  dateMax: null,
+  absoluteDateMin: null,
+  absoluteDateMax: null
 }, action) => {
   switch (action.type) {
   case types.TOGGLE_BRANCH_LABELS:
@@ -55,6 +59,22 @@ const Controls = (state = {
   case types.CHANGE_DISTANCE_MEASURE:
     return Object.assign({}, state, {
       distanceMeasure: action.data
+    });
+  case types.CHANGE_DATE_MIN:
+    return Object.assign({}, state, {
+      dateMin: action.data
+    });
+  case types.CHANGE_DATE_MAX:
+    return Object.assign({}, state, {
+      dateMax: action.data
+    });
+  case types.CHANGE_ABSOLUTE_DATE_MIN:
+    return Object.assign({}, state, {
+      absoluteDateMin: action.data
+    });
+  case types.CHANGE_ABSOLUTE_DATE_MAX:
+    return Object.assign({}, state, {
+      absoluteDateMax: action.data
     });
   default:
     return state;

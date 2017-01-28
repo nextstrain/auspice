@@ -8,7 +8,8 @@ import {
   populateEntropyStore,
   BROWSER_DIMENSIONS
 } from "../actions";
-import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE } from "../actions/controls";
+import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_DATE_MIN,
+  CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN, CHANGE_ABSOLUTE_DATE_MAX } from "../actions/controls";
 
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
@@ -28,14 +29,19 @@ import queryString from "query-string";
 import getColorScale from "../util/getColorScale";
 import { parseGenotype, getGenotype } from "../util/getGenotype";
 import * as globals from "../util/globals";
+import { defaultDateRange, defaultLayout,
+  defaultDistanceMeasure } from "../util/globals";
 import Sidebar from "react-sidebar";
+import moment from 'moment';
 
 const returnStateNeeded = (fullStateTree) => {
   return {
     tree: fullStateTree.tree,
     sequences: fullStateTree.sequences,
     metadata: fullStateTree.metadata,
-    selectedLegendItem: fullStateTree.controls.selectedLegendItem
+    selectedLegendItem: fullStateTree.controls.selectedLegendItem,
+    dateMin: fullStateTree.controls.dateMin,
+    dateMax: fullStateTree.controls.dateMax
   };
 };
 @connect(returnStateNeeded)
@@ -97,15 +103,7 @@ class App extends React.Component {
 
   componentWillMount() {
 
-    // update redux store from query params
-    if (this.props.location.query.l) {
-      this.props.dispatch({ type: CHANGE_LAYOUT,
-                            data: this.props.location.query.l });
-    }
-    if (this.props.location.query.m) {
-      this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE,
-                            data: this.props.location.query.m });
-    }
+    this.initializeReduxStore();
 
     var mql = window.matchMedia(`(min-width: ${globals.controlsHiddenWidth}px)`);
     mql.addListener(this.mediaQueryChanged.bind(this));
@@ -158,6 +156,49 @@ class App extends React.Component {
       const cScale = this.updateColorScale(this.state.location.query.colorBy || "region");
       this.setState(cScale);
     }
+  }
+
+  numericDate(secSinceUnix) {
+    const res = 1970 + (secSinceUnix / 365.25 / 24 / 3600 / 1000);
+    return res;
+  }
+
+  initializeReduxStore() {
+
+    // initialize to query param if available, otherwise use defaults
+    if (this.props.location.query.l) {
+      this.props.dispatch({ type: CHANGE_LAYOUT, data: this.props.location.query.l });
+    } else {
+      this.props.dispatch({ type: CHANGE_LAYOUT, data: defaultLayout });
+    }
+
+    if (this.props.location.query.m) {
+      this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE,
+                            data: this.props.location.query.m });
+    } else {
+      this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE,
+                            data: defaultDistanceMeasure });
+    }
+
+    // update absolute date range
+    const absoluteMin = this.numericDate(moment().subtract(defaultDateRange, "years").valueOf());
+    const absoluteMax = this.numericDate(moment().valueOf());
+    this.props.dispatch({ type: CHANGE_ABSOLUTE_DATE_MIN, data: absoluteMin });
+    this.props.dispatch({ type: CHANGE_ABSOLUTE_DATE_MAX, data: absoluteMax });
+
+    // set selected date range to query params if they exist, if not set to defaults
+    if (this.props.location.query.dmin) {
+      this.props.dispatch({ type: CHANGE_DATE_MIN, data: this.props.location.query.dmin });
+    } else {
+      this.props.dispatch({ type: CHANGE_DATE_MIN, data: absoluteMin });
+    }
+
+    if (this.props.location.query.dmax) {
+      this.props.dispatch({ type: CHANGE_DATE_MAX, data: this.props.location.query.dmax });
+    } else {
+      this.props.dispatch({ type: CHANGE_DATE_MAX, data: absoluteMax });
+    }
+
   }
 
   handleResize() {
@@ -244,8 +285,8 @@ class App extends React.Component {
   }
 
   tipVisibility(filters) {
-    let upperLimit = +this.state.location.query.dmax;
-    let lowerLimit = +this.state.location.query.dmin;
+    let upperLimit = +this.props.dateMax;
+    let lowerLimit = +this.props.dateMin;
     if (!upperLimit) {
       upperLimit = 1000000000000;
     }
