@@ -8,6 +8,7 @@ import {
   populateEntropyStore,
   BROWSER_DIMENSIONS
 } from "../actions";
+import { CHANGE_LAYOUT } from "../actions/controls";
 
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
@@ -95,6 +96,12 @@ class App extends React.Component {
   }
 
   componentWillMount() {
+
+    // update redux store from query params
+    if (this.props.location.query.l) {
+      this.props.dispatch({ type: CHANGE_LAYOUT, data: this.props.location.query.l });
+    }
+
     var mql = window.matchMedia(`(min-width: ${globals.controlsHiddenWidth}px)`);
     mql.addListener(this.mediaQueryChanged.bind(this));
     this.setState({mql: mql, sidebarDocked: mql.matches});
@@ -344,6 +351,7 @@ class App extends React.Component {
         sidebar={
           <Controls changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
+            router={this.props.router}
             colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || globals.colorOptions) : globals.colorOptions}
             colorScale={this.state.colorScale}
           />
@@ -365,7 +373,6 @@ class App extends React.Component {
               nodeColor={this.nodeColor()}
               tipRadii={this.tipRadii()}
               tipVisibility={this.tipVisibility()}
-              layout={this.state.location.query.l || "rectangular"}
               distanceMeasure={this.state.location.query.m || "div"}
               datasetGuid={this.props.tree.datasetGuid}
             />

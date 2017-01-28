@@ -25,15 +25,16 @@ class ChooseLayout extends React.Component {
   }
 
   componentDidMount() {
-    // Richard move to algo that checks for url validity
-    if (!this.props.location.query.l) {
-      this.setLayoutQueryParam("rectangular");
-    }
+
   }
 
   setLayoutQueryParam(title) {
-    const newQuery = Object.assign({}, this.props.location.query, {l: title});
-    this.props.changeRoute(this.props.location.pathname, newQuery);
+    const location = this.props.router.getCurrentLocation();
+    const newQuery = Object.assign({}, location.query, {l: title});
+    this.props.router.push({
+      pathname: location.pathname,
+      query: newQuery
+    });
   }
 
   render() {
