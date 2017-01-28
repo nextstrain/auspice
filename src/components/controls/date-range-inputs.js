@@ -9,8 +9,7 @@ import { CHANGE_DATE_MIN, CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN,
 
 moment.updateLocale('en', {
     longDateFormat : {
-        L: "DD/MM/YYYY",
-        l: "D/M/YYYY"
+        L: "YYYY-MM-DD"
     }
 });
 
@@ -49,14 +48,14 @@ class DateRangeInputs extends React.Component {
     };
   }
 
-  numericDate(secSinceUnix) {
-    const res = 1970 + (secSinceUnix / 365.25 / 24 / 3600 / 1000);
-    return res;
+  numericToCalendar(numDate) {
+    const unixDate = (numDate - 1970) * 365.25 * 24 * 3600; // number of seconds since 1970
+    return moment.unix(unixDate).format("YYYY-MM-DD");
   }
 
-  numericToUnix(numdate) {
-    const res = (numdate - 1970) * 365.25 * 24 * 3600 * 1000;
-    return res;
+  calendarToNumeric(calDate) {
+    const unixDate = moment(calDate).unix();  // number of seconds since 1970
+    return 1970 + (unixDate / 365.25 / 24 / 3600);
   }
 
   setDateQueryParam(range) {
@@ -68,24 +67,26 @@ class DateRangeInputs extends React.Component {
     });
   }
 
-  updateDateRange(ref, m) {
+  updateDateRange(ref, momentDate) {
+    // a momentDate is received from DatePicker
     let newRange;
     if (ref === "updateDateMin") {
-      newRange = { min: this.numericDate(m.valueOf()),
+      newRange = { min: momentDate.format("YYYY-MM-DD"),
                    max: this.props.dateMax };
     } else if (ref === "updateDateMax") {
       newRange = { min: this.props.dateMin,
-                   max: this.numericDate(m.valueOf()) };
+                   max: momentDate.format("YYYY-MM-DD") };
     }
     this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
     this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
     this.setDateQueryParam(newRange);
   }
 
-  updateSlider(values) {
-    // {values} is an array of unix timestamps
-    // [timestampStart, timestampEnd]
-    const newRange = {min: values[0], max: values[1]};
+  updateSlider(numDateValues) {
+    // {numDateValues} is an array of numDates received from Slider
+    // [numDateStart, numDateEnd]
+    const newRange = {min: this.numericToCalendar(numDateValues[0]),
+      max: this.numericToCalendar(numDateValues[1])};
     this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
     this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
     this.setDateQueryParam(newRange);
@@ -131,18 +132,21 @@ class DateRangeInputs extends React.Component {
     const absoluteMin = this.props.absoluteDateMin;
     const absoluteMax = this.props.absoluteDateMax;
     const selectedMin = this.props.dateMin;
-    const selectedMax = this.props.dateMax ;
-    const datePickerMin = moment(this.numericToUnix(this.props.dateMin));
-    const datePickerMax = moment(this.numericToUnix(this.props.dateMax));
+    const selectedMax = this.props.dateMax;
+
+    const absoluteMinNumDate = this.calendarToNumeric(absoluteMin);
+    const absoluteMaxNumDate = this.calendarToNumeric(absoluteMax);
+    const selectedMinNumDate = this.calendarToNumeric(selectedMin);
+    const selectedMaxNumDate = this.calendarToNumeric(selectedMax);
 
     return (
       <div>
         <div style={{width: 250}}>
-        <Slider
-          min={absoluteMin}
-          max={absoluteMax}
-          defaultValue={[absoluteMin, absoluteMax]}
-          value={[selectedMin, selectedMax]}
+        <Slider                                       // numDates are handed to Slider
+          min={absoluteMinNumDate}
+          max={absoluteMaxNumDate}
+          defaultValue={[absoluteMinNumDate, absoluteMaxNumDate]}
+          value={[selectedMinNumDate, selectedMaxNumDate]}
           onChange={this.updateSlider.bind(this)}
           withBars />
         </div>
@@ -152,12 +156,12 @@ class DateRangeInputs extends React.Component {
           docs: https://hacker0x01.github.io/react-datepicker/
         */}
         <div style={{width: 250}}>
-          <DatePicker
-            selected={datePickerMin}
+          <DatePicker                               // momentDates are handed to DatePicker
+            selected={moment(selectedMin)}
             onChange={this.updateDateRange.bind(this, "updateDateMin")}
           />
-          <DatePicker
-            selected={datePickerMax}
+          <DatePicker                               // momentDates are handed to DatePicker
+            selected={moment(selectedMax)}
             onChange={this.updateDateRange.bind(this, "updateDateMax")}
           />
         </div>

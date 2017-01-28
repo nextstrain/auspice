@@ -181,8 +181,8 @@ class App extends React.Component {
     }
 
     // update absolute date range
-    const absoluteMin = this.numericDate(moment().subtract(defaultDateRange, "years").valueOf());
-    const absoluteMax = this.numericDate(moment().valueOf());
+    const absoluteMin = moment().subtract(defaultDateRange, "years").format("YYYY-MM-DD");
+    const absoluteMax = moment().format("YYYY-MM-DD");
     this.props.dispatch({ type: CHANGE_ABSOLUTE_DATE_MIN, data: absoluteMin });
     this.props.dispatch({ type: CHANGE_ABSOLUTE_DATE_MAX, data: absoluteMax });
 
@@ -285,14 +285,9 @@ class App extends React.Component {
   }
 
   tipVisibility(filters) {
-    let upperLimit = +this.props.dateMax;
-    let lowerLimit = +this.props.dateMin;
-    if (!upperLimit) {
-      upperLimit = 1000000000000;
-    }
-    if (!lowerLimit) {
-      lowerLimit = -1000000000000;
-    }
+    let upperLimit = this.props.dateMax;
+    let lowerLimit = this.props.dateMin;
+
     if (this.props.tree.nodes){
       const filter_pairs = [];
       if (this.props.metadata && this.props.metadata.metadata) {
@@ -305,15 +300,17 @@ class App extends React.Component {
           }
         }
       }
-      if (filter_pairs.length) {
-        return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
-          && d.attr.num_date < upperLimit
-          && filter_pairs.every((x) => x[1].indexOf(d.attr[x[0]])>-1))
-            ? "visible" : "hidden");
-      } else {
-        return this.props.tree.nodes.map((d) => (d.attr.num_date >= lowerLimit
-          && d.attr.num_date < upperLimit)
-            ? "visible" : "hidden");
+      if (upperLimit && lowerLimit) {
+        if (filter_pairs.length) {
+          return this.props.tree.nodes.map((d) => (d.attr.date >= lowerLimit
+            && d.attr.date < upperLimit
+            && filter_pairs.every((x) => x[1].indexOf(d.attr[x[0]])>-1))
+              ? "visible" : "hidden");
+        } else {
+          return this.props.tree.nodes.map((d) => (d.attr.date >= lowerLimit
+            && d.attr.date < upperLimit)
+              ? "visible" : "hidden");
+        }
       }
     } else {
       return "visible";
