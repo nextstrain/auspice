@@ -2,11 +2,14 @@ import React from "react";
 import TimeTree from "../framework/svg-time-tree";
 import MutationTree from "../framework/svg-mutation-tree";
 import {materialButton} from "../../globalStyles";
+import { connect } from "react-redux";
+import { CHANGE_DISTANCE_MEASURE } from "../../actions/controls";
 
 /*
  * implements a pair of buttons the toggle between timetree and divergence tree
- * copied from chose-layout
  */
+
+@connect()
 class ChooseMetric extends React.Component {
   getStyles() {
     return {
@@ -20,16 +23,14 @@ class ChooseMetric extends React.Component {
       }
     };
   }
-  componentDidMount() {
-    // Richard move to algo that checks for url validity
-    if (!this.props.location.query.l) {
-      this.setMetricQueryParam("div");
-    }
-  }
 
   setMetricQueryParam(title) {
-    const newQuery = Object.assign({}, this.props.location.query, {m: title});
-    this.props.changeRoute(this.props.location.pathname, newQuery);
+    const location = this.props.router.getCurrentLocation();
+    const newQuery = Object.assign({}, location.query, {m: title});
+    this.props.router.push({
+      pathname: location.pathname,
+      query: newQuery
+    });
   }
 
   render() {
@@ -39,15 +40,19 @@ class ChooseMetric extends React.Component {
         <button
           key={1}
           style={materialButton}
-          onClick={() => { this.setMetricQueryParam("div"); }}
-        >
+          onClick={() => {
+            this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
+            this.setMetricQueryParam("div");
+          }}>
           <span style={styles.title}> {"mutations"} </span>
         </button>
         <button
           key={2}
           style={materialButton}
-          onClick={() => { this.setMetricQueryParam("num_date"); }}
-        >
+          onClick={() => {
+            this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "num_date" });
+            this.setMetricQueryParam("num_date");
+          }}>
           <span style={styles.title}> {"time"} </span>
         </button>
       </div>

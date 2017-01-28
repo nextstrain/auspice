@@ -35,7 +35,8 @@ const arrayInEquality = function(a,b) {
     tree: state.tree.tree,
     metadata: state.metadata.metadata,
     browserDimensions: state.browserDimensions.browserDimensions,
-    layout: state.controls.layout
+    layout: state.controls.layout,
+    distanceMeasure: state.controls.distanceMeasure
   };
 })
 class TreeView extends React.Component {

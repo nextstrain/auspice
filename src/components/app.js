@@ -8,7 +8,7 @@ import {
   populateEntropyStore,
   BROWSER_DIMENSIONS
 } from "../actions";
-import { CHANGE_LAYOUT } from "../actions/controls";
+import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE } from "../actions/controls";
 
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
@@ -99,7 +99,12 @@ class App extends React.Component {
 
     // update redux store from query params
     if (this.props.location.query.l) {
-      this.props.dispatch({ type: CHANGE_LAYOUT, data: this.props.location.query.l });
+      this.props.dispatch({ type: CHANGE_LAYOUT,
+                            data: this.props.location.query.l });
+    }
+    if (this.props.location.query.m) {
+      this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE,
+                            data: this.props.location.query.m });
     }
 
     var mql = window.matchMedia(`(min-width: ${globals.controlsHiddenWidth}px)`);
@@ -373,7 +378,6 @@ class App extends React.Component {
               nodeColor={this.nodeColor()}
               tipRadii={this.tipRadii()}
               tipVisibility={this.tipVisibility()}
-              distanceMeasure={this.state.location.query.m || "div"}
               datasetGuid={this.props.tree.datasetGuid}
             />
             <Map

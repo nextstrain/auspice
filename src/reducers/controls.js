@@ -17,6 +17,7 @@ const Controls = (state = {
   search: null,
   strain: null,
   layout: "rectangular",
+  distanceMeasure: "div"
 }, action) => {
   switch (action.type) {
   case types.TOGGLE_BRANCH_LABELS:
@@ -50,6 +51,10 @@ const Controls = (state = {
   case types.CHANGE_LAYOUT:
     return Object.assign({}, state, {
       layout: action.data
+    });
+  case types.CHANGE_DISTANCE_MEASURE:
+    return Object.assign({}, state, {
+      distanceMeasure: action.data
     });
   default:
     return state;

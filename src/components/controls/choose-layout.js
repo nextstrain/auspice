@@ -24,10 +24,6 @@ class ChooseLayout extends React.Component {
     };
   }
 
-  componentDidMount() {
-
-  }
-
   setLayoutQueryParam(title) {
     const location = this.props.router.getCurrentLocation();
     const newQuery = Object.assign({}, location.query, {l: title});
