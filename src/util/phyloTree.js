@@ -603,17 +603,34 @@ PhyloTree.prototype.updateGeometry = function(dt) {
 };
 
 PhyloTree.prototype.selectBranch = function(node) {
-  this.svg.select("#branch_"+node.n.clade)
-    .style("stroke-dasharray", function(d) {
-      return "2, 3";
-    });
+  /* make this branch dashed, in a two step process
+  (1) make the displayed line invisible (callbacks still live)
+  (2) make the background line "dashedBranch" the same colour and dashed
+  This is so you can click on the gaps in the dash
+  */
+
+  const currentLine = this.svg.select("#branch_"+node.n.clade)
+
+  this.svg.select("#dashedBranch")
+	  .style({
+	    'stroke': currentLine.style("stroke"),
+	    'stroke-width': currentLine.style("stroke-width"),
+	    'fill': "none"
+	  })
+	  .attr("d", currentLine.attr("d"))
+
+  // make the line (which has the callbacks) invisible
+  currentLine.style("stroke-opacity", 0);
+
 };
 
 PhyloTree.prototype.deSelectBranch = function(node) {
   this.svg.select("#branch_"+node.n.clade)
-    .style("stroke-dasharray", function(d) {
-      return "none";
-    });
+    .style("stroke-opacity", 1)
+  this.svg.select("#dashedBranch")
+	  .attr("d","")
+
+
 };
 
 PhyloTree.prototype.selectTip = function(node) {
@@ -805,7 +822,16 @@ PhyloTree.prototype.makeTips = function() {
     .style("cursor", "pointer");
 };
 
-PhyloTree.prototype.makeBranches = function() {
+PhyloTree.prototype.makeBranches = function () {
+  // add a simple path element which will be used to display dotted lines
+  // see selectBranch()
+  this.svg.append("g")
+	  .append("path")
+	  .attr("id", "dashedBranch")
+	  .style("stroke-dasharray", function (d) {
+	    return "2, 3";
+	  });
+
   this.branches = this.svg.append("g").selectAll('.branch')
     .data(this.nodes)
     .enter()
