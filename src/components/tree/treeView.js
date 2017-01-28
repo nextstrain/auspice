@@ -174,8 +174,8 @@ class TreeView extends React.Component {
       this.state.tree && /* tree exists */
       prevProps.browserDimensions && /* it's not the first render, the listener is registered and width/height passed in */
       this.props.browserDimensions &&
-      prevProps.browserDimensions.width !== this.props.browserDimensions.width || /* the browser dimensions have changed */
-      prevProps.browserDimensions.height !== this.props.browserDimensions.height
+      (prevProps.browserDimensions.width !== this.props.browserDimensions.width || /* the browser dimensions have changed */
+      prevProps.browserDimensions.height !== this.props.browserDimensions.height)
     ) {
       this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
     }
