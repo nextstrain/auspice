@@ -1,8 +1,8 @@
 import React from "react";
-import RectangleTreeLayout from "../framework/svg-tree-layout-rectangle";
+import RectangularTreeLayout from "../framework/svg-tree-layout-rectangular";
 import RadialTreeLayout from "../framework/svg-tree-layout-radial";
 import UnrootedTreeLayout from "../framework/svg-tree-layout-unrooted";
-import RootToTipTreeLayout from "../framework/svg-tree-layout-rootToTip";
+import ClockTreeLayout from "../framework/svg-tree-layout-clock";
 import {materialButton} from "../../globalStyles";
 import { connect } from "react-redux";
 import { CHANGE_LAYOUT } from "../../actions/controls";
@@ -41,10 +41,10 @@ class ChooseLayout extends React.Component {
           key={1}
           style={materialButton}
           onClick={() => {
-            this.props.dispatch({ type: CHANGE_LAYOUT, data: "rectangular" });
-            this.setLayoutQueryParam("rectangular");
+            this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });
+            this.setLayoutQueryParam("rect");
           }}>
-          <RectangleTreeLayout width={25} stroke="rgb(130,130,130)"/>
+          <RectangularTreeLayout width={25} stroke="rgb(130,130,130)"/>
           <span style={styles.title}> {"rectangular"} </span>
         </button>
         <button
@@ -71,10 +71,10 @@ class ChooseLayout extends React.Component {
           key={4}
           style={materialButton}
           onClick={() => {
-            this.props.dispatch({ type: CHANGE_LAYOUT, data: "rootToTip" });
-            this.setLayoutQueryParam("rootToTip");
+            this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });
+            this.setLayoutQueryParam("clock");
           }}>
-          <RootToTipTreeLayout width={25} stroke="rgb(130,130,130)"/>
+          <ClockTreeLayout width={25} stroke="rgb(130,130,130)"/>
           <span style={styles.title}> {"clock"} </span>
         </button>
       </div>

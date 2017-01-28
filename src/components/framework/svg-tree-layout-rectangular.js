@@ -1,6 +1,6 @@
 import React from "react";
 
-class RectangleTreeLayout extends React.Component {
+class RectangularTreeLayout extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -43,4 +43,4 @@ class RectangleTreeLayout extends React.Component {
   }
 }
 
-export default RectangleTreeLayout;
+export default RectangularTreeLayout;

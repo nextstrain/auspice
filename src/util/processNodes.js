@@ -65,7 +65,7 @@ export const calcLayouts = (nodes, distanceMeasures, nTips) => {
         distanceMeasures.forEach((distanceMeasure, di) => {
             const rootVal = (distanceMeasure === "div") ? nodes[0].xvalue : nodes[0].attr[distanceMeasure];
             node.geometry[distanceMeasure]={};
-            node.geometry[distanceMeasure]['rectangular'] = rectangularLayout(node, distanceMeasure);
+            node.geometry[distanceMeasure]["rect"] = rectangularLayout(node, distanceMeasure);
             node.geometry[distanceMeasure]['radial'] = radialLayout(node, distanceMeasure, nTips, rootVal);
             node.geometry[distanceMeasure]['vsDate'] = vsDateLayout(node, distanceMeasure);
         });
@@ -86,4 +86,3 @@ export const mapToCoordinates = (nodes, xScale, yScale, layout, distanceMeasure)
         node.geometry[distanceMeasure][layout]['y'] = yScales(node.geometry[distanceMeasure][layout]['yVal']);
     });
 }
-
