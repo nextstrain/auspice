@@ -2,7 +2,6 @@ import * as types from "../actions/controls";
 import * as globals from "../util/globals";
 
 const Controls = (state = {
-  dateRange: null,
   /*
     we don't actually need to have legendBoundsMap default if regions will always be the
     default colorBy. this is saftey in case we change that.
@@ -21,7 +20,8 @@ const Controls = (state = {
   dateMin: null,
   dateMax: null,
   absoluteDateMin: null,
-  absoluteDateMax: null
+  absoluteDateMax: null,
+  colorBy: null
 }, action) => {
   switch (action.type) {
   case types.TOGGLE_BRANCH_LABELS:
@@ -75,6 +75,10 @@ const Controls = (state = {
   case types.CHANGE_ABSOLUTE_DATE_MAX:
     return Object.assign({}, state, {
       absoluteDateMax: action.data
+    });
+  case types.CHANGE_COLOR_BY:
+    return Object.assign({}, state, {
+      colorBy: action.data
     });
   default:
     return state;

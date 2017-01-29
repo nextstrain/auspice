@@ -9,7 +9,8 @@ import {
   BROWSER_DIMENSIONS
 } from "../actions";
 import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_DATE_MIN,
-  CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN, CHANGE_ABSOLUTE_DATE_MAX } from "../actions/controls";
+  CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN, CHANGE_ABSOLUTE_DATE_MAX,
+  CHANGE_COLOR_BY } from "../actions/controls";
 
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
@@ -30,7 +31,7 @@ import getColorScale from "../util/getColorScale";
 import { parseGenotype, getGenotype } from "../util/getGenotype";
 import * as globals from "../util/globals";
 import { defaultDateRange, defaultLayout,
-  defaultDistanceMeasure } from "../util/globals";
+  defaultDistanceMeasure, defaultColorBy } from "../util/globals";
 import Sidebar from "react-sidebar";
 import moment from 'moment';
 
@@ -41,7 +42,8 @@ const returnStateNeeded = (fullStateTree) => {
     metadata: fullStateTree.metadata,
     selectedLegendItem: fullStateTree.controls.selectedLegendItem,
     dateMin: fullStateTree.controls.dateMin,
-    dateMax: fullStateTree.controls.dateMax
+    dateMax: fullStateTree.controls.dateMax,
+    colorBy: fullStateTree.controls.colorBy
   };
 };
 @connect(returnStateNeeded)
@@ -55,13 +57,7 @@ class App extends React.Component {
       location: {
         pathname: this.props.location.pathname,           // injected by react-router
         query: this.props.location.query                  // injected by react-router
-      },
-      colorScale: {
-        colorBy: null,
-        scale: null,
-        legendBoundsMap: null,
-        continuous: null
-      },
+      }
       // sidebarDocked: true,
     };
   }
@@ -85,22 +81,6 @@ class App extends React.Component {
    * LIFECYLCE METHODS
    *****************************************/
 
-  componentWillReceiveProps(nextProps) {
-    let cScale;
-    const tmpQuery = this.props.location.query;
-    if (tmpQuery.colorBy) {
-      cScale = getColorScale(tmpQuery.colorBy, nextProps.tree, nextProps.sequences,
-                                 this.props.metadata.metadata ? this.props.metadata.metadata.color_options : null);
-    }
-    else {
-      cScale = getColorScale("country", nextProps.tree, nextProps.sequences,
-                                 this.props.metadata.metadata ? this.props.metadata.metadata.color_options : null);
-    }
-    this.setState({
-      colorScale: cScale
-    });
-  }
-
   componentWillMount() {
 
     this.initializeReduxStore();
@@ -110,31 +90,27 @@ class App extends React.Component {
     this.setState({mql: mql, sidebarDocked: mql.matches});
 
     const tmpQuery = this.props.location.query;
-    const cScale = this.updateColorScale(tmpQuery.colorBy || "region");
     const pathname = this.props.location.pathname;
     const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/" : "";
     this.setState({
       location: {
         pathname: pathname + suffix,
         query: tmpQuery
-      },
-      colorScale: cScale.colorScale
+      }
     });
   }
 
   componentDidMount() {
     // when the user hits the back button or forward, let us know so we can setstate again
     // all of the other intentional route changes we will manually setState
-    const tmpQuery = this.props.location.query;
     this.maybeFetchDataset();
-    const cScale = this.updateColorScale(tmpQuery.colorBy || "region");
+    const tmpQuery = this.props.location.query;
     window.addEventListener("popstate", (a, b, c) => {
       this.setState({
         location: {
           pathname: this.props.location.pathname.slice(1, -1),
           query: tmpQuery
-        },
-        colorScale: cScale.colorScale
+        }
       });
     });
 
@@ -152,15 +128,6 @@ class App extends React.Component {
 
   componentDidUpdate() {
     this.maybeFetchDataset();
-    if (!this.state.colorScale) {
-      const cScale = this.updateColorScale(this.state.location.query.colorBy || "region");
-      this.setState(cScale);
-    }
-  }
-
-  numericDate(secSinceUnix) {
-    const res = 1970 + (secSinceUnix / 365.25 / 24 / 3600 / 1000);
-    return res;
   }
 
   initializeReduxStore() {
@@ -197,6 +164,12 @@ class App extends React.Component {
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: this.props.location.query.dmax });
     } else {
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: absoluteMax });
+    }
+
+    if (this.props.location.query.colorBy) {
+      this.props.dispatch({ type: CHANGE_COLOR_BY, data: this.props.location.query.colorBy });
+    } else {
+      this.props.dispatch({ type: CHANGE_COLOR_BY, data: defaultColorBy });
     }
 
   }
@@ -247,7 +220,7 @@ class App extends React.Component {
   }
 
   getTipColorAttribute(node, cScale) {
-    if (cScale.colorBy.slice(0,3) === "gt-") {
+    if (cScale.colorBy.slice(0,3) === "gt-" && cScale.genotype) {
         return getGenotype(cScale.genotype[0][0],
                                   cScale.genotype[0][1],
                                   node, this.props.sequences.sequences);
@@ -256,17 +229,17 @@ class App extends React.Component {
     };
   }
 
-  updateColorScale(colorBy) {
+  createColorScale(colorBy) {
     const cScale = getColorScale(colorBy, this.props.tree, this.props.sequences,
                                  this.props.metadata.metadata ? this.props.metadata.metadata.color_options : null);
-    let gts = null;
-    if (colorBy.slice(0,3) === "gt-" && this.props.sequences.geneLength) {
-      gts = parseGenotype(colorBy, this.props.sequences.geneLength);
+    if (colorBy) {
+      let gts = null;
+      if (colorBy.slice(0,3) === "gt-" && this.props.sequences.geneLength) {
+        gts = parseGenotype(colorBy, this.props.sequences.geneLength);
+      }
+      cScale.genotype = gts;
     }
-    cScale.genotype = gts;
-    return {
-      colorScale: cScale,
-    };
+    return cScale;
   }
 
   parseFilterQuery(query) {
@@ -274,12 +247,11 @@ class App extends React.Component {
     return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1].split(',') )};
   }
 
-  nodeColor(){
-    const cScale = this.state.colorScale;
+  nodeColor(cScale){
     if (this.props.tree.nodes && cScale && cScale.colorBy){
       const nodeColorAttr = this.props.tree.nodes.map((n) => this.getTipColorAttribute(n, cScale));
       return nodeColorAttr.map((n) => cScale.scale(n));
-    }else{
+    } else {
       return null;
     }
   }
@@ -324,19 +296,13 @@ class App extends React.Component {
     const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/?" : "?";
     const url = prefix + pathname + suffix + queryString.stringify(query);
     window.history.pushState({}, "", url);
-
-    let new_colorData = {};
-    //only update colorScales and nodeColors when changed
-    if (query.colorBy && (query.colorBy !== this.state.colorScale.colorBy)) {
-      new_colorData = this.updateColorScale(query.colorBy);
-    }
-    this.setState(Object.assign({location:{query, pathname}}, new_colorData));
+    this.setState(Object.assign({location:{query, pathname}}));
   }
 
   currentFrequencies() {
     let freq = "";
-    if (this.state.location.query.colorBy && this.state.location.query.colorBy.slice(0,3) === "gt-") {
-      const gt = this.state.location.query.colorBy.slice(3).split("_");
+    if (this.props.colorBy && this.props.colorBy.slice(0,3) === "gt-") {
+      const gt = this.props.colorBy.slice(3).split("_");
       freq = "global_" + gt[0] + ":" + gt[1];
     }
     return freq;
@@ -345,9 +311,9 @@ class App extends React.Component {
   /******************************************
    * HOVER EVENTS
    *****************************************/
-  determineLegendMatch(selectedLegendItem, node, legendBoundsMap) {
+  determineLegendMatch(selectedLegendItem, node, legendBoundsMap, cScale) {
     let bool;
-    const nodeAttr = this.getTipColorAttribute(node, this.state.colorScale);
+    const nodeAttr = this.getTipColorAttribute(node, cScale);
     // equates a tip and a legend element
     // exact match is required for categorical qunantities such as genotypes, regions
     // continuous variables need to fall into the interal (lower_bound[leg], leg]
@@ -360,12 +326,12 @@ class App extends React.Component {
     return bool;
   }
 
-  tipRadii() {
+  tipRadii(cScale) {
     const selItem = this.props.selectedLegendItem;
     if (selItem && this.props.tree.nodes){
-      const legendMap = this.state.colorScale.continuous
-                        ? this.state.colorScale.legendBoundsMap : false;
-      return this.props.tree.nodes.map((d) => this.determineLegendMatch(selItem, d, legendMap) ? 6 : 3);
+      const legendMap = cScale.continuous
+                        ? cScale.legendBoundsMap : false;
+      return this.props.tree.nodes.map((d) => this.determineLegendMatch(selItem, d, legendMap, cScale) ? 6 : 3);
     } else if (this.props.tree.nodes) {
       return this.props.tree.nodes.map((d) => 3);
     } else {
@@ -389,6 +355,7 @@ class App extends React.Component {
    * RENDER
    *****************************************/
   render() {
+      const colorScale = this.createColorScale(this.props.colorBy);
       return (
       <Sidebar
         sidebar={
@@ -396,7 +363,7 @@ class App extends React.Component {
             location={this.state.location}
             router={this.props.router}
             colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || globals.colorOptions) : globals.colorOptions}
-            colorScale={this.state.colorScale}
+            colorScale={colorScale}
           />
         }
         open={this.state.sidebarOpen}
@@ -412,15 +379,15 @@ class App extends React.Component {
           <Header/>
             <TreeView nodes={this.props.tree.nodes}
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-              colorScale={this.state.colorScale}
-              nodeColor={this.nodeColor()}
-              tipRadii={this.tipRadii()}
+              colorScale={colorScale}
+              nodeColor={this.nodeColor(colorScale)}
+              tipRadii={this.tipRadii(colorScale)}
               tipVisibility={this.tipVisibility()}
               datasetGuid={this.props.tree.datasetGuid}
             />
             <Map
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-              colorScale={this.state.colorScale.scale}
+              colorScale={colorScale.scale}
               nodes={this.props.tree.nodes}
               justGotNewDatasetRenderNewMap={false}
               />
