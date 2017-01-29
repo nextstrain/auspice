@@ -1,6 +1,6 @@
 import getLatLongs from "./mapHelpersLatLong";
 
-export const setupTipsAndTransmissions = (nodes, metadata, colorScale, map, responsive, handleAnimationPlayClicked) => {
+export const setupTipsAndTransmissions = (nodes, metadata, colorScale, map, responsive) => {
 
   /*
     data structures to feed to d3
@@ -17,9 +17,9 @@ export const setupTipsAndTransmissions = (nodes, metadata, colorScale, map, resp
   */
 
     const mapSVG = d3.select(map.getPanes().overlayPane).append("svg").attr("width", responsive.width).attr("height", responsive.height);
-    const d3Group = mapSVG.append("g").attr("class", "leaflet-zoom-hide");
+    const g = mapSVG.append("g").attr("class", "leaflet-zoom-hide");
 
-    const tips = d3Group.selectAll("tips")
+    const tips = g.selectAll("tips")
       .data(latLongs.tips)
       .enter().append("circle")
       .style("stroke", "none")
@@ -27,11 +27,29 @@ export const setupTipsAndTransmissions = (nodes, metadata, colorScale, map, resp
       .style("fill", (d) => { return colorScale(d.country) })
       .attr("r", (d) => { console.log('adf', d); return 2 + Math.sqrt(d.total) * 4 });
 
-    const play = d3Group.append("circle")
-      .attr("width", 40)
-      .attr("height", 40)
-      .style("background-color", "green")
-      .on("click", handleAnimationPlayClicked)
+      console.log(1243214, latLongs)
+
+    const transmissions = g.append("path")
+      .datum({
+        type: "LineString",
+        coordinates: []
+      })
+      .attr("d", d3.geo.path())
+      .attr("fill","none")
+      .attr("stroke", "red")
+      .attr("stroke-width", "3px")
+
+      /*
+
+      http://gis.stackexchange.com/questions/49114/d3-geo-path-to-draw-a-path-from-gis-coordinates
+      https://bl.ocks.org/mbostock/3916621
+      http://bl.ocks.org/mbostock/5851933
+      http://bl.ocks.org/mbostock/5928813
+      https://github.com/d3/d3-shape/blob/master/README.md#curves
+      https://github.com/d3/d3-shape/blob/master/README.md#lines
+
+      */
+
 
       /* this will need to be scaled if transmissions is high */
       // const arrowSizeMultiplier = value > 1 ? value * 2 : 0;

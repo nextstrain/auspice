@@ -109,8 +109,7 @@ class Map extends React.Component {
         this.props.metadata,
         this.props.colorScale,
         this.state.map,
-        this.state.responsive,
-        this.handleAnimationPlayClicked.bind(this)
+        this.state.responsive
       );
       // don't redraw on every rerender - need to seperately handle virus change redraw
       this.setState({
@@ -161,10 +160,27 @@ class Map extends React.Component {
 
   createMapDiv() {
     return (
-      <div style={{
-          height: this.state.responsive.height,
-          width: this.state.responsive.width
-        }} id="map">
+      <div style={{position: "relative"}}>
+        <button style={{
+            position: "absolute",
+            left: 25,
+            top: 25,
+            zIndex: 9999,
+            border: "none",
+            padding: 15,
+            borderRadius: 4,
+            backgroundColor: "rgb(124, 184, 121)",
+            fontWeight: 700,
+            color: "white"
+          }}
+          onClick={this.handleAnimationPlayClicked.bind(this)}>
+          Play
+        </button>
+        <div style={{
+            height: this.state.responsive.height,
+            width: this.state.responsive.width
+          }} id="map">
+        </div>
       </div>
     )
   }

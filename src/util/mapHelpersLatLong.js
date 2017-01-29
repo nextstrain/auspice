@@ -74,11 +74,15 @@ const setupLatLong = (nodes, metadata, map) => {
     const start = new L.LatLng(lat0, long0)
     const end = new L.LatLng(lat1, long1)
 
+    // _.map(latLongs.transmissions[27].geodesic._latlngs[0], (obj) => {
+    //   return [obj.lat, obj.lng]
+    // })
+
     /*
       add a polyline to the map for current country pair iteratee
       store the computation. access _latlngs to show where each segment is on the map
     */
-    const geodesic = L.geodesic([[start,end]], {
+    const rawGeodesic = L.geodesic([[start,end]], {
       // stroke:	value,
       // radius: value,
       // color: colorScale(countries[0]), /* this will go up above in d3 rather than in leaflet now */
@@ -91,10 +95,16 @@ const setupLatLong = (nodes, metadata, map) => {
       // fillOpacity:
     })
 
+    const geodesics = [];
+
+    rawGeodesic._latlngs.forEach((arr) => {
+      geodesics.push
+    })
+
     tipsAndTransmissions.transmissions.push({
       start,
       end,
-      geodesic,
+      geodesics, /* incomplete for dev, will need to grab BOTH lines when there is wraparound */
       from: countries[0],
       to: countries[1]
     })
