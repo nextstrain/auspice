@@ -245,7 +245,7 @@ PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
   this.updateGeometry(dt);
   if (this.grid) this.addGrid(this.layout);
   this.svg.selectAll(".regression").remove();
-  if (this.layout === "rootToTip") this.drawRegression();
+  if (this.layout === "clock") this.drawRegression();
 };
 
 PhyloTree.prototype.mapToScreen = function(){
@@ -262,7 +262,7 @@ PhyloTree.prototype.mapToScreen = function(){
         const maxSpan = d3.max([spanY, spanX]);
         this.xScale.domain([minX, minX+maxSpan]);
         this.yScale.domain([minY, minY+maxSpan]);
-    }else if (this.layout==="rootToTip"){
+    }else if (this.layout==="clock"){
         this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
         this.yScale.domain([d3.max(tmp_yValues), d3.min(tmp_yValues)]);
     }else{
@@ -276,14 +276,14 @@ PhyloTree.prototype.mapToScreen = function(){
     this.nodes.forEach(function(d){d.yTip = tmp_yScale(d.y)});
     this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
     this.nodes.forEach(function(d){d.yBase = tmp_yScale(d.py)});
-    if (this.params.confidence && this.layout==="rectangular"){
+    if (this.params.confidence && this.layout==="rect"){
       this.nodes.forEach(function(d){d.xConf = [tmp_xScale(d.conf[0]), tmp_xScale(d.conf[1])];});
     }
 
-    if (this.layout==="rootToTip" || this.layout==="unrooted"){
+    if (this.layout==="clock" || this.layout==="unrooted"){
         this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
                                                  " L "+d.xTip.toString()+","+d.yTip.toString();});
-    } else if (this.layout==="rectangular"){
+    } else if (this.layout==="rect"){
         this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])});
         this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])});
         this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
@@ -319,13 +319,13 @@ PhyloTree.prototype.setLayout = function(layout){
         this.nodes.forEach(function(d){d.update=true});
     }
     if (typeof layout==="undefined"){
-        this.layout = "rectangular";
+        this.layout = "rect";
     }else {
         this.layout = layout;
     }
-    if (this.layout==="rectangular"){
+    if (this.layout==="rect"){
         this.rectangularLayout();
-    } else if (this.layout==="rootToTip"){
+    } else if (this.layout==="clock"){
         this.timeVsRootToTip();
     } else if (this.layout==="radial"){
         this.radialLayout();
@@ -360,7 +360,7 @@ PhyloTree.prototype.updateDistance = function(attr,dt){
   this.updateGeometry(dt);
   if (this.grid) this.addGrid(this.layout);
   this.svg.selectAll(".regression").remove();
-  if (this.layout==="rootToTip") this.drawRegression();
+  if (this.layout==="clock") this.drawRegression();
 };
 
 PhyloTree.prototype.updateLayout = function(layout,dt){
@@ -369,7 +369,7 @@ PhyloTree.prototype.updateLayout = function(layout,dt){
     this.updateGeometryFade(dt);
     if (this.grid) this.addGrid(layout);
     this.svg.selectAll(".regression").remove();
-    if (layout==="rootToTip") this.drawRegression();
+    if (layout==="clock") this.drawRegression();
 };
 
 /*
@@ -398,7 +398,7 @@ PhyloTree.prototype.addGrid = function(layout) {
       return function(x){
           const xPos = xScale(x[0]-offset);
           let tmp_d="";
-          if (layout==="rectangular" || layout==="rootToTip"){
+          if (layout==="rect" || layout==="clock"){
             tmp_d = 'M'+xPos.toString() +
               " " +
               yScale.range()[0].toString() +
@@ -464,7 +464,7 @@ PhyloTree.prototype.addGrid = function(layout) {
       }
   };
 
-  if (this.layout==="rootToTip"){
+  if (this.layout==="clock"){
       const logRangeY = Math.floor(Math.log10(ymax - ymin));
       const roundingLevelY = Math.pow(10, logRangeY);
       const offsetY=0;
@@ -568,7 +568,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
 
   this.svg.selectAll('.conf')
     .transition().duration(dt)
-    .attr("visibility", this.layout==="rectangular"?"visible":"hidden")
+    .attr("visibility", this.layout==="rect"?"visible":"hidden")
     .attr("d", function(d) {
       return d.confLine;
     });
@@ -596,7 +596,7 @@ PhyloTree.prototype.updateGeometry = function(dt) {
 
   this.svg.selectAll('.conf')
     .transition().duration(dt)
-    .attr("visibility", this.layout==="rectangular"?"visible":"hidden")
+    .attr("visibility", this.layout==="rect"?"visible":"hidden")
     .attr("d", function(d) {
       return d.confLine;
     });
@@ -875,7 +875,7 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks)
   this.makeTips();
   this.updateGeometry(10);
   this.svg.selectAll(".regression").remove();
-  if (layout==="rootToTip") this.drawRegression();
+  if (layout==="clock") this.drawRegression();
 };
 
 export default PhyloTree;
