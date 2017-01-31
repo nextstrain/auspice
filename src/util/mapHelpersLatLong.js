@@ -1,14 +1,11 @@
 const setupLatLong = (nodes, metadata, map) => {
 
   const aggregatedLocations = {}; /* tips */
-  const transmissions = {};
+  const transmissions = {}; /* edges, animation paths */
   const tipsAndTransmissions = {
     tips: [],
     transmissions: []
   };
-  /*
-    edges / transmissions
-  */
   const geo = metadata.geo;
 
   /*
@@ -87,7 +84,7 @@ const setupLatLong = (nodes, metadata, map) => {
       // radius: value,
       // color: colorScale(countries[0]), /* this will go up above in d3 rather than in leaflet now */
       // opacity: .5,
-      // steps: 25,
+      steps: 25,
       // weight:	value	/* Stroke width in pixels.*/
       // opacity:	0.5	Stroke opacity.
       // fill:
@@ -98,7 +95,14 @@ const setupLatLong = (nodes, metadata, map) => {
     const geodesics = [];
 
     rawGeodesic._latlngs.forEach((arr) => {
-      geodesics.push
+      geodesics.push(arr.map((pair) => {
+        return map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            pair.lat,
+            pair.lng
+          )
+        );
+      }));
     })
 
     tipsAndTransmissions.transmissions.push({

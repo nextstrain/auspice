@@ -353,7 +353,7 @@ class App extends React.Component {
             }}
           />
           <Header/>
-            <TreeView nodes={this.props.tree.nodes}
+            {/*<TreeView nodes={this.props.tree.nodes}
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               colorScale={this.state.colorScale}
               nodeColor={this.nodeColor()}
@@ -362,7 +362,7 @@ class App extends React.Component {
               layout={this.state.location.query.l || "rectangular"}
               distanceMeasure={this.state.location.query.m || "div"}
               datasetGuid={this.props.tree.datasetGuid}
-            />
+            />*/}
           <Map
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
             colorScale={this.state.colorScale.scale}
