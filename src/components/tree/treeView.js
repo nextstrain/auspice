@@ -193,7 +193,7 @@ class TreeView extends React.Component {
         {
           /* options */
           grid: true,
-          confidence: true
+          confidence: false
         },
         {
           /* callbacks */
