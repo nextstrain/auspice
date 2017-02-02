@@ -685,7 +685,7 @@ PhyloTree.prototype.drawTips = function() {
       this.callbacks.onTipHover(d)
     })
     .on("mouseout", (d) => {
-      this.callbacks.onTipMouseOut(d)
+      this.callbacks.onBranchOrTipLeave()
     })
     .on("click", (d) => {
       this.callbacks.onTipClick(d)
@@ -724,7 +724,7 @@ PhyloTree.prototype.drawBranches = function() {
       this.callbacks.onBranchHover(d)
     })
     .on("mouseout", (d) => {
-      this.callbacks.onBranchMouseOut(d)
+      this.callbacks.onBranchOrTipLeave()
     })
     .on("click", (d) => {
       this.callbacks.onBranchClick(d)
