@@ -106,7 +106,7 @@ class TreeView extends React.Component {
       /* fill has changed */
       if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
         styleToUpdate['fill'] = nextProps.nodeColor;
-        tree.updateStyleArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration);
+        tree.updateStyleOrAttributeArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration, "style");
         styleToUpdate['stroke'] = nextProps.nodeColor.map((d) => {
           d3.rgb(d).darker(0.7)
         });
