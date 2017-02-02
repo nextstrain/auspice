@@ -10,7 +10,7 @@ import {
 } from "../actions";
 import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_DATE_MIN,
   CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN, CHANGE_ABSOLUTE_DATE_MAX,
-  CHANGE_COLOR_BY } from "../actions/controls";
+  changeColorBy } from "../actions/controls";
 
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
@@ -166,10 +166,10 @@ class App extends React.Component {
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: absoluteMax });
     }
 
-    if (this.props.location.query.colorBy) {
-      this.props.dispatch({ type: CHANGE_COLOR_BY, data: this.props.location.query.colorBy });
+    if (this.props.location.query.c) {
+      this.props.dispatch(changeColorBy(this.props.location.query.c, this.props.router));
     } else {
-      this.props.dispatch({ type: CHANGE_COLOR_BY, data: defaultColorBy });
+      this.props.dispatch(changeColorBy(defaultColorBy));
     }
 
   }
@@ -229,9 +229,22 @@ class App extends React.Component {
     };
   }
 
+  /* color options are parameters for each colorBy value (country, region etc)
+  these parameters ideally come from the JSON, but there are defaults if necessary
+  */
+  getColorOptions() {
+    if (this.props.metadata.metadata && this.props.metadata.metadata.color_options) {
+      return this.props.metadata.metadata.color_options;
+    }
+    return globals.colorOptions;
+  }
+
   createColorScale(colorBy) {
-    const cScale = getColorScale(colorBy, this.props.tree, this.props.sequences,
-                                 this.props.metadata.metadata ? this.props.metadata.metadata.color_options : null);
+    const cScale = getColorScale(colorBy,
+      this.props.tree,
+      this.props.sequences,
+      this.getColorOptions()
+    );
     if (colorBy) {
       let gts = null;
       if (colorBy.slice(0,3) === "gt-" && this.props.sequences.geneLength) {
@@ -355,14 +368,15 @@ class App extends React.Component {
    * RENDER
    *****************************************/
   render() {
-      const colorScale = this.createColorScale(this.props.colorBy);
+      const colorBy = this.props.colorBy ? this.props.colorBy : defaultColorBy;
+      const colorScale = this.createColorScale(colorBy);
       return (
       <Sidebar
         sidebar={
           <Controls changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
             router={this.props.router}
-            colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || globals.colorOptions) : globals.colorOptions}
+            colorOptions={this.getColorOptions()}
             colorScale={colorScale}
           />
         }

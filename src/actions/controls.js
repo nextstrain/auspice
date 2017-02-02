@@ -13,3 +13,24 @@ export const CHANGE_DATE_MAX = "CHANGE_DATE_MAX";
 export const CHANGE_ABSOLUTE_DATE_MIN = "CHANGE_ABSOLUTE_DATE_MIN";
 export const CHANGE_ABSOLUTE_DATE_MAX = "CHANGE_ABSOLUTE_DATE_MAX";
 export const CHANGE_COLOR_BY = "CHANGE_COLOR_BY";
+
+
+/* an action to set the URL / react-router query bit when color By changes
+   YES, this is syncronous, it's not a thunk
+*/
+export const changeColorBy = (colorBy, router = null) => {
+  // ∆ react-router, only if router provided
+  if (router) {
+    const location = router.getCurrentLocation();
+    const newQuery = Object.assign({}, location.query, {c: colorBy});
+    router.push({
+      pathname: location.pathname,
+      query: newQuery
+    });
+  }
+  // return an action to be dispatched
+  return {
+    type: CHANGE_COLOR_BY,
+    data: colorBy
+  };
+};
