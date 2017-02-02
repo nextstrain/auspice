@@ -42,7 +42,7 @@ class ColorBy extends React.Component {
 
   setColorByQueryParam(title) {
     const location = this.props.router.getCurrentLocation();
-    const newQuery = Object.assign({}, location.query, {colorby: title});
+    const newQuery = Object.assign({}, location.query, {c: title});
     this.props.router.push({
       pathname: location.pathname,
       query: newQuery
