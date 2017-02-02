@@ -121,42 +121,42 @@ export const genotypeColors = [
   "#C4B945",
   "#75B681"
 ];
-export const regions = [
-  ['southeast_asia',     '#462EB9'],
-  ['oceania',            '#3F4FCC'],
-  ['china',              '#4271CE'],
-  ['japan_korea',        '#4B8DC2'],
-  ['south_america',      '#69B091'],
-  ['north_america',      '#E0A33B']
-];
-export const countries = [
-// Asia: "#462EB9", "#403DC5", "#3F4FCC", "#3F60D0", "#4271CE", "#4580CA", "#4B8DC2", "#5199B8", "#58A2AC"
-["thailand",           "#462EB9"],
-["singapore",          "#403DC5"],
-["french_polynesia",   "#3F4FCC"],
-["american_samoa",	   "#3F60D0"],
-["tonga",	             "#4271CE"],
-["china",			         "#4580CA"],
-["japan",			         "#4B8DC2"],
-// South America: "#60AA9F", "#69B091", "#73B584", "#7DB877", "#89BB6B", "#95BD60", "#A2BE57", "#AFBD4F"
-["brazil",  		       "#60AA9F"],
-["ecuador",  		       "#7DB877"],
-["colombia",  		     "#89BB6B"],
-["french_guiana",  	   "#95BD60"],
-["suriname",  		     "#A2BE57"],
-["venezuela",  		     "#AFBD4F"],
-// Central America: "#BBBC49", "#C6B944", "#D0B440", "#D9AD3D", "#E0A33B", "#E49838", "#E68835", "#E67732", "#E4632E", "#E04E2A", "#DE3926"
-["panama",             "#BBBC49"],
-["honduras",           "#C6B944"],
-["guatemala",  		     "#D0B440"],
-["mexico",             "#D9AD3D"],
-["martinique",  	     "#E0A33B"],
-["guadeloupe",         "#E49838"],
-["puerto_rico",  	     "#E68835"],
-["dominican_republic", "#E67732"],
-["haiti",  			       "#E4632E"],
-["usa",                "#E04E2A"]
-];
+// export const regions = [
+//   ['southeast_asia',     '#462EB9'],
+//   ['oceania',            '#3F4FCC'],
+//   ['china',              '#4271CE'],
+//   ['japan_korea',        '#4B8DC2'],
+//   ['south_america',      '#69B091'],
+//   ['north_america',      '#E0A33B']
+// ];
+// export const countries = [
+// // Asia: "#462EB9", "#403DC5", "#3F4FCC", "#3F60D0", "#4271CE", "#4580CA", "#4B8DC2", "#5199B8", "#58A2AC"
+// ["thailand",           "#462EB9"],
+// ["singapore",          "#403DC5"],
+// ["french_polynesia",   "#3F4FCC"],
+// ["american_samoa",	   "#3F60D0"],
+// ["tonga",	             "#4271CE"],
+// ["china",			         "#4580CA"],
+// ["japan",			         "#4B8DC2"],
+// // South America: "#60AA9F", "#69B091", "#73B584", "#7DB877", "#89BB6B", "#95BD60", "#A2BE57", "#AFBD4F"
+// ["brazil",  		       "#60AA9F"],
+// ["ecuador",  		       "#7DB877"],
+// ["colombia",  		     "#89BB6B"],
+// ["french_guiana",  	   "#95BD60"],
+// ["suriname",  		     "#A2BE57"],
+// ["venezuela",  		     "#AFBD4F"],
+// // Central America: "#BBBC49", "#C6B944", "#D0B440", "#D9AD3D", "#E0A33B", "#E49838", "#E68835", "#E67732", "#E4632E", "#E04E2A", "#DE3926"
+// ["panama",             "#BBBC49"],
+// ["honduras",           "#C6B944"],
+// ["guatemala",  		     "#D0B440"],
+// ["mexico",             "#D9AD3D"],
+// ["martinique",  	     "#E0A33B"],
+// ["guadeloupe",         "#E49838"],
+// ["puerto_rico",  	     "#E68835"],
+// ["dominican_republic", "#E67732"],
+// ["haiti",  			       "#E4632E"],
+// ["usa",                "#E04E2A"]
+// ];
 
 //const filterAbbr = [["geo", "geographic location"]];
 export const filterAbbrFwd = {"geo":"geographic location", "all":"all"};
