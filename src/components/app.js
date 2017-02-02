@@ -229,9 +229,22 @@ class App extends React.Component {
     };
   }
 
+  /* color options are parameters for each colorBy value (country, region etc)
+  these parameters ideally come from the JSON, but there are defaults if necessary
+  */
+  getColorOptions() {
+    if (this.props.metadata.metadata && this.props.metadata.metadata.color_options) {
+      return this.props.metadata.metadata.color_options;
+    }
+    return globals.colorOptions;
+  }
+
   createColorScale(colorBy) {
-    const cScale = getColorScale(colorBy, this.props.tree, this.props.sequences,
-                                 this.props.metadata.metadata ? this.props.metadata.metadata.color_options : null);
+    const cScale = getColorScale(colorBy,
+      this.props.tree,
+      this.props.sequences,
+      this.getColorOptions()
+    );
     if (colorBy) {
       let gts = null;
       if (colorBy.slice(0,3) === "gt-" && this.props.sequences.geneLength) {
@@ -362,7 +375,7 @@ class App extends React.Component {
           <Controls changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
             router={this.props.router}
-            colorOptions={this.props.metadata.metadata ? (this.props.metadata.metadata.color_options || globals.colorOptions) : globals.colorOptions}
+            colorOptions={this.getColorOptions()}
             colorScale={colorScale}
           />
         }
