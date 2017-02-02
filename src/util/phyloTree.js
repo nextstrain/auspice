@@ -1,23 +1,41 @@
 import d3 from "d3";
 
+/*
+ * adds the total number of descendant leaves to each node in the tree
+ * the functions works recursively.
+ * @params:
+ *   node -- root node of the tree.
+ */
 const addLeafCount = function (node) {
     if (node.terminal) {
         node.leafCount=1;
     }else{
         node.leafCount=0;
-        for (var i=0; i<node.children.length; i+=1){
+        for (var i=0; i<node.children.length; i++){
             addLeafCount(node.children[i]);
             node.leafCount += node.children[i].leafCount;
         }
     }
 };
 
+
+const contains = function(array, elem){
+  return array.some(function (d){return d===elem;});
+}
+
+/*
+ * Utility function for the unrooted tree layout.
+ * assigns x,y coordinates to the subtree starting in node
+ * @params:
+ *   node -- root of the subtree.
+ *   nTips -- total number of tips in the tree.
+ */
 const unrootedPlaceSubtree = function(node, nTips){
   node.x = node.px+node.branchLength*Math.cos(node.tau + node.w*0.5);
   node.y = node.py+node.branchLength*Math.sin(node.tau + node.w*0.5);
-  var eta = node.tau;
+  var eta = node.tau; //eta is the cumulative angle for the wedges in the layout
   if (!node.terminal){
-      for (var i=0; i<node.children.length; i+=1){
+      for (var i=0; i<node.children.length; i++){
           var ch = node.children[i];
           ch.w = 2*Math.PI*ch.leafCount/nTips;
           ch.tau = eta;
@@ -29,32 +47,60 @@ const unrootedPlaceSubtree = function(node, nTips){
   }
 };
 
+
+/*
+ * this function takes a call back and applies it recursively
+ * to all child nodes, including internal nodes
+ * @params:
+ *   node -- node to whose children the function is to be applied
+ *   func -- call back function to apply
+ */
+const applyToChildren = function(node,func){
+  func(node);
+  if (node.terminal){ return;}
+  else{
+    for (let i=0; i<node.children.length; i++){
+      applyToChildren(node.children[i], func);
+    }
+  }
+};
+
+/*
+ * phylogenetic tree drawing class
+ * it is instantiated with a nested tree json.
+ * the actual tree is rendered by the render method
+ * @params:
+ *   treeJson -- tree object as exported by nextstrain.
+ */
 var PhyloTree = function(treeJson) {
   this.grid = false;
   this.setDefaults();
+  // use d3 tree layout to convert the tree json into a flat list of nodes
   this.tree = d3.layout.tree();
+  // wrap each node in a shell structure to avoid mutating the input data
   this.nodes = this.tree.nodes(treeJson).map(function(d) {
     return {
-      n: d,
-      x: 0,
+      n: d, // .n is the original node
+      x: 0, // x,y coordinates
       y: 0
     };
   });
+  // assign the root as its own parent to avoid exception handling
   this.nodes[0].n.parent = this.nodes[0].n;
-  this.xScale = d3.scale.linear();
-  this.yScale = d3.scale.linear();
+  // pull out the total number of tips -- the is the maximal yvalue
   this.numberOfTips = d3.max(this.nodes.map(function(d) {
     return d.n.yvalue;
   }));
   this.nodes.forEach(function(d) {
-    d.inView=true;
+    d.inView=true; // each node is visible
     d.n.shell = d; // a back link from the original node object to the wrapper
     d.terminal = (typeof d.n.children === "undefined");
   });
+
   // remember the range of children subtending a node (i.e. the range of yvalues)
-  // and create children structure
+  // this is useful for drawing
+  // and create children structure for the shell.
   this.nodes.forEach(function(d) {
-    d.parent = d.n.parent.shell;
     if (d.terminal) {
       d.yRange = [d.n.yvalue, d.n.yvalue];
       d.children=null;
@@ -66,12 +112,17 @@ var PhyloTree = function(treeJson) {
       }
     }
   });
+
+  this.xScale = d3.scale.linear();
+  this.yScale = d3.scale.linear();
 };
 
 /*
  * set default values.
  */
 PhyloTree.prototype.setDefaults = function () {
+    this.grid = false;
+    this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
     this.params = {
         regressionStroke: "#CCC",
         regressionWidth: 3,
@@ -83,48 +134,132 @@ PhyloTree.prototype.setDefaults = function () {
         tickLabelFill: "#BBB",
         minorTicksTimeTree: 3,
         minorTicks: 4,
+        orientation: [1,1],
         margins: {left:50, right:50, top:50, bottom:50},
         showGrid: true,
+        fillSelected:"#A73",
+        radiusSelected:5,
+        branchStroke: "#AAA",
+        branchStrokeWidth: 2,
+        tipStroke: "#AAA",
+        tipFill: "#CCC",
+        tipStrokeWidth: 2,
+        tipRadius: 4,
     };
 };
 
 
-/*
- * calculate tree layout, scales, and updating of those
+/**
+ * @param  svg    -- the svg into which the tree is drawn
+ * @param  layout -- the layout to be used, e.g. "rect"
+ * @param  distance   -- the property used as branch length, e.g. div or num_date
+ * @param  options    -- an object that contains options that will be added to this.params
+ * @param  callbacks  -- an object with call back function defining mouse behavior
+ * @return {null}
  */
-PhyloTree.prototype.setDistance = function(attr) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks) {
+  this.svg = svg;
+  this.params = Object.assign(this.params, options);
+  this.callbacks = callbacks;
+
+  this.clearSVG();
+  this.setDistance(distance);
+  this.setLayout(layout);
+  this.mapToScreen();
+  if (this.params.showGrid){
+      this.addGrid();
+  }
+  if (this.params.confidence){
+    this.drawConfidence();
+  }
+  this.drawBranches();
+  this.drawTips();
+  this.updateGeometry(10);
+  this.svg.selectAll(".regression").remove();
+  if (layout==="clock") this.drawRegression();
+};
+
+
+/*
+ * set the property that is used as distance along branches
+ * this is set to "depth" of each node. depth is later used to
+ * calculate coordinates. Parent depth is assigned as well.
+ */
+PhyloTree.prototype.setDistance = function(distanceAttribute) {
   this.nodes.forEach(function(d) {
     d.update = true
   });
-  if (typeof attr === "undefined") {
-    this.distance = "div";
+  if (typeof distanceAttribute === "undefined") {
+    this.distance = "div"; // default is "div" for divergence
   } else {
-    this.distance = attr;
+    this.distance = distanceAttribute;
   }
-  const tmp_dist = this.distance;
+  // assign node and parent depth
+  var tmp_dist = this.distance;
   this.nodes.forEach(function(d) {
     d.depth = d.n.attr[tmp_dist];
+    d.pDepth = d.n.parent.attr[tmp_dist];
     if (d.n.attr[tmp_dist+"_confidence"]){
       d.conf = d.n.attr[tmp_dist+"_confidence"];
     }else{
       d.conf = [d.depth, d.depth];
     }
   });
-  this.nodes.forEach(function(d) {
-    d.pDepth = d.n.parent.attr[tmp_dist];
-  });
 };
 
+
+
+/**
+ * assigns the attribute this.layout and calls the function that
+ * calculates the x,y coordinates for the respective layouts
+ * @param layout -- the layout to be used, has to be one of
+ *                  ["rect", "radial", "unrooted", "clock"]
+ */
+PhyloTree.prototype.setLayout = function(layout){
+    if (typeof layout==="undefined" || layout!==this.layout){
+        this.nodes.forEach(function(d){d.update=true});
+    }
+    if (typeof layout==="undefined"){
+        this.layout = "rect";
+    }else {
+        this.layout = layout;
+    }
+    if (this.layout==="rect"){
+        this.rectangularLayout();
+    } else if (this.layout==="clock"){
+        this.timeVsRootToTip();
+    } else if (this.layout==="radial"){
+        this.radialLayout();
+    } else if (this.layout==="unrooted"){
+        this.unrootedLayout();
+    }
+};
+
+
+
+/// ASSIGN XY COORDINATES FOR DIFFERENCE LAYOUTS
+
+/**
+ * assignes x,y coordinates for a rectancular layout
+ * @return {null}
+ */
 PhyloTree.prototype.rectangularLayout = function() {
   this.nodes.forEach(function(d) {
-    d.y = d.n.yvalue;
-    d.x = d.depth;
-    d.x_conf = d.conf;
-    d.px = d.pDepth;
+    d.y = d.n.yvalue; // precomputed y-values
+    d.x = d.depth;    // depth according to current distance
+    d.px = d.pDepth;  // parent positions
     d.py = d.y;
+    d.x_conf = d.conf; // assign confidence intervals
   });
 };
 
+/**
+ * assign x,y coordinates fro the root-to-tip regression layout
+ * this requires a time tree with attr["num_date"] set
+ * in addition, this function calculates a regression between
+ * num_date and div which is saved as this.regression
+ * @return {null}
+ */
 PhyloTree.prototype.timeVsRootToTip = function(){
   this.nodes.forEach(function (d) {
     d.y = d.n.attr["div"];
@@ -149,6 +284,10 @@ PhyloTree.prototype.timeVsRootToTip = function(){
   this.regression = {slope:slope, intercept: intercept};
 };
 
+/**
+ * draws the regression line in the svg and adds a text with the rate estimate
+ * @return {null}
+ */
 PhyloTree.prototype.drawRegression = function(){
     const leftY = this.yScale(this.regression.intercept+this.xScale.domain()[0]*this.regression.slope);
     const rightY = this.yScale(this.regression.intercept+this.xScale.domain()[1]*this.regression.slope);
@@ -173,6 +312,12 @@ PhyloTree.prototype.drawRegression = function(){
         .style("font-size",this.params.tickLabelSize);
 };
 
+/**
+ * calculates and assigns x,y coordinates for the radial layout.
+ * in addition to x,y, this calculates the end-points of the radial
+ * arcs and whether that arc is more than pi or not
+ * @return {null}
+ */
 PhyloTree.prototype.radialLayout = function() {
   const nTips = this.numberOfTips;
   const offset = this.nodes[0].depth;
@@ -192,7 +337,11 @@ PhyloTree.prototype.radialLayout = function() {
   });
 };
 
-
+/**
+ * calculates x,y coordinates for the unrooted layout. this is
+ * done recursively via a the function unrootedPlaceSubtree
+ * @return {null}
+ */
 PhyloTree.prototype.unrootedLayout = function(){
   const nTips=this.numberOfTips;
   //postorder iteration to determine leaf count of every node
@@ -207,7 +356,7 @@ PhyloTree.prototype.unrootedLayout = function(){
   this.nodes[0].w = 2*Math.PI;
   this.nodes[0].tau = 0;
   var eta = 1.5*Math.PI;
-  for (var i=0; i<this.nodes[0].children.length; i+=1){
+  for (var i=0; i<this.nodes[0].children.length; i++){
     this.nodes[0].children[i].px=0;
     this.nodes[0].children[i].py=0;
     this.nodes[0].children[i].w = 2.0*Math.PI*this.nodes[0].children[i].leafCount/nTips;
@@ -215,32 +364,24 @@ PhyloTree.prototype.unrootedLayout = function(){
     eta += this.nodes[0].children[i].w;
     unrootedPlaceSubtree(this.nodes[0].children[i], nTips);
   }
-  // this.nodes.forEach(function(d){
-  //   d.x = d.n.x;
-  //   d.y = d.n.y;
-  //   d.px = d.n.px;
-  //   d.py = d.n.py;
-  // });
 };
 
+///****************************************************************
+
+// MAPPING TO SCREEN
+
+/**
+ * zoom such that a particular clade fills the svg
+ * @param  clade -- branch/node at the root of the clade to zoom into
+ * @param  dt -- time of the transition in milliseconds
+ * @return {null}
+ */
 PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
+  // assign all nodes to inView false and force update
   this.nodes.forEach(function(d){d.inView=false; d.update=true;});
-  const kidsVisible = function(node){
-    node.inView=true;
-    if (node.terminal){ return;}
-    else{
-      for (let i=0; i<node.children.length; i++){
-        kidsVisible(node.children[i]);
-      }
-    }
-  };
-  // zooming into terminal node doesn't make sense, presumably the parent is meant
-  if (clade.terminal){
-    kidsVisible(clade.parent);
-  }else{
-    kidsVisible(clade);
-  }
-  kidsVisible(clade);
+  // assign all child nodes of the chosen clade to inView=true
+  applyToChildren(clade, function(d){d.inView=true;});
+  // redraw
   this.mapToScreen();
   this.updateGeometry(dt);
   if (this.grid) this.addGrid(this.layout);
@@ -248,13 +389,21 @@ PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
   if (this.layout === "clock") this.drawRegression();
 };
 
+/**
+ * this function sets the xScale, yScale domains and maps precalculated x,y
+ * coordinates to their places on the screen
+ * @return {null}
+ */
 PhyloTree.prototype.mapToScreen = function(){
     this.setScales(this.params.margins);
-    const tmp_xValues = this.nodes.filter((d)=>d.inView).map(function(d){return d.x});
-    const tmp_yValues = this.nodes.filter((d)=>d.inView).map(function(d){return d.y});
+    // determine x,y values of visibile nodes
+    const tmp_xValues = this.nodes.filter(function(d){return d.inView;}).map(function(d){return d.x});
+    const tmp_yValues = this.nodes.filter(function(d){return d.inView;}).map(function(d){return d.y});
+
     if (this.layout==="radial" || this.layout==="unrooted") {
-        // const maxSpan = d3.max([-d3.min(tmp_xValues), d3.max(tmp_xValues),
-        //                         -d3.min(tmp_yValues), d3.max(tmp_yValues)]);
+        // handle "radial and unrooted differently since they need to be square
+        // since branch length move in x and y direction
+        // TODO: should be tied to svg dimensions
         const minX = d3.min(tmp_xValues);
         const minY = d3.min(tmp_yValues);
         const spanX = d3.max(tmp_xValues)-minX;
@@ -263,13 +412,15 @@ PhyloTree.prototype.mapToScreen = function(){
         this.xScale.domain([minX, minX+maxSpan]);
         this.yScale.domain([minY, minY+maxSpan]);
     }else if (this.layout==="clock"){
+        // same as rectangular, but flipped yscale
         this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
         this.yScale.domain([d3.max(tmp_yValues), d3.min(tmp_yValues)]);
-    }else{
+    }else{ //rectangular
         this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
         this.yScale.domain([d3.min(tmp_yValues), d3.max(tmp_yValues)]);
     }
 
+    // pass all x,y through scales and assign to xTip, xBase
     const tmp_xScale=this.xScale;
     const tmp_yScale=this.yScale;
     this.nodes.forEach(function(d){d.xTip = tmp_xScale(d.x)});
@@ -280,6 +431,7 @@ PhyloTree.prototype.mapToScreen = function(){
       this.nodes.forEach(function(d){d.xConf = [tmp_xScale(d.conf[0]), tmp_xScale(d.conf[1])];});
     }
 
+    // assign the branches as path to each node for the different layouts
     if (this.layout==="clock" || this.layout==="unrooted"){
         this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
                                                  " L "+d.xTip.toString()+","+d.yTip.toString();});
@@ -306,7 +458,8 @@ PhyloTree.prototype.mapToScreen = function(){
                 d.branch =" M "+d.xBase.toString()+" "+d.yBase.toString()+
                           " L "+d.xTip.toString()+" "+d.yTip.toString() +
                          " M "+tmp_xScale(d.xCBarStart).toString()+" "+tmp_yScale(d.yCBarStart).toString()+
-                         " A "+(tmp_xScale(d.depth)-tmp_xScale(offset)).toString()+" "+(tmp_yScale(d.depth)-tmp_yScale(offset)).toString()
+                         " A "+(tmp_xScale(d.depth)-tmp_xScale(offset)).toString()+" "
+                         +(tmp_yScale(d.depth)-tmp_yScale(offset)).toString()
                          +" 0 "+(d.smallBigArc?"1 ":"0 ") +" 1 "+
                          " "+tmp_xScale(d.xCBarEnd).toString()+","+tmp_yScale(d.yCBarEnd).toString();
             }
@@ -314,31 +467,16 @@ PhyloTree.prototype.mapToScreen = function(){
     }
 };
 
-PhyloTree.prototype.setLayout = function(layout){
-    if (typeof layout==="undefined" || layout!==this.layout){
-        this.nodes.forEach(function(d){d.update=true});
-    }
-    if (typeof layout==="undefined"){
-        this.layout = "rect";
-    }else {
-        this.layout = layout;
-    }
-    if (this.layout==="rect"){
-        this.rectangularLayout();
-    } else if (this.layout==="clock"){
-        this.timeVsRootToTip();
-    } else if (this.layout==="radial"){
-        this.radialLayout();
-    } else if (this.layout==="unrooted"){
-        this.unrootedLayout();
-    }
-};
 
+/**
+ * sets the range of the scales used to map the x,y coordinates to the screen
+ * @param {margins} -- object with "right, left, top, bottom" margins
+ */
 PhyloTree.prototype.setScales = function(margins) {
   const width = parseInt(this.svg.attr("width"), 10);
   const height = parseInt(this.svg.attr("height"), 10);
   if (this.layout === "radial" || this.layout === "unrooted") {
-    //Force Square
+    //Force Square: TODO, harmonize with the map to screen
     const xExtend = width - (margins["left"] || 0) - (margins["right"] || 0);
     const yExtend = height - (margins["top"] || 0) - (margins["top"] || 0);
     const minExtend = d3.min([xExtend, yExtend]);
@@ -348,32 +486,22 @@ PhyloTree.prototype.setScales = function(margins) {
     this.yScale.range([0.5 * ySlack + margins["top"] || 0, height - 0.5 * ySlack - (margins["bottom"] || 0)]);
 
   } else {
-    this.xScale.range([margins["left"] || 0, width - (margins["right"] || 0)]);
-    this.yScale.range([margins["top"] || 0, height - (margins["bottom"] || 0)]);
+    // for rectancular layout, allow flipping orientation of left right and top/botton
+    if (this.params.orientation[0]>0){
+      this.xScale.range([margins["left"] || 0, width - (margins["right"] || 0)]);
+    }else{
+      this.xScale.range([width - (margins["right"] || 0), margins["left"] || 0]);
+    }
+    if (this.params.orientation[1]>0){
+      this.yScale.range([margins["top"] || 0, height - (margins["bottom"] || 0)]);
+    } else {
+      this.yScale.range([height - (margins["bottom"] || 0), margins["top"] || 0]);
+    }
   }
 };
 
-PhyloTree.prototype.updateDistance = function(attr,dt){
-  this.setDistance(attr);
-  this.setLayout(this.layout);
-  this.mapToScreen();
-  this.updateGeometry(dt);
-  if (this.grid) this.addGrid(this.layout);
-  this.svg.selectAll(".regression").remove();
-  if (this.layout==="clock") this.drawRegression();
-};
-
-PhyloTree.prototype.updateLayout = function(layout,dt){
-    this.setLayout(layout);
-    this.mapToScreen();
-    this.updateGeometryFade(dt);
-    if (this.grid) this.addGrid(layout);
-    this.svg.selectAll(".regression").remove();
-    if (layout==="clock") this.drawRegression();
-};
-
-/*
- * make grid
+/**
+ * remove the grid
  */
 PhyloTree.prototype.removeGrid = function() {
   this.svg.selectAll(".majorGrid").remove();
@@ -382,6 +510,10 @@ PhyloTree.prototype.removeGrid = function() {
   this.grid = false;
 };
 
+/**
+ * add a grid to the svg
+ * @param {layout}
+ */
 PhyloTree.prototype.addGrid = function(layout) {
   if (typeof layout==="undefined"){ layout=this.layout;}
 
@@ -434,9 +566,7 @@ PhyloTree.prototype.addGrid = function(layout) {
     }
   }
 
-  const majorGrid = this.gridGroup
-			    .selectAll('.majorGrid')
-			    .data(gridPoints);
+  const majorGrid = this.svg.selectAll('.majorGrid').data(gridPoints);
   majorGrid.exit().remove();
   majorGrid.enter().append("path");
   majorGrid
@@ -479,9 +609,7 @@ PhyloTree.prototype.addGrid = function(layout) {
       }
   }
 
-  const gridLabels = this.gridGroup
-			     .selectAll('.gridTick')
-			     .data(gridPoints);
+  const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
   gridLabels.exit().remove();
   gridLabels.enter().append("text");
   gridLabels
@@ -504,9 +632,7 @@ PhyloTree.prototype.addGrid = function(layout) {
         minorGridPoints.push([pos, pos-offset>xmax+minorRoundingLevel?"hidden":"visible"]);
     }
   }
-  const minorGrid = this.gridGroup
-			    .selectAll('.minorGrid')
-			    .data(minorGridPoints);
+  const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
   minorGrid.exit().remove();
   minorGrid.enter().append("path");
   minorGrid
@@ -520,16 +646,175 @@ PhyloTree.prototype.addGrid = function(layout) {
   this.grid=true;
 };
 
+
 /*
- * basic update of positions of elements in tree
+ * add and remove elements from tree, initial render
+ */
+PhyloTree.prototype.clearSVG = function() {
+  this.svg.selectAll('.tip').remove();
+  this.svg.selectAll('.branch').remove();
+};
+
+
+/**
+ * adds all the tip circles to the svg, they have class tip
+ * @return {null}
+ */
+PhyloTree.prototype.drawTips = function() {
+  var params=this.params;
+  this.tipElements = this.svg.append("g").selectAll(".tip")
+    .data(this.nodes.filter(function(d) {
+      return d.terminal;
+    }))
+    .enter()
+    .append("circle")
+    .attr("class", "tip")
+    .attr("id", function(d) {
+      return "tip_" + d.n.clade;
+    })
+    .attr("cx", function(d) {
+      return d.xTip;
+    })
+    .attr("cy", function(d) {
+      return d.yTip;
+    })
+    .attr("r", function(d) {
+      return d.r || params.tipRadius;
+    })
+    .on("mouseover", (d) => {
+      this.callbacks.onTipHover(d)
+    })
+    .on("mouseout", (d) => {
+      this.callbacks.onTipMouseOut(d)
+    })
+    .on("click", (d) => {
+      this.callbacks.onTipClick(d)
+    })
+    .style("pointer-events", "auto")
+    .style("fill", function(d) {
+      return d.fill || params.tipFill;
+    })
+    .style("stroke", function(d) {
+      return d.stroke || params.tipStroke;
+    })
+    .style("stroke-width", function(d) {
+      return d.strokeWidth || params.tipStrokeWidth;
+    })
+    .style("cursor", "pointer");
+};
+
+/**
+ * adds all branches to the svg, these are paths with class branch
+ * @return {null}
+ */
+PhyloTree.prototype.drawBranches = function() {
+  var params = this.params;
+  this.branches = this.svg.append("g").selectAll('.branch')
+    .data(this.nodes)
+    .enter()
+    .append("path")
+    .attr("class", "branch")
+    .attr("id", function(d) {
+      return "branch_" + d.n.clade;
+    })
+    .attr("d", function(d) {
+      return d.branch;
+    })
+    .on("mouseover", (d) => {
+      this.callbacks.onBranchHover(d)
+    })
+    .on("mouseout", (d) => {
+      this.callbacks.onBranchMouseOut(d)
+    })
+    .on("click", (d) => {
+      this.callbacks.onBranchClick(d)
+    })
+    .style("pointer-events", "auto")
+    .style("stroke", function(d) {
+      return d.stroke || params.branchStroke;
+    })
+    .style("fill", "none")
+    .style("stroke-width", function(d) {
+      return d.strokeWidth || params.branchStrokeWidth;
+    })
+    .style("cursor", "pointer");
+};
+
+
+PhyloTree.prototype.drawConfidence = function() {
+  this.confidence = this.svg.append("g").selectAll('.conf')
+    .data(this.nodes)
+    .enter()
+    .append("path")
+    .attr("class", "conf")
+    .attr("id", function(d) {
+      return "conf_" + d.n.clade;
+    })
+    .attr("d", function(d) {
+      return d.confLine;
+    })
+    .style("stroke", function(d) {
+      return d.stroke || "#888";
+    })
+    .style("opacity", 0.5)
+    .style("fill", "none")
+    .style("stroke-width", function(d) {
+      return d.strokeWidth*2 || 4;
+    });
+};
+
+
+
+/************************************************/
+
+/**
+ * call to change the distance measure
+ * @param  attr -- attribute to be used as a distance measure, e.g. div or num_date
+ * @param  dt -- time of transition in milliseconds
+ * @return null
+ */
+PhyloTree.prototype.updateDistance = function(attr,dt){
+  this.setDistance(attr);
+  this.setLayout(this.layout);
+  this.mapToScreen();
+  this.updateGeometry(dt);
+  if (this.grid) this.addGrid(this.layout);
+  this.svg.selectAll(".regression").remove();
+  if (this.layout==="clock") this.drawRegression();
+};
+
+
+/**
+ * call to change the layout
+ * @param  layout -- needs to be one of "rect", "radial", "unrooted", "clock"
+ * @param  dt -- time of transition in milliseconds
+ * @return null
+ */
+PhyloTree.prototype.updateLayout = function(layout,dt){
+    this.setLayout(layout);
+    this.mapToScreen();
+    this.updateGeometryFade(dt);
+    if (this.grid) this.addGrid(layout);
+    this.svg.selectAll(".regression").remove();
+    if (layout==="clock") this.drawRegression();
+};
+
+
+/*
+ * redraw the tree based on the current xTip, yTip, branch attributes
+ * this function will remove branches, move the tips continuously
+ * and add the new branches again after the tips arrived at their destination
+ *  @params dt -- time of transition in milliseconds
  */
 PhyloTree.prototype.updateGeometryFade = function(dt) {
+  // fade out branches
   this.svg.selectAll('.branch').filter(function(d) {
       return d.update;
     })
     .transition().duration(dt * 0.5)
     .style("opacity", 0.0);
 
+  // closure to move the tips, called via the time out below
   const tipTrans = function(tmp_svg, tmp_dt) {
     const svg = tmp_svg;
     return function() {
@@ -547,6 +832,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
   };
   setTimeout(tipTrans(this.svg, dt), 0.5 * dt);
 
+  // closure to change the branches, called via time out after the tipTrans is done
   const flipBranches = function(tmp_svg) {
     const svg = tmp_svg;
     return function() {
@@ -560,6 +846,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
   };
   setTimeout(flipBranches(this.svg), 0.5 * dt);
 
+  // closure to add the new branches after the tipTrans
   const fadeBack = function(tmp_svg, tmp_dt) {
     const svg = tmp_svg;
     return function(d) {
@@ -580,6 +867,12 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
     });
 };
 
+
+/**
+ * transition of branches and tips at the same time. only useful within a layout
+ * @param  dt -- time of transition in milliseconds
+ * @return {[type]}
+ */
 PhyloTree.prototype.updateGeometry = function(dt) {
   this.svg.selectAll('.tip').filter(function(d) {
       return d.update;
@@ -606,27 +899,33 @@ PhyloTree.prototype.updateGeometry = function(dt) {
     .attr("d", function(d) {
       return d.confLine;
     });
+
 };
+
+/*********************************************/
+/* TO BE REDONE */
 
 PhyloTree.prototype.selectBranch = function(node) {
   this.svg.select("#branch_"+node.n.clade)
-    .style("stroke-dasharray", function(d) {
-      return "2, 3";
+    .style("stroke-width", function(d) {
+      return "4";
     });
 };
 
 PhyloTree.prototype.deSelectBranch = function(node) {
   this.svg.select("#branch_"+node.n.clade)
-    .style("stroke-dasharray", function(d) {
-      return "none";
+    .style("stroke-width", function(d) {
+      return "2";
     });
 };
 
 PhyloTree.prototype.selectTip = function(node) {
+  var fill = this.params.fillSelected, r=this.params.radiusSelected;
   this.svg.select("#tip_"+node.n.clade)
-    .style("stroke", function(d) {return d.fill;})
+    .style("stroke", function(d) {return fill;})
     .style("stroke-dasharray", function(d) {return "2, 2";})
-    .style("fill", function(d) { return "white";});
+    .style("fill", function(d) { return fill;})
+    .attr("cr", function(d) { return r;});
 };
 
 PhyloTree.prototype.deSelectTip = function(node) {
@@ -647,10 +946,15 @@ PhyloTree.prototype.updateSelectedBranchOrTip = function (oldSelected, newSelect
   }
 };
 
-/*
- * update tree element style of attributes
+/**
+ * Update multiple style or attributes of  tree elements at once
+ * @param {string} treeElem one of .tip or .branch
+ * @param {object} attr object containing the attributes to change as keys, array with values as value
+ * @param {object} styles object containing the styles to change
+ * @param {int} dt time in milliseconds
  */
 PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) {
+  // assign new values and decide whether to update
   this.nodes.forEach(function(d, i) {
     d.update = false;
     /* note that this is not node.attr, but element attr such as <g width="100" vs style="" */
@@ -672,16 +976,16 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
     }
   });
 
+  // function that return the closure object for updating the svg
   function update(attrToSet, stylesToSet) {
     return function(selection) {
-      for (var i = 0; i < stylesToSet.length; i += 1) {
-
+      for (var i=0; i<stylesToSet.length; i++) {
         var prop = stylesToSet[i];
         selection.style(prop, function(d) {
           return d[prop];
         });
       }
-      for (var i = 0; i < attrToSet.length; i += 1) {
+      for (var i = 0; i < attrToSet.length; i++) {
         var prop = attrToSet[i];
         selection.attr(prop, function(d) {
           return d[prop];
@@ -689,6 +993,7 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
       }
     };
   };
+  // update the svg
   this.svg.selectAll(treeElem).filter(function(d) {
       return d.update;
     })
@@ -697,14 +1002,31 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
 
 };
 
-PhyloTree.prototype.updateAttribute = function(treeElem, attr, callback, dt) {
-  this.updateAttributeArray(treeElem, attr,
+/**
+ * as updateAttributeArray, but accepts a callback function rather than an array
+ * with the values. will create array and call updateAttributeArray
+ * @param  treeElem  --- the part of the tree to update (.tip, .branch)
+ * @param  attr  --- the attribute to update (e.g. r for tipRadius)
+ * @param  callback -- function that assigns the attribute
+ * @param  dt  --- time of transition in milliseconds
+ * @return {[type]}
+ */
+PhyloTree.prototype.updateStyleOrAttribute = function(treeElem, attr, callback, dt, styleOrAttribute) {
+  this.updateStyleOrAttributeArray(treeElem, attr,
     this.nodes.map(function(d) {
       return callback(d);
-    }), dt);
+    }), dt, styleOrAttribute);
 };
 
-PhyloTree.prototype.updateAttributeArray = function(treeElem, attr, attr_array, dt) {
+/**
+ * update an attribute of the tree for all nodes
+ * @param  treeElem  --- the part of the tree to update (.tip, .branch)
+ * @param  attr  --- the attribute to update (e.g. r for tipRadius)
+ * @param  attr_array  --- an array with values for every node in the tree
+ * @param  dt  --- time of transition in milliseconds
+ * @return {[type]}
+ */
+PhyloTree.prototype.updateStyleOrAttributeArray = function(treeElem, attr, attr_array, dt, styleOrAttribute) {
   this.nodes.forEach(function(d, i) {
     const newAttr = attr_array[i];
     if (newAttr === d[attr]) {
@@ -714,9 +1036,27 @@ PhyloTree.prototype.updateAttributeArray = function(treeElem, attr, attr_array, 
       d.update = true;
     }
   });
-  this.redrawAttribute(treeElem, attr, dt);
+  if (typeof styleOrAttribute==="undefined"){
+    var all_attr = this.attributes;
+    if (contains(all_attr, attr)){
+      styleOrAttribute="attr";
+    }else{
+      styleOrAttribute="style";
+    }
+  }
+  if (styleOrAttribute==="style"){
+    this.redrawStyle(treeElem, attr, dt);
+  }else{
+    this.redrawAttribute(treeElem, attr, dt);
+  }
 };
 
+/**
+ * update the svg after all new values have been assigned
+ * @param  treeElem -- one of .tip, .branch
+ * @param  attr  -- attribute of the tree element to update
+ * @param  dt -- transition time
+ */
 PhyloTree.prototype.redrawAttribute = function(treeElem, attr, dt) {
   this.svg.selectAll(treeElem).filter(function(d) {
       return d.update;
@@ -727,26 +1067,12 @@ PhyloTree.prototype.redrawAttribute = function(treeElem, attr, dt) {
     });
 };
 
-PhyloTree.prototype.updateStyle = function(treeElem, styleElem, callback, dt) {
-  this.updateStyleArray(treeElem, attr,
-    this.nodes.map(function(d) {
-      return callback(d);
-    }), dt);
-};
-
-PhyloTree.prototype.updateStyleArray = function(treeElem, styleElem, style_array, dt) {
-  this.nodes.forEach(function(d, i) {
-    const newStyle = style_array[i];
-    if (newStyle === d[styleElem]) {
-      d.update = false;
-    } else {
-      d[styleElem] = newStyle;
-      d.update = true;
-    }
-  });
-  this.redrawStyle(treeElem, styleElem, dt);
-};
-
+/**
+ * update the svg after all new values have been assigned
+ * @param  treeElem -- one of .tip, .branch
+ * @param  styleElem  -- style element of the tree element to update
+ * @param  dt -- transition time
+ */
 PhyloTree.prototype.redrawStyle = function(treeElem, styleElem, dt) {
   this.svg.selectAll(treeElem).filter(function(d) {
       return d.update;
@@ -755,135 +1081,6 @@ PhyloTree.prototype.redrawStyle = function(treeElem, styleElem, dt) {
     .style(styleElem, function(d) {
       return d[styleElem];
     });
-};
-
-/*
- * add and remove elements from tree, initial render
- */
-PhyloTree.prototype.clearSVG = function() {
-  this.svg.selectAll("*").remove()
-  // this.svg.selectAll('.tip').remove();
-  // this.svg.selectAll('.branch').remove();
-};
-
-PhyloTree.prototype.makeTips = function() {
-  this.tipElements = this.svg.append("g").selectAll(".tip")
-    .data(this.nodes.filter(function(d) {
-      return d.terminal;
-    }))
-    .enter()
-    .append("circle")
-    .attr("class", "tip")
-    .attr("id", function(d) {
-      return "tip_" + d.n.clade;
-    })
-    .attr("cx", function(d) {
-      return d.xTip;
-    })
-    .attr("cy", function(d) {
-      return d.yTip;
-    })
-    .attr("r", function(d) {
-      return d.r || 5;
-    })
-    .on("mouseover", (d) => {
-      this.callbacks.onTipHover(d)
-    })
-    .on("mouseout", () => {
-      this.callbacks.onBranchOrTipLeave()
-    })
-    .on("click", (d) => {
-      this.callbacks.onTipClick(d)
-    })
-    .style("pointer-events", "auto")
-    .style("fill", function(d) {
-      return d.fill || "#CCC";
-    })
-    .style("stroke", function(d) {
-      return d.stroke || "#AAA";
-    })
-    .style("stroke-width", function(d) {
-      return d.strokeWidth || 2;
-    })
-    .style("cursor", "pointer");
-};
-
-PhyloTree.prototype.makeBranches = function() {
-  this.branches = this.svg.append("g").selectAll('.branch')
-    .data(this.nodes)
-    .enter()
-    .append("path")
-    .attr("class", "branch")
-    .attr("id", function(d) {
-      return "branch_" + d.n.clade;
-    })
-    .attr("d", function(d) {
-      return d.branch;
-    })
-    .on("mouseover", (d) => {
-      this.callbacks.onBranchHover(d)
-    })
-    .on("mouseout", () => {
-      this.callbacks.onBranchOrTipLeave()
-    })
-    .on("click", (d) => {
-      this.callbacks.onBranchClick(d)
-    })
-    .style("pointer-events", "auto")
-    .style("stroke", function(d) {
-      return d.stroke || "#AAA";
-    })
-    .style("fill", "none")
-    .style("stroke-width", function(d) {
-      return d.strokeWidth || 2;
-    })
-    .style("cursor", "pointer");
-};
-
-PhyloTree.prototype.makeConfidence = function() {
-  this.confidence = this.svg.append("g").selectAll('.conf')
-    .data(this.nodes)
-    .enter()
-    .append("path")
-    .attr("class", "conf")
-    .attr("id", function(d) {
-      return "conf_" + d.n.clade;
-    })
-    .attr("d", function(d) {
-      return d.confLine;
-    })
-    .style("stroke", function(d) {
-      return d.stroke || "#888";
-    })
-    .style("opacity", 0.5)
-    .style("fill", "none")
-    .style("stroke-width", function(d) {
-      return d.strokeWidth*2 || 4;
-    });
-};
-
-
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks) {
-  this.svg = svg;
-  this.params = Object.assign(this.params, options);
-  this.callbacks = callbacks;
-
-  this.clearSVG();
-  this.setDistance(distance);
-  this.setLayout(layout);
-  this.mapToScreen();
-  this.gridGroup = this.svg.append("g"); // the group holding all grid stuff
-  if (this.params.showGrid){
-      this.addGrid();
-  }
-  if (this.params.confidence){
-    this.makeConfidence();
-  }
-  this.makeBranches();
-  this.makeTips();
-  this.updateGeometry(10);
-  this.svg.selectAll(".regression").remove();
-  if (layout==="clock") this.drawRegression();
 };
 
 export default PhyloTree;
