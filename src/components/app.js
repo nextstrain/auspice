@@ -410,6 +410,7 @@ class App extends React.Component {
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               changeRoute={this.changeRoute.bind(this)}
               location={this.state.location}
+              router={this.props.router}              
             />
         </Background>
       </Sidebar>

@@ -57,9 +57,15 @@ class ColorBy extends React.Component {
   }
 
   genotypeInput() {
+    let placeholder = "Genome position";
+    if (this.props.colorBy) {
+      if (this.props.colorBy.slice(0,2) === "gt") {
+        placeholder = this.props.colorBy.slice(3);
+      }
+    }
     if (this.state.selected === "gt") {
       return (
-        <input type="text" placeholder="Genome position"
+        <input type="text" placeholder={placeholder}
                onChange={(e) => this.setGenotypeColorBy(e.target.value)}
         />
       );
@@ -69,9 +75,6 @@ class ColorBy extends React.Component {
   }
 
   setGenotypeColorBy(genotype) {
-    console.log("setGenotypeColorBy");
-    console.log("genotype");
-    console.log(genotype);
     if (parseGenotype("gt-" + genotype, this.props.geneLength)) {
       // We got a valid genotype, set query params and state
       this.props.dispatch(changeColorBy("gt-" + genotype, this.props.router))
