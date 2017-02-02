@@ -166,8 +166,8 @@ class App extends React.Component {
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: absoluteMax });
     }
 
-    if (this.props.location.query.colorBy) {
-      this.props.dispatch(changeColorBy(this.props.location.query.colorBy));
+    if (this.props.location.query.c) {
+      this.props.dispatch(changeColorBy(this.props.location.query.c, this.props.router));
     } else {
       this.props.dispatch(changeColorBy(defaultColorBy));
     }
@@ -368,7 +368,8 @@ class App extends React.Component {
    * RENDER
    *****************************************/
   render() {
-      const colorScale = this.createColorScale(this.props.colorBy);
+      const colorBy = this.props.colorBy ? this.props.colorBy : defaultColorBy;
+      const colorScale = this.createColorScale(colorBy);
       return (
       <Sidebar
         sidebar={

@@ -22,7 +22,7 @@ export const changeColorBy = (colorBy, router = null) => {
   // ∆ react-router, only if router provided
   if (router) {
     const location = router.getCurrentLocation();
-    const newQuery = Object.assign({}, location.query, {colorBy});
+    const newQuery = Object.assign({}, location.query, {c: colorBy});
     router.push({
       pathname: location.pathname,
       query: newQuery
