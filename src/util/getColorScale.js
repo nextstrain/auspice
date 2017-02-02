@@ -66,9 +66,10 @@ const discreteAttributeScale = (nodes, attr) => {
                          : stateCount[n.attr[attr]] = 1));
   const domain = Object.keys(stateCount);
   domain.sort((a, b) => stateCount[a] > stateCount[b]);
+  const colorList = colors[domain.length];
   return d3.scale.ordinal()
                  .domain(domain)
-                 .range(createListOfColors(domain.length, [d3.rgb("#007AFF"), d3.rgb("#FFD000")]));
+                 .range(colorList);
 };
 
 const getColorScale = (colorBy, tree, sequences, colorOptions) => {
