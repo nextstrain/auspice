@@ -4,7 +4,12 @@ import { parseGenotype } from "../../util/getGenotype";
 import { select} from "../../globalStyles";
 import SelectLabel from "../framework/select-label";
 import { connect } from "react-redux";
-import { CHANGE_COLOR_BY } from "../../actions/controls";
+import { changeColorBy } from "../../actions/controls";
+
+/* Why does this have colorBy set as state (here) and in redux?
+   it's for the case where we select genotype, then wait for the
+   base to be selected, so we modify state but not yet dispatch
+*/
 
 @connect((state) => {
   return {
@@ -21,7 +26,8 @@ class ColorBy extends React.Component {
   }
   static propTypes = {
     /* react */
-    // dispatch: React.PropTypes.func,
+    dispatch: React.PropTypes.func,
+    router: React.PropTypes.object,
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */
@@ -40,19 +46,9 @@ class ColorBy extends React.Component {
     }
   }
 
-  setColorByQueryParam(title) {
-    const location = this.props.router.getCurrentLocation();
-    const newQuery = Object.assign({}, location.query, {colorby: title});
-    this.props.router.push({
-      pathname: location.pathname,
-      query: newQuery
-    });
-  }
-
   setColorBy(colorBy) {
     if (colorBy.slice(0,2) !== "gt") {
-      this.props.dispatch({ type: CHANGE_COLOR_BY, data: colorBy });
-      this.setColorByQueryParam(colorBy);
+      this.props.dispatch(changeColorBy(colorBy, this.props.router))
       this.setState({"selected": colorBy});
     } else {
       // don't update colorBy yet, genotype still needs to be specified
@@ -78,8 +74,7 @@ class ColorBy extends React.Component {
     console.log(genotype);
     if (parseGenotype("gt-" + genotype, this.props.geneLength)) {
       // We got a valid genotype, set query params and state
-      this.props.dispatch({ type: CHANGE_COLOR_BY, data: "gt-" + genotype });
-      this.setColorByQueryParam("gt-" + genotype);
+      this.props.dispatch(changeColorBy("gt-" + genotype, this.props.router))
     } else {
       // we don't have a valid genotype, don't update anything yet
       return null;

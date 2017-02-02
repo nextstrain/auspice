@@ -10,7 +10,7 @@ import {
 } from "../actions";
 import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_DATE_MIN,
   CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN, CHANGE_ABSOLUTE_DATE_MAX,
-  CHANGE_COLOR_BY } from "../actions/controls";
+  changeColorBy } from "../actions/controls";
 
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
@@ -167,9 +167,9 @@ class App extends React.Component {
     }
 
     if (this.props.location.query.colorBy) {
-      this.props.dispatch({ type: CHANGE_COLOR_BY, data: this.props.location.query.colorBy });
+      this.props.dispatch(changeColorBy(this.props.location.query.colorBy));
     } else {
-      this.props.dispatch({ type: CHANGE_COLOR_BY, data: defaultColorBy });
+      this.props.dispatch(changeColorBy(defaultColorBy));
     }
 
   }
