@@ -8,6 +8,7 @@ import Card from "../framework/card";
 import d3 from "d3";
 import { parseGenotype } from "../../util/getGenotype";
 import computeResponsive from "../../util/computeResponsive";
+import { changeColorBy } from "../../actions/controls";
 
 @connect(state => {
   return {
@@ -22,12 +23,9 @@ class Entropy extends React.Component {
     /* check here to see if this.props.browserDimensions has changed and rerender */
   }
 
-  setColorByQuery(colorBy) {
-    const newQuery = Object.assign({}, this.props.location.query,
-                                   {colorBy: colorBy});
-    this.props.changeRoute(this.props.location.pathname, newQuery);
+  setColorByGenotype(colorBy) {
+    this.props.dispatch(changeColorBy(colorBy, this.props.router))
   }
-
 
   drawEntropy() {
     const responsive = computeResponsive({
@@ -116,7 +114,7 @@ class Entropy extends React.Component {
                 y={y(e.y)}
                 width="1" height={y(0) - y(e.y)}
                 cursor={"pointer"}
-                onClick={() => {this.setColorByQuery("gt-nuc_" + (e.x + 1));}}
+                onClick={() => {this.setColorByGenotype("gt-nuc_" + (e.x + 1));}}
                 fill={"#CCC"}
                 stroke={"#CCC"}
               />
@@ -130,7 +128,7 @@ class Entropy extends React.Component {
                 y={y(e.y)}
                 width="2.5" height={y(0) - y(e.y)}
                 cursor={"pointer"}
-                onClick={() => {this.setColorByQuery("gt-" + e.prot + "_" + (e.codon + 1));}}
+                onClick={() => {this.setColorByGenotype("gt-" + e.prot + "_" + (e.codon + 1));}}
                 fill={e.fill}
                 stroke={"#CCC"}
               />
