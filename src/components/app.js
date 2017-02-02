@@ -166,8 +166,8 @@ class App extends React.Component {
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: absoluteMax });
     }
 
-    if (this.props.location.query.c) {
-      this.props.dispatch({ type: CHANGE_COLOR_BY, data: this.props.location.query.c });
+    if (this.props.location.query.colorBy) {
+      this.props.dispatch({ type: CHANGE_COLOR_BY, data: this.props.location.query.colorBy });
     } else {
       this.props.dispatch({ type: CHANGE_COLOR_BY, data: defaultColorBy });
     }
