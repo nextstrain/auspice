@@ -66,7 +66,8 @@ const discreteAttributeScale = (nodes, attr) => {
                          : stateCount[n.attr[attr]] = 1));
   const domain = Object.keys(stateCount);
   domain.sort((a, b) => stateCount[a] > stateCount[b]);
-  const colorList = colors[domain.length];
+  // note: colors[n] has n colors
+  const colorList = domain.length < colors.length ? colors[domain.length] : colors[colors.length - 1];
   return d3.scale.ordinal()
                  .domain(domain)
                  .range(colorList);
