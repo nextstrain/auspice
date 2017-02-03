@@ -105,7 +105,7 @@ class TreeView extends React.Component {
       let attrToUpdate = {};
       let styleToUpdate = {};
 
-      /* fill has changed */
+      /* tip color has changed */
       if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
         styleToUpdate['fill'] = nextProps.nodeColor.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
@@ -131,11 +131,16 @@ class TreeView extends React.Component {
       attrToUpdate = {};
       styleToUpdate = {};
 
+      /* branch color has changed */
       if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
         styleToUpdate['stroke'] = nextProps.nodeColor.map((col) => {
           var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
         	return d3.rgb(modCol).toString();
         });
+      }
+      /* branch stroke width has changed */
+      if (nextProps.branchThickness && arrayInEquality(nextProps.branchThickness, this.props.branchThickness)) {
+        styleToUpdate['stroke-width'] = nextProps.branchThickness;
       }
       /* implement style changes */
       if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
