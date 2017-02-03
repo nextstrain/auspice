@@ -3,6 +3,7 @@ import Radium from "radium";
 import titleCase from "title-case";
 import { connect } from "react-redux";
 import { LEGEND_ITEM_MOUSEENTER, LEGEND_ITEM_MOUSELEAVE } from "../../actions/controls";
+import { dataFont, darkGrey } from "../../globalStyles";
 
 function isNumeric(n) {
   return !isNaN(parseFloat(n)) && isFinite(n);
@@ -58,7 +59,7 @@ class LegendItem extends React.Component {
         <text
           x={this.props.legendRectSize + this.props.legendSpacing + 5}
           y={this.props.legendRectSize - this.props.legendSpacing}
-          style={{fontSize: 12}}>{label}</text>
+          style={{fontSize: 12, fill: darkGrey, fontFamily: dataFont}}>{label}</text>
       </g>
     );
   }

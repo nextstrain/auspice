@@ -16,7 +16,7 @@ import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
 import _ from "lodash";
 import Flex from "./framework/flex";
-import Header from "./framework/header";
+import Title from "./framework/title";
 import Footer from "./framework/footer";
 import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
@@ -383,6 +383,10 @@ class App extends React.Component {
   render() {
       const colorBy = this.props.colorBy ? this.props.colorBy : defaultColorBy;
       const colorScale = this.createColorScale(colorBy);
+      let suffix = "strain";
+      if (this.state.location.pathname) {
+        suffix = this.state.location.pathname.split("/")[1];
+      }
       return (
       <Sidebar
         sidebar={
@@ -403,7 +407,7 @@ class App extends React.Component {
               this.setState({sidebarDocked: !this.state.sidebarDocked})
             }}
           />
-          <Header/>
+          <Title suffix={suffix}/>
             <TreeView nodes={this.props.tree.nodes}
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               colorScale={colorScale}

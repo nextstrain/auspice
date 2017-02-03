@@ -10,7 +10,7 @@ const returnStateNeeded = (fullStateTree) => {
   };
 };
 @connect(returnStateNeeded)
-class Header extends React.Component {
+class Title extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -24,12 +24,17 @@ class Header extends React.Component {
     routes: React.PropTypes.array,
     /* component api */
     style: React.PropTypes.object,
+    suffix: React.PropTypes.string
     // foo: React.PropTypes.string
   }
 
   createTitle() {
+
     const title = "nextstrain";
     const colors = ["#4377CD", "#5097BA", "#63AC9A", "#7CB879", "#9ABE5C", "#B9BC4A", "#D4B13F", "#E49938", "#E67030", "#DE3C26"];
+
+//    const title = "next|" + this.props.suffix;
+//    const colors = ["#4377CD", "#5097BA", "#63AC9A", "#7CB879", "#999", "#B9BC4A", "#D4B13F", "#E49938", "#E67030", "#DE3C26"];
 
     return title.split("").map((letter, i) => {
       return (
@@ -39,12 +44,12 @@ class Header extends React.Component {
   }
   render() {
     return (
-      <Flex>
-        <HeaderFont size="large"> {this.createTitle()} </HeaderFont>
+      <Flex style={{height: 80}}>
+        <HeaderFont size="large" weight="300"> {this.createTitle()} </HeaderFont>
       </Flex>
     );
   }
 }
 
-export default Header;
+export default Title;
 // <p> Real-time tracking of <MonoFont>this.props.metadata.virus = {this.props.metadata ? this.props.metadata.virus : "loading"}</MonoFont> virus evolution </p>

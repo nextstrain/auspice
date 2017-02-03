@@ -23,13 +23,7 @@ const returnStateNeeded = (fullStateTree) => {
 @connect(returnStateNeeded)
 class Controls extends React.Component {
   getStyles() {
-    return {
-      heading: {
-        fontSize: 18,
-        letterSpacing: .4,
-        color: "rgb(150,150,150)"
-      },
-    };
+    return {};
   }
   render() {
     const styles = this.getStyles();
@@ -43,22 +37,22 @@ class Controls extends React.Component {
           padding: "0px 20px 20px 20px"
         }}>
 
-        <HeaderFont style={styles.heading}>{"Dataset"}</HeaderFont>
+        <HeaderFont bold dark>{"Dataset"}</HeaderFont>
         <ChooseVirus {...this.props}/>
 
-        <HeaderFont style={styles.heading}>{"Date Range"}</HeaderFont>
+        <HeaderFont bold dark>{"Date Range"}</HeaderFont>
         <DateRangeInputs {...this.props}/>
 
-        <HeaderFont style={styles.heading}>{"Color By"}</HeaderFont>
+        <HeaderFont bold dark>{"Color By"}</HeaderFont>
         <ColorBy {...this.props}/>
 
-        <HeaderFont style={styles.heading}>{"Tree Options"}</HeaderFont>
+        <HeaderFont bold dark>{"Tree Options"}</HeaderFont>
         <SelectLabel text="Layout"/>
         <ChooseLayout {...this.props}/>
         <SelectLabel text="Branch Length"/>
         <ChooseMetric {...this.props}/>
 
-        <HeaderFont style={styles.heading}>{"Filters"}</HeaderFont>
+        <HeaderFont bold dark>{"Filters"}</HeaderFont>
         <AllFilters {...this.props} />
         <ToggleBranchLabels/>
         <Search/>

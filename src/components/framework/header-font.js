@@ -1,6 +1,6 @@
 import React from "react";
 import Radium from "radium";
-import * as globalStyles from "../../globalStyles";
+import {headerFont, darkGrey, medGrey} from "../../globalStyles";
 
 @Radium
 class HeaderFont extends React.Component {
@@ -9,7 +9,9 @@ class HeaderFont extends React.Component {
     /* react */
 
     style: React.PropTypes.object,
-    size: React.PropTypes.string
+    size: React.PropTypes.string,
+    bold: React.PropTypes.bool,
+    dark: React.PropTypes.bool
   }
   static defaultProps = {
     size: "small"
@@ -17,15 +19,18 @@ class HeaderFont extends React.Component {
   getStyles() {
     return {
       base: {
-        fontFamily: globalStyles.sans,
-        fontSize: this.props.size === "large" ? 76 : 28,
+        fontFamily: headerFont,
+        fontSize: this.props.size === "large" ? 76 : 14,
         lineHeight: "28px",
-        letterSpacing: -1.8,
+        // letterSpacing: -1.8,
         marginTop: 20,
-        marginBottom: 10
+        marginBottom: 10,
+        fontWeight: this.props.bold ? 500 : 300,
+        color: this.props.dark ? darkGrey : medGrey
       }
     };
   }
+
   render() {
     const styles = this.getStyles();
     return (

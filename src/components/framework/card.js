@@ -1,6 +1,6 @@
 import React from "react";
 import Radium from "radium";
-import {sans} from "../../globalStyles";
+import {headerFont, medGrey, darkGrey} from "../../globalStyles";
 
 @Radium
 class Card extends React.Component {
@@ -17,10 +17,12 @@ class Card extends React.Component {
         position: "relative"
       },
       title: {
-        fontFamily: sans,
-        marginBottom: 5,
+        fontFamily: headerFont,
+        color: darkGrey,
+        fontSize: 16,
+        marginBottom: 10,
         marginLeft: 10,
-        marginTop: 10,
+        marginTop: 5,
         fontWeight: 500,
       }
     };
