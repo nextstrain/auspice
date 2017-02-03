@@ -100,16 +100,18 @@ class TreeView extends React.Component {
 
     /* if we have a tree and we have new props, figure out what we need to update */
     if (tree) {
-      const attrToUpdate = {};
-      const styleToUpdate = {};
 
-      /* fill has changed */
+      /* update tips */
+      let attrToUpdate = {};
+      let styleToUpdate = {};
+
+      /* tip color has changed */
       if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
-        styleToUpdate['fill'] = nextProps.nodeColor;
-        tree.updateStyleOrAttributeArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration, "style");
-        styleToUpdate['stroke'] = nextProps.nodeColor.map((d) => {
-          d3.rgb(d).darker(0.7)
+        styleToUpdate['fill'] = nextProps.nodeColor.map((col) => {
+          return d3.rgb(col).brighter([0.65]).toString();
         });
+        tree.updateStyleOrAttributeArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration, "style");
+        styleToUpdate['stroke'] = nextProps.nodeColor;
       }
       /* tip radius has changed */
       if (nextProps.tipRadii && arrayInEquality(nextProps.tipRadii, this.props.tipRadii)) {
@@ -120,11 +122,31 @@ class TreeView extends React.Component {
         // console.log("updateVisibility");
         styleToUpdate['visibility'] = nextProps.tipVisibility;
       }
-
-      /* update style changes */
+      /* implement style changes */
       if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
         tree.updateMultipleArray(".tip", attrToUpdate, styleToUpdate, fastTransitionDuration);
       }
+
+      /* update branches */
+      attrToUpdate = {};
+      styleToUpdate = {};
+
+      /* branch color has changed */
+      if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
+        styleToUpdate['stroke'] = nextProps.nodeColor.map((col) => {
+          var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
+        	return d3.rgb(modCol).toString();
+        });
+      }
+      /* branch stroke width has changed */
+      if (nextProps.branchThickness && arrayInEquality(nextProps.branchThickness, this.props.branchThickness)) {
+        styleToUpdate['stroke-width'] = nextProps.branchThickness;
+      }
+      /* implement style changes */
+      if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
+        tree.updateMultipleArray(".branch", attrToUpdate, styleToUpdate, fastTransitionDuration);
+      }
+
       /* swap layouts */
       if (this.props.layout !== nextProps.layout) {
         tree.updateLayout(nextProps.layout, slowTransitionDuration);

@@ -30,8 +30,8 @@ import queryString from "query-string";
 import getColorScale from "../util/getColorScale";
 import { parseGenotype, getGenotype } from "../util/getGenotype";
 import * as globals from "../util/globals";
-import { defaultDateRange, defaultLayout,
-  defaultDistanceMeasure, defaultColorBy } from "../util/globals";
+import { defaultDateRange, defaultLayout, defaultDistanceMeasure,
+  defaultColorBy, tipRadius, freqScale } from "../util/globals";
 import Sidebar from "react-sidebar";
 import moment from 'moment';
 
@@ -302,6 +302,17 @@ class App extends React.Component {
     }
   }
 
+  // branch thickness is from clade frequencies
+  branchThickness() {
+    if (this.props.tree.nodes) {
+      const maxTipCount = this.props.tree.nodes[0].fullTipCount;
+      return this.props.tree.nodes.map((d) => {
+        return freqScale(d.fullTipCount/maxTipCount);
+      });
+    } else {
+      return 2.0;
+    }
+  }
 
   changeRoute(pathname, query) {
     pathname = pathname.replace("!/", ""); // needed to assist with S3 redirects
@@ -346,7 +357,7 @@ class App extends React.Component {
                         ? cScale.legendBoundsMap : false;
       return this.props.tree.nodes.map((d) => this.determineLegendMatch(selItem, d, legendMap, cScale) ? 6 : 3);
     } else if (this.props.tree.nodes) {
-      return this.props.tree.nodes.map((d) => 3);
+      return this.props.tree.nodes.map((d) => tipRadius);
     } else {
       return null;
     }
@@ -397,6 +408,7 @@ class App extends React.Component {
               nodeColor={this.nodeColor(colorScale)}
               tipRadii={this.tipRadii(colorScale)}
               tipVisibility={this.tipVisibility()}
+              branchThickness={this.branchThickness()}
               datasetGuid={this.props.tree.datasetGuid}
             />
             <Map
@@ -410,7 +422,7 @@ class App extends React.Component {
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               changeRoute={this.changeRoute.bind(this)}
               location={this.state.location}
-              router={this.props.router}              
+              router={this.props.router}
             />
         </Background>
       </Sidebar>

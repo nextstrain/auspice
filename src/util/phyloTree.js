@@ -143,7 +143,7 @@ PhyloTree.prototype.setDefaults = function () {
         branchStrokeWidth: 2,
         tipStroke: "#AAA",
         tipFill: "#CCC",
-        tipStrokeWidth: 2,
+        tipStrokeWidth: 1,
         tipRadius: 4,
     };
 };
@@ -720,6 +720,16 @@ PhyloTree.prototype.drawBranches = function() {
     .attr("d", function(d) {
       return d.branch;
     })
+    .style("stroke", function(d) {
+      return d.stroke || params.branchStroke;
+    })
+		.style("stroke-linecap", "round")
+    .style("stroke-width", function(d) {
+      return d.strokeWidth || params.branchStrokeWidth;
+    })
+    .style("fill", "none")
+    .style("cursor", "pointer")
+    .style("pointer-events", "auto")
     .on("mouseover", (d) => {
       this.callbacks.onBranchHover(d)
     })
@@ -728,16 +738,7 @@ PhyloTree.prototype.drawBranches = function() {
     })
     .on("click", (d) => {
       this.callbacks.onBranchClick(d)
-    })
-    .style("pointer-events", "auto")
-    .style("stroke", function(d) {
-      return d.stroke || params.branchStroke;
-    })
-    .style("fill", "none")
-    .style("stroke-width", function(d) {
-      return d.strokeWidth || params.branchStrokeWidth;
-    })
-    .style("cursor", "pointer");
+    });
 };
 
 
