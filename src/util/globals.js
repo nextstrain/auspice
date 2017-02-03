@@ -33,7 +33,7 @@ export const colorOptions = {
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
 export const width = 1126; /* no longer used */
 export const margin = 60;
-export const controlsWidth = 250;
+export const controlsWidth = 240;
 export const totalVerticalPadding = 160; // this includes the header + space between the bottom and the card (refactor.)
 export const controlsHiddenWidth = 800;
 export const entropyChartHeight = 300;

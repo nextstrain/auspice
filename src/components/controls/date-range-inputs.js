@@ -6,6 +6,7 @@ import Slider from './slider';
 import { connect } from "react-redux";
 import { CHANGE_DATE_MIN, CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN,
   CHANGE_ABSOLUTE_DATE_MAX } from "../../actions/controls";
+import { controlsWidth } from "../../util/globals";
 
 moment.updateLocale('en', {
     longDateFormat : {
@@ -169,7 +170,7 @@ class DateRangeInputs extends React.Component {
 
     return (
       <div>
-        <div style={{width: 250}}>
+        <div style={{width: controlsWidth}}>
         <Slider                                       // numDates are handed to Slider
           min={absoluteMinNumDate}
           max={absoluteMaxNumDate}
@@ -185,12 +186,13 @@ class DateRangeInputs extends React.Component {
           the CSS for this is in index.html
           docs: https://hacker0x01.github.io/react-datepicker/
         */}
-        <div style={{width: 250}}>
+        <div style={{width: controlsWidth}}>
           <DatePicker                               // momentDates are handed to DatePicker
             selected={moment(selectedMin)}
             onChange={this.updateFromPicker.bind(this, "updateDateMin")}
           />
           <DatePicker                               // momentDates are handed to DatePicker
+            className="right-datepicker"
             selected={moment(selectedMax)}
             onChange={this.updateFromPicker.bind(this, "updateDateMax")}
           />

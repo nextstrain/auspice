@@ -1,3 +1,5 @@
+import { controlsWidth } from "./util/globals";
+
 export const sans = "aw-conqueror-sans, sans-serif";
 export const lighterGrey = "rgb(200, 200, 200)";
 export const darkerGrey = "rgb(100,100,100)";
@@ -7,7 +9,7 @@ export const brandColor = "#5DA8A3";
 export const select = {
   background: "transparent",
   fontFamily: sans,
-  width: 200,
+  width: controlsWidth,
   fontSize: 16,
   border: "1px solid #ccc",
   height: 34,
