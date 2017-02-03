@@ -176,7 +176,9 @@ class DateRangeInputs extends React.Component {
           defaultValue={[absoluteMinNumDate, absoluteMaxNumDate]}
           value={[selectedMinNumDate, selectedMaxNumDate]}
           onChange={this.updateFromSlider.bind(this)}
-          withBars />
+          minDistance={0.5}                           // minDistance is in years
+          pearling
+          withBars/>
         </div>
         <div style={{height: 10}}> </div>
         {/*

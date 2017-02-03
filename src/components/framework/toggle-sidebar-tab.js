@@ -1,4 +1,5 @@
 import React from "react";
+import {brandColor} from "../../globalStyles";
 
 const ToggleSidebarTab = ({open, handler}) => {
 
@@ -13,7 +14,8 @@ const ToggleSidebarTab = ({open, handler}) => {
         position: "fixed",
         top: 5,
         zIndex: 1001,
-        backgroundColor: "rgb(67, 119, 205)"
+        backgroundColor: brandColor,
+        cursor: "pointer"
       }}>
       <svg
         style={{

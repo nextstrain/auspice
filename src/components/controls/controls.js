@@ -49,14 +49,16 @@ class Controls extends React.Component {
         <HeaderFont style={styles.heading}>{"Date Range"}</HeaderFont>
         <DateRangeInputs {...this.props}/>
 
+        <HeaderFont style={styles.heading}>{"Color By"}</HeaderFont>
+        <ColorBy {...this.props}/>
+
         <HeaderFont style={styles.heading}>{"Tree Options"}</HeaderFont>
         <SelectLabel text="Layout"/>
         <ChooseLayout {...this.props}/>
-        <SelectLabel text="X axis"/>
+        <SelectLabel text="Branch Length"/>
         <ChooseMetric {...this.props}/>
 
         <HeaderFont style={styles.heading}>{"Filters"}</HeaderFont>
-        <ColorBy {...this.props}/>
         <AllFilters {...this.props} />
         <ToggleBranchLabels/>
         <Search/>

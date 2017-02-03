@@ -44,7 +44,7 @@ class ChooseMetric extends React.Component {
           this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
           this.setMetricQueryParam("div");
         }}>
-        <span style={styles.title}> {"mutations"} </span>
+        <span style={styles.title}> {"divergence"} </span>
       </button>
       <button
         key={2}

@@ -110,7 +110,6 @@ class TreeView extends React.Component {
         styleToUpdate['fill'] = nextProps.nodeColor.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
         });
-        tree.updateStyleOrAttributeArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration, "style");
         styleToUpdate['stroke'] = nextProps.nodeColor;
       }
       /* tip radius has changed */
@@ -149,11 +148,11 @@ class TreeView extends React.Component {
 
       /* swap layouts */
       if (this.props.layout !== nextProps.layout) {
-        tree.updateLayout(nextProps.layout, slowTransitionDuration);
+        tree.updateLayout(nextProps.layout, mediumTransitionDuration);
       }
       /* change distance metrics */
       if (this.props.distanceMeasure !== nextProps.distanceMeasure) {
-        tree.updateDistance(nextProps.distanceMeasure, slowTransitionDuration);
+        tree.updateDistance(nextProps.distanceMeasure, mediumTransitionDuration);
       }
     }
   }
@@ -289,10 +288,10 @@ class TreeView extends React.Component {
     return () => {
 
       if (tool === "zoom-in") {
-        this.Viewer.zoomOnViewerCenter(1.1);
+        this.Viewer.zoomOnViewerCenter(1.4);
         // console.log('zooming in', this.state.zoom, zoom)
       } else {
-        this.Viewer.zoomOnViewerCenter(0.9);
+        this.Viewer.zoomOnViewerCenter(0.71);
       }
 
       // const viewerX = this.state.width / 2;

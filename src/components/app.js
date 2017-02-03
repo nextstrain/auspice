@@ -31,7 +31,7 @@ import getColorScale from "../util/getColorScale";
 import { parseGenotype, getGenotype } from "../util/getGenotype";
 import * as globals from "../util/globals";
 import { defaultDateRange, defaultLayout, defaultDistanceMeasure,
-  defaultColorBy, tipRadius, freqScale } from "../util/globals";
+  defaultColorBy, tipRadius, tipRadiusOnLegendMatch, freqScale } from "../util/globals";
 import Sidebar from "react-sidebar";
 import moment from 'moment';
 
@@ -339,7 +339,7 @@ class App extends React.Component {
     let bool;
     const nodeAttr = this.getTipColorAttribute(node, cScale);
     // equates a tip and a legend element
-    // exact match is required for categorical qunantities such as genotypes, regions
+    // exact match is required for categorical quantities such as genotypes, regions
     // continuous variables need to fall into the interal (lower_bound[leg], leg]
     if (legendBoundsMap) {
       bool = (nodeAttr <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
@@ -355,7 +355,9 @@ class App extends React.Component {
     if (selItem && this.props.tree.nodes){
       const legendMap = cScale.continuous
                         ? cScale.legendBoundsMap : false;
-      return this.props.tree.nodes.map((d) => this.determineLegendMatch(selItem, d, legendMap, cScale) ? 6 : 3);
+      return this.props.tree.nodes.map((d) =>
+        this.determineLegendMatch(selItem, d, legendMap, cScale) ? tipRadiusOnLegendMatch : tipRadius
+      );
     } else if (this.props.tree.nodes) {
       return this.props.tree.nodes.map((d) => tipRadius);
     } else {

@@ -19,9 +19,10 @@ class HeaderFont extends React.Component {
       base: {
         fontFamily: globalStyles.sans,
         fontSize: this.props.size === "large" ? 76 : 28,
-        lineHeight: "68px",
+        lineHeight: "28px",
         letterSpacing: -1.8,
-        margin: 0
+        marginTop: 20,
+        marginBottom: 10
       }
     };
   }

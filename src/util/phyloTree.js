@@ -995,11 +995,18 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
     };
   };
   // update the svg
-  this.svg.selectAll(treeElem).filter(function(d) {
-      return d.update;
-    })
-    .transition().duration(dt)
-    .call(update(Object.keys(attrs), Object.keys(styles)));
+  if (dt) {
+    this.svg.selectAll(treeElem).filter(function(d) {
+        return d.update;
+      })
+      .transition().duration(dt)
+      .call(update(Object.keys(attrs), Object.keys(styles)));
+  } else {
+    this.svg.selectAll(treeElem).filter(function(d) {
+        return d.update;
+      })
+      .call(update(Object.keys(attrs), Object.keys(styles)));
+  }
 
 };
 
