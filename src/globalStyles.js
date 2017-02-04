@@ -1,6 +1,6 @@
 import { controlsWidth } from "./util/globals";
 
-//export const headerFont = "aw-conqueror-sans, sans-serif";
+//export const titleFont = "aw-conqueror-sans, sans-serif";
 export const titleFont = "Quicksand, Helvetica Neue, Helvetica, sans-serif";
 export const headerFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const dataFont = "Lato, Helvetica Neue, Helvetica, sans-serif";

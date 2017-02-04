@@ -29,7 +29,9 @@ const computeResponsive = ({
   horizontal, /* multiplicative 1 (mobile, tablet, laptop) or .5 (2 column big monitor) */
   vertical, /* multiplicative .5 (if splitting with another pane) or 1 (if full height of browser window)*/
   browserDimensions, /* window.innerWidth & window.innerHeight as an object */
-  sidebar /* if open, subtract sidebar width from browser width? */
+  sidebar, /* if open, subtract sidebar width from browser width? */
+  minHeight, /* minimum height of element */
+  maxAspectRatio /* maximum aspect ratio of element */
 }) => {
 
   let width = null;
@@ -44,6 +46,14 @@ const computeResponsive = ({
     let controls = sidebar ? globals.controlsWidth + controlsPadding : 0;
     width = horizontal * (browserDimensions.width - controls - horizontalPadding);
     height = browserDimensions.height * vertical - verticalPadding;
+  }
+
+  if (minHeight && height < minHeight) {
+    height = minHeight;
+  }
+
+  if (maxAspectRatio && height > maxAspectRatio*width) {
+    height = maxAspectRatio*width;
   }
 
   return {

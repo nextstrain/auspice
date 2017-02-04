@@ -330,8 +330,8 @@ class TreeView extends React.Component {
       vertical: 1,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
-      split: false,
-      extraPadding: 0
+      minHeight: 400,
+      maxAspectRatio: 1.3
     })
 
     return (
@@ -341,8 +341,8 @@ class TreeView extends React.Component {
           height={250 /* this should be dynamically calculated by number of elements */}
           style={{
             position: "absolute",
-            left: 13,
-            top: 45,
+            left: 12,
+            top: 35,
             borderRadius: 10,
             zIndex: 1000,
             backgroundColor: "rgba(255,255,255,.85)"

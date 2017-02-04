@@ -23,10 +23,9 @@ class Card extends React.Component {
         fontFamily: headerFont,
         color: medGrey,
         fontSize: 16,
-        marginBottom: 10,
-        marginLeft: 10,
-        marginTop: 5,
+        margin: 5,
         fontWeight: 500,
+        backgroundColor: "#FFFFFF"
       }
     };
   }
@@ -37,10 +36,10 @@ class Card extends React.Component {
         styles.base,
         this.props.style
       ]}>
-        <p style={[
+        <div style={[
           styles.title,
           this.props.titleStyles
-        ]}> {this.props.title} </p>
+        ]}> {this.props.title} </div>
         <div style={{
             display: "flex",
             justifyContent: this.props.center ? "center" : "flex-start"

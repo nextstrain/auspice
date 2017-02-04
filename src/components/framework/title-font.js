@@ -16,7 +16,7 @@ class TitleFont extends React.Component {
       base: {
         fontFamily: titleFont,
         fontSize: 76,
-        lineHeight: "28px",
+        lineHeight: "76px",
         letterSpacing: -1.8,
         marginTop: 20,
         marginBottom: 10,
