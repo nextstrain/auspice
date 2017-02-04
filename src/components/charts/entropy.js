@@ -39,8 +39,8 @@ class Entropy extends React.Component {
     const entropyChartWidth = responsive.width;
     const entropyChartHeight = 300;
     const bottomPadding = 50;
-    const leftPadding = 80;
-    const rightPadding = 80;
+    const leftPadding = 38;
+    const rightPadding = 12;
 
     const entropy = this.props.entropy['nuc']['val'].map((s, i) => {return {x: this.props.entropy['nuc']['pos'][i], y: s}});
 

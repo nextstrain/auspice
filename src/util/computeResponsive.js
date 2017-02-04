@@ -35,13 +35,14 @@ const computeResponsive = ({
   let width = null;
   let height = null;
 
-  const horizontalPadding = horizontal === 1 ? 115 : 75; /* could be more solid */
+  const horizontalPadding = horizontal === 1 ? 45 : 75; /* could be more solid */
   const headerFooterPadding = 300;
   const verticalPadding = 165;
+  const controlsPadding = 55;
 
   if (browserDimensions) {
-    let controls = sidebar ? globals.controlsWidth : 0;
-    width = (browserDimensions.width * horizontal) - (controls * horizontal) - horizontalPadding;
+    let controls = sidebar ? globals.controlsWidth + controlsPadding : 0;
+    width = horizontal * (browserDimensions.width - controls - horizontalPadding);
     height = browserDimensions.height * vertical - verticalPadding;
   }
 
