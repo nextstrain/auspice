@@ -1,7 +1,7 @@
 import React from "react";
 import TimeTree from "../framework/svg-time-tree";
 import MutationTree from "../framework/svg-mutation-tree";
-import {materialButton} from "../../globalStyles";
+import {materialButton, materialButtonSelected} from "../../globalStyles";
 import { connect } from "react-redux";
 import { CHANGE_DISTANCE_MEASURE } from "../../actions/controls";
 
@@ -9,7 +9,11 @@ import { CHANGE_DISTANCE_MEASURE } from "../../actions/controls";
  * implements a pair of buttons the toggle between timetree and divergence tree
  */
 
-@connect()
+ @connect((state) => {
+   return {
+     distanceMeasure: state.controls.distanceMeasure
+   };
+ })
 class ChooseMetric extends React.Component {
   getStyles() {
     return {
@@ -17,9 +21,9 @@ class ChooseMetric extends React.Component {
         marginBottom: 10
       },
       title: {
+        margin: 5,
         position: "relative",
-        top: -5,
-        fontWeight: 300
+        top: -1
       }
     };
   }
@@ -35,11 +39,12 @@ class ChooseMetric extends React.Component {
 
   render() {
   const styles = this.getStyles();
+  const selected = this.props.distanceMeasure;
   return (
     <div style={styles.container}>
       <button
         key={1}
-        style={materialButton}
+        style={selected === "div" ? materialButtonSelected : materialButton}
         onClick={() => {
           this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
           this.setMetricQueryParam("div");
@@ -48,7 +53,7 @@ class ChooseMetric extends React.Component {
       </button>
       <button
         key={2}
-        style={materialButton}
+        style={selected === "num_date" ? materialButtonSelected : materialButton}
         onClick={() => {
           this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "num_date" });
           this.setMetricQueryParam("num_date");

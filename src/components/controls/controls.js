@@ -37,22 +37,22 @@ class Controls extends React.Component {
           padding: "0px 20px 20px 20px"
         }}>
 
-        <HeaderFont bold dark>{"Dataset"}</HeaderFont>
+        <HeaderFont>{"Dataset"}</HeaderFont>
         <ChooseVirus {...this.props}/>
 
-        <HeaderFont bold dark>{"Date Range"}</HeaderFont>
+        <HeaderFont>{"Date Range"}</HeaderFont>
         <DateRangeInputs {...this.props}/>
 
-        <HeaderFont bold dark>{"Color By"}</HeaderFont>
+        <HeaderFont>{"Color By"}</HeaderFont>
         <ColorBy {...this.props}/>
 
-        <HeaderFont bold dark>{"Tree Options"}</HeaderFont>
+        <HeaderFont>{"Tree Options"}</HeaderFont>
         <SelectLabel text="Layout"/>
         <ChooseLayout {...this.props}/>
         <SelectLabel text="Branch Length"/>
         <ChooseMetric {...this.props}/>
 
-        <HeaderFont bold dark>{"Filters"}</HeaderFont>
+        <HeaderFont>{"Filters"}</HeaderFont>
         <AllFilters {...this.props} />
         <ToggleBranchLabels/>
         <Search/>

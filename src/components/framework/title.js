@@ -1,6 +1,6 @@
 import React from 'react';
 import Flex from './flex';
-import HeaderFont from "./header-font";
+import TitleFont from "./title-font";
 import MonoFont from "./mono-font";
 import { connect } from "react-redux";
 
@@ -45,7 +45,7 @@ class Title extends React.Component {
   render() {
     return (
       <Flex style={{height: 80}}>
-        <HeaderFont size="large" weight="300"> {this.createTitle()} </HeaderFont>
+        <TitleFont> {this.createTitle()} </TitleFont>
       </Flex>
     );
   }

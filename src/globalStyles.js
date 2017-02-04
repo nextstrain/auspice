@@ -1,10 +1,11 @@
 import { controlsWidth } from "./util/globals";
 
 //export const headerFont = "aw-conqueror-sans, sans-serif";
-export const headerFont = "Quicksand, sans-serif";
+export const titleFont = "Quicksand, sans-serif";
+export const headerFont = "Lato, sans-serif";
 export const dataFont = "Lato, sans-serif";
 export const lighterGrey = "rgb(200, 200, 200)";
-export const darkGrey = "#555";
+export const darkGrey = "#333";
 export const medGrey = "#888";
 export const lightGrey = "#CCC";
 export const brandColor = "#5DA8A3";
@@ -14,22 +15,41 @@ export const select = {
   background: "transparent",
   fontFamily: dataFont,
   width: controlsWidth,
-  fontSize: 16,
+  fontSize: 14,
   border: "1px solid #ccc",
   height: 34,
   appearance: "none",
   borderRadius: 6,
-  color: medGrey
+  color: darkGrey,
+  fontWeight: 400
 };
 
 export const materialButton = {
-  border: "1px solid #CCC",
+  border: "0px",
   backgroundColor: "#FFFFFF",
   margin: 5,
-  borderRadius: 6,
+  borderRadius: 2,
   cursor: "pointer",
-  padding: "10px 10px 0px 10px",
+  padding: 5,
   fontFamily: dataFont,
-  // height: 40,
-  // width: 140,
+  color: brandColor,
+  fontWeight: 400,
+  textTransform: "uppercase",
+  fontSize: 14,
+  verticalAlign: "top"
+};
+
+export const materialButtonSelected = {
+  border: "0px",
+  backgroundColor: brandColor,
+  margin: 5,
+  borderRadius: 2,
+  cursor: "pointer",
+  padding: 5,
+  fontFamily: dataFont,
+  color: "#FFF",
+  fontWeight: 400,
+  textTransform: "uppercase",
+  fontSize: 14,
+  verticalAlign: "top"  
 };

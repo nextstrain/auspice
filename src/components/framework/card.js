@@ -18,7 +18,7 @@ class Card extends React.Component {
       },
       title: {
         fontFamily: headerFont,
-        color: darkGrey,
+        color: medGrey,
         fontSize: 16,
         marginBottom: 10,
         marginLeft: 10,
