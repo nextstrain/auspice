@@ -21,7 +21,8 @@ const Controls = (state = {
   dateMax: null,
   absoluteDateMin: null,
   absoluteDateMax: null,
-  colorBy: null
+  colorBy: globals.defaultColorBy,
+  colorScale: null
 }, action) => {
   switch (action.type) {
   case types.TOGGLE_BRANCH_LABELS:
@@ -79,6 +80,10 @@ const Controls = (state = {
   case types.CHANGE_COLOR_BY:
     return Object.assign({}, state, {
       colorBy: action.data
+    });
+  case types.SET_COLOR_SCALE:
+    return Object.assign({}, state, {
+      colorScale: action.data
     });
   default:
     return state;

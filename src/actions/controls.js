@@ -1,3 +1,6 @@
+import { parseGenotype } from "../util/getGenotype";
+import getColorScale from "../util/getColorScale";
+
 export const TOGGLE_BRANCH_LABELS = "TOGGLE_BRANCH_LABELS";
 export const LEGEND_ITEM_MOUSEENTER = "LEGEND_ITEM_MOUSEENTER";
 export const LEGEND_ITEM_MOUSELEAVE = "LEGEND_ITEM_MOUSELEAVE";
@@ -13,24 +16,48 @@ export const CHANGE_DATE_MAX = "CHANGE_DATE_MAX";
 export const CHANGE_ABSOLUTE_DATE_MIN = "CHANGE_ABSOLUTE_DATE_MIN";
 export const CHANGE_ABSOLUTE_DATE_MAX = "CHANGE_ABSOLUTE_DATE_MAX";
 export const CHANGE_COLOR_BY = "CHANGE_COLOR_BY";
+export const SET_COLOR_SCALE = "SET_COLOR_SCALE";
 
+const colorScaleWrapper = function (colorBy, tree, sequences, colorOptions) {
+  const colorScale = getColorScale(colorBy, tree, sequences, colorOptions);
+  if (colorBy.slice(0, 3) === "gt-" && sequences.geneLength) {
+    colorScale.genotype = parseGenotype(colorBy, sequences.geneLength);
+  }
+  return colorScale;
+};
+
+export const updateColorScale = function () {
+  return function (dispatch, getState) {
+    console.log("colorScale updated")
+    const { controls, tree, sequences, metadata } = getState();
+    dispatch({
+      type: SET_COLOR_SCALE,
+      data: colorScaleWrapper(controls.colorBy, tree, sequences, metadata.colorOptions)
+    });
+  };
+};
 
 /* an action to set the URL / react-router query bit when color By changes
-   YES, this is syncronous, it's not a thunk
+   this is a thunk so it can access (redux) state
+   here is where the colorScale is calculated
 */
-export const changeColorBy = (colorBy, router = null) => {
-  // ∆ react-router, only if router provided
-  if (router) {
-    const location = router.getCurrentLocation();
-    const newQuery = Object.assign({}, location.query, {c: colorBy});
-    router.push({
-      pathname: location.pathname,
-      query: newQuery
+export const changeColorBy = function (colorBy, router = null) {
+  return function (dispatch, getState) {
+    console.log("changeColorBy thunk")
+    // ∆ react-router, only if router provided
+    if (router) {
+      const location = router.getCurrentLocation();
+      const newQuery = Object.assign({}, location.query, {c: colorBy});
+      router.push({
+        pathname: location.pathname,
+        query: newQuery
+      });
+    }
+    dispatch({
+      type: CHANGE_COLOR_BY,
+      data: colorBy
     });
-  }
-  // return an action to be dispatched
-  return {
-    type: CHANGE_COLOR_BY,
-    data: colorBy
+    // update the colorScale - NB this won't have an effect unless the tree etc are loaded
+    dispatch(updateColorScale());
   };
 };

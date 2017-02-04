@@ -18,6 +18,7 @@ const getExtraVals = (nodes, colorBy, color_map) => {
 
 
 const genericScale = (cmin, cmax) => {
+  console.log("genericScale called. This is next to useless.")
   const offset = +cmin;
   const range = cmax - cmin;
   const tmpColorScale = d3.scale.linear()
@@ -76,10 +77,8 @@ const discreteAttributeScale = (nodes, attr) => {
 const getColorScale = (colorBy, tree, sequences, colorOptions) => {
   let colorScale;
   let continuous = false;
-
   if (!tree.nodes) {
     // make a dummy color scale before the tree is in place
-    // console.log("tree not ready - making dummy color scale")
     continuous = true;
     colorScale = genericScale(0, 1);
   } else if (colorBy.slice(0, 2) === "gt") {

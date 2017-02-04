@@ -15,6 +15,7 @@ import computeResponsive from "../../util/computeResponsive";
   return {
     tree: state.tree.tree,
     metadata: state.metadata.metadata,
+    colorScale: state.controls.colorScale,
     browserDimensions: state.browserDimensions.browserDimensions
   };
 })
@@ -25,6 +26,9 @@ class Map extends React.Component {
       tips: false,
       map: null
     };
+  }
+  static propTypes = {
+    colorScale: React.PropTypes.object.isRequired
   }
   componentWillMount() {
     /* this sets up window.L */
@@ -59,8 +63,8 @@ class Map extends React.Component {
       this.props.nodes &&
       !this.state.tips /* we haven't already drawn tips */
     ) {
-      addAllTipsToMap(this.props.nodes, this.props.metadata, this.props.colorScale, this.state.map);
-      addTransmissionEventsToMap(this.props.nodes, this.props.metadata, this.props.colorScale, this.state.map);
+      addAllTipsToMap(this.props.nodes, this.props.metadata, this.props.colorScale.scale, this.state.map);
+      addTransmissionEventsToMap(this.props.nodes, this.props.metadata, this.props.colorScale.scale, this.state.map);
       // don't redraw on every rerender - need to seperately handle virus change redraw
       this.setState({tips: true});
     }

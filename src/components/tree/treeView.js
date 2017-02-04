@@ -15,6 +15,7 @@ import * as globalStyles from "../../globalStyles";
 import InfoPanel from "./infoPanel";
 import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
+import { getGenotype } from "../../util/getGenotype";
 
 const arrayInEquality = function(a,b) {
   if (a&&b){
@@ -25,6 +26,60 @@ const arrayInEquality = function(a,b) {
   }
 };
 
+// following fns moved from app.js when colorScale -> REDUX
+const getTipColorAttribute = function (node, colorScale, sequences) {
+  if (colorScale.colorBy.slice(0, 3) === "gt-" && colorScale.genotype) {
+    return getGenotype(colorScale.genotype[0][0],
+                       colorScale.genotype[0][1],
+                       node,
+                       sequences.sequences);
+  }
+  return node.attr[colorScale.colorBy];
+};
+
+const nodeColor = function (tree, colorScale, sequences) {
+  if (tree && tree.nodes && colorScale && colorScale.colorBy) {
+    const nodeColorAttr = tree.nodes.map((n) => getTipColorAttribute(n, colorScale, sequences));
+    return nodeColorAttr.map((n) => colorScale.scale(n));
+  }
+  return null;
+};
+
+const determineLegendMatch = function (selectedLegendItem,
+                                       node,
+                                       legendBoundsMap,
+                                       colorScale,
+                                       sequences) {
+  let bool;
+  const nodeAttr = getTipColorAttribute(node, colorScale, sequences);
+  // equates a tip and a legend element
+  // exact match is required for categorical qunantities such as genotypes, regions
+  // continuous variables need to fall into the interal (lower_bound[leg], leg]
+  if (legendBoundsMap) {
+    bool = (nodeAttr <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
+           (nodeAttr > legendBoundsMap.lower_bound[selectedLegendItem]);
+  } else {
+    bool = nodeAttr === selectedLegendItem;
+  }
+  return bool;
+};
+
+const tipRadii = function (selectedLegendItem,
+                           colorScale,
+                           sequences,
+                           tree
+                         ) {
+  if (selectedLegendItem && tree && tree.nodes){
+    const legendMap = colorScale.continuous
+                      ? colorScale.legendBoundsMap : false;
+    return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, legendMap, colorScale, sequences) ? 6 : 3);
+  } else if (tree && tree.nodes) {
+    return tree.nodes.map((d) => globals.tipRadius);
+  }
+  return null; // fallthrough
+};
+// end of fns from app.js
+
 /*
  * TreeView creates a (now responsive!) SVG & scales according to layout
  * such that branches and tips are correctly placed.
@@ -32,11 +87,15 @@ const arrayInEquality = function(a,b) {
 */
 @connect((state) => {
   return {
-    tree: state.tree.tree,
+    tree: state.tree,
     metadata: state.metadata.metadata,
+    colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
     layout: state.controls.layout,
-    distanceMeasure: state.controls.distanceMeasure
+    distanceMeasure: state.controls.distanceMeasure,
+    sequences: state.sequences,
+    selectedLegendItem: state.controls.selectedLegendItem,
+    colorScale: state.controls.colorScale
   };
 })
 class TreeView extends React.Component {
@@ -101,22 +160,35 @@ class TreeView extends React.Component {
     /* if we have a tree and we have new props, figure out what we need to update */
     if (tree) {
 
+      /* in preparation for figuring what's changed, we need to work out a few attributes
+      these used to be in app.js
+      these should be moved to REDUX
+      */
+      const oldTipRadii = tipRadii(this.props.selectedLegendItem, this.props.colorScale, this.props.sequences, this.props.tree)
+      const newTipRadii = tipRadii(nextProps.selectedLegendItem, nextProps.colorScale, nextProps.sequences, nextProps.tree)
+
+      const oldNodeColor = nodeColor(this.props.tree, this.props.colorScale, this.props.sequences)
+      const newNodeColor = nodeColor(nextProps.tree, nextProps.colorScale, nextProps.sequences)
+
       /* update tips */
       let attrToUpdate = {};
       let styleToUpdate = {};
 
+
       /* tip color has changed */
-      if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
-        styleToUpdate['fill'] = nextProps.nodeColor.map((col) => {
+      if (newNodeColor && arrayInEquality(oldNodeColor, newNodeColor)) {
+        styleToUpdate['fill'] = newNodeColor.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
         });
-        tree.updateStyleOrAttributeArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration, "style");
-        styleToUpdate['stroke'] = nextProps.nodeColor;
+        tree.updateStyleOrAttributeArray(".branch", "stroke", newNodeColor, fastTransitionDuration, "style");
+        styleToUpdate['stroke'] = newNodeColor;
       }
+
       /* tip radius has changed */
-      if (nextProps.tipRadii && arrayInEquality(nextProps.tipRadii, this.props.tipRadii)) {
-        attrToUpdate['r'] = nextProps.tipRadii;
+      if (newTipRadii && arrayInEquality(oldTipRadii, newTipRadii)) {
+        attrToUpdate['r'] = newTipRadii;
       }
+
       /* tip visibility has changed, for instance because of date slider */
       if (nextProps.tipVisibility && arrayInEquality(nextProps.tipVisibility, this.props.tipVisibility)) {
         // console.log("updateVisibility");
@@ -132,10 +204,9 @@ class TreeView extends React.Component {
       styleToUpdate = {};
 
       /* branch color has changed */
-      if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
-        styleToUpdate['stroke'] = nextProps.nodeColor.map((col) => {
-          var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
-        	return d3.rgb(modCol).toString();
+      if (newNodeColor && arrayInEquality(oldNodeColor, newNodeColor)) {
+        styleToUpdate['stroke'] = newNodeColor.map((col) => {
+      	return d3.rgb(d3.interpolateRgb(col, "#BBB")(0.6)).toString();
         });
       }
       /* branch stroke width has changed */

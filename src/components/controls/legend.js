@@ -2,7 +2,13 @@ import React from "react";
 import d3 from "d3";
 import { legendRectSize, legendSpacing, defaultColorBy } from "../../util/globals";
 import LegendItem from "./legend-item";
+import { connect } from "react-redux";
 
+@connect((state) => {
+  return {
+    colorScale: state.controls.colorScale
+  };
+})
 class Legend extends React.Component {
   chooseLegendTitle() {
     let legendTitle = "";

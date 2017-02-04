@@ -10,7 +10,7 @@ import {
 } from "../actions";
 import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_DATE_MIN,
   CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN, CHANGE_ABSOLUTE_DATE_MAX,
-  changeColorBy } from "../actions/controls";
+  changeColorBy, updateColorScale } from "../actions/controls";
 
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
@@ -31,21 +31,26 @@ import getColorScale from "../util/getColorScale";
 import { parseGenotype, getGenotype } from "../util/getGenotype";
 import * as globals from "../util/globals";
 import { defaultDateRange, defaultLayout, defaultDistanceMeasure,
-  defaultColorBy, tipRadius, freqScale } from "../util/globals";
+  tipRadius, freqScale, defaultColorBy } from "../util/globals";
 import Sidebar from "react-sidebar";
 import moment from 'moment';
 
-const returnStateNeeded = (fullStateTree) => {
+const returnStateNeeded = (reduxState) => {
   return {
-    tree: fullStateTree.tree,
-    sequences: fullStateTree.sequences,
-    metadata: fullStateTree.metadata,
-    selectedLegendItem: fullStateTree.controls.selectedLegendItem,
-    dateMin: fullStateTree.controls.dateMin,
-    dateMax: fullStateTree.controls.dateMax,
-    colorBy: fullStateTree.controls.colorBy
+    tree: reduxState.tree,
+    sequences: reduxState.sequences,
+    metadata: reduxState.metadata,
+    colorOptions: reduxState.metadata.colorOptions,
+    selectedLegendItem: reduxState.controls.selectedLegendItem,
+    dateMin: reduxState.controls.dateMin,
+    dateMax: reduxState.controls.dateMax,
+    colorBy: reduxState.controls.colorBy
   };
 };
+/* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
+  colorOptions: parameters for each colorBy value (country, region etc)
+      ideally come from the JSON, but there are defaults if necessary
+*/
 @connect(returnStateNeeded)
 @Radium
 class App extends React.Component {
@@ -204,6 +209,14 @@ class App extends React.Component {
       this.props.dispatch(populateSequencesStore(data_path));
       this.props.dispatch(populateFrequenciesStore(data_path));
       this.props.dispatch(populateEntropyStore(data_path));
+      /* when all this has been done we need to re-create the colorScale
+      there's definately a better way to do it than this
+      but for now... SORRY!
+      */
+      window.setTimeout(
+        () => this.props.dispatch(updateColorScale()),
+        500
+      )
       this.setState({latestValidParams: parsedParams.fullsplat});
     }
   }
@@ -219,54 +232,9 @@ class App extends React.Component {
     this.changeRoute(newPath, this.state.location.query);
   }
 
-  getTipColorAttribute(node, cScale) {
-    if (cScale.colorBy.slice(0,3) === "gt-" && cScale.genotype) {
-        return getGenotype(cScale.genotype[0][0],
-                                  cScale.genotype[0][1],
-                                  node, this.props.sequences.sequences);
-    } else {
-      return node.attr[cScale.colorBy];
-    };
-  }
-
-  /* color options are parameters for each colorBy value (country, region etc)
-  these parameters ideally come from the JSON, but there are defaults if necessary
-  */
-  getColorOptions() {
-    if (this.props.metadata.metadata && this.props.metadata.metadata.color_options) {
-      return this.props.metadata.metadata.color_options;
-    }
-    return globals.colorOptions;
-  }
-
-  createColorScale(colorBy) {
-    const cScale = getColorScale(colorBy,
-      this.props.tree,
-      this.props.sequences,
-      this.getColorOptions()
-    );
-    if (colorBy) {
-      let gts = null;
-      if (colorBy.slice(0,3) === "gt-" && this.props.sequences.geneLength) {
-        gts = parseGenotype(colorBy, this.props.sequences.geneLength);
-      }
-      cScale.genotype = gts;
-    }
-    return cScale;
-  }
-
   parseFilterQuery(query) {
     const tmp = query.split("-").map( (d) => d.split("."));
     return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1].split(',') )};
-  }
-
-  nodeColor(cScale){
-    if (this.props.tree.nodes && cScale && cScale.colorBy){
-      const nodeColorAttr = this.props.tree.nodes.map((n) => this.getTipColorAttribute(n, cScale));
-      return nodeColorAttr.map((n) => cScale.scale(n));
-    } else {
-      return null;
-    }
   }
 
   tipVisibility(filters) {
@@ -333,36 +301,6 @@ class App extends React.Component {
   }
 
   /******************************************
-   * HOVER EVENTS
-   *****************************************/
-  determineLegendMatch(selectedLegendItem, node, legendBoundsMap, cScale) {
-    let bool;
-    const nodeAttr = this.getTipColorAttribute(node, cScale);
-    // equates a tip and a legend element
-    // exact match is required for categorical qunantities such as genotypes, regions
-    // continuous variables need to fall into the interal (lower_bound[leg], leg]
-    if (legendBoundsMap) {
-      bool = (nodeAttr <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
-             (nodeAttr > legendBoundsMap.lower_bound[selectedLegendItem]);
-    } else {
-      bool = nodeAttr === selectedLegendItem;
-    }
-    return bool;
-  }
-
-  tipRadii(cScale) {
-    const selItem = this.props.selectedLegendItem;
-    if (selItem && this.props.tree.nodes){
-      const legendMap = cScale.continuous
-                        ? cScale.legendBoundsMap : false;
-      return this.props.tree.nodes.map((d) => this.determineLegendMatch(selItem, d, legendMap, cScale) ? 6 : 3);
-    } else if (this.props.tree.nodes) {
-      return this.props.tree.nodes.map((d) => tipRadius);
-    } else {
-      return null;
-    }
-  }
-  /******************************************
    * SIDEBAR
    *****************************************/
 
@@ -379,16 +317,13 @@ class App extends React.Component {
    * RENDER
    *****************************************/
   render() {
-      const colorBy = this.props.colorBy ? this.props.colorBy : defaultColorBy;
-      const colorScale = this.createColorScale(colorBy);
       return (
       <Sidebar
         sidebar={
           <Controls changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
             router={this.props.router}
-            colorOptions={this.getColorOptions()}
-            colorScale={colorScale}
+            colorOptions={this.props.colorOptions}
           />
         }
         open={this.state.sidebarOpen}
@@ -402,28 +337,25 @@ class App extends React.Component {
             }}
           />
           <Header/>
-            <TreeView nodes={this.props.tree.nodes}
-              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-              colorScale={colorScale}
-              nodeColor={this.nodeColor(colorScale)}
-              tipRadii={this.tipRadii(colorScale)}
-              tipVisibility={this.tipVisibility()}
-              branchThickness={this.branchThickness()}
-              datasetGuid={this.props.tree.datasetGuid}
+          <TreeView nodes={this.props.tree.nodes}
+            location={this.state.location}
+            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+            tipVisibility={this.tipVisibility()}
+            branchThickness={this.branchThickness()}
+            datasetGuid={this.props.tree.datasetGuid}
+          />
+          <Map
+            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+            nodes={this.props.tree.nodes}
+            justGotNewDatasetRenderNewMap={false}
             />
-            <Map
-              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-              colorScale={colorScale.scale}
-              nodes={this.props.tree.nodes}
-              justGotNewDatasetRenderNewMap={false}
-              />
-            <Frequencies genotype={this.currentFrequencies()}/>
-            <Entropy
-              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-              changeRoute={this.changeRoute.bind(this)}
-              location={this.state.location}
-              router={this.props.router}
-            />
+          <Frequencies genotype={this.currentFrequencies()}/>
+          <Entropy
+            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+            changeRoute={this.changeRoute.bind(this)}
+            location={this.state.location}
+            router={this.props.router}
+          />
         </Background>
       </Sidebar>
     );
