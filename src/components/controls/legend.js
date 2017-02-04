@@ -66,9 +66,19 @@ class Legend extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <g>
-        {this.createLegendItems()}
-      </g>
+      <svg
+        width = {styles.svg.width}
+        height = {styles.svg.height}
+        style={{
+          position: "absolute",
+          left: 12,
+          top: 35,
+          borderRadius: 2,
+          zIndex: 1000,
+          backgroundColor: "rgba(255,255,255,.85)"
+        }}>
+        <g>{this.createLegendItems()}</g>
+      </svg>
     );
   }
 }

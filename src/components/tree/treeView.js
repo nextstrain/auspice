@@ -336,19 +336,7 @@ class TreeView extends React.Component {
 
     return (
       <Card center title="Phylogeny">
-        <svg
-          width={300}
-          height={250 /* this should be dynamically calculated by number of elements */}
-          style={{
-            position: "absolute",
-            left: 12,
-            top: 35,
-            borderRadius: 10,
-            zIndex: 1000,
-            backgroundColor: "rgba(255,255,255,.85)"
-          }}>
-          <Legend colorScale={this.props.colorScale}/>
-        </svg>
+        <Legend colorScale={this.props.colorScale}/>
         <InfoPanel
           dismiss={this.infoPanelDismiss.bind(this)}
           zoom={this.state.tree ? this.state.tree.zoomIntoClade.bind(this.state.tree) : null}
