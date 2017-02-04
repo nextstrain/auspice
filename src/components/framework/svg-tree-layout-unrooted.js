@@ -15,7 +15,7 @@ class UnrootedTreeLayout extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <svg width={this.props.width+5} height={this.props.width+5}>
+      <svg width={this.props.width} height={this.props.width+5}>
         <g transform="translate(0,5)">
           <svg width={this.props.width} height={this.props.width} viewBox="106 49 150 118">
             <polyline

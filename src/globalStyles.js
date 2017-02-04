@@ -32,7 +32,7 @@ export const materialButton = {
   cursor: "pointer",
   padding: 5,
   fontFamily: dataFont,
-  color: brandColor,
+  color: medGrey,
   fontWeight: 400,
   textTransform: "uppercase",
   fontSize: 14,
@@ -41,15 +41,16 @@ export const materialButton = {
 
 export const materialButtonSelected = {
   border: "0px",
-  backgroundColor: brandColor,
+  backgroundColor: "#FFFFFF",
   margin: 5,
   borderRadius: 2,
   cursor: "pointer",
   padding: 5,
   fontFamily: dataFont,
-  color: "#FFF",
+  color: brandColor,
   fontWeight: 400,
   textTransform: "uppercase",
   fontSize: 14,
-  verticalAlign: "top"
+  verticalAlign: "top",
+  cursor: "default"
 };

@@ -29,7 +29,7 @@ class RectangularTreeLayout extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <svg width={this.props.width+5} height={this.props.width+5}>
+      <svg width={this.props.width} height={this.props.width+5}>
         <g transform="translate(0,5)">
           <svg width={this.props.width} height={this.props.width} viewBox="16 19 27 22">
             <g id="Group" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd" transform="translate(17.000000, 20.000000)">

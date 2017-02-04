@@ -11,7 +11,8 @@ class ToggleBranchLabels extends React.Component {
         marginBottom: 20,
         fontFamily: dataFont,
         marginTop: 10,
-        color: darkGrey
+        color: darkGrey,
+        fontSize: 14
       }
     };
   }
