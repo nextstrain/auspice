@@ -181,17 +181,19 @@ class DateRangeInputs extends React.Component {
           pearling
           withBars/>
         </div>
-        <div style={{height: 10}}> </div>
+        <div style={{height: 5}}> </div>
         {/*
           the CSS for this is in index.html
           docs: https://hacker0x01.github.io/react-datepicker/
         */}
         <div style={{width: controlsWidth}}>
           <DatePicker                               // momentDates are handed to DatePicker
+            dateFormat="YYYY/MM/DD"
             selected={moment(selectedMin)}
             onChange={this.updateFromPicker.bind(this, "updateDateMin")}
           />
           <DatePicker                               // momentDates are handed to DatePicker
+            dateFormat="YYYY/MM/DD"
             className="right-datepicker"
             selected={moment(selectedMax)}
             onChange={this.updateFromPicker.bind(this, "updateDateMax")}

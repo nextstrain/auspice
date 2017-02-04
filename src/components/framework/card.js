@@ -10,8 +10,8 @@ class Card extends React.Component {
         backgroundColor: "#FFFFFF",
         display: "inline-block",
         margin: 12,
-        boxShadow: "3px 3px 12px 2px rgba(217,217,217,0.85)",
-        borderRadius: 4,
+        boxShadow: "2px 2px 4px 1px rgba(215,215,215,0.85)",
+        borderRadius: 2,
         padding: 5,
         overflow: "hidden",
         position: "relative"

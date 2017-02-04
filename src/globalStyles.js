@@ -1,9 +1,9 @@
 import { controlsWidth } from "./util/globals";
 
 //export const headerFont = "aw-conqueror-sans, sans-serif";
-export const titleFont = "Quicksand, sans-serif";
-export const headerFont = "Lato, sans-serif";
-export const dataFont = "Lato, sans-serif";
+export const titleFont = "Quicksand, Helvetica Neue, Helvetica, sans-serif";
+export const headerFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
+export const dataFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const lighterGrey = "rgb(200, 200, 200)";
 export const darkGrey = "#333";
 export const medGrey = "#888";
@@ -19,7 +19,7 @@ export const select = {
   border: "1px solid #ccc",
   height: 34,
   appearance: "none",
-  borderRadius: 6,
+  borderRadius: 2,
   color: darkGrey,
   fontWeight: 400
 };
@@ -51,5 +51,5 @@ export const materialButtonSelected = {
   fontWeight: 400,
   textTransform: "uppercase",
   fontSize: 14,
-  verticalAlign: "top"  
+  verticalAlign: "top"
 };
