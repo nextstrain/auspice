@@ -29,20 +29,31 @@ const computeResponsive = ({
   horizontal, /* multiplicative 1 (mobile, tablet, laptop) or .5 (2 column big monitor) */
   vertical, /* multiplicative .5 (if splitting with another pane) or 1 (if full height of browser window)*/
   browserDimensions, /* window.innerWidth & window.innerHeight as an object */
-  sidebar /* if open, subtract sidebar width from browser width? */
+  sidebar, /* if open, subtract sidebar width from browser width? */
+  minHeight, /* minimum height of element */
+  maxAspectRatio /* maximum aspect ratio of element */
 }) => {
 
   let width = null;
   let height = null;
 
-  const horizontalPadding = horizontal === 1 ? 115 : 75; /* could be more solid */
+  const horizontalPadding = horizontal === 1 ? 45 : 75; /* could be more solid */
   const headerFooterPadding = 300;
   const verticalPadding = 165;
+  const controlsPadding = 55;
 
   if (browserDimensions) {
-    let controls = sidebar ? globals.controlsWidth : 0;
-    width = (browserDimensions.width * horizontal) - (controls * horizontal) - horizontalPadding;
+    let controls = sidebar ? globals.controlsWidth + controlsPadding : 0;
+    width = horizontal * (browserDimensions.width - controls - horizontalPadding);
     height = browserDimensions.height * vertical - verticalPadding;
+  }
+
+  if (minHeight && height < minHeight) {
+    height = minHeight;
+  }
+
+  if (maxAspectRatio && height > maxAspectRatio*width) {
+    height = maxAspectRatio*width;
   }
 
   return {

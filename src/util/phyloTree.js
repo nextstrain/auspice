@@ -1,4 +1,5 @@
 import d3 from "d3";
+import { dataFont, darkGray } from "../globalStyles";
 
 /*
  * adds the total number of descendant leaves to each node in the tree
@@ -130,12 +131,12 @@ PhyloTree.prototype.setDefaults = function () {
         majorGridWidth: 2,
         minorGridStroke: "#DDD",
         minorGridWidth: 1,
-        tickLabelSize: 10,
-        tickLabelFill: "#BBB",
+        tickLabelSize: 12,
+        tickLabelFill: darkGray,
         minorTicksTimeTree: 3,
         minorTicks: 4,
         orientation: [1,1],
-        margins: {left:50, right:50, top:50, bottom:50},
+        margins: {left:25, right:15, top:5, bottom:25},
         showGrid: true,
         fillSelected:"#A73",
         radiusSelected:5,
@@ -145,6 +146,7 @@ PhyloTree.prototype.setDefaults = function () {
         tipFill: "#CCC",
         tipStrokeWidth: 1,
         tipRadius: 4,
+        fontFamily: dataFont
     };
 };
 
@@ -309,7 +311,8 @@ PhyloTree.prototype.drawRegression = function(){
         .attr("x", this.xScale.range()[1]-200)
         .attr("y", leftY)
         .style("fill", this.params.regressionStroke)
-        .style("font-size",this.params.tickLabelSize);
+        .style("font-size",this.params.tickLabelSize)
+        .style("font-family",this.params.fontFamily);
 };
 
 /**
@@ -608,20 +611,7 @@ PhyloTree.prototype.addGrid = function(layout) {
         }
       }
   }
-
-  const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
-  gridLabels.exit().remove();
-  gridLabels.enter().append("text");
-  gridLabels
-      .text(function(d){return d[0].toString();})
-      .attr("class", "gridTick")
-      .style("font-size",this.params.tickLabelSize)
-      .style("fill",this.params.tickLabelFill)
-      .style("text-anchor", this.layout==="radial" ? "end" : "start")
-      .style("visibility", function (d){return d[1];})
-      .attr("x", xTextPos(this.xScale, layout))
-      .attr("y", yTextPos(this.yScale, layout));
-
+  
   const minorRoundingLevel = roundingLevel / (this.distanceMeasure === "num_date"
                                               ? this.params.minorTicksTimeTree
                                               : this.params.minorTicks);
@@ -642,6 +632,20 @@ PhyloTree.prototype.addGrid = function(layout) {
       .style("visibility", function (d){return d[1];})
       .style("stroke",this.params.minorGridStroke)
       .style("stroke-width",this.params.minorGridWidth);
+
+  const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
+  gridLabels.exit().remove();
+  gridLabels.enter().append("text");
+  gridLabels
+      .text(function(d){return d[0].toString();})
+      .attr("class", "gridTick")
+      .style("font-size",this.params.tickLabelSize)
+      .style("font-family",this.params.fontFamily)
+      .style("fill",this.params.tickLabelFill)
+      .style("text-anchor", this.layout==="radial" ? "end" : "middle")
+      .style("visibility", function (d){return d[1];})
+      .attr("x", xTextPos(this.xScale, layout))
+      .attr("y", yTextPos(this.yScale, layout));
 
   this.grid=true;
 };
@@ -995,11 +999,18 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
     };
   };
   // update the svg
-  this.svg.selectAll(treeElem).filter(function(d) {
-      return d.update;
-    })
-    .transition().duration(dt)
-    .call(update(Object.keys(attrs), Object.keys(styles)));
+  if (dt) {
+    this.svg.selectAll(treeElem).filter(function(d) {
+        return d.update;
+      })
+      .transition().duration(dt)
+      .call(update(Object.keys(attrs), Object.keys(styles)));
+  } else {
+    this.svg.selectAll(treeElem).filter(function(d) {
+        return d.update;
+      })
+      .call(update(Object.keys(attrs), Object.keys(styles)));
+  }
 
 };
 

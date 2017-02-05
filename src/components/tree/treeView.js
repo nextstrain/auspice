@@ -110,7 +110,6 @@ class TreeView extends React.Component {
         styleToUpdate['fill'] = nextProps.nodeColor.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
         });
-        tree.updateStyleOrAttributeArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration, "style");
         styleToUpdate['stroke'] = nextProps.nodeColor;
       }
       /* tip radius has changed */
@@ -149,11 +148,11 @@ class TreeView extends React.Component {
 
       /* swap layouts */
       if (this.props.layout !== nextProps.layout) {
-        tree.updateLayout(nextProps.layout, slowTransitionDuration);
+        tree.updateLayout(nextProps.layout, mediumTransitionDuration);
       }
       /* change distance metrics */
       if (this.props.distanceMeasure !== nextProps.distanceMeasure) {
-        tree.updateDistance(nextProps.distanceMeasure, slowTransitionDuration);
+        tree.updateDistance(nextProps.distanceMeasure, mediumTransitionDuration);
       }
     }
   }
@@ -289,10 +288,10 @@ class TreeView extends React.Component {
     return () => {
 
       if (tool === "zoom-in") {
-        this.Viewer.zoomOnViewerCenter(1.1);
+        this.Viewer.zoomOnViewerCenter(1.4);
         // console.log('zooming in', this.state.zoom, zoom)
       } else {
-        this.Viewer.zoomOnViewerCenter(0.9);
+        this.Viewer.zoomOnViewerCenter(0.71);
       }
 
       // const viewerX = this.state.width / 2;
@@ -331,25 +330,13 @@ class TreeView extends React.Component {
       vertical: 1,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
-      split: false,
-      extraPadding: 0
+      minHeight: 400,
+      maxAspectRatio: 1.3
     })
 
     return (
       <Card center title="Phylogeny">
-        <svg
-          width={300}
-          height={250 /* this should be dynamically calculated by number of elements */}
-          style={{
-            position: "absolute",
-            left: 13,
-            top: 45,
-            borderRadius: 10,
-            zIndex: 1000,
-            backgroundColor: "rgba(255,255,255,.85)"
-          }}>
-          <Legend colorScale={this.props.colorScale}/>
-        </svg>
+        <Legend colorScale={this.props.colorScale}/>
         <InfoPanel
           dismiss={this.infoPanelDismiss.bind(this)}
           zoom={this.state.tree ? this.state.tree.zoomIntoClade.bind(this.state.tree) : null}

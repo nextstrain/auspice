@@ -101,7 +101,6 @@ class ColorBy extends React.Component {
 
     return (
       <div style={styles.base}>
-        <SelectLabel text="Color by"/>
         <select style={select} id="coloring"
           onChange={(e) => { this.setColorBy(e.target.value); }}>
           {colorOptions}
