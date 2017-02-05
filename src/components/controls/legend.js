@@ -36,12 +36,7 @@ class Legend extends React.Component {
     const vert = fromTop * (legendRectSize + legendSpacing);
     return "translate(" + horz + "," + vert + ")";
   }
-
-  /*
-   * draws legend title
-   * coordinate system from top,left of parent SVG
-   */
-  legendTitle() {
+  getTitleString() {
     let title = "";
     if (this.props.colorBy) {
       title = this.props.colorBy;
@@ -54,6 +49,13 @@ class Legend extends React.Component {
     } else {
       title = titleCase(title);
     }
+    return title;
+  }
+  /*
+   * draws legend title
+   * coordinate system from top,left of parent SVG
+   */
+  legendTitle() {
     return (
       <g>
         <rect width="100" height="12" fill="rgba(255,255,255,.85)"/>
@@ -66,7 +68,7 @@ class Legend extends React.Component {
             fontFamily: headerFont,
             backgroundColor: "#fff"
           }}>
-          {title}
+          {this.getTitleString()}
         </text>
       </g>
     );
@@ -78,7 +80,10 @@ class Legend extends React.Component {
    */
   legendChevron() {
     const degrees = this.state.legendVisible ? -180 : 0;
-    const offset = 50;  // TODO fix this to be dynamically determined by title width
+    // This is a hack because we can't use getBBox in React.
+    // Lots of work to get measured width of DOM element.
+    // Works fine, but will need adjusting if title font is changed.
+    const offset = 10 + 5.3 * this.getTitleString().length;
     return (
       <g transform={`translate(${offset},0)`}>
         <svg width="12" height="12" viewBox="0 0 1792 1792"
