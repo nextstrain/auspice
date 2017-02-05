@@ -48,12 +48,13 @@ const computeResponsive = ({
     height = browserDimensions.height * vertical - verticalPadding;
   }
 
-  if (minHeight && height < minHeight) {
-    height = minHeight;
-  }
-
   if (maxAspectRatio && height > maxAspectRatio*width) {
     height = maxAspectRatio*width;
+  }
+
+  // favor minHeight over maxAspectRatio
+  if (minHeight && height < minHeight) {
+    height = minHeight;
   }
 
   return {
