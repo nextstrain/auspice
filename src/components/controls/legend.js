@@ -3,12 +3,14 @@ import d3 from "d3";
 import { connect } from "react-redux";
 import LegendItem from "./legend-item";
 import { headerFont, darkGrey } from "../../globalStyles";
-import { legendRectSize, legendSpacing, fastTransitionDuration } from "../../util/globals";
+import { legendRectSize, legendSpacing, fastTransitionDuration,
+  controlsWidth } from "../../util/globals";
 import titleCase from "title-case";
 
 @connect((state) => {
   return {
-    colorBy: state.controls.colorBy
+    colorBy: state.controls.colorBy,
+    browserDimensions: state.browserDimensions.browserDimensions
   };
 })
 class Legend extends React.Component {
@@ -18,6 +20,38 @@ class Legend extends React.Component {
       legendVisible: true
     };
   }
+  static propTypes = {
+    /* react */
+    // dispatch: React.PropTypes.func,
+    params: React.PropTypes.object,
+    routes: React.PropTypes.array,
+    /* component api */
+    style: React.PropTypes.object,
+    sidebar: React.PropTypes.bool
+  }
+  // hide/show legend based on initial browserDimensions
+  componentWillMount() {
+    this.updateLegendVisibility(this.props.browserDimensions.width, this.props.sidebar);
+  }
+
+  // hide/show legend based on browserDimensions
+  componentWillReceiveProps(nextProps) {
+    if (this.props.browserDimensions && nextProps.browserDimensions) {
+      if (this.props.browserDimensions.width != nextProps.browserDimensions.width) {
+        this.updateLegendVisibility(nextProps.browserDimensions.width, nextProps.sidebar);
+      }
+    }
+  }
+
+  updateLegendVisibility(currentWidth, sidebar) {
+    const sidebarPadding = sidebar ? controlsWidth + 55 : 0;
+    if (currentWidth < 600 + sidebarPadding) {
+      this.setState({"legendVisible": false});
+    } else {
+      this.setState({"legendVisible": true});
+    }
+  }
+
   getSVGHeight() {
     let nItems = 10;
     const titlePadding = 20;
@@ -51,6 +85,14 @@ class Legend extends React.Component {
     }
     return title;
   }
+  getTitleWidth() {
+    return 10 + 5.3 * this.getTitleString().length;
+  }
+  toggleLegend() {
+    const newState = this.state.legendVisible ? false : true;
+    this.setState({"legendVisible": newState});
+  }
+
   /*
    * draws legend title
    * coordinate system from top,left of parent SVG
@@ -58,7 +100,7 @@ class Legend extends React.Component {
   legendTitle() {
     return (
       <g>
-        <rect width="100" height="12" fill="rgba(255,255,255,.85)"/>
+        <rect width={this.getTitleWidth()} height="12" fill="rgba(255,255,255,.85)"/>
         <text
           x={0}
           y={10}
@@ -83,18 +125,10 @@ class Legend extends React.Component {
     // This is a hack because we can't use getBBox in React.
     // Lots of work to get measured width of DOM element.
     // Works fine, but will need adjusting if title font is changed.
-    const offset = 10 + 5.3 * this.getTitleString().length;
+    const offset = this.getTitleWidth();
     return (
       <g transform={`translate(${offset},0)`}>
-        <svg width="12" height="12" viewBox="0 0 1792 1792"
-          style={{
-            cursor: "pointer"
-          }}
-          onClick={() => {
-            const newState = this.state.legendVisible ? false : true;
-            this.setState({"legendVisible": newState});
-          }}
-          >
+        <svg width="12" height="12" viewBox="0 0 1792 1792">
           <rect width="1792" height="1792" fill="rgba(255,255,255,.85)"/>
           <path
             fill={darkGrey}
@@ -164,8 +198,11 @@ class Legend extends React.Component {
     return (
       <svg width = "280" height = {this.getSVGHeight()} style={styles.svg}>
         {this.legendItems()}
-        {this.legendTitle()}
-        {this.legendChevron()}
+        <g onClick={() => { this.toggleLegend(); }}
+          style={{cursor: "pointer"}}>
+          {this.legendTitle()}
+          {this.legendChevron()}
+        </g>
       </svg>
     );
   }
