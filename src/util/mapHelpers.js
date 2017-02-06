@@ -33,7 +33,7 @@ export const setupTipsAndTransmissions = (nodes, metadata, colorScale, map, resp
         .attr("d", pathStringGenerator) /* with the interpolation in the function above */
         .attr("fill","none")
         .attr("stroke", "red")
-        .attr("stroke-width", "0px")
+        .attr("stroke-width", "2px")
 
       transmissionPaths.push({ /* and add it to an array, which we'll map over to create our missiles */
         elem,

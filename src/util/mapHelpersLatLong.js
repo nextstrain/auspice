@@ -71,10 +71,6 @@ const setupLatLong = (nodes, metadata, map) => {
     const start = new L.LatLng(lat0, long0)
     const end = new L.LatLng(lat1, long1)
 
-    // _.map(latLongs.transmissions[27].geodesic._latlngs[0], (obj) => {
-    //   return [obj.lat, obj.lng]
-    // })
-
     /*
       add a polyline to the map for current country pair iteratee
       store the computation. access _latlngs to show where each segment is on the map
