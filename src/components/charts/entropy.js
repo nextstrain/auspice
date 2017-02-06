@@ -8,6 +8,8 @@ import Card from "../framework/card";
 import d3 from "d3";
 import { parseGenotype } from "../../util/getGenotype";
 import computeResponsive from "../../util/computeResponsive";
+import { changeColorBy } from "../../actions/controls";
+import { dataFont, darkGrey } from "../../globalStyles";
 
 @connect(state => {
   return {
@@ -22,12 +24,9 @@ class Entropy extends React.Component {
     /* check here to see if this.props.browserDimensions has changed and rerender */
   }
 
-  setColorByQuery(colorBy) {
-    const newQuery = Object.assign({}, this.props.location.query,
-                                   {colorBy: colorBy});
-    this.props.changeRoute(this.props.location.pathname, newQuery);
+  setColorByGenotype(colorBy) {
+    this.props.dispatch(changeColorBy(colorBy, this.props.router))
   }
-
 
   drawEntropy() {
     const responsive = computeResponsive({
@@ -39,9 +38,9 @@ class Entropy extends React.Component {
 
     const entropyChartWidth = responsive.width;
     const entropyChartHeight = 300;
-    const bottomPadding = 45;
-    const leftPadding = 80;
-    const rightPadding = 80;
+    const bottomPadding = 50;
+    const leftPadding = 38;
+    const rightPadding = 12;
 
     const entropy = this.props.entropy['nuc']['val'].map((s, i) => {return {x: this.props.entropy['nuc']['pos'][i], y: s}});
 
@@ -83,7 +82,7 @@ class Entropy extends React.Component {
                     .range([entropyChartHeight-bottomPadding, 0]);
 
     return (
-      <Card title={"Genetic Diversity"}>
+      <Card title={"Diversity"}>
         <svg width={entropyChartWidth} height={entropyChartHeight}>
           {annotations.map((e, i) => {
             return (
@@ -116,7 +115,7 @@ class Entropy extends React.Component {
                 y={y(e.y)}
                 width="1" height={y(0) - y(e.y)}
                 cursor={"pointer"}
-                onClick={() => {this.setColorByQuery("gt-nuc_" + (e.x + 1));}}
+                onClick={() => {this.setColorByGenotype("gt-nuc_" + (e.x + 1));}}
                 fill={"#CCC"}
                 stroke={"#CCC"}
               />
@@ -130,7 +129,7 @@ class Entropy extends React.Component {
                 y={y(e.y)}
                 width="2.5" height={y(0) - y(e.y)}
                 cursor={"pointer"}
-                onClick={() => {this.setColorByQuery("gt-" + e.prot + "_" + (e.codon + 1));}}
+                onClick={() => {this.setColorByGenotype("gt-" + e.prot + "_" + (e.codon + 1));}}
                 fill={e.fill}
                 stroke={"#CCC"}
               />
@@ -149,6 +148,13 @@ class Entropy extends React.Component {
             width={entropyChartWidth}
             standalone={false}
             label={"Position"}
+            tickCount={5}
+            style={{
+              axis: {stroke: "black", padding: 0},
+              axisLabel: {fontSize: 14, padding: 30, fill: darkGrey, fontFamily: dataFont},
+              tickLabels: {fontSize: 12, padding: 0, fill: darkGrey, fontFamily: dataFont},
+              ticks: {stroke: "black", size: 5, padding: 5}
+            }}
           />
           {/* y axis */}
           <VictoryAxis
@@ -162,6 +168,12 @@ class Entropy extends React.Component {
             domain={y.domain()}
             offsetY={bottomPadding}
             standalone={false}
+            style={{
+              axis: {stroke: "black", padding: 0},
+              axisLabel: {fontSize: 14, padding: 30, fill: darkGrey, fontFamily: dataFont},
+              tickLabels: {fontSize: 12, padding: 0, fill: darkGrey, fontFamily: dataFont},
+              ticks: {stroke: "black", size: 5, padding: 5}
+            }}
           />
         </svg>
       </Card>

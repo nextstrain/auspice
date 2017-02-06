@@ -35,7 +35,9 @@ const arrayInEquality = function(a,b) {
     tree: state.tree.tree,
     metadata: state.metadata.metadata,
     browserDimensions: state.browserDimensions.browserDimensions,
-    map: state.map
+    map: state.map,
+    layout: state.controls.layout,
+    distanceMeasure: state.controls.distanceMeasure
   };
 })
 class TreeView extends React.Component {
@@ -47,6 +49,8 @@ class TreeView extends React.Component {
     this.state = {
       okToDraw: false,
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
+      clicked: null,
+      hover: null
     };
   }
   componentWillMount() {
@@ -97,16 +101,17 @@ class TreeView extends React.Component {
 
     /* if we have a tree and we have new props, figure out what we need to update */
     if (tree) {
-      const attrToUpdate = {};
-      const styleToUpdate = {};
 
-      /* fill has changed */
+      /* update tips */
+      let attrToUpdate = {};
+      let styleToUpdate = {};
+
+      /* tip color has changed */
       if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
-        styleToUpdate['fill'] = nextProps.nodeColor;
-        tree.updateStyleArray(".branch", "stroke", nextProps.nodeColor, fastTransitionDuration);
-        styleToUpdate['stroke'] = nextProps.nodeColor.map((d) => {
-          d3.rgb(d).darker(0.7)
+        styleToUpdate['fill'] = nextProps.nodeColor.map((col) => {
+          return d3.rgb(col).brighter([0.65]).toString();
         });
+        styleToUpdate['stroke'] = nextProps.nodeColor;
       }
       /* tip radius has changed */
       if (nextProps.tipRadii && arrayInEquality(nextProps.tipRadii, this.props.tipRadii)) {
@@ -117,18 +122,38 @@ class TreeView extends React.Component {
         // console.log("updateVisibility");
         styleToUpdate['visibility'] = nextProps.tipVisibility;
       }
-
-      /* update style changes */
+      /* implement style changes */
       if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
         tree.updateMultipleArray(".tip", attrToUpdate, styleToUpdate, fastTransitionDuration);
       }
+
+      /* update branches */
+      attrToUpdate = {};
+      styleToUpdate = {};
+
+      /* branch color has changed */
+      if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
+        styleToUpdate['stroke'] = nextProps.nodeColor.map((col) => {
+          var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
+        	return d3.rgb(modCol).toString();
+        });
+      }
+      /* branch stroke width has changed */
+      if (nextProps.branchThickness && arrayInEquality(nextProps.branchThickness, this.props.branchThickness)) {
+        styleToUpdate['stroke-width'] = nextProps.branchThickness;
+      }
+      /* implement style changes */
+      if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
+        tree.updateMultipleArray(".branch", attrToUpdate, styleToUpdate, fastTransitionDuration);
+      }
+
       /* swap layouts */
       if (this.props.layout !== nextProps.layout) {
-        tree.updateLayout(nextProps.layout, slowTransitionDuration);
+        tree.updateLayout(nextProps.layout, mediumTransitionDuration);
       }
       /* change distance metrics */
       if (this.props.distanceMeasure !== nextProps.distanceMeasure) {
-        tree.updateDistance(nextProps.distanceMeasure, slowTransitionDuration);
+        tree.updateDistance(nextProps.distanceMeasure, mediumTransitionDuration);
       }
     }
   }
@@ -205,14 +230,15 @@ class TreeView extends React.Component {
         {
           /* options */
           grid: true,
-          confidence: true
+          confidence: false
         },
         {
           /* callbacks */
           onTipHover: this.onTipHover.bind(this),
           onTipClick: this.onTipClick.bind(this),
           onBranchHover: this.onBranchHover.bind(this),
-          onBranchClick: this.onBranchClick.bind(this)
+          onBranchClick: this.onBranchClick.bind(this),
+          onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this)
         },
         {
           /* presently selected node / branch */
@@ -267,14 +293,21 @@ class TreeView extends React.Component {
       hovered: null
     });
   }
+  // mouse out from tip/branch
+  onBranchOrTipLeave(){
+    if (this.state.hovered) {
+      this.setState({hovered: null})
+    }
+  }
+
   handleIconClick(tool) {
     return () => {
 
       if (tool === "zoom-in") {
-        this.Viewer.zoomOnViewerCenter(1.1);
+        this.Viewer.zoomOnViewerCenter(1.4);
         // console.log('zooming in', this.state.zoom, zoom)
       } else {
-        this.Viewer.zoomOnViewerCenter(0.9);
+        this.Viewer.zoomOnViewerCenter(0.71);
       }
 
       // const viewerX = this.state.width / 2;
@@ -313,25 +346,13 @@ class TreeView extends React.Component {
       vertical: 1,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
-      split: false,
-      extraPadding: 0
+      minHeight: 400,
+      maxAspectRatio: 1.3
     })
 
     return (
       <Card center title="Phylogeny">
-        <svg
-          width={300}
-          height={250 /* this should be dynamically calculated by number of elements */}
-          style={{
-            position: "absolute",
-            left: 13,
-            top: 45,
-            borderRadius: 10,
-            zIndex: 1000,
-            backgroundColor: "rgba(255,255,255,.85)"
-          }}>
-          <Legend colorScale={this.props.colorScale}/>
-        </svg>
+        <Legend colorScale={this.props.colorScale}/>
         <InfoPanel
           dismiss={this.infoPanelDismiss.bind(this)}
           zoom={this.state.tree ? this.state.tree.zoomIntoClade.bind(this.state.tree) : null}

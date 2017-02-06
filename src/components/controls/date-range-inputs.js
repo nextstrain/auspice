@@ -1,18 +1,27 @@
 import React from "react";
-import { defaultDateSliderFraction, defaultDateRange } from "../../util/globals";
 import DatePicker from 'react-datepicker';
 import moment from 'moment';
 import _ from 'lodash';
-
 import Slider from './slider';
+import { connect } from "react-redux";
+import { CHANGE_DATE_MIN, CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN,
+  CHANGE_ABSOLUTE_DATE_MAX } from "../../actions/controls";
+import { controlsWidth } from "../../util/globals";
 
 moment.updateLocale('en', {
     longDateFormat : {
-        L: "DD/MM/YYYY",
-        l: "D/M/YYYY"
+        L: "YYYY-MM-DD"
     }
 });
 
+@connect((state) => {
+  return {
+    dateMin: state.controls.dateMin,
+    dateMax: state.controls.dateMax,
+    absoluteDateMin: state.controls.absoluteDateMin,
+    absoluteDateMax: state.controls.absoluteDateMax,
+  };
+})
 class DateRangeInputs extends React.Component {
   constructor(props) {
     super(props);
@@ -40,41 +49,77 @@ class DateRangeInputs extends React.Component {
     };
   }
 
-  numericDate(secSinceUnix) {
-    const res = 1970 + (secSinceUnix / 365.25 / 24 / 3600 / 1000);
-    return res;
+  numericToCalendar(numDate) {
+   const unixDate = (numDate - 1970) * 365.2425 * 24 * 3600; // number of seconds since 1970
+   return moment.unix(unixDate).format("YYYY-MM-DD");
   }
 
-  numericToUnix(numdate) {
-    const res = (numdate - 1970) * 365.25 * 24 * 3600 * 1000;
-    return res;
+  calendarToNumeric(calDate) {
+   const unixDate = moment(calDate).unix();  // number of seconds since 1970
+   return 1970 + (unixDate / 365.2425 / 24 / 3600);
   }
 
-  setDateQueryParam(newRange) {
-    const newQuery = Object.assign({}, this.props.location.query,
-                                   {dmin: newRange.min, dmax:newRange.max});
-    this.props.changeRoute(this.props.location.pathname, newQuery);
+  setDateRangeQueryParam(dateRange) {
+    const location = this.props.router.getCurrentLocation();
+    const newQuery = Object.assign({}, location.query, {dmin: dateRange.min, dmax: dateRange.max});
+    this.props.router.push({
+      pathname: location.pathname,
+      query: newQuery
+    });
   }
 
+  setDateMinQueryParam(dateMin) {
+    const location = this.props.router.getCurrentLocation();
+    const newQuery = Object.assign({}, location.query, {dmin: dateMin});
+    this.props.router.push({
+      pathname: location.pathname,
+      query: newQuery
+    });
+  }
 
-  updateDateRange(ref, m) {
+  setDateMaxQueryParam(dateMax) {
+    const location = this.props.router.getCurrentLocation();
+    const newQuery = Object.assign({}, location.query, {dmax: dateMax});
+    this.props.router.push({
+      pathname: location.pathname,
+      query: newQuery
+    });
+  }
+
+  updateFromPicker(ref, momentDate) {
+    // a momentDate is received from DatePicker
     let newRange;
-    if (ref === "date_min") {
-      newRange = { min: this.numericDate(m.valueOf()),
-                   max: (this.props.location.query.dmax || this.numericDate(moment().valueOf())) /* present */ };
-    } else {
-      newRange = { min: (this.props.location.query.dmin
-                        || this.numericDate(moment().subtract(12, "years").valueOf())),
-                   max: this.numericDate(m.valueOf()) };
+    if (ref === "updateDateMin") {
+      newRange = { min: momentDate.format("YYYY-MM-DD"),
+                   max: this.props.dateMax };
+      this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
+      this.setDateMinQueryParam(newRange.min);
+    } else if (ref === "updateDateMax") {
+      newRange = { min: this.props.dateMin,
+                   max: momentDate.format("YYYY-MM-DD") };
+      this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
+      this.setDateMaxQueryParam(newRange.max);
     }
-    this.setDateQueryParam(newRange);
   }
-  updateSlider(values) {
-    // {values} is an array of unix timestamps
-    // [timestampStart, timestampEnd]
-    const newRange = {min: values[0], max: values[1]};
-    this.setDateQueryParam(newRange);
+
+  updateFromSlider(numDateValues) {
+    // {numDateValues} is an array of numDates received from Slider
+    // [numDateStart, numDateEnd]
+    const newRange = {min: this.numericToCalendar(numDateValues[0]),
+      max: this.numericToCalendar(numDateValues[1])};
+    if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) { // update min
+      this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
+      this.setDateMinQueryParam(newRange.min);
+    } else if (this.props.dateMin === newRange.min && this.props.dateMax !== newRange.max) { // update max
+      this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
+      this.setDateMaxQueryParam(newRange.max);
+    } else if (this.props.dateMin !== newRange.min && this.props.dateMax !== newRange.max) { // update both
+      this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
+      this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
+      this.setDateRangeQueryParam(newRange);
+    }
   }
+
   render() {
     /*
     this shows a string of text above the slider
@@ -113,48 +158,45 @@ class DateRangeInputs extends React.Component {
 
     */
 
-    /* strainMinDate is the dataset, selectedMinDate is the user option */
-    /* abstract these dates into the reducer so they come in as props and are global state */
-    const absoluteMin = this.numericDate(moment().subtract(defaultDateRange, "years").valueOf()); // replace 12 with duration
-    const absoluteMax = this.numericDate(moment().valueOf()); // present
-    const selectedMin = (+this.props.location.query.dmin
-                         || this.numericDate(moment().subtract(defaultDateRange*defaultDateSliderFraction, "years").valueOf()));
-    const selectedMax = +this.props.location.query.dmax || absoluteMax;
-    const datePickerMin = (this.props.location.query.dmin
-                           ? moment(this.numericToUnix(+this.props.location.query.dmin))
-                           : moment(this.numericToUnix(absoluteMin)));
-    const datePickerMax = (this.props.location.query.dmax
-                           ? moment(this.numericToUnix(+this.props.location.query.dmax))
-                           : moment(this.numericToUnix(absoluteMax)));
+    const absoluteMin = this.props.absoluteDateMin;
+    const absoluteMax = this.props.absoluteDateMax;
+    const selectedMin = this.props.dateMin;
+    const selectedMax = this.props.dateMax;
 
-    if (!(this.props.location.query.dmax && this.props.location.query.dmin) ){
-      this.setDateQueryParam({"min":selectedMin, "max":selectedMax});
-      return null;
-    }
+    const absoluteMinNumDate = this.calendarToNumeric(absoluteMin);
+    const absoluteMaxNumDate = this.calendarToNumeric(absoluteMax);
+    const selectedMinNumDate = this.calendarToNumeric(selectedMin);
+    const selectedMaxNumDate = this.calendarToNumeric(selectedMax);
+
     return (
       <div>
-        <div style={{width: 250}}>
-        <Slider
-          min={absoluteMin}
-          max={absoluteMax}
-          defaultValue={[absoluteMin, absoluteMax]}
-          value={[selectedMin, selectedMax]}
-          onChange={this.updateSlider.bind(this)}
-          withBars />
+        <div style={{width: controlsWidth}}>
+        <Slider                                       // numDates are handed to Slider
+          min={absoluteMinNumDate}
+          max={absoluteMaxNumDate}
+          defaultValue={[absoluteMinNumDate, absoluteMaxNumDate]}
+          value={[selectedMinNumDate, selectedMaxNumDate]}
+          onChange={this.updateFromSlider.bind(this)}
+          minDistance={0.5}                           // minDistance is in years
+          pearling
+          withBars/>
         </div>
-        <div style={{height: 10}}> </div>
+        <div style={{height: 5}}> </div>
         {/*
           the CSS for this is in index.html
           docs: https://hacker0x01.github.io/react-datepicker/
         */}
-        <div style={{width: 250}}>
-          <DatePicker
-            selected={datePickerMin}
-            onChange={this.updateDateRange.bind(this, "date_min")}
+        <div style={{width: controlsWidth}}>
+          <DatePicker                               // momentDates are handed to DatePicker
+            dateFormat="YYYY/MM/DD"
+            selected={moment(selectedMin)}
+            onChange={this.updateFromPicker.bind(this, "updateDateMin")}
           />
-          <DatePicker
-            selected={datePickerMax}
-            onChange={this.updateDateRange.bind(this, "date_max")}
+          <DatePicker                               // momentDates are handed to DatePicker
+            dateFormat="YYYY/MM/DD"
+            className="right-datepicker"
+            selected={moment(selectedMax)}
+            onChange={this.updateFromPicker.bind(this, "updateDateMax")}
           />
         </div>
       </div>

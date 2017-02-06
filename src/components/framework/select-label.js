@@ -1,12 +1,14 @@
 import React from "react";
-import {sans} from "../../globalStyles";
+import {headerFont, medGrey, darkGrey} from "../../globalStyles";
 
 const SelectLabel = ({text}) => {
   return (
     <p style={{
-      fontFamily: sans,
+      fontFamily: headerFont,
       margin: "0px 0px 5px 0px",
-      fontSize: 12
+      fontSize: 12,
+      fontWeight: 400,
+      color: darkGrey
     }}>
       {text}
     </p>

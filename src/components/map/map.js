@@ -47,6 +47,7 @@ class Map extends React.Component {
       React to browser width/height changes responsively
       This is stored in state because it's used by both the map and the d3 overlay
     */
+
     if (
       this.props.browserDimensions &&
       (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
@@ -56,7 +57,9 @@ class Map extends React.Component {
         horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? 1 : 1,
         vertical: 1, /* if we are in single column, full height */
         browserDimensions: nextProps.browserDimensions,
-        sidebar: nextProps.sidebar
+        sidebar: nextProps.sidebar,
+        minHeight: 400,
+        maxAspectRatio: 1.3,
       })
       this.setState({responsive})
     } else if (!this.props.browserDimensions && nextProps.browserDimensions) { /* first time */
@@ -64,7 +67,9 @@ class Map extends React.Component {
         horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? 1 : 1,
         vertical: 1, /* if we are in single column, full height */
         browserDimensions: nextProps.browserDimensions,
-        sidebar: nextProps.sidebar
+        sidebar: nextProps.sidebar,
+        minHeight: 400,
+        maxAspectRatio: 1.3,
       })
       this.setState({responsive})
     }
@@ -124,7 +129,7 @@ class Map extends React.Component {
   createMap() {
 
     const southWest = L.latLng(-70, -180);
-    const northEast = L.latLng(90, 180);
+    const northEast = L.latLng(80, 180);
     const bounds = L.latLngBounds(southWest, northEast);
 
     var map = L.map('map', {

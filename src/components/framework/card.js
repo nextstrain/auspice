@@ -1,6 +1,6 @@
 import React from "react";
 import Radium from "radium";
-import {sans} from "../../globalStyles";
+import {headerFont, medGrey, darkGrey} from "../../globalStyles";
 
 @Radium
 class Card extends React.Component {
@@ -9,19 +9,23 @@ class Card extends React.Component {
       base: {
         backgroundColor: "#FFFFFF",
         display: "inline-block",
-        margin: 12,
-        boxShadow: "3px 3px 12px 2px rgba(217,217,217,0.85)",
-        borderRadius: 4,
+        marginLeft: 10,
+        marginRight: 10,
+        marginTop: 5,
+        marginBottom: 5,
+        boxShadow: "2px 2px 4px 1px rgba(215,215,215,0.85)",
+        borderRadius: 2,
         padding: 5,
         overflow: "hidden",
         position: "relative"
       },
       title: {
-        fontFamily: sans,
-        marginBottom: 5,
-        marginLeft: 10,
-        marginTop: 10,
+        fontFamily: headerFont,
+        color: medGrey,
+        fontSize: 16,
+        margin: 5,
         fontWeight: 500,
+        backgroundColor: "#FFFFFF"
       }
     };
   }
@@ -32,10 +36,10 @@ class Card extends React.Component {
         styles.base,
         this.props.style
       ]}>
-        <p style={[
+        <div style={[
           styles.title,
           this.props.titleStyles
-        ]}> {this.props.title} </p>
+        ]}> {this.props.title} </div>
         <div style={{
             display: "flex",
             justifyContent: this.props.center ? "center" : "flex-start"

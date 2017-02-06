@@ -1,6 +1,7 @@
 import React from "react";
 import * as globalStyles from "../../globalStyles";
 import * as globals from "../../util/globals";
+import {dataFont} from "../../globalStyles";
 
 const InfoPanel = ({hovered, clicked, dismiss, zoom}) => {
 
@@ -21,25 +22,28 @@ const InfoPanel = ({hovered, clicked, dismiss, zoom}) => {
   };
 
   const body = {
-    fontFamily: globalStyles.sans,
+    fontFamily: dataFont,
     fontSize: 14,
     lineHeight: .8
   };
 
   const muts = {
-    fontFamily: globalStyles.sans,
+    fontFamily: dataFont,
     fontSize: 14,
     lineHeight: 1.6
   };
 
   const link = {
-    fontFamily: globalStyles.sans,
+    fontFamily: dataFont,
     fontSize: 14,
     display: "block",
     marginTop: 20,
     textDecoration: "none",
     pointerEvents: "auto",
-    lineHeight: .8
+    lineHeight: .8,
+    color: "#0000EE", // link color
+    // color: "#551A8B", // visited link color
+    cursor: "pointer"
   };
 
   const dismissStyle = {
@@ -88,10 +92,9 @@ const InfoPanel = ({hovered, clicked, dismiss, zoom}) => {
       <div style={container}>
         {clicked ? <p style={dismissStyle} onClick={dismiss}>x</p> : null}
         { typeof branch.frequency !== "undefined" ? frequencies(branch.n) : null }
-        <p style={link} onClick={function(d) {zoom(branch, globals.mediumTransitionDuration);}}>Zoom into Clade</p>
         <p style={muts}>Mutations: {mutations(branch.n)}</p>
-        <a href="#" style={link}> Filter to this clade </a>
-        <a href="#" style={link}> Reset layout to this clade </a>
+        <p style={link} onClick={function(d) {zoom(branch, globals.mediumTransitionDuration);}}>Zoom into this clade</p>
+        <p style={link} onClick={function() {console.log("not yet implemented")}}> Filter to this clade (to do!) </p>
       </div>
     );
   };

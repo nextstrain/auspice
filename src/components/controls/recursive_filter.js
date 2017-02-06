@@ -1,8 +1,7 @@
 import React from "react";
 import Radium from "radium";
-import queryString from "query-string";
 import Select from "react-select";
-import { filterAbbrRev, filterAbbrFwd } from "../../util/globals";
+import { filterAbbrRev, filterAbbrFwd, controlsWidth } from "../../util/globals";
 /*
  * implements a selector that
  * (i) knows about the upstream choices and
@@ -45,7 +44,7 @@ class RecursiveFilter extends React.Component {
     }
     return (
       <Select
-        style={{width:230}}
+        style={{width: controlsWidth}}
         name="form-field-name"
         value={this.state.selection}
         multi={true}

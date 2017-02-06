@@ -1,7 +1,7 @@
 import React from "react";
 import Radium from "radium";
 import { TOGGLE_BRANCH_LABELS } from "../../actions/controls";
-import {sans} from "../../globalStyles";
+import {dataFont, darkGrey} from "../../globalStyles";
 
 @Radium
 class ToggleBranchLabels extends React.Component {
@@ -9,8 +9,10 @@ class ToggleBranchLabels extends React.Component {
     return {
       base: {
         marginBottom: 20,
-        fontFamily: sans,
-        marginTop: 10
+        fontFamily: dataFont,
+        marginTop: 10,
+        color: darkGrey,
+        fontSize: 14
       }
     };
   }

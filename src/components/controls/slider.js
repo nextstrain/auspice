@@ -171,7 +171,7 @@ var Slider = React.createClass({
     return {
       min: 0,
       max: 100,
-      step: 1.0/365,
+      step: 1.0/365.2425,
       minDistance: 0,
       defaultValue: 0,
       orientation: 'horizontal',
@@ -806,18 +806,18 @@ const styles = {
   handle: {
     fontSize: '0.9em',
     textAlign: 'center',
-    backgroundColor: 'rgb(100,100,100)',
+    backgroundColor: '#CCC',
     color: 'white',
+    border: '1px solid #777',
     cursor: 'pointer',
     height: 12,
     width: 12,
-    borderRadius: 6,
-    top: -3
+    borderRadius: 12,
+    top: -4
   },
   bar: {
     position: 'relative',
     backgroundColor: "rgb(200,200,200)",
-    height: 6,
     borderRadius: 2
   },
   /*
@@ -833,10 +833,13 @@ const styles = {
   */
 
   unselectedBar: {
-    backgroundColor: 'rgb(230,230,230)'
+    backgroundColor: '#777',
+    height: 1,
+    top: 2
   },
   selectedBar: {
-    backgroundColor: "rgb(150,150,150)"
+    backgroundColor: '#CCC',
+    height: 6
   }
 
 };

@@ -14,13 +14,15 @@ import App from "./components/app";
 
 const store = configureStore();
 
-
 class Root extends React.Component {
   render() {
     return (
       <div>
         <Provider store={store}>
-          <App/>
+          <Router history={browserHistory}>
+            <Route path="/" component={App}/>
+            <Route path="/:segment1/" component={App}/>
+          </Router>
         </Provider>
       </div>
     );
