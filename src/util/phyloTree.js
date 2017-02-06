@@ -102,6 +102,7 @@ var PhyloTree = function(treeJson) {
   // this is useful for drawing
   // and create children structure for the shell.
   this.nodes.forEach(function(d) {
+    d.parent = d.n.parent.shell;
     if (d.terminal) {
       d.yRange = [d.n.yvalue, d.n.yvalue];
       d.children=null;
@@ -383,7 +384,12 @@ PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
   // assign all nodes to inView false and force update
   this.nodes.forEach(function(d){d.inView=false; d.update=true;});
   // assign all child nodes of the chosen clade to inView=true
-  applyToChildren(clade, function(d){d.inView=true;});
+  // if clade is terminal, apply to parent
+  if (clade.terminal){
+    applyToChildren(clade.parent, function(d){d.inView=true;});
+  }else{
+    applyToChildren(clade, function(d){d.inView=true;});
+  }
   // redraw
   this.mapToScreen();
   this.updateGeometry(dt);
@@ -611,7 +617,7 @@ PhyloTree.prototype.addGrid = function(layout) {
         }
       }
   }
-  
+
   const minorRoundingLevel = roundingLevel / (this.distanceMeasure === "num_date"
                                               ? this.params.minorTicksTimeTree
                                               : this.params.minorTicks);
