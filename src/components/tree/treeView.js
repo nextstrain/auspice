@@ -336,7 +336,9 @@ class TreeView extends React.Component {
 
     return (
       <Card center title="Phylogeny">
-        <Legend colorScale={this.props.colorScale}/>
+        <Legend
+          colorScale={this.props.colorScale}
+          sidebar={this.props.sidebar}/>
         <InfoPanel
           dismiss={this.infoPanelDismiss.bind(this)}
           zoom={this.state.tree ? this.state.tree.zoomIntoClade.bind(this.state.tree) : null}
