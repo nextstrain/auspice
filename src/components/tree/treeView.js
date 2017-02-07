@@ -19,6 +19,7 @@ import { getGenotype } from "../../util/getGenotype";
 import { arrayInEquality,
          branchThickness,
          tipRadii,
+         tipVisibility,
          nodeColor} from "../../util/treeHelpers";
 
 /* UNDERSTANDING THIS CODE:
@@ -55,7 +56,9 @@ need this information are children of this component
     sequences: state.sequences,
     selectedLegendItem: state.controls.selectedLegendItem,
     colorScale: state.controls.colorScale,
-    datasetGuid: state.tree.datasetGuid
+    datasetGuid: state.tree.datasetGuid,
+    dateMin: state.controls.dateMin,
+    dateMax: state.controls.dateMax
   };
 })
 class TreeView extends React.Component {
@@ -119,9 +122,13 @@ class TreeView extends React.Component {
       }
 
       /* tip visibility has changed, for instance because of date slider */
-      if (nextProps.tipVisibility && arrayInEquality(nextProps.tipVisibility, this.props.tipVisibility)) {
-        tipStyleToUpdate['visibility'] = nextProps.tipVisibility;
+      /* to do: find a smarter way to check for changes here */
+      const prevTipVisibility = tipVisibility(this.props.tree, this.props.metadata, this.props.dateMin, this.props.dateMax, this.props.location)
+      const newTipVisibility = tipVisibility(nextProps.tree, nextProps.metadata, nextProps.dateMin, nextProps.dateMax, nextProps.location)
+      if (arrayInEquality(prevTipVisibility, newTipVisibility)) {
+        tipStyleToUpdate["visibility"] = newTipVisibility;
       }
+
 
       /* branches change thickness if the (active) tip count changes */
       if (this.props.tree.nodes[0].fullTipCount !== nextProps.tree.nodes[0].fullTipCount) {

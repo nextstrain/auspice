@@ -41,9 +41,6 @@ const returnStateNeeded = (reduxState) => {
     sequences: reduxState.sequences,
     metadata: reduxState.metadata,
     colorOptions: reduxState.metadata.colorOptions,
-    selectedLegendItem: reduxState.controls.selectedLegendItem,
-    dateMin: reduxState.controls.dateMin,
-    dateMax: reduxState.controls.dateMax,
     colorBy: reduxState.controls.colorBy
   };
 };
@@ -232,44 +229,6 @@ class App extends React.Component {
     this.changeRoute(newPath, this.state.location.query);
   }
 
-  parseFilterQuery(query) {
-    const tmp = query.split("-").map( (d) => d.split("."));
-    return {"fields": tmp.map( (d) => d[0] ), "filters": tmp.map( (d) => d[d.length-1].split(',') )};
-  }
-
-  tipVisibility(filters) {
-    let upperLimit = this.props.dateMax;
-    let lowerLimit = this.props.dateMin;
-
-    if (this.props.tree.nodes){
-      const filter_pairs = [];
-      if (this.props.metadata && this.props.metadata.metadata) {
-        for (const filter in this.props.metadata.metadata.controls) { // possible race condition with tree?
-          const tmp = this.parseFilterQuery(this.state.location.query[filter] || "");
-          for (let ii = 0; ii < tmp.filters.length; ii += 1) {
-            if (tmp.filters[ii] && tmp.fields[ii]){
-              filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
-            }
-          }
-        }
-      }
-      if (upperLimit && lowerLimit) {
-        if (filter_pairs.length) {
-          return this.props.tree.nodes.map((d) => (d.attr.date >= lowerLimit
-            && d.attr.date < upperLimit
-            && filter_pairs.every((x) => x[1].indexOf(d.attr[x[0]])>-1))
-              ? "visible" : "hidden");
-        } else {
-          return this.props.tree.nodes.map((d) => (d.attr.date >= lowerLimit
-            && d.attr.date < upperLimit)
-              ? "visible" : "hidden");
-        }
-      }
-    } else {
-      return "visible";
-    }
-  }
-
   changeRoute(pathname, query) {
     pathname = pathname.replace("!/", ""); // needed to assist with S3 redirects
     const prefix = (pathname === "" || pathname[0] === "/") ? "" : "/";
@@ -328,7 +287,6 @@ class App extends React.Component {
           <TreeView nodes={this.props.tree.nodes}
             location={this.state.location}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            tipVisibility={this.tipVisibility()}
           />
           <Map
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}

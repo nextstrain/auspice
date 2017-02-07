@@ -187,4 +187,42 @@ export const tipRadii = function (selectedLegendItem,
   }
   return null; // fallthrough
 };
-// end of fns from app.js
+
+const parseFilterQuery = function (query) {
+  const tmp = query.split("-").map((d) => d.split("."));
+  return {
+    "fields": tmp.map((d) => d[0]),
+    "filters": tmp.map((d) => d[d.length - 1].split(","))
+  };
+};
+
+export const tipVisibility = function (tree, metaMetadata, lowerLimit, upperLimit, location) {
+  if (tree.nodes){
+    const filter_pairs = [];
+    if (metaMetadata) {
+      for (const filter in metaMetadata.controls) { // possible race condition with tree?
+        const tmp = parseFilterQuery(location.query[filter] || "");
+        for (let ii = 0; ii < tmp.filters.length; ii += 1) {
+          if (tmp.filters[ii] && tmp.fields[ii]){
+            filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
+          }
+        }
+      }
+    }
+    if (upperLimit && lowerLimit) {
+      if (filter_pairs.length) {
+        return tree.nodes.map((d) => (
+          d.attr.date >= lowerLimit
+          && d.attr.date < upperLimit
+          && filter_pairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
+        ) ? "visible" : "hidden");
+      } else {
+        return tree.nodes.map((d) => (
+          d.attr.date >= lowerLimit
+          && d.attr.date < upperLimit
+        ) ? "visible" : "hidden");
+      }
+    }
+  }
+  return "visible";
+};
