@@ -408,16 +408,16 @@ class App extends React.Component {
               this.setState({sidebarDocked: !this.state.sidebarDocked})
             }}
           />
-            <Title suffix={suffix}/>
-            <TreeView nodes={this.props.tree.nodes}
-              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-              colorScale={colorScale}
-              nodeColor={this.nodeColor(colorScale)}
-              tipRadii={this.tipRadii(colorScale)}
-              tipVisibility={this.tipVisibility()}
-              branchThickness={this.branchThickness()}
-              datasetGuid={this.props.tree.datasetGuid}
-            />
+          <Title suffix={suffix}/>
+          <TreeView nodes={this.props.tree.nodes}
+            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+            colorScale={colorScale}
+            nodeColor={this.nodeColor(colorScale)}
+            tipRadii={this.tipRadii(colorScale)}
+            tipVisibility={this.tipVisibility()}
+            branchThickness={this.branchThickness()}
+            datasetGuid={this.props.tree.datasetGuid}
+          />
           <Map
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
             colorScale={colorScale.scale}
