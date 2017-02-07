@@ -26,6 +26,17 @@ const arrayInEquality = function(a,b) {
   }
 };
 
+// branch thickness is from clade frequencies
+const branchThickness = function (tree) {
+  if (tree.nodes) {
+    const maxTipCount = tree.nodes[0].fullTipCount;
+    return tree.nodes.map((d) => {
+      return globals.freqScale(d.fullTipCount / maxTipCount);
+    });
+  }
+  return 2.0;
+}
+
 // following fns moved from app.js when colorScale -> REDUX
 const getTipColorAttribute = function (node, colorScale, sequences) {
   if (colorScale.colorBy.slice(0, 3) === "gt-" && colorScale.genotype) {
@@ -95,7 +106,8 @@ const tipRadii = function (selectedLegendItem,
     distanceMeasure: state.controls.distanceMeasure,
     sequences: state.sequences,
     selectedLegendItem: state.controls.selectedLegendItem,
-    colorScale: state.controls.colorScale
+    colorScale: state.controls.colorScale,
+    // datasetGuid: state.tree.datasetGuid
   };
 })
 class TreeView extends React.Component {
@@ -120,6 +132,7 @@ class TreeView extends React.Component {
       });
     }
   }
+
   componentWillReceiveProps(nextProps) {
 
     /*
@@ -170,6 +183,9 @@ class TreeView extends React.Component {
       const oldNodeColor = nodeColor(this.props.tree, this.props.colorScale, this.props.sequences)
       const newNodeColor = nodeColor(nextProps.tree, nextProps.colorScale, nextProps.sequences)
 
+      const oldBranchThickness = branchThickness(this.props.tree);
+      const newBranchThickness = branchThickness(nextProps.tree);
+
       /* update tips */
       let attrToUpdate = {};
       let styleToUpdate = {};
@@ -210,9 +226,13 @@ class TreeView extends React.Component {
         });
       }
       /* branch stroke width has changed */
-      if (nextProps.branchThickness && arrayInEquality(nextProps.branchThickness, this.props.branchThickness)) {
-        styleToUpdate['stroke-width'] = nextProps.branchThickness;
+      // if (nextProps.branchThickness && arrayInEquality(nextProps.branchThickness, this.props.branchThickness)) {
+        // styleToUpdate['stroke-width'] = nextProps.branchThickness;
+      // }
+      if (newBranchThickness && arrayInEquality(oldBranchThickness, newBranchThickness)) {
+        styleToUpdate['stroke-width'] = newBranchThickness;
       }
+
       /* implement style changes */
       if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
         tree.updateMultipleArray(".branch", attrToUpdate, styleToUpdate, fastTransitionDuration);
@@ -302,6 +322,11 @@ class TreeView extends React.Component {
           clicked: this.state.clicked
         }
       );
+
+      const styleToUpdate = {};
+      styleToUpdate['stroke-width'] = branchThickness(this.props.tree);
+      myTree.updateMultipleArray(".branch", {}, styleToUpdate, fastTransitionDuration);
+
       return myTree;
     } else {
       return null;
@@ -489,6 +514,7 @@ class TreeView extends React.Component {
       1. set up SVGs
       2. tree will be added on props loading
     */
+    console.log("treeView render")
     return (
       <span>
         {this.props.browserDimensions ? this.createTreeMarkup() : null}

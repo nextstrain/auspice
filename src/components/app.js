@@ -270,18 +270,6 @@ class App extends React.Component {
     }
   }
 
-  // branch thickness is from clade frequencies
-  branchThickness() {
-    if (this.props.tree.nodes) {
-      const maxTipCount = this.props.tree.nodes[0].fullTipCount;
-      return this.props.tree.nodes.map((d) => {
-        return freqScale(d.fullTipCount/maxTipCount);
-      });
-    } else {
-      return 2.0;
-    }
-  }
-
   changeRoute(pathname, query) {
     pathname = pathname.replace("!/", ""); // needed to assist with S3 redirects
     const prefix = (pathname === "" || pathname[0] === "/") ? "" : "/";
@@ -341,7 +329,6 @@ class App extends React.Component {
             location={this.state.location}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
             tipVisibility={this.tipVisibility()}
-            branchThickness={this.branchThickness()}
             datasetGuid={this.props.tree.datasetGuid}
           />
           <Map
