@@ -8,6 +8,9 @@ const setupLatLong = (nodes, metadata, map) => {
   };
   const geo = metadata.geo;
 
+  /* dev only, abstract to controls later */
+  const adminLevel = "country"
+
   /*
     aggregate locations for tips
   */
@@ -38,6 +41,7 @@ const setupLatLong = (nodes, metadata, map) => {
     });
   });
 
+
   /*
     count transmissions for line thickness
   */
@@ -45,13 +49,13 @@ const setupLatLong = (nodes, metadata, map) => {
     if (!parent.children) { return; }
     // if (parent.attr.country !== "china") { return; } // remove me, example filter
     parent.children.forEach((child) => {
-      if (parent.attr.country === child.attr.country) { return; }
+      if (parent.attr[adminLevel] === child.attr[adminLevel]) { return; }
       // look up in transmissions dictionary
-      if (transmissions[parent.attr.country + "/" + child.attr.country]) {
-        transmissions[parent.attr.country + "/" + child.attr.country]++;
+      if (transmissions[parent.attr[adminLevel] + "/" + child.attr[adminLevel]]) {
+        transmissions[parent.attr[adminLevel] + "/" + child.attr[adminLevel]]++;
       } else {
         // we don't have it, add it
-        transmissions[parent.attr.country + "/" + child.attr.country] = 1;
+        transmissions[parent.attr[adminLevel] + "/" + child.attr[adminLevel]] = 1;
       }
     });
   });
@@ -62,10 +66,10 @@ const setupLatLong = (nodes, metadata, map) => {
     // go from "brazil/cuba" to ["brazil", "cuba"]
     const countries = key.split("/");
     // go from "brazil" to lat0 = -14.2350
-    let long0 = geo.country[countries[0]].longitude;
-    let long1 = geo.country[countries[1]].longitude;
-    let lat0 = geo.country[countries[0]].latitude;
-    let lat1 = geo.country[countries[1]].latitude;
+    let long0 = geo[adminLevel][countries[0]].longitude;
+    let long1 = geo[adminLevel][countries[1]].longitude;
+    let lat0 = geo[adminLevel][countries[0]].latitude;
+    let lat1 = geo[adminLevel][countries[1]].latitude;
 
     // create new leaflet LatLong objects
     const start = new L.LatLng(lat0, long0)

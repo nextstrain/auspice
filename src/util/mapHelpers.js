@@ -3,6 +3,8 @@ import d3 from "d3";
 
 export const setupTipsAndTransmissions = (nodes, metadata, colorScale, map, responsive) => {
 
+  // console.log("setup", colorScale("asdf"))
+
   /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
   const latLongs = getLatLongs(nodes, metadata, map);
 
@@ -32,8 +34,8 @@ export const setupTipsAndTransmissions = (nodes, metadata, colorScale, map, resp
         .datum(partialTransmission)
         .attr("d", pathStringGenerator) /* with the interpolation in the function above */
         .attr("fill","none")
-        .attr("stroke", "red")
-        .attr("stroke-width", "2px")
+        .attr("stroke", "rgba(255,0,0,.3)")
+        .attr("stroke-width", "1px")
 
       transmissionPaths.push({ /* and add it to an array, which we'll map over to create our missiles */
         elem,
@@ -55,10 +57,10 @@ export const setupTipsAndTransmissions = (nodes, metadata, colorScale, map, resp
 
   const missiles = transmissionPaths.map((transmissionPath) => {
 
-    console.log(transmissionPath)
+    // console.log(transmissionPath)
 
     const missile = g.append("circle")
-      .attr("r", 5)
+      .attr("r", 3)
       .attr("fill", (d) => { return colorScale(transmissionPath.transmission.to) })
       .attr("transform", `translate(
         ${transmissionPath.partialTransmission[0].x},
