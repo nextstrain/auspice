@@ -1,4 +1,5 @@
 import { tipRadius, freqScale } from "./globals";
+import queryString from "query-string";
 
 export const gatherTips = (node, tips) => {
 
@@ -197,11 +198,12 @@ const parseFilterQuery = function (query) {
 };
 
 export const tipVisibility = function (tree, metaMetadata, lowerLimit, upperLimit, location) {
+  const query = queryString.parse(location.search);
   if (tree.nodes){
     const filter_pairs = [];
     if (metaMetadata) {
       for (const filter in metaMetadata.controls) { // possible race condition with tree?
-        const tmp = parseFilterQuery(location.query[filter] || "");
+        const tmp = parseFilterQuery(query[filter] || "");
         for (let ii = 0; ii < tmp.filters.length; ii += 1) {
           if (tmp.filters[ii] && tmp.fields[ii]){
             filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);

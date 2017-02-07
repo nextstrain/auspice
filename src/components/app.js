@@ -40,6 +40,9 @@ const returnStateNeeded = (reduxState) => {
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   colorOptions: parameters for each colorBy value (country, region etc)
       ideally come from the JSON, but there are defaults if necessary
+
+  React-Router v4 injects length, action, location, push etc into props
+    see https://reacttraining.com/react-router/#history
 */
 @connect(returnStateNeeded)
 @Radium
@@ -50,15 +53,15 @@ class App extends React.Component {
       sidebarOpen: false,
       sidebarDocked: false,
       location: {
-        pathname: this.props.location.pathname,           // injected by react-router
-        query: this.props.location.query                  // injected by react-router
+        pathname: this.props.location.pathname,
+        query: queryString.parse(this.props.location.search)
       }
       // sidebarDocked: true,
     };
   }
   static propTypes = {
     /* react */
-    dispatch: React.PropTypes.func,
+    dispatch: React.PropTypes.func.isRequired,
     params: React.PropTypes.object,
     /* component api */
     error: React.PropTypes.object,
@@ -72,6 +75,11 @@ class App extends React.Component {
 
   }
 
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
+
+
   /******************************************
    * LIFECYLCE METHODS
    *****************************************/
@@ -84,7 +92,7 @@ class App extends React.Component {
     mql.addListener(this.mediaQueryChanged.bind(this));
     this.setState({mql: mql, sidebarDocked: mql.matches});
 
-    const tmpQuery = this.props.location.query;
+    const tmpQuery = queryString.parse(this.context.router.location.search);
     const pathname = this.props.location.pathname;
     const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/" : "";
     this.setState({
@@ -100,7 +108,7 @@ class App extends React.Component {
     // all of the other intentional route changes we will manually setState
 
     this.maybeFetchDataset();
-    const tmpQuery = this.props.location.query;
+    const tmpQuery = queryString.parse(this.context.router.location.search);
     window.addEventListener("popstate", (a, b, c) => {
       this.setState({
         location: {
@@ -131,17 +139,17 @@ class App extends React.Component {
   }
 
   initializeReduxStore() {
-
+    const query = queryString.parse(this.context.router.location.search);
     // initialize to query param if available, otherwise use defaults
-    if (this.props.location.query.l) {
-      this.props.dispatch({ type: CHANGE_LAYOUT, data: this.props.location.query.l });
+    if (query.l) {
+      this.props.dispatch({ type: CHANGE_LAYOUT, data: query.l });
     } else {
       this.props.dispatch({ type: CHANGE_LAYOUT, data: defaultLayout });
     }
 
-    if (this.props.location.query.m) {
+    if (query.m) {
       this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE,
-                            data: this.props.location.query.m });
+                            data: query.m });
     } else {
       this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE,
                             data: defaultDistanceMeasure });
@@ -154,20 +162,20 @@ class App extends React.Component {
     this.props.dispatch({ type: CHANGE_ABSOLUTE_DATE_MAX, data: absoluteMax });
 
     // set selected date range to query params if they exist, if not set to defaults
-    if (this.props.location.query.dmin) {
-      this.props.dispatch({ type: CHANGE_DATE_MIN, data: this.props.location.query.dmin });
+    if (query.dmin) {
+      this.props.dispatch({ type: CHANGE_DATE_MIN, data: query.dmin });
     } else {
       this.props.dispatch({ type: CHANGE_DATE_MIN, data: absoluteMin });
     }
 
-    if (this.props.location.query.dmax) {
-      this.props.dispatch({ type: CHANGE_DATE_MAX, data: this.props.location.query.dmax });
+    if (query.dmax) {
+      this.props.dispatch({ type: CHANGE_DATE_MAX, data: query.dmax });
     } else {
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: absoluteMax });
     }
 
-    if (this.props.location.query.c) {
-      this.props.dispatch(changeColorBy(this.props.location.query.c, this.props.router));
+    if (query.c) {
+      this.props.dispatch(changeColorBy(query.c, this.context.router));
     } else {
       this.props.dispatch(changeColorBy(defaultColorBy));
     }
@@ -180,9 +188,11 @@ class App extends React.Component {
       data: {
         width: window.innerWidth,
         height: window.innerHeight,
-        docHeight: window.document.body.clientHeight /* background needs this because sidebar creates absolutely positioned container and blocks height 100% */
+        docHeight: window.document.body.clientHeight
+        /* background needs docHeight because sidebar creates
+        absolutely positioned container and blocks height 100% */
       }
-    })
+    });
   }
 
   maybeFetchDataset() {
@@ -211,9 +221,9 @@ class App extends React.Component {
   setVirusPath(newPath) {
     const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
     const suffix = (newPath.length && newPath[newPath.length - 1] !== "/") ? "/?" : "?";
-    const url = prefix + newPath + suffix + queryString.stringify(this.state.location.query);
+    const url = prefix + newPath + suffix + this.context.router.location.search;
     window.history.pushState({}, "", url);
-    this.changeRoute(newPath, this.state.location.query);
+    this.changeRoute(newPath, queryString.parse(this.context.router.location.search));
   }
 
   changeRoute(pathname, query) {
@@ -256,7 +266,7 @@ class App extends React.Component {
         sidebar={
           <Controls changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
-            router={this.props.router}
+            router={this.context.router}
             colorOptions={this.props.colorOptions}
           />
         }
@@ -285,7 +295,7 @@ class App extends React.Component {
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
             changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
-            router={this.props.router}
+            router={this.context.router}
           />
         </Background>
       </Sidebar>

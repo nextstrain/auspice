@@ -70,6 +70,8 @@ class Legend extends React.Component {
     };
   }
   render() {
+    // catch the case where we try to render before anythings ready
+    if (!this.props.colorScale) {return (<g/>);}
     const styles = this.getStyles();
     return (
       <g>

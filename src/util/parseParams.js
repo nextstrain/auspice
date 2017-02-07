@@ -7,6 +7,7 @@ import {datasets} from "./globals";
  * incomplete path are augmented with defaults
  */
 const parseParams = (path) => {
+  // console.log("parseParams. path in:", path)
   let params; // split path at '/', if path === "", set params to []
   if (path.length) {
     params = path.split("/").filter( (d) => d !== "");

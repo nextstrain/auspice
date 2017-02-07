@@ -1,5 +1,6 @@
 import * as types from "../actions/controls";
 import * as globals from "../util/globals";
+import getColorScale from "../util/getColorScale";
 
 const Controls = (state = {
   /*
@@ -22,7 +23,7 @@ const Controls = (state = {
   absoluteDateMin: null,
   absoluteDateMax: null,
   colorBy: globals.defaultColorBy,
-  colorScale: null
+  colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1)
 }, action) => {
   switch (action.type) {
   case types.TOGGLE_BRANCH_LABELS:

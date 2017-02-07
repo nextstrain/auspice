@@ -70,8 +70,15 @@ class TreeView extends React.Component {
       clicked: null,
       hover: null,
       tree: null,
-      shouldReRender: true // start off this way I guess
+      shouldReRender: false // start off this way I guess
     };
+  }
+
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
+
+  static propTypes = {
   }
 
   componentWillReceiveProps(nextProps) {
@@ -84,9 +91,10 @@ class TreeView extends React.Component {
     let tree = this.state.tree
     /* should we create a new tree (dataset change) */
 
-    if ((nextProps.datasetGuid !== this.props.datasetGuid && nextProps.nodes) ||
-        (!tree && nextProps.datasetGuid && nextProps.nodes)) {
-      tree = this.makeTree(nextProps.nodes)
+    if ((nextProps.datasetGuid !== this.props.datasetGuid && nextProps.tree.nodes) ||
+        (!tree && nextProps.datasetGuid && nextProps.tree.nodes)) {
+      tree = this.makeTree(nextProps.tree.nodes)
+      console.log("making tree")
       this.setState({tree, shouldReRender: true});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
@@ -98,7 +106,6 @@ class TreeView extends React.Component {
     that redrawing the tree is expensive, so we try and do the least amount
     of work possible */
     if (tree) {
-
       /* the objects storing the changes to make to the tree */
       const tipAttrToUpdate = {};
       const tipStyleToUpdate = {};
@@ -124,11 +131,15 @@ class TreeView extends React.Component {
 
       /* tip visibility has changed, for instance because of date slider */
       /* to do: find a smarter way to check for changes here */
-      const prevTipVisibility = tipVisibility(this.props.tree, this.props.metadata, this.props.dateMin, this.props.dateMax, this.props.location)
-      const newTipVisibility = tipVisibility(nextProps.tree, nextProps.metadata, nextProps.dateMin, nextProps.dateMax, nextProps.location)
-      if (arrayInEquality(prevTipVisibility, newTipVisibility)) {
-        tipStyleToUpdate["visibility"] = newTipVisibility;
-      }
+      /* BUG (react router v4)
+      should perhaps pass in the previous history location to prevTip...
+      https://github.com/ReactTraining/history#properties
+      */
+      // const prevTipVisibility = tipVisibility(this.props.tree, this.props.metadata, this.props.dateMin, this.props.dateMax, this.props.location);
+      // const newTipVisibility = tipVisibility(nextProps.tree, nextProps.metadata, nextProps.dateMin, nextProps.dateMax, nextProps.location);
+      // if (arrayInEquality(prevTipVisibility, newTipVisibility)) {
+        // tipStyleToUpdate["visibility"] = newTipVisibility;
+      // }
 
 
       /* branches change thickness if the (active) tip count changes */
@@ -404,7 +415,7 @@ class TreeView extends React.Component {
       1. set up SVGs
       2. tree will be added on props loading
     */
-    // console.log("treeView render")
+    console.log("treeView render")
     return (
       <span>
         {this.props.browserDimensions ? this.createTreeMarkup() : null}
