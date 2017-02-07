@@ -74,7 +74,7 @@ const discreteAttributeScale = (nodes, attr) => {
                  .range(colorList);
 };
 
-const getColorScale = (colorBy, tree, sequences, colorOptions) => {
+const getColorScale = (colorBy, tree, sequences, colorOptions, version) => {
   let colorScale;
   let continuous = false;
   if (!tree.nodes) {
@@ -136,8 +136,9 @@ const getColorScale = (colorBy, tree, sequences, colorOptions) => {
   return {
     "scale": colorScale,
     "continuous": continuous,
-    "colorBy": colorBy,
-    "legendBoundsMap": createLegendMatchBound(colorScale)
+    "colorBy": colorBy, // this should be removed
+    "legendBoundsMap": createLegendMatchBound(colorScale),
+    version
   };
 };
 

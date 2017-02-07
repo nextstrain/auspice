@@ -16,80 +16,28 @@ import InfoPanel from "./infoPanel";
 import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
 import { getGenotype } from "../../util/getGenotype";
+import { arrayInEquality,
+         branchThickness,
+         tipRadii,
+         nodeColor} from "../../util/treeHelpers";
 
-const arrayInEquality = function(a,b) {
-  if (a&&b){
-    const eq = a.map((d,i)=>d!==b[i]);
-    return eq.some((d)=>d);
-  }else{
-    return true;
-  }
-};
+/* UNDERSTANDING THIS CODE:
+the "tree" object passed in from redux (this.props.tree)
+contains the nodes etc used to build the PhyloTree
+object called tree (!). Those nodes are in a 1-1 ordering, and
+there are actually backlinks from the phylotree tree
+(i.e. tree.nodes[i].n links to props.tree.nodes[i])
 
-// branch thickness is from clade frequencies
-const branchThickness = function (tree) {
-  if (tree.nodes) {
-    const maxTipCount = tree.nodes[0].fullTipCount;
-    return tree.nodes.map((d) => {
-      return globals.freqScale(d.fullTipCount / maxTipCount);
-    });
-  }
-  return 2.0;
-}
+I (james) don't want to put phylotree into redux
+as it's not simply data
 
-// following fns moved from app.js when colorScale -> REDUX
-const getTipColorAttribute = function (node, colorScale, sequences) {
-  if (colorScale.colorBy.slice(0, 3) === "gt-" && colorScale.genotype) {
-    return getGenotype(colorScale.genotype[0][0],
-                       colorScale.genotype[0][1],
-                       node,
-                       sequences.sequences);
-  }
-  return node.attr[colorScale.colorBy];
-};
+the state of this component contains a few flags and
+hovered / clicked, which reference the nodes currently in that state
+they're not in redux as (1) its easier and (2) all components that
+need this information are children of this component
+(it would probably be a good idea to move them to redux)
+*/
 
-const nodeColor = function (tree, colorScale, sequences) {
-  if (tree && tree.nodes && colorScale && colorScale.colorBy) {
-    const nodeColorAttr = tree.nodes.map((n) => getTipColorAttribute(n, colorScale, sequences));
-    return nodeColorAttr.map((n) => colorScale.scale(n));
-  }
-  return null;
-};
-
-const determineLegendMatch = function (selectedLegendItem,
-                                       node,
-                                       legendBoundsMap,
-                                       colorScale,
-                                       sequences) {
-  let bool;
-  const nodeAttr = getTipColorAttribute(node, colorScale, sequences);
-  // equates a tip and a legend element
-  // exact match is required for categorical qunantities such as genotypes, regions
-  // continuous variables need to fall into the interal (lower_bound[leg], leg]
-  if (legendBoundsMap) {
-    bool = (nodeAttr <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
-           (nodeAttr > legendBoundsMap.lower_bound[selectedLegendItem]);
-  } else {
-    bool = nodeAttr === selectedLegendItem;
-  }
-  return bool;
-};
-
-const tipRadii = function (selectedLegendItem,
-                           colorScale,
-                           sequences,
-                           tree
-                         ) {
-  if (selectedLegendItem && tree && tree.nodes){
-    const legendMap = colorScale.continuous
-                      ? colorScale.legendBoundsMap : false;
-    return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, legendMap, colorScale, sequences) ? 6 : 3);
-  } else if (tree && tree.nodes) {
-    return tree.nodes.map((d) => globals.tipRadius);
-  }
-  return null; // fallthrough
-};
-// end of fns from app.js
 
 /*
  * TreeView creates a (now responsive!) SVG & scales according to layout
@@ -107,135 +55,85 @@ const tipRadii = function (selectedLegendItem,
     sequences: state.sequences,
     selectedLegendItem: state.controls.selectedLegendItem,
     colorScale: state.controls.colorScale,
-    // datasetGuid: state.tree.datasetGuid
+    datasetGuid: state.tree.datasetGuid
   };
 })
 class TreeView extends React.Component {
   constructor(props) {
     super(props);
-
     this.Viewer = null;
-
     this.state = {
-      okToDraw: false,
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
       clicked: null,
-      hover: null
+      hover: null,
+      tree: null
     };
-  }
-  componentWillMount() {
-    if (this.state.currentDatasetGuid !== this.props.datasetGuid) {
-      this.setState({
-        okToDraw: true,
-        currentDatasetGuid: this.props.datasetGuid,
-        width: globals.width,
-      });
-    }
   }
 
   componentWillReceiveProps(nextProps) {
-
     /*
-      previously in componentDidMount, but we don't mount immediately anymore -
-      need to wait for browserDimensions
+    This both creates the tree (when it's loaded into redux) and
+    works out what to update, based upon changes to redux.control
+
+    NB logic was previously in CDM, but now we wait for browserDimensions
     */
-    const good_tree = (this.state.tree && (nextProps.datasetGuid === this.props.datasetGuid));
-    if (this.Viewer && !good_tree) {
-      this.Viewer.fitToViewer();
-      const tree = (this.state.tree)
-        ? this.state.tree
-        : this.makeTree(this.props.nodes, this.props.layout, this.props.distance);
-      this.setState({tree: tree});
+    let tree = this.state.tree
+    /* should we create a new tree (dataset change) */
+
+    if ((nextProps.datasetGuid !== this.props.datasetGuid && nextProps.nodes) ||
+        (!tree && nextProps.datasetGuid && nextProps.nodes)) {
+      tree = this.makeTree(nextProps.nodes)
+      this.setState({tree});
+      if (this.Viewer) {
+        this.Viewer.fitToViewer();
+      }
     }
 
-    /* Do we have a tree to draw? if yes, check whether it needs to be redrawn */
-    const tree = good_tree
-      ? this.state.tree
-      : this.makeTree(nextProps.nodes, this.props.layout, this.props.distance);
-
-    /* if we don't have a dataset or nodes, don't draw */
-    if (!(nextProps.datasetGuid && nextProps.nodes)) {
-      this.setState({okToDraw: false});
-    } else if (
-      /* if the dataset, layout or distance measure has changed, do book keeping & redraw */
-      (nextProps.datasetGuid !== this.props.datasetGuid) ||
-      (nextProps.layout !== this.props.layout) ||
-      (nextProps.distanceMeasure !== this.props.distanceMeasure)
-    ) {
-      this.setState({
-        okToDraw: true,
-        currentDatasetGuid: nextProps.datasetGuid,
-        width: globals.width,
-        tree: tree
-      });
-    }
-
-    /* if we have a tree and we have new props, figure out what we need to update */
+    /* if we have a tree and we have new props, figure out what we need to update...
+    this is imperitive, as opposed to redux-style coding, due to the fact
+    that redrawing the tree is expensive, so we try and do the least amount
+    of work possible */
     if (tree) {
 
-      /* in preparation for figuring what's changed, we need to work out a few attributes
-      these used to be in app.js
-      these should be moved to REDUX
-      */
-      const oldTipRadii = tipRadii(this.props.selectedLegendItem, this.props.colorScale, this.props.sequences, this.props.tree)
-      const newTipRadii = tipRadii(nextProps.selectedLegendItem, nextProps.colorScale, nextProps.sequences, nextProps.tree)
+      /* the objects storing the changes to make to the tree */
+      const tipAttrToUpdate = {};
+      const tipStyleToUpdate = {};
+      const branchAttrToUpdate = {};
+      const branchStyleToUpdate = {};
 
-      const oldNodeColor = nodeColor(this.props.tree, this.props.colorScale, this.props.sequences)
-      const newNodeColor = nodeColor(nextProps.tree, nextProps.colorScale, nextProps.sequences)
-
-      const oldBranchThickness = branchThickness(this.props.tree);
-      const newBranchThickness = branchThickness(nextProps.tree);
-
-      /* update tips */
-      let attrToUpdate = {};
-      let styleToUpdate = {};
-
-
-      /* tip color has changed */
-      if (newNodeColor && arrayInEquality(oldNodeColor, newNodeColor)) {
-        styleToUpdate['fill'] = newNodeColor.map((col) => {
+      /* calculate all changes resulting from ∆ colorScale */
+      if (this.props.colorScale.version !== nextProps.colorScale.version) {
+        const newNodeColor = nodeColor(nextProps.tree, nextProps.colorScale, nextProps.sequences);
+        tipStyleToUpdate["fill"] = newNodeColor.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
         });
-        tree.updateStyleOrAttributeArray(".branch", "stroke", newNodeColor, fastTransitionDuration, "style");
-        styleToUpdate['stroke'] = newNodeColor;
+        tipStyleToUpdate["stroke"] = newNodeColor;
+        branchStyleToUpdate["stroke"] = newNodeColor.map((col) => {
+          return d3.rgb(d3.interpolateRgb(col, "#BBB")(0.6)).toString();
+        });
       }
 
-      /* tip radius has changed */
-      if (newTipRadii && arrayInEquality(oldTipRadii, newTipRadii)) {
-        attrToUpdate['r'] = newTipRadii;
+      /* tip radii change when the selectedLegendItem changes*/
+      if (this.props.selectedLegendItem !== nextProps.selectedLegendItem) {
+        tipAttrToUpdate["r"] = tipRadii(nextProps.selectedLegendItem, nextProps.colorScale, nextProps.sequences, nextProps.tree);
       }
 
       /* tip visibility has changed, for instance because of date slider */
       if (nextProps.tipVisibility && arrayInEquality(nextProps.tipVisibility, this.props.tipVisibility)) {
-        // console.log("updateVisibility");
-        styleToUpdate['visibility'] = nextProps.tipVisibility;
-      }
-      /* implement style changes */
-      if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
-        tree.updateMultipleArray(".tip", attrToUpdate, styleToUpdate, fastTransitionDuration);
+        tipStyleToUpdate['visibility'] = nextProps.tipVisibility;
       }
 
-      /* update branches */
-      attrToUpdate = {};
-      styleToUpdate = {};
-
-      /* branch color has changed */
-      if (newNodeColor && arrayInEquality(oldNodeColor, newNodeColor)) {
-        styleToUpdate['stroke'] = newNodeColor.map((col) => {
-      	return d3.rgb(d3.interpolateRgb(col, "#BBB")(0.6)).toString();
-        });
-      }
-      /* branch stroke width has changed */
-      // if (nextProps.branchThickness && arrayInEquality(nextProps.branchThickness, this.props.branchThickness)) {
-        // styleToUpdate['stroke-width'] = nextProps.branchThickness;
-      // }
-      if (newBranchThickness && arrayInEquality(oldBranchThickness, newBranchThickness)) {
-        styleToUpdate['stroke-width'] = newBranchThickness;
+      /* branches change thickness if the (active) tip count changes */
+      if (this.props.tree.nodes[0].fullTipCount !== nextProps.tree.nodes[0].fullTipCount) {
+        branchStyleToUpdate["stroke-width"] = branchThickness(nextProps.tree)
       }
 
       /* implement style changes */
-      if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
-        tree.updateMultipleArray(".branch", attrToUpdate, styleToUpdate, fastTransitionDuration);
+      if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
+        tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, fastTransitionDuration);
+      }
+      if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
+        tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, fastTransitionDuration);
       }
 
       /* swap layouts */

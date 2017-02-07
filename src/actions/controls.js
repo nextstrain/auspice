@@ -18,8 +18,8 @@ export const CHANGE_ABSOLUTE_DATE_MAX = "CHANGE_ABSOLUTE_DATE_MAX";
 export const CHANGE_COLOR_BY = "CHANGE_COLOR_BY";
 export const SET_COLOR_SCALE = "SET_COLOR_SCALE";
 
-const colorScaleWrapper = function (colorBy, tree, sequences, colorOptions) {
-  const colorScale = getColorScale(colorBy, tree, sequences, colorOptions);
+const colorScaleWrapper = function (colorBy, tree, sequences, colorOptions, newVersion) {
+  const colorScale = getColorScale(colorBy, tree, sequences, colorOptions, newVersion);
   if (colorBy.slice(0, 3) === "gt-" && sequences.geneLength) {
     colorScale.genotype = parseGenotype(colorBy, sequences.geneLength);
   }
@@ -30,9 +30,10 @@ export const updateColorScale = function () {
   return function (dispatch, getState) {
     console.log("colorScale updated")
     const { controls, tree, sequences, metadata } = getState();
+    const previousVersion = controls.colorScale ? controls.colorScale.version : 0;
     dispatch({
       type: SET_COLOR_SCALE,
-      data: colorScaleWrapper(controls.colorBy, tree, sequences, metadata.colorOptions)
+      data: colorScaleWrapper(controls.colorBy, tree, sequences, metadata.colorOptions, previousVersion + 1)
     });
   };
 };

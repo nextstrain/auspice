@@ -5,7 +5,6 @@ import d3 from "d3";
 
 const Tree = (state = {
   loading: false,
-  tree: null,
   nodes: null,
   error: null,
   root: null

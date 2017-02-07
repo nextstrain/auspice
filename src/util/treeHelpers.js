@@ -1,12 +1,4 @@
-/*********************************
-**********************************
-**********************************
-**********************************
-** Tree functions
-**********************************
-**********************************
-**********************************
-*********************************/
+import { tipRadius, freqScale } from "./globals";
 
 export const gatherTips = (node, tips) => {
 
@@ -124,3 +116,75 @@ export const adjust_freq_by_date = (nodes, rootNode) => {
     // d.frequency = (d.tipCount) / rootNode.tipCount;
   });
 };
+
+export const arrayInEquality = function(a,b) {
+  if (a&&b){
+    const eq = a.map((d,i)=>d!==b[i]);
+    return eq.some((d)=>d);
+  }else{
+    return true;
+  }
+};
+
+// branch thickness is from clade frequencies
+export const branchThickness = function (tree) {
+  if (tree.nodes) {
+    const maxTipCount = tree.nodes[0].fullTipCount;
+    return tree.nodes.map((d) => {
+      return freqScale(d.fullTipCount / maxTipCount);
+    });
+  }
+  return 2.0;
+}
+
+const getTipColorAttribute = function (node, colorScale, sequences) {
+  if (colorScale.colorBy.slice(0, 3) === "gt-" && colorScale.genotype) {
+    return getGenotype(colorScale.genotype[0][0],
+                       colorScale.genotype[0][1],
+                       node,
+                       sequences.sequences);
+  }
+  return node.attr[colorScale.colorBy];
+};
+
+export const nodeColor = function (tree, colorScale, sequences) {
+  if (tree && tree.nodes && colorScale && colorScale.colorBy) {
+    const nodeColorAttr = tree.nodes.map((n) => getTipColorAttribute(n, colorScale, sequences));
+    return nodeColorAttr.map((n) => colorScale.scale(n));
+  }
+  return null;
+};
+
+const determineLegendMatch = function (selectedLegendItem,
+                                       node,
+                                       legendBoundsMap,
+                                       colorScale,
+                                       sequences) {
+  let bool;
+  const nodeAttr = getTipColorAttribute(node, colorScale, sequences);
+  // equates a tip and a legend element
+  // exact match is required for categorical qunantities such as genotypes, regions
+  // continuous variables need to fall into the interal (lower_bound[leg], leg]
+  if (legendBoundsMap) {
+    bool = (nodeAttr <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
+           (nodeAttr > legendBoundsMap.lower_bound[selectedLegendItem]);
+  } else {
+    bool = nodeAttr === selectedLegendItem;
+  }
+  return bool;
+};
+
+export const tipRadii = function (selectedLegendItem,
+                           colorScale,
+                           sequences,
+                           tree
+                         ) {
+  if (selectedLegendItem && tree && tree.nodes){
+    const legendMap = colorScale.continuous ? colorScale.legendBoundsMap : false;
+    return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, legendMap, colorScale, sequences) ? 6 : 3);
+  } else if (tree && tree.nodes) {
+    return tree.nodes.map((d) => tipRadius);
+  }
+  return null; // fallthrough
+};
+// end of fns from app.js

@@ -329,7 +329,6 @@ class App extends React.Component {
             location={this.state.location}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
             tipVisibility={this.tipVisibility()}
-            datasetGuid={this.props.tree.datasetGuid}
           />
           <Map
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
