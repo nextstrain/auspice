@@ -69,7 +69,8 @@ class TreeView extends React.Component {
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
       clicked: null,
       hover: null,
-      tree: null
+      tree: null,
+      shouldReRender: true // start off this way I guess
     };
   }
 
@@ -86,7 +87,7 @@ class TreeView extends React.Component {
     if ((nextProps.datasetGuid !== this.props.datasetGuid && nextProps.nodes) ||
         (!tree && nextProps.datasetGuid && nextProps.nodes)) {
       tree = this.makeTree(nextProps.nodes)
-      this.setState({tree});
+      this.setState({tree, shouldReRender: true});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
       }
@@ -153,8 +154,13 @@ class TreeView extends React.Component {
       }
     }
   }
-  componentWillUpdate(nextProps, nextState) {
-    /* reconcile hover and click selections in tree */
+
+  shouldComponentUpdate(nextProps, nextState) {
+    /* reconcile hover and click selections in tree
+    used to be in componentWillReceiveProps, however
+    by having it here we both get access to nextState and can
+    control whether this component re-renders
+    */
     if (
       this.state.tree &&
       (this.state.hovered || this.state.clicked) &&
@@ -176,8 +182,7 @@ class TreeView extends React.Component {
           this.state.hovered,
           nextState.hovered,
         );
-      }
-      else if (this.state.clicked && nextState.clicked === null) {
+      } else if (this.state.clicked && nextState.clicked === null) {
         // x clicked or clicked off will give a null value, so reset everything to be safe
         this.state.tree.updateSelectedBranchOrTip(
           this.state.clicked,
@@ -185,6 +190,14 @@ class TreeView extends React.Component {
         )
       }
     }
+    /* we are now in a position to control the rendering to improve performance */
+    if (nextState.shouldReRender) {
+      // console.log("SCU returning true")
+      this.setState({shouldReRender: false});
+      return true;
+    }
+    // console.log("SCU returning false")
+    return false
   }
 
   componentDidUpdate(prevProps, prevState) {
@@ -227,57 +240,31 @@ class TreeView extends React.Component {
           clicked: this.state.clicked
         }
       );
-
-      const styleToUpdate = {};
-      styleToUpdate['stroke-width'] = branchThickness(this.props.tree);
-      myTree.updateMultipleArray(".branch", {}, styleToUpdate, fastTransitionDuration);
-
+      // Update the branch thickness - perhaps this could be better...
+      myTree.updateMultipleArray(".branch", {}, {"stroke-width": branchThickness(this.props.tree)}, fastTransitionDuration);
       return myTree;
     } else {
       return null;
     }
   }
 
+  /* Callbacks used by the tips / branches when hovered / clicked */
+  /* By keeping this out of redux I think it makes things a little faster */
   onTipHover(d) {
     if (!this.state.clicked) {
-      this.setState({
-        hovered: {
-          d,
-          type: ".tip"
-        }
-      });
+      this.setState({hovered: {d, type: ".tip"}});
     }
   }
   onTipClick(d) {
-    // if it's the same, deselect
-    this.setState({
-      clicked: {
-        d,
-        type: ".tip"
-      },
-      hovered: null
-    });
+    this.setState({clicked: {d,type: ".tip"}, hovered: null});
   }
   onBranchHover(d) {
     if (!this.state.clicked) {
-      this.setState({
-        hovered: {
-          d,
-          type: ".branch"
-        }
-      });
+      this.setState({hovered: {d,type: ".branch"}});
     }
   }
   onBranchClick(d) {
-    // console.log('clicked', d)
-    // if it's the same, deselect
-    this.setState({
-      clicked: {
-        d,
-        type: ".branch"
-      },
-      hovered: null
-    });
+    this.setState({clicked: {d, type: ".branch"},hovered: null});
   }
   // mouse out from tip/branch
   onBranchOrTipLeave(){
@@ -288,18 +275,15 @@ class TreeView extends React.Component {
 
   handleIconClick(tool) {
     return () => {
-
       if (tool === "zoom-in") {
         this.Viewer.zoomOnViewerCenter(1.1);
         // console.log('zooming in', this.state.zoom, zoom)
       } else {
         this.Viewer.zoomOnViewerCenter(0.9);
       }
-
       // const viewerX = this.state.width / 2;
       // const viewerY = this.treePlotHeight(this.state.width) / 2;
       // const nextValue = ViewerHelper.zoom(this.state.value, zoom, viewerX, viewerY);
-
       // this.setState({value: nextValue});
     };
   }
@@ -307,19 +291,16 @@ class TreeView extends React.Component {
   // handleZoomEvent(direction) {
   //   return () => {
   //     this.state.value.matrix
-  //
   //     console.log(direction)
   //   }
   // }
-
-  handleChange(value) {
-    // console.log(value)
-  }
-
-  handleClick(event){
-    // console.log('event', event)
-    // console.log('click', event.x, event.y, event.originalEvent);
-  }
+  // handleChange(value) {
+  //   console.log("handleChange not yet implemented", value)
+  // }
+  // handleClick(event){
+  //   console.log('handleClick not yet implemented', event)
+  //   // console.log('click', event.x, event.y, event.originalEvent);
+  // }
 
   infoPanelDismiss() {
     this.setState({clicked: null, hovered: null});
@@ -335,6 +316,12 @@ class TreeView extends React.Component {
       split: false,
       extraPadding: 0
     })
+
+    /* NOTE these props were removed from SVG pan-zoom as they led to functions that did
+    nothing, but they may be useful in the future...
+    onChangeValue={this.handleChange.bind(this)}
+    onClick={this.handleClick.bind(this)}
+    */
 
     return (
       <Card center title="Phylogeny">
@@ -368,9 +355,7 @@ class TreeView extends React.Component {
           detectWheel={false}
           toolbarPosition={"none"}
           detectAutoPan={false}
-          background={"#FFF"}
-          onChangeValue={this.handleChange.bind(this)}
-          onClick={this.handleClick.bind(this)}>
+          background={"#FFF"}>
           <svg style={{pointerEvents: "auto"}}
             width={responsive.width}
             height={responsive.height}
@@ -419,7 +404,7 @@ class TreeView extends React.Component {
       1. set up SVGs
       2. tree will be added on props loading
     */
-    console.log("treeView render")
+    // console.log("treeView render")
     return (
       <span>
         {this.props.browserDimensions ? this.createTreeMarkup() : null}
@@ -427,6 +412,5 @@ class TreeView extends React.Component {
     );
   }
 }
-
 
 export default TreeView;
