@@ -1,13 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import {
-  populateMetadataStore,
-  populateTreeStore,
-  populateSequencesStore,
-  populateFrequenciesStore,
-  populateEntropyStore,
-  BROWSER_DIMENSIONS
-} from "../actions";
+import { BROWSER_DIMENSIONS, loadJSONs } from "../actions";
 import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_DATE_MIN,
   CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN, CHANGE_ABSOLUTE_DATE_MAX,
   changeColorBy, updateColorScale } from "../actions/controls";
@@ -105,6 +98,7 @@ class App extends React.Component {
   componentDidMount() {
     // when the user hits the back button or forward, let us know so we can setstate again
     // all of the other intentional route changes we will manually setState
+
     this.maybeFetchDataset();
     const tmpQuery = this.props.location.query;
     window.addEventListener("popstate", (a, b, c) => {
@@ -126,9 +120,13 @@ class App extends React.Component {
         trailing: true
       }) /* invoke resize event at most twice per second to let redraws catch up */
     );
+
+    // console.log("app.js CDM")
+    this.props.dispatch(loadJSONs(this.props.location))
   }
 
   componentDidUpdate() {
+    // console.log("app.js CDU")
     this.maybeFetchDataset();
   }
 
@@ -188,6 +186,7 @@ class App extends React.Component {
   }
 
   maybeFetchDataset() {
+    // console.log("maybeFetchDataset")
     if (this.state.latestValidParams === this.state.location.pathname) {
       return;
     }
@@ -201,19 +200,7 @@ class App extends React.Component {
       this.setVirusPath(parsedParams.fullsplat);
     }
     if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
-      this.props.dispatch(populateMetadataStore(data_path));
-      this.props.dispatch(populateTreeStore(data_path));
-      this.props.dispatch(populateSequencesStore(data_path));
-      this.props.dispatch(populateFrequenciesStore(data_path));
-      this.props.dispatch(populateEntropyStore(data_path));
-      /* when all this has been done we need to re-create the colorScale
-      there's definately a better way to do it than this
-      but for now... SORRY!
-      */
-      window.setTimeout(
-        () => this.props.dispatch(updateColorScale()),
-        500
-      )
+      this.props.dispatch(loadJSONs(data_path))
       this.setState({latestValidParams: parsedParams.fullsplat});
     }
   }

@@ -1,3 +1,5 @@
+import { updateColorScale } from "./controls";
+
 export const REQUEST_METADATA = "REQUEST_METADATA";
 export const RECEIVE_METADATA = "RECEIVE_METADATA";
 export const METADATA_FETCH_ERROR = "METADATA_FETCH_ERROR";
@@ -48,11 +50,14 @@ const fetchMetadata = (q) => {
   );
 };
 
-export const populateMetadataStore = (queryParams) => {
+const populateMetadataStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestMetadata());
     return fetchMetadata(queryParams).then((res) => res.json()).then(
-      (json) => dispatch(receiveMetadata(json)),
+      (json) => {
+        dispatch(receiveMetadata(json));
+        dispatch(updateColorScale())
+      },
       (err) => dispatch(metadataFetchError(err))
     );
   };
@@ -87,11 +92,14 @@ const fetchTree = (q) => {
   );
 };
 
-export const populateTreeStore = (queryParams) => {
+const populateTreeStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestTree());
     return fetchTree(queryParams).then((res) => res.json()).then(
-      (json) => dispatch(receiveTree(json)),
+      (json) => {
+        dispatch(receiveTree(json));
+        dispatch(updateColorScale())
+      },
       (err) => dispatch(treeFetchError(err))
     );
   };
@@ -126,11 +134,14 @@ const fetchSequences = (q) => {
   );
 };
 
-export const populateSequencesStore = (queryParams) => {
+const populateSequencesStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestSequences());
     return fetchSequences(queryParams).then((res) => res.json()).then(
-      (json) => dispatch(receiveSequences(json)),
+      (json) => {
+        dispatch(receiveSequences(json));
+        dispatch(updateColorScale())
+      },
       (err) => dispatch(sequencesFetchError(err))
     );
   };
@@ -164,7 +175,7 @@ const fetchFrequencies = (q) => {
   );
 };
 
-export const populateFrequenciesStore = (queryParams) => {
+const populateFrequenciesStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestFrequencies());
     return fetchFrequencies(queryParams).then((res) => res.json()).then(
@@ -200,7 +211,7 @@ const fetchEntropy = (q) => {
       q + "_entropy.json");
 };
 
-export const populateEntropyStore = (queryParams) => {
+const populateEntropyStore = (queryParams) => {
   return (dispatch) => {
     dispatch(requestEntropy());
     return fetchEntropy(queryParams).then((res) => res.json()).then(
@@ -209,3 +220,22 @@ export const populateEntropyStore = (queryParams) => {
     );
   };
 };
+
+
+export const loadJSONs = (data_path) => {
+  return (dispatch) => {
+    dispatch(populateMetadataStore(data_path));
+    dispatch(populateTreeStore(data_path));
+    dispatch(populateSequencesStore(data_path));
+    dispatch(populateFrequenciesStore(data_path));
+    dispatch(populateEntropyStore(data_path));
+    /* when all this has been done we need to re-create the colorScale
+    there's definately a better way to do it than this
+    but for now... SORRY!
+    */
+    // window.setTimeout(
+    //   () => dispatch(updateColorScale()),
+    //   500
+    // )
+  }
+}
