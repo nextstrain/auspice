@@ -92,9 +92,9 @@ class TreeView extends React.Component {
     /* should we create a new tree (dataset change) */
 
     if ((nextProps.datasetGuid !== this.props.datasetGuid && nextProps.tree.nodes) ||
-        (!tree && nextProps.datasetGuid && nextProps.tree.nodes)) {
+        (tree === null && nextProps.datasetGuid && nextProps.tree.nodes !== null)) {
       tree = this.makeTree(nextProps.tree.nodes)
-      console.log("making tree")
+      // console.log("made tree", tree)
       this.setState({tree, shouldReRender: true});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
@@ -141,9 +141,12 @@ class TreeView extends React.Component {
         tipStyleToUpdate["visibility"] = newTipVisibility;
       }
 
-
       /* branches change thickness if the (active) tip count changes */
-      if (this.props.tree.nodes[0].fullTipCount !== nextProps.tree.nodes[0].fullTipCount) {
+      /* feb8 (JAMES) we always re-calculate the stroke width due to some really weird
+      race-condition thing. This clearly needs fixing!
+      */
+      // if (this.props.tree.nodes[0].fullTipCount !== nextProps.tree.nodes[0].fullTipCount) {
+      if (true) {
         branchStyleToUpdate["stroke-width"] = branchThickness(nextProps.tree)
       }
 
@@ -212,6 +215,11 @@ class TreeView extends React.Component {
       this.props.sidebar !== nextProps.sidebar)
     ) {
       return true;
+    } else if (
+      this.state.hovered !== nextState.hovered ||
+      this.state.clicked !== nextState.clicked
+    ) {
+      return true;
     }
     return false;
   }
@@ -266,8 +274,6 @@ class TreeView extends React.Component {
           clicked: this.state.clicked
         }
       );
-      // Update the branch thickness - perhaps this could be better...
-      myTree.updateMultipleArray(".branch", {}, {"stroke-width": branchThickness(this.props.tree)}, fastTransitionDuration);
       return myTree;
     } else {
       return null;
@@ -430,7 +436,7 @@ class TreeView extends React.Component {
       1. set up SVGs
       2. tree will be added on props loading
     */
-    console.log("treeView render")
+    // console.log("treeView render")
     return (
       <span>
         {this.props.browserDimensions ? this.createTreeMarkup() : null}

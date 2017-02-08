@@ -938,6 +938,7 @@ PhyloTree.prototype.deSelectTip = function(node) {
 
 
 PhyloTree.prototype.updateSelectedBranchOrTip = function (oldSelected, newSelected) {
+  // console.log("updating something", oldSelected.d.n.clade, newSelected.d.n.clade)
   if (!newSelected || !newSelected || oldSelected.d.n.clade !== newSelected.d.n.clade){
     if (oldSelected) this.deSelectBranch(oldSelected.d);
     if (newSelected && newSelected.type===".branch") this.selectBranch(newSelected.d);
