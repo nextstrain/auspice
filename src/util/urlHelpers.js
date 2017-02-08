@@ -1,6 +1,7 @@
 import queryString from "query-string";
 import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_DATE_MIN,
   CHANGE_DATE_MAX, changeColorBy } from "../actions/controls";
+import parseParams from "./parseParams";
 
 /* this function takes (potentially multiple) changes you would like
 reflected in the URL and makes one change.
@@ -50,4 +51,33 @@ export const restoreStateFromURL = function (router, dispatch) {
   if (query.c) {
     dispatch(changeColorBy(query.c));
   }
+}
+
+// make prefix for data files with fields joined by _ instead of / as in URL
+const makeDataPathFromParsedParams = function (parsedParams) {
+  const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);
+  tmp_levels.sort((x, y) => x[0] > y[0]);
+  return tmp_levels.map((d) => d[1]).join("_");
+};
+
+/* if we have decided that the URL (data, not query) has changed
+this fn will work out the correct datapath, set it if necessary,
+and return the data path used to load the data
+*/
+export const turnURLtoDataPath = function (router) {
+  const parsedParams = parseParams(router.location.pathname);
+  // console.log("parsed params turned", router.location.pathname, "to", parsedParams)
+  // set a new URL if the dataPath is incomplete
+  if (parsedParams.incomplete) {
+    // console.log("parsed params incomplete, will make new URL:")
+    router.replace({
+      pathname: parsedParams.fullsplat,
+      search: router.location.search
+    })
+  }
+  // if valid, return the data_path, else undefined
+  if (parsedParams.valid) {
+    return makeDataPathFromParsedParams(parsedParams);
+  }
+  return undefined;
 }

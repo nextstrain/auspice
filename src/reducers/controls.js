@@ -29,12 +29,17 @@ const getDefaultState = function () {
     absoluteDateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
-    colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1)
+    colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
+    datasetPathName: null
   };
 };
 
 const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
+  case types.NEW_DATASET:
+    return Object.assign({}, state, {
+      datasetPathName: action.data
+    });
   case types.TOGGLE_BRANCH_LABELS:
     return Object.assign({}, state, {
       showBranchLabels: !state.showBranchLabels

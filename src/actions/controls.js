@@ -18,6 +18,7 @@ export const CHANGE_ABSOLUTE_DATE_MIN = "CHANGE_ABSOLUTE_DATE_MIN";
 export const CHANGE_ABSOLUTE_DATE_MAX = "CHANGE_ABSOLUTE_DATE_MAX";
 export const CHANGE_COLOR_BY = "CHANGE_COLOR_BY";
 export const SET_COLOR_SCALE = "SET_COLOR_SCALE";
+export const NEW_DATASET = "NEW_DATASET";
 
 const colorScaleWrapper = function (colorBy, tree, sequences, colorOptions, newVersion) {
   const colorScale = getColorScale(colorBy, tree, sequences, colorOptions, newVersion);

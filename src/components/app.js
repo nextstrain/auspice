@@ -1,7 +1,9 @@
+/*eslint-env browser*/
 import React from "react";
 import { connect } from "react-redux";
 import { BROWSER_DIMENSIONS, loadJSONs } from "../actions";
-import { modifyURL, restoreStateFromURL } from "../util/urlHelpers"
+import { NEW_DATASET } from "../actions/controls";
+import { modifyURL, restoreStateFromURL, turnURLtoDataPath } from "../util/urlHelpers"
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
 import _ from "lodash";
@@ -13,7 +15,6 @@ import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
 import Map from "./map/map";
 import TreeView from "./tree/treeView";
-import parseParams from "../util/parseParams";
 import queryString from "query-string";
 import * as globals from "../util/globals";
 import Sidebar from "react-sidebar";
@@ -24,7 +25,8 @@ const returnStateNeeded = (reduxState) => {
     sequences: reduxState.sequences,
     metadata: reduxState.metadata,
     colorOptions: reduxState.metadata.colorOptions,
-    colorBy: reduxState.controls.colorBy
+    colorBy: reduxState.controls.colorBy,
+    datasetPathName: reduxState.controls.datasetPathName
   };
 };
 /* BRIEF (INCOMPLETE) REMINDER OF PROPS AVAILABLE TO APP:
@@ -93,41 +95,47 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    // when the user hits the back button or forward, let us know so we can setstate again
-    // all of the other intentional route changes we will manually setState
+    /* This is hit on the initial load and when a browser is refreshed
+    but NOT when browser back/forward buttons are used.
+    */
 
-    this.maybeFetchDataset();
-    const tmpQuery = queryString.parse(this.context.router.location.search);
-    window.addEventListener("popstate", (a, b, c) => {
-      this.setState({
-        location: {
-          pathname: this.props.location.pathname.slice(1, -1),
-          query: tmpQuery
-        }
-      });
-    });
-
-    /* initial dimensions */
-    this.handleResize()
-    /* future resizes */
-    window.addEventListener(
-      'resize',
-      _.throttle(this.handleResize.bind(this), 500, { /* fire every N milliseconds. Could also be _.debounce for 'wait until resize stops' */
+    /* firstly, set up browser stuff for resizes etc */
+    this.handleResizeByDispatching(); // initial dimensions
+    window.addEventListener( // future resizes
+      "resize",
+      _.throttle(this.handleResizeByDispatching.bind(this), 500, {
         leading: true,
         trailing: true
-      }) /* invoke resize event at most twice per second to let redraws catch up */
+      })
+      /* invoke resize event at most twice per second to let redraws catch up
+      Could also be _.debounce for 'wait until resize stops'
+      */
     );
 
-    // console.log("app.js CDM")
-    this.props.dispatch(loadJSONs(this.props.location))
+    /* secondly, parse URL, set URL, load data etc
+    we're always going to load data here, it's just a question of what data to load!
+    */
+    // console.log("CDM")
+    const data_path = turnURLtoDataPath(this.context.router);
+    if (data_path) {
+      this.props.dispatch({type: NEW_DATASET, data: this.context.router.location.pathname});
+      this.props.dispatch(loadJSONs(data_path));
+    } else {
+      console.log("<app> couldn't work out the dataset to load. Bad.");
+    }
   }
 
   componentDidUpdate() {
+    /* back/forward buttons used (i.e. app doesn't reload, things don't
+    remount, but we still have to pick up URL changes)
+    */
     // console.log("app.js CDU")
-    this.maybeFetchDataset();
+    // console.log("redux datasetPathName:", this.props.datasetPathName);
+    // console.log("")
+    // this.maybeFetchDataset();
   }
 
-  handleResize() {
+  handleResizeByDispatching() {
     this.props.dispatch({
       type: BROWSER_DIMENSIONS,
       data: {
@@ -140,37 +148,9 @@ class App extends React.Component {
     });
   }
 
-  maybeFetchDataset() {
-    // console.log("maybeFetchDataset")
-    if (this.state.latestValidParams === this.state.location.pathname) {
-      return;
-    }
-
-    const parsedParams = parseParams(this.state.location.pathname);
-    const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);
-    tmp_levels.sort((x, y) => x[0] > y[0]);
-    // make prefix for data files with fields joined by _ instead of / as in URL
-    const data_path = tmp_levels.map((d) => d[1]).join("_");
-    if (parsedParams.incomplete) {
-      this.setVirusPath(parsedParams.fullsplat);
-    }
-    if (parsedParams.valid && this.state.latestValidParams !== parsedParams.fullsplat) {
-      this.props.dispatch(loadJSONs(data_path))
-      this.setState({latestValidParams: parsedParams.fullsplat});
-    }
-  }
-
   /******************************************
    * HANDLE QUERY PARAM CHANGES AND ASSOCIATED STATE UPDATES
    *****************************************/
-  setVirusPath(newPath) {
-    console.log("setting new virus path to ", newPath)
-    const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
-    const suffix = (newPath.length && newPath[newPath.length - 1] !== "/") ? "/?" : "?";
-    const url = prefix + newPath + suffix + this.context.router.location.search;
-    window.history.pushState({}, "", url);
-    this.changeRoute(newPath, queryString.parse(this.context.router.location.search));
-  }
 
   changeRoute(pathname, query) {
     pathname = pathname.replace("!/", ""); // needed to assist with S3 redirects
