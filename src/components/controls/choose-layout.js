@@ -6,10 +6,13 @@ import ClockTreeLayout from "../framework/svg-tree-layout-clock";
 import {materialButton} from "../../globalStyles";
 import { connect } from "react-redux";
 import { CHANGE_LAYOUT } from "../../actions/controls";
-
+import { modifyURLquery } from "../../util/urlHelpers";
 
 @connect()
 class ChooseLayout extends React.Component {
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
   getStyles() {
     return {
       container: {
@@ -33,7 +36,7 @@ class ChooseLayout extends React.Component {
          style={materialButton}
          onClick={() => {
            this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });
-          //  this.setLayoutQueryParam("rect");
+           modifyURLquery(this.context.router, null, {l: "rect"}, true);
          }}>
          <RectangularTreeLayout width={25} stroke="rgb(130,130,130)"/>
          <span style={styles.title}> {"rectangular"} </span>
@@ -43,7 +46,7 @@ class ChooseLayout extends React.Component {
          style={materialButton}
          onClick={() => {
            this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });
-          //  this.setLayoutQueryParam("radial");
+           modifyURLquery(this.context.router, null, {l: "radial"}, true);
          }}>
          <RadialTreeLayout width={25} stroke="rgb(130,130,130)"/>
          <span style={styles.title}> {"radial"} </span>
@@ -53,7 +56,7 @@ class ChooseLayout extends React.Component {
          style={materialButton}
          onClick={() => {
            this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });
-          //  this.setLayoutQueryParam("unrooted");
+           modifyURLquery(this.context.router, null, {l: "unrooted"}, true);
          }}>
          <UnrootedTreeLayout width={25} stroke="rgb(130,130,130)"/>
          <span style={styles.title}> {"unrooted"} </span>
@@ -63,7 +66,7 @@ class ChooseLayout extends React.Component {
          style={materialButton}
          onClick={() => {
            this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });
-          //  this.setLayoutQueryParam("clock");
+           modifyURLquery(this.context.router, null, {l: "clock"}, true);
          }}>
          <ClockTreeLayout width={25} stroke="rgb(130,130,130)"/>
          <span style={styles.title}> {"clock"} </span>

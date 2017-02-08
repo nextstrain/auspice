@@ -6,6 +6,8 @@ import Slider from './slider';
 import { connect } from "react-redux";
 import { CHANGE_DATE_MIN, CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN,
   CHANGE_ABSOLUTE_DATE_MAX } from "../../actions/controls";
+import { modifyURLquery } from "../../util/urlHelpers";
+
 
 moment.updateLocale('en', {
     longDateFormat : {
@@ -27,6 +29,9 @@ class DateRangeInputs extends React.Component {
     this.state = {
 
     };
+  }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
   }
   static propTypes = {
     /* react */
@@ -58,32 +63,6 @@ class DateRangeInputs extends React.Component {
    return 1970 + (unixDate / 365.2425 / 24 / 3600);
   }
 
-  // setDateRangeQueryParam(dateRange) {
-  //   const location = this.props.router.getCurrentLocation();
-  //   const newQuery = Object.assign({}, location.query, {dmin: dateRange.min, dmax: dateRange.max});
-  //   this.props.router.push({
-  //     pathname: location.pathname,
-  //     query: newQuery
-  //   });
-  // }
-  //
-  // setDateMinQueryParam(dateMin) {
-  //   const location = this.props.router.getCurrentLocation();
-  //   const newQuery = Object.assign({}, location.query, {dmin: dateMin});
-  //   this.props.router.push({
-  //     pathname: location.pathname,
-  //     query: newQuery
-  //   });
-  // }
-  //
-  // setDateMaxQueryParam(dateMax) {
-  //   const location = this.props.router.getCurrentLocation();
-  //   const newQuery = Object.assign({}, location.query, {dmax: dateMax});
-  //   this.props.router.push({
-  //     pathname: location.pathname,
-  //     query: newQuery
-  //   });
-  // }
 
   updateFromPicker(ref, momentDate) {
     // a momentDate is received from DatePicker
@@ -92,12 +71,12 @@ class DateRangeInputs extends React.Component {
       newRange = { min: momentDate.format("YYYY-MM-DD"),
                    max: this.props.dateMax };
       this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
-      this.setDateMinQueryParam(newRange.min);
+      modifyURLquery(this.context.router, null, {dmin: newRange.min}, true);
     } else if (ref === "updateDateMax") {
       newRange = { min: this.props.dateMin,
                    max: momentDate.format("YYYY-MM-DD") };
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
-      this.setDateMaxQueryParam(newRange.max);
+      modifyURLquery(this.context.router, null, {dmax: newRange.max}, true);
     }
   }
 
@@ -108,14 +87,14 @@ class DateRangeInputs extends React.Component {
       max: this.numericToCalendar(numDateValues[1])};
     if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) { // update min
       this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
-      // this.setDateMinQueryParam(newRange.min);
+      modifyURLquery(this.context.router, null, {dmin: newRange.min}, true);
     } else if (this.props.dateMin === newRange.min && this.props.dateMax !== newRange.max) { // update max
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
-      // this.setDateMaxQueryParam(newRange.max);
+      modifyURLquery(this.context.router, null, {dmax: newRange.max}, true);
     } else if (this.props.dateMin !== newRange.min && this.props.dateMax !== newRange.max) { // update both
       this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
-      // this.setDateRangeQueryParam(newRange);
+      modifyURLquery(this.context.router, null, {dmin: newRange.min, dmax: newRange.max}, true);
     }
   }
 

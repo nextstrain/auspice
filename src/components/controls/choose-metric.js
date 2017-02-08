@@ -4,6 +4,7 @@ import MutationTree from "../framework/svg-mutation-tree";
 import {materialButton} from "../../globalStyles";
 import { connect } from "react-redux";
 import { CHANGE_DISTANCE_MEASURE } from "../../actions/controls";
+import { modifyURLquery } from "../../util/urlHelpers";
 
 /*
  * implements a pair of buttons the toggle between timetree and divergence tree
@@ -23,15 +24,9 @@ class ChooseMetric extends React.Component {
       }
     };
   }
-  //
-  // setMetricQueryParam(title) {
-  //   const location = this.props.router.getCurrentLocation();
-  //   const newQuery = Object.assign({}, location.query, {m: title});
-  //   this.props.router.push({
-  //     pathname: location.pathname,
-  //     query: newQuery
-  //   });
-  // }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
 
   render() {
   const styles = this.getStyles();
@@ -42,7 +37,7 @@ class ChooseMetric extends React.Component {
         style={materialButton}
         onClick={() => {
           this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
-          // this.setMetricQueryParam("div");
+          modifyURLquery(this.context.router, null, {m: "div"}, true);
         }}>
         <span style={styles.title}> {"mutations"} </span>
       </button>
@@ -51,7 +46,7 @@ class ChooseMetric extends React.Component {
         style={materialButton}
         onClick={() => {
           this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "num_date" });
-          // this.setMetricQueryParam("num_date");
+          modifyURLquery(this.context.router, null, {m: "num_date"}, true);
         }}>
         <span style={styles.title}> {"time"} </span>
       </button>

@@ -29,6 +29,9 @@ class ComponentName extends React.Component {
   static defaultProps = {
     // foo: "bar"
   }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
   getStyles() {
     return {
       base: {
