@@ -37,11 +37,13 @@ const returnStateNeeded = (reduxState) => {
     colorBy: reduxState.controls.colorBy
   };
 };
-/* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
+/* BRIEF (INCOMPLETE) REMINDER OF PROPS AVAILABLE TO APP:
   colorOptions: parameters for each colorBy value (country, region etc)
       ideally come from the JSON, but there are defaults if necessary
 
-  React-Router v4 injects length, action, location, push etc into props
+  React-Router v4 injects length, action, location, push etc into props,
+    but perhaps it's more consistent if we access these through
+    this.context.router
     see https://reacttraining.com/react-router/#history
 */
 @connect(returnStateNeeded)
@@ -49,14 +51,23 @@ const returnStateNeeded = (reduxState) => {
 class App extends React.Component {
   constructor(props) {
     super(props);
+    /* window listener to see when width changes cross thrhershold to toggle sidebar */
+    /* A note on sidebar terminology:
+    sidebarOpen (AFAIK) is only used via touch drag events
+    sidebarDocked is the prop used on desktop.
+    While these states could be moved to redux, they would need
+    to be connected to here, triggering an app render anyways
+    */
+    const mql = window.matchMedia(`(min-width: ${globals.controlsHiddenWidth}px)`);
+    mql.addListener(() => this.setState({sidebarDocked: this.state.mql.matches}));
     this.state = {
-      sidebarOpen: false,
-      sidebarDocked: false,
       location: {
         pathname: this.props.location.pathname,
         query: queryString.parse(this.props.location.search)
-      }
-      // sidebarDocked: true,
+      },
+      mql,
+      sidebarDocked: mql.matches,
+      sidebarOpen: false
     };
   }
   static propTypes = {
@@ -74,24 +85,13 @@ class App extends React.Component {
     // foo: "bar"
 
   }
-
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   }
 
-
-  /******************************************
-   * LIFECYLCE METHODS
-   *****************************************/
-
   componentWillMount() {
 
     this.initializeReduxStore();
-
-    var mql = window.matchMedia(`(min-width: ${globals.controlsHiddenWidth}px)`);
-    mql.addListener(this.mediaQueryChanged.bind(this));
-    this.setState({mql: mql, sidebarDocked: mql.matches});
-
     const tmpQuery = queryString.parse(this.context.router.location.search);
     const pathname = this.props.location.pathname;
     const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/" : "";
@@ -244,24 +244,12 @@ class App extends React.Component {
     return freq;
   }
 
-  /******************************************
-   * SIDEBAR
-   *****************************************/
-
-  onSetSidebarOpen(open) {
-    this.setState({sidebarOpen: open});
-  }
-
-  mediaQueryChanged() {
-    this.setState({sidebarDocked: this.state.mql.matches});
-  }
-
-
   render() {
     return (
       <Sidebar
         sidebar={
-          <Controls changeRoute={this.changeRoute.bind(this)}
+          <Controls
+            changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
             router={this.context.router}
             colorOptions={this.props.colorOptions}
@@ -269,13 +257,11 @@ class App extends React.Component {
         }
         open={this.state.sidebarOpen}
         docked={this.state.sidebarDocked}
-        onSetOpen={this.onSetSidebarOpen}>
+        onSetOpen={(a) => {this.setState({sidebarOpen: a});}}>
         <Background>
           <ToggleSidebarTab
             open={this.state.sidebarDocked}
-            handler={() => {
-              this.setState({sidebarDocked: !this.state.sidebarDocked})
-            }}
+            handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
           />
           <Header/>
           <TreeView
@@ -287,7 +273,9 @@ class App extends React.Component {
             nodes={this.props.tree.nodes}
             justGotNewDatasetRenderNewMap={false}
             />
-          <Frequencies genotype={this.currentFrequencies()}/>
+          <Frequencies
+            genotype={this.currentFrequencies()}
+          />
           <Entropy
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
             changeRoute={this.changeRoute.bind(this)}
@@ -299,9 +287,5 @@ class App extends React.Component {
     );
   }
 }
-
-
-// <Footer/>
-
 
 export default App;

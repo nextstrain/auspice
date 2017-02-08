@@ -203,21 +203,36 @@ class TreeView extends React.Component {
     }
     /* we are now in a position to control the rendering to improve performance */
     if (nextState.shouldReRender) {
-      // console.log("SCU returning true")
       this.setState({shouldReRender: false});
       return true;
+    } else if (
+      this.state.tree &&
+      (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
+      this.props.browserDimensions.height !== nextProps.browserDimensions.height ||
+      this.props.sidebar !== nextProps.sidebar)
+    ) {
+      return true;
     }
-    // console.log("SCU returning false")
-    return false
+    return false;
   }
 
   componentDidUpdate(prevProps, prevState) {
+    /* after a re-render (i.e. perhaps the SVG has changed size) call zoomIntoClade
+    so that the tree rescales to fit the SVG
+    */
     if (
-      this.state.tree && /* tree exists */
-      prevProps.browserDimensions && /* it's not the first render, the listener is registered and width/height passed in */
-      this.props.browserDimensions &&
-      (prevProps.browserDimensions.width !== this.props.browserDimensions.width || /* the browser dimensions have changed */
+      // the tree exists AND
+      this.state.tree &&
+      // it's not the first render (the listener is registered and width/height passed in)  AND
+      prevProps.browserDimensions && this.props.browserDimensions &&
+      // the browser dimensions have changed
+      (prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
       prevProps.browserDimensions.height !== this.props.browserDimensions.height)
+    ) {
+      this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
+    } else if (
+      // the tree exists AND the sidebar has changed
+      this.state.tree && (this.props.sidebar !== prevProps.sidebar)
     ) {
       this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
     }
