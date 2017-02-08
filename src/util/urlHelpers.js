@@ -1,5 +1,6 @@
 import queryString from "query-string";
-
+import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_DATE_MIN,
+  CHANGE_DATE_MAX, changeColorBy } from "../actions/controls";
 
 /* this function takes (potentially multiple) changes you would like
 reflected in the URL and makes one change.
@@ -30,3 +31,23 @@ export const modifyURL = function (router, newPath = null, keyValuePairs = null,
   };
   replace ? router.replace(newURL) : router.push(newURL);
 };
+
+
+export const restoreStateFromURL = function (router, dispatch) {
+  const query = queryString.parse(router.location.search);
+  if (query.l) {
+    dispatch({ type: CHANGE_LAYOUT, data: query.l });
+  }
+  if (query.m) {
+    dispatch({ type: CHANGE_DISTANCE_MEASURE, data: query.m });
+  }
+  if (query.dmin) {
+    dispatch({ type: CHANGE_DATE_MIN, data: query.dmin });
+  }
+  if (query.dmax) {
+    dispatch({ type: CHANGE_DATE_MAX, data: query.dmax });
+  }
+  if (query.c) {
+    dispatch(changeColorBy(query.c));
+  }
+}

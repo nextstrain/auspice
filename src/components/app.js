@@ -1,16 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
 import { BROWSER_DIMENSIONS, loadJSONs } from "../actions";
-import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_DATE_MIN,
-  CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN, CHANGE_ABSOLUTE_DATE_MAX,
-  changeColorBy, updateColorScale } from "../actions/controls";
-
+import { modifyURL, restoreStateFromURL } from "../util/urlHelpers"
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
 import _ from "lodash";
-import Flex from "./framework/flex";
 import Header from "./framework/header";
-import Footer from "./framework/footer";
 import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
@@ -20,13 +15,8 @@ import Map from "./map/map";
 import TreeView from "./tree/treeView";
 import parseParams from "../util/parseParams";
 import queryString from "query-string";
-import getColorScale from "../util/getColorScale";
-import { parseGenotype, getGenotype } from "../util/getGenotype";
 import * as globals from "../util/globals";
-import { defaultDateRange, defaultLayout, defaultDistanceMeasure,
-  tipRadius, freqScale, defaultColorBy } from "../util/globals";
 import Sidebar from "react-sidebar";
-import moment from 'moment';
 
 const returnStateNeeded = (reduxState) => {
   return {
@@ -90,8 +80,7 @@ class App extends React.Component {
   }
 
   componentWillMount() {
-
-    this.initializeReduxStore();
+    restoreStateFromURL(this.context.router, this.props.dispatch);
     const tmpQuery = queryString.parse(this.context.router.location.search);
     const pathname = this.props.location.pathname;
     const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/" : "";
@@ -138,50 +127,6 @@ class App extends React.Component {
     this.maybeFetchDataset();
   }
 
-  initializeReduxStore() {
-    const query = queryString.parse(this.context.router.location.search);
-    // initialize to query param if available, otherwise use defaults
-    if (query.l) {
-      this.props.dispatch({ type: CHANGE_LAYOUT, data: query.l });
-    } else {
-      this.props.dispatch({ type: CHANGE_LAYOUT, data: defaultLayout });
-    }
-
-    if (query.m) {
-      this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE,
-                            data: query.m });
-    } else {
-      this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE,
-                            data: defaultDistanceMeasure });
-    }
-
-    // update absolute date range
-    const absoluteMin = moment().subtract(defaultDateRange, "years").format("YYYY-MM-DD");
-    const absoluteMax = moment().format("YYYY-MM-DD");
-    this.props.dispatch({ type: CHANGE_ABSOLUTE_DATE_MIN, data: absoluteMin });
-    this.props.dispatch({ type: CHANGE_ABSOLUTE_DATE_MAX, data: absoluteMax });
-
-    // set selected date range to query params if they exist, if not set to defaults
-    if (query.dmin) {
-      this.props.dispatch({ type: CHANGE_DATE_MIN, data: query.dmin });
-    } else {
-      this.props.dispatch({ type: CHANGE_DATE_MIN, data: absoluteMin });
-    }
-
-    if (query.dmax) {
-      this.props.dispatch({ type: CHANGE_DATE_MAX, data: query.dmax });
-    } else {
-      this.props.dispatch({ type: CHANGE_DATE_MAX, data: absoluteMax });
-    }
-
-    if (query.c) {
-      this.props.dispatch(changeColorBy(query.c, this.context.router));
-    } else {
-      this.props.dispatch(changeColorBy(defaultColorBy));
-    }
-
-  }
-
   handleResize() {
     this.props.dispatch({
       type: BROWSER_DIMENSIONS,
@@ -219,6 +164,7 @@ class App extends React.Component {
    * HANDLE QUERY PARAM CHANGES AND ASSOCIATED STATE UPDATES
    *****************************************/
   setVirusPath(newPath) {
+    console.log("setting new virus path to ", newPath)
     const prefix = (newPath === "" || newPath[0] === "/") ? "" : "/";
     const suffix = (newPath.length && newPath[newPath.length - 1] !== "/") ? "/?" : "?";
     const url = prefix + newPath + suffix + this.context.router.location.search;
