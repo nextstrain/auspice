@@ -37,6 +37,9 @@ class ColorBy extends React.Component {
   static defaultProps = {
     // foo: "bar"
   }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
 
   componentWillReceiveProps(nextProps) {
     const colorBy = nextProps.colorBy;
@@ -48,7 +51,7 @@ class ColorBy extends React.Component {
 
   setColorBy(colorBy) {
     if (colorBy.slice(0,2) !== "gt") {
-      this.props.dispatch(changeColorBy(colorBy, this.props.router))
+      this.props.dispatch(changeColorBy(colorBy, this.context.router))
       this.setState({"selected": colorBy});
     } else {
       // don't update colorBy yet, genotype still needs to be specified
@@ -77,7 +80,7 @@ class ColorBy extends React.Component {
   setGenotypeColorBy(genotype) {
     if (parseGenotype("gt-" + genotype, this.props.geneLength)) {
       // We got a valid genotype, set query params and state
-      this.props.dispatch(changeColorBy("gt-" + genotype, this.props.router))
+      this.props.dispatch(changeColorBy("gt-" + genotype, this.context.router))
     } else {
       // we don't have a valid genotype, don't update anything yet
       return null;

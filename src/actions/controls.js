@@ -1,5 +1,6 @@
 import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
+import { modifyURLquery } from "../util/urlHelpers";
 
 export const TOGGLE_BRANCH_LABELS = "TOGGLE_BRANCH_LABELS";
 export const LEGEND_ITEM_MOUSEENTER = "LEGEND_ITEM_MOUSEENTER";
@@ -43,17 +44,10 @@ export const updateColorScale = function () {
    here is where the colorScale is calculated
 */
 export const changeColorBy = function (colorBy, router = null) {
-  return function (dispatch, getState) {
-    console.log("changeColorBy thunk")
+  return function (dispatch) {
     // ∆ react-router, only if router provided
     if (router) {
-      console.log("changeColorBy action to do")
-      // const location = router.getCurrentLocation();
-      // const newQuery = Object.assign({}, location.query, {c: colorBy});
-      // router.push({
-      //   pathname: location.pathname,
-      //   query: newQuery
-      // });
+      modifyURLquery(router, null, {c: colorBy}, true);
     }
     dispatch({
       type: CHANGE_COLOR_BY,

@@ -18,13 +18,15 @@ import { changeColorBy } from "../../actions/controls";
 })
 @Radium
 class Entropy extends React.Component {
-
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
   componentWillUpdate(prevProps) {
     /* check here to see if this.props.browserDimensions has changed and rerender */
   }
 
   setColorByGenotype(colorBy) {
-    this.props.dispatch(changeColorBy(colorBy, this.props.router))
+    this.props.dispatch(changeColorBy(colorBy, this.context.router))
   }
 
   drawEntropy() {
