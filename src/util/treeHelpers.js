@@ -1,5 +1,4 @@
 import { tipRadius, freqScale } from "./globals";
-import queryString from "query-string";
 
 export const gatherTips = (node, tips) => {
 
@@ -197,8 +196,8 @@ const parseFilterQuery = function (query) {
   };
 };
 
-export const tipVisibility = function (tree, metaMetadata, lowerLimit, upperLimit, location) {
-  const query = queryString.parse(location.search);
+export const tipVisibility = function (tree, metaMetadata, lowerLimit, upperLimit, query) {
+  // console.log("in tipVis query:", query)
   if (tree.nodes){
     const filter_pairs = [];
     if (metaMetadata) {

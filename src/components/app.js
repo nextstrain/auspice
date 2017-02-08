@@ -257,11 +257,8 @@ class App extends React.Component {
   }
 
 
-  /******************************************
-   * RENDER
-   *****************************************/
   render() {
-      return (
+    return (
       <Sidebar
         sidebar={
           <Controls changeRoute={this.changeRoute.bind(this)}
@@ -281,8 +278,8 @@ class App extends React.Component {
             }}
           />
           <Header/>
-          <TreeView nodes={this.props.tree.nodes}
-            location={this.state.location}
+          <TreeView
+            query={queryString.parse(this.context.router.location.search)}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
           />
           <Map

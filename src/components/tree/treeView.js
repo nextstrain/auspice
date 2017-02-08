@@ -135,11 +135,11 @@ class TreeView extends React.Component {
       should perhaps pass in the previous history location to prevTip...
       https://github.com/ReactTraining/history#properties
       */
-      // const prevTipVisibility = tipVisibility(this.props.tree, this.props.metadata, this.props.dateMin, this.props.dateMax, this.props.location);
-      // const newTipVisibility = tipVisibility(nextProps.tree, nextProps.metadata, nextProps.dateMin, nextProps.dateMax, nextProps.location);
-      // if (arrayInEquality(prevTipVisibility, newTipVisibility)) {
-        // tipStyleToUpdate["visibility"] = newTipVisibility;
-      // }
+      const prevTipVisibility = tipVisibility(this.props.tree, this.props.metadata, this.props.dateMin, this.props.dateMax, this.props.query);
+      const newTipVisibility = tipVisibility(nextProps.tree, nextProps.metadata, nextProps.dateMin, nextProps.dateMax, nextProps.query);
+      if (arrayInEquality(prevTipVisibility, newTipVisibility)) {
+        tipStyleToUpdate["visibility"] = newTipVisibility;
+      }
 
 
       /* branches change thickness if the (active) tip count changes */

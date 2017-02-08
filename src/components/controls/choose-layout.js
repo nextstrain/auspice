@@ -24,15 +24,6 @@ class ChooseLayout extends React.Component {
     };
   }
 
-  setLayoutQueryParam(title) {
-    const location = this.props.router.getCurrentLocation();
-    const newQuery = Object.assign({}, location.query, {l: title});
-    this.props.router.push({
-      pathname: location.pathname,
-      query: newQuery
-    });
-  }
-
   render() {
    const styles = this.getStyles();
    return (
@@ -42,7 +33,7 @@ class ChooseLayout extends React.Component {
          style={materialButton}
          onClick={() => {
            this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });
-           this.setLayoutQueryParam("rect");
+          //  this.setLayoutQueryParam("rect");
          }}>
          <RectangularTreeLayout width={25} stroke="rgb(130,130,130)"/>
          <span style={styles.title}> {"rectangular"} </span>
@@ -52,7 +43,7 @@ class ChooseLayout extends React.Component {
          style={materialButton}
          onClick={() => {
            this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });
-           this.setLayoutQueryParam("radial");
+          //  this.setLayoutQueryParam("radial");
          }}>
          <RadialTreeLayout width={25} stroke="rgb(130,130,130)"/>
          <span style={styles.title}> {"radial"} </span>
@@ -62,7 +53,7 @@ class ChooseLayout extends React.Component {
          style={materialButton}
          onClick={() => {
            this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });
-           this.setLayoutQueryParam("unrooted");
+          //  this.setLayoutQueryParam("unrooted");
          }}>
          <UnrootedTreeLayout width={25} stroke="rgb(130,130,130)"/>
          <span style={styles.title}> {"unrooted"} </span>
@@ -72,7 +63,7 @@ class ChooseLayout extends React.Component {
          style={materialButton}
          onClick={() => {
            this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });
-           this.setLayoutQueryParam("clock");
+          //  this.setLayoutQueryParam("clock");
          }}>
          <ClockTreeLayout width={25} stroke="rgb(130,130,130)"/>
          <span style={styles.title}> {"clock"} </span>

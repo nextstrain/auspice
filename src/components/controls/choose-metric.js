@@ -23,15 +23,15 @@ class ChooseMetric extends React.Component {
       }
     };
   }
-
-  setMetricQueryParam(title) {
-    const location = this.props.router.getCurrentLocation();
-    const newQuery = Object.assign({}, location.query, {m: title});
-    this.props.router.push({
-      pathname: location.pathname,
-      query: newQuery
-    });
-  }
+  //
+  // setMetricQueryParam(title) {
+  //   const location = this.props.router.getCurrentLocation();
+  //   const newQuery = Object.assign({}, location.query, {m: title});
+  //   this.props.router.push({
+  //     pathname: location.pathname,
+  //     query: newQuery
+  //   });
+  // }
 
   render() {
   const styles = this.getStyles();
@@ -42,7 +42,7 @@ class ChooseMetric extends React.Component {
         style={materialButton}
         onClick={() => {
           this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
-          this.setMetricQueryParam("div");
+          // this.setMetricQueryParam("div");
         }}>
         <span style={styles.title}> {"mutations"} </span>
       </button>
@@ -51,7 +51,7 @@ class ChooseMetric extends React.Component {
         style={materialButton}
         onClick={() => {
           this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "num_date" });
-          this.setMetricQueryParam("num_date");
+          // this.setMetricQueryParam("num_date");
         }}>
         <span style={styles.title}> {"time"} </span>
       </button>

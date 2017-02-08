@@ -58,32 +58,32 @@ class DateRangeInputs extends React.Component {
    return 1970 + (unixDate / 365.2425 / 24 / 3600);
   }
 
-  setDateRangeQueryParam(dateRange) {
-    const location = this.props.router.getCurrentLocation();
-    const newQuery = Object.assign({}, location.query, {dmin: dateRange.min, dmax: dateRange.max});
-    this.props.router.push({
-      pathname: location.pathname,
-      query: newQuery
-    });
-  }
-
-  setDateMinQueryParam(dateMin) {
-    const location = this.props.router.getCurrentLocation();
-    const newQuery = Object.assign({}, location.query, {dmin: dateMin});
-    this.props.router.push({
-      pathname: location.pathname,
-      query: newQuery
-    });
-  }
-
-  setDateMaxQueryParam(dateMax) {
-    const location = this.props.router.getCurrentLocation();
-    const newQuery = Object.assign({}, location.query, {dmax: dateMax});
-    this.props.router.push({
-      pathname: location.pathname,
-      query: newQuery
-    });
-  }
+  // setDateRangeQueryParam(dateRange) {
+  //   const location = this.props.router.getCurrentLocation();
+  //   const newQuery = Object.assign({}, location.query, {dmin: dateRange.min, dmax: dateRange.max});
+  //   this.props.router.push({
+  //     pathname: location.pathname,
+  //     query: newQuery
+  //   });
+  // }
+  //
+  // setDateMinQueryParam(dateMin) {
+  //   const location = this.props.router.getCurrentLocation();
+  //   const newQuery = Object.assign({}, location.query, {dmin: dateMin});
+  //   this.props.router.push({
+  //     pathname: location.pathname,
+  //     query: newQuery
+  //   });
+  // }
+  //
+  // setDateMaxQueryParam(dateMax) {
+  //   const location = this.props.router.getCurrentLocation();
+  //   const newQuery = Object.assign({}, location.query, {dmax: dateMax});
+  //   this.props.router.push({
+  //     pathname: location.pathname,
+  //     query: newQuery
+  //   });
+  // }
 
   updateFromPicker(ref, momentDate) {
     // a momentDate is received from DatePicker
@@ -108,14 +108,14 @@ class DateRangeInputs extends React.Component {
       max: this.numericToCalendar(numDateValues[1])};
     if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) { // update min
       this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
-      this.setDateMinQueryParam(newRange.min);
+      // this.setDateMinQueryParam(newRange.min);
     } else if (this.props.dateMin === newRange.min && this.props.dateMax !== newRange.max) { // update max
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
-      this.setDateMaxQueryParam(newRange.max);
+      // this.setDateMaxQueryParam(newRange.max);
     } else if (this.props.dateMin !== newRange.min && this.props.dateMax !== newRange.max) { // update both
       this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
-      this.setDateRangeQueryParam(newRange);
+      // this.setDateRangeQueryParam(newRange);
     }
   }
 
