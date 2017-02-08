@@ -1,6 +1,6 @@
 import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
-import { modifyURLquery } from "../util/urlHelpers";
+import { modifyURL } from "../util/urlHelpers";
 
 export const TOGGLE_BRANCH_LABELS = "TOGGLE_BRANCH_LABELS";
 export const LEGEND_ITEM_MOUSEENTER = "LEGEND_ITEM_MOUSEENTER";
@@ -47,7 +47,7 @@ export const changeColorBy = function (colorBy, router = null) {
   return function (dispatch) {
     // ∆ react-router, only if router provided
     if (router) {
-      modifyURLquery(router, null, {c: colorBy}, true);
+      modifyURL(router, null, {c: colorBy}, true);
     }
     dispatch({
       type: CHANGE_COLOR_BY,

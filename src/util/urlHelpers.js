@@ -9,7 +9,7 @@ reflected in the URL and makes one change.
                 (or replaces) e.g. .../?key=value
   replace: if true, you can't go "back" to the old state via the browser
 */
-export const modifyURLquery = function (router, newPath = null, keyValuePairs = null, replace = false) {
+export const modifyURL = function (router, newPath = null, keyValuePairs = null, replace = false) {
   let query = queryString.parse(router.location.search);
   // const query = queryString.parse(router.location.search);
   if (keyValuePairs) {
