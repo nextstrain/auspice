@@ -45,7 +45,7 @@ class Controls extends React.Component {
         }}>
 
         <HeaderFont style={styles.heading}>{"Dataset"}</HeaderFont>
-        <ChooseVirus {...this.props}/>
+        <ChooseVirus/>
 
         <HeaderFont style={styles.heading}>{"Date Range"}</HeaderFont>
         <DateRangeInputs {...this.props}/>
