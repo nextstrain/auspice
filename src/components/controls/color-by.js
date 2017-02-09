@@ -27,7 +27,6 @@ class ColorBy extends React.Component {
   static propTypes = {
     /* react */
     dispatch: React.PropTypes.func,
-    router: React.PropTypes.object,
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     /* component api */

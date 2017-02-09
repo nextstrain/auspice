@@ -117,7 +117,7 @@ class App extends React.Component {
     return (
       <Sidebar
         sidebar={
-          <Controls router={this.context.router}/>
+          <Controls/>
         }
         open={this.state.sidebarOpen}
         docked={this.state.sidebarDocked}
@@ -139,7 +139,6 @@ class App extends React.Component {
           <Frequencies/>
           <Entropy
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            router={this.context.router}
           />
         </Background>
       </Sidebar>
