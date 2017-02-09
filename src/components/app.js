@@ -3,7 +3,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { BROWSER_DIMENSIONS, loadJSONs } from "../actions";
 import { NEW_DATASET } from "../actions/controls";
-import { modifyURL, restoreStateFromURL, turnURLtoDataPath } from "../util/urlHelpers"
+import { restoreStateFromURL, turnURLtoDataPath } from "../util/urlHelpers"
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
 import _ from "lodash";
@@ -19,26 +19,15 @@ import queryString from "query-string";
 import * as globals from "../util/globals";
 import Sidebar from "react-sidebar";
 
-const returnStateNeeded = (reduxState) => {
-  return {
-    tree: reduxState.tree,
-    sequences: reduxState.sequences,
-    metadata: reduxState.metadata,
-    colorOptions: reduxState.metadata.colorOptions,
-    colorBy: reduxState.controls.colorBy,
-    datasetPathName: reduxState.controls.datasetPathName
-  };
-};
-/* BRIEF (INCOMPLETE) REMINDER OF PROPS AVAILABLE TO APP:
-  colorOptions: parameters for each colorBy value (country, region etc)
-      ideally come from the JSON, but there are defaults if necessary
-
+/* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   React-Router v4 injects length, action, location, push etc into props,
     but perhaps it's more consistent if we access these through
-    this.context.router
-    see https://reacttraining.com/react-router/#history
+    this.context.router.
+  Regardless, changes in URL will trigger the lifecycle methods
+    here as that is a prop of this component, whether we use it or not
+  see https://reacttraining.com/react-router
 */
-@connect(returnStateNeeded)
+@connect()
 @Radium
 class App extends React.Component {
   constructor(props) {
@@ -63,19 +52,7 @@ class App extends React.Component {
     };
   }
   static propTypes = {
-    /* react */
-    dispatch: React.PropTypes.func.isRequired,
-    params: React.PropTypes.object,
-    /* component api */
-    error: React.PropTypes.object,
-    loading: React.PropTypes.bool,
-    user: React.PropTypes.object,
-    routes: React.PropTypes.array
-    // foo: React.PropTypes.string
-  }
-  static defaultProps = {
-    // foo: "bar"
-
+    dispatch: React.PropTypes.func.isRequired
   }
   static contextTypes = {
     router: React.PropTypes.object.isRequired
@@ -130,11 +107,10 @@ class App extends React.Component {
 
   componentDidUpdate() {
     /* back/forward buttons used (i.e. app doesn't reload, things don't
-    remount, but we still have to pick up URL changes)
+    remount, but this is the place to detect URL changes)
     */
     // console.log("app.js CDU")
     // console.log("redux datasetPathName:", this.props.datasetPathName);
-    // console.log("")
     // this.maybeFetchDataset();
   }
 
@@ -158,7 +134,6 @@ class App extends React.Component {
           <Controls
             location={this.state.location}
             router={this.context.router}
-            colorOptions={this.props.colorOptions}
           />
         }
         open={this.state.sidebarOpen}
@@ -176,9 +151,8 @@ class App extends React.Component {
           />
           <Map
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            nodes={this.props.tree.nodes}
             justGotNewDatasetRenderNewMap={false}
-            />
+          />
           <Frequencies/>
           <Entropy
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}

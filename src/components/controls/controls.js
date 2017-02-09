@@ -16,7 +16,8 @@ import * as globals from "../../util/globals";
 const returnStateNeeded = (fullStateTree) => {
   return {
     controls: fullStateTree.controls,
-    metadata: fullStateTree.metadata
+    metadata: fullStateTree.metadata,
+    colorOptions: fullStateTree.metadata.colorOptions
   };
 };
 

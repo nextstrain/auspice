@@ -16,7 +16,8 @@ import computeResponsive from "../../util/computeResponsive";
     tree: state.tree.tree,
     metadata: state.metadata.metadata,
     colorScale: state.controls.colorScale,
-    browserDimensions: state.browserDimensions.browserDimensions
+    browserDimensions: state.browserDimensions.browserDimensions,
+    nodes: state.tree.nodes
   };
 })
 class Map extends React.Component {
