@@ -5,10 +5,6 @@ import RecursiveFilter from "./recursive_filter";
 import parseParams from "../../util/parseParams";
 import SelectLabel from "../framework/select-label";
 
-// @connect(state => {
-//   return state.FOO;
-// })
-
 /*
  * this component implements a series of selectors to select datasets.
  * the dataset hierarchy is specified in a datasets.json, currently
@@ -18,9 +14,6 @@ import SelectLabel from "../framework/select-label";
 class ChooseFilter extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-
-    };
   }
   static propTypes = {
     /* react */
@@ -30,16 +23,6 @@ class ChooseFilter extends React.Component {
     /* component api */
     style: React.PropTypes.object
     // foo: React.PropTypes.string
-  }
-  static defaultProps = {
-    // foo: "bar"
-  }
-  getStyles() {
-    return {
-      base: {
-
-      }
-    };
   }
 
   parseFilterQuery(query) {
@@ -53,11 +36,10 @@ class ChooseFilter extends React.Component {
 
 
   render() {
-    const styles = this.getStyles();
-
     // pull out filter query
-    let filterQuery = this.props.location.query[this.props.filterType] || "";
 
+    // TODO GET THIS INFO FROM REDUX NOT THE URL
+    let filterQuery = this.props.location.query[this.props.filterType] || "";
     // names of the current filters, i.e. [geo, north_america, mexico]
     const filters = this.parseFilterQuery(filterQuery).filters.map((d) => (filterAbbrFwd[d] || d) );
     //if (filters[filters.length-1]["value"] !== "all") { filters.push({"value":"all"}); }

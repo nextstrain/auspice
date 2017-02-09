@@ -151,25 +151,11 @@ class App extends React.Component {
     });
   }
 
-  /******************************************
-   * HANDLE QUERY PARAM CHANGES AND ASSOCIATED STATE UPDATES
-   *****************************************/
-
-  changeRoute(pathname, query) {
-    pathname = pathname.replace("!/", ""); // needed to assist with S3 redirects
-    const prefix = (pathname === "" || pathname[0] === "/") ? "" : "/";
-    const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/?" : "?";
-    const url = prefix + pathname + suffix + queryString.stringify(query);
-    window.history.pushState({}, "", url);
-    this.setState(Object.assign({location:{query, pathname}}));
-  }
-
   render() {
     return (
       <Sidebar
         sidebar={
           <Controls
-            changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
             router={this.context.router}
             colorOptions={this.props.colorOptions}
