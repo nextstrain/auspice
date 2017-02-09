@@ -57,7 +57,7 @@ class Controls extends React.Component {
 
         <HeaderFont style={styles.heading}>{"Filters"}</HeaderFont>
         <ColorBy {...this.props}/>
-        <AllFilters {...this.props} />
+        <AllFilters/>
         <ToggleBranchLabels/>
         <Search/>
 

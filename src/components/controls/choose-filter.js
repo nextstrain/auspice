@@ -16,13 +16,9 @@ class ChooseFilter extends React.Component {
     super(props);
   }
   static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object
-    // foo: React.PropTypes.string
+    shortKey: React.PropTypes.string.isRequired,
+    filterType: React.PropTypes.string.isRequired,
+    filterOptions: React.PropTypes.object.isRequired
   }
 
   parseFilterQuery(query) {
@@ -39,7 +35,8 @@ class ChooseFilter extends React.Component {
     // pull out filter query
 
     // TODO GET THIS INFO FROM REDUX NOT THE URL
-    let filterQuery = this.props.location.query[this.props.filterType] || "";
+    // let filterQuery = this.props.location.query[this.props.filterType] || "";
+    let filterQuery = ""; // this was broken above anyway
     // names of the current filters, i.e. [geo, north_america, mexico]
     const filters = this.parseFilterQuery(filterQuery).filters.map((d) => (filterAbbrFwd[d] || d) );
     //if (filters[filters.length-1]["value"] !== "all") { filters.push({"value":"all"}); }
@@ -62,10 +59,9 @@ class ChooseFilter extends React.Component {
           selectors.push((
             <div key={vi} style={{marginBottom: 10}}>
               <RecursiveFilter
-                {...this.props}
-                title={"all"}
+                shortKey={this.props.shortKey}
+                filterType={this.props.filterType}
                 filterTree={filters.slice(0, vi)}
-                selected = {vi===filters.length ? null : filters[vi]}
                 options={options}
                 counts={counts}
                 fields={fields}

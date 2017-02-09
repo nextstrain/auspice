@@ -11,6 +11,14 @@ import { modifyURL } from "../../util/urlHelpers";
  */
 @Radium
 class RecursiveFilter extends React.Component {
+  static propTypes = {
+    filterTree: React.PropTypes.array.isRequired,
+    filterType: React.PropTypes.string.isRequired,
+    shortKey: React.PropTypes.string.isRequired,
+    counts: React.PropTypes.array.isRequired,
+    fields: React.PropTypes.array.isRequired,
+    options: React.PropTypes.array.isRequired
+  }
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   }
