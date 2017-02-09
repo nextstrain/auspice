@@ -164,15 +164,6 @@ class App extends React.Component {
     this.setState(Object.assign({location:{query, pathname}}));
   }
 
-  currentFrequencies() {
-    let freq = "";
-    if (this.props.colorBy && this.props.colorBy.slice(0,3) === "gt-") {
-      const gt = this.props.colorBy.slice(3).split("_");
-      freq = "global_" + gt[0] + ":" + gt[1];
-    }
-    return freq;
-  }
-
   render() {
     return (
       <Sidebar
@@ -202,9 +193,7 @@ class App extends React.Component {
             nodes={this.props.tree.nodes}
             justGotNewDatasetRenderNewMap={false}
             />
-          <Frequencies
-            genotype={this.currentFrequencies()}
-          />
+          <Frequencies/>
           <Entropy
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
             location={this.state.location}

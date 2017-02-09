@@ -6,8 +6,11 @@ import * as globals from "../../util/globals";
 import Card from "../framework/card";
 
 @connect(state => {
-  return {frequencies: state.frequencies,
-         metadata: state.metadata};
+  return {
+    frequencies: state.frequencies,
+    metadata: state.metadata,
+    colorBy: state.controls.colorBy
+  };
 })
 @Radium
 class Frequencies extends React.Component {
@@ -24,20 +27,25 @@ class Frequencies extends React.Component {
     routes: React.PropTypes.array,
     /* component api */
     style: React.PropTypes.object,
-    genotype: React.PropTypes.string,
   }
-  static defaultProps = {
-    genotype:["global", "HA1", "159F"]
-  }
+  // static defaultProps = {
+  //   genotype:["global", "HA1", "159F"]
+  // }
   getStyles() {
-    return {
-      base: {
+    return { base: {}}
+  }
 
-      }
-    };
+  currentFrequencies() {
+    let freq = "";
+    if (this.props.colorBy && this.props.colorBy.slice(0,3) === "gt-") {
+      const gt = this.props.colorBy.slice(3).split("_");
+      freq = "global_" + gt[0] + ":" + gt[1];
+    }
+    return freq;
   }
 
   drawFrequencies() {
+    const genotype = this.currentFrequencies();
     const frequencyChartWidth = 900;
     const frequencyChartHeight = 300;
     const bottomPadding = 45;
@@ -59,9 +67,7 @@ class Frequencies extends React.Component {
                          "W", "X", "Y", "Z", "-", "*"];
     let tCount=0;
     for (let si=0; si<states.length; si+=1){
-      const key = this.props.genotype
-                  ? this.props.genotype+states[si]
-                  : "not found";
+      const key = genotype ? genotype + states[si] : "not found";
       if (key !== "not found" && this.props.frequencies.frequencies[key]){
         const vals = this.props.frequencies.frequencies[key];
         const new_traj = { d: ("M"+x(pivots[0]).toString()+" " + y(vals[0]).toString() + vals.map((v,i) => ["L", x(pivots[i]).toString(), y(v).toString()].join(" ")).join(" ")),
