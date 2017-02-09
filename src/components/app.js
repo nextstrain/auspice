@@ -42,10 +42,6 @@ class App extends React.Component {
     const mql = window.matchMedia(`(min-width: ${globals.controlsHiddenWidth}px)`);
     mql.addListener(() => this.setState({sidebarDocked: this.state.mql.matches}));
     this.state = {
-      location: {
-        pathname: this.props.location.pathname,
-        query: queryString.parse(this.props.location.search)
-      },
       mql,
       sidebarDocked: mql.matches,
       sidebarOpen: false
@@ -58,18 +54,8 @@ class App extends React.Component {
     router: React.PropTypes.object.isRequired
   }
 
-  componentWillMount() {
-    /* i'll probably remove all of this in a future commit */
-    const tmpQuery = queryString.parse(this.context.router.location.search);
-    const pathname = this.props.location.pathname;
-    const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/" : "";
-    this.setState({
-      location: {
-        pathname: pathname + suffix,
-        query: tmpQuery
-      }
-    });
-  }
+  // componentWillMount() {
+  // }
 
   componentDidMount() {
     /* This is hit on the initial load and when a browser is refreshed
@@ -131,10 +117,7 @@ class App extends React.Component {
     return (
       <Sidebar
         sidebar={
-          <Controls
-            location={this.state.location}
-            router={this.context.router}
-          />
+          <Controls router={this.context.router}/>
         }
         open={this.state.sidebarOpen}
         docked={this.state.sidebarDocked}
@@ -156,7 +139,6 @@ class App extends React.Component {
           <Frequencies/>
           <Entropy
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            location={this.state.location}
             router={this.context.router}
           />
         </Background>

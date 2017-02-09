@@ -20,17 +20,21 @@ class ChooseVirus extends React.Component {
     routes: React.PropTypes.array,
     style: React.PropTypes.object
   }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
+
   getStyles() {
     return { base: {} }
   }
 
   render() {
+    // temporary fix - TODO - improve
+    const pathname = this.context.router.location.pathname;
     const styles = this.getStyles();
     /* ALL OF THIS SHOULD COME FROM REDUX, NOT THE URL!!!!!! */
     // remove starting or trailing slashes from path
-    let tmppath = ((this.props.location.pathname[0] === "/")
-                    ? this.props.location.pathname.substring(1)
-                    : this.props.location.pathname);
+    let tmppath = pathname[0] === "/" ? pathname.substring(1) : pathname;
     tmppath = ((tmppath[tmppath.length - 1] === "/")
                 ? tmppath.substring(0, tmppath.length - 1)
                 : tmppath);
