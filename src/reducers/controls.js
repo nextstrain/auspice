@@ -36,6 +36,8 @@ const getDefaultState = function () {
 
 const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
+  case types.RESET_CONTROLS:
+    return getDefaultState();
   case types.NEW_DATASET:
     return Object.assign({}, state, {
       datasetPathName: action.data

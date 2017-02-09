@@ -3,39 +3,30 @@ import Radium from "radium";
 import { datasets } from "../../util/globals";
 import ChooseVirusSelect from "./choose-virus-select";
 import parseParams from "../../util/parseParams";
+import { connect } from "react-redux";
 
 @Radium
+@connect((state) => {
+  return {
+    datasetPathName: state.controls.datasetPathName
+  }
+})
 class ChooseVirus extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-
-    };
   }
   static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
-    /* component api */
     style: React.PropTypes.object
-    // foo: React.PropTypes.string
-  }
-  static defaultProps = {
-    // foo: "bar"
   }
   getStyles() {
-    return {
-      base: {
-
-      }
-    };
+    return { base: {} }
   }
-
 
   render() {
     const styles = this.getStyles();
-
+    /* ALL OF THIS SHOULD COME FROM REDUX, NOT THE URL!!!!!! */
     // remove starting or trailing slashes from path
     let tmppath = ((this.props.location.pathname[0] === "/")
                     ? this.props.location.pathname.substring(1)

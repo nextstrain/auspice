@@ -82,7 +82,7 @@ class App extends React.Component {
   }
 
   componentWillMount() {
-    restoreStateFromURL(this.context.router, this.props.dispatch);
+    /* i'll probably remove all of this in a future commit */
     const tmpQuery = queryString.parse(this.context.router.location.search);
     const pathname = this.props.location.pathname;
     const suffix = (pathname.length && pathname[pathname.length - 1] !== "/") ? "/" : "";
@@ -114,8 +114,11 @@ class App extends React.Component {
 
     /* secondly, parse URL, set URL, load data etc
     we're always going to load data here, it's just a question of what data to load!
+    NOTE because the page has just loaded, there is no state to clear, we simply load
+    new bits of state via the URL query and then URL pathname
     */
     // console.log("CDM")
+    restoreStateFromURL(this.context.router, this.props.dispatch);
     const data_path = turnURLtoDataPath(this.context.router);
     if (data_path) {
       this.props.dispatch({type: NEW_DATASET, data: this.context.router.location.pathname});
@@ -204,7 +207,6 @@ class App extends React.Component {
           />
           <Entropy
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            changeRoute={this.changeRoute.bind(this)}
             location={this.state.location}
             router={this.context.router}
           />

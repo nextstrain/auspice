@@ -1,14 +1,22 @@
 import React from "react";
 import Radium from "radium";
 import {select} from "../../globalStyles";
+import { RESET_CONTROLS, NEW_DATASET } from "../../actions/controls";
+import { loadJSONs } from "../../actions"
+import { turnURLtoDataPath } from "../../util/urlHelpers";
+import { connect } from "react-redux";
 
 @Radium
+@connect()
 class ChooseVirusSelect extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
 
     };
+  }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
   }
   static propTypes = {
     /* react */
@@ -37,8 +45,22 @@ class ChooseVirusSelect extends React.Component {
     return p;
   }
 
-  setVirusPath(newPath) {
-    this.props.changeRoute(newPath, this.props.location.query);
+  changeDataset(newPath) {
+    // 1 reset redux controls state in preparation for a change
+    this.props.dispatch({type: RESET_CONTROLS})
+    // 2 change URL (push, not replace)
+    this.context.router.push({
+      pathname: newPath,
+      search: ""
+    })
+    // 3 load in new data (via the URL we just changed, kinda weird I know)
+    const data_path = turnURLtoDataPath(this.context.router);
+    if (data_path) {
+      this.props.dispatch({type: NEW_DATASET, data: this.context.router.location.pathname});
+      this.props.dispatch(loadJSONs(data_path));
+    } else {
+      console.log("Couldn't work out the dataset to load. Bad.");
+    }
   }
 
   render() {
@@ -50,8 +72,8 @@ class ChooseVirusSelect extends React.Component {
         style={select}
         value={this.props.selected}
         onChange={(e) => {
-          if (e.target.value === this.props.title) { return }
-            this.setVirusPath(this.createPath(e));
+          if (e.target.value === this.props.title) { return; }
+          this.changeDataset(this.createPath(e));
         }}
       >
         <option key={"titleOption"}> {this.props.title} </option>
