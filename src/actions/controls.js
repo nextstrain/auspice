@@ -1,6 +1,5 @@
 import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
-import { modifyURL } from "../util/urlHelpers";
 
 export const TOGGLE_BRANCH_LABELS = "TOGGLE_BRANCH_LABELS";
 export const LEGEND_ITEM_MOUSEENTER = "LEGEND_ITEM_MOUSEENTER";
@@ -41,16 +40,11 @@ export const updateColorScale = function () {
   };
 };
 
-/* an action to set the URL / react-router query bit when color By changes
-   this is a thunk so it can access (redux) state
+/* this is a thunk so it can dispatch multiple actions
    here is where the colorScale is calculated
 */
-export const changeColorBy = function (colorBy, router = null) {
+export const changeColorBy = function (colorBy) {
   return function (dispatch) {
-    // ∆ react-router, only if router provided
-    if (router) {
-      modifyURL(router, null, {c: colorBy}, true);
-    }
     dispatch({
       type: CHANGE_COLOR_BY,
       data: colorBy

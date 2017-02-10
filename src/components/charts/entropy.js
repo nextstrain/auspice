@@ -9,6 +9,7 @@ import d3 from "d3";
 import { parseGenotype } from "../../util/getGenotype";
 import computeResponsive from "../../util/computeResponsive";
 import { changeColorBy } from "../../actions/controls";
+import { modifyURLquery } from "../../util/urlHelpers";
 
 @connect(state => {
   return {
@@ -26,7 +27,8 @@ class Entropy extends React.Component {
   }
 
   setColorByGenotype(colorBy) {
-    this.props.dispatch(changeColorBy(colorBy, this.context.router))
+    this.props.dispatch(changeColorBy(colorBy))
+    modifyURLquery(this.context.router, {c: colorBy}, true);
   }
 
   drawEntropy() {

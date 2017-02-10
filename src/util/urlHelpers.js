@@ -11,7 +11,7 @@ reflected in the URL and makes one change.
                 (or replaces) e.g. .../?key=value
   replace: if true, you can't go "back" to the old state via the browser
 */
-export const modifyURL = function (router, newPath = null, keyValuePairs = null, replace = false) {
+export const modifyURLquery = function (router, keyValuePairs = null, replace = false) {
   let query = queryString.parse(router.location.search);
   // const query = queryString.parse(router.location.search);
   if (keyValuePairs) {
@@ -20,14 +20,8 @@ export const modifyURL = function (router, newPath = null, keyValuePairs = null,
   }
   // console.log("query in:", queryString.parse(router.location.search))
   // console.log("query out:", query)
-
-  const pathName = router.location.pathname;
-  if (newPath) {
-    console.log("to do");
-  }
-
   const newURL = {
-    pathname: pathName,
+    pathname: router.location.pathname,
     search: queryString.stringify(query)
   };
   replace ? router.replace(newURL) : router.push(newURL);

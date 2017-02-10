@@ -6,7 +6,7 @@ import Slider from './slider';
 import { connect } from "react-redux";
 import { CHANGE_DATE_MIN, CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN,
   CHANGE_ABSOLUTE_DATE_MAX } from "../../actions/controls";
-import { modifyURL } from "../../util/urlHelpers";
+import { modifyURLquery } from "../../util/urlHelpers";
 
 
 moment.updateLocale('en', {
@@ -71,12 +71,12 @@ class DateRangeInputs extends React.Component {
       newRange = { min: momentDate.format("YYYY-MM-DD"),
                    max: this.props.dateMax };
       this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
-      modifyURL(this.context.router, null, {dmin: newRange.min}, true);
+      modifyURLquery(this.context.router, {dmin: newRange.min}, true);
     } else if (ref === "updateDateMax") {
       newRange = { min: this.props.dateMin,
                    max: momentDate.format("YYYY-MM-DD") };
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
-      modifyURL(this.context.router, null, {dmax: newRange.max}, true);
+      modifyURLquery(this.context.router, {dmax: newRange.max}, true);
     }
   }
 
@@ -87,14 +87,14 @@ class DateRangeInputs extends React.Component {
       max: this.numericToCalendar(numDateValues[1])};
     if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) { // update min
       this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
-      modifyURL(this.context.router, null, {dmin: newRange.min}, true);
+      modifyURLquery(this.context.router, {dmin: newRange.min}, true);
     } else if (this.props.dateMin === newRange.min && this.props.dateMax !== newRange.max) { // update max
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
-      modifyURL(this.context.router, null, {dmax: newRange.max}, true);
+      modifyURLquery(this.context.router, {dmax: newRange.max}, true);
     } else if (this.props.dateMin !== newRange.min && this.props.dateMax !== newRange.max) { // update both
       this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
       this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
-      modifyURL(this.context.router, null, {dmin: newRange.min, dmax: newRange.max}, true);
+      modifyURLquery(this.context.router, {dmin: newRange.min, dmax: newRange.max}, true);
     }
   }
 

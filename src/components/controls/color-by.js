@@ -5,6 +5,7 @@ import { select} from "../../globalStyles";
 import SelectLabel from "../framework/select-label";
 import { connect } from "react-redux";
 import { changeColorBy } from "../../actions/controls";
+import { modifyURLquery } from "../../util/urlHelpers";
 
 /* Why does this have colorBy set as state (here) and in redux?
    it's for the case where we select genotype, then wait for the
@@ -45,7 +46,8 @@ class ColorBy extends React.Component {
 
   setColorBy(colorBy) {
     if (colorBy.slice(0, 2) !== "gt") {
-      this.props.dispatch(changeColorBy(colorBy, this.context.router))
+      this.props.dispatch(changeColorBy(colorBy))
+      modifyURLquery(this.context.router, {c: colorBy}, true);
       this.setState({"selected": colorBy});
     } else {
       // don't update colorBy yet, genotype still needs to be specified
@@ -74,7 +76,8 @@ class ColorBy extends React.Component {
   setGenotypeColorBy(genotype) {
     if (parseGenotype("gt-" + genotype, this.props.geneLength)) {
       // We got a valid genotype, set query params and state
-      this.props.dispatch(changeColorBy("gt-" + genotype, this.context.router))
+      this.props.dispatch(changeColorBy("gt-" + genotype))
+      modifyURLquery(this.context.router, {c: "gt-" + genotype}, true);
     }
     // else we don't have a valid genotype, don't update anything yet
     return null;

@@ -2,7 +2,7 @@ import React from "react";
 import Radium from "radium";
 import Select from "react-select";
 import { filterAbbrRev, filterAbbrFwd } from "../../util/globals";
-import { modifyURL } from "../../util/urlHelpers";
+import { modifyURLquery } from "../../util/urlHelpers";
 
 /*
  * implements a selector that
@@ -41,7 +41,7 @@ class RecursiveFilter extends React.Component {
     // console.log("in r-filter. setting", this.props.filterType, "to", this.makeQueryString(filters, fields))
     // filterQ[this.props.filterType] = this.makeQueryString(filters, fields);
     filterQ[this.props.shortKey] = filters;
-    modifyURL(this.context.router, null, filterQ, false)
+    modifyURLquery(this.context.router, filterQ, false)
   }
 
   render() {
