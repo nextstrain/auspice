@@ -1,4 +1,4 @@
-import * as types from "../actions/controls";
+import * as types from "../actions/types";
 import * as globals from "../util/globals";
 import getColorScale from "../util/getColorScale";
 import moment from 'moment';

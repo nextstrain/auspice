@@ -3,7 +3,7 @@ import TimeTree from "../framework/svg-time-tree";
 import MutationTree from "../framework/svg-mutation-tree";
 import {materialButton} from "../../globalStyles";
 import { connect } from "react-redux";
-import { CHANGE_DISTANCE_MEASURE } from "../../actions/controls";
+import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { modifyURLquery } from "../../util/urlHelpers";
 
 /*

@@ -1,5 +1,6 @@
 import queryString from "query-string";
-import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, changeColorBy } from "../actions/controls";
+import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE } from "../actions/types";
+import { changeColorBy } from "../actions/colors";
 import parseParams from "./parseParams";
 import { changeDateFilter } from "../actions/treeProperties";
 

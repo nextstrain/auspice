@@ -5,7 +5,7 @@ import UnrootedTreeLayout from "../framework/svg-tree-layout-unrooted";
 import ClockTreeLayout from "../framework/svg-tree-layout-clock";
 import {materialButton} from "../../globalStyles";
 import { connect } from "react-redux";
-import { CHANGE_LAYOUT } from "../../actions/controls";
+import { CHANGE_LAYOUT } from "../../actions/types";
 import { modifyURLquery } from "../../util/urlHelpers";
 
 @connect()

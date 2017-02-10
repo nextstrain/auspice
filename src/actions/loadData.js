@@ -1,41 +1,24 @@
-import { updateColorScale } from "./controls";
-import { updateNodeColors } from "./treeProperties";
-
-export const REQUEST_METADATA = "REQUEST_METADATA";
-export const RECEIVE_METADATA = "RECEIVE_METADATA";
-export const METADATA_FETCH_ERROR = "METADATA_FETCH_ERROR";
-export const REQUEST_TREE = "REQUEST_TREE";
-export const RECEIVE_TREE = "RECEIVE_TREE";
-export const TREE_FETCH_ERROR = "TREE_FETCH_ERROR";
-export const REQUEST_SEQUENCES = "REQUEST_SEQUENCES";
-export const RECEIVE_SEQUENCES = "RECEIVE_SEQUENCES";
-export const SEQUENCES_FETCH_ERROR = "SEQUENCES_FETCH_ERROR";
-export const REQUEST_FREQUENCIES = "REQUEST_FREQUENCIES";
-export const RECEIVE_FREQUENCIES = "RECEIVE_FREQUENCIES";
-export const FREQUENCIES_FETCH_ERROR = "FREQUENCIES_FETCH_ERROR";
-export const REQUEST_ENTROPY = "REQUEST_ENTROPY";
-export const RECEIVE_ENTROPY = "RECEIVE_ENTROPY";
-export const ENTROPY_FETCH_ERROR = "ENTROPY_FETCH_ERROR";
-export const BROWSER_DIMENSIONS = "BROWSER_DIMENSIONS";
+import { updateColorScale, updateNodeColors } from "./colors";
+import * as types from "./types";
 
 /* request metadata */
 
 const requestMetadata = () => {
   return {
-    type: REQUEST_METADATA
+    type: types.REQUEST_METADATA
   };
 };
 
 const receiveMetadata = (data) => {
   return {
-    type: RECEIVE_METADATA,
+    type: types.RECEIVE_METADATA,
     data: data
   };
 };
 
 const metadataFetchError = (err) => {
   return {
-    type: METADATA_FETCH_ERROR,
+    type: types.METADATA_FETCH_ERROR,
     data: err
   };
 };
@@ -69,20 +52,20 @@ const populateMetadataStore = (queryParams) => {
 
 const requestTree = () => {
   return {
-    type: REQUEST_TREE
+    type: types.REQUEST_TREE
   };
 };
 
 const receiveTree = (data) => {
   return {
-    type: RECEIVE_TREE,
+    type: types.RECEIVE_TREE,
     data: data
   };
 };
 
 const treeFetchError = (err) => {
   return {
-    type: TREE_FETCH_ERROR,
+    type: types.TREE_FETCH_ERROR,
     data: err
   };
 };
@@ -112,20 +95,20 @@ const populateTreeStore = (queryParams) => {
 
 const requestSequences = () => {
   return {
-    type: REQUEST_SEQUENCES
+    type: types.REQUEST_SEQUENCES
   };
 };
 
 const receiveSequences = (data) => {
   return {
-    type: RECEIVE_SEQUENCES,
+    type: types.RECEIVE_SEQUENCES,
     data: data
   };
 };
 
 const sequencesFetchError = (err) => {
   return {
-    type: SEQUENCES_FETCH_ERROR,
+    type: types.SEQUENCES_FETCH_ERROR,
     data: err
   };
 };
@@ -154,20 +137,20 @@ const populateSequencesStore = (queryParams) => {
 /* request frequencies */
 const requestFrequencies = () => {
   return {
-    type: REQUEST_FREQUENCIES
+    type: types.REQUEST_FREQUENCIES
   };
 };
 
 const receiveFrequencies = (data) => {
   return {
-    type: RECEIVE_FREQUENCIES,
+    type: types.RECEIVE_FREQUENCIES,
     data: data
   };
 };
 
 const frequenciesFetchError = (err) => {
   return {
-    type: FREQUENCIES_FETCH_ERROR,
+    type: types.FREQUENCIES_FETCH_ERROR,
     data: err
   };
 };
@@ -192,20 +175,20 @@ const populateFrequenciesStore = (queryParams) => {
 /* request entropyes */
 const requestEntropy = () => {
   return {
-    type: REQUEST_ENTROPY
+    type: types.REQUEST_ENTROPY
   };
 };
 
 const receiveEntropy = (data) => {
   return {
-    type: RECEIVE_ENTROPY,
+    type: types.RECEIVE_ENTROPY,
     data: data
   };
 };
 
 const entropyFetchError = (err) => {
   return {
-    type: ENTROPY_FETCH_ERROR,
+    type: types.ENTROPY_FETCH_ERROR,
     data: err
   };
 };

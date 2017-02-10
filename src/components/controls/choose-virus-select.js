@@ -1,8 +1,8 @@
 import React from "react";
 import Radium from "radium";
 import {select} from "../../globalStyles";
-import { RESET_CONTROLS, NEW_DATASET } from "../../actions/controls";
-import { loadJSONs } from "../../actions"
+import { RESET_CONTROLS, NEW_DATASET } from "../../actions/types";
+import { loadJSONs } from "../../actions/loadData"
 import { turnURLtoDataPath } from "../../util/urlHelpers";
 import { connect } from "react-redux";
 

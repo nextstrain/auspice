@@ -1,4 +1,4 @@
-import * as types from "../actions";
+import * as types from "../actions/types";
 import { colorOptions } from "../util/globals"
 
 const Metadata = (state = {

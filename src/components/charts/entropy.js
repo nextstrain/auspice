@@ -8,7 +8,7 @@ import Card from "../framework/card";
 import d3 from "d3";
 import { parseGenotype } from "../../util/getGenotype";
 import computeResponsive from "../../util/computeResponsive";
-import { changeColorBy } from "../../actions/controls";
+import { changeColorBy } from "../../actions/colors";
 import { modifyURLquery } from "../../util/urlHelpers";
 
 @connect(state => {

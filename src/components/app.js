@@ -1,8 +1,8 @@
 /*eslint-env browser*/
 import React from "react";
 import { connect } from "react-redux";
-import { BROWSER_DIMENSIONS, loadJSONs } from "../actions";
-import { NEW_DATASET } from "../actions/controls";
+import { loadJSONs } from "../actions/loadData";
+import { BROWSER_DIMENSIONS, NEW_DATASET } from "../actions/types";
 import { restoreStateFromURL, turnURLtoDataPath } from "../util/urlHelpers"
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";

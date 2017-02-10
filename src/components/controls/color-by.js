@@ -4,7 +4,7 @@ import { parseGenotype } from "../../util/getGenotype";
 import { select} from "../../globalStyles";
 import SelectLabel from "../framework/select-label";
 import { connect } from "react-redux";
-import { changeColorBy } from "../../actions/controls";
+import { changeColorBy } from "../../actions/colors";
 import { modifyURLquery } from "../../util/urlHelpers";
 
 /* Why does this have colorBy set as state (here) and in redux?

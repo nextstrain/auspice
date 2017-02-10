@@ -1,7 +1,4 @@
-import * as types from "../actions";
-import { UPDATE_TIP_VISIBILITY,
-         UPDATE_TIP_RADII,
-         UPDATE_NODE_COLORS } from "../actions/treeProperties";
+import * as types from "../actions/types";
 // import { gatherTips } from "../util/treeHelpers";
 import { processNodes, calcLayouts } from "../util/processNodes";
 import d3 from "d3";
@@ -31,7 +28,7 @@ const Tree = (state = getDefaultState(), action) => {
       error: null
     });
   case types.RECEIVE_TREE:
-    const tree = d3.layout.tree().size([1,1]);
+    const tree = d3.layout.tree().size([1, 1]);
     const nodes = processNodes(tree.nodes(action.data));
     nodes[0].parent = nodes[0]; // make root its own parent
     calcLayouts(nodes, ["div", "num_date"]);
@@ -50,17 +47,17 @@ const Tree = (state = getDefaultState(), action) => {
       loading: false,
       error: action.data
     });
-  case UPDATE_TIP_VISIBILITY:
+  case types.UPDATE_TIP_VISIBILITY:
     return Object.assign({}, state, {
       tipVisibility: action.data,
       tipVisibilityVersion: action.version
     });
-  case UPDATE_TIP_RADII:
+  case types.UPDATE_TIP_RADII:
     return Object.assign({}, state, {
       tipRadii: action.data,
       tipRadiiVersion: action.version
     });
-  case UPDATE_NODE_COLORS:
+  case types.UPDATE_NODE_COLORS:
     return Object.assign({}, state, {
       nodeColors: action.data,
       nodeColorsVersion: action.version
