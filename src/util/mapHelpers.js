@@ -18,7 +18,9 @@ const translateAlong = (path) => {
 };
 
 /*
-  If d3 shapes are getting mysteriously cut off while zooming and dragging... https://github.com/Leaflet/Leaflet/issues/2814  
+  If d3 shapes are getting mysteriously cut off while zooming and dragging around leaflet...
+  https://github.com/Leaflet/Leaflet/issues/2814
+
 */
 
 export const drawTipsAndTransmissions = (latLongs, colorScale, g) => {
@@ -63,6 +65,8 @@ export const updateOnMoveEnd = (d3elems, latLongs) => {
     .attr("d", (d) => { return pathStringGenerator(d.coords) })
 
 }
+
+// averaging colors https://github.com/nextstrain/auspice/commit/0b1f2c90f7d45732935c88e60e2c854a42213d9c
 
 // const missiles = transmissionPaths.map((transmissionPath) => {
 //
