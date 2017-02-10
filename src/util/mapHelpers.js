@@ -2,7 +2,7 @@ import d3 from "d3";
 
 /* util */
 
-const pathStringGenerator = d3.svg.line()
+export const pathStringGenerator = d3.svg.line()
   .x((d) => { return d.x })
   .y((d) => { return d.y })
   .interpolate("basis");
@@ -17,7 +17,9 @@ const translateAlong = (path) => {
   };
 };
 
-/* main */
+/*
+  If d3 shapes are getting mysteriously cut off while zooming and dragging... https://github.com/Leaflet/Leaflet/issues/2814  
+*/
 
 export const drawTipsAndTransmissions = (latLongs, colorScale, g) => {
 
@@ -45,6 +47,20 @@ export const drawTipsAndTransmissions = (latLongs, colorScale, g) => {
     tips,
     transmissions
   };
+
+}
+
+export const updateOnMoveEnd = (d3elems, latLongs) => {
+  /* map has moved or rescaled, make tips and transmissions line up */
+  d3elems.tips
+    .data(latLongs.tips)
+    .attr("transform", (d) => {
+      return "translate(" + d.coords.x + "," + d.coords.y + ")";
+    })
+
+  d3elems.transmissions
+    .data(latLongs.transmissions)
+    .attr("d", (d) => { return pathStringGenerator(d.coords) })
 
 }
 

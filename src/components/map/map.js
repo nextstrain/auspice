@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
-import {drawTipsAndTransmissions} from "../../util/mapHelpers";
+import {drawTipsAndTransmissions, updateOnMoveEnd} from "../../util/mapHelpers";
 import * as globals from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import getLatLongs from "../../util/mapHelpersLatLong";
@@ -118,21 +118,26 @@ class Map extends React.Component {
       !this.state.tips /* we haven't already drawn tips */
     ) {
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
-      const latLongs = this.latLongs();
+      const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
 
       const d3elems = drawTipsAndTransmissions(
         latLongs,
         this.props.colorScale,
         this.state.d3DOMNode,
       );
-      // this.state.map.on("viewreset", this.drawOverlay.bind(this));
-      // this.state.map.on("moveend", this.drawOverlay.bind(this));
+      // this.state.map.on("viewreset", this.respondToLeafletEvent.bind(this));
+      this.state.map.on("moveend", this.respondToLeafletEvent.bind(this));
 
       // don't redraw on every rerender - need to seperately handle virus change redraw
       this.setState({
         tips: true,
         d3elems,
       });
+    }
+  }
+  respondToLeafletEvent(leafletEvent) {
+    if (leafletEvent.type === "moveend") { /* zooming and panning */
+      updateOnMoveEnd(this.state.d3elems, this.latLongs());
     }
   }
   maybeUpdateTipsAndTransmissions() {
@@ -142,7 +147,10 @@ class Map extends React.Component {
     /* todo */
   }
   maybeRemoveAllTipsAndTransmissions(prevProps) {
-    /* dataset change, remove all tips and transmissions d3 added */
+    /*
+      dataset change, remove all tips and transmissions d3 added
+      we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
+    */
     if (
       this.state.map && // we have a map
       prevProps.datasetGuid &&
@@ -153,7 +161,6 @@ class Map extends React.Component {
 
       /* clear references to the tips and transmissions d3 added */
       this.setState({
-        map: null,
         tips: false,
         d3elems: null,
         latLongs: null,
@@ -180,17 +187,19 @@ class Map extends React.Component {
     let center = [0,0];
 
     /*
-      hardcode. this will last a while.
+      hardcode zoom level. this will last a while.
       when we want to dynamically calculate the bounds,
       map will have to know about the path latlongs calculated in maphelpers.
       not at all sure how we'll do that and account for great circle paths.
+
+      if we do this, it has to be done procedurally from reset to handle dataset switch
     */
-    if (window.location.pathname.indexOf("ebola") !== -1) {
-      zoom = 7;
-      center = [8, -11];
-    } else if (window.location.pathname.indexOf("zika") !== -1) {
-      /* zika is fine at the default settings */
-    }
+    // if (window.location.pathname.indexOf("ebola") !== -1) {
+    //   zoom = 7;
+    //   center = [8, -11];
+    // } else if (window.location.pathname.indexOf("zika") !== -1) {
+    //   /* zika is fine at the default settings */
+    // }
 
     var map = L.map('map', {
       center: center,
@@ -212,6 +221,8 @@ class Map extends React.Component {
       // should hovering wake the map? (clicking always will)
       hoverToWake: false
     })
+
+    map.getRenderer(map).options.padding = 2;
 
     L.tileLayer('https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2l1MDRoMzg5MDEwbjJvcXBpNnUxMXdwbCJ9.PMqX7vgORuXLXxtI3wISjw', {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
@@ -279,7 +290,7 @@ class Map extends React.Component {
       window.requestAnimationFrame(step);
   }
   render() {
-    // console.log('map sees', this.props.map)
+    console.log('map sees', this.state)
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
 
     return (
