@@ -1,15 +1,13 @@
-const setupLatLong = (nodes, metadata, map) => {
+const setupLatLong = (nodes, metadata, map, colorBy) => {
 
   const aggregatedLocations = {}; /* tips */
-  const transmissions = {}; /* edges, animation paths */
+  const aggregatedTransmissions = {}; /* edges, animation paths */
+  const nestedTransmissions = [];
   const tipsAndTransmissions = {
     tips: [],
     transmissions: []
   };
   const geo = metadata.geo;
-
-  /* dev only, abstract to controls later */
-  const adminLevel = "country"
 
   /*
     aggregate locations for tips
@@ -17,11 +15,11 @@ const setupLatLong = (nodes, metadata, map) => {
   nodes.forEach((n) => {
     if (n.children) { return; }
     // look up geo1 geo2 geo3 do lat longs differ
-    if (aggregatedLocations[n.attr.country]) {
-      aggregatedLocations[n.attr.country]++;
+    if (aggregatedLocations[n.attr[colorBy]]) {
+      aggregatedLocations[n.attr[colorBy]]++;
     } else {
       // if we haven't added this pair, add it
-      aggregatedLocations[n.attr.country] = 1;
+      aggregatedLocations[n.attr[colorBy]] = 1;
     }
   });
 
@@ -34,13 +32,12 @@ const setupLatLong = (nodes, metadata, map) => {
       total: value, // 20
       coords: map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) we MAY have to do this every time rather than just once */
         new L.LatLng(
-          metadata.geo.country[key].latitude,
-          metadata.geo.country[key].longitude
+          metadata.geo[colorBy][key].latitude,
+          metadata.geo[colorBy][key].longitude
         )
       )
     });
   });
-
 
   /*
     count transmissions for line thickness
@@ -49,27 +46,27 @@ const setupLatLong = (nodes, metadata, map) => {
     if (!parent.children) { return; }
     // if (parent.attr.country !== "china") { return; } // remove me, example filter
     parent.children.forEach((child) => {
-      if (parent.attr[adminLevel] === child.attr[adminLevel]) { return; }
+      if (parent.attr[colorBy] === child.attr[colorBy]) { return; }
       // look up in transmissions dictionary
-      if (transmissions[parent.attr[adminLevel] + "/" + child.attr[adminLevel]]) {
-        transmissions[parent.attr[adminLevel] + "/" + child.attr[adminLevel]]++;
+      if (aggregatedTransmissions[parent.attr[colorBy] + "/" + child.attr[colorBy]]) {
+        aggregatedTransmissions[parent.attr[colorBy] + "/" + child.attr[colorBy]]++;
       } else {
         // we don't have it, add it
-        transmissions[parent.attr[adminLevel] + "/" + child.attr[adminLevel]] = 1;
+        aggregatedTransmissions[parent.attr[colorBy] + "/" + child.attr[colorBy]] = 1;
       }
     });
   });
 
   // for each item in the object produced above, add a line
-  _.forOwn(transmissions, (value, key) => {
+  _.forOwn(aggregatedTransmissions, (value, key) => {
 
     // go from "brazil/cuba" to ["brazil", "cuba"]
     const countries = key.split("/");
     // go from "brazil" to lat0 = -14.2350
-    let long0 = geo[adminLevel][countries[0]].longitude;
-    let long1 = geo[adminLevel][countries[1]].longitude;
-    let lat0 = geo[adminLevel][countries[0]].latitude;
-    let lat1 = geo[adminLevel][countries[1]].latitude;
+    let long0 = geo[colorBy][countries[0]].longitude;
+    let long1 = geo[colorBy][countries[1]].longitude;
+    let lat0 = geo[colorBy][countries[0]].latitude;
+    let lat1 = geo[colorBy][countries[1]].latitude;
 
     // create new leaflet LatLong objects
     const start = new L.LatLng(lat0, long0)
@@ -105,17 +102,32 @@ const setupLatLong = (nodes, metadata, map) => {
       }));
     })
 
-    tipsAndTransmissions.transmissions.push({
+    nestedTransmissions.push({
       start,
       end,
+      count: value,
+      rawGeodesic,
       geodesics, /* incomplete for dev, will need to grab BOTH lines when there is wraparound */
       from: countries[0],
       to: countries[1]
     })
+  });
 
+  /* flatter data structure */
+  nestedTransmissions.forEach((transmission) => { /* for each transmission */
+    transmission.geodesics.forEach((partialTransmission) => { /* and for each part of a lines split across dateline in each */
+      tipsAndTransmissions.transmissions.push( /* and add it to an array, which we'll map over to create our paths. */
+        /* not optimized for missiles here. we could check index of for each and if it's greater than one add a flag for partials, and their order? so that we can animate around the map */
+        Object.assign(
+          transmission,
+          { coords: partialTransmission }
+        )
+      );
+    });
   });
 
   return tipsAndTransmissions;
+
 }
 
 export default setupLatLong
