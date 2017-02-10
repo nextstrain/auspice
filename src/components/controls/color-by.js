@@ -96,7 +96,7 @@ class ColorBy extends React.Component {
     const styles = this.getStyles();
     const colorOptions = Object.keys(this.props.colorOptions).map((cOpt, i) =>
       <option key={i} value={ cOpt } selected={cOpt === this.state.selected ? true : false}>
-        { this.props.colorOptions[cOpt].menuItem }
+        { this.props.colorOptions[cOpt].menuItem.toLowerCase() }
       </option> );
 
     return (
