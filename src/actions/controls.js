@@ -1,5 +1,6 @@
 import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
+import { updateNodeColors } from "./treeProperties";
 
 export const TOGGLE_BRANCH_LABELS = "TOGGLE_BRANCH_LABELS";
 export const LEGEND_ITEM_MOUSEENTER = "LEGEND_ITEM_MOUSEENTER";
@@ -51,5 +52,6 @@ export const changeColorBy = function (colorBy) {
     });
     // update the colorScale - NB this won't have an effect unless the tree etc are loaded
     dispatch(updateColorScale());
+    dispatch(updateNodeColors());
   };
 };

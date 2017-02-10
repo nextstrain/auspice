@@ -1,4 +1,5 @@
 import { updateColorScale } from "./controls";
+import { updateNodeColors } from "./treeProperties";
 
 export const REQUEST_METADATA = "REQUEST_METADATA";
 export const RECEIVE_METADATA = "RECEIVE_METADATA";
@@ -15,7 +16,7 @@ export const FREQUENCIES_FETCH_ERROR = "FREQUENCIES_FETCH_ERROR";
 export const REQUEST_ENTROPY = "REQUEST_ENTROPY";
 export const RECEIVE_ENTROPY = "RECEIVE_ENTROPY";
 export const ENTROPY_FETCH_ERROR = "ENTROPY_FETCH_ERROR";
-export const BROWSER_DIMENSIONS = "BROWSER_DIMENSIONS"
+export const BROWSER_DIMENSIONS = "BROWSER_DIMENSIONS";
 
 /* request metadata */
 
@@ -56,7 +57,8 @@ const populateMetadataStore = (queryParams) => {
     return fetchMetadata(queryParams).then((res) => res.json()).then(
       (json) => {
         dispatch(receiveMetadata(json));
-        dispatch(updateColorScale())
+        dispatch(updateColorScale());
+        dispatch(updateNodeColors());
       },
       (err) => dispatch(metadataFetchError(err))
     );
@@ -98,7 +100,8 @@ const populateTreeStore = (queryParams) => {
     return fetchTree(queryParams).then((res) => res.json()).then(
       (json) => {
         dispatch(receiveTree(json));
-        dispatch(updateColorScale())
+        dispatch(updateColorScale());
+        dispatch(updateNodeColors());
       },
       (err) => dispatch(treeFetchError(err))
     );
@@ -140,7 +143,8 @@ const populateSequencesStore = (queryParams) => {
     return fetchSequences(queryParams).then((res) => res.json()).then(
       (json) => {
         dispatch(receiveSequences(json));
-        dispatch(updateColorScale())
+        dispatch(updateColorScale());
+        dispatch(updateNodeColors());
       },
       (err) => dispatch(sequencesFetchError(err))
     );
@@ -229,13 +233,5 @@ export const loadJSONs = (data_path) => {
     dispatch(populateSequencesStore(data_path));
     dispatch(populateFrequenciesStore(data_path));
     dispatch(populateEntropyStore(data_path));
-    /* when all this has been done we need to re-create the colorScale
-    there's definately a better way to do it than this
-    but for now... SORRY!
-    */
-    // window.setTimeout(
-    //   () => dispatch(updateColorScale()),
-    //   500
-    // )
-  }
-}
+  };
+};

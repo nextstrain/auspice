@@ -21,6 +21,7 @@ import { arrayInEquality,
          tipRadii,
          tipVisibility,
          nodeColor} from "../../util/treeHelpers";
+import _ from "lodash";
 
 /* UNDERSTANDING THIS CODE:
 the "tree" object passed in from redux (this.props.tree)
@@ -38,7 +39,6 @@ they're not in redux as (1) its easier and (2) all components that
 need this information are children of this component
 (it would probably be a good idea to move them to redux)
 */
-
 
 /*
  * TreeView creates a (now responsive!) SVG & scales according to layout
@@ -73,11 +73,9 @@ class TreeView extends React.Component {
       shouldReRender: false // start off this way I guess
     };
   }
-
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   }
-
   static propTypes = {
   }
 
@@ -104,7 +102,9 @@ class TreeView extends React.Component {
     /* if we have a tree and we have new props, figure out what we need to update...
     this is imperitive, as opposed to redux-style coding, due to the fact
     that redrawing the tree is expensive, so we try and do the least amount
-    of work possible */
+    of work possible.
+    These attributes are stored in redux.tree
+    */
     if (tree) {
       /* the objects storing the changes to make to the tree */
       const tipAttrToUpdate = {};
@@ -112,42 +112,28 @@ class TreeView extends React.Component {
       const branchAttrToUpdate = {};
       const branchStyleToUpdate = {};
 
-      /* calculate all changes resulting from ∆ colorScale */
-      if (this.props.colorScale.version !== nextProps.colorScale.version) {
-        const newNodeColor = nodeColor(nextProps.tree, nextProps.colorScale, nextProps.sequences);
-        tipStyleToUpdate["fill"] = newNodeColor.map((col) => {
+      if (nextProps.tree.tipVisibilityVersion &&
+          this.props.tree.tipVisibilityVersion !== nextProps.tree.tipVisibilityVersion) {
+        tipStyleToUpdate["visibility"] = nextProps.tree.tipVisibility;
+      }
+      if (nextProps.tree.tipRadiiVersion &&
+          this.props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion) {
+        tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
+      }
+      if (nextProps.tree.nodeColorsVersion &&
+          this.props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion) {
+        tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
         });
-        tipStyleToUpdate["stroke"] = newNodeColor;
-        branchStyleToUpdate["stroke"] = newNodeColor.map((col) => {
+        tipStyleToUpdate["stroke"] = nextProps.tree.nodeColors;
+        branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col) => {
           return d3.rgb(d3.interpolateRgb(col, "#BBB")(0.6)).toString();
         });
       }
-
-      /* tip radii change when the selectedLegendItem changes*/
-      if (this.props.selectedLegendItem !== nextProps.selectedLegendItem) {
-        tipAttrToUpdate["r"] = tipRadii(nextProps.selectedLegendItem, nextProps.colorScale, nextProps.sequences, nextProps.tree);
-      }
-
-      /* tip visibility has changed, for instance because of date slider */
-      /* to do: find a smarter way to check for changes here */
-      /* BUG (react router v4)
-      should perhaps pass in the previous history location to prevTip...
-      https://github.com/ReactTraining/history#properties
-      */
-      const prevTipVisibility = tipVisibility(this.props.tree, this.props.metadata, this.props.dateMin, this.props.dateMax, this.props.query);
-      const newTipVisibility = tipVisibility(nextProps.tree, nextProps.metadata, nextProps.dateMin, nextProps.dateMax, nextProps.query);
-      if (arrayInEquality(prevTipVisibility, newTipVisibility)) {
-        tipStyleToUpdate["visibility"] = newTipVisibility;
-      }
-
-      /* branches change thickness if the (active) tip count changes */
-      /* feb8 (JAMES) we always re-calculate the stroke width due to some really weird
-      race-condition thing. This clearly needs fixing!
-      */
-      // if (this.props.tree.nodes[0].fullTipCount !== nextProps.tree.nodes[0].fullTipCount) {
-      if (true) {
-        branchStyleToUpdate["stroke-width"] = branchThickness(nextProps.tree)
+      /* branch thicknesses should also be conditioned like the others, but
+      for some reason this doesn't work. To investigate! */
+      if (this.props.tree.branchThickness) {
+        branchStyleToUpdate["stroke-width"] = this.props.tree.branchThickness;
       }
 
       /* implement style changes */

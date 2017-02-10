@@ -1,18 +1,16 @@
 import React from "react";
-import DatePicker from 'react-datepicker';
-import moment from 'moment';
-import _ from 'lodash';
-import Slider from './slider';
+import DatePicker from "react-datepicker";
+import moment from "moment";
+// import _ from "lodash";
+import Slider from "./slider";
 import { connect } from "react-redux";
-import { CHANGE_DATE_MIN, CHANGE_DATE_MAX, CHANGE_ABSOLUTE_DATE_MIN,
-  CHANGE_ABSOLUTE_DATE_MAX } from "../../actions/controls";
 import { modifyURLquery } from "../../util/urlHelpers";
+import { changeDateFilter } from "../../actions/treeProperties";
 
-
-moment.updateLocale('en', {
-    longDateFormat : {
-        L: "YYYY-MM-DD"
-    }
+moment.updateLocale("en", {
+  longDateFormat: {
+    L: "YYYY-MM-DD"
+  }
 });
 
 @connect((state) => {
@@ -20,30 +18,22 @@ moment.updateLocale('en', {
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
     absoluteDateMin: state.controls.absoluteDateMin,
-    absoluteDateMax: state.controls.absoluteDateMax,
+    absoluteDateMax: state.controls.absoluteDateMax
   };
 })
 class DateRangeInputs extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-
-    };
   }
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   }
   static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    /* component api */
-    style: React.PropTypes.object
-    // foo: React.PropTypes.string
-  }
-  static defaultProps = {
-    // foo: "bar"
+    dateMin: React.PropTypes.string.isRequired,
+    dateMax: React.PropTypes.string.isRequired,
+    absoluteDateMin: React.PropTypes.string.isRequired,
+    absoluteDateMax: React.PropTypes.string.isRequired,
+    dispatch: React.PropTypes.func.isRequired
   }
   getStyles() {
     return {
@@ -54,13 +44,13 @@ class DateRangeInputs extends React.Component {
   }
 
   numericToCalendar(numDate) {
-   const unixDate = (numDate - 1970) * 365.2425 * 24 * 3600; // number of seconds since 1970
-   return moment.unix(unixDate).format("YYYY-MM-DD");
+    const unixDate = (numDate - 1970) * 365.2425 * 24 * 3600; // number of seconds since 1970
+    return moment.unix(unixDate).format("YYYY-MM-DD");
   }
 
   calendarToNumeric(calDate) {
-   const unixDate = moment(calDate).unix();  // number of seconds since 1970
-   return 1970 + (unixDate / 365.2425 / 24 / 3600);
+    const unixDate = moment(calDate).unix();  // number of seconds since 1970
+    return 1970 + (unixDate / 365.2425 / 24 / 3600);
   }
 
 
@@ -70,12 +60,12 @@ class DateRangeInputs extends React.Component {
     if (ref === "updateDateMin") {
       newRange = { min: momentDate.format("YYYY-MM-DD"),
                    max: this.props.dateMax };
-      this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
+      this.props.dispatch(changeDateFilter(newRange.min, null));
       modifyURLquery(this.context.router, {dmin: newRange.min}, true);
     } else if (ref === "updateDateMax") {
       newRange = { min: this.props.dateMin,
                    max: momentDate.format("YYYY-MM-DD") };
-      this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
+      this.props.dispatch(changeDateFilter(null, newRange.max));
       modifyURLquery(this.context.router, {dmax: newRange.max}, true);
     }
   }
@@ -86,14 +76,15 @@ class DateRangeInputs extends React.Component {
     const newRange = {min: this.numericToCalendar(numDateValues[0]),
       max: this.numericToCalendar(numDateValues[1])};
     if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) { // update min
-      this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
+      this.props.dispatch(changeDateFilter(newRange.min, null));
       modifyURLquery(this.context.router, {dmin: newRange.min}, true);
-    } else if (this.props.dateMin === newRange.min && this.props.dateMax !== newRange.max) { // update max
-      this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
+    } else if (this.props.dateMin === newRange.min &&
+               this.props.dateMax !== newRange.max) { // update max
+      this.props.dispatch(changeDateFilter(null, newRange.max));
       modifyURLquery(this.context.router, {dmax: newRange.max}, true);
-    } else if (this.props.dateMin !== newRange.min && this.props.dateMax !== newRange.max) { // update both
-      this.props.dispatch({ type: CHANGE_DATE_MIN, data: newRange.min });
-      this.props.dispatch({ type: CHANGE_DATE_MAX, data: newRange.max });
+    } else if (this.props.dateMin !== newRange.min &&
+               this.props.dateMax !== newRange.max) { // update both
+      this.props.dispatch(changeDateFilter(newRange.min, newRange.max));
       modifyURLquery(this.context.router, {dmin: newRange.min, dmax: newRange.max}, true);
     }
   }

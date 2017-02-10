@@ -1,7 +1,7 @@
 import queryString from "query-string";
-import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_DATE_MIN,
-  CHANGE_DATE_MAX, changeColorBy } from "../actions/controls";
+import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, changeColorBy } from "../actions/controls";
 import parseParams from "./parseParams";
+import { changeDateFilter } from "../actions/treeProperties";
 
 /* this function takes (potentially multiple) changes you would like
 reflected in the URL and makes one change.
@@ -37,15 +37,15 @@ export const restoreStateFromURL = function (router, dispatch) {
     dispatch({ type: CHANGE_DISTANCE_MEASURE, data: query.m });
   }
   if (query.dmin) {
-    dispatch({ type: CHANGE_DATE_MIN, data: query.dmin });
+    dispatch(changeDateFilter(query.min, null));
   }
   if (query.dmax) {
-    dispatch({ type: CHANGE_DATE_MAX, data: query.dmax });
+    dispatch(changeDateFilter(null, query.max));
   }
   if (query.c) {
     dispatch(changeColorBy(query.c));
   }
-}
+};
 
 // make prefix for data files with fields joined by _ instead of / as in URL
 const makeDataPathFromParsedParams = function (parsedParams) {

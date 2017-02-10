@@ -117,14 +117,14 @@ export const adjust_freq_by_date = (nodes, rootNode) => {
   });
 };
 
-export const arrayInEquality = function(a,b) {
-  if (a&&b){
-    const eq = a.map((d,i)=>d!==b[i]);
-    return eq.some((d)=>d);
-  }else{
-    return true;
-  }
-};
+// export const arrayInEquality = function(a,b) {
+//   if (a&&b){
+//     const eq = a.map((d,i)=>d!==b[i]);
+//     return eq.some((d)=>d);
+//   }else{
+//     return true;
+//   }
+// };
 
 // branch thickness is from clade frequencies
 export const branchThickness = function (tree) {
@@ -147,7 +147,7 @@ const getTipColorAttribute = function (node, colorScale, sequences) {
   return node.attr[colorScale.colorBy];
 };
 
-export const nodeColor = function (tree, colorScale, sequences) {
+export const calcNodeColor = function (tree, colorScale, sequences) {
   if (tree && tree.nodes && colorScale && colorScale.colorBy) {
     const nodeColorAttr = tree.nodes.map((n) => getTipColorAttribute(n, colorScale, sequences));
     return nodeColorAttr.map((n) => colorScale.scale(n));
@@ -174,7 +174,7 @@ const determineLegendMatch = function (selectedLegendItem,
   return bool;
 };
 
-export const tipRadii = function (selectedLegendItem,
+export const calcTipRadii = function (selectedLegendItem,
                            colorScale,
                            sequences,
                            tree
@@ -196,20 +196,20 @@ const parseFilterQuery = function (query) {
   };
 };
 
-export const tipVisibility = function (tree, metaMetadata, lowerLimit, upperLimit, query) {
-  // console.log("in tipVis query:", query)
+export const calcTipVisibility = function (tree, metaMetadata, lowerLimit, upperLimit) {
   if (tree.nodes){
     const filter_pairs = [];
-    if (metaMetadata) {
-      for (const filter in metaMetadata.controls) { // possible race condition with tree?
-        const tmp = parseFilterQuery(query[filter] || "");
-        for (let ii = 0; ii < tmp.filters.length; ii += 1) {
-          if (tmp.filters[ii] && tmp.fields[ii]){
-            filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
-          }
-        }
-      }
-    }
+    // TODO: this used to get query but should get the info from REDUX instead
+    // if (metaMetadata) {
+    //   for (const filter in metaMetadata.controls) { // possible race condition with tree?
+    //     const tmp = parseFilterQuery(query[filter] || "");
+    //     for (let ii = 0; ii < tmp.filters.length; ii += 1) {
+    //       if (tmp.filters[ii] && tmp.fields[ii]){
+    //         filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
+    //       }
+    //     }
+    //   }
+    // }
     if (upperLimit && lowerLimit) {
       if (filter_pairs.length) {
         return tree.nodes.map((d) => (
