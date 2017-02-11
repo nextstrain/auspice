@@ -7,7 +7,7 @@ import { restoreStateFromURL, turnURLtoDataPath } from "../util/urlHelpers"
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
 import _ from "lodash";
-import Header from "./framework/header";
+import Title from "./framework/title";
 import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
@@ -17,6 +17,8 @@ import Map from "./map/map";
 import TreeView from "./tree/treeView";
 import queryString from "query-string";
 import * as globals from "../util/globals";
+import { defaultDateRange, defaultLayout, defaultDistanceMeasure,
+  defaultColorBy, tipRadius, tipRadiusOnLegendMatch, freqScale } from "../util/globals";
 import Sidebar from "react-sidebar";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
@@ -127,7 +129,7 @@ class App extends React.Component {
             open={this.state.sidebarDocked}
             handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
           />
-          <Header/>
+          <Title/>
           <TreeView
             query={queryString.parse(this.context.router.location.search)}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}

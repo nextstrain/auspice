@@ -33,11 +33,11 @@ export const colorOptions = {
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
 export const width = 1126; /* no longer used */
 export const margin = 60;
-export const controlsWidth = 250;
+export const controlsWidth = 240;
 export const totalVerticalPadding = 160; // this includes the header + space between the bottom and the card (refactor.)
-export const controlsHiddenWidth = 800;
+export const controlsHiddenWidth = 1000;
 export const entropyChartHeight = 300;
-export const twoColumnBreakpoint = 1400;
+export const twoColumnBreakpoint = 1600;
 export const maxMapWidth = 1000; /* just right for our default zoom level (which is also min) */
 export const defaultColorBy = "country";
 export const defaultLayout = "rect";
@@ -67,11 +67,11 @@ export const legendRectSize = 15;
 export const legendSpacing = 4;
 export const nonTipNodeRadius = 0;
 export const tipRadius = 4;
-export const tipRadiusOnLegendMatchMultiplier = 1.7;
+export const tipRadiusOnLegendMatch = 7;
 export const defaultDistanceMeasures = ["num_date", "div"];
-export const fastTransitionDuration = 300; // in milliseconds
-export const mediumTransitionDuration = 600; // in milliseconds
-export const slowTransitionDuration = 1200; // in milliseconds
+export const fastTransitionDuration = 350; // in milliseconds
+export const mediumTransitionDuration = 700; // in milliseconds
+export const slowTransitionDuration = 1400; // in milliseconds
 export const HIColorDomain = genericDomain.map((d) => {
   return Math.round(100 * (d * 3.6)) / 100;
 });

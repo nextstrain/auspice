@@ -75,7 +75,7 @@ class Map extends React.Component {
   createMap() {
 
     const southWest = L.latLng(-70, -180);
-    const northEast = L.latLng(90, 180);
+    const northEast = L.latLng(80, 180);
     const bounds = L.latLngBounds(southWest, northEast);
 
     var map = L.map('map', {
@@ -112,9 +112,11 @@ class Map extends React.Component {
   createMapDiv() {
     const responsive = computeResponsive({
       horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
-      vertical: 1, /* if we are in single column, full height */
+      vertical: 1.0, /* if we are in single column, full height */
       browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar
+      sidebar: this.props.sidebar,
+      minHeight: 400,
+      maxAspectRatio: 1.3
     })
     return (
       <div style={{

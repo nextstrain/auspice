@@ -5,7 +5,7 @@ import Flex from './flex';
 // import { connect } from 'react-redux';
 // import { FOO } from '../actions';
 import Logos from "./logos";
-import globalStyles from "../../globalStyles";
+import {lightGray} from "../../globalStyles";
 
 // @connect(state => {
 //   return state.FOO;
@@ -40,12 +40,12 @@ class Footer extends React.Component {
 
       },
       credits: {
-        borderBottom: `1px solid ${globalStyles.lighterGrey}`,
+        borderBottom: `1px solid ${lightGrey}`,
         paddingBottom: 10,
         marginBottom: 10
       },
       names: {
-        color: globalStyles.lighterGrey,
+        color: lightGrey,
         fontSize: 14
       }
     };

@@ -4,6 +4,7 @@ import moment from "moment";
 // import _ from "lodash";
 import Slider from "./slider";
 import { connect } from "react-redux";
+import { controlsWidth } from "../../util/globals";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
 
@@ -139,26 +140,31 @@ class DateRangeInputs extends React.Component {
 
     return (
       <div>
-        <div style={{width: 250}}>
+        <div style={{width: controlsWidth}}>
         <Slider                                       // numDates are handed to Slider
           min={absoluteMinNumDate}
           max={absoluteMaxNumDate}
           defaultValue={[absoluteMinNumDate, absoluteMaxNumDate]}
           value={[selectedMinNumDate, selectedMaxNumDate]}
           onChange={this.updateFromSlider.bind(this)}
-          withBars />
+          minDistance={0.5}                           // minDistance is in years
+          pearling
+          withBars/>
         </div>
-        <div style={{height: 10}}> </div>
+        <div style={{height: 5}}> </div>
         {/*
           the CSS for this is in index.html
           docs: https://hacker0x01.github.io/react-datepicker/
         */}
-        <div style={{width: 250}}>
+        <div style={{width: controlsWidth}}>
           <DatePicker                               // momentDates are handed to DatePicker
+            dateFormat="YYYY/MM/DD"
             selected={moment(selectedMin)}
             onChange={this.updateFromPicker.bind(this, "updateDateMin")}
           />
           <DatePicker                               // momentDates are handed to DatePicker
+            dateFormat="YYYY/MM/DD"
+            className="right-datepicker"
             selected={moment(selectedMax)}
             onChange={this.updateFromPicker.bind(this, "updateDateMax")}
           />

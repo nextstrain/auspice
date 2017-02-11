@@ -14,13 +14,7 @@ import * as globals from "../../util/globals";
 
 class Controls extends React.Component {
   getStyles() {
-    return {
-      heading: {
-        fontSize: 18,
-        letterSpacing: .4,
-        color: "rgb(150,150,150)"
-      }
-    };
+    return {};
   }
   render() {
     const styles = this.getStyles();
@@ -35,22 +29,24 @@ class Controls extends React.Component {
         }}
       >
 
-        <HeaderFont style={styles.heading}>{"Dataset"}</HeaderFont>
+        <HeaderFont>{"Dataset"}</HeaderFont>
         <ChooseVirus/>
 
-        <HeaderFont style={styles.heading}>{"Date Range"}</HeaderFont>
+        <HeaderFont>{"Date Range"}</HeaderFont>
         <DateRangeInputs/>
 
-        <HeaderFont style={styles.heading}>{"Tree Options"}</HeaderFont>
+        <HeaderFont>{"Color by"}</HeaderFont>
+        <ColorBy/>
+
+        <HeaderFont>{"Tree Options"}</HeaderFont>
 
         <SelectLabel text="Layout"/>
         <ChooseLayout/>
-
-        <SelectLabel text="X axis"/>
+  
+        <SelectLabel text="Branch Length"/>
         <ChooseMetric/>
 
-        <HeaderFont style={styles.heading}>{"Filters"}</HeaderFont>
-        <ColorBy/>
+        <HeaderFont>{"Filters"}</HeaderFont>
         <AllFilters/>
         <ToggleBranchLabels/>
         <Search/>

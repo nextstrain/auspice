@@ -5,12 +5,14 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="https://unpkg.com/react-select/dist/react-select.css">
+    <link rel="stylesheet" type="text/css"
+              href="https://fonts.googleapis.com/css?family=Lato:400,500|Quicksand:300">
     <style type="text/css">
 
       html, p, div, input, button {
-        font-family: "Helvetica Neue", "Helvetica", "sans-serif";
+        font-family: "Lato", "Helvetica Neue", "Helvetica", "sans-serif";
         font-weight: 400;
-        /*color: rgb(160, 160, 179);*/
+        color: "#333";
       }
       /*! normalize.css v3.0.2 | MIT License | git.io/normalize */
 
@@ -488,7 +490,6 @@
       }
 
       .react-datepicker {
-        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
         font-size: 11px;
         background-color: #fff;
         color: #000;
@@ -624,13 +625,15 @@
       }
 
       .react-datepicker__input-container input {
-        width: 30%;
-        font-family: "aw-conqueror-sans";
-        font-size: 14px;
-        border-radius: 3px;
-        padding: 10px 10px;
-        border: 1px solid rgb(200,200,200);
-        margin-right: 10px;
+        width: 68px;
+        font-size: 12px;
+        border-radius: 2px;
+        height: 24px;
+        border: 0px;
+      }
+
+      .right-datepicker {
+        float: right;
       }
 
       .react-datepicker__year-read-view {
