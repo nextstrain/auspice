@@ -2,7 +2,6 @@ import React from "react";
 import { defaultColorBy } from "../../util/globals";
 import { parseGenotype } from "../../util/getGenotype";
 import { select} from "../../globalStyles";
-import SelectLabel from "../framework/select-label";
 import { connect } from "react-redux";
 import { changeColorBy } from "../../actions/colors";
 import { modifyURLquery } from "../../util/urlHelpers";
@@ -100,7 +99,6 @@ class ColorBy extends React.Component {
 
     return (
       <div style={styles.base}>
-        <SelectLabel text="Color by"/>
         <select
           style={select}
           id="coloring"
