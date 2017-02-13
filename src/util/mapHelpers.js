@@ -20,6 +20,8 @@ const translateAlong = (path) => {
 /*
   If d3 shapes are getting mysteriously cut off while zooming and dragging around leaflet...
   https://github.com/Leaflet/Leaflet/issues/2814
+  or possibly...
+  https://github.com/Leaflet/Leaflet/issues/2282 check the css in our index.js
 
 */
 
