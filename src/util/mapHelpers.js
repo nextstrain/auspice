@@ -90,6 +90,8 @@ export const updateOnMoveEnd = (d3elems, latLongs) => {
 
 }
 
+
+
 // averaging colors https://github.com/nextstrain/auspice/commit/0b1f2c90f7d45732935c88e60e2c854a42213d9c
 
 // const missiles = transmissionPaths.map((transmissionPath) => {
@@ -124,27 +126,6 @@ export const updateOnMoveEnd = (d3elems, latLongs) => {
 // setTipCoords();
 // map.on("viewreset", setTipCoords); /* search: -Note (A) for an idea as to why this might not be working properly */
 // animateTransmissions();
-
-
-
-/* this will need to be scaled if transmissions is high */
-// const arrowSizeMultiplier = value > 1 ? value * 2 : 0;
-
-/* this decorator adds arrows to the lines. */
-// const arrows = L.polylineDecorator(partialTransmission, {
-//   patterns: [{
-//     offset: 25,
-//     repeat: 50,
-//     symbol: L.Symbol.arrowHead({
-//       pixelSize: 8 /*+ arrowSizeMultiplier*/,
-//       pathOptions: {
-//         fillOpacity: .5,
-//         color: colorScale(transmission.to),
-//         weight: 0
-//       }
-//     })
-//   }]
-// }).addTo(map)
 
 /*
   http://gis.stackexchange.com/questions/49114/d3-geo-path-to-draw-a-path-from-gis-coordinates
