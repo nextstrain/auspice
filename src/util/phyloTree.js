@@ -418,8 +418,10 @@ PhyloTree.prototype.mapToScreen = function(){
         const spanX = d3.max(tmp_xValues)-minX;
         const spanY = d3.max(tmp_yValues)-minY;
         const maxSpan = d3.max([spanY, spanX]);
-        this.xScale.domain([minX, minX+maxSpan]);
-        this.yScale.domain([minY, minY+maxSpan]);
+        const ySlack = (spanX>spanY) ? (spanX-spanY)*0.5 : 0.0;
+        const xSlack = (spanX<spanY) ? (spanY-spanX)*0.5 : 0.0;
+        this.xScale.domain([minX-xSlack, minX+maxSpan-xSlack]);
+        this.yScale.domain([minY-ySlack, minY+maxSpan-ySlack]);
     }else if (this.layout==="clock"){
         // same as rectangular, but flipped yscale
         this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
@@ -522,6 +524,16 @@ PhyloTree.prototype.removeGrid = function() {
   this.svg.selectAll(".gridTick").remove();
   this.grid = false;
 };
+
+/**
+ * hide the grid
+ */
+PhyloTree.prototype.hideGrid = function() {
+  this.svg.selectAll(".majorGrid").style('visibility', 'hidden');
+  this.svg.selectAll(".minorGrid").style('visibility', 'hidden');
+  this.svg.selectAll(".gridTick").style('visibility', 'hidden');
+};
+
 
 /**
  * add a grid to the svg
@@ -724,7 +736,7 @@ PhyloTree.prototype.drawTips = function() {
 PhyloTree.prototype.drawBranches = function() {
   var params = this.params;
   this.Tbranches = this.svg.append("g").selectAll('.branch')
-    .data(this.nodes.filter(function(d){return d.branch[1]!=="";}))
+    .data(this.nodes.filter(function(d){return !d.terminal;}))
     .enter()
     .append("path")
     .attr("class", "branch T")
@@ -822,7 +834,8 @@ PhyloTree.prototype.updateDistance = function(attr,dt){
   this.setLayout(this.layout);
   this.mapToScreen();
   this.updateGeometry(dt);
-  if (this.grid) this.addGrid(this.layout);
+  if (this.grid && this.layout!=="unrooted") {this.addGrid(this.layout);}
+  else this.hideGrid()
   this.svg.selectAll(".regression").remove();
   if (this.layout==="clock") this.drawRegression();
 };
@@ -838,7 +851,8 @@ PhyloTree.prototype.updateLayout = function(layout,dt){
     this.setLayout(layout);
     this.mapToScreen();
     this.updateGeometryFade(dt);
-    if (this.grid) this.addGrid(layout);
+    if (this.grid && this.layout!=="unrooted") this.addGrid(layout);
+    else this.hideGrid()
     this.svg.selectAll(".regression").remove();
     if (layout==="clock") this.drawRegression();
 };
