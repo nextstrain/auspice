@@ -15,15 +15,30 @@ import * as globalStyles from "../../globalStyles";
 import InfoPanel from "./infoPanel";
 import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
+import { getGenotype } from "../../util/getGenotype";
+import { arrayInEquality,
+         branchThickness,
+         tipRadii,
+         tipVisibility,
+         nodeColor} from "../../util/treeHelpers";
+import _ from "lodash";
 
-const arrayInEquality = function(a,b) {
-  if (a&&b){
-    const eq = a.map((d,i)=>d!==b[i]);
-    return eq.some((d)=>d);
-  }else{
-    return true;
-  }
-};
+/* UNDERSTANDING THIS CODE:
+the "tree" object passed in from redux (this.props.tree)
+contains the nodes etc used to build the PhyloTree
+object called tree (!). Those nodes are in a 1-1 ordering, and
+there are actually backlinks from the phylotree tree
+(i.e. tree.nodes[i].n links to props.tree.nodes[i])
+
+I (james) don't want to put phylotree into redux
+as it's not simply data
+
+the state of this component contains a few flags and
+hovered / clicked, which reference the nodes currently in that state
+they're not in redux as (1) its easier and (2) all components that
+need this information are children of this component
+(it would probably be a good idea to move them to redux)
+*/
 
 /*
  * TreeView creates a (now responsive!) SVG & scales according to layout
@@ -32,118 +47,101 @@ const arrayInEquality = function(a,b) {
 */
 @connect((state) => {
   return {
-    tree: state.tree.tree,
+    tree: state.tree,
     metadata: state.metadata.metadata,
+    colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
     layout: state.controls.layout,
-    distanceMeasure: state.controls.distanceMeasure
+    distanceMeasure: state.controls.distanceMeasure,
+    sequences: state.sequences,
+    selectedLegendItem: state.controls.selectedLegendItem,
+    colorScale: state.controls.colorScale,
+    datasetGuid: state.tree.datasetGuid,
+    dateMin: state.controls.dateMin,
+    dateMax: state.controls.dateMax
   };
 })
 class TreeView extends React.Component {
   constructor(props) {
     super(props);
-
     this.Viewer = null;
-
     this.state = {
-      okToDraw: false,
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
       clicked: null,
-      hover: null
+      hover: null,
+      tree: null,
+      shouldReRender: false // start off this way I guess
     };
   }
-  componentWillMount() {
-    if (this.state.currentDatasetGuid !== this.props.datasetGuid) {
-      this.setState({
-        okToDraw: true,
-        currentDatasetGuid: this.props.datasetGuid,
-        width: globals.width,
-      });
-    }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
   }
+  static propTypes = {
+  }
+
   componentWillReceiveProps(nextProps) {
-
     /*
-      previously in componentDidMount, but we don't mount immediately anymore -
-      need to wait for browserDimensions
+    This both creates the tree (when it's loaded into redux) and
+    works out what to update, based upon changes to redux.control
+
+    NB logic was previously in CDM, but now we wait for browserDimensions
     */
-    const good_tree = (this.state.tree && (nextProps.datasetGuid === this.props.datasetGuid));
-    if (this.Viewer && !good_tree) {
-      this.Viewer.fitToViewer();
-      const tree = (this.state.tree)
-        ? this.state.tree
-        : this.makeTree(this.props.nodes, this.props.layout, this.props.distance);
-      this.setState({tree: tree});
+    let tree = this.state.tree
+    /* should we create a new tree (dataset change) */
+
+    if ((nextProps.datasetGuid !== this.props.datasetGuid && nextProps.tree.nodes) ||
+        (tree === null && nextProps.datasetGuid && nextProps.tree.nodes !== null)) {
+      tree = this.makeTree(nextProps.tree.nodes)
+      // console.log("made tree", tree)
+      this.setState({tree, shouldReRender: true});
+      if (this.Viewer) {
+        this.Viewer.fitToViewer();
+      }
     }
 
-    /* Do we have a tree to draw? if yes, check whether it needs to be redrawn */
-    const tree = good_tree
-      ? this.state.tree
-      : this.makeTree(nextProps.nodes, this.props.layout, this.props.distance);
-
-    /* if we don't have a dataset or nodes, don't draw */
-    if (!(nextProps.datasetGuid && nextProps.nodes)) {
-      this.setState({okToDraw: false});
-    } else if (
-      /* if the dataset, layout or distance measure has changed, do book keeping & redraw */
-      (nextProps.datasetGuid !== this.props.datasetGuid) ||
-      (nextProps.layout !== this.props.layout) ||
-      (nextProps.distanceMeasure !== this.props.distanceMeasure)
-    ) {
-      this.setState({
-        okToDraw: true,
-        currentDatasetGuid: nextProps.datasetGuid,
-        width: globals.width,
-        tree: tree
-      });
-    }
-
-    /* if we have a tree and we have new props, figure out what we need to update */
+    /* if we have a tree and we have new props, figure out what we need to update...
+    this is imperitive, as opposed to redux-style coding, due to the fact
+    that redrawing the tree is expensive, so we try and do the least amount
+    of work possible.
+    These attributes are stored in redux.tree
+    */
     if (tree) {
+      /* the objects storing the changes to make to the tree */
+      const tipAttrToUpdate = {};
+      const tipStyleToUpdate = {};
+      const branchAttrToUpdate = {};
+      const branchStyleToUpdate = {};
 
-      /* update tips */
-      let attrToUpdate = {};
-      let styleToUpdate = {};
-
-      /* tip color has changed */
-      if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
-        styleToUpdate['fill'] = nextProps.nodeColor.map((col) => {
+      if (nextProps.tree.tipVisibilityVersion &&
+          this.props.tree.tipVisibilityVersion !== nextProps.tree.tipVisibilityVersion) {
+        tipStyleToUpdate["visibility"] = nextProps.tree.tipVisibility;
+      }
+      if (nextProps.tree.tipRadiiVersion &&
+          this.props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion) {
+        tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
+      }
+      if (nextProps.tree.nodeColorsVersion &&
+          this.props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion) {
+        tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
         });
-        styleToUpdate['stroke'] = nextProps.nodeColor;
-      }
-      /* tip radius has changed */
-      if (nextProps.tipRadii && arrayInEquality(nextProps.tipRadii, this.props.tipRadii)) {
-        attrToUpdate['r'] = nextProps.tipRadii;
-      }
-      /* tip visibility has changed, for instance because of date slider */
-      if (nextProps.tipVisibility && arrayInEquality(nextProps.tipVisibility, this.props.tipVisibility)) {
-        // console.log("updateVisibility");
-        styleToUpdate['visibility'] = nextProps.tipVisibility;
-      }
-      /* implement style changes */
-      if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
-        tree.updateMultipleArray(".tip", attrToUpdate, styleToUpdate, fastTransitionDuration);
-      }
-
-      /* update branches */
-      attrToUpdate = {};
-      styleToUpdate = {};
-
-      /* branch color has changed */
-      if (nextProps.nodeColor && arrayInEquality(nextProps.nodeColor, this.props.nodeColor)) {
-        styleToUpdate['stroke'] = nextProps.nodeColor.map((col) => {
-          var modCol = d3.interpolateRgb(col, "#BBB")(0.6);
-        	return d3.rgb(modCol).toString();
+        tipStyleToUpdate["stroke"] = nextProps.tree.nodeColors;
+        branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col) => {
+          return d3.rgb(d3.interpolateRgb(col, "#BBB")(0.6)).toString();
         });
       }
-      /* branch stroke width has changed */
-      if (nextProps.branchThickness && arrayInEquality(nextProps.branchThickness, this.props.branchThickness)) {
-        styleToUpdate['stroke-width'] = nextProps.branchThickness;
+      /* branch thicknesses should also be conditioned like the others, but
+      for some reason this doesn't work. To investigate! */
+      if (this.props.tree.branchThickness) {
+        branchStyleToUpdate["stroke-width"] = this.props.tree.branchThickness;
       }
+
       /* implement style changes */
-      if (Object.keys(attrToUpdate).length || Object.keys(styleToUpdate).length) {
-        tree.updateMultipleArray(".branch", attrToUpdate, styleToUpdate, fastTransitionDuration);
+      if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
+        tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, fastTransitionDuration);
+      }
+      if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
+        tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, fastTransitionDuration);
       }
 
       /* swap layouts */
@@ -156,8 +154,13 @@ class TreeView extends React.Component {
       }
     }
   }
-  componentWillUpdate(nextProps, nextState) {
-    /* reconcile hover and click selections in tree */
+
+  shouldComponentUpdate(nextProps, nextState) {
+    /* reconcile hover and click selections in tree
+    used to be in componentWillReceiveProps, however
+    by having it here we both get access to nextState and can
+    control whether this component re-renders
+    */
     if (
       this.state.tree &&
       (this.state.hovered || this.state.clicked) &&
@@ -179,8 +182,7 @@ class TreeView extends React.Component {
           this.state.hovered,
           nextState.hovered,
         );
-      }
-      else if (this.state.clicked && nextState.clicked === null) {
+      } else if (this.state.clicked && nextState.clicked === null) {
         // x clicked or clicked off will give a null value, so reset everything to be safe
         this.state.tree.updateSelectedBranchOrTip(
           this.state.clicked,
@@ -188,15 +190,43 @@ class TreeView extends React.Component {
         )
       }
     }
+    /* we are now in a position to control the rendering to improve performance */
+    if (nextState.shouldReRender) {
+      this.setState({shouldReRender: false});
+      return true;
+    } else if (
+      this.state.tree &&
+      (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
+      this.props.browserDimensions.height !== nextProps.browserDimensions.height ||
+      this.props.sidebar !== nextProps.sidebar)
+    ) {
+      return true;
+    } else if (
+      this.state.hovered !== nextState.hovered ||
+      this.state.clicked !== nextState.clicked
+    ) {
+      return true;
+    }
+    return false;
   }
 
   componentDidUpdate(prevProps, prevState) {
+    /* after a re-render (i.e. perhaps the SVG has changed size) call zoomIntoClade
+    so that the tree rescales to fit the SVG
+    */
     if (
-      this.state.tree && /* tree exists */
-      prevProps.browserDimensions && /* it's not the first render, the listener is registered and width/height passed in */
-      this.props.browserDimensions &&
-      (prevProps.browserDimensions.width !== this.props.browserDimensions.width || /* the browser dimensions have changed */
+      // the tree exists AND
+      this.state.tree &&
+      // it's not the first render (the listener is registered and width/height passed in)  AND
+      prevProps.browserDimensions && this.props.browserDimensions &&
+      // the browser dimensions have changed
+      (prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
       prevProps.browserDimensions.height !== this.props.browserDimensions.height)
+    ) {
+      this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
+    } else if (
+      // the tree exists AND the sidebar has changed
+      this.state.tree && (this.props.sidebar !== prevProps.sidebar)
     ) {
       this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
     }
@@ -236,46 +266,23 @@ class TreeView extends React.Component {
     }
   }
 
+  /* Callbacks used by the tips / branches when hovered / clicked */
+  /* By keeping this out of redux I think it makes things a little faster */
   onTipHover(d) {
     if (!this.state.clicked) {
-      this.setState({
-        hovered: {
-          d,
-          type: ".tip"
-        }
-      });
+      this.setState({hovered: {d, type: ".tip"}});
     }
   }
   onTipClick(d) {
-    // if it's the same, deselect
-    this.setState({
-      clicked: {
-        d,
-        type: ".tip"
-      },
-      hovered: null
-    });
+    this.setState({clicked: {d,type: ".tip"}, hovered: null});
   }
   onBranchHover(d) {
     if (!this.state.clicked) {
-      this.setState({
-        hovered: {
-          d,
-          type: ".branch"
-        }
-      });
+      this.setState({hovered: {d,type: ".branch"}});
     }
   }
   onBranchClick(d) {
-    // console.log('clicked', d)
-    // if it's the same, deselect
-    this.setState({
-      clicked: {
-        d,
-        type: ".branch"
-      },
-      hovered: null
-    });
+    this.setState({clicked: {d, type: ".branch"},hovered: null});
   }
   // mouse out from tip/branch
   onBranchOrTipLeave(){
@@ -286,18 +293,15 @@ class TreeView extends React.Component {
 
   handleIconClick(tool) {
     return () => {
-
       if (tool === "zoom-in") {
         this.Viewer.zoomOnViewerCenter(1.4);
         // console.log('zooming in', this.state.zoom, zoom)
       } else {
         this.Viewer.zoomOnViewerCenter(0.71);
       }
-
       // const viewerX = this.state.width / 2;
       // const viewerY = this.treePlotHeight(this.state.width) / 2;
       // const nextValue = ViewerHelper.zoom(this.state.value, zoom, viewerX, viewerY);
-
       // this.setState({value: nextValue});
     };
   }
@@ -305,19 +309,16 @@ class TreeView extends React.Component {
   // handleZoomEvent(direction) {
   //   return () => {
   //     this.state.value.matrix
-  //
   //     console.log(direction)
   //   }
   // }
-
-  handleChange(value) {
-    // console.log(value)
-  }
-
-  handleClick(event){
-    // console.log('event', event)
-    // console.log('click', event.x, event.y, event.originalEvent);
-  }
+  // handleChange(value) {
+  //   console.log("handleChange not yet implemented", value)
+  // }
+  // handleClick(event){
+  //   console.log('handleClick not yet implemented', event)
+  //   // console.log('click', event.x, event.y, event.originalEvent);
+  // }
 
   infoPanelDismiss() {
     this.setState({clicked: null, hovered: null});
@@ -333,6 +334,12 @@ class TreeView extends React.Component {
       minHeight: 400,
       maxAspectRatio: 1.3
     })
+
+    /* NOTE these props were removed from SVG pan-zoom as they led to functions that did
+    nothing, but they may be useful in the future...
+    onChangeValue={this.handleChange.bind(this)}
+    onClick={this.handleClick.bind(this)}
+    */
 
     return (
       <Card center title="Phylogeny">
@@ -356,9 +363,7 @@ class TreeView extends React.Component {
           detectWheel={false}
           toolbarPosition={"none"}
           detectAutoPan={false}
-          background={"#FFF"}
-          onChangeValue={this.handleChange.bind(this)}
-          onClick={this.handleClick.bind(this)}>
+          background={"#FFF"}>
           <svg style={{pointerEvents: "auto"}}
             width={responsive.width}
             height={responsive.height}
@@ -407,6 +412,7 @@ class TreeView extends React.Component {
       1. set up SVGs
       2. tree will be added on props loading
     */
+    // console.log("treeView render")
     return (
       <span>
         {this.props.browserDimensions ? this.createTreeMarkup() : null}
@@ -414,6 +420,5 @@ class TreeView extends React.Component {
     );
   }
 }
-
 
 export default TreeView;

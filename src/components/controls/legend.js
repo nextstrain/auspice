@@ -10,6 +10,7 @@ import titleCase from "title-case";
 @connect((state) => {
   return {
     colorBy: state.controls.colorBy,
+    colorScale: state.controls.colorScale,
     browserDimensions: state.browserDimensions.browserDimensions
   };
 })
@@ -194,6 +195,8 @@ class Legend extends React.Component {
     };
   }
   render() {
+    // catch the case where we try to render before anythings ready
+    if (!this.props.colorScale) {return (<g/>);}
     const styles = this.getStyles();
     return (
       <svg width = "280" height = {this.getSVGHeight()} style={styles.svg}>

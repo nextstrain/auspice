@@ -1,6 +1,5 @@
 import React from "react";
 import Flex from "../framework/flex";
-import { connect } from "react-redux";
 import SelectLabel from "../framework/select-label";
 import HeaderFont from "../framework/header-font";
 import ToggleBranchLabels from "./toggle-branch-labels";
@@ -13,14 +12,6 @@ import ChooseMetric from "./choose-metric";
 import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 
-const returnStateNeeded = (fullStateTree) => {
-  return {
-    controls: fullStateTree.controls,
-    metadata: fullStateTree.metadata
-  };
-};
-
-@connect(returnStateNeeded)
 class Controls extends React.Component {
   getStyles() {
     return {};
@@ -35,28 +26,30 @@ class Controls extends React.Component {
         style={{
           width: globals.controlsWidth,
           padding: "0px 20px 20px 20px"
-        }}>
+        }}
+      >
 
         <HeaderFont>{"Dataset"}</HeaderFont>
-        <ChooseVirus {...this.props}/>
+        <ChooseVirus/>
 
         <HeaderFont>{"Date Range"}</HeaderFont>
-        <DateRangeInputs {...this.props}/>
+        <DateRangeInputs/>
 
-        <HeaderFont>{"Color By"}</HeaderFont>
-        <ColorBy {...this.props}/>
+        <HeaderFont>{"Color by"}</HeaderFont>
+        <ColorBy/>
 
         <HeaderFont>{"Tree Options"}</HeaderFont>
+
         <SelectLabel text="Layout"/>
-        <ChooseLayout {...this.props}/>
+        <ChooseLayout/>
+  
         <SelectLabel text="Branch Length"/>
-        <ChooseMetric {...this.props}/>
+        <ChooseMetric/>
 
         <HeaderFont>{"Filters"}</HeaderFont>
-        <AllFilters {...this.props} />
+        <AllFilters/>
         <ToggleBranchLabels/>
         <Search/>
-
 
         <HeaderFont style={styles.heading}>{"Map Options"}</HeaderFont>
 
@@ -66,25 +59,3 @@ class Controls extends React.Component {
 }
 
 export default Controls;
-
-// <Button> Reset Filters </Button>
-
-// <div className="d3-tip se"/>
-// <div className="d3-tip e"/>
-// <div className="d3-tip"/>
-// <div id="date-input"></div>
-// <div id="legend-title"></div>
-// <div id="legend"></div>
-// <div id="gt-color"></div>
-// <div id="branchlabels"></div>
-// <div id="region"></div>
-// <div id="search"></div>
-// <div id="straininput"></div>
-// <div id="bp-ac"></div>
-// <div id="bp-input"></div>
-// <div id="searchinputclear"></div>
-// <div id="reset"></div>
-// <div className="freqplot-container"></div>
-// <div className="treeplot-container" id="treeplot-container"></div>
-// <div id="updated"></div>
-// <div id="commit"></div>

@@ -1,15 +1,10 @@
-// React Core
 import React from 'react';
 import ReactDOM from 'react-dom';
-// React Router
-import { Router, Route, Link, IndexRoute, browserHistory } from 'react-router';
-// React Redux
+// import { BrowserRouter, Route, Match, Link, IndexRoute, browserHistory } from 'react-router';
 import { Provider, connect } from 'react-redux';
-// Redux Devtools
-
+import { BrowserRouter, Route } from 'react-router-dom';
+import injectTapEventPlugin from "react-tap-event-plugin";
 import configureStore from "./store";
-
-// controller view
 import App from "./components/app";
 
 const store = configureStore();
@@ -17,25 +12,24 @@ const store = configureStore();
 class Root extends React.Component {
   render() {
     return (
-      <div>
-        <Provider store={store}>
-          <Router history={browserHistory}>
+      <Provider store={store}>
+        <BrowserRouter>
+          <div>
             <Route path="/" component={App}/>
-            <Route path="/:segment1/" component={App}/>
-          </Router>
-        </Provider>
-      </div>
+          </div>
+        </BrowserRouter>
+      </Provider>
     );
   }
 }
 
-// for material ui
-import injectTapEventPlugin from "react-tap-event-plugin";
-
-//Needed for onTouchTap
-//Can go away when react 1.0 release
-//Check this repo:
-//https://github.com/zilverline/react-tap-event-plugin
+/*  to fix iOS's dreaded 300ms tap delay, we need this plugin
+NOTE Facebook is not planning on supporting tap events (#436)
+because browsers are fixing/removing the click delay.
+Unfortunately it will take a lot of time before all mobile
+browsers (including iOS' UIWebView) will and can be updated.
+https://github.com/zilverline/react-tap-event-plugin
+*/
 injectTapEventPlugin();
 
 ReactDOM.render(<Root/>, document.getElementById("root"));

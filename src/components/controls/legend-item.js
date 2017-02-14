@@ -2,7 +2,7 @@ import React from "react";
 import Radium from "radium";
 import titleCase from "title-case";
 import { connect } from "react-redux";
-import { LEGEND_ITEM_MOUSEENTER, LEGEND_ITEM_MOUSELEAVE } from "../../actions/controls";
+import { legendMouseEnterExit } from "../../actions/treeProperties";
 import { dataFont, darkGrey } from "../../globalStyles";
 
 function isNumeric(n) {
@@ -12,14 +12,10 @@ function isNumeric(n) {
 @connect()
 @Radium
 class LegendItem extends React.Component {
-
-  getStyles() {
-    return {
-      base: {
-
-      }
-    };
+  static propTypes = {
+    dispatch: React.PropTypes.func.isRequired
   }
+
   createLabelText(d) {
     // We assume that label text arrives either Properly Formatted or as snake_case or as CamelCase
     let label = "";
@@ -30,26 +26,26 @@ class LegendItem extends React.Component {
     if (isNumeric(d)){
       const val = parseFloat(d);
       const magnitude = Math.ceil(Math.log10(Math.abs(val)+1e-10));
-      label = val.toFixed(5-magnitude);
+      label = val.toFixed(5 - magnitude);
     }
-
     if (this.props.dFreq) {
       label += "\u00D7";
     }
     return label;
   }
+
   render() {
     const label = this.createLabelText(this.props.label);
     return (
       <g
         transform={this.props.transform}
         onMouseEnter={() => {
-          this.props.dispatch({ type: LEGEND_ITEM_MOUSEENTER,
-                                data: this.props.label });
+          this.props.dispatch(legendMouseEnterExit(this.props.label));
         }}
         onMouseLeave={() => {
-          this.props.dispatch({ type: LEGEND_ITEM_MOUSELEAVE });
-        }}>
+          this.props.dispatch(legendMouseEnterExit());
+        }}
+      >
         <rect
           style={{strokeWidth: 2}}
           width={this.props.legendRectSize}
