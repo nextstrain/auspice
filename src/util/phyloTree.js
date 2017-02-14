@@ -326,11 +326,11 @@ PhyloTree.prototype.radialLayout = function() {
   const nTips = this.numberOfTips;
   const offset = this.nodes[0].depth;
   this.nodes.forEach(function(d) {
-    const angle = 2.0 * 0.95 * Math.PI * d.n.yvalue / nTips;
     const angleCBar1 = 2.0 * 0.95 * Math.PI * d.yRange[0] / nTips;
     const angleCBar2 = 2.0 * 0.95 * Math.PI * d.yRange[1] / nTips;
-    d.y = (d.depth - offset) * Math.cos(angle);
-    d.x = (d.depth - offset) * Math.sin(angle);
+    d.angle = 2.0 * 0.95 * Math.PI * d.n.yvalue / nTips;
+    d.y = (d.depth - offset) * Math.cos(d.angle);
+    d.x = (d.depth - offset) * Math.sin(d.angle);
     d.py = d.y * (d.pDepth - offset) / (d.depth - offset + 1e-15);
     d.px = d.x * (d.pDepth - offset) / (d.depth - offset + 1e-15);
     d.yCBarStart = (d.depth - offset) * Math.cos(angleCBar1);
@@ -449,8 +449,9 @@ PhyloTree.prototype.mapToScreen = function(){
         this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])})
         this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])  });
         //this.nodes.forEach(function(d){d.branch =[" M "+d.xBase.toString()+","+d.yBase.toString()+
-        this.nodes.forEach(function(d){
-          d.branch =[" M "+(d.xBase - (0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0)).toString()
+        const stem_offset = this.nodes.map(function(d){return (0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0);});
+        this.nodes.forEach(function(d,i){
+          d.branch =[" M "+(d.xBase - stem_offset[i]).toString()
                        +","+d.yBase.toString()+
                        " L "+d.xTip.toString()+","+d.yTip.toString(),
                        " M "+d.xTip.toString()+","+d.cBarStart.toString()+
@@ -461,16 +462,15 @@ PhyloTree.prototype.mapToScreen = function(){
         }
     } else if (this.layout==="radial"){
         const offset = this.nodes[0].depth;
+        const stem_offset_radial = this.nodes.map(function(d){return (0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0);});
         this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])});
         this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])});
-        this.nodes.forEach(function(d){
-            if (d.terminal){
-                d.branch =[" M "+d.xBase.toString()+" "+d.yBase.toString()+
-                           " L "+d.xTip.toString()+" "+d.yTip.toString(),""];
-            }else{
-                d.branch =[" M "+d.xBase.toString()+" "+d.yBase.toString()+
-                           " L "+d.xTip.toString()+" "+d.yTip.toString(),
-                           " M "+tmp_xScale(d.xCBarStart).toString()+" "+tmp_yScale(d.yCBarStart).toString()+
+        this.nodes.forEach(function(d,i){
+            d.branch =[" M "+(d.xBase-stem_offset_radial[i]*Math.sin(d.angle)).toString()
+                        +" "+(d.yBase-stem_offset_radial[i]*Math.cos(d.angle)).toString()+
+                       " L "+d.xTip.toString()+" "+d.yTip.toString(),""];
+            if (!d.terminal){
+                d.branch[1] =[" M "+tmp_xScale(d.xCBarStart).toString()+" "+tmp_yScale(d.yCBarStart).toString()+
                            " A "+(tmp_xScale(d.depth)-tmp_xScale(offset)).toString()+" "
                              +(tmp_yScale(d.depth)-tmp_yScale(offset)).toString()
                              +" 0 "+(d.smallBigArc?"1 ":"0 ") +" 1 "+
