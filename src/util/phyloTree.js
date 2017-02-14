@@ -442,16 +442,19 @@ PhyloTree.prototype.mapToScreen = function(){
 
     // assign the branches as path to each node for the different layouts
     if (this.layout==="clock" || this.layout==="unrooted"){
-        this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
-                                                 " L "+d.xTip.toString()+","+d.yTip.toString();});
+        this.nodes.forEach(function(d){d.branch =[" M "+d.xBase.toString()+","+d.yBase.toString()+
+                                                 " L "+d.xTip.toString()+","+d.yTip.toString(),""];});
     } else if (this.layout==="rect"){
         const tmpStrokeWidth = this.params.branchStrokeWidth;
-        this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])- 0.5* (d['stroke-width'] || tmpStrokeWidth)})
-        this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])  + 0.5* (d['stroke-width'] || tmpStrokeWidth)});
-        this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
-                                                 " L "+d.xTip.toString()+","+d.yTip.toString()+
-                                                 " M "+d.xTip.toString()+","+d.cBarStart.toString()+
-                                                 " L "+d.xTip.toString()+","+d.cBarEnd.toString();});
+        this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])})
+        this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])  });
+        //this.nodes.forEach(function(d){d.branch =[" M "+d.xBase.toString()+","+d.yBase.toString()+
+        this.nodes.forEach(function(d){
+          d.branch =[" M "+(d.xBase - (0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0)).toString()
+                       +","+d.yBase.toString()+
+                       " L "+d.xTip.toString()+","+d.yTip.toString(),
+                       " M "+d.xTip.toString()+","+d.cBarStart.toString()+
+                       " L "+d.xTip.toString()+","+d.cBarEnd.toString()];});
         if (this.params.confidence){
           this.nodes.forEach(function(d){d.confLine =" M "+d.xConf[0].toString()+","+d.yBase.toString()+
                                                    " L "+d.xConf[1].toString()+","+d.yTip.toString();});
@@ -462,16 +465,16 @@ PhyloTree.prototype.mapToScreen = function(){
         this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])});
         this.nodes.forEach(function(d){
             if (d.terminal){
-                d.branch =" M "+d.xBase.toString()+" "+d.yBase.toString()+
-                          " L "+d.xTip.toString()+" "+d.yTip.toString();
+                d.branch =[" M "+d.xBase.toString()+" "+d.yBase.toString()+
+                           " L "+d.xTip.toString()+" "+d.yTip.toString(),""];
             }else{
-                d.branch =" M "+d.xBase.toString()+" "+d.yBase.toString()+
-                          " L "+d.xTip.toString()+" "+d.yTip.toString() +
-                         " M "+tmp_xScale(d.xCBarStart).toString()+" "+tmp_yScale(d.yCBarStart).toString()+
-                         " A "+(tmp_xScale(d.depth)-tmp_xScale(offset)).toString()+" "
-                         +(tmp_yScale(d.depth)-tmp_yScale(offset)).toString()
-                         +" 0 "+(d.smallBigArc?"1 ":"0 ") +" 1 "+
-                         " "+tmp_xScale(d.xCBarEnd).toString()+","+tmp_yScale(d.yCBarEnd).toString();
+                d.branch =[" M "+d.xBase.toString()+" "+d.yBase.toString()+
+                           " L "+d.xTip.toString()+" "+d.yTip.toString(),
+                           " M "+tmp_xScale(d.xCBarStart).toString()+" "+tmp_yScale(d.yCBarStart).toString()+
+                           " A "+(tmp_xScale(d.depth)-tmp_xScale(offset)).toString()+" "
+                             +(tmp_yScale(d.depth)-tmp_yScale(offset)).toString()
+                             +" 0 "+(d.smallBigArc?"1 ":"0 ") +" 1 "+
+                           " "+tmp_xScale(d.xCBarEnd).toString()+","+tmp_yScale(d.yCBarEnd).toString()];
             }
         });
     }
@@ -720,16 +723,45 @@ PhyloTree.prototype.drawTips = function() {
  */
 PhyloTree.prototype.drawBranches = function() {
   var params = this.params;
-  this.branches = this.svg.append("g").selectAll('.branch')
-    .data(this.nodes)
+  this.Tbranches = this.svg.append("g").selectAll('.branch')
+    .data(this.nodes.filter(function(d){return d.branch[1]!=="";}))
     .enter()
     .append("path")
-    .attr("class", "branch")
+    .attr("class", "branch T")
     .attr("id", function(d) {
       return "branch_" + d.n.clade;
     })
     .attr("d", function(d) {
-      return d.branch;
+      return d.branch[1];
+    })
+    .style("stroke", function(d) {
+      return d.stroke || params.branchStroke;
+    })
+    .style("stroke-width", function(d) {
+      return d['stroke-width'] || params.branchStrokeWidth;
+    })
+    .style("fill", "none")
+    .style("cursor", "pointer")
+    .style("pointer-events", "auto")
+    .on("mouseover", (d) => {
+      this.callbacks.onBranchHover(d)
+    })
+    .on("mouseout", (d) => {
+      this.callbacks.onBranchOrTipLeave()
+    })
+    .on("click", (d) => {
+      this.callbacks.onBranchClick(d)
+    });
+  this.branches = this.svg.append("g").selectAll('.branch')
+    .data(this.nodes)
+    .enter()
+    .append("path")
+    .attr("class", "branch S")
+    .attr("id", function(d) {
+      return "branch_" + d.n.clade;
+    })
+    .attr("d", function(d) {
+      return d.branch[0];
     })
     .style("stroke", function(d) {
       return d.stroke || params.branchStroke;
@@ -848,11 +880,17 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
   const flipBranches = function(tmp_svg) {
     const svg = tmp_svg;
     return function() {
-      svg.selectAll('.branch').filter(function(d) {
+      svg.selectAll('.branch').filter('.S').filter(function(d) {
           return d.update;
         })
         .attr("d", function(d) {
-          return d.branch;
+          return d.branch[0];
+        });
+      svg.selectAll('.branch').filter('.T').filter(function(d) {
+          return d.update;
+        })
+        .attr("d", function(d) {
+          return d.branch[1];
         });
     };
   };
@@ -897,12 +935,19 @@ PhyloTree.prototype.updateGeometry = function(dt) {
       return d.yTip;
     });
 
-  this.svg.selectAll('.branch').filter(function(d) {
+  this.svg.selectAll('.branch').filter('.T').filter(function(d) {
       return d.update;
     })
     .transition().duration(dt)
     .attr("d", function(d) {
-      return d.branch;
+      return d.branch[1];
+    });
+  this.svg.selectAll('.branch').filter('.S').filter(function(d) {
+      return d.update;
+    })
+    .transition().duration(dt)
+    .attr("d", function(d) {
+      return d.branch[0];
     });
 
   this.svg.selectAll('.conf')
