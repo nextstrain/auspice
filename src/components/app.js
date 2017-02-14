@@ -17,9 +17,9 @@ import Map from "./map/map";
 import TreeView from "./tree/treeView";
 import queryString from "query-string";
 import * as globals from "../util/globals";
-import { defaultDateRange, defaultLayout, defaultDistanceMeasure,
-  defaultColorBy, tipRadius, tipRadiusOnLegendMatch, freqScale } from "../util/globals";
 import Sidebar from "react-sidebar";
+import Flex from "./framework/flex";
+import { titleStyles } from "../globalStyles";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   React-Router v4 injects length, action, location, push etc into props,
@@ -129,7 +129,9 @@ class App extends React.Component {
             open={this.state.sidebarDocked}
             handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
           />
-          <Title/>
+          <Flex style={{height: 80}}>
+            <Title style={titleStyles.big}/>
+          </Flex>
           <TreeView
             query={queryString.parse(this.context.router.location.search)}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}

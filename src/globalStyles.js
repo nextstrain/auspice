@@ -54,3 +54,25 @@ export const materialButtonSelected = {
   verticalAlign: "top",
   cursor: "default"
 };
+
+export const titleStyles = {
+  big: {
+    fontFamily: titleFont,
+    fontSize: 76,
+    lineHeight: "76px",
+    letterSpacing: -1.8,
+    marginTop: 20,
+    marginBottom: 10,
+    fontWeight: 300,
+    color: medGrey
+  },
+  small: {
+    fontFamily: headerFont,
+    fontSize: 16,
+    lineHeight: "28px",
+    marginTop: 20,
+    marginBottom: 10,
+    fontWeight: 500,
+    color: medGrey
+  }
+};
