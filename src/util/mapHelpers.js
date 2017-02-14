@@ -44,7 +44,7 @@ export const drawTipsAndTransmissions = (latLongs, colorScale, g) => {
     .append("path") /* append a geodesic path from the leaflet plugin data */
     .attr("d", (d) => { return pathStringGenerator(d.coords) }) /* with the interpolation in the function above pathStringGenerator */
     .attr("fill","none")
-    .attr("stroke", (d) => { return colorScale(d.to); }) /* color path by contry in which the transmission arrived */
+    .attr("stroke", (d) => { return colorScale(d.from); }) /* color path by contry in which the transmission arrived */
     .attr("stroke-width", (d) => { return d.count }) /* scale line by total number of transmissions */
 
   return {
