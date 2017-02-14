@@ -25,7 +25,7 @@ const translateAlong = (path) => {
 
 */
 
-export const drawTipsAndTransmissions = (latLongs, colorScale, g) => {
+export const drawTipsAndTransmissions = (latLongs, colorScale, g, map) => {
 
   const tips = g.selectAll("tips")
     .data(latLongs.tips)
