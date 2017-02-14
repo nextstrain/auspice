@@ -97,14 +97,8 @@ class Map extends React.Component {
       this.state.responsive &&
       !this.state.d3DOMNode
     ) {
-      /* add circles and lines to map, add event listeners for leaflet zooming */
-      const mapSVG = d3.select(this.state.map.getPanes().overlayPane)
-        .append("svg")
-        .attr("width", this.state.responsive.width)
-        .attr("height", this.state.responsive.height);
-      const g = mapSVG.append("g").attr("class", "leaflet-zoom-hide");
-
-      this.setState({d3DOMNode: g})
+      const d3DOMNode = d3.select("#map svg");
+      this.setState({d3DOMNode});
     }
   }
   maybeDrawTipsAndTransmissions() {
@@ -207,7 +201,6 @@ class Map extends React.Component {
       scrollWheelZoom: false,
       maxBounds: bounds,
       minZoom: 2,
-      maxZoom: 9,
       zoomControl: false,
       /* leaflet sleep see https://cliffcloud.github.io/Leaflet.Sleep/#summary */
       // true by default, false if you want a wild map
