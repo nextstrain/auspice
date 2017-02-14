@@ -54,7 +54,7 @@ class Map extends React.Component {
     ) {
       const responsive = computeResponsive({
         horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
-        vertical: 1, /* if we are in single column, full height */
+        vertical: .75, /* if we are in single column, full height */
         browserDimensions: nextProps.browserDimensions,
         sidebar: nextProps.sidebar,
         minHeight: 400,
@@ -64,7 +64,7 @@ class Map extends React.Component {
     } else if (!this.props.browserDimensions && nextProps.browserDimensions) { /* first time */
       const responsive = computeResponsive({
         horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
-        vertical: 1, /* if we are in single column, full height */
+        vertical: .75, /* if we are in single column, full height */
         browserDimensions: nextProps.browserDimensions,
         sidebar: nextProps.sidebar,
         minHeight: 400,
