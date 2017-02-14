@@ -445,8 +445,9 @@ PhyloTree.prototype.mapToScreen = function(){
         this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
                                                  " L "+d.xTip.toString()+","+d.yTip.toString();});
     } else if (this.layout==="rect"){
-        this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])});
-        this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])});
+        const tmpStrokeWidth = this.params.branchStrokeWidth;
+        this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])- 0.5* (d['stroke-width'] || tmpStrokeWidth)})
+        this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])  + 0.5* (d['stroke-width'] || tmpStrokeWidth)});
         this.nodes.forEach(function(d){d.branch =" M "+d.xBase.toString()+","+d.yBase.toString()+
                                                  " L "+d.xTip.toString()+","+d.yTip.toString()+
                                                  " M "+d.xTip.toString()+","+d.cBarStart.toString()+
@@ -708,7 +709,7 @@ PhyloTree.prototype.drawTips = function() {
       return d.stroke || params.tipStroke;
     })
     .style("stroke-width", function(d) {
-      return d.strokeWidth || params.tipStrokeWidth;
+      return d['stroke-width'] || params.tipStrokeWidth;
     })
     .style("cursor", "pointer");
 };
@@ -735,7 +736,7 @@ PhyloTree.prototype.drawBranches = function() {
     })
 		.style("stroke-linecap", "round")
     .style("stroke-width", function(d) {
-      return d.strokeWidth || params.branchStrokeWidth;
+      return d['stroke-width'] || params.branchStrokeWidth;
     })
     .style("fill", "none")
     .style("cursor", "pointer")
@@ -770,7 +771,7 @@ PhyloTree.prototype.drawConfidence = function() {
     .style("opacity", 0.5)
     .style("fill", "none")
     .style("stroke-width", function(d) {
-      return d.strokeWidth*2 || 4;
+      return d['stroke-width']*2 || 4;
     });
 };
 
@@ -926,7 +927,8 @@ PhyloTree.prototype.selectBranch = function(node) {
 PhyloTree.prototype.deSelectBranch = function(node) {
   this.svg.select("#branch_"+node.n.clade)
     .style("stroke-width", function(d) {
-      return "2";
+      console.log(d['stroke-width']);
+      return d['stroke-width'] || "2";
     });
 };
 
