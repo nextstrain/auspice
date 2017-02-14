@@ -1,7 +1,6 @@
 import React from "react";
 import Flex from "../framework/flex";
 import SelectLabel from "../framework/select-label";
-import HeaderFont from "../framework/header-font";
 import ToggleBranchLabels from "./toggle-branch-labels";
 import ColorBy from "./color-by";
 import Search from "./search";
@@ -11,6 +10,13 @@ import ChooseVirus from "./choose-virus";
 import ChooseMetric from "./choose-metric";
 import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
+import { titleStyles } from "../../globalStyles";
+
+const header = (text) => (
+  <span style={titleStyles.small}>
+    {text}
+  </span>
+);
 
 class Controls extends React.Component {
   getStyles() {
@@ -29,29 +35,29 @@ class Controls extends React.Component {
         }}
       >
 
-        <HeaderFont>{"Dataset"}</HeaderFont>
+        {header("Dataset")}
         <ChooseVirus/>
 
-        <HeaderFont>{"Date Range"}</HeaderFont>
+        {header("Date Range")}
         <DateRangeInputs/>
 
-        <HeaderFont>{"Color by"}</HeaderFont>
+        {header("Color By")}
         <ColorBy/>
 
-        <HeaderFont>{"Tree Options"}</HeaderFont>
+        {header("Tree Options")}
 
         <SelectLabel text="Layout"/>
         <ChooseLayout/>
-  
+
         <SelectLabel text="Branch Length"/>
         <ChooseMetric/>
 
-        <HeaderFont>{"Filters"}</HeaderFont>
+        {header("Filters")}
         <AllFilters/>
         <ToggleBranchLabels/>
         <Search/>
 
-        <HeaderFont style={styles.heading}>{"Map Options"}</HeaderFont>
+        {header("Map Options")}
 
       </Flex>
     );
