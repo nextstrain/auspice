@@ -2,6 +2,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
+import TitleBar from "./framework/title-bar";
 
 @connect()
 class Splash extends React.Component {
@@ -11,6 +12,7 @@ class Splash extends React.Component {
   render() {
     return(
       <div>
+        <TitleBar/>
         <h2>
           SPLASH PAGE
         </h2>

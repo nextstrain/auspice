@@ -9,8 +9,6 @@ import App from "./components/app";
 import About from "./components/about";
 import Help from "./components/help";
 import Splash from "./components/splash";
-import TitleBar from "./components/framework/title-bar";
-
 
 const store = configureStore();
 
@@ -20,8 +18,8 @@ class Root extends React.Component {
       <Provider store={store}>
         <BrowserRouter>
           <div>
-            <TitleBar/>
             <Switch>
+              <Route path="/methods" component={About}/>
               <Route path="/about" component={About}/>
               <Route path="/help" component={Help}/>
               <Route path="/zika" component={App}/>

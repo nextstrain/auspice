@@ -34,6 +34,7 @@ class TitleBar extends React.Component {
         height: titleBarHeight,
         justifyContent: "flex-end",
         backgroundColor: "#F8F9F9",
+        marginBottom: 5,
         boxShadow: "2px 2px 4px 1px rgba(215,215,215,0.85)" // from card
       },
       link: {
@@ -64,11 +65,13 @@ class TitleBar extends React.Component {
     return (
       <div>
         <Flex style={styles.main}>
-          <Title style={styles.title}/>
+          <Link style={styles.link} to="/">
+            <Title style={styles.title}/>
+          </Link>
           {dataName}
           <div style={{flex: 2 }}/>
-          <Link style={styles.link} to="/">Splash</Link>
           <Link style={styles.link} to="/about">About</Link>
+          <Link style={styles.link} to="/methods">Methods</Link>
           <Link style={styles.link} to="/help">Help</Link>
           <div style={styles.alerts}>Alerts</div>
         </Flex>

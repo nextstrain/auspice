@@ -20,6 +20,7 @@ import * as globals from "../util/globals";
 import Sidebar from "react-sidebar";
 import Flex from "./framework/flex";
 import { titleStyles } from "../globalStyles";
+import TitleBar from "./framework/title-bar";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   React-Router v4 injects length, action, location, push etc into props,
@@ -124,16 +125,13 @@ class App extends React.Component {
         }
         open={this.state.sidebarOpen}
         docked={this.state.sidebarDocked}
-        styles={{root: {top: globals.titleBarHeight}}}
         onSetOpen={(a) => {this.setState({sidebarOpen: a});}}>
         <Background>
+          <TitleBar/>
           <ToggleSidebarTab
             open={this.state.sidebarDocked}
             handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
           />
-          <Flex style={{height: 80}}>
-            <Title style={titleStyles.big}/>
-          </Flex>
           <TreeView
             query={queryString.parse(this.context.router.location.search)}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
