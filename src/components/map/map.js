@@ -118,6 +118,7 @@ class Map extends React.Component {
         latLongs,
         this.props.colorScale,
         this.state.d3DOMNode,
+        this.state.map,
       );
       // this.state.map.on("viewreset", this.respondToLeafletEvent.bind(this));
       this.state.map.on("moveend", this.respondToLeafletEvent.bind(this));
@@ -283,9 +284,7 @@ class Map extends React.Component {
       window.requestAnimationFrame(step);
   }
   render() {
-    console.log('map sees', this.state)
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
-
     return (
       <Card center title="Transmissions">
         {this.props.browserDimensions ? this.createMapDiv() : "Loading"}
