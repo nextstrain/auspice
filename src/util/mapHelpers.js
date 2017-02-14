@@ -47,6 +47,28 @@ export const drawTipsAndTransmissions = (latLongs, colorScale, g, map) => {
     .attr("stroke", (d) => { return colorScale(d.from); }) /* color path by contry in which the transmission arrived */
     .attr("stroke-width", (d) => { return d.count }) /* scale line by total number of transmissions */
 
+  /* this will need to be scaled if transmissions is high */
+  // const arrowSizeMultiplier = value > 1 ? value * 2 : 0;
+
+  /* this decorator adds arrows to the lines. */
+  console.log(latLongs)
+  latLongs.transmissions.forEach((transmission) => {
+    const arrows = L.polylineDecorator(transmission.rawGeodesic._latlngs[0], {
+      patterns: [{
+        offset: 25,
+        repeat: 50,
+        symbol: L.Symbol.arrowHead({
+          pixelSize: 14 /*+ arrowSizeMultiplier*/,
+          pathOptions: {
+            fillOpacity: .5,
+            color: colorScale(transmission.from),
+            weight: 0
+          }
+        })
+      }]
+    }).addTo(map)
+  });
+
   return {
     tips,
     transmissions
