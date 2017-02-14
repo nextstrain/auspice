@@ -116,6 +116,7 @@ class App extends React.Component {
   }
 
   render() {
+    /* there must be a better way to accomodate header. See https://github.com/balloob/react-sidebar/issues/23 */
     return (
       <Sidebar
         sidebar={
@@ -123,6 +124,7 @@ class App extends React.Component {
         }
         open={this.state.sidebarOpen}
         docked={this.state.sidebarDocked}
+        styles={{root: {top: globals.titleBarHeight}}}
         onSetOpen={(a) => {this.setState({sidebarOpen: a});}}>
         <Background>
           <ToggleSidebarTab

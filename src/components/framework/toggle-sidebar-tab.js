@@ -1,5 +1,6 @@
 import React from "react";
 import {brandColor} from "../../globalStyles";
+import { titleBarHeight } from "../../util/globals";
 
 const ToggleSidebarTab = ({open, handler}) => {
 
@@ -12,7 +13,7 @@ const ToggleSidebarTab = ({open, handler}) => {
         width: 15,
         height: 55,
         position: "fixed",
-        top: 5,
+        top: titleBarHeight + 5,
         zIndex: 1001,
         backgroundColor: brandColor,
         cursor: "pointer"

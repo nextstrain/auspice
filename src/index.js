@@ -1,11 +1,16 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-// import { BrowserRouter, Route, Match, Link, IndexRoute, browserHistory } from 'react-router';
-import { Provider, connect } from 'react-redux';
-import { BrowserRouter, Route } from 'react-router-dom';
+/*eslint-env browser*/
+import React from "react";
+import ReactDOM from "react-dom";
+import { Provider } from "react-redux";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
 import injectTapEventPlugin from "react-tap-event-plugin";
 import configureStore from "./store";
 import App from "./components/app";
+import About from "./components/about";
+import Help from "./components/help";
+import Splash from "./components/splash";
+import TitleBar from "./components/framework/title-bar";
+
 
 const store = configureStore();
 
@@ -15,7 +20,15 @@ class Root extends React.Component {
       <Provider store={store}>
         <BrowserRouter>
           <div>
-            <Route path="/" component={App}/>
+            <TitleBar/>
+            <Switch>
+              <Route path="/about" component={About}/>
+              <Route path="/help" component={Help}/>
+              <Route path="/zika" component={App}/>
+              <Route path="/ebola" component={App}/>
+              <Route exact path="/flu*" render={() => window.location.assign("http://nextflu.org/")}/>
+              <Route path="*" component={Splash}/>
+            </Switch>
           </div>
         </BrowserRouter>
       </Provider>
