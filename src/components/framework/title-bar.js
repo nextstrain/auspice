@@ -1,7 +1,7 @@
 import React from "react";
 import Flex from "./flex";
 import { titleColors, titleBarHeight } from "../../util/globals";
-import { titleFont, darkGrey, medGrey, lightGrey } from "../../globalStyles";
+import { titleFont, darkGrey, medGrey, lightGrey, brandColor } from "../../globalStyles";
 import Radium from "radium";
 import Title from "./title";
 import { Link } from "react-router-dom";
@@ -33,14 +33,14 @@ class TitleBar extends React.Component {
       main: {
         height: titleBarHeight,
         justifyContent: "flex-end",
-        backgroundColor: "#F8F9F9",
+        backgroundColor: "#e5e6e6",
         marginBottom: 5,
-        boxShadow: "2px 2px 4px 1px rgba(215,215,215,0.85)" // from card
+        boxShadow: "0px -1px 1px 1px rgba(215,215,215,0.85) inset" // from card
       },
       link: {
         alignSelf: "center",
         padding: "7px",
-        color: "#2980B9",
+        color: brandColor,
         textDecoration: "none",
         cursor: "pointer"
       },
@@ -48,7 +48,7 @@ class TitleBar extends React.Component {
         textAlign: "center",
         verticalAlign: "middle",
         width: 70,
-        color: "#E74C3C"
+        color: brandColor
       },
       dataName: {
         textAlign: "center",
