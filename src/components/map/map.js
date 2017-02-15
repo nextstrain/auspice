@@ -9,15 +9,15 @@ import {drawTipsAndTransmissions, updateOnMoveEnd} from "../../util/mapHelpers";
 import * as globals from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import getLatLongs from "../../util/mapHelpersLatLong";
-import {
-  MAP_ANIMATION_TICK,
-  MAP_ANIMATION_END
-} from "../../actions";
+// import {
+//   MAP_ANIMATION_TICK,
+//   MAP_ANIMATION_END
+// } from "../../actions";
 
 @connect((state) => {
   return {
     tree: state.tree.tree,
-    nodes: state.tree.nodes
+    nodes: state.tree.nodes,
     metadata: state.metadata.metadata,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorScale: state.controls.colorScale,
@@ -233,6 +233,7 @@ class Map extends React.Component {
     this.setState({map});
   }
   createMapDiv() {
+    // onClick={this.handleAnimationPlayClicked.bind(this) }
     return (
       <div style={{position: "relative"}}>
         <button style={{
@@ -247,7 +248,7 @@ class Map extends React.Component {
             fontWeight: 700,
             color: "white"
           }}
-          onClick={this.handleAnimationPlayClicked.bind(this)}>
+          >
           Play
         </button>
         <div style={{
@@ -258,36 +259,36 @@ class Map extends React.Component {
       </div>
     )
   }
-  handleAnimationPlayClicked() {
-    /******************************************
-    * ANIMATE MAP (AND THAT LINE ON TREE)
-    *****************************************/
-    this.animateMap();
-  }
-  animateMap() {
-    let start = null;
-
-      const step = (timestamp) => {
-        if (!start) start = timestamp;
-
-        let progress = timestamp - start;
-
-        this.props.dispatch({
-          type: MAP_ANIMATION_TICK,
-          data: {
-            progress
-          }
-        })
-
-        if (progress < globals.mapAnimationDurationInMilliseconds) {
-          window.requestAnimationFrame(step);
-        } else {
-          this.props.dispatch({ type: MAP_ANIMATION_END })
-        }
-      }
-
-      window.requestAnimationFrame(step);
-  }
+  // handleAnimationPlayClicked() {
+  //   /******************************************
+  //   * ANIMATE MAP (AND THAT LINE ON TREE)
+  //   *****************************************/
+  //   this.animateMap();
+  // }
+  // animateMap() {
+  //   let start = null;
+  //
+  //     const step = (timestamp) => {
+  //       if (!start) start = timestamp;
+  //
+  //       let progress = timestamp - start;
+  //
+  //       this.props.dispatch({
+  //         type: MAP_ANIMATION_TICK,
+  //         data: {
+  //           progress
+  //         }
+  //       })
+  //
+  //       if (progress < globals.mapAnimationDurationInMilliseconds) {
+  //         window.requestAnimationFrame(step);
+  //       } else {
+  //         this.props.dispatch({ type: MAP_ANIMATION_END })
+  //       }
+  //     }
+  //
+  //     window.requestAnimationFrame(step);
+  // }
   render() {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (

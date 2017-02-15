@@ -16,7 +16,7 @@ const rootReducer = combineReducers({
   controls,
   entropy,
   browserDimensions,
-  map
+  // map
 });
 
 export default rootReducer;
