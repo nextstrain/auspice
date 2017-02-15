@@ -1,9 +1,9 @@
 var path = require('path');
 var webpack = require('webpack');
 
-let commitHash = require('child_process')
-  .execSync('git rev-parse --short HEAD')
-  .toString();
+// let commitHash = require('child_process')
+//   .execSync('git rev-parse --short HEAD')
+//   .toString();
 
 module.exports = {
   devtool: ['eval','sourcemap'],
@@ -24,9 +24,9 @@ module.exports = {
         "NODE_ENV": JSON.stringify("dev")
       }
     }),
-    new webpack.DefinePlugin({
-      __COMMIT_HASH__: JSON.stringify(commitHash)
-    }),
+    // new webpack.DefinePlugin({
+    //   __COMMIT_HASH__: JSON.stringify(commitHash)
+    // }),
     new webpack.NoErrorsPlugin()
   ],
   module: {

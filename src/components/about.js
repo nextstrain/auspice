@@ -43,8 +43,10 @@ const builtByText = (
     and {link("http://bedford.io/team/james-hadfield/", "James Hadfield")}.
     <p/>
     All {link("github.com/nextstrain/auspice", "source code")} is freely available under the terms of the {link("http://github.com/blab/nextflu/blob/master/LICENSE.txt", "GNU Affero General Public License")}.
+    {/*
     <p/>
     Auspice commit {__COMMIT_HASH__}
+    */}
   </g>
 );
 

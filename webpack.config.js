@@ -1,9 +1,9 @@
 var path = require("path");
 var webpack = require("webpack");
 
-let commitHash = require('child_process')
-  .execSync('git rev-parse --short HEAD')
-  .toString();
+// let commitHash = require('child_process')
+//   .execSync('git rev-parse --short HEAD')
+//   .toString();
 
 module.exports = {
   // devtool: "source-map",
@@ -22,9 +22,9 @@ module.exports = {
         "NODE_ENV": JSON.stringify("production")
       }
     }),
-    new webpack.DefinePlugin({
-      __COMMIT_HASH__: JSON.stringify(commitHash)
-    }),
+    // new webpack.DefinePlugin({
+    //   __COMMIT_HASH__: JSON.stringify(commitHash)
+    // }),
     new webpack.optimize.UglifyJsPlugin({
       compressor: {
         warnings: false
