@@ -8,7 +8,7 @@ export const lighterGrey = "rgb(200, 200, 200)";
 export const darkGrey = "#333";
 export const medGrey = "#888";
 export const lightGrey = "#CCC";
-export const brandColor = "#5DA8A3";
+export const brandColor = "#5097BA"; // #5DA8A3 
 
 // http://stackoverflow.com/questions/1895476/how-to-style-a-select-dropdown-with-css-only-without-javascript
 export const select = {
@@ -111,7 +111,7 @@ export const textStyles = {
     borderBottom: `1px solid ${lightGrey}`
   },
   link: {
-    color: "#2980B9",
+    color: brandColor,
     textDecoration: "none",
     cursor: "pointer"
   }

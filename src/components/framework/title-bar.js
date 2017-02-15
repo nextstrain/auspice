@@ -1,7 +1,7 @@
 import React from "react";
 import Flex from "./flex";
 import { titleColors, titleBarHeight } from "../../util/globals";
-import { titleFont, darkGrey, medGrey, lightGrey } from "../../globalStyles";
+import { titleFont, darkGrey, medGrey, lightGrey, brandColor } from "../../globalStyles";
 import Radium from "radium";
 import Title from "./title";
 import { Link } from "react-router-dom";
@@ -28,19 +28,19 @@ class TitleBar extends React.Component {
         marginBottom: 2,
         fontWeight: 500,
         color: medGrey,
-        padding: "20px"
+        padding: "8px"
       },
       main: {
         height: titleBarHeight,
-        justifyContent: "flex-end",
-        backgroundColor: "#F8F9F9",
+        justifyContent: "space-between",
+        backgroundColor: "#eaebeb",
         marginBottom: 5,
-        boxShadow: "2px 2px 4px 1px rgba(215,215,215,0.85)" // from card
+        boxShadow: "0px -1px 1px 1px rgba(215,215,215,0.85) inset" // from card
       },
       link: {
         alignSelf: "center",
-        padding: "7px",
-        color: "#2980B9",
+        padding: "8px",
+        color: brandColor,
         textDecoration: "none",
         cursor: "pointer"
       },
@@ -48,7 +48,7 @@ class TitleBar extends React.Component {
         textAlign: "center",
         verticalAlign: "middle",
         width: 70,
-        color: "#E74C3C"
+        color: brandColor
       },
       dataName: {
         textAlign: "center",
@@ -65,15 +65,16 @@ class TitleBar extends React.Component {
     return (
       <div>
         <Flex style={styles.main}>
+          <div style={{flex: 1 }}/>
           <Link style={styles.link} to="/">
             <Title style={styles.title}/>
           </Link>
           {dataName}
-          <div style={{flex: 2 }}/>
+          <div style={{flex: 40 }}/>
           <Link style={styles.link} to="/about">About</Link>
           <Link style={styles.link} to="/methods">Methods</Link>
           <Link style={styles.link} to="/help">Help</Link>
-          <div style={styles.alerts}>Alerts</div>
+          <div style={{flex: 1 }}/>
         </Flex>
       </div>
     );
