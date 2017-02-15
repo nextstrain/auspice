@@ -76,3 +76,43 @@ export const titleStyles = {
     color: medGrey
   }
 };
+
+export const textStyles = {
+  main: {
+    marginTop: 30
+  },
+  title: {
+    fontSize: 28
+  },
+  headers: {
+    fontFamily: headerFont,
+    fontSize: 16,
+    lineHeight: "28px",
+    marginTop: 20,
+    marginBottom: 10,
+    fontWeight: 300,
+    color: medGrey
+  },
+  text: {
+    fontFamily: dataFont,
+    fontSize: 14,
+    marginTop: 5,
+    marginBottom: 5,
+    fontWeight: 100,
+    color: medGrey
+  },
+  logos: {
+    marginTop: 20,
+    justifyContent: "space-around"
+  },
+  line: {
+    marginTop: 30,
+    marginBottom: 30,
+    borderBottom: `1px solid ${lightGrey}`
+  },
+  link: {
+    color: "#2980B9",
+    textDecoration: "none",
+    cursor: "pointer"
+  }
+};
