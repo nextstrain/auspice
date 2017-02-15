@@ -1,6 +1,6 @@
 import React from "react";
 import Radium from "radium";
-import { TOGGLE_BRANCH_LABELS } from "../../actions/controls";
+import { TOGGLE_BRANCH_LABELS } from "../../actions/types";
 import {dataFont, darkGrey} from "../../globalStyles";
 
 @Radium

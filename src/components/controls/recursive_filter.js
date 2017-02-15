@@ -2,6 +2,8 @@ import React from "react";
 import Radium from "radium";
 import Select from "react-select";
 import { filterAbbrRev, filterAbbrFwd, controlsWidth } from "../../util/globals";
+import { modifyURLquery } from "../../util/urlHelpers";
+
 /*
  * implements a selector that
  * (i) knows about the upstream choices and
@@ -9,32 +11,40 @@ import { filterAbbrRev, filterAbbrFwd, controlsWidth } from "../../util/globals"
  */
 @Radium
 class RecursiveFilter extends React.Component {
-
-  makeQueryString(filters, fields){
-    // the first item specifies the filter type (not really necessary)
-    const tmp_filter = [];
-    // all other filters are appended as key.value separated by dashes
-    for (let ii = 0; ii < fields.length; ii += 1) {
-      if (filters[ii] && filters[ii]) {
-        tmp_filter.push(fields[ii] + "." + filters[ii]);
-      }
-    }
-    return tmp_filter.join("-");
+  static propTypes = {
+    filterTree: React.PropTypes.array.isRequired,
+    filterType: React.PropTypes.string.isRequired,
+    shortKey: React.PropTypes.string.isRequired,
+    counts: React.PropTypes.array.isRequired,
+    fields: React.PropTypes.array.isRequired,
+    options: React.PropTypes.array.isRequired
   }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
+  // // TODO this is broken!
+  // makeQueryString(filters, fields){
+  //   // the first item specifies the filter type (not really necessary)
+  //   const tmp_filter = [];
+  //   // all other filters are appended as key.value separated by dashes
+  //   for (let ii = 0; ii < fields.length; ii += 1) {
+  //     if (filters[ii] && filters[ii]) {
+  //       tmp_filter.push(fields[ii] + "." + filters[ii]);
+  //     }
+  //   }
+  //   return tmp_filter.join("-");
+  // }
 
   setFilterQuery(filters, fields) {
     const ft = this.props.filterType;
     const filterQ = {};
-    filterQ[this.props.filterType] = this.makeQueryString(filters, fields);
-    // push new query into changeRoute
-    const newQuery = Object.assign({}, this.props.location.query, filterQ);
-    this.props.changeRoute(this.props.location.pathname, newQuery);
+    // console.log("in r-filter. setting", this.props.filterType, "to", this.makeQueryString(filters, fields))
+    // filterQ[this.props.filterType] = this.makeQueryString(filters, fields);
+    filterQ[this.props.shortKey] = filters;
+    modifyURLquery(this.context.router, filterQ, false)
   }
 
   render() {
-    // the selector below resets the path by router.push({pathname:new_path})
-    // the currently selected option is passed down as this.props.selected
-    // 9/19/2016: https://facebook.github.io/react/docs/forms.html#why-select-value
     const options = [];
     for (let i = 0; i < this.props.options.length; i++) {
       options.push({

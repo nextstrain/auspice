@@ -17,9 +17,11 @@ import {
 @connect((state) => {
   return {
     tree: state.tree.tree,
+    nodes: state.tree.nodes
     metadata: state.metadata.metadata,
-    colorBy: state.controls.colorBy,
     browserDimensions: state.browserDimensions.browserDimensions,
+    colorScale: state.controls.colorScale,
+    colorBy: state.controls.colorBy,
     map: state.map
   };
 })
@@ -34,6 +36,9 @@ class Map extends React.Component {
       datasetGuid: null,
       responsive: null,
     };
+  }
+  static propTypes = {
+    colorScale: React.PropTypes.object.isRequired
   }
   componentWillMount() {
     setupLeaflet(); /* this sets up window.L */

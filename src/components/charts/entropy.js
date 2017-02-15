@@ -8,7 +8,8 @@ import Card from "../framework/card";
 import d3 from "d3";
 import { parseGenotype } from "../../util/getGenotype";
 import computeResponsive from "../../util/computeResponsive";
-import { changeColorBy } from "../../actions/controls";
+import { changeColorBy } from "../../actions/colors";
+import { modifyURLquery } from "../../util/urlHelpers";
 import { dataFont, darkGrey } from "../../globalStyles";
 
 @connect(state => {
@@ -19,13 +20,16 @@ import { dataFont, darkGrey } from "../../globalStyles";
 })
 @Radium
 class Entropy extends React.Component {
-
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
   componentWillUpdate(prevProps) {
     /* check here to see if this.props.browserDimensions has changed and rerender */
   }
 
   setColorByGenotype(colorBy) {
-    this.props.dispatch(changeColorBy(colorBy, this.props.router))
+    this.props.dispatch(changeColorBy(colorBy))
+    modifyURLquery(this.context.router, {c: colorBy}, true);
   }
 
   drawEntropy() {

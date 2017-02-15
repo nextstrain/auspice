@@ -5,8 +5,8 @@ import UnrootedTreeLayout from "../framework/svg-tree-layout-unrooted";
 import ClockTreeLayout from "../framework/svg-tree-layout-clock";
 import {materialButton, materialButtonSelected, medGrey} from "../../globalStyles";
 import { connect } from "react-redux";
-import { CHANGE_LAYOUT } from "../../actions/controls";
-
+import { CHANGE_LAYOUT } from "../../actions/types";
+import { modifyURLquery } from "../../util/urlHelpers";
 
 @connect((state) => {
   return {
@@ -14,6 +14,13 @@ import { CHANGE_LAYOUT } from "../../actions/controls";
   };
 })
 class ChooseLayout extends React.Component {
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
+  static propTypes = {
+    layout: React.PropTypes.string.isRequired,
+    dispatch: React.PropTypes.func.isRequired
+  }
   getStyles() {
     return {
       container: {
@@ -27,72 +34,66 @@ class ChooseLayout extends React.Component {
     };
   }
 
-  setLayoutQueryParam(title) {
-    const location = this.props.router.getCurrentLocation();
-    const newQuery = Object.assign({}, location.query, {l: title});
-    this.props.router.push({
-      pathname: location.pathname,
-      query: newQuery
-    });
-  }
-
   render() {
     const styles = this.getStyles();
     const selected = this.props.layout;
     return (
       <div style={styles.container}>
         <div style={{margin: 5}}>
-          <RectangularTreeLayout width={25} stroke={medGrey}/>
-          <button
-            key={1}
-            style={selected === "rect" ? materialButtonSelected : materialButton}
-            onClick={() => {
-              this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });
-              this.setLayoutQueryParam("rect");
-            }}>
+        <RectangularTreeLayout width={25} stroke={medGrey}/>
+        <button
+          key={1}
+          style={selected === "rect" ? materialButtonSelected : materialButton}
+          onClick={() => {
+            this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });
+            modifyURLquery(this.context.router, {l: "rect"}, true);
+          }}
+        >
           <span style={styles.title}> {"rectangular"} </span>
-          </button>
+        </button>
         </div>
         <div style={{margin: 5}}>
-          <RadialTreeLayout width={25} stroke={medGrey}/>
-          <button
-            key={2}
-            style={selected === "radial" ? materialButtonSelected : materialButton}
-            onClick={() => {
-              this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });
-              this.setLayoutQueryParam("radial");
-            }}>
-            <span style={styles.title}> {"radial"} </span>
-          </button>
+        <RadialTreeLayout width={25} stroke={medGrey}/>
+        <button
+          key={2}
+          style={selected === "radial" ? materialButtonSelected : materialButton}
+          onClick={() => {
+            this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });
+            modifyURLquery(this.context.router, {l: "radial"}, true);
+          }}
+        >
+          <span style={styles.title}> {"radial"} </span>
+        </button>
         </div>
         <div style={{margin: 5}}>
-          <UnrootedTreeLayout width={25} stroke={medGrey}/>
-          <button
-            key={3}
-            style={selected === "unrooted" ? materialButtonSelected : materialButton}
-            onClick={() => {
-              this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });
-              this.setLayoutQueryParam("unrooted");
-            }}>
-            <span style={styles.title}> {"unrooted"} </span>
-          </button>
+        <UnrootedTreeLayout width={25} stroke={medGrey}/>
+        <button
+          key={3}
+          style={selected === "unrooted" ? materialButtonSelected : materialButton}
+          onClick={() => {
+            this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });
+            modifyURLquery(this.context.router, {l: "unrooted"}, true);
+          }}
+        >
+          <span style={styles.title}> {"unrooted"} </span>
+        </button>
         </div>
         <div style={{margin: 5}}>
-          <ClockTreeLayout width={25} stroke={medGrey}/>
-          <button
-            key={4}
-            style={selected === "clock" ? materialButtonSelected : materialButton}
-            onClick={() => {
-              this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });
-              this.setLayoutQueryParam("clock");
-            }}>
-            <span style={styles.title}> {"clock"} </span>
-          </button>
+        <ClockTreeLayout width={25} stroke={medGrey}/>
+        <button
+          key={4}
+          style={selected === "clock" ? materialButtonSelected : materialButton}
+          onClick={() => {
+            this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });
+            modifyURLquery(this.context.router, {l: "clock"}, true);
+          }}
+        >
+          <span style={styles.title}> {"clock"} </span>
+        </button>
         </div>
       </div>
     );
   }
-
 }
 
 export default ChooseLayout;

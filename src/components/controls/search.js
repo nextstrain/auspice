@@ -3,7 +3,7 @@ import Radium from "radium";
 // import _ from "lodash";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
-import { SEARCH_INPUT_CHANGE } from "../../actions/controls";
+import { SEARCH_INPUT_CHANGE } from "../../actions/types";
 import Autosuggest from 'react-autosuggest';
 
 @connect(state => {

@@ -1,4 +1,4 @@
-import * as types from "../actions";
+import * as types from "../actions/types";
 
 const Entropy = (state = {
   loading: false,

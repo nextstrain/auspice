@@ -1,9 +1,11 @@
-import * as types from "../actions";
+import * as types from "../actions/types";
+import { colorOptions } from "../util/globals"
 
 const Metadata = (state = {
   loading: false,
   metadata: null,
-  error: null
+  error: null,
+  colorOptions
 }, action) => {
   switch (action.type) {
   case types.REQUEST_METADATA:
@@ -15,7 +17,8 @@ const Metadata = (state = {
     return Object.assign({}, state, {
       loading: false,
       error: null,
-      metadata: action.data
+      metadata: action.data,
+      colorOptions: action.data.color_options
     });
   case types.METADATA_FETCH_ERROR:
     return Object.assign({}, state, {
