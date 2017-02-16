@@ -81,7 +81,7 @@ class Map extends React.Component {
   componentDidUpdate(prevProps, prevState) {
     this.maybeSetupLeaflet(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
-    this.maybeDrawTipsAndTransmissions(); /* it's the first time, or they were just removed because we changed dataset */
+    this.maybeDrawTipsAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset */
     this.maybeUpdateTipsAndTransmissions(); /* every time we change something like colorBy */
     this.maybeAnimateTipsAndTransmissions();
     this.maybeRemoveAllTipsAndTransmissions(prevProps); /* dataset just changed */
@@ -106,7 +106,7 @@ class Map extends React.Component {
       this.setState({d3DOMNode});
     }
   }
-  maybeDrawTipsAndTransmissions() {
+  maybeDrawTipsAndTransmissions(prevProps) {
     if (
       this.props.colorScale &&
       this.state.map && /* we have already drawn the map */
@@ -114,14 +114,16 @@ class Map extends React.Component {
       this.props.nodes &&
       this.state.responsive &&
       this.state.d3DOMNode &&
-      !this.state.tips /* we haven't already drawn tips */
+      // !this.state.tips /* we haven't already drawn tips */
+      (this.props.colorScale.version !== prevProps.colorScale.version)
     ) {
+      console.log("maybeDrawTipsAndTransmissions hit")
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
       const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
 
       const d3elems = drawTipsAndTransmissions(
         latLongs,
-        this.props.colorScale,
+        this.props.colorScale.scale,
         this.state.d3DOMNode,
         this.state.map,
       );
