@@ -1,5 +1,6 @@
 import React from "react";
 import {brandColor} from "../../globalStyles";
+import { titleBarHeight } from "../../util/globals";
 
 const ToggleSidebarTab = ({open, handler}) => {
 
@@ -10,7 +11,7 @@ const ToggleSidebarTab = ({open, handler}) => {
       onClick={handler}
       style={{
         width: 15,
-        height: 55,
+        height: 40,
         position: "fixed",
         top: 5,
         zIndex: 1001,
@@ -20,7 +21,7 @@ const ToggleSidebarTab = ({open, handler}) => {
       <svg
         style={{
           position: "relative",
-          top: 17,
+          top: 10,
           left: 4
         }}
         width="7px"
