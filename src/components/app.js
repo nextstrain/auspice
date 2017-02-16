@@ -17,9 +17,10 @@ import Map from "./map/map";
 import TreeView from "./tree/treeView";
 import queryString from "query-string";
 import * as globals from "../util/globals";
-import { defaultDateRange, defaultLayout, defaultDistanceMeasure,
-  defaultColorBy, tipRadius, tipRadiusOnLegendMatch, freqScale } from "../util/globals";
 import Sidebar from "react-sidebar";
+import Flex from "./framework/flex";
+import { titleStyles } from "../globalStyles";
+import TitleBar from "./framework/title-bar";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   React-Router v4 injects length, action, location, push etc into props,
@@ -116,6 +117,7 @@ class App extends React.Component {
   }
 
   render() {
+    /* there must be a better way to accomodate header. See https://github.com/balloob/react-sidebar/issues/23 */
     return (
       <Sidebar
         sidebar={
@@ -125,11 +127,11 @@ class App extends React.Component {
         docked={this.state.sidebarDocked}
         onSetOpen={(a) => {this.setState({sidebarOpen: a});}}>
         <Background>
+          <TitleBar/>
           <ToggleSidebarTab
             open={this.state.sidebarDocked}
             handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
           />
-          <Title/>
           <TreeView
             query={queryString.parse(this.context.router.location.search)}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}

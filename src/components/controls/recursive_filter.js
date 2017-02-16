@@ -3,45 +3,46 @@ import Radium from "radium";
 import Select from "react-select";
 import { filterAbbrRev, filterAbbrFwd, controlsWidth } from "../../util/globals";
 import { modifyURLquery } from "../../util/urlHelpers";
+import { connect } from "react-redux";
+import { applyFilterQuery } from "../../actions/treeProperties"
 
 /*
  * implements a selector that
  * (i) knows about the upstream choices and
- * (ii) resets the route upon change
+ * (ii) URL features have been removed. Potentially to be added in the future.
+ * (iii) dispatches an action to change the state of the app
  */
 @Radium
+@connect((state) => ({selections: state.controls.filters}))
 class RecursiveFilter extends React.Component {
+  constructor(props) {
+    super(props);
+  }
   static propTypes = {
     filterTree: React.PropTypes.array.isRequired,
     filterType: React.PropTypes.string.isRequired,
     shortKey: React.PropTypes.string.isRequired,
     counts: React.PropTypes.array.isRequired,
     fields: React.PropTypes.array.isRequired,
-    options: React.PropTypes.array.isRequired
+    options: React.PropTypes.array.isRequired,
+    dispatch: React.PropTypes.func.isRequired,
+    selections: React.PropTypes.object.isRequired
   }
-  static contextTypes = {
-    router: React.PropTypes.object.isRequired
-  }
-  // // TODO this is broken!
-  // makeQueryString(filters, fields){
-  //   // the first item specifies the filter type (not really necessary)
-  //   const tmp_filter = [];
-  //   // all other filters are appended as key.value separated by dashes
-  //   for (let ii = 0; ii < fields.length; ii += 1) {
-  //     if (filters[ii] && filters[ii]) {
-  //       tmp_filter.push(fields[ii] + "." + filters[ii]);
-  //     }
-  //   }
-  //   return tmp_filter.join("-");
+  // static contextTypes = {
+  //   router: React.PropTypes.object.isRequired
   // }
 
-  setFilterQuery(filters, fields) {
-    const ft = this.props.filterType;
-    const filterQ = {};
-    // console.log("in r-filter. setting", this.props.filterType, "to", this.makeQueryString(filters, fields))
-    // filterQ[this.props.filterType] = this.makeQueryString(filters, fields);
-    filterQ[this.props.shortKey] = filters;
-    modifyURLquery(this.context.router, filterQ, false)
+  setFilterQuery(e) {
+    /* the variables of interest:
+    this.props.filterType: e.g. authers || geographic location
+    this.props.fields: e.g. region || country || authors
+    values: list of selected values, e.g [brazil, usa, ...]
+    */
+    const values = this.props.filterTree.concat(e.map((d) => d["value"]));
+    this.props.dispatch(
+      applyFilterQuery(this.props.filterType, this.props.fields, values)
+    );
+    // console.log("selection:", e)
   }
 
   render() {
@@ -52,22 +53,15 @@ class RecursiveFilter extends React.Component {
         label: this.props.options[i] + (this.props.counts[i] ? " (" + this.props.counts[i] + ")" : "")
       });
     }
+    /* note that e (onChange) is an array of objects each with label and value */
     return (
       <Select
         style={{width: controlsWidth}}
         name="form-field-name"
-        value={this.state.selection}
+        value={this.props.selections[this.props.fields]}
         multi={true}
         options={options}
-        onChange={(e) => {
-          this.setFilterQuery(
-            this.props.filterTree.concat(e.map((d) => d["value"])
-              .join(','))
-              .map((d) => filterAbbrRev[d] || d),
-            this.props.fields
-          );
-          this.setState({selection:e});
-        }}
+        onChange={(e) => this.setFilterQuery(e)}
       />
     );
   }

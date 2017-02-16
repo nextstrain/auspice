@@ -196,26 +196,29 @@ const parseFilterQuery = function (query) {
   };
 };
 
-export const calcTipVisibility = function (tree, metaMetadata, lowerLimit, upperLimit) {
+export const calcTipVisibility = function (tree, metaMetadata, controls) {
   if (tree.nodes){
-    const filter_pairs = [];
-    // TODO: this used to get query but should get the info from REDUX instead
-    // if (metaMetadata) {
-    //   for (const filter in metaMetadata.controls) { // possible race condition with tree?
-    //     const tmp = parseFilterQuery(query[filter] || "");
-    //     for (let ii = 0; ii < tmp.filters.length; ii += 1) {
-    //       if (tmp.filters[ii] && tmp.fields[ii]){
-    //         filter_pairs.push([tmp.fields[ii], tmp.filters[ii]]);
-    //       }
-    //     }
-    //   }
-    // }
+    /* extract the filter information from redux.
+    redux.filters has 2 keys, each with an array of values
+    keys: "region" and/or "authors"
+    filterPairs is a list of lists. Each list defines the filtering to do.
+    i.e. [ [ region, [...values]], [authors, [...values]]]
+    */
+    const filterPairs = [];
+    Object.keys(controls.filters).map((key) => {
+      if (controls.filters[key].length) {
+        filterPairs.push([key, controls.filters[key]]);
+      }
+    });
+
+    const lowerLimit = controls.dateMin;
+    const upperLimit = controls.dateMax;
     if (upperLimit && lowerLimit) {
-      if (filter_pairs.length) {
+      if (filterPairs.length) {
         return tree.nodes.map((d) => (
           d.attr.date >= lowerLimit
           && d.attr.date < upperLimit
-          && filter_pairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
+          && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
         ) ? "visible" : "hidden");
       } else {
         return tree.nodes.map((d) => (

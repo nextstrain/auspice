@@ -18,7 +18,7 @@ const getExtraVals = (nodes, colorBy, color_map) => {
 
 
 const genericScale = (cmin, cmax) => {
-  console.log("genericScale called. This is next to useless.")
+  // console.log("genericScale called.")
   const offset = +cmin;
   const range = cmax - cmin;
   const tmpColorScale = d3.scale.linear()
