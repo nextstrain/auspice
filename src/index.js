@@ -9,6 +9,10 @@ import App from "./components/app";
 import About from "./components/about";
 import Help from "./components/help";
 import Splash from "./components/splash";
+import "./css/global.css";
+import "./css/browserCompatability.css";
+import "./css/datePicker.css";
+import "./css/static.css";
 
 const store = configureStore();
 

@@ -4,7 +4,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import TitleBar from "./framework/title-bar";
-import { textStyles, headerFont } from "../globalStyles";
+import { headerFont } from "../globalStyles";
 import Flex from "./framework/flex";
 // import Card from "./framework/card";
 
@@ -53,33 +53,30 @@ class Splash extends React.Component {
     super(props);
   }
   render() {
-    const styles = textStyles;
     return(
       <div>
         <TitleBar/>
-        <Flex style={styles.main}>
+        <Flex style={{marginTop: 30}}>
           <div style={{flex: 1 }}/>
-          <div style={{flex: 3 }}>
-            <div style={[styles.headers, styles.title]}>
-              Real-time tracking of virus evolution
-            </div>
+          <div className={"static"} style={{flex: 3 }}>
+            <h1>Real-time tracking of virus evolution</h1>
             <p/>
-            <div style={styles.text}>Brief introduction?</div>
-            <div style={styles.line}/>
+            <div>Brief introduction?</div>
+            <div className={"line"}/>
 
-            <Link style={styles.link} to="/about">
+            <Link to="/about">
               More detailed information about Nextstrain
             </Link>
             <p/>
-            <Link style={styles.link} to="/methods">
+            <Link to="/methods">
               How we process the data
             </Link>
             <p/>
-            <Link style={styles.link} to="/help">
+            <Link to="/help">
               How to use Nextstrain
             </Link>
 
-            <div style={styles.line}/>
+            <div className={"line"}/>
 
           </div>
           <div style={{flex: 1 }}/>

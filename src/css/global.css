@@ -1,0 +1,35 @@
+
+html, p, div, input, button {
+  font-family: "Lato", "Helvetica Neue", "Helvetica", "sans-serif";
+  font-weight: 400;
+  color: "#333";
+}
+/*! normalize.css v3.0.2 | MIT License | git.io/normalize */
+
+/**
+ * 1. Set default font family to sans-serif.
+ * 2. Prevent iOS text size adjust after orientation change, without disabling
+ *    user zoom.
+ */
+html {
+  font-family: sans-serif; /* 1 */
+  -ms-text-size-adjust: 100%; /* 2 */
+  -webkit-text-size-adjust: 100%; /* 2 */
+}
+/**
+ * Remove default margin.
+ */
+html, body, #root, [data-reactid=".0"] {
+  margin: 0;
+  height: 100%;
+  position: relative;
+}
+
+/*
+links
+*/
+a {
+  color: #5097BA;
+  text-decoration: none;
+  cursor: pointer;
+}

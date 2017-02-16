@@ -8,7 +8,7 @@ export const lighterGrey = "rgb(200, 200, 200)";
 export const darkGrey = "#333";
 export const medGrey = "#888";
 export const lightGrey = "#CCC";
-export const brandColor = "#5097BA"; // #5DA8A3 
+export const brandColor = "#5097BA"; // #5DA8A3
 
 // http://stackoverflow.com/questions/1895476/how-to-style-a-select-dropdown-with-css-only-without-javascript
 export const select = {
@@ -74,45 +74,5 @@ export const titleStyles = {
     marginBottom: 10,
     fontWeight: 500,
     color: medGrey
-  }
-};
-
-export const textStyles = {
-  main: {
-    marginTop: 30
-  },
-  title: {
-    fontSize: 28
-  },
-  headers: {
-    fontFamily: headerFont,
-    fontSize: 16,
-    lineHeight: "28px",
-    marginTop: 20,
-    marginBottom: 10,
-    fontWeight: 300,
-    color: medGrey
-  },
-  text: {
-    fontFamily: dataFont,
-    fontSize: 14,
-    marginTop: 5,
-    marginBottom: 5,
-    fontWeight: 100,
-    color: medGrey
-  },
-  logos: {
-    marginTop: 20,
-    justifyContent: "space-around"
-  },
-  line: {
-    marginTop: 30,
-    marginBottom: 30,
-    borderBottom: `1px solid ${lightGrey}`
-  },
-  link: {
-    color: brandColor,
-    textDecoration: "none",
-    cursor: "pointer"
   }
 };

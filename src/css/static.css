@@ -1,0 +1,40 @@
+
+.static .line {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #CCC;
+}
+
+.static .main {
+  margin-top: 30px;
+}
+
+.static .title {
+  font-size: 28;
+}
+
+.static div {
+  font-size: 14;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-weight: 100;
+  color: #888;
+}
+
+.static h1 {
+  font-size: 28;
+  line-height: 28px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-weight: 300;
+  color: #888;
+}
+
+.static h2 {
+  font-size: 16;
+  line-height: 28px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-weight: 300;
+  color: #888;
+}

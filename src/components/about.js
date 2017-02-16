@@ -3,7 +3,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import Flex from "./framework/flex";
-import { textStyles } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
 
 /* helper / generating functions */
@@ -22,61 +21,42 @@ const generateLogos = [
   </a>
 ];
 
-const link = (url, text) => (
-  <a href={url} style={textStyles.link}>
-    {text}
-  </a>
-);
-
-const thanksText = (
-  <g>
-    This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions. For data reuse (particularly for publication), please contact the original authors...
-  </g>
-);
-
-const builtByText = (
-  <g>
-    Concept by {link("https://neherlab.wordpress.com/", "Richard Neher")} and {link("http://bedford.io/", "Trevor Bedford")}.
-    <p/>
-    Built by {link("https://neherlab.wordpress.com/", "Richard Neher")}, {link("http://bedford.io/", "Trevor Bedford")},&nbsp;
-    {link("http://www.colinmegill.com/", "Colin Megill")}&nbsp;
-    and {link("http://bedford.io/team/james-hadfield/", "James Hadfield")}.
-    <p/>
-    All {link("github.com/nextstrain/auspice", "source code")} is freely available under the terms of the {link("http://github.com/blab/nextflu/blob/master/LICENSE.txt", "GNU Affero General Public License")}.
-    {/*
-    <p/>
-    Auspice commit {__COMMIT_HASH__}
-    */}
-  </g>
-);
-
 @connect()
 class About extends React.Component {
   constructor(props) {
     super(props);
   }
-
-
   render() {
-    const styles = textStyles;
     return(
       <g>
         <TitleBar/>
-        <Flex style={styles.main}>
+        <Flex style={{marginTop: 30}}>
           <div style={{flex: 1 }}/>
-          <div style={{flex: 3 }}>
-            <div style={[styles.headers, styles.title]}>
-              Real-time tracking of virus evolution
+          <div className={"static"} style={{flex: 3 }}>
+            <h1>Real-time tracking of virus evolution</h1>
+
+            <h2>Data Sources</h2>
+            <div>
+              This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions. For data reuse (particularly for publication), please contact the original authors...
             </div>
 
-            <div style={styles.headers}>Data Sources</div>
-            <div style={styles.text}>{thanksText}</div>
+            <div className={"line"}/>
+            <div>
+              Concept by <a href="https://neherlab.wordpress.com/">Richard Neher</a> and <a href="http://bedford.io/">Trevor Bedford</a>.
+              <p/>
+              Built by <a href="https://neherlab.wordpress.com/">Richard Neher</a>, <a href="http://bedford.io/">Trevor Bedford</a>,&nbsp;
+              <a href="http://www.colinmegill.com/">Colin Megill</a>&nbsp;
+              and <a href="http://bedford.io/team/james-hadfield/">James Hadfield</a>.
+              <p/>
+              All <a href="github.com/nextstrain/auspice">source code</a> is freely available under the terms of the <a href="http://github.com/blab/nextflu/blob/master/LICENSE.txt">GNU Affero General Public License</a>.
+              {/*
+              <p/>
+              Auspice commit {__COMMIT_HASH__}
+              */}
+            </div>
 
-            <div style={styles.line}/>
-            <div style={styles.text}>{builtByText}</div>
-
-            <div style={styles.line}/>
-            <Flex style={styles.logos}>
+            <div className={"line"}/>
+            <Flex style={{marginTop: 20, justifyContent: "space-around"}}>
               {generateLogos}
             </Flex>
           </div>
