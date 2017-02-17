@@ -45,7 +45,8 @@ class TitleBar extends React.Component {
         padding: "8px",
         color: brandColor,
         textDecoration: "none",
-        cursor: "pointer"
+        cursor: "pointer",
+        fontSize: 16
       },
       alerts: {
         textAlign: "center",

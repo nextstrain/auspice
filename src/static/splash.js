@@ -15,13 +15,18 @@ const generateCard = (title, imgRequired, to) => (
     // marginRight: 10,
     // marginTop: 5,
     // marginBottom: 5,
-    padding: 20,
+    padding: 0,
     overflow: "hidden",
-    position: "relative"
+    position: "relative",
+    // boxSizing: "content-box"
   }}>
     <div style={{
       boxShadow: "3px 3px 4px 1px rgba(215,215,215,0.85)",
-      borderRadius: 2
+      borderRadius: 2,
+      marginLeft: 10,
+      marginRight: 10,
+      marginTop: 5,
+      marginBottom: 5
       // display: "flex",
       // justifyContent: "center",
       // alignItems: "center",
@@ -117,6 +122,6 @@ const Splash = () => {
       </div>
     </g>
   );
-}
+};
 
 export default Splash;
