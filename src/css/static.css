@@ -89,6 +89,10 @@ strong {
   padding-right: 25px;
 }
 
+.static .col-md-9 img {
+  width: 100%;
+}
+
 /*.static aside {
   float: right;
 }*/
