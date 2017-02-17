@@ -541,6 +541,21 @@ PhyloTree.prototype.hideGrid = function() {
   this.svg.selectAll(".gridTick").style('visibility', 'hidden');
 };
 
+/**
+ * hide branchLabels
+ */
+PhyloTree.prototype.hideBranchLabels = function() {
+  this.params.branchLabels=false;
+  this.svg.selectAll(".branchLabel").style('visibility', 'hidden');
+};
+
+/**
+ * show branchLabels
+ */
+PhyloTree.prototype.showBranchLabels = function() {
+  this.params.branchLabels=True;
+  this.svg.selectAll(".branchLabel").style('visibility', 'visible');
+};
 
 /**
  * add a grid to the svg
