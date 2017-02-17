@@ -244,7 +244,8 @@ class TreeView extends React.Component {
         {
           /* options */
           grid: true,
-          confidence: false
+          confidence: false,
+          branchLabels: true
         },
         {
           /* callbacks */
@@ -252,7 +253,9 @@ class TreeView extends React.Component {
           onTipClick: this.onTipClick.bind(this),
           onBranchHover: this.onBranchHover.bind(this),
           onBranchClick: this.onBranchClick.bind(this),
-          onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this)
+          onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this),
+          branchLabel: this.branchLabel.bind(this),
+          branchLabelSize: this.branchLabelSize.bind(this)
         },
         {
           /* presently selected node / branch */
@@ -288,6 +291,25 @@ class TreeView extends React.Component {
   onBranchOrTipLeave(){
     if (this.state.hovered) {
       this.setState({hovered: null})
+    }
+  }
+  branchLabel(d){
+    if (d.n.muts){
+      //console.log(d.n.muts.join(","));
+      if (d.n.muts.length>5){
+        return d.n.muts.slice(0,5).join(", ") + "...";
+      }else{
+        return d.n.muts.join(", ");
+      }
+    }else{
+      return "";
+    }
+  }
+  branchLabelSize(d,n){
+    if (d.leafCount>n/10){
+      return 6;
+    }else{
+      return 0;
     }
   }
 

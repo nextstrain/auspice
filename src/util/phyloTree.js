@@ -117,6 +117,7 @@ var PhyloTree = function(treeJson) {
 
   this.xScale = d3.scale.linear();
   this.yScale = d3.scale.linear();
+  addLeafCount(this.nodes[0]);
 };
 
 /*
@@ -147,7 +148,11 @@ PhyloTree.prototype.setDefaults = function () {
         tipFill: "#CCC",
         tipStrokeWidth: 1,
         tipRadius: 4,
-        fontFamily: dataFont
+        fontFamily: dataFont,
+        branchLabels:true,
+        branchLabelFont: dataFont,
+        branchLabelPadX: 8,
+        branchLabelPadY:5,
     };
 };
 
@@ -177,6 +182,7 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks)
   }
   this.drawBranches();
   this.drawTips();
+  this.drawBranchLabels();
   this.updateGeometry(10);
   this.svg.selectAll(".regression").remove();
   if (layout==="clock") this.drawRegression();
@@ -408,6 +414,7 @@ PhyloTree.prototype.mapToScreen = function(){
     // determine x,y values of visibile nodes
     const tmp_xValues = this.nodes.filter(function(d){return d.inView;}).map(function(d){return d.x});
     const tmp_yValues = this.nodes.filter(function(d){return d.inView;}).map(function(d){return d.y});
+    this.nNodesInView = tmp_yValues.length;
 
     if (this.layout==="radial" || this.layout==="unrooted") {
         // handle "radial and unrooted differently since they need to be square
@@ -797,6 +804,20 @@ PhyloTree.prototype.drawBranches = function() {
 };
 
 
+PhyloTree.prototype.drawBranchLabels = function() {
+  var params = this.params;
+  console.log("drawBranchLabels");
+  const bLFunc = this.callbacks.branchLabel;
+  //this.nodes.forEach(function(d){console.log(bLFunc(d));})
+  this.branchLabels = this.svg.append("g").selectAll('.branchLabel')
+    .data(this.nodes) //.filter(function (d){return bLFunc(d)!=="";}))
+    .enter()
+    .append("text")
+    .text(function (d){return bLFunc(d);})
+    .attr("class", "branchLabel")
+    .style("text-anchor","end");
+}
+
 PhyloTree.prototype.drawConfidence = function() {
   this.confidence = this.svg.append("g").selectAll('.conf')
     .data(this.nodes)
@@ -963,6 +984,28 @@ PhyloTree.prototype.updateGeometry = function(dt) {
     .attr("d", function(d) {
       return d.branch[0];
     });
+
+
+  const xPad = this.params.branchLabelPadX, yPad = this.params.branchLabelPadY;
+  const nNIV = this.nNodesInView;
+  const bLSFunc = this.callbacks.branchLabelSize;
+  const fontFamily = this.params.branchLabelFont;
+  const branchLabels = this.params.branchLabels;
+  this.svg.selectAll('.branchLabel').filter(function(d) {
+      return d.update;
+    })
+    .transition().duration(dt)
+    .attr("x", function(d) {
+      return d.xTip - xPad;
+    })
+    .attr("y", function(d) {
+      return d.yTip - yPad;
+    })
+    .attr("visibility", (this.layout==="rect" && branchLabels)?"visible":"hidden")
+    .style("font-family", fontFamily)
+    .style("font-size", function(d) {return bLSFunc(d, nNIV);});
+
+
 
   this.svg.selectAll('.conf')
     .transition().duration(dt)
