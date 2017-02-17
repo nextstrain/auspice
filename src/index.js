@@ -11,8 +11,8 @@ import About from "./static/about";
 import Methods from "./static/methods";
 import Splash from "./static/splash";
 import "./css/global.css";
-// import "./css/browserCompatability.css";
-import "./css/bootstrapCustomized.css"
+import "./css/browserCompatability.css";
+import "./css/bootstrapCustomized.css";
 import "./css/datePicker.css";
 import "./css/static.css";
 

@@ -7,6 +7,21 @@
   --brandColor: #5097BA;
 }
 
+/* The width and height properties include
+the content, the padding and border, but not the margin.
+*/
+.static * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.static *:before,
+.static *:after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
 .static .line {
   margin-top: 30px;
   margin-bottom: 30px;
@@ -28,6 +43,7 @@
   margin-bottom: 5px;
   font-weight: 300;
   color: var(--medGrey);
+  line-height: 1.42857143;
 }
 
 .static h1 {
