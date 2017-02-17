@@ -117,9 +117,9 @@ class App extends React.Component {
   }
 
   render() {
-    /* there must be a better way to accomodate header. See https://github.com/balloob/react-sidebar/issues/23 */
     return (
       <Sidebar
+        sidebarClassName="sidebar-hide-scrollbar"
         sidebar={
           <Controls/>
         }
