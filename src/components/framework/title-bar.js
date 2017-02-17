@@ -15,8 +15,11 @@ class TitleBar extends React.Component {
   constructor(props) {
     super(props);
   }
-  static propTypes = {
-    dataName: React.PropTypes.string
+  // static propTypes = {
+  //   dataName: React.PropTypes.string
+  // }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
   }
   getStyles() {
     return {
@@ -51,17 +54,20 @@ class TitleBar extends React.Component {
         color: brandColor
       },
       dataName: {
-        textAlign: "center",
-        verticalAlign: "text-bottom",
+        letterSpacing: "3px",
         color: darkGrey,
-        fontSize: 18
+        fontSize: 24,
+        fontWeight: 400,
+        marginBottom: -7
       }
     };
   }
   render() {
     const styles = this.getStyles();
-    const dataName = this.props.dataName ?
-      <div style={styles.dataName}>{this.props.dataName}</div> : null;
+    // const dataName = this.props.dataName ?
+    //   <div style={styles.dataName}>{this.props.dataName}</div> : null;
+    let dataName = this.context.router.location.pathname;
+    if (dataName.length === 1) {dataName = "";}
     return (
       <div>
         <Flex style={styles.main}>
@@ -69,7 +75,10 @@ class TitleBar extends React.Component {
           <Link style={styles.link} to="/">
             <Title style={styles.title}/>
           </Link>
-          {dataName}
+          {/*{dataName}*/}
+          <div style={styles.dataName}>
+            {dataName}
+          </div>
           <div style={{flex: 40 }}/>
           <Link style={styles.link} to="/about">About</Link>
           <Link style={styles.link} to="/methods">Methods</Link>
