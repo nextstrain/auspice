@@ -32,4 +32,7 @@ a {
   color: #5097BA;
   text-decoration: none;
   cursor: pointer;
+  font-family: "Lato";
+  font-weight: 400;
+  font-size: 94%;
 }

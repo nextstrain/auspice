@@ -1,5 +1,6 @@
 import { controlsWidth } from "./util/globals";
 
+/* IF YOU CHANGE THINGS HERE CHANGE THEM IN static.css AS WELL! */
 //export const titleFont = "aw-conqueror-sans, sans-serif";
 export const titleFont = "Quicksand, Helvetica Neue, Helvetica, sans-serif";
 export const headerFont = "Lato, Helvetica Neue, Helvetica, sans-serif";

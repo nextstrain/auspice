@@ -23,7 +23,7 @@ class TitleBar extends React.Component {
       title: {
         fontFamily: titleFont,
         fontSize: 48,
-        lineHeight: "38px",
+        lineHeight: "28px",
         marginTop: 0,
         marginBottom: 2,
         fontWeight: 500,

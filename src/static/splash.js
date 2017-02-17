@@ -3,9 +3,9 @@
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
-import TitleBar from "./framework/title-bar";
+import TitleBar from "../components/framework/title-bar";
 import { headerFont } from "../globalStyles";
-import Flex from "./framework/flex";
+import Flex from "../components/framework/flex";
 // import Card from "./framework/card";
 
 const generateCard = (title, imgRequired, to) => (
