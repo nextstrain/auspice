@@ -161,35 +161,45 @@ class TreeView extends React.Component {
     by having it here we both get access to nextState and can
     control whether this component re-renders
     */
-    if (
-      this.state.tree &&
-      (this.state.hovered || this.state.clicked) &&
-      this.props.layout === nextProps.layout // this block interferes with layout transition otherwise
-    ) {
-      /* check whether or not the previously selected item was clicked */
-      if (this.state.clicked && nextState.clicked) { // was the previous item a click?
-        this.state.tree.updateSelectedBranchOrTip(
-          this.state.clicked, /* turn this one off */
-          nextState.clicked, /* turn this one on */
-        );
-      } else if (this.state.hovered && nextState.clicked) { // previously a hover, now a click
-        this.state.tree.updateSelectedBranchOrTip(
-          this.state.hovered,
-          nextState.clicked,
-        );
-      } else if (this.state.hovered && nextState.hovered) { // deselect the previously selected hover
-        this.state.tree.updateSelectedBranchOrTip(
-          this.state.hovered,
-          nextState.hovered,
-        );
-      } else if (this.state.clicked && nextState.clicked === null) {
-        // x clicked or clicked off will give a null value, so reset everything to be safe
-        this.state.tree.updateSelectedBranchOrTip(
-          this.state.clicked,
-          null
-        )
+    if (this.state.tree)
+    {
+      if ((this.state.hovered || this.state.clicked) &&
+          this.props.layout === nextProps.layout // this block interferes with layout transition otherwise
+         )
+      {
+        /* check whether or not the previously selected item was clicked */
+        if (this.state.clicked && nextState.clicked) { // was the previous item a click?
+          this.state.tree.updateSelectedBranchOrTip(
+            this.state.clicked, /* turn this one off */
+            nextState.clicked, /* turn this one on */
+          );
+        } else if (this.state.hovered && nextState.clicked) { // previously a hover, now a click
+          this.state.tree.updateSelectedBranchOrTip(
+            this.state.hovered,
+            nextState.clicked,
+          );
+        } else if (this.state.hovered && nextState.hovered) { // deselect the previously selected hover
+          this.state.tree.updateSelectedBranchOrTip(
+            this.state.hovered,
+            nextState.hovered,
+          );
+        } else if (this.state.clicked && nextState.clicked === null) {
+          // x clicked or clicked off will give a null value, so reset everything to be safe
+          this.state.tree.updateSelectedBranchOrTip(
+            this.state.clicked,
+            null
+          )
+        }
       }
-    }
+      console.log("BL:", this.state.showBranchLabels, nextState.showBranchLabels);
+      if (this.state.showBranchLabels!==nextState.showBranchLabels){
+        if (nextState.showBranchLabels){
+          this.state.tree.showBranchLabels();
+        }else{
+          this.state.tree.hideBranchLabels();
+        }
+      }
+   }
     /* we are now in a position to control the rendering to improve performance */
     if (nextState.shouldReRender) {
       this.setState({shouldReRender: false});

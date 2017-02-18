@@ -907,6 +907,11 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
     })
     .transition().duration(dt * 0.5)
     .style("opacity", 0.0);
+  this.svg.selectAll('.branchLabels').filter(function(d) {
+      return d.update;
+    })
+    .transition().duration(dt * 0.5)
+    .style("opacity", 0.0);
 
   // closure to move the tips, called via the time out below
   const tipTrans = function(tmp_svg, tmp_dt) {
@@ -958,6 +963,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
     };
   };
   setTimeout(fadeBack(this.svg, 0.2 * dt), 1.5 * dt);
+  this.updateBranchLabels(dt);
 
   this.svg.selectAll('.conf')
     .transition().duration(dt)
@@ -1000,12 +1006,25 @@ PhyloTree.prototype.updateGeometry = function(dt) {
       return d.branch[0];
     });
 
+  this.updateBranchLabels(dt);
 
+  this.svg.selectAll('.conf')
+    .transition().duration(dt)
+    .attr("visibility", this.layout==="rect" ? "visibile" : "hidden")
+    .attr("d", function(d) {
+      return d.confLine;
+    });
+
+};
+
+
+PhyloTree.prototype.updateBranchLabels = function(dt){
   const xPad = this.params.branchLabelPadX, yPad = this.params.branchLabelPadY;
   const nNIV = this.nNodesInView;
   const bLSFunc = this.callbacks.branchLabelSize;
   const fontFamily = this.params.branchLabelFont;
-  const branchLabels = this.params.branchLabels;
+  const showBL = (this.layout==="rect") && this.params.branchLabels;
+  const visBL = showBL ? "visible" : "hidden";
   this.svg.selectAll('.branchLabel').filter(function(d) {
       return d.update;
     })
@@ -1016,20 +1035,10 @@ PhyloTree.prototype.updateGeometry = function(dt) {
     .attr("y", function(d) {
       return d.yTip - yPad;
     })
-    .attr("visibility", (this.layout==="rect" && branchLabels)?"visible":"hidden")
+    .attr("visibility",visBL)
     .style("font-family", fontFamily)
     .style("font-size", function(d) {return bLSFunc(d, nNIV);});
-
-
-
-  this.svg.selectAll('.conf')
-    .transition().duration(dt)
-    .attr("visibility", this.layout==="rect"?"visible":"hidden")
-    .attr("d", function(d) {
-      return d.confLine;
-    });
-
-};
+}
 
 /*********************************************/
 /* TO BE REDONE */
