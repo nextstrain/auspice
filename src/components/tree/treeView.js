@@ -52,6 +52,7 @@ need this information are children of this component
     colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
     layout: state.controls.layout,
+    showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
     sequences: state.sequences,
     selectedLegendItem: state.controls.selectedLegendItem,
@@ -152,6 +153,14 @@ class TreeView extends React.Component {
       if (this.props.distanceMeasure !== nextProps.distanceMeasure) {
         tree.updateDistance(nextProps.distanceMeasure, mediumTransitionDuration);
       }
+
+      if (this.props.showBranchLabels!==nextProps.showBranchLabels){
+        if (nextProps.showBranchLabels){
+          tree.showBranchLabels();
+        }else{
+          tree.hideBranchLabels();
+        }
+      }
     }
   }
 
@@ -189,14 +198,6 @@ class TreeView extends React.Component {
             this.state.clicked,
             null
           )
-        }
-      }
-      console.log("BL:", this.state.showBranchLabels, nextState.showBranchLabels);
-      if (this.state.showBranchLabels!==nextState.showBranchLabels){
-        if (nextState.showBranchLabels){
-          this.state.tree.showBranchLabels();
-        }else{
-          this.state.tree.hideBranchLabels();
         }
       }
    }
@@ -255,7 +256,8 @@ class TreeView extends React.Component {
           /* options */
           grid: true,
           confidence: false,
-          branchLabels: true
+          branchLabels: true,      //generate DOM object
+          showBranchLabels: false  //hide them initially -> couple to redux state
         },
         {
           /* callbacks */
@@ -303,9 +305,14 @@ class TreeView extends React.Component {
       this.setState({hovered: null})
     }
   }
+
+  /**
+   * @param  {node}
+   * @return {string that is displayed as label on the branch
+   *          corresponding to the node}
+   */
   branchLabel(d){
     if (d.n.muts){
-      //console.log(d.n.muts.join(","));
       if (d.n.muts.length>5){
         return d.n.muts.slice(0,5).join(", ") + "...";
       }else{
@@ -315,9 +322,14 @@ class TreeView extends React.Component {
       return "";
     }
   }
+  /**
+   * @param  {node}
+   * @param  {total number of nodes in current view}
+   * @return {font size of the branch label}
+   */
   branchLabelSize(d,n){
-    if (d.leafCount>n/10){
-      return 6;
+    if (d.leafCount>n/10.0){
+      return 12;
     }else{
       return 0;
     }
