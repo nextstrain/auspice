@@ -6,7 +6,7 @@ const updateTipVisibility = () => {
     const { tree, metadata, controls } = getState();
     dispatch({
       type: types.UPDATE_TIP_VISIBILITY,
-      data: calcTipVisibility(tree, metadata, controls.dateMin, controls.dateMax),
+      data: calcTipVisibility(tree, metadata, controls),
       version: tree.tipVisibilityVersion + 1
     });
   };
@@ -51,5 +51,19 @@ export const legendMouseEnterExit = function (label = null) {
       dispatch({type: types.LEGEND_ITEM_MOUSELEAVE});
     }
     dispatch(updateTipRadii());
+  };
+};
+
+export const applyFilterQuery = (filterType, fields, values) => {
+  /* filterType: e.g. authers || geographic location
+  fields: e.g. region || country || authors
+  values: list of selected values, e.g [brazil, usa, ...]
+  */
+  return (dispatch) => {
+    dispatch({type: types.APPLY_FILTER_QUERY,
+              // filterType,
+              fields,
+              values});
+    dispatch(updateTipVisibility());
   };
 };

@@ -30,7 +30,8 @@ const getDefaultState = function () {
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
-    datasetPathName: null
+    datasetPathName: null,
+    filters: {}
   };
 };
 
@@ -101,6 +102,13 @@ const Controls = (state = getDefaultState(), action) => {
   case types.SET_COLOR_SCALE:
     return Object.assign({}, state, {
       colorScale: action.data
+    });
+  case types.APPLY_FILTER_QUERY:
+    // values arrive as array
+    const filters = Object.assign({}, state.filters, {});
+    filters[action.fields] = action.values;
+    return Object.assign({}, state, {
+      filters
     });
   default:
     return state;
