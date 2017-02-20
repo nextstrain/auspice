@@ -117,6 +117,7 @@ var PhyloTree = function(treeJson) {
 
   this.xScale = d3.scale.linear();
   this.yScale = d3.scale.linear();
+  addLeafCount(this.nodes[0]);
 };
 
 /*
@@ -147,7 +148,13 @@ PhyloTree.prototype.setDefaults = function () {
         tipFill: "#CCC",
         tipStrokeWidth: 1,
         tipRadius: 4,
-        fontFamily: dataFont
+        fontFamily: dataFont,
+        branchLabels:true,
+        showBranchLabels:false,
+        branchLabelFont: dataFont,
+        branchLabelFill: "#555",
+        branchLabelPadX: 8,
+        branchLabelPadY:5,
     };
 };
 
@@ -175,8 +182,11 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks)
   if (this.params.confidence){
     this.drawConfidence();
   }
-  this.drawBranches();
+  if (this.params.branchLabels){
+    this.drawBranches();
+  }
   this.drawTips();
+  this.drawBranchLabels();
   this.updateGeometry(10);
   this.svg.selectAll(".regression").remove();
   if (layout==="clock") this.drawRegression();
@@ -396,6 +406,9 @@ PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
   if (this.grid) this.addGrid(this.layout);
   this.svg.selectAll(".regression").remove();
   if (this.layout === "clock") this.drawRegression();
+  if (this.params.branchLabels){
+    this.updateBranchLabels(dt);
+  }
 };
 
 /**
@@ -408,6 +421,7 @@ PhyloTree.prototype.mapToScreen = function(){
     // determine x,y values of visibile nodes
     const tmp_xValues = this.nodes.filter(function(d){return d.inView;}).map(function(d){return d.x});
     const tmp_yValues = this.nodes.filter(function(d){return d.inView;}).map(function(d){return d.y});
+    this.nNodesInView = tmp_yValues.length;
 
     if (this.layout==="radial" || this.layout==="unrooted") {
         // handle "radial and unrooted differently since they need to be square
@@ -534,6 +548,21 @@ PhyloTree.prototype.hideGrid = function() {
   this.svg.selectAll(".gridTick").style('visibility', 'hidden');
 };
 
+/**
+ * hide branchLabels
+ */
+PhyloTree.prototype.hideBranchLabels = function() {
+  this.params.showBranchLabels=false;
+  this.svg.selectAll(".branchLabel").style('visibility', 'hidden');
+};
+
+/**
+ * show branchLabels
+ */
+PhyloTree.prototype.showBranchLabels = function() {
+  this.params.showBranchLabels=true;
+  this.svg.selectAll(".branchLabel").style('visibility', 'visible');
+};
 
 /**
  * add a grid to the svg
@@ -656,10 +685,11 @@ PhyloTree.prototype.addGrid = function(layout) {
       .style("stroke-width",this.params.minorGridWidth);
 
   const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
+  const precision = Math.max(0, 1-logRange)
   gridLabels.exit().remove();
   gridLabels.enter().append("text");
   gridLabels
-      .text(function(d){return d[0].toString();})
+      .text(function(d){return d[0].toFixed(precision);})
       .attr("class", "gridTick")
       .style("font-size",this.params.tickLabelSize)
       .style("font-family",this.params.fontFamily)
@@ -797,6 +827,18 @@ PhyloTree.prototype.drawBranches = function() {
 };
 
 
+PhyloTree.prototype.drawBranchLabels = function() {
+  var params = this.params;
+  const bLFunc = this.callbacks.branchLabel;
+  this.branchLabels = this.svg.append("g").selectAll('.branchLabel')
+    .data(this.nodes) //.filter(function (d){return bLFunc(d)!=="";}))
+    .enter()
+    .append("text")
+    .text(function (d){return bLFunc(d);})
+    .attr("class", "branchLabel")
+    .style("text-anchor","end");
+}
+
 PhyloTree.prototype.drawConfidence = function() {
   this.confidence = this.svg.append("g").selectAll('.conf')
     .data(this.nodes)
@@ -871,6 +913,11 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
     })
     .transition().duration(dt * 0.5)
     .style("opacity", 0.0);
+  this.svg.selectAll('.branchLabels').filter(function(d) {
+      return d.update;
+    })
+    .transition().duration(dt * 0.5)
+    .style("opacity", 0.0);
 
   // closure to move the tips, called via the time out below
   const tipTrans = function(tmp_svg, tmp_dt) {
@@ -922,6 +969,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
     };
   };
   setTimeout(fadeBack(this.svg, 0.2 * dt), 1.5 * dt);
+  this.updateBranchLabels(dt);
 
   this.svg.selectAll('.conf')
     .transition().duration(dt)
@@ -964,14 +1012,37 @@ PhyloTree.prototype.updateGeometry = function(dt) {
       return d.branch[0];
     });
 
+  this.updateBranchLabels(dt);
+
   this.svg.selectAll('.conf')
     .transition().duration(dt)
-    .attr("visibility", this.layout==="rect"?"visible":"hidden")
+    .attr("visibility", this.layout==="rect" ? "visibile" : "hidden")
     .attr("d", function(d) {
       return d.confLine;
     });
 
 };
+
+
+PhyloTree.prototype.updateBranchLabels = function(dt){
+  const xPad = this.params.branchLabelPadX, yPad = this.params.branchLabelPadY;
+  const nNIV = this.nNodesInView;
+  const bLSFunc = this.callbacks.branchLabelSize;
+  const showBL = (this.layout==="rect") && this.params.showBranchLabels;
+  const visBL = showBL ? "visible" : "hidden";
+  this.svg.selectAll('.branchLabel')
+    .transition().duration(dt)
+    .attr("x", function(d) {
+      return d.xTip - xPad;
+    })
+    .attr("y", function(d) {
+      return d.yTip - yPad;
+    })
+    .attr("visibility",visBL)
+    .style("fill", this.params.branchLabelFill)
+    .style("font-family", this.params.branchLabelFont)
+    .style("font-size", function(d) {return bLSFunc(d, nNIV).toString()+"px";});
+}
 
 /*********************************************/
 /* TO BE REDONE */
@@ -986,7 +1057,6 @@ PhyloTree.prototype.selectBranch = function(node) {
 PhyloTree.prototype.deSelectBranch = function(node) {
   this.svg.select("#branch_"+node.n.clade)
     .style("stroke-width", function(d) {
-      console.log(d['stroke-width']);
       return d['stroke-width'] || "2";
     });
 };

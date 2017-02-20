@@ -52,6 +52,7 @@ need this information are children of this component
     colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
     layout: state.controls.layout,
+    showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
     sequences: state.sequences,
     selectedLegendItem: state.controls.selectedLegendItem,
@@ -152,6 +153,14 @@ class TreeView extends React.Component {
       if (this.props.distanceMeasure !== nextProps.distanceMeasure) {
         tree.updateDistance(nextProps.distanceMeasure, mediumTransitionDuration);
       }
+
+      if (this.props.showBranchLabels!==nextProps.showBranchLabels){
+        if (nextProps.showBranchLabels){
+          tree.showBranchLabels();
+        }else{
+          tree.hideBranchLabels();
+        }
+      }
     }
   }
 
@@ -161,35 +170,37 @@ class TreeView extends React.Component {
     by having it here we both get access to nextState and can
     control whether this component re-renders
     */
-    if (
-      this.state.tree &&
-      (this.state.hovered || this.state.clicked) &&
-      this.props.layout === nextProps.layout // this block interferes with layout transition otherwise
-    ) {
-      /* check whether or not the previously selected item was clicked */
-      if (this.state.clicked && nextState.clicked) { // was the previous item a click?
-        this.state.tree.updateSelectedBranchOrTip(
-          this.state.clicked, /* turn this one off */
-          nextState.clicked, /* turn this one on */
-        );
-      } else if (this.state.hovered && nextState.clicked) { // previously a hover, now a click
-        this.state.tree.updateSelectedBranchOrTip(
-          this.state.hovered,
-          nextState.clicked,
-        );
-      } else if (this.state.hovered && nextState.hovered) { // deselect the previously selected hover
-        this.state.tree.updateSelectedBranchOrTip(
-          this.state.hovered,
-          nextState.hovered,
-        );
-      } else if (this.state.clicked && nextState.clicked === null) {
-        // x clicked or clicked off will give a null value, so reset everything to be safe
-        this.state.tree.updateSelectedBranchOrTip(
-          this.state.clicked,
-          null
-        )
+    if (this.state.tree)
+    {
+      if ((this.state.hovered || this.state.clicked) &&
+          this.props.layout === nextProps.layout // this block interferes with layout transition otherwise
+         )
+      {
+        /* check whether or not the previously selected item was clicked */
+        if (this.state.clicked && nextState.clicked) { // was the previous item a click?
+          this.state.tree.updateSelectedBranchOrTip(
+            this.state.clicked, /* turn this one off */
+            nextState.clicked, /* turn this one on */
+          );
+        } else if (this.state.hovered && nextState.clicked) { // previously a hover, now a click
+          this.state.tree.updateSelectedBranchOrTip(
+            this.state.hovered,
+            nextState.clicked,
+          );
+        } else if (this.state.hovered && nextState.hovered) { // deselect the previously selected hover
+          this.state.tree.updateSelectedBranchOrTip(
+            this.state.hovered,
+            nextState.hovered,
+          );
+        } else if (this.state.clicked && nextState.clicked === null) {
+          // x clicked or clicked off will give a null value, so reset everything to be safe
+          this.state.tree.updateSelectedBranchOrTip(
+            this.state.clicked,
+            null
+          )
+        }
       }
-    }
+   }
     /* we are now in a position to control the rendering to improve performance */
     if (nextState.shouldReRender) {
       this.setState({shouldReRender: false});
@@ -244,7 +255,9 @@ class TreeView extends React.Component {
         {
           /* options */
           grid: true,
-          confidence: false
+          confidence: false,
+          branchLabels: true,      //generate DOM object
+          showBranchLabels: false  //hide them initially -> couple to redux state
         },
         {
           /* callbacks */
@@ -252,7 +265,9 @@ class TreeView extends React.Component {
           onTipClick: this.onTipClick.bind(this),
           onBranchHover: this.onBranchHover.bind(this),
           onBranchClick: this.onBranchClick.bind(this),
-          onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this)
+          onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this),
+          branchLabel: this.branchLabel.bind(this),
+          branchLabelSize: this.branchLabelSize.bind(this)
         },
         {
           /* presently selected node / branch */
@@ -288,6 +303,35 @@ class TreeView extends React.Component {
   onBranchOrTipLeave(){
     if (this.state.hovered) {
       this.setState({hovered: null})
+    }
+  }
+
+  /**
+   * @param  {node}
+   * @return {string that is displayed as label on the branch
+   *          corresponding to the node}
+   */
+  branchLabel(d){
+    if (d.n.muts){
+      if (d.n.muts.length>5){
+        return d.n.muts.slice(0,5).join(", ") + "...";
+      }else{
+        return d.n.muts.join(", ");
+      }
+    }else{
+      return "";
+    }
+  }
+  /**
+   * @param  {node}
+   * @param  {total number of nodes in current view}
+   * @return {font size of the branch label}
+   */
+  branchLabelSize(d,n){
+    if (d.leafCount>n/10.0){
+      return 12;
+    }else{
+      return 0;
     }
   }
 
