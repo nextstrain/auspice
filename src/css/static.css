@@ -28,8 +28,8 @@ the content, the padding and border, but not the margin.
 }
 
 .static .line {
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin-top: 25px;
+  margin-bottom: 25px;
   border-bottom: 1px solid #CCC;
 }
 
@@ -65,7 +65,7 @@ the content, the padding and border, but not the margin.
   text-align: left;
   font-size: 24;
   line-height: 28px;
-  margin-top: 20px;
+  margin-top: 0px;
   margin-bottom: 10px;
   font-weight: 300;
   color: var(--darkGrey);
