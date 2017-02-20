@@ -40,6 +40,14 @@ module.exports = {
         test: /\.json$/, loader: "json-loader"
       },
       {
+        test: /\.css$/,
+        loaders: [ "style-loader", "css-loader" ]
+      },
+      // {
+      //   test: /\.svg$/,
+      //   loaders: [ "url-loader?limit=8192" ]
+      // },
+      {
         test: /\.(gif|png|jpe?g|svg)$/i, loader: "file-loader",
         include: path.join(__dirname, "src")
       }

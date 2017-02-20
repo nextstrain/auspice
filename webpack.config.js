@@ -42,6 +42,10 @@ module.exports = {
       include: path.join(__dirname, "src")
     },
     {
+      test: /\.css$/,
+      loaders: [ "style-loader", "css-loader" ]
+    },
+    {
       test: /\.(gif|png|jpe?g|svg)$/i, loader: "file-loader",
       include: path.join(__dirname, "src")
     }]

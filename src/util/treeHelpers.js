@@ -1,4 +1,5 @@
 import { tipRadius, freqScale } from "./globals";
+import { getGenotype } from "./getGenotype";
 
 export const gatherTips = (node, tips) => {
 

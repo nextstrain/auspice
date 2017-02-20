@@ -1,0 +1,145 @@
+
+/* Variables - keep in sync with globalStyles.js*/
+:root {
+  --darkGrey: #333;
+  --medGrey: #888;
+  --lightGrey: #CCC;
+  --brandColor: #5097BA;
+}
+
+/* stop horizontal scroll bar appearing*/
+body {
+  overflow-x: hidden;
+}
+
+/* The width and height properties include
+the content, the padding and border, but not the margin.
+*/
+.static * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+.static *:before,
+.static *:after {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+.static .line {
+  margin-top: 30px;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #CCC;
+}
+
+.static .main {
+  margin-top: 30px;
+}
+
+.static .title {
+  font-size: 28;
+}
+
+.static div {
+  text-align: justify;
+  font-size: 15px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-weight: 300;
+  color: var(--medGrey);
+  line-height: 1.42857143;
+}
+
+.static h1 {
+  text-align: left;
+  font-size: 28;
+  line-height: 32px;
+  font-weight: 300;
+  color: var(--darkGrey);
+  border-bottom: 10px;
+  min-width: 240px;
+}
+
+.static h2 {
+  text-align: left;
+  font-size: 24;
+  line-height: 28px;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-weight: 300;
+  color: var(--darkGrey);
+  border-bottom: 10px;
+  min-width: 240px;
+}
+
+.static .bigspacer {
+  height: 30px;
+}
+
+.static .hugespacer {
+	height: 50px;
+}
+
+.static .bigspacer {
+	height: 30px;
+}
+
+.static .spacer {
+	height: 10px;
+}
+
+.static .smallspacer {
+	height: 5px;
+}
+
+.static .highlight {
+	background-color: white;
+	color: var(--medGrey);
+	font-size: 94%; /* same as <a>*/
+}
+
+strong {
+	background-color: white;
+	color: var(--medGrey);
+	font-size: 94%; /* same as <a>*/
+}
+
+.static.container {
+  padding-left: 25px;
+  padding-right: 25px;
+}
+
+.static .col-md-9 img {
+  width: 100%;
+}
+
+/*.static aside {
+  float: right;
+}*/
+@media (min-width: 992px) {
+  .static aside {
+    float: right;
+    padding-left: 30px;
+    text-align: left;
+  }
+  .static .col-md-3 h1 {
+    text-align: right;
+    float: right;
+  }
+  .static .col-md-3 h2 {
+    text-align: right;
+    float: right;
+  }
+}
+
+.static aside {
+  margin-top: 26px;
+  /*border: 1px solid red;*/
+}
+
+/*@media (max-width: 1100px) {
+  .static .aside {
+    font-size: 0
+  }
+}*/

@@ -6,9 +6,15 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import injectTapEventPlugin from "react-tap-event-plugin";
 import configureStore from "./store";
 import App from "./components/app";
-import About from "./components/about";
-import Help from "./components/help";
-import Splash from "./components/splash";
+import About from "./static/about";
+import Help from "./static/help";
+import Methods from "./static/methods";
+import Splash from "./static/splash";
+import "./css/global.css";
+import "./css/browserCompatability.css";
+import "./css/bootstrapCustomized.css";
+import "./css/datePicker.css";
+import "./css/static.css";
 
 const store = configureStore();
 
@@ -19,9 +25,9 @@ class Root extends React.Component {
         <BrowserRouter>
           <div>
             <Switch>
-              <Route path="/methods" component={About}/>
+              <Route path="/methods" component={Methods}/>
               <Route path="/about" component={About}/>
-              <Route path="/help" component={About}/>
+              <Route path="/help" component={Help}/>
               <Route path="/zika" component={App}/>
               <Route path="/ebola" component={App}/>
               <Route exact path="/flu*" render={() => window.location.assign("http://nextflu.org/")}/>
