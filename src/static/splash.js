@@ -9,8 +9,31 @@ import { headerFont, materialButtonOutline } from "../globalStyles";
 import Flex from "../components/framework/flex";
 // import Card from "./framework/card";
 
-const generateCard = (title, imgRequired, to) => (
-  <div style={{
+const styles = {
+  cardMainText: {
+    fontFamily: headerFont,
+    fontWeight: 500,
+    fontSize: 28,
+    position: "absolute",
+    paddingTop: 10,
+    paddingBottom: 10,
+    paddingLeft: 25,
+    paddingRight: 25,
+    top: "40px",
+    left: "20px",
+    // width: "100%",
+    color: "white",
+    background: "rgba(0, 0, 0, 0.7)"
+  },
+  cardSubText: {
+    color: "white",
+    fontStyle: "italic",
+    fontSize: 16,
+    fontWeight: 400,
+    lineHeight: 0.3,
+    textAlign: "right"
+  },
+  cardOuterDiv: {
     backgroundColor: "#FFFFFF",
     // marginLeft: 10,
     // marginRight: 10,
@@ -18,50 +41,41 @@ const generateCard = (title, imgRequired, to) => (
     // marginBottom: 5,
     padding: 0,
     overflow: "hidden",
-    position: "relative",
+    position: "relative"
     // boxSizing: "content-box"
-  }}>
-    <div style={{
-      boxShadow: "3px 3px 4px 1px rgba(215,215,215,0.85)",
-      borderRadius: 2,
-      marginLeft: 10,
-      marginRight: 10,
-      marginTop: 5,
-      marginBottom: 5
-      // display: "flex",
-      // justifyContent: "center",
-      // alignItems: "center",
-      // overflow: "hidden"
-    }}>
-      <img
-        style={{
-          objectFit: "cover",
-          width: "100%"
-        }}
-        src={imgRequired}
-      />
+  },
+  cardInnerDiv: {
+    boxShadow: "3px 3px 4px 1px rgba(215,215,215,0.85)",
+    borderRadius: 2,
+    marginLeft: 10,
+    marginRight: 10,
+    marginTop: 5,
+    marginBottom: 5
+    // display: "flex",
+    // justifyContent: "center",
+    // alignItems: "center",
+    // overflow: "hidden"
+  },
+  cardImg: {
+    objectFit: "cover",
+    width: "100%"
+  }
+};
+
+const generateCard = (title, imgRequired, to) => (
+  <div style={styles.cardOuterDiv}>
+    <div style={styles.cardInnerDiv}>
+      <img style={styles.cardImg} src={imgRequired}/>
       <Link to={to}>
-        <span style={{
-          fontFamily: headerFont,
-          fontWeight: 500,
-          fontSize: 28,
-          position: "absolute",
-          paddingTop: 10,
-          paddingBottom: 10,
-          paddingLeft: 25,
-          paddingRight: 25,
-          top: "40px",
-          left: "20px",
-          // width: "100%",
-          color: "white",
-          background: "rgba(0, 0, 0, 0.7)"
-        }}>
-          {title}
+        <span style={styles.cardMainText}>
+          {title[0]}
+          {title.length === 2 ? <div style={styles.cardSubText}>{title[1]}</div> : null}
         </span>
       </Link>
     </div>
   </div>
 );
+
 
 const Splash = () => {
 
@@ -79,7 +93,7 @@ const Splash = () => {
             <Title/>
             <h2>
             Real-time tracking of virus evolution
-            </h2>            
+            </h2>
           </div>
           <div className="col-md-5"/>
         </div>
@@ -128,13 +142,13 @@ const Splash = () => {
           <div className="col-md-10">
             <div className="row">
       				<div className="col-sm-4">
-                {generateCard("Ebola", require("../images/ebola.png"), "/ebola")}
+                {generateCard(["Ebola"], require("../images/ebola.png"), "/ebola")}
               </div>
               <div className="col-sm-4">
-                {generateCard("Zika", require("../images/zika.png"), "/zika")}
+                {generateCard(["Zika"], require("../images/zika.png"), "/zika")}
               </div>
               <div className="col-sm-4">
-                {generateCard("Influenza", require("../images/influenza.png"), "/flu")}
+                {generateCard(["Influenza", "(uses nextflu.org)"], require("../images/influenza.png"), "/flu")}
               </div>
             </div>
           </div>
