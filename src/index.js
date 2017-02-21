@@ -10,6 +10,7 @@ import About from "./static/about";
 import Help from "./static/help";
 import Methods from "./static/methods";
 import Splash from "./static/splash";
+import BrowserDimensionMonitor from "./components/framework/browserDimensionMonitor";
 import "./css/global.css";
 import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";
@@ -24,6 +25,7 @@ class Root extends React.Component {
       <Provider store={store}>
         <BrowserRouter>
           <div>
+            <BrowserDimensionMonitor/>
             <Switch>
               <Route path="/methods" component={Methods}/>
               <Route path="/about" component={About}/>
