@@ -7,19 +7,19 @@ import TitleBar from "../components/framework/title-bar";
 
 /* helper / generating functions */
 const generateLogos = [
-  <a href="http://www.fredhutch.org/">
+  <a key={1} href="http://www.fredhutch.org/">
     <img width="75" src={require("../images/fred-hutch-logo-small.png")}/>
   </a>,
-  <a href="http://www.eb.tuebingen.mpg.de/">
+  <a key={2} href="http://www.eb.tuebingen.mpg.de/">
     <img width="65" src={require("../images/max-planck-logo-small.png")}/>
   </a>,
-  <a href="https://www.nih.gov/">
+  <a key={3} href="https://www.nih.gov/">
     <img width="52" src={require("../images/nih-logo-small.png")}/>
   </a>,
-  <a href="https://erc.europa.eu/">
+  <a key={4} href="https://erc.europa.eu/">
     <img width="60" src={require("../images/erc-logo-small.png")}/>
   </a>,
-  <a href="https://www.openscienceprize.org/">
+  <a key={5} href="https://www.openscienceprize.org/">
     <img width="82" src={require("../images/osp-logo-small.png")}/>
   </a>
 ];
