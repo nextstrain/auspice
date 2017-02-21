@@ -7,7 +7,7 @@ import TitleBar from "../components/framework/title-bar";
 const Help = () => {
   return (
 		<g>
-			<TitleBar/>
+			<TitleBar dataNameHidden={true} helpSelected={true}/>
 
 			<div className="static container">
 

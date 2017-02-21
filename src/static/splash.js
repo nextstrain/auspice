@@ -82,7 +82,7 @@ const Splash = () => {
             Real-time tracking of virus evolution
             </h2>
 
-            This website aims to provide a real-time snapshot of evolving virus populations to aid epidemiological understanding and improve outbreak response.
+            This website aims to provide a real-time snapshot of evolving virus populations to aid epidemiological understanding and improve outbreak response
 
             <div className={"line"}/>
 

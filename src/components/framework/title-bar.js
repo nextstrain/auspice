@@ -1,7 +1,7 @@
 import React from "react";
 import Flex from "./flex";
 import { titleColors, titleBarHeight } from "../../util/globals";
-import { titleFont, darkGrey, medGrey, lightGrey, brandColor } from "../../globalStyles";
+import { titleFont, dataFont, darkGrey, medGrey, lightGrey, brandColor } from "../../globalStyles";
 import Radium from "radium";
 import Title from "./title";
 import { Link } from "react-router-dom";
@@ -29,9 +29,11 @@ class TitleBar extends React.Component {
         lineHeight: "28px",
         marginTop: 0,
         marginBottom: 2,
-        fontWeight: 500,
+        fontWeight: 300,
         color: medGrey,
-        padding: "8px"
+        paddingLeft: "8px",
+        paddingRight: "0px",
+        letterSpacing: "-1px"
       },
       main: {
         height: titleBarHeight,
@@ -48,6 +50,13 @@ class TitleBar extends React.Component {
         cursor: "pointer",
         fontSize: 16
       },
+      inactive: {
+        alignSelf: "center",
+        padding: "8px",
+        color: medGrey,
+        textDecoration: "none",
+        fontSize: 16
+      },
       alerts: {
         textAlign: "center",
         verticalAlign: "middle",
@@ -55,11 +64,13 @@ class TitleBar extends React.Component {
         color: brandColor
       },
       dataName: {
-        letterSpacing: "3px",
-        color: darkGrey,
+        fontFamily: titleFont,
+        color: medGrey,
         fontSize: 24,
-        fontWeight: 400,
-        marginBottom: -7
+        fontWeight: 300,
+        marginBottom: -10,
+        paddingLeft: 0,
+        letterSpacing: "-1px"
       }
     };
   }
@@ -68,6 +79,8 @@ class TitleBar extends React.Component {
     // const dataName = this.props.dataName ?
     //   <div style={styles.dataName}>{this.props.dataName}</div> : null;
     let dataName = this.context.router.location.pathname;
+    dataName = dataName.replace(/^\//, '');
+    // dataName = dataName += '|';
     if (dataName.length === 1) {dataName = "";}
     return (
       <div>
@@ -77,14 +90,23 @@ class TitleBar extends React.Component {
             <Link style={styles.link} to="/">
               <Title style={styles.title}/>
             </Link>}
-          {/*{dataName}*/}
-          <div style={styles.dataName}>
-            {dataName}
-          </div>
+          {this.props.titleHidden || this.props.dataNameHidden ? <p/> :
+            <div style={styles.dataName}>
+              {dataName}
+            </div>}
           <div style={{flex: 40 }}/>
-          <Link style={styles.link} to="/about">About</Link>
-          <Link style={styles.link} to="/methods">Methods</Link>
-          <Link style={styles.link} to="/help">Help</Link>
+          {this.props.aboutSelected ?
+            <div style={styles.inactive}>About</div> :
+            <Link style={styles.link} to="/about">About</Link>
+          }
+          {this.props.methodsSelected ?
+            <div style={styles.inactive}>Methods</div> :
+            <Link style={styles.link} to="/methods">Methods</Link>
+          }
+          {this.props.helpSelected ?
+            <div style={styles.inactive}>Help</div> :
+            <Link style={styles.link} to="/help">Help</Link>
+          }                    
           <div style={{flex: 1 }}/>
         </Flex>
       </div>

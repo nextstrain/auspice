@@ -2,14 +2,14 @@ import { controlsWidth } from "./util/globals";
 
 /* IF YOU CHANGE THINGS HERE CHANGE THEM IN static.css AS WELL! */
 //export const titleFont = "aw-conqueror-sans, sans-serif";
-export const titleFont = "Quicksand, Helvetica Neue, Helvetica, sans-serif";
+export const titleFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const headerFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const dataFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const lighterGrey = "rgb(200, 200, 200)";
 export const darkGrey = "#333";
 export const medGrey = "#888";
 export const lightGrey = "#CCC";
-export const brandColor = "#5097BA"; // #5DA8A3
+export const brandColor = "#5097BA"; // #5DA8A3 (green) or #5097BA (blue)
 
 // http://stackoverflow.com/questions/1895476/how-to-style-a-select-dropdown-with-css-only-without-javascript
 export const select = {

@@ -19,8 +19,9 @@ class Title extends React.Component {
         lineHeight: "28px",
         marginTop: 0,
         marginBottom: 2,
-        fontWeight: 500,
-        color: medGrey
+        fontWeight: 300,
+        color: medGrey,
+        letterSpacing: "-1px"
       }
     };
   }

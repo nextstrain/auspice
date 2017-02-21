@@ -27,7 +27,7 @@ const generateLogos = [
 const About = () => {
   return(
     <g>
-      <TitleBar/>
+      <TitleBar dataNameHidden={true} aboutSelected={true}/>
 
 			<div className="static container">
 

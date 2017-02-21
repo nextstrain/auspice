@@ -7,7 +7,7 @@ import TitleBar from "../components/framework/title-bar";
 const Methods = () => {
   return (
 		<g>
-			<TitleBar/>
+			<TitleBar dataNameHidden={true} methodsSelected={true}/>
 
 			<div className="static container">
 
