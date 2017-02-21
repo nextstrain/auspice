@@ -28,8 +28,8 @@ the content, the padding and border, but not the margin.
 }
 
 .static .line {
-  margin-top: 25px;
-  margin-bottom: 25px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   border-bottom: 1px solid #CCC;
 }
 

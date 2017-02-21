@@ -4,12 +4,13 @@ import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import TitleBar from "../components/framework/title-bar";
+import Title from "../components/framework/title";
 import { headerFont } from "../globalStyles";
 import Flex from "../components/framework/flex";
 // import Card from "./framework/card";
 
 const generateCard = (title, imgRequired, to) => (
-  <div className="col-sm-4" style={{
+  <div style={{
     backgroundColor: "#FFFFFF",
     // marginLeft: 10,
     // marginRight: 10,
@@ -63,27 +64,25 @@ const generateCard = (title, imgRequired, to) => (
 );
 
 const Splash = () => {
+
   return(
     <g>
-      <TitleBar/>
+      <TitleBar titleHidden={true}/>
 
       <div className="static container">
 
   			<div className="bigspacer"></div>
 
   			<div className="row">
-  				<div className="col-md-3"></div>
-  				<h1 className="col-md-7">
+          <div className="col-md-1"/>
+  				<div className="col-md-7">
+            <Title/>
+            <p/>
+            <h2>
             Real-time tracking of virus evolution
-          </h1>
-        </div>
+            </h2>
 
-        <div className="row">
-					<div className="col-md-3">
-					</div>
-
-					<div className="col-md-7">
-            Brief introduction?
+            This website aims to provide a real-time snapshot of evolving virus populations to aid epidemiological understanding and improve outbreak response.
 
             <div className={"line"}/>
 
@@ -101,9 +100,10 @@ const Splash = () => {
 
             <div className={"line"}/>
 					</div>
+          <div className="col-md-4"/>
 				</div>
 
-        <div className="bigspacer"></div>
+
 
         {/* THE CLICKABLE CARDS
           images styalized in lunapic witht he grey filter
@@ -111,15 +111,27 @@ const Splash = () => {
           http://www.cidresearch.org/uploads/12/10/ebola_virus_particles_budding_VERO_E6_cell_blue_yellow_NIAID.jpg
           http://cdn1.bostonmagazine.com/wp-content/uploads/2013/10/flu-virus-main.jpg
         */}
+
+        <div className="row">
+          <div className="col-md-1"/>
+          <div className="col-md-10">
+            <div className="row">
+      				<div className="col-sm-4">
+                {generateCard("Ebola", require("../images/ebola.png"), "/ebola")}
+              </div>
+              <div className="col-sm-4">
+                {generateCard("Zika", require("../images/zika.png"), "/zika")}
+              </div>
+              <div className="col-sm-4">
+                {generateCard("Influenza", require("../images/influenza.png"), "/flu")}
+              </div>
+            </div>
+          </div>
+          <div className="col-md-1"/>
+        </div>
+
       </div>
 
-      <div className="container" style={{maxWidth: "970px"}}>
-        <div className="row">
-          {generateCard("Ebola", require("../images/ebola.png"), "/ebola")}
-          {generateCard("Zika", require("../images/zika.png"), "/zika")}
-          {generateCard("Influenza", require("../images/influenza.png"), "/flu")}
-        </div>
-      </div>
     </g>
   );
 };

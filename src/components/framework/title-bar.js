@@ -73,9 +73,10 @@ class TitleBar extends React.Component {
       <div>
         <Flex style={styles.main}>
           <div style={{flex: 1 }}/>
-          <Link style={styles.link} to="/">
-            <Title style={styles.title}/>
-          </Link>
+          {this.props.titleHidden ? <p/> :
+            <Link style={styles.link} to="/">
+              <Title style={styles.title}/>
+            </Link>}
           {/*{dataName}*/}
           <div style={styles.dataName}>
             {dataName}
