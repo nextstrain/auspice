@@ -1,4 +1,5 @@
 import { updateColorScale, updateNodeColors } from "./colors";
+import { dataURLStem } from "../util/globals";
 import * as types from "./types";
 
 /* request metadata */
@@ -29,8 +30,7 @@ const fetchMetadata = (q) => {
     /data/flu_h3n2_3y_meta.json
   */
   return fetch(
-    "/data/" +
-    q + "_meta.json"
+    dataURLStem + q + "_meta.json"
   );
 };
 
@@ -72,8 +72,7 @@ const treeFetchError = (err) => {
 
 const fetchTree = (q) => {
   return fetch(
-    "/data/" +
-      q + "_tree.json"
+    dataURLStem + q + "_tree.json"
   );
 };
 
@@ -115,8 +114,7 @@ const sequencesFetchError = (err) => {
 
 const fetchSequences = (q) => {
   return fetch(
-    "/data/" +
-      q + "_sequences.json"
+    dataURLStem + q + "_sequences.json"
   );
 };
 
@@ -157,8 +155,7 @@ const frequenciesFetchError = (err) => {
 
 const fetchFrequencies = (q) => {
   return fetch(
-    "/data/" +
-      q + "_frequencies.json"
+    dataURLStem + q + "_frequencies.json"
   );
 };
 
@@ -194,8 +191,9 @@ const entropyFetchError = (err) => {
 };
 
 const fetchEntropy = (q) => {
-  return fetch("/data/" +
-      q + "_entropy.json");
+  return fetch(
+    dataURLStem + q + "_entropy.json"
+  );
 };
 
 const populateEntropyStore = (queryParams) => {
