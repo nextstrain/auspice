@@ -56,6 +56,23 @@ export const materialButtonSelected = {
   cursor: "default"
 };
 
+export const materialButtonOutline = {
+  border: "1px solid #CCC",
+  backgroundColor: "#FFFFFF",
+  borderRadius: 2,
+  cursor: "pointer",
+  paddingTop: 5,
+  paddingBottom: 5,
+  paddingLeft: 10,
+  paddingRight: 10,
+  fontFamily: dataFont,
+  color: medGrey,
+  fontWeight: 400,
+  textTransform: "uppercase",
+  fontSize: 14,
+  verticalAlign: "top"
+};
+
 export const titleStyles = {
   big: {
     fontFamily: titleFont,

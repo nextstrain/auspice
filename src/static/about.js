@@ -35,6 +35,7 @@ const About = () => {
 					<div className="col-md-1"/>
 					<div className="col-md-7">
             <h1>About</h1>
+            <h2>Viral Phylogenies</h2>
           </div>
         </div>
 
@@ -42,8 +43,6 @@ const About = () => {
 
           <div className="col-md-1"/>
 					<div className="col-md-6">
-
-            <h2>Viral Phylogenies</h2>
 
             In the course of an infection and over an epidemic, viral pathogens naturally accumulate random mutations to their genomes. This is an inevitable consequence of viral replication and usually occurs without natural selection. Consequently, viral mutations can be used as a marker of transmission in which closely related viral genomes indicate closely related infections. By reconstructing a viral "phylogeny" we can learn about important epidemiological phenomena such as spatial spread, introduction timings and epidemic growth rate.
 
@@ -83,6 +82,7 @@ const About = () => {
           <div className="col-md-1"/>
         </div>
 
+      <div className="bigspacer"></div>
 
       </div>
     </g>

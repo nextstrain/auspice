@@ -11,12 +11,13 @@ const Methods = () => {
 
 			<div className="static container">
 
-  
+
 
         <div className="row">
           <div className="col-md-1"/>
           <div className="col-md-7">
             <h1>Methods</h1>
+            <h2>Overview</h2>            
           </div>
         </div>
 
@@ -24,8 +25,6 @@ const Methods = () => {
 
           <div className="col-md-1"/>
 					<div className="col-md-6">
-
-            <h2>Overview</h2>
 
 						The data processing for nextrain consists of two stages: data collection (known as <a href="https://github.com/nextstrain/fauna">fauna</a>) and data processing (known as <a href="https://github.com/nextstrain/augur">augur</a>), each publically available and detailed on github. Here we give an overview of these methods. The data vizualisation code is known as <a href="https://github.com/nextstrain/auspice">auspice</a>.
 

@@ -6,10 +6,8 @@ import Radium from "radium";
 import Title from "./title";
 import { Link } from "react-router-dom";
 
-/*
-This titlebar is not great, mostly becuase I'm no expert at flexbox.
-You have free reign to make this titlebar great again.
-*/
+var RadiumLink = Radium(Link); // needed to style custom components with radium
+
 @Radium
 class TitleBar extends React.Component {
   constructor(props) {
@@ -45,14 +43,21 @@ class TitleBar extends React.Component {
       link: {
         alignSelf: "center",
         padding: "8px",
-        color: brandColor,
+        color: medGrey,
         textDecoration: "none",
         cursor: "pointer",
-        fontSize: 16
+        fontSize: 16,
+        ':hover': {
+          color: brandColor
+        }
       },
       inactive: {
         alignSelf: "center",
-        padding: "8px",
+        background: "#e0e1e1",
+        paddingLeft: "8px",
+        paddingRight: "8px",
+        paddingTop: "15px",
+        paddingBottom: "15px",
         color: medGrey,
         textDecoration: "none",
         fontSize: 16
@@ -97,15 +102,15 @@ class TitleBar extends React.Component {
           <div style={{flex: 30 }}/>
           {this.props.aboutSelected ?
             <div style={styles.inactive}>About</div> :
-            <Link style={styles.link} to="/about">About</Link>
+            <RadiumLink style={styles.link} to="/about">About</RadiumLink>
           }
           {this.props.methodsSelected ?
             <div style={styles.inactive}>Methods</div> :
-            <Link style={styles.link} to="/methods">Methods</Link>
+            <RadiumLink style={styles.link} to="/methods">Methods</RadiumLink>
           }
           {this.props.helpSelected ?
             <div style={styles.inactive}>Help</div> :
-            <Link style={styles.link} to="/help">Help</Link>
+            <RadiumLink style={styles.link} to="/help">Help</RadiumLink>
           }
           <div style={{flex: 1 }}/>
         </Flex>

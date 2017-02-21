@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import TitleBar from "../components/framework/title-bar";
 import Title from "../components/framework/title";
-import { headerFont } from "../globalStyles";
+import { headerFont, materialButtonOutline } from "../globalStyles";
 import Flex from "../components/framework/flex";
 // import Card from "./framework/card";
 
@@ -73,37 +73,46 @@ const Splash = () => {
 
   			<div className="bigspacer"></div>
 
-  			<div className="row">
+        <div className="row">
           <div className="col-md-1"/>
   				<div className="col-md-6">
             <Title/>
-            <p/>
             <h2>
             Real-time tracking of virus evolution
-            </h2>
+            </h2>            
+          </div>
+          <div className="col-md-5"/>
+        </div>
+
+  			<div className="row">
+          <div className="col-md-1"/>
+  				<div className="col-md-6">
 
             This website aims to provide a real-time snapshot of evolving virus populations to aid epidemiological understanding and improve outbreak response
 
-            <div className={"line"}/>
-
-            <Link to="/about">
-              More detailed information about Nextstrain
-            </Link>
-            <p/>
-            <Link to="/methods">
-              How we process the data
-            </Link>
-            <p/>
-            <Link to="/help">
-              How to use Nextstrain
-            </Link>
-
-            <div className={"line"}/>
 					</div>
-          <div className="col-md-5"/>
+
+          <div className="col-md-1"/>
+
+          <div className="col-md-3 aside">
+            <Link to="/about">
+              <button style={materialButtonOutline}>
+                Learn More
+              </button>
+            </Link>
+          </div>
+
+          <div className="col-md-1"/>
+
 				</div>
 
-
+        <div className="row">
+          <div className="col-md-1"/>
+  				<div className="col-md-6">
+            <div className={"line"}/>
+          </div>
+          <div className="col-md-5"/>
+        </div>
 
         {/* THE CLICKABLE CARDS
           images styalized in lunapic witht he grey filter
@@ -111,6 +120,8 @@ const Splash = () => {
           http://www.cidresearch.org/uploads/12/10/ebola_virus_particles_budding_VERO_E6_cell_blue_yellow_NIAID.jpg
           http://cdn1.bostonmagazine.com/wp-content/uploads/2013/10/flu-virus-main.jpg
         */}
+
+        <div className="bigspacer"></div>
 
         <div className="row">
           <div className="col-md-1"/>
@@ -129,6 +140,8 @@ const Splash = () => {
           </div>
           <div className="col-md-1"/>
         </div>
+
+      <div className="bigspacer"></div>
 
       </div>
 

@@ -59,7 +59,7 @@ the content, the padding and border, but not the margin.
   color: var(--darkGrey);
   min-width: 240px;
   margin-top: 40px;
-  margin-bottom: 5px;
+  margin-bottom: 30px;
 }
 
 .static h2 {
@@ -135,10 +135,8 @@ strong {
 }
 
 .static .aside {
-  margin-top: 54px;
   font-size: 13px;
   font-weight: 300;
-  /*border: 1px solid red;*/
 }
 
 /*@media (max-width: 1100px) {
