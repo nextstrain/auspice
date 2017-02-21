@@ -69,7 +69,7 @@ class TitleBar extends React.Component {
         fontSize: 24,
         fontWeight: 300,
         marginBottom: -10,
-        paddingLeft: 0,
+        paddingLeft: 2,
         letterSpacing: "-1px"
       }
     };
