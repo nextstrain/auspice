@@ -75,7 +75,7 @@ const About = () => {
           <div className="col-md-1"/>
           <div className="col-md-10">
             <div className="line"></div>
-            <Flex style={{marginTop: 20, justifyContent: "space-around"}}>
+            <Flex wrap="wrap" style={{marginTop: 20, justifyContent: "space-around"}}>
               {generateLogos}
             </Flex>
           </div>
