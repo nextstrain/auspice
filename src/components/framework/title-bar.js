@@ -1,15 +1,13 @@
 import React from "react";
 import Flex from "./flex";
 import { titleColors, titleBarHeight } from "../../util/globals";
-import { titleFont, darkGrey, medGrey, lightGrey, brandColor } from "../../globalStyles";
+import { titleFont, dataFont, darkGrey, medGrey, lightGrey, brandColor } from "../../globalStyles";
 import Radium from "radium";
 import Title from "./title";
 import { Link } from "react-router-dom";
 
-/*
-This titlebar is not great, mostly becuase I'm no expert at flexbox.
-You have free reign to make this titlebar great again.
-*/
+var RadiumLink = Radium(Link); // needed to style custom components with radium
+
 @Radium
 class TitleBar extends React.Component {
   constructor(props) {
@@ -29,9 +27,11 @@ class TitleBar extends React.Component {
         lineHeight: "28px",
         marginTop: 0,
         marginBottom: 2,
-        fontWeight: 500,
+        fontWeight: 300,
         color: medGrey,
-        padding: "8px"
+        paddingLeft: "8px",
+        paddingRight: "0px",
+        letterSpacing: "-1px"
       },
       main: {
         height: titleBarHeight,
@@ -43,9 +43,23 @@ class TitleBar extends React.Component {
       link: {
         alignSelf: "center",
         padding: "8px",
-        color: brandColor,
+        color: medGrey,
         textDecoration: "none",
         cursor: "pointer",
+        fontSize: 16,
+        ':hover': {
+          color: brandColor
+        }
+      },
+      inactive: {
+        alignSelf: "center",
+        background: "#e0e1e1",
+        paddingLeft: "8px",
+        paddingRight: "8px",
+        paddingTop: "15px",
+        paddingBottom: "15px",
+        color: medGrey,
+        textDecoration: "none",
         fontSize: 16
       },
       alerts: {
@@ -55,11 +69,13 @@ class TitleBar extends React.Component {
         color: brandColor
       },
       dataName: {
-        letterSpacing: "3px",
-        color: darkGrey,
+        fontFamily: titleFont,
+        color: medGrey,
         fontSize: 24,
-        fontWeight: 400,
-        marginBottom: -7
+        fontWeight: 300,
+        marginBottom: -10,
+        paddingLeft: 2,
+        letterSpacing: "-1px"
       }
     };
   }
@@ -68,22 +84,34 @@ class TitleBar extends React.Component {
     // const dataName = this.props.dataName ?
     //   <div style={styles.dataName}>{this.props.dataName}</div> : null;
     let dataName = this.context.router.location.pathname;
+    dataName = dataName.replace(/^\//, '');
+    // dataName = dataName += '|';
     if (dataName.length === 1) {dataName = "";}
     return (
       <div>
         <Flex style={styles.main}>
           <div style={{flex: 1 }}/>
-          <Link style={styles.link} to="/">
-            <Title style={styles.title}/>
-          </Link>
-          {/*{dataName}*/}
-          <div style={styles.dataName}>
-            {dataName}
-          </div>
-          <div style={{flex: 40 }}/>
-          <Link style={styles.link} to="/about">About</Link>
-          <Link style={styles.link} to="/methods">Methods</Link>
-          <Link style={styles.link} to="/help">Help</Link>
+          {this.props.titleHidden ? <div style={{flex: 10 }}/> :
+            <Link style={styles.link} to="/">
+              <Title style={styles.title}/>
+            </Link>}
+          {this.props.titleHidden || this.props.dataNameHidden ? <div style={{flex: 10 }}/> :
+            <div style={styles.dataName}>
+              {dataName}
+            </div>}
+          <div style={{flex: 30 }}/>
+          {this.props.aboutSelected ?
+            <div style={styles.inactive}>About</div> :
+            <RadiumLink style={styles.link} to="/about">About</RadiumLink>
+          }
+          {this.props.methodsSelected ?
+            <div style={styles.inactive}>Methods</div> :
+            <RadiumLink style={styles.link} to="/methods">Methods</RadiumLink>
+          }
+          {this.props.helpSelected ?
+            <div style={styles.inactive}>Help</div> :
+            <RadiumLink style={styles.link} to="/help">Help</RadiumLink>
+          }
           <div style={{flex: 1 }}/>
         </Flex>
       </div>

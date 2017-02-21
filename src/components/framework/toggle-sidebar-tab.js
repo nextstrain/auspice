@@ -21,7 +21,7 @@ const ToggleSidebarTab = ({open, handler}) => {
       <svg
         style={{
           position: "relative",
-          top: 10,
+          top: 15,
           left: 4
         }}
         width="7px"

@@ -28,8 +28,8 @@ the content, the padding and border, but not the margin.
 }
 
 .static .line {
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin-top: 20px;
+  margin-bottom: 20px;
   border-bottom: 1px solid #CCC;
 }
 
@@ -43,31 +43,32 @@ the content, the padding and border, but not the margin.
 
 .static div {
   text-align: justify;
-  font-size: 15px;
+  font-size: 16px;
   margin-top: 5px;
   margin-bottom: 5px;
   font-weight: 300;
-  color: var(--medGrey);
+  color: var(--darkGrey);
   line-height: 1.42857143;
 }
 
 .static h1 {
   text-align: left;
-  font-size: 28;
+  font-size: 38px;
   line-height: 32px;
   font-weight: 300;
   color: var(--darkGrey);
-  border-bottom: 10px;
   min-width: 240px;
+  margin-top: 40px;
+  margin-bottom: 30px;
 }
 
 .static h2 {
   text-align: left;
-  font-size: 24;
+  font-size: 16px;
   line-height: 28px;
-  margin-top: 20px;
-  margin-bottom: 10px;
-  font-weight: 300;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  font-weight: 500;
   color: var(--darkGrey);
   border-bottom: 10px;
   min-width: 240px;
@@ -133,9 +134,9 @@ strong {
   }
 }
 
-.static aside {
-  margin-top: 26px;
-  /*border: 1px solid red;*/
+.static .aside {
+  font-size: 13px;
+  font-weight: 300;
 }
 
 /*@media (max-width: 1100px) {

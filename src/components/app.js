@@ -2,11 +2,10 @@
 import React from "react";
 import { connect } from "react-redux";
 import { loadJSONs } from "../actions/loadData";
-import { BROWSER_DIMENSIONS, NEW_DATASET } from "../actions/types";
+import { NEW_DATASET } from "../actions/types";
 import { restoreStateFromURL, turnURLtoDataPath } from "../util/urlHelpers"
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
-import _ from "lodash";
 import Title from "./framework/title";
 import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
@@ -61,24 +60,11 @@ class App extends React.Component {
   // }
 
   componentDidMount() {
-    /* This is hit on the initial load and when a browser is refreshed
+    /* parse URL, set URL, load data etc
+
+    This is hit on the initial load and when a browser is refreshed
     but NOT when browser back/forward buttons are used.
-    */
 
-    /* firstly, set up browser stuff for resizes etc */
-    this.handleResizeByDispatching(); // initial dimensions
-    window.addEventListener( // future resizes
-      "resize",
-      _.throttle(this.handleResizeByDispatching.bind(this), 500, {
-        leading: true,
-        trailing: true
-      })
-      /* invoke resize event at most twice per second to let redraws catch up
-      Could also be _.debounce for 'wait until resize stops'
-      */
-    );
-
-    /* secondly, parse URL, set URL, load data etc
     we're always going to load data here, it's just a question of what data to load!
     NOTE because the page has just loaded, there is no state to clear, we simply load
     new bits of state via the URL query and then URL pathname
@@ -101,19 +87,6 @@ class App extends React.Component {
     // console.log("app.js CDU")
     // console.log("redux datasetPathName:", this.props.datasetPathName);
     // this.maybeFetchDataset();
-  }
-
-  handleResizeByDispatching() {
-    this.props.dispatch({
-      type: BROWSER_DIMENSIONS,
-      data: {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        docHeight: window.document.body.clientHeight
-        /* background needs docHeight because sidebar creates
-        absolutely positioned container and blocks height 100% */
-      }
-    });
   }
 
   render() {
