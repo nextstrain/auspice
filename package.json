@@ -1,13 +1,12 @@
 {
   "name": "nextstrain-auspice",
   "version": "0.0.1",
-  "description": "Nextstrain Auspice",
+  "description": "Nextstrain auspice",
   "scripts": {
     "clean": "rimraf dist",
     "build:webpack": "NODE_ENV=production webpack --config webpack.config.js",
     "build": "npm run clean && npm run build:webpack",
     "start": "node dev-server.js",
-    "fetchAndStart": "sh fetch_data.sh && node server.js",
     "lint": "eslint src",
     "postinstall": "npm run build"
   },
