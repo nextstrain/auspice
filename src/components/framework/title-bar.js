@@ -86,15 +86,15 @@ class TitleBar extends React.Component {
       <div>
         <Flex style={styles.main}>
           <div style={{flex: 1 }}/>
-          {this.props.titleHidden ? <p/> :
+          {this.props.titleHidden ? <div style={{flex: 10 }}/> :
             <Link style={styles.link} to="/">
               <Title style={styles.title}/>
             </Link>}
-          {this.props.titleHidden || this.props.dataNameHidden ? <p/> :
+          {this.props.titleHidden || this.props.dataNameHidden ? <div style={{flex: 10 }}/> :
             <div style={styles.dataName}>
               {dataName}
             </div>}
-          <div style={{flex: 40 }}/>
+          <div style={{flex: 30 }}/>
           {this.props.aboutSelected ?
             <div style={styles.inactive}>About</div> :
             <Link style={styles.link} to="/about">About</Link>
@@ -106,7 +106,7 @@ class TitleBar extends React.Component {
           {this.props.helpSelected ?
             <div style={styles.inactive}>Help</div> :
             <Link style={styles.link} to="/help">Help</Link>
-          }                    
+          }
           <div style={{flex: 1 }}/>
         </Flex>
       </div>

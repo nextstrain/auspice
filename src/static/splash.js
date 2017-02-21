@@ -75,7 +75,7 @@ const Splash = () => {
 
   			<div className="row">
           <div className="col-md-1"/>
-  				<div className="col-md-7">
+  				<div className="col-md-6">
             <Title/>
             <p/>
             <h2>
@@ -100,7 +100,7 @@ const Splash = () => {
 
             <div className={"line"}/>
 					</div>
-          <div className="col-md-4"/>
+          <div className="col-md-5"/>
 				</div>
 
 
