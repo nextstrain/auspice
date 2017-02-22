@@ -16,7 +16,7 @@ import getLatLongs from "../../util/mapHelpersLatLong";
 
 @connect((state) => {
   return {
-    tree: state.tree.tree,
+    datasetGuid: state.tree.datasetGuid,
     nodes: state.tree.nodes,
     metadata: state.metadata.metadata,
     browserDimensions: state.browserDimensions.browserDimensions,
