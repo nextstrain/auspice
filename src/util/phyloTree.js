@@ -1072,6 +1072,11 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
       }
     }
   });
+  let updatePath = false;
+  if (styles["stroke-width"]){
+    this.mapToScreen();
+    updatePath = true;
+  }
 
   // function that return the closure object for updating the svg
   function update(attrToSet, stylesToSet) {
@@ -1088,6 +1093,9 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
           return d[prop];
         });
       }
+      if (updatePath){
+	selection.filter('.S').attr("d", function(d){return d.branch[0];})
+      }
     };
   };
   // update the svg
@@ -1103,7 +1111,6 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
       })
       .call(update(Object.keys(attrs), Object.keys(styles)));
   }
-
 };
 
 /**
