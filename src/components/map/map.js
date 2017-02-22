@@ -234,32 +234,45 @@ class Map extends React.Component {
 
     this.setState({map});
   }
-  createMapDiv() {
+  maybeCreateMapDiv() {
     // onClick={this.handleAnimationPlayClicked.bind(this) }
-    return (
-      <div style={{position: "relative"}}>
-        <button style={{
-            position: "absolute",
-            left: 25,
-            top: 25,
-            zIndex: 9999,
-            border: "none",
-            padding: 15,
-            borderRadius: 4,
-            backgroundColor: "rgb(124, 184, 121)",
-            fontWeight: 700,
-            color: "white"
-          }}
-          >
-          Play
-        </button>
-        <div style={{
-            height: this.state.responsive.height,
-            width: this.state.responsive.width
-          }} id="map">
+    let container = null;
+
+    console.log('create map div', this.props.browserDimensions, this.state.responsive)
+
+    if (
+      this.props.browserDimensions &&
+      this.state.responsive
+    ) {
+
+      container = (
+        <div style={{position: "relative"}}>
+          <button style={{
+              position: "absolute",
+              left: 25,
+              top: 25,
+              zIndex: 9999,
+              border: "none",
+              padding: 15,
+              borderRadius: 4,
+              backgroundColor: "rgb(124, 184, 121)",
+              fontWeight: 700,
+              color: "white"
+            }}
+            >
+            Play
+          </button>
+          <div style={{
+              height: this.state.responsive.height,
+              width: this.state.responsive.width
+            }} id="map">
+          </div>
         </div>
-      </div>
-    )
+      )
+    }
+
+
+    return container;
   }
   // handleAnimationPlayClicked() {
   //   /******************************************
@@ -295,7 +308,7 @@ class Map extends React.Component {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
       <Card center title="Transmissions">
-        {this.props.browserDimensions ? this.createMapDiv() : "Loading"}
+        {this.maybeCreateMapDiv()}
       </Card>
     );
   }
