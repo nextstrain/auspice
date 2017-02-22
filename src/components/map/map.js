@@ -46,9 +46,35 @@ class Map extends React.Component {
     }
   }
   componentDidMount() {
-    setupLeafletPlugins(); /* this attaches several properties to window.L */
+    /*
+      this attaches several properties to window.L
+      it's a bit of a hack, but it's a code execution order problem and it works fine.
+    */
+    setupLeafletPlugins();
   }
   componentWillReceiveProps(nextProps) {
+    this.maybeComputeResponive(nextProps);
+  }
+  componentDidUpdate(prevProps, prevState) {
+    this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
+    this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
+    this.maybeDrawTipsAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset */
+    this.maybeUpdateTipsAndTransmissions(); /* every time we change something like colorBy */
+    this.maybeAnimateTipsAndTransmissions();
+    this.maybeRemoveAllTipsAndTransmissions(prevProps); /* dataset just changed */
+  }
+  maybeCreateLeafletMap() {
+    /* first time map, this sets up leaflet */
+    if (
+      this.props.browserDimensions &&
+      this.props.metadata &&
+      !this.state.map &&
+      document.getElementById("map")
+    ) {
+      this.createMap();
+    }
+  }
+  maybeComputeResponive(nextProps) {
     /*
       React to browser width/height changes responsively
       This is stored in state because it's used by both the map and the d3 overlay
@@ -59,44 +85,27 @@ class Map extends React.Component {
       (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
       this.props.browserDimensions.height !== nextProps.browserDimensions.height)
     ) {
-      const responsive = computeResponsive({
-        horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
-        vertical: .75, /* if we are in single column, full height */
-        browserDimensions: nextProps.browserDimensions,
-        sidebar: nextProps.sidebar,
-        minHeight: 400,
-        maxAspectRatio: 1.3,
-      })
-      this.setState({responsive})
+      this.setState({responsive: this.doComputeResponsive(nextProps)});
     } else if (!this.props.browserDimensions && nextProps.browserDimensions) { /* first time */
-      const responsive = computeResponsive({
-        horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
-        vertical: .75, /* if we are in single column, full height */
-        browserDimensions: nextProps.browserDimensions,
-        sidebar: nextProps.sidebar,
-        minHeight: 400,
-        maxAspectRatio: 1.3,
-      })
-      this.setState({responsive})
-    }
-  }
-  componentDidUpdate(prevProps, prevState) {
-    this.maybeSetupLeaflet(); /* puts leaflet in the DOM, only done once */
-    this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
-    this.maybeDrawTipsAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset */
-    this.maybeUpdateTipsAndTransmissions(); /* every time we change something like colorBy */
-    this.maybeAnimateTipsAndTransmissions();
-    this.maybeRemoveAllTipsAndTransmissions(prevProps); /* dataset just changed */
-  }
-  maybeSetupLeaflet() {
-    /* first time map, this sets up leaflet */
-    if (
+      this.setState({responsive: this.doComputeResponsive(nextProps)});
+    } else if (
       this.props.browserDimensions &&
-      this.props.metadata &&
-      !this.state.map
+      this.props.datasetGuid &&
+      nextProps.datasetGuid &&
+      this.props.datasetGuid !== nextProps.datasetGuid // the dataset has changed
     ) {
-      this.createMap();
+      this.setState({responsive: this.doComputeResponsive(nextProps)});
     }
+  }
+  doComputeResponsive(nextProps) {
+    return computeResponsive({
+      horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+      vertical: .75, /* if we are in single column, full height */
+      browserDimensions: nextProps.browserDimensions,
+      sidebar: nextProps.sidebar,
+      minHeight: 400,
+      maxAspectRatio: 1.3,
+    })
   }
   maybeSetupD3DOMNode() {
     if (
@@ -116,10 +125,9 @@ class Map extends React.Component {
       this.props.nodes &&
       this.state.responsive &&
       this.state.d3DOMNode &&
-      // !this.state.tips /* we haven't already drawn tips */
+      !this.state.tips && /* we haven't already drawn tips */
       (this.props.colorScale.version !== prevProps.colorScale.version)
     ) {
-      console.log("maybeDrawTipsAndTransmissions hit")
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
       const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
 
@@ -180,6 +188,7 @@ class Map extends React.Component {
     );
   }
   createMap() {
+
     /******************************************
     * GET LEAFLET IN THE DOM
     *****************************************/
