@@ -41,7 +41,9 @@ class Map extends React.Component {
     colorScale: React.PropTypes.object.isRequired
   }
   componentWillMount() {
-    setupLeaflet(); /* this sets up window.L */
+    if (!window.L) {
+      setupLeaflet(); /* this sets up window.L */
+    }
   }
   componentDidMount() {
     setupLeafletPlugins(); /* this attaches several properties to window.L */
