@@ -1,7 +1,12 @@
+/*eslint-env browser*/
 import * as types from "../actions/types";
 
 const BrowserDimensions = (state = {
-  browserDimensions: null
+  browserDimensions: {
+    width: window.innerWidth,
+    height: window.innerHeight,
+    docHeight: window.document.body.clientHeight
+  }
 }, action) => {
   switch (action.type) {
   case types.BROWSER_DIMENSIONS:
