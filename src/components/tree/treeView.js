@@ -165,42 +165,6 @@ class TreeView extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    /* reconcile hover and click selections in tree
-    used to be in componentWillReceiveProps, however
-    by having it here we both get access to nextState and can
-    control whether this component re-renders
-    */
-    if (this.state.tree)
-    {
-      if ((this.state.hovered || this.state.clicked) &&
-          this.props.layout === nextProps.layout // this block interferes with layout transition otherwise
-         )
-      {
-        /* check whether or not the previously selected item was clicked */
-        if (this.state.clicked && nextState.clicked) { // was the previous item a click?
-          this.state.tree.updateSelectedBranchOrTip(
-            this.state.clicked, /* turn this one off */
-            nextState.clicked, /* turn this one on */
-          );
-        } else if (this.state.hovered && nextState.clicked) { // previously a hover, now a click
-          this.state.tree.updateSelectedBranchOrTip(
-            this.state.hovered,
-            nextState.clicked,
-          );
-        } else if (this.state.hovered && nextState.hovered) { // deselect the previously selected hover
-          this.state.tree.updateSelectedBranchOrTip(
-            this.state.hovered,
-            nextState.hovered,
-          );
-        } else if (this.state.clicked && nextState.clicked === null) {
-          // x clicked or clicked off will give a null value, so reset everything to be safe
-          this.state.tree.updateSelectedBranchOrTip(
-            this.state.clicked,
-            null
-          )
-        }
-      }
-   }
     /* we are now in a position to control the rendering to improve performance */
     if (nextState.shouldReRender) {
       this.setState({shouldReRender: false});
@@ -265,7 +229,9 @@ class TreeView extends React.Component {
           onTipClick: this.onTipClick.bind(this),
           onBranchHover: this.onBranchHover.bind(this),
           onBranchClick: this.onBranchClick.bind(this),
-          onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this),
+	  onBranchLeave: this.onBranchLeave.bind(this),
+	  onTipLeave: this.onTipLeave.bind(this),
+	  // onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this),
           branchLabel: this.branchLabel.bind(this),
           branchLabelSize: this.branchLabelSize.bind(this)
         },
@@ -284,6 +250,8 @@ class TreeView extends React.Component {
   /* Callbacks used by the tips / branches when hovered / clicked */
   /* By keeping this out of redux I think it makes things a little faster */
   onTipHover(d) {
+    this.state.tree.svg.select("#tip_" + d.n.clade)
+      .attr("r", (d) => d["r"] + 4)
     if (!this.state.clicked) {
       this.setState({hovered: {d, type: ".tip"}});
     }
@@ -292,15 +260,31 @@ class TreeView extends React.Component {
     this.setState({clicked: {d,type: ".tip"}, hovered: null});
   }
   onBranchHover(d) {
+    for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
+      this.state.tree.svg.select(id)
+	.style("stroke", (d) => d["stroke"])
+    }
     if (!this.state.clicked) {
-      this.setState({hovered: {d,type: ".branch"}});
+      this.setState({hovered: {d, type: ".branch"}});
     }
   }
   onBranchClick(d) {
     this.setState({clicked: {d, type: ".branch"},hovered: null});
   }
-  // mouse out from tip/branch
-  onBranchOrTipLeave(){
+
+  onBranchLeave(d) {
+    for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
+      this.state.tree.svg.select(id)
+	.style("stroke", (d) => d3.rgb(d3.interpolateRgb(d["stroke"], "#BBB")(0.6)).toString());
+    }
+    if (this.state.hovered) {
+      this.setState({hovered: null})
+    }
+  }
+
+  onTipLeave(d) {
+    this.state.tree.svg.select("#tip_" + d.n.clade)
+      .attr("r", (d) => d["r"])
     if (this.state.hovered) {
       this.setState({hovered: null})
     }
