@@ -16,7 +16,8 @@ const getDefaultState = function () {
     nodeColorsVersion: 0,
     tipRadii: null,
     tipRadiiVersion: 0,
-    branchThickness: null
+    branchThickness: null,
+    branchThicknessVersion: 0
   };
 };
 
@@ -39,7 +40,8 @@ const Tree = (state = getDefaultState(), action) => {
       error: null,
       // dateRange: [dmin, dmax],
       nodes: nodes,
-      branchThickness: branchThickness({nodes}),
+      branchThickness: branchThickness({nodes}), /* set initially */
+      branchThicknessVersion: 1,
       datasetGuid: Math.floor(Math.random() * 100000000000)
     });
   case types.TREE_FETCH_ERROR:
