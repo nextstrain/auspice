@@ -52,7 +52,6 @@ export const drawTipsAndTransmissions = (latLongs, colorScale, g, map) => {
   // const arrowSizeMultiplier = value > 1 ? value * 2 : 0;
 
   /* this decorator adds arrows to the lines. */
-  console.log(latLongs)
   latLongs.transmissions.forEach((transmission) => {
     const arrows = L.polylineDecorator(transmission.rawGeodesic._latlngs[0], {
       patterns: [{
