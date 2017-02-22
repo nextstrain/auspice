@@ -29,7 +29,9 @@ module.exports = {
       compressor: {
         warnings: false
       }
-    })
+    }),
+    // Ignore all locale files of moment.js
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)    
   ],
   module: {
 
