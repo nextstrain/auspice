@@ -166,7 +166,10 @@ PhyloTree.prototype.setDefaults = function () {
  * @param  callbacks  -- an object with call back function defining mouse behavior
  * @return {null}
  */
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness) {
+  if (branchThickness) {
+    this.changeBranchThicknessAttr(branchThickness)
+  }
   this.svg = svg;
   this.params = Object.assign(this.params, options);
   this.callbacks = callbacks;
@@ -191,6 +194,16 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks)
   if (layout==="clock") this.drawRegression();
 };
 
+/*
+ * update branchThicknesses without modifying the SVG
+ */
+PhyloTree.prototype.changeBranchThicknessAttr = function (thicknesses) {
+  this.nodes.forEach(function(d, i) {
+    if (thicknesses[i] !== d["stroke-width"]) {
+      d["stroke-width"] = thicknesses[i];
+    }
+  });
+};
 
 /*
  * set the property that is used as distance along branches

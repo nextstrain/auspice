@@ -92,7 +92,7 @@ class TreeView extends React.Component {
 
     if ((nextProps.datasetGuid !== this.props.datasetGuid && nextProps.tree.nodes) ||
         (tree === null && nextProps.datasetGuid && nextProps.tree.nodes !== null)) {
-      tree = this.makeTree(nextProps.tree.nodes)
+      tree = this.makeTree(nextProps)
       // console.log("made tree", tree)
       this.setState({tree, shouldReRender: true});
       if (this.Viewer) {
@@ -131,10 +131,9 @@ class TreeView extends React.Component {
           return d3.rgb(d3.interpolateRgb(col, "#BBB")(0.6)).toString();
         });
       }
-      /* branch thicknesses should also be conditioned like the others, but
-      for some reason this doesn't work. To investigate! */
-      if (this.props.tree.branchThickness) {
-        branchStyleToUpdate["stroke-width"] = this.props.tree.branchThickness;
+      if (this.props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion) {
+	console.log("branchThicknessVersion change detected", this.props.tree.branchThicknessVersion, nextProps.tree.branchThicknessVersion)
+	branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
       }
 
       /* implement style changes */
@@ -207,7 +206,8 @@ class TreeView extends React.Component {
     }
   }
 
-  makeTree(nodes) {
+  makeTree(nextProps) {
+    const nodes = nextProps.tree.nodes;
     if (nodes && this.refs.d3TreeElement) {
       var myTree = new PhyloTree(nodes[0]);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
@@ -235,11 +235,14 @@ class TreeView extends React.Component {
           branchLabel: this.branchLabel.bind(this),
           branchLabelSize: this.branchLabelSize.bind(this)
         },
-        {
-          /* presently selected node / branch */
-          hovered: this.state.hovered,
-          clicked: this.state.clicked
-        }
+	/* this param must have been removed from phyloTree.render at some point */
+	// {
+	//   /* presently selected node / branch */
+	//   hovered: this.state.hovered,
+	//   clicked: this.state.clicked
+	// },
+	/* branch Thicknesses - guarenteed to be in redux by now */
+	nextProps.tree.branchThickness
       );
       return myTree;
     } else {
