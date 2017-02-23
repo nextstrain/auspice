@@ -782,14 +782,14 @@ PhyloTree.prototype.drawBranches = function() {
       return d['stroke-width'] || params.branchStrokeWidth;
     })
     .style("fill", "none")
-    .style("cursor", "pointer")
+    // .style("cursor", "pointer")
     .style("pointer-events", "auto")
-    .on("mouseover", (d) => {
-      this.callbacks.onBranchHover(d)
-    })
-    .on("mouseout", (d) => {
-      this.callbacks.onBranchLeave(d)
-    })
+    // .on("mouseover", (d) => {
+    //   this.callbacks.onBranchHover(d)
+    // })
+    // .on("mouseout", (d) => {
+    //   this.callbacks.onBranchLeave(d)
+    // })
     .on("click", (d) => {
       this.callbacks.onBranchClick(d)
     });

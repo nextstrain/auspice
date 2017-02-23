@@ -260,10 +260,10 @@ class TreeView extends React.Component {
     this.setState({clicked: {d,type: ".tip"}, hovered: null});
   }
   onBranchHover(d) {
-    for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
-      this.state.tree.svg.select(id)
-        .style("stroke", (d) => d["stroke"])
-    }
+    // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
+    const id = "#branch_S_" + d.n.clade;
+    this.state.tree.svg.select(id)
+      .style("stroke", (d) => d["stroke"])
     if (!this.state.clicked) {
       this.setState({hovered: {d, type: ".branch"}});
     }
@@ -273,10 +273,10 @@ class TreeView extends React.Component {
   }
 
   onBranchLeave(d) {
-    for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
-      this.state.tree.svg.select(id)
-        .style("stroke", (d) => d3.rgb(d3.interpolateRgb(d["stroke"], "#BBB")(0.6)).toString());
-    }
+    // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
+    const id = "#branch_S_" + d.n.clade;
+    this.state.tree.svg.select(id)
+      .style("stroke", (d) => d3.rgb(d3.interpolateRgb(d["stroke"], "#BBB")(0.6)).toString());
     if (this.state.hovered) {
       this.setState({hovered: null})
     }
