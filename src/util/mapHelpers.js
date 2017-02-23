@@ -46,6 +46,7 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
     .attr("fill","none")
     .attr("stroke", (d) => { return d.data.color }) /* colorScale(d.data.from); color path by contry in which the transmission arrived */
     .attr("stroke-opacity", .6)
+    .attr("stroke-linecap", "round")
     .attr("stroke-width", (d) => { return d.data.total }) /* scale line by total number of transmissions */
 
   /* this will need to be scaled if transmissions is high */
@@ -78,16 +79,17 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
 
 export const updateOnMoveEnd = (d3elems, latLongs) => {
   /* map has moved or rescaled, make demes and transmissions line up */
-  d3elems.demes
-    .data(latLongs.demes)
-    .attr("transform", (d) => {
-      return "translate(" + d.coords.x + "," + d.coords.y + ")";
-    })
+  if (d3elems){
+    d3elems.demes
+      .data(latLongs.demes)
+      .attr("transform", (d) => {
+        return "translate(" + d.coords.x + "," + d.coords.y + ")";
+      })
 
-  d3elems.transmissions
-    .data(latLongs.transmissions)
-    .attr("d", (d) => { return pathStringGenerator(d.coords) })
-
+    d3elems.transmissions
+      .data(latLongs.transmissions)
+      .attr("d", (d) => { return pathStringGenerator(d.coords) })
+  }
 }
 
 // averaging colors https://github.com/nextstrain/auspice/commit/0b1f2c90f7d45732935c88e60e2c854a42213d9c

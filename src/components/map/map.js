@@ -80,8 +80,6 @@ class Map extends React.Component {
       React to browser width/height changes responsively
       This is stored in state because it's used by both the map and the d3 overlay
     */
-      console.log("maybeComputeResponive", this.props.browserDimensions, nextProps.browserDimensions);
-
     if (
       this.props.browserDimensions &&
       (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
@@ -159,9 +157,13 @@ class Map extends React.Component {
       (this.props.colorScale.version !== prevProps.colorScale.version ||
         this.props.geoResolution !== prevProps.geoResolution)
     ) {
-      /* data structures to feed to d3 latLongs = { demes: [{}, {}], transmissions: [{}, {}] } */
-      const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
+      /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
+      if (!this.state.boundsSet){ //we are doing the initial render -> set map to the range of the data
+        const SWNE = this.getGeoRange();
+        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
+      }
 
+      const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
       const d3elems = drawDemesAndTransmissions(
         latLongs,
         this.props.colorScale.scale,
@@ -173,6 +175,7 @@ class Map extends React.Component {
 
       // don't redraw on every rerender - need to seperately handle virus change redraw
       this.setState({
+        boundsSet: true,
         demes: true,
         d3elems,
       });
@@ -183,6 +186,28 @@ class Map extends React.Component {
       updateOnMoveEnd(this.state.d3elems, this.latLongs());
     }
   }
+  getGeoRange() {
+    const latitudes = [];
+    const longitudes = [];
+    for (let k in this.props.metadata.geo){
+      for (let c in this.props.metadata.geo[k]){
+        latitudes.push(this.props.metadata.geo[k][c].latitude);
+        longitudes.push(this.props.metadata.geo[k][c].longitude);
+      }
+    }
+    const maxLat = d3.max(latitudes);
+    const minLat = d3.min(latitudes);
+    const maxLng = d3.max(longitudes);
+    const minLng = d3.min(longitudes);
+    const lngRange = (maxLng - minLng)%360;
+    const latRange = (maxLat - minLat);
+    const south = Math.max(-80, minLat - latRange*0.2);
+    const north = Math.min(80, maxLat + latRange*0.2);
+    const east = Math.max(-180, minLng - lngRange*0.2);
+    const west = Math.min(180, maxLng + lngRange*0.2);
+    return [L.latLng(south,west), L.latLng(north, east)];
+  }
+
   maybeUpdateDemesAndTransmissions() {
     /* todo */
   }
@@ -204,9 +229,10 @@ class Map extends React.Component {
     /******************************************
     * GET LEAFLET IN THE DOM
     *****************************************/
-
+    console.log("createMap", this.props.nodes);
     const southWest = L.latLng(-70, -180);
     const northEast = L.latLng(80, 180);
+    console.log(southWest, northEast);
     const bounds = L.latLngBounds(southWest, northEast);
     let zoom = 2;
     let center = [0,0];
@@ -276,7 +302,6 @@ class Map extends React.Component {
     //   Play
     // </button>
     let container = null;
-    console.log(this.props.browserDimensions, this.state.responsive);
     if (
       this.props.browserDimensions &&
       this.state.responsive
