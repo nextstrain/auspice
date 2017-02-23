@@ -54,14 +54,14 @@ class Map extends React.Component {
   }
   componentWillReceiveProps(nextProps) {
     this.maybeComputeResponive(nextProps);
+    this.maybeRemoveAllTipsAndTransmissions(nextProps); /* dataset or colorby just changed, this change is upstream of maybeDraw */
   }
   componentDidUpdate(prevProps, prevState) {
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
-    this.maybeDrawTipsAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset */
+    this.maybeDrawTipsAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby */
     this.maybeUpdateTipsAndTransmissions(); /* every time we change something like colorBy */
     this.maybeAnimateTipsAndTransmissions();
-    this.maybeRemoveAllTipsAndTransmissions(prevProps); /* dataset just changed */
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
@@ -117,6 +117,31 @@ class Map extends React.Component {
       this.setState({d3DOMNode});
     }
   }
+  maybeRemoveAllTipsAndTransmissions(nextProps) {
+    /*
+      xx dataset change, remove all tips and transmissions d3 added
+      xx we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
+      THE ABOVE IS NO LONGER TRUE: while App remounts, this is all getting nuked, so it doesn't matter.
+      Here's what we were doing and might do again:
+
+      // this.state.map && // we have a map
+      // this.props.datasetGuid &&
+      // nextProps.datasetGuid &&
+      // this.props.datasetGuid !== nextProps.datasetGuid // and the dataset has changed
+    */
+    if (
+      this.props.colorBy !== nextProps.colorBy // prevProps.colorBy !== /*  */
+    ) {
+      this.state.d3DOMNode.selectAll("*").remove();
+
+      /* clear references to the tips and transmissions d3 added */
+      this.setState({
+        tips: false,
+        d3elems: null,
+        latLongs: null,
+      })
+    }
+  }
   maybeDrawTipsAndTransmissions(prevProps) {
     if (
       this.props.colorScale &&
@@ -157,27 +182,6 @@ class Map extends React.Component {
   }
   maybeAnimateTipsAndTransmissions() {
     /* todo */
-  }
-  maybeRemoveAllTipsAndTransmissions(prevProps) {
-    /*
-      dataset change, remove all tips and transmissions d3 added
-      we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
-    */
-    if (
-      this.state.map && // we have a map
-      prevProps.datasetGuid &&
-      this.props.datasetGuid &&
-      prevProps.datasetGuid !== this.props.datasetGuid // and the dataset has changed
-    ) {
-      this.state.d3DOMNode.selectAll("*").remove();
-
-      /* clear references to the tips and transmissions d3 added */
-      this.setState({
-        tips: false,
-        d3elems: null,
-        latLongs: null,
-      })
-    }
   }
   latLongs() {
     return getLatLongs(
