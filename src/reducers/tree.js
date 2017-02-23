@@ -2,7 +2,7 @@ import * as types from "../actions/types";
 // import { gatherTips } from "../util/treeHelpers";
 import { processNodes, calcLayouts } from "../util/processNodes";
 import d3 from "d3";
-import { branchThickness } from "../util/treeHelpers";
+import { calcBranchThickness } from "../util/treeHelpers";
 
 
 const getDefaultState = function () {
@@ -38,9 +38,10 @@ const Tree = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       loading: false,
       error: null,
+      inViewRootNodeIdx: 0,
       // dateRange: [dmin, dmax],
       nodes: nodes,
-      branchThickness: branchThickness({nodes}), /* set initially */
+      branchThickness: calcBranchThickness(nodes, 0), /* set initially */
       branchThicknessVersion: 1,
       datasetGuid: Math.floor(Math.random() * 100000000000)
     });
@@ -63,6 +64,11 @@ const Tree = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       nodeColors: action.data,
       nodeColorsVersion: action.version
+    });
+  case types.UPDATE_BRANCH_THICKNESS:
+    return Object.assign({}, state, {
+      branchThickness: action.data,
+      branchThicknessVersion: action.version
     });
   default:
     return state;

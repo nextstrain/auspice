@@ -1,4 +1,7 @@
-import { calcTipVisibility, calcTipRadii } from "../util/treeHelpers";
+import { calcTipVisibility,
+	 calcTipRadii,
+	 calcTipCounts,
+	 calcBranchThickness } from "../util/treeHelpers";
 import * as types from "./types";
 
 const updateTipVisibility = () => {
@@ -9,6 +12,25 @@ const updateTipVisibility = () => {
       data: calcTipVisibility(tree, metadata, controls),
       version: tree.tipVisibilityVersion + 1
     });
+  };
+};
+
+/* this must be called AFTER tipVisibility is updated */
+const updateBranchThickness = () => {
+  return (dispatch, getState) => {
+    const { tree } = getState();
+    if (tree.nodes) {
+      /* step 1: recalculate tipCounts over the tree
+      note that the tips (actually the nodes) already have
+      d["tip-visible"] set (from calcTipVisibility) */
+      calcTipCounts(tree.nodes[0]);
+      /* step 2: re-calculate branchThickness & dispatch*/
+      dispatch({
+	type: types.UPDATE_BRANCH_THICKNESS,
+	data: calcBranchThickness(tree.nodes, 0),
+	version: tree.branchThicknessVersion + 1
+      });
+    }
   };
 };
 
@@ -23,6 +45,7 @@ export const changeDateFilter = function (newMin, newMax) {
       dispatch({type: types.CHANGE_DATE_MAX, data: newMax});
     }
     dispatch(updateTipVisibility());
+    dispatch(updateBranchThickness());
   };
 };
 
@@ -65,5 +88,6 @@ export const applyFilterQuery = (filterType, fields, values) => {
               fields,
               values});
     dispatch(updateTipVisibility());
+    dispatch(updateBranchThickness());
   };
 };

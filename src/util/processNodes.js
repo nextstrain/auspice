@@ -6,8 +6,10 @@ export const processNodes = (nodes) => {
   nodes.forEach((d) => {if (typeof d.attr === "undefined") {d.attr = {};} });
   treeHelpers.calcFullTipCounts(rootNode);
   treeHelpers.calcBranchLength(rootNode);
-  treeHelpers.calcTipCounts(rootNode);
   treeHelpers.calcDates(nodes);
+  /* since everything is in view upon load (URL changes processed later),
+  tipCount == fullTipCOunt */
+  nodes.map((d) => {d["tipCount"] = d["fullTipCount"];});
 
   // colorByTrait();
   //var nodesWithFrequencyAdded = treeHelpers.adjust_freq_by_date(nodes, rootNode);
