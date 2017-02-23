@@ -26,9 +26,9 @@ const updateBranchThickness = () => {
       calcTipCounts(tree.nodes[0]);
       /* step 2: re-calculate branchThickness & dispatch*/
       dispatch({
-	type: types.UPDATE_BRANCH_THICKNESS,
-	data: calcBranchThickness(tree.nodes, 0),
-	version: tree.branchThicknessVersion + 1
+				type: types.UPDATE_BRANCH_THICKNESS,
+				data: calcBranchThickness(tree.nodes, 0),
+				version: tree.branchThicknessVersion + 1
       });
     }
   };

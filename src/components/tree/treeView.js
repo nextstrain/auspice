@@ -132,8 +132,8 @@ class TreeView extends React.Component {
         });
       }
       if (this.props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion) {
-	console.log("branchThicknessVersion change detected", this.props.tree.branchThicknessVersion, nextProps.tree.branchThicknessVersion)
-	branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
+        // console.log("branchThicknessVersion change detected", this.props.tree.branchThicknessVersion, nextProps.tree.branchThicknessVersion)
+        branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
       }
 
       /* implement style changes */
@@ -235,14 +235,14 @@ class TreeView extends React.Component {
           branchLabel: this.branchLabel.bind(this),
           branchLabelSize: this.branchLabelSize.bind(this)
         },
-	/* this param must have been removed from phyloTree.render at some point */
-	// {
-	//   /* presently selected node / branch */
-	//   hovered: this.state.hovered,
-	//   clicked: this.state.clicked
-	// },
-	/* branch Thicknesses - guarenteed to be in redux by now */
-	nextProps.tree.branchThickness
+        /* this param must have been removed from phyloTree.render at some point */
+        // {
+        //   /* presently selected node / branch */
+        //   hovered: this.state.hovered,
+        //   clicked: this.state.clicked
+        // },
+        /* branch Thicknesses - guarenteed to be in redux by now */
+        nextProps.tree.branchThickness
       );
       return myTree;
     } else {
