@@ -7,6 +7,10 @@ app.set('port', process.env.PORT || 8080);
 app.use("/dist", expressStaticGzip("dist"));
 app.use('/dist', express.static('dist'))
 
+app.get("/favicon.png", function(req, res) {
+  res.sendFile(path.join(__dirname, "favicon.png")); 
+});
+
 app.get("*", function(req, res) {
   res.sendFile(path.join(__dirname, "index.html"));
 });
