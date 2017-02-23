@@ -1,5 +1,6 @@
 var path = require("path");
 var webpack = require("webpack");
+var CompressionPlugin = require('compression-webpack-plugin');
 
 // let commitHash = require('child_process')
 //   .execSync('git rev-parse --short HEAD')
@@ -22,16 +23,21 @@ module.exports = {
         "NODE_ENV": JSON.stringify("production")
       }
     }),
-    // new webpack.DefinePlugin({
-    //   __COMMIT_HASH__: JSON.stringify(commitHash)
-    // }),
-    new webpack.optimize.UglifyJsPlugin({
+    new webpack.optimize.UglifyJsPlugin({ // minify everything
       compressor: {
         warnings: false
       }
     }),
-    // Ignore all locale files of moment.js
-    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)    
+    new webpack.optimize.DedupePlugin(), // dedupe similar code
+    new webpack.optimize.AggressiveMergingPlugin(), // merge chunks
+    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/), // ignore all locale files of moment.js
+    new CompressionPlugin({ // gzip everything
+       asset: "[path].gz[query]",
+       algorithm: "gzip",
+       test: /\.js$|\.css$|\.html$/,
+       threshold: 10240,
+       minRatio: 0.8
+    })
   ],
   module: {
 
