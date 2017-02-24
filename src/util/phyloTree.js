@@ -164,9 +164,17 @@ PhyloTree.prototype.setDefaults = function () {
  * @param  distance   -- the property used as branch length, e.g. div or num_date
  * @param  options    -- an object that contains options that will be added to this.params
  * @param  callbacks  -- an object with call back function defining mouse behavior
+ * @param  branchThickness (OPTIONAL) -- array of branch thicknesses
+ * @param  tipVisibility (OPTIONAL) -- array of "visible" or "hidden"
  * @return {null}
  */
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, tipVisibility) {
+  if (branchThickness) {
+    this.nodes.forEach(function(d, i) {
+      d["stroke-width"] = branchThickness[i];
+    });
+  }
+
   this.svg = svg;
   this.params = Object.assign(this.params, options);
   this.callbacks = callbacks;
@@ -185,12 +193,30 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks)
     this.drawBranches();
   }
   this.drawTips();
+
+  if (tipVisibility) {
+    this.nodes.forEach(function(d, i) {
+      d["visibility"] = tipVisibility[i];
+    });
+    this.svg.selectAll(".tip").style("visibility", (d) => d["visibility"]);
+  }
+
   this.drawBranchLabels();
   this.updateGeometry(10);
   this.svg.selectAll(".regression").remove();
   if (layout==="clock") this.drawRegression();
 };
 
+/*
+ * update branchThicknesses without modifying the SVG
+ */
+PhyloTree.prototype.changeBranchThicknessAttr = function (thicknesses) {
+  this.nodes.forEach(function(d, i) {
+    if (thicknesses[i] !== d["stroke-width"]) {
+      d["stroke-width"] = thicknesses[i];
+    }
+  });
+};
 
 /*
  * set the property that is used as distance along branches
@@ -753,7 +779,8 @@ PhyloTree.prototype.drawTips = function() {
       return d.stroke || params.tipStroke;
     })
     .style("stroke-width", function(d) {
-      return d['stroke-width'] || params.tipStrokeWidth;
+      // return d['stroke-width'] || params.tipStrokeWidth;
+      return params.tipStrokeWidth; /* don't want branch thicknesses applied */
     })
     .style("cursor", "pointer");
 };
@@ -1072,6 +1099,11 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
       }
     }
   });
+  let updatePath = false;
+  if (styles["stroke-width"]){
+    this.mapToScreen();
+    updatePath = true;
+  }
 
   // function that return the closure object for updating the svg
   function update(attrToSet, stylesToSet) {
@@ -1088,6 +1120,9 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
           return d[prop];
         });
       }
+      if (updatePath){
+	selection.filter('.S').attr("d", function(d){return d.branch[0];})
+      }
     };
   };
   // update the svg
@@ -1103,7 +1138,6 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
       })
       .call(update(Object.keys(attrs), Object.keys(styles)));
   }
-
 };
 
 /**

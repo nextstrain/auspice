@@ -92,7 +92,7 @@ class TreeView extends React.Component {
 
     if ((nextProps.datasetGuid !== this.props.datasetGuid && nextProps.tree.nodes) ||
         (tree === null && nextProps.datasetGuid && nextProps.tree.nodes !== null)) {
-      tree = this.makeTree(nextProps.tree.nodes)
+      tree = this.makeTree(nextProps)
       // console.log("made tree", tree)
       this.setState({tree, shouldReRender: true});
       if (this.Viewer) {
@@ -115,14 +115,17 @@ class TreeView extends React.Component {
 
       if (nextProps.tree.tipVisibilityVersion &&
           this.props.tree.tipVisibilityVersion !== nextProps.tree.tipVisibilityVersion) {
+        // console.log("tipVisibilityVersion change detected", this.props.tree.tipVisibilityVersion, nextProps.tree.tipVisibilityVersion)
         tipStyleToUpdate["visibility"] = nextProps.tree.tipVisibility;
       }
       if (nextProps.tree.tipRadiiVersion &&
           this.props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion) {
+        // console.log("tipRadiiVersion change detected", this.props.tree.tipRadiiVersion, nextProps.tree.tipRadiiVersion)
         tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
       }
       if (nextProps.tree.nodeColorsVersion &&
           this.props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion) {
+        // console.log("nodeColorsVersion change detected", this.props.tree.nodeColorsVersion, nextProps.tree.nodeColorsVersion)
         tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
         });
@@ -131,17 +134,18 @@ class TreeView extends React.Component {
           return d3.rgb(d3.interpolateRgb(col, "#BBB")(0.6)).toString();
         });
       }
-      /* branch thicknesses should also be conditioned like the others, but
-      for some reason this doesn't work. To investigate! */
-      if (this.props.tree.branchThickness) {
-        branchStyleToUpdate["stroke-width"] = this.props.tree.branchThickness;
+      if (this.props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion) {
+        // console.log("branchThicknessVersion change detected", this.props.tree.branchThicknessVersion, nextProps.tree.branchThicknessVersion)
+        branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
       }
 
       /* implement style changes */
       if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
+        // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
         tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, fastTransitionDuration);
       }
       if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
+        // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
         tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, fastTransitionDuration);
       }
 
@@ -207,7 +211,8 @@ class TreeView extends React.Component {
     }
   }
 
-  makeTree(nodes) {
+  makeTree(nextProps) {
+    const nodes = nextProps.tree.nodes;
     if (nodes && this.refs.d3TreeElement) {
       var myTree = new PhyloTree(nodes[0]);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
@@ -235,11 +240,15 @@ class TreeView extends React.Component {
           branchLabel: this.branchLabel.bind(this),
           branchLabelSize: this.branchLabelSize.bind(this)
         },
-        {
-          /* presently selected node / branch */
-          hovered: this.state.hovered,
-          clicked: this.state.clicked
-        }
+        /* this param must have been removed from phyloTree.render at some point */
+        // {
+        //   /* presently selected node / branch */
+        //   hovered: this.state.hovered,
+        //   clicked: this.state.clicked
+        // },
+        /* branch Thicknesses - guarenteed to be in redux by now */
+        nextProps.tree.branchThickness,
+        nextProps.tree.tipVisibility
       );
       return myTree;
     } else {

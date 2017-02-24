@@ -6,15 +6,9 @@ export const processNodes = (nodes) => {
   nodes.forEach((d) => {if (typeof d.attr === "undefined") {d.attr = {};} });
   treeHelpers.calcFullTipCounts(rootNode);
   treeHelpers.calcBranchLength(rootNode);
-  treeHelpers.calcTipCounts(rootNode);
   treeHelpers.calcDates(nodes);
-
-  // colorByTrait();
-  //var nodesWithFrequencyAdded = treeHelpers.adjust_freq_by_date(nodes, rootNode);
   nodes.forEach((d) => d.hasChildren = typeof d.children !== "undefined");
-
   return nodes;
-
 };
 
 const rectangularLayout = (node, distanceMeasure) => {

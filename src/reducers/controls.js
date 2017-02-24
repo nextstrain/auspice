@@ -29,7 +29,7 @@ const getDefaultState = function () {
     absoluteDateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
-    colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
+    colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 0),
     datasetPathName: null,
     filters: {}
   };
