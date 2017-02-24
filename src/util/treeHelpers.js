@@ -191,7 +191,7 @@ const parseFilterQuery = function (query) {
   };
 };
 
-export const calcTipVisibility = function (tree, metaMetadata, controls) {
+export const calcTipVisibility = function (tree, controls) {
   if (tree.nodes){
     /* extract the filter information from redux.
     redux.filters has 2 keys, each with an array of values
@@ -212,16 +212,16 @@ export const calcTipVisibility = function (tree, metaMetadata, controls) {
     const upperLimit = controls.dateMax;
     if (upperLimit && lowerLimit) {
       if (filterPairs.length) {
-	  visibility = tree.nodes.map((d) => (
+        visibility = tree.nodes.map((d) => (
           d.attr.date >= lowerLimit
           && d.attr.date < upperLimit
           && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
-	) ? 1 : 0);
+        ) ? 1 : 0);
       } else {
-	  visibility = tree.nodes.map((d) => (
+        visibility = tree.nodes.map((d) => (
           d.attr.date >= lowerLimit
           && d.attr.date < upperLimit
-	) ? 1 : 0);
+        ) ? 1 : 0);
       }
     }
 

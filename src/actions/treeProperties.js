@@ -9,7 +9,7 @@ const updateTipVisibility = () => {
     const { tree, metadata, controls } = getState();
     dispatch({
       type: types.UPDATE_TIP_VISIBILITY,
-      data: calcTipVisibility(tree, metadata, controls),
+      data: calcTipVisibility(tree, controls),
       version: tree.tipVisibilityVersion + 1
     });
   };
@@ -37,15 +37,20 @@ const updateBranchThickness = () => {
 /* when tip max / min changes, we need to (a) update the controls reducer
 with the new value(s), (b) update the tree tipVisibility */
 export const changeDateFilter = function (newMin, newMax) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+		// console.log("changeDateFilter", newMin, newMax)
+		const { tree } = getState();
     if (newMin) {
       dispatch({type: types.CHANGE_DATE_MIN, data: newMin});
     }
     if (newMax) {
       dispatch({type: types.CHANGE_DATE_MAX, data: newMax});
     }
-    dispatch(updateTipVisibility());
-    dispatch(updateBranchThickness());
+		/* initially, the tree isn't loaded, so don't bother trying to do things */
+		if (tree.loadStatus === 2) {
+			dispatch(updateTipVisibility());
+			dispatch(updateBranchThickness());
+		}
   };
 };
 

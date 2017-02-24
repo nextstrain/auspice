@@ -7,7 +7,7 @@ import { calcBranchThickness } from "../util/treeHelpers";
 
 const getDefaultState = function () {
   return {
-    loading: false,
+    loadStatus: 0, /* 0: no data, 1: data incoming, 2: data loaded */
     nodes: null,
     error: null,
     tipVisibility: null,
@@ -25,7 +25,7 @@ const Tree = (state = getDefaultState(), action) => {
   switch (action.type) {
   case types.REQUEST_TREE:
     return Object.assign({}, getDefaultState(), {
-      loading: true,
+      loadStatus: 1,
       error: null
     });
   case types.RECEIVE_TREE:
@@ -36,7 +36,7 @@ const Tree = (state = getDefaultState(), action) => {
     // const dmin = d3.min(nodes.map((d) => (typeof d.attr !== "undefined")?d.attr.num_date:1900));
     // const dmax = d3.max(nodes.map((d) => (typeof d.attr !== "undefined")?d.attr.num_date:2020));
     return Object.assign({}, state, {
-      loading: false,
+      loadStatus: 2,
       error: null,
       inViewRootNodeIdx: 0,
       // dateRange: [dmin, dmax],
@@ -47,7 +47,7 @@ const Tree = (state = getDefaultState(), action) => {
     });
   case types.TREE_FETCH_ERROR:
     return Object.assign({}, state, {
-      loading: false,
+      loadStatus: 0,
       error: action.data
     });
   case types.UPDATE_TIP_VISIBILITY:
