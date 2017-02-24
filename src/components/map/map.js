@@ -5,7 +5,7 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
-import {drawTipsAndTransmissions, updateOnMoveEnd} from "../../util/mapHelpers";
+import {drawDemesAndTransmissions, updateOnMoveEnd} from "../../util/mapHelpers";
 import * as globals from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import getLatLongs from "../../util/mapHelpersLatLong";
@@ -22,7 +22,8 @@ import getLatLongs from "../../util/mapHelpersLatLong";
     browserDimensions: state.browserDimensions.browserDimensions,
     colorScale: state.controls.colorScale,
     colorBy: state.controls.colorBy,
-    map: state.map
+    map: state.map,
+    geoResolution: state.controls.geoResolution,
   };
 })
 class Map extends React.Component {
@@ -30,7 +31,7 @@ class Map extends React.Component {
     super(props);
     this.state = {
       map: null,
-      tips: false,
+      demes: false,
       d3DOMNode: null,
       d3elems: null,
       datasetGuid: null,
@@ -54,14 +55,14 @@ class Map extends React.Component {
   }
   componentWillReceiveProps(nextProps) {
     this.maybeComputeResponive(nextProps);
-    this.maybeRemoveAllTipsAndTransmissions(nextProps); /* dataset or colorby just changed, this change is upstream of maybeDraw */
+    this.maybeRemoveAllDemesAndTransmissions(nextProps); /* dataset or colorby just changed, this change is upstream of maybeDraw */
   }
   componentDidUpdate(prevProps, prevState) {
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
-    this.maybeDrawTipsAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby */
-    this.maybeUpdateTipsAndTransmissions(); /* every time we change something like colorBy */
-    this.maybeAnimateTipsAndTransmissions();
+    this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
+    this.maybeUpdateDemesAndTransmissions(); /* every time we change something like colorBy */
+    this.maybeAnimateDemesAndTransmissions();
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
@@ -117,9 +118,9 @@ class Map extends React.Component {
       this.setState({d3DOMNode});
     }
   }
-  maybeRemoveAllTipsAndTransmissions(nextProps) {
+  maybeRemoveAllDemesAndTransmissions(nextProps) {
     /*
-      xx dataset change, remove all tips and transmissions d3 added
+      xx dataset change, remove all demes and transmissions d3 added
       xx we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
       THE ABOVE IS NO LONGER TRUE: while App remounts, this is all getting nuked, so it doesn't matter.
       Here's what we were doing and might do again:
@@ -130,20 +131,22 @@ class Map extends React.Component {
       // this.props.datasetGuid !== nextProps.datasetGuid // and the dataset has changed
     */
     if (
-      this.state.map &&
-      this.props.colorBy !== nextProps.colorBy // prevProps.colorBy !== /*  */
+      (this.state.map &&
+      this.props.colorBy !== nextProps.colorBy) || // prevProps.colorBy !== /*  */
+      (this.state.map &&
+      this.props.geoResolution !== nextProps.geoResolution)
     ) {
       this.state.d3DOMNode.selectAll("*").remove();
 
-      /* clear references to the tips and transmissions d3 added */
+      /* clear references to the demes and transmissions d3 added */
       this.setState({
-        tips: false,
+        demes: false,
         d3elems: null,
         latLongs: null,
       })
     }
   }
-  maybeDrawTipsAndTransmissions(prevProps) {
+  maybeDrawDemesAndTransmissions(prevProps) {
     if (
       this.props.colorScale &&
       this.state.map && /* we have already drawn the map */
@@ -151,13 +154,14 @@ class Map extends React.Component {
       this.props.nodes &&
       this.state.responsive &&
       this.state.d3DOMNode &&
-      !this.state.tips && /* we haven't already drawn tips */
-      (this.props.colorScale.version !== prevProps.colorScale.version)
+      !this.state.demes && /* we haven't already drawn demes */
+      (this.props.colorScale.version !== prevProps.colorScale.version ||
+        this.props.geoResolution !== prevProps.geoResolution)
     ) {
-      /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
+      /* data structures to feed to d3 latLongs = { demes: [{}, {}], transmissions: [{}, {}] } */
       const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
 
-      const d3elems = drawTipsAndTransmissions(
+      const d3elems = drawDemesAndTransmissions(
         latLongs,
         this.props.colorScale.scale,
         this.state.d3DOMNode,
@@ -168,7 +172,7 @@ class Map extends React.Component {
 
       // don't redraw on every rerender - need to seperately handle virus change redraw
       this.setState({
-        tips: true,
+        demes: true,
         d3elems,
       });
     }
@@ -178,10 +182,10 @@ class Map extends React.Component {
       updateOnMoveEnd(this.state.d3elems, this.latLongs());
     }
   }
-  maybeUpdateTipsAndTransmissions() {
+  maybeUpdateDemesAndTransmissions() {
     /* todo */
   }
-  maybeAnimateTipsAndTransmissions() {
+  maybeAnimateDemesAndTransmissions() {
     /* todo */
   }
   latLongs() {
@@ -189,7 +193,9 @@ class Map extends React.Component {
       this.props.nodes,
       this.props.metadata,
       this.state.map,
-      this.props.colorBy
+      this.props.colorBy,
+      this.props.geoResolution,
+      this.props.colorScale.scale,
     );
   }
   createMap() {
