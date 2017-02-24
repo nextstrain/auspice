@@ -44,9 +44,9 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
     .append("path") /* append a geodesic path from the leaflet plugin data */
     .attr("d", (d) => { return pathStringGenerator(d.coords) }) /* with the interpolation in the function above pathStringGenerator */
     .attr("fill","none")
-    .attr("stroke", (d) => { return d.color }) /* colorScale(d.data.from); color path by contry in which the transmission arrived */
+    .attr("stroke", (d) => { return d.data.color }) /* colorScale(d.data.from); color path by contry in which the transmission arrived */
     .attr("stroke-opacity", .6)
-    .attr("stroke-width", (d) => { return d.total }) /* scale line by total number of transmissions */
+    .attr("stroke-width", (d) => { return d.data.total }) /* scale line by total number of transmissions */
 
   /* this will need to be scaled if transmissions is high */
   // const arrowSizeMultiplier = value > 1 ? value * 2 : 0;
@@ -61,7 +61,7 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
           pixelSize: 14 /*+ arrowSizeMultiplier*/,
           pathOptions: {
             fillOpacity: .5,
-            color: colorScale(transmission.data.from),
+            color: transmission.data.color,
             weight: 0
           }
         })
