@@ -114,20 +114,16 @@ const setupLatLong = (nodes, metadata, map, colorBy) => {
   });
 
   /* flatter data structure */
-  nestedTransmissions.forEach((transmission) => { /* for each transmission */
-    transmission.geodesics.forEach((partialTransmission) => { /* and for each part of a lines split across dateline in each */
-      tipsAndTransmissions.transmissions.push( /* and add it to an array, which we'll map over to create our paths. */
-        /* not optimized for missiles here. we could check index of for each and if it's greater than one add a flag for partials, and their order? so that we can animate around the map */
-        Object.assign(
-          transmission,
-          { coords: partialTransmission }
-        )
-      );
+  nestedTransmissions.forEach((transmission, i) => { /* for each transmission */
+    transmission.geodesics.forEach((geodesic, j) => { /* and for each part of a lines split across dateline in each */
+      tipsAndTransmissions.transmissions.push({ /* and add it to an array, which we'll map over to create our paths. */ /* not optimized for missiles here. we could check index of for each and if it's greater than one add a flag for partials, and their order? so that we can animate around the map */
+        data: transmission,
+        coords: geodesic,
+        wraparoundKey: j,
+      });
     });
   });
-
   return tipsAndTransmissions;
-
 }
 
 export default setupLatLong
