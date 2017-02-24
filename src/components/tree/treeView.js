@@ -24,7 +24,7 @@ import { arrayInEquality,
          tipRadii,
          tipVisibility,
          nodeColor} from "../../util/treeHelpers";
-import { zoomToClade } from "../../actions/treeProperties";
+import { zoomToClade, restrictTreeToSingleTip } from "../../actions/treeProperties";
 import _ from "lodash";
 
 /* UNDERSTANDING THIS CODE:
@@ -283,6 +283,7 @@ class TreeView extends React.Component {
       hovered: null,
       selectedTip: d
     });
+    this.props.dispatch(restrictTreeToSingleTip(1, d.n.arrayIdx))
   }
   onBranchHover(d) {
     // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
@@ -340,6 +341,8 @@ class TreeView extends React.Component {
     this.state.tree.svg.select("#tip_" + d.n.clade)
       .attr("r", (d) => d["r"]);
     this.setState({selectedTip: null, hovered: null});
+    /* restore the tip visibility! */
+    this.props.dispatch(restrictTreeToSingleTip(0))
   }
 
   /**

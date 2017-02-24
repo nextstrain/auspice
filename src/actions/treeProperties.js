@@ -4,7 +4,7 @@ import { calcTipVisibility,
 	 calcBranchThickness } from "../util/treeHelpers";
 import * as types from "./types";
 
-export const updateTipVisibility = () => {
+const updateTipVisibility = () => {
   return (dispatch, getState) => {
     const { tree, controls } = getState();
     dispatch({
@@ -33,6 +33,34 @@ const updateBranchThickness = (idxOfInViewRootNode = 0) => {
     }
   };
 };
+
+export const restrictTreeToSingleTip = function (restrict, tipIdx = undefined) {
+	return (dispatch, getState) => {
+		const { tree, controls } = getState();
+		if (restrict === 1) {
+			// console.log("restrict")
+			const vis = tree.nodes.map((d, idx) => {
+				d["tip-visible"] = idx === tipIdx ? 1 : 0;
+				return idx === tipIdx ? "visible" : "hidden";
+			});
+			dispatch({
+				type: types.UPDATE_TIP_VISIBILITY,
+				data: vis,
+				version: tree.tipVisibilityVersion + 1
+			});
+			dispatch(updateBranchThickness());
+		} else {
+			// console.log("return")
+			dispatch({
+				type: types.UPDATE_TIP_VISIBILITY,
+				data: calcTipVisibility(tree, controls),
+				version: tree.tipVisibilityVersion + 1
+			});
+			dispatch(updateBranchThickness());
+		}
+	}
+}
+
 
 /* when tip max / min changes, we need to (a) update the controls reducer
 with the new value(s), (b) update the tree tipVisibility */
