@@ -8,7 +8,7 @@ const prettyString = (x) => {
           .replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
 };
 
-const TipSelectedPanel = ({tip, branchSelected, goAwayCallback, responsive}) => {
+const TipSelectedPanel = ({tip, goAwayCallback}) => {
   const styles = {
     container: {
       backgroundColor: "rgba(80, 80, 80, .20)",
@@ -69,44 +69,46 @@ const TipSelectedPanel = ({tip, branchSelected, goAwayCallback, responsive}) => 
   const makePanel = () => {
     if (!tip) {return null;}
     return (
-      <div style={styles.container} onClick={() => goAwayCallback()}>
+      <div style={styles.container} onClick={() => goAwayCallback(tip)}>
         <div className={"panel"} style={styles.panel}>
           <p style={styles.heading}>
             {`${tip.n.strain}`}
           </p>
           <table>
-            <tr>
-              <th>Paper</th>
-              <td>{tip.n.attr.authors}</td>
-            </tr>
-            <tr>
-              <th>Date</th>
-              <td>{prettyString(tip.n.attr.date)}</td>
-            </tr>
-            <tr>
-              <th>Region</th>
-              <td>{prettyString(tip.n.attr.region)}</td>
-            </tr>
-            <tr>
-              <th>Country</th>
-              <td>{prettyString(tip.n.attr.country)}</td>
-            </tr>
-            <tr>
-              <th>Division</th>
-              <td>{prettyString(tip.n.attr.division)}</td>
-            </tr>
-            <tr>
-              <th>Database</th>
-              <td>{prettyString(tip.n.attr.db)}</td>
-            </tr>
-            <tr>
-              <th>NCBI link</th>
-              <td>to do</td>
-            </tr>
-            <tr>
-              <th>Accession</th>
-              <td>{tip.n.attr.accession}</td>
-            </tr>
+            <tbody>
+              <tr>
+                <th>Paper</th>
+                <td>{tip.n.attr.authors}</td>
+              </tr>
+              <tr>
+                <th>Date</th>
+                <td>{prettyString(tip.n.attr.date)}</td>
+              </tr>
+              <tr>
+                <th>Region</th>
+                <td>{prettyString(tip.n.attr.region)}</td>
+              </tr>
+              <tr>
+                <th>Country</th>
+                <td>{prettyString(tip.n.attr.country)}</td>
+              </tr>
+              <tr>
+                <th>Division</th>
+                <td>{prettyString(tip.n.attr.division)}</td>
+              </tr>
+              <tr>
+                <th>Database</th>
+                <td>{prettyString(tip.n.attr.db)}</td>
+              </tr>
+              <tr>
+                <th>NCBI link</th>
+                <td>to do</td>
+              </tr>
+              <tr>
+                <th>Accession</th>
+                <td>{tip.n.attr.accession}</td>
+              </tr>
+            </tbody>
           </table>
           <p style={styles.comment}>
             Click outside this box to go back to the tree

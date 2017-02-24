@@ -38,7 +38,7 @@ I (james) don't want to put phylotree into redux
 as it's not simply data
 
 the state of this component contains a few flags and
-hovered / clicked / branchSelected,
+hovered / branchSelected / tipSelected,
 each of which reference the nodes currently in that state
 they're not in redux as (1) its easier and (2) all components that
 need this information are children of this component
@@ -73,7 +73,6 @@ class TreeView extends React.Component {
     this.Viewer = null;
     this.state = {
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
-      clicked: null,
       hover: null,
       selectedBranch: null,
       selectedTip: null,
@@ -91,7 +90,11 @@ class TreeView extends React.Component {
   componentWillMount() {
     /* the tree resets itself on resize, so reset selections */
     window.addEventListener("resize",
-      () => this.setState({clicked: null, hover: null, selectedBranch: null})
+      () => this.setState({
+        hover: null,
+        selectedBranch: null,
+        selectedTip: null
+      })
     );
   }
 
@@ -197,7 +200,6 @@ class TreeView extends React.Component {
       return true;
     } else if (
       this.state.hovered !== nextState.hovered ||
-      this.state.clicked !== nextState.clicked ||
       this.state.selectedTip !== nextState.selectedTip ||
       this.state.selectedBranch !== nextState.selectedBranch
     ) {
@@ -257,12 +259,6 @@ class TreeView extends React.Component {
           branchLabel: this.branchLabel.bind(this),
           branchLabelSize: this.branchLabelSize.bind(this)
         },
-        /* this param must have been removed from phyloTree.render at some point */
-        // {
-        //   /* presently selected node / branch */
-        //   hovered: this.state.hovered,
-        //   clicked: this.state.clicked
-        // },
         /* branch Thicknesses - guarenteed to be in redux by now */
         nextProps.tree.branchThickness,
         nextProps.tree.tipVisibility
@@ -273,18 +269,17 @@ class TreeView extends React.Component {
     }
   }
 
-  /* Callbacks used by the tips / branches when hovered / clicked */
+  /* Callbacks used by the tips / branches when hovered / selected */
   onTipHover(d) {
     this.state.tree.svg.select("#tip_" + d.n.clade)
-      .attr("r", (d) => d["r"] + 4)
-    if (!this.state.clicked) {
-      this.setState({hovered: {d, type: ".tip"}});
-    }
+      .attr("r", (d) => d["r"] + 4);
+    this.setState({
+      hovered: {d, type: ".tip"}
+    });
   }
   onTipClick(d) {
-    console.log("tip click")
+    console.log("tip click", d)
     this.setState({
-      // clicked: {d,type: ".tip"},
       hovered: null,
       selectedTip: d
     });
@@ -294,9 +289,9 @@ class TreeView extends React.Component {
     const id = "#branch_S_" + d.n.clade;
     this.state.tree.svg.select(id)
       .style("stroke", (d) => d["stroke"])
-    if (!this.state.clicked) {
-      this.setState({hovered: {d, type: ".branch"}});
-    }
+    this.setState({
+      hovered: {d, type: ".branch"}
+    });
   }
   onBranchClick(d) {
     this.state.tree.zoomIntoClade(d, mediumTransitionDuration);
@@ -307,7 +302,6 @@ class TreeView extends React.Component {
       mediumTransitionDuration
     );
     this.setState({
-      clicked: null, //{d, type: ".branch"},
       hovered: null,
       selectedBranch: d
     });
@@ -323,8 +317,10 @@ class TreeView extends React.Component {
     }
   }
   onTipLeave(d) {
-    this.state.tree.svg.select("#tip_" + d.n.clade)
-      .attr("r", (d) => d["r"]);
+    if (!this.state.selectedTip) {
+      this.state.tree.svg.select("#tip_" + d.n.clade)
+        .attr("r", (d) => d["r"]);
+    }
     if (this.state.hovered) {
       this.setState({hovered: null});
     }
@@ -340,8 +336,10 @@ class TreeView extends React.Component {
     this.setState({selectedBranch: null, selectedTip: null});
   }
   /* clearSelectedTip when clicking to go away */
-  clearSelectedTip() {
-    this.setState({selectedTip: null});
+  clearSelectedTip(d) {
+    this.state.tree.svg.select("#tip_" + d.n.clade)
+      .attr("r", (d) => d["r"]);
+    this.setState({selectedTip: null, hovered: null});
   }
 
   /**
@@ -388,25 +386,6 @@ class TreeView extends React.Component {
     };
   }
 
-  // handleZoomEvent(direction) {
-  //   return () => {
-  //     this.state.value.matrix
-  //     console.log(direction)
-  //   }
-  // }
-  // handleChange(value) {
-  //   console.log("handleChange not yet implemented", value)
-  // }
-  // handleClick(event){
-  //   console.log('handleClick not yet implemented', event)
-  //   // console.log('click', event.x, event.y, event.originalEvent);
-  // }
-  //
-  // infoPanelDismiss() {
-  //   this.setState({clicked: null, hovered: null});
-  //   this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
-  // }
-
   render() {
     const responsive = computeResponsive({
       horizontal: this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
@@ -429,9 +408,8 @@ class TreeView extends React.Component {
         <Legend sidebar={this.props.sidebar}/>
         <InfoPanel
           tree={this.state.tree}
-          resetState={() => this.setState({clicked: null, hovered: null})}
+          resetState={() => this.setState({hovered: null})}
           hovered={this.state.hovered}
-          clicked={this.state.clicked}
         />
         <BranchSelectedPanel
           responsive={responsive}
@@ -439,10 +417,8 @@ class TreeView extends React.Component {
           branch={this.state.selectedBranch}
         />
         <TipSelectedPanel
-          responsive={responsive}
-          goAwayCallback={() => this.clearSelectedTip()}
+          goAwayCallback={(d) => this.clearSelectedTip(d)}
           tip={this.state.selectedTip}
-          branchSelected={this.state.selectedBranch !== null}
         />
         <ReactSVGPanZoom
           width={responsive ? responsive.width : 1}
