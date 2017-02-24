@@ -128,7 +128,11 @@ export const adjust_freq_by_date = (nodes, rootNode) => {
 
 // branch thickness is from clade frequencies
 export const calcBranchThickness = function (nodes, rootIdx) {
-  const maxTipCount = nodes[rootIdx].tipCount;
+  let maxTipCount = nodes[rootIdx].tipCount;
+  /* edge case: no tips selected */
+  if (!maxTipCount) {
+    maxTipCount = 1;
+  }
   return nodes.map((d) => freqScale(d.tipCount / maxTipCount));
 };
 
