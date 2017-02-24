@@ -817,9 +817,9 @@ PhyloTree.prototype.drawBranches = function() {
     // .on("mouseout", (d) => {
     //   this.callbacks.onBranchLeave(d)
     // })
-    .on("click", (d) => {
-      this.callbacks.onBranchClick(d)
-    });
+    // .on("click", (d) => {
+    //   this.callbacks.onBranchClick(d)
+    // });
   this.branches = this.svg.append("g").selectAll('.branch')
     .data(this.nodes)
     .enter()

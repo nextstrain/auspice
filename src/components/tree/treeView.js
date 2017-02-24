@@ -1,3 +1,4 @@
+/*eslint-env browser*/
 import React from "react";
 import d3 from "d3";
 import * as globals from "../../util/globals";
@@ -13,6 +14,7 @@ import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration} from "../../util/globals";
 import * as globalStyles from "../../globalStyles";
 import InfoPanel from "./infoPanel";
+import BranchSelectedPanel from "./branchSelectedPanel";
 import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
 import { getGenotype } from "../../util/getGenotype";
@@ -34,7 +36,8 @@ I (james) don't want to put phylotree into redux
 as it's not simply data
 
 the state of this component contains a few flags and
-hovered / clicked, which reference the nodes currently in that state
+hovered / clicked / branchSelected,
+each of which reference the nodes currently in that state
 they're not in redux as (1) its easier and (2) all components that
 need this information are children of this component
 (it would probably be a good idea to move them to redux)
@@ -70,6 +73,7 @@ class TreeView extends React.Component {
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
       clicked: null,
       hover: null,
+      selectedBranch: null,
       tree: null,
       shouldReRender: false // start off this way I guess
     };
@@ -78,6 +82,14 @@ class TreeView extends React.Component {
     router: React.PropTypes.object.isRequired
   }
   static propTypes = {
+    sidebar: React.PropTypes.bool.isRequired
+  }
+
+  componentWillMount() {
+    /* the tree resets itself on resize, so reset selections */
+    window.addEventListener("resize",
+      () => this.setState({clicked: null, hover: null, selectedBranch: null})
+    );
   }
 
   componentWillReceiveProps(nextProps) {
@@ -182,7 +194,8 @@ class TreeView extends React.Component {
       return true;
     } else if (
       this.state.hovered !== nextState.hovered ||
-      this.state.clicked !== nextState.clicked
+      this.state.clicked !== nextState.clicked ||
+      this.state.selectedBranch !== nextState.selectedBranch
     ) {
       return true;
     }
@@ -257,7 +270,6 @@ class TreeView extends React.Component {
   }
 
   /* Callbacks used by the tips / branches when hovered / clicked */
-  /* By keeping this out of redux I think it makes things a little faster */
   onTipHover(d) {
     this.state.tree.svg.select("#tip_" + d.n.clade)
       .attr("r", (d) => d["r"] + 4)
@@ -278,7 +290,12 @@ class TreeView extends React.Component {
     }
   }
   onBranchClick(d) {
-    this.setState({clicked: {d, type: ".branch"},hovered: null});
+    this.state.tree.zoomIntoClade(d, mediumTransitionDuration);
+    this.setState({
+      clicked: null, //{d, type: ".branch"},
+      hovered: null,
+      selectedBranch: d
+    });
   }
 
   onBranchLeave(d) {
@@ -356,11 +373,11 @@ class TreeView extends React.Component {
   //   console.log('handleClick not yet implemented', event)
   //   // console.log('click', event.x, event.y, event.originalEvent);
   // }
-
-  infoPanelDismiss() {
-    this.setState({clicked: null, hovered: null});
-    this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
-  }
+  //
+  // infoPanelDismiss() {
+  //   this.setState({clicked: null, hovered: null});
+  //   this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
+  // }
 
   createTreeMarkup() {
     const responsive = computeResponsive({
@@ -371,7 +388,7 @@ class TreeView extends React.Component {
       minHeight: 400,
       maxAspectRatio: 1.3
     })
-
+    const cardTitle = this.state.selectedBranch ? "" : "Phylogeny";
     /* NOTE these props were removed from SVG pan-zoom as they led to functions that did
     nothing, but they may be useful in the future...
     onChangeValue={this.handleChange.bind(this)}
@@ -379,15 +396,20 @@ class TreeView extends React.Component {
     */
 
     return (
-      <Card center title="Phylogeny">
-        <Legend
-          colorScale={this.props.colorScale}
-          sidebar={this.props.sidebar}/>
+      <Card center title={cardTitle}>
+        <Legend sidebar={this.props.sidebar}/>
         <InfoPanel
-          dismiss={this.infoPanelDismiss.bind(this)}
-          zoom={this.state.tree ? this.state.tree.zoomIntoClade.bind(this.state.tree) : null}
+          tree={this.state.tree}
+          resetState={() => this.setState({clicked: null, hovered: null})}
           hovered={this.state.hovered}
-          clicked={this.state.clicked}/>
+          clicked={this.state.clicked}
+        />
+        <BranchSelectedPanel
+          responsive={responsive}
+          tree={this.state.tree}
+          resetState={() => this.setState({selectedBranch: null})}
+          branch={this.state.selectedBranch}
+        />
         <ReactSVGPanZoom
           width={responsive ? responsive.width : 1}
           height={responsive ? responsive.height : 1}
