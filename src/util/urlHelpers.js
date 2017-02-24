@@ -37,11 +37,12 @@ export const restoreStateFromURL = function (router, dispatch) {
   if (query.m) {
     dispatch({ type: CHANGE_DISTANCE_MEASURE, data: query.m });
   }
-  if (query.dmin) {
-    dispatch(changeDateFilter(query.min, null));
-  }
-  if (query.dmax) {
-    dispatch(changeDateFilter(null, query.max));
+  if (query.dmin && query.dmax) {
+    dispatch(changeDateFilter(query.dmin, query.dmax));
+  } else if (query.dmin) {
+    dispatch(changeDateFilter(query.dmin, null));
+  } else if (query.dmax) {
+    dispatch(changeDateFilter(null, query.dmax));
   }
   if (query.c) {
     dispatch(changeColorBy(query.c));

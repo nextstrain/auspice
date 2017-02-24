@@ -115,14 +115,17 @@ class TreeView extends React.Component {
 
       if (nextProps.tree.tipVisibilityVersion &&
           this.props.tree.tipVisibilityVersion !== nextProps.tree.tipVisibilityVersion) {
+        // console.log("tipVisibilityVersion change detected", this.props.tree.tipVisibilityVersion, nextProps.tree.tipVisibilityVersion)
         tipStyleToUpdate["visibility"] = nextProps.tree.tipVisibility;
       }
       if (nextProps.tree.tipRadiiVersion &&
           this.props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion) {
+        // console.log("tipRadiiVersion change detected", this.props.tree.tipRadiiVersion, nextProps.tree.tipRadiiVersion)
         tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
       }
       if (nextProps.tree.nodeColorsVersion &&
           this.props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion) {
+        // console.log("nodeColorsVersion change detected", this.props.tree.nodeColorsVersion, nextProps.tree.nodeColorsVersion)
         tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
         });
@@ -138,9 +141,11 @@ class TreeView extends React.Component {
 
       /* implement style changes */
       if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
+        // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
         tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, fastTransitionDuration);
       }
       if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
+        // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
         tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, fastTransitionDuration);
       }
 
@@ -242,7 +247,8 @@ class TreeView extends React.Component {
         //   clicked: this.state.clicked
         // },
         /* branch Thicknesses - guarenteed to be in redux by now */
-        nextProps.tree.branchThickness
+        nextProps.tree.branchThickness,
+        nextProps.tree.tipVisibility
       );
       return myTree;
     } else {

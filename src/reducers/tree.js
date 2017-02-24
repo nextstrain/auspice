@@ -2,7 +2,7 @@ import * as types from "../actions/types";
 // import { gatherTips } from "../util/treeHelpers";
 import { processNodes, calcLayouts } from "../util/processNodes";
 import d3 from "d3";
-import { calcBranchThickness } from "../util/treeHelpers";
+import { calcBranchThickness, calcTipCounts, calcTipVisibility } from "../util/treeHelpers";
 
 
 const getDefaultState = function () {
@@ -29,21 +29,33 @@ const Tree = (state = getDefaultState(), action) => {
       error: null
     });
   case types.RECEIVE_TREE:
-    const tree = d3.layout.tree().size([1, 1]);
-    const nodes = processNodes(tree.nodes(action.data));
+    /* this function is required to do a number of things, and the order is crucial
+    (1) construct the nodes
+    (2) calculate tip (node) visibility - uses redux.controls located in action.controls
+    (3) calculate tipCounts (not fullTipCounts)
+    (4) set branchThickness
+    */
+    /* step 1 */
+    const nodes = processNodes(d3.layout.tree().size([1, 1]).nodes(action.data));
     nodes[0].parent = nodes[0]; // make root its own parent
     calcLayouts(nodes, ["div", "num_date"]);
-    // const dmin = d3.min(nodes.map((d) => (typeof d.attr !== "undefined")?d.attr.num_date:1900));
-    // const dmax = d3.max(nodes.map((d) => (typeof d.attr !== "undefined")?d.attr.num_date:2020));
+    /* step 2 */
+    const tipVisibility = calcTipVisibility({nodes}, action.controls);
+    /* step 3 - this will set the tipCount property of each node */
+    calcTipCounts(nodes[0]);
+    /* step 4 */
+    const branchThickness = calcBranchThickness(nodes, 0);
+    /* set state */
     return Object.assign({}, state, {
       loadStatus: 2,
       error: null,
       inViewRootNodeIdx: 0,
-      // dateRange: [dmin, dmax],
       nodes: nodes,
-      branchThickness: calcBranchThickness(nodes, 0), /* set initially */
-      branchThicknessVersion: 1,
-      datasetGuid: Math.floor(Math.random() * 100000000000)
+      branchThickness,
+      /* do not change branchThicknessVersion - this is applied by phyloTree.render, not an update method */
+      datasetGuid: Math.floor(Math.random() * 100000000000),
+      tipVisibility,
+      tipVisibilityVersion: 1
     });
   case types.TREE_FETCH_ERROR:
     return Object.assign({}, state, {

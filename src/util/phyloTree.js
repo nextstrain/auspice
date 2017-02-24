@@ -164,12 +164,17 @@ PhyloTree.prototype.setDefaults = function () {
  * @param  distance   -- the property used as branch length, e.g. div or num_date
  * @param  options    -- an object that contains options that will be added to this.params
  * @param  callbacks  -- an object with call back function defining mouse behavior
+ * @param  branchThickness (OPTIONAL) -- array of branch thicknesses
+ * @param  tipVisibility (OPTIONAL) -- array of "visible" or "hidden"
  * @return {null}
  */
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, tipVisibility) {
   if (branchThickness) {
-    this.changeBranchThicknessAttr(branchThickness)
+    this.nodes.forEach(function(d, i) {
+      d["stroke-width"] = branchThickness[i];
+    });
   }
+
   this.svg = svg;
   this.params = Object.assign(this.params, options);
   this.callbacks = callbacks;
@@ -188,6 +193,14 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
     this.drawBranches();
   }
   this.drawTips();
+
+  if (tipVisibility) {
+    this.nodes.forEach(function(d, i) {
+      d["visibility"] = tipVisibility[i];
+    });
+    this.svg.selectAll(".tip").style("visibility", (d) => d["visibility"]);
+  }
+
   this.drawBranchLabels();
   this.updateGeometry(10);
   this.svg.selectAll(".regression").remove();
@@ -766,7 +779,8 @@ PhyloTree.prototype.drawTips = function() {
       return d.stroke || params.tipStroke;
     })
     .style("stroke-width", function(d) {
-      return d['stroke-width'] || params.tipStrokeWidth;
+      // return d['stroke-width'] || params.tipStrokeWidth;
+      return params.tipStrokeWidth; /* don't want branch thicknesses applied */
     })
     .style("cursor", "pointer");
 };
