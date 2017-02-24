@@ -251,32 +251,28 @@ class Map extends React.Component {
   }
   maybeCreateMapDiv() {
     // onClick={this.handleAnimationPlayClicked.bind(this) }
+    // <button style={{
+    //     position: "absolute",
+    //     left: 25,
+    //     top: 25,
+    //     zIndex: 9999,
+    //     border: "none",
+    //     padding: 15,
+    //     borderRadius: 4,
+    //     backgroundColor: "rgb(124, 184, 121)",
+    //     fontWeight: 700,
+    //     color: "white"
+    //   }}
+    //   >
+    //   Play
+    // </button>
     let container = null;
-
-    console.log('create map div', this.props.browserDimensions, this.state.responsive)
-
     if (
       this.props.browserDimensions &&
       this.state.responsive
     ) {
-
       container = (
         <div style={{position: "relative"}}>
-          <button style={{
-              position: "absolute",
-              left: 25,
-              top: 25,
-              zIndex: 9999,
-              border: "none",
-              padding: 15,
-              borderRadius: 4,
-              backgroundColor: "rgb(124, 184, 121)",
-              fontWeight: 700,
-              color: "white"
-            }}
-            >
-            Play
-          </button>
           <div style={{
               height: this.state.responsive.height,
               width: this.state.responsive.width
@@ -285,8 +281,6 @@ class Map extends React.Component {
         </div>
       )
     }
-
-
     return container;
   }
   // handleAnimationPlayClicked() {
