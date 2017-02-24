@@ -3,7 +3,7 @@ import React from "react";
 import d3 from "d3";
 import * as globals from "../../util/globals";
 import Card from "../framework/card";
-import Legend from "../controls/legend";
+import Legend from "./legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
 import MoveIcon from "../framework/move-icon";
@@ -379,9 +379,9 @@ class TreeView extends React.Component {
   //   this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
   // }
 
-  createTreeMarkup() {
+  render() {
     const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+      horizontal: this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
       vertical: 1,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
@@ -389,6 +389,7 @@ class TreeView extends React.Component {
       maxAspectRatio: 1.3
     })
     const cardTitle = this.state.selectedBranch ? "" : "Phylogeny";
+
     /* NOTE these props were removed from SVG pan-zoom as they led to functions that did
     nothing, but they may be useful in the future...
     onChangeValue={this.handleChange.bind(this)}
@@ -426,17 +427,18 @@ class TreeView extends React.Component {
           <svg style={{pointerEvents: "auto"}}
             width={responsive.width}
             height={responsive.height}
-            >
+          >
             <g
               width={responsive.width}
               height={responsive.height}
               style={{cursor: "default"}}
-              ref="d3TreeElement">
+              ref="d3TreeElement"
+            >
             </g>
           </svg>
         </ReactSVGPanZoom>
         <svg width={50} height={130}
-             style={{position: "absolute", right: 20, bottom: 20}}>
+          style={{position: "absolute", right: 20, bottom: 20}}>
             <defs>
               <filter id="dropshadow" height="130%">
                 <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
@@ -452,30 +454,18 @@ class TreeView extends React.Component {
             </defs>
           <ZoomInIcon
             handleClick={this.handleIconClick("zoom-in")}
-            active={true}
+            active
             x={10}
             y={50}
-            />
+          />
           <ZoomOutIcon
             handleClick={this.handleIconClick("zoom-out")}
             active={true}
             x={10}
             y={90}
-            />
+          />
         </svg>
       </Card>
-    )
-  }
-  render() {
-    /*
-      1. set up SVGs
-      2. tree will be added on props loading
-    */
-    // console.log("treeView render")
-    return (
-      <span>
-        {this.props.browserDimensions ? this.createTreeMarkup() : null}
-      </span>
     );
   }
 }
