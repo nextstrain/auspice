@@ -3,7 +3,7 @@ import * as globalStyles from "../../globalStyles";
 import * as globals from "../../util/globals";
 import {dataFont, materialButtonOutline} from "../../globalStyles";
 
-const BranchSelectedPanel = ({tree, branch, resetState, responsive}) => {
+const BranchSelectedPanel = ({tree, branch, viewEntireTree, responsive}) => {
 
   const styles = {
     container: {
@@ -44,11 +44,6 @@ const BranchSelectedPanel = ({tree, branch, resetState, responsive}) => {
     }
   };
 
-  const deselectBranch = () => {
-    tree.zoomIntoClade(tree.nodes[0], globals.mediumTransitionDuration);
-    resetState();
-  };
-
   const makePanel = () => {
     if (!branch) {return null;}
     let text = [`Branch selected with ${branch.n.fullTipCount} sequences.`,
@@ -59,7 +54,7 @@ const BranchSelectedPanel = ({tree, branch, resetState, responsive}) => {
     return (
       <div style={styles.container}>
         {text[0]}
-        <button style={styles.link} onClick={() => deselectBranch()}>
+        <button style={styles.link} onClick={() => viewEntireTree()}>
           {text[1]}
         </button>
       </div>

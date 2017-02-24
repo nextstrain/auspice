@@ -4,9 +4,9 @@ import { calcTipVisibility,
 	 calcBranchThickness } from "../util/treeHelpers";
 import * as types from "./types";
 
-const updateTipVisibility = () => {
+export const updateTipVisibility = () => {
   return (dispatch, getState) => {
-    const { tree, metadata, controls } = getState();
+    const { tree, controls } = getState();
     dispatch({
       type: types.UPDATE_TIP_VISIBILITY,
       data: calcTipVisibility(tree, controls),

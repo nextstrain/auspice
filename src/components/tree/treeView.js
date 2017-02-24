@@ -23,6 +23,7 @@ import { arrayInEquality,
          tipRadii,
          tipVisibility,
          nodeColor} from "../../util/treeHelpers";
+import { updateTipVisibility } from "../../actions/treeProperties";
 import _ from "lodash";
 
 /* UNDERSTANDING THIS CODE:
@@ -291,13 +292,19 @@ class TreeView extends React.Component {
   }
   onBranchClick(d) {
     this.state.tree.zoomIntoClade(d, mediumTransitionDuration);
+    /* to stop multiple phyloTree updates potentially clashing,
+    we change tipVis after geometry update + transition */
+    window.setTimeout(() =>
+      this.props.dispatch(updateTipVisibility()),
+      mediumTransitionDuration
+    );
     this.setState({
       clicked: null, //{d, type: ".branch"},
       hovered: null,
       selectedBranch: d
     });
   }
-
+  /* onBranchLeave called when mouse-off, i.e. anti-hover */
   onBranchLeave(d) {
     // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
     const id = "#branch_S_" + d.n.clade;
@@ -307,7 +314,6 @@ class TreeView extends React.Component {
       this.setState({hovered: null})
     }
   }
-
   onTipLeave(d) {
     this.state.tree.svg.select("#tip_" + d.n.clade)
       .attr("r", (d) => d["r"])
@@ -315,6 +321,17 @@ class TreeView extends React.Component {
       this.setState({hovered: null})
     }
   }
+  /* viewEntireTree: triggered by "reset to entire tree" button */
+  viewEntireTree() {
+    this.state.tree.zoomIntoClade(this.state.tree.nodes[0], globals.mediumTransitionDuration);
+    /* wait until view has transitioned back, i.e. tips have moved */
+    window.setTimeout(
+      () => this.props.dispatch(updateTipVisibility()),
+      mediumTransitionDuration
+    )
+    this.setState({selectedBranch: null})
+  }
+
 
   /**
    * @param  {node}
@@ -408,7 +425,7 @@ class TreeView extends React.Component {
         <BranchSelectedPanel
           responsive={responsive}
           tree={this.state.tree}
-          resetState={() => this.setState({selectedBranch: null})}
+          viewEntireTree={() => this.viewEntireTree()}
           branch={this.state.selectedBranch}
         />
         <ReactSVGPanZoom
