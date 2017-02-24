@@ -56,7 +56,7 @@ export const drawTipsAndTransmissions = (latLongs, colorScale, g, map) => {
     const arrows = L.polylineDecorator(transmission.rawGeodesic._latlngs[0], {
       patterns: [{
         offset: 25,
-        repeat: 50,
+        repeat: 75,
         symbol: L.Symbol.arrowHead({
           pixelSize: 14 /*+ arrowSizeMultiplier*/,
           pathOptions: {
@@ -89,8 +89,6 @@ export const updateOnMoveEnd = (d3elems, latLongs) => {
     .attr("d", (d) => { return pathStringGenerator(d.coords) })
 
 }
-
-
 
 // averaging colors https://github.com/nextstrain/auspice/commit/0b1f2c90f7d45732935c88e60e2c854a42213d9c
 
