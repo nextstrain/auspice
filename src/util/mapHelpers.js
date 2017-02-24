@@ -25,14 +25,14 @@ const translateAlong = (path) => {
 
 */
 
-export const drawTipsAndTransmissions = (latLongs, colorScale, g, map) => {
+export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
 
-  const tips = g.selectAll("tips")
-    .data(latLongs.tips)
+  const demes = g.selectAll("demes")
+    .data(latLongs.demes)
     .enter().append("circle")
     .style("stroke", "none")
     .style("fill-opacity", .6)
-    .style("fill", (d) => { return colorScale(d.country) })
+    .style("fill", (d) => { return d.color })
     .attr("r", (d) => { return 2 + Math.sqrt(d.total) * 4 })
     .attr("transform", (d) => {
       return "translate(" + d.coords.x + "," + d.coords.y + ")";
@@ -44,9 +44,9 @@ export const drawTipsAndTransmissions = (latLongs, colorScale, g, map) => {
     .append("path") /* append a geodesic path from the leaflet plugin data */
     .attr("d", (d) => { return pathStringGenerator(d.coords) }) /* with the interpolation in the function above pathStringGenerator */
     .attr("fill","none")
-    .attr("stroke", (d) => { return colorScale(d.data.from); }) /* color path by contry in which the transmission arrived */
+    .attr("stroke", (d) => { return d.color }) /* colorScale(d.data.from); color path by contry in which the transmission arrived */
     .attr("stroke-opacity", .6)
-    .attr("stroke-width", (d) => { return d.count }) /* scale line by total number of transmissions */
+    .attr("stroke-width", (d) => { return d.total }) /* scale line by total number of transmissions */
 
   /* this will need to be scaled if transmissions is high */
   // const arrowSizeMultiplier = value > 1 ? value * 2 : 0;
@@ -70,16 +70,16 @@ export const drawTipsAndTransmissions = (latLongs, colorScale, g, map) => {
   });
 
   return {
-    tips,
+    demes,
     transmissions
   };
 
 }
 
 export const updateOnMoveEnd = (d3elems, latLongs) => {
-  /* map has moved or rescaled, make tips and transmissions line up */
-  d3elems.tips
-    .data(latLongs.tips)
+  /* map has moved or rescaled, make demes and transmissions line up */
+  d3elems.demes
+    .data(latLongs.demes)
     .attr("transform", (d) => {
       return "translate(" + d.coords.x + "," + d.coords.y + ")";
     })
@@ -111,7 +111,7 @@ export const updateOnMoveEnd = (d3elems, latLongs) => {
 // })
 
 // const setTipCoords = () => {
-//   tips.attr("transform", (d) => {
+//   demes.attr("transform", (d) => {
 //     return "translate(" + d.coords.x + "," + d.coords.y + ")";
 //   });
 // };
