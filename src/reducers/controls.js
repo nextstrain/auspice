@@ -30,6 +30,7 @@ const getDefaultState = function () {
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
+    geoResolution: globals.defaultGeoResolution,
     datasetPathName: null,
     filters: {}
   };
@@ -102,6 +103,10 @@ const Controls = (state = getDefaultState(), action) => {
   case types.SET_COLOR_SCALE:
     return Object.assign({}, state, {
       colorScale: action.data
+    });
+  case types.CHANGE_GEO_RESOLUTION:
+    return Object.assign({}, state, {
+      geoResolution: action.data
     });
   case types.APPLY_FILTER_QUERY:
     // values arrive as array
