@@ -593,7 +593,7 @@ PhyloTree.prototype.showBranchLabels = function() {
  * add a grid to the svg
  * @param {layout}
  */
-PhyloTree.prototype.addGrid = function(layout) {
+PhyloTree.prototype.addGrid = function(layout, yMinView, yMaxView) {
   if (typeof layout==="undefined"){ layout=this.layout;}
 
   const xmin = (this.xScale.domain()[0]>0)?this.xScale.domain()[0]:0.0;
@@ -604,7 +604,8 @@ PhyloTree.prototype.addGrid = function(layout) {
                           -this.xScale.domain()[0], -this.yScale.domain()[0]])
                 : this.xScale.domain()[1];
   const offset = layout==="radial"?this.nodes[0].depth:0.0;
-
+  const viewTop = yMaxView ?    yMaxView+this.params.margins.top : this.yScale.range()[0];
+  const viewBottom = yMinView ? yMinView-this.params.margins.bottom : this.yScale.range()[1];
   const gridline = function(xScale, yScale, layout){
       return function(x){
           const xPos = xScale(x[0]-offset);
@@ -612,11 +613,11 @@ PhyloTree.prototype.addGrid = function(layout) {
           if (layout==="rect" || layout==="clock"){
             tmp_d = 'M'+xPos.toString() +
               " " +
-              yScale.range()[0].toString() +
+              viewBottom.toString() +
               " L " +
               xPos.toString() +
               " " +
-              yScale.range()[1].toString();
+              viewTop.toString();
           }else if (layout==="radial"){
             tmp_d = 'M '+xPos.toString() +
               "  " +
@@ -668,16 +669,17 @@ PhyloTree.prototype.addGrid = function(layout) {
   const yTextPos = function(yScale, layout){
       return function(x){
           if (x[2]==="x"){
-              return layout==="radial" ? yScale(x[0]-offset) :  yScale.range()[1]+18;
+              return layout==="radial" ? yScale(x[0]-offset) : viewBottom +  18;
           }else{
               return yScale(x[0]);
           }
       }
   };
 
+  let logRangeY = 0;
   if (this.layout==="clock"){
-      const logRangeY = Math.floor(Math.log10(ymax - ymin));
       const roundingLevelY = Math.pow(10, logRangeY);
+      logRangeY = Math.floor(Math.log10(ymax - ymin));
       const offsetY=0;
       const gridMinY = Math.floor((ymin+offsetY)/roundingLevelY)*roundingLevelY;
       for (let ii = 0; ii <= (ymax + offsetY - gridMinY)/roundingLevelY+10; ii++) {
@@ -710,11 +712,12 @@ PhyloTree.prototype.addGrid = function(layout) {
       .style("stroke-width",this.params.minorGridWidth);
 
   const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
-  const precision = Math.max(0, 1-logRange)
+  const precision = Math.max(0, 1-logRange);
+  const precisionY = Math.max(0, 1-logRangeY);
   gridLabels.exit().remove();
   gridLabels.enter().append("text");
   gridLabels
-      .text(function(d){return d[0].toFixed(precision);})
+      .text(function(d){return d[0].toFixed(d[2]==='y'?precisionY:precision);})
       .attr("class", "gridTick")
       .style("font-size",this.params.tickLabelSize)
       .style("font-family",this.params.fontFamily)
