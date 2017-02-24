@@ -3,7 +3,7 @@ import * as globalStyles from "../../globalStyles";
 import * as globals from "../../util/globals";
 import {dataFont, materialButtonOutline} from "../../globalStyles";
 
-const BranchSelectedPanel = ({tree, branch, viewEntireTree, responsive}) => {
+const BranchSelectedPanel = ({branch, viewEntireTreeCallback, responsive}) => {
 
   const styles = {
     container: {
@@ -18,7 +18,7 @@ const BranchSelectedPanel = ({tree, branch, viewEntireTree, responsive}) => {
       paddingLeft: 10,
       paddingRight: 30,
       borderRadius: 5,
-      pointerEvents: "none",
+      pointerEvents: "all",
       // backgroundColor: "rgba(255,255,255,.85)",
       backgroundColor: "rgba(174, 182, 191, .85)", // "rgba(255,255,255,.85)"
       zIndex: 1000,
@@ -49,12 +49,12 @@ const BranchSelectedPanel = ({tree, branch, viewEntireTree, responsive}) => {
     let text = [`Branch selected with ${branch.n.fullTipCount} sequences.`,
       "Return to entire tree"];
     if (responsive.width < 500) {
-      text = ["Branch selected", "Reset"]
+      text = ["Branch selected", "Reset"];
     }
     return (
       <div style={styles.container}>
         {text[0]}
-        <button style={styles.link} onClick={() => viewEntireTree()}>
+        <button style={styles.link} onClick={() => viewEntireTreeCallback()}>
           {text[1]}
         </button>
       </div>

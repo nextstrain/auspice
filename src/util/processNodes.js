@@ -8,6 +8,8 @@ export const processNodes = (nodes) => {
   treeHelpers.calcBranchLength(rootNode);
   treeHelpers.calcDates(nodes);
   nodes.forEach((d) => d.hasChildren = typeof d.children !== "undefined");
+  /* set an index so that we can access tipVisibility / nodeColors if needed */
+  nodes.map((d, idx) => {d.arrayIdx = idx;})
   return nodes;
 };
 

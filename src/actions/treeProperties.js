@@ -16,7 +16,7 @@ export const updateTipVisibility = () => {
 };
 
 /* this must be called AFTER tipVisibility is updated */
-const updateBranchThickness = () => {
+const updateBranchThickness = (idxOfInViewRootNode = 0) => {
   return (dispatch, getState) => {
     const { tree } = getState();
     if (tree.nodes) {
@@ -27,7 +27,7 @@ const updateBranchThickness = () => {
       /* step 2: re-calculate branchThickness & dispatch*/
       dispatch({
 				type: types.UPDATE_BRANCH_THICKNESS,
-				data: calcBranchThickness(tree.nodes, 0),
+				data: calcBranchThickness(tree.nodes, idxOfInViewRootNode),
 				version: tree.branchThicknessVersion + 1
       });
     }
@@ -54,6 +54,14 @@ export const changeDateFilter = function (newMin, newMax) {
   };
 };
 
+/* zoomToClade takes care of setting tipVis and branchThickness.
+Note that the zooming / tree stuff is done imperitively by phyloTree */
+export const zoomToClade = function (idxOfInViewRootNode) {
+	return (dispatch) => {
+		dispatch(updateTipVisibility());
+		dispatch(updateBranchThickness(idxOfInViewRootNode));
+	};
+};
 
 const updateTipRadii = () => {
   return (dispatch, getState) => {

@@ -15,6 +15,7 @@ import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration
 import * as globalStyles from "../../globalStyles";
 import InfoPanel from "./infoPanel";
 import BranchSelectedPanel from "./branchSelectedPanel";
+import TipSelectedPanel from "./tipSelectedPanel";
 import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
 import { getGenotype } from "../../util/getGenotype";
@@ -23,7 +24,7 @@ import { arrayInEquality,
          tipRadii,
          tipVisibility,
          nodeColor} from "../../util/treeHelpers";
-import { updateTipVisibility } from "../../actions/treeProperties";
+import { zoomToClade } from "../../actions/treeProperties";
 import _ from "lodash";
 
 /* UNDERSTANDING THIS CODE:
@@ -75,6 +76,7 @@ class TreeView extends React.Component {
       clicked: null,
       hover: null,
       selectedBranch: null,
+      selectedTip: null,
       tree: null,
       shouldReRender: false // start off this way I guess
     };
@@ -196,6 +198,7 @@ class TreeView extends React.Component {
     } else if (
       this.state.hovered !== nextState.hovered ||
       this.state.clicked !== nextState.clicked ||
+      this.state.selectedTip !== nextState.selectedTip ||
       this.state.selectedBranch !== nextState.selectedBranch
     ) {
       return true;
@@ -279,7 +282,12 @@ class TreeView extends React.Component {
     }
   }
   onTipClick(d) {
-    this.setState({clicked: {d,type: ".tip"}, hovered: null});
+    console.log("tip click")
+    this.setState({
+      // clicked: {d,type: ".tip"},
+      hovered: null,
+      selectedTip: d
+    });
   }
   onBranchHover(d) {
     // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
@@ -295,7 +303,7 @@ class TreeView extends React.Component {
     /* to stop multiple phyloTree updates potentially clashing,
     we change tipVis after geometry update + transition */
     window.setTimeout(() =>
-      this.props.dispatch(updateTipVisibility()),
+      this.props.dispatch(zoomToClade(d.arrayIdx)),
       mediumTransitionDuration
     );
     this.setState({
@@ -316,9 +324,9 @@ class TreeView extends React.Component {
   }
   onTipLeave(d) {
     this.state.tree.svg.select("#tip_" + d.n.clade)
-      .attr("r", (d) => d["r"])
+      .attr("r", (d) => d["r"]);
     if (this.state.hovered) {
-      this.setState({hovered: null})
+      this.setState({hovered: null});
     }
   }
   /* viewEntireTree: triggered by "reset to entire tree" button */
@@ -326,12 +334,15 @@ class TreeView extends React.Component {
     this.state.tree.zoomIntoClade(this.state.tree.nodes[0], globals.mediumTransitionDuration);
     /* wait until view has transitioned back, i.e. tips have moved */
     window.setTimeout(
-      () => this.props.dispatch(updateTipVisibility()),
+      () => this.props.dispatch(zoomToClade(0)),
       mediumTransitionDuration
-    )
-    this.setState({selectedBranch: null})
+    );
+    this.setState({selectedBranch: null, selectedTip: null});
   }
-
+  /* clearSelectedTip when clicking to go away */
+  clearSelectedTip() {
+    this.setState({selectedTip: null});
+  }
 
   /**
    * @param  {node}
@@ -424,9 +435,14 @@ class TreeView extends React.Component {
         />
         <BranchSelectedPanel
           responsive={responsive}
-          tree={this.state.tree}
-          viewEntireTree={() => this.viewEntireTree()}
+          viewEntireTreeCallback={() => this.viewEntireTree()}
           branch={this.state.selectedBranch}
+        />
+        <TipSelectedPanel
+          responsive={responsive}
+          goAwayCallback={() => this.clearSelectedTip()}
+          tip={this.state.selectedTip}
+          branchSelected={this.state.selectedBranch !== null}
         />
         <ReactSVGPanZoom
           width={responsive ? responsive.width : 1}
