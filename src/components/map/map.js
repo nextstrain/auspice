@@ -130,6 +130,7 @@ class Map extends React.Component {
       // this.props.datasetGuid !== nextProps.datasetGuid // and the dataset has changed
     */
     if (
+      this.props.map &&
       this.props.colorBy !== nextProps.colorBy // prevProps.colorBy !== /*  */
     ) {
       this.state.d3DOMNode.selectAll("*").remove();
