@@ -116,6 +116,7 @@ var PhyloTree = function(treeJson) {
 
   this.xScale = d3.scale.linear();
   this.yScale = d3.scale.linear();
+  this.zoomNode = this.nodes[0];
   addLeafCount(this.nodes[0]);
 };
 
@@ -417,6 +418,7 @@ PhyloTree.prototype.unrootedLayout = function(){
  */
 PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
   // assign all nodes to inView false and force update
+  this.zoomNode = clade;
   this.nodes.forEach(function(d){d.inView=false; d.update=true;});
   // assign all child nodes of the chosen clade to inView=true
   // if clade is terminal, apply to parent
@@ -435,6 +437,18 @@ PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
     this.updateBranchLabels(dt);
   }
 };
+
+
+/**
+ * zoom out a little by using the parent of the current clade
+ * as a zoom focus.
+ * @param  {int} dt [transition time]
+ */
+PhyloTree.prototype.zoomToParent = function(dt) {
+  if (this.zoomNode){
+    this.zoomIntoClade(this.zoomNode.parent, dt);
+  }
+}
 
 /**
  * this function sets the xScale, yScale domains and maps precalculated x,y

@@ -339,6 +339,7 @@ class TreeView extends React.Component {
           this.Viewer.zoomOnViewerCenter(0.71);
         }else{
           this.resetView();
+          this.state.tree.zoomToParent(mediumTransitionDuration);
         }
       }
       this.resetGrid();
