@@ -4,26 +4,37 @@ import * as globals from "../../util/globals";
 import {dataFont, infoPanelStyles} from "../../globalStyles";
 import { prettyString } from "./tipSelectedPanel";
 
-const InfoPanel = ({tree, hovered, responsive}) => {
+const InfoPanel = ({tree, hovered, responsive, viewer}) => {
 
   /* this is a function - we can bail early */
   if (!(tree && hovered)) {
     return null
   }
 
+  /**
+   * This maps tree coordinates to coordinates on the svg.
+   * @param  {float} x
+   * @param  {float}} y
+   * @param  {reactSVGpanZoom} V viewer state
+   * @return {[x,y]} point on plane
+   */
+  const treePosToViewer = (x,y, V) =>{
+    const dx = (x*V.a + V.e); //this is the distance form the upper left corner
+    const dy = (y*V.d + V.f); //at the current zoome level
+    return {x: dx, y: dy};
+  }
+
   /* I have no idea how these should acually be calculated, but apparently
   they are relative to the HTML body */
-  const svgOffsets = document.getElementById("d3TreeElement").getBoundingClientRect();
-  // console.log(svgOffsets)
-  const xOffset = svgOffsets.left;
-  const yOffset = -1 * svgOffsets.top;
+  const viewerState = viewer.getValue();
+  const xOffset = 10;
+  const yOffset = 10;
 
   const width = 150;
   const height = 150;
-  const left = hovered.x + xOffset > responsive.width - width ?
-    responsive.width - width : hovered.x + xOffset;
-  const top = hovered.y + yOffset > responsive.height - height ?
-    responsive.height - height : hovered.y + yOffset;
+  const pos = treePosToViewer(hovered.d.xTip, hovered.d.yTip, viewerState);
+  const left = pos.x + ((pos.x<viewerState.viewerWidth *0.7)? xOffset : -width -xOffset);
+  const top =  pos.y + ((pos.y<viewerState.viewerHeight*0.7)? yOffset : -height-yOffset);
 
   const styles = {
     container: {

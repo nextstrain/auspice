@@ -413,6 +413,7 @@ class TreeView extends React.Component {
           tree={this.state.tree}
           hovered={this.state.hovered}
           responsive={responsive}
+          viewer={this.Viewer}
         />
         <BranchSelectedPanel
           responsive={responsive}
