@@ -347,10 +347,9 @@ class TreeView extends React.Component {
   }
 
   startPan(d){
-    // console.log('removing grid');
   }
 
-  endPan(d){
+  onViewerChange(d){
     if (this.Viewer && this.state.tree){
       const V = this.Viewer.getValue();
       if (V.mode==="panning"){
@@ -448,7 +447,7 @@ class TreeView extends React.Component {
           // onMouseDown={this.startPan.bind(this)}
           onDoubleClick={this.resetView.bind(this)}
           //onMouseUp={this.endPan.bind(this)}
-          onChangeValue={ this.endPan.bind(this) }
+          onChangeValue={ this.onViewerChange.bind(this) }
           >
           <svg style={{pointerEvents: "auto"}}
             width={responsive.width}
