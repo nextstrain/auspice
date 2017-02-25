@@ -17,11 +17,10 @@ const styles = {
     position: "absolute",
     paddingTop: 10,
     paddingBottom: 10,
-    paddingLeft: 25,
-    paddingRight: 25,
+    paddingLeft: 20,
+    paddingRight: 20,
     top: "40px",
     left: "20px",
-    // width: "100%",
     color: "white",
     background: "rgba(0, 0, 0, 0.7)"
   },
@@ -65,7 +64,7 @@ const styles = {
 const generateCard = (title, imgRequired, to) => (
   <div style={styles.cardOuterDiv}>
     <div style={styles.cardInnerDiv}>
-      <Link to={to}>    
+      <Link to={to}>
       <img style={styles.cardImg} src={imgRequired}/>
         <span style={styles.cardMainText}>
           {title[0]}
