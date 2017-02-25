@@ -385,7 +385,7 @@ class TreeView extends React.Component {
         }else{        // otherwise reset view to have SVG fit the viewer
           this.resetView();
           // if we have clade zoom, zoom out to the parent clade
-          if (this.state.selectedBranch.n.arrayIdx){
+          if (this.state.selectedBranch && this.state.selectedBranch.n.arrayIdx){
             const dp = this.props.dispatch;
             const arrayIdx = this.state.tree.zoomNode.parent.n.arrayIdx;
             this.setState({
@@ -397,10 +397,13 @@ class TreeView extends React.Component {
                 dp(restrictTreeToSingleTip(0,arrayIdx));
               }
             }
+            // wait and reset tipVisibility
+            if (this.timeout){
+              clearTimeout(this.timeout);
+            }
             // call phyloTree to zoom out, this rerenders the geometry
             this.state.tree.zoomToParent(mediumTransitionDuration);
-            // wait and reset tipVisibility
-            setTimeout(makeCallBack(), 2*mediumTransitionDuration);
+            this.timeout = setTimeout(makeCallBack(), 2*mediumTransitionDuration);
           }
         }
       }
