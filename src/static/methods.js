@@ -17,7 +17,7 @@ const Methods = () => {
           <div className="col-md-1"/>
           <div className="col-md-7">
             <h1>Methods</h1>
-            <h2>Overview</h2>            
+            <h2>Overview</h2>
           </div>
         </div>
 

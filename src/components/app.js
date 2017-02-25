@@ -94,17 +94,25 @@ class App extends React.Component {
       <Sidebar
         sidebarClassName="sidebar-hide-scrollbar"
         sidebar={
-          <Controls/>
+          <div>
+            <TitleBar minified={true}/>
+            <Controls/>
+            <ToggleSidebarTab
+              open={this.state.sidebarDocked}
+              handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
+            />
+          </div>
         }
         open={this.state.sidebarOpen}
         docked={this.state.sidebarDocked}
         onSetOpen={(a) => {this.setState({sidebarOpen: a});}}>
         <Background>
-          <TitleBar/>
-          <ToggleSidebarTab
-            open={this.state.sidebarDocked}
-            handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
-          />
+          {this.state.sidebarOpen || this.state.sidebarDocked ? <div/> :
+            <ToggleSidebarTab
+              open={this.state.sidebarDocked}
+              handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
+            />
+          }
           <TreeView
             query={queryString.parse(this.context.router.location.search)}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
