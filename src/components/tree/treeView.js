@@ -385,7 +385,20 @@ class TreeView extends React.Component {
           this.Viewer.zoomOnViewerCenter(0.71);
         }else{
           this.resetView();
+          const dp = this.props.dispatch;
+          const arrayIdx = this.state.tree.zoomNode.parent.n.arrayIdx;
+          this.setState({
+            hovered: null,
+            selectedBranch: this.state.tree.zoomNode.parent
+          });
+          console.log(arrayIdx);
+          const makeCallBack = function(){
+            return function(){
+              dp(restrictTreeToSingleTip(0,arrayIdx));
+            }
+          }
           this.state.tree.zoomToParent(mediumTransitionDuration);
+          setTimeout(makeCallBack(), 2*mediumTransitionDuration);
         }
       }
       this.resetGrid();
@@ -451,7 +464,7 @@ class TreeView extends React.Component {
     this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
   }
 
-  createTreeMarkup() {
+  render() {
     const responsive = computeResponsive({
       horizontal: this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
       vertical: 1,
