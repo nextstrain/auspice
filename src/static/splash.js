@@ -81,7 +81,7 @@ const Splash = () => {
 
   return(
     <g>
-      <TitleBar titleHidden={true}/>
+      <TitleBar logoHidden={true} titleHidden={true}/>
 
       <div className="static container">
 
