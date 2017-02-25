@@ -17,11 +17,10 @@ const styles = {
     position: "absolute",
     paddingTop: 10,
     paddingBottom: 10,
-    paddingLeft: 25,
-    paddingRight: 25,
+    paddingLeft: 20,
+    paddingRight: 20,
     top: "40px",
     left: "20px",
-    // width: "100%",
     color: "white",
     background: "rgba(0, 0, 0, 0.7)"
   },
@@ -65,8 +64,8 @@ const styles = {
 const generateCard = (title, imgRequired, to) => (
   <div style={styles.cardOuterDiv}>
     <div style={styles.cardInnerDiv}>
-      <img style={styles.cardImg} src={imgRequired}/>
       <Link to={to}>
+      <img style={styles.cardImg} src={imgRequired}/>
         <span style={styles.cardMainText}>
           {title[0]}
           {title.length === 2 ? <div style={styles.cardSubText}>{title[1]}</div> : null}
@@ -81,7 +80,7 @@ const Splash = () => {
 
   return(
     <g>
-      <TitleBar titleHidden={true}/>
+      <TitleBar logoHidden={true} titleHidden={true}/>
 
       <div className="static container">
 

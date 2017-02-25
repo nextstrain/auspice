@@ -1,8 +1,14 @@
 import React from "react";
+import { connect } from "react-redux";
 import { titleColors } from "../../util/globals";
 import { titleStyles, titleFont, medGrey } from "../../globalStyles";
 import Radium from "radium";
 
+@connect((state) => {
+  return {
+    browserDimensions: state.browserDimensions.browserDimensions
+  };
+})
 @Radium
 class Title extends React.Component {
   constructor(props) {
@@ -12,13 +18,25 @@ class Title extends React.Component {
     style: React.PropTypes.object.isRequired
   }
   getStyles() {
+    let fontSize = 106;
+    if (this.props.browserDimensions.width < 500) {
+      fontSize = 84;
+    }
+    if (this.props.browserDimensions.width < 450) {
+      fontSize = 78;
+    }
+    if (this.props.browserDimensions.width < 400) {
+      fontSize = 72;
+    }
+    if (this.props.browserDimensions.width < 350) {
+      fontSize = 66;
+    }
     return {
       title: {
         fontFamily: titleFont,
-        fontSize: 106,
-        lineHeight: "28px",
+        fontSize: fontSize,
         marginTop: 0,
-        marginBottom: 2,
+        marginBottom: 0,
         fontWeight: 300,
         color: medGrey,
         letterSpacing: "-1px"
@@ -28,7 +46,7 @@ class Title extends React.Component {
   createTitle() {
     const title = "nextstrain";
     return title.split("").map((letter, i) =>
-      <span key={i} style={{color: titleColors[i]}}>{letter}</span>
+      <span key={i} style={{color: this.props.minified ? "#fff" : titleColors[i] }}>{letter}</span>
     );
   }
   render() {

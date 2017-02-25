@@ -11,17 +11,19 @@ const ToggleSidebarTab = ({open, handler}) => {
       onClick={handler}
       style={{
         width: 15,
-        height: 40,
+        height: 50,
         position: "fixed",
-        top: 5,
+        top: 0,
         zIndex: 1001,
-        backgroundColor: brandColor,
-        cursor: "pointer"
+        backgroundColor: "#4b4e4e",
+        cursor: "pointer",
+        left: open ? "auto" : 0,
+        right: open ? 0 : "auto"
       }}>
       <svg
         style={{
           position: "relative",
-          top: 15,
+          top: 20,
           left: 4
         }}
         width="7px"
