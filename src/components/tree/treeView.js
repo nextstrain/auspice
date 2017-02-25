@@ -411,7 +411,6 @@ class TreeView extends React.Component {
         <Legend sidebar={this.props.sidebar}/>
         <InfoPanel
           tree={this.state.tree}
-          resetState={() => this.setState({hovered: null})}
           hovered={this.state.hovered}
         />
         <BranchSelectedPanel

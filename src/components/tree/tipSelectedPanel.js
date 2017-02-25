@@ -1,9 +1,7 @@
 import React from "react";
-import * as globalStyles from "../../globalStyles";
-import * as globals from "../../util/globals";
-import {dataFont} from "../../globalStyles";
+import {infoPanelStyles} from "../../globalStyles";
 
-const prettyString = (x) => {
+export const prettyString = (x) => {
   return x.replace("_", " ")
           .replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
 };
@@ -23,46 +21,6 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
       display: "flex",
       justifyContent: "center",
       alignItems: "center"
-    },
-    panel: {
-      position: "relative",
-      paddingLeft: 30,
-      padding: "5% 5%",
-      borderRadius: 5,
-      backgroundColor: globalStyles.darkGrey,
-      color: "white",
-      fontFamily: dataFont,
-      fontSize: 18,
-      lineHeight: 1,
-      fontWeight: 300
-    },
-    heading: {
-      fontSize: 24,
-      fontWeight: 400
-    },
-    list: {
-      listStyleType: "disc"
-    },
-    comment: {
-      fontStyle: "italic",
-      fontWeight: 200,
-      fontSize: 14
-    },
-    link: {
-      // display: "inline",
-      float: "right",
-      fontFamily: dataFont,
-      fontSize: 14,
-      textDecoration: "none",
-      pointerEvents: "auto",
-      lineHeight: .8,
-      backgroundColor: "#888",
-      color: "white", // link color
-      cursor: "pointer",
-      // textTransform: "uppercase",
-      border: "none",
-      borderRadius: 3
-      // ...materialButtonOutline
     }
   };
 
@@ -70,8 +28,8 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
     if (!tip) {return null;}
     return (
       <div style={styles.container} onClick={() => goAwayCallback(tip)}>
-        <div className={"panel"} style={styles.panel}>
-          <p style={styles.heading}>
+        <div className={"panel"} style={infoPanelStyles.panel}>
+          <p style={infoPanelStyles.modalHeading}>
             {`${tip.n.strain}`}
           </p>
           <table>
@@ -110,7 +68,7 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
               </tr>
             </tbody>
           </table>
-          <p style={styles.comment}>
+          <p style={infoPanelStyles.comment}>
             Click outside this box to go back to the tree
           </p>
         </div>

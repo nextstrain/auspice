@@ -94,3 +94,49 @@ export const titleStyles = {
     color: medGrey
   }
 };
+
+export const infoPanelStyles = {
+  buttonLink: {
+    float: "right",
+    fontFamily: dataFont,
+    fontSize: 14,
+    textDecoration: "none",
+    pointerEvents: "auto",
+    lineHeight: .8,
+    backgroundColor: "#888",
+    color: "white", // link color
+    cursor: "pointer",
+    // textTransform: "uppercase",
+    border: "none",
+    borderRadius: 3
+  },
+  panel: {
+    position: "relative",
+    paddingLeft: 30,
+    padding: "5% 5%",
+    borderRadius: 5,
+    backgroundColor: darkGrey,
+    color: "white",
+    fontFamily: dataFont,
+    fontSize: 18,
+    lineHeight: 1,
+    fontWeight: 300
+  },
+  modalHeading: {
+    fontSize: 24,
+    fontWeight: 400
+  },
+  heading: {
+    fontSize: 20,
+    fontWeight: 400
+  },
+  comment: {
+    fontStyle: "italic",
+    fontWeight: 200,
+    fontSize: 14
+  },
+  list: {
+    paddingLeft: 15,
+    listStyleType: "disc"
+  },
+};

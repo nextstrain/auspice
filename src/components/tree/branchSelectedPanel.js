@@ -1,7 +1,5 @@
 import React from "react";
-import * as globalStyles from "../../globalStyles";
-import * as globals from "../../util/globals";
-import {dataFont, materialButtonOutline} from "../../globalStyles";
+import {infoPanelStyles, dataFont} from "../../globalStyles";
 
 const BranchSelectedPanel = ({branch, viewEntireTreeCallback, responsive}) => {
 
@@ -25,22 +23,6 @@ const BranchSelectedPanel = ({branch, viewEntireTreeCallback, responsive}) => {
       fontFamily: dataFont,
       fontSize: 14,
       lineHeight: .8
-    },
-    link: {
-      // display: "inline",
-      float: "right",
-      fontFamily: dataFont,
-      fontSize: 14,
-      textDecoration: "none",
-      pointerEvents: "auto",
-      lineHeight: .8,
-      backgroundColor: "#888",
-      color: "white", // link color
-      cursor: "pointer",
-      // textTransform: "uppercase",
-      border: "none",
-      borderRadius: 3
-      // ...materialButtonOutline
     }
   };
 
@@ -54,7 +36,7 @@ const BranchSelectedPanel = ({branch, viewEntireTreeCallback, responsive}) => {
     return (
       <div style={styles.container}>
         {text[0]}
-        <button style={styles.link} onClick={() => viewEntireTreeCallback()}>
+        <button style={infoPanelStyles.buttonLink} onClick={() => viewEntireTreeCallback()}>
           {text[1]}
         </button>
       </div>
