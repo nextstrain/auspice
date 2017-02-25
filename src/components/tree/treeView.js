@@ -388,21 +388,24 @@ class TreeView extends React.Component {
           if (this.state.selectedBranch && this.state.selectedBranch.n.arrayIdx){
             const dp = this.props.dispatch;
             const arrayIdx = this.state.tree.zoomNode.parent.n.arrayIdx;
+            // reset the "clicked" branch, unset if we zoomed out all the way to the root
             this.setState({
               hovered: null,
-              selectedBranch: this.state.tree.zoomNode.parent
+              selectedBranch: (arrayIdx)?this.state.tree.zoomNode.parent:null
             });
+
             const makeCallBack = function(){
               return function(){
                 dp(restrictTreeToSingleTip(0,arrayIdx));
               }
             }
-            // wait and reset tipVisibility
+            // clear previous timeout bc they potentially mess with the geometry update
             if (this.timeout){
               clearTimeout(this.timeout);
             }
             // call phyloTree to zoom out, this rerenders the geometry
             this.state.tree.zoomToParent(mediumTransitionDuration);
+            // wait and reset tipVisibility
             this.timeout = setTimeout(makeCallBack(), 2*mediumTransitionDuration);
           }
         }
@@ -432,9 +435,7 @@ class TreeView extends React.Component {
     const viewer = this.Viewer;
     const delayedRedraw = function(){
       return function(){
-        console.log('reseting grid');
         const view = visibleArea(viewer);
-        //tree.removeGrid();
         tree.addGrid(layout, view.bottom, view.top);
       }
     }
