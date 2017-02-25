@@ -29,7 +29,6 @@ class Root extends React.Component {
             <Switch>
               <Route path="/methods" component={Methods}/>
               <Route path="/about" component={About}/>
-              <Route path="/help" component={Help}/>
               <Route path="/zika" component={App}/>
               <Route path="/ebola" component={App}/>
               <Route exact path="/flu*" render={() => window.location.assign("http://nextflu.org/")}/>
