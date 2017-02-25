@@ -196,9 +196,15 @@ const parseFilterQuery = function (query) {
 };
 
 export const calcTipVisibility = function (tree, controls) {
-  if (tree.nodes){
-    /* extract the filter information from redux.
-    redux.filters has 2 keys, each with an array of values
+  if (tree.nodes) {
+    /* Terminology:
+    inView: attribute of nodes, bool, set by phyloTree, determines if the tip is within the view
+    tip-visible: attribute of nodes, corresponds to tipVisibility array except this is binary (1/0)
+    this fn returns tipVisibility, array of "visible" or "hidden"
+
+    Filters:
+    filters stored in redux - controls.filters
+    filters have 2 keys, each with an array of values
     keys: "region" and/or "authors"
     filterPairs is a list of lists. Each list defines the filtering to do.
     i.e. [ [ region, [...values]], [authors, [...values]]]
@@ -220,24 +226,31 @@ export const calcTipVisibility = function (tree, controls) {
           d.attr.date >= lowerLimit
           && d.attr.date < upperLimit
           && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
-        ) ? 1 : 0);
+        ));
       } else {
         visibility = tree.nodes.map((d) => (
           d.attr.date >= lowerLimit
           && d.attr.date < upperLimit
-        ) ? 1 : 0);
+        ));
       }
     }
 
+    /* edge case: this fn may be called before the shell structure of the nodes
+    has been created (i.e. phyloTree's not run yet). In this case, it's
+    safe to assume that everything's in view */
+    let inView;
+    try {
+      inView = tree.nodes.map((d) => d.shell.inView);
+    } catch(e) {
+      inView = tree.nodes.map((d) => true);
+    }
+    /* intersect visibility and inView*/
+    visibility = visibility.map((cv, idx) => (cv && inView[idx]));
+
     /* save results in tree.nodes as well */
-    tree.nodes.map((d, idx) => {d["tip-visible"] = visibility[idx]})
+    tree.nodes.map((d, idx) => {d["tip-visible"] = visibility[idx];});
     /* return array of "visible" or "hidden" values */
-    return visibility.map((cv, idx) => cv ? "visible" : "hidden")
-
-    // const inView = tree.nodes.map((d) => d.shell.inView);
-
-    /* intersect visibility and inView, return visible || hidden */
-    // return visibility.map((cv, idx) => (cv && inView[idx]) ? "visible" : "hidden");
+    return visibility.map((cv) => cv ? "visible" : "hidden");
   }
   return "visible";
 };

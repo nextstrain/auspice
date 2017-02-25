@@ -1,8 +1,9 @@
+/*eslint-env browser*/
 import React from "react";
 import d3 from "d3";
 import * as globals from "../../util/globals";
 import Card from "../framework/card";
-import Legend from "../controls/legend";
+import Legend from "./legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
 import MoveIcon from "../framework/move-icon";
@@ -13,6 +14,8 @@ import {Viewer, ViewerHelper} from 'react-svg-pan-zoom';
 import {fastTransitionDuration, mediumTransitionDuration, slowTransitionDuration} from "../../util/globals";
 import * as globalStyles from "../../globalStyles";
 import InfoPanel from "./infoPanel";
+import BranchSelectedPanel from "./branchSelectedPanel";
+import TipSelectedPanel from "./tipSelectedPanel";
 import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
 import { getGenotype } from "../../util/getGenotype";
@@ -21,6 +24,7 @@ import { arrayInEquality,
          tipRadii,
          tipVisibility,
          nodeColor} from "../../util/treeHelpers";
+import { zoomToClade, restrictTreeToSingleTip } from "../../actions/treeProperties";
 import _ from "lodash";
 
 /* UNDERSTANDING THIS CODE:
@@ -34,7 +38,8 @@ I (james) don't want to put phylotree into redux
 as it's not simply data
 
 the state of this component contains a few flags and
-hovered / clicked, which reference the nodes currently in that state
+hovered / branchSelected / tipSelected,
+each of which reference the nodes currently in that state
 they're not in redux as (1) its easier and (2) all components that
 need this information are children of this component
 (it would probably be a good idea to move them to redux)
@@ -68,8 +73,9 @@ class TreeView extends React.Component {
     this.Viewer = null;
     this.state = {
       tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
-      clicked: null,
       hover: null,
+      selectedBranch: null,
+      selectedTip: null,
       tree: null,
       shouldReRender: false // start off this way I guess
     };
@@ -78,6 +84,18 @@ class TreeView extends React.Component {
     router: React.PropTypes.object.isRequired
   }
   static propTypes = {
+    sidebar: React.PropTypes.bool.isRequired
+  }
+
+  componentWillMount() {
+    /* the tree resets itself on resize, so reset selections */
+    window.addEventListener("resize",
+      () => this.setState({
+        hover: null,
+        selectedBranch: null,
+        selectedTip: null
+      })
+    );
   }
 
   componentWillReceiveProps(nextProps) {
@@ -182,7 +200,8 @@ class TreeView extends React.Component {
       return true;
     } else if (
       this.state.hovered !== nextState.hovered ||
-      this.state.clicked !== nextState.clicked
+      this.state.selectedTip !== nextState.selectedTip ||
+      this.state.selectedBranch !== nextState.selectedBranch
     ) {
       return true;
     }
@@ -240,12 +259,6 @@ class TreeView extends React.Component {
           branchLabel: this.branchLabel.bind(this),
           branchLabelSize: this.branchLabelSize.bind(this)
         },
-        /* this param must have been removed from phyloTree.render at some point */
-        // {
-        //   /* presently selected node / branch */
-        //   hovered: this.state.hovered,
-        //   clicked: this.state.clicked
-        // },
         /* branch Thicknesses - guarenteed to be in redux by now */
         nextProps.tree.branchThickness,
         nextProps.tree.tipVisibility
@@ -256,31 +269,45 @@ class TreeView extends React.Component {
     }
   }
 
-  /* Callbacks used by the tips / branches when hovered / clicked */
-  /* By keeping this out of redux I think it makes things a little faster */
-  onTipHover(d) {
+  /* Callbacks used by the tips / branches when hovered / selected */
+  onTipHover(d, x, y) {
     this.state.tree.svg.select("#tip_" + d.n.clade)
-      .attr("r", (d) => d["r"] + 4)
-    if (!this.state.clicked) {
-      this.setState({hovered: {d, type: ".tip"}});
-    }
+      .attr("r", (d) => d["r"] + 4);
+    this.setState({
+      hovered: {d, type: ".tip", x, y}
+    });
   }
   onTipClick(d) {
-    this.setState({clicked: {d,type: ".tip"}, hovered: null});
+    // console.log("tip click", d)
+    this.setState({
+      hovered: null,
+      selectedTip: d
+    });
+    this.props.dispatch(restrictTreeToSingleTip(1, d.n.arrayIdx))
   }
-  onBranchHover(d) {
+  onBranchHover(d, x, y) {
     // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
     const id = "#branch_S_" + d.n.clade;
     this.state.tree.svg.select(id)
       .style("stroke", (d) => d["stroke"])
-    if (!this.state.clicked) {
-      this.setState({hovered: {d, type: ".branch"}});
-    }
+    this.setState({
+      hovered: {d, type: ".branch", x, y}
+    });
   }
   onBranchClick(d) {
-    this.setState({clicked: {d, type: ".branch"},hovered: null});
+    this.state.tree.zoomIntoClade(d, mediumTransitionDuration);
+    /* to stop multiple phyloTree updates potentially clashing,
+    we change tipVis after geometry update + transition */
+    window.setTimeout(() =>
+      this.props.dispatch(zoomToClade(d.arrayIdx)),
+      mediumTransitionDuration
+    );
+    this.setState({
+      hovered: null,
+      selectedBranch: d
+    });
   }
-
+  /* onBranchLeave called when mouse-off, i.e. anti-hover */
   onBranchLeave(d) {
     // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
     const id = "#branch_S_" + d.n.clade;
@@ -290,13 +317,32 @@ class TreeView extends React.Component {
       this.setState({hovered: null})
     }
   }
-
   onTipLeave(d) {
-    this.state.tree.svg.select("#tip_" + d.n.clade)
-      .attr("r", (d) => d["r"])
-    if (this.state.hovered) {
-      this.setState({hovered: null})
+    if (!this.state.selectedTip) {
+      this.state.tree.svg.select("#tip_" + d.n.clade)
+        .attr("r", (d) => d["r"]);
     }
+    if (this.state.hovered) {
+      this.setState({hovered: null});
+    }
+  }
+  /* viewEntireTree: triggered by "reset to entire tree" button */
+  viewEntireTree() {
+    this.state.tree.zoomIntoClade(this.state.tree.nodes[0], globals.mediumTransitionDuration);
+    /* wait until view has transitioned back, i.e. tips have moved */
+    window.setTimeout(
+      () => this.props.dispatch(zoomToClade(0)),
+      mediumTransitionDuration
+    );
+    this.setState({selectedBranch: null, selectedTip: null});
+  }
+  /* clearSelectedTip when clicking to go away */
+  clearSelectedTip(d) {
+    this.state.tree.svg.select("#tip_" + d.n.clade)
+      .attr("r", (d) => d["r"]);
+    this.setState({selectedTip: null, hovered: null});
+    /* restore the tip visibility! */
+    this.props.dispatch(restrictTreeToSingleTip(0))
   }
 
   /**
@@ -330,17 +376,80 @@ class TreeView extends React.Component {
 
   handleIconClick(tool) {
     return () => {
+      const V = this.Viewer.getValue();
       if (tool === "zoom-in") {
         this.Viewer.zoomOnViewerCenter(1.4);
-        // console.log('zooming in', this.state.zoom, zoom)
-      } else {
-        this.Viewer.zoomOnViewerCenter(0.71);
+      } else { // zoom out
+        if (V.a>1.0){ // if there is room to zoom out via the SVGPanZoom, do
+          this.Viewer.zoomOnViewerCenter(0.71);
+        }else{        // otherwise reset view to have SVG fit the viewer
+          this.resetView();
+          // if we have clade zoom, zoom out to the parent clade
+          if (this.state.selectedBranch && this.state.selectedBranch.n.arrayIdx){
+            const dp = this.props.dispatch;
+            const arrayIdx = this.state.tree.zoomNode.parent.n.arrayIdx;
+            // reset the "clicked" branch, unset if we zoomed out all the way to the root
+            this.setState({
+              hovered: null,
+              selectedBranch: (arrayIdx)?this.state.tree.zoomNode.parent:null
+            });
+
+            const makeCallBack = function(){
+              return function(){
+                dp(restrictTreeToSingleTip(0,arrayIdx));
+              }
+            }
+            // clear previous timeout bc they potentially mess with the geometry update
+            if (this.timeout){
+              clearTimeout(this.timeout);
+            }
+            // call phyloTree to zoom out, this rerenders the geometry
+            this.state.tree.zoomToParent(mediumTransitionDuration);
+            // wait and reset tipVisibility
+            this.timeout = setTimeout(makeCallBack(), 2*mediumTransitionDuration);
+          }
+        }
       }
-      // const viewerX = this.state.width / 2;
-      // const viewerY = this.treePlotHeight(this.state.width) / 2;
-      // const nextValue = ViewerHelper.zoom(this.state.value, zoom, viewerX, viewerY);
-      // this.setState({value: nextValue});
+      this.resetGrid();
     };
+  }
+
+  startPan(d){
+  }
+
+  onViewerChange(d){
+    if (this.Viewer && this.state.tree){
+      const V = this.Viewer.getValue();
+      if (V.mode==="panning"){
+          this.resetGrid();
+      }else if (V.mode==="idle"){
+          this.resetGrid();
+      }
+    }
+  }
+
+  resetGrid(){
+    const tree = this.state.tree;
+    const visibleArea = this.visibleArea;
+    const layout = this.props.layout;
+    const viewer = this.Viewer;
+    const delayedRedraw = function(){
+      return function(){
+        const view = visibleArea(viewer);
+        tree.addGrid(layout, view.bottom, view.top);
+      }
+    }
+    setTimeout(delayedRedraw(), 200);
+  }
+
+  resetView(d){
+    this.Viewer.fitToViewer();
+  }
+
+  visibleArea(Viewer){
+    const V = Viewer.getValue();
+    return {left: -V.e/V.a, top:-V.f/V.d,
+            right:(V.viewerWidth - V.e)/V.a, bottom: (V.viewerHeight-V.f)/V.d}
   }
 
   // handleZoomEvent(direction) {
@@ -362,15 +471,16 @@ class TreeView extends React.Component {
     this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
   }
 
-  createTreeMarkup() {
+  render() {
     const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+      horizontal: this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
       vertical: 1,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
       minHeight: 400,
       maxAspectRatio: 1.3
     })
+    const cardTitle = this.state.selectedBranch ? "" : "Phylogeny";
 
     /* NOTE these props were removed from SVG pan-zoom as they led to functions that did
     nothing, but they may be useful in the future...
@@ -379,15 +489,23 @@ class TreeView extends React.Component {
     */
 
     return (
-      <Card center title="Phylogeny">
-        <Legend
-          colorScale={this.props.colorScale}
-          sidebar={this.props.sidebar}/>
+      <Card center title={cardTitle}>
+        <Legend sidebar={this.props.sidebar}/>
         <InfoPanel
-          dismiss={this.infoPanelDismiss.bind(this)}
-          zoom={this.state.tree ? this.state.tree.zoomIntoClade.bind(this.state.tree) : null}
+          tree={this.state.tree}
           hovered={this.state.hovered}
-          clicked={this.state.clicked}/>
+          responsive={responsive}
+          viewer={this.Viewer}
+        />
+        <BranchSelectedPanel
+          responsive={responsive}
+          viewEntireTreeCallback={() => this.viewEntireTree()}
+          branch={this.state.selectedBranch}
+        />
+        <TipSelectedPanel
+          goAwayCallback={(d) => this.clearSelectedTip(d)}
+          tip={this.state.selectedTip}
+        />
         <ReactSVGPanZoom
           width={responsive ? responsive.width : 1}
           height={responsive ? responsive.height : 1}
@@ -396,25 +514,32 @@ class TreeView extends React.Component {
             this.Viewer = Viewer
           }}
           style={{cursor: "default"}}
-          tool={this.state.tool}
+          tool={'auto'}
           detectWheel={false}
           toolbarPosition={"none"}
           detectAutoPan={false}
-          background={"#FFF"}>
+          background={"#FFF"}
+          // onMouseDown={this.startPan.bind(this)}
+          onDoubleClick={this.resetView.bind(this)}
+          //onMouseUp={this.endPan.bind(this)}
+          onChangeValue={ this.onViewerChange.bind(this) }
+          >
           <svg style={{pointerEvents: "auto"}}
             width={responsive.width}
             height={responsive.height}
-            >
+          >
             <g
               width={responsive.width}
               height={responsive.height}
+              id={"d3TreeElement"}
               style={{cursor: "default"}}
-              ref="d3TreeElement">
+              ref="d3TreeElement"
+            >
             </g>
           </svg>
         </ReactSVGPanZoom>
         <svg width={50} height={130}
-             style={{position: "absolute", right: 20, bottom: 20}}>
+          style={{position: "absolute", right: 20, bottom: 20}}>
             <defs>
               <filter id="dropshadow" height="130%">
                 <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
@@ -430,30 +555,18 @@ class TreeView extends React.Component {
             </defs>
           <ZoomInIcon
             handleClick={this.handleIconClick("zoom-in")}
-            active={true}
+            active
             x={10}
             y={50}
-            />
+          />
           <ZoomOutIcon
             handleClick={this.handleIconClick("zoom-out")}
             active={true}
             x={10}
             y={90}
-            />
+          />
         </svg>
       </Card>
-    )
-  }
-  render() {
-    /*
-      1. set up SVGs
-      2. tree will be added on props loading
-    */
-    // console.log("treeView render")
-    return (
-      <span>
-        {this.props.browserDimensions ? this.createTreeMarkup() : null}
-      </span>
     );
   }
 }

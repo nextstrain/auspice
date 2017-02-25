@@ -6,7 +6,7 @@ import * as types from "./types";
 
 const updateTipVisibility = () => {
   return (dispatch, getState) => {
-    const { tree, metadata, controls } = getState();
+    const { tree, controls } = getState();
     dispatch({
       type: types.UPDATE_TIP_VISIBILITY,
       data: calcTipVisibility(tree, controls),
@@ -16,7 +16,7 @@ const updateTipVisibility = () => {
 };
 
 /* this must be called AFTER tipVisibility is updated */
-const updateBranchThickness = () => {
+const updateBranchThickness = (idxOfInViewRootNode = 0) => {
   return (dispatch, getState) => {
     const { tree } = getState();
     if (tree.nodes) {
@@ -27,12 +27,40 @@ const updateBranchThickness = () => {
       /* step 2: re-calculate branchThickness & dispatch*/
       dispatch({
 				type: types.UPDATE_BRANCH_THICKNESS,
-				data: calcBranchThickness(tree.nodes, 0),
+				data: calcBranchThickness(tree.nodes, idxOfInViewRootNode),
 				version: tree.branchThicknessVersion + 1
       });
     }
   };
 };
+
+export const restrictTreeToSingleTip = function (restrict, tipIdx = undefined) {
+	return (dispatch, getState) => {
+		const { tree, controls } = getState();
+		if (restrict === 1) {
+			// console.log("restrict")
+			const vis = tree.nodes.map((d, idx) => {
+				d["tip-visible"] = idx === tipIdx ? 1 : 0;
+				return idx === tipIdx ? "visible" : "hidden";
+			});
+			dispatch({
+				type: types.UPDATE_TIP_VISIBILITY,
+				data: vis,
+				version: tree.tipVisibilityVersion + 1
+			});
+			dispatch(updateBranchThickness());
+		} else {
+			// console.log("return")
+			dispatch({
+				type: types.UPDATE_TIP_VISIBILITY,
+				data: calcTipVisibility(tree, controls),
+				version: tree.tipVisibilityVersion + 1
+			});
+			dispatch(updateBranchThickness());
+		}
+	}
+}
+
 
 /* when tip max / min changes, we need to (a) update the controls reducer
 with the new value(s), (b) update the tree tipVisibility */
@@ -54,6 +82,14 @@ export const changeDateFilter = function (newMin, newMax) {
   };
 };
 
+/* zoomToClade takes care of setting tipVis and branchThickness.
+Note that the zooming / tree stuff is done imperitively by phyloTree */
+export const zoomToClade = function (idxOfInViewRootNode) {
+	return (dispatch) => {
+		dispatch(updateTipVisibility());
+		dispatch(updateBranchThickness(idxOfInViewRootNode));
+	};
+};
 
 const updateTipRadii = () => {
   return (dispatch, getState) => {

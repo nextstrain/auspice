@@ -42,3 +42,24 @@ a {
     background: transparent;  /* optional: just make scrollbar invisible */
     display: none;
 }
+
+
+/* from Bootstrap */
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+td,
+th {
+  padding: 0;
+}
+/* end bootstrap */
+
+.panel th {
+  text-align: left;
+  padding-right: 10px;
+}
+.panel td {
+  text-align: left;
+  padding: 3px;
+}
