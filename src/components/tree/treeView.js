@@ -379,26 +379,29 @@ class TreeView extends React.Component {
       const V = this.Viewer.getValue();
       if (tool === "zoom-in") {
         this.Viewer.zoomOnViewerCenter(1.4);
-        // console.log('zooming in', this.state.zoom, zoom)
-      } else {
-        if (V.a>1.0){
+      } else { // zoom out
+        if (V.a>1.0){ // if there is room to zoom out via the SVGPanZoom, do
           this.Viewer.zoomOnViewerCenter(0.71);
-        }else{
+        }else{        // otherwise reset view to have SVG fit the viewer
           this.resetView();
-          const dp = this.props.dispatch;
-          const arrayIdx = this.state.tree.zoomNode.parent.n.arrayIdx;
-          this.setState({
-            hovered: null,
-            selectedBranch: this.state.tree.zoomNode.parent
-          });
-          console.log(arrayIdx);
-          const makeCallBack = function(){
-            return function(){
-              dp(restrictTreeToSingleTip(0,arrayIdx));
+          // if we have clade zoom, zoom out to the parent clade
+          if (this.state.selectedBranch.n.arrayIdx){
+            const dp = this.props.dispatch;
+            const arrayIdx = this.state.tree.zoomNode.parent.n.arrayIdx;
+            this.setState({
+              hovered: null,
+              selectedBranch: this.state.tree.zoomNode.parent
+            });
+            const makeCallBack = function(){
+              return function(){
+                dp(restrictTreeToSingleTip(0,arrayIdx));
+              }
             }
+            // call phyloTree to zoom out, this rerenders the geometry
+            this.state.tree.zoomToParent(mediumTransitionDuration);
+            // wait and reset tipVisibility
+            setTimeout(makeCallBack(), 2*mediumTransitionDuration);
           }
-          this.state.tree.zoomToParent(mediumTransitionDuration);
-          setTimeout(makeCallBack(), 2*mediumTransitionDuration);
         }
       }
       this.resetGrid();
