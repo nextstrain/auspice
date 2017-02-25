@@ -270,28 +270,28 @@ class TreeView extends React.Component {
   }
 
   /* Callbacks used by the tips / branches when hovered / selected */
-  onTipHover(d) {
+  onTipHover(d, x, y) {
     this.state.tree.svg.select("#tip_" + d.n.clade)
       .attr("r", (d) => d["r"] + 4);
     this.setState({
-      hovered: {d, type: ".tip"}
+      hovered: {d, type: ".tip", x, y}
     });
   }
   onTipClick(d) {
-    console.log("tip click", d)
+    // console.log("tip click", d)
     this.setState({
       hovered: null,
       selectedTip: d
     });
     this.props.dispatch(restrictTreeToSingleTip(1, d.n.arrayIdx))
   }
-  onBranchHover(d) {
+  onBranchHover(d, x, y) {
     // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
     const id = "#branch_S_" + d.n.clade;
     this.state.tree.svg.select(id)
       .style("stroke", (d) => d["stroke"])
     this.setState({
-      hovered: {d, type: ".branch"}
+      hovered: {d, type: ".branch", x, y}
     });
   }
   onBranchClick(d) {
@@ -412,6 +412,7 @@ class TreeView extends React.Component {
         <InfoPanel
           tree={this.state.tree}
           hovered={this.state.hovered}
+          responsive={responsive}
         />
         <BranchSelectedPanel
           responsive={responsive}
@@ -442,6 +443,7 @@ class TreeView extends React.Component {
             <g
               width={responsive.width}
               height={responsive.height}
+              id={"d3TreeElement"}
               style={{cursor: "default"}}
               ref="d3TreeElement"
             >

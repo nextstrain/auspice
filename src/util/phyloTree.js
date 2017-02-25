@@ -763,7 +763,7 @@ PhyloTree.prototype.drawTips = function() {
       return d.r;
     })
     .on("mouseover", (d) => {
-      this.callbacks.onTipHover(d)
+      this.callbacks.onTipHover(d, d3.event.pageX, d3.event.pageY)
     })
     .on("mouseout", (d) => {
       this.callbacks.onTipLeave(d)
@@ -812,7 +812,7 @@ PhyloTree.prototype.drawBranches = function() {
     // .style("cursor", "pointer")
     .style("pointer-events", "auto")
     // .on("mouseover", (d) => {
-    //   this.callbacks.onBranchHover(d)
+    //   this.callbacks.onBranchHover(d, d3.event.pageX, d3.event.pageY)
     // })
     // .on("mouseout", (d) => {
     //   this.callbacks.onBranchLeave(d)
@@ -842,7 +842,7 @@ PhyloTree.prototype.drawBranches = function() {
     .style("cursor", "pointer")
     .style("pointer-events", "auto")
     .on("mouseover", (d) => {
-      this.callbacks.onBranchHover(d)
+      this.callbacks.onBranchHover(d, d3.event.pageX, d3.event.pageY)
     })
     .on("mouseout", (d) => {
       this.callbacks.onBranchLeave(d)
