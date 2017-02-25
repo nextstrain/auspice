@@ -330,17 +330,60 @@ class TreeView extends React.Component {
 
   handleIconClick(tool) {
     return () => {
+      const V = this.Viewer.getValue();
       if (tool === "zoom-in") {
         this.Viewer.zoomOnViewerCenter(1.4);
         // console.log('zooming in', this.state.zoom, zoom)
       } else {
-        this.Viewer.zoomOnViewerCenter(0.71);
+        if (V.a>1.0){
+          this.Viewer.zoomOnViewerCenter(0.71);
+        }else{
+          this.resetView();
+          this.state.tree.zoomToParent(mediumTransitionDuration);
+        }
       }
-      // const viewerX = this.state.width / 2;
-      // const viewerY = this.treePlotHeight(this.state.width) / 2;
-      // const nextValue = ViewerHelper.zoom(this.state.value, zoom, viewerX, viewerY);
-      // this.setState({value: nextValue});
+      this.resetGrid();
     };
+  }
+
+  startPan(d){
+  }
+
+  onViewerChange(d){
+    if (this.Viewer && this.state.tree){
+      const V = this.Viewer.getValue();
+      if (V.mode==="panning"){
+          this.resetGrid();
+      }else if (V.mode==="idle"){
+          this.resetGrid();
+      }
+    }
+  }
+
+  resetGrid(){
+    const tree = this.state.tree;
+    const visibleArea = this.visibleArea;
+    const layout = this.props.layout;
+    const viewer = this.Viewer;
+    const delayedRedraw = function(){
+      return function(){
+        console.log('reseting grid');
+        const view = visibleArea(viewer);
+        //tree.removeGrid();
+        tree.addGrid(layout, view.bottom, view.top);
+      }
+    }
+    setTimeout(delayedRedraw(), 200);
+  }
+
+  resetView(d){
+    this.Viewer.fitToViewer();
+  }
+
+  visibleArea(Viewer){
+    const V = Viewer.getValue();
+    return {left: -V.e/V.a, top:-V.f/V.d,
+            right:(V.viewerWidth - V.e)/V.a, bottom: (V.viewerHeight-V.f)/V.d}
   }
 
   // handleZoomEvent(direction) {
@@ -396,11 +439,16 @@ class TreeView extends React.Component {
             this.Viewer = Viewer
           }}
           style={{cursor: "default"}}
-          tool={this.state.tool}
+          tool={'auto'}
           detectWheel={false}
           toolbarPosition={"none"}
           detectAutoPan={false}
-          background={"#FFF"}>
+          background={"#FFF"}
+          // onMouseDown={this.startPan.bind(this)}
+          onDoubleClick={this.resetView.bind(this)}
+          //onMouseUp={this.endPan.bind(this)}
+          onChangeValue={ this.onViewerChange.bind(this) }
+          >
           <svg style={{pointerEvents: "auto"}}
             width={responsive.width}
             height={responsive.height}
