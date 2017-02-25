@@ -361,18 +361,27 @@ class TreeView extends React.Component {
   }
 
   resetGrid(){
-    console.log('reseting grid');
-    const view = this.visibleArea();
-    this.state.tree.removeGrid();
-    this.state.tree.addGrid(this.props.layout, view.bottom, view.top);
+    const tree = this.state.tree;
+    const visibleArea = this.visibleArea;
+    const layout = this.props.layout;
+    const viewer = this.Viewer;
+    const delayedRedraw = function(){
+      return function(){
+        console.log('reseting grid');
+        const view = visibleArea(viewer);
+        //tree.removeGrid();
+        tree.addGrid(layout, view.bottom, view.top);
+      }
+    }
+    setTimeout(delayedRedraw(), 200);
   }
 
   resetView(d){
     this.Viewer.fitToViewer();
   }
 
-  visibleArea(){
-    const V = this.Viewer.getValue();
+  visibleArea(Viewer){
+    const V = Viewer.getValue();
     return {left: -V.e/V.a, top:-V.f/V.d,
             right:(V.viewerWidth - V.e)/V.a, bottom: (V.viewerHeight-V.f)/V.d}
   }
@@ -435,7 +444,7 @@ class TreeView extends React.Component {
           toolbarPosition={"none"}
           detectAutoPan={false}
           background={"#FFF"}
-          onMouseDown={this.startPan.bind(this)}
+          // onMouseDown={this.startPan.bind(this)}
           onDoubleClick={this.resetView.bind(this)}
           //onMouseUp={this.endPan.bind(this)}
           onChangeValue={ this.endPan.bind(this) }
