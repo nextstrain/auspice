@@ -65,8 +65,8 @@ const styles = {
 const generateCard = (title, imgRequired, to) => (
   <div style={styles.cardOuterDiv}>
     <div style={styles.cardInnerDiv}>
+      <Link to={to}>    
       <img style={styles.cardImg} src={imgRequired}/>
-      <Link to={to}>
         <span style={styles.cardMainText}>
           {title[0]}
           {title.length === 2 ? <div style={styles.cardSubText}>{title[1]}</div> : null}
