@@ -56,10 +56,11 @@ const requestTree = () => {
   };
 };
 
-const receiveTree = (data) => {
+const receiveTree = (data, controls) => {
   return {
     type: types.RECEIVE_TREE,
-    data: data
+    data,
+    controls
   };
 };
 
@@ -77,11 +78,12 @@ const fetchTree = (q) => {
 };
 
 const populateTreeStore = (queryParams) => {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    const { controls } = getState();
     dispatch(requestTree());
     return fetchTree(queryParams).then((res) => res.json()).then(
       (json) => {
-        dispatch(receiveTree(json));
+        dispatch(receiveTree(json, controls));
         dispatch(updateColorScale());
         dispatch(updateNodeColors());
       },

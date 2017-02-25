@@ -78,7 +78,7 @@ export const calcFullTipCounts = (node) => {
 
 
 /**
- * for each node, calculate the number of tips in the currently selected time window.
+ * for each node, calculate the number of tips in view.
 **/
 export const calcTipCounts = (node) => {
   node.tipCount = 0;
@@ -87,10 +87,9 @@ export const calcTipCounts = (node) => {
       calcTipCounts(node.children[i]);
       node.tipCount += node.children[i].tipCount;
     }
-  } else if (node.current) {
-    node.tipCount = 1;
+  } else {
+    node.tipCount = node["tip-visible"];
   }
-  // console.log("node has children so iterate", node.tipCount, "number of children", node.children && node.children.length, node.current)
 };
 
 /**
@@ -128,15 +127,14 @@ export const adjust_freq_by_date = (nodes, rootNode) => {
 // };
 
 // branch thickness is from clade frequencies
-export const branchThickness = function (tree) {
-  if (tree.nodes) {
-    const maxTipCount = tree.nodes[0].fullTipCount;
-    return tree.nodes.map((d) => {
-      return freqScale(d.fullTipCount / maxTipCount);
-    });
+export const calcBranchThickness = function (nodes, rootIdx) {
+  let maxTipCount = nodes[rootIdx].tipCount;
+  /* edge case: no tips selected */
+  if (!maxTipCount) {
+    maxTipCount = 1;
   }
-  return 2.0;
-}
+  return nodes.map((d) => freqScale(d.tipCount / maxTipCount));
+};
 
 const getTipColorAttribute = function (node, colorScale, sequences) {
   if (colorScale.colorBy.slice(0, 3) === "gt-" && colorScale.genotype) {
@@ -197,7 +195,7 @@ const parseFilterQuery = function (query) {
   };
 };
 
-export const calcTipVisibility = function (tree, metaMetadata, controls) {
+export const calcTipVisibility = function (tree, controls) {
   if (tree.nodes){
     /* extract the filter information from redux.
     redux.filters has 2 keys, each with an array of values
@@ -205,6 +203,8 @@ export const calcTipVisibility = function (tree, metaMetadata, controls) {
     filterPairs is a list of lists. Each list defines the filtering to do.
     i.e. [ [ region, [...values]], [authors, [...values]]]
     */
+    let visibility;
+
     const filterPairs = [];
     Object.keys(controls.filters).map((key) => {
       if (controls.filters[key].length) {
@@ -216,18 +216,28 @@ export const calcTipVisibility = function (tree, metaMetadata, controls) {
     const upperLimit = controls.dateMax;
     if (upperLimit && lowerLimit) {
       if (filterPairs.length) {
-        return tree.nodes.map((d) => (
+        visibility = tree.nodes.map((d) => (
           d.attr.date >= lowerLimit
           && d.attr.date < upperLimit
           && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
-        ) ? "visible" : "hidden");
+        ) ? 1 : 0);
       } else {
-        return tree.nodes.map((d) => (
+        visibility = tree.nodes.map((d) => (
           d.attr.date >= lowerLimit
           && d.attr.date < upperLimit
-        ) ? "visible" : "hidden");
+        ) ? 1 : 0);
       }
     }
+
+    /* save results in tree.nodes as well */
+    tree.nodes.map((d, idx) => {d["tip-visible"] = visibility[idx]})
+    /* return array of "visible" or "hidden" values */
+    return visibility.map((cv, idx) => cv ? "visible" : "hidden")
+
+    // const inView = tree.nodes.map((d) => d.shell.inView);
+
+    /* intersect visibility and inView, return visible || hidden */
+    // return visibility.map((cv, idx) => (cv && inView[idx]) ? "visible" : "hidden");
   }
   return "visible";
 };

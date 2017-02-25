@@ -2,7 +2,7 @@ import * as types from "../actions/types";
 import { colorOptions } from "../util/globals"
 
 const Metadata = (state = {
-  loading: false,
+  loadStatus: 0, /* 0: no data, 1: data incoming, 2: data loaded */
   metadata: null,
   error: null,
   colorOptions
@@ -10,19 +10,19 @@ const Metadata = (state = {
   switch (action.type) {
   case types.REQUEST_METADATA:
     return Object.assign({}, state, {
-      loading: true,
+      loadStatus: 1,
       error: null
     });
   case types.RECEIVE_METADATA:
     return Object.assign({}, state, {
-      loading: false,
+      loadStatus: 2,
       error: null,
       metadata: action.data,
       colorOptions: action.data.color_options
     });
   case types.METADATA_FETCH_ERROR:
     return Object.assign({}, state, {
-      loading: false,
+      loadStatus: 0,
       error: action.data
     });
   default:

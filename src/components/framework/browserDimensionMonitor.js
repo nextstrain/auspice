@@ -14,7 +14,7 @@ class BrowserDimensionMonitor extends React.Component {
   }
 
   componentDidMount() {
-    this.handleResizeByDispatching(); // initial dimensions
+    /* don't need initial dimensions - they're in the redux store on load */
     window.addEventListener( // future resizes
       "resize",
       _.throttle(this.handleResizeByDispatching.bind(this), 500, {

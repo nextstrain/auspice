@@ -92,7 +92,7 @@ class TreeView extends React.Component {
 
     if ((nextProps.datasetGuid !== this.props.datasetGuid && nextProps.tree.nodes) ||
         (tree === null && nextProps.datasetGuid && nextProps.tree.nodes !== null)) {
-      tree = this.makeTree(nextProps.tree.nodes)
+      tree = this.makeTree(nextProps)
       // console.log("made tree", tree)
       this.setState({tree, shouldReRender: true});
       if (this.Viewer) {
@@ -115,14 +115,17 @@ class TreeView extends React.Component {
 
       if (nextProps.tree.tipVisibilityVersion &&
           this.props.tree.tipVisibilityVersion !== nextProps.tree.tipVisibilityVersion) {
+        // console.log("tipVisibilityVersion change detected", this.props.tree.tipVisibilityVersion, nextProps.tree.tipVisibilityVersion)
         tipStyleToUpdate["visibility"] = nextProps.tree.tipVisibility;
       }
       if (nextProps.tree.tipRadiiVersion &&
           this.props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion) {
+        // console.log("tipRadiiVersion change detected", this.props.tree.tipRadiiVersion, nextProps.tree.tipRadiiVersion)
         tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
       }
       if (nextProps.tree.nodeColorsVersion &&
           this.props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion) {
+        // console.log("nodeColorsVersion change detected", this.props.tree.nodeColorsVersion, nextProps.tree.nodeColorsVersion)
         tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
         });
@@ -131,17 +134,18 @@ class TreeView extends React.Component {
           return d3.rgb(d3.interpolateRgb(col, "#BBB")(0.6)).toString();
         });
       }
-      /* branch thicknesses should also be conditioned like the others, but
-      for some reason this doesn't work. To investigate! */
-      if (this.props.tree.branchThickness) {
-        branchStyleToUpdate["stroke-width"] = this.props.tree.branchThickness;
+      if (this.props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion) {
+        // console.log("branchThicknessVersion change detected", this.props.tree.branchThicknessVersion, nextProps.tree.branchThicknessVersion)
+        branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
       }
 
       /* implement style changes */
       if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
+        // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
         tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, fastTransitionDuration);
       }
       if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
+        // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
         tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, fastTransitionDuration);
       }
 
@@ -165,42 +169,6 @@ class TreeView extends React.Component {
   }
 
   shouldComponentUpdate(nextProps, nextState) {
-    /* reconcile hover and click selections in tree
-    used to be in componentWillReceiveProps, however
-    by having it here we both get access to nextState and can
-    control whether this component re-renders
-    */
-    if (this.state.tree)
-    {
-      if ((this.state.hovered || this.state.clicked) &&
-          this.props.layout === nextProps.layout // this block interferes with layout transition otherwise
-         )
-      {
-        /* check whether or not the previously selected item was clicked */
-        if (this.state.clicked && nextState.clicked) { // was the previous item a click?
-          this.state.tree.updateSelectedBranchOrTip(
-            this.state.clicked, /* turn this one off */
-            nextState.clicked, /* turn this one on */
-          );
-        } else if (this.state.hovered && nextState.clicked) { // previously a hover, now a click
-          this.state.tree.updateSelectedBranchOrTip(
-            this.state.hovered,
-            nextState.clicked,
-          );
-        } else if (this.state.hovered && nextState.hovered) { // deselect the previously selected hover
-          this.state.tree.updateSelectedBranchOrTip(
-            this.state.hovered,
-            nextState.hovered,
-          );
-        } else if (this.state.clicked && nextState.clicked === null) {
-          // x clicked or clicked off will give a null value, so reset everything to be safe
-          this.state.tree.updateSelectedBranchOrTip(
-            this.state.clicked,
-            null
-          )
-        }
-      }
-   }
     /* we are now in a position to control the rendering to improve performance */
     if (nextState.shouldReRender) {
       this.setState({shouldReRender: false});
@@ -243,7 +211,8 @@ class TreeView extends React.Component {
     }
   }
 
-  makeTree(nodes) {
+  makeTree(nextProps) {
+    const nodes = nextProps.tree.nodes;
     if (nodes && this.refs.d3TreeElement) {
       var myTree = new PhyloTree(nodes[0]);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
@@ -265,15 +234,21 @@ class TreeView extends React.Component {
           onTipClick: this.onTipClick.bind(this),
           onBranchHover: this.onBranchHover.bind(this),
           onBranchClick: this.onBranchClick.bind(this),
-          onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this),
+          onBranchLeave: this.onBranchLeave.bind(this),
+          onTipLeave: this.onTipLeave.bind(this),
+          // onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this),
           branchLabel: this.branchLabel.bind(this),
           branchLabelSize: this.branchLabelSize.bind(this)
         },
-        {
-          /* presently selected node / branch */
-          hovered: this.state.hovered,
-          clicked: this.state.clicked
-        }
+        /* this param must have been removed from phyloTree.render at some point */
+        // {
+        //   /* presently selected node / branch */
+        //   hovered: this.state.hovered,
+        //   clicked: this.state.clicked
+        // },
+        /* branch Thicknesses - guarenteed to be in redux by now */
+        nextProps.tree.branchThickness,
+        nextProps.tree.tipVisibility
       );
       return myTree;
     } else {
@@ -284,6 +259,8 @@ class TreeView extends React.Component {
   /* Callbacks used by the tips / branches when hovered / clicked */
   /* By keeping this out of redux I think it makes things a little faster */
   onTipHover(d) {
+    this.state.tree.svg.select("#tip_" + d.n.clade)
+      .attr("r", (d) => d["r"] + 4)
     if (!this.state.clicked) {
       this.setState({hovered: {d, type: ".tip"}});
     }
@@ -292,15 +269,31 @@ class TreeView extends React.Component {
     this.setState({clicked: {d,type: ".tip"}, hovered: null});
   }
   onBranchHover(d) {
+    // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
+    const id = "#branch_S_" + d.n.clade;
+    this.state.tree.svg.select(id)
+      .style("stroke", (d) => d["stroke"])
     if (!this.state.clicked) {
-      this.setState({hovered: {d,type: ".branch"}});
+      this.setState({hovered: {d, type: ".branch"}});
     }
   }
   onBranchClick(d) {
     this.setState({clicked: {d, type: ".branch"},hovered: null});
   }
-  // mouse out from tip/branch
-  onBranchOrTipLeave(){
+
+  onBranchLeave(d) {
+    // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
+    const id = "#branch_S_" + d.n.clade;
+    this.state.tree.svg.select(id)
+      .style("stroke", (d) => d3.rgb(d3.interpolateRgb(d["stroke"], "#BBB")(0.6)).toString());
+    if (this.state.hovered) {
+      this.setState({hovered: null})
+    }
+  }
+
+  onTipLeave(d) {
+    this.state.tree.svg.select("#tip_" + d.n.clade)
+      .attr("r", (d) => d["r"])
     if (this.state.hovered) {
       this.setState({hovered: null})
     }

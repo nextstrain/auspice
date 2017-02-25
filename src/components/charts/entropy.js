@@ -2,7 +2,7 @@ import React from "react";
 import Radium from "radium";
 import _ from "lodash";
 import { connect } from "react-redux";
-import {VictoryAxis} from "victory";
+import {VictoryAxis} from "victory-chart";
 import * as globals from "../../util/globals";
 import Card from "../framework/card";
 import d3 from "d3";
