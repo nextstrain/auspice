@@ -41,7 +41,7 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
   let markerCount=0;
   const makeMarker = function (d){
     markerCount++;
-    console.log(markerCount, d);
+    // console.log(markerCount, d);
     const mID = "marker"+markerCount.toString();
     g.append("defs").selectAll("marker")
         .data([mID])

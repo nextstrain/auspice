@@ -231,10 +231,10 @@ class Map extends React.Component {
     /******************************************
     * GET LEAFLET IN THE DOM
     *****************************************/
-    console.log("createMap", this.props.nodes);
+    // console.log("createMap", this.props.nodes);
     const southWest = L.latLng(-70, -180);
     const northEast = L.latLng(80, 180);
-    console.log(southWest, northEast);
+    // console.log(southWest, northEast);
     const bounds = L.latLngBounds(southWest, northEast);
     let zoom = 2;
     let center = [0,0];

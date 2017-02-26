@@ -73,7 +73,7 @@ const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale) =
     count transmissions for line thickness
   */
 
-  console.log(aggregatedTransmissions)
+  // console.log(aggregatedTransmissions)
   // for each item in the object produced above...
   _.forOwn(aggregatedTransmissions, (value, key) => {
 
@@ -88,6 +88,10 @@ const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale) =
     // create new leaflet LatLong objects
     const start = new L.LatLng(lat0, long0)
     const end = new L.LatLng(lat1, long1)
+    const dlambda = Math.abs((long1-long0)%360)*Math.PI/180.0;
+    const angle = Math.acos(Math.sin(lat1*Math.PI/180.0)*Math.sin(lat0*Math.PI/180.0)
+                            + Math.cos(lat1*Math.PI/180.0)*Math.cos(lat0*Math.PI/180.0)*Math.cos(dlambda));
+    const nSteps = Math.ceil(Math.max(4,angle*36/Math.PI));
 
     /*
       add a polyline to the map for current country pair iteratee
@@ -98,7 +102,7 @@ const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale) =
       // radius: value,
       // color: colorScale(countries[0]), /* this will go up above in d3 rather than in leaflet now */
       // opacity: .5,
-      steps: 25,
+      steps: nSteps,
       // weight:	value	/* Stroke width in pixels.*/
       // opacity:	0.5	Stroke opacity.
       // fill:
