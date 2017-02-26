@@ -96,19 +96,27 @@ export const titleStyles = {
 };
 
 export const infoPanelStyles = {
+  branchInfoHeading: {
+    fontSize: 15,
+    fontWeight: 400,
+    verticalAlign: "middle",
+    padding: "5px"
+  },
   buttonLink: {
     float: "right",
     fontFamily: dataFont,
     fontSize: 14,
+    fontWeight: 400,
     textDecoration: "none",
     pointerEvents: "auto",
-    lineHeight: .8,
-    backgroundColor: "#888",
+    background: "none",
     color: "white", // link color
     cursor: "pointer",
-    // textTransform: "uppercase",
+    textTransform: "uppercase",
     border: "none",
-    borderRadius: 3
+    borderRadius: 2,
+    border: "1px solid #CCC",
+    verticalAlign: "middle"
   },
   tooltip: {
     position: "relative",

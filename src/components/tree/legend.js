@@ -188,7 +188,7 @@ class Legend extends React.Component {
       svg: {
         position: "absolute",
         left: 12,
-        top: 38,
+        top: 39,
         borderRadius: 2,
         zIndex: 1000
       }
