@@ -57,8 +57,10 @@ class Footer extends React.Component {
       if (this.props.tree.nodes) {
         this.props.tree.nodes.forEach((node) => {
           if (node.children) { return; }
-          authorsSet.add(node.attr.authors);
-          authorsToURL[node.attr.authors] = node.attr.url;
+          if (node.attr.authors !== "" && node.attr.authors !== "?") {
+            authorsSet.add(node.attr.authors);
+            authorsToURL[node.attr.authors] = node.attr.url;
+          }
         });
       }
     }
