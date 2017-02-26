@@ -91,6 +91,7 @@ const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale) =
     const dlambda = Math.abs((long1-long0)%360)*Math.PI/180.0;
     const angle = Math.acos(Math.sin(lat1*Math.PI/180.0)*Math.sin(lat0*Math.PI/180.0)
                             + Math.cos(lat1*Math.PI/180.0)*Math.cos(lat0*Math.PI/180.0)*Math.cos(dlambda));
+    // this sets the number of segments of the path, min 4, max 36 for half way around the globe
     const nSteps = Math.ceil(Math.max(4,angle*36/Math.PI));
 
     /*

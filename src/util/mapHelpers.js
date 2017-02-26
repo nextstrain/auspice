@@ -38,6 +38,7 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
       return "translate(" + d.coords.x + "," + d.coords.y + ")";
     });
 
+  // define markers that are appended to the definition part of the group
   let markerCount=0;
   const makeMarker = function (d){
     markerCount++;
@@ -50,16 +51,19 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
           .attr("viewBox", "0 -5 10 10")
           .attr("refX", 0)
           .attr("refY", 0)
+          // the next two lines set the marker size relative to the stroke-width
           .attr("markerWidth",   function(x){return Math.max(1.5,7.0/d.data.total);})
           .attr("markerHeight",  function(x){return Math.max(1.5,7.0/d.data.total);})
           .attr("orient", "auto")
         .append("path")
           .attr("d", "M0,-5L10,0L0,5")
-          .attr("stroke-width",2)
+          .attr("stroke-width",0)
+          .attr("fill-opacity",0.5)
           .attr("fill", function(){return d.data.color;});
   return "url(#"+mID+")";
   }
 
+  // add transmission lines with mid markers at each inner point of the path
   const transmissions = g.selectAll("transmissions")
     .data(latLongs.transmissions)
     .enter()
