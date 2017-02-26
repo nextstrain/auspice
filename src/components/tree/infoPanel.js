@@ -33,15 +33,13 @@ const InfoPanel = ({tree, hovered, responsive, viewer}) => {
   const width = 200;
   const height = 200;
   const pos = treePosToViewer(hovered.d.xTip, hovered.d.yTip, viewerState);
-  const left = pos.x + ((pos.x<viewerState.viewerWidth *0.7)? xOffset : (-width - 5*xOffset));
-  const top =  pos.y + ((pos.y<viewerState.viewerHeight*0.7)? 5*yOffset : (-height-yOffset));
+  const left = pos.x + ((pos.x<viewerState.viewerWidth *0.7)? xOffset : (-width - 3*xOffset));
+  const top =  pos.y + ((pos.y<viewerState.viewerHeight*0.7)? 3*yOffset : (-height-yOffset));
 
   const styles = {
     container: {
       position: "absolute",
       width,
-      left,
-      top,
       padding: "10px",
       borderRadius: 10,
       zIndex: 1000,
@@ -52,9 +50,19 @@ const InfoPanel = ({tree, hovered, responsive, viewer}) => {
       fontWeight: infoPanelStyles.panel.fontWeight,
       color: infoPanelStyles.panel.color,
       backgroundColor: infoPanelStyles.panel.backgroundColor,
-      wordWrap: "break-word"
+      wordWrap: "break-word",
     }
   };
+  if (pos.x<viewerState.viewerWidth*0.7){
+    styles.container.left = pos.x + xOffset;
+  }else{
+    styles.container.right = viewerState.viewerWidth-pos.x + xOffset;
+  }
+  if (pos.y<viewerState.viewerHeight*0.7){
+    styles.container.top = pos.y + 4*yOffset;
+  }else{
+    styles.container.bottom = viewerState.viewerHeight-pos.y+yOffset;
+  }
 
   /* getX methods return styled JSX */
   const getMutations = (d) => {
