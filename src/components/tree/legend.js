@@ -54,6 +54,9 @@ class Legend extends React.Component {
   }
 
   getSVGHeight() {
+    if (!this.state.legendVisible) {
+      return 18;
+    }
     let nItems = 10;
     const titlePadding = 20;
     if (this.props.colorScale.scale) {
@@ -169,12 +172,15 @@ class Legend extends React.Component {
         );
       });
     }
+    // This gives the nice looking show/hide animation. Should restore while maintaining
+    // legend collapse functionality.
+    // <g style={{
+    //   opacity: opacity,
+    //   transform: `translate(0, ${offset}px)`,
+    //   transition: `${fastTransitionDuration}ms ease-in-out`
+    //   }}>
     return (
-      <g style={{
-        opacity: opacity,
-        transform: `translate(0, ${offset}px)`,
-        transition: `${fastTransitionDuration}ms ease-in-out`
-        }}>
+      <g>
         <rect width="280" height={this.getSVGHeight()} fill="rgba(255,255,255,.85)"/>
         <g transform="translate(0,20)">
           {items}
