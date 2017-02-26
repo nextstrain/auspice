@@ -31,10 +31,7 @@ const InfoPanel = ({tree, hovered, responsive, viewer}) => {
   const yOffset = 10;
 
   const width = 200;
-  const height = 200;
   const pos = treePosToViewer(hovered.d.xTip, hovered.d.yTip, viewerState);
-  const left = pos.x + ((pos.x<viewerState.viewerWidth *0.7)? xOffset : (-width - 3*xOffset));
-  const top =  pos.y + ((pos.y<viewerState.viewerHeight*0.7)? 3*yOffset : (-height-yOffset));
 
   const styles = {
     container: {
