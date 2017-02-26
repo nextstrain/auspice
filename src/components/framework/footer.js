@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { dataFont, medGrey } from "../../globalStyles";
+import computeResponsive from "../../util/computeResponsive";
 import Radium from "radium";
 import d3 from "d3";
 
@@ -21,9 +22,11 @@ class Footer extends React.Component {
   getStyles() {
     return {
       footer: {
+        textAlign: "justify",
+        marginLeft: "30px",
+        padding: "0px",
         fontFamily: dataFont,
         fontSize: 16,
-        padding: "20px",
         fontWeight: 300,
         color: medGrey
       },
@@ -35,6 +38,11 @@ class Footer extends React.Component {
         display: "inline-block",
         paddingLeft: "5px",
         paddingRight: "5px"
+      },
+      line: {
+        marginTop: "20px",
+        marginBottom: "20px",
+        borderBottom: "1px solid #CCC"
       }
     };
   }
@@ -67,9 +75,10 @@ class Footer extends React.Component {
       </ul>
     );
   }
-  getFooterText(styles) {
+  drawFooter(styles, width) {
     return (
-      <div>
+      <div style={{width: width}}>
+        <div style={styles.line}/>
         This work is made possible by the open sharing of genetic data by research groups from all
         over the world. We gratefully acknowledge their contributions. For data reuse (particularly
         for publication), please contact the original authors:
@@ -79,9 +88,16 @@ class Footer extends React.Component {
   }
   render() {
     const styles = this.getStyles();
+    const responsive = computeResponsive({
+      horizontal: 1,
+      vertical: .3333333,
+      browserDimensions: this.props.browserDimensions,
+      sidebar: this.props.sidebar
+    })
+    const width = responsive.width - 30; // need to subtract margin when calculing div width
     return (
       <div style={styles.footer}>
-        {this.props.tree && this.props.browserDimensions ? this.getFooterText(styles) : "Waiting on citation data"}
+        {this.props.tree && this.props.browserDimensions ? this.drawFooter(styles, width) : "Waiting on citation data"}
       </div>
     );
   }

@@ -126,7 +126,9 @@ class App extends React.Component {
           <Entropy
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
           />
-          <Footer/>
+          <Footer
+            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+          />
         </Background>
       </Sidebar>
     );
