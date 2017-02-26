@@ -69,10 +69,11 @@ const InfoPanel = ({tree, hovered, responsive, viewer}) => {
         mutations += " + " + (nmuts - numMutsToShow) + " more";
       }
     }
-    if (typeof d.fitness !== "undefined") {
-      mutations += "Fitness: " + d.fitness.toFixed(3);
-    }
-    return (<span>Mutations at {mutations}</span>);
+    return (
+      mutations !== "" ?
+      <span>Mutations at {mutations}</span> :
+      <span>No mutations</span>
+    );
   };
   const getFrequencies = (d) => {
     if (d.frequency !== undefined) {
