@@ -30,8 +30,8 @@ const InfoPanel = ({tree, hovered, responsive, viewer}) => {
   const xOffset = 10;
   const yOffset = 10;
 
-  const width = 150;
-  const height = 150;
+  const width = 200;
+  const height = 200;
   const pos = treePosToViewer(hovered.d.xTip, hovered.d.yTip, viewerState);
   const left = pos.x + ((pos.x<viewerState.viewerWidth *0.7)? xOffset : (-width - 5*xOffset));
   const top =  pos.y + ((pos.y<viewerState.viewerHeight*0.7)? 5*yOffset : (-height-yOffset));
@@ -40,10 +40,9 @@ const InfoPanel = ({tree, hovered, responsive, viewer}) => {
     container: {
       position: "absolute",
       width,
-      height,
       left,
       top,
-      padding: "20px 20px 10px 20px",
+      padding: "10px",
       borderRadius: 10,
       zIndex: 1000,
       pointerEvents: "none",
@@ -73,7 +72,7 @@ const InfoPanel = ({tree, hovered, responsive, viewer}) => {
     if (typeof d.fitness !== "undefined") {
       mutations += "Fitness: " + d.fitness.toFixed(3);
     }
-    return (<li>Mutations: {mutations}</li>);
+    return (<span>Mutations at {mutations}</span>);
   };
   const getFrequencies = (d) => {
     if (d.frequency !== undefined) {
@@ -88,32 +87,35 @@ const InfoPanel = ({tree, hovered, responsive, viewer}) => {
       const tip = hovered.d;
       return (
         <div style={styles.container}>
-          <div style={infoPanelStyles.heading}>
-            {tip.n.attr.strain}
+          <div className={"tooltip"} style={infoPanelStyles.tooltip}>
+            <div style={infoPanelStyles.tooltipHeading}>
+              {tip.n.attr.strain}
+            </div>
+            <div>
+              {prettyString(tip.n.attr.country)}, {prettyString(tip.n.attr.date)}
+            </div>
+            <div style={infoPanelStyles.comment}>
+              Click on tip to display more info
+            </div>
           </div>
-          <ul style={infoPanelStyles.list}>
-            <li>{prettyString(tip.n.attr.country)}</li>
-            <li>{tip.n.attr.date}</li>
-          </ul>
-          <p style={infoPanelStyles.comment}>
-            Click on tip to display more info
-          </p>
         </div>
       );
     } else { /* BRANCH */
       const branch = hovered.d;
       return (
         <div style={styles.container}>
-          <div style={infoPanelStyles.heading}>
-            {`Branch with ${branch.n.fullTipCount} children`}
+          <div className={"tooltip"} style={infoPanelStyles.tooltip}>
+            <div style={infoPanelStyles.tooltipHeading}>
+              {`Branch with ${branch.n.fullTipCount} children`}
+            </div>
+            <div>
+              {getFrequencies(branch.n)}
+              {getMutations(branch.n)}
+            </div>
+            <div style={infoPanelStyles.comment}>
+              Click on branch to zoom into this clade
+            </div>
           </div>
-          <ul style={infoPanelStyles.list}>
-            {getFrequencies(branch.n)}
-            {getMutations(branch.n)}
-          </ul>
-          <p style={infoPanelStyles.comment}>
-            Click on branch to zoom into this clade
-          </p>
         </div>
       );
     }

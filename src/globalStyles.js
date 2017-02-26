@@ -110,12 +110,21 @@ export const infoPanelStyles = {
     border: "none",
     borderRadius: 3
   },
+  tooltip: {
+    position: "relative",
+    padding: 5,
+    color: "white",
+    fontFamily: dataFont,
+    fontSize: 14,
+    lineHeight: 1,
+    fontWeight: 300
+  },
   panel: {
     position: "relative",
     paddingLeft: 30,
     padding: "5% 5%",
     borderRadius: 5,
-    backgroundColor: darkGrey,
+    backgroundColor: "rgba(55,55,55,0.85)",
     color: "white",
     fontFamily: dataFont,
     fontSize: 18,
@@ -126,14 +135,16 @@ export const infoPanelStyles = {
     fontSize: 24,
     fontWeight: 400
   },
-  heading: {
-    fontSize: 20,
-    fontWeight: 400
+  tooltipHeading: {
+    fontSize: 18,
+    fontWeight: 400,
+    marginBottom: "10px"
   },
   comment: {
     fontStyle: "italic",
     fontWeight: 200,
-    fontSize: 14
+    fontSize: 14,
+    marginTop: "10px"
   },
   list: {
     paddingLeft: 15,

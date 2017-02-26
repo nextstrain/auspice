@@ -35,14 +35,6 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
           <table>
             <tbody>
               <tr>
-                <th>Paper</th>
-                <td>{tip.n.attr.authors}</td>
-              </tr>
-              <tr>
-                <th>Date</th>
-                <td>{prettyString(tip.n.attr.date)}</td>
-              </tr>
-              <tr>
                 <th>Region</th>
                 <td>{prettyString(tip.n.attr.region)}</td>
               </tr>
@@ -55,16 +47,20 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
                 <td>{prettyString(tip.n.attr.division)}</td>
               </tr>
               <tr>
-                <th>Database</th>
-                <td>{prettyString(tip.n.attr.db)}</td>
+                <th>Collection date</th>
+                <td>{prettyString(tip.n.attr.date)}</td>
               </tr>
               <tr>
-                <th>NCBI link</th>
-                <td>to do</td>
+                <th>Authors</th>
+                <td>{tip.n.attr.authors}</td>
               </tr>
               <tr>
                 <th>Accession</th>
                 <td>{tip.n.attr.accession}</td>
+              </tr>
+              <tr>
+                <th>URL</th>
+                <td><a href={tip.n.attr.url} target="_blank">{tip.n.attr.url}</a></td>
               </tr>
             </tbody>
           </table>
