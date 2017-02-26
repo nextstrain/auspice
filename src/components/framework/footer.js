@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { dataFont, medGrey } from "../../globalStyles";
 import computeResponsive from "../../util/computeResponsive";
+import Flex from "./flex";
 import Radium from "radium";
 import d3 from "d3";
 
@@ -24,6 +25,7 @@ class Footer extends React.Component {
       footer: {
         textAlign: "justify",
         marginLeft: "30px",
+        marginBottom: "30px",
         padding: "0px",
         fontFamily: dataFont,
         fontSize: 16,
@@ -31,13 +33,13 @@ class Footer extends React.Component {
         color: medGrey
       },
       citationList: {
-        paddingLeft: "0px",
-        marginLeft: "-5px"
+        marginTop: "10px"
       },
       citationItem: {
-        display: "inline-block",
-        paddingLeft: "5px",
-        paddingRight: "5px"
+        paddingLeft: "0px",
+        paddingRight: "10px",
+        paddingTop: "1px",
+        paddingBottom: "0px"
       },
       line: {
         marginTop: "20px",
@@ -66,15 +68,15 @@ class Footer extends React.Component {
     }
     const authorsListItems = authorsSet.values().sort().map((authors, index) => {
         return (
-          <li key={index} style={styles.citationItem}>
+          <div key={index} style={styles.citationItem}>
             <a href={authorsToURL[authors]} target="_blank">{authors}</a>
-          </li>
+          </div>
         );
       });
     return (
-      <ul style={styles.citationList}>
+      <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
         {authorsListItems}
-      </ul>
+      </Flex>
     );
   }
   drawFooter(styles, width) {
@@ -96,7 +98,7 @@ class Footer extends React.Component {
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar
     })
-    const width = responsive.width - 30; // need to subtract margin when calculing div width
+    const width = responsive.width - 30; // need to subtract margin when calculating div width
     return (
       <div style={styles.footer}>
         {this.props.tree && this.props.browserDimensions ? this.drawFooter(styles, width) : "Waiting on citation data"}
