@@ -5,15 +5,6 @@ import d3 from "d3";
 // resolution are made
 export const datasets={
   'virus':{
-    'flu':{
-      'lineages':{
-        'h3n2':     {'duration':{'3y':{}, '6y':{}, '12y':{}, 'default':'3y'}},
-        'h1n1pdm':  {'duration':{'3y':{}, '6y':{}, '12y':{}, 'default':'3y'}},
-        'Vic':      {'duration':{'3y':{}, '6y':{}, '12y':{}, 'default':'3y'}},
-        'Yam':      {'duration':{'3y':{}, '6y':{}, '12y':{}, 'default':'3y'}},
-        'default':'h3n2',
-        }
-      },
     'zika':{},
     'ebola':{},
     'default':'zika'
