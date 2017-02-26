@@ -245,7 +245,9 @@ class TreeView extends React.Component {
           grid: true,
           confidence: false,
           branchLabels: true,      //generate DOM object
-          showBranchLabels: false  //hide them initially -> couple to redux state
+          showBranchLabels: false,  //hide them initially -> couple to redux state
+          tipLabels: true,      //generate DOM object
+          showTipLabels: true   //show
         },
         {
           /* callbacks */
@@ -257,7 +259,9 @@ class TreeView extends React.Component {
           onTipLeave: this.onTipLeave.bind(this),
           // onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this),
           branchLabel: this.branchLabel.bind(this),
-          branchLabelSize: this.branchLabelSize.bind(this)
+          branchLabelSize: this.branchLabelSize.bind(this),
+          tipLabel: this.tipLabel.bind(this),
+          tipLabelSize: this.tipLabelSize.bind(this)
         },
         /* branch Thicknesses - guarenteed to be in redux by now */
         nextProps.tree.branchThickness,
@@ -373,6 +377,32 @@ class TreeView extends React.Component {
       return 0;
     }
   }
+
+  /**
+   * @param  {node}
+   * @return {string that is displayed as label on the branch
+   *          corresponding to the node}
+   */
+  tipLabel(d){
+    return d.n.strain;
+  }
+  /**
+   * @param  {node}
+   * @param  {total number of nodes in current view}
+   * @return {font size of the tip label}
+   */
+  tipLabelSize(d,n){
+    if (n>70){
+      return 0;
+    }else if (n<20){
+      return 14;
+    }else{
+      const fs = 6+8*(70-n)/(70-20);
+      return fs;
+    }
+  }
+
+
 
   handleIconClick(tool) {
     return () => {

@@ -155,6 +155,12 @@ PhyloTree.prototype.setDefaults = function () {
         branchLabelFill: "#555",
         branchLabelPadX: 8,
         branchLabelPadY:5,
+        tipLabels:true,
+        showTipLabels:false,
+        tipLabelFont: dataFont,
+        tipLabelFill: "#555",
+        tipLabelPadX: 8,
+        tipLabelPadY: 2,
     };
 };
 
@@ -203,6 +209,7 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
   }
 
   this.drawBranchLabels();
+  this.drawTipLabels();
   this.updateGeometry(10);
   this.svg.selectAll(".regression").remove();
   if (layout==="clock") this.drawRegression();
@@ -436,6 +443,7 @@ PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
   if (this.params.branchLabels){
     this.updateBranchLabels(dt);
   }
+  this.updateTipLabels(dt);
 };
 
 
@@ -460,7 +468,7 @@ PhyloTree.prototype.mapToScreen = function(){
     // determine x,y values of visibile nodes
     const tmp_xValues = this.nodes.filter(function(d){return d.inView;}).map(function(d){return d.x});
     const tmp_yValues = this.nodes.filter(function(d){return d.inView;}).map(function(d){return d.y});
-    this.nNodesInView = tmp_yValues.length;
+    this.nNodesInView = this.nodes.filter(function(d){return d.inView&&d.terminal;}).length;
 
     if (this.layout==="radial" || this.layout==="unrooted") {
         // handle "radial and unrooted differently since they need to be square
@@ -602,6 +610,23 @@ PhyloTree.prototype.showBranchLabels = function() {
   this.params.showBranchLabels=true;
   this.svg.selectAll(".branchLabel").style('visibility', 'visible');
 };
+
+/**
+ * hide tipLabels
+ */
+PhyloTree.prototype.hideTipLabels = function() {
+  this.params.showTipLabels=false;
+  this.svg.selectAll(".tipLabel").style('visibility', 'hidden');
+};
+
+/**
+ * show tipLabels
+ */
+PhyloTree.prototype.showTipLabels = function() {
+  this.params.showTipLabels=true;
+  this.svg.selectAll(".tipLabel").style('visibility', 'visible');
+};
+
 
 /**
  * add a grid to the svg
@@ -882,6 +907,17 @@ PhyloTree.prototype.drawBranchLabels = function() {
     .style("text-anchor","end");
 }
 
+PhyloTree.prototype.drawTipLabels = function() {
+  var params = this.params;
+  const tLFunc = this.callbacks.tipLabel;
+  this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
+    .data(this.nodes.filter(function(d){return d.terminal;}))
+    .enter()
+    .append("text")
+    .text(function (d){return tLFunc(d);})
+    .attr("class", "tipLabel");
+}
+
 PhyloTree.prototype.drawConfidence = function() {
   this.confidence = this.svg.append("g").selectAll('.conf')
     .data(this.nodes)
@@ -961,6 +997,11 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
     })
     .transition().duration(dt * 0.5)
     .style("opacity", 0.0);
+  this.svg.selectAll('.tipLabels').filter(function(d) {
+      return d.update;
+    })
+    .transition().duration(dt * 0.5)
+    .style("opacity", 0.0);
 
   // closure to move the tips, called via the time out below
   const tipTrans = function(tmp_svg, tmp_dt) {
@@ -1013,6 +1054,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
   };
   setTimeout(fadeBack(this.svg, 0.2 * dt), 1.5 * dt);
   this.updateBranchLabels(dt);
+  this.updateTipLabels(dt);
 
   this.svg.selectAll('.conf')
     .transition().duration(dt)
@@ -1056,6 +1098,7 @@ PhyloTree.prototype.updateGeometry = function(dt) {
     });
 
   this.updateBranchLabels(dt);
+  this.updateTipLabels(dt);
 
   this.svg.selectAll('.conf')
     .transition().duration(dt)
@@ -1085,6 +1128,27 @@ PhyloTree.prototype.updateBranchLabels = function(dt){
     .style("fill", this.params.branchLabelFill)
     .style("font-family", this.params.branchLabelFont)
     .style("font-size", function(d) {return bLSFunc(d, nNIV).toString()+"px";});
+}
+
+
+PhyloTree.prototype.updateTipLabels = function(dt){
+  const xPad = this.params.tipLabelPadX, yPad = this.params.tipLabelPadY;
+  const nNIV = this.nNodesInView;
+  const tLSFunc = this.callbacks.tipLabelSize;
+  const showTL = (this.layout==="rect") && this.params.showTipLabels;
+  const visTL = showTL ? "visible" : "hidden";
+  this.svg.selectAll('.tipLabel')
+    .transition().duration(dt)
+    .attr("x", function(d) {
+      return d.xTip + xPad;
+    })
+    .attr("y", function(d) {
+      return d.yTip + yPad;
+    })
+    .attr("visibility",visTL)
+    .style("fill", this.params.tipLabelFill)
+    .style("font-family", this.params.tipLabelFont)
+    .style("font-size", function(d) {return tLSFunc(d, nNIV).toString()+"px";});
 }
 
 /**
