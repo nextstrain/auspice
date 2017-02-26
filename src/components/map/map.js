@@ -181,11 +181,13 @@ class Map extends React.Component {
       });
     }
   }
+
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
       updateOnMoveEnd(this.state.d3elems, this.latLongs());
     }
   }
+
   getGeoRange() {
     const latitudes = [];
     const longitudes = [];

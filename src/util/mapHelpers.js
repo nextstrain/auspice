@@ -38,6 +38,28 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
       return "translate(" + d.coords.x + "," + d.coords.y + ")";
     });
 
+  let markerCount=0;
+  const makeMarker = function (d){
+    markerCount++;
+    console.log(markerCount, d);
+    const mID = "marker"+markerCount.toString();
+    g.append("defs").selectAll("marker")
+        .data([mID])
+        .enter().append("marker")
+          .attr("id", mID)
+          .attr("viewBox", "0 -5 10 10")
+          .attr("refX", 0)
+          .attr("refY", 0)
+          .attr("markerWidth",   function(x){return Math.max(1.5,7.0/d.data.total);})
+          .attr("markerHeight",  function(x){return Math.max(1.5,7.0/d.data.total);})
+          .attr("orient", "auto")
+        .append("path")
+          .attr("d", "M0,-5L10,0L0,5")
+          .attr("stroke-width",2)
+          .attr("fill", function(){return d.data.color;});
+  return "url(#"+mID+")";
+  }
+
   const transmissions = g.selectAll("transmissions")
     .data(latLongs.transmissions)
     .enter()
@@ -48,27 +70,7 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
     .attr("stroke-opacity", .6)
     .attr("stroke-linecap", "round")
     .attr("stroke-width", (d) => { return d.data.total }) /* scale line by total number of transmissions */
-
-  /* this will need to be scaled if transmissions is high */
-  // const arrowSizeMultiplier = value > 1 ? value * 2 : 0;
-
-  /* this decorator adds arrows to the lines. */
-  latLongs.transmissions.forEach((transmission, i) => {
-    const arrows = L.polylineDecorator(transmission.data.rawGeodesic._latlngs[transmission.wraparoundKey], {
-      patterns: [{
-        offset: 25,
-        repeat: 75,
-        symbol: L.Symbol.arrowHead({
-          pixelSize: 14 /*+ arrowSizeMultiplier*/,
-          pathOptions: {
-            fillOpacity: .5,
-            color: transmission.data.color,
-            weight: 0
-          }
-        })
-      }]
-    }).addTo(map)
-  });
+    .attr("marker-mid", makeMarker);
 
   return {
     demes,
