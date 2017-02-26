@@ -9,6 +9,7 @@ import d3 from "d3";
 @connect((state) => {
   return {
     tree: state.tree,
+    metadata: state.metadata.metadata,
     browserDimensions: state.browserDimensions.browserDimensions
   };
 })
@@ -45,6 +46,9 @@ class Footer extends React.Component {
         marginTop: "20px",
         marginBottom: "20px",
         borderBottom: "1px solid #CCC"
+      },
+      fineprint: {
+        fontSize: 14
       }
     };
   }
@@ -79,6 +83,19 @@ class Footer extends React.Component {
       </Flex>
     );
   }
+  getUpdated(styles) {
+    let updated = null;
+    if (this.props.metadata.updated) {
+      updated = this.props.metadata.updated;
+    }
+    return (
+      updated ?
+        <Flex style={styles.fineprint}>
+          Data updated {updated}
+        </Flex> :
+        <div/>
+    )
+  }
   drawFooter(styles, width) {
     return (
       <div style={{width: width}}>
@@ -87,6 +104,8 @@ class Footer extends React.Component {
         over the world. We gratefully acknowledge their contributions. For data reuse (particularly
         for publication), please contact the original authors:
         {this.getCitations(styles)}
+        <div style={styles.line}/>
+        {this.getUpdated(styles)}
       </div>
     );
   }
