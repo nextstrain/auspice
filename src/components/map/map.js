@@ -80,6 +80,7 @@ class Map extends React.Component {
       React to browser width/height changes responsively
       This is stored in state because it's used by both the map and the d3 overlay
     */
+      console.log("maybeComputeResponive", this.props.browserDimensions, nextProps.browserDimensions);
 
     if (
       this.props.browserDimensions &&
@@ -87,7 +88,7 @@ class Map extends React.Component {
       this.props.browserDimensions.height !== nextProps.browserDimensions.height)
     ) {
       this.setState({responsive: this.doComputeResponsive(nextProps)});
-    } else if (!this.props.browserDimensions && nextProps.browserDimensions) { /* first time */
+    } else if (!this.state.responsive && nextProps.browserDimensions) { /* first time */
       this.setState({responsive: this.doComputeResponsive(nextProps)});
     } else if (
       this.props.browserDimensions &&
@@ -275,6 +276,7 @@ class Map extends React.Component {
     //   Play
     // </button>
     let container = null;
+    console.log(this.props.browserDimensions, this.state.responsive);
     if (
       this.props.browserDimensions &&
       this.state.responsive
