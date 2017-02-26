@@ -56,6 +56,7 @@ need this information are children of this component
     metadata: state.metadata.metadata,
     colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
+    map: state.map,
     layout: state.controls.layout,
     showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
@@ -503,8 +504,8 @@ class TreeView extends React.Component {
 
   render() {
     const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
-      vertical: 1,
+      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+      vertical: .75,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
       minHeight: 400,
@@ -602,3 +603,17 @@ class TreeView extends React.Component {
 }
 
 export default TreeView;
+
+// map animation code to be integrated into componentWillUpdate or other lifecycle later, commented out for big merge -- Colin
+// if (
+//   this.state.tree &&
+//   this.props.layout &&
+//   this.props.map &&
+//   this.props.map.animating === true /* the map is in motion, move the bar across the tree */
+// ) {
+//   this.state.tree.updateTimeBar(
+//     globals.mapAnimationDurationInMilliseconds,
+//     this.props.map.progress, /* where the requestAnimationFrame is at the moment */
+//     this.props.layout
+//   );
+// }

@@ -1151,6 +1151,10 @@ PhyloTree.prototype.updateTipLabels = function(dt){
     .style("font-size", function(d) {return tLSFunc(d, nNIV).toString()+"px";});
 }
 
+PhyloTree.prototype.updateTimeBar = function(d){
+  return;
+}
+
 /**
  * Update multiple style or attributes of  tree elements at once
  * @param {string} treeElem one of .tip or .branch

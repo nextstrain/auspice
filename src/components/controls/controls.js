@@ -8,6 +8,7 @@ import DateRangeInputs from "./date-range-inputs";
 import ChooseLayout from "./choose-layout";
 import ChooseVirus from "./choose-virus";
 import ChooseMetric from "./choose-metric";
+import GeoResolution from "./geoResolution";
 import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
@@ -58,6 +59,7 @@ class Controls extends React.Component {
         <Search/>
 
         {header("Map Options")}
+        <GeoResolution/>
 
       </Flex>
     );
