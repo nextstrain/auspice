@@ -5,6 +5,7 @@ import { RESET_CONTROLS, NEW_DATASET } from "../../actions/types";
 import { loadJSONs } from "../../actions/loadData"
 import { turnURLtoDataPath } from "../../util/urlHelpers";
 import { connect } from "react-redux";
+import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
 @Radium
 @connect() // to provide dispatch
@@ -35,6 +36,8 @@ class ChooseVirusSelect extends React.Component {
   }
 
   changeDataset(newPath) {
+    // 0 analytics (optional)
+    analyticsControlsEvent(`change-virus-to-${newPath.replace(/\//g, "")}`);
     // 1 reset redux controls state in preparation for a change
     this.props.dispatch({type: RESET_CONTROLS});
     // 2 change URL (push, not replace)

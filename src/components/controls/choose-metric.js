@@ -5,6 +5,7 @@ import {materialButton, materialButtonSelected} from "../../globalStyles";
 import { connect } from "react-redux";
 import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { modifyURLquery } from "../../util/urlHelpers";
+import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
 /*
  * implements a pair of buttons the toggle between timetree and divergence tree
@@ -41,6 +42,7 @@ class ChooseMetric extends React.Component {
         key={1}
         style={selected === "num_date" ? materialButtonSelected : materialButton}
         onClick={() => {
+          analyticsControlsEvent("tree-metric-temporal");
           this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "num_date" });
           modifyURLquery(this.context.router, {m: "num_date"}, true);
         }}>
@@ -50,6 +52,7 @@ class ChooseMetric extends React.Component {
         key={2}
         style={selected === "div" ? materialButtonSelected : materialButton}
         onClick={() => {
+          analyticsControlsEvent("tree-metric-divergence");
           this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
           modifyURLquery(this.context.router, {m: "div"}, true);
         }}>

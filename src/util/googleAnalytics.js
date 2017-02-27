@@ -3,7 +3,7 @@ import ReactGA from "react-ga";
 /* https://github.com/react-ga/react-ga */
 
 export const analyticsNewPage = () => {
-  console.log("GA page change to", window.location.pathname)
+  // console.log("GA page change to", window.location.pathname)
   ReactGA.set({ page: window.location.pathname });
   ReactGA.pageview(window.location.pathname);
 };
@@ -15,4 +15,11 @@ export const outboundLinkWithAnalytics = (address) => {
     // () => window.open(address, "_blank") /* pop-up blocked */
   );
   return null;
+};
+
+export const analyticsControlsEvent = (action) => {
+  ReactGA.event({
+    category: "Controls",
+    action
+  });
 };

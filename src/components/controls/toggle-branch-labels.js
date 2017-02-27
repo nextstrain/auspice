@@ -4,6 +4,7 @@ import { TOGGLE_BRANCH_LABELS } from "../../actions/types";
 import {dataFont, darkGrey} from "../../globalStyles";
 import Flex from "../framework/flex";
 import { connect } from "react-redux"
+import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
 @Radium
 @connect()
@@ -20,6 +21,7 @@ class ToggleBranchLabels extends React.Component {
     };
   }
   handleCheckboxClick() {
+    analyticsControlsEvent(`toggle-branch-labels`);
     this.props.dispatch({type: TOGGLE_BRANCH_LABELS});
   }
   render() {

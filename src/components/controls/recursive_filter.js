@@ -5,6 +5,7 @@ import { filterAbbrRev, filterAbbrFwd, controlsWidth } from "../../util/globals"
 import { modifyURLquery } from "../../util/urlHelpers";
 import { connect } from "react-redux";
 import { applyFilterQuery } from "../../actions/treeProperties"
+import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
 /*
  * implements a selector that
@@ -39,6 +40,7 @@ class RecursiveFilter extends React.Component {
     values: list of selected values, e.g [brazil, usa, ...]
     */
     const values = this.props.filterTree.concat(e.map((d) => d["value"]));
+    analyticsControlsEvent(`filter-${this.props.filterType.replace(/\s/gi, "-")}`);
     this.props.dispatch(
       applyFilterQuery(this.props.filterType, this.props.fields, values)
     );
