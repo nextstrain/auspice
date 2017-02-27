@@ -460,17 +460,19 @@ class TreeView extends React.Component {
   }
 
   resetGrid(){
-    const tree = this.state.tree;
-    const visibleArea = this.visibleArea;
     const layout = this.props.layout;
-    const viewer = this.Viewer;
-    const delayedRedraw = function(){
-      return function(){
-        const view = visibleArea(viewer);
-        tree.addGrid(layout, view.bottom, view.top);
+    if (this.props.layout !== "unrooted"){
+      const tree = this.state.tree;
+      const visibleArea = this.visibleArea;
+      const viewer = this.Viewer;
+      const delayedRedraw = function(){
+        return function(){
+          const view = visibleArea(viewer);
+          tree.addGrid(layout, view.bottom, view.top);
+        }
       }
+      setTimeout(delayedRedraw(), 200);
     }
-    setTimeout(delayedRedraw(), 200);
   }
 
   resetView(d){
