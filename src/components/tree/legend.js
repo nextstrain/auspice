@@ -30,26 +30,33 @@ class Legend extends React.Component {
     style: React.PropTypes.object,
     sidebar: React.PropTypes.bool
   }
-  // hide/show legend based on initial browserDimensions
+  // hide/show legend based on initial browserDimensions and legend length
   componentWillMount() {
-    this.updateLegendVisibility(this.props.browserDimensions.width, this.props.sidebar);
+    this.updateLegendVisibility(this.props.browserDimensions.width, this.props.sidebar, this.props.colorScale);
   }
 
-  // hide/show legend based on browserDimensions
+  // hide/show legend based on browserDimensions and legend length
   componentWillReceiveProps(nextProps) {
-    if (this.props.browserDimensions && nextProps.browserDimensions) {
-      if (this.props.browserDimensions.width != nextProps.browserDimensions.width) {
-        this.updateLegendVisibility(nextProps.browserDimensions.width, nextProps.sidebar);
+    if (this.props.browserDimensions && nextProps.browserDimensions
+        && this.props.colorScale && nextProps.colorScale) {
+      if (this.props.browserDimensions.width != nextProps.browserDimensions.width
+        || this.props.colorScale.scale != nextProps.colorScale.scale) {
+        this.updateLegendVisibility(nextProps.browserDimensions.width, nextProps.sidebar, nextProps.colorScale);
       }
     }
   }
 
-  updateLegendVisibility(currentWidth, sidebar) {
+  updateLegendVisibility(currentWidth, sidebar, colorScale) {
     const sidebarPadding = sidebar ? controlsWidth + 55 : 0;
     if (currentWidth < 600 + sidebarPadding) {
       this.setState({"legendVisible": false});
     } else {
       this.setState({"legendVisible": true});
+    }
+    if (colorScale) {
+      if (colorScale.scale.domain().length > 30) {
+        this.setState({"legendVisible": false});
+      }
     }
   }
 
