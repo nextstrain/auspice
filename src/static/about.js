@@ -5,6 +5,7 @@ import React from "react";
 import Flex from "../components/framework/flex";
 import TitleBar from "../components/framework/title-bar";
 import { analyticsNewPage } from "../util/googleAnalytics";
+import { version } from "../version";
 
 /* helper / generating functions */
 const generateLogos = [
@@ -67,6 +68,8 @@ const About = () => {
             Built by <a href="http://neherlab.org/">Richard Neher</a>, <a href="http://bedford.io/">Trevor Bedford</a>, <a href="http://www.colinmegill.com/">Colin Megill</a>, <a href="http://bedford.io/team/james-hadfield/">James Hadfield</a>, <a href="http://bedford.io/team/charlton-callender/">Charlton Callender</a>, <a href="http://bedford.io/team/sidney-bell/">Sidney Bell</a>, <a href="http://bedford.io/team/barney-potter/">Barney Potter</a> and <a href="https://twitter.com/sarahinkiwi">Sarah Murata</a>.
             <p/>
             All <a href="http://github.com/nextstrain">source code</a> is freely available under the terms of the <a href="http://github.com/nextstrain/auspice/blob/master/LICENSE.txt">GNU Affero General Public License</a>.
+            <p/>
+            Auspice version {version}
           </div>
 
           <div className="col-md-1"/>
