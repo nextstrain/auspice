@@ -56,6 +56,7 @@ need this information are children of this component
     metadata: state.metadata.metadata,
     colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
+    map: state.map,
     layout: state.controls.layout,
     showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
@@ -245,7 +246,9 @@ class TreeView extends React.Component {
           grid: true,
           confidence: false,
           branchLabels: true,      //generate DOM object
-          showBranchLabels: false  //hide them initially -> couple to redux state
+          showBranchLabels: false,  //hide them initially -> couple to redux state
+          tipLabels: true,      //generate DOM object
+          showTipLabels: true   //show
         },
         {
           /* callbacks */
@@ -257,7 +260,9 @@ class TreeView extends React.Component {
           onTipLeave: this.onTipLeave.bind(this),
           // onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this),
           branchLabel: this.branchLabel.bind(this),
-          branchLabelSize: this.branchLabelSize.bind(this)
+          branchLabelSize: this.branchLabelSize.bind(this),
+          tipLabel: this.tipLabel.bind(this),
+          tipLabelSize: this.tipLabelSize.bind(this)
         },
         /* branch Thicknesses - guarenteed to be in redux by now */
         nextProps.tree.branchThickness,
@@ -374,6 +379,32 @@ class TreeView extends React.Component {
     }
   }
 
+  /**
+   * @param  {node}
+   * @return {string that is displayed as label on the branch
+   *          corresponding to the node}
+   */
+  tipLabel(d){
+    return d.n.strain;
+  }
+  /**
+   * @param  {node}
+   * @param  {total number of nodes in current view}
+   * @return {font size of the tip label}
+   */
+  tipLabelSize(d,n){
+    if (n>70){
+      return 0;
+    }else if (n<20){
+      return 14;
+    }else{
+      const fs = 6+8*(70-n)/(70-20);
+      return fs;
+    }
+  }
+
+
+
   handleIconClick(tool) {
     return () => {
       const V = this.Viewer.getValue();
@@ -473,8 +504,8 @@ class TreeView extends React.Component {
 
   render() {
     const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
-      vertical: 1,
+      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+      vertical: .75,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
       minHeight: 400,
@@ -572,3 +603,17 @@ class TreeView extends React.Component {
 }
 
 export default TreeView;
+
+// map animation code to be integrated into componentWillUpdate or other lifecycle later, commented out for big merge -- Colin
+// if (
+//   this.state.tree &&
+//   this.props.layout &&
+//   this.props.map &&
+//   this.props.map.animating === true /* the map is in motion, move the bar across the tree */
+// ) {
+//   this.state.tree.updateTimeBar(
+//     globals.mapAnimationDurationInMilliseconds,
+//     this.props.map.progress, /* where the requestAnimationFrame is at the moment */
+//     this.props.layout
+//   );
+// }

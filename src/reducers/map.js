@@ -1,0 +1,27 @@
+// import * as types from "../actions"; // this doesn't exist anymore, rewrite
+//
+// const Map = (state = {
+//   animating: false,
+//   progress: null
+// }, action) => {
+//   switch (action.type) {
+//   // case types.ANIMATION_START:
+//   //   return Object.assign({}, state, {
+//   //     animating: true,
+//   //   });
+//   case types.MAP_ANIMATION_END:
+//     return Object.assign({}, state, {
+//       animating: false,
+//       progress: null
+//     });
+//   case types.MAP_ANIMATION_TICK:
+//     return Object.assign({}, state, {
+//       animating: true,
+//       progress: action.data.progress
+//     });
+//   default:
+//     return state;
+//   }
+// };
+//
+// export default Map;

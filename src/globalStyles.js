@@ -96,26 +96,43 @@ export const titleStyles = {
 };
 
 export const infoPanelStyles = {
+  branchInfoHeading: {
+    fontSize: 15,
+    fontWeight: 400,
+    verticalAlign: "middle",
+    padding: "5px"
+  },
   buttonLink: {
     float: "right",
     fontFamily: dataFont,
     fontSize: 14,
+    fontWeight: 400,
     textDecoration: "none",
     pointerEvents: "auto",
-    lineHeight: .8,
-    backgroundColor: "#888",
+    background: "none",
     color: "white", // link color
     cursor: "pointer",
-    // textTransform: "uppercase",
+    textTransform: "uppercase",
     border: "none",
-    borderRadius: 3
+    borderRadius: 2,
+    border: "1px solid #CCC",
+    verticalAlign: "middle"
+  },
+  tooltip: {
+    position: "relative",
+    padding: 5,
+    color: "white",
+    fontFamily: dataFont,
+    fontSize: 14,
+    lineHeight: 1,
+    fontWeight: 300
   },
   panel: {
     position: "relative",
     paddingLeft: 30,
     padding: "5% 5%",
     borderRadius: 5,
-    backgroundColor: darkGrey,
+    backgroundColor: "rgba(55,55,55,0.85)",
     color: "white",
     fontFamily: dataFont,
     fontSize: 18,
@@ -126,14 +143,16 @@ export const infoPanelStyles = {
     fontSize: 24,
     fontWeight: 400
   },
-  heading: {
-    fontSize: 20,
-    fontWeight: 400
+  tooltipHeading: {
+    fontSize: 18,
+    fontWeight: 400,
+    marginBottom: "10px"
   },
   comment: {
     fontStyle: "italic",
     fontWeight: 200,
-    fontSize: 14
+    fontSize: 14,
+    marginTop: "10px"
   },
   list: {
     paddingLeft: 15,

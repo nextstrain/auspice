@@ -1,109 +1,150 @@
-export const addAllTipsToMap = (nodes, metadata, colorScale, map) => {
-  const aggregatedLocations = {};
-  nodes.forEach((n) => {
-    if (n.children) { return; }
-    // look up geo1 geo2 geo3 do lat longs differ
-    if (aggregatedLocations[n.attr.country]) {
-      aggregatedLocations[n.attr.country]++;
-    } else {
-      // if we haven't added this pair, add it
-      aggregatedLocations[n.attr.country] = 1;
-    }
-  });
+import d3 from "d3";
 
-  _.forOwn(aggregatedLocations, (value, key) => {
-    L.circleMarker([
-      metadata.geo.country[key].latitude,
-      metadata.geo.country[key].longitude
-    ], {
-      stroke:	false,
-      radius: 2 + Math.sqrt(value) * 4,
+/* util */
 
-      // color: ""
-      // weight:	5	Stroke width in pixels.
-      // opacity:	0.5	Stroke opacity.
-      // fill:
-      fillColor: colorScale(key),
-      fillOpacity: .6
-    }).addTo(map);
-  });
-}
+export const pathStringGenerator = d3.svg.line()
+  .x((d) => { return d.x })
+  .y((d) => { return d.y })
+  .interpolate("basis");
 
-export const addTransmissionEventsToMap = (nodes, metadata, colorScale, map) => {
-  const transmissions = {};
-  const geo = metadata.geo;
+const translateAlong = (path) => {
+  var l = path.getTotalLength();
+  return (d, i, a) => {
+    return (t) => {
+      var p = path.getPointAtLength(t * l);
+      return "translate(" + p.x + "," + p.y + ")";
+    };
+  };
+};
 
-  // count transmissions for line thickness
-  nodes.forEach((parent) => {
-    if (!parent.children) { return; }
-    // if (parent.attr.country !== "china") { return; } // remove me, example filter
-    parent.children.forEach((child) => {
-      if (parent.attr.country === child.attr.country) { return; }
-      // look up in transmissions dictionary
-      if (transmissions[parent.attr.country + "/" + child.attr.country]) {
-        transmissions[parent.attr.country + "/" + child.attr.country]++;
-      } else {
-        // we don't have it, add it
-        transmissions[parent.attr.country + "/" + child.attr.country] = 1;
-      }
+/*
+  If d3 shapes are getting mysteriously cut off while zooming and dragging around leaflet...
+  https://github.com/Leaflet/Leaflet/issues/2814
+  or possibly...
+  https://github.com/Leaflet/Leaflet/issues/2282 check the css in our index.js
+
+*/
+
+export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
+
+  const demes = g.selectAll("demes")
+    .data(latLongs.demes)
+    .enter().append("circle")
+    .style("stroke", "none")
+    .style("fill-opacity", .6)
+    .style("fill", (d) => { return d.color })
+    .attr("r", (d) => { return 2 + Math.sqrt(d.total) * 4 })
+    .attr("transform", (d) => {
+      return "translate(" + d.coords.x + "," + d.coords.y + ")";
     });
-  });
 
-  // for each item in the object produced above, add a line
-  _.forOwn(transmissions, (value, key) => {
+  // define markers that are appended to the definition part of the group
+  let markerCount=0;
+  const makeMarker = function (d){
+    markerCount++;
+    // console.log(markerCount, d);
+    const mID = "marker"+markerCount.toString();
+    g.append("defs").selectAll("marker")
+        .data([mID])
+        .enter().append("marker")
+          .attr("id", mID)
+          .attr("viewBox", "0 -5 10 10")
+          .attr("refX", 0)
+          .attr("refY", 0)
+          // the next two lines set the marker size relative to the stroke-width
+          .attr("markerWidth",   function(x){return Math.max(1.5,7.0/d.data.total);})
+          .attr("markerHeight",  function(x){return Math.max(1.5,7.0/d.data.total);})
+          .attr("orient", "auto")
+        .append("path")
+          .attr("d", "M0,-5L10,0L0,5")
+          .attr("stroke-width",0)
+          .attr("fill-opacity",0.5)
+          .attr("fill", function(){return d.data.color;});
+  return "url(#"+mID+")";
+  }
 
-    // go from "brazil/cuba" to ["brazil", "cuba"]
-    const countries = key.split("/");
-    // go from "brazil" to lat0 = -14.2350
-    let long0 = geo.country[countries[0]].longitude;
-    let long1 = geo.country[countries[1]].longitude;
-    let lat0 = geo.country[countries[0]].latitude;
-    let lat1 = geo.country[countries[1]].latitude;
+  // add transmission lines with mid markers at each inner point of the path
+  const transmissions = g.selectAll("transmissions")
+    .data(latLongs.transmissions)
+    .enter()
+    .append("path") /* append a geodesic path from the leaflet plugin data */
+    .attr("d", (d) => { return pathStringGenerator(d.coords) }) /* with the interpolation in the function above pathStringGenerator */
+    .attr("fill","none")
+    .attr("stroke", (d) => { return d.data.color }) /* colorScale(d.data.from); color path by contry in which the transmission arrived */
+    .attr("stroke-opacity", .6)
+    .attr("stroke-linecap", "round")
+    .attr("stroke-width", (d) => { return d.data.total }) /* scale line by total number of transmissions */
+    .attr("marker-mid", makeMarker);
 
-    // create new leaflet LatLong objects
-    const start = new L.LatLng(lat0, long0)
-    const end = new L.LatLng(lat1, long1)
+  return {
+    demes,
+    transmissions
+  };
 
-    // remove me! temporary random colors in lieu of scale.
-
-    /*
-      add a polyline to the map for current country pair iteratee
-      store the computation. access _latlngs to show where each segment is on the map
-    */
-    const geodesicPath = L.geodesic([[start,end]], {
-      // stroke:	value,
-      // radius: value,
-      color: colorScale(countries[0]),
-      opacity: .5,
-      steps: 25,
-      weight:	value	/* Stroke width in pixels.*/
-      // opacity:	0.5	Stroke opacity.
-      // fill:
-      // fillColor: randomColor
-      // fillOpacity:
-    }).addTo(map)
-
-    /* this will need to be scaled if transmissions is high */
-    const arrowSizeMultiplier = value > 1 ? value * 2 : 0;
-
-    // this decorator adds arrows to the lines.
-    // decorator docs: https://github.com/bbecquet/Leaflet.PolylineDecorator
-    for (let i = 0; i < geodesicPath._latlngs.length; i++) {
-      L.polylineDecorator(geodesicPath._latlngs[i], {
-        patterns: [{
-          offset: 25,
-          repeat: 50,
-          symbol: L.Symbol.arrowHead({
-            pixelSize: 8 + arrowSizeMultiplier,
-            pathOptions: {
-              fillOpacity: .5,
-              color: colorScale(countries[0]),
-              weight: 0
-            }
-          })
-        }]
-      }).addTo(map);
-    }
-
-  });
 }
+
+export const updateOnMoveEnd = (d3elems, latLongs) => {
+  /* map has moved or rescaled, make demes and transmissions line up */
+  if (d3elems){
+    d3elems.demes
+      .data(latLongs.demes)
+      .attr("transform", (d) => {
+        return "translate(" + d.coords.x + "," + d.coords.y + ")";
+      })
+
+    d3elems.transmissions
+      .data(latLongs.transmissions)
+      .attr("d", (d) => { return pathStringGenerator(d.coords) })
+  }
+}
+
+// averaging colors https://github.com/nextstrain/auspice/commit/0b1f2c90f7d45732935c88e60e2c854a42213d9c
+
+// const missiles = transmissionPaths.map((transmissionPath) => {
+//
+//   // console.log(transmissionPath)
+//
+//   const missile = g.append("circle")
+//     .attr("r", 0)
+//     .attr("fill", (d) => { return colorScale(transmissionPath.transmission.to) })
+//     .attr("transform", `translate(
+//       ${transmissionPath.partialTransmission[0].x},
+//       ${transmissionPath.partialTransmission[0].y}
+//     )`) /* begin the missile on the start of the line */
+//     // .transition()
+//     // .duration(5000)
+//     // .attrTween("transform", translateAlong(transmissionPath.elem.node()));
+//
+//   return missile;
+// })
+
+// const setTipCoords = () => {
+//   demes.attr("transform", (d) => {
+//     return "translate(" + d.coords.x + "," + d.coords.y + ")";
+//   });
+// };
+
+// const animateTransmissions = () => {
+//   /* point along path interpolation https://bl.ocks.org/mbostock/1705868 */
+//
+// }
+
+// setTipCoords();
+// map.on("viewreset", setTipCoords); /* search: -Note (A) for an idea as to why this might not be working properly */
+// animateTransmissions();
+
+/*
+  http://gis.stackexchange.com/questions/49114/d3-geo-path-to-draw-a-path-from-gis-coordinates
+  https://bl.ocks.org/mbostock/3916621  // Compute point-interpolators at each distance.
+  http://bl.ocks.org/mbostock/5851933 // draw line on map
+  https://gist.github.com/mikeatlas/0b69b354a8d713989147 // polyline split if we don't use leaflet
+  http://bl.ocks.org/mbostock/5928813
+  http://bl.ocks.org/duopixel/4063326 // animate path in
+  https://bl.ocks.org/mbostock/1705868 // point along path interpolation
+  https://bl.ocks.org/mbostock/1313857 // point along path interpolation
+  https://github.com/d3/d3-shape/blob/master/README.md#curves
+  https://github.com/d3/d3-shape/blob/master/README.md#lines
+*/
+
+// since we're now using d3 we'll probably do something like http://stackoverflow.com/questions/11808860/arrow-triangles-on-my-svg-line/11809868#11809868
+// decorator docs: https://github.com/bbecquet/Leaflet.PolylineDecorator

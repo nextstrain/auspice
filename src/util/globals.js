@@ -31,6 +31,7 @@ export const entropyChartHeight = 300;
 export const twoColumnBreakpoint = 1600;
 export const maxMapWidth = 1000; /* just right for our default zoom level (which is also min) */
 export const defaultColorBy = "country";
+export const defaultGeoResolution = "country";
 export const defaultLayout = "rect";
 export const defaultDistanceMeasure = "div";
 export const defaultDateRange = 6;
@@ -65,6 +66,7 @@ export const defaultDistanceMeasures = ["num_date", "div"];
 export const fastTransitionDuration = 350; // in milliseconds
 export const mediumTransitionDuration = 700; // in milliseconds
 export const slowTransitionDuration = 1400; // in milliseconds
+export const mapAnimationDurationInMilliseconds = 5000;
 export const HIColorDomain = genericDomain.map((d) => {
   return Math.round(100 * (d * 3.6)) / 100;
 });

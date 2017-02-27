@@ -1,5 +1,5 @@
 import queryString from "query-string";
-import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE } from "../actions/types";
+import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_GEO_RESOLUTION } from "../actions/types";
 import { changeColorBy } from "../actions/colors";
 import parseParams from "./parseParams";
 import { changeDateFilter } from "../actions/treeProperties";
@@ -46,6 +46,9 @@ export const restoreStateFromURL = function (router, dispatch) {
   }
   if (query.c) {
     dispatch(changeColorBy(query.c));
+  }
+  if (query.r) {
+    dispatch({ type: CHANGE_GEO_RESOLUTION, data: query.r })
   }
 };
 
