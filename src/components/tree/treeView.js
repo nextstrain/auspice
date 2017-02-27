@@ -24,7 +24,9 @@ import { arrayInEquality,
          tipRadii,
          tipVisibility,
          nodeColor} from "../../util/treeHelpers";
-import { zoomToClade, restrictTreeToSingleTip } from "../../actions/treeProperties";
+import { zoomToClade,
+         restrictTreeToSingleTip,
+         updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
 import _ from "lodash";
 
 /* UNDERSTANDING THIS CODE:
@@ -288,7 +290,7 @@ class TreeView extends React.Component {
       hovered: null,
       selectedTip: d
     });
-    this.props.dispatch(restrictTreeToSingleTip(1, d.n.arrayIdx))
+    this.props.dispatch(restrictTreeToSingleTip(d.n.arrayIdx))
   }
   onBranchHover(d, x, y) {
     // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
@@ -347,7 +349,7 @@ class TreeView extends React.Component {
       .attr("r", (d) => d["r"]);
     this.setState({selectedTip: null, hovered: null});
     /* restore the tip visibility! */
-    this.props.dispatch(restrictTreeToSingleTip(0))
+    this.props.dispatch(updateVisibleTipsAndBranchThicknesses())
   }
 
   /**
@@ -427,7 +429,7 @@ class TreeView extends React.Component {
 
             const makeCallBack = function(){
               return function(){
-                dp(restrictTreeToSingleTip(0,arrayIdx));
+                dp(updateVisibleTipsAndBranchThicknesses());
               }
             }
             // clear previous timeout bc they potentially mess with the geometry update
