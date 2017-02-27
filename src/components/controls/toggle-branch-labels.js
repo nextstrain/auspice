@@ -2,6 +2,7 @@ import React from "react";
 import Radium from "radium";
 import { TOGGLE_BRANCH_LABELS } from "../../actions/types";
 import {dataFont, darkGrey} from "../../globalStyles";
+import Flex from "../framework/flex";
 import { connect } from "react-redux"
 
 @Radium
@@ -10,11 +11,11 @@ class ToggleBranchLabels extends React.Component {
   getStyles() {
     return {
       base: {
-        marginBottom: 20,
+        marginBottom: 10,
         fontFamily: dataFont,
-        marginTop: 10,
+        marginTop: 0,
         color: darkGrey,
-        fontSize: 14
+        fontSize: 12
       }
     };
   }
@@ -24,10 +25,10 @@ class ToggleBranchLabels extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <label style={styles.base}>
+      <Flex style={styles.base}>
         <input onChange={this.handleCheckboxClick.bind(this)} type="checkbox"/>
-        <span> show branch labels</span>
-      </label>
+        <div style={{marginLeft: "5px"}}>show branch labels</div>
+      </Flex>
     );
   }
 }

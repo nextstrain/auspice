@@ -8,7 +8,7 @@ import DateRangeInputs from "./date-range-inputs";
 import ChooseLayout from "./choose-layout";
 import ChooseVirus from "./choose-virus";
 import ChooseMetric from "./choose-metric";
-import GeoResolution from "./geoResolution";
+import GeoResolution from "./geo-resolution";
 import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
@@ -53,13 +53,14 @@ class Controls extends React.Component {
         <SelectLabel text="Branch Length"/>
         <ChooseMetric/>
 
-        {header("Filters")}
-        <AllFilters/>
         <ToggleBranchLabels/>
-        <Search/>
 
         {header("Map Options")}
+        <SelectLabel text="Geographic resolution"/>
         <GeoResolution/>
+
+        {header("Filters")}
+        <AllFilters/>
 
       </Flex>
     );
