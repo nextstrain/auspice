@@ -214,7 +214,8 @@ export const loadJSONs = (data_path) => {
     dispatch(populateMetadataStore(data_path));
     dispatch(populateTreeStore(data_path));
     dispatch(populateSequencesStore(data_path));
-    dispatch(populateFrequenciesStore(data_path));
+    /* while nextstrain is limited to ebola & zika, frequencies are not needed */
+    // dispatch(populateFrequenciesStore(data_path));
     dispatch(populateEntropyStore(data_path));
   };
 };
