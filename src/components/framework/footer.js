@@ -65,7 +65,9 @@ class Footer extends React.Component {
           if (node.children) { return; }
           if (node.attr.authors !== "" && node.attr.authors !== "?") {
             authorsSet.add(node.attr.authors);
-            authorsToURL[node.attr.authors] = node.attr.url;
+            if (node.attr.url) {
+              authorsToURL[node.attr.authors] = node.attr.url;
+            }
           }
         });
       }
@@ -73,7 +75,9 @@ class Footer extends React.Component {
     const authorsListItems = authorsSet.values().sort().map((authors, index) => {
         return (
           <div key={index} style={styles.citationItem}>
-            <a href={authorsToURL[authors]} target="_blank">{authors}</a>
+            {authorsToURL[authors] ?
+              <a href={authorsToURL[authors]} target="_blank">{authors}</a> :
+              authors}
           </div>
         );
       });
