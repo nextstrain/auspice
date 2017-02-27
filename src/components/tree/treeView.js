@@ -335,8 +335,11 @@ class TreeView extends React.Component {
   }
   /* viewEntireTree: triggered by "reset to entire tree" button */
   viewEntireTree() {
+    /* reset the SVGPanZoom */
+    this.Viewer.reset();
+    /* imperitively manipulate SVG tree elements */
     this.state.tree.zoomIntoClade(this.state.tree.nodes[0], globals.mediumTransitionDuration);
-    /* wait until view has transitioned back, i.e. tips have moved */
+    /* update branch thicknesses / tip vis after SVG tree elemtents have moved */
     window.setTimeout(
       () => this.props.dispatch(zoomToClade(0)),
       mediumTransitionDuration
