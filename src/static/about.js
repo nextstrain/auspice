@@ -48,7 +48,7 @@ const About = () => {
 
 						<h2>Actionable Inferences</h2>
 
-            However, if viral genome sequences are going to inform public health interventions, then analyses have to be rapidly conducted and results widely disseminated. Current scientific publishing practices hinder the rapid dissemination of epidemiologically relevant results. We thought an open online system that implements robust bioinformatic pipleins to synthesize data from across research groups has the best capacity to make epidemiologically actionable inferences.
+            However, if viral genome sequences are going to inform public health interventions, then analyses have to be rapidly conducted and results widely disseminated. Current scientific publishing practices hinder the rapid dissemination of epidemiologically relevant results. We thought an open online system that implements robust bioinformatic pipelines to synthesize data from across research groups has the best capacity to make epidemiologically actionable inferences.
 
             <h2>This Website</h2>
 
