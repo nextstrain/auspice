@@ -48,6 +48,7 @@ const InfoPanel = ({tree, hovered, responsive, viewer}) => {
       color: infoPanelStyles.panel.color,
       backgroundColor: infoPanelStyles.panel.backgroundColor,
       wordWrap: "break-word",
+      wordBreak: "break-word"
     }
   };
   if (pos.x<viewerState.viewerWidth*0.7){

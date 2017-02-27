@@ -20,7 +20,9 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
       /* FLEXBOX */
       display: "flex",
       justifyContent: "center",
-      alignItems: "center"
+      alignItems: "center",
+      wordWrap: "break-word",
+      wordBreak: "break-word"
     }
   };
 
@@ -35,7 +37,7 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
           <table>
             <tbody>
               <tr>
-                <th>Region</th>
+                <th width={130}>Region</th>
                 <td>{prettyString(tip.n.attr.region)}</td>
               </tr>
               <tr>
