@@ -100,11 +100,11 @@ class Map extends React.Component {
   doComputeResponsive(nextProps) {
     return computeResponsive({
       horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
-      vertical: .75, /* if we are in single column, full height */
+      vertical: 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
-      minHeight: 400,
-      maxAspectRatio: 1.3,
+      minHeight: 480,
+      maxAspectRatio: 1.0,
     })
   }
   maybeSetupD3DOMNode() {
