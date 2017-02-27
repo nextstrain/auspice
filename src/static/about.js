@@ -4,6 +4,7 @@ import React from "react";
 // import { connect } from "react-redux";
 import Flex from "../components/framework/flex";
 import TitleBar from "../components/framework/title-bar";
+import { analyticsNewPage } from "../util/googleAnalytics";
 
 /* helper / generating functions */
 const generateLogos = [
@@ -25,6 +26,7 @@ const generateLogos = [
 ];
 
 const About = () => {
+  analyticsNewPage();
   return(
     <g>
       <TitleBar dataNameHidden={true} aboutSelected={true}/>

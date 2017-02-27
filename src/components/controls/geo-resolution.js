@@ -5,6 +5,7 @@ import { connect } from "react-redux";
 import { CHANGE_GEO_RESOLUTION } from "../../actions/types";
 import { changeColorBy } from "../../actions/colors";
 import { modifyURLquery } from "../../util/urlHelpers";
+import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
 /* Why does this have colorBy set as state (here) and in redux?
    it's for the case where we select genotype, then wait for the
@@ -54,6 +55,7 @@ class GeoResolution extends React.Component {
           style={select}
           id="geoResolution"
           onChange={(e) => {
+            analyticsControlsEvent("change-geo-resolution");
             this.props.dispatch({ type: CHANGE_GEO_RESOLUTION, data: e.target.value });
             modifyURLquery(this.context.router, {r: e.target.value}, true);
           }}

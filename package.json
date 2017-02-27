@@ -51,6 +51,7 @@
     "react-datepicker": "^0.29.0",
     "react-dom": "^0.14.0",
     "react-fontawesome": "^0.3.3",
+    "react-ga": "^2.1.2",
     "react-redux": "^4.0.0",
     "react-router-dom": "^4.0.0-beta.5",
     "react-select": "^1.0.0-rc.2",

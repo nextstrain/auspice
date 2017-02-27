@@ -1,6 +1,7 @@
 /*eslint-env browser*/
 import React from "react";
 import ReactDOM from "react-dom";
+import ReactGA from "react-ga";
 import { Provider } from "react-redux";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import injectTapEventPlugin from "react-tap-event-plugin";
@@ -16,6 +17,10 @@ import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";
 import "./css/datePicker.css";
 import "./css/static.css";
+import { outboundLinkWithAnalytics } from "./util/googleAnalytics";
+
+/* google analytics */
+ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-1");
 
 const store = configureStore();
 
@@ -31,7 +36,10 @@ class Root extends React.Component {
               <Route path="/about" component={About}/>
               <Route path="/zika" component={App}/>
               <Route path="/ebola" component={App}/>
-              <Route exact path="/flu*" render={() => window.location.assign("http://nextflu.org/")}/>
+              <Route exact path="/flu*" render={() =>
+                outboundLinkWithAnalytics("http://nextflu.org/")
+              }
+              />
               <Route path="*" component={Splash}/>
             </Switch>
           </div>
