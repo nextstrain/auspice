@@ -437,7 +437,7 @@ class TreeView extends React.Component {
             // call phyloTree to zoom out, this rerenders the geometry
             this.state.tree.zoomToParent(mediumTransitionDuration);
             // wait and reset tipVisibility
-            this.timeout = setTimeout(makeCallBack(), 2*mediumTransitionDuration);
+            this.timeout = setTimeout(makeCallBack(), mediumTransitionDuration);
           }
         }
       }
