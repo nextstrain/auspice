@@ -21,6 +21,7 @@ import Flex from "./framework/flex";
 import { titleStyles } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
+import { analyticsNewPage } from "../util/googleAnalytics";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   React-Router v4 injects length, action, location, push etc into props,
@@ -49,6 +50,7 @@ class App extends React.Component {
       sidebarDocked: mql.matches,
       sidebarOpen: false
     };
+    analyticsNewPage();
   }
   static propTypes = {
     dispatch: React.PropTypes.func.isRequired

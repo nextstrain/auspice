@@ -7,6 +7,7 @@ import TitleBar from "../components/framework/title-bar";
 import Title from "../components/framework/title";
 import { headerFont, materialButtonOutline } from "../globalStyles";
 import Flex from "../components/framework/flex";
+import { analyticsNewPage } from "../util/googleAnalytics";
 // import Card from "./framework/card";
 
 const styles = {
@@ -77,7 +78,7 @@ const generateCard = (title, imgRequired, to) => (
 
 
 const Splash = () => {
-
+  analyticsNewPage();
   return(
     <g>
       <TitleBar logoHidden={true} titleHidden={true}/>

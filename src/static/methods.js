@@ -3,8 +3,10 @@
 import React from "react";
 // import Flex from "./framework/flex";
 import TitleBar from "../components/framework/title-bar";
+import { analyticsNewPage } from "../util/googleAnalytics";
 
 const Methods = () => {
+  analyticsNewPage();
   return (
 		<g>
 			<TitleBar dataNameHidden={true} methodsSelected={true}/>
