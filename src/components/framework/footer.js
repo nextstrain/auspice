@@ -85,8 +85,10 @@ class Footer extends React.Component {
   }
   getUpdated(styles) {
     let updated = null;
-    if (this.props.metadata.updated) {
-      updated = this.props.metadata.updated;
+    if (this.props.metadata) {
+      if (this.props.metadata.updated) {
+        updated = this.props.metadata.updated;
+      }
     }
     return (
       updated ?
