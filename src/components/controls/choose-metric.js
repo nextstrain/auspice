@@ -39,21 +39,21 @@ class ChooseMetric extends React.Component {
     <div style={styles.container}>
       <button
         key={1}
-        style={selected === "div" ? materialButtonSelected : materialButton}
-        onClick={() => {
-          this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
-          modifyURLquery(this.context.router, {m: "div"}, true);
-        }}>
-        <span style={styles.title}> {"divergence"} </span>
-      </button>
-      <button
-        key={2}
         style={selected === "num_date" ? materialButtonSelected : materialButton}
         onClick={() => {
           this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "num_date" });
           modifyURLquery(this.context.router, {m: "num_date"}, true);
         }}>
         <span style={styles.title}> {"time"} </span>
+      </button>
+      <button
+        key={2}
+        style={selected === "div" ? materialButtonSelected : materialButton}
+        onClick={() => {
+          this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
+          modifyURLquery(this.context.router, {m: "div"}, true);
+        }}>
+        <span style={styles.title}> {"divergence"} </span>
       </button>
     </div>
   );
