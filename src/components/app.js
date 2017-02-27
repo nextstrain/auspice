@@ -20,6 +20,7 @@ import Sidebar from "react-sidebar";
 import Flex from "./framework/flex";
 import { titleStyles } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
+import Footer from "./framework/footer";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   React-Router v4 injects length, action, location, push etc into props,
@@ -123,6 +124,9 @@ class App extends React.Component {
           />
           <Frequencies/>
           <Entropy
+            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+          />
+          <Footer
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
           />
         </Background>
