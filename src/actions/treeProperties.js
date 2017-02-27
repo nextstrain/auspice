@@ -34,33 +34,37 @@ const updateBranchThickness = (idxOfInViewRootNode = 0) => {
   };
 };
 
-export const restrictTreeToSingleTip = function (restrict, tipIdx = undefined) {
+export const restrictTreeToSingleTip = function (tipIdx) {
+	/* this fn causes things to fall out of sync with the "inView" attr of nodes
+	you should run updateVisibleTipsAndBranchThicknesses to get things back in sync */
+	return (dispatch, getState) => {
+		const { tree } = getState();
+		// console.log("restrict")
+		const vis = tree.nodes.map((d, idx) => {
+			d["tip-visible"] = idx === tipIdx ? 1 : 0;
+			return idx === tipIdx ? "visible" : "hidden";
+		});
+		dispatch({
+			type: types.UPDATE_TIP_VISIBILITY,
+			data: vis,
+			version: tree.tipVisibilityVersion + 1
+		});
+		dispatch(updateBranchThickness());
+	};
+};
+
+export const updateVisibleTipsAndBranchThicknesses = function () {
+	/* this fn doesn't need arguments as it relies on the "inView" attr of nodes */
 	return (dispatch, getState) => {
 		const { tree, controls } = getState();
-		if (restrict === 1) {
-			// console.log("restrict")
-			const vis = tree.nodes.map((d, idx) => {
-				d["tip-visible"] = idx === tipIdx ? 1 : 0;
-				return idx === tipIdx ? "visible" : "hidden";
-			});
-			dispatch({
-				type: types.UPDATE_TIP_VISIBILITY,
-				data: vis,
-				version: tree.tipVisibilityVersion + 1
-			});
-			dispatch(updateBranchThickness());
-		} else {
-			// console.log("return")
-			dispatch({
-				type: types.UPDATE_TIP_VISIBILITY,
-				data: calcTipVisibility(tree, controls),
-				version: tree.tipVisibilityVersion + 1
-			});
-			dispatch(updateBranchThickness());
-		}
-	}
-}
-
+		dispatch({
+			type: types.UPDATE_TIP_VISIBILITY,
+			data: calcTipVisibility(tree, controls),
+			version: tree.tipVisibilityVersion + 1
+		});
+		dispatch(updateBranchThickness());
+	};
+};
 
 /* when tip max / min changes, we need to (a) update the controls reducer
 with the new value(s), (b) update the tree tipVisibility */

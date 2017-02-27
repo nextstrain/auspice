@@ -25,6 +25,9 @@ moment.updateLocale("en", {
 class DateRangeInputs extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      lastSliderUpdateTime: Date.now()
+    }
   }
   static contextTypes = {
     router: React.PropTypes.object.isRequired
@@ -71,7 +74,17 @@ class DateRangeInputs extends React.Component {
     }
   }
 
-  updateFromSlider(numDateValues) {
+  updateFromSlider(debounce, numDateValues) {
+    if (debounce) {
+      // simple debounce @ 250ms
+      const currentTime = Date.now();
+      if (currentTime < this.state.lastSliderUpdateTime + 250) {
+        return null
+      }
+      // console.log("UPDATING", currentTime, this.state.lastSliderUpdateTime)
+      this.setState({lastSliderUpdateTime: currentTime})
+    }
+
     // {numDateValues} is an array of numDates received from Slider
     // [numDateStart, numDateEnd]
     const newRange = {min: this.numericToCalendar(numDateValues[0]),
@@ -146,7 +159,9 @@ class DateRangeInputs extends React.Component {
           max={absoluteMaxNumDate}
           defaultValue={[absoluteMinNumDate, absoluteMaxNumDate]}
           value={[selectedMinNumDate, selectedMaxNumDate]}
-          onChange={this.updateFromSlider.bind(this)}
+          /* debounce the onChange event, but ensure the final one goes through */
+          onChange={this.updateFromSlider.bind(this, true)}
+          onAfterChange={this.updateFromSlider.bind(this, false)}
           minDistance={0.5}                           // minDistance is in years
           pearling
           withBars/>
