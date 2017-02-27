@@ -5,8 +5,8 @@ import d3 from "d3";
 // resolution are made
 export const datasets={
   'virus':{
+    'ebola':{},    
     'zika':{},
-    'ebola':{},
     'default':'zika'
   }
 }

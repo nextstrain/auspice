@@ -141,7 +141,7 @@ const Splash = () => {
           <div className="col-md-10">
             <div className="row">
       				<div className="col-sm-4">
-                {generateCard(["Ebola"], require("../images/ebola.png"), "/ebola")}
+                {generateCard(["Ebola"], require("../images/ebola.png"), "/ebola?c=division&r=division")}
               </div>
               <div className="col-sm-4">
                 {generateCard(["Zika"], require("../images/zika.png"), "/zika")}
