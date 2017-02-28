@@ -100,20 +100,22 @@ const Splash = () => {
 
   			<div className="row">
           <div className="col-md-1"/>
-  				<div className="col-md-6">
+  				<div className="col-md-8">
 
-            This website aims to provide a real-time snapshot of evolving virus populations to aid epidemiological understanding and improve outbreak response
+            <div style={{marginTop: "0px", marginBottom: "20px"}}>
+            Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data. We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread. Our goal is to aid epidemiological understanding and improve outbreak response.
+            </div>
 
 					</div>
 
-          <div className="col-md-1"/>
-
-          <div className="col-md-3 aside">
+          <div className="col-md-2 aside">
+            <div style={{marginTop: "6px"}}>
             <Link to="/about">
               <button style={materialButtonOutline}>
                 Learn More
               </button>
             </Link>
+            </div>
           </div>
 
           <div className="col-md-1"/>
@@ -123,7 +125,7 @@ const Splash = () => {
         <div className="row">
           <div className="col-md-1"/>
   				<div className="col-md-6">
-            <div className={"line"}/>
+            <div className={"line"} style={{marginTop: "0px", marginBottom: "0px"}}/>
           </div>
           <div className="col-md-5"/>
         </div>
