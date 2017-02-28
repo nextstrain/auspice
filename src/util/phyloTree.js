@@ -1,5 +1,5 @@
 import d3 from "d3";
-import { dataFont, darkGray } from "../globalStyles";
+import { dataFont, darkGrey } from "../globalStyles";
 
 /*
  * adds the total number of descendant leaves to each node in the tree
@@ -134,7 +134,7 @@ PhyloTree.prototype.setDefaults = function () {
         minorGridStroke: "#DDD",
         minorGridWidth: 1,
         tickLabelSize: 12,
-        tickLabelFill: darkGray,
+        tickLabelFill: darkGrey,
         minorTicksTimeTree: 3,
         minorTicks: 4,
         orientation: [1,1],
