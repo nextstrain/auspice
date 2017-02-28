@@ -23,6 +23,7 @@ class Controls extends React.Component {
   getStyles() {
     return {};
   }
+  // restore <ToggleBranchLabels/> below when perf is improved
   render() {
     const styles = this.getStyles();
     return (
@@ -52,8 +53,6 @@ class Controls extends React.Component {
 
         <SelectLabel text="Branch Length"/>
         <ChooseMetric/>
-
-        <ToggleBranchLabels/>
 
         {header("Map Options")}
         <SelectLabel text="Geographic resolution"/>
