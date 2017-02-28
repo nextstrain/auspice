@@ -20,7 +20,7 @@ import "./css/static.css";
 import { outboundLinkWithAnalytics } from "./util/googleAnalytics";
 
 /* google analytics */
-ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-1");
+ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "unknown");
 
 const store = configureStore();
 
