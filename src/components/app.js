@@ -2,7 +2,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { loadJSONs } from "../actions/loadData";
-import { NEW_DATASET } from "../actions/types";
+import { RESET_CONTROLS, NEW_DATASET } from "../actions/types";
 import { restoreStateFromURL, turnURLtoDataPath } from "../util/urlHelpers"
 import "whatwg-fetch"; // setup polyfill
 import Radium from "radium";
@@ -73,6 +73,7 @@ class App extends React.Component {
     new bits of state via the URL query and then URL pathname
     */
     // console.log("CDM")
+    this.props.dispatch({type: RESET_CONTROLS});
     restoreStateFromURL(this.context.router, this.props.dispatch);
     const data_path = turnURLtoDataPath(this.context.router);
     if (data_path) {
