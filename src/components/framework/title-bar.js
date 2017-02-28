@@ -27,6 +27,16 @@ class TitleBar extends React.Component {
   }
   getStyles() {
     return {
+      main: {
+        maxWidth: 960,
+        margin: "auto",
+        height: titleBarHeight,
+        justifyContent: "space-between",
+        alignItems: "center",
+        background: "#fff",
+        marginBottom: 5,
+        overflow: "hidden"
+      },
       logo: {
         paddingLeft: "8px",
         paddingRight: "8px",
@@ -43,22 +53,20 @@ class TitleBar extends React.Component {
         fontSize: 20,
         fontWeight: 400
       },
-      main: {
-        maxWidth: 960,
-        margin: "auto",
-        height: titleBarHeight,
-        justifyContent: "space-between",
-        alignItems: "center",
-        background: "#fff",
-        marginBottom: 5,
-        overflow: "hidden"
+      dataName: {
+        alignSelf: "center",
+        padding: "0px",
+        color: darkGrey,
+        textDecoration: "none",
+        fontSize: 20,
+        fontWeight: 400
       },
       link: {
         paddingLeft: this.props.minified ? "6px" : "12px",
         paddingRight: this.props.minified ? "6px" : "12px",
         paddingTop: "20px",
         paddingBottom: "20px",
-        color: "black",
+        color: darkGrey,
         textDecoration: "none",
         cursor: "pointer",
         fontSize: this.props.minified ? 12 : 16,
@@ -80,14 +88,6 @@ class TitleBar extends React.Component {
         verticalAlign: "middle",
         width: 70,
         color: brandColor
-      },
-      dataName: {
-        alignSelf: "center",
-        padding: "0px",
-        color: "#fff",
-        textDecoration: "none",
-        fontSize: 20,
-        fontWeight: 400
       }
     };
   }

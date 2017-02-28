@@ -78,7 +78,7 @@ const About = () => {
 
             <h2>Future Directions</h2>
 
-            Nextstrain is under active development and we have big plans for its future, including visualization, bioinformatics analysis and an increasing number and variety of datasets. Please get in touch with <a href="https://twitter.com/richardneher">@richardneher</a> or <a href="https://twitter.com/trvrd">@trvrb</a> with any questions or comments.
+            Nextstrain is under active development and we have big plans for its future, including visualization, bioinformatics analysis and an increasing number and variety of datasets. Please get in touch with <a href="https://twitter.com/richardneher">@richardneher</a> or <a href="https://twitter.com/trvrb">@trvrb</a> with any questions or comments.
 
 					</div>
 
