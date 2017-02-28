@@ -336,7 +336,7 @@ class TreeView extends React.Component {
   /* viewEntireTree: triggered by "reset to entire tree" button */
   viewEntireTree() {
     /* reset the SVGPanZoom */
-    this.Viewer.reset();
+    this.Viewer.fitToViewer();
     /* imperitively manipulate SVG tree elements */
     this.state.tree.zoomIntoClade(this.state.tree.nodes[0], globals.mediumTransitionDuration);
     /* update branch thicknesses / tip vis after SVG tree elemtents have moved */
@@ -552,7 +552,7 @@ class TreeView extends React.Component {
             this.Viewer = Viewer
           }}
           style={{cursor: "default"}}
-          tool={'auto'}
+          tool={'pan'}
           detectWheel={false}
           toolbarPosition={"none"}
           detectAutoPan={false}
