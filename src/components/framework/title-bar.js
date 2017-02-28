@@ -49,9 +49,8 @@ class TitleBar extends React.Component {
         height: titleBarHeight,
         justifyContent: "space-between",
         alignItems: "center",
-        background: "#4b4e4e",
+        background: "#fff",
         marginBottom: 5,
-        boxShadow: "1px 1px 2px 1px rgba(215,215,215,0.85)",
         overflow: "hidden"
       },
       link: {
@@ -59,21 +58,20 @@ class TitleBar extends React.Component {
         paddingRight: this.props.minified ? "6px" : "12px",
         paddingTop: "20px",
         paddingBottom: "20px",
-        color: "#fff",
+        color: "black",
         textDecoration: "none",
         cursor: "pointer",
         fontSize: this.props.minified ? 12 : 16,
         ':hover': {
-          background: "rgba(215,215,215,0.10)"
+          color: "rgb(80, 151, 186)",
         }
       },
       inactive: {
-        background: "rgba(215,215,215,0.10)",
         paddingLeft: "8px",
         paddingRight: "8px",
         paddingTop: "20px",
         paddingBottom: "20px",
-        color: "#fff",
+        color: "rgb(80, 151, 186)",
         textDecoration: "none",
         fontSize: this.props.minified ? 12 : 16
       },
