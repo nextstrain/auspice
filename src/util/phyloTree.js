@@ -149,13 +149,13 @@ PhyloTree.prototype.setDefaults = function () {
         tipStrokeWidth: 1,
         tipRadius: 4,
         fontFamily: dataFont,
-        branchLabels:true,
+        branchLabels:false,
         showBranchLabels:false,
         branchLabelFont: dataFont,
         branchLabelFill: "#555",
         branchLabelPadX: 8,
         branchLabelPadY:5,
-        tipLabels:true,
+        tipLabels:false,
         showTipLabels:false,
         tipLabelFont: dataFont,
         tipLabelFill: "#555",
@@ -208,8 +208,14 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
     this.svg.selectAll(".tip").style("visibility", (d) => d["visibility"]);
   }
 
-  this.drawBranchLabels();
-  this.drawTipLabels();
+  // setting branchLabels and tipLabels to false above in params is not working for some react-dimensions
+  // hence the commenting here
+  // if (this.params.branchLabels){
+  //   this.drawBranchLabels();
+  // }
+  // if (this.params.tipLabels){
+  //   this.drawTipLabels();
+  // }
   this.updateGeometry(10);
   this.svg.selectAll(".regression").remove();
   if (layout==="clock") this.drawRegression();
