@@ -83,6 +83,10 @@ const About = () => {
             over the world. We gratefully acknowledge their contributions.
             <p/>
             Special thanks to Nick Loman, Kristian Andersen, Andrew Rambaut, Matt Cotten and Paul Kellam for comments, suggestions and data sharing.
+
+            <p/>
+            Splash page images stylised in <a href="http://www.lunapic.com/">Lunapic</a>. <a href="https://en.wikipedia.org/wiki/Zika_virus#/media/File:197-Zika_Virus-ZikaVirus.tif">Zika drawing</a> by David Goodwill, <a href="https://commons.wikimedia.org/wiki/Ebola#/media/File:Ebola_virus_em.png">Ebola EM</a> by Frederick A. Murphy / CDC, <a href="https://www.cdc.gov/media/subtopic/library/diseases.htm">Influenza TEM</a> by Cynthia Goldsmith / CDC.
+
           </div>
 
           <div className="col-md-1"/>
