@@ -66,10 +66,24 @@ const About = () => {
           <div className="col-md-3 aside">
 
             Concept by <a href="http://neherlab.org/">Richard Neher</a> and <a href="http://bedford.io/">Trevor Bedford</a>.
+
             <p/>
+
             Built by <a href="http://neherlab.org/">Richard Neher</a>, <a href="http://bedford.io/">Trevor Bedford</a>, <a href="http://www.colinmegill.com/">Colin Megill</a>, <a href="http://bedford.io/team/james-hadfield/">James Hadfield</a>, <a href="http://bedford.io/team/charlton-callender/">Charlton Callender</a>, <a href="http://bedford.io/team/sidney-bell/">Sidney Bell</a>, <a href="http://bedford.io/team/barney-potter/">Barney Potter</a> and <a href="https://twitter.com/sarahinkiwi">Sarah Murata</a>.
+
             <p/>
+
             All <a href="http://github.com/nextstrain">source code</a> is freely available under the terms of the <a href="http://github.com/nextstrain/auspice/blob/master/LICENSE.txt">GNU Affero General Public License</a>.
+
+            <p/>
+
+            This work is made possible by the open sharing of genetic data by research groups from all
+            over the world. We gratefully acknowledge their contributions.
+
+            <p/>
+
+            Special thanks to Nick Loman, Kristian Andersen, Andrew Rambaut, Matt Cotten and Paul Kellam for comments, suggestions and data sharing.
+
           </div>
 
           <div className="col-md-1"/>
