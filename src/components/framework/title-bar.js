@@ -44,12 +44,13 @@ class TitleBar extends React.Component {
         fontWeight: 400
       },
       main: {
+        maxWidth: 960,
+        margin: "auto",
         height: titleBarHeight,
         justifyContent: "space-between",
         alignItems: "center",
-        background: "#4b4e4e",
+        background: "#fff",
         marginBottom: 5,
-        boxShadow: "1px 1px 2px 1px rgba(215,215,215,0.85)",
         overflow: "hidden"
       },
       link: {
@@ -57,21 +58,20 @@ class TitleBar extends React.Component {
         paddingRight: this.props.minified ? "6px" : "12px",
         paddingTop: "20px",
         paddingBottom: "20px",
-        color: "#fff",
+        color: "black",
         textDecoration: "none",
         cursor: "pointer",
         fontSize: this.props.minified ? 12 : 16,
         ':hover': {
-          background: "rgba(215,215,215,0.10)"
+          color: "rgb(80, 151, 186)",
         }
       },
       inactive: {
-        background: "rgba(215,215,215,0.10)",
         paddingLeft: "8px",
         paddingRight: "8px",
         paddingTop: "20px",
         paddingBottom: "20px",
-        color: "#fff",
+        color: "rgb(80, 151, 186)",
         textDecoration: "none",
         fontSize: this.props.minified ? 12 : 16
       },
@@ -94,7 +94,6 @@ class TitleBar extends React.Component {
 
   getLogo(styles) {
     return (
-      this.props.logoHidden ? <div style={{flex: "none" }}/> :
         <Link style={styles.logo} to="/">
           <img width="40" src={require("../../images/nextstrain-logo-small.png")}/>
         </Link>
@@ -103,7 +102,7 @@ class TitleBar extends React.Component {
 
   getTitle(styles) {
     return (
-      this.props.titleHidden || this.props.browserDimensions.width < 600 || this.props.minified ?
+      this.props.browserDimensions.width < 600 || this.props.minified ?
         <div style={{flex: "none" }}/> :
         <Link style={styles.title} to="/">
           <Title minified={true} style={styles.title}/>
@@ -134,14 +133,14 @@ class TitleBar extends React.Component {
     dataName = dataName.replace(/^\//, '').replace(/\/$/, '');
     if (dataName.length === 1) {dataName = "";}
     return (
-      <div>
+      <div >
         <Flex style={styles.main}>
           {this.getLogo(styles)}
           {this.getTitle(styles)}
           {this.getDataName(dataName, styles)}
           <div style={{flex: 5}}/>
-          {this.getLink("About", "/about", this.props.aboutSelected, styles)}
-          {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
+            {this.getLink("About", "/about", this.props.aboutSelected, styles)}
+            {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
           <div style={{flex: this.props.minified ? 1 : "none" }}/>
         </Flex>
       </div>
