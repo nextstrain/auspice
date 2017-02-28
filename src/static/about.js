@@ -6,6 +6,7 @@ import Flex from "../components/framework/flex";
 import TitleBar from "../components/framework/title-bar";
 import { analyticsNewPage } from "../util/googleAnalytics";
 import { version } from "../version";
+import { Link } from "react-router-dom";
 
 /* helper / generating functions */
 const generateLogos = [
@@ -59,6 +60,25 @@ const About = () => {
             <h2>This Website</h2>
 
             This website aims to provide a <i>real-time</i> snapshot of evolving viral populations and to provide interactive data visualizations to virologists, epidemiologists, public health officials and citizen scientists. Through interactive data visualizations, we aim to allow exploration of continually up-to-date datasets, providing a novel surveillance tool to the scientific and public health communities.
+
+            <h2>Current Datasets</h2>
+
+            <p/><Link to="/ebola">Ebola Virus</Link><p/>
+
+            The 2013-2016 Ebola outbreak caused worldwide alarm and over 10,000 fatalities in West Africa. Nextstrain allows exploration of the phylogeny of over 2000 genomes, complete with temporal and geographic data and inferred transmission events. For a review into how genomic sequencing helped understand this outbreak see <a href="http://www.nature.com/nature/journal/v538/n7624/full/nature19790.html">Holmes <i>et al.</i></a>
+
+            <p/><Link to="/zika">Zika Virus</Link><p/>
+
+            The ongoing (2015-) epidemic of zika fever in the Americas is seen here in the context of over 400 genomes including isolates from Asia and the Pacific Islands. Multiple trans-Pacific and trans-Atlantic transmission events are easily seen, as well as the complex transmission routes between Brazil, Central America and the USA.
+
+            <p/><Link to="/flu">Influenza Virus (via nextflu.org)</Link><p/>
+
+            H1N1 and H3N2 strains of Influenza virus are shown together with antigen evolution, epitope mutations and clade frequency changes over the past 2-12 years. These data and features are being moved over to this site at the moment.
+
+
+            <h2>Future Directions</h2>
+
+            Nextstrain is under active development and we have big plans for its future, including visualization, bioinformatics analysis and an increasing number and variety of datasets. Please get in touch with <a href="https://twitter.com/richardneher">@richardneher</a> or <a href="https://twitter.com/trvrd">@trvrb</a> with any questions or comments.
 
 					</div>
 
