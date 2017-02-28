@@ -94,7 +94,6 @@ class TitleBar extends React.Component {
 
   getLogo(styles) {
     return (
-      this.props.logoHidden ? <div style={{flex: "none" }}/> :
         <Link style={styles.logo} to="/">
           <img width="40" src={require("../../images/nextstrain-logo-small.png")}/>
         </Link>
@@ -103,7 +102,7 @@ class TitleBar extends React.Component {
 
   getTitle(styles) {
     return (
-      this.props.titleHidden || this.props.browserDimensions.width < 600 || this.props.minified ?
+      this.props.browserDimensions.width < 600 || this.props.minified ?
         <div style={{flex: "none" }}/> :
         <Link style={styles.title} to="/">
           <Title minified={true} style={styles.title}/>
@@ -134,14 +133,14 @@ class TitleBar extends React.Component {
     dataName = dataName.replace(/^\//, '').replace(/\/$/, '');
     if (dataName.length === 1) {dataName = "";}
     return (
-      <div>
+      <div >
         <Flex style={styles.main}>
           {this.getLogo(styles)}
           {this.getTitle(styles)}
           {this.getDataName(dataName, styles)}
           <div style={{flex: 5}}/>
-          {this.getLink("About", "/about", this.props.aboutSelected, styles)}
-          {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
+            {this.getLink("About", "/about", this.props.aboutSelected, styles)}
+            {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
           <div style={{flex: this.props.minified ? 1 : "none" }}/>
         </Flex>
       </div>
