@@ -34,11 +34,11 @@ echo "$purposeMsg"
 
 # step 1: check master is up to date with github
 step="1"
-# git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
-# git checkout master
-# git fetch origin
-# git status -uno | grep "up-to-date" # $? = 1 if not up-to-date
-# git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
+git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
+git checkout master
+git fetch origin
+git status -uno | grep "up-to-date" # $? = 1 if not up-to-date
+git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
 
 # step 2: increment version number (req user input)
 step="2"
