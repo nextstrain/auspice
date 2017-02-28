@@ -155,8 +155,8 @@ PhyloTree.prototype.setDefaults = function () {
         branchLabelFill: "#555",
         branchLabelPadX: 8,
         branchLabelPadY:5,
-        tipLabels:false,
-        showTipLabels:false,
+        tipLabels:true,
+        // showTipLabels:true,
         tipLabelFont: dataFont,
         tipLabelFill: "#555",
         tipLabelPadX: 8,
@@ -213,8 +213,9 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
   // if (this.params.branchLabels){
   //   this.drawBranchLabels();
   // }
+  /* don't even bother initially - there will be too many! */
   // if (this.params.tipLabels){
-  //   this.drawTipLabels();
+  //   this.updateTipLabels(100);
   // }
   this.updateGeometry(10);
   this.svg.selectAll(".regression").remove();
@@ -618,21 +619,22 @@ PhyloTree.prototype.showBranchLabels = function() {
   this.svg.selectAll(".branchLabel").style('visibility', 'visible');
 };
 
-/**
- * hide tipLabels
- */
-PhyloTree.prototype.hideTipLabels = function() {
-  this.params.showTipLabels=false;
-  this.svg.selectAll(".tipLabel").style('visibility', 'hidden');
-};
-
-/**
- * show tipLabels
- */
-PhyloTree.prototype.showTipLabels = function() {
-  this.params.showTipLabels=true;
-  this.svg.selectAll(".tipLabel").style('visibility', 'visible');
-};
+/* these functions are never called! */
+// /**
+//  * hide tipLabels
+//  */
+// PhyloTree.prototype.hideTipLabels = function() {
+//   this.params.showTipLabels=false;
+//   this.svg.selectAll(".tipLabel").style('visibility', 'hidden');
+// };
+//
+// /**
+//  * show tipLabels
+//  */
+// PhyloTree.prototype.showTipLabels = function() {
+//   this.params.showTipLabels=true;
+//   this.svg.selectAll(".tipLabel").style('visibility', 'visible');
+// };
 
 
 /**
@@ -914,16 +916,20 @@ PhyloTree.prototype.drawBranchLabels = function() {
     .style("text-anchor","end");
 }
 
-PhyloTree.prototype.drawTipLabels = function() {
-  var params = this.params;
-  const tLFunc = this.callbacks.tipLabel;
-  this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
-    .data(this.nodes.filter(function(d){return d.terminal;}))
-    .enter()
-    .append("text")
-    .text(function (d){return tLFunc(d);})
-    .attr("class", "tipLabel");
-}
+// PhyloTree.prototype.drawTipLabels = function() {
+//   var params = this.params;
+//   const tLFunc = this.callbacks.tipLabel;
+//   const inViewTerminalNodes = this.nodes
+//                   .filter(function(d){return d.terminal;})
+//                   .filter(function(d){return d.inView;});
+//   console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
+//   this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
+//     .data(inViewTerminalNodes)
+//     .enter()
+//     .append("text")
+//     .text(function (d){return tLFunc(d);})
+//     .attr("class", "tipLabel");
+// }
 
 PhyloTree.prototype.drawConfidence = function() {
   this.confidence = this.svg.append("g").selectAll('.conf')
@@ -1138,24 +1144,56 @@ PhyloTree.prototype.updateBranchLabels = function(dt){
 }
 
 
-PhyloTree.prototype.updateTipLabels = function(dt){
-  const xPad = this.params.tipLabelPadX, yPad = this.params.tipLabelPadY;
-  const nNIV = this.nNodesInView;
-  const tLSFunc = this.callbacks.tipLabelSize;
-  const showTL = (this.layout==="rect") && this.params.showTipLabels;
-  const visTL = showTL ? "visible" : "hidden";
-  this.svg.selectAll('.tipLabel')
-    .transition().duration(dt)
-    .attr("x", function(d) {
-      return d.xTip + xPad;
-    })
-    .attr("y", function(d) {
-      return d.yTip + yPad;
-    })
-    .attr("visibility",visTL)
-    .style("fill", this.params.tipLabelFill)
-    .style("font-family", this.params.tipLabelFont)
-    .style("font-size", function(d) {return tLSFunc(d, nNIV).toString()+"px";});
+/* this was the *old* updateTipLabels */
+// PhyloTree.prototype.updateTipLabels = function(dt){
+//   const xPad = this.params.tipLabelPadX, yPad = this.params.tipLabelPadY;
+//   const nNIV = this.nNodesInView;
+//   const tLSFunc = this.callbacks.tipLabelSize;
+//   const showTL = (this.layout==="rect") && this.params.showTipLabels;
+//   const visTL = showTL ? "visible" : "hidden";
+//   this.svg.selectAll('.tipLabel')
+//     .transition().duration(dt)
+//     .attr("x", function(d) {
+//       return d.xTip + xPad;
+//     })
+//     .attr("y", function(d) {
+//       return d.yTip + yPad;
+//     })
+//     .attr("visibility",visTL)
+//     .style("fill", this.params.tipLabelFill)
+//     .style("font-family", this.params.tipLabelFont)
+//     .style("font-size", function(d) {return tLSFunc(d, nNIV).toString()+"px";});
+// }
+/* the new updateTipLabels is here: */
+PhyloTree.prototype.updateTipLabels = function(dt) {
+  this.svg.selectAll('.tipLabel').remove()
+  var params = this.params;
+  const tLFunc = this.callbacks.tipLabel;
+  const xPad = this.params.tipLabelPadX;
+  const yPad = this.params.tipLabelPadY;
+  const inViewTerminalNodes = this.nodes
+                  .filter(function(d){return d.terminal;})
+                  .filter(function(d){return d.inView;});
+  // console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
+  if (inViewTerminalNodes.length < 50) {
+    // console.log("DRAWING!", inViewTerminalNodes)
+    window.setTimeout( () =>
+      this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
+        .data(inViewTerminalNodes)
+        .enter()
+        .append("text")
+        .attr("x", function(d) {
+          return d.xTip + xPad;
+        })
+        .attr("y", function(d) {
+          return d.yTip + yPad;
+        })
+        .text(function (d){return tLFunc(d);})
+        .attr("class", "tipLabel")
+        .style('visibility', 'visible')
+      , dt
+    )
+  }
 }
 
 PhyloTree.prototype.updateTimeBar = function(d){
