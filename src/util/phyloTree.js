@@ -127,8 +127,8 @@ PhyloTree.prototype.setDefaults = function () {
     this.grid = false;
     this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
     this.params = {
-        regressionStroke: "#CCC",
-        regressionWidth: 3,
+        regressionStroke: darkGrey,
+        regressionWidth: 6,
         majorGridStroke: "#CCC",
         majorGridWidth: 2,
         minorGridStroke: "#DDD",
@@ -218,7 +218,7 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
   // }
   this.updateGeometry(10);
   this.svg.selectAll(".regression").remove();
-  if (layout==="clock") this.drawRegression();
+  if (this.layout==="clock" && this.distance === "num_date") this.drawRegression();
 };
 
 /*
@@ -356,12 +356,13 @@ PhyloTree.prototype.drawRegression = function(){
         .style("stroke-width",this.params.regressionWidth);
     this.svg
         .append("text")
-        .text("rate estimate: "+this.regression.slope.toFixed(4)+'/year')
+        .text("rate estimate: "+this.regression.slope.toFixed(4)+' / year')
         .attr("class", "regression")
-        .attr("x", this.xScale.range()[1]-200)
-        .attr("y", leftY)
+        .attr("x", this.xScale.range()[1] / 2 - 75)
+        .attr("y", this.yScale.range()[0] + 50)
         .style("fill", this.params.regressionStroke)
-        .style("font-size",this.params.tickLabelSize)
+        .style("font-size", this.params.tickLabelSize + 8)
+        .style("font-weight", 400)
         .style("font-family",this.params.fontFamily);
 };
 
@@ -445,7 +446,7 @@ PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
   this.updateGeometry(dt);
   if (this.grid) this.addGrid(this.layout);
   this.svg.selectAll(".regression").remove();
-  if (this.layout === "clock") this.drawRegression();
+  if (this.layout==="clock" && this.distance === "num_date") this.drawRegression();
   if (this.params.branchLabels){
     this.updateBranchLabels(dt);
   }
@@ -964,7 +965,7 @@ PhyloTree.prototype.updateDistance = function(attr,dt){
   if (this.grid && this.layout!=="unrooted") {this.addGrid(this.layout);}
   else this.hideGrid()
   this.svg.selectAll(".regression").remove();
-  if (this.layout==="clock") this.drawRegression();
+  if (this.layout==="clock" && this.distance === "num_date") this.drawRegression();
 };
 
 
@@ -981,7 +982,7 @@ PhyloTree.prototype.updateLayout = function(layout,dt){
     if (this.grid && this.layout!=="unrooted") this.addGrid(layout);
     else this.hideGrid()
     this.svg.selectAll(".regression").remove();
-    if (layout==="clock") this.drawRegression();
+    if (this.layout==="clock" && this.distance === "num_date") this.drawRegression();
 };
 
 
