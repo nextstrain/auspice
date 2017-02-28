@@ -95,7 +95,6 @@ class App extends React.Component {
   render() {
     return (
       <Sidebar
-        sidebarClassName="sidebar-hide-scrollbar"
         sidebar={
           <div>
             <TitleBar minified={true}/>

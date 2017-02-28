@@ -37,12 +37,6 @@ a {
   font-size: 94%;
 }
 
-.sidebar-hide-scrollbar::-webkit-scrollbar {
-    width: 0px;  /* remove scrollbar space */
-    background: transparent;  /* optional: just make scrollbar invisible */
-    display: none;
-}
-
 
 /* from Bootstrap */
 table {
