@@ -69,11 +69,11 @@ unset packagesVersion srcVersion minorPart majorPart minorPlusOne majorPlusOne
 # step 3: commit to current branch (master)
 step="3"
 git add .
-git commit -m "version bump to ${newVersion}"
+git commit -m "version bump to ${newVersion} for release"
 
 # step 4: checkout release branch
 step="4"
-if git rev-parse --verify --quiet release 
+if git rev-parse --verify --quiet release
   then
     echo "release branch already exists locally - fatal"
     exit 2
@@ -100,6 +100,6 @@ git push -f heroku release:master
 step="9"
 git checkout master
 git branch -d release
+git push origin master # push master, with the updated version number...
 
-
-echo -e "\nScript completed. New version: $newVersion\n"
+echo -e "\nScript completed. New version: $newVersion pushed to github:release, github:master and heroku:master\n"
