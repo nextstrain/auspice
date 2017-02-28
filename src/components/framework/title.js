@@ -46,7 +46,7 @@ class Title extends React.Component {
   createTitle() {
     const title = "nextstrain";
     return title.split("").map((letter, i) =>
-      <span key={i} style={{color: this.props.minified ? "#fff" : titleColors[i] }}>{letter}</span>
+      <span key={i} style={{color: titleColors[i] }}>{letter}</span>
     );
   }
   render() {
