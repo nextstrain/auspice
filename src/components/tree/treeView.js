@@ -552,7 +552,7 @@ class TreeView extends React.Component {
             this.Viewer = Viewer
           }}
           style={{cursor: "default"}}
-          tool={'auto'}
+          tool={'pan'}
           detectWheel={false}
           toolbarPosition={"none"}
           detectAutoPan={false}

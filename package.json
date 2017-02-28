@@ -33,6 +33,7 @@
     "redbox-react": "1.1.1",
     "rimraf": "^2.4.3",
     "run-sequence": "~0.3.6",
+    "style-loader": "^0.13.2",
     "webpack": "^1.12.2",
     "webpack-dev-middleware": "^1.2.0",
     "webpack-hot-middleware": "^2.4.1"
