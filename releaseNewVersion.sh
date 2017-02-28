@@ -73,7 +73,7 @@ git commit -m "version bump to ${newVersion}"
 
 # step 4: checkout release branch
 step="4"
-if ! [ git rev-parse --verify <branch_name> ]
+if ! [ git rev-parse --verify release ]
   then
     echo "release branch already exists locally - fatal"
     exit 2
