@@ -5,6 +5,7 @@ import React from "react";
 import Flex from "../components/framework/flex";
 import TitleBar from "../components/framework/title-bar";
 import { analyticsNewPage } from "../util/googleAnalytics";
+import { version } from "../version";
 
 /* helper / generating functions */
 const generateLogos = [
@@ -65,6 +66,8 @@ const About = () => {
 
           <div className="col-md-3 aside">
 
+            Auspice version {version}
+            <p/>
             Concept by <a href="http://neherlab.org/">Richard Neher</a> and <a href="http://bedford.io/">Trevor Bedford</a>.
 
             <p/>
@@ -76,14 +79,10 @@ const About = () => {
             All <a href="http://github.com/nextstrain">source code</a> is freely available under the terms of the <a href="http://github.com/nextstrain/auspice/blob/master/LICENSE.txt">GNU Affero General Public License</a>.
 
             <p/>
-
             This work is made possible by the open sharing of genetic data by research groups from all
             over the world. We gratefully acknowledge their contributions.
-
             <p/>
-
             Special thanks to Nick Loman, Kristian Andersen, Andrew Rambaut, Matt Cotten and Paul Kellam for comments, suggestions and data sharing.
-
           </div>
 
           <div className="col-md-1"/>
