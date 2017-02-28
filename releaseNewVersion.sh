@@ -88,9 +88,9 @@ git merge --ff-only master
 step="6"
 git tag -a v${newVersion} -m "version ${newVersion}"
 
-# step 7: push to github
+# step 7: push to github, including the tag
 step="7"
-git push origin release
+git push --follow-tags origin release
 
 # step 8: push local release branch to heroku master
 step="8"
