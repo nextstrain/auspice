@@ -44,6 +44,8 @@ class TitleBar extends React.Component {
         fontWeight: 400
       },
       main: {
+        maxWidth: 960,
+        margin: "auto",
         height: titleBarHeight,
         justifyContent: "space-between",
         alignItems: "center",
