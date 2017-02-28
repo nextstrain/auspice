@@ -142,6 +142,7 @@ const Splash = () => {
         <div className="bigspacer"></div>
 
         <div className="row">
+          <h1 style={{textAlign: "center"}}>Explore It</h1>
           <div className="col-md-1"/>
           <div className="col-md-10">
             <div className="row">
