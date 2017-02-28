@@ -95,6 +95,8 @@ class Map extends React.Component {
       this.props.datasetGuid !== nextProps.datasetGuid // the dataset has changed
     ) {
       this.setState({responsive: this.doComputeResponsive(nextProps)});
+    } else if (this.props.sidebar !== nextProps.sidebar) {
+      this.setState({responsive: this.doComputeResponsive(nextProps)});
     }
   }
   doComputeResponsive(nextProps) {
