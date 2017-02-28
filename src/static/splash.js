@@ -106,49 +106,31 @@ const Splash = () => {
       <TitleBar logoHidden={true} titleHidden={true}/>
 
       <div className="static container">
-
+        <Flex justifyContent="center">
+          <Title/>
+        </Flex>
         <div className="row">
-          <div className="col-md-1"/>
-  				<div className="col-md-6">
-            <Title/>
-            <h2>
-            Real-time tracking of virus evolution
-            </h2>
-          </div>
-          <div className="col-md-5"/>
+          <h1 style={{textAlign: "center"}}> Real-time tracking of virus evolution </h1>
         </div>
 
-  			<div className="row">
-          <div className="col-md-1"/>
-  				<div className="col-md-8">
+  			<p style={{
+            maxWidth: 600,
+            margin: "0px auto 20px auto",
+            textAlign: "center",
+            fontSize: 16,
+            fontWeight: 300,
+            lineHeight: 1.42857143
+          }}>
+          Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data. We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread. Our goal is to aid epidemiological understanding and improve outbreak response.
+        </p>
 
-            <div style={{marginTop: "0px", marginBottom: "20px"}}>
-            Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data. We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread. Our goal is to aid epidemiological understanding and improve outbreak response.
-            </div>
-
-					</div>
-
-          <div className="col-md-2 aside">
-            <div style={{marginTop: "6px"}}>
-            <Link to="/about">
-              <button style={materialButtonOutline}>
-                Learn More
-              </button>
-            </Link>
-            </div>
-          </div>
-
-          <div className="col-md-1"/>
-
-				</div>
-
-        <div className="row">
-          <div className="col-md-1"/>
-  				<div className="col-md-6">
-            <div className={"line"} style={{marginTop: "0px", marginBottom: "0px"}}/>
-          </div>
-          <div className="col-md-5"/>
-        </div>
+        <Flex justifyContent="center">
+          <Link to="/about">
+            <button style={materialButtonOutline}>
+              Read About It
+            </button>
+          </Link>
+        </Flex>
 
         {/* THE CLICKABLE CARDS
           images styalized in lunapic witht he grey filter
