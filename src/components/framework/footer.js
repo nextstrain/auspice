@@ -26,8 +26,9 @@ class Footer extends React.Component {
       footer: {
         textAlign: "justify",
         marginLeft: "30px",
-        marginBottom: "30px",
-        padding: "0px",
+        // marginBottom: "30px",
+        // padding: "0px",
+        paddingBottom: "30px",
         fontFamily: dataFont,
         fontSize: 16,
         fontWeight: 300,
