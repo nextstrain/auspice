@@ -59,6 +59,17 @@ const styles = {
   cardImg: {
     objectFit: "cover",
     width: "100%"
+  },
+  introText: {
+    maxWidth: 600,
+    marginTop: 0,
+    marginRight: "auto",
+    marginBottom: 20,
+    marginLeft: "auto",
+    textAlign: "center",
+    fontSize: 16,
+    fontWeight: 300,
+    lineHeight: 1.42857143
   }
 };
 
@@ -118,14 +129,7 @@ class Splash extends React.Component {
             <h1 style={{textAlign: "center"}}> Real-time tracking of virus evolution </h1>
           </div>
 
-    			<p style={{
-              maxWidth: 600,
-              margin: "0px auto 20px auto",
-              textAlign: "center",
-              fontSize: 16,
-              fontWeight: 300,
-              lineHeight: 1.42857143
-            }}>
+    			<p style={styles.introText}>
             Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data. We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread. Our goal is to aid epidemiological understanding and improve outbreak response.
           </p>
 

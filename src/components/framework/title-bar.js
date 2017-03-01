@@ -29,7 +29,10 @@ class TitleBar extends React.Component {
     return {
       main: {
         maxWidth: 960,
-        margin: "auto",
+        marginTop: "auto",
+        marginRight: "auto",
+        marginBottom: "auto",
+        marginLeft: "auto",
         height: titleBarHeight,
         justifyContent: "space-between",
         alignItems: "center",
