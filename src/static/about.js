@@ -4,31 +4,10 @@ import React from "react";
 // import { connect } from "react-redux";
 import Flex from "../components/framework/flex";
 import TitleBar from "../components/framework/title-bar";
-import { analyticsNewPage } from "../util/googleAnalytics";
+import { analyticsNewPage, triggerOutboundEvent } from "../util/googleAnalytics";
 import { version } from "../version";
 import { Link } from "react-router-dom";
-
-/* helper / generating functions */
-const generateLogos = [
-  <a key={1} href="http://www.fredhutch.org/" target="_blank">
-    <img width="75" src={require("../images/fred-hutch-logo-small.png")}/>
-  </a>,
-  <a key={2} href="http://www.eb.tuebingen.mpg.de/" target="_blank">
-    <img width="65" src={require("../images/max-planck-logo-small.png")}/>
-  </a>,
-  <a key={3} href="https://www.nih.gov/" target="_blank">
-    <img width="52" src={require("../images/nih-logo-small.png")}/>
-  </a>,
-  <a key={4} href="https://erc.europa.eu/" target="_blank">
-    <img width="60" src={require("../images/erc-logo-small.png")}/>
-  </a>,
-  <a key={5} href="https://www.openscienceprize.org/" target="_blank">
-    <img width="82" src={require("../images/osp-logo-small.png")}/>
-  </a>,
-  <a key={6} href="http://biozentrum.org/" target="_blank">
-    <img width="85" src={require("../images/bz_logo.png")}/>
-  </a>
-];
+import {generateLogos} from "./helpers/logos";
 
 const About = () => {
   analyticsNewPage();
@@ -71,7 +50,7 @@ const About = () => {
 
             The ongoing (2015-) epidemic of zika fever in the Americas is seen here in the context of over 400 genomes including isolates from Asia and the Pacific Islands. Multiple trans-Pacific and trans-Atlantic transmission events are easily seen, as well as the complex transmission routes between Brazil, Central America and the USA.
 
-            <p/><Link to="/flu">Influenza Virus (via nextflu.org)</Link><p/>
+            <p/><a href="http://nextflu.org/" target="_blank" onClick={() => triggerOutboundEvent("http://nextflu.org")}>Influenza Virus (via nextflu.org)</a><p/>
 
             H1N1 and H3N2 strains of Influenza virus are shown together with antigen evolution, epitope mutations and clade frequency changes over the past 2-12 years. These data and features are being moved over to this site at the moment.
 
