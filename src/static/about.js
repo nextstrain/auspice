@@ -4,7 +4,7 @@ import React from "react";
 // import { connect } from "react-redux";
 import Flex from "../components/framework/flex";
 import TitleBar from "../components/framework/title-bar";
-import { analyticsNewPage } from "../util/googleAnalytics";
+import { analyticsNewPage, triggerOutboundEvent } from "../util/googleAnalytics";
 import { version } from "../version";
 import { Link } from "react-router-dom";
 
@@ -71,7 +71,7 @@ const About = () => {
 
             The ongoing (2015-) epidemic of zika fever in the Americas is seen here in the context of over 400 genomes including isolates from Asia and the Pacific Islands. Multiple trans-Pacific and trans-Atlantic transmission events are easily seen, as well as the complex transmission routes between Brazil, Central America and the USA.
 
-            <p/><Link to="/flu">Influenza Virus (via nextflu.org)</Link><p/>
+            <p/><a href="http://nextflu.org/" target="_blank" onClick={() => triggerOutboundEvent("http://nextflu.org")}>Influenza Virus (via nextflu.org)</a><p/>
 
             H1N1 and H3N2 strains of Influenza virus are shown together with antigen evolution, epitope mutations and clade frequency changes over the past 2-12 years. These data and features are being moved over to this site at the moment.
 

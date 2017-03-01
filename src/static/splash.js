@@ -7,7 +7,7 @@ import TitleBar from "../components/framework/title-bar";
 import Title from "../components/framework/title";
 import { headerFont, materialButtonOutline } from "../globalStyles";
 import Flex from "../components/framework/flex";
-import { analyticsNewPage } from "../util/googleAnalytics";
+import { analyticsNewPage, triggerOutboundEvent } from "../util/googleAnalytics";
 // import Card from "./framework/card";
 
 const styles = {
@@ -62,19 +62,41 @@ const styles = {
   }
 };
 
-const generateCard = (title, imgRequired, to) => (
-  <div style={styles.cardOuterDiv}>
-    <div style={styles.cardInnerDiv}>
-      <Link to={to}>
-      <img style={styles.cardImg} src={imgRequired}/>
+const generateCard = (title, imgRequired, to, outboundLink) => {
+  function imgAndText() {
+    return (
+      <g>
+        <img style={styles.cardImg} src={imgRequired}/>
         <span style={styles.cardMainText}>
           {title[0]}
           {title.length === 2 ? <div style={styles.cardSubText}>{title[1]}</div> : null}
         </span>
-      </Link>
-    </div>
-  </div>
-);
+      </g>
+    );
+  }
+  if (outboundLink) { // use <a> and trigger google analytics
+    return (
+      <div style={styles.cardOuterDiv}>
+        <div style={styles.cardInnerDiv}>
+          <a href={to} target="_blank" onClick={() => triggerOutboundEvent(to)}>
+            {imgAndText()}
+          </a>
+        </div>
+      </div>
+    );
+  } else { // use <Link> and let React Router sort it out
+    return (
+      <div style={styles.cardOuterDiv}>
+        <div style={styles.cardInnerDiv}>
+          <Link to={to}>
+            {imgAndText()}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+};
+
 
 /* helper / generating functions */
 const generateLogos = [
@@ -139,12 +161,7 @@ class Splash extends React.Component {
             </Link>
           </Flex>
 
-          {/* THE CLICKABLE CARDS
-            images styalized in lunapic witht he grey filter
-            https://upload.wikimedia.org/wikipedia/commons/thumb/b/b4/197-Zika_Virus-ZikaVirus.tif/lossy-page1-800px-197-Zika_Virus-ZikaVirus.tif.jpg
-            http://www.cidresearch.org/uploads/12/10/ebola_virus_particles_budding_VERO_E6_cell_blue_yellow_NIAID.jpg
-            http://cdn1.bostonmagazine.com/wp-content/uploads/2013/10/flu-virus-main.jpg
-          */}
+          {/* THE CLICKABLE CARDS - see about page for sources & attribution */}
 
           <div className="bigspacer"></div>
 
@@ -154,18 +171,20 @@ class Splash extends React.Component {
             <div className="col-md-10">
               <div className="row">
         				<div className="col-sm-4">
-                  {generateCard(["Ebola"], require("../images/ebola.png"), "/ebola?c=division&r=division")}
+                  {generateCard(["Ebola"], require("../images/ebola.png"), "/ebola?c=division&r=division", false)}
                 </div>
                 <div className="col-sm-4">
-                  {generateCard(["Zika"], require("../images/zika.png"), "/zika")}
+                  {generateCard(["Zika"], require("../images/zika.png"), "/zika", false)}
                 </div>
                 <div className="col-sm-4">
-                  {generateCard(["Influenza", "(uses nextflu.org)"], require("../images/influenza.png"), "/flu")}
+                  {generateCard(["Influenza", "(uses nextflu.org)"], require("../images/influenza.png"), "http://nextflu.org", true)}
                 </div>
               </div>
             </div>
             <div className="col-md-1"/>
           </div>
+
+          {/* SOCIAL MEDIA AKA TWITTER */}
 
           <div className="row" >
             <h1 style={{textAlign: "center"}}>From the community</h1>
@@ -188,6 +207,9 @@ class Splash extends React.Component {
               <blockquote className="twitter-tweet" dataLang="en"><p lang="en" dir="ltr">Well said <a href="https://twitter.com/trvrb">@trvrb</a> ! <a href="http://t.co/CqXuO43x7p">http://t.co/CqXuO43x7p</a> <a href="http://t.co/uoq0CO4anX">http://t.co/uoq0CO4anX</a> <a href="http://t.co/zSVEJVVLMI">pic.twitter.com/zSVEJVVLMI</a></p>&mdash; Nick Loman (@pathogenomenick) <a href="https://twitter.com/pathogenomenick/status/612150119518093312">June 20, 2015</a></blockquote>
             </div>
           </Flex>
+
+          {/* FOOTER / LOGOS */}
+
           <div className="bigspacer"></div>
           <div className="row">
             <div className="col-md-1"/>
@@ -204,7 +226,7 @@ class Splash extends React.Component {
       </div>
     );
   }
-};
+}
 
 export default Splash;
 

@@ -8,18 +8,17 @@ export const analyticsNewPage = () => {
   ReactGA.pageview(window.location.pathname);
 };
 
-export const outboundLinkWithAnalytics = (address) => {
-  ReactGA.outboundLink(
-    {label: address},
-    () => window.location.assign(address)
-    // () => window.open(address, "_blank") /* pop-up blocked */
-  );
-  return null;
-};
-
 export const analyticsControlsEvent = (action) => {
   ReactGA.event({
     category: "Controls",
     action
   });
+};
+
+export const triggerOutboundEvent = (address) => {
+  ReactGA.outboundLink(
+    {label: address},
+    () => console.log("outbound event triggered", address)
+  );
+  return null;
 };

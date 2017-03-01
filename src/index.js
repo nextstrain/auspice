@@ -36,10 +36,8 @@ class Root extends React.Component {
               <Route path="/about" component={About}/>
               <Route path="/zika" component={App}/>
               <Route path="/ebola" component={App}/>
-              <Route exact path="/flu*" render={() =>
-                outboundLinkWithAnalytics("http://nextflu.org/")
-              }
-              />
+              {/* note that this app never triggers /flu, but a user might */}
+              <Route path="/flu*" render={() => {window.location.assign("http://nextflu.org/"); return null;}}/>
               <Route path="*" component={Splash}/>
             </Switch>
           </div>
