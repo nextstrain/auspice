@@ -158,6 +158,9 @@ class Splash extends React.Component {
                   {generateCard(["Zika"], require("../images/zika.png"), "/zika", false)}
                 </div>
                 <div className="col-sm-4">
+                  {generateCard(["H7N9"], require("../images/influenza.png"), "/h7n9", false)}
+                </div>
+                <div className="col-sm-4">
                   {generateCard(["Influenza", "(uses nextflu.org)"], require("../images/influenza.png"), "http://nextflu.org", true)}
                 </div>
               </div>
@@ -170,7 +173,7 @@ class Splash extends React.Component {
           <div className="row" >
             <h1 style={{textAlign: "center"}}>From the community</h1>
           </div>
-          
+
           {tweets()}
 
           {/* FOOTER / LOGOS */}
