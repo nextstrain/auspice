@@ -170,9 +170,8 @@ class Splash extends React.Component {
           <div className="row" >
             <h1 style={{textAlign: "center"}}>From the community</h1>
           </div>
-          <div style={{margin: "auto", maxWidth: 500}}>
-            {tweets()}
-          </div>
+          
+          {tweets()}
 
           {/* FOOTER / LOGOS */}
 
