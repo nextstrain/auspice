@@ -5,7 +5,7 @@ import d3 from "d3";
 // resolution are made
 export const datasets={
   'virus':{
-    'ebola':{},    
+    'ebola':{},
     'zika':{},
     'default':'zika'
   }
@@ -36,8 +36,7 @@ export const defaultLayout = "rect";
 export const defaultDistanceMeasure = "num_date";
 export const defaultDateRange = 6;
 export const date_select = true;
-// export const dataURLStem = "/data/"; /* for local development */
-export const dataURLStem = "http://data.nextstrain.org/"; /* for content delivery */
+export const dataURLStem = process.env.DATA_LOCAL ? "/data/" : "http://data.nextstrain.org/";
 export const file_prefix = "Zika_";
 export const branchLabels = false;
 export const restrictTo = {"region": "all"};

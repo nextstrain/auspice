@@ -1,6 +1,8 @@
 var path = require("path");
 var express = require("express");
 var webpack = require("webpack");
+/* very hacky way of passing arguments to webpack.config.dev.js */
+global.dataLocal = process.argv.indexOf("local") !== -1 ? true : false;
 var config = require("./webpack.config.dev");
 var request = require("request");
 
