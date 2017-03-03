@@ -178,3 +178,16 @@ blockquote.twitter-tweet a:focus {
     font-size: 0
   }
 }*/
+
+@media (min-width: 550px) { /* apply these styles down to/until we're at 700px */
+  .twitterRow {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    flex-wrap: wrap;
+  }
+  .twitterColumn {
+    display: flex;
+    flex-direction: column;
+  }
+}
