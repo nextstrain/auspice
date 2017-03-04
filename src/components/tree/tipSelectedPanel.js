@@ -2,6 +2,9 @@ import React from "react";
 import {infoPanelStyles} from "../../globalStyles";
 
 export const prettyString = (x) => {
+  if (!x) {
+    return "unknown";
+  }
   return x.replace("_", " ")
           .replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
 };
