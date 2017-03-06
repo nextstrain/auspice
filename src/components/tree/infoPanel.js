@@ -4,7 +4,7 @@ import * as globals from "../../util/globals";
 import {dataFont, infoPanelStyles} from "../../globalStyles";
 import { prettyString } from "./tipSelectedPanel";
 
-const InfoPanel = ({tree, hovered, responsive, viewer}) => {
+const InfoPanel = ({tree, hovered, viewer, colorBy}) => {
 
   /* this is a function - we can bail early */
   if (!(tree && hovered)) {
@@ -84,10 +84,14 @@ const InfoPanel = ({tree, hovered, responsive, viewer}) => {
   const getFrequencies = (d) => {
     if (d.frequency !== undefined) {
       const disp = "Frequency: " + (100 * d.frequency).toFixed(1) + "%";
-      return (<li>{disp}</li>);
+      return (<p>{disp}</p>);
     }
     return null;
-  }
+  };
+  const getColorByAttr = (d) => {
+    const disp = `${prettyString(colorBy)}: ${prettyString(d.attr[colorBy])}`;
+    return (<p>{disp}</p>);
+  };
 
   const makeInfoPanel = () => {
     if (hovered.type === ".tip") {
@@ -118,6 +122,7 @@ const InfoPanel = ({tree, hovered, responsive, viewer}) => {
             <div>
               {getFrequencies(branch.n)}
               {getMutations(branch.n)}
+              {getColorByAttr(branch.n)}
             </div>
             <div style={infoPanelStyles.comment}>
               Click on branch to zoom into this clade

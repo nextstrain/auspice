@@ -5,8 +5,13 @@ export const prettyString = (x) => {
   if (!x) {
     return "unknown";
   }
-  return x.replace("_", " ")
-          .replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
+  if (typeof x === "string") {
+    return x.replace("_", " ")
+            .replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
+  } else if (typeof x === "number") {
+    return x.toFixed(2);
+  }
+  return x;
 };
 
 const TipSelectedPanel = ({tip, goAwayCallback}) => {

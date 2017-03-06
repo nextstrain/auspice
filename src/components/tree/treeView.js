@@ -59,6 +59,7 @@ need this information are children of this component
     colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
     map: state.map,
+    colorBy: state.controls.colorBy,
     layout: state.controls.layout,
     showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
@@ -532,8 +533,8 @@ class TreeView extends React.Component {
         <InfoPanel
           tree={this.state.tree}
           hovered={this.state.hovered}
-          responsive={responsive}
           viewer={this.Viewer}
+          colorBy={this.props.colorBy}
         />
         <BranchSelectedPanel
           responsive={responsive}
