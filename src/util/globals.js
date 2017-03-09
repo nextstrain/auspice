@@ -3,13 +3,25 @@ import d3 from "d3";
 // datasets json: object of list (to ensure order) of list (to be flexible)
 // until terminated by an empty list indicating that no further datasets
 // resolution are made
-export const datasets={
-  'virus':{
-    'ebola':{},    
-    'zika':{},
-    'default':'zika'
+export const datasets = {
+  "pathogen": {
+    "ebola": "c=division&r=division",
+    "zika": "",
+    "flu": {
+      "lineage": {
+        "H7N9": {
+          "segment": {
+            "HA": "c=division&r=division",
+            "NA": "c=division&r=division",
+            "default": "HA"
+          }
+        },
+        "default": "H7N9"
+      }
+    },
+    "default": "zika"
   }
-}
+};
 
 export const colorOptions = {
     "country":{"key":"country", "legendTitle":"Country", "menuItem":"country", "type":"discrete"},
@@ -36,8 +48,7 @@ export const defaultLayout = "rect";
 export const defaultDistanceMeasure = "num_date";
 export const defaultDateRange = 6;
 export const date_select = true;
-// export const dataURLStem = "/data/"; /* for local development */
-export const dataURLStem = "http://data.nextstrain.org/"; /* for content delivery */
+export const dataURLStem = process.env.DATA_LOCAL ? "/data/" : "http://data.nextstrain.org/";
 export const file_prefix = "Zika_";
 export const branchLabels = false;
 export const restrictTo = {"region": "all"};

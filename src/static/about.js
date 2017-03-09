@@ -50,6 +50,11 @@ const About = () => {
 
             The ongoing (2015-) epidemic of zika fever in the Americas is seen here in the context of over 400 genomes including isolates from Asia and the Pacific Islands. Multiple trans-Pacific and trans-Atlantic transmission events are easily seen, as well as the complex transmission routes between Brazil, Central America and the USA.
 
+
+            <p/><Link to="/flu/H7N9">Avian Influenza A (H7N9)</Link><p/>
+
+            First detected in Humans in 2013, China is currently experiencing the fifth epidemic of avian influenza A(H7N9), which has a mortality rate of around 40%. The current epidemic is marked by a significant increase in cases compared to the past four winters, the reasons for which are unclear. Here, analysis of 1200 HA and NA genes (via <a href="http://platform.gisaid.org/">GISAID</a>) allows visualization of the inferred host jumps and geographic progression of this lineage over time. For more information see <a href="https://www.cdc.gov/mmwr/volumes/66/wr/mm6609e2.htm">Iuliano et al.</a>, and the <a href="https://www.cdc.gov/flu/avianflu/h7n9-virus.htm">CDC</a>.
+
             <p/><a href="http://nextflu.org/" target="_blank" onClick={() => triggerOutboundEvent("http://nextflu.org")}>Influenza Virus (via nextflu.org)</a><p/>
 
             H1N1 and H3N2 strains of Influenza virus are shown together with antigen evolution, epitope mutations and clade frequency changes over the past 2-12 years. These data and features are being moved over to this site at the moment.
@@ -84,7 +89,7 @@ const About = () => {
             Special thanks to Nick Loman, Kristian Andersen, Andrew Rambaut, Matt Cotten and Paul Kellam for comments, suggestions and data sharing.
 
             <p/>
-            Splash page images stylised in <a href="http://www.lunapic.com/">Lunapic</a>. <a href="https://en.wikipedia.org/wiki/Zika_virus#/media/File:197-Zika_Virus-ZikaVirus.tif">Zika drawing</a> by David Goodwill, <a href="https://commons.wikimedia.org/wiki/Ebola#/media/File:Ebola_virus_em.png">Ebola EM</a> by Frederick A. Murphy / CDC, <a href="https://www.cdc.gov/media/subtopic/library/diseases.htm">Influenza TEM</a> by Cynthia Goldsmith / CDC.
+            Splash page images stylised in <a href="http://www.lunapic.com/">Lunapic</a>. <a href="https://en.wikipedia.org/wiki/Zika_virus#/media/File:197-Zika_Virus-ZikaVirus.tif">Zika drawing</a> by David Goodwill, <a href="https://commons.wikimedia.org/wiki/Ebola#/media/File:Ebola_virus_em.png">Ebola EM</a> by Frederick A. Murphy / CDC, <a href="https://www.cdc.gov/media/subtopic/library/diseases.htm">Influenza images</a> by Cynthia Goldsmith / Thomas Rowe / CDC.
 
           </div>
 

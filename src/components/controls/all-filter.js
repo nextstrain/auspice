@@ -2,7 +2,6 @@ import React from "react";
 import Radium from "radium";
 import { filterAbbrFwd } from "../../util/globals";
 import ChooseFilter from "./choose-filter";
-import parseParams from "../../util/parseParams";
 import { connect } from "react-redux";
 
 /* this should be re-thought out & moved to augur */

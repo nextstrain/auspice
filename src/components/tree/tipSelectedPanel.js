@@ -2,8 +2,16 @@ import React from "react";
 import {infoPanelStyles} from "../../globalStyles";
 
 export const prettyString = (x) => {
-  return x.replace("_", " ")
-          .replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
+  if (!x) {
+    return "unknown";
+  }
+  if (typeof x === "string") {
+    return x.replace("_", " ")
+            .replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
+  } else if (typeof x === "number") {
+    return x.toFixed(2);
+  }
+  return x;
 };
 
 const TipSelectedPanel = ({tip, goAwayCallback}) => {

@@ -22,7 +22,8 @@ export const select = {
   appearance: "none",
   borderRadius: 2,
   color: darkGrey,
-  fontWeight: 400
+  fontWeight: 400,
+  marginBottom: "3px"
 };
 
 export const materialButton = {

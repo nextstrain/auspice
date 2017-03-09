@@ -21,7 +21,8 @@ module.exports = {
     // perf test on nodes - remove this line to get warnings back.
     new webpack.DefinePlugin({
       "process.env": {
-        "NODE_ENV": JSON.stringify("dev")
+        "NODE_ENV": JSON.stringify("dev"),
+        "DATA_LOCAL": JSON.stringify(global.dataLocal)
       }
     }),
     // new webpack.DefinePlugin({

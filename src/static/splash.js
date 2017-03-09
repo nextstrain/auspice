@@ -15,7 +15,7 @@ const styles = {
   cardMainText: {
     fontFamily: headerFont,
     fontWeight: 500,
-    fontSize: 28,
+    fontSize: window.innerWidth > 1200 ? 28 : 20,
     position: "absolute",
     paddingTop: 10,
     paddingBottom: 10,
@@ -29,7 +29,7 @@ const styles = {
   cardSubText: {
     color: "white",
     fontStyle: "italic",
-    fontSize: 16,
+    fontSize: window.innerWidth > 1200 ? 28 : 12,
     fontWeight: 400,
     lineHeight: 0.3,
     textAlign: "right"
@@ -152,13 +152,16 @@ class Splash extends React.Component {
             <div className="col-md-10">
               <div className="row">
         				<div className="col-sm-4">
-                  {generateCard(["Ebola"], require("../images/ebola.png"), "/ebola?c=division&r=division", false)}
+                  {generateCard(["Ebola"], require("../images/ebola.png"), "/ebola", false)}
+                </div>
+                <div className="col-sm-4">
+                  {generateCard(["Avian Influenza", "A / H7N9"], require("../images/H7N9.png"), "/flu/H7N9", false)}
                 </div>
                 <div className="col-sm-4">
                   {generateCard(["Zika"], require("../images/zika.png"), "/zika", false)}
                 </div>
                 <div className="col-sm-4">
-                  {generateCard(["Influenza", "(uses nextflu.org)"], require("../images/influenza.png"), "http://nextflu.org", true)}
+                  {generateCard(["Seasonal Influenza", "(uses nextflu.org)"], require("../images/influenza.png"), "http://nextflu.org", true)}
                 </div>
               </div>
             </div>
@@ -170,7 +173,7 @@ class Splash extends React.Component {
           <div className="row" >
             <h1 style={{textAlign: "center"}}>From the community</h1>
           </div>
-          
+
           {tweets()}
 
           {/* FOOTER / LOGOS */}
