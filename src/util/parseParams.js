@@ -24,19 +24,19 @@ const parseParams = (path) => {
     "valid": true, // the URL is incorrect and we don't know what to do!
     "incomplete": false, // the URL, as passed in, is incomplete
     "dataset": {}, // see above
-    "fullsplat": "" // just the URL
+    "fullsplat": "", // just the URL
+    "search": "" // the URL search query
   };
 
   let elemType; // object whose keys are the available choices (e.g. "zika" and "ebola")
   let idx;      // the index of the current param (of params)
   let elem;     // the choice (e.g. "flu", "h7n9", "ebola")
-  let datasetSlice = datasets; // start with the outermost
+  let datasetSlice = datasets; // This is usually an object, sometimes a string
   for (idx = 0; idx < params.length; idx++) {
     elem = params[idx];
-    if (Object.keys(datasetSlice).length) {
+    if (typeof datasetSlice !== "string" && Object.keys(datasetSlice).length) {
       elemType = Object.keys(datasetSlice)[0];
       // elemType will be "pathogen", "lineage" or "segment"
-      if (typeof datasetSlice[elemType][elem] === undefined) {
       if (typeof datasetSlice[elemType][elem] === "undefined") {
         // the elem (the param requested) is NOT available in the dataset. BAIL.
         console.log(elem, " not found at level of ", elemType);
@@ -49,19 +49,28 @@ const parseParams = (path) => {
       config.dataset[elemType] = [idx, elem];
       config.fullsplat += "/" + elem;
       datasetSlice = datasetSlice[elemType][elem];
+      // now dataset may be {}, {...} or "..."
+      if (typeof datasetSlice === "string" && datasetSlice !== "") {
+        config.search = datasetSlice;
+        config.incomplete = true; // so the search gets put in!
+      }
+    } else {
+      // so we've got a param, but we've run out of levels!
+      // mark as "incomplete" so the URL will change
+      config.incomplete = true;
     }
+
   }
   // parse any remaining levels of globals.datasets
   // this stops when we encounter 'xx: {}' as Object.keys({}).length==0
   // this both populates the dataset property, and sets defaults,
   // else the URL wouldn't be valid so the data request would 404
-  while(Object.keys(datasetSlice).length) {
+  while(typeof datasetSlice !== "string" && Object.keys(datasetSlice).length) {
     elemType = Object.keys(datasetSlice)[0];
     elem = datasetSlice[elemType]["default"];
     // console.log("filling default ", elemType," as ", elem);
     config.dataset[elemType] = [idx, elem];
     // double check specified default is actually valid
-    if (typeof datasetSlice[elemType][elem] === undefined) {
     if (typeof datasetSlice[elemType][elem] === "undefined") {
       config.valid = false;
       console.log("incorrect / no default set");
@@ -72,8 +81,14 @@ const parseParams = (path) => {
     config.dataset[elemType] = [idx, elem];
     // move to next level
     datasetSlice = datasetSlice[elemType][elem];
+    // now dataset may be {}, {...} or "..."
+    if (typeof datasetSlice === "string" && datasetSlice !== "") {
+      config.search = datasetSlice;
+      // already config.incomplete is true
+    }
     idx++;
   }
+
   return config;
 };
 

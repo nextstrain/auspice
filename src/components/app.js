@@ -74,8 +74,8 @@ class App extends React.Component {
     */
     // console.log("CDM")
     this.props.dispatch({type: RESET_CONTROLS});
-    restoreStateFromURL(this.context.router, this.props.dispatch);
     const data_path = turnURLtoDataPath(this.context.router);
+    restoreStateFromURL(this.context.router, this.props.dispatch);
     if (data_path) {
       this.props.dispatch({type: NEW_DATASET, data: this.context.router.location.pathname});
       this.props.dispatch(loadJSONs(data_path));

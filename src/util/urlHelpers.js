@@ -72,8 +72,8 @@ export const turnURLtoDataPath = function (router) {
     // console.log("parsed params incomplete => modifying URL")
     router.replace({
       pathname: parsedParams.fullsplat,
-      search: router.location.search
-    })
+      search: parsedParams.search ? parsedParams.search : router.location.search
+    });
   }
   // if valid, return the data_path, else undefined
   if (parsedParams.valid) {

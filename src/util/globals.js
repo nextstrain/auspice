@@ -5,24 +5,20 @@ import d3 from "d3";
 // resolution are made
 export const datasets = {
   "pathogen": {
-    // SINGLETONS:
-    "ebola": {},
-    "zika": {},
-    // MORE COMPLEX
+    "ebola": "c=division&r=division",
+    "zika": "",
     "flu": {
       "lineage": {
         "H7N9": {
           "segment": {
-            "HA": {},
-            "NA": {},
+            "HA": "c=division&r=division",
+            "NA": "c=division&r=division",
             "default": "HA"
           }
         },
         "default": "H7N9"
       }
     },
-    // 'h7n9.ha':{},
-    // 'h7n9.na':{},
     "default": "zika"
   }
 };
