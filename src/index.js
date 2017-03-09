@@ -24,6 +24,10 @@ ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA
 
 const store = configureStore();
 
+/* if ever you want to redirect an entered URL somewhere use this:
+<Route path="/flu*" render={() => {window.location.assign("http://nextflu.org/"); return null;}}/>
+*/
+
 class Root extends React.Component {
   render() {
     return (
@@ -37,9 +41,6 @@ class Root extends React.Component {
               <Route path="/zika" component={App}/>
               <Route path="/ebola" component={App}/>
               <Route path="/flu*" component={App}/>
-              {/* note that this app never triggers /flu, but a user might
-              <Route path="/flu*" render={() => {window.location.assign("http://nextflu.org/"); return null;}}/>
-              */ }
               <Route path="*" component={Splash}/>
             </Switch>
           </div>
