@@ -64,11 +64,12 @@ this fn will work out the correct datapath, set it if necessary,
 and return the data path used to load the data
 */
 export const turnURLtoDataPath = function (router) {
+  // console.log("turnURLtoDataPath")
   const parsedParams = parseParams(router.location.pathname);
   // console.log("parsed params turned", router.location.pathname, "to", parsedParams)
   // set a new URL if the dataPath is incomplete
   if (parsedParams.incomplete) {
-    // console.log("parsed params incomplete, will make new URL:")
+    // console.log("parsed params incomplete => modifying URL")
     router.replace({
       pathname: parsedParams.fullsplat,
       search: router.location.search

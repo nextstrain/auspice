@@ -36,9 +36,10 @@ class Root extends React.Component {
               <Route path="/about" component={About}/>
               <Route path="/zika" component={App}/>
               <Route path="/ebola" component={App}/>
-              <Route path="/h7n9" component={App}/>
-              {/* note that this app never triggers /flu, but a user might */}
+              <Route path="/flu*" component={App}/>
+              {/* note that this app never triggers /flu, but a user might
               <Route path="/flu*" render={() => {window.location.assign("http://nextflu.org/"); return null;}}/>
+              */ }
               <Route path="*" component={Splash}/>
             </Switch>
           </div>

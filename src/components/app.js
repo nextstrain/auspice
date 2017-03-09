@@ -62,7 +62,7 @@ class App extends React.Component {
   // componentWillMount() {
   // }
 
-  componentDidMount() {
+  componentWillMount() {
     /* parse URL, set URL, load data etc
 
     This is hit on the initial load and when a browser is refreshed

@@ -2,7 +2,6 @@ import React from "react";
 import Radium from "radium";
 import { filterAbbrFwd } from "../../util/globals";
 import RecursiveFilter from "./recursive_filter";
-import parseParams from "../../util/parseParams";
 import SelectLabel from "../framework/select-label";
 
 /*
