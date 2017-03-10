@@ -51,7 +51,7 @@ const About = () => {
             The ongoing (2015-) epidemic of zika fever in the Americas is seen here in the context of over 400 genomes including isolates from Asia and the Pacific Islands. Multiple trans-Pacific and trans-Atlantic transmission events are easily seen, as well as the complex transmission routes between Brazil, Central America and the USA.
 
 
-            <p/><Link to="/flu/H7N9">Avian Influenza A (H7N9)</Link><p/>
+            <p/><Link to="/flu/h7n9">Avian Influenza A (H7N9)</Link><p/>
 
             First detected in Humans in 2013, China is currently experiencing the fifth epidemic of avian influenza A(H7N9), which has a mortality rate of around 40%. The current epidemic is marked by a significant increase in cases compared to the past four winters, the reasons for which are unclear. Here, analysis of 1200 HA and NA genes (via <a href="http://platform.gisaid.org/">GISAID</a>) allows visualization of the inferred host jumps and geographic progression of this lineage over time. For more information see <a href="https://www.cdc.gov/mmwr/volumes/66/wr/mm6609e2.htm">Iuliano et al.</a>, and the <a href="https://www.cdc.gov/flu/avianflu/h7n9-virus.htm">CDC</a>.
 
