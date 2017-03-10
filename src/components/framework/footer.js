@@ -64,25 +64,63 @@ class Footer extends React.Component {
     if (this.context.router.location.pathname.includes("H7N9")) {
       return (
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-          <a href="http://www.afcd.gov.hk/eindex.html" target="_blank">Agriculture, Fisheries and Conservation Department</a>,&ensp;
-          <a href="http://english.shanghaipasteur.cas.cn/" target="_blank">Institute Pasteur of Shanghai, CAS</a>,&ensp;
-          <a href="http://www.chp.gov.hk/en/phlsb/8/23/40.html" target="_blank">Public Health Laboratory Services Branch, Centre for Health Protection</a>,&ensp;
-          <a href="http://liferiver.en.ecplaza.net/" target="_blank">Shanghai Zhijiang Biotechnology Co.,Ltd</a>,&ensp;
-          Beijing Institute of Microbiology and Epidemiology,&ensp;
-          <a href="https://www.cdc.gov/" target="_blank">Centers for Disease Control and Prevention</a>,&ensp;
-          <a href="http://www.wur.nl/en/Expertise-Services/Research-Institutes/Bioveterinary-Research.htm" target="_blank">Central Veterinary Institute</a>,&ensp;
-          <a href="http://www.chinacdc.cn/en/" target="_blank">Fujian Center for Disease Control and Prevention</a>,&ensp;
-          <a href="http://www.chinacdc.cn/en/" target="_blank">Guandong Centers for Disease Control</a>,&ensp;
-          Guangzhou Institute of Respiratory Diseases (GIRD),&ensp;
-          <a href="http://www.chinacdc.cn/en/" target="_blank">Hangzhou Center for Disease Control and Prevention</a>,&ensp;
-          <a href="http://www.hvri.ac.cn/en/" target="_blank">Harbin Veterinary Research Institute (CAAS)</a>,&ensp;
-          <a href="http://www.chinacdc.cn/en/" target="_blank">Jiangsu Provincial Center for Disease Control & Prevention</a>,&ensp;
-          <a href="http://www.phac-aspc.gc.ca/index-eng.php" target="_blank">Public Health Agency of Canada (PHAC)</a>,&ensp;
-          <a href="http://www.med.stu.edu.cn/eng/" target="_blank">Shantou University Medical College</a>,&ensp;
-          <a href="http://english.scau.edu.cn/" target="_blank">South China Agricultural University</a>,&ensp;
-          <a href="http://www.cdc.gov.tw/rwd/english" target="_blank">Taiwan CDC</a>,&ensp;
-          <a href="http://www.cnic.org.cn/" target="_blank">WHO Chinese National Influenza Center</a>,&ensp;
-          <a href="http://www.chinacdc.cn/en/" target="_blank">Zhejiang Provincial Center for Disease Control and Prevention</a>
+          <div style={styles.citationItem}>
+            <a href="http://www.afcd.gov.hk/eindex.html" target="_blank">Agriculture, Fisheries and Conservation Department</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://english.shanghaipasteur.cas.cn/" target="_blank">Institute Pasteur of Shanghai, CAS</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.chp.gov.hk/en/phlsb/8/23/40.html" target="_blank">Public Health Laboratory Services Branch, Centre for Health Protection</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://liferiver.en.ecplaza.net/" target="_blank">Shanghai Zhijiang Biotechnology Co</a>
+          </div>
+          <div style={styles.citationItem}>
+            Beijing Institute of Microbiology and Epidemiology
+          </div>
+          <div style={styles.citationItem}>
+            <a href="https://www.cdc.gov/" target="_blank">Centers for Disease Control and Prevention</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.wur.nl/en/Expertise-Services/Research-Institutes/Bioveterinary-Research.htm" target="_blank">Central Veterinary Institute</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.chinacdc.cn/en/" target="_blank">Fujian Center for Disease Control and Prevention</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.chinacdc.cn/en/" target="_blank">Guandong Centers for Disease Control</a>
+          </div>
+          <div style={styles.citationItem}>
+            Guangzhou Institute of Respiratory Diseases (GIRD)
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.chinacdc.cn/en/" target="_blank">Hangzhou Center for Disease Control and Prevention</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.hvri.ac.cn/en/" target="_blank">Harbin Veterinary Research Institute (CAAS)</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.chinacdc.cn/en/" target="_blank">Jiangsu Provincial Center for Disease Control & Prevention</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.phac-aspc.gc.ca/index-eng.php" target="_blank">Public Health Agency of Canada (PHAC)</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.med.stu.edu.cn/eng/" target="_blank">Shantou University Medical College</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://english.scau.edu.cn/" target="_blank">South China Agricultural University</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.cdc.gov.tw/rwd/english" target="_blank">Taiwan CDC</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.cnic.org.cn/" target="_blank">WHO Chinese National Influenza Center</a>
+          </div>
+          <div style={styles.citationItem}>
+            <a href="http://www.chinacdc.cn/en/" target="_blank">Zhejiang Provincial Center for Disease Control and Prevention</a>
+          </div>
         </Flex>
       );
     }
@@ -141,7 +179,7 @@ class Footer extends React.Component {
     if (this.context.router.location.pathname.includes("H7N9")) {
       text = (
         <div>
-          This work is made possible by the open sharing of genetic data by research groups from all over the world via <a href="http://platform.gisaid.org/">GISAID</a>. For data reuse please contact the submitting labs (listed below) or see <a href="http://data.nextstrain.org/gisaid_acknowledge_table_H7N9.xls">this spreadsheet</a> for a full list of authors and samples available.
+          This work is made possible by the open sharing of genetic data by research groups from all over the world via <a href="http://platform.gisaid.org/">GISAID</a>. For data reuse please contact the submitting labs (listed below) or see <a href="http://data.nextstrain.org/flu_h7n9_acknowledgement_table.xls">this spreadsheet</a> for a full list of authors and samples available.
         </div>
       )
     }

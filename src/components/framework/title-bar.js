@@ -144,7 +144,7 @@ class TitleBar extends React.Component {
           <div style={{flex: 5}}/>
             {this.getLink("About", "/about", this.props.aboutSelected, styles)}
             {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
-          <div style={{flex: this.props.minified ? 1 : "none" }}/>
+          <div style={{width: this.props.minified ? 15 : 0 }}/>
         </Flex>
       </div>
     );
