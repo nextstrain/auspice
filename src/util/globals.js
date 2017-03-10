@@ -9,14 +9,14 @@ export const datasets = {
     "zika": "",
     "flu": {
       "lineage": {
-        "H7N9": {
+        "h7n9": {
           "segment": {
-            "HA": "c=division&r=division",
-            "NA": "c=division&r=division",
-            "default": "HA"
+            "ha": "c=division&r=division",
+            "na": "c=division&r=division",
+            "default": "ha"
           }
         },
-        "default": "H7N9"
+        "default": "h7n9"
       }
     },
     "default": "zika"
