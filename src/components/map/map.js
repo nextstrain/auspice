@@ -133,11 +133,13 @@ class Map extends React.Component {
       // nextProps.datasetGuid &&
       // this.props.datasetGuid !== nextProps.datasetGuid // and the dataset has changed
     */
+
+    const mapIsDrawn = !!this.state.map;
+    const somethingChanged = (this.props.colorBy !== nextProps.colorBy || this.props.geoResolution !== nextProps.geoResolution || this.props.tipVisibilityVersion !== nextProps.tipVisibilityVersion); // prevProps.colorBy !== /*  */
+
     if (
-      (this.state.map &&
-      this.props.colorBy !== nextProps.colorBy) || // prevProps.colorBy !== /*  */
-      (this.state.map &&
-      this.props.geoResolution !== nextProps.geoResolution)
+      mapIsDrawn &&
+      somethingChanged
     ) {
       this.state.d3DOMNode.selectAll("*").remove();
 
