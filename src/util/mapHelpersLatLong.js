@@ -41,6 +41,7 @@ const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale) =
       // if (parent.attr.country !== "china") { return; } // remove me, example filter
       n.children.forEach((child) => {
         if (n.attr[geoResolution] === child.attr[geoResolution]) { return; }
+
         // look up in transmissions dictionary
         if (aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]]) {
           aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]].push(colorScale(n.attr[colorBy]));
@@ -73,7 +74,6 @@ const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale) =
     count transmissions for line thickness
   */
 
-  // console.log(aggregatedTransmissions)
   // for each item in the object produced above...
   _.forOwn(aggregatedTransmissions, (value, key) => {
 

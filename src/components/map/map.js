@@ -183,13 +183,11 @@ class Map extends React.Component {
       });
     }
   }
-
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
       updateOnMoveEnd(this.state.d3elems, this.latLongs());
     }
   }
-
   getGeoRange() {
     const latitudes = [];
     const longitudes = [];
@@ -211,7 +209,6 @@ class Map extends React.Component {
     const west = Math.min(180, maxLng + lngRange*0.2);
     return [L.latLng(south,west), L.latLng(north, east)];
   }
-
   maybeUpdateDemesAndTransmissions() {
     /* todo */
   }
