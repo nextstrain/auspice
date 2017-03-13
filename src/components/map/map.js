@@ -152,16 +152,19 @@ class Map extends React.Component {
     }
   }
   maybeDrawDemesAndTransmissions(prevProps) {
+
+    const mapIsDrawn = !!this.state.map;
+    const allDataPresent = !!(this.props.colorScale && this.props.colorScale.version >= 2 && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode);
+    const demesAbsent = !this.state.demes;
+    // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;
+    // const newGeoResolution = this.props.geoResolution !== prevProps.geoResolution;
+    // const initialTipVisibilityVersion = this.props.tipVisibilityVersion === 1; /* see tree reducer, we set this to 1 after tree comes back */
+    // const newTipVisibilityVersion = this.props.tipVisibilityVersion !== prevProps.tipVisibilityVersion;
+
     if (
-      this.props.colorScale &&
-      this.state.map && /* we have already drawn the map */
-      this.props.metadata && /* we have the data we need */
-      this.props.nodes &&
-      this.state.responsive &&
-      this.state.d3DOMNode &&
-      !this.state.demes && /* we haven't already drawn demes */
-      (this.props.colorScale.version !== prevProps.colorScale.version ||
-        this.props.geoResolution !== prevProps.geoResolution)
+      mapIsDrawn &&
+      allDataPresent &&
+      demesAbsent
     ) {
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
       if (!this.state.boundsSet){ //we are doing the initial render -> set map to the range of the data
