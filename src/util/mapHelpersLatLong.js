@@ -38,10 +38,9 @@ const getLatLongs = (nodes, tipVisibility, metadata, map, colorBy, geoResolution
       }
     }
     if (n.children) {
-      // if (parent.attr.country !== "china") { return; } // remove me, example filter
       n.children.forEach((child) => {
-        if (n.attr[geoResolution] === child.attr[geoResolution]) { return; }
 
+        if (n.attr[geoResolution] === child.attr[geoResolution] || child["tip-visible"] === false) { return; }
         // look up in transmissions dictionary
         if (aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]]) {
           aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]].push(colorScale(n.attr[colorBy]));
