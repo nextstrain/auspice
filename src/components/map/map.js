@@ -220,6 +220,7 @@ class Map extends React.Component {
   latLongs() {
     return getLatLongs(
       this.props.nodes,
+      this.props.tipVisibility,
       this.props.metadata,
       this.state.map,
       this.props.colorBy,
