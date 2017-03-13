@@ -27,8 +27,8 @@ const getLatLongs = (nodes, tipVisibility, metadata, map, colorBy, geoResolution
   /*
     aggregate locations for demes
   */
-  nodes.forEach((n) => {
-    if (!n.children) {
+  nodes.forEach((n, i) => {
+    if (!n.children && tipVisibility[i] === "visible") {
       // look up geo1 geo2 geo3 do lat longs differ
       if (aggregatedLocations[n.attr[geoResolution]]) {
         aggregatedLocations[n.attr[geoResolution]].push(colorScale(n.attr[colorBy]));
