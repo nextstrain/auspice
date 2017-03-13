@@ -18,6 +18,8 @@ import getLatLongs from "../../util/mapHelpersLatLong";
   return {
     datasetGuid: state.tree.datasetGuid,
     nodes: state.tree.nodes,
+    tipVisibility: state.tree.tipVisibility,
+    tipVisibilityVersion: state.tree.tipVisibilityVersion,
     metadata: state.metadata.metadata,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorScale: state.controls.colorScale,
