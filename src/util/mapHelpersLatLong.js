@@ -1,6 +1,6 @@
 import {averageColors} from "./colorHelpers";
 
-const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale) => {
+const getLatLongs = (nodes, tipVisibility, metadata, map, colorBy, geoResolution, colorScale) => {
 
   const aggregatedLocations = {}; /* demes */
   const aggregatedTransmissions = {}; /* edges, animation paths */
