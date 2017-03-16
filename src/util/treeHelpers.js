@@ -198,47 +198,80 @@ const parseFilterQuery = function (query) {
   };
 };
 
+
+// const findMRCAidx = function (nodes, filtered) {
+//   const nTipsVis = filtered.reduce((a, b) => b ? a + 1 : a, 0); /* INT */
+//   /* nTipsVisPerNode: for each node, how many tips are in play? */
+//   const nTipsVisPerNode = new Array(nodes.length);
+//   nTipsVisPerNode.fill(0)
+//   // walk back from each visibile tip
+//   for (let i = 0; i++; i < filtered.length) {
+//     if (filtered[i]) { // visibile tip
+//       let parentIdx = nodes[i].parent.arrayIdx;
+//       while (true) { /* stop when reached the root node */
+//         nTipsVisPerNode[parentIdx]++;
+//         parentIdx = nodes[parentIdx].parent.arrayIdx;
+//         /* stopping criteria */
+//         if (parentIdx === 0) {break;} /* reached root node */
+//         if (nTipsVisPerNode[parentIdx] === nTipsVis) {
+//           /* this only happens when all tips have been traced back (by definition)
+//           so don'e need to break the for loop */
+//           return parentIdx;
+//         }
+//       }
+//     }
+//   }
+//   return undefined; // WTF
+// };
+
+const makeParentVisible = function (visArray, node) {
+  if (node.arrayIdx === 0 || visArray[node.parent.arrayIdx]) {
+    return; // this is the root of the tree or the parent was already visibile
+  }
+  visArray[node.parent.arrayIdx] = true;
+  makeParentVisible(visArray, node.parent);
+};
+
+
+/* calcVisibility
+USES:
+inView: attribute of phyloTree.nodes, but accessible through redux.tree.nodes[idx].shell.inView
+  Bool. Set by phyloTree, determines if the tip is within the view.
+controls.filters
+controls.dateMin & controls.dateMax
+
+SIDE EFFECTS
+tip-visible: attribute of nodes, corresponds to (returned) visibility array except this is binary
+
+RETURNS:
+visibility: array of "visible" or "hidden"
+
+ROUGH DESCRIPTION OF HOW FILTERING IS APPLIED:
+ - time filtering is simple - all nodes (internal + terminal) not within (tmin, tmax) are excluded.
+ - inView filtering is similar - nodes out of the view cannot possibly be visible
+ - filters are a bit more tricky - the visibile tips are calculated, and the parent
+    branches back to the MRCA are considered visibile. This is then intersected with
+    the time & inView visibile stuff
+
+FILTERS:
+ - filters stored in redux - controls.filters
+ - filters have 2 keys, each with an array of values
+   keys: "region" and/or "authors"
+ - filterPairs is a list of lists. Each list defines the filtering to do.
+   i.e. [ [ region, [...values]], [authors, [...values]]]
+*/
 export const calcVisibility = function (tree, controls) {
   if (tree.nodes) {
-    /* Terminology:
-    inView: attribute of nodes, bool, set by phyloTree, determines if the tip is within the view
-    tip-visible: attribute of nodes, corresponds to (returned) visibility array except this is binary (1/0)
-    this fn returns visibility, array of "visible" or "hidden"
-
-    Filters:
-    filters stored in redux - controls.filters
-    filters have 2 keys, each with an array of values
-    keys: "region" and/or "authors"
-    filterPairs is a list of lists. Each list defines the filtering to do.
-    i.e. [ [ region, [...values]], [authors, [...values]]]
-    */
     let visibility;
 
-    const filterPairs = [];
-    Object.keys(controls.filters).map((key) => {
-      if (controls.filters[key].length) {
-        filterPairs.push([key, controls.filters[key]]);
-      }
-    });
-
+    // TIME FILTERING (internal + terminal nodes)
     const lowerLimit = calendarToNumeric(controls.dateMin);
     const upperLimit = calendarToNumeric(controls.dateMax);
-    // debugger;
-    if (upperLimit && lowerLimit) {
-      if (filterPairs.length) {
-        visibility = tree.nodes.map((d) => (
-          d.attr.num_date >= lowerLimit
-          && d.attr.num_date < upperLimit
-          && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
-        ));
-      } else {
-        visibility = tree.nodes.map((d) => (
-          d.attr.num_date >= lowerLimit
-          && d.attr.num_date < upperLimit
-        ));
-      }
-    }
+    visibility = tree.nodes.map((d) => (
+      d.attr.num_date >= lowerLimit && d.attr.num_date <= upperLimit
+    ));
 
+    // IN VIEW FILTERING (internal + terminal nodes)
     /* edge case: this fn may be called before the shell structure of the nodes
     has been created (i.e. phyloTree's not run yet). In this case, it's
     safe to assume that everything's in view */
@@ -246,15 +279,42 @@ export const calcVisibility = function (tree, controls) {
     try {
       inView = tree.nodes.map((d) => d.shell.inView);
     } catch(e) {
-      inView = tree.nodes.map((d) => true);
+      inView = tree.nodes.map(() => true);
     }
-    /* intersect visibility and inView*/
+    /* intersect visibility and inView */
     visibility = visibility.map((cv, idx) => (cv && inView[idx]));
 
-    const numVisTrue = visibility.reduce((a, b) => b ? a + 1 : a, 0);
-    const numVisTrueAndTerminal = visibility.reduce((acc, cv, idx) => (
-      !tree.nodes[idx].hasChildren && cv ? acc + 1 : acc
-    ), 0)
+    // FILTERS
+    const filterPairs = [];
+    Object.keys(controls.filters).map((key) => {
+      if (controls.filters[key].length) {
+        filterPairs.push([key, controls.filters[key]]);
+      }
+    });
+    if (filterPairs.length) {
+      /* find the terminal nodes that were (a) already visibile and (b) match the filters */
+      const filtered = tree.nodes.map((d, idx) => (
+        !d.hasChildren && visibility[idx] && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
+      ));
+      const idxsOfFilteredTips = filtered.reduce((a, e, i) => {
+        if (e) {a.push(i);}
+        return a;
+      }, []);
+      // console.log("# indicies visibile", idxsOfFilteredTips.length)
+      /* for each visibile tip, make the parent nodes visible (recursively) */
+      for (let i = 0; i < idxsOfFilteredTips.length; i++) {
+        makeParentVisible(filtered, tree.nodes[idxsOfFilteredTips[i]]);
+      }
+      /* intersect visibility and filtered */
+      visibility = visibility.map((cv, idx) => (cv && filtered[idx]));
+    }
+
+
+    // ?? DEBUGGING
+    // const numVisTrue = visibility.reduce((a, b) => b ? a + 1 : a, 0);
+    // const numVisTrueAndTerminal = visibility.reduce((acc, cv, idx) => (
+    //   !tree.nodes[idx].hasChildren && cv ? acc + 1 : acc
+    // ), 0)
     // tree.nodes.map((d)=> {
     //   if (d.attr.date) {
     //     console.log("yes", d.hasChildren, d.attr.date, d.attr.num_date)
