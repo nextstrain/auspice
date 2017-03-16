@@ -57,15 +57,15 @@ class ColorBy extends React.Component {
   }
 
   genotypeInput() {
-    let placeholder = "Genome position";
+    let value = "";
     if (this.props.colorBy) {
       if (this.props.colorBy.slice(0, 2) === "gt") {
-        placeholder = this.props.colorBy.slice(3);
+        value = this.props.colorBy.slice(3);
       }
     }
     if (this.state.selected === "gt") {
       return (
-        <input type="text" placeholder={placeholder}
+        <input type="text" placeholder="Genome position" value={value}
           onChange={(e) => this.setGenotypeColorBy(e.target.value)}
         />
       );
