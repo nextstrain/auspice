@@ -199,31 +199,8 @@ const parseFilterQuery = function (query) {
 };
 
 
-// const findMRCAidx = function (nodes, filtered) {
-//   const nTipsVis = filtered.reduce((a, b) => b ? a + 1 : a, 0); /* INT */
-//   /* nTipsVisPerNode: for each node, how many tips are in play? */
-//   const nTipsVisPerNode = new Array(nodes.length);
-//   nTipsVisPerNode.fill(0)
-//   // walk back from each visibile tip
-//   for (let i = 0; i++; i < filtered.length) {
-//     if (filtered[i]) { // visibile tip
-//       let parentIdx = nodes[i].parent.arrayIdx;
-//       while (true) { /* stop when reached the root node */
-//         nTipsVisPerNode[parentIdx]++;
-//         parentIdx = nodes[parentIdx].parent.arrayIdx;
-//         /* stopping criteria */
-//         if (parentIdx === 0) {break;} /* reached root node */
-//         if (nTipsVisPerNode[parentIdx] === nTipsVis) {
-//           /* this only happens when all tips have been traced back (by definition)
-//           so don'e need to break the for loop */
-//           return parentIdx;
-//         }
-//       }
-//     }
-//   }
-//   return undefined; // WTF
-// };
-
+/* recursively mark the parents of a given node active
+by setting the node idx to true in the param visArray */
 const makeParentVisible = function (visArray, node) {
   if (node.arrayIdx === 0 || visArray[node.parent.arrayIdx]) {
     return; // this is the root of the tree or the parent was already visibile
@@ -300,7 +277,6 @@ export const calcVisibility = function (tree, controls) {
         if (e) {a.push(i);}
         return a;
       }, []);
-      // console.log("# indicies visibile", idxsOfFilteredTips.length)
       /* for each visibile tip, make the parent nodes visible (recursively) */
       for (let i = 0; i < idxsOfFilteredTips.length; i++) {
         makeParentVisible(filtered, tree.nodes[idxsOfFilteredTips[i]]);
@@ -308,27 +284,6 @@ export const calcVisibility = function (tree, controls) {
       /* intersect visibility and filtered */
       visibility = visibility.map((cv, idx) => (cv && filtered[idx]));
     }
-
-
-    // ?? DEBUGGING
-    // const numVisTrue = visibility.reduce((a, b) => b ? a + 1 : a, 0);
-    // const numVisTrueAndTerminal = visibility.reduce((acc, cv, idx) => (
-    //   !tree.nodes[idx].hasChildren && cv ? acc + 1 : acc
-    // ), 0)
-    // tree.nodes.map((d)=> {
-    //   if (d.attr.date) {
-    //     console.log("yes", d.hasChildren, d.attr.date, d.attr.num_date)
-    //   } else {
-    //     console.log("no :(", d.hasChildren, d)
-    //   }
-    // })
-    // console.log("filter pairs:", filterPairs)
-    // console.log("# Nodes:", tree.nodes.length)
-    // console.log("# terminal nodes:", tree.nodes.reduce((a,b)=>b.hasChildren?a:a+1, 0))
-    // console.log("# visible: ", numVisTrue)
-    // console.log("# visible and terminal", numVisTrueAndTerminal)
-    // console.log("# visible and internal", numVisTrue - numVisTrueAndTerminal)
-
     /* save results in tree.nodes as well */
     tree.nodes.map((d, idx) => {d["tip-visible"] = visibility[idx];});
     /* return array of "visible" or "hidden" values */
