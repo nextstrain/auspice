@@ -201,7 +201,7 @@ const parseFilterQuery = function (query) {
 
 /* recursively mark the parents of a given node active
 by setting the node idx to true in the param visArray */
-const makeParentVisible = function (visArray, node) {
+export const makeParentVisible = function (visArray, node) {
   if (node.arrayIdx === 0 || visArray[node.parent.arrayIdx]) {
     return; // this is the root of the tree or the parent was already visibile
   }

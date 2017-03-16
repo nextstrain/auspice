@@ -1,7 +1,8 @@
 import { calcVisibility,
-	 calcTipRadii,
-	 calcTipCounts,
-	 calcBranchThickness } from "../util/treeHelpers";
+   calcTipRadii,
+   calcTipCounts,
+   makeParentVisible,
+   calcBranchThickness } from "../util/treeHelpers";
 import * as types from "./types";
 
 const updateVisibility = () => {
@@ -26,73 +27,73 @@ const updateBranchThickness = (idxOfInViewRootNode = 0) => {
       calcTipCounts(tree.nodes[0]);
       /* step 2: re-calculate branchThickness & dispatch*/
       dispatch({
-				type: types.UPDATE_BRANCH_THICKNESS,
-				data: calcBranchThickness(tree.nodes, tree.visibility, idxOfInViewRootNode),
-				version: tree.branchThicknessVersion + 1
+        type: types.UPDATE_BRANCH_THICKNESS,
+        data: calcBranchThickness(tree.nodes, tree.visibility, idxOfInViewRootNode),
+        version: tree.branchThicknessVersion + 1
       });
     }
   };
 };
 
 export const restrictTreeToSingleTip = function (tipIdx) {
-	/* this fn causes things to fall out of sync with the "inView" attr of nodes
-	you should run updateVisibleTipsAndBranchThicknesses to get things back in sync */
-	return (dispatch, getState) => {
-		const { tree } = getState();
-		// console.log("restrict")
-		const vis = tree.nodes.map((d, idx) => {
-			d["tip-visible"] = idx === tipIdx ? 1 : 0;
-			return idx === tipIdx ? "visible" : "hidden";
-		});
-		dispatch({
-			type: types.UPDATE_TIP_VISIBILITY,
-			data: vis,
-			version: tree.visibilityVersion + 1
-		});
-		dispatch(updateBranchThickness());
-	};
+  /* this fn causes things to fall out of sync with the "inView" attr of nodes
+  you should run updateVisibleTipsAndBranchThicknesses to get things back in sync */
+  return (dispatch, getState) => {
+    const { tree } = getState();
+    /* make the tip and all the parents down to the root visibile */
+    const visibility = new Array(tree.nodes.length);
+    visibility.fill(false);
+    visibility[tipIdx] = true;
+    makeParentVisible(visibility, tree.nodes[tipIdx]);
+    dispatch({
+      type: types.UPDATE_TIP_VISIBILITY,
+      data: visibility.map((cv) => cv ? "visible" : "hidden"),
+      version: tree.visibilityVersion + 1
+    });
+    dispatch(updateBranchThickness());
+  };
 };
 
 export const updateVisibleTipsAndBranchThicknesses = function () {
-	/* this fn doesn't need arguments as it relies on the "inView" attr of nodes */
-	return (dispatch, getState) => {
-		const { tree, controls } = getState();
-		dispatch({
-			type: types.UPDATE_TIP_VISIBILITY,
-			data: calcVisibility(tree, controls),
-			version: tree.visibilityVersion + 1
-		});
-		dispatch(updateBranchThickness());
-	};
+  /* this fn doesn't need arguments as it relies on the "inView" attr of nodes */
+  return (dispatch, getState) => {
+    const { tree, controls } = getState();
+    dispatch({
+      type: types.UPDATE_TIP_VISIBILITY,
+      data: calcVisibility(tree, controls),
+      version: tree.visibilityVersion + 1
+    });
+    dispatch(updateBranchThickness());
+  };
 };
 
 /* when tip max / min changes, we need to (a) update the controls reducer
 with the new value(s), (b) update the tree visibility */
 export const changeDateFilter = function (newMin, newMax) {
   return (dispatch, getState) => {
-		// console.log("changeDateFilter", newMin, newMax)
-		const { tree } = getState();
+  // console.log("changeDateFilter", newMin, newMax)
+    const { tree } = getState();
     if (newMin) {
       dispatch({type: types.CHANGE_DATE_MIN, data: newMin});
     }
     if (newMax) {
       dispatch({type: types.CHANGE_DATE_MAX, data: newMax});
     }
-		/* initially, the tree isn't loaded, so don't bother trying to do things */
-		if (tree.loadStatus === 2) {
-			dispatch(updateVisibility());
-			dispatch(updateBranchThickness());
-		}
+    /* initially, the tree isn't loaded, so don't bother trying to do things */
+    if (tree.loadStatus === 2) {
+      dispatch(updateVisibility());
+      dispatch(updateBranchThickness());
+    }
   };
 };
 
 /* zoomToClade takes care of setting tipVis and branchThickness.
 Note that the zooming / tree stuff is done imperitively by phyloTree */
 export const zoomToClade = function (idxOfInViewRootNode) {
-	return (dispatch) => {
-		dispatch(updateVisibility());
-		dispatch(updateBranchThickness(idxOfInViewRootNode));
-	};
+  return (dispatch) => {
+    dispatch(updateVisibility());
+    dispatch(updateBranchThickness(idxOfInViewRootNode));
+  };
 };
 
 const updateTipRadii = () => {
