@@ -27,7 +27,7 @@ const updateBranchThickness = (idxOfInViewRootNode = 0) => {
       /* step 2: re-calculate branchThickness & dispatch*/
       dispatch({
 				type: types.UPDATE_BRANCH_THICKNESS,
-				data: calcBranchThickness(tree.nodes, idxOfInViewRootNode),
+				data: calcBranchThickness(tree.nodes, tree.tipVisibility, idxOfInViewRootNode),
 				version: tree.branchThicknessVersion + 1
       });
     }

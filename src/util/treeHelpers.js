@@ -128,13 +128,15 @@ export const adjust_freq_by_date = (nodes, rootNode) => {
 // };
 
 // branch thickness is from clade frequencies
-export const calcBranchThickness = function (nodes, rootIdx) {
+export const calcBranchThickness = function (nodes, tipVisibility, rootIdx) {
   let maxTipCount = nodes[rootIdx].tipCount;
   /* edge case: no tips selected */
   if (!maxTipCount) {
     maxTipCount = 1;
   }
-  return nodes.map((d) => freqScale(d.tipCount / maxTipCount));
+  return nodes.map((d, idx) => (
+    tipVisibility[idx] === "visible" ? freqScale(d.tipCount / maxTipCount) : 1
+  ));
 };
 
 const getTipColorAttribute = function (node, colorScale, sequences) {

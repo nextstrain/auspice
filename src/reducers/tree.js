@@ -44,7 +44,7 @@ const Tree = (state = getDefaultState(), action) => {
     /* step 3 - this will set the tipCount property of each node */
     calcTipCounts(nodes[0]);
     /* step 4 */
-    const branchThickness = calcBranchThickness(nodes, 0);
+    const branchThickness = calcBranchThickness(nodes, tipVisibility, 0);
     /* set state */
     return Object.assign({}, state, {
       loadStatus: 2,
