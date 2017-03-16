@@ -18,8 +18,8 @@ import getLatLongs from "../../util/mapHelpersLatLong";
   return {
     datasetGuid: state.tree.datasetGuid,
     nodes: state.tree.nodes,
-    tipVisibility: state.tree.tipVisibility,
-    tipVisibilityVersion: state.tree.tipVisibilityVersion,
+    visibility: state.tree.visibility,
+    visibilityVersion: state.tree.visibilityVersion,
     metadata: state.metadata.metadata,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorScale: state.controls.colorScale,
@@ -135,7 +135,7 @@ class Map extends React.Component {
     */
 
     const mapIsDrawn = !!this.state.map;
-    const somethingChanged = (this.props.colorBy !== nextProps.colorBy || this.props.geoResolution !== nextProps.geoResolution || this.props.tipVisibilityVersion !== nextProps.tipVisibilityVersion); // prevProps.colorBy !== /*  */
+    const somethingChanged = (this.props.colorBy !== nextProps.colorBy || this.props.geoResolution !== nextProps.geoResolution || this.props.visibilityVersion !== nextProps.visibilityVersion); // prevProps.colorBy !== /*  */
 
     if (
       mapIsDrawn &&
@@ -158,8 +158,8 @@ class Map extends React.Component {
     const demesAbsent = !this.state.demes;
     // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;
     // const newGeoResolution = this.props.geoResolution !== prevProps.geoResolution;
-    // const initialTipVisibilityVersion = this.props.tipVisibilityVersion === 1; /* see tree reducer, we set this to 1 after tree comes back */
-    // const newTipVisibilityVersion = this.props.tipVisibilityVersion !== prevProps.tipVisibilityVersion;
+    // const initialVisibilityVersion = this.props.visibilityVersion === 1; /* see tree reducer, we set this to 1 after tree comes back */
+    // const newVisibilityVersion = this.props.visibilityVersion !== prevProps.visibilityVersion;
 
     if (
       mapIsDrawn &&
@@ -225,7 +225,7 @@ class Map extends React.Component {
   latLongs() {
     return getLatLongs(
       this.props.nodes,
-      this.props.tipVisibility,
+      this.props.visibility,
       this.props.metadata,
       this.state.map,
       this.props.colorBy,

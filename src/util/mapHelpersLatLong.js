@@ -1,6 +1,6 @@
 import {averageColors} from "./colorHelpers";
 
-const getLatLongs = (nodes, tipVisibility, metadata, map, colorBy, geoResolution, colorScale) => {
+const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale) => {
 
   const aggregatedLocations = {}; /* demes */
   const aggregatedTransmissions = {}; /* edges, animation paths */
@@ -29,7 +29,7 @@ const getLatLongs = (nodes, tipVisibility, metadata, map, colorBy, geoResolution
   */
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
-    if (!n.children && tipVisibility[i] === "visible") {
+    if (!n.children && visibility[i] === "visible") {
       // look up geo1 geo2 geo3 do lat longs differ
       if (aggregatedLocations[n.attr[geoResolution]]) {
         aggregatedLocations[n.attr[geoResolution]].push(colorScale(n.attr[colorBy]));
@@ -48,7 +48,7 @@ const getLatLongs = (nodes, tipVisibility, metadata, map, colorBy, geoResolution
         (2) if child is visibile
         */
         if (n.attr[geoResolution] !== child.attr[geoResolution] &&
-          tipVisibility[child.arrayIdx] === "visible") {
+          visibility[child.arrayIdx] === "visible") {
           const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution];
           if (aggregatedTransmissions[transmission]) {
             aggregatedTransmissions[transmission].push(colorScale(n.attr[colorBy]));

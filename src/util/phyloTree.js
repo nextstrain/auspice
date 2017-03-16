@@ -172,10 +172,10 @@ PhyloTree.prototype.setDefaults = function () {
  * @param  options    -- an object that contains options that will be added to this.params
  * @param  callbacks  -- an object with call back function defining mouse behavior
  * @param  branchThickness (OPTIONAL) -- array of branch thicknesses
- * @param  tipVisibility (OPTIONAL) -- array of "visible" or "hidden"
+ * @param  visibility (OPTIONAL) -- array of "visible" or "hidden"
  * @return {null}
  */
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, tipVisibility) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility) {
   if (branchThickness) {
     this.nodes.forEach(function(d, i) {
       d["stroke-width"] = branchThickness[i];
@@ -201,9 +201,9 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
   }
   this.drawTips();
 
-  if (tipVisibility) {
+  if (visibility) {
     this.nodes.forEach(function(d, i) {
-      d["visibility"] = tipVisibility[i];
+      d["visibility"] = visibility[i];
     });
     this.svg.selectAll(".tip").style("visibility", (d) => d["visibility"]);
   }

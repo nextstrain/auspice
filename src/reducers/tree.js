@@ -2,7 +2,7 @@ import * as types from "../actions/types";
 // import { gatherTips } from "../util/treeHelpers";
 import { processNodes, calcLayouts } from "../util/processNodes";
 import d3 from "d3";
-import { calcBranchThickness, calcTipCounts, calcTipVisibility } from "../util/treeHelpers";
+import { calcBranchThickness, calcTipCounts, calcVisibility } from "../util/treeHelpers";
 
 
 const getDefaultState = function () {
@@ -10,8 +10,8 @@ const getDefaultState = function () {
     loadStatus: 0, /* 0: no data, 1: data incoming, 2: data loaded */
     nodes: null,
     error: null,
-    tipVisibility: null,
-    tipVisibilityVersion: 0,
+    visibility: null,
+    visibilityVersion: 0,
     nodeColors: null,
     nodeColorsVersion: 0,
     tipRadii: null,
@@ -40,11 +40,11 @@ const Tree = (state = getDefaultState(), action) => {
     nodes[0].parent = nodes[0]; // make root its own parent
     calcLayouts(nodes, ["div", "num_date"]);
     /* step 2 */
-    const tipVisibility = calcTipVisibility({nodes}, action.controls);
+    const visibility = calcVisibility({nodes}, action.controls);
     /* step 3 - this will set the tipCount property of each node */
     calcTipCounts(nodes[0]);
     /* step 4 */
-    const branchThickness = calcBranchThickness(nodes, tipVisibility, 0);
+    const branchThickness = calcBranchThickness(nodes, visibility, 0);
     /* set state */
     return Object.assign({}, state, {
       loadStatus: 2,
@@ -54,8 +54,8 @@ const Tree = (state = getDefaultState(), action) => {
       branchThickness,
       /* do not change branchThicknessVersion - this is applied by phyloTree.render, not an update method */
       datasetGuid: Math.floor(Math.random() * 100000000000),
-      tipVisibility,
-      tipVisibilityVersion: 1
+      visibility,
+      visibilityVersion: 1
     });
   case types.TREE_FETCH_ERROR:
     return Object.assign({}, state, {
@@ -64,8 +64,8 @@ const Tree = (state = getDefaultState(), action) => {
     });
   case types.UPDATE_TIP_VISIBILITY:
     return Object.assign({}, state, {
-      tipVisibility: action.data,
-      tipVisibilityVersion: action.version
+      visibility: action.data,
+      visibilityVersion: action.version
     });
   case types.UPDATE_TIP_RADII:
     return Object.assign({}, state, {

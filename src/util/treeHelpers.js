@@ -128,14 +128,14 @@ export const adjust_freq_by_date = (nodes, rootNode) => {
 // };
 
 // branch thickness is from clade frequencies
-export const calcBranchThickness = function (nodes, tipVisibility, rootIdx) {
+export const calcBranchThickness = function (nodes, visibility, rootIdx) {
   let maxTipCount = nodes[rootIdx].tipCount;
   /* edge case: no tips selected */
   if (!maxTipCount) {
     maxTipCount = 1;
   }
   return nodes.map((d, idx) => (
-    tipVisibility[idx] === "visible" ? freqScale(d.tipCount / maxTipCount) : 1
+    visibility[idx] === "visible" ? freqScale(d.tipCount / maxTipCount) : 1
   ));
 };
 
@@ -198,12 +198,12 @@ const parseFilterQuery = function (query) {
   };
 };
 
-export const calcTipVisibility = function (tree, controls) {
+export const calcVisibility = function (tree, controls) {
   if (tree.nodes) {
     /* Terminology:
     inView: attribute of nodes, bool, set by phyloTree, determines if the tip is within the view
-    tip-visible: attribute of nodes, corresponds to tipVisibility array except this is binary (1/0)
-    this fn returns tipVisibility, array of "visible" or "hidden"
+    tip-visible: attribute of nodes, corresponds to (returned) visibility array except this is binary (1/0)
+    this fn returns visibility, array of "visible" or "hidden"
 
     Filters:
     filters stored in redux - controls.filters
