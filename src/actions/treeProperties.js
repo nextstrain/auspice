@@ -21,10 +21,8 @@ const updateBranchThickness = (idxOfInViewRootNode = 0) => {
   return (dispatch, getState) => {
     const { tree } = getState();
     if (tree.nodes) {
-      /* step 1: recalculate tipCounts over the tree
-      note that the tips (actually the nodes) already have
-      d["tip-visible"] set (from calcVisibility) */
-      calcTipCounts(tree.nodes[0]);
+      /* step 1: recalculate tipCounts over the tree */
+      calcTipCounts(tree.nodes[0], tree.visibility);
       /* step 2: re-calculate branchThickness & dispatch*/
       dispatch({
         type: types.UPDATE_BRANCH_THICKNESS,

@@ -42,7 +42,7 @@ const Tree = (state = getDefaultState(), action) => {
     /* step 2 */
     const visibility = calcVisibility({nodes}, action.controls);
     /* step 3 - this will set the tipCount property of each node */
-    calcTipCounts(nodes[0]);
+    calcTipCounts(nodes[0], visibility);
     /* step 4 */
     const branchThickness = calcBranchThickness(nodes, visibility, 0);
     /* set state */

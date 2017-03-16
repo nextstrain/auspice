@@ -81,15 +81,15 @@ export const calcFullTipCounts = (node) => {
 /**
  * for each node, calculate the number of tips in view.
 **/
-export const calcTipCounts = (node) => {
+export const calcTipCounts = (node, visibility) => {
   node.tipCount = 0;
   if (typeof node.children !== "undefined") {
     for (let i = 0; i < node.children.length; i++) {
-      calcTipCounts(node.children[i]);
+      calcTipCounts(node.children[i], visibility);
       node.tipCount += node.children[i].tipCount;
     }
   } else {
-    node.tipCount = node["tip-visible"];
+    node.tipCount = visibility[node.arrayIdx] === "visible" ? 1 : 0;
   }
 };
 
@@ -217,9 +217,6 @@ inView: attribute of phyloTree.nodes, but accessible through redux.tree.nodes[id
 controls.filters
 controls.dateMin & controls.dateMax
 
-SIDE EFFECTS
-tip-visible: attribute of nodes, corresponds to (returned) visibility array except this is binary
-
 RETURNS:
 visibility: array of "visible" or "hidden"
 
@@ -284,8 +281,6 @@ export const calcVisibility = function (tree, controls) {
       /* intersect visibility and filtered */
       visibility = visibility.map((cv, idx) => (cv && filtered[idx]));
     }
-    /* save results in tree.nodes as well */
-    tree.nodes.map((d, idx) => {d["tip-visible"] = visibility[idx];});
     /* return array of "visible" or "hidden" values */
     return visibility.map((cv) => cv ? "visible" : "hidden");
   }
