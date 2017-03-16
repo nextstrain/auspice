@@ -14,6 +14,11 @@ moment.updateLocale("en", {
   }
 });
 
+export const calendarToNumeric = (calDate) => {
+  const unixDate = moment(calDate).unix();  // number of seconds since 1970
+  return 1970 + (unixDate / 365.2425 / 24 / 3600);
+};
+
 @connect((state) => {
   return {
     dateMin: state.controls.dateMin,
@@ -51,12 +56,6 @@ class DateRangeInputs extends React.Component {
     const unixDate = (numDate - 1970) * 365.2425 * 24 * 3600; // number of seconds since 1970
     return moment.unix(unixDate).format("YYYY-MM-DD");
   }
-
-  calendarToNumeric(calDate) {
-    const unixDate = moment(calDate).unix();  // number of seconds since 1970
-    return 1970 + (unixDate / 365.2425 / 24 / 3600);
-  }
-
 
   updateFromPicker(ref, momentDate) {
     // a momentDate is received from DatePicker
@@ -146,10 +145,10 @@ class DateRangeInputs extends React.Component {
     const selectedMin = this.props.dateMin;
     const selectedMax = this.props.dateMax;
 
-    const absoluteMinNumDate = this.calendarToNumeric(absoluteMin);
-    const absoluteMaxNumDate = this.calendarToNumeric(absoluteMax);
-    const selectedMinNumDate = this.calendarToNumeric(selectedMin);
-    const selectedMaxNumDate = this.calendarToNumeric(selectedMax);
+    const absoluteMinNumDate = calendarToNumeric(absoluteMin);
+    const absoluteMaxNumDate = calendarToNumeric(absoluteMax);
+    const selectedMinNumDate = calendarToNumeric(selectedMin);
+    const selectedMaxNumDate = calendarToNumeric(selectedMax);
 
     return (
       <div>

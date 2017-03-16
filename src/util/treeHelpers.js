@@ -1,5 +1,6 @@
 import { tipRadius, freqScale } from "./globals";
 import { getGenotype } from "./getGenotype";
+import { calendarToNumeric } from "../components/controls/date-range-inputs";
 
 export const gatherTips = (node, tips) => {
 
@@ -218,19 +219,20 @@ export const calcTipVisibility = function (tree, controls) {
       }
     });
 
-    const lowerLimit = controls.dateMin;
-    const upperLimit = controls.dateMax;
+    const lowerLimit = calendarToNumeric(controls.dateMin);
+    const upperLimit = calendarToNumeric(controls.dateMax);
+    // debugger;
     if (upperLimit && lowerLimit) {
       if (filterPairs.length) {
         visibility = tree.nodes.map((d) => (
-          d.attr.date >= lowerLimit
-          && d.attr.date < upperLimit
+          d.attr.num_date >= lowerLimit
+          && d.attr.num_date < upperLimit
           && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
         ));
       } else {
         visibility = tree.nodes.map((d) => (
-          d.attr.date >= lowerLimit
-          && d.attr.date < upperLimit
+          d.attr.num_date >= lowerLimit
+          && d.attr.num_date < upperLimit
         ));
       }
     }
@@ -246,6 +248,24 @@ export const calcTipVisibility = function (tree, controls) {
     }
     /* intersect visibility and inView*/
     visibility = visibility.map((cv, idx) => (cv && inView[idx]));
+
+    const numVisTrue = visibility.reduce((a, b) => b ? a + 1 : a, 0);
+    const numVisTrueAndTerminal = visibility.reduce((acc, cv, idx) => (
+      !tree.nodes[idx].hasChildren && cv ? acc + 1 : acc
+    ), 0)
+    // tree.nodes.map((d)=> {
+    //   if (d.attr.date) {
+    //     console.log("yes", d.hasChildren, d.attr.date, d.attr.num_date)
+    //   } else {
+    //     console.log("no :(", d.hasChildren, d)
+    //   }
+    // })
+    // console.log("filter pairs:", filterPairs)
+    // console.log("# Nodes:", tree.nodes.length)
+    // console.log("# terminal nodes:", tree.nodes.reduce((a,b)=>b.hasChildren?a:a+1, 0))
+    // console.log("# visible: ", numVisTrue)
+    // console.log("# visible and terminal", numVisTrueAndTerminal)
+    // console.log("# visible and internal", numVisTrue - numVisTrueAndTerminal)
 
     /* save results in tree.nodes as well */
     tree.nodes.map((d, idx) => {d["tip-visible"] = visibility[idx];});

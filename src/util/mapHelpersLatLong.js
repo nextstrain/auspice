@@ -28,6 +28,7 @@ const getLatLongs = (nodes, tipVisibility, metadata, map, colorBy, geoResolution
     aggregate locations for demes
   */
   nodes.forEach((n, i) => {
+    /* demes only count terminal nodes */
     if (!n.children && tipVisibility[i] === "visible") {
       // look up geo1 geo2 geo3 do lat longs differ
       if (aggregatedLocations[n.attr[geoResolution]]) {
@@ -37,16 +38,23 @@ const getLatLongs = (nodes, tipVisibility, metadata, map, colorBy, geoResolution
         aggregatedLocations[n.attr[geoResolution]] = [colorScale(n.attr[colorBy])];
       }
     }
+    /* transmissions count internal node transitions as well
+    they are from the parent of the node to the node itself
+    */
     if (n.children) {
       n.children.forEach((child) => {
-
-        if (n.attr[geoResolution] === child.attr[geoResolution] || child["tip-visible"] === false) { return; }
-        // look up in transmissions dictionary
-        if (aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]]) {
-          aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]].push(colorScale(n.attr[colorBy]));
-        } else {
-          // we don't have it, add it
-          aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]] = [colorScale(n.attr[colorBy])];
+        /* only draw transmissions if
+        (1) the node & child aren't the same location and
+        (2) if child is visibile
+        */
+        if (n.attr[geoResolution] !== child.attr[geoResolution] &&
+          tipVisibility[child.arrayIdx] === "visible") {
+          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution];
+          if (aggregatedTransmissions[transmission]) {
+            aggregatedTransmissions[transmission].push(colorScale(n.attr[colorBy]));
+          } else {
+            aggregatedTransmissions[transmission] = [colorScale(n.attr[colorBy])];
+          }
         }
       });
     }
