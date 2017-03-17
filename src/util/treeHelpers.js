@@ -139,7 +139,7 @@ export const calcBranchThickness = function (nodes, visibility, rootIdx) {
   ));
 };
 
-const getTipColorAttribute = function (node, colorScale, sequences) {
+export const getTipColorAttribute = function (node, colorScale, sequences) {
   if (colorScale.colorBy.slice(0, 3) === "gt-" && colorScale.genotype) {
     return getGenotype(colorScale.genotype[0][0],
                        colorScale.genotype[0][1],

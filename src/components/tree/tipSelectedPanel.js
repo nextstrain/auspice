@@ -1,3 +1,4 @@
+/*eslint-env browser*/
 import React from "react";
 import {infoPanelStyles} from "../../globalStyles";
 
@@ -34,11 +35,17 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
     }
   };
 
+  const stopProp = (e) => {
+    if (!e) {e = window.event;}
+    e.cancelBubble = true;
+    if (e.stopPropagation) {e.stopPropagation();}
+  };
+
   const makePanel = () => {
     if (!tip) {return null;}
     return (
       <div style={styles.container} onClick={() => goAwayCallback(tip)}>
-        <div className={"panel"} style={infoPanelStyles.panel}>
+        <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
           <p style={infoPanelStyles.modalHeading}>
             {`${tip.n.strain}`}
           </p>

@@ -26,6 +26,7 @@ import getLatLongs from "../../util/mapHelpersLatLong";
     colorBy: state.controls.colorBy,
     map: state.map,
     geoResolution: state.controls.geoResolution,
+    sequences: state.sequences
   };
 })
 class Map extends React.Component {
@@ -230,7 +231,8 @@ class Map extends React.Component {
       this.state.map,
       this.props.colorBy,
       this.props.geoResolution,
-      this.props.colorScale.scale,
+      this.props.colorScale,
+      this.props.sequences
     );
   }
   createMap() {

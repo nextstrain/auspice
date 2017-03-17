@@ -1,7 +1,7 @@
 import {averageColors} from "./colorHelpers";
+import {getTipColorAttribute} from "./treeHelpers";
 
-const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale) => {
-
+const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale, sequences) => {
   const aggregatedLocations = {}; /* demes */
   const aggregatedTransmissions = {}; /* edges, animation paths */
   const demesToColors = {};
@@ -29,13 +29,14 @@ const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, c
   */
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
+    const tipColorAttribute = getTipColorAttribute(n, colorScale, sequences);
     if (!n.children && visibility[i] === "visible") {
       // look up geo1 geo2 geo3 do lat longs differ
       if (aggregatedLocations[n.attr[geoResolution]]) {
-        aggregatedLocations[n.attr[geoResolution]].push(colorScale(n.attr[colorBy]));
+        aggregatedLocations[n.attr[geoResolution]].push(colorScale.scale(tipColorAttribute));
       } else {
         // if we haven't added this pair, add it
-        aggregatedLocations[n.attr[geoResolution]] = [colorScale(n.attr[colorBy])];
+        aggregatedLocations[n.attr[geoResolution]] = [colorScale.scale(tipColorAttribute)];
       }
     }
     /* transmissions count internal node transitions as well
@@ -51,9 +52,9 @@ const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, c
           visibility[child.arrayIdx] === "visible") {
           const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution];
           if (aggregatedTransmissions[transmission]) {
-            aggregatedTransmissions[transmission].push(colorScale(n.attr[colorBy]));
+            aggregatedTransmissions[transmission].push(colorScale.scale(n.attr[colorBy]));
           } else {
-            aggregatedTransmissions[transmission] = [colorScale(n.attr[colorBy])];
+            aggregatedTransmissions[transmission] = [colorScale.scale(n.attr[colorBy])];
           }
         }
       });
