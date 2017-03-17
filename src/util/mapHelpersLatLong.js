@@ -1,6 +1,7 @@
 import {averageColors} from "./colorHelpers";
+import {getTipColorAttribute} from "./treeHelpers";
 
-const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale) => {
+const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale, sequences) => {
 
   const aggregatedLocations = {}; /* demes */
   const aggregatedTransmissions = {}; /* edges, animation paths */
@@ -28,13 +29,14 @@ const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale) =
     aggregate locations for demes
   */
   nodes.forEach((n) => {
+    const tipColorAttribute = getTipColorAttribute(n, colorScale, sequences);
     if (!n.children) {
       // look up geo1 geo2 geo3 do lat longs differ
       if (aggregatedLocations[n.attr[geoResolution]]) {
-        aggregatedLocations[n.attr[geoResolution]].push(colorScale(n.attr[colorBy]));
+        aggregatedLocations[n.attr[geoResolution]].push(colorScale.scale(tipColorAttribute));
       } else {
         // if we haven't added this pair, add it
-        aggregatedLocations[n.attr[geoResolution]] = [colorScale(n.attr[colorBy])];
+        aggregatedLocations[n.attr[geoResolution]] = [colorScale.scale(tipColorAttribute)];
       }
     }
     if (n.children) {
@@ -43,10 +45,10 @@ const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale) =
         if (n.attr[geoResolution] === child.attr[geoResolution]) { return; }
         // look up in transmissions dictionary
         if (aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]]) {
-          aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]].push(colorScale(n.attr[colorBy]));
+          aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]].push(colorScale.scale(tipColorAttribute));
         } else {
           // we don't have it, add it
-          aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]] = [colorScale(n.attr[colorBy])];
+          aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]] = [colorScale.scale(tipColorAttribute)];
         }
       });
     }
