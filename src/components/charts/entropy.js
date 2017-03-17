@@ -10,7 +10,7 @@ import d3 from "d3";
 import computeResponsive from "../../util/computeResponsive";
 import { changeColorBy } from "../../actions/colors";
 import { modifyURLquery } from "../../util/urlHelpers";
-import { dataFont, darkGrey } from "../../globalStyles";
+import { dataFont, darkGrey, materialButton, materialButtonSelected } from "../../globalStyles";
 
 const calcEntropy = function (entropy) {
   const entropyNt = entropy["nuc"]["val"].map((s, i) => {
@@ -116,7 +116,20 @@ const makeAnnotation = (x, y, yMax, e, i) => (
   </g>
 );
 
-
+const getStyles = function (width) {
+  return {
+    switchContainer: {
+      position: "absolute",
+      marginTop: -25,
+      paddingLeft: width - 100
+    },
+    switchTitle: {
+      margin: 5,
+      position: "relative",
+      top: -1
+    }
+  };
+};
 
 @connect(state => {
   return {
@@ -125,6 +138,12 @@ const makeAnnotation = (x, y, yMax, e, i) => (
   };
 })
 class Entropy extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      aa: true
+    };
+  }
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   }
@@ -186,6 +205,27 @@ class Entropy extends React.Component {
     };
   }
 
+  aaNtSwitch(styles) {
+    return (
+      <div style={styles.switchContainer}>
+        <button
+          key={1}
+          style={this.state.aa ? materialButtonSelected : materialButton}
+          onClick={() => this.setState({aa: true})}
+        >
+          <span style={styles.switchTitle}> {"AA"} </span>
+        </button>
+        <button
+          key={2}
+          style={!this.state.aa ? materialButtonSelected : materialButton}
+          onClick={() => this.setState({aa: false})}
+        >
+          <span style={styles.switchTitle}> {"NT"} </span>
+        </button>
+      </div>
+    );
+  }
+
   render() {
     if (!(this.props.entropy && this.props.browserDimensions)) {
       return (
@@ -201,6 +241,8 @@ class Entropy extends React.Component {
       entropyNtWithoutZeros } = calcEntropy(this.props.entropy);
     /* get chart geom data */
     const chartGeom = this.getChartGeom();
+    /* get styles */
+    const styles = getStyles(chartGeom.width);
     /* d3 scales */
     const x = d3.scale.linear()
       .domain([0, entropyNt.length]) // original array, since the x values are still mapped to that
@@ -213,10 +255,13 @@ class Entropy extends React.Component {
 
     return (
       <Card title={"Diversity"}>
+        {this.aaNtSwitch(styles)}
         <svg width={chartGeom.width} height={chartGeom.height}>
           {annotations.map(makeAnnotation.bind(this, x, y, yMax))}
-          {entropyNtWithoutZeros.map(this.makeEntropyNtBar.bind(this, x, y))}
-          {aminoAcidEntropyWithoutZeros.map(this.makeEntropyAABar.bind(this, x, y))}
+          {this.state.aa ?
+            aminoAcidEntropyWithoutZeros.map(this.makeEntropyAABar.bind(this, x, y)) :
+            entropyNtWithoutZeros.map(this.makeEntropyNtBar.bind(this, x, y))
+          }
           {makeXAxis(chartGeom, x.domain())}
           {makeYAxis(chartGeom, y.domain())}
         </svg>
