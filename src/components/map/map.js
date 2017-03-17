@@ -154,7 +154,7 @@ class Map extends React.Component {
   maybeDrawDemesAndTransmissions(prevProps) {
 
     const mapIsDrawn = !!this.state.map;
-    const allDataPresent = !!(this.props.colorScale && this.props.colorScale.version >= 2 && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode);
+    const allDataPresent = !!(this.props.colorScale && this.props.colorScale.version !== prevProps.colorScale.version && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode);
     const demesAbsent = !this.state.demes;
     // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;
     // const newGeoResolution = this.props.geoResolution !== prevProps.geoResolution;
