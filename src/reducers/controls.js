@@ -14,6 +14,7 @@ import moment from 'moment';
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
 const getDefaultState = function () {
+  console.log("reducer getDefaultState")
   return {
     showBranchLabels: false,
     selectedLegendItem: null,
@@ -39,6 +40,7 @@ const getDefaultState = function () {
 const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
   case types.RESET_CONTROLS:
+    console.log("RESET_CONTROLS")
     return getDefaultState();
   case types.NEW_DATASET:
     return Object.assign({}, state, {
