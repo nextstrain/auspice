@@ -52,9 +52,9 @@ const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, c
           visibility[child.arrayIdx] === "visible") {
           const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution];
           if (aggregatedTransmissions[transmission]) {
-            aggregatedTransmissions[transmission].push(colorScale.scale(n.attr[colorBy]));
+            aggregatedTransmissions[transmission].push(colorScale.scale(tipColorAttribute));
           } else {
-            aggregatedTransmissions[transmission] = [colorScale.scale(n.attr[colorBy])];
+            aggregatedTransmissions[transmission] = [colorScale.scale(tipColorAttribute)];
           }
         }
       });
