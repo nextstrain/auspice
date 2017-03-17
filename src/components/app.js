@@ -35,7 +35,6 @@ import { analyticsNewPage } from "../util/googleAnalytics";
 @Radium
 class App extends React.Component {
   constructor(props) {
-    console.log("APP CONSTRUCTING")
     super(props);
     /* window listener to see when width changes cross thrhershold to toggle sidebar */
     /* A note on sidebar terminology:

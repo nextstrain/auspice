@@ -133,7 +133,6 @@ const getColorScale = (colorBy, tree, sequences, colorOptions, version) => {
     continuous = true;
     colorScale = minMaxAttributeScale(tree.nodes, colorBy);
   }
-  console.log("get color scale returning v", version)
   return {
     "scale": colorScale,
     "continuous": continuous,
