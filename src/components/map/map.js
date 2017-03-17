@@ -18,6 +18,8 @@ import getLatLongs from "../../util/mapHelpersLatLong";
   return {
     datasetGuid: state.tree.datasetGuid,
     nodes: state.tree.nodes,
+    visibility: state.tree.visibility,
+    visibilityVersion: state.tree.visibilityVersion,
     metadata: state.metadata.metadata,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorScale: state.controls.colorScale,
@@ -132,11 +134,13 @@ class Map extends React.Component {
       // nextProps.datasetGuid &&
       // this.props.datasetGuid !== nextProps.datasetGuid // and the dataset has changed
     */
+
+    const mapIsDrawn = !!this.state.map;
+    const somethingChanged = (this.props.colorBy !== nextProps.colorBy || this.props.geoResolution !== nextProps.geoResolution || this.props.visibilityVersion !== nextProps.visibilityVersion); // prevProps.colorBy !== /*  */
+
     if (
-      (this.state.map &&
-      this.props.colorBy !== nextProps.colorBy) || // prevProps.colorBy !== /*  */
-      (this.state.map &&
-      this.props.geoResolution !== nextProps.geoResolution)
+      mapIsDrawn &&
+      somethingChanged
     ) {
       this.state.d3DOMNode.selectAll("*").remove();
 
@@ -149,16 +153,19 @@ class Map extends React.Component {
     }
   }
   maybeDrawDemesAndTransmissions(prevProps) {
+
+    const mapIsDrawn = !!this.state.map;
+    const allDataPresent = !!(this.props.colorScale && this.props.colorScale.version !== prevProps.colorScale.version && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode);
+    const demesAbsent = !this.state.demes;
+    // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;
+    // const newGeoResolution = this.props.geoResolution !== prevProps.geoResolution;
+    // const initialVisibilityVersion = this.props.visibilityVersion === 1; /* see tree reducer, we set this to 1 after tree comes back */
+    // const newVisibilityVersion = this.props.visibilityVersion !== prevProps.visibilityVersion;
+
     if (
-      this.props.colorScale &&
-      this.state.map && /* we have already drawn the map */
-      this.props.metadata && /* we have the data we need */
-      this.props.nodes &&
-      this.state.responsive &&
-      this.state.d3DOMNode &&
-      !this.state.demes && /* we haven't already drawn demes */
-      (this.props.colorScale.version !== prevProps.colorScale.version ||
-        this.props.geoResolution !== prevProps.geoResolution)
+      mapIsDrawn &&
+      allDataPresent &&
+      demesAbsent
     ) {
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
       if (!this.state.boundsSet){ //we are doing the initial render -> set map to the range of the data
@@ -184,13 +191,11 @@ class Map extends React.Component {
       });
     }
   }
-
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
       updateOnMoveEnd(this.state.d3elems, this.latLongs());
     }
   }
-
   getGeoRange() {
     const latitudes = [];
     const longitudes = [];
@@ -212,7 +217,6 @@ class Map extends React.Component {
     const west = Math.min(180, maxLng + lngRange*0.2);
     return [L.latLng(south,west), L.latLng(north, east)];
   }
-
   maybeUpdateDemesAndTransmissions() {
     /* todo */
   }
@@ -222,6 +226,7 @@ class Map extends React.Component {
   latLongs() {
     return getLatLongs(
       this.props.nodes,
+      this.props.visibility,
       this.props.metadata,
       this.state.map,
       this.props.colorBy,

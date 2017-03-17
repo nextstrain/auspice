@@ -1,5 +1,6 @@
 import { tipRadius, freqScale } from "./globals";
 import { getGenotype } from "./getGenotype";
+import { calendarToNumeric } from "../components/controls/date-range-inputs";
 
 export const gatherTips = (node, tips) => {
 
@@ -80,15 +81,15 @@ export const calcFullTipCounts = (node) => {
 /**
  * for each node, calculate the number of tips in view.
 **/
-export const calcTipCounts = (node) => {
+export const calcTipCounts = (node, visibility) => {
   node.tipCount = 0;
   if (typeof node.children !== "undefined") {
     for (let i = 0; i < node.children.length; i++) {
-      calcTipCounts(node.children[i]);
+      calcTipCounts(node.children[i], visibility);
       node.tipCount += node.children[i].tipCount;
     }
   } else {
-    node.tipCount = node["tip-visible"];
+    node.tipCount = visibility[node.arrayIdx] === "visible" ? 1 : 0;
   }
 };
 
@@ -127,13 +128,15 @@ export const adjust_freq_by_date = (nodes, rootNode) => {
 // };
 
 // branch thickness is from clade frequencies
-export const calcBranchThickness = function (nodes, rootIdx) {
+export const calcBranchThickness = function (nodes, visibility, rootIdx) {
   let maxTipCount = nodes[rootIdx].tipCount;
   /* edge case: no tips selected */
   if (!maxTipCount) {
     maxTipCount = 1;
   }
-  return nodes.map((d) => freqScale(d.tipCount / maxTipCount));
+  return nodes.map((d, idx) => (
+    visibility[idx] === "visible" ? freqScale(d.tipCount / maxTipCount) : 1
+  ));
 };
 
 export const getTipColorAttribute = function (node, colorScale, sequences) {
@@ -195,46 +198,54 @@ const parseFilterQuery = function (query) {
   };
 };
 
-export const calcTipVisibility = function (tree, controls) {
-  if (tree.nodes) {
-    /* Terminology:
-    inView: attribute of nodes, bool, set by phyloTree, determines if the tip is within the view
-    tip-visible: attribute of nodes, corresponds to tipVisibility array except this is binary (1/0)
-    this fn returns tipVisibility, array of "visible" or "hidden"
 
-    Filters:
-    filters stored in redux - controls.filters
-    filters have 2 keys, each with an array of values
-    keys: "region" and/or "authors"
-    filterPairs is a list of lists. Each list defines the filtering to do.
-    i.e. [ [ region, [...values]], [authors, [...values]]]
-    */
+/* recursively mark the parents of a given node active
+by setting the node idx to true in the param visArray */
+export const makeParentVisible = function (visArray, node) {
+  if (node.arrayIdx === 0 || visArray[node.parent.arrayIdx]) {
+    return; // this is the root of the tree or the parent was already visibile
+  }
+  visArray[node.parent.arrayIdx] = true;
+  makeParentVisible(visArray, node.parent);
+};
+
+
+/* calcVisibility
+USES:
+inView: attribute of phyloTree.nodes, but accessible through redux.tree.nodes[idx].shell.inView
+  Bool. Set by phyloTree, determines if the tip is within the view.
+controls.filters
+controls.dateMin & controls.dateMax
+
+RETURNS:
+visibility: array of "visible" or "hidden"
+
+ROUGH DESCRIPTION OF HOW FILTERING IS APPLIED:
+ - time filtering is simple - all nodes (internal + terminal) not within (tmin, tmax) are excluded.
+ - inView filtering is similar - nodes out of the view cannot possibly be visible
+ - filters are a bit more tricky - the visibile tips are calculated, and the parent
+    branches back to the MRCA are considered visibile. This is then intersected with
+    the time & inView visibile stuff
+
+FILTERS:
+ - filters stored in redux - controls.filters
+ - filters have 2 keys, each with an array of values
+   keys: "region" and/or "authors"
+ - filterPairs is a list of lists. Each list defines the filtering to do.
+   i.e. [ [ region, [...values]], [authors, [...values]]]
+*/
+export const calcVisibility = function (tree, controls) {
+  if (tree.nodes) {
     let visibility;
 
-    const filterPairs = [];
-    Object.keys(controls.filters).map((key) => {
-      if (controls.filters[key].length) {
-        filterPairs.push([key, controls.filters[key]]);
-      }
-    });
+    // TIME FILTERING (internal + terminal nodes)
+    const lowerLimit = calendarToNumeric(controls.dateMin);
+    const upperLimit = calendarToNumeric(controls.dateMax);
+    visibility = tree.nodes.map((d) => (
+      d.attr.num_date >= lowerLimit && d.attr.num_date <= upperLimit
+    ));
 
-    const lowerLimit = controls.dateMin;
-    const upperLimit = controls.dateMax;
-    if (upperLimit && lowerLimit) {
-      if (filterPairs.length) {
-        visibility = tree.nodes.map((d) => (
-          d.attr.date >= lowerLimit
-          && d.attr.date < upperLimit
-          && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
-        ));
-      } else {
-        visibility = tree.nodes.map((d) => (
-          d.attr.date >= lowerLimit
-          && d.attr.date < upperLimit
-        ));
-      }
-    }
-
+    // IN VIEW FILTERING (internal + terminal nodes)
     /* edge case: this fn may be called before the shell structure of the nodes
     has been created (i.e. phyloTree's not run yet). In this case, it's
     safe to assume that everything's in view */
@@ -242,13 +253,34 @@ export const calcTipVisibility = function (tree, controls) {
     try {
       inView = tree.nodes.map((d) => d.shell.inView);
     } catch(e) {
-      inView = tree.nodes.map((d) => true);
+      inView = tree.nodes.map(() => true);
     }
-    /* intersect visibility and inView*/
+    /* intersect visibility and inView */
     visibility = visibility.map((cv, idx) => (cv && inView[idx]));
 
-    /* save results in tree.nodes as well */
-    tree.nodes.map((d, idx) => {d["tip-visible"] = visibility[idx];});
+    // FILTERS
+    const filterPairs = [];
+    Object.keys(controls.filters).map((key) => {
+      if (controls.filters[key].length) {
+        filterPairs.push([key, controls.filters[key]]);
+      }
+    });
+    if (filterPairs.length) {
+      /* find the terminal nodes that were (a) already visibile and (b) match the filters */
+      const filtered = tree.nodes.map((d, idx) => (
+        !d.hasChildren && visibility[idx] && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
+      ));
+      const idxsOfFilteredTips = filtered.reduce((a, e, i) => {
+        if (e) {a.push(i);}
+        return a;
+      }, []);
+      /* for each visibile tip, make the parent nodes visible (recursively) */
+      for (let i = 0; i < idxsOfFilteredTips.length; i++) {
+        makeParentVisible(filtered, tree.nodes[idxsOfFilteredTips[i]]);
+      }
+      /* intersect visibility and filtered */
+      visibility = visibility.map((cv, idx) => (cv && filtered[idx]));
+    }
     /* return array of "visible" or "hidden" values */
     return visibility.map((cv) => cv ? "visible" : "hidden");
   }

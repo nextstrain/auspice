@@ -18,12 +18,6 @@ import BranchSelectedPanel from "./branchSelectedPanel";
 import TipSelectedPanel from "./tipSelectedPanel";
 import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
-import { getGenotype } from "../../util/getGenotype";
-import { arrayInEquality,
-         branchThickness,
-         tipRadii,
-         tipVisibility,
-         nodeColor} from "../../util/treeHelpers";
 import { zoomToClade,
          restrictTreeToSingleTip,
          updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
@@ -135,10 +129,10 @@ class TreeView extends React.Component {
       const branchAttrToUpdate = {};
       const branchStyleToUpdate = {};
 
-      if (nextProps.tree.tipVisibilityVersion &&
-          this.props.tree.tipVisibilityVersion !== nextProps.tree.tipVisibilityVersion) {
-        // console.log("tipVisibilityVersion change detected", this.props.tree.tipVisibilityVersion, nextProps.tree.tipVisibilityVersion)
-        tipStyleToUpdate["visibility"] = nextProps.tree.tipVisibility;
+      if (nextProps.tree.visibilityVersion &&
+          this.props.tree.visibilityVersion !== nextProps.tree.visibilityVersion) {
+        // console.log("visibilityVersion change detected", this.props.tree.visibilityVersion, nextProps.tree.visibilityVersion)
+        tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
       }
       if (nextProps.tree.tipRadiiVersion &&
           this.props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion) {
@@ -269,7 +263,7 @@ class TreeView extends React.Component {
         },
         /* branch Thicknesses - guarenteed to be in redux by now */
         nextProps.tree.branchThickness,
-        nextProps.tree.tipVisibility
+        nextProps.tree.visibility
       );
       return myTree;
     } else {
@@ -442,7 +436,7 @@ class TreeView extends React.Component {
             }
             // call phyloTree to zoom out, this rerenders the geometry
             this.state.tree.zoomToParent(mediumTransitionDuration);
-            // wait and reset tipVisibility
+            // wait and reset visibility
             this.timeout = setTimeout(makeCallBack(), mediumTransitionDuration);
           }
         }

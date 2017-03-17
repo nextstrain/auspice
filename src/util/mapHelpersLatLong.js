@@ -1,8 +1,7 @@
 import {averageColors} from "./colorHelpers";
 import {getTipColorAttribute} from "./treeHelpers";
 
-const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale, sequences) => {
-
+const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale, sequences) => {
   const aggregatedLocations = {}; /* demes */
   const aggregatedTransmissions = {}; /* edges, animation paths */
   const demesToColors = {};
@@ -28,9 +27,10 @@ const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale, s
   /*
     aggregate locations for demes
   */
-  nodes.forEach((n) => {
+  nodes.forEach((n, i) => {
+    /* demes only count terminal nodes */
     const tipColorAttribute = getTipColorAttribute(n, colorScale, sequences);
-    if (!n.children) {
+    if (!n.children && visibility[i] === "visible") {
       // look up geo1 geo2 geo3 do lat longs differ
       if (aggregatedLocations[n.attr[geoResolution]]) {
         aggregatedLocations[n.attr[geoResolution]].push(colorScale.scale(tipColorAttribute));
@@ -39,16 +39,23 @@ const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale, s
         aggregatedLocations[n.attr[geoResolution]] = [colorScale.scale(tipColorAttribute)];
       }
     }
+    /* transmissions count internal node transitions as well
+    they are from the parent of the node to the node itself
+    */
     if (n.children) {
-      // if (parent.attr.country !== "china") { return; } // remove me, example filter
       n.children.forEach((child) => {
-        if (n.attr[geoResolution] === child.attr[geoResolution]) { return; }
-        // look up in transmissions dictionary
-        if (aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]]) {
-          aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]].push(colorScale.scale(tipColorAttribute));
-        } else {
-          // we don't have it, add it
-          aggregatedTransmissions[n.attr[geoResolution] + "/" + child.attr[geoResolution]] = [colorScale.scale(tipColorAttribute)];
+        /* only draw transmissions if
+        (1) the node & child aren't the same location and
+        (2) if child is visibile
+        */
+        if (n.attr[geoResolution] !== child.attr[geoResolution] &&
+          visibility[child.arrayIdx] === "visible") {
+          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution];
+          if (aggregatedTransmissions[transmission]) {
+            aggregatedTransmissions[transmission].push(colorScale.scale(n.attr[colorBy]));
+          } else {
+            aggregatedTransmissions[transmission] = [colorScale.scale(n.attr[colorBy])];
+          }
         }
       });
     }
@@ -75,7 +82,6 @@ const getLatLongs = (nodes, metadata, map, colorBy, geoResolution, colorScale, s
     count transmissions for line thickness
   */
 
-  // console.log(aggregatedTransmissions)
   // for each item in the object produced above...
   _.forOwn(aggregatedTransmissions, (value, key) => {
 
