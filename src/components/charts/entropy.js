@@ -165,11 +165,10 @@ class Entropy extends React.Component {
         key={i}
         x={x(e.x)}
         y={y(e.y)}
-        width="1" height={y(0) - y(e.y)}
+        width="2" height={y(0) - y(e.y)}
         cursor={"pointer"}
         onClick={() => {this.setColorByGenotype("gt-nuc_" + (e.x + 1));}}
         fill={"#CCC"}
-        stroke={"#CCC"}
       />
     );
   }
@@ -184,7 +183,6 @@ class Entropy extends React.Component {
         cursor={"pointer"}
         onClick={() => {this.setColorByGenotype("gt-" + e.prot + "_" + (e.codon + 1));}}
         fill={e.fill}
-        stroke={"#CCC"}
       />
     );
   }
