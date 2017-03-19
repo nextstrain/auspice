@@ -2,8 +2,40 @@ import { updateColorScale, updateNodeColors } from "./colors";
 import { dataURLStem } from "../util/globals";
 import * as types from "./types";
 
-/* request metadata */
+const updateDateRange = function () {
+  return function (dispatch, getState) {
+    const { controls, metadata } = getState();
+    /* bail if all required params aren't (yet) available! */
+    if (!(metadata.loadStatus === 2)) {
+      return null;
+    }
+    if (metadata.metadata.date_range) {
+      if (metadata.metadata.date_range.date_min) {
+        dispatch({
+          type: types.CHANGE_ABSOLUTE_DATE_MIN,
+          data: metadata.metadata.date_range.date_min
+        });
+        dispatch({
+          type: types.CHANGE_DATE_MIN,
+          data: metadata.metadata.date_range.date_min
+        });
+      }
+      if (metadata.metadata.date_range.date_max) {
+        dispatch({
+          type: types.CHANGE_ABSOLUTE_DATE_MAX,
+          data: metadata.metadata.date_range.date_max
+        });
+        dispatch({
+          type: types.CHANGE_DATE_MAX,
+          data: metadata.metadata.date_range.date_max
+        });
+      }
+    }
 
+  };
+};
+
+/* request metadata */
 const requestMetadata = () => {
   return {
     type: types.REQUEST_METADATA
@@ -42,6 +74,7 @@ const populateMetadataStore = (queryParams) => {
         dispatch(receiveMetadata(json));
         dispatch(updateColorScale());
         dispatch(updateNodeColors());
+        dispatch(updateDateRange());
       },
       (err) => dispatch(metadataFetchError(err))
     );

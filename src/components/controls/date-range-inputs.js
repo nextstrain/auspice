@@ -150,6 +150,8 @@ class DateRangeInputs extends React.Component {
     const selectedMinNumDate = calendarToNumeric(selectedMin);
     const selectedMaxNumDate = calendarToNumeric(selectedMax);
 
+    const minDistance = (absoluteMaxNumDate - absoluteMinNumDate) / 10.0;
+
     return (
       <div>
         <div style={{width: controlsWidth}}>
@@ -161,7 +163,7 @@ class DateRangeInputs extends React.Component {
           /* debounce the onChange event, but ensure the final one goes through */
           onChange={this.updateFromSlider.bind(this, true)}
           onAfterChange={this.updateFromSlider.bind(this, false)}
-          minDistance={0.5}                           // minDistance is in years
+          minDistance={minDistance}
           pearling
           withBars/>
         </div>

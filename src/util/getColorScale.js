@@ -23,7 +23,7 @@ const genericScale = (cmin, cmax) => {
   const range = cmax - cmin;
   const tmpColorScale = d3.scale.linear()
     .domain(genericDomain.map((d) => offset + d * range))
-    .range(colors[10]);
+    .range(colors[9]);
   return tmpColorScale;
 };
 
