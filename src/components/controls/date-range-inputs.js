@@ -75,9 +75,9 @@ class DateRangeInputs extends React.Component {
 
   updateFromSlider(debounce, numDateValues) {
     if (debounce) {
-      // simple debounce @ 250ms
+      // simple debounce @ 100ms
       const currentTime = Date.now();
-      if (currentTime < this.state.lastSliderUpdateTime + 250) {
+      if (currentTime < this.state.lastSliderUpdateTime + 100) {
         return null
       }
       // console.log("UPDATING", currentTime, this.state.lastSliderUpdateTime)
