@@ -1,5 +1,4 @@
 import React from "react";
-import Radium from "radium";
 import _ from "lodash";
 import { connect } from "react-redux";
 import {VictoryAxis} from "victory-chart";
@@ -18,7 +17,6 @@ import { dataFont, darkGrey } from "../../globalStyles";
     browserDimensions: state.browserDimensions.browserDimensions
   };
 })
-@Radium
 class Entropy extends React.Component {
   static contextTypes = {
     router: React.PropTypes.object.isRequired

@@ -1,5 +1,4 @@
 import React from "react";
-import Radium from "radium";
 import titleCase from "title-case";
 import { connect } from "react-redux";
 import { legendMouseEnterExit } from "../../actions/treeProperties";
@@ -10,7 +9,6 @@ function isNumeric(n) {
 }
 
 @connect()
-@Radium
 class LegendItem extends React.Component {
   static propTypes = {
     dispatch: React.PropTypes.func.isRequired

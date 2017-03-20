@@ -5,7 +5,6 @@ import { loadJSONs } from "../actions/loadData";
 import { RESET_CONTROLS, NEW_DATASET } from "../actions/types";
 import { restoreStateFromURL, turnURLtoDataPath } from "../util/urlHelpers"
 import "whatwg-fetch"; // setup polyfill
-import Radium from "radium";
 import Title from "./framework/title";
 import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
@@ -32,7 +31,6 @@ import { analyticsNewPage } from "../util/googleAnalytics";
   see https://reacttraining.com/react-router
 */
 @connect()
-@Radium
 class App extends React.Component {
   constructor(props) {
     super(props);

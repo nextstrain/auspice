@@ -1,5 +1,4 @@
 import React from "react";
-import Radium from "radium";
 import { connect } from "react-redux";
 import {VictoryAxis} from "victory-chart";
 import * as globals from "../../util/globals";
@@ -12,7 +11,6 @@ import Card from "../framework/card";
     colorBy: state.controls.colorBy
   };
 })
-@Radium
 class Frequencies extends React.Component {
   constructor(props) {
     super(props);
