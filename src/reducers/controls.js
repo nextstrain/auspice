@@ -1,3 +1,4 @@
+/*eslint dot-notation: 0*/
 import * as types from "../actions/types";
 import * as globals from "../util/globals";
 import getColorScale from "../util/getColorScale";
@@ -108,6 +109,24 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       geoResolution: action.data
     });
+  /* metadata in may affect the date ranges... */
+  case types.RECEIVE_METADATA:
+    const dates = {};
+    /* do each of the 4 conditions manually as they're different... */
+    if ("absoluteDateMin" in action) {
+      dates["absoluteDateMin"] = action["absoluteDateMin"];
+    }
+    if ("absoluteDateMax" in action) {
+      dates["absoluteDateMax"] = action["absoluteDateMax"];
+    }
+    /* only change the dateMax / dateMin *if* they're outside bounds */
+    if ("dateMax" in action && action["dateMax"] < state["dateMax"]) {
+      dates["dateMax"] = action["dateMax"];
+    }
+    if ("dateMin" in action && action["dateMin"] > state["dateMin"]) {
+      dates["dateMin"] = action["dateMin"];
+    }
+    return Object.assign({}, state, dates);
   case types.APPLY_FILTER_QUERY:
     // values arrive as array
     const filters = Object.assign({}, state.filters, {});
