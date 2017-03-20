@@ -158,11 +158,11 @@ class TreeView extends React.Component {
       /* implement style changes */
       if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
         // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
-        tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, fastTransitionDuration);
+        tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate);
       }
       if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
         // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
-        tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, fastTransitionDuration);
+        tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate);
       }
 
       /* swap layouts */

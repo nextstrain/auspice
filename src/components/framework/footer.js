@@ -3,11 +3,7 @@ import { connect } from "react-redux";
 import { dataFont, medGrey } from "../../globalStyles";
 import computeResponsive from "../../util/computeResponsive";
 import Flex from "./flex";
-import Radium from "radium";
 import d3 from "d3";
-
-
-
 
 @connect((state) => {
   return {
@@ -16,7 +12,6 @@ import d3 from "d3";
     browserDimensions: state.browserDimensions.browserDimensions
   };
 })
-@Radium
 class Footer extends React.Component {
   constructor(props) {
     super(props);

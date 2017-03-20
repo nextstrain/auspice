@@ -1,4 +1,4 @@
-import { tipRadius, freqScale } from "./globals";
+import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "./globals";
 import { getGenotype } from "./getGenotype";
 import { calendarToNumeric } from "../components/controls/date-range-inputs";
 
@@ -183,7 +183,7 @@ export const calcTipRadii = function (selectedLegendItem,
                          ) {
   if (selectedLegendItem && tree && tree.nodes){
     const legendMap = colorScale.continuous ? colorScale.legendBoundsMap : false;
-    return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, legendMap, colorScale, sequences) ? 6 : 3);
+    return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, legendMap, colorScale, sequences) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (tree && tree.nodes) {
     return tree.nodes.map((d) => tipRadius);
   }
