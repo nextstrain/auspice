@@ -1,6 +1,6 @@
 import { tipRadius, freqScale } from "./globals";
 import { getGenotype } from "./getGenotype";
-import { calendarToNumeric } from "../components/controls/date-range-inputs";
+import { calendarToNumericDeprecated } from "../components/controls/date-range-inputs";
 
 export const gatherTips = (node, tips) => {
 
@@ -239,8 +239,8 @@ export const calcVisibility = function (tree, controls) {
     let visibility;
 
     // TIME FILTERING (internal + terminal nodes)
-    const lowerLimit = calendarToNumeric(controls.dateMin);
-    const upperLimit = calendarToNumeric(controls.dateMax);
+    const lowerLimit = calendarToNumericDeprecated(controls.dateMin);
+    const upperLimit = calendarToNumericDeprecated(controls.dateMax);
     visibility = tree.nodes.map((d) => (
       d.attr.num_date >= lowerLimit && d.attr.num_date <= upperLimit
     ));

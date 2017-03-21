@@ -7,6 +7,7 @@ import { connect } from "react-redux";
 import { controlsWidth } from "../../util/globals";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
+import d3 from "d3";
 
 moment.updateLocale("en", {
   longDateFormat: {
@@ -14,7 +15,7 @@ moment.updateLocale("en", {
   }
 });
 
-export const calendarToNumeric = (calDate) => {
+export const calendarToNumericDeprecated = (calDate) => {
   const unixDate = moment(calDate).unix();  // number of seconds since 1970
   return 1970 + (unixDate / 365.2425 / 24 / 3600);
 };
@@ -31,7 +32,9 @@ class DateRangeInputs extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      lastSliderUpdateTime: Date.now()
+      lastSliderUpdateTime: Date.now(),
+      dateScale: d3.time.scale().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
+      dateFormater: d3.time.format("%Y-%m-%d")
     }
   }
   static contextTypes = {
@@ -53,9 +56,12 @@ class DateRangeInputs extends React.Component {
   }
 
   numericToCalendar(numDate) {
-    const unixDate = (numDate - 1970) * 365.2425 * 24 * 3600; // number of seconds since 1970
-    return moment.unix(unixDate).format("YYYY-MM-DD");
+    return(this.state.dateFormater(this.state.dateScale.invert(numDate)));
   }
+
+  calendarToNumeric(calDate) {
+    return(this.state.dateScale(this.state.dateFormater.parse(calDate)));
+  };
 
   updateFromPicker(ref, momentDate) {
     // a momentDate is received from DatePicker
@@ -145,10 +151,10 @@ class DateRangeInputs extends React.Component {
     const selectedMin = this.props.dateMin;
     const selectedMax = this.props.dateMax;
 
-    const absoluteMinNumDate = calendarToNumeric(absoluteMin);
-    const absoluteMaxNumDate = calendarToNumeric(absoluteMax);
-    const selectedMinNumDate = calendarToNumeric(selectedMin);
-    const selectedMaxNumDate = calendarToNumeric(selectedMax);
+    const absoluteMinNumDate = this.calendarToNumeric(absoluteMin);
+    const absoluteMaxNumDate = this.calendarToNumeric(absoluteMax);
+    const selectedMinNumDate = this.calendarToNumeric(selectedMin);
+    const selectedMaxNumDate = this.calendarToNumeric(selectedMax);
 
     const minDistance = (absoluteMaxNumDate - absoluteMinNumDate) / 10.0;
 
