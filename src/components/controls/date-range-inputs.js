@@ -15,26 +15,21 @@ moment.updateLocale("en", {
   }
 });
 
-export const calendarToNumericDeprecated = (calDate) => {
-  const unixDate = moment(calDate).unix();  // number of seconds since 1970
-  return 1970 + (unixDate / 365.2425 / 24 / 3600);
-};
-
 @connect((state) => {
   return {
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
     absoluteDateMin: state.controls.absoluteDateMin,
-    absoluteDateMax: state.controls.absoluteDateMax
+    absoluteDateMax: state.controls.absoluteDateMax,
+    dateScale: state.controls.dateScale,
+    dateFormat: state.controls.dateFormat
   };
 })
 class DateRangeInputs extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      lastSliderUpdateTime: Date.now(),
-      dateScale: d3.time.scale().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
-      dateFormater: d3.time.format("%Y-%m-%d")
+      lastSliderUpdateTime: Date.now()
     }
   }
   static contextTypes = {
@@ -56,11 +51,11 @@ class DateRangeInputs extends React.Component {
   }
 
   numericToCalendar(numDate) {
-    return(this.state.dateFormater(this.state.dateScale.invert(numDate)));
+    return(this.props.dateFormat(this.props.dateScale.invert(numDate)));
   }
 
   calendarToNumeric(calDate) {
-    return(this.state.dateScale(this.state.dateFormater.parse(calDate)));
+    return(this.props.dateScale(this.props.dateFormat.parse(calDate)));
   };
 
   updateFromPicker(ref, momentDate) {

@@ -3,6 +3,7 @@ import * as types from "../actions/types";
 import * as globals from "../util/globals";
 import getColorScale from "../util/getColorScale";
 import moment from 'moment';
+import d3 from "d3";
 
 /*
   we don't actually need to have legendBoundsMap default if regions will always be the
@@ -33,7 +34,9 @@ const getDefaultState = function () {
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
     geoResolution: globals.defaultGeoResolution,
     datasetPathName: null,
-    filters: {}
+    filters: {},
+    dateScale: d3.time.scale().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
+    dateFormat: d3.time.format("%Y-%m-%d")
   };
 };
 
