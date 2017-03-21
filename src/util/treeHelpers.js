@@ -1,6 +1,5 @@
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "./globals";
 import { getGenotype } from "./getGenotype";
-import { calendarToNumeric } from "../components/controls/date-range-inputs";
 
 export const gatherTips = (node, tips) => {
 
@@ -239,8 +238,8 @@ export const calcVisibility = function (tree, controls) {
     let visibility;
 
     // TIME FILTERING (internal + terminal nodes)
-    const lowerLimit = calendarToNumeric(controls.dateMin);
-    const upperLimit = calendarToNumeric(controls.dateMax);
+    const lowerLimit = controls.dateScale(controls.dateFormat.parse(controls.dateMin)); // convert caldate to numdate
+    const upperLimit = controls.dateScale(controls.dateFormat.parse(controls.dateMax)); // convert caldate to numdate
     visibility = tree.nodes.map((d) => (
       d.attr.num_date >= lowerLimit && d.attr.num_date <= upperLimit
     ));

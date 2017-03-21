@@ -59,6 +59,18 @@ const makeDataPathFromParsedParams = function (parsedParams) {
   return tmp_levels.map((d) => d[1]).join("_");
 };
 
+const selectivelyUpdateSearch = function (defaultSearch, userSearch) {
+  if (!defaultSearch) {return userSearch;}
+  const final = queryString.parse(userSearch);
+  const defaults = queryString.parse(defaultSearch);
+  for (const key of Object.keys(defaults)) {
+    if (!(key in final)) {
+      final[key] = defaults[key];
+    }
+  }
+  return queryString.stringify(final);
+};
+
 /* if we have decided that the URL (data, not query) has changed
 this fn will work out the correct datapath, set it if necessary,
 and return the data path used to load the data
@@ -72,7 +84,7 @@ export const turnURLtoDataPath = function (router) {
     // console.log("parsed params incomplete => modifying URL")
     router.replace({
       pathname: parsedParams.fullsplat,
-      search: parsedParams.search ? parsedParams.search : router.location.search
+      search: selectivelyUpdateSearch(parsedParams.search, router.location.search)
     });
   }
   // if valid, return the data_path, else undefined
@@ -80,4 +92,4 @@ export const turnURLtoDataPath = function (router) {
     return makeDataPathFromParsedParams(parsedParams);
   }
   return undefined;
-}
+};

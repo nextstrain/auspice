@@ -1,9 +1,10 @@
+/*eslint dot-notation: 0*/
 import { updateColorScale, updateNodeColors } from "./colors";
 import { dataURLStem } from "../util/globals";
 import * as types from "./types";
 
-/* request metadata */
 
+/* request metadata */
 const requestMetadata = () => {
   return {
     type: types.REQUEST_METADATA
@@ -11,10 +12,22 @@ const requestMetadata = () => {
 };
 
 const receiveMetadata = (data) => {
-  return {
+  const ret = {
     type: types.RECEIVE_METADATA,
     data: data
   };
+  /* if there's data data include this for the controls reducer */
+  if (data.date_range) {
+    if (data.date_range.date_min) {
+      ret["dateMin"] = data.date_range.date_min;
+      ret["absoluteDateMin"] = data.date_range.date_min;
+    }
+    if (data.date_range.date_min) {
+      ret["dateMax"] = data.date_range.date_max;
+      ret["absoluteDateMax"] = data.date_range.date_max;
+    }
+  }
+  return ret;
 };
 
 const metadataFetchError = (err) => {

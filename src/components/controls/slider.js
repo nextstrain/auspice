@@ -171,7 +171,7 @@ var Slider = React.createClass({
     return {
       min: 0,
       max: 100,
-      step: 1.0/365.2425,
+      step: 0.00001,
       minDistance: 0,
       defaultValue: 0,
       orientation: 'horizontal',
