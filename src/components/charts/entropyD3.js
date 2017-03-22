@@ -2,7 +2,8 @@ import _ from "lodash";
 import { select, event } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
-import { zoom } from "d3-zoom";
+import { zoom, zoomIdentity } from "d3-zoom";
+import { brushX } from "d3-brush";
 
 /* constructor - sed up data and store params */
 const EntropyChart = function (ref, data, callbacks) {
@@ -29,9 +30,9 @@ EntropyChart.prototype.drawGenes = function (annotations) {
     .data(annotations)
     .enter().append("rect")
       .attr("class", "gene")
-      .attr("x", (d) => this.x(d.start))
-      .attr("y", (d) => this.y(this.yMin) + 20 + readingFrameOffset(d.readingFrame))
-      .attr("width", (d) => this.x(d.end) - this.x(d.start))
+      .attr("x", (d) => this.x2(d.start))
+      .attr("y", (d) => 20 + readingFrameOffset(d.readingFrame))
+      .attr("width", (d) => this.x2(d.end) - this.x2(d.start))
       .attr("height", geneHeight)
       .style("fill", (d) => d.fill);
 };
@@ -66,6 +67,9 @@ EntropyChart.prototype.setScales = function (chartGeom, xMax, yMax) {
   this.x = scaleLinear()
     .domain([0, xMax])
     .range([chartGeom.padLeft, chartGeom.width - chartGeom.padRight]);
+  this.x2 = scaleLinear()
+    .domain([0, xMax])
+    .range([chartGeom.padLeft, chartGeom.width - chartGeom.padRight]);
   this.yMin = -0.11 * yMax;
   this.y = scaleLinear()
     .domain([-0.11 * yMax, 1.2 * yMax])
@@ -88,7 +92,6 @@ EntropyChart.prototype.render = function (chartGeom) {
   /* tear things down */
   this.svg.selectAll("*").remove();
 
-
   /* Z O O M I N G    P A R T   1 */
   // set up a zoom overlay (else clicking on whitespace won't zoom)
   this.zoom = zoom()
@@ -106,6 +109,7 @@ EntropyChart.prototype.render = function (chartGeom) {
   /* draw x & y axis, given the scales this.x and this.y */
   this.yAxis = axisLeft(this.y).ticks(4);
   this.xAxis = axisBottom(this.x).ticks(20);
+  this.x2Axis = axisBottom(this.x2).ticks(20);
   this.svg.append("g")
       .attr("class", "y axis")
       .attr("transform", "translate(" + this.x(0) + ",0)")
@@ -116,22 +120,55 @@ EntropyChart.prototype.render = function (chartGeom) {
       .call(this.xAxis);
   this.svg.append("g")
       .attr("class", "x2 axis")
-      .attr("transform", "translate(0," + this.height + 60 + ")")
-      .call(this.xAxis);
-  this.mainGraph = this.svg.append("g");
-  this.navGraph = this.svg.append("g");
+      .attr("transform", "translate(0," + (this.height + 60) + ")")
+      .call(this.x2Axis);
+  this.mainGraph = this.svg.append("g")
+    .attr("class", "main");
+  this.navGraph = this.svg.append("g")
+    .attr("class", "nav")
+    .attr("transform", "translate(0," + (this.height + 20) + ")");
+
+  this.brushed = function () {
+    const s = event.selection || this.x2.range();
+    const x = this.x.domain(s.map(this.x2.invert, this.x2));
+    this.xAxis = this.xAxis.scale(x);
+    this.svg.select(".x.axis").call(this.xAxis);
+    this.drawBars(x);
+
+    // this.svg.select(".zoom").call(
+    //   this.zoom.transform,
+    //   zoomIdentity.scale(this.width / (s[1] - s[0])).translate(-s[0], 0)
+    // )
+
+  };
+
+  this.brush = brushX()
+    .extent([[0, 0], [this.width, 60]]) // relative to div it's attached to
+    .on("brush end", () => this.brushed());
+
+  this.navGraph.append("g")
+    .attr("class", "brush")
+    .call(this.brush)
+    .call(this.brush.move, this.x.range());
 
   /* draw some data */
   this.drawBars(this.x);
   this.drawGenes(this.data.annotations);
 
   this.zoomed = function () {
+    const t = event.transform;
     /* rescale the x axis (not y) */
-    const x = event.transform.rescaleX(this.x);
+    const x = t.rescaleX(this.x);
     this.xAxis = this.xAxis.scale(x);
     this.svg.select(".x.axis").call(this.xAxis);
     this.drawBars(x);
+
+    /* move the brush */
+    this.navGraph.select(".brush")
+      .call(this.brush.move, x.range().map(t.invertX, t));
+
   };
+
 
 };
 
