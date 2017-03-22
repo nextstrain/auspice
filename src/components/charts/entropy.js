@@ -3,7 +3,7 @@
 import React from "react";
 import _ from "lodash";
 import { connect } from "react-redux";
-import {VictoryAxis} from "victory-chart";
+// import {VictoryAxis} from "victory-chart";
 import * as globals from "../../util/globals";
 import Card from "../framework/card";
 import d3 from "d3";
@@ -11,6 +11,10 @@ import computeResponsive from "../../util/computeResponsive";
 import { changeColorBy } from "../../actions/colors";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { dataFont, darkGrey, materialButton, materialButtonSelected } from "../../globalStyles";
+import EntropyChart from "./entropyD3"
+import InfoPanel from "./entropyInfoPanel";
+import "../../css/entropy.css";
+
 
 const calcEntropy = function (entropy) {
   const entropyNt = entropy["nuc"]["val"].map((s, i) => {
@@ -50,72 +54,6 @@ const calcEntropy = function (entropy) {
     entropyNtWithoutZeros};
 };
 
-const makeXAxis = (chartGeom, domain) => (
-  <VictoryAxis
-    padding={{
-      top: 0,
-      bottom: 0,
-      left: chartGeom.padLeft, // cosmetic, 1px overhang, add +1 if persists
-      right: chartGeom.padRight // this is confusing, but ok
-    }}
-    domain={domain}
-    offsetY={chartGeom.padBottom}
-    width={chartGeom.width}
-    standalone={false}
-    label={"Position"}
-    tickCount={5}
-    style={{
-      axis: {stroke: "black", padding: 0},
-      axisLabel: {fontSize: 14, padding: 30, fill: darkGrey, fontFamily: dataFont},
-      tickLabels: {fontSize: 12, padding: 0, fill: darkGrey, fontFamily: dataFont},
-      ticks: {stroke: "black", size: 5, padding: 5}
-    }}
-  />
-);
-
-const makeYAxis = (chartGeom, domain) => (
-  <VictoryAxis
-    dependentAxis
-    padding={{
-      top: 0,
-      bottom: chartGeom.padBottom,
-      left: chartGeom.padLeft, // cosmetic, 1px overhang, add +1 if persists
-      right: chartGeom.padRight / 2 // bug? why is that / 2 necessary...
-    }}
-    domain={domain}
-    offsetY={chartGeom.padBottom}
-    standalone={false}
-    style={{
-      axis: {stroke: "black", padding: 0},
-      axisLabel: {fontSize: 14, padding: 30, fill: darkGrey, fontFamily: dataFont},
-      tickLabels: {fontSize: 12, padding: 0, fill: darkGrey, fontFamily: dataFont},
-      ticks: {stroke: "black", size: 5, padding: 5}
-    }}
-  />
-);
-
-const makeAnnotation = (x, y, yMax, e, i) => (
-  <g key={i}>
-    <rect
-      x={x(e.start)}
-      y={y(-0.025 * yMax * e.readingFrame)}
-      width={x(e.end) - x(e.start)}
-      height={12}
-      fill={e.fill}
-      stroke={e.fill}
-    />
-    <text
-      x={0.5 * (x(e.start) + x(e.end)) }
-      y={y(-0.025 * yMax * e.readingFrame) + 10}
-      textAnchor={"middle"}
-      fontSize={10}
-      fill={"#444"}
-    >
-      {e.prot}
-    </text>
-  </g>
-);
-
 const getStyles = function (width) {
   return {
     switchContainer: {
@@ -134,14 +72,17 @@ const getStyles = function (width) {
 @connect(state => {
   return {
     entropy: state.entropy.entropy,
-    browserDimensions: state.browserDimensions.browserDimensions
+    browserDimensions: state.browserDimensions.browserDimensions,
+    load: state.entropy.loadStatus,
+    shouldReRender: false
   };
 })
 class Entropy extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      aa: true
+      aa: true,
+      hovered: false
     };
   }
   static contextTypes = {
@@ -151,40 +92,13 @@ class Entropy extends React.Component {
     dispatch: React.PropTypes.func.isRequired,
     entropy: React.PropTypes.object,
     sidebar: React.PropTypes.bool,
-    browserDimensions: React.PropTypes.object
+    browserDimensions: React.PropTypes.object,
+    load: React.PropTypes.number
   }
 
   setColorByGenotype(colorBy) {
     this.props.dispatch(changeColorBy(colorBy));
     modifyURLquery(this.context.router, {c: colorBy}, true);
-  }
-
-  makeEntropyNtBar(x, y, e, i) {
-    return (
-      <rect
-        key={i}
-        x={x(e.x)}
-        y={y(e.y)}
-        width="2" height={y(0) - y(e.y)}
-        cursor={"pointer"}
-        onClick={() => {this.setColorByGenotype("gt-nuc_" + (e.x + 1));}}
-        fill={"#CCC"}
-      />
-    );
-  }
-
-  makeEntropyAABar(x, y, e, i) {
-    return (
-      <rect
-        key={i}
-        x={x(e.x)}
-        y={y(e.y)}
-        width="2.5" height={y(0) - y(e.y)}
-        cursor={"pointer"}
-        onClick={() => {this.setColorByGenotype("gt-" + e.prot + "_" + (e.codon + 1));}}
-        fill={e.fill}
-      />
-    );
   }
 
   getChartGeom() {
@@ -195,12 +109,25 @@ class Entropy extends React.Component {
       sidebar: this.props.sidebar
     });
     return {
+      responsive,
       width: responsive.width,
       height: 300,
       padBottom: 50,
       padLeft: 38,
       padRight: 12
     };
+  }
+  /* CALLBACKS */
+  onHover(d, x, y) {
+    // console.log("hovering @", x, y, this.state.chartGeom);
+    this.setState({hovered: {d, type: ".tip", x, y, chartGeom: this.state.chartGeom}});
+  }
+  onLeave() {
+    this.setState({hovered: false});
+  }
+  onClick(d) {
+    this.setColorByGenotype("gt-" + d.prot + "_" + (d.codon + 1));
+    this.setState({hovered: false});
   }
 
   aaNtSwitch(styles) {
@@ -223,48 +150,63 @@ class Entropy extends React.Component {
       </div>
     );
   }
-
-  render() {
-    if (!(this.props.entropy && this.props.browserDimensions)) {
-      return (
-        <div>
-          "Waiting on entropy data"
-        </div>
+  componentWillReceiveProps(nextProps) {
+    if (this.props.load !== nextProps.load && nextProps.load === 2) {
+      const chart = new EntropyChart(
+        this.refs.d3entropy,
+        calcEntropy(nextProps.entropy),
+        { /* callbacks */
+          onHover: this.onHover.bind(this),
+          onLeave: this.onLeave.bind(this),
+          onClick: this.onClick.bind(this)
+        }
       );
+      chart.render(this.getChartGeom());
+      this.setState({
+        chart,
+        chartGeom: this.getChartGeom(),
+        shouldReRender: true
+      });
     }
-    /* get entropy data */
-    const { annotations,
-      aminoAcidEntropyWithoutZeros,
-      entropyNt,
-      entropyNtWithoutZeros } = calcEntropy(this.props.entropy);
+  }
+  // componentDidMount() {
+  //   this.repaint();
+  // }
+  componentDidUpdate() {
+    if (this.state.shouldReRender && this.state.chart && this.props.browserDimensions) {
+      this.setState({shouldReRender: false});
+      this.state.chart.render(this.getChartGeom());
+    }
+  }
+  // repaint() {
+  //   if (this.state.chart && this.props.browserDimensions) {
+  //     this.state.chart.render(this.getChartGeom());
+  //   }
+  // }
+  render() {
+
     /* get chart geom data */
     const chartGeom = this.getChartGeom();
     /* get styles */
     const styles = getStyles(chartGeom.width);
-    /* d3 scales */
-    const x = d3.scale.linear()
-      .domain([0, entropyNt.length]) // original array, since the x values are still mapped to that
-      .range([chartGeom.padLeft, chartGeom.width - chartGeom.padRight]);
-    const yMax = Math.max(_.maxBy(entropyNtWithoutZeros, "y").y,
-                          _.maxBy(aminoAcidEntropyWithoutZeros, "y").y);
-    const y = d3.scale.linear()
-      .domain([-0.11 * yMax, 1.2 * yMax]) // x values are mapped to orig array
-      .range([chartGeom.height - chartGeom.padBottom, 0]);
 
     return (
       <Card title={"Diversity"}>
         {this.aaNtSwitch(styles)}
-        <svg width={chartGeom.width} height={chartGeom.height}>
-          {annotations.map(makeAnnotation.bind(this, x, y, yMax))}
-          {this.state.aa ?
-            aminoAcidEntropyWithoutZeros.map(this.makeEntropyAABar.bind(this, x, y)) :
-            entropyNtWithoutZeros.map(this.makeEntropyNtBar.bind(this, x, y))
-          }
-          {makeXAxis(chartGeom, x.domain())}
-          {makeYAxis(chartGeom, y.domain())}
+        <InfoPanel
+          hovered={this.state.hovered}
+        />
+        <svg
+          style={{pointerEvents: "auto"}}
+          width={chartGeom.responsive.width}
+          height={chartGeom.height}
+        >
+          <g ref="d3entropy" id="d3entropy"/>
         </svg>
       </Card>
-    );
+    )
+
+
   }
 }
 

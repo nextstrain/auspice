@@ -114,6 +114,11 @@ class App extends React.Component {
               handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
             />
           }
+
+          <Entropy
+            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+          />
+
           <TreeView
             query={queryString.parse(this.context.router.location.search)}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
@@ -123,9 +128,7 @@ class App extends React.Component {
             justGotNewDatasetRenderNewMap={false}
           />
           <Frequencies/>
-          <Entropy
-            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-          />
+
           <Footer
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
           />
