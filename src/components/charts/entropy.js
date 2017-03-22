@@ -126,8 +126,19 @@ class Entropy extends React.Component {
     this.setState({hovered: false});
   }
   onClick(d) {
-    this.setColorByGenotype("gt-" + d.prot + "_" + (d.codon + 1));
+    if (this.state.aa) {
+      this.setColorByGenotype("gt-" + d.prot + "_" + (d.codon + 1));
+    } else {
+      this.setColorByGenotype("gt-nuc_" + (d.x + 1));
+    }
     this.setState({hovered: false});
+  }
+
+  toggleAA(aa) {
+    if (aa !== this.state.aa) {
+      this.state.chart.toggle(aa);
+      this.setState({aa});
+    }
   }
 
   aaNtSwitch(styles) {
@@ -136,14 +147,14 @@ class Entropy extends React.Component {
         <button
           key={1}
           style={this.state.aa ? materialButtonSelected : materialButton}
-          onClick={() => this.setState({aa: true})}
+          onClick={() => this.toggleAA(true)}
         >
           <span style={styles.switchTitle}> {"AA"} </span>
         </button>
         <button
           key={2}
           style={!this.state.aa ? materialButtonSelected : materialButton}
-          onClick={() => this.setState({aa: false})}
+          onClick={() => this.toggleAA(false)}
         >
           <span style={styles.switchTitle}> {"NT"} </span>
         </button>
@@ -175,7 +186,7 @@ class Entropy extends React.Component {
   componentDidUpdate() {
     if (this.state.shouldReRender && this.state.chart && this.props.browserDimensions) {
       this.setState({shouldReRender: false});
-      this.state.chart.render(this.getChartGeom());
+      this.state.chart.render(this.getChartGeom(), this.state.aa);
     }
   }
   // repaint() {

@@ -15,6 +15,7 @@ const EntropyChart = function (ref, data, callbacks) {
     this.geneMap[d.prot] = d;
     this.geneMap[d.prot].idx = idx;
   });
+  console.log(this.data)
 };
 
 /* convert amino acid X in gene Y to a nucleotide number */
@@ -37,11 +38,8 @@ EntropyChart.prototype.drawGenes = function (annotations) {
       .style("fill", (d) => d.fill);
 };
 
-/* draw the bars (for each base / aa) */
-EntropyChart.prototype.drawBars = function (xscale) {
-  this.mainGraph.selectAll("*").remove();
-  this.mainGraph.selectAll(".bar")
-    .data(this.data.aminoAcidEntropyWithoutZeros)
+EntropyChart.prototype.drawAA = function (el, xscale) {
+  el.data(this.data.aminoAcidEntropyWithoutZeros)
     .enter().append("rect")
       .attr("class", "bar")
       .attr("x", (d) => xscale(this.aaToNtCoord(d.prot, d.codon)))
@@ -61,12 +59,49 @@ EntropyChart.prototype.drawBars = function (xscale) {
       .style("cursor", "pointer");
 };
 
+EntropyChart.prototype.drawNt = function (el, xscale) {
+  el.data(this.data.entropyNtWithoutZeros)
+    .enter().append("rect")
+      .attr("class", "bar")
+      .attr("x", (d) => xscale(d.x))
+      .attr("y", (d) => this.y(d.y))
+      .attr("width", 1)
+      .attr("height", (d) => this.height - this.y(d.y))
+      .style("fill", (d) => "#DC9BFF")
+      .on("mouseover", (d) => {
+        this.callbacks.onHover(d, event.pageX, event.pageY);
+      })
+      .on("mouseout", (d) => {
+        this.callbacks.onLeave(d);
+      })
+      .on("click", (d) => {
+        this.callbacks.onClick(d);
+      })
+      .style("cursor", "pointer");
+};
+
+/* draw the bars (for each base / aa) */
+EntropyChart.prototype.drawBars = function (xscale) {
+  this.mainGraph.selectAll("*").remove();
+  if (this.aa) {
+    this.drawAA(this.mainGraph.selectAll(".bar"), xscale);
+  } else {
+    this.drawNt(this.mainGraph.selectAll(".bar"), xscale);
+  }
+};
+
+EntropyChart.prototype.toggle = function (aa) {
+  this.aa = aa;
+  this.drawBars(this.xModified);
+};
+
 /* set scales */
 EntropyChart.prototype.setScales = function (chartGeom, xMax, yMax) {
   this.xMax = xMax;
   this.x = scaleLinear()
     .domain([0, xMax])
     .range([chartGeom.padLeft, chartGeom.width - chartGeom.padRight]);
+  this.xModified = this.x;
   this.x2 = scaleLinear()
     .domain([0, xMax])
     .range([chartGeom.padLeft, chartGeom.width - chartGeom.padRight]);
@@ -77,7 +112,8 @@ EntropyChart.prototype.setScales = function (chartGeom, xMax, yMax) {
 };
 
 /* initial render - set up zooming etc */
-EntropyChart.prototype.render = function (chartGeom) {
+EntropyChart.prototype.render = function (chartGeom, aa) {
+  this.aa = aa;
   this.setScales(
     chartGeom,
     this.data.entropyNt.length,
@@ -95,7 +131,7 @@ EntropyChart.prototype.render = function (chartGeom) {
   /* Z O O M I N G    P A R T   1 */
   // set up a zoom overlay (else clicking on whitespace won't zoom)
   this.zoom = zoom()
-    .scaleExtent([1, 4])
+    .scaleExtent([1, 8])
     .translateExtent([[0, 0], [this.width, this.height]])
     .extent([[0, 0], [this.width, this.height]])
     .on("zoom", () => this.zoomed());
@@ -130,10 +166,10 @@ EntropyChart.prototype.render = function (chartGeom) {
 
   this.brushed = function () {
     const s = event.selection || this.x2.range();
-    const x = this.x.domain(s.map(this.x2.invert, this.x2));
-    this.xAxis = this.xAxis.scale(x);
+    this.xModified = this.x.domain(s.map(this.x2.invert, this.x2));
+    this.xAxis = this.xAxis.scale(this.xModified);
     this.svg.select(".x.axis").call(this.xAxis);
-    this.drawBars(x);
+    this.drawBars(this.xModified);
 
     // this.svg.select(".zoom").call(
     //   this.zoom.transform,
@@ -158,14 +194,14 @@ EntropyChart.prototype.render = function (chartGeom) {
   this.zoomed = function () {
     const t = event.transform;
     /* rescale the x axis (not y) */
-    const x = t.rescaleX(this.x);
-    this.xAxis = this.xAxis.scale(x);
+    this.xModified = t.rescaleX(this.x);
+    this.xAxis = this.xAxis.scale(this.xModified);
     this.svg.select(".x.axis").call(this.xAxis);
-    this.drawBars(x);
+    this.drawBars(this.xModified);
 
     /* move the brush */
     this.navGraph.select(".brush")
-      .call(this.brush.move, x.range().map(t.invertX, t));
+      .call(this.brush.move, this.xModified.range().map(t.invertX, t));
 
   };
 
