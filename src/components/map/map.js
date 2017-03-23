@@ -299,22 +299,6 @@ class Map extends React.Component {
     this.setState({map});
   }
   maybeCreateMapDiv() {
-    // onClick={this.handleAnimationPlayClicked.bind(this) }
-    // <button style={{
-    //     position: "absolute",
-    //     left: 25,
-    //     top: 25,
-    //     zIndex: 9999,
-    //     border: "none",
-    //     padding: 15,
-    //     borderRadius: 4,
-    //     backgroundColor: "rgb(124, 184, 121)",
-    //     fontWeight: 700,
-    //     color: "white"
-    //   }}
-    //   >
-    //   Play
-    // </button>
     let container = null;
     if (
       this.props.browserDimensions &&
@@ -322,6 +306,22 @@ class Map extends React.Component {
     ) {
       container = (
         <div style={{position: "relative"}}>
+          <button style={{
+              position: "absolute",
+              left: 25,
+              top: 25,
+              zIndex: 9999,
+              border: "none",
+              padding: 15,
+              borderRadius: 4,
+              backgroundColor: "rgb(124, 184, 121)",
+              fontWeight: 700,
+              color: "white"
+            }}
+          onClick={this.handleAnimationPlayClicked.bind(this) }
+            >
+            Play
+          </button>
           <div style={{
               height: this.state.responsive.height,
               width: this.state.responsive.width
@@ -332,10 +332,10 @@ class Map extends React.Component {
     }
     return container;
   }
-  // handleAnimationPlayClicked() {
-  //   /******************************************
-  //   * ANIMATE MAP (AND THAT LINE ON TREE)
-  //   *****************************************/
+  handleAnimationPlayClicked() {
+    /******************************************
+    * ANIMATE MAP (AND THAT LINE ON TREE)
+    *****************************************/
   //   this.animateMap();
   // }
   // animateMap() {
@@ -361,7 +361,7 @@ class Map extends React.Component {
   //     }
   //
   //     window.requestAnimationFrame(step);
-  // }
+  }
   render() {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
