@@ -3,3 +3,7 @@
   fill: none;
   pointer-events: all;
 }
+
+#d3entropy .brush {
+  stroke: none;
+}

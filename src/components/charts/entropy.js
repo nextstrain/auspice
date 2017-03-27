@@ -3,15 +3,13 @@
 import React from "react";
 import _ from "lodash";
 import { connect } from "react-redux";
-// import {VictoryAxis} from "victory-chart";
 import * as globals from "../../util/globals";
 import Card from "../framework/card";
-import d3 from "d3";
 import computeResponsive from "../../util/computeResponsive";
 import { changeColorBy } from "../../actions/colors";
 import { modifyURLquery } from "../../util/urlHelpers";
-import { dataFont, darkGrey, materialButton, materialButtonSelected } from "../../globalStyles";
-import EntropyChart from "./entropyD3"
+import { materialButton, materialButtonSelected } from "../../globalStyles";
+import EntropyChart from "./entropyD3";
 import InfoPanel from "./entropyInfoPanel";
 import "../../css/entropy.css";
 
@@ -113,7 +111,7 @@ class Entropy extends React.Component {
       width: responsive.width,
       height: 300,
       padBottom: 50,
-      padLeft: 38,
+      padLeft: 15,
       padRight: 12
     };
   }
@@ -178,6 +176,8 @@ class Entropy extends React.Component {
         chartGeom: this.getChartGeom(),
         shouldReRender: true
       });
+    } else if (nextProps.load === 2 && this.props.sidebar !== nextProps.sidebar) {
+      this.setState({shouldReRender: true});
     }
   }
   // componentDidMount() {
@@ -206,6 +206,7 @@ class Entropy extends React.Component {
         {this.aaNtSwitch(styles)}
         <InfoPanel
           hovered={this.state.hovered}
+          aa={this.state.aa}
         />
         <svg
           style={{pointerEvents: "auto"}}
@@ -215,9 +216,7 @@ class Entropy extends React.Component {
           <g ref="d3entropy" id="d3entropy"/>
         </svg>
       </Card>
-    )
-
-
+    );
   }
 }
 

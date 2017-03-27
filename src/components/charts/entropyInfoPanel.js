@@ -4,7 +4,7 @@ import * as globals from "../../util/globals";
 import {dataFont, infoPanelStyles} from "../../globalStyles";
 import { prettyString } from "../tree/tipSelectedPanel";
 
-const InfoPanel = ({hovered}) => {
+const InfoPanel = ({hovered, aa}) => {
 
   /* this is a function - we can bail early */
   if (!hovered) {
@@ -31,7 +31,9 @@ const InfoPanel = ({hovered}) => {
     }
   };
 
-  const bounds = document.getElementById("d3entropy").getBoundingClientRect();
+  /* don't use d3entropy or main chart SVG as these change on zoom.
+  The Y axis is safe as it is invariant */
+  const bounds = document.getElementById("entropyYAxis").getBoundingClientRect();
   const pos = {
     x: hovered.x - bounds.left + 15,
     y: hovered.y - bounds.top
@@ -48,16 +50,21 @@ const InfoPanel = ({hovered}) => {
     styles.container.bottom = hovered.chartGeom.height - pos.y;
   }
 
-  // console.log(hovered.d)
-
+  // heading JSX:
+  // <div style={infoPanelStyles.tooltipHeading}>
+  //   {"Entropy Bar"}
+  // </div>
   return (
     <div style={styles.container}>
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
-        <div style={infoPanelStyles.tooltipHeading}>
-          {"Entropy Bar"}
-        </div>
         <div>
-          {`Codon ${hovered.d.codon} in protein ${hovered.d.prot}`}
+          {aa ? `Codon ${hovered.d.codon} in protein ${hovered.d.prot}` :
+            hovered.d.prot ? `Nucleotide ${hovered.d.x} (in protein ${hovered.d.prot})` :
+            `Nucleotide ${hovered.d.x}`}
+        </div>
+        <p/>
+        <div>
+          {`Entropy: ${hovered.d.y}`}
         </div>
         <div style={infoPanelStyles.comment}>
           Click to color tree & map
