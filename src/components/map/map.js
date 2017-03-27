@@ -339,11 +339,34 @@ class Map extends React.Component {
     /******************************************
     * ANIMATE MAP (AND THAT LINE ON TREE)
     *****************************************/
+
     this.animateMap();
   }
   animateMap() {
-      this.props.dispatch(changeDateFilter("2016-06-28", "2016-10-23"));
-      console.log("moment", )
+    const timeSliderWindow = 1; /* in months for now  */
+    const incrementBy = 5; /* in days for now */
+    const incrementByUnit = "day";
+    const tick = 100;
+    const trailing = true;
+    /* initial time window */
+    let first = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD");
+    let second = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD").add(timeSliderWindow, "months");
+    let last = moment(this.props.controls.absoluteDateMax, "YYYY-MM-DD");
+
+    const animationLoop = setInterval(() => {
+      /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
+      this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+      if (trailing) {
+        first = first.add(incrementBy, incrementByUnit);
+      }
+      second = second.add(incrementBy, incrementByUnit);
+
+      if (second.valueOf() >= last.valueOf()) {
+        clearInterval(animationLoop)
+        this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+      }
+    }, tick);
+
     // controls: state.controls,
     // this.props.dateMin //"2013-06-28"
     // this.props.dateMax //"2016-11-21"
