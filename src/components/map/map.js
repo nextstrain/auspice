@@ -1,8 +1,10 @@
 import React from "react";
 import d3 from "d3";
 import _ from "lodash";
+import moment from "moment";
 import { connect } from "react-redux";
 import Card from "../framework/card";
+import {changeDateFilter} from "../../actions/treeProperties";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
 import {drawDemesAndTransmissions, updateOnMoveEnd} from "../../util/mapHelpers";
@@ -17,6 +19,7 @@ import getLatLongs from "../../util/mapHelpersLatLong";
 @connect((state) => {
   return {
     datasetGuid: state.tree.datasetGuid,
+    controls: state.controls,
     nodes: state.tree.nodes,
     visibility: state.tree.visibility,
     visibilityVersion: state.tree.visibilityVersion,
@@ -336,31 +339,43 @@ class Map extends React.Component {
     /******************************************
     * ANIMATE MAP (AND THAT LINE ON TREE)
     *****************************************/
-  //   this.animateMap();
-  // }
-  // animateMap() {
-  //   let start = null;
-  //
-  //     const step = (timestamp) => {
-  //       if (!start) start = timestamp;
-  //
-  //       let progress = timestamp - start;
-  //
-  //       this.props.dispatch({
-  //         type: MAP_ANIMATION_TICK,
-  //         data: {
-  //           progress
-  //         }
-  //       })
-  //
-  //       if (progress < globals.mapAnimationDurationInMilliseconds) {
-  //         window.requestAnimationFrame(step);
-  //       } else {
-  //         this.props.dispatch({ type: MAP_ANIMATION_END })
-  //       }
-  //     }
-  //
-  //     window.requestAnimationFrame(step);
+    this.animateMap();
+  }
+  animateMap() {
+      this.props.dispatch(changeDateFilter("2016-06-28", "2016-10-23"));
+      console.log("moment", )
+    // controls: state.controls,
+    // this.props.dateMin //"2013-06-28"
+    // this.props.dateMax //"2016-11-21"
+    // this.props.absoluteDateMin //"2013-06-29"
+    // this.props.absoluteDateMax //"2016-11-21"
+    // export const CHANGE_DATE_MIN = "CHANGE_DATE_MIN";
+    // export const CHANGE_DATE_MAX = "CHANGE_DATE_MAX";
+    // export const CHANGE_ABSOLUTE_DATE_MIN = "CHANGE_ABSOLUTE_DATE_MIN";
+    // export const CHANGE_ABSOLUTE_DATE_MAX = "CHANGE_ABSOLUTE_DATE_MAX";
+
+    // =======OLD RAF CODE=======
+    // let start = null;
+    //
+    // const step = (timestamp) => {
+    //   if (!start) start = timestamp;
+    //
+    //   let progress = timestamp - start;
+    //
+    //   this.props.dispatch({
+    //     type: MAP_ANIMATION_TICK,
+    //     data: {
+    //       progress
+    //     }
+    //   })
+    //
+    //   if (progress < globals.mapAnimationDurationInMilliseconds) {
+    //     window.requestAnimationFrame(step);
+    //   } else {
+    //     this.props.dispatch({ type: MAP_ANIMATION_END })
+    //   }
+    // }
+    // window.requestAnimationFrame(step);
   }
   render() {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
