@@ -19,9 +19,6 @@ class Footer extends React.Component {
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   }
-  static propTypes = {
-    style: React.PropTypes.object.isRequired
-  }
   getStyles() {
     return {
       footer: {
