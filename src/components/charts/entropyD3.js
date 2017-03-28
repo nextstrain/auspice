@@ -209,7 +209,7 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
     .on("zoom", () => this.zoomed());
 
   /* the overlay should be dependent on whether you have certain keys pressed */
-  const zoomKeys = ["ctrl"];
+  const zoomKeys = ["option"];
   Mousetrap.bind(zoomKeys, () => {
     this.svg.append("rect")
       .attr("class", "overlay")
@@ -228,7 +228,7 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
   .attr("class", "zoomHint niceText")
   .attr("transform", "translate(" + (this.offsets.x1 + 40) + "," + (this.offsets.y1Main + 30) + ")")
   .append("text")
-    .text("Note: Holding control (ctrl) allows you to zoom");
+    .text("Note: Holding option / alt allows you to pan & zoom");
 
   /* construct axes */
   this.axes = {};
