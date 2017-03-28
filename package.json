@@ -53,6 +53,7 @@
     "lodash": "4.16.4",
     "moment": "^2.14.1",
     "moment-range": "^2.2.0",
+    "mousetrap": "^1.6.0",
     "query-string": "^4.2.3",
     "radium": "0.18.1",
     "react": "15.3.1",

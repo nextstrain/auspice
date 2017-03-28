@@ -5,6 +5,7 @@ import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { zoom, zoomIdentity } from "d3-zoom";
 import { brushX } from "d3-brush";
+import Mousetrap from "mousetrap";
 
 /* constructor - sed up data and store params */
 const EntropyChart = function (ref, data, callbacks) {
@@ -207,13 +208,27 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
     .extent(zoomExtents)
     .on("zoom", () => this.zoomed());
 
-  this.svg.append("rect")
-    .attr("class", "overlay")
-    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Main + ")")
-    .attr("width", this.offsets.width)
-    .attr("height", this.offsets.heightMain)
-    .call(this.zoom)
-    .on("wheel", () => { event.preventDefault(); });
+  /* the overlay should be dependent on whether you have certain keys pressed */
+  const zoomKeys = ["ctrl"];
+  Mousetrap.bind(zoomKeys, () => {
+    this.svg.append("rect")
+      .attr("class", "overlay")
+      .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Main + ")")
+      .attr("width", this.offsets.width)
+      .attr("height", this.offsets.heightMain)
+      .call(this.zoom)
+      .on("wheel", () => { event.preventDefault(); });
+  }, "keydown");
+  Mousetrap.bind(zoomKeys, () => {
+    this.svg.selectAll(".overlay").remove();
+    this.svg.selectAll(".zoomHint").remove();
+  }, "keyup");
+
+  this.svg.append("g")
+  .attr("class", "zoomHint niceText")
+  .attr("transform", "translate(" + (this.offsets.x1 + 40) + "," + (this.offsets.y1Main + 30) + ")")
+  .append("text")
+    .text("Note: Holding control (ctrl) allows you to zoom");
 
   /* construct axes */
   this.axes = {};

@@ -1,4 +1,10 @@
 
+/* Variables - keep in sync with globalStyles.js*/
+:root {
+  --darkGrey: #333;
+  --medGrey: #888;
+}
+
 #d3entropy .overlay {
   fill: none;
   pointer-events: all;
@@ -6,4 +12,11 @@
 
 #d3entropy .brush {
   stroke: none;
+}
+
+#d3entropy .niceText {
+  font-family: "Lato";
+  font-size: 14px;
+  font-style: italic;
+  color: var(--medGrey);
 }
