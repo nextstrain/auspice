@@ -132,7 +132,8 @@ class TitleBar extends React.Component {
 
   render() {
     const styles = this.getStyles();
-    let dataName = this.context.router.location.pathname;
+    // console.log("title-bar0", this.context.router)
+    let dataName = this.context.router.history.location.pathname;
     dataName = dataName.replace(/^\//, '').replace(/\/$/, '');
     if (dataName.length === 1) {dataName = "";}
     return (

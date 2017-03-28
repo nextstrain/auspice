@@ -75,7 +75,7 @@ class App extends React.Component {
     const data_path = turnURLtoDataPath(this.context.router);
     restoreStateFromURL(this.context.router, this.props.dispatch);
     if (data_path) {
-      this.props.dispatch({type: NEW_DATASET, data: this.context.router.location.pathname});
+      this.props.dispatch({type: NEW_DATASET, data: this.context.router.history.location.pathname});
       this.props.dispatch(loadJSONs(data_path));
     } else {
       console.log("<app> couldn't work out the dataset to load. Bad.");
@@ -115,7 +115,7 @@ class App extends React.Component {
             />
           }
           <TreeView
-            query={queryString.parse(this.context.router.location.search)}
+            query={queryString.parse(this.context.router.history.location.search)}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
           />
           <Map

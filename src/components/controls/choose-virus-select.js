@@ -41,7 +41,7 @@ class ChooseVirusSelect extends React.Component {
     // 1 reset redux controls state in preparation for a change
     this.props.dispatch({type: RESET_CONTROLS});
     // 2 change URL (push, not replace)
-    this.context.router.push({
+    this.context.router.history.push({
       pathname: newPath,
       search: ""
     });
@@ -49,7 +49,7 @@ class ChooseVirusSelect extends React.Component {
     const data_path = turnURLtoDataPath(this.context.router);
     restoreStateFromURL(this.context.router, this.props.dispatch);
     if (data_path) {
-      this.props.dispatch({type: NEW_DATASET, data: this.context.router.location.pathname});
+      this.props.dispatch({type: NEW_DATASET, data: this.context.router.history.location.pathname});
       this.props.dispatch(loadJSONs(data_path));
     } else {
       console.log("Couldn't work out the dataset to load. Bad.");
