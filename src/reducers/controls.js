@@ -112,24 +112,35 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       geoResolution: action.data
     });
-  /* metadata in may affect the date ranges... */
+  /* metadata in may affect the date ranges and colorBy... */
   case types.RECEIVE_METADATA:
-    const dates = {};
+    const toAdd = {};
     /* do each of the 4 conditions manually as they're different... */
     if ("absoluteDateMin" in action) {
-      dates["absoluteDateMin"] = action["absoluteDateMin"];
+      toAdd["absoluteDateMin"] = action["absoluteDateMin"];
     }
     if ("absoluteDateMax" in action) {
-      dates["absoluteDateMax"] = action["absoluteDateMax"];
+      toAdd["absoluteDateMax"] = action["absoluteDateMax"];
     }
     /* only change the dateMax / dateMin *if* they're outside bounds */
     if ("dateMax" in action && action["dateMax"] < state["dateMax"]) {
-      dates["dateMax"] = action["dateMax"];
+      toAdd["dateMax"] = action["dateMax"];
     }
     if ("dateMin" in action && action["dateMin"] > state["dateMin"]) {
-      dates["dateMin"] = action["dateMin"];
+      toAdd["dateMin"] = action["dateMin"];
     }
-    return Object.assign({}, state, dates);
+    /* check if the default color by (set when this reducer was initialised)
+    is an option in the JSON */
+    const available_colorBy = Object.keys(action.data.color_options);
+    if (available_colorBy.indexOf(globals.defaultColorBy) === -1) {
+      /* remove "gt" */
+      const gtIdx = available_colorBy.indexOf("gt");
+      if (gtIdx > -1) {
+        available_colorBy.splice(gtIdx, 1);
+      }
+      toAdd["colorBy"] = available_colorBy[0];
+    }
+    return Object.assign({}, state, toAdd);
   case types.APPLY_FILTER_QUERY:
     // values arrive as array
     const filters = Object.assign({}, state.filters, {});
