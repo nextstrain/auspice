@@ -13,16 +13,16 @@ reflected in the URL and makes one change.
   replace: if true, you can't go "back" to the old state via the browser
 */
 export const modifyURLquery = function (router, keyValuePairs = null, replace = false) {
-  let query = queryString.parse(router.location.search);
-  // const query = queryString.parse(router.location.search);
+  let query = queryString.parse(router.history.location.search);
+  // const query = queryString.parse(router.history.location.search);
   if (keyValuePairs) {
     // Object.keys(keyValuePairs).forEach((key, idx) => {console.log(key, idx)});
     query = Object.assign({}, query, keyValuePairs);
   }
-  // console.log("query in:", queryString.parse(router.location.search))
+  // console.log("query in:", queryString.parse(router.history.location.search))
   // console.log("query out:", query)
   const newURL = {
-    pathname: router.location.pathname,
+    pathname: router.history.location.pathname,
     search: queryString.stringify(query)
   };
   replace ? router.replace(newURL) : router.push(newURL);
@@ -30,7 +30,7 @@ export const modifyURLquery = function (router, keyValuePairs = null, replace = 
 
 
 export const restoreStateFromURL = function (router, dispatch) {
-  const query = queryString.parse(router.location.search);
+  const query = queryString.parse(router.history.location.search);
   if (query.l) {
     dispatch({ type: CHANGE_LAYOUT, data: query.l });
   }
@@ -77,14 +77,14 @@ and return the data path used to load the data
 */
 export const turnURLtoDataPath = function (router) {
   // console.log("turnURLtoDataPath")
-  const parsedParams = parseParams(router.location.pathname);
-  // console.log("parsed params turned", router.location.pathname, "to", parsedParams)
+  const parsedParams = parseParams(router.history.location.pathname);
+  // console.log("parsed params turned", router.history.location.pathname, "to", parsedParams)
   // set a new URL if the dataPath is incomplete
   if (parsedParams.incomplete) {
     // console.log("parsed params incomplete => modifying URL")
-    router.replace({
+    router.history.replace({
       pathname: parsedParams.fullsplat,
-      search: selectivelyUpdateSearch(parsedParams.search, router.location.search)
+      search: selectivelyUpdateSearch(parsedParams.search, router.history.location.search)
     });
   }
   // if valid, return the data_path, else undefined
