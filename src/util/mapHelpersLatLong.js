@@ -93,6 +93,26 @@ const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, c
     let lat0 = geo[geoResolution][countries[0]].latitude;
     let lat1 = geo[geoResolution][countries[1]].latitude;
 
+    const originToDestinationXYs = [];
+
+    originToDestinationXYs.push(
+      map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+        new L.LatLng(
+          lat0,
+          long0
+        )
+      )
+    );
+
+    originToDestinationXYs.push(
+      map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+        new L.LatLng(
+          lat1,
+          long1
+        )
+      )
+    );
+
     // create new leaflet LatLong objects
     const start = new L.LatLng(lat0, long0)
     const end = new L.LatLng(lat1, long1)
@@ -130,15 +150,16 @@ const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, c
           )
         );
       }));
-    })
+    });
 
     nestedTransmissions.push({
       start,
       end,
+      originToDestinationXYs,
       total: value.length,
       color: averageColors(value),
       rawGeodesic,
-      geodesics, /* incomplete for dev, will need to grab BOTH lines when there is wraparound */
+      geodesics,
       from: countries[0],
       to: countries[1]
     })
