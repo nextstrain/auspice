@@ -25,7 +25,7 @@ export const modifyURLquery = function (router, keyValuePairs = null, replace = 
     pathname: router.history.location.pathname,
     search: queryString.stringify(query)
   };
-  replace ? router.replace(newURL) : router.push(newURL);
+  replace ? router.history.replace(newURL) : router.history.push(newURL);
 };
 
 
