@@ -62,6 +62,7 @@ class Map extends React.Component {
   }
   componentWillReceiveProps(nextProps) {
     this.maybeComputeResponive(nextProps);
+    this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
   }
   componentDidUpdate(prevProps, prevState) {
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
@@ -171,6 +172,28 @@ class Map extends React.Component {
       });
     }
   }
+  maybeRemoveAllDemesAndTransmissions(nextProps) {
+    /*
+      xx dataset change, remove all demes and transmissions d3 added
+      xx we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
+      THE ABOVE IS NO LONGER TRUE: while App remounts, this is all getting nuked, so it doesn't matter.
+      Here's what we were doing and might do again:
+
+      // this.state.map && // we have a map
+      // this.props.datasetGuid &&
+      // nextProps.datasetGuid &&
+      // this.props.datasetGuid !== nextProps.datasetGuid // and the dataset has changed
+    */
+
+    this.state.d3DOMNode.selectAll("*").remove();
+
+    // clear references to the demes and transmissions d3 added
+    this.setState({
+      demes: false,
+      d3elems: null,
+      latLongs: null,
+    })
+  }
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
       updateOnMoveEnd(this.state.d3elems, this.latLongs());
@@ -203,6 +226,7 @@ class Map extends React.Component {
 
     const mapIsDrawn = !!this.state.map;
     const demesAreDrawn = this.state.demes;
+
     const somethingChanged = (this.props.colorBy !== prevProps.colorBy ||
                               this.props.geoResolution !== prevProps.geoResolution ||
                               this.props.visibilityVersion !== prevProps.visibilityVersion ||
@@ -396,29 +420,3 @@ class Map extends React.Component {
 }
 
 export default Map;
-
-// this was called from componentWillReceiveProps
-// this.maybeRemoveAllDemesAndTransmissions(nextProps); /* dataset or colorby just changed, this change is upstream of maybeDraw */
-
-// maybeRemoveAllDemesAndTransmissions(nextProps) {
-//   /*
-//     xx dataset change, remove all demes and transmissions d3 added
-//     xx we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
-//     THE ABOVE IS NO LONGER TRUE: while App remounts, this is all getting nuked, so it doesn't matter.
-//     Here's what we were doing and might do again:
-//
-//     // this.state.map && // we have a map
-//     // this.props.datasetGuid &&
-//     // nextProps.datasetGuid &&
-//     // this.props.datasetGuid !== nextProps.datasetGuid // and the dataset has changed
-//
-//     this.state.d3DOMNode.selectAll("*").remove();
-//
-//     // clear references to the demes and transmissions d3 added
-//     this.setState({
-//       demes: false,
-//       d3elems: null,
-//       latLongs: null,
-//     })
-//   */
-// }
