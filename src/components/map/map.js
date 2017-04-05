@@ -10,7 +10,7 @@ import setupLeafletPlugins from "../../util/leaflet-plugins";
 import {drawDemesAndTransmissions, updateOnMoveEnd} from "../../util/mapHelpers";
 import * as globals from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
-import getLatLongs from "../../util/mapHelpersLatLong";
+import {getLatLongs} from "../../util/mapHelpersLatLong";
 // import {
 //   MAP_ANIMATION_TICK,
 //   MAP_ANIMATION_END
