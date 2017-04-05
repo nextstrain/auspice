@@ -38,6 +38,7 @@ class Map extends React.Component {
     this.state = {
       map: null,
       demes: false,
+      latLongs: null,
       d3DOMNode: null,
       d3elems: null,
       datasetGuid: null,
@@ -156,6 +157,8 @@ class Map extends React.Component {
         this.state.d3DOMNode,
         this.state.map,
       );
+
+      /* Set up leaflet events */
       // this.state.map.on("viewreset", this.respondToLeafletEvent.bind(this));
       this.state.map.on("moveend", this.respondToLeafletEvent.bind(this));
 
@@ -164,6 +167,7 @@ class Map extends React.Component {
         boundsSet: true,
         demes: true,
         d3elems,
+        latLongs,
       });
     }
   }
