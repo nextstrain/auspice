@@ -1,19 +1,9 @@
 import {averageColors} from "./colorHelpers";
 import {getTipColorAttribute} from "./treeHelpers";
 
-const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale, sequences) => {
+const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => {
   const aggregatedLocations = {}; /* demes */
   const aggregatedTransmissions = {}; /* edges, animation paths */
-  const demesToColors = {};
-  const transmissionsToColors = {};
-
-  const nestedTransmissions = [];
-  const demesAndTransmissions = {
-    demes: [],
-    transmissions: []
-  };
-  const geo = metadata.geo;
-
   /*
     walk through nodes and collect a bunch of arrays...
     can count how many times observe a tip and make an array of an attribute,
