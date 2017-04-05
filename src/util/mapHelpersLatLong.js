@@ -170,7 +170,7 @@ const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, c
     transmission.geodesics.forEach((geodesic, j) => { /* and for each part of a lines split across dateline in each */
       demesAndTransmissions.transmissions.push({ /* and add it to an array, which we'll map over to create our paths. */ /* not optimized for missiles here. we could check index of for each and if it's greater than one add a flag for partials, and their order? so that we can animate around the map */
         data: transmission,
-        coords: geodesic,
+        // coords: geodesic,
         wraparoundKey: j,
       });
     });
