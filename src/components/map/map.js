@@ -125,44 +125,15 @@ class Map extends React.Component {
       this.setState({d3DOMNode});
     }
   }
-  maybeRemoveAllDemesAndTransmissions(nextProps) {
-    /*
-      xx dataset change, remove all demes and transmissions d3 added
-      xx we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
-      THE ABOVE IS NO LONGER TRUE: while App remounts, this is all getting nuked, so it doesn't matter.
-      Here's what we were doing and might do again:
-
-      // this.state.map && // we have a map
-      // this.props.datasetGuid &&
-      // nextProps.datasetGuid &&
-      // this.props.datasetGuid !== nextProps.datasetGuid // and the dataset has changed
-    */
-
-    const mapIsDrawn = !!this.state.map;
-    const somethingChanged = (this.props.colorBy !== nextProps.colorBy ||
-                              this.props.geoResolution !== nextProps.geoResolution ||
-                              this.props.visibilityVersion !== nextProps.visibilityVersion ||
-                              this.props.colorScale.version !== nextProps.colorScale.version);
-
-    if (
-      mapIsDrawn &&
-      somethingChanged
-    ) {
-      this.state.d3DOMNode.selectAll("*").remove();
-
-      /* clear references to the demes and transmissions d3 added */
-      this.setState({
-        demes: false,
-        d3elems: null,
-        latLongs: null,
-      })
-    }
-  }
   maybeDrawDemesAndTransmissions(prevProps) {
+
+    /* before April 2017 we fired this every time */
 
     const mapIsDrawn = !!this.state.map;
     const allDataPresent = !!(this.props.colorScale && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode);
     const demesAbsent = !this.state.demes;
+
+    /* if at any point we change dataset and app doesn't remount, we'll need these again */
     // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;
     // const newGeoResolution = this.props.geoResolution !== prevProps.geoResolution;
     // const initialVisibilityVersion = this.props.visibilityVersion === 1; /* see tree reducer, we set this to 1 after tree comes back */
@@ -411,3 +382,29 @@ class Map extends React.Component {
 }
 
 export default Map;
+
+// this was called from componentWillReceiveProps
+// this.maybeRemoveAllDemesAndTransmissions(nextProps); /* dataset or colorby just changed, this change is upstream of maybeDraw */
+
+// maybeRemoveAllDemesAndTransmissions(nextProps) {
+//   /*
+//     xx dataset change, remove all demes and transmissions d3 added
+//     xx we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
+//     THE ABOVE IS NO LONGER TRUE: while App remounts, this is all getting nuked, so it doesn't matter.
+//     Here's what we were doing and might do again:
+//
+//     // this.state.map && // we have a map
+//     // this.props.datasetGuid &&
+//     // nextProps.datasetGuid &&
+//     // this.props.datasetGuid !== nextProps.datasetGuid // and the dataset has changed
+//
+//     this.state.d3DOMNode.selectAll("*").remove();
+//
+//     // clear references to the demes and transmissions d3 added
+//     this.setState({
+//       demes: false,
+//       d3elems: null,
+//       latLongs: null,
+//     })
+//   */
+// }
