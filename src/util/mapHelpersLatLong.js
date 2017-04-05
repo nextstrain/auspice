@@ -59,20 +59,17 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
 export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale, sequences, include) => {
 
   const {aggregatedLocations, aggregatedTransmissions} = aggregated(nodes, visibility, geoResolution, colorScale, sequences);
-
+  const geo = metadata.geo;
   const demesAndTransmissions = {
     demes: [],
     transmissions: []
   };
-  const geo = metadata.geo;
 
-  /*
-    create a latlong pair for each country's location and push them all to a common array
-  */
+  /* count DEMES */
   _.forOwn(aggregatedLocations, (value, key) => {
     demesAndTransmissions.demes.push({
       location: key, // Thailand:
-      total: value.length, // 20
+      total: value.length, // 20, this is an array of all demes of a certain type
       color: averageColors(value),
       coords: map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) we MAY have to do this every time rather than just once */
         new L.LatLng(
@@ -83,11 +80,7 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
     });
   });
 
-  /*
-    count transmissions for line thickness
-  */
-
-  // for each item in the object produced above...
+  /* count TRANSMISSIONS for line thickness */
   _.forOwn(aggregatedTransmissions, (value, key) => {
 
     const countries = key.split("/");
