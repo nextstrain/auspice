@@ -61,7 +61,6 @@ class Map extends React.Component {
   }
   componentWillReceiveProps(nextProps) {
     this.maybeComputeResponive(nextProps);
-    this.maybeRemoveAllDemesAndTransmissions(nextProps); /* dataset or colorby just changed, this change is upstream of maybeDraw */
   }
   componentDidUpdate(prevProps, prevState) {
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
