@@ -243,26 +243,11 @@ class Map extends React.Component {
     let zoom = 2;
     let center = [0,0];
 
-    /*
-      hardcode zoom level. this will last a while.
-      when we want to dynamically calculate the bounds,
-      map will have to know about the path latlongs calculated in maphelpers.
-      not at all sure how we'll do that and account for great circle paths.
-
-      if we do this, it has to be done procedurally from reset to handle dataset switch
-    */
-    // if (window.location.pathname.indexOf("ebola") !== -1) {
-    //   zoom = 7;
-    //   center = [8, -11];
-    // } else if (window.location.pathname.indexOf("zika") !== -1) {
-    //   /* zika is fine at the default settings */
-    // }
-
     var map = L.map('map', {
       center: center,
       zoom: zoom,
       scrollWheelZoom: false,
-      maxBounds: bounds,
+      // maxBounds: bounds,
       minZoom: 2,
       maxZoom: 8,
       zoomControl: false,
@@ -342,19 +327,30 @@ class Map extends React.Component {
     let second = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD").add(timeSliderWindow, "months");
     let last = moment(this.props.controls.absoluteDateMax, "YYYY-MM-DD");
 
-    const animationLoop = setInterval(() => {
-      /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
-      this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
-      if (trailing) {
-        first = first.add(incrementBy, incrementByUnit);
-      }
-      second = second.add(incrementBy, incrementByUnit);
+    const pathLengths = this.state.d3elems.transmissionPathLengths;
 
-      if (second.valueOf() >= last.valueOf()) {
-        clearInterval(animationLoop)
-        this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
-      }
-    }, tick);
+    /* https://css-tricks.com/svg-line-animation-works/ */
+    d3.selectAll(this.state.d3elems.transmissions[0])
+      .attr("stroke-dasharray", (d, i) => { return pathLengths[i] + " " + pathLengths[i] })
+      .attr("stroke-dashoffset", (d, i) => { return pathLengths[i] })
+      .transition()
+      .duration(2000)
+      .ease("linear")
+      .attr("stroke-dashoffset", 0);
+
+    // const animationLoop = setInterval(() => {
+    //   /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
+    //   this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+    //   if (trailing) {
+    //     first = first.add(incrementBy, incrementByUnit);
+    //   }
+    //   second = second.add(incrementBy, incrementByUnit);
+    //
+    //   if (second.valueOf() >= last.valueOf()) {
+    //     clearInterval(animationLoop)
+    //     this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+    //   }
+    // }, tick);
 
     // controls: state.controls,
     // this.props.dateMin //"2013-06-28"
