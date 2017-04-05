@@ -71,11 +71,15 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
     .attr("stroke-opacity", .6)
     .attr("stroke-linecap", "round")
     .attr("stroke-width", (d) => { return d.data.total }) /* scale line by total number of transmissions */
-    .attr("marker-mid", makeMarker);
+    // .attr("marker-mid", makeMarker);
+
+    let transmissionPathLengths = [];
+    transmissions[0].forEach((d, i) => { transmissionPathLengths.push(d.getTotalLength()) })
 
   return {
     demes,
-    transmissions
+    transmissions,
+    transmissionPathLengths
   };
 
 }
@@ -91,11 +95,9 @@ export const updateOnMoveEnd = (d3elems, latLongs) => {
 
     d3elems.transmissions
       .data(latLongs.transmissions)
-      .attr("d", (d) => { return pathStringGenerator(d.coords) })
+      .attr("d", (d) => { return pathStringGenerator(d.data.originToDestinationXYs) })
   }
 }
-
-// averaging colors https://github.com/nextstrain/auspice/commit/0b1f2c90f7d45732935c88e60e2c854a42213d9c
 
 // const missiles = transmissionPaths.map((transmissionPath) => {
 //
