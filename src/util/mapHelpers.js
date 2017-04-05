@@ -17,14 +17,6 @@ const translateAlong = (path) => {
   };
 };
 
-/*
-  If d3 shapes are getting mysteriously cut off while zooming and dragging around leaflet...
-  https://github.com/Leaflet/Leaflet/issues/2814
-  or possibly...
-  https://github.com/Leaflet/Leaflet/issues/2282 check the css in our index.js
-
-*/
-
 export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
 
   const demes = g.selectAll("demes")
@@ -45,30 +37,35 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
     // console.log(markerCount, d);
     const mID = "marker"+markerCount.toString();
     g.append("defs").selectAll("marker")
-        .data([mID])
-        .enter().append("marker")
-          .attr("id", mID)
-          .attr("viewBox", "0 -5 10 10")
-          .attr("refX", 0)
-          .attr("refY", 0)
-          // the next two lines set the marker size relative to the stroke-width
-          .attr("markerWidth",   function(x){return Math.max(1.5,7.0/d.data.total);})
-          .attr("markerHeight",  function(x){return Math.max(1.5,7.0/d.data.total);})
-          .attr("orient", "auto")
-        .append("path")
-          .attr("d", "M0,-5L10,0L0,5")
-          .attr("stroke-width",0)
-          .attr("fill-opacity",0.5)
-          .attr("fill", function(){return d.data.color;});
-  return "url(#"+mID+")";
+      .data([mID])
+      .enter().append("marker")
+        .attr("id", mID)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 0)
+        .attr("refY", 0)
+        // the next two lines set the marker size relative to the stroke-width
+        .attr("markerWidth",  (x) => { return Math.max(1.5, 7.0 / d.data.total); })
+        .attr("markerHeight", (x) => { return Math.max(1.5, 7.0 / d.data.total); })
+        .attr("orient", "auto")
+      .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("stroke-width",0)
+        .attr("fill-opacity",0.5)
+        .attr("fill", function(){return d.data.color;});
+    return "url(#"+mID+")";
   }
 
+  /* we're ditching geodesic. That means we don't have inner parts anymore.
+    538 actually solved that... http://bl.ocks.org/bycoffe/18441cddeb8fe147b719fab5e30b5d45
+    then we want to deeplink to animation state... which this may help with: http://jsfiddle.net/henbox/b4bbgdnz/5/
+  */
   // add transmission lines with mid markers at each inner point of the path
+
   const transmissions = g.selectAll("transmissions")
     .data(latLongs.transmissions)
     .enter()
-    .append("path") /* append a geodesic path from the leaflet plugin data */
-    .attr("d", (d) => { return pathStringGenerator(d.coords) }) /* with the interpolation in the function above pathStringGenerator */
+    .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
+    .attr("d", (d) => { return pathStringGenerator(d.data.originToDestinationXYs) }) /* with the interpolation in the function above pathStringGenerator */
     .attr("fill","none")
     .attr("stroke", (d) => { return d.data.color }) /* colorScale(d.data.from); color path by contry in which the transmission arrived */
     .attr("stroke-opacity", .6)
