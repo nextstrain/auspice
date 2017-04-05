@@ -50,6 +50,21 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
       });
     }
   });
+  return {
+    aggregatedLocations,
+    aggregatedTransmissions
+  }
+}
+
+export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale, sequences, include) => {
+
+  const {aggregatedLocations, aggregatedTransmissions} = aggregated(nodes, visibility, geoResolution, colorScale, sequences);
+
+  const demesAndTransmissions = {
+    demes: [],
+    transmissions: []
+  };
+  const geo = metadata.geo;
 
   /*
     create a latlong pair for each country's location and push them all to a common array
@@ -75,97 +90,46 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
   // for each item in the object produced above...
   _.forOwn(aggregatedTransmissions, (value, key) => {
 
-    // go from "brazil/cuba" to ["brazil", "cuba"]
     const countries = key.split("/");
-    // go from "brazil" to lat0 = -14.2350
-    let long0 = geo[geoResolution][countries[0]].longitude;
-    let long1 = geo[geoResolution][countries[1]].longitude;
-    let lat0 = geo[geoResolution][countries[0]].latitude;
-    let lat1 = geo[geoResolution][countries[1]].latitude;
-
-    const originToDestinationXYs = [];
-
-    originToDestinationXYs.push(
+    const originToDestinationXYs = [
       map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
         new L.LatLng(
-          lat0,
-          long0
+          geo[geoResolution][countries[0]].latitude,
+          geo[geoResolution][countries[0]].longitude
         )
-      )
-    );
-
-    originToDestinationXYs.push(
+      ),
       map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
         new L.LatLng(
-          lat1,
-          long1
+          geo[geoResolution][countries[1]].latitude,
+          geo[geoResolution][countries[1]].longitude
         )
       )
-    );
+    ];
 
-    // create new leaflet LatLong objects
-    const start = new L.LatLng(lat0, long0)
-    const end = new L.LatLng(lat1, long1)
-    const dlambda = Math.abs((long1-long0)%360)*Math.PI/180.0;
-    const angle = Math.acos(Math.sin(lat1*Math.PI/180.0)*Math.sin(lat0*Math.PI/180.0)
-                            + Math.cos(lat1*Math.PI/180.0)*Math.cos(lat0*Math.PI/180.0)*Math.cos(dlambda));
-    // this sets the number of segments of the path, min 4, max 36 for half way around the globe
-    const nSteps = Math.ceil(Math.max(4,angle*36/Math.PI));
-
-    /*
-      add a polyline to the map for current country pair iteratee
-      store the computation. access _latlngs to show where each segment is on the map
-    */
-    const rawGeodesic = L.geodesic([[start,end]], {
-      // stroke:	value,
-      // radius: value,
-      // color: colorScale(countries[0]), /* this will go up above in d3 rather than in leaflet now */
-      // opacity: .5,
-      steps: nSteps,
-      // weight:	value	/* Stroke width in pixels.*/
-      // opacity:	0.5	Stroke opacity.
-      // fill:
-      // fillColor: randomColor
-      // fillOpacity:
-    })
-
-    const geodesics = [];
-
-    rawGeodesic._latlngs.forEach((arr) => {
-      geodesics.push(arr.map((pair) => {
-        return map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-          new L.LatLng(
-            pair.lat,
-            pair.lng
-          )
-        );
-      }));
-    });
-
-    nestedTransmissions.push({
-      start,
-      end,
+    const transmission = {
       originToDestinationXYs,
-      total: value.length,
-      color: averageColors(value),
-      rawGeodesic,
-      geodesics,
-      from: countries[0],
-      to: countries[1]
-    })
+      total: value.length, /* changes over time */
+      color: averageColors(value), /* changes over time */
+    }
+
+    demesAndTransmissions.transmissions.push({data: transmission})
   });
 
-  /* flatter data structure */
-  nestedTransmissions.forEach((transmission, i) => { /* for each transmission */
-    transmission.geodesics.forEach((geodesic, j) => { /* and for each part of a lines split across dateline in each */
-      demesAndTransmissions.transmissions.push({ /* and add it to an array, which we'll map over to create our paths. */ /* not optimized for missiles here. we could check index of for each and if it's greater than one add a flag for partials, and their order? so that we can animate around the map */
-        data: transmission,
-        // coords: geodesic,
-        wraparoundKey: j,
-      });
-    });
-  });
   return demesAndTransmissions;
 }
 
-export default getLatLongs;
+/* we used to return this in transmission */
+// create new leaflet LatLong objects
+// const start = new L.LatLng(lat0, long0)
+// const end = new L.LatLng(lat1, long1)
+// start, /* changes with zoom level */
+// end, /* changes with zoom level */
+// from: countries[0],
+// to: countries[1]
+
+/* we used to compute this... likely with geodesic from leaflet */
+// const dlambda = Math.abs((long1-long0)%360)*Math.PI/180.0;
+// const angle = Math.acos(Math.sin(lat1*Math.PI/180.0)*Math.sin(lat0*Math.PI/180.0)
+//                         + Math.cos(lat1*Math.PI/180.0)*Math.cos(lat0*Math.PI/180.0)*Math.cos(dlambda));
+// // this sets the number of segments of the path, min 4, max 36 for half way around the globe
+// const nSteps = Math.ceil(Math.max(4,angle*36/Math.PI));
