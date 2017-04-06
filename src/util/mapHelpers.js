@@ -67,9 +67,9 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
     .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
     .attr("d", (d) => { return pathStringGenerator(d.data.originToDestinationXYs) }) /* with the interpolation in the function above pathStringGenerator */
     .attr("fill","none")
-    .attr("stroke", (d) => { return d.data.color }) /* colorScale(d.data.from); color path by contry in which the transmission arrived */
     .attr("stroke-opacity", .6)
     .attr("stroke-linecap", "round")
+    .attr("stroke", (d) => { return d.data.color }) /* colorScale(d.data.from); color path by contry in which the transmission arrived */
     .attr("stroke-width", (d) => { return d.data.total }) /* scale line by total number of transmissions */
     // .attr("marker-mid", makeMarker);
 
@@ -86,7 +86,7 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
 
 export const updateOnMoveEnd = (d3elems, latLongs) => {
   /* map has moved or rescaled, make demes and transmissions line up */
-  if (d3elems){
+  if (d3elems) {
     d3elems.demes
       .data(latLongs.demes)
       .attr("transform", (d) => {
@@ -98,6 +98,59 @@ export const updateOnMoveEnd = (d3elems, latLongs) => {
       .attr("d", (d) => { return pathStringGenerator(d.data.originToDestinationXYs) })
   }
 }
+
+export const updateVisibility = (d3elems, latLongs) => {
+
+  /* this adds things, but incorrectly */
+  // d3elems.demes
+  // .data(latLongs.demes)
+  // .enter().append("circle")
+  // .style("stroke", "none")
+  // .style("fill-opacity", .6)
+  // .style("fill", (d) => { return d.color })
+  // .attr("r", (d) => { return 2 + Math.sqrt(d.total) * 4 })
+  // .attr("transform", (d) => {
+  //   return "translate(" + d.coords.x + "," + d.coords.y + ")";
+  // });
+  /* end incorrectly adding things */
+
+  /* this correctly removes everything */
+  // d3elems.demes
+  //   .data(latLongs.demes)
+  //   .exit().remove();
+  //
+  // d3elems.transmissions
+  //   .data(latLongs.transmissions)
+  //   .exit().remove();
+  /* end correctly removes everything */
+
+
+  /* this scrambles everything */
+  // d3elems.demes
+  //   .data(latLongs.demes)
+  //   .style("fill", (d) => { return d.color })
+  //   .attr("r", (d) => {
+  //     return 2 + Math.sqrt(d.total) * 4
+  //   })
+  //
+  // d3elems.transmissions
+  //   .data(latLongs.transmissions)
+  //   .attr("stroke", (d) => { return d.data.color })
+  //   .attr("stroke-width", (d) => {
+  //     return d.data.total
+  //   })
+  /* end scrambles everything */
+}
+
+/* template for an update helper */
+export const updateFoo = (d3elems, latLongs) => {
+  d3elems.demes
+    .data(latLongs.demes)
+
+  d3elems.transmissions
+    .data(latLongs.transmissions)
+}
+
 
 // const missiles = transmissionPaths.map((transmissionPath) => {
 //
