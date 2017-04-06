@@ -7,7 +7,7 @@ import Card from "../framework/card";
 import {changeDateFilter} from "../../actions/treeProperties";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
-import {drawDemesAndTransmissions, updateOnMoveEnd} from "../../util/mapHelpers";
+import {drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility} from "../../util/mapHelpers";
 import * as globals from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import {getLatLongs} from "../../util/mapHelpersLatLong";
@@ -233,22 +233,18 @@ class Map extends React.Component {
     return [L.latLng(south,west), L.latLng(north, east)];
   }
   maybeUpdateDemesAndTransmissions(prevProps) {
-    const rand = Math.floor(Math.random() * 1000)
-    console.log('====maybe update!====', rand, "csv: ", this.props.colorScale.version, this.state.demes)
+    /* nothing to update */
+    const noMap = !this.state.map;
+    const noDemes = !this.state.demes;
 
-    const mapIsDrawn = !!this.state.map;
-    const demesAreDrawn = this.state.demes;
+    if (noMap || noDemes) return;
 
     const somethingChanged = (this.props.colorBy !== prevProps.colorBy ||
-                              this.props.geoResolution !== prevProps.geoResolution ||
-                              this.props.visibilityVersion !== prevProps.visibilityVersion ||
                               this.props.colorScale.version !== prevProps.colorScale.version);
     if (
-      mapIsDrawn &&
-      demesAreDrawn &&
-      somethingChanged
+      this.props.visibilityVersion !== prevProps.visibilityVersion
     ) {
-      console.log('____yes update!______', rand, "csv: ", this.props.colorScale.version, this.state.d3elems);
+      updateVisibility(this.state.d3elems, this.latLongs());
     }
   }
   maybeAnimateDemesAndTransmissions() {
