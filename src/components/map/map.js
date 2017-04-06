@@ -185,14 +185,26 @@ class Map extends React.Component {
       // this.props.datasetGuid !== nextProps.datasetGuid // and the dataset has changed
     */
 
-    this.state.d3DOMNode.selectAll("*").remove();
+    const mapIsDrawn = !!this.state.map;
+    const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
 
-    // clear references to the demes and transmissions d3 added
-    this.setState({
-      demes: false,
-      d3elems: null,
-      latLongs: null,
-    })
+    // (this.props.colorBy !== nextProps.colorBy ||
+    //   this.props.visibilityVersion !== nextProps.visibilityVersion ||
+    //   this.props.colorScale.version !== nextProps.colorScale.version);
+
+    if (
+      mapIsDrawn &&
+      geoResolutionChanged
+    ) {
+      this.state.d3DOMNode.selectAll("*").remove();
+
+      /* clear references to the demes and transmissions d3 added */
+      this.setState({
+        demes: false,
+        d3elems: null,
+        latLongs: null,
+      })
+    }
   }
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
