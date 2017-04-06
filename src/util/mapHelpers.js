@@ -101,7 +101,7 @@ export const updateOnMoveEnd = (d3elems, latLongs) => {
 
 export const updateVisibility = (d3elems, latLongs) => {
 
-  /* this adds things, but incorrectly */
+  /* this adds things, but incorrectly, when date slider goes from 0---0----------- to 0----------------0 */
   // d3elems.demes
   // .data(latLongs.demes)
   // .enter().append("circle")
@@ -114,7 +114,7 @@ export const updateVisibility = (d3elems, latLongs) => {
   // });
   /* end incorrectly adding things */
 
-  /* this correctly removes everything */
+  /* this correctly (to the eye at least) removes everything when date slider goes from 0-----------0 to 0--0---------- */
   // d3elems.demes
   //   .data(latLongs.demes)
   //   .exit().remove();
@@ -125,7 +125,7 @@ export const updateVisibility = (d3elems, latLongs) => {
   /* end correctly removes everything */
 
 
-  /* this scrambles everything */
+  /* this scrambles everything comically when date slider is toggled as usual, because lat long's length isn't consistent, maybe it should be */
   // d3elems.demes
   //   .data(latLongs.demes)
   //   .style("fill", (d) => { return d.color })
