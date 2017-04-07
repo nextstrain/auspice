@@ -1,7 +1,9 @@
+/*eslint dot-notation: 0*/
 import * as types from "../actions/types";
 import * as globals from "../util/globals";
 import getColorScale from "../util/getColorScale";
 import moment from 'moment';
+import d3 from "d3";
 
 /*
   we don't actually need to have legendBoundsMap default if regions will always be the
@@ -32,7 +34,9 @@ const getDefaultState = function () {
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
     geoResolution: globals.defaultGeoResolution,
     datasetPathName: null,
-    filters: {}
+    filters: {},
+    dateScale: d3.time.scale().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
+    dateFormat: d3.time.format("%Y-%m-%d")
   };
 };
 
@@ -108,6 +112,24 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       geoResolution: action.data
     });
+  /* metadata in may affect the date ranges... */
+  case types.RECEIVE_METADATA:
+    const dates = {};
+    /* do each of the 4 conditions manually as they're different... */
+    if ("absoluteDateMin" in action) {
+      dates["absoluteDateMin"] = action["absoluteDateMin"];
+    }
+    if ("absoluteDateMax" in action) {
+      dates["absoluteDateMax"] = action["absoluteDateMax"];
+    }
+    /* only change the dateMax / dateMin *if* they're outside bounds */
+    if ("dateMax" in action && action["dateMax"] < state["dateMax"]) {
+      dates["dateMax"] = action["dateMax"];
+    }
+    if ("dateMin" in action && action["dateMin"] > state["dateMin"]) {
+      dates["dateMin"] = action["dateMin"];
+    }
+    return Object.assign({}, state, dates);
   case types.APPLY_FILTER_QUERY:
     // values arrive as array
     const filters = Object.assign({}, state.filters, {});

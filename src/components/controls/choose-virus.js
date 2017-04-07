@@ -32,7 +32,7 @@ class ChooseVirus extends React.Component {
 
   render() {
     const styles = this.getStyles();
-    const pathname = this.context.router.location.pathname;
+    const pathname = this.context.router.history.location.pathname;
     /* analyse the current route in order to adjust the dataset selection choices.
     paramFields is an object with keys "virus" and potentially "lineage" and "duration"
     as well */

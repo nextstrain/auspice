@@ -7,6 +7,7 @@ import { connect } from "react-redux";
 import { controlsWidth } from "../../util/globals";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
+import d3 from "d3";
 
 moment.updateLocale("en", {
   longDateFormat: {
@@ -14,17 +15,14 @@ moment.updateLocale("en", {
   }
 });
 
-export const calendarToNumeric = (calDate) => {
-  const unixDate = moment(calDate).unix();  // number of seconds since 1970
-  return 1970 + (unixDate / 365.2425 / 24 / 3600);
-};
-
 @connect((state) => {
   return {
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
     absoluteDateMin: state.controls.absoluteDateMin,
-    absoluteDateMax: state.controls.absoluteDateMax
+    absoluteDateMax: state.controls.absoluteDateMax,
+    dateScale: state.controls.dateScale,
+    dateFormat: state.controls.dateFormat
   };
 })
 class DateRangeInputs extends React.Component {
@@ -53,9 +51,12 @@ class DateRangeInputs extends React.Component {
   }
 
   numericToCalendar(numDate) {
-    const unixDate = (numDate - 1970) * 365.2425 * 24 * 3600; // number of seconds since 1970
-    return moment.unix(unixDate).format("YYYY-MM-DD");
+    return(this.props.dateFormat(this.props.dateScale.invert(numDate)));
   }
+
+  calendarToNumeric(calDate) {
+    return(this.props.dateScale(this.props.dateFormat.parse(calDate)));
+  };
 
   updateFromPicker(ref, momentDate) {
     // a momentDate is received from DatePicker
@@ -145,10 +146,12 @@ class DateRangeInputs extends React.Component {
     const selectedMin = this.props.dateMin;
     const selectedMax = this.props.dateMax;
 
-    const absoluteMinNumDate = calendarToNumeric(absoluteMin);
-    const absoluteMaxNumDate = calendarToNumeric(absoluteMax);
-    const selectedMinNumDate = calendarToNumeric(selectedMin);
-    const selectedMaxNumDate = calendarToNumeric(selectedMax);
+    const absoluteMinNumDate = this.calendarToNumeric(absoluteMin);
+    const absoluteMaxNumDate = this.calendarToNumeric(absoluteMax);
+    const selectedMinNumDate = this.calendarToNumeric(selectedMin);
+    const selectedMaxNumDate = this.calendarToNumeric(selectedMax);
+
+    const minDistance = (absoluteMaxNumDate - absoluteMinNumDate) / 10.0;
 
     return (
       <div>
@@ -161,7 +164,7 @@ class DateRangeInputs extends React.Component {
           /* debounce the onChange event, but ensure the final one goes through */
           onChange={this.updateFromSlider.bind(this, true)}
           onAfterChange={this.updateFromSlider.bind(this, false)}
-          minDistance={0.5}                           // minDistance is in years
+          minDistance={minDistance}
           pearling
           withBars/>
         </div>
