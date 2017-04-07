@@ -221,14 +221,7 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
   }, "keydown");
   Mousetrap.bind(zoomKeys, () => {
     this.svg.selectAll(".overlay").remove();
-    this.svg.selectAll(".zoomHint").remove();
   }, "keyup");
-
-  this.svg.append("g")
-  .attr("class", "zoomHint niceText")
-  .attr("transform", "translate(" + (this.offsets.x1 + 40) + "," + (this.offsets.y1Main + 30) + ")")
-  .append("text")
-    .text("Note: Holding option / alt allows you to pan & zoom");
 
   /* construct axes */
   this.axes = {};
