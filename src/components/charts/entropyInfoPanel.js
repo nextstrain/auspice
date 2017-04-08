@@ -4,7 +4,7 @@ import * as globals from "../../util/globals";
 import {dataFont, infoPanelStyles} from "../../globalStyles";
 import { prettyString } from "../tree/tipSelectedPanel";
 
-const InfoPanel = ({hovered, aa}) => {
+const InfoPanel = ({hovered, mutType}) => {
 
   /* this is a function - we can bail early */
   if (!hovered) {
@@ -58,7 +58,7 @@ const InfoPanel = ({hovered, aa}) => {
     <div style={styles.container}>
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
         <div>
-          {aa ? `Codon ${hovered.d.codon} in protein ${hovered.d.prot}` :
+          {mutType === "aa" ? `Codon ${hovered.d.codon} in protein ${hovered.d.prot}` :
             hovered.d.prot ? `Nucleotide ${hovered.d.x} (in protein ${hovered.d.prot})` :
             `Nucleotide ${hovered.d.x}`}
         </div>

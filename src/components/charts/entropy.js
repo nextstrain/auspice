@@ -12,7 +12,7 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./entropyInfoPanel";
 import "../../css/entropy.css";
-
+import { changeMutType } from "../../actions/treeProperties";
 
 const calcEntropy = function (entropy) {
   const entropyNt = entropy["nuc"]["val"].map((s, i) => {
@@ -69,6 +69,7 @@ const getStyles = function (width) {
 
 @connect(state => {
   return {
+    mutType: state.controls.mutType,
     entropy: state.entropy.entropy,
     browserDimensions: state.browserDimensions.browserDimensions,
     load: state.entropy.loadStatus,
@@ -79,7 +80,6 @@ class Entropy extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      aa: true,
       hovered: false
     };
   }
@@ -124,7 +124,7 @@ class Entropy extends React.Component {
     this.setState({hovered: false});
   }
   onClick(d) {
-    if (this.state.aa) {
+    if (this.props.mutType === "aa") {
       this.setColorByGenotype("gt-" + d.prot + "_" + (d.codon + 1));
     } else {
       this.setColorByGenotype("gt-nuc_" + (d.x + 1));
@@ -132,10 +132,9 @@ class Entropy extends React.Component {
     this.setState({hovered: false});
   }
 
-  toggleAA(aa) {
-    if (aa !== this.state.aa) {
-      this.state.chart.toggle(aa);
-      this.setState({aa});
+  changeMutTypeCallback(newMutType) {
+    if (newMutType !== this.props.mutType) {
+      this.props.dispatch(changeMutType(newMutType));
     }
   }
 
@@ -144,15 +143,15 @@ class Entropy extends React.Component {
       <div style={styles.switchContainer}>
         <button
           key={1}
-          style={this.state.aa ? materialButtonSelected : materialButton}
-          onClick={() => this.toggleAA(true)}
+          style={this.props.mutType === "aa" ? materialButtonSelected : materialButton}
+          onClick={() => this.changeMutTypeCallback("aa")}
         >
           <span style={styles.switchTitle}> {"AA"} </span>
         </button>
         <button
           key={2}
-          style={!this.state.aa ? materialButtonSelected : materialButton}
-          onClick={() => this.toggleAA(false)}
+          style={this.props.mutType !== "aa" ? materialButtonSelected : materialButton}
+          onClick={() => this.changeMutTypeCallback("nuc")}
         >
           <span style={styles.switchTitle}> {"NT"} </span>
         </button>
@@ -186,7 +185,9 @@ class Entropy extends React.Component {
   componentDidUpdate() {
     if (this.state.shouldReRender && this.state.chart && this.props.browserDimensions) {
       this.setState({shouldReRender: false});
-      this.state.chart.render(this.getChartGeom(), this.state.aa);
+      this.state.chart.render(this.getChartGeom(), this.props.mutType === "aa");
+    } else {
+      this.state.chart.updateMutType(this.props.mutType === "aa")
     }
   }
   // repaint() {
@@ -206,7 +207,7 @@ class Entropy extends React.Component {
         {this.aaNtSwitch(styles)}
         <InfoPanel
           hovered={this.state.hovered}
-          aa={this.state.aa}
+          mutType={this.props.mutType}
         />
         <svg
           style={{pointerEvents: "auto"}}

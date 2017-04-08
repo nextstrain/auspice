@@ -141,9 +141,11 @@ EntropyChart.prototype.drawBars = function () {
   }
 };
 
-EntropyChart.prototype.toggle = function (aa) {
-  this.aa = aa;
-  this.drawBars();
+EntropyChart.prototype.updateMutType = function (aa) {
+  if (aa !== this.aa) {
+    this.aa = aa;
+    this.drawBars();
+  }
 };
 
 /* set scales - normally use this.scales.y, this.scales.xMain, this.scales.xNav */

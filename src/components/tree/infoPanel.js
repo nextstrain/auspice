@@ -4,7 +4,7 @@ import * as globals from "../../util/globals";
 import {dataFont, infoPanelStyles} from "../../globalStyles";
 import { prettyString } from "./tipSelectedPanel";
 
-const InfoPanel = ({tree, hovered, viewer, colorBy}) => {
+const InfoPanel = ({mutType, tree, hovered, viewer, colorBy}) => {
 
   /* this is a function - we can bail early */
   if (!(tree && hovered)) {
@@ -64,22 +64,47 @@ const InfoPanel = ({tree, hovered, viewer, colorBy}) => {
 
   /* getX methods return styled JSX */
   const getMutations = (d) => {
-    let mutations = "";
-    if ((typeof d.muts !== "undefined") && (globals.mutType === "nuc") && (d.muts.length)) {
-      const numMutsToShow = 5;
-      let tmp_muts = d.muts;
-      const nmuts = tmp_muts.length;
-      tmp_muts = tmp_muts.slice(0, Math.min(numMutsToShow, nmuts));
-      mutations += tmp_muts.join(", ");
-      if (nmuts > numMutsToShow) {
-        mutations += " + " + (nmuts - numMutsToShow) + " more";
+    /* mutations are stored at:
+    NUCLEOTIDE: d.muts = list of strings
+    AMINO ACID: d.aa_muts = dict of proteins -> list of strings
+    */
+    if (mutType === "nuc") {
+      if (typeof d.muts !== "undefined" && d.muts.length) {
+        const nDisplay = 5; // number of mutations to display (max)
+        const n = d.muts.length; // number of mutations that exist
+        let m = "Nt mutations: " + d.muts.slice(0, Math.min(nDisplay, n)).join(", ");
+        if (n > nDisplay) {
+          m += (" + " + (n - nDisplay) + " more");
+        }
+        return (<span>{m}</span>);
+      } else {
+        return (<span>No nucleotide mutations</span>);
+      }
+    } else if (typeof d.aa_muts !== "undefined") {
+      /* are there any? */
+      const prots = Object.keys(d.aa_muts);
+      const counts = {};
+      for (const prot of prots) {
+        counts[prot] = d.aa_muts[prot].length;
+      }
+      if (prots.map((k) => counts[k]).reduce((a, b) => a + b, 0)) {
+        const nDisplay = 3; // number of mutations to display per protein
+        const m = [<span key={"init"}>AA mutations:</span>];
+        prots.forEach((prot, idx) => {
+          if (counts[prot]) {
+            let x = prot + ":\u00A0\u00A0" + d.muts.slice(0, Math.min(nDisplay, counts[prot])).join(", ");
+            if (counts[prot] > nDisplay) {
+              x += " + " + (counts[prot] - nDisplay) + " more";
+            }
+            m.push(<span key={idx}><br />{x}</span>);
+          }
+        });
+        return m;
+      } else {
+        return (<span>No amino acid mutations</span>);
       }
     }
-    return (
-      mutations !== "" ?
-      <span>Mutations at {mutations}</span> :
-      <span>No mutations</span>
-    );
+    return "Error parsing mutations.";
   };
   const getFrequencies = (d) => {
     if (d.frequency !== undefined) {

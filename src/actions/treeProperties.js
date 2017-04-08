@@ -135,3 +135,5 @@ export const applyFilterQuery = (filterType, fields, values) => {
     dispatch(updateBranchThickness());
   };
 };
+
+export const changeMutType = (data) => ({type: types.TOGGLE_MUT_TYPE, data});
