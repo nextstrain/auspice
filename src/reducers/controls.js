@@ -123,10 +123,10 @@ const Controls = (state = getDefaultState(), action) => {
       dates["absoluteDateMax"] = action["absoluteDateMax"];
     }
     /* only change the dateMax / dateMin *if* they're outside bounds */
-    if ("dateMax" in action && action["dateMax"] < state["dateMax"]) {
+    if ("dateMax" in action) {
       dates["dateMax"] = action["dateMax"];
     }
-    if ("dateMin" in action && action["dateMin"] > state["dateMin"]) {
+    if ("dateMin" in action) {
       dates["dateMin"] = action["dateMin"];
     }
     return Object.assign({}, state, dates);

@@ -22,7 +22,7 @@ const receiveMetadata = (data) => {
       ret["dateMin"] = data.date_range.date_min;
       ret["absoluteDateMin"] = data.date_range.date_min;
     }
-    if (data.date_range.date_min) {
+    if (data.date_range.date_max) {
       ret["dateMax"] = data.date_range.date_max;
       ret["absoluteDateMax"] = data.date_range.date_max;
     }
