@@ -79,12 +79,12 @@ EntropyChart.prototype.drawAA = function (el, w) {
   el.data(this.data.aminoAcidEntropyWithoutZeros)
     .enter().append("rect")
       .attr("class", "bar")
+      .attr("id", (d) => d.prot + d.codon)
       .attr("x", (d) => this.scales.xMain(this.aaToNtCoord(d.prot, d.codon)))
       .attr("y", (d) => this.scales.y(d.y))
       .attr("width", w)
       .attr("height", (d) => this.offsets.heightMain - this.scales.y(d.y))
       .style("fill", (d) => this.geneMap[d.prot].idx % 2 ? medGrey : darkGrey)
-      // .style("fill", (d) => d.fill)
       .on("mouseover", (d) => {
         this.callbacks.onHover(d, event.pageX, event.pageY);
       })
@@ -93,6 +93,13 @@ EntropyChart.prototype.drawAA = function (el, w) {
       })
       .on("click", (d) => {
         this.callbacks.onClick(d);
+        /* clear any previously selected bars */
+        select("#entropySelected")
+          .attr("id", (node) => node.prot + node.codon)
+          .style("fill", (node) => this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey);
+        select("#" + d.prot + d.codon)
+          .attr("id", "entropySelected")
+          .style("fill", () => this.geneMap[d.prot].fill);
       })
       .style("cursor", "pointer");
 };
@@ -101,6 +108,7 @@ EntropyChart.prototype.drawNt = function (el, w) {
   el.data(this.data.entropyNtWithoutZeros)
     .enter().append("rect")
       .attr("class", "bar")
+      .attr("id", (d) => "nt" + d.x)
       .attr("x", (d) => this.scales.xMain(d.x))
       .attr("y", (d) => this.scales.y(d.y))
       .attr("width", w)
@@ -119,6 +127,23 @@ EntropyChart.prototype.drawNt = function (el, w) {
       })
       .on("click", (d) => {
         this.callbacks.onClick(d);
+        /* clear any previously selected bars */
+        select("#entropySelected")
+          .attr("id", (node) => "nt" + node.x)
+          .style("fill", (node) => {
+            if (node.prot) {
+              return (this.geneMap[node.prot].idx % 2) ? medGrey : darkGrey;
+            }
+            return lightGrey;
+          });
+        select("#nt" + d.x)
+          .attr("id", "entropySelected")
+          .style("fill", () => {
+            if (d.prot) {
+              return this.geneMap[d.prot].fill;
+            }
+            return "red";
+          });
       })
       .style("cursor", "pointer");
 };
