@@ -264,30 +264,6 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
     .attr("class", "nav")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Nav + ")")
 
-
-  /* the brush is the shaded area in the nav window */
-  /* drawing here puts it _behind_ the axes */
-  this.brushed = function () {
-    /* this block called when the brush is manipulated */
-    const s = event.selection || this.scales.xNav.range();
-    // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
-    this.xModified = this.scales.xMain.domain(s.map(this.scales.xNav.invert, this.scales.xNav));
-    this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
-    this.svg.select(".xMain.axis").call(this.axes.xMain);
-    this.drawBars();
-  };
-  this.brush = brushX()
-    /* the extent is relative to the navGraph group - the constants are a bit hacky... */
-    .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 30]])
-    .on("brush end", () => this.brushed());
-  this.navGraph.append("g")
-    .attr("class", "brush")
-    .call(this.brush)
-    .call(this.brush.move, () => {
-      return this.scales.xMain.range()
-    });
-
-
   /* draw axes */
   this.svg.append("g")
       .attr("class", "y axis")
@@ -304,6 +280,51 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
       .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y2Nav + ")")
       .call(this.axes.xNav);
 
+  /* the brush is the shaded area in the nav window */
+  this.brushed = function () {
+    /* this block called when the brush is manipulated */
+    const s = event.selection || this.scales.xNav.range();
+    console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
+    this.xModified = this.scales.xMain.domain(s.map(this.scales.xNav.invert, this.scales.xNav));
+    this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
+    this.svg.select(".xMain.axis").call(this.axes.xMain);
+    this.drawBars();
+    if (this.brushHandle) {
+      const sx = s.map(this.scales.xNav.invert);
+      this.brushHandle
+        .attr("display", null)
+        .attr("transform", (d, i) => "translate(" + s[i] + "," + (this.offsets.heightNav + 29) + ")");
+    }
+  };
+
+  this.brush = brushX()
+    /* the extent is relative to the navGraph group - the constants are a bit hacky... */
+    .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 30]])
+    .on("brush end", () => this.brushed());
+  this.gBrush = this.navGraph.append("g")
+    .attr("class", "brush")
+    .attr("stroke-width", 0)
+    .call(this.brush)
+    .call(this.brush.move, () => {
+      return this.scales.xMain.range()
+    });
+  /* https://bl.ocks.org/mbostock/4349545 */
+  this.brushHandle = this.gBrush.selectAll(".handle--custom")
+    .data([{type: "w"}, {type: "e"}])
+    .enter().append("path")
+      .attr("class", "handle--custom")
+      .attr("fill", darkGrey)
+      .attr("cursor", "ew-resize")
+      .attr("d", "M0,0 0,0 -7,15 7,15 0,0 Z")
+      /* see the extent x,y params in brushX() (above) */
+      .attr("transform", (d, i) =>
+        d.type === "e" ?
+        "translate(" + (this.offsets.x2 - 1) + "," + (this.offsets.heightNav + 29) + ")" :
+        "translate(" + (this.offsets.x1 + 1) + "," + (this.offsets.heightNav + 29) + ")"
+        )
+
+
+
   /* https://bl.ocks.org/mbostock/4015254 */
   this.svg.append("g")
     .append("clipPath")
@@ -314,20 +335,6 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
       .attr("width", this.offsets.width)
       .attr("height", this.offsets.heightMain)
 
-
-
-  //
-  // /* the brush is the shaded area in the nav window */
-  // this.brush = brushX()
-  //   /* the extent is relative to the navGraph group - the constants are a bit hacky... */
-  //   .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 30]])
-  //   .on("brush end", () => this.brushed());
-  // this.navGraph.append("g")
-  //   .attr("class", "brush")
-  //   .call(this.brush)
-  //   .call(this.brush.move, () => {
-  //     return this.scales.xMain.range()
-  //   });
 
   /* draw the genes */
   this.drawGenes(this.data.annotations);
