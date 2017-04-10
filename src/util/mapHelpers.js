@@ -25,7 +25,7 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, userDate
     .style("stroke", "none")
     .style("fill-opacity", .6)
     .style("fill", (d) => { return d.color })
-    .attr("r", (d) => { return 2 + Math.sqrt(d.total) * 4 })
+    .attr("r", (d) => { return 0 + Math.sqrt(d.total) * 4 })
     .attr("transform", (d) => {
       return "translate(" + d.coords.x + "," + d.coords.y + ")";
     });
@@ -132,9 +132,10 @@ export const updateVisibility = (d3elems, latLongs) => {
   /* this scrambles everything comically when date slider is toggled as usual, because lat long's length isn't consistent, maybe it should be */
   d3elems.demes
     .data(latLongs.demes)
-    .style("fill", (d) => { return d.color })
+    .transition(5)
+    .style("fill", (d) => { return d.total >0 ? d.color : "white" })
     .attr("r", (d) => {
-      return 2 + Math.sqrt(d.total) * 4
+      return 0 + Math.sqrt(d.total) * 4
     })
 
   d3elems.transmissions
