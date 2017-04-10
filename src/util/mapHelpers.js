@@ -17,7 +17,7 @@ const translateAlong = (path) => {
   };
 };
 
-export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
+export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, userDateMin, userDateMax) => {
 
   const demes = g.selectAll("demes")
     .data(latLongs.demes)
@@ -61,11 +61,15 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
   */
   // add transmission lines with mid markers at each inner point of the path
 
+  const foo = (pair) => {
+    return pair;
+  }
+
   const transmissions = g.selectAll("transmissions")
     .data(latLongs.transmissions)
     .enter()
     .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
-    .attr("d", (d) => { return pathStringGenerator(d.data.originToDestinationXYs) }) /* with the interpolation in the function above pathStringGenerator */
+    .attr("d", (d) => { return pathStringGenerator(foo(d.data.originToDestinationXYs)) }) /* with the interpolation in the function above pathStringGenerator */
     .attr("fill","none")
     .attr("stroke-opacity", .6)
     .attr("stroke-linecap", "round")

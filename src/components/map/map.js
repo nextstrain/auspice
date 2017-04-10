@@ -359,30 +359,19 @@ class Map extends React.Component {
     let second = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD").add(timeSliderWindow, "months");
     let last = moment(this.props.controls.absoluteDateMax, "YYYY-MM-DD");
 
-    const pathLengths = this.state.d3elems.transmissionPathLengths;
+    const animationLoop = setInterval(() => {
+      /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
+      this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+      if (trailing) {
+        first = first.add(incrementBy, incrementByUnit);
+      }
+      second = second.add(incrementBy, incrementByUnit);
 
-    /* https://css-tricks.com/svg-line-animation-works/ */
-    d3.selectAll(this.state.d3elems.transmissions[0])
-      .attr("stroke-dasharray", (d, i) => { return pathLengths[i] + " " + pathLengths[i] })
-      .attr("stroke-dashoffset", (d, i) => { return pathLengths[i] })
-      .transition()
-      .duration(2000)
-      .ease("linear")
-      .attr("stroke-dashoffset", 0);
-
-    // const animationLoop = setInterval(() => {
-    //   /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
-    //   this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
-    //   if (trailing) {
-    //     first = first.add(incrementBy, incrementByUnit);
-    //   }
-    //   second = second.add(incrementBy, incrementByUnit);
-    //
-    //   if (second.valueOf() >= last.valueOf()) {
-    //     clearInterval(animationLoop)
-    //     this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
-    //   }
-    // }, tick);
+      if (second.valueOf() >= last.valueOf()) {
+        clearInterval(animationLoop)
+        this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+      }
+    }, tick);
 
     // controls: state.controls,
     // this.props.dateMin //"2013-06-28"
