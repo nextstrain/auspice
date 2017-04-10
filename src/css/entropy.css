@@ -20,3 +20,9 @@
   font-style: italic;
   color: var(--medGrey);
 }
+
+.brush .selection {
+  cursor: grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab;
+}

@@ -78,9 +78,11 @@ const getStyles = function (width) {
 })
 class Entropy extends React.Component {
   constructor(props) {
+    console.log("ENTROPY CONSTRUCTOR")
     super(props);
     this.state = {
-      hovered: false
+      hovered: false,
+      chart: false
     };
   }
   static contextTypes = {
@@ -91,7 +93,8 @@ class Entropy extends React.Component {
     entropy: React.PropTypes.object,
     sidebar: React.PropTypes.bool,
     browserDimensions: React.PropTypes.object,
-    load: React.PropTypes.number
+    load: React.PropTypes.number,
+    mutType: React.PropTypes.string.isRequired
   }
 
   setColorByGenotype(colorBy) {
@@ -99,12 +102,12 @@ class Entropy extends React.Component {
     modifyURLquery(this.context.router, {c: colorBy}, true);
   }
 
-  getChartGeom() {
+  getChartGeom(props) {
     const responsive = computeResponsive({
       horizontal: 1,
       vertical: .3333333,
-      browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar
+      browserDimensions: props.browserDimensions,
+      sidebar: props.sidebar
     });
     return {
       responsive,
@@ -159,7 +162,10 @@ class Entropy extends React.Component {
     );
   }
   componentWillReceiveProps(nextProps) {
-    if (this.props.load !== nextProps.load && nextProps.load === 2) {
+    if (this.props.load !== nextProps.load && nextProps.load !== 2) {
+      this.setState({chart: false});
+    }
+    if (!this.state.chart && this.props.load !== nextProps.load && nextProps.load === 2) {
       const chart = new EntropyChart(
         this.refs.d3entropy,
         calcEntropy(nextProps.entropy),
@@ -169,36 +175,26 @@ class Entropy extends React.Component {
           onClick: this.onClick.bind(this)
         }
       );
-      chart.render(this.getChartGeom());
+      chart.render(this.getChartGeom(nextProps));
       this.setState({
         chart,
-        chartGeom: this.getChartGeom(),
-        shouldReRender: true
+        chartGeom: this.getChartGeom(nextProps)
       });
-    } else if (nextProps.load === 2 && this.props.sidebar !== nextProps.sidebar) {
-      this.setState({shouldReRender: true});
+      return; // nothing more CWRP should do
+    }
+    if (this.state.chart) {
+      if ((this.props.browserDimensions !== nextProps.browserDimensions) ||
+         (this.props.sidebar !== nextProps.sidebar)) {
+        this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
+      } else if (this.props.mutType !== nextProps.mutType) {
+        this.state.chart.updateMutType(nextProps.mutType === "aa");
+      }
     }
   }
-  // componentDidMount() {
-  //   this.repaint();
-  // }
-  componentDidUpdate() {
-    if (this.state.shouldReRender && this.state.chart && this.props.browserDimensions) {
-      this.setState({shouldReRender: false});
-      this.state.chart.render(this.getChartGeom(), this.props.mutType === "aa");
-    } else {
-      this.state.chart.updateMutType(this.props.mutType === "aa")
-    }
-  }
-  // repaint() {
-  //   if (this.state.chart && this.props.browserDimensions) {
-  //     this.state.chart.render(this.getChartGeom());
-  //   }
-  // }
-  render() {
 
+  render() {
     /* get chart geom data */
-    const chartGeom = this.getChartGeom();
+    const chartGeom = this.getChartGeom(this.props);
     /* get styles */
     const styles = getStyles(chartGeom.width);
 
