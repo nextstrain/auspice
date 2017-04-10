@@ -17,17 +17,34 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
   /*
     aggregate locations for demes
   */
+
+  // first pass to initialize empty vectors
+  nodes.forEach((n, i) => {
+    const tipColorAttribute = getTipColorAttribute(n, colorScale, sequences);
+    if (!n.children) {
+      if (!aggregatedLocations[n.attr[geoResolution]]) {
+        aggregatedLocations[n.attr[geoResolution]] = [];
+      }
+    }
+    if (n.children) {
+      n.children.forEach((child) => {
+        if (n.attr[geoResolution] !== child.attr[geoResolution]) {
+          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution];
+          if (!aggregatedTransmissions[transmission]) {
+            aggregatedTransmissions[transmission] = [];
+          }
+        }
+      });
+    }
+  });
+
+  // second pass to fill vectors
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
     const tipColorAttribute = getTipColorAttribute(n, colorScale, sequences);
     if (!n.children && visibility[i] === "visible") {
-      // look up geo1 geo2 geo3 do lat longs differ
-      if (aggregatedLocations[n.attr[geoResolution]]) {
-        aggregatedLocations[n.attr[geoResolution]].push(colorScale.scale(tipColorAttribute));
-      } else {
-        // if we haven't added this pair, add it
-        aggregatedLocations[n.attr[geoResolution]] = [colorScale.scale(tipColorAttribute)];
-      }
+      // if tip and visible, push
+      aggregatedLocations[n.attr[geoResolution]].push(colorScale.scale(tipColorAttribute));
     }
     /* transmissions count internal node transitions as well
     they are from the parent of the node to the node itself
@@ -41,11 +58,7 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
         if (n.attr[geoResolution] !== child.attr[geoResolution] &&
           visibility[child.arrayIdx] === "visible") {
           const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution];
-          if (aggregatedTransmissions[transmission]) {
-            aggregatedTransmissions[transmission].push(colorScale.scale(tipColorAttribute));
-          } else {
-            aggregatedTransmissions[transmission] = [colorScale.scale(tipColorAttribute)];
-          }
+          aggregatedTransmissions[transmission].push(colorScale.scale(tipColorAttribute));
         }
       });
     }
