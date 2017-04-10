@@ -126,19 +126,19 @@ export const updateVisibility = (d3elems, latLongs) => {
 
 
   /* this scrambles everything comically when date slider is toggled as usual, because lat long's length isn't consistent, maybe it should be */
-  // d3elems.demes
-  //   .data(latLongs.demes)
-  //   .style("fill", (d) => { return d.color })
-  //   .attr("r", (d) => {
-  //     return 2 + Math.sqrt(d.total) * 4
-  //   })
-  //
-  // d3elems.transmissions
-  //   .data(latLongs.transmissions)
-  //   .attr("stroke", (d) => { return d.data.color })
-  //   .attr("stroke-width", (d) => {
-  //     return d.data.total
-  //   })
+  d3elems.demes
+    .data(latLongs.demes)
+    .style("fill", (d) => { return d.color })
+    .attr("r", (d) => {
+      return 2 + Math.sqrt(d.total) * 4
+    })
+
+  d3elems.transmissions
+    .data(latLongs.transmissions)
+    .attr("stroke", (d) => { return d.data.color })
+    .attr("stroke-width", (d) => {
+      return d.data.total
+    })
   /* end scrambles everything */
 }
 
