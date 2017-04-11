@@ -2,8 +2,8 @@
 import { updateColorScale, updateNodeColors } from "./colors";
 import { dataURLStem } from "../util/globals";
 import * as types from "./types";
-import { CHANGE_GEO_RESOLUTION } from "./types";
-import {defaultGeoResolution} from "../util/globals";
+// import { CHANGE_GEO_RESOLUTION } from "./types";
+// import {defaultGeoResolution} from "../util/globals";
 
 
 /* request metadata */
@@ -63,23 +63,23 @@ const populateMetadataStore = (queryParams) => {
   };
 };
 
-const checkGeoResolution = (node) => {
-  return {
-    if defaultGeoResolution not in node.attr():{
-    // need to fix conditional syntax.... I have no idea where the semicolons go ;)
-      if 'region' in node.attr():{ // default is 'country'; if null, try 'region'
-        type: CHANGE_GEO_RESOLUTION,
-        data: 'region'};
-      else:{
-        type: CHANGE_GEO_RESOLUTION,  // if neither 'region' nor 'country' available, don't draw the map.
-                                            // should also add a conditional to the map.js component checking that state.controls.georesolution exists
-        data: null};
-    };
-    // else:{
-      // do I need an else clause here to say "do nothing" if the default is fine?
-    // }
-  }
-}
+// const checkGeoResolution = (node) => {
+//   return {
+//     if defaultGeoResolution not in node.attr():{
+//     // need to fix conditional syntax.... I have no idea where the semicolons go ;)
+//       if 'region' in node.attr():{ // default is 'country'; if null, try 'region'
+//         type: CHANGE_GEO_RESOLUTION,
+//         data: 'region'};
+//       else:{
+//         type: CHANGE_GEO_RESOLUTION,  // if neither 'region' nor 'country' available, don't draw the map.
+//                                       // should also add a conditional to the map.js component checking that state.controls.georesolution exists
+//         data: null};
+//     };
+//     // else:{
+//       // do I need an else clause here to say "do nothing" if the default is fine?
+//     // }
+//   }
+// }
 
 /* request tree */
 
@@ -116,9 +116,13 @@ const populateTreeStore = (queryParams) => {
     dispatch(requestTree());
     return fetchTree(queryParams).then((res) => res.json()).then(
       (json) => {
+        console.log("TREE JSON ARRIVED")
         dispatch(receiveTree(json, controls));
+        console.log("TREE JSON ARRIVED #2")
+
+        // console.log(controls.geoResolution)
         // need to figure out how to access the first node in the tree object / where the tree object lives. Pass this as argument.
-        dispatch(checkGeoResolution(nodes[0]));
+        // dispatch(checkGeoResolution(nodes[0]));
         dispatch(updateColorScale());
         dispatch(updateNodeColors());
       },

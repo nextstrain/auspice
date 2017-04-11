@@ -65,6 +65,7 @@ const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, c
     create a latlong pair for each country's location and push them all to a common array
   */
   _.forOwn(aggregatedLocations, (value, key) => {
+    console.log("value:", value, "key:", key)
     demesAndTransmissions.demes.push({
       location: key, // Thailand:
       total: value.length, // 20
