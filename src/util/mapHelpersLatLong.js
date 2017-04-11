@@ -29,7 +29,7 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
     if (n.children) {
       n.children.forEach((child) => {
         if (n.attr[geoResolution] !== child.attr[geoResolution]) {
-          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution];
+          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution] + "-" + n.strain + "/" + child.strain;
           if (!aggregatedTransmissions[transmission]) {
             aggregatedTransmissions[transmission] = [];
           }
@@ -57,8 +57,8 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
         */
         if (n.attr[geoResolution] !== child.attr[geoResolution] &&
           visibility[child.arrayIdx] === "visible") {
-          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution];
-          aggregatedTransmissions[transmission].push(colorScale.scale(tipColorAttribute));
+          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution] + "-" + n.strain + "/" + child.strain;
+          aggregatedTransmissions[transmission] = [colorScale.scale(tipColorAttribute)]
         }
       });
     }
@@ -96,7 +96,7 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
   /* count TRANSMISSIONS for line thickness */
   _.forOwn(aggregatedTransmissions, (value, key) => {
 
-    const countries = key.split("/");
+    const countries = key.split("-")[0].split("/");
     const originToDestinationXYs = [
       map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
         new L.LatLng(

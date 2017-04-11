@@ -19,17 +19,6 @@ const translateAlong = (path) => {
 
 export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, userDateMin, userDateMax) => {
 
-  const demes = g.selectAll("demes")
-    .data(latLongs.demes)
-    .enter().append("circle")
-    .style("stroke", "none")
-    .style("fill-opacity", .6)
-    .style("fill", (d) => { return d.color })
-    .attr("r", (d) => { return 0 + Math.sqrt(d.total) * 4 })
-    .attr("transform", (d) => {
-      return "translate(" + d.coords.x + "," + d.coords.y + ")";
-    });
-
   // define markers that are appended to the definition part of the group
   let markerCount=0;
   const makeMarker = function (d){
@@ -80,6 +69,17 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, userDate
     let transmissionPathLengths = [];
     transmissions[0].forEach((d, i) => { transmissionPathLengths.push(d.getTotalLength()) })
 
+  const demes = g.selectAll("demes")
+    .data(latLongs.demes)
+    .enter().append("circle")
+    .style("stroke", "none")
+    .style("fill-opacity", .6)
+    .style("fill", (d) => { return d.color })
+    .attr("r", (d) => { return 0 + Math.sqrt(d.total) * 4 })
+    .attr("transform", (d) => {
+      return "translate(" + d.coords.x + "," + d.coords.y + ")";
+    });
+
   return {
     demes,
     transmissions,
@@ -128,23 +128,22 @@ export const updateVisibility = (d3elems, latLongs) => {
   //   .exit().remove();
   /* end correctly removes everything */
 
-
-  /* this scrambles everything comically when date slider is toggled as usual, because lat long's length isn't consistent, maybe it should be */
-  d3elems.demes
-    .data(latLongs.demes)
-    .transition(5)
-    .style("fill", (d) => { return d.total >0 ? d.color : "white" })
-    .attr("r", (d) => {
-      return 0 + Math.sqrt(d.total) * 4
-    })
-
   d3elems.transmissions
     .data(latLongs.transmissions)
-    .attr("stroke", (d) => { return d.data.color })
+    .transition(5)
+    .attr("stroke", (d) => { return d.data.total >0 ? d.data.color : "white" })
     .attr("stroke-width", (d) => {
       return d.data.total
     })
-  /* end scrambles everything */
+
+d3elems.demes
+  .data(latLongs.demes)
+  .transition(5)
+  .style("fill", (d) => { return d.total >0 ? d.color : "white" })
+  .attr("r", (d) => {
+    return 0 + Math.sqrt(d.total) * 4
+  })
+
 }
 
 /* template for an update helper */
