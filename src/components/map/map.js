@@ -57,6 +57,7 @@ class Map extends React.Component {
     setupLeafletPlugins();
   }
   componentWillReceiveProps(nextProps) {
+    console.log("MAP WILL RECIEVE PROPS")
     this.maybeComputeResponive(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* dataset or colorby just changed, this change is upstream of maybeDraw */
   }

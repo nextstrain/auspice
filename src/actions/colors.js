@@ -22,6 +22,7 @@ export const updateColorScale = function () {
       return null;
     }
     const previousVersion = controls.colorScale ? controls.colorScale.version : 0;
+    console.log("updateColorScale dispatching")
     dispatch({
       type: types.SET_COLOR_SCALE,
       data: colorScaleWrapper(controls.colorBy, tree, sequences, metadata.colorOptions, previousVersion + 1)

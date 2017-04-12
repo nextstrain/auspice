@@ -46,6 +46,7 @@ const Tree = (state = getDefaultState(), action) => {
     /* step 4 */
     const branchThickness = calcBranchThickness(nodes, visibility, 0);
     /* set state */
+    console.log("Tree reducer returning now.")
     return Object.assign({}, state, {
       loadStatus: 2,
       error: null,

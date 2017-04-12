@@ -90,6 +90,7 @@ const requestTree = () => {
 };
 
 const receiveTree = (data, controls) => {
+  console.log("receive tree action being dispatched")
   return {
     type: types.RECEIVE_TREE,
     data,
@@ -116,11 +117,8 @@ const populateTreeStore = (queryParams) => {
     dispatch(requestTree());
     return fetchTree(queryParams).then((res) => res.json()).then(
       (json) => {
-        console.log("TREE JSON ARRIVED")
         dispatch(receiveTree(json, controls));
-        console.log("TREE JSON ARRIVED #2")
-
-        // console.log(controls.geoResolution)
+        console.log("THIS CODE NEVER RUNS. WHY!?!?!?!?!?!?!?!?!?")
         // need to figure out how to access the first node in the tree object / where the tree object lives. Pass this as argument.
         // dispatch(checkGeoResolution(nodes[0]));
         dispatch(updateColorScale());
