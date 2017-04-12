@@ -58,9 +58,9 @@ const InfoPanel = ({hovered, mutType}) => {
     <div style={styles.container}>
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
         <div>
-          {mutType === "aa" ? `Codon ${hovered.d.codon} in protein ${hovered.d.prot}` :
-            hovered.d.prot ? `Nucleotide ${hovered.d.x} (in protein ${hovered.d.prot})` :
-            `Nucleotide ${hovered.d.x}`}
+          {mutType === "aa" ? `Codon ${hovered.d.codon + 1} in protein ${hovered.d.prot}` :
+            hovered.d.prot ? `Nucleotide ${hovered.d.x + 1} (in protein ${hovered.d.prot})` :
+            `Nucleotide ${hovered.d.x + 1}`}
         </div>
         <p/>
         <div>

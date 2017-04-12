@@ -19,6 +19,11 @@ const EntropyChart = function (ref, data, callbacks) {
   // console.log(this.data)
 };
 
+/* zero-based arrays in JSON. No such thing as nucleotide 0 or amino acid 0 */
+const fix = function (x) {
+  return x + 1;
+};
+
 /* the annotation order in JSON is not necessarily sorted */
 EntropyChart.prototype.processAnnotations = function () {
   const m = {};
@@ -45,7 +50,7 @@ EntropyChart.prototype.intersectGenes = function (pos) {
 
 /* convert amino acid X in gene Y to a nucleotide number */
 EntropyChart.prototype.aaToNtCoord = function (gene, aaPos) {
-  return this.geneMap[gene].start + aaPos * 3;
+  return this.geneMap[gene].start + fix(aaPos) * 3;
 };
 
 /* draw the genes (annotations) */
@@ -108,8 +113,8 @@ EntropyChart.prototype.drawNt = function (el, w) {
   el.data(this.data.entropyNtWithoutZeros)
     .enter().append("rect")
       .attr("class", "bar")
-      .attr("id", (d) => "nt" + d.x)
-      .attr("x", (d) => this.scales.xMain(d.x))
+      .attr("id", (d) => "nt" + fix(d.x))
+      .attr("x", (d) => this.scales.xMain(fix(d.x)))
       .attr("y", (d) => this.scales.y(d.y))
       .attr("width", w)
       .attr("height", (d) => this.offsets.heightMain - this.scales.y(d.y))
@@ -136,7 +141,7 @@ EntropyChart.prototype.drawNt = function (el, w) {
             }
             return lightGrey;
           });
-        select("#nt" + d.x)
+        select("#nt" + fix(d.x))
           .attr("id", "entropySelected")
           .style("fill", () => {
             if (d.prot) {
