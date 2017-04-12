@@ -78,7 +78,6 @@ const getStyles = function (width) {
 })
 class Entropy extends React.Component {
   constructor(props) {
-    console.log("ENTROPY CONSTRUCTOR")
     super(props);
     this.state = {
       hovered: false,
@@ -175,7 +174,7 @@ class Entropy extends React.Component {
           onClick: this.onClick.bind(this)
         }
       );
-      chart.render(this.getChartGeom(nextProps));
+      chart.render(this.getChartGeom(nextProps), nextProps.mutType);
       this.setState({
         chart,
         chartGeom: this.getChartGeom(nextProps)
