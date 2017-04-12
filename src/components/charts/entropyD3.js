@@ -262,7 +262,7 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Main + ")");
   this.navGraph = this.svg.append("g")
     .attr("class", "nav")
-    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Nav + ")")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Nav + ")");
 
   /* draw axes */
   this.svg.append("g")
@@ -284,13 +284,12 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
   this.brushed = function () {
     /* this block called when the brush is manipulated */
     const s = event.selection || this.scales.xNav.range();
-    console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
+    // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
     this.xModified = this.scales.xMain.domain(s.map(this.scales.xNav.invert, this.scales.xNav));
     this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
     this.svg.select(".xMain.axis").call(this.axes.xMain);
     this.drawBars();
     if (this.brushHandle) {
-      const sx = s.map(this.scales.xNav.invert);
       this.brushHandle
         .attr("display", null)
         .attr("transform", (d, i) => "translate(" + s[i] + "," + (this.offsets.heightNav + 29) + ")");
@@ -306,7 +305,7 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
     .attr("stroke-width", 0)
     .call(this.brush)
     .call(this.brush.move, () => {
-      return this.scales.xMain.range()
+      return this.scales.xMain.range();
     });
   /* https://bl.ocks.org/mbostock/4349545 */
   this.brushHandle = this.gBrush.selectAll(".handle--custom")
@@ -315,15 +314,13 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
       .attr("class", "handle--custom")
       .attr("fill", darkGrey)
       .attr("cursor", "ew-resize")
-      .attr("d", "M0,0 0,0 -7,15 7,15 0,0 Z")
+      .attr("d", "M0,0 0,0 -5,11 5,11 0,0 Z")
       /* see the extent x,y params in brushX() (above) */
-      .attr("transform", (d, i) =>
+      .attr("transform", (d) =>
         d.type === "e" ?
         "translate(" + (this.offsets.x2 - 1) + "," + (this.offsets.heightNav + 29) + ")" :
         "translate(" + (this.offsets.x1 + 1) + "," + (this.offsets.heightNav + 29) + ")"
-        )
-
-
+      );
 
   /* https://bl.ocks.org/mbostock/4015254 */
   this.svg.append("g")
@@ -333,8 +330,7 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
     .append("rect")
       .attr("id", "cliprect")
       .attr("width", this.offsets.width)
-      .attr("height", this.offsets.heightMain)
-
+      .attr("height", this.offsets.heightMain);
 
   /* draw the genes */
   this.drawGenes(this.data.annotations);
@@ -352,7 +348,7 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
     /* move the brush */
     this.navGraph.select(".brush")
       .call(this.brush.move, () => {
-        return this.scales.xMain.range().map(t.invertX, t)
+        return this.scales.xMain.range().map(t.invertX, t);
       });
 
   };
