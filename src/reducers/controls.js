@@ -24,6 +24,7 @@ const getDefaultState = function () {
     region: null,
     search: null,
     strain: null,
+    mutType: globals.mutType,
     layout: globals.defaultLayout,
     distanceMeasure: globals.defaultDistanceMeasure,
     dateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
@@ -136,6 +137,10 @@ const Controls = (state = getDefaultState(), action) => {
     filters[action.fields] = action.values;
     return Object.assign({}, state, {
       filters
+    });
+  case types.TOGGLE_MUT_TYPE:
+    return Object.assign({}, state, {
+      mutType: action.data
     });
   default:
     return state;
