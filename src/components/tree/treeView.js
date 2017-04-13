@@ -299,6 +299,7 @@ class TreeView extends React.Component {
     });
   }
   onBranchClick(d) {
+    this.Viewer.fitToViewer();
     this.state.tree.zoomIntoClade(d, mediumTransitionDuration);
     /* to stop multiple phyloTree updates potentially clashing,
     we change tipVis after geometry update + transition */
