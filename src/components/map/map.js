@@ -57,7 +57,6 @@ class Map extends React.Component {
     setupLeafletPlugins();
   }
   componentWillReceiveProps(nextProps) {
-    console.log("MAP WILL RECIEVE PROPS")
     this.maybeComputeResponive(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* dataset or colorby just changed, this change is upstream of maybeDraw */
   }
@@ -159,7 +158,7 @@ class Map extends React.Component {
   maybeDrawDemesAndTransmissions(prevProps) {
 
     const mapIsDrawn = !!this.state.map;
-    const allDataPresent = !!(this.props.colorScale && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode);
+    const allDataPresent = !!(this.props.colorScale && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode && this.props.geoResolution);
     const demesAbsent = !this.state.demes;
     // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;
     // const newGeoResolution = this.props.geoResolution !== prevProps.geoResolution;

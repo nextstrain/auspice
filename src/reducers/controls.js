@@ -32,7 +32,7 @@ const getDefaultState = function () {
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
-    geoResolution: globals.defaultGeoResolution,
+    geoResolution: null,
     datasetPathName: null,
     filters: {},
     dateScale: d3.time.scale().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
