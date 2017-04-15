@@ -5,19 +5,22 @@ import { calcVisibility,
    calcBranchThickness } from "../util/treeHelpers";
 import * as types from "./types";
 
-const updateVisibility = () => {
+export const updateVisibility = (vis) => {
   return (dispatch, getState) => {
     const { tree, controls } = getState();
+    if (typeof vis==="undefined"){
+      vis = calcVisibility(tree, controls);
+    }
     dispatch({
       type: types.UPDATE_TIP_VISIBILITY,
-      data: calcVisibility(tree, controls),
+      data: vis,
       version: tree.visibilityVersion + 1
     });
   };
 };
 
 /* this must be called AFTER Visibility is updated */
-const updateBranchThickness = (idxOfInViewRootNode = 0) => {
+export const updateBranchThickness = (idxOfInViewRootNode = 0) => {
   return (dispatch, getState) => {
     const { tree } = getState();
     if (tree.nodes) {

@@ -12,6 +12,7 @@ import GeoResolution from "./geo-resolution";
 import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
+import Table from "./table";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -61,6 +62,7 @@ class Controls extends React.Component {
         {header("Filters")}
         <AllFilters/>
 
+        <Table/>
       </Flex>
     );
   }
