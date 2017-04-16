@@ -51,7 +51,7 @@ class Table extends React.Component {
         const tipAttrs = nodes.filter(function(d){return d.attr['strain'];}).map(function(d){return d.attr;});
         const columns = [];
         for (let k in tipAttrs[0]){
-          columns.push({name:k, width:60, data:k, visible:((k==="strain")||(k==="authors")||(k==="country"))?true:false});
+          columns.push({name:k, width:60, data:k, visible:((k==="strain"))?true:false});
         }
         //console.log("columns", columns);
 
