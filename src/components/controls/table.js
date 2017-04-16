@@ -21,7 +21,7 @@ class Table extends React.Component {
     componentWillReceiveProps(nextProps){
         if (nextProps.nodes){
           const tipAttrs = nextProps.nodes.filter(function(d){return d.attr['strain'];}).map(function(d){return d.attr;});
-          console.log("table:", tipAttrs);
+          //console.log("table:", tipAttrs);
           this.makeTable(nextProps.nodes);
         }else{
           console.log("no nodes");
@@ -53,7 +53,20 @@ class Table extends React.Component {
         for (let k in tipAttrs[0]){
           columns.push({name:k, width:60, data:k, visible:((k==="strain")||(k==="authors")||(k==="country"))?true:false});
         }
-        console.log("columns", columns);
+        //console.log("columns", columns);
+
+        //** add headers to table
+        const columns_list = Object.keys(tipAttrs[0]);
+        var table_div = d3.select(this.refs.main);
+        var thead = table_div.append("thead")
+            .attr("align", "left");
+        thead.append("tr")
+            .selectAll("th")
+            .data(columns_list)
+            .enter()
+            .append("th")
+            .text(function(d) { return d; });
+
         $(this.refs.main).DataTable({
           "dom": '<"top"il>rt<"bottom"p><"clear">',
            data: tipAttrs,
@@ -98,7 +111,7 @@ class Table extends React.Component {
    //dispatch vector with existing tips
 
     render() {
-        console.log("rendering table");
+        //console.log("rendering table");
         return (
             <div>
                 <input type="text" placeholder="Search"
