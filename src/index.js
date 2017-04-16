@@ -15,6 +15,8 @@ import BrowserDimensionMonitor from "./components/framework/browserDimensionMoni
 import "./css/global.css";
 import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";
+import "./css/bootstrapCustomized_table.css";
+import "./css/tableCustomized.css";
 import "./css/datePicker.css";
 import "./css/static.css";
 import { outboundLinkWithAnalytics } from "./util/googleAnalytics";
