@@ -94,6 +94,13 @@ class Table extends React.Component {
           .text('deselect')
 
         var that =this;
+
+        function deselect_all(){
+          const selectedTips = that.props.nodes.map(function(d){return "visible";});
+          that.props.dispatch(updateVisibility(selectedTips));
+          that.props.dispatch(updateBranchThickness());
+        }
+
         //** select clicked rows(single/multiple) and update tree & map
         $(this.refs.main).on('click', 'tr', function(){
             $(this).toggleClass('active');
@@ -114,15 +121,15 @@ class Table extends React.Component {
               });
               that.props.dispatch(updateVisibility(selectedTips));
               that.props.dispatch(updateBranchThickness());
+            }else{
+              deselect_all();
             }
         });
 
         //**deselect all clicked rows and reset tree & map
         $('#deselect_clicked').on( 'click', function () {
             $('#'+table_id+' tbody tr').removeClass('active row_selected');
-              const selectedTips = that.props.nodes.map(function(d){return "visible";});
-              that.props.dispatch(updateVisibility(selectedTips));
-              that.props.dispatch(updateBranchThickness());
+            deselect_all();
         } );
         //console.log("made table");
     }
