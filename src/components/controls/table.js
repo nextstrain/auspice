@@ -2,11 +2,14 @@ import React from "react";
 import Radium from "radium";
 import { connect } from "react-redux";
 import {updateVisibility, updateBranchThickness} from "../../actions/treeProperties";
+import jquery from "jquery";
+import DataTable from "datatables.net";
+const $ = jquery;
 
-const $ = require('jquery');
-$.DataTable = require('datatables.net');
 require('datatables.net-bs');
 
+// built on
+// https://medium.com/@zbzzn/integrating-react-and-datatables-not-as-hard-as-advertised-f3364f395dfa
 @Radium
 @connect((state) => ({nodes: state.tree.nodes}))
 class Table extends React.Component {
@@ -26,11 +29,6 @@ class Table extends React.Component {
         }else{
           console.log("no nodes");
         }
-    }
-
-    componentDidRecieveProps()
-    {
-      this.makeTable(this.nodes.props);
     }
 
     componentWillUnmount(){
