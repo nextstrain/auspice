@@ -1,0 +1,5 @@
+/* highlight row_selected in table*/
+tr.row_selected td {
+  background-color:#5FA0C0 !important;
+  color: white;
+}
