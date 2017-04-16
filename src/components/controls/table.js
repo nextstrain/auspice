@@ -117,7 +117,7 @@ class Table extends React.Component {
                 <input type="text" placeholder="Search"
                     onChange={(e) => this.search(e.target.value)}
                 />
-                <table ref="main" />
+                <table cellSpacing="0" width="100%" className="table table-striped table" ref="main" />
             </div>);
     }
 }
