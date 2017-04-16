@@ -5,6 +5,7 @@ import {updateVisibility, updateBranchThickness} from "../../actions/treePropert
 
 const $ = require('jquery');
 $.DataTable = require('datatables.net');
+require('datatables.net-bs');
 
 @Radium
 @connect((state) => ({nodes: state.tree.nodes}))
@@ -54,9 +55,11 @@ class Table extends React.Component {
         }
         console.log("columns", columns);
         $(this.refs.main).DataTable({
-           dom: '<"data-table-wrapper">',
+          "dom": '<"top"il>rt<"bottom"p><"clear">',
            data: tipAttrs,
            columns,
+           //scrollX: true,
+           scrollY: '200px',
            ordering: false
         });
         console.log("made table");
