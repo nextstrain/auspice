@@ -2,11 +2,14 @@ import React from "react";
 import Radium from "radium";
 import { connect } from "react-redux";
 import {updateVisibility, updateBranchThickness} from "../../actions/treeProperties";
+import jquery from "jquery";
+import DataTable from "datatables.net";
+const $ = jquery;
 
-const $ = require('jquery');
-$.DataTable = require('datatables.net');
 require('datatables.net-bs');
 
+// built on
+// https://medium.com/@zbzzn/integrating-react-and-datatables-not-as-hard-as-advertised-f3364f395dfa
 @Radium
 @connect((state) => ({nodes: state.tree.nodes}))
 class Table extends React.Component {
@@ -28,11 +31,6 @@ class Table extends React.Component {
         }
     }
 
-    componentDidRecieveProps()
-    {
-      this.makeTable(this.nodes.props);
-    }
-
     componentWillUnmount(){
        $('.data-table-wrapper')
        .find('table')
@@ -51,7 +49,7 @@ class Table extends React.Component {
         const tipAttrs = nodes.filter(function(d){return d.attr['strain'];}).map(function(d){return d.attr;});
         const columns = [];
         for (let k in tipAttrs[0]){
-          columns.push({name:k, width:60, data:k, visible:((k==="strain")||(k==="authors")||(k==="country"))?true:false});
+          columns.push({name:k, width:60, data:k, visible:((k==="strain"))?true:false});
         }
         //console.log("columns", columns);
 
