@@ -67,17 +67,64 @@ class Table extends React.Component {
             .append("th")
             .text(function(d) { return d; });
 
-        $(this.refs.main).DataTable({
+        //**table initialisation
+        var table=$(this.refs.main).DataTable({
           "dom": '<"top"il>rt<"bottom"p><"clear">',
            data: tipAttrs,
            columns,
+           select: true,
            bAutoWidth: true,
            //scrollX: true,
            scrollY: '200px',
            pagingType: 'full',
            ordering: false
         });
-        console.log("made table");
+
+        const table_id=this.refs.main.id;
+        //** add space among dataTables_length and deselect button
+        d3.select('#'+this.refs.main.id+'_length.dataTables_length')
+          .append('span')
+          .style("display","inline-block")
+          .style("width","10px")
+        //** add deselect button to unselect all clicked rows
+        d3.select('#'+this.refs.main.id+'_length.dataTables_length')
+          .append('button')
+          .attr('id','deselect_clicked')
+          .attr('class','btn btn-default btn-sm')
+          .text('deselect')
+
+        var that =this;
+        //** select clicked rows(single/multiple) and update tree & map
+        $(this.refs.main).on('click', 'tr', function(){
+            $(this).toggleClass('active');
+            if ($(this).hasClass( 'active' )){
+              $(this).addClass('row_selected');
+            }else{
+              $(this).removeClass('row_selected');
+            }
+
+            if (table.rows('.row_selected').any()){
+              const clickedItems= table.rows('.active').data();
+              var selectedStrains ={};
+              clickedItems.each(function(virus,ii){
+                selectedStrains[virus.strain]=true;
+              });
+              const selectedTips = that.props.nodes.map(function(d){
+                return selectedStrains[d.attr.strain]?"visible":"hidden";
+              });
+              that.props.dispatch(updateVisibility(selectedTips));
+              that.props.dispatch(updateBranchThickness());
+            }
+        });
+
+        //**deselect all clicked rows and reset tree & map
+        $('#deselect_clicked').on( 'click', function () {
+            $('#'+table_id+' tbody tr').removeClass('active row_selected');
+              const selectedTips = that.props.nodes.map(function(d){return "visible";});
+              that.props.dispatch(updateVisibility(selectedTips));
+              that.props.dispatch(updateBranchThickness());
+        } );
+        //console.log("made table");
     }
 
     reloadTableData(names) {
