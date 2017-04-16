@@ -58,8 +58,10 @@ class Table extends React.Component {
           "dom": '<"top"il>rt<"bottom"p><"clear">',
            data: tipAttrs,
            columns,
+           bAutoWidth: true,
            //scrollX: true,
            scrollY: '200px',
+           pagingType: 'full',
            ordering: false
         });
         console.log("made table");
