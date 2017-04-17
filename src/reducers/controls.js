@@ -102,9 +102,13 @@ const Controls = (state = getDefaultState(), action) => {
       absoluteDateMax: action.data
     });
   case types.CHANGE_COLOR_BY:
-    return Object.assign({}, state, {
+    const newState = Object.assign({}, state, {
       colorBy: action.data
     });
+    if (action.data.startsWith("gt-")) {
+      newState.mutType = "nuc";
+    }
+    return newState;
   case types.SET_COLOR_SCALE:
     return Object.assign({}, state, {
       colorScale: action.data
