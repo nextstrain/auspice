@@ -3,7 +3,10 @@ import { calcVisibility,
    calcTipCounts,
    makeParentVisible,
    calcBranchThickness } from "../util/treeHelpers";
+import { determineColorByGenotypeType } from "../util/urlHelpers";
+import { changeColorBy } from "./colors";
 import * as types from "./types";
+import { defaultColorBy } from "../util/globals";
 
 const updateVisibility = () => {
   return (dispatch, getState) => {
@@ -136,4 +139,13 @@ export const applyFilterQuery = (filterType, fields, values) => {
   };
 };
 
-export const changeMutType = (data) => ({type: types.TOGGLE_MUT_TYPE, data});
+export const changeMutType = (data) => {
+  return (dispatch, getState) => {
+    const { controls } = getState();
+    const g = determineColorByGenotypeType(controls.colorBy);
+    if (g && g !== data) {
+      dispatch(changeColorBy(defaultColorBy));
+    }
+    dispatch({type: types.TOGGLE_MUT_TYPE, data});
+  };
+};

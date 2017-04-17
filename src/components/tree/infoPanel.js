@@ -72,7 +72,7 @@ const InfoPanel = ({mutType, tree, hovered, viewer, colorBy}) => {
       if (typeof d.muts !== "undefined" && d.muts.length) {
         const nDisplay = 5; // number of mutations to display (max)
         const n = d.muts.length; // number of mutations that exist
-        let m = "Nt mutations: " + d.muts.slice(0, Math.min(nDisplay, n)).join(", ");
+        let m = "Nucleotide mutations: " + d.muts.slice(0, Math.min(nDisplay, n)).join(", ");
         if (n > nDisplay) {
           m += (" + " + (n - nDisplay) + " more");
         }
@@ -92,7 +92,7 @@ const InfoPanel = ({mutType, tree, hovered, viewer, colorBy}) => {
         const m = [<span key={"init"}>AA mutations:</span>];
         prots.forEach((prot, idx) => {
           if (counts[prot]) {
-            let x = prot + ":\u00A0\u00A0" + d.muts.slice(0, Math.min(nDisplay, counts[prot])).join(", ");
+            let x = prot + ":\u00A0\u00A0" + d.aa_muts[prot].slice(0, Math.min(nDisplay, counts[prot])).join(", ");
             if (counts[prot] > nDisplay) {
               x += " + " + (counts[prot] - nDisplay) + " more";
             }
@@ -114,8 +114,12 @@ const InfoPanel = ({mutType, tree, hovered, viewer, colorBy}) => {
     return null;
   };
   const getColorByAttr = (d) => {
-    const disp = `${prettyString(colorBy)}: ${prettyString(d.attr[colorBy])}`;
-    return (<p>{disp}</p>);
+    if (colorBy.slice(0,2)!=='gt'){
+      const disp = `${prettyString(colorBy)}: ${prettyString(d.attr[colorBy])}`;
+      return (<p>{disp}</p>);
+    }else{
+      return "";
+    }
   };
 
   const makeInfoPanel = () => {
