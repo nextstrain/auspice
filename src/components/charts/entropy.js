@@ -179,6 +179,7 @@ class Entropy extends React.Component {
         chart,
         chartGeom: this.getChartGeom(nextProps)
       });
+      chart.updateMutType(nextProps.mutType === "aa");
       return; // nothing more CWRP should do
     }
     if (this.state.chart) {
