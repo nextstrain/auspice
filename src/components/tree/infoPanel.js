@@ -72,7 +72,7 @@ const InfoPanel = ({mutType, tree, hovered, viewer, colorBy}) => {
       if (typeof d.muts !== "undefined" && d.muts.length) {
         const nDisplay = 5; // number of mutations to display (max)
         const n = d.muts.length; // number of mutations that exist
-        let m = "Nt mutations: " + d.muts.slice(0, Math.min(nDisplay, n)).join(", ");
+        let m = "Nucleotide mutations: " + d.muts.slice(0, Math.min(nDisplay, n)).join(", ");
         if (n > nDisplay) {
           m += (" + " + (n - nDisplay) + " more");
         }
