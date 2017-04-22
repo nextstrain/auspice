@@ -17,7 +17,8 @@ const translateAlong = (path) => {
   };
 };
 
-export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, userDateMin, userDateMax) => {
+
+export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
 
   // define markers that are appended to the definition part of the group
   let markerCount=0;
