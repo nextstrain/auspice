@@ -96,30 +96,33 @@ export const updateOnMoveEnd = (d3elems, latLongs) => {
   }
 }
 
-export const updateVisibility = (d3elems, latLongs) => {
+const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems, i) => {
 
-  /* this adds things, but incorrectly, when date slider goes from 0---0----------- to 0----------------0 */
-  // d3elems.demes
-  // .data(latLongs.demes)
-  // .enter().append("circle")
-  // .style("stroke", "none")
-  // .style("fill-opacity", .6)
-  // .style("fill", (d) => { return d.color })
-  // .attr("r", (d) => { return 2 + Math.sqrt(d.total) * 4 })
-  // .attr("transform", (d) => {
-  //   return "translate(" + d.coords.x + "," + d.coords.y + ")";
-  // });
-  /* end incorrectly adding things */
+  if (!nodes[d.data.demePairIndices[0]]) { console.warn("No node found for this index, which is needed to compare user dates to transmission origin/destination dates, so we're returning the default x y pair. No smaller, interior line will appear. This occurred because the index accessor for the node array returned from getLatLongs was not a valid value. Try a console log upstream of where demePairIndices is returned from src/util/mapHelpersLatLong.js"); return pair; } /* handle weird data */
 
-  /* this correctly (to the eye at least) removes everything when date slider goes from 0-----------0 to 0--0---------- */
-  // d3elems.demes
-  //   .data(latLongs.demes)
-  //   .exit().remove();
-  //
-  // d3elems.transmissions
-  //   .data(latLongs.transmissions)
-  //   .exit().remove();
-  /* end correctly removes everything */
+  const originDate = nodes[d.data.demePairIndices[0]].attr.num_date;
+  const destinationDate = nodes[d.data.demePairIndices[1]].attr.num_date;
+  const userDateMin = new Date(controls.dateMin) / 1000 / 3600 / 24 / 365.25 + 1970;
+  const userDateMax = new Date(controls.dateMax) / 1000 / 3600 / 24 / 365.25 + 1970;
+
+  /*
+    entire line is either visible or invisible, so return pair
+  */
+  if (
+    userDateMin < originDate && userDateMax > destinationDate || /* visible ie., user: jan-dec 2015 origin/dest june-july 2015, so completely within */
+    userDateMin > destinationDate || /* invisible ie., user: jan-dec 2015 dest: feb 1980 */
+    userDateMax < originDate /* invisibile ie., user: jan-dec 2015 origin: feb 2017 */
+  ) {
+    return pair;
+  } else {
+    const dateScale = d3.scale.linear().domain([originDate, destinationDate]).range([0, d3elems.transmissionPathLengths[i]])
+    /* only part of line is visible, figure out which part */
+    return [
+      d3elems.transmissions[0][i].getPointAtLength(dateScale(userDateMin)),
+      d3elems.transmissions[0][i].getPointAtLength(dateScale(userDateMax))
+    ]
+  }
+}
 
 const translateAlong = (path) => {
   var totalPathLength = path.getTotalLength();
