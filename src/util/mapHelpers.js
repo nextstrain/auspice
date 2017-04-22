@@ -7,15 +7,6 @@ export const pathStringGenerator = d3.svg.line()
   .y((d) => { return d.y })
   .interpolate("basis");
 
-const translateAlong = (path) => {
-  var l = path.getTotalLength();
-  return (d, i, a) => {
-    return (t) => {
-      var p = path.getPointAtLength(t * l);
-      return "translate(" + p.x + "," + p.y + ")";
-    };
-  };
-};
 
 
 export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
@@ -128,6 +119,16 @@ export const updateVisibility = (d3elems, latLongs) => {
   //   .data(latLongs.transmissions)
   //   .exit().remove();
   /* end correctly removes everything */
+
+const translateAlong = (path) => {
+  var totalPathLength = path.getTotalLength();
+  return (datum, index, a) => {
+    return (t) => {
+      var p = path.getPointAtLength(t * totalPathLength);
+      return "translate(" + p.x + "," + p.y + ")";
+    };
+  };
+};
 
   d3elems.transmissions
     .data(latLongs.transmissions)
