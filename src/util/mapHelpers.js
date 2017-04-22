@@ -42,15 +42,16 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
   */
   // add transmission lines with mid markers at each inner point of the path
 
-  const foo = (pair) => {
-    return pair;
-  }
-
   const transmissions = g.selectAll("transmissions")
     .data(latLongs.transmissions)
     .enter()
     .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
-    .attr("d", (d) => { return pathStringGenerator(foo(d.data.originToDestinationXYs)) }) /* with the interpolation in the function above pathStringGenerator */
+    .attr("d", (d) => {
+      return pathStringGenerator(
+        // extractLineSegmentForAnimationEffect(d.data.originToDestinationXYs)
+        d.data.originToDestinationXYs
+      )
+    }) /* with the interpolation in the function above pathStringGenerator */
     .attr("fill","none")
     .attr("stroke-opacity", .6)
     .attr("stroke-linecap", "round")
@@ -130,21 +131,28 @@ const translateAlong = (path) => {
   };
 };
 
+export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
+
+  d3elems.demes
+    .data(latLongs.demes)
+    .transition(5)
+    .style("fill", (d) => { return d.total > 0 ? d.color : "white" })
+    .attr("r", (d) => {
+      return 0 + Math.sqrt(d.total) * 4
+    })
+
   d3elems.transmissions
     .data(latLongs.transmissions)
-    .transition(5)
-    .attr("stroke", (d) => { return d.data.total >0 ? d.data.color : "white" })
+    // .transition(5)
+    .attr("d", (d, i) => {
+      return pathStringGenerator(
+        extractLineSegmentForAnimationEffect(d.data.originToDestinationXYs, controls, d, nodes, d3elems, i)
+      )
+    }) /* with the interpolation in the function above pathStringGenerator */
+    .attr("stroke", (d) => { return d.data.total > 0 ? d.data.color : "white" })
     .attr("stroke-width", (d) => {
       return d.data.total
     })
-
-d3elems.demes
-  .data(latLongs.demes)
-  .transition(5)
-  .style("fill", (d) => { return d.total >0 ? d.color : "white" })
-  .attr("r", (d) => {
-    return 0 + Math.sqrt(d.total) * 4
-  })
 
 }
 
