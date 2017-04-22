@@ -244,7 +244,7 @@ class Map extends React.Component {
     if (
       this.props.visibilityVersion !== prevProps.visibilityVersion
     ) {
-      updateVisibility(this.state.d3elems, this.latLongs());
+      updateVisibility(this.state.d3elems, this.latLongs(), this.props.controls, this.props.nodes);
     }
   }
   maybeAnimateDemesAndTransmissions() {
