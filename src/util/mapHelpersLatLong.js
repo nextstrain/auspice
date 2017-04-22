@@ -29,7 +29,9 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
     if (n.children) {
       n.children.forEach((child) => {
         if (n.attr[geoResolution] !== child.attr[geoResolution]) {
-          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution] + "-" + n.strain + "/" + child.strain;
+          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution] + "-" +
+                               n.strain + "/" + child.strain + "-" +
+                               n.arrayIdx + "/" + child.arrayIdx;
           if (!aggregatedTransmissions[transmission]) {
             aggregatedTransmissions[transmission] = [];
           }
@@ -57,7 +59,9 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
         */
         if (n.attr[geoResolution] !== child.attr[geoResolution] &&
           visibility[child.arrayIdx] === "visible") {
-          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution] + "-" + n.strain + "/" + child.strain;
+          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution] + "-" +
+                               n.strain + "/" + child.strain + "-" +
+                               n.arrayIdx + "/" + child.arrayIdx;
           aggregatedTransmissions[transmission] = [colorScale.scale(tipColorAttribute)]
         }
       });
@@ -112,7 +116,11 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
       )
     ];
 
+    /* this gives us an index for both demes in the transmission pair with which we will access the node array */
+
+
     const transmission = {
+      demePairIndices: key.split("-")[2].split("/"), /* this has some weird values occassionally that do not presently break anything. created/discovered during animation work. */
       originToDestinationXYs,
       total: value.length, /* changes over time */
       color: averageColors(value), /* changes over time */
