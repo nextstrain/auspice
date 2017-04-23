@@ -21,6 +21,7 @@ import { titleStyles } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
 import { analyticsNewPage } from "../util/googleAnalytics";
+import Table from "./controls/table";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   React-Router v4 injects length, action, location, push etc into props,
@@ -124,6 +125,9 @@ class App extends React.Component {
           />
           <Frequencies/>
           <Entropy
+            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+          />
+          <Table
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
           />
           <Footer

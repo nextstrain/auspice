@@ -2,6 +2,8 @@ import React from "react";
 import Radium from "radium";
 import { connect } from "react-redux";
 import {updateVisibility, updateBranchThickness} from "../../actions/treeProperties";
+import computeResponsive from "../../util/computeResponsive";
+import Card from "../framework/card";
 import jquery from "jquery";
 import DataTable from "datatables.net";
 const $ = jquery;
@@ -13,6 +15,23 @@ require('datatables.net-bs');
 @Radium
 @connect((state) => ({nodes: state.tree.nodes}))
 class Table extends React.Component {
+    getChartGeom(props) {
+    const responsive = computeResponsive({
+      horizontal: 1,
+      vertical: .3333333,
+      browserDimensions: props.browserDimensions,
+      sidebar: props.sidebar
+    });
+    return {
+      responsive,
+      width: responsive.width,
+      height: 500,
+      padBottom: 50,
+      padLeft: 15,
+      padRight: 12
+    };
+  }
+
     componentDidMount() {
         if (this.props.nodes){
           console.log(this.props.nodes.filter(function(d) {return d.is_terminal;}).map(function(d){return d.attr;}));
@@ -24,8 +43,16 @@ class Table extends React.Component {
     componentWillReceiveProps(nextProps){
         if (nextProps.nodes){
           const tipAttrs = nextProps.nodes.filter(function(d){return d.attr['strain'];}).map(function(d){return d.attr;});
-          //console.log("table:", tipAttrs);
-          this.makeTable(nextProps.nodes);
+          if (nextProps.nodes===this.props.nodes){
+            //console.log("table:", tipAttrs);
+            this.makeTable(nextProps.nodes);
+          }else{
+             $('.data-table-wrapper')
+             .find('table')
+             .DataTable()
+             .destroy(true);
+            this.makeTable(nextProps.nodes);
+          }
         }else{
           console.log("no nodes");
         }
@@ -49,23 +76,35 @@ class Table extends React.Component {
         const tipAttrs = nodes.filter(function(d){return d.attr['strain'];}).map(function(d){return d.attr;});
         const columns = [];
         for (let k in tipAttrs[0]){
-          columns.push({name:k, width:60, data:k, visible:((k==="strain"))?true:false});
+          columns.push({name:k,
+                        //width:200,
+                        data:k,
+                        visible:((k==="div"||k==="num_date"||k==="url"))?false:true});
         }
-        //console.log("columns", columns);
+        const column_order = {"strain":1, "authors":2, "date":3, "region":4, "country":5, "division":6}
+        columns.sort(function(a,b){if (column_order[a.name]&&column_order[b.name])
+                                      {return column_order[a.name]-column_order[b.name];}
+                                   else if (column_order[a.name]){return -1;}
+                                   else if (column_order[b.name]){return 1;}
+                                   else {return 0;}
+                                  }
+                    );
+        console.log("columns", columns);
 
         //** add headers to table
-        const columns_list = Object.keys(tipAttrs[0]);
+        const column_names = columns.map(function(d){return d.name;});
         var table_div = d3.select(this.refs.main);
         var thead = table_div.append("thead")
             .attr("align", "left");
         thead.append("tr")
             .selectAll("th")
-            .data(columns_list)
+            .data(column_names)
             .enter()
             .append("th")
             .text(function(d) { return d; });
 
         //**table initialisation
+        $(this.refs.main).DataTable().destroy();
         var table=$(this.refs.main).DataTable({
           "dom": '<"top"il>rt<"bottom"p><"clear">',
            data: tipAttrs,
@@ -89,7 +128,7 @@ class Table extends React.Component {
           .append('button')
           .attr('id','deselect_clicked')
           .attr('class','btn btn-default btn-sm')
-          .text('deselect')
+          .text('clear')
 
         var that =this;
 
@@ -163,14 +202,15 @@ class Table extends React.Component {
    //dispatch vector with existing tips
 
     render() {
-        //console.log("rendering table");
         return (
+          <Card title={"Metadata"}>
             <div>
                 <input type="text" placeholder="Search"
                     onChange={(e) => this.search(e.target.value)}
                 />
                 <table cellSpacing="0" width="100%" className="table table-striped table" ref="main" />
-            </div>);
+            </div>
+        </Card>);
     }
 }
 
