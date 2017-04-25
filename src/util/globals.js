@@ -11,8 +11,14 @@ export const datasets = {
       "lineage": {
         "h7n9": {
           "segment": {
+            "pb2": "c=division&r=division",
+            "pb1": "c=division&r=division",
+            "pa": "c=division&r=division",
             "ha": "c=division&r=division",
+            "np": "c=division&r=division",
             "na": "c=division&r=division",
+            "mp": "c=division&r=division",
+            "ns": "c=division&r=division",
             "default": "ha"
           }
         },
