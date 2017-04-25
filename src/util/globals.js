@@ -16,6 +16,12 @@ export const datasets = {
             "default": "ha"
           }
         },
+        "h3n2": {
+          "segment": {
+            "ha": "",
+            "default": "ha"
+          }
+        },
         "default": "h7n9"
       }
     },
