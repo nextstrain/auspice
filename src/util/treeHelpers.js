@@ -244,6 +244,16 @@ export const calcVisibility = function (tree, controls) {
       d.attr.num_date >= lowerLimit && d.attr.num_date <= upperLimit
     ));
 
+    // if we have an analysis slider active, then we must filter on that as well
+    // note that min date for analyis doesnt apply
+    if (controls.analysisSlider && controls.analysisSlider.valid) {
+      /* extra slider is numerical rounded to 2dp */
+      const valid = tree.nodes.map((d) =>
+        d.attr[controls.analysisSlider.key] ? Math.round(d.attr[controls.analysisSlider.key] * 100) / 100 <= controls.analysisSlider.value : true
+      );
+      visibility = visibility.map((cv, idx) => (cv && valid[idx]));
+    }
+
     // IN VIEW FILTERING (internal + terminal nodes)
     /* edge case: this fn may be called before the shell structure of the nodes
     has been created (i.e. phyloTree's not run yet). In this case, it's

@@ -34,6 +34,7 @@ const getDefaultState = function () {
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
+    analysisSlider: false,
     geoResolution: globals.defaultGeoResolution,
     datasetPathName: null,
     filters: {},
@@ -119,28 +120,28 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       geoResolution: action.data
     });
-  /* metadata in may affect the date ranges... */
+  /* metadata in may affect the date ranges, etc */
   case types.RECEIVE_METADATA:
-    const dates = {};
-    /* do each of the 4 conditions manually as they're different... */
-    if ("absoluteDateMin" in action) {
-      dates["absoluteDateMin"] = action["absoluteDateMin"];
+    const extras = {};
+    if (action.data.date_range) {
+      if (action.data.date_range.date_min) {
+        extras["dateMin"] = action.data.date_range.date_min;
+        extras["absoluteDateMin"] = action.data.date_range.date_min;
+      }
+      if (action.data.date_range.date_max) {
+        extras["dateMax"] = action.data.date_range.date_max;
+        extras["absoluteDateMax"] = action.data.date_range.date_max;
+      }
     }
-    if ("absoluteDateMax" in action) {
-      dates["absoluteDateMax"] = action["absoluteDateMax"];
+    if (action.data.analysisSlider) {
+      extras["analysisSlider"] = {key: action.data.analysisSlider, valid: false};
     }
-    /* only change the dateMax / dateMin *if* they're outside bounds */
-    if ("dateMax" in action) {
-      dates["dateMax"] = action["dateMax"];
-    }
-    if ("dateMin" in action) {
-      dates["dateMin"] = action["dateMin"];
-    }
-    return Object.assign({}, state, dates);
+    return Object.assign({}, state, extras);
   case types.APPLY_FILTER_QUERY:
     // values arrive as array
     const filters = Object.assign({}, state.filters, {});
     filters[action.fields] = action.values;
+    // console.log(filters)
     return Object.assign({}, state, {
       filters
     });
@@ -148,6 +149,27 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       mutType: action.data
     });
+  case types.ANALYSIS_SLIDER:
+    if (action.destroy) {
+      return Object.assign({}, state, {
+        analysisSlider: false
+      });
+    }
+    return Object.assign({}, state, {
+      analysisSlider: {
+        key: state.analysisSlider.key,
+        valid: true,
+        value: action.maxVal,
+        absoluteMinVal: action.minVal,
+        absoluteMaxVal: action.maxVal
+      }
+    });
+  case types.CHANGE_ANALYSIS_VALUE:
+    return Object.assign({}, state, {
+      analysisSlider: Object.assign({}, state.analysisSlider, {
+        value: action.value
+      }
+    )});
   default:
     return state;
   }
