@@ -133,10 +133,16 @@ const Controls = (state = getDefaultState(), action) => {
         extras["absoluteDateMax"] = action.data.date_range.date_max;
       }
     }
+    if (action.data.defaults) {
+      if (action.data.defaults.geoResolution) {
+        extras["geoResolution"] = action.data.defaults.geoResolution;
+      }
+    }
     if (action.data.analysisSlider) {
       extras["analysisSlider"] = {key: action.data.analysisSlider, valid: false};
     }
     return Object.assign({}, state, extras);
+    
   case types.APPLY_FILTER_QUERY:
     // values arrive as array
     const filters = Object.assign({}, state.filters, {});
