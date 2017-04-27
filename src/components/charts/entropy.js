@@ -1,192 +1,218 @@
+/*eslint-env browser*/
+/*eslint dot-notation: "off", max-params: 0*/
 import React from "react";
 import _ from "lodash";
 import { connect } from "react-redux";
-import {VictoryAxis} from "victory-chart";
 import * as globals from "../../util/globals";
 import Card from "../framework/card";
-import d3 from "d3";
-import { parseGenotype } from "../../util/getGenotype";
 import computeResponsive from "../../util/computeResponsive";
 import { changeColorBy } from "../../actions/colors";
 import { modifyURLquery } from "../../util/urlHelpers";
-import { dataFont, darkGrey } from "../../globalStyles";
+import { materialButton, materialButtonSelected } from "../../globalStyles";
+import EntropyChart from "./entropyD3";
+import InfoPanel from "./entropyInfoPanel";
+import "../../css/entropy.css";
+import { changeMutType } from "../../actions/treeProperties";
+
+const calcEntropy = function (entropy) {
+  const entropyNt = entropy["nuc"]["val"].map((s, i) => {
+    return {x: entropy["nuc"]["pos"][i], y: s};
+  });
+
+  const entropyNtWithoutZeros = _.filter(entropyNt, (e) => {return e.y !== 0;});
+
+  let aminoAcidEntropyWithoutZeros = [];
+  const annotations = [];
+  let aaCount = 0;
+  for (let prot in entropy) {
+    if (prot !== "nuc") {
+      const tmpProt = entropy[prot];
+      aaCount += 1;
+      annotations.push({prot: prot,
+                        start: tmpProt["pos"][0],
+                        end: tmpProt["pos"][tmpProt["pos"].length - 1],
+                        readingFrame: 1, //+tmpProt['pos'][0]%3,
+                        fill: globals.genotypeColors[aaCount % 10]
+                       });
+      const tmpEntropy = tmpProt["val"].map((s, i) => ({
+        x: tmpProt["pos"][i],
+        y: s,
+        codon: tmpProt["codon"][i],
+        fill: globals.genotypeColors[aaCount % 10],
+        prot: prot
+      }));
+      aminoAcidEntropyWithoutZeros = aminoAcidEntropyWithoutZeros.concat(
+        tmpEntropy.filter((e) => e.y !== 0)
+      );
+    }
+  }
+  return {annotations,
+    aminoAcidEntropyWithoutZeros,
+    entropyNt,
+    entropyNtWithoutZeros};
+};
+
+const getStyles = function (width) {
+  return {
+    switchContainer: {
+      position: "absolute",
+      marginTop: -25,
+      paddingLeft: width - 100
+    },
+    switchTitle: {
+      margin: 5,
+      position: "relative",
+      top: -1
+    }
+  };
+};
 
 @connect(state => {
   return {
+    mutType: state.controls.mutType,
     entropy: state.entropy.entropy,
-    browserDimensions: state.browserDimensions.browserDimensions
+    browserDimensions: state.browserDimensions.browserDimensions,
+    load: state.entropy.loadStatus,
+    shouldReRender: false
   };
 })
 class Entropy extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hovered: false,
+      chart: false
+    };
+  }
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   }
-  componentWillUpdate(prevProps) {
-    /* check here to see if this.props.browserDimensions has changed and rerender */
+  static propTypes = {
+    dispatch: React.PropTypes.func.isRequired,
+    entropy: React.PropTypes.object,
+    sidebar: React.PropTypes.bool,
+    browserDimensions: React.PropTypes.object,
+    load: React.PropTypes.number,
+    mutType: React.PropTypes.string.isRequired
   }
 
   setColorByGenotype(colorBy) {
-    this.props.dispatch(changeColorBy(colorBy))
+    this.props.dispatch(changeColorBy(colorBy));
     modifyURLquery(this.context.router, {c: colorBy}, true);
   }
 
-  drawEntropy() {
+  getChartGeom(props) {
     const responsive = computeResponsive({
       horizontal: 1,
       vertical: .3333333,
-      browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar
-    })
+      browserDimensions: props.browserDimensions,
+      sidebar: props.sidebar
+    });
+    return {
+      responsive,
+      width: responsive.width,
+      height: 300,
+      padBottom: 50,
+      padLeft: 15,
+      padRight: 12
+    };
+  }
+  /* CALLBACKS */
+  onHover(d, x, y) {
+    // console.log("hovering @", x, y, this.state.chartGeom);
+    this.setState({hovered: {d, type: ".tip", x, y, chartGeom: this.state.chartGeom}});
+  }
+  onLeave() {
+    this.setState({hovered: false});
+  }
+  onClick(d) {
+    if (this.props.mutType === "aa") {
+      this.setColorByGenotype("gt-" + d.prot + "_" + (d.codon + 1));
+    } else {
+      this.setColorByGenotype("gt-nuc_" + (d.x + 1));
+    }
+    this.setState({hovered: false});
+  }
 
-    const entropyChartWidth = responsive.width;
-    const entropyChartHeight = 300;
-    const bottomPadding = 50;
-    const leftPadding = 38;
-    const rightPadding = 12;
+  changeMutTypeCallback(newMutType) {
+    if (newMutType !== this.props.mutType) {
+      this.props.dispatch(changeMutType(newMutType));
+    }
+  }
 
-    const entropy = this.props.entropy['nuc']['val'].map((s, i) => {return {x: this.props.entropy['nuc']['pos'][i], y: s}});
-
-    const entropyWithoutZeros = _.filter(entropy, (e) => {return e.y !== 0});
-
-    let aminoAcidEntropyWithoutZeros = [];
-    const annotations = [];
-    let aaCount=0;
-    for (let prot in this.props.entropy) {
-      if (prot !== "nuc") {
-        let tmpProt= this.props.entropy[prot];
-        aaCount+=1;
-        annotations.push({prot: prot,
-                          start: tmpProt['pos'][0],
-                          end: tmpProt['pos'][tmpProt['pos'].length-1],
-                          readingFrame: 1, //+tmpProt['pos'][0]%3,
-                          fill: globals.genotypeColors[aaCount%10],
-                         });
-        const tmpEntropy = tmpProt['val'].map(
-              (s, i) => {return {x: tmpProt['pos'][i],
-                                 y: s,
-                                 codon: tmpProt['codon'][i],
-                                 fill: globals.genotypeColors[aaCount%10],
-                                 prot: prot
-                                 }}
-            );
-        aminoAcidEntropyWithoutZeros = aminoAcidEntropyWithoutZeros.concat(tmpEntropy.filter((e) => e.y !== 0));
+  aaNtSwitch(styles) {
+    return (
+      <div style={styles.switchContainer}>
+        <button
+          key={1}
+          style={this.props.mutType === "aa" ? materialButtonSelected : materialButton}
+          onClick={() => this.changeMutTypeCallback("aa")}
+        >
+          <span style={styles.switchTitle}> {"AA"} </span>
+        </button>
+        <button
+          key={2}
+          style={this.props.mutType !== "aa" ? materialButtonSelected : materialButton}
+          onClick={() => this.changeMutTypeCallback("nuc")}
+        >
+          <span style={styles.switchTitle}> {"NT"} </span>
+        </button>
+      </div>
+    );
+  }
+  componentWillReceiveProps(nextProps) {
+    if (this.props.load !== nextProps.load && nextProps.load !== 2) {
+      this.setState({chart: false});
+    }
+    if (!this.state.chart && this.props.load !== nextProps.load && nextProps.load === 2) {
+      const chart = new EntropyChart(
+        this.refs.d3entropy,
+        calcEntropy(nextProps.entropy),
+        { /* callbacks */
+          onHover: this.onHover.bind(this),
+          onLeave: this.onLeave.bind(this),
+          onClick: this.onClick.bind(this)
+        }
+      );
+      chart.render(this.getChartGeom(nextProps), nextProps.mutType);
+      this.setState({
+        chart,
+        chartGeom: this.getChartGeom(nextProps)
+      });
+      chart.updateMutType(nextProps.mutType === "aa");
+      return; // nothing more CWRP should do
+    }
+    if (this.state.chart) {
+      if ((this.props.browserDimensions !== nextProps.browserDimensions) ||
+         (this.props.sidebar !== nextProps.sidebar)) {
+        this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
+      } else if (this.props.mutType !== nextProps.mutType) {
+        this.state.chart.updateMutType(nextProps.mutType === "aa");
       }
     }
-
-    const x = d3.scale.linear()
-                    .domain([0, entropy.length]) // original array, since the x values are still mapped to that
-                    .range([leftPadding, entropyChartWidth - rightPadding]);
-
-    const yMax = Math.max(_.maxBy(entropyWithoutZeros, 'y').y,
-                          _.maxBy(aminoAcidEntropyWithoutZeros, 'y').y);
-    const y = d3.scale.linear()
-                    .domain([-0.11*yMax, 1.2*yMax]) // original array, since the x values are still mapped to that
-                    .range([entropyChartHeight-bottomPadding, 0]);
-
-    return (
-      <Card title={"Diversity"}>
-        <svg width={entropyChartWidth} height={entropyChartHeight}>
-          {annotations.map((e, i) => {
-            return (
-              <g key={i}>
-              <rect
-                x={x(e.start)}
-                y={y(-0.025*yMax*e.readingFrame)}
-                width={x(e.end)-x(e.start)}
-                height={12}
-                fill={e.fill}
-                stroke={e.fill}
-              />
-              <text
-                x={0.5*(x(e.start) + x(e.end)) }
-                y={y(-0.025*yMax*e.readingFrame) + 10}
-                textAnchor={"middle"}
-                fontSize={10}
-                fill={"#444"}
-              >
-                {e.prot}
-              </text>
-              </g>
-            );
-          })}
-          {entropyWithoutZeros.map((e, i) => {
-            return (
-              <rect
-                key={i}
-                x={x(e.x)}
-                y={y(e.y)}
-                width="1" height={y(0) - y(e.y)}
-                cursor={"pointer"}
-                onClick={() => {this.setColorByGenotype("gt-nuc_" + (e.x + 1));}}
-                fill={"#CCC"}
-                stroke={"#CCC"}
-              />
-            );
-          })}
-          {aminoAcidEntropyWithoutZeros.map((e, i) => {
-            return (
-              <rect
-                key={i}
-                x={x(e.x)}
-                y={y(e.y)}
-                width="2.5" height={y(0) - y(e.y)}
-                cursor={"pointer"}
-                onClick={() => {this.setColorByGenotype("gt-" + e.prot + "_" + (e.codon + 1));}}
-                fill={e.fill}
-                stroke={"#CCC"}
-              />
-            );
-          })}
-          {/* x axis */}
-          <VictoryAxis
-            padding={{
-              top: 0,
-              bottom: 0,
-              left: leftPadding, // cosmetic, 1px overhang, add +1 if persists
-              right: rightPadding // this is confusing, but ok
-            }}
-            domain={x.domain()}
-            offsetY={bottomPadding}
-            width={entropyChartWidth}
-            standalone={false}
-            label={"Position"}
-            tickCount={5}
-            style={{
-              axis: {stroke: "black", padding: 0},
-              axisLabel: {fontSize: 14, padding: 30, fill: darkGrey, fontFamily: dataFont},
-              tickLabels: {fontSize: 12, padding: 0, fill: darkGrey, fontFamily: dataFont},
-              ticks: {stroke: "black", size: 5, padding: 5}
-            }}
-          />
-          {/* y axis */}
-          <VictoryAxis
-            dependentAxis
-            padding={{
-              top: 0,
-              bottom: bottomPadding,
-              left: leftPadding, // cosmetic, 1px overhang, add +1 if persists
-              right: rightPadding / 2 // bug? why is that / 2 necessary...
-            }}
-            domain={y.domain()}
-            offsetY={bottomPadding}
-            standalone={false}
-            style={{
-              axis: {stroke: "black", padding: 0},
-              axisLabel: {fontSize: 14, padding: 30, fill: darkGrey, fontFamily: dataFont},
-              tickLabels: {fontSize: 12, padding: 0, fill: darkGrey, fontFamily: dataFont},
-              ticks: {stroke: "black", size: 5, padding: 5}
-            }}
-          />
-        </svg>
-      </Card>
-    );
   }
 
   render() {
+    /* get chart geom data */
+    const chartGeom = this.getChartGeom(this.props);
+    /* get styles */
+    const styles = getStyles(chartGeom.width);
+
     return (
-      <div>
-        {this.props.entropy && this.props.browserDimensions ? this.drawEntropy() : "Waiting on entropy data"}
-      </div>
+      <Card title={"Diversity"}>
+        {this.aaNtSwitch(styles)}
+        <InfoPanel
+          hovered={this.state.hovered}
+          mutType={this.props.mutType}
+        />
+        <svg
+          style={{pointerEvents: "auto"}}
+          width={chartGeom.responsive.width}
+          height={chartGeom.height}
+        >
+          <g ref="d3entropy" id="d3entropy"/>
+        </svg>
+      </Card>
     );
   }
 }

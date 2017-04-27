@@ -4,6 +4,7 @@ import * as globals from "../util/globals";
 import getColorScale from "../util/getColorScale";
 import moment from 'moment';
 import d3 from "d3";
+import { determineColorByGenotypeType } from "../util/urlHelpers";
 
 /*
   we don't actually need to have legendBoundsMap default if regions will always be the
@@ -24,6 +25,7 @@ const getDefaultState = function () {
     region: null,
     search: null,
     strain: null,
+    mutType: globals.mutType,
     layout: globals.defaultLayout,
     distanceMeasure: globals.defaultDistanceMeasure,
     dateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
@@ -101,9 +103,14 @@ const Controls = (state = getDefaultState(), action) => {
       absoluteDateMax: action.data
     });
   case types.CHANGE_COLOR_BY:
-    return Object.assign({}, state, {
+    const newState = Object.assign({}, state, {
       colorBy: action.data
     });
+    /* may need to toggle the entropy selector AA <-> NUC */
+    if (determineColorByGenotypeType(action.data)) {
+      newState.mutType = determineColorByGenotypeType(action.data);
+    }
+    return newState;
   case types.SET_COLOR_SCALE:
     return Object.assign({}, state, {
       colorScale: action.data
@@ -136,6 +143,10 @@ const Controls = (state = getDefaultState(), action) => {
     filters[action.fields] = action.values;
     return Object.assign({}, state, {
       filters
+    });
+  case types.TOGGLE_MUT_TYPE:
+    return Object.assign({}, state, {
+      mutType: action.data
     });
   default:
     return state;
