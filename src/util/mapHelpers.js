@@ -102,8 +102,8 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems,
 
   const originDate = nodes[d.data.demePairIndices[0]].attr.num_date;
   const destinationDate = nodes[d.data.demePairIndices[1]].attr.num_date;
-  const userDateMin = new Date(controls.dateMin) / 1000 / 3600 / 24 / 365.25 + 1970;
-  const userDateMax = new Date(controls.dateMax) / 1000 / 3600 / 24 / 365.25 + 1970;
+  const userDateMin = controls.dateScale(controls.dateFormat.parse(controls.dateMin));
+  const userDateMax = controls.dateScale(controls.dateFormat.parse(controls.dateMax));
 
   /*
     entire line is either visible or invisible, so return pair
