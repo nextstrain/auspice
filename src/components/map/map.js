@@ -331,6 +331,22 @@ class Map extends React.Component {
             >
             Play
           </button>
+          <button style={{
+              position: "absolute",
+              left: 90,
+              top: 25,
+              zIndex: 9999,
+              border: "none",
+              padding: 15,
+              borderRadius: 4,
+              backgroundColor: "rgb(230, 230, 230)",
+              fontWeight: 700,
+              color: "white"
+            }}
+          onClick={this.handleAnimationStopClicked.bind(this) }
+            >
+            Stop
+          </button>
           <div style={{
               height: this.state.responsive.height,
               width: this.state.responsive.width
@@ -348,18 +364,27 @@ class Map extends React.Component {
 
     this.animateMap();
   }
+  handleAnimationStopClicked() {
+    clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
+  }
   animateMap() {
     const timeSliderWindow = 3; /* in months for now  */ // this is 1/10 the date range in date slider
-    const incrementBy = 5; /* in days for now */
+    const incrementBy = 3; /* in days for now */
     const incrementByUnit = "day";
-    const tick = 12;
+    const tick = 5;
     const trailing = true;
     /* initial time window */
     let first = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD");
     let second = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD").add(timeSliderWindow, "months");
     let last = moment(this.props.controls.absoluteDateMax, "YYYY-MM-DD");
 
-    const animationLoop = setInterval(() => {
+    if (!window.NEXTSTRAIN) {
+      window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
+    }
+
+    /* we should setState({reference}) so that it's not possible to create multiple */ 
+
+    window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
       /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
       this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
       if (trailing) {
@@ -368,7 +393,7 @@ class Map extends React.Component {
       second = second.add(incrementBy, incrementByUnit);
 
       if (second.valueOf() >= last.valueOf()) {
-        clearInterval(animationLoop)
+        clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
         this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
       }
     }, tick);
