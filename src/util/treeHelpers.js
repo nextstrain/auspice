@@ -238,11 +238,11 @@ export const calcVisibility = function (tree, controls) {
     let visibility;
 
     // TIME FILTERING (internal + terminal nodes)
-    const lowerLimit = controls.dateScale(controls.dateFormat.parse(controls.dateMin)); // convert caldate to numdate
-    const upperLimit = controls.dateScale(controls.dateFormat.parse(controls.dateMax)); // convert caldate to numdate
-    visibility = tree.nodes.map((d) => (
-      d.attr.num_date >= lowerLimit && d.attr.num_date <= upperLimit
-    ));
+    const userDateMin = controls.dateScale(controls.dateFormat.parse(controls.dateMin)); // convert caldate to numdate
+    const userDateMax = controls.dateScale(controls.dateFormat.parse(controls.dateMax)); // convert caldate to numdate
+    visibility = tree.nodes.map((d) => {
+      return !(d.attr.num_date < userDateMin || d.parent.attr.num_date > userDateMax);
+    });
 
     // IN VIEW FILTERING (internal + terminal nodes)
     /* edge case: this fn may be called before the shell structure of the nodes
