@@ -117,7 +117,9 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems,
   } else {
     console.log("----------------------------------------------------------------------------")
     console.log("origin: ", nodes[d.data.demePairIndices[0]].attr.country, originDate);
-    console.log("destination: ", destinationDate, userDateMin, userDateMax)
+    console.log("destination: ", nodes[d.data.demePairIndices[1]].attr.country, destinationDate);
+    console.log("userDateMin: ", userDateMin);
+    console.log("userDateMax: ", userDateMax);
 
 
     /* only part of line is visible, figure out which part */

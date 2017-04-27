@@ -58,7 +58,9 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
         (2) if child is visibile
         */
         if (n.attr[geoResolution] !== child.attr[geoResolution] &&
-          visibility[child.arrayIdx] === "visible") {
+          visibility[child.arrayIdx] === "visible") { 
+          // make this a pair of indices that point to nodes
+          // this is flatter and self documenting
           const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution] + "-" +
                                n.strain + "/" + child.strain + "-" +
                                n.arrayIdx + "/" + child.arrayIdx;
