@@ -81,20 +81,6 @@ const populateMetadataStore = (queryParams) => {
   };
 };
 
-const updateGeoResolution = (rootNodeAttrs) => {
-  let resolution = null;
-  if (rootNodeAttrs.division) {
-    resolution = 'division';
-  } else if (rootNodeAttrs.country) {
-        resolution = 'country';
-  }
-  else if (rootNodeAttrs.region) {
-    resolution = 'region';
-  }
- return { type: CHANGE_GEO_RESOLUTION,
-   data: resolution };
-}
-
 /* request tree */
 
 const requestTree = () => {
