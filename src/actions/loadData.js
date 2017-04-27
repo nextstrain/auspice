@@ -2,7 +2,38 @@
 import { updateColorScale, updateNodeColors } from "./colors";
 import { dataURLStem } from "../util/globals";
 import * as types from "./types";
-import { CHANGE_GEO_RESOLUTION } from "./types";
+import d3 from "d3";
+
+/* if the metadata specifies an analysis slider, this is where we process it */
+const addAnalysisSlider = () => {
+  return (dispatch, getState) => {
+    const { controls, tree } = getState();
+    if (controls.analysisSlider && tree.loadStatus === 2) {
+      /* we can now get the range of values for the analysis slider */
+      const vals = tree.nodes.map((d) => d.attr[controls.analysisSlider.key])
+        .filter((n) => n !== undefined)
+        .filter((item, i, ar) => ar.indexOf(item) === i);
+      /* check that the key is found in at least some nodes */
+      if (!vals.length) {
+        dispatch({
+          type: types.ANALYSIS_SLIDER,
+          destroy: true
+        });
+        /* dispatch warning / error message */
+        console.log("Analysis slider key ", controls.analysisSlider.key, " never found in tree. Skipping.");
+        return null;
+      }
+      dispatch({
+        type: types.ANALYSIS_SLIDER,
+        destroy: false,
+        maxVal: Math.round(d3.max(vals) * 100) / 100,
+        minVal: Math.round(d3.min(vals) * 100) / 100
+      });
+    }
+    return null;
+  };
+};
+
 
 /* request metadata */
 const requestMetadata = () => {
@@ -12,22 +43,10 @@ const requestMetadata = () => {
 };
 
 const receiveMetadata = (data) => {
-  const ret = {
+  return {
     type: types.RECEIVE_METADATA,
     data: data
   };
-  /* if there's data data include this for the controls reducer */
-  if (data.date_range) {
-    if (data.date_range.date_min) {
-      ret["dateMin"] = data.date_range.date_min;
-      ret["absoluteDateMin"] = data.date_range.date_min;
-    }
-    if (data.date_range.date_max) {
-      ret["dateMax"] = data.date_range.date_max;
-      ret["absoluteDateMax"] = data.date_range.date_max;
-    }
-  }
-  return ret;
 };
 
 const metadataFetchError = (err) => {
@@ -53,6 +72,7 @@ const populateMetadataStore = (queryParams) => {
     return fetchMetadata(queryParams).then((res) => res.json()).then(
       (json) => {
         dispatch(receiveMetadata(json));
+        dispatch(addAnalysisSlider());
         dispatch(updateColorScale());
         dispatch(updateNodeColors());
       },
@@ -112,7 +132,7 @@ const populateTreeStore = (queryParams) => {
     return fetchTree(queryParams).then((res) => res.json()).then(
       (json) => {
         dispatch(receiveTree(json, controls));
-        dispatch(updateGeoResolution(json.attr));
+        dispatch(addAnalysisSlider());
         dispatch(updateColorScale());
         dispatch(updateNodeColors());
       },
