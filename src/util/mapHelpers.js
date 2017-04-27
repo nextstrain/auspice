@@ -115,12 +115,17 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems,
   ) {
     return pair;
   } else {
-    const dateScale = d3.scale.linear().domain([originDate, destinationDate]).range([0, d3elems.transmissionPathLengths[i]])
+    console.log("----------------------------------------------------------------------------")
+    console.log("origin: ", nodes[d.data.demePairIndices[0]].attr.country, originDate);
+    console.log("destination: ", destinationDate, userDateMin, userDateMax)
+
+
     /* only part of line is visible, figure out which part */
-    return [
-      d3elems.transmissions[0][i].getPointAtLength(dateScale(userDateMin)),
-      d3elems.transmissions[0][i].getPointAtLength(dateScale(userDateMax))
-    ]
+    return pair
+    // [
+    //   d3elems.transmissions[0][i].getPointAtLength(userDateMin),
+    //   d3elems.transmissions[0][i].getPointAtLength(userDateMax)
+    // ]
   }
 }
 
