@@ -120,7 +120,7 @@ class Splash extends React.Component {
   render() {
     return(
       <div>
-        <TitleBar logoHidden={true} titleHidden={true}/>
+        <TitleBar dataNameHidden/>
 
         <div className="static container">
           <Flex justifyContent="center">
