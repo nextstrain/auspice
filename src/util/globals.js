@@ -7,6 +7,16 @@ export const datasets = {
   "pathogen": {
     "ebola": "c=division&r=division",
     "zika": "",
+    "dengue": {
+      "serotype": {
+        "all": "",
+        "denv1": "",
+        "denv2": "",
+        "denv3": "",
+        "denv4": "",
+        "default": "all"
+      }
+    },
     "flu": {
       "lineage": {
         "h7n9": {

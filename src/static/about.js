@@ -50,6 +50,9 @@ const About = () => {
 
             The ongoing (2015-) epidemic of zika fever in the Americas is seen here in the context of over 400 genomes including isolates from Asia and the Pacific Islands. Multiple trans-Pacific and trans-Atlantic transmission events are easily seen, as well as the complex transmission routes between Brazil, Central America and the USA.
 
+            <p/><Link to="/dengue">Dengue Virus</Link><p/>
+
+            Since the 1970s, dengue fever has rapidly expanded to become endemic to most tropical regions of the globe; today, approximately 40% of the total human population is at risk. There are four serotypes of dengue, DENV1-4. This rapid geographical expansion and genetic diversification is clearly seen here in the analysis of dengue genome sequences (curated by <a href="https://hfv.lanl.gov/components/sequence/HCV/search/searchi.html">LANL</a>). More information about dengue can be found at the <a href="http://www.who.int/denguecontrol/en/">WHO</a>.
 
             <p/><Link to="/flu/h7n9">Avian Influenza A (H7N9)</Link><p/>
 
@@ -89,7 +92,10 @@ const About = () => {
             Special thanks to Nick Loman, Kristian Andersen, Andrew Rambaut, Matt Cotten and Paul Kellam for comments, suggestions and data sharing.
 
             <p/>
-            Splash page images stylised in <a href="http://www.lunapic.com/">Lunapic</a>. <a href="https://en.wikipedia.org/wiki/Zika_virus#/media/File:197-Zika_Virus-ZikaVirus.tif">Zika drawing</a> by David Goodwill, <a href="https://commons.wikimedia.org/wiki/Ebola#/media/File:Ebola_virus_em.png">Ebola EM</a> by Frederick A. Murphy / CDC, <a href="https://www.cdc.gov/media/subtopic/library/diseases.htm">Influenza images</a> by Cynthia Goldsmith / Thomas Rowe / CDC.
+            Splash page images stylised in <a href="http://www.lunapic.com/">Lunapic</a>.
+            <a href="https://en.wikipedia.org/wiki/Zika_virus#/media/File:197-Zika_Virus-ZikaVirus.tif">Zika drawing</a> by David Goodwill,
+            <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC156766/figure/cdg270f4/">Dengue EM</a> by Zhang. et al., 
+            <a href="https://commons.wikimedia.org/wiki/Ebola#/media/File:Ebola_virus_em.png">Ebola EM</a> by Frederick A. Murphy / CDC, <a href="https://www.cdc.gov/media/subtopic/library/diseases.htm">Influenza images</a> by Cynthia Goldsmith / Thomas Rowe / CDC.
 
           </div>
 
