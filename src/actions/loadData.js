@@ -94,7 +94,6 @@ const requestTree = () => {
 };
 
 const receiveTree = (data, controls) => {
-  console.log("receive tree action being dispatched");
   return {
     type: types.RECEIVE_TREE,
     data,
