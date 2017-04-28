@@ -158,7 +158,7 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       analysisSlider: {
         key: state.analysisSlider.key,
-        valid: true,
+        valid: false, // FIXME --- This is a temporary hack to disable the analysis slider, while keeping color options
         value: action.maxVal,
         absoluteMinVal: action.minVal,
         absoluteMaxVal: action.maxVal
