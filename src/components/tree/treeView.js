@@ -61,8 +61,6 @@ need this information are children of this component
     selectedLegendItem: state.controls.selectedLegendItem,
     colorScale: state.controls.colorScale,
     datasetGuid: state.tree.datasetGuid,
-    dateMin: state.controls.dateMin,
-    dateMax: state.controls.dateMax,
     mutType: state.controls.mutType
   };
 })
