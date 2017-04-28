@@ -61,8 +61,7 @@ need this information are children of this component
     selectedLegendItem: state.controls.selectedLegendItem,
     colorScale: state.controls.colorScale,
     datasetGuid: state.tree.datasetGuid,
-    dateMin: state.controls.dateMin,
-    dateMax: state.controls.dateMax
+    mutType: state.controls.mutType
   };
 })
 class TreeView extends React.Component {
@@ -82,7 +81,8 @@ class TreeView extends React.Component {
     router: React.PropTypes.object.isRequired
   }
   static propTypes = {
-    sidebar: React.PropTypes.bool.isRequired
+    sidebar: React.PropTypes.bool.isRequired,
+    mutType: React.PropTypes.string.isRequired
   }
 
   componentWillMount() {
@@ -297,6 +297,7 @@ class TreeView extends React.Component {
     });
   }
   onBranchClick(d) {
+    this.Viewer.fitToViewer();
     this.state.tree.zoomIntoClade(d, mediumTransitionDuration);
     /* to stop multiple phyloTree updates potentially clashing,
     we change tipVis after geometry update + transition */
@@ -525,6 +526,7 @@ class TreeView extends React.Component {
       <Card center title={cardTitle}>
         <Legend sidebar={this.props.sidebar}/>
         <InfoPanel
+          mutType={this.props.mutType}
           tree={this.state.tree}
           hovered={this.state.hovered}
           viewer={this.Viewer}

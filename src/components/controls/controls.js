@@ -5,6 +5,7 @@ import ToggleBranchLabels from "./toggle-branch-labels";
 import ColorBy from "./color-by";
 import Search from "./search";
 import DateRangeInputs from "./date-range-inputs";
+import AnalysisDateSlider from "./analysis-date-slider";
 import ChooseLayout from "./choose-layout";
 import ChooseVirus from "./choose-virus";
 import ChooseMetric from "./choose-metric";
@@ -12,6 +13,7 @@ import GeoResolution from "./geo-resolution";
 import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
+import { connect } from "react-redux";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -19,9 +21,25 @@ const header = (text) => (
   </span>
 );
 
+@connect((state) => ({analysisSlider: state.controls.analysisSlider}))
 class Controls extends React.Component {
+  static propTypes = {
+    analysisSlider: React.PropTypes.any
+  }
   getStyles() {
     return {};
+  }
+  analysisSlider() {
+    if (this.props.analysisSlider && this.props.analysisSlider.valid) {
+      return (
+        <g>
+          <br/>
+          {header("Analysis Date")}
+          <AnalysisDateSlider/>
+        </g>
+      );
+    }
+    return null;
   }
   // restore <ToggleBranchLabels/> below when perf is improved
   render() {
@@ -42,6 +60,8 @@ class Controls extends React.Component {
 
         {header("Date Range")}
         <DateRangeInputs/>
+
+        {this.analysisSlider()}
 
         {header("Color By")}
         <ColorBy/>

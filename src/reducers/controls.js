@@ -4,6 +4,7 @@ import * as globals from "../util/globals";
 import getColorScale from "../util/getColorScale";
 import moment from 'moment';
 import d3 from "d3";
+import { determineColorByGenotypeType } from "../util/urlHelpers";
 
 /*
   we don't actually need to have legendBoundsMap default if regions will always be the
@@ -24,6 +25,7 @@ const getDefaultState = function () {
     region: null,
     search: null,
     strain: null,
+    mutType: globals.mutType,
     layout: globals.defaultLayout,
     distanceMeasure: globals.defaultDistanceMeasure,
     dateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
@@ -32,6 +34,7 @@ const getDefaultState = function () {
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
+    analysisSlider: false,
     geoResolution: globals.defaultGeoResolution,
     datasetPathName: null,
     filters: {},
@@ -101,9 +104,14 @@ const Controls = (state = getDefaultState(), action) => {
       absoluteDateMax: action.data
     });
   case types.CHANGE_COLOR_BY:
-    return Object.assign({}, state, {
+    const newState = Object.assign({}, state, {
       colorBy: action.data
     });
+    /* may need to toggle the entropy selector AA <-> NUC */
+    if (determineColorByGenotypeType(action.data)) {
+      newState.mutType = determineColorByGenotypeType(action.data);
+    }
+    return newState;
   case types.SET_COLOR_SCALE:
     return Object.assign({}, state, {
       colorScale: action.data
@@ -112,31 +120,73 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       geoResolution: action.data
     });
-  /* metadata in may affect the date ranges... */
+  /* metadata in may affect the date ranges, etc */
   case types.RECEIVE_METADATA:
-    const dates = {};
-    /* do each of the 4 conditions manually as they're different... */
-    if ("absoluteDateMin" in action) {
-      dates["absoluteDateMin"] = action["absoluteDateMin"];
+    const extras = {};
+    if (action.data.date_range) {
+      if (action.data.date_range.date_min) {
+        extras["dateMin"] = action.data.date_range.date_min;
+        extras["absoluteDateMin"] = action.data.date_range.date_min;
+      }
+      if (action.data.date_range.date_max) {
+        extras["dateMax"] = action.data.date_range.date_max;
+        extras["absoluteDateMax"] = action.data.date_range.date_max;
+      }
     }
-    if ("absoluteDateMax" in action) {
-      dates["absoluteDateMax"] = action["absoluteDateMax"];
+    if (action.data.defaults) {
+      if (action.data.defaults.geoResolution) {
+        extras["geoResolution"] = action.data.defaults.geoResolution;
+      }
     }
-    /* only change the dateMax / dateMin *if* they're outside bounds */
-    if ("dateMax" in action) {
-      dates["dateMax"] = action["dateMax"];
+    if (action.data.analysisSlider) {
+      extras["analysisSlider"] = {key: action.data.analysisSlider, valid: false};
     }
-    if ("dateMin" in action) {
-      dates["dateMin"] = action["dateMin"];
-    }
-    return Object.assign({}, state, dates);
+    /* check if the default color by (set when this reducer was initialised)
+    is an option in the JSON */
+    const available_colorBy = Object.keys(action.data.color_options);
+      if (available_colorBy.indexOf(globals.defaultColorBy) === -1) {
+        /* remove "gt" */
+        const gtIdx = available_colorBy.indexOf("gt");
+        if (gtIdx > -1) {
+          available_colorBy.splice(gtIdx, 1);
+        }
+        extras["colorBy"] = available_colorBy[0];
+      }
+    return Object.assign({}, state, extras);
+
   case types.APPLY_FILTER_QUERY:
     // values arrive as array
     const filters = Object.assign({}, state.filters, {});
     filters[action.fields] = action.values;
+    // console.log(filters)
     return Object.assign({}, state, {
       filters
     });
+  case types.TOGGLE_MUT_TYPE:
+    return Object.assign({}, state, {
+      mutType: action.data
+    });
+  case types.ANALYSIS_SLIDER:
+    if (action.destroy) {
+      return Object.assign({}, state, {
+        analysisSlider: false
+      });
+    }
+    return Object.assign({}, state, {
+      analysisSlider: {
+        key: state.analysisSlider.key,
+        valid: true,
+        value: action.maxVal,
+        absoluteMinVal: action.minVal,
+        absoluteMaxVal: action.maxVal
+      }
+    });
+  case types.CHANGE_ANALYSIS_VALUE:
+    return Object.assign({}, state, {
+      analysisSlider: Object.assign({}, state.analysisSlider, {
+        value: action.value
+      }
+    )});
   default:
     return state;
   }
