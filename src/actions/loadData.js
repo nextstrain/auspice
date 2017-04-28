@@ -3,6 +3,8 @@ import { updateColorScale, updateNodeColors } from "./colors";
 import { dataURLStem } from "../util/globals";
 import * as types from "./types";
 import d3 from "d3";
+import { changeDateFilter } from "./treeProperties";
+
 
 /* if the metadata specifies an analysis slider, this is where we process it */
 const addAnalysisSlider = () => {
@@ -72,6 +74,9 @@ const populateMetadataStore = (queryParams) => {
     return fetchMetadata(queryParams).then((res) => res.json()).then(
       (json) => {
         dispatch(receiveMetadata(json));
+        if (json.date_range) {
+          dispatch(changeDateFilter(json.date_range.date_min, json.date_range.date_max));
+        }
         dispatch(addAnalysisSlider());
         dispatch(updateColorScale());
         dispatch(updateNodeColors());
@@ -113,10 +118,10 @@ const fetchTree = (q) => {
 
 const populateTreeStore = (queryParams) => {
   return (dispatch, getState) => {
-    const { controls } = getState();
     dispatch(requestTree());
     return fetchTree(queryParams).then((res) => res.json()).then(
       (json) => {
+        const { controls } = getState();
         dispatch(receiveTree(json, controls));
         dispatch(addAnalysisSlider());
         dispatch(updateColorScale());
