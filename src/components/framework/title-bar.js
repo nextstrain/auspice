@@ -11,7 +11,8 @@ var RadiumLink = Radium(Link); // needed to style custom components with radium
 
 @connect((state) => {
   return {
-    browserDimensions: state.browserDimensions.browserDimensions
+    browserDimensions: state.browserDimensions.browserDimensions,
+    datasetPathName: state.controls.datasetPathName
   };
 })
 @Radium
@@ -19,9 +20,9 @@ class TitleBar extends React.Component {
   constructor(props) {
     super(props);
   }
-  // static propTypes = {
-  //   dataName: React.PropTypes.string
-  // }
+  static propTypes = {
+    datasetPathName: React.PropTypes.string
+  }
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   }
@@ -113,11 +114,11 @@ class TitleBar extends React.Component {
     );
   }
 
-  getDataName(dataName, styles) {
+  getDataName(styles) {
     return (
       this.props.dataNameHidden ? <div style={{flex: "none" }}/> :
         <div style={styles.dataName}>
-          {dataName}
+          {this.props.datasetPathName}
         </div>
     );
   }
@@ -132,16 +133,12 @@ class TitleBar extends React.Component {
 
   render() {
     const styles = this.getStyles();
-    // console.log("title-bar0", this.context.router)
-    let dataName = this.context.router.history.location.pathname;
-    dataName = dataName.replace(/^\//, '').replace(/\/$/, '');
-    if (dataName.length === 1) {dataName = "";}
     return (
       <div >
         <Flex style={styles.main}>
           {this.getLogo(styles)}
           {this.getTitle(styles)}
-          {this.getDataName(dataName, styles)}
+          {this.getDataName(styles)}
           <div style={{flex: 5}}/>
             {this.getLink("About", "/about", this.props.aboutSelected, styles)}
             {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
