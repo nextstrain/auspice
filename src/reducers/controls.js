@@ -141,8 +141,19 @@ const Controls = (state = getDefaultState(), action) => {
     if (action.data.analysisSlider) {
       extras["analysisSlider"] = {key: action.data.analysisSlider, valid: false};
     }
+    /* check if the default color by (set when this reducer was initialised)
+    is an option in the JSON */
+    const available_colorBy = Object.keys(action.data.color_options);
+      if (available_colorBy.indexOf(globals.defaultColorBy) === -1) {
+        /* remove "gt" */
+        const gtIdx = available_colorBy.indexOf("gt");
+        if (gtIdx > -1) {
+          available_colorBy.splice(gtIdx, 1);
+        }
+        extras["colorBy"] = available_colorBy[0];
+      }
     return Object.assign({}, state, extras);
-    
+
   case types.APPLY_FILTER_QUERY:
     // values arrive as array
     const filters = Object.assign({}, state.filters, {});
