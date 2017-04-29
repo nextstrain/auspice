@@ -133,16 +133,13 @@ const Controls = (state = getDefaultState(), action) => {
         extras["absoluteDateMax"] = action.data.date_range.date_max;
       }
     }
-    if (action.data.defaults) {
-      if (action.data.defaults.geoResolution) {
-        extras["geoResolution"] = action.data.defaults.geoResolution;
-      }
-    }
+
     if (action.data.analysisSlider) {
       extras["analysisSlider"] = {key: action.data.analysisSlider, valid: false};
     }
-    /* check if the default color by (set when this reducer was initialised)
-    is an option in the JSON */
+
+    /* If the default color by (set when this reducer was initialised)
+    isn't an option in the JSON, provide a fallback */
     const available_colorBy = Object.keys(action.data.color_options);
     if (available_colorBy.indexOf(globals.defaultColorBy) === -1) {
       /* remove "gt" */
@@ -152,7 +149,24 @@ const Controls = (state = getDefaultState(), action) => {
       }
       extras["colorBy"] = available_colorBy[0];
     }
+
+    // Check if there were defaults provided in the meta JSON; these overrides all other defaults.
+    if (action.data.defaults) {
+      if (action.data.defaults.geoResolution) {
+        extras["geoResolution"] = action.data.defaults.geoResolution;
+      }
+      if (action.data.defaults.colorBy) {
+        extras["colorBy"] = action.data.defaults.colorBy;
+      }
+      if (action.data.defaults.distanceMeasure) {
+        extras["distanceMeasure"] = action.data.defaults.distanceMeasure;
+      }
+      if (action.data.defaults.layout) {
+        extras["layout"] = action.data.defaults.layout;
+      }
+    }
     return Object.assign({}, state, extras);
+
   case types.APPLY_FILTER_QUERY:
     // values arrive as array
     const filters = Object.assign({}, state.filters, {});
