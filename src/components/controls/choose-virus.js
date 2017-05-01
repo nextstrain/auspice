@@ -16,13 +16,13 @@ const tidyUpPathname = function (pathname) {
          : tmppath;
 };
 
-@Radium
 @connect((state) => {
   return {
     datasetPathName: state.controls.datasetPathName, /* triggers component update */
     geoResolution: state.controls.geoResolution
   };
 })
+@Radium
 class ChooseVirus extends React.Component {
   constructor(props) {
     super(props);
