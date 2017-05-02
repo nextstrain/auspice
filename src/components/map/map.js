@@ -157,6 +157,7 @@ class Map extends React.Component {
         this.props.colorScale.scale,
         this.state.d3DOMNode,
         this.state.map,
+        this.props.nodes,
       );
 
       /* Set up leaflet events */
