@@ -651,9 +651,26 @@ PhyloTree.prototype.addGrid = function(layout, yMinView, yMaxView) {
                 ? d3.max([this.xScale.domain()[1], this.yScale.domain()[1],
                           -this.xScale.domain()[0], -this.yScale.domain()[0]])
                 : this.xScale.domain()[1];
+
   const offset = layout==="radial"?this.nodes[0].depth:0.0;
   const viewTop = yMaxView ?    yMaxView+this.params.margins.top : this.yScale.range()[0];
   const viewBottom = yMinView ? yMinView-this.params.margins.bottom : this.yScale.range()[1];
+
+  /* should we re-draw the grid? */
+  if (!this.gridParams) {
+    this.gridParams = [xmin, xmax, ymin, ymax, viewTop, viewBottom, layout];
+  } else if (xmin === this.gridParams[0] && xmax === this.gridParams[1] &&
+        ymin === this.gridParams[2] && ymax === this.gridParams[3] &&
+        viewTop === this.gridParams[4] && viewBottom === this.gridParams[5] &&
+        layout === this.gridParams[6]) {
+    // console.log("bailing - no difference");
+    return;
+  }
+
+  /* yes - redraw and update gridParams */
+  this.gridParams = [xmin, xmax, ymin, ymax, viewTop, viewBottom, layout];
+
+
   const gridline = function(xScale, yScale, layout){
       return function(x){
           const xPos = xScale(x[0]-offset);
