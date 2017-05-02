@@ -7,9 +7,7 @@ export const pathStringGenerator = d3.svg.line()
   .y((d) => { return d.y })
   .interpolate("basis");
 
-
-
-export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
+export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, nodes) => {
 
   // define markers that are appended to the definition part of the group
   let markerCount=0;
@@ -60,7 +58,33 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map) => {
     // .attr("marker-mid", makeMarker);
 
     let transmissionPathLengths = [];
-    transmissions[0].forEach((d, i) => { transmissionPathLengths.push(d.getTotalLength()) })
+    transmissions[0].forEach((d, i) => {
+
+      /* https://developer.mozilla.org/en-US/docs/Web/API/SVGGeometryElement/getTotalLength */
+      const totalPathLength = d.getTotalLength();
+
+      /*
+        1. Here, we make a mapping between time and geographic position for the transmission.
+        2. In short, make the line visible in proportion to the user selected date range, which
+            may not include the entire length of the line.
+        3. .clamp(true)
+            never return a value outside the date range
+            this would put the transmission path outside the geographic target
+      */
+      console.log(totalPathLength)
+      const pathScale = d3.scale.linear()
+                                .domain([
+                                  nodes[latLongs.transmissions[i].data.demePairIndices[0]].attr.num_date, /* origin date */
+                                  nodes[latLongs.transmissions[i].data.demePairIndices[1]].attr.num_date /* destination date */
+                                ])
+                                .range([0, totalPathLength])
+                                .clamp(true);
+
+      transmissionPathLengths.push({
+        totalPathLength,
+        pathScale,
+      })
+    })
 
   const demes = g.selectAll("demes")
     .data(latLongs.demes)
@@ -115,31 +139,28 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems,
   ) {
     return pair;
   } else {
-    console.log("----------------------------------------------------------------------------")
-    console.log("origin: ", nodes[d.data.demePairIndices[0]].attr.country, originDate);
-    console.log("destination: ", nodes[d.data.demePairIndices[1]].attr.country, destinationDate);
-    console.log("userDateMin: ", userDateMin);
-    console.log("userDateMax: ", userDateMax);
 
+    console.log(i + "---" + originDate + "---" + userDateMin + "---" + userDateMax + "---" + destinationDate);
+    console.log(i + "=== totalPathLength ==== " + d3elems.transmissionPathLengths[i].totalPathLength)
+    console.log(i + "=== origin =============", pair[0].x, pair[0].y)
+    console.log(i + "=== destination ========", pair[1].x, pair[1].y)
+    console.log(i + "=== scaled origin ======", d3elems.transmissionPathLengths[i].pathScale(userDateMin))
+    console.log(i + "=== scaled destination =", d3elems.transmissionPathLengths[i].pathScale(userDateMax))
 
-    /* only part of line is visible, figure out which part */
-    return pair
-    // [
-    //   d3elems.transmissions[0][i].getPointAtLength(userDateMin),
-    //   d3elems.transmissions[0][i].getPointAtLength(userDateMax)
-    // ]
+    /*
+      1. input user dates to the scale which knows about origin/dest dates and total path length, derive proportion
+      2. feed scaled number into get point at length
+    */
+
+    console.log("origin getPointAtlength ::::::: ", d3elems.transmissions[0][i].getPointAtLength(d3elems.transmissionPathLengths[i].pathScale(userDateMin)))
+    console.log("dest getPointAtlength ::::::::: ", d3elems.transmissions[0][i].getPointAtLength(d3elems.transmissionPathLengths[i].pathScale(userDateMax)))
+
+    return [
+      d3elems.transmissions[0][i].getPointAtLength(d3elems.transmissionPathLengths[i].pathScale(userDateMin)),
+      d3elems.transmissions[0][i].getPointAtLength(d3elems.transmissionPathLengths[i].pathScale(userDateMax))
+    ]
   }
 }
-
-const translateAlong = (path) => {
-  var totalPathLength = path.getTotalLength();
-  return (datum, index, a) => {
-    return (t) => {
-      var p = path.getPointAtLength(t * totalPathLength);
-      return "translate(" + p.x + "," + p.y + ")";
-    };
-  };
-};
 
 export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
 
@@ -149,14 +170,23 @@ export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
     .style("fill", (d) => { return d.total > 0 ? d.color : "white" })
     .attr("r", (d) => {
       return 0 + Math.sqrt(d.total) * 4
-    })
+    });
+
+    console.log("UPDATING ====================================================")
 
   d3elems.transmissions
     .data(latLongs.transmissions)
     // .transition(5)
     .attr("d", (d, i) => {
       return pathStringGenerator(
-        extractLineSegmentForAnimationEffect(d.data.originToDestinationXYs, controls, d, nodes, d3elems, i)
+        extractLineSegmentForAnimationEffect(
+          d.data.originToDestinationXYs,
+          controls,
+          d,
+          nodes,
+          d3elems,
+          i
+        )
       )
     }) /* with the interpolation in the function above pathStringGenerator */
     .attr("stroke", (d) => { return d.data.total > 0 ? d.data.color : "white" })
@@ -175,6 +205,18 @@ export const updateFoo = (d3elems, latLongs) => {
     .data(latLongs.transmissions)
 }
 
+
+
+
+// const translateAlong = (path) => {
+//   var totalPathLength = path.getTotalLength();
+//   return (datum, index) => {
+//     return (t) => {
+//       var p = path.getPointAtLength(t * totalPathLength);
+//       return "translate(" + p.x + "," + p.y + ")";
+//     };
+//   };
+// };
 
 // const missiles = transmissionPaths.map((transmissionPath) => {
 //
