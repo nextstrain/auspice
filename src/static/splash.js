@@ -10,7 +10,10 @@ import Flex from "../components/framework/flex";
 import { analyticsNewPage, triggerOutboundEvent } from "../util/googleAnalytics";
 import { generateLogos } from "./helpers/logos";
 import { tweets } from "./helpers/tweets";
-import { triggerInfoNotification } from "../actions/notifications";
+import { infoNotification,
+          successNotification,
+          errorNotification,
+          warningNotification } from "../actions/notifications";
 
 const styles = {
   cardMainText: {
@@ -148,8 +151,17 @@ class Splash extends React.Component {
           <div className="bigspacer"></div>
           <div className="col-md-3"/>
           <div className="col-md-6">
-            <button onClick={() => this.props.dispatch(triggerInfoNotification())}>
-              Info Notification
+            <button onClick={() => this.props.dispatch(errorNotification())}>
+              ERROR
+            </button>
+            <button onClick={() => this.props.dispatch(infoNotification())}>
+              INFO
+            </button>
+            <button onClick={() => this.props.dispatch(successNotification())}>
+              SUCCESS
+            </button>
+            <button onClick={() => this.props.dispatch(warningNotification())}>
+              WARNING
             </button>
           </div>
 

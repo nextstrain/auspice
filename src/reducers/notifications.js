@@ -9,11 +9,12 @@ const arrayObjectIndexOf = function (myArray, id) {
   return -1;
 };
 
-const makeNotification = function (action, id) {
+const makeNotification = function (action) {
   return {
-    form: action.form || "info",
-    message: action.message || "no msg provided",
-    id
+    message: action.message || "Default Error Message",
+    details: action.details || "Default Error Detail",
+    classes: ["notification", action.notificationType],
+    id: action.id
   };
 };
 
@@ -21,18 +22,26 @@ const Metadata = (state = {
   stack: [],
   counter: 0
 }, action) => {
+  let stack;
   switch (action.type) {
   case types.ADD_NOTIFICATION:
-    const stack = state.stack.slice(); // shallow copy
-    const counter = state.counter + 1;
-    stack.push(makeNotification(action, counter));
-    return Object.assign({}, state, {counter, stack});
+    stack = state.stack.slice(); // shallow copy
+    stack.push(makeNotification(action));
+    return Object.assign({}, state, {counter: action.id, stack});
+  case types.ANIMATE_NOTIFICATION:
+    const idx = arrayObjectIndexOf(state.stack, action.id);
+    // console.log("idx", idx, action, state.stack[idx])
+    if (idx > -1) {
+      stack = state.stack.slice(); // shallow copy
+      stack[idx].classes.push(action.class);
+      // console.log("classes:", stack[idx].classes)
+      return Object.assign({}, state, {stack});
+    }
+    return state; // no-op
   case types.REMOVE_NOTIFICATION:
-    const tmp = state.stack.slice(); // shallow copy
-    tmp.splice(arrayObjectIndexOf(state.stack, action.id), 1);
-    return Object.assign({}, state, {
-      stack: tmp
-    });
+    stack = state.stack.slice(); // shallow copy
+    stack.splice(arrayObjectIndexOf(stack, action.id), 1);
+    return Object.assign({}, state, {stack});
   default:
     return state;
   }

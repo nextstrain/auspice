@@ -1,14 +1,16 @@
 import React from "react";
 import { connect } from "react-redux";
 
-const generateEl = function (msg, id) {
+const generateEl = function (d) {
   return (
-    <div key={id}>
+    <div key={d.id} className={ d.classes.join(" ") }>
       <div className="content">
-        <div className="message item"></div>
+        <div className="message item">
+          {d.message}
+        </div>
         <div className="detail item">
           <div className="detail-content">
-            {msg}
+            {d.details}
           </div>
           <a href="#" className="stack-toggle"></a>
           <div className="stack-container"></div>
@@ -34,8 +36,8 @@ class Notifications extends React.Component {
   }
   render() {
     return (
-      <div>
-        {this.props.stack.map((d) => generateEl(d.message, d.id))}
+      <div className="notifications">
+        {this.props.stack.map((d) => generateEl(d))}
       </div>
     );
   }

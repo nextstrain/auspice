@@ -1,0 +1,158 @@
+/*
+https://github.com/atom/notifications/blob/master/styles/notifications.less
+https://github.com/atom/atom/blob/master/static/variables/octicon-utf-codes.less
+https://github.com/atom/atom/blob/master/static/variables/octicon-mixins.less
+https://github.com/atom/atom/blob/master/static/variables/ui-variables.less
+*/
+
+:root {
+  --icon-size: 30px;
+  --width: 450px;
+  --width-detail: 450px;
+
+  --background-color-info: #0098ff;
+  --background-color-success: #17ca65;
+  --background-color-warning: #ff4800;
+  --background-color-error: #c00;
+
+  --text-color-info: #5293d8;
+  --text-color-success: #1fe977;
+  --text-color-warning: #f78a46;
+  --text-color-error: #c00;
+}
+
+.notifications {
+  display: block;
+  z-index: 1000;
+  position: absolute;
+  top: 35px;
+  right: 0;
+  bottom: 0;
+  padding: 0;
+  font-size: 1.2em;
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: none;
+}
+
+.notification {
+  float: right;
+  clear: right;
+  position: relative;
+  width: var(--width);
+  padding-left: var(--icon-size);
+  margin-bottom: 2px;
+  max-height: 800px;
+  word-wrap: break-word;
+  pointer-events: auto;
+}
+
+/* BACKGROUND & TEXT COLOURS */
+.notification.error {
+  background-color: var(--background-color-error);
+  color: var(--text-color-error);
+}
+
+.notification.warning {
+  background-color: var(--background-color-warning);
+  color: var(--text-color-warning);
+}
+
+.notification.info {
+  background-color: var(--background-color-info);
+  color: var(--text-color-info);
+}
+
+.notification.success {
+  background-color: var(--background-color-success);
+  color: var(--text-color-success);
+}
+
+
+
+/*.notification.remove {
+  color: red;
+}*/
+
+.notifications::-webkit-scrollbar {
+  display: none;
+}
+
+.notification.icon:before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 30px;
+  height: 100%;
+  padding-top: 0;
+  text-align: center;
+  border-radius: 0 0 0 0;
+}
+
+.notification .item.message {
+  border-top: none;
+}
+.notification .item.message p:last-child {
+  margin-bottom: 0;
+}
+.notification.has-close .message {
+  padding-right: 24px;
+}
+.notification .content {
+  border-radius: 0 0 0 0;
+}
+.notification .message {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.notification {
+  -webkit-animation: notification-show 0.16s cubic-bezier(0.175, 0.885, 0.32, 1.27499);
+}
+
+.notification.remove,
+.notification.remove:hover {
+  -webkit-animation: notification-hide 0.12s cubic-bezier(0.34, 0.07, 1, 0.2), notification-shrink 0.24s 0.12s cubic-bezier(0.5, 0, 0, 1);
+  -webkit-animation-fill-mode: forwards;
+}
+
+@-webkit-keyframes .notification-show {
+  0% {
+    opacity: 0;
+    transform: perspective(450px) translate(0, -30px) rotateX(90deg);
+  }
+  100% {
+    opacity: 1;
+    transform: perspective(450px) translate(0, 0) rotateX(0deg);
+  }
+}
+@-webkit-keyframes .notification-hide {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+@-webkit-keyframes .notification-shrink {
+  0% {
+    opacity: 0;
+    max-height: 800px;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 0;
+    max-height: 0;
+    transform: scale(0.8);
+  }
+}
+
+.notification .detail {
+  font-size: .8em;
+  background-color: rgba(255, 255, 255, 0.3);
+  background-clip: padding-box;
+  max-height: 500px;
+  overflow-y: auto;
+}
