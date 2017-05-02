@@ -13,6 +13,7 @@ const makeNotification = function (action) {
   return {
     message: action.message || "Default Error Message",
     details: action.details || "Default Error Detail",
+    notificationType: action.notificationType,
     classes: ["notification", action.notificationType],
     id: action.id
   };
