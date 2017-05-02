@@ -17,6 +17,8 @@ import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";
 import "./css/datePicker.css";
 import "./css/static.css";
+import "./css/notifications.css";
+import Notifications from "./components/notifications/notifications";
 import { outboundLinkWithAnalytics } from "./util/googleAnalytics";
 
 /* google analytics */
@@ -35,6 +37,7 @@ class Root extends React.Component {
         <BrowserRouter>
           <div>
             <BrowserDimensionMonitor/>
+            <Notifications/>
             <Switch>
               <Route path="/methods" component={Methods}/>
               <Route path="/about" component={About}/>

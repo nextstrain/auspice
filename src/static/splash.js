@@ -10,6 +10,7 @@ import Flex from "../components/framework/flex";
 import { analyticsNewPage, triggerOutboundEvent } from "../util/googleAnalytics";
 import { generateLogos } from "./helpers/logos";
 import { tweets } from "./helpers/tweets";
+import { triggerInfoNotification } from "../actions/notifications";
 
 const styles = {
   cardMainText: {
@@ -109,6 +110,7 @@ const generateCard = (title, imgRequired, to, outboundLink) => {
   }
 };
 
+@connect()
 class Splash extends React.Component {
   componentWillMount() {
     analyticsNewPage();
@@ -141,6 +143,15 @@ class Splash extends React.Component {
               </button>
             </Link>
           </Flex>
+
+          {/* TESTING FOR NOTIFICATIONS */}
+          <div className="bigspacer"></div>
+          <div className="col-md-3"/>
+          <div className="col-md-6">
+            <button onClick={() => this.props.dispatch(triggerInfoNotification())}>
+              Info Notification
+            </button>
+          </div>
 
           {/* THE CLICKABLE CARDS - see about page for sources & attribution */}
 
