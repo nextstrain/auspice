@@ -40,7 +40,8 @@ const generateIcon = function (notificationType) {
 
 @connect((state) => {
   return {
-    stack: state.notifications.stack
+    stack: state.notifications.stack,
+    pageWidth: state.browserDimensions.browserDimensions.width
   };
 })
 class Notifications extends React.Component {
@@ -49,7 +50,8 @@ class Notifications extends React.Component {
   }
   static propTypes = {
     stack: React.PropTypes.array.isRequired,
-    dispatch: React.PropTypes.func.isRequired
+    dispatch: React.PropTypes.func.isRequired,
+    pageWidth: React.PropTypes.number.isRequired
   }
   closeIcon(d) {
     return(
@@ -87,6 +89,10 @@ class Notifications extends React.Component {
     this.props.dispatch({type: REMOVE_NOTIFICATION, id});
   }
   render() {
+    /* don't display on small screens */
+    if (this.props.pageWidth < 600) {
+      return null;
+    }
     return (
       <ReactCSSTransitionGroup className="notifications"
         transitionName="notification"
