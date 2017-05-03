@@ -161,7 +161,6 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems,
     // console.log(i + "=== scaled destination distance ======", scaledDestinationDist)
     // console.log(i + "=== scaled destination x,y ======", scaledDestinationXY)
 
-  }
     return [scaledOriginXY, scaledDestinationXY]
   }
 }
