@@ -515,7 +515,7 @@ class TreeView extends React.Component {
       minHeight: 480,
       maxAspectRatio: 1.0
     })
-    const cardTitle = this.state.selectedBranch ? "" : "Phylogeny";
+    const cardTitle = this.state.selectedBranch ? "." : "Phylogeny";
 
     /* NOTE these props were removed from SVG pan-zoom as they led to functions that did
     nothing, but they may be useful in the future...
