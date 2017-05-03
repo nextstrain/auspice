@@ -114,6 +114,16 @@ https://github.com/atom/atom/blob/master/static/variables/ui-variables.less
   text-decoration: none;
 }
 
+.notification .close-icon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  margin: 5px 5px 0px 0px;
+  fill: rgba(255, 255, 255, 0.8);
+}
+
 /*
 https://facebook.github.io/react/docs/animation.html#high-level-api-reactcsstransitiongroup
 */

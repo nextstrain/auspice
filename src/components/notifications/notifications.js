@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import ReactCSSTransitionGroup from "react-addons-css-transition-group"; // ES6
+import { REMOVE_NOTIFICATION } from "../../actions/types";
 
 const generateIcon = function (notificationType) {
   switch (notificationType) {
@@ -37,31 +38,6 @@ const generateIcon = function (notificationType) {
   }
 };
 
-const generateEl = function (d) {
-  return (
-    <div key={d.id} className={ d.classes.join(" ") }>
-      <div className="icon icon-main">
-        {generateIcon(d.notificationType)}
-      </div>
-
-      <div className="content">
-        <div className="message item">
-          {d.message}
-        </div>
-        <div className="detail item">
-          <div className="detail-content">
-            {d.details}
-          </div>
-          <a href="#" className="stack-toggle"></a>
-          <div className="stack-container"></div>
-        </div>
-        <div className="meta item"></div>
-      </div>
-      {/*<div className="close icon icon-x"></div> */}
-    </div>
-  );
-};
-
 @connect((state) => {
   return {
     stack: state.notifications.stack
@@ -72,7 +48,43 @@ class Notifications extends React.Component {
     super(props);
   }
   static propTypes = {
-    stack: React.PropTypes.array.isRequired
+    stack: React.PropTypes.array.isRequired,
+    dispatch: React.PropTypes.func.isRequired
+  }
+  closeIcon(d) {
+    return(
+      <div onClick={() => { this.removeNotificationCallback(d.id); }}
+        style={{cursor: "pointer"}} className={"close-icon"}
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 15 15">
+          <polygon id="Shape" points="7.48 8 11.23 11.75 9.75 13.23 6 9.48 2.25 13.23 0.77 11.75 4.52 8 0.77 4.25 2.25 2.77 6 6.52 9.75 2.77 11.23 4.25"></polygon>
+        </svg>
+      </div>
+    );
+  }
+  generateEl(d) {
+    return (
+      <div key={d.id} className={ d.classes.join(" ") }>
+        <div className="icon icon-main">
+          {generateIcon(d.notificationType)}
+        </div>
+        <div className="content">
+          <div className="message item">
+            {d.message}
+          </div>
+          <div className="detail item">
+            <div className="detail-content">
+              {d.details}
+            </div>
+          </div>
+        </div>
+        {d.notificationType === "error" ? this.closeIcon(d) : <g/>}
+        {/*<div className="close icon icon-x"></div> */}
+      </div>
+    );
+  }
+  removeNotificationCallback(id) {
+    this.props.dispatch({type: REMOVE_NOTIFICATION, id});
   }
   render() {
     return (
@@ -81,7 +93,7 @@ class Notifications extends React.Component {
         transitionEnterTimeout={500}
         transitionLeaveTimeout={500}
       >
-        {this.props.stack.map((d) => generateEl(d))}
+        {this.props.stack.map((d) => this.generateEl(d))}
       </ReactCSSTransitionGroup>
     );
   }

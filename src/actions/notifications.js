@@ -10,10 +10,12 @@ const triggerNotification = (data) => {
       type: types.ADD_NOTIFICATION,
       id
     }));
-    window.setTimeout(() => dispatch({
-      type: types.REMOVE_NOTIFICATION,
-      id
-    }), notificationDuration);
+    if (data.notificationType !== "error") {
+      window.setTimeout(() => dispatch({
+        type: types.REMOVE_NOTIFICATION,
+        id
+      }), notificationDuration);
+    }
   };
 };
 
