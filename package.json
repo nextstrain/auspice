@@ -57,6 +57,7 @@
     "query-string": "^4.2.3",
     "radium": "0.18.1",
     "react": "15.3.1",
+    "react-addons-css-transition-group": "^15.5.2",
     "react-autosuggest": "^3.9.0",
     "react-datepicker": "^0.29.0",
     "react-dom": "^0.14.0",

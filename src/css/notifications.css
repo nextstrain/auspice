@@ -71,74 +71,6 @@ https://github.com/atom/atom/blob/master/static/variables/ui-variables.less
   color: var(--text-color-success);
 }
 
-/*.notification.remove {
-  color: red;
-}*/
-/*
-.notifications::-webkit-scrollbar {
-  display: none;
-}
-
-.notification .item.message {
-  border-top: none;
-}
-.notification .item.message p:last-child {
-  margin-bottom: 0;
-}
-.notification.has-close .message {
-  padding-right: 24px;
-}
-.notification .content {
-  border-radius: 0 0 0 0;
-}
-.notification .message {
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.notification {
-  -webkit-animation: notification-show 0.16s cubic-bezier(0.175, 0.885, 0.32, 1.27499);
-}
-
-.notification.remove,
-.notification.remove:hover {
-  -webkit-animation: notification-hide 0.12s cubic-bezier(0.34, 0.07, 1, 0.2), notification-shrink 0.24s 0.12s cubic-bezier(0.5, 0, 0, 1);
-  -webkit-animation-fill-mode: forwards;
-}
-
-@-webkit-keyframes .notification-show {
-  0% {
-    opacity: 0;
-    transform: perspective(450px) translate(0, -30px) rotateX(90deg);
-  }
-  100% {
-    opacity: 1;
-    transform: perspective(450px) translate(0, 0) rotateX(0deg);
-  }
-}
-@-webkit-keyframes .notification-hide {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-}
-@-webkit-keyframes .notification-shrink {
-  0% {
-    opacity: 0;
-    max-height: 800px;
-    transform: scale(0.8);
-  }
-  100% {
-    opacity: 0;
-    max-height: 0;
-    transform: scale(0.8);
-  }
-}*/
-
 .notification .content {
   background-color: rgba(255, 255, 255, 0.5);
   min-height: var(--min-h);
@@ -180,4 +112,25 @@ https://github.com/atom/atom/blob/master/static/variables/ui-variables.less
   line-height: 1;
   -webkit-font-smoothing: antialiased;
   text-decoration: none;
+}
+
+/*
+https://facebook.github.io/react/docs/animation.html#high-level-api-reactcsstransitiongroup
+*/
+.notification-enter {
+  left: var(--width);
+}
+
+.notification-enter.notification-enter-active {
+  transition: 400ms ease-in;
+  left: 0;
+}
+
+.notification-leave {
+  left: 0;
+}
+
+.notification-leave.notification-leave-active {
+  transition: 400ms ease-in;
+  left: var(--width);
 }

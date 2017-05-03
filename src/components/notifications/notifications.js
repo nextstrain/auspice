@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import ReactCSSTransitionGroup from "react-addons-css-transition-group"; // ES6
 
 const generateIcon = function (notificationType) {
   switch (notificationType) {
@@ -75,9 +76,13 @@ class Notifications extends React.Component {
   }
   render() {
     return (
-      <div className="notifications">
+      <ReactCSSTransitionGroup className="notifications"
+        transitionName="notification"
+        transitionEnterTimeout={500}
+        transitionLeaveTimeout={500}
+      >
         {this.props.stack.map((d) => generateEl(d))}
-      </div>
+      </ReactCSSTransitionGroup>
     );
   }
 }

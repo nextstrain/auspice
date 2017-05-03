@@ -29,16 +29,6 @@ const Metadata = (state = {
     stack = state.stack.slice(); // shallow copy
     stack.push(makeNotification(action));
     return Object.assign({}, state, {counter: action.id, stack});
-  case types.ANIMATE_NOTIFICATION:
-    const idx = arrayObjectIndexOf(state.stack, action.id);
-    // console.log("idx", idx, action, state.stack[idx])
-    if (idx > -1) {
-      stack = state.stack.slice(); // shallow copy
-      stack[idx].classes.push(action.class);
-      // console.log("classes:", stack[idx].classes)
-      return Object.assign({}, state, {stack});
-    }
-    return state; // no-op
   case types.REMOVE_NOTIFICATION:
     stack = state.stack.slice(); // shallow copy
     stack.splice(arrayObjectIndexOf(stack, action.id), 1);

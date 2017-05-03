@@ -11,14 +11,9 @@ const triggerNotification = (data) => {
       id
     }));
     window.setTimeout(() => dispatch({
-      type: types.ANIMATE_NOTIFICATION,
-      class: "remove",
-      id
-    }), notificationDuration);
-    window.setTimeout(() => dispatch({
       type: types.REMOVE_NOTIFICATION,
       id
-    }), notificationDuration + notificationAnimationDuration);
+    }), notificationDuration);
   };
 };
 
