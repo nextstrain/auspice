@@ -7,12 +7,28 @@ export const datasets = {
   "pathogen": {
     "ebola": "c=division&r=division",
     "zika": "",
+    "dengue": {
+      "serotype": {
+        "all": "",
+        "denv1": "",
+        "denv2": "",
+        "denv3": "",
+        "denv4": "",
+        "default": "all"
+      }
+    },
     "flu": {
       "lineage": {
         "h7n9": {
           "segment": {
+            "pb2": "c=division&r=division",
+            "pb1": "c=division&r=division",
+            "pa": "c=division&r=division",
             "ha": "c=division&r=division",
+            "np": "c=division&r=division",
             "na": "c=division&r=division",
+            "mp": "c=division&r=division",
+            "ns": "c=division&r=division",
             "default": "ha"
           }
         },
@@ -60,7 +76,7 @@ export const reallySmallNumber = -100000000;
 export const reallyBigNumber = 10000000;
 export const LBItime_window = 0.5;
 export const LBItau = 0.0005;
-export const mutType = "nuc";
+export const mutType = "aa";
 export const default_gene = "nuc";
 export const plot_frequencies = false;
 export const genericDomain = [ 0, 0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0 ];

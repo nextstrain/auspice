@@ -17,21 +17,28 @@ const getExtraVals = (nodes, colorBy, color_map) => {
 }
 
 
-const genericScale = (cmin, cmax) => {
-  // console.log("genericScale called.")
+const genericScale = (cmin, cmax, vals = false) => {
+  if (vals && vals.length <= 9) {
+    return d3.scale.linear()
+      .domain(vals)
+      .range(colors[vals.length]);
+  }
+  /* if we have more than 9 values to display
+  (and the scale is continuous at this point)
+  create an evenly spaced 9-item domain (this is genericDomain) */
   const offset = +cmin;
   const range = cmax - cmin;
-  const tmpColorScale = d3.scale.linear()
+  return d3.scale.linear()
     .domain(genericDomain.map((d) => offset + d * range))
     .range(colors[9]);
-  return tmpColorScale;
 };
 
 
 const minMaxAttributeScale = (nodes, attr) => {
-  const maxAttr = d3.max(nodes.map((n) => n.attr[attr]));
-  const minAttr = d3.min(nodes.map((n) => n.attr[attr]));
-  return genericScale(minAttr, maxAttr);
+  const vals = nodes.map((n) => n.attr[attr])
+    .filter((n) => n !== undefined)
+    .filter((item, i, ar) => ar.indexOf(item) === i);
+  return genericScale(d3.min(vals), d3.max(vals), vals);
 };
 
 const integerAttributeScale = (nodes, attr) => {

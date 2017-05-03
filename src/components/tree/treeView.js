@@ -1,4 +1,5 @@
 /*eslint-env browser*/
+/*eslint dot-notation: 0*/
 import React from "react";
 import d3 from "d3";
 import * as globals from "../../util/globals";
@@ -61,8 +62,7 @@ need this information are children of this component
     selectedLegendItem: state.controls.selectedLegendItem,
     colorScale: state.controls.colorScale,
     datasetGuid: state.tree.datasetGuid,
-    dateMin: state.controls.dateMin,
-    dateMax: state.controls.dateMax
+    mutType: state.controls.mutType
   };
 })
 class TreeView extends React.Component {
@@ -82,7 +82,8 @@ class TreeView extends React.Component {
     router: React.PropTypes.object.isRequired
   }
   static propTypes = {
-    sidebar: React.PropTypes.bool.isRequired
+    sidebar: React.PropTypes.bool.isRequired,
+    mutType: React.PropTypes.string.isRequired
   }
 
   componentWillMount() {
@@ -297,6 +298,7 @@ class TreeView extends React.Component {
     });
   }
   onBranchClick(d) {
+    this.Viewer.fitToViewer();
     this.state.tree.zoomIntoClade(d, mediumTransitionDuration);
     /* to stop multiple phyloTree updates potentially clashing,
     we change tipVis after geometry update + transition */
@@ -513,7 +515,7 @@ class TreeView extends React.Component {
       minHeight: 480,
       maxAspectRatio: 1.0
     })
-    const cardTitle = this.state.selectedBranch ? "" : "Phylogeny";
+    const cardTitle = this.state.selectedBranch ? "." : "Phylogeny";
 
     /* NOTE these props were removed from SVG pan-zoom as they led to functions that did
     nothing, but they may be useful in the future...
@@ -525,6 +527,7 @@ class TreeView extends React.Component {
       <Card center title={cardTitle}>
         <Legend sidebar={this.props.sidebar}/>
         <InfoPanel
+          mutType={this.props.mutType}
           tree={this.state.tree}
           hovered={this.state.hovered}
           viewer={this.Viewer}

@@ -120,7 +120,7 @@ class Splash extends React.Component {
   render() {
     return(
       <div>
-        <TitleBar logoHidden={true} titleHidden={true}/>
+        <TitleBar dataNameHidden/>
 
         <div className="static container">
           <Flex justifyContent="center">
@@ -162,6 +162,9 @@ class Splash extends React.Component {
                 </div>
                 <div className="col-sm-4">
                   {generateCard(["Seasonal Influenza", "(uses nextflu.org)"], require("../images/influenza.png"), "http://nextflu.org", true)}
+                </div>
+                <div className="col-sm-4">
+                  {generateCard(["Dengue"], require("../images/dengue.png"), "/dengue", false)}
                 </div>
               </div>
             </div>

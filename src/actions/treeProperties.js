@@ -3,7 +3,10 @@ import { calcVisibility,
    calcTipCounts,
    makeParentVisible,
    calcBranchThickness } from "../util/treeHelpers";
+import { determineColorByGenotypeType } from "../util/urlHelpers";
+import { changeColorBy } from "./colors";
 import * as types from "./types";
+import { defaultColorBy } from "../util/globals";
 
 const updateVisibility = () => {
   return (dispatch, getState) => {
@@ -85,6 +88,18 @@ export const changeDateFilter = function (newMin, newMax) {
   };
 };
 
+export const changeAnalysisSliderValue = function (value) {
+  return (dispatch, getState) => {
+    const { tree } = getState();
+    dispatch({type: types.CHANGE_ANALYSIS_VALUE, value});
+    /* initially, the tree isn't loaded, so don't bother trying to do things */
+    if (tree.loadStatus === 2) {
+      dispatch(updateVisibility());
+      dispatch(updateBranchThickness());
+    }
+  };
+};
+
 /* zoomToClade takes care of setting tipVis and branchThickness.
 Note that the zooming / tree stuff is done imperitively by phyloTree */
 export const zoomToClade = function (idxOfInViewRootNode) {
@@ -133,5 +148,16 @@ export const applyFilterQuery = (filterType, fields, values) => {
               values});
     dispatch(updateVisibility());
     dispatch(updateBranchThickness());
+  };
+};
+
+export const changeMutType = (data) => {
+  return (dispatch, getState) => {
+    const { controls } = getState();
+    const g = determineColorByGenotypeType(controls.colorBy);
+    if (g && g !== data) {
+      dispatch(changeColorBy(defaultColorBy));
+    }
+    dispatch({type: types.TOGGLE_MUT_TYPE, data});
   };
 };

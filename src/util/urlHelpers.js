@@ -93,3 +93,14 @@ export const turnURLtoDataPath = function (router) {
   }
   return undefined;
 };
+
+export const determineColorByGenotypeType = function (colorBy) {
+  /* note that nucleotide genotypes are either gt-nucXXX or gt-XXX */
+  if (colorBy.startsWith("gt")) {
+    if (colorBy.slice(3, 6) === "nuc" || !isNaN(parseInt(colorBy.slice(3, 4)))) {
+      return "nuc";
+    }
+    return "aa";
+  }
+  return false;
+};

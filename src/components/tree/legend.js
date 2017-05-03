@@ -6,6 +6,8 @@ import { headerFont, darkGrey } from "../../globalStyles";
 import { legendRectSize, legendSpacing, fastTransitionDuration,
   controlsWidth } from "../../util/globals";
 import titleCase from "title-case";
+import { determineColorByGenotypeType } from "../../util/urlHelpers";
+
 
 @connect((state) => {
   return {
@@ -26,7 +28,7 @@ class Legend extends React.Component {
     // dispatch: React.PropTypes.func,
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
-    /* component api */
+    colorBy: React.PropTypes.string.isRequired,
     style: React.PropTypes.object,
     sidebar: React.PropTypes.bool
   }
@@ -82,19 +84,16 @@ class Legend extends React.Component {
     return "translate(" + horz + "," + vert + ")";
   }
   getTitleString() {
-    let title = "";
-    if (this.props.colorBy) {
-      title = this.props.colorBy;
+    const g = determineColorByGenotypeType(this.props.colorBy); /* g = false, "aa" or "nuc" */
+    if (g) {
+      if (g === "nuc") {
+        return "Genotype at position " + this.props.colorBy.replace("gt-", "").replace("nuc_", "");
+      }
+      return "Genotype at " + this.props.colorBy.replace("gt-", "").replace("_", " site ");
+    } else if (this.props.colorBy === "num_date") {
+      return "Date";
     }
-    if (title === "num_date") {
-      title = "date";
-    }
-    if (title.slice(0,2) === "gt") {
-      title = title.replace("gt-", "Genotype at ").replace("_", " site ");
-    } else {
-      title = titleCase(title);
-    }
-    return title;
+    return titleCase(this.props.colorBy);
   }
   getTitleWidth() {
     return 10 + 5.3 * this.getTitleString().length;
