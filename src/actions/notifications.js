@@ -17,15 +17,15 @@ const triggerNotification = (data) => {
   };
 };
 
-export const infoNotification = (message, details = "") => {
+export const infoNotification = (message = "Info", details = "") => {
   return triggerNotification({notificationType: "info", message, details});
 };
-export const errorNotification = (message, details = "") => {
+export const errorNotification = (message = "Error (unknown)", details = "") => {
   return triggerNotification({notificationType: "error", message, details});
 };
-export const successNotification = (message, details = "") => {
+export const successNotification = (message = "Success!", details = "") => {
   return triggerNotification({notificationType: "success", message, details});
 };
-export const warningNotification = (message, details = "") => {
+export const warningNotification = (message = "Warning (unknown)", details = "") => {
   return triggerNotification({notificationType: "warning", message, details});
 };

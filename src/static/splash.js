@@ -151,16 +151,16 @@ class Splash extends React.Component {
           <div className="bigspacer"></div>
           <div className="col-md-3"/>
           <div className="col-md-6">
-            <button onClick={() => this.props.dispatch(errorNotification())}>
+            <button onClick={() => this.props.dispatch(errorNotification("Error notification"))}>
               ERROR
             </button>
-            <button onClick={() => this.props.dispatch(infoNotification())}>
+            <button onClick={() => this.props.dispatch(infoNotification("Info notification"))}>
               INFO
             </button>
-            <button onClick={() => this.props.dispatch(successNotification())}>
+            <button onClick={() => this.props.dispatch(successNotification("Success notification"))}>
               SUCCESS
             </button>
-            <button onClick={() => this.props.dispatch(warningNotification())}>
+            <button onClick={() => this.props.dispatch(warningNotification("Warning notification", "some more info"))}>
               WARNING
             </button>
           </div>
