@@ -2,10 +2,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { loadJSONs } from "../actions/loadData";
-import { RESET_CONTROLS, NEW_DATASET } from "../actions/types";
-import { restoreStateFromURL, turnURLtoDataPath } from "../util/urlHelpers"
 import "whatwg-fetch"; // setup polyfill
-import Title from "./framework/title";
 import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
@@ -16,8 +13,8 @@ import TreeView from "./tree/treeView";
 import queryString from "query-string";
 import * as globals from "../util/globals";
 import Sidebar from "react-sidebar";
-import Flex from "./framework/flex";
-import { titleStyles } from "../globalStyles";
+// import Flex from "./framework/flex";
+// import { titleStyles } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
 import { analyticsNewPage } from "../util/googleAnalytics";
@@ -56,41 +53,9 @@ class App extends React.Component {
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   }
-
-  // componentWillMount() {
-  // }
-
   componentWillMount() {
-    /* parse URL, set URL, load data etc
-
-    This is hit on the initial load and when a browser is refreshed
-    but NOT when browser back/forward buttons are used.
-
-    we're always going to load data here, it's just a question of what data to load!
-    NOTE because the page has just loaded, there is no state to clear, we simply load
-    new bits of state via the URL query and then URL pathname
-    */
-    // console.log("CDM")
-    this.props.dispatch({type: RESET_CONTROLS});
-    const data_path = turnURLtoDataPath(this.context.router);
-    restoreStateFromURL(this.context.router, this.props.dispatch);
-    if (data_path) {
-      this.props.dispatch({type: NEW_DATASET, data: this.context.router.history.location.pathname});
-      this.props.dispatch(loadJSONs(data_path));
-    } else {
-      console.log("<app> couldn't work out the dataset to load. Bad.");
-    }
+    this.props.dispatch(loadJSONs(this.context.router));
   }
-
-  componentDidUpdate() {
-    /* back/forward buttons used (i.e. app doesn't reload, things don't
-    remount, but this is the place to detect URL changes)
-    */
-    // console.log("app.js CDU")
-    // console.log("redux datasetPathName:", this.props.datasetPathName);
-    // this.maybeFetchDataset();
-  }
-
   render() {
     return (
       <Sidebar

@@ -36,7 +36,7 @@ const getDefaultState = function () {
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
     analysisSlider: false,
     geoResolution: globals.defaultGeoResolution,
-    datasetPathName: null,
+    datasetPathName: "",
     filters: {},
     dateScale: d3.time.scale().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
     dateFormat: d3.time.format("%Y-%m-%d")
@@ -45,12 +45,60 @@ const getDefaultState = function () {
 
 const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
-  case types.RESET_CONTROLS:
-    return getDefaultState();
   case types.NEW_DATASET:
-    return Object.assign({}, state, {
-      datasetPathName: action.data
-    });
+    const base = getDefaultState();
+    /* overwrite base state with data from the metadata JSON */
+    if (action.meta.date_range) {
+      if (action.meta.date_range.date_min) {
+        base["dateMin"] = action.meta.date_range.date_min;
+        base["absoluteDateMin"] = action.meta.date_range.date_min;
+      }
+      if (action.meta.date_range.date_max) {
+        base["dateMax"] = action.meta.date_range.date_max;
+        base["absoluteDateMax"] = action.meta.date_range.date_max;
+      }
+    }
+    if (action.meta.analysisSlider) {
+      base["analysisSlider"] = {key: action.meta.analysisSlider, valid: false};
+    }
+    if (action.meta.defaults) {
+      if (action.meta.defaults.geoResolution) {
+        base["geoResolution"] = action.meta.defaults.geoResolution;
+      }
+      if (action.meta.defaults.colorBy) {
+        base["colorBy"] = action.meta.defaults.colorBy;
+      }
+      if (action.meta.defaults.distanceMeasure) {
+        base["distanceMeasure"] = action.meta.defaults.distanceMeasure;
+      }
+      if (action.meta.defaults.layout) {
+        base["layout"] = action.meta.defaults.layout;
+      }
+    }
+    /* now overwrite state with data from the URL */
+    if (action.query.l) {
+      base["layout"] = action.query.l;
+    }
+    if (action.query.m) {
+      base["distanceMeasure"] = action.query.m;
+    }
+    if (action.query.c) {
+      base["colorBy"] = action.query.c;
+    }
+    if (action.query.r) {
+      base["geoResolution"] = action.query.r;
+    }
+    if (action.query.dmin) {
+      base["dateMin"] = action.query.dmin;
+    }
+    if (action.query.dmax) {
+      base["dateMax"] = action.query.dmax;
+    }
+    /* basic sanity checking */
+    if (Object.keys(action.meta.color_options).indexOf(base["colorBy"]) === -1) {
+      throw new Error("colorBy (" + base["colorBy"] + ") not available.");
+    }
+    return base;
   case types.TOGGLE_BRANCH_LABELS:
     return Object.assign({}, state, {
       showBranchLabels: !state.showBranchLabels
@@ -120,53 +168,6 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       geoResolution: action.data
     });
-  /* metadata in may affect the date ranges, etc */
-  case types.RECEIVE_METADATA:
-    const extras = {};
-    if (action.data.date_range) {
-      if (action.data.date_range.date_min) {
-        extras["dateMin"] = action.data.date_range.date_min;
-        extras["absoluteDateMin"] = action.data.date_range.date_min;
-      }
-      if (action.data.date_range.date_max) {
-        extras["dateMax"] = action.data.date_range.date_max;
-        extras["absoluteDateMax"] = action.data.date_range.date_max;
-      }
-    }
-
-    if (action.data.analysisSlider) {
-      extras["analysisSlider"] = {key: action.data.analysisSlider, valid: false};
-    }
-
-    /* If the default color by (set when this reducer was initialised)
-    isn't an option in the JSON, provide a fallback */
-    const available_colorBy = Object.keys(action.data.color_options);
-    if (available_colorBy.indexOf(globals.defaultColorBy) === -1) {
-      /* remove "gt" */
-      const gtIdx = available_colorBy.indexOf("gt");
-      if (gtIdx > -1) {
-        available_colorBy.splice(gtIdx, 1);
-      }
-      extras["colorBy"] = available_colorBy[0];
-    }
-
-    // Check if there were defaults provided in the meta JSON; these overrides all other defaults.
-    if (action.data.defaults) {
-      if (action.data.defaults.geoResolution) {
-        extras["geoResolution"] = action.data.defaults.geoResolution;
-      }
-      if (action.data.defaults.colorBy) {
-        extras["colorBy"] = action.data.defaults.colorBy;
-      }
-      if (action.data.defaults.distanceMeasure) {
-        extras["distanceMeasure"] = action.data.defaults.distanceMeasure;
-      }
-      if (action.data.defaults.layout) {
-        extras["layout"] = action.data.defaults.layout;
-      }
-    }
-    return Object.assign({}, state, extras);
-
   case types.APPLY_FILTER_QUERY:
     // values arrive as array
     const filters = Object.assign({}, state.filters, {});
@@ -188,6 +189,7 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       analysisSlider: {
         key: state.analysisSlider.key,
+        // valid: true, // TESTING ONLY
         valid: false, // FIXME --- This is a temporary hack to disable the analysis slider, while keeping color options
         value: action.maxVal,
         absoluteMinVal: action.minVal,

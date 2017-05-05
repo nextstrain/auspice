@@ -1,8 +1,5 @@
 import queryString from "query-string";
-import { CHANGE_LAYOUT, CHANGE_DISTANCE_MEASURE, CHANGE_GEO_RESOLUTION } from "../actions/types";
-import { changeColorBy } from "../actions/colors";
 import parseParams from "./parseParams";
-import { changeDateFilter } from "../actions/treeProperties";
 
 /* this function takes (potentially multiple) changes you would like
 reflected in the URL and makes one change.
@@ -26,30 +23,6 @@ export const modifyURLquery = function (router, keyValuePairs = null, replace = 
     search: queryString.stringify(query)
   };
   replace ? router.history.replace(newURL) : router.history.push(newURL);
-};
-
-
-export const restoreStateFromURL = function (router, dispatch) {
-  const query = queryString.parse(router.history.location.search);
-  if (query.l) {
-    dispatch({ type: CHANGE_LAYOUT, data: query.l });
-  }
-  if (query.m) {
-    dispatch({ type: CHANGE_DISTANCE_MEASURE, data: query.m });
-  }
-  if (query.dmin && query.dmax) {
-    dispatch(changeDateFilter(query.dmin, query.dmax));
-  } else if (query.dmin) {
-    dispatch(changeDateFilter(query.dmin, null));
-  } else if (query.dmax) {
-    dispatch(changeDateFilter(null, query.dmax));
-  }
-  if (query.c) {
-    dispatch(changeColorBy(query.c));
-  }
-  if (query.r) {
-    dispatch({ type: CHANGE_GEO_RESOLUTION, data: query.r })
-  }
 };
 
 // make prefix for data files with fields joined by _ instead of / as in URL
