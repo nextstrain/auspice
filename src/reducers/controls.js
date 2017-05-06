@@ -47,6 +47,7 @@ const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
   case types.NEW_DATASET:
     const base = getDefaultState();
+    base["datasetPathName"] = action.datasetPathName;
     /* overwrite base state with data from the metadata JSON */
     if (action.meta.date_range) {
       if (action.meta.date_range.date_min) {

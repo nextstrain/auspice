@@ -161,6 +161,7 @@ const loadMetaAndTreeJSONs = (metaPath, treePath, router) => {
         /* initial dispatch sets most values */
         dispatch({
           type: types.NEW_DATASET,
+          datasetPathName: router.history.location.pathname,
           meta: values[0],
           tree: values[1],
           query: queryString.parse(router.history.location.search)
