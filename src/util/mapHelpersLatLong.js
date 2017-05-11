@@ -102,7 +102,7 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
       coords: map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) we MAY have to do this every time rather than just once */
         new L.LatLng(
           metadata.geo[geoResolution][key].latitude,
-          metadata.geo[geoResolution][key].longitude + 360
+          metadata.geo[geoResolution][key].longitude
         )
       )
     });
