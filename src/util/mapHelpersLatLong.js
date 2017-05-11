@@ -93,20 +93,24 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
     transmissions: []
   };
 
-  /* count DEMES */
-  _.forOwn(aggregatedLocations, (value, key) => {
-    demesAndTransmissions.demes.push({
-      location: key, // Thailand:
-      total: value.length, // 20, this is an array of all demes of a certain type
-      color: averageColors(value),
-      coords: map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) we MAY have to do this every time rather than just once */
-        new L.LatLng(
-          metadata.geo[geoResolution][key].latitude,
-          metadata.geo[geoResolution][key].longitude
+  [-360, 0, 360].forEach((OFFSET) => {
+    /* count DEMES */
+    _.forOwn(aggregatedLocations, (value, key) => {
+      demesAndTransmissions.demes.push({
+        location: key, // Thailand:
+        total: value.length, // 20, this is an array of all demes of a certain type
+        color: averageColors(value),
+        coords: map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) we MAY have to do this every time rather than just once */
+          new L.LatLng(
+            metadata.geo[geoResolution][key].latitude,
+            metadata.geo[geoResolution][key].longitude + OFFSET
+          )
         )
-      )
+      });
     });
-  });
+  })
+
+
 
   // /* count WRAPAROUNDS */
   // _.forOwn(aggregatedLocationsWraparoundCopy, (value, key) => {
@@ -123,89 +127,89 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
   //   });
   // });
 
-  const knownShortestPaths = {};
+  // const knownShortestPaths = {};
 
-  /* count TRANSMISSIONS for line thickness */
-  _.forOwn(aggregatedTransmissions, (value, key) => {
+  const offsets = [-360, 0, 360];
 
-    const countries = key.split("-")[0].split("/");
+  offsets.forEach((OFFSET) => {
 
-    knownShortestPaths[key] = "forwards";
-    knownShortestPaths[countries[1] + "/" + countries[0]] = "backwards";
+    /* count TRANSMISSIONS for line thickness */
+    _.forOwn(aggregatedTransmissions, (value, key) => {
 
-    // if (/* we already know the path for china to us because we've already done us to china */) {
-    //   /* use the one we already know about from knownShortestPaths. */
-    // } else {
-    //   /* figure out the new one, insert it AND ITS REVERSE into the knownShortestPaths map above */
-    // }
+      const countries = key.split("-")[0].split("/");
 
-    const original = [
-      map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-        new L.LatLng(
-          geo[geoResolution][countries[0]].latitude,
-          geo[geoResolution][countries[0]].longitude
+      // /* we already know the path for china to us because we've already done us to china */
+      // if (
+      //   knownShortestPaths[countries[0] + "/" + countries[1]] ||
+      //   knownShortestPaths[countries[1] + "/" + countries[0]]
+      // ) {
+      //   /* use the one we already know about from knownShortestPaths. */
+      // } else {
+      //   /* figure out the new one, insert it AND ITS REVERSE into the knownShortestPaths map above */
+      // }
+
+      const original = [
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            geo[geoResolution][countries[0]].latitude,
+            geo[geoResolution][countries[0]].longitude + OFFSET
+          )
+        ),
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            geo[geoResolution][countries[1]].latitude,
+            geo[geoResolution][countries[1]].longitude + OFFSET
+          )
         )
-      ),
-      map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-        new L.LatLng(
-          geo[geoResolution][countries[1]].latitude,
-          geo[geoResolution][countries[1]].longitude
+      ];
+
+      const west = [
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            geo[geoResolution][countries[0]].latitude,
+            geo[geoResolution][countries[0]].longitude + OFFSET
+          )
+        ),
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            geo[geoResolution][countries[1]].latitude,
+            geo[geoResolution][countries[1]].longitude - 360 + OFFSET
+          )
         )
-      )
-    ];
+      ];
 
-    const west = [
-      map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-        new L.LatLng(
-          geo[geoResolution][countries[0]].latitude,
-          geo[geoResolution][countries[0]].longitude
+      const east = [
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            geo[geoResolution][countries[0]].latitude,
+            geo[geoResolution][countries[0]].longitude + OFFSET
+          )
+        ),
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            geo[geoResolution][countries[1]].latitude,
+            geo[geoResolution][countries[1]].longitude + 360 + OFFSET
+          )
         )
-      ),
-      map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-        new L.LatLng(
-          geo[geoResolution][countries[1]].latitude,
-          geo[geoResolution][countries[1]].longitude - 360
-        )
-      )
-    ];
+      ];
 
-    const east = [
-      map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-        new L.LatLng(
-          geo[geoResolution][countries[0]].latitude,
-          geo[geoResolution][countries[0]].longitude
-        )
-      ),
-      map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-        new L.LatLng(
-          geo[geoResolution][countries[1]].latitude,
-          geo[geoResolution][countries[1]].longitude + 360
-        )
-      )
-    ];
+      let originToDestinationXYs;
 
-    let originToDestinationXYs;
+      /* this gives us an index for both demes in the transmission pair with which we will access the node array */
 
-    if (countries[0] === "china" || countries[1] === "china") {
-      console.log("distance for " + key)
-      console.log("original x: ", original[0].x)
-      console.log(original[1].x, east[1].x, west[1].x)
-    }
+      const transmission = {
+        demePairIndices: key.split("-")[2].split("/"), /* this has some weird values occassionally that do not presently break anything. created/discovered during animation work. */
+        originToDestinationXYs: _.minBy([original, west, east], (pair) => { return Math.abs(pair[1].x - pair[0].x) }),
+        // originToDestinationXYs: original,
+        total: value.length, /* changes over time */
+        color: averageColors(value), /* changes over time */
+      }
 
-    /* this gives us an index for both demes in the transmission pair with which we will access the node array */
+      demesAndTransmissions.transmissions.push({data: transmission})
+    });
 
-    const transmission = {
-      demePairIndices: key.split("-")[2].split("/"), /* this has some weird values occassionally that do not presently break anything. created/discovered during animation work. */
-      originToDestinationXYs: _.minBy([original, west, east], (pair) => { return Math.abs(pair[1].x - pair[0].x) }),
-      // originToDestinationXYs: original,
-      total: value.length, /* changes over time */
-      color: averageColors(value), /* changes over time */
-    }
+  }) /* End OFFSET */
 
-    demesAndTransmissions.transmissions.push({data: transmission})
-  });
-
-  console.log(knownShortestPaths)
 
   return demesAndTransmissions;
 }
