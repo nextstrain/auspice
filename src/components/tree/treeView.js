@@ -508,7 +508,7 @@ class TreeView extends React.Component {
 
   render() {
     const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint && (this.props.controls && this.props.controls.splitTreeAndMap) ? .5 : 1,
       vertical: 1.0,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,

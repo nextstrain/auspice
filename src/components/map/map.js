@@ -108,7 +108,7 @@ class Map extends React.Component {
   }
   doComputeResponsive(nextProps) {
     return computeResponsive({
-      horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+      horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint && (this.props.controls && this.props.controls.splitTreeAndMap) ? .5 : 1,
       vertical: 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
@@ -383,7 +383,7 @@ class Map extends React.Component {
       window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
     }
 
-    /* we should setState({reference}) so that it's not possible to create multiple */ 
+    /* we should setState({reference}) so that it's not possible to create multiple */
 
     window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
       /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
