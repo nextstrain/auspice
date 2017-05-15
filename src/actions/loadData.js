@@ -1,133 +1,36 @@
 /*eslint dot-notation: 0*/
+/*eslint-env browser*/
+/*eslint no-console: 0*/
 import { updateColorScale, updateNodeColors } from "./colors";
 import { dataURLStem } from "../util/globals";
 import * as types from "./types";
 import d3 from "d3";
-import { changeDateFilter } from "./treeProperties";
+import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
+import { turnURLtoDataPath } from "../util/urlHelpers";
+import queryString from "query-string";
 
 /* if the metadata specifies an analysis slider, this is where we process it */
-const addAnalysisSlider = () => {
-  return (dispatch, getState) => {
-    const { controls, tree } = getState();
-    if (controls.analysisSlider && tree.loadStatus === 2) {
-      /* we can now get the range of values for the analysis slider */
-      const vals = tree.nodes.map((d) => d.attr[controls.analysisSlider.key])
-        .filter((n) => n !== undefined)
-        .filter((item, i, ar) => ar.indexOf(item) === i);
-      /* check that the key is found in at least some nodes */
-      if (!vals.length) {
-        dispatch({
-          type: types.ANALYSIS_SLIDER,
-          destroy: true
-        });
-        /* dispatch warning / error message */
-        console.log("Analysis slider key ", controls.analysisSlider.key, " never found in tree. Skipping.");
-        return null;
-      }
-      dispatch({
-        type: types.ANALYSIS_SLIDER,
-        destroy: false,
-        maxVal: Math.round(d3.max(vals) * 100) / 100,
-        minVal: Math.round(d3.min(vals) * 100) / 100
-      });
-    }
-    return null;
-  };
-};
-
-
-/* request metadata */
-const requestMetadata = () => {
-  return {
-    type: types.REQUEST_METADATA
-  };
-};
-
-const receiveMetadata = (data) => {
-  return {
-    type: types.RECEIVE_METADATA,
-    data: data
-  };
-};
-
-const metadataFetchError = (err) => {
-  return {
-    type: types.METADATA_FETCH_ERROR,
-    data: err
-  };
-};
-
-const fetchMetadata = (q) => {
-  /*
-    this will resolve to something like:
-    /data/flu_h3n2_3y_meta.json
-  */
-  return fetch(
-    dataURLStem + q + "_meta.json"
-  );
-};
-
-const populateMetadataStore = (queryParams) => {
-  return (dispatch) => {
-    dispatch(requestMetadata());
-    return fetchMetadata(queryParams).then((res) => res.json()).then(
-      (json) => {
-        dispatch(receiveMetadata(json));
-        if (json.date_range) {
-          dispatch(changeDateFilter(json.date_range.date_min, json.date_range.date_max));
-        }
-        dispatch(addAnalysisSlider());
-        dispatch(updateColorScale());
-        dispatch(updateNodeColors());
-      },
-      (err) => dispatch(metadataFetchError(err))
-    );
-  };
-};
-
-/* request tree */
-
-const requestTree = () => {
-  return {
-    type: types.REQUEST_TREE
-  };
-};
-
-const receiveTree = (data, controls) => {
-  return {
-    type: types.RECEIVE_TREE,
-    data,
-    controls
-  };
-};
-
-const treeFetchError = (err) => {
-  return {
-    type: types.TREE_FETCH_ERROR,
-    data: err
-  };
-};
-
-const fetchTree = (q) => {
-  return fetch(
-    dataURLStem + q + "_tree.json"
-  );
-};
-
-const populateTreeStore = (queryParams) => {
-  return (dispatch, getState) => {
-    dispatch(requestTree());
-    return fetchTree(queryParams).then((res) => res.json()).then(
-      (json) => {
-        const { controls } = getState();
-        dispatch(receiveTree(json, controls));
-        dispatch(addAnalysisSlider());
-        dispatch(updateColorScale());
-        dispatch(updateNodeColors());
-      },
-      (err) => dispatch(treeFetchError(err))
-    );
-  };
+const addAnalysisSlider = (dispatch, tree, controls) => {
+  /* we can now get the range of values for the analysis slider */
+  const vals = tree.nodes.map((d) => d.attr[controls.analysisSlider.key])
+    .filter((n) => n !== undefined)
+    .filter((item, i, ar) => ar.indexOf(item) === i);
+  /* check that the key is found in at least some nodes */
+  if (!vals.length) {
+    dispatch({
+      type: types.ANALYSIS_SLIDER,
+      destroy: true
+    });
+    /* dispatch warning / error message */
+    console.log("Analysis slider key ", controls.analysisSlider.key, " never found in tree. Skipping.");
+  } else {
+    dispatch({
+      type: types.ANALYSIS_SLIDER,
+      destroy: false,
+      maxVal: Math.round(d3.max(vals) * 100) / 100,
+      minVal: Math.round(d3.min(vals) * 100) / 100
+    });
+  }
 };
 
 /* request sequences */
@@ -247,10 +150,53 @@ const populateEntropyStore = (queryParams) => {
 };
 
 
-export const loadJSONs = (data_path) => {
+const loadMetaAndTreeJSONs = (metaPath, treePath, router) => {
+  return (dispatch, getState) => {
+    const metaJSONpromise = fetch(metaPath)
+      .then((res) => res.json());
+    const treeJSONpromise = fetch(treePath)
+      .then((res) => res.json());
+    Promise.all([metaJSONpromise, treeJSONpromise])
+      .then((values) => {
+        /* initial dispatch sets most values */
+        dispatch({
+          type: types.NEW_DATASET,
+          datasetPathName: router.history.location.pathname,
+          meta: values[0],
+          tree: values[1],
+          query: queryString.parse(router.history.location.search)
+        });
+        dispatch({type: types.RECEIVE_METADATA, data: values[0]});
+        const {controls, tree} = getState(); // reflects updated data
+        /* add analysis slider (if applicable) */
+        if (controls.analysisSlider) {
+          addAnalysisSlider(dispatch, tree, controls);
+        }
+        /* there still remain a number of actions to do with calculations */
+        dispatch(updateVisibleTipsAndBranchThicknesses());
+        dispatch(updateColorScale());
+        dispatch(updateNodeColors());
+        /* validate the reducers */
+        dispatch({type: types.DATA_VALID});
+      })
+      .catch((err) => {
+        /* note that this catches both 404 type errors AND
+        any error from the reducers */
+        console.log("loadMetaAndTreeJSONs error:", err);
+        // dispatch error notification
+      });
+  };
+};
+
+export const loadJSONs = (router) => {
   return (dispatch) => {
-    dispatch(populateMetadataStore(data_path));
-    dispatch(populateTreeStore(data_path));
+    dispatch({type: types.DATA_INVALID});
+    const data_path = turnURLtoDataPath(router);
+    const JSONpaths = {
+      meta: dataURLStem + data_path + "_meta.json",
+      tree: dataURLStem + data_path + "_tree.json"
+    };
+    dispatch(loadMetaAndTreeJSONs(JSONpaths.meta, JSONpaths.tree, router));
     dispatch(populateSequencesStore(data_path));
     /* while nextstrain is limited to ebola & zika, frequencies are not needed */
     // dispatch(populateFrequenciesStore(data_path));

@@ -139,7 +139,8 @@ class Map extends React.Component {
     const somethingChanged = (this.props.colorBy !== nextProps.colorBy ||
                               this.props.geoResolution !== nextProps.geoResolution ||
                               this.props.visibilityVersion !== nextProps.visibilityVersion ||
-                              this.props.colorScale.version !== nextProps.colorScale.version);
+                              this.props.colorScale.version !== nextProps.colorScale.version ||
+                              !this.props.datasetGuid);
 
     if (
       mapIsDrawn &&
@@ -156,7 +157,7 @@ class Map extends React.Component {
     }
   }
   maybeDrawDemesAndTransmissions(prevProps) {
-
+    const treeIsReady = this.props.datasetGuid;
     const mapIsDrawn = !!this.state.map;
     const allDataPresent = !!(this.props.colorScale && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode);
     const demesAbsent = !this.state.demes;
@@ -166,6 +167,7 @@ class Map extends React.Component {
     // const newVisibilityVersion = this.props.visibilityVersion !== prevProps.visibilityVersion;
 
     if (
+      treeIsReady &&
       mapIsDrawn &&
       allDataPresent &&
       demesAbsent

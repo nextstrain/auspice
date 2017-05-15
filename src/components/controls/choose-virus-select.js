@@ -46,14 +46,7 @@ class ChooseVirusSelect extends React.Component {
       search: ""
     });
     // 3 load in new data (via the URL we just changed, kinda weird I know)
-    const data_path = turnURLtoDataPath(this.context.router);
-    restoreStateFromURL(this.context.router, this.props.dispatch);
-    if (data_path) {
-      this.props.dispatch({type: NEW_DATASET, data: this.context.router.history.location.pathname});
-      this.props.dispatch(loadJSONs(data_path));
-    } else {
-      console.log("Couldn't work out the dataset to load. Bad.");
-    }
+    this.props.dispatch(loadJSONs(this.context.router));
   }
 
   render() {

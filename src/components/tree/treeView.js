@@ -116,6 +116,11 @@ class TreeView extends React.Component {
         this.Viewer.fitToViewer();
       }
     }
+    /* check to see if the reducers are in a state of change */
+    if (!nextProps.datasetGuid && this.state.tree) {
+      this.setState({tree: null});
+      return null;
+    }
 
     /* if we have a tree and we have new props, figure out what we need to update...
     this is imperitive, as opposed to redux-style coding, due to the fact
@@ -140,9 +145,11 @@ class TreeView extends React.Component {
         // console.log("tipRadiiVersion change detected", this.props.tree.tipRadiiVersion, nextProps.tree.tipRadiiVersion)
         tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
       }
+      // this code really needs some work
       if (nextProps.tree.nodeColorsVersion &&
-          this.props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion) {
-        // console.log("nodeColorsVersion change detected", this.props.tree.nodeColorsVersion, nextProps.tree.nodeColorsVersion)
+          (this.props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
+          nextProps.tree.nodeColorsVersion === 1)
+        ) {
         tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
         });
