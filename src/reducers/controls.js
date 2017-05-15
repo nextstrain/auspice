@@ -97,7 +97,15 @@ const Controls = (state = getDefaultState(), action) => {
     }
     /* basic sanity checking */
     if (Object.keys(action.meta.color_options).indexOf(base["colorBy"]) === -1) {
-      throw new Error("colorBy (" + base["colorBy"] + ") not available.");
+      /* ideally, somehow, a notification is dispatched, but redux, unlike elm,
+      doesn't allow dispatches from the reducer */
+      // throw new Error("colorBy (" + base["colorBy"] + ") not available.");
+      const available_colorBy = Object.keys(action.meta.color_options);
+      /* remove "gt" */
+      if (available_colorBy.indexOf("gt") > -1) {
+        available_colorBy.splice(available_colorBy.indexOf("gt"), 1);
+      }
+      base["colorBy"] = available_colorBy[0];
     }
     return base;
   case types.TOGGLE_BRANCH_LABELS:
