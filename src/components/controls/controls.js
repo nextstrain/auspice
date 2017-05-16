@@ -1,9 +1,10 @@
 import React from "react";
 import Flex from "../framework/flex";
 import SelectLabel from "../framework/select-label";
-import ToggleBranchLabels from "./toggle-branch-labels";
+// import ToggleBranchLabels from "./toggle-branch-labels";
 import ColorBy from "./color-by";
-import Search from "./search";
+import LikelihoodToggle from "./likelihoodToggle";
+// import Search from "./search";
 import DateRangeInputs from "./date-range-inputs";
 import AnalysisDateSlider from "./analysis-date-slider";
 import ChooseLayout from "./choose-layout";
@@ -43,7 +44,7 @@ class Controls extends React.Component {
   }
   // restore <ToggleBranchLabels/> below when perf is improved
   render() {
-    const styles = this.getStyles();
+    // const styles = this.getStyles();
     return (
       <Flex
         direction="column"
@@ -65,6 +66,7 @@ class Controls extends React.Component {
 
         {header("Color By")}
         <ColorBy/>
+        <LikelihoodToggle/>
 
         {header("Tree Options")}
 
