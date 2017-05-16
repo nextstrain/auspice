@@ -1,5 +1,6 @@
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "./globals";
 import { getGenotype } from "./getGenotype";
+import { scalePow } from "d3-scale";
 
 export const gatherTips = (node, tips) => {
 
@@ -295,3 +296,11 @@ export const calcVisibility = function (tree, controls) {
   }
   return "visible";
 };
+
+
+export const branchOpacityConstant = 0.4;
+export const branchOpacityFunction = scalePow()
+  .exponent([4])
+  .domain([0, 1])
+  .range([1, branchOpacityConstant])
+  .clamp(true);
