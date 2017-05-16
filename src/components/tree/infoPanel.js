@@ -4,17 +4,51 @@ import * as globals from "../../util/globals";
 import {dataFont, infoPanelStyles} from "../../globalStyles";
 import { prettyString } from "./tipSelectedPanel";
 
-const InfoPanel = ({mutType, tree, hovered, viewer, colorBy}) => {
+/**
+ * This creates a table of the likelihood values (used for opacity of branches)
+ * for each of the legend items (e.g. for each country)
+ * @param  {dictionary} l keys: items (e.g. countries), values: probabilities \in [0,1]
+ * @return {JSX} table DOM JSX
+ */
+const likelihoodTable = (attrs, colorBy) => {
+  const lkey = colorBy + "_marginal";
+  if (Object.keys(attrs).indexOf(lkey) === -1) {
+    console.log("Error - couldn't find likelihoods for ", lkey);
+    return null;
+  }
+  const vals = Object.keys(attrs[lkey])
+    .sort((a, b) => attrs[lkey][a] > attrs[lkey][b] ? -1 : 1)
+    .slice(0, 4);
+  return (
+    <g>
+      <p>
+        {`${prettyString(colorBy)} likelihoods:`}
+      </p>
+      <table>
+        <tbody>
+          {vals.map((k) => (
+            <tr key={k}>
+              <th>{prettyString(k)}</th>
+              <td>{attrs[lkey][k].toFixed(2).toString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </g>
+  );
+};
+
+
+const InfoPanel = ({mutType, tree, hovered, viewer, colorBy, likelihoods}) => {
 
   /* this is a function - we can bail early */
   if (!(tree && hovered)) {
-    return null
+    return null;
   }
-
   /**
    * This maps tree coordinates to coordinates on the svg.
-   * @param  {float} x
-   * @param  {float}} y
+   * @param  {float} x x
+   * @param  {float} y y
    * @param  {reactSVGpanZoom} V viewer state
    * @return {[x,y]} point on plane
    */
@@ -152,6 +186,9 @@ const InfoPanel = ({mutType, tree, hovered, viewer, colorBy}) => {
               {getFrequencies(branch.n)}
               {getMutations(branch.n)}
               {getColorByAttr(branch.n)}
+            </div>
+            <div>
+              {likelihoods === true ? likelihoodTable(branch.n.attr, colorBy) : null}
             </div>
             <div style={infoPanelStyles.comment}>
               Click on branch to zoom into this clade
