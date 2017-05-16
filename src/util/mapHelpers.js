@@ -71,6 +71,7 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, nodes) =
             never return a value outside the date range
             this would put the transmission path outside the geographic target
       */
+
       const pathScale = d3.scale.linear()
                                 .domain([
                                   nodes[latLongs.transmissions[i].data.demePairIndices[0]].attr.num_date, /* origin date */
@@ -174,8 +175,6 @@ export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
     .attr("r", (d) => {
       return 0 + Math.sqrt(d.total) * 4
     });
-
-    console.log("UPDATING ====================================================")
 
   d3elems.transmissions
     .data(latLongs.transmissions)

@@ -32,9 +32,9 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
     if (n.children) {
       n.children.forEach((child) => {
         if (n.attr[geoResolution] !== child.attr[geoResolution]) {
-          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution] + "-" +
-                               n.strain + "/" + child.strain + "-" +
-                               n.arrayIdx + "/" + child.arrayIdx;
+          const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
+                               n.strain + "|" + child.strain + "@" +
+                               n.arrayIdx + "|" + child.arrayIdx;
           if (!aggregatedTransmissions[transmission]) {
             aggregatedTransmissions[transmission] = [];
           }
@@ -64,9 +64,9 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
           visibility[child.arrayIdx] === "visible") {
           // make this a pair of indices that point to nodes
           // this is flatter and self documenting
-          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution] + "-" +
-                               n.strain + "/" + child.strain + "-" +
-                               n.arrayIdx + "/" + child.arrayIdx;
+          const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
+                               n.strain + "|" + child.strain + "@" +
+                               n.arrayIdx + "|" + child.arrayIdx;
           aggregatedTransmissions[transmission] = [colorScale.scale(tipColorAttribute)]
         }
       });
@@ -136,7 +136,7 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
     /* count TRANSMISSIONS for line thickness */
     _.forOwn(aggregatedTransmissions, (value, key) => {
 
-      const countries = key.split("-")[0].split("/");
+      const countries = key.split("@")[0].split("|");
 
       // /* we already know the path for china to us because we've already done us to china */
       // if (
@@ -197,8 +197,10 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
 
       /* this gives us an index for both demes in the transmission pair with which we will access the node array */
 
+
+
       const transmission = {
-        demePairIndices: key.split("-")[2].split("/"), /* this has some weird values occassionally that do not presently break anything. created/discovered during animation work. */
+        demePairIndices: key.split("@")[2].split("|"), /* this has some weird values occassionally that do not presently break anything. created/discovered during animation work. */
         originToDestinationXYs: _.minBy([original, west, east], (pair) => { return Math.abs(pair[1].x - pair[0].x) }),
         // originToDestinationXYs: original,
         total: value.length, /* changes over time */

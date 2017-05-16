@@ -370,9 +370,9 @@ class Map extends React.Component {
   }
   animateMap() {
     const timeSliderWindow = 3; /* in months for now  */ // this is 1/10 the date range in date slider
-    const incrementBy = 3; /* in days for now */
+    const incrementBy = 1; /* in days for now */
     const incrementByUnit = "day";
-    const tick = 5;
+    const tick = 12;
     const trailing = true;
     /* initial time window */
     let first = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD");
