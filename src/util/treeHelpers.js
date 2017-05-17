@@ -1,5 +1,6 @@
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "./globals";
 import { getGenotype } from "./getGenotype";
+import { scalePow } from "d3-scale";
 
 export const gatherTips = (node, tips) => {
 
@@ -295,3 +296,14 @@ export const calcVisibility = function (tree, controls) {
   }
   return "visible";
 };
+
+
+export const branchOpacityConstant = 0.4;
+export const branchOpacityFunction = scalePow()
+  .exponent([0.3])
+  .domain([0, 1])
+  .range([branchOpacityConstant, 1])
+  .clamp(true);
+// entropy calculation precomputed in augur
+// export const calcEntropyOfValues = (vals) =>
+//   vals.map((v) => v * Math.log(v + 1E-10)).reduce((a, b) => a + b, 0) * -1 / Math.log(vals.length);

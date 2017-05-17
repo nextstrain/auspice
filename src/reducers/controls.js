@@ -6,12 +6,10 @@ import moment from 'moment';
 import d3 from "d3";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
 
-/*
-  we don't actually need to have legendBoundsMap default if regions will always be the
-  default colorBy. this is saftey in case we change that.
-  continuous in state is to be true whenever the color scale is continuous
-  as opposed to discrete/categorical. we need a legendBoundsMap in the former, not the latter
-*/
+const checkLikelihood = function (attrs, colorBy) {
+  // colorByLikelihood undefined: not available, false: off, true: on
+  return (attrs.indexOf(colorBy + "_likelihoods") > -1 && attrs.indexOf(colorBy + "_entropy") > -1) ? true : undefined;
+};
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
@@ -33,6 +31,7 @@ const getDefaultState = function () {
     absoluteDateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
+    colorByLikelihood: false,
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
     analysisSlider: false,
     geoResolution: globals.defaultGeoResolution,
@@ -107,6 +106,9 @@ const Controls = (state = getDefaultState(), action) => {
       }
       base["colorBy"] = available_colorBy[0];
     }
+    /* available tree attrs - based upon the root node */
+    base["attrs"] = Object.keys(action.tree.attr);
+    base["colorByLikelihood"] = checkLikelihood(base["attrs"], base["colorBy"]);
     return base;
   case types.TOGGLE_BRANCH_LABELS:
     return Object.assign({}, state, {
@@ -162,7 +164,8 @@ const Controls = (state = getDefaultState(), action) => {
     });
   case types.CHANGE_COLOR_BY:
     const newState = Object.assign({}, state, {
-      colorBy: action.data
+      colorBy: action.data,
+      colorByLikelihood: checkLikelihood(state.attrs, action.data)
     });
     /* may need to toggle the entropy selector AA <-> NUC */
     if (determineColorByGenotypeType(action.data)) {
@@ -188,6 +191,10 @@ const Controls = (state = getDefaultState(), action) => {
   case types.TOGGLE_MUT_TYPE:
     return Object.assign({}, state, {
       mutType: action.data
+    });
+  case types.TOGGLE_COLORBY_LIKELIHOOD:
+    return Object.assign({}, state, {
+      colorByLikelihood: !state.colorByLikelihood
     });
   case types.ANALYSIS_SLIDER:
     if (action.destroy) {

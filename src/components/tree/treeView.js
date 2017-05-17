@@ -19,6 +19,7 @@ import BranchSelectedPanel from "./branchSelectedPanel";
 import TipSelectedPanel from "./tipSelectedPanel";
 import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
+import { branchOpacityConstant, branchOpacityFunction } from "../../util/treeHelpers";
 import { zoomToClade,
          restrictTreeToSingleTip,
          updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
@@ -55,6 +56,7 @@ need this information are children of this component
     browserDimensions: state.browserDimensions.browserDimensions,
     map: state.map,
     colorBy: state.controls.colorBy,
+    colorByLikelihood: state.controls.colorByLikelihood,
     layout: state.controls.layout,
     showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
@@ -145,18 +147,36 @@ class TreeView extends React.Component {
         // console.log("tipRadiiVersion change detected", this.props.tree.tipRadiiVersion, nextProps.tree.tipRadiiVersion)
         tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
       }
+
+      /* what are the situations where we want a smooth (but expensive) transition? */
+      let branchTransitionTime = false; /* false = no transition. Use when speed is critical */
+      let tipTransitionTime = false;
+      if (nextProps.colorByLikelihood !== this.props.colorByLikelihood) {
+        branchTransitionTime = globals.mediumTransitionDuration;
+      }
       // this code really needs some work
       if (nextProps.tree.nodeColorsVersion &&
           (this.props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
-          nextProps.tree.nodeColorsVersion === 1)
+          nextProps.tree.nodeColorsVersion === 1 ||
+          nextProps.colorByLikelihood !== this.props.colorByLikelihood)
         ) {
         tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
           return d3.rgb(col).brighter([0.65]).toString();
         });
         tipStyleToUpdate["stroke"] = nextProps.tree.nodeColors;
-        branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col) => {
-          return d3.rgb(d3.interpolateRgb(col, "#BBB")(0.6)).toString();
-        });
+        // likelihoods manifest as opacity ramps
+        if (nextProps.colorByLikelihood === true) {
+          branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col, idx) => {
+            const attr = nextProps.tree.nodes[idx].attr;
+            const entropy = attr[nextProps.colorBy + "_entropy"];
+            // const lhd = attr[nextProps.colorBy + "_likelihoods"][attr[nextProps.colorBy]];
+            return d3.rgb(d3.interpolateRgb(col, "#BBB")(branchOpacityFunction(entropy))).toString();
+          });
+        } else {
+          branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col) => {
+            return d3.rgb(d3.interpolateRgb(col, "#BBB")(branchOpacityConstant)).toString();
+          });
+        }
       }
       if (this.props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion) {
         // console.log("branchThicknessVersion change detected", this.props.tree.branchThicknessVersion, nextProps.tree.branchThicknessVersion)
@@ -166,11 +186,11 @@ class TreeView extends React.Component {
       /* implement style changes */
       if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
         // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
-        tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate);
+        tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, branchTransitionTime);
       }
       if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
         // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
-        tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate);
+        tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, tipTransitionTime);
       }
 
       /* swap layouts */
@@ -298,8 +318,17 @@ class TreeView extends React.Component {
   onBranchHover(d, x, y) {
     // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
     const id = "#branch_S_" + d.n.clade;
-    this.state.tree.svg.select(id)
-      .style("stroke", (d) => d["stroke"])
+    if (this.props.colorByLikelihood) {
+      const attr = this.props.tree.nodes[d.n.arrayIdx].attr;
+      const entropy = attr[this.props.colorBy + "_entropy"];
+      this.state.tree.svg.select(id)
+        .style("stroke", (o) =>
+          d3.rgb(d3.interpolateRgb(o["stroke"], "#555")(branchOpacityFunction(entropy))).toString()
+        );
+    } else {
+      this.state.tree.svg.select(id)
+        .style("stroke", (e) => e["stroke"]);
+    }
     this.setState({
       hovered: {d, type: ".branch", x, y}
     });
@@ -322,8 +351,21 @@ class TreeView extends React.Component {
   onBranchLeave(d) {
     // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
     const id = "#branch_S_" + d.n.clade;
-    this.state.tree.svg.select(id)
-      .style("stroke", (d) => d3.rgb(d3.interpolateRgb(d["stroke"], "#BBB")(0.6)).toString());
+    if (this.props.colorByLikelihood) {
+      const attr = this.props.tree.nodes[d.n.arrayIdx].attr;
+      // const lhd = attr[this.props.colorBy + "_likelihoods"][attr[this.props.colorBy]]
+      const entropy = attr[this.props.colorBy + "_entropy"];
+      // console.log("max lhd:", lhd, "entropy:", entropy, "modifier:", branchOpacityFunction(entropy))
+      this.state.tree.svg.select(id)
+        .style("stroke", (o) =>
+          d3.rgb(d3.interpolateRgb(o["stroke"], "#BBB")(branchOpacityFunction(entropy))).toString()
+        );
+    } else {
+      this.state.tree.svg.select(id)
+        .style("stroke", (o) =>
+          d3.rgb(d3.interpolateRgb(o["stroke"], "#BBB")(branchOpacityConstant)).toString()
+        );
+    }
     if (this.state.hovered) {
       this.setState({hovered: null})
     }
@@ -539,6 +581,7 @@ class TreeView extends React.Component {
           hovered={this.state.hovered}
           viewer={this.Viewer}
           colorBy={this.props.colorBy}
+          likelihoods={this.props.colorByLikelihood}
         />
         <BranchSelectedPanel
           responsive={responsive}
