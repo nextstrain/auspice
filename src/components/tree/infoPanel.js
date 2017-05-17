@@ -21,19 +21,15 @@ const likelihoodTable = (attrs, colorBy) => {
     .slice(0, 4);
   return (
     <g>
-      <p>
+      <p style={{marginBottom: "-0.7em"}}>
         {`${prettyString(colorBy)} likelihoods:`}
       </p>
-      <table>
-        <tbody>
-          {vals.map((k) => (
-            <tr key={k}>
-              <th>{prettyString(k)}</th>
-              <td>{attrs[lkey][k].toFixed(2).toString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {vals.map((k, i) => (
+        <p key={i} style={{fontWeight: "200", marginBottom: "-0.7em", marginLeft: "1em"}}>
+          {`• ${attrs[lkey][k].toFixed(2).toString()} - ${prettyString(k)}`}
+        </p>
+      ))}
+      <br/>
     </g>
   );
 };
@@ -185,10 +181,7 @@ const InfoPanel = ({mutType, tree, hovered, viewer, colorBy, likelihoods}) => {
             <div>
               {getFrequencies(branch.n)}
               {getMutations(branch.n)}
-              {getColorByAttr(branch.n)}
-            </div>
-            <div>
-              {likelihoods === true ? likelihoodTable(branch.n.attr, colorBy) : null}
+              {likelihoods === true ? likelihoodTable(branch.n.attr, colorBy) : getColorByAttr(branch.n)}
             </div>
             <div style={infoPanelStyles.comment}>
               Click on branch to zoom into this clade

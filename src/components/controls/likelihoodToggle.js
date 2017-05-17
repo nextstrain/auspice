@@ -23,7 +23,6 @@ class LikelihoodToggle extends React.Component {
     };
   }
   render() {
-    console.log("colorByLikelihood in toggle:", this.props.colorByLikelihood)
     if (this.props.colorByLikelihood === undefined) {
       return null;
     }
@@ -36,13 +35,12 @@ class LikelihoodToggle extends React.Component {
             className="switch"
             type="checkbox"
             style={{marginLeft: "40px"}}
-            value={this.props.colorByLikelihood ? "On" : "Off"}
             checked={this.props.colorByLikelihood}
             onChange={() => this.props.dispatch(toggleColorByLikelihood())}
           />
           <div className={"slider round"}></div>
           <SelectLabel
-            text="Likelihood"
+            text="Likelihoods"
             extraStyles={{marginLeft: "40px", marginTop: "4px"}}
           />
         </label>
