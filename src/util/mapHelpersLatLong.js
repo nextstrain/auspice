@@ -1,6 +1,7 @@
 import {averageColors} from "./colorHelpers";
 import {getTipColorAttribute} from "./treeHelpers";
 
+
 const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => {
   const aggregatedLocations = {}; /* demes */
   const aggregatedLocationsWraparoundCopy = {}; /* edges, animation paths */
@@ -196,22 +197,24 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
       let originToDestinationXYs;
 
       /* this gives us an index for both demes in the transmission pair with which we will access the node array */
-
-
+      const winningPair = _.minBy([original, west, east], (pair) => { return Math.abs(pair[1].x - pair[0].x) });
 
       const transmission = {
         demePairIndices: key.split("@")[2].split("|"), /* this has some weird values occassionally that do not presently break anything. created/discovered during animation work. */
-        originToDestinationXYs: _.minBy([original, west, east], (pair) => { return Math.abs(pair[1].x - pair[0].x) }),
+        originToDestinationXYs: winningPair,
+        // originToDestinationXYs: Bezier(winningPair[0],computeMidpoint(winningPair),winningPair[1]),
         // originToDestinationXYs: original,
         total: value.length, /* changes over time */
         color: averageColors(value), /* changes over time */
       }
+
 
       demesAndTransmissions.transmissions.push({data: transmission})
     });
 
   }) /* End OFFSET */
 
+  // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
 
   return demesAndTransmissions;
 }
