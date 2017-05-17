@@ -318,8 +318,17 @@ class TreeView extends React.Component {
   onBranchHover(d, x, y) {
     // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
     const id = "#branch_S_" + d.n.clade;
-    this.state.tree.svg.select(id)
-      .style("stroke", (d) => d["stroke"])
+    if (this.props.colorByLikelihood) {
+      const attr = this.props.tree.nodes[d.n.arrayIdx].attr;
+      const entropy = attr[this.props.colorBy + "_entropy"];
+      this.state.tree.svg.select(id)
+        .style("stroke", (o) =>
+          d3.rgb(d3.interpolateRgb(o["stroke"], "#555")(branchOpacityFunction(entropy))).toString()
+        );
+    } else {
+      this.state.tree.svg.select(id)
+        .style("stroke", (e) => e["stroke"]);
+    }
     this.setState({
       hovered: {d, type: ".branch", x, y}
     });
