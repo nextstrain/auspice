@@ -169,7 +169,7 @@ class TreeView extends React.Component {
           branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col, idx) => {
             const attr = nextProps.tree.nodes[idx].attr;
             const entropy = attr[nextProps.colorBy + "_entropy"];
-            // const lhd = attr[nextProps.colorBy + "_marginal"][attr[nextProps.colorBy]];
+            // const lhd = attr[nextProps.colorBy + "_likelihoods"][attr[nextProps.colorBy]];
             return d3.rgb(d3.interpolateRgb(col, "#BBB")(branchOpacityFunction(entropy))).toString();
           });
         } else {
@@ -344,7 +344,7 @@ class TreeView extends React.Component {
     const id = "#branch_S_" + d.n.clade;
     if (this.props.colorByLikelihood) {
       const attr = this.props.tree.nodes[d.n.arrayIdx].attr;
-      // const lhd = attr[this.props.colorBy + "_marginal"][attr[this.props.colorBy]]
+      // const lhd = attr[this.props.colorBy + "_likelihoods"][attr[this.props.colorBy]]
       const entropy = attr[this.props.colorBy + "_entropy"];
       // console.log("max lhd:", lhd, "entropy:", entropy, "modifier:", branchOpacityFunction(entropy))
       this.state.tree.svg.select(id)

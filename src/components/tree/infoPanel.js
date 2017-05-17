@@ -11,7 +11,7 @@ import { prettyString } from "./tipSelectedPanel";
  * @return {JSX} table DOM JSX
  */
 const likelihoodTable = (attrs, colorBy) => {
-  const lkey = colorBy + "_marginal";
+  const lkey = colorBy + "_likelihoods";
   if (Object.keys(attrs).indexOf(lkey) === -1) {
     console.log("Error - couldn't find likelihoods for ", lkey);
     return null;
