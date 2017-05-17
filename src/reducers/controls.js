@@ -8,7 +8,8 @@ import { determineColorByGenotypeType } from "../util/urlHelpers";
 
 const checkLikelihood = function (attrs, colorBy) {
   // colorByLikelihood undefined: not available, false: off, true: on
-  return attrs.indexOf(colorBy + "_marginal") > -1 ? false : undefined;
+  return attrs.indexOf(colorBy + "_marginal") && attrs.indexOf(colorBy + "entropy") ?
+    true : undefined; // turn on by default
 };
 
 /* defaultState is a fn so that we can re-create it
