@@ -23,30 +23,31 @@ class LikelihoodToggle extends React.Component {
     };
   }
   render() {
+    console.log("colorByLikelihood in toggle:", this.props.colorByLikelihood)
     if (this.props.colorByLikelihood === undefined) {
       return null;
     }
     const styles = this.getStyles();
     // should be a radio button...
     return (
-      <div style={{}}>
-        <SelectLabel text="Likelihood (opacity & tooltip)"/>
-        <button
-          key={1}
-          style={this.props.colorByLikelihood === false ? materialButtonSelected : materialButton}
-          onClick={() => this.props.dispatch(toggleColorByLikelihood())}
-        >
-          <span style={styles.switchTitle}> {"Off"} </span>
-        </button>
-        <button
-          key={2}
-          style={this.props.colorByLikelihood === true ? materialButtonSelected : materialButton}
-          onClick={() => this.props.dispatch(toggleColorByLikelihood())}
-        >
-          <span style={styles.switchTitle}> {"On"} </span>
-        </button>
+      <div>
+        <label className="switch">
+          <input
+            className="switch"
+            type="checkbox"
+            style={{marginLeft: "40px"}}
+            value={this.props.colorByLikelihood ? "On" : "Off"}
+            checked={this.props.colorByLikelihood}
+            onChange={() => this.props.dispatch(toggleColorByLikelihood())}
+          />
+          <div className={"slider round"}></div>
+          <SelectLabel
+            text="Likelihood"
+            extraStyles={{marginLeft: "40px", marginTop: "4px"}}
+          />
+        </label>
       </div>
-    );
+    )
   }
 }
 export default LikelihoodToggle;
