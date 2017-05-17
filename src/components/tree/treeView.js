@@ -147,6 +147,13 @@ class TreeView extends React.Component {
         // console.log("tipRadiiVersion change detected", this.props.tree.tipRadiiVersion, nextProps.tree.tipRadiiVersion)
         tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
       }
+
+      /* what are the situations where we want a smooth (but expensive) transition? */
+      let branchTransitionTime = false; /* false = no transition. Use when speed is critical */
+      let tipTransitionTime = false;
+      if (nextProps.colorByLikelihood !== this.props.colorByLikelihood) {
+        branchTransitionTime = globals.mediumTransitionDuration;
+      }
       // this code really needs some work
       if (nextProps.tree.nodeColorsVersion &&
           (this.props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
@@ -179,11 +186,11 @@ class TreeView extends React.Component {
       /* implement style changes */
       if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
         // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
-        tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate);
+        tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, branchTransitionTime);
       }
       if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
         // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
-        tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate);
+        tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, tipTransitionTime);
       }
 
       /* swap layouts */
