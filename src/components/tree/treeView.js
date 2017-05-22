@@ -58,6 +58,7 @@ need this information are children of this component
     colorBy: state.controls.colorBy,
     colorByLikelihood: state.controls.colorByLikelihood,
     layout: state.controls.layout,
+    confidence: state.controls.confidence,
     showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
     sequences: state.sequences,
@@ -269,7 +270,7 @@ class TreeView extends React.Component {
         {
           /* options */
           grid: true,
-          confidence: false,
+          confidence: this.props.confidence,
           branchLabels: true,      //generate DOM object
           showBranchLabels: false,  //hide them initially -> couple to redux state
           tipLabels: true,      //generate DOM object

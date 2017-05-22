@@ -24,6 +24,7 @@ const getDefaultState = function () {
     search: null,
     strain: null,
     mutType: globals.mutType,
+    confidence: false, // is temporal confidence avaliable in attrs?
     layout: globals.defaultLayout,
     distanceMeasure: globals.defaultDistanceMeasure,
     dateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
@@ -94,6 +95,7 @@ const Controls = (state = getDefaultState(), action) => {
     if (action.query.dmax) {
       base["dateMax"] = action.query.dmax;
     }
+    base["confidence"] = Object.keys(action.tree.attr).indexOf("num_date_confidence") > -1 ? true : false;
     /* basic sanity checking */
     if (Object.keys(action.meta.color_options).indexOf(base["colorBy"]) === -1) {
       /* ideally, somehow, a notification is dispatched, but redux, unlike elm,
