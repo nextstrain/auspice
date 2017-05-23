@@ -369,6 +369,13 @@ class Map extends React.Component {
     clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
   }
   animateMap() {
+
+    if (!window.NEXTSTRAIN) {
+      window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
+    }
+
+    const window.NEXTSTRAIN.mapAnimationDurationInMilliseconds = 10000; /* total duration, in milliseconds */ 
+
     const timeSliderWindow = 3; /* in months for now  */ // this is 1/10 the date range in date slider
     const incrementBy = 1; /* in days for now */
     const incrementByUnit = "day";
@@ -379,9 +386,7 @@ class Map extends React.Component {
     let second = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD").add(timeSliderWindow, "months");
     let last = moment(this.props.controls.absoluteDateMax, "YYYY-MM-DD");
 
-    if (!window.NEXTSTRAIN) {
-      window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
-    }
+
 
     /* we should setState({reference}) so that it's not possible to create multiple */
 
