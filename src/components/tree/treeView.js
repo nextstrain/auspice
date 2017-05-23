@@ -83,6 +83,11 @@ class TreeView extends React.Component {
     works out what to update, based upon changes to redux.control */
     let tree = this.state.tree;
     const changes = funcs.salientPropChanges(this.props, nextProps, tree);
+    /* usefull for debugging: */
+    console.log("Changes:",
+       Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {
+         o[k] = changes[k]; return o;
+       }, {}));
 
     if (changes.dataInFlux) {
       this.setState({tree: null});
@@ -94,66 +99,55 @@ class TreeView extends React.Component {
         this.Viewer.fitToViewer();
       }
       // return null // TODO why do we need to update styles&attrs on the first round?
-    } else if (!tree) {
-      return null;
     }
-
-    /* the objects storing the changes to make to the tree */
-    const tipAttrToUpdate = {};
-    const tipStyleToUpdate = {};
-    const branchAttrToUpdate = {};
-    const branchStyleToUpdate = {};
-
-    if (changes.visibility) {
-      tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
+    if (tree) {
+      funcs.updateStylesAndAttrs(changes, nextProps, tree);
     }
-    if (changes.tipRadii) {
-      tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
-    }
-    if (changes.colorBy) {
-      tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
-        return d3.rgb(col).brighter([0.65]).toString();
-      });
-      tipStyleToUpdate["stroke"] = nextProps.tree.nodeColors;
-      // likelihoods manifest as opacity ramps
-      if (nextProps.colorByLikelihood === true) {
-        branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col, idx) => {
-          const attr = nextProps.tree.nodes[idx].attr;
-          const entropy = attr[nextProps.colorBy + "_entropy"];
-          // const lhd = attr[nextProps.colorBy + "_likelihoods"][attr[nextProps.colorBy]];
-          return d3.rgb(d3.interpolateRgb(col, "#BBB")(branchOpacityFunction(entropy))).toString();
-        });
-      } else {
-        branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col) => {
-          return d3.rgb(d3.interpolateRgb(col, "#BBB")(branchOpacityConstant)).toString();
-        });
-      }
-    }
-    if (changes.branchThickness) {
-      branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
-    }
-
-    /* implement style * attr changes */
-    if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
-      // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
-      tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, changes.branchTransitionTime);
-    }
-    if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
-      // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
-      tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, changes.tipTransitionTime);
-    }
-
-    if (changes.layout) { /* swap layouts */
-      tree.updateLayout(nextProps.layout, mediumTransitionDuration);
-    }
-    if (changes.distanceMeasure) { /* change distance metrics */
-      tree.updateDistance(nextProps.distanceMeasure, mediumTransitionDuration);
-    }
-    if (changes.branchLabels === 2) {
-      tree.showBranchLabels();
-    } else if (changes.branchLabels === 1) {
-      tree.hideBranchLabels();
-    }
+    return null;
+    // /* the objects storing the changes to make to the tree */
+    // const tipAttrToUpdate = {};
+    // const tipStyleToUpdate = {};
+    // const branchAttrToUpdate = {};
+    // const branchStyleToUpdate = {};
+    //
+    // if (changes.visibility) {
+    //   tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
+    // }
+    // if (changes.tipRadii) {
+    //   tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
+    // }
+    // if (changes.colorBy) {
+    //   tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
+    //     return d3.rgb(col).brighter([0.65]).toString();
+    //   });
+    //   tipStyleToUpdate["stroke"] = nextProps.tree.nodeColors;
+    //   branchStyleToUpdate["stroke"] = funcs.calcStrokeCols(nextProps.tree, nextProps.colorByLikelihood, nextProps.colorBy);
+    // }
+    // if (changes.branchThickness) {
+    //   branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
+    // }
+    //
+    // /* implement style * attr changes */
+    // if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
+    //   // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
+    //   tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, changes.branchTransitionTime);
+    // }
+    // if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
+    //   // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
+    //   tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, changes.tipTransitionTime);
+    // }
+    //
+    // if (changes.layout) { /* swap layouts */
+    //   tree.updateLayout(nextProps.layout, mediumTransitionDuration);
+    // }
+    // if (changes.distanceMeasure) { /* change distance metrics */
+    //   tree.updateDistance(nextProps.distanceMeasure, mediumTransitionDuration);
+    // }
+    // if (changes.branchLabels === 2) {
+    //   tree.showBranchLabels();
+    // } else if (changes.branchLabels === 1) {
+    //   tree.hideBranchLabels();
+    // }
   }
 
   shouldComponentUpdate(nextProps, nextState) {
