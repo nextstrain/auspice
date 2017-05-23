@@ -209,7 +209,7 @@ class Map extends React.Component {
   }
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
-      updateOnMoveEnd(this.state.d3elems, this.latLongs());
+      updateOnMoveEnd(this.state.d3elems, this.latLongs(), this.props.controls, this.props.nodes);
     }
   }
   getGeoRange() {
@@ -242,8 +242,13 @@ class Map extends React.Component {
 
     const somethingChanged = (this.props.colorBy !== prevProps.colorBy ||
                               this.props.colorScale.version !== prevProps.colorScale.version);
+
+    // console.log("-----------------------------------------------------------------------------------")
+    // console.log("visibilityVersion", this.props.visibilityVersion, prevProps.visibilityVersion)
+    // console.log("colorScale", this.props.colorScale.version, prevProps.colorScale.version)
     if (
-      this.props.visibilityVersion !== prevProps.visibilityVersion
+      this.props.visibilityVersion !== prevProps.visibilityVersion ||
+      this.props.colorScale.version !== prevProps.colorScale.version
     ) {
       updateVisibility(this.state.d3elems, this.latLongs(), this.props.controls, this.props.nodes);
     }
@@ -369,12 +374,14 @@ class Map extends React.Component {
     clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
   }
   animateMap() {
-    const timeSliderWindow = 0.5; /* in months for now  */ // this is 1/10 the date range in date slider
-    const incrementBy = 7; /* in days for now */
+
+    const timeSliderWindow = 1; /* in months for now  */ // this is 1/10 the date range in date slider
+    const incrementBy = 1; /* in days for now */
     const incrementByUnit = "day";
     const tick = 12;
-    const trailing = true;
+    const trailing = false;
     /* initial time window */
+
     let first = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD");
     let second = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD").add(timeSliderWindow, "months");
     let last = moment(this.props.controls.absoluteDateMax, "YYYY-MM-DD");

@@ -21,7 +21,7 @@ function zeros(dimensions) {
     return array
 }
 
-const Bezier = (pathControl,start=0.0,end=1.0,num=15) => { // returns Bezier curve starting at first point in pair, curving towards the second point in pair and
+const Bezier = (pathControl, start=0.0, end=1.0, num=15) => { // returns Bezier curve starting at first point in pair, curving towards the second point in pair and
   const N = _.range(pathControl.length) // number of points in [start, mid, end] that will be used to compute the curve
   var linspace = require('linspace')
   var outerProducts = require('outer-product')
@@ -32,7 +32,7 @@ const Bezier = (pathControl,start=0.0,end=1.0,num=15) => { // returns Bezier cur
     curve[i] = {x: curve[i][0], y: curve[i][1]}
   }
 
-  for (var ii in N){ // iterate over provided points
+  for (var ii in N) { // iterate over provided points
     const B_func = Bernstein(N.length - 1, ii) // get Bernstein polynomial
     const tB = t.map(B_func) // apply Bernstein polynomial to linspace
     const P = [pathControl[ii].x,pathControl[ii].y]
@@ -109,7 +109,7 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, nodes) =
     .data(latLongs.transmissions)
     .enter()
     .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
-    .attr("d", (d) => {
+    .attr("d", (d, i) => {
       return pathStringGenerator(
         // extractLineSegmentForAnimationEffect(d.data.originToDestinationXYs)
         d.data.originToDestinationXYs
@@ -170,7 +170,7 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, nodes) =
 
 }
 
-export const updateOnMoveEnd = (d3elems, latLongs) => {
+export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
   /* map has moved or rescaled, make demes and transmissions line up */
   if (d3elems) {
     d3elems.demes
@@ -181,7 +181,18 @@ export const updateOnMoveEnd = (d3elems, latLongs) => {
 
     d3elems.transmissions
       .data(latLongs.transmissions)
-      .attr("d", (d) => { return pathStringGenerator(d.data.originToDestinationXYs) })
+      .attr("d", (d, i) => {
+        return pathStringGenerator(
+          extractLineSegmentForAnimationEffect(
+            d.data.originToDestinationXYs,
+            controls,
+            d,
+            nodes,
+            d3elems,
+            i
+          )
+        )
+      }) /* with the interpolation in the function above pathStringGenerator */
   }
 }
 
@@ -194,7 +205,7 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems,
   /* manually find the points along a Bezier curve at which we should be given the user date selection */
   const start = Math.max(0.0,(userDateMin-originDate)/(destinationDate-originDate)) // clamp start at 0.0 if userDateMin gives a number <0
   const end = Math.min(1.0,(userDateMax-originDate)/(destinationDate-originDate)) // clamp end at 1.0 if userDateMax gives a number >1
-  const Bcurve = Bezier([pair[0],computeMidpoint(pair),pair[1]],start,end,10) // calculate Bezier
+  const Bcurve = Bezier([pair[0], computeMidpoint(pair),pair[1]],start,end,10) // calculate Bezier
 
   return Bcurve
 }
