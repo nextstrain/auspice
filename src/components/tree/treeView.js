@@ -1,5 +1,6 @@
 /*eslint-env browser*/
 /*eslint dot-notation: 0*/
+/*eslint react/prop-types: 0*/
 import React from "react";
 import ReactDOM from "react-dom";
 import d3 from "d3";
@@ -16,7 +17,6 @@ import BranchSelectedPanel from "./branchSelectedPanel";
 import TipSelectedPanel from "./tipSelectedPanel";
 import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
-import { branchOpacityConstant, branchOpacityFunction } from "../../util/treeHelpers";
 import * as funcs from "./treeViewFunctions";
 
 /*
@@ -55,12 +55,8 @@ class TreeView extends React.Component {
       hover: null,
       selectedBranch: null,
       selectedTip: null,
-      tree: null,
-      shouldReRender: false // start off this way I guess
+      tree: null
     };
-  }
-  static contextTypes = {
-    router: React.PropTypes.object.isRequired
   }
   static propTypes = {
     sidebar: React.PropTypes.bool.isRequired,
@@ -84,17 +80,17 @@ class TreeView extends React.Component {
     let tree = this.state.tree;
     const changes = funcs.salientPropChanges(this.props, nextProps, tree);
     /* usefull for debugging: */
-    console.log("Changes:",
-       Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {
-         o[k] = changes[k]; return o;
-       }, {}));
+    // console.log("CWRP Changes:",
+    //    Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {
+    //      o[k] = changes[k]; return o;
+    //    }, {}));
 
     if (changes.dataInFlux) {
       this.setState({tree: null});
       return null;
     } else if (changes.datasetChanged || changes.firstDataReady) {
       tree = this.makeTree(nextProps);
-      this.setState({tree, shouldReRender: true});
+      this.setState({tree});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
       }
@@ -108,8 +104,7 @@ class TreeView extends React.Component {
 
   componentDidUpdate(prevProps) {
     /* after a re-render (i.e. perhaps the SVG has changed size) call zoomIntoClade
-    so that the tree rescales to fit the SVG
-    */
+    so that the tree rescales to fit the SVG */
     if (
       // the tree exists AND
       this.state.tree &&
@@ -120,8 +115,7 @@ class TreeView extends React.Component {
       prevProps.browserDimensions.height !== this.props.browserDimensions.height)
     ) {
       this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
-    } else if (
-      // the tree exists AND the sidebar has changed
+    } else if ( // the tree exists AND the sidebar has changed
       this.state.tree && (this.props.sidebar !== prevProps.sidebar)
     ) {
       this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
@@ -131,15 +125,13 @@ class TreeView extends React.Component {
   makeTree(nextProps) {
     const nodes = nextProps.tree.nodes;
     if (nodes && this.refs.d3TreeElement) {
-      var myTree = new PhyloTree(nodes[0]);
+      const myTree = new PhyloTree(nodes[0]);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
-      var treeplot = d3.select(this.refs.d3TreeElement);
       myTree.render(
-        treeplot,
+        d3.select(this.refs.d3TreeElement),
         this.props.layout,
         this.props.distanceMeasure,
-        {
-          /* options */
+        { /* options */
           grid: true,
           confidence: this.props.confidence,
           branchLabels: true,      //generate DOM object
@@ -147,22 +139,19 @@ class TreeView extends React.Component {
           tipLabels: true,      //generate DOM object
           showTipLabels: true   //show
         },
-        {
-          /* callbacks */
+        { /* callbacks */
           onTipHover: funcs.onTipHover.bind(this),
           onTipClick: funcs.onTipClick.bind(this),
           onBranchHover: funcs.onBranchHover.bind(this),
           onBranchClick: funcs.onBranchClick.bind(this),
           onBranchLeave: funcs.onBranchLeave.bind(this),
           onTipLeave: funcs.onTipLeave.bind(this),
-          // onBranchOrTipLeave: this.onBranchOrTipLeave.bind(this),
           branchLabel: funcs.branchLabel,
           branchLabelSize: funcs.branchLabelSize,
           tipLabel: (d) => d.n.strain,
           tipLabelSize: funcs.tipLabelSize.bind(this)
         },
-        /* branch Thicknesses - guarenteed to be in redux by now */
-        nextProps.tree.branchThickness,
+        nextProps.tree.branchThickness, /* guarenteed to be in redux by now */
         nextProps.tree.visibility
       );
       return myTree;
@@ -179,7 +168,7 @@ class TreeView extends React.Component {
       sidebar: this.props.sidebar,
       minHeight: 480,
       maxAspectRatio: 1.0
-    })
+    });
     const cardTitle = this.state.selectedBranch ? "." : "Phylogeny";
 
     return (
@@ -207,7 +196,7 @@ class TreeView extends React.Component {
           height={responsive ? responsive.height : 1}
           ref={(Viewer) => {
             // https://facebook.github.io/react/docs/refs-and-the-dom.html
-            this.Viewer = Viewer
+            this.Viewer = Viewer;
           }}
           style={{cursor: "default"}}
           tool={'pan'}
@@ -235,7 +224,8 @@ class TreeView extends React.Component {
           </svg>
         </ReactSVGPanZoom>
         <svg width={50} height={130}
-          style={{position: "absolute", right: 20, bottom: 20}}>
+          style={{position: "absolute", right: 20, bottom: 20}}
+        >
             <defs>
               <filter id="dropshadow" height="130%">
                 <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
@@ -257,7 +247,7 @@ class TreeView extends React.Component {
           />
           <ZoomOutIcon
             handleClick={funcs.handleIconClick.bind(this)("zoom-out")}
-            active={true}
+            active
             x={10}
             y={90}
           />
