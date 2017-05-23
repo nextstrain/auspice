@@ -236,3 +236,49 @@ export const tipLabelSize = function (d, n) {
   const fs = 6 + 8 * (70 - n) / (70 - 20);
   return fs;
 };
+
+/* functions to help determine what parts of phylotree should update */
+export const salientPropChanges = (props, nextProps, tree) => {
+  const dataInFlux = !nextProps.datasetGuid && tree;
+  const datasetChanged = nextProps.tree.nodes && nextProps.datasetGuid && nextProps.datasetGuid !== props.datasetGuid;
+  const firstDataReady = tree === null && nextProps.datasetGuid && nextProps.tree.nodes !== null;
+
+  const visibility = !!nextProps.tree.visibilityVersion && props.tree.visibilityVersion !== nextProps.tree.visibilityVersion
+  const tipRadii = !!nextProps.tree.tipRadiiVersion && props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion;
+  const colorBy = !!nextProps.tree.nodeColorsVersion &&
+      (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
+      nextProps.tree.nodeColorsVersion === 1 ||
+      nextProps.colorByLikelihood !== props.colorByLikelihood);
+  const branchThickness = props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion;
+  const layout = props.layout !== nextProps.layout;
+  const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
+
+  /* branch labels use 0: no change, 1: turn off, 2: turn on */
+  const branchLabels = props.showBranchLabels === nextProps.showBranchLabels ? 0 : nextProps.showBranchLabels ? 2 : 1;
+
+  /* sometimes we may want smooth transitions */
+  let branchTransitionTime = false; /* false = no transition. Use when speed is critical */
+  let tipTransitionTime = false;
+  if (nextProps.colorByLikelihood !== props.colorByLikelihood) {
+    branchTransitionTime = mediumTransitionDuration;
+  }
+
+
+
+  const r = {
+    dataInFlux,
+    datasetChanged,
+    firstDataReady,
+    visibility,
+    tipRadii,
+    colorBy,
+    layout,
+    distanceMeasure,
+    branchThickness,
+    branchTransitionTime,
+    tipTransitionTime,
+    branchLabels
+  };
+  console.log(r);
+  return r;
+};

@@ -79,115 +79,80 @@ class TreeView extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    /*
-    This both creates the tree (when it's loaded into redux) and
-    works out what to update, based upon changes to redux.control
+    /* This both creates the tree (when it's loaded into redux) and
+    works out what to update, based upon changes to redux.control */
+    let tree = this.state.tree;
+    const changes = funcs.salientPropChanges(this.props, nextProps, tree);
 
-    NB logic was previously in CDM, but now we wait for browserDimensions
-    */
-    let tree = this.state.tree
-    /* should we create a new tree (dataset change) */
-
-    if ((nextProps.datasetGuid !== this.props.datasetGuid && nextProps.tree.nodes) ||
-        (tree === null && nextProps.datasetGuid && nextProps.tree.nodes !== null)) {
-      tree = this.makeTree(nextProps)
-      // console.log("made tree", tree)
+    if (changes.dataInFlux) {
+      this.setState({tree: null});
+      return null;
+    } else if (changes.datasetChanged || changes.firstDataReady) {
+      tree = this.makeTree(nextProps);
       this.setState({tree, shouldReRender: true});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
       }
-    }
-    /* check to see if the reducers are in a state of change */
-    if (!nextProps.datasetGuid && this.state.tree) {
-      this.setState({tree: null});
+      // return null // TODO why do we need to update styles&attrs on the first round?
+    } else if (!tree) {
       return null;
     }
 
-    /* if we have a tree and we have new props, figure out what we need to update...
-    this is imperitive, as opposed to redux-style coding, due to the fact
-    that redrawing the tree is expensive, so we try and do the least amount
-    of work possible.
-    These attributes are stored in redux.tree
-    */
-    if (tree) {
-      /* the objects storing the changes to make to the tree */
-      const tipAttrToUpdate = {};
-      const tipStyleToUpdate = {};
-      const branchAttrToUpdate = {};
-      const branchStyleToUpdate = {};
+    /* the objects storing the changes to make to the tree */
+    const tipAttrToUpdate = {};
+    const tipStyleToUpdate = {};
+    const branchAttrToUpdate = {};
+    const branchStyleToUpdate = {};
 
-      if (nextProps.tree.visibilityVersion &&
-          this.props.tree.visibilityVersion !== nextProps.tree.visibilityVersion) {
-        // console.log("visibilityVersion change detected", this.props.tree.visibilityVersion, nextProps.tree.visibilityVersion)
-        tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
-      }
-      if (nextProps.tree.tipRadiiVersion &&
-          this.props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion) {
-        // console.log("tipRadiiVersion change detected", this.props.tree.tipRadiiVersion, nextProps.tree.tipRadiiVersion)
-        tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
-      }
-
-      /* what are the situations where we want a smooth (but expensive) transition? */
-      let branchTransitionTime = false; /* false = no transition. Use when speed is critical */
-      let tipTransitionTime = false;
-      if (nextProps.colorByLikelihood !== this.props.colorByLikelihood) {
-        branchTransitionTime = globals.mediumTransitionDuration;
-      }
-      // this code really needs some work
-      if (nextProps.tree.nodeColorsVersion &&
-          (this.props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
-          nextProps.tree.nodeColorsVersion === 1 ||
-          nextProps.colorByLikelihood !== this.props.colorByLikelihood)
-        ) {
-        tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
-          return d3.rgb(col).brighter([0.65]).toString();
+    if (changes.visibility) {
+      tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
+    }
+    if (changes.tipRadii) {
+      tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
+    }
+    if (changes.colorBy) {
+      tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
+        return d3.rgb(col).brighter([0.65]).toString();
+      });
+      tipStyleToUpdate["stroke"] = nextProps.tree.nodeColors;
+      // likelihoods manifest as opacity ramps
+      if (nextProps.colorByLikelihood === true) {
+        branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col, idx) => {
+          const attr = nextProps.tree.nodes[idx].attr;
+          const entropy = attr[nextProps.colorBy + "_entropy"];
+          // const lhd = attr[nextProps.colorBy + "_likelihoods"][attr[nextProps.colorBy]];
+          return d3.rgb(d3.interpolateRgb(col, "#BBB")(branchOpacityFunction(entropy))).toString();
         });
-        tipStyleToUpdate["stroke"] = nextProps.tree.nodeColors;
-        // likelihoods manifest as opacity ramps
-        if (nextProps.colorByLikelihood === true) {
-          branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col, idx) => {
-            const attr = nextProps.tree.nodes[idx].attr;
-            const entropy = attr[nextProps.colorBy + "_entropy"];
-            // const lhd = attr[nextProps.colorBy + "_likelihoods"][attr[nextProps.colorBy]];
-            return d3.rgb(d3.interpolateRgb(col, "#BBB")(branchOpacityFunction(entropy))).toString();
-          });
-        } else {
-          branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col) => {
-            return d3.rgb(d3.interpolateRgb(col, "#BBB")(branchOpacityConstant)).toString();
-          });
-        }
+      } else {
+        branchStyleToUpdate["stroke"] = nextProps.tree.nodeColors.map((col) => {
+          return d3.rgb(d3.interpolateRgb(col, "#BBB")(branchOpacityConstant)).toString();
+        });
       }
-      if (this.props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion) {
-        // console.log("branchThicknessVersion change detected", this.props.tree.branchThicknessVersion, nextProps.tree.branchThicknessVersion)
-        branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
-      }
+    }
+    if (changes.branchThickness) {
+      branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
+    }
 
-      /* implement style changes */
-      if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
-        // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
-        tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, branchTransitionTime);
-      }
-      if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
-        // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
-        tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, tipTransitionTime);
-      }
+    /* implement style * attr changes */
+    if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
+      // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
+      tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, changes.branchTransitionTime);
+    }
+    if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
+      // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
+      tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, changes.tipTransitionTime);
+    }
 
-      /* swap layouts */
-      if (this.props.layout !== nextProps.layout) {
-        tree.updateLayout(nextProps.layout, mediumTransitionDuration);
-      }
-      /* change distance metrics */
-      if (this.props.distanceMeasure !== nextProps.distanceMeasure) {
-        tree.updateDistance(nextProps.distanceMeasure, mediumTransitionDuration);
-      }
-
-      if (this.props.showBranchLabels!==nextProps.showBranchLabels){
-        if (nextProps.showBranchLabels){
-          tree.showBranchLabels();
-        }else{
-          tree.hideBranchLabels();
-        }
-      }
+    if (changes.layout) { /* swap layouts */
+      tree.updateLayout(nextProps.layout, mediumTransitionDuration);
+    }
+    if (changes.distanceMeasure) { /* change distance metrics */
+      tree.updateDistance(nextProps.distanceMeasure, mediumTransitionDuration);
+    }
+    if (changes.branchLabels === 2) {
+      tree.showBranchLabels();
+    } else if (changes.branchLabels === 1) {
+      tree.hideBranchLabels();
     }
   }
 
