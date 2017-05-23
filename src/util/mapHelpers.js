@@ -58,7 +58,7 @@ const computeMidpoint = (pair, modify, height) => {
   const slope = (y2-y1) / (x2-x1)
   const d = Math.sqrt(Math.pow((y2-y1),2) + Math.pow((x2-x1),2)) // distance between points
 
-  let H = 1/height || Math.log(Math.pow(d,0.05))*200+modify // define height of control point
+  let H = 1/height || Math.log(Math.pow(d,0.05))*200 //+modify // define height of control point
   const h = Math.sqrt(Math.pow(H,2)+ Math.pow(d,2)/4.0)  // mathemagics
 
   const xm = x1 + h * Math.cos(Math.atan(2*H/d) + Math.atan(slope)) * sign
