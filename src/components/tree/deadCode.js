@@ -40,3 +40,25 @@ nothing, but they may be useful in the future...
 onChangeValue={this.handleChange.bind(this)}
 onClick={this.handleClick.bind(this)}
 */
+
+shouldComponentUpdate(nextProps, nextState) {
+  /* we are now in a position to control the rendering to improve performance */
+  if (nextState.shouldReRender) {
+    this.setState({shouldReRender: false});
+    return true;
+  } else if (
+    this.state.tree &&
+    (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
+    this.props.browserDimensions.height !== nextProps.browserDimensions.height ||
+    this.props.sidebar !== nextProps.sidebar)
+  ) {
+    return true;
+  } else if (
+    this.state.hovered !== nextState.hovered ||
+    this.state.selectedTip !== nextState.selectedTip ||
+    this.state.selectedBranch !== nextState.selectedBranch
+  ) {
+    return true;
+  }
+  return false;
+}
