@@ -46,7 +46,7 @@ const Bezier = (pathControl, start=0.0, end=1.0, num=15) => { // returns Bezier 
   return curve
 }
 
-const computeMidpoint = (pair, height) => {
+const computeMidpoint = (pair, modify, height) => {
   /* Equation derived by Luiz Max Fagundes de Carvalho (University of Edinburgh). */
   const [pointA,pointB] = pair
   const x1 = pointA.x
@@ -58,7 +58,7 @@ const computeMidpoint = (pair, height) => {
   const slope = (y2-y1) / (x2-x1)
   const d = Math.sqrt(Math.pow((y2-y1),2) + Math.pow((x2-x1),2)) // distance between points
 
-  let H = 1/height || Math.log(Math.pow(d,0.05))*200 // define height of control point
+  let H = 1/height || Math.log(Math.pow(d,0.05))*200+modify // define height of control point
   const h = Math.sqrt(Math.pow(H,2)+ Math.pow(d,2)/4.0)  // mathemagics
 
   const xm = x1 + h * Math.cos(Math.atan(2*H/d) + Math.atan(slope)) * sign
@@ -205,7 +205,7 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems,
   /* manually find the points along a Bezier curve at which we should be given the user date selection */
   const start = Math.max(0.0,(userDateMin-originDate)/(destinationDate-originDate)) // clamp start at 0.0 if userDateMin gives a number <0
   const end = Math.min(1.0,(userDateMax-originDate)/(destinationDate-originDate)) // clamp end at 1.0 if userDateMax gives a number >1
-  const Bcurve = Bezier([pair[0], computeMidpoint(pair),pair[1]],start,end,10) // calculate Bezier
+  const Bcurve = Bezier([pair[0],computeMidpoint(pair,(destinationDate-2013.0)*25.0),pair[1]],start,end,15) // calculate Bezier
 
   return Bcurve
 }
