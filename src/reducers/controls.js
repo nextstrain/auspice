@@ -165,6 +165,9 @@ const Controls = (state = getDefaultState(), action) => {
       if (action.data.defaults.layout) {
         extras["layout"] = action.data.defaults.layout;
       }
+      if (action.data.defaults.mapAnimationStartDate) {
+        extras["mapAnimationStartDate"] = action.data.defaults.mapAnimationStartDate;
+      }
     }
     return Object.assign({}, state, extras);
 

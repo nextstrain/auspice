@@ -29,9 +29,12 @@ import {getLatLongs} from "../../util/mapHelpersLatLong";
     colorBy: state.controls.colorBy,
     map: state.map,
     geoResolution: state.controls.geoResolution,
+    mapAnimationStartDate: state.controls.mapAnimationStartDate,
+    mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     sequences: state.sequences
   };
 })
+
 class Map extends React.Component {
   constructor(props) {
     super(props);
@@ -374,27 +377,32 @@ class Map extends React.Component {
     clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
   }
   animateMap() {
-
-    const timeSliderWindow = 1; /* in months for now  */ // this is 1/10 the date range in date slider
-    const incrementBy = 1; /* in days for now */
-    const incrementByUnit = "day";
-    const tick = 12;
-    const trailing = false;
-    /* initial time window */
-
-    let first = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD");
-    let second = moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD").add(timeSliderWindow, "months");
+    /* By default, start at absoluteDateMin; allow overriding via augur default export */
+    let first = this.props.mapAnimationStartDate ? moment(this.props.mapAnimationStartDate, "YYYY-MM-DD"): moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD");
     let last = moment(this.props.controls.absoluteDateMax, "YYYY-MM-DD");
+    let numberDays = moment.duration(last.diff(first)).asDays(); // Total number of days in the animation
+
+    const tick = 100; // Length of each tick in milliseconds
+    let incrementBy = Math.ceil((tick*numberDays)/globals.mapAnimationDurationInMilliseconds); // [(ms * days) / ms] = days
+    const incrementByUnit = "day";
+    const timeSliderWindow = Math.ceil((numberDays / 20)); /* in months for now  */ // this is 1/10 the date range in date slider
+    let second = moment(first, "YYYY-MM-DD").add(timeSliderWindow, "days");
+    const trailing = true;
+
 
     if (!window.NEXTSTRAIN) {
       window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
     }
 
+
+
     /* we should setState({reference}) so that it's not possible to create multiple */
 
     window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
+
       /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
       this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+
       if (trailing) {
         first = first.add(incrementBy, incrementByUnit);
       }
