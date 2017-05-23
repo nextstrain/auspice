@@ -369,8 +369,8 @@ class Map extends React.Component {
     clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
   }
   animateMap() {
-    const timeSliderWindow = 3; /* in months for now  */ // this is 1/10 the date range in date slider
-    const incrementBy = 1; /* in days for now */
+    const timeSliderWindow = 0.5; /* in months for now  */ // this is 1/10 the date range in date slider
+    const incrementBy = 7; /* in days for now */
     const incrementByUnit = "day";
     const tick = 12;
     const trailing = true;

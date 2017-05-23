@@ -2,6 +2,71 @@ import d3 from "d3";
 
 /* util */
 
+const Bernstein = (n, k) => {
+  var binom = require('binomial')
+  const coeff = binom.get(n, k) // calculate binomial coefficient
+
+  const _bpoly = (x) => {
+    return coeff * Math.pow(x,k) * Math.pow(1-x,n-k)
+  }
+  return _bpoly //return Bernstein polynomial
+}
+
+function zeros(dimensions) {
+    var array = [];
+
+    for (var i = 0; i < dimensions[0]; ++i) {
+        array.push(dimensions.length == 1 ? 0 : zeros(dimensions.slice(1)));
+    }
+    return array
+}
+
+const Bezier = (pathControl,start=0.0,end=1.0,num=15) => { // returns Bezier curve starting at first point in pair, curving towards the second point in pair and
+  const N = _.range(pathControl.length) // number of points in [start, mid, end] that will be used to compute the curve
+  var linspace = require('linspace')
+  var outerProducts = require('outer-product')
+  const t = linspace(start,end,num) // num points spaced evenly between fractions of the total curve path (0 = beginning, 1 = end)
+  let curve = zeros([num,2]) // empty vector that will become the curve
+
+  for (var i in _.range(curve.length)){ // convert curve to an (x:,y:) format
+    curve[i] = {x: curve[i][0], y: curve[i][1]}
+  }
+
+  for (var ii in N){ // iterate over provided points
+    const B_func = Bernstein(N.length - 1, ii) // get Bernstein polynomial
+    const tB = t.map(B_func) // apply Bernstein polynomial to linspace
+    const P = [pathControl[ii].x,pathControl[ii].y]
+    const prod_idx = outerProducts([_.range(tB.length), _.range(P.length)]) // get indices for outer product
+
+    for (var j in _.range(curve.length)){ // iterate over future curve, adjust each point's coordinate
+      curve[j].x += tB[prod_idx[j][0]] * P[prod_idx[j][1]] // update x coordinate for curve with outer product
+      curve[j].y += tB[prod_idx[Number(j)+num][0]] * P[prod_idx[Number(j)+num][1]] // update y coordinate for curve with outer product
+      }
+    }
+  return curve
+}
+
+const computeMidpoint = (pair, height) => {
+  /* Equation derived by Luiz Max Fagundes de Carvalho (University of Edinburgh). */
+  const [pointA,pointB] = pair
+  const x1 = pointA.x
+  const y1 = pointA.y
+  const x2 = pointB.x
+  const y2 = pointB.y
+
+  const sign = Math.sign(x2-x1) // induce asymmetry in transitions
+  const slope = (y2-y1) / (x2-x1)
+  const d = Math.sqrt(Math.pow((y2-y1),2) + Math.pow((x2-x1),2)) // distance between points
+
+  let H = 1/height || Math.log(Math.pow(d,0.05))*200 // define height of control point
+  const h = Math.sqrt(Math.pow(H,2)+ Math.pow(d,2)/4.0)  // mathemagics
+
+  const xm = x1 + h * Math.cos(Math.atan(2*H/d) + Math.atan(slope)) * sign
+  const ym = y1 + h * Math.sin(Math.atan(2*H/d) + Math.atan(slope)) * sign
+
+  return {x: xm, y: ym}
+}
+
 export const pathStringGenerator = d3.svg.line()
   .x((d) => { return d.x })
   .y((d) => { return d.y })
@@ -120,50 +185,18 @@ export const updateOnMoveEnd = (d3elems, latLongs) => {
   }
 }
 
-const getPointForLineSegment = (originX, originY, destinationX, destinationY, dist) => {
-    const rad = Math.atan2(destinationY-originY, destinationX-originX);
-    const newX = originX + dist * Math.cos(rad);
-    const newY = originY + dist * Math.sin(rad);
-    return {x: newX, y: newY}
-}
-
 const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems, i) => {
-
-  if (!nodes[d.data.demePairIndices[0]]) { console.warn("No node found for this index, which is needed to compare user dates to transmission origin/destination dates, so we're returning the default x y pair. No smaller, interior line will appear. This occurred because the index accessor for the node array returned from getLatLongs was not a valid value. Try a console log upstream of where demePairIndices is returned from src/util/mapHelpersLatLong.js"); return pair; } /* handle weird data */
-
   const originDate = nodes[d.data.demePairIndices[0]].attr.num_date;
   const destinationDate = nodes[d.data.demePairIndices[1]].attr.num_date;
   const userDateMin = controls.dateScale(controls.dateFormat.parse(controls.dateMin));
   const userDateMax = controls.dateScale(controls.dateFormat.parse(controls.dateMax));
 
-  /*
-    entire line is either visible or invisible, so return pair
-  */
-  if (
-    userDateMin < originDate && userDateMax > destinationDate || /* visible ie., user: jan-dec 2015 origin/dest june-july 2015, so completely within */
-    userDateMin > destinationDate || /* invisible ie., user: jan-dec 2015 dest: feb 1980 */
-    userDateMax < originDate /* invisibile ie., user: jan-dec 2015 origin: feb 2017 */
-  ) {
-    return pair;
-  } else {
+  /* manually find the points along a Bezier curve at which we should be given the user date selection */
+  const start = Math.max(0.0,(userDateMin-originDate)/(destinationDate-originDate)) // clamp start at 0.0 if userDateMin gives a number <0
+  const end = Math.min(1.0,(userDateMax-originDate)/(destinationDate-originDate)) // clamp end at 1.0 if userDateMax gives a number >1
+  const Bcurve = Bezier([pair[0],computeMidpoint(pair),pair[1]],start,end,10) // calculate Bezier
 
-    const scaledOriginDist = d3elems.transmissionPathLengths[i].pathScale(userDateMin);
-    const scaledDestinationDist = d3elems.transmissionPathLengths[i].pathScale(userDateMax);
-    const scaledOriginXY = getPointForLineSegment(pair[0].x, pair[0].y, pair[1].x, pair[1].y, scaledOriginDist);
-    const scaledDestinationXY = getPointForLineSegment(pair[0].x, pair[0].y, pair[1].x, pair[1].y, scaledDestinationDist);
-
-    // console.log(i + " is " + nodes[d.data.demePairIndices[0]].attr.country + " to " + nodes[d.data.demePairIndices[1]].attr.country)
-    // console.log(i + "---" + originDate + "---" + userDateMin + "---" + userDateMax + "---" + destinationDate);
-    // console.log(i + "=== totalPathLength ==== " + d3elems.transmissionPathLengths[i].totalPathLength)
-    // console.log(i + "=== origin =============", pair[0].x, pair[0].y)
-    // console.log(i + "=== destination ========", pair[1].x, pair[1].y)
-    // console.log(i + "=== scaled origin distance ======", scaledOriginDist)
-    // console.log(i + "=== scaled origin x,y ======", scaledOriginXY)
-    // console.log(i + "=== scaled destination distance ======", scaledDestinationDist)
-    // console.log(i + "=== scaled destination x,y ======", scaledDestinationXY)
-
-    return [scaledOriginXY, scaledDestinationXY]
-  }
+  return Bcurve
 }
 
 export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
