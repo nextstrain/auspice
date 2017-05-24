@@ -11,10 +11,11 @@ import {drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility} from "../.
 import * as globals from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import {getLatLongs} from "../../util/mapHelpersLatLong";
-// import {
-//   MAP_ANIMATION_TICK,
-//   MAP_ANIMATION_END
-// } from "../../actions";
+import {
+  CHANGE_ANIMATION_START,
+  CHANGE_ANIMATION_TIME,
+  CHANGE_ANIMATION_PATHTRAILING
+} from "../../actions/types.js";
 
 @connect((state) => {
   return {
@@ -31,6 +32,7 @@ import {getLatLongs} from "../../util/mapHelpersLatLong";
     geoResolution: state.controls.geoResolution,
     mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
+    mapAnimationPathTrailing: state.controls.mapAnimationPathTrailing,
     sequences: state.sequences
   };
 })
@@ -383,7 +385,7 @@ class Map extends React.Component {
     let numberDays = moment.duration(last.diff(first)).asDays(); // Total number of days in the animation
 
     const tick = 100; // Length of each tick in milliseconds
-    let incrementBy = Math.ceil((tick*numberDays)/globals.mapAnimationDurationInMilliseconds); // [(ms * days) / ms] = days
+    let incrementBy = Math.ceil((tick*numberDays)/this.props.mapAnimationDurationInMilliseconds); // [(ms * days) / ms] = days
     const incrementByUnit = "day";
     const timeSliderWindow = Math.ceil((numberDays / 20)); /* in months for now  */ // this is 1/10 the date range in date slider
     let second = moment(first, "YYYY-MM-DD").add(timeSliderWindow, "days");

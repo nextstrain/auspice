@@ -40,7 +40,10 @@ const getDefaultState = function () {
     datasetPathName: null,
     filters: {},
     dateScale: d3.time.scale().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
-    dateFormat: d3.time.format("%Y-%m-%d")
+    dateFormat: d3.time.format("%Y-%m-%d"),
+    mapAnimationDurationInMilliseconds: 30000, // in milliseconds
+    mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
+    mapAnimationPathTrailing: false
   };
 };
 
@@ -150,6 +153,18 @@ const Controls = (state = getDefaultState(), action) => {
       }
       extras["colorBy"] = available_colorBy[0];
     }
+
+
+
+// let valid = ['geoResolution', 'colorBy', 'distanceMeasure', 'layout', 'mapAnimationStartDate', 'triplicateMap']
+// console.log('defaults', action.data.defaults)
+
+// trial = action.data.defaults.keys()
+// for (let thing in trial){
+//   console.log(thing in valid);
+// }
+
+// let valid_defaults = _.pickBy(action.data.defaults, (v,k)=>{return k in valid})
 
     // Check if there were defaults provided in the meta JSON; these overrides all other defaults.
     if (action.data.defaults) {
