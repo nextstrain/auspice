@@ -26,7 +26,7 @@ const getDefaultState = function () {
     search: null,
     strain: null,
     mutType: globals.mutType,
-    confidence: {display: false, on: false},
+    confidence: {exists: false, display: false, on: false},
     layout: globals.defaultLayout,
     distanceMeasure: globals.defaultDistanceMeasure,
     dateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
@@ -97,7 +97,11 @@ const Controls = (state = getDefaultState(), action) => {
     if (action.query.dmax) {
       base["dateMax"] = action.query.dmax;
     }
-    base["confidence"] = Object.keys(action.tree.attr).indexOf("num_date_confidence") > -1 ? {display: true, on: true} : {display: false, on: false};
+    base["confidence"] = Object.keys(action.tree.attr).indexOf("num_date_confidence") > -1 ?
+      {exists: true, display: true, on: true} : {exists: false, display: false, on: false};
+    if (base.confidence.exists && base.layout !== "rect") {
+      base.confidence.display = false;
+    }
     /* basic sanity checking */
     if (Object.keys(action.meta.color_options).indexOf(base["colorBy"]) === -1) {
       /* ideally, somehow, a notification is dispatched, but redux, unlike elm,
@@ -143,8 +147,15 @@ const Controls = (state = getDefaultState(), action) => {
       selectedNode: null
     });
   case types.CHANGE_LAYOUT:
+    const layout = action.data;
+    /* if confidence and layout !== rect then disable confidence toggle */
+    const confidence = Object.assign({}, state.confidence);
+    if (confidence.exists) {
+      confidence.display = layout === "rect";
+    }
     return Object.assign({}, state, {
-      layout: action.data
+      layout,
+      confidence
     });
   case types.CHANGE_DISTANCE_MEASURE:
     return Object.assign({}, state, {
@@ -205,10 +216,9 @@ const Controls = (state = getDefaultState(), action) => {
     });
   case types.TOGGLE_CONFIDENCE:
     return Object.assign({}, state, {
-      confidence: {
-        display: state.confidence.display,
+      confidence: Object.assign({}, state.confidence, {
         on: !state.confidence.on
-      }
+      })
     });
   case types.ANALYSIS_SLIDER:
     if (action.destroy) {
