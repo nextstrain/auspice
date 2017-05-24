@@ -158,6 +158,22 @@ const Controls = (state = getDefaultState(), action) => {
       confidence
     });
   case types.CHANGE_DISTANCE_MEASURE:
+    /* while this may change, div currently doesn't have CIs,
+    so they shouldn't be displayed. The SVG el's still exist, they're just of
+    width zero */
+    if (state.confidence.exists) {
+      if (state.confidence.display && action.data === "div") {
+        return Object.assign({}, state, {
+          distanceMeasure: action.data,
+          confidence: Object.assign({}, state.confidence, {display: false})
+        });
+      } else if (state.layout === "rect" && action.data === "num_date") {
+        return Object.assign({}, state, {
+          distanceMeasure: action.data,
+          confidence: Object.assign({}, state.confidence, {display: true})
+        });
+      }
+    }
     return Object.assign({}, state, {
       distanceMeasure: action.data
     });

@@ -69,12 +69,6 @@ class Controls extends React.Component {
 
         {header("Date Range")}
         <DateRangeInputs/>
-        <Toggle
-          display={this.props.confidence.display}
-          on={this.props.confidence.on}
-          callback={() => this.props.dispatch(toggleConfidence())}
-          label="Confidence Intervals"
-        />
 
         {this.analysisSlider()}
 
@@ -94,6 +88,12 @@ class Controls extends React.Component {
 
         <SelectLabel text="Branch Length"/>
         <ChooseMetric/>
+        <Toggle
+          display={this.props.confidence.display}
+          on={this.props.confidence.on}
+          callback={() => this.props.dispatch(toggleConfidence())}
+          label="Confidence Intervals"
+        />
 
         {header("Map Options")}
         <SelectLabel text="Geographic resolution"/>
