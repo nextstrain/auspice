@@ -133,7 +133,7 @@ class TreeView extends React.Component {
         this.props.distanceMeasure,
         { /* options */
           grid: true,
-          confidence: this.props.confidence,
+          confidence: nextProps.confidence,
           branchLabels: true,      //generate DOM object
           showBranchLabels: false,  //hide them initially -> couple to redux state
           tipLabels: true,      //generate DOM object
@@ -153,7 +153,6 @@ class TreeView extends React.Component {
         },
         nextProps.tree.branchThickness, /* guarenteed to be in redux by now */
         nextProps.tree.visibility,
-        nextProps.confidence
       );
       return myTree;
     } else {

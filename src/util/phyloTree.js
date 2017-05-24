@@ -175,7 +175,7 @@ PhyloTree.prototype.setDefaults = function () {
  * @param  visibility (OPTIONAL) -- array of "visible" or "hidden"
  * @return {null}
  */
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility, confidence) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility) {
   if (branchThickness) {
     this.nodes.forEach(function(d, i) {
       d["stroke-width"] = branchThickness[i];
@@ -220,7 +220,7 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
   if (this.layout === "clock" && this.distance === "num_date") {
     this.drawRegression();
   }
-  if (confidence) {
+  if (this.params.confidence) {
     this.drawConfidence();
   }
 };
@@ -953,31 +953,45 @@ PhyloTree.prototype.drawBranchLabels = function() {
 
 /* C O N F I D E N C E    I N T E R V A L S */
 
-PhyloTree.prototype.removeConfidence = function (dt = 0) {
-  this.svg.selectAll(".conf")
-    // .transition()
-    //   .duration(dt)
+PhyloTree.prototype.removeConfidence = function (dt) {
+  if (dt) {
+    this.svg.selectAll(".conf")
+      .transition()
+      .duration(dt)
       .style("opacity", 0)
     .remove();
+  } else {
+    this.svg.selectAll(".conf").remove();
+  }
+  this.props.confidence = false;
 };
 
 PhyloTree.prototype.drawConfidence = function (dt) {
-
-  this.confidence = this.svg.append("g").selectAll(".conf")
-    .data(this.nodes)
-    .enter()
-    // .transition()
-    //   .duration(dt)
-      .call(this.drawSingleCI);
+  if (dt) {
+    this.confidence = this.svg.append("g").selectAll(".conf")
+      .data(this.nodes)
+      .enter()
+        .call((sel) => this.drawSingleCI(sel, 0));
+    this.svg.selectAll(".conf")
+        .transition()
+          .duration(dt)
+          .style("opacity", 0.5);
+  } else {
+    this.confidence = this.svg.append("g").selectAll(".conf")
+      .data(this.nodes)
+      .enter()
+        .call(this.drawSingleCI);
+  }
+  this.props.confidence = true;
 };
 
-PhyloTree.prototype.drawSingleCI = function (selection) {
+PhyloTree.prototype.drawSingleCI = function (selection, opacity = 0.5) {
   selection.append("path")
     .attr("class", "conf")
     .attr("id", (d) => "conf_" + d.n.clade)
     .attr("d", (d) => d.confLine)
     .style("stroke", (d) => d.stroke || "#888")
-    .style("opacity", 0.5)
+    .style("opacity", opacity)
     .style("fill", "none")
     .style("stroke-width", (d) => d["stroke-width"] * 2);
 };

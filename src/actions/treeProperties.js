@@ -165,3 +165,7 @@ export const changeMutType = (data) => {
 export const toggleColorByLikelihood = () => ({
   type: types.TOGGLE_COLORBY_LIKELIHOOD
 });
+
+export const toggleConfidence = () => ({
+  type: types.TOGGLE_CONFIDENCE
+});

@@ -23,7 +23,7 @@ const Toggle = ({status, callback, label}) => {
         <div className={"slider round"}></div>
         <SelectLabel
           text={label}
-          extraStyles={{marginLeft: "40px", marginTop: "4px"}}
+          extraStyles={{marginLeft: "40px", marginTop: "4px", width: "200px"}}
         />
       </label>
     </div>

@@ -198,6 +198,10 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       colorByLikelihood: !state.colorByLikelihood
     });
+  case types.TOGGLE_CONFIDENCE:
+    return Object.assign({}, state, {
+      confidence: !state.confidence
+    });
   case types.ANALYSIS_SLIDER:
     if (action.destroy) {
       return Object.assign({}, state, {

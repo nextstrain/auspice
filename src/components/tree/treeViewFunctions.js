@@ -281,8 +281,9 @@ export const salientPropChanges = (props, nextProps, tree) => {
   const layout = props.layout !== nextProps.layout;
   const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
 
-  /* branch labels use 0: no change, 1: turn off, 2: turn on */
+  /* branch labels & confidence use 0: no change, 1: turn off, 2: turn on */
   const branchLabels = props.showBranchLabels === nextProps.showBranchLabels ? 0 : nextProps.showBranchLabels ? 2 : 1;
+  const confidence = props.confidence === nextProps.confidence ? 0 : nextProps.confidence ? 2 : 1;
 
   /* sometimes we may want smooth transitions */
   let branchTransitionTime = false; /* false = no transition. Use when speed is critical */
@@ -303,7 +304,8 @@ export const salientPropChanges = (props, nextProps, tree) => {
     branchThickness,
     branchTransitionTime,
     tipTransitionTime,
-    branchLabels
+    branchLabels,
+    confidence
   };
 };
 
@@ -371,5 +373,10 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
     tree.showBranchLabels();
   } else if (changes.branchLabels === 1) {
     tree.hideBranchLabels();
+  }
+  if (changes.confidence === 1) {
+    tree.removeConfidence(mediumTransitionDuration);
+  } else if (changes.confidence === 2) {
+    tree.drawConfidence(mediumTransitionDuration);
   }
 };

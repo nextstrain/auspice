@@ -15,7 +15,7 @@ import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import { connect } from "react-redux";
-import { toggleColorByLikelihood } from "../../actions/treeProperties";
+import { toggleColorByLikelihood, toggleConfidence } from "../../actions/treeProperties";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -25,6 +25,7 @@ const header = (text) => (
 
 @connect((state) => ({
   analysisSlider: state.controls.analysisSlider,
+  confidence: state.controls.confidence,
   colorByLikelihood: state.controls.colorByLikelihood
 }))
 class Controls extends React.Component {
@@ -67,6 +68,11 @@ class Controls extends React.Component {
 
         {header("Date Range")}
         <DateRangeInputs/>
+        <Toggle
+          status={this.props.confidence}
+          callback={() => this.props.dispatch(toggleConfidence())}
+          label="Confidence Intervals"
+        />
 
         {this.analysisSlider()}
 
