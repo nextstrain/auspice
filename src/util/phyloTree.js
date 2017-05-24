@@ -221,6 +221,7 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
   if (this.layout === "clock" && this.distance === "num_date") {
     this.drawRegression();
   }
+  this.removeConfidence();
   if (this.params.confidence) {
     this.drawConfidence();
   }
@@ -969,7 +970,7 @@ PhyloTree.prototype.removeConfidence = function (dt) {
 
 PhyloTree.prototype.drawConfidence = function (dt) {
   // this.removeConfidence(); // just in case
-  console.log("drawing:", this.svg.selectAll(".conf"))
+  // console.log("drawing:", this.svg.selectAll(".conf"))
   if (dt) {
     this.confidence = this.svg.append("g").selectAll(".conf")
       .data(this.nodes)

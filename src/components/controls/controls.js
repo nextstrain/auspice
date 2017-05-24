@@ -52,7 +52,6 @@ class Controls extends React.Component {
   }
   // restore <ToggleBranchLabels/> below when perf is improved
   render() {
-    console.log("rendering", this.props.confidence)
     // const styles = this.getStyles();
     return (
       <Flex
