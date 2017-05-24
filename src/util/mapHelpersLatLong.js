@@ -80,7 +80,9 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
   }
 }
 
-export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale, sequences) => {
+export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale, sequences, triplicate) => {
+
+  let offsets = triplicate ? [-360, 0, 360] : [0]
 
   const {
     aggregatedLocations,
@@ -94,7 +96,7 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
     transmissions: []
   };
 
-  [-360, 0, 360].forEach((OFFSET) => {
+  offsets.forEach((OFFSET) => {
     /* count DEMES */
     _.forOwn(aggregatedLocations, (value, key) => {
       demesAndTransmissions.demes.push({
@@ -130,7 +132,6 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
 
   // const knownShortestPaths = {};
 
-  const offsets = [-360, 0, 360];
 
   offsets.forEach((OFFSET) => {
 

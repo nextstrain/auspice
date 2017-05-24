@@ -33,7 +33,9 @@ import {
     mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationPathTrailing: state.controls.mapAnimationPathTrailing,
-    sequences: state.sequences
+    sequences: state.sequences,
+    mapTriplicate: state.controls.mapTriplicate
+
   };
 })
 
@@ -270,7 +272,8 @@ class Map extends React.Component {
       this.props.colorBy,
       this.props.geoResolution,
       this.props.colorScale,
-      this.props.sequences
+      this.props.sequences,
+      this.props.mapTriplicate
     );
   }
   createMap() {

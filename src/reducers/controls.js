@@ -156,7 +156,7 @@ const Controls = (state = getDefaultState(), action) => {
 
 
 
-// let valid = ['geoResolution', 'colorBy', 'distanceMeasure', 'layout', 'mapAnimationStartDate', 'triplicateMap']
+// let valid = ['geoResolution', 'colorBy', 'distanceMeasure', 'layout', 'mapAnimationStartDate', 'mapTriplicate']
 // console.log('defaults', action.data.defaults)
 
 // trial = action.data.defaults.keys()
@@ -182,6 +182,9 @@ const Controls = (state = getDefaultState(), action) => {
       }
       if (action.data.defaults.mapAnimationStartDate) {
         extras["mapAnimationStartDate"] = action.data.defaults.mapAnimationStartDate;
+      }
+      if (action.data.defaults.mapTriplicate) {
+        extras["mapTriplicate"] = (action.data.defaults.mapTriplicate == 'false' || action.data.defaults.mapTriplicate == 'False') ? false : true; //convert string to boolean; default is true; turned off with either false (js) or False (python)
       }
     }
     return Object.assign({}, state, extras);
