@@ -31,7 +31,8 @@ const header = (text) => (
 class Controls extends React.Component {
   static propTypes = {
     analysisSlider: React.PropTypes.any,
-    colorByLikelihood: React.PropTypes.any,
+    colorByLikelihood: React.PropTypes.object.isRequired,
+    confidence: React.PropTypes.object.isRequired,
     dispatch: React.PropTypes.func
   }
   getStyles() {
@@ -69,7 +70,8 @@ class Controls extends React.Component {
         {header("Date Range")}
         <DateRangeInputs/>
         <Toggle
-          status={this.props.confidence}
+          display={this.props.confidence.display}
+          on={this.props.confidence.on}
           callback={() => this.props.dispatch(toggleConfidence())}
           label="Confidence Intervals"
         />
@@ -79,7 +81,8 @@ class Controls extends React.Component {
         {header("Color By")}
         <ColorBy/>
         <Toggle
-          status={this.props.colorByLikelihood}
+          display={this.props.colorByLikelihood.display}
+          on={this.props.colorByLikelihood.on}
           callback={() => this.props.dispatch(toggleColorByLikelihood())}
           label="Likelihoods"
         />

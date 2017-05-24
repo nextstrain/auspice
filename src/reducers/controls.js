@@ -7,8 +7,10 @@ import d3 from "d3";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
 
 const checkLikelihood = function (attrs, colorBy) {
-  // colorByLikelihood undefined: not available, false: off, true: on
-  return (attrs.indexOf(colorBy + "_likelihoods") > -1 && attrs.indexOf(colorBy + "_entropy") > -1) ? true : undefined;
+  if (attrs.indexOf(colorBy + "_likelihoods") > -1) {
+    return {display: true, on: true};
+  }
+  return {display: false, on: false};
 };
 
 /* defaultState is a fn so that we can re-create it
@@ -24,7 +26,7 @@ const getDefaultState = function () {
     search: null,
     strain: null,
     mutType: globals.mutType,
-    confidence: false, // is temporal confidence avaliable in attrs?
+    confidence: {display: false, on: false},
     layout: globals.defaultLayout,
     distanceMeasure: globals.defaultDistanceMeasure,
     dateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
@@ -32,7 +34,7 @@ const getDefaultState = function () {
     absoluteDateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
-    colorByLikelihood: false,
+    colorByLikelihood: {display: false, on: false},
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
     analysisSlider: false,
     geoResolution: globals.defaultGeoResolution,
@@ -95,7 +97,7 @@ const Controls = (state = getDefaultState(), action) => {
     if (action.query.dmax) {
       base["dateMax"] = action.query.dmax;
     }
-    base["confidence"] = Object.keys(action.tree.attr).indexOf("num_date_confidence") > -1 ? true : false;
+    base["confidence"] = Object.keys(action.tree.attr).indexOf("num_date_confidence") > -1 ? {display: true, on: true} : {display: false, on: false};
     /* basic sanity checking */
     if (Object.keys(action.meta.color_options).indexOf(base["colorBy"]) === -1) {
       /* ideally, somehow, a notification is dispatched, but redux, unlike elm,
@@ -196,11 +198,17 @@ const Controls = (state = getDefaultState(), action) => {
     });
   case types.TOGGLE_COLORBY_LIKELIHOOD:
     return Object.assign({}, state, {
-      colorByLikelihood: !state.colorByLikelihood
+      colorByLikelihood: {
+        display: state.colorByLikelihood.display,
+        on: !state.colorByLikelihood.on
+      }
     });
   case types.TOGGLE_CONFIDENCE:
     return Object.assign({}, state, {
-      confidence: !state.confidence
+      confidence: {
+        display: state.confidence.display,
+        on: !state.confidence.on
+      }
     });
   case types.ANALYSIS_SLIDER:
     if (action.destroy) {

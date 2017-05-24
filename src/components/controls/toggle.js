@@ -1,13 +1,8 @@
 import React from "react";
 import SelectLabel from "../framework/select-label";
 
-/* the status of the toggle can be one of 3 values:
-undefined -> not displayed
-false -> displayed in off position
-true -> displated in on position */
-
-const Toggle = ({status, callback, label}) => {
-  if (status === undefined) {
+const Toggle = ({display, on, callback, label}) => {
+  if (!display) {
     return null;
   }
   return (
@@ -17,7 +12,7 @@ const Toggle = ({status, callback, label}) => {
           className="switch"
           type="checkbox"
           style={{marginLeft: "40px"}}
-          checked={status}
+          checked={on}
           onChange={callback}
         />
         <div className={"slider round"}></div>
@@ -27,7 +22,7 @@ const Toggle = ({status, callback, label}) => {
         />
       </label>
     </div>
-  )
-}
+  );
+};
 
 export default Toggle;

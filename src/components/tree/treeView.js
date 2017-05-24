@@ -180,7 +180,7 @@ class TreeView extends React.Component {
           hovered={this.state.hovered}
           viewer={this.Viewer}
           colorBy={this.props.colorBy}
-          likelihoods={this.props.colorByLikelihood}
+          likelihoods={this.props.colorByLikelihood.on}
         />
         <BranchSelectedPanel
           responsive={responsive}

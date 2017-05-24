@@ -74,7 +74,7 @@ export const onTipClick = function (d) {
 export const onBranchHover = function (d, x, y) {
   // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
   const id = "#branch_S_" + d.n.clade;
-  if (this.props.colorByLikelihood) {
+  if (this.props.colorByLikelihood.on) {
     const attr = this.props.tree.nodes[d.n.arrayIdx].attr;
     const entropy = attr[this.props.colorBy + "_entropy"];
     this.state.tree.svg.select(id)
@@ -109,7 +109,7 @@ export const onBranchClick = function (d) {
 export const onBranchLeave = function (d) {
   // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
   const id = "#branch_S_" + d.n.clade;
-  if (this.props.colorByLikelihood) {
+  if (this.props.colorByLikelihood.on) {
     const attr = this.props.tree.nodes[d.n.arrayIdx].attr;
     // const lhd = attr[this.props.colorBy + "_likelihoods"][attr[this.props.colorBy]]
     const entropy = attr[this.props.colorBy + "_entropy"];
@@ -277,19 +277,19 @@ export const salientPropChanges = (props, nextProps, tree) => {
   const colorBy = !!nextProps.tree.nodeColorsVersion &&
       (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
       nextProps.tree.nodeColorsVersion === 1 ||
-      nextProps.colorByLikelihood !== props.colorByLikelihood);
+      nextProps.colorByLikelihood.on !== props.colorByLikelihood.on);
   const branchThickness = props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion;
   const layout = props.layout !== nextProps.layout;
   const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
 
   /* branch labels & confidence use 0: no change, 1: turn off, 2: turn on */
   const branchLabels = props.showBranchLabels === nextProps.showBranchLabels ? 0 : nextProps.showBranchLabels ? 2 : 1;
-  const confidence = props.confidence === nextProps.confidence ? 0 : nextProps.confidence ? 2 : 1;
+  const confidence = props.confidence.on === nextProps.confidence.on ? 0 : nextProps.confidence.on ? 2 : 1;
 
   /* sometimes we may want smooth transitions */
   let branchTransitionTime = false; /* false = no transition. Use when speed is critical */
   let tipTransitionTime = false;
-  if (nextProps.colorByLikelihood !== props.colorByLikelihood) {
+  if (nextProps.colorByLikelihood.on !== props.colorByLikelihood.on) {
     branchTransitionTime = mediumTransitionDuration;
   }
 
@@ -337,7 +337,7 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
       return d3.rgb(col).brighter([0.65]).toString();
     });
     tipStyleToUpdate["stroke"] = nextProps.tree.nodeColors;
-    const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByLikelihood, nextProps.colorBy);
+    const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByLikelihood.on, nextProps.colorBy);
     branchStyleToUpdate["stroke"] = branchStrokes;
     if (nextProps.confidence) {
       confidenceStyleToUpdate["stroke"] = branchStrokes;
