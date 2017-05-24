@@ -3,7 +3,7 @@ import Flex from "../framework/flex";
 import SelectLabel from "../framework/select-label";
 // import ToggleBranchLabels from "./toggle-branch-labels";
 import ColorBy from "./color-by";
-import LikelihoodToggle from "./likelihoodToggle";
+import Toggle from "./toggle";
 // import Search from "./search";
 import DateRangeInputs from "./date-range-inputs";
 import AnalysisDateSlider from "./analysis-date-slider";
@@ -15,6 +15,7 @@ import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import { connect } from "react-redux";
+import { toggleColorByLikelihood } from "../../actions/treeProperties";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -22,10 +23,15 @@ const header = (text) => (
   </span>
 );
 
-@connect((state) => ({analysisSlider: state.controls.analysisSlider}))
+@connect((state) => ({
+  analysisSlider: state.controls.analysisSlider,
+  colorByLikelihood: state.controls.colorByLikelihood
+}))
 class Controls extends React.Component {
   static propTypes = {
-    analysisSlider: React.PropTypes.any
+    analysisSlider: React.PropTypes.any,
+    colorByLikelihood: React.PropTypes.any,
+    dispatch: React.PropTypes.func
   }
   getStyles() {
     return {};
@@ -66,7 +72,11 @@ class Controls extends React.Component {
 
         {header("Color By")}
         <ColorBy/>
-        <LikelihoodToggle/>
+        <Toggle
+          status={this.props.colorByLikelihood}
+          callback={() => this.props.dispatch(toggleColorByLikelihood())}
+          label="Likelihoods"
+        />
 
         {header("Tree Options")}
 
