@@ -6,7 +6,8 @@ import { zoomToClade,
          restrictTreeToSingleTip,
          updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
 import { branchOpacityConstant, branchOpacityFunction } from "../../util/treeHelpers";
-import { mediumTransitionDuration } from "../../util/globals";
+import { mediumTransitionDuration,
+  confidenceStrokeMultiplier } from "../../util/globals";
 import d3 from "d3";
 
 
@@ -345,7 +346,7 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
   if (changes.branchThickness) {
     branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
     if (nextProps.confidence) {
-      confidenceStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
+      confidenceStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness.map((v) => v * confidenceStrokeMultiplier);
     }
   }
 

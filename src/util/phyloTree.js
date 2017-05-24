@@ -1,5 +1,6 @@
 import d3 from "d3";
 import { dataFont, darkGrey } from "../globalStyles";
+import { confidenceStrokeMultiplier } from "./globals";
 
 /*
  * adds the total number of descendant leaves to each node in the tree
@@ -963,10 +964,13 @@ PhyloTree.prototype.removeConfidence = function (dt) {
   } else {
     this.svg.selectAll(".conf").remove();
   }
-  this.props.confidence = false;
+  // this.props.confidence = false;
 };
 
+
 PhyloTree.prototype.drawConfidence = function (dt) {
+  // this.removeConfidence(); // just in case
+  console.log("drawing:", this.svg.selectAll(".conf"))
   if (dt) {
     this.confidence = this.svg.append("g").selectAll(".conf")
       .data(this.nodes)
@@ -980,12 +984,12 @@ PhyloTree.prototype.drawConfidence = function (dt) {
     this.confidence = this.svg.append("g").selectAll(".conf")
       .data(this.nodes)
       .enter()
-        .call(this.drawSingleCI);
+        .call((sel) => this.drawSingleCI(sel, 0.5));
   }
-  this.props.confidence = true;
+  // this.props.confidence = true;
 };
 
-PhyloTree.prototype.drawSingleCI = function (selection, opacity = 0.5) {
+PhyloTree.prototype.drawSingleCI = function (selection, opacity) {
   selection.append("path")
     .attr("class", "conf")
     .attr("id", (d) => "conf_" + d.n.clade)
@@ -993,7 +997,7 @@ PhyloTree.prototype.drawSingleCI = function (selection, opacity = 0.5) {
     .style("stroke", (d) => d.stroke || "#888")
     .style("opacity", opacity)
     .style("fill", "none")
-    .style("stroke-width", (d) => d["stroke-width"] * 2);
+    .style("stroke-width", (d) => d["stroke-width"] * confidenceStrokeMultiplier);
 };
 
 
@@ -1111,8 +1115,6 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
   setTimeout(fadeBack(this.svg, 0.2 * dt), 1.5 * dt);
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
-  // this.updateConfidenceIntervals(dt);
-  // this.drawConfidence(dt);
 };
 
 /**
@@ -1235,7 +1237,6 @@ PhyloTree.prototype.updateTimeBar = function(d){
  */
 PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) {
   // assign new values and decide whether to update
-  console.log("updateMultipleArray styles:", styles)
   this.nodes.forEach(function(d, i) {
     d.update = false;
     /* note that this is not node.attr, but element attr such as <g width="100" vs style="" */
