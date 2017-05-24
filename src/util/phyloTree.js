@@ -214,7 +214,6 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
   //   this.updateTipLabels(100);
   // }
 
-  /* updateGeometry will draw confidence intervals for us, if needed */
   this.updateGeometry(10);
 
   this.svg.selectAll(".regression").remove();
@@ -511,7 +510,6 @@ PhyloTree.prototype.mapToScreen = function(){
     this.nodes.forEach(function(d){d.yTip = tmp_yScale(d.y)});
     this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
     this.nodes.forEach(function(d){d.yBase = tmp_yScale(d.py)});
-    console.log("mapToScreen conf", this.params.confidence)
     if (this.params.confidence && this.layout==="rect"){
       this.nodes.forEach(function(d){d.xConf = [tmp_xScale(d.conf[0]), tmp_xScale(d.conf[1])];});
     }
@@ -955,51 +953,12 @@ PhyloTree.prototype.drawBranchLabels = function() {
 
 /* C O N F I D E N C E    I N T E R V A L S */
 
-/**
- * remove or create confidence intervals.
- * we do not "hide" them as this is a perf burden
- * @param {int} dt -- time of transition in milliseconds
- * @return {undefined} side effects
- */
-// PhyloTree.prototype.updateConfidenceIntervals = function (startFresh = true, dt = false) {
-//   if (startFresh) {
-//     this.removeConfidence(dt);
-//   }
-//   if (this.params.confidence && this.layout === "rect" && this.distance === "num_date") {
-//     // console.log("making CIs");
-//     this.drawConfidence(dt);
-//   } else if (!startFresh) {
-//     // console.log("removing CIs");
-//     this.removeConfidence(dt);
-//   }
-// };
-
-/**
- * remove or create confidence intervals.
- * we do not "hide" them as this is a perf burden
- * @param {int} dt -- time of transition in milliseconds
- * @return {undefined} side effects
- */
-// PhyloTree.prototype.updateConfidenceIntervals = function (startFresh = true, dt = false) {
-//   if (startFresh) {
-//     this.removeConfidence(dt);
-//   }
-//   if (this.params.confidence && this.layout === "rect" && this.distance === "num_date") {
-//     // console.log("making CIs");
-//     this.drawConfidence(dt);
-//   } else if (!startFresh) {
-//     // console.log("removing CIs");
-//     this.removeConfidence(dt);
-//   }
-// };
-
-
 PhyloTree.prototype.removeConfidence = function (dt = 0) {
   this.svg.selectAll(".conf")
     // .transition()
     //   .duration(dt)
       .style("opacity", 0)
-    .remove()
+    .remove();
 };
 
 PhyloTree.prototype.drawConfidence = function (dt) {
@@ -1148,7 +1107,6 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
  * @return {[type]}
  */
 PhyloTree.prototype.updateGeometry = function (dt) {
-  // this.removeConfidence(dt)
   this.svg.selectAll(".tip")
     .filter((d) => d.update)
     .transition()
@@ -1166,10 +1124,14 @@ PhyloTree.prototype.updateGeometry = function (dt) {
         .attr("d", (d) => d.branch[i]);
   }
 
+  this.svg.selectAll(".conf")
+    .filter((d) => d.update)
+    .transition()
+      .duration(dt)
+      .attr("d", (dd) => dd.confLine);
+
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
-  // this.updateConfidenceIntervals(true, dt);
-  // this.drawConfidence(dt);
 };
 
 
