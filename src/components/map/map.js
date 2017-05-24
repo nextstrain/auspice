@@ -389,7 +389,7 @@ class Map extends React.Component {
     const incrementByUnit = "day";
     const timeSliderWindow = Math.ceil((numberDays / 20)); /* in months for now  */ // this is 1/10 the date range in date slider
     let second = moment(first, "YYYY-MM-DD").add(timeSliderWindow, "days");
-    const trailing = true;
+    const trailing = false;
 
 
     if (!window.NEXTSTRAIN) {
