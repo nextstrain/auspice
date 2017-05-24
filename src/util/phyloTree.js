@@ -175,7 +175,7 @@ PhyloTree.prototype.setDefaults = function () {
  * @param  visibility (OPTIONAL) -- array of "visible" or "hidden"
  * @return {null}
  */
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility, confidence) {
   if (branchThickness) {
     this.nodes.forEach(function(d, i) {
       d["stroke-width"] = branchThickness[i];
@@ -218,7 +218,12 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
   this.updateGeometry(10);
 
   this.svg.selectAll(".regression").remove();
-  if (this.layout==="clock" && this.distance === "num_date") this.drawRegression();
+  if (this.layout === "clock" && this.distance === "num_date") {
+    this.drawRegression();
+  }
+  if (confidence) {
+    this.drawConfidence();
+  }
 };
 
 /*
@@ -506,6 +511,7 @@ PhyloTree.prototype.mapToScreen = function(){
     this.nodes.forEach(function(d){d.yTip = tmp_yScale(d.y)});
     this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
     this.nodes.forEach(function(d){d.yBase = tmp_yScale(d.py)});
+    console.log("mapToScreen conf", this.params.confidence)
     if (this.params.confidence && this.layout==="rect"){
       this.nodes.forEach(function(d){d.xConf = [tmp_xScale(d.conf[0]), tmp_xScale(d.conf[1])];});
     }
@@ -955,28 +961,55 @@ PhyloTree.prototype.drawBranchLabels = function() {
  * @param {int} dt -- time of transition in milliseconds
  * @return {undefined} side effects
  */
-PhyloTree.prototype.updateConfidenceIntervals = function (startFresh = true, dt = false) {
-  if (startFresh) {
-    this.removeConfidence(dt);
-  }
-  if (this.params.confidence && this.layout === "rect" && this.distance === "num_date") {
-    // console.log("making CIs");
-    this.drawConfidence(dt);
-  } else if (!startFresh) {
-    // console.log("removing CIs");
-    this.removeConfidence(dt);
-  }
+// PhyloTree.prototype.updateConfidenceIntervals = function (startFresh = true, dt = false) {
+//   if (startFresh) {
+//     this.removeConfidence(dt);
+//   }
+//   if (this.params.confidence && this.layout === "rect" && this.distance === "num_date") {
+//     // console.log("making CIs");
+//     this.drawConfidence(dt);
+//   } else if (!startFresh) {
+//     // console.log("removing CIs");
+//     this.removeConfidence(dt);
+//   }
+// };
+
+/**
+ * remove or create confidence intervals.
+ * we do not "hide" them as this is a perf burden
+ * @param {int} dt -- time of transition in milliseconds
+ * @return {undefined} side effects
+ */
+// PhyloTree.prototype.updateConfidenceIntervals = function (startFresh = true, dt = false) {
+//   if (startFresh) {
+//     this.removeConfidence(dt);
+//   }
+//   if (this.params.confidence && this.layout === "rect" && this.distance === "num_date") {
+//     // console.log("making CIs");
+//     this.drawConfidence(dt);
+//   } else if (!startFresh) {
+//     // console.log("removing CIs");
+//     this.removeConfidence(dt);
+//   }
+// };
+
+
+PhyloTree.prototype.removeConfidence = function (dt = 0) {
+  this.svg.selectAll(".conf")
+    // .transition()
+    //   .duration(dt)
+      .style("opacity", 0)
+    .remove()
 };
 
-PhyloTree.prototype.removeConfidence = function () {
-  this.svg.selectAll(".conf").remove();
-};
+PhyloTree.prototype.drawConfidence = function (dt) {
 
-PhyloTree.prototype.drawConfidence = function () {
   this.confidence = this.svg.append("g").selectAll(".conf")
     .data(this.nodes)
     .enter()
-    .call(this.drawSingleCI);
+    // .transition()
+    //   .duration(dt)
+      .call(this.drawSingleCI);
 };
 
 PhyloTree.prototype.drawSingleCI = function (selection) {
@@ -1035,6 +1068,7 @@ PhyloTree.prototype.updateLayout = function(layout,dt){
  *  @params dt -- time of transition in milliseconds
  */
 PhyloTree.prototype.updateGeometryFade = function(dt) {
+  // this.removeConfidence(dt)
   // fade out branches
   this.svg.selectAll('.branch').filter(function(d) {
       return d.update;
@@ -1104,7 +1138,8 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
   setTimeout(fadeBack(this.svg, 0.2 * dt), 1.5 * dt);
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
-  this.updateConfidenceIntervals(dt);
+  // this.updateConfidenceIntervals(dt);
+  // this.drawConfidence(dt);
 };
 
 /**
@@ -1113,6 +1148,7 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
  * @return {[type]}
  */
 PhyloTree.prototype.updateGeometry = function (dt) {
+  // this.removeConfidence(dt)
   this.svg.selectAll(".tip")
     .filter((d) => d.update)
     .transition()
@@ -1132,7 +1168,8 @@ PhyloTree.prototype.updateGeometry = function (dt) {
 
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
-  this.updateConfidenceIntervals(true, dt);
+  // this.updateConfidenceIntervals(true, dt);
+  // this.drawConfidence(dt);
 };
 
 
@@ -1222,6 +1259,7 @@ PhyloTree.prototype.updateTimeBar = function(d){
  */
 PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) {
   // assign new values and decide whether to update
+  console.log("updateMultipleArray styles:", styles)
   this.nodes.forEach(function(d, i) {
     d.update = false;
     /* note that this is not node.attr, but element attr such as <g width="100" vs style="" */

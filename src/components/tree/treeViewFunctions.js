@@ -321,6 +321,8 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
   const branchAttrToUpdate = {};
   const branchStyleToUpdate = {};
 
+  const confidenceStyleToUpdate = {};
+
   if (changes.visibility) {
     tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
   }
@@ -332,10 +334,17 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
       return d3.rgb(col).brighter([0.65]).toString();
     });
     tipStyleToUpdate["stroke"] = nextProps.tree.nodeColors;
-    branchStyleToUpdate["stroke"] = calcStrokeCols(nextProps.tree, nextProps.colorByLikelihood, nextProps.colorBy);
+    const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByLikelihood, nextProps.colorBy);
+    branchStyleToUpdate["stroke"] = branchStrokes;
+    if (nextProps.confidence) {
+      confidenceStyleToUpdate["stroke"] = branchStrokes;
+    }
   }
   if (changes.branchThickness) {
     branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
+    if (nextProps.confidence) {
+      confidenceStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
+    }
   }
 
   /* implement style * attr changes */
@@ -346,6 +355,10 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
   if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
     // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
     tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, changes.tipTransitionTime);
+  }
+
+  if (Object.keys(confidenceStyleToUpdate).length) {
+    tree.updateMultipleArray(".conf", {}, confidenceStyleToUpdate, changes.branchTransitionTime);
   }
 
   if (changes.layout) { /* swap layouts */

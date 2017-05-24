@@ -80,10 +80,10 @@ class TreeView extends React.Component {
     let tree = this.state.tree;
     const changes = funcs.salientPropChanges(this.props, nextProps, tree);
     /* usefull for debugging: */
-    // console.log("CWRP Changes:",
-    //    Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {
-    //      o[k] = changes[k]; return o;
-    //    }, {}));
+    console.log("CWRP Changes:",
+       Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {
+         o[k] = changes[k]; return o;
+       }, {}));
 
     if (changes.dataInFlux) {
       this.setState({tree: null});
@@ -152,7 +152,8 @@ class TreeView extends React.Component {
           tipLabelSize: funcs.tipLabelSize.bind(this)
         },
         nextProps.tree.branchThickness, /* guarenteed to be in redux by now */
-        nextProps.tree.visibility
+        nextProps.tree.visibility,
+        nextProps.confidence
       );
       return myTree;
     } else {
