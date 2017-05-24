@@ -967,7 +967,6 @@ PhyloTree.prototype.removeConfidence = function (dt) {
   // this.props.confidence = false;
 };
 
-
 PhyloTree.prototype.drawConfidence = function (dt) {
   // this.removeConfidence(); // just in case
   console.log("drawing:", this.svg.selectAll(".conf"))
@@ -1045,7 +1044,7 @@ PhyloTree.prototype.updateLayout = function(layout,dt){
  *  @params dt -- time of transition in milliseconds
  */
 PhyloTree.prototype.updateGeometryFade = function(dt) {
-  // this.removeConfidence(dt)
+  this.removeConfidence(dt)
   // fade out branches
   this.svg.selectAll('.branch').filter(function(d) {
       return d.update;
@@ -1115,6 +1114,11 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
   setTimeout(fadeBack(this.svg, 0.2 * dt), 1.5 * dt);
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
+
+  /* if conditions are met then add back the confidence intervals */
+  if (this.layout === "rect") {
+    setTimeout(() => this.drawConfidence(false, true), 1.5 * dt);
+  }
 };
 
 /**
