@@ -4,14 +4,13 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import d3 from "d3";
-import * as globals from "../../util/globals";
 import Card from "../framework/card";
 import Legend from "./legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
 import PhyloTree from "../../util/phyloTree";
 import { ReactSVGPanZoom } from "react-svg-pan-zoom";
-import { mediumTransitionDuration } from "../../util/globals";
+import { mediumTransitionDuration, twoColumnBreakpoint } from "../../util/globals";
 import InfoPanel from "./infoPanel";
 import BranchSelectedPanel from "./branchSelectedPanel";
 import TipSelectedPanel from "./tipSelectedPanel";
@@ -29,20 +28,13 @@ there are actually backlinks from the phylotree tree
 @connect((state) => {
   return {
     tree: state.tree,
-    metadata: state.metadata.metadata,
-    colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
-    map: state.map,
     colorBy: state.controls.colorBy,
     colorByLikelihood: state.controls.colorByLikelihood,
     layout: state.controls.layout,
     confidence: state.controls.confidence,
     showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
-    sequences: state.sequences,
-    selectedLegendItem: state.controls.selectedLegendItem,
-    colorScale: state.controls.colorScale,
-    datasetGuid: state.tree.datasetGuid,
     mutType: state.controls.mutType
   };
 })
@@ -162,7 +154,7 @@ class TreeView extends React.Component {
 
   render() {
     const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > twoColumnBreakpoint ? .5 : 1,
       vertical: 1.0,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,

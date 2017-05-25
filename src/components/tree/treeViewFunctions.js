@@ -268,9 +268,9 @@ const calcStrokeCols = (tree, likelihoods, colorBy) => {
  * @return {obj} values are mostly bools, but not always
  */
 export const salientPropChanges = (props, nextProps, tree) => {
-  const dataInFlux = !nextProps.datasetGuid && tree;
-  const datasetChanged = nextProps.tree.nodes && nextProps.datasetGuid && nextProps.datasetGuid !== props.datasetGuid;
-  const firstDataReady = tree === null && nextProps.datasetGuid && nextProps.tree.nodes !== null;
+  const dataInFlux = !nextProps.tree.datasetGuid && tree;
+  const datasetChanged = nextProps.tree.nodes && nextProps.tree.datasetGuid && nextProps.tree.datasetGuid !== props.tree.datasetGuid;
+  const firstDataReady = tree === null && nextProps.tree.datasetGuid && nextProps.tree.nodes !== null;
 
   const visibility = !!nextProps.tree.visibilityVersion && props.tree.visibilityVersion !== nextProps.tree.visibilityVersion
   const tipRadii = !!nextProps.tree.tipRadiiVersion && props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion;
