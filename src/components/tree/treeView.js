@@ -72,10 +72,10 @@ class TreeView extends React.Component {
     let tree = this.state.tree;
     const changes = funcs.salientPropChanges(this.props, nextProps, tree);
     /* usefull for debugging: */
-    console.log("CWRP Changes:",
-       Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {
-         o[k] = changes[k]; return o;
-       }, {}));
+    // console.log("CWRP Changes:",
+    //    Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {
+    //      o[k] = changes[k]; return o;
+    //    }, {}));
 
     if (changes.dataInFlux) {
       this.setState({tree: null});
@@ -167,8 +167,10 @@ class TreeView extends React.Component {
       <Card center title={cardTitle}>
         <Legend sidebar={this.props.sidebar}/>
         <InfoPanel
-          mutType={this.props.mutType}
           tree={this.state.tree}
+          mutType={this.props.mutType}
+          confidence={this.props.confidence.display && this.props.confidence.on}
+          distanceMeasure={this.props.distanceMeasure}
           hovered={this.state.hovered}
           viewer={this.Viewer}
           colorBy={this.props.colorBy}
