@@ -392,8 +392,6 @@ class Map extends React.Component {
     const incrementByUnit = "day";
     const timeSliderWindow = Math.ceil((numberDays / 20)); /* in months for now  */ // this is 1/10 the date range in date slider
     let second = moment(first, "YYYY-MM-DD").add(timeSliderWindow, "days");
-    const trailing = false;
-
 
     if (!window.NEXTSTRAIN) {
       window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
@@ -408,7 +406,7 @@ class Map extends React.Component {
       /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
       this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
 
-      if (trailing) {
+      if (this.props.mapAnimationPathTrailing) {
         first = first.add(incrementBy, incrementByUnit);
       }
       second = second.add(incrementBy, incrementByUnit);
