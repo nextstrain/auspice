@@ -107,6 +107,18 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       absoluteDateMax: action.data
     });
+  case types.CHANGE_ANIMATION_TIME:
+    return Object.assign({}, state, {
+      mapAnimationDurationInMilliseconds: action.data
+    })
+  case types.CHANGE_ANIMATION_PATHTRAILING:
+    return Object.assign({}, state, {
+      mapAnimationPathTrailing: action.data
+    })
+  case types.CHANGE_ANIMATION_START:
+    return Object.assign({}, state, {
+      mapAnimationStartDate: action.data
+    })
   case types.CHANGE_COLOR_BY:
     const newState = Object.assign({}, state, {
       colorBy: action.data
@@ -136,6 +148,11 @@ const Controls = (state = getDefaultState(), action) => {
         extras["dateMax"] = action.data.date_range.date_max;
         extras["absoluteDateMax"] = action.data.date_range.date_max;
       }
+    }
+
+    if (action.data.date_range && action.data.date_range.date_min) {
+      extras["mapAnimationStartDate"] = action.data.date_range.date_min;
+      console.log('we receive date min as, ', action.data.date_range.date_min)
     }
 
     if (action.data.analysisSlider) {
