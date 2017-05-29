@@ -61,7 +61,7 @@
     "radium": "0.18.1",
     "react": "15.3.1",
     "react-autosuggest": "^3.9.0",
-    "react-datepicker": "^0.29.0",
+    "react-datepicker": "0.46.0",
     "react-dom": "^0.14.0",
     "react-fontawesome": "^0.3.3",
     "react-ga": "^2.1.2",
