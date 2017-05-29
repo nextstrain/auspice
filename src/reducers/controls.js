@@ -43,7 +43,7 @@ const getDefaultState = function () {
     dateFormat: d3.time.format("%Y-%m-%d"),
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
-    mapAnimationPathTrailing: false
+    mapAnimationPathTrailing: false,
   };
 };
 
@@ -152,7 +152,6 @@ const Controls = (state = getDefaultState(), action) => {
 
     if (action.data.date_range && action.data.date_range.date_min) {
       extras["mapAnimationStartDate"] = action.data.date_range.date_min;
-      console.log('we receive date min as, ', action.data.date_range.date_min)
     }
 
     if (action.data.analysisSlider) {
@@ -197,9 +196,7 @@ const Controls = (state = getDefaultState(), action) => {
       if (action.data.defaults.layout) {
         extras["layout"] = action.data.defaults.layout;
       }
-      if (action.data.defaults.mapAnimationStartDate) {
-        extras["mapAnimationStartDate"] = action.data.defaults.mapAnimationStartDate;
-      }
+
       if (action.data.defaults.mapTriplicate) {
         extras["mapTriplicate"] = (action.data.defaults.mapTriplicate == 'false' || action.data.defaults.mapTriplicate == 'False') ? false : true; //convert string to boolean; default is true; turned off with either false (js) or False (python)
       }
