@@ -1,5 +1,6 @@
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "./globals";
 import { getGenotype } from "./getGenotype";
+import { scalePow } from "d3-scale";
 
 export const gatherTips = (node, tips) => {
 
@@ -244,6 +245,16 @@ export const calcVisibility = function (tree, controls) {
       d.attr.num_date >= lowerLimit && d.attr.num_date <= upperLimit
     ));
 
+    // if we have an analysis slider active, then we must filter on that as well
+    // note that min date for analyis doesnt apply
+    if (controls.analysisSlider && controls.analysisSlider.valid) {
+      /* extra slider is numerical rounded to 2dp */
+      const valid = tree.nodes.map((d) =>
+        d.attr[controls.analysisSlider.key] ? Math.round(d.attr[controls.analysisSlider.key] * 100) / 100 <= controls.analysisSlider.value : true
+      );
+      visibility = visibility.map((cv, idx) => (cv && valid[idx]));
+    }
+
     // IN VIEW FILTERING (internal + terminal nodes)
     /* edge case: this fn may be called before the shell structure of the nodes
     has been created (i.e. phyloTree's not run yet). In this case, it's
@@ -285,3 +296,14 @@ export const calcVisibility = function (tree, controls) {
   }
   return "visible";
 };
+
+
+export const branchOpacityConstant = 0.4;
+export const branchOpacityFunction = scalePow()
+  .exponent([0.3])
+  .domain([0, 1])
+  .range([branchOpacityConstant, 1])
+  .clamp(true);
+// entropy calculation precomputed in augur
+// export const calcEntropyOfValues = (vals) =>
+//   vals.map((v) => v * Math.log(v + 1E-10)).reduce((a, b) => a + b, 0) * -1 / Math.log(vals.length);

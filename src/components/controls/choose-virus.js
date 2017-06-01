@@ -3,6 +3,7 @@ import Radium from "radium";
 import { datasets } from "../../util/globals";
 import ChooseVirusSelect from "./choose-virus-select";
 import parseParams from "../../util/parseParams";
+import { connect } from "react-redux";
 
 /* not sure if these functions are necessary, really. If so, i'll
 move them to util/urlHelpers.js
@@ -15,6 +16,12 @@ const tidyUpPathname = function (pathname) {
          : tmppath;
 };
 
+@connect((state) => {
+  return {
+    datasetPathName: state.controls.datasetPathName, /* triggers component update */
+    geoResolution: state.controls.geoResolution
+  };
+})
 @Radium
 class ChooseVirus extends React.Component {
   constructor(props) {

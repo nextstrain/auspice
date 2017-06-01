@@ -88,6 +88,18 @@ export const changeDateFilter = function (newMin, newMax) {
   };
 };
 
+export const changeAnalysisSliderValue = function (value) {
+  return (dispatch, getState) => {
+    const { tree } = getState();
+    dispatch({type: types.CHANGE_ANALYSIS_VALUE, value});
+    /* initially, the tree isn't loaded, so don't bother trying to do things */
+    if (tree.loadStatus === 2) {
+      dispatch(updateVisibility());
+      dispatch(updateBranchThickness());
+    }
+  };
+};
+
 /* zoomToClade takes care of setting tipVis and branchThickness.
 Note that the zooming / tree stuff is done imperitively by phyloTree */
 export const zoomToClade = function (idxOfInViewRootNode) {
@@ -149,3 +161,11 @@ export const changeMutType = (data) => {
     dispatch({type: types.TOGGLE_MUT_TYPE, data});
   };
 };
+
+export const toggleColorByLikelihood = () => ({
+  type: types.TOGGLE_COLORBY_LIKELIHOOD
+});
+
+export const toggleConfidence = () => ({
+  type: types.TOGGLE_CONFIDENCE
+});
