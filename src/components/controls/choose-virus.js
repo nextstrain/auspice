@@ -1,6 +1,6 @@
 import React from "react";
 import Radium from "radium";
-import { datasets } from "../../util/globals";
+import { datasets } from "../../util/datasets";
 import ChooseVirusSelect from "./choose-virus-select";
 import parseParams from "../../util/parseParams";
 import { connect } from "react-redux";

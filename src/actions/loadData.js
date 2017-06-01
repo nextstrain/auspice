@@ -2,7 +2,7 @@
 /*eslint-env browser*/
 /*eslint no-console: 0*/
 import { updateColorScale, updateNodeColors } from "./colors";
-import { dataURLStem } from "../util/globals";
+import { dataURLStem } from "../util/datasets";
 import * as types from "./types";
 import d3 from "d3";
 import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
