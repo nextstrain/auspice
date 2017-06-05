@@ -161,3 +161,11 @@ export const changeMutType = (data) => {
     dispatch({type: types.TOGGLE_MUT_TYPE, data});
   };
 };
+
+export const toggleColorByLikelihood = () => ({
+  type: types.TOGGLE_COLORBY_LIKELIHOOD
+});
+
+export const toggleConfidence = () => ({
+  type: types.TOGGLE_CONFIDENCE
+});

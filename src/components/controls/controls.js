@@ -1,9 +1,10 @@
 import React from "react";
 import Flex from "../framework/flex";
 import SelectLabel from "../framework/select-label";
-import ToggleBranchLabels from "./toggle-branch-labels";
+// import ToggleBranchLabels from "./toggle-branch-labels";
 import ColorBy from "./color-by";
-import Search from "./search";
+import Toggle from "./toggle";
+// import Search from "./search";
 import DateRangeInputs from "./date-range-inputs";
 import AnalysisDateSlider from "./analysis-date-slider";
 import ChooseLayout from "./choose-layout";
@@ -14,6 +15,7 @@ import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import { connect } from "react-redux";
+import { toggleColorByLikelihood, toggleConfidence } from "../../actions/treeProperties";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -21,10 +23,17 @@ const header = (text) => (
   </span>
 );
 
-@connect((state) => ({analysisSlider: state.controls.analysisSlider}))
+@connect((state) => ({
+  analysisSlider: state.controls.analysisSlider,
+  confidence: state.controls.confidence,
+  colorByLikelihood: state.controls.colorByLikelihood
+}))
 class Controls extends React.Component {
   static propTypes = {
-    analysisSlider: React.PropTypes.any
+    analysisSlider: React.PropTypes.any,
+    colorByLikelihood: React.PropTypes.object.isRequired,
+    confidence: React.PropTypes.object.isRequired,
+    dispatch: React.PropTypes.func
   }
   getStyles() {
     return {};
@@ -43,7 +52,7 @@ class Controls extends React.Component {
   }
   // restore <ToggleBranchLabels/> below when perf is improved
   render() {
-    const styles = this.getStyles();
+    // const styles = this.getStyles();
     return (
       <Flex
         direction="column"
@@ -65,6 +74,12 @@ class Controls extends React.Component {
 
         {header("Color By")}
         <ColorBy/>
+        <Toggle
+          display={this.props.colorByLikelihood.display}
+          on={this.props.colorByLikelihood.on}
+          callback={() => this.props.dispatch(toggleColorByLikelihood())}
+          label="Likelihoods"
+        />
 
         {header("Tree Options")}
 
@@ -73,6 +88,12 @@ class Controls extends React.Component {
 
         <SelectLabel text="Branch Length"/>
         <ChooseMetric/>
+        <Toggle
+          display={this.props.confidence.display}
+          on={this.props.confidence.on}
+          callback={() => this.props.dispatch(toggleConfidence())}
+          label="Confidence Intervals"
+        />
 
         {header("Map Options")}
         <SelectLabel text="Geographic resolution"/>
