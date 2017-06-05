@@ -8,7 +8,7 @@ import { determineColorByGenotypeType } from "../util/urlHelpers";
 
 const checkLikelihood = function (attrs, colorBy) {
   if (attrs.indexOf(colorBy + "_likelihoods") > -1) {
-    return {display: true, on: true};
+    return {display: true, on: false};
   }
   return {display: false, on: false};
 };
@@ -115,7 +115,7 @@ const Controls = (state = getDefaultState(), action) => {
       base["dateMax"] = action.query.dmax;
     }
     base["confidence"] = Object.keys(action.tree.attr).indexOf("num_date_confidence") > -1 ?
-      {exists: true, display: true, on: true} : {exists: false, display: false, on: false};
+      {exists: true, display: true, on: false} : {exists: false, display: false, on: false};
     if (base.confidence.exists && base.layout !== "rect") {
       base.confidence.display = false;
     }

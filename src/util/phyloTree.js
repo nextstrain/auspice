@@ -176,7 +176,7 @@ PhyloTree.prototype.setDefaults = function () {
  * @param  visibility (OPTIONAL) -- array of "visible" or "hidden"
  * @return {null}
  */
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility, drawConfidence) {
   if (branchThickness) {
     this.nodes.forEach(function(d, i) {
       d["stroke-width"] = branchThickness[i];
@@ -222,7 +222,7 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
     this.drawRegression();
   }
   this.removeConfidence();
-  if (this.params.confidence) {
+  if (drawConfidence) {
     this.drawConfidence();
   }
 };
