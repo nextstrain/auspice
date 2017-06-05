@@ -13,7 +13,7 @@ const checkLikelihood = function (attrs, colorBy) {
   return {display: false, on: false};
 };
 
-const ensureDatesGoBackFarEnough = function (newState, rootAttr) {
+const getMinDateViaRoot = function (rootAttr) {
   const rootDate = Object.keys(rootAttr).indexOf("num_date_confidence") > -1 ?
     rootAttr.num_date_confidence[0] : rootAttr.num_date;
   const years = rootDate.toString().split(".")[0];
@@ -21,10 +21,7 @@ const ensureDatesGoBackFarEnough = function (newState, rootAttr) {
   if (days === "0") {days = 1;}
   const root = moment("".concat(years, "-", days), "Y-DDD");
   root.subtract(1, "days"); /* slider should be earlier than actual day */
-  if (root.isBefore(moment(newState.absoluteDateMin, "YYYY-MM-DD"))) {
-    newState.absoluteDateMin = root.format("YYYY-MM-DD");
-    newState.dateMin = root.format("YYYY-MM-DD");
-  }
+  return root;
 };
 
 /* defaultState is a fn so that we can re-create it
@@ -64,13 +61,19 @@ const Controls = (state = getDefaultState(), action) => {
   case types.NEW_DATASET:
     const base = getDefaultState();
     base["datasetPathName"] = action.datasetPathName;
+    const rootDate = getMinDateViaRoot(action.tree.attr);
+    base["dateMin"] = rootDate.format("YYYY-MM-DD");
+    base["absoluteDateMin"] = rootDate.format("YYYY-MM-DD");
     /* overwrite base state with data from the metadata JSON */
     if (action.meta.date_range) {
       if (action.meta.date_range.date_min) {
-        base["dateMin"] = action.meta.date_range.date_min;
-        base["absoluteDateMin"] = action.meta.date_range.date_min;
+        if (rootDate.isBefore(moment(action.meta.date_range.date_min, "YYYY-MM-DD"))) {
+          base["dateMin"] = action.meta.date_range.date_min;
+        }
       }
       if (action.meta.date_range.date_max) {
+        /* this may be useful if, e.g., one were to want to display an outbreak
+        from 2000-2005 (the default is the present day) */
         base["dateMax"] = action.meta.date_range.date_max;
         base["absoluteDateMax"] = action.meta.date_range.date_max;
       }
@@ -92,8 +95,6 @@ const Controls = (state = getDefaultState(), action) => {
         base["layout"] = action.meta.defaults.layout;
       }
     }
-    /* check dates are OK before potentially overwriting dateMin via URL */
-    ensureDatesGoBackFarEnough(base, action.tree.attr);
     /* now overwrite state with data from the URL */
     if (action.query.l) {
       base["layout"] = action.query.l;
