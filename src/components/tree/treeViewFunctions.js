@@ -85,6 +85,12 @@ export const onBranchHover = function (d, x, y) {
     this.state.tree.svg.select(id)
       .style("stroke", (e) => e["stroke"]);
   }
+  if (this.props.confidence.exists && this.props.confidence.display && !this.props.confidence.on) {
+    this.state.tree.svg.append("g").selectAll(".conf")
+      .data([d])
+      .enter()
+        .call((sel) => this.state.tree.drawSingleCI(sel, 0.5));
+  }
   this.setState({
     hovered: {d, type: ".branch", x, y}
   });
@@ -123,6 +129,9 @@ export const onBranchLeave = function (d) {
       .style("stroke", (o) =>
         d3.rgb(d3.interpolateRgb(o["stroke"], "#BBB")(branchOpacityConstant)).toString()
       );
+  }
+  if (this.props.confidence.exists && this.props.confidence.display && !this.props.confidence.on) {
+    this.state.tree.removeConfidence(mediumTransitionDuration);
   }
   if (this.state.hovered) {
     this.setState({hovered: null});
