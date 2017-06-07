@@ -82,8 +82,11 @@ export const onBranchHover = function (d, x, y) {
         d3.rgb(d3.interpolateRgb(o["stroke"], "#555")(branchOpacityFunction(entropy))).toString()
       );
   } else {
+    /* make the stroke colour darker */
     this.state.tree.svg.select(id)
-      .style("stroke", (e) => e["stroke"]);
+      .style("stroke", (o) =>
+        d3.rgb(d3.interpolateRgb(o["stroke"], "#555")(branchOpacityConstant)).toString()
+      );
   }
   if (this.props.confidence.exists && this.props.confidence.display && !this.props.confidence.on) {
     this.state.tree.svg.append("g").selectAll(".conf")
@@ -115,21 +118,8 @@ export const onBranchClick = function (d) {
 export const onBranchLeave = function (d) {
   // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
   const id = "#branch_S_" + d.n.clade;
-  if (this.props.colorByLikelihood.on) {
-    const attr = this.props.tree.nodes[d.n.arrayIdx].attr;
-    // const lhd = attr[this.props.colorBy + "_likelihoods"][attr[this.props.colorBy]]
-    const entropy = attr[this.props.colorBy + "_entropy"];
-    // console.log("max lhd:", lhd, "entropy:", entropy, "modifier:", branchOpacityFunction(entropy))
-    this.state.tree.svg.select(id)
-      .style("stroke", (o) =>
-        d3.rgb(d3.interpolateRgb(o["stroke"], "#BBB")(branchOpacityFunction(entropy))).toString()
-      );
-  } else {
-    this.state.tree.svg.select(id)
-      .style("stroke", (o) =>
-        d3.rgb(d3.interpolateRgb(o["stroke"], "#BBB")(branchOpacityConstant)).toString()
-      );
-  }
+  this.state.tree.svg.select(id)
+    .style("stroke", (el) => el["stroke"]);
   if (this.props.confidence.exists && this.props.confidence.display && !this.props.confidence.on) {
     this.state.tree.removeConfidence(mediumTransitionDuration);
   }
