@@ -54,7 +54,9 @@ const colorByInfoJSX = (d, likelihoods, colorBy, distanceMeasure, confidence) =>
       return (<p>{`Divergence: ${prettyString(d.attr.div.toExponential(3))}`}</p>);
     } else if (confidence) {
       return (<p>
-        {`Date Confidence Interval:
+        {`Date: ${prettyString(d.attr[colorBy])}`}
+        <br/>
+        {`Date 90% CI:
           ${d.attr.num_date_confidence[0].toFixed(2)} - ${d.attr.num_date_confidence[1].toFixed(2)}`}
       </p>);
     } else {

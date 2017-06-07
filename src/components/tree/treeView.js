@@ -170,12 +170,12 @@ class TreeView extends React.Component {
         <InfoPanel
           tree={this.state.tree}
           mutType={this.props.mutType}
-          confidence={this.props.confidence.display && this.props.confidence.on}
+          confidence={this.props.confidence.display}
           distanceMeasure={this.props.distanceMeasure}
           hovered={this.state.hovered}
           viewer={this.Viewer}
           colorBy={this.props.colorBy}
-          likelihoods={this.props.colorByLikelihood.on}
+          likelihoods={this.props.colorByLikelihood.display}
         />
         <BranchSelectedPanel
           responsive={responsive}
