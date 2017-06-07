@@ -73,20 +73,24 @@ export const onTipClick = function (d) {
 
 export const onBranchHover = function (d, x, y) {
   // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
-  const id = "#branch_S_" + d.n.clade;
+  const ids = ["#branch_S_" + d.n.clade, "#branch_T_" + d.n.clade];
   if (this.props.colorByLikelihood.on) {
     const attr = this.props.tree.nodes[d.n.arrayIdx].attr;
     const entropy = attr[this.props.colorBy + "_entropy"];
-    this.state.tree.svg.select(id)
-      .style("stroke", (o) =>
-        d3.rgb(d3.interpolateRgb(o["stroke"], "#555")(branchOpacityFunction(entropy))).toString()
-      );
+    for (const id of ids) {
+      this.state.tree.svg.select(id)
+        .style("stroke", (o) =>
+          d3.rgb(d3.interpolateRgb(o["stroke"], "#555")(branchOpacityFunction(entropy))).toString()
+        );
+    }
   } else {
     /* make the stroke colour darker */
-    this.state.tree.svg.select(id)
-      .style("stroke", (o) =>
-        d3.rgb(d3.interpolateRgb(o["stroke"], "#555")(branchOpacityConstant)).toString()
-      );
+    for (const id of ids) {
+      this.state.tree.svg.select(id)
+        .style("stroke", (o) =>
+          d3.rgb(d3.interpolateRgb(o["stroke"], "#555")(branchOpacityConstant)).toString()
+        );
+    }
   }
   if (this.props.confidence.exists && this.props.confidence.display && !this.props.confidence.on) {
     this.state.tree.svg.append("g").selectAll(".conf")
@@ -116,10 +120,10 @@ export const onBranchClick = function (d) {
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function (d) {
-  // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
-  const id = "#branch_S_" + d.n.clade;
-  this.state.tree.svg.select(id)
-    .style("stroke", (el) => el["stroke"]);
+  for (const id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
+    this.state.tree.svg.select(id)
+      .style("stroke", (el) => el["stroke"]);
+  }
   if (this.props.confidence.exists && this.props.confidence.display && !this.props.confidence.on) {
     this.state.tree.removeConfidence(mediumTransitionDuration);
   }
