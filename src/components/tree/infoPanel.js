@@ -2,6 +2,8 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 import { prettyString } from "./tipSelectedPanel";
+import { floatDateToMoment } from "../../util/dateHelpers";
+import moment from "moment";
 
 /**
  * This creates a table of the confidence values (used for opacity of branches)
@@ -51,16 +53,15 @@ const colorByInfoJSX = (d, colorByConfidence, colorBy, distanceMeasure, temporal
     if (distanceMeasure === "div") {
       return (<p>{`Divergence: ${prettyString(d.attr.div.toExponential(3))}`}</p>);
     }
+    const date = floatDateToMoment(d.attr[colorBy]).format("YYYY-MM-DD");
     if (temporalConfidence) {
       return (<p>
-        {`Date: ${prettyString(d.attr[colorBy])}`}
+        {`Date: ${date}`}
         <br/>
-        {`Date Confidence Interval:
-          ${d.attr.num_date_confidence[0].toFixed(2)} - ${d.attr.num_date_confidence[1].toFixed(2)}`}
+        {`Date Confidence Interval: (${floatDateToMoment(d.attr.num_date_confidence[0]).format("YYYY-MM-DD")}, ${floatDateToMoment(d.attr.num_date_confidence[1]).format("YYYY-MM-DD")})`}
       </p>);
-    } else {
-      return (<p>{`Date: ${prettyString(d.attr[colorBy])}`}</p>);
     }
+    return (<p>{`Date: ${date}`}</p>);
   } else if (colorByConfidence === true) { // COLOURING WITH CONFIDENCES PRESENT
     return confidenceTableJSX(d.attr, colorBy);
   } else if (colorBy.slice(0, 2) === "gt") { // COLOURING BY GENOTYPE

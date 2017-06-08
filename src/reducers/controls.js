@@ -5,10 +5,11 @@ import getColorScale from "../util/getColorScale";
 import moment from 'moment';
 import d3 from "d3";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
+import { floatDateToMoment } from "../util/dateHelpers";
 
 const checkColorByConfidence = function (attrs, colorBy) {
   if (colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1) {
-    return {display: true, on: false};
+    return {display: true, on: true};
   }
   return {display: false, on: false};
 };
@@ -16,10 +17,7 @@ const checkColorByConfidence = function (attrs, colorBy) {
 const getMinDateViaRoot = function (rootAttr) {
   const rootDate = Object.keys(rootAttr).indexOf("num_date_confidence") > -1 ?
     rootAttr.num_date_confidence[0] : rootAttr.num_date;
-  const years = rootDate.toString().split(".")[0];
-  let days = Math.floor(rootDate % 1 * 365.25).toString();
-  if (days === "0") {days = 1;}
-  const root = moment("".concat(years, "-", days), "Y-DDD");
+  const root = floatDateToMoment(rootDate);
   root.subtract(1, "days"); /* slider should be earlier than actual day */
   return root;
 };
