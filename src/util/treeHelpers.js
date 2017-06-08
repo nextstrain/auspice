@@ -152,6 +152,7 @@ export const getTipColorAttribute = function (node, colorScale, sequences) {
 export const calcNodeColor = function (tree, colorScale, sequences) {
   if (tree && tree.nodes && colorScale && colorScale.colorBy) {
     const nodeColorAttr = tree.nodes.map((n) => getTipColorAttribute(n, colorScale, sequences));
+    // console.log(nodeColorAttr.map((n) => colorScale.scale(n)))
     return nodeColorAttr.map((n) => colorScale.scale(n));
   }
   return null;
@@ -297,7 +298,7 @@ export const calcVisibility = function (tree, controls) {
   return "visible";
 };
 
-
+export const branchInterpolateColour = "#BBB";
 export const branchOpacityConstant = 0.4;
 export const branchOpacityFunction = scalePow()
   .exponent([0.3])
