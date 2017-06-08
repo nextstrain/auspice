@@ -15,7 +15,7 @@ import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import { connect } from "react-redux";
-import { toggleColorByConfidence, toggleTemporalConfidence } from "../../actions/treeProperties";
+import { toggleTemporalConfidence } from "../../actions/treeProperties";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -26,12 +26,10 @@ const header = (text) => (
 @connect((state) => ({
   analysisSlider: state.controls.analysisSlider,
   temporalConfidence: state.controls.temporalConfidence,
-  colorByConfidence: state.controls.colorByConfidence
 }))
 class Controls extends React.Component {
   static propTypes = {
     analysisSlider: React.PropTypes.any,
-    colorByConfidence: React.PropTypes.object.isRequired,
     temporalConfidence: React.PropTypes.object.isRequired,
     dispatch: React.PropTypes.func
   }
@@ -74,12 +72,6 @@ class Controls extends React.Component {
 
         {header("Color By")}
         <ColorBy/>
-        <Toggle
-          display={this.props.colorByConfidence.display}
-          on={this.props.colorByConfidence.on}
-          callback={() => this.props.dispatch(toggleColorByConfidence())}
-          label="Confidence"
-        />
 
         {header("Tree Options")}
 

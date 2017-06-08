@@ -8,10 +8,7 @@ import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { floatDateToMoment } from "../util/dateHelpers";
 
 const checkColorByConfidence = function (attrs, colorBy) {
-  if (colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1) {
-    return {display: true, on: true};
-  }
-  return {display: false, on: false};
+  return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
 };
 
 const getMinDateViaRoot = function (rootAttr) {
@@ -237,13 +234,6 @@ const Controls = (state = getDefaultState(), action) => {
   case types.TOGGLE_MUT_TYPE:
     return Object.assign({}, state, {
       mutType: action.data
-    });
-  case types.TOGGLE_COLORBY_CONF:
-    return Object.assign({}, state, {
-      colorByConfidence: {
-        display: state.colorByConfidence.display,
-        on: !state.colorByConfidence.on
-      }
     });
   case types.TOGGLE_TEMPORAL_CONF:
     return Object.assign({}, state, {

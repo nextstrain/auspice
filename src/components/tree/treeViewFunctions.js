@@ -76,7 +76,7 @@ export const onTipClick = function (d) {
 export const onBranchHover = function (d, x, y) {
   /* emphasize the color of the branch */
   for (const id of ["#branch_S_" + d.n.clade, "#branch_T_" + d.n.clade]) {
-    if (this.props.colorByConfidence.on) {
+    if (this.props.colorByConfidence) {
       this.state.tree.svg.select(id)
         .style("stroke", (el) => {
           const ramp = branchOpacityFunction(this.props.tree.nodes[el.n.arrayIdx].attr[this.props.colorBy + "_entropy"]);
@@ -275,7 +275,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
   const colorBy = !!nextProps.tree.nodeColorsVersion &&
       (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
       nextProps.tree.nodeColorsVersion === 1 ||
-      nextProps.colorByConfidence.on !== props.colorByConfidence.on);
+      nextProps.colorByConfidence !== props.colorByConfidence);
   const branchThickness = props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion;
   const layout = props.layout !== nextProps.layout;
   const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
@@ -287,7 +287,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
   /* sometimes we may want smooth transitions */
   let branchTransitionTime = false; /* false = no transition. Use when speed is critical */
   let tipTransitionTime = false;
-  if (nextProps.colorByConfidence.on !== props.colorByConfidence.on) {
+  if (nextProps.colorByConfidence !== props.colorByConfidence) {
     branchTransitionTime = mediumTransitionDuration;
   }
 
@@ -334,7 +334,7 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
     tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
       return d3.rgb(col).brighter([0.65]).toString();
     });
-    const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByConfidence.on, nextProps.colorBy);
+    const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy);
     branchStyleToUpdate["stroke"] = branchStrokes;
     tipStyleToUpdate["stroke"] = branchStrokes;
     if (nextProps.confidence) {

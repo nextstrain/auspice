@@ -162,11 +162,6 @@ export const changeMutType = (data) => {
   };
 };
 
-export const toggleColorByConfidence = () => ({
-  type: types.TOGGLE_COLORBY_CONF
-});
-
-/* should be renamed to temporal confidnce */
 export const toggleTemporalConfidence = () => ({
   type: types.TOGGLE_TEMPORAL_CONF
 });
