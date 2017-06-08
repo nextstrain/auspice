@@ -4,17 +4,17 @@ import { infoPanelStyles } from "../../globalStyles";
 import { prettyString } from "./tipSelectedPanel";
 
 /**
- * This creates a table of the likelihood values (used for opacity of branches)
+ * This creates a table of the confidence values (used for opacity of branches)
  * for each of the legend items (e.g. for each country)
  * @param  {object} attrs keys: items (e.g. countries)
- * @param  {string} colorBy e.g. country. Known that colorBy + "_likelihoods" is
+ * @param  {string} colorBy e.g. country. Guaranteed that colorBy + "_confidence" is
  * a valid key of attrs
  * @return {JSX} table DOM JSX
  */
-const likelihoodTableJSX = (attrs, colorBy) => {
-  const lkey = colorBy + "_likelihoods";
+const confidenceTableJSX = (attrs, colorBy) => {
+  const lkey = colorBy + "_confidence";
   if (Object.keys(attrs).indexOf(lkey) === -1) {
-    console.log("Error - couldn't find likelihoods for ", lkey);
+    console.log("Error - couldn't find confidence vals for ", lkey);
     return null;
   }
   const vals = Object.keys(attrs[lkey])
@@ -23,11 +23,11 @@ const likelihoodTableJSX = (attrs, colorBy) => {
   return (
     <g>
       <p style={{marginBottom: "-0.7em"}}>
-        {`${prettyString(colorBy)} likelihoods:`}
+        {`${prettyString(colorBy)} confidence:`}
       </p>
       {vals.map((k, i) => (
         <p key={i} style={{fontWeight: "200", marginBottom: "-0.7em", marginLeft: "1em"}}>
-          {`• ${attrs[lkey][k].toFixed(2).toString()} - ${prettyString(k)}`}
+          {`• ${(100 * attrs[lkey][k]).toFixed(0)}% - ${prettyString(k)}`}
         </p>
       ))}
       <br/>
@@ -37,32 +37,33 @@ const likelihoodTableJSX = (attrs, colorBy) => {
 
 /**
  * Display information about the currently highlighed branch
- * Depends on whether likelihood is available, whether confidence intervals are present
- * etc
+ * Depends on whether confidence vals are available, whether temporal
+ * confidence intervals are present etc
  * @param  {node} d branch node currently highlighted
- * @param  {bool} likelihoods should these be displayed, if applicable?
+ * @param  {bool} colorByConfidence should these (colorBy conf) be displayed, if applicable?
  * @param  {string} colorBy a valid key of attrs
  * @param  {string} distanceMeasure num_date or div
- * @param  {bool} confidence num_date_confidence valid key of d.attrs?
+ * @param  {bool} temporalConfidence num_date_confidence valid key of d.attrs?
  * @return {JSX} to be displayed
  */
-const colorByInfoJSX = (d, likelihoods, colorBy, distanceMeasure, confidence) => {
-  if (likelihoods === true) {
-    return likelihoodTableJSX(d.attr, colorBy);
-  } else if (colorBy === "num_date") {
+const colorByInfoJSX = (d, colorByConfidence, colorBy, distanceMeasure, temporalConfidence) => {
+  if (colorBy === "num_date") { // TEMPORAL COLOURING
     if (distanceMeasure === "div") {
       return (<p>{`Divergence: ${prettyString(d.attr.div.toExponential(3))}`}</p>);
-    } else if (confidence) {
+    }
+    if (temporalConfidence) {
       return (<p>
         {`Date: ${prettyString(d.attr[colorBy])}`}
         <br/>
-        {`Date 90% CI:
+        {`Date Confidence Interval:
           ${d.attr.num_date_confidence[0].toFixed(2)} - ${d.attr.num_date_confidence[1].toFixed(2)}`}
       </p>);
     } else {
       return (<p>{`Date: ${prettyString(d.attr[colorBy])}`}</p>);
     }
-  } else if (colorBy.slice(0, 2) === "gt") {
+  } else if (colorByConfidence === true) { // COLOURING WITH CONFIDENCES PRESENT
+    return confidenceTableJSX(d.attr, colorBy);
+  } else if (colorBy.slice(0, 2) === "gt") { // COLOURING BY GENOTYPE
     return null; /* display nothing for genotypes */
   }
   /* the default: just show the attr value */
@@ -148,7 +149,7 @@ const treePosToViewer = (x, y, V) => {
 };
 
 const InfoPanel = ({
-  tree, mutType, confidence, distanceMeasure, hovered, viewer, colorBy, likelihoods
+  tree, mutType, temporalConfidence, distanceMeasure, hovered, viewer, colorBy, colorByConfidence
 }) => {
   /* this is a function - we can bail early */
   if (!(tree && hovered)) {
@@ -202,7 +203,7 @@ const InfoPanel = ({
       <div>
         {getFrequenciesJSX(d.n, mutType)}
         {getMutationsJSX(d.n)}
-        {colorByInfoJSX(d.n, likelihoods, colorBy, distanceMeasure, confidence)}
+        {colorByInfoJSX(d.n, colorByConfidence, colorBy, distanceMeasure, temporalConfidence)}
       </div>
     );
   }

@@ -74,7 +74,7 @@ export const onTipClick = function (d) {
 export const onBranchHover = function (d, x, y) {
   // for (let id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
   const ids = ["#branch_S_" + d.n.clade, "#branch_T_" + d.n.clade];
-  if (this.props.colorByLikelihood.on) {
+  if (this.props.colorByConfidence.on) {
     const attr = this.props.tree.nodes[d.n.arrayIdx].attr;
     const entropy = attr[this.props.colorBy + "_entropy"];
     for (const id of ids) {
@@ -92,7 +92,7 @@ export const onBranchHover = function (d, x, y) {
         );
     }
   }
-  if (this.props.confidence.exists && this.props.confidence.display && !this.props.confidence.on) {
+  if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
     this.state.tree.svg.append("g").selectAll(".conf")
       .data([d])
       .enter()
@@ -124,7 +124,7 @@ export const onBranchLeave = function (d) {
     this.state.tree.svg.select(id)
       .style("stroke", (el) => el["stroke"]);
   }
-  if (this.props.confidence.exists && this.props.confidence.display && !this.props.confidence.on) {
+  if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
     this.state.tree.removeConfidence(mediumTransitionDuration);
   }
   if (this.state.hovered) {
@@ -244,17 +244,17 @@ export const tipLabelSize = function (d, n) {
 
 /**
  * calculate array of HEXs to actually be displayed.
- * likelihoods manifest as opacity ramps
+ * (colorBy) confidences manifest as opacity ramps
  * @param {obj} tree phyloTree object
- * @param {bool} likelihoods enabled?
+ * @param {bool} confidence enabled?
  * @return {array} array of hex's. 1-1 with nodes.
  */
-const calcStrokeCols = (tree, likelihoods, colorBy) => {
-  if (likelihoods === true) {
+const calcStrokeCols = (tree, confidence, colorBy) => {
+  if (confidence === true) {
     return tree.nodeColors.map((col, idx) => {
       const attr = tree.nodes[idx].attr;
       const entropy = attr[colorBy + "_entropy"];
-      // const lhd = attr[nextProps.colorBy + "_likelihoods"][attr[nextProps.colorBy]];
+      // const lhd = attr[nextProps.colorBy + "_confidence"][attr[nextProps.colorBy]];
       return d3.rgb(d3.interpolateRgb(col, "#BBB")(branchOpacityFunction(entropy))).toString();
     });
   }
@@ -280,19 +280,19 @@ export const salientPropChanges = (props, nextProps, tree) => {
   const colorBy = !!nextProps.tree.nodeColorsVersion &&
       (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
       nextProps.tree.nodeColorsVersion === 1 ||
-      nextProps.colorByLikelihood.on !== props.colorByLikelihood.on);
+      nextProps.colorByConfidence.on !== props.colorByConfidence.on);
   const branchThickness = props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion;
   const layout = props.layout !== nextProps.layout;
   const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
 
   /* branch labels & confidence use 0: no change, 1: turn off, 2: turn on */
   const branchLabels = props.showBranchLabels === nextProps.showBranchLabels ? 0 : nextProps.showBranchLabels ? 2 : 1;
-  const confidence = props.confidence.on === nextProps.confidence.on ? 0 : nextProps.confidence.on ? 2 : 1;
+  const confidence = props.temporalConfidence.on === nextProps.temporalConfidence.on ? 0 : nextProps.temporalConfidence.on ? 2 : 1;
 
   /* sometimes we may want smooth transitions */
   let branchTransitionTime = false; /* false = no transition. Use when speed is critical */
   let tipTransitionTime = false;
-  if (nextProps.colorByLikelihood.on !== props.colorByLikelihood.on) {
+  if (nextProps.colorByConfidence.on !== props.colorByConfidence.on) {
     branchTransitionTime = mediumTransitionDuration;
   }
 
@@ -340,7 +340,7 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
       return d3.rgb(col).brighter([0.65]).toString();
     });
     tipStyleToUpdate["stroke"] = nextProps.tree.nodeColors;
-    const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByLikelihood.on, nextProps.colorBy);
+    const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByConfidence.on, nextProps.colorBy);
     branchStyleToUpdate["stroke"] = branchStrokes;
     if (nextProps.confidence) {
       confidenceStyleToUpdate["stroke"] = branchStrokes;

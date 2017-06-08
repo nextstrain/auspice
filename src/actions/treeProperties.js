@@ -162,10 +162,11 @@ export const changeMutType = (data) => {
   };
 };
 
-export const toggleColorByLikelihood = () => ({
-  type: types.TOGGLE_COLORBY_LIKELIHOOD
+export const toggleColorByConfidence = () => ({
+  type: types.TOGGLE_COLORBY_CONF
 });
 
-export const toggleConfidence = () => ({
-  type: types.TOGGLE_CONFIDENCE
+/* should be renamed to temporal confidnce */
+export const toggleTemporalConfidence = () => ({
+  type: types.TOGGLE_TEMPORAL_CONF
 });

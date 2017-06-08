@@ -15,7 +15,7 @@ import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import { connect } from "react-redux";
-import { toggleColorByLikelihood, toggleConfidence } from "../../actions/treeProperties";
+import { toggleColorByConfidence, toggleTemporalConfidence } from "../../actions/treeProperties";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -25,14 +25,14 @@ const header = (text) => (
 
 @connect((state) => ({
   analysisSlider: state.controls.analysisSlider,
-  confidence: state.controls.confidence,
-  colorByLikelihood: state.controls.colorByLikelihood
+  temporalConfidence: state.controls.temporalConfidence,
+  colorByConfidence: state.controls.colorByConfidence
 }))
 class Controls extends React.Component {
   static propTypes = {
     analysisSlider: React.PropTypes.any,
-    colorByLikelihood: React.PropTypes.object.isRequired,
-    confidence: React.PropTypes.object.isRequired,
+    colorByConfidence: React.PropTypes.object.isRequired,
+    temporalConfidence: React.PropTypes.object.isRequired,
     dispatch: React.PropTypes.func
   }
   getStyles() {
@@ -75,10 +75,10 @@ class Controls extends React.Component {
         {header("Color By")}
         <ColorBy/>
         <Toggle
-          display={this.props.colorByLikelihood.display}
-          on={this.props.colorByLikelihood.on}
-          callback={() => this.props.dispatch(toggleColorByLikelihood())}
-          label="Likelihoods"
+          display={this.props.colorByConfidence.display}
+          on={this.props.colorByConfidence.on}
+          callback={() => this.props.dispatch(toggleColorByConfidence())}
+          label="Confidence"
         />
 
         {header("Tree Options")}
@@ -89,9 +89,9 @@ class Controls extends React.Component {
         <SelectLabel text="Branch Length"/>
         <ChooseMetric/>
         <Toggle
-          display={this.props.confidence.display}
-          on={this.props.confidence.on}
-          callback={() => this.props.dispatch(toggleConfidence())}
+          display={this.props.temporalConfidence.display}
+          on={this.props.temporalConfidence.on}
+          callback={() => this.props.dispatch(toggleTemporalConfidence())}
           label="Confidence Intervals"
         />
 
