@@ -1,6 +1,5 @@
 import d3 from "d3";
 import { dataFont, darkGrey } from "../globalStyles";
-import { confidenceStrokeMultiplier } from "./globals";
 
 /*
  * adds the total number of descendant leaves to each node in the tree
@@ -176,7 +175,7 @@ PhyloTree.prototype.setDefaults = function () {
  * @param  visibility (OPTIONAL) -- array of "visible" or "hidden"
  * @return {null}
  */
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility, drawConfidence) {
   if (branchThickness) {
     this.nodes.forEach(function(d, i) {
       d["stroke-width"] = branchThickness[i];
@@ -222,7 +221,7 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
     this.drawRegression();
   }
   this.removeConfidence();
-  if (this.params.confidence) {
+  if (drawConfidence) {
     this.drawConfidence();
   }
 };
@@ -989,6 +988,10 @@ PhyloTree.prototype.drawConfidence = function (dt) {
   // this.props.confidence = true;
 };
 
+const confidenceWidth = (el) =>
+  el["stroke-width"] === 1 ? 0 :
+    el["stroke-width"] > 6 ? el["stroke-width"] + 6 : el["stroke-width"] * 2;
+
 PhyloTree.prototype.drawSingleCI = function (selection, opacity) {
   selection.append("path")
     .attr("class", "conf")
@@ -997,9 +1000,23 @@ PhyloTree.prototype.drawSingleCI = function (selection, opacity) {
     .style("stroke", (d) => d.stroke || "#888")
     .style("opacity", opacity)
     .style("fill", "none")
-    .style("stroke-width", (d) => d["stroke-width"] * confidenceStrokeMultiplier);
+    .style("stroke-width", confidenceWidth);
 };
 
+
+PhyloTree.prototype.updateConfidence = function (dt) {
+  if (dt) {
+    this.svg.selectAll(".conf")
+      .transition()
+        .duration(dt)
+      .style("stroke", (el) => el.stroke)
+      .style("stroke-width", confidenceWidth);
+  } else {
+    this.svg.selectAll(".conf")
+      .style("stroke", (el) => el.stroke)
+      .style("stroke-width", confidenceWidth);
+  }
+};
 
 /************************************************/
 

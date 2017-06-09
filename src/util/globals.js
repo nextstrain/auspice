@@ -38,7 +38,6 @@ export const LBItime_window = 0.5;
 export const LBItau = 0.0005;
 export const mutType = "aa";
 export const default_gene = "nuc";
-export const confidenceStrokeMultiplier = 2;
 export const plot_frequencies = false;
 export const genericDomain = [ 0, 0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0 ];
 export const epiColorDomain = genericDomain;

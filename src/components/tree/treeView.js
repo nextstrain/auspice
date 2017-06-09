@@ -30,9 +30,9 @@ there are actually backlinks from the phylotree tree
     tree: state.tree,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorBy: state.controls.colorBy,
-    colorByLikelihood: state.controls.colorByLikelihood,
+    colorByConfidence: state.controls.colorByConfidence,
     layout: state.controls.layout,
-    confidence: state.controls.confidence,
+    temporalConfidence: state.controls.temporalConfidence,
     showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
     mutType: state.controls.mutType
@@ -125,7 +125,7 @@ class TreeView extends React.Component {
         this.props.distanceMeasure,
         { /* options */
           grid: true,
-          confidence: nextProps.confidence,
+          confidence: nextProps.temporalConfidence.display,
           branchLabels: true,      //generate DOM object
           showBranchLabels: false,  //hide them initially -> couple to redux state
           tipLabels: true,      //generate DOM object
@@ -145,6 +145,7 @@ class TreeView extends React.Component {
         },
         nextProps.tree.branchThickness, /* guarenteed to be in redux by now */
         nextProps.tree.visibility,
+        nextProps.temporalConfidence.on /* drawConfidence? */
       );
       return myTree;
     } else {
@@ -169,12 +170,12 @@ class TreeView extends React.Component {
         <InfoPanel
           tree={this.state.tree}
           mutType={this.props.mutType}
-          confidence={this.props.confidence.display && this.props.confidence.on}
+          temporalConfidence={this.props.temporalConfidence.display}
           distanceMeasure={this.props.distanceMeasure}
           hovered={this.state.hovered}
           viewer={this.Viewer}
           colorBy={this.props.colorBy}
-          likelihoods={this.props.colorByLikelihood.on}
+          colorByConfidence={this.props.colorByConfidence}
         />
         <BranchSelectedPanel
           responsive={responsive}
