@@ -5,13 +5,14 @@ import LegendItem from "./legend-item";
 import { headerFont, darkGrey } from "../../globalStyles";
 import { legendRectSize, legendSpacing, fastTransitionDuration,
   controlsWidth } from "../../util/globals";
-import titleCase from "title-case";
+// import titleCase from "title-case";
 import { determineColorByGenotypeType } from "../../util/urlHelpers";
 
 
 @connect((state) => {
   return {
     colorBy: state.controls.colorBy,
+    colorOptions: state.metadata.colorOptions,
     colorScale: state.controls.colorScale,
     browserDimensions: state.browserDimensions.browserDimensions
   };
@@ -24,8 +25,8 @@ class Legend extends React.Component {
     };
   }
   static propTypes = {
-    /* react */
-    // dispatch: React.PropTypes.func,
+    colorOptions: React.PropTypes.object,
+    colorScale: React.PropTypes.object,
     params: React.PropTypes.object,
     routes: React.PropTypes.array,
     colorBy: React.PropTypes.string.isRequired,
@@ -90,10 +91,8 @@ class Legend extends React.Component {
         return "Genotype at position " + this.props.colorBy.replace("gt-", "").replace("nuc_", "");
       }
       return "Genotype at " + this.props.colorBy.replace("gt-", "").replace("_", " site ");
-    } else if (this.props.colorBy === "num_date") {
-      return "Date";
     }
-    return titleCase(this.props.colorBy);
+    return this.props.colorOptions[this.props.colorBy].legendTitle;
   }
   getTitleWidth() {
     return 10 + 5.3 * this.getTitleString().length;
