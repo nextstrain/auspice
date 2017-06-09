@@ -8,8 +8,7 @@ import { zoomToClade,
 import { branchOpacityConstant,
          branchOpacityFunction,
          branchInterpolateColour } from "../../util/treeHelpers";
-import { mediumTransitionDuration,
-  confidenceStrokeMultiplier } from "../../util/globals";
+import { mediumTransitionDuration } from "../../util/globals";
 import d3 from "d3";
 
 
@@ -321,8 +320,7 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
   const tipStyleToUpdate = {};
   const branchAttrToUpdate = {};
   const branchStyleToUpdate = {};
-
-  const confidenceStyleToUpdate = {};
+  let updateConfidenceFlag = false;
 
   if (changes.visibility) {
     tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
@@ -337,14 +335,15 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
     const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy);
     branchStyleToUpdate["stroke"] = branchStrokes;
     tipStyleToUpdate["stroke"] = branchStrokes;
-    if (nextProps.confidence) {
-      confidenceStyleToUpdate["stroke"] = branchStrokes;
+    if (nextProps.temporalConfidence) {
+      updateConfidenceFlag = true;
     }
   }
   if (changes.branchThickness) {
+    console.log("branch width change detected - update branch stroke-widths")
     branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
-    if (nextProps.confidence) {
-      confidenceStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness.map((v) => v * confidenceStrokeMultiplier);
+    if (nextProps.temporalConfidence) {
+      updateConfidenceFlag = true;
     }
   }
 
@@ -356,10 +355,6 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
   if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
     // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
     tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, changes.tipTransitionTime);
-  }
-
-  if (Object.keys(confidenceStyleToUpdate).length) {
-    tree.updateMultipleArray(".conf", {}, confidenceStyleToUpdate, changes.branchTransitionTime);
   }
 
   if (changes.layout) { /* swap layouts */
@@ -377,5 +372,7 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
     tree.removeConfidence(mediumTransitionDuration);
   } else if (changes.confidence === 2) {
     tree.drawConfidence(mediumTransitionDuration);
+  } else if (updateConfidenceFlag) {
+    tree.updateConfidence(changes.tipTransitionTime);
   }
 };

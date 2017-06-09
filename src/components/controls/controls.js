@@ -84,7 +84,7 @@ class Controls extends React.Component {
           display={this.props.temporalConfidence.display}
           on={this.props.temporalConfidence.on}
           callback={() => this.props.dispatch(toggleTemporalConfidence())}
-          label="Confidence Intervals"
+          label="Show all Confidence Intervals"
         />
 
         {header("Map Options")}
