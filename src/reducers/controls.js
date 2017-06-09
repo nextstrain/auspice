@@ -12,9 +12,7 @@ const checkColorByConfidence = function (attrs, colorBy) {
 };
 
 const getMinDateViaRoot = function (rootAttr) {
-  const rootDate = Object.keys(rootAttr).indexOf("num_date_confidence") > -1 ?
-    rootAttr.num_date_confidence[0] : rootAttr.num_date;
-  const root = floatDateToMoment(rootDate);
+  const root = floatDateToMoment(rootAttr.num_date);
   root.subtract(1, "days"); /* slider should be earlier than actual day */
   return root;
 };
