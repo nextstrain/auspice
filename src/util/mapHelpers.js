@@ -196,7 +196,8 @@ export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
   }
 }
 
-const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems, i) => {
+const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems, i, minTransmissionDate) => {
+  console.log('extractLineSegmentForAnimationEffect.minTransmissionDate', minTransmissionDate)
   const originDate = nodes[d.data.demePairIndices[0]].attr.num_date;
   const destinationDate = nodes[d.data.demePairIndices[1]].attr.num_date;
   const userDateMin = controls.dateScale(controls.dateFormat.parse(controls.dateMin));
@@ -205,7 +206,7 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems,
   /* manually find the points along a Bezier curve at which we should be given the user date selection */
   const start = Math.max(0.0,(userDateMin-originDate)/(destinationDate-originDate)) // clamp start at 0.0 if userDateMin gives a number <0
   const end = Math.min(1.0,(userDateMax-originDate)/(destinationDate-originDate)) // clamp end at 1.0 if userDateMax gives a number >1
-  const Bcurve = Bezier([pair[0],computeMidpoint(pair,(destinationDate-2013.0)*25.0),pair[1]],start,end,15) // calculate Bezier
+  const Bcurve = Bezier([pair[0],computeMidpoint(pair,(destinationDate-minTransmissionDate)*25.0),pair[1]],start,end,15) // calculate Bezier
 
   return Bcurve
 }
@@ -231,7 +232,8 @@ export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
           d,
           nodes,
           d3elems,
-          i
+          i,
+          latLongs.minTransmissionDate
         )
       )
     }) /* with the interpolation in the function above pathStringGenerator */
