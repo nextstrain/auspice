@@ -14,7 +14,7 @@ import {getLatLongs} from "../../util/mapHelpersLatLong";
 import {
   CHANGE_ANIMATION_START,
   CHANGE_ANIMATION_TIME,
-  CHANGE_ANIMATION_PATHTRAILING
+  CHANGE_ANIMATION_CUMULATIVE
 } from "../../actions/types.js";
 
 @connect((state) => {
@@ -32,7 +32,7 @@ import {
     geoResolution: state.controls.geoResolution,
     // mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
-    mapAnimationPathTrailing: state.controls.mapAnimationPathTrailing,
+    mapAnimationCumulative: state.controls.mapAnimationCumulative,
     sequences: state.sequences,
     mapTriplicate: state.controls.mapTriplicate
 
@@ -407,7 +407,7 @@ class Map extends React.Component {
       /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
       this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
 
-      if (this.props.mapAnimationPathTrailing) {
+      if (!this.props.mapAnimationCumulative) {
         first = first.add(incrementBy, incrementByUnit);
       }
       second = second.add(incrementBy, incrementByUnit);

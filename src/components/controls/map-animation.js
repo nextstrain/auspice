@@ -6,7 +6,7 @@ import { select} from "../../globalStyles";
 import { connect } from "react-redux";
 import { CHANGE_ANIMATION_TIME } from "../../actions/types";//*
 import { CHANGE_ANIMATION_START } from "../../actions/types"; //*
-import { CHANGE_ANIMATION_PATHTRAILING } from "../../actions/types"; //*
+import { CHANGE_ANIMATION_CUMULATIVE } from "../../actions/types"; //*
 import { changeColorBy } from "../../actions/colors";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
@@ -114,7 +114,7 @@ class MapAnimationStartDatePicker extends React.Component {
     metadata: state.metadata.metadata,
     mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
-    mapAnimationPathTrailing: state.controls.mapAnimationPathTrailing
+    mapAnimationCumulative: state.controls.mapAnimationCumulative
   };
 })
 class MapAnimationControls extends React.Component {
@@ -176,14 +176,14 @@ class MapAnimationControls extends React.Component {
         {/*<SelectLabel text="Animation start date (click to change)"/>*/}
         {/*<MapAnimationStartDatePicker/>*/}
 
-        <SelectLabel text="Animation path trailing"/>
+        <SelectLabel text="Animation is Cumulative"/>
         <input
           type='checkbox'
-          checked={this.props.mapAnimationPathTrailing}
-          id='mapAnimationPathTrailing'
+          checked={this.props.mapAnimationCumulative}
+          id='mapAnimationCumulative'
           onChange={(e) => {
-            analyticsControlsEvent("change-animation-pathtrailing");
-            this.props.dispatch({ type: CHANGE_ANIMATION_PATHTRAILING, data: !this.props.mapAnimationPathTrailing });
+            analyticsControlsEvent("change-animation-cumulative");
+            this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
             // modifyURLquery(this.context.router, {apt: e.target.value}, true);
           }}/>
 

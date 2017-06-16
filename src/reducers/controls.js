@@ -43,7 +43,7 @@ const getDefaultState = function () {
     dateFormat: d3.time.format("%Y-%m-%d"),
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
-    mapAnimationPathTrailing: false,
+    mapAnimationCumulative: false,
   };
 };
 
@@ -111,9 +111,9 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       mapAnimationDurationInMilliseconds: action.data
     })
-  case types.CHANGE_ANIMATION_PATHTRAILING:
+  case types.CHANGE_ANIMATION_CUMULATIVE:
     return Object.assign({}, state, {
-      mapAnimationPathTrailing: action.data
+      mapAnimationCumulative: action.data
     })
   case types.CHANGE_ANIMATION_START:
     return Object.assign({}, state, {
