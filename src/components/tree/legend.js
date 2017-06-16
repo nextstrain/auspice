@@ -92,7 +92,8 @@ class Legend extends React.Component {
       }
       return "Genotype at " + this.props.colorBy.replace("gt-", "").replace("_", " site ");
     }
-    return this.props.colorOptions[this.props.colorBy].legendTitle;
+    return this.props.colorOptions[this.props.colorBy] === undefined ?
+      "" : this.props.colorOptions[this.props.colorBy].legendTitle;
   }
   getTitleWidth() {
     return 10 + 5.3 * this.getTitleString().length;
