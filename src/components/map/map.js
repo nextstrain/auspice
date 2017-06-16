@@ -30,7 +30,7 @@ import {
     colorBy: state.controls.colorBy,
     map: state.map,
     geoResolution: state.controls.geoResolution,
-    mapAnimationStartDate: state.controls.mapAnimationStartDate,
+    // mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationPathTrailing: state.controls.mapAnimationPathTrailing,
     sequences: state.sequences,
@@ -383,7 +383,8 @@ class Map extends React.Component {
   }
   animateMap() {
     /* By default, start at absoluteDateMin; allow overriding via augur default export */
-    let first = this.props.mapAnimationStartDate ? moment(this.props.mapAnimationStartDate, "YYYY-MM-DD"): moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD");
+    // let first = this.props.mapAnimationStartDate ? moment(this.props.dateMin, "YYYY-MM-DD"): moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD");
+    let first = moment(this.props.controls.dateMin);
     let last = moment(this.props.controls.absoluteDateMax, "YYYY-MM-DD");
     let numberDays = moment.duration(last.diff(first)).asDays(); // Total number of days in the animation
 

@@ -28,7 +28,7 @@ moment.updateLocale("en", {
     absoluteDateMax: state.controls.absoluteDateMax,
     dateScale: state.controls.dateScale,
     dateFormat: state.controls.dateFormat,
-    mapAnimationStartDate: state.controls.mapAnimationStartDate,
+    // mapAnimationStartDate: state.controls.mapAnimationStartDate,
   };
 })
 
@@ -173,8 +173,8 @@ class MapAnimationControls extends React.Component {
             }
           }}/>
 
-        <SelectLabel text="Animation start date (click to change)"/>
-        <MapAnimationStartDatePicker/>
+        {/*<SelectLabel text="Animation start date (click to change)"/>*/}
+        {/*<MapAnimationStartDatePicker/>*/}
 
         <SelectLabel text="Animation path trailing"/>
         <input
