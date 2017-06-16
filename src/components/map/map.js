@@ -50,6 +50,7 @@ class Map extends React.Component {
       d3elems: null,
       datasetGuid: null,
       responsive: null,
+      playPause: "Play",
     };
   }
   static propTypes = {
@@ -339,11 +340,11 @@ class Map extends React.Component {
               borderRadius: 4,
               backgroundColor: "rgb(124, 184, 121)",
               fontWeight: 700,
-              color: "white"
+              color: "white",
             }}
-          onClick={this.handleAnimationPlayClicked.bind(this) }
+          onClick={this.handleAnimationPlayPauseClicked.bind(this) }
             >
-            Play
+            {this.state.playPause === "Play" ? "Play" : "Pause"}
           </button>
           <button style={{
               position: "absolute",
@@ -357,9 +358,9 @@ class Map extends React.Component {
               fontWeight: 700,
               color: "white"
             }}
-          onClick={this.handleAnimationStopClicked.bind(this) }
+          onClick={this.handleAnimationResetClicked.bind(this) }
             >
-            Stop
+            Reset
           </button>
           <div style={{
               height: this.state.responsive.height,
@@ -371,15 +372,23 @@ class Map extends React.Component {
     }
     return container;
   }
-  handleAnimationPlayClicked() {
+  handleAnimationPlayPauseClicked() {
     /******************************************
     * ANIMATE MAP (AND THAT LINE ON TREE)
     *****************************************/
-
-    this.animateMap();
+    if (this.state.playPause === "Play") {
+      this.animateMap();
+      this.setState({playPause: "Pause"});
+    } else {
+      clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
+      this.setState({playPause: "Play"});
+    }
   }
-  handleAnimationStopClicked() {
+
+  handleAnimationResetClicked() {
     clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
+    this.props.dispatch(changeDateFilter(this.props.controls.absoluteDateMin, this.props.controls.absoluteDateMax));
+    this.setState({playPause: "Play"})
   }
   animateMap() {
     /* By default, start at absoluteDateMin; allow overriding via augur default export */
