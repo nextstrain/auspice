@@ -4,10 +4,10 @@ const seasonal = {
   segment: {
     ha: {
       "resolution": {
-        "2y": "",
-        "3y": "",
-        "6y": "",
-        "12y": "",
+        "2y": "c=region",
+        "3y": "c=region",
+        "6y": "c=region",
+        "12y": "c=region",
         default: "6y"
       }
     },
