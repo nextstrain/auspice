@@ -217,7 +217,11 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
 
   // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
 
-  demesAndTransmissions.minTransmissionDate = demesAndTransmissions.transmissions.map((x)=>nodes[x.data.demePairIndices[0]].attr.num_date).reduce((prev, cur)=> cur<prev ? cur : prev)
+  demesAndTransmissions.minTransmissionDate = demesAndTransmissions.transmissions.map((x) => {
+    return nodes[x.data.demePairIndices[0]].attr.num_date;
+  }).reduce((prev, cur) => {
+    return cur < prev ? cur : prev;
+  });
   return demesAndTransmissions;
 }
 

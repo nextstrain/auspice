@@ -189,7 +189,8 @@ export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
             d,
             nodes,
             d3elems,
-            i
+            i,
+            latLongs.minTransmissionDate
           )
         )
       }) /* with the interpolation in the function above pathStringGenerator */
@@ -197,7 +198,6 @@ export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
 }
 
 const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems, i, minTransmissionDate) => {
-  console.log('extractLineSegmentForAnimationEffect.minTransmissionDate', minTransmissionDate)
   const originDate = nodes[d.data.demePairIndices[0]].attr.num_date;
   const destinationDate = nodes[d.data.demePairIndices[1]].attr.num_date;
   const userDateMin = controls.dateScale(controls.dateFormat.parse(controls.dateMin));
