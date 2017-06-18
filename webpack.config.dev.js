@@ -53,6 +53,10 @@ module.exports = {
       {
         test: /\.(gif|png|jpe?g|svg)$/i, loader: "file-loader",
         include: path.join(__dirname, "src")
+      },
+      {
+        test: /\.(gif|png|jpe?g|svg)$/i, loader: "file-loader",
+        include: path.join(__dirname, ".")
       }
     ]
   }
