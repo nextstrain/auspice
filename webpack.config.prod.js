@@ -1,6 +1,8 @@
 var path = require("path");
 var webpack = require("webpack");
 var CompressionPlugin = require('compression-webpack-plugin');
+const ElectronPackager = require("webpack-electron-packager");
+
 
 // let commitHash = require('child_process')
 //   .execSync('git rev-parse --short HEAD')
@@ -38,6 +40,11 @@ module.exports = {
        test: /\.js$|\.css$|\.html$/,
        threshold: 10240,
        minRatio: 0.8
+    }),
+    new ElectronPackager({
+      dir: ".",
+      arch: "x64",
+      platform: "darwin",
     })
   ],
   module: {
