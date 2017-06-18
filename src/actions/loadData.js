@@ -181,9 +181,13 @@ const loadMetaAndTreeJSONs = (metaPath, treePath, router) => {
       })
       .catch((err) => {
         /* note that this catches both 404 type errors AND
-        any error from the reducers */
+        any error from the reducers AND, confusingly,
+        errors from the lifecycle methods of components
+        that run while in the middle of this thunk */
         console.log("loadMetaAndTreeJSONs error:", err);
         // dispatch error notification
+        // but, it would seem, you can't have the reducer return AND
+        // also get a notification dispatched :(
       });
   };
 };

@@ -5,13 +5,19 @@ import getColorScale from "../util/getColorScale";
 import moment from 'moment';
 import d3 from "d3";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
+import { floatDateToMoment } from "../util/dateHelpers";
 
-/*
-  we don't actually need to have legendBoundsMap default if regions will always be the
-  default colorBy. this is saftey in case we change that.
-  continuous in state is to be true whenever the color scale is continuous
-  as opposed to discrete/categorical. we need a legendBoundsMap in the former, not the latter
-*/
+const checkColorByConfidence = function (attrs, colorBy) {
+  return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
+};
+
+const getMinDateViaRoot = function (rootAttr) {
+  const rootDate = Object.keys(rootAttr).indexOf("num_date_confidence") > -1 ?
+    rootAttr.num_date_confidence[0] : rootAttr.num_date;
+  const root = floatDateToMoment(rootDate);
+  root.subtract(1, "days"); /* slider should be earlier than actual day */
+  return root;
+};
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
@@ -26,6 +32,7 @@ const getDefaultState = function () {
     search: null,
     strain: null,
     mutType: globals.mutType,
+    temporalConfidence: {exists: false, display: false, on: false},
     layout: globals.defaultLayout,
     distanceMeasure: globals.defaultDistanceMeasure,
     dateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
@@ -33,6 +40,7 @@ const getDefaultState = function () {
     absoluteDateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
+    colorByConfidence: {display: false, on: false},
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
     analysisSlider: false,
     geoResolution: globals.defaultGeoResolution,
@@ -48,13 +56,19 @@ const Controls = (state = getDefaultState(), action) => {
   case types.NEW_DATASET:
     const base = getDefaultState();
     base["datasetPathName"] = action.datasetPathName;
+    const rootDate = getMinDateViaRoot(action.tree.attr);
+    base["dateMin"] = rootDate.format("YYYY-MM-DD");
+    base["absoluteDateMin"] = rootDate.format("YYYY-MM-DD");
     /* overwrite base state with data from the metadata JSON */
     if (action.meta.date_range) {
       if (action.meta.date_range.date_min) {
-        base["dateMin"] = action.meta.date_range.date_min;
-        base["absoluteDateMin"] = action.meta.date_range.date_min;
+        if (rootDate.isBefore(moment(action.meta.date_range.date_min, "YYYY-MM-DD"))) {
+          base["dateMin"] = action.meta.date_range.date_min;
+        }
       }
       if (action.meta.date_range.date_max) {
+        /* this may be useful if, e.g., one were to want to display an outbreak
+        from 2000-2005 (the default is the present day) */
         base["dateMax"] = action.meta.date_range.date_max;
         base["absoluteDateMax"] = action.meta.date_range.date_max;
       }
@@ -95,6 +109,11 @@ const Controls = (state = getDefaultState(), action) => {
     if (action.query.dmax) {
       base["dateMax"] = action.query.dmax;
     }
+    base["temporalConfidence"] = Object.keys(action.tree.attr).indexOf("num_date_confidence") > -1 ?
+      {exists: true, display: true, on: false} : {exists: false, display: false, on: false};
+    if (base.temporalConfidence.exists && base.layout !== "rect") {
+      base.temporalConfidence.display = false;
+    }
     /* basic sanity checking */
     if (Object.keys(action.meta.color_options).indexOf(base["colorBy"]) === -1) {
       /* ideally, somehow, a notification is dispatched, but redux, unlike elm,
@@ -107,6 +126,9 @@ const Controls = (state = getDefaultState(), action) => {
       }
       base["colorBy"] = available_colorBy[0];
     }
+    /* available tree attrs - based upon the root node */
+    base["attrs"] = Object.keys(action.tree.attr);
+    base["colorByConfidence"] = checkColorByConfidence(base["attrs"], base["colorBy"]);
     return base;
   case types.TOGGLE_BRANCH_LABELS:
     return Object.assign({}, state, {
@@ -137,10 +159,33 @@ const Controls = (state = getDefaultState(), action) => {
       selectedNode: null
     });
   case types.CHANGE_LAYOUT:
+    const layout = action.data;
+    /* if temporalConfidence and layout !== rect then disable confidence toggle */
+    const temporalConfidence = Object.assign({}, state.temporalConfidence);
+    if (temporalConfidence.exists) {
+      temporalConfidence.display = layout === "rect";
+    }
     return Object.assign({}, state, {
-      layout: action.data
+      layout,
+      temporalConfidence
     });
   case types.CHANGE_DISTANCE_MEASURE:
+    /* while this may change, div currently doesn't have CIs,
+    so they shouldn't be displayed. The SVG el's still exist, they're just of
+    width zero */
+    if (state.temporalConfidence.exists) {
+      if (state.temporalConfidence.display && action.data === "div") {
+        return Object.assign({}, state, {
+          distanceMeasure: action.data,
+          temporalConfidence: Object.assign({}, state.temporalConfidence, {display: false})
+        });
+      } else if (state.layout === "rect" && action.data === "num_date") {
+        return Object.assign({}, state, {
+          distanceMeasure: action.data,
+          temporalConfidence: Object.assign({}, state.temporalConfidence, {display: true})
+        });
+      }
+    }
     return Object.assign({}, state, {
       distanceMeasure: action.data
     });
@@ -162,7 +207,8 @@ const Controls = (state = getDefaultState(), action) => {
     });
   case types.CHANGE_COLOR_BY:
     const newState = Object.assign({}, state, {
-      colorBy: action.data
+      colorBy: action.data,
+      colorByConfidence: checkColorByConfidence(state.attrs, action.data)
     });
     /* may need to toggle the entropy selector AA <-> NUC */
     if (determineColorByGenotypeType(action.data)) {
@@ -188,6 +234,12 @@ const Controls = (state = getDefaultState(), action) => {
   case types.TOGGLE_MUT_TYPE:
     return Object.assign({}, state, {
       mutType: action.data
+    });
+  case types.TOGGLE_TEMPORAL_CONF:
+    return Object.assign({}, state, {
+      temporalConfidence: Object.assign({}, state.temporalConfidence, {
+        on: !state.temporalConfidence.on
+      })
     });
   case types.ANALYSIS_SLIDER:
     if (action.destroy) {
