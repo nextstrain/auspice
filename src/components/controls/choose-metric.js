@@ -3,9 +3,11 @@ import React from "react";
 // import MutationTree from "../framework/svg-mutation-tree";
 import {materialButton, materialButtonSelected} from "../../globalStyles";
 import { connect } from "react-redux";
+import Toggle from "./toggle";
 import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import { toggleTemporalConfidence } from "../../actions/treeProperties";
 
 /*
  * implements a pair of buttons the toggle between timetree and divergence tree
@@ -13,10 +15,16 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
  @connect((state) => {
    return {
-     distanceMeasure: state.controls.distanceMeasure
+     distanceMeasure: state.controls.distanceMeasure,
+     temporalConfidence: state.controls.temporalConfidence
    };
  })
 class ChooseMetric extends React.Component {
+  static propTypes = {
+    analysisSlider: React.PropTypes.any,
+    temporalConfidence: React.PropTypes.object.isRequired,
+    dispatch: React.PropTypes.func
+  }
   getStyles() {
     return {
       container: {
@@ -26,6 +34,9 @@ class ChooseMetric extends React.Component {
         margin: 5,
         position: "relative",
         top: -1
+      },
+      toggle: {
+        margin: 5
       }
     };
   }
@@ -58,6 +69,14 @@ class ChooseMetric extends React.Component {
         }}>
         <span style={styles.title}> {"divergence"} </span>
       </button>
+      <div style={styles.toggle}>
+      <Toggle
+        display={this.props.temporalConfidence.display}
+        on={this.props.temporalConfidence.on}
+        callback={() => this.props.dispatch(toggleTemporalConfidence())}
+        label="Show confidence intervals"
+      />
+      </div>
     </div>
   );
 }

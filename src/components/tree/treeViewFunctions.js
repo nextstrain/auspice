@@ -340,7 +340,7 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
     }
   }
   if (changes.branchThickness) {
-    console.log("branch width change detected - update branch stroke-widths")
+    // console.log("branch width change detected - update branch stroke-widths")
     branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
     if (nextProps.temporalConfidence) {
       updateConfidenceFlag = true;

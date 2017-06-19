@@ -3,7 +3,6 @@ import Flex from "../framework/flex";
 import SelectLabel from "../framework/select-label";
 // import ToggleBranchLabels from "./toggle-branch-labels";
 import ColorBy from "./color-by";
-import Toggle from "./toggle";
 // import Search from "./search";
 import DateRangeInputs from "./date-range-inputs";
 import AnalysisDateSlider from "./analysis-date-slider";
@@ -15,7 +14,6 @@ import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import { connect } from "react-redux";
-import { toggleTemporalConfidence } from "../../actions/treeProperties";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -24,13 +22,11 @@ const header = (text) => (
 );
 
 @connect((state) => ({
-  analysisSlider: state.controls.analysisSlider,
-  temporalConfidence: state.controls.temporalConfidence,
+  analysisSlider: state.controls.analysisSlider
 }))
 class Controls extends React.Component {
   static propTypes = {
     analysisSlider: React.PropTypes.any,
-    temporalConfidence: React.PropTypes.object.isRequired,
     dispatch: React.PropTypes.func
   }
   getStyles() {
@@ -80,12 +76,6 @@ class Controls extends React.Component {
 
         <SelectLabel text="Branch Length"/>
         <ChooseMetric/>
-        <Toggle
-          display={this.props.temporalConfidence.display}
-          on={this.props.temporalConfidence.on}
-          callback={() => this.props.dispatch(toggleTemporalConfidence())}
-          label="Show all Confidence Intervals"
-        />
 
         {header("Map Options")}
         <SelectLabel text="Geographic resolution"/>

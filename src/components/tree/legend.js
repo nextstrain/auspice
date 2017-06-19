@@ -57,7 +57,7 @@ class Legend extends React.Component {
       this.setState({"legendVisible": true});
     }
     if (colorScale) {
-      if (colorScale.scale.domain().length > 30) {
+      if (colorScale.scale.domain().length > 32) {
         this.setState({"legendVisible": false});
       }
     }
