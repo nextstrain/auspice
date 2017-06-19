@@ -10,10 +10,20 @@
     "start:local": "node dev-server.js local",
     "server": "node server.js",
     "lint": "eslint src",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "buildelectron": "npm build && electron-builder ."
   },
   "author": "Trevor Bedford and Richard Neher",
   "license": "AGPL",
+  "build": {
+    "appId": "nextstrain",
+    "files": [
+      "dist/*",
+      "index.js",
+      "index.html",
+      "!**/node_modules"
+    ]
+  },
   "devDependencies": {
     "babel-core": "^5.8.25",
     "babel-eslint": "^4.1.3",
@@ -21,6 +31,8 @@
     "babel-plugin-react-transform": "^1.1.1",
     "compression-webpack-plugin": "^0.3.2",
     "css-loader": "^0.26.1",
+    "electron": "1.7.3",
+    "electron-builder": "next",
     "es6-promise": "~1.0.0",
     "eslint": "3.5.0",
     "eslint-config-defaults": "^7.0.1",
@@ -41,6 +53,7 @@
     "webpack-hot-middleware": "^2.4.1"
   },
   "dependencies": {
+    "asar": "^0.13.0",
     "color": "^0.7.3",
     "d3": "^3.5.17",
     "d3-axis": "^1.0.6",
