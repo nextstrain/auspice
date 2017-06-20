@@ -87,6 +87,9 @@ const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, c
 
     // go from "brazil/cuba" to ["brazil", "cuba"]
     const countries = key.split("/");
+    if (countries[0].toLowerCase() === countries[1].toLowerCase()) {
+      return;
+    }
     // go from "brazil" to lat0 = -14.2350
     let long0 = undefined;
     let long1 = undefined;
