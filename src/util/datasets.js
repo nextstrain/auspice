@@ -1,15 +1,19 @@
 export const dataURLStem = process.env.DATA_LOCAL ? "/data/" : "http://data.nextstrain.org/";
 
+const init = "c=region&r=country";
+
 const seasonal = {
   segment: {
     ha: {
-      "resolution": {
-        "2y": "c=region",
-        "3y": "c=region",
-        "6y": "c=region",
-        "12y": "c=region",
-        default: "6y"
-      }
+      "resolution": {"2y": init, "3y": init, "6y": init, "12y": init, default: "6y"}
+    },
+    default: "ha"
+  }
+};
+const seasonal_no2y = {
+  segment: {
+    ha: {
+      "resolution": {"3y": init, "6y": init, "12y": init, default: "6y"}
     },
     default: "ha"
   }
@@ -45,8 +49,8 @@ export const datasets = {
           }
         },
         "h3n2": seasonal,
-        "vic": seasonal,
-        "yam": seasonal,
+        "vic": seasonal_no2y,
+        "yam": seasonal_no2y,
         "h1n1pdm": seasonal,
         "default": "h7n9"
       }
