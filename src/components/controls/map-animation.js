@@ -138,6 +138,29 @@ class MapAnimationControls extends React.Component {
   //   return validatedInput * 1000 // ship milliseconds instead of seconds to reducer
   // }
 
+  handleChangeAnimationTimeClicked(userSelectedDuration) {
+    return () => {
+      analyticsControlsEvent("change-animation-time");
+      let duration;
+
+      if (userSelectedDuration === "slow") {
+        duration = 60000;
+      } else if (userSelectedDuration === "medium") {
+        duration = 30000;
+      } else if (userSelectedDuration === "fast") {
+        duration = 15000;
+      } else {
+        console.warn("Odd... controls/map-animation.js tried to set an animation speed we don't offer...")
+      }
+
+      /* cast string to num, the see if its an integer, ie., don't send the action if they type 'd' */
+      this.props.dispatch({
+        type: CHANGE_ANIMATION_TIME,
+        data: duration /* this.checkAndTransformAnimationDuration(+e.target.value) */
+      });
+    }
+  }
+
   render() {
 
     /* duplicated */
@@ -150,44 +173,66 @@ class MapAnimationControls extends React.Component {
     return (
       <div id='mapAnimationControls'>
 
-        <SelectLabel text="Animation length (seconds)"/>
-        <input
+      <div style={{marginBottom: 15}}>
+        <SelectLabel text="Animation speed (seconds)"/>
+        <button
           style={{
             padding: "5px 10px",
+            outline: "none",
+            color: this.props.mapAnimationDurationInMilliseconds === 60000 ? "white" : "black",
+            backgroundColor: this.props.mapAnimationDurationInMilliseconds === 60000 ? "rgb(80, 151, 186)" : "white",
+            border: this.props.mapAnimationDurationInMilliseconds === 60000 ? "1px solid rgb(80, 151, 186)" : "1px solid lightgrey",
+            marginRight: 10,
             borderRadius: 3,
-            border: "1px solid lightgrey",
-            marginBottom: 10,
             fontSize: 14,
           }}
-          type='text'
-          id='animationLengthInSeconds'
-          value={this.props.mapAnimationDurationInMilliseconds / 1000 /* we get milliseconds from reducer, and send milliseconds as well, see: checkAndTransformAnimationDuration */}
-          onChange={(e) => {
-            analyticsControlsEvent("change-animation-time");
-            /* cast string to num, the see if its an integer, ie., don't send the action if they type 'd' */
-            if (Number.isInteger(+e.target.value)) {
-              this.props.dispatch({
-                type: CHANGE_ANIMATION_TIME,
-                data: +e.target.value * 1000 /* this.checkAndTransformAnimationDuration(+e.target.value) */
-              });
-            }
-          }}/>
+          onClick={this.handleChangeAnimationTimeClicked("slow")}>
+          Slow
+        </button>
+        <button
+          style={{
+            padding: "5px 10px",
+            outline: "none",
+            color: this.props.mapAnimationDurationInMilliseconds === 30000 ? "white" : "black",
+            backgroundColor: this.props.mapAnimationDurationInMilliseconds === 30000 ? "rgb(80, 151, 186)" : "white",
+            border: this.props.mapAnimationDurationInMilliseconds === 30000 ? "1px solid rgb(80, 151, 186)" : "1px solid lightgrey",
+            marginRight: 10,
+            borderRadius: 3,
+            fontSize: 14,
+          }}
+          onClick={this.handleChangeAnimationTimeClicked("medium")}>
+          Medium
+        </button>
+        <button
+          style={{
+            padding: "5px 10px",
+            outline: "none",
+            color: this.props.mapAnimationDurationInMilliseconds === 15000 ? "white" : "black",
+            backgroundColor: this.props.mapAnimationDurationInMilliseconds === 15000 ? "rgb(80, 151, 186)" : "white",
+            border: this.props.mapAnimationDurationInMilliseconds === 15000 ? "1px solid rgb(80, 151, 186)" : "1px solid lightgrey",
+            marginRight: 10,
+            borderRadius: 3,
+            fontSize: 14,
+          }}
+          onClick={this.handleChangeAnimationTimeClicked("fast")}>
+          Fast
+        </button>
+      </div>
+      {/*<SelectLabel text="Animation start date (click to change)"/>*/}
+      {/*<MapAnimationStartDatePicker/>*/}
 
-        {/*<SelectLabel text="Animation start date (click to change)"/>*/}
-        {/*<MapAnimationStartDatePicker/>*/}
+      <SelectLabel text="Animate cumulative history"/>
+      <input
+        type='checkbox'
+        checked={this.props.mapAnimationCumulative}
+        id='mapAnimationCumulative'
+        onChange={(e) => {
+          analyticsControlsEvent("change-animation-cumulative");
+          this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
+          // modifyURLquery(this.context.router, {apt: e.target.value}, true);
+        }}/>
 
-        <SelectLabel text="Animation is Cumulative"/>
-        <input
-          type='checkbox'
-          checked={this.props.mapAnimationCumulative}
-          id='mapAnimationCumulative'
-          onChange={(e) => {
-            analyticsControlsEvent("change-animation-cumulative");
-            this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
-            // modifyURLquery(this.context.router, {apt: e.target.value}, true);
-          }}/>
-
-        </div>
+      </div>
     );
   }
 }
