@@ -336,6 +336,7 @@ class Map extends React.Component {
               top: 25,
               zIndex: 9999,
               border: "none",
+              width: 56,
               padding: 15,
               borderRadius: 4,
               backgroundColor: "rgb(124, 184, 121)",
