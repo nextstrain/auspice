@@ -8,16 +8,6 @@ const inits = {
 const seasonal = {
   segment: {
     ha: {
-      "resolution": {
-        "2y": inits.flu, "3y": inits.flu, "6y": inits.flu, "12y": inits.flu, default: "6y"
-      }
-    },
-    default: "ha"
-  }
-};
-const seasonal_no2y = {
-  segment: {
-    ha: {
       "resolution": {"3y": inits.flu, "6y": inits.flu, "12y": inits.flu, default: "6y"}
     },
     default: "ha"
@@ -54,8 +44,8 @@ export const datasets = {
     "flu": {
       "lineage": {
         "h3n2": seasonal,
-        "vic": seasonal_no2y,
-        "yam": seasonal_no2y,
+        "vic": seasonal,
+        "yam": seasonal,
         "h1n1pdm": seasonal,
         "default": "h3n2"
       }
