@@ -14,7 +14,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, 'devel'),
     filename: 'bundle.js',
-    publicPath: '/dist/'
+    publicPath: './dist/'
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
@@ -53,6 +53,10 @@ module.exports = {
       {
         test: /\.(gif|png|jpe?g|svg)$/i, loader: "file-loader",
         include: path.join(__dirname, "src")
+      },
+      {
+        test: /\.(gif|png|jpe?g|svg)$/i, loader: "file-loader",
+        include: path.join(__dirname, ".")
       }
     ]
   }

@@ -25,6 +25,15 @@ Auspice is the web app that gives an interactive display of inferences produced 
 `$ npm install `
 `$ npm start `
 
+# Package for Electron
+```
+npm install
+npm build
+npm install electron-packager -g
+npm install -g electron-packager-interactive
+electron-packager-interactive
+```
+
 ## License and copyright
 
 Copyright 2014-2016 Trevor Bedford, Richard Neher and Colin Megill.

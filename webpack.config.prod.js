@@ -2,6 +2,7 @@ var path = require("path");
 var webpack = require("webpack");
 var CompressionPlugin = require('compression-webpack-plugin');
 
+
 // let commitHash = require('child_process')
 //   .execSync('git rev-parse --short HEAD')
 //   .toString();
@@ -14,7 +15,7 @@ module.exports = {
   output: {
     path: path.join(__dirname, "dist"),
     filename: "bundle.js",
-    publicPath: "/dist/"
+    publicPath: "./dist/"
   },
   plugins: [
     new webpack.optimize.OccurenceOrderPlugin(),
@@ -57,6 +58,11 @@ module.exports = {
     {
       test: /\.(gif|png|jpe?g|svg)$/i, loader: "file-loader",
       include: path.join(__dirname, "src")
-    }]
+    },
+    {
+      test: /\.(gif|png|jpe?g|svg)$/i, loader: "file-loader",
+      include: path.join(__dirname, ".")
+    }
+	]
   }
 };
