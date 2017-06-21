@@ -87,12 +87,23 @@ const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, c
 
     // go from "brazil/cuba" to ["brazil", "cuba"]
     const countries = key.split("/");
+    if (countries[0].toLowerCase() === countries[1].toLowerCase()) {
+      return;
+    }
     // go from "brazil" to lat0 = -14.2350
-    let long0 = geo[geoResolution][countries[0]].longitude;
-    let long1 = geo[geoResolution][countries[1]].longitude;
-    let lat0 = geo[geoResolution][countries[0]].latitude;
-    let lat1 = geo[geoResolution][countries[1]].latitude;
-
+    let long0 = undefined;
+    let long1 = undefined;
+    let lat0 = undefined;
+    let lat1 = undefined;
+    try {
+      long0 = geo[geoResolution][countries[0]].longitude;
+      long1 = geo[geoResolution][countries[1]].longitude;
+      lat0 = geo[geoResolution][countries[0]].latitude;
+      lat1 = geo[geoResolution][countries[1]].latitude;
+    } catch (e) {
+      // console.log("Error getting transmission lat/longs for ", countries[0], " -> ", countries[1])
+      return;
+    }
     // create new leaflet LatLong objects
     const start = new L.LatLng(lat0, long0)
     const end = new L.LatLng(lat1, long1)
