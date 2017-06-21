@@ -41,10 +41,10 @@ const Bezier = (pathControl, start=0.0, end=1.0, num=15) => { // returns Bezier 
     for (var j in _.range(curve.length)){ // iterate over future curve, adjust each point's coordinate
       curve[j].x += tB[prod_idx[j][0]] * P[prod_idx[j][1]] // update x coordinate for curve with outer product
       curve[j].y += tB[prod_idx[Number(j)+num][0]] * P[prod_idx[Number(j)+num][1]] // update y coordinate for curve with outer product
-      }
     }
+  }
   return curve
-}
+};
 
 const computeMidpoint = (pair, modify, height) => {
   /* Equation derived by Luiz Max Fagundes de Carvalho (University of Edinburgh). */
@@ -202,14 +202,19 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems,
   const destinationDate = nodes[d.data.demePairIndices[1]].attr.num_date;
   const userDateMin = controls.dateScale(controls.dateFormat.parse(controls.dateMin));
   const userDateMax = controls.dateScale(controls.dateFormat.parse(controls.dateMax));
-
   /* manually find the points along a Bezier curve at which we should be given the user date selection */
   const start = Math.max(0.0,(userDateMin-originDate)/(destinationDate-originDate)) // clamp start at 0.0 if userDateMin gives a number <0
-  const end = Math.min(1.0,(userDateMax-originDate)/(destinationDate-originDate)) // clamp end at 1.0 if userDateMax gives a number >1
+  let end = (userDateMax-originDate)/(destinationDate-originDate)
+  console.log('end1', end)
+  if (end === Number.POSITIVE_INFINITY) {
+    let end = 1.0;
+  } else if (end === Number.NEGATIVE_INFINITY) {
+    let end = 0.0;
+  }
+  console.log('end', end)
   const Bcurve = Bezier([pair[0],computeMidpoint(pair,(destinationDate-minTransmissionDate)*25.0),pair[1]],start,end,15) // calculate Bezier
-
-  return Bcurve
-}
+  return Bcurve;
+};
 
 export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
 
