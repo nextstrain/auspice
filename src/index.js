@@ -41,6 +41,7 @@ class Root extends React.Component {
               <Route path="/zika" component={App}/>
               <Route path="/ebola" component={App}/>
               <Route path="/flu*" component={App}/>
+              <Route path="/avian*" component={App}/>
               <Route path="/dengue*" component={App}/>
               <Route path="*" component={Splash}/>
             </Switch>

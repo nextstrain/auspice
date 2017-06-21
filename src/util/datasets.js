@@ -1,11 +1,16 @@
 export const dataURLStem = process.env.DATA_LOCAL ? "/data/" : "http://data.nextstrain.org/";
 
-const init = "c=region&r=country";
+const inits = {
+  "flu": "c=region&r=country",
+  "avian": "c=division&r=division"
+};
 
 const seasonal = {
   segment: {
     ha: {
-      "resolution": {"2y": init, "3y": init, "6y": init, "12y": init, default: "6y"}
+      "resolution": {
+        "2y": inits.flu, "3y": inits.flu, "6y": inits.flu, "12y": inits.flu, default: "6y"
+      }
     },
     default: "ha"
   }
@@ -13,11 +18,12 @@ const seasonal = {
 const seasonal_no2y = {
   segment: {
     ha: {
-      "resolution": {"3y": init, "6y": init, "12y": init, default: "6y"}
+      "resolution": {"3y": inits.flu, "6y": inits.flu, "12y": inits.flu, default: "6y"}
     },
     default: "ha"
   }
 };
+
 
 export const datasets = {
   "pathogen": {
@@ -33,26 +39,25 @@ export const datasets = {
         "default": "all"
       }
     },
-    "flu": {
+    "avian": {
       "lineage": {
         "h7n9": {
           "segment": {
-            "pb2": "c=division&r=division",
-            "pb1": "c=division&r=division",
-            "pa": "c=division&r=division",
-            "ha": "c=division&r=division",
-            "np": "c=division&r=division",
-            "na": "c=division&r=division",
-            "mp": "c=division&r=division",
-            "ns": "c=division&r=division",
+            "pb2": inits.avian, "pb1": inits.avian, "pa": inits.avian, "ha": inits.avian,
+            "np": inits.avian, "na": inits.avian, "mp": inits.avian, "ns": inits.avian,
             "default": "ha"
           }
         },
+        "default": "h7n9"
+      }
+    },
+    "flu": {
+      "lineage": {
         "h3n2": seasonal,
         "vic": seasonal_no2y,
         "yam": seasonal_no2y,
         "h1n1pdm": seasonal,
-        "default": "h7n9"
+        "default": "h3n2"
       }
     },
     "default": "zika"

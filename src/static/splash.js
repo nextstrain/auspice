@@ -161,7 +161,7 @@ class Splash extends React.Component {
                   {generateCard(["Seasonal Influenza"], require("../images/influenza.png"), "/flu/h3n2/ha", false)}
                 </div>
                 <div className="col-sm-4">
-                  {generateCard(["Avian Influenza", "A/H7N9"], require("../images/H7N9.png"), "/flu/h7n9", false)}
+                  {generateCard(["Avian Influenza", "A/H7N9"], require("../images/H7N9.png"), "/avian/h7n9", false)}
                 </div>
                 <div className="col-sm-4">
                   {generateCard(["Dengue"], require("../images/dengue.png"), "/dengue", false)}
