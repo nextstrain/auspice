@@ -58,7 +58,15 @@ class DateRangeInputs extends React.Component {
     return(this.props.dateScale(this.props.dateFormat.parse(calDate)));
   };
 
+  maybeClearMapAnimationInterval() {
+    if (window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop) {
+      clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
+    }
+  }
+
   updateFromPicker(ref, momentDate) {
+    this.maybeClearMapAnimationInterval()
+
     // a momentDate is received from DatePicker
     let newRange;
     if (ref === "updateDateMin") {
@@ -75,6 +83,8 @@ class DateRangeInputs extends React.Component {
   }
 
   updateFromSlider(debounce, numDateValues) {
+    this.maybeClearMapAnimationInterval()
+
     if (debounce) {
       // simple debounce @ 100ms
       const currentTime = Date.now();
