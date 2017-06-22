@@ -174,7 +174,7 @@ class MapAnimationControls extends React.Component {
       <div id='mapAnimationControls'>
 
       <div style={{marginBottom: 15}}>
-        <SelectLabel text="Animation speed (seconds)"/>
+        <SelectLabel text="Animation speed"/>
         <button
           style={{
             padding: "5px 10px",
