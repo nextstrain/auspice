@@ -175,7 +175,7 @@ PhyloTree.prototype.setDefaults = function () {
  * @param  visibility (OPTIONAL) -- array of "visible" or "hidden"
  * @return {null}
  */
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility, drawConfidence) {
   if (branchThickness) {
     this.nodes.forEach(function(d, i) {
       d["stroke-width"] = branchThickness[i];
@@ -193,14 +193,10 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
   if (this.params.showGrid){
       this.addGrid();
   }
-  if (this.params.confidence){
-    this.drawConfidence();
-  }
   if (this.params.branchLabels){
     this.drawBranches();
   }
   this.drawTips();
-
   if (visibility) {
     this.nodes.forEach(function(d, i) {
       d["visibility"] = visibility[i];
@@ -217,21 +213,29 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
   // if (this.params.tipLabels){
   //   this.updateTipLabels(100);
   // }
+
   this.updateGeometry(10);
+
   this.svg.selectAll(".regression").remove();
-  if (this.layout==="clock" && this.distance === "num_date") this.drawRegression();
+  if (this.layout === "clock" && this.distance === "num_date") {
+    this.drawRegression();
+  }
+  this.removeConfidence();
+  if (drawConfidence) {
+    this.drawConfidence();
+  }
 };
 
 /*
  * update branchThicknesses without modifying the SVG
  */
-PhyloTree.prototype.changeBranchThicknessAttr = function (thicknesses) {
-  this.nodes.forEach(function(d, i) {
-    if (thicknesses[i] !== d["stroke-width"]) {
-      d["stroke-width"] = thicknesses[i];
-    }
-  });
-};
+// PhyloTree.prototype.changeBranchThicknessAttr = function (thicknesses) {
+//   this.nodes.forEach(function(d, i) {
+//     if (thicknesses[i] !== d["stroke-width"]) {
+//       d["stroke-width"] = thicknesses[i];
+//     }
+//   });
+// };
 
 /*
  * set the property that is used as distance along branches
@@ -948,29 +952,71 @@ PhyloTree.prototype.drawBranchLabels = function() {
 //     .attr("class", "tipLabel");
 // }
 
-PhyloTree.prototype.drawConfidence = function() {
-  this.confidence = this.svg.append("g").selectAll('.conf')
-    .data(this.nodes)
-    .enter()
-    .append("path")
+/* C O N F I D E N C E    I N T E R V A L S */
+
+PhyloTree.prototype.removeConfidence = function (dt) {
+  if (dt) {
+    this.svg.selectAll(".conf")
+      .transition()
+      .duration(dt)
+      .style("opacity", 0)
+    .remove();
+  } else {
+    this.svg.selectAll(".conf").remove();
+  }
+  // this.props.confidence = false;
+};
+
+PhyloTree.prototype.drawConfidence = function (dt) {
+  // this.removeConfidence(); // just in case
+  // console.log("drawing:", this.svg.selectAll(".conf"))
+  if (dt) {
+    this.confidence = this.svg.append("g").selectAll(".conf")
+      .data(this.nodes)
+      .enter()
+        .call((sel) => this.drawSingleCI(sel, 0));
+    this.svg.selectAll(".conf")
+        .transition()
+          .duration(dt)
+          .style("opacity", 0.5);
+  } else {
+    this.confidence = this.svg.append("g").selectAll(".conf")
+      .data(this.nodes)
+      .enter()
+        .call((sel) => this.drawSingleCI(sel, 0.5));
+  }
+  // this.props.confidence = true;
+};
+
+const confidenceWidth = (el) =>
+  el["stroke-width"] === 1 ? 0 :
+    el["stroke-width"] > 6 ? el["stroke-width"] + 6 : el["stroke-width"] * 2;
+
+PhyloTree.prototype.drawSingleCI = function (selection, opacity) {
+  selection.append("path")
     .attr("class", "conf")
-    .attr("id", function(d) {
-      return "conf_" + d.n.clade;
-    })
-    .attr("d", function(d) {
-      return d.confLine;
-    })
-    .style("stroke", function(d) {
-      return d.stroke || "#888";
-    })
-    .style("opacity", 0.5)
+    .attr("id", (d) => "conf_" + d.n.clade)
+    .attr("d", (d) => d.confLine)
+    .style("stroke", (d) => d.stroke || "#888")
+    .style("opacity", opacity)
     .style("fill", "none")
-    .style("stroke-width", function(d) {
-      return d['stroke-width']*2 || 4;
-    });
+    .style("stroke-width", confidenceWidth);
 };
 
 
+PhyloTree.prototype.updateConfidence = function (dt) {
+  if (dt) {
+    this.svg.selectAll(".conf")
+      .transition()
+        .duration(dt)
+      .style("stroke", (el) => el.stroke)
+      .style("stroke-width", confidenceWidth);
+  } else {
+    this.svg.selectAll(".conf")
+      .style("stroke", (el) => el.stroke)
+      .style("stroke-width", confidenceWidth);
+  }
+};
 
 /************************************************/
 
@@ -1016,6 +1062,7 @@ PhyloTree.prototype.updateLayout = function(layout,dt){
  *  @params dt -- time of transition in milliseconds
  */
 PhyloTree.prototype.updateGeometryFade = function(dt) {
+  this.removeConfidence(dt)
   // fade out branches
   this.svg.selectAll('.branch').filter(function(d) {
       return d.update;
@@ -1086,57 +1133,43 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
 
-  this.svg.selectAll('.conf')
-    .transition().duration(dt)
-    .attr("visibility", this.layout==="rect"?"visible":"hidden")
-    .attr("d", function(d) {
-      return d.confLine;
-    });
+  /* if conditions are met then add back the confidence intervals */
+  if (this.layout === "rect") {
+    setTimeout(() => this.drawConfidence(false, true), 1.5 * dt);
+  }
 };
-
 
 /**
  * transition of branches and tips at the same time. only useful within a layout
  * @param  dt -- time of transition in milliseconds
  * @return {[type]}
  */
-PhyloTree.prototype.updateGeometry = function(dt) {
-  this.svg.selectAll('.tip').filter(function(d) {
-      return d.update;
-    })
-    .transition().duration(dt)
-    .attr("cx", function(d) {
-      return d.xTip;
-    })
-    .attr("cy", function(d) {
-      return d.yTip;
-    });
+PhyloTree.prototype.updateGeometry = function (dt) {
+  this.svg.selectAll(".tip")
+    .filter((d) => d.update)
+    .transition()
+      .duration(dt)
+      .attr("cx", (d) => d.xTip)
+      .attr("cy", (d) => d.yTip);
 
-  this.svg.selectAll('.branch').filter('.T').filter(function(d) {
-      return d.update;
-    })
-    .transition().duration(dt)
-    .attr("d", function(d) {
-      return d.branch[1];
-    });
-  this.svg.selectAll('.branch').filter('.S').filter(function(d) {
-      return d.update;
-    })
-    .transition().duration(dt)
-    .attr("d", function(d) {
-      return d.branch[0];
-    });
+  const branchEls = [".S", ".T"];
+  for (let i = 0; i < 2; i++) {
+    this.svg.selectAll(".branch")
+      .filter(branchEls[i])
+      .filter((d) => d.update)
+      .transition()
+        .duration(dt)
+        .attr("d", (d) => d.branch[i]);
+  }
+
+  this.svg.selectAll(".conf")
+    .filter((d) => d.update)
+    .transition()
+      .duration(dt)
+      .attr("d", (dd) => dd.confLine);
 
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
-
-  this.svg.selectAll('.conf')
-    .transition().duration(dt)
-    .attr("visibility", this.layout==="rect" ? "visibile" : "hidden")
-    .attr("d", function(d) {
-      return d.confLine;
-    });
-
 };
 
 

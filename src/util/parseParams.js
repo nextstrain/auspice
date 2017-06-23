@@ -1,4 +1,4 @@
-import {datasets} from "./globals";
+import {datasets} from "./datasets";
 
 /*
  * utility function that takes a string (splat as in flu/h3n2/3y)

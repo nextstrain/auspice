@@ -1,44 +1,5 @@
 import d3 from "d3";
 
-// datasets json: object of list (to ensure order) of list (to be flexible)
-// until terminated by an empty list indicating that no further datasets
-// resolution are made
-export const datasets = {
-  "pathogen": {
-    "ebola": "c=division&r=division",
-    "zika": "",
-    "dengue": {
-      "serotype": {
-        "all": "",
-        "denv1": "",
-        "denv2": "",
-        "denv3": "",
-        "denv4": "",
-        "default": "all"
-      }
-    },
-    "flu": {
-      "lineage": {
-        "h7n9": {
-          "segment": {
-            "pb2": "c=division&r=division",
-            "pb1": "c=division&r=division",
-            "pa": "c=division&r=division",
-            "ha": "c=division&r=division",
-            "np": "c=division&r=division",
-            "na": "c=division&r=division",
-            "mp": "c=division&r=division",
-            "ns": "c=division&r=division",
-            "default": "ha"
-          }
-        },
-        "default": "h7n9"
-      }
-    },
-    "default": "zika"
-  }
-};
-
 export const colorOptions = {
     "country":{"key":"country", "legendTitle":"Country", "menuItem":"country", "type":"discrete"},
     "region":{"key":"region", "legendTitle":"Region", "menuItem":"region", "type":"discrete"},
@@ -64,7 +25,6 @@ export const defaultLayout = "rect";
 export const defaultDistanceMeasure = "num_date";
 export const defaultDateRange = 6;
 export const date_select = true;
-export const dataURLStem = process.env.DATA_LOCAL ? "/data/" : "http://data.nextstrain.org/";
 export const file_prefix = "Zika_";
 export const branchLabels = false;
 export const restrictTo = {"region": "all"};

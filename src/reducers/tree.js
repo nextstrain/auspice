@@ -23,40 +23,23 @@ const getDefaultState = function () {
 
 const Tree = (state = getDefaultState(), action) => {
   switch (action.type) {
-  case types.REQUEST_TREE:
-    return Object.assign({}, getDefaultState(), {
-      loadStatus: 1,
-      error: null
-    });
-  case types.RECEIVE_TREE:
-    /* this function is required to do a number of things, and the order is crucial
-    (1) construct the nodes
-    (2) calculate tip (node) visibility - uses redux.controls located in action.controls
-    (3) calculate tipCounts (not fullTipCounts)
-    (4) set branchThickness
-    */
-    /* step 1 */
-    const nodes = processNodes(d3.layout.tree().size([1, 1]).nodes(action.data));
+  case types.NEW_DATASET:
+    /* keep loadStatus @ 1 */
+    const nodes = processNodes(d3.layout.tree().size([1, 1]).nodes(action.tree));
     nodes[0].parent = nodes[0]; // make root its own parent
     calcLayouts(nodes, ["div", "num_date"]);
-    /* step 2 */
-    const visibility = calcVisibility({nodes}, action.controls);
-    /* step 3 - this will set the tipCount property of each node */
-    calcTipCounts(nodes[0], visibility);
-    /* step 4 */
-    const branchThickness = calcBranchThickness(nodes, visibility, 0);
-    /* set state */
+    return Object.assign({}, getDefaultState(), {
+      loadStatus: 2,
+      inViewRootNodeIdx: 0,
+      nodes: nodes
+    });
+  case types.DATA_VALID:
     return Object.assign({}, state, {
       loadStatus: 2,
-      error: null,
-      inViewRootNodeIdx: 0,
-      nodes: nodes,
-      branchThickness,
-      /* do not change branchThicknessVersion - this is applied by phyloTree.render, not an update method */
-      datasetGuid: Math.floor(Math.random() * 100000000000),
-      visibility,
-      visibilityVersion: 1
+      datasetGuid: Math.floor(Math.random() * 100000000000)
     });
+  case types.DATA_INVALID:
+    return getDefaultState();
   case types.TREE_FETCH_ERROR:
     return Object.assign({}, state, {
       loadStatus: 0,

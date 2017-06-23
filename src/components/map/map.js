@@ -149,6 +149,9 @@ class Map extends React.Component {
     // const newVisibilityVersion = this.props.visibilityVersion !== prevProps.visibilityVersion;
 
     if (
+      // determining when the tree is ready needs to be improved
+      this.props.datasetGuid &&
+      this.props.nodes !== null &&
       mapIsDrawn &&
       allDataPresent &&
       demesAbsent

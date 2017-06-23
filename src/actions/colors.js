@@ -15,12 +15,18 @@ const colorScaleWrapper = function (colorBy, tree, sequences, colorOptions, newV
 
 export const updateColorScale = function () {
   return function (dispatch, getState) {
-    // console.log("colorScale updated")
     const { controls, tree, sequences, metadata } = getState();
     /* bail if all required params aren't (yet) available! */
     if (!(tree.loadStatus === 2 && sequences.loadStatus === 2 && metadata.loadStatus === 2)) {
+      // console.log(
+      //   "updateColorScale not running due to loadStatuses of ",
+      //   "tree", tree.loadStatus,
+      //   "sequences", sequences.loadStatus,
+      //   "metadata", metadata.loadStatus
+      // );
       return null;
     }
+    // console.log("updateColorScale running");
     const previousVersion = controls.colorScale ? controls.colorScale.version : 0;
     dispatch({
       type: types.SET_COLOR_SCALE,
@@ -37,6 +43,7 @@ export const updateNodeColors = () => {
       return null;
     }
     const data = calcNodeColor(tree, controls.colorScale, sequences);
+    // console.log("updateNodeColors() run with version", controls.colorScale.version, "data:", data)
     if (data) {
       dispatch({
         type: types.UPDATE_NODE_COLORS,

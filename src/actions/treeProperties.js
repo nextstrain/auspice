@@ -161,3 +161,7 @@ export const changeMutType = (data) => {
     dispatch({type: types.TOGGLE_MUT_TYPE, data});
   };
 };
+
+export const toggleTemporalConfidence = () => ({
+  type: types.TOGGLE_TEMPORAL_CONF
+});

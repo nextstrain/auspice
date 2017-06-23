@@ -20,7 +20,6 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
   /*
     aggregate locations for demes
   */
-
   // first pass to initialize empty vectors
   nodes.forEach((n, i) => {
     const tipColorAttribute = getTipColorAttribute(n, colorScale, sequences);
@@ -43,7 +42,6 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
       });
     }
   });
-
   // second pass to fill vectors
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
@@ -89,7 +87,6 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
     // aggregatedLocationsWraparoundCopy,
     aggregatedTransmissions
   } = aggregated(nodes, visibility, geoResolution, colorScale, sequences);
-
   const geo = metadata.geo;
   const demesAndTransmissions = {
     demes: [],
@@ -112,7 +109,6 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
       });
     });
   })
-
 
 
   // /* count WRAPAROUNDS */
@@ -150,17 +146,31 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
       //   /* figure out the new one, insert it AND ITS REVERSE into the knownShortestPaths map above */
       // }
 
+      let long0;
+      let long1;
+      let lat0;
+      let lat1;
+      try {
+        long0 = geo[geoResolution][countries[0]].longitude;
+        long1 = geo[geoResolution][countries[1]].longitude;
+        lat0 = geo[geoResolution][countries[0]].latitude;
+        lat1 = geo[geoResolution][countries[1]].latitude;
+      } catch (e) {
+        // console.log("No transmission lat/longs for ", countries[0], " -> ", countries[1])
+        return;
+      }
+
       const original = [
         map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
           new L.LatLng(
-            geo[geoResolution][countries[0]].latitude,
-            geo[geoResolution][countries[0]].longitude + OFFSET
+            lat0,
+            long0 + OFFSET
           )
         ),
         map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
           new L.LatLng(
-            geo[geoResolution][countries[1]].latitude,
-            geo[geoResolution][countries[1]].longitude + OFFSET
+            lat1,
+            long1 + OFFSET
           )
         )
       ];
@@ -168,14 +178,14 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
       const west = [
         map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
           new L.LatLng(
-            geo[geoResolution][countries[0]].latitude,
-            geo[geoResolution][countries[0]].longitude + OFFSET
+            lat0,
+            long0 + OFFSET
           )
         ),
         map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
           new L.LatLng(
-            geo[geoResolution][countries[1]].latitude,
-            geo[geoResolution][countries[1]].longitude - 360 + OFFSET
+            lat1,
+            long1 - 360 + OFFSET
           )
         )
       ];
@@ -183,14 +193,14 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
       const east = [
         map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
           new L.LatLng(
-            geo[geoResolution][countries[0]].latitude,
-            geo[geoResolution][countries[0]].longitude + OFFSET
+            lat0,
+            long0 + OFFSET
           )
         ),
         map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
           new L.LatLng(
-            geo[geoResolution][countries[1]].latitude,
-            geo[geoResolution][countries[1]].longitude + 360 + OFFSET
+            lat1,
+            long1 + 360 + OFFSET
           )
         )
       ];
@@ -216,12 +226,13 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
   }) /* End OFFSET */
 
   // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
-
-  demesAndTransmissions.minTransmissionDate = demesAndTransmissions.transmissions.map((x) => {
-    return nodes[x.data.demePairIndices[0]].attr.num_date;
-  }).reduce((prev, cur) => {
-    return cur < prev ? cur : prev;
-  });
+  if (demesAndTransmissions.transmissions.length) {
+    demesAndTransmissions.minTransmissionDate = demesAndTransmissions.transmissions.map((x) => {
+      return nodes[x.data.demePairIndices[0]].attr.num_date;
+    }).reduce((prev, cur) => {
+      return cur < prev ? cur : prev;
+    });
+  }
   return demesAndTransmissions;
 }
 
