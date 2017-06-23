@@ -251,9 +251,6 @@ class Map extends React.Component {
     const somethingChanged = (this.props.colorBy !== prevProps.colorBy ||
                               this.props.colorScale.version !== prevProps.colorScale.version);
 
-    // console.log("-----------------------------------------------------------------------------------")
-    // console.log("visibilityVersion", this.props.visibilityVersion, prevProps.visibilityVersion)
-    // console.log("colorScale", this.props.colorScale.version, prevProps.colorScale.version)
     if (
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
       this.props.colorScale.version !== prevProps.colorScale.version
@@ -282,10 +279,10 @@ class Map extends React.Component {
     /******************************************
     * GET LEAFLET IN THE DOM
     *****************************************/
-    // console.log("createMap", this.props.nodes);
+
+    /* todo consider triplicate here: if (this.props.metadata.triplicate) {} different bounds */
     const southWest = L.latLng(-70, -180);
     const northEast = L.latLng(80, 180);
-    // console.log(southWest, northEast);
     const bounds = L.latLngBounds(southWest, northEast);
     let zoom = 2;
     let center = [0,0];
@@ -294,7 +291,7 @@ class Map extends React.Component {
       center: center,
       zoom: zoom,
       scrollWheelZoom: false,
-      // maxBounds: bounds,
+      maxBounds: bounds,
       minZoom: 2,
       maxZoom: 8,
       zoomControl: false,

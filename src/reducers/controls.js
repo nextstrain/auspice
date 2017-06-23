@@ -25,7 +25,7 @@ const getDefaultState = function () {
     region: null,
     search: null,
     strain: null,
-    splitTreeAndMap: false,
+    splitTreeAndMap: true,
     mutType: globals.mutType,
     layout: globals.defaultLayout,
     distanceMeasure: globals.defaultDistanceMeasure,

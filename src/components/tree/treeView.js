@@ -54,6 +54,7 @@ need this information are children of this component
     colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
     map: state.map,
+    splitTreeAndMap: state.controls.splitTreeAndMap,
     colorBy: state.controls.colorBy,
     layout: state.controls.layout,
     showBranchLabels: state.controls.showBranchLabels,
@@ -508,7 +509,7 @@ class TreeView extends React.Component {
 
   render() {
     const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint && (this.props.controls && this.props.controls.splitTreeAndMap) ? .5 : 1,
+      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > globals.twoColumnBreakpoint && this.props.splitTreeAndMap ? .5 : 1,
       vertical: 1.0,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
