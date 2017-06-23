@@ -43,6 +43,12 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
 
   const makePanel = () => {
     if (!tip) {return null;}
+    let url = tip.n.attr.url;
+    if (url !== undefined && url.startsWith("https_")) {
+      url = url.replace("https_", "https:");
+    } else if (url !== undefined && url.startsWith("http_")) {
+      url = url.replace("http_", "http:");
+    }
     return (
       <div style={styles.container} onClick={() => goAwayCallback(tip)}>
         <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
@@ -77,7 +83,7 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
               </tr>
               <tr>
                 <th>URL</th>
-                <td><a href={tip.n.attr.url} target="_blank">{tip.n.attr.url}</a></td>
+                <td><a href={url} target="_blank">{url}</a></td>
               </tr>
             </tbody>
           </table>
