@@ -39,7 +39,7 @@ const getDefaultState = function () {
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
     colorByConfidence: {display: false, on: false},
-    colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
+    colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 0),
     analysisSlider: false,
     geoResolution: globals.defaultGeoResolution,
     datasetPathName: "",
@@ -213,9 +213,9 @@ const Controls = (state = getDefaultState(), action) => {
       newState.mutType = determineColorByGenotypeType(action.data);
     }
     return newState;
-  case types.SET_COLOR_SCALE:
+  case types.NEW_COLORS:
     return Object.assign({}, state, {
-      colorScale: action.data
+      colorScale: action.colorScale
     });
   case types.CHANGE_GEO_RESOLUTION:
     return Object.assign({}, state, {
