@@ -215,7 +215,8 @@ const Controls = (state = getDefaultState(), action) => {
     return newState;
   case types.NEW_COLORS:
     return Object.assign({}, state, {
-      colorScale: action.colorScale
+      colorScale: action.colorScale,
+      colorBy: action.colorBy
     });
   case types.CHANGE_GEO_RESOLUTION:
     return Object.assign({}, state, {
