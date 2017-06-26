@@ -197,6 +197,7 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
     this.drawBranches();
   }
   this.drawTips();
+  this.drawCladeLabels();
   if (visibility) {
     this.nodes.forEach(function(d, i) {
       d["visibility"] = visibility[i];
@@ -935,6 +936,18 @@ PhyloTree.prototype.drawBranchLabels = function() {
     .text(function (d){return bLFunc(d);})
     .attr("class", "branchLabel")
     .style("text-anchor","end");
+}
+
+
+PhyloTree.prototype.drawCladeLabels = function() {
+  this.branchLabels = this.svg.append("g").selectAll('.tip')
+    .data(this.nodes.filter(function (d) { return typeof d.n.attr.clade_name !== 'undefined'; }))
+    .enter()
+    .append("text")
+    .style("visibility", "visible")
+    .text(function (d) { return d.n.attr.clade_name; })
+    .attr("class", "branchLabel")
+    .style("text-anchor", "end");
 }
 
 // PhyloTree.prototype.drawTipLabels = function() {
