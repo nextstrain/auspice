@@ -7,12 +7,20 @@ export const prettyString = (x) => {
     return "unknown";
   }
   if (typeof x === "string") {
-    return x.replace("_", " ")
+    return x.replace(/_/g, " ")
             .replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
   } else if (typeof x === "number") {
     return x.toFixed(2);
   }
   return x;
+};
+
+const authorString = (x) => {
+  const y = prettyString(x);
+  if (y.indexOf("Et Al") !== -1) {
+    return (<span>{y.replace(" Et Al", "")}<em> et al</em></span>);
+  }
+  return y;
 };
 
 const TipSelectedPanel = ({tip, goAwayCallback}) => {
@@ -75,7 +83,7 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
               </tr>
               <tr>
                 <th>Authors</th>
-                <td>{tip.n.attr.authors}</td>
+                <td>{authorString(tip.n.attr.authors)}</td>
               </tr>
               <tr>
                 <th>Accession</th>

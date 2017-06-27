@@ -1,11 +1,11 @@
 import React from "react";
 import Radium from "radium";
 import Select from "react-select";
-import { filterAbbrRev, filterAbbrFwd, controlsWidth } from "../../util/globals";
-import { modifyURLquery } from "../../util/urlHelpers";
+import { controlsWidth } from "../../util/globals";
 import { connect } from "react-redux";
 import { applyFilterQuery } from "../../actions/treeProperties"
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import { prettyString } from "../tree/tipSelectedPanel";
 
 /*
  * implements a selector that
@@ -52,7 +52,7 @@ class RecursiveFilter extends React.Component {
     for (let i = 0; i < this.props.options.length; i++) {
       options.push({
         value: this.props.options[i],
-        label: this.props.options[i] + (this.props.counts[i] ? " (" + this.props.counts[i] + ")" : "")
+        label: prettyString(this.props.options[i]).replace("Et Al", "et al") + (this.props.counts[i] ? " (" + this.props.counts[i] + ")" : "")
       });
     }
     /* note that e (onChange) is an array of objects each with label and value */
