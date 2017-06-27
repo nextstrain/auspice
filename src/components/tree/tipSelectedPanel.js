@@ -1,32 +1,7 @@
 /*eslint-env browser*/
 import React from "react";
 import {infoPanelStyles} from "../../globalStyles";
-
-export const prettyString = (x, multiplier = false) => {
-  if (!x) {
-    return "";
-  }
-  if (typeof x === "string") {
-    if (["usvi", "usa", "uk"].indexOf(x.toLowerCase()) !== -1) {
-      return x.toUpperCase();
-    }
-    return x.replace(/_/g, " ")
-            .replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
-  } else if (typeof x === "number") {
-    const val = parseFloat(x);
-    const magnitude = Math.ceil(Math.log10(Math.abs(val) + 1e-10));
-    return multiplier ? val.toFixed(5 - magnitude) + "\u00D7" : val.toFixed(5 - magnitude);
-  }
-  return x;
-};
-
-const authorString = (x) => {
-  const y = prettyString(x);
-  if (y.indexOf("Et Al") !== -1) {
-    return (<span>{y.replace(" Et Al", "")}<em> et al</em></span>);
-  }
-  return y;
-};
+import {prettyString, authorString} from "./treeViewFunctions";
 
 const TipSelectedPanel = ({tip, goAwayCallback}) => {
   const styles = {
@@ -90,13 +65,10 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
                 <th>Authors</th>
                 <td>{authorString(tip.n.attr.authors)}</td>
               </tr>
+              {/* todo: check if both URL && accession exist */}
               <tr>
                 <th>Accession</th>
-                <td>{tip.n.attr.accession}</td>
-              </tr>
-              <tr>
-                <th>URL</th>
-                <td><a href={url} target="_blank">{url}</a></td>
+                <td><a href={url} target="_blank">{tip.n.attr.accession}</a></td>
               </tr>
             </tbody>
           </table>

@@ -5,7 +5,7 @@ import { controlsWidth } from "../../util/globals";
 import { connect } from "react-redux";
 import { applyFilterQuery } from "../../actions/treeProperties"
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { prettyString } from "../tree/tipSelectedPanel";
+import { prettyString } from "../tree/treeViewFunctions";
 
 /*
  * implements a selector that

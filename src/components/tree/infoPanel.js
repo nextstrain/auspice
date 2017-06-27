@@ -1,7 +1,7 @@
 /*eslint-env browser*/
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
-import { prettyString } from "./tipSelectedPanel";
+import { prettyString } from "./treeViewFunctions";
 import { floatDateToMoment } from "../../util/dateHelpers";
 import moment from "moment";
 

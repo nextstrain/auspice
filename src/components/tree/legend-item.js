@@ -1,7 +1,7 @@
 import React from "react";
 import { legendMouseEnterExit } from "../../actions/treeProperties";
 import { dataFont, darkGrey } from "../../globalStyles";
-import { prettyString } from "./tipSelectedPanel";
+import { prettyString } from "./treeViewFunctions";
 
 const LegendItem = ({
   dispatch, transform,
