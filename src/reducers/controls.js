@@ -203,21 +203,17 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       absoluteDateMax: action.data
     });
-  case types.CHANGE_COLOR_BY:
+  case types.NEW_COLORS:
     const newState = Object.assign({}, state, {
-      colorBy: action.data,
-      colorByConfidence: checkColorByConfidence(state.attrs, action.data)
+      colorBy: action.colorBy,
+      colorScale: action.colorScale,
+      colorByConfidence: checkColorByConfidence(state.attrs, action.colorBy)
     });
     /* may need to toggle the entropy selector AA <-> NUC */
-    if (determineColorByGenotypeType(action.data)) {
-      newState.mutType = determineColorByGenotypeType(action.data);
+    if (determineColorByGenotypeType(action.colorBy)) {
+      newState.mutType = determineColorByGenotypeType(action.colorBy);
     }
     return newState;
-  case types.NEW_COLORS:
-    return Object.assign({}, state, {
-      colorScale: action.colorScale,
-      colorBy: action.colorBy
-    });
   case types.CHANGE_GEO_RESOLUTION:
     return Object.assign({}, state, {
       geoResolution: action.data
