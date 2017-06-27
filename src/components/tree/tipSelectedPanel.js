@@ -2,15 +2,20 @@
 import React from "react";
 import {infoPanelStyles} from "../../globalStyles";
 
-export const prettyString = (x) => {
+export const prettyString = (x, multiplier = false) => {
   if (!x) {
-    return "unknown";
+    return "";
   }
   if (typeof x === "string") {
+    if (["usvi", "usa", "uk"].indexOf(x.toLowerCase()) !== -1) {
+      return x.toUpperCase();
+    }
     return x.replace(/_/g, " ")
             .replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
   } else if (typeof x === "number") {
-    return x.toFixed(2);
+    const val = parseFloat(x);
+    const magnitude = Math.ceil(Math.log10(Math.abs(val) + 1e-10));
+    return multiplier ? val.toFixed(5 - magnitude) + "\u00D7" : val.toFixed(5 - magnitude);
   }
   return x;
 };
