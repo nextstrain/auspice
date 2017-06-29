@@ -38,6 +38,7 @@ const getDefaultState = function () {
     absoluteDateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
+    defaultColorBy: globals.defaultColorBy,
     colorByConfidence: {display: false, on: false},
     colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 0),
     analysisSlider: false,
@@ -127,6 +128,7 @@ const Controls = (state = getDefaultState(), action) => {
     /* available tree attrs - based upon the root node */
     base["attrs"] = Object.keys(action.tree.attr);
     base["colorByConfidence"] = checkColorByConfidence(base["attrs"], base["colorBy"]);
+    base["defaultColorBy"] = base["colorBy"];
     return base;
   case types.TOGGLE_BRANCH_LABELS:
     return Object.assign({}, state, {
