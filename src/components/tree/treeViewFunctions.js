@@ -3,7 +3,6 @@
 /*eslint dot-notation: 0*/
 /*eslint max-len : 0*/
 import { zoomToClade,
-         restrictTreeToSingleTip,
          updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
 import { branchOpacityConstant,
          branchOpacityFunction,
@@ -95,7 +94,7 @@ export const onTipClick = function (d) {
     hovered: null,
     selectedTip: d
   });
-  this.props.dispatch(restrictTreeToSingleTip(d.n.arrayIdx));
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: d.n.arrayIdx}));
 };
 
 export const onBranchHover = function (d, x, y) {

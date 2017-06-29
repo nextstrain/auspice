@@ -39,10 +39,12 @@ const Tree = (state = getDefaultState(), action) => {
       loaded: true,
       datasetGuid: Math.floor(Math.random() * 100000000000)
     });
-  case types.UPDATE_TIP_VISIBILITY:
+  case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
     return Object.assign({}, state, {
-      visibility: action.data,
-      visibilityVersion: action.version
+      visibility: action.visibility,
+      visibilityVersion: action.visibilityVersion,
+      branchThickness: action.branchThickness,
+      branchThicknessVersion: action.branchThicknessVersion
     });
   case types.UPDATE_TIP_RADII:
     return Object.assign({}, state, {
@@ -53,11 +55,6 @@ const Tree = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       nodeColors: action.nodeColors,
       nodeColorsVersion: action.version
-    });
-  case types.UPDATE_BRANCH_THICKNESS:
-    return Object.assign({}, state, {
-      branchThickness: action.data,
-      branchThicknessVersion: action.version
     });
   default:
     return state;

@@ -1,72 +1,42 @@
+/*eslint max-len: 0*/
 import { calcVisibility,
    calcTipRadii,
    calcTipCounts,
-   makeParentVisible,
+   identifyPathToTip,
    calcBranchThickness } from "../util/treeHelpers";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { changeColorBy } from "./colors";
 import * as types from "./types";
 import { defaultColorBy } from "../util/globals";
 
-const updateVisibility = () => {
-  return (dispatch, getState) => {
-    const { tree, controls } = getState();
-    dispatch({
-      type: types.UPDATE_TIP_VISIBILITY,
-      data: calcVisibility(tree, controls),
-      version: tree.visibilityVersion + 1
-    });
-  };
-};
-
-/* this must be called AFTER Visibility is updated */
-const updateBranchThickness = (idxOfInViewRootNode = 0) => {
-  return (dispatch, getState) => {
-    const { tree } = getState();
-    if (tree.nodes) {
-      /* step 1: recalculate tipCounts over the tree */
-      calcTipCounts(tree.nodes[0], tree.visibility);
-      /* step 2: re-calculate branchThickness & dispatch*/
-      dispatch({
-        type: types.UPDATE_BRANCH_THICKNESS,
-        data: calcBranchThickness(tree.nodes, tree.visibility, idxOfInViewRootNode),
-        version: tree.branchThicknessVersion + 1
-      });
-    }
-  };
-};
-
-export const restrictTreeToSingleTip = function (tipIdx) {
-  /* this fn causes things to fall out of sync with the "inView" attr of nodes
-  you should run updateVisibleTipsAndBranchThicknesses to get things back in sync */
-  return (dispatch, getState) => {
-    const { tree } = getState();
-    /* make the tip and all the parents down to the root visibile */
-    const visibility = new Array(tree.nodes.length);
-    visibility.fill(false);
-    visibility[tipIdx] = true;
-    makeParentVisible(visibility, tree.nodes[tipIdx]);
-    dispatch({
-      type: types.UPDATE_TIP_VISIBILITY,
-      data: visibility.map((cv) => cv ? "visible" : "hidden"),
-      version: tree.visibilityVersion + 1
-    });
-    dispatch(updateBranchThickness());
-  };
-};
-
-export const updateVisibleTipsAndBranchThicknesses = function () {
+/**
+ * define the visible branches and their thicknesses. This could be a path to a single tip or a selected clade.
+ * filtering etc will "turn off" branches, etc etc
+ * for arg destructuring see https://simonsmith.io/destructuring-objects-as-function-parameters-in-es6/
+ * @param  {int} idxOfInViewRootNode If clade selected then start visibility at this index. (root = 0)
+ * @param  {int} tipSelectedIdx idx of the selected tip. If not 0 will highlight path to this tip.
+ * @return {null} side effects: a single action
+ */
+export const updateVisibleTipsAndBranchThicknesses = function (
+  {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) {
   /* this fn doesn't need arguments as it relies on the "inView" attr of nodes */
   return (dispatch, getState) => {
     const { tree, controls } = getState();
+    if (!tree.nodes) {return;}
+    const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls);
+    /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
+    calcTipCounts(tree.nodes[0], visibility);
+    /* re-calculate branchThickness (inline)*/
     dispatch({
-      type: types.UPDATE_TIP_VISIBILITY,
-      data: calcVisibility(tree, controls),
-      version: tree.visibilityVersion + 1
+      type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
+      visibility: visibility,
+      visibilityVersion: tree.visibilityVersion + 1,
+      branchThickness: calcBranchThickness(tree.nodes, visibility, idxOfInViewRootNode),
+      branchThicknessVersion: tree.branchThicknessVersion + 1
     });
-    dispatch(updateBranchThickness());
   };
 };
+
 
 /* when tip max / min changes, we need to (a) update the controls reducer
 with the new value(s), (b) update the tree visibility */
@@ -82,8 +52,7 @@ export const changeDateFilter = function (newMin, newMax) {
     }
     /* initially, the tree isn't loaded, so don't bother trying to do things */
     if (tree.loaded) {
-      dispatch(updateVisibility());
-      dispatch(updateBranchThickness());
+      dispatch(updateVisibleTipsAndBranchThicknesses());
     }
   };
 };
@@ -94,8 +63,7 @@ export const changeAnalysisSliderValue = function (value) {
     dispatch({type: types.CHANGE_ANALYSIS_VALUE, value});
     /* initially, the tree isn't loaded, so don't bother trying to do things */
     if (tree.loaded) {
-      dispatch(updateVisibility());
-      dispatch(updateBranchThickness());
+      dispatch(updateVisibleTipsAndBranchThicknesses());
     }
   };
 };
@@ -104,8 +72,7 @@ export const changeAnalysisSliderValue = function (value) {
 Note that the zooming / tree stuff is done imperitively by phyloTree */
 export const zoomToClade = function (idxOfInViewRootNode) {
   return (dispatch) => {
-    dispatch(updateVisibility());
-    dispatch(updateBranchThickness(idxOfInViewRootNode));
+    dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode}));
   };
 };
 
@@ -146,8 +113,7 @@ export const applyFilterQuery = (filterType, fields, values) => {
               // filterType,
               fields,
               values});
-    dispatch(updateVisibility());
-    dispatch(updateBranchThickness());
+    dispatch(updateVisibleTipsAndBranchThicknesses());
   };
 };
 
