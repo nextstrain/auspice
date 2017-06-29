@@ -275,18 +275,26 @@ class Map extends React.Component {
       this.props.geoResolution,
       this.props.colorScale,
       this.props.sequences,
-      this.props.mapTriplicate
+      this.props.mapTriplicate,
     );
   }
   createMap() {
+
+    let southWest;
+    let northEast;
 
     /******************************************
     * GET LEAFLET IN THE DOM
     *****************************************/
 
-    /* todo consider triplicate here: if (this.props.metadata.triplicate) {} different bounds */
-    const southWest = L.latLng(-70, -180);
-    const northEast = L.latLng(80, 180);
+    if (this.props.mapTriplicate === true) {
+      southWest = L.latLng(-70, -540);
+      northEast = L.latLng(80, 540);
+    } else {
+      southWest = L.latLng(-70, -180);
+      northEast = L.latLng(80, 180);
+    }
+
     const bounds = L.latLngBounds(southWest, northEast);
     let zoom = 2;
     let center = [0,0];
