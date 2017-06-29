@@ -33,47 +33,6 @@ const addAnalysisSlider = (dispatch, tree, controls) => {
   }
 };
 
-/* request sequences */
-
-const requestSequences = () => {
-  return {
-    type: types.REQUEST_SEQUENCES
-  };
-};
-
-const receiveSequences = (data) => {
-  return {
-    type: types.RECEIVE_SEQUENCES,
-    data: data
-  };
-};
-
-const sequencesFetchError = (err) => {
-  return {
-    type: types.SEQUENCES_FETCH_ERROR,
-    data: err
-  };
-};
-
-const fetchSequences = (q) => {
-  return fetch(
-    dataURLStem + q + "_sequences.json"
-  );
-};
-
-const populateSequencesStore = (queryParams) => {
-  return (dispatch) => {
-    dispatch(requestSequences());
-    return fetchSequences(queryParams).then((res) => res.json()).then(
-      (json) => {
-        dispatch(receiveSequences(json));
-        dispatch(updateColors());
-      },
-      (err) => dispatch(sequencesFetchError(err))
-    );
-  };
-};
-
 /* request frequencies */
 const requestFrequencies = () => {
   return {
@@ -149,13 +108,15 @@ const populateEntropyStore = (queryParams) => {
 };
 
 
-const loadMetaAndTreeJSONs = (metaPath, treePath, router) => {
+const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
   return (dispatch, getState) => {
-    const metaJSONpromise = fetch(metaPath)
+    const metaJSONpromise = fetch(paths.meta)
       .then((res) => res.json());
-    const treeJSONpromise = fetch(treePath)
+    const treeJSONpromise = fetch(paths.tree)
       .then((res) => res.json());
-    Promise.all([metaJSONpromise, treeJSONpromise])
+    const seqsJSONpromise = fetch(paths.seqs)
+      .then((res) => res.json());
+    Promise.all([metaJSONpromise, treeJSONpromise, seqsJSONpromise])
       .then((values) => {
         /* initial dispatch sets most values */
         dispatch({
@@ -163,6 +124,7 @@ const loadMetaAndTreeJSONs = (metaPath, treePath, router) => {
           datasetPathName: router.history.location.pathname,
           meta: values[0],
           tree: values[1],
+          seqs: values[2],
           query: queryString.parse(router.history.location.search)
         });
         const {controls, tree} = getState(); // reflects updated data
@@ -195,10 +157,11 @@ export const loadJSONs = (router) => {
     const data_path = turnURLtoDataPath(router);
     const JSONpaths = {
       meta: dataURLStem + data_path + "_meta.json",
-      tree: dataURLStem + data_path + "_tree.json"
+      tree: dataURLStem + data_path + "_tree.json",
+      seqs: dataURLStem + data_path + "_sequences.json"
     };
-    dispatch(loadMetaAndTreeJSONs(JSONpaths.meta, JSONpaths.tree, router));
-    dispatch(populateSequencesStore(data_path));
+    dispatch(loadMetaAndTreeAndSequencesJSONs(JSONpaths, router));
+    /* subsequent JSON loading is *not* essential to the main functionality */
     /* while nextstrain is limited to ebola & zika, frequencies are not needed */
     // dispatch(populateFrequenciesStore(data_path));
     dispatch(populateEntropyStore(data_path));
