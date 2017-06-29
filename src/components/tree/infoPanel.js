@@ -33,11 +33,13 @@ const getBranchDivJSX = (d) =>
   <p>{infoLineJSX("Divergence:", prettyString(d.attr.div.toExponential(3)))}</p>;
 
 const getBranchTimeJSX = (d, temporalConfidence) => {
-  console.log("TC:", temporalConfidence)
   const dates = [floatDateToMoment(d.attr.num_date).format("YYYY-MM-DD")];
   if (temporalConfidence) {
     dates[1] = floatDateToMoment(d.attr.num_date_confidence[0]).format("YYYY-MM-DD");
     dates[2] = floatDateToMoment(d.attr.num_date_confidence[1]).format("YYYY-MM-DD");
+    if (dates[1] === dates[2]) {
+      return <p>{infoLineJSX("Date:", dates[0])}</p>;
+    }
     return (
       <p>
         {infoLineJSX("Inferred Date:", dates[0])}
@@ -46,7 +48,7 @@ const getBranchTimeJSX = (d, temporalConfidence) => {
       </p>
     );
   }
-  return <p>{infoLineJSX("Inferred Date:", dates[0])}</p>;
+  return <p>{infoLineJSX("Date:", dates[0])}</p>;
 };
 
 /**
@@ -209,7 +211,12 @@ const InfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
   const styles = getPanelStyling(d, viewer);
   let inner;
   if (tip) {
-    inner = infoLineJSX(prettyString(colorBy) + ":", prettyString(d.n.attr[colorBy]));
+    inner = (
+      <p>
+        {infoLineJSX(prettyString(colorBy) + ":", prettyString(d.n.attr[colorBy]))}
+        {distanceMeasure === "div" ? getBranchDivJSX(d.n) : getBranchTimeJSX(d.n, temporalConfidence)}
+      </p>
+    );
   } else {
     inner = (
       <g>
