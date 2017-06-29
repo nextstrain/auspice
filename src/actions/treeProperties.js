@@ -12,6 +12,7 @@ import { defaultColorBy } from "../util/globals";
 /**
  * define the visible branches and their thicknesses. This could be a path to a single tip or a selected clade.
  * filtering etc will "turn off" branches, etc etc
+ * note that this function checks to see if the tree has been defined (different to if it's ready / loaded!)
  * for arg destructuring see https://simonsmith.io/destructuring-objects-as-function-parameters-in-es6/
  * @param  {int} idxOfInViewRootNode If clade selected then start visibility at this index. (root = 0)
  * @param  {int} tipSelectedIdx idx of the selected tip. If not 0 will highlight path to this tip.
@@ -57,13 +58,9 @@ export const changeDateFilter = function ({newMin = false, newMax = false}) {
 };
 
 export const changeAnalysisSliderValue = function (value) {
-  return (dispatch, getState) => {
-    const { tree } = getState();
+  return (dispatch) => {
     dispatch({type: types.CHANGE_ANALYSIS_VALUE, value});
-    /* initially, the tree isn't loaded, so don't bother trying to do things */
-    if (tree.loaded) {
-      dispatch(updateVisibleTipsAndBranchThicknesses());
-    }
+    dispatch(updateVisibleTipsAndBranchThicknesses());
   };
 };
 
