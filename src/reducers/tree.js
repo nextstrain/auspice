@@ -39,8 +39,6 @@ const Tree = (state = getDefaultState(), action) => {
       loaded: true,
       datasetGuid: Math.floor(Math.random() * 100000000000)
     });
-  case types.DATA_INVALID:
-    return getDefaultState();
   case types.UPDATE_TIP_VISIBILITY:
     return Object.assign({}, state, {
       visibility: action.data,

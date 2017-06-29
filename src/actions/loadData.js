@@ -33,80 +33,60 @@ import queryString from "query-string";
 //   }
 // };
 
-/* request frequencies */
-const requestFrequencies = () => {
-  return {
-    type: types.REQUEST_FREQUENCIES
-  };
-};
+// /* request frequencies */
+// const requestFrequencies = () => {
+//   return {
+//     type: types.REQUEST_FREQUENCIES
+//   };
+// };
+//
+// const receiveFrequencies = (data) => {
+//   return {
+//     type: types.RECEIVE_FREQUENCIES,
+//     data: data
+//   };
+// };
+//
+// const frequenciesFetchError = (err) => {
+//   return {
+//     type: types.FREQUENCIES_FETCH_ERROR,
+//     data: err
+//   };
+// };
+//
+// const fetchFrequencies = (q) => {
+//   return fetch(
+//     dataURLStem + q + "_frequencies.json"
+//   );
+// };
+//
+// const populateFrequenciesStore = (queryParams) => {
+//   return (dispatch) => {
+//     dispatch(requestFrequencies());
+//     return fetchFrequencies(queryParams).then((res) => res.json()).then(
+//       (json) => dispatch(receiveFrequencies(json)),
+//       (err) => dispatch(frequenciesFetchError(err))
+//     );
+//   };
+// };
 
-const receiveFrequencies = (data) => {
-  return {
-    type: types.RECEIVE_FREQUENCIES,
-    data: data
-  };
-};
-
-const frequenciesFetchError = (err) => {
-  return {
-    type: types.FREQUENCIES_FETCH_ERROR,
-    data: err
-  };
-};
-
-const fetchFrequencies = (q) => {
-  return fetch(
-    dataURLStem + q + "_frequencies.json"
-  );
-};
-
-const populateFrequenciesStore = (queryParams) => {
+const populateEntropyStore = (paths) => {
   return (dispatch) => {
-    dispatch(requestFrequencies());
-    return fetchFrequencies(queryParams).then((res) => res.json()).then(
-      (json) => dispatch(receiveFrequencies(json)),
-      (err) => dispatch(frequenciesFetchError(err))
-    );
+    const entropyJSONpromise = fetch(paths.entropy)
+      .then((res) => res.json());
+    entropyJSONpromise
+      .then((data) => {
+        dispatch({
+          type: types.RECEIVE_ENTROPY,
+          data: data
+        });
+      })
+      .catch((err) => {
+        /* entropy reducer has already been invalidated */
+        console.log("entropyJSONpromise error", err);
+      });
   };
 };
-
-/* request entropyes */
-const requestEntropy = () => {
-  return {
-    type: types.REQUEST_ENTROPY
-  };
-};
-
-const receiveEntropy = (data) => {
-  return {
-    type: types.RECEIVE_ENTROPY,
-    data: data
-  };
-};
-
-const entropyFetchError = (err) => {
-  return {
-    type: types.ENTROPY_FETCH_ERROR,
-    data: err
-  };
-};
-
-const fetchEntropy = (q) => {
-  return fetch(
-    dataURLStem + q + "_entropy.json"
-  );
-};
-
-const populateEntropyStore = (queryParams) => {
-  return (dispatch) => {
-    dispatch(requestEntropy());
-    return fetchEntropy(queryParams).then((res) => res.json()).then(
-      (json) => dispatch(receiveEntropy(json)),
-      (err) => dispatch(entropyFetchError(err))
-    );
-  };
-};
-
 
 const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
   return (dispatch) => {
@@ -159,12 +139,13 @@ export const loadJSONs = (router) => {
     const JSONpaths = {
       meta: dataURLStem + data_path + "_meta.json",
       tree: dataURLStem + data_path + "_tree.json",
-      seqs: dataURLStem + data_path + "_sequences.json"
+      seqs: dataURLStem + data_path + "_sequences.json",
+      entropy: dataURLStem + data_path + "_entropy.json"
     };
     dispatch(loadMetaAndTreeAndSequencesJSONs(JSONpaths, router));
     /* subsequent JSON loading is *not* essential to the main functionality */
     /* while nextstrain is limited to ebola & zika, frequencies are not needed */
     // dispatch(populateFrequenciesStore(data_path));
-    dispatch(populateEntropyStore(data_path));
+    dispatch(populateEntropyStore(JSONpaths));
   };
 };
