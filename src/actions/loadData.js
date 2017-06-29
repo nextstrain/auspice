@@ -9,29 +9,29 @@ import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { turnURLtoDataPath } from "../util/urlHelpers";
 import queryString from "query-string";
 
-/* if the metadata specifies an analysis slider, this is where we process it */
-const addAnalysisSlider = (dispatch, tree, controls) => {
-  /* we can now get the range of values for the analysis slider */
-  const vals = tree.nodes.map((d) => d.attr[controls.analysisSlider.key])
-    .filter((n) => n !== undefined)
-    .filter((item, i, ar) => ar.indexOf(item) === i);
-  /* check that the key is found in at least some nodes */
-  if (!vals.length) {
-    dispatch({
-      type: types.ANALYSIS_SLIDER,
-      destroy: true
-    });
-    /* dispatch warning / error message */
-    console.log("Analysis slider key ", controls.analysisSlider.key, " never found in tree. Skipping.");
-  } else {
-    dispatch({
-      type: types.ANALYSIS_SLIDER,
-      destroy: false,
-      maxVal: Math.round(d3.max(vals) * 100) / 100,
-      minVal: Math.round(d3.min(vals) * 100) / 100
-    });
-  }
-};
+// /* if the metadata specifies an analysis slider, this is where we process it */
+// const addAnalysisSlider = (dispatch, tree, controls) => {
+//   /* we can now get the range of values for the analysis slider */
+//   const vals = tree.nodes.map((d) => d.attr[controls.analysisSlider.key])
+//     .filter((n) => n !== undefined)
+//     .filter((item, i, ar) => ar.indexOf(item) === i);
+//   /* check that the key is found in at least some nodes */
+//   if (!vals.length) {
+//     dispatch({
+//       type: types.ANALYSIS_SLIDER,
+//       destroy: true
+//     });
+//     /* dispatch warning / error message */
+//     console.log("Analysis slider key ", controls.analysisSlider.key, " never found in tree. Skipping.");
+//   } else {
+//     dispatch({
+//       type: types.ANALYSIS_SLIDER,
+//       destroy: false,
+//       maxVal: Math.round(d3.max(vals) * 100) / 100,
+//       minVal: Math.round(d3.min(vals) * 100) / 100
+//     });
+//   }
+// };
 
 /* request frequencies */
 const requestFrequencies = () => {
@@ -109,7 +109,7 @@ const populateEntropyStore = (queryParams) => {
 
 
 const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
-  return (dispatch, getState) => {
+  return (dispatch) => {
     const metaJSONpromise = fetch(paths.meta)
       .then((res) => res.json());
     const treeJSONpromise = fetch(paths.tree)
@@ -127,11 +127,12 @@ const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
           seqs: values[2],
           query: queryString.parse(router.history.location.search)
         });
-        const {controls, tree} = getState(); // reflects updated data
         /* add analysis slider (if applicable) */
-        if (controls.analysisSlider) {
-          addAnalysisSlider(dispatch, tree, controls);
-        }
+        // revisit this when applicable
+        // if (controls.analysisSlider) {
+        //   const {controls, tree} = getState(); // reflects updated data
+        //   addAnalysisSlider(dispatch, tree, controls);
+        // }
         /* there still remain a number of actions to do with calculations */
         dispatch(updateVisibleTipsAndBranchThicknesses());
         dispatch(updateColors());
