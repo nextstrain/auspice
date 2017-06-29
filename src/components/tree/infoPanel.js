@@ -6,10 +6,10 @@ import { floatDateToMoment } from "../../util/dateHelpers";
 
 const infoLineJSX = (item, value) => (
   <g>
-    <span style={{fontWeight: "400"}}>
+    <span style={{fontWeight: "500"}}>
       {item + " "}
     </span>
-    <span style={{fontWeight: "200"}}>
+    <span style={{fontWeight: "300"}}>
       {value}
     </span>
   </g>
@@ -17,11 +17,11 @@ const infoLineJSX = (item, value) => (
 
 const infoBlockJSX = (item, values) => (
   <div>
-    <p style={{marginBottom: "-0.7em", fontWeight: "400"}}>
+    <p style={{marginBottom: "-0.7em", fontWeight: "500"}}>
       {item}
     </p>
     {values.map((k, i) => (
-      <p key={i} style={{fontWeight: "200", marginBottom: "-0.9em", marginLeft: "0em"}}>
+      <p key={i} style={{fontWeight: "300", marginBottom: "-0.9em", marginLeft: "0em"}}>
         {k}
       </p>
     ))}
