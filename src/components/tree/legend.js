@@ -165,6 +165,7 @@ class Legend extends React.Component {
       items = this.props.colorScale.scale.domain().map((d, i) => {
         return (
           <LegendItem
+            dispatch={this.props.dispatch}
             legendRectSize={legendRectSize}
             legendSpacing={legendSpacing}
             rectFill={d3.rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}

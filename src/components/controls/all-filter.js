@@ -1,6 +1,5 @@
 import React from "react";
 import Radium from "radium";
-import { filterAbbrFwd } from "../../util/globals";
 import ChooseFilter from "./choose-filter";
 import { connect } from "react-redux";
 
