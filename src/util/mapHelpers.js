@@ -1,4 +1,5 @@
 import d3 from "d3";
+import _ from "lodash";
 
 /* util */
 
@@ -204,12 +205,22 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems,
   const userDateMax = controls.dateScale(controls.dateFormat.parse(controls.dateMax));
 
   /* manually find the points along a Bezier curve at which we should be given the user date selection */
-  const start = Math.max(0.0,(userDateMin-originDate)/(destinationDate-originDate)) // clamp start at 0.0 if userDateMin gives a number <0
-  const end = Math.min(1.0,(userDateMax-originDate)/(destinationDate-originDate)) // clamp end at 1.0 if userDateMax gives a number >1
-  const Bcurve = Bezier([pair[0],computeMidpoint(pair,(destinationDate-minTransmissionDate)*25.0),pair[1]],start,end,15) // calculate Bezier
+  let start = Math.max(0.0,(userDateMin-originDate)/(destinationDate-originDate)); // clamp start at 0.0 if userDateMin gives a number <0
+  let end = Math.min(1.0,(userDateMax-originDate)/(destinationDate-originDate));// clamp end at 1.0 if userDateMax gives a number >1
 
-  return Bcurve
-}
+  if (!_.isFinite(start)){ // For 0 branch-length transmissions, (destinationDate-originDate) is 0 --> +/- Infinity values for start and end.
+    start = 0.0;
+  };
+  if (!_.isFinite(end)){
+    end = start + 1e-6;
+  };
+
+  const Bcurve = Bezier([pair[0],computeMidpoint(pair,(destinationDate-minTransmissionDate)*25.0),pair[1]],start,end,15); // calculate Bezier
+
+  return Bcurve;
+};
+
+
 
 export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
 
