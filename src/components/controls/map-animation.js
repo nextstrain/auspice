@@ -13,6 +13,7 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import moment from 'moment';
 import { controlsWidth } from "../../util/globals";
 import { dataFont, darkGrey } from "../../globalStyles";
+import Toggle from "./toggle";
 
 moment.updateLocale("en", {
   longDateFormat: {
@@ -221,17 +222,16 @@ class MapAnimationControls extends React.Component {
       {/*<SelectLabel text="Animation start date (click to change)"/>*/}
       {/*<MapAnimationStartDatePicker/>*/}
 
-      <SelectLabel text="Animate cumulative history"/>
-      <input
-        type='checkbox'
-        checked={this.props.mapAnimationCumulative}
-        id='mapAnimationCumulative'
-        onChange={(e) => {
+      <Toggle
+        display={true}
+        on={this.props.mapAnimationCumulative}
+        callback={(e) => {
           analyticsControlsEvent("change-animation-cumulative");
           this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
           // modifyURLquery(this.context.router, {apt: e.target.value}, true);
-        }}/>
-
+        }}
+        label="Animate cumulative history"
+      />
       </div>
     );
   }
