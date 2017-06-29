@@ -165,7 +165,6 @@ const loadMetaAndTreeJSONs = (metaPath, treePath, router) => {
           tree: values[1],
           query: queryString.parse(router.history.location.search)
         });
-        dispatch({type: types.RECEIVE_METADATA, data: values[0]});
         const {controls, tree} = getState(); // reflects updated data
         /* add analysis slider (if applicable) */
         if (controls.analysisSlider) {

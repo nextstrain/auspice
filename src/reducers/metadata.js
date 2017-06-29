@@ -13,12 +13,12 @@ const Metadata = (state = {
       loadStatus: 1,
       error: null
     });
-  case types.RECEIVE_METADATA:
+  case types.NEW_DATASET:
     return Object.assign({}, state, {
       loadStatus: 2,
       error: null,
-      metadata: action.data,
-      colorOptions: action.data.color_options
+      metadata: action.meta,
+      colorOptions: action.meta.color_options
     });
   case types.METADATA_FETCH_ERROR:
     return Object.assign({}, state, {
