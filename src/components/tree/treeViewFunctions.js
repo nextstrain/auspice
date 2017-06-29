@@ -287,14 +287,12 @@ const calcStrokeCols = (tree, confidence, colorBy) => {
  * function to help determine what parts of phylotree should update
  * @param {obj} props redux props
  * @param {obj} nextProps next redux props
- * @param {obj} tree phyloTree object
+ * @param {obj} tree phyloTree object (stored in the state of treeView)
  * @return {obj} values are mostly bools, but not always
  */
 export const salientPropChanges = (props, nextProps, tree) => {
-  const dataInFlux = !nextProps.tree.datasetGuid && tree;
-  const datasetChanged = nextProps.tree.nodes && nextProps.tree.datasetGuid && nextProps.tree.datasetGuid !== props.tree.datasetGuid;
-  const firstDataReady = tree === null && nextProps.tree.datasetGuid && nextProps.tree.nodes !== null;
-
+  const dataInFlux = !nextProps.tree.loaded;
+  const newData = tree === null && nextProps.tree.loaded;
   const visibility = !!nextProps.tree.visibilityVersion && props.tree.visibilityVersion !== nextProps.tree.visibilityVersion
   const tipRadii = !!nextProps.tree.tipRadiiVersion && props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion;
   const colorBy = !!nextProps.tree.nodeColorsVersion &&
@@ -318,8 +316,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
 
   return {
     dataInFlux,
-    datasetChanged,
-    firstDataReady,
+    newData,
     visibility,
     tipRadii,
     colorBy,

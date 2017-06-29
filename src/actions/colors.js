@@ -9,13 +9,14 @@ export const updateColors = function (providedColorBy = undefined) {
   return function (dispatch, getState) {
     const { controls, tree, sequences, metadata } = getState();
     /* step 0: bail if all required params aren't (yet) available! */
-    if (!(tree.loadStatus === 2 && sequences.loaded && metadata.loaded)) {
-      console.log(
-        "updateColorScale not running due to load statuses of ",
-        "tree", tree.loadStatus,
-        "sequences", sequences.loaded,
-        "metadata", metadata.loaded
-      );
+    /* note this *can* run before the tree is loaded - we only need the nodes */
+    if (!(tree.nodes !== null && sequences.loaded && metadata.loaded)) {
+      // console.log(
+      //   "updateColorScale not running due to load statuses of ",
+      //   "tree nodes are null?", tree.nodes === null,
+      //   "sequences", sequences.loaded,
+      //   "metadata", metadata.loaded
+      // );
       return null;
     }
     const colorBy = providedColorBy ? providedColorBy : controls.colorBy;

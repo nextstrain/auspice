@@ -81,7 +81,7 @@ export const changeDateFilter = function (newMin, newMax) {
       dispatch({type: types.CHANGE_DATE_MAX, data: newMax});
     }
     /* initially, the tree isn't loaded, so don't bother trying to do things */
-    if (tree.loadStatus === 2) {
+    if (tree.loaded) {
       dispatch(updateVisibility());
       dispatch(updateBranchThickness());
     }
@@ -93,7 +93,7 @@ export const changeAnalysisSliderValue = function (value) {
     const { tree } = getState();
     dispatch({type: types.CHANGE_ANALYSIS_VALUE, value});
     /* initially, the tree isn't loaded, so don't bother trying to do things */
-    if (tree.loadStatus === 2) {
+    if (tree.loaded) {
       dispatch(updateVisibility());
       dispatch(updateBranchThickness());
     }

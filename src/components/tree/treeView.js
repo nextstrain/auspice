@@ -69,7 +69,7 @@ class TreeView extends React.Component {
     if (changes.dataInFlux) {
       this.setState({tree: null});
       return null;
-    } else if (changes.datasetChanged || changes.firstDataReady) {
+    } else if (changes.newData) {
       tree = this.makeTree(nextProps);
       this.setState({tree});
       if (this.Viewer) {
