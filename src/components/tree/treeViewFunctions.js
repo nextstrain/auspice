@@ -2,8 +2,7 @@
 /*eslint-env browser*/
 /*eslint dot-notation: 0*/
 /*eslint max-len : 0*/
-import { zoomToClade,
-         updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
+import { updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
 import { branchOpacityConstant,
          branchOpacityFunction,
          branchInterpolateColour } from "../../util/treeHelpers";
@@ -130,7 +129,7 @@ export const onBranchClick = function (d) {
   /* to stop multiple phyloTree updates potentially clashing,
   we change tipVis after geometry update + transition */
   window.setTimeout(() =>
-    this.props.dispatch(zoomToClade(d.arrayIdx)),
+    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.arrayIdx})),
     mediumTransitionDuration
   );
   this.setState({
@@ -171,7 +170,7 @@ export const viewEntireTree = function () {
   this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
   /* update branch thicknesses / tip vis after SVG tree elemtents have moved */
   window.setTimeout(
-    () => this.props.dispatch(zoomToClade(0)),
+    () => this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0})),
     mediumTransitionDuration
   );
   this.setState({selectedBranch: null, selectedTip: null});

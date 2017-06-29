@@ -67,14 +67,6 @@ export const changeAnalysisSliderValue = function (value) {
   };
 };
 
-/* zoomToClade takes care of setting tipVis and branchThickness.
-Note that the zooming / tree stuff is done imperitively by phyloTree */
-export const zoomToClade = function (idxOfInViewRootNode) {
-  return (dispatch) => {
-    dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode}));
-  };
-};
-
 const updateTipRadii = () => {
   return (dispatch, getState) => {
     const { controls, sequences, tree } = getState();
