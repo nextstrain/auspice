@@ -187,13 +187,10 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       distanceMeasure: action.data
     });
-  case types.CHANGE_DATE_MIN:
+  case types.CHANGE_SELECTED_DATES:
     return Object.assign({}, state, {
-      dateMin: action.data
-    });
-  case types.CHANGE_DATE_MAX:
-    return Object.assign({}, state, {
-      dateMax: action.data
+      dateMin: action.dateMin ? action.dateMin : state.dateMin,
+      dateMax: action.dateMax ? action.dateMax : state.dateMax
     });
   case types.CHANGE_ABSOLUTE_DATE_MIN:
     return Object.assign({}, state, {

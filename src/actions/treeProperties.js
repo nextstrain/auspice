@@ -37,23 +37,22 @@ export const updateVisibleTipsAndBranchThicknesses = function (
   };
 };
 
-
-/* when tip max / min changes, we need to (a) update the controls reducer
-with the new value(s), (b) update the tree visibility */
-export const changeDateFilter = function (newMin, newMax) {
-  return (dispatch, getState) => {
-  // console.log("changeDateFilter", newMin, newMax)
-    const { tree } = getState();
-    if (newMin) {
-      dispatch({type: types.CHANGE_DATE_MIN, data: newMin});
-    }
-    if (newMax) {
-      dispatch({type: types.CHANGE_DATE_MAX, data: newMax});
-    }
-    /* initially, the tree isn't loaded, so don't bother trying to do things */
-    if (tree.loaded) {
-      dispatch(updateVisibleTipsAndBranchThicknesses());
-    }
+/**
+ * trigger an action to change the selected dates (look at the slider)
+ * and then recalculate the visible tips & thicknesses
+ * NB this cannot be called without at least one newMin / newMax (this is deliberate)
+ * @param  {string|false} newMin
+ * @param  {string|false} newMax
+ * @return {null} 2 actions
+ */
+export const changeDateFilter = function ({newMin = false, newMax = false}) {
+  return (dispatch) => {
+    dispatch({
+      type: types.CHANGE_SELECTED_DATES,
+      dateMin: newMin,
+      dateMax: newMax
+    });
+    dispatch(updateVisibleTipsAndBranchThicknesses());
   };
 };
 

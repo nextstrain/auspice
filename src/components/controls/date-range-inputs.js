@@ -56,7 +56,7 @@ class DateRangeInputs extends React.Component {
 
   calendarToNumeric(calDate) {
     return(this.props.dateScale(this.props.dateFormat.parse(calDate)));
-  };
+  }
 
   updateFromPicker(ref, momentDate) {
     // a momentDate is received from DatePicker
@@ -64,12 +64,12 @@ class DateRangeInputs extends React.Component {
     if (ref === "updateDateMin") {
       newRange = { min: momentDate.format("YYYY-MM-DD"),
                    max: this.props.dateMax };
-      this.props.dispatch(changeDateFilter(newRange.min, null));
+      this.props.dispatch(changeDateFilter({newMin: newRange.min}));
       modifyURLquery(this.context.router, {dmin: newRange.min}, true);
     } else if (ref === "updateDateMax") {
       newRange = { min: this.props.dateMin,
                    max: momentDate.format("YYYY-MM-DD") };
-      this.props.dispatch(changeDateFilter(null, newRange.max));
+      this.props.dispatch(changeDateFilter({newMax: newRange.max}));
       modifyURLquery(this.context.router, {dmax: newRange.max}, true);
     }
   }
@@ -79,10 +79,10 @@ class DateRangeInputs extends React.Component {
       // simple debounce @ 100ms
       const currentTime = Date.now();
       if (currentTime < this.state.lastSliderUpdateTime + 100) {
-        return null
+        return null;
       }
       // console.log("UPDATING", currentTime, this.state.lastSliderUpdateTime)
-      this.setState({lastSliderUpdateTime: currentTime})
+      this.setState({lastSliderUpdateTime: currentTime});
     }
 
     // {numDateValues} is an array of numDates received from Slider
@@ -90,17 +90,18 @@ class DateRangeInputs extends React.Component {
     const newRange = {min: this.numericToCalendar(numDateValues[0]),
       max: this.numericToCalendar(numDateValues[1])};
     if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) { // update min
-      this.props.dispatch(changeDateFilter(newRange.min, null));
+      this.props.dispatch(changeDateFilter({newMin: newRange.min}));
       modifyURLquery(this.context.router, {dmin: newRange.min}, true);
     } else if (this.props.dateMin === newRange.min &&
                this.props.dateMax !== newRange.max) { // update max
-      this.props.dispatch(changeDateFilter(null, newRange.max));
+      this.props.dispatch(changeDateFilter({newMax: newRange.max}));
       modifyURLquery(this.context.router, {dmax: newRange.max}, true);
     } else if (this.props.dateMin !== newRange.min &&
                this.props.dateMax !== newRange.max) { // update both
-      this.props.dispatch(changeDateFilter(newRange.min, newRange.max));
+      this.props.dispatch(changeDateFilter({newMin: newRange.min, newMax: newRange.max}));
       modifyURLquery(this.context.router, {dmin: newRange.min, dmax: newRange.max}, true);
     }
+    return null;
   }
 
   render() {
