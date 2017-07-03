@@ -941,7 +941,7 @@ PhyloTree.prototype.drawBranches = function() {
 
 
 PhyloTree.prototype.drawCladeLabels = function() {
-  this.branchLabels = this.svg.append("g").selectAll('.tip')
+  this.branchLabels = this.svg.append("g").selectAll('.branchLabel')
     .data(this.nodes.filter(function (d) { return typeof d.n.attr.clade_name !== 'undefined'; }))
     .enter()
     .append("text")
