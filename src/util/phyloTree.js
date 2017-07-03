@@ -807,6 +807,7 @@ PhyloTree.prototype.addGrid = function(layout, yMinView, yMaxView) {
 PhyloTree.prototype.clearSVG = function() {
   this.svg.selectAll('.tip').remove();
   this.svg.selectAll('.branch').remove();
+  this.svg.selectAll('.branchLabel').remove();
 };
 
 
