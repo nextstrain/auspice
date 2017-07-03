@@ -927,17 +927,17 @@ PhyloTree.prototype.drawBranches = function() {
 };
 
 
-PhyloTree.prototype.drawBranchLabels = function() {
-  var params = this.params;
-  const bLFunc = this.callbacks.branchLabel;
-  this.branchLabels = this.svg.append("g").selectAll('.branchLabel')
-    .data(this.nodes) //.filter(function (d){return bLFunc(d)!=="";}))
-    .enter()
-    .append("text")
-    .text(function (d){return bLFunc(d);})
-    .attr("class", "branchLabel")
-    .style("text-anchor","end");
-}
+// PhyloTree.prototype.drawBranchLabels = function() {
+//   var params = this.params;
+//   const bLFunc = this.callbacks.branchLabel;
+//   this.branchLabels = this.svg.append("g").selectAll('.branchLabel')
+//     .data(this.nodes) //.filter(function (d){return bLFunc(d)!=="";}))
+//     .enter()
+//     .append("text")
+//     .text(function (d){return bLFunc(d);})
+//     .attr("class", "branchLabel")
+//     .style("text-anchor","end");
+// }
 
 
 PhyloTree.prototype.drawCladeLabels = function() {
