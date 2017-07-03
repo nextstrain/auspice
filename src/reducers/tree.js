@@ -55,9 +55,9 @@ const Tree = (state = getDefaultState(), action) => {
       tipRadii: action.data,
       tipRadiiVersion: action.version
     });
-  case types.UPDATE_NODE_COLORS:
+  case types.NEW_COLORS:
     return Object.assign({}, state, {
-      nodeColors: action.data,
+      nodeColors: action.nodeColors,
       nodeColorsVersion: action.version
     });
   case types.UPDATE_BRANCH_THICKNESS:

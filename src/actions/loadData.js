@@ -1,7 +1,7 @@
 /*eslint dot-notation: 0*/
 /*eslint-env browser*/
 /*eslint no-console: 0*/
-import { updateColorScale, updateNodeColors } from "./colors";
+import { updateColors } from "./colors";
 import { dataURLStem } from "../util/datasets";
 import * as types from "./types";
 import d3 from "d3";
@@ -67,8 +67,7 @@ const populateSequencesStore = (queryParams) => {
     return fetchSequences(queryParams).then((res) => res.json()).then(
       (json) => {
         dispatch(receiveSequences(json));
-        dispatch(updateColorScale());
-        dispatch(updateNodeColors());
+        dispatch(updateColors());
       },
       (err) => dispatch(sequencesFetchError(err))
     );
@@ -174,8 +173,7 @@ const loadMetaAndTreeJSONs = (metaPath, treePath, router) => {
         }
         /* there still remain a number of actions to do with calculations */
         dispatch(updateVisibleTipsAndBranchThicknesses());
-        dispatch(updateColorScale());
-        dispatch(updateNodeColors());
+        dispatch(updateColors());
         /* validate the reducers */
         dispatch({type: types.DATA_VALID});
       })

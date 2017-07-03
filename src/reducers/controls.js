@@ -38,8 +38,9 @@ const getDefaultState = function () {
     absoluteDateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
+    defaultColorBy: globals.defaultColorBy,
     colorByConfidence: {display: false, on: false},
-    colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
+    colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 0),
     analysisSlider: false,
     geoResolution: globals.defaultGeoResolution,
     datasetPathName: "",
@@ -127,6 +128,7 @@ const Controls = (state = getDefaultState(), action) => {
     /* available tree attrs - based upon the root node */
     base["attrs"] = Object.keys(action.tree.attr);
     base["colorByConfidence"] = checkColorByConfidence(base["attrs"], base["colorBy"]);
+    base["defaultColorBy"] = base["colorBy"];
     return base;
   case types.TOGGLE_BRANCH_LABELS:
     return Object.assign({}, state, {
@@ -203,20 +205,17 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       absoluteDateMax: action.data
     });
-  case types.CHANGE_COLOR_BY:
+  case types.NEW_COLORS:
     const newState = Object.assign({}, state, {
-      colorBy: action.data,
-      colorByConfidence: checkColorByConfidence(state.attrs, action.data)
+      colorBy: action.colorBy,
+      colorScale: action.colorScale,
+      colorByConfidence: checkColorByConfidence(state.attrs, action.colorBy)
     });
     /* may need to toggle the entropy selector AA <-> NUC */
-    if (determineColorByGenotypeType(action.data)) {
-      newState.mutType = determineColorByGenotypeType(action.data);
+    if (determineColorByGenotypeType(action.colorBy)) {
+      newState.mutType = determineColorByGenotypeType(action.colorBy);
     }
     return newState;
-  case types.SET_COLOR_SCALE:
-    return Object.assign({}, state, {
-      colorScale: action.data
-    });
   case types.CHANGE_GEO_RESOLUTION:
     return Object.assign({}, state, {
       geoResolution: action.data

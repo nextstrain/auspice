@@ -98,7 +98,7 @@ class Entropy extends React.Component {
 
   setColorByGenotype(colorBy) {
     this.props.dispatch(changeColorBy(colorBy));
-    modifyURLquery(this.context.router, {c: colorBy}, true);
+    // modifyURLquery(this.context.router, {c: colorBy}, true);
   }
 
   getChartGeom(props) {
