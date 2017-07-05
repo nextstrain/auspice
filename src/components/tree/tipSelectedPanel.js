@@ -62,9 +62,11 @@ const justURL = (url) => (
   </tr>
 );
 
+const validAttr = (attrs, key) => key in attrs && attrs[key] !== "?" && attrs[key] !== "" && attrs[key] !== undefined;
+
 const TipSelectedPanel = ({tip, goAwayCallback}) => {
   if (!tip) {return null;}
-  const url = formatURL(tip.n.attr.url);
+  const url = validAttr(tip.n.attr, "url") ? formatURL(tip.n.attr.url) : false;
   const uncertainty = "num_date_confidence" in tip.n.attr && tip.n.attr.num_date_confidence[0] !== tip.n.attr.num_date_confidence[1];
   return (
     <div style={styles.container} onClick={() => goAwayCallback(tip)}>
@@ -76,18 +78,19 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
           <tbody>
             {/* the "basic" attributes (which may not exist in certain datasets) */}
             {["country", "region", "division"].map((x) => {
-              return (x in tip.n.attr) ? item(prettyString(x), prettyString(tip.n.attr[x])) : null;
+              return validAttr(tip.n.attr, x) ? item(prettyString(x), prettyString(tip.n.attr[x])) : null;
             })}
             {/* Dates */}
             {item(uncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
             {uncertainty ? dateConfidence(tip.n.attr.num_date_confidence) : null}
-            {/* authors (if provided) */}
-            {("authors" in tip.n.attr) ? item("Publication", authorString(tip.n.attr.authors)) : null}
+            {/* Paper Title, Author(s), Accession + URL (if provided) */}
+            {validAttr(tip.n.attr, "title") ? item("Publication", prettyString(tip.n.attr.title, {trim: 70})) : null}
+            {validAttr(tip.n.attr, "authors") ? item("Authors", authorString(tip.n.attr.authors)) : null}
             {/* try to join URL with accession, else display the one that's available */}
-            {url !== undefined && ("accession" in tip.n.attr) ?
+            {url && validAttr(tip.n.attr, "accession") ?
               accessionAndURL(url, tip.n.attr.accession) :
-              url !== undefined ? justURL(url) :
-              ("accession" in tip.n.attr) ? item("Accession", tip.n.attr.accession) :
+              url ? justURL(url) :
+              validAttr(tip.n.attr, "accession") ? item("Accession", tip.n.attr.accession) :
               null
             }
           </tbody>
