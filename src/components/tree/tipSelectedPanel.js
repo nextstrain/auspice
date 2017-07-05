@@ -27,9 +27,10 @@ const stopProp = (e) => {
   if (e.stopPropagation) {e.stopPropagation();}
 };
 
+/* min width to get "collection date" on 1 line: 120 */
 const item = (key, value) => (
   <tr key={key}>
-    <th>{key}</th>
+    <th style={{minWidth: 120}}>{key}</th>
     <td>{value}</td>
   </tr>
 );
