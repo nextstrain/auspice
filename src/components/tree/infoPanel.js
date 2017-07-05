@@ -1,7 +1,7 @@
 /*eslint-env browser*/
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
-import { prettyString } from "./treeViewFunctions";
+import { prettyString } from "../../util/stringHelpers";
 import { floatDateToMoment } from "../../util/dateHelpers";
 
 const infoLineJSX = (item, value) => (

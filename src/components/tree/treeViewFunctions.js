@@ -12,32 +12,6 @@ import { mediumTransitionDuration } from "../../util/globals";
 import React from "react";
 import d3 from "d3";
 
-export const prettyString = (x, multiplier = false) => {
-  if (!x) {
-    return "";
-  }
-  if (typeof x === "string") {
-    if (["usvi", "usa", "uk"].indexOf(x.toLowerCase()) !== -1) {
-      return x.toUpperCase();
-    }
-    return x.replace(/_/g, " ")
-            .replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
-  } else if (typeof x === "number") {
-    const val = parseFloat(x);
-    const magnitude = Math.ceil(Math.log10(Math.abs(val) + 1e-10));
-    return multiplier ? val.toFixed(5 - magnitude) + "\u00D7" : val.toFixed(5 - magnitude);
-  }
-  return x;
-};
-
-export const authorString = (x) => {
-  const y = prettyString(x);
-  if (y.indexOf("Et Al") !== -1) {
-    return (<span>{y.replace(" Et Al", "")}<em> et al</em></span>);
-  }
-  return y;
-};
-
 export const visibleArea = function (Viewer) {
   const V = Viewer.getValue();
   return {

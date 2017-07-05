@@ -1,7 +1,7 @@
 import React from "react";
 import { legendMouseEnterExit } from "../../actions/treeProperties";
 import { dataFont, darkGrey } from "../../globalStyles";
-import { prettyString } from "./treeViewFunctions";
+import { prettyString } from "../../util/stringHelpers";
 
 const LegendItem = ({
   dispatch, transform,
@@ -29,7 +29,7 @@ const LegendItem = ({
       y={legendRectSize - legendSpacing}
       style={{fontSize: 12, fill: darkGrey, fontFamily: dataFont}}
     >
-      {prettyString(label, dFreq)}
+      {prettyString(label, {multiplier: dFreq})}
     </text>
   </g>
 );
