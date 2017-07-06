@@ -14,7 +14,8 @@ import {getLatLongs} from "../../util/mapHelpersLatLong";
 import {
   CHANGE_ANIMATION_START,
   CHANGE_ANIMATION_TIME,
-  CHANGE_ANIMATION_CUMULATIVE
+  CHANGE_ANIMATION_CUMULATIVE,
+  MAP_ANIMATION_PLAY_PAUSE_BUTTON
 } from "../../actions/types.js";
 
 @connect((state) => {
@@ -33,6 +34,7 @@ import {
     // mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative,
+    mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
     sequences: state.sequences,
     mapTriplicate: state.controls.mapTriplicate
 
@@ -50,7 +52,6 @@ class Map extends React.Component {
       d3elems: null,
       datasetGuid: null,
       responsive: null,
-      playPause: "Play",
     };
   }
   static propTypes = {
@@ -361,7 +362,7 @@ class Map extends React.Component {
             }}
           onClick={this.handleAnimationPlayPauseClicked.bind(this) }
             >
-            {this.state.playPause === "Play" ? "Play" : "Pause"}
+            {this.props.mapAnimationPlayPauseButton}
           </button>
           <button style={{
               position: "absolute",
@@ -393,21 +394,34 @@ class Map extends React.Component {
     /******************************************
     * ANIMATE MAP (AND THAT LINE ON TREE)
     *****************************************/
-    if (this.state.playPause === "Play") {
+    if (this.props.mapAnimationPlayPauseButton === "Play") {
       this.animateMap();
-      this.setState({playPause: "Pause"});
+      this.props.dispatch({
+        type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+        data: "Pause"
+      });
     } else {
       clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
       window.NEXTSTRAIN.mapAnimationLoop = null;
-      this.setState({playPause: "Play"});
+      this.props.dispatch({
+        type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+        data: "Play"
+      });
     }
   }
 
-  handleAnimationResetClicked() {
+  resetAnimation() {
     clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
     window.NEXTSTRAIN.mapAnimationLoop = null;
     this.props.dispatch(changeDateFilter(this.props.controls.absoluteDateMin, this.props.controls.absoluteDateMax));
-    this.setState({playPause: "Play"});
+    this.props.dispatch({
+      type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+      data: "Play"
+    });
+  }
+
+  handleAnimationResetClicked() {
+    this.resetAnimation();
   }
   animateMap() {
     /* By default, start at absoluteDateMin; allow overriding via augur default export */

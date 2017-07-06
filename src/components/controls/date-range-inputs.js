@@ -8,6 +8,9 @@ import { controlsWidth } from "../../util/globals";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
 import d3 from "d3";
+import {
+  MAP_ANIMATION_PLAY_PAUSE_BUTTON
+} from "../../actions/types.js";
 
 moment.updateLocale("en", {
   longDateFormat: {
@@ -62,6 +65,10 @@ class DateRangeInputs extends React.Component {
     if (window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop) {
       clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
       window.NEXTSTRAIN.mapAnimationLoop = null;
+      this.props.dispatch({
+        type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+        data: "Play"
+      });
     }
   }
 

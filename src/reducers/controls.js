@@ -50,6 +50,7 @@ const getDefaultState = function () {
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
+    mapAnimationPlayPauseButton: "Play",
   };
 };
 
@@ -219,6 +220,10 @@ const Controls = (state = getDefaultState(), action) => {
   case types.CHANGE_ANIMATION_CUMULATIVE:
     return Object.assign({}, state, {
       mapAnimationCumulative: action.data
+    })
+  case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
+    return Object.assign({}, state, {
+      mapAnimationPlayPauseButton: action.data
     })
   case types.CHANGE_ANIMATION_START:
     return Object.assign({}, state, {
