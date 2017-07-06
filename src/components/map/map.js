@@ -457,6 +457,10 @@ class Map extends React.Component {
         window.NEXTSTRAIN.mapAnimationLoop = null;
         // this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
         this.props.dispatch(changeDateFilter(this.props.controls.absoluteDateMin, this.props.controls.absoluteDateMax));
+        this.props.dispatch({
+          type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+          data: "Play"
+        });
       }
     }, tick);
 
