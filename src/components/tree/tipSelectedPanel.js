@@ -30,8 +30,8 @@ const stopProp = (e) => {
 /* min width to get "collection date" on 1 line: 120 */
 const item = (key, value) => (
   <tr key={key}>
-    <th style={{minWidth: 120}}>{key}</th>
-    <td>{value}</td>
+    <th style={infoPanelStyles.item}>{key}</th>
+    <td style={infoPanelStyles.item}>{value}</td>
   </tr>
 );
 
@@ -84,7 +84,7 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
             {item(uncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
             {uncertainty ? dateConfidence(tip.n.attr.num_date_confidence) : null}
             {/* Paper Title, Author(s), Accession + URL (if provided) */}
-            {validAttr(tip.n.attr, "title") ? item("Publication", prettyString(tip.n.attr.title, {trim: 70, camelCase: false})) : null}
+            {validAttr(tip.n.attr, "title") ? item("Publication", prettyString(tip.n.attr.title, {trim: 80, camelCase: false})) : null}
             {validAttr(tip.n.attr, "authors") ? item("Authors", authorString(tip.n.attr.authors)) : null}
             {/* try to join URL with accession, else display the one that's available */}
             {url && validAttr(tip.n.attr, "accession") ?

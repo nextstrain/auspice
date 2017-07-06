@@ -138,7 +138,8 @@ export const infoPanelStyles = {
     fontFamily: dataFont,
     fontSize: 18,
     lineHeight: 1,
-    fontWeight: 300
+    fontWeight: 300,
+    maxWidth: 500
   },
   modalHeading: {
     fontSize: 24,
@@ -159,4 +160,9 @@ export const infoPanelStyles = {
     paddingLeft: 15,
     listStyleType: "disc"
   },
+  item: {
+    paddingTop: 4,
+    paddingBottom: 4,
+    minWidth: 120
+  }
 };
