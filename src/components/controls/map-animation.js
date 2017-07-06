@@ -141,24 +141,29 @@ class MapAnimationControls extends React.Component {
 
   handleChangeAnimationTimeClicked(userSelectedDuration) {
     return () => {
-      analyticsControlsEvent("change-animation-time");
-      let duration;
+      const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop;
+      if (!loopRunning) {
+        analyticsControlsEvent("change-animation-time");
+        let duration;
 
-      if (userSelectedDuration === "slow") {
-        duration = 60000;
-      } else if (userSelectedDuration === "medium") {
-        duration = 30000;
-      } else if (userSelectedDuration === "fast") {
-        duration = 15000;
-      } else {
-        console.warn("Odd... controls/map-animation.js tried to set an animation speed we don't offer...")
+        if (userSelectedDuration === "slow") {
+          duration = 60000;
+        } else if (userSelectedDuration === "medium") {
+          duration = 30000;
+        } else if (userSelectedDuration === "fast") {
+          duration = 15000;
+        } else {
+          console.warn("Odd... controls/map-animation.js tried to set an animation speed we don't offer...")
+        }
+
+        // if (window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop)
+
+        /* cast string to num, the see if its an integer, ie., don't send the action if they type 'd' */
+        this.props.dispatch({
+          type: CHANGE_ANIMATION_TIME,
+          data: duration /* this.checkAndTransformAnimationDuration(+e.target.value) */
+        });
       }
-
-      /* cast string to num, the see if its an integer, ie., don't send the action if they type 'd' */
-      this.props.dispatch({
-        type: CHANGE_ANIMATION_TIME,
-        data: duration /* this.checkAndTransformAnimationDuration(+e.target.value) */
-      });
     }
   }
 
