@@ -152,7 +152,6 @@ class Map extends React.Component {
     if (
       // determining when the tree is ready needs to be improved
       this.props.datasetGuid &&
-      this.props.nodes !== null &&
       mapIsDrawn &&
       allDataPresent &&
       demesAbsent
@@ -162,6 +161,8 @@ class Map extends React.Component {
         const SWNE = this.getGeoRange();
         this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
       }
+
+      this.state.map.setMaxBounds(this.getBounds())
 
       const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
       const d3elems = drawDemesAndTransmissions(
@@ -279,15 +280,11 @@ class Map extends React.Component {
       this.props.mapTriplicate,
     );
   }
-  createMap() {
-
+  getBounds() {
     let southWest;
     let northEast;
 
-    /******************************************
-    * GET LEAFLET IN THE DOM
-    *****************************************/
-
+    /* initial map bounds */
     if (this.props.mapTriplicate === true) {
       southWest = L.latLng(-70, -540);
       northEast = L.latLng(80, 540);
@@ -297,14 +294,23 @@ class Map extends React.Component {
     }
 
     const bounds = L.latLngBounds(southWest, northEast);
+
+    return bounds;
+  }
+  createMap() {
+
     let zoom = 2;
     let center = [0,0];
+
+    /******************************************
+    * GET LEAFLET IN THE DOM
+    *****************************************/
 
     var map = L.map('map', {
       center: center,
       zoom: zoom,
       scrollWheelZoom: false,
-      maxBounds: bounds,
+      maxBounds: this.getBounds(),
       minZoom: 2,
       maxZoom: 8,
       zoomControl: false,
