@@ -2,7 +2,7 @@
 import React from "react";
 // import * as globals from "../../util/globals";
 import { infoPanelStyles} from "../../globalStyles";
-// import { prettyString } from "../tree/treeViewFunctions";
+// import { prettyString } from "../../util/stringHelpers";
 
 const InfoPanel = ({hovered, mutType}) => {
 
