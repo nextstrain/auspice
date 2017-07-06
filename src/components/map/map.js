@@ -213,6 +213,7 @@ class Map extends React.Component {
 
       /* clear references to the demes and transmissions d3 added */
       this.setState({
+        boundsSet: false,
         demes: false,
         d3elems: null,
         latLongs: null,
@@ -418,8 +419,6 @@ class Map extends React.Component {
     if (!window.NEXTSTRAIN) {
       window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
     }
-
-
 
     /* we should setState({reference}) so that it's not possible to create multiple */
 
