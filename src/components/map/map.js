@@ -391,14 +391,16 @@ class Map extends React.Component {
       this.setState({playPause: "Pause"});
     } else {
       clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
+      window.NEXTSTRAIN.mapAnimationLoop = null;
       this.setState({playPause: "Play"});
     }
   }
 
   handleAnimationResetClicked() {
-    clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
+    clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
+    window.NEXTSTRAIN.mapAnimationLoop = null;
     this.props.dispatch(changeDateFilter(this.props.controls.absoluteDateMin, this.props.controls.absoluteDateMax));
-    this.setState({playPause: "Play"})
+    this.setState({playPause: "Play"});
   }
   animateMap() {
     /* By default, start at absoluteDateMin; allow overriding via augur default export */

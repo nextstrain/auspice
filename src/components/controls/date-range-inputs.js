@@ -60,7 +60,8 @@ class DateRangeInputs extends React.Component {
 
   maybeClearMapAnimationInterval() {
     if (window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop) {
-      clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
+      clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
+      window.NEXTSTRAIN.mapAnimationLoop = null;
     }
   }
 
