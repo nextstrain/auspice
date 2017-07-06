@@ -434,7 +434,9 @@ class Map extends React.Component {
 
       if (second.valueOf() >= last.valueOf()) {
         clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
-        this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+        window.NEXTSTRAIN.mapAnimationLoop = null;
+        // this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+        this.props.dispatch(changeDateFilter(this.props.controls.absoluteDateMin, this.props.controls.absoluteDateMax));
       }
     }, tick);
 
