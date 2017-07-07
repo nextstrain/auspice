@@ -1,18 +1,11 @@
 import {averageColors} from "./colorHelpers";
 import {getTipColorAttribute} from "./treeHelpers";
 
-const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale, sequences) => {
-  const aggregatedLocations = {}; /* demes */
-  const aggregatedTransmissions = {}; /* edges, animation paths */
-  const demesToColors = {};
-  const transmissionsToColors = {};
 
-  const nestedTransmissions = [];
-  const demesAndTransmissions = {
-    demes: [],
-    transmissions: []
-  };
-  const geo = metadata.geo;
+const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => {
+  const aggregatedLocations = {}; /* demes */
+  const aggregatedLocationsWraparoundCopy = {}; /* edges, animation paths */
+  const aggregatedTransmissions = {}; /* edges, animation paths */
 
   /*
     walk through nodes and collect a bunch of arrays...
@@ -27,17 +20,35 @@ const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, c
   /*
     aggregate locations for demes
   */
+  // first pass to initialize empty vectors
+  nodes.forEach((n, i) => {
+    const tipColorAttribute = getTipColorAttribute(n, colorScale, sequences);
+    if (!n.children) {
+      if (!aggregatedLocations[n.attr[geoResolution]]) {
+        aggregatedLocations[n.attr[geoResolution]] = [];
+        aggregatedLocationsWraparoundCopy[n.attr[geoResolution]] = [];
+      }
+    }
+    if (n.children) {
+      n.children.forEach((child) => {
+        if (n.attr[geoResolution] !== child.attr[geoResolution]) {
+          const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
+                               n.strain + "|" + child.strain + "@" +
+                               n.arrayIdx + "|" + child.arrayIdx;
+          if (!aggregatedTransmissions[transmission]) {
+            aggregatedTransmissions[transmission] = [];
+          }
+        }
+      });
+    }
+  });
+  // second pass to fill vectors
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
     const tipColorAttribute = getTipColorAttribute(n, colorScale, sequences);
     if (!n.children && visibility[i] === "visible") {
-      // look up geo1 geo2 geo3 do lat longs differ
-      if (aggregatedLocations[n.attr[geoResolution]]) {
-        aggregatedLocations[n.attr[geoResolution]].push(colorScale.scale(tipColorAttribute));
-      } else {
-        // if we haven't added this pair, add it
-        aggregatedLocations[n.attr[geoResolution]] = [colorScale.scale(tipColorAttribute)];
-      }
+      // if tip and visible, push
+      aggregatedLocations[n.attr[geoResolution]].push(colorScale.scale(tipColorAttribute));
     }
     /* transmissions count internal node transitions as well
     they are from the parent of the node to the node itself
@@ -50,122 +61,193 @@ const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, c
         */
         if (n.attr[geoResolution] !== child.attr[geoResolution] &&
           visibility[child.arrayIdx] === "visible") {
-          const transmission = n.attr[geoResolution] + "/" + child.attr[geoResolution];
-          if (aggregatedTransmissions[transmission]) {
-            aggregatedTransmissions[transmission].push(colorScale.scale(tipColorAttribute));
-          } else {
-            aggregatedTransmissions[transmission] = [colorScale.scale(tipColorAttribute)];
-          }
+          // make this a pair of indices that point to nodes
+          // this is flatter and self documenting
+          const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
+                               n.strain + "|" + child.strain + "@" +
+                               n.arrayIdx + "|" + child.arrayIdx;
+          aggregatedTransmissions[transmission] = [colorScale.scale(tipColorAttribute)]
         }
       });
     }
   });
+  return {
+    aggregatedLocations,
+    aggregatedLocationsWraparoundCopy,
+    aggregatedTransmissions
+  }
+}
 
-  /*
-    create a latlong pair for each country's location and push them all to a common array
-  */
-  _.forOwn(aggregatedLocations, (value, key) => {
-    demesAndTransmissions.demes.push({
-      location: key, // Thailand:
-      total: value.length, // 20
-      color: averageColors(value),
-      coords: map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) we MAY have to do this every time rather than just once */
-        new L.LatLng(
-          metadata.geo[geoResolution][key].latitude,
-          metadata.geo[geoResolution][key].longitude
-        )
-      )
-    });
-  });
+export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale, sequences, triplicate) => {
 
-  /*
-    count transmissions for line thickness
-  */
+  let offsets = triplicate ? [-360, 0, 360] : [0]
 
-  // for each item in the object produced above...
-  _.forOwn(aggregatedTransmissions, (value, key) => {
+  const {
+    aggregatedLocations,
+    // aggregatedLocationsWraparoundCopy,
+    aggregatedTransmissions
+  } = aggregated(nodes, visibility, geoResolution, colorScale, sequences);
+  const geo = metadata.geo;
+  const demesAndTransmissions = {
+    demes: [],
+    transmissions: []
+  };
 
-    // go from "brazil/cuba" to ["brazil", "cuba"]
-    const countries = key.split("/");
-    if (countries[0].toLowerCase() === countries[1].toLowerCase()) {
-      return;
-    }
-    // go from "brazil" to lat0 = -14.2350
-    let long0 = undefined;
-    let long1 = undefined;
-    let lat0 = undefined;
-    let lat1 = undefined;
-    try {
-      long0 = geo[geoResolution][countries[0]].longitude;
-      long1 = geo[geoResolution][countries[1]].longitude;
-      lat0 = geo[geoResolution][countries[0]].latitude;
-      lat1 = geo[geoResolution][countries[1]].latitude;
-    } catch (e) {
-      // console.log("Error getting transmission lat/longs for ", countries[0], " -> ", countries[1])
-      return;
-    }
-    // create new leaflet LatLong objects
-    const start = new L.LatLng(lat0, long0)
-    const end = new L.LatLng(lat1, long1)
-    const dlambda = Math.abs((long1-long0)%360)*Math.PI/180.0;
-    const angle = Math.acos(Math.sin(lat1*Math.PI/180.0)*Math.sin(lat0*Math.PI/180.0)
-                            + Math.cos(lat1*Math.PI/180.0)*Math.cos(lat0*Math.PI/180.0)*Math.cos(dlambda));
-    // this sets the number of segments of the path, min 4, max 36 for half way around the globe
-    const nSteps = Math.ceil(Math.max(4,angle*36/Math.PI));
-
-    /*
-      add a polyline to the map for current country pair iteratee
-      store the computation. access _latlngs to show where each segment is on the map
-    */
-    const rawGeodesic = L.geodesic([[start,end]], {
-      // stroke:	value,
-      // radius: value,
-      // color: colorScale(countries[0]), /* this will go up above in d3 rather than in leaflet now */
-      // opacity: .5,
-      steps: nSteps,
-      // weight:	value	/* Stroke width in pixels.*/
-      // opacity:	0.5	Stroke opacity.
-      // fill:
-      // fillColor: randomColor
-      // fillOpacity:
-    })
-
-    const geodesics = [];
-
-    rawGeodesic._latlngs.forEach((arr) => {
-      geodesics.push(arr.map((pair) => {
-        return map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+  offsets.forEach((OFFSET) => {
+    /* count DEMES */
+    _.forOwn(aggregatedLocations, (value, key) => {
+      demesAndTransmissions.demes.push({
+        location: key, // Thailand:
+        total: value.length, // 20, this is an array of all demes of a certain type
+        color: averageColors(value),
+        coords: map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) we MAY have to do this every time rather than just once */
           new L.LatLng(
-            pair.lat,
-            pair.lng
+            metadata.geo[geoResolution][key].latitude,
+            metadata.geo[geoResolution][key].longitude + OFFSET
           )
-        );
-      }));
-    })
-
-    nestedTransmissions.push({
-      start,
-      end,
-      total: value.length,
-      color: averageColors(value),
-      rawGeodesic,
-      geodesics, /* incomplete for dev, will need to grab BOTH lines when there is wraparound */
-      from: countries[0],
-      to: countries[1]
-    })
-  });
-
-  /* flatter data structure */
-  nestedTransmissions.forEach((transmission, i) => { /* for each transmission */
-    transmission.geodesics.forEach((geodesic, j) => { /* and for each part of a lines split across dateline in each */
-      demesAndTransmissions.transmissions.push({ /* and add it to an array, which we'll map over to create our paths. */ /* not optimized for missiles here. we could check index of for each and if it's greater than one add a flag for partials, and their order? so that we can animate around the map */
-        data: transmission,
-        coords: geodesic,
-        wraparoundKey: j,
+        )
       });
     });
-  });
+  })
+
+
+  // /* count WRAPAROUNDS */
+  // _.forOwn(aggregatedLocationsWraparoundCopy, (value, key) => {
+  //   demesAndTransmissions.demes.push({
+  //     location: key, // Thailand:
+  //     total: value.length, // 20, this is an array of all demes of a certain type
+  //     color: averageColors(value),
+  //     coords: map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) we MAY have to do this every time rather than just once */
+  //       new L.LatLng(
+  //         metadata.geo[geoResolution][key].latitude,
+  //         metadata.geo[geoResolution][key].longitude + 360
+  //       )
+  //     )
+  //   });
+  // });
+
+  // const knownShortestPaths = {};
+
+
+  offsets.forEach((OFFSET) => {
+
+    /* count TRANSMISSIONS for line thickness */
+    _.forOwn(aggregatedTransmissions, (value, key) => {
+
+      const countries = key.split("@")[0].split("|");
+
+      // /* we already know the path for china to us because we've already done us to china */
+      // if (
+      //   knownShortestPaths[countries[0] + "/" + countries[1]] ||
+      //   knownShortestPaths[countries[1] + "/" + countries[0]]
+      // ) {
+      //   /* use the one we already know about from knownShortestPaths. */
+      // } else {
+      //   /* figure out the new one, insert it AND ITS REVERSE into the knownShortestPaths map above */
+      // }
+
+      let long0;
+      let long1;
+      let lat0;
+      let lat1;
+      try {
+        long0 = geo[geoResolution][countries[0]].longitude;
+        long1 = geo[geoResolution][countries[1]].longitude;
+        lat0 = geo[geoResolution][countries[0]].latitude;
+        lat1 = geo[geoResolution][countries[1]].latitude;
+      } catch (e) {
+        // console.log("No transmission lat/longs for ", countries[0], " -> ", countries[1])
+        return;
+      }
+
+      const original = [
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            lat0,
+            long0 + OFFSET
+          )
+        ),
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            lat1,
+            long1 + OFFSET
+          )
+        )
+      ];
+
+      const west = [
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            lat0,
+            long0 + OFFSET
+          )
+        ),
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            lat1,
+            long1 - 360 + OFFSET
+          )
+        )
+      ];
+
+      const east = [
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            lat0,
+            long0 + OFFSET
+          )
+        ),
+        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+          new L.LatLng(
+            lat1,
+            long1 + 360 + OFFSET
+          )
+        )
+      ];
+
+      let originToDestinationXYs;
+
+      /* this gives us an index for both demes in the transmission pair with which we will access the node array */
+      const winningPair = _.minBy([original, west, east], (pair) => { return Math.abs(pair[1].x - pair[0].x) });
+
+      const transmission = {
+        demePairIndices: key.split("@")[2].split("|"), /* this has some weird values occassionally that do not presently break anything. created/discovered during animation work. */
+        originToDestinationXYs: winningPair,
+        // originToDestinationXYs: Bezier(winningPair[0],computeMidpoint(winningPair),winningPair[1]),
+        // originToDestinationXYs: original,
+        total: value.length, /* changes over time */
+        color: averageColors(value), /* changes over time */
+      }
+
+
+      demesAndTransmissions.transmissions.push({data: transmission})
+    });
+
+  }) /* End OFFSET */
+
+  // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
+  if (demesAndTransmissions.transmissions.length) {
+    demesAndTransmissions.minTransmissionDate = demesAndTransmissions.transmissions.map((x) => {
+      return nodes[x.data.demePairIndices[0]].attr.num_date;
+    }).reduce((prev, cur) => {
+      return cur < prev ? cur : prev;
+    });
+  }
   return demesAndTransmissions;
 }
 
-export default getLatLongs;
+/* we used to return this in transmission */
+// create new leaflet LatLong objects
+// const start = new L.LatLng(lat0, long0)
+// const end = new L.LatLng(lat1, long1)
+// start, /* changes with zoom level */
+// end, /* changes with zoom level */
+// from: countries[0],
+// to: countries[1]
+
+/* we used to compute this... likely with geodesic from leaflet */
+// const dlambda = Math.abs((long1-long0)%360)*Math.PI/180.0;
+// const angle = Math.acos(Math.sin(lat1*Math.PI/180.0)*Math.sin(lat0*Math.PI/180.0)
+//                         + Math.cos(lat1*Math.PI/180.0)*Math.cos(lat0*Math.PI/180.0)*Math.cos(dlambda));
+// // this sets the number of segments of the path, min 4, max 36 for half way around the globe
+// const nSteps = Math.ceil(Math.max(4,angle*36/Math.PI));

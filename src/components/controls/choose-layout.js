@@ -46,9 +46,12 @@ class ChooseLayout extends React.Component {
           key={1}
           style={selected === "rect" ? materialButtonSelected : materialButton}
           onClick={() => {
-            analyticsControlsEvent("change-layout-rectangular");
-            this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });
-            modifyURLquery(this.context.router, {l: "rect"}, true);
+            const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop;
+            if (!loopRunning) {
+              analyticsControlsEvent("change-layout-rectangular");
+              this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });
+              modifyURLquery(this.context.router, {l: "rect"}, true);
+            }
           }}
         >
           <span style={styles.title}> {"rectangular"} </span>
@@ -60,9 +63,12 @@ class ChooseLayout extends React.Component {
           key={2}
           style={selected === "radial" ? materialButtonSelected : materialButton}
           onClick={() => {
-            analyticsControlsEvent("change-layout-radial");
-            this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });
-            modifyURLquery(this.context.router, {l: "radial"}, true);
+            const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop;
+            if (!loopRunning) {
+              analyticsControlsEvent("change-layout-radial");
+              this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });
+              modifyURLquery(this.context.router, {l: "radial"}, true);
+            }
           }}
         >
           <span style={styles.title}> {"radial"} </span>
@@ -74,9 +80,12 @@ class ChooseLayout extends React.Component {
           key={3}
           style={selected === "unrooted" ? materialButtonSelected : materialButton}
           onClick={() => {
-            analyticsControlsEvent("change-layout-unrooted");
-            this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });
-            modifyURLquery(this.context.router, {l: "unrooted"}, true);
+            const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop;
+            if (!loopRunning) {
+              analyticsControlsEvent("change-layout-unrooted");
+              this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });
+              modifyURLquery(this.context.router, {l: "unrooted"}, true);
+            }
           }}
         >
           <span style={styles.title}> {"unrooted"} </span>
@@ -88,9 +97,12 @@ class ChooseLayout extends React.Component {
           key={4}
           style={selected === "clock" ? materialButtonSelected : materialButton}
           onClick={() => {
-            analyticsControlsEvent("change-layout-clock");
-            this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });
-            modifyURLquery(this.context.router, {l: "clock"}, true);
+            const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop;
+            if (!loopRunning) {
+              analyticsControlsEvent("change-layout-clock");
+              this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });
+              modifyURLquery(this.context.router, {l: "clock"}, true);
+            }
           }}
         >
           <span style={styles.title}> {"clock"} </span>

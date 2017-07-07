@@ -29,6 +29,7 @@ const getDefaultState = function () {
     region: null,
     search: null,
     strain: null,
+    splitTreeAndMap: true,
     mutType: globals.mutType,
     temporalConfidence: {exists: false, display: false, on: false},
     layout: globals.defaultLayout,
@@ -46,7 +47,11 @@ const getDefaultState = function () {
     datasetPathName: "",
     filters: {},
     dateScale: d3.time.scale().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
-    dateFormat: d3.time.format("%Y-%m-%d")
+    dateFormat: d3.time.format("%Y-%m-%d"),
+    mapAnimationDurationInMilliseconds: 30000, // in milliseconds
+    mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
+    mapAnimationCumulative: false,
+    mapAnimationPlayPauseButton: "Play"
   };
 };
 
@@ -61,6 +66,7 @@ const Controls = (state = getDefaultState(), action) => {
     /* overwrite base state with data from the metadata JSON */
     if (action.meta.date_range) {
       if (action.meta.date_range.date_min) {
+        base["mapAnimationStartDate"] = action.meta.date_range.date_min;
         if (rootDate.isBefore(moment(action.meta.date_range.date_min, "YYYY-MM-DD"))) {
           base["dateMin"] = action.meta.date_range.date_min;
         }
@@ -87,6 +93,10 @@ const Controls = (state = getDefaultState(), action) => {
       }
       if (action.meta.defaults.layout) {
         base["layout"] = action.meta.defaults.layout;
+      }
+      if (action.meta.defaults.mapTriplicate) {
+       //convert string to boolean; default is true; turned off with either false (js) or False (python)
+       base["mapTriplicate"] = (action.meta.defaults.mapTriplicate == 'false' || action.meta.defaults.mapTriplicate == 'False') ? false : true;
       }
     }
     /* now overwrite state with data from the URL */
@@ -204,6 +214,22 @@ const Controls = (state = getDefaultState(), action) => {
   case types.CHANGE_ABSOLUTE_DATE_MAX:
     return Object.assign({}, state, {
       absoluteDateMax: action.data
+    });
+  case types.CHANGE_ANIMATION_TIME:
+    return Object.assign({}, state, {
+      mapAnimationDurationInMilliseconds: action.data
+    });
+  case types.CHANGE_ANIMATION_CUMULATIVE:
+    return Object.assign({}, state, {
+      mapAnimationCumulative: action.data
+    });
+  case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
+    return Object.assign({}, state, {
+      mapAnimationPlayPauseButton: action.data
+    });
+  case types.CHANGE_ANIMATION_START:
+    return Object.assign({}, state, {
+      mapAnimationStartDate: action.data
     });
   case types.NEW_COLORS:
     const newState = Object.assign({}, state, {

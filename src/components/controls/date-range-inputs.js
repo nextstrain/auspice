@@ -8,6 +8,9 @@ import { controlsWidth } from "../../util/globals";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
 import d3 from "d3";
+import {
+  MAP_ANIMATION_PLAY_PAUSE_BUTTON
+} from "../../actions/types.js";
 
 moment.updateLocale("en", {
   longDateFormat: {
@@ -58,7 +61,20 @@ class DateRangeInputs extends React.Component {
     return(this.props.dateScale(this.props.dateFormat.parse(calDate)));
   };
 
+  maybeClearMapAnimationInterval() {
+    if (window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop) {
+      clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
+      window.NEXTSTRAIN.mapAnimationLoop = null;
+      this.props.dispatch({
+        type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+        data: "Play"
+      });
+    }
+  }
+
   updateFromPicker(ref, momentDate) {
+    this.maybeClearMapAnimationInterval()
+
     // a momentDate is received from DatePicker
     let newRange;
     if (ref === "updateDateMin") {
@@ -75,6 +91,8 @@ class DateRangeInputs extends React.Component {
   }
 
   updateFromSlider(debounce, numDateValues) {
+    this.maybeClearMapAnimationInterval()
+
     if (debounce) {
       // simple debounce @ 100ms
       const currentTime = Date.now();

@@ -1,22 +1,27 @@
 import React from "react";
 import d3 from "d3";
 import _ from "lodash";
+import moment from "moment";
 import { connect } from "react-redux";
 import Card from "../framework/card";
+import {changeDateFilter} from "../../actions/treeProperties";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
-import {drawDemesAndTransmissions, updateOnMoveEnd} from "../../util/mapHelpers";
+import {drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility} from "../../util/mapHelpers";
 import * as globals from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
-import getLatLongs from "../../util/mapHelpersLatLong";
-// import {
-//   MAP_ANIMATION_TICK,
-//   MAP_ANIMATION_END
-// } from "../../actions";
+import {getLatLongs} from "../../util/mapHelpersLatLong";
+import {
+  CHANGE_ANIMATION_START,
+  CHANGE_ANIMATION_TIME,
+  CHANGE_ANIMATION_CUMULATIVE,
+  MAP_ANIMATION_PLAY_PAUSE_BUTTON
+} from "../../actions/types.js";
 
 @connect((state) => {
   return {
     datasetGuid: state.tree.datasetGuid,
+    controls: state.controls,
     nodes: state.tree.nodes,
     visibility: state.tree.visibility,
     visibilityVersion: state.tree.visibilityVersion,
@@ -26,15 +31,23 @@ import getLatLongs from "../../util/mapHelpersLatLong";
     colorBy: state.controls.colorBy,
     map: state.map,
     geoResolution: state.controls.geoResolution,
-    sequences: state.sequences
+    // mapAnimationStartDate: state.controls.mapAnimationStartDate,
+    mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
+    mapAnimationCumulative: state.controls.mapAnimationCumulative,
+    mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
+    sequences: state.sequences,
+    mapTriplicate: state.controls.mapTriplicate
+
   };
 })
+
 class Map extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       map: null,
       demes: false,
+      latLongs: null,
       d3DOMNode: null,
       d3elems: null,
       datasetGuid: null,
@@ -58,13 +71,14 @@ class Map extends React.Component {
   }
   componentWillReceiveProps(nextProps) {
     this.maybeComputeResponive(nextProps);
-    this.maybeRemoveAllDemesAndTransmissions(nextProps); /* dataset or colorby just changed, this change is upstream of maybeDraw */
+    this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
   }
   componentDidUpdate(prevProps, prevState) {
+    if (this.props.nodes === null) {return}
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
-    this.maybeUpdateDemesAndTransmissions(); /* every time we change something like colorBy */
+    this.maybeUpdateDemesAndTransmissions(prevProps); /* every time we change something like colorBy */
     this.maybeAnimateDemesAndTransmissions();
   }
   maybeCreateLeafletMap() {
@@ -104,7 +118,7 @@ class Map extends React.Component {
   }
   doComputeResponsive(nextProps) {
     return computeResponsive({
-      horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint ? .5 : 1,
+      horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint && (this.props.controls && this.props.controls.splitTreeAndMap) ? .5 : 1,
       vertical: 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
@@ -122,6 +136,58 @@ class Map extends React.Component {
       this.setState({d3DOMNode});
     }
   }
+  maybeDrawDemesAndTransmissions(prevProps) {
+
+    /* before April 2017 we fired this every time */
+
+    const mapIsDrawn = !!this.state.map;
+    const allDataPresent = !!(this.props.colorScale && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode);
+    const demesAbsent = !this.state.demes;
+
+    /* if at any point we change dataset and app doesn't remount, we'll need these again */
+    // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;
+    // const newGeoResolution = this.props.geoResolution !== prevProps.geoResolution;
+    // const initialVisibilityVersion = this.props.visibilityVersion === 1; /* see tree reducer, we set this to 1 after tree comes back */
+    // const newVisibilityVersion = this.props.visibilityVersion !== prevProps.visibilityVersion;
+
+    if (
+      // determining when the tree is ready needs to be improved
+      this.props.datasetGuid &&
+      mapIsDrawn &&
+      allDataPresent &&
+      demesAbsent
+    ) {
+      /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
+      if (!this.state.boundsSet){ //we are doing the initial render -> set map to the range of the data
+        const SWNE = this.getGeoRange();
+        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
+      }
+
+      this.state.map.setMaxBounds(this.getBounds())
+
+      const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
+      const d3elems = drawDemesAndTransmissions(
+        latLongs,
+        this.props.colorScale.scale,
+        this.state.d3DOMNode,
+        this.state.map,
+        this.props.nodes,
+        this.props.controls
+      );
+
+      /* Set up leaflet events */
+      // this.state.map.on("viewreset", this.respondToLeafletEvent.bind(this));
+      this.state.map.on("moveend", this.respondToLeafletEvent.bind(this));
+
+      // don't redraw on every rerender - need to seperately handle virus change redraw
+      this.setState({
+        boundsSet: true,
+        demes: true,
+        d3elems,
+        latLongs,
+      });
+    }
+  }
   maybeRemoveAllDemesAndTransmissions(nextProps) {
     /*
       xx dataset change, remove all demes and transmissions d3 added
@@ -136,69 +202,30 @@ class Map extends React.Component {
     */
 
     const mapIsDrawn = !!this.state.map;
-    const somethingChanged = (this.props.colorBy !== nextProps.colorBy ||
-                              this.props.geoResolution !== nextProps.geoResolution ||
-                              this.props.visibilityVersion !== nextProps.visibilityVersion ||
-                              this.props.colorScale.version !== nextProps.colorScale.version ||
-                              !this.props.datasetGuid);
+    const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
+
+    // (this.props.colorBy !== nextProps.colorBy ||
+    //   this.props.visibilityVersion !== nextProps.visibilityVersion ||
+    //   this.props.colorScale.version !== nextProps.colorScale.version);
 
     if (
       mapIsDrawn &&
-      somethingChanged
+      geoResolutionChanged
     ) {
       this.state.d3DOMNode.selectAll("*").remove();
 
       /* clear references to the demes and transmissions d3 added */
       this.setState({
+        boundsSet: false,
         demes: false,
         d3elems: null,
         latLongs: null,
       })
     }
   }
-  maybeDrawDemesAndTransmissions(prevProps) {
-    const treeIsReady = this.props.datasetGuid;
-    const mapIsDrawn = !!this.state.map;
-    const allDataPresent = !!(this.props.colorScale && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode);
-    const demesAbsent = !this.state.demes;
-    // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;
-    // const newGeoResolution = this.props.geoResolution !== prevProps.geoResolution;
-    // const initialVisibilityVersion = this.props.visibilityVersion === 1; /* see tree reducer, we set this to 1 after tree comes back */
-    // const newVisibilityVersion = this.props.visibilityVersion !== prevProps.visibilityVersion;
-
-    if (
-      treeIsReady &&
-      mapIsDrawn &&
-      allDataPresent &&
-      demesAbsent
-    ) {
-      /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
-      if (!this.state.boundsSet){ //we are doing the initial render -> set map to the range of the data
-        const SWNE = this.getGeoRange();
-        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
-      }
-
-      const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
-      const d3elems = drawDemesAndTransmissions(
-        latLongs,
-        this.props.colorScale.scale,
-        this.state.d3DOMNode,
-        this.state.map,
-      );
-      // this.state.map.on("viewreset", this.respondToLeafletEvent.bind(this));
-      this.state.map.on("moveend", this.respondToLeafletEvent.bind(this));
-
-      // don't redraw on every rerender - need to seperately handle virus change redraw
-      this.setState({
-        boundsSet: true,
-        demes: true,
-        d3elems,
-      });
-    }
-  }
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
-      updateOnMoveEnd(this.state.d3elems, this.latLongs());
+      updateOnMoveEnd(this.state.d3elems, this.latLongs(), this.props.controls, this.props.nodes);
     }
   }
   getGeoRange() {
@@ -222,57 +249,74 @@ class Map extends React.Component {
     const west = Math.min(180, maxLng + lngRange*0.2);
     return [L.latLng(south,west), L.latLng(north, east)];
   }
-  maybeUpdateDemesAndTransmissions() {
-    /* todo */
+  maybeUpdateDemesAndTransmissions(prevProps) {
+    /* nothing to update */
+    const noMap = !this.state.map;
+    const noDemes = !this.state.demes;
+
+    if (noMap || noDemes) return;
+
+    const latLongs = this.latLongs();
+    if (latLongs == null) return; 
+
+    if (
+      this.props.visibilityVersion !== prevProps.visibilityVersion ||
+      this.props.colorScale.version !== prevProps.colorScale.version
+    ) {
+      updateVisibility(this.state.d3elems, latLongs, this.props.controls, this.props.nodes);
+    }
   }
   maybeAnimateDemesAndTransmissions() {
     /* todo */
   }
   latLongs() {
-    return getLatLongs(
-      this.props.nodes,
-      this.props.visibility,
-      this.props.metadata,
-      this.state.map,
-      this.props.colorBy,
-      this.props.geoResolution,
-      this.props.colorScale,
-      this.props.sequences
-    );
+    if (this.props.nodes && this.props.visibility && this.props.metadata && this.state.map) {
+      return getLatLongs(
+        this.props.nodes,
+        this.props.visibility,
+        this.props.metadata,
+        this.state.map,
+        this.props.colorBy,
+        this.props.geoResolution,
+        this.props.colorScale,
+        this.props.sequences,
+        this.props.mapTriplicate,
+      );
+    } else {
+      return null;
+    }
+  }
+  getBounds() {
+    let southWest;
+    let northEast;
+
+    /* initial map bounds */
+    if (this.props.mapTriplicate === true) {
+      southWest = L.latLng(-70, -540);
+      northEast = L.latLng(80, 540);
+    } else {
+      southWest = L.latLng(-70, -180);
+      northEast = L.latLng(80, 180);
+    }
+
+    const bounds = L.latLngBounds(southWest, northEast);
+
+    return bounds;
   }
   createMap() {
+
+    let zoom = 2;
+    let center = [0,0];
 
     /******************************************
     * GET LEAFLET IN THE DOM
     *****************************************/
-    // console.log("createMap", this.props.nodes);
-    const southWest = L.latLng(-70, -180);
-    const northEast = L.latLng(80, 180);
-    // console.log(southWest, northEast);
-    const bounds = L.latLngBounds(southWest, northEast);
-    let zoom = 2;
-    let center = [0,0];
-
-    /*
-      hardcode zoom level. this will last a while.
-      when we want to dynamically calculate the bounds,
-      map will have to know about the path latlongs calculated in maphelpers.
-      not at all sure how we'll do that and account for great circle paths.
-
-      if we do this, it has to be done procedurally from reset to handle dataset switch
-    */
-    // if (window.location.pathname.indexOf("ebola") !== -1) {
-    //   zoom = 7;
-    //   center = [8, -11];
-    // } else if (window.location.pathname.indexOf("zika") !== -1) {
-    //   /* zika is fine at the default settings */
-    // }
 
     var map = L.map('map', {
       center: center,
       zoom: zoom,
       scrollWheelZoom: false,
-      maxBounds: bounds,
+      maxBounds: this.getBounds(),
       minZoom: 2,
       maxZoom: 8,
       zoomControl: false,
@@ -301,22 +345,6 @@ class Map extends React.Component {
     this.setState({map});
   }
   maybeCreateMapDiv() {
-    // onClick={this.handleAnimationPlayClicked.bind(this) }
-    // <button style={{
-    //     position: "absolute",
-    //     left: 25,
-    //     top: 25,
-    //     zIndex: 9999,
-    //     border: "none",
-    //     padding: 15,
-    //     borderRadius: 4,
-    //     backgroundColor: "rgb(124, 184, 121)",
-    //     fontWeight: 700,
-    //     color: "white"
-    //   }}
-    //   >
-    //   Play
-    // </button>
     let container = null;
     if (
       this.props.browserDimensions &&
@@ -324,6 +352,39 @@ class Map extends React.Component {
     ) {
       container = (
         <div style={{position: "relative"}}>
+          <button style={{
+              position: "absolute",
+              left: 25,
+              top: 25,
+              zIndex: 9999,
+              border: "none",
+              width: 56,
+              padding: 15,
+              borderRadius: 4,
+              backgroundColor: "rgb(124, 184, 121)",
+              fontWeight: 700,
+              color: "white",
+            }}
+          onClick={this.handleAnimationPlayPauseClicked.bind(this) }
+            >
+            {this.props.mapAnimationPlayPauseButton}
+          </button>
+          <button style={{
+              position: "absolute",
+              left: 90,
+              top: 25,
+              zIndex: 9999,
+              border: "none",
+              padding: 15,
+              borderRadius: 4,
+              backgroundColor: "rgb(230, 230, 230)",
+              fontWeight: 700,
+              color: "white"
+            }}
+          onClick={this.handleAnimationResetClicked.bind(this) }
+            >
+            Reset
+          </button>
           <div style={{
               height: this.state.responsive.height,
               width: this.state.responsive.width
@@ -334,36 +395,113 @@ class Map extends React.Component {
     }
     return container;
   }
-  // handleAnimationPlayClicked() {
-  //   /******************************************
-  //   * ANIMATE MAP (AND THAT LINE ON TREE)
-  //   *****************************************/
-  //   this.animateMap();
-  // }
-  // animateMap() {
-  //   let start = null;
-  //
-  //     const step = (timestamp) => {
-  //       if (!start) start = timestamp;
-  //
-  //       let progress = timestamp - start;
-  //
-  //       this.props.dispatch({
-  //         type: MAP_ANIMATION_TICK,
-  //         data: {
-  //           progress
-  //         }
-  //       })
-  //
-  //       if (progress < globals.mapAnimationDurationInMilliseconds) {
-  //         window.requestAnimationFrame(step);
-  //       } else {
-  //         this.props.dispatch({ type: MAP_ANIMATION_END })
-  //       }
-  //     }
-  //
-  //     window.requestAnimationFrame(step);
-  // }
+  handleAnimationPlayPauseClicked() {
+    /******************************************
+    * ANIMATE MAP (AND THAT LINE ON TREE)
+    *****************************************/
+    if (this.props.mapAnimationPlayPauseButton === "Play") {
+      this.animateMap();
+      this.props.dispatch({
+        type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+        data: "Pause"
+      });
+    } else {
+      clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
+      window.NEXTSTRAIN.mapAnimationLoop = null;
+      this.props.dispatch({
+        type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+        data: "Play"
+      });
+    }
+  }
+
+  resetAnimation() {
+    clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
+    window.NEXTSTRAIN.mapAnimationLoop = null;
+    this.props.dispatch(changeDateFilter(this.props.controls.absoluteDateMin, this.props.controls.absoluteDateMax));
+    this.props.dispatch({
+      type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+      data: "Play"
+    });
+  }
+
+  handleAnimationResetClicked() {
+    this.resetAnimation();
+  }
+  animateMap() {
+    /* By default, start at absoluteDateMin; allow overriding via augur default export */
+    // let first = this.props.mapAnimationStartDate ? moment(this.props.dateMin, "YYYY-MM-DD"): moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD");
+    let first = moment(this.props.controls.dateMin);
+    let last = moment(this.props.controls.absoluteDateMax, "YYYY-MM-DD");
+    let numberDays = moment.duration(last.diff(first)).asDays(); // Total number of days in the animation
+
+    const tick = 100; // Length of each tick in milliseconds
+    let incrementBy = Math.ceil((tick*numberDays)/this.props.mapAnimationDurationInMilliseconds); // [(ms * days) / ms] = days
+    const incrementByUnit = "day";
+    const timeSliderWindow = Math.ceil((numberDays / 20)); /* in months for now  */ // this is 1/10 the date range in date slider
+    let second = moment(first, "YYYY-MM-DD").add(timeSliderWindow, "days");
+
+    if (!window.NEXTSTRAIN) {
+      window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
+    }
+
+    /* we should setState({reference}) so that it's not possible to create multiple */
+
+    window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
+
+      /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
+      this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+
+      if (!this.props.mapAnimationCumulative) {
+        first = first.add(incrementBy, incrementByUnit);
+      }
+      second = second.add(incrementBy, incrementByUnit);
+
+      if (second.valueOf() >= last.valueOf()) {
+        clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
+        window.NEXTSTRAIN.mapAnimationLoop = null;
+        // this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+        this.props.dispatch(changeDateFilter(this.props.controls.absoluteDateMin, this.props.controls.absoluteDateMax));
+        this.props.dispatch({
+          type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+          data: "Play"
+        });
+      }
+    }, tick);
+
+    // controls: state.controls,
+    // this.props.dateMin //"2013-06-28"
+    // this.props.dateMax //"2016-11-21"
+    // this.props.absoluteDateMin //"2013-06-29"
+    // this.props.absoluteDateMax //"2016-11-21"
+    // export const CHANGE_DATE_MIN = "CHANGE_DATE_MIN";
+    // export const CHANGE_DATE_MAX = "CHANGE_DATE_MAX";
+    // export const CHANGE_ABSOLUTE_DATE_MIN = "CHANGE_ABSOLUTE_DATE_MIN";
+    // export const CHANGE_ABSOLUTE_DATE_MAX = "CHANGE_ABSOLUTE_DATE_MAX";
+
+    // =======OLD RAF CODE=======
+    // let start = null;
+    //
+    // const step = (timestamp) => {
+    //   if (!start) start = timestamp;
+    //
+    //   let progress = timestamp - start;
+    //
+    //   this.props.dispatch({
+    //     type: MAP_ANIMATION_TICK,
+    //     data: {
+    //       progress
+    //     }
+    //   })
+    //
+    //   if (progress < globals.mapAnimationDurationInMilliseconds) {
+    //     window.requestAnimationFrame(step);
+    //   } else {
+    //     this.props.dispatch({ type: MAP_ANIMATION_END })
+    //   }
+    // }
+    // window.requestAnimationFrame(step);
+  }
   render() {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (

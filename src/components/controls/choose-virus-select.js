@@ -6,6 +6,9 @@ import { loadJSONs } from "../../actions/loadData"
 import { turnURLtoDataPath, restoreStateFromURL } from "../../util/urlHelpers";
 import { connect } from "react-redux";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import {
+  MAP_ANIMATION_PLAY_PAUSE_BUTTON
+} from "../../actions/types.js";
 
 @Radium
 @connect() // to provide dispatch
@@ -40,6 +43,14 @@ class ChooseVirusSelect extends React.Component {
     analyticsControlsEvent(`change-virus-to-${newPath.replace(/\//g, "")}`);
     // 1 reset redux controls state in preparation for a change
     this.props.dispatch({type: RESET_CONTROLS});
+    if (window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop) {
+      clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
+      window.NEXTSTRAIN.mapAnimationLoop = null;
+      this.props.dispatch({
+        type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+        data: "Play"
+      });
+    }
     // 2 change URL (push, not replace)
     this.context.router.history.push({
       pathname: newPath,

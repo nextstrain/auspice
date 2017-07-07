@@ -10,6 +10,7 @@ import ChooseLayout from "./choose-layout";
 import ChooseVirus from "./choose-virus";
 import ChooseMetric from "./choose-metric";
 import GeoResolution from "./geo-resolution";
+import MapAnimationControls from "./map-animation";
 import AllFilters from "./all-filter";
 import * as globals from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
@@ -80,7 +81,7 @@ class Controls extends React.Component {
         {header("Map Options")}
         <SelectLabel text="Geographic resolution"/>
         <GeoResolution/>
-
+        <MapAnimationControls/>
         {header("Filters")}
         <AllFilters/>
 
