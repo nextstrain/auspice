@@ -24,6 +24,7 @@ import {
   return {
     datasetGuid: state.tree.datasetGuid,
     treeVersion: state.tree.version,
+    treeLoaded: state.tree.loaded,
     controls: state.controls,
     nodes: state.tree.nodes,
     visibility: state.tree.visibility,
@@ -59,6 +60,7 @@ class Map extends React.Component {
   }
   static propTypes = {
     treeVersion: React.PropTypes.number.isRequired,
+    treeLoaded: React.PropTypes.bool.isRequired,
     colorScale: React.PropTypes.object.isRequired
   }
   componentWillMount() {
@@ -88,7 +90,7 @@ class Map extends React.Component {
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
     if (
-      this.props.browserDimensions &&
+      // this.props.browserDimensions && // no longer needed - in redux from the start
       this.props.metadata &&
       !this.state.map &&
       document.getElementById("map")
@@ -154,7 +156,8 @@ class Map extends React.Component {
     /* before April 2017 we fired this every time */
 
     const mapIsDrawn = !!this.state.map;
-    const allDataPresent = !!(this.props.colorScale && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode);
+    // NB should be able to remove dependence on colorScale - I don't think tree can be loaded without it. TODO.
+    const allDataPresent = !!(this.props.colorScale && this.props.metadata && this.props.treeLoaded && this.state.responsive && this.state.d3DOMNode);
     const demesAbsent = !this.state.demes;
 
     /* if at any point we change dataset and app doesn't remount, we'll need these again */
@@ -165,7 +168,7 @@ class Map extends React.Component {
 
     if (
       // determining when the tree is ready needs to be improved
-      this.props.datasetGuid &&
+      // this.props.datasetGuid &&
       mapIsDrawn &&
       allDataPresent &&
       demesAbsent
@@ -270,7 +273,7 @@ class Map extends React.Component {
     if (noMap || noDemes) return;
 
     const latLongs = this.latLongs();
-    if (latLongs == null) return; 
+    if (latLongs == null) return;
 
     if (
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
