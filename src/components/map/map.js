@@ -3,10 +3,10 @@
 import React from "react";
 import d3 from "d3";
 import _ from "lodash";
-import moment from "moment";
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import {changeDateFilter} from "../../actions/treeProperties";
+import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
 import {drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility} from "../../util/mapHelpers";
@@ -40,7 +40,13 @@ import {
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative,
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
-    mapTriplicate: state.controls.mapTriplicate
+    mapTriplicate: state.controls.mapTriplicate,
+    dateMin: state.controls.dateMin,
+    dateMax: state.controls.dateMax,
+    absoluteDateMin: state.controls.absoluteDateMin,
+    absoluteDateMax: state.controls.absoluteDateMax,
+    dateScale: state.controls.dateScale,
+    dateFormat: state.controls.dateFormat
   };
 })
 
@@ -440,16 +446,19 @@ class Map extends React.Component {
   }
   animateMap() {
     /* By default, start at absoluteDateMin; allow overriding via augur default export */
-    // let first = this.props.mapAnimationStartDate ? moment(this.props.dateMin, "YYYY-MM-DD"): moment(this.props.controls.absoluteDateMin, "YYYY-MM-DD");
-    let first = moment(this.props.controls.dateMin);
-    let last = moment(this.props.controls.absoluteDateMax, "YYYY-MM-DD");
-    let numberDays = moment.duration(last.diff(first)).asDays(); // Total number of days in the animation
+
+    // dates are num date format
+    // leftWindow --- rightWindow ------------------------------- end
+    // 2011.4 ------- 2011.6 ------------------------------------ 2015.4
+
+    let leftWindow = calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin);
+    let end = calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.absoluteDateMax);
+    let totalRange = end - leftWindow; // years in the animation
 
     const tick = 100; // Length of each tick in milliseconds
-    let incrementBy = Math.ceil((tick*numberDays)/this.props.mapAnimationDurationInMilliseconds); // [(ms * days) / ms] = days
-    const incrementByUnit = "day";
-    const timeSliderWindow = Math.ceil((numberDays / 20)); /* in months for now  */ // this is 1/10 the date range in date slider
-    let second = moment(first, "YYYY-MM-DD").add(timeSliderWindow, "days");
+    let animationIncrement = Math.ceil((tick*totalRange)/this.props.mapAnimationDurationInMilliseconds); // [(ms * days) / ms] = days
+    const windowRange = Math.ceil((totalRange / 100)); // this is 1/10 the date range in date slider
+    let rightWindow = leftWindow + windowRange;
 
     if (!window.NEXTSTRAIN) {
       window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
@@ -459,19 +468,21 @@ class Map extends React.Component {
 
     window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
 
-      /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
-      this.props.dispatch(changeDateFilter({newMin: first.format("YYYY-MM-DD"), newMax: second.format("YYYY-MM-DD")}));
+      const newWindow = {min: numericToCalendar(this.props.dateFormat, this.props.dateScale, leftWindow),
+        max: numericToCalendar(this.props.dateFormat, this.props.dateScale, rightWindow)};
+
+      /* first pass sets the timer to absolute min and absolute min + windowRange because they reference above initial time window */
+      this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max}));
 
       if (!this.props.mapAnimationCumulative) {
-        first = first.add(incrementBy, incrementByUnit);
+        leftWindow = leftWindow + animationIncrement;
       }
-      second = second.add(incrementBy, incrementByUnit);
+      rightWindow = rightWindow + animationIncrement;
 
-      if (second.valueOf() >= last.valueOf()) {
+      if (rightWindow >= end) {
         clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
         window.NEXTSTRAIN.mapAnimationLoop = null;
-        // this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
-        this.props.dispatch(changeDateFilter({newMin: this.props.controls.absoluteDateMin, newMax: this.props.controls.absoluteDateMax}));
+        this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
         this.props.dispatch({
           type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
           data: "Play"
