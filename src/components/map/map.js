@@ -156,8 +156,7 @@ class Map extends React.Component {
     /* before April 2017 we fired this every time */
 
     const mapIsDrawn = !!this.state.map;
-    // NB should be able to remove dependence on colorScale - I don't think tree can be loaded without it. TODO.
-    const allDataPresent = !!(this.props.colorScale && this.props.metadata && this.props.treeLoaded && this.state.responsive && this.state.d3DOMNode);
+    const allDataPresent = !!(this.props.metadata && this.props.treeLoaded && this.state.responsive && this.state.d3DOMNode);
     const demesAbsent = !this.state.demes;
 
     /* if at any point we change dataset and app doesn't remount, we'll need these again */
@@ -184,7 +183,6 @@ class Map extends React.Component {
       const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
       const d3elems = drawDemesAndTransmissions(
         latLongs,
-        this.props.colorScale.scale,
         this.state.d3DOMNode,
         this.state.map,
         this.props.nodes,
