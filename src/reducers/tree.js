@@ -4,6 +4,8 @@ import { processNodes, calcLayouts } from "../util/processNodes";
 import d3 from "d3";
 import { calcBranchThickness, calcTipCounts, calcVisibility } from "../util/treeHelpers";
 
+/* A version increase (i.e. props.version !== nextProps.version) necessarily implies
+that the tree is loaded as they are set on the same action */
 
 const getDefaultState = function () {
   return {
@@ -16,7 +18,8 @@ const getDefaultState = function () {
     tipRadii: null,
     tipRadiiVersion: 0,
     branchThickness: null,
-    branchThicknessVersion: 0
+    branchThicknessVersion: 0,
+    version: 0
   };
 };
 
@@ -37,6 +40,7 @@ const Tree = (state = getDefaultState(), action) => {
   case types.DATA_VALID:
     return Object.assign({}, state, {
       loaded: true,
+      version: state.version + 1,
       datasetGuid: Math.floor(Math.random() * 100000000000)
     });
   case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
