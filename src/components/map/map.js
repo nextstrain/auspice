@@ -267,13 +267,9 @@ class Map extends React.Component {
     /* nothing to update */
     const noMap = !this.state.map;
     const noDemes = !this.state.demes;
-
-    if (noMap || noDemes) return;
-
-    const latLongs = this.latLongs();
-    if (latLongs == null) return;
-
-    if (!this.props.treeLoaded) {return;}
+    if (noMap || noDemes) {return;}
+    const latLongs = this.latLongs(); /* can't run if noMap || noDemes */
+    if (!this.props.treeLoaded || latLongs === null) {return;}
 
     if (
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
@@ -286,7 +282,7 @@ class Map extends React.Component {
   //   /* todo */
   // }
   latLongs() {
-    if (this.props.nodes && this.props.visibility && this.props.metadata && this.state.map) {
+    if (this.props.treeLoaded && this.state.map) {
       return getLatLongs(
         this.props.nodes,
         this.props.visibility,
@@ -297,9 +293,8 @@ class Map extends React.Component {
         this.props.mapTriplicate,
         this.props.nodeColors,
       );
-    } else {
-      return null;
     }
+    return null;
   }
   getBounds() {
     let southWest;
