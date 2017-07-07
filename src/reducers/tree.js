@@ -23,9 +23,6 @@ const getDefaultState = function () {
   };
 };
 
-/* TODO hopefully datasetGuid can be removed and tree.loaded used instead.
-Leaving this here this until map-animation-v1 is merged (it's only used in map) */
-
 const Tree = (state = getDefaultState(), action) => {
   switch (action.type) {
   case types.NEW_DATASET:
@@ -40,8 +37,7 @@ const Tree = (state = getDefaultState(), action) => {
   case types.DATA_VALID:
     return Object.assign({}, state, {
       loaded: true,
-      version: state.version + 1,
-      datasetGuid: Math.floor(Math.random() * 100000000000)
+      version: state.version + 1
     });
   case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
     return Object.assign({}, state, {
