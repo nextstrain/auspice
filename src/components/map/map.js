@@ -451,9 +451,10 @@ class Map extends React.Component {
     // leftWindow --- rightWindow ------------------------------- end
     // 2011.4 ------- 2011.6 ------------------------------------ 2015.4
 
+    let start = calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.absoluteDateMin);
     let leftWindow = calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin);
     let end = calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.absoluteDateMax);
-    let totalRange = end - leftWindow; // years in the animation
+    let totalRange = end - start; // years in the animation
 
     let animationIncrement = (animationTick * totalRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
     const windowRange = animationWindowWidth * totalRange;
