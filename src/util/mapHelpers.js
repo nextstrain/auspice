@@ -73,7 +73,7 @@ export const pathStringGenerator = d3.svg.line()
   .y((d) => { return d.y })
   .interpolate("basis");
 
-export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, nodes, controls) => {
+export const drawDemesAndTransmissions = (latLongs, g, map, nodes, controls) => {
 
   // define markers that are appended to the definition part of the group
   let markerCount=0;

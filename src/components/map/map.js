@@ -1,3 +1,5 @@
+/*eslint-env browser*/
+/*eslint max-len: 0*/
 import React from "react";
 import d3 from "d3";
 import _ from "lodash";
@@ -20,14 +22,17 @@ import {
 
 @connect((state) => {
   return {
-    datasetGuid: state.tree.datasetGuid,
+    // datasetGuid: state.tree.datasetGuid,
+    treeVersion: state.tree.version,
+    treeLoaded: state.tree.loaded,
     controls: state.controls,
     nodes: state.tree.nodes,
+    nodeColors: state.tree.nodeColors,
     visibility: state.tree.visibility,
     visibilityVersion: state.tree.visibilityVersion,
     metadata: state.metadata.metadata,
     browserDimensions: state.browserDimensions.browserDimensions,
-    colorScale: state.controls.colorScale,
+    colorScaleVersion: state.controls.colorScale.version,
     colorBy: state.controls.colorBy,
     map: state.map,
     geoResolution: state.controls.geoResolution,
@@ -35,9 +40,7 @@ import {
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative,
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
-    sequences: state.sequences,
     mapTriplicate: state.controls.mapTriplicate
-
   };
 })
 
@@ -50,12 +53,14 @@ class Map extends React.Component {
       latLongs: null,
       d3DOMNode: null,
       d3elems: null,
-      datasetGuid: null,
+      // datasetGuid: null,
       responsive: null,
     };
   }
   static propTypes = {
-    colorScale: React.PropTypes.object.isRequired
+    treeVersion: React.PropTypes.number.isRequired,
+    treeLoaded: React.PropTypes.bool.isRequired,
+    colorScaleVersion: React.PropTypes.number.isRequired
   }
   componentWillMount() {
     if (!window.L) {
@@ -79,12 +84,12 @@ class Map extends React.Component {
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
     this.maybeUpdateDemesAndTransmissions(prevProps); /* every time we change something like colorBy */
-    this.maybeAnimateDemesAndTransmissions();
+    // this.maybeAnimateDemesAndTransmissions();
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
     if (
-      this.props.browserDimensions &&
+      // this.props.browserDimensions && // no longer needed - in redux from the start
       this.props.metadata &&
       !this.state.map &&
       document.getElementById("map")
@@ -97,24 +102,33 @@ class Map extends React.Component {
       React to browser width/height changes responsively
       This is stored in state because it's used by both the map and the d3 overlay
     */
-    if (
-      this.props.browserDimensions &&
-      (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
-      this.props.browserDimensions.height !== nextProps.browserDimensions.height)
-    ) {
-      this.setState({responsive: this.doComputeResponsive(nextProps)});
-    } else if (!this.state.responsive && nextProps.browserDimensions) { /* first time */
-      this.setState({responsive: this.doComputeResponsive(nextProps)});
-    } else if (
-      this.props.browserDimensions &&
-      this.props.datasetGuid &&
-      nextProps.datasetGuid &&
-      this.props.datasetGuid !== nextProps.datasetGuid // the dataset has changed
-    ) {
-      this.setState({responsive: this.doComputeResponsive(nextProps)});
-    } else if (this.props.sidebar !== nextProps.sidebar) {
+    const changes = {
+      dimensionsChanged: this.props.browserDimensions.width !== nextProps.browserDimensions.width || this.props.browserDimensions.height !== nextProps.browserDimensions.height,
+      responsiveNotSet: !this.state.responsive,
+      treeChanged: this.props.treeVersion !== nextProps.treeVersion, // treeVersion change implies tree is ready (modified by the same action)
+      sidebarChanged: this.props.sidebar !== nextProps.sidebar
+    };
+    if (Object.values(changes).some((v) => v === true)) {
       this.setState({responsive: this.doComputeResponsive(nextProps)});
     }
+    // if (
+    //   this.props.browserDimensions &&
+    //   (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
+    //   this.props.browserDimensions.height !== nextProps.browserDimensions.height)
+    // ) {
+    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
+    // } else if (!this.state.responsive && nextProps.browserDimensions) { /* first time */
+    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
+    // } else if (
+    //   this.props.browserDimensions &&
+    //   this.props.datasetGuid &&
+    //   nextProps.datasetGuid &&
+    //   this.props.datasetGuid !== nextProps.datasetGuid // the dataset has changed
+    // ) {
+    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
+    // } else if (this.props.sidebar !== nextProps.sidebar) {
+    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
+    // }
   }
   doComputeResponsive(nextProps) {
     return computeResponsive({
@@ -141,7 +155,7 @@ class Map extends React.Component {
     /* before April 2017 we fired this every time */
 
     const mapIsDrawn = !!this.state.map;
-    const allDataPresent = !!(this.props.colorScale && this.props.metadata && this.props.nodes && this.state.responsive && this.state.d3DOMNode);
+    const allDataPresent = !!(this.props.metadata && this.props.treeLoaded && this.state.responsive && this.state.d3DOMNode);
     const demesAbsent = !this.state.demes;
 
     /* if at any point we change dataset and app doesn't remount, we'll need these again */
@@ -152,7 +166,7 @@ class Map extends React.Component {
 
     if (
       // determining when the tree is ready needs to be improved
-      this.props.datasetGuid &&
+      // this.props.datasetGuid &&
       mapIsDrawn &&
       allDataPresent &&
       demesAbsent
@@ -168,7 +182,6 @@ class Map extends React.Component {
       const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
       const d3elems = drawDemesAndTransmissions(
         latLongs,
-        this.props.colorScale.scale,
         this.state.d3DOMNode,
         this.state.map,
         this.props.nodes,
@@ -189,6 +202,9 @@ class Map extends React.Component {
     }
   }
   maybeRemoveAllDemesAndTransmissions(nextProps) {
+    /* as of jul 7 2017, the constructor / omponentDidMount is NOT running
+    on dataset change! */
+
     /*
       xx dataset change, remove all demes and transmissions d3 added
       xx we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
@@ -203,15 +219,13 @@ class Map extends React.Component {
 
     const mapIsDrawn = !!this.state.map;
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
+    const dataChanged = this.state.demes && (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
 
     // (this.props.colorBy !== nextProps.colorBy ||
     //   this.props.visibilityVersion !== nextProps.visibilityVersion ||
     //   this.props.colorScale.version !== nextProps.colorScale.version);
 
-    if (
-      mapIsDrawn &&
-      geoResolutionChanged
-    ) {
+    if (mapIsDrawn && (geoResolutionChanged || dataChanged)) {
       this.state.d3DOMNode.selectAll("*").remove();
 
       /* clear references to the demes and transmissions d3 added */
@@ -253,24 +267,22 @@ class Map extends React.Component {
     /* nothing to update */
     const noMap = !this.state.map;
     const noDemes = !this.state.demes;
-
-    if (noMap || noDemes) return;
-
-    const latLongs = this.latLongs();
-    if (latLongs == null) return; 
+    if (noMap || noDemes) {return;}
+    const latLongs = this.latLongs(); /* can't run if noMap || noDemes */
+    if (!this.props.treeLoaded || latLongs === null) {return;}
 
     if (
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
-      this.props.colorScale.version !== prevProps.colorScale.version
+      this.props.colorScaleVersion !== prevProps.colorScaleVersion
     ) {
       updateVisibility(this.state.d3elems, latLongs, this.props.controls, this.props.nodes);
     }
   }
-  maybeAnimateDemesAndTransmissions() {
-    /* todo */
-  }
+  // maybeAnimateDemesAndTransmissions() {
+  //   /* todo */
+  // }
   latLongs() {
-    if (this.props.nodes && this.props.visibility && this.props.metadata && this.state.map) {
+    if (this.props.treeLoaded && this.state.map) {
       return getLatLongs(
         this.props.nodes,
         this.props.visibility,
@@ -278,13 +290,11 @@ class Map extends React.Component {
         this.state.map,
         this.props.colorBy,
         this.props.geoResolution,
-        this.props.colorScale,
-        this.props.sequences,
         this.props.mapTriplicate,
+        this.props.nodeColors,
       );
-    } else {
-      return null;
     }
+    return null;
   }
   getBounds() {
     let southWest;
@@ -450,7 +460,7 @@ class Map extends React.Component {
     window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
 
       /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
-      this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+      this.props.dispatch(changeDateFilter({newMin: first.format("YYYY-MM-DD"), newMax: second.format("YYYY-MM-DD")}));
 
       if (!this.props.mapAnimationCumulative) {
         first = first.add(incrementBy, incrementByUnit);
@@ -461,7 +471,7 @@ class Map extends React.Component {
         clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
         window.NEXTSTRAIN.mapAnimationLoop = null;
         // this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
-        this.props.dispatch(changeDateFilter(this.props.controls.absoluteDateMin, this.props.controls.absoluteDateMax));
+        this.props.dispatch(changeDateFilter({newMin: this.props.controls.absoluteDateMin, newMax: this.props.controls.absoluteDateMax}));
         this.props.dispatch({
           type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
           data: "Play"

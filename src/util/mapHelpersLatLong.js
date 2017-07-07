@@ -2,7 +2,7 @@ import {averageColors} from "./colorHelpers";
 import {getTipColorAttribute} from "./treeHelpers";
 
 
-const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => {
+const aggregated = (nodes, visibility, geoResolution, nodeColors) => {
   const aggregatedLocations = {}; /* demes */
   const aggregatedLocationsWraparoundCopy = {}; /* edges, animation paths */
   const aggregatedTransmissions = {}; /* edges, animation paths */
@@ -22,7 +22,6 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
   */
   // first pass to initialize empty vectors
   nodes.forEach((n, i) => {
-    const tipColorAttribute = getTipColorAttribute(n, colorScale, sequences);
     if (!n.children) {
       if (!aggregatedLocations[n.attr[geoResolution]]) {
         aggregatedLocations[n.attr[geoResolution]] = [];
@@ -45,10 +44,9 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
   // second pass to fill vectors
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
-    const tipColorAttribute = getTipColorAttribute(n, colorScale, sequences);
     if (!n.children && visibility[i] === "visible") {
       // if tip and visible, push
-      aggregatedLocations[n.attr[geoResolution]].push(colorScale.scale(tipColorAttribute));
+      aggregatedLocations[n.attr[geoResolution]].push(nodeColors[i]);
     }
     /* transmissions count internal node transitions as well
     they are from the parent of the node to the node itself
@@ -66,7 +64,7 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
           const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
                                n.strain + "|" + child.strain + "@" +
                                n.arrayIdx + "|" + child.arrayIdx;
-          aggregatedTransmissions[transmission] = [colorScale.scale(tipColorAttribute)]
+          aggregatedTransmissions[transmission] = [nodeColors[i]];
         }
       });
     }
@@ -78,7 +76,7 @@ const aggregated = (nodes, visibility, geoResolution, colorScale, sequences) => 
   }
 }
 
-export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, colorScale, sequences, triplicate) => {
+export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, triplicate, nodeColors) => {
 
   let offsets = triplicate ? [-360, 0, 360] : [0]
 
@@ -86,7 +84,7 @@ export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolu
     aggregatedLocations,
     // aggregatedLocationsWraparoundCopy,
     aggregatedTransmissions
-  } = aggregated(nodes, visibility, geoResolution, colorScale, sequences);
+  } = aggregated(nodes, visibility, geoResolution, nodeColors);
   const geo = metadata.geo;
   const demesAndTransmissions = {
     demes: [],
