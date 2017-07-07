@@ -6,3 +6,11 @@ export const floatDateToMoment = function (num_date) {
   if (days === "0") {days = 1;}
   return moment("".concat(years, "-", days), "Y-DDD");
 };
+
+export const numericToCalendar = function (dateFormat, dateScale, numDate) {
+  return(dateFormat(dateScale.invert(numDate)));
+};
+
+export const calendarToNumeric = function (dateFormat, dateScale, calDate) {
+  return(dateScale(dateFormat.parse(calDate)));
+};
