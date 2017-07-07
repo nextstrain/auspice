@@ -205,6 +205,9 @@ class Map extends React.Component {
     }
   }
   maybeRemoveAllDemesAndTransmissions(nextProps) {
+    /* as of jul 7 2017, the constructor / omponentDidMount is NOT running
+    on dataset change! */
+
     /*
       xx dataset change, remove all demes and transmissions d3 added
       xx we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
@@ -219,15 +222,13 @@ class Map extends React.Component {
 
     const mapIsDrawn = !!this.state.map;
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
+    const dataChanged = this.state.demes && (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
 
     // (this.props.colorBy !== nextProps.colorBy ||
     //   this.props.visibilityVersion !== nextProps.visibilityVersion ||
     //   this.props.colorScale.version !== nextProps.colorScale.version);
 
-    if (
-      mapIsDrawn &&
-      geoResolutionChanged
-    ) {
+    if (mapIsDrawn && (geoResolutionChanged || dataChanged)) {
       this.state.d3DOMNode.selectAll("*").remove();
 
       /* clear references to the demes and transmissions d3 added */
