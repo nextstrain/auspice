@@ -48,7 +48,9 @@ const Bezier = (pathControl, start=0.0, end=1.0, num=15) => { // returns Bezier 
 }
 
 const computeMidpoint = (pair, modify, height) => {
-  /* Equation derived by Luiz Max Fagundes de Carvalho (University of Edinburgh). */
+  /* Equation derived by Luiz Max Fagundes de Carvalho (University of Edinburgh).
+     This function computes the coordinate of a point that is at a distance `height` perpendicular to the center of the line connecting the two points define in `pair`.
+   */
   const [pointA,pointB] = pair
   const x1 = pointA.x
   const y1 = pointA.y
