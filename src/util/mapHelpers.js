@@ -73,7 +73,7 @@ export const pathStringGenerator = d3.svg.line()
   .y((d) => { return d.y })
   .interpolate("basis");
 
-export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, nodes) => {
+export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, nodes, controls) => {
 
   // define markers that are appended to the definition part of the group
   let markerCount=0;
@@ -112,8 +112,14 @@ export const drawDemesAndTransmissions = (latLongs, colorScale, g, map, nodes) =
     .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
     .attr("d", (d, i) => {
       return pathStringGenerator(
-        // extractLineSegmentForAnimationEffect(d.data.originToDestinationXYs)
-        d.data.originToDestinationXYs
+        extractLineSegmentForAnimationEffect(
+          d.data.originToDestinationXYs,
+          controls,
+          d,
+          nodes,
+          i,
+          latLongs.minTransmissionDate
+        )
       )
     }) /* with the interpolation in the function above pathStringGenerator */
     .attr("fill","none")
@@ -189,7 +195,6 @@ export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
             controls,
             d,
             nodes,
-            d3elems,
             i,
             latLongs.minTransmissionDate
           )
@@ -198,7 +203,7 @@ export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
   }
 }
 
-const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, d3elems, i, minTransmissionDate) => {
+const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, i, minTransmissionDate) => {
   const originDate = nodes[d.data.demePairIndices[0]].attr.num_date;
   const destinationDate = nodes[d.data.demePairIndices[1]].attr.num_date;
   const userDateMin = controls.dateScale(controls.dateFormat.parse(controls.dateMin));
@@ -242,7 +247,6 @@ export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
           controls,
           d,
           nodes,
-          d3elems,
           i,
           latLongs.minTransmissionDate
         )

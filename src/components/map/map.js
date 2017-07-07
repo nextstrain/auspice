@@ -172,6 +172,7 @@ class Map extends React.Component {
         this.state.d3DOMNode,
         this.state.map,
         this.props.nodes,
+        this.props.controls
       );
 
       /* Set up leaflet events */
@@ -254,9 +255,6 @@ class Map extends React.Component {
     const noDemes = !this.state.demes;
 
     if (noMap || noDemes) return;
-
-    const somethingChanged = (this.props.colorBy !== prevProps.colorBy ||
-                              this.props.colorScale.version !== prevProps.colorScale.version);
 
     if (
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
