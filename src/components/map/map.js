@@ -256,28 +256,35 @@ class Map extends React.Component {
 
     if (noMap || noDemes) return;
 
+    const latLongs = this.latLongs();
+    if (latLongs == null) return; 
+
     if (
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
       this.props.colorScale.version !== prevProps.colorScale.version
     ) {
-      updateVisibility(this.state.d3elems, this.latLongs(), this.props.controls, this.props.nodes);
+      updateVisibility(this.state.d3elems, latLongs, this.props.controls, this.props.nodes);
     }
   }
   maybeAnimateDemesAndTransmissions() {
     /* todo */
   }
   latLongs() {
-    return getLatLongs(
-      this.props.nodes,
-      this.props.visibility,
-      this.props.metadata,
-      this.state.map,
-      this.props.colorBy,
-      this.props.geoResolution,
-      this.props.colorScale,
-      this.props.sequences,
-      this.props.mapTriplicate,
-    );
+    if (this.props.nodes && this.props.visibility && this.props.metadata && this.state.map) {
+      return getLatLongs(
+        this.props.nodes,
+        this.props.visibility,
+        this.props.metadata,
+        this.state.map,
+        this.props.colorBy,
+        this.props.geoResolution,
+        this.props.colorScale,
+        this.props.sequences,
+        this.props.mapTriplicate,
+      );
+    } else {
+      return null;
+    }
   }
   getBounds() {
     let southWest;
