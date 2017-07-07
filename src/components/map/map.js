@@ -10,7 +10,7 @@ import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
 import {drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility} from "../../util/mapHelpers";
-import * as globals from "../../util/globals";
+import { animationWindowWidth, animationTick, twoColumnBreakpoint } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import {getLatLongs} from "../../util/mapHelpersLatLong";
 import {
@@ -138,7 +138,7 @@ class Map extends React.Component {
   }
   doComputeResponsive(nextProps) {
     return computeResponsive({
-      horizontal: nextProps.browserDimensions.width > globals.twoColumnBreakpoint && (this.props.controls && this.props.controls.splitTreeAndMap) ? .5 : 1,
+      horizontal: nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.controls && this.props.controls.splitTreeAndMap) ? .5 : 1,
       vertical: 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
@@ -455,9 +455,8 @@ class Map extends React.Component {
     let end = calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.absoluteDateMax);
     let totalRange = end - leftWindow; // years in the animation
 
-    const tick = 100; // Length of each tick in milliseconds
-    let animationIncrement = Math.ceil((tick*totalRange)/this.props.mapAnimationDurationInMilliseconds); // [(ms * days) / ms] = days
-    const windowRange = Math.ceil((totalRange / 100)); // this is 1/10 the date range in date slider
+    let animationIncrement = (animationTick * totalRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
+    const windowRange = animationWindowWidth * totalRange;
     let rightWindow = leftWindow + windowRange;
 
     if (!window.NEXTSTRAIN) {
@@ -488,7 +487,7 @@ class Map extends React.Component {
           data: "Play"
         });
       }
-    }, tick);
+    }, animationTick);
 
     // controls: state.controls,
     // this.props.dateMin //"2013-06-28"
