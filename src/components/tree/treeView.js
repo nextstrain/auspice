@@ -57,17 +57,6 @@ class TreeView extends React.Component {
     mutType: React.PropTypes.string.isRequired
   }
 
-  componentWillMount() {
-    /* the tree resets itself on resize, so reset selections */
-    window.addEventListener("resize",
-      () => this.setState({
-        hover: null,
-        selectedBranch: null,
-        selectedTip: null
-      })
-    );
-  }
-
   componentWillReceiveProps(nextProps) {
     /* This both creates the tree (when it's loaded into redux) and
     works out what to update, based upon changes to redux.control */
@@ -97,22 +86,18 @@ class TreeView extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    /* after a re-render (i.e. perhaps the SVG has changed size) call zoomIntoClade
-    so that the tree rescales to fit the SVG */
+    /* if the  SVG has changed size, call zoomIntoClade so that the tree rescales to fit the SVG */
     if (
       // the tree exists AND
       this.state.tree &&
-      // it's not the first render (the listener is registered and width/height passed in)  AND
-      prevProps.browserDimensions && this.props.browserDimensions &&
-      // the browser dimensions have changed
+      // either the browser dimensions have changed
       (prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
-      prevProps.browserDimensions.height !== this.props.browserDimensions.height)
+      prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
+      // or the sidebar's (dis)appeared
+      this.props.sidebar !== prevProps.sidebar)
     ) {
-      this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
-    } else if ( // the tree exists AND the sidebar has changed
-      this.state.tree && (this.props.sidebar !== prevProps.sidebar)
-    ) {
-      this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
+      const baseNodeInView = this.state.selectedBranch ? this.state.selectedBranch.n.arrayIdx : 0;
+      this.state.tree.zoomIntoClade(this.state.tree.nodes[baseNodeInView], mediumTransitionDuration);
     }
   }
 

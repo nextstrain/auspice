@@ -9,8 +9,8 @@ import { branchOpacityConstant,
          branchOpacityFunction,
          branchInterpolateColour } from "../../util/treeHelpers";
 import { mediumTransitionDuration } from "../../util/globals";
+import React from "react";
 import d3 from "d3";
-
 
 export const visibleArea = function (Viewer) {
   const V = Viewer.getValue();

@@ -39,8 +39,9 @@ const getDefaultState = function () {
     absoluteDateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
     absoluteDateMax: moment().format("YYYY-MM-DD"),
     colorBy: globals.defaultColorBy,
+    defaultColorBy: globals.defaultColorBy,
     colorByConfidence: {display: false, on: false},
-    colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 1),
+    colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 0),
     analysisSlider: false,
     geoResolution: globals.defaultGeoResolution,
     datasetPathName: "",
@@ -50,7 +51,7 @@ const getDefaultState = function () {
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
-    mapAnimationPlayPauseButton: "Play",
+    mapAnimationPlayPauseButton: "Play"
   };
 };
 
@@ -65,9 +66,9 @@ const Controls = (state = getDefaultState(), action) => {
     /* overwrite base state with data from the metadata JSON */
     if (action.meta.date_range) {
       if (action.meta.date_range.date_min) {
+        base["mapAnimationStartDate"] = action.meta.date_range.date_min;
         if (rootDate.isBefore(moment(action.meta.date_range.date_min, "YYYY-MM-DD"))) {
           base["dateMin"] = action.meta.date_range.date_min;
-          base["mapAnimationStartDate"] = action.meta.date_range.date_min;
         }
       }
       if (action.meta.date_range.date_max) {
@@ -94,8 +95,8 @@ const Controls = (state = getDefaultState(), action) => {
         base["layout"] = action.meta.defaults.layout;
       }
       if (action.meta.defaults.mapTriplicate) {
-        //convert string to boolean; default is true; turned off with either false (js) or False (python)
-        base["mapTriplicate"] = (action.meta.defaults.mapTriplicate == 'false' || action.meta.defaults.mapTriplicate == 'False') ? false : true;
+       //convert string to boolean; default is true; turned off with either false (js) or False (python)
+       base["mapTriplicate"] = (action.meta.defaults.mapTriplicate == 'false' || action.meta.defaults.mapTriplicate == 'False') ? false : true;
       }
     }
     /* now overwrite state with data from the URL */
@@ -137,6 +138,7 @@ const Controls = (state = getDefaultState(), action) => {
     /* available tree attrs - based upon the root node */
     base["attrs"] = Object.keys(action.tree.attr);
     base["colorByConfidence"] = checkColorByConfidence(base["attrs"], base["colorBy"]);
+    base["defaultColorBy"] = base["colorBy"];
     return base;
   case types.TOGGLE_BRANCH_LABELS:
     return Object.assign({}, state, {
@@ -216,33 +218,30 @@ const Controls = (state = getDefaultState(), action) => {
   case types.CHANGE_ANIMATION_TIME:
     return Object.assign({}, state, {
       mapAnimationDurationInMilliseconds: action.data
-    })
+    });
   case types.CHANGE_ANIMATION_CUMULATIVE:
     return Object.assign({}, state, {
       mapAnimationCumulative: action.data
-    })
+    });
   case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
     return Object.assign({}, state, {
       mapAnimationPlayPauseButton: action.data
-    })
+    });
   case types.CHANGE_ANIMATION_START:
     return Object.assign({}, state, {
       mapAnimationStartDate: action.data
-    })
-  case types.CHANGE_COLOR_BY:
+    });
+  case types.NEW_COLORS:
     const newState = Object.assign({}, state, {
-      colorBy: action.data,
-      colorByConfidence: checkColorByConfidence(state.attrs, action.data)
+      colorBy: action.colorBy,
+      colorScale: action.colorScale,
+      colorByConfidence: checkColorByConfidence(state.attrs, action.colorBy)
     });
     /* may need to toggle the entropy selector AA <-> NUC */
-    if (determineColorByGenotypeType(action.data)) {
-      newState.mutType = determineColorByGenotypeType(action.data);
+    if (determineColorByGenotypeType(action.colorBy)) {
+      newState.mutType = determineColorByGenotypeType(action.colorBy);
     }
     return newState;
-  case types.SET_COLOR_SCALE:
-    return Object.assign({}, state, {
-      colorScale: action.data
-    });
   case types.CHANGE_GEO_RESOLUTION:
     return Object.assign({}, state, {
       geoResolution: action.data
