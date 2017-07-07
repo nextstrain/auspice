@@ -22,7 +22,7 @@ import {
 
 @connect((state) => {
   return {
-    datasetGuid: state.tree.datasetGuid,
+    // datasetGuid: state.tree.datasetGuid,
     treeVersion: state.tree.version,
     treeLoaded: state.tree.loaded,
     controls: state.controls,
@@ -54,7 +54,7 @@ class Map extends React.Component {
       latLongs: null,
       d3DOMNode: null,
       d3elems: null,
-      datasetGuid: null,
+      // datasetGuid: null,
       responsive: null,
     };
   }
