@@ -428,7 +428,7 @@ class Map extends React.Component {
   resetAnimation() {
     clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
     window.NEXTSTRAIN.mapAnimationLoop = null;
-    this.props.dispatch(changeDateFilter(this.props.controls.absoluteDateMin, this.props.controls.absoluteDateMax));
+    this.props.dispatch(changeDateFilter({newMin: this.props.controls.absoluteDateMin, newMax: this.props.controls.absoluteDateMax}));
     this.props.dispatch({
       type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
       data: "Play"
