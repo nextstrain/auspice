@@ -9,153 +9,94 @@ import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { turnURLtoDataPath } from "../util/urlHelpers";
 import queryString from "query-string";
 
-/* if the metadata specifies an analysis slider, this is where we process it */
-const addAnalysisSlider = (dispatch, tree, controls) => {
-  /* we can now get the range of values for the analysis slider */
-  const vals = tree.nodes.map((d) => d.attr[controls.analysisSlider.key])
-    .filter((n) => n !== undefined)
-    .filter((item, i, ar) => ar.indexOf(item) === i);
-  /* check that the key is found in at least some nodes */
-  if (!vals.length) {
-    dispatch({
-      type: types.ANALYSIS_SLIDER,
-      destroy: true
-    });
-    /* dispatch warning / error message */
-    console.log("Analysis slider key ", controls.analysisSlider.key, " never found in tree. Skipping.");
-  } else {
-    dispatch({
-      type: types.ANALYSIS_SLIDER,
-      destroy: false,
-      maxVal: Math.round(d3.max(vals) * 100) / 100,
-      minVal: Math.round(d3.min(vals) * 100) / 100
-    });
-  }
-};
+// /* if the metadata specifies an analysis slider, this is where we process it */
+// const addAnalysisSlider = (dispatch, tree, controls) => {
+//   /* we can now get the range of values for the analysis slider */
+//   const vals = tree.nodes.map((d) => d.attr[controls.analysisSlider.key])
+//     .filter((n) => n !== undefined)
+//     .filter((item, i, ar) => ar.indexOf(item) === i);
+//   /* check that the key is found in at least some nodes */
+//   if (!vals.length) {
+//     dispatch({
+//       type: types.ANALYSIS_SLIDER,
+//       destroy: true
+//     });
+//     /* dispatch warning / error message */
+//     console.log("Analysis slider key ", controls.analysisSlider.key, " never found in tree. Skipping.");
+//   } else {
+//     dispatch({
+//       type: types.ANALYSIS_SLIDER,
+//       destroy: false,
+//       maxVal: Math.round(d3.max(vals) * 100) / 100,
+//       minVal: Math.round(d3.min(vals) * 100) / 100
+//     });
+//   }
+// };
 
-/* request sequences */
+// /* request frequencies */
+// const requestFrequencies = () => {
+//   return {
+//     type: types.REQUEST_FREQUENCIES
+//   };
+// };
+//
+// const receiveFrequencies = (data) => {
+//   return {
+//     type: types.RECEIVE_FREQUENCIES,
+//     data: data
+//   };
+// };
+//
+// const frequenciesFetchError = (err) => {
+//   return {
+//     type: types.FREQUENCIES_FETCH_ERROR,
+//     data: err
+//   };
+// };
+//
+// const fetchFrequencies = (q) => {
+//   return fetch(
+//     dataURLStem + q + "_frequencies.json"
+//   );
+// };
+//
+// const populateFrequenciesStore = (queryParams) => {
+//   return (dispatch) => {
+//     dispatch(requestFrequencies());
+//     return fetchFrequencies(queryParams).then((res) => res.json()).then(
+//       (json) => dispatch(receiveFrequencies(json)),
+//       (err) => dispatch(frequenciesFetchError(err))
+//     );
+//   };
+// };
 
-const requestSequences = () => {
-  return {
-    type: types.REQUEST_SEQUENCES
-  };
-};
-
-const receiveSequences = (data) => {
-  return {
-    type: types.RECEIVE_SEQUENCES,
-    data: data
-  };
-};
-
-const sequencesFetchError = (err) => {
-  return {
-    type: types.SEQUENCES_FETCH_ERROR,
-    data: err
-  };
-};
-
-const fetchSequences = (q) => {
-  return fetch(
-    dataURLStem + q + "_sequences.json"
-  );
-};
-
-const populateSequencesStore = (queryParams) => {
+const populateEntropyStore = (paths) => {
   return (dispatch) => {
-    dispatch(requestSequences());
-    return fetchSequences(queryParams).then((res) => res.json()).then(
-      (json) => {
-        dispatch(receiveSequences(json));
-        dispatch(updateColors());
-      },
-      (err) => dispatch(sequencesFetchError(err))
-    );
-  };
-};
-
-/* request frequencies */
-const requestFrequencies = () => {
-  return {
-    type: types.REQUEST_FREQUENCIES
-  };
-};
-
-const receiveFrequencies = (data) => {
-  return {
-    type: types.RECEIVE_FREQUENCIES,
-    data: data
-  };
-};
-
-const frequenciesFetchError = (err) => {
-  return {
-    type: types.FREQUENCIES_FETCH_ERROR,
-    data: err
-  };
-};
-
-const fetchFrequencies = (q) => {
-  return fetch(
-    dataURLStem + q + "_frequencies.json"
-  );
-};
-
-const populateFrequenciesStore = (queryParams) => {
-  return (dispatch) => {
-    dispatch(requestFrequencies());
-    return fetchFrequencies(queryParams).then((res) => res.json()).then(
-      (json) => dispatch(receiveFrequencies(json)),
-      (err) => dispatch(frequenciesFetchError(err))
-    );
-  };
-};
-
-/* request entropyes */
-const requestEntropy = () => {
-  return {
-    type: types.REQUEST_ENTROPY
-  };
-};
-
-const receiveEntropy = (data) => {
-  return {
-    type: types.RECEIVE_ENTROPY,
-    data: data
-  };
-};
-
-const entropyFetchError = (err) => {
-  return {
-    type: types.ENTROPY_FETCH_ERROR,
-    data: err
-  };
-};
-
-const fetchEntropy = (q) => {
-  return fetch(
-    dataURLStem + q + "_entropy.json"
-  );
-};
-
-const populateEntropyStore = (queryParams) => {
-  return (dispatch) => {
-    dispatch(requestEntropy());
-    return fetchEntropy(queryParams).then((res) => res.json()).then(
-      (json) => dispatch(receiveEntropy(json)),
-      (err) => dispatch(entropyFetchError(err))
-    );
-  };
-};
-
-
-const loadMetaAndTreeJSONs = (metaPath, treePath, router) => {
-  return (dispatch, getState) => {
-    const metaJSONpromise = fetch(metaPath)
+    const entropyJSONpromise = fetch(paths.entropy)
       .then((res) => res.json());
-    const treeJSONpromise = fetch(treePath)
+    entropyJSONpromise
+      .then((data) => {
+        dispatch({
+          type: types.RECEIVE_ENTROPY,
+          data: data
+        });
+      })
+      .catch((err) => {
+        /* entropy reducer has already been invalidated */
+        console.log("entropyJSONpromise error", err);
+      });
+  };
+};
+
+const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
+  return (dispatch) => {
+    const metaJSONpromise = fetch(paths.meta)
       .then((res) => res.json());
-    Promise.all([metaJSONpromise, treeJSONpromise])
+    const treeJSONpromise = fetch(paths.tree)
+      .then((res) => res.json());
+    const seqsJSONpromise = fetch(paths.seqs)
+      .then((res) => res.json());
+    Promise.all([metaJSONpromise, treeJSONpromise, seqsJSONpromise])
       .then((values) => {
         /* initial dispatch sets most values */
         dispatch({
@@ -163,14 +104,15 @@ const loadMetaAndTreeJSONs = (metaPath, treePath, router) => {
           datasetPathName: router.history.location.pathname,
           meta: values[0],
           tree: values[1],
+          seqs: values[2],
           query: queryString.parse(router.history.location.search)
         });
-        dispatch({type: types.RECEIVE_METADATA, data: values[0]});
-        const {controls, tree} = getState(); // reflects updated data
         /* add analysis slider (if applicable) */
-        if (controls.analysisSlider) {
-          addAnalysisSlider(dispatch, tree, controls);
-        }
+        // revisit this when applicable
+        // if (controls.analysisSlider) {
+        //   const {controls, tree} = getState(); // reflects updated data
+        //   addAnalysisSlider(dispatch, tree, controls);
+        // }
         /* there still remain a number of actions to do with calculations */
         dispatch(updateVisibleTipsAndBranchThicknesses());
         dispatch(updateColors());
@@ -196,12 +138,14 @@ export const loadJSONs = (router) => {
     const data_path = turnURLtoDataPath(router);
     const JSONpaths = {
       meta: dataURLStem + data_path + "_meta.json",
-      tree: dataURLStem + data_path + "_tree.json"
+      tree: dataURLStem + data_path + "_tree.json",
+      seqs: dataURLStem + data_path + "_sequences.json",
+      entropy: dataURLStem + data_path + "_entropy.json"
     };
-    dispatch(loadMetaAndTreeJSONs(JSONpaths.meta, JSONpaths.tree, router));
-    dispatch(populateSequencesStore(data_path));
+    dispatch(loadMetaAndTreeAndSequencesJSONs(JSONpaths, router));
+    /* subsequent JSON loading is *not* essential to the main functionality */
     /* while nextstrain is limited to ebola & zika, frequencies are not needed */
     // dispatch(populateFrequenciesStore(data_path));
-    dispatch(populateEntropyStore(data_path));
+    dispatch(populateEntropyStore(JSONpaths));
   };
 };

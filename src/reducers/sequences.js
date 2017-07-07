@@ -1,31 +1,24 @@
 import * as types from "../actions/types";
 
+/* note regarding `loaded` - this starts off false.
+On the first dataset load, it becomes true.
+Subsequent loads arrive via a single action, so there is no period
+of time when they are "loading" - i.e. when they are *not* ready */
+
 const Sequences = (state = {
-  loadStatus: 0, /* 0: no data, 1: data incoming, 2: data loaded */
-  sequences: null,
-  error: null
+  loaded: false,
+  sequences: null
 }, action) => {
   switch (action.type) {
-  case types.REQUEST_SEQUENCES:
-    return Object.assign({}, state, {
-      loadStatus: 1,
-      error: null
-    });
-  case types.RECEIVE_SEQUENCES:
+  case types.NEW_DATASET:
     const glength = {};
-    for (let gene in action.data.root) {
-      glength[gene] = action.data.root[gene].length;
+    for (const gene in action.seqs.root) {
+      glength[gene] = action.seqs.root[gene].length;
     }
     return Object.assign({}, state, {
-      loadStatus: 2,
-      error: null,
-      sequences: action.data,
+      loaded: true,
+      sequences: action.seqs,
       geneLength: glength
-    });
-  case types.SEQUENCES_FETCH_ERROR:
-    return Object.assign({}, state, {
-      loadStatus: 0,
-      error: action.data
     });
   default:
     return state;

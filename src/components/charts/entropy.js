@@ -67,12 +67,12 @@ const getStyles = function (width) {
   };
 };
 
-@connect(state => {
+@connect((state) => {
   return {
     mutType: state.controls.mutType,
     entropy: state.entropy.entropy,
     browserDimensions: state.browserDimensions.browserDimensions,
-    load: state.entropy.loadStatus,
+    loaded: state.entropy.loaded,
     shouldReRender: false
   };
 })
@@ -92,7 +92,7 @@ class Entropy extends React.Component {
     entropy: React.PropTypes.object,
     sidebar: React.PropTypes.bool,
     browserDimensions: React.PropTypes.object,
-    load: React.PropTypes.number,
+    loaded: React.PropTypes.bool.isRequired,
     mutType: React.PropTypes.string.isRequired
   }
 
@@ -161,10 +161,10 @@ class Entropy extends React.Component {
     );
   }
   componentWillReceiveProps(nextProps) {
-    if (this.props.load !== nextProps.load && nextProps.load !== 2) {
+    if (!nextProps.loaded) {
       this.setState({chart: false});
     }
-    if (!this.state.chart && this.props.load !== nextProps.load && nextProps.load === 2) {
+    if (!this.state.chart && nextProps.loaded) {
       const chart = new EntropyChart(
         this.refs.d3entropy,
         calcEntropy(nextProps.entropy),

@@ -199,10 +199,9 @@ const parseFilterQuery = function (query) {
   };
 };
 
-
 /* recursively mark the parents of a given node active
 by setting the node idx to true in the param visArray */
-export const makeParentVisible = function (visArray, node) {
+const makeParentVisible = function (visArray, node) {
   if (node.arrayIdx === 0 || visArray[node.parent.arrayIdx]) {
     return; // this is the root of the tree or the parent was already visibile
   }
@@ -210,6 +209,18 @@ export const makeParentVisible = function (visArray, node) {
   makeParentVisible(visArray, node.parent);
 };
 
+/**
+ * Create a visibility array to show the path through the tree to the selected tip
+ * @param  {array} nodes redux tree nodes
+ * @param  {int} tipIdx idx of the selected tip
+ * @return {array} visibility array (values of "visible" | "hidden")
+ */
+export const identifyPathToTip = (nodes, tipIdx) => {
+  const visibility = new Array(nodes.length).fill(false);
+  visibility[tipIdx] = true;
+  makeParentVisible(visibility, nodes[tipIdx]); /* recursive */
+  return visibility.map((cv) => cv ? "visible" : "hidden");
+};
 
 /* calcVisibility
 USES:

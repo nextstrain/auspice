@@ -2,9 +2,7 @@
 /*eslint-env browser*/
 /*eslint dot-notation: 0*/
 /*eslint max-len : 0*/
-import { zoomToClade,
-         restrictTreeToSingleTip,
-         updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
+import { updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
 import { branchOpacityConstant,
          branchOpacityFunction,
          branchInterpolateColour } from "../../util/treeHelpers";
@@ -69,7 +67,7 @@ export const onTipClick = function (d) {
     hovered: null,
     selectedTip: d
   });
-  this.props.dispatch(restrictTreeToSingleTip(d.n.arrayIdx));
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: d.n.arrayIdx}));
 };
 
 export const onBranchHover = function (d, x, y) {
@@ -105,7 +103,7 @@ export const onBranchClick = function (d) {
   /* to stop multiple phyloTree updates potentially clashing,
   we change tipVis after geometry update + transition */
   window.setTimeout(() =>
-    this.props.dispatch(zoomToClade(d.arrayIdx)),
+    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.arrayIdx})),
     mediumTransitionDuration
   );
   this.setState({
@@ -146,7 +144,7 @@ export const viewEntireTree = function () {
   this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
   /* update branch thicknesses / tip vis after SVG tree elemtents have moved */
   window.setTimeout(
-    () => this.props.dispatch(zoomToClade(0)),
+    () => this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0})),
     mediumTransitionDuration
   );
   this.setState({selectedBranch: null, selectedTip: null});
@@ -261,14 +259,12 @@ const calcStrokeCols = (tree, confidence, colorBy) => {
  * function to help determine what parts of phylotree should update
  * @param {obj} props redux props
  * @param {obj} nextProps next redux props
- * @param {obj} tree phyloTree object
+ * @param {obj} tree phyloTree object (stored in the state of treeView)
  * @return {obj} values are mostly bools, but not always
  */
 export const salientPropChanges = (props, nextProps, tree) => {
-  const dataInFlux = !nextProps.tree.datasetGuid && tree;
-  const datasetChanged = nextProps.tree.nodes && nextProps.tree.datasetGuid && nextProps.tree.datasetGuid !== props.tree.datasetGuid;
-  const firstDataReady = tree === null && nextProps.tree.datasetGuid && nextProps.tree.nodes !== null;
-
+  const dataInFlux = !nextProps.tree.loaded;
+  const newData = tree === null && nextProps.tree.loaded;
   const visibility = !!nextProps.tree.visibilityVersion && props.tree.visibilityVersion !== nextProps.tree.visibilityVersion
   const tipRadii = !!nextProps.tree.tipRadiiVersion && props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion;
   const colorBy = !!nextProps.tree.nodeColorsVersion &&
@@ -292,8 +288,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
 
   return {
     dataInFlux,
-    datasetChanged,
-    firstDataReady,
+    newData,
     visibility,
     tipRadii,
     colorBy,
