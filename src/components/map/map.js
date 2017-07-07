@@ -468,7 +468,7 @@ class Map extends React.Component {
     window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
 
       /* first pass sets the timer to absolute min and absolute min + 6 months because they reference above initial time window */
-      this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
+      this.props.dispatch(changeDateFilter({newMin: first.format("YYYY-MM-DD"), newMax: second.format("YYYY-MM-DD")}));
 
       if (!this.props.mapAnimationCumulative) {
         first = first.add(incrementBy, incrementByUnit);
@@ -479,7 +479,7 @@ class Map extends React.Component {
         clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
         window.NEXTSTRAIN.mapAnimationLoop = null;
         // this.props.dispatch(changeDateFilter(first.format("YYYY-MM-DD"), second.format("YYYY-MM-DD")));
-        this.props.dispatch(changeDateFilter(this.props.controls.absoluteDateMin, this.props.controls.absoluteDateMax));
+        this.props.dispatch(changeDateFilter({newMin: this.props.controls.absoluteDateMin, newMax: this.props.controls.absoluteDateMax}));
         this.props.dispatch({
           type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
           data: "Play"
