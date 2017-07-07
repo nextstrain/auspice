@@ -1,3 +1,5 @@
+/*eslint-env browser*/
+/*eslint max-len: 0*/
 import React from "react";
 import d3 from "d3";
 import _ from "lodash";
@@ -21,6 +23,7 @@ import {
 @connect((state) => {
   return {
     datasetGuid: state.tree.datasetGuid,
+    treeVersion: state.tree.version,
     controls: state.controls,
     nodes: state.tree.nodes,
     visibility: state.tree.visibility,
@@ -55,6 +58,7 @@ class Map extends React.Component {
     };
   }
   static propTypes = {
+    treeVersion: React.PropTypes.number.isRequired,
     colorScale: React.PropTypes.object.isRequired
   }
   componentWillMount() {
@@ -97,24 +101,33 @@ class Map extends React.Component {
       React to browser width/height changes responsively
       This is stored in state because it's used by both the map and the d3 overlay
     */
-    if (
-      this.props.browserDimensions &&
-      (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
-      this.props.browserDimensions.height !== nextProps.browserDimensions.height)
-    ) {
-      this.setState({responsive: this.doComputeResponsive(nextProps)});
-    } else if (!this.state.responsive && nextProps.browserDimensions) { /* first time */
-      this.setState({responsive: this.doComputeResponsive(nextProps)});
-    } else if (
-      this.props.browserDimensions &&
-      this.props.datasetGuid &&
-      nextProps.datasetGuid &&
-      this.props.datasetGuid !== nextProps.datasetGuid // the dataset has changed
-    ) {
-      this.setState({responsive: this.doComputeResponsive(nextProps)});
-    } else if (this.props.sidebar !== nextProps.sidebar) {
+    const changes = {
+      dimensionsChanged: this.props.browserDimensions.width !== nextProps.browserDimensions.width || this.props.browserDimensions.height !== nextProps.browserDimensions.height,
+      responsiveNotSet: !this.state.responsive,
+      treeChanged: this.props.treeVersion !== nextProps.treeVersion, // treeVersion change implies tree is ready (modified by the same action)
+      sidebarChanged: this.props.sidebar !== nextProps.sidebar
+    };
+    if (Object.values(changes).some((v) => v === true)) {
       this.setState({responsive: this.doComputeResponsive(nextProps)});
     }
+    // if (
+    //   this.props.browserDimensions &&
+    //   (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
+    //   this.props.browserDimensions.height !== nextProps.browserDimensions.height)
+    // ) {
+    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
+    // } else if (!this.state.responsive && nextProps.browserDimensions) { /* first time */
+    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
+    // } else if (
+    //   this.props.browserDimensions &&
+    //   this.props.datasetGuid &&
+    //   nextProps.datasetGuid &&
+    //   this.props.datasetGuid !== nextProps.datasetGuid // the dataset has changed
+    // ) {
+    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
+    // } else if (this.props.sidebar !== nextProps.sidebar) {
+    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
+    // }
   }
   doComputeResponsive(nextProps) {
     return computeResponsive({
