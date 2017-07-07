@@ -27,11 +27,12 @@ import {
     treeLoaded: state.tree.loaded,
     controls: state.controls,
     nodes: state.tree.nodes,
+    nodeColors: state.tree.nodeColors,
     visibility: state.tree.visibility,
     visibilityVersion: state.tree.visibilityVersion,
     metadata: state.metadata.metadata,
     browserDimensions: state.browserDimensions.browserDimensions,
-    colorScale: state.controls.colorScale,
+    colorScaleVersion: state.controls.colorScale.version,
     colorBy: state.controls.colorBy,
     map: state.map,
     geoResolution: state.controls.geoResolution,
@@ -39,9 +40,7 @@ import {
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative,
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
-    sequences: state.sequences,
     mapTriplicate: state.controls.mapTriplicate
-
   };
 })
 
@@ -61,7 +60,7 @@ class Map extends React.Component {
   static propTypes = {
     treeVersion: React.PropTypes.number.isRequired,
     treeLoaded: React.PropTypes.bool.isRequired,
-    colorScale: React.PropTypes.object.isRequired
+    colorScaleVersion: React.PropTypes.number.isRequired
   }
   componentWillMount() {
     if (!window.L) {
@@ -278,7 +277,7 @@ class Map extends React.Component {
 
     if (
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
-      this.props.colorScale.version !== prevProps.colorScale.version
+      this.props.colorScaleVersion !== prevProps.colorScaleVersion
     ) {
       updateVisibility(this.state.d3elems, latLongs, this.props.controls, this.props.nodes);
     }
@@ -295,9 +294,8 @@ class Map extends React.Component {
         this.state.map,
         this.props.colorBy,
         this.props.geoResolution,
-        this.props.colorScale,
-        this.props.sequences,
         this.props.mapTriplicate,
+        this.props.nodeColors,
       );
     } else {
       return null;
