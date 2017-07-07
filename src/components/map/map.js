@@ -85,7 +85,7 @@ class Map extends React.Component {
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
     this.maybeUpdateDemesAndTransmissions(prevProps); /* every time we change something like colorBy */
-    this.maybeAnimateDemesAndTransmissions();
+    // this.maybeAnimateDemesAndTransmissions();
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
@@ -284,9 +284,9 @@ class Map extends React.Component {
       updateVisibility(this.state.d3elems, latLongs, this.props.controls, this.props.nodes);
     }
   }
-  maybeAnimateDemesAndTransmissions() {
-    /* todo */
-  }
+  // maybeAnimateDemesAndTransmissions() {
+  //   /* todo */
+  // }
   latLongs() {
     if (this.props.nodes && this.props.visibility && this.props.metadata && this.state.map) {
       return getLatLongs(
