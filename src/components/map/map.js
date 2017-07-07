@@ -275,6 +275,8 @@ class Map extends React.Component {
     const latLongs = this.latLongs();
     if (latLongs == null) return;
 
+    if (!this.props.treeLoaded) {return;}
+
     if (
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
       this.props.colorScale.version !== prevProps.colorScale.version
