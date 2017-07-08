@@ -76,7 +76,7 @@ const aggregated = (nodes, visibility, geoResolution, nodeColors) => {
   }
 }
 
-export const getLatLongs = (nodes, visibility, metadata, map, colorBy, geoResolution, triplicate, nodeColors) => {
+export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, triplicate, nodeColors) => {
 
   let offsets = triplicate ? [-360, 0, 360] : [0]
 
