@@ -158,8 +158,6 @@ class Map extends React.Component {
   }
   maybeDrawDemesAndTransmissions(prevProps) {
 
-    /* before April 2017 we fired this every time */
-
     const mapIsDrawn = !!this.state.map;
     const allDataPresent = !!(this.props.metadata && this.props.treeLoaded && this.state.responsive && this.state.d3DOMNode);
     const demesAbsent = !this.state.demes;
@@ -273,14 +271,14 @@ class Map extends React.Component {
     /* nothing to update */
     const noMap = !this.state.map;
     const noDemes = !this.state.demes;
-    if (noMap || noDemes) {return;}
-    const latLongs = this.latLongs(); /* can't run if noMap || noDemes */
-    if (!this.props.treeLoaded || latLongs === null) {return;}
+    if (noMap || noDemes || !this.props.treeLoaded) { return; }
 
     if (
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
       this.props.colorScaleVersion !== prevProps.colorScaleVersion
     ) {
+      const latLongs = this.latLongs(); /* can't run if noMap || noDemes */
+      if (latLongs === null) { return; }
       updateVisibility(this.state.d3elems, latLongs, this.props.controls, this.props.nodes);
     }
   }
