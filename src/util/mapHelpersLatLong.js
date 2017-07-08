@@ -158,6 +158,8 @@ export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, tri
         return;
       }
 
+      let pairs = [];
+
       const original = [
         map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
           new L.LatLng(
@@ -172,51 +174,64 @@ export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, tri
           )
         )
       ];
+      pairs.push(original);
 
-      const west = [
-        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-          new L.LatLng(
-            lat0,
-            long0 + OFFSET
-          )
-        ),
-        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-          new L.LatLng(
-            lat1,
-            long1 - 360 + OFFSET
-          )
-        )
-      ];
+      // only compute copies if triplicate
+      if (triplicate) {
 
-      const east = [
-        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-          new L.LatLng(
-            lat0,
-            long0 + OFFSET
-          )
-        ),
-        map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-          new L.LatLng(
-            lat1,
-            long1 + 360 + OFFSET
-          )
-        )
-      ];
+        // don't compute west vs east
+        if (OFFSET !== 360) {
+          const westCopy = [
+            map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+              new L.LatLng(
+                lat0,
+                long0 + OFFSET
+              )
+            ),
+            map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+              new L.LatLng(
+                lat1,
+                long1 - 360 + OFFSET
+              )
+            )
+          ];
+          pairs.push(westCopy);
+        }
 
-      let originToDestinationXYs;
+        // don't compute west vs east
+        if (OFFSET !== -360) {   
+          const eastCopy = [
+            map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+              new L.LatLng(
+                lat0,
+                long0 + OFFSET
+              )
+            ),
+            map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
+              new L.LatLng(
+                lat1,
+                long1 + 360 + OFFSET
+              )
+            )
+          ];
+          pairs.push(eastCopy);
+        }
+
+      }
 
       /* this gives us an index for both demes in the transmission pair with which we will access the node array */
-      const winningPair = _.minBy([original, west, east], (pair) => { return Math.abs(pair[1].x - pair[0].x) });
+      let winningPair = original;
+
+      if (triplicate) {
+        winningPair = _.minBy(pairs, (pair) => { return Math.abs(pair[1].x - pair[0].x) });
+      }
 
       const transmission = {
         demePairIndices: key.split("@")[2].split("|"), /* this has some weird values occassionally that do not presently break anything. created/discovered during animation work. */
         originToDestinationXYs: winningPair,
-        // originToDestinationXYs: Bezier(winningPair[0],computeMidpoint(winningPair),winningPair[1]),
-        // originToDestinationXYs: original,
         total: value.length, /* changes over time */
         color: averageColors(value), /* changes over time */
       }
-
 
       demesAndTransmissions.transmissions.push({data: transmission})
     });
