@@ -1,6 +1,11 @@
 import {averageColors} from "./colorHelpers";
 import {getTipColorAttribute} from "./treeHelpers";
 
+/* interchange. this is a leaflet method that will tell d3 where to draw.
+-Note (A) we MAY have to do this every time rather than just once */
+const leafletLatLongToLayerPoint = (lat, long, map) => {
+  return map.latLngToLayerPoint(new L.LatLng(lat, long))
+}
 
 const aggregated = (nodes, visibility, geoResolution, nodeColors) => {
   const aggregatedLocations = {}; /* demes */
@@ -80,8 +85,8 @@ export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, tri
 
   let offsets = triplicate ? [-360, 0, 360] : [0]
 
-  // longs of original map is -180 to 180
-  // longs of fully triplicated map is -540 to 540
+  // longs of original map are -180 to 180
+  // longs of fully triplicated map are -540 to 540
   // restrict to longs between -360 to 360
   const westBound = -360;
   const eastBound = 360;
@@ -106,9 +111,7 @@ export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, tri
           location: key, // Thailand:
           total: value.length, // 20, this is an array of all demes of a certain type
           color: averageColors(value),
-          coords: map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) we MAY have to do this every time rather than just once */
-            new L.LatLng(lat, long)
-          )
+          coords: leafletLatLongToLayerPoint(lat, long, map)
         });
       }
     });
@@ -132,15 +135,15 @@ export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, tri
       //   /* figure out the new one, insert it AND ITS REVERSE into the knownShortestPaths map above */
       // }
 
-      let long0;
-      let long1;
-      let lat0;
-      let lat1;
+      let longOrig;
+      let longDest;
+      let latOrig;
+      let latDest;
       try {
-        long0 = geo[geoResolution][locs[0]].longitude;
-        long1 = geo[geoResolution][locs[1]].longitude;
-        lat0 = geo[geoResolution][locs[0]].latitude;
-        lat1 = geo[geoResolution][locs[1]].latitude;
+        longOrig = geo[geoResolution][locs[0]].longitude;
+        longDest = geo[geoResolution][locs[1]].longitude;
+        latOrig = geo[geoResolution][locs[0]].latitude;
+        latDest = geo[geoResolution][locs[1]].latitude;
       } catch (e) {
         // console.log("No transmission lat/longs for ", countries[0], " -> ", countries[1])
         return;
@@ -151,23 +154,13 @@ export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, tri
       // if either origin or destination are inside bounds, include
       // transmission must be less than 180 lat difference
       if (
-        (long0 + OFFSET > westBound || long1 > westBound) &&
-        (long0 + OFFSET < eastBound || long1 < eastBound) &&
-        (Math.abs( (long0 + OFFSET) - (long1) ) < 180)
+        (longOrig + OFFSET > westBound || longDest > westBound) &&
+        (longOrig + OFFSET < eastBound || longDest < eastBound) &&
+        (Math.abs( (longOrig + OFFSET) - (longDest) ) < 180)
       ) {
         const middleDest = [
-          map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-            new L.LatLng(
-              lat0,
-              long0 + OFFSET
-            )
-          ),
-          map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-            new L.LatLng(
-              lat1,
-              long1
-            )
-          )
+          leafletLatLongToLayerPoint(latOrig, longOrig + OFFSET, map),
+          leafletLatLongToLayerPoint(latDest, longDest, map)
         ];
         pairs.push(middleDest);
       }
@@ -175,23 +168,13 @@ export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, tri
       // if either origin or destination are inside bounds, include
       // transmission must be less than 180 lat difference
       if (
-        (long0 + OFFSET > westBound || long1 - 360 > westBound) &&
-        (long0 + OFFSET < eastBound || long1 - 360 < eastBound) &&
-        (Math.abs( (long0 + OFFSET) - (long1 - 360) ) < 180)
+        (longOrig + OFFSET > westBound || longDest - 360 > westBound) &&
+        (longOrig + OFFSET < eastBound || longDest - 360 < eastBound) &&
+        (Math.abs( (longOrig + OFFSET) - (longDest - 360) ) < 180)
       ) {
         const westDest = [
-          map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-            new L.LatLng(
-              lat0,
-              long0 + OFFSET
-            )
-          ),
-          map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-            new L.LatLng(
-              lat1,
-              long1 - 360
-            )
-          )
+          leafletLatLongToLayerPoint(latOrig, longOrig + OFFSET, map),
+          leafletLatLongToLayerPoint(latDest, longDest - 360, map)
         ];
         pairs.push(westDest);
       }
@@ -199,23 +182,13 @@ export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, tri
       // if either origin or destination are inside bounds, include
       // transmission must be less than 180 lat difference
       if (
-        (long0 + OFFSET > westBound || long1 + 360 > westBound) &&
-        (long0 + OFFSET < eastBound || long1 + 360 < eastBound) &&
-        (Math.abs( (long0 + OFFSET) - (long1 + 360) ) < 180)
+        (longOrig + OFFSET > westBound || longDest + 360 > westBound) &&
+        (longOrig + OFFSET < eastBound || longDest + 360 < eastBound) &&
+        (Math.abs( (longOrig + OFFSET) - (longDest + 360) ) < 180)
       ) {
         const eastDest = [
-          map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-            new L.LatLng(
-              lat0,
-              long0 + OFFSET
-            )
-          ),
-          map.latLngToLayerPoint( /* interchange. this is a leaflet method that will tell d3 where to draw. -Note (A) We may have to do this every time */
-            new L.LatLng(
-              lat1,
-              long1 + 360
-            )
-          )
+          leafletLatLongToLayerPoint(latOrig, longOrig + OFFSET, map),
+          leafletLatLongToLayerPoint(latDest, longDest + 360, map)
         ];
         pairs.push(eastDest);
       }
