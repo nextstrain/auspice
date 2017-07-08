@@ -2,7 +2,6 @@
 /*eslint max-len: 0*/
 import React from "react";
 import d3 from "d3";
-import _ from "lodash";
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import {changeDateFilter} from "../../actions/treeProperties";
@@ -25,7 +24,7 @@ import {
     // datasetGuid: state.tree.datasetGuid,
     treeVersion: state.tree.version,
     treeLoaded: state.tree.loaded,
-    controls: state.controls,
+    splitTreeAndMap: state.controls.splitTreeAndMap,
     nodes: state.tree.nodes,
     nodeColors: state.tree.nodeColors,
     visibility: state.tree.visibility,
@@ -36,7 +35,6 @@ import {
     colorBy: state.controls.colorBy,
     map: state.map,
     geoResolution: state.controls.geoResolution,
-    // mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative,
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
@@ -138,7 +136,7 @@ class Map extends React.Component {
   }
   doComputeResponsive(nextProps) {
     return computeResponsive({
-      horizontal: nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.controls && this.props.controls.splitTreeAndMap) ? .5 : 1,
+      horizontal: nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap) ? .5 : 1,
       vertical: 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
@@ -189,7 +187,8 @@ class Map extends React.Component {
         this.state.d3DOMNode,
         this.state.map,
         this.props.nodes,
-        this.props.controls
+        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
+        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax)
       );
 
       /* Set up leaflet events */
@@ -243,7 +242,13 @@ class Map extends React.Component {
   }
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
-      updateOnMoveEnd(this.state.d3elems, this.latLongs(), this.props.controls, this.props.nodes);
+      updateOnMoveEnd(
+        this.state.d3elems,
+        this.latLongs(),
+        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
+        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
+        this.props.nodes
+      );
     }
   }
   getGeoRange() {
@@ -279,7 +284,13 @@ class Map extends React.Component {
     ) {
       const latLongs = this.latLongs(); /* can't run if noMap || noDemes */
       if (latLongs === null) { return; }
-      updateVisibility(this.state.d3elems, latLongs, this.props.controls, this.props.nodes);
+      updateVisibility(
+        this.state.d3elems,
+        latLongs,
+        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
+        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
+        this.props.nodes
+      );
     }
   }
   // maybeAnimateDemesAndTransmissions() {
@@ -432,7 +443,7 @@ class Map extends React.Component {
   resetAnimation() {
     clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
     window.NEXTSTRAIN.mapAnimationLoop = null;
-    this.props.dispatch(changeDateFilter({newMin: this.props.controls.absoluteDateMin, newMax: this.props.controls.absoluteDateMax}));
+    this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
     this.props.dispatch({
       type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
       data: "Play"
@@ -488,38 +499,6 @@ class Map extends React.Component {
       }
     }, animationTick);
 
-    // controls: state.controls,
-    // this.props.dateMin //"2013-06-28"
-    // this.props.dateMax //"2016-11-21"
-    // this.props.absoluteDateMin //"2013-06-29"
-    // this.props.absoluteDateMax //"2016-11-21"
-    // export const CHANGE_DATE_MIN = "CHANGE_DATE_MIN";
-    // export const CHANGE_DATE_MAX = "CHANGE_DATE_MAX";
-    // export const CHANGE_ABSOLUTE_DATE_MIN = "CHANGE_ABSOLUTE_DATE_MIN";
-    // export const CHANGE_ABSOLUTE_DATE_MAX = "CHANGE_ABSOLUTE_DATE_MAX";
-
-    // =======OLD RAF CODE=======
-    // let start = null;
-    //
-    // const step = (timestamp) => {
-    //   if (!start) start = timestamp;
-    //
-    //   let progress = timestamp - start;
-    //
-    //   this.props.dispatch({
-    //     type: MAP_ANIMATION_TICK,
-    //     data: {
-    //       progress
-    //     }
-    //   })
-    //
-    //   if (progress < globals.mapAnimationDurationInMilliseconds) {
-    //     window.requestAnimationFrame(step);
-    //   } else {
-    //     this.props.dispatch({ type: MAP_ANIMATION_END })
-    //   }
-    // }
-    // window.requestAnimationFrame(step);
   }
   render() {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011

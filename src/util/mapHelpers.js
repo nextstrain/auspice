@@ -73,7 +73,7 @@ export const pathStringGenerator = d3.svg.line()
   .y((d) => { return d.y })
   .interpolate("basis");
 
-export const drawDemesAndTransmissions = (latLongs, g, map, nodes, controls) => {
+export const drawDemesAndTransmissions = (latLongs, g, map, nodes, numDateMin, numDateMax) => {
 
   // define markers that are appended to the definition part of the group
   let markerCount=0;
@@ -114,7 +114,8 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, controls) => 
       return pathStringGenerator(
         extractLineSegmentForAnimationEffect(
           d.data.originToDestinationXYs,
-          controls,
+          numDateMin,
+          numDateMax,
           d,
           nodes,
           i,
@@ -177,7 +178,7 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, controls) => 
 
 }
 
-export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
+export const updateOnMoveEnd = (d3elems, latLongs, numDateMin, numDateMax, nodes) => {
   /* map has moved or rescaled, make demes and transmissions line up */
   if (d3elems) {
     d3elems.demes
@@ -192,7 +193,8 @@ export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
         return pathStringGenerator(
           extractLineSegmentForAnimationEffect(
             d.data.originToDestinationXYs,
-            controls,
+            numDateMin,
+            numDateMax,
             d,
             nodes,
             i,
@@ -203,15 +205,13 @@ export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
   }
 }
 
-const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, i, minTransmissionDate) => {
+const extractLineSegmentForAnimationEffect = (pair, numDateMin, numDateMax, d, nodes, i, minTransmissionDate) => {
   const originDate = nodes[d.data.demePairIndices[0]].attr.num_date;
   const destinationDate = nodes[d.data.demePairIndices[1]].attr.num_date;
-  const userDateMin = controls.dateScale(controls.dateFormat.parse(controls.dateMin));
-  const userDateMax = controls.dateScale(controls.dateFormat.parse(controls.dateMax));
 
   /* manually find the points along a Bezier curve at which we should be given the user date selection */
-  let start = Math.max(0.0,(userDateMin-originDate)/(destinationDate-originDate)); // clamp start at 0.0 if userDateMin gives a number <0
-  let end = Math.min(1.0,(userDateMax-originDate)/(destinationDate-originDate));// clamp end at 1.0 if userDateMax gives a number >1
+  let start = Math.max(0.0,(numDateMin-originDate)/(destinationDate-originDate)); // clamp start at 0.0 if userDateMin gives a number <0
+  let end = Math.min(1.0,(numDateMax-originDate)/(destinationDate-originDate));// clamp end at 1.0 if userDateMax gives a number >1
 
   if (!_.isFinite(start)){ // For 0 branch-length transmissions, (destinationDate-originDate) is 0 --> +/- Infinity values for start and end.
     start = 0.0;
@@ -227,7 +227,7 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, i, minTr
 
 
 
-export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
+export const updateVisibility = (d3elems, latLongs, numDateMin, numDateMax, nodes) => {
 
   d3elems.demes
     .data(latLongs.demes)
@@ -244,7 +244,8 @@ export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
       return pathStringGenerator(
         extractLineSegmentForAnimationEffect(
           d.data.originToDestinationXYs,
-          controls,
+          numDateMin,
+          numDateMax,
           d,
           nodes,
           i,
