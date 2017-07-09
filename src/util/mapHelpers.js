@@ -22,7 +22,11 @@ function zeros(dimensions) {
     return array
 }
 
-const Bezier = (pathControl, start=0.0, end=1.0, num=15) => { // returns Bezier curve starting at first point in pair, curving towards the second point in pair and
+/*  returns Bezier curve starting at first point in pair, curving towards the second point
+    in pair and finishing at third point. Start and end are fractions of the full Bezier
+    path to draw the curve along. num is number of points to calculate Bezier along
+    (more = smoother curve). */
+const Bezier = (pathControl, start=0.0, end=1.0, num=15) => {
   const N = _.range(pathControl.length) // number of points in [start, mid, end] that will be used to compute the curve
   var linspace = require('linspace')
   var outerProducts = require('outer-product')
@@ -47,8 +51,10 @@ const Bezier = (pathControl, start=0.0, end=1.0, num=15) => { // returns Bezier 
   return curve
 }
 
+/* Equation derived by Luiz Max Fagundes de Carvalho (University of Edinburgh).
+   This function computes the coordinate of a point that is at a distance `height`
+   perpendicular to the center of the line connecting the two points define in `pair`. */
 const computeMidpoint = (pair, modify, height) => {
-  /* Equation derived by Luiz Max Fagundes de Carvalho (University of Edinburgh). */
   const [pointA,pointB] = pair
   const x1 = pointA.x
   const y1 = pointA.y
@@ -220,7 +226,10 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, i, minTr
     end = start + 1e-6;
   };
 
-  const Bcurve = Bezier([pair[0],computeMidpoint(pair,(destinationDate-minTransmissionDate)*25.0),pair[1]],start,end,15); // calculate Bezier
+  /* calculate Bezier from pair[0] to pair[1] with control point positioned at
+  distance (destinationDate-minTransmissionDate)*25.0 perpendicular to center of the line
+  between pair[0] and pair[1]. */
+  const Bcurve = Bezier([pair[0],computeMidpoint(pair,(destinationDate-minTransmissionDate)*25.0),pair[1]],start,end,15);
 
   return Bcurve;
 };
