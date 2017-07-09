@@ -10,7 +10,7 @@ import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
 import {drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility} from "../../util/mapHelpers";
-import { animationWindowWidth, animationTick, twoColumnBreakpoint } from "../../util/globals";
+import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import {getLatLongs} from "../../util/mapHelpersLatLong";
 import {
@@ -358,6 +358,51 @@ class Map extends React.Component {
 
     this.setState({map});
   }
+
+  animationButtons() {
+    if (!enableAnimationDisplay) {
+        return null;
+    } else {
+      return (
+        <div>
+        <button style={{
+            position: "absolute",
+            left: 25,
+            top: 25,
+            zIndex: 9999,
+            border: "none",
+            width: 56,
+            padding: 15,
+            borderRadius: 4,
+            backgroundColor: "rgb(124, 184, 121)",
+            fontWeight: 700,
+            color: "white",
+          }}
+          onClick={this.handleAnimationPlayPauseClicked.bind(this) }
+          >
+          {this.props.mapAnimationPlayPauseButton}
+        </button>
+        <button style={{
+            position: "absolute",
+            left: 90,
+            top: 25,
+            zIndex: 9999,
+            border: "none",
+            padding: 15,
+            borderRadius: 4,
+            backgroundColor: "rgb(230, 230, 230)",
+            fontWeight: 700,
+            color: "white"
+          }}
+          onClick={this.handleAnimationResetClicked.bind(this) }
+          >
+          Reset
+        </button>
+        </div>
+      )
+    }
+  }
+
   maybeCreateMapDiv() {
     let container = null;
     if (
@@ -366,39 +411,7 @@ class Map extends React.Component {
     ) {
       container = (
         <div style={{position: "relative"}}>
-          <button style={{
-              position: "absolute",
-              left: 25,
-              top: 25,
-              zIndex: 9999,
-              border: "none",
-              width: 56,
-              padding: 15,
-              borderRadius: 4,
-              backgroundColor: "rgb(124, 184, 121)",
-              fontWeight: 700,
-              color: "white",
-            }}
-          onClick={this.handleAnimationPlayPauseClicked.bind(this) }
-            >
-            {this.props.mapAnimationPlayPauseButton}
-          </button>
-          <button style={{
-              position: "absolute",
-              left: 90,
-              top: 25,
-              zIndex: 9999,
-              border: "none",
-              padding: 15,
-              borderRadius: 4,
-              backgroundColor: "rgb(230, 230, 230)",
-              fontWeight: 700,
-              color: "white"
-            }}
-          onClick={this.handleAnimationResetClicked.bind(this) }
-            >
-            Reset
-          </button>
+          {this.animationButtons()}
           <div style={{
               height: this.state.responsive.height,
               width: this.state.responsive.width

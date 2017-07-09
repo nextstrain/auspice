@@ -12,7 +12,7 @@ import ChooseMetric from "./choose-metric";
 import GeoResolution from "./geo-resolution";
 import MapAnimationControls from "./map-animation";
 import AllFilters from "./all-filter";
-import * as globals from "../../util/globals";
+import { controlsWidth, enableAnimationDisplay } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import { connect } from "react-redux";
 
@@ -54,7 +54,7 @@ class Controls extends React.Component {
         justifyContent="flex-start"
         alignItems="flex-start"
         style={{
-          width: globals.controlsWidth,
+          width: controlsWidth,
           padding: "0px 20px 20px 20px"
         }}
       >
@@ -81,7 +81,7 @@ class Controls extends React.Component {
         {header("Map Options")}
         <SelectLabel text="Geographic resolution"/>
         <GeoResolution/>
-        <MapAnimationControls/>
+        {enableAnimationDisplay ? <MapAnimationControls/> : null}
         {header("Filters")}
         <AllFilters/>
 
