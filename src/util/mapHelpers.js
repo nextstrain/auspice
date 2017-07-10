@@ -241,23 +241,28 @@ export const updateVisibility = (d3elems, latLongs, numDateMin, numDateMax, node
     .data(latLongs.transmissions)
     // .transition(5)
     .attr("d", (d, i) => {
-      return pathStringGenerator(
-        extractLineSegmentForAnimationEffect(
-          d.data.originToDestinationXYs,
-          numDateMin,
-          numDateMax,
-          d,
-          nodes,
-          i,
-          latLongs.minTransmissionDate
-        )
-      )
+      try{
+        return pathStringGenerator(
+          extractLineSegmentForAnimationEffect(
+            d.data.originToDestinationXYs,
+            numDateMin,
+            numDateMax,
+            d,
+            nodes,
+            i,
+            latLongs.minTransmissionDate
+          )
+        );
+      } catch (e) {
+        console.log("Bezier error");
+        // console.log(e); /* uncomment this for the stack trace */
+        return "";
+      }
     }) /* with the interpolation in the function above pathStringGenerator */
     .attr("stroke", (d) => { return d.data.total > 0 ? d.data.color : "white" })
     .attr("stroke-width", (d) => {
       return d.data.total
     })
-
 }
 
 /* template for an update helper */
