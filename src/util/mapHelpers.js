@@ -130,34 +130,34 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, numDateMin, n
     .attr("stroke-width", (d) => { return d.data.total }) /* scale line by total number of transmissions */
     // .attr("marker-mid", makeMarker);
 
-    let transmissionPathLengths = [];
-    transmissions[0].forEach((d, i) => {
-
-      /* https://developer.mozilla.org/en-US/docs/Web/API/SVGGeometryElement/getTotalLength */
-      const totalPathLength = d.getTotalLength();
-
-      /*
-        1. Here, we make a mapping between time and geographic position for the transmission.
-        2. In short, make the line visible in proportion to the user selected date range, which
-            may not include the entire length of the line.
-        3. .clamp(true)
-            never return a value outside the date range
-            this would put the transmission path outside the geographic target
-      */
-
-      const pathScale = d3.scale.linear()
-                                .domain([
-                                  nodes[latLongs.transmissions[i].data.demePairIndices[0]].attr.num_date, /* origin date */
-                                  nodes[latLongs.transmissions[i].data.demePairIndices[1]].attr.num_date /* destination date */
-                                ])
-                                .range([0, totalPathLength])
-                                .clamp(true);
-
-      transmissionPathLengths.push({
-        totalPathLength,
-        pathScale,
-      })
-    })
+  // let transmissionPathLengths = [];
+  // transmissions[0].forEach((d, i) => {
+  //
+  //   /* https://developer.mozilla.org/en-US/docs/Web/API/SVGGeometryElement/getTotalLength */
+  //   const totalPathLength = d.getTotalLength();
+  //
+  //   /*
+  //     1. Here, we make a mapping between time and geographic position for the transmission.
+  //     2. In short, make the line visible in proportion to the user selected date range, which
+  //         may not include the entire length of the line.
+  //     3. .clamp(true)
+  //         never return a value outside the date range
+  //         this would put the transmission path outside the geographic target
+  //   */
+  //
+  //   const pathScale = d3.scale.linear()
+  //                             .domain([
+  //                               nodes[latLongs.transmissions[i].data.demePairIndices[0]].attr.num_date, /* origin date */
+  //                               nodes[latLongs.transmissions[i].data.demePairIndices[1]].attr.num_date /* destination date */
+  //                             ])
+  //                             .range([0, totalPathLength])
+  //                             .clamp(true);
+  //
+  //   transmissionPathLengths.push({
+  //     totalPathLength,
+  //     pathScale,
+  //   })
+  // })
 
   const demes = g.selectAll("demes")
     .data(latLongs.demes)
@@ -173,7 +173,7 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, numDateMin, n
   return {
     demes,
     transmissions,
-    transmissionPathLengths
+    // transmissionPathLengths
   };
 
 }
