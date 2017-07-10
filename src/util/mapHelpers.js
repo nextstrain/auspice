@@ -1,5 +1,7 @@
 import d3 from "d3";
-import _ from "lodash";
+import {range, isFinite} from "lodash";
+import linspace from "linspace";
+import outerProducts from "outer-product";
 
 /* util */
 
@@ -22,18 +24,12 @@ function zeros(dimensions) {
     return array
 }
 
-/*  returns Bezier curve starting at first point in pair, curving towards the second point
-    in pair and finishing at third point. Start and end are fractions of the full Bezier
-    path to draw the curve along. num is number of points to calculate Bezier along
-    (more = smoother curve). */
-const Bezier = (pathControl, start=0.0, end=1.0, num=15) => {
-  const N = _.range(pathControl.length) // number of points in [start, mid, end] that will be used to compute the curve
-  var linspace = require('linspace')
-  var outerProducts = require('outer-product')
+const Bezier = (pathControl, start=0.0, end=1.0, num=15) => { // returns Bezier curve starting at first point in pair, curving towards the second point in pair and
+  const N = range(pathControl.length) // number of points in [start, mid, end] that will be used to compute the curve
   const t = linspace(start,end,num) // num points spaced evenly between fractions of the total curve path (0 = beginning, 1 = end)
   let curve = zeros([num,2]) // empty vector that will become the curve
 
-  for (var i in _.range(curve.length)){ // convert curve to an (x:,y:) format
+  for (var i in range(curve.length)){ // convert curve to an (x:,y:) format
     curve[i] = {x: curve[i][0], y: curve[i][1]}
   }
 
@@ -41,9 +37,9 @@ const Bezier = (pathControl, start=0.0, end=1.0, num=15) => {
     const B_func = Bernstein(N.length - 1, ii) // get Bernstein polynomial
     const tB = t.map(B_func) // apply Bernstein polynomial to linspace
     const P = [pathControl[ii].x,pathControl[ii].y]
-    const prod_idx = outerProducts([_.range(tB.length), _.range(P.length)]) // get indices for outer product
+    const prod_idx = outerProducts([range(tB.length), range(P.length)]) // get indices for outer product
 
-    for (var j in _.range(curve.length)){ // iterate over future curve, adjust each point's coordinate
+    for (var j in range(curve.length)){ // iterate over future curve, adjust each point's coordinate
       curve[j].x += tB[prod_idx[j][0]] * P[prod_idx[j][1]] // update x coordinate for curve with outer product
       curve[j].y += tB[prod_idx[Number(j)+num][0]] * P[prod_idx[Number(j)+num][1]] // update y coordinate for curve with outer product
       }
@@ -79,7 +75,7 @@ export const pathStringGenerator = d3.svg.line()
   .y((d) => { return d.y })
   .interpolate("basis");
 
-export const drawDemesAndTransmissions = (latLongs, g, map, nodes, controls) => {
+export const drawDemesAndTransmissions = (latLongs, g, map, nodes, numDateMin, numDateMax) => {
 
   // define markers that are appended to the definition part of the group
   let markerCount=0;
@@ -120,7 +116,8 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, controls) => 
       return pathStringGenerator(
         extractLineSegmentForAnimationEffect(
           d.data.originToDestinationXYs,
-          controls,
+          numDateMin,
+          numDateMax,
           d,
           nodes,
           i,
@@ -135,34 +132,34 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, controls) => 
     .attr("stroke-width", (d) => { return d.data.total }) /* scale line by total number of transmissions */
     // .attr("marker-mid", makeMarker);
 
-    let transmissionPathLengths = [];
-    transmissions[0].forEach((d, i) => {
-
-      /* https://developer.mozilla.org/en-US/docs/Web/API/SVGGeometryElement/getTotalLength */
-      const totalPathLength = d.getTotalLength();
-
-      /*
-        1. Here, we make a mapping between time and geographic position for the transmission.
-        2. In short, make the line visible in proportion to the user selected date range, which
-            may not include the entire length of the line.
-        3. .clamp(true)
-            never return a value outside the date range
-            this would put the transmission path outside the geographic target
-      */
-
-      const pathScale = d3.scale.linear()
-                                .domain([
-                                  nodes[latLongs.transmissions[i].data.demePairIndices[0]].attr.num_date, /* origin date */
-                                  nodes[latLongs.transmissions[i].data.demePairIndices[1]].attr.num_date /* destination date */
-                                ])
-                                .range([0, totalPathLength])
-                                .clamp(true);
-
-      transmissionPathLengths.push({
-        totalPathLength,
-        pathScale,
-      })
-    })
+  // let transmissionPathLengths = [];
+  // transmissions[0].forEach((d, i) => {
+  //
+  //   /* https://developer.mozilla.org/en-US/docs/Web/API/SVGGeometryElement/getTotalLength */
+  //   const totalPathLength = d.getTotalLength();
+  //
+  //   /*
+  //     1. Here, we make a mapping between time and geographic position for the transmission.
+  //     2. In short, make the line visible in proportion to the user selected date range, which
+  //         may not include the entire length of the line.
+  //     3. .clamp(true)
+  //         never return a value outside the date range
+  //         this would put the transmission path outside the geographic target
+  //   */
+  //
+  //   const pathScale = d3.scale.linear()
+  //                             .domain([
+  //                               nodes[latLongs.transmissions[i].data.demePairIndices[0]].attr.num_date, /* origin date */
+  //                               nodes[latLongs.transmissions[i].data.demePairIndices[1]].attr.num_date /* destination date */
+  //                             ])
+  //                             .range([0, totalPathLength])
+  //                             .clamp(true);
+  //
+  //   transmissionPathLengths.push({
+  //     totalPathLength,
+  //     pathScale,
+  //   })
+  // })
 
   const demes = g.selectAll("demes")
     .data(latLongs.demes)
@@ -178,12 +175,12 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, controls) => 
   return {
     demes,
     transmissions,
-    transmissionPathLengths
+    // transmissionPathLengths
   };
 
 }
 
-export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
+export const updateOnMoveEnd = (d3elems, latLongs, numDateMin, numDateMax, nodes) => {
   /* map has moved or rescaled, make demes and transmissions line up */
   if (d3elems) {
     d3elems.demes
@@ -198,7 +195,8 @@ export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
         return pathStringGenerator(
           extractLineSegmentForAnimationEffect(
             d.data.originToDestinationXYs,
-            controls,
+            numDateMin,
+            numDateMax,
             d,
             nodes,
             i,
@@ -209,20 +207,18 @@ export const updateOnMoveEnd = (d3elems, latLongs, controls, nodes) => {
   }
 }
 
-const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, i, minTransmissionDate) => {
+const extractLineSegmentForAnimationEffect = (pair, numDateMin, numDateMax, d, nodes, i, minTransmissionDate) => {
   const originDate = nodes[d.data.demePairIndices[0]].attr.num_date;
   const destinationDate = nodes[d.data.demePairIndices[1]].attr.num_date;
-  const userDateMin = controls.dateScale(controls.dateFormat.parse(controls.dateMin));
-  const userDateMax = controls.dateScale(controls.dateFormat.parse(controls.dateMax));
 
   /* manually find the points along a Bezier curve at which we should be given the user date selection */
-  let start = Math.max(0.0,(userDateMin-originDate)/(destinationDate-originDate)); // clamp start at 0.0 if userDateMin gives a number <0
-  let end = Math.min(1.0,(userDateMax-originDate)/(destinationDate-originDate));// clamp end at 1.0 if userDateMax gives a number >1
+  let start = Math.max(0.0,(numDateMin-originDate)/(destinationDate-originDate)); // clamp start at 0.0 if userDateMin gives a number <0
+  let end = Math.min(1.0,(numDateMax-originDate)/(destinationDate-originDate));// clamp end at 1.0 if userDateMax gives a number >1
 
-  if (!_.isFinite(start)){ // For 0 branch-length transmissions, (destinationDate-originDate) is 0 --> +/- Infinity values for start and end.
+  if (!isFinite(start)){ // For 0 branch-length transmissions, (destinationDate-originDate) is 0 --> +/- Infinity values for start and end.
     start = 0.0;
   };
-  if (!_.isFinite(end)){
+  if (!isFinite(end)){
     end = start + 1e-6;
   };
 
@@ -236,7 +232,7 @@ const extractLineSegmentForAnimationEffect = (pair, controls, d, nodes, i, minTr
 
 
 
-export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
+export const updateVisibility = (d3elems, latLongs, numDateMin, numDateMax, nodes) => {
 
   d3elems.demes
     .data(latLongs.demes)
@@ -250,22 +246,28 @@ export const updateVisibility = (d3elems, latLongs, controls, nodes) => {
     .data(latLongs.transmissions)
     // .transition(5)
     .attr("d", (d, i) => {
-      return pathStringGenerator(
-        extractLineSegmentForAnimationEffect(
-          d.data.originToDestinationXYs,
-          controls,
-          d,
-          nodes,
-          i,
-          latLongs.minTransmissionDate
-        )
-      )
+      try{
+        return pathStringGenerator(
+          extractLineSegmentForAnimationEffect(
+            d.data.originToDestinationXYs,
+            numDateMin,
+            numDateMax,
+            d,
+            nodes,
+            i,
+            latLongs.minTransmissionDate
+          )
+        );
+      } catch (e) {
+        console.log("Bezier error");
+        // console.log(e); /* uncomment this for the stack trace */
+        return "";
+      }
     }) /* with the interpolation in the function above pathStringGenerator */
     .attr("stroke", (d) => { return d.data.total > 0 ? d.data.color : "white" })
     .attr("stroke-width", (d) => {
       return d.data.total
     })
-
 }
 
 /* template for an update helper */
