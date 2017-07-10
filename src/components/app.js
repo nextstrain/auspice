@@ -13,8 +13,6 @@ import TreeView from "./tree/treeView";
 import queryString from "query-string";
 import * as globals from "../util/globals";
 import Sidebar from "react-sidebar";
-// import Flex from "./framework/flex";
-// import { titleStyles } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
 import { analyticsNewPage } from "../util/googleAnalytics";
@@ -27,7 +25,7 @@ import { analyticsNewPage } from "../util/googleAnalytics";
     here as that is a prop of this component, whether we use it or not
   see https://reacttraining.com/react-router
 */
-@connect()
+@connect((state) => ({datasetPathName: state.controls.datasetPathName}))
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -55,6 +53,12 @@ class App extends React.Component {
   }
   componentWillMount() {
     this.props.dispatch(loadJSONs(this.context.router));
+  }
+  componentDidUpdate() {
+    /* browser back / forward */
+    if (this.props.datasetPathName !== undefined && this.props.datasetPathName !== this.context.router.history.location.pathname) {
+      this.props.dispatch(loadJSONs(this.context.router));
+    }
   }
   render() {
     return (
