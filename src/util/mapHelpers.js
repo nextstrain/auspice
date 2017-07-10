@@ -1,5 +1,7 @@
 import d3 from "d3";
 import _ from "lodash";
+import linspace from "linspace";
+import outerProducts from "outer-product";
 
 /* util */
 
@@ -24,8 +26,6 @@ function zeros(dimensions) {
 
 const Bezier = (pathControl, start=0.0, end=1.0, num=15) => { // returns Bezier curve starting at first point in pair, curving towards the second point in pair and
   const N = _.range(pathControl.length) // number of points in [start, mid, end] that will be used to compute the curve
-  var linspace = require('linspace')
-  var outerProducts = require('outer-product')
   const t = linspace(start,end,num) // num points spaced evenly between fractions of the total curve path (0 = beginning, 1 = end)
   let curve = zeros([num,2]) // empty vector that will become the curve
 
