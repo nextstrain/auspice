@@ -1,5 +1,5 @@
 import d3 from "d3";
-import _ from "lodash";
+import {range, isFinite} from "lodash";
 import linspace from "linspace";
 import outerProducts from "outer-product";
 
@@ -25,11 +25,11 @@ function zeros(dimensions) {
 }
 
 const Bezier = (pathControl, start=0.0, end=1.0, num=15) => { // returns Bezier curve starting at first point in pair, curving towards the second point in pair and
-  const N = _.range(pathControl.length) // number of points in [start, mid, end] that will be used to compute the curve
+  const N = range(pathControl.length) // number of points in [start, mid, end] that will be used to compute the curve
   const t = linspace(start,end,num) // num points spaced evenly between fractions of the total curve path (0 = beginning, 1 = end)
   let curve = zeros([num,2]) // empty vector that will become the curve
 
-  for (var i in _.range(curve.length)){ // convert curve to an (x:,y:) format
+  for (var i in range(curve.length)){ // convert curve to an (x:,y:) format
     curve[i] = {x: curve[i][0], y: curve[i][1]}
   }
 
@@ -37,9 +37,9 @@ const Bezier = (pathControl, start=0.0, end=1.0, num=15) => { // returns Bezier 
     const B_func = Bernstein(N.length - 1, ii) // get Bernstein polynomial
     const tB = t.map(B_func) // apply Bernstein polynomial to linspace
     const P = [pathControl[ii].x,pathControl[ii].y]
-    const prod_idx = outerProducts([_.range(tB.length), _.range(P.length)]) // get indices for outer product
+    const prod_idx = outerProducts([range(tB.length), range(P.length)]) // get indices for outer product
 
-    for (var j in _.range(curve.length)){ // iterate over future curve, adjust each point's coordinate
+    for (var j in range(curve.length)){ // iterate over future curve, adjust each point's coordinate
       curve[j].x += tB[prod_idx[j][0]] * P[prod_idx[j][1]] // update x coordinate for curve with outer product
       curve[j].y += tB[prod_idx[Number(j)+num][0]] * P[prod_idx[Number(j)+num][1]] // update y coordinate for curve with outer product
       }
@@ -213,10 +213,10 @@ const extractLineSegmentForAnimationEffect = (pair, numDateMin, numDateMax, d, n
   let start = Math.max(0.0,(numDateMin-originDate)/(destinationDate-originDate)); // clamp start at 0.0 if userDateMin gives a number <0
   let end = Math.min(1.0,(numDateMax-originDate)/(destinationDate-originDate));// clamp end at 1.0 if userDateMax gives a number >1
 
-  if (!_.isFinite(start)){ // For 0 branch-length transmissions, (destinationDate-originDate) is 0 --> +/- Infinity values for start and end.
+  if (!isFinite(start)){ // For 0 branch-length transmissions, (destinationDate-originDate) is 0 --> +/- Infinity values for start and end.
     start = 0.0;
   };
-  if (!_.isFinite(end)){
+  if (!isFinite(end)){
     end = start + 1e-6;
   };
 
