@@ -423,11 +423,11 @@ class Map extends React.Component {
     * ANIMATE MAP (AND THAT LINE ON TREE)
     *****************************************/
     if (this.props.mapAnimationPlayPauseButton === "Play") {
-      this.animateMap();
       this.props.dispatch({
         type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
         data: "Pause"
       });
+      this.animateMap();
     } else {
       clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
       window.NEXTSTRAIN.mapAnimationLoop = null;
