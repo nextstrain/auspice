@@ -73,11 +73,17 @@ class TreeView extends React.Component {
       return null;
     } else if (changes.newData) {
       tree = this.makeTree(nextProps);
+      /* extra (initial, once only) call to update the tree colouring */
+      for (const k in changes) {
+        changes[k] = false;
+      }
+      changes.colorBy = true;
+      funcs.updateStylesAndAttrs(changes, nextProps, tree);
       this.setState({tree});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
       }
-      // return null // TODO why do we need to update styles&attrs on the first round?
+      return null; /* return to avoid an unnecessary updateStylesAndAttrs call */
     }
     if (tree) {
       funcs.updateStylesAndAttrs(changes, nextProps, tree);
