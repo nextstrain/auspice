@@ -1,8 +1,6 @@
 import * as types from "../actions/types";
-// import { gatherTips } from "../util/treeHelpers";
 import { processNodes, calcLayouts } from "../util/processNodes";
 import d3 from "d3";
-import { calcBranchThickness, calcTipCounts, calcVisibility } from "../util/treeHelpers";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
 that the tree is loaded as they are set on the same action */
@@ -39,6 +37,7 @@ const Tree = (state = getDefaultState(), action) => {
       loaded: true,
       version: state.version + 1
     });
+  case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
   case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
     return Object.assign({}, state, {
       visibility: action.visibility,
