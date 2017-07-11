@@ -269,7 +269,6 @@ export const salientPropChanges = (props, nextProps, tree) => {
   const tipRadii = !!nextProps.tree.tipRadiiVersion && props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion;
   const colorBy = !!nextProps.tree.nodeColorsVersion &&
       (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
-      nextProps.tree.nodeColorsVersion === 1 ||
       nextProps.colorByConfidence !== props.colorByConfidence);
   const branchThickness = props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion;
   const layout = props.layout !== nextProps.layout;
