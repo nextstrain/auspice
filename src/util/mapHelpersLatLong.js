@@ -54,18 +54,22 @@ const aggregated = (nodes, visibility, geoResolution, nodeColors) => {
   // first pass to initialize empty vectors
   nodes.forEach((n, i) => {
     if (!n.children) {
-      if (!aggregatedLocations[n.attr[geoResolution]]) {
-        aggregatedLocations[n.attr[geoResolution]] = [];
+      if (n.attr[geoResolution]) { // check for undefined
+        if (!aggregatedLocations[n.attr[geoResolution]]) {
+          aggregatedLocations[n.attr[geoResolution]] = [];
+        }
       }
     }
     if (n.children) {
       n.children.forEach((child) => {
-        if (n.attr[geoResolution] !== child.attr[geoResolution]) {
-          const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
-                               n.strain + "|" + child.strain + "@" +
-                               n.arrayIdx + "|" + child.arrayIdx;
-          if (!aggregatedTransmissions[transmission]) {
-            aggregatedTransmissions[transmission] = [];
+        if (n.attr[geoResolution] && child.attr[geoResolution]) { // check for undefined
+          if (n.attr[geoResolution] !== child.attr[geoResolution]) {
+            const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
+                                 n.strain + "|" + child.strain + "@" +
+                                 n.arrayIdx + "|" + child.arrayIdx;
+            if (!aggregatedTransmissions[transmission]) {
+              aggregatedTransmissions[transmission] = [];
+            }
           }
         }
       });
@@ -76,7 +80,9 @@ const aggregated = (nodes, visibility, geoResolution, nodeColors) => {
     /* demes only count terminal nodes */
     if (!n.children && visibility[i] === "visible") {
       // if tip and visible, push
-      aggregatedLocations[n.attr[geoResolution]].push(nodeColors[i]);
+      if (n.attr[geoResolution]) { // check for undefined
+        aggregatedLocations[n.attr[geoResolution]].push(nodeColors[i]);
+      }
     }
     /* transmissions count internal node transitions as well
     they are from the parent of the node to the node itself
@@ -87,14 +93,16 @@ const aggregated = (nodes, visibility, geoResolution, nodeColors) => {
         (1) the node & child aren't the same location and
         (2) if child is visibile
         */
-        if (n.attr[geoResolution] !== child.attr[geoResolution] &&
-          visibility[child.arrayIdx] === "visible") {
-          // make this a pair of indices that point to nodes
-          // this is flatter and self documenting
-          const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
-                               n.strain + "|" + child.strain + "@" +
-                               n.arrayIdx + "|" + child.arrayIdx;
-          aggregatedTransmissions[transmission] = [nodeColors[i]];
+        if (n.attr[geoResolution] && child.attr[geoResolution]) { // check for undefined
+          if (n.attr[geoResolution] !== child.attr[geoResolution] &&
+            visibility[child.arrayIdx] === "visible") {
+            // make this a pair of indices that point to nodes
+            // this is flatter and self documenting
+            const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
+                                 n.strain + "|" + child.strain + "@" +
+                                 n.arrayIdx + "|" + child.arrayIdx;
+            aggregatedTransmissions[transmission] = [nodeColors[i]];
+          }
         }
       });
     }
