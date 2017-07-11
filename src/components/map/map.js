@@ -12,12 +12,8 @@ import {drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility} from "../.
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import {getLatLongs} from "../../util/mapHelpersLatLong";
-import {
-  CHANGE_ANIMATION_START,
-  CHANGE_ANIMATION_TIME,
-  CHANGE_ANIMATION_CUMULATIVE,
-  MAP_ANIMATION_PLAY_PAUSE_BUTTON
-} from "../../actions/types.js";
+import { modifyURLquery } from "../../util/urlHelpers";
+import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types.js";
 
 @connect((state) => {
   return {
@@ -59,6 +55,9 @@ class Map extends React.Component {
       // datasetGuid: null,
       responsive: null,
     };
+  }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
   }
   static propTypes = {
     treeVersion: React.PropTypes.number.isRequired,
@@ -448,6 +447,7 @@ class Map extends React.Component {
         type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
         data: "Play"
       });
+      modifyURLquery(this.context.router, {dmin: this.props.dateMin, dmax: this.props.dateMax});
     }
   }
 
@@ -459,6 +459,7 @@ class Map extends React.Component {
       type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
       data: "Play"
     });
+    modifyURLquery(this.context.router, {dmin: false, dmax: false});
   }
 
   handleAnimationResetClicked() {
@@ -493,6 +494,7 @@ class Map extends React.Component {
 
       /* first pass sets the timer to absolute min and absolute min + windowRange because they reference above initial time window */
       this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max}));
+      // don't modifyURLquery
 
       if (!this.props.mapAnimationCumulative) {
         leftWindow = leftWindow + animationIncrement;
@@ -507,6 +509,7 @@ class Map extends React.Component {
           type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
           data: "Play"
         });
+        modifyURLquery(this.context.router, {dmin: false, dmax: false});
       }
     }, animationTick);
 

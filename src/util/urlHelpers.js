@@ -15,6 +15,11 @@ export const modifyURLquery = function (router, keyValuePairs = null, replace = 
   if (keyValuePairs) {
     // Object.keys(keyValuePairs).forEach((key, idx) => {console.log(key, idx)});
     query = Object.assign({}, query, keyValuePairs);
+    for (const k in keyValuePairs) {
+      if (keyValuePairs[k] === false) {
+        delete query[k];
+      }
+    }
   }
   // console.log("query in:", queryString.parse(router.history.location.search))
   // console.log("query out:", query)
