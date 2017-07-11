@@ -89,7 +89,6 @@ class App extends React.Component {
           />
           <Map
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            justGotNewDatasetRenderNewMap={false}
           />
           <Frequencies/>
           <Entropy
