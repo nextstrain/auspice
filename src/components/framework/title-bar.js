@@ -116,10 +116,11 @@ class TitleBar extends React.Component {
 
   getDataName(styles) {
     return (
-      this.props.dataNameHidden ? <div style={{flex: "none" }}/> :
-        <div style={styles.dataName}>
-          {this.props.datasetPathName.replace(/^\//, "").replace(/\//g, " / ")}
-        </div>
+      this.props.dataNameHidden || this.props.datasetPathName === undefined ?
+      <div style={{flex: "none" }}/> :
+      <div style={styles.dataName}>
+        {this.props.datasetPathName.replace(/^\//, "").replace(/\//g, " / ")}
+      </div>
     );
   }
 

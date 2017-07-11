@@ -57,6 +57,10 @@ const getDefaultState = function () {
 
 const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
+  case types.DATA_INVALID:
+    return Object.assign({}, state, {
+      datasetPathName: undefined
+    });
   case types.NEW_DATASET:
     const base = getDefaultState();
     base["datasetPathName"] = action.datasetPathName;
