@@ -227,7 +227,7 @@ USES:
 inView: attribute of phyloTree.nodes, but accessible through redux.tree.nodes[idx].shell.inView
   Bool. Set by phyloTree, determines if the tip is within the view.
 controls.filters
-controls.dateMin & controls.dateMax
+use dates NOT controls.dateMin & controls.dateMax
 
 RETURNS:
 visibility: array of "visible" or "hidden"
@@ -246,7 +246,7 @@ FILTERS:
  - filterPairs is a list of lists. Each list defines the filtering to do.
    i.e. [ [ region, [...values]], [authors, [...values]]]
 */
-export const calcVisibility = function (tree, controls) {
+export const calcVisibility = function (tree, controls, dates) {
   if (tree.nodes) {
     /* reset visibility */
     let visibility = tree.nodes.map((d) => {
@@ -301,8 +301,8 @@ export const calcVisibility = function (tree, controls) {
     }
 
     // TIME FILTERING (internal + terminal nodes)
-    const userDateMin = controls.dateScale(controls.dateFormat.parse(controls.dateMin)); // convert caldate to numdate
-    const userDateMax = controls.dateScale(controls.dateFormat.parse(controls.dateMax)); // convert caldate to numdate
+    const userDateMin = controls.dateScale(controls.dateFormat.parse(dates.dateMin)); // convert caldate to numdate
+    const userDateMax = controls.dateScale(controls.dateFormat.parse(dates.dateMax)); // convert caldate to numdate
     const timeFiltered = tree.nodes.map((d, idx) => {
       return !(d.attr.num_date < userDateMin || d.parent.attr.num_date > userDateMax);
     });

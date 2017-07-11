@@ -203,7 +203,7 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       distanceMeasure: action.data
     });
-  case types.CHANGE_SELECTED_DATES:
+  case types.CHANGE_DATES_VISIBILITY_THICKNESS:
     return Object.assign({}, state, {
       dateMin: action.dateMin ? action.dateMin : state.dateMin,
       dateMax: action.dateMax ? action.dateMax : state.dateMax
