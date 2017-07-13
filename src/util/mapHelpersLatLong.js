@@ -34,9 +34,9 @@ const maybeGetTransmissionPair = (latOrig, longOrig, latDest, longDest, map) => 
   }
 }
 
-const aggregated = (nodes, visibility, geoResolution, nodeColors) => {
-  const aggregatedLocations = {}; /* demes */
-  const aggregatedTransmissions = {}; /* edges, animation paths */
+export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, nodeColors) => {
+  const demeData = {}; /* demes */
+  const transmissionData = {}; /* edges, animation paths */
 
   /*
     walk through nodes and collect a bunch of arrays...
@@ -55,8 +55,8 @@ const aggregated = (nodes, visibility, geoResolution, nodeColors) => {
   nodes.forEach((n, i) => {
     if (!n.children) {
       if (n.attr[geoResolution]) { // check for undefined
-        if (!aggregatedLocations[n.attr[geoResolution]]) {
-          aggregatedLocations[n.attr[geoResolution]] = [];
+        if (!demeData[n.attr[geoResolution]]) {
+          demeData[n.attr[geoResolution]] = [];
         }
       }
     }
@@ -67,8 +67,8 @@ const aggregated = (nodes, visibility, geoResolution, nodeColors) => {
             const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
                                  n.strain + "|" + child.strain + "@" +
                                  n.arrayIdx + "|" + child.arrayIdx;
-            if (!aggregatedTransmissions[transmission]) {
-              aggregatedTransmissions[transmission] = [];
+            if (!transmissionData[transmission]) {
+              transmissionData[transmission] = [];
             }
           }
         }
@@ -81,7 +81,7 @@ const aggregated = (nodes, visibility, geoResolution, nodeColors) => {
     if (!n.children && visibility[i] === "visible") {
       // if tip and visible, push
       if (n.attr[geoResolution]) { // check for undefined
-        aggregatedLocations[n.attr[geoResolution]].push(nodeColors[i]);
+        demeData[n.attr[geoResolution]].push(nodeColors[i]);
       }
     }
     /* transmissions count internal node transitions as well
@@ -101,26 +101,32 @@ const aggregated = (nodes, visibility, geoResolution, nodeColors) => {
             const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
                                  n.strain + "|" + child.strain + "@" +
                                  n.arrayIdx + "|" + child.arrayIdx;
-            aggregatedTransmissions[transmission] = [nodeColors[i]];
+            transmissionData[transmission] = [nodeColors[i]];
           }
         }
       });
     }
   });
   return {
-    aggregatedLocations,
-    aggregatedTransmissions
+    demeData,
+    transmissionData
   }
 }
 
-export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, triplicate, nodeColors) => {
+export const getLatLongs = (
+  nodes,
+  visibility,
+  metadata,
+  map,
+  geoResolution,
+  triplicate,
+  nodeColors,
+  demeData,
+  transmissionData,
+) => {
 
   let offsets = triplicate ? [-360, 0, 360] : [0]
 
-  const {
-    aggregatedLocations,
-    aggregatedTransmissions
-  } = aggregated(nodes, visibility, geoResolution, nodeColors);
   const geo = metadata.geo;
   const demesAndTransmissions = {
     demes: [],
@@ -129,7 +135,7 @@ export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, tri
 
   offsets.forEach((OFFSET) => {
     /* count DEMES */
-    _.forOwn(aggregatedLocations, (value, key) => {
+    _.forOwn(demeData, (value, key) => {
       let lat = geo[geoResolution][key].latitude;
       let long = geo[geoResolution][key].longitude + OFFSET;
       if (long > westBound && long < eastBound) {
@@ -143,10 +149,11 @@ export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, tri
     });
   })
 
+  /* Expensive because hundreds of transmisions */
   // offset is applied to transmission origin
   offsets.forEach((offsetOrig) => {
 
-    _.forOwn(aggregatedTransmissions, (value, key) => {
+    _.forOwn(transmissionData, (value, key) => {
 
       const locs = key.split("@")[0].split("|");
 
@@ -183,6 +190,7 @@ export const getLatLongs = (nodes, visibility, metadata, map, geoResolution, tri
         originToDestinationXYs: closestPair,
         total: value.length, /* changes over time */
         color: averageColors(value), /* changes over time */
+        /* visibility */
       }
 
       demesAndTransmissions.transmissions.push({data: transmission})

@@ -11,7 +11,7 @@ import setupLeafletPlugins from "../../util/leaflet-plugins";
 import {drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility} from "../../util/mapHelpers";
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
-import {getLatLongs} from "../../util/mapHelpersLatLong";
+import {getLatLongs, createDemeAndTransmissionData} from "../../util/mapHelpersLatLong";
 import {
   CHANGE_ANIMATION_START,
   CHANGE_ANIMATION_TIME,
@@ -22,6 +22,8 @@ import {
 @connect((state) => {
   return {
     // datasetGuid: state.tree.datasetGuid,
+    absoluteDateMin: state.controls.absoluteDateMin,
+    absoluteDateMax: state.controls.absoluteDateMax,
     treeVersion: state.tree.version,
     treeLoaded: state.tree.loaded,
     splitTreeAndMap: state.controls.splitTreeAndMap,
@@ -40,10 +42,8 @@ import {
     mapTriplicate: state.controls.mapTriplicate,
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
-    absoluteDateMin: state.controls.absoluteDateMin,
-    absoluteDateMax: state.controls.absoluteDateMax,
     dateScale: state.controls.dateScale,
-    dateFormat: state.controls.dateFormat
+    dateFormat: state.controls.dateFormat,
   };
 })
 
@@ -53,11 +53,12 @@ class Map extends React.Component {
     this.state = {
       map: null,
       demes: false,
-      latLongs: null,
       d3DOMNode: null,
       d3elems: null,
       // datasetGuid: null,
       responsive: null,
+      demeData: null,
+      transmissionData: null,
     };
   }
   static propTypes = {
@@ -180,7 +181,19 @@ class Map extends React.Component {
 
       this.state.map.setMaxBounds(this.getBounds())
 
-      const latLongs = this.latLongs(); /* no reference stored, we recompute this for now rather than updating in place */
+      const {
+        demeData,
+        transmissionData
+      } = createDemeAndTransmissionData(
+        this.props.nodes,
+        this.props.visibility,
+        this.props.geoResolution,
+        this.props.nodeColors
+      );
+
+      console.log(demeData, transmissionData)
+
+      const latLongs = this.latLongs(demeData, transmissionData); /* no reference stored, we recompute this for now rather than updating in place */
       const d3elems = drawDemesAndTransmissions(
         latLongs,
         this.state.d3DOMNode,
@@ -199,7 +212,8 @@ class Map extends React.Component {
         boundsSet: true,
         demes: true,
         d3elems,
-        latLongs,
+        demeData,
+        transmissionData,
       });
     }
   }
@@ -233,9 +247,11 @@ class Map extends React.Component {
       /* clear references to the demes and transmissions d3 added */
       this.setState({
         boundsSet: false,
-        demes: false,
+        demes: false, /* remove this and just look at demeData is null or not */
         d3elems: null,
         latLongs: null,
+        demeData: null,
+        transmissionData: null,
       })
     }
   }
@@ -295,7 +311,11 @@ class Map extends React.Component {
   // maybeAnimateDemesAndTransmissions() {
   //   /* todo */
   // }
-  latLongs() {
+  latLongs(demeData, transmissionData) {
+
+    const demes = demeData || this.state.demeData;
+    const transmissions = transmissionData || this.state.transmissionData;
+
     if (this.props.treeLoaded && this.state.map) {
       return getLatLongs(
         this.props.nodes,
@@ -305,6 +325,8 @@ class Map extends React.Component {
         this.props.geoResolution,
         this.props.mapTriplicate,
         this.props.nodeColors,
+        demes,
+        transmissions,
       );
     }
     return null;
