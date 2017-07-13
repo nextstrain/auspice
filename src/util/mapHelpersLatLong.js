@@ -34,9 +34,83 @@ const maybeGetTransmissionPair = (latOrig, longOrig, latDest, longDest, map) => 
   }
 }
 
+const setupDemeData = (nodes, visibility, geoResolution, nodeColors) => {
+
+  const demeData = []; /* demes */
+
+  // do aggregation as intermediate step
+  let demeMap = {};
+  nodes.forEach((n, i) => {
+    if (!n.children) {
+      if (n.attr[geoResolution]) { // check for undefined
+        if (!demeData[n.attr[geoResolution]]) {
+          demeMap[n.attr[geoResolution]] = [];
+        }
+      }
+    }
+  });
+
+  // second pass to fill vectors
+  nodes.forEach((n, i) => {
+    /* demes only count terminal nodes */
+    if (!n.children && visibility[i] === "visible") {
+      // if tip and visible, push
+      if (n.attr[geoResolution]) { // check for undefined
+        demeMap[n.attr[geoResolution]].push(nodeColors[i]);
+      }
+    }
+  });
+
+  _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
+    const deme = {
+      name: key,
+      latLong: null,
+      count: value.length,
+      color: averageColors(value)
+    }
+    demeData.push(deme);
+  });
+
+  return demeData;
+
+}
+
+const setupTransmissionData = (nodes, visibility, geoResolution, nodeColors) => {
+
+  const transmissionData = []; /* edges, animation paths */
+
+  nodes.forEach((n, i) => {
+    if (n.children) {
+      n.children.forEach((child) => {
+        if (n.attr[geoResolution] && child.attr[geoResolution]) { // check for undefined
+          if (n.attr[geoResolution] !== child.attr[geoResolution]) {
+
+            /* build up transmissions object */
+
+            const transmission = {
+              originNode: n,
+              destinationNode: child,
+              originLatLong: null,
+              destinationLatLong: null,
+              originName: n.attr[geoResolution],
+              destinationName: child.attr[geoResolution],
+              originNumDate: n.attr["num_date"],
+              destinationNumDate: child.attr["num_date"],
+              color: nodeColors[i],
+              visible: visibility[i] === "visible" && visibility[child.arrayIdx] === "visible",
+            }
+
+            transmissionData.push(transmission);
+          }
+        }
+      });
+    }
+  });
+
+  return transmissionData;
+}
+
 export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, nodeColors) => {
-  const demeData = {}; /* demes */
-  const transmissionData = {}; /* edges, animation paths */
 
   /*
     walk through nodes and collect a bunch of arrays...
@@ -48,68 +122,9 @@ export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, 
     count them for width and average to get color
   */
 
-  /*
-    aggregate locations for demes
-  */
-  // first pass to initialize empty vectors
-  nodes.forEach((n, i) => {
-    if (!n.children) {
-      if (n.attr[geoResolution]) { // check for undefined
-        if (!demeData[n.attr[geoResolution]]) {
-          demeData[n.attr[geoResolution]] = [];
-        }
-      }
-    }
-    if (n.children) {
-      n.children.forEach((child) => {
-        if (n.attr[geoResolution] && child.attr[geoResolution]) { // check for undefined
-          if (n.attr[geoResolution] !== child.attr[geoResolution]) {
-            const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
-                                 n.strain + "|" + child.strain + "@" +
-                                 n.arrayIdx + "|" + child.arrayIdx;
-            if (!transmissionData[transmission]) {
-              transmissionData[transmission] = [];
-            }
-          }
-        }
-      });
-    }
-  });
-  // second pass to fill vectors
-  nodes.forEach((n, i) => {
-    /* demes only count terminal nodes */
-    if (!n.children && visibility[i] === "visible") {
-      // if tip and visible, push
-      if (n.attr[geoResolution]) { // check for undefined
-        demeData[n.attr[geoResolution]].push(nodeColors[i]);
-      }
-    }
-    /* transmissions count internal node transitions as well
-    they are from the parent of the node to the node itself
-    */
-    if (n.children) {
-      n.children.forEach((child) => {
-        /* only draw transmissions if
-        (1) the node & child aren't the same location and
-        (2) if child is visibile
-        */
-        if (n.attr[geoResolution] && child.attr[geoResolution]) { // check for undefined
-          if (n.attr[geoResolution] !== child.attr[geoResolution] &&
-            visibility[child.arrayIdx] === "visible") {
-            // make this a pair of indices that point to nodes
-            // this is flatter and self documenting
-            const transmission = n.attr[geoResolution] + "|" + child.attr[geoResolution] + "@" +
-                                 n.strain + "|" + child.strain + "@" +
-                                 n.arrayIdx + "|" + child.arrayIdx;
-            transmissionData[transmission] = [nodeColors[i]];
-          }
-        }
-      });
-    }
-  });
   return {
-    demeData,
-    transmissionData
+    demeData: setupDemeData(nodes, visibility, geoResolution, nodeColors),
+    transmissionData: setupTransmissionData(nodes, visibility, geoResolution, nodeColors),
   }
 }
 
@@ -135,34 +150,33 @@ export const getLatLongs = (
 
   offsets.forEach((OFFSET) => {
     /* count DEMES */
-    _.forOwn(demeData, (value, key) => {
-      let lat = geo[geoResolution][key].latitude;
-      let long = geo[geoResolution][key].longitude + OFFSET;
+    demeData.forEach((deme) => {
+      let lat = geo[geoResolution][deme.name].latitude;
+      let long = geo[geoResolution][deme.name].longitude + OFFSET;
+
       if (long > westBound && long < eastBound) {
         demesAndTransmissions.demes.push({
-          location: key, // Thailand:
-          total: value.length, // 20, this is an array of all demes of a certain type
-          color: averageColors(value),
+          location: deme.name, // Thailand:
+          total: deme.count, // 20, this is an array of all demes of a certain type
+          color: deme.color,
           coords: leafletLatLongToLayerPoint(lat, long, map)
         });
       }
     });
-  })
+  });
 
   /* Expensive because hundreds of transmisions */
   // offset is applied to transmission origin
   offsets.forEach((offsetOrig) => {
 
-    _.forOwn(transmissionData, (value, key) => {
-
-      const locs = key.split("@")[0].split("|");
+    transmissionData.forEach((transmission) => {
 
       let latOrig, longOrig, latDest, longDest;
       try {
-        latOrig = geo[geoResolution][locs[0]].latitude;
-        longOrig = geo[geoResolution][locs[0]].longitude;
-        latDest = geo[geoResolution][locs[1]].latitude;
-        longDest = geo[geoResolution][locs[1]].longitude;
+        latOrig = geo[geoResolution][transmission.originName].latitude;
+        longOrig = geo[geoResolution][transmission.originName].longitude;
+        latDest = geo[geoResolution][transmission.destinationName].latitude;
+        longDest = geo[geoResolution][transmission.destinationName].longitude;
       } catch (e) {
         // console.log("No transmission lat/longs for ", countries[0], " -> ", countries[1])
         return;
@@ -185,15 +199,14 @@ export const getLatLongs = (
       /* this gives us an index for both demes in the transmission pair with which we will access the node array */
       const closestPair = _.minBy(pairs, (pair) => { return Math.abs(pair[1].x - pair[0].x) });
 
-      const transmission = {
-        demePairIndices: key.split("@")[2].split("|"), /* this has some weird values occassionally that do not presently break anything. created/discovered during animation work. */
-        originToDestinationXYs: closestPair,
-        total: value.length, /* changes over time */
-        color: averageColors(value), /* changes over time */
-        /* visibility */
-      }
+      const t = Object.assign({}, transmission, {
+        originLatLong: closestPair[0],
+        destinationLatLong: closestPair[1]
+      })
 
-      demesAndTransmissions.transmissions.push({data: transmission})
+      demesAndTransmissions.transmissions.push({
+        data: t
+      })
     });
 
   }) /* End offsetOrig */
@@ -201,7 +214,7 @@ export const getLatLongs = (
   // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
   if (demesAndTransmissions.transmissions.length) {
     demesAndTransmissions.minTransmissionDate = demesAndTransmissions.transmissions.map((x) => {
-      return nodes[x.data.demePairIndices[0]].attr.num_date;
+      return x.originNumDate;
     }).reduce((prev, cur) => {
       return cur < prev ? cur : prev;
     });

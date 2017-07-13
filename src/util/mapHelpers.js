@@ -115,13 +115,13 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, numDateMin, n
     .attr("d", (d, i) => {
       return pathStringGenerator(
         extractLineSegmentForAnimationEffect(
-          d.data.originToDestinationXYs,
           numDateMin,
           numDateMax,
-          d,
-          nodes,
-          i,
-          latLongs.minTransmissionDate
+          latLongs.minTransmissionDate,
+          d.data.originLatLong,
+          d.data.destinationLatLong,
+          d.data.originNumDate,
+          d.data.destinationNumDate
         )
       )
     }) /* with the interpolation in the function above pathStringGenerator */
@@ -194,26 +194,26 @@ export const updateOnMoveEnd = (d3elems, latLongs, numDateMin, numDateMax, nodes
       .attr("d", (d, i) => {
         return pathStringGenerator(
           extractLineSegmentForAnimationEffect(
-            d.data.originToDestinationXYs,
             numDateMin,
             numDateMax,
-            d,
-            nodes,
-            i,
-            latLongs.minTransmissionDate
+            latLongs.minTransmissionDate,
+            d.data.originLatLong,
+            d.data.destinationLatLong,
+            d.data.originNumDate,
+            d.data.destinationNumDate
           )
         )
       }) /* with the interpolation in the function above pathStringGenerator */
   }
 }
 
-const extractLineSegmentForAnimationEffect = (pair, numDateMin, numDateMax, d, nodes, i, minTransmissionDate) => {
-  const originDate = nodes[d.data.demePairIndices[0]].attr.num_date;
-  const destinationDate = nodes[d.data.demePairIndices[1]].attr.num_date;
+const extractLineSegmentForAnimationEffect = (numDateMin, numDateMax, minTransmissionDate, originLatLong, destinationLatLong, originNumDate, destinationNumDate) => {
+
+  const pair = [originLatLong, destinationLatLong];
 
   /* manually find the points along a Bezier curve at which we should be given the user date selection */
-  let start = Math.max(0.0,(numDateMin-originDate)/(destinationDate-originDate)); // clamp start at 0.0 if userDateMin gives a number <0
-  let end = Math.min(1.0,(numDateMax-originDate)/(destinationDate-originDate));// clamp end at 1.0 if userDateMax gives a number >1
+  let start = Math.max(0.0,(numDateMin-originNumDate)/(destinationNumDate-originNumDate)); // clamp start at 0.0 if userDateMin gives a number <0
+  let end = Math.min(1.0,(numDateMax-originNumDate)/(destinationNumDate-originNumDate));// clamp end at 1.0 if userDateMax gives a number >1
 
   if (!isFinite(start)){ // For 0 branch-length transmissions, (destinationDate-originDate) is 0 --> +/- Infinity values for start and end.
     start = 0.0;
@@ -225,7 +225,7 @@ const extractLineSegmentForAnimationEffect = (pair, numDateMin, numDateMax, d, n
   /* calculate Bezier from pair[0] to pair[1] with control point positioned at
   distance (destinationDate-minTransmissionDate)*25.0 perpendicular to center of the line
   between pair[0] and pair[1]. */
-  const Bcurve = Bezier([pair[0],computeMidpoint(pair,(destinationDate-minTransmissionDate)*25.0),pair[1]],start,end,15);
+  const Bcurve = Bezier([pair[0],computeMidpoint(pair,(destinationNumDate-minTransmissionDate)*25.0),pair[1]],start,end,15);
 
   return Bcurve;
 };
@@ -249,13 +249,13 @@ export const updateVisibility = (d3elems, latLongs, numDateMin, numDateMax, node
       try{
         return pathStringGenerator(
           extractLineSegmentForAnimationEffect(
-            d.data.originToDestinationXYs,
             numDateMin,
             numDateMax,
-            d,
-            nodes,
-            i,
-            latLongs.minTransmissionDate
+            latLongs.minTransmissionDate,
+            d.data.originLatLong,
+            d.data.destinationLatLong,
+            d.data.originNumDate,
+            d.data.destinationNumDate
           )
         );
       } catch (e) {

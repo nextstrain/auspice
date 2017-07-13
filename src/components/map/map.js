@@ -191,8 +191,6 @@ class Map extends React.Component {
         this.props.nodeColors
       );
 
-      console.log(demeData, transmissionData)
-
       const latLongs = this.latLongs(demeData, transmissionData); /* no reference stored, we recompute this for now rather than updating in place */
       const d3elems = drawDemesAndTransmissions(
         latLongs,
@@ -313,8 +311,8 @@ class Map extends React.Component {
   // }
   latLongs(demeData, transmissionData) {
 
-    const demes = demeData || this.state.demeData;
-    const transmissions = transmissionData || this.state.transmissionData;
+    const d = demeData || this.state.demeData;
+    const t = transmissionData || this.state.transmissionData;
 
     if (this.props.treeLoaded && this.state.map) {
       return getLatLongs(
@@ -325,8 +323,8 @@ class Map extends React.Component {
         this.props.geoResolution,
         this.props.mapTriplicate,
         this.props.nodeColors,
-        demes,
-        transmissions,
+        d,
+        t,
       );
     }
     return null;
