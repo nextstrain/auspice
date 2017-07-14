@@ -75,7 +75,7 @@ export const pathStringGenerator = d3.svg.line()
   .y((d) => { return d.y })
   .interpolate("basis");
 
-export const drawDemesAndTransmissions = (latLongs, g, map, nodes, numDateMin, numDateMax) => {
+export const drawDemesAndTransmissions = (demeData, transmissionData, g, map, nodes, numDateMin, numDateMax, minTransmissionDate) => {
 
   // define markers that are appended to the definition part of the group
   let markerCount=0;
@@ -109,7 +109,7 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, numDateMin, n
   // add transmission lines with mid markers at each inner point of the path
 
   const transmissions = g.selectAll("transmissions")
-    .data(latLongs.transmissions)
+    .data(transmissionData)
     .enter()
     .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
     .attr("d", (d, i) => {
@@ -117,19 +117,19 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, numDateMin, n
         extractLineSegmentForAnimationEffect(
           numDateMin,
           numDateMax,
-          latLongs.minTransmissionDate,
-          d.data.originLatLong,
-          d.data.destinationLatLong,
-          d.data.originNumDate,
-          d.data.destinationNumDate
+          minTransmissionDate,
+          d.originLatLong,
+          d.destinationLatLong,
+          d.originNumDate,
+          d.destinationNumDate
         )
       )
     }) /* with the interpolation in the function above pathStringGenerator */
     .attr("fill","none")
     .attr("stroke-opacity", .6)
     .attr("stroke-linecap", "round")
-    .attr("stroke", (d) => { return d.data.color }) /* colorScale(d.data.from); color path by contry in which the transmission arrived */
-    .attr("stroke-width", (d) => { return d.data.total }) /* scale line by total number of transmissions */
+    .attr("stroke", (d) => { return d.color }) /* colorScale(d.data.from); color path by contry in which the transmission arrived */
+    .attr("stroke-width", 1) /* scale line by total number of transmissions */
     // .attr("marker-mid", makeMarker);
 
   // let transmissionPathLengths = [];
@@ -162,12 +162,12 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, numDateMin, n
   // })
 
   const demes = g.selectAll("demes")
-    .data(latLongs.demes)
+    .data(demeData)
     .enter().append("circle")
     .style("stroke", "none")
     .style("fill-opacity", .6)
     .style("fill", (d) => { return d.color })
-    .attr("r", (d) => { return 0 + Math.sqrt(d.total) * 4 })
+    .attr("r", (d) => { return 0 + Math.sqrt(d.count) * 4 })
     .attr("transform", (d) => {
       return "translate(" + d.coords.x + "," + d.coords.y + ")";
     });
@@ -180,27 +180,27 @@ export const drawDemesAndTransmissions = (latLongs, g, map, nodes, numDateMin, n
 
 }
 
-export const updateOnMoveEnd = (d3elems, latLongs, numDateMin, numDateMax, nodes) => {
+export const updateOnMoveEnd = (demeData, transmissionData, minTransmissionDate, d3elems, numDateMin, numDateMax, nodes) => {
   /* map has moved or rescaled, make demes and transmissions line up */
   if (d3elems) {
     d3elems.demes
-      .data(latLongs.demes)
+      .data(demeData)
       .attr("transform", (d) => {
         return "translate(" + d.coords.x + "," + d.coords.y + ")";
       })
 
     d3elems.transmissions
-      .data(latLongs.transmissions)
+      .data(transmissionData)
       .attr("d", (d, i) => {
         return pathStringGenerator(
           extractLineSegmentForAnimationEffect(
             numDateMin,
             numDateMax,
-            latLongs.minTransmissionDate,
-            d.data.originLatLong,
-            d.data.destinationLatLong,
-            d.data.originNumDate,
-            d.data.destinationNumDate
+            minTransmissionDate,
+            d.originLatLong,
+            d.destinationLatLong,
+            d.originNumDate,
+            d.destinationNumDate
           )
         )
       }) /* with the interpolation in the function above pathStringGenerator */
@@ -232,10 +232,10 @@ const extractLineSegmentForAnimationEffect = (numDateMin, numDateMax, minTransmi
 
 
 
-export const updateVisibility = (d3elems, latLongs, numDateMin, numDateMax, nodes) => {
+export const updateVisibility = (demeData, transmissionData, minTransmissionDate, d3elems, numDateMin, numDateMax, nodes) => {
 
   d3elems.demes
-    .data(latLongs.demes)
+    .data(demeData)
     .transition(5)
     .style("fill", (d) => { return d.total > 0 ? d.color : "white" })
     .attr("r", (d) => {
@@ -243,7 +243,7 @@ export const updateVisibility = (d3elems, latLongs, numDateMin, numDateMax, node
     });
 
   d3elems.transmissions
-    .data(latLongs.transmissions)
+    .data(transmissionData)
     // .transition(5)
     .attr("d", (d, i) => {
       try{
@@ -251,11 +251,11 @@ export const updateVisibility = (d3elems, latLongs, numDateMin, numDateMax, node
           extractLineSegmentForAnimationEffect(
             numDateMin,
             numDateMax,
-            latLongs.minTransmissionDate,
-            d.data.originLatLong,
-            d.data.destinationLatLong,
-            d.data.originNumDate,
-            d.data.destinationNumDate
+            minTransmissionDate,
+            d.originLatLong,
+            d.destinationLatLong,
+            d.originNumDate,
+            d.destinationNumDate
           )
         );
       } catch (e) {

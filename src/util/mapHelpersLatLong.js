@@ -34,7 +34,7 @@ const maybeGetTransmissionPair = (latOrig, longOrig, latDest, longDest, map) => 
   }
 }
 
-const setupDemeData = (nodes, visibility, geoResolution, nodeColors) => {
+const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
 
   const demeData = []; /* demes */
 
@@ -61,47 +61,162 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors) => {
     }
   });
 
-  _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
-    const deme = {
-      name: key,
-      latLong: null,
-      count: value.length,
-      color: averageColors(value)
-    }
-    demeData.push(deme);
+  let offsets = triplicate ? [-360, 0, 360] : [0]
+  const geo = metadata.geo;
+
+  offsets.forEach((OFFSET) => {
+    /* count DEMES */
+    _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
+      let lat = geo[geoResolution][key].latitude;
+      let long = geo[geoResolution][key].longitude + OFFSET;
+
+      if (long > westBound && long < eastBound) {
+
+        const deme = {
+          name: key,
+          coords: leafletLatLongToLayerPoint(lat, long, map),
+          count: value.length,
+          color: averageColors(value)
+        }
+        demeData.push(deme);
+
+      }
+    });
   });
 
   return demeData;
 
 }
 
-const setupTransmissionData = (nodes, visibility, geoResolution, nodeColors) => {
+const maybeConstructTransmissionEvent = (
+  node,
+  child,
+  metadataGeoLookupTable,
+  geoResolution,
+  nodeColors,
+  visibility,
+  map,
+  offsetOrig,
+  offsetDest
+) => {
 
+  let latOrig, longOrig, latDest, longDest;
+  let transmission = null;
+
+  /* checking metadata for lat longs name match - ie., does the metadata list a latlong for Thailand?*/
+  try {
+    // node.attr[geoResolution] is the node's location, we're looking that up in the metadata lookup table
+    latOrig = metadataGeoLookupTable[geoResolution][node.attr[geoResolution]].latitude;
+    longOrig = metadataGeoLookupTable[geoResolution][node.attr[geoResolution]].longitude;
+    latDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].latitude;
+    longDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].longitude;
+  } catch (e) {
+    // console.warn("No transmission lat/longs for ", countries[0], " -> ", countries[1], "If this wasn't fired in the context of a dataset change, it's probably a bug.")
+    return;
+  }
+
+  const validLatLongPair = maybeGetTransmissionPair(
+    latOrig,
+    longOrig + offsetOrig,
+    latDest,
+    longDest + offsetDest,
+    map
+  );
+
+  if (validLatLongPair) {
+    /* build up transmissions object */
+    transmission = {
+      originNode: node,
+      destinationNode: child,
+      originLatLong: validLatLongPair[0],
+      destinationLatLong: validLatLongPair[1],
+      originName: node.attr[geoResolution],
+      destinationName: child.attr[geoResolution],
+      originNumDate: node.attr["num_date"],
+      destinationNumDate: child.attr["num_date"],
+      color: nodeColors[node.arrayIdx],
+      visible: visibility[node.arrayIdx] === "visible" && visibility[child.arrayIdx] === "visible",
+    }
+  }
+
+  return transmission;
+}
+
+const maybeGetClosestTransmissionEvent = (
+  node,
+  child,
+  metadataGeoLookupTable,
+  geoResolution,
+  nodeColors,
+  visibility,
+  map,
+  offsetOrig
+) => {
+  const possibleEvents = [];
+  let closestEvent;
+
+  // iterate over offsets applied to transmission destination
+  // even if map is not tripled - ie., don't let a line go across the whole world
+  [-360, 0, 360].forEach((offsetDest) => {
+    const t = maybeConstructTransmissionEvent(
+      node,
+      child,
+      metadataGeoLookupTable,
+      geoResolution,
+      nodeColors,
+      visibility,
+      map,
+      offsetOrig,
+      offsetDest
+    );
+    if (t) { possibleEvents.push(t); }
+  });
+
+  if (possibleEvents.length === 0) { return; }
+
+  closestEvent = _.minBy(possibleEvents, (event) => {
+    return Math.abs(event.destinationLatLong.x - event.originLatLong.x)
+  });
+
+  return closestEvent;
+}
+
+const setupTransmissionData = (
+  nodes,
+  visibility,
+  geoResolution,
+  nodeColors,
+  triplicate,
+  metadata,
+  map
+) => {
+
+  let offsets = triplicate ? [-360, 0, 360] : [0]
+  const metadataGeoLookupTable = metadata.geo;
   const transmissionData = []; /* edges, animation paths */
 
   nodes.forEach((n, i) => {
     if (n.children) {
       n.children.forEach((child) => {
-        if (n.attr[geoResolution] && child.attr[geoResolution]) { // check for undefined
-          if (n.attr[geoResolution] !== child.attr[geoResolution]) {
-
-            /* build up transmissions object */
-
-            const transmission = {
-              originNode: n,
-              destinationNode: child,
-              originLatLong: null,
-              destinationLatLong: null,
-              originName: n.attr[geoResolution],
-              destinationName: child.attr[geoResolution],
-              originNumDate: n.attr["num_date"],
-              destinationNumDate: child.attr["num_date"],
-              color: nodeColors[i],
-              visible: visibility[i] === "visible" && visibility[child.arrayIdx] === "visible",
-            }
-
-            transmissionData.push(transmission);
-          }
+        if (
+          n.attr[geoResolution] &&
+          child.attr[geoResolution] &&
+          n.attr[geoResolution] !== child.attr[geoResolution]
+        ) {
+          // offset is applied to transmission origin
+          offsets.forEach((offsetOrig) => {
+            const t = maybeGetClosestTransmissionEvent(
+              n,
+              child,
+              metadataGeoLookupTable,
+              geoResolution,
+              nodeColors,
+              visibility,
+              map,
+              offsetOrig,
+            );
+            if (t) { transmissionData.push(t) }
+          });
         }
       });
     }
@@ -110,7 +225,7 @@ const setupTransmissionData = (nodes, visibility, geoResolution, nodeColors) => 
   return transmissionData;
 }
 
-export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, nodeColors) => {
+export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
 
   /*
     walk through nodes and collect a bunch of arrays...
@@ -122,102 +237,21 @@ export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, 
     count them for width and average to get color
   */
 
-  return {
-    demeData: setupDemeData(nodes, visibility, geoResolution, nodeColors),
-    transmissionData: setupTransmissionData(nodes, visibility, geoResolution, nodeColors),
-  }
-}
-
-export const getLatLongs = (
-  nodes,
-  visibility,
-  metadata,
-  map,
-  geoResolution,
-  triplicate,
-  nodeColors,
-  demeData,
-  transmissionData,
-) => {
-
-  let offsets = triplicate ? [-360, 0, 360] : [0]
-
-  const geo = metadata.geo;
-  const demesAndTransmissions = {
-    demes: [],
-    transmissions: []
-  };
-
-  offsets.forEach((OFFSET) => {
-    /* count DEMES */
-    demeData.forEach((deme) => {
-      let lat = geo[geoResolution][deme.name].latitude;
-      let long = geo[geoResolution][deme.name].longitude + OFFSET;
-
-      if (long > westBound && long < eastBound) {
-        demesAndTransmissions.demes.push({
-          location: deme.name, // Thailand:
-          total: deme.count, // 20, this is an array of all demes of a certain type
-          color: deme.color,
-          coords: leafletLatLongToLayerPoint(lat, long, map)
-        });
-      }
-    });
-  });
-
-  /* Expensive because hundreds of transmisions */
-  // offset is applied to transmission origin
-  offsets.forEach((offsetOrig) => {
-
-    transmissionData.forEach((transmission) => {
-
-      let latOrig, longOrig, latDest, longDest;
-      try {
-        latOrig = geo[geoResolution][transmission.originName].latitude;
-        longOrig = geo[geoResolution][transmission.originName].longitude;
-        latDest = geo[geoResolution][transmission.destinationName].latitude;
-        longDest = geo[geoResolution][transmission.destinationName].longitude;
-      } catch (e) {
-        // console.log("No transmission lat/longs for ", countries[0], " -> ", countries[1])
-        return;
-      }
-
-      // origin to destination
-      let pairs = [];
-
-      // iterate over offsets applied to transmission destination
-      // even if map is not tripled
-      [-360, 0, 360].forEach((offsetDest) => {
-        const pair = maybeGetTransmissionPair(latOrig, longOrig + offsetOrig, latDest, longDest + offsetDest, map);
-        if (pair) {
-          pairs.push(pair);
-        }
-      })
-
-      if (pairs.length === 0) { return; }
-
-      /* this gives us an index for both demes in the transmission pair with which we will access the node array */
-      const closestPair = _.minBy(pairs, (pair) => { return Math.abs(pair[1].x - pair[0].x) });
-
-      const t = Object.assign({}, transmission, {
-        originLatLong: closestPair[0],
-        destinationLatLong: closestPair[1]
-      })
-
-      demesAndTransmissions.transmissions.push({
-        data: t
-      })
-    });
-
-  }) /* End offsetOrig */
+  const t = setupTransmissionData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map)
+  let minTransmissionDate;
 
   // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
-  if (demesAndTransmissions.transmissions.length) {
-    demesAndTransmissions.minTransmissionDate = demesAndTransmissions.transmissions.map((x) => {
+  if (t.length) {
+    minTransmissionDate = t.map((x) => {
       return x.originNumDate;
     }).reduce((prev, cur) => {
       return cur < prev ? cur : prev;
     });
   }
-  return demesAndTransmissions;
+
+  return {
+    demeData: setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map),
+    transmissionData: t,
+    minTransmissionDate,
+  }
 }

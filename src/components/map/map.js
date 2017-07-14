@@ -159,6 +159,7 @@ class Map extends React.Component {
     const mapIsDrawn = !!this.state.map;
     const allDataPresent = !!(this.props.metadata && this.props.treeLoaded && this.state.responsive && this.state.d3DOMNode);
     const demesAbsent = !this.state.demes;
+    const demesTransmissionsComputed = !this.state.demeData && !this.state.transmissionData;
 
     /* if at any point we change dataset and app doesn't remount, we'll need these again */
     // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;
@@ -171,7 +172,8 @@ class Map extends React.Component {
       // this.props.datasetGuid &&
       mapIsDrawn &&
       allDataPresent &&
-      demesAbsent
+      demesAbsent &&
+      demesTransmissionsComputed
     ) {
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
       if (!this.state.boundsSet){ //we are doing the initial render -> set map to the range of the data
@@ -183,22 +185,28 @@ class Map extends React.Component {
 
       const {
         demeData,
-        transmissionData
+        transmissionData,
+        minTransmissionDate
       } = createDemeAndTransmissionData(
         this.props.nodes,
         this.props.visibility,
         this.props.geoResolution,
-        this.props.nodeColors
+        this.props.nodeColors,
+        this.props.mapTriplicate,
+        this.props.metadata,
+        this.state.map
       );
 
-      const latLongs = this.latLongs(demeData, transmissionData); /* no reference stored, we recompute this for now rather than updating in place */
+      // const latLongs = this.latLongs(demeData, transmissionData); /* no reference stored, we recompute this for now rather than updating in place */
       const d3elems = drawDemesAndTransmissions(
-        latLongs,
+        demeData,
+        transmissionData,
         this.state.d3DOMNode,
         this.state.map,
         this.props.nodes,
         calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
-        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax)
+        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
+        minTransmissionDate
       );
 
       /* Set up leaflet events */
@@ -256,8 +264,11 @@ class Map extends React.Component {
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
       updateOnMoveEnd(
+        this.state.demeData,
+        this.state.transmissionData,
+        this.state.minTransmissionDate,
         this.state.d3elems,
-        this.latLongs(),
+        // this.latLongs(),
         calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
         calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
         this.props.nodes
@@ -295,15 +306,14 @@ class Map extends React.Component {
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
       this.props.colorScaleVersion !== prevProps.colorScaleVersion
     ) {
-      const latLongs = this.latLongs(); /* can't run if noMap || noDemes */
-      if (latLongs === null) { return; }
-      updateVisibility(
-        this.state.d3elems,
-        latLongs,
-        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
-        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
-        this.props.nodes
-      );
+      // CHANGE IN VISIBILITY OR COLORBY SO UPDATE DEMEDATA & TRANSMISSIONDATA
+      // updateVisibility(
+      //   this.state.d3elems,
+      //   latLongs,
+      //   calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
+      //   calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
+      //   this.props.nodes
+      // );
     }
   }
   // maybeAnimateDemesAndTransmissions() {
