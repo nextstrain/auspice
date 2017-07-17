@@ -1,0 +1,146 @@
+/*
+https://github.com/atom/notifications/blob/master/styles/notifications.less
+https://github.com/atom/atom/blob/master/static/variables/octicon-utf-codes.less
+https://github.com/atom/atom/blob/master/static/variables/octicon-mixins.less
+https://github.com/atom/atom/blob/master/static/variables/ui-variables.less
+*/
+
+:root {
+  --icon-size: 35px;
+  --icon-size-plus-padding: 45px;
+  --width: 450px;
+  --width-detail: 450px;
+  --min-h: 50px;
+
+  --background-color-info: #0098ff;
+  --background-color-success: #00ce4c;
+  --background-color-warning: #ff8533;
+  --background-color-error: #c00;
+
+  --text-color-info: #3b71ab;
+  --text-color-success: #17944e;
+  --text-color-warning: #bf5818;
+  --text-color-error: #9c0101;
+}
+
+.notifications {
+  display: block;
+  z-index: 1000;
+  position: fixed;
+  top: 20px;
+  right: 0;
+  bottom: 0;
+  padding: 0;
+  /*font-size: 1.2em;*/
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: none;
+}
+
+.notification {
+  float: right;
+  clear: right;
+  position: relative;
+  width: var(--width);
+  padding-left: var(--icon-size-plus-padding);
+  margin-bottom: 4px;
+  max-height: 800px;
+  min-height: var(--min-h);
+  word-wrap: break-word;
+  pointer-events: auto;
+}
+
+/* BACKGROUND & TEXT COLOURS */
+.notification.error {
+  background-color: var(--background-color-error);
+  color: var(--text-color-error);
+}
+
+.notification.warning {
+  background-color: var(--background-color-warning);
+  color: var(--text-color-warning);
+}
+
+.notification.info {
+  background-color: var(--background-color-info);
+  color: var(--text-color-info);
+}
+
+.notification.success {
+  background-color: var(--background-color-success);
+  color: var(--text-color-success);
+}
+
+.notification .content {
+  background-color: rgba(255, 255, 255, 0.5);
+  min-height: var(--min-h);
+  /* top | right | bottom | left */
+  padding: 5px 0px 0px 5px;
+}
+
+.notification .message {
+  font-size: 22px;
+  /*color: white;*/
+  background-clip: padding-box;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.notification .detail {
+  font-size: 14px;
+  font-weight: 200;
+  /*background-color: rgba(255, 255, 255, 0.3);*/
+  background-clip: padding-box;
+  max-height: 500px;
+  overflow-y: auto;
+}
+
+.notification .icon {
+  font-size: var(--icon-size);
+  width: var(--icon-size);
+  height: var(--icon-size);
+  top: 0;
+  left: 0;
+  /* top | right | bottom | left */
+  margin: 7px 0px 0px 5px;
+  /*padding: 0;*/
+  position: absolute;
+  /*fill: white;*/
+  fill: rgba(255, 255, 255, 0.8);
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  text-decoration: none;
+}
+
+.notification .close-icon {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  margin: 5px 5px 0px 0px;
+  fill: rgba(255, 255, 255, 0.8);
+}
+
+/*
+https://facebook.github.io/react/docs/animation.html#high-level-api-reactcsstransitiongroup
+*/
+.notification-enter {
+  left: var(--width);
+}
+
+.notification-enter.notification-enter-active {
+  transition: 400ms ease-in;
+  left: 0;
+}
+
+.notification-leave {
+  left: 0;
+}
+
+.notification-leave.notification-leave-active {
+  transition: 400ms ease-in;
+  left: var(--width);
+}
