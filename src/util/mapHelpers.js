@@ -121,7 +121,8 @@ export const drawDemesAndTransmissions = (demeData, transmissionData, g, map, no
           d.originLatLong,
           d.destinationLatLong,
           d.originNumDate,
-          d.destinationNumDate
+          d.destinationNumDate,
+          d.visible
         )
       )
     }) /* with the interpolation in the function above pathStringGenerator */
@@ -200,14 +201,15 @@ export const updateOnMoveEnd = (demeData, transmissionData, minTransmissionDate,
             d.originLatLong,
             d.destinationLatLong,
             d.originNumDate,
-            d.destinationNumDate
+            d.destinationNumDate,
+            d.visible
           )
         )
       }) /* with the interpolation in the function above pathStringGenerator */
   }
 }
 
-const extractLineSegmentForAnimationEffect = (numDateMin, numDateMax, minTransmissionDate, originLatLong, destinationLatLong, originNumDate, destinationNumDate) => {
+const extractLineSegmentForAnimationEffect = (numDateMin, numDateMax, minTransmissionDate, originLatLong, destinationLatLong, originNumDate, destinationNumDate, visible) => {
 
   const pair = [originLatLong, destinationLatLong];
 
@@ -222,6 +224,11 @@ const extractLineSegmentForAnimationEffect = (numDateMin, numDateMax, minTransmi
     end = start + 1e-6;
   };
 
+  if (visible === "hidden") {
+    start = 0.0;
+    end = 1e-6;
+  }
+
   /* calculate Bezier from pair[0] to pair[1] with control point positioned at
   distance (destinationDate-minTransmissionDate)*25.0 perpendicular to center of the line
   between pair[0] and pair[1]. */
@@ -231,20 +238,16 @@ const extractLineSegmentForAnimationEffect = (numDateMin, numDateMax, minTransmi
 };
 
 
-
-export const updateVisibility = (demeData, transmissionData, minTransmissionDate, d3elems, numDateMin, numDateMax, nodes) => {
+export const updateVisibility = (demeData, transmissionData, d3elems, map, nodes, numDateMin, numDateMax, minTransmissionDate) => {
 
   d3elems.demes
     .data(demeData)
     .transition(5)
-    .style("fill", (d) => { return d.total > 0 ? d.color : "white" })
-    .attr("r", (d) => {
-      return 0 + Math.sqrt(d.total) * 4
-    });
+    .style("fill", (d) => { return d.count > 0 ? d.color : "white" })
+    .attr("r", (d) => { return 0 + Math.sqrt(d.count) * 4 });
 
   d3elems.transmissions
     .data(transmissionData)
-    // .transition(5)
     .attr("d", (d, i) => {
       try{
         return pathStringGenerator(
@@ -255,7 +258,8 @@ export const updateVisibility = (demeData, transmissionData, minTransmissionDate
             d.originLatLong,
             d.destinationLatLong,
             d.originNumDate,
-            d.destinationNumDate
+            d.destinationNumDate,
+            d.visible
           )
         );
       } catch (e) {
@@ -264,10 +268,8 @@ export const updateVisibility = (demeData, transmissionData, minTransmissionDate
         return "";
       }
     }) /* with the interpolation in the function above pathStringGenerator */
-    .attr("stroke", (d) => { return d.data.total > 0 ? d.data.color : "white" })
-    .attr("stroke-width", (d) => {
-      return d.data.total
-    })
+    .attr("stroke", (d) => { return d.color })
+
 }
 
 /* template for an update helper */

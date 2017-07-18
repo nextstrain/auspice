@@ -4,14 +4,14 @@ import React from "react";
 import d3 from "d3";
 import { connect } from "react-redux";
 import Card from "../framework/card";
-import {changeDateFilter} from "../../actions/treeProperties";
+import { changeDateFilter } from "../../actions/treeProperties";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
-import {drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility} from "../../util/mapHelpers";
+import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "../../util/mapHelpers";
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
-import {getLatLongs, createDemeAndTransmissionData} from "../../util/mapHelpersLatLong";
+import { getLatLongs, createDemeAndTransmissionData, updateDemeAndTransmissionData } from "../../util/mapHelpersLatLong";
 import {
   CHANGE_ANIMATION_START,
   CHANGE_ANIMATION_TIME,
@@ -306,19 +306,27 @@ class Map extends React.Component {
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
       this.props.colorScaleVersion !== prevProps.colorScaleVersion
     ) {
-      // CHANGE IN VISIBILITY OR COLORBY SO UPDATE DEMEDATA & TRANSMISSIONDATA
-      // updateVisibility(
-      //   this.state.d3elems,
-      //   latLongs,
-      //   calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
-      //   calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
-      //   this.props.nodes
-      // );
+      updateDemeAndTransmissionData(
+        this.state.demeData,
+        this.state.transmissionData,
+        this.props.nodes,
+        this.props.visibility,
+        this.props.geoResolution,
+        this.props.nodeColors);
+      updateVisibility(
+        this.state.demeData,
+        this.state.transmissionData,
+        this.state.d3elems,
+        this.state.map,
+        this.props.nodes,
+        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
+        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
+        this.state.minTransmissionDate
+      );
     }
+
   }
-  // maybeAnimateDemesAndTransmissions() {
-  //   /* todo */
-  // }
+
   latLongs(demeData, transmissionData) {
 
     const d = demeData || this.state.demeData;

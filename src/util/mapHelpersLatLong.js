@@ -43,7 +43,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   nodes.forEach((n, i) => {
     if (!n.children) {
       if (n.attr[geoResolution]) { // check for undefined
-        if (!demeData[n.attr[geoResolution]]) {
+        if (!demeMap[n.attr[geoResolution]]) {
           demeMap[n.attr[geoResolution]] = [];
         }
       }
@@ -126,6 +126,7 @@ const maybeConstructTransmissionEvent = (
   if (validLatLongPair) {
     /* build up transmissions object */
     transmission = {
+      id: node.arrayIdx.toString() + "-" + child.arrayIdx.toString(),
       originNode: node,
       destinationNode: child,
       originLatLong: validLatLongPair[0],
@@ -135,7 +136,7 @@ const maybeConstructTransmissionEvent = (
       originNumDate: node.attr["num_date"],
       destinationNumDate: child.attr["num_date"],
       color: nodeColors[node.arrayIdx],
-      visible: visibility[node.arrayIdx] === "visible" && visibility[child.arrayIdx] === "visible",
+      visible: visibility[node.arrayIdx] === "visible" && visibility[child.arrayIdx] === "visible" ? "visible" : "hidden",
     }
   }
 
@@ -228,30 +229,119 @@ const setupTransmissionData = (
 export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
 
   /*
-    walk through nodes and collect a bunch of arrays...
-    can count how many times observe a tip and make an array of an attribute,
-    which in this case will be color,
-    could be an array of hexes which would be enough,
-    similar operation for each transmission -
-    for each deme pair observe how many and record a hex value from the from deme and
-    count them for width and average to get color
+    walk through nodes and collect all data
+    for demeData we have:
+      name, coords, count, color
+    for transmissionData we have:
+      originNode, destinationNode, originLatLong, destinationLatLong, originName, destinationName
+      originNumDate, destinationNumDate, color, visible
   */
 
-  const t = setupTransmissionData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map)
-  let minTransmissionDate;
+  const dData = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
+  const tData = setupTransmissionData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
 
+  let minTransmissionDate;
   // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
-  if (t.length) {
-    minTransmissionDate = t.map((x) => {
-      return x.originNumDate;
+  if (tData.length) {
+    minTransmissionDate = tData.map((x) => {
+      return tData.originNumDate;
     }).reduce((prev, cur) => {
       return cur < prev ? cur : prev;
     });
   }
 
   return {
-    demeData: setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map),
-    transmissionData: t,
+    demeData: dData,
+    transmissionData: tData,
     minTransmissionDate,
   }
+}
+
+const updateDemeData = (demeData, nodes, visibility, geoResolution, nodeColors) => {
+
+  // do aggregation as intermediate step
+  let demeMap = {};
+  nodes.forEach((n, i) => {
+    if (!n.children) {
+      if (n.attr[geoResolution]) { // check for undefined
+        if (!demeMap[n.attr[geoResolution]]) {
+          demeMap[n.attr[geoResolution]] = [];
+        }
+      }
+    }
+  });
+
+  // second pass to fill vectors
+  nodes.forEach((n, i) => {
+    /* demes only count terminal nodes */
+    if (!n.children && visibility[i] === "visible") {
+      // if tip and visible, push
+      if (n.attr[geoResolution]) { // check for undefined
+        demeMap[n.attr[geoResolution]].push(nodeColors[i]);
+      }
+    }
+  });
+
+  // update demeData, for each deme, update all elements whose name matches
+  _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
+    demeData.forEach((d,i) => {
+      if (d.name === key) {
+        d.count = value.length;
+        d.color = averageColors(value);
+      }
+    })
+  });
+
+}
+
+const updateTransmissionData = (transmissionData, nodes, visibility, geoResolution, nodeColors) => {
+
+  // index transmissions by node.arrayIdx
+  // map node.arrayIdx to [color, visibility]
+
+  let transmissionMap = {};
+
+  nodes.forEach((node, i) => {
+    if (node.children) {
+      node.children.forEach((child) => {
+        if (
+          node.attr[geoResolution] &&
+          child.attr[geoResolution] &&
+          node.attr[geoResolution] !== child.attr[geoResolution]
+        ) {
+
+          // this is a transmission event from n to child
+          const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
+          const col = nodeColors[node.arrayIdx];
+          const vis = visibility[node.arrayIdx] === "visible" && visibility[child.arrayIdx] === "visible" ? "visible" : "hidden";
+          transmissionMap[id] = [col, vis];
+        }
+      });
+    }
+  });
+
+  _.forOwn(transmissionMap, (value, key) => { // value: [color, visibility], key: transmission id
+    transmissionData.forEach((transmission,i) => {
+      if (transmission.id === key) {
+        transmission.color = value[0],
+        transmission.visible = value[1]
+      }
+    })
+  });
+
+}
+
+export const updateDemeAndTransmissionData = (demeData, transmissionData, nodes, visibility, geoResolution, nodeColors) => {
+
+  /*
+    walk through nodes and update attributes that can mutate
+    for demeData we have:
+      count, color
+    for transmissionData we have:
+      color, visible
+  */
+
+  updateDemeData(demeData, nodes, visibility, geoResolution, nodeColors);
+  updateTransmissionData(transmissionData, nodes, visibility, geoResolution, nodeColors);
+
 }
