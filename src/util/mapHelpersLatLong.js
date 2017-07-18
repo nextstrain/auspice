@@ -36,7 +36,8 @@ const maybeGetTransmissionPair = (latOrig, longOrig, latDest, longDest, map) => 
 
 const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
 
-  const demeData = []; /* demes */
+  const demeData = []; /* deme array */
+  const demeIndices = {}; /* map of name to indices in array */
 
   // do aggregation as intermediate step
   let demeMap = {};
@@ -64,6 +65,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   let offsets = triplicate ? [-360, 0, 360] : [0]
   const geo = metadata.geo;
 
+  let index = 0;
   offsets.forEach((OFFSET) => {
     /* count DEMES */
     _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
@@ -82,11 +84,21 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
         }
         demeData.push(deme);
 
+        if (!demeIndices[key]) {
+          demeIndices[key] = [index];
+        } else{
+          demeIndices[key].push(index);
+        }
+        index += 1;
+
       }
     });
   });
 
-  return demeData;
+  return {
+    demeData: demeData,
+    demeIndices: demeIndices
+  }
 
 }
 
@@ -201,6 +213,7 @@ const setupTransmissionData = (
   let offsets = triplicate ? [-360, 0, 360] : [0]
   const metadataGeoLookupTable = metadata.geo;
   const transmissionData = []; /* edges, animation paths */
+  const transmissionIndices = {}; /* map of transmission id to array of indices */
 
   nodes.forEach((n, i) => {
     if (n.children) {
@@ -229,7 +242,19 @@ const setupTransmissionData = (
     }
   });
 
-  return transmissionData;
+  transmissionData.forEach((transmission, index) => {
+    if (!transmissionIndices[transmission.id]) {
+      transmissionIndices[transmission.id] = [index];
+    } else {
+      transmissionIndices[transmission.id].push(index);
+    }
+  })
+
+  return {
+    transmissionData: transmissionData,
+    transmissionIndices: transmissionIndices
+  }
+
 }
 
 export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
@@ -243,38 +268,41 @@ export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, 
       originNumDate, destinationNumDate, color, visible
   */
 
-  const dData = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
-  const tData = setupTransmissionData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
+  const {
+    demeData,
+    demeIndices
+  } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
+
+  const {
+    transmissionData,
+    transmissionIndices
+  } = setupTransmissionData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
 
   let minTransmissionDate;
   // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
-  if (tData.length) {
-    minTransmissionDate = tData.map((x) => {
-      return tData.originNumDate;
+  if (transmissionData.length) {
+    minTransmissionDate = transmissionData.map((x) => {
+      return transmissionData.originNumDate;
     }).reduce((prev, cur) => {
       return cur < prev ? cur : prev;
     });
   }
 
   return {
-    demeData: dData,
-    transmissionData: tData,
-    minTransmissionDate,
+    demeData: demeData,
+    transmissionData: transmissionData,
+    demeIndices: demeIndices,
+    transmissionIndices: transmissionIndices,
+    minTransmissionDate
   }
 }
 
-const updateDemeDataColAndVis = (demeData, nodes, visibility, geoResolution, nodeColors) => {
+const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors) => {
 
-  // do aggregation as intermediate step
+  // initialize empty map
   let demeMap = {};
-  nodes.forEach((n, i) => {
-    if (!n.children) {
-      if (n.attr[geoResolution]) { // check for undefined
-        if (!demeMap[n.attr[geoResolution]]) {
-          demeMap[n.attr[geoResolution]] = [];
-        }
-      }
-    }
+  _.forOwn(demeIndices, (value, key) => { // value: array of indices, key: deme name
+    demeMap[key] = [];
   });
 
   // second pass to fill vectors
@@ -288,24 +316,18 @@ const updateDemeDataColAndVis = (demeData, nodes, visibility, geoResolution, nod
     }
   });
 
-  // update demeData, for each deme, update all elements whose name matches
+  // update demeData, for each deme, update all elements via demeIndices lookup
   _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
-    demeData.forEach((deme,i) => {
-      if (deme.name === key) {
-        deme.count = value.length;
-        deme.color = averageColors(value);
-      }
+    const name = key;
+    demeIndices[name].forEach((index) => {
+      demeData[index].count = value.length;
+      demeData[index].color = averageColors(value);
     })
   });
 
 }
 
-const updateTransmissionDataColAndVis = (transmissionData, nodes, visibility, geoResolution, nodeColors) => {
-
-  // index transmissions by node.arrayIdx
-  // map node.arrayIdx to [color, visibility]
-
-  let transmissionMap = {};
+const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
 
   nodes.forEach((node, i) => {
     if (node.children) {
@@ -320,24 +342,21 @@ const updateTransmissionDataColAndVis = (transmissionData, nodes, visibility, ge
           const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
           const col = nodeColors[node.arrayIdx];
           const vis = visibility[child.arrayIdx] === "visible" ? "visible" : "hidden"; // transmission visible if child is visible
-          transmissionMap[id] = [col, vis];
+
+          // update transmissionData via index lookup
+          transmissionIndices[id].forEach((index) => {
+            transmissionData[index].color = col;
+            transmissionData[index].visible = vis;
+          })
+
         }
       });
     }
   });
 
-  _.forOwn(transmissionMap, (value, key) => { // value: [color, visibility], key: transmission id
-    transmissionData.forEach((transmission,i) => {
-      if (transmission.id === key) {
-        transmission.color = value[0],
-        transmission.visible = value[1]
-      }
-    })
-  });
-
 }
 
-export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, nodes, visibility, geoResolution, nodeColors) => {
+export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
 
   /*
     walk through nodes and update attributes that can mutate
@@ -347,8 +366,8 @@ export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionDat
       color, visible
   */
 
-  updateDemeDataColAndVis(demeData, nodes, visibility, geoResolution, nodeColors);
-  updateTransmissionDataColAndVis(transmissionData, nodes, visibility, geoResolution, nodeColors);
+  updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors);
+  updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
 
 }
 

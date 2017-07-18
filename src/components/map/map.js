@@ -58,6 +58,8 @@ class Map extends React.Component {
       responsive: null,
       demeData: null,
       transmissionData: null,
+      demeIndices: null,
+      transmissionIndices: null
     };
   }
   static propTypes = {
@@ -182,6 +184,8 @@ class Map extends React.Component {
       const {
         demeData,
         transmissionData,
+        demeIndices,
+        transmissionIndices,
         minTransmissionDate
       } = createDemeAndTransmissionData(
         this.props.nodes,
@@ -215,6 +219,8 @@ class Map extends React.Component {
         d3elems,
         demeData,
         transmissionData,
+        demeIndices,
+        transmissionIndices
       });
     }
   }
@@ -251,6 +257,8 @@ class Map extends React.Component {
         d3elems: null,
         demeData: null,
         transmissionData: null,
+        demeIndices: null,
+        transmissionIndices: null
       })
     }
   }
@@ -306,6 +314,8 @@ class Map extends React.Component {
       updateDemeAndTransmissionDataColAndVis(
         this.state.demeData,
         this.state.transmissionData,
+        this.state.demeIndices,
+        this.state.transmissionIndices,
         this.props.nodes,
         this.props.visibility,
         this.props.geoResolution,
