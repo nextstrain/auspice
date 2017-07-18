@@ -11,7 +11,7 @@ import setupLeafletPlugins from "../../util/leaflet-plugins";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "../../util/mapHelpers";
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
-import { getLatLongs, createDemeAndTransmissionData, updateDemeAndTransmissionDataColAndVis, updateDemeAndTransmissionDataLatLong } from "../../util/mapHelpersLatLong";
+import { createDemeAndTransmissionData, updateDemeAndTransmissionDataColAndVis, updateDemeAndTransmissionDataLatLong } from "../../util/mapHelpersLatLong";
 import {
   CHANGE_ANIMATION_START,
   CHANGE_ANIMATION_TIME,
@@ -52,7 +52,6 @@ class Map extends React.Component {
     super(props);
     this.state = {
       map: null,
-      demes: false,
       d3DOMNode: null,
       d3elems: null,
       // datasetGuid: null,
@@ -88,7 +87,6 @@ class Map extends React.Component {
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
     this.maybeUpdateDemesAndTransmissions(prevProps); /* every time we change something like colorBy */
-    // this.maybeAnimateDemesAndTransmissions();
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
@@ -158,7 +156,6 @@ class Map extends React.Component {
 
     const mapIsDrawn = !!this.state.map;
     const allDataPresent = !!(this.props.metadata && this.props.treeLoaded && this.state.responsive && this.state.d3DOMNode);
-    const demesAbsent = !this.state.demes;
     const demesTransmissionsComputed = !this.state.demeData && !this.state.transmissionData;
 
     /* if at any point we change dataset and app doesn't remount, we'll need these again */
@@ -172,7 +169,6 @@ class Map extends React.Component {
       // this.props.datasetGuid &&
       mapIsDrawn &&
       allDataPresent &&
-      demesAbsent &&
       demesTransmissionsComputed
     ) {
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
@@ -216,7 +212,6 @@ class Map extends React.Component {
       // don't redraw on every rerender - need to seperately handle virus change redraw
       this.setState({
         boundsSet: true,
-        demes: true,
         d3elems,
         demeData,
         transmissionData,
@@ -241,7 +236,7 @@ class Map extends React.Component {
 
     const mapIsDrawn = !!this.state.map;
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
-    const dataChanged = this.state.demes && (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
+    const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
 
     // (this.props.colorBy !== nextProps.colorBy ||
     //   this.props.visibilityVersion !== nextProps.visibilityVersion ||
@@ -253,9 +248,7 @@ class Map extends React.Component {
       /* clear references to the demes and transmissions d3 added */
       this.setState({
         boundsSet: false,
-        demes: false, /* remove this and just look at demeData is null or not */
         d3elems: null,
-        latLongs: null,
         demeData: null,
         transmissionData: null,
       })
@@ -274,7 +267,6 @@ class Map extends React.Component {
         this.state.transmissionData,
         this.state.minTransmissionDate,
         this.state.d3elems,
-        // this.latLongs(),
         calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
         calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
         this.props.nodes
@@ -305,8 +297,7 @@ class Map extends React.Component {
   maybeUpdateDemesAndTransmissions(prevProps) {
     /* nothing to update */
     const noMap = !this.state.map;
-    const noDemes = !this.state.demes;
-    if (noMap || noDemes || !this.props.treeLoaded) { return; }
+    if (noMap || !this.props.treeLoaded) { return; }
 
     if (
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
@@ -333,26 +324,6 @@ class Map extends React.Component {
 
   }
 
-  latLongs(demeData, transmissionData) {
-
-    const d = demeData || this.state.demeData;
-    const t = transmissionData || this.state.transmissionData;
-
-    if (this.props.treeLoaded && this.state.map) {
-      return getLatLongs(
-        this.props.nodes,
-        this.props.visibility,
-        this.props.metadata,
-        this.state.map,
-        this.props.geoResolution,
-        this.props.mapTriplicate,
-        this.props.nodeColors,
-        d,
-        t,
-      );
-    }
-    return null;
-  }
   getBounds() {
     let southWest;
     let northEast;
