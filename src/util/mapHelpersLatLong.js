@@ -74,9 +74,11 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 
         const deme = {
           name: key,
-          coords: leafletLatLongToLayerPoint(lat, long, map),
           count: value.length,
-          color: averageColors(value)
+          color: averageColors(value),
+          latitude: lat, // raw latitude value
+          longitude: long, // raw longitude value
+          coords: leafletLatLongToLayerPoint(lat, long, map) // coords are x,y plotted via d3
         }
         demeData.push(deme);
 
@@ -129,14 +131,18 @@ const maybeConstructTransmissionEvent = (
       id: node.arrayIdx.toString() + "-" + child.arrayIdx.toString(),
       originNode: node,
       destinationNode: child,
-      originLatLong: validLatLongPair[0],
-      destinationLatLong: validLatLongPair[1],
       originName: node.attr[geoResolution],
       destinationName: child.attr[geoResolution],
+      originCoords: validLatLongPair[0], // after interchange
+      destinationCoords: validLatLongPair[1], // after interchange
+      originLatitude: latOrig, // raw latitude value
+      destinationLatitude: latDest, // raw latitude value
+      originLongitude: longOrig + offsetOrig, // raw longitude value
+      destinationLongitude: longDest + offsetDest, //raw longitude value
       originNumDate: node.attr["num_date"],
       destinationNumDate: child.attr["num_date"],
       color: nodeColors[node.arrayIdx],
-      visible: visibility[node.arrayIdx] === "visible" && visibility[child.arrayIdx] === "visible" ? "visible" : "hidden",
+      visible: visibility[child.arrayIdx] === "visible" ? "visible" : "hidden", // transmission visible if child is visible
     }
   }
 
@@ -176,7 +182,7 @@ const maybeGetClosestTransmissionEvent = (
   if (possibleEvents.length === 0) { return; }
 
   closestEvent = _.minBy(possibleEvents, (event) => {
-    return Math.abs(event.destinationLatLong.x - event.originLatLong.x)
+    return Math.abs(event.destinationCoords.x - event.originCoords.x)
   });
 
   return closestEvent;
@@ -233,7 +239,7 @@ export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, 
     for demeData we have:
       name, coords, count, color
     for transmissionData we have:
-      originNode, destinationNode, originLatLong, destinationLatLong, originName, destinationName
+      originNode, destinationNode, originCoords, destinationCoords, originName, destinationName
       originNumDate, destinationNumDate, color, visible
   */
 
@@ -257,7 +263,7 @@ export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, 
   }
 }
 
-const updateDemeData = (demeData, nodes, visibility, geoResolution, nodeColors) => {
+const updateDemeDataColAndVis = (demeData, nodes, visibility, geoResolution, nodeColors) => {
 
   // do aggregation as intermediate step
   let demeMap = {};
@@ -284,17 +290,17 @@ const updateDemeData = (demeData, nodes, visibility, geoResolution, nodeColors) 
 
   // update demeData, for each deme, update all elements whose name matches
   _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
-    demeData.forEach((d,i) => {
-      if (d.name === key) {
-        d.count = value.length;
-        d.color = averageColors(value);
+    demeData.forEach((deme,i) => {
+      if (deme.name === key) {
+        deme.count = value.length;
+        deme.color = averageColors(value);
       }
     })
   });
 
 }
 
-const updateTransmissionData = (transmissionData, nodes, visibility, geoResolution, nodeColors) => {
+const updateTransmissionDataColAndVis = (transmissionData, nodes, visibility, geoResolution, nodeColors) => {
 
   // index transmissions by node.arrayIdx
   // map node.arrayIdx to [color, visibility]
@@ -313,7 +319,7 @@ const updateTransmissionData = (transmissionData, nodes, visibility, geoResoluti
           // this is a transmission event from n to child
           const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
           const col = nodeColors[node.arrayIdx];
-          const vis = visibility[node.arrayIdx] === "visible" && visibility[child.arrayIdx] === "visible" ? "visible" : "hidden";
+          const vis = visibility[child.arrayIdx] === "visible" ? "visible" : "hidden"; // transmission visible if child is visible
           transmissionMap[id] = [col, vis];
         }
       });
@@ -331,7 +337,7 @@ const updateTransmissionData = (transmissionData, nodes, visibility, geoResoluti
 
 }
 
-export const updateDemeAndTransmissionData = (demeData, transmissionData, nodes, visibility, geoResolution, nodeColors) => {
+export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, nodes, visibility, geoResolution, nodeColors) => {
 
   /*
     walk through nodes and update attributes that can mutate
@@ -341,7 +347,41 @@ export const updateDemeAndTransmissionData = (demeData, transmissionData, nodes,
       color, visible
   */
 
-  updateDemeData(demeData, nodes, visibility, geoResolution, nodeColors);
-  updateTransmissionData(transmissionData, nodes, visibility, geoResolution, nodeColors);
+  updateDemeDataColAndVis(demeData, nodes, visibility, geoResolution, nodeColors);
+  updateTransmissionDataColAndVis(transmissionData, nodes, visibility, geoResolution, nodeColors);
+
+}
+
+const updateDemeDataLatLong = (demeData, map) => {
+
+  // interchange for all demes
+  demeData.forEach((d,i) => {
+    d.coords = leafletLatLongToLayerPoint(d.latitude, d.longitude, map);
+  });
+
+}
+
+const updateTransmissionDataLatLong = (transmissionData, map) => {
+
+  // interchange for all transmissions
+  transmissionData.forEach((transmission,i) => {
+    transmission.originCoords = leafletLatLongToLayerPoint(transmission.originLatitude, transmission.originLongitude, map);
+    transmission.destinationCoords = leafletLatLongToLayerPoint(transmission.destinationLatitude, transmission.destinationLongitude, map);
+  });
+
+}
+
+export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData, map) => {
+
+  /*
+    walk through nodes and update attributes that can mutate
+    for demeData we have:
+      count, color
+    for transmissionData we have:
+      color, visible
+  */
+
+  updateDemeDataLatLong(demeData, map);
+  updateTransmissionDataLatLong(transmissionData, map);
 
 }

@@ -118,8 +118,8 @@ export const drawDemesAndTransmissions = (demeData, transmissionData, g, map, no
           numDateMin,
           numDateMax,
           minTransmissionDate,
-          d.originLatLong,
-          d.destinationLatLong,
+          d.originCoords,
+          d.destinationCoords,
           d.originNumDate,
           d.destinationNumDate,
           d.visible
@@ -198,8 +198,8 @@ export const updateOnMoveEnd = (demeData, transmissionData, minTransmissionDate,
             numDateMin,
             numDateMax,
             minTransmissionDate,
-            d.originLatLong,
-            d.destinationLatLong,
+            d.originCoords,
+            d.destinationCoords,
             d.originNumDate,
             d.destinationNumDate,
             d.visible
@@ -209,9 +209,9 @@ export const updateOnMoveEnd = (demeData, transmissionData, minTransmissionDate,
   }
 }
 
-const extractLineSegmentForAnimationEffect = (numDateMin, numDateMax, minTransmissionDate, originLatLong, destinationLatLong, originNumDate, destinationNumDate, visible) => {
+const extractLineSegmentForAnimationEffect = (numDateMin, numDateMax, minTransmissionDate, originCoords, destinationCoords, originNumDate, destinationNumDate, visible) => {
 
-  const pair = [originLatLong, destinationLatLong];
+  const pair = [originCoords, destinationCoords];
 
   /* manually find the points along a Bezier curve at which we should be given the user date selection */
   let start = Math.max(0.0,(numDateMin-originNumDate)/(destinationNumDate-originNumDate)); // clamp start at 0.0 if userDateMin gives a number <0
@@ -255,8 +255,8 @@ export const updateVisibility = (demeData, transmissionData, d3elems, map, nodes
             numDateMin,
             numDateMax,
             minTransmissionDate,
-            d.originLatLong,
-            d.destinationLatLong,
+            d.originCoords,
+            d.destinationCoords,
             d.originNumDate,
             d.destinationNumDate,
             d.visible

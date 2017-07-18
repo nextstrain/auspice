@@ -11,7 +11,7 @@ import setupLeafletPlugins from "../../util/leaflet-plugins";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "../../util/mapHelpers";
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
-import { getLatLongs, createDemeAndTransmissionData, updateDemeAndTransmissionData } from "../../util/mapHelpersLatLong";
+import { getLatLongs, createDemeAndTransmissionData, updateDemeAndTransmissionDataColAndVis, updateDemeAndTransmissionDataLatLong } from "../../util/mapHelpersLatLong";
 import {
   CHANGE_ANIMATION_START,
   CHANGE_ANIMATION_TIME,
@@ -263,6 +263,12 @@ class Map extends React.Component {
   }
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
+
+      updateDemeAndTransmissionDataLatLong(
+        this.state.demeData,
+        this.state.transmissionData,
+        this.state.map);
+
       updateOnMoveEnd(
         this.state.demeData,
         this.state.transmissionData,
@@ -306,7 +312,7 @@ class Map extends React.Component {
       this.props.visibilityVersion !== prevProps.visibilityVersion ||
       this.props.colorScaleVersion !== prevProps.colorScaleVersion
     ) {
-      updateDemeAndTransmissionData(
+      updateDemeAndTransmissionDataColAndVis(
         this.state.demeData,
         this.state.transmissionData,
         this.props.nodes,
