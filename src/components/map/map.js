@@ -225,11 +225,11 @@ class Map extends React.Component {
     }
   }
   maybeRemoveAllDemesAndTransmissions(nextProps) {
-    /* as of jul 7 2017, the constructor / omponentDidMount is NOT running
+    /* as of jul 7 2017, the constructor / componentDidMount is NOT running
     on dataset change! */
 
     /*
-      xx dataset change, remove all demes and transmissions d3 added
+      xx dataset change or resolution change, remove all demes and transmissions d3 added
       xx we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
       THE ABOVE IS NO LONGER TRUE: while App remounts, this is all getting nuked, so it doesn't matter.
       Here's what we were doing and might do again:

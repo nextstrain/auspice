@@ -366,8 +366,10 @@ export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionDat
       color, visible
   */
 
-  updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors);
-  updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
+  if (demeData && transmissionData) {
+    updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors);
+    updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
+  }
 
 }
 
@@ -400,7 +402,9 @@ export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData,
       color, visible
   */
 
-  updateDemeDataLatLong(demeData, map);
-  updateTransmissionDataLatLong(transmissionData, map);
+  if (demeData && transmissionData) {
+    updateDemeDataLatLong(demeData, map);
+    updateTransmissionDataLatLong(transmissionData, map);
+  }
 
 }
