@@ -1,19 +1,57 @@
 {
   "name": "nextstrain-auspice",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "description": "Nextstrain auspice",
   "scripts": {
     "clean": "rimraf dist",
     "build:webpack": "NODE_ENV=production webpack --config webpack.config.prod.js",
+    "build:electron": "NODE_ENV=production webpack --config webpack.config.electron.js",
     "build": "npm run clean && npm run build:webpack",
     "start": "node dev-server.js",
     "start:local": "node dev-server.js local",
     "server": "node server.js",
     "lint": "eslint src",
-    "postinstall": "npm run build"
+    "postinstall": "npm run build",
+    "getdata": "sh scripts/get_data.sh",
+    "run:electron": "npm run clean && npm run build:electron && npm run getdata && ./node_modules/.bin/electron . ",
+    "dist:electron": "npm run clean && npm run build:electron && npm run getdata && electron-builder"
   },
   "author": "Trevor Bedford and Richard Neher",
   "license": "AGPL",
+  "homepage": "./",
+  "build": {
+    "appId": "nextstrain",
+    "directories": {
+      "output": "releases"
+    },
+    "files": [
+      "data/*",
+      "dist/*",
+      "index.html",
+      "index.js",
+      "package.json"
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
+  },
   "devDependencies": {
     "babel-core": "^5.8.25",
     "babel-eslint": "^4.1.3",
@@ -21,6 +59,8 @@
     "babel-plugin-react-transform": "^1.1.1",
     "compression-webpack-plugin": "^0.3.2",
     "css-loader": "^0.26.1",
+    "electron-builder": "next",
+    "electron": "^1.6.11",
     "es6-promise": "~1.0.0",
     "eslint": "3.5.0",
     "eslint-config-defaults": "^7.0.1",
@@ -29,6 +69,7 @@
     "express": "^4.13.3",
     "file-loader": "^0.10.0",
     "json-loader": "^0.5.1",
+    "react-addons-perf": "^15.4.2",
     "react-transform-catch-errors": "^1.0.0",
     "react-transform-hmr": "^1.0.1",
     "redbox-react": "1.1.1",
@@ -41,6 +82,7 @@
     "webpack-hot-middleware": "^2.4.1"
   },
   "dependencies": {
+    "asar": "^0.13.0",
     "binomial": "^0.2.0",
     "color": "^0.7.3",
     "d3": "^3.5.17",
@@ -49,6 +91,7 @@
     "d3-scale": "^1.0.5",
     "d3-selection": "^1.0.5",
     "d3-zoom": "^1.1.3",
+    "express": "^4.13.3",
     "express-static-gzip": "^0.2.2",
     "history": "^4.6.0",
     "linspace": "^1.0.0",
@@ -59,10 +102,11 @@
     "outer-product": "0.0.4",
     "query-string": "^4.2.3",
     "radium": "0.18.1",
-    "react": "15.3.1",
+    "react": "15.6.1",
+    "react-addons-css-transition-group": "^15.6.0",
     "react-autosuggest": "^3.9.0",
     "react-datepicker": "0.46.0",
-    "react-dom": "^0.14.0",
+    "react-dom": "^15.6.1",
     "react-fontawesome": "^0.3.3",
     "react-ga": "^2.1.2",
     "react-redux": "^4.0.0",
@@ -70,7 +114,7 @@
     "react-select": "^1.0.0-rc.2",
     "react-sidebar": "git://github.com/nextstrain/react-sidebar.git#remove-savewidth",
     "react-svg-pan-zoom": "2.0.0",
-    "react-tap-event-plugin": "^0.2.1",
+    "react-tap-event-plugin": "^2.0.0",
     "react-throttle": "^0.3.0",
     "redux": "^3.0.2",
     "redux-logger": "^2.0.4",

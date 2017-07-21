@@ -4,14 +4,22 @@ import React from "react";
 import d3 from "d3";
 import { connect } from "react-redux";
 import Card from "../framework/card";
-import { changeDateFilter } from "../../actions/treeProperties";
+
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "../../util/mapHelpers";
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
-import { createDemeAndTransmissionData, updateDemeAndTransmissionDataColAndVis, updateDemeAndTransmissionDataLatLong } from "../../util/mapHelpersLatLong";
+import {getLatLongs} from "../../util/mapHelpersLatLong";
+import { modifyURLquery } from "../../util/urlHelpers";
+import { 
+  createDemeAndTransmissionData, 
+  updateDemeAndTransmissionDataColAndVis, 
+  updateDemeAndTransmissionDataLatLong 
+} from "../../util/mapHelpersLatLong";
+
+import { changeDateFilter } from "../../actions/treeProperties";
 import {
   CHANGE_ANIMATION_START,
   CHANGE_ANIMATION_TIME,
@@ -61,6 +69,9 @@ class Map extends React.Component {
       demeIndices: null,
       transmissionIndices: null
     };
+  }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
   }
   static propTypes = {
     treeVersion: React.PropTypes.number.isRequired,
@@ -473,6 +484,7 @@ class Map extends React.Component {
         type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
         data: "Play"
       });
+      modifyURLquery(this.context.router, {dmin: this.props.dateMin, dmax: this.props.dateMax});
     }
   }
 
@@ -484,6 +496,7 @@ class Map extends React.Component {
       type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
       data: "Play"
     });
+    modifyURLquery(this.context.router, {dmin: false, dmax: false});
   }
 
   handleAnimationResetClicked() {
@@ -518,6 +531,7 @@ class Map extends React.Component {
 
       /* first pass sets the timer to absolute min and absolute min + windowRange because they reference above initial time window */
       this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max}));
+      // don't modifyURLquery
 
       if (!this.props.mapAnimationCumulative) {
         leftWindow = leftWindow + animationIncrement;
@@ -532,6 +546,7 @@ class Map extends React.Component {
           type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
           data: "Play"
         });
+        modifyURLquery(this.context.router, {dmin: false, dmax: false});
       }
     }, animationTick);
 

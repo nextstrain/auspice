@@ -16,13 +16,15 @@ module.exports = {
     filename: "bundle.js",
     publicPath: "/dist/"
   },
+  target: "electron-renderer",
   plugins: [
     new webpack.optimize.OccurenceOrderPlugin(),
     new webpack.DefinePlugin({
       "process.env": {
         "NODE_ENV": JSON.stringify("production"),
-        "DATA_LOCAL": JSON.stringify(false)
-      }
+        "DATA_LOCAL": JSON.stringify(true)
+      },
+	  'global': {}
     }),
 	
     new webpack.optimize.UglifyJsPlugin({ // minify everything
