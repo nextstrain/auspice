@@ -297,7 +297,15 @@ export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, 
   }
 }
 
+/*******************************
+********************************
+  UPDATE DEMES & TRANSMISSIONS
+********************************
+********************************/
+
 const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors) => {
+
+  let demeDataCopy = demeData.slice();
 
   // initialize empty map
   let demeMap = {};
@@ -320,14 +328,19 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
   _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
     const name = key;
     demeIndices[name].forEach((index) => {
-      demeData[index].count = value.length;
-      demeData[index].color = averageColors(value);
+      demeDataCopy[index].count = value.length;
+      demeDataCopy[index].color = averageColors(value);
     })
   });
+
+
+  return demeDataCopy;
 
 }
 
 const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
+
+  let transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
 
   nodes.forEach((node, i) => {
     if (node.children) {
@@ -345,15 +358,15 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
 
           // update transmissionData via index lookup
           transmissionIndices[id].forEach((index) => {
-            transmissionData[index].color = col;
-            transmissionData[index].visible = vis;
+            transmissionDataCopy[index].color = col;
+            transmissionDataCopy[index].visible = vis;
           })
 
         }
       });
     }
   });
-
+  return transmissionDataCopy;
 }
 
 export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
@@ -366,17 +379,31 @@ export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionDat
       color, visible
   */
 
+  let newDemes;
+  let newTransmissions;
+
   if (demeData && transmissionData) {
-    updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors);
-    updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
+    newDemes = updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors);
+    newTransmissions = updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
+  }
+
+  return {
+    newDemes,
+    newTransmissions,
   }
 
 }
 
+/*********************
+**********************
+  ZOOM LEVEL CHANGE
+**********************
+**********************/
+
 const updateDemeDataLatLong = (demeData, map) => {
 
   // interchange for all demes
-  demeData.forEach((d,i) => {
+  return _.map(demeData, (d,i) => {
     d.coords = leafletLatLongToLayerPoint(d.latitude, d.longitude, map);
   });
 

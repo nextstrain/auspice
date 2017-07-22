@@ -13,10 +13,10 @@ import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnB
 import computeResponsive from "../../util/computeResponsive";
 import {getLatLongs} from "../../util/mapHelpersLatLong";
 import { modifyURLquery } from "../../util/urlHelpers";
-import { 
-  createDemeAndTransmissionData, 
-  updateDemeAndTransmissionDataColAndVis, 
-  updateDemeAndTransmissionDataLatLong 
+import {
+  createDemeAndTransmissionData,
+  updateDemeAndTransmissionDataColAndVis,
+  updateDemeAndTransmissionDataLatLong
 } from "../../util/mapHelpersLatLong";
 
 import { changeDateFilter } from "../../actions/treeProperties";
@@ -91,15 +91,16 @@ class Map extends React.Component {
     setupLeafletPlugins();
   }
   componentWillReceiveProps(nextProps) {
+    /* this is the place we update state in response to new props */
     this.maybeComputeResponive(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
+    this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
   }
   componentDidUpdate(prevProps, prevState) {
     if (this.props.nodes === null) {return}
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
-    this.maybeUpdateDemesAndTransmissions(prevProps); /* every time we change something like colorBy */
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
@@ -276,10 +277,12 @@ class Map extends React.Component {
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
 
+      /* mutates state, refactor */
       updateDemeAndTransmissionDataLatLong(
         this.state.demeData,
         this.state.transmissionData,
-        this.state.map);
+        this.state.map
+      );
 
       updateOnMoveEnd(
         this.state.demeData,
@@ -313,36 +316,48 @@ class Map extends React.Component {
     const west = Math.min(180, maxLng + lngRange*0.2);
     return [L.latLng(south,west), L.latLng(north, east)];
   }
-  maybeUpdateDemesAndTransmissions(prevProps) {
+  maybeUpdateDemesAndTransmissions(nextProps) {
     /* nothing to update */
     const noMap = !this.state.map;
     if (noMap || !this.props.treeLoaded) { return; }
 
     if (
-      this.props.visibilityVersion !== prevProps.visibilityVersion ||
-      this.props.colorScaleVersion !== prevProps.colorScaleVersion
+      nextProps.visibilityVersion !== this.props.visibilityVersion ||
+      nextProps.colorScaleVersion !== this.props.colorScaleVersion
     ) {
-      updateDemeAndTransmissionDataColAndVis(
+
+      const {
+        newDemes,
+        newTransmissions
+      } = updateDemeAndTransmissionDataColAndVis(
         this.state.demeData,
         this.state.transmissionData,
         this.state.demeIndices,
         this.state.transmissionIndices,
-        this.props.nodes,
-        this.props.visibility,
-        this.props.geoResolution,
-        this.props.nodeColors);
+        nextProps.nodes,
+        nextProps.visibility,
+        nextProps.geoResolution,
+        nextProps.nodeColors
+      );
+
       updateVisibility(
-        this.state.demeData,
-        this.state.transmissionData,
+        /* updated in the function above */
+        newDemes,
+        newTransmissions,
+        /* we already have all this */
         this.state.d3elems,
         this.state.map,
-        this.props.nodes,
-        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
-        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
+        nextProps.nodes,
+        calendarToNumeric(nextProps.dateFormat, nextProps.dateScale, nextProps.dateMin),
+        calendarToNumeric(nextProps.dateFormat, nextProps.dateScale, nextProps.dateMax),
         this.state.minTransmissionDate
       );
-    }
 
+      this.setState({
+        demeData: newDemes,
+        transmissionData: newTransmissions,
+      })
+    }
   }
 
   getBounds() {
