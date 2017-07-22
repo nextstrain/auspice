@@ -1,5 +1,6 @@
 import {averageColors} from "./colorHelpers";
 import {getTipColorAttribute} from "./treeHelpers";
+import {computeMidpoint, Bezier} from "./transmissionBezier";
 
 // longs of original map are -180 to 180
 // longs of fully triplicated map are -540 to 540
@@ -111,7 +112,8 @@ const maybeConstructTransmissionEvent = (
   visibility,
   map,
   offsetOrig,
-  offsetDest
+  offsetDest,
+  minTransmissionDate
 ) => {
 
   let latOrig, longOrig, latDest, longDest;
@@ -138,11 +140,28 @@ const maybeConstructTransmissionEvent = (
   );
 
   if (validLatLongPair) {
+
+    let Bcurve;
+
+    if (minTransmissionDate) {
+      Bcurve = Bezier(
+        [
+          validLatLongPair[0],
+          computeMidpoint(
+            validLatLongPair,
+            (child.attr["num_date"] - minTransmissionDate) * 25.0
+          ),
+          validLatLongPair[1]
+        ]
+      );
+    }
+
     /* build up transmissions object */
     transmission = {
       id: node.arrayIdx.toString() + "-" + child.arrayIdx.toString(),
       originNode: node,
       destinationNode: child,
+      bezierCurve: Bcurve,
       originName: node.attr[geoResolution],
       destinationName: child.attr[geoResolution],
       originCoords: validLatLongPair[0], // after interchange
@@ -169,7 +188,8 @@ const maybeGetClosestTransmissionEvent = (
   nodeColors,
   visibility,
   map,
-  offsetOrig
+  offsetOrig,
+  minTransmissionDate,
 ) => {
   const possibleEvents = [];
   let closestEvent;
@@ -186,7 +206,8 @@ const maybeGetClosestTransmissionEvent = (
       visibility,
       map,
       offsetOrig,
-      offsetDest
+      offsetDest,
+      minTransmissionDate
     );
     if (t) { possibleEvents.push(t); }
   });
@@ -207,7 +228,8 @@ const setupTransmissionData = (
   nodeColors,
   triplicate,
   metadata,
-  map
+  map,
+  minTransmissionDate
 ) => {
 
   let offsets = triplicate ? [-360, 0, 360] : [0]
@@ -234,6 +256,7 @@ const setupTransmissionData = (
               visibility,
               map,
               offsetOrig,
+              minTransmissionDate,
             );
             if (t) { transmissionData.push(t) }
           });
@@ -273,20 +296,46 @@ export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, 
     demeIndices
   } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
 
-  const {
-    transmissionData,
-    transmissionIndices
-  } = setupTransmissionData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
 
-  let minTransmissionDate;
-  // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
-  if (transmissionData.length) {
-    minTransmissionDate = transmissionData.map((x) => {
-      return transmissionData.originNumDate;
-    }).reduce((prev, cur) => {
-      return cur < prev ? cur : prev;
-    });
+  const getMinTransmissionDate = () => {
+    /* first time in a scope so that we can run minTransmissionDate */
+    const { transmissionData } = setupTransmissionData(
+      nodes,
+      visibility,
+      geoResolution,
+      nodeColors,
+      triplicate,
+      metadata,
+      map
+    );
+
+    let minTransmissionDate;
+    // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
+    if (transmissionData.length) {
+      minTransmissionDate = transmissionData.map((x) => {
+        return x.originNumDate;
+      }).reduce((prev, cur) => {
+        return cur < prev ? cur : prev;
+      });
+    }
+
+    return minTransmissionDate;
   }
+
+  const minTransmissionDate = getMinTransmissionDate();
+
+
+  /* second time so that we can get Bezier */
+  const { transmissionData, transmissionIndices } = setupTransmissionData(
+    nodes,
+    visibility,
+    geoResolution,
+    nodeColors,
+    triplicate,
+    metadata,
+    map,
+    minTransmissionDate
+  );
 
   return {
     demeData: demeData,

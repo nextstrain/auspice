@@ -1,79 +1,66 @@
 import d3 from "d3";
-import {range, isFinite} from "lodash";
-import linspace from "linspace";
-import outerProducts from "outer-product";
 
 /* util */
-
-const Bernstein = (n, k) => {
-  var binom = require('binomial')
-  const coeff = binom.get(n, k) // calculate binomial coefficient
-
-  const _bpoly = (x) => {
-    return coeff * Math.pow(x,k) * Math.pow(1-x,n-k)
-  }
-  return _bpoly //return Bernstein polynomial
-}
-
-function zeros(dimensions) {
-    var array = [];
-
-    for (var i = 0; i < dimensions[0]; ++i) {
-        array.push(dimensions.length == 1 ? 0 : zeros(dimensions.slice(1)));
-    }
-    return array
-}
-
-const Bezier = (pathControl, start=0.0, end=1.0, num=15) => { // returns Bezier curve starting at first point in pair, curving towards the second point in pair and
-  const N = range(pathControl.length) // number of points in [start, mid, end] that will be used to compute the curve
-  const t = linspace(start,end,num) // num points spaced evenly between fractions of the total curve path (0 = beginning, 1 = end)
-  let curve = zeros([num,2]) // empty vector that will become the curve
-
-  for (var i in range(curve.length)){ // convert curve to an (x:,y:) format
-    curve[i] = {x: curve[i][0], y: curve[i][1]}
-  }
-
-  for (var ii in N) { // iterate over provided points
-    const B_func = Bernstein(N.length - 1, ii) // get Bernstein polynomial
-    const tB = t.map(B_func) // apply Bernstein polynomial to linspace
-    const P = [pathControl[ii].x,pathControl[ii].y]
-    const prod_idx = outerProducts([range(tB.length), range(P.length)]) // get indices for outer product
-
-    for (var j in range(curve.length)){ // iterate over future curve, adjust each point's coordinate
-      curve[j].x += tB[prod_idx[j][0]] * P[prod_idx[j][1]] // update x coordinate for curve with outer product
-      curve[j].y += tB[prod_idx[Number(j)+num][0]] * P[prod_idx[Number(j)+num][1]] // update y coordinate for curve with outer product
-      }
-    }
-  return curve
-}
-
-/* Equation derived by Luiz Max Fagundes de Carvalho (University of Edinburgh).
-   This function computes the coordinate of a point that is at a distance `height`
-   perpendicular to the center of the line connecting the two points define in `pair`. */
-const computeMidpoint = (pair, modify, height) => {
-  const [pointA,pointB] = pair
-  const x1 = pointA.x
-  const y1 = pointA.y
-  const x2 = pointB.x
-  const y2 = pointB.y
-
-  const sign = Math.sign(x2-x1) // induce asymmetry in transitions
-  const slope = (y2-y1) / (x2-x1)
-  const d = Math.sqrt(Math.pow((y2-y1),2) + Math.pow((x2-x1),2)) // distance between points
-
-  let H = 1/height || Math.log(Math.pow(d,0.05))*200 //+modify // define height of control point
-  const h = Math.sqrt(Math.pow(H,2)+ Math.pow(d,2)/4.0)  // mathemagics
-
-  const xm = x1 + h * Math.cos(Math.atan(2*H/d) + Math.atan(slope)) * sign
-  const ym = y1 + h * Math.sin(Math.atan(2*H/d) + Math.atan(slope)) * sign
-
-  return {x: xm, y: ym}
-}
 
 export const pathStringGenerator = d3.svg.line()
   .x((d) => { return d.x })
   .y((d) => { return d.y })
   .interpolate("basis");
+
+const extractLineSegmentForAnimationEffect = (
+  numDateMin,
+  numDateMax,
+  minTransmissionDate,
+  originCoords,
+  destinationCoords,
+  originNumDate,
+  destinationNumDate,
+  visible
+) => {
+
+  const pair = [originCoords, destinationCoords];
+
+  /* manually find the points along a Bezier curve at which we should be given the user date selection */
+  let start = Math.max(
+    0.0, // clamp start at 0.0 if userDateMin gives a number < 0
+    (numDateMin - originNumDate) / (destinationNumDate - originNumDate)
+  );
+
+  let end = Math.min(
+    1.0, // clamp end at 1.0 if userDateMax gives a number > 1
+    (numDateMax - originNumDate) / (destinationNumDate - originNumDate)
+  );
+
+  if (!isFinite(start)){ // For 0 branch-length transmissions, (destinationDate-originDate) is 0 --> +/- Infinity values for start and end.
+    start = 0.0;
+  };
+
+  if (!isFinite(end)){
+    end = start + 1e-6;
+  };
+
+  if (visible === "hidden") {
+    start = 0.0;
+    end = 1e-6;
+  }
+
+  /* calculate Bezier from pair[0] to pair[1] with control point positioned at
+  distance (destinationDate-minTransmissionDate)*25.0 perpendicular to center of the line
+  between pair[0] and pair[1]. */
+  const Bcurve = Bezier(
+    [pair[0],
+    computeMidpoint(
+      pair,
+      (destinationNumDate-minTransmissionDate) * 25.0
+    ),
+      pair[1]],
+      start,
+      end,
+      15
+  );
+
+  return Bcurve;
+};
 
 export const drawDemesAndTransmissions = (demeData, transmissionData, g, map, nodes, numDateMin, numDateMax, minTransmissionDate) => {
 
@@ -113,18 +100,17 @@ export const drawDemesAndTransmissions = (demeData, transmissionData, g, map, no
     .enter()
     .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
     .attr("d", (d, i) => {
-      return pathStringGenerator(
-        extractLineSegmentForAnimationEffect(
-          numDateMin,
-          numDateMax,
-          minTransmissionDate,
-          d.originCoords,
-          d.destinationCoords,
-          d.originNumDate,
-          d.destinationNumDate,
-          d.visible
-        )
-      )
+      // extractLineSegmentForAnimationEffect(
+      //   numDateMin,
+      //   numDateMax,
+      //   minTransmissionDate,
+      //   d.originCoords,
+      //   d.destinationCoords,
+      //   d.originNumDate,
+      //   d.destinationNumDate,
+      //   d.visible
+      // )
+      return pathStringGenerator(d.bezierCurve)
     }) /* with the interpolation in the function above pathStringGenerator */
     .attr("fill","none")
     .attr("stroke-opacity", .6)
@@ -193,52 +179,34 @@ export const updateOnMoveEnd = (demeData, transmissionData, minTransmissionDate,
     d3elems.transmissions
       .data(transmissionData)
       .attr("d", (d, i) => {
-        return pathStringGenerator(
-          extractLineSegmentForAnimationEffect(
-            numDateMin,
-            numDateMax,
-            minTransmissionDate,
-            d.originCoords,
-            d.destinationCoords,
-            d.originNumDate,
-            d.destinationNumDate,
-            d.visible
-          )
-        )
+        return pathStringGenerator(d.bezierCurve)
+
+        // return pathStringGenerator(
+        //   extractLineSegmentForAnimationEffect(
+        //     numDateMin,
+        //     numDateMax,
+        //     minTransmissionDate,
+        //     d.originCoords,
+        //     d.destinationCoords,
+        //     d.originNumDate,
+        //     d.destinationNumDate,
+        //     d.visible
+        //   )
+        // )
       }) /* with the interpolation in the function above pathStringGenerator */
   }
 }
 
-const extractLineSegmentForAnimationEffect = (numDateMin, numDateMax, minTransmissionDate, originCoords, destinationCoords, originNumDate, destinationNumDate, visible) => {
-
-  const pair = [originCoords, destinationCoords];
-
-  /* manually find the points along a Bezier curve at which we should be given the user date selection */
-  let start = Math.max(0.0,(numDateMin-originNumDate)/(destinationNumDate-originNumDate)); // clamp start at 0.0 if userDateMin gives a number <0
-  let end = Math.min(1.0,(numDateMax-originNumDate)/(destinationNumDate-originNumDate));// clamp end at 1.0 if userDateMax gives a number >1
-
-  if (!isFinite(start)){ // For 0 branch-length transmissions, (destinationDate-originDate) is 0 --> +/- Infinity values for start and end.
-    start = 0.0;
-  };
-  if (!isFinite(end)){
-    end = start + 1e-6;
-  };
-
-  if (visible === "hidden") {
-    start = 0.0;
-    end = 1e-6;
-  }
-
-  /* calculate Bezier from pair[0] to pair[1] with control point positioned at
-  distance (destinationDate-minTransmissionDate)*25.0 perpendicular to center of the line
-  between pair[0] and pair[1]. */
-  const Bcurve = Bezier([pair[0],computeMidpoint(pair,(destinationNumDate-minTransmissionDate)*25.0),pair[1]],start,end,15);
-
-  return Bcurve;
-};
-
-
-export const updateVisibility = (demeData, transmissionData, d3elems, map, nodes, numDateMin, numDateMax, minTransmissionDate) => {
+export const updateVisibility = (
+  demeData,
+  transmissionData,
+  d3elems,
+  map,
+  nodes,
+  numDateMin,
+  numDateMax,
+  minTransmissionDate
+) => {
 
   d3elems.demes
     .data(demeData)
@@ -250,18 +218,19 @@ export const updateVisibility = (demeData, transmissionData, d3elems, map, nodes
     .data(transmissionData)
     .attr("d", (d, i) => {
       try{
-        return pathStringGenerator(
-          extractLineSegmentForAnimationEffect(
-            numDateMin,
-            numDateMax,
-            minTransmissionDate,
-            d.originCoords,
-            d.destinationCoords,
-            d.originNumDate,
-            d.destinationNumDate,
-            d.visible
-          )
-        );
+        return pathStringGenerator(d.bezierCurve)
+        // return pathStringGenerator(
+        //   extractLineSegmentForAnimationEffect(
+        //     numDateMin,
+        //     numDateMax,
+        //     minTransmissionDate,
+        //     d.originCoords,
+        //     d.destinationCoords,
+        //     d.originNumDate,
+        //     d.destinationNumDate,
+        //     d.visible
+        //   )
+        // );
       } catch (e) {
         console.log("Bezier error");
         // console.log(e); /* uncomment this for the stack trace */
