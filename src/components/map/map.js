@@ -123,7 +123,17 @@ class Map extends React.Component {
       treeChanged: this.props.treeVersion !== nextProps.treeVersion, // treeVersion change implies tree is ready (modified by the same action)
       sidebarChanged: this.props.sidebar !== nextProps.sidebar
     };
-    if (Object.values(changes).some((v) => v === true)) {
+    // Object.values would be the obvious thing to do here
+    // but not supported in many browsers including iOS Safari
+    let somethingChanged = false;
+    for (var property in changes) {
+      if (changes.hasOwnProperty(property)) {
+        if (changes[property] === true) {
+          somethingChanged = true;
+        }
+      }
+    }
+    if (somethingChanged) {
       this.setState({responsive: this.doComputeResponsive(nextProps)});
     }
     // if (
