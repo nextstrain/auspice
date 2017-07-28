@@ -109,7 +109,7 @@ const Controls = (state = getDefaultState(), action) => {
         base["colorBy"] = action.meta.defaults.colorBy;
       }
       if (action.meta.defaults.distanceMeasure) {
-        base["distanceMeasure"] = action.meta.defaults.distanceMeasure;
+        base["distanceMeasure"] = action.meta.defaults.distanceMeasure[0];
       }
       if (action.meta.defaults.layout) {
         base["layout"] = action.meta.defaults.layout;
