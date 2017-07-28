@@ -488,6 +488,7 @@ class Map extends React.Component {
       });
       this.animateMap();
     } else {
+      if (process.env.NODE_ENV !== "production") {window.Perf.resetCount();}
       clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
       window.NEXTSTRAIN.mapAnimationLoop = null;
       this.props.dispatch({
@@ -535,7 +536,7 @@ class Map extends React.Component {
     /* we should setState({reference}) so that it's not possible to create multiple */
 
     window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
-
+      if (process.env.NODE_ENV !== "production") {window.Perf.bump();}
       const newWindow = {min: numericToCalendar(this.props.dateFormat, this.props.dateScale, leftWindow),
         max: numericToCalendar(this.props.dateFormat, this.props.dateScale, rightWindow)};
 
