@@ -1,5 +1,6 @@
 import d3 from "d3";
 import { dataFont, darkGrey } from "../globalStyles";
+import {debounce} from "lodash";
 
 /*
  * adds the total number of descendant leaves to each node in the tree
@@ -118,6 +119,9 @@ var PhyloTree = function(treeJson) {
   this.yScale = d3.scale.linear();
   this.zoomNode = this.nodes[0];
   addLeafCount(this.nodes[0]);
+
+  /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
+  this.debouncedMapToScreen = debounce(this.mapToScreen, this.params.mapToScreenDebounceTime, {leading: false, trailing: true});
 };
 
 /*
@@ -161,6 +165,7 @@ PhyloTree.prototype.setDefaults = function () {
         tipLabelFill: "#555",
         tipLabelPadX: 8,
         tipLabelPadY: 2,
+      mapToScreenDebounceTime: 200
     };
 };
 
@@ -1295,7 +1300,8 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
   });
   let updatePath = false;
   if (styles["stroke-width"]){
-    this.mapToScreen();
+    // this.mapToScreen();
+    this.debouncedMapToScreen();
     updatePath = true;
   }
 
