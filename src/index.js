@@ -21,12 +21,13 @@ import "./css/notifications.css";
 import Notifications from "./components/notifications/notifications";
 import { outboundLinkWithAnalytics } from "./util/googleAnalytics";
 import { setUpPerf } from "./util/quantify-performance";
+import { enableAnimationPerfTesting } from "./util/globals"
 
 /* google analytics */
 ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-2");
 
 /* Performance measurement - DEV ONLY */
-if (process.env.NODE_ENV !== "production") {
+if (enableAnimationPerfTesting) {
   setUpPerf();
 }
 
