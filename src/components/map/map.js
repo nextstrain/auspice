@@ -166,6 +166,7 @@ class Map extends React.Component {
       this.setState({d3DOMNode});
     }
   }
+
   maybeDrawDemesAndTransmissions(prevProps) {
 
     const mapIsDrawn = !!this.state.map;
@@ -277,22 +278,28 @@ class Map extends React.Component {
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
 
-      /* mutates state, refactor */
-      updateDemeAndTransmissionDataLatLong(
+    const {
+      newDemes,
+      newTransmissions
+    } = updateDemeAndTransmissionDataLatLong(
         this.state.demeData,
         this.state.transmissionData,
         this.state.map
       );
 
+      newTransmissionsWithNewBezier =
+
       updateOnMoveEnd(
-        this.state.demeData,
-        this.state.transmissionData,
+        newDemes,
+        newTransmissions,
         this.state.minTransmissionDate,
         this.state.d3elems,
         calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
         calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
         this.props.nodes
       );
+
+
     }
   }
   getGeoRange() {

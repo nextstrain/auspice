@@ -295,7 +295,15 @@ const setupTransmissionData = (
 
 }
 
-export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
+export const createDemeAndTransmissionData = (
+  nodes,
+  visibility,
+  geoResolution,
+  nodeColors,
+  triplicate,
+  metadata,
+  map
+) => {
 
   /*
     walk through nodes and collect all data
@@ -469,17 +477,22 @@ const updateDemeDataLatLong = (demeData, map) => {
   // interchange for all demes
   return _.map(demeData, (d,i) => {
     d.coords = leafletLatLongToLayerPoint(d.latitude, d.longitude, map);
+    return d;
   });
 
 }
 
 const updateTransmissionDataLatLong = (transmissionData, map) => {
 
+  let transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
+
   // interchange for all transmissions
-  transmissionData.forEach((transmission,i) => {
+  transmissionDataCopy.forEach((transmission,i) => {
     transmission.originCoords = leafletLatLongToLayerPoint(transmission.originLatitude, transmission.originLongitude, map);
     transmission.destinationCoords = leafletLatLongToLayerPoint(transmission.destinationLatitude, transmission.destinationLongitude, map);
   });
+
+  return transmissionDataCopy;
 
 }
 
@@ -493,9 +506,17 @@ export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData,
       color, visible
   */
 
+  let newDemes;
+  let newTransmissions;
+
   if (demeData && transmissionData) {
-    updateDemeDataLatLong(demeData, map);
-    updateTransmissionDataLatLong(transmissionData, map);
+    newDemes = updateDemeDataLatLong(demeData, map);
+    newTransmissions = updateTransmissionDataLatLong(transmissionData, map);
+  }
+
+  return {
+    newDemes,
+    newTransmissions,
   }
 
 }
