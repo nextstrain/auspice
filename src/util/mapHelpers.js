@@ -46,7 +46,20 @@ const extractLineSegmentForAnimationEffect = (
     end = 1e-6;
   }
 
-  let curve = bezierCurve.slice(0,7);
+  /* find closest by sliding from each end till failure then choose previous */
+
+  let curve;
+  let closestBezierDateMIN; /* an index, closest to user date min */
+  let closestBezierDateMAX; /* an index, closest to user date max */
+
+  if (false) {
+    /* check whether above conditions mean we already know to show the whole line, etc */
+  } else {
+    curve = _.filter(bezierCurve, (pair, i) => {
+      return bezierDates[i] > numDateMin && bezierDates[i] < numDateMax;
+    });
+  }
+
 
   /*
 
@@ -121,17 +134,20 @@ export const drawDemesAndTransmissions = (
     .enter()
     .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
     .attr("d", (d, i) => {
-      // extractLineSegmentForAnimationEffect(
-      //   numDateMin,
-      //   numDateMax,
-      //   minTransmissionDate,
-      //   d.originCoords,
-      //   d.destinationCoords,
-      //   d.originNumDate,
-      //   d.destinationNumDate,
-      //   d.visible
-      // )
-      return pathStringGenerator(d.bezierCurve)
+      return pathStringGenerator(
+        extractLineSegmentForAnimationEffect(
+          numDateMin,
+          numDateMax,
+          minTransmissionDate,
+          d.originCoords,
+          d.destinationCoords,
+          d.originNumDate,
+          d.destinationNumDate,
+          d.visible,
+          d.bezierCurve,
+          d.bezierDates
+        )
+      );
     }) /* with the interpolation in the function above pathStringGenerator */
     .attr("fill","none")
     .attr("stroke-opacity", .6)
@@ -200,20 +216,20 @@ export const updateOnMoveEnd = (demeData, transmissionData, minTransmissionDate,
     d3elems.transmissions
       .data(transmissionData)
       .attr("d", (d, i) => {
-        return pathStringGenerator(d.bezierCurve)
-
-        // return pathStringGenerator(
-        //   extractLineSegmentForAnimationEffect(
-        //     numDateMin,
-        //     numDateMax,
-        //     minTransmissionDate,
-        //     d.originCoords,
-        //     d.destinationCoords,
-        //     d.originNumDate,
-        //     d.destinationNumDate,
-        //     d.visible
-        //   )
-        // )
+        return pathStringGenerator(
+          extractLineSegmentForAnimationEffect(
+            numDateMin,
+            numDateMax,
+            minTransmissionDate,
+            d.originCoords,
+            d.destinationCoords,
+            d.originNumDate,
+            d.destinationNumDate,
+            d.visible,
+            d.bezierCurve,
+            d.bezierDates
+          )
+        );
       }) /* with the interpolation in the function above pathStringGenerator */
   }
 }
@@ -238,9 +254,6 @@ export const updateVisibility = (
   d3elems.transmissions
     .data(transmissionData)
     .attr("d", (d, i) => {
-      console.log('d', d)
-      try {
-        // return pathStringGenerator(d.bezierCurve)
         return pathStringGenerator(
           extractLineSegmentForAnimationEffect(
             numDateMin,
@@ -255,11 +268,6 @@ export const updateVisibility = (
             d.bezierDates
           )
         );
-      } catch (e) {
-        console.log("Bezier error");
-        // console.log(e); /* uncomment this for the stack trace */
-        return "";
-      }
     }) /* with the interpolation in the function above pathStringGenerator */
     .attr("stroke", (d) => { return d.color })
 

@@ -164,11 +164,9 @@ const maybeConstructTransmissionEvent = (
       Bcurve.forEach((d, i) => {
         /* fill it with interpolated dates */
         Bdates.push(
-          interpolator(i / Bcurve.length) /* ie., 5 / 15ths of the way through = 2016.3243 */
+          interpolator(i / (Bcurve.length - 1)) /* ie., 5 / 15ths of the way through = 2016.3243 */
         )
       });
-
-      // Bdates.push(child.attr.num_date) /* add the destination as well */
 
     }
 
