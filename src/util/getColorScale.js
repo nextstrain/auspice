@@ -35,14 +35,14 @@ const genericScale = (cmin, cmax, vals = false) => {
 
 
 const minMaxAttributeScale = (nodes, attr, options) => {
-  if (options.vmin && options.vmax){
-      return genericScale(options.vmin, options.vmax);
+  if (options.vmin && options.vmax) {
+    return genericScale(options.vmin, options.vmax);
   } else {
-  const vals = nodes.map((n) => n.attr[attr])
-    .filter((n) => n !== undefined)
-    .filter((item, i, ar) => ar.indexOf(item) === i);
-  return genericScale(d3.min(vals), d3.max(vals), vals);
-}
+    const vals = nodes.map((n) => n.attr[attr])
+      .filter((n) => n !== undefined)
+      .filter((item, i, ar) => ar.indexOf(item) === i);
+    return genericScale(d3.min(vals), d3.max(vals), vals);
+  }
 };
 
 const integerAttributeScale = (nodes, attr) => {
