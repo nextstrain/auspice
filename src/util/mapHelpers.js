@@ -15,7 +15,9 @@ const extractLineSegmentForAnimationEffect = (
   destinationCoords,
   originNumDate,
   destinationNumDate,
-  visible
+  visible,
+  bezierCurve,
+  bezierDates
 ) => {
 
   const pair = [originCoords, destinationCoords];
@@ -44,25 +46,42 @@ const extractLineSegmentForAnimationEffect = (
     end = 1e-6;
   }
 
-  /* calculate Bezier from pair[0] to pair[1] with control point positioned at
-  distance (destinationDate-minTransmissionDate)*25.0 perpendicular to center of the line
-  between pair[0] and pair[1]. */
-  const Bcurve = Bezier(
-    [pair[0],
-    computeMidpoint(
-      pair,
-      (destinationNumDate-minTransmissionDate) * 25.0
-    ),
-      pair[1]],
-      start,
-      end,
-      15
-  );
+  let curve = bezierCurve.slice(0,7);
 
-  return Bcurve;
+  /*
+
+    ## calculate Bezier from pair[0] to pair[1] with control point positioned at
+    ## distance (destinationDate-minTransmissionDate)*25.0 perpendicular to center of the line
+    ## between pair[0] and pair[1].
+
+    this is commented out as of 8/3/2017 but left for reference, as we are now precomputing upstream
+
+    const Bcurve = Bezier(
+      [pair[0],
+      computeMidpoint(
+        pair,
+        (destinationNumDate-minTransmissionDate) * 25.0
+      ),
+        pair[1]],
+        start,
+        end,
+        15
+    );
+  */
+
+  return curve;
 };
 
-export const drawDemesAndTransmissions = (demeData, transmissionData, g, map, nodes, numDateMin, numDateMax, minTransmissionDate) => {
+export const drawDemesAndTransmissions = (
+  demeData,
+  transmissionData,
+  g,
+  map,
+  nodes,
+  numDateMin,
+  numDateMax,
+  minTransmissionDate
+) => {
 
   // define markers that are appended to the definition part of the group
   let markerCount=0;
@@ -89,10 +108,12 @@ export const drawDemesAndTransmissions = (demeData, transmissionData, g, map, no
     return "url(#"+mID+")";
   }
 
-  /* we're ditching geodesic. That means we don't have inner parts anymore.
+  /*
+    we're ditching geodesic. That means we don't have inner parts anymore.
     538 actually solved that... http://bl.ocks.org/bycoffe/18441cddeb8fe147b719fab5e30b5d45
     then we want to deeplink to animation state... which this may help with: http://jsfiddle.net/henbox/b4bbgdnz/5/
   */
+
   // add transmission lines with mid markers at each inner point of the path
 
   const transmissions = g.selectAll("transmissions")
@@ -217,20 +238,23 @@ export const updateVisibility = (
   d3elems.transmissions
     .data(transmissionData)
     .attr("d", (d, i) => {
-      try{
-        return pathStringGenerator(d.bezierCurve)
-        // return pathStringGenerator(
-        //   extractLineSegmentForAnimationEffect(
-        //     numDateMin,
-        //     numDateMax,
-        //     minTransmissionDate,
-        //     d.originCoords,
-        //     d.destinationCoords,
-        //     d.originNumDate,
-        //     d.destinationNumDate,
-        //     d.visible
-        //   )
-        // );
+      console.log('d', d)
+      try {
+        // return pathStringGenerator(d.bezierCurve)
+        return pathStringGenerator(
+          extractLineSegmentForAnimationEffect(
+            numDateMin,
+            numDateMax,
+            minTransmissionDate,
+            d.originCoords,
+            d.destinationCoords,
+            d.originNumDate,
+            d.destinationNumDate,
+            d.visible,
+            d.bezierCurve,
+            d.bezierDates
+          )
+        );
       } catch (e) {
         console.log("Bezier error");
         // console.log(e); /* uncomment this for the stack trace */

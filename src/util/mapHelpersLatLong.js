@@ -2,6 +2,7 @@ import {averageColors} from "./colorHelpers";
 import {getTipColorAttribute} from "./treeHelpers";
 import {computeMidpoint, Bezier} from "./transmissionBezier";
 
+
 // longs of original map are -180 to 180
 // longs of fully triplicated map are -540 to 540
 // restrict to longs between -360 to 360
@@ -142,6 +143,7 @@ const maybeConstructTransmissionEvent = (
   if (validLatLongPair) {
 
     let Bcurve;
+    let Bdates = [];
 
     if (minTransmissionDate) {
       Bcurve = Bezier(
@@ -154,6 +156,20 @@ const maybeConstructTransmissionEvent = (
           validLatLongPair[1]
         ]
       );
+
+      /* set up interpolator with origin and destination numdates */
+      const interpolator = d3.interpolateNumber(node.attr.num_date, child.attr.num_date)
+
+      /* make a Bdates array as long as Bcurve */
+      Bcurve.forEach((d, i) => {
+        /* fill it with interpolated dates */
+        Bdates.push(
+          interpolator(i / Bcurve.length) /* ie., 5 / 15ths of the way through = 2016.3243 */
+        )
+      });
+
+      // Bdates.push(child.attr.num_date) /* add the destination as well */
+
     }
 
     /* build up transmissions object */
@@ -162,6 +178,7 @@ const maybeConstructTransmissionEvent = (
       originNode: node,
       destinationNode: child,
       bezierCurve: Bcurve,
+      bezierDates: Bdates,
       originName: node.attr[geoResolution],
       destinationName: child.attr[geoResolution],
       originCoords: validLatLongPair[0], // after interchange
