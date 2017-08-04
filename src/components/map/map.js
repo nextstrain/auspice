@@ -326,10 +326,12 @@ class Map extends React.Component {
     /* nothing to update */
     const noMap = !this.state.map;
     if (noMap || !this.props.treeLoaded) { return; }
+    const colorOrVisibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion || nextProps.colorScaleVersion !== this.props.colorScaleVersion
+    const haveData = nextProps.nodes && nextProps.visibility && nextProps.geoResolution && nextProps.nodeColors;
 
     if (
-      nextProps.visibilityVersion !== this.props.visibilityVersion ||
-      nextProps.colorScaleVersion !== this.props.colorScaleVersion
+      colorOrVisibilityChange &&
+      haveData
     ) {
 
       const {
