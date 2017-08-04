@@ -163,10 +163,10 @@ class Map extends React.Component {
 
     return computeResponsive({
       horizontal: widescreen || thirds ? .5 : 1,
-      vertical: this.props.panelLayout === "thirds" ? .667 : 1.0, /* if we are in single column, full height */
+      vertical: this.props.panelLayout === "thirds" ? 0.85 : 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
-      maxAspectRatio: 1.0,
+      maxAspectRatio: 1.2,
     })
   }
   maybeSetupD3DOMNode() {

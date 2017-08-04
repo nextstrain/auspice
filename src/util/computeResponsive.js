@@ -39,7 +39,7 @@ const computeResponsive = ({
 
   const horizontalPadding = horizontal === 1 ? 45 : 75; /* could be more solid */
   const headerFooterPadding = 300;
-  const verticalPadding = 165;
+  const verticalPadding = 135;
   const controlsPadding = 55;
 
   if (browserDimensions) {
