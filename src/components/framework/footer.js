@@ -21,7 +21,8 @@ class Footer extends React.Component {
     router: React.PropTypes.object.isRequired
   }
   shouldComponentUpdate(nextProps, nextState) {
-    if (this.props.tree.version !== nextProps.tree.version) {
+    if (this.props.tree.version !== nextProps.tree.version ||
+        this.props.browserDimensions !== nextProps.browserDimensions) {
       return true;
     }
     else {
