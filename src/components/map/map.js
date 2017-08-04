@@ -284,10 +284,9 @@ class Map extends React.Component {
     } = updateDemeAndTransmissionDataLatLong(
         this.state.demeData,
         this.state.transmissionData,
-        this.state.map
+        this.state.map,
+        this.state.minTransmissionDate
       );
-
-      newTransmissionsWithNewBezier =
 
       updateOnMoveEnd(
         newDemes,

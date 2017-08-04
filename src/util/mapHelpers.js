@@ -49,8 +49,6 @@ const extractLineSegmentForAnimationEffect = (
   /* find closest by sliding from each end till failure then choose previous */
 
   let curve;
-  let closestBezierDateMIN; /* an index, closest to user date min */
-  let closestBezierDateMAX; /* an index, closest to user date max */
 
   if (false) {
     /* check whether above conditions mean we already know to show the whole line, etc */

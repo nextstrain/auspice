@@ -104,6 +104,26 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 
 }
 
+const constructBcurve = (
+  originLatLongPair,
+  destinationLatLongPair,
+  destinationNumDate,
+  minTransmissionDate
+) => {
+  const midpoint = computeMidpoint(
+    [originLatLongPair, destinationLatLongPair],
+    (destinationNumDate - minTransmissionDate) * 25.0
+  );
+  const Bcurve = Bezier(
+    [
+      originLatLongPair,
+      midpoint,
+      destinationLatLongPair
+    ]
+  );
+  return Bcurve;
+}
+
 const maybeConstructTransmissionEvent = (
   node,
   child,
@@ -146,16 +166,7 @@ const maybeConstructTransmissionEvent = (
     let Bdates = [];
 
     if (minTransmissionDate) {
-      Bcurve = Bezier(
-        [
-          validLatLongPair[0],
-          computeMidpoint(
-            validLatLongPair,
-            (child.attr["num_date"] - minTransmissionDate) * 25.0
-          ),
-          validLatLongPair[1]
-        ]
-      );
+      Bcurve = constructBcurve(validLatLongPair[0], validLatLongPair[1], child.attr["num_date"], minTransmissionDate);
 
       /* set up interpolator with origin and destination numdates */
       const interpolator = d3.interpolateNumber(node.attr.num_date, child.attr.num_date)
@@ -482,7 +493,7 @@ const updateDemeDataLatLong = (demeData, map) => {
 
 }
 
-const updateTransmissionDataLatLong = (transmissionData, map) => {
+const updateTransmissionDataLatLong = (transmissionData, map, minTransmissionDate) => {
 
   let transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
 
@@ -490,13 +501,19 @@ const updateTransmissionDataLatLong = (transmissionData, map) => {
   transmissionDataCopy.forEach((transmission,i) => {
     transmission.originCoords = leafletLatLongToLayerPoint(transmission.originLatitude, transmission.originLongitude, map);
     transmission.destinationCoords = leafletLatLongToLayerPoint(transmission.destinationLatitude, transmission.destinationLongitude, map);
+    transmission.bezierCurve = constructBcurve(
+      transmission.originCoords,
+      transmission.destinationCoords,
+      transmission.destinationNumDate,
+      minTransmissionDate
+    );
   });
 
   return transmissionDataCopy;
 
 }
 
-export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData, map) => {
+export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData, map, minTransmissionDate) => {
 
   /*
     walk through nodes and update attributes that can mutate
