@@ -73,7 +73,8 @@ const getStyles = function (width) {
     entropy: state.entropy.entropy,
     browserDimensions: state.browserDimensions.browserDimensions,
     loaded: state.entropy.loaded,
-    shouldReRender: false
+    shouldReRender: false,
+    panelLayout: state.controls.panelLayout,
   };
 })
 class Entropy extends React.Component {

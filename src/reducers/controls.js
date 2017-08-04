@@ -63,7 +63,8 @@ const getDefaultState = function () {
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
-    mapAnimationPlayPauseButton: "Play"
+    mapAnimationPlayPauseButton: "Play",
+    panelLayout: "thirds",
   };
 };
 
@@ -247,6 +248,10 @@ const Controls = (state = getDefaultState(), action) => {
   case types.CHANGE_ANIMATION_START:
     return Object.assign({}, state, {
       mapAnimationStartDate: action.data
+    });
+  case types.CHANGE_PANEL_LAYOUT:
+    return Object.assign({}, state, {
+      panelLayout: action.data
     });
   case types.NEW_COLORS:
     const newState = Object.assign({}, state, {

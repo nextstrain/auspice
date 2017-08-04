@@ -37,7 +37,8 @@ there are actually backlinks from the phylotree tree
     temporalConfidence: state.controls.temporalConfidence,
     showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
-    mutType: state.controls.mutType
+    mutType: state.controls.mutType,
+    panelLayout: state.controls.panelLayout,
   };
 })
 class TreeView extends React.Component {
@@ -147,12 +148,14 @@ class TreeView extends React.Component {
   }
 
   render() {
+    const widescreen = this.props.browserDimensions && this.props.browserDimensions.width > twoColumnBreakpoint && this.props.splitTreeAndMap;
+    const thirds = this.props.panelLayout === "thirds"; /* add a check here for min browser width tbd */
+
     const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > twoColumnBreakpoint && this.props.splitTreeAndMap ? .5 : 1,
-      vertical: 1.0,
+      horizontal: widescreen || thirds ? .5 : 1,
+      vertical: this.props.panelLayout === "thirds" ? .667 : 1.0,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
-      minHeight: 480,
       maxAspectRatio: 1.0
     });
     const cardTitle = this.state.selectedBranch ? "." : "Phylogeny";

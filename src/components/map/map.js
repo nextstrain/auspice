@@ -13,10 +13,10 @@ import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnB
 import computeResponsive from "../../util/computeResponsive";
 import {getLatLongs} from "../../util/mapHelpersLatLong";
 import { modifyURLquery } from "../../util/urlHelpers";
-import { 
-  createDemeAndTransmissionData, 
-  updateDemeAndTransmissionDataColAndVis, 
-  updateDemeAndTransmissionDataLatLong 
+import {
+  createDemeAndTransmissionData,
+  updateDemeAndTransmissionDataColAndVis,
+  updateDemeAndTransmissionDataLatLong
 } from "../../util/mapHelpersLatLong";
 
 import { changeDateFilter } from "../../actions/treeProperties";
@@ -52,6 +52,7 @@ import {
     dateMax: state.controls.dateMax,
     dateScale: state.controls.dateScale,
     dateFormat: state.controls.dateFormat,
+    panelLayout: state.controls.panelLayout,
   };
 })
 
@@ -156,12 +157,15 @@ class Map extends React.Component {
     // }
   }
   doComputeResponsive(nextProps) {
+
+    const widescreen = nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap);
+    const thirds = this.props.panelLayout === "thirds"; /* add a check here for min browser width tbd */
+
     return computeResponsive({
-      horizontal: nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap) ? .5 : 1,
-      vertical: 1.0, /* if we are in single column, full height */
+      horizontal: widescreen || thirds ? .5 : 1,
+      vertical: this.props.panelLayout === "thirds" ? .667 : 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
-      minHeight: 480,
       maxAspectRatio: 1.0,
     })
   }
