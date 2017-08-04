@@ -1349,6 +1349,9 @@ PhyloTree.prototype.rerenderAllElements = function () {
   this.mapToScreen();
   this.svg.selectAll(".branch")
     .style("stroke-width", (d) => d["stroke-width"]);
+  this.svg.selectAll(".branch")
+    .filter(".S")
+    .attr("d", (d) => d.branch[0]);
 };
 
 
