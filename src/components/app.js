@@ -15,7 +15,7 @@ import * as globals from "../util/globals";
 import Sidebar from "react-sidebar";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
-import FilterOnHeader from "./framework/filterOnHeader";
+import Header from "./framework/header";
 import { analyticsNewPage } from "../util/googleAnalytics";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
@@ -84,7 +84,7 @@ class App extends React.Component {
               handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
             />
           }
-          <FilterOnHeader sidebar={this.state.sidebarOpen || this.state.sidebarDocked}/>
+          <Header sidebar={this.state.sidebarOpen || this.state.sidebarDocked}/>
           <TreeView
             query={queryString.parse(this.context.router.history.location.search)}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
