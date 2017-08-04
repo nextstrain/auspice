@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import { dataFont, medGrey } from "../../globalStyles";
+import { authorString } from "../../util/stringHelpers";
 import computeResponsive from "../../util/computeResponsive";
 import Flex from "./flex";
 import d3 from "d3";
@@ -147,7 +148,7 @@ class Footer extends React.Component {
         return (
           <div key={index} style={styles.citationItem}>
             {authorsToURL[authors] ?
-              <a href={authorsToURL[authors]} target="_blank">{authors}</a> :
+              <a href={authorsToURL[authors]} target="_blank">{authorString(authors)}</a> :
               authors}
           </div>
         );
