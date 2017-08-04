@@ -9,7 +9,7 @@ import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "../../util/mapHelpers";
-import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint } from "../../util/globals";
+import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint, enableAnimationPerfTesting } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import {getLatLongs} from "../../util/mapHelpersLatLong";
 import { modifyURLquery } from "../../util/urlHelpers";
@@ -488,6 +488,7 @@ class Map extends React.Component {
       });
       this.animateMap();
     } else {
+      if (enableAnimationPerfTesting) {window.Perf.resetCount();}
       clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
       window.NEXTSTRAIN.mapAnimationLoop = null;
       this.props.dispatch({
@@ -535,7 +536,7 @@ class Map extends React.Component {
     /* we should setState({reference}) so that it's not possible to create multiple */
 
     window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
-
+      if (enableAnimationPerfTesting) {window.Perf.bump();}
       const newWindow = {min: numericToCalendar(this.props.dateFormat, this.props.dateScale, leftWindow),
         max: numericToCalendar(this.props.dateFormat, this.props.dateScale, rightWindow)};
 
