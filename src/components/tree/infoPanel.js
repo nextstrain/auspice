@@ -59,12 +59,12 @@ const getBranchTimeJSX = (d, temporalConfidence) => {
  * @return {JSX} to be displayed
  */
 const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidence, colorBy) => {
-  if (colorBy === "num_date" || colorBy.slice(0, 2) === "gt") {
-    if (colorBy !== distanceMeasure) {
-      /* i.e. colorBy is date and branch lengths are divergence - should still show node date */
-      return getBranchTimeJSX(d, temporalConfidence);
-    }
-    return null;
+  if (colorBy.slice(0, 2) === "gt") {
+    return null; /* muts ahave already been displayed */
+  }
+  if (colorBy === "num_date") {
+    /* if colorBy is date and branch lengths are divergence we should still show node date */
+    return (colorBy !== distanceMeasure) ? getBranchTimeJSX(d, temporalConfidence) : null;
   }
   if (colorByConfidence === true) {
     const lkey = colorBy + "_confidence";
