@@ -94,7 +94,8 @@ const parseEncodedGenotype = (colorBy) => {
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
     defaultColorBy: state.controls.defaultColorBy,
-    shouldReRender: false
+    shouldReRender: false,
+    panelLayout: state.controls.panelLayout
   };
 })
 class Entropy extends React.Component {

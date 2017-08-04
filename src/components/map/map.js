@@ -46,7 +46,8 @@ import { incommingMapPNG } from "../download/helperFunctions";
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
     mapTriplicate: state.controls.mapTriplicate,
     dateMin: state.controls.dateMin,
-    dateMax: state.controls.dateMax
+    dateMax: state.controls.dateMax,
+    panelLayout: state.controls.panelLayout
   };
 })
 
@@ -142,12 +143,14 @@ class Map extends React.Component {
 
   }
   doComputeResponsive(nextProps) {
+
+    const widescreen = nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap);
+    const thirds = this.props.panelLayout === "thirds"; /* add a check here for min browser width tbd */
     return computeResponsive({
-      horizontal: nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap) ? 0.5 : 1,
-      vertical: 1.0, /* if we are in single column, full height */
+      horizontal: widescreen || thirds ? 0.5 : 1,
+      vertical: this.props.panelLayout === "thirds" ? 0.667 : 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
-      minHeight: 480,
       maxAspectRatio: 1.0
     });
   }
