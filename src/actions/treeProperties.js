@@ -56,7 +56,7 @@ export const updateVisibleTipsAndBranchThicknesses = function (
  * @param  {string|false} newMax optional
  * @return {null} side-effects: a single action
  */
-export const changeDateFilter = function ({newMin = false, newMax = false}) {
+export const changeDateFilter = function ({newMin = false, newMax = false, quickdraw = false}) {
   return (dispatch, getState) => {
     const { tree, controls } = getState();
     if (!tree.nodes) {return;}
@@ -67,6 +67,7 @@ export const changeDateFilter = function ({newMin = false, newMax = false}) {
     const data = calculateVisiblityAndBranchThickness(tree, controls, dates);
     dispatch({
       type: types.CHANGE_DATES_VISIBILITY_THICKNESS,
+      quickdraw,
       dateMin: newMin ? newMin : controls.dateMin,
       dateMax: newMax ? newMax : controls.dateMax,
       visibility: data.visibility,

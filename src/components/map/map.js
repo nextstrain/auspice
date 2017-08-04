@@ -13,10 +13,10 @@ import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnB
 import computeResponsive from "../../util/computeResponsive";
 import {getLatLongs} from "../../util/mapHelpersLatLong";
 import { modifyURLquery } from "../../util/urlHelpers";
-import { 
-  createDemeAndTransmissionData, 
-  updateDemeAndTransmissionDataColAndVis, 
-  updateDemeAndTransmissionDataLatLong 
+import {
+  createDemeAndTransmissionData,
+  updateDemeAndTransmissionDataColAndVis,
+  updateDemeAndTransmissionDataLatLong
 } from "../../util/mapHelpersLatLong";
 
 import { changeDateFilter } from "../../actions/treeProperties";
@@ -502,7 +502,7 @@ class Map extends React.Component {
   resetAnimation() {
     clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
     window.NEXTSTRAIN.mapAnimationLoop = null;
-    this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
+    this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
     this.props.dispatch({
       type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
       data: "Play"
@@ -541,7 +541,7 @@ class Map extends React.Component {
         max: numericToCalendar(this.props.dateFormat, this.props.dateScale, rightWindow)};
 
       /* first pass sets the timer to absolute min and absolute min + windowRange because they reference above initial time window */
-      this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max}));
+      this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max, quickdraw: true}));
       // don't modifyURLquery
 
       if (!this.props.mapAnimationCumulative) {
@@ -552,7 +552,7 @@ class Map extends React.Component {
       if (rightWindow >= end) {
         clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
         window.NEXTSTRAIN.mapAnimationLoop = null;
-        this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
+        this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
         this.props.dispatch({
           type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
           data: "Play"

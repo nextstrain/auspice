@@ -60,6 +60,7 @@ const getDefaultState = function () {
     filters: {},
     dateScale: d3.time.scale().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
     dateFormat: d3.time.format("%Y-%m-%d"),
+    quickdraw: false, // if true, components may skip expensive computes.
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
@@ -221,6 +222,7 @@ const Controls = (state = getDefaultState(), action) => {
     });
   case types.CHANGE_DATES_VISIBILITY_THICKNESS:
     return Object.assign({}, state, {
+      // quickdraw: action.quickdraw,
       dateMin: action.dateMin ? action.dateMin : state.dateMin,
       dateMax: action.dateMax ? action.dateMax : state.dateMax
     });
