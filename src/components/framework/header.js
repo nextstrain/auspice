@@ -50,47 +50,61 @@ class Header extends React.Component {
     );
   }
 
-  render() {
-    const styles = makeStyles(this.props.sidebar);
-    const button = (!this.props.filters.hasOwnProperty("authors") || this.props.filters.authors.length === 0) ?
+  makeText() {
+    if (!this.props.metadata.metadata) {
+      return null;
+    }
+    const metadata = this.props.metadata.metadata;
+    if (!this.props.filters.hasOwnProperty("authors") || this.props.filters.authors.length === 0) {
+      const numAuths = Object.keys(metadata.author_info).length;
+      return (<g>
+          <span style={infoPanelStyles.branchInfoHeading}>{metadata.title}</span>
+          <span style={infoPanelStyles.comment}>{` ${metadata.virus_count} samples from ${numAuths} publications`}</span>
+        </g>);
+    }
+    let inner;
+    const data = this.props.filters.authors.map((v) => ({
+      name: authorString(v),
+      n: metadata.author_info[v].n,
+      title: prettyString(metadata.author_info[v].title)
+    }));
+    if (data.length === 1) {
+      inner = (<g>
+          <span style={infoPanelStyles.branchInfoHeading}>{data[0].name}</span>
+          <span style={infoPanelStyles.comment}>{`  (${data[0].n} sequences)`}</span>
+          <span style={infoPanelStyles.branchInfoHeading}>{data[0].title}</span>
+        </g>);
+    } else if (data.length < 4) {
+      inner = (<g>{data.map((cv, idx) => (
+        <g key={idx}>
+          <span style={infoPanelStyles.branchInfoHeading}>{cv.name}</span>
+          <span style={infoPanelStyles.comment}>{`  (${cv.n} sequences)`}</span>
+        </g>
+      ))}</g>);
+    } else {
+      inner = (<g>
+          <span style={infoPanelStyles.branchInfoHeading}>{`${data.length} authors selected`}</span>
+        </g>);
+    }
+    return inner;
+  }
+
+  makeButton() {
+    return (!this.props.filters.hasOwnProperty("authors") || this.props.filters.authors.length === 0) ?
       null :
       (
         <button style={infoPanelStyles.buttonLink} onClick={() => this.clearAuthors()}>
           {"clear author filters"}
         </button>
       );
-    let inner;
-    if (!this.props.filters.hasOwnProperty("authors") || this.props.filters.authors.length === 0) {
-      inner = "Main title should come from Augur...";
-    } else {
-      const data = this.props.filters.authors.map((v) => ({
-        name: authorString(v),
-        n: this.props.metadata.metadata.controls.authors[v].count,
-        title: prettyString("paper title should be exported in augur metadata JSON")
-      }));
-      if (data.length === 1) {
-        inner = (<g>
-            <span style={infoPanelStyles.branchInfoHeading}>{data[0].name}</span>
-            <span style={infoPanelStyles.comment}>{`  (${data[0].n} sequences)`}</span>
-            <span style={infoPanelStyles.branchInfoHeading}>{data[0].title}</span>
-          </g>);
-      } else if (data.length < 4) {
-        inner = (<g>{data.map((cv, idx) => (
-          <g key={idx}>
-            <span style={infoPanelStyles.branchInfoHeading}>{cv.name}</span>
-            <span style={infoPanelStyles.comment}>{`  (${cv.n} sequences)`}</span>
-          </g>
-        ))}</g>);
-      } else {
-        inner = (<g>
-            <span style={infoPanelStyles.branchInfoHeading}>{`${data.length} authors selected`}</span>
-          </g>);
-      }
-    }
+  }
+
+  render() {
+    const styles = makeStyles(this.props.sidebar);
     return (
       <div style={styles.container}>
-        {inner}
-        {button}
+        {this.makeText()}
+        {this.makeButton()}
       </div>
     );
   }
