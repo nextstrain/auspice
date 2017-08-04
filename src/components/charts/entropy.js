@@ -108,14 +108,14 @@ class Entropy extends React.Component {
     this.getChartGeom = (p) => {
       const responsive = computeResponsive({
         horizontal: 1,
-        vertical: 0.3333333,
+        vertical: 0.35,
         browserDimensions: p.browserDimensions,
         sidebar: p.sidebar
       });
       return {
         responsive,
         width: responsive.width,
-        height: 300,
+        height: 300, /* look into using responsive.height */
         padBottom: 50,
         padLeft: 15,
         padRight: 12

@@ -154,10 +154,10 @@ class TreeView extends React.Component {
 
     const responsive = computeResponsive({
       horizontal: widescreen || thirds ? .5 : 1,
-      vertical: this.props.panelLayout === "thirds" ? .667 : 1.0,
+      vertical: this.props.panelLayout === "thirds" ? 0.85 : 1.0,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
-      maxAspectRatio: 1.0
+      maxAspectRatio: 1.2
     });
     const cardTitle = this.state.selectedBranch ? "." : "Phylogeny";
 

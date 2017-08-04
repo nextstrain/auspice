@@ -38,7 +38,7 @@ const computeResponsive = ({
   let height = null;
 
   const horizontalPadding = horizontal === 1 ? 34 : 56; // derived from empirical testing, depends on Card margins
-  const verticalPadding = 165;
+  const verticalPadding = 135;
 
   // sidebar scrollbar has width equal to its offsetWidth - clientWidth
   let scrollbarWidth = 0;

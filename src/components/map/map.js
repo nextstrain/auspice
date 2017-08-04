@@ -148,10 +148,10 @@ class Map extends React.Component {
     const thirds = this.props.panelLayout === "thirds"; /* add a check here for min browser width tbd */
     return computeResponsive({
       horizontal: widescreen || thirds ? 0.5 : 1,
-      vertical: this.props.panelLayout === "thirds" ? 0.667 : 1.0, /* if we are in single column, full height */
+      vertical: this.props.panelLayout === "thirds" ? 0.85 : 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
-      maxAspectRatio: 1.0
+      maxAspectRatio: 1.2
     });
   }
   maybeSetupD3DOMNode() {
