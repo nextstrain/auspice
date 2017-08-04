@@ -222,7 +222,7 @@ const Controls = (state = getDefaultState(), action) => {
     });
   case types.CHANGE_DATES_VISIBILITY_THICKNESS:
     return Object.assign({}, state, {
-      // quickdraw: action.quickdraw,
+      quickdraw: action.quickdraw,
       dateMin: action.dateMin ? action.dateMin : state.dateMin,
       dateMax: action.dateMax ? action.dateMax : state.dateMax
     });
