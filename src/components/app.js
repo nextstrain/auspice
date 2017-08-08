@@ -16,6 +16,7 @@ import Sidebar from "react-sidebar";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
 import { analyticsNewPage } from "../util/googleAnalytics";
+import { filesDropped } from "../actions/filesDropped";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   React-Router v4 injects length, action, location, push etc into props,
@@ -53,6 +54,13 @@ class App extends React.Component {
   }
   componentWillMount() {
     this.props.dispatch(loadJSONs(this.context.router));
+  }
+  componentDidMount() {
+    document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
+    document.addEventListener("drop", (e) => {
+      e.preventDefault();
+      return this.props.dispatch(filesDropped(e.dataTransfer.files));
+    }, false);
   }
   componentDidUpdate() {
     /* browser back / forward */
