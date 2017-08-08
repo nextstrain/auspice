@@ -244,6 +244,7 @@ const Controls = (state = getDefaultState(), action) => {
     });
   case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
     return Object.assign({}, state, {
+      quickdraw: action.data === "Play" ? false : true,
       mapAnimationPlayPauseButton: action.data
     });
   case types.CHANGE_ANIMATION_START:

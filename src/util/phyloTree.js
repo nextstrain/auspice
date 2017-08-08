@@ -1348,8 +1348,10 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt, 
 PhyloTree.prototype.rerenderAllElements = function () {
   this.mapToScreen();
   this.svg.selectAll(".branch")
+    .transition().duration(0)
     .style("stroke-width", (d) => d["stroke-width"]);
   this.svg.selectAll(".branch")
+    .transition().duration(0)
     .filter(".S")
     .attr("d", (d) => d.branch[0]);
 };

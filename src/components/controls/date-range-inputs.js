@@ -95,6 +95,7 @@ class DateRangeInputs extends React.Component {
     }
 
     const quickdraw = debounce;
+    const quickdraw = false;
     // {numDateValues} is an array of numDates received from Slider
     // [numDateStart, numDateEnd]
     const newRange = {min: numericToCalendar(this.props.dateFormat, this.props.dateScale, numDateValues[0]),
