@@ -1346,6 +1346,7 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt, 
 
 /* this need a bit more work as the quickdraw functionality improves */
 PhyloTree.prototype.rerenderAllElements = function () {
+  // console.log("rerenderAllElements")
   this.mapToScreen();
   this.svg.selectAll(".branch")
     .transition().duration(0)
