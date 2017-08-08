@@ -37,7 +37,9 @@ there are actually backlinks from the phylotree tree
     temporalConfidence: state.controls.temporalConfidence,
     showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
-    mutType: state.controls.mutType
+    mutType: state.controls.mutType,
+    sequences: state.sequences,
+    colorScale: state.controls.colorScale
   };
 })
 class TreeView extends React.Component {
@@ -169,6 +171,8 @@ class TreeView extends React.Component {
           viewer={this.Viewer}
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
+          colorScale={this.props.colorScale}
+          sequences={this.props.sequences}
         />
         <BranchSelectedPanel
           responsive={responsive}
