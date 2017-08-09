@@ -55,6 +55,16 @@ const Tree = (state = getDefaultState(), action) => {
       nodeColors: action.nodeColors,
       nodeColorsVersion: action.version
     });
+  case types.ADD_COLOR_BYS:
+    /* modify in place ?!?! */
+    for (const node of state.nodes) {
+      if (action.taxa.indexOf(node.strain) !== -1) {
+        action.newColorBys.map((colorBy, idx) => {
+          node.attr[colorBy] = action.data[node.strain][idx];
+        });
+      }
+    }
+    return state;
   default:
     return state;
   }
