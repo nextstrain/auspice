@@ -276,7 +276,10 @@ export const salientPropChanges = (props, nextProps, tree) => {
 
   /* branch labels & confidence use 0: no change, 1: turn off, 2: turn on */
   const branchLabels = props.showBranchLabels === nextProps.showBranchLabels ? 0 : nextProps.showBranchLabels ? 2 : 1;
-  const confidence = props.temporalConfidence.on === nextProps.temporalConfidence.on ? 0 : nextProps.temporalConfidence.on ? 2 : 1;
+  const confidence = props.temporalConfidence.on === nextProps.temporalConfidence.on && props.temporalConfidence.display === nextProps.temporalConfidence.display ? 0 :
+    (props.temporalConfidence.on === false && nextProps.temporalConfidence.on === false) ? 0 :
+    (nextProps.temporalConfidence.display === false || nextProps.temporalConfidence.on === false) ? 1 :
+    (nextProps.temporalConfidence.display === true && nextProps.temporalConfidence.on === true) ? 2 : 0;
 
   /* sometimes we may want smooth transitions */
   let branchTransitionTime = false; /* false = no transition. Use when speed is critical */
@@ -314,7 +317,6 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
   const tipStyleToUpdate = {};
   const branchAttrToUpdate = {};
   const branchStyleToUpdate = {};
-  let updateConfidenceFlag = false;
 
   if (changes.visibility) {
     tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
@@ -329,16 +331,10 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
     const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy);
     branchStyleToUpdate["stroke"] = branchStrokes;
     tipStyleToUpdate["stroke"] = branchStrokes;
-    if (nextProps.temporalConfidence) {
-      updateConfidenceFlag = true;
-    }
   }
   if (changes.branchThickness) {
     // console.log("branch width change detected - update branch stroke-widths")
     branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
-    if (nextProps.temporalConfidence) {
-      updateConfidenceFlag = true;
-    }
   }
 
   /* implement style * attr changes */
@@ -365,8 +361,13 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
   if (changes.confidence === 1) {
     tree.removeConfidence(mediumTransitionDuration);
   } else if (changes.confidence === 2) {
-    tree.drawConfidence(mediumTransitionDuration);
-  } else if (updateConfidenceFlag) {
+    if (changes.layout) { /* setTimeout else they come back in before the branches have transitioned */
+      setTimeout(() => tree.drawConfidence(mediumTransitionDuration), mediumTransitionDuration * 1.5);
+    } else {
+      tree.drawConfidence(mediumTransitionDuration);
+    }
+  } else if (nextProps.temporalConfidence.on && (changes.branchThickness || changes.colorBy)) {
+     /* some updates may necessitate an updating of the CIs (e.g. ∆ branch thicknesses) */
     tree.updateConfidence(changes.tipTransitionTime);
   }
 };
