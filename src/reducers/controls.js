@@ -60,6 +60,7 @@ const getDefaultState = function () {
     filters: {},
     dateScale: d3.time.scale().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
     dateFormat: d3.time.format("%Y-%m-%d"),
+    showDownload: false,
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
@@ -303,6 +304,14 @@ const Controls = (state = getDefaultState(), action) => {
         value: action.value
       }
     )});
+  case types.TRIGGER_DOWNLOAD_MODAL:
+    return Object.assign({}, state, {
+      showDownload: true
+    });
+  case types.DISMISS_DOWNLOAD_MODAL:
+    return Object.assign({}, state, {
+      showDownload: false
+    });
   default:
     return state;
   }

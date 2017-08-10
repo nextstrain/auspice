@@ -15,6 +15,7 @@ import * as globals from "../util/globals";
 import Sidebar from "react-sidebar";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
+import DownloadModal from "./controls/download";
 import { analyticsNewPage } from "../util/googleAnalytics";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
@@ -62,44 +63,47 @@ class App extends React.Component {
   }
   render() {
     return (
-      <Sidebar
-        sidebar={
-          <div>
-            <TitleBar minified={true}/>
-            <Controls/>
-            <ToggleSidebarTab
-              open={this.state.sidebarDocked}
-              handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
-            />
-          </div>
-        }
-        open={this.state.sidebarOpen}
-        docked={this.state.sidebarDocked}
-        onSetOpen={(a) => {this.setState({sidebarOpen: a});}}>
-        <Background>
-          {this.state.sidebarOpen || this.state.sidebarDocked ? <div/> :
-            <ToggleSidebarTab
-              open={this.state.sidebarDocked}
-              handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
-            />
+      <g>
+        <DownloadModal/>
+        <Sidebar
+          sidebar={
+            <div>
+              <TitleBar minified={true}/>
+              <Controls/>
+              <ToggleSidebarTab
+                open={this.state.sidebarDocked}
+                handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
+              />
+            </div>
           }
-          <TreeView
-            query={queryString.parse(this.context.router.history.location.search)}
-            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-          />
-          <Map
-            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            justGotNewDatasetRenderNewMap={false}
-          />
-          <Frequencies/>
-          <Entropy
-            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-          />
-          <Footer
-            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-          />
-        </Background>
-      </Sidebar>
+          open={this.state.sidebarOpen}
+          docked={this.state.sidebarDocked}
+          onSetOpen={(a) => {this.setState({sidebarOpen: a});}}>
+          <Background>
+            {this.state.sidebarOpen || this.state.sidebarDocked ? <div/> :
+              <ToggleSidebarTab
+                open={this.state.sidebarDocked}
+                handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
+              />
+            }
+            <TreeView
+              query={queryString.parse(this.context.router.history.location.search)}
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+            />
+            <Map
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+              justGotNewDatasetRenderNewMap={false}
+            />
+            <Frequencies/>
+            <Entropy
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+            />
+            <Footer
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+            />
+          </Background>
+        </Sidebar>
+      </g>
     );
   }
 }
