@@ -1,9 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
-import { materialButton, medGrey } from "../../globalStyles";
+import { materialButton, medGrey, infoPanelStyles } from "../../globalStyles";
 import RectangularTreeLayout from "../framework/svg-tree-layout-rectangular";
-
+import { stopProp } from "../tree/TipSelectedPanel";
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -35,6 +35,9 @@ class DownloadModal extends React.Component {
       }
     };
   }
+  dismissModal() {
+    this.props.dispatch({ type: DISMISS_DOWNLOAD_MODAL });
+  }
   downloadButtons() {
     const names = ["Tree (newick)", "Metadata (CSV)"];
     const callbacks = [
@@ -62,8 +65,8 @@ class DownloadModal extends React.Component {
     const styles = this.getStyles(this.props.browserDimensions.width, this.props.browserDimensions.height);
     const meta = this.props.metadata.metadata;
     return (
-      <div style={styles.behind}>
-        <div className="static container" style={styles.modal}>
+      <div style={styles.behind} onClick={this.dismissModal.bind(this)}>
+        <div className="static container" style={styles.modal} onClick={(e) => stopProp(e)}>
           <div className="row">
             <div className="col-md-1"/>
             <div className="col-md-10">
@@ -86,17 +89,11 @@ class DownloadModal extends React.Component {
               <h2>Download data as</h2>
               {this.downloadButtons()}
 
+              <p style={infoPanelStyles.comment}>
+                (click outside this box to go back to the tree)
+              </p>
             </div>
           </div>
-
-
-          <button
-            key={2}
-            style={materialButton}
-            onClick={() => {this.props.dispatch({ type: DISMISS_DOWNLOAD_MODAL });}}
-          >
-            <span style={{left: -10, position: "relative", top: 10}}>{"CLOSE THIS MODAL"}</span>
-          </button>
         </div>
       </div>
     );

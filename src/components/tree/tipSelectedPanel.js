@@ -21,7 +21,7 @@ const styles = {
   }
 };
 
-const stopProp = (e) => {
+export const stopProp = (e) => {
   if (!e) {e = window.event;}
   e.cancelBubble = true;
   if (e.stopPropagation) {e.stopPropagation();}
