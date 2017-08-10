@@ -4,7 +4,6 @@ import Papa from "papaparse";
 import { ADD_COLOR_BYS } from "./types";
 
 const csvComplete = (dispatch, getState, results, file) => {
-  console.log("Parsing complete:", results, file);
   const strainKey = results.meta.fields[0];
   const newColorBys = results.meta.fields.slice(1);
   const csvTaxa = results.data.map((o) => o[strainKey]);
@@ -20,6 +19,14 @@ const csvComplete = (dispatch, getState, results, file) => {
   for (const o of results.data.filter((r) => taxaMatchingTree.indexOf(r.strain) !== -1)) {
     // console.log("adding data", o);
     data[o.strain] = newColorBys.map((x) => o[x]);
+  }
+  /* edge cases where the CSV has no "real" info */
+  if (taxaMatchingTree.length === 0 || newColorBys.length === 0) {
+    dispatch(errorNotification({
+      message: file.name + " had no (relevent) information",
+      details: newColorBys.length === 0 ? "No columns to add as traits" : "No taxa which match those in the tree"
+    }));
+    return;
   }
   dispatch({type: ADD_COLOR_BYS, newColorBys, data, taxa: taxaMatchingTree});
   dispatch(successNotification({
@@ -37,9 +44,10 @@ export const filesDropped = (files) => {
     for (const file of files) {
       if (file.type !== "text/csv") {
         dispatch(warningNotification({message: "Non-CSV File dropped", details: file.name}));
+      } else {
+        // http://papaparse.com/docs#config
+        Papa.parse(file, {header: true, complete: csvComplete.bind(this, dispatch, getState), error: csvError.bind(this, dispatch), comments: "#", skipEmptyLines: true});
       }
-      // http://papaparse.com/docs#config
-      Papa.parse(file, {header: true, complete: csvComplete.bind(this, dispatch, getState), error: csvError.bind(this, dispatch), comments: "#", skipEmptyLines: true});
     }
   };
 };
