@@ -80,6 +80,13 @@ const discreteAttributeScale = (nodes, attr) => {
   domain.sort((a, b) => stateCount[a] > stateCount[b]);
   // note: colors[n] has n colors
   const colorList = domain.length < colors.length ? colors[domain.length] : colors[colors.length - 1];
+
+  /* if NA / undefined / unknown, change the colours to grey */
+  for (const key of ["unknown", "undefined", "NA", "NaN"]) {
+    if (domain.indexOf(key) !== -1) {
+      colorList[domain.indexOf(key)] = "#DDDDDD";
+    }
+  }
   return d3.scale.ordinal()
                  .domain(domain)
                  .range(colorList);
