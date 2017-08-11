@@ -4,6 +4,7 @@ import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, medGrey, infoPanelStyles } from "../../globalStyles";
 import RectangularTreeLayout from "../framework/svg-tree-layout-rectangular";
 import { stopProp } from "../tree/TipSelectedPanel";
+import { authorString } from "../../util/stringHelpers";
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -31,7 +32,8 @@ class DownloadModal extends React.Component {
         width: bw - 2 * 200,
         height: bh - 2 * 130,
         borderRadius: 2,
-        backgroundColor: "rgba(250, 250, 250, 1)"
+        backgroundColor: "rgba(250, 250, 250, 1)",
+        overflowY: "auto"
       }
     };
   }
@@ -69,8 +71,13 @@ class DownloadModal extends React.Component {
         <div className="static container" style={styles.modal} onClick={(e) => stopProp(e)}>
           <div className="row">
             <div className="col-md-1"/>
-            <div className="col-md-10">
+            <div className="col-md-7">
               <h1>Download Data</h1>
+            </div>
+          </div>
+          <div className="row">
+            <div className="col-md-1"/>
+            <div className="col-md-7">
               <h2>Dataset details</h2>
               {meta.title} (last updated {meta.updated}) contains {meta.virus_count} sequences from {Object.keys(meta.author_info).length} authors, some of which may be unpublished.
               <br/>
@@ -92,6 +99,14 @@ class DownloadModal extends React.Component {
               <p style={infoPanelStyles.comment}>
                 (click outside this box to go back to the tree)
               </p>
+            </div>
+            <div className="col-md-3">
+              <h2>Data providers</h2>
+              {Object.keys(meta.author_info).sort((a, b) => {
+                return meta.author_info[a].n > meta.author_info[b].n ? -1 : 1;
+              }).map((k) => (
+                <g>{authorString(k)} (n = {meta.author_info[k].n})<br/></g>
+              ))}
             </div>
           </div>
         </div>
