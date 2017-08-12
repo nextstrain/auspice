@@ -34,11 +34,15 @@ const genericScale = (cmin, cmax, vals = false) => {
 };
 
 
-const minMaxAttributeScale = (nodes, attr) => {
-  const vals = nodes.map((n) => n.attr[attr])
-    .filter((n) => n !== undefined)
-    .filter((item, i, ar) => ar.indexOf(item) === i);
-  return genericScale(d3.min(vals), d3.max(vals), vals);
+const minMaxAttributeScale = (nodes, attr, options) => {
+  if (options.vmin && options.vmax) {
+    return genericScale(options.vmin, options.vmax);
+  } else {
+    const vals = nodes.map((n) => n.attr[attr])
+      .filter((n) => n !== undefined)
+      .filter((item, i, ar) => ar.indexOf(item) === i);
+    return genericScale(d3.min(vals), d3.max(vals), vals);
+  }
 };
 
 const integerAttributeScale = (nodes, attr) => {
@@ -132,13 +136,13 @@ const getColorScale = (colorBy, tree, sequences, colorOptions, version) => {
     } else if (colorOptions && colorOptions[colorBy].type === "continuous") {
       // console.log("making a continuous color scale for ", colorBy)
       continuous = true;
-      colorScale = minMaxAttributeScale(tree.nodes, colorBy);
+      colorScale = minMaxAttributeScale(tree.nodes, colorBy, colorOptions[colorBy]);
     }
   } else {
     // This shouldn't ever happen!
     // console.log("no colorOptions for ", colorBy, " returning minMaxAttributeScale")
     continuous = true;
-    colorScale = minMaxAttributeScale(tree.nodes, colorBy);
+    colorScale = minMaxAttributeScale(tree.nodes, colorBy, colorOptions[colorBy]);
   }
   return {
     "scale": colorScale,

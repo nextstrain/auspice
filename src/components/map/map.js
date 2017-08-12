@@ -9,7 +9,7 @@ import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "../../util/mapHelpers";
-import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint } from "../../util/globals";
+import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint, enableAnimationPerfTesting } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import {getLatLongs} from "../../util/mapHelpersLatLong";
 import { modifyURLquery } from "../../util/urlHelpers";
@@ -124,7 +124,17 @@ class Map extends React.Component {
       treeChanged: this.props.treeVersion !== nextProps.treeVersion, // treeVersion change implies tree is ready (modified by the same action)
       sidebarChanged: this.props.sidebar !== nextProps.sidebar
     };
-    if (Object.values(changes).some((v) => v === true)) {
+    // Object.values would be the obvious thing to do here
+    // but not supported in many browsers including iOS Safari
+    let somethingChanged = false;
+    for (var property in changes) {
+      if (changes.hasOwnProperty(property)) {
+        if (changes[property] === true) {
+          somethingChanged = true;
+        }
+      }
+    }
+    if (somethingChanged) {
       this.setState({responsive: this.doComputeResponsive(nextProps)});
     }
     // if (
@@ -501,6 +511,7 @@ class Map extends React.Component {
       });
       this.animateMap();
     } else {
+      if (enableAnimationPerfTesting) {window.Perf.resetCount();}
       clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
       window.NEXTSTRAIN.mapAnimationLoop = null;
       this.props.dispatch({
@@ -514,7 +525,7 @@ class Map extends React.Component {
   resetAnimation() {
     clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
     window.NEXTSTRAIN.mapAnimationLoop = null;
-    this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
+    this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
     this.props.dispatch({
       type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
       data: "Play"
@@ -548,12 +559,12 @@ class Map extends React.Component {
     /* we should setState({reference}) so that it's not possible to create multiple */
 
     window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
-
+      if (enableAnimationPerfTesting) {window.Perf.bump();}
       const newWindow = {min: numericToCalendar(this.props.dateFormat, this.props.dateScale, leftWindow),
         max: numericToCalendar(this.props.dateFormat, this.props.dateScale, rightWindow)};
 
       /* first pass sets the timer to absolute min and absolute min + windowRange because they reference above initial time window */
-      this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max}));
+      this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max, quickdraw: true}));
       // don't modifyURLquery
 
       if (!this.props.mapAnimationCumulative) {
@@ -564,7 +575,7 @@ class Map extends React.Component {
       if (rightWindow >= end) {
         clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
         window.NEXTSTRAIN.mapAnimationLoop = null;
-        this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
+        this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
         this.props.dispatch({
           type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
           data: "Play"
