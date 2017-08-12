@@ -1146,11 +1146,6 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
   setTimeout(fadeBack(this.svg, 0.2 * dt), 1.5 * dt);
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
-
-  /* if conditions are met then add back the confidence intervals */
-  if (this.layout === "rect") {
-    setTimeout(() => this.drawConfidence(false, true), 1.5 * dt);
-  }
 };
 
 /**
