@@ -273,6 +273,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
   const branchThickness = props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion;
   const layout = props.layout !== nextProps.layout;
   const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
+  const rerenderAllElements = nextProps.quickdraw === false && props.quickdraw === true;
 
   /* branch labels & confidence use 0: no change, 1: turn off, 2: turn on */
   const branchLabels = props.showBranchLabels === nextProps.showBranchLabels ? 0 : nextProps.showBranchLabels ? 2 : 1;
@@ -300,7 +301,9 @@ export const salientPropChanges = (props, nextProps, tree) => {
     branchTransitionTime,
     tipTransitionTime,
     branchLabels,
-    confidence
+    confidence,
+    quickdraw: nextProps.quickdraw,
+    rerenderAllElements
   };
 };
 
@@ -336,15 +339,14 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
     // console.log("branch width change detected - update branch stroke-widths")
     branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
   }
-
   /* implement style * attr changes */
   if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
     // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
-    tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, changes.branchTransitionTime);
+    tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, changes.branchTransitionTime, changes.quickdraw);
   }
   if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
     // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
-    tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, changes.tipTransitionTime);
+    tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, changes.tipTransitionTime, changes.quickdraw);
   }
 
   if (changes.layout) { /* swap layouts */
@@ -369,5 +371,9 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
   } else if (nextProps.temporalConfidence.on && (changes.branchThickness || changes.colorBy)) {
      /* some updates may necessitate an updating of the CIs (e.g. ∆ branch thicknesses) */
     tree.updateConfidence(changes.tipTransitionTime);
+  }
+
+  if (changes.rerenderAllElements) {
+    tree.rerenderAllElements();
   }
 };

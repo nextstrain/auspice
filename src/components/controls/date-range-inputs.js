@@ -9,9 +9,7 @@ import { modifyURLquery } from "../../util/urlHelpers";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
 import d3 from "d3";
-import {
-  MAP_ANIMATION_PLAY_PAUSE_BUTTON
-} from "../../actions/types.js";
+import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types.js";
 
 moment.updateLocale("en", {
   longDateFormat: {
@@ -34,7 +32,7 @@ class DateRangeInputs extends React.Component {
     super(props);
     this.state = {
       lastSliderUpdateTime: Date.now()
-    }
+    };
   }
   static contextTypes = {
     router: React.PropTypes.object.isRequired
@@ -84,6 +82,7 @@ class DateRangeInputs extends React.Component {
   }
 
   updateFromSlider(debounce, numDateValues) {
+    /* debounce: boolean. TRUE: both debounce and quickdraw.*/
     this.maybeClearMapAnimationInterval()
 
     if (debounce) {
@@ -95,22 +94,24 @@ class DateRangeInputs extends React.Component {
       // console.log("UPDATING", currentTime, this.state.lastSliderUpdateTime)
       this.setState({lastSliderUpdateTime: currentTime});
     }
-
     // {numDateValues} is an array of numDates received from Slider
     // [numDateStart, numDateEnd]
     const newRange = {min: numericToCalendar(this.props.dateFormat, this.props.dateScale, numDateValues[0]),
       max: numericToCalendar(this.props.dateFormat, this.props.dateScale, numDateValues[1])};
     if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) { // update min
-      this.props.dispatch(changeDateFilter({newMin: newRange.min}));
+      this.props.dispatch(changeDateFilter({newMin: newRange.min, quickdraw: debounce}));
       modifyURLquery(this.context.router, {dmin: newRange.min}, true);
     } else if (this.props.dateMin === newRange.min &&
                this.props.dateMax !== newRange.max) { // update max
-      this.props.dispatch(changeDateFilter({newMax: newRange.max}));
+      this.props.dispatch(changeDateFilter({newMax: newRange.max, quickdraw: debounce}));
       modifyURLquery(this.context.router, {dmax: newRange.max}, true);
     } else if (this.props.dateMin !== newRange.min &&
                this.props.dateMax !== newRange.max) { // update both
-      this.props.dispatch(changeDateFilter({newMin: newRange.min, newMax: newRange.max}));
+      this.props.dispatch(changeDateFilter({newMin: newRange.min, newMax: newRange.max, quickdraw: debounce}));
       modifyURLquery(this.context.router, {dmin: newRange.min, dmax: newRange.max}, true);
+    } else if (debounce === false) {
+      /* this occurs when no dates have actually changed BUT we need to redraw (e.g. quickdraw has come off) */
+      this.props.dispatch(changeDateFilter({quickdraw: debounce}));
     }
     return null;
   }

@@ -1,5 +1,6 @@
 import d3 from "d3";
 import { dataFont, darkGrey } from "../globalStyles";
+import {debounce} from "lodash";
 
 /*
  * adds the total number of descendant leaves to each node in the tree
@@ -118,6 +119,10 @@ var PhyloTree = function(treeJson) {
   this.yScale = d3.scale.linear();
   this.zoomNode = this.nodes[0];
   addLeafCount(this.nodes[0]);
+
+  /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
+  this.debouncedMapToScreen = debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
+    {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
 };
 
 /*
@@ -161,6 +166,7 @@ PhyloTree.prototype.setDefaults = function () {
         tipLabelFill: "#555",
         tipLabelPadX: 8,
         tipLabelPadY: 2,
+      mapToScreenDebounceTime: 500
     };
 };
 
@@ -1266,7 +1272,7 @@ PhyloTree.prototype.updateTimeBar = function(d){
  * @param {object} styles object containing the styles to change
  * @param {int} dt time in milliseconds
  */
-PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) {
+PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt, quickdraw) {
   // assign new values and decide whether to update
   this.nodes.forEach(function(d, i) {
     d.update = false;
@@ -1289,8 +1295,12 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
     }
   });
   let updatePath = false;
-  if (styles["stroke-width"]){
-    this.mapToScreen();
+  if (styles["stroke-width"]) {
+    if (quickdraw) {
+      this.debouncedMapToScreen();
+    } else {
+      this.mapToScreen();
+    }
     updatePath = true;
   }
 
@@ -1328,6 +1338,20 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
       .call(update(Object.keys(attrs), Object.keys(styles)));
   }
 };
+
+/* this need a bit more work as the quickdraw functionality improves */
+PhyloTree.prototype.rerenderAllElements = function () {
+  // console.log("rerenderAllElements")
+  this.mapToScreen();
+  this.svg.selectAll(".branch")
+    .transition().duration(0)
+    .style("stroke-width", (d) => d["stroke-width"]);
+  this.svg.selectAll(".branch")
+    .transition().duration(0)
+    .filter(".S")
+    .attr("d", (d) => d.branch[0]);
+};
+
 
 /**
  * as updateAttributeArray, but accepts a callback function rather than an array
