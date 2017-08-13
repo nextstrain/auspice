@@ -11,7 +11,6 @@ export const pathStringGenerator = d3.svg.line()
 const extractLineSegmentForAnimationEffect = (
   numDateMin,
   numDateMax,
-  minTransmissionDate,
   originCoords,
   destinationCoords,
   originNumDate,
@@ -101,8 +100,7 @@ export const drawDemesAndTransmissions = (
   map,
   nodes,
   numDateMin,
-  numDateMax,
-  minTransmissionDate
+  numDateMax
 ) => {
 
   // define markers that are appended to the definition part of the group
@@ -147,7 +145,6 @@ export const drawDemesAndTransmissions = (
         extractLineSegmentForAnimationEffect(
           numDateMin,
           numDateMax,
-          minTransmissionDate,
           d.originCoords,
           d.destinationCoords,
           d.originNumDate,
@@ -198,7 +195,7 @@ export const drawDemesAndTransmissions = (
     .data(demeData)
     .enter().append("circle")
     .style("stroke", "none")
-    .style("fill-opacity", .6)
+    .style("fill-opacity", 0.65)
     .style("fill", (d) => { return d.color })
     .attr("r", (d) => { return 0 + Math.sqrt(d.count) * 4 })
     .attr("transform", (d) => {
@@ -213,7 +210,7 @@ export const drawDemesAndTransmissions = (
 
 }
 
-export const updateOnMoveEnd = (demeData, transmissionData, minTransmissionDate, d3elems, numDateMin, numDateMax, nodes) => {
+export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin, numDateMax, nodes) => {
   /* map has moved or rescaled, make demes and transmissions line up */
   if (d3elems) {
     d3elems.demes
@@ -229,7 +226,6 @@ export const updateOnMoveEnd = (demeData, transmissionData, minTransmissionDate,
           extractLineSegmentForAnimationEffect(
             numDateMin,
             numDateMax,
-            minTransmissionDate,
             d.originCoords,
             d.destinationCoords,
             d.originNumDate,
@@ -250,8 +246,7 @@ export const updateVisibility = (
   map,
   nodes,
   numDateMin,
-  numDateMax,
-  minTransmissionDate
+  numDateMax
 ) => {
 
   d3elems.demes
@@ -267,7 +262,6 @@ export const updateVisibility = (
           extractLineSegmentForAnimationEffect(
             numDateMin,
             numDateMax,
-            minTransmissionDate,
             d.originCoords,
             d.destinationCoords,
             d.originNumDate,

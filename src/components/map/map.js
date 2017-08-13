@@ -207,8 +207,7 @@ class Map extends React.Component {
         demeData,
         transmissionData,
         demeIndices,
-        transmissionIndices,
-        minTransmissionDate
+        transmissionIndices
       } = createDemeAndTransmissionData(
         this.props.nodes,
         this.props.visibility,
@@ -227,8 +226,7 @@ class Map extends React.Component {
         this.state.map,
         this.props.nodes,
         calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
-        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
-        minTransmissionDate
+        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax)
       );
 
       /* Set up leaflet events */
@@ -293,14 +291,12 @@ class Map extends React.Component {
     } = updateDemeAndTransmissionDataLatLong(
         this.state.demeData,
         this.state.transmissionData,
-        this.state.map,
-        this.state.minTransmissionDate
+        this.state.map
       );
 
       updateOnMoveEnd(
         newDemes,
         newTransmissions,
-        this.state.minTransmissionDate,
         this.state.d3elems,
         calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
         calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
@@ -366,8 +362,7 @@ class Map extends React.Component {
         this.state.map,
         nextProps.nodes,
         calendarToNumeric(nextProps.dateFormat, nextProps.dateScale, nextProps.dateMin),
-        calendarToNumeric(nextProps.dateFormat, nextProps.dateScale, nextProps.dateMax),
-        this.state.minTransmissionDate
+        calendarToNumeric(nextProps.dateFormat, nextProps.dateScale, nextProps.dateMax)
       );
 
       this.setState({

@@ -113,13 +113,9 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 const constructBcurve = (
   originLatLongPair,
   destinationLatLongPair,
-  destinationNumDate,
-  minTransmissionDate
+  destinationNumDate
 ) => {
-  const midpoint = computeMidpoint(
-    [originLatLongPair, destinationLatLongPair],
-    (destinationNumDate - minTransmissionDate) * 25.0
-  );
+  const midpoint = computeMidpoint(originLatLongPair, destinationLatLongPair);
   const Bcurve = Bezier(
     [
       originLatLongPair,
@@ -139,8 +135,7 @@ const maybeConstructTransmissionEvent = (
   visibility,
   map,
   offsetOrig,
-  offsetDest,
-  minTransmissionDate
+  offsetDest
 ) => {
 
   let latOrig, longOrig, latDest, longDest;
@@ -168,24 +163,21 @@ const maybeConstructTransmissionEvent = (
 
   if (validLatLongPair) {
 
-    let Bcurve;
+    let Bcurve = constructBcurve(validLatLongPair[0], validLatLongPair[1], child.attr["num_date"]);
+
+    /* set up interpolator with origin and destination numdates */
+    const interpolator = d3.interpolateNumber(node.attr.num_date, child.attr.num_date)
+
+    /* make a Bdates array as long as Bcurve */
     let Bdates = [];
+    Bcurve.forEach((d, i) => {
+      /* fill it with interpolated dates */
+      Bdates.push(
+        interpolator(i / (Bcurve.length - 1)) /* ie., 5 / 15ths of the way through = 2016.3243 */
+      )
+    });
 
-    if (minTransmissionDate) {
-      Bcurve = constructBcurve(validLatLongPair[0], validLatLongPair[1], child.attr["num_date"], minTransmissionDate);
 
-      /* set up interpolator with origin and destination numdates */
-      const interpolator = d3.interpolateNumber(node.attr.num_date, child.attr.num_date)
-
-      /* make a Bdates array as long as Bcurve */
-      Bcurve.forEach((d, i) => {
-        /* fill it with interpolated dates */
-        Bdates.push(
-          interpolator(i / (Bcurve.length - 1)) /* ie., 5 / 15ths of the way through = 2016.3243 */
-        )
-      });
-
-    }
 
     /* build up transmissions object */
     transmission = {
@@ -220,8 +212,7 @@ const maybeGetClosestTransmissionEvent = (
   nodeColors,
   visibility,
   map,
-  offsetOrig,
-  minTransmissionDate,
+  offsetOrig
 ) => {
   const possibleEvents = [];
   let closestEvent;
@@ -238,8 +229,7 @@ const maybeGetClosestTransmissionEvent = (
       visibility,
       map,
       offsetOrig,
-      offsetDest,
-      minTransmissionDate
+      offsetDest
     );
     if (t) { possibleEvents.push(t); }
   });
@@ -260,8 +250,7 @@ const setupTransmissionData = (
   nodeColors,
   triplicate,
   metadata,
-  map,
-  minTransmissionDate
+  map
 ) => {
 
   let offsets = triplicate ? [-360, 0, 360] : [0]
@@ -287,8 +276,7 @@ const setupTransmissionData = (
               nodeColors,
               visibility,
               map,
-              offsetOrig,
-              minTransmissionDate,
+              offsetOrig
             );
             if (t) { transmissionData.push(t) }
           });
@@ -336,35 +324,6 @@ export const createDemeAndTransmissionData = (
     demeIndices
   } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
 
-
-  const getMinTransmissionDate = () => {
-    /* first time in a scope so that we can run minTransmissionDate */
-    const { transmissionData } = setupTransmissionData(
-      nodes,
-      visibility,
-      geoResolution,
-      nodeColors,
-      triplicate,
-      metadata,
-      map
-    );
-
-    let minTransmissionDate;
-    // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
-    if (transmissionData.length) {
-      minTransmissionDate = transmissionData.map((x) => {
-        return x.originNumDate;
-      }).reduce((prev, cur) => {
-        return cur < prev ? cur : prev;
-      });
-    }
-
-    return minTransmissionDate;
-  }
-
-  const minTransmissionDate = getMinTransmissionDate();
-
-
   /* second time so that we can get Bezier */
   const { transmissionData, transmissionIndices } = setupTransmissionData(
     nodes,
@@ -373,16 +332,14 @@ export const createDemeAndTransmissionData = (
     nodeColors,
     triplicate,
     metadata,
-    map,
-    minTransmissionDate
+    map
   );
 
   return {
     demeData: demeData,
     transmissionData: transmissionData,
     demeIndices: demeIndices,
-    transmissionIndices: transmissionIndices,
-    minTransmissionDate
+    transmissionIndices: transmissionIndices
   }
 }
 
@@ -499,7 +456,7 @@ const updateDemeDataLatLong = (demeData, map) => {
 
 }
 
-const updateTransmissionDataLatLong = (transmissionData, map, minTransmissionDate) => {
+const updateTransmissionDataLatLong = (transmissionData, map) => {
 
   let transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
 
@@ -510,8 +467,7 @@ const updateTransmissionDataLatLong = (transmissionData, map, minTransmissionDat
     transmission.bezierCurve = constructBcurve(
       transmission.originCoords,
       transmission.destinationCoords,
-      transmission.destinationNumDate,
-      minTransmissionDate
+      transmission.destinationNumDate
     );
   });
 
@@ -519,7 +475,7 @@ const updateTransmissionDataLatLong = (transmissionData, map, minTransmissionDat
 
 }
 
-export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData, map, minTransmissionDate) => {
+export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData, map) => {
 
   /*
     walk through nodes and update attributes that can mutate
@@ -543,3 +499,28 @@ export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData,
   }
 
 }
+
+// const getMinTransmissionDate = () => {
+//   /* first time in a scope so that we can run minTransmissionDate */
+//   const { transmissionData } = setupTransmissionData(
+//     nodes,
+//     visibility,
+//     geoResolution,
+//     nodeColors,
+//     triplicate,
+//     metadata,
+//     map
+//   );
+//
+//   let minTransmissionDate;
+//   // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
+//   if (transmissionData.length) {
+//     minTransmissionDate = transmissionData.map((x) => {
+//       return x.originNumDate;
+//     }).reduce((prev, cur) => {
+//       return cur < prev ? cur : prev;
+//     });
+//   }
+//
+//   return minTransmissionDate;
+// }

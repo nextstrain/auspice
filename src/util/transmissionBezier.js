@@ -24,8 +24,7 @@ const Bernstein = (n, k) => {
 /* Equation derived by Luiz Max Fagundes de Carvalho (University of Edinburgh).
    This function computes the coordinate of a point that is at a distance `height`
    perpendicular to the center of the line connecting the two points define in `pair`. */
-export const computeMidpoint = (pair, modify, height) => {
-  const [pointA,pointB] = pair
+export const computeMidpoint = (pointA, pointB) => {
   const x1 = pointA.x
   const y1 = pointA.y
   const x2 = pointB.x
@@ -35,7 +34,7 @@ export const computeMidpoint = (pair, modify, height) => {
   const slope = (y2-y1) / (x2-x1)
   const d = Math.sqrt(Math.pow((y2-y1),2) + Math.pow((x2-x1),2)) // distance between points
 
-  let H = 1/height || Math.log(Math.pow(d,0.05))*200 //+modify // define height of control point
+  let H = Math.log(Math.pow(d,0.05))*200 // +modify // define height of control point
   const h = Math.sqrt(Math.pow(H,2)+ Math.pow(d,2)/4.0)  // mathemagics
 
   const xm = x1 + h * Math.cos(Math.atan(2*H/d) + Math.atan(slope)) * sign
