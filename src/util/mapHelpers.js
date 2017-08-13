@@ -1,4 +1,5 @@
 import d3 from "d3";
+import _ from "lodash";
 
 /* util */
 
@@ -20,67 +21,73 @@ const extractLineSegmentForAnimationEffect = (
   bezierDates
 ) => {
 
-  const pair = [originCoords, destinationCoords];
+  // want to slice out all points that lie between numDateMin and numDateMax
+  // and append interpolated start and end points
+  // full data
+  // bezierDates = [ 2015.1    2015.2    2015.3    2015.4    2015.5 ]
+  // bezierCurve = [ x1,y1     x2,y2     x3,y13    x4,y4     x5,y5  ]
+  // slice via numDateMin = 2015.25, numDateMax = 2015.45
+  // bezierDates = [ 2015.25  2015.3    2015.4  2015.45 ]
+  // bezierCurve = [ x23,y23  x3,y13    x4,y4   x45,y45  ]
 
-  /* manually find the points along a Bezier curve at which we should be given the user date selection */
-  let start = Math.max(
-    0.0, // clamp start at 0.0 if userDateMin gives a number < 0
-    (numDateMin - originNumDate) / (destinationNumDate - originNumDate)
-  );
+  // find start
+  const startIndex = _.findIndex(bezierDates, function (d) { return d > numDateMin });
 
-  let end = Math.min(
-    1.0, // clamp end at 1.0 if userDateMax gives a number > 1
-    (numDateMax - originNumDate) / (destinationNumDate - originNumDate)
-  );
+  // find end
+  const endIndex = _.findLastIndex(bezierDates, function (d) { return d < numDateMax });
 
-  if (!isFinite(start)){ // For 0 branch-length transmissions, (destinationDate-originDate) is 0 --> +/- Infinity values for start and end.
-    start = 0.0;
-  };
-
-  if (!isFinite(end)){
-    end = start + 1e-6;
-  };
-
-  if (visible === "hidden") {
-    start = 0.0;
-    end = 1e-6;
+  // startIndex and endIndex is -1 if not found
+  // this indicates a slice of time that lies outside the bounds of BCurve
+  // return empty array
+  if (startIndex == -1 || endIndex == -1) {
+    return [];
   }
 
-  /* find closest by sliding from each end till failure then choose previous */
+  // get curve
+  // slice takes index at begin
+  // slice extracts up to but not including end
+  let curve = bezierCurve.slice(startIndex, endIndex+1);
 
-  let curve;
-
-  if (false) {
-    /* check whether above conditions mean we already know to show the whole line, etc */
-  } else {
-    curve = _.filter(bezierCurve, (pair, i) => {
-      return bezierDates[i] > numDateMin && bezierDates[i] < numDateMax;
-    });
+  // if possible construct and prepend interpolated start
+  let newStart;
+  if (startIndex > 0) {
+    // determine weighting of positions at startIndex and startIndex-1
+    const dateDiff = bezierDates[startIndex] - bezierDates[startIndex-1];
+    const weightRight = (numDateMin - bezierDates[startIndex-1]) / dateDiff;
+    const weightLeft = (bezierDates[startIndex] - numDateMin) / dateDiff;
+    // construct interpolated new start
+    newStart = {
+      x: weightLeft*bezierCurve[startIndex-1].x + weightRight*bezierCurve[startIndex].x,
+      y: weightLeft*bezierCurve[startIndex-1].y + weightRight*bezierCurve[startIndex].y
+    }
+    // will break indexing, so wait to prepend
   }
 
+  // if possible construct and prepend interpolated start
+  let newEnd;
+  if (endIndex < bezierCurve.length-1) {
+    // determine weighting of positions at startIndex and startIndex-1
+    const dateDiff = bezierDates[endIndex+1] - bezierDates[endIndex];
+    const weightRight = (numDateMax - bezierDates[endIndex]) / dateDiff;
+    const weightLeft = (bezierDates[endIndex+1] - numDateMax) / dateDiff;
+    // construct interpolated new end
+    newEnd = {
+      x: weightLeft*bezierCurve[endIndex].x + weightRight*bezierCurve[endIndex+1].x,
+      y: weightLeft*bezierCurve[endIndex].y + weightRight*bezierCurve[endIndex+1].y
+    }
+    // will break indexing, so wait to append
+  }
 
-  /*
-
-    ## calculate Bezier from pair[0] to pair[1] with control point positioned at
-    ## distance (destinationDate-minTransmissionDate)*25.0 perpendicular to center of the line
-    ## between pair[0] and pair[1].
-
-    this is commented out as of 8/3/2017 but left for reference, as we are now precomputing upstream
-
-    const Bcurve = Bezier(
-      [pair[0],
-      computeMidpoint(
-        pair,
-        (destinationNumDate-minTransmissionDate) * 25.0
-      ),
-        pair[1]],
-        start,
-        end,
-        15
-    );
-  */
+  // prepend / append interpolated points if they exist
+  if (newStart) {
+    curve.unshift(newStart);
+  }
+  if (newEnd) {
+    curve.push(newEnd);
+  }
 
   return curve;
+
 };
 
 export const drawDemesAndTransmissions = (
