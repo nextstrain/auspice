@@ -77,6 +77,9 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
         lat = geo[geoResolution][key].latitude;
         long = geo[geoResolution][key].longitude + OFFSET;
       }
+      else {
+        console.warn("Warning: Lat/long missing from metadata for", key);
+      }
       if (long > westBound && long < eastBound) {
 
         const deme = {
