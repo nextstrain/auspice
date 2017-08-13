@@ -21,6 +21,10 @@ const extractLineSegmentForAnimationEffect = (
   bezierDates
 ) => {
 
+  if (visible === "hidden") {
+    return [];
+  }
+
   // want to slice out all points that lie between numDateMin and numDateMax
   // and append interpolated start and end points
   // full data
