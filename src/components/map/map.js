@@ -11,7 +11,6 @@ import setupLeafletPlugins from "../../util/leaflet-plugins";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "../../util/mapHelpers";
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint, enableAnimationPerfTesting } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
-import {getLatLongs} from "../../util/mapHelpersLatLong";
 import { modifyURLquery } from "../../util/urlHelpers";
 import {
   createDemeAndTransmissionData,

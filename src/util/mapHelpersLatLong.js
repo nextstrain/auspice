@@ -71,9 +71,12 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   offsets.forEach((OFFSET) => {
     /* count DEMES */
     _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
-      let lat = geo[geoResolution][key].latitude;
-      let long = geo[geoResolution][key].longitude + OFFSET;
-
+      let lat = 0;
+      let long = 0;
+      if (geo[geoResolution][key]) {
+        lat = geo[geoResolution][key].latitude;
+        long = geo[geoResolution][key].longitude + OFFSET;
+      }
       if (long > westBound && long < eastBound) {
 
         const deme = {
