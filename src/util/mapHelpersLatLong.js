@@ -1,3 +1,5 @@
+/*eslint-env browser*/
+/*eslint max-len: 0*/
 import {averageColors} from "./colorHelpers";
 import {getTipColorAttribute} from "./treeHelpers";
 import {computeMidpoint, Bezier} from "./transmissionBezier";
@@ -12,8 +14,8 @@ const eastBound = 360;
 /* interchange. this is a leaflet method that will tell d3 where to draw.
 -Note (A) we MAY have to do this every time rather than just once */
 const leafletLatLongToLayerPoint = (lat, long, map) => {
-  return map.latLngToLayerPoint(new L.LatLng(lat, long))
-}
+  return map.latLngToLayerPoint(new L.LatLng(lat, long));
+};
 
 /* if transmission pair is legal, return a leaflet LatLng origin / dest pair
 otherwise return null */
@@ -42,8 +44,8 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   const demeIndices = {}; /* map of name to indices in array */
 
   // do aggregation as intermediate step
-  let demeMap = {};
-  nodes.forEach((n, i) => {
+  const demeMap = {};
+  nodes.forEach((n) => {
     if (!n.children) {
       if (n.attr[geoResolution]) { // check for undefined
         if (!demeMap[n.attr[geoResolution]]) {
@@ -64,7 +66,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
     }
   });
 
-  let offsets = triplicate ? [-360, 0, 360] : [0]
+  const offsets = triplicate ? [-360, 0, 360] : [0];
   const geo = metadata.geo;
 
   let index = 0;
@@ -76,8 +78,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
       if (geo[geoResolution][key]) {
         lat = geo[geoResolution][key].latitude;
         long = geo[geoResolution][key].longitude + OFFSET;
-      }
-      else {
+      } else {
         console.warn("Warning: Lat/long missing from metadata for", key);
       }
       if (long > westBound && long < eastBound) {
@@ -89,7 +90,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
           latitude: lat, // raw latitude value
           longitude: long, // raw longitude value
           coords: leafletLatLongToLayerPoint(lat, long, map) // coords are x,y plotted via d3
-        }
+        };
         demeData.push(deme);
 
         if (!demeIndices[key]) {
@@ -106,9 +107,8 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   return {
     demeData: demeData,
     demeIndices: demeIndices
-  }
-
-}
+  };
+};
 
 const constructBcurve = (
   originLatLongPair,
@@ -150,7 +150,7 @@ const maybeConstructTransmissionEvent = (
     longDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].longitude;
   } catch (e) {
     // console.warn("No transmission lat/longs for ", countries[0], " -> ", countries[1], "If this wasn't fired in the context of a dataset change, it's probably a bug.")
-    return;
+    return undefined;
   }
 
   const validLatLongPair = maybeGetTransmissionPair(
@@ -163,21 +163,19 @@ const maybeConstructTransmissionEvent = (
 
   if (validLatLongPair) {
 
-    let Bcurve = constructBcurve(validLatLongPair[0], validLatLongPair[1], child.attr["num_date"]);
+    const Bcurve = constructBcurve(validLatLongPair[0], validLatLongPair[1], child.attr["num_date"]);
 
     /* set up interpolator with origin and destination numdates */
     const interpolator = d3.interpolateNumber(node.attr.num_date, child.attr.num_date)
 
     /* make a Bdates array as long as Bcurve */
-    let Bdates = [];
+    const Bdates = [];
     Bcurve.forEach((d, i) => {
       /* fill it with interpolated dates */
       Bdates.push(
         interpolator(i / (Bcurve.length - 1)) /* ie., 5 / 15ths of the way through = 2016.3243 */
-      )
+      );
     });
-
-
 
     /* build up transmissions object */
     transmission = {
@@ -197,12 +195,11 @@ const maybeConstructTransmissionEvent = (
       originNumDate: node.attr["num_date"],
       destinationNumDate: child.attr["num_date"],
       color: nodeColors[node.arrayIdx],
-      visible: visibility[child.arrayIdx] === "visible" ? "visible" : "hidden", // transmission visible if child is visible
-    }
+      visible: visibility[child.arrayIdx] === "visible" ? "visible" : "hidden" // transmission visible if child is visible
+    };
   }
-
   return transmission;
-}
+};
 
 const maybeGetClosestTransmissionEvent = (
   node,
@@ -215,7 +212,6 @@ const maybeGetClosestTransmissionEvent = (
   offsetOrig
 ) => {
   const possibleEvents = [];
-  let closestEvent;
 
   // iterate over offsets applied to transmission destination
   // even if map is not tripled - ie., don't let a line go across the whole world
@@ -236,12 +232,12 @@ const maybeGetClosestTransmissionEvent = (
 
   if (possibleEvents.length === 0) { return; }
 
-  closestEvent = _.minBy(possibleEvents, (event) => {
+  const closestEvent = _.minBy(possibleEvents, (event) => {
     return Math.abs(event.destinationCoords.x - event.originCoords.x)
   });
 
   return closestEvent;
-}
+};
 
 const setupTransmissionData = (
   nodes,
@@ -253,12 +249,12 @@ const setupTransmissionData = (
   map
 ) => {
 
-  let offsets = triplicate ? [-360, 0, 360] : [0]
+  const offsets = triplicate ? [-360, 0, 360] : [0];
   const metadataGeoLookupTable = metadata.geo;
   const transmissionData = []; /* edges, animation paths */
   const transmissionIndices = {}; /* map of transmission id to array of indices */
 
-  nodes.forEach((n, i) => {
+  nodes.forEach((n) => {
     if (n.children) {
       n.children.forEach((child) => {
         if (
@@ -278,7 +274,7 @@ const setupTransmissionData = (
               map,
               offsetOrig
             );
-            if (t) { transmissionData.push(t) }
+            if (t) { transmissionData.push(t); }
           });
         }
       });
@@ -291,14 +287,12 @@ const setupTransmissionData = (
     } else {
       transmissionIndices[transmission.id].push(index);
     }
-  })
-
+  });
   return {
     transmissionData: transmissionData,
     transmissionIndices: transmissionIndices
-  }
-
-}
+  };
+};
 
 export const createDemeAndTransmissionData = (
   nodes,
@@ -318,7 +312,6 @@ export const createDemeAndTransmissionData = (
       originNode, destinationNode, originCoords, destinationCoords, originName, destinationName
       originNumDate, destinationNumDate, color, visible
   */
-
   const {
     demeData,
     demeIndices
@@ -340,8 +333,8 @@ export const createDemeAndTransmissionData = (
     transmissionData: transmissionData,
     demeIndices: demeIndices,
     transmissionIndices: transmissionIndices
-  }
-}
+  };
+};
 
 /*******************************
 ********************************
@@ -351,10 +344,10 @@ export const createDemeAndTransmissionData = (
 
 const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors) => {
 
-  let demeDataCopy = demeData.slice();
+  const demeDataCopy = demeData.slice();
 
   // initialize empty map
-  let demeMap = {};
+  const demeMap = {};
   _.forOwn(demeIndices, (value, key) => { // value: array of indices, key: deme name
     demeMap[key] = [];
   });
@@ -376,19 +369,16 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
     demeIndices[name].forEach((index) => {
       demeDataCopy[index].count = value.length;
       demeDataCopy[index].color = averageColors(value);
-    })
+    });
   });
-
-
   return demeDataCopy;
-
-}
+};
 
 const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
 
-  let transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
+  const transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
 
-  nodes.forEach((node, i) => {
+  nodes.forEach((node) => {
     if (node.children) {
       node.children.forEach((child) => {
         if (
@@ -406,17 +396,16 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
           transmissionIndices[id].forEach((index) => {
             transmissionDataCopy[index].color = col;
             transmissionDataCopy[index].visible = vis;
-          })
+          });
 
         }
       });
     }
   });
   return transmissionDataCopy;
-}
+};
 
 export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
-
   /*
     walk through nodes and update attributes that can mutate
     for demeData we have:
@@ -432,13 +421,8 @@ export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionDat
     newDemes = updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors);
     newTransmissions = updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
   }
-
-  return {
-    newDemes,
-    newTransmissions,
-  }
-
-}
+  return {newDemes, newTransmissions};
+};
 
 /*********************
 **********************
@@ -495,32 +479,6 @@ export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData,
 
   return {
     newDemes,
-    newTransmissions,
-  }
-
-}
-
-// const getMinTransmissionDate = () => {
-//   /* first time in a scope so that we can run minTransmissionDate */
-//   const { transmissionData } = setupTransmissionData(
-//     nodes,
-//     visibility,
-//     geoResolution,
-//     nodeColors,
-//     triplicate,
-//     metadata,
-//     map
-//   );
-//
-//   let minTransmissionDate;
-//   // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
-//   if (transmissionData.length) {
-//     minTransmissionDate = transmissionData.map((x) => {
-//       return x.originNumDate;
-//     }).reduce((prev, cur) => {
-//       return cur < prev ? cur : prev;
-//     });
-//   }
-//
-//   return minTransmissionDate;
-// }
+    newTransmissions
+  };
+};

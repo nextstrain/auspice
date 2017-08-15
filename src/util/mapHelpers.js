@@ -34,50 +34,50 @@ const extractLineSegmentForAnimationEffect = (
   // bezierCurve = [ x23,y23  x3,y13    x4,y4   x45,y45  ]
 
   // find start
-  const startIndex = _.findIndex(bezierDates, function (d) { return d > numDateMin });
+  const startIndex = _.findIndex(bezierDates, function (d) { return d > numDateMin; });
 
   // find end
-  const endIndex = _.findLastIndex(bezierDates, function (d) { return d < numDateMax });
+  const endIndex = _.findLastIndex(bezierDates, function (d) { return d < numDateMax; });
 
   // startIndex and endIndex is -1 if not found
   // this indicates a slice of time that lies outside the bounds of BCurve
   // return empty array
-  if (startIndex == -1 || endIndex == -1) {
+  if (startIndex === -1 || endIndex === -1) {
     return [];
   }
 
   // get curve
   // slice takes index at begin
   // slice extracts up to but not including end
-  let curve = bezierCurve.slice(startIndex, endIndex+1);
+  const curve = bezierCurve.slice(startIndex, endIndex + 1);
 
   // if possible construct and prepend interpolated start
   let newStart;
   if (startIndex > 0) {
     // determine weighting of positions at startIndex and startIndex-1
-    const dateDiff = bezierDates[startIndex] - bezierDates[startIndex-1];
-    const weightRight = (numDateMin - bezierDates[startIndex-1]) / dateDiff;
+    const dateDiff = bezierDates[startIndex] - bezierDates[startIndex - 1];
+    const weightRight = (numDateMin - bezierDates[startIndex - 1]) / dateDiff;
     const weightLeft = (bezierDates[startIndex] - numDateMin) / dateDiff;
     // construct interpolated new start
     newStart = {
-      x: weightLeft*bezierCurve[startIndex-1].x + weightRight*bezierCurve[startIndex].x,
-      y: weightLeft*bezierCurve[startIndex-1].y + weightRight*bezierCurve[startIndex].y
-    }
+      x: weightLeft * bezierCurve[startIndex - 1].x + weightRight * bezierCurve[startIndex].x,
+      y: weightLeft * bezierCurve[startIndex - 1].y + weightRight * bezierCurve[startIndex].y
+    };
     // will break indexing, so wait to prepend
   }
 
   // if possible construct and prepend interpolated start
   let newEnd;
-  if (endIndex < bezierCurve.length-1) {
+  if (endIndex < bezierCurve.length - 1) {
     // determine weighting of positions at startIndex and startIndex-1
-    const dateDiff = bezierDates[endIndex+1] - bezierDates[endIndex];
+    const dateDiff = bezierDates[endIndex + 1] - bezierDates[endIndex];
     const weightRight = (numDateMax - bezierDates[endIndex]) / dateDiff;
-    const weightLeft = (bezierDates[endIndex+1] - numDateMax) / dateDiff;
+    const weightLeft = (bezierDates[endIndex + 1] - numDateMax) / dateDiff;
     // construct interpolated new end
     newEnd = {
-      x: weightLeft*bezierCurve[endIndex].x + weightRight*bezierCurve[endIndex+1].x,
-      y: weightLeft*bezierCurve[endIndex].y + weightRight*bezierCurve[endIndex+1].y
-    }
+      x: weightLeft * bezierCurve[endIndex].x + weightRight * bezierCurve[endIndex + 1].x,
+      y: weightLeft * bezierCurve[endIndex].y + weightRight * bezierCurve[endIndex + 1].y
+    };
     // will break indexing, so wait to append
   }
 
@@ -88,9 +88,7 @@ const extractLineSegmentForAnimationEffect = (
   if (newEnd) {
     curve.push(newEnd);
   }
-
   return curve;
-
 };
 
 export const drawDemesAndTransmissions = (
@@ -252,29 +250,28 @@ export const updateVisibility = (
   d3elems.demes
     .data(demeData)
     .transition(5)
-    .style("fill", (d) => { return d.count > 0 ? d.color : "white" })
-    .attr("r", (d) => { return 0 + Math.sqrt(d.count) * 4 });
+    .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
+    .attr("r", (d) => { return 0 + Math.sqrt(d.count) * 4; });
 
   d3elems.transmissions
     .data(transmissionData)
-    .attr("d", (d, i) => {
-        return pathStringGenerator(
-          extractLineSegmentForAnimationEffect(
-            numDateMin,
-            numDateMax,
-            d.originCoords,
-            d.destinationCoords,
-            d.originNumDate,
-            d.destinationNumDate,
-            d.visible,
-            d.bezierCurve,
-            d.bezierDates
-          )
-        );
+    .attr("d", (d) => {
+      return pathStringGenerator(
+        extractLineSegmentForAnimationEffect(
+          numDateMin,
+          numDateMax,
+          d.originCoords,
+          d.destinationCoords,
+          d.originNumDate,
+          d.destinationNumDate,
+          d.visible,
+          d.bezierCurve,
+          d.bezierDates
+        )
+      );
     }) /* with the interpolation in the function above pathStringGenerator */
-    .attr("stroke", (d) => { return d.color })
-
-}
+    .attr("stroke", (d) => { return d.color; });
+};
 
 /* template for an update helper */
 export const updateFoo = (d3elems, latLongs) => {

@@ -4,7 +4,6 @@ import React from "react";
 import d3 from "d3";
 import { connect } from "react-redux";
 import Card from "../framework/card";
-
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
 import setupLeafletPlugins from "../../util/leaflet-plugins";
@@ -17,14 +16,8 @@ import {
   updateDemeAndTransmissionDataColAndVis,
   updateDemeAndTransmissionDataLatLong
 } from "../../util/mapHelpersLatLong";
-
 import { changeDateFilter } from "../../actions/treeProperties";
-import {
-  CHANGE_ANIMATION_START,
-  CHANGE_ANIMATION_TIME,
-  CHANGE_ANIMATION_CUMULATIVE,
-  MAP_ANIMATION_PLAY_PAUSE_BUTTON
-} from "../../actions/types.js";
+import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types.js";
 
 @connect((state) => {
   return {
@@ -50,7 +43,7 @@ import {
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
     dateScale: state.controls.dateScale,
-    dateFormat: state.controls.dateFormat,
+    dateFormat: state.controls.dateFormat
   };
 })
 
@@ -61,7 +54,6 @@ class Map extends React.Component {
       map: null,
       d3DOMNode: null,
       d3elems: null,
-      // datasetGuid: null,
       responsive: null,
       demeData: null,
       transmissionData: null,
@@ -83,10 +75,8 @@ class Map extends React.Component {
     }
   }
   componentDidMount() {
-    /*
-      this attaches several properties to window.L
-      it's a bit of a hack, but it's a code execution order problem and it works fine.
-    */
+    /* this attaches several properties to window.L
+      it's a bit of a hack, but it's a code execution order problem and it works fine.*/
     setupLeafletPlugins();
   }
   componentWillReceiveProps(nextProps) {
@@ -96,19 +86,14 @@ class Map extends React.Component {
     this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
   }
   componentDidUpdate(prevProps, prevState) {
-    if (this.props.nodes === null) {return}
+    if (this.props.nodes === null) {return;}
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
-    if (
-      // this.props.browserDimensions && // no longer needed - in redux from the start
-      this.props.metadata &&
-      !this.state.map &&
-      document.getElementById("map")
-    ) {
+    if (this.props.metadata && !this.state.map && document.getElementById("map")) {
       this.createMap();
     }
   }
@@ -126,7 +111,7 @@ class Map extends React.Component {
     // Object.values would be the obvious thing to do here
     // but not supported in many browsers including iOS Safari
     let somethingChanged = false;
-    for (var property in changes) {
+    for (const property in changes) {
       if (changes.hasOwnProperty(property)) {
         if (changes[property] === true) {
           somethingChanged = true;
@@ -136,24 +121,6 @@ class Map extends React.Component {
     if (somethingChanged) {
       this.setState({responsive: this.doComputeResponsive(nextProps)});
     }
-    // if (
-    //   this.props.browserDimensions &&
-    //   (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
-    //   this.props.browserDimensions.height !== nextProps.browserDimensions.height)
-    // ) {
-    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
-    // } else if (!this.state.responsive && nextProps.browserDimensions) { /* first time */
-    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
-    // } else if (
-    //   this.props.browserDimensions &&
-    //   this.props.datasetGuid &&
-    //   nextProps.datasetGuid &&
-    //   this.props.datasetGuid !== nextProps.datasetGuid // the dataset has changed
-    // ) {
-    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
-    // } else if (this.props.sidebar !== nextProps.sidebar) {
-    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
-    // }
   }
   doComputeResponsive(nextProps) {
     return computeResponsive({
@@ -162,7 +129,7 @@ class Map extends React.Component {
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
       minHeight: 480,
-      maxAspectRatio: 1.0,
+      maxAspectRatio: 1.0
     })
   }
   maybeSetupD3DOMNode() {
@@ -176,32 +143,24 @@ class Map extends React.Component {
     }
   }
 
-  maybeDrawDemesAndTransmissions(prevProps) {
-
+  maybeDrawDemesAndTransmissions() {
     const mapIsDrawn = !!this.state.map;
     const allDataPresent = !!(this.props.metadata && this.props.treeLoaded && this.state.responsive && this.state.d3DOMNode);
-    const demesTransmissionsComputed = !this.state.demeData && !this.state.transmissionData;
-
+    const demesTransmissionsNotComputed = !this.state.demeData && !this.state.transmissionData;
     /* if at any point we change dataset and app doesn't remount, we'll need these again */
     // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;
     // const newGeoResolution = this.props.geoResolution !== prevProps.geoResolution;
     // const initialVisibilityVersion = this.props.visibilityVersion === 1; /* see tree reducer, we set this to 1 after tree comes back */
     // const newVisibilityVersion = this.props.visibilityVersion !== prevProps.visibilityVersion;
 
-    if (
-      // determining when the tree is ready needs to be improved
-      // this.props.datasetGuid &&
-      mapIsDrawn &&
-      allDataPresent &&
-      demesTransmissionsComputed
-    ) {
+    if (mapIsDrawn && allDataPresent && demesTransmissionsNotComputed) {
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
-      if (!this.state.boundsSet){ //we are doing the initial render -> set map to the range of the data
+      if (!this.state.boundsSet) { //we are doing the initial render -> set map to the range of the data
         const SWNE = this.getGeoRange();
         this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
       }
 
-      this.state.map.setMaxBounds(this.getBounds())
+      this.state.map.setMaxBounds(this.getBounds());
 
       const {
         demeData,
@@ -279,7 +238,7 @@ class Map extends React.Component {
         transmissionData: null,
         demeIndices: null,
         transmissionIndices: null
-      })
+      });
     }
   }
   respondToLeafletEvent(leafletEvent) {
@@ -327,10 +286,13 @@ class Map extends React.Component {
     const west = Math.min(180, maxLng + lngRange*0.2);
     return [L.latLng(south,west), L.latLng(north, east)];
   }
+  /**
+   * updates demes & transmissions when redux (tree) visibility or colorScale (i.e. colorBy) has changed
+   * returns early if the map or tree isn't ready
+   * uses deme & transmission indicies for smart (quick) updating
+   */
   maybeUpdateDemesAndTransmissions(nextProps) {
-    /* nothing to update */
-    const noMap = !this.state.map;
-    if (noMap || !this.props.treeLoaded) { return; }
+    if (!this.state.map || !this.props.treeLoaded) { return; }
     const colorOrVisibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion || nextProps.colorScaleVersion !== this.props.colorScaleVersion
     const haveData = nextProps.nodes && nextProps.visibility && nextProps.geoResolution && nextProps.nodeColors;
 
@@ -338,11 +300,7 @@ class Map extends React.Component {
       colorOrVisibilityChange &&
       haveData
     ) {
-
-      const {
-        newDemes,
-        newTransmissions
-      } = updateDemeAndTransmissionDataColAndVis(
+      const { newDemes, newTransmissions } = updateDemeAndTransmissionDataColAndVis(
         this.state.demeData,
         this.state.transmissionData,
         this.state.demeIndices,
@@ -367,8 +325,8 @@ class Map extends React.Component {
 
       this.setState({
         demeData: newDemes,
-        transmissionData: newTransmissions,
-      })
+        transmissionData: newTransmissions
+      });
     }
   }
 
