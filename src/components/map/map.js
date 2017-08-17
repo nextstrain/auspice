@@ -105,7 +105,6 @@ class Map extends React.Component {
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
     if (
-      // this.props.browserDimensions && // no longer needed - in redux from the start
       this.props.metadata &&
       !this.state.map &&
       document.getElementById("map")
@@ -147,7 +146,7 @@ class Map extends React.Component {
 
     return computeResponsive({
       horizontal: widescreen || thirds ? .5 : 1,
-      vertical: nextProps.panelLayout === "thirds" ? 0.85 : 1.0, /* if we are in single column, full height */
+      vertical: thirds ? 0.85 : 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
       maxAspectRatio: 1.2,
@@ -449,7 +448,7 @@ class Map extends React.Component {
   maybeCreateMapDiv() {
     let container = null;
     if (
-      this.props.browserDimensions &&
+      this.props.browserDimensions && /* this can probably be removed */
       this.state.responsive
     ) {
       container = (

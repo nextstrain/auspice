@@ -98,10 +98,14 @@ class TreeView extends React.Component {
       // the tree exists AND
       this.state.tree &&
       // either the browser dimensions have changed
-      (prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
-      prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
-      // or the sidebar's (dis)appeared
-      this.props.sidebar !== prevProps.sidebar)
+      (
+        prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
+        prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
+        // or the sidebar's (dis)appeared
+        this.props.sidebar !== prevProps.sidebar ||
+        prevProps.panelLayout !== this.props.panelLayout /* full vs thirds */
+      )
+
     ) {
       const baseNodeInView = this.state.selectedBranch ? this.state.selectedBranch.n.arrayIdx : 0;
       this.state.tree.zoomIntoClade(this.state.tree.nodes[baseNodeInView], mediumTransitionDuration);
