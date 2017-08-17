@@ -10,7 +10,8 @@ import * as download from "../../util/downloadDataFunctions";
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
   show: state.controls.showDownload,
-  metadata: state.metadata
+  metadata: state.metadata,
+  tree: state.tree
 }))
 class DownloadModal extends React.Component {
   static propTypes = {
@@ -44,7 +45,7 @@ class DownloadModal extends React.Component {
     const iconStroke = medGrey;
     const buttons = [
       ["Tree (newick)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), download.newick],
-      ["Metadata (CSV)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), download.CSV],
+      ["Metadata (CSV)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), () => download.CSV(this.props.tree.nodes)],
       ["Screenshot (SGV)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), download.SVG]
     ];
     return (
