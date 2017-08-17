@@ -8,9 +8,15 @@ rules:
   quotes: 0 # ', ", ` no one cares
   max-len: 0 # be sensible
   object-curly-spacing: 0 # allow { a: 1 } and {a: 1}
+  block-spacing: 0 # same as above for 1-line blocks
   dot-notation: 0 # allows someObject["a"] as well as someObject.a
   react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
+  react/jsx-tag-spacing: 0
+  forbid-prop-types: 0 # allow PropTypes.object, array etc
+  arrow-parens: ["error", "always"]
   comma-dangle: ["error", "never"]
+  class-methods-use-this: 0 # we can revisit
+  no-console: 0 # we should allow this in dev and strip (webpack plugin) before it goes to production
 parserOptions:
   ecmaVersion: 6
   sourceType: module
