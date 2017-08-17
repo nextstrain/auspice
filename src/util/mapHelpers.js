@@ -26,12 +26,33 @@ const extractLineSegmentForAnimationEffect = (
 
   // want to slice out all points that lie between numDateMin and numDateMax
   // and append interpolated start and end points
-  // full data
+  // initial data
   // bezierDates = [ 2015.1    2015.2    2015.3    2015.4    2015.5 ]
-  // bezierCurve = [ x1,y1     x2,y2     x3,y13    x4,y4     x5,y5  ]
-  // slice via numDateMin = 2015.25, numDateMax = 2015.45
+  // bezierCurve = [ x0,y0     x1,y1     x2,y2     x3,y3     x4,y4  ]
+  //
+  // scenario A: numDateMin = 2015.25, numDateMax = 2015.45
   // bezierDates = [ 2015.25  2015.3    2015.4  2015.45 ]
-  // bezierCurve = [ x23,y23  x3,y13    x4,y4   x45,y45  ]
+  // bezierCurve = [ x12,y12  x2,y2     x3,y3   x34,y34 ]
+  // startIndex is 2 in scenario A
+  // endIndex is 3 in scenario A
+  //
+  // scenario B: numDateMin = 2014.5, numDateMax = 2015.45
+  // bezierDates = [ 2015.1    2015.2    2015.3    2015.4  2015.45 ]
+  // bezierCurve = [ x0,y0     x1,y1     x2,y2     x3,y3   x34,y34 ]
+  // startIndex is 0 in scenario B
+  // endIndex is 3 in scenario B
+  //
+  // scenario C: numDateMin = 2015.25, numDateMax = 2015.7
+  // bezierDates = [ 2015.25  2015.3    2015.4    2015.5 ]
+  // bezierCurve = [ x12,y12  x2,y2     x3,y3     x4,y4  ]
+  // startIndex is 2 in scenario C
+  // endIndex is 4 in scenario C
+  //
+  // scenario D: numDateMin = 2015.6, numDateMax = 2015.9
+  // bezierDates = [ ]
+  // bezierCurve = [ ]
+  // startIndex is -1 in scenario D
+  // endIndex is 4 in scenario D
 
   // find start
   const startIndex = _.findIndex(bezierDates, function (d) { return d > numDateMin; });
