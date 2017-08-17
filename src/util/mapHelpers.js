@@ -54,10 +54,10 @@ const extractLineSegmentForAnimationEffect = (
   // startIndex is -1 in scenario D
   // endIndex is 4 in scenario D
 
-  // find start
+  // find start walking forwards from left of array
   const startIndex = _.findIndex(bezierDates, function (d) { return d > numDateMin; });
 
-  // find end
+  // find end walking backwards from right of array
   const endIndex = _.findLastIndex(bezierDates, function (d) { return d < numDateMax; });
 
   // startIndex and endIndex is -1 if not found
