@@ -122,7 +122,8 @@ class Map extends React.Component {
       dimensionsChanged: this.props.browserDimensions.width !== nextProps.browserDimensions.width || this.props.browserDimensions.height !== nextProps.browserDimensions.height,
       responsiveNotSet: !this.state.responsive,
       treeChanged: this.props.treeVersion !== nextProps.treeVersion, // treeVersion change implies tree is ready (modified by the same action)
-      sidebarChanged: this.props.sidebar !== nextProps.sidebar
+      sidebarChanged: this.props.sidebar !== nextProps.sidebar,
+      panelLayout: this.props.panelLayout !== nextProps.panelLayout,
     };
     // Object.values would be the obvious thing to do here
     // but not supported in many browsers including iOS Safari
@@ -134,36 +135,19 @@ class Map extends React.Component {
         }
       }
     }
+
     if (somethingChanged) {
       this.setState({responsive: this.doComputeResponsive(nextProps)});
     }
-    // if (
-    //   this.props.browserDimensions &&
-    //   (this.props.browserDimensions.width !== nextProps.browserDimensions.width ||
-    //   this.props.browserDimensions.height !== nextProps.browserDimensions.height)
-    // ) {
-    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
-    // } else if (!this.state.responsive && nextProps.browserDimensions) { /* first time */
-    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
-    // } else if (
-    //   this.props.browserDimensions &&
-    //   this.props.datasetGuid &&
-    //   nextProps.datasetGuid &&
-    //   this.props.datasetGuid !== nextProps.datasetGuid // the dataset has changed
-    // ) {
-    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
-    // } else if (this.props.sidebar !== nextProps.sidebar) {
-    //   this.setState({responsive: this.doComputeResponsive(nextProps)});
-    // }
   }
   doComputeResponsive(nextProps) {
 
     const widescreen = nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap);
-    const thirds = this.props.panelLayout === "thirds"; /* add a check here for min browser width tbd */
+    const thirds = nextProps.panelLayout === "thirds"; /* add a check here for min browser width tbd */
 
     return computeResponsive({
       horizontal: widescreen || thirds ? .5 : 1,
-      vertical: this.props.panelLayout === "thirds" ? 0.85 : 1.0, /* if we are in single column, full height */
+      vertical: nextProps.panelLayout === "thirds" ? 0.85 : 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
       maxAspectRatio: 1.2,

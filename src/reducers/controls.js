@@ -26,9 +26,6 @@ const getMaxDateViaTips = function (tree) {
   return maxTipDate;
 };
 
-
-
-
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
