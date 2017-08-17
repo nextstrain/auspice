@@ -145,10 +145,10 @@ class Map extends React.Component {
   doComputeResponsive(nextProps) {
 
     const widescreen = nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap);
-    const thirds = this.props.panelLayout === "thirds"; /* add a check here for min browser width tbd */
+    const thirds = nextProps.panelLayout === "thirds"; /* add a check here for min browser width tbd */
     return computeResponsive({
       horizontal: widescreen || thirds ? 0.5 : 1,
-      vertical: nextProps.panelLayout === "thirds" ? 0.85 : 1.0, /* if we are in single column, full height */
+      vertical: thirds ? 0.85 : 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
       maxAspectRatio: 1.2
@@ -460,7 +460,7 @@ class Map extends React.Component {
   maybeCreateMapDiv() {
     let container = null;
     if (
-      this.props.browserDimensions &&
+      this.props.browserDimensions && /* this can probably be removed */
       this.state.responsive
     ) {
       container = (
