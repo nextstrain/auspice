@@ -128,7 +128,8 @@ class Map extends React.Component {
       dimensionsChanged: this.props.browserDimensions.width !== nextProps.browserDimensions.width || this.props.browserDimensions.height !== nextProps.browserDimensions.height,
       responsiveNotSet: !this.state.responsive,
       treeChanged: this.props.treeVersion !== nextProps.treeVersion, // treeVersion change implies tree is ready (modified by the same action)
-      sidebarChanged: this.props.sidebar !== nextProps.sidebar
+      sidebarChanged: this.props.sidebar !== nextProps.sidebar,
+      panelLayout: this.props.panelLayout !== nextProps.panelLayout,
     };
 
     // Object.values would be the obvious thing to do here
@@ -140,7 +141,6 @@ class Map extends React.Component {
     if (values.some(v => v === true)) {
       this.setState({responsive: this.doComputeResponsive(nextProps)});
     }
-
   }
   doComputeResponsive(nextProps) {
 
@@ -148,7 +148,7 @@ class Map extends React.Component {
     const thirds = this.props.panelLayout === "thirds"; /* add a check here for min browser width tbd */
     return computeResponsive({
       horizontal: widescreen || thirds ? 0.5 : 1,
-      vertical: this.props.panelLayout === "thirds" ? 0.85 : 1.0, /* if we are in single column, full height */
+      vertical: nextProps.panelLayout === "thirds" ? 0.85 : 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
       maxAspectRatio: 1.2
