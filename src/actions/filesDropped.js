@@ -4,10 +4,16 @@ import Papa from "papaparse";
 import { ADD_COLOR_BYS } from "./types";
 
 const csvComplete = (dispatch, getState, results, file) => {
+  const { tree, metadata } = getState();
   const strainKey = results.meta.fields[0];
-  const newColorBys = results.meta.fields.slice(1);
+  const existingOpts = metadata.metadata.color_options;
+  let existingColorBys = [];
+  Object.keys(metadata.metadata.color_options).map((k) => {
+    existingColorBys = existingColorBys.concat([existingOpts[k].key, existingOpts[k].menuItem, existingOpts[k].legendTitle]);
+  });
+  const newColorBys = results.meta.fields.slice(1).filter((x) => existingColorBys.indexOf(x) === -1);
+  const excludedColorBys = results.meta.fields.slice(1).filter((x) => existingColorBys.indexOf(x) !== -1);
   const csvTaxa = results.data.map((o) => o[strainKey]);
-  const { tree } = getState();
   const treeTaxa = tree.nodes.filter((n) => !n.hasChildren).map((n) => n.strain);
   const taxaMatchingTree = csvTaxa.filter((x) => treeTaxa.indexOf(x) !== -1);
   const csvTaxaToIgnore = csvTaxa.filter((x) => taxaMatchingTree.indexOf(x) === -1);
@@ -33,6 +39,12 @@ const csvComplete = (dispatch, getState, results, file) => {
     message: "Adding metadata from " + file.name,
     details: newColorBys.length + " fields for " + taxaMatchingTree.length + " / " + treeTaxa.length + " taxa"
   }));
+  if (excludedColorBys.length) {
+    dispatch(warningNotification({
+      message: "Excluded " + excludedColorBys.length + " fields as they already exist",
+      details: excludedColorBys.join(", ")
+    }));
+  }
 };
 
 const csvError = (dispatch, error, file) => {
