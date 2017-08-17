@@ -1,10 +1,10 @@
 /* eslint no-restricted-syntax: 0 */
+import { infoNotification, errorNotification, successNotification, warningNotification } from "../actions/notifications";
 
-export const CSV = (nodes) => {
+export const CSV = (dispatch, nodes) => {
   console.log("download metadata csv");
 
   /* TODO
-   * TRIGGER SUCCESS / ERROR NOTIFICATION
    * FILENAME BASED ON DATASET NAME
    * DONT HARDCODE ATTRS
    */
@@ -43,6 +43,7 @@ export const CSV = (nodes) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  dispatch(infoNotification({message: "Metadata exported to " + hardcodedFNameTemp}));
 };
 
 export const newick = () => {

@@ -98,6 +98,7 @@ class Notifications extends React.Component {
         transitionName="notification"
         transitionEnterTimeout={500}
         transitionLeaveTimeout={500}
+        style={{zIndex: 20000}}
       >
         {this.props.stack.map((d) => this.generateEl(d))}
       </ReactCSSTransitionGroup>
