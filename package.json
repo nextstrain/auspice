@@ -100,6 +100,7 @@
     "moment-range": "^2.2.0",
     "mousetrap": "^1.6.0",
     "outer-product": "0.0.4",
+    "papaparse": "^4.3.5",
     "query-string": "^4.2.3",
     "radium": "0.18.1",
     "react": "15.6.1",
