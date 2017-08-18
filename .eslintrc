@@ -13,6 +13,9 @@ rules:
   comma-dangle: ["error", "never"]
   padded-blocks: off
   arrow-body-style: off
+  one-var: off
+  one-var-declaration-per-line: off
+  no-console: [1, { "allow": ["warn", "error"] }]
 parserOptions:
   ecmaVersion: 6
   sourceType: module
