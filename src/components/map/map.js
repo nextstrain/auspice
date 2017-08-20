@@ -84,7 +84,7 @@ class Map extends React.Component {
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
   }
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
     if (this.props.nodes === null) { return; }
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
@@ -265,12 +265,14 @@ class Map extends React.Component {
   getGeoRange() {
     const latitudes = [];
     const longitudes = [];
-    for (let k in this.props.metadata.geo){
-      for (let c in this.props.metadata.geo[k]){
-        latitudes.push(this.props.metadata.geo[k][c].latitude);
-        longitudes.push(this.props.metadata.geo[k][c].longitude);
-      }
-    }
+
+    Object.keys(this.props.metadata.geo).forEach((geoLevel) => {
+      Object.keys(this.props.metadata.geo[geoLevel]).forEach((geoEntry) => {
+        latitudes.push(this.props.metadata.geo[geoLevel][geoEntry].latitude);
+        longitudes.push(this.props.metadata.geo[geoLevel][geoEntry].longitude);
+      });
+    });
+
     const maxLat = d3.max(latitudes);
     const minLat = d3.min(latitudes);
     const maxLng = d3.max(longitudes);
@@ -290,7 +292,7 @@ class Map extends React.Component {
    */
   maybeUpdateDemesAndTransmissions(nextProps) {
     if (!this.state.map || !this.props.treeLoaded) { return; }
-    const colorOrVisibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion || nextProps.colorScaleVersion !== this.props.colorScaleVersion
+    const colorOrVisibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion || nextProps.colorScaleVersion !== this.props.colorScaleVersion;
     const haveData = nextProps.nodes && nextProps.visibility && nextProps.geoResolution && nextProps.nodeColors;
 
     if (
@@ -401,7 +403,7 @@ class Map extends React.Component {
             fontWeight: 700,
             color: "white"
           }}
-          onClick={this.handleAnimationPlayPauseClicked.bind(this) }
+            onClick={this.handleAnimationPlayPauseClicked.bind(this)}
           >
             {this.props.mapAnimationPlayPauseButton}
           </button>
@@ -417,12 +419,12 @@ class Map extends React.Component {
             fontWeight: 700,
             color: "white"
           }}
-          onClick={this.handleAnimationResetClicked.bind(this) }
+            onClick={this.handleAnimationResetClicked.bind(this)}
           >
             Reset
           </button>
         </div>
-      )
+      );
     }
     return null;
   }
