@@ -1,6 +1,31 @@
 /* eslint no-restricted-syntax: 0 */
 import { infoNotification, errorNotification, successNotification, warningNotification } from "../actions/notifications";
 
+
+/* this function based on https://github.com/daviddao/biojs-io-newick/blob/master/src/newick.js */
+const treeToNewick = (root, temporal) => {
+  function recurse(node, parentX) {
+    let subtree = "";
+    if (node.hasChildren) {
+      const children = [];
+      node.children.forEach((child) => {
+        const subsubtree = recurse(child, temporal ? node.attr.num_date : node.attr.div);
+        children.push(subsubtree);
+      });
+      subtree += "(" + children.join(",") + ")" + node.strain + ":";
+      subtree += (temporal ? node.attr.num_date : node.attr.div) - parentX;
+    } else { /* terminal node */
+      let leaf = node.strain + ":";
+      leaf += (temporal ? node.attr.num_date : node.attr.div) - parentX;
+      subtree += leaf;
+    }
+    return subtree;
+  }
+  return recurse(root, 0) + ";";
+};
+
+const plainMIME = "text/plain;charset=utf-8;";
+
 const write = (filename, type, content) => {
   /* https://stackoverflow.com/questions/18848860/javascript-array-to-csv/18849208#comment59677504_18849208 */
   const blob = new Blob([content], { type: type });
@@ -15,8 +40,6 @@ const write = (filename, type, content) => {
 };
 
 export const CSV = (dispatch, nodes) => {
-  console.log("download metadata csv");
-
   /* TODO
    * FILENAME BASED ON DATASET NAME
    * DONT HARDCODE ATTRS
@@ -50,13 +73,16 @@ export const CSV = (dispatch, nodes) => {
   dispatch(infoNotification({message: "Metadata exported to " + hardcodedFNameTemp}));
 };
 
-export const newick = () => {
-  console.log("download newick");
+export const newick = (dispatch, root, temporal) => {
+  const fName = temporal ? "nextstrain_timetree.new" : "nextstrain_tree.new";
+  const message = temporal ? "TimeTree" : "Tree";
+  write(fName, plainMIME, treeToNewick(root, temporal));
+  dispatch(infoNotification({message: message + " written to " + fName}));
 };
 
-export const nexus = () => {
-  console.log("download nexus");
-};
+// export const nexus = () => {
+//   console.log("download nexus");
+// };
 
 export const SVG = (dispatch) => {
   console.log("download SVG (currently tree only)");

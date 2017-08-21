@@ -14,37 +14,42 @@ import * as download from "../../util/downloadDataFunctions";
   tree: state.tree
 }))
 class DownloadModal extends React.Component {
+  constructor(props) {
+    super(props);
+    this.getStyles = (bw, bh) => {
+      return {
+        behind: { /* covers the screen */
+          position: "absolute",
+          width: bw,
+          height: bh,
+          zIndex: 10000,
+          backgroundColor: "rgba(0, 0, 0, 0.3)"
+        },
+        modal: {
+          marginLeft: 200,
+          marginTop: 130,
+          width: bw - (2 * 200),
+          height: bh - (2 * 130),
+          borderRadius: 2,
+          backgroundColor: "rgba(250, 250, 250, 1)",
+          overflowY: "auto"
+        }
+      };
+    };
+  }
   static propTypes = {
     show: React.PropTypes.bool.isRequired,
     dispatch: React.PropTypes.func.isRequired,
     metadata: React.PropTypes.object.isRequired,
     browserDimensions: React.PropTypes.object.isRequired
   }
-  getStyles(bw, bh) {
-    return {
-      behind: { /* covers the screen */
-        position: "absolute",
-        width: bw,
-        height: bh,
-        zIndex: 10000,
-        backgroundColor: "rgba(0, 0, 0, 0.3)"
-      },
-      modal: {
-        marginLeft: 200,
-        marginTop: 130,
-        width: bw - (2 * 200),
-        height: bh - (2 * 130),
-        borderRadius: 2,
-        backgroundColor: "rgba(250, 250, 250, 1)",
-        overflowY: "auto"
-      }
-    };
-  }
+
   downloadButtons() {
     const iconWidth = 25;
     const iconStroke = medGrey;
     const buttons = [
-      ["Tree (newick)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), download.newick],
+      ["Tree (newick)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, this.props.tree.nodes[0], false)],
+      ["TimeTree (newick)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, this.props.tree.nodes[0], true)],
       ["Metadata (CSV)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), () => download.CSV(this.props.dispatch, this.props.tree.nodes)],
       ["Screenshot (SGV)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), () => download.SVG(this.props.dispatch)]
     ];
@@ -92,7 +97,7 @@ class DownloadModal extends React.Component {
               {Object.keys(meta.author_info).sort((a, b) => {
                 return meta.author_info[a].n > meta.author_info[b].n ? -1 : 1;
               }).map((k) => (
-                <g>{authorString(k)} (n = {meta.author_info[k].n}0), </g >
+                <g key={k}>{authorString(k)} (n = {meta.author_info[k].n}), </g >
               ))}
 
 

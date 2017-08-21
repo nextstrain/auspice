@@ -20,7 +20,8 @@ rules:
   one-var-declaration-per-line: off
   no-console: [1, { "allow": ["warn", "error"] }]
   no-param-reassign: [1, { "props": false }]
-  jsx-tag-spacing: ["error", { "closingSlash", "never", "beforeSelfClosing": "never", "afterOpening": "never" }]
+  react/jsx-tag-spacing: ["error", { "closingSlash": "never", "beforeSelfClosing": "allow", "afterOpening": "never" }]
+  react/forbid-prop-types: off
   react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
   react/jsx-first-prop-new-line: off
   react/prop-types: off # possibly reinstate
