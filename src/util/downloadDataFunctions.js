@@ -84,23 +84,38 @@ export const newick = (dispatch, root, temporal) => {
 //   console.log("download nexus");
 // };
 
-export const SVG = (dispatch) => {
-  console.log("download SVG (currently tree only)");
-  const tree = document.getElementById("d3TreeElement");
-  let svg_xml = (new XMLSerializer()).serializeToString(tree);
-  if (svg_xml.match(/^<g/)) {
-    svg_xml = svg_xml.replace(/^<g/, '<svg');
-    svg_xml = svg_xml.replace(/<\/g>$/, '</svg>');
+const fixSVGString = (svgBroken) => {
+  let svgFixed = svgBroken;
+  if (svgFixed.match(/^<g/)) {
+    svgFixed = svgFixed.replace(/^<g/, '<svg');
+    svgFixed = svgFixed.replace(/<\/g>$/, '</svg>');
   }
-  svg_xml = svg_xml.replace("cursor: pointer;", "");
+  svgFixed = svgFixed.replace("cursor: pointer;", "");
   /* https://stackoverflow.com/questions/23218174/how-do-i-save-export-an-svg-file-after-creating-an-svg-with-d3-js-ie-safari-an */
-  if (!svg_xml.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-    svg_xml = svg_xml.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
+  if (!svgFixed.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
+    svgFixed = svgFixed.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
   }
-  if (!svg_xml.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
-    svg_xml = svg_xml.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
+  if (!svgFixed.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
+    svgFixed = svgFixed.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
   }
-  svg_xml = '<?xml version="1.0" standalone="no"?>\r\n' + svg_xml;
-  write("nextstrain_tree.svg", "image/svg+xml;charset=utf-8", svg_xml);
-  dispatch(infoNotification({message: "Tree SVG saved", details: "nextstrain_tree.svg"}));
+  return '<?xml version="1.0" standalone="no"?>\r\n' + svgFixed;
+};
+
+export const SVG = (dispatch) => {
+  const MIME = "image/svg+xml;charset=utf-8";
+  const files = [];
+  /* tree */
+  const svg_tree = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
+  files.unshift("nextstrain_tree.svg");
+  write(files[0], MIME, svg_tree);
+  /* map */
+  const svg_map = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("map")));
+  files.unshift("nextstrain_map.svg");
+  write(files[0], MIME, svg_map);
+  /* entropy panel */
+  const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropy")));
+  files.unshift("nextstrain_entropy.svg");
+  write(files[0], MIME, svg_entropy);
+  /* notification */
+  dispatch(infoNotification({message: "Vector images saved", details: files.join(", ")}));
 };
