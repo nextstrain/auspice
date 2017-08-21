@@ -1,12 +1,9 @@
-/*eslint-env browser*/
-/*eslint max-len: 0*/
 import React from "react";
 import d3 from "d3";
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
-import setupLeafletPlugins from "../../util/leaflet-plugins";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "../../util/mapHelpers";
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint, enableAnimationPerfTesting } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
@@ -17,7 +14,10 @@ import {
   updateDemeAndTransmissionDataLatLong
 } from "../../util/mapHelpersLatLong";
 import { changeDateFilter } from "../../actions/treeProperties";
-import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types.js";
+import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
+
+/* global L */
+// L is global in scope and placed by setupLeaflet()
 
 @connect((state) => {
   return {
@@ -48,6 +48,15 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types.js";
 })
 
 class Map extends React.Component {
+
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
+  static propTypes = {
+    treeVersion: React.PropTypes.number.isRequired,
+    treeLoaded: React.PropTypes.bool.isRequired,
+    colorScaleVersion: React.PropTypes.number.isRequired
+  }
   constructor(props) {
     super(props);
     this.state = {
@@ -61,32 +70,22 @@ class Map extends React.Component {
       transmissionIndices: null
     };
   }
-  static contextTypes = {
-    router: React.PropTypes.object.isRequired
-  }
-  static propTypes = {
-    treeVersion: React.PropTypes.number.isRequired,
-    treeLoaded: React.PropTypes.bool.isRequired,
-    colorScaleVersion: React.PropTypes.number.isRequired
-  }
+
   componentWillMount() {
     if (!window.L) {
       setupLeaflet(); /* this sets up window.L */
     }
   }
   componentDidMount() {
-    /* this attaches several properties to window.L
-      it's a bit of a hack, but it's a code execution order problem and it works fine.*/
-    setupLeafletPlugins();
   }
   componentWillReceiveProps(nextProps) {
     /* this is the place we update state in response to new props */
-    this.maybeComputeResponive(nextProps);
+    this.maybeComputeResponsive(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
   }
-  componentDidUpdate(prevProps, prevState) {
-    if (this.props.nodes === null) {return;}
+  componentDidUpdate(prevProps) {
+    if (this.props.nodes === null) { return; }
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
@@ -97,7 +96,7 @@ class Map extends React.Component {
       this.createMap();
     }
   }
-  maybeComputeResponive(nextProps) {
+  maybeComputeResponsive(nextProps) {
     /*
       React to browser width/height changes responsively
       This is stored in state because it's used by both the map and the d3 overlay
@@ -108,29 +107,27 @@ class Map extends React.Component {
       treeChanged: this.props.treeVersion !== nextProps.treeVersion, // treeVersion change implies tree is ready (modified by the same action)
       sidebarChanged: this.props.sidebar !== nextProps.sidebar
     };
+
     // Object.values would be the obvious thing to do here
     // but not supported in many browsers including iOS Safari
-    let somethingChanged = false;
-    for (const property in changes) {
-      if (changes.hasOwnProperty(property)) {
-        if (changes[property] === true) {
-          somethingChanged = true;
-        }
-      }
-    }
-    if (somethingChanged) {
+    const values = Object.keys(changes).map((key) => {
+      return changes[key];
+    });
+
+    if (values.some(v => v === true)) {
       this.setState({responsive: this.doComputeResponsive(nextProps)});
     }
+
   }
   doComputeResponsive(nextProps) {
     return computeResponsive({
-      horizontal: nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap) ? .5 : 1,
+      horizontal: nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap) ? 0.5 : 1,
       vertical: 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
       minHeight: 480,
       maxAspectRatio: 1.0
-    })
+    });
   }
   maybeSetupD3DOMNode() {
     if (
@@ -155,9 +152,10 @@ class Map extends React.Component {
 
     if (mapIsDrawn && allDataPresent && demesTransmissionsNotComputed) {
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
-      if (!this.state.boundsSet) { //we are doing the initial render -> set map to the range of the data
+      if (!this.state.boundsSet) { // we are doing the initial render -> set map to the range of the data
         const SWNE = this.getGeoRange();
-        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
+        // L. available because setupLeaflet() was called in componentWillMount
+        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1])); // eslint-disable-line no-undef
       }
 
       this.state.map.setMaxBounds(this.getBounds());
@@ -244,10 +242,10 @@ class Map extends React.Component {
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
 
-    const {
-      newDemes,
-      newTransmissions
-    } = updateDemeAndTransmissionDataLatLong(
+      const {
+        newDemes,
+        newTransmissions
+      } = updateDemeAndTransmissionDataLatLong(
         this.state.demeData,
         this.state.transmissionData,
         this.state.map
@@ -258,8 +256,7 @@ class Map extends React.Component {
         newTransmissions,
         this.state.d3elems,
         calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin),
-        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax),
-        this.props.nodes
+        calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMax)
       );
 
 
@@ -268,23 +265,25 @@ class Map extends React.Component {
   getGeoRange() {
     const latitudes = [];
     const longitudes = [];
-    for (let k in this.props.metadata.geo){
-      for (let c in this.props.metadata.geo[k]){
-        latitudes.push(this.props.metadata.geo[k][c].latitude);
-        longitudes.push(this.props.metadata.geo[k][c].longitude);
-      }
-    }
+
+    Object.keys(this.props.metadata.geo).forEach((geoLevel) => {
+      Object.keys(this.props.metadata.geo[geoLevel]).forEach((geoEntry) => {
+        latitudes.push(this.props.metadata.geo[geoLevel][geoEntry].latitude);
+        longitudes.push(this.props.metadata.geo[geoLevel][geoEntry].longitude);
+      });
+    });
+
     const maxLat = d3.max(latitudes);
     const minLat = d3.min(latitudes);
     const maxLng = d3.max(longitudes);
     const minLng = d3.min(longitudes);
-    const lngRange = (maxLng - minLng)%360;
+    const lngRange = (maxLng - minLng) % 360;
     const latRange = (maxLat - minLat);
-    const south = Math.max(-80, minLat - latRange*0.2);
-    const north = Math.min(80, maxLat + latRange*0.2);
-    const east = Math.max(-180, minLng - lngRange*0.2);
-    const west = Math.min(180, maxLng + lngRange*0.2);
-    return [L.latLng(south,west), L.latLng(north, east)];
+    const south = Math.max(-80, minLat - (0.2 * latRange));
+    const north = Math.min(80, maxLat + (0.2 * latRange));
+    const east = Math.max(-180, minLng - (0.2 * lngRange));
+    const west = Math.min(180, maxLng + (0.2 * lngRange));
+    return [window.L.latLng(south, west), window.L.latLng(north, east)];
   }
   /**
    * updates demes & transmissions when redux (tree) visibility or colorScale (i.e. colorBy) has changed
@@ -293,7 +292,7 @@ class Map extends React.Component {
    */
   maybeUpdateDemesAndTransmissions(nextProps) {
     if (!this.state.map || !this.props.treeLoaded) { return; }
-    const colorOrVisibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion || nextProps.colorScaleVersion !== this.props.colorScaleVersion
+    const colorOrVisibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion || nextProps.colorScaleVersion !== this.props.colorScaleVersion;
     const haveData = nextProps.nodes && nextProps.visibility && nextProps.geoResolution && nextProps.nodeColors;
 
     if (
@@ -349,14 +348,14 @@ class Map extends React.Component {
   }
   createMap() {
 
-    let zoom = 2;
-    let center = [0,0];
+    const zoom = 2;
+    const center = [0, 0];
 
-    /******************************************
-    * GET LEAFLET IN THE DOM
-    *****************************************/
+    /* *****************************************
+    GET LEAFLET IN THE DOM
+    **************************************** */
 
-    var map = L.map('map', {
+    const map = L.map('map', {
       center: center,
       zoom: zoom,
       scrollWheelZoom: false,
@@ -375,13 +374,12 @@ class Map extends React.Component {
       sleepNote: true,
       // should hovering wake the map? (clicking always will)
       hoverToWake: false
-    })
+    });
 
     map.getRenderer(map).options.padding = 2;
 
     L.tileLayer('https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2l1MDRoMzg5MDEwbjJvcXBpNnUxMXdwbCJ9.PMqX7vgORuXLXxtI3wISjw', {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-        // noWrap: true
+      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
     L.control.zoom({position: "bottomright"}).addTo(map);
@@ -390,13 +388,10 @@ class Map extends React.Component {
   }
 
   animationButtons() {
-    if (!enableAnimationDisplay) {
-        return null;
-    } else {
+    if (enableAnimationDisplay) {
       return (
         <div>
-        <button style={{
-            position: "absolute",
+          <button style={{position: "absolute",
             left: 25,
             top: 25,
             zIndex: 9999,
@@ -406,13 +401,13 @@ class Map extends React.Component {
             borderRadius: 4,
             backgroundColor: "rgb(124, 184, 121)",
             fontWeight: 700,
-            color: "white",
+            color: "white"
           }}
-          onClick={this.handleAnimationPlayPauseClicked.bind(this) }
+            onClick={this.handleAnimationPlayPauseClicked.bind(this)}
           >
-          {this.props.mapAnimationPlayPauseButton}
-        </button>
-        <button style={{
+            {this.props.mapAnimationPlayPauseButton}
+          </button>
+          <button style={{
             position: "absolute",
             left: 90,
             top: 25,
@@ -424,13 +419,14 @@ class Map extends React.Component {
             fontWeight: 700,
             color: "white"
           }}
-          onClick={this.handleAnimationResetClicked.bind(this) }
+            onClick={this.handleAnimationResetClicked.bind(this)}
           >
-          Reset
-        </button>
+            Reset
+          </button>
         </div>
-      )
+      );
     }
+    return null;
   }
 
   maybeCreateMapDiv() {
@@ -442,20 +438,21 @@ class Map extends React.Component {
       container = (
         <div style={{position: "relative"}}>
           {this.animationButtons()}
-          <div style={{
+          <div id="map"
+            style={{
               height: this.state.responsive.height,
               width: this.state.responsive.width
-            }} id="map">
-          </div>
+            }}
+          />
         </div>
-      )
+      );
     }
     return container;
   }
   handleAnimationPlayPauseClicked() {
-    /******************************************
-    * ANIMATE MAP (AND THAT LINE ON TREE)
-    *****************************************/
+    /* *****************************************
+    ANIMATE MAP (AND THAT LINE ON TREE)
+    **************************************** */
     if (this.props.mapAnimationPlayPauseButton === "Play") {
       this.props.dispatch({
         type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
@@ -463,8 +460,8 @@ class Map extends React.Component {
       });
       this.animateMap();
     } else {
-      if (enableAnimationPerfTesting) {window.Perf.resetCount();}
-      clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
+      if (enableAnimationPerfTesting) { window.Perf.resetCount(); }
+      clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
       window.NEXTSTRAIN.mapAnimationLoop = null;
       this.props.dispatch({
         type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
@@ -495,12 +492,12 @@ class Map extends React.Component {
     // leftWindow --- rightWindow ------------------------------- end
     // 2011.4 ------- 2011.6 ------------------------------------ 2015.4
 
-    let start = calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.absoluteDateMin);
+    const start = calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.absoluteDateMin);
     let leftWindow = calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.dateMin);
-    let end = calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.absoluteDateMax);
-    let totalRange = end - start; // years in the animation
+    const end = calendarToNumeric(this.props.dateFormat, this.props.dateScale, this.props.absoluteDateMax);
+    const totalRange = end - start; // years in the animation
 
-    let animationIncrement = (animationTick * totalRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
+    const animationIncrement = (animationTick * totalRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
     const windowRange = animationWindowWidth * totalRange;
     let rightWindow = leftWindow + windowRange;
 
@@ -511,7 +508,7 @@ class Map extends React.Component {
     /* we should setState({reference}) so that it's not possible to create multiple */
 
     window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
-      if (enableAnimationPerfTesting) {window.Perf.bump();}
+      if (enableAnimationPerfTesting) { window.Perf.bump(); }
       const newWindow = {min: numericToCalendar(this.props.dateFormat, this.props.dateScale, leftWindow),
         max: numericToCalendar(this.props.dateFormat, this.props.dateScale, rightWindow)};
 
@@ -520,12 +517,12 @@ class Map extends React.Component {
       // don't modifyURLquery
 
       if (!this.props.mapAnimationCumulative) {
-        leftWindow = leftWindow + animationIncrement;
+        leftWindow += animationIncrement;
       }
-      rightWindow = rightWindow + animationIncrement;
+      rightWindow += animationIncrement;
 
       if (rightWindow >= end) {
-        clearInterval(window.NEXTSTRAIN.mapAnimationLoop)
+        clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
         window.NEXTSTRAIN.mapAnimationLoop = null;
         this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
         this.props.dispatch({
