@@ -1,5 +1,10 @@
-import {averageColors} from "./colorHelpers";
-import {getTipColorAttribute} from "./treeHelpers";
+import _ from "lodash";
+import d3 from "d3";
+import { averageColors } from "./colorHelpers";
+import { computeMidpoint, Bezier } from "./transmissionBezier";
+
+/* global L */
+// L is global in scope and placed by setupLeaflet()
 
 // longs of original map are -180 to 180
 // longs of fully triplicated map are -540 to 540
@@ -7,11 +12,10 @@ import {getTipColorAttribute} from "./treeHelpers";
 const westBound = -360;
 const eastBound = 360;
 
-/* interchange. this is a leaflet method that will tell d3 where to draw.
--Note (A) we MAY have to do this every time rather than just once */
+// interchange. this is a leaflet method that will tell d3 where to draw.
 const leafletLatLongToLayerPoint = (lat, long, map) => {
-  return map.latLngToLayerPoint(new L.LatLng(lat, long))
-}
+  return map.latLngToLayerPoint(new L.LatLng(lat, long));
+};
 
 /* if transmission pair is legal, return a leaflet LatLng origin / dest pair
 otherwise return null */
@@ -19,20 +23,21 @@ const maybeGetTransmissionPair = (latOrig, longOrig, latDest, longDest, map) => 
 
   // if either origin or destination are inside bounds, include
   // transmission must be less than 180 lat difference
+  let pair = null;
   if (
     (longOrig > westBound || longDest > westBound) &&
     (longOrig < eastBound || longDest < eastBound) &&
     (Math.abs(longOrig - longDest) < 180)
   ) {
-    return [
+    pair = [
       leafletLatLongToLayerPoint(latOrig, longOrig, map),
       leafletLatLongToLayerPoint(latDest, longDest, map)
     ];
   }
-  else {
-    return null;
-  }
-}
+
+  return pair;
+
+};
 
 const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
 
@@ -40,8 +45,8 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   const demeIndices = {}; /* map of name to indices in array */
 
   // do aggregation as intermediate step
-  let demeMap = {};
-  nodes.forEach((n, i) => {
+  const demeMap = {};
+  nodes.forEach((n) => {
     if (!n.children) {
       if (n.attr[geoResolution]) { // check for undefined
         if (!demeMap[n.attr[geoResolution]]) {
@@ -62,16 +67,21 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
     }
   });
 
-  let offsets = triplicate ? [-360, 0, 360] : [0]
+  const offsets = triplicate ? [-360, 0, 360] : [0];
   const geo = metadata.geo;
 
   let index = 0;
   offsets.forEach((OFFSET) => {
     /* count DEMES */
     _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
-      let lat = geo[geoResolution][key].latitude;
-      let long = geo[geoResolution][key].longitude + OFFSET;
-
+      let lat = 0;
+      let long = 0;
+      if (geo[geoResolution][key]) {
+        lat = geo[geoResolution][key].latitude;
+        long = geo[geoResolution][key].longitude + OFFSET;
+      } else {
+        console.warn("Warning: Lat/long missing from metadata for", key);
+      }
       if (long > westBound && long < eastBound) {
 
         const deme = {
@@ -81,12 +91,12 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
           latitude: lat, // raw latitude value
           longitude: long, // raw longitude value
           coords: leafletLatLongToLayerPoint(lat, long, map) // coords are x,y plotted via d3
-        }
+        };
         demeData.push(deme);
 
         if (!demeIndices[key]) {
           demeIndices[key] = [index];
-        } else{
+        } else {
           demeIndices[key].push(index);
         }
         index += 1;
@@ -98,9 +108,23 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   return {
     demeData: demeData,
     demeIndices: demeIndices
-  }
+  };
+};
 
-}
+const constructBcurve = (
+  originLatLongPair,
+  destinationLatLongPair
+) => {
+  const midpoint = computeMidpoint(originLatLongPair, destinationLatLongPair);
+  const Bcurve = Bezier(
+    [
+      originLatLongPair,
+      midpoint,
+      destinationLatLongPair
+    ]
+  );
+  return Bcurve;
+};
 
 const maybeConstructTransmissionEvent = (
   node,
@@ -115,9 +139,9 @@ const maybeConstructTransmissionEvent = (
 ) => {
 
   let latOrig, longOrig, latDest, longDest;
-  let transmission = null;
+  let transmission;
 
-  /* checking metadata for lat longs name match - ie., does the metadata list a latlong for Thailand?*/
+  /* checking metadata for lat longs name match - ie., does the metadata list a latlong for Thailand? */
   try {
     // node.attr[geoResolution] is the node's location, we're looking that up in the metadata lookup table
     latOrig = metadataGeoLookupTable[geoResolution][node.attr[geoResolution]].latitude;
@@ -126,7 +150,7 @@ const maybeConstructTransmissionEvent = (
     longDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].longitude;
   } catch (e) {
     // console.warn("No transmission lat/longs for ", countries[0], " -> ", countries[1], "If this wasn't fired in the context of a dataset change, it's probably a bug.")
-    return;
+    return undefined;
   }
 
   const validLatLongPair = maybeGetTransmissionPair(
@@ -138,11 +162,28 @@ const maybeConstructTransmissionEvent = (
   );
 
   if (validLatLongPair) {
+
+    const Bcurve = constructBcurve(validLatLongPair[0], validLatLongPair[1]);
+
+    /* set up interpolator with origin and destination numdates */
+    const interpolator = d3.interpolateNumber(node.attr.num_date, child.attr.num_date);
+
+    /* make a Bdates array as long as Bcurve */
+    const Bdates = [];
+    Bcurve.forEach((d, i) => {
+      /* fill it with interpolated dates */
+      Bdates.push(
+        interpolator(i / (Bcurve.length - 1)) /* ie., 5 / 15ths of the way through = 2016.3243 */
+      );
+    });
+
     /* build up transmissions object */
     transmission = {
       id: node.arrayIdx.toString() + "-" + child.arrayIdx.toString(),
       originNode: node,
       destinationNode: child,
+      bezierCurve: Bcurve,
+      bezierDates: Bdates,
       originName: node.attr[geoResolution],
       destinationName: child.attr[geoResolution],
       originCoords: validLatLongPair[0], // after interchange
@@ -150,16 +191,15 @@ const maybeConstructTransmissionEvent = (
       originLatitude: latOrig, // raw latitude value
       destinationLatitude: latDest, // raw latitude value
       originLongitude: longOrig + offsetOrig, // raw longitude value
-      destinationLongitude: longDest + offsetDest, //raw longitude value
+      destinationLongitude: longDest + offsetDest, // raw longitude value
       originNumDate: node.attr["num_date"],
       destinationNumDate: child.attr["num_date"],
       color: nodeColors[node.arrayIdx],
-      visible: visibility[child.arrayIdx] === "visible" ? "visible" : "hidden", // transmission visible if child is visible
-    }
+      visible: visibility[child.arrayIdx] === "visible" ? "visible" : "hidden" // transmission visible if child is visible
+    };
   }
-
   return transmission;
-}
+};
 
 const maybeGetClosestTransmissionEvent = (
   node,
@@ -172,7 +212,6 @@ const maybeGetClosestTransmissionEvent = (
   offsetOrig
 ) => {
   const possibleEvents = [];
-  let closestEvent;
 
   // iterate over offsets applied to transmission destination
   // even if map is not tripled - ie., don't let a line go across the whole world
@@ -191,14 +230,18 @@ const maybeGetClosestTransmissionEvent = (
     if (t) { possibleEvents.push(t); }
   });
 
-  if (possibleEvents.length === 0) { return; }
+  if (possibleEvents.length > 0) {
 
-  closestEvent = _.minBy(possibleEvents, (event) => {
-    return Math.abs(event.destinationCoords.x - event.originCoords.x)
-  });
+    const closestEvent = _.minBy(possibleEvents, (event) => {
+      return Math.abs(event.destinationCoords.x - event.originCoords.x);
+    });
+    return closestEvent;
 
-  return closestEvent;
-}
+  }
+
+  return null;
+
+};
 
 const setupTransmissionData = (
   nodes,
@@ -210,12 +253,12 @@ const setupTransmissionData = (
   map
 ) => {
 
-  let offsets = triplicate ? [-360, 0, 360] : [0]
+  const offsets = triplicate ? [-360, 0, 360] : [0];
   const metadataGeoLookupTable = metadata.geo;
   const transmissionData = []; /* edges, animation paths */
   const transmissionIndices = {}; /* map of transmission id to array of indices */
 
-  nodes.forEach((n, i) => {
+  nodes.forEach((n) => {
     if (n.children) {
       n.children.forEach((child) => {
         if (
@@ -233,9 +276,9 @@ const setupTransmissionData = (
               nodeColors,
               visibility,
               map,
-              offsetOrig,
+              offsetOrig
             );
-            if (t) { transmissionData.push(t) }
+            if (t) { transmissionData.push(t); }
           });
         }
       });
@@ -248,16 +291,22 @@ const setupTransmissionData = (
     } else {
       transmissionIndices[transmission.id].push(index);
     }
-  })
-
+  });
   return {
     transmissionData: transmissionData,
     transmissionIndices: transmissionIndices
-  }
+  };
+};
 
-}
-
-export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
+export const createDemeAndTransmissionData = (
+  nodes,
+  visibility,
+  geoResolution,
+  nodeColors,
+  triplicate,
+  metadata,
+  map
+) => {
 
   /*
     walk through nodes and collect all data
@@ -267,40 +316,42 @@ export const createDemeAndTransmissionData = (nodes, visibility, geoResolution, 
       originNode, destinationNode, originCoords, destinationCoords, originName, destinationName
       originNumDate, destinationNumDate, color, visible
   */
-
   const {
     demeData,
     demeIndices
   } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
 
-  const {
-    transmissionData,
-    transmissionIndices
-  } = setupTransmissionData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
-
-  let minTransmissionDate;
-  // console.log("This is a transmission from mapHelpersLatLong.js: ", demesAndTransmissions)
-  if (transmissionData.length) {
-    minTransmissionDate = transmissionData.map((x) => {
-      return transmissionData.originNumDate;
-    }).reduce((prev, cur) => {
-      return cur < prev ? cur : prev;
-    });
-  }
+  /* second time so that we can get Bezier */
+  const { transmissionData, transmissionIndices } = setupTransmissionData(
+    nodes,
+    visibility,
+    geoResolution,
+    nodeColors,
+    triplicate,
+    metadata,
+    map
+  );
 
   return {
     demeData: demeData,
     transmissionData: transmissionData,
     demeIndices: demeIndices,
-    transmissionIndices: transmissionIndices,
-    minTransmissionDate
-  }
-}
+    transmissionIndices: transmissionIndices
+  };
+};
+
+/* ******************************
+********************************
+UPDATE DEMES & TRANSMISSIONS
+********************************
+******************************* */
 
 const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors) => {
 
+  const demeDataCopy = demeData.slice();
+
   // initialize empty map
-  let demeMap = {};
+  const demeMap = {};
   _.forOwn(demeIndices, (value, key) => { // value: array of indices, key: deme name
     demeMap[key] = [];
   });
@@ -320,16 +371,18 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
   _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
     const name = key;
     demeIndices[name].forEach((index) => {
-      demeData[index].count = value.length;
-      demeData[index].color = averageColors(value);
-    })
+      demeDataCopy[index].count = value.length;
+      demeDataCopy[index].color = averageColors(value);
+    });
   });
-
-}
+  return demeDataCopy;
+};
 
 const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
 
-  nodes.forEach((node, i) => {
+  const transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
+
+  nodes.forEach((node) => {
     if (node.children) {
       node.children.forEach((child) => {
         if (
@@ -345,19 +398,18 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
 
           // update transmissionData via index lookup
           transmissionIndices[id].forEach((index) => {
-            transmissionData[index].color = col;
-            transmissionData[index].visible = vis;
-          })
+            transmissionDataCopy[index].color = col;
+            transmissionDataCopy[index].visible = vis;
+          });
 
         }
       });
     }
   });
-
-}
+  return transmissionDataCopy;
+};
 
 export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
-
   /*
     walk through nodes and update attributes that can mutate
     for demeData we have:
@@ -366,31 +418,50 @@ export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionDat
       color, visible
   */
 
-  if (demeData && transmissionData) {
-    updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors);
-    updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
-  }
+  let newDemes;
+  let newTransmissions;
 
-}
+  if (demeData && transmissionData) {
+    newDemes = updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors);
+    newTransmissions = updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
+  }
+  return {newDemes, newTransmissions};
+};
+
+/* ********************
+**********************
+ZOOM LEVEL CHANGE
+**********************
+********************* */
 
 const updateDemeDataLatLong = (demeData, map) => {
 
   // interchange for all demes
-  demeData.forEach((d,i) => {
+  return _.map(demeData, (d) => {
     d.coords = leafletLatLongToLayerPoint(d.latitude, d.longitude, map);
+    return d;
   });
 
-}
+};
 
 const updateTransmissionDataLatLong = (transmissionData, map) => {
 
+  const transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
+
   // interchange for all transmissions
-  transmissionData.forEach((transmission,i) => {
+  transmissionDataCopy.forEach((transmission) => {
     transmission.originCoords = leafletLatLongToLayerPoint(transmission.originLatitude, transmission.originLongitude, map);
     transmission.destinationCoords = leafletLatLongToLayerPoint(transmission.destinationLatitude, transmission.destinationLongitude, map);
+    transmission.bezierCurve = constructBcurve(
+      transmission.originCoords,
+      transmission.destinationCoords,
+      transmission.destinationNumDate
+    );
   });
 
-}
+  return transmissionDataCopy;
+
+};
 
 export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData, map) => {
 
@@ -402,9 +473,16 @@ export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData,
       color, visible
   */
 
+  let newDemes;
+  let newTransmissions;
+
   if (demeData && transmissionData) {
-    updateDemeDataLatLong(demeData, map);
-    updateTransmissionDataLatLong(transmissionData, map);
+    newDemes = updateDemeDataLatLong(demeData, map);
+    newTransmissions = updateTransmissionDataLatLong(transmissionData, map);
   }
 
-}
+  return {
+    newDemes,
+    newTransmissions
+  };
+};

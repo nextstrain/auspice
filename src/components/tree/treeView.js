@@ -28,6 +28,7 @@ there are actually backlinks from the phylotree tree
 @connect((state) => {
   return {
     tree: state.tree,
+    quickdraw: state.controls.quickdraw,
     browserDimensions: state.browserDimensions.browserDimensions,
     // map: state.map,
     splitTreeAndMap: state.controls.splitTreeAndMap,
