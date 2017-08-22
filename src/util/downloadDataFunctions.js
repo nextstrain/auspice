@@ -80,6 +80,12 @@ export const newick = (dispatch, root, temporal) => {
   dispatch(infoNotification({message: message + " written to " + fName}));
 };
 
+export const incommingMapPNG = (data) => {
+  let svg = `<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${data.dimensions.x}" height="${data.dimensions.y}">\n`;
+  svg += `<image width="${data.dimensions.x}" height="${data.dimensions.y}" xlink:href="${data.base64map}"/>\n</svg>`;
+  write("tmp.svg", "image/svg", svg);
+};
+
 // export const nexus = () => {
 //   console.log("download nexus");
 // };
@@ -114,7 +120,7 @@ export const SVG = (dispatch) => {
   write(files[0], MIME, svg_map);
 
   files.unshift("nextstrain_map_panes.png");
-  window.L.save(files[0]);
+  window.L.save(files[0]); /* triggers the incommingMapPNG callback */
 
   /* entropy panel */
   const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropy")));

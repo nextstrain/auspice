@@ -16,6 +16,7 @@ import {
 } from "../../util/mapHelpersLatLong";
 import { changeDateFilter } from "../../actions/treeProperties";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
+import { incommingMapPNG } from "../../util/downloadDataFunctions";
 
 /* global L */
 // L is global in scope and placed by setupLeaflet()
@@ -75,19 +76,23 @@ class Map extends React.Component {
   componentWillMount() {
     if (!window.L) {
       setupLeaflet(); /* this sets up window.L */
-      /* add a print method to leaflet */
-      window.L.save = (fileName) => {
+      /* add a print method to leaflet. some relevent links:
+      https://github.com/mapbox/leaflet-image
+      https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+      https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
+      */
+      window.L.save = () => {
         leafletImage(this.state.map, (err, canvas) => {
           canvas.toBlob((blob) => {
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", fileName);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          }, "image/png;charset=utf-8;", 1);
+            const reader = new FileReader();
+            reader.addEventListener('loadend', (e) => {
+              incommingMapPNG({
+                base64map: e.srcElement.result,
+                dimensions: this.state.map.getSize()
+              });
+            });
+            reader.readAsDataURL(blob);
+          }, "image/png;base64;", 1);
         });
       };
     }
