@@ -117,7 +117,7 @@ class DownloadModal extends React.Component {
               <h2>Data usage policy</h2>
               To Write
 
-              <h2>Authors involved</h2>
+              <h2>Data contributed by the following authors</h2>
               {Object.keys(meta.author_info).sort((a, b) => {
                 return meta.author_info[a].n > meta.author_info[b].n ? -1 : 1;
               }).map((k) => (
@@ -130,7 +130,7 @@ class DownloadModal extends React.Component {
               {this.downloadButtons()}
 
               <p style={infoPanelStyles.comment}>
-                (click outside this box to go back to the tree)
+                (click outside this box to return to the app)
               </p>
             </div>
           </div>
