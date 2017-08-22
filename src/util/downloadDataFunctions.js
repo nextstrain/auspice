@@ -81,14 +81,13 @@ export const newick = (dispatch, root, temporal) => {
 };
 
 export const incommingMapPNG = (data) => {
-  let svg = `<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${data.dimensions.x}" height="${data.dimensions.y}">\n`;
-  svg += `<image width="${data.dimensions.x}" height="${data.dimensions.y}" xlink:href="${data.base64map}"/>\n</svg>`;
-  write("tmp.svg", "image/svg", svg);
+  let svg = '<?xml version="1.0" standalone="no"?>';
+  svg += `<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${data.mapDimensions.x}" height="${data.mapDimensions.y}">\n`;
+  svg += `<image width="${data.mapDimensions.x}" height="${data.mapDimensions.y}" xlink:href="${data.base64map}"/>\n`;
+  svg += data.demes_transmissions_path;
+  svg += "</svg>";
+  write(data.fileName, "image/svg", svg);
 };
-
-// export const nexus = () => {
-//   console.log("download nexus");
-// };
 
 const fixSVGString = (svgBroken) => {
   let svgFixed = svgBroken;
@@ -115,13 +114,15 @@ export const SVG = (dispatch) => {
   files.unshift("nextstrain_tree.svg");
   write(files[0], MIME, svg_tree);
   /* map */
-  const svg_map = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions")));
-  files.unshift("nextstrain_map_transmissions_demes.svg");
-  write(files[0], MIME, svg_map);
-
-  files.unshift("nextstrain_map_panes.png");
-  window.L.save(files[0]); /* triggers the incommingMapPNG callback */
-
+  const demes_transmissions_xml = (new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions"));
+  const groups = demes_transmissions_xml.match(/^<svg(.*?)>(.*?)<\/svg>/);
+  files.unshift("nextstrain_map.svg");
+  /* window.L.save triggers the incommingMapPNG callback, with the data given here passed through */
+  window.L.save({
+    fileName: files[0],
+    demes_transmissions_header: groups[1],
+    demes_transmissions_path: groups[2]
+  });
   /* entropy panel */
   const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropy")));
   files.unshift("nextstrain_entropy.svg");

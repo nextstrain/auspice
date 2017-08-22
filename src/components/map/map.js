@@ -81,15 +81,15 @@ class Map extends React.Component {
       https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
       https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
       */
-      window.L.save = () => {
+      window.L.save = (data) => {
         leafletImage(this.state.map, (err, canvas) => {
           canvas.toBlob((blob) => {
             const reader = new FileReader();
             reader.addEventListener('loadend', (e) => {
-              incommingMapPNG({
+              incommingMapPNG(Object.assign({}, data, {
                 base64map: e.srcElement.result,
-                dimensions: this.state.map.getSize()
-              });
+                mapDimensions: this.state.map.getSize()
+              }));
             });
             reader.readAsDataURL(blob);
           }, "image/png;base64;", 1);
