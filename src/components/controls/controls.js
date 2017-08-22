@@ -15,24 +15,11 @@ import AllFilters from "./all-filter";
 import { controlsWidth, enableAnimationDisplay } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import { connect } from "react-redux";
-import { materialButton } from "../../globalStyles";
-import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 
 const header = (text) => (
   <span style={titleStyles.small}>
     {text}
   </span>
-);
-
-/* REMOVE THIS BEFORE MERGING INTO MASTER */
-const downloadButton = (dispatch) => (
-  <button
-    key={2}
-    style={materialButton}
-    onClick={() => {dispatch({ type: TRIGGER_DOWNLOAD_MODAL });}}
-  >
-    <span style={{left: -10, position: "relative", top: 10}}>{"DOWNLOAD DATA"}</span>
-  </button>
 );
 
 @connect((state) => ({
@@ -74,8 +61,6 @@ class Controls extends React.Component {
 
         {header("Dataset")}
         <ChooseVirus/>
-
-        {downloadButton(this.props.dispatch)}
 
         {header("Date Range")}
         <DateRangeInputs/>
