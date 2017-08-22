@@ -24,6 +24,7 @@ const header = (text) => (
   </span>
 );
 
+/* REMOVE THIS BEFORE MERGING INTO MASTER */
 const downloadButton = (dispatch) => (
   <button
     key={2}

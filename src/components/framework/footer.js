@@ -1,10 +1,17 @@
 import React from "react";
 import { connect } from "react-redux";
-import { dataFont, medGrey } from "../../globalStyles";
+import d3 from "d3";
+import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { authorString } from "../../util/stringHelpers";
 import computeResponsive from "../../util/computeResponsive";
+import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
-import d3 from "d3";
+
+const dot = (
+  <span style={{marginLeft: 10, marginRight: 10}}>
+    •
+  </span>
+);
 
 @connect((state) => {
   return {
@@ -160,20 +167,32 @@ class Footer extends React.Component {
       </Flex>
     );
   }
-  getUpdated(styles) {
+  getUpdated() {
     let updated = null;
     if (this.props.metadata) {
       if (this.props.metadata.updated) {
         updated = this.props.metadata.updated;
       }
     }
+    if (!updated) return null;
     return (
-      updated ?
-        <Flex style={styles.fineprint}>
-          Data updated {updated}
-        </Flex> :
-        <div/>
-    )
+      <span>Data updated {updated}</span>
+    );
+  }
+  downloadDataButton() {
+    return (
+      <button
+        style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", margin: 0, padding: 0})}
+        onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
+      >
+        <span style={{position: "relative"}}>{"DOWNLOAD DATA"}</span>
+      </button>
+    );
+  }
+  getMaintainer() {
+    return (
+      <span>dataset maintained by <a href="https://twitter.com/trvrb">@trvrb</a> (take from meta.json)</span>
+    );
   }
   drawFooter(styles, width) {
     let text = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions. For data reuse (particularly for publication), please contact the original authors:"
@@ -191,7 +210,13 @@ class Footer extends React.Component {
         {text}
         {this.getCitations(styles)}
         <div style={styles.line}/>
-        {this.getUpdated(styles)}
+        <Flex style={styles.fineprint}>
+          {this.getUpdated()}
+          {dot}
+          {this.downloadDataButton()}
+          {dot}
+          {this.getMaintainer()}
+        </Flex>
       </div>
     );
   }
