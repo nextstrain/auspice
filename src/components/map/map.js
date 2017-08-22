@@ -135,7 +135,7 @@ class Map extends React.Component {
       this.state.responsive &&
       !this.state.d3DOMNode
     ) {
-      const d3DOMNode = d3.select("#map svg");
+      const d3DOMNode = d3.select("#map svg").attr("id", "d3DemesTransmissions");
       this.setState({d3DOMNode});
     }
   }

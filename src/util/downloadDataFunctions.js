@@ -109,9 +109,14 @@ export const SVG = (dispatch) => {
   files.unshift("nextstrain_tree.svg");
   write(files[0], MIME, svg_tree);
   /* map */
-  const svg_map = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("map")));
-  files.unshift("nextstrain_map.svg");
+  const svg_map = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions")));
+  files.unshift("nextstrain_map_transmissions_demes.svg");
   write(files[0], MIME, svg_map);
+
+  const svg_panes = fixSVGString((new XMLSerializer()).serializeToString(document.getElementsByClassName("leaflet-layer")[0]));
+  files.unshift("nextstrain_map_panes.svg");
+  write(files[0], MIME, svg_panes);
+
   /* entropy panel */
   const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropy")));
   files.unshift("nextstrain_entropy.svg");
