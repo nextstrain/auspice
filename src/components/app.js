@@ -15,7 +15,7 @@ import * as globals from "../util/globals";
 import Sidebar from "react-sidebar";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
-import DownloadModal from "./controls/download";
+import DownloadModal from "./controls/downloadModal";
 import { analyticsNewPage } from "../util/googleAnalytics";
 import { filesDropped } from "../actions/filesDropped";
 
