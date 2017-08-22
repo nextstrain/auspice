@@ -113,9 +113,8 @@ export const SVG = (dispatch) => {
   files.unshift("nextstrain_map_transmissions_demes.svg");
   write(files[0], MIME, svg_map);
 
-  const svg_panes = fixSVGString((new XMLSerializer()).serializeToString(document.getElementsByClassName("leaflet-layer")[0]));
-  files.unshift("nextstrain_map_panes.svg");
-  write(files[0], MIME, svg_panes);
+  files.unshift("nextstrain_map_panes.png");
+  window.L.save(files[0]);
 
   /* entropy panel */
   const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropy")));

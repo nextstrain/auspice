@@ -1,6 +1,7 @@
 import React from "react";
 import d3 from "d3";
 import { connect } from "react-redux";
+import leafletImage from "leaflet-image";
 import Card from "../framework/card";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
@@ -74,10 +75,25 @@ class Map extends React.Component {
   componentWillMount() {
     if (!window.L) {
       setupLeaflet(); /* this sets up window.L */
+      /* add a print method to leaflet */
+      window.L.save = (fileName) => {
+        leafletImage(this.state.map, (err, canvas) => {
+          canvas.toBlob((blob) => {
+            const link = document.createElement("a");
+            const url = URL.createObjectURL(blob);
+            link.setAttribute("href", url);
+            link.setAttribute("download", fileName);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          }, "image/png;charset=utf-8;", 1);
+        });
+      };
     }
   }
-  componentDidMount() {
-  }
+  // componentDidMount() {
+  // }
   componentWillReceiveProps(nextProps) {
     /* this is the place we update state in response to new props */
     this.maybeComputeResponsive(nextProps);
