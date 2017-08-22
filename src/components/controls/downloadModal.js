@@ -10,6 +10,7 @@ import * as download from "../../util/downloadDataFunctions";
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
   show: state.controls.showDownload,
+  colorBy: state.controls.colorBy,
   metadata: state.metadata,
   tree: state.tree
 }))
@@ -42,6 +43,28 @@ class DownloadModal extends React.Component {
     dispatch: React.PropTypes.func.isRequired,
     metadata: React.PropTypes.object.isRequired,
     browserDimensions: React.PropTypes.object.isRequired
+  }
+
+  relevantPublications() {
+    const titer_related_keys = ["antigenic_advance"];
+    const titer = (titer_related_keys.indexOf(this.props.colorBy) !== -1) ?
+      (<li><a href="http://www.biorxiv.org/content/early/2017/06/21/153494">
+        {authorString("Neher et al")}, Prediction, dynamics, and visualization of antigenic phenotypes of seasonal influenza viruses, PNAS, 2016
+      </a></li>) : null;
+    return (
+      <g>
+        <h2>The current data analysis relies on</h2>
+        <ul>
+          <li><a href="https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btv381">
+            Neher & Bedford, Nextflu: real-time tracking of seasonal influenza virus evolution in humans, Bioinformatics, 2015
+          </a></li>
+          <li><a href="http://www.biorxiv.org/content/early/2017/06/21/153494">
+            {authorString("Sagulenko et al")}, TreeTime: maximum likelihood phylodynamic analysis, bioRxiv, 2017
+          </a></li>
+          {titer}
+        </ul>
+      </g>
+    );
   }
 
   downloadButtons() {
@@ -92,6 +115,7 @@ class DownloadModal extends React.Component {
               <br />
 
               <h2>Data usage policy</h2>
+              To Write
 
               <h2>Authors involved</h2>
               {Object.keys(meta.author_info).sort((a, b) => {
@@ -100,14 +124,7 @@ class DownloadModal extends React.Component {
                 <g key={k}>{authorString(k)} (n = {meta.author_info[k].n}), </g >
               ))}
 
-
-              <h2>Relevent publications (??)</h2>
-              <ul>
-                <li>Nextstrain paper (to write!)</li>
-                <li>TimeTree?</li>
-                <li>Titer model paper?</li>
-                <li>Dataset specific papers?</li>
-              </ul>
+              {this.relevantPublications()}
 
               <h2>Download data as</h2>
               {this.downloadButtons()}
