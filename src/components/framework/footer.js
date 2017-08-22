@@ -190,9 +190,14 @@ class Footer extends React.Component {
     );
   }
   getMaintainer() {
-    return (
-      <span>dataset maintained by <a href="https://twitter.com/trvrb">@trvrb</a> (take from meta.json)</span>
-    );
+    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainer")) {
+      return (
+        <span>
+          dataset maintained by <a href={this.props.metadata.maintainer[1]}>{this.props.metadata.maintainer[0]}</a>
+        </span>
+      );
+    }
+    return null;
   }
   drawFooter(styles, width) {
     let text = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions. For data reuse (particularly for publication), please contact the original authors:"
@@ -221,6 +226,7 @@ class Footer extends React.Component {
     );
   }
   render() {
+    if (!this.props.metadata) return null;
     const styles = this.getStyles();
     const responsive = computeResponsive({
       horizontal: 1,
