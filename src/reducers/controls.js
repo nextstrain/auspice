@@ -4,6 +4,9 @@ import * as globals from "../util/globals";
 import getColorScale from "../util/getColorScale";
 import moment from 'moment';
 import d3 from "d3";
+import { scaleTime } from "d3-scale";
+import traverse from "traverse";
+import { reallySmallNumber } from "../util/globals";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { floatDateToMoment } from "../util/dateHelpers";
 import maxBy from "lodash";
@@ -18,16 +21,21 @@ const getMinDateViaRoot = function (rootAttr) {
   return root;
 };
 
-const getMaxDateViaTips = function (tree) {
-  const nodes = d3.layout.tree().nodes(tree);
-  const latestTip = _.maxBy(nodes, function(node) { return node.attr.num_date; });
-  let maxTipDate = floatDateToMoment(latestTip.attr.num_date);
-  maxTipDate.add(1, "days"); /* slider should be later than actual day */
-  return maxTipDate;
+const getMaxDateViaTips = (tree) => {
+  let maxNumDate = reallySmallNumber;
+  traverse(tree).forEach((node) => {
+    if (node.attr) {
+      if (node.attr.num_date) {
+        if (node.attr.num_date > maxNumDate) {
+          maxNumDate = node.attr.num_date;
+        }
+      }
+    }
+  });
+  const maxMomentDate = floatDateToMoment(maxNumDate);
+  maxMomentDate.add(1, "days"); /* slider should be later than actual day */
+  return maxMomentDate;
 };
-
-
-
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
@@ -58,7 +66,7 @@ const getDefaultState = function () {
     geoResolution: globals.defaultGeoResolution,
     datasetPathName: "",
     filters: {},
-    dateScale: d3.time.scale().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
+    dateScale: scaleTime().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
     dateFormat: d3.time.format("%Y-%m-%d"),
     quickdraw: false, // if true, components may skip expensive computes.
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds

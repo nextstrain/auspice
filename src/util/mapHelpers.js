@@ -1,12 +1,12 @@
-import d3 from "d3";
+import { line, curveBasis } from "d3-shape";
 import _ from "lodash";
 
 /* util */
 
-export const pathStringGenerator = d3.svg.line()
+export const pathStringGenerator = line()
   .x((d) => { return d.x; })
   .y((d) => { return d.y; })
-  .interpolate("basis");
+  .curve(curveBasis);
 
 const extractLineSegmentForAnimationEffect = (
   numDateMin,

@@ -1,5 +1,6 @@
 import React from "react";
-import d3 from "d3";
+import _ from "lodash";
+import { select } from "d3-selection";
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
@@ -135,7 +136,7 @@ class Map extends React.Component {
       this.state.responsive &&
       !this.state.d3DOMNode
     ) {
-      const d3DOMNode = d3.select("#map svg");
+      const d3DOMNode = select("#map svg");
       this.setState({d3DOMNode});
     }
   }
@@ -273,17 +274,17 @@ class Map extends React.Component {
       });
     });
 
-    const maxLat = d3.max(latitudes);
-    const minLat = d3.min(latitudes);
-    const maxLng = d3.max(longitudes);
-    const minLng = d3.min(longitudes);
+    const maxLat = _.max(latitudes);
+    const minLat = _.min(latitudes);
+    const maxLng = _.max(longitudes);
+    const minLng = _.min(longitudes);
     const lngRange = (maxLng - minLng) % 360;
     const latRange = (maxLat - minLat);
-    const south = Math.max(-80, minLat - (0.2 * latRange));
-    const north = Math.min(80, maxLat + (0.2 * latRange));
-    const east = Math.max(-180, minLng - (0.2 * lngRange));
-    const west = Math.min(180, maxLng + (0.2 * lngRange));
-    return [window.L.latLng(south, west), window.L.latLng(north, east)];
+    const south = _.max([-80, minLat - (0.2 * latRange)]);
+    const north = _.min([80, maxLat + (0.2 * latRange)]);
+    const east = _.max([-180, minLng - (0.2 * lngRange)]);
+    const west = _.min([180, maxLng + (0.2 * lngRange)]);
+    return [L.latLng(south, west), L.latLng(north, east)];
   }
   /**
    * updates demes & transmissions when redux (tree) visibility or colorScale (i.e. colorBy) has changed

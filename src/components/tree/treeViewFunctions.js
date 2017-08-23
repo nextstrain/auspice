@@ -2,13 +2,13 @@
 /*eslint-env browser*/
 /*eslint dot-notation: 0*/
 /*eslint max-len : 0*/
+import React from "react";
+import d3 from "d3";
 import { updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
 import { branchOpacityConstant,
          branchOpacityFunction,
          branchInterpolateColour } from "../../util/treeHelpers";
 import { mediumTransitionDuration } from "../../util/globals";
-import React from "react";
-import d3 from "d3";
 
 export const visibleArea = function (Viewer) {
   const V = Viewer.getValue();

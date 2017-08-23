@@ -8,7 +8,6 @@ import { controlsWidth } from "../../util/globals";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { changeAnalysisSliderValue } from "../../actions/treeProperties";
 import { dataFont, darkGrey } from "../../globalStyles";
-// import d3 from "d3";
 
 moment.updateLocale("en", {
   longDateFormat: {
