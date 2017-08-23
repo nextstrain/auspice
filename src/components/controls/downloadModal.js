@@ -2,10 +2,10 @@ import React from "react";
 import { connect } from "react-redux";
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, medGrey, infoPanelStyles } from "../../globalStyles";
-import RectangularTreeLayout from "../framework/svg-tree-layout-rectangular";
 import { stopProp } from "../tree/tipSelectedPanel";
 import { authorString } from "../../util/stringHelpers";
 import * as download from "../../util/downloadDataFunctions";
+import * as icons from "../framework/svg-icons";
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -71,10 +71,10 @@ class DownloadModal extends React.Component {
     const iconWidth = 25;
     const iconStroke = medGrey;
     const buttons = [
-      ["Tree (newick)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, this.props.tree.nodes[0], false)],
-      ["TimeTree (newick)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, this.props.tree.nodes[0], true)],
-      ["Metadata (CSV)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), () => download.CSV(this.props.dispatch, this.props.tree.nodes)],
-      ["Screenshot (SGV)", (<RectangularTreeLayout width={iconWidth} stroke={iconStroke} />), () => download.SVG(this.props.dispatch)]
+      ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, this.props.tree.nodes[0], false)],
+      ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, this.props.tree.nodes[0], true)],
+      ["Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => download.strainCSV(this.props.dispatch, this.props.tree.nodes)],
+      ["Screenshot (SGV)", (<icons.Panels width={iconWidth} stroke={iconStroke} />), () => download.SVG(this.props.dispatch)]
     ];
     return (
       <div className="row">
