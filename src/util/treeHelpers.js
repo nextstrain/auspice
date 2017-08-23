@@ -1,6 +1,7 @@
+import { scalePow } from "d3-scale";
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "./globals";
 import { getGenotype } from "./getGenotype";
-import { scalePow } from "d3-scale";
+import { calendarToNumeric } from "./dateHelpers";
 
 export const gatherTips = (node, tips) => {
 
@@ -301,8 +302,8 @@ export const calcVisibility = function (tree, controls, dates) {
     }
 
     // TIME FILTERING (internal + terminal nodes)
-    const userDateMin = controls.dateScale(controls.dateFormat.parse(dates.dateMin)); // convert caldate to numdate
-    const userDateMax = controls.dateScale(controls.dateFormat.parse(dates.dateMax)); // convert caldate to numdate
+    const userDateMin = calendarToNumeric(controls.dateParser, controls.dateScale, dates.dateMin);
+    const userDateMax = calendarToNumeric(controls.dateParser, controls.dateScale, dates.dateMax);
     const timeFiltered = tree.nodes.map((d, idx) => {
       return !(d.attr.num_date < userDateMin || d.parent.attr.num_date > userDateMax);
     });

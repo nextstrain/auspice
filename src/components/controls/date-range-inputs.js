@@ -23,7 +23,8 @@ moment.updateLocale("en", {
     absoluteDateMin: state.controls.absoluteDateMin,
     absoluteDateMax: state.controls.absoluteDateMax,
     dateScale: state.controls.dateScale,
-    dateFormat: state.controls.dateFormat
+    dateFormatter: state.controls.dateFormatter,
+    dateParser: state.controls.dateParser
   };
 })
 class DateRangeInputs extends React.Component {
@@ -41,6 +42,8 @@ class DateRangeInputs extends React.Component {
     dateMax: React.PropTypes.string.isRequired,
     absoluteDateMin: React.PropTypes.string.isRequired,
     absoluteDateMax: React.PropTypes.string.isRequired,
+    dateFormatter: React.PropTypes.func.isRequired,
+    dateParser: React.PropTypes.func.isRequired,
     dispatch: React.PropTypes.func.isRequired
   }
   getStyles() {
@@ -95,8 +98,8 @@ class DateRangeInputs extends React.Component {
     }
     // {numDateValues} is an array of numDates received from Slider
     // [numDateStart, numDateEnd]
-    const newRange = {min: numericToCalendar(this.props.dateFormat, this.props.dateScale, numDateValues[0]),
-      max: numericToCalendar(this.props.dateFormat, this.props.dateScale, numDateValues[1])};
+    const newRange = {min: numericToCalendar(this.props.dateFormatter, this.props.dateScale, numDateValues[0]),
+      max: numericToCalendar(this.props.dateFormatter, this.props.dateScale, numDateValues[1])};
     if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) { // update min
       this.props.dispatch(changeDateFilter({newMin: newRange.min, quickdraw: debounce}));
       modifyURLquery(this.context.router, {dmin: newRange.min}, true);
@@ -158,10 +161,10 @@ class DateRangeInputs extends React.Component {
     const selectedMin = this.props.dateMin;
     const selectedMax = this.props.dateMax;
 
-    const absoluteMinNumDate = calendarToNumeric(this.props.dateFormat, this.props.dateScale, absoluteMin);
-    const absoluteMaxNumDate = calendarToNumeric(this.props.dateFormat, this.props.dateScale, absoluteMax);
-    const selectedMinNumDate = calendarToNumeric(this.props.dateFormat, this.props.dateScale, selectedMin);
-    const selectedMaxNumDate = calendarToNumeric(this.props.dateFormat, this.props.dateScale, selectedMax);
+    const absoluteMinNumDate = calendarToNumeric(this.props.dateParser, this.props.dateScale, absoluteMin);
+    const absoluteMaxNumDate = calendarToNumeric(this.props.dateParser, this.props.dateScale, absoluteMax);
+    const selectedMinNumDate = calendarToNumeric(this.props.dateParser, this.props.dateScale, selectedMin);
+    const selectedMaxNumDate = calendarToNumeric(this.props.dateParser, this.props.dateScale, selectedMax);
 
     const minDistance = (absoluteMaxNumDate - absoluteMinNumDate) / 10.0;
 

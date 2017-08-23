@@ -1,8 +1,7 @@
 /*eslint dot-notation: 0*/
 import moment from 'moment';
-import d3 from "d3";
 import { scaleTime } from "d3-scale";
-import { timeFormat } from "d3-time-format";
+import { timeFormat, timeParse } from "d3-time-format";
 import traverse from "traverse";
 import maxBy from "lodash";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
@@ -68,7 +67,8 @@ const getDefaultState = function () {
     datasetPathName: "",
     filters: {},
     dateScale: scaleTime().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
-    dateFormat: d3.time.format("%Y-%m-%d"),
+    dateFormatter: timeFormat("%Y-%m-%d"),
+    dateParser: timeParse("%Y-%m-%d"),
     quickdraw: false, // if true, components may skip expensive computes.
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default

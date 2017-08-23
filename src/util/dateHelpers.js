@@ -7,10 +7,14 @@ export const floatDateToMoment = function (num_date) {
   return moment("".concat(years, "-", days), "Y-DDD");
 };
 
-export const numericToCalendar = function (dateFormat, dateScale, numDate) {
-  return(dateFormat(dateScale.invert(numDate)));
+export const numericToCalendar = (dateFormatter, dateScale, numDate) => {
+  const d3Date = dateScale.invert(numDate);
+  const calDate = dateFormatter(d3Date);
+  return calDate;
 };
 
-export const calendarToNumeric = function (dateFormat, dateScale, calDate) {
-  return(dateScale(dateFormat.parse(calDate)));
+export const calendarToNumeric = (dateParser, dateScale, calDate) => {
+  const d3Date = dateParser(calDate);
+  const numDate = dateScale(d3Date);
+  return numDate;
 };
