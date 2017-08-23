@@ -1,4 +1,5 @@
 import d3 from "d3";
+import traverse from "traverse";
 import { dataFont, darkGrey } from "../globalStyles";
 import {debounce} from "lodash";
 
@@ -77,10 +78,19 @@ const applyToChildren = function(node,func){
 var PhyloTree = function(treeJson) {
   this.grid = false;
   this.setDefaults();
-  // use d3 tree layout to convert the tree json into a flat list of nodes
-  this.tree = d3.layout.tree();
+  // convert the tree json into a flat list of nodes
+  const nodesArray = [];
+  const cladeIndexArray = [];
+  traverse(treeJson).forEach((node) => {
+    if (node.clade || node.clade === 0) {
+      if (!cladeIndexArray.includes(node.clade)) {
+        nodesArray.push(node);
+        cladeIndexArray.push(node.clade);
+      }
+    }
+  });
   // wrap each node in a shell structure to avoid mutating the input data
-  this.nodes = this.tree.nodes(treeJson).map((d) => ({
+  this.nodes = nodesArray.map((d) => ({
     n: d, // .n is the original node
     x: 0, // x,y coordinates
     y: 0,
