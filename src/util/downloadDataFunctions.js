@@ -1,6 +1,7 @@
 /* eslint no-restricted-syntax: 0 */
 import { infoNotification, errorNotification, successNotification, warningNotification } from "../actions/notifications";
-import { prettyString } from "./stringHelpers";
+import { prettyString, formatURLString } from "./stringHelpers";
+import { isPaperURLValid } from "../components/controls/downloadModal";
 
 /* this function based on https://github.com/daviddao/biojs-io-newick/blob/master/src/newick.js */
 const treeToNewick = (root, temporal) => {
@@ -40,7 +41,7 @@ const write = (filename, type, content) => {
 };
 
 export const authorCSV = (dispatch, dataset, metadata) => {
-  const lineArray = [["Author", "n(strains)", "publication title", "publication URL", "strains"]];
+  const lineArray = [["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"]];
   const filename = "nextstrain_" + dataset + "_authors.csv";
 
   const authors = {};
@@ -59,7 +60,8 @@ export const authorCSV = (dispatch, dataset, metadata) => {
       prettyString(author, {camelCase: false}),
       metadata.author_info[author].n,
       prettyString(metadata.author_info[author].title, {removeComma: true}),
-      "to do",
+      prettyString(metadata.author_info[author].journal, {removeComma: true}),
+      isPaperURLValid(metadata.author_info[author]) ? formatURLString(metadata.author_info[author].paper_url) : "unknown",
       authors[author].join("\t")
     ]);
   }

@@ -7,17 +7,21 @@ import { authorString, formatURLString } from "../../util/stringHelpers";
 import * as download from "../../util/downloadDataFunctions";
 import * as icons from "../framework/svg-icons";
 
+export const isPaperURLValid = (d) => {
+  return (
+    Object.prototype.hasOwnProperty.call(d, "paper_url") &&
+    !d.paper_url.endsWith('/') &&
+    d.paper_url !== "?"
+  );
+};
+
 export const getAuthor = (info, k) => {
   if (info === undefined || k === undefined) {
     return (
       <span>Not Available</span>
     );
   }
-  if (
-    Object.prototype.hasOwnProperty.call(info[k], "paper_url") &&
-    !info[k].paper_url.endsWith('/') &&
-    info[k].paper_url !== "?"
-  ) {
+  if (isPaperURLValid(info[k])) {
     return (
       <a href={formatURLString(info[k].paper_url)} target="_blank">
         {authorString(k)}
