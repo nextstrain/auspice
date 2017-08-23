@@ -9,6 +9,7 @@ rules:
   max-len: off # be sensible
   no-mixed-operators: off # allow 1 + 1 * 3
   no-confusing-arrow: off # allow (a) => a ? 1 : 2;
+  no-useless-constructor: off
   no-nested-ternary: off
   object-curly-spacing: off # allow { a: 1 } and {a: 1}
   dot-notation: off # allows someObject["a"] as well as someObject.a

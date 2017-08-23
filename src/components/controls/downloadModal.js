@@ -3,9 +3,24 @@ import { connect } from "react-redux";
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, medGrey, infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/tipSelectedPanel";
-import { authorString } from "../../util/stringHelpers";
+import { authorString, formatURLString } from "../../util/stringHelpers";
 import * as download from "../../util/downloadDataFunctions";
 import * as icons from "../framework/svg-icons";
+
+export const getAuthor = (info, k) => {
+  if (
+    Object.prototype.hasOwnProperty.call(info[k], "paper_url") &&
+    !info[k].paper_url.endsWith('/') &&
+    info[k].paper_url !== "?"
+  ) {
+    return (
+      <a href={formatURLString(info[k].paper_url)} target="_blank">
+        {authorString(k)}
+      </a>
+    );
+  }
+  return authorString(k);
+};
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -122,7 +137,10 @@ class DownloadModal extends React.Component {
               {Object.keys(meta.author_info).sort((a, b) => {
                 return meta.author_info[a].n > meta.author_info[b].n ? -1 : 1;
               }).map((k) => (
-                <g key={k}>{authorString(k)} (n = {meta.author_info[k].n}), </g >
+                <span key={k}>
+                  {getAuthor(meta.author_info, k)}
+                  {" (n = " + meta.author_info[k].n + "), "}
+                </span>
               ))}
 
               {this.relevantPublications()}
