@@ -39,9 +39,9 @@ const write = (filename, type, content) => {
   document.body.removeChild(link);
 };
 
-export const authorCSV = (dispatch, metadata) => {
+export const authorCSV = (dispatch, dataset, metadata) => {
   const lineArray = [["Author", "n(strains)", "publication title", "publication URL", "strains"]];
-  const fileName = "nextstrain_author_metadata.csv";
+  const filename = "nextstrain_" + dataset + "_authors.csv";
 
   const authors = {};
   for (const strain of Object.keys(metadata.seq_author_map)) {
@@ -65,12 +65,12 @@ export const authorCSV = (dispatch, metadata) => {
   }
 
   body.forEach((line) => { lineArray.push(line.join(",")); });
-  write(fileName, 'text/csv;charset=utf-8;', lineArray.join("\n"));
-  dispatch(infoNotification({message: "Author metadata exported", details: fileName}));
+  write(filename, 'text/csv;charset=utf-8;', lineArray.join("\n"));
+  dispatch(infoNotification({message: "Author metadata exported", details: filename}));
 };
 
 
-export const strainCSV = (dispatch, nodes) => {
+export const strainCSV = (dispatch, dataset, nodes) => {
   /* TODO
    * FILENAME BASED ON DATASET NAME
    * DONT HARDCODE ATTRS
@@ -78,7 +78,7 @@ export const strainCSV = (dispatch, nodes) => {
 
   // dont need to traverse the tree - can just loop the nodes
   const hardcodedAttrsTemp = ["country", "authors", "accession", "num_date", "region", "date"];
-  const hardcodedFNameTemp = "nextstrain_metadata.csv";
+  const filename = "nextstrain_" + dataset + "_metadata.csv";
   const data = [];
   for (const node of nodes) {
     if (node.hasChildren) {
@@ -100,12 +100,12 @@ export const strainCSV = (dispatch, nodes) => {
     lineArray.push(lineString);
   });
   const csvContent = lineArray.join("\n");
-  write(hardcodedFNameTemp, 'text/csv;charset=utf-8;', csvContent);
-  dispatch(infoNotification({message: "Metadata exported to " + hardcodedFNameTemp}));
+  write(filename, 'text/csv;charset=utf-8;', csvContent);
+  dispatch(infoNotification({message: "Metadata exported to " + filename}));
 };
 
-export const newick = (dispatch, root, temporal) => {
-  const fName = temporal ? "nextstrain_timetree.new" : "nextstrain_tree.new";
+export const newick = (dispatch, dataset, root, temporal) => {
+  const fName = temporal ? "nextstrain_" + dataset + "_timetree.new" : "nextstrain_" + dataset + "_tree.new";
   const message = temporal ? "TimeTree" : "Tree";
   write(fName, plainMIME, treeToNewick(root, temporal));
   dispatch(infoNotification({message: message + " written to " + fName}));
@@ -137,7 +137,7 @@ const fixSVGString = (svgBroken) => {
   return '<?xml version="1.0" standalone="no"?>\r\n' + svgFixed;
 };
 
-export const SVG = (dispatch) => {
+export const SVG = (dispatch, dataset) => {
   const MIME = "image/svg+xml;charset=utf-8";
   const files = [];
   /* tree */
@@ -147,7 +147,7 @@ export const SVG = (dispatch) => {
   /* map */
   const demes_transmissions_xml = (new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions"));
   const groups = demes_transmissions_xml.match(/^<svg(.*?)>(.*?)<\/svg>/);
-  files.unshift("nextstrain_map.svg");
+  files.unshift("nextstrain_" + dataset + "_map.svg");
   /* window.L.save triggers the incommingMapPNG callback, with the data given here passed through */
   window.L.save({
     fileName: files[0],
