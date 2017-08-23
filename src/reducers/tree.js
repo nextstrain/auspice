@@ -1,6 +1,6 @@
+import d3 from "d3";
 import * as types from "../actions/types";
 import { processNodes, calcLayouts } from "../util/processNodes";
-import d3 from "d3";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
 that the tree is loaded as they are set on the same action */

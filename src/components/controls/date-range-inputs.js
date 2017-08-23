@@ -8,7 +8,6 @@ import { controlsWidth } from "../../util/globals";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
-import d3 from "d3";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types.js";
 
 moment.updateLocale("en", {

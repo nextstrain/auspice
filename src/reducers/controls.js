@@ -1,15 +1,16 @@
 /*eslint dot-notation: 0*/
-import * as types from "../actions/types";
-import * as globals from "../util/globals";
-import getColorScale from "../util/getColorScale";
 import moment from 'moment';
 import d3 from "d3";
 import { scaleTime } from "d3-scale";
+import { timeFormat } from "d3-time-format";
 import traverse from "traverse";
-import { reallySmallNumber } from "../util/globals";
+import maxBy from "lodash";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { floatDateToMoment } from "../util/dateHelpers";
-import maxBy from "lodash";
+import * as types from "../actions/types";
+import * as globals from "../util/globals";
+import { reallySmallNumber } from "../util/globals";
+import getColorScale from "../util/getColorScale";
 
 const checkColorByConfidence = function (attrs, colorBy) {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;

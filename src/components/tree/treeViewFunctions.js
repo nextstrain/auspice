@@ -3,7 +3,8 @@
 /*eslint dot-notation: 0*/
 /*eslint max-len : 0*/
 import React from "react";
-import d3 from "d3";
+import { rgb } from "d3-color";
+import { interpolateRgb } from "d3-interpolate";
 import { updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
 import { branchOpacityConstant,
          branchOpacityFunction,
@@ -79,7 +80,7 @@ export const onBranchHover = function (d, x, y) {
           const ramp = branchOpacityFunction(this.props.tree.nodes[el.n.arrayIdx].attr[this.props.colorBy + "_entropy"]);
           const raw = this.props.tree.nodeColors[el.n.arrayIdx];
           const base = el["stroke"];
-          return d3.rgb(d3.interpolateRgb(raw, base)(ramp)).toString();
+          return rgb(interpolateRgb(raw, base)(ramp)).toString();
         });
     } else {
       this.state.tree.svg.select(id)
@@ -247,11 +248,11 @@ const calcStrokeCols = (tree, confidence, colorBy) => {
   if (confidence === true) {
     return tree.nodeColors.map((col, idx) => {
       const entropy = tree.nodes[idx].attr[colorBy + "_entropy"];
-      return d3.rgb(d3.interpolateRgb(col, branchInterpolateColour)(branchOpacityFunction(entropy))).toString();
+      return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityFunction(entropy))).toString();
     });
   }
   return tree.nodeColors.map((col) => {
-    return d3.rgb(d3.interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString();
+    return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString();
   });
 };
 
@@ -329,7 +330,7 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
   }
   if (changes.colorBy) {
     tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
-      return d3.rgb(col).brighter([0.65]).toString();
+      return rgb(col).brighter([0.65]).toString();
     });
     const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy);
     branchStyleToUpdate["stroke"] = branchStrokes;
