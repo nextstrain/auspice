@@ -1,4 +1,6 @@
 import d3 from "d3";
+import { min, max, sum } from "d3-array";
+import { scaleLinear } from "d3-scale";
 import traverse from "traverse";
 import { dataFont, darkGrey } from "../globalStyles";
 import {debounce} from "lodash";
@@ -99,7 +101,7 @@ var PhyloTree = function(treeJson) {
   // assign the root as its own parent to avoid exception handling
   this.nodes[0].n.parent = this.nodes[0].n;
   // pull out the total number of tips -- the is the maximal yvalue
-  this.numberOfTips = d3.max(this.nodes.map(function(d) {
+  this.numberOfTips = max(this.nodes.map(function(d) {
     return d.n.yvalue;
   }));
   this.nodes.forEach(function(d) {
@@ -125,8 +127,8 @@ var PhyloTree = function(treeJson) {
     }
   });
 
-  this.xScale = d3.scale.linear();
-  this.yScale = d3.scale.linear();
+  this.xScale = scaleLinear();
+  this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
   addLeafCount(this.nodes[0]);
 
@@ -351,8 +353,8 @@ PhyloTree.prototype.timeVsRootToTip = function(){
   //const intercept = meanDiv-meanTime*slope;
   // REGRESSION THROUGH ROOT
   const offset = this.nodes[0].depth;
-  const XY = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y)*(d.depth-offset)))/nTips;
-  const secondMomentTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-offset)*(d.depth-offset)))/nTips;
+  const XY = sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y)*(d.depth-offset)))/nTips;
+  const secondMomentTime = sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-offset)*(d.depth-offset)))/nTips;
   const slope = XY/secondMomentTime;
   const intercept = -offset*slope;
   this.regression = {slope:slope, intercept: intercept};
@@ -503,22 +505,22 @@ PhyloTree.prototype.mapToScreen = function(){
         // handle "radial and unrooted differently since they need to be square
         // since branch length move in x and y direction
         // TODO: should be tied to svg dimensions
-        const minX = d3.min(tmp_xValues);
-        const minY = d3.min(tmp_yValues);
-        const spanX = d3.max(tmp_xValues)-minX;
-        const spanY = d3.max(tmp_yValues)-minY;
-        const maxSpan = d3.max([spanY, spanX]);
+        const minX = min(tmp_xValues);
+        const minY = min(tmp_yValues);
+        const spanX = max(tmp_xValues)-minX;
+        const spanY = max(tmp_yValues)-minY;
+        const maxSpan = max([spanY, spanX]);
         const ySlack = (spanX>spanY) ? (spanX-spanY)*0.5 : 0.0;
         const xSlack = (spanX<spanY) ? (spanY-spanX)*0.5 : 0.0;
         this.xScale.domain([minX-xSlack, minX+maxSpan-xSlack]);
         this.yScale.domain([minY-ySlack, minY+maxSpan-ySlack]);
     }else if (this.layout==="clock"){
         // same as rectangular, but flipped yscale
-        this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
-        this.yScale.domain([d3.max(tmp_yValues), d3.min(tmp_yValues)]);
+        this.xScale.domain([min(tmp_xValues), max(tmp_xValues)]);
+        this.yScale.domain([max(tmp_yValues), min(tmp_yValues)]);
     }else{ //rectangular
-        this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
-        this.yScale.domain([d3.min(tmp_yValues), d3.max(tmp_yValues)]);
+        this.xScale.domain([min(tmp_xValues), max(tmp_xValues)]);
+        this.yScale.domain([min(tmp_yValues), max(tmp_yValues)]);
     }
 
     // pass all x,y through scales and assign to xTip, xBase
@@ -584,7 +586,7 @@ PhyloTree.prototype.setScales = function(margins) {
     //Force Square: TODO, harmonize with the map to screen
     const xExtend = width - (margins["left"] || 0) - (margins["right"] || 0);
     const yExtend = height - (margins["top"] || 0) - (margins["top"] || 0);
-    const minExtend = d3.min([xExtend, yExtend]);
+    const minExtend = min([xExtend, yExtend]);
     const xSlack = xExtend - minExtend;
     const ySlack = yExtend - minExtend;
     this.xScale.range([0.5 * xSlack + margins["left"] || 0, width - 0.5 * xSlack - (margins["right"] || 0)]);
@@ -669,7 +671,7 @@ PhyloTree.prototype.addGrid = function(layout, yMinView, yMaxView) {
   const ymin = this.yScale.domain()[1];
   const ymax = this.yScale.domain()[0];
   const xmax = layout=="radial"
-                ? d3.max([this.xScale.domain()[1], this.yScale.domain()[1],
+                ? max([this.xScale.domain()[1], this.yScale.domain()[1],
                           -this.xScale.domain()[0], -this.yScale.domain()[0]])
                 : this.xScale.domain()[1];
 
