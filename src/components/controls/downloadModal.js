@@ -73,7 +73,8 @@ class DownloadModal extends React.Component {
     const buttons = [
       ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, this.props.tree.nodes[0], false)],
       ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, this.props.tree.nodes[0], true)],
-      ["Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => download.strainCSV(this.props.dispatch, this.props.tree.nodes)],
+      ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => download.strainCSV(this.props.dispatch, this.props.tree.nodes)],
+      ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => download.authorCSV(this.props.dispatch, this.props.metadata.metadata)],
       ["Screenshot (SGV)", (<icons.Panels width={iconWidth} stroke={iconStroke} />), () => download.SVG(this.props.dispatch)]
     ];
     return (

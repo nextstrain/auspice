@@ -1,6 +1,6 @@
 /* eslint no-restricted-syntax: 0 */
 import { infoNotification, errorNotification, successNotification, warningNotification } from "../actions/notifications";
-
+import { prettyString } from "./stringHelpers";
 
 /* this function based on https://github.com/daviddao/biojs-io-newick/blob/master/src/newick.js */
 const treeToNewick = (root, temporal) => {
@@ -39,7 +39,38 @@ const write = (filename, type, content) => {
   document.body.removeChild(link);
 };
 
-export const CSV = (dispatch, nodes) => {
+export const authorCSV = (dispatch, metadata) => {
+  const lineArray = [["Author", "n(strains)", "publication title", "publication URL", "strains"]];
+  const fileName = "nextstrain_author_metadata.csv";
+
+  const authors = {};
+  for (const strain of Object.keys(metadata.seq_author_map)) {
+    const author = metadata.seq_author_map[strain];
+    if (Object.prototype.hasOwnProperty.call(authors, author)) {
+      authors[author].push(strain);
+    } else {
+      authors[author] = [strain];
+    }
+  }
+
+  const body = [];
+  for (const author of Object.keys(metadata.author_info)) {
+    body.push([
+      prettyString(author, {camelCase: false}),
+      metadata.author_info[author].n,
+      prettyString(metadata.author_info[author].title, {removeComma: true}),
+      "to do",
+      authors[author].join("\t")
+    ]);
+  }
+
+  body.forEach((line) => { lineArray.push(line.join(",")); });
+  write(fileName, 'text/csv;charset=utf-8;', lineArray.join("\n"));
+  dispatch(infoNotification({message: "Author metadata exported", details: fileName}));
+};
+
+
+export const strainCSV = (dispatch, nodes) => {
   /* TODO
    * FILENAME BASED ON DATASET NAME
    * DONT HARDCODE ATTRS
