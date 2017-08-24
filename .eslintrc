@@ -18,6 +18,7 @@ rules:
   padded-blocks: off
   arrow-body-style: off
   arrow-parens: ["error", "always"] # use brackets always, (a) => body // () => body // (a, b) => body
+  no-case-declarations: off # we don't surround case blocks with { } in our switch statements as we use fallthroughs deliberately
   one-var: off
   one-var-declaration-per-line: off
   no-console: [1, { "allow": ["warn", "error"] }]

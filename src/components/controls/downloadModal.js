@@ -67,7 +67,7 @@ class DownloadModal extends React.Component {
     show: React.PropTypes.bool.isRequired,
     dispatch: React.PropTypes.func.isRequired,
     metadata: React.PropTypes.object.isRequired,
-    datasetPathName: React.PropTypes.string.isRequired,
+    datasetPathName: React.PropTypes.string,
     browserDimensions: React.PropTypes.object.isRequired
   }
 
@@ -100,7 +100,7 @@ class DownloadModal extends React.Component {
     const buttons = [
       ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, dataset, this.props.tree.nodes[0], false)],
       ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, dataset, this.props.tree.nodes[0], true)],
-      ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => download.strainCSV(this.props.dispatch, dataset, this.props.tree.nodes)],
+      ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => download.strainCSV(this.props.dispatch, dataset, this.props.tree.nodes, this.props.tree.attrs)],
       ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => download.authorCSV(this.props.dispatch, dataset, this.props.metadata.metadata)],
       ["Screenshot (SGV)", (<icons.Panels width={iconWidth} stroke={iconStroke} />), () => download.SVG(this.props.dispatch, dataset)]
     ];

@@ -25,7 +25,12 @@ const treeToNewick = (root, temporal) => {
   return recurse(root, 0) + ";";
 };
 
-const plainMIME = "text/plain;charset=utf-8;";
+const MIME = {
+  text: "text/plain;charset=utf-8;",
+  csv: 'text/csv;charset=utf-8;',
+  svg: "image/svg+xml;charset=utf-8"
+};
+
 
 const write = (filename, type, content) => {
   /* https://stackoverflow.com/questions/18848860/javascript-array-to-csv/18849208#comment59677504_18849208 */
@@ -67,19 +72,16 @@ export const authorCSV = (dispatch, dataset, metadata) => {
   }
 
   body.forEach((line) => { lineArray.push(line.join(",")); });
-  write(filename, 'text/csv;charset=utf-8;', lineArray.join("\n"));
+  write(filename, MIME.csv, lineArray.join("\n"));
   dispatch(infoNotification({message: "Author metadata exported", details: filename}));
 };
 
+const turnAttrsIntoHeaderArray = (attrs) => {
+  return ["Strain"].concat(attrs.map((v) => prettyString(v)));
+};
 
-export const strainCSV = (dispatch, dataset, nodes) => {
-  /* TODO
-   * FILENAME BASED ON DATASET NAME
-   * DONT HARDCODE ATTRS
-   */
-
+export const strainCSV = (dispatch, dataset, nodes, attrs) => {
   // dont need to traverse the tree - can just loop the nodes
-  const hardcodedAttrsTemp = ["country", "authors", "accession", "num_date", "region", "date"];
   const filename = "nextstrain_" + dataset + "_metadata.csv";
   const data = [];
   for (const node of nodes) {
@@ -87,29 +89,57 @@ export const strainCSV = (dispatch, dataset, nodes) => {
       continue;
     }
     const line = [node.strain];
-    for (const field of hardcodedAttrsTemp) {
+    // console.log(node.attr)
+    for (const field of attrs) {
       if (Object.keys(node.attr).indexOf(field) === -1) {
         line.push("unknown");
       } else {
-        line.push(node.attr[field]);
+        const value = node.attr[field];
+        if (typeof value === 'string') {
+          if (value.lastIndexOf("http", 0) === 0) {
+            line.push(formatURLString(value));
+          } else {
+            line.push(prettyString(value, {removeComma: true}));
+          }
+        } else if (typeof value === "number") {
+          line.push(parseFloat(value).toFixed(2));
+        } else if (typeof value === "object") {
+          if (Array.isArray(value)) {
+            if (typeof value[0] === "number") {
+              line.push(value.map((v) => parseFloat(v).toFixed(2)).join(" - "));
+            } else {
+              line.push(value.map((v) => prettyString(v, {removeComma: true})).join(" - "));
+            }
+          } else { /* not an array, but a relational object */
+            let x = "";
+            for (const k of Object.keys(value)) {
+              const v = typeof value[k] === "number" ? parseFloat(value[k]).toFixed(2) : prettyString(value[k], {removeComma: true});
+              x += prettyString(k, {removeComma: true}) + ": " + v + ";";
+            }
+            line.push(x);
+          }
+        } else {
+          console.warn("Tried to save " + value + " of type " + typeof value);
+          line.push("unknown");
+        }
       }
     }
     data.push(line);
   }
-  const lineArray = [["strain"].concat(hardcodedAttrsTemp)];
+  const lineArray = [turnAttrsIntoHeaderArray(attrs)];
   data.forEach((line) => {
     const lineString = line.join(",");
     lineArray.push(lineString);
   });
   const csvContent = lineArray.join("\n");
-  write(filename, 'text/csv;charset=utf-8;', csvContent);
+  write(filename, MIME.csv, csvContent);
   dispatch(infoNotification({message: "Metadata exported to " + filename}));
 };
 
 export const newick = (dispatch, dataset, root, temporal) => {
   const fName = temporal ? "nextstrain_" + dataset + "_timetree.new" : "nextstrain_" + dataset + "_tree.new";
   const message = temporal ? "TimeTree" : "Tree";
-  write(fName, plainMIME, treeToNewick(root, temporal));
+  write(fName, MIME.text, treeToNewick(root, temporal));
   dispatch(infoNotification({message: message + " written to " + fName}));
 };
 
@@ -140,7 +170,6 @@ const fixSVGString = (svgBroken) => {
 };
 
 export const SVG = (dispatch, dataset) => {
-  const MIME = "image/svg+xml;charset=utf-8";
   const files = [];
   /* tree */
   const svg_tree = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
@@ -159,7 +188,7 @@ export const SVG = (dispatch, dataset) => {
   /* entropy panel */
   const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropy")));
   files.unshift("nextstrain_entropy.svg");
-  write(files[0], MIME, svg_entropy);
+  write(files[0], MIME.svg, svg_entropy);
   /* notification */
   dispatch(infoNotification({message: "Vector images saved", details: files.join(", ")}));
 };
