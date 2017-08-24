@@ -17,7 +17,7 @@ import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
 import DownloadModal from "./controls/downloadModal";
 import { analyticsNewPage } from "../util/googleAnalytics";
-import { filesDropped } from "../actions/filesDropped";
+import filesDropped from "../actions/filesDropped";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   React-Router v4 injects length, action, location, push etc into props,

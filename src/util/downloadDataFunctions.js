@@ -76,7 +76,7 @@ export const authorCSV = (dispatch, dataset, metadata) => {
   dispatch(infoNotification({message: "Author metadata exported", details: filename}));
 };
 
-const turnAttrsIntoHeaderArray = (attrs) => {
+export const turnAttrsIntoHeaderArray = (attrs) => {
   return ["Strain"].concat(attrs.map((v) => prettyString(v)));
 };
 

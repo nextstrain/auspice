@@ -25,7 +25,7 @@ const getDefaultState = () => {
 const getAttrsOnTerminalNodes = (nodes) => {
   for (const node of nodes) {
     if (!node.hasChildren) {
-      return Object.keys(node.attr);
+      return Object.keys(node.attr).filter((v) => v.toLowerCase() !== "strain");
     }
   }
   console.error("Parsed tree without terminal nodes.");
@@ -77,7 +77,7 @@ const Tree = (state = getDefaultState(), action) => {
         }
       }
       return Object.assign({}, state, {
-        attrs: getAttrsOnTerminalNodes(nodes)
+        attrs: getAttrsOnTerminalNodes(state.nodes)
       });
     default:
       return state;
