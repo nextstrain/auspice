@@ -12,6 +12,7 @@ rules:
   no-useless-constructor: off
   no-nested-ternary: off
   object-curly-spacing: off # allow { a: 1 } and {a: 1}
+  block-spacing: off # same as above for function blocks on a single line
   dot-notation: off # allows someObject["a"] as well as someObject.a
   comma-dangle: ["error", "never"]
   padded-blocks: off
