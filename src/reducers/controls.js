@@ -2,10 +2,10 @@
 import moment from 'moment';
 import { scaleTime } from "d3-scale";
 import { timeFormat, timeParse } from "d3-time-format";
-import traverse from "traverse";
 import maxBy from "lodash";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { floatDateToMoment } from "../util/dateHelpers";
+import { flattenTree } from "../util/treeHelpers";
 import * as types from "../actions/types";
 import * as globals from "../util/globals";
 import { reallySmallNumber } from "../util/globals";
@@ -23,7 +23,8 @@ const getMinDateViaRoot = function (rootAttr) {
 
 const getMaxDateViaTips = (tree) => {
   let maxNumDate = reallySmallNumber;
-  traverse(tree).forEach((node) => {
+  const nodesArray = flattenTree(tree);
+  nodesArray.forEach((node) => {
     if (node.attr) {
       if (node.attr.num_date) {
         if (node.attr.num_date > maxNumDate) {

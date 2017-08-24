@@ -1,9 +1,9 @@
+import { debounce } from "lodash";
 import d3 from "d3";
 import { min, max, sum } from "d3-array";
 import { scaleLinear } from "d3-scale";
-import traverse from "traverse";
+import { flattenTree, appendParentsToTree } from "./treeHelpers";
 import { dataFont, darkGrey } from "../globalStyles";
-import {debounce} from "lodash";
 
 /*
  * adds the total number of descendant leaves to each node in the tree
@@ -80,17 +80,8 @@ const applyToChildren = function(node,func){
 var PhyloTree = function(treeJson) {
   this.grid = false;
   this.setDefaults();
-  // convert the tree json into a flat list of nodes
-  const nodesArray = [];
-  const cladeIndexArray = [];
-  traverse(treeJson).forEach((node) => {
-    if (node.clade || node.clade === 0) {
-      if (!cladeIndexArray.includes(node.clade)) {
-        nodesArray.push(node);
-        cladeIndexArray.push(node.clade);
-      }
-    }
-  });
+  appendParentsToTree(treeJson); // add reference to .parent to each node in tree
+  const nodesArray = flattenTree(treeJson); // convert the tree json into a flat list of nodes
   // wrap each node in a shell structure to avoid mutating the input data
   this.nodes = nodesArray.map((d) => ({
     n: d, // .n is the original node
@@ -98,8 +89,6 @@ var PhyloTree = function(treeJson) {
     y: 0,
     r: this.params.tipRadius // set defaults
   }));
-  // assign the root as its own parent to avoid exception handling
-  this.nodes[0].n.parent = this.nodes[0].n;
   // pull out the total number of tips -- the is the maximal yvalue
   this.numberOfTips = max(this.nodes.map(function(d) {
     return d.n.yvalue;

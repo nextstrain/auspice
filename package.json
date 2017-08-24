@@ -131,7 +131,6 @@
     "redux-thunk": "^1.0.0",
     "request": "^2.65.0",
     "title-case": "^2.1.0",
-    "traverse": "^0.6.6",
     "victory-chart": "^16.1.2",
     "whatwg-fetch": "^0.10.1"
   }

@@ -1,6 +1,5 @@
-import d3 from "d3";
-import traverse from "traverse";
 import * as types from "../actions/types";
+import { flattenTree, appendParentsToTree } from "../util/treeHelpers";
 import { processNodes, calcLayouts } from "../util/processNodes";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
@@ -26,19 +25,9 @@ const Tree = (state = getDefaultState(), action) => {
   switch (action.type) {
   case types.NEW_DATASET: {
     /* loaded returns to the default (false) */
-    const nodesArray = [];
-    const cladeIndexArray = [];
-    traverse(action.tree).forEach((node) => {
-      if (node.clade || node.clade === 0) {
-        if (!cladeIndexArray.includes(node.clade)) {
-          nodesArray.push(node);
-          cladeIndexArray.push(node.clade);
-        }
-      }
-    });
-    const oldNodesArray = d3.layout.tree().size([1, 1]).nodes(action.tree); // TODO this is setting .parent, need to replace this with another function
+    appendParentsToTree(action.tree);
+    const nodesArray = flattenTree(action.tree);
     const nodes = processNodes(nodesArray);
-    nodes[0].parent = nodes[0]; // make root its own parent 
     calcLayouts(nodes, ["div", "num_date"]);
     return Object.assign({}, getDefaultState(), {
       inViewRootNodeIdx: 0,
