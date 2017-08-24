@@ -1,5 +1,5 @@
 import { debounce } from "lodash";
-import d3 from "d3";
+import { event } from "d3-selection";
 import { min, max, sum } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { flattenTree, appendParentsToTree } from "./treeHelpers";
@@ -724,15 +724,16 @@ PhyloTree.prototype.addGrid = function(layout, yMinView, yMaxView) {
   }
 
   const majorGrid = this.svg.selectAll('.majorGrid').data(gridPoints);
-  majorGrid.exit().remove();
-  majorGrid.enter().append("path");
-  majorGrid
-      .attr("d", gridline(this.xScale, this.yScale, layout))
-      .attr("class", "majorGrid")
-      .style("fill", "none")
-      .style("visibility", function (d){return d[1];})
-      .style("stroke",this.params.majorGridStroke)
-      .style("stroke-width",this.params.majorGridWidth);
+
+  majorGrid.exit().remove(); // EXIT
+  majorGrid.enter().append("path") // ENTER
+    .merge(majorGrid) // ENTER + UPDATE
+    .attr("d", gridline(this.xScale, this.yScale, layout))
+    .attr("class", "majorGrid")
+    .style("fill", "none")
+    .style("visibility", function (d){return d[1];})
+    .style("stroke",this.params.majorGridStroke)
+    .style("stroke-width",this.params.majorGridWidth);
 
   const xTextPos = function(xScale, layout){
       return function(x){
@@ -778,31 +779,31 @@ PhyloTree.prototype.addGrid = function(layout, yMinView, yMaxView) {
     }
   }
   const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
-  minorGrid.exit().remove();
-  minorGrid.enter().append("path");
-  minorGrid
-      .attr("d", gridline(this.xScale, this.yScale, layout))
-      .attr("class", "minorGrid")
-      .style("fill", "none")
-      .style("visibility", function (d){return d[1];})
-      .style("stroke",this.params.minorGridStroke)
-      .style("stroke-width",this.params.minorGridWidth);
+  minorGrid.exit().remove(); // EXIT
+  minorGrid.enter().append("path") // ENTER
+    .merge(minorGrid) // ENTER + UPDATE
+    .attr("d", gridline(this.xScale, this.yScale, layout))
+    .attr("class", "minorGrid")
+    .style("fill", "none")
+    .style("visibility", function (d){return d[1];})
+    .style("stroke",this.params.minorGridStroke)
+    .style("stroke-width",this.params.minorGridWidth);
 
   const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
   const precision = Math.max(0, 1-logRange);
   const precisionY = Math.max(0, 1-logRangeY);
-  gridLabels.exit().remove();
-  gridLabels.enter().append("text");
-  gridLabels
-      .text(function(d){return d[0].toFixed(d[2]==='y'?precisionY:precision);})
-      .attr("class", "gridTick")
-      .style("font-size",this.params.tickLabelSize)
-      .style("font-family",this.params.fontFamily)
-      .style("fill",this.params.tickLabelFill)
-      .style("text-anchor", this.layout==="radial" ? "end" : "middle")
-      .style("visibility", function (d){return d[1];})
-      .attr("x", xTextPos(this.xScale, layout))
-      .attr("y", yTextPos(this.yScale, layout));
+  gridLabels.exit().remove(); // EXIT
+  gridLabels.enter().append("text") // ENTER
+    .merge(gridLabels) // ENTER + UPDATE
+    .text(function(d){return d[0].toFixed(d[2]==='y'?precisionY:precision);})
+    .attr("class", "gridTick")
+    .style("font-size",this.params.tickLabelSize)
+    .style("font-family",this.params.fontFamily)
+    .style("fill",this.params.tickLabelFill)
+    .style("text-anchor", this.layout==="radial" ? "end" : "middle")
+    .style("visibility", function (d){return d[1];})
+    .attr("x", xTextPos(this.xScale, layout))
+    .attr("y", yTextPos(this.yScale, layout));
 
   this.grid=true;
 };
@@ -844,7 +845,7 @@ PhyloTree.prototype.drawTips = function() {
       return d.r;
     })
     .on("mouseover", (d) => {
-      this.callbacks.onTipHover(d, d3.event.pageX, d3.event.pageY)
+      this.callbacks.onTipHover(d, event.pageX, event.pageY)
     })
     .on("mouseout", (d) => {
       this.callbacks.onTipLeave(d)
@@ -923,7 +924,7 @@ PhyloTree.prototype.drawBranches = function() {
     .style("cursor", "pointer")
     .style("pointer-events", "auto")
     .on("mouseover", (d) => {
-      this.callbacks.onBranchHover(d, d3.event.pageX, d3.event.pageY)
+      this.callbacks.onBranchHover(d, event.pageX, event.pageY)
     })
     .on("mouseout", (d) => {
       this.callbacks.onBranchLeave(d)

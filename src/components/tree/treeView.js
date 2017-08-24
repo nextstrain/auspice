@@ -3,7 +3,7 @@
 /*eslint react/prop-types: 0*/
 import React from "react";
 import ReactDOM from "react-dom";
-import d3 from "d3";
+import { select } from "d3-selection";
 import Card from "../framework/card";
 import Legend from "./legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
@@ -116,7 +116,7 @@ class TreeView extends React.Component {
       const myTree = new PhyloTree(nodes[0]);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
       myTree.render(
-        d3.select(this.refs.d3TreeElement),
+        select(this.refs.d3TreeElement),
         this.props.layout,
         this.props.distanceMeasure,
         { /* options */
