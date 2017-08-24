@@ -1,4 +1,5 @@
 import d3 from "d3";
+import traverse from "traverse";
 import * as types from "../actions/types";
 import { processNodes, calcLayouts } from "../util/processNodes";
 
@@ -23,15 +24,27 @@ const getDefaultState = function () {
 
 const Tree = (state = getDefaultState(), action) => {
   switch (action.type) {
-  case types.NEW_DATASET:
+  case types.NEW_DATASET: {
     /* loaded returns to the default (false) */
-    const nodes = processNodes(d3.layout.tree().size([1, 1]).nodes(action.tree));
-    nodes[0].parent = nodes[0]; // make root its own parent
+    const nodesArray = [];
+    const cladeIndexArray = [];
+    traverse(action.tree).forEach((node) => {
+      if (node.clade || node.clade === 0) {
+        if (!cladeIndexArray.includes(node.clade)) {
+          nodesArray.push(node);
+          cladeIndexArray.push(node.clade);
+        }
+      }
+    });
+    const oldNodesArray = d3.layout.tree().size([1, 1]).nodes(action.tree); // TODO this is setting .parent, need to replace this with another function
+    const nodes = processNodes(nodesArray);
+    nodes[0].parent = nodes[0]; // make root its own parent 
     calcLayouts(nodes, ["div", "num_date"]);
     return Object.assign({}, getDefaultState(), {
       inViewRootNodeIdx: 0,
       nodes: nodes
     });
+  }
   case types.DATA_VALID:
     return Object.assign({}, state, {
       loaded: true,
