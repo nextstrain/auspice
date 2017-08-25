@@ -186,7 +186,7 @@ export const SVG = (dispatch, dataset) => {
     demes_transmissions_path: groups[2]
   });
   /* entropy panel */
-  const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropy")));
+  const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
   files.unshift("nextstrain_entropy.svg");
   write(files[0], MIME.svg, svg_entropy);
   /* notification */
