@@ -1,4 +1,4 @@
-import d3 from "d3";
+import { scaleLinear, scaleSqrt } from "d3-scale";
 
 export const colorOptions = {
     "country":{"key":"country", "legendTitle":"Country", "menuItem":"country", "type":"discrete"},
@@ -66,15 +66,15 @@ export const dfreqColorDomain = genericDomain.map((d) => {
 export const fitnessColorDomain = genericDomain.map((d) => {
   return Math.round(100 * ((d - 0.5) * 16.0)) / 100;
 });
-export const dHIScale = d3.scale.linear()
+export const dHIScale = scaleLinear()
   .domain([0, 1])
   .range([2.0, 4.5]);
 
-export const freqScale = d3.scale.sqrt()
+export const freqScale = scaleSqrt()
   .domain([0, 1])
   .range([1, 10]);
 
-export const distanceScale = d3.scale.sqrt()
+export const distanceScale = scaleSqrt()
   .domain([3, 20])
   .range([9, 3])
   .clamp([true]);

@@ -1,10 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
+import { set } from "d3-collection";
 import { dataFont, medGrey } from "../../globalStyles";
 import { authorString } from "../../util/stringHelpers";
 import computeResponsive from "../../util/computeResponsive";
 import Flex from "./flex";
-import d3 from "d3";
 
 @connect((state) => {
   return {
@@ -130,7 +130,7 @@ class Footer extends React.Component {
     // check if !hasChildren
     // in each node there is attr.authors and attr.url
     // construct array of unique author strings
-    let authorsSet = d3.set();
+    let authorsSet = set();
     let authorsToURL = {};
     if (this.props.tree) {
       if (this.props.tree.nodes) {

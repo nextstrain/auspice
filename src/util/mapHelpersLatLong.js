@@ -1,5 +1,5 @@
 import _ from "lodash";
-import d3 from "d3";
+import { interpolateNumber } from "d3-interpolate";
 import { averageColors } from "./colorHelpers";
 import { computeMidpoint, Bezier } from "./transmissionBezier";
 
@@ -166,7 +166,7 @@ const maybeConstructTransmissionEvent = (
     const Bcurve = constructBcurve(validLatLongPair[0], validLatLongPair[1]);
 
     /* set up interpolator with origin and destination numdates */
-    const interpolator = d3.interpolateNumber(node.attr.num_date, child.attr.num_date);
+    const interpolator = interpolateNumber(node.attr.num_date, child.attr.num_date);
 
     /* make a Bdates array as long as Bcurve */
     const Bdates = [];

@@ -1,8 +1,11 @@
 // import * as scales from "./colorScales";
+import { scaleLinear, scaleOrdinal } from "d3-scale";
+import { min, max } from "d3-array";
+import { rgb } from "d3-color";
+import { interpolateHcl } from "d3-interpolate";
 import createLegendMatchBound from "./createLegendMatchBounds";
 import { genericDomain, colors, genotypeColors } from "./globals";
 import { parseGenotype, getGenotype } from "./getGenotype"
-import d3 from "d3";
 
 /* this checks if there are more items in the tree compared
    to associated colours in the metadata JSON
@@ -19,7 +22,7 @@ const getExtraVals = (nodes, colorBy, color_map) => {
 
 const genericScale = (cmin, cmax, vals = false) => {
   if (vals && vals.length <= 9) {
-    return d3.scale.linear()
+    return scaleLinear()
       .domain(vals)
       .range(colors[vals.length]);
   }
@@ -28,7 +31,7 @@ const genericScale = (cmin, cmax, vals = false) => {
   create an evenly spaced 9-item domain (this is genericDomain) */
   const offset = +cmin;
   const range = cmax - cmin;
-  return d3.scale.linear()
+  return scaleLinear()
     .domain(genericDomain.map((d) => offset + d * range))
     .range(colors[9]);
 };
@@ -41,18 +44,18 @@ const minMaxAttributeScale = (nodes, attr, options) => {
     const vals = nodes.map((n) => n.attr[attr])
       .filter((n) => n !== undefined)
       .filter((item, i, ar) => ar.indexOf(item) === i);
-    return genericScale(d3.min(vals), d3.max(vals), vals);
+    return genericScale(min(vals), max(vals), vals);
   }
 };
 
 const integerAttributeScale = (nodes, attr) => {
-  const maxAttr = d3.max(nodes.map((n) => n.attr[attr]));
-  const minAttr = d3.min(nodes.map((n) => n.attr[attr]));
+  const maxAttr = max(nodes.map((n) => n.attr[attr]));
+  const minAttr = min(nodes.map((n) => n.attr[attr]));
   const nStates = maxAttr - minAttr;
   if (nStates < 11) {
     const domain = [];
     for (let i = minAttr; i <= maxAttr; i++) { domain.push(i); }
-    return d3.scale.linear().domain(domain).range(colors[maxAttr - minAttr]);
+    return scaleLinear().domain(domain).range(colors[maxAttr - minAttr]);
   } else {
     return genericScale(minAttr, maxAttr);
   }
@@ -65,10 +68,10 @@ const integerAttributeScale = (nodes, attr) => {
    range: [a,b], the colours to go between
 */
 const createListOfColors = (n, range) => {
-  const scale = d3.scale.linear().domain([0, n])
-      .interpolate(d3.interpolateHcl)
+  const scale = scaleLinear().domain([0, n])
+      .interpolate(interpolateHcl)
       .range(range);
-  return d3.range(0, n).map(scale);
+  return range(0, n).map(scale);
 };
 
 const discreteAttributeScale = (nodes, attr) => {
@@ -80,7 +83,7 @@ const discreteAttributeScale = (nodes, attr) => {
   domain.sort((a, b) => stateCount[a] > stateCount[b]);
   // note: colors[n] has n colors
   const colorList = domain.length < colors.length ? colors[domain.length] : colors[colors.length - 1];
-  return d3.scale.ordinal()
+  return scaleOrdinal()
                  .domain(domain)
                  .range(colorList);
 };
@@ -106,7 +109,7 @@ const getColorScale = (colorBy, tree, sequences, colorOptions, version) => {
                                : stateCount[getGenotype(gt[0][0], gt[0][1], n,   sequences.sequences)] = 1));
         const domain = Object.keys(stateCount);
         domain.sort((a, b) => stateCount[a] > stateCount[b]);
-        colorScale = d3.scale.ordinal().domain(domain).range(genotypeColors);
+        colorScale = scaleOrdinal().domain(domain).range(genotypeColors);
       }
     }
   } else if (colorOptions && colorOptions[colorBy]) {
@@ -118,11 +121,11 @@ const getColorScale = (colorBy, tree, sequences, colorOptions, version) => {
       if (extraVals.length) {
         // we must add these to the domain + provide a value in the range
         domain = domain.concat(extraVals);
-        const extrasColorAB = [d3.rgb(192, 192, 192), d3.rgb(32, 32, 32)]
+        const extrasColorAB = [rgb(192, 192, 192), rgb(32, 32, 32)]
         range = range.concat(createListOfColors(extraVals.length, extrasColorAB))
       }
       continuous = false;
-      colorScale = d3.scale.ordinal()
+      colorScale = scaleOrdinal()
                            .domain(domain)
                            .range(range);
     } else if (colorOptions && colorOptions[colorBy].type === "discrete") {

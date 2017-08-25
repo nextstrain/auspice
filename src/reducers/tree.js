@@ -1,6 +1,6 @@
 import * as types from "../actions/types";
+import { flattenTree, appendParentsToTree } from "../util/treeHelpers";
 import { processNodes, calcLayouts } from "../util/processNodes";
-import d3 from "d3";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
 that the tree is loaded as they are set on the same action */
@@ -23,15 +23,17 @@ const getDefaultState = function () {
 
 const Tree = (state = getDefaultState(), action) => {
   switch (action.type) {
-  case types.NEW_DATASET:
+  case types.NEW_DATASET: {
     /* loaded returns to the default (false) */
-    const nodes = processNodes(d3.layout.tree().size([1, 1]).nodes(action.tree));
-    nodes[0].parent = nodes[0]; // make root its own parent
+    appendParentsToTree(action.tree);
+    const nodesArray = flattenTree(action.tree);
+    const nodes = processNodes(nodesArray);
     calcLayouts(nodes, ["div", "num_date"]);
     return Object.assign({}, getDefaultState(), {
       inViewRootNodeIdx: 0,
       nodes: nodes
     });
+  }
   case types.DATA_VALID:
     return Object.assign({}, state, {
       loaded: true,
