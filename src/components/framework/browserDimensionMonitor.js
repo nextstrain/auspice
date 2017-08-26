@@ -1,4 +1,3 @@
-/*eslint-env browser*/
 import React from "react";
 import { connect } from "react-redux";
 import _throttle from "lodash/throttle";

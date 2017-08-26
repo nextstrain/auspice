@@ -1,20 +1,16 @@
-/*eslint-env browser*/
-/*eslint dot-notation: 0*/
-/*eslint react/prop-types: 0*/
 import React from "react";
-import ReactDOM from "react-dom";
+import { connect } from "react-redux";
 import { select } from "d3-selection";
+import { ReactSVGPanZoom } from "react-svg-pan-zoom";
 import Card from "../framework/card";
 import Legend from "./legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
 import PhyloTree from "../../util/phyloTree";
-import { ReactSVGPanZoom } from "react-svg-pan-zoom";
 import { mediumTransitionDuration, twoColumnBreakpoint } from "../../util/globals";
 import InfoPanel from "./infoPanel";
 import BranchSelectedPanel from "./branchSelectedPanel";
 import TipSelectedPanel from "./tipSelectedPanel";
-import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
 import * as funcs from "./treeViewFunctions";
 

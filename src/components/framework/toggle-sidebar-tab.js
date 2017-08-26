@@ -1,6 +1,4 @@
 import React from "react";
-import {brandColor} from "../../globalStyles";
-import { titleBarHeight } from "../../util/globals";
 
 const ToggleSidebarTab = ({open, handler}) => {
 

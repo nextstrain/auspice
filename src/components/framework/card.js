@@ -1,6 +1,6 @@
 import React from "react";
-import Radium from "radium";
-import {headerFont, medGrey, darkGrey} from "../../globalStyles";
+import Radium from "radium"; // necessary
+import { headerFont, medGrey } from "../../globalStyles";
 
 @Radium
 class Card extends React.Component {

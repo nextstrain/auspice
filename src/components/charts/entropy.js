@@ -1,18 +1,15 @@
-/*eslint-env browser*/
-/*eslint dot-notation: "off", max-params: 0*/
 import React from "react";
-import _filter from "lodash/filter";
 import { connect } from "react-redux";
-import * as globals from "../../util/globals";
+import _filter from "lodash/filter";
+import { genotypeColors } from "../../util/globals";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
 import { changeColorBy } from "../../actions/colors";
-import { modifyURLquery } from "../../util/urlHelpers";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./entropyInfoPanel";
-import "../../css/entropy.css";
 import { changeMutType } from "../../actions/treeProperties";
+import "../../css/entropy.css";
 
 const calcEntropy = function (entropy) {
   const entropyNt = entropy["nuc"]["val"].map((s, i) => {
@@ -32,13 +29,13 @@ const calcEntropy = function (entropy) {
                         start: tmpProt["pos"][0],
                         end: tmpProt["pos"][tmpProt["pos"].length - 1],
                         readingFrame: 1, //+tmpProt['pos'][0]%3,
-                        fill: globals.genotypeColors[aaCount % 10]
+                        fill: genotypeColors[aaCount % 10]
                        });
       const tmpEntropy = tmpProt["val"].map((s, i) => ({
         x: tmpProt["pos"][i],
         y: s,
         codon: tmpProt["codon"][i],
-        fill: globals.genotypeColors[aaCount % 10],
+        fill: genotypeColors[aaCount % 10],
         prot: prot
       }));
       aminoAcidEntropyWithoutZeros = aminoAcidEntropyWithoutZeros.concat(
@@ -98,7 +95,6 @@ class Entropy extends React.Component {
 
   setColorByGenotype(colorBy) {
     this.props.dispatch(changeColorBy(colorBy));
-    // modifyURLquery(this.context.router, {c: colorBy}, true);
   }
 
   getChartGeom(props) {

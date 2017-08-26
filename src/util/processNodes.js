@@ -1,12 +1,12 @@
-import * as treeHelpers from "./treeHelpers";
-import * as globals from "./globals";
+import { calcFullTipCounts, calcBranchLength, calcDates } from "./treeHelpers";
+import { defaultDistanceMeasures } from "./globals";
 
 export const processNodes = (nodes) => {
   const rootNode = nodes[0];
   nodes.forEach((d) => {if (typeof d.attr === "undefined") {d.attr = {};} });
-  treeHelpers.calcFullTipCounts(rootNode);
-  treeHelpers.calcBranchLength(rootNode);
-  treeHelpers.calcDates(nodes);
+  calcFullTipCounts(rootNode);
+  calcBranchLength(rootNode);
+  calcDates(nodes);
   nodes.forEach((d) => {d.hasChildren = typeof d.children !== "undefined";});
   /* set an index so that we can access visibility / nodeColors if needed */
   nodes.map((d, idx) => {d.arrayIdx = idx;});
@@ -51,7 +51,7 @@ const radialLayout = (node, distanceMeasure, nTips, rootVal) => {
 */
 export const calcLayouts = (nodes, distanceMeasures, nTips) => {
     if (typeof distanceMeasures==='undefined'){
-        distanceMeasures = globals.defaultDistanceMeasures;
+        distanceMeasures = defaultDistanceMeasures;
     }
     if (typeof nTips==='undefined'){
         nTips = nodes.filter((d) => {return !d.hasChildren;} ).length;

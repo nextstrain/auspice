@@ -1,4 +1,3 @@
-/*eslint-env browser*/
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 import { prettyString } from "../../util/stringHelpers";

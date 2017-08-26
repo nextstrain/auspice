@@ -1,5 +1,5 @@
 import React from "react";
-import {infoPanelStyles, dataFont} from "../../globalStyles";
+import { infoPanelStyles, dataFont } from "../../globalStyles";
 
 const BranchSelectedPanel = ({branch, viewEntireTreeCallback, responsive}) => {
   if (!branch) {return null;}

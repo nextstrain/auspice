@@ -1,6 +1,6 @@
 import React from "react";
-import Radium from "radium";
 import { connect } from "react-redux";
+import Radium from "radium"; // necessary
 
 /* add connect, browserDimensions & documentHeight here and use instead of 100% */
 @connect((state) => {

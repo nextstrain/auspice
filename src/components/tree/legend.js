@@ -1,11 +1,12 @@
 import React from "react";
-import { rgb } from "d3-color";
 import { connect } from "react-redux";
+import { rgb } from "d3-color";
 import LegendItem from "./legend-item";
 import { headerFont, darkGrey } from "../../globalStyles";
-import { legendRectSize, legendSpacing, fastTransitionDuration,
+import { legendRectSize,
+  legendSpacing,
+  fastTransitionDuration,
   controlsWidth } from "../../util/globals";
-// import titleCase from "title-case";
 import { determineColorByGenotypeType } from "../../util/urlHelpers";
 
 

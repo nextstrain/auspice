@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
+import Radium from "radium"; // necessary
 import { titleColors } from "../../util/globals";
-import { titleStyles, titleFont, medGrey } from "../../globalStyles";
-import Radium from "radium";
+import { titleFont, medGrey } from "../../globalStyles";
 
 @connect((state) => {
   return {

@@ -1,14 +1,18 @@
-/*eslint dot-notation: 0*/
 import moment from 'moment';
 import { scaleTime } from "d3-scale";
 import { timeFormat, timeParse } from "d3-time-format";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { floatDateToMoment } from "../util/dateHelpers";
 import { flattenTree } from "../util/treeHelpers";
-import * as types from "../actions/types";
-import * as globals from "../util/globals";
-import { reallySmallNumber } from "../util/globals";
 import getColorScale from "../util/getColorScale";
+import { defaultGeoResolution,
+  defaultColorBy,
+  defaultDateRange,
+  defaultDistanceMeasure,
+  defaultLayout,
+  mutType,
+  reallySmallNumber } from "../util/globals";
+import * as types from "../actions/types";
 
 const checkColorByConfidence = function (attrs, colorBy) {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -50,20 +54,20 @@ const getDefaultState = function () {
     search: null,
     strain: null,
     splitTreeAndMap: true,
-    mutType: globals.mutType,
+    mutType: mutType,
     temporalConfidence: {exists: false, display: false, on: false},
-    layout: globals.defaultLayout,
-    distanceMeasure: globals.defaultDistanceMeasure,
-    dateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
+    layout: defaultLayout,
+    distanceMeasure: defaultDistanceMeasure,
+    dateMin: moment().subtract(defaultDateRange, "years").format("YYYY-MM-DD"),
     dateMax: moment().format("YYYY-MM-DD"),
-    absoluteDateMin: moment().subtract(globals.defaultDateRange, "years").format("YYYY-MM-DD"),
+    absoluteDateMin: moment().subtract(defaultDateRange, "years").format("YYYY-MM-DD"),
     absoluteDateMax: moment().format("YYYY-MM-DD"),
-    colorBy: globals.defaultColorBy,
-    defaultColorBy: globals.defaultColorBy,
+    colorBy: defaultColorBy,
+    defaultColorBy: defaultColorBy,
     colorByConfidence: {display: false, on: false},
-    colorScale: getColorScale(globals.defaultColorBy, {}, {}, {}, 0),
+    colorScale: getColorScale(defaultColorBy, {}, {}, {}, 0),
     analysisSlider: false,
-    geoResolution: globals.defaultGeoResolution,
+    geoResolution: defaultGeoResolution,
     datasetPathName: "",
     filters: {},
     dateScale: scaleTime().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),

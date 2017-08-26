@@ -1,8 +1,9 @@
-/*eslint-env browser*/
 import React from "react";
 import { connect } from "react-redux";
-import { loadJSONs } from "../actions/loadData";
+import Sidebar from "react-sidebar";
+import queryString from "query-string";
 import "whatwg-fetch"; // setup polyfill
+import { loadJSONs } from "../actions/loadData";
 import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
@@ -10,9 +11,7 @@ import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
 import Map from "./map/map";
 import TreeView from "./tree/treeView";
-import queryString from "query-string";
-import * as globals from "../util/globals";
-import Sidebar from "react-sidebar";
+import { controlsHiddenWidth } from "../util/globals";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
 import { analyticsNewPage } from "../util/googleAnalytics";
@@ -36,7 +35,7 @@ class App extends React.Component {
     While these states could be moved to redux, they would need
     to be connected to here, triggering an app render anyways
     */
-    const mql = window.matchMedia(`(min-width: ${globals.controlsHiddenWidth}px)`);
+    const mql = window.matchMedia(`(min-width: ${controlsHiddenWidth}px)`);
     mql.addListener(() => this.setState({sidebarDocked: this.state.mql.matches}));
     this.state = {
       mql,

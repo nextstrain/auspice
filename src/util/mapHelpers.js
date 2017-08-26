@@ -1,6 +1,6 @@
-import { line, curveBasis } from "d3-shape";
 import _findIndex from "lodash/findIndex";
 import _findLastIndex from "lodash/findLastIndex";
+import { line, curveBasis } from "d3-shape";
 
 /* util */
 

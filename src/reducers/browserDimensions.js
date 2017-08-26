@@ -1,4 +1,3 @@
-/*eslint-env browser*/
 import * as types from "../actions/types";
 
 const BrowserDimensions = (state = {

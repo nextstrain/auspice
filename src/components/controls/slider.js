@@ -1,5 +1,5 @@
 import React from "react";
-import Radium from "radium";
+import Radium from "radium"; // necessary
 import _assign from "lodash/assign";
 import _isArray from "lodash/isArray";
 

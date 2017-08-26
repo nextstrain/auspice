@@ -1,9 +1,8 @@
 import React from "react";
-import Radium from "radium";
+import { connect } from "react-redux";
 import Select from "react-select";
 import { controlsWidth } from "../../util/globals";
-import { connect } from "react-redux";
-import { applyFilterQuery } from "../../actions/treeProperties"
+import { applyFilterQuery } from "../../actions/treeProperties";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { prettyString } from "../../util/stringHelpers";
 
@@ -13,7 +12,6 @@ import { prettyString } from "../../util/stringHelpers";
  * (ii) URL features have been removed. Potentially to be added in the future.
  * (iii) dispatches an action to change the state of the app
  */
-@Radium
 @connect((state) => ({selections: state.controls.filters}))
 class RecursiveFilter extends React.Component {
   constructor(props) {

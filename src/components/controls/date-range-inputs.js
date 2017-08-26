@@ -1,13 +1,13 @@
 import React from "react";
+import { connect } from "react-redux";
 import DatePicker from "react-datepicker";
 import moment from "moment";
 import Slider from "./slider";
-import { connect } from "react-redux";
 import { controlsWidth } from "../../util/globals";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
-import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types.js";
+import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 
 moment.updateLocale("en", {
   longDateFormat: {

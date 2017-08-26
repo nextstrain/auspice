@@ -1,13 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
-import Flex from "./flex";
-import { titleColors, titleBarHeight } from "../../util/globals";
-import { titleFont, dataFont, darkGrey, medGrey, lightGrey, brandColor } from "../../globalStyles";
-import Radium from "radium";
-import Title from "./title";
+import Radium from "radium"; // necessary
 import { Link } from "react-router-dom";
+import Flex from "./flex";
+import { titleBarHeight } from "../../util/globals";
+import { darkGrey, brandColor } from "../../globalStyles";
+import Title from "./title";
 
-var RadiumLink = Radium(Link); // needed to style custom components with radium
+const RadiumLink = Radium(Link); // needed to style custom components with radium
 
 @connect((state) => {
   return {
@@ -15,7 +15,6 @@ var RadiumLink = Radium(Link); // needed to style custom components with radium
     datasetPathName: state.controls.datasetPathName
   };
 })
-@Radium
 class TitleBar extends React.Component {
   constructor(props) {
     super(props);

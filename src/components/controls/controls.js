@@ -1,9 +1,8 @@
 import React from "react";
+import { connect } from "react-redux";
 import Flex from "../framework/flex";
 import SelectLabel from "../framework/select-label";
-// import ToggleBranchLabels from "./toggle-branch-labels";
 import ColorBy from "./color-by";
-// import Search from "./search";
 import DateRangeInputs from "./date-range-inputs";
 import AnalysisDateSlider from "./analysis-date-slider";
 import ChooseLayout from "./choose-layout";
@@ -14,7 +13,6 @@ import MapAnimationControls from "./map-animation";
 import AllFilters from "./all-filter";
 import { controlsWidth, enableAnimationDisplay } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
-import { connect } from "react-redux";
 
 const header = (text) => (
   <span style={titleStyles.small}>

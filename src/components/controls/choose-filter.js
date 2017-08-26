@@ -1,5 +1,4 @@
 import React from "react";
-import Radium from "radium";
 import { filterAbbrFwd } from "../../util/globals";
 import RecursiveFilter from "./recursive_filter";
 import SelectLabel from "../framework/select-label";
@@ -9,7 +8,6 @@ import SelectLabel from "../framework/select-label";
  * the dataset hierarchy is specified in a datasets.json, currently
  * in ../../util/globals
 */
-@Radium
 class ChooseFilter extends React.Component {
   constructor(props) {
     super(props);

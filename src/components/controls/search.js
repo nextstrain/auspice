@@ -1,14 +1,10 @@
 import React from "react";
-import Radium from "radium";
-// import Flex from "./framework/flex";
 import { connect } from "react-redux";
-import { SEARCH_INPUT_CHANGE } from "../../actions/types";
 import Autosuggest from 'react-autosuggest';
 
 @connect(state => {
   return state.tree
 })
-@Radium
 class SearchStrains extends React.Component {
   constructor(props) {
     super();
