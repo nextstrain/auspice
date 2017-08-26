@@ -1,5 +1,4 @@
 import React from "react";
-import Radium from "radium"; // necessary
 
 /**
 
@@ -78,14 +77,11 @@ class Flex extends React.Component {
     return (
       <div
         onClick={this.props.clickHandler}
-        style={[
-          styles.base,
-          styles.style
-        ]}>
+        style={{ ...styles.base, ...styles.style }}>
         {this.props.children}
       </div>
     );
   }
 }
 
-export default Radium(Flex);
+export default Flex;

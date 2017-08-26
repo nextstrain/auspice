@@ -39,10 +39,7 @@ class ComponentName extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <div style={[
-        styles.base,
-        this.props.style
-      ]}>
+      <div style={{ ...styles.base, ...this.props.style }}>
         {"ComponentName"}
       </div>
     );

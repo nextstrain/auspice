@@ -1,5 +1,4 @@
 import React from "react";
-import Radium from "radium"; // necessary
 import _assign from "lodash/assign";
 import _isArray from "lodash/isArray";
 
@@ -647,7 +646,7 @@ var Slider = React.createClass({
         ref={'handle' + i}
         key={'handle' + i}
         className={className}
-        style={[styles.handle, style]}
+        style={{ ...styles.handle, ...style }}
         onMouseDown={this._createOnMouseDown(i)}
         onTouchStart={this._createOnTouchStart(i)}
       >
@@ -711,7 +710,7 @@ var Slider = React.createClass({
         key={'bar' + i}
         ref={'bar' + i}
         className={className}
-        style={[styles.bar, barStyle]} />
+        style={{ ...styles.bar, ...barStyle }}/>
     );
   },
 
@@ -777,7 +776,7 @@ var Slider = React.createClass({
     return (
       <div
         ref="slider"
-        style={[styles.base, orientation]}
+        style={{ ...styles.base, ...orientation }}
         onMouseDown={this._onSliderMouseDown}
         onClick={this._onSliderClick}
       >
@@ -788,7 +787,7 @@ var Slider = React.createClass({
   }
 });
 
-export default Radium(Slider);
+export default Slider;
 
 const styles = {
   base: {

@@ -1,13 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
-import Radium from "radium"; // necessary
 import { Link } from "react-router-dom";
 import Flex from "./flex";
 import { titleBarHeight } from "../../util/globals";
 import { darkGrey, brandColor } from "../../globalStyles";
 import Title from "./title";
-
-const RadiumLink = Radium(Link); // needed to style custom components with radium
 
 @connect((state) => {
   return {
@@ -127,7 +124,7 @@ class TitleBar extends React.Component {
     return (
       selected ?
         <div style={styles.inactive}>{name}</div> :
-        <RadiumLink style={styles.link} to={url}>{name}</RadiumLink>
+        <Link style={styles.link} to={url}>{name}</Link>
     );
   }
 

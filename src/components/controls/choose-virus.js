@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import Radium from "radium";
 import { datasets } from "../../util/datasets";
 import ChooseVirusSelect from "./choose-virus-select";
 import parseParams from "../../util/parseParams";
@@ -16,7 +15,6 @@ const tidyUpPathname = function (pathname) {
          : tmppath;
 };
 
-@Radium
 @connect((state) => {
   return {
     datasetPathName: state.controls.datasetPathName, /* triggers component update */
@@ -58,7 +56,7 @@ class ChooseVirus extends React.Component {
         // pull options from the current level of the dataset hierarchy, ignore 'default'
         const options = Object.keys(level[fields[vi]]).filter((d) => d !== "default");
         selectors.push((
-          <div key={vi} style={[styles.base]}>
+          <div key={vi} style={styles.base}>
             <ChooseVirusSelect
               title={"Choose " + fields[vi]}
               choice_tree={choices.slice(0, vi)}

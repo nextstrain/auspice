@@ -1,8 +1,6 @@
 import React from "react";
-import Radium from "radium";
 import Color from "color";
 
-@Radium
 class Button extends React.Component {
   static propTypes = {
     style: React.PropTypes.object
@@ -55,10 +53,8 @@ class Button extends React.Component {
     return (
       <button
         onClick={this.props.onClick}
-        style={[
-          styles.base,
-          this.props.style
-        ]}>
+        style={{ ...styles.base, ...this.props.style }}
+      >
         {this.props.children}
       </button>
     );
