@@ -1,7 +1,7 @@
 /*eslint-env browser*/
 import React from "react";
 import { connect } from "react-redux";
-import _ from "lodash";
+import _throttle from "lodash/throttle";
 import { BROWSER_DIMENSIONS } from "../../actions/types";
 
 @connect()
@@ -17,7 +17,7 @@ class BrowserDimensionMonitor extends React.Component {
     /* don't need initial dimensions - they're in the redux store on load */
     window.addEventListener( // future resizes
       "resize",
-      _.throttle(this.handleResizeByDispatching.bind(this), 500, {
+      _throttle(this.handleResizeByDispatching.bind(this), 500, {
         leading: true,
         trailing: true
       })

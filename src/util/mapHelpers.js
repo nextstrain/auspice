@@ -1,5 +1,6 @@
 import { line, curveBasis } from "d3-shape";
-import _ from "lodash";
+import _findIndex from "lodash/findIndex";
+import _findLastIndex from "lodash/findLastIndex";
 
 /* util */
 
@@ -55,10 +56,10 @@ const extractLineSegmentForAnimationEffect = (
   // endIndex is 4 in scenario D
 
   // find start walking forwards from left of array
-  const startIndex = _.findIndex(bezierDates, (d) => { return d > numDateMin; });
+  const startIndex = _findIndex(bezierDates, (d) => { return d > numDateMin; });
 
   // find end walking backwards from right of array
-  const endIndex = _.findLastIndex(bezierDates, (d) => { return d < numDateMax; });
+  const endIndex = _findLastIndex(bezierDates, (d) => { return d < numDateMax; });
 
   // startIndex and endIndex is -1 if not found
   // this indicates a slice of time that lies outside the bounds of BCurve

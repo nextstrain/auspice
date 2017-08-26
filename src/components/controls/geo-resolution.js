@@ -1,5 +1,5 @@
 import React from "react";
-import _ from "lodash";
+import _keys from "lodash/keys";
 import { select} from "../../globalStyles";
 import { connect } from "react-redux";
 import { CHANGE_GEO_RESOLUTION } from "../../actions/types";
@@ -33,7 +33,7 @@ class GeoResolution extends React.Component {
     let resolutions = null;
 
     if (this.props.metadata) {
-      const resolutionKeys = _.keys(this.props.metadata.geo)
+      const resolutionKeys = _keys(this.props.metadata.geo)
       resolutions = resolutionKeys.map((resolution, i) => {
         return (
           <option key={i} value={ resolution }>

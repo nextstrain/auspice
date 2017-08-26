@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _maxBy from "lodash/maxBy";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
 import { select, event } from "d3-selection";
 import { scaleLinear } from "d3-scale";
@@ -221,8 +221,8 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
     chartGeom,
     this.data.entropyNt.length + 1,
     Math.max(
-      _.maxBy(this.data.entropyNtWithoutZeros, "y").y,
-      _.maxBy(this.data.aminoAcidEntropyWithoutZeros, "y").y
+      _maxBy(this.data.entropyNtWithoutZeros, "y").y,
+      _maxBy(this.data.aminoAcidEntropyWithoutZeros, "y").y
     )
   );
 

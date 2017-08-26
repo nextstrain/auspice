@@ -1,6 +1,5 @@
 import React from "react";
 import Radium from "radium";
-// import _ from "lodash";
 // import Flex from "./framework/flex";
 import { connect } from "react-redux";
 import { SEARCH_INPUT_CHANGE } from "../../actions/types";

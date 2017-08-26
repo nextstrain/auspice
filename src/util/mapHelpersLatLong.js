@@ -1,4 +1,6 @@
-import _ from "lodash";
+import _forOwn from "lodash/forOwn";
+import _map from "lodash/map";
+import _minBy from "lodash/minBy";
 import { interpolateNumber } from "d3-interpolate";
 import { averageColors } from "./colorHelpers";
 import { computeMidpoint, Bezier } from "./transmissionBezier";
@@ -73,7 +75,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   let index = 0;
   offsets.forEach((OFFSET) => {
     /* count DEMES */
-    _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
+    _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
       let lat = 0;
       let long = 0;
       if (geo[geoResolution][key]) {
@@ -232,7 +234,7 @@ const maybeGetClosestTransmissionEvent = (
 
   if (possibleEvents.length > 0) {
 
-    const closestEvent = _.minBy(possibleEvents, (event) => {
+    const closestEvent = _minBy(possibleEvents, (event) => {
       return Math.abs(event.destinationCoords.x - event.originCoords.x);
     });
     return closestEvent;
@@ -352,7 +354,7 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
 
   // initialize empty map
   const demeMap = {};
-  _.forOwn(demeIndices, (value, key) => { // value: array of indices, key: deme name
+  _forOwn(demeIndices, (value, key) => { // value: array of indices, key: deme name
     demeMap[key] = [];
   });
 
@@ -368,7 +370,7 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
   });
 
   // update demeData, for each deme, update all elements via demeIndices lookup
-  _.forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
+  _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
     const name = key;
     demeIndices[name].forEach((index) => {
       demeDataCopy[index].count = value.length;
@@ -437,7 +439,7 @@ ZOOM LEVEL CHANGE
 const updateDemeDataLatLong = (demeData, map) => {
 
   // interchange for all demes
-  return _.map(demeData, (d) => {
+  return _map(demeData, (d) => {
     d.coords = leafletLatLongToLayerPoint(d.latitude, d.longitude, map);
     return d;
   });

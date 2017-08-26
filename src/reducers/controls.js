@@ -2,7 +2,6 @@
 import moment from 'moment';
 import { scaleTime } from "d3-scale";
 import { timeFormat, timeParse } from "d3-time-format";
-import maxBy from "lodash";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { floatDateToMoment } from "../util/dateHelpers";
 import { flattenTree } from "../util/treeHelpers";

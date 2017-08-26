@@ -1,6 +1,7 @@
 import React from "react";
 import Radium from "radium";
-import _ from "lodash";
+import _assign from "lodash/assign";
+import _isArray from "lodash/isArray";
 
 /**
  * To prevent text selection while dragging.
@@ -692,10 +693,10 @@ var Slider = React.createClass({
     const className = this.props.barClassName + ' ' + this.props.barClassName + '-' + i;
     let barStyle = this._buildBarStyle(offsetFrom, this.state.upperBound - offsetTo);
 
-    if ((i === 0 && !_.isArray(this.props.defaultValue)) || i === 1 && _.isArray(this.props.defaultValue)) {
-      barStyle = _.assign({}, barStyle, styles.selectedBar);
+    if ((i === 0 && !_isArray(this.props.defaultValue)) || i === 1 && _isArray(this.props.defaultValue)) {
+      barStyle = _assign({}, barStyle, styles.selectedBar);
     } else {
-      barStyle = _.assign({}, barStyle, styles.unselectedBar);
+      barStyle = _assign({}, barStyle, styles.unselectedBar);
     }
 
     // React.createElement('div', {

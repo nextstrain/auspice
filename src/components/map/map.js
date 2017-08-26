@@ -1,5 +1,6 @@
 import React from "react";
-import _ from "lodash";
+import _min from "lodash/min";
+import _max from "lodash/max";
 import { select } from "d3-selection";
 import { connect } from "react-redux";
 import Card from "../framework/card";
@@ -275,16 +276,16 @@ class Map extends React.Component {
       });
     });
 
-    const maxLat = _.max(latitudes);
-    const minLat = _.min(latitudes);
-    const maxLng = _.max(longitudes);
-    const minLng = _.min(longitudes);
+    const maxLat = _max(latitudes);
+    const minLat = _min(latitudes);
+    const maxLng = _max(longitudes);
+    const minLng = _min(longitudes);
     const lngRange = (maxLng - minLng) % 360;
     const latRange = (maxLat - minLat);
-    const south = _.max([-80, minLat - (0.2 * latRange)]);
-    const north = _.min([80, maxLat + (0.2 * latRange)]);
-    const east = _.max([-180, minLng - (0.2 * lngRange)]);
-    const west = _.min([180, maxLng + (0.2 * lngRange)]);
+    const south = _max([-80, minLat - (0.2 * latRange)]);
+    const north = _min([80, maxLat + (0.2 * latRange)]);
+    const east = _max([-180, minLng - (0.2 * lngRange)]);
+    const west = _min([180, maxLng + (0.2 * lngRange)]);
     return [L.latLng(south, west), L.latLng(north, east)];
   }
   /**

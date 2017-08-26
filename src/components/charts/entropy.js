@@ -1,7 +1,7 @@
 /*eslint-env browser*/
 /*eslint dot-notation: "off", max-params: 0*/
 import React from "react";
-import _ from "lodash";
+import _filter from "lodash/filter";
 import { connect } from "react-redux";
 import * as globals from "../../util/globals";
 import Card from "../framework/card";
@@ -19,7 +19,7 @@ const calcEntropy = function (entropy) {
     return {x: entropy["nuc"]["pos"][i], y: s};
   });
 
-  const entropyNtWithoutZeros = _.filter(entropyNt, (e) => {return e.y !== 0;});
+  const entropyNtWithoutZeros = _filter(entropyNt, (e) => {return e.y !== 0;});
 
   let aminoAcidEntropyWithoutZeros = [];
   const annotations = [];

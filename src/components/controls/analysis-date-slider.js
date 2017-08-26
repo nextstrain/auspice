@@ -1,7 +1,6 @@
 import React from "react";
 import DatePicker from "react-datepicker";
 import moment from "moment";
-// import _ from "lodash";
 import Slider from "./slider";
 import { connect } from "react-redux";
 import { controlsWidth } from "../../util/globals";

@@ -1,5 +1,4 @@
 import React from "react";
-// import _ from "lodash";
 // import Flex from "./framework/flex";
 // import { connect } from "react-redux";
 // import { FOO } from "../actions";
