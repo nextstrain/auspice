@@ -114,7 +114,7 @@
     "react-ga": "^2.1.2",
     "react-redux": "^4.0.0",
     "react-router-dom": "^4.0.0",
-    "react-select": "^1.0.0-rc.2",
+    "react-select": "^1.0.0-rc.5",
     "react-sidebar": "git://github.com/nextstrain/react-sidebar.git#remove-savewidth",
     "react-svg-pan-zoom": "2.0.0",
     "react-tap-event-plugin": "^2.0.0",
