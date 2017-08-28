@@ -1,8 +1,5 @@
-/*eslint-env browser*/
 import React from "react";
-// import * as globals from "../../util/globals";
-import { infoPanelStyles} from "../../globalStyles";
-// import { prettyString } from "../../util/stringHelpers";
+import { infoPanelStyles } from "../../globalStyles";
 
 const InfoPanel = ({hovered, mutType}) => {
 

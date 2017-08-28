@@ -1,14 +1,9 @@
-/*eslint no-invalid-this: 0*/
-/*eslint-env browser*/
-/*eslint dot-notation: 0*/
-/*eslint max-len : 0*/
-import React from "react";
 import { rgb } from "d3-color";
 import { interpolateRgb } from "d3-interpolate";
 import { updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
 import { branchOpacityConstant,
-         branchOpacityFunction,
-         branchInterpolateColour } from "../../util/treeHelpers";
+  branchOpacityFunction,
+  branchInterpolateColour } from "../../util/treeHelpers";
 import { mediumTransitionDuration } from "../../util/globals";
 
 export const visibleArea = function (Viewer) {

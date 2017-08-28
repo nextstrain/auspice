@@ -1,6 +1,5 @@
 import React from "react";
 import Color from "color";
-import globalStyles from "../../globalStyles";
 
 class Button extends React.Component {
   static propTypes = {
@@ -54,10 +53,8 @@ class Button extends React.Component {
     return (
       <button
         onClick={this.props.onClick}
-        style={[
-          styles.base,
-          this.props.style
-        ]}>
+        style={{ ...styles.base, ...this.props.style }}
+      >
         {this.props.children}
       </button>
     );

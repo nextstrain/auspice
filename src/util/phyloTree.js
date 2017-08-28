@@ -1,4 +1,4 @@
-import { debounce } from "lodash";
+import _debounce from "lodash/debounce";
 import { event } from "d3-selection";
 import { min, max, sum } from "d3-array";
 import { scaleLinear } from "d3-scale";
@@ -122,7 +122,7 @@ var PhyloTree = function(treeJson) {
   addLeafCount(this.nodes[0]);
 
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
-  this.debouncedMapToScreen = debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
+  this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
     {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
 };
 

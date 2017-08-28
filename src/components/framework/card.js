@@ -1,8 +1,6 @@
 import React from "react";
-import Radium from "radium";
-import {headerFont, medGrey, darkGrey} from "../../globalStyles";
+import { headerFont, medGrey } from "../../globalStyles";
 
-@Radium
 class Card extends React.Component {
   getStyles() {
     return {
@@ -32,14 +30,10 @@ class Card extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <div style={[
-        styles.base,
-        this.props.style
-      ]}>
-        <div style={[
-          styles.title,
-          this.props.titleStyles
-        ]}> {this.props.title} </div>
+      <div style={{ ...styles.base, ...this.props.style }}>
+        <div style={{ ...styles.title, ...this.props.titleStyles }}>
+          {this.props.title}
+        </div>
         <div style={{
             display: "flex",
             justifyContent: this.props.center ? "center" : "flex-start"

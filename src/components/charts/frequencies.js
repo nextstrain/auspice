@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
-import {VictoryAxis} from "victory-chart";
-import * as globals from "../../util/globals";
+import { VictoryAxis } from "victory-chart";
 import Card from "../framework/card";
+import { genotypeColors } from "../../util/globals";
 
 @connect(state => {
   return {
@@ -70,9 +70,9 @@ class Frequencies extends React.Component {
         const vals = this.props.frequencies.frequencies[key];
         const new_traj = { d: ("M"+x(pivots[0]).toString()+" " + y(vals[0]).toString() + vals.map((v,i) => ["L", x(pivots[i]).toString(), y(v).toString()].join(" ")).join(" ")),
                           strokeWidth: 3,
-                          stroke:globals.genotypeColors[tCount%10]
+                          stroke:genotypeColors[tCount%10]
                         }
-        const new_legendItem = {text:key, fill:globals.genotypeColors[tCount%10], fontSize:14};
+        const new_legendItem = {text:key, fill:genotypeColors[tCount%10], fontSize:14};
         traj.push(new_traj);
         legendItems.push(new_legendItem)
         tCount++;

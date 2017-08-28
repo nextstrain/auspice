@@ -1,6 +1,6 @@
 import React from "react";
-import Radium from "radium";
-import _ from "lodash";
+import _assign from "lodash/assign";
+import _isArray from "lodash/isArray";
 
 /**
  * To prevent text selection while dragging.
@@ -646,7 +646,7 @@ var Slider = React.createClass({
         ref={'handle' + i}
         key={'handle' + i}
         className={className}
-        style={[styles.handle, style]}
+        style={{ ...styles.handle, ...style }}
         onMouseDown={this._createOnMouseDown(i)}
         onTouchStart={this._createOnTouchStart(i)}
       >
@@ -692,10 +692,10 @@ var Slider = React.createClass({
     const className = this.props.barClassName + ' ' + this.props.barClassName + '-' + i;
     let barStyle = this._buildBarStyle(offsetFrom, this.state.upperBound - offsetTo);
 
-    if ((i === 0 && !_.isArray(this.props.defaultValue)) || i === 1 && _.isArray(this.props.defaultValue)) {
-      barStyle = _.assign({}, barStyle, styles.selectedBar);
+    if ((i === 0 && !_isArray(this.props.defaultValue)) || i === 1 && _isArray(this.props.defaultValue)) {
+      barStyle = _assign({}, barStyle, styles.selectedBar);
     } else {
-      barStyle = _.assign({}, barStyle, styles.unselectedBar);
+      barStyle = _assign({}, barStyle, styles.unselectedBar);
     }
 
     // React.createElement('div', {
@@ -710,7 +710,7 @@ var Slider = React.createClass({
         key={'bar' + i}
         ref={'bar' + i}
         className={className}
-        style={[styles.bar, barStyle]} />
+        style={{ ...styles.bar, ...barStyle }}/>
     );
   },
 
@@ -776,7 +776,7 @@ var Slider = React.createClass({
     return (
       <div
         ref="slider"
-        style={[styles.base, orientation]}
+        style={{ ...styles.base, ...orientation }}
         onMouseDown={this._onSliderMouseDown}
         onClick={this._onSliderClick}
       >
@@ -787,7 +787,7 @@ var Slider = React.createClass({
   }
 });
 
-export default Radium(Slider);
+export default Slider;
 
 const styles = {
   base: {

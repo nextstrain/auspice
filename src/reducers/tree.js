@@ -1,6 +1,6 @@
-import * as types from "../actions/types";
 import { flattenTree, appendParentsToTree } from "../util/treeHelpers";
 import { processNodes, calcLayouts } from "../util/processNodes";
+import * as types from "../actions/types";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
 that the tree is loaded as they are set on the same action */

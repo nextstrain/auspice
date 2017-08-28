@@ -1,4 +1,3 @@
-/*eslint-env browser*/
 
 export const setUpPerf = function () {
   window.Perf = require("react-addons-perf");

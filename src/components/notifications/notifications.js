@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import ReactCSSTransitionGroup from "react-addons-css-transition-group"; // ES6
+import ReactCSSTransitionGroup from "react-addons-css-transition-group";
 import { REMOVE_NOTIFICATION } from "../../actions/types";
 
 const generateIcon = function (notificationType) {

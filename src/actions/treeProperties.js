@@ -1,9 +1,8 @@
-/*eslint max-len: 0*/
 import { calcVisibility,
-   calcTipRadii,
-   calcTipCounts,
-   identifyPathToTip,
-   calcBranchThickness } from "../util/treeHelpers";
+  calcTipRadii,
+  calcTipCounts,
+  identifyPathToTip,
+  calcBranchThickness } from "../util/treeHelpers";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { changeColorBy } from "./colors";
 import * as types from "./types";

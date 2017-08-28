@@ -6,7 +6,6 @@ import frequencies from "./frequencies";
 import entropy from "./entropy";
 import controls from "./controls";
 import browserDimensions from "./browserDimensions";
-// import map from "./map";
 import notifications from "./notifications";
 
 const rootReducer = combineReducers({
@@ -18,7 +17,6 @@ const rootReducer = combineReducers({
   entropy,
   browserDimensions,
   notifications
-  // map
 });
 
 export default rootReducer;

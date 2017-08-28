@@ -1,8 +1,6 @@
-/*eslint-env browser*/
-/*eslint max-len: 0*/
 import React from "react";
-import {infoPanelStyles} from "../../globalStyles";
-import {prettyString, authorString} from "../../util/stringHelpers";
+import { infoPanelStyles } from "../../globalStyles";
+import { prettyString, authorString } from "../../util/stringHelpers";
 import { floatDateToMoment } from "../../util/dateHelpers";
 
 const styles = {

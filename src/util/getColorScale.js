@@ -1,11 +1,10 @@
-// import * as scales from "./colorScales";
 import { scaleLinear, scaleOrdinal } from "d3-scale";
 import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
 import createLegendMatchBound from "./createLegendMatchBounds";
 import { genericDomain, colors, genotypeColors } from "./globals";
-import { parseGenotype, getGenotype } from "./getGenotype"
+import { parseGenotype, getGenotype } from "./getGenotype";
 
 /* this checks if there are more items in the tree compared
    to associated colours in the metadata JSON

@@ -1,5 +1,3 @@
-/*eslint-env browser*/
-/*eslint max-len: 0*/
 import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
 import { calcNodeColor } from "../util/treeHelpers";

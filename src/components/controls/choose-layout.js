@@ -1,10 +1,10 @@
 import React from "react";
+import { connect } from "react-redux";
 import RectangularTreeLayout from "../framework/svg-tree-layout-rectangular";
 import RadialTreeLayout from "../framework/svg-tree-layout-radial";
 import UnrootedTreeLayout from "../framework/svg-tree-layout-unrooted";
 import ClockTreeLayout from "../framework/svg-tree-layout-clock";
-import {materialButton, materialButtonSelected, medGrey} from "../../globalStyles";
-import { connect } from "react-redux";
+import { materialButton, materialButtonSelected, medGrey } from "../../globalStyles";
 import { CHANGE_LAYOUT } from "../../actions/types";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";

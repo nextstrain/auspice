@@ -1,6 +1,5 @@
-/*eslint-env browser*/
 import * as types from "./types";
-import { notificationDuration, notificationAnimationDuration } from "../util/globals";
+import { notificationDuration } from "../util/globals";
 
 const triggerNotification = (data) => {
   return (dispatch, getState) => {

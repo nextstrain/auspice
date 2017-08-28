@@ -1,12 +1,10 @@
 import React from "react";
-import Radium from "radium";
+import { connect } from "react-redux";
 import { TOGGLE_BRANCH_LABELS } from "../../actions/types";
-import {dataFont, darkGrey} from "../../globalStyles";
+import { dataFont, darkGrey } from "../../globalStyles";
 import Flex from "../framework/flex";
-import { connect } from "react-redux"
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
-@Radium
 @connect()
 class ToggleBranchLabels extends React.Component {
   getStyles() {

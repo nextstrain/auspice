@@ -1,5 +1,5 @@
+import { colorOptions } from "../util/globals";
 import * as types from "../actions/types";
-import { colorOptions } from "../util/globals"
 
 const Metadata = (state = {
   loaded: false, /* see comment in the sequences reducer for explination */
