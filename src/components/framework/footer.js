@@ -2,11 +2,12 @@ import React from "react";
 import { connect } from "react-redux";
 import { set } from "d3-collection";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
-import { authorString } from "../../util/stringHelpers";
+// import { authorString } from "../../util/stringHelpers";
 import computeResponsive from "../../util/computeResponsive";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { getAuthor } from "../controls/downloadModal";
+import { enableDownloadModal } from "../../util/globals";
 
 const generateH7N9citations = (styles) => {
   return (
@@ -210,6 +211,23 @@ class Footer extends React.Component {
         </div>
       );
     }
+    if (enableDownloadModal) {
+      return (
+        <div style={{width: width}}>
+          <div style={styles.line}/>
+          {text}
+          {this.getCitations(styles)}
+          <div style={styles.line}/>
+          <Flex style={styles.fineprint}>
+            {this.getUpdated()}
+            {dot}
+            {this.downloadDataButton()}
+            {dot}
+            {this.getMaintainer()}
+          </Flex>
+        </div>
+      );
+    }
     return (
       <div style={{width: width}}>
         <div style={styles.line}/>
@@ -218,10 +236,6 @@ class Footer extends React.Component {
         <div style={styles.line}/>
         <Flex style={styles.fineprint}>
           {this.getUpdated()}
-          {dot}
-          {this.downloadDataButton()}
-          {dot}
-          {this.getMaintainer()}
         </Flex>
       </div>
     );

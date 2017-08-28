@@ -1,5 +1,6 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
+import { enableDownloadModal } from "../../util/globals";
 import { prettyString, authorString } from "../../util/stringHelpers";
 import { floatDateToMoment } from "../../util/dateHelpers";
 import { getAuthor } from "../controls/downloadModal";
@@ -87,8 +88,15 @@ const TipSelectedPanel = ({tip, goAwayCallback, metadata}) => {
             {item(uncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
             {uncertainty ? dateConfidence(tip.n.attr.num_date_confidence) : null}
             {/* Paper Title, Author(s), Accession + URL (if provided) - from info.json NOT tree.json */}
-            {authorInfo[author].title ? item("Publication", prettyString(authorInfo[author].title, {trim: 80, camelCase: false})) : null}
-            {item("Authors", getAuthor(authorInfo, author))}
+            {/* currently this code uses overly complex nested ternaries to allow switching on the enableDownloadModal flag */}
+            { enableDownloadModal ?
+              (authorInfo[author].title ? item("Publication", prettyString(authorInfo[author].title, {trim: 80, camelCase: false})) : null) :
+              (validAttr(tip.n.attr, "title") ? item("Publication", prettyString(tip.n.attr.title, {trim: 80, camelCase: false})) : null)
+            }
+            { enableDownloadModal ?
+              item("Authors", getAuthor(authorInfo, author)) :
+              (validAttr(tip.n.attr, "authors") ? item("Authors", authorString(tip.n.attr.authors)) : null)
+            }
             {/* try to join URL with accession, else display the one that's available */}
             {url && validAttr(tip.n.attr, "accession") ?
               accessionAndURL(url, tip.n.attr.accession) :
