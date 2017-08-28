@@ -1,7 +1,7 @@
 import React from "react";
-import * as icons from "../framework/svg-icons";
-import {materialButton, materialButtonSelected, medGrey} from "../../globalStyles";
 import { connect } from "react-redux";
+import * as icons from "../framework/svg-icons";
+import { materialButton, materialButtonSelected, medGrey } from "../../globalStyles";
 import { CHANGE_LAYOUT } from "../../actions/types";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";

@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import d3 from "d3";
+import { set } from "d3-collection";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { authorString } from "../../util/stringHelpers";
 import computeResponsive from "../../util/computeResponsive";
@@ -141,8 +141,8 @@ class Footer extends React.Component {
     // check if !hasChildren
     // in each node there is attr.authors and attr.url
     // construct array of unique author strings
-    const authorsSet = d3.set();
-    const authorsToURL = {};
+    let authorsSet = set();
+    let authorsToURL = {};
     if (this.props.tree) {
       if (this.props.tree.nodes) {
         this.props.tree.nodes.forEach((node) => {

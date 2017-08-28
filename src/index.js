@@ -1,4 +1,3 @@
-/*eslint-env browser*/
 import React from "react";
 import ReactDOM from "react-dom";
 import ReactGA from "react-ga";
@@ -8,20 +7,18 @@ import injectTapEventPlugin from "react-tap-event-plugin";
 import configureStore from "./store";
 import App from "./components/app";
 import About from "./static/about";
-import Help from "./static/help";
 import Methods from "./static/methods";
 import Splash from "./static/splash";
 import BrowserDimensionMonitor from "./components/framework/browserDimensionMonitor";
+import Notifications from "./components/notifications/notifications";
+import { setUpPerf } from "./util/quantify-performance";
+import { enableAnimationPerfTesting } from "./util/globals";
 import "./css/global.css";
 import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";
 import "./css/datePicker.css";
 import "./css/static.css";
 import "./css/notifications.css";
-import Notifications from "./components/notifications/notifications";
-import { outboundLinkWithAnalytics } from "./util/googleAnalytics";
-import { setUpPerf } from "./util/quantify-performance";
-import { enableAnimationPerfTesting } from "./util/globals"
 
 /* google analytics */
 ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-2");

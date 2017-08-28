@@ -1,14 +1,10 @@
 import React from "react";
-import DatePicker from "react-datepicker";
-import moment from "moment";
-// import _ from "lodash";
-import Slider from "./slider";
 import { connect } from "react-redux";
+import moment from "moment";
+import Slider from "./slider";
 import { controlsWidth } from "../../util/globals";
-import { modifyURLquery } from "../../util/urlHelpers";
 import { changeAnalysisSliderValue } from "../../actions/treeProperties";
 import { dataFont, darkGrey } from "../../globalStyles";
-// import d3 from "d3";
 
 moment.updateLocale("en", {
   longDateFormat: {

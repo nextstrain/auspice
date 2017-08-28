@@ -1,13 +1,10 @@
 import React from "react";
-import SelectLabel from "../framework/select-label";
 import { connect } from "react-redux";
-import { CHANGE_ANIMATION_TIME } from "../../actions/types";//*
-import { CHANGE_ANIMATION_START } from "../../actions/types"; //*
-import { CHANGE_ANIMATION_CUMULATIVE } from "../../actions/types"; //*
-import { modifyURLquery } from "../../util/urlHelpers";
+import SelectLabel from "../framework/select-label";
+import { CHANGE_ANIMATION_TIME, CHANGE_ANIMATION_CUMULATIVE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import Toggle from "./toggle";
-import {materialButton, materialButtonSelected} from "../../globalStyles";
+import { materialButton, materialButtonSelected } from "../../globalStyles";
 
 @connect((state) => {
   return {
@@ -96,7 +93,6 @@ class MapAnimationControls extends React.Component {
         callback={(e) => {
           analyticsControlsEvent("change-animation-cumulative");
           this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
-          // modifyURLquery(this.context.router, {apt: e.target.value}, true);
         }}
         label="Animate cumulative history"
       />

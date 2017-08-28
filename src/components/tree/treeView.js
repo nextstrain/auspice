@@ -1,20 +1,16 @@
-/*eslint-env browser*/
-/*eslint dot-notation: 0*/
-/*eslint react/prop-types: 0*/
 import React from "react";
-import ReactDOM from "react-dom";
-import d3 from "d3";
+import { connect } from "react-redux";
+import { select } from "d3-selection";
+import { ReactSVGPanZoom } from "react-svg-pan-zoom";
 import Card from "../framework/card";
 import Legend from "./legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
 import PhyloTree from "../../util/phyloTree";
-import { ReactSVGPanZoom } from "react-svg-pan-zoom";
 import { mediumTransitionDuration, twoColumnBreakpoint } from "../../util/globals";
 import InfoPanel from "./infoPanel";
 import BranchSelectedPanel from "./branchSelectedPanel";
 import TipSelectedPanel from "./tipSelectedPanel";
-import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
 import * as funcs from "./treeViewFunctions";
 
@@ -117,7 +113,7 @@ class TreeView extends React.Component {
       const myTree = new PhyloTree(nodes[0]);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
       myTree.render(
-        d3.select(this.refs.d3TreeElement),
+        select(this.refs.d3TreeElement),
         this.props.layout,
         this.props.distanceMeasure,
         { /* options */

@@ -1,4 +1,4 @@
-import * as globals from "./globals";
+import { controlsWidth } from "./globals";
 
 /*
   Why this function is here
@@ -43,7 +43,7 @@ const computeResponsive = ({
   const controlsPadding = 55;
 
   if (browserDimensions) {
-    let controls = sidebar ? globals.controlsWidth + controlsPadding : 0;
+    let controls = sidebar ? controlsWidth + controlsPadding : 0;
     width = horizontal * (browserDimensions.width - controls - horizontalPadding);
     height = browserDimensions.height * vertical - verticalPadding;
   }

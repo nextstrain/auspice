@@ -1,13 +1,9 @@
-/*eslint dot-notation: 0*/
-/*eslint-env browser*/
-/*eslint no-console: 0*/
+import queryString from "query-string";
+import * as types from "./types";
 import { updateColors } from "./colors";
 import { dataURLStem } from "../util/datasets";
-import * as types from "./types";
-import d3 from "d3";
 import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { turnURLtoDataPath } from "../util/urlHelpers";
-import queryString from "query-string";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {

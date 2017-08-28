@@ -1,6 +1,4 @@
-/*eslint-env browser*/
-import ReactGA from "react-ga";
-/* https://github.com/react-ga/react-ga */
+import ReactGA from "react-ga"; /* https://github.com/react-ga/react-ga */
 
 export const analyticsNewPage = () => {
   // console.log("GA page change to", window.location.pathname)

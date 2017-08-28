@@ -1,16 +1,10 @@
 import React from "react";
-import Radium from "radium";
-import {select} from "../../globalStyles";
-import { RESET_CONTROLS, NEW_DATASET } from "../../actions/types";
-import { loadJSONs } from "../../actions/loadData"
-import { turnURLtoDataPath, restoreStateFromURL } from "../../util/urlHelpers";
 import { connect } from "react-redux";
+import { select } from "../../globalStyles";
+import { loadJSONs } from "../../actions/loadData";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import {
-  MAP_ANIMATION_PLAY_PAUSE_BUTTON
-} from "../../actions/types.js";
+import { RESET_CONTROLS, MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 
-@Radium
 @connect() // to provide dispatch
 class ChooseVirusSelect extends React.Component {
   constructor(props) {

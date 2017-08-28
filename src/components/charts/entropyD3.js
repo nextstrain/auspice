@@ -1,11 +1,11 @@
-import _ from "lodash";
-import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
+import _maxBy from "lodash/maxBy";
 import { select, event } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
-import { zoom, zoomIdentity } from "d3-zoom";
+import { zoom } from "d3-zoom";
 import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
+import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
 
 /* constructor - sed up data and store params */
 const EntropyChart = function (ref, data, callbacks) {
@@ -221,8 +221,8 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
     chartGeom,
     this.data.entropyNt.length + 1,
     Math.max(
-      _.maxBy(this.data.entropyNtWithoutZeros, "y").y,
-      _.maxBy(this.data.aminoAcidEntropyWithoutZeros, "y").y
+      _maxBy(this.data.entropyNtWithoutZeros, "y").y,
+      _maxBy(this.data.aminoAcidEntropyWithoutZeros, "y").y
     )
   );
 

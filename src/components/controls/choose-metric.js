@@ -1,8 +1,6 @@
 import React from "react";
-// import TimeTree from "../framework/svg-time-tree";
-// import MutationTree from "../framework/svg-mutation-tree";
-import {materialButton, materialButtonSelected} from "../../globalStyles";
 import { connect } from "react-redux";
+import { materialButton, materialButtonSelected } from "../../globalStyles";
 import Toggle from "./toggle";
 import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { modifyURLquery } from "../../util/urlHelpers";

@@ -1,13 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
-import Flex from "./flex";
-import { titleColors, titleBarHeight } from "../../util/globals";
-import { titleFont, dataFont, darkGrey, medGrey, lightGrey, brandColor } from "../../globalStyles";
-import Radium from "radium";
-import Title from "./title";
 import { Link } from "react-router-dom";
-
-var RadiumLink = Radium(Link); // needed to style custom components with radium
+import Flex from "./flex";
+import { titleBarHeight } from "../../util/globals";
+import { darkGrey, brandColor } from "../../globalStyles";
+import Title from "./title";
 
 @connect((state) => {
   return {
@@ -15,7 +12,6 @@ var RadiumLink = Radium(Link); // needed to style custom components with radium
     datasetPathName: state.controls.datasetPathName
   };
 })
-@Radium
 class TitleBar extends React.Component {
   constructor(props) {
     super(props);
@@ -128,7 +124,7 @@ class TitleBar extends React.Component {
     return (
       selected ?
         <div style={styles.inactive}>{name}</div> :
-        <RadiumLink style={styles.link} to={url}>{name}</RadiumLink>
+        <Link style={styles.link} to={url}>{name}</Link>
     );
   }
 

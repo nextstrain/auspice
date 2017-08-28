@@ -1,11 +1,12 @@
 import React from "react";
-import d3 from "d3";
 import { connect } from "react-redux";
+import { rgb } from "d3-color";
 import LegendItem from "./legend-item";
 import { headerFont, darkGrey } from "../../globalStyles";
-import { legendRectSize, legendSpacing, fastTransitionDuration,
+import { legendRectSize,
+  legendSpacing,
+  fastTransitionDuration,
   controlsWidth } from "../../util/globals";
-// import titleCase from "title-case";
 import { determineColorByGenotypeType } from "../../util/urlHelpers";
 
 
@@ -168,8 +169,8 @@ class Legend extends React.Component {
             dispatch={this.props.dispatch}
             legendRectSize={legendRectSize}
             legendSpacing={legendSpacing}
-            rectFill={d3.rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
-            rectStroke={d3.rgb(this.props.colorScale.scale(d)).toString()}
+            rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
+            rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
             transform={this.getTransformationForLegendItem(i)}
             dFreq={this.props.colorScale.colorBy === "dfreq"}
             key={i}
