@@ -167,6 +167,8 @@ class Footer extends React.Component {
   getCitations(styles) {
     if (this.context.router.history.location.pathname.includes("h7n9")) {
       return generateH7N9citations(styles);
+    } else if (this.context.router.history.location.pathname.includes("flu")) {
+      return null; /* FIX ME */
     }
     /* in future, get this from meta.json */
     const author_info = getAuthorsFromTreeJSON(this.props.tree.nodes);
@@ -231,6 +233,12 @@ class Footer extends React.Component {
       text = (
         <div>
           This work is made possible by the open sharing of genetic data by research groups from all over the world via <a href="http://platform.gisaid.org/">GISAID</a>. For data reuse please contact the submitting labs (listed below) or see <a href="http://data.nextstrain.org/flu_h7n9_acknowledgement_table.xls">this spreadsheet</a> for a full list of authors and samples available.
+        </div>
+      );
+    } else if (this.context.router.history.location.pathname.includes("flu")) {
+      text = (
+        <div>
+          This work is made possible by the open sharing of genetic data by research groups from all over the world via <a href="http://platform.gisaid.org/">GISAID</a>. We gratefully acknowledge their contributions.
         </div>
       );
     }
