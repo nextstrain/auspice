@@ -1,13 +1,30 @@
 import React from "react";
 import { connect } from "react-redux";
-import { set } from "d3-collection";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
-// import { authorString } from "../../util/stringHelpers";
+import { prettyString } from "../../util/stringHelpers";
 import computeResponsive from "../../util/computeResponsive";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
-import { getAuthor } from "../controls/downloadModal";
 import { enableDownloadModal } from "../../util/globals";
+import { applyFilterQuery } from "../../actions/treeProperties";
+
+const getAuthorsFromTreeJSON = (nodes) => {
+  /* this fn generates the author_info object to be found in meta.JSON from the tree.JSON
+  once all augur builds are updated we can remove this and get this from meta.JSON */
+  const author_info = {};
+  nodes.forEach((node) => {
+    if (node.children) { return; }
+    if (node.attr.authors !== "" && node.attr.authors !== "?") {
+      if (Object.keys(author_info).indexOf(node.attr.authors) === -1) {
+        author_info[node.attr.authors] = {n: 1};
+      } else {
+        author_info[node.attr.authors].n += 1;
+      }
+    }
+  });
+  return author_info;
+};
+
 
 const generateH7N9citations = (styles) => {
   return (
@@ -84,14 +101,15 @@ const dot = (
   return {
     tree: state.tree,
     metadata: state.metadata.metadata,
-    browserDimensions: state.browserDimensions.browserDimensions
+    browserDimensions: state.browserDimensions.browserDimensions,
+    selectedAuthors: state.controls.filters.authors
   };
 })
 class Footer extends React.Component {
   constructor(props) {
     super(props);
     this.getStyles = () => {
-      return {
+      const styles = {
         footer: {
           textAlign: "justify",
           marginLeft: "30px",
@@ -112,6 +130,7 @@ class Footer extends React.Component {
           paddingTop: "1px",
           paddingBottom: "0px"
         },
+
         line: {
           marginTop: "20px",
           marginBottom: "20px",
@@ -121,55 +140,59 @@ class Footer extends React.Component {
           fontSize: 14
         }
       };
+      styles.filterAuthOn = { ...styles.citationItem, ...{cursor: "pointer", color: '#007AB6', fontWeight: 700}}
+      styles.filterAuthOff = { ...styles.citationItem, ...{cursor: "pointer", color: '#5097BA', fontWeight: 300}}
+      return styles
     };
   }
   static contextTypes = {
     router: React.PropTypes.object.isRequired
   }
   shouldComponentUpdate(nextProps) {
-    if (this.props.tree.version !== nextProps.tree.version ||
-        this.props.browserDimensions !== nextProps.browserDimensions) {
+    if (
+      this.props.tree.version !== nextProps.tree.version ||
+        this.props.browserDimensions !== nextProps.browserDimensions ||
+        this.props.selectedAuthors !== nextProps.selectedAuthors
+    ) {
       return true;
     }
     return false;
   }
 
+  filterAuthor(authors) {
+    const mode = this.props.selectedAuthors.indexOf(authors) === -1 ? "add" : "remove";
+    this.props.dispatch(applyFilterQuery("authors", [authors], mode));
+  }
+
   getCitations(styles) {
     if (this.context.router.history.location.pathname.includes("h7n9")) {
-      generateH7N9citations(styles);
+      return generateH7N9citations(styles);
     }
-    // traverse tree.nodes
-    // check if !hasChildren
-    // in each node there is attr.authors and attr.url
-    // construct array of unique author strings
-    let authorsSet = set();
-    let authorsToURL = {};
-    if (this.props.tree) {
-      if (this.props.tree.nodes) {
-        this.props.tree.nodes.forEach((node) => {
-          if (node.children) { return; }
-          if (node.attr.authors !== "" && node.attr.authors !== "?") {
-            authorsSet.add(node.attr.authors);
-            if (node.attr.url) {
-              authorsToURL[node.attr.authors] = node.attr.url;
-            }
-          }
-        });
-      }
-    }
-    const authorsListItems = authorsSet.values().sort().map((authors) => {
+    /* in future, get this from meta.json */
+    const author_info = getAuthorsFromTreeJSON(this.props.tree.nodes);
+
+    const authorsListItems = Object.keys(author_info).sort().map((authors) => {
       return (
-        <div key={authors} style={styles.citationItem}>
-          {getAuthor(this.props.metadata.author_info, authors)}
+        <div
+          style={this.props.selectedAuthors.indexOf(authors) === -1 ? styles.filterAuthOff : styles.filterAuthOn}
+          key={authors}
+          onClick={() => {this.filterAuthor(authors);}}
+          role="button"
+          tabIndex={0}
+        >
+          {prettyString(authors, {stripEtAl: true})}
+          <em>{" et al (n=" + author_info[authors].n + ")"}</em>
         </div>
       );
     });
+
     return (
       <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
         {authorsListItems}
       </Flex>
     );
   }
+
   getUpdated() {
     let updated = null;
     if (this.props.metadata) {
@@ -203,7 +226,7 @@ class Footer extends React.Component {
     return null;
   }
   drawFooter(styles, width) {
-    let text = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions. For data reuse (particularly for publication), please contact the original authors:";
+    let text = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions. Click the authors to display their data in the global context.";
     if (this.context.router.history.location.pathname.includes("h7n9")) {
       text = (
         <div>
@@ -241,7 +264,7 @@ class Footer extends React.Component {
     );
   }
   render() {
-    if (!this.props.metadata) return null;
+    if (!this.props.metadata || !this.props.tree.nodes) return null;
     const styles = this.getStyles();
     const responsive = computeResponsive({
       horizontal: 1,
@@ -252,7 +275,7 @@ class Footer extends React.Component {
     const width = responsive.width - 30; // need to subtract margin when calculating div width
     return (
       <div style={styles.footer}>
-        {this.props.tree && this.props.browserDimensions ? this.drawFooter(styles, width) : "Waiting on citation data"}
+        {this.drawFooter(styles, width)}
       </div>
     );
   }

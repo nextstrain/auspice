@@ -69,7 +69,7 @@ const getDefaultState = function () {
     analysisSlider: false,
     geoResolution: defaultGeoResolution,
     datasetPathName: "",
-    filters: {},
+    filters: {authors: []}, /* initialise authors to [] so it can be accessed always */
     dateScale: scaleTime().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
     dateFormatter: timeFormat("%Y-%m-%d"),
     dateParser: timeParse("%Y-%m-%d"),

@@ -111,16 +111,44 @@ export const legendMouseEnterExit = function (label = null) {
   };
 };
 
-export const applyFilterQuery = (filterType, fields, values) => {
-  /* filterType: e.g. authers || geographic location
-  fields: e.g. region || country || authors
+export const applyFilterQuery = (fields, values, mode = "set") => {
+  /* fields: e.g. region || country || authors
   values: list of selected values, e.g [brazil, usa, ...]
+  mode: set | add | remove
+    set: sets the filter values to those provided
+    add: adds the values to the current selection
+    remove: vice versa
   */
-  return (dispatch) => {
-    dispatch({type: types.APPLY_FILTER_QUERY,
-              // filterType,
-              fields,
-              values});
+  return (dispatch, getState) => {
+    let newValues;
+    if (mode === "set") {
+      newValues = values;
+    } else {
+      const { controls } = getState();
+      const currentFields = Object.keys(controls.filters);
+      if (mode === "add") {
+        if (currentFields.indexOf(fields) === -1) {
+          newValues = values;
+        } else {
+          newValues = controls.filters[fields].concat(values);
+        }
+      } else if (mode === "remove") {
+        if (currentFields.indexOf(fields) === -1) {
+          console.error("trying to remove values from an un-initialised filter!");
+          return;
+        }
+        newValues = values;
+        for (const item of values) {
+          const idx = newValues.indexOf(item);
+          if (idx !== -1) {
+            newValues.splice(idx, 1);
+          } else {
+            console.error("trying to remove filter value ", item, " which was not part of the filter selection");
+          }
+        }
+      }
+    }
+    dispatch({type: types.APPLY_FILTER_QUERY, fields, values: newValues});
     dispatch(updateVisibleTipsAndBranchThicknesses());
   };
 };

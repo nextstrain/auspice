@@ -7,7 +7,7 @@ import React from "react";
  * @param {int} trim (default: 0) should strings get trimmed? Applies only to strings. 0: no trimming.
  * @returns {string|float} to display
  */
-export const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false} = {}) => {
+export const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false, stripEtAl = false} = {}) => {
   if (!x) {
     return "";
   }
@@ -24,6 +24,9 @@ export const prettyString = (x, {multiplier = false, trim = 0, camelCase = true,
     }
     if (removeComma) {
       x = x.replace(/,/g, "");
+    }
+    if (stripEtAl) {
+      x = x.replace('et al', '').replace('Et Al', '');
     }
     return x;
   } else if (typeof x === "number") {
