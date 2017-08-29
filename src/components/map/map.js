@@ -43,10 +43,7 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
     mapTriplicate: state.controls.mapTriplicate,
     dateMin: state.controls.dateMin,
-    dateMax: state.controls.dateMax,
-    dateScale: state.controls.dateScale,
-    dateFormatter: state.controls.dateFormatter,
-    dateParser: state.controls.dateParser
+    dateMax: state.controls.dateMax
   };
 })
 
@@ -185,8 +182,8 @@ class Map extends React.Component {
         this.state.d3DOMNode,
         this.state.map,
         this.props.nodes,
-        calendarToNumeric(this.props.dateParser, this.props.dateScale, this.props.dateMin),
-        calendarToNumeric(this.props.dateParser, this.props.dateScale, this.props.dateMax)
+        calendarToNumeric(this.props.dateMin),
+        calendarToNumeric(this.props.dateMax)
       );
 
       /* Set up leaflet events */
@@ -258,8 +255,8 @@ class Map extends React.Component {
         newDemes,
         newTransmissions,
         this.state.d3elems,
-        calendarToNumeric(this.props.dateParser, this.props.dateScale, this.props.dateMin),
-        calendarToNumeric(this.props.dateParser, this.props.dateScale, this.props.dateMax)
+        calendarToNumeric(this.props.dateMin),
+        calendarToNumeric(this.props.dateMax)
       );
 
 
@@ -321,8 +318,8 @@ class Map extends React.Component {
         this.state.d3elems,
         this.state.map,
         nextProps.nodes,
-        calendarToNumeric(nextProps.dateParser, nextProps.dateScale, nextProps.dateMin),
-        calendarToNumeric(nextProps.dateParser, nextProps.dateScale, nextProps.dateMax)
+        calendarToNumeric(nextProps.dateMin),
+        calendarToNumeric(nextProps.dateMax)
       );
 
       this.setState({
@@ -495,9 +492,9 @@ class Map extends React.Component {
     // leftWindow --- rightWindow ------------------------------- end
     // 2011.4 ------- 2011.6 ------------------------------------ 2015.4
 
-    const start = calendarToNumeric(this.props.dateParser, this.props.dateScale, this.props.absoluteDateMin);
-    let leftWindow = calendarToNumeric(this.props.dateParser, this.props.dateScale, this.props.dateMin);
-    const end = calendarToNumeric(this.props.dateParser, this.props.dateScale, this.props.absoluteDateMax);
+    const start = calendarToNumeric(this.props.absoluteDateMin);
+    let leftWindow = calendarToNumeric(this.props.dateMin);
+    const end = calendarToNumeric(this.props.absoluteDateMax);
     const totalRange = end - start; // years in the animation
 
     const animationIncrement = (animationTick * totalRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
@@ -512,8 +509,8 @@ class Map extends React.Component {
 
     window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
       if (enableAnimationPerfTesting) { window.Perf.bump(); }
-      const newWindow = {min: numericToCalendar(this.props.dateFormatter, this.props.dateScale, leftWindow),
-        max: numericToCalendar(this.props.dateFormatter, this.props.dateScale, rightWindow)};
+      const newWindow = {min: numericToCalendar(leftWindow),
+        max: numericToCalendar(rightWindow)};
 
       /* first pass sets the timer to absolute min and absolute min + windowRange because they reference above initial time window */
       this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max, quickdraw: true}));

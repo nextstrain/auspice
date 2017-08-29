@@ -26,7 +26,7 @@ module.exports = {
       },
 	  'global': {}
     }),
-	
+
     new webpack.optimize.UglifyJsPlugin({ // minify everything
       compressor: {
         warnings: false
@@ -34,7 +34,6 @@ module.exports = {
     }),
     new webpack.optimize.DedupePlugin(), // dedupe similar code
     new webpack.optimize.AggressiveMergingPlugin(), // merge chunks
-    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/), // ignore all locale files of moment.js
     new CompressionPlugin({ // gzip everything
        asset: "[path].gz[query]",
        algorithm: "gzip",

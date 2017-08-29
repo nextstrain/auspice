@@ -1,7 +1,7 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 import { prettyString, authorString } from "../../util/stringHelpers";
-import { floatDateToMoment } from "../../util/dateHelpers";
+import { numericToCalendar } from "../../util/dateHelpers";
 
 const styles = {
   container: {
@@ -43,7 +43,7 @@ const formatURL = (url) => {
 };
 
 const dateConfidence = (x) => (
-  item("Collection date confidence", `(${floatDateToMoment(x[0]).format("YYYY-MM-DD")}, ${floatDateToMoment(x[1]).format("YYYY-MM-DD")})`)
+  item("Collection date confidence", `(${numericToCalendar(x[0])}, ${numericToCalendar(x[1])})`)
 );
 
 const accessionAndURL = (url, accession) => (

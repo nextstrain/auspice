@@ -1,20 +1,30 @@
-import moment from "moment";
+import { scaleTime } from "d3-scale";
+import { timeFormat, timeParse } from "d3-time-format";
 
-export const floatDateToMoment = function (num_date) {
-  const years = num_date.toString().split(".")[0];
-  let days = Math.floor(num_date % 1 * 365.25).toString();
-  if (days === "0") {days = 1;}
-  return moment("".concat(years, "-", days), "Y-DDD");
-};
+const dateFormatter = timeFormat("%Y-%m-%d");
+const dateParser = timeParse("%Y-%m-%d");
+const dateScale = scaleTime()
+  .domain([new Date(2000, 0, 0), new Date(2100, 0, 0)])
+  .range([2000, 2100]);
 
-export const numericToCalendar = (dateFormatter, dateScale, numDate) => {
+export const numericToCalendar = (numDate) => {
   const d3Date = dateScale.invert(numDate);
   const calDate = dateFormatter(d3Date);
   return calDate;
 };
 
-export const calendarToNumeric = (dateParser, dateScale, calDate) => {
+export const calendarToNumeric = (calDate) => {
   const d3Date = dateParser(calDate);
   const numDate = dateScale(d3Date);
   return numDate;
+};
+
+export const currentNumDate = () => {
+  const now = new Date();
+  return dateScale(now);
+};
+
+export const currentCalDate = () => {
+  const now = new Date();
+  return dateFormatter(now);
 };

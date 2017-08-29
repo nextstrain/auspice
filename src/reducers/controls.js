@@ -1,8 +1,5 @@
-import { scaleTime } from "d3-scale";
-import { timeYear } from "d3-time";
-import { timeFormat, timeParse } from "d3-time-format";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
-import { numericToCalendar } from "../util/dateHelpers";
+import { numericToCalendar, currentNumDate, currentCalDate } from "../util/dateHelpers";
 import { flattenTree } from "../util/treeHelpers";
 import getColorScale from "../util/getColorScale";
 import { defaultGeoResolution,
@@ -18,11 +15,12 @@ const checkColorByConfidence = function (attrs, colorBy) {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
 };
 
-const getMinNumDateViaTree = function (rootAttr) {
-  return rootAttr.num_date - 0.01; /* slider should be earlier than actual day */
+const getMinCalDateViaTree = function (root) {
+  const minNumDate = root.attr.num_date - 0.01; /* slider should be earlier than actual day */
+  return numericToCalendar(minNumDate);
 };
 
-const getMaxNumDateViaTree = (tree) => {
+const getMaxCalDateViaTree = (tree) => {
   let maxNumDate = reallySmallNumber;
   const nodesArray = flattenTree(tree);
   nodesArray.forEach((node) => {
@@ -35,18 +33,13 @@ const getMaxNumDateViaTree = (tree) => {
     }
   });
   maxNumDate += 0.01; /* slider should be later than actual day */
-  return maxNumDate;
+  return numericToCalendar(maxNumDate);
 };
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
 const getDefaultState = () => {
-  const dateFormatter = timeFormat("%Y-%m-%d");
-  const maxD3Date = new Date();
-  const minD3Date = timeYear.offset(maxD3Date, -1 * defaultDateRange);
-  const maxCalDate = dateFormatter(maxD3Date);
-  const minCalDate = dateFormatter(minD3Date);
   return {
     showBranchLabels: false,
     selectedLegendItem: null,
@@ -60,10 +53,10 @@ const getDefaultState = () => {
     temporalConfidence: {exists: false, display: false, on: false},
     layout: defaultLayout,
     distanceMeasure: defaultDistanceMeasure,
-    dateMin: minCalDate,
-    dateMax: maxCalDate,
-    absoluteDateMin: minCalDate,
-    absoluteDateMax: maxCalDate,
+    dateMin: numericToCalendar(currentNumDate() - defaultDateRange),
+    dateMax: currentCalDate(),
+    absoluteDateMin: numericToCalendar(currentNumDate() - defaultDateRange),
+    absoluteDateMax: currentCalDate(),
     colorBy: defaultColorBy,
     defaultColorBy: defaultColorBy,
     colorByConfidence: {display: false, on: false},
@@ -72,9 +65,6 @@ const getDefaultState = () => {
     geoResolution: defaultGeoResolution,
     datasetPathName: "",
     filters: {},
-    dateScale: scaleTime().domain([new Date(2000, 0, 0), new Date(2100, 0, 0)]).range([2000, 2100]),
-    dateFormatter: timeFormat("%Y-%m-%d"),
-    dateParser: timeParse("%Y-%m-%d"),
     quickdraw: false, // if true, components may skip expensive computes.
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
@@ -92,12 +82,10 @@ const Controls = (state = getDefaultState(), action) => {
   case types.NEW_DATASET: {
     const base = getDefaultState();
     base["datasetPathName"] = action.datasetPathName;
-    const minNumDate = getMinNumDateViaTree(action.tree.attr);
-    base["dateMin"] = numericToCalendar(base.dateFormatter, base.dateScale, minNumDate);
-    base["absoluteDateMin"] = numericToCalendar(base.dateFormatter, base.dateScale, minNumDate);
-    const maxNumDate = getMaxNumDateViaTree(action.tree);
-    base["dateMax"] = numericToCalendar(base.dateFormatter, base.dateScale, maxNumDate);
-    base["absoluteDateMax"] = numericToCalendar(base.dateFormatter, base.dateScale, maxNumDate);
+    base["dateMin"] = getMinCalDateViaTree(action.tree);
+    base["absoluteDateMin"] = getMinCalDateViaTree(action.tree);
+    base["dateMax"] = getMaxCalDateViaTree(action.tree);
+    base["absoluteDateMax"] = getMaxCalDateViaTree(action.tree);
     /* overwrite base state with data from the metadata JSON */
     if (action.meta.date_range) {
       /* this may be useful if, e.g., one were to want to display an outbreak

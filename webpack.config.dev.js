@@ -28,9 +28,7 @@ module.exports = {
     // new webpack.DefinePlugin({
     //   __COMMIT_HASH__: JSON.stringify(commitHash)
     // }),
-    new webpack.NoErrorsPlugin(),
-    // Ignore all locale files of moment.js
-    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
+    new webpack.NoErrorsPlugin()
   ],
   module: {
     loaders: [
