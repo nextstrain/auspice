@@ -1,29 +1,19 @@
 import React from "react";
 import { connect } from "react-redux";
-import DatePicker from "react-datepicker";
-import moment from "moment";
 import Slider from "./slider";
 import { controlsWidth } from "../../util/globals";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
-
-moment.updateLocale("en", {
-  longDateFormat: {
-    L: "YYYY-MM-DD"
-  }
-});
+import { headerFont, darkGrey } from "../../globalStyles";
 
 @connect((state) => {
   return {
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
     absoluteDateMin: state.controls.absoluteDateMin,
-    absoluteDateMax: state.controls.absoluteDateMax,
-    dateScale: state.controls.dateScale,
-    dateFormatter: state.controls.dateFormatter,
-    dateParser: state.controls.dateParser
+    absoluteDateMax: state.controls.absoluteDateMax
   };
 })
 class DateRangeInputs extends React.Component {
@@ -41,14 +31,16 @@ class DateRangeInputs extends React.Component {
     dateMax: React.PropTypes.string.isRequired,
     absoluteDateMin: React.PropTypes.string.isRequired,
     absoluteDateMax: React.PropTypes.string.isRequired,
-    dateFormatter: React.PropTypes.func.isRequired,
-    dateParser: React.PropTypes.func.isRequired,
     dispatch: React.PropTypes.func.isRequired
   }
   getStyles() {
     return {
       base: {
-
+        fontFamily: headerFont,
+        margin: "0px 0px 5px 0px",
+        fontSize: 12,
+        fontWeight: 400,
+        color: darkGrey
       }
     };
   }
@@ -61,24 +53,6 @@ class DateRangeInputs extends React.Component {
         type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
         data: "Play"
       });
-    }
-  }
-
-  updateFromPicker(ref, momentDate) {
-    this.maybeClearMapAnimationInterval()
-
-    // a momentDate is received from DatePicker
-    let newRange;
-    if (ref === "updateDateMin") {
-      newRange = { min: momentDate.format("YYYY-MM-DD"),
-                   max: this.props.dateMax };
-      this.props.dispatch(changeDateFilter({newMin: newRange.min}));
-      modifyURLquery(this.context.router, {dmin: newRange.min}, true);
-    } else if (ref === "updateDateMax") {
-      newRange = { min: this.props.dateMin,
-                   max: momentDate.format("YYYY-MM-DD") };
-      this.props.dispatch(changeDateFilter({newMax: newRange.max}));
-      modifyURLquery(this.context.router, {dmax: newRange.max}, true);
     }
   }
 
@@ -97,8 +71,8 @@ class DateRangeInputs extends React.Component {
     }
     // {numDateValues} is an array of numDates received from Slider
     // [numDateStart, numDateEnd]
-    const newRange = {min: numericToCalendar(this.props.dateFormatter, this.props.dateScale, numDateValues[0]),
-      max: numericToCalendar(this.props.dateFormatter, this.props.dateScale, numDateValues[1])};
+    const newRange = {min: numericToCalendar(numDateValues[0]),
+      max: numericToCalendar(numDateValues[1])};
     if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) { // update min
       this.props.dispatch(changeDateFilter({newMin: newRange.min, quickdraw: debounce}));
       modifyURLquery(this.context.router, {dmin: newRange.min}, true);
@@ -160,12 +134,14 @@ class DateRangeInputs extends React.Component {
     const selectedMin = this.props.dateMin;
     const selectedMax = this.props.dateMax;
 
-    const absoluteMinNumDate = calendarToNumeric(this.props.dateParser, this.props.dateScale, absoluteMin);
-    const absoluteMaxNumDate = calendarToNumeric(this.props.dateParser, this.props.dateScale, absoluteMax);
-    const selectedMinNumDate = calendarToNumeric(this.props.dateParser, this.props.dateScale, selectedMin);
-    const selectedMaxNumDate = calendarToNumeric(this.props.dateParser, this.props.dateScale, selectedMax);
+    const absoluteMinNumDate = calendarToNumeric(absoluteMin);
+    const absoluteMaxNumDate = calendarToNumeric(absoluteMax);
+    const selectedMinNumDate = calendarToNumeric(selectedMin);
+    const selectedMaxNumDate = calendarToNumeric(selectedMax);
 
     const minDistance = (absoluteMaxNumDate - absoluteMinNumDate) / 10.0;
+
+    const styles = this.getStyles();
 
     return (
       <div>
@@ -183,22 +159,13 @@ class DateRangeInputs extends React.Component {
           withBars/>
         </div>
         <div style={{height: 5}}> </div>
-        {/*
-          the CSS for this is in index.html
-          docs: https://hacker0x01.github.io/react-datepicker/
-        */}
         <div style={{width: controlsWidth}}>
-          <DatePicker                               // momentDates are handed to DatePicker
-            dateFormat="YYYY/MM/DD"
-            selected={moment(selectedMin)}
-            onChange={this.updateFromPicker.bind(this, "updateDateMin")}
-          />
-          <DatePicker                               // momentDates are handed to DatePicker
-            dateFormat="YYYY/MM/DD"
-            className="right-datepicker"
-            selected={moment(selectedMax)}
-            onChange={this.updateFromPicker.bind(this, "updateDateMax")}
-          />
+          <div style={{ ...styles.base, float: "left" }}>
+            {selectedMin}
+          </div>
+          <div style={{ ...styles.base, float: "right" }}>
+            {selectedMax}
+          </div>
         </div>
       </div>
     );

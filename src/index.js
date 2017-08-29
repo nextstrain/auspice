@@ -16,7 +16,6 @@ import { enableAnimationPerfTesting } from "./util/globals";
 import "./css/global.css";
 import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";
-import "./css/datePicker.css";
 import "./css/static.css";
 import "./css/notifications.css";
 

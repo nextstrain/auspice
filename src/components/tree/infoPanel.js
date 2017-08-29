@@ -1,7 +1,7 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 import { prettyString } from "../../util/stringHelpers";
-import { floatDateToMoment } from "../../util/dateHelpers";
+import { numericToCalendar } from "../../util/dateHelpers";
 import { getTipColorAttribute } from "../../util/treeHelpers";
 
 const infoLineJSX = (item, value) => (
@@ -33,10 +33,10 @@ const getBranchDivJSX = (d) =>
   <p>{infoLineJSX("Divergence:", prettyString(d.attr.div.toExponential(3)))}</p>;
 
 const getBranchTimeJSX = (d, temporalConfidence) => {
-  const dates = [floatDateToMoment(d.attr.num_date).format("YYYY-MM-DD")];
+  const dates = [numericToCalendar(d.attr.num_date)];
   if (temporalConfidence) {
-    dates[1] = floatDateToMoment(d.attr.num_date_confidence[0]).format("YYYY-MM-DD");
-    dates[2] = floatDateToMoment(d.attr.num_date_confidence[1]).format("YYYY-MM-DD");
+    dates[1] = numericToCalendar(d.attr.num_date_confidence[0]);
+    dates[2] = numericToCalendar(d.attr.num_date_confidence[1]);
     if (dates[1] === dates[2]) {
       return <p>{infoLineJSX("Date:", dates[0])}</p>;
     }

@@ -1,16 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
-import moment from "moment";
 import Slider from "./slider";
 import { controlsWidth } from "../../util/globals";
 import { changeAnalysisSliderValue } from "../../actions/treeProperties";
 import { dataFont, darkGrey } from "../../globalStyles";
-
-moment.updateLocale("en", {
-  longDateFormat: {
-    L: "YYYY-MM-DD"
-  }
-});
 
 @connect((state) => {
   return {

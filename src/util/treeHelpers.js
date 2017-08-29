@@ -369,8 +369,8 @@ export const calcVisibility = function (tree, controls, dates) {
     }
 
     // TIME FILTERING (internal + terminal nodes)
-    const userDateMin = calendarToNumeric(controls.dateParser, controls.dateScale, dates.dateMin);
-    const userDateMax = calendarToNumeric(controls.dateParser, controls.dateScale, dates.dateMax);
+    const userDateMin = calendarToNumeric(dates.dateMin);
+    const userDateMax = calendarToNumeric(dates.dateMax);
     const timeFiltered = tree.nodes.map((d, idx) => {
       return !(d.attr.num_date < userDateMin || d.parent.attr.num_date > userDateMax);
     });
