@@ -14,6 +14,7 @@ import TreeView from "./tree/treeView";
 import { controlsHiddenWidth } from "../util/globals";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
+import Header from "./framework/header";
 import { analyticsNewPage } from "../util/googleAnalytics";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
@@ -82,13 +83,13 @@ class App extends React.Component {
               handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
             />
           }
+          <Header sidebar={this.state.sidebarOpen || this.state.sidebarDocked}/>
           <TreeView
             query={queryString.parse(this.context.router.history.location.search)}
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
           />
           <Map
             sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            justGotNewDatasetRenderNewMap={false}
           />
           <Frequencies/>
           <Entropy
