@@ -1,8 +1,8 @@
-import moment from 'moment';
 import { scaleTime } from "d3-scale";
+import { timeYear } from "d3-time";
 import { timeFormat, timeParse } from "d3-time-format";
 import { determineColorByGenotypeType } from "../util/urlHelpers";
-import { floatDateToMoment } from "../util/dateHelpers";
+import { numericToCalendar } from "../util/dateHelpers";
 import { flattenTree } from "../util/treeHelpers";
 import getColorScale from "../util/getColorScale";
 import { defaultGeoResolution,
@@ -18,13 +18,11 @@ const checkColorByConfidence = function (attrs, colorBy) {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
 };
 
-const getMinDateViaRoot = function (rootAttr) {
-  const root = floatDateToMoment(rootAttr.num_date);
-  root.subtract(1, "days"); /* slider should be earlier than actual day */
-  return root;
+const getMinNumDateViaTree = function (rootAttr) {
+  return rootAttr.num_date - 0.01; /* slider should be earlier than actual day */
 };
 
-const getMaxDateViaTips = (tree) => {
+const getMaxNumDateViaTree = (tree) => {
   let maxNumDate = reallySmallNumber;
   const nodesArray = flattenTree(tree);
   nodesArray.forEach((node) => {
@@ -36,15 +34,19 @@ const getMaxDateViaTips = (tree) => {
       }
     }
   });
-  const maxMomentDate = floatDateToMoment(maxNumDate);
-  maxMomentDate.add(1, "days"); /* slider should be later than actual day */
-  return maxMomentDate;
+  maxNumDate += 0.01; /* slider should be later than actual day */
+  return maxNumDate;
 };
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
-const getDefaultState = function () {
+const getDefaultState = () => {
+  const dateFormatter = timeFormat("%Y-%m-%d");
+  const maxD3Date = new Date();
+  const minD3Date = timeYear.offset(maxD3Date, -1 * defaultDateRange);
+  const maxCalDate = dateFormatter(maxD3Date);
+  const minCalDate = dateFormatter(minD3Date);
   return {
     showBranchLabels: false,
     selectedLegendItem: null,
@@ -58,10 +60,10 @@ const getDefaultState = function () {
     temporalConfidence: {exists: false, display: false, on: false},
     layout: defaultLayout,
     distanceMeasure: defaultDistanceMeasure,
-    dateMin: moment().subtract(defaultDateRange, "years").format("YYYY-MM-DD"),
-    dateMax: moment().format("YYYY-MM-DD"),
-    absoluteDateMin: moment().subtract(defaultDateRange, "years").format("YYYY-MM-DD"),
-    absoluteDateMax: moment().format("YYYY-MM-DD"),
+    dateMin: minCalDate,
+    dateMax: maxCalDate,
+    absoluteDateMin: minCalDate,
+    absoluteDateMax: maxCalDate,
     colorBy: defaultColorBy,
     defaultColorBy: defaultColorBy,
     colorByConfidence: {display: false, on: false},
@@ -87,26 +89,25 @@ const Controls = (state = getDefaultState(), action) => {
     return Object.assign({}, state, {
       datasetPathName: undefined
     });
-  case types.NEW_DATASET:
+  case types.NEW_DATASET: {
     const base = getDefaultState();
     base["datasetPathName"] = action.datasetPathName;
-    const rootDate = getMinDateViaRoot(action.tree.attr);
-    base["dateMin"] = rootDate.format("YYYY-MM-DD");
-    base["absoluteDateMin"] = rootDate.format("YYYY-MM-DD");
-    const maxTipDate = getMaxDateViaTips(action.tree);
-    base["dateMax"] = maxTipDate.format("YYYY-MM-DD");
-    base["absoluteDateMax"] = maxTipDate.format("YYYY-MM-DD");
+    const minNumDate = getMinNumDateViaTree(action.tree.attr);
+    base["dateMin"] = numericToCalendar(base.dateFormatter, base.dateScale, minNumDate);
+    base["absoluteDateMin"] = numericToCalendar(base.dateFormatter, base.dateScale, minNumDate);
+    const maxNumDate = getMaxNumDateViaTree(action.tree);
+    base["dateMax"] = numericToCalendar(base.dateFormatter, base.dateScale, maxNumDate);
+    base["absoluteDateMax"] = numericToCalendar(base.dateFormatter, base.dateScale, maxNumDate);
     /* overwrite base state with data from the metadata JSON */
     if (action.meta.date_range) {
+      /* this may be useful if, e.g., one were to want to display an outbreak
+      from 2000-2005 (the default is the present day) */
       if (action.meta.date_range.date_min) {
+        base["dateMin"] = action.meta.date_range.date_min;
+        base["absoluteDateMin"] = action.meta.date_range.date_min;
         base["mapAnimationStartDate"] = action.meta.date_range.date_min;
-        if (rootDate.isBefore(moment(action.meta.date_range.date_min, "YYYY-MM-DD"))) {
-          base["dateMin"] = action.meta.date_range.date_min;
-        }
       }
       if (action.meta.date_range.date_max) {
-        /* this may be useful if, e.g., one were to want to display an outbreak
-        from 2000-2005 (the default is the present day) */
         base["dateMax"] = action.meta.date_range.date_max;
         base["absoluteDateMax"] = action.meta.date_range.date_max;
       }
@@ -174,6 +175,7 @@ const Controls = (state = getDefaultState(), action) => {
     base["colorByConfidence"] = checkColorByConfidence(base["attrs"], base["colorBy"]);
     base["defaultColorBy"] = base["colorBy"];
     return base;
+  }
   case types.TOGGLE_BRANCH_LABELS:
     return Object.assign({}, state, {
       showBranchLabels: !state.showBranchLabels
