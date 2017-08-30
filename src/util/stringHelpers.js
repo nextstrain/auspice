@@ -26,7 +26,7 @@ export const prettyString = (x, {multiplier = false, trim = 0, camelCase = true,
       x = x.replace(/,/g, "");
     }
     if (stripEtAl) {
-      x = x.replace('et al', '').replace('Et Al', '');
+      x = x.replace('et al.', '').replace('Et Al.', '').replace('et al', '').replace('Et Al', '');
     }
     return x;
   } else if (typeof x === "number") {

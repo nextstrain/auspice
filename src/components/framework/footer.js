@@ -117,7 +117,7 @@ class Footer extends React.Component {
           // padding: "0px",
           paddingBottom: "30px",
           fontFamily: dataFont,
-          fontSize: 16,
+          fontSize: 15,
           fontWeight: 300,
           color: medGrey
         },
@@ -125,8 +125,8 @@ class Footer extends React.Component {
           marginTop: "10px"
         },
         citationItem: {
-          paddingLeft: "0px",
-          paddingRight: "10px",
+          paddingLeft: "4px",
+          paddingRight: "4px",
           paddingTop: "1px",
           paddingBottom: "0px"
         },
@@ -183,7 +183,7 @@ class Footer extends React.Component {
           tabIndex={0}
         >
           {prettyString(authors, {stripEtAl: true})}
-          <em>{" et al (n=" + author_info[authors].n + ")"}</em>
+          {" et al (" + author_info[authors].n + ")"}
         </div>
       );
     });
