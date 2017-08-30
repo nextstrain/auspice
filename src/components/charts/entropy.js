@@ -202,6 +202,7 @@ class Entropy extends React.Component {
           mutType={this.props.mutType}
         />
         <svg
+          id="d3entropyParent"
           style={{pointerEvents: "auto"}}
           width={chartGeom.responsive.width}
           height={chartGeom.height}

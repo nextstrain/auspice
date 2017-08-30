@@ -64,7 +64,8 @@ const getDefaultState = () => {
     analysisSlider: false,
     geoResolution: defaultGeoResolution,
     datasetPathName: "",
-    filters: {},
+    filters: {authors: []}, /* initialise authors to [] so it can be accessed always */
+    showDownload: false,
     quickdraw: false, // if true, components may skip expensive computes.
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
@@ -309,6 +310,14 @@ const Controls = (state = getDefaultState(), action) => {
         value: action.value
       }
     )});
+  case types.TRIGGER_DOWNLOAD_MODAL:
+    return Object.assign({}, state, {
+      showDownload: true
+    });
+  case types.DISMISS_DOWNLOAD_MODAL:
+    return Object.assign({}, state, {
+      showDownload: false
+    });
   default:
     return state;
   }

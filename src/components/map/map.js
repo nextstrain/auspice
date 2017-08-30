@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import _min from "lodash/min";
 import _max from "lodash/max";
 import { select } from "d3-selection";
+import leafletImage from "leaflet-image";
 import Card from "../framework/card";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
@@ -17,6 +18,7 @@ import {
 } from "../../util/mapHelpersLatLong";
 import { changeDateFilter } from "../../actions/treeProperties";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
+import { incommingMapPNG } from "../../util/downloadDataFunctions";
 
 /* global L */
 // L is global in scope and placed by setupLeaflet()
@@ -74,10 +76,29 @@ class Map extends React.Component {
   componentWillMount() {
     if (!window.L) {
       setupLeaflet(); /* this sets up window.L */
+      /* add a print method to leaflet. some relevent links:
+      https://github.com/mapbox/leaflet-image
+      https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+      https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
+      */
+      window.L.save = (data) => {
+        leafletImage(this.state.map, (err, canvas) => {
+          canvas.toBlob((blob) => {
+            const reader = new FileReader();
+            reader.addEventListener('loadend', (e) => {
+              incommingMapPNG(Object.assign({}, data, {
+                base64map: e.srcElement.result,
+                mapDimensions: this.state.map.getSize()
+              }));
+            });
+            reader.readAsDataURL(blob);
+          }, "image/png;base64;", 1);
+        });
+      };
     }
   }
-  componentDidMount() {
-  }
+  // componentDidMount() {
+  // }
   componentWillReceiveProps(nextProps) {
     /* this is the place we update state in response to new props */
     this.maybeComputeResponsive(nextProps);
@@ -135,7 +156,7 @@ class Map extends React.Component {
       this.state.responsive &&
       !this.state.d3DOMNode
     ) {
-      const d3DOMNode = select("#map svg");
+      const d3DOMNode = select("#map svg").attr("id", "d3DemesTransmissions");
       this.setState({d3DOMNode});
     }
   }

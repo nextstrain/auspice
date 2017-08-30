@@ -36,7 +36,8 @@ there are actually backlinks from the phylotree tree
     distanceMeasure: state.controls.distanceMeasure,
     mutType: state.controls.mutType,
     sequences: state.sequences,
-    colorScale: state.controls.colorScale
+    colorScale: state.controls.colorScale,
+    metadata: state.metadata
   };
 })
 class TreeView extends React.Component {
@@ -44,7 +45,7 @@ class TreeView extends React.Component {
     super(props);
     this.Viewer = null;
     this.state = {
-      tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
+      tool: "pan", // one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
       hover: null,
       selectedBranch: null,
       selectedTip: null,
@@ -179,6 +180,7 @@ class TreeView extends React.Component {
         <TipSelectedPanel
           goAwayCallback={(d) => funcs.clearSelectedTip.bind(this)(d)}
           tip={this.state.selectedTip}
+          metadata={this.props.metadata}
         />
         <ReactSVGPanZoom
           width={responsive ? responsive.width : 1}

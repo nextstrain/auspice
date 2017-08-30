@@ -1,25 +1,29 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
+import { enableDownloadModal } from "../../util/globals";
 import { prettyString, authorString } from "../../util/stringHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
-
+import { getAuthor } from "../controls/downloadModal";
 const styles = {
   container: {
     position: "absolute",
-    width: "100%", height: "100%",
+    width: "100%",
+    height: "100%",
     pointerEvents: "all",
-    top: 0, left: 0,
+    top: 0,
+    left: 0,
     zIndex: 2000,
     backgroundColor: "rgba(80, 80, 80, .20)",
     /* FLEXBOX */
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    wordWrap: "break-word", wordBreak: "break-word"
+    wordWrap: "break-word",
+    wordBreak: "break-word"
   }
 };
 
-const stopProp = (e) => {
+export const stopProp = (e) => {
   if (!e) {e = window.event;}
   e.cancelBubble = true;
   if (e.stopPropagation) {e.stopPropagation();}
@@ -62,10 +66,49 @@ const justURL = (url) => (
 
 const validAttr = (attrs, key) => key in attrs && attrs[key] !== "?" && attrs[key] !== "" && attrs[key] !== undefined;
 
-const TipSelectedPanel = ({tip, goAwayCallback}) => {
+const TipSelectedPanel = ({tip, goAwayCallback, metadata}) => {
   if (!tip) {return null;}
   const url = validAttr(tip.n.attr, "url") ? formatURL(tip.n.attr.url) : false;
   const uncertainty = "num_date_confidence" in tip.n.attr && tip.n.attr.num_date_confidence[0] !== tip.n.attr.num_date_confidence[1];
+  /* The following blocks are repeated temporarily while we work on sourcing the data from
+  the meta.JSON instead of the tree.JSON. This is toggled by the enableDownloadModal flag */
+  if (!enableDownloadModal) {
+    return (
+      <div style={styles.container} onClick={() => goAwayCallback(tip)}>
+        <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
+          <p style={infoPanelStyles.modalHeading}>
+            {`${tip.n.strain}`}
+          </p>
+          <table>
+            <tbody>
+              {/* the "basic" attributes (which may not exist in certain datasets) */}
+              {["country", "region", "division"].map((x) => {
+                return validAttr(tip.n.attr, x) ? item(prettyString(x), prettyString(tip.n.attr[x])) : null;
+              })}
+              {/* Dates */}
+              {item(uncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
+              {uncertainty ? dateConfidence(tip.n.attr.num_date_confidence) : null}
+              {/* Paper Title, Author(s), Accession + URL (if provided) - from info.json NOT tree.json */}
+              {validAttr(tip.n.attr, "title") ? item("Publication", prettyString(tip.n.attr.title, {trim: 80, camelCase: false})) : null}
+              {validAttr(tip.n.attr, "authors") ? item("Authors", authorString(tip.n.attr.authors)) : null}
+              {/* try to join URL with accession, else display the one that's available */}
+              {url && validAttr(tip.n.attr, "accession") ?
+                accessionAndURL(url, tip.n.attr.accession) :
+                url ? justURL(url) :
+                  validAttr(tip.n.attr, "accession") ? item("Accession", tip.n.attr.accession) :
+                    null
+              }
+            </tbody>
+          </table>
+          <p style={infoPanelStyles.comment}>
+            Click outside this box to go back to the tree
+          </p>
+        </div>
+      </div>
+    );
+  }
+  const author = metadata.metadata.seq_author_map[tip.n.strain];
+  const authorInfo = metadata.metadata.author_info;
   return (
     <div style={styles.container} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
@@ -81,15 +124,15 @@ const TipSelectedPanel = ({tip, goAwayCallback}) => {
             {/* Dates */}
             {item(uncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
             {uncertainty ? dateConfidence(tip.n.attr.num_date_confidence) : null}
-            {/* Paper Title, Author(s), Accession + URL (if provided) */}
-            {validAttr(tip.n.attr, "title") ? item("Publication", prettyString(tip.n.attr.title, {trim: 80, camelCase: false})) : null}
+            {/* Paper Title, Author(s), Accession + URL (if provided) - from info.json NOT tree.json */}
+            {authorInfo[author].title ? item("Publication", prettyString(authorInfo[author].title, {trim: 80, camelCase: false})) : null}
             {validAttr(tip.n.attr, "authors") ? item("Authors", authorString(tip.n.attr.authors)) : null}
             {/* try to join URL with accession, else display the one that's available */}
             {url && validAttr(tip.n.attr, "accession") ?
               accessionAndURL(url, tip.n.attr.accession) :
               url ? justURL(url) :
-              validAttr(tip.n.attr, "accession") ? item("Accession", tip.n.attr.accession) :
-              null
+                validAttr(tip.n.attr, "accession") ? item("Accession", tip.n.attr.accession) :
+                  null
             }
           </tbody>
         </table>

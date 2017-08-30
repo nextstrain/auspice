@@ -9,18 +9,23 @@ rules:
   max-len: off # be sensible
   no-mixed-operators: off # allow 1 + 1 * 3
   no-confusing-arrow: off # allow (a) => a ? 1 : 2;
+  no-useless-constructor: off
   no-nested-ternary: off
   object-curly-spacing: off # allow { a: 1 } and {a: 1}
+  block-spacing: off # same as above for function blocks on a single line
   dot-notation: off # allows someObject["a"] as well as someObject.a
   comma-dangle: ["error", "never"]
   padded-blocks: off
   arrow-body-style: off
   arrow-parens: ["error", "always"] # use brackets always, (a) => body // () => body // (a, b) => body
+  no-case-declarations: off # we don't surround case blocks with { } in our switch statements as we use fallthroughs deliberately
   one-var: off
   one-var-declaration-per-line: off
   no-console: [1, { "allow": ["warn", "error"] }]
   no-param-reassign: [1, { "props": false }]
-  react/jsx-tag-spacing: ["error", { "closingSlash": "never", "beforeSelfClosing": "never", "afterOpening": "never" }]
+  no-restricted-syntax: ['error', 'ForInStatement', 'LabeledStatement', 'WithStatement'] # allow ForOfStatement
+  react/jsx-tag-spacing: ["error", { "closingSlash": "never", "beforeSelfClosing": "allow", "afterOpening": "never" }]
+  react/forbid-prop-types: off
   react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
   react/jsx-first-prop-new-line: off
   react/prop-types: off # possibly reinstate

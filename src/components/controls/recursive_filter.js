@@ -40,7 +40,7 @@ class RecursiveFilter extends React.Component {
     const values = this.props.filterTree.concat(e.map((d) => d["value"]));
     analyticsControlsEvent(`filter-${this.props.filterType.replace(/\s/gi, "-")}`);
     this.props.dispatch(
-      applyFilterQuery(this.props.filterType, this.props.fields, values)
+      applyFilterQuery(this.props.fields, values)
     );
     // console.log("selection:", e)
   }
