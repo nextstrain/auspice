@@ -11,27 +11,28 @@ import InfoPanel from "./entropyInfoPanel";
 import { changeMutType } from "../../actions/treeProperties";
 import "../../css/entropy.css";
 
-const calcEntropy = function (entropy) {
+const calcEntropy = function calcEntropy(entropy) {
   const entropyNt = entropy["nuc"]["val"].map((s, i) => {
     return {x: entropy["nuc"]["pos"][i], y: s};
   });
 
-  const entropyNtWithoutZeros = _filter(entropyNt, (e) => {return e.y !== 0;});
+  const entropyNtWithoutZeros = _filter(entropyNt, (e) => { return e.y !== 0; });
 
   let aminoAcidEntropyWithoutZeros = [];
   const annotations = [];
   let aaCount = 0;
-  for (let prot in entropy) {
+  for (const prot of Object.keys(entropy)) {
     if (prot !== "nuc") {
       const tmpProt = entropy[prot];
       aaCount += 1;
-      annotations.push({prot: prot,
-                        start: tmpProt["pos"][0],
-                        end: tmpProt["pos"][tmpProt["pos"].length - 1],
-                        readingFrame: 1, //+tmpProt['pos'][0]%3,
-                        fill: genotypeColors[aaCount % 10]
-                       });
-      const tmpEntropy = tmpProt["val"].map((s, i) => ({
+      annotations.push({
+        prot: prot,
+        start: tmpProt["pos"][0],
+        end: tmpProt["pos"][tmpProt["pos"].length - 1],
+        readingFrame: 1, // +tmpProt['pos'][0]%3,
+        fill: genotypeColors[aaCount % 10]
+      });
+      const tmpEntropy = tmpProt["val"].map((s, i) => ({ // eslint-disable-line no-loop-func
         x: tmpProt["pos"][i],
         y: s,
         codon: tmpProt["codon"][i],
@@ -49,7 +50,7 @@ const calcEntropy = function (entropy) {
     entropyNtWithoutZeros};
 };
 
-const getStyles = function (width) {
+const getStyles = function getStyles(width) {
   return {
     switchContainer: {
       position: "absolute",
@@ -80,6 +81,22 @@ class Entropy extends React.Component {
       hovered: false,
       chart: false
     };
+    this.getChartGeom = (p) => {
+      const responsive = computeResponsive({
+        horizontal: 1,
+        vertical: 0.3333333,
+        browserDimensions: p.browserDimensions,
+        sidebar: p.sidebar
+      });
+      return {
+        responsive,
+        width: responsive.width,
+        height: 300,
+        padBottom: 50,
+        padLeft: 15,
+        padRight: 12
+      };
+    };
   }
   static contextTypes = {
     router: React.PropTypes.object.isRequired
@@ -87,8 +104,8 @@ class Entropy extends React.Component {
   static propTypes = {
     dispatch: React.PropTypes.func.isRequired,
     entropy: React.PropTypes.object,
-    sidebar: React.PropTypes.bool,
-    browserDimensions: React.PropTypes.object,
+    sidebar: React.PropTypes.bool.isRequired,
+    browserDimensions: React.PropTypes.object.isRequired,
     loaded: React.PropTypes.bool.isRequired,
     mutType: React.PropTypes.string.isRequired
   }
@@ -97,22 +114,6 @@ class Entropy extends React.Component {
     this.props.dispatch(changeColorBy(colorBy));
   }
 
-  getChartGeom(props) {
-    const responsive = computeResponsive({
-      horizontal: 1,
-      vertical: .3333333,
-      browserDimensions: props.browserDimensions,
-      sidebar: props.sidebar
-    });
-    return {
-      responsive,
-      width: responsive.width,
-      height: 300,
-      padBottom: 50,
-      padLeft: 15,
-      padRight: 12
-    };
-  }
   /* CALLBACKS */
   onHover(d, x, y) {
     // console.log("hovering @", x, y, this.state.chartGeom);
@@ -162,7 +163,7 @@ class Entropy extends React.Component {
     }
     if (!this.state.chart && nextProps.loaded) {
       const chart = new EntropyChart(
-        this.refs.d3entropy,
+        this.d3entropy,
         calcEntropy(nextProps.entropy),
         { /* callbacks */
           onHover: this.onHover.bind(this),
@@ -206,7 +207,7 @@ class Entropy extends React.Component {
           width={chartGeom.responsive.width}
           height={chartGeom.height}
         >
-          <g ref="d3entropy" id="d3entropy"/>
+          <g ref={(c) => { this.d3entropy = c; }} id="d3entropy"/>
         </svg>
       </Card>
     );

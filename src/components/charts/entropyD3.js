@@ -8,7 +8,7 @@ import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
 
 /* constructor - sed up data and store params */
-const EntropyChart = function (ref, data, callbacks) {
+const EntropyChart = function EntropyChart(ref, data, callbacks) {
   this.svg = select(ref);
   this.data = data;
   this.callbacks = callbacks;
@@ -20,12 +20,12 @@ const EntropyChart = function (ref, data, callbacks) {
 };
 
 /* zero-based arrays in JSON. No such thing as nucleotide 0 or amino acid 0 */
-const fix = function (x) {
+const fix = (x) => {
   return x + 1;
 };
 
 /* the annotation order in JSON is not necessarily sorted */
-EntropyChart.prototype.processAnnotations = function () {
+EntropyChart.prototype.processAnnotations = function processAnnotations() {
   const m = {};
   this.data.annotations.map((d) => {
     m[d.prot] = d;
@@ -33,14 +33,14 @@ EntropyChart.prototype.processAnnotations = function () {
   const sorted = Object.keys(m).sort((a, b) =>
     m[a].start < m[b].start ? -1 : m[a].start > m[b].start ? 1 : 0
   );
-  for (const gene in m) {
+  for (const gene of Object.keys(m)) {
     m[gene].idx = sorted.indexOf(gene);
   }
   this.geneMap = m;
 };
 
-EntropyChart.prototype.intersectGenes = function (pos) {
-  for (const gene in this.geneMap) {
+EntropyChart.prototype.intersectGenes = function intersectGenes(pos) {
+  for (const gene of Object.keys(this.geneMap)) {
     if (pos >= this.geneMap[gene].start && pos <= this.geneMap[gene].end) {
       return gene;
     }
@@ -49,14 +49,14 @@ EntropyChart.prototype.intersectGenes = function (pos) {
 };
 
 /* convert amino acid X in gene Y to a nucleotide number */
-EntropyChart.prototype.aaToNtCoord = function (gene, aaPos) {
+EntropyChart.prototype.aaToNtCoord = function aaToNtCoord(gene, aaPos) {
   return this.geneMap[gene].start + fix(aaPos) * 3;
 };
 
 /* draw the genes (annotations) */
-EntropyChart.prototype.drawGenes = function (annotations) {
+EntropyChart.prototype.drawGenes = function drawGenes(annotations) {
   const geneHeight = 20;
-  const readingFrameOffset = (frame) => 5
+  const readingFrameOffset = (frame) => 5; // eslint-disable-line no-unused-vars
   const selection = this.navGraph.selectAll(".gene")
     .data(annotations)
     .enter()
@@ -80,81 +80,81 @@ EntropyChart.prototype.drawGenes = function (annotations) {
     .text((d) => d.prot);
 };
 
-EntropyChart.prototype.drawAA = function (el, w) {
+EntropyChart.prototype.drawAA = function drawAA(el, w) {
   el.data(this.data.aminoAcidEntropyWithoutZeros)
     .enter().append("rect")
-      .attr("class", "bar")
-      .attr("id", (d) => d.prot + d.codon)
-      .attr("x", (d) => this.scales.xMain(this.aaToNtCoord(d.prot, d.codon)))
-      .attr("y", (d) => this.scales.y(d.y))
-      .attr("width", w)
-      .attr("height", (d) => this.offsets.heightMain - this.scales.y(d.y))
-      .style("fill", (d) => this.geneMap[d.prot].idx % 2 ? medGrey : darkGrey)
-      .on("mouseover", (d) => {
-        this.callbacks.onHover(d, event.pageX, event.pageY);
-      })
-      .on("mouseout", (d) => {
-        this.callbacks.onLeave(d);
-      })
-      .on("click", (d) => {
-        this.callbacks.onClick(d);
-        /* clear any previously selected bars */
-        select("#entropySelected")
-          .attr("id", (node) => node.prot + node.codon)
-          .style("fill", (node) => this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey);
-        select("#" + d.prot + d.codon)
-          .attr("id", "entropySelected")
-          .style("fill", () => this.geneMap[d.prot].fill);
-      })
-      .style("cursor", "pointer");
+    .attr("class", "bar")
+    .attr("id", (d) => d.prot + d.codon)
+    .attr("x", (d) => this.scales.xMain(this.aaToNtCoord(d.prot, d.codon)))
+    .attr("y", (d) => this.scales.y(d.y))
+    .attr("width", w)
+    .attr("height", (d) => this.offsets.heightMain - this.scales.y(d.y))
+    .style("fill", (d) => this.geneMap[d.prot].idx % 2 ? medGrey : darkGrey)
+    .on("mouseover", (d) => {
+      this.callbacks.onHover(d, event.pageX, event.pageY);
+    })
+    .on("mouseout", (d) => {
+      this.callbacks.onLeave(d);
+    })
+    .on("click", (d) => {
+      this.callbacks.onClick(d);
+      /* clear any previously selected bars */
+      select("#entropySelected")
+        .attr("id", (node) => node.prot + node.codon)
+        .style("fill", (node) => this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey);
+      select("#" + d.prot + d.codon)
+        .attr("id", "entropySelected")
+        .style("fill", () => this.geneMap[d.prot].fill);
+    })
+    .style("cursor", "pointer");
 };
 
-EntropyChart.prototype.drawNt = function (el, w) {
+EntropyChart.prototype.drawNt = function drawNt(el, w) {
   el.data(this.data.entropyNtWithoutZeros)
     .enter().append("rect")
-      .attr("class", "bar")
-      .attr("id", (d) => "nt" + fix(d.x))
-      .attr("x", (d) => this.scales.xMain(fix(d.x)))
-      .attr("y", (d) => this.scales.y(d.y))
-      .attr("width", w)
-      .attr("height", (d) => this.offsets.heightMain - this.scales.y(d.y))
-      .style("fill", (d) => {
-        if (d.prot) {
-          return (this.geneMap[d.prot].idx % 2) ? medGrey : darkGrey;
-        }
-        return lightGrey;
-      })
-      .on("mouseover", (d) => {
-        this.callbacks.onHover(d, event.pageX, event.pageY);
-      })
-      .on("mouseout", (d) => {
-        this.callbacks.onLeave(d);
-      })
-      .on("click", (d) => {
-        this.callbacks.onClick(d);
-        /* clear any previously selected bars */
-        select("#entropySelected")
-          .attr("id", (node) => "nt" + node.x)
-          .style("fill", (node) => {
-            if (node.prot) {
-              return (this.geneMap[node.prot].idx % 2) ? medGrey : darkGrey;
-            }
-            return lightGrey;
-          });
-        select("#nt" + fix(d.x))
-          .attr("id", "entropySelected")
-          .style("fill", () => {
-            if (d.prot) {
-              return this.geneMap[d.prot].fill;
-            }
-            return "red";
-          });
-      })
-      .style("cursor", "pointer");
+    .attr("class", "bar")
+    .attr("id", (d) => "nt" + fix(d.x))
+    .attr("x", (d) => this.scales.xMain(fix(d.x)))
+    .attr("y", (d) => this.scales.y(d.y))
+    .attr("width", w)
+    .attr("height", (d) => this.offsets.heightMain - this.scales.y(d.y))
+    .style("fill", (d) => {
+      if (d.prot) {
+        return (this.geneMap[d.prot].idx % 2) ? medGrey : darkGrey;
+      }
+      return lightGrey;
+    })
+    .on("mouseover", (d) => {
+      this.callbacks.onHover(d, event.pageX, event.pageY);
+    })
+    .on("mouseout", (d) => {
+      this.callbacks.onLeave(d);
+    })
+    .on("click", (d) => {
+      this.callbacks.onClick(d);
+      /* clear any previously selected bars */
+      select("#entropySelected")
+        .attr("id", (node) => "nt" + node.x)
+        .style("fill", (node) => {
+          if (node.prot) {
+            return (this.geneMap[node.prot].idx % 2) ? medGrey : darkGrey;
+          }
+          return lightGrey;
+        });
+      select("#nt" + fix(d.x))
+        .attr("id", "entropySelected")
+        .style("fill", () => {
+          if (d.prot) {
+            return this.geneMap[d.prot].fill;
+          }
+          return "red";
+        });
+    })
+    .style("cursor", "pointer");
 };
 
 /* draw the bars (for each base / aa) */
-EntropyChart.prototype.drawBars = function () {
+EntropyChart.prototype.drawBars = function drawBars() {
   this.mainGraph.selectAll("*").remove();
   let posInView = this.scales.xMain.domain()[1] - this.scales.xMain.domain()[0];
   if (this.aa) {
@@ -171,7 +171,7 @@ EntropyChart.prototype.drawBars = function () {
   }
 };
 
-EntropyChart.prototype.updateMutType = function (aa) {
+EntropyChart.prototype.updateMutType = function updateMutType(aa) {
   if (aa !== this.aa) {
     this.aa = aa;
     this.drawBars();
@@ -179,11 +179,11 @@ EntropyChart.prototype.updateMutType = function (aa) {
 };
 
 /* set scales - normally use this.scales.y, this.scales.xMain, this.scales.xNav */
-EntropyChart.prototype.setScales = function (chartGeom, xMax, yMax) {
+EntropyChart.prototype.setScales = function setScales(chartGeom, xMax, yMax) {
   this.scales = {};
   this.scales.xMax = xMax;
   this.scales.yMax = yMax;
-  this.scales.yMin = 0; //-0.11 * yMax;
+  this.scales.yMin = 0; // -0.11 * yMax;
   this.scales.xMin = 0;
   this.scales.xMainOriginal = scaleLinear()
     .domain([0, xMax])
@@ -199,7 +199,7 @@ EntropyChart.prototype.setScales = function (chartGeom, xMax, yMax) {
 };
 
 /* calculate the offsets */
-EntropyChart.prototype.calcOffsets = function (chartGeom) {
+EntropyChart.prototype.calcOffsets = function calcOffsets(chartGeom) {
   this.offsets = {
     x1: chartGeom.padLeft,
     x2: chartGeom.width - chartGeom.padRight - 20,
@@ -214,7 +214,7 @@ EntropyChart.prototype.calcOffsets = function (chartGeom) {
 };
 
 /* initial render - set up zooming etc */
-EntropyChart.prototype.render = function (chartGeom, aa) {
+EntropyChart.prototype.render = function render(chartGeom, aa) {
   this.aa = aa; /* bool */
   this.calcOffsets(chartGeom);
   this.setScales(
@@ -271,22 +271,22 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
 
   /* draw axes */
   this.svg.append("g")
-      .attr("class", "y axis")
-      .attr("id", "entropyYAxis")
-      /* no idea why the 15 is needed here */
-      .attr("transform", "translate(" + (this.offsets.x1 + 15) + "," + this.offsets.y1Main + ")")
-      .call(this.axes.y);
+    .attr("class", "y axis")
+    .attr("id", "entropyYAxis")
+    /* no idea why the 15 is needed here */
+    .attr("transform", "translate(" + (this.offsets.x1 + 15) + "," + this.offsets.y1Main + ")")
+    .call(this.axes.y);
   this.svg.append("g")
-      .attr("class", "xMain axis")
-      .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y2Main + ")")
-      .call(this.axes.xMain);
+    .attr("class", "xMain axis")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y2Main + ")")
+    .call(this.axes.xMain);
   this.svg.append("g")
-      .attr("class", "xNav axis")
-      .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y2Nav + ")")
-      .call(this.axes.xNav);
+    .attr("class", "xNav axis")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y2Nav + ")")
+    .call(this.axes.xNav);
 
   /* the brush is the shaded area in the nav window */
-  this.brushed = function () {
+  this.brushed = function brushed() {
     /* this block called when the brush is manipulated */
     const s = event.selection || this.scales.xNav.range();
     // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
@@ -316,33 +316,33 @@ EntropyChart.prototype.render = function (chartGeom, aa) {
   this.brushHandle = this.gBrush.selectAll(".handle--custom")
     .data([{type: "w"}, {type: "e"}])
     .enter().append("path")
-      .attr("class", "handle--custom")
-      .attr("fill", darkGrey)
-      .attr("cursor", "ew-resize")
-      .attr("d", "M0,0 0,0 -5,11 5,11 0,0 Z")
-      /* see the extent x,y params in brushX() (above) */
-      .attr("transform", (d) =>
-        d.type === "e" ?
+    .attr("class", "handle--custom")
+    .attr("fill", darkGrey)
+    .attr("cursor", "ew-resize")
+    .attr("d", "M0,0 0,0 -5,11 5,11 0,0 Z")
+    /* see the extent x,y params in brushX() (above) */
+    .attr("transform", (d) =>
+      d.type === "e" ?
         "translate(" + (this.offsets.x2 - 1) + "," + (this.offsets.heightNav + 29) + ")" :
         "translate(" + (this.offsets.x1 + 1) + "," + (this.offsets.heightNav + 29) + ")"
-      );
+    );
 
   /* https://bl.ocks.org/mbostock/4015254 */
   this.svg.append("g")
     .append("clipPath")
-      .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Main + ")")
-      .attr("id", "clip")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Main + ")")
+    .attr("id", "clip")
     .append("rect")
-      .attr("id", "cliprect")
-      .attr("width", this.offsets.width)
-      .attr("height", this.offsets.heightMain);
+    .attr("id", "cliprect")
+    .attr("width", this.offsets.width)
+    .attr("height", this.offsets.heightMain);
 
   /* draw the genes */
   this.drawGenes(this.data.annotations);
   /* draw the data */
   this.drawBars();
 
-  this.zoomed = function () {
+  this.zoomed = function zoomed() {
     const t = event.transform;
     /* rescale the x axis (not y) */
     this.xModified = t.rescaleX(this.scales.xMainOriginal);
