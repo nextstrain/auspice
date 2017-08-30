@@ -2,8 +2,8 @@ import React from "react";
 import { connect } from "react-redux";
 import _min from "lodash/min";
 import _max from "lodash/max";
-import { select } from "d3-selection"
-import leafletImage from "leaflet-image";;
+import { select } from "d3-selection";
+import leafletImage from "leaflet-image";
 import Card from "../framework/card";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import setupLeaflet from "../../util/leaflet";
