@@ -3,8 +3,6 @@ import { calcVisibility,
   calcTipCounts,
   identifyPathToTip,
   calcBranchThickness } from "../util/treeHelpers";
-import { determineColorByGenotypeType } from "../util/urlHelpers";
-import { changeColorBy } from "./colors";
 import * as types from "./types";
 
 const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
@@ -122,17 +120,6 @@ export const applyFilterQuery = (filterType, fields, values) => {
               fields,
               values});
     dispatch(updateVisibleTipsAndBranchThicknesses());
-  };
-};
-
-export const changeMutType = (data) => {
-  return (dispatch, getState) => {
-    const { controls } = getState();
-    const g = determineColorByGenotypeType(controls.colorBy); /* returns "nuc", "aa" of false */
-    if (g && g !== data) {
-      dispatch(changeColorBy(controls.defaultColorBy));
-    }
-    dispatch({type: types.TOGGLE_MUT_TYPE, data});
   };
 };
 

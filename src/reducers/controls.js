@@ -145,22 +145,20 @@ const Controls = (state = getDefaultState(), action) => {
       if (base.temporalConfidence.exists && base.layout !== "rect") {
         base.temporalConfidence.display = false;
       }
-      /* check that the chosen colorBy is valid - if it's not we can change the colorBy but the URL will become out of sync */
-      if (Object.keys(action.meta.color_options).indexOf(base["colorBy"]) === -1 && !base["colorBy"].startsWith("gt-")) {
-        /* ideally, somehow, a notification is dispatched, but redux, unlike elm,
-        doesn't allow dispatches from the reducer */
-        // throw new Error("colorBy (" + base["colorBy"] + ") not available.");
-        const available_colorBy = Object.keys(action.meta.color_options);
-        /* remove "gt" - this shouldn't be chosen as the fallback! */
-        if (available_colorBy.indexOf("gt") > -1) {
-          available_colorBy.splice(available_colorBy.indexOf("gt"), 1);
-        }
-        base["colorBy"] = available_colorBy[0];
+      /* check if chosen colorBy is valid */
+      const colorByValid = Object.keys(action.meta.color_options).indexOf(base["colorBy"]) !== -1;
+      const availableNonGenotypeColorBys = Object.keys(action.meta.color_options);
+      if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
+        availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
+      }
+      if (!colorByValid || base["colorBy"].startsWith("gt-")) {
+        base["defaultColorBy"] = availableNonGenotypeColorBys[0];
+      } else {
+        base["defaultColorBy"] = base["colorBy"];
       }
       /* available tree attrs - based upon the root node */
       base["attrs"] = Object.keys(action.tree.attr);
       base["colorByConfidence"] = checkColorByConfidence(base["attrs"], base["colorBy"]);
-      base["defaultColorBy"] = base["colorBy"];
       return base;
     }
     case types.TOGGLE_BRANCH_LABELS:

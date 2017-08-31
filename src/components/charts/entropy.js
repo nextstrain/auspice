@@ -8,7 +8,7 @@ import { changeColorBy } from "../../actions/colors";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./entropyInfoPanel";
-import { changeMutType } from "../../actions/treeProperties";
+import { TOGGLE_MUT_TYPE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { modifyURLquery } from "../../util/urlHelpers";
 import "../../css/entropy.css";
@@ -92,6 +92,7 @@ const parseEncodedGenotype = (colorBy) => {
     browserDimensions: state.browserDimensions.browserDimensions,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
+    defaultColorBy: state.controls.defaultColorBy,
     shouldReRender: false
   };
 })
@@ -129,6 +130,7 @@ class Entropy extends React.Component {
     browserDimensions: React.PropTypes.object.isRequired,
     loaded: React.PropTypes.bool.isRequired,
     colorBy: React.PropTypes.string,
+    defaultColorBy: React.PropTypes.string,
     mutType: React.PropTypes.string.isRequired
   }
 
@@ -150,7 +152,12 @@ class Entropy extends React.Component {
 
   changeMutTypeCallback(newMutType) {
     if (newMutType !== this.props.mutType) {
-      this.props.dispatch(changeMutType(newMutType));
+      /* 1. switch the redux colorBy back to the default */
+      this.props.dispatch(changeColorBy(this.props.defaultColorBy));
+      /* 2. update the mut type in redux */
+      this.props.dispatch({type: TOGGLE_MUT_TYPE, data: newMutType});
+      /* 3. modify the URL */
+      modifyURLquery(this.context.router, {c: this.props.defaultColorBy}, true);
     }
   }
 
@@ -205,7 +212,7 @@ class Entropy extends React.Component {
           this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
         }
       } if (this.props.mutType !== nextProps.mutType) {
-        this.state.chart.update({aa: nextProps.mutType === "aa"});
+        this.state.chart.update({aa: nextProps.mutType === "aa", clearSelected: true});
       }
       if (this.props.colorBy !== nextProps.colorBy && (this.props.colorBy.startsWith("gt") || nextProps.colorBy.startsWith("gt"))) {
         if (!nextProps.colorBy.startsWith("gt")) {
