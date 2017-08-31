@@ -9,6 +9,8 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./entropyInfoPanel";
 import { changeMutType } from "../../actions/treeProperties";
+import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import { modifyURLquery } from "../../util/urlHelpers";
 import "../../css/entropy.css";
 
 const calcEntropy = function calcEntropy(entropy) {
@@ -140,7 +142,9 @@ class Entropy extends React.Component {
   }
   onClick(d) {
     const colorBy = constructEncodedGenotype(this.props.mutType === "aa", d);
+    analyticsControlsEvent("color-by-genotype");
     this.props.dispatch(changeColorBy(colorBy));
+    modifyURLquery(this.context.router, {c: colorBy}, true);
     this.setState({hovered: false});
   }
 
