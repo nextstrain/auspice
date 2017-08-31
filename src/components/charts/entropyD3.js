@@ -141,8 +141,17 @@ EntropyChart.prototype.highlightSelectedBar = function highlightSelectedBar() {
   }
 };
 
-/* draw actually draws everything */
-EntropyChart.prototype.draw = function draw(chart, barWidth) {
+/* draw the bars (for each base / aa) */
+EntropyChart.prototype.drawBars = function drawBars() {
+  this.mainGraph.selectAll("*").remove();
+  let posInView = this.scales.xMain.domain()[1] - this.scales.xMain.domain()[0];
+  if (this.aa) {
+    posInView /= 3;
+  }
+  const barWidth = posInView > 10000 ? 1 : posInView > 1000 ? 2 : posInView > 100 ? 3 : 5;
+  const chart = this.mainGraph.append("g")
+    .attr("clip-path", "url(#clip)")
+    .selectAll(".bar");
   const data = this.aa ? this.data.aminoAcidEntropyWithoutZeros : this.data.entropyNtWithoutZeros;
   const idfn = this.aa ? (d) => d.prot + d.codon : (d) => "nt" + fix(d.x);
   const xscale = this.aa ?
@@ -175,20 +184,7 @@ EntropyChart.prototype.draw = function draw(chart, barWidth) {
       this.callbacks.onClick(d);
     })
     .style("cursor", "pointer");
-};
-
-/* draw the bars (for each base / aa) */
-EntropyChart.prototype.drawBars = function drawBars() {
-  this.mainGraph.selectAll("*").remove();
-  let posInView = this.scales.xMain.domain()[1] - this.scales.xMain.domain()[0];
-  if (this.aa) {
-    posInView /= 3;
-  }
-  const barWidth = posInView > 10000 ? 1 : posInView > 1000 ? 2 : posInView > 100 ? 3 : 5;
-  const chart = this.mainGraph.append("g")
-    .attr("clip-path", "url(#clip)")
-    .selectAll(".bar");
-  this.draw(chart, barWidth);
+  this.highlightSelectedBar();
 };
 
 EntropyChart.prototype.update = function update({
