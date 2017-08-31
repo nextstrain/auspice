@@ -242,9 +242,9 @@ EntropyChart.prototype.calcOffsets = function calcOffsets(chartGeom) {
 };
 
 /* initial render - set up zooming etc */
-EntropyChart.prototype.render = function render(chartGeom, aa) {
+EntropyChart.prototype.render = function render(chartGeom, aa, selected = undefined) {
   this.aa = aa; /* bool */
-  this.selectedNode = undefined; /* start with no bar selected on initial render */
+  this.selectedNode = selected;
   this.calcOffsets(chartGeom);
   this.setScales(
     chartGeom,

@@ -199,7 +199,11 @@ class Entropy extends React.Component {
     if (this.state.chart) {
       if ((this.props.browserDimensions !== nextProps.browserDimensions) ||
          (this.props.sidebar !== nextProps.sidebar)) {
-        this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
+        if (nextProps.colorBy.startsWith("gt")) {
+          this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa", parseEncodedGenotype(nextProps.colorBy));
+        } else {
+          this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
+        }
       } if (this.props.mutType !== nextProps.mutType) {
         this.state.chart.update({aa: nextProps.mutType === "aa"});
       }
