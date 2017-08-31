@@ -65,6 +65,24 @@ const getStyles = function getStyles(width) {
   };
 };
 
+/* these two functions convert between the genotype naming system used in the URLs,
+e.g. 'gt-nuc_1234', 'gt-NS1-123' and the data structure used in entropy.json
+note that the numbering systems are not the same! */
+const constructEncodedGenotype = (aa, d) => {
+  return aa ? 'gt-' + d.prot + "_" + (d.codon + 1) : 'gt-nuc_' + (d.x + 1);
+};
+const parseEncodedGenotype = (colorBy) => {
+  const [name, num] = colorBy.slice(3).split('_');
+  const aa = name !== 'nuc';
+  const data = {aa, prot: aa ? name : false};
+  if (aa) {
+    data.codon = num - 1;
+  } else {
+    data.x = num - 1;
+  }
+  return data;
+};
+
 @connect((state) => {
   return {
     mutType: state.controls.mutType,
@@ -121,9 +139,7 @@ class Entropy extends React.Component {
     this.setState({hovered: false});
   }
   onClick(d) {
-    const colorBy = this.props.mutType === "aa" ?
-      "gt-" + d.prot + "_" + (d.codon + 1) :
-      "gt-nuc_" + (d.x + 1);
+    const colorBy = constructEncodedGenotype(this.props.mutType === "aa", d);
     this.props.dispatch(changeColorBy(colorBy));
     this.setState({hovered: false});
   }
@@ -180,15 +196,14 @@ class Entropy extends React.Component {
       if ((this.props.browserDimensions !== nextProps.browserDimensions) ||
          (this.props.sidebar !== nextProps.sidebar)) {
         this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
-      }
-      if (this.props.mutType !== nextProps.mutType) {
+      } if (this.props.mutType !== nextProps.mutType) {
         this.state.chart.update({aa: nextProps.mutType === "aa"});
       }
-      if (this.props.colorBy !== nextProps.colorBy) {
+      if (this.props.colorBy !== nextProps.colorBy && (this.props.colorBy.startsWith("gt") || nextProps.colorBy.startsWith("gt"))) {
         if (!nextProps.colorBy.startsWith("gt")) {
           this.state.chart.update({clearSelected: true});
         } else {
-          console.log("GENOTYPE SELECTION MANUALLY CHANGED!", nextProps.colorBy)
+          this.state.chart.update({selected: parseEncodedGenotype(nextProps.colorBy)});
         }
       }
     }
