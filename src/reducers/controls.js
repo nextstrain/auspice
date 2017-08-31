@@ -145,13 +145,13 @@ const Controls = (state = getDefaultState(), action) => {
       if (base.temporalConfidence.exists && base.layout !== "rect") {
         base.temporalConfidence.display = false;
       }
-      /* basic sanity checking */
-      if (Object.keys(action.meta.color_options).indexOf(base["colorBy"]) === -1) {
+      /* check that the chosen colorBy is valid - if it's not we can change the colorBy but the URL will become out of sync */
+      if (Object.keys(action.meta.color_options).indexOf(base["colorBy"]) === -1 && !base["colorBy"].startsWith("gt-")) {
         /* ideally, somehow, a notification is dispatched, but redux, unlike elm,
         doesn't allow dispatches from the reducer */
         // throw new Error("colorBy (" + base["colorBy"] + ") not available.");
         const available_colorBy = Object.keys(action.meta.color_options);
-        /* remove "gt" */
+        /* remove "gt" - this shouldn't be chosen as the fallback! */
         if (available_colorBy.indexOf("gt") > -1) {
           available_colorBy.splice(available_colorBy.indexOf("gt"), 1);
         }
