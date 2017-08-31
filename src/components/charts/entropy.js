@@ -71,6 +71,7 @@ const getStyles = function getStyles(width) {
     entropy: state.entropy.entropy,
     browserDimensions: state.browserDimensions.browserDimensions,
     loaded: state.entropy.loaded,
+    colorBy: state.controls.colorBy,
     shouldReRender: false
   };
 })
@@ -107,11 +108,8 @@ class Entropy extends React.Component {
     sidebar: React.PropTypes.bool.isRequired,
     browserDimensions: React.PropTypes.object.isRequired,
     loaded: React.PropTypes.bool.isRequired,
+    colorBy: React.PropTypes.string,
     mutType: React.PropTypes.string.isRequired
-  }
-
-  setColorByGenotype(colorBy) {
-    this.props.dispatch(changeColorBy(colorBy));
   }
 
   /* CALLBACKS */
@@ -123,11 +121,10 @@ class Entropy extends React.Component {
     this.setState({hovered: false});
   }
   onClick(d) {
-    if (this.props.mutType === "aa") {
-      this.setColorByGenotype("gt-" + d.prot + "_" + (d.codon + 1));
-    } else {
-      this.setColorByGenotype("gt-nuc_" + (d.x + 1));
-    }
+    const colorBy = this.props.mutType === "aa" ?
+      "gt-" + d.prot + "_" + (d.codon + 1) :
+      "gt-nuc_" + (d.x + 1);
+    this.props.dispatch(changeColorBy(colorBy));
     this.setState({hovered: false});
   }
 
@@ -176,15 +173,23 @@ class Entropy extends React.Component {
         chart,
         chartGeom: this.getChartGeom(nextProps)
       });
-      chart.updateMutType(nextProps.mutType === "aa");
-      return; // nothing more CWRP should do
+      chart.update({aa: nextProps.mutType === "aa"}); // why is this necessary straight after an initial render?!
+      return;
     }
     if (this.state.chart) {
       if ((this.props.browserDimensions !== nextProps.browserDimensions) ||
          (this.props.sidebar !== nextProps.sidebar)) {
         this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
-      } else if (this.props.mutType !== nextProps.mutType) {
-        this.state.chart.updateMutType(nextProps.mutType === "aa");
+      }
+      if (this.props.mutType !== nextProps.mutType) {
+        this.state.chart.update({aa: nextProps.mutType === "aa"});
+      }
+      if (this.props.colorBy !== nextProps.colorBy) {
+        if (!nextProps.colorBy.startsWith("gt")) {
+          this.state.chart.update({clearSelected: true});
+        } else {
+          console.log("GENOTYPE SELECTION MANUALLY CHANGED!", nextProps.colorBy)
+        }
       }
     }
   }

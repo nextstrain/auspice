@@ -80,50 +80,64 @@ EntropyChart.prototype.drawGenes = function drawGenes(annotations) {
     .text((d) => d.prot);
 };
 
-EntropyChart.prototype.drawAA = function drawAA(el, w) {
-  el.data(this.data.aminoAcidEntropyWithoutZeros)
-    .enter().append("rect")
-    .attr("class", "bar")
-    .attr("id", (d) => d.prot + d.codon)
-    .attr("x", (d) => this.scales.xMain(this.aaToNtCoord(d.prot, d.codon)))
-    .attr("y", (d) => this.scales.y(d.y))
-    .attr("width", w)
-    .attr("height", (d) => this.offsets.heightMain - this.scales.y(d.y))
-    .style("fill", (d) => this.geneMap[d.prot].idx % 2 ? medGrey : darkGrey)
-    .on("mouseover", (d) => {
-      this.callbacks.onHover(d, event.pageX, event.pageY);
-    })
-    .on("mouseout", (d) => {
-      this.callbacks.onLeave(d);
-    })
-    .on("click", (d) => {
-      this.callbacks.onClick(d);
-      /* clear any previously selected bars */
-      select("#entropySelected")
-        .attr("id", (node) => node.prot + node.codon)
-        .style("fill", (node) => this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey);
-      select("#" + d.prot + d.codon)
-        .attr("id", "entropySelected")
-        .style("fill", () => this.geneMap[d.prot].fill);
-    })
-    .style("cursor", "pointer");
+EntropyChart.prototype.clearSelectedBar = function clearSelectedBar() {
+  if (this.aa) {
+    select("#entropySelected")
+      .attr("id", (node) => node.prot + node.codon)
+      .style("fill", (node) => this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey);
+  } else {
+    select("#entropySelected")
+      .attr("id", (node) => "nt" + node.x)
+      .style("fill", (node) => {
+        if (node.prot) {
+          return (this.geneMap[node.prot].idx % 2) ? medGrey : darkGrey;
+        }
+        return lightGrey;
+      });
+  }
 };
 
-EntropyChart.prototype.drawNt = function drawNt(el, w) {
-  el.data(this.data.entropyNtWithoutZeros)
-    .enter().append("rect")
-    .attr("class", "bar")
-    .attr("id", (d) => "nt" + fix(d.x))
-    .attr("x", (d) => this.scales.xMain(fix(d.x)))
-    .attr("y", (d) => this.scales.y(d.y))
-    .attr("width", w)
-    .attr("height", (d) => this.offsets.heightMain - this.scales.y(d.y))
-    .style("fill", (d) => {
+EntropyChart.prototype.highlightSelectedBar = function highlightSelectedBar(d) {
+  if (this.aa) {
+    select("#" + d.prot + d.codon)
+      .attr("id", "entropySelected")
+      .style("fill", () => this.geneMap[d.prot].fill);
+  } else {
+    select("#nt" + fix(d.x))
+      .attr("id", "entropySelected")
+      .style("fill", () => {
+        if (d.prot) {
+          return this.geneMap[d.prot].fill;
+        }
+        return "red";
+      });
+  }
+};
+
+/* draw actually draws everything */
+EntropyChart.prototype.draw = function draw(chart, barWidth) {
+  const data = this.aa ? this.data.aminoAcidEntropyWithoutZeros : this.data.entropyNtWithoutZeros;
+  const idfn = this.aa ? (d) => d.prot + d.codon : (d) => "nt" + fix(d.x);
+  const xscale = this.aa ?
+    (d) => this.scales.xMain(this.aaToNtCoord(d.prot, d.codon)) :
+    (d) => this.scales.xMain(fix(d.x));
+  const fillfn = this.aa ?
+    (d) => this.geneMap[d.prot].idx % 2 ? medGrey : darkGrey :
+    (d) => {
       if (d.prot) {
         return (this.geneMap[d.prot].idx % 2) ? medGrey : darkGrey;
       }
       return lightGrey;
-    })
+    };
+  chart.data(data)
+    .enter().append("rect")
+    .attr("class", "bar")
+    .attr("id", idfn)
+    .attr("x", xscale)
+    .attr("y", (d) => this.scales.y(d.y))
+    .attr("width", barWidth)
+    .attr("height", (d) => this.offsets.heightMain - this.scales.y(d.y))
+    .style("fill", fillfn)
     .on("mouseover", (d) => {
       this.callbacks.onHover(d, event.pageX, event.pageY);
     })
@@ -132,23 +146,7 @@ EntropyChart.prototype.drawNt = function drawNt(el, w) {
     })
     .on("click", (d) => {
       this.callbacks.onClick(d);
-      /* clear any previously selected bars */
-      select("#entropySelected")
-        .attr("id", (node) => "nt" + node.x)
-        .style("fill", (node) => {
-          if (node.prot) {
-            return (this.geneMap[node.prot].idx % 2) ? medGrey : darkGrey;
-          }
-          return lightGrey;
-        });
-      select("#nt" + fix(d.x))
-        .attr("id", "entropySelected")
-        .style("fill", () => {
-          if (d.prot) {
-            return this.geneMap[d.prot].fill;
-          }
-          return "red";
-        });
+      this.update({selected: d});
     })
     .style("cursor", "pointer");
 };
@@ -164,17 +162,25 @@ EntropyChart.prototype.drawBars = function drawBars() {
   const chart = this.mainGraph.append("g")
     .attr("clip-path", "url(#clip)")
     .selectAll(".bar");
-  if (this.aa) {
-    this.drawAA(chart, barWidth);
-  } else {
-    this.drawNt(chart, barWidth);
-  }
+  this.draw(chart, barWidth);
 };
 
-EntropyChart.prototype.updateMutType = function updateMutType(aa) {
-  if (aa !== this.aa) {
+EntropyChart.prototype.update = function update({
+  aa = undefined,
+  selected = undefined,
+  clearSelected = false
+}) {
+  if (aa !== undefined && aa !== this.aa) {
     this.aa = aa;
     this.drawBars();
+  }
+  if (selected !== undefined) {
+    this.selected = selected;
+    this.clearSelectedBar();
+    this.highlightSelectedBar(selected);
+  } else if (clearSelected) {
+    this.selected = undefined;
+    this.clearSelectedBar();
   }
 };
 
@@ -216,6 +222,7 @@ EntropyChart.prototype.calcOffsets = function calcOffsets(chartGeom) {
 /* initial render - set up zooming etc */
 EntropyChart.prototype.render = function render(chartGeom, aa) {
   this.aa = aa; /* bool */
+  this.selected = undefined; /* start with no bar selected on initial render */
   this.calcOffsets(chartGeom);
   this.setScales(
     chartGeom,
