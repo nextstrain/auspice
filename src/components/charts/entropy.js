@@ -13,7 +13,7 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { modifyURLquery } from "../../util/urlHelpers";
 import "../../css/entropy.css";
 
-const calcEntropy = function calcEntropy(entropy) {
+const calcEntropy = (entropy) => {
   const entropyNt = entropy["nuc"]["val"].map((s, i) => {
     return {x: entropy["nuc"]["pos"][i], y: s};
   });
@@ -52,7 +52,7 @@ const calcEntropy = function calcEntropy(entropy) {
     entropyNtWithoutZeros};
 };
 
-const getStyles = function getStyles(width) {
+const getStyles = (width) => {
   return {
     switchContainer: {
       position: "absolute",

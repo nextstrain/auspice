@@ -27,9 +27,8 @@ const fix = (x) => {
 /* the annotation order in JSON is not necessarily sorted */
 EntropyChart.prototype.processAnnotations = function processAnnotations() {
   const m = {};
-  this.data.annotations.map((d) => {
+  this.data.annotations.forEach((d) => {
     m[d.prot] = d;
-    return undefined;
   });
   const sorted = Object.keys(m).sort((a, b) =>
     m[a].start < m[b].start ? -1 : m[a].start > m[b].start ? 1 : 0
