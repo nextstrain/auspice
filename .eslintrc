@@ -23,6 +23,7 @@ rules:
   one-var-declaration-per-line: off
   no-console: [1, { "allow": ["warn", "error"] }]
   no-param-reassign: [1, { "props": false }]
+  no-unused-expressions: ['error', {"allowTernary": true }]
   no-restricted-syntax: ['error', 'ForInStatement', 'LabeledStatement', 'WithStatement'] # allow ForOfStatement
   react/jsx-tag-spacing: ["error", { "closingSlash": "never", "beforeSelfClosing": "allow", "afterOpening": "never" }]
   react/forbid-prop-types: off

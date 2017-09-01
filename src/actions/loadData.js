@@ -79,7 +79,7 @@ const populateEntropyStore = (paths) => {
       })
       .catch((err) => {
         /* entropy reducer has already been invalidated */
-        console.log("entropyJSONpromise error", err);
+        console.error("entropyJSONpromise error", err);
       });
   };
 };
@@ -120,7 +120,7 @@ const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
         any error from the reducers AND, confusingly,
         errors from the lifecycle methods of components
         that run while in the middle of this thunk */
-        console.log("loadMetaAndTreeJSONs error:", err);
+        console.error("loadMetaAndTreeJSONs error:", err);
         // dispatch error notification
         // but, it would seem, you can't have the reducer return AND
         // also get a notification dispatched :(
@@ -128,7 +128,7 @@ const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
   };
 };
 
-export const loadJSONs = (router) => {
+export const loadJSONs = (router) => { // eslint-disable-line import/prefer-default-export
   return (dispatch) => {
     dispatch({type: types.DATA_INVALID});
     const data_path = turnURLtoDataPath(router);
