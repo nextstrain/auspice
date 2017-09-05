@@ -27,7 +27,10 @@ import filesDropped from "../actions/filesDropped";
     here as that is a prop of this component, whether we use it or not
   see https://reacttraining.com/react-router
 */
-@connect((state) => ({datasetPathName: state.controls.datasetPathName}))
+@connect((state) => ({
+  datasetPathName: state.controls.datasetPathName,
+  readyToLoad: state.datasets.ready,
+}))
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -54,7 +57,9 @@ class App extends React.Component {
     router: PropTypes.object.isRequired
   }
   componentWillMount() {
-    this.props.dispatch(loadJSONs(this.context.router));
+    if (this.props.readyToLoad) { /* charon API call loaded before the app came in - i.e. splash came first */
+      this.props.dispatch(loadJSONs(this.context.router));
+    }
   }
   componentDidMount() {
     document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
@@ -63,9 +68,16 @@ class App extends React.Component {
       return this.props.dispatch(filesDropped(e.dataTransfer.files));
     }, false);
   }
-  componentDidUpdate() {
-    /* browser back / forward */
-    if (this.props.datasetPathName !== undefined && this.props.datasetPathName !== this.context.router.history.location.pathname) {
+  componentDidUpdate(prevProps) {
+    /* browser back / forward / prop change */
+    if (
+      (prevProps.readyToLoad === false && this.props.readyToLoad === true) ||
+      (
+        this.props.readyToLoad &&
+        this.props.datasetPathName !== undefined &&
+        this.props.datasetPathName !== this.context.router.history.location.pathname
+      )
+    ) {
       this.props.dispatch(loadJSONs(this.context.router));
     }
   }

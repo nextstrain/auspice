@@ -21,8 +21,8 @@ module.exports = {
     // perf test on nodes - remove this line to get warnings back.
     new webpack.DefinePlugin({
       "process.env": {
-        "NODE_ENV": JSON.stringify("dev"),
-        "DATA_LOCAL": JSON.stringify(global.dataLocal)
+        NODE_ENV: JSON.stringify("dev"),
+        CHARON_LOCAL_API: JSON.stringify(global.CHARON_LOCAL_API)
       }
     }),
     // new webpack.DefinePlugin({

@@ -10,10 +10,9 @@ import Flex from "../components/framework/flex";
 import { analyticsNewPage, triggerOutboundEvent } from "../util/googleAnalytics";
 import { generateLogos } from "./helpers/logos";
 import { tweets } from "./helpers/tweets";
-// import { infoNotification,
-//           successNotification,
-//           errorNotification,
-//           warningNotification } from "../actions/notifications";
+import { requestImage } from "../util/charonAPI";
+
+const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
 const styles = {
   cardMainText: {
@@ -82,7 +81,7 @@ const generateCard = (title, imgRequired, to, outboundLink) => {
   function imgAndText() {
     return (
       <g>
-        <img style={styles.cardImg} src={imgRequired}/>
+        <img style={styles.cardImg} src={imgRequired} alt={""}/>
         <span style={styles.cardMainText}>
           {title[0]}
           {title.length === 2 ? <div style={styles.cardSubText}>{title[1]}</div> : null}
@@ -100,20 +99,41 @@ const generateCard = (title, imgRequired, to, outboundLink) => {
         </div>
       </div>
     );
-  } else { // use <Link> and let React Router sort it out
+  }
+  // default: use <Link> and let React Router sort it out
+  return (
+    <div style={styles.cardOuterDiv}>
+      <div style={styles.cardInnerDiv}>
+        <Link to={to}>
+          {imgAndText()}
+        </Link>
+      </div>
+    </div>
+  );
+};
+
+const generateTiles = (props) => {
+  if (props.splash) {
     return (
-      <div style={styles.cardOuterDiv}>
-        <div style={styles.cardInnerDiv}>
-          <Link to={to}>
-            {imgAndText()}
-          </Link>
-        </div>
+      <div className="row">
+        {props.splash.map((d) => {
+          return (
+            <div className="col-sm-4" key={d.title}>
+              {generateCard([d.title, ""], requestImage(d.img), d.url, false)}
+            </div>
+          );
+        })}
       </div>
     );
   }
+  return (
+    <img className={"spinner"} src={nextstrainLogo} alt="loading"/>
+  );
 };
 
-@connect()
+@connect((state) => ({
+  splash: state.datasets.splash
+}))
 class Splash extends React.Component {
   componentWillMount() {
     analyticsNewPage();
@@ -123,7 +143,7 @@ class Splash extends React.Component {
     document.body.appendChild(script);
   }
   render() {
-    return(
+    return (
       <div>
         <TitleBar dataNameHidden/>
 
@@ -135,7 +155,7 @@ class Splash extends React.Component {
             <h1 style={{textAlign: "center"}}> Real-time tracking of virus evolution </h1>
           </div>
 
-    			<p style={styles.introText}>
+          <p style={styles.introText}>
             Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data. We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread. Our goal is to aid epidemiological understanding and improve outbreak response.
           </p>
 
@@ -147,49 +167,15 @@ class Splash extends React.Component {
             </Link>
           </Flex>
 
-          {/* TESTING FOR NOTIFICATIONS
-          <div className="bigspacer"></div>
-          <div className="col-md-3"/>
-          <div className="col-md-6">
-            <button onClick={() => this.props.dispatch(errorNotification({message: "Error notification"}))}>
-              ERROR
-            </button>
-            <button onClick={() => this.props.dispatch(infoNotification({message: "Info notification"}))}>
-              INFO
-            </button>
-            <button onClick={() => this.props.dispatch(successNotification({message: "Success notification"}))}>
-              SUCCESS
-            </button>
-            <button onClick={() => this.props.dispatch(warningNotification({message: "Warning notification", details: "some more info"}))}>
-              WARNING
-            </button>
-          </div> */}
-
           {/* THE CLICKABLE CARDS - see about page for sources & attribution */}
 
-          <div className="bigspacer"></div>
+          <div className="bigspacer"/>
 
           <div className="row">
             <h1 style={{textAlign: "center"}}>Explore viruses</h1>
             <div className="col-md-1"/>
             <div className="col-md-10">
-              <div className="row">
-        				<div className="col-sm-4">
-                  {generateCard(["Ebola"], require("../images/ebola.png"), "/ebola", false)}
-                </div>
-                <div className="col-sm-4">
-                  {generateCard(["Zika"], require("../images/zika.png"), "/zika", false)}
-                </div>
-                <div className="col-sm-4">
-                  {generateCard(["Seasonal Influenza"], require("../images/influenza.png"), "/flu/h3n2/ha", false)}
-                </div>
-                <div className="col-sm-4">
-                  {generateCard(["Avian Influenza", "A/H7N9"], require("../images/H7N9.png"), "/avian/h7n9", false)}
-                </div>
-                <div className="col-sm-4">
-                  {generateCard(["Dengue"], require("../images/dengue.png"), "/dengue", false)}
-                </div>
-              </div>
+              {generateTiles(this.props)}
             </div>
             <div className="col-md-1"/>
           </div>
@@ -204,11 +190,11 @@ class Splash extends React.Component {
 
           {/* FOOTER / LOGOS */}
 
-          <div className="bigspacer"></div>
+          <div className="bigspacer"/>
           <div className="row">
             <div className="col-md-1"/>
             <div className="col-md-10">
-              <div className="line"></div>
+              <div className="line"/>
               <Flex wrap="wrap" style={{marginTop: 20, justifyContent: "space-around"}}>
                 {generateLogos}
               </Flex>

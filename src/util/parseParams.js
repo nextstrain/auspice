@@ -1,5 +1,3 @@
-import { datasets } from "./datasets";
-
 /*
  * utility function that takes a string (splat as in flu/h3n2/3y)
  * parses it, and compares it against the (hardcoded) available datasets
@@ -12,7 +10,7 @@ import { datasets } from "./datasets";
  *    second value: the selected option, e.g. "ebola" or "H7N9", or "NA"
  */
 
-const parseParams = (path) => {
+const parseParams = (path, datasets) => {
   // console.log("parseParams. path in:", path)
   let params; // split path at '/', if path === "", set params to []
   if (path.length) {

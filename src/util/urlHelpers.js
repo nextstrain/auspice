@@ -53,9 +53,9 @@ const selectivelyUpdateSearch = (defaultSearch, userSearch) => {
 this fn will work out the correct datapath, set it if necessary,
 and return the data path used to load the data
 */
-export const turnURLtoDataPath = (router) => {
+export const turnURLtoDataPath = (router, datasets) => {
   // console.log("turnURLtoDataPath")
-  const parsedParams = parseParams(router.history.location.pathname);
+  const parsedParams = parseParams(router.history.location.pathname, datasets);
   // console.log("parsed params turned", router.history.location.pathname, "to", parsedParams)
   // set a new URL if the dataPath is incomplete
   if (parsedParams.incomplete) {

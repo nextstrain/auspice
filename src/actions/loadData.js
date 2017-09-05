@@ -1,9 +1,9 @@
 import queryString from "query-string";
 import * as types from "./types";
 import { updateColors } from "./colors";
-import { dataURLStem } from "../util/datasets";
 import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { turnURLtoDataPath } from "../util/urlHelpers";
+import { charonAPIAddress } from "../util/globals";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {
@@ -129,14 +129,21 @@ const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
 };
 
 export const loadJSONs = (router) => { // eslint-disable-line import/prefer-default-export
-  return (dispatch) => {
+  return (dispatch, getState) => {
+
+    const { datasets } = getState();
+    if (!datasets.ready) {
+      console.error("Attempted to fetch JSONs before Charon returned initial data.");
+      return;
+    }
+
     dispatch({type: types.DATA_INVALID});
-    const data_path = turnURLtoDataPath(router);
+    const data_path = turnURLtoDataPath(router, {pathogen: datasets.pathogen});
     const JSONpaths = {
-      meta: dataURLStem + data_path + "_meta.json",
-      tree: dataURLStem + data_path + "_tree.json",
-      seqs: dataURLStem + data_path + "_sequences.json",
-      entropy: dataURLStem + data_path + "_entropy.json"
+      meta: charonAPIAddress + "want=json&path=" + data_path + "_meta.json",
+      tree: charonAPIAddress + "want=json&path=" + data_path + "_tree.json",
+      seqs: charonAPIAddress + "want=json&path=" + data_path + "_sequences.json",
+      entropy: charonAPIAddress + "want=json&path=" + data_path + "_entropy.json"
     };
     dispatch(loadMetaAndTreeAndSequencesJSONs(JSONpaths, router));
     /* subsequent JSON loading is *not* essential to the main functionality */
