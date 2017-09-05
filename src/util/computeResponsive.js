@@ -1,4 +1,4 @@
-import { controlsWidth } from "./globals";
+import { controlsWidth, controlsPadding } from "./globals";
 
 /*
   Why this function is here
@@ -39,7 +39,6 @@ const computeResponsive = ({
 
   const horizontalPadding = horizontal === 1 ? 34 : 56; // derived from empirical testing, depends on Card margins
   const verticalPadding = 165;
-  const controlsPadding = 40; // derived from empirical testing, matches Sidebar padding
 
   if (browserDimensions) {
     const computedControlWidth = sidebar ? controlsWidth + controlsPadding : 0;

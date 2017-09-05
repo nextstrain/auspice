@@ -1,4 +1,5 @@
 import React from "react";
+import { controlsWidth, controlsPadding } from "../../util/globals";
 
 const ToggleSidebarTab = ({open, handler}) => {
 
@@ -13,11 +14,12 @@ const ToggleSidebarTab = ({open, handler}) => {
         position: "fixed",
         top: 0,
         zIndex: 1001,
-        backgroundColor: "#4b4e4e",
+        backgroundColor: "#AAA",
         cursor: "pointer",
-        left: open ? "auto" : 0,
-        right: open ? 0 : "auto"
-      }}>
+        left: open ? controlsWidth + controlsPadding - 15 : 0,
+        transition: "left .3s ease-out"
+      }}
+    >
       <svg
         style={{
           position: "relative",

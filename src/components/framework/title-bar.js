@@ -33,9 +33,14 @@ class TitleBar extends React.Component {
         height: titleBarHeight,
         justifyContent: "space-between",
         alignItems: "center",
-        background: "#fff",
-        marginBottom: 5,
-        overflow: "hidden"
+        overflow: "hidden",
+        left: this.props.absent ? -320 : 0,
+        zIndex: 1001,
+        transition: "left .3s ease-out",
+        background: this.props.minified ? "#AAA" : "#FFF",
+        width: this.props.minified ? 320 : "auto",
+        position: this.props.minified ? "fixed" : "inherit",
+        boxShadow: this.props.minified ? "0px 0px 8px 4px rgba(215,215,215,0.55)" : "0px"
       },
       logo: {
         paddingLeft: "8px",
@@ -56,7 +61,7 @@ class TitleBar extends React.Component {
       dataName: {
         alignSelf: "center",
         padding: "0px",
-        color: darkGrey,
+        color: this.props.minified ? "#fff" : darkGrey,
         textDecoration: "none",
         fontSize: 20,
         fontWeight: 400
@@ -66,12 +71,12 @@ class TitleBar extends React.Component {
         paddingRight: this.props.minified ? "6px" : "12px",
         paddingTop: "20px",
         paddingBottom: "20px",
-        color: darkGrey,
+        color: this.props.minified ? "#fff" : darkGrey,
         textDecoration: "none",
         cursor: "pointer",
         fontSize: this.props.minified ? 12 : 16,
         ':hover': {
-          color: "rgb(80, 151, 186)",
+          color: "rgb(80, 151, 186)"
         }
       },
       inactive: {
@@ -131,17 +136,15 @@ class TitleBar extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <div >
-        <Flex style={styles.main}>
-          {this.getLogo(styles)}
-          {this.getTitle(styles)}
-          {this.getDataName(styles)}
-          <div style={{flex: 5}}/>
-            {this.getLink("About", "/about", this.props.aboutSelected, styles)}
-            {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
-          <div style={{width: this.props.minified ? 15 : 0 }}/>
-        </Flex>
-      </div>
+      <Flex style={styles.main}>
+        {this.getLogo(styles)}
+        {this.getTitle(styles)}
+        {this.getDataName(styles)}
+        <div style={{flex: 5}}/>
+          {this.getLink("About", "/about", this.props.aboutSelected, styles)}
+          {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
+        <div style={{width: this.props.minified ? 15 : 0 }}/>
+      </Flex>
     );
   }
 }

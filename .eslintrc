@@ -31,6 +31,7 @@ rules:
   react/jsx-first-prop-new-line: off
   react/prop-types: off # possibly reinstate
   react/sort-comp: off # possibly reinstate
+  jsx-a11y/no-static-element-interactions: off
 parserOptions:
   ecmaVersion: 6
   sourceType: module
