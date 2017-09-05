@@ -27,7 +27,7 @@ import { controlsWidth } from "./globals";
 
 const computeResponsive = ({
   horizontal, /* multiplicative 1 (mobile, tablet, laptop) or .5 (2 column big monitor) */
-  vertical, /* multiplicative .5 (if splitting with another pane) or 1 (if full height of browser window)*/
+  vertical, /* multiplicative .5 (if splitting with another pane) or 1 (if full height of browser window) */
   browserDimensions, /* window.innerWidth & window.innerHeight as an object */
   sidebar, /* if open, subtract sidebar width from browser width? */
   minHeight, /* minimum height of element */
@@ -37,19 +37,18 @@ const computeResponsive = ({
   let width = null;
   let height = null;
 
-  const horizontalPadding = horizontal === 1 ? 45 : 75; /* could be more solid */
-  const headerFooterPadding = 300;
+  const horizontalPadding = horizontal === 1 ? 34 : 56; // derived from empirical testing, depends on Card margins
   const verticalPadding = 165;
-  const controlsPadding = 55;
+  const controlsPadding = 40; // derived from empirical testing, matches Sidebar padding
 
   if (browserDimensions) {
-    let controls = sidebar ? controlsWidth + controlsPadding : 0;
-    width = horizontal * (browserDimensions.width - controls - horizontalPadding);
+    const computedControlWidth = sidebar ? controlsWidth + controlsPadding : 0;
+    width = horizontal * (browserDimensions.width - computedControlWidth - horizontalPadding);
     height = browserDimensions.height * vertical - verticalPadding;
   }
 
-  if (maxAspectRatio && height > maxAspectRatio*width) {
-    height = maxAspectRatio*width;
+  if (maxAspectRatio && height > maxAspectRatio * width) {
+    height = maxAspectRatio * width;
   }
 
   // favor minHeight over maxAspectRatio
@@ -60,8 +59,8 @@ const computeResponsive = ({
   return {
     width,
     height
-  }
+  };
 
-}
+};
 
 export default computeResponsive;
