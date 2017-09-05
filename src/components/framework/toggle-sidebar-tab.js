@@ -3,7 +3,7 @@ import { controlsWidth, controlsPadding } from "../../util/globals";
 
 const ToggleSidebarTab = ({open, handler}) => {
 
-  const transform = open ? "translate(374.000000, 167.500000) rotate(180.000000) translate(-374.000000, -167.500000)" : "none";
+  const degrees = open ? 180 : 0;
 
   return (
     <div
@@ -14,7 +14,7 @@ const ToggleSidebarTab = ({open, handler}) => {
         position: "fixed",
         top: 0,
         zIndex: 1001,
-        backgroundColor: "#AAA",
+        backgroundColor: "#4b4e4e",
         cursor: "pointer",
         left: open ? controlsWidth + controlsPadding - 15 : 0,
         transition: "left .3s ease-out"
@@ -24,18 +24,20 @@ const ToggleSidebarTab = ({open, handler}) => {
         style={{
           position: "relative",
           top: 20,
-          left: 4
+          left: 4,
+          transform: `rotate(${degrees}deg)`,
+          transition: "transform 0.3s ease-out"
         }}
         width="7px"
         height="10.5px"
-        viewBox="369 160 10 15">
+        viewBox="369 160 10 15"
+      >
         <polygon
           id="Triangle"
           stroke="none"
           fill="#FFFFFF"
-          transform={transform}
-          points="379 167.5 369 175 369 160">
-        </polygon>
+          points="379 167.5 369 175 369 160"
+        />
       </svg>
     </div>
   );

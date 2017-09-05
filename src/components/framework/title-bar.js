@@ -34,13 +34,11 @@ class TitleBar extends React.Component {
         justifyContent: "space-between",
         alignItems: "center",
         overflow: "hidden",
-        left: this.props.absent ? -320 : 0,
+        left: 0,
         zIndex: 1001,
         transition: "left .3s ease-out",
-        background: this.props.minified ? "#AAA" : "#FFF",
-        width: this.props.minified ? 320 : "auto",
-        position: this.props.minified ? "fixed" : "inherit",
-        boxShadow: this.props.minified ? "0px 0px 8px 4px rgba(215,215,215,0.55)" : "0px"
+        background: "#FFF",
+        width: this.props.minified ? 320 : "auto"
       },
       logo: {
         paddingLeft: "8px",
@@ -61,7 +59,7 @@ class TitleBar extends React.Component {
       dataName: {
         alignSelf: "center",
         padding: "0px",
-        color: this.props.minified ? "#fff" : darkGrey,
+        color: darkGrey,
         textDecoration: "none",
         fontSize: 20,
         fontWeight: 400
@@ -71,7 +69,7 @@ class TitleBar extends React.Component {
         paddingRight: this.props.minified ? "6px" : "12px",
         paddingTop: "20px",
         paddingBottom: "20px",
-        color: this.props.minified ? "#fff" : darkGrey,
+        color: darkGrey,
         textDecoration: "none",
         cursor: "pointer",
         fontSize: this.props.minified ? 12 : 16,

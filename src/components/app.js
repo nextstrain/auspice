@@ -72,16 +72,16 @@ class App extends React.Component {
     return (
       <g>
         <DownloadModal/>
-        {this.state.sidebarOpen || this.state.sidebarDocked ?
-          <TitleBar minified/> :
-          <TitleBar minfied absent/>}
         <ToggleSidebarTab
           open={this.state.sidebarDocked}
           handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
         />
         <Sidebar
           sidebar={
-            <Controls/>
+            <div>
+              <TitleBar minified/>
+              <Controls/>
+            </div>
           }
           open={this.state.sidebarOpen}
           docked={this.state.sidebarDocked}

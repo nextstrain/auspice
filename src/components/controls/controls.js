@@ -53,7 +53,6 @@ class Controls extends React.Component {
         alignItems="flex-start"
         style={{
           width: controlsWidth,
-          marginTop: "50px",
           padding: "0px 20px 20px 20px"
         }}
       >
