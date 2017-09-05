@@ -17,6 +17,7 @@ export const controlsWidth = 280;
 export const controlsPadding = 40; // from Sidebar padding
 export const totalVerticalPadding = 160; // this includes the header + space between the bottom and the card (refactor.)
 export const controlsHiddenWidth = 1000;
+export const cardMinimumWidth = 300;
 export const entropyChartHeight = 300;
 export const twoColumnBreakpoint = 1600;
 export const maxMapWidth = 1000; /* just right for our default zoom level (which is also min) */

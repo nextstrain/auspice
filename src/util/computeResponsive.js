@@ -1,4 +1,4 @@
-import { controlsWidth, controlsPadding } from "./globals";
+import { controlsWidth, controlsPadding, cardMinimumWidth } from "./globals";
 
 /*
   Why this function is here
@@ -43,6 +43,9 @@ const computeResponsive = ({
   if (browserDimensions) {
     const computedControlWidth = sidebar ? controlsWidth + controlsPadding : 0;
     width = horizontal * (browserDimensions.width - computedControlWidth - horizontalPadding);
+    if (width < cardMinimumWidth) {
+      width = horizontal * (browserDimensions.width - horizontalPadding);
+    }
     height = browserDimensions.height * vertical - verticalPadding;
   }
 
