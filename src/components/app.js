@@ -11,6 +11,7 @@ import Controls from "./controls/controls";
 // import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
 import Map from "./map/map";
+import Info from "./info/info";
 import TreeView from "./tree/treeView";
 import { controlsHiddenWidth } from "../util/globals";
 import TitleBar from "./framework/title-bar";
@@ -102,6 +103,9 @@ class App extends React.Component {
           sidebarClassName={"sidebar"}
         >
           <Background>
+            <Info
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+            />
             <TreeView
               query={queryString.parse(this.context.router.history.location.search)}
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}

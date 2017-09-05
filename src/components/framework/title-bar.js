@@ -106,7 +106,7 @@ class TitleBar extends React.Component {
 
   getTitle(styles) {
     return (
-      this.props.browserDimensions.width < 600 || this.props.minified ?
+      this.props.splash ?
         <div style={{flex: "none" }}/> :
         <Link style={styles.title} to="/">
           <Title minified={true} style={styles.title}/>
@@ -138,7 +138,6 @@ class TitleBar extends React.Component {
       <Flex style={styles.main}>
         {this.getLogo(styles)}
         {this.getTitle(styles)}
-        {this.getDataName(styles)}
         <div style={{flex: 5}}/>
           {this.getLink("About", "/about", this.props.aboutSelected, styles)}
           {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
