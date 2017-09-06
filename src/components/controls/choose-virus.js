@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { datasets } from "../../util/datasets";
 import ChooseVirusSelect from "./choose-virus-select";
@@ -28,7 +29,7 @@ class ChooseVirus extends React.Component {
   // static propTypes = {
   // }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
 
   getStyles() {

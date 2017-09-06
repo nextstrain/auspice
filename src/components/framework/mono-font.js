@@ -1,12 +1,13 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 class MonoFont extends React.Component {
 
   static propTypes = {
     /* react */
 
-    style: React.PropTypes.object,
-    size: React.PropTypes.string
+    style: PropTypes.object,
+    size: PropTypes.string
   }
   static defaultProps = {
     size: "small"

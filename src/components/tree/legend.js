@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./legend-item";
@@ -26,13 +27,13 @@ class Legend extends React.Component {
     };
   }
   static propTypes = {
-    colorOptions: React.PropTypes.object,
-    colorScale: React.PropTypes.object,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    colorBy: React.PropTypes.string.isRequired,
-    style: React.PropTypes.object,
-    sidebar: React.PropTypes.bool
+    colorOptions: PropTypes.object,
+    colorScale: PropTypes.object,
+    params: PropTypes.object,
+    routes: PropTypes.array,
+    colorBy: PropTypes.string.isRequired,
+    style: PropTypes.object,
+    sidebar: PropTypes.bool
   }
   // hide/show legend based on initial browserDimensions and legend length
   componentWillMount() {

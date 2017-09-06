@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { prettyString } from "../../util/stringHelpers";
@@ -146,7 +147,7 @@ class Footer extends React.Component {
     };
   }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   shouldComponentUpdate(nextProps) {
     if (

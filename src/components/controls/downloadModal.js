@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, medGrey, infoPanelStyles } from "../../globalStyles";
@@ -64,11 +65,11 @@ class DownloadModal extends React.Component {
     };
   }
   static propTypes = {
-    show: React.PropTypes.bool.isRequired,
-    dispatch: React.PropTypes.func.isRequired,
-    metadata: React.PropTypes.object.isRequired,
-    datasetPathName: React.PropTypes.string,
-    browserDimensions: React.PropTypes.object.isRequired
+    show: PropTypes.bool.isRequired,
+    dispatch: PropTypes.func.isRequired,
+    metadata: PropTypes.object.isRequired,
+    datasetPathName: PropTypes.string,
+    browserDimensions: PropTypes.object.isRequired
   }
 
   relevantPublications() {

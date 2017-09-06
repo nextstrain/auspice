@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import _filter from "lodash/filter";
 import { genotypeColors } from "../../util/globals";
@@ -121,17 +122,17 @@ class Entropy extends React.Component {
     };
   }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   static propTypes = {
-    dispatch: React.PropTypes.func.isRequired,
-    entropy: React.PropTypes.object,
-    sidebar: React.PropTypes.bool.isRequired,
-    browserDimensions: React.PropTypes.object.isRequired,
-    loaded: React.PropTypes.bool.isRequired,
-    colorBy: React.PropTypes.string,
-    defaultColorBy: React.PropTypes.string,
-    mutType: React.PropTypes.string.isRequired
+    dispatch: PropTypes.func.isRequired,
+    entropy: PropTypes.object,
+    sidebar: PropTypes.bool.isRequired,
+    browserDimensions: PropTypes.object.isRequired,
+    loaded: PropTypes.bool.isRequired,
+    colorBy: PropTypes.string,
+    defaultColorBy: PropTypes.string,
+    mutType: PropTypes.string.isRequired
   }
 
   /* CALLBACKS */

@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Flex from "../framework/flex";
 import SelectLabel from "../framework/select-label";
@@ -25,8 +26,8 @@ const header = (text) => (
 }))
 class Controls extends React.Component {
   static propTypes = {
-    analysisSlider: React.PropTypes.any,
-    dispatch: React.PropTypes.func
+    analysisSlider: PropTypes.any,
+    dispatch: PropTypes.func
   }
   getStyles() {
     return {};

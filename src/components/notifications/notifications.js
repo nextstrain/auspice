@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import ReactCSSTransitionGroup from "react-addons-css-transition-group";
 import { REMOVE_NOTIFICATION } from "../../actions/types";
@@ -49,9 +50,9 @@ class Notifications extends React.Component {
     super(props);
   }
   static propTypes = {
-    stack: React.PropTypes.array.isRequired,
-    dispatch: React.PropTypes.func.isRequired,
-    pageWidth: React.PropTypes.number.isRequired
+    stack: PropTypes.array.isRequired,
+    dispatch: PropTypes.func.isRequired,
+    pageWidth: PropTypes.number.isRequired
   }
   closeIcon(d) {
     return(

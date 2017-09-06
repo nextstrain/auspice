@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import _min from "lodash/min";
 import _max from "lodash/max";
@@ -52,12 +53,12 @@ import { incommingMapPNG } from "../../util/downloadDataFunctions";
 class Map extends React.Component {
 
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   static propTypes = {
-    treeVersion: React.PropTypes.number.isRequired,
-    treeLoaded: React.PropTypes.bool.isRequired,
-    colorScaleVersion: React.PropTypes.number.isRequired
+    treeVersion: PropTypes.number.isRequired,
+    treeLoaded: PropTypes.bool.isRequired,
+    colorScaleVersion: PropTypes.number.isRequired
   }
   constructor(props) {
     super(props);

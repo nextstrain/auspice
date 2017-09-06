@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import ChooseFilter from "./choose-filter";
 
@@ -15,7 +16,7 @@ const filterShortName = {
 @connect((state) => ({metadata: state.metadata}))
 class AllFilters extends React.Component {
   static propTypes = {
-    metadata: React.PropTypes.object.isRequired // should use shape here
+    metadata: PropTypes.object.isRequired // should use shape here
   }
   render() {
     const filters = [];

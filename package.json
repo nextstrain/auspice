@@ -107,6 +107,7 @@
     "mousetrap": "^1.6.0",
     "outer-product": "0.0.4",
     "papaparse": "^4.3.5",
+    "prop-types": "^15.5.10",
     "query-string": "^4.2.3",
     "react": "15.6.1",
     "react-addons-css-transition-group": "^15.6.0",

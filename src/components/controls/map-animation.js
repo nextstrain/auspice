@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import SelectLabel from "../framework/select-label";
 import { CHANGE_ANIMATION_TIME, CHANGE_ANIMATION_CUMULATIVE } from "../../actions/types";
@@ -17,7 +18,7 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
 class MapAnimationControls extends React.Component {
 
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
 
   // checkAndTransformAnimationDuration(input) {

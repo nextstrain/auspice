@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { filterAbbrFwd } from "../../util/globals";
 import RecursiveFilter from "./recursive_filter";
 import SelectLabel from "../framework/select-label";
@@ -13,9 +14,9 @@ class ChooseFilter extends React.Component {
     super(props);
   }
   static propTypes = {
-    shortKey: React.PropTypes.string.isRequired,
-    filterType: React.PropTypes.string.isRequired,
-    filterOptions: React.PropTypes.object.isRequired
+    shortKey: PropTypes.string.isRequired,
+    filterType: PropTypes.string.isRequired,
+    filterOptions: PropTypes.object.isRequired
   }
 
   parseFilterQuery(query) {
