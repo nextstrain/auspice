@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
 import Flex from "./flex";
@@ -17,10 +18,10 @@ class TitleBar extends React.Component {
     super(props);
   }
   static propTypes = {
-    datasetPathName: React.PropTypes.string
+    datasetPathName: PropTypes.string
   }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   getStyles() {
     return {

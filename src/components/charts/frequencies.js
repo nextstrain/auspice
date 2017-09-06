@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { VictoryAxis } from "victory-chart";
 import Card from "../framework/card";
@@ -20,11 +21,10 @@ class Frequencies extends React.Component {
   }
   static propTypes = {
     /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
+    params: PropTypes.object,
+    routes: PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
+    style: PropTypes.object,
   }
   // static defaultProps = {
   //   genotype:["global", "HA1", "159F"]

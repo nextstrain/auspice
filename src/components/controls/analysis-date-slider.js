@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Slider from "./slider";
 import { controlsWidth } from "../../util/globals";
@@ -20,10 +21,10 @@ class AnalysisDateSlider extends React.Component {
     }
   }
   static propTypes = {
-    value: React.PropTypes.number.isRequired,
-    absoluteMinVal: React.PropTypes.number.isRequired,
-    absoluteMaxVal: React.PropTypes.number.isRequired,
-    dispatch: React.PropTypes.func.isRequired
+    value: PropTypes.number.isRequired,
+    absoluteMinVal: PropTypes.number.isRequired,
+    absoluteMaxVal: PropTypes.number.isRequired,
+    dispatch: PropTypes.func.isRequired
   }
   getStyles() {
     return {

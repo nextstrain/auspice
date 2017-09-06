@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import * as icons from "../framework/svg-icons";
 import { materialButton, materialButtonSelected, medGrey } from "../../globalStyles";
@@ -13,11 +14,11 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 })
 class ChooseLayout extends React.Component {
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   static propTypes = {
-    layout: React.PropTypes.string.isRequired,
-    dispatch: React.PropTypes.func.isRequired
+    layout: PropTypes.string.isRequired,
+    dispatch: PropTypes.func.isRequired
   }
   getStyles() {
     return {

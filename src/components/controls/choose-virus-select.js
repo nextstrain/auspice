@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { select } from "../../globalStyles";
 import { loadJSONs } from "../../actions/loadData";
@@ -11,14 +12,14 @@ class ChooseVirusSelect extends React.Component {
     super(props);
   }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   static propTypes = {
-    dispatch: React.PropTypes.func.isRequired,
-    selected: React.PropTypes.string.isRequired,
-    choice_tree: React.PropTypes.array,
-    title: React.PropTypes.string.isRequired,
-    options: React.PropTypes.array.isRequired
+    dispatch: PropTypes.func.isRequired,
+    selected: PropTypes.string.isRequired,
+    choice_tree: PropTypes.array,
+    title: PropTypes.string.isRequired,
+    options: PropTypes.array.isRequired
   }
   getStyles() {
     return { base: {} };

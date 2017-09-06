@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import _throttle from "lodash/throttle";
 import { BROWSER_DIMENSIONS } from "../../actions/types";
@@ -9,7 +10,7 @@ class BrowserDimensionMonitor extends React.Component {
     super(props);
   }
   static propTypes = {
-    dispatch: React.PropTypes.func.isRequired
+    dispatch: PropTypes.func.isRequired
   }
 
   componentDidMount() {

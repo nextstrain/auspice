@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Sidebar from "react-sidebar";
 import queryString from "query-string";
@@ -47,10 +48,10 @@ class App extends React.Component {
     analyticsNewPage();
   }
   static propTypes = {
-    dispatch: React.PropTypes.func.isRequired
+    dispatch: PropTypes.func.isRequired
   }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   componentWillMount() {
     this.props.dispatch(loadJSONs(this.context.router));

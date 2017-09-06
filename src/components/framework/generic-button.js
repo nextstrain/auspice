@@ -1,9 +1,10 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import Color from "color";
 
 class Button extends React.Component {
   static propTypes = {
-    style: React.PropTypes.object
+    style: PropTypes.object
   }
   static defaultProps = {
     style: {
@@ -62,8 +63,8 @@ class Button extends React.Component {
 }
 
 Button.propTypes = {
-  color: React.PropTypes.string,
-  onClick: React.PropTypes.func
+  color: PropTypes.string,
+  onClick: PropTypes.func
 };
 
 module.exports = Button;

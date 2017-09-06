@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 class ChooseLayoutButton extends React.Component {
   constructor(props) {
@@ -9,12 +10,12 @@ class ChooseLayoutButton extends React.Component {
   }
   static propTypes = {
     /* react */
-    // dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
+    // dispatch: PropTypes.func,
+    params: PropTypes.object,
+    routes: PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
-    // foo: React.PropTypes.string
+    style: PropTypes.object,
+    // foo: PropTypes.string
   }
   static defaultProps = {
     // foo: "bar"

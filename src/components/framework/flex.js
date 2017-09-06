@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 /**
 
@@ -13,31 +14,31 @@ import React from "react";
 
 class Flex extends React.Component {
   static propTypes = {
-    direction: React.PropTypes.oneOf([
+    direction: PropTypes.oneOf([
       "row", "rowReverse", "column", "columnReverse"
     ]),
-    wrap: React.PropTypes.oneOf([
+    wrap: PropTypes.oneOf([
       "nowrap", "wrap", "wrap-reverse"
     ]),
-    justifyContent: React.PropTypes.oneOf([
+    justifyContent: PropTypes.oneOf([
       "flex-start", "flex-end", "center", "space-between", "space-around"
     ]),
-    alignItems: React.PropTypes.oneOf([
+    alignItems: PropTypes.oneOf([
       "flex-start", "flex-end", "center", "baseline", "stretch"
     ]),
-    alignContent: React.PropTypes.oneOf([
+    alignContent: PropTypes.oneOf([
       "flex-start", "flex-end", "center", "space-between", "space-around", "stretch"
     ]),
-    grow: React.PropTypes.number,
-    shrink: React.PropTypes.number,
-    basis: React.PropTypes.string,
-    order: React.PropTypes.number,
-    alignSelf: React.PropTypes.oneOf([
+    grow: PropTypes.number,
+    shrink: PropTypes.number,
+    basis: PropTypes.string,
+    order: PropTypes.number,
+    alignSelf: PropTypes.oneOf([
       "auto", "flex-start", "flex-end", "center", "baseline", "stretch"
     ]),
-    styleOverrides: React.PropTypes.object,
-    children: React.PropTypes.node,
-    clickHandler: React.PropTypes.func,
+    styleOverrides: PropTypes.object,
+    children: PropTypes.node,
+    clickHandler: PropTypes.func,
   }
   static defaultProps = {
     direction: "row",

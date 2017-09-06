@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { select } from "d3-selection";
 import { ReactSVGPanZoom } from "react-svg-pan-zoom";
@@ -53,8 +54,8 @@ class TreeView extends React.Component {
     };
   }
   static propTypes = {
-    sidebar: React.PropTypes.bool.isRequired,
-    mutType: React.PropTypes.string.isRequired
+    sidebar: PropTypes.bool.isRequired,
+    mutType: PropTypes.string.isRequired
   }
 
   componentWillReceiveProps(nextProps) {

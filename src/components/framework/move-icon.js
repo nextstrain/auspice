@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 
 const MoveIcon = ({
   x,
@@ -32,11 +33,11 @@ const MoveIcon = ({
 };
 
 MoveIcon.propTypes = {
-  scale: React.PropTypes.number,
-  IconTranslateX: React.PropTypes.number,
-  IconTranslateY: React.PropTypes.number,
-  rectWidth: React.PropTypes.number,
-  rectHeight: React.PropTypes.number
+  scale: PropTypes.number,
+  IconTranslateX: PropTypes.number,
+  IconTranslateY: PropTypes.number,
+  rectWidth: PropTypes.number,
+  rectHeight: PropTypes.number
 };
 
 MoveIcon.defaultProps = {

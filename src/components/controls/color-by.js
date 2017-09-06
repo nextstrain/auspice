@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { defaultColorBy } from "../../util/globals";
 import { parseGenotype } from "../../util/getGenotype";
@@ -27,13 +28,13 @@ class ColorBy extends React.Component {
     };
   }
   static propTypes = {
-    colorBy: React.PropTypes.string.isRequired,
-    geneLength: React.PropTypes.object,
-    colorOptions: React.PropTypes.object.isRequired,
-    dispatch: React.PropTypes.func.isRequired
+    colorBy: PropTypes.string.isRequired,
+    geneLength: PropTypes.object,
+    colorOptions: PropTypes.object.isRequired,
+    dispatch: PropTypes.func.isRequired
   }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
 
   componentWillReceiveProps(nextProps) {

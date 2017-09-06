@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import _keys from "lodash/keys";
 import { select } from "../../globalStyles";
@@ -19,7 +20,7 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 })
 class GeoResolution extends React.Component {
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   getStyles() {
     return {

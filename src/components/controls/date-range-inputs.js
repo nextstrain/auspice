@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Slider from "./slider";
 import { controlsWidth } from "../../util/globals";
@@ -24,14 +25,14 @@ class DateRangeInputs extends React.Component {
     };
   }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   static propTypes = {
-    dateMin: React.PropTypes.string.isRequired,
-    dateMax: React.PropTypes.string.isRequired,
-    absoluteDateMin: React.PropTypes.string.isRequired,
-    absoluteDateMax: React.PropTypes.string.isRequired,
-    dispatch: React.PropTypes.func.isRequired
+    dateMin: PropTypes.string.isRequired,
+    dateMax: PropTypes.string.isRequired,
+    absoluteDateMin: PropTypes.string.isRequired,
+    absoluteDateMax: PropTypes.string.isRequired,
+    dispatch: PropTypes.func.isRequired
   }
   getStyles() {
     return {
