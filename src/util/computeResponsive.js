@@ -40,11 +40,18 @@ const computeResponsive = ({
   const horizontalPadding = horizontal === 1 ? 34 : 56; // derived from empirical testing, depends on Card margins
   const verticalPadding = 165;
 
+  // sidebar scrollbar has width equal to its offsetWidth - clientWidth
+  let scrollbarWidth = 0;
+  const classArray = document.getElementsByClassName("sidebar");
+  if (classArray.length > 0) {
+    scrollbarWidth = classArray[0].offsetWidth - classArray[0].clientWidth;
+  }
+
   if (browserDimensions) {
-    const computedControlWidth = sidebar ? controlsWidth + controlsPadding : 0;
-    width = horizontal * (browserDimensions.width - computedControlWidth - horizontalPadding);
+    const computedControlWidth = sidebar ? controlsWidth + controlsPadding + scrollbarWidth : 0;
+    width = horizontal * (browserDimensions.width - computedControlWidth - horizontalPadding - scrollbarWidth);
     if (width < cardMinimumWidth) {
-      width = horizontal * (browserDimensions.width - horizontalPadding);
+      width = horizontal * (browserDimensions.width - horizontalPadding - scrollbarWidth);
     }
     height = browserDimensions.height * vertical - verticalPadding;
   }

@@ -86,6 +86,7 @@ class App extends React.Component {
           open={this.state.sidebarOpen}
           docked={this.state.sidebarDocked}
           onSetOpen={(a) => {this.setState({sidebarOpen: a});}}
+          sidebarClassName={"sidebar"}
         >
           <Background>
             <TreeView
