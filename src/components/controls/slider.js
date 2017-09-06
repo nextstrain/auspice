@@ -1,4 +1,5 @@
 import React from "react";
+import createReactClass from "create-react-class";
 import _assign from "lodash/assign";
 import _isArray from "lodash/isArray";
 
@@ -41,7 +42,7 @@ function undoEnsureArray(x) {
 
 // undoEnsureArray(ensureArray(x)) === x
 
-var Slider = React.createClass({
+var Slider = createReactClass({
 
   propTypes: {
 
