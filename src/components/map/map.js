@@ -394,7 +394,10 @@ class Map extends React.Component {
       // defines whether or not the user is prompted oh how to wake map
       sleepNote: true,
       // should hovering wake the map? (clicking always will)
-      hoverToWake: false
+      hoverToWake: false,
+      // if mobile, disable single finger dragging
+      dragging: !L.Browser.mobile,
+      tap: false
     });
 
     map.getRenderer(map).options.padding = 2;
