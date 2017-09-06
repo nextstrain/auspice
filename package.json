@@ -87,6 +87,7 @@
   "dependencies": {
     "binomial": "^0.2.0",
     "color": "^0.7.3",
+    "create-react-class": "^15.6.0",
     "d3-array": "^1.2.0",
     "d3-axis": "^1.0.6",
     "d3-brush": "^1.0.4",
@@ -112,7 +113,7 @@
     "react-addons-css-transition-group": "^15.6.0",
     "react-autosuggest": "^3.9.0",
     "react-dom": "^15.6.1",
-    "react-ga": "^2.1.2",
+    "react-ga": "^2.2.0",
     "react-redux": "^4.0.0",
     "react-router-dom": "^4.0.0",
     "react-select": "^1.0.0-rc.5",
