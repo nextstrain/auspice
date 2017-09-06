@@ -1,12 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
+import leaflet from "leaflet";
 import _min from "lodash/min";
 import _max from "lodash/max";
 import { select } from "d3-selection";
 import leafletImage from "leaflet-image";
 import Card from "../framework/card";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
-import setupLeaflet from "../../util/leaflet";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "../../util/mapHelpers";
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint, enableAnimationPerfTesting } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
@@ -21,7 +21,7 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { incommingMapPNG } from "../../util/downloadDataFunctions";
 
 /* global L */
-// L is global in scope and placed by setupLeaflet()
+// L is global in scope and placed by leaflet()
 
 @connect((state) => {
   return {
@@ -75,7 +75,7 @@ class Map extends React.Component {
 
   componentWillMount() {
     if (!window.L) {
-      setupLeaflet(); /* this sets up window.L */
+      leaflet(); /* this sets up window.L */
       /* add a print method to leaflet. some relevent links:
       https://github.com/mapbox/leaflet-image
       https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
@@ -175,7 +175,7 @@ class Map extends React.Component {
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
       if (!this.state.boundsSet) { // we are doing the initial render -> set map to the range of the data
         const SWNE = this.getGeoRange();
-        // L. available because setupLeaflet() was called in componentWillMount
+        // L. available because leaflet() was called in componentWillMount
         this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1])); // eslint-disable-line no-undef
       }
 
@@ -394,7 +394,10 @@ class Map extends React.Component {
       // defines whether or not the user is prompted oh how to wake map
       sleepNote: true,
       // should hovering wake the map? (clicking always will)
-      hoverToWake: false
+      hoverToWake: false,
+      // if mobile, disable single finger dragging
+      dragging: !L.Browser.mobile,
+      tap: false
     });
 
     map.getRenderer(map).options.padding = 2;

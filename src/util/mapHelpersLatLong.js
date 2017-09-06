@@ -6,7 +6,7 @@ import { averageColors } from "./colorHelpers";
 import { computeMidpoint, Bezier } from "./transmissionBezier";
 
 /* global L */
-// L is global in scope and placed by setupLeaflet()
+// L is global in scope and placed by leaflet()
 
 // longs of original map are -180 to 180
 // longs of fully triplicated map are -540 to 540
