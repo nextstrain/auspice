@@ -72,27 +72,23 @@ class App extends React.Component {
     return (
       <g>
         <DownloadModal/>
+        <ToggleSidebarTab
+          open={this.state.sidebarDocked}
+          handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
+        />
         <Sidebar
           sidebar={
             <div>
-              <TitleBar minified={true}/>
+              <TitleBar minified/>
               <Controls/>
-              <ToggleSidebarTab
-                open={this.state.sidebarDocked}
-                handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
-              />
             </div>
           }
           open={this.state.sidebarOpen}
           docked={this.state.sidebarDocked}
-          onSetOpen={(a) => {this.setState({sidebarOpen: a});}}>
+          onSetOpen={(a) => {this.setState({sidebarOpen: a});}}
+          sidebarClassName={"sidebar"}
+        >
           <Background>
-            {this.state.sidebarOpen || this.state.sidebarDocked ? <div/> :
-              <ToggleSidebarTab
-                open={this.state.sidebarDocked}
-                handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
-              />
-            }
             <TreeView
               query={queryString.parse(this.context.router.history.location.search)}
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}

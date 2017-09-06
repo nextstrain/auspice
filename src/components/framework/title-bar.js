@@ -33,9 +33,12 @@ class TitleBar extends React.Component {
         height: titleBarHeight,
         justifyContent: "space-between",
         alignItems: "center",
-        background: "#fff",
-        marginBottom: 5,
-        overflow: "hidden"
+        overflow: "hidden",
+        left: 0,
+        zIndex: 1001,
+        transition: "left .3s ease-out",
+        background: "#FFF",
+        width: this.props.minified ? 320 : "auto"
       },
       logo: {
         paddingLeft: "8px",
@@ -71,7 +74,7 @@ class TitleBar extends React.Component {
         cursor: "pointer",
         fontSize: this.props.minified ? 12 : 16,
         ':hover': {
-          color: "rgb(80, 151, 186)",
+          color: "rgb(80, 151, 186)"
         }
       },
       inactive: {
@@ -131,17 +134,15 @@ class TitleBar extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <div >
-        <Flex style={styles.main}>
-          {this.getLogo(styles)}
-          {this.getTitle(styles)}
-          {this.getDataName(styles)}
-          <div style={{flex: 5}}/>
-            {this.getLink("About", "/about", this.props.aboutSelected, styles)}
-            {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
-          <div style={{width: this.props.minified ? 15 : 0 }}/>
-        </Flex>
-      </div>
+      <Flex style={styles.main}>
+        {this.getLogo(styles)}
+        {this.getTitle(styles)}
+        {this.getDataName(styles)}
+        <div style={{flex: 5}}/>
+          {this.getLink("About", "/about", this.props.aboutSelected, styles)}
+          {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
+        <div style={{width: this.props.minified ? 15 : 0 }}/>
+      </Flex>
     );
   }
 }
