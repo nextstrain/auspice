@@ -102,16 +102,31 @@ class Map extends React.Component {
   // componentDidMount() {
   // }
   componentWillReceiveProps(nextProps) {
-    /* this is the place we update state in response to new props */
     this.maybeComputeResponsive(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
+    this.maybeInvalidateMapSize(nextProps);
   }
   componentDidUpdate(prevProps) {
     if (this.props.nodes === null) { return; }
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
+  }
+  maybeInvalidateMapSize(nextProps) {
+    /* when we procedurally change the size of the card, for instance, when we swap from thirds to full */
+    if (
+      this.state.map &&
+      (
+        this.props.sidebar !== nextProps.sidebar ||
+        this.props.panelLayout !== nextProps.panelLayout
+      )
+    ) {
+      window.setTimeout(this.invalidateMapSize.bind(this), 1500);
+    }
+  }
+  invalidateMapSize() {
+    this.state.map.invalidateSize()
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
