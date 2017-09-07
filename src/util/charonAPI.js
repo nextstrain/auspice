@@ -1,6 +1,7 @@
 import { CHARON_INIT } from "../actions/types";
 import { errorNotification } from "../actions/notifications";
 import { charonAPIAddress } from "./globals";
+import queryString from "query-string";
 
 const processData = (data, dispatch) => {
   const datasets = JSON.parse(data);
@@ -13,7 +14,7 @@ const processData = (data, dispatch) => {
   });
 };
 
-export const getManifest = (user, dispatch) => {
+export const getManifest = (router, dispatch) => {
   const charonErrorHandler = (e) => {
     process.env.DATA_LOCAL ?
       dispatch(errorNotification({message: "Charon is not running locally", details: "cd nextstrain/charon; node server.js"})) :
@@ -21,11 +22,15 @@ export const getManifest = (user, dispatch) => {
     console.error(e);
   };
 
+  /* who am i? */
+  const query = queryString.parse(router.history.location.search);
+  const user = Object.keys(query).indexOf("user") === -1 ? "guest" : query.user;
+
   const xmlHttp = new XMLHttpRequest();
   xmlHttp.onload = () => {
     if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
       processData(xmlHttp.responseText, dispatch);
-      // window.setTimeout(() => processData(xmlHttp.responseText, dispatch, router), 5000) // mock slow API call
+      // window.setTimeout(() => processData(xmlHttp.responseText, dispatch), 5000) // mock slow API call
     } else {
       charonErrorHandler(xmlHttp);
     }

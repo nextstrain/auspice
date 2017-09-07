@@ -13,10 +13,12 @@ class Monitor extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired
   }
+  static contextTypes = {
+    router: PropTypes.object.isRequired
+  }
   componentDidMount() {
     /* API call to charon to get initial datasets etc (needed to load the splash page) */
-    getManifest("guest", this.props.dispatch);
-
+    getManifest(this.context.router, this.props.dispatch);
     /* don't need initial dimensions - they're in the redux store on load */
     window.addEventListener( // future resizes
       "resize",
