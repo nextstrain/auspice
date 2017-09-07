@@ -1,9 +1,10 @@
 import _forOwn from "lodash/forOwn";
 import _map from "lodash/map";
 import _minBy from "lodash/minBy";
+import linspace from "linspace";
 import { interpolateNumber } from "d3-interpolate";
 import { averageColors } from "./colorHelpers";
-import { computeMidpoint, Bezier } from "./transmissionBezier";
+// import { computeMidpoint, Bezier } from "./transmissionBezier";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -117,15 +118,27 @@ const constructBcurve = (
   originLatLongPair,
   destinationLatLongPair
 ) => {
-  const midpoint = computeMidpoint(originLatLongPair, destinationLatLongPair);
-  const Bcurve = Bezier(
-    [
-      originLatLongPair,
-      midpoint,
-      destinationLatLongPair
-    ]
-  );
-  return Bcurve;
+
+  /* set up interpolator with origin and destination numdates */
+  const interpolatorX = interpolateNumber(originLatLongPair.x, destinationLatLongPair.x);
+  const interpolatorY = interpolateNumber(originLatLongPair.y, destinationLatLongPair.y);
+
+  const Lcurve = linspace(0, 1, 15).map((d) => {
+    return {x: interpolatorX(d), y: interpolatorY(d)};
+  });
+
+  return Lcurve;
+
+  // const midpoint = computeMidpoint(originLatLongPair, destinationLatLongPair);
+  // const Bcurve = Bezier(
+  //   [
+  //     originLatLongPair,
+  //     midpoint,
+  //     destinationLatLongPair
+  //   ]
+  // );
+  //
+  // return Bcurve;
 };
 
 const maybeConstructTransmissionEvent = (
@@ -186,6 +199,7 @@ const maybeConstructTransmissionEvent = (
       destinationNode: child,
       bezierCurve: Bcurve,
       bezierDates: Bdates,
+      transmissionDate: node.attr.num_date,
       originName: node.attr[geoResolution],
       destinationName: child.attr[geoResolution],
       originCoords: validLatLongPair[0], // after interchange

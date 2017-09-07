@@ -1,6 +1,8 @@
 import _findIndex from "lodash/findIndex";
 import _findLastIndex from "lodash/findLastIndex";
+import _map from "lodash/map";
 import { line, curveBasis } from "d3-shape";
+import { easeLinear } from "d3-ease";
 
 /* util */
 
@@ -18,12 +20,30 @@ const extractLineSegmentForAnimationEffect = (
   destinationNumDate,
   visible,
   bezierCurve,
-  bezierDates
+  bezierDates,
+  transmissionDate
 ) => {
 
   if (visible === "hidden") {
-    return [];
+    return _map(bezierCurve, () => bezierCurve[0]);
   }
+
+  // if transmissionDate lies between numDateMin and numDateMax
+  // return full array
+  // otherwise, return array of same length only at origin
+  if (transmissionDate > numDateMin && transmissionDate < numDateMax) {
+    return bezierCurve;
+  }
+
+  if (transmissionDate > numDateMax) {
+    return _map(bezierCurve, () => bezierCurve[0]);
+  }
+
+  if (transmissionDate < numDateMin) {
+    return _map(bezierCurve, () => bezierCurve[bezierCurve.length - 1]);
+  }
+
+  return _map(bezierCurve, () => bezierCurve[0]);
 
   // want to slice out all points that lie between numDateMin and numDateMax
   // and append interpolated start and end points
@@ -67,6 +87,8 @@ const extractLineSegmentForAnimationEffect = (
   if (startIndex === -1 || endIndex === -1) {
     return [];
   }
+
+  return bezierCurve;
 
   // get curve
   // slice takes index at begin
@@ -139,7 +161,8 @@ export const drawDemesAndTransmissions = (
           d.destinationNumDate,
           d.visible,
           d.bezierCurve,
-          d.bezierDates
+          d.bezierDates,
+          d.transmissionDate
         )
       );
     })
@@ -190,7 +213,8 @@ export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin,
             d.destinationNumDate,
             d.visible,
             d.bezierCurve,
-            d.bezierDates
+            d.bezierDates,
+            d.transmissionDate
           )
         );
       }); // other attrs remain the same as they were
@@ -210,12 +234,19 @@ export const updateVisibility = (
 
   d3elems.demes
     .data(demeData)
-    .transition(5)
+    .interrupt()
+    .transition()
+    .duration(500)
+    .ease(easeLinear)
     .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
     .attr("r", (d) => { return 4 * Math.sqrt(d.count); });
 
   d3elems.transmissions
     .data(transmissionData)
+    .interrupt()
+    .transition()
+    .duration(500)
+    .ease(easeLinear)
     .attr("d", (d) => {
       return pathStringGenerator(
         extractLineSegmentForAnimationEffect(
@@ -227,7 +258,8 @@ export const updateVisibility = (
           d.destinationNumDate,
           d.visible,
           d.bezierCurve,
-          d.bezierDates
+          d.bezierDates,
+          d.transmissionDate
         )
       );
     }) /* with the interpolation in the function above pathStringGenerator */
