@@ -105,21 +105,22 @@ const Controls = (state = getDefaultState(), action) => {
         base["analysisSlider"] = {key: action.meta.analysisSlider, valid: false};
       }
       if (action.meta.defaults) {
-        if (action.meta.defaults.geoResolution) {
-          base["geoResolution"] = action.meta.defaults.geoResolution;
+        const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout"];
+        const expectedTypes = ["string", "string", "string", "string"];
+
+        for (let i = 0; i < keysToCheckFor.length; i += 1) {
+          if (action.meta.defaults[keysToCheckFor[i]]) {
+            if (typeof action.meta.defaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
+              base[keysToCheckFor[i]] = action.meta.defaults[keysToCheckFor[i]];
+            } else {
+              console.error("Skipping (meta.json) default for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
+            }
+          }
         }
-        if (action.meta.defaults.colorBy) {
-          base["colorBy"] = action.meta.defaults.colorBy;
-        }
-        if (action.meta.defaults.distanceMeasure) {
-          base["distanceMeasure"] = action.meta.defaults.distanceMeasure[0];
-        }
-        if (action.meta.defaults.layout) {
-          base["layout"] = action.meta.defaults.layout;
-        }
+        // TODO: why are these false / False
         if (action.meta.defaults.mapTriplicate) {
-         // convert string to boolean; default is true; turned off with either false (js) or False (python)
-         base["mapTriplicate"] = (action.meta.defaults.mapTriplicate === 'false' || action.meta.defaults.mapTriplicate === 'False') ? false : true;
+          // convert string to boolean; default is true; turned off with either false (js) or False (python)
+          base["mapTriplicate"] = (action.meta.defaults.mapTriplicate === 'false' || action.meta.defaults.mapTriplicate === 'False') ? false : true;
         }
       }
       /* now overwrite state with data from the URL */
@@ -146,7 +147,9 @@ const Controls = (state = getDefaultState(), action) => {
       if (base.temporalConfidence.exists && base.layout !== "rect") {
         base.temporalConfidence.display = false;
       }
-      /* check if chosen colorBy is valid */
+
+      /* we now check that the set values (meta.json defaults, hardcoded defaults, URL queries) are "valid" */
+      /* colorBy */
       const colorByValid = Object.keys(action.meta.color_options).indexOf(base["colorBy"]) !== -1;
       const availableNonGenotypeColorBys = Object.keys(action.meta.color_options);
       if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
@@ -154,9 +157,25 @@ const Controls = (state = getDefaultState(), action) => {
       }
       if (!colorByValid || base["colorBy"].startsWith("gt-")) {
         base["defaultColorBy"] = availableNonGenotypeColorBys[0];
+        base["colorBy"] = base["defaultColorBy"];
+        console.error("Error detected. Setting colorBy to ", base["colorBy"]);
       } else {
-        base["defaultColorBy"] = base["colorBy"];
+        base["defaultColorBy"] = base["colorBy"]; // set this so that we can always go back to the initial value
       }
+
+      /* geoResolution */
+      const availableGeoResultions = Object.keys(action.meta.geo);
+      if (availableGeoResultions.indexOf(base["geoResolution"]) === -1) {
+        base["geoResolution"] = availableGeoResultions[0];
+        console.error("Error detected. Setting geoResolution to ", base["geoResolution"]);
+      }
+
+      /* distanceMeasure */
+      if (["div", "num_date"].indexOf(base["distanceMeasure"]) === -1) {
+        base["distanceMeasure"] = "num_date";
+        console.error("Error detected. Setting distanceMeasure to ", base["distanceMeasure"]);
+      }
+
       /* available tree attrs - based upon the root node */
       base["attrs"] = Object.keys(action.tree.attr);
       base["colorByConfidence"] = checkColorByConfidence(base["attrs"], base["colorBy"]);

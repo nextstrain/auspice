@@ -16,7 +16,7 @@ curl http://data.nextstrain.org/flu_sequences.json --compressed -o data/flu_sequ
 curl http://data.nextstrain.org/flu_meta.json --compressed -o data/flu_meta.json
 curl http://data.nextstrain.org/flu_entropy.json --compressed -o data/flu_entropy.json
 
-curl http://data.nextstrain.org/dengue_tree.json --compressed -o data/dengue_tree.json
-curl http://data.nextstrain.org/dengue_sequences.json --compressed -o data/dengue_sequences.json
-curl http://data.nextstrain.org/dengue_meta.json --compressed -o data/dengue_meta.json
-curl http://data.nextstrain.org/dengue_entropy.json --compressed -o data/dengue_entropy.json
+curl http://data.nextstrain.org/dengue_all_tree.json --compressed -o data/dengue_all_tree.json
+curl http://data.nextstrain.org/dengue_all_sequences.json --compressed -o data/dengue_all_sequences.json
+curl http://data.nextstrain.org/dengue_all_meta.json --compressed -o data/dengue_all_meta.json
+curl http://data.nextstrain.org/dengue_all_entropy.json --compressed -o data/dengue_all_entropy.json
