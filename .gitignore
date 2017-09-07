@@ -1,10 +1,13 @@
 ### OSX ###
 .DS_Store
 
+### npm ###
+package-lock.json
+node_modules/
+npm-debug.log
+
 # App specific
 dist/
-node_modules
-npm-debug.log
 big_flu
 data/
 releases/
