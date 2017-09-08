@@ -4,11 +4,16 @@ import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
 import { twoColumnBreakpoint } from "../../util/globals";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
+import { applyFilterQuery } from "../../actions/treeProperties";
+import { prettyString, authorString } from "../../util/stringHelpers";
 
 @connect((state) => {
   return {
     browserDimensions: state.browserDimensions.browserDimensions,
-    metadata: state.metadata.metadata
+    filters: state.controls.filters,
+    metadata: state.metadata.metadata,
+    nodes: state.tree.nodes,
+    visibility: state.tree.visibility
   };
 })
 class Info extends React.Component {
@@ -16,7 +21,12 @@ class Info extends React.Component {
     super(props);
   }
   static propTypes = {
-    sidebar: React.PropTypes.bool.isRequired
+    sidebar: React.PropTypes.bool.isRequired,
+    filters: React.PropTypes.object.isRequired,
+    metadata: React.PropTypes.object, // not required. starts as null
+    nodes: React.PropTypes.array, // not required. starts as null
+    visibility: React.PropTypes.array, // not required. starts as null
+    dispatch: React.PropTypes.func.isRequired
   }
 
   getStyles() {
@@ -58,7 +68,76 @@ class Info extends React.Component {
     };
   }
 
+  getNumSelectedAuthors() {
+    if (!Object.prototype.hasOwnProperty.call(this.props.filters, "authors") || this.props.filters.authors.length === 0) {
+      return Object.keys(this.props.metadata.author_info).length;
+    }
+    return this.props.filters.authors.length;
+  }
+  getNumSelectedTips() {
+    let count = 0;
+    this.props.nodes.forEach((d, idx) => {
+      if (!d.hasChildren && this.props.visibility[idx] === "visible") count += 1;
+    });
+    return count;
+  }
+  summariseFilters() {
+    const otherFilters = Object.keys(this.props.filters)
+      // .filter((n) => n !== "authors")
+      .filter((n) => this.props.filters[n].length > 0);
+    if (otherFilters.length === 0) return null;
+    return (
+      <g>
+        {`${otherFilters.length} active filters (click to remove): `}
+        {otherFilters.map((n) => (
+          <span>{this.clearFilterButton(n)}{' // '}</span>
+        ))}
+      </g>
+    );
+  }
+  clearFilterButton(field) {
+    return (
+      <span
+        style={{cursor: "pointer", color: '#5097BA'}}
+        key={field}
+        onClick={() => this.props.dispatch(applyFilterQuery(field, []))}
+        role="button"
+        tabIndex={0}
+      >
+        {field}
+      </span>
+    );
+  }
+  summariseSelectedAuthors(nSelectedAuthors) {
+    const authorInfo = this.props.filters.authors.map((v) => ({
+      name: authorString(v),
+      n: this.props.metadata.author_info[v].n,
+      title: prettyString(this.props.metadata.author_info[v].title)
+    }));
+    /* case 1 (no selected authors) has already been handled */
+    /* case 2: a single author selected */
+    if (nSelectedAuthors === 1) {
+      return (<g>{"Data from "}{authorInfo[0].name}{" : \""}{authorInfo[0].title}{"\""}</g>);
+    /* case 3: a "few" authors */
+    } else if (nSelectedAuthors < 4) {
+      return (
+        <g>
+          {"Data from "}
+          {authorInfo.slice(0, authorInfo.length - 1).map((cv, idx) => (
+            <g key={this.props.filters.authors[idx].v}>
+              {cv.name}{` (n=${cv.n}), `}
+            </g>
+          ))}
+          {" and "}{authorInfo[authorInfo.length - 1].name}{` (n=${authorInfo[authorInfo.length - 1].n}).`}
+        </g>
+      );
+    }
+    /* case 4 (fallthrough) more than "a few" authors selected */
+    return null;
+  }
+
   render() {
+    if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
     const responsive = computeResponsive({
       horizontal: this.props.browserDimensions && this.props.browserDimensions.width > twoColumnBreakpoint ? 0.5 : 1,
       vertical: 1.0,
@@ -67,24 +146,27 @@ class Info extends React.Component {
       minHeight: 480,
       maxAspectRatio: 1.0
     });
-    let title = "";
-    if (this.props.metadata && this.props.metadata.title) {
-      title = this.props.metadata.title;
-    }
     const styles = this.getStyles();
+    const title = this.props.metadata.title ? this.props.metadata.title : "";
+    const nTotalSamples = this.props.metadata.virus_count;
+    const nTotalAuthors = Object.keys(this.props.metadata.author_info).length;
+    const nSelectedAuthors = this.getNumSelectedAuthors(); // will be equal to nTotalAuthors if none selected
+    const nSelectedSamples = this.getNumSelectedTips();
     return (
       <Card center>
-        <div
-          style={{
-            width: responsive.width,
-            display: "inline-block"
-          }}
-        >
+        <div style={{width: responsive.width, display: "inline-block"}}>
           <div width={responsive.width} style={styles.title}>
             {title}
           </div>
           <div width={responsive.width} style={styles.n}>
-            {"Showing XXX out of XXX viruses"}
+            {`Showing ${nSelectedSamples} out of ${nTotalSamples} viruses from ${nSelectedAuthors} `}
+            {nTotalAuthors === nSelectedAuthors ? "publications" : `out of ${nTotalAuthors} publications`}
+          </div>
+          <div width={responsive.width} style={styles.n}>
+            {nSelectedAuthors === nTotalAuthors ? null : this.summariseSelectedAuthors(nSelectedAuthors)}
+          </div>
+          <div width={responsive.width} style={styles.n}>
+            {this.summariseFilters()}
           </div>
         </div>
       </Card>
