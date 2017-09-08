@@ -135,7 +135,7 @@ export const applyFilterQuery = (fields, values, mode = "set") => {
           console.error("trying to remove values from an un-initialised filter!");
           return;
         }
-        newValues = values;
+        newValues = controls.filters[fields].slice();
         for (const item of values) {
           const idx = newValues.indexOf(item);
           if (idx !== -1) {
