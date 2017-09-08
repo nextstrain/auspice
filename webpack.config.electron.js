@@ -1,6 +1,6 @@
-var path = require("path");
-var webpack = require("webpack");
-var CompressionPlugin = require('compression-webpack-plugin');
+const path = require("path");
+const webpack = require("webpack");
+const CompressionPlugin = require('compression-webpack-plugin');
 
 // let commitHash = require('child_process')
 //   .execSync('git rev-parse --short HEAD')
@@ -22,8 +22,8 @@ module.exports = {
     // as of webpack 2 OccurrenceOrderPlugin is on by default
     new webpack.DefinePlugin({
       "process.env": {
-        "NODE_ENV": JSON.stringify("production"),
-        "DATA_LOCAL": JSON.stringify(true)
+        NODE_ENV: JSON.stringify("production"),
+        DATA_LOCAL: JSON.stringify(true)
       },
       global: {}
     }),
@@ -31,11 +31,11 @@ module.exports = {
     new webpack.optimize.UglifyJsPlugin(), // minify everything,
     new webpack.optimize.AggressiveMergingPlugin(), // merge chunks
     new CompressionPlugin({ // gzip everything
-       asset: "[path].gz[query]",
-       algorithm: "gzip",
-       test: /\.js$|\.css$|\.html$/,
-       threshold: 10240,
-       minRatio: 0.8
+      asset: "[path].gz[query]",
+      algorithm: "gzip",
+      test: /\.js$|\.css$|\.html$/,
+      threshold: 10240,
+      minRatio: 0.8
     })
   ],
   module: {

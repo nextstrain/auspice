@@ -1,5 +1,5 @@
-var path = require('path');
-var webpack = require('webpack');
+const path = require('path');
+const webpack = require('webpack');
 
 // let commitHash = require('child_process')
 //   .execSync('git rev-parse --short HEAD')
@@ -21,14 +21,14 @@ module.exports = {
     // perf test on nodes - remove this line to get warnings back.
     new webpack.DefinePlugin({
       "process.env": {
-        "NODE_ENV": JSON.stringify("dev"),
-        "DATA_LOCAL": JSON.stringify(global.dataLocal)
+        NODE_ENV: JSON.stringify("dev"),
+        DATA_LOCAL: JSON.stringify(global.dataLocal)
       }
     }),
     // new webpack.DefinePlugin({
     //   __COMMIT_HASH__: JSON.stringify(commitHash)
     // }),
-    new webpack.NoEmitOnErrorsPlugin(),
+    new webpack.NoEmitOnErrorsPlugin()
   ],
   module: {
     rules: [
