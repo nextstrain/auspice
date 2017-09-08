@@ -9,31 +9,25 @@ const queryString = require("query-string");
 an explanation of command line arguments and their effect.
 Remember, Heroku runs this with no arguments.
 
+By default, the API calls go to wherever you're running this server.
+I.e. if this is via localhost, then it's localhost:4000/charon,
+if this is deployed on heroku, it's nextstrain.org/charon...
+
 "dev"
 runs the dev server, with react hot loading etc. If this is not present then
 the production server is run, which sources the bundle from dist/
 (i.e. you have to run "npm run build" first).
-Because this bundle has been (pre-)compiled, the API calls are hardcoded to go to
-www.nextstrain.org.
-
-"localAPI"
-API calls are made to "localhost:4000/charon" rather than www.nextstrain.org/charon
-You probably want this on.
-(Only works for the dev server)
 
 "localData"
 Sources the JSONs / splash images etc from /data/ rather than data.nextstrain.org.
-Only has an effect if running the dev server and if localAPI is set.
+This works even if you've built the bundle, as the API calls are handled by the same server.
+You probably want this on for development, off for testing before deploying.
 */
 
 /* parse args, set some as global to be available in bundle */
 const devServer = process.argv.indexOf("dev") !== -1;
-const localAPI = process.argv.indexOf("localAPI") !== -1;
-const localData = process.argv.indexOf("localData") !== -1;
-global.CHARON_LOCAL_API = localAPI; // must be in webpack.config.*.js files also if you want the front end to see
-// global.LOCAL_DATA = localData;
-global.DATA_PREFIX = localData ? path.join(__dirname, "/data/") : "http://data.nextstrain.org/";
-// global.BASE_DIRNAME = __dirname;
+global.LOCAL_DATA = process.argv.indexOf("localData") !== -1;
+// global.DATA_PREFIX = global.LOCAL_DATA ? path.join(__dirname, "/data/") : "http://data.nextstrain.org/";
 
 /* dev-specific libraries & imports */
 let webpack;
@@ -50,7 +44,7 @@ if (devServer) {
 }
 
 const app = express();
-app.set('port', 4000);
+app.set('port', process.env.PORT || 4000);
 
 if (devServer) {
   const compiler = webpack(config);
@@ -99,17 +93,7 @@ app.get("*", (req, res) => {
 const server = app.listen(app.get('port'), () => {
   console.log("-----------------------------------");
   console.log("Auspice server started on port " + server.address().port);
-  if (!devServer) {
-    console.log("Serving compiled bundle from /dist");
-    console.log("API calls are being made to nextstrain.org/charon (and so data is being sourced from S3)");
-  } else {
-    console.log("Serving (hot-reloading) dev bundle");
-    if (localAPI) {
-      console.log("API calls are being made to localhost:" + server.address().port + "/charon");
-      console.log(localData ? "Data is being sourced from /data" : "Data is being sourced from S3");
-    } else {
-      console.log("API calls are being made to www.nextstrain.org  (and so data is being sourced from S3)");
-    }
-  }
-  console.log("-----------------------------------");
+  console.log(devServer ? "Serving dev bundle with hot-reloading enabled" : "Serving compiled bundle from /dist");
+  console.log(global.LOCAL_DATA ? "Data is being sourced from /data" : "Data is being sourced from data.nextstrain.org (S3)");
+  console.log("-----------------------------------\n\n");
 });
