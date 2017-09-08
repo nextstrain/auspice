@@ -10,7 +10,7 @@ const validUsers = ['guest', 'mumps'];
 
 const getFile = (res, filePath) => {
   if (global.LOCAL_DATA) {
-    res.sendFile(path.join(global.DATA_PREFIX, filePath));
+    res.sendFile(path.join(global.LOCAL_DATA_PATH, filePath));
   } else {
     request(s3 + filePath).pipe(res);
     /* TODO explore https://www.npmjs.com/package/cached-request */

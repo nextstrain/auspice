@@ -27,7 +27,7 @@ You probably want this on for development, off for testing before deploying.
 /* parse args, set some as global to be available in bundle */
 const devServer = process.argv.indexOf("dev") !== -1;
 global.LOCAL_DATA = process.argv.indexOf("localData") !== -1;
-// global.DATA_PREFIX = global.LOCAL_DATA ? path.join(__dirname, "/data/") : "http://data.nextstrain.org/";
+global.LOCAL_DATA_PATH = path.join(__dirname, "/data/");
 
 /* dev-specific libraries & imports */
 let webpack;
