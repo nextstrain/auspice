@@ -196,6 +196,7 @@ class TreeView extends React.Component {
           toolbarPosition={"none"}
           detectAutoPan={false}
           background={"#FFF"}
+          miniaturePosition={"none"}
           // onMouseDown={this.startPan.bind(this)}
           onDoubleClick={funcs.resetView.bind(this)}
           //onMouseUp={this.endPan.bind(this)}
