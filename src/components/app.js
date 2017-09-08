@@ -8,7 +8,7 @@ import { loadJSONs } from "../actions/loadData";
 import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
-import Frequencies from "./charts/frequencies";
+// import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
 import Map from "./map/map";
 import TreeView from "./tree/treeView";
@@ -98,7 +98,6 @@ class App extends React.Component {
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
               justGotNewDatasetRenderNewMap={false}
             />
-            <Frequencies/>
             <Entropy
               sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
             />
