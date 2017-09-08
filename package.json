@@ -1,6 +1,6 @@
 {
   "name": "nextstrain-auspice",
-  "version": "1.3.16",
+  "version": "1.4.0",
   "description": "Nextstrain auspice",
   "scripts": {
     "clean": "rimraf dist",
