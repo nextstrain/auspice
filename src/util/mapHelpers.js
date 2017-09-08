@@ -1,6 +1,7 @@
 import _findIndex from "lodash/findIndex";
 import _findLastIndex from "lodash/findLastIndex";
 import { line, curveBasis } from "d3-shape";
+import { easeLinear } from "d3-ease";
 
 /* util */
 
@@ -210,7 +211,9 @@ export const updateVisibility = (
 
   d3elems.demes
     .data(demeData)
-    .transition(5)
+    .transition()
+    .duration(200)
+    .ease(easeLinear)
     .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
     .attr("r", (d) => { return 4 * Math.sqrt(d.count); });
 

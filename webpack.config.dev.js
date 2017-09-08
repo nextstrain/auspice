@@ -1,12 +1,12 @@
-var path = require('path');
-var webpack = require('webpack');
+const path = require('path');
+const webpack = require('webpack');
 
 // let commitHash = require('child_process')
 //   .execSync('git rev-parse --short HEAD')
 //   .toString();
 
 module.exports = {
-  devtool: ['eval','sourcemap'],
+  devtool: 'eval-source-map',
   entry: [
     'webpack-hot-middleware/client',
     './src/index'
@@ -27,28 +27,22 @@ module.exports = {
     // new webpack.DefinePlugin({
     //   __COMMIT_HASH__: JSON.stringify(commitHash)
     // }),
-    new webpack.NoErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin()
   ],
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.js$/,
-        loaders: ['babel'],
+        use: ['babel-loader'],
         include: path.join(__dirname, 'src')
       },
       {
-        test: /\.json$/, loader: "json-loader"
-      },
-      {
         test: /\.css$/,
-        loaders: [ "style-loader", "css-loader" ]
+        use: ["style-loader", "css-loader"]
       },
-      // {
-      //   test: /\.svg$/,
-      //   loaders: [ "url-loader?limit=8192" ]
-      // },
       {
-        test: /\.(gif|png|jpe?g|svg)$/i, loader: "file-loader",
+        test: /\.(gif|png|jpe?g|svg)$/i,
+        use: "file-loader",
         include: path.join(__dirname, "src")
       }
     ]
