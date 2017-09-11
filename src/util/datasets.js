@@ -1,14 +1,14 @@
 export const dataURLStem = process.env.DATA_LOCAL ? "/data/" : "http://data.nextstrain.org/";
 
 const inits = {
-  "flu": "c=region&r=country",
+  "flu": "c=region&r=country&m=div",
   "avian": "c=division&r=division"
 };
 
 const seasonal = {
   segment: {
     ha: {
-      "resolution": {"3y": inits.flu, "6y": inits.flu, "12y": inits.flu, default: "6y"}
+      "resolution": {"2y": inits.flu, "3y": inits.flu, "6y": inits.flu, "12y": inits.flu, default: "3y"}
     },
     default: "ha"
   }
@@ -44,9 +44,9 @@ export const datasets = {
     "flu": {
       "lineage": {
         "h3n2": seasonal,
+        "h1n1pdm": seasonal,
         "vic": seasonal,
         "yam": seasonal,
-        "h1n1pdm": seasonal,
         "default": "h3n2"
       }
     },
