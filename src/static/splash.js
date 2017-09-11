@@ -1,5 +1,3 @@
-/*eslint-env browser*/
-/*eslint max-len: 0*/
 import React from "react";
 import { connect } from "react-redux";
 import { Link } from "react-router-dom";
@@ -10,7 +8,7 @@ import Flex from "../components/framework/flex";
 import { analyticsNewPage, triggerOutboundEvent } from "../util/googleAnalytics";
 import { generateLogos } from "./helpers/logos";
 import { tweets } from "./helpers/tweets";
-import { requestImage } from "../util/charonAPI";
+import { requestImage } from "../util/clientAPIInterface";
 
 const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 

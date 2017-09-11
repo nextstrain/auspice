@@ -65,11 +65,11 @@ app.get("/favicon.png", (req, res) => {
 app.get('/charon*', (req, res) => {
   const query = queryString.parse(req.url.split('?')[1]);
   console.log("API request: " + req.originalUrl);
-  if (Object.keys(query).indexOf("want") === -1) {
-    console.warn("Query rejected (nothing wanted) -- " + req.originalUrl);
+  if (Object.keys(query).indexOf("request") === -1) {
+    console.warn("Query rejected (nothing requested) -- " + req.originalUrl);
     return; // 404
   }
-  switch (query.want) {
+  switch (query.request) {
     case "manifest": {
       dataFuncs.getManifest(query, res);
       break;

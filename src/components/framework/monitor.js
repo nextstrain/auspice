@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import _throttle from "lodash/throttle";
 import { BROWSER_DIMENSIONS } from "../../actions/types";
-import { getManifest } from "../../util/charonAPI";
+import { getManifest } from "../../util/clientAPIInterface";
 
 @connect()
 class Monitor extends React.Component {

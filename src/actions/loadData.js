@@ -140,10 +140,10 @@ export const loadJSONs = (router) => { // eslint-disable-line import/prefer-defa
     dispatch({type: types.DATA_INVALID});
     const data_path = turnURLtoDataPath(router, {pathogen: datasets.pathogen});
     const JSONpaths = {
-      meta: charonAPIAddress + "want=json&path=" + data_path + "_meta.json",
-      tree: charonAPIAddress + "want=json&path=" + data_path + "_tree.json",
-      seqs: charonAPIAddress + "want=json&path=" + data_path + "_sequences.json",
-      entropy: charonAPIAddress + "want=json&path=" + data_path + "_entropy.json"
+      meta: charonAPIAddress + "request=json&path=" + data_path + "_meta.json",
+      tree: charonAPIAddress + "request=json&path=" + data_path + "_tree.json",
+      seqs: charonAPIAddress + "request=json&path=" + data_path + "_sequences.json",
+      entropy: charonAPIAddress + "request=json&path=" + data_path + "_entropy.json"
     };
     dispatch(loadMetaAndTreeAndSequencesJSONs(JSONpaths, router));
     /* subsequent JSON loading is *not* essential to the main functionality */

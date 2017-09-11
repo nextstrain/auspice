@@ -6,7 +6,7 @@ const datasets = (state = {
   ready: false
 }, action) => {
   switch (action.type) {
-    case types.CHARON_INIT: {
+    case types.MANIFEST_RECEIVED: {
       return {
         splash: action.splash,
         pathogen: action.pathogen,

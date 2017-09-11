@@ -1,13 +1,13 @@
-import { CHARON_INIT } from "../actions/types";
+import { MANIFEST_RECEIVED } from "../actions/types";
 import { errorNotification } from "../actions/notifications";
 import { charonAPIAddress } from "./globals";
 import queryString from "query-string";
 
 const processData = (data, dispatch) => {
   const datasets = JSON.parse(data);
-  console.log("CHARON RETURNED:", datasets);
+  console.log("SERVER API REQUEST RETURNED:", datasets);
   dispatch({
-    type: CHARON_INIT,
+    type: MANIFEST_RECEIVED,
     splash: datasets.splash,
     pathogen: datasets.pathogen,
     user: "guest"
@@ -16,9 +16,7 @@ const processData = (data, dispatch) => {
 
 export const getManifest = (router, dispatch) => {
   const charonErrorHandler = (e) => {
-    process.env.DATA_LOCAL ?
-      dispatch(errorNotification({message: "Charon is not running locally", details: "cd nextstrain/charon; node server.js"})) :
-      dispatch(errorNotification({message: "Failed to get datasets from server"}));
+    dispatch(errorNotification({message: "Failed to get datasets from server"}));
     console.error(e);
   };
 
@@ -36,10 +34,10 @@ export const getManifest = (router, dispatch) => {
     }
   };
   xmlHttp.onerror = charonErrorHandler;
-  xmlHttp.open("get", charonAPIAddress + 'want=manifest&user=' + user, true); // true for asynchronous
+  xmlHttp.open("get", charonAPIAddress + 'request=manifest&user=' + user, true); // true for asynchronous
   xmlHttp.send(null);
 };
 
 export const requestImage = (src) => {
-  return charonAPIAddress + "want=image&src=" + src;
+  return charonAPIAddress + "request=image&src=" + src;
 };
