@@ -44,7 +44,7 @@ const About = () => {
 
             <p/><Link to="/ebola">Ebola Virus</Link><p/>
 
-            The 2013-2016 Ebola outbreak caused worldwide alarm and over 10,000 fatalities in West Africa. Nextstrain allows exploration of the phylogeny of over 2000 genomes, complete with temporal and geographic data and inferred transmission events. For a review into how genomic sequencing helped understand this outbreak see <a href="http://www.nature.com/nature/journal/v538/n7624/full/nature19790.html">Holmes <i>et al</i></a>
+            The 2013-2016 Ebola outbreak caused worldwide alarm and over 10,000 fatalities in West Africa. Nextstrain allows exploration of the phylogeny of over 1500 genomes, complete with temporal and geographic data and inferred transmission events. For a review into how genomic sequencing helped understand this outbreak see <a href="http://www.nature.com/nature/journal/v538/n7624/full/nature19790.html">Holmes <i>et al</i></a>
 
             <p/><Link to="/zika">Zika Virus</Link><p/>
 
