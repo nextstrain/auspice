@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { datasets } from "../../util/datasets";
 import ChooseVirusSelect from "./choose-virus-select";
 import parseParams from "../../util/parseParams";
 
@@ -19,7 +18,8 @@ const tidyUpPathname = function (pathname) {
 @connect((state) => {
   return {
     datasetPathName: state.controls.datasetPathName, /* triggers component update */
-    geoResolution: state.controls.geoResolution
+    geoResolution: state.controls.geoResolution,
+    pathogen: state.datasets.pathogen
   };
 })
 class ChooseVirus extends React.Component {
@@ -37,12 +37,16 @@ class ChooseVirus extends React.Component {
   }
 
   render() {
+    /* if charon hasn't given us data yet, we should not render the dropdown */
+    if (!this.props.pathogen) return null;
+
+    const datasets = {pathogen: this.props.pathogen};
     const styles = this.getStyles();
     const pathname = this.context.router.history.location.pathname;
     /* analyse the current route in order to adjust the dataset selection choices.
     paramFields is an object with keys "virus" and potentially "lineage" and "duration"
     as well */
-    const paramFields = parseParams(tidyUpPathname(pathname)).dataset;
+    const paramFields = parseParams(tidyUpPathname(pathname), datasets).dataset;
     // names of the different selectors in the current hierarchy: [virus, lineage, duration]
     // there will be (fields.length) dropdown boxes
     const fields = Object.keys(paramFields).sort((a, b) => paramFields[a][0] > paramFields[b][0]);

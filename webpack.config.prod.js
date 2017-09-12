@@ -21,8 +21,7 @@ module.exports = {
     // as of webpack 2 OccurrenceOrderPlugin is on by default
     new webpack.DefinePlugin({
       "process.env": {
-        NODE_ENV: JSON.stringify("production"),
-        DATA_LOCAL: JSON.stringify(false)
+        NODE_ENV: JSON.stringify("production")
       }
     }),
 

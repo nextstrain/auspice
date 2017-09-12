@@ -9,7 +9,7 @@ import App from "./components/app";
 import About from "./static/about";
 import Methods from "./static/methods";
 import Splash from "./static/splash";
-import BrowserDimensionMonitor from "./components/framework/browserDimensionMonitor";
+import Monitor from "./components/framework/monitor";
 import Notifications from "./components/notifications/notifications";
 import { setUpPerf } from "./util/quantify-performance";
 import { enableAnimationPerfTesting } from "./util/globals";
@@ -39,17 +39,13 @@ class Root extends React.Component {
       <Provider store={store}>
         <BrowserRouter>
           <div>
-            <BrowserDimensionMonitor/>
+            <Monitor/>
             <Notifications/>
             <Switch>
+              <Route exact path="/" component={Splash}/>
               <Route path="/methods" component={Methods}/>
               <Route path="/about" component={About}/>
-              <Route path="/zika" component={App}/>
-              <Route path="/ebola" component={App}/>
-              <Route path="/flu*" component={App}/>
-              <Route path="/avian*" component={App}/>
-              <Route path="/dengue*" component={App}/>
-              <Route path="*" component={Splash}/>
+              <Route path="/*" component={App}/>
             </Switch>
           </div>
         </BrowserRouter>
