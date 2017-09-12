@@ -58,6 +58,11 @@ if (devServer) {
   app.use('/dist', express.static('dist')); // why is this line here?
 }
 
+/* loader.io token (needed to run tests) */
+app.get("/loaderio-b65b3d7f32a7febf80e8e05678347cb3.txt", (req, res) => {
+  res.sendFile(path.join(__dirname, "loader.io-token.txt"));
+});
+
 app.get("/favicon.png", (req, res) => {
   res.sendFile(path.join(__dirname, "favicon.png"));
 });
