@@ -5,7 +5,7 @@ import queryString from "query-string";
 
 const processData = (data, dispatch) => {
   const datasets = JSON.parse(data);
-  console.log("SERVER API REQUEST RETURNED:", datasets);
+  // console.log("SERVER API REQUEST RETURNED:", datasets);
   dispatch({
     type: MANIFEST_RECEIVED,
     splash: datasets.splash,
