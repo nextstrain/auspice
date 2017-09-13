@@ -2,7 +2,8 @@
 const path = require("path");
 const express = require("express");
 const expressStaticGzip = require("express-static-gzip");
-const dataFuncs = require('./src/server/data');
+const getFiles = require('./src/server/util/getFiles');
+const serverReact = require('./src/server/util/sendReactComponents');
 const queryString = require("query-string");
 
 /*
@@ -31,13 +32,11 @@ global.LOCAL_DATA_PATH = path.join(__dirname, "/data/");
 
 /* dev-specific libraries & imports */
 let webpack;
-// let request;
 let config;
 let webpackDevMiddleware;
 let webpackHotMiddleware;
 if (devServer) {
-  webpack = require("webpack");
-  // request = require("request");
+  webpack = require("webpack"); // eslint-disable-line import/no-extraneous-dependencies global-require
   config = require("./webpack.config.dev");
   webpackDevMiddleware = require("webpack-dev-middleware");
   webpackHotMiddleware = require("webpack-hot-middleware");
@@ -76,13 +75,16 @@ app.get('/charon*', (req, res) => {
   }
   switch (query.request) {
     case "manifest": {
-      dataFuncs.getManifest(query, res);
+      getFiles.getManifest(query, res);
       break;
     } case "image": {
-      dataFuncs.getImage(query, res);
+      getFiles.getImage(query, res);
       break;
     } case "json": {
-      dataFuncs.getDatasetJson(query, res);
+      getFiles.getDatasetJson(query, res);
+      break;
+    } case "report": {
+      serverReact.serveStaticReport(query, res);
       break;
     } default: {
       console.warn("Query rejected (unknown want) -- " + req.originalUrl);
