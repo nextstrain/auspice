@@ -74,6 +74,18 @@ the content, the padding and border, but not the margin.
   min-width: 240px;
 }
 
+.static h3 {
+  text-align: left;
+  font-size: 16px;
+  line-height: 28px;
+  margin-top: 10px;
+  margin-bottom: 0px;
+  font-weight: 500;
+  color: var(--darkGrey);
+  border-bottom: 0px;
+  min-width: 240px;
+}
+
 .static .bigspacer {
   height: 30px;
 }
@@ -115,6 +127,14 @@ strong {
   width: 100%;
 }
 
+.static .clickable {
+  color: #5097BA;
+  text-decoration: none;
+  cursor: pointer;
+  font-family: "Lato";
+  font-weight: 400;
+  font-size: 94%;
+}
 /*.static aside {
   float: right;
 }*/

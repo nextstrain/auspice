@@ -10,14 +10,14 @@ import { charonAPIAddress } from "../util/globals";
 i.e. headers, footers etc but not the content.
 The content is delivered statically from the server */
 
-@connect()
+@connect((state) => ({reports: state.datasets.reports}))
 class Reports extends React.Component {
   // analyticsNewPage();
   static contextTypes = {
     router: PropTypes.object.isRequired
   }
 
-  getAndInsertReportContentViaAPI() {
+  getAndInsertReportContentViaAPI(requestedPath) {
     // this.context.router
     const errorHandler = (e) => {
       this.props.dispatch(errorNotification({message: "Failed to get report from server"}));
@@ -44,27 +44,75 @@ class Reports extends React.Component {
       }
     };
     xmlHttp.onerror = errorHandler;
-    xmlHttp.open("get", charonAPIAddress + 'request=report', true);
+    xmlHttp.open("get", charonAPIAddress + 'request=report&path=' + requestedPath, true);
     xmlHttp.send(null);
   }
 
   componentDidMount() {
-    console.log("Client querying API for report content")
-    this.getAndInsertReportContentViaAPI();
+    // console.log("Client querying API for report content")
+    // this.getAndInsertReportContentViaAPI();
   }
 
   render() {
+    const mainTitle = (
+      <div className="row">
+        <div className="col-md-1"/>
+        <div className="col-md-7">
+          <h1>Reports</h1>
+        </div>
+      </div>
+    );
+    if (!this.props.reports) {
+      return (
+        <g>
+          <TitleBar dataNameHidden methodsSelected/>
+          {mainTitle}
+          <div>
+            awaiting manifest....
+          </div>
+        </g>
+      );
+    }
     return (
       <g>
         <TitleBar dataNameHidden methodsSelected/>
         <div className="static container">
+          {mainTitle}
+          {/* PART 1: the available reports (from the manifest) */}
           <div className="row">
             <div className="col-md-1"/>
-            <div ref={(c) => { this.reportBody = c; }}>
-              To Be Replaced by server rendered content
-              <br/>
-              (this should be a spinner i think)
+            <div className="col-md-6" ref={(c) => { this.reportBody = c; }}>
+              {this.props.reports.map((d) => {
+                return (
+                  <g key={d.title}>
+                    <h3>{d.title}</h3>
+                    <ul>
+                      {d.posts.map((p) => {
+                        return (
+                          <li key={p.title}>
+                            <div
+                              className={"clickable"}
+                              tabIndex="0"
+                              role="button"
+                              onClick={() => {this.getAndInsertReportContentViaAPI(p.path);}}
+                            >
+                              {p.title}
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </g>
+                );
+              })}
             </div>
+            <div className="col-md-1"/>
+          </div>
+          {/* PART 2: the content (inserted from the server) */}
+          <div className="row">
+            <div className="col-md-1"/>
+            <div className="col-md-6" ref={(c) => { this.reportBody = c; }} />
+            <div className="col-md-1"/>
           </div>
         </div>
       </g>
