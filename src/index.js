@@ -20,7 +20,7 @@ import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";
 import "./css/static.css";
 import "./css/notifications.css";
-
+import "./css/reports.css";
 
 const store = configureStore();
 

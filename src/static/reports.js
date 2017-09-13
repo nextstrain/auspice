@@ -26,8 +26,8 @@ class Reports extends React.Component {
     const xmlHttp = new XMLHttpRequest();
     xmlHttp.onload = () => {
       if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-        console.log("HERE IT IS!!!!")
-        console.log(xmlHttp.responseText)
+        console.log("server delivered the following HTML:");
+        console.log(xmlHttp.responseText);
         const htmlString = xmlHttp.responseText;
         /* we now need to insert the html string into the waiting div,
         I can't really find a good guide on how to do this (WTF!).
@@ -109,9 +109,9 @@ class Reports extends React.Component {
             <div className="col-md-1"/>
           </div>
           {/* PART 2: the content (inserted from the server) */}
-          <div className="row">
+          <div className="reports row">
             <div className="col-md-1"/>
-            <div className="col-md-6" ref={(c) => { this.reportBody = c; }} />
+            <div className="col-md-10" ref={(c) => { this.reportBody = c; }} />
             <div className="col-md-1"/>
           </div>
         </div>

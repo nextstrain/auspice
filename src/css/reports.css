@@ -1,0 +1,76 @@
+:root {
+  --darkGrey: #333;
+  --medGrey: #888;
+  --lightGrey: #CCC;
+  --brandColor: #5097BA;
+}
+
+.reports h1 {
+  text-align: left;
+  font-size: 38px;
+  line-height: 32px;
+  font-weight: 300;
+  color: var(--medGrey);
+  min-width: 240px;
+  margin-left: -50px;
+  margin-top: 40px;
+  margin-bottom: 30px;
+}
+
+.reports h2 {
+  text-align: left;
+  font-size: 24px;
+  line-height: 28px;
+  margin-left: -50px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  font-weight: 500;
+  color: var(--medGrey);
+  border-bottom: 10px;
+  min-width: 240px;
+}
+
+.reports h3 {
+  text-align: left;
+  font-size: 16px;
+  line-height: 28px;
+  margin-left: -50px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  font-weight: 500;
+  color: var(--medGrey);
+  border-bottom: 0px;
+  min-width: 240px;
+}
+
+.reports p {
+  text-align: left;
+  font-size: 14px;
+  margin-top: 5px;
+  margin-bottom: 0px;
+  font-weight: 500;
+  color: var(--darkGrey);
+}
+
+.reports p {
+  text-align: left;
+  font-size: 14px;
+  line-height: 24px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  font-weight: 500;
+  color: var(--darkGrey);
+}
+
+.reports strong {
+  color: var(--darkGrey);
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.reports img {
+  padding-top: 25px;
+  padding-bottom: 25px;
+  margin-left: 10%;
+  width: 80%;
+}
