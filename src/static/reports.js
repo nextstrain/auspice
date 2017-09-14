@@ -103,7 +103,7 @@ class Reports extends React.Component {
                 onChange={() => this.setState({showTOC: !this.state.showTOC})}
               />
               <label htmlFor="toggle">
-                Table of Contents
+                Available Reports
               </label>
               <div id="toc">
                 {this.props.reports.map((d) => {
