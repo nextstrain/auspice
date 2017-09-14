@@ -110,6 +110,10 @@ class TreeView extends React.Component {
     ) {
       const baseNodeInView = this.state.selectedBranch ? this.state.selectedBranch.n.arrayIdx : 0;
       this.state.tree.zoomIntoClade(this.state.tree.nodes[baseNodeInView], mediumTransitionDuration);
+      /*
+        this shouldn't be necessary - it is currently a mystery why the svg does not change on browser size with out this
+      */
+      this.forceUpdate();
     }
   }
 
