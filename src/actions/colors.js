@@ -1,6 +1,6 @@
 import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
-import { calcNodeColor } from "../util/treeHelpers";
+import { calcNodeColor } from "../components/tree/treeHelpers";
 import * as types from "./types";
 
 export const updateColors = function (providedColorBy = undefined) {

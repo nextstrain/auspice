@@ -1,5 +1,5 @@
-import { flattenTree, appendParentsToTree } from "../util/treeHelpers";
-import { processNodes, calcLayouts } from "../util/processNodes";
+import { flattenTree, appendParentsToTree } from "../components/tree/treeHelpers";
+import { processNodes, calcLayouts } from "../components/tree/processNodes";
 import * as types from "../actions/types";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies

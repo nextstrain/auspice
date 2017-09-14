@@ -1,6 +1,6 @@
 import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { numericToCalendar, currentNumDate, currentCalDate } from "../util/dateHelpers";
-import { flattenTree } from "../util/treeHelpers";
+import { flattenTree } from "../components/tree/treeHelpers";
 import getColorScale from "../util/getColorScale";
 import { defaultGeoResolution,
   defaultColorBy,

@@ -3,7 +3,7 @@ import { event } from "d3-selection";
 import { min, max, sum } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { flattenTree, appendParentsToTree } from "./treeHelpers";
-import { dataFont, darkGrey } from "../globalStyles";
+import { dataFont, darkGrey } from "../../globalStyles";
 
 /*
  * adds the total number of descendant leaves to each node in the tree

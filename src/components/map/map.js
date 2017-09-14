@@ -8,7 +8,7 @@ import { select } from "d3-selection";
 import leafletImage from "leaflet-image";
 import Card from "../framework/card";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
-import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "../../util/mapHelpers";
+import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint, enableAnimationPerfTesting } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import { modifyURLquery } from "../../util/urlHelpers";
@@ -16,10 +16,10 @@ import {
   createDemeAndTransmissionData,
   updateDemeAndTransmissionDataColAndVis,
   updateDemeAndTransmissionDataLatLong
-} from "../../util/mapHelpersLatLong";
+} from "./mapHelpersLatLong";
 import { changeDateFilter } from "../../actions/treeProperties";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
-import { incommingMapPNG } from "../../util/downloadDataFunctions";
+import { incommingMapPNG } from "../download/helperFunctions";
 
 /* global L */
 // L is global in scope and placed by leaflet()

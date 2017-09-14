@@ -15,7 +15,7 @@ import TreeView from "./tree/treeView";
 import { controlsHiddenWidth } from "../util/globals";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
-import DownloadModal from "./controls/downloadModal";
+import DownloadModal from "./download/downloadModal";
 import { analyticsNewPage } from "../util/googleAnalytics";
 import filesDropped from "../actions/filesDropped";
 

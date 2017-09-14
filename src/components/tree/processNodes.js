@@ -1,5 +1,5 @@
 import { calcFullTipCounts, calcBranchLength, calcDates } from "./treeHelpers";
-import { defaultDistanceMeasures } from "./globals";
+import { defaultDistanceMeasures } from "../../util/globals";
 
 export const processNodes = (nodes) => {
   const rootNode = nodes[0];

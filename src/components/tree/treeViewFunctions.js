@@ -3,7 +3,7 @@ import { interpolateRgb } from "d3-interpolate";
 import { updateVisibleTipsAndBranchThicknesses} from "../../actions/treeProperties";
 import { branchOpacityConstant,
   branchOpacityFunction,
-  branchInterpolateColour } from "../../util/treeHelpers";
+  branchInterpolateColour } from "./treeHelpers";
 import { mediumTransitionDuration } from "../../util/globals";
 
 export const visibleArea = function (Viewer) {

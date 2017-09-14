@@ -2,7 +2,7 @@ import _forOwn from "lodash/forOwn";
 import _map from "lodash/map";
 import _minBy from "lodash/minBy";
 import { interpolateNumber } from "d3-interpolate";
-import { averageColors } from "./colorHelpers";
+import { averageColors } from "../../util/colorHelpers";
 import { computeMidpoint, Bezier } from "./transmissionBezier";
 
 /* global L */

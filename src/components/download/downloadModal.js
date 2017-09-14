@@ -5,32 +5,9 @@ import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, medGrey, infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/tipSelectedPanel";
 import { authorString, formatURLString } from "../../util/stringHelpers";
-import * as download from "../../util/downloadDataFunctions";
+import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";
 
-export const isPaperURLValid = (d) => {
-  return (
-    Object.prototype.hasOwnProperty.call(d, "paper_url") &&
-    !d.paper_url.endsWith('/') &&
-    d.paper_url !== "?"
-  );
-};
-
-export const getAuthor = (info, k) => {
-  if (info === undefined || k === undefined) {
-    return (
-      <span>Not Available</span>
-    );
-  }
-  if (isPaperURLValid(info[k])) {
-    return (
-      <a href={formatURLString(info[k].paper_url)} target="_blank">
-        {authorString(k)}
-      </a>
-    );
-  }
-  return authorString(k);
-};
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -99,11 +76,11 @@ class DownloadModal extends React.Component {
     const iconWidth = 25;
     const iconStroke = medGrey;
     const buttons = [
-      ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, dataset, this.props.tree.nodes[0], false)],
-      ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => download.newick(this.props.dispatch, dataset, this.props.tree.nodes[0], true)],
-      ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => download.strainCSV(this.props.dispatch, dataset, this.props.tree.nodes, this.props.tree.attrs)],
-      ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => download.authorCSV(this.props.dispatch, dataset, this.props.metadata.metadata)],
-      ["Screenshot (SGV)", (<icons.Panels width={iconWidth} stroke={iconStroke} />), () => download.SVG(this.props.dispatch, dataset)]
+      ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, dataset, this.props.tree.nodes[0], false)],
+      ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, dataset, this.props.tree.nodes[0], true)],
+      ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.strainCSV(this.props.dispatch, dataset, this.props.tree.nodes, this.props.tree.attrs)],
+      ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorCSV(this.props.dispatch, dataset, this.props.metadata.metadata)],
+      ["Screenshot (SGV)", (<icons.Panels width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, dataset)]
     ];
     return (
       <div className="row">
@@ -151,7 +128,7 @@ class DownloadModal extends React.Component {
                 return meta.author_info[a].n > meta.author_info[b].n ? -1 : 1;
               }).map((k) => (
                 <span key={k}>
-                  {getAuthor(meta.author_info, k)}
+                  {helpers.getAuthor(meta.author_info, k)}
                   {" (n = " + meta.author_info[k].n + "), "}
                 </span>
               ))}

@@ -2,7 +2,7 @@ import { calcVisibility,
   calcTipRadii,
   calcTipCounts,
   identifyPathToTip,
-  calcBranchThickness } from "../util/treeHelpers";
+  calcBranchThickness } from "../components/tree/treeHelpers";
 import * as types from "./types";
 
 const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {

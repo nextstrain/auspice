@@ -1,7 +1,31 @@
 /* eslint no-restricted-syntax: 0 */
-import { infoNotification, errorNotification, successNotification, warningNotification } from "../actions/notifications";
-import { prettyString, formatURLString } from "./stringHelpers";
-import { isPaperURLValid } from "../components/controls/downloadModal";
+import React from "react";
+import { infoNotification, errorNotification, successNotification, warningNotification } from "../../actions/notifications";
+import { prettyString, formatURLString, authorString } from "../../util/stringHelpers";
+
+export const isPaperURLValid = (d) => {
+  return (
+    Object.prototype.hasOwnProperty.call(d, "paper_url") &&
+    !d.paper_url.endsWith('/') &&
+    d.paper_url !== "?"
+  );
+};
+
+export const getAuthor = (info, k) => {
+  if (info === undefined || k === undefined) {
+    return (
+      <span>Not Available</span>
+    );
+  }
+  if (isPaperURLValid(info[k])) {
+    return (
+      <a href={formatURLString(info[k].paper_url)} target="_blank">
+        {authorString(k)}
+      </a>
+    );
+  }
+  return authorString(k);
+};
 
 /* this function based on https://github.com/daviddao/biojs-io-newick/blob/master/src/newick.js */
 const treeToNewick = (root, temporal) => {

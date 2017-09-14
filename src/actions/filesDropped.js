@@ -1,8 +1,7 @@
-/*eslint max-len: 0*/
-import { infoNotification, errorNotification, successNotification, warningNotification } from "./notifications";
 import Papa from "papaparse";
+import { errorNotification, successNotification, warningNotification } from "./notifications";
 import { ADD_COLOR_BYS } from "./types";
-import { turnAttrsIntoHeaderArray } from "../util/downloadDataFunctions";
+import { turnAttrsIntoHeaderArray } from "../components/download/helperFunctions";
 
 const csvCompleteCallback = (dispatch, getState, results, file) => {
   const { tree } = getState();

@@ -1,7 +1,7 @@
 import { scalePow } from "d3-scale";
-import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "./globals";
-import { getGenotype } from "./getGenotype";
-import { calendarToNumeric } from "./dateHelpers";
+import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "../../util/globals";
+import { getGenotype } from "../../util/getGenotype";
+import { calendarToNumeric } from "../../util/dateHelpers";
 
 /**
 *  For each node visit if node not a hashMap key, insert

@@ -2,8 +2,7 @@ import { scaleLinear, scaleOrdinal } from "d3-scale";
 import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
-import createLegendMatchBound from "./createLegendMatchBounds";
-import { genericDomain, colors, genotypeColors } from "./globals";
+import { genericDomain, colors, genotypeColors, reallySmallNumber, reallyBigNumber } from "./globals";
 import { parseGenotype, getGenotype } from "./getGenotype";
 
 /* this checks if there are more items in the tree compared
@@ -18,6 +17,24 @@ const getExtraVals = (nodes, colorBy, color_map) => {
   return valsInTree.filter((x) => valsInMeta.indexOf(x) === -1)
 }
 
+const createLegendMatchBound = (colorScale) => {
+  const lower_bound = {};
+  const upper_bound = {};
+  lower_bound[colorScale.domain()[0]] = reallySmallNumber;
+  upper_bound[colorScale.domain()[0]] = colorScale.domain()[0];
+
+  for (let i = 1; i < colorScale.domain().length; i++) {
+    lower_bound[colorScale.domain()[i]] = colorScale.domain()[i - 1];
+    upper_bound[colorScale.domain()[i]] = colorScale.domain()[i];
+  }
+
+  upper_bound[colorScale.domain()[colorScale.domain().length - 1]] = reallyBigNumber;
+
+  return {
+    lower_bound,
+    upper_bound
+  };
+};
 
 const genericScale = (cmin, cmax, vals = false) => {
   if (vals && vals.length <= 9) {

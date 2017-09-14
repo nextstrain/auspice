@@ -2,7 +2,7 @@ import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 import { prettyString } from "../../util/stringHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
-import { getTipColorAttribute } from "../../util/treeHelpers";
+import { getTipColorAttribute } from "./treeHelpers";
 
 const infoLineJSX = (item, value) => (
   <g>

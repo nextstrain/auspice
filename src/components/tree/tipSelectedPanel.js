@@ -3,7 +3,8 @@ import { infoPanelStyles } from "../../globalStyles";
 import { enableDownloadModal } from "../../util/globals";
 import { prettyString, authorString } from "../../util/stringHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
-import { getAuthor } from "../controls/downloadModal";
+// import { getAuthor } from "../download/helperFunctions";
+
 const styles = {
   container: {
     position: "absolute",
