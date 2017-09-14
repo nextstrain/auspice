@@ -1,19 +1,17 @@
 import React from "react";
-import Radium from "radium";
-import {headerFont, medGrey, darkGrey} from "../../globalStyles";
+import { headerFont, medGrey } from "../../globalStyles";
 
-@Radium
 class Card extends React.Component {
   getStyles() {
     return {
       base: {
         backgroundColor: "#FFFFFF",
         display: "inline-block",
-        marginLeft: 10,
-        marginRight: 10,
-        marginTop: 5,
-        marginBottom: 5,
-        boxShadow: "2px 2px 4px 1px rgba(215,215,215,0.85)",
+        marginLeft: 12,
+        marginRight: 0,
+        marginTop: 8,
+        marginBottom: 2,
+        boxShadow: "0px 0px 4px 2px rgba(215,215,215,0.55)",
         borderRadius: 2,
         padding: 5,
         overflow: "hidden",
@@ -23,7 +21,9 @@ class Card extends React.Component {
         fontFamily: headerFont,
         color: medGrey,
         fontSize: 16,
-        margin: 5,
+        marginLeft: 2,
+        marginTop: 2,
+        marginBottom: 5,
         fontWeight: 500,
         backgroundColor: "#FFFFFF"
       }
@@ -32,14 +32,10 @@ class Card extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <div style={[
-        styles.base,
-        this.props.style
-      ]}>
-        <div style={[
-          styles.title,
-          this.props.titleStyles
-        ]}> {this.props.title} </div>
+      <div style={{ ...styles.base, ...this.props.style }}>
+        <div style={{ ...styles.title, ...this.props.titleStyles }}>
+          {this.props.title}
+        </div>
         <div style={{
             display: "flex",
             justifyContent: this.props.center ? "center" : "flex-start"

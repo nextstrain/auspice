@@ -1,5 +1,9 @@
-import d3 from "d3";
-import { dataFont, darkGrey } from "../globalStyles";
+import _debounce from "lodash/debounce";
+import { event } from "d3-selection";
+import { min, max, sum } from "d3-array";
+import { scaleLinear } from "d3-scale";
+import { flattenTree, appendParentsToTree } from "./treeHelpers";
+import { dataFont, darkGrey } from "../../globalStyles";
 
 /*
  * adds the total number of descendant leaves to each node in the tree
@@ -76,19 +80,17 @@ const applyToChildren = function(node,func){
 var PhyloTree = function(treeJson) {
   this.grid = false;
   this.setDefaults();
-  // use d3 tree layout to convert the tree json into a flat list of nodes
-  this.tree = d3.layout.tree();
+  appendParentsToTree(treeJson); // add reference to .parent to each node in tree
+  const nodesArray = flattenTree(treeJson); // convert the tree json into a flat list of nodes
   // wrap each node in a shell structure to avoid mutating the input data
-  this.nodes = this.tree.nodes(treeJson).map((d) => ({
+  this.nodes = nodesArray.map((d) => ({
     n: d, // .n is the original node
     x: 0, // x,y coordinates
     y: 0,
     r: this.params.tipRadius // set defaults
   }));
-  // assign the root as its own parent to avoid exception handling
-  this.nodes[0].n.parent = this.nodes[0].n;
   // pull out the total number of tips -- the is the maximal yvalue
-  this.numberOfTips = d3.max(this.nodes.map(function(d) {
+  this.numberOfTips = max(this.nodes.map(function(d) {
     return d.n.yvalue;
   }));
   this.nodes.forEach(function(d) {
@@ -114,10 +116,14 @@ var PhyloTree = function(treeJson) {
     }
   });
 
-  this.xScale = d3.scale.linear();
-  this.yScale = d3.scale.linear();
+  this.xScale = scaleLinear();
+  this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
   addLeafCount(this.nodes[0]);
+
+  /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
+  this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
+    {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
 };
 
 /*
@@ -161,6 +167,7 @@ PhyloTree.prototype.setDefaults = function () {
         tipLabelFill: "#555",
         tipLabelPadX: 8,
         tipLabelPadY: 2,
+      mapToScreenDebounceTime: 500
     };
 };
 
@@ -335,8 +342,8 @@ PhyloTree.prototype.timeVsRootToTip = function(){
   //const intercept = meanDiv-meanTime*slope;
   // REGRESSION THROUGH ROOT
   const offset = this.nodes[0].depth;
-  const XY = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y)*(d.depth-offset)))/nTips;
-  const secondMomentTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-offset)*(d.depth-offset)))/nTips;
+  const XY = sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y)*(d.depth-offset)))/nTips;
+  const secondMomentTime = sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-offset)*(d.depth-offset)))/nTips;
   const slope = XY/secondMomentTime;
   const intercept = -offset*slope;
   this.regression = {slope:slope, intercept: intercept};
@@ -487,22 +494,22 @@ PhyloTree.prototype.mapToScreen = function(){
         // handle "radial and unrooted differently since they need to be square
         // since branch length move in x and y direction
         // TODO: should be tied to svg dimensions
-        const minX = d3.min(tmp_xValues);
-        const minY = d3.min(tmp_yValues);
-        const spanX = d3.max(tmp_xValues)-minX;
-        const spanY = d3.max(tmp_yValues)-minY;
-        const maxSpan = d3.max([spanY, spanX]);
+        const minX = min(tmp_xValues);
+        const minY = min(tmp_yValues);
+        const spanX = max(tmp_xValues)-minX;
+        const spanY = max(tmp_yValues)-minY;
+        const maxSpan = max([spanY, spanX]);
         const ySlack = (spanX>spanY) ? (spanX-spanY)*0.5 : 0.0;
         const xSlack = (spanX<spanY) ? (spanY-spanX)*0.5 : 0.0;
         this.xScale.domain([minX-xSlack, minX+maxSpan-xSlack]);
         this.yScale.domain([minY-ySlack, minY+maxSpan-ySlack]);
     }else if (this.layout==="clock"){
         // same as rectangular, but flipped yscale
-        this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
-        this.yScale.domain([d3.max(tmp_yValues), d3.min(tmp_yValues)]);
+        this.xScale.domain([min(tmp_xValues), max(tmp_xValues)]);
+        this.yScale.domain([max(tmp_yValues), min(tmp_yValues)]);
     }else{ //rectangular
-        this.xScale.domain([d3.min(tmp_xValues), d3.max(tmp_xValues)]);
-        this.yScale.domain([d3.min(tmp_yValues), d3.max(tmp_yValues)]);
+        this.xScale.domain([min(tmp_xValues), max(tmp_xValues)]);
+        this.yScale.domain([min(tmp_yValues), max(tmp_yValues)]);
     }
 
     // pass all x,y through scales and assign to xTip, xBase
@@ -568,7 +575,7 @@ PhyloTree.prototype.setScales = function(margins) {
     //Force Square: TODO, harmonize with the map to screen
     const xExtend = width - (margins["left"] || 0) - (margins["right"] || 0);
     const yExtend = height - (margins["top"] || 0) - (margins["top"] || 0);
-    const minExtend = d3.min([xExtend, yExtend]);
+    const minExtend = min([xExtend, yExtend]);
     const xSlack = xExtend - minExtend;
     const ySlack = yExtend - minExtend;
     this.xScale.range([0.5 * xSlack + margins["left"] || 0, width - 0.5 * xSlack - (margins["right"] || 0)]);
@@ -653,7 +660,7 @@ PhyloTree.prototype.addGrid = function(layout, yMinView, yMaxView) {
   const ymin = this.yScale.domain()[1];
   const ymax = this.yScale.domain()[0];
   const xmax = layout=="radial"
-                ? d3.max([this.xScale.domain()[1], this.yScale.domain()[1],
+                ? max([this.xScale.domain()[1], this.yScale.domain()[1],
                           -this.xScale.domain()[0], -this.yScale.domain()[0]])
                 : this.xScale.domain()[1];
 
@@ -717,15 +724,16 @@ PhyloTree.prototype.addGrid = function(layout, yMinView, yMaxView) {
   }
 
   const majorGrid = this.svg.selectAll('.majorGrid').data(gridPoints);
-  majorGrid.exit().remove();
-  majorGrid.enter().append("path");
-  majorGrid
-      .attr("d", gridline(this.xScale, this.yScale, layout))
-      .attr("class", "majorGrid")
-      .style("fill", "none")
-      .style("visibility", function (d){return d[1];})
-      .style("stroke",this.params.majorGridStroke)
-      .style("stroke-width",this.params.majorGridWidth);
+
+  majorGrid.exit().remove(); // EXIT
+  majorGrid.enter().append("path") // ENTER
+    .merge(majorGrid) // ENTER + UPDATE
+    .attr("d", gridline(this.xScale, this.yScale, layout))
+    .attr("class", "majorGrid")
+    .style("fill", "none")
+    .style("visibility", function (d){return d[1];})
+    .style("stroke",this.params.majorGridStroke)
+    .style("stroke-width",this.params.majorGridWidth);
 
   const xTextPos = function(xScale, layout){
       return function(x){
@@ -771,31 +779,31 @@ PhyloTree.prototype.addGrid = function(layout, yMinView, yMaxView) {
     }
   }
   const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
-  minorGrid.exit().remove();
-  minorGrid.enter().append("path");
-  minorGrid
-      .attr("d", gridline(this.xScale, this.yScale, layout))
-      .attr("class", "minorGrid")
-      .style("fill", "none")
-      .style("visibility", function (d){return d[1];})
-      .style("stroke",this.params.minorGridStroke)
-      .style("stroke-width",this.params.minorGridWidth);
+  minorGrid.exit().remove(); // EXIT
+  minorGrid.enter().append("path") // ENTER
+    .merge(minorGrid) // ENTER + UPDATE
+    .attr("d", gridline(this.xScale, this.yScale, layout))
+    .attr("class", "minorGrid")
+    .style("fill", "none")
+    .style("visibility", function (d){return d[1];})
+    .style("stroke",this.params.minorGridStroke)
+    .style("stroke-width",this.params.minorGridWidth);
 
   const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
   const precision = Math.max(0, 1-logRange);
   const precisionY = Math.max(0, 1-logRangeY);
-  gridLabels.exit().remove();
-  gridLabels.enter().append("text");
-  gridLabels
-      .text(function(d){return d[0].toFixed(d[2]==='y'?precisionY:precision);})
-      .attr("class", "gridTick")
-      .style("font-size",this.params.tickLabelSize)
-      .style("font-family",this.params.fontFamily)
-      .style("fill",this.params.tickLabelFill)
-      .style("text-anchor", this.layout==="radial" ? "end" : "middle")
-      .style("visibility", function (d){return d[1];})
-      .attr("x", xTextPos(this.xScale, layout))
-      .attr("y", yTextPos(this.yScale, layout));
+  gridLabels.exit().remove(); // EXIT
+  gridLabels.enter().append("text") // ENTER
+    .merge(gridLabels) // ENTER + UPDATE
+    .text(function(d){return d[0].toFixed(d[2]==='y'?precisionY:precision);})
+    .attr("class", "gridTick")
+    .style("font-size",this.params.tickLabelSize)
+    .style("font-family",this.params.fontFamily)
+    .style("fill",this.params.tickLabelFill)
+    .style("text-anchor", this.layout==="radial" ? "end" : "middle")
+    .style("visibility", function (d){return d[1];})
+    .attr("x", xTextPos(this.xScale, layout))
+    .attr("y", yTextPos(this.yScale, layout));
 
   this.grid=true;
 };
@@ -837,7 +845,7 @@ PhyloTree.prototype.drawTips = function() {
       return d.r;
     })
     .on("mouseover", (d) => {
-      this.callbacks.onTipHover(d, d3.event.pageX, d3.event.pageY)
+      this.callbacks.onTipHover(d, event.pageX, event.pageY)
     })
     .on("mouseout", (d) => {
       this.callbacks.onTipLeave(d)
@@ -916,7 +924,7 @@ PhyloTree.prototype.drawBranches = function() {
     .style("cursor", "pointer")
     .style("pointer-events", "auto")
     .on("mouseover", (d) => {
-      this.callbacks.onBranchHover(d, d3.event.pageX, d3.event.pageY)
+      this.callbacks.onBranchHover(d, event.pageX, event.pageY)
     })
     .on("mouseout", (d) => {
       this.callbacks.onBranchLeave(d)
@@ -1146,11 +1154,6 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
   setTimeout(fadeBack(this.svg, 0.2 * dt), 1.5 * dt);
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
-
-  /* if conditions are met then add back the confidence intervals */
-  if (this.layout === "rect") {
-    setTimeout(() => this.drawConfidence(false, true), 1.5 * dt);
-  }
 };
 
 /**
@@ -1271,7 +1274,7 @@ PhyloTree.prototype.updateTimeBar = function(d){
  * @param {object} styles object containing the styles to change
  * @param {int} dt time in milliseconds
  */
-PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) {
+PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt, quickdraw) {
   // assign new values and decide whether to update
   this.nodes.forEach(function(d, i) {
     d.update = false;
@@ -1294,8 +1297,12 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
     }
   });
   let updatePath = false;
-  if (styles["stroke-width"]){
-    this.mapToScreen();
+  if (styles["stroke-width"]) {
+    if (quickdraw) {
+      this.debouncedMapToScreen();
+    } else {
+      this.mapToScreen();
+    }
     updatePath = true;
   }
 
@@ -1333,6 +1340,20 @@ PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt) 
       .call(update(Object.keys(attrs), Object.keys(styles)));
   }
 };
+
+/* this need a bit more work as the quickdraw functionality improves */
+PhyloTree.prototype.rerenderAllElements = function () {
+  // console.log("rerenderAllElements")
+  this.mapToScreen();
+  this.svg.selectAll(".branch")
+    .transition().duration(0)
+    .style("stroke-width", (d) => d["stroke-width"]);
+  this.svg.selectAll(".branch")
+    .transition().duration(0)
+    .filter(".S")
+    .attr("d", (d) => d.branch[0]);
+};
+
 
 /**
  * as updateAttributeArray, but accepts a callback function rather than an array

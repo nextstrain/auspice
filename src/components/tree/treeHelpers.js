@@ -1,6 +1,74 @@
-import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "./globals";
-import { getGenotype } from "./getGenotype";
 import { scalePow } from "d3-scale";
+import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "../../util/globals";
+import { getGenotype } from "../../util/getGenotype";
+import { calendarToNumeric } from "../../util/dateHelpers";
+
+/**
+*  For each node visit if node not a hashMap key, insert
+*  into array.  Then append node into end of the array.
+*  @params node - object to check
+*  @param hashMap - object literal used for deduping
+*  @param array - final array that nodes are inserted
+*/
+const visitNode = (node, hashMap, array) => {
+  if (!hashMap[node.clade]) {
+    hashMap[node.clade] = true;
+    array.push(node);
+  }
+};
+
+/**
+*  Pre-order tree traversal visits each node using stack.
+*  Checks if leaf node based on node.children
+*  pushes all children into stack and continues traversal.
+*  hashMap object literal used for deduping.
+*  @param root - deserialized JSON root to begin traversal
+*  @returns array  - final array of nodes in order with no dups
+*/
+export const flattenTree = (root) => {
+
+  const stack = [], array = [], hashMap = {};
+  stack.push(root);
+
+  while (stack.length !== 0) {
+    const node = stack.pop();
+    visitNode(node, hashMap, array);
+    if (node.children) {
+      for (let i = node.children.length - 1; i >= 0; i -= 1) {
+        stack.push(node.children[i]);
+      }
+    }
+  }
+
+  return array;
+
+};
+
+/**
+*  Add reference to node.parent for each node in tree
+*  For root add root.parent = root
+*  Pre-order tree traversal visits each node using stack.
+*  Checks if leaf node based on node.children
+*  pushes all children into stack and continues traversal.
+*  @param root - deserialized JSON root to begin traversal
+*/
+export const appendParentsToTree = (root) => {
+
+  root.parent = root;
+  const stack = [];
+  stack.push(root);
+
+  while (stack.length !== 0) {
+    const node = stack.pop();
+    if (node.children) {
+      for (let i = node.children.length - 1; i >= 0; i -= 1) {
+        node.children[i].parent = node;
+        stack.push(node.children[i]);
+      }
+    }
+  }
+
+};
 
 export const gatherTips = (node, tips) => {
 
@@ -301,8 +369,8 @@ export const calcVisibility = function (tree, controls, dates) {
     }
 
     // TIME FILTERING (internal + terminal nodes)
-    const userDateMin = controls.dateScale(controls.dateFormat.parse(dates.dateMin)); // convert caldate to numdate
-    const userDateMax = controls.dateScale(controls.dateFormat.parse(dates.dateMax)); // convert caldate to numdate
+    const userDateMin = calendarToNumeric(dates.dateMin);
+    const userDateMax = calendarToNumeric(dates.dateMax);
     const timeFiltered = tree.nodes.map((d, idx) => {
       return !(d.attr.num_date < userDateMin || d.parent.attr.num_date > userDateMax);
     });

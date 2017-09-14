@@ -1,4 +1,4 @@
-import * as globals from "./globals";
+import { controlsWidth, controlsPadding, cardMinimumWidth } from "./globals";
 
 /*
   Why this function is here
@@ -27,7 +27,7 @@ import * as globals from "./globals";
 
 const computeResponsive = ({
   horizontal, /* multiplicative 1 (mobile, tablet, laptop) or .5 (2 column big monitor) */
-  vertical, /* multiplicative .5 (if splitting with another pane) or 1 (if full height of browser window)*/
+  vertical, /* multiplicative .5 (if splitting with another pane) or 1 (if full height of browser window) */
   browserDimensions, /* window.innerWidth & window.innerHeight as an object */
   sidebar, /* if open, subtract sidebar width from browser width? */
   minHeight, /* minimum height of element */
@@ -37,19 +37,27 @@ const computeResponsive = ({
   let width = null;
   let height = null;
 
-  const horizontalPadding = horizontal === 1 ? 45 : 75; /* could be more solid */
-  const headerFooterPadding = 300;
-  const verticalPadding = 135;
-  const controlsPadding = 55;
+  const horizontalPadding = horizontal === 1 ? 34 : 56; // derived from empirical testing, depends on Card margins
+  const verticalPadding = 165;
+
+  // sidebar scrollbar has width equal to its offsetWidth - clientWidth
+  let scrollbarWidth = 0;
+  const classArray = document.getElementsByClassName("sidebar");
+  if (classArray.length > 0) {
+    scrollbarWidth = classArray[0].offsetWidth - classArray[0].clientWidth;
+  }
 
   if (browserDimensions) {
-    let controls = sidebar ? globals.controlsWidth + controlsPadding : 0;
-    width = horizontal * (browserDimensions.width - controls - horizontalPadding);
+    const computedControlWidth = sidebar ? controlsWidth + controlsPadding + scrollbarWidth : 0;
+    width = horizontal * (browserDimensions.width - computedControlWidth - horizontalPadding - scrollbarWidth);
+    if (width < cardMinimumWidth) {
+      width = horizontal * (browserDimensions.width - horizontalPadding - scrollbarWidth);
+    }
     height = browserDimensions.height * vertical - verticalPadding;
   }
 
-  if (maxAspectRatio && height > maxAspectRatio*width) {
-    height = maxAspectRatio*width;
+  if (maxAspectRatio && height > maxAspectRatio * width) {
+    height = maxAspectRatio * width;
   }
 
   // favor minHeight over maxAspectRatio
@@ -60,8 +68,8 @@ const computeResponsive = ({
   return {
     width,
     height
-  }
+  };
 
-}
+};
 
 export default computeResponsive;

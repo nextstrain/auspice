@@ -1,21 +1,23 @@
-/*eslint-env browser*/
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { loadJSONs } from "../actions/loadData";
+import Sidebar from "react-sidebar";
+import queryString from "query-string";
 import "whatwg-fetch"; // setup polyfill
+import { loadJSONs } from "../actions/loadData";
 import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
-import Frequencies from "./charts/frequencies";
+// import Frequencies from "./charts/frequencies";
 import Entropy from "./charts/entropy";
 import Map from "./map/map";
 import TreeView from "./tree/treeView";
-import queryString from "query-string";
-import * as globals from "../util/globals";
-import Sidebar from "react-sidebar";
+import { controlsHiddenWidth } from "../util/globals";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
+import DownloadModal from "./download/downloadModal";
 import { analyticsNewPage } from "../util/googleAnalytics";
+import filesDropped from "../actions/filesDropped";
 
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   React-Router v4 injects length, action, location, push etc into props,
@@ -25,7 +27,10 @@ import { analyticsNewPage } from "../util/googleAnalytics";
     here as that is a prop of this component, whether we use it or not
   see https://reacttraining.com/react-router
 */
-@connect((state) => ({datasetPathName: state.controls.datasetPathName}))
+@connect((state) => ({
+  datasetPathName: state.controls.datasetPathName,
+  readyToLoad: state.datasets.ready,
+}))
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -36,7 +41,7 @@ class App extends React.Component {
     While these states could be moved to redux, they would need
     to be connected to here, triggering an app render anyways
     */
-    const mql = window.matchMedia(`(min-width: ${globals.controlsHiddenWidth}px)`);
+    const mql = window.matchMedia(`(min-width: ${controlsHiddenWidth}px)`);
     mql.addListener(() => this.setState({sidebarDocked: this.state.mql.matches}));
     this.state = {
       mql,
@@ -46,60 +51,74 @@ class App extends React.Component {
     analyticsNewPage();
   }
   static propTypes = {
-    dispatch: React.PropTypes.func.isRequired
+    dispatch: PropTypes.func.isRequired
   }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   componentWillMount() {
-    this.props.dispatch(loadJSONs(this.context.router));
+    if (this.props.readyToLoad) { /* charon API call loaded before the app came in - i.e. splash came first */
+      this.props.dispatch(loadJSONs(this.context.router));
+    }
   }
-  componentDidUpdate() {
-    /* browser back / forward */
-    if (this.props.datasetPathName !== undefined && this.props.datasetPathName !== this.context.router.history.location.pathname) {
+  componentDidMount() {
+    document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
+    document.addEventListener("drop", (e) => {
+      e.preventDefault();
+      return this.props.dispatch(filesDropped(e.dataTransfer.files));
+    }, false);
+  }
+  componentDidUpdate(prevProps) {
+    /* browser back / forward / prop change */
+    if (
+      (prevProps.readyToLoad === false && this.props.readyToLoad === true) ||
+      (
+        this.props.readyToLoad &&
+        this.props.datasetPathName !== undefined &&
+        this.props.datasetPathName !== this.context.router.history.location.pathname
+      )
+    ) {
       this.props.dispatch(loadJSONs(this.context.router));
     }
   }
   render() {
     return (
-      <Sidebar
-        sidebar={
-          <div>
-            <TitleBar minified={true}/>
-            <Controls/>
-            <ToggleSidebarTab
-              open={this.state.sidebarDocked}
-              handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
-            />
-          </div>
-        }
-        open={this.state.sidebarOpen}
-        docked={this.state.sidebarDocked}
-        onSetOpen={(a) => {this.setState({sidebarOpen: a});}}>
-        <Background>
-          {this.state.sidebarOpen || this.state.sidebarDocked ? <div/> :
-            <ToggleSidebarTab
-              open={this.state.sidebarDocked}
-              handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
-            />
+      <g>
+        <DownloadModal/>
+        <ToggleSidebarTab
+          open={this.state.sidebarDocked}
+          handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
+        />
+        <Sidebar
+          sidebar={
+            <div>
+              <TitleBar minified/>
+              <Controls/>
+            </div>
           }
-          <TreeView
-            query={queryString.parse(this.context.router.history.location.search)}
-            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-          />
-          <Map
-            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            justGotNewDatasetRenderNewMap={false}
-          />
-          <Frequencies/>
-          <Entropy
-            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-          />
-          <Footer
-            sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-          />
-        </Background>
-      </Sidebar>
+          open={this.state.sidebarOpen}
+          docked={this.state.sidebarDocked}
+          onSetOpen={(a) => {this.setState({sidebarOpen: a});}}
+          sidebarClassName={"sidebar"}
+        >
+          <Background>
+            <TreeView
+              query={queryString.parse(this.context.router.history.location.search)}
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+            />
+            <Map
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+              justGotNewDatasetRenderNewMap={false}
+            />
+            <Entropy
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+            />
+            <Footer
+              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+            />
+          </Background>
+        </Sidebar>
+      </g>
     );
   }
 }

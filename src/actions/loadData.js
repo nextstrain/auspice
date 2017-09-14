@@ -1,13 +1,9 @@
-/*eslint dot-notation: 0*/
-/*eslint-env browser*/
-/*eslint no-console: 0*/
-import { updateColors } from "./colors";
-import { dataURLStem } from "../util/datasets";
+import queryString from "query-string";
 import * as types from "./types";
-import d3 from "d3";
+import { updateColors } from "./colors";
 import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { turnURLtoDataPath } from "../util/urlHelpers";
-import queryString from "query-string";
+import { charonAPIAddress } from "../util/globals";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {
@@ -83,7 +79,7 @@ const populateEntropyStore = (paths) => {
       })
       .catch((err) => {
         /* entropy reducer has already been invalidated */
-        console.log("entropyJSONpromise error", err);
+        console.error("entropyJSONpromise error", err);
       });
   };
 };
@@ -124,7 +120,7 @@ const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
         any error from the reducers AND, confusingly,
         errors from the lifecycle methods of components
         that run while in the middle of this thunk */
-        console.log("loadMetaAndTreeJSONs error:", err);
+        console.error("loadMetaAndTreeJSONs error:", err);
         // dispatch error notification
         // but, it would seem, you can't have the reducer return AND
         // also get a notification dispatched :(
@@ -132,15 +128,22 @@ const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
   };
 };
 
-export const loadJSONs = (router) => {
-  return (dispatch) => {
+export const loadJSONs = (router) => { // eslint-disable-line import/prefer-default-export
+  return (dispatch, getState) => {
+
+    const { datasets } = getState();
+    if (!datasets.ready) {
+      console.error("Attempted to fetch JSONs before Charon returned initial data.");
+      return;
+    }
+
     dispatch({type: types.DATA_INVALID});
-    const data_path = turnURLtoDataPath(router);
+    const data_path = turnURLtoDataPath(router, {pathogen: datasets.pathogen});
     const JSONpaths = {
-      meta: dataURLStem + data_path + "_meta.json",
-      tree: dataURLStem + data_path + "_tree.json",
-      seqs: dataURLStem + data_path + "_sequences.json",
-      entropy: dataURLStem + data_path + "_entropy.json"
+      meta: charonAPIAddress + "request=json&path=" + data_path + "_meta.json",
+      tree: charonAPIAddress + "request=json&path=" + data_path + "_tree.json",
+      seqs: charonAPIAddress + "request=json&path=" + data_path + "_sequences.json",
+      entropy: charonAPIAddress + "request=json&path=" + data_path + "_entropy.json"
     };
     dispatch(loadMetaAndTreeAndSequencesJSONs(JSONpaths, router));
     /* subsequent JSON loading is *not* essential to the main functionality */

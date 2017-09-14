@@ -1,9 +1,8 @@
 import React from "react";
-import Radium from "radium";
-import { datasets } from "../../util/datasets";
+import PropTypes from 'prop-types';
+import { connect } from "react-redux";
 import ChooseVirusSelect from "./choose-virus-select";
 import parseParams from "../../util/parseParams";
-import { connect } from "react-redux";
 
 /* not sure if these functions are necessary, really. If so, i'll
 move them to util/urlHelpers.js
@@ -19,10 +18,10 @@ const tidyUpPathname = function (pathname) {
 @connect((state) => {
   return {
     datasetPathName: state.controls.datasetPathName, /* triggers component update */
-    geoResolution: state.controls.geoResolution
+    geoResolution: state.controls.geoResolution,
+    pathogen: state.datasets.pathogen
   };
 })
-@Radium
 class ChooseVirus extends React.Component {
   constructor(props) {
     super(props);
@@ -30,7 +29,7 @@ class ChooseVirus extends React.Component {
   // static propTypes = {
   // }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
 
   getStyles() {
@@ -38,12 +37,16 @@ class ChooseVirus extends React.Component {
   }
 
   render() {
+    /* if charon hasn't given us data yet, we should not render the dropdown */
+    if (!this.props.pathogen) return null;
+
+    const datasets = {pathogen: this.props.pathogen};
     const styles = this.getStyles();
     const pathname = this.context.router.history.location.pathname;
     /* analyse the current route in order to adjust the dataset selection choices.
     paramFields is an object with keys "virus" and potentially "lineage" and "duration"
     as well */
-    const paramFields = parseParams(tidyUpPathname(pathname)).dataset;
+    const paramFields = parseParams(tidyUpPathname(pathname), datasets).dataset;
     // names of the different selectors in the current hierarchy: [virus, lineage, duration]
     // there will be (fields.length) dropdown boxes
     const fields = Object.keys(paramFields).sort((a, b) => paramFields[a][0] > paramFields[b][0]);
@@ -58,7 +61,7 @@ class ChooseVirus extends React.Component {
         // pull options from the current level of the dataset hierarchy, ignore 'default'
         const options = Object.keys(level[fields[vi]]).filter((d) => d !== "default");
         selectors.push((
-          <div key={vi} style={[styles.base]}>
+          <div key={vi} style={styles.base}>
             <ChooseVirusSelect
               title={"Choose " + fields[vi]}
               choice_tree={choices.slice(0, vi)}

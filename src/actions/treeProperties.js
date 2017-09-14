@@ -1,11 +1,8 @@
-/*eslint max-len: 0*/
 import { calcVisibility,
-   calcTipRadii,
-   calcTipCounts,
-   identifyPathToTip,
-   calcBranchThickness } from "../util/treeHelpers";
-import { determineColorByGenotypeType } from "../util/urlHelpers";
-import { changeColorBy } from "./colors";
+  calcTipRadii,
+  calcTipCounts,
+  identifyPathToTip,
+  calcBranchThickness } from "../components/tree/treeHelpers";
 import * as types from "./types";
 
 const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
@@ -56,7 +53,7 @@ export const updateVisibleTipsAndBranchThicknesses = function (
  * @param  {string|false} newMax optional
  * @return {null} side-effects: a single action
  */
-export const changeDateFilter = function ({newMin = false, newMax = false}) {
+export const changeDateFilter = function ({newMin = false, newMax = false, quickdraw = false}) {
   return (dispatch, getState) => {
     const { tree, controls } = getState();
     if (!tree.nodes) {return;}
@@ -67,6 +64,7 @@ export const changeDateFilter = function ({newMin = false, newMax = false}) {
     const data = calculateVisiblityAndBranchThickness(tree, controls, dates);
     dispatch({
       type: types.CHANGE_DATES_VISIBILITY_THICKNESS,
+      quickdraw,
       dateMin: newMin ? newMin : controls.dateMin,
       dateMax: newMax ? newMax : controls.dateMax,
       visibility: data.visibility,
@@ -111,28 +109,45 @@ export const legendMouseEnterExit = function (label = null) {
   };
 };
 
-export const applyFilterQuery = (filterType, fields, values) => {
-  /* filterType: e.g. authers || geographic location
-  fields: e.g. region || country || authors
+export const applyFilterQuery = (fields, values, mode = "set") => {
+  /* fields: e.g. region || country || authors
   values: list of selected values, e.g [brazil, usa, ...]
+  mode: set | add | remove
+    set: sets the filter values to those provided
+    add: adds the values to the current selection
+    remove: vice versa
   */
-  return (dispatch) => {
-    dispatch({type: types.APPLY_FILTER_QUERY,
-              // filterType,
-              fields,
-              values});
-    dispatch(updateVisibleTipsAndBranchThicknesses());
-  };
-};
-
-export const changeMutType = (data) => {
   return (dispatch, getState) => {
-    const { controls } = getState();
-    const g = determineColorByGenotypeType(controls.colorBy); /* returns "nuc", "aa" of false */
-    if (g && g !== data) {
-      dispatch(changeColorBy(controls.defaultColorBy));
+    let newValues;
+    if (mode === "set") {
+      newValues = values;
+    } else {
+      const { controls } = getState();
+      const currentFields = Object.keys(controls.filters);
+      if (mode === "add") {
+        if (currentFields.indexOf(fields) === -1) {
+          newValues = values;
+        } else {
+          newValues = controls.filters[fields].concat(values);
+        }
+      } else if (mode === "remove") {
+        if (currentFields.indexOf(fields) === -1) {
+          console.error("trying to remove values from an un-initialised filter!");
+          return;
+        }
+        newValues = controls.filters[fields].slice();
+        for (const item of values) {
+          const idx = newValues.indexOf(item);
+          if (idx !== -1) {
+            newValues.splice(idx, 1);
+          } else {
+            console.error("trying to remove filter value ", item, " which was not part of the filter selection");
+          }
+        }
+      }
     }
-    dispatch({type: types.TOGGLE_MUT_TYPE, data});
+    dispatch({type: types.APPLY_FILTER_QUERY, fields, values: newValues});
+    dispatch(updateVisibleTipsAndBranchThicknesses());
   };
 };
 

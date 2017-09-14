@@ -1,11 +1,13 @@
 import React from "react";
-import d3 from "d3";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import { rgb } from "d3-color";
 import LegendItem from "./legend-item";
 import { headerFont, darkGrey } from "../../globalStyles";
-import { legendRectSize, legendSpacing, fastTransitionDuration,
+import { legendRectSize,
+  legendSpacing,
+  fastTransitionDuration,
   controlsWidth } from "../../util/globals";
-// import titleCase from "title-case";
 import { determineColorByGenotypeType } from "../../util/urlHelpers";
 
 
@@ -25,13 +27,13 @@ class Legend extends React.Component {
     };
   }
   static propTypes = {
-    colorOptions: React.PropTypes.object,
-    colorScale: React.PropTypes.object,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
-    colorBy: React.PropTypes.string.isRequired,
-    style: React.PropTypes.object,
-    sidebar: React.PropTypes.bool
+    colorOptions: PropTypes.object,
+    colorScale: PropTypes.object,
+    params: PropTypes.object,
+    routes: PropTypes.array,
+    colorBy: PropTypes.string.isRequired,
+    style: PropTypes.object,
+    sidebar: PropTypes.bool
   }
   // hide/show legend based on initial browserDimensions and legend length
   componentWillMount() {
@@ -168,8 +170,8 @@ class Legend extends React.Component {
             dispatch={this.props.dispatch}
             legendRectSize={legendRectSize}
             legendSpacing={legendSpacing}
-            rectFill={d3.rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
-            rectStroke={d3.rgb(this.props.colorScale.scale(d)).toString()}
+            rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
+            rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
             transform={this.getTransformationForLegendItem(i)}
             dFreq={this.props.colorScale.colorBy === "dfreq"}
             key={i}
@@ -201,7 +203,7 @@ class Legend extends React.Component {
       svg: {
         position: "absolute",
         left: 12,
-        top: 39,
+        top: 36,
         borderRadius: 2,
         zIndex: 1000
       }

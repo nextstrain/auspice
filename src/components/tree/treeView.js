@@ -1,20 +1,17 @@
-/*eslint-env browser*/
-/*eslint dot-notation: 0*/
-/*eslint react/prop-types: 0*/
 import React from "react";
-import ReactDOM from "react-dom";
-import d3 from "d3";
+import PropTypes from 'prop-types';
+import { connect } from "react-redux";
+import { select } from "d3-selection";
+import { ReactSVGPanZoom } from "react-svg-pan-zoom";
 import Card from "../framework/card";
 import Legend from "./legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
-import PhyloTree from "../../util/phyloTree";
-import { ReactSVGPanZoom } from "react-svg-pan-zoom";
+import PhyloTree from "./phyloTree";
 import { mediumTransitionDuration, twoColumnBreakpoint } from "../../util/globals";
 import InfoPanel from "./infoPanel";
 import BranchSelectedPanel from "./branchSelectedPanel";
 import TipSelectedPanel from "./tipSelectedPanel";
-import { connect } from "react-redux";
 import computeResponsive from "../../util/computeResponsive";
 import * as funcs from "./treeViewFunctions";
 
@@ -28,6 +25,7 @@ there are actually backlinks from the phylotree tree
 @connect((state) => {
   return {
     tree: state.tree,
+    quickdraw: state.controls.quickdraw,
     browserDimensions: state.browserDimensions.browserDimensions,
     // map: state.map,
     splitTreeAndMap: state.controls.splitTreeAndMap,
@@ -39,6 +37,9 @@ there are actually backlinks from the phylotree tree
     distanceMeasure: state.controls.distanceMeasure,
     mutType: state.controls.mutType,
     panelLayout: state.controls.panelLayout,
+    sequences: state.sequences,
+    colorScale: state.controls.colorScale,
+    metadata: state.metadata
   };
 })
 class TreeView extends React.Component {
@@ -46,7 +47,7 @@ class TreeView extends React.Component {
     super(props);
     this.Viewer = null;
     this.state = {
-      tool: "pan",  //one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
+      tool: "pan", // one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
       hover: null,
       selectedBranch: null,
       selectedTip: null,
@@ -54,8 +55,8 @@ class TreeView extends React.Component {
     };
   }
   static propTypes = {
-    sidebar: React.PropTypes.bool.isRequired,
-    mutType: React.PropTypes.string.isRequired
+    sidebar: PropTypes.bool.isRequired,
+    mutType: PropTypes.string.isRequired
   }
 
   componentWillReceiveProps(nextProps) {
@@ -118,7 +119,7 @@ class TreeView extends React.Component {
       const myTree = new PhyloTree(nodes[0]);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
       myTree.render(
-        d3.select(this.refs.d3TreeElement),
+        select(this.refs.d3TreeElement),
         this.props.layout,
         this.props.distanceMeasure,
         { /* options */
@@ -176,6 +177,8 @@ class TreeView extends React.Component {
           viewer={this.Viewer}
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
+          colorScale={this.props.colorScale}
+          sequences={this.props.sequences}
         />
         <BranchSelectedPanel
           responsive={responsive}
@@ -185,6 +188,7 @@ class TreeView extends React.Component {
         <TipSelectedPanel
           goAwayCallback={(d) => funcs.clearSelectedTip.bind(this)(d)}
           tip={this.state.selectedTip}
+          metadata={this.props.metadata}
         />
         <ReactSVGPanZoom
           width={responsive ? responsive.width : 1}
@@ -199,6 +203,7 @@ class TreeView extends React.Component {
           toolbarPosition={"none"}
           detectAutoPan={false}
           background={"#FFF"}
+          miniaturePosition={"none"}
           // onMouseDown={this.startPan.bind(this)}
           onDoubleClick={funcs.resetView.bind(this)}
           //onMouseUp={this.endPan.bind(this)}

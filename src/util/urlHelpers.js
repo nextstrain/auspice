@@ -9,13 +9,13 @@ reflected in the URL and makes one change.
                 (or replaces) e.g. .../?key=value
   replace: if true, you can't go "back" to the old state via the browser
 */
-export const modifyURLquery = function (router, keyValuePairs = null, replace = false) {
+export const modifyURLquery = (router, keyValuePairs = null, replace = false) => {
   let query = queryString.parse(router.history.location.search);
   // const query = queryString.parse(router.history.location.search);
   if (keyValuePairs) {
     // Object.keys(keyValuePairs).forEach((key, idx) => {console.log(key, idx)});
     query = Object.assign({}, query, keyValuePairs);
-    for (const k in keyValuePairs) {
+    for (const k of Object.keys(keyValuePairs)) {
       if (keyValuePairs[k] === false) {
         delete query[k];
       }
@@ -31,14 +31,14 @@ export const modifyURLquery = function (router, keyValuePairs = null, replace = 
 };
 
 // make prefix for data files with fields joined by _ instead of / as in URL
-const makeDataPathFromParsedParams = function (parsedParams) {
+const makeDataPathFromParsedParams = (parsedParams) => {
   const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);
   tmp_levels.sort((x, y) => x[0] > y[0]);
   return tmp_levels.map((d) => d[1]).join("_");
 };
 
-const selectivelyUpdateSearch = function (defaultSearch, userSearch) {
-  if (!defaultSearch) {return userSearch;}
+const selectivelyUpdateSearch = (defaultSearch, userSearch) => {
+  if (!defaultSearch) { return userSearch; }
   const final = queryString.parse(userSearch);
   const defaults = queryString.parse(defaultSearch);
   for (const key of Object.keys(defaults)) {
@@ -53,9 +53,9 @@ const selectivelyUpdateSearch = function (defaultSearch, userSearch) {
 this fn will work out the correct datapath, set it if necessary,
 and return the data path used to load the data
 */
-export const turnURLtoDataPath = function (router) {
+export const turnURLtoDataPath = (router, datasets) => {
   // console.log("turnURLtoDataPath")
-  const parsedParams = parseParams(router.history.location.pathname);
+  const parsedParams = parseParams(router.history.location.pathname, datasets);
   // console.log("parsed params turned", router.history.location.pathname, "to", parsedParams)
   // set a new URL if the dataPath is incomplete
   if (parsedParams.incomplete) {
@@ -72,10 +72,10 @@ export const turnURLtoDataPath = function (router) {
   return undefined;
 };
 
-export const determineColorByGenotypeType = function (colorBy) {
+export const determineColorByGenotypeType = (colorBy) => {
   /* note that nucleotide genotypes are either gt-nucXXX or gt-XXX */
   if (colorBy.startsWith("gt")) {
-    if (colorBy.slice(3, 6) === "nuc" || !isNaN(parseInt(colorBy.slice(3, 4)))) {
+    if (colorBy.slice(3, 6) === "nuc" || !isNaN(parseInt(colorBy.slice(3, 4), 10))) {
       return "nuc";
     }
     return "aa";

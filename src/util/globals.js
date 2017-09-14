@@ -1,4 +1,4 @@
-import d3 from "d3";
+import { scaleLinear, scaleSqrt } from "d3-scale";
 
 export const colorOptions = {
     "country":{"key":"country", "legendTitle":"Country", "menuItem":"country", "type":"discrete"},
@@ -14,8 +14,10 @@ export const colorOptions = {
 export const width = 1126; /* no longer used */
 export const margin = 60;
 export const controlsWidth = 280;
+export const controlsPadding = 40; // from Sidebar padding
 export const totalVerticalPadding = 160; // this includes the header + space between the bottom and the card (refactor.)
 export const controlsHiddenWidth = 1000;
+export const cardMinimumWidth = 300;
 export const entropyChartHeight = 300;
 export const twoColumnBreakpoint = 1600;
 export const maxMapWidth = 1000; /* just right for our default zoom level (which is also min) */
@@ -53,10 +55,11 @@ export const defaultDistanceMeasures = ["num_date", "div"];
 export const fastTransitionDuration = 350; // in milliseconds
 export const mediumTransitionDuration = 700; // in milliseconds
 export const slowTransitionDuration = 1400; // in milliseconds
-export const enableAnimationDisplay = false;
+export const enableDownloadModal = false;
+export const enableAnimationDisplay = true;
 export const enableAnimationPerfTesting = false;
 export const animationWindowWidth = 0.075; // width of animation window relative to date slider
-export const animationTick = 100; // animation tick in milliseconds
+export const animationTick = 50; // animation tick in milliseconds
 export const HIColorDomain = genericDomain.map((d) => {
   return Math.round(100 * (d * 3.6)) / 100;
 });
@@ -66,15 +69,15 @@ export const dfreqColorDomain = genericDomain.map((d) => {
 export const fitnessColorDomain = genericDomain.map((d) => {
   return Math.round(100 * ((d - 0.5) * 16.0)) / 100;
 });
-export const dHIScale = d3.scale.linear()
+export const dHIScale = scaleLinear()
   .domain([0, 1])
   .range([2.0, 4.5]);
 
-export const freqScale = d3.scale.sqrt()
+export const freqScale = scaleSqrt()
   .domain([0, 1])
   .range([1, 10]);
 
-export const distanceScale = d3.scale.sqrt()
+export const distanceScale = scaleSqrt()
   .domain([3, 20])
   .range([9, 3])
   .clamp([true]);
@@ -131,3 +134,6 @@ export const filterAbbrRev = {"geographic location":"geo", "all":"all"};
 export const titleColors = ["#4377CD", "#5097BA", "#63AC9A", "#7CB879", "#9ABE5C", "#B9BC4A", "#D4B13F", "#E49938", "#E67030", "#DE3C26"];
 export const titleBarHeight = 50;
 export const notificationDuration = 5000;
+
+/* server init stuff */
+export const charonAPIAddress = "/charon?"

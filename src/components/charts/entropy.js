@@ -1,44 +1,45 @@
-/*eslint-env browser*/
-/*eslint dot-notation: "off", max-params: 0*/
 import React from "react";
-import _ from "lodash";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import * as globals from "../../util/globals";
+import _filter from "lodash/filter";
+import { genotypeColors } from "../../util/globals";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
 import { changeColorBy } from "../../actions/colors";
-import { modifyURLquery } from "../../util/urlHelpers";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./entropyInfoPanel";
+import { TOGGLE_MUT_TYPE } from "../../actions/types";
+import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import { modifyURLquery } from "../../util/urlHelpers";
 import "../../css/entropy.css";
-import { changeMutType } from "../../actions/treeProperties";
 
-const calcEntropy = function (entropy) {
+const calcEntropy = (entropy) => {
   const entropyNt = entropy["nuc"]["val"].map((s, i) => {
     return {x: entropy["nuc"]["pos"][i], y: s};
   });
 
-  const entropyNtWithoutZeros = _.filter(entropyNt, (e) => {return e.y !== 0;});
+  const entropyNtWithoutZeros = _filter(entropyNt, (e) => { return e.y !== 0; });
 
   let aminoAcidEntropyWithoutZeros = [];
   const annotations = [];
   let aaCount = 0;
-  for (let prot in entropy) {
+  for (const prot of Object.keys(entropy)) {
     if (prot !== "nuc") {
       const tmpProt = entropy[prot];
       aaCount += 1;
-      annotations.push({prot: prot,
-                        start: tmpProt["pos"][0],
-                        end: tmpProt["pos"][tmpProt["pos"].length - 1],
-                        readingFrame: 1, //+tmpProt['pos'][0]%3,
-                        fill: globals.genotypeColors[aaCount % 10]
-                       });
-      const tmpEntropy = tmpProt["val"].map((s, i) => ({
+      annotations.push({
+        prot: prot,
+        start: tmpProt["pos"][0],
+        end: tmpProt["pos"][tmpProt["pos"].length - 1],
+        readingFrame: 1, // +tmpProt['pos'][0]%3,
+        fill: genotypeColors[aaCount % 10]
+      });
+      const tmpEntropy = tmpProt["val"].map((s, i) => ({ // eslint-disable-line no-loop-func
         x: tmpProt["pos"][i],
         y: s,
         codon: tmpProt["codon"][i],
-        fill: globals.genotypeColors[aaCount % 10],
+        fill: genotypeColors[aaCount % 10],
         prot: prot
       }));
       aminoAcidEntropyWithoutZeros = aminoAcidEntropyWithoutZeros.concat(
@@ -52,7 +53,7 @@ const calcEntropy = function (entropy) {
     entropyNtWithoutZeros};
 };
 
-const getStyles = function (width) {
+const getStyles = (width) => {
   return {
     switchContainer: {
       position: "absolute",
@@ -67,12 +68,32 @@ const getStyles = function (width) {
   };
 };
 
+/* these two functions convert between the genotype naming system used in the URLs,
+e.g. 'gt-nuc_1234', 'gt-NS1-123' and the data structure used in entropy.json
+note that the numbering systems are not the same! */
+const constructEncodedGenotype = (aa, d) => {
+  return aa ? 'gt-' + d.prot + "_" + (d.codon + 1) : 'gt-nuc_' + (d.x + 1);
+};
+const parseEncodedGenotype = (colorBy) => {
+  const [name, num] = colorBy.slice(3).split('_');
+  const aa = name !== 'nuc';
+  const data = {aa, prot: aa ? name : false};
+  if (aa) {
+    data.codon = num - 1;
+  } else {
+    data.x = num - 1;
+  }
+  return data;
+};
+
 @connect((state) => {
   return {
     mutType: state.controls.mutType,
     entropy: state.entropy.entropy,
     browserDimensions: state.browserDimensions.browserDimensions,
     loaded: state.entropy.loaded,
+    colorBy: state.controls.colorBy,
+    defaultColorBy: state.controls.defaultColorBy,
     shouldReRender: false,
     panelLayout: state.controls.panelLayout,
   };
@@ -84,40 +105,37 @@ class Entropy extends React.Component {
       hovered: false,
       chart: false
     };
-  }
-  static contextTypes = {
-    router: React.PropTypes.object.isRequired
-  }
-  static propTypes = {
-    dispatch: React.PropTypes.func.isRequired,
-    entropy: React.PropTypes.object,
-    sidebar: React.PropTypes.bool,
-    browserDimensions: React.PropTypes.object,
-    loaded: React.PropTypes.bool.isRequired,
-    mutType: React.PropTypes.string.isRequired
-  }
-
-  setColorByGenotype(colorBy) {
-    this.props.dispatch(changeColorBy(colorBy));
-    // modifyURLquery(this.context.router, {c: colorBy}, true);
-  }
-
-  getChartGeom(props) {
-    const responsive = computeResponsive({
-      horizontal: 1,
-      vertical: 0.35,
-      browserDimensions: props.browserDimensions,
-      sidebar: props.sidebar
-    });
-    return {
-      responsive,
-      width: responsive.width,
-      height: responsive.height,
-      padBottom: 50,
-      padLeft: 15,
-      padRight: 12
+    this.getChartGeom = (p) => {
+      const responsive = computeResponsive({
+        horizontal: 1,
+        vertical: 0.35,
+        browserDimensions: p.browserDimensions,
+        sidebar: p.sidebar
+      });
+      return {
+        responsive,
+        width: responsive.width,
+        height: responsive.height,
+        padBottom: 50,
+        padLeft: 15,
+        padRight: 12
+      };
     };
   }
+  static contextTypes = {
+    router: PropTypes.object.isRequired
+  }
+  static propTypes = {
+    dispatch: PropTypes.func.isRequired,
+    entropy: PropTypes.object,
+    sidebar: PropTypes.bool.isRequired,
+    browserDimensions: PropTypes.object.isRequired,
+    loaded: PropTypes.bool.isRequired,
+    colorBy: PropTypes.string,
+    defaultColorBy: PropTypes.string,
+    mutType: PropTypes.string.isRequired
+  }
+
   /* CALLBACKS */
   onHover(d, x, y) {
     // console.log("hovering @", x, y, this.state.chartGeom);
@@ -127,17 +145,21 @@ class Entropy extends React.Component {
     this.setState({hovered: false});
   }
   onClick(d) {
-    if (this.props.mutType === "aa") {
-      this.setColorByGenotype("gt-" + d.prot + "_" + (d.codon + 1));
-    } else {
-      this.setColorByGenotype("gt-nuc_" + (d.x + 1));
-    }
+    const colorBy = constructEncodedGenotype(this.props.mutType === "aa", d);
+    analyticsControlsEvent("color-by-genotype");
+    this.props.dispatch(changeColorBy(colorBy));
+    modifyURLquery(this.context.router, {c: colorBy}, true);
     this.setState({hovered: false});
   }
 
   changeMutTypeCallback(newMutType) {
     if (newMutType !== this.props.mutType) {
-      this.props.dispatch(changeMutType(newMutType));
+      /* 1. switch the redux colorBy back to the default */
+      this.props.dispatch(changeColorBy(this.props.defaultColorBy));
+      /* 2. update the mut type in redux */
+      this.props.dispatch({type: TOGGLE_MUT_TYPE, data: newMutType});
+      /* 3. modify the URL */
+      modifyURLquery(this.context.router, {c: this.props.defaultColorBy}, true);
     }
   }
 
@@ -167,7 +189,7 @@ class Entropy extends React.Component {
     }
     if (!this.state.chart && nextProps.loaded) {
       const chart = new EntropyChart(
-        this.refs.d3entropy,
+        this.d3entropy,
         calcEntropy(nextProps.entropy),
         { /* callbacks */
           onHover: this.onHover.bind(this),
@@ -180,15 +202,30 @@ class Entropy extends React.Component {
         chart,
         chartGeom: this.getChartGeom(nextProps)
       });
-      chart.updateMutType(nextProps.mutType === "aa");
-      return; // nothing more CWRP should do
+      chart.update({aa: nextProps.mutType === "aa"}); // why is this necessary straight after an initial render?!
+      return;
     }
     if (this.state.chart) {
       if ((this.props.browserDimensions !== nextProps.browserDimensions) ||
          (this.props.sidebar !== nextProps.sidebar)) {
-        this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
-      } else if (this.props.mutType !== nextProps.mutType) {
-        this.state.chart.updateMutType(nextProps.mutType === "aa");
+        if (nextProps.colorBy.startsWith("gt")) {
+          this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa", parseEncodedGenotype(nextProps.colorBy));
+        } else {
+          this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
+        }
+      } if (this.props.mutType !== nextProps.mutType) {
+        if (nextProps.colorBy.startsWith("gt")) {
+          this.state.chart.update({aa: nextProps.mutType === "aa", selected: parseEncodedGenotype(nextProps.colorBy)});
+        } else {
+          this.state.chart.update({aa: nextProps.mutType === "aa", clearSelected: true});
+        }
+      }
+      if (this.props.colorBy !== nextProps.colorBy && (this.props.colorBy.startsWith("gt") || nextProps.colorBy.startsWith("gt"))) {
+        if (!nextProps.colorBy.startsWith("gt")) {
+          this.state.chart.update({clearSelected: true});
+        } else {
+          this.state.chart.update({selected: parseEncodedGenotype(nextProps.colorBy)});
+        }
       }
     }
   }
@@ -207,11 +244,12 @@ class Entropy extends React.Component {
           mutType={this.props.mutType}
         />
         <svg
+          id="d3entropyParent"
           style={{pointerEvents: "auto"}}
           width={chartGeom.responsive.width}
           height={chartGeom.height}
         >
-          <g ref="d3entropy" id="d3entropy"/>
+          <g ref={(c) => { this.d3entropy = c; }} id="d3entropy"/>
         </svg>
       </Card>
     );

@@ -1,8 +1,7 @@
 import React from "react";
-// import TimeTree from "../framework/svg-time-tree";
-// import MutationTree from "../framework/svg-mutation-tree";
-import {materialButton, materialButtonSelected} from "../../globalStyles";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import { materialButton, materialButtonSelected } from "../../globalStyles";
 import Toggle from "./toggle";
 import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { modifyURLquery } from "../../util/urlHelpers";
@@ -21,9 +20,9 @@ import { toggleTemporalConfidence } from "../../actions/treeProperties";
  })
 class ChooseMetric extends React.Component {
   static propTypes = {
-    analysisSlider: React.PropTypes.any,
-    temporalConfidence: React.PropTypes.object.isRequired,
-    dispatch: React.PropTypes.func
+    analysisSlider: PropTypes.any,
+    temporalConfidence: PropTypes.object.isRequired,
+    dispatch: PropTypes.func
   }
   getStyles() {
     return {
@@ -41,7 +40,7 @@ class ChooseMetric extends React.Component {
     };
   }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
 
   render() {

@@ -1,9 +1,9 @@
 import React from "react";
-import Radium from "radium";
+import PropTypes from 'prop-types';
+import { connect } from "react-redux";
 import Select from "react-select";
 import { controlsWidth } from "../../util/globals";
-import { connect } from "react-redux";
-import { applyFilterQuery } from "../../actions/treeProperties"
+import { applyFilterQuery } from "../../actions/treeProperties";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { prettyString } from "../../util/stringHelpers";
 
@@ -13,24 +13,23 @@ import { prettyString } from "../../util/stringHelpers";
  * (ii) URL features have been removed. Potentially to be added in the future.
  * (iii) dispatches an action to change the state of the app
  */
-@Radium
 @connect((state) => ({selections: state.controls.filters}))
 class RecursiveFilter extends React.Component {
   constructor(props) {
     super(props);
   }
   static propTypes = {
-    filterTree: React.PropTypes.array.isRequired,
-    filterType: React.PropTypes.string.isRequired,
-    shortKey: React.PropTypes.string.isRequired,
-    counts: React.PropTypes.array.isRequired,
-    fields: React.PropTypes.array.isRequired,
-    options: React.PropTypes.array.isRequired,
-    dispatch: React.PropTypes.func.isRequired,
-    selections: React.PropTypes.object.isRequired
+    filterTree: PropTypes.array.isRequired,
+    filterType: PropTypes.string.isRequired,
+    shortKey: PropTypes.string.isRequired,
+    counts: PropTypes.array.isRequired,
+    fields: PropTypes.array.isRequired,
+    options: PropTypes.array.isRequired,
+    dispatch: PropTypes.func.isRequired,
+    selections: PropTypes.object.isRequired
   }
   // static contextTypes = {
-  //   router: React.PropTypes.object.isRequired
+  //   router: PropTypes.object.isRequired
   // }
 
   setFilterQuery(e) {
@@ -42,7 +41,7 @@ class RecursiveFilter extends React.Component {
     const values = this.props.filterTree.concat(e.map((d) => d["value"]));
     analyticsControlsEvent(`filter-${this.props.filterType.replace(/\s/gi, "-")}`);
     this.props.dispatch(
-      applyFilterQuery(this.props.filterType, this.props.fields, values)
+      applyFilterQuery(this.props.fields, values)
     );
     // console.log("selection:", e)
   }

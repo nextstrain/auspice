@@ -1,13 +1,11 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import Flex from "./flex";
-import { titleColors, titleBarHeight } from "../../util/globals";
-import { titleFont, dataFont, darkGrey, medGrey, lightGrey, brandColor } from "../../globalStyles";
-import Radium from "radium";
-import Title from "./title";
 import { Link } from "react-router-dom";
-
-var RadiumLink = Radium(Link); // needed to style custom components with radium
+import Flex from "./flex";
+import { titleBarHeight } from "../../util/globals";
+import { darkGrey, brandColor } from "../../globalStyles";
+import Title from "./title";
 
 @connect((state) => {
   return {
@@ -15,16 +13,15 @@ var RadiumLink = Radium(Link); // needed to style custom components with radium
     datasetPathName: state.controls.datasetPathName
   };
 })
-@Radium
 class TitleBar extends React.Component {
   constructor(props) {
     super(props);
   }
   static propTypes = {
-    datasetPathName: React.PropTypes.string
+    datasetPathName: PropTypes.string
   }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   getStyles() {
     return {
@@ -37,9 +34,12 @@ class TitleBar extends React.Component {
         height: titleBarHeight,
         justifyContent: "space-between",
         alignItems: "center",
-        background: "#fff",
-        marginBottom: 5,
-        overflow: "hidden"
+        overflow: "hidden",
+        left: 0,
+        zIndex: 1001,
+        transition: "left .3s ease-out",
+        background: "#FFF",
+        width: this.props.minified ? 320 : "auto"
       },
       logo: {
         paddingLeft: "8px",
@@ -75,7 +75,7 @@ class TitleBar extends React.Component {
         cursor: "pointer",
         fontSize: this.props.minified ? 12 : 16,
         ':hover': {
-          color: "rgb(80, 151, 186)",
+          color: "rgb(80, 151, 186)"
         }
       },
       inactive: {
@@ -128,24 +128,22 @@ class TitleBar extends React.Component {
     return (
       selected ?
         <div style={styles.inactive}>{name}</div> :
-        <RadiumLink style={styles.link} to={url}>{name}</RadiumLink>
+        <Link style={styles.link} to={url}>{name}</Link>
     );
   }
 
   render() {
     const styles = this.getStyles();
     return (
-      <div >
-        <Flex style={styles.main}>
-          {this.getLogo(styles)}
-          {this.getTitle(styles)}
-          {this.getDataName(styles)}
-          <div style={{flex: 5}}/>
-            {this.getLink("About", "/about", this.props.aboutSelected, styles)}
-            {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
-          <div style={{width: this.props.minified ? 15 : 0 }}/>
-        </Flex>
-      </div>
+      <Flex style={styles.main}>
+        {this.getLogo(styles)}
+        {this.getTitle(styles)}
+        {this.getDataName(styles)}
+        <div style={{flex: 5}}/>
+          {this.getLink("About", "/about", this.props.aboutSelected, styles)}
+          {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
+        <div style={{width: this.props.minified ? 15 : 0 }}/>
+      </Flex>
     );
   }
 }

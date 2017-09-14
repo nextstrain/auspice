@@ -1,6 +1,6 @@
-var path = require("path");
-var webpack = require("webpack");
-var CompressionPlugin = require('compression-webpack-plugin');
+const path = require("path");
+const webpack = require("webpack");
+const CompressionPlugin = require('compression-webpack-plugin');
 
 // let commitHash = require('child_process')
 //   .execSync('git rev-parse --short HEAD')
@@ -17,46 +17,37 @@ module.exports = {
     publicPath: "/dist/"
   },
   plugins: [
-    new webpack.optimize.OccurenceOrderPlugin(),
+    // new webpack.optimize.OccurenceOrderPlugin(),
+    // as of webpack 2 OccurrenceOrderPlugin is on by default
     new webpack.DefinePlugin({
       "process.env": {
-        "NODE_ENV": JSON.stringify("production"),
-        "DATA_LOCAL": JSON.stringify(false)
+        NODE_ENV: JSON.stringify("production")
       }
     }),
-	
-    new webpack.optimize.UglifyJsPlugin({ // minify everything
-      compressor: {
-        warnings: false
-      }
-    }),
-    new webpack.optimize.DedupePlugin(), // dedupe similar code
-    new webpack.optimize.AggressiveMergingPlugin(), // merge chunks
-    new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/), // ignore all locale files of moment.js
-    new CompressionPlugin({ // gzip everything
-       asset: "[path].gz[query]",
-       algorithm: "gzip",
-       test: /\.js$|\.css$|\.html$/,
-       threshold: 10240,
-       minRatio: 0.8
+
+    new webpack.optimize.UglifyJsPlugin(), // minify everything - https://webpack.github.io/docs/list-of-plugins.html#uglifyjsplugin
+    new webpack.optimize.AggressiveMergingPlugin(), // merge chunks - https://webpack.github.io/docs/list-of-plugins.html#aggressivemergingplugin
+    new CompressionPlugin({ // gzip everything - https://github.com/webpack-contrib/compression-webpack-plugin
+      asset: "[path].gz[query]",
+      algorithm: "gzip",
+      test: /\.js$|\.css$|\.html$/,
+      threshold: 10240,
+      minRatio: 0.8
     })
   ],
   module: {
-
-    preLoaders: [
-      { test: /\.json$/, loader: "json"}
-    ],
-    loaders: [{
+    rules: [{
       test: /\.js$/,
-      loaders: ["babel"],
+      use: ["babel-loader"],
       include: path.join(__dirname, "src")
     },
     {
       test: /\.css$/,
-      loaders: [ "style-loader", "css-loader" ]
+      use: ["style-loader", "css-loader"]
     },
     {
-      test: /\.(gif|png|jpe?g|svg)$/i, loader: "file-loader",
+      test: /\.(gif|png|jpe?g|svg)$/i,
+      use: "file-loader",
       include: path.join(__dirname, "src")
     }]
   }

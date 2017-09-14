@@ -1,7 +1,7 @@
 import React from "react";
-import Radium from "radium";
-import ChooseFilter from "./choose-filter";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import ChooseFilter from "./choose-filter";
 
 /* this should be re-thought out & moved to augur */
 const filterShortName = {
@@ -13,11 +13,10 @@ const filterShortName = {
  * the dataset hierarchy is specified in a datasets.json, currently
  * in ../../util/globals
 */
-@Radium
 @connect((state) => ({metadata: state.metadata}))
 class AllFilters extends React.Component {
   static propTypes = {
-    metadata: React.PropTypes.object.isRequired // should use shape here
+    metadata: PropTypes.object.isRequired // should use shape here
   }
   render() {
     const filters = [];

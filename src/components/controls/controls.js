@@ -1,9 +1,9 @@
 import React from "react";
+import PropTypes from 'prop-types';
+import { connect } from "react-redux";
 import Flex from "../framework/flex";
 import SelectLabel from "../framework/select-label";
-// import ToggleBranchLabels from "./toggle-branch-labels";
 import ColorBy from "./color-by";
-// import Search from "./search";
 import DateRangeInputs from "./date-range-inputs";
 import AnalysisDateSlider from "./analysis-date-slider";
 import ChooseLayout from "./choose-layout";
@@ -15,7 +15,6 @@ import MapAnimationControls from "./map-animation";
 import AllFilters from "./all-filter";
 import { controlsWidth, enableAnimationDisplay } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
-import { connect } from "react-redux";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -28,8 +27,8 @@ const header = (text) => (
 }))
 class Controls extends React.Component {
   static propTypes = {
-    analysisSlider: React.PropTypes.any,
-    dispatch: React.PropTypes.func
+    analysisSlider: PropTypes.any,
+    dispatch: PropTypes.func
   }
   getStyles() {
     return {};

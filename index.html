@@ -4,11 +4,6 @@
     <title>nextstrain</title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="https://unpkg.com/react-select/dist/react-select.css">
-    <link rel="stylesheet" type="text/css"
-              href="https://fonts.googleapis.com/css?family=Lato:100,200,300,400,500">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
     <link rel="shortcut icon" href="/favicon.png" type="image/png">
     <link rel="icon" href="/favicon.png" type="image/png">
   </head>
@@ -16,6 +11,21 @@
   <body class="viewport">
     <div id='root'>
     </div>
+
+    <!-- asyncronously load the react bundle -->
+    <script async src="/dist/bundle.js"></script>
+
+    <!-- by placing this in the body, we mimic async ability
+    This is important as sometimes unpkg takes 10s to return and, if in the header
+    this blocks the page load.
+    https://codepen.io/tigt/post/async-css-without-javascript
+    https://stackoverflow.com/questions/9271276/is-the-recommendation-to-include-css-before-javascript-invalid
+    -->
+    <link rel="stylesheet" href="https://unpkg.com/react-select/dist/react-select.css">
+    <link rel="stylesheet" type="text/css"
+              href="https://fonts.googleapis.com/css?family=Lato:100,200,300,400,500">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.1/dist/leaflet.css" />
 
     <script>
       /**
@@ -250,6 +260,5 @@
         return component;
       }
     </script>
-    <script src="/dist/bundle.js"></script>
   </body>
 </html>

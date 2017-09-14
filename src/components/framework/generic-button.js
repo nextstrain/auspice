@@ -1,10 +1,10 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import Color from "color";
-import globalStyles from "../../globalStyles";
 
 class Button extends React.Component {
   static propTypes = {
-    style: React.PropTypes.object
+    style: PropTypes.object
   }
   static defaultProps = {
     style: {
@@ -54,10 +54,8 @@ class Button extends React.Component {
     return (
       <button
         onClick={this.props.onClick}
-        style={[
-          styles.base,
-          this.props.style
-        ]}>
+        style={{ ...styles.base, ...this.props.style }}
+      >
         {this.props.children}
       </button>
     );
@@ -65,8 +63,8 @@ class Button extends React.Component {
 }
 
 Button.propTypes = {
-  color: React.PropTypes.string,
-  onClick: React.PropTypes.func
+  color: PropTypes.string,
+  onClick: PropTypes.func
 };
 
 module.exports = Button;

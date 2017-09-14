@@ -1,9 +1,9 @@
 import React from "react";
-import _ from "lodash";
-import { select} from "../../globalStyles";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import _keys from "lodash/keys";
+import { select } from "../../globalStyles";
 import { CHANGE_GEO_RESOLUTION } from "../../actions/types";
-import { changeColorBy } from "../../actions/colors";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
@@ -20,7 +20,7 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 })
 class GeoResolution extends React.Component {
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
   getStyles() {
     return {
@@ -33,7 +33,7 @@ class GeoResolution extends React.Component {
     let resolutions = null;
 
     if (this.props.metadata) {
-      const resolutionKeys = _.keys(this.props.metadata.geo)
+      const resolutionKeys = _keys(this.props.metadata.geo)
       resolutions = resolutionKeys.map((resolution, i) => {
         return (
           <option key={i} value={ resolution }>

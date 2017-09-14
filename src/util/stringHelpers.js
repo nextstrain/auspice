@@ -7,7 +7,7 @@ import React from "react";
  * @param {int} trim (default: 0) should strings get trimmed? Applies only to strings. 0: no trimming.
  * @returns {string|float} to display
  */
-export const prettyString = (x, {multiplier = false, trim = 0, camelCase = true} = {}) => {
+export const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false, stripEtAl = false} = {}) => {
   if (!x) {
     return "";
   }
@@ -20,7 +20,13 @@ export const prettyString = (x, {multiplier = false, trim = 0, camelCase = true}
     }
     x = x.replace(/_/g, " ");
     if (camelCase) {
-      return x.replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
+      x = x.replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
+    }
+    if (removeComma) {
+      x = x.replace(/,/g, "");
+    }
+    if (stripEtAl) {
+      x = x.replace('et al.', '').replace('Et Al.', '').replace('et al', '').replace('Et Al', '');
     }
     return x;
   } else if (typeof x === "number") {
@@ -37,4 +43,14 @@ export const authorString = (x) => {
     return (<span>{y.replace(" Et Al", "")}<em> et al</em></span>);
   }
   return y;
+};
+
+export const formatURLString = (x) => {
+  let url = x;
+  if (url.startsWith("https_")) {
+    url = url.replace(/^https_/, "https:");
+  } else if (url.startsWith("http_")) {
+    url = url.replace(/^https_/, "http:");
+  }
+  return url;
 };

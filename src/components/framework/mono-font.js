@@ -1,14 +1,13 @@
 import React from "react";
-import Radium from "radium";
+import PropTypes from 'prop-types';
 
-@Radium
 class MonoFont extends React.Component {
 
   static propTypes = {
     /* react */
 
-    style: React.PropTypes.object,
-    size: React.PropTypes.string
+    style: PropTypes.object,
+    size: PropTypes.string
   }
   static defaultProps = {
     size: "small"
@@ -24,10 +23,9 @@ class MonoFont extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <span style={[
-        styles.base,
-        this.props.style
-      ]}>{this.props.children}</span>
+      <span style={{ ...styles.base, ...this.props.style }}>
+        {this.props.children}
+      </span>
     );
   }
 }

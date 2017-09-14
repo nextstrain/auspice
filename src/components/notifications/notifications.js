@@ -1,6 +1,7 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import ReactCSSTransitionGroup from "react-addons-css-transition-group"; // ES6
+import ReactCSSTransitionGroup from "react-addons-css-transition-group";
 import { REMOVE_NOTIFICATION } from "../../actions/types";
 
 const generateIcon = function (notificationType) {
@@ -49,9 +50,9 @@ class Notifications extends React.Component {
     super(props);
   }
   static propTypes = {
-    stack: React.PropTypes.array.isRequired,
-    dispatch: React.PropTypes.func.isRequired,
-    pageWidth: React.PropTypes.number.isRequired
+    stack: PropTypes.array.isRequired,
+    dispatch: PropTypes.func.isRequired,
+    pageWidth: PropTypes.number.isRequired
   }
   closeIcon(d) {
     return(
@@ -98,6 +99,7 @@ class Notifications extends React.Component {
         transitionName="notification"
         transitionEnterTimeout={500}
         transitionLeaveTimeout={500}
+        style={{zIndex: 20000}}
       >
         {this.props.stack.map((d) => this.generateEl(d))}
       </ReactCSSTransitionGroup>

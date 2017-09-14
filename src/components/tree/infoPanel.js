@@ -1,8 +1,8 @@
-/*eslint-env browser*/
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 import { prettyString } from "../../util/stringHelpers";
-import { floatDateToMoment } from "../../util/dateHelpers";
+import { numericToCalendar } from "../../util/dateHelpers";
+import { getTipColorAttribute } from "./treeHelpers";
 
 const infoLineJSX = (item, value) => (
   <g>
@@ -33,10 +33,10 @@ const getBranchDivJSX = (d) =>
   <p>{infoLineJSX("Divergence:", prettyString(d.attr.div.toExponential(3)))}</p>;
 
 const getBranchTimeJSX = (d, temporalConfidence) => {
-  const dates = [floatDateToMoment(d.attr.num_date).format("YYYY-MM-DD")];
+  const dates = [numericToCalendar(d.attr.num_date)];
   if (temporalConfidence) {
-    dates[1] = floatDateToMoment(d.attr.num_date_confidence[0]).format("YYYY-MM-DD");
-    dates[2] = floatDateToMoment(d.attr.num_date_confidence[1]).format("YYYY-MM-DD");
+    dates[1] = numericToCalendar(d.attr.num_date_confidence[0]);
+    dates[2] = numericToCalendar(d.attr.num_date_confidence[1]);
     if (dates[1] === dates[2]) {
       return <p>{infoLineJSX("Date:", dates[0])}</p>;
     }
@@ -59,12 +59,12 @@ const getBranchTimeJSX = (d, temporalConfidence) => {
  * @return {JSX} to be displayed
  */
 const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidence, colorBy) => {
-  if (colorBy === "num_date" || colorBy.slice(0, 2) === "gt") {
-    if (colorBy !== distanceMeasure) {
-      /* i.e. colorBy is date and branch lengths are divergence - should still show node date */
-      return getBranchTimeJSX(d, temporalConfidence);
-    }
-    return null;
+  if (colorBy.slice(0, 2) === "gt") {
+    return null; /* muts ahave already been displayed */
+  }
+  if (colorBy === "num_date") {
+    /* if colorBy is date and branch lengths are divergence we should still show node date */
+    return (colorBy !== distanceMeasure) ? getBranchTimeJSX(d, temporalConfidence) : null;
   }
   if (colorByConfidence === true) {
     const lkey = colorBy + "_confidence";
@@ -200,9 +200,27 @@ const getPanelStyling = (d, viewer) => {
   return styles;
 };
 
+const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale, sequences) => {
+  if (colorBy === "num_date") {
+    if (distanceMeasure === "num_date") {
+      return null;
+    } else {
+      return getBranchTimeJSX(d.n, temporalConfidence);
+    }
+  }
+  if (colorBy.slice(0, 2) === "gt") {
+    const key = mutType === "nuc" ?
+      "Nucleotide at pos " + colorBy.replace("gt-", "").replace("nuc_", "") :
+      "Amino Acid at " + colorBy.replace("gt-", "").replace("_", " site ");
+    const state = getTipColorAttribute(d.n, colorScale, sequences);
+    return infoLineJSX(key + ":", state);
+  }
+  return infoLineJSX(prettyString(colorBy) + ":", prettyString(d.n.attr[colorBy]));
+};
+
 /* the actual component - a pure function, so we can return early if needed */
 const InfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
-  hovered, viewer, colorBy, colorByConfidence}) => {
+  hovered, viewer, colorBy, colorByConfidence, colorScale, sequences}) => {
   if (!(tree && hovered)) {
     return null;
   }
@@ -213,7 +231,7 @@ const InfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
   if (tip) {
     inner = (
       <p>
-        {infoLineJSX(prettyString(colorBy) + ":", prettyString(d.n.attr[colorBy]))}
+        {tipDisplayColorByInfo(d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale, sequences)}
         {distanceMeasure === "div" ? getBranchDivJSX(d.n) : getBranchTimeJSX(d.n, temporalConfidence)}
       </p>
     );

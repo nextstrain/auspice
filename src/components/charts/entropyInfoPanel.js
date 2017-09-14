@@ -1,14 +1,11 @@
-/*eslint-env browser*/
 import React from "react";
-// import * as globals from "../../util/globals";
-import { infoPanelStyles} from "../../globalStyles";
-// import { prettyString } from "../../util/stringHelpers";
+import { infoPanelStyles } from "../../globalStyles";
 
 const InfoPanel = ({hovered, mutType}) => {
 
   /* this is a function - we can bail early */
   if (!hovered) {
-    return null
+    return null;
   }
   const width = 200;
 
@@ -60,7 +57,7 @@ const InfoPanel = ({hovered, mutType}) => {
         <div>
           {mutType === "aa" ? `Codon ${hovered.d.codon + 1} in protein ${hovered.d.prot}` :
             hovered.d.prot ? `Nucleotide ${hovered.d.x + 1} (in protein ${hovered.d.prot})` :
-            `Nucleotide ${hovered.d.x + 1}`}
+              `Nucleotide ${hovered.d.x + 1}`}
         </div>
         <p/>
         <div>

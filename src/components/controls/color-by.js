@@ -1,8 +1,9 @@
 import React from "react";
+import PropTypes from 'prop-types';
+import { connect } from "react-redux";
 import { defaultColorBy } from "../../util/globals";
 import { parseGenotype } from "../../util/getGenotype";
-import { select} from "../../globalStyles";
-import { connect } from "react-redux";
+import { select } from "../../globalStyles";
 import { changeColorBy } from "../../actions/colors";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
@@ -27,13 +28,13 @@ class ColorBy extends React.Component {
     };
   }
   static propTypes = {
-    colorBy: React.PropTypes.string.isRequired,
-    geneLength: React.PropTypes.object,
-    colorOptions: React.PropTypes.object.isRequired,
-    dispatch: React.PropTypes.func.isRequired
+    colorBy: PropTypes.string.isRequired,
+    geneLength: PropTypes.object,
+    colorOptions: PropTypes.object.isRequired,
+    dispatch: PropTypes.func.isRequired
   }
   static contextTypes = {
-    router: React.PropTypes.object.isRequired
+    router: PropTypes.object.isRequired
   }
 
   componentWillReceiveProps(nextProps) {
@@ -65,13 +66,15 @@ class ColorBy extends React.Component {
     }
     if (this.state.selected === "gt") {
       return (
-        <input type="text" placeholder="Genome position" value={value}
+        <input
+          type="text"
+          placeholder="Genome position"
+          value={value}
           onChange={(e) => this.setGenotypeColorBy(e.target.value)}
         />
       );
-    } else {
-      return null;
     }
+    return null;
   }
 
   setGenotypeColorBy(genotype) {

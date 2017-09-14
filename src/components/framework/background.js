@@ -1,5 +1,4 @@
 import React from "react";
-import Radium from "radium";
 import { connect } from "react-redux";
 
 /* add connect, browserDimensions & documentHeight here and use instead of 100% */
@@ -8,23 +7,20 @@ import { connect } from "react-redux";
     browserDimensions: state.browserDimensions.browserDimensions
   };
 })
-@Radium
 class Background extends React.Component {
   getStyles() {
     return {
       base: {
-        backgroundColor: "#F8F8F8",
-        height: this.props.docHeight
+        backgroundColor: "#F4F4F4",
+        height: this.props.docHeight,
+        overflowX: "hidden"
       }
     };
   }
   render() {
     const styles = this.getStyles();
     return (
-      <div style={[
-        styles.base,
-        this.props.style
-      ]}>
+      <div id="background" style={{ ...styles.base, ...this.props.style }}>
         {this.props.children}
       </div>
     );

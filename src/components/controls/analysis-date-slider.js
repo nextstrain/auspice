@@ -1,20 +1,10 @@
 import React from "react";
-import DatePicker from "react-datepicker";
-import moment from "moment";
-// import _ from "lodash";
-import Slider from "./slider";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import Slider from "./slider";
 import { controlsWidth } from "../../util/globals";
-import { modifyURLquery } from "../../util/urlHelpers";
 import { changeAnalysisSliderValue } from "../../actions/treeProperties";
 import { dataFont, darkGrey } from "../../globalStyles";
-// import d3 from "d3";
-
-moment.updateLocale("en", {
-  longDateFormat: {
-    L: "YYYY-MM-DD"
-  }
-});
 
 @connect((state) => {
   return {
@@ -31,10 +21,10 @@ class AnalysisDateSlider extends React.Component {
     }
   }
   static propTypes = {
-    value: React.PropTypes.number.isRequired,
-    absoluteMinVal: React.PropTypes.number.isRequired,
-    absoluteMaxVal: React.PropTypes.number.isRequired,
-    dispatch: React.PropTypes.func.isRequired
+    value: PropTypes.number.isRequired,
+    absoluteMinVal: PropTypes.number.isRequired,
+    absoluteMaxVal: PropTypes.number.isRequired,
+    dispatch: PropTypes.func.isRequired
   }
   getStyles() {
     return {

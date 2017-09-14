@@ -1,15 +1,11 @@
 import React from "react";
-import Radium from "radium";
-// import _ from "lodash";
-// import Flex from "./framework/flex";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { SEARCH_INPUT_CHANGE } from "../../actions/types";
 import Autosuggest from 'react-autosuggest';
 
 @connect(state => {
   return state.tree
 })
-@Radium
 class SearchStrains extends React.Component {
   constructor(props) {
     super();
@@ -24,13 +20,13 @@ class SearchStrains extends React.Component {
   }
   static propTypes = {
     /* react */
-    dispatch: React.PropTypes.func,
-    params: React.PropTypes.object,
-    routes: React.PropTypes.array,
+    dispatch: PropTypes.func,
+    params: PropTypes.object,
+    routes: PropTypes.array,
     /* component api */
-    style: React.PropTypes.object,
-    tips: React.PropTypes.array
-    // foo: React.PropTypes.string
+    style: PropTypes.object,
+    tips: PropTypes.array
+    // foo: PropTypes.string
   }
   static defaultProps = {
     // foo: "bar"

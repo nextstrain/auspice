@@ -1,22 +1,14 @@
 import React from "react";
 import { connect } from "react-redux";
 import { titleColors } from "../../util/globals";
-import { titleStyles, titleFont, medGrey } from "../../globalStyles";
-import Radium from "radium";
+import { titleFont, medGrey } from "../../globalStyles";
 
 @connect((state) => {
   return {
     browserDimensions: state.browserDimensions.browserDimensions
   };
 })
-@Radium
 class Title extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-  static propTypes = {
-    style: React.PropTypes.object.isRequired
-  }
   getStyles() {
     let fontSize = 106;
     if (this.props.browserDimensions.width < 500) {
@@ -52,7 +44,7 @@ class Title extends React.Component {
   render() {
     const styles = this.getStyles();
     return (
-      <span style={[styles.title, this.props.style]}>
+      <span style={{ ...styles.title, ...this.props.style }}>
         {this.createTitle()}
       </span>
     );
