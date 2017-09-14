@@ -11,3 +11,4 @@ dist/
 big_flu
 data/
 releases/
+server.dist.js
