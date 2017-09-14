@@ -1,32 +1,31 @@
 /* eslint no-console: off */
 const React = require("react");
 const ReactDOMServer = require('react-dom/server');
-const ReactMarkdown = require('react-markdown');
+const ReactMarkdown = require('react-markdown'); /* https://github.com/rexxars/react-markdown */
 const fs = require('fs');
 const path = require("path");
+const request = require('request');
 
-/* https://github.com/rexxars/react-markdown */
+const s3 = "http://data.nextstrain.org/";
 
 const serveStaticReport = (query, res) => {
-  console.log("serveStaticReport()");
   if (Object.keys(query).indexOf("path") === -1) {
     res.status(404).send('No path found in query');
     return;
   }
-  // THIS MUST BE TURNED INTO PROMISES!!!!!!
-  /* 1: get and parse the markdown file */
-  let md;
   if (global.LOCAL_DATA) {
-    md = fs.readFileSync(path.join(global.LOCAL_DATA_PATH, query.path), 'utf8');
+    /* this code is syncronous, but that's ok since this is never used in production */
+    const md = fs.readFileSync(path.join(global.LOCAL_DATA_PATH, query.path), 'utf8');
+    res.send(ReactDOMServer.renderToStaticMarkup(<ReactMarkdown source={md} />));
   } else {
-    md = '# no puedo';
+    request(s3 + query.path, (err, response, body) => {
+      if (err || body.split("\n")[1] === '<head><title>404 Not Found</title></head>') {
+        res.status(404).send('Report not found.');
+        return;
+      }
+      res.send(ReactDOMServer.renderToStaticMarkup(<ReactMarkdown source={body} />));
+    });
   }
-  //
-  // console.log("(1): get and parse the file " + query.path);
-  // console.log("(2): construct the react component");
-  // console.log("(3): send it down the wire");
-  // res.send(ReactDOMServer.renderToStaticMarkup(<ReportBody path={query.path}/>));
-  res.send(ReactDOMServer.renderToStaticMarkup(<ReactMarkdown source={md} />));
 };
 
 module.exports = {

@@ -30,6 +30,14 @@ export const modifyURLquery = (router, keyValuePairs = null, replace = false) =>
   replace ? router.history.replace(newURL) : router.history.push(newURL);
 };
 
+export const clearURLquery = (router, replace = false) => {
+  const newURL = {
+    pathname: router.history.location.pathname,
+    search: queryString.stringify({})
+  };
+  replace ? router.history.replace(newURL) : router.history.push(newURL);
+};
+
 // make prefix for data files with fields joined by _ instead of / as in URL
 const makeDataPathFromParsedParams = (parsedParams) => {
   const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);

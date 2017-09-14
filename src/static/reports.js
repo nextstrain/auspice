@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import queryString from "query-string";
 import PropTypes from 'prop-types';
 import TitleBar from "../components/framework/title-bar";
-import { modifyURLquery } from "../util/urlHelpers";
+import { modifyURLquery, clearURLquery } from "../util/urlHelpers";
 // import { analyticsNewPage } from "../util/googleAnalytics";
 import { warningNotification } from "../actions/notifications";
 import { charonAPIAddress } from "../util/globals";
@@ -37,6 +37,7 @@ class Reports extends React.Component {
       this.props.dispatch(warningNotification({message: "Failed to get report from server"}));
       console.error(e);
       this.setState({showTOC: true, nameOfCurrentReport: undefined});
+      clearURLquery(this.context.router);
     };
     const xmlHttp = new XMLHttpRequest();
     xmlHttp.onload = () => {
