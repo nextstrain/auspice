@@ -115,7 +115,7 @@ class Entropy extends React.Component {
       return {
         responsive,
         width: responsive.width,
-        height: 300, /* look into using responsive.height */
+        height: responsive.width > 800 ? 300 : 200, /* look into using responsive.height */
         padBottom: 50,
         padLeft: 15,
         padRight: 12
