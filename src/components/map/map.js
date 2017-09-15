@@ -474,10 +474,7 @@ class Map extends React.Component {
 
   maybeCreateMapDiv() {
     let container = null;
-    if (
-      this.props.browserDimensions && /* this can probably be removed */
-      this.state.responsive
-    ) {
+    if (this.state.responsive) {
       container = (
         <div style={{position: "relative"}}>
           {this.animationButtons()}

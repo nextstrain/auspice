@@ -8,8 +8,10 @@ import { defaultGeoResolution,
   defaultDistanceMeasure,
   defaultLayout,
   mutType,
+  twoColumnBreakpoint,
   reallySmallNumber } from "../util/globals";
 import * as types from "../actions/types";
+import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 
 const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -71,7 +73,7 @@ const getDefaultState = () => {
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
     mapAnimationPlayPauseButton: "Play",
-    panelLayout: "grid" // must modify default based on browser dimensions
+    panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full"
   };
 };
 

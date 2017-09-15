@@ -153,7 +153,7 @@ class TreeView extends React.Component {
   }
 
   render() {
-    const widescreen = this.props.browserDimensions && this.props.browserDimensions.width > twoColumnBreakpoint && this.props.splitTreeAndMap;
+    const widescreen = this.props.browserDimensions.width > twoColumnBreakpoint && this.props.splitTreeAndMap;
     const grid = this.props.panelLayout === "grid"; /* add a check here for min browser width tbd */
 
     const responsive = computeResponsive({
