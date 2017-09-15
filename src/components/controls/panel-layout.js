@@ -40,17 +40,19 @@ class PanelLayouts extends React.Component {
           onClick={() => {
             analyticsControlsEvent("change-layout-full");
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "full" });
-          }}>
+          }}
+        >
           <span style={styles.title}> {"full"} </span>
         </button>
         <button
           key={2}
-          style={this.props.panelLayout === "thirds" ? materialButtonSelected : materialButton}
+          style={this.props.panelLayout === "grid" ? materialButtonSelected : materialButton}
           onClick={() => {
-            analyticsControlsEvent("change-layout-thirds");
-            this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "thirds" });
-          }}>
-          <span style={styles.title}> {"thirds"} </span>
+            analyticsControlsEvent("change-layout-grid");
+            this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "grid" });
+          }}
+        >
+          <span style={styles.title}> {"grid"} </span>
         </button>
       </div>
     );

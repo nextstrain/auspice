@@ -114,7 +114,7 @@ class Map extends React.Component {
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
   }
   maybeInvalidateMapSize(nextProps) {
-    /* when we procedurally change the size of the card, for instance, when we swap from thirds to full */
+    /* when we procedurally change the size of the card, for instance, when we swap from grid to full */
     if (
       this.state.map &&
       (
@@ -160,10 +160,10 @@ class Map extends React.Component {
   doComputeResponsive(nextProps) {
 
     const widescreen = nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap);
-    const thirds = nextProps.panelLayout === "thirds"; /* add a check here for min browser width tbd */
+    const grid = nextProps.panelLayout === "grid"; /* add a check here for min browser width tbd */
     return computeResponsive({
-      horizontal: widescreen || thirds ? 0.5 : 1,
-      vertical: thirds ? 0.85 : 1.0, /* if we are in single column, full height */
+      horizontal: widescreen || grid ? 0.5 : 1,
+      vertical: grid ? 0.85 : 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,
       maxAspectRatio: 1.2

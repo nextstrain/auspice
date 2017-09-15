@@ -104,7 +104,7 @@ class TreeView extends React.Component {
         prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
         // or the sidebar's (dis)appeared
         this.props.sidebar !== prevProps.sidebar ||
-        prevProps.panelLayout !== this.props.panelLayout /* full vs thirds */
+        prevProps.panelLayout !== this.props.panelLayout /* full vs grid */
       )
 
     ) {
@@ -154,11 +154,11 @@ class TreeView extends React.Component {
 
   render() {
     const widescreen = this.props.browserDimensions && this.props.browserDimensions.width > twoColumnBreakpoint && this.props.splitTreeAndMap;
-    const thirds = this.props.panelLayout === "thirds"; /* add a check here for min browser width tbd */
+    const grid = this.props.panelLayout === "grid"; /* add a check here for min browser width tbd */
 
     const responsive = computeResponsive({
-      horizontal: widescreen || thirds ? .5 : 1,
-      vertical: this.props.panelLayout === "thirds" ? 0.85 : 1.0,
+      horizontal: widescreen || grid ? 0.5 : 1,
+      vertical: grid ? 0.85 : 1.0,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
       maxAspectRatio: 1.2

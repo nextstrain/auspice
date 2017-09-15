@@ -71,7 +71,7 @@ const getDefaultState = () => {
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
     mapAnimationPlayPauseButton: "Play",
-    panelLayout: "thirds",
+    panelLayout: "grid" // must modify default based on browser dimensions
   };
 };
 
