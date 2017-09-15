@@ -70,7 +70,8 @@ const getDefaultState = () => {
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
-    mapAnimationPlayPauseButton: "Play"
+    mapAnimationPlayPauseButton: "Play",
+    panelLayout: "thirds",
   };
 };
 
@@ -306,6 +307,10 @@ const Controls = (state = getDefaultState(), action) => {
         temporalConfidence: Object.assign({}, state.temporalConfidence, {
           on: !state.temporalConfidence.on
         })
+      });
+    case types.CHANGE_PANEL_LAYOUT:
+      return Object.assign({}, state, {
+        panelLayout: action.data
       });
     case types.ANALYSIS_SLIDER:
       if (action.destroy) {

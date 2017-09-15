@@ -94,7 +94,8 @@ const parseEncodedGenotype = (colorBy) => {
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
     defaultColorBy: state.controls.defaultColorBy,
-    shouldReRender: false
+    shouldReRender: false,
+    panelLayout: state.controls.panelLayout,
   };
 })
 class Entropy extends React.Component {
@@ -107,14 +108,14 @@ class Entropy extends React.Component {
     this.getChartGeom = (p) => {
       const responsive = computeResponsive({
         horizontal: 1,
-        vertical: 0.3333333,
+        vertical: 0.35,
         browserDimensions: p.browserDimensions,
         sidebar: p.sidebar
       });
       return {
         responsive,
         width: responsive.width,
-        height: 300,
+        height: responsive.height,
         padBottom: 50,
         padLeft: 15,
         padRight: 12

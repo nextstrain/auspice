@@ -36,6 +36,7 @@ there are actually backlinks from the phylotree tree
     showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
     mutType: state.controls.mutType,
+    panelLayout: state.controls.panelLayout,
     sequences: state.sequences,
     colorScale: state.controls.colorScale,
     metadata: state.metadata
@@ -98,13 +99,21 @@ class TreeView extends React.Component {
       // the tree exists AND
       this.state.tree &&
       // either the browser dimensions have changed
-      (prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
-      prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
-      // or the sidebar's (dis)appeared
-      this.props.sidebar !== prevProps.sidebar)
+      (
+        prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
+        prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
+        // or the sidebar's (dis)appeared
+        this.props.sidebar !== prevProps.sidebar ||
+        prevProps.panelLayout !== this.props.panelLayout /* full vs thirds */
+      )
+
     ) {
       const baseNodeInView = this.state.selectedBranch ? this.state.selectedBranch.n.arrayIdx : 0;
       this.state.tree.zoomIntoClade(this.state.tree.nodes[baseNodeInView], mediumTransitionDuration);
+      /*
+        this shouldn't be necessary - it is currently a mystery why the svg does not change on browser size with out this
+      */
+      this.forceUpdate();
     }
   }
 
@@ -148,13 +157,15 @@ class TreeView extends React.Component {
   }
 
   render() {
+    const widescreen = this.props.browserDimensions && this.props.browserDimensions.width > twoColumnBreakpoint && this.props.splitTreeAndMap;
+    const thirds = this.props.panelLayout === "thirds"; /* add a check here for min browser width tbd */
+
     const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > twoColumnBreakpoint && this.props.splitTreeAndMap ? .5 : 1,
-      vertical: 1.0,
+      horizontal: widescreen || thirds ? .5 : 1,
+      vertical: this.props.panelLayout === "thirds" ? 0.85 : 1.0,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
-      minHeight: 480,
-      maxAspectRatio: 1.0
+      maxAspectRatio: 1.2
     });
     const cardTitle = this.state.selectedBranch ? "." : "Phylogeny";
 
