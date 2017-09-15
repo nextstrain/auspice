@@ -50,7 +50,6 @@ const getDefaultState = () => {
     region: null,
     search: null,
     strain: null,
-    splitTreeAndMap: true,
     mutType: mutType,
     temporalConfidence: {exists: false, display: false, on: false},
     layout: defaultLayout,

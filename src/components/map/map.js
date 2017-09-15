@@ -31,7 +31,6 @@ import { incommingMapPNG } from "../download/helperFunctions";
     absoluteDateMax: state.controls.absoluteDateMax,
     treeVersion: state.tree.version,
     treeLoaded: state.tree.loaded,
-    splitTreeAndMap: state.controls.splitTreeAndMap,
     nodes: state.tree.nodes,
     nodeColors: state.tree.nodeColors,
     visibility: state.tree.visibility,
@@ -158,11 +157,9 @@ class Map extends React.Component {
     }
   }
   doComputeResponsive(nextProps) {
-
-    const widescreen = nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap);
     const grid = nextProps.panelLayout === "grid"; /* add a check here for min browser width tbd */
     return computeResponsive({
-      horizontal: widescreen || grid ? 0.5 : 1,
+      horizontal: grid ? 0.5 : 1,
       vertical: grid ? 0.85 : 1.0, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar,

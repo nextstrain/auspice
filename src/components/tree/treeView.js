@@ -27,8 +27,6 @@ there are actually backlinks from the phylotree tree
     tree: state.tree,
     quickdraw: state.controls.quickdraw,
     browserDimensions: state.browserDimensions.browserDimensions,
-    // map: state.map,
-    splitTreeAndMap: state.controls.splitTreeAndMap,
     colorBy: state.controls.colorBy,
     colorByConfidence: state.controls.colorByConfidence,
     layout: state.controls.layout,
@@ -153,11 +151,9 @@ class TreeView extends React.Component {
   }
 
   render() {
-    const widescreen = this.props.browserDimensions.width > twoColumnBreakpoint && this.props.splitTreeAndMap;
     const grid = this.props.panelLayout === "grid"; /* add a check here for min browser width tbd */
-
     const responsive = computeResponsive({
-      horizontal: widescreen || grid ? 0.5 : 1,
+      horizontal: grid ? 0.5 : 1,
       vertical: grid ? 0.85 : 1.0,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
