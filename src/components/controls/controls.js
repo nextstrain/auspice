@@ -83,7 +83,8 @@ class Controls extends React.Component {
         <GeoResolution/>
         {enableAnimationDisplay ? <MapAnimationControls/> : null}
 
-        {header("Panel Layout")}
+        {header("Layout Options")}
+        <SelectLabel text="Panel layout"/>
         <PanelLayout/>
 
         {header("Filters")}
