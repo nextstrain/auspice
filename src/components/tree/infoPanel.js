@@ -147,7 +147,7 @@ const getBranchDescendents = (n) => {
   if (n.fullTipCount === 1) {
     return <g>{infoLineJSX("Branch leading to", n.strain)}<p/></g>;
   }
-  return <g>{infoLineJSX("Number of descendents:", n.fullTipCount)}<p/></g>;
+  return <g>{infoLineJSX("Number of descendants:", n.fullTipCount)}<p/></g>;
 };
 
 /**
