@@ -27,8 +27,6 @@ there are actually backlinks from the phylotree tree
     tree: state.tree,
     quickdraw: state.controls.quickdraw,
     browserDimensions: state.browserDimensions.browserDimensions,
-    // map: state.map,
-    splitTreeAndMap: state.controls.splitTreeAndMap,
     colorBy: state.controls.colorBy,
     colorByConfidence: state.controls.colorByConfidence,
     layout: state.controls.layout,
@@ -38,7 +36,8 @@ there are actually backlinks from the phylotree tree
     mutType: state.controls.mutType,
     sequences: state.sequences,
     colorScale: state.controls.colorScale,
-    metadata: state.metadata
+    metadata: state.metadata,
+    panelLayout: state.controls.panelLayout
   };
 })
 class TreeView extends React.Component {
@@ -98,10 +97,14 @@ class TreeView extends React.Component {
       // the tree exists AND
       this.state.tree &&
       // either the browser dimensions have changed
-      (prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
-      prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
-      // or the sidebar's (dis)appeared
-      this.props.sidebar !== prevProps.sidebar)
+      (
+        prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
+        prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
+        // or the sidebar's (dis)appeared
+        this.props.sidebar !== prevProps.sidebar ||
+        prevProps.panelLayout !== this.props.panelLayout /* full vs grid */
+      )
+
     ) {
       const baseNodeInView = this.state.selectedBranch ? this.state.selectedBranch.n.arrayIdx : 0;
       this.state.tree.zoomIntoClade(this.state.tree.nodes[baseNodeInView], mediumTransitionDuration);
@@ -148,13 +151,12 @@ class TreeView extends React.Component {
   }
 
   render() {
+    const grid = this.props.panelLayout === "grid"; /* add a check here for min browser width tbd */
     const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > twoColumnBreakpoint && this.props.splitTreeAndMap ? .5 : 1,
-      vertical: 1.0,
+      horizontal: grid ? 0.5 : 1,
+      vertical: grid ? 0.7 : 0.9,
       browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar,
-      minHeight: 480,
-      maxAspectRatio: 1.0
+      sidebar: this.props.sidebar
     });
     const cardTitle = this.state.selectedBranch ? "." : "Phylogeny";
 

@@ -91,7 +91,7 @@ class ColorBy extends React.Component {
   getStyles() {
     return {
       base: {
-        marginBottom: 10
+        marginBottom: 0
       }
     };
   }

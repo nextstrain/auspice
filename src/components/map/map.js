@@ -31,7 +31,6 @@ import { incommingMapPNG } from "../download/helperFunctions";
     absoluteDateMax: state.controls.absoluteDateMax,
     treeVersion: state.tree.version,
     treeLoaded: state.tree.loaded,
-    splitTreeAndMap: state.controls.splitTreeAndMap,
     nodes: state.tree.nodes,
     nodeColors: state.tree.nodeColors,
     visibility: state.tree.visibility,
@@ -46,7 +45,8 @@ import { incommingMapPNG } from "../download/helperFunctions";
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
     mapTriplicate: state.controls.mapTriplicate,
     dateMin: state.controls.dateMin,
-    dateMax: state.controls.dateMax
+    dateMax: state.controls.dateMax,
+    panelLayout: state.controls.panelLayout
   };
 })
 
@@ -101,16 +101,31 @@ class Map extends React.Component {
   // componentDidMount() {
   // }
   componentWillReceiveProps(nextProps) {
-    /* this is the place we update state in response to new props */
     this.maybeComputeResponsive(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
+    this.maybeInvalidateMapSize(nextProps);
   }
   componentDidUpdate(prevProps) {
     if (this.props.nodes === null) { return; }
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
+  }
+  maybeInvalidateMapSize(nextProps) {
+    /* when we procedurally change the size of the card, for instance, when we swap from grid to full */
+    if (
+      this.state.map &&
+      (
+        this.props.sidebar !== nextProps.sidebar ||
+        this.props.panelLayout !== nextProps.panelLayout
+      )
+    ) {
+      window.setTimeout(this.invalidateMapSize.bind(this), 1500);
+    }
+  }
+  invalidateMapSize() {
+    this.state.map.invalidateSize()
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
@@ -127,7 +142,8 @@ class Map extends React.Component {
       dimensionsChanged: this.props.browserDimensions.width !== nextProps.browserDimensions.width || this.props.browserDimensions.height !== nextProps.browserDimensions.height,
       responsiveNotSet: !this.state.responsive,
       treeChanged: this.props.treeVersion !== nextProps.treeVersion, // treeVersion change implies tree is ready (modified by the same action)
-      sidebarChanged: this.props.sidebar !== nextProps.sidebar
+      sidebarChanged: this.props.sidebar !== nextProps.sidebar,
+      panelLayout: this.props.panelLayout !== nextProps.panelLayout,
     };
 
     // Object.values would be the obvious thing to do here
@@ -139,16 +155,14 @@ class Map extends React.Component {
     if (values.some(v => v === true)) {
       this.setState({responsive: this.doComputeResponsive(nextProps)});
     }
-
   }
   doComputeResponsive(nextProps) {
+    const grid = nextProps.panelLayout === "grid"; /* add a check here for min browser width tbd */
     return computeResponsive({
-      horizontal: nextProps.browserDimensions.width > twoColumnBreakpoint && (this.props.splitTreeAndMap) ? 0.5 : 1,
-      vertical: 1.0, /* if we are in single column, full height */
+      horizontal: grid ? 0.5 : 1,
+      vertical: grid ? 0.7 : 0.9, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
-      sidebar: nextProps.sidebar,
-      minHeight: 480,
-      maxAspectRatio: 1.0
+      sidebar: nextProps.sidebar
     });
   }
   maybeSetupD3DOMNode() {
@@ -456,10 +470,7 @@ class Map extends React.Component {
 
   maybeCreateMapDiv() {
     let container = null;
-    if (
-      this.props.browserDimensions &&
-      this.state.responsive
-    ) {
+    if (this.state.responsive) {
       container = (
         <div style={{position: "relative"}}>
           {this.animationButtons()}

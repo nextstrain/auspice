@@ -8,8 +8,10 @@ import { defaultGeoResolution,
   defaultDistanceMeasure,
   defaultLayout,
   mutType,
+  twoColumnBreakpoint,
   reallySmallNumber } from "../util/globals";
 import * as types from "../actions/types";
+import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 
 const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -48,7 +50,6 @@ const getDefaultState = () => {
     region: null,
     search: null,
     strain: null,
-    splitTreeAndMap: true,
     mutType: mutType,
     temporalConfidence: {exists: false, display: false, on: false},
     layout: defaultLayout,
@@ -70,7 +71,8 @@ const getDefaultState = () => {
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
-    mapAnimationPlayPauseButton: "Play"
+    mapAnimationPlayPauseButton: "Play",
+    panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full"
   };
 };
 
@@ -271,6 +273,10 @@ const Controls = (state = getDefaultState(), action) => {
     case types.CHANGE_ANIMATION_START:
       return Object.assign({}, state, {
         mapAnimationStartDate: action.data
+      });
+    case types.CHANGE_PANEL_LAYOUT:
+      return Object.assign({}, state, {
+        panelLayout: action.data
       });
     case types.NEW_COLORS: {
       const newState = Object.assign({}, state, {

@@ -9,6 +9,7 @@ import AnalysisDateSlider from "./analysis-date-slider";
 import ChooseLayout from "./choose-layout";
 import ChooseVirus from "./choose-virus";
 import ChooseMetric from "./choose-metric";
+import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
 import MapAnimationControls from "./map-animation";
 import AllFilters from "./all-filter";
@@ -81,6 +82,11 @@ class Controls extends React.Component {
         <SelectLabel text="Geographic resolution"/>
         <GeoResolution/>
         {enableAnimationDisplay ? <MapAnimationControls/> : null}
+
+        {header("Layout Options")}
+        <SelectLabel text="Panel layout"/>
+        <PanelLayout/>
+
         {header("Filters")}
         <AllFilters/>
 

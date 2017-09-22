@@ -69,7 +69,7 @@ class MapAnimationControls extends React.Component {
     return (
       <div id='mapAnimationControls'>
 
-      <div style={{marginBottom: 15}}>
+      <div style={{marginBottom: 5}}>
         <SelectLabel text="Animation speed"/>
         <button
           style={this.props.mapAnimationDurationInMilliseconds === 60000 ? materialButtonSelected : materialButton}
