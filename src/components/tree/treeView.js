@@ -154,10 +154,9 @@ class TreeView extends React.Component {
     const grid = this.props.panelLayout === "grid"; /* add a check here for min browser width tbd */
     const responsive = computeResponsive({
       horizontal: grid ? 0.5 : 1,
-      vertical: grid ? 0.85 : 1.0,
+      vertical: grid ? 0.7 : 0.9,
       browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar,
-      maxAspectRatio: 1.2
+      sidebar: this.props.sidebar
     });
     const cardTitle = this.state.selectedBranch ? "." : "Phylogeny";
 
