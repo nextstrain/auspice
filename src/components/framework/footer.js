@@ -6,91 +6,8 @@ import { prettyString } from "../../util/stringHelpers";
 import computeResponsive from "../../util/computeResponsive";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
-import { enableDownloadModal } from "../../util/globals";
 import { applyFilterQuery } from "../../actions/treeProperties";
-
-const getAuthorsFromTreeJSON = (nodes) => {
-  /* this fn generates the author_info object to be found in meta.JSON from the tree.JSON
-  once all augur builds are updated we can remove this and get this from meta.JSON */
-  const author_info = {};
-  nodes.forEach((node) => {
-    if (node.children) { return; }
-    if (node.attr.authors !== "" && node.attr.authors !== "?") {
-      if (Object.keys(author_info).indexOf(node.attr.authors) === -1) {
-        author_info[node.attr.authors] = {n: 1};
-      } else {
-        author_info[node.attr.authors].n += 1;
-      }
-    }
-  });
-  return author_info;
-};
-
-
-const generateH7N9citations = (styles) => {
-  return (
-    <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-      <div style={styles.citationItem}>
-        <a href="http://www.afcd.gov.hk/eindex.html" target="_blank" rel="noreferrer noopener">Agriculture, Fisheries and Conservation Department</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://english.shanghaipasteur.cas.cn/" target="_blank" rel="noreferrer noopener">Institute Pasteur of Shanghai, CAS</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.chp.gov.hk/en/phlsb/8/23/40.html" target="_blank" rel="noreferrer noopener">Public Health Laboratory Services Branch, Centre for Health Protection</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://liferiver.en.ecplaza.net/" target="_blank" rel="noreferrer noopener">Shanghai Zhijiang Biotechnology Co</a>
-      </div>
-      <div style={styles.citationItem}>
-        Beijing Institute of Microbiology and Epidemiology
-      </div>
-      <div style={styles.citationItem}>
-        <a href="https://www.cdc.gov/" target="_blank" rel="noreferrer noopener">Centers for Disease Control and Prevention</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.wur.nl/en/Expertise-Services/Research-Institutes/Bioveterinary-Research.htm" target="_blank" rel="noreferrer noopener">Central Veterinary Institute</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.chinacdc.cn/en/" target="_blank" rel="noreferrer noopener">Fujian Center for Disease Control and Prevention</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.chinacdc.cn/en/" target="_blank" rel="noreferrer noopener">Guandong Centers for Disease Control</a>
-      </div>
-      <div style={styles.citationItem}>
-        Guangzhou Institute of Respiratory Diseases (GIRD)
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.chinacdc.cn/en/" target="_blank" rel="noreferrer noopener">Hangzhou Center for Disease Control and Prevention</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.hvri.ac.cn/en/" target="_blank" rel="noreferrer noopener">Harbin Veterinary Research Institute (CAAS)</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.chinacdc.cn/en/" target="_blank" rel="noreferrer noopener">Jiangsu Provincial Center for Disease Control & Prevention</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.phac-aspc.gc.ca/index-eng.php" target="_blank" rel="noreferrer noopener">Public Health Agency of Canada (PHAC)</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.med.stu.edu.cn/eng/" target="_blank" rel="noreferrer noopener">Shantou University Medical College</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://english.scau.edu.cn/" target="_blank" rel="noreferrer noopener">South China Agricultural University</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.cdc.gov.tw/rwd/english" target="_blank" rel="noreferrer noopener">Taiwan CDC</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.cnic.org.cn/" target="_blank" rel="noreferrer noopener">WHO Chinese National Influenza Center</a>
-      </div>
-      <div style={styles.citationItem}>
-        <a href="http://www.chinacdc.cn/en/" target="_blank" rel="noreferrer noopener">Zhejiang Provincial Center for Disease Control and Prevention</a>
-      </div>
-    </Flex>
-  );
-};
-
+import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -102,8 +19,9 @@ const dot = (
   return {
     tree: state.tree,
     metadata: state.metadata.metadata,
+    colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
-    selectedAuthors: state.controls.filters.authors
+    activeFilters: state.controls.filters
   };
 })
 class Footer extends React.Component {
@@ -150,53 +68,54 @@ class Footer extends React.Component {
     router: PropTypes.object.isRequired
   }
   shouldComponentUpdate(nextProps) {
-    if (
-      this.props.tree.version !== nextProps.tree.version ||
-        this.props.browserDimensions !== nextProps.browserDimensions ||
-        this.props.selectedAuthors !== nextProps.selectedAuthors
-    ) {
+    if (this.props.tree.version !== nextProps.tree.version ||
+    this.props.browserDimensions !== nextProps.browserDimensions) {
       return true;
+    } else if (Object.keys(this.props.activeFilters) !== Object.keys(nextProps.activeFilters)) {
+      return true;
+    } else if (Object.keys(this.props.activeFilters)) {
+      for (const name of this.props.activeFilters) {
+        if (this.props.activeFilters[name] !== nextProps.activeFilters[name]) {
+          return true;
+        }
+      }
     }
     return false;
   }
 
-  filterAuthor(authors) {
-    const mode = this.props.selectedAuthors.indexOf(authors) === -1 ? "add" : "remove";
-    this.props.dispatch(applyFilterQuery("authors", [authors], mode));
+  filter(key, value) {
+    const mode = this.props.activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
+    this.props.dispatch(applyFilterQuery(key, [value], mode));
   }
 
-  getCitations(styles) {
-    if (this.context.router.history.location.pathname.includes("h7n9")) {
-      return generateH7N9citations(styles);
-    } else if (this.context.router.history.location.pathname.includes("flu")) {
-      return null; /* FIX ME */
-    }
-    /* in future, get this from meta.json */
-    const author_info = getAuthorsFromTreeJSON(this.props.tree.nodes);
-
-    const authorsListItems = Object.keys(author_info).sort().map((authors) => {
+  displayIndividualFilter(styles, filterName) {
+    // console.log(filterName)
+    const stateCount = getValuesAndCountsOfTraitFromTree(this.props.tree.nodes, filterName);
+    // console.log(stateCount)
+    const contents = Object.keys(stateCount).sort().map((item) => {
       return (
         <div
-          style={this.props.selectedAuthors.indexOf(authors) === -1 ? styles.filterAuthOff : styles.filterAuthOn}
-          key={authors}
-          onClick={() => {this.filterAuthor(authors);}}
+          style={this.props.activeFilters[filterName].indexOf(item) === -1 ? styles.filterAuthOff : styles.filterAuthOn}
+          key={item}
+          onClick={() => {this.filter(filterName, item);}}
           role="button"
           tabIndex={0}
         >
-          {prettyString(authors, {stripEtAl: true})}
-          {" et al (" + author_info[authors].n + ")"}
+          {prettyString(item)}
+          {" (" + stateCount[item] + ")"}
         </div>
       );
     });
-
     return (
-      <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-        {authorsListItems}
-      </Flex>
+      <div>
+        {`Filter on ${prettyString(filterName)}`}
+        <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
+          {contents}
+        </Flex>
+      </div>
     );
   }
-
-  getAdditionalInfo(styles) {
+  getAdditionalDatasetSpecificInfo(styles) {
     if (this.context.router.history.location.pathname.includes("ebola")) {
       return (
         <div style={styles.citationList}>
@@ -204,9 +123,7 @@ class Footer extends React.Component {
         </div>
       );
     }
-    return (
-      <div/>
-    );
+    return null;
   }
 
   getUpdated() {
@@ -241,51 +158,45 @@ class Footer extends React.Component {
     }
     return null;
   }
-  drawFooter(styles, width) {
-    let text = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions. Click the authors to display their data in the global context.";
-    if (this.context.router.history.location.pathname.includes("h7n9")) {
-      text = (
-        <div>
-          This work is made possible by the open sharing of genetic data by research groups from all over the world via <a href="http://platform.gisaid.org/">GISAID</a>. For data reuse please contact the submitting labs (listed below) or see <a href="http://data.nextstrain.org/flu_h7n9_acknowledgement_table.xls">this spreadsheet</a> for a full list of authors and samples available.
-        </div>
-      );
-    } else if (this.context.router.history.location.pathname.includes("flu")) {
-      text = (
+  authorInfoAndFilter(styles) {
+    let preamble = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
+    if (this.context.router.history.location.pathname.includes("avian") || this.context.router.history.location.pathname.includes("flu")) {
+      preamble = (
         <div>
           This work is made possible by the open sharing of genetic data by research groups from all over the world via <a href="http://platform.gisaid.org/">GISAID</a>. We gratefully acknowledge their contributions.
         </div>
       );
     }
-    if (enableDownloadModal) {
+    /* if we don't have authors in the filters (keys) then nothing to display */
+    if (Object.keys(this.props.activeFilters).indexOf("authors") === -1) {
+      return preamble;
+    }
+    const author_info = this.props.metadata.author_info;
+    const authorsListItems = Object.keys(author_info).sort().map((authors) => {
       return (
-        <div style={{width: width}}>
-          <div style={styles.line}/>
-          {text}
-          {this.getCitations(styles)}
-          <div style={styles.line}/>
-          <Flex style={styles.fineprint}>
-            {this.getUpdated()}
-            {dot}
-            {this.downloadDataButton()}
-            {dot}
-            {this.getMaintainer()}
-          </Flex>
+        <div
+          style={this.props.activeFilters.authors.indexOf(authors) === -1 ? styles.filterAuthOff : styles.filterAuthOn}
+          key={authors}
+          onClick={() => {this.filter("authors", authors);}}
+          role="button"
+          tabIndex={0}
+        >
+          {prettyString(authors, {stripEtAl: true})}
+          {" et al (" + author_info[authors].n + ")"}
         </div>
       );
-    }
+    });
+
     return (
-      <div style={{width: width}}>
-        <div style={styles.line}/>
-        {text}
-        {this.getCitations(styles)}
-        {this.getAdditionalInfo(styles)}
-        <div style={styles.line}/>
-        <Flex style={styles.fineprint}>
-          {this.getUpdated()}
+      <div>
+        {preamble}
+        <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
+          {authorsListItems}
         </Flex>
       </div>
     );
   }
+
   render() {
     if (!this.props.metadata || !this.props.tree.nodes) return null;
     const styles = this.getStyles();
@@ -298,7 +209,28 @@ class Footer extends React.Component {
     const width = responsive.width - 30; // need to subtract margin when calculating div width
     return (
       <div style={styles.footer}>
-        {this.drawFooter(styles, width)}
+        <div style={{width: width}}>
+          <div style={styles.line}/>
+          {this.authorInfoAndFilter(styles)}
+          {this.getAdditionalDatasetSpecificInfo(styles)}
+          <div style={styles.line}/>
+          {Object.keys(this.props.activeFilters).map((name) => {
+            if (name === "authors") {return null;}
+            return (
+              <div key={name}>
+                {this.displayIndividualFilter(styles, name)}
+                <div style={styles.line}/>
+              </div>
+            );
+          })}
+          <Flex style={styles.fineprint}>
+            {this.getUpdated()}
+            {dot}
+            {this.downloadDataButton()}
+            {dot}
+            {this.getMaintainer()}
+          </Flex>
+        </div>
       </div>
     );
   }
