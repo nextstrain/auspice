@@ -29,6 +29,10 @@ You probably want this on for development, off for testing before deploying.
 const devServer = process.argv.indexOf("dev") !== -1;
 global.LOCAL_DATA = process.argv.indexOf("localData") !== -1;
 global.LOCAL_DATA_PATH = path.join(__dirname, "/data/");
+global.REMOTE_DATA_BASEURL = "http://data.nextstrain.org/";
+global.LOCAL_STATIC = process.argv.indexOf("localStatic") !== -1;
+global.LOCAL_STATIC_PATH = path.join(__dirname, "/static/");
+global.REMOTE_STATIC_BASEURL = "http://cdn.rawgit.com/nextstrain/themis/master/files/";
 
 /* dev-specific libraries & imports */
 let webpack;
@@ -102,5 +106,6 @@ const server = app.listen(app.get('port'), () => {
   console.log("Auspice server started on port " + server.address().port);
   console.log(devServer ? "Serving dev bundle with hot-reloading enabled" : "Serving compiled bundle from /dist");
   console.log(global.LOCAL_DATA ? "Data is being sourced from /data" : "Data is being sourced from data.nextstrain.org (S3)");
+  console.log(global.LOCAL_STATIC ? "Static content is being sourced from /static" : "Static content is being sourced from cdn.rawgit.com");
   console.log("-----------------------------------\n\n");
 });
