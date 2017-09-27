@@ -5,7 +5,10 @@ import computeResponsive from "../../util/computeResponsive";
 import { twoColumnBreakpoint } from "../../util/globals";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilterQuery } from "../../actions/treeProperties";
-import { prettyString, authorString } from "../../util/stringHelpers";
+import { prettyString } from "../../util/stringHelpers";
+import { displayFilterValueAsButton, displayClearAllButton } from "../framework/footer";
+// import Flex from "../framework/flex";
+import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 
 @connect((state) => {
   return {
@@ -58,7 +61,7 @@ class Info extends React.Component {
       n: {
         fontFamily: headerFont,
         fontSize: 15,
-        lineHeight: "28px",
+        lineHeight: 1.4,
         marginLeft: 10,
         marginTop: 5,
         marginBottom: 10,
@@ -81,17 +84,22 @@ class Info extends React.Component {
     });
     return count;
   }
-  summariseFilters() {
-    const otherFilters = Object.keys(this.props.filters)
-      // .filter((n) => n !== "authors")
-      .filter((n) => this.props.filters[n].length > 0);
-    if (otherFilters.length === 0) return null;
+  summariseNonAuthorFilter(filterName) {
+    const stateCount = getValuesAndCountsOfTraitFromTree(this.props.nodes, filterName);
     return (
-      <g>
-        {`${otherFilters.length} active filters (click to remove): `}
-        {otherFilters.map((n) => (
-          <span key={n}>{this.clearFilterButton(n)}{' // '}</span>
-        ))}
+      <g key={filterName}>
+        {`${prettyString(filterName)} is restricted to: `}
+        {this.props.filters[filterName].sort().map((itemName) => {
+          const display = (
+            <g>
+              {prettyString(itemName)}
+              {" (" + stateCount[itemName] + ")"}
+            </g>
+          );
+          return displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display);
+        })}
+        {this.props.filters[filterName].length > 1 ? displayClearAllButton(this.props.dispatch, filterName, "") : null}
+        {`. `}
       </g>
     );
   }
@@ -108,32 +116,46 @@ class Info extends React.Component {
       </span>
     );
   }
-  summariseSelectedAuthors(nSelectedAuthors) {
+  summariseSelectedAuthors() {
+    if (!this.props.metadata.author_info) {return null;}
+    const nTotalAuthors = Object.keys(this.props.metadata.author_info).length;
+    const nSelectedAuthors = this.getNumSelectedAuthors(); // will be equal to nTotalAuthors if none selected
+
     const authorInfo = this.props.filters.authors.map((v) => ({
-      name: authorString(v),
-      n: this.props.metadata.author_info[v].n,
+      name: v,
+      label: (
+        <g>
+          {prettyString(v, {stripEtAl: true})}
+          {" et al (n=" + this.props.metadata.author_info[v].n + ")"}
+        </g>
+      ),
       title: prettyString(this.props.metadata.author_info[v].title)
     }));
     /* case 1 (no selected authors) has already been handled */
+    if (nTotalAuthors === nSelectedAuthors) {
+      return null;
+    }
     /* case 2: a single author selected */
     if (nSelectedAuthors === 1) {
-      return (<g>{"Data from "}{authorInfo[0].name}{" : \""}{authorInfo[0].title}{"\""}</g>);
-    /* case 3: a "few" authors */
-    } else if (nSelectedAuthors < 4) {
       return (
         <g>
           {"Data from "}
-          {authorInfo.slice(0, authorInfo.length - 1).map((cv, idx) => (
-            <g key={this.props.filters.authors[idx]}>
-              {cv.name}{` (n=${cv.n}), `}
-            </g>
-          ))}
-          {" and "}{authorInfo[authorInfo.length - 1].name}{` (n=${authorInfo[authorInfo.length - 1].n}).`}
+          {displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", authorInfo[0].name, authorInfo[0].label)}
+          <span style={{fontWeight: 300}}>{`"${authorInfo[0].title}". `}</span>
         </g>
       );
     }
-    /* case 4 (fallthrough) more than "a few" authors selected */
-    return null;
+    /* case 3: more than one author selected. */
+    return (
+      <g>
+        {"Data from "}
+        {authorInfo.map((d) => (
+          displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.label)
+        ))}
+        {displayClearAllButton(this.props.dispatch, "authors", "")}
+        {`. `}
+      </g>
+    );
   }
 
   render() {
@@ -149,8 +171,6 @@ class Info extends React.Component {
     const styles = this.getStyles();
     const title = this.props.metadata.title ? this.props.metadata.title : "";
     const nTotalSamples = this.props.metadata.virus_count;
-    const nTotalAuthors = Object.keys(this.props.metadata.author_info).length;
-    const nSelectedAuthors = this.getNumSelectedAuthors(); // will be equal to nTotalAuthors if none selected
     const nSelectedSamples = this.getNumSelectedTips();
     return (
       <Card center>
@@ -159,19 +179,21 @@ class Info extends React.Component {
             {title}
           </div>
           <div width={responsive.width} style={styles.n}>
-            {`Showing ${nSelectedSamples} out of ${nTotalSamples} viruses from ${nSelectedAuthors} `}
-            {nTotalAuthors === nSelectedAuthors ? "publications" : `out of ${nTotalAuthors} publications`}
-          </div>
-          <div width={responsive.width} style={styles.n}>
-            {nSelectedAuthors === nTotalAuthors ? null : this.summariseSelectedAuthors(nSelectedAuthors)}
-          </div>
-          <div width={responsive.width} style={styles.n}>
-            {this.summariseFilters()}
+            {`Showing ${nSelectedSamples} of ${nTotalSamples} genomes. `}
+            {/* Author filters */}
+            {this.summariseSelectedAuthors()}
+            {/* Summarise other filters */}
+            {Object.keys(this.props.filters)
+              .filter((n) => n !== "authors")
+              .filter((n) => this.props.filters[n].length > 0)
+              .map((n) => this.summariseNonAuthorFilter(n))
+            }
           </div>
         </div>
       </Card>
     );
   }
 }
-
+// from ${nSelectedAuthors} `}
+// {nTotalAuthors === nSelectedAuthors ? "publications. " : `out of ${nTotalAuthors} publications. `}
 export default Info;
