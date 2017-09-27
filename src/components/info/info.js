@@ -124,7 +124,7 @@ class Info extends React.Component {
         <g>
           {"Data from "}
           {authorInfo.slice(0, authorInfo.length - 1).map((cv, idx) => (
-            <g key={this.props.filters.authors[idx].v}>
+            <g key={this.props.filters.authors[idx]}>
               {cv.name}{` (n=${cv.n}), `}
             </g>
           ))}

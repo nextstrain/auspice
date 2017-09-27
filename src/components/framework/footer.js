@@ -209,6 +209,7 @@ class Footer extends React.Component {
     return (
       <div>
         {preamble}
+        {this.props.activeFilters.authors.length ? this.displayClearAllButton("authors", "inlineRight") : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
           {Object.keys(author_info).sort().map((authorName) => {
             const display = (
