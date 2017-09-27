@@ -6,7 +6,7 @@ import { twoColumnBreakpoint } from "../../util/globals";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilterQuery } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
-import { displayFilterValueAsButton, displayClearAllButton } from "../framework/footer";
+import { displayFilterValueAsButton, removeFiltersButton } from "../framework/footer";
 // import Flex from "../framework/flex";
 import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 
@@ -96,9 +96,8 @@ class Info extends React.Component {
               {" (" + stateCount[itemName] + ")"}
             </g>
           );
-          return displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display);
+          return displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true);
         })}
-        {this.props.filters[filterName].length > 1 ? displayClearAllButton(this.props.dispatch, filterName, "") : null}
         {`. `}
       </g>
     );
@@ -140,7 +139,7 @@ class Info extends React.Component {
       return (
         <g>
           {"Data from "}
-          {displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", authorInfo[0].name, authorInfo[0].label)}
+          {displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", authorInfo[0].name, authorInfo[0].label, true)}
           <span style={{fontWeight: 300}}>{`"${authorInfo[0].title}". `}</span>
         </g>
       );
@@ -150,9 +149,8 @@ class Info extends React.Component {
       <g>
         {"Data from "}
         {authorInfo.map((d) => (
-          displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.label)
+          displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.label, true)
         ))}
-        {displayClearAllButton(this.props.dispatch, "authors", "")}
         {`. `}
       </g>
     );
@@ -172,6 +170,7 @@ class Info extends React.Component {
     const title = this.props.metadata.title ? this.props.metadata.title : "";
     const nTotalSamples = this.props.metadata.virus_count;
     const nSelectedSamples = this.getNumSelectedTips();
+    const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
     return (
       <Card center>
         <div style={{width: responsive.width, display: "inline-block"}}>
@@ -187,6 +186,11 @@ class Info extends React.Component {
               .filter((n) => n !== "authors")
               .filter((n) => this.props.filters[n].length > 0)
               .map((n) => this.summariseNonAuthorFilter(n))
+            }
+            {/* Clear all filters (if applicable!) */}
+            {filtersWithValues.length ?
+              removeFiltersButton(this.props.dispatch, filtersWithValues, "", "Remove all filters.") :
+              null
             }
           </div>
         </div>

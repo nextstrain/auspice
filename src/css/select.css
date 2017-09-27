@@ -7,7 +7,7 @@
   color: #007AB6;
 }
 
-.select-item.active {
+.select-item.active-with-icon {
   background-color: #ebf5ff;
   border-bottom-right-radius: 2px;
   border-top-right-radius: 2px;
@@ -19,10 +19,20 @@
   margin: 0px 2px 0px 0px;
 }
 
+.select-item.active-clickable {
+  background-color: #ebf5ff;
+  border-radius: 2px;
+  border: 1px solid #c2e0ff;
+  font-weight: 300;
+  cursor: "pointer";
+  display: inline-block;
+  border-width: 1;
+  cursor: pointer;
+}
+
 .select-item.inactive {
   font-weight: 300;
   padding: 2px 3px 2px 3px; /* increase to mimic border */
-
 }
 
 .select-item.inactive:hover {

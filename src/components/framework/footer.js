@@ -20,9 +20,9 @@ const dispatchFilter = (dispatch, activeFilters, key, value) => {
   dispatch(applyFilterQuery(key, [value], mode));
 };
 
-export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, itemName, display) => {
+export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, itemName, display, showX) => {
   const active = activeFilters[filterName].indexOf(itemName) !== -1;
-  if (active) {
+  if (active && showX) {
     return (
       <div key={itemName} style={{display: "inline-block"}}>
         <div
@@ -33,9 +33,22 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
         >
           {'\xD7'}
         </div>
-        <div className={"select-item active"}>
+        <div className={"select-item active-with-icon"}>
           {display}
         </div>
+      </div>
+    );
+  }
+  if (active) {
+    return (
+      <div
+        className={"select-item active-clickable"}
+        key={itemName}
+        onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
+        role="button"
+        tabIndex={0}
+      >
+        {display}
       </div>
     );
   }
@@ -52,20 +65,16 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
   );
 };
 
-export const displayClearAllButton = (dispatch, filterName, outerClassName) => {
+export const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
   return (
-    <div className={outerClassName} style={{display: "inline-block"}}>
-      <div
-        className={'select-item-icon'}
-        onClick={() => {dispatch(applyFilterQuery(filterName, [], 'set'));}}
-        role="button"
-        tabIndex={0}
-      >
-        {'\xD7'}
-      </div>
-      <div className={"select-item active"} style={{paddingLeft: '5px', paddingRight: '5px'}}>
-        clear all
-      </div>
+    <div
+      className={`${outerClassName} select-item active-clickable`}
+      style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
+      onClick={() => {
+        filterNames.forEach((n) => dispatch(applyFilterQuery(n, [], 'set')))
+      }}
+    >
+      {label}
     </div>
   );
 };
@@ -135,7 +144,7 @@ class Footer extends React.Component {
     return (
       <div>
         {`Filter on ${prettyString(filterName)}`}
-        {this.props.activeFilters[filterName].length ? displayClearAllButton(this.props.dispatch, filterName, "inlineRight") : null}
+        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
           {Object.keys(stateCount).sort().map((itemName) => {
             const display = (
@@ -144,7 +153,7 @@ class Footer extends React.Component {
                 {" (" + stateCount[itemName] + ")"}
               </g>
             );
-            return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display);
+            return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
           })}
         </Flex>
       </div>
@@ -210,7 +219,7 @@ class Footer extends React.Component {
     return (
       <div>
         {preamble}
-        {this.props.activeFilters.authors.length ? displayClearAllButton(this.props.dispatch, "authors", "inlineRight") : null}
+        {this.props.activeFilters.authors.length ? removeFiltersButton(this.props.dispatch, ["authors"], "inlineRight", "Clear author filter") : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
           {Object.keys(author_info).sort().map((authorName) => {
             const display = (
@@ -219,7 +228,7 @@ class Footer extends React.Component {
                 {" et al (" + author_info[authorName].n + ")"}
               </g>
             );
-            return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, "authors", authorName, display);
+            return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, "authors", authorName, display, false);
           })}
         </Flex>
       </div>
