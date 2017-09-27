@@ -132,6 +132,8 @@ class TitleBar extends React.Component {
     );
   }
 
+  // {this.getLink("Posts", "/posts", this.props.postsSelected, styles)}
+
   render() {
     const styles = this.getStyles();
     return (
@@ -140,9 +142,8 @@ class TitleBar extends React.Component {
         {this.getTitle(styles)}
         {this.getDataName(styles)}
         <div style={{flex: 5}}/>
-          {this.getLink("About", "/about", this.props.aboutSelected, styles)}
-          {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
-          {this.getLink("Posts", "/posts", this.props.postsSelected, styles)}
+        {this.getLink("About", "/about", this.props.aboutSelected, styles)}
+        {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
         <div style={{width: this.props.minified ? 15 : 0 }}/>
       </Flex>
     );
