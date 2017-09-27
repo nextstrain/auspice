@@ -59,9 +59,23 @@ class Footer extends React.Component {
           fontSize: 14
         }
       };
-      styles.filterAuthOn = { ...styles.citationItem, ...{cursor: "pointer", color: '#007AB6', fontWeight: 700}}
-      styles.filterAuthOff = { ...styles.citationItem, ...{cursor: "pointer", color: '#5097BA', fontWeight: 300}}
-      return styles
+      styles.filterActive = {
+        ...styles.citationItem,
+        ...{
+          cursor: "pointer",
+          color: '#007AB6',
+          fontWeight: 700
+        }
+      };
+      styles.filterInactive = {
+        ...styles.citationItem,
+        ...{
+          cursor: "pointer",
+          color: '#5097BA',
+          fontWeight: 300
+        }
+      };
+      return styles;
     };
   }
   static contextTypes = {
@@ -87,30 +101,36 @@ class Footer extends React.Component {
     const mode = this.props.activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
     this.props.dispatch(applyFilterQuery(key, [value], mode));
   }
+  displayFilterEntry(styles, filterName, itemName, display) {
+    const active = this.props.activeFilters[filterName].indexOf(itemName) === -1;
+    return (
+      <div
+        style={active ? styles.filterInactive : styles.filterActive}
+        key={itemName}
+        onClick={() => {this.filter(filterName, itemName);}}
+        role="button"
+        tabIndex={0}
+      >
+        {display}
+      </div>
+    );
+  }
 
-  displayIndividualFilter(styles, filterName) {
-    // console.log(filterName)
+  displayFilter(styles, filterName) {
     const stateCount = getValuesAndCountsOfTraitFromTree(this.props.tree.nodes, filterName);
-    // console.log(stateCount)
-    const contents = Object.keys(stateCount).sort().map((item) => {
-      return (
-        <div
-          style={this.props.activeFilters[filterName].indexOf(item) === -1 ? styles.filterAuthOff : styles.filterAuthOn}
-          key={item}
-          onClick={() => {this.filter(filterName, item);}}
-          role="button"
-          tabIndex={0}
-        >
-          {prettyString(item)}
-          {" (" + stateCount[item] + ")"}
-        </div>
-      );
-    });
     return (
       <div>
         {`Filter on ${prettyString(filterName)}`}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-          {contents}
+          {Object.keys(stateCount).sort().map((itemName) => {
+            const display = (
+              <g>
+                {prettyString(itemName)}
+                {" (" + stateCount[itemName] + ")"}
+              </g>
+            );
+            return this.displayFilterEntry(styles, filterName, itemName, display);
+          })}
         </Flex>
       </div>
     );
@@ -172,26 +192,19 @@ class Footer extends React.Component {
       return preamble;
     }
     const author_info = this.props.metadata.author_info;
-    const authorsListItems = Object.keys(author_info).sort().map((authors) => {
-      return (
-        <div
-          style={this.props.activeFilters.authors.indexOf(authors) === -1 ? styles.filterAuthOff : styles.filterAuthOn}
-          key={authors}
-          onClick={() => {this.filter("authors", authors);}}
-          role="button"
-          tabIndex={0}
-        >
-          {prettyString(authors, {stripEtAl: true})}
-          {" et al (" + author_info[authors].n + ")"}
-        </div>
-      );
-    });
-
     return (
       <div>
         {preamble}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-          {authorsListItems}
+          {Object.keys(author_info).sort().map((authorName) => {
+            const display = (
+              <g>
+                {prettyString(authorName, {stripEtAl: true})}
+                {" et al (" + author_info[authorName].n + ")"}
+              </g>
+            );
+            return this.displayFilterEntry(styles, "authors", authorName, display);
+          })}
         </Flex>
       </div>
     );
@@ -218,7 +231,7 @@ class Footer extends React.Component {
             if (name === "authors") {return null;}
             return (
               <div key={name}>
-                {this.displayIndividualFilter(styles, name)}
+                {this.displayFilter(styles, name)}
                 <div style={styles.line}/>
               </div>
             );
