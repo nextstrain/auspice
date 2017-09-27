@@ -1,10 +1,10 @@
 ### App specific ###
-dist/
+/dist/
 big_flu
-data/
-releases/
+/data/
+/releases/
 server.dist.js
-static/
+/static/
 
 ### OSX ###
 .DS_Store

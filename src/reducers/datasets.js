@@ -3,7 +3,7 @@ import * as types from "../actions/types";
 const datasets = (state = {
   pathogen: undefined,
   splash: undefined,
-  reports: undefined,
+  posts: undefined,
   ready: false
 }, action) => {
   switch (action.type) {
@@ -12,7 +12,7 @@ const datasets = (state = {
         splash: action.splash,
         pathogen: action.pathogen,
         user: action.user,
-        reports: action.reports,
+        posts: action.posts,
         ready: true
       };
     } default: {

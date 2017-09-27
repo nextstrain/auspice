@@ -6,7 +6,7 @@ const fs = require('fs');
 const path = require("path");
 const request = require('request');
 
-const serveStaticReport = (query, res) => {
+const serveStaticPost = (query, res) => {
   if (Object.keys(query).indexOf("path") === -1) {
     res.status(404).send('No path found in query');
     return;
@@ -18,7 +18,7 @@ const serveStaticReport = (query, res) => {
   } else {
     request(global.REMOTE_STATIC_BASEURL + query.path, (err, response, body) => {
       if (err || body.split("\n")[1] === '<head><title>404 Not Found</title></head>') {
-        res.status(404).send('Report not found.');
+        res.status(404).send('Post not found.');
         return;
       }
       res.send(ReactDOMServer.renderToStaticMarkup(<ReactMarkdown source={body} />));
@@ -27,5 +27,5 @@ const serveStaticReport = (query, res) => {
 };
 
 module.exports = {
-  serveStaticReport
+  serveStaticPost
 };

@@ -5,7 +5,7 @@
   --brandColor: #5097BA;
 }
 
-.reports h1 {
+.posts h1 {
   text-align: left;
   font-size: 38px;
   line-height: 32px;
@@ -17,7 +17,7 @@
   margin-bottom: 30px;
 }
 
-.reports h2 {
+.posts h2 {
   text-align: left;
   font-size: 24px;
   line-height: 28px;
@@ -30,7 +30,7 @@
   min-width: 240px;
 }
 
-.reports h3 {
+.posts h3 {
   text-align: left;
   font-size: 24px;
   line-height: 28px;
@@ -43,7 +43,7 @@
   min-width: 240px;
 }
 
-.reports p {
+.posts p {
   text-align: left;
   font-size: 14px;
   line-height: 24px;
@@ -53,13 +53,13 @@
   color: var(--darkGrey);
 }
 
-.reports strong {
+.posts strong {
   color: var(--darkGrey);
   font-size: 16px;
   font-weight: 700;
 }
 
-.reports img {
+.posts img {
   padding-top: 25px;
   padding-bottom: 25px;
   margin-left: 10%;
@@ -67,13 +67,13 @@
 }
 
 
-/* here is stuff related to the collapsable reports TOC */
-.reports input {
+/* here is stuff related to the collapsable posts TOC */
+.posts input {
   display: none;
   visibility: hidden;
   color: var(--brandColor);
 }
-.reports label {
+.posts label {
   text-align: left;
   font-size: 28px;
   line-height: 32px;
@@ -86,19 +86,19 @@
   font-family: "Lato";
   font-weight: 300;
 }
-.reports label:hover {
+.posts label:hover {
   font-weight: 500;
 }
 /* ::before creates a pseudo-element that is the first child of the selected element.
 It is often used to add cosmetic content to an element with the content property.
 It is inline by default. */
-.reports label::before {
+.posts label::before {
   content: '\25ba';
   color: var(--darkGrey);
   font-size: 20px;
   padding-right: 5px;
 }
-.reports #toc {
+.posts #toc {
   height: 0px;
   /*overflow: hidden;*/
   visibility: hidden;
@@ -107,11 +107,11 @@ It is inline by default. */
 /*
 .check:checked ~ .content matches all .content elements that are siblings of .check:checked and appear after it.
 */
-.reports #toggle:checked ~ label::before {
+.posts #toggle:checked ~ label::before {
   content: '\25bc';
   color: var(--darkGrey);
 }
-.reports #toggle:checked ~ #toc {
+.posts #toggle:checked ~ #toc {
   height: 100%;
   visibility: visible;
   /*transition: height 0.5s;*/

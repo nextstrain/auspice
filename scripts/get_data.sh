@@ -124,10 +124,10 @@ datasets=( "manifest_guest.json" "manifest_mumps.json"
   "figures_sep-2016_yam_counts.png"\
   "figures_sep-2016_yam_mutations.png"\
   "figures_sep-2016_yam_tree.png"\
-  "report_2015-09-16-sep-2015.md"\
-  "report_2016-02-18-feb-2016.md"\
-  "report_2016-09-21-sep-2016.md"\
-  "report_2017-02-23-feb-2017.md"\
+  "post_2015-09-16-sep-2015.md"\
+  "post_2016-02-18-feb-2016.md"\
+  "post_2016-09-21-sep-2016.md"\
+  "post_2017-02-23-feb-2017.md"\
   )
 
 for i in "${datasets[@]}"

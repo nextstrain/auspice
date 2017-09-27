@@ -10,7 +10,7 @@ const processData = (data, dispatch) => {
     type: MANIFEST_RECEIVED,
     splash: datasets.splash,
     pathogen: datasets.pathogen,
-    reports: datasets.reports,
+    posts: datasets.posts,
     user: "guest"
   });
 };

@@ -10,7 +10,7 @@ import { enableAnimationPerfTesting } from "./util/globals";
 import App from "./components/app";
 import About from "./static/about";
 import Methods from "./static/methods";
-import Reports from "./static/reports";
+import Posts from "./static/posts";
 import Splash from "./static/splash";
 import Monitor from "./components/framework/monitor";
 import Notifications from "./components/notifications/notifications";
@@ -20,7 +20,7 @@ import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";
 import "./css/static.css";
 import "./css/notifications.css";
-import "./css/reports.css";
+import "./css/posts.css";
 
 const store = configureStore();
 
@@ -42,7 +42,7 @@ const Root = () => {
           <Switch>
             <Route exact path="/" component={Splash}/>
             <Route path="/methods" component={Methods}/>
-            <Route path="/reports" component={Reports}/>
+            <Route path="/posts" component={Posts}/>
             <Route path="/about" component={About}/>
             <Route path="/*" component={App}/>
           </Switch>

@@ -87,8 +87,8 @@ app.get('/charon*', (req, res) => {
     } case "json": {
       getFiles.getDatasetJson(query, res);
       break;
-    } case "report": {
-      serverReact.serveStaticReport(query, res);
+    } case "post": {
+      serverReact.serveStaticPost(query, res);
       break;
     } default: {
       console.warn("Query rejected (unknown want) -- " + req.originalUrl);

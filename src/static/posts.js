@@ -8,41 +8,41 @@ import { modifyURLquery, clearURLquery } from "../util/urlHelpers";
 import { warningNotification } from "../actions/notifications";
 import { charonAPIAddress } from "../util/globals";
 
-/* This component renders the "shell" of the reports page,
+/* This component renders the "shell" of the posts page,
 i.e. headers, footers etc but not the content.
 The content is delivered statically from the server */
 
-@connect((state) => ({reports: state.datasets.reports}))
-class Reports extends React.Component {
+@connect((state) => ({posts: state.datasets.posts}))
+class Posts extends React.Component {
   // analyticsNewPage();
   constructor(props) {
     super(props);
     this.state = {
       showTOC: true, // the TOC
-      nameOfCurrentReport: undefined
+      nameOfCurrentPost: undefined
     };
   }
   static contextTypes = {
     router: PropTypes.object.isRequired
   }
 
-  getAndInsertReportContentViaAPI() {
+  getAndInsertPostContentViaAPI() {
 
     const query = queryString.parse(this.context.router.history.location.search);
     if (!query.name) {return;}
-    if (this.state.nameOfCurrentReport === query.name) {return;}
-    this.setState({nameOfCurrentReport: query.name});
+    if (this.state.nameOfCurrentPost === query.name) {return;}
+    this.setState({nameOfCurrentPost: query.name});
     // this.context.router
     const errorHandler = (e) => {
-      this.props.dispatch(warningNotification({message: "Failed to get report from server"}));
+      this.props.dispatch(warningNotification({message: "Failed to get post from server"}));
       console.error(e);
-      this.setState({showTOC: true, nameOfCurrentReport: undefined});
+      this.setState({showTOC: true, nameOfCurrentPost: undefined});
       clearURLquery(this.context.router);
     };
     const xmlHttp = new XMLHttpRequest();
     xmlHttp.onload = () => {
       if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-        // console.log("server returned a report");
+        // console.log("server returned a post");
         // console.log(xmlHttp.responseText);
         const htmlString = xmlHttp.responseText;
         /* we now need to insert the html string into the waiting div,
@@ -50,12 +50,12 @@ class Reports extends React.Component {
         There seem to be 2 options:
         (1) use dangerouslySetInnerHTML
         https://stackoverflow.com/questions/29706828/how-to-render-a-react-element-using-an-html-string
-        ReactDOM.render(<div dangerouslySetInnerHTML={{__html: htmlString}} />, document.getElementById('reportbody'));
+        ReactDOM.render(<div dangerouslySetInnerHTML={{__html: htmlString}} />, document.getElementById('postbody'));
         (2) use innerHTML
         https://stackoverflow.com/questions/37337289/react-js-set-innerhtml-vs-dangerouslysetinnerhtml
         */
-        if (this.reportBody) { // needed for race conditions in hot-loading situations
-          this.reportBody.innerHTML = htmlString;
+        if (this.postBody) { // needed for race conditions in hot-loading situations
+          this.postBody.innerHTML = htmlString;
         }
         this.setState({showTOC: false}); // collapse the TOC
       } else {
@@ -63,36 +63,36 @@ class Reports extends React.Component {
       }
     };
     xmlHttp.onerror = errorHandler;
-    xmlHttp.open("get", charonAPIAddress + 'request=report&path=' + query.name, true);
+    xmlHttp.open("get", charonAPIAddress + 'request=post&path=' + query.name, true);
     xmlHttp.send(null);
   }
 
-  goToReportPage(name) {
+  goToPostPage(name) {
     modifyURLquery(this.context.router, {name}, false);
-    this.getAndInsertReportContentViaAPI();
+    this.getAndInsertPostContentViaAPI();
   }
 
   componentDidMount() {
-    this.getAndInsertReportContentViaAPI();
+    this.getAndInsertPostContentViaAPI();
   }
   componentDidUpdate() {
-    this.getAndInsertReportContentViaAPI();
+    this.getAndInsertPostContentViaAPI();
   }
 
   render() {
-    if (!this.props.reports) {
+    if (!this.props.posts) {
       return (
         <g>
-          <TitleBar dataNameHidden reportsSelected/>
+          <TitleBar dataNameHidden postsSelected/>
         </g>
       );
     }
     return (
       <g>
-        <TitleBar dataNameHidden reportsSelected/>
-        <div className="static reports container">
+        <TitleBar dataNameHidden postsSelected/>
+        <div className="static posts container">
           <div className="bigspacer"/>
-          {/* PART 1: the available reports (from the manifest) */}
+          {/* PART 1: the available posts (from the manifest) */}
           <div className="row">
             <div className="col-md-1"/>
             <div className="col-md-6">
@@ -103,10 +103,10 @@ class Reports extends React.Component {
                 onChange={() => this.setState({showTOC: !this.state.showTOC})}
               />
               <label htmlFor="toggle">
-                Available Reports
+                Available Posts
               </label>
               <div id="toc">
-                {this.props.reports.map((d) => {
+                {this.props.posts.map((d) => {
                   return (
                     <g key={d.title}>
                       <h3>{d.title}</h3>
@@ -118,7 +118,7 @@ class Reports extends React.Component {
                                 className={"clickable"}
                                 tabIndex="0"
                                 role="button"
-                                onClick={() => {this.goToReportPage(p.path);}}
+                                onClick={() => {this.goToPostPage(p.path);}}
                               >
                                 {p.title}
                               </div>
@@ -136,7 +136,7 @@ class Reports extends React.Component {
           {/* PART 2: the content (inserted from the server) */}
           <div className="row">
             <div className="col-md-1"/>
-            <div className="col-md-10" ref={(c) => { this.reportBody = c; }} />
+            <div className="col-md-10" ref={(c) => { this.postBody = c; }} />
             <div className="col-md-1"/>
           </div>
         </div>
@@ -146,4 +146,4 @@ class Reports extends React.Component {
 }
 
 
-export default Reports;
+export default Posts;
