@@ -28,6 +28,7 @@ class Footer extends React.Component {
   constructor(props) {
     super(props);
     this.getStyles = () => {
+      /* the styles of the individual items is set in CSS */
       const styles = {
         footer: {
           textAlign: "justify",
@@ -43,13 +44,6 @@ class Footer extends React.Component {
         citationList: {
           marginTop: "10px"
         },
-        citationItem: {
-          paddingLeft: "4px",
-          paddingRight: "4px",
-          paddingTop: "1px",
-          paddingBottom: "0px"
-        },
-
         line: {
           marginTop: "20px",
           marginBottom: "20px",
@@ -57,22 +51,6 @@ class Footer extends React.Component {
         },
         fineprint: {
           fontSize: 14
-        }
-      };
-      styles.filterActive = {
-        ...styles.citationItem,
-        ...{
-          cursor: "pointer",
-          color: '#007AB6',
-          fontWeight: 700
-        }
-      };
-      styles.filterInactive = {
-        ...styles.citationItem,
-        ...{
-          cursor: "pointer",
-          color: '#5097BA',
-          fontWeight: 300
         }
       };
       return styles;
@@ -101,11 +79,46 @@ class Footer extends React.Component {
     const mode = this.props.activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
     this.props.dispatch(applyFilterQuery(key, [value], mode));
   }
-  displayFilterEntry(styles, filterName, itemName, display) {
-    const active = this.props.activeFilters[filterName].indexOf(itemName) === -1;
+
+  displayClearAllButton(filterName, outerClassName) {
+    return (
+      <div className={outerClassName}>
+        <div
+          className={'select-item-icon'}
+          onClick={() => {this.props.dispatch(applyFilterQuery(filterName, [], 'set'));}}
+          role="button"
+          tabIndex={0}
+        >
+          {'\xD7'}
+        </div>
+        <div className={"select-item active"} style={{paddingLeft: '5px', paddingRight: '5px'}}>
+          clear all
+        </div>
+      </div>
+    );
+  }
+  displayFilterValueAsButton(styles, filterName, itemName, display) {
+    const active = this.props.activeFilters[filterName].indexOf(itemName) !== -1;
+    if (active) {
+      return (
+        <div key={itemName}>
+          <div
+            className={'select-item-icon'}
+            onClick={() => {this.filter(filterName, itemName);}}
+            role="button"
+            tabIndex={0}
+          >
+            {'\xD7'}
+          </div>
+          <div className={"select-item active"}>
+            {display}
+          </div>
+        </div>
+      );
+    }
     return (
       <div
-        style={active ? styles.filterInactive : styles.filterActive}
+        className={"select-item inactive"}
         key={itemName}
         onClick={() => {this.filter(filterName, itemName);}}
         role="button"
@@ -121,6 +134,7 @@ class Footer extends React.Component {
     return (
       <div>
         {`Filter on ${prettyString(filterName)}`}
+        {this.props.activeFilters[filterName].length ? this.displayClearAllButton(filterName, "inlineRight") : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
           {Object.keys(stateCount).sort().map((itemName) => {
             const display = (
@@ -129,7 +143,7 @@ class Footer extends React.Component {
                 {" (" + stateCount[itemName] + ")"}
               </g>
             );
-            return this.displayFilterEntry(styles, filterName, itemName, display);
+            return this.displayFilterValueAsButton(styles, filterName, itemName, display);
           })}
         </Flex>
       </div>
@@ -203,7 +217,7 @@ class Footer extends React.Component {
                 {" et al (" + author_info[authorName].n + ")"}
               </g>
             );
-            return this.displayFilterEntry(styles, "authors", authorName, display);
+            return this.displayFilterValueAsButton(styles, "authors", authorName, display);
           })}
         </Flex>
       </div>
