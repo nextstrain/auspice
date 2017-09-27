@@ -60,7 +60,7 @@
   color: #0071e6;
 }
 
-.select-item.inactive:focus, .select-item-icon:focus {
+.select-item.inactive:focus, .select-item-icon:focus, .active-clickable:focus {
   outline:0;
 }
 

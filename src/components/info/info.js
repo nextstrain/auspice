@@ -7,7 +7,7 @@ import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilterQuery } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton, removeFiltersButton } from "../framework/footer";
-// import Flex from "../framework/flex";
+import Toggle from "../controls/toggle";
 import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 
 @connect((state) => {
@@ -22,6 +22,7 @@ import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 class Info extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {expanded: true};
   }
   static propTypes = {
     sidebar: React.PropTypes.bool.isRequired,
@@ -56,6 +57,16 @@ class Info extends React.Component {
         fontWeight: 300,
         color: darkGrey,
         letterSpacing: "-1px",
+        maxWidth: 960
+      },
+      titleSmall: {
+        fontFamily: titleFont,
+        fontSize: 18,
+        marginLeft: 5,
+        marginTop: 0,
+        marginBottom: 4,
+        fontWeight: 300,
+        color: darkGrey,
         maxWidth: 960
       },
       n: {
@@ -156,10 +167,21 @@ class Info extends React.Component {
     );
   }
 
+  toggle() {
+    return (
+      <Toggle
+        display
+        on={this.state.expanded}
+        callback={() => {this.setState({expanded: !this.state.expanded});}}
+        label=""
+      />
+    );
+  }
+
   render() {
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
     const responsive = computeResponsive({
-      horizontal: this.props.browserDimensions && this.props.browserDimensions.width > twoColumnBreakpoint ? 0.5 : 1,
+      horizontal: 1,
       vertical: 1.0,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar,
@@ -174,25 +196,38 @@ class Info extends React.Component {
     return (
       <Card center>
         <div style={{width: responsive.width, display: "inline-block"}}>
-          <div width={responsive.width} style={styles.title}>
+          <Toggle
+            display
+            on={this.state.expanded}
+            style={{
+              position: "absolute",
+              marginTop: 0,
+              paddingLeft: responsive.width - 40
+            }}
+            callback={() => {this.setState({expanded: !this.state.expanded});}}
+            label=""
+          />
+          <div width={responsive.width} style={this.state.expanded ? styles.title : styles.titleSmall}>
             {title}
           </div>
-          <div width={responsive.width} style={styles.n}>
-            {`Showing ${nSelectedSamples} of ${nTotalSamples} genomes. `}
-            {/* Author filters */}
-            {this.summariseSelectedAuthors()}
-            {/* Summarise other filters */}
-            {Object.keys(this.props.filters)
-              .filter((n) => n !== "authors")
-              .filter((n) => this.props.filters[n].length > 0)
-              .map((n) => this.summariseNonAuthorFilter(n))
-            }
-            {/* Clear all filters (if applicable!) */}
-            {filtersWithValues.length ?
-              removeFiltersButton(this.props.dispatch, filtersWithValues, "", "Remove all filters.") :
-              null
-            }
-          </div>
+          {this.state.expanded ? (
+            <div width={responsive.width} style={styles.n}>
+              {`Showing ${nSelectedSamples} of ${nTotalSamples} genomes. `}
+              {/* Author filters */}
+              {this.summariseSelectedAuthors()}
+              {/* Summarise other filters */}
+              {Object.keys(this.props.filters)
+                .filter((n) => n !== "authors")
+                .filter((n) => this.props.filters[n].length > 0)
+                .map((n) => this.summariseNonAuthorFilter(n))
+              }
+              {/* Clear all filters (if applicable!) */}
+              {filtersWithValues.length ?
+                removeFiltersButton(this.props.dispatch, filtersWithValues, "", "Remove all filters.") :
+                null
+              }
+            </div>
+          ) : null}
         </div>
       </Card>
     );
