@@ -90,7 +90,7 @@ class Info extends React.Component {
       <g>
         {`${otherFilters.length} active filters (click to remove): `}
         {otherFilters.map((n) => (
-          <span>{this.clearFilterButton(n)}{' // '}</span>
+          <span key={n}>{this.clearFilterButton(n)}{' // '}</span>
         ))}
       </g>
     );
