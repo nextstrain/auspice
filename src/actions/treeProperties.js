@@ -30,18 +30,19 @@ const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInVie
  * @return {null} side effects: a single action
  */
 export const updateVisibleTipsAndBranchThicknesses = function (
-  {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) {
+  {idxOfInViewRootNode = undefined, tipSelectedIdx = 0} = {}) {
   return (dispatch, getState) => {
     const { tree, controls } = getState();
     if (!tree.nodes) {return;}
-    const data = calculateVisiblityAndBranchThickness(tree, controls, {dateMin: controls.dateMin, dateMax: controls.dateMax}, {tipSelectedIdx, idxOfInViewRootNode});
+    const validIdxRoot = idxOfInViewRootNode !== undefined ? idxOfInViewRootNode : tree.idxOfInViewRootNode;
+    const data = calculateVisiblityAndBranchThickness(tree, controls, {dateMin: controls.dateMin, dateMax: controls.dateMax}, {tipSelectedIdx, validIdxRoot});
     dispatch({
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
       visibility: data.visibility,
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
-      idxOfInViewRootNode
+      idxOfInViewRootNode: validIdxRoot
     });
   };
 };
@@ -71,7 +72,8 @@ export const changeDateFilter = function ({newMin = false, newMax = false, quick
       visibility: data.visibility,
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
-      branchThicknessVersion: data.branchThicknessVersion
+      branchThicknessVersion: data.branchThicknessVersion,
+      idxOfInViewRootNode: tree.idxOfInViewRootNode
     });
   };
 };
