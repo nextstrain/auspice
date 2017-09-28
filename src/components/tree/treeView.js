@@ -10,7 +10,6 @@ import ZoomInIcon from "../framework/zoom-in-icon";
 import PhyloTree from "./phyloTree";
 import { mediumTransitionDuration, twoColumnBreakpoint } from "../../util/globals";
 import InfoPanel from "./infoPanel";
-import BranchSelectedPanel from "./branchSelectedPanel";
 import TipSelectedPanel from "./tipSelectedPanel";
 import computeResponsive from "../../util/computeResponsive";
 import * as funcs from "./treeViewFunctions";
@@ -78,7 +77,7 @@ class TreeView extends React.Component {
         changes[k] = false;
       }
       changes.colorBy = true;
-      funcs.updateStylesAndAttrs(changes, nextProps, tree);
+      funcs.updateStylesAndAttrs(this, changes, nextProps, tree);
       this.setState({tree});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
@@ -86,7 +85,7 @@ class TreeView extends React.Component {
       return null; /* return to avoid an unnecessary updateStylesAndAttrs call */
     }
     if (tree) {
-      funcs.updateStylesAndAttrs(changes, nextProps, tree);
+      funcs.updateStylesAndAttrs(this, changes, nextProps, tree);
     }
     return null;
   }
@@ -158,7 +157,7 @@ class TreeView extends React.Component {
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar
     });
-    const cardTitle = this.state.selectedBranch ? "." : "Phylogeny";
+    const cardTitle = "Phylogeny";
 
     return (
       <Card center title={cardTitle}>
@@ -174,11 +173,6 @@ class TreeView extends React.Component {
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
           sequences={this.props.sequences}
-        />
-        <BranchSelectedPanel
-          responsive={responsive}
-          viewEntireTreeCallback={() => funcs.viewEntireTree.bind(this)()}
-          branch={this.state.selectedBranch}
         />
         <TipSelectedPanel
           goAwayCallback={(d) => funcs.clearSelectedTip.bind(this)(d)}

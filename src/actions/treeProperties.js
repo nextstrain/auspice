@@ -40,7 +40,8 @@ export const updateVisibleTipsAndBranchThicknesses = function (
       visibility: data.visibility,
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
-      branchThicknessVersion: data.branchThicknessVersion
+      branchThicknessVersion: data.branchThicknessVersion,
+      idxOfInViewRootNode
     });
   };
 };

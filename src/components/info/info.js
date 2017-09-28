@@ -2,16 +2,30 @@ import React from "react";
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
-import { twoColumnBreakpoint } from "../../util/globals";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilterQuery } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton, removeFiltersButton } from "../framework/footer";
 import Toggle from "../controls/toggle";
 import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
+import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
 
-const areAnyFiltersActive = (filters) => {
-  return !!Object.keys(filters).filter((d) => filters[d].length > 0).length;
+const shouldPanelBeExpanded = (props) => {
+  const filtersOn = !!Object.keys(props.filters).filter((d) => props.filters[d].length > 0).length;
+  const branchSelected = props.idxOfInViewRootNode !== 0;
+  return filtersOn || branchSelected;
+};
+
+const resetTreeButton = (dispatch) => {
+  return (
+    <div
+      className={`select-item active-clickable`}
+      style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
+      onClick={() => dispatch({type: CHANGE_TREE_ROOT_IDX, idxOfInViewRootNode: 0})}
+    >
+      {"View Entire Tree."}
+    </div>
+  );
 };
 
 @connect((state) => {
@@ -20,6 +34,7 @@ const areAnyFiltersActive = (filters) => {
     filters: state.controls.filters,
     metadata: state.metadata.metadata,
     nodes: state.tree.nodes,
+    idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
     visibility: state.tree.visibility
   };
 })
@@ -29,7 +44,7 @@ class Info extends React.Component {
     this.state = {expanded: false};
   }
   componentWillReceiveProps(nextProps) {
-    if (!this.state.expanded && areAnyFiltersActive(nextProps.filters)) {
+    if (!this.state.expanded && shouldPanelBeExpanded(nextProps)) {
       this.setState({expanded: true});
     }
   }
@@ -39,8 +54,10 @@ class Info extends React.Component {
     metadata: React.PropTypes.object, // not required. starts as null
     nodes: React.PropTypes.array, // not required. starts as null
     visibility: React.PropTypes.array, // not required. starts as null
-    dispatch: React.PropTypes.func.isRequired
+    dispatch: React.PropTypes.func.isRequired,
+    idxOfInViewRootNode: React.PropTypes.number
   }
+
 
   getStyles(responsive) {
     let fontSize = 36;
@@ -241,6 +258,10 @@ class Info extends React.Component {
                 removeFiltersButton(this.props.dispatch, filtersWithValues, "", "Remove all filters.") :
                 null
               }
+              {/* branch selected message? (and button) */}
+              {this.props.idxOfInViewRootNode === 0 ? null :
+                ` Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants.`}
+              {this.props.idxOfInViewRootNode === 0 ? null : resetTreeButton(this.props.dispatch)}
             </div>
           ) : null}
         </div>

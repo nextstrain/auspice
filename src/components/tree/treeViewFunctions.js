@@ -99,7 +99,7 @@ export const onBranchClick = function (d) {
   /* to stop multiple phyloTree updates potentially clashing,
   we change tipVis after geometry update + transition */
   window.setTimeout(() =>
-    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.arrayIdx})),
+    this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.n.arrayIdx})),
     mediumTransitionDuration
   );
   this.setState({
@@ -132,8 +132,8 @@ export const onTipLeave = function (d) {
   }
 };
 
-/* viewEntireTree: triggered by "reset to entire tree" button */
-export const viewEntireTree = function () {
+/* viewEntireTree: go back to the root! */
+const viewEntireTree = function () {
   /* reset the SVGPanZoom */
   this.Viewer.fitToViewer();
   /* imperitively manipulate SVG tree elements */
@@ -270,7 +270,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
   const layout = props.layout !== nextProps.layout;
   const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
   const rerenderAllElements = nextProps.quickdraw === false && props.quickdraw === true;
-
+  const resetViewToRoot = props.tree.idxOfInViewRootNode !== 0 && nextProps.tree.idxOfInViewRootNode === 0;
   /* branch labels & confidence use 0: no change, 1: turn off, 2: turn on */
   const branchLabels = props.showBranchLabels === nextProps.showBranchLabels ? 0 : nextProps.showBranchLabels ? 2 : 1;
   const confidence = props.temporalConfidence.on === nextProps.temporalConfidence.on && props.temporalConfidence.display === nextProps.temporalConfidence.display ? 0 :
@@ -297,6 +297,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
     branchTransitionTime,
     tipTransitionTime,
     branchLabels,
+    resetViewToRoot,
     confidence,
     quickdraw: nextProps.quickdraw,
     rerenderAllElements
@@ -310,7 +311,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
  * @param {obj} tree phyloTree object
  * @return {null} causes side-effects via phyloTree object
  */
-export const updateStylesAndAttrs = (changes, nextProps, tree) => {
+export const updateStylesAndAttrs = (that, changes, nextProps, tree) => {
   /* the objects storing the changes to make to the tree */
   const tipAttrToUpdate = {};
   const tipStyleToUpdate = {};
@@ -368,7 +369,9 @@ export const updateStylesAndAttrs = (changes, nextProps, tree) => {
      /* some updates may necessitate an updating of the CIs (e.g. ∆ branch thicknesses) */
     tree.updateConfidence(changes.tipTransitionTime);
   }
-
+  if (changes.resetViewToRoot) {
+    viewEntireTree.bind(that)();
+  }
   if (changes.rerenderAllElements) {
     tree.rerenderAllElements();
   }
