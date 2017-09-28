@@ -33,7 +33,7 @@ class Info extends React.Component {
     dispatch: React.PropTypes.func.isRequired
   }
 
-  getStyles() {
+  getStyles(responsive) {
     let fontSize = 36;
     if (this.props.browserDimensions.width < 1000) {
       fontSize = 32;
@@ -57,7 +57,7 @@ class Info extends React.Component {
         fontWeight: 300,
         color: darkGrey,
         letterSpacing: "-1px",
-        maxWidth: 960
+        maxWidth: responsive.width - 50
       },
       titleSmall: {
         fontFamily: titleFont,
@@ -67,7 +67,7 @@ class Info extends React.Component {
         marginBottom: 4,
         fontWeight: 300,
         color: darkGrey,
-        maxWidth: 960
+        maxWidth: responsive.width - 50
       },
       n: {
         fontFamily: headerFont,
@@ -188,7 +188,7 @@ class Info extends React.Component {
       minHeight: 480,
       maxAspectRatio: 1.0
     });
-    const styles = this.getStyles();
+    const styles = this.getStyles(responsive);
     const title = this.props.metadata.title ? this.props.metadata.title : "";
     const nTotalSamples = this.props.metadata.virus_count;
     const nSelectedSamples = this.getNumSelectedTips();
