@@ -113,6 +113,9 @@ class Footer extends React.Component {
           marginBottom: "20px",
           borderBottom: "1px solid #CCC"
         },
+        preamble: {
+          fontSize: 15
+        },
         fineprint: {
           fontSize: 14
         }
@@ -143,23 +146,33 @@ class Footer extends React.Component {
     const stateCount = getValuesAndCountsOfTraitFromTree(this.props.tree.nodes, filterName);
     return (
       <div>
-        {`Filter on ${prettyString(filterName)}`}
+        {`Filter by ${prettyString(filterName)}`}
         {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
           {Object.keys(stateCount).sort().map((itemName) => {
-            const display = (
-              <g>
-                {prettyString(itemName)}
-                {" (" + stateCount[itemName] + ")"}
-              </g>
-            );
+            let display;
+            if (filterName === "authors") {
+              display = (
+                <g>
+                  {prettyString(itemName, {stripEtAl: true})}
+                  {" et al (" + stateCount[itemName] + ")"}
+                </g>
+              );
+            } else {
+              display = (
+                <g>
+                  {prettyString(itemName)}
+                  {" (" + stateCount[itemName] + ")"}
+                </g>
+              );
+            }
             return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
           })}
         </Flex>
       </div>
     );
   }
-  getAdditionalDatasetSpecificInfo(styles) {
+  getAcknowledgments(styles) {
     if (this.context.router.history.location.pathname.includes("ebola")) {
       return (
         <div style={styles.citationList}>
@@ -188,7 +201,8 @@ class Footer extends React.Component {
         style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", margin: 0, padding: 0})}
         onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
       >
-        <span style={{position: "relative"}}>{"DOWNLOAD DATA"}</span>
+        <i className="fa fa-download" aria-hidden="true"/>
+        <span style={{position: "relative"}}>{" Data download"}</span>
       </button>
     );
   }
@@ -196,43 +210,11 @@ class Footer extends React.Component {
     if (Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainer")) {
       return (
         <span>
-          dataset maintained by <a href={this.props.metadata.maintainer[1]} target="_blank">{this.props.metadata.maintainer[0]}</a>
+          Build maintained by <a href={this.props.metadata.maintainer[1]} target="_blank">{this.props.metadata.maintainer[0]}</a>
         </span>
       );
     }
     return null;
-  }
-  authorInfoAndFilter(styles) {
-    let preamble = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
-    if (this.context.router.history.location.pathname.includes("avian") || this.context.router.history.location.pathname.includes("flu")) {
-      preamble = (
-        <div>
-          This work is made possible by the open sharing of genetic data by research groups from all over the world via <a href="http://platform.gisaid.org/">GISAID</a>. We gratefully acknowledge their contributions.
-        </div>
-      );
-    }
-    /* if we don't have authors in the filters (keys) then nothing to display */
-    if (Object.keys(this.props.activeFilters).indexOf("authors") === -1) {
-      return preamble;
-    }
-    const author_info = this.props.metadata.author_info;
-    return (
-      <div>
-        {preamble}
-        {this.props.activeFilters.authors.length ? removeFiltersButton(this.props.dispatch, ["authors"], "inlineRight", "Clear author filter") : null}
-        <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-          {Object.keys(author_info).sort().map((authorName) => {
-            const display = (
-              <g>
-                {prettyString(authorName, {stripEtAl: true})}
-                {" et al (" + author_info[authorName].n + ")"}
-              </g>
-            );
-            return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, "authors", authorName, display, false);
-          })}
-        </Flex>
-      </div>
-    );
   }
 
   render() {
@@ -249,11 +231,12 @@ class Footer extends React.Component {
       <div style={styles.footer}>
         <div style={{width: width}}>
           <div style={styles.line}/>
-          {this.authorInfoAndFilter(styles)}
-          {this.getAdditionalDatasetSpecificInfo(styles)}
+          <div style={styles.preamble}>
+            {"This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions."}
+          </div>
+          {this.getAcknowledgments(styles)}
           <div style={styles.line}/>
           {Object.keys(this.props.activeFilters).map((name) => {
-            if (name === "authors") {return null;}
             return (
               <div key={name}>
                 {this.displayFilter(styles, name)}
@@ -262,11 +245,11 @@ class Footer extends React.Component {
             );
           })}
           <Flex style={styles.fineprint}>
+            {this.getMaintainer()}
+            {dot}
             {this.getUpdated()}
             {dot}
             {this.downloadDataButton()}
-            {dot}
-            {this.getMaintainer()}
           </Flex>
         </div>
       </div>
