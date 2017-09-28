@@ -13,7 +13,8 @@ import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
 const shouldPanelBeExpanded = (props) => {
   const filtersOn = !!Object.keys(props.filters).filter((d) => props.filters[d].length > 0).length;
   const branchSelected = props.idxOfInViewRootNode !== 0;
-  return filtersOn || branchSelected;
+  const datesModified = props.dateMin !== props.absoluteDateMin || props.dateMax !== props.absoluteDateMax;
+  return filtersOn || branchSelected || datesModified;
 };
 
 const resetTreeButton = (dispatch) => {
@@ -32,6 +33,10 @@ const resetTreeButton = (dispatch) => {
   return {
     browserDimensions: state.browserDimensions.browserDimensions,
     filters: state.controls.filters,
+    dateMin: state.controls.dateMin,
+    dateMax: state.controls.dateMax,
+    absoluteDateMin: state.controls.absoluteDateMin,
+    absoluteDateMax: state.controls.absoluteDateMax,
     metadata: state.metadata.metadata,
     nodes: state.tree.nodes,
     idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
@@ -257,6 +262,13 @@ class Info extends React.Component {
               {filtersWithValues.length ?
                 removeFiltersButton(this.props.dispatch, filtersWithValues, "", "Remove all filters.") :
                 null
+              }
+              {/* dates restricted? */}
+              { this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
+                this.props.dateMin !== this.props.absoluteDateMin && this.props.dateMax !== this.props.absoluteDateMax ?
+                  ` Date restricted to between ${this.props.dateMin} & ${this.props.dateMax}.` :
+                  this.props.dateMin !== this.props.absoluteDateMin ?
+                    ` Restriced to sequences after ${this.props.dateMin}.` : ` Restriced to sequences before ${this.props.dateMax}.`
               }
               {/* branch selected message? (and button) */}
               {this.props.idxOfInViewRootNode === 0 ? null :
