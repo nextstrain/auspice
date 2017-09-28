@@ -198,10 +198,16 @@ class Info extends React.Component {
       maxAspectRatio: 1.0
     });
     const styles = this.getStyles(responsive);
-    const title = this.props.metadata.title ? this.props.metadata.title : "";
     const nTotalSamples = this.props.metadata.virus_count;
     const nSelectedSamples = this.getNumSelectedTips();
     const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
+    let title = "";
+    if (this.props.metadata.title) {
+      title = this.props.metadata.title;
+      if (!this.state.expanded) {
+        title += ` (n=${nSelectedSamples}/${nTotalSamples} genomes)`;
+      }
+    }
     return (
       <Card center>
         <div style={{width: responsive.width, display: "inline-block"}}>
