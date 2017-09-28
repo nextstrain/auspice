@@ -10,6 +10,10 @@ import { displayFilterValueAsButton, removeFiltersButton } from "../framework/fo
 import Toggle from "../controls/toggle";
 import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 
+const areAnyFiltersActive = (filters) => {
+  return !!Object.keys(filters).filter((d) => filters[d].length > 0).length;
+};
+
 @connect((state) => {
   return {
     browserDimensions: state.browserDimensions.browserDimensions,
@@ -22,7 +26,12 @@ import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 class Info extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {expanded: true};
+    this.state = {expanded: false};
+  }
+  componentWillReceiveProps(nextProps) {
+    if (!this.state.expanded && areAnyFiltersActive(nextProps.filters)) {
+      this.setState({expanded: true});
+    }
   }
   static propTypes = {
     sidebar: React.PropTypes.bool.isRequired,
