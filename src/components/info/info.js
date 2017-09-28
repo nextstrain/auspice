@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { applyFilterQuery } from "../../actions/treeProperties";
+import { applyFilterQuery, changeDateFilter } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton, removeFiltersButton } from "../framework/footer";
 import Toggle from "../controls/toggle";
@@ -25,6 +25,18 @@ const resetTreeButton = (dispatch) => {
       onClick={() => dispatch({type: CHANGE_TREE_ROOT_IDX, idxOfInViewRootNode: 0})}
     >
       {"View Entire Tree."}
+    </div>
+  );
+};
+
+const resetDatesButton = (dispatch, newMin, newMax) => {
+  return (
+    <div
+      className={`select-item active-clickable`}
+      style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
+      onClick={() => dispatch(changeDateFilter({newMin, newMax}))}
+    >
+      {"Reset Date Filters."}
     </div>
   );
 };
@@ -269,6 +281,10 @@ class Info extends React.Component {
                   ` Date restricted to between ${this.props.dateMin} & ${this.props.dateMax}.` :
                   this.props.dateMin !== this.props.absoluteDateMin ?
                     ` Restriced to sequences after ${this.props.dateMin}.` : ` Restriced to sequences before ${this.props.dateMax}.`
+              }
+              {/* reset dates button? */}
+              {this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
+                resetDatesButton(this.props.dispatch, this.props.absoluteDateMin, this.props.absoluteDateMax)
               }
               {/* branch selected message? (and button) */}
               {this.props.idxOfInViewRootNode === 0 ? null :
