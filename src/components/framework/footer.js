@@ -65,7 +65,7 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
   );
 };
 
-export const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
+const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
   return (
     <div
       className={`${outerClassName} select-item active-clickable`}

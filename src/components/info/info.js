@@ -5,7 +5,7 @@ import computeResponsive from "../../util/computeResponsive";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilterQuery, changeDateFilter } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
-import { displayFilterValueAsButton, removeFiltersButton } from "../framework/footer";
+import { displayFilterValueAsButton } from "../framework/footer";
 import Toggle from "../controls/toggle";
 import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
@@ -25,18 +25,6 @@ const resetTreeButton = (dispatch) => {
       onClick={() => dispatch({type: CHANGE_TREE_ROOT_IDX, idxOfInViewRootNode: 0})}
     >
       {"View Entire Tree."}
-    </div>
-  );
-};
-
-const resetDatesButton = (dispatch, newMin, newMax) => {
-  return (
-    <div
-      className={`select-item active-clickable`}
-      style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
-      onClick={() => dispatch(changeDateFilter({newMin, newMax}))}
-    >
-      {"Reset Date Filters."}
     </div>
   );
 };
@@ -277,11 +265,6 @@ class Info extends React.Component {
                     .filter((n) => this.props.filters[n].length > 0)
                     .map((n) => this.summariseNonAuthorFilter(n))
                   }
-                  {/* Clear all filters (if applicable!) */}
-                  {filtersWithValues.length ?
-                    removeFiltersButton(this.props.dispatch, filtersWithValues, "", "Remove all filters.") :
-                    null
-                  }
                   {/* dates restricted? */}
                   { this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
                     this.props.dateMin !== this.props.absoluteDateMin && this.props.dateMax !== this.props.absoluteDateMax ?
@@ -289,10 +272,23 @@ class Info extends React.Component {
                       this.props.dateMin !== this.props.absoluteDateMin ?
                         ` Restriced to sequences after ${this.props.dateMin}.` : ` Restriced to sequences before ${this.props.dateMax}.`
                   }
-                  {/* reset dates button? */}
-                  {this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
-                    resetDatesButton(this.props.dispatch, this.props.absoluteDateMin, this.props.absoluteDateMax)
-                  }
+                  {/* Clear all filters (if applicable!) */}
+                  {filtersWithValues.length || this.props.dateMin !== this.props.absoluteDateMin || this.props.dateMax !== this.props.absoluteDateMax ? (
+                    <div
+                      className={`select-item active-clickable`}
+                      style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
+                      onClick={() => {
+                        if (filtersWithValues.length) {
+                          filtersWithValues.forEach((n) => this.props.dispatch(applyFilterQuery(n, [], 'set')));
+                        }
+                        if (this.props.dateMin !== this.props.absoluteDateMin || this.props.dateMax !== this.props.absoluteDateMax) {
+                          this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
+                        }
+                      }}
+                    >
+                      {"Reset all filters"}
+                    </div>
+                  ) : null}
                   {/* branch selected message? (and button) */}
                   {this.props.idxOfInViewRootNode === 0 ? null :
                     ` Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants.`}
