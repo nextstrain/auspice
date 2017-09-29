@@ -49,6 +49,7 @@ const resetDatesButton = (dispatch, newMin, newMax) => {
     dateMax: state.controls.dateMax,
     absoluteDateMin: state.controls.absoluteDateMin,
     absoluteDateMax: state.controls.absoluteDateMax,
+    mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
     metadata: state.metadata.metadata,
     nodes: state.tree.nodes,
     idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
@@ -259,39 +260,46 @@ class Info extends React.Component {
           <div width={responsive.width} style={this.state.expanded ? styles.title : styles.titleSmall}>
             {title}
           </div>
-          {this.state.expanded ? (
-            <div width={responsive.width} style={styles.n}>
-              {`Showing ${nSelectedSamples} of ${nTotalSamples} genomes. `}
-              {/* Author filters */}
-              {this.summariseSelectedAuthors()}
-              {/* Summarise other filters */}
-              {Object.keys(this.props.filters)
-                .filter((n) => n !== "authors")
-                .filter((n) => this.props.filters[n].length > 0)
-                .map((n) => this.summariseNonAuthorFilter(n))
-              }
-              {/* Clear all filters (if applicable!) */}
-              {filtersWithValues.length ?
-                removeFiltersButton(this.props.dispatch, filtersWithValues, "", "Remove all filters.") :
-                null
-              }
-              {/* dates restricted? */}
-              { this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
-                this.props.dateMin !== this.props.absoluteDateMin && this.props.dateMax !== this.props.absoluteDateMax ?
-                  ` Date restricted to between ${this.props.dateMin} & ${this.props.dateMax}.` :
-                  this.props.dateMin !== this.props.absoluteDateMin ?
-                    ` Restriced to sequences after ${this.props.dateMin}.` : ` Restriced to sequences before ${this.props.dateMax}.`
-              }
-              {/* reset dates button? */}
-              {this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
-                resetDatesButton(this.props.dispatch, this.props.absoluteDateMin, this.props.absoluteDateMax)
-              }
-              {/* branch selected message? (and button) */}
-              {this.props.idxOfInViewRootNode === 0 ? null :
-                ` Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants.`}
-              {this.props.idxOfInViewRootNode === 0 ? null : resetTreeButton(this.props.dispatch)}
-            </div>
-          ) : null}
+          {(!this.state.expanded) ? null :
+            this.props.mapAnimationPlayPauseButton === "Pause" ? (
+              <div width={responsive.width} style={styles.n}>
+                {`Map animation in progress (showing ${nSelectedSamples} of ${nTotalSamples} genomes).`}
+              </div>
+            ) :
+              (
+                <div width={responsive.width} style={styles.n}>
+                  {`Showing ${nSelectedSamples} of ${nTotalSamples} genomes. `}
+                  {/* Author filters */}
+                  {this.summariseSelectedAuthors()}
+                  {/* Summarise other filters */}
+                  {Object.keys(this.props.filters)
+                    .filter((n) => n !== "authors")
+                    .filter((n) => this.props.filters[n].length > 0)
+                    .map((n) => this.summariseNonAuthorFilter(n))
+                  }
+                  {/* Clear all filters (if applicable!) */}
+                  {filtersWithValues.length ?
+                    removeFiltersButton(this.props.dispatch, filtersWithValues, "", "Remove all filters.") :
+                    null
+                  }
+                  {/* dates restricted? */}
+                  { this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
+                    this.props.dateMin !== this.props.absoluteDateMin && this.props.dateMax !== this.props.absoluteDateMax ?
+                      ` Date restricted to between ${this.props.dateMin} & ${this.props.dateMax}.` :
+                      this.props.dateMin !== this.props.absoluteDateMin ?
+                        ` Restriced to sequences after ${this.props.dateMin}.` : ` Restriced to sequences before ${this.props.dateMax}.`
+                  }
+                  {/* reset dates button? */}
+                  {this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
+                    resetDatesButton(this.props.dispatch, this.props.absoluteDateMin, this.props.absoluteDateMax)
+                  }
+                  {/* branch selected message? (and button) */}
+                  {this.props.idxOfInViewRootNode === 0 ? null :
+                    ` Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants.`}
+                  {this.props.idxOfInViewRootNode === 0 ? null : resetTreeButton(this.props.dispatch)}
+                </div>
+              )
+          }
         </div>
       </Card>
     );
