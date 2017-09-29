@@ -50,9 +50,7 @@ class Info extends React.Component {
     this.state = {expanded: false};
   }
   componentWillReceiveProps(nextProps) {
-    if (!this.state.expanded && shouldPanelBeExpanded(nextProps)) {
-      this.setState({expanded: true});
-    }
+    this.setState({expanded: shouldPanelBeExpanded(nextProps)});
   }
   static propTypes = {
     sidebar: React.PropTypes.bool.isRequired,
@@ -199,16 +197,16 @@ class Info extends React.Component {
     );
   }
 
-  toggle() {
-    return (
-      <Toggle
-        display
-        on={this.state.expanded}
-        callback={() => {this.setState({expanded: !this.state.expanded});}}
-        label=""
-      />
-    );
-  }
+  // toggle() {
+  //   return (
+  //     <Toggle
+  //       display
+  //       on={this.state.expanded}
+  //       callback={() => {this.setState({expanded: !this.state.expanded});}}
+  //       label=""
+  //     />
+  //   );
+  // }
 
   render() {
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
@@ -234,7 +232,7 @@ class Info extends React.Component {
     return (
       <Card center>
         <div style={{width: responsive.width, display: "inline-block"}}>
-          <Toggle
+          {/* <Toggle
             display
             on={this.state.expanded}
             style={{
@@ -244,7 +242,7 @@ class Info extends React.Component {
             }}
             callback={() => {this.setState({expanded: !this.state.expanded});}}
             label=""
-          />
+          /> */}
           <div width={responsive.width} style={this.state.expanded ? styles.title : styles.titleSmall}>
             {title}
           </div>
