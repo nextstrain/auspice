@@ -150,6 +150,11 @@ const Controls = (state = getDefaultState(), action) => {
         base.temporalConfidence.display = false;
       }
 
+      /* if only map or only tree, then panelLayout must be full */
+      if (action.meta.panels.indexOf("map") === -1 || action.meta.panels.indexOf("tree") === -1) {
+        base["panelLayout"] = "full";
+      }
+
       /* we now check that the set values (meta.json defaults, hardcoded defaults, URL queries) are "valid" */
       /* colorBy */
       const colorByValid = Object.keys(action.meta.color_options).indexOf(base["colorBy"]) !== -1;

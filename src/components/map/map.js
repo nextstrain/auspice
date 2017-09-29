@@ -98,8 +98,12 @@ class Map extends React.Component {
       };
     }
   }
-  // componentDidMount() {
-  // }
+  componentDidMount() {
+    this.maybeComputeResponsive(this.props);
+    this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
+    this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
+    this.maybeInvalidateMapSize(this.props);
+  }
   componentWillReceiveProps(nextProps) {
     this.maybeComputeResponsive(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */

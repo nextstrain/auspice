@@ -183,26 +183,32 @@ class Entropy extends React.Component {
       </div>
     );
   }
+  setUp(props) {
+    const chart = new EntropyChart(
+      this.d3entropy,
+      calcEntropy(props.entropy),
+      { /* callbacks */
+        onHover: this.onHover.bind(this),
+        onLeave: this.onLeave.bind(this),
+        onClick: this.onClick.bind(this)
+      }
+    );
+    chart.render(this.getChartGeom(props), props.mutType);
+    this.setState({
+      chart,
+      chartGeom: this.getChartGeom(props)
+    });
+    chart.update({aa: props.mutType === "aa"}); // why is this necessary straight after an initial render?!
+  }
+  componentDidMount() {
+    this.setUp(this.props);
+  }
   componentWillReceiveProps(nextProps) {
     if (!nextProps.loaded) {
       this.setState({chart: false});
     }
     if (!this.state.chart && nextProps.loaded) {
-      const chart = new EntropyChart(
-        this.d3entropy,
-        calcEntropy(nextProps.entropy),
-        { /* callbacks */
-          onHover: this.onHover.bind(this),
-          onLeave: this.onLeave.bind(this),
-          onClick: this.onClick.bind(this)
-        }
-      );
-      chart.render(this.getChartGeom(nextProps), nextProps.mutType);
-      this.setState({
-        chart,
-        chartGeom: this.getChartGeom(nextProps)
-      });
-      chart.update({aa: nextProps.mutType === "aa"}); // why is this necessary straight after an initial render?!
+      this.setUp(nextProps);
       return;
     }
     if (this.state.chart) {

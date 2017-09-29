@@ -91,6 +91,15 @@ class TreeView extends React.Component {
     return null;
   }
 
+  componentDidMount() {
+    const tree = this.makeTree(this.props);
+    funcs.updateStylesAndAttrs({colorBy: true}, this.props, tree);
+    this.setState({tree});
+    if (this.Viewer) {
+      this.Viewer.fitToViewer();
+    }
+  }
+
   componentDidUpdate(prevProps) {
     /* if the  SVG has changed size, call zoomIntoClade so that the tree rescales to fit the SVG */
     if (
