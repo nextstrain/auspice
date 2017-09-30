@@ -145,19 +145,28 @@ class Info extends React.Component {
           {" et al (n=" + this.props.metadata.author_info[v].n + ")"}
         </g>
       ),
-      title: prettyString(this.props.metadata.author_info[v].title)
+      longlabel: (
+        <g>
+          {prettyString(v, {stripEtAl: true})}
+          {" et al "}
+          {prettyString(this.props.metadata.author_info[v].title)}
+          {" (n=" + this.props.metadata.author_info[v].n + ")"}
+        </g>
+      )
     }));
     /* case 1 (no selected authors) has already been handled */
     if (nTotalAuthors === nSelectedAuthors) {
       return null;
     }
     /* case 2: a single author selected */
-    if (nSelectedAuthors === 1) {
+    if (nSelectedAuthors > 0 && nSelectedAuthors < 3) {
       return (
         <g>
           {"Data from "}
-          {displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", authorInfo[0].name, authorInfo[0].label, true)}
-          <span style={{fontWeight: 300}}>{`"${authorInfo[0].title}". `}</span>
+          {authorInfo.map((d) => (
+            displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.longlabel, true)
+          ))}
+          {". "}
         </g>
       );
     }
@@ -168,7 +177,7 @@ class Info extends React.Component {
         {authorInfo.map((d) => (
           displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.label, true)
         ))}
-        {`. `}
+        {". "}
       </g>
     );
   }
