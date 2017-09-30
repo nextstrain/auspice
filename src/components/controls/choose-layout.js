@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import * as icons from "../framework/svg-icons";
-import { materialButton, materialButtonSelected, medGrey } from "../../globalStyles";
+import { materialButton, materialButtonSelected, lightGrey, brandColor } from "../../globalStyles";
 import { CHANGE_LAYOUT } from "../../actions/types";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
@@ -39,7 +39,7 @@ class ChooseLayout extends React.Component {
     return (
       <div style={styles.container}>
         <div style={{margin: 5}}>
-        <icons.RectangularTree width={25} stroke={medGrey}/>
+        <icons.RectangularTree width={25} stroke={selected === "rect" ? brandColor : lightGrey}/>
         <button
           key={1}
           style={selected === "rect" ? materialButtonSelected : materialButton}
@@ -56,7 +56,7 @@ class ChooseLayout extends React.Component {
         </button>
         </div>
         <div style={{margin: 5}}>
-        <icons.RadialTree width={25} stroke={medGrey}/>
+        <icons.RadialTree width={25} stroke={selected === "radial" ? brandColor : lightGrey}/>
         <button
           key={2}
           style={selected === "radial" ? materialButtonSelected : materialButton}
@@ -73,7 +73,7 @@ class ChooseLayout extends React.Component {
         </button>
         </div>
         <div style={{margin: 5}}>
-        <icons.UnrootedTree width={25} stroke={medGrey}/>
+        <icons.UnrootedTree width={25} stroke={selected === "unrooted" ? brandColor : lightGrey}/>
         <button
           key={3}
           style={selected === "unrooted" ? materialButtonSelected : materialButton}
@@ -90,7 +90,7 @@ class ChooseLayout extends React.Component {
         </button>
         </div>
         <div style={{margin: 5}}>
-        <icons.Clock width={25} stroke={medGrey}/>
+        <icons.Clock width={25} stroke={selected === "clock" ? brandColor : lightGrey}/>
         <button
           key={4}
           style={selected === "clock" ? materialButtonSelected : materialButton}

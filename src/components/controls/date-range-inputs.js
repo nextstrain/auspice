@@ -41,7 +41,7 @@ class DateRangeInputs extends React.Component {
         margin: "0px 0px 5px 0px",
         fontSize: 12,
         fontWeight: 400,
-        color: darkGrey
+        color: "#fff"
       }
     };
   }

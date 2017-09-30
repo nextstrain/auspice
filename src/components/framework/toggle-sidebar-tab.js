@@ -1,5 +1,6 @@
 import React from "react";
 import { controlsWidth, controlsPadding } from "../../util/globals";
+import { sidebarColor } from "../../globalStyles";
 
 const ToggleSidebarTab = ({open, handler}) => {
 
@@ -14,7 +15,7 @@ const ToggleSidebarTab = ({open, handler}) => {
         position: "fixed",
         top: 0,
         zIndex: 1001,
-        backgroundColor: "#4b4e4e",
+        backgroundColor: sidebarColor,
         cursor: "pointer",
         left: open ? controlsWidth + controlsPadding - 15 : 0,
         transition: "left .3s ease-out"

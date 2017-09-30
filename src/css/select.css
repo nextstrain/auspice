@@ -4,14 +4,14 @@
 .select-item {
   margin: 0px 2px 0px 2px;
   padding: 1px 2px 1px 2px;
-  color: #007AB6;
+  color: #5DA8A3;
 }
 
 .select-item.active-with-icon {
-  background-color: #ebf5ff;
+  background-color: #EBF4F4;
   border-bottom-right-radius: 2px;
   border-top-right-radius: 2px;
-  border: 1px solid #c2e0ff;
+  border: 1px solid #C2DEDD;
   font-weight: 300;
   cursor: "pointer";
   display: inline-block;
@@ -20,9 +20,9 @@
 }
 
 .select-item.active-clickable {
-  background-color: #ebf5ff;
+  background-color: #EBF4F4;
   border-radius: 2px;
-  border: 1px solid #c2e0ff;
+  border: 1px solid #C2DEDD;
   font-weight: 300;
   cursor: "pointer";
   display: inline-block;
@@ -41,14 +41,14 @@
 
 .select-item-icon {
   cursor: pointer;
-  color: #007AB6;
+  color: #5DA8A3;
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
   border-width: 1px 0px 1px 1px;
   border-style: solid;
-  border-color: #c2e0ff;
+  border-color: #C2DEDD;
   min-width: 15px;
-  background-color: #ebf5ff;
+  background-color: #EBF4F4;
   padding: 1px 0px 1px 2px;
   margin: 0px 0px 0px 2px;
   display: inline-block;

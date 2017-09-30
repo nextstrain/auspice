@@ -14,6 +14,7 @@ import Map from "./map/map";
 import Info from "./info/info";
 import TreeView from "./tree/treeView";
 import { controlsHiddenWidth } from "../util/globals";
+import { sidebarColor } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
 import DownloadModal from "./download/downloadModal";
@@ -107,6 +108,11 @@ class App extends React.Component {
           docked={this.state.sidebarDocked}
           onSetOpen={(a) => {this.setState({sidebarOpen: a});}}
           sidebarClassName={"sidebar"}
+          styles={{
+            sidebar: {
+              backgroundColor: sidebarColor
+            }
+          }}
         >
           {
             (!this.props.treeLoaded || !this.props.metadata.metadata) ? (

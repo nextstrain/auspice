@@ -11,7 +11,7 @@ class Background extends React.Component {
   getStyles() {
     return {
       base: {
-        backgroundColor: "#F4F4F4",
+        backgroundColor: "#fff", // #F4F4F4
         height: this.props.docHeight,
         overflowX: "hidden"
       }
