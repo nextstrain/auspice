@@ -1,45 +1,31 @@
 import React from "react";
 import { controlsWidth, controlsPadding } from "../../util/globals";
-import { sidebarColor } from "../../globalStyles";
 
 const ToggleSidebarTab = ({open, handler}) => {
-
-  const degrees = open ? 180 : 0;
 
   return (
     <div
       onClick={handler}
       style={{
-        width: 15,
-        height: 50,
+        width: 13,
+        height: 35,
         position: "fixed",
         top: 0,
         zIndex: 1001,
-        backgroundColor: sidebarColor,
+        color: "#fff",
+        backgroundColor: open ? "inherit" : "#696E76",
+        boxShadow: open ? "none" : "2px 2px 4px rgba(0, 0, 0, 0.15)", // from react-sidebar
         cursor: "pointer",
-        left: open ? controlsWidth + controlsPadding - 15 : 0,
-        transition: "left .3s ease-out"
+        paddingTop: 17,
+        paddingLeft: open ? 1 : 4,
+        left: open ? controlsWidth + controlsPadding - 19 : 0,
+        transition: "left .3s ease-out",
+        fontSize: 14
       }}
     >
-      <svg
-        style={{
-          position: "relative",
-          top: 20,
-          left: 4,
-          transform: `rotate(${degrees}deg)`,
-          transition: "transform 0.3s ease-out"
-        }}
-        width="7px"
-        height="10.5px"
-        viewBox="369 160 10 15"
-      >
-        <polygon
-          id="Triangle"
-          stroke="none"
-          fill="#FFFFFF"
-          points="379 167.5 369 175 369 160"
-        />
-      </svg>
+      {open ? <i className="fa fa-chevron-left" aria-hidden="true"/>
+        : <i className="fa fa-chevron-right" aria-hidden="true"/>
+      }
     </div>
   );
 };
