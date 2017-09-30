@@ -65,7 +65,7 @@ const getDefaultState = () => {
     analysisSlider: false,
     geoResolution: defaultGeoResolution,
     datasetPathName: "",
-    filters: {authors: []}, /* initialise authors to [] so it can be accessed always */
+    filters: {},
     showDownload: false,
     quickdraw: false, // if true, components may skip expensive computes.
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
@@ -105,6 +105,16 @@ const Controls = (state = getDefaultState(), action) => {
       }
       if (action.meta.analysisSlider) {
         base["analysisSlider"] = {key: action.meta.analysisSlider, valid: false};
+      }
+      if (action.meta.author_info) {
+        base.filters.authors = [];
+      } else {
+        console.error("update meta.json to include author_info.");
+      }
+      if (action.meta.filters) {
+        action.meta.filters.forEach((v) => {base.filters[v] = [];});
+      } else {
+        console.warn("the meta.json did not include any filters");
       }
       if (action.meta.defaults) {
         const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout"];

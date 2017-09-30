@@ -25,7 +25,7 @@ rules:
   no-console: [1, { "allow": ["warn", "error"] }]
   no-param-reassign: [1, { "props": false }]
   no-unused-expressions: ['error', {"allowTernary": true }]
-  no-restricted-syntax: ['error', 'ForInStatement', 'LabeledStatement', 'WithStatement'] # allow ForOfStatement
+  no-restricted-syntax: ['error', 'ForInStatement', 'WithStatement'] # allow ForOfStatement & LabeledStatement
   react/jsx-tag-spacing: ["error", { "closingSlash": "never", "beforeSelfClosing": "allow", "afterOpening": "never" }]
   react/forbid-prop-types: off
   react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
@@ -33,6 +33,8 @@ rules:
   react/prop-types: off # possibly reinstate
   react/sort-comp: off # possibly reinstate
   jsx-a11y/no-static-element-interactions: off
+  no-labels: off
+  no-continue: off
 parserOptions:
   ecmaVersion: 6
   sourceType: module

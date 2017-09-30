@@ -129,7 +129,7 @@ class DownloadModal extends React.Component {
               }).map((k) => (
                 <span key={k}>
                   {helpers.getAuthor(meta.author_info, k)}
-                  {" (n = " + meta.author_info[k].n + "), "}
+                  {" (n=" + meta.author_info[k].n + "), "}
                 </span>
               ))}
 

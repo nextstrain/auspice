@@ -17,13 +17,14 @@ export const getAuthor = (info, k) => {
       <span>Not Available</span>
     );
   }
-  if (isPaperURLValid(info[k])) {
-    return (
-      <a href={formatURLString(info[k].paper_url)} target="_blank">
-        {authorString(k)}
-      </a>
-    );
-  }
+  // TODO: improve this block
+  // if (isPaperURLValid(info[k])) {
+  //   return (
+  //     <a href={formatURLString(info[k].paper_url)} target="_blank">
+  //       {authorString(k)}
+  //     </a>
+  //   );
+  // }
   return authorString(k);
 };
 

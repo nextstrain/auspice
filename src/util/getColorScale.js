@@ -90,11 +90,16 @@ const createListOfColors = (n, range) => {
   return d3Range(0, n).map(scale);
 };
 
-const discreteAttributeScale = (nodes, attr) => {
+export const getValuesAndCountsOfTraitFromTree = (nodes, attr) => {
   const stateCount = {};
   nodes.forEach((n) => (stateCount[n.attr[attr]]
-                         ? stateCount[n.attr[attr]] += 1
-                         : stateCount[n.attr[attr]] = 1));
+    ? stateCount[n.attr[attr]] += 1
+    : stateCount[n.attr[attr]] = 1));
+  return stateCount;
+};
+
+const discreteAttributeScale = (nodes, attr) => {
+  const stateCount = getValuesAndCountsOfTraitFromTree(nodes, attr);
   const domain = Object.keys(stateCount);
   domain.sort((a, b) => stateCount[a] > stateCount[b]);
   // note: colors[n] has n colors

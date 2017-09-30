@@ -1,6 +1,14 @@
 import React from "react";
 import { infoPanelStyles, dataFont } from "../../globalStyles";
 
+// This component was called by treeView via:
+// <BranchSelectedPanel
+//   responsive={responsive}
+//   viewEntireTreeCallback={() => funcs.viewEntireTree.bind(this)()}
+//   branch={this.state.selectedBranch}
+// />
+
+
 const BranchSelectedPanel = ({branch, viewEntireTreeCallback, responsive}) => {
   if (!branch) {return null;}
 

@@ -17,7 +17,8 @@ const getDefaultState = () => {
     tipRadiiVersion: 0,
     branchThickness: null,
     branchThicknessVersion: 0,
-    version: 0
+    version: 0,
+    idxOfInViewRootNode: 0
   };
 };
 
@@ -40,7 +41,6 @@ const Tree = (state = getDefaultState(), action) => {
       const nodes = processNodes(nodesArray);
       calcLayouts(nodes, ["div", "num_date"]);
       return Object.assign({}, getDefaultState(), {
-        inViewRootNodeIdx: 0,
         nodes: nodes,
         attrs: getAttrsOnTerminalNodes(nodes)
       });
@@ -50,13 +50,18 @@ const Tree = (state = getDefaultState(), action) => {
         loaded: true,
         version: state.version + 1
       });
+    case types.CHANGE_TREE_ROOT_IDX:
+      return Object.assign({}, state, {
+        idxOfInViewRootNode: action.idxOfInViewRootNode
+      });
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       return Object.assign({}, state, {
         visibility: action.visibility,
         visibilityVersion: action.visibilityVersion,
         branchThickness: action.branchThickness,
-        branchThicknessVersion: action.branchThicknessVersion
+        branchThicknessVersion: action.branchThicknessVersion,
+        idxOfInViewRootNode: action.idxOfInViewRootNode
       });
     case types.UPDATE_TIP_RADII:
       return Object.assign({}, state, {
