@@ -20,6 +20,8 @@ import DownloadModal from "./download/downloadModal";
 import { analyticsNewPage } from "../util/googleAnalytics";
 import filesDropped from "../actions/filesDropped";
 
+const nextstrainLogo = require("../images/nextstrain-logo-small.png");
+
 /* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
   React-Router v4 injects length, action, location, push etc into props,
     but perhaps it's more consistent if we access these through
@@ -31,6 +33,9 @@ import filesDropped from "../actions/filesDropped";
 @connect((state) => ({
   datasetPathName: state.controls.datasetPathName,
   readyToLoad: state.datasets.ready,
+  metadata: state.metadata,
+  treeLoaded: state.tree.loaded,
+  browserDimensions: state.browserDimensions.browserDimensions
 }))
 class App extends React.Component {
   constructor(props) {
@@ -82,6 +87,7 @@ class App extends React.Component {
       this.props.dispatch(loadJSONs(this.context.router));
     }
   }
+
   render() {
     return (
       <g>
@@ -102,25 +108,37 @@ class App extends React.Component {
           onSetOpen={(a) => {this.setState({sidebarOpen: a});}}
           sidebarClassName={"sidebar"}
         >
-          <Background>
-            <Info
-              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            />
-            <TreeView
-              query={queryString.parse(this.context.router.history.location.search)}
-              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            />
-            <Map
-              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-              justGotNewDatasetRenderNewMap={false}
-            />
-            <Entropy
-              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            />
-            <Footer
-              sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-            />
-          </Background>
+          {
+            (!this.props.treeLoaded || !this.props.metadata.metadata) ? (
+              <img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${this.props.browserDimensions.height / 2 - 100}px`}}/>
+            ) : (
+              <Background>
+                <Info
+                  sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+                />
+                {this.props.metadata.metadata.panels.indexOf("tree") === -1 ? null : (
+                  <TreeView
+                    query={queryString.parse(this.context.router.history.location.search)}
+                    sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+                  />
+                )}
+                {this.props.metadata.metadata.panels.indexOf("map") === -1 ? null : (
+                  <Map
+                    sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+                    justGotNewDatasetRenderNewMap={false}
+                  />
+                )}
+                {this.props.metadata.metadata.panels.indexOf("entropy") === -1 ? null : (
+                  <Entropy
+                    sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+                  />
+                )}
+                <Footer
+                  sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+                />
+              </Background>
+            )
+          }
         </Sidebar>
       </g>
     );

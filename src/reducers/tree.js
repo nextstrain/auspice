@@ -50,6 +50,10 @@ const Tree = (state = getDefaultState(), action) => {
         loaded: true,
         version: state.version + 1
       });
+    case types.DATA_INVALID:
+      return Object.assign({}, state, {
+        loaded: false
+      });
     case types.CHANGE_TREE_ROOT_IDX:
       return Object.assign({}, state, {
         idxOfInViewRootNode: action.idxOfInViewRootNode

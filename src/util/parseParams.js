@@ -37,7 +37,7 @@ const parseParams = (path, datasets) => {
       // elemType will be "pathogen", "lineage" or "segment"
       if (typeof datasetSlice[elemType][elem] === "undefined") {
         // the elem (the param requested) is NOT available in the dataset. BAIL.
-        console.log(elem, " not found at level of ", elemType);
+        console.warn("in manifest, ", elem, " not found at level of ", elemType);
         config.valid = false;
         return config;
       }

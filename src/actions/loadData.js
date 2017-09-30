@@ -4,6 +4,7 @@ import { updateColors } from "./colors";
 import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { turnURLtoDataPath } from "../util/urlHelpers";
 import { charonAPIAddress } from "../util/globals";
+import { errorNotification } from "./notifications";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {
@@ -84,8 +85,23 @@ const populateEntropyStore = (paths) => {
   };
 };
 
-const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
-  return (dispatch) => {
+export const loadJSONs = (router) => { // eslint-disable-line import/prefer-default-export
+  return (dispatch, getState) => {
+
+    const { datasets } = getState();
+    if (!datasets.ready) {
+      console.error("Attempted to fetch JSONs before Charon returned initial data.");
+      return;
+    }
+
+    dispatch({type: types.DATA_INVALID});
+    const data_path = turnURLtoDataPath(router, {pathogen: datasets.pathogen});
+    const paths = {
+      meta: charonAPIAddress + "request=json&path=" + data_path + "_meta.json",
+      tree: charonAPIAddress + "request=json&path=" + data_path + "_tree.json",
+      seqs: charonAPIAddress + "request=json&path=" + data_path + "_sequences.json",
+      entropy: charonAPIAddress + "request=json&path=" + data_path + "_entropy.json"
+    };
     const metaJSONpromise = fetch(paths.meta)
       .then((res) => res.json());
     const treeJSONpromise = fetch(paths.tree)
@@ -114,41 +130,27 @@ const loadMetaAndTreeAndSequencesJSONs = (paths, router) => {
         dispatch(updateColors());
         /* validate the reducers */
         dispatch({type: types.DATA_VALID});
+
+        /* now load the secondary things */
+        if (values[0].panels.indexOf("entropy") !== -1) {
+          dispatch(populateEntropyStore(paths));
+        }
+
       })
       .catch((err) => {
         /* note that this catches both 404 type errors AND
         any error from the reducers AND, confusingly,
         errors from the lifecycle methods of components
         that run while in the middle of this thunk */
+        dispatch(errorNotification({
+          message: "Couldn't load data JSONs",
+          details: router.history.location.pathname.replace(/^\//, '') + " doesn't exist."
+        }));
+        router.history.push({pathname: '/', search: ''});
         console.error("loadMetaAndTreeJSONs error:", err);
         // dispatch error notification
         // but, it would seem, you can't have the reducer return AND
         // also get a notification dispatched :(
       });
-  };
-};
-
-export const loadJSONs = (router) => { // eslint-disable-line import/prefer-default-export
-  return (dispatch, getState) => {
-
-    const { datasets } = getState();
-    if (!datasets.ready) {
-      console.error("Attempted to fetch JSONs before Charon returned initial data.");
-      return;
-    }
-
-    dispatch({type: types.DATA_INVALID});
-    const data_path = turnURLtoDataPath(router, {pathogen: datasets.pathogen});
-    const JSONpaths = {
-      meta: charonAPIAddress + "request=json&path=" + data_path + "_meta.json",
-      tree: charonAPIAddress + "request=json&path=" + data_path + "_tree.json",
-      seqs: charonAPIAddress + "request=json&path=" + data_path + "_sequences.json",
-      entropy: charonAPIAddress + "request=json&path=" + data_path + "_entropy.json"
-    };
-    dispatch(loadMetaAndTreeAndSequencesJSONs(JSONpaths, router));
-    /* subsequent JSON loading is *not* essential to the main functionality */
-    /* while nextstrain is limited to ebola & zika, frequencies are not needed */
-    // dispatch(populateFrequenciesStore(data_path));
-    dispatch(populateEntropyStore(JSONpaths));
   };
 };
