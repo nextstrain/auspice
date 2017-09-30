@@ -13,8 +13,7 @@ import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
 const shouldPanelBeExpanded = (props) => {
   const filtersOn = !!Object.keys(props.filters).filter((d) => props.filters[d].length > 0).length;
   const branchSelected = props.idxOfInViewRootNode !== 0;
-  const datesModified = props.dateMin !== props.absoluteDateMin || props.dateMax !== props.absoluteDateMax;
-  return filtersOn || branchSelected || datesModified;
+  return filtersOn || branchSelected;
 };
 
 const resetTreeButton = (dispatch) => {
@@ -33,10 +32,6 @@ const resetTreeButton = (dispatch) => {
   return {
     browserDimensions: state.browserDimensions.browserDimensions,
     filters: state.controls.filters,
-    dateMin: state.controls.dateMin,
-    dateMax: state.controls.dateMax,
-    absoluteDateMin: state.controls.absoluteDateMin,
-    absoluteDateMax: state.controls.absoluteDateMax,
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
     metadata: state.metadata.metadata,
     nodes: state.tree.nodes,
@@ -263,24 +258,14 @@ class Info extends React.Component {
                     .filter((n) => this.props.filters[n].length > 0)
                     .map((n) => this.summariseNonAuthorFilter(n))
                   }
-                  {/* dates restricted? */}
-                  { this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
-                    this.props.dateMin !== this.props.absoluteDateMin && this.props.dateMax !== this.props.absoluteDateMax ?
-                      ` Date restricted to between ${this.props.dateMin} & ${this.props.dateMax}.` :
-                      this.props.dateMin !== this.props.absoluteDateMin ?
-                        ` Restriced to sequences after ${this.props.dateMin}.` : ` Restriced to sequences before ${this.props.dateMax}.`
-                  }
                   {/* Clear all filters (if applicable!) */}
-                  {filtersWithValues.length || this.props.dateMin !== this.props.absoluteDateMin || this.props.dateMax !== this.props.absoluteDateMax ? (
+                  {filtersWithValues.length ? (
                     <div
                       className={`select-item active-clickable`}
                       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
                       onClick={() => {
                         if (filtersWithValues.length) {
                           filtersWithValues.forEach((n) => this.props.dispatch(applyFilterQuery(n, [], 'set')));
-                        }
-                        if (this.props.dateMin !== this.props.absoluteDateMin || this.props.dateMax !== this.props.absoluteDateMax) {
-                          this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
                         }
                       }}
                     >
