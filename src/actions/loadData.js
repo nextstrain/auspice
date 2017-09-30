@@ -4,6 +4,7 @@ import { updateColors } from "./colors";
 import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { turnURLtoDataPath } from "../util/urlHelpers";
 import { charonAPIAddress } from "../util/globals";
+import { errorNotification } from "./notifications";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {
@@ -141,6 +142,11 @@ export const loadJSONs = (router) => { // eslint-disable-line import/prefer-defa
         any error from the reducers AND, confusingly,
         errors from the lifecycle methods of components
         that run while in the middle of this thunk */
+        dispatch(errorNotification({
+          message: "Couldn't load data JSONs",
+          details: router.history.location.pathname.replace(/^\//, '') + " doesn't exist."
+        }));
+        router.history.push({pathname: '/', search: ''});
         console.error("loadMetaAndTreeJSONs error:", err);
         // dispatch error notification
         // but, it would seem, you can't have the reducer return AND

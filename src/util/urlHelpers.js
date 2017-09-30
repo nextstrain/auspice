@@ -69,7 +69,7 @@ export const turnURLtoDataPath = (router, datasets) => {
   if (parsedParams.valid) {
     return makeDataPathFromParsedParams(parsedParams);
   }
-  return undefined;
+  return router.history.location.pathname.replace(/^\//, '').replace(/\/$/, '').replace('/', '_');
 };
 
 export const determineColorByGenotypeType = (colorBy) => {
