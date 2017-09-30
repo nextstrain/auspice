@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
+import { enableDataDownload } from "../../util/globals";
 import { prettyString } from "../../util/stringHelpers";
 import computeResponsive from "../../util/computeResponsive";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
@@ -248,8 +249,8 @@ class Footer extends React.Component {
             {this.getMaintainer()}
             {dot}
             {this.getUpdated()}
-            {dot}
-            {this.downloadDataButton()}
+            {enableDataDownload ? dot : <div/>}
+            {enableDataDownload ? this.downloadDataButton() : <div/>}
           </Flex>
         </div>
       </div>

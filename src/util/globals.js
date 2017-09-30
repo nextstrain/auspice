@@ -57,6 +57,7 @@ export const mediumTransitionDuration = 700; // in milliseconds
 export const slowTransitionDuration = 1400; // in milliseconds
 export const enableAnimationDisplay = true;
 export const enableAnimationPerfTesting = false;
+export const enableDataDownload = false;
 export const animationWindowWidth = 0.075; // width of animation window relative to date slider
 export const animationTick = 50; // animation tick in milliseconds
 export const HIColorDomain = genericDomain.map((d) => {
