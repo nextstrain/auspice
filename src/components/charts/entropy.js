@@ -201,7 +201,9 @@ class Entropy extends React.Component {
     chart.update({aa: props.mutType === "aa"}); // why is this necessary straight after an initial render?!
   }
   componentDidMount() {
-    this.setUp(this.props);
+    if (this.props.loaded) {
+      this.setUp(this.props);
+    }
   }
   componentWillReceiveProps(nextProps) {
     if (!nextProps.loaded) {
