@@ -14,16 +14,18 @@ export const brandColor = "#5DA8A3"; // #5DA8A3 (green) or #5097BA (blue)
 export const sidebarColor = "#373D48";
 
 // http://stackoverflow.com/questions/1895476/how-to-style-a-select-dropdown-with-css-only-without-javascript
-export const select = {
-  background: "transparent",
+export const sidebarField = {
+  backgroundColor: "#30353F",
   fontFamily: dataFont,
-  width: controlsWidth,
+  width: controlsWidth - 13,
+  borderSpacing: 0,
   fontSize: 14,
-  border: "1px solid #ccc",
-  height: 34,
+  paddingLeft: "10px",
+  border: "1px solid #222",
+  height: 36,
   appearance: "none",
-  borderRadius: 2,
-  color: darkGrey,
+  borderRadius: "4px",
+  color: lightGrey,
   fontWeight: 400,
   marginBottom: "3px"
 };
