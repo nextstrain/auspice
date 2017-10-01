@@ -23,7 +23,8 @@ class GeoResolution extends React.Component {
     return {
       base: {
         marginBottom: 10,
-        width: controlsWidth
+        width: controlsWidth,
+        fontSize: 14     
       }
     };
   }

@@ -8,7 +8,8 @@ export const dataFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const lighterGrey = "rgb(200, 200, 200)";
 export const darkGrey = "#333";
 export const medGrey = "#888";
-export const lightGrey = "#CCC";
+export const lightGrey = "#D3D3D3";
+export const extraLightGrey = "#F1F1F1";
 export const brandColor = "#5DA8A3"; // #5DA8A3 (green) or #5097BA (blue)
 export const sidebarColor = "#373D48";
 

@@ -26,7 +26,8 @@ class ChooseDatasetSelect extends React.Component {
   getStyles() {
     return {
       base: {
-        width: controlsWidth
+        width: controlsWidth,
+        fontSize: 14
       }
     };
   }

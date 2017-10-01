@@ -90,7 +90,7 @@ th {
   width: 15px;
   left: 4px;
   bottom: 3px;
-  background-color: white;
+  background-color: #F1F1F1;
   -webkit-transition: .4s;
   transition: .4s;
 }
