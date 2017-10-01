@@ -69,6 +69,9 @@ class Controls extends React.Component {
         {header("Color By")}
         <ColorBy/>
 
+        {header("Panel Layout")}
+        <PanelLayout/>
+
         {header("Tree Options")}
 
         <SelectLabel text="Layout"/>
@@ -81,10 +84,6 @@ class Controls extends React.Component {
         <SelectLabel text="Geographic resolution"/>
         <GeoResolution/>
         {enableAnimationDisplay ? <MapAnimationControls/> : null}
-
-        {header("Layout Options")}
-        <SelectLabel text="Panel layout"/>
-        <PanelLayout/>
 
       </Flex>
     );
