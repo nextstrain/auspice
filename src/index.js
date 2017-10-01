@@ -19,6 +19,7 @@ import "./css/bootstrapCustomized.css";
 import "./css/static.css";
 import "./css/notifications.css";
 import "./css/boxed.css";
+import "./css/select.css";
 
 /* google analytics */
 ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-2");
