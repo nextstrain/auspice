@@ -3,17 +3,16 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { applyFilterQuery, changeDateFilter } from "../../actions/treeProperties";
+import { applyFilterQuery } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton } from "../framework/footer";
-import Toggle from "../controls/toggle";
 import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
 
 const resetTreeButton = (dispatch) => {
   return (
     <div
-      className={`select-item active-clickable`}
+      className={`boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => dispatch({type: CHANGE_TREE_ROOT_IDX, idxOfInViewRootNode: 0})}
     >
@@ -225,7 +224,7 @@ class Info extends React.Component {
                 {/* Clear all filters (if applicable!) */}
                 {filtersWithValues.length ? (
                   <div
-                    className={`select-item active-clickable`}
+                    className={`boxed-item active-clickable`}
                     style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
                     onClick={() => {
                       if (filtersWithValues.length) {
