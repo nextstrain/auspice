@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import ChooseVirusSelect from "./choose-virus-select";
+import ChooseDatasetSelect from "./choose-dataset-select";
 import parseParams from "../../util/parseParams";
 
 /* not sure if these functions are necessary, really. If so, i'll
@@ -22,7 +22,7 @@ const tidyUpPathname = function (pathname) {
     pathogen: state.datasets.pathogen
   };
 })
-class ChooseVirus extends React.Component {
+class ChooseDataset extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -62,7 +62,7 @@ class ChooseVirus extends React.Component {
         const options = Object.keys(level[fields[vi]]).filter((d) => d !== "default");
         selectors.push((
           <div key={vi} style={styles.base}>
-            <ChooseVirusSelect
+            <ChooseDatasetSelect
               title={"Choose " + fields[vi]}
               choice_tree={choices.slice(0, vi)}
               selected = {choices[vi]}
@@ -83,4 +83,4 @@ class ChooseVirus extends React.Component {
   }
 }
 
-export default ChooseVirus;
+export default ChooseDataset;
