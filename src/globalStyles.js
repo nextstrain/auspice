@@ -45,7 +45,8 @@ export const materialButton = {
   fontWeight: 400,
   textTransform: "uppercase",
   fontSize: 14,
-  verticalAlign: "top"
+  verticalAlign: "top",
+  outline: 0
 };
 
 export const materialButtonSelected = {
@@ -64,7 +65,7 @@ export const materialButtonSelected = {
   textTransform: "uppercase",
   fontSize: 14,
   verticalAlign: "top",
-  cursor: "default"
+  outline: 0
 };
 
 export const materialButtonOutline = {

@@ -57,6 +57,9 @@ class ColorBy extends React.Component {
     } else {
       // don't update colorBy yet, genotype still needs to be specified
       this.setState({colorBySelected: "gt"});
+      const gene = this.state.geneSelected;
+      const position = this.state.positionSelected;
+      this.setGenotypeColoring(gene, position);
     }
   }
 
@@ -84,7 +87,10 @@ class ColorBy extends React.Component {
         clearable={false}
         multi={false}
         onChange={(opt) => {
-          this.setState({geneSelected: opt.value});
+          const gene = opt.value;
+          const position = this.state.positionSelected;
+          this.setState({geneSelected: gene});
+          this.setGenotypeColoring(gene, position);
         }}
       />
     );
@@ -107,8 +113,10 @@ class ColorBy extends React.Component {
           placeholder={this.state.geneSelected + " position..."}
           value={this.state.positionSelected}
           onChange={(e) => {
-            this.setState({positionSelected: e.target.value});
-            this.setGenotypeColorByFromInput(e.target.value);
+            const gene = this.state.geneSelected;
+            const position = e.target.value;
+            this.setState({positionSelected: position});
+            this.setGenotypeColoring(gene, position);
           }}
         />
       );
@@ -121,13 +129,12 @@ class ColorBy extends React.Component {
     return String(n) === str && n >= 0;
   }
 
-  setGenotypeColorByFromInput(position) {
+  setGenotypeColoring(gene, position) {
     // check if this is any sort of integer
     if (!this.isNormalInteger(position)) {
       return;
     }
     // check if integer is in range
-    const gene = this.state.geneSelected;
     if (parseInt(position, 10) < 1 || parseInt(position, 10) > this.props.geneLength[gene]) {
       return;
     }
