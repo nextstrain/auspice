@@ -3,7 +3,7 @@ import React from "react";
 export const RectangularTree = ({stroke = "black", width = 30}) => {
   return (
     <svg width={width} height={width + 5}>
-      <g transform="translate(0,5)">
+      <g transform="translate(0,2)">
         <svg width={width} height={width} viewBox="16 19 27 22">
           <g id="Group" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd" transform="translate(17.000000, 20.000000)">
             <polyline id="Path-3" stroke={stroke} points="2.94117647 12.8571429 2.94117647 18.6083984 17.8459616 18.6083984 17.8459616 16.0260882 24.870031 16.0260882"/>
@@ -22,7 +22,7 @@ export const RectangularTree = ({stroke = "black", width = 30}) => {
 export const Clock = ({stroke = "black", width = 30}) => {
   return (
     <svg width={width} height={width + 5}>
-      <g transform="translate(0,7)">
+      <g transform="translate(0,4)">
         <svg width={width} height={width} viewBox="0 0 30 30 ">
           <g id="Group" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd" transform="translate(17.000000, 20.000000)">
             <polyline id="Path-3" stroke={stroke} points="-15 5 -15 -25 "/>
@@ -43,7 +43,7 @@ export const Clock = ({stroke = "black", width = 30}) => {
 export const RadialTree = ({stroke = "black", width = 30}) => {
   return (
     <svg width={width} height={width + 5}>
-      <g transform="translate(0,5)">
+      <g transform="translate(0,0)">
         <svg width={width} height={width} viewBox="14 14 25 26" >
           <g id="Group" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd" transform="translate(15.000000, 15.000000)">
             <path d="M15,15 L17.6450195,15" id="Path-12" stroke={stroke}/>
@@ -61,7 +61,7 @@ export const RadialTree = ({stroke = "black", width = 30}) => {
 export const UnrootedTree = ({stroke = "black", width = 30}) => {
   return (
     <svg width={width} height={width + 5}>
-      <g transform="translate(0,5)">
+      <g transform="translate(0,2)">
         <svg width={width} height={width} viewBox="106 49 150 118">
           <polyline id="Path-2" stroke={stroke} strokeWidth="4" fill="none" points="108 77 125.182237 87.8599894 133.381156 119.402591 111.867082 144.368016"/>
           <path d="M125.2,87.5 L137.624777,70" id="Path-3" stroke={stroke} strokeWidth="4" fill="none"/>
@@ -92,15 +92,36 @@ export const Meta = ({stroke = "black", width = 30}) => {
   );
 };
 
-export const Panels = ({stroke = "black", width = 30}) => {
+// grid v2
+// <rect fill="none" stroke={stroke} x="1" y="1" width="7" height="25"/>
+// <rect fill="none" stroke={stroke} x="8" y="1" width="10" height="17"/>
+// <rect fill="none" stroke={stroke} x="18" y="1" width="10" height="17"/>
+// <rect fill="none" stroke={stroke} x="8" y="18" width="20" height="8"/>
+
+export const PanelsGrid = ({stroke = "black", width = 30}) => {
   return (
     <svg width={width} height={width + 5}>
-      <g transform="translate(0,7)">
+      <g transform="translate(0,6)">
         <svg width={width} height={width} viewBox="0 0 30 30 ">
           <g id="Group" stroke="none" strokeWidth="1" fillRule="evenodd">
-            <rect fill={stroke} x="1.5" y="1.7" width="12.4" height="16.8"/>
-            <rect fill={stroke} x="15.7" y="1.7" width="12.4" height="16.8"/>
-            <rect fill={stroke} x="1.5" y="19.9" width="26.6" height="8.4"/>
+            <rect fill="none" stroke={stroke} x="1" y="1" width="14" height="17"/>
+            <rect fill="none" stroke={stroke} x="15" y="1" width="14" height="17"/>
+            <rect fill="none" stroke={stroke} x="1" y="18" width="28" height="8"/>
+          </g>
+        </svg>
+      </g>
+    </svg>
+  );
+};
+
+export const PanelsFull = ({stroke = "black", width = 30}) => {
+  return (
+    <svg width={width} height={width + 5}>
+      <g transform="translate(0,6)">
+        <svg width={width} height={width} viewBox="0 0 30 30 ">
+          <g id="Group" stroke="none" strokeWidth="1" fillRule="evenodd">
+            <rect fill="none" stroke={stroke} x="1" y="1" width="7" height="25"/>
+            <rect fill="none" stroke={stroke} x="8" y="1" width="20" height="25"/>
           </g>
         </svg>
       </g>

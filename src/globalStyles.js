@@ -8,19 +8,23 @@ export const dataFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const lighterGrey = "rgb(200, 200, 200)";
 export const darkGrey = "#333";
 export const medGrey = "#888";
-export const lightGrey = "#CCC";
+export const lightGrey = "#D3D3D3";
+export const extraLightGrey = "#F1F1F1";
 export const brandColor = "#5097BA"; // #5DA8A3 (green) or #5097BA (blue)
+export const sidebarColor = "#F2F2F2"; // #F4F4F4
 
 // http://stackoverflow.com/questions/1895476/how-to-style-a-select-dropdown-with-css-only-without-javascript
-export const select = {
-  background: "transparent",
+export const sidebarField = {
+  backgroundColor: "#FFF",
   fontFamily: dataFont,
-  width: controlsWidth,
+  width: controlsWidth - 13,
+  borderSpacing: 0,
   fontSize: 14,
+  paddingLeft: "10px",
   border: "1px solid #ccc",
-  height: 34,
+  height: 36,
   appearance: "none",
-  borderRadius: 2,
+  borderRadius: "4px",
   color: darkGrey,
   fontWeight: 400,
   marginBottom: "3px"
@@ -28,38 +32,45 @@ export const select = {
 
 export const materialButton = {
   border: "0px",
-  backgroundColor: "#FFFFFF",
-  margin: 5,
+  backgroundColor: "inherit",
+  marginLeft: 0,
+  marginTop: 5,
+  marginRight: 10,
+  marginBottom: 5,
   borderRadius: 2,
   cursor: "pointer",
-  padding: 5,
+  padding: 2,
   fontFamily: dataFont,
-  color: medGrey,
+  color: darkGrey,
   fontWeight: 400,
   textTransform: "uppercase",
   fontSize: 14,
-  verticalAlign: "top"
+  verticalAlign: "top",
+  outline: 0
 };
 
 export const materialButtonSelected = {
   border: "0px",
-  backgroundColor: "#FFFFFF",
-  margin: 5,
+  backgroundColor: "inherit",
+  marginLeft: 0,
+  marginTop: 5,
+  marginRight: 10,
+  marginBottom: 5,
   borderRadius: 2,
   cursor: "pointer",
-  padding: 5,
+  padding: 2,
   fontFamily: dataFont,
   color: brandColor,
   fontWeight: 400,
   textTransform: "uppercase",
   fontSize: 14,
   verticalAlign: "top",
-  cursor: "default"
+  outline: 0
 };
 
 export const materialButtonOutline = {
   border: "1px solid #CCC",
-  backgroundColor: "#FFFFFF",
+  backgroundColor: "inherit",
   borderRadius: 2,
   cursor: "pointer",
   paddingTop: 5,
@@ -83,16 +94,16 @@ export const titleStyles = {
     marginTop: 20,
     marginBottom: 10,
     fontWeight: 300,
-    color: medGrey
+    color: "#fff"
   },
   small: {
     fontFamily: headerFont,
     fontSize: 16,
     lineHeight: "28px",
-    marginTop: 20,
+    marginTop: 15,
     marginBottom: 10,
     fontWeight: 500,
-    color: medGrey
+    color: "#000"
   }
 };
 

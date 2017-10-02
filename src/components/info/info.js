@@ -3,23 +3,16 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { applyFilterQuery, changeDateFilter } from "../../actions/treeProperties";
+import { applyFilterQuery } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton } from "../framework/footer";
-import Toggle from "../controls/toggle";
 import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
-
-const shouldPanelBeExpanded = (props) => {
-  const filtersOn = !!Object.keys(props.filters).filter((d) => props.filters[d].length > 0).length;
-  const branchSelected = props.idxOfInViewRootNode !== 0;
-  return filtersOn || branchSelected;
-};
 
 const resetTreeButton = (dispatch) => {
   return (
     <div
-      className={`select-item active-clickable`}
+      className={`boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => dispatch({type: CHANGE_TREE_ROOT_IDX, idxOfInViewRootNode: 0})}
     >
@@ -42,11 +35,8 @@ const resetTreeButton = (dispatch) => {
 class Info extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {expanded: false};
   }
-  componentWillReceiveProps(nextProps) {
-    this.setState({expanded: shouldPanelBeExpanded(nextProps)});
-  }
+
   static propTypes = {
     sidebar: React.PropTypes.bool.isRequired,
     filters: React.PropTypes.object.isRequired,
@@ -59,15 +49,15 @@ class Info extends React.Component {
 
 
   getStyles(responsive) {
-    let fontSize = 36;
+    let fontSize = 32;
     if (this.props.browserDimensions.width < 1000) {
-      fontSize = 32;
+      fontSize = 30;
     }
     if (this.props.browserDimensions.width < 800) {
       fontSize = 28;
     }
     if (this.props.browserDimensions.width < 600) {
-      fontSize = 24;
+      fontSize = 26;
     }
     if (this.props.browserDimensions.width < 400) {
       fontSize = 24;
@@ -77,30 +67,20 @@ class Info extends React.Component {
         fontFamily: titleFont,
         fontSize: fontSize,
         marginLeft: 5,
-        marginTop: 5,
-        marginBottom: 10,
+        marginTop: 0,
+        marginBottom: 5,
         fontWeight: 300,
         color: darkGrey,
         letterSpacing: "-1px",
-        maxWidth: responsive.width - 50
-      },
-      titleSmall: {
-        fontFamily: titleFont,
-        fontSize: 18,
-        marginLeft: 5,
-        marginTop: 0,
-        marginBottom: 4,
-        fontWeight: 300,
-        color: darkGrey,
-        maxWidth: responsive.width - 50
+        maxWidth: responsive.width
       },
       n: {
         fontFamily: headerFont,
-        fontSize: 15,
+        fontSize: 14,
         lineHeight: 1.4,
         marginLeft: 10,
         marginTop: 5,
-        marginBottom: 10,
+        marginBottom: 5,
         fontWeight: 500,
         color: medGrey
       }
@@ -164,19 +144,28 @@ class Info extends React.Component {
           {" et al (n=" + this.props.metadata.author_info[v].n + ")"}
         </g>
       ),
-      title: prettyString(this.props.metadata.author_info[v].title)
+      longlabel: (
+        <g>
+          {prettyString(v, {stripEtAl: true})}
+          {" et al "}
+          {prettyString(this.props.metadata.author_info[v].title)}
+          {" (n=" + this.props.metadata.author_info[v].n + ")"}
+        </g>
+      )
     }));
     /* case 1 (no selected authors) has already been handled */
     if (nTotalAuthors === nSelectedAuthors) {
       return null;
     }
     /* case 2: a single author selected */
-    if (nSelectedAuthors === 1) {
+    if (nSelectedAuthors > 0 && nSelectedAuthors < 3) {
       return (
         <g>
           {"Data from "}
-          {displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", authorInfo[0].name, authorInfo[0].label, true)}
-          <span style={{fontWeight: 300}}>{`"${authorInfo[0].title}". `}</span>
+          {authorInfo.map((d) => (
+            displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.longlabel, true)
+          ))}
+          {". "}
         </g>
       );
     }
@@ -187,21 +176,10 @@ class Info extends React.Component {
         {authorInfo.map((d) => (
           displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.label, true)
         ))}
-        {`. `}
+        {". "}
       </g>
     );
   }
-
-  // toggle() {
-  //   return (
-  //     <Toggle
-  //       display
-  //       on={this.state.expanded}
-  //       callback={() => {this.setState({expanded: !this.state.expanded});}}
-  //       label=""
-  //     />
-  //   );
-  // }
 
   render() {
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
@@ -220,64 +198,49 @@ class Info extends React.Component {
     let title = "";
     if (this.props.metadata.title) {
       title = this.props.metadata.title;
-      if (!this.state.expanded) {
-        title += ` (n=${nSelectedSamples}/${nTotalSamples} genomes)`;
-      }
     }
     return (
-      <Card center>
-        <div style={{width: responsive.width, display: "inline-block"}}>
-          {/* <Toggle
-            display
-            on={this.state.expanded}
-            style={{
-              position: "absolute",
-              marginTop: 0,
-              paddingLeft: responsive.width - 40
-            }}
-            callback={() => {this.setState({expanded: !this.state.expanded});}}
-            label=""
-          /> */}
-          <div width={responsive.width} style={this.state.expanded ? styles.title : styles.titleSmall}>
+      <Card center infocard>
+        <div style={{width: responsive.width+34, display: "inline-block"}}>
+          <div width={responsive.width} style={styles.title}>
             {title}
           </div>
-          {(!this.state.expanded) ? null :
-            this.props.mapAnimationPlayPauseButton === "Pause" ? (
+          {this.props.mapAnimationPlayPauseButton === "Pause" ? (
+            <div width={responsive.width} style={styles.n}>
+              {`Map animation in progress (showing ${nSelectedSamples} of ${nTotalSamples} genomes).`}
+            </div>
+          ) :
+            (
               <div width={responsive.width} style={styles.n}>
-                {`Map animation in progress (showing ${nSelectedSamples} of ${nTotalSamples} genomes).`}
+                {`Showing ${nSelectedSamples} of ${nTotalSamples} genomes. `}
+                {/* Author filters */}
+                {this.summariseSelectedAuthors()}
+                {/* Summarise other filters */}
+                {Object.keys(this.props.filters)
+                  .filter((n) => n !== "authors")
+                  .filter((n) => this.props.filters[n].length > 0)
+                  .map((n) => this.summariseNonAuthorFilter(n))
+                }
+                {/* Clear all filters (if applicable!) */}
+                {filtersWithValues.length ? (
+                  <div
+                    className={`boxed-item active-clickable`}
+                    style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
+                    onClick={() => {
+                      if (filtersWithValues.length) {
+                        filtersWithValues.forEach((n) => this.props.dispatch(applyFilterQuery(n, [], 'set')));
+                      }
+                    }}
+                  >
+                    {"Reset all filters"}
+                  </div>
+                ) : null}
+                {/* branch selected message? (and button) */}
+                {this.props.idxOfInViewRootNode === 0 ? null :
+                  ` Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants.`}
+                {this.props.idxOfInViewRootNode === 0 ? null : resetTreeButton(this.props.dispatch)}
               </div>
-            ) :
-              (
-                <div width={responsive.width} style={styles.n}>
-                  {`Showing ${nSelectedSamples} of ${nTotalSamples} genomes. `}
-                  {/* Author filters */}
-                  {this.summariseSelectedAuthors()}
-                  {/* Summarise other filters */}
-                  {Object.keys(this.props.filters)
-                    .filter((n) => n !== "authors")
-                    .filter((n) => this.props.filters[n].length > 0)
-                    .map((n) => this.summariseNonAuthorFilter(n))
-                  }
-                  {/* Clear all filters (if applicable!) */}
-                  {filtersWithValues.length ? (
-                    <div
-                      className={`select-item active-clickable`}
-                      style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
-                      onClick={() => {
-                        if (filtersWithValues.length) {
-                          filtersWithValues.forEach((n) => this.props.dispatch(applyFilterQuery(n, [], 'set')));
-                        }
-                      }}
-                    >
-                      {"Reset all filters"}
-                    </div>
-                  ) : null}
-                  {/* branch selected message? (and button) */}
-                  {this.props.idxOfInViewRootNode === 0 ? null :
-                    ` Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants.`}
-                  {this.props.idxOfInViewRootNode === 0 ? null : resetTreeButton(this.props.dispatch)}
-                </div>
-              )
+            )
           }
         </div>
       </Card>

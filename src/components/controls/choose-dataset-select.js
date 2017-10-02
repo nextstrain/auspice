@@ -1,13 +1,14 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { select } from "../../globalStyles";
+import Select from "react-select";
+import { controlsWidth } from "../../util/globals";
 import { loadJSONs } from "../../actions/loadData";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { RESET_CONTROLS, MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 
 @connect() // to provide dispatch
-class ChooseVirusSelect extends React.Component {
+class ChooseDatasetSelect extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -21,15 +22,21 @@ class ChooseVirusSelect extends React.Component {
     title: PropTypes.string.isRequired,
     options: PropTypes.array.isRequired
   }
+
   getStyles() {
-    return { base: {} };
+    return {
+      base: {
+        width: controlsWidth,
+        fontSize: 14
+      }
+    };
   }
 
   // assembles a new path from the upstream choices and the new selection
   // downstream choices will be set to defaults in parseParams
-  createPath(e) {
+  createDataPath(dataset) {
     let p = (this.props.choice_tree.length > 0) ? "/" : "";
-    p += this.props.choice_tree.join("/") + "/" + e.target.value;
+    p += this.props.choice_tree.join("/") + "/" + dataset;
     return p;
   }
 
@@ -55,28 +62,38 @@ class ChooseVirusSelect extends React.Component {
     this.props.dispatch(loadJSONs(this.context.router));
   }
 
+  getDatasetOptions() {
+    let options = {};
+    if (this.props.options) {
+      options = this.props.options.map((opt) => {
+        return {
+          value: opt,
+          label: opt
+        };
+      });
+    }
+    return options;
+  }
+
   render() {
+    const styles = this.getStyles();
+    const datasetOptions = this.getDatasetOptions();
     return (
-      <select
-        style={select}
-        value={this.props.selected}
-        onChange={(e) => {
-          if (e.target.value === this.props.title) { return; }
-          this.changeDataset(this.createPath(e));
-        }}
-      >
-        <option key={"titleOption"}> {this.props.title} </option>
-        {
-          this.props.options.map((option, i) => {
-            return (
-              <option key={i}>
-                {option}
-              </option>);
-          })
-        }
-      </select>
+      <div style={styles.base}>
+        <Select
+          name="selectDataset"
+          id="selectDataset"
+          value={this.props.selected}
+          options={datasetOptions}
+          clearable={false}
+          multi={false}
+          onChange={(opt) => {
+            this.changeDataset(this.createDataPath(opt.value));
+          }}
+        />
+      </div>
     );
   }
 }
 
-export default ChooseVirusSelect;
+export default ChooseDatasetSelect;

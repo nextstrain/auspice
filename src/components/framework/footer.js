@@ -27,14 +27,14 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
     return (
       <div key={itemName} style={{display: "inline-block"}}>
         <div
-          className={'select-item-icon'}
+          className={'boxed-item-icon'}
           onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
           role="button"
           tabIndex={0}
         >
           {'\xD7'}
         </div>
-        <div className={"select-item active-with-icon"}>
+        <div className={"boxed-item active-with-icon"}>
           {display}
         </div>
       </div>
@@ -43,7 +43,7 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
   if (active) {
     return (
       <div
-        className={"select-item active-clickable"}
+        className={"boxed-item active-clickable"}
         key={itemName}
         onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
         role="button"
@@ -55,7 +55,7 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
   }
   return (
     <div
-      className={"select-item inactive"}
+      className={"boxed-item inactive"}
       key={itemName}
       onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
       role="button"
@@ -69,7 +69,7 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
 const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
   return (
     <div
-      className={`${outerClassName} select-item active-clickable`}
+      className={`${outerClassName} boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => {
         filterNames.forEach((n) => dispatch(applyFilterQuery(n, [], 'set')))

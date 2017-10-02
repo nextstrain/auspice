@@ -1,12 +1,9 @@
 import React from "react";
-// import TimeTree from "../framework/svg-time-tree";
-// import MutationTree from "../framework/svg-mutation-tree";
-import {materialButton, materialButtonSelected} from "../../globalStyles";
 import { connect } from "react-redux";
-import Toggle from "./toggle";
+import { materialButton, materialButtonSelected, brandColor, lightGrey, darkGrey } from "../../globalStyles";
+import * as icons from "../framework/svg-icons";
 import { CHANGE_PANEL_LAYOUT } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { toggleTemporalConfidence } from "../../actions/treeProperties";
 
 @connect((state) => {
   return {
@@ -34,6 +31,7 @@ class PanelLayouts extends React.Component {
     const styles = this.getStyles();
     return (
       <div style={styles.container}>
+        <icons.PanelsFull width={22} stroke={this.props.panelLayout === "full" ? brandColor : darkGrey}/>
         <button
           key={1}
           style={this.props.panelLayout === "full" ? materialButtonSelected : materialButton}
@@ -44,6 +42,7 @@ class PanelLayouts extends React.Component {
         >
           <span style={styles.title}> {"full"} </span>
         </button>
+        <icons.PanelsGrid width={22} stroke={this.props.panelLayout === "grid" ? brandColor : darkGrey}/>
         <button
           key={2}
           style={this.props.panelLayout === "grid" ? materialButtonSelected : materialButton}

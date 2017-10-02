@@ -110,7 +110,8 @@ class Entropy extends React.Component {
         horizontal: 1,
         vertical: 0.3,
         browserDimensions: p.browserDimensions,
-        sidebar: p.sidebar
+        sidebar: p.sidebar,
+        minHeight: 150
       });
       return {
         responsive,

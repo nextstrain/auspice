@@ -78,7 +78,7 @@ th {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: #888;
   -webkit-transition: .4s;
   transition: .4s;
 }
@@ -90,7 +90,7 @@ th {
   width: 15px;
   left: 4px;
   bottom: 3px;
-  background-color: white;
+  background-color: #FFF;
   -webkit-transition: .4s;
   transition: .4s;
 }

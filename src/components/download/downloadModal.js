@@ -80,7 +80,7 @@ class DownloadModal extends React.Component {
       ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, dataset, this.props.tree.nodes[0], true)],
       ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.strainCSV(this.props.dispatch, dataset, this.props.tree.nodes, this.props.tree.attrs)],
       ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorCSV(this.props.dispatch, dataset, this.props.metadata.metadata)],
-      ["Screenshot (SGV)", (<icons.Panels width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, dataset)]
+      ["Screenshot (SGV)", (<icons.PanelsGrid width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, dataset)]
     ];
     return (
       <div className="row">

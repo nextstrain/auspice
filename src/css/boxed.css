@@ -1,0 +1,71 @@
+
+/* http://jedwatson.github.io/react-select/ */
+
+.boxed-item {
+  margin: 0px 2px 0px 2px;
+  padding: 1px 2px 1px 2px;
+  color: #5097BA;
+}
+
+.boxed-item.active-with-icon {
+  background-color: #E9F2F6;
+  border-bottom-right-radius: 2px;
+  border-top-right-radius: 2px;
+  border: 1px solid #BDD8E5;
+  font-weight: 300;
+  cursor: "pointer";
+  display: inline-block;
+  border-width: 1;
+  margin: 0px 2px 0px 0px;
+}
+
+.boxed-item.active-clickable {
+  background-color: #E9F2F6;
+  border-radius: 2px;
+  border: 1px solid #BDD8E5;
+  font-weight: 300;
+  cursor: "pointer";
+  display: inline-block;
+  border-width: 1;
+  cursor: pointer;
+}
+
+.boxed-item.inactive {
+  font-weight: 300;
+  padding: 2px 3px 2px 3px; /* increase to mimic border */
+}
+
+.boxed-item.inactive:hover {
+  text-decoration: underline;
+}
+
+.boxed-item-icon {
+  cursor: pointer;
+  color: #5097BA;
+  border-bottom-left-radius: 2px;
+  border-top-left-radius: 2px;
+  border-width: 1px 0px 1px 1px;
+  border-style: solid;
+  border-color: #BDD8E5;
+  min-width: 15px;
+  background-color: #E9F2F6;
+  padding: 1px 0px 1px 2px;
+  margin: 0px 0px 0px 2px;
+  display: inline-block;
+  text-align: center;
+}
+
+.boxed-item-icon:hover, .boxed-item-icon:focus {
+  background-color: #d8eafd;
+  color: #0071e6;
+}
+
+.boxed-item.inactive:focus, .boxed-item-icon:focus, .active-clickable:focus {
+  outline:0;
+}
+
+div.inlineRight {
+  float: right;
+  margin: 0px 4px;
+  display: inline;
+}

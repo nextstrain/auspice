@@ -7,7 +7,7 @@ import ColorBy from "./color-by";
 import DateRangeInputs from "./date-range-inputs";
 import AnalysisDateSlider from "./analysis-date-slider";
 import ChooseLayout from "./choose-layout";
-import ChooseVirus from "./choose-virus";
+import ChooseDataset from "./choose-dataset";
 import ChooseMetric from "./choose-metric";
 import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
@@ -59,7 +59,7 @@ class Controls extends React.Component {
       >
 
         {header("Dataset")}
-        <ChooseVirus/>
+        <ChooseDataset/>
 
         {header("Date Range")}
         <DateRangeInputs/>
@@ -68,6 +68,9 @@ class Controls extends React.Component {
 
         {header("Color By")}
         <ColorBy/>
+
+        {header("Panel Layout")}
+        <PanelLayout/>
 
         {header("Tree Options")}
 
@@ -81,10 +84,6 @@ class Controls extends React.Component {
         <SelectLabel text="Geographic resolution"/>
         <GeoResolution/>
         {enableAnimationDisplay ? <MapAnimationControls/> : null}
-
-        {header("Layout Options")}
-        <SelectLabel text="Panel layout"/>
-        <PanelLayout/>
 
       </Flex>
     );

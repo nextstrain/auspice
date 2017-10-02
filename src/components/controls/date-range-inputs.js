@@ -7,7 +7,7 @@ import { modifyURLquery } from "../../util/urlHelpers";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
-import { headerFont, darkGrey } from "../../globalStyles";
+import { headerFont, lightGrey, darkGrey } from "../../globalStyles";
 
 @connect((state) => {
   return {

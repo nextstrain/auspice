@@ -1,67 +1,69 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import _keys from "lodash/keys";
-import { select } from "../../globalStyles";
+import Select from "react-select";
+import { controlsWidth } from "../../util/globals";
 import { CHANGE_GEO_RESOLUTION } from "../../actions/types";
 import { modifyURLquery } from "../../util/urlHelpers";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
-/* Why does this have colorBy set as state (here) and in redux?
-   it's for the case where we select genotype, then wait for the
-   base to be selected, so we modify state but not yet dispatch
-*/
-
 @connect((state) => {
   return {
     metadata: state.metadata.metadata,
-    geoResolution: state.controls.geoResolution,
+    geoResolution: state.controls.geoResolution
   };
 })
 class GeoResolution extends React.Component {
+
   static contextTypes = {
     router: PropTypes.object.isRequired
   }
+
   getStyles() {
     return {
       base: {
-        marginBottom: 10
+        marginBottom: 10,
+        width: controlsWidth,
+        fontSize: 14
       }
     };
   }
-  createResolutions() {
-    let resolutions = null;
 
+  getGeoResolutionOptions() {
+    let options = [];
     if (this.props.metadata) {
-      const resolutionKeys = _keys(this.props.metadata.geo)
-      resolutions = resolutionKeys.map((resolution, i) => {
-        return (
-          <option key={i} value={ resolution }>
-            { resolution.toLowerCase() }
-          </option>
-        )
-      })
+      options = Object.keys(this.props.metadata.geo).map((key) => {
+        return {
+          value: key,
+          label: key
+        };
+      });
     }
-    return resolutions;
+    return options;
   }
+
+  changeGeoResolution(resolution) {
+    analyticsControlsEvent("change-geo-resolution");
+    this.props.dispatch({ type: CHANGE_GEO_RESOLUTION, data: resolution });
+    modifyURLquery(this.context.router, {r: resolution}, true);
+  }
+
   render() {
-
     const styles = this.getStyles();
-
+    const geoResolutionOptions = this.getGeoResolutionOptions();
     return (
       <div style={styles.base}>
-        <select
+        <Select
+          name="selectGeoResolution"
+          id="selectGeoResolution"
           value={this.props.geoResolution}
-          style={select}
-          id="geoResolution"
-          onChange={(e) => {
-            analyticsControlsEvent("change-geo-resolution");
-            this.props.dispatch({ type: CHANGE_GEO_RESOLUTION, data: e.target.value });
-            modifyURLquery(this.context.router, {r: e.target.value}, true);
+          options={geoResolutionOptions}
+          clearable={false}
+          multi={false}
+          onChange={(opt) => {
+            this.changeGeoResolution(opt.value);
           }}
-        >
-        {this.createResolutions()}
-        </select>
+        />
       </div>
     );
   }
