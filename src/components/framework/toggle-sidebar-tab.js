@@ -9,7 +9,7 @@ const ToggleSidebarTab = ({open, handler}) => {
       onClick={handler}
       style={{
         width: 13,
-        height: 35,
+        height: 34,
         position: "fixed",
         top: 0,
         zIndex: 1001,

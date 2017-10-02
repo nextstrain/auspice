@@ -11,7 +11,7 @@ export const medGrey = "#888";
 export const lightGrey = "#D3D3D3";
 export const extraLightGrey = "#F1F1F1";
 export const brandColor = "#5097BA"; // #5DA8A3 (green) or #5097BA (blue)
-export const sidebarColor = "#F5F5F5"; // #F4F4F4
+export const sidebarColor = "#F2F2F2"; // #F4F4F4
 
 // http://stackoverflow.com/questions/1895476/how-to-style-a-select-dropdown-with-css-only-without-javascript
 export const sidebarField = {
