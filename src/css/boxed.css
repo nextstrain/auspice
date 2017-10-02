@@ -2,8 +2,8 @@
 /* http://jedwatson.github.io/react-select/ */
 
 .boxed-item {
-  margin: 0px 2px 0px 2px;
-  padding: 1px 2px 1px 2px;
+  margin: 1px 2px 1px 2px;
+  padding: 0px 2px 0px 2px;
   color: #5097BA;
 }
 
@@ -49,8 +49,8 @@
   border-color: #BDD8E5;
   min-width: 15px;
   background-color: #E9F2F6;
-  padding: 1px 0px 1px 2px;
-  margin: 0px 0px 0px 2px;
+  padding: 0px 0px 0px 2px;
+  margin: 1px 0px 1px 2px;
   display: inline-block;
   text-align: center;
 }

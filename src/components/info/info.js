@@ -63,6 +63,11 @@ class Info extends React.Component {
       fontSize = 24;
     }
     return {
+      base: {
+        width: responsive.width + 34,
+        display: "inline-block",
+        lineHeight: 1.4
+      },
       title: {
         fontFamily: titleFont,
         fontSize: fontSize,
@@ -77,7 +82,6 @@ class Info extends React.Component {
       n: {
         fontFamily: headerFont,
         fontSize: 14,
-        lineHeight: 1.4,
         marginLeft: 10,
         marginTop: 5,
         marginBottom: 5,
@@ -201,7 +205,7 @@ class Info extends React.Component {
     }
     return (
       <Card center infocard>
-        <div style={{width: responsive.width+34, display: "inline-block"}}>
+        <div style={styles.base}>
           <div width={responsive.width} style={styles.title}>
             {title}
           </div>

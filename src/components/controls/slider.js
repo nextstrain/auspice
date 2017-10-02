@@ -808,9 +808,9 @@ const styles = {
   handle: {
     fontSize: '0.9em',
     textAlign: 'center',
-    backgroundColor: "#FFF",
+    backgroundColor: "#FAFAFA",
     color: 'white',
-    border: '1px solid #222',
+    border: '1px solid #555',
     cursor: 'pointer',
     height: 12,
     width: 12,

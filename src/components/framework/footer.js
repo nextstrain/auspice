@@ -98,16 +98,16 @@ class Footer extends React.Component {
         footer: {
           textAlign: "justify",
           marginLeft: "30px",
-          // marginBottom: "30px",
-          // padding: "0px",
           paddingBottom: "30px",
           fontFamily: dataFont,
           fontSize: 15,
           fontWeight: 300,
-          color: medGrey
+          color: medGrey,
+          lineHeight: 1.4
         },
         citationList: {
-          marginTop: "10px"
+          marginTop: "10px",
+          lineHeight: 1.0
         },
         line: {
           marginTop: "20px",
