@@ -26,7 +26,7 @@ class Card extends React.Component {
         marginBottom: 5,
         fontWeight: 500,
         backgroundColor: "#FFFFFF",
-        borderTop: "thin solid #555"
+        borderTop: "thin solid #CCC"
       }
     };
   }

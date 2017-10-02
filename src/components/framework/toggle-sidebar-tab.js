@@ -1,5 +1,6 @@
 import React from "react";
 import { controlsWidth, controlsPadding } from "../../util/globals";
+import { sidebarColor, darkGrey } from "../../globalStyles";
 
 const ToggleSidebarTab = ({open, handler}) => {
 
@@ -12,9 +13,9 @@ const ToggleSidebarTab = ({open, handler}) => {
         position: "fixed",
         top: 0,
         zIndex: 1001,
-        color: "#fff",
-        backgroundColor: open ? "inherit" : "#696E76",
-        boxShadow: open ? "none" : "2px 2px 4px rgba(0, 0, 0, 0.15)", // from react-sidebar
+        color: darkGrey,
+        backgroundColor: open ? "inherit" : sidebarColor,
+        boxShadow: open ? "none" : "-2px -2px 4px -2px rgba(0, 0, 0, 0.15) inset", // from react-sidebar
         cursor: "pointer",
         paddingTop: 17,
         paddingLeft: open ? 1 : 4,

@@ -121,7 +121,7 @@ class Info extends React.Component {
   clearFilterButton(field) {
     return (
       <span
-        style={{cursor: "pointer", color: '#5DA8A3'}}
+        style={{cursor: "pointer", color: '#5097BA'}}
         key={field}
         onClick={() => this.props.dispatch(applyFilterQuery(field, []))}
         role="button"

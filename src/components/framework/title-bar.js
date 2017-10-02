@@ -40,13 +40,13 @@ class TitleBar extends React.Component {
         paddingRight: "8px",
         paddingTop: "20px",
         paddingBottom: "20px",
-        color: "#fff",
+        color: "#000",
         textDecoration: "none",
         fontSize: this.props.minified ? 12 : 16
       },
       title: {
         padding: "0px",
-        color: "#fff",
+        color: "#000",
         textDecoration: "none",
         fontSize: 20,
         fontWeight: 400
@@ -60,7 +60,7 @@ class TitleBar extends React.Component {
         cursor: "pointer",
         fontSize: this.props.minified ? 12 : 16,
         ':hover': {
-          color: "#5DA8A3"
+          color: "#5097BA"
         }
       },
       inactive: {
@@ -68,7 +68,7 @@ class TitleBar extends React.Component {
         paddingRight: "8px",
         paddingTop: "20px",
         paddingBottom: "20px",
-        color: "#5DA8A3",
+        color: "#5097BA",
         textDecoration: "none",
         fontSize: this.props.minified ? 12 : 16
       },
@@ -105,7 +105,7 @@ class TitleBar extends React.Component {
   }
 
   getLink(name, url, selected, styles) {
-    const linkCol = this.props.minified ? "#fff" : darkGrey;
+    const linkCol = this.props.minified ? "#000" : darkGrey;
     return (
       selected ?
         <div style={{ ...{color: linkCol}, ...styles.inactive }}>{name}</div> :

@@ -10,22 +10,22 @@ export const darkGrey = "#333";
 export const medGrey = "#888";
 export const lightGrey = "#D3D3D3";
 export const extraLightGrey = "#F1F1F1";
-export const brandColor = "#5DA8A3"; // #5DA8A3 (green) or #5097BA (blue)
-export const sidebarColor = "#373D48";
+export const brandColor = "#5097BA"; // #5DA8A3 (green) or #5097BA (blue)
+export const sidebarColor = "#F5F5F5"; // #F4F4F4
 
 // http://stackoverflow.com/questions/1895476/how-to-style-a-select-dropdown-with-css-only-without-javascript
 export const sidebarField = {
-  backgroundColor: "#30353F",
+  backgroundColor: "#FFF",
   fontFamily: dataFont,
   width: controlsWidth - 13,
   borderSpacing: 0,
   fontSize: 14,
   paddingLeft: "10px",
-  border: "1px solid #222",
+  border: "1px solid #ccc",
   height: 36,
   appearance: "none",
   borderRadius: "4px",
-  color: lightGrey,
+  color: darkGrey,
   fontWeight: 400,
   marginBottom: "3px"
 };
@@ -41,7 +41,7 @@ export const materialButton = {
   cursor: "pointer",
   padding: 2,
   fontFamily: dataFont,
-  color: lightGrey,
+  color: darkGrey,
   fontWeight: 400,
   textTransform: "uppercase",
   fontSize: 14,
@@ -103,7 +103,7 @@ export const titleStyles = {
     marginTop: 15,
     marginBottom: 10,
     fontWeight: 500,
-    color: "#fff"
+    color: "#000"
   }
 };
 

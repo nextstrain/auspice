@@ -4,14 +4,14 @@
 .boxed-item {
   margin: 0px 2px 0px 2px;
   padding: 1px 2px 1px 2px;
-  color: #5DA8A3;
+  color: #5097BA;
 }
 
 .boxed-item.active-with-icon {
-  background-color: #EBF4F4;
+  background-color: #E9F2F6;
   border-bottom-right-radius: 2px;
   border-top-right-radius: 2px;
-  border: 1px solid #C2DEDD;
+  border: 1px solid #BDD8E5;
   font-weight: 300;
   cursor: "pointer";
   display: inline-block;
@@ -20,9 +20,9 @@
 }
 
 .boxed-item.active-clickable {
-  background-color: #EBF4F4;
+  background-color: #E9F2F6;
   border-radius: 2px;
-  border: 1px solid #C2DEDD;
+  border: 1px solid #BDD8E5;
   font-weight: 300;
   cursor: "pointer";
   display: inline-block;
@@ -41,14 +41,14 @@
 
 .boxed-item-icon {
   cursor: pointer;
-  color: #5DA8A3;
+  color: #5097BA;
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
   border-width: 1px 0px 1px 1px;
   border-style: solid;
-  border-color: #C2DEDD;
+  border-color: #BDD8E5;
   min-width: 15px;
-  background-color: #EBF4F4;
+  background-color: #E9F2F6;
   padding: 1px 0px 1px 2px;
   margin: 0px 0px 0px 2px;
   display: inline-block;

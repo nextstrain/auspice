@@ -7,7 +7,7 @@ import { modifyURLquery } from "../../util/urlHelpers";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
-import { headerFont, lightGrey } from "../../globalStyles";
+import { headerFont, lightGrey, darkGrey } from "../../globalStyles";
 
 @connect((state) => {
   return {
@@ -41,7 +41,7 @@ class DateRangeInputs extends React.Component {
         margin: "0px 0px 5px 0px",
         fontSize: 12,
         fontWeight: 400,
-        color: lightGrey
+        color: darkGrey
       }
     };
   }

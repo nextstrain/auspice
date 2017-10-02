@@ -1,5 +1,5 @@
 import React from "react";
-import { headerFont, lightGrey } from "../../globalStyles";
+import { headerFont, lightGrey, darkGrey } from "../../globalStyles";
 
 const SelectLabel = ({text, extraStyles = {}}) => {
   return (
@@ -9,7 +9,7 @@ const SelectLabel = ({text, extraStyles = {}}) => {
         margin: "0px 0px 5px 0px",
         fontSize: 12,
         fontWeight: 400,
-        color: lightGrey
+        color: darkGrey
       }, extraStyles)}
     >
       {text}
