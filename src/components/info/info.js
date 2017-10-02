@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { applyFilterQuery } from "../../actions/treeProperties";
+import { applyFilterQuery, changeDateFilter } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton } from "../framework/footer";
 import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
@@ -21,6 +21,27 @@ const resetTreeButton = (dispatch) => {
   );
 };
 
+const months = {
+  '01': 'January',
+  '02': 'February',
+  '03': 'March',
+  '04': 'April',
+  '05': 'May',
+  '06': 'June',
+  '07': 'July',
+  '08': 'August',
+  '09': 'September',
+  '10': 'October',
+  '11': 'November',
+  '12': 'December'
+};
+
+const styliseDateRange = (dateStr) => {
+  // 2012-01-22
+  const fields = dateStr.split('-');
+  return `${months[fields[1]]} ${fields[0]}`;
+};
+
 @connect((state) => {
   return {
     browserDimensions: state.browserDimensions.browserDimensions,
@@ -29,7 +50,11 @@ const resetTreeButton = (dispatch) => {
     metadata: state.metadata.metadata,
     nodes: state.tree.nodes,
     idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
-    visibility: state.tree.visibility
+    visibility: state.tree.visibility,
+    dateMin: state.controls.dateMin,
+    dateMax: state.controls.dateMax,
+    absoluteDateMin: state.controls.absoluteDateMin,
+    absoluteDateMax: state.controls.absoluteDateMax
   };
 })
 class Info extends React.Component {
@@ -221,6 +246,13 @@ class Info extends React.Component {
                   .filter((n) => this.props.filters[n].length > 0)
                   .map((n) => this.summariseNonAuthorFilter(n))
                 }
+                {/* dates restricted? */}
+                { this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
+                  this.props.dateMin !== this.props.absoluteDateMin && this.props.dateMax !== this.props.absoluteDateMax ?
+                    ` Date restricted to between ${styliseDateRange(this.props.dateMin)} & ${styliseDateRange(this.props.dateMax)}.` :
+                    this.props.dateMin !== this.props.absoluteDateMin ?
+                      ` Restriced to sequences after ${styliseDateRange(this.props.dateMin)}.` : ` Restriced to sequences before ${styliseDateRange(this.props.dateMax)}.`
+                }
                 {/* Clear all filters (if applicable!) */}
                 {filtersWithValues.length ? (
                   <div
@@ -229,6 +261,9 @@ class Info extends React.Component {
                     onClick={() => {
                       if (filtersWithValues.length) {
                         filtersWithValues.forEach((n) => this.props.dispatch(applyFilterQuery(n, [], 'set')));
+                      }
+                      if (this.props.dateMin !== this.props.absoluteDateMin || this.props.dateMax !== this.props.absoluteDateMax) {
+                        this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
                       }
                     }}
                   >
