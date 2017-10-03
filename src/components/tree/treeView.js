@@ -162,7 +162,7 @@ class TreeView extends React.Component {
     const grid = this.props.panelLayout === "grid"; /* add a check here for min browser width tbd */
     const responsive = computeResponsive({
       horizontal: grid ? 0.5 : 1,
-      vertical: grid ? 0.7 : 0.9,
+      vertical: grid ? 0.7 : 0.88,
       browserDimensions: this.props.browserDimensions,
       sidebar: this.props.sidebar
     });

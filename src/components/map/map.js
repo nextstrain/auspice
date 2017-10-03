@@ -164,7 +164,7 @@ class Map extends React.Component {
     const grid = nextProps.panelLayout === "grid"; /* add a check here for min browser width tbd */
     return computeResponsive({
       horizontal: grid ? 0.5 : 1,
-      vertical: grid ? 0.7 : 0.9, /* if we are in single column, full height */
+      vertical: grid ? 0.7 : 0.88, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
       sidebar: nextProps.sidebar
     });
