@@ -50,6 +50,10 @@ const getManifest = (query, res) => {
   getDataFile(res, 'manifest_' + query.user + '.json');
 };
 
+const getPostsManifest = (query, res) => {
+  getStaticFile(res, 'manifest.json');
+};
+
 const getSplashImage = (query, res) => {
   getDataFile(res, query.src);
 };
@@ -64,6 +68,7 @@ const getDatasetJson = (query, res) => {
 
 module.exports = {
   getManifest,
+  getPostsManifest,
   getSplashImage,
   getImage,
   getDatasetJson

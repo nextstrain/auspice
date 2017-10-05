@@ -86,6 +86,9 @@ app.get('/charon*', (req, res) => {
     case "manifest": {
       getFiles.getManifest(query, res);
       break;
+    } case "posts_manifest": {
+      getFiles.getPostsManifest(query, res);
+      break;
     } case "splashimage": {
       getFiles.getSplashImage(query, res);
       break;

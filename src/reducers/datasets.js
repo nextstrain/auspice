@@ -8,13 +8,14 @@ const datasets = (state = {
 }, action) => {
   switch (action.type) {
     case types.MANIFEST_RECEIVED: {
-      return {
+      return Object.assign({}, state, {
         splash: action.splash,
         pathogen: action.pathogen,
         user: action.user,
-        posts: action.posts,
         ready: true
-      };
+      });
+    } case types.POSTS_MANIFEST_RECEIVED: {
+      return Object.assign({}, state, {posts: action.data});
     } default: {
       return state;
     }

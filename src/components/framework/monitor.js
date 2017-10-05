@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import _throttle from "lodash/throttle";
 import { BROWSER_DIMENSIONS } from "../../actions/types";
-import { getManifest } from "../../util/clientAPIInterface";
+import { getManifest, getPostsManifest } from "../../util/clientAPIInterface";
 
 @connect()
 class Monitor extends React.Component {
@@ -19,6 +19,7 @@ class Monitor extends React.Component {
   componentDidMount() {
     /* API call to charon to get initial datasets etc (needed to load the splash page) */
     getManifest(this.context.router, this.props.dispatch);
+    getPostsManifest(this.context.router, this.props.dispatch);
     /* don't need initial dimensions - they're in the redux store on load */
     window.addEventListener( // future resizes
       "resize",
