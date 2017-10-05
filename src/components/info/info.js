@@ -220,6 +220,7 @@ class Info extends React.Component {
     const nTotalSamples = this.props.metadata.virus_count;
     const nSelectedSamples = this.getNumSelectedTips();
     const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
+    const animating = this.props.mapAnimationPlayPauseButton === "Pause";
     let title = "";
     if (this.props.metadata.title) {
       title = this.props.metadata.title;
@@ -230,53 +231,45 @@ class Info extends React.Component {
           <div width={responsive.width} style={styles.title}>
             {title}
           </div>
-          {this.props.mapAnimationPlayPauseButton === "Pause" ? (
-            <div width={responsive.width} style={styles.n}>
-              {`Map animation in progress (showing ${nSelectedSamples} of ${nTotalSamples} genomes).`}
-            </div>
-          ) :
-            (
-              <div width={responsive.width} style={styles.n}>
-                {`Showing ${nSelectedSamples} of ${nTotalSamples} genomes. `}
-                {/* Author filters */}
-                {this.summariseSelectedAuthors()}
-                {/* Summarise other filters */}
-                {Object.keys(this.props.filters)
-                  .filter((n) => n !== "authors")
-                  .filter((n) => this.props.filters[n].length > 0)
-                  .map((n) => this.summariseNonAuthorFilter(n))
-                }
-                {/* dates restricted? */}
-                { this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
-                  this.props.dateMin !== this.props.absoluteDateMin && this.props.dateMax !== this.props.absoluteDateMax ?
-                    ` Date restricted to between ${styliseDateRange(this.props.dateMin)} & ${styliseDateRange(this.props.dateMax)}.` :
-                    this.props.dateMin !== this.props.absoluteDateMin ?
-                      ` Restriced to sequences after ${styliseDateRange(this.props.dateMin)}.` : ` Restriced to sequences before ${styliseDateRange(this.props.dateMax)}.`
-                }
-                {/* Clear all filters (if applicable!) */}
-                {filtersWithValues.length ? (
-                  <div
-                    className={`boxed-item active-clickable`}
-                    style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
-                    onClick={() => {
-                      if (filtersWithValues.length) {
-                        filtersWithValues.forEach((n) => this.props.dispatch(applyFilterQuery(n, [], 'set')));
-                      }
-                      if (this.props.dateMin !== this.props.absoluteDateMin || this.props.dateMax !== this.props.absoluteDateMax) {
-                        this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
-                      }
-                    }}
-                  >
-                    {"Reset all filters"}
-                  </div>
-                ) : null}
-                {/* branch selected message? (and button) */}
-                {this.props.idxOfInViewRootNode === 0 ? null :
-                  ` Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants.`}
-                {this.props.idxOfInViewRootNode === 0 ? null : resetTreeButton(this.props.dispatch)}
+          <div width={responsive.width} style={styles.n}>
+            {animating ? `Map animation in progress. ` : `Showing ${nSelectedSamples} of ${nTotalSamples} genomes. `}
+            {/* Author filters */}
+            {this.summariseSelectedAuthors()}
+            {/* Summarise other filters */}
+            {Object.keys(this.props.filters)
+              .filter((n) => n !== "authors")
+              .filter((n) => this.props.filters[n].length > 0)
+              .map((n) => this.summariseNonAuthorFilter(n))
+            }
+            {/* dates restricted? */}
+            { animating || this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
+              this.props.dateMin !== this.props.absoluteDateMin && this.props.dateMax !== this.props.absoluteDateMax ?
+                ` Date restricted to between ${styliseDateRange(this.props.dateMin)} & ${styliseDateRange(this.props.dateMax)}.` :
+                this.props.dateMin !== this.props.absoluteDateMin ?
+                  ` Restriced to sequences after ${styliseDateRange(this.props.dateMin)}.` : ` Restriced to sequences before ${styliseDateRange(this.props.dateMax)}.`
+            }
+            {/* Clear all filters (if applicable!) */}
+            {filtersWithValues.length ? (
+              <div
+                className={`boxed-item active-clickable`}
+                style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
+                onClick={() => {
+                  if (filtersWithValues.length) {
+                    filtersWithValues.forEach((n) => this.props.dispatch(applyFilterQuery(n, [], 'set')));
+                  }
+                  if (this.props.dateMin !== this.props.absoluteDateMin || this.props.dateMax !== this.props.absoluteDateMax) {
+                    this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
+                  }
+                }}
+              >
+                {"Reset all filters"}
               </div>
-            )
-          }
+            ) : null}
+            {/* branch selected message? (and button) */}
+            {this.props.idxOfInViewRootNode === 0 ? null :
+              ` Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants.`}
+            {this.props.idxOfInViewRootNode === 0 ? null : resetTreeButton(this.props.dispatch)}
+          </div>
         </div>
       </Card>
     );
