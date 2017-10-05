@@ -127,6 +127,9 @@ class Info extends React.Component {
   }
   summariseNonAuthorFilter(filterName) {
     const stateCount = getValuesAndCountsOfTraitFromTree(this.props.nodes, filterName);
+    if (!this.props.filters[filterName].length) {
+      return `n(${prettyString(filterName)}): ${Object.keys(stateCount).length}. `;
+    }
     return (
       <g key={filterName}>
         {`${prettyString(filterName)} is restricted to: `}
@@ -180,7 +183,7 @@ class Info extends React.Component {
     }));
     /* case 1 (no selected authors) has already been handled */
     if (nTotalAuthors === nSelectedAuthors) {
-      return null;
+      return `Data from ${nTotalAuthors} publications. `;
     }
     /* case 2: a single author selected */
     if (nSelectedAuthors > 0 && nSelectedAuthors < 3) {
@@ -221,6 +224,7 @@ class Info extends React.Component {
     const nSelectedSamples = this.getNumSelectedTips();
     const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
     const animating = this.props.mapAnimationPlayPauseButton === "Pause";
+    const datesMaxed = this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax;
     let title = "";
     if (this.props.metadata.title) {
       title = this.props.metadata.title;
@@ -238,18 +242,21 @@ class Info extends React.Component {
             {/* Summarise other filters */}
             {Object.keys(this.props.filters)
               .filter((n) => n !== "authors")
-              .filter((n) => this.props.filters[n].length > 0)
+              // .filter((n) => this.props.filters[n].length > 0)
               .map((n) => this.summariseNonAuthorFilter(n))
             }
             {/* dates restricted? */}
-            { animating || this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax ? "" :
-              this.props.dateMin !== this.props.absoluteDateMin && this.props.dateMax !== this.props.absoluteDateMax ?
-                ` Date restricted to between ${styliseDateRange(this.props.dateMin)} & ${styliseDateRange(this.props.dateMax)}.` :
-                this.props.dateMin !== this.props.absoluteDateMin ?
-                  ` Restriced to sequences after ${styliseDateRange(this.props.dateMin)}.` : ` Restriced to sequences before ${styliseDateRange(this.props.dateMax)}.`
+            { animating ? '' :
+              datesMaxed ?
+                `Data sampled between ${styliseDateRange(this.props.absoluteDateMin)} & ${styliseDateRange(this.props.absoluteDateMax)}. ` :
+                this.props.dateMin !== this.props.absoluteDateMin && this.props.dateMax !== this.props.absoluteDateMax ?
+                  `Date restricted to between ${styliseDateRange(this.props.dateMin)} & ${styliseDateRange(this.props.dateMax)}. ` :
+                  this.props.dateMin !== this.props.absoluteDateMin ?
+                    `Restriced to sequences after ${styliseDateRange(this.props.dateMin)}. ` :
+                    `Restriced to sequences before ${styliseDateRange(this.props.dateMax)}. `
             }
-            {/* Clear all filters (if applicable!) */}
-            {filtersWithValues.length ? (
+            {/* Button to clear all filters (when applicable) */}
+            {!animating && (filtersWithValues.length || !datesMaxed) ? (
               <div
                 className={`boxed-item active-clickable`}
                 style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
@@ -267,7 +274,7 @@ class Info extends React.Component {
             ) : null}
             {/* branch selected message? (and button) */}
             {this.props.idxOfInViewRootNode === 0 ? null :
-              ` Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants.`}
+              `Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants. `}
             {this.props.idxOfInViewRootNode === 0 ? null : resetTreeButton(this.props.dispatch)}
           </div>
         </div>
