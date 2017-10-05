@@ -35,7 +35,7 @@ import { incommingMapPNG } from "../download/helperFunctions";
     nodeColors: state.tree.nodeColors,
     visibility: state.tree.visibility,
     visibilityVersion: state.tree.visibilityVersion,
-    metadata: state.metadata.metadata,
+    metadata: state.metadata,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorScaleVersion: state.controls.colorScale.version,
     map: state.map,
@@ -133,7 +133,7 @@ class Map extends React.Component {
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
-    if (this.props.metadata && !this.state.map && document.getElementById("map")) {
+    if (this.props.metadata.loaded && !this.state.map && document.getElementById("map")) {
       this.createMap();
     }
   }
@@ -182,7 +182,7 @@ class Map extends React.Component {
 
   maybeDrawDemesAndTransmissions() {
     const mapIsDrawn = !!this.state.map;
-    const allDataPresent = !!(this.props.metadata && this.props.treeLoaded && this.state.responsive && this.state.d3DOMNode);
+    const allDataPresent = !!(this.props.metadata.loaded && this.props.treeLoaded && this.state.responsive && this.state.d3DOMNode);
     const demesTransmissionsNotComputed = !this.state.demeData && !this.state.transmissionData;
     /* if at any point we change dataset and app doesn't remount, we'll need these again */
     // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;

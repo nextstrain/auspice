@@ -115,26 +115,26 @@ class App extends React.Component {
           }}
         >
           {
-            (!this.props.treeLoaded || !this.props.metadata.metadata) ? (
+            (!this.props.treeLoaded || !this.props.metadata.loaded) ? (
               <img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${this.props.browserDimensions.height / 2 - 100}px`}}/>
             ) : (
               <Background>
                 <Info
                   sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
                 />
-                {this.props.metadata.metadata.panels.indexOf("tree") === -1 ? null : (
+                {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
                   <TreeView
                     query={queryString.parse(this.context.router.history.location.search)}
                     sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
                   />
                 )}
-                {this.props.metadata.metadata.panels.indexOf("map") === -1 ? null : (
+                {this.props.metadata.panels.indexOf("map") === -1 ? null : (
                   <Map
                     sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
                     justGotNewDatasetRenderNewMap={false}
                   />
                 )}
-                {this.props.metadata.metadata.panels.indexOf("entropy") === -1 ? null : (
+                {this.props.metadata.panels.indexOf("entropy") === -1 ? null : (
                   <Entropy
                     sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
                   />
