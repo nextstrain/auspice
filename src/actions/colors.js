@@ -20,7 +20,7 @@ export const updateColors = function (providedColorBy = undefined) {
     const colorBy = providedColorBy ? providedColorBy : controls.colorBy;
 
     /* step 1: calculate the required colour scale */
-    const version = controls.colorScale.version + 1;
+    const version = controls.colorScale === undefined ? 1 : controls.colorScale.version + 1;
     // console.log("updateColorScale setting colorScale to ", version);
     const colorScale = getColorScale(colorBy, tree, sequences, metadata.colorOptions, version);
     /*   */
