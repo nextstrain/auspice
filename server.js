@@ -23,9 +23,14 @@ the production server is run, which sources the bundle from dist/
 Sources the JSONs / splash images etc from /data/ rather than data.nextstrain.org.
 This works even if you've built the bundle, as the API calls are handled by the same server.
 You probably want this on for development, off for testing before deploying.
+
+"localStatic"
+Sources the Static posts (reports) from /static/ rather than github->themis.
+This works even if you've built the bundle, as the API calls are handled by the same server.
+You probably want this on for development, off for testing before deploying.
 */
 
-/* parse args, set some as global to be available in bundle */
+/* parse args, set some as global to be available in utility scripts */
 const devServer = process.argv.indexOf("dev") !== -1;
 global.LOCAL_DATA = process.argv.indexOf("localData") !== -1;
 global.LOCAL_DATA_PATH = path.join(__dirname, "/data/");
@@ -80,6 +85,9 @@ app.get('/charon*', (req, res) => {
   switch (query.request) {
     case "manifest": {
       getFiles.getManifest(query, res);
+      break;
+    } case "splashimage": {
+      getFiles.getSplashImage(query, res);
       break;
     } case "image": {
       getFiles.getImage(query, res);

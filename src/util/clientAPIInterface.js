@@ -40,5 +40,5 @@ export const getManifest = (router, dispatch) => {
 };
 
 export const requestImage = (src) => {
-  return charonAPIAddress + "request=image&src=" + src;
+  return charonAPIAddress + "request=splashimage&src=" + src;
 };

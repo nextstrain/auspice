@@ -1,7 +1,10 @@
-rm -rf data/
-mkdir -p data/
-
-data_files=( "manifest_guest.json" "manifest_mumps.json"
+data_files=( "manifest_guest.json" "manifest_mumps.json"\
+  "img_mumps.jpg"\
+  "img_dengue.png"\
+  "img_avianinfluenza.png"\
+  "img_seasonalinfluenza.png"\
+  "img_ebola.png"\
+  "img_zika.png"\
   "ebola_tree.json" "ebola_sequences.json" "ebola_meta.json" "ebola_entropy.json"\
   "zika_tree.json" "zika_sequences.json" "zika_meta.json" "zika_entropy.json"\
   "flu_h3n2_ha_3y_tree.json" "flu_h3n2_ha_3y_sequences.json" "flu_h3n2_ha_3y_meta.json" "flu_h3n2_ha_3y_entropy.json"\
@@ -30,17 +33,10 @@ data_files=( "manifest_guest.json" "manifest_mumps.json"
   "dengue_denv3_tree.json" "dengue_denv3_sequences.json" "dengue_denv3_meta.json" "dengue_denv3_entropy.json"\
   "dengue_denv4_tree.json" "dengue_denv4_sequences.json" "dengue_denv4_meta.json" "dengue_denv4_entropy.json"\
   "mumps_global_tree.json" "mumps_global_sequences.json" "mumps_global_meta.json" "mumps_global_entropy.json"\
-  "mumps_bc_tree.json" "mumps_bc_sequences.json" "mumps_bc_meta.json" "mumps_bc_entropy.json"\
-  "mumps_mass_tree.json" "mumps_mass_sequences.json" "mumps_mass_meta.json" "mumps_mass_entropy.json"\
+  "mers_tree.json" "mers_sequences.json" "mers_meta.json"\
 )
 
 static_files=(
-  "img_mumps.jpg"\
-  "img_dengue.png"\
-  "img_avianinfluenza.png"\
-  "img_seasonalinfluenza.png"\
-  "img_ebola.png"\
-  "img_zika.png"\  
   "figures_feb-2016_h1n1pdm_6b2_tree.png"\
   "figures_feb-2016_h1n1pdm_clades.png"\
   "figures_feb-2016_h1n1pdm_counts.png"\
@@ -133,12 +129,16 @@ static_files=(
   "post_2017-02-23-feb-2017.md"\
   )
 
+rm -rf data/
+mkdir -p data/
 for i in "${data_files[@]}"
 do
   curl http://data.nextstrain.org/${i} --compressed -o data/${i}
 done
 
+rm -rf static/
+mkdir -p static/
 for i in "${static_files[@]}"
 do
-  curl http://cdn.rawgit.com/nextstrain/themis/master/files/${i} --compressed -o static/${i}
+  curl https://raw.githubusercontent.com/nextstrain/themis/master/files/${i} --compressed -o static/${i}
 done
