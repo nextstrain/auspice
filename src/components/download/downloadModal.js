@@ -79,7 +79,7 @@ class DownloadModal extends React.Component {
       ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, dataset, this.props.tree.nodes[0], false)],
       ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, dataset, this.props.tree.nodes[0], true)],
       ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.strainCSV(this.props.dispatch, dataset, this.props.tree.nodes, this.props.tree.attrs)],
-      ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorCSV(this.props.dispatch, dataset, this.props.metadata.metadata)],
+      ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorCSV(this.props.dispatch, dataset, this.props.metadata)],
       ["Screenshot (SGV)", (<icons.PanelsGrid width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, dataset)]
     ];
     return (
@@ -103,7 +103,7 @@ class DownloadModal extends React.Component {
       return null;
     }
     const styles = this.getStyles(this.props.browserDimensions.width, this.props.browserDimensions.height);
-    const meta = this.props.metadata.metadata;
+    const meta = this.props.metadata;
     return (
       <div style={styles.behind} onClick={this.dismissModal.bind(this)}>
         <div className="static container" style={styles.modal} onClick={(e) => stopProp(e)}>

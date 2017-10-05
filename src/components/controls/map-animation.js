@@ -9,7 +9,7 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
 
 @connect((state) => {
   return {
-    metadata: state.metadata.metadata,
+    // metadata: state.metadata,
     mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative

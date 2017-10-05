@@ -20,13 +20,13 @@ class AllFilters extends React.Component {
   }
   render() {
     const filters = [];
-    if (this.props.metadata.metadata) {
-      for (let key in this.props.metadata.metadata.controls) {
+    if (this.props.metadata.loaded) {
+      for (let key in this.props.metadata.controls) {
         // console.log("making filter", key, this.props.metadata.metadata.controls[key])
         filters.push(
           <ChooseFilter
             key={key}
-            filterOptions={this.props.metadata.metadata.controls[key]}
+            filterOptions={this.props.metadata.controls[key]}
             filterType={key}
             shortKey={filterShortName[key]}
           />

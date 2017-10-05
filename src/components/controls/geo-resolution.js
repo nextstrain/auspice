@@ -9,7 +9,7 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
 @connect((state) => {
   return {
-    metadata: state.metadata.metadata,
+    metadata: state.metadata,
     geoResolution: state.controls.geoResolution
   };
 })
@@ -31,7 +31,7 @@ class GeoResolution extends React.Component {
 
   getGeoResolutionOptions() {
     let options = [];
-    if (this.props.metadata) {
+    if (this.props.metadata.loaded) {
       options = Object.keys(this.props.metadata.geo).map((key) => {
         return {
           value: key,

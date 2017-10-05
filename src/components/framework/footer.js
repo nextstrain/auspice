@@ -83,7 +83,7 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
 @connect((state) => {
   return {
     tree: state.tree,
-    metadata: state.metadata.metadata,
+    metadata: state.metadata,
     colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
     activeFilters: state.controls.filters
@@ -214,10 +214,8 @@ class Footer extends React.Component {
 
   getUpdated() {
     let updated = null;
-    if (this.props.metadata) {
-      if (this.props.metadata.updated) {
-        updated = this.props.metadata.updated;
-      }
+    if (this.props.metadata.updated) {
+      updated = this.props.metadata.updated;
     }
     if (!updated) return null;
     return (

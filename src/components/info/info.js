@@ -26,7 +26,7 @@ const resetTreeButton = (dispatch) => {
     browserDimensions: state.browserDimensions.browserDimensions,
     filters: state.controls.filters,
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
-    metadata: state.metadata.metadata,
+    metadata: state.metadata,
     nodes: state.tree.nodes,
     idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
     visibility: state.tree.visibility
