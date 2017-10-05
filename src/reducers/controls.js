@@ -1,7 +1,6 @@
 import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { numericToCalendar, currentNumDate, currentCalDate } from "../util/dateHelpers";
 import { flattenTree } from "../components/tree/treeHelpers";
-import getColorScale from "../util/getColorScale";
 import { defaultGeoResolution,
   defaultColorBy,
   defaultDateRange,
@@ -61,7 +60,7 @@ const getDefaultState = () => {
     colorBy: defaultColorBy,
     defaultColorBy: defaultColorBy,
     colorByConfidence: {display: false, on: false},
-    colorScale: getColorScale(defaultColorBy, {}, {}, {}, 0),
+    colorScale: undefined,
     analysisSlider: false,
     geoResolution: defaultGeoResolution,
     datasetPathName: "",
