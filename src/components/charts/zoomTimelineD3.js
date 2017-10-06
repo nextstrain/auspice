@@ -81,15 +81,14 @@ var brush = d3.svg.brush()
 				.enter().append("g") // for each bin
 						.attr("class", "bar stack")
 						.attr("transform", function(d) {
-							return "translate(" + d.x + ",0)";
+							return "translate(" + x(d.x) + ",0)";
 						})
 				// a bar for each value in the stack, positioned in the correct y positions
 				.selectAll("rect")
-				.data(function(d) {
-					return d.counts}) // for each category
+				.data(function(d) {return d.counts}) // for each category
 				.enter().append("rect")
 						.attr("class", "bar")
-						.attr("width", 6)
+						.attr("width", 18) // make top level later on
 						.attr("y", function(d) { return y(d.y1); })
 						.attr("height", function(d) { return y(d.y0) - y(d.y1); })
 						.style("fill", function(d) { return d.color; });

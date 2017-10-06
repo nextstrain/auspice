@@ -45,7 +45,7 @@ class Timeline extends React.Component {
     return {
       responsive,
       width: responsive.width,
-      height: responsive.height,
+      height: responsive.height/2,
       padBottom: 50,
       padLeft: 15,
       padRight: 12
@@ -59,7 +59,7 @@ class Timeline extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.nodes[0] && nextProps.visibility && nextProps.nodeColors) {
     let tallies = this.getCounts(nextProps)
-    drawTimeline(tallies.counts, tallies.colors,this.state.chartGeom.responsive.width,this.state.chartGeom.responsive.height)
+    drawTimeline(tallies.counts, tallies.colors,this.state.chartGeom.responsive.width,this.state.chartGeom.responsive.height/2)
   }
     // this.maybeComputeResponive(nextProps);
   }
