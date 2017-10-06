@@ -15,6 +15,26 @@
     <!-- asyncronously load the react bundle -->
     <script async src="/dist/bundle.js"></script>
 
+<!-- Temporary work around to get the opacity right -->
+  <style>
+    .axis {
+      font: 10px sans-serif;
+    }
+    .axis path,
+    .axis line {
+      fill: none;
+      stroke: #000;
+      shape-rendering: crispEdges;
+    }
+    .brush .extent {
+      stroke: #fff;
+      fill-opacity: .125;
+      shape-rendering: crispEdges;
+    }
+    </style>
+
+
+
     <!-- by placing this in the body, we mimic async ability
     This is important as sometimes unpkg takes 10s to return and, if in the header
     this blocks the page load.
