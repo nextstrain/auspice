@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import d3 from "d3";
 // import * as globals from "../../util/globals";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";

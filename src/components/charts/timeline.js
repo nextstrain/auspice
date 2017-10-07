@@ -6,6 +6,7 @@ import computeResponsive from "../../util/computeResponsive";
 import getColorScale from "../../util/getColorScale"
 import drawTimeline from "./timelineD3.js"
 import _ from "lodash";
+import d3 from "d3";
 
 @connect(state => {
   return {
