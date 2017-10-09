@@ -1,3 +1,11 @@
+### App specific ###
+/dist/
+big_flu
+/data/
+/releases/
+server.dist.js
+/static/
+
 ### OSX ###
 .DS_Store
 
@@ -5,10 +13,3 @@
 package-lock.json
 node_modules/
 npm-debug.log
-
-# App specific
-dist/
-big_flu
-data/
-releases/
-server.dist.js

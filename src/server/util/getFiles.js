@@ -5,14 +5,22 @@ const fetch = require('node-fetch'); // not needed for local data
 const request = require('request');
 // const prettyjson = require('prettyjson');
 
-const s3 = "http://data.nextstrain.org/";
 const validUsers = ['guest', 'mumps'];
 
-const getFile = (res, filePath) => {
+const getDataFile = (res, filePath) => {
   if (global.LOCAL_DATA) {
     res.sendFile(path.join(global.LOCAL_DATA_PATH, filePath));
   } else {
-    request(s3 + filePath).pipe(res);
+    request(global.REMOTE_DATA_BASEURL + filePath).pipe(res);
+    /* TODO explore https://www.npmjs.com/package/cached-request */
+  }
+};
+
+const getStaticFile = (res, filePath) => {
+  if (global.LOCAL_STATIC) {
+    res.sendFile(path.join(global.LOCAL_STATIC_PATH, filePath));
+  } else {
+    request(global.REMOTE_STATIC_BASEURL + filePath).pipe(res);
     /* TODO explore https://www.npmjs.com/package/cached-request */
   }
 };
@@ -39,19 +47,29 @@ const getManifest = (query, res) => {
     res.status(404).send('Invalid user');
     return;
   }
-  getFile(res, 'manifest_' + query.user + '.json');
+  getDataFile(res, 'manifest_' + query.user + '.json');
+};
+
+const getPostsManifest = (query, res) => {
+  getStaticFile(res, 'manifest.json');
+};
+
+const getSplashImage = (query, res) => {
+  getDataFile(res, query.src);
 };
 
 const getImage = (query, res) => {
-  getFile(res, query.src);
+  getStaticFile(res, query.src);
 };
 
 const getDatasetJson = (query, res) => {
-  getFile(res, query.path);
+  getDataFile(res, query.path);
 };
 
 module.exports = {
   getManifest,
+  getPostsManifest,
+  getSplashImage,
   getImage,
   getDatasetJson
 };

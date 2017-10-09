@@ -1,13 +1,10 @@
 const path = require('path');
 const webpack = require('webpack');
 
-// let commitHash = require('child_process')
-//   .execSync('git rev-parse --short HEAD')
-//   .toString();
-
 module.exports = {
   devtool: 'eval-source-map',
   entry: [
+    'react-hot-loader/patch',
     'webpack-hot-middleware/client',
     './src/index'
   ],
@@ -18,15 +15,11 @@ module.exports = {
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
-    // perf test on nodes - remove this line to get warnings back.
     new webpack.DefinePlugin({
       "process.env": {
         NODE_ENV: JSON.stringify("dev")
       }
     }),
-    // new webpack.DefinePlugin({
-    //   __COMMIT_HASH__: JSON.stringify(commitHash)
-    // }),
     new webpack.NoEmitOnErrorsPlugin()
   ],
   module: {

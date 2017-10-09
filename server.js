@@ -2,7 +2,8 @@
 const path = require("path");
 const express = require("express");
 const expressStaticGzip = require("express-static-gzip");
-const dataFuncs = require('./src/server/data');
+const getFiles = require('./src/server/util/getFiles');
+const serverReact = require('./src/server/util/sendReactComponents');
 const queryString = require("query-string");
 
 /*
@@ -22,22 +23,29 @@ the production server is run, which sources the bundle from dist/
 Sources the JSONs / splash images etc from /data/ rather than data.nextstrain.org.
 This works even if you've built the bundle, as the API calls are handled by the same server.
 You probably want this on for development, off for testing before deploying.
+
+"localStatic"
+Sources the Static posts (reports) from /static/ rather than github->themis.
+This works even if you've built the bundle, as the API calls are handled by the same server.
+You probably want this on for development, off for testing before deploying.
 */
 
-/* parse args, set some as global to be available in bundle */
+/* parse args, set some as global to be available in utility scripts */
 const devServer = process.argv.indexOf("dev") !== -1;
 global.LOCAL_DATA = process.argv.indexOf("localData") !== -1;
 global.LOCAL_DATA_PATH = path.join(__dirname, "/data/");
+global.REMOTE_DATA_BASEURL = "http://data.nextstrain.org/";
+global.LOCAL_STATIC = process.argv.indexOf("localStatic") !== -1;
+global.LOCAL_STATIC_PATH = path.join(__dirname, "/static/");
+global.REMOTE_STATIC_BASEURL = "http://cdn.rawgit.com/nextstrain/themis/master/files/";
 
 /* dev-specific libraries & imports */
 let webpack;
-// let request;
 let config;
 let webpackDevMiddleware;
 let webpackHotMiddleware;
 if (devServer) {
-  webpack = require("webpack");
-  // request = require("request");
+  webpack = require("webpack"); // eslint-disable-line import/no-extraneous-dependencies global-require
   config = require("./webpack.config.dev");
   webpackDevMiddleware = require("webpack-dev-middleware");
   webpackHotMiddleware = require("webpack-hot-middleware");
@@ -76,13 +84,22 @@ app.get('/charon*', (req, res) => {
   }
   switch (query.request) {
     case "manifest": {
-      dataFuncs.getManifest(query, res);
+      getFiles.getManifest(query, res);
+      break;
+    } case "posts_manifest": {
+      getFiles.getPostsManifest(query, res);
+      break;
+    } case "splashimage": {
+      getFiles.getSplashImage(query, res);
       break;
     } case "image": {
-      dataFuncs.getImage(query, res);
+      getFiles.getImage(query, res);
       break;
     } case "json": {
-      dataFuncs.getDatasetJson(query, res);
+      getFiles.getDatasetJson(query, res);
+      break;
+    } case "post": {
+      serverReact.serveStaticPost(query, res);
       break;
     } default: {
       console.warn("Query rejected (unknown want) -- " + req.originalUrl);
@@ -100,5 +117,6 @@ const server = app.listen(app.get('port'), () => {
   console.log("Auspice server started on port " + server.address().port);
   console.log(devServer ? "Serving dev bundle with hot-reloading enabled" : "Serving compiled bundle from /dist");
   console.log(global.LOCAL_DATA ? "Data is being sourced from /data" : "Data is being sourced from data.nextstrain.org (S3)");
+  console.log(global.LOCAL_STATIC ? "Static content is being sourced from /static" : "Static content is being sourced from cdn.rawgit.com");
   console.log("-----------------------------------\n\n");
 });
