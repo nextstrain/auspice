@@ -8,7 +8,7 @@ import Legend from "./legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
 import PhyloTree from "./phyloTree";
-import { mediumTransitionDuration, twoColumnBreakpoint } from "../../util/globals";
+import { mediumTransitionDuration } from "../../util/globals";
 import InfoPanel from "./infoPanel";
 import TipSelectedPanel from "./tipSelectedPanel";
 import computeResponsive from "../../util/computeResponsive";

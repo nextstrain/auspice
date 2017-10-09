@@ -6,7 +6,9 @@ import { BROWSER_DIMENSIONS, CHANGE_PANEL_LAYOUT } from "../../actions/types";
 import { getManifest, getPostsManifest } from "../../util/clientAPIInterface";
 import { twoColumnBreakpoint } from "../../util/globals";
 
-@connect()
+@connect((state) => ({
+  panels: state.metadata.panels
+}))
 class Monitor extends React.Component {
   constructor(props) {
     super(props);
@@ -47,10 +49,13 @@ class Monitor extends React.Component {
         docHeight: window.document.body.clientHeight /* background needs docHeight because sidebar creates absolutely positioned container and blocks height 100% */
       };
       dispatch({type: BROWSER_DIMENSIONS, data: newBrowserDimensions});
-      if (oldBrowserDimensions.width < twoColumnBreakpoint && newBrowserDimensions.width >= twoColumnBreakpoint) {
-        dispatch({type: CHANGE_PANEL_LAYOUT, data: "grid"});
-      } else if (oldBrowserDimensions.width > twoColumnBreakpoint && newBrowserDimensions.width <= twoColumnBreakpoint) {
-        dispatch({type: CHANGE_PANEL_LAYOUT, data: "full"});
+      /* only switch between grid / full if there is a map and a tree */
+      if (this.props.panels !== undefined && this.props.panels.indexOf("map") !== -1 && this.props.panels.indexOf("tree") !== -1) {
+        if (oldBrowserDimensions.width < twoColumnBreakpoint && newBrowserDimensions.width >= twoColumnBreakpoint) {
+          dispatch({type: CHANGE_PANEL_LAYOUT, data: "grid"});
+        } else if (oldBrowserDimensions.width > twoColumnBreakpoint && newBrowserDimensions.width <= twoColumnBreakpoint) {
+          dispatch({type: CHANGE_PANEL_LAYOUT, data: "full"});
+        }
       }
     });
   }
