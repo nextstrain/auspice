@@ -16,7 +16,7 @@ const resetTreeButton = (dispatch) => {
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => dispatch({type: CHANGE_TREE_ROOT_IDX, idxOfInViewRootNode: 0})}
     >
-      {"View Entire Tree."}
+      {"view entire tree."}
     </div>
   );
 };
@@ -34,6 +34,18 @@ const months = {
   '10': 'October',
   '11': 'November',
   '12': 'December'
+};
+
+const plurals = {
+  country: "countries",
+  authors: "authors"
+};
+
+const pluralise = (word, n) => {
+  if (n === 1) {
+    return word === "authors" ? "author" : word;
+  }
+  return plurals[word] !== undefined ? plurals[word] : word + 's';
 };
 
 const styliseDateRange = (dateStr) => {
@@ -61,7 +73,6 @@ class Info extends React.Component {
   constructor(props) {
     super(props);
   }
-
   static propTypes = {
     sidebar: React.PropTypes.bool.isRequired,
     filters: React.PropTypes.object.isRequired,
@@ -71,8 +82,6 @@ class Info extends React.Component {
     dispatch: React.PropTypes.func.isRequired,
     idxOfInViewRootNode: React.PropTypes.number
   }
-
-
   getStyles(responsive) {
     let fontSize = 32;
     if (this.props.browserDimensions.width < 1000) {
@@ -125,26 +134,34 @@ class Info extends React.Component {
     });
     return count;
   }
-  summariseNonAuthorFilter(filterName) {
-    const stateCount = getValuesAndCountsOfTraitFromTree(this.props.nodes, filterName);
-    if (!this.props.filters[filterName].length) {
-      return `n(${prettyString(filterName)}): ${Object.keys(stateCount).length}. `;
-    }
-    return (
-      <g key={filterName}>
-        {`${prettyString(filterName)} is restricted to: `}
-        {this.props.filters[filterName].sort().map((itemName) => {
-          const display = (
-            <g>
-              {prettyString(itemName)}
-              {" (" + stateCount[itemName] + ")"}
-            </g>
-          );
-          return displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true);
-        })}
-        {`. `}
-      </g>
+  addFilteredDatesButton(buttons) {
+    buttons.push(
+      <div key={"timefilter"} style={{display: "inline-block"}}>
+        <div
+          className={'boxed-item-icon'}
+          onClick={() => this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}))}
+          role="button"
+          tabIndex={0}
+        >
+          {'\xD7'}
+        </div>
+        <div className={"boxed-item active-with-icon"}>
+          {`${styliseDateRange(this.props.dateMin)} - ${styliseDateRange(this.props.dateMax)}`}
+        </div>
+      </div>
     );
+  }
+  addNonAuthorFilterButton(buttons, filterName) {
+    const stateCount = getValuesAndCountsOfTraitFromTree(this.props.nodes, filterName);
+    this.props.filters[filterName].sort().forEach((itemName) => {
+      const display = (
+        <g>
+          {prettyString(itemName)}
+          {" (" + stateCount[itemName] + ")"}
+        </g>
+      );
+      buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));
+    });
   }
   clearFilterButton(field) {
     return (
@@ -159,54 +176,46 @@ class Info extends React.Component {
       </span>
     );
   }
-  summariseSelectedAuthors() {
-    if (!this.props.metadata.author_info) {return null;}
+
+  addFilteredAuthorsButton(buttons) {
+    if (!this.props.metadata.author_info) {return;}
     const nTotalAuthors = Object.keys(this.props.metadata.author_info).length;
     const nSelectedAuthors = this.getNumSelectedAuthors(); // will be equal to nTotalAuthors if none selected
-
+    /* case 1 (no selected authors) - return now. */
+    if (nTotalAuthors === nSelectedAuthors) {return;}
     const authorInfo = this.props.filters.authors.map((v) => ({
       name: v,
       label: (
         <g>
           {prettyString(v, {stripEtAl: true})}
-          {" et al (n=" + this.props.metadata.author_info[v].n + ")"}
+          <i>{" et al, "}</i>
+          {"(n=" + this.props.metadata.author_info[v].n + ")"}
         </g>
       ),
       longlabel: (
         <g>
           {prettyString(v, {stripEtAl: true})}
-          {" et al "}
+          <i>{" et al, "}</i>
           {prettyString(this.props.metadata.author_info[v].title)}
           {" (n=" + this.props.metadata.author_info[v].n + ")"}
         </g>
       )
     }));
-    /* case 1 (no selected authors) has already been handled */
-    if (nTotalAuthors === nSelectedAuthors) {
-      return `Data from ${nTotalAuthors} publications. `;
-    }
-    /* case 2: a single author selected */
+    /* case 2: 1 or 2 authors selected */
     if (nSelectedAuthors > 0 && nSelectedAuthors < 3) {
-      return (
-        <g>
-          {"Data from "}
-          {authorInfo.map((d) => (
-            displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.longlabel, true)
-          ))}
-          {". "}
-        </g>
-      );
+      authorInfo.forEach((d) => (
+        buttons.push(
+          displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.longlabel, true)
+        )
+      ));
+      return;
     }
-    /* case 3: more than one author selected. */
-    return (
-      <g>
-        {"Data from "}
-        {authorInfo.map((d) => (
-          displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.label, true)
-        ))}
-        {". "}
-      </g>
-    );
+    /* case 3: more than 2 authors selected. */
+    authorInfo.forEach((d) => (
+      buttons.push(
+        displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.label, true)
+      )
+    ));
   }
 
   render() {
@@ -222,66 +231,65 @@ class Info extends React.Component {
     const styles = this.getStyles(responsive);
     const nTotalSamples = this.props.metadata.virus_count;
     const nSelectedSamples = this.getNumSelectedTips();
-    const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
+    // const nSelectedAuthors = this.getNumSelectedAuthors();
+    // const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
     const animating = this.props.mapAnimationPlayPauseButton === "Pause";
     const datesMaxed = this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax;
     let title = "";
     if (this.props.metadata.title) {
       title = this.props.metadata.title;
     }
+
+    /* the content is made up of two parts:
+    (1) the summary - e.g. Showing 4 of 379 sequences, from 1 author, 1 country and 1 region, dated Apr 2016 to Jun 2016.
+    (2) The active filters: Filtered to [[Metsky et al Zika Virus Evolution And Spread In The Americas (76)]], [[Colombia (28)]].
+    */
+
+    const summary = [(`Showing ${nSelectedSamples} of ${nTotalSamples} genomes`)];
+    Object.keys(this.props.filters).forEach((filterName) => {
+      const n = Object.keys(getValuesAndCountsOfTraitFromTree(this.props.nodes, filterName)).length;
+      summary.push((`from ${n} ${pluralise(filterName, n)}`));
+    });
+    summary.push(`between ${styliseDateRange(this.props.dateMin)} & ${styliseDateRange(this.props.dateMax)}`);
+
+    /* part II - the active filters */
+    const filters = [];
+    this.addFilteredAuthorsButton(filters);
+    Object.keys(this.props.filters)
+      .filter((n) => n !== "authors")
+      .filter((n) => this.props.filters[n].length > 0)
+      .forEach((n) => this.addNonAuthorFilterButton(filters, n));
+    if (!datesMaxed) {this.addFilteredDatesButton(filters);}
+
     return (
       <Card center infocard>
-        <div style={{width: responsive.width+34, display: "inline-block"}}>
+        <div style={{width: responsive.width + 34, display: "inline-block"}}>
           <div width={responsive.width} style={styles.title}>
             {title}
           </div>
           <div width={responsive.width} style={styles.n}>
-            {animating ? `Map animation in progress. ` : `Showing ${nSelectedSamples} of ${nTotalSamples} genomes. `}
-            {/* Author filters */}
-            {this.summariseSelectedAuthors()}
-            {/* Summarise other filters */}
-            {Object.keys(this.props.filters)
-              .filter((n) => n !== "authors")
-              // .filter((n) => this.props.filters[n].length > 0)
-              .map((n) => this.summariseNonAuthorFilter(n))
-            }
-            {/* dates restricted? */}
-            { animating ? '' :
-              datesMaxed ?
-                `Data sampled between ${styliseDateRange(this.props.absoluteDateMin)} & ${styliseDateRange(this.props.absoluteDateMax)}. ` :
-                this.props.dateMin !== this.props.absoluteDateMin && this.props.dateMax !== this.props.absoluteDateMax ?
-                  `Date restricted to between ${styliseDateRange(this.props.dateMin)} & ${styliseDateRange(this.props.dateMax)}. ` :
-                  this.props.dateMin !== this.props.absoluteDateMin ?
-                    `Restriced to sequences after ${styliseDateRange(this.props.dateMin)}. ` :
-                    `Restriced to sequences before ${styliseDateRange(this.props.dateMax)}. `
-            }
-            {/* Button to clear all filters (when applicable) */}
-            {!animating && (filtersWithValues.length || !datesMaxed) ? (
-              <div
-                className={`boxed-item active-clickable`}
-                style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
-                onClick={() => {
-                  if (filtersWithValues.length) {
-                    filtersWithValues.forEach((n) => this.props.dispatch(applyFilterQuery(n, [], 'set')));
-                  }
-                  if (this.props.dateMin !== this.props.absoluteDateMin || this.props.dateMax !== this.props.absoluteDateMax) {
-                    this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
-                  }
-                }}
-              >
-                {"Reset all filters"}
-              </div>
+            {animating ? `Map animation in progress. ` : null}
+            {/* part 1 - the summary */}
+            {!animating ? summary.map((d, i) =>
+              (i + 1 !== summary.length ? <span key={i}>{`${d}, `}</span> : <span key={i}>{`${d}. `}</span>)
             ) : null}
-            {/* branch selected message? (and button) */}
+            {/* part 2 - the filters */}
+            {!animating && filters.length ? (
+              <span>
+                {"Filtered to "}
+                {filters.map((d) => d)}
+                {". "}
+              </span>
+            ) : null}
+            {/* finally - is a branch selected? */}
             {this.props.idxOfInViewRootNode === 0 ? null :
-              `Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants. `}
-            {this.props.idxOfInViewRootNode === 0 ? null : resetTreeButton(this.props.dispatch)}
+              `Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants, `}
+            {this.props.idxOfInViewRootNode === 0 ? null :
+              resetTreeButton(this.props.dispatch)}
           </div>
         </div>
       </Card>
     );
   }
 }
-// from ${nSelectedAuthors} `}
-// {nTotalAuthors === nSelectedAuthors ? "publications. " : `out of ${nTotalAuthors} publications. `}
 export default Info;
