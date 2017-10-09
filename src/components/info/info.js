@@ -62,6 +62,7 @@ const styliseDateRange = (dateStr) => {
     metadata: state.metadata.metadata,
     nodes: state.tree.nodes,
     idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
+    visibleStateCounts: state.tree.visibleStateCounts,
     visibility: state.tree.visibility,
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
@@ -152,12 +153,12 @@ class Info extends React.Component {
     );
   }
   addNonAuthorFilterButton(buttons, filterName) {
-    const stateCount = getValuesAndCountsOfTraitFromTree(this.props.nodes, filterName);
+    // const stateCount = getValuesAndCountsOfTraitFromTree(this.props.nodes, filterName);
     this.props.filters[filterName].sort().forEach((itemName) => {
       const display = (
         <g>
           {prettyString(itemName)}
-          {" (" + stateCount[itemName] + ")"}
+          {" (" + this.props.visibleStateCounts[filterName][itemName] + ")"}
         </g>
       );
       buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));

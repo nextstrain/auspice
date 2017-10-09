@@ -91,10 +91,28 @@ const createListOfColors = (n, range) => {
 };
 
 export const getValuesAndCountsOfTraitFromTree = (nodes, attr) => {
+  // BUG: VISIBILITY MUST BE TAKEN INTO ACCOUNT
   const stateCount = {};
   nodes.forEach((n) => (stateCount[n.attr[attr]]
     ? stateCount[n.attr[attr]] += 1
     : stateCount[n.attr[attr]] = 1));
+  return stateCount;
+};
+
+export const getValuesAndCountsOfVisibleTraitsFromTree = (nodes, visibility, attrs) => {
+  const stateCount = {};
+  for (const attr of attrs) {
+    stateCount[attr] = {};
+  }
+  nodes.forEach((n) => {
+    if (n.hasChildren) {return;}
+    if (visibility[n.arrayIdx] !== "visible") {return;}
+    for (const attr of attrs) {
+      // attr is "country" or "author" etc
+      // n.attr[attr] is "USA", "Black et al", "USVI", etc
+      stateCount[attr][n.attr[attr]] ? stateCount[attr][n.attr[attr]] += 1 : stateCount[attr][n.attr[attr]] = 1;
+    }
+  });
   return stateCount;
 };
 

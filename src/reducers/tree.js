@@ -1,5 +1,6 @@
 import { flattenTree, appendParentsToTree } from "../components/tree/treeHelpers";
 import { processNodes, calcLayouts } from "../components/tree/processNodes";
+import { getValuesAndCountsOfVisibleTraitsFromTree } from "../util/getColorScale";
 import * as types from "../actions/types";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
@@ -18,7 +19,8 @@ const getDefaultState = () => {
     branchThickness: null,
     branchThicknessVersion: 0,
     version: 0,
-    idxOfInViewRootNode: 0
+    idxOfInViewRootNode: 0,
+    visibleStateCounts: {}
   };
 };
 
@@ -65,7 +67,8 @@ const Tree = (state = getDefaultState(), action) => {
         visibilityVersion: action.visibilityVersion,
         branchThickness: action.branchThickness,
         branchThicknessVersion: action.branchThicknessVersion,
-        idxOfInViewRootNode: action.idxOfInViewRootNode
+        idxOfInViewRootNode: action.idxOfInViewRootNode,
+        visibleStateCounts: getValuesAndCountsOfVisibleTraitsFromTree(state.nodes, action.visibility, action.stateCountAttrs)
       });
     case types.UPDATE_TIP_RADII:
       return Object.assign({}, state, {
