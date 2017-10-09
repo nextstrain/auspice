@@ -22,7 +22,8 @@ const header = (text) => (
 );
 
 @connect((state) => ({
-  analysisSlider: state.controls.analysisSlider
+  analysisSlider: state.controls.analysisSlider,
+  panels: state.metadata.panels
 }))
 class Controls extends React.Component {
   static propTypes = {
@@ -46,7 +47,7 @@ class Controls extends React.Component {
   }
   // restore <ToggleBranchLabels/> below when perf is improved
   render() {
-    // const styles = this.getStyles();
+    const mapAndTree = this.props.panels !== undefined && this.props.panels.indexOf("map") !== -1 && this.props.panels.indexOf("tree") !== -1;
     return (
       <Flex
         direction="column"
@@ -69,8 +70,8 @@ class Controls extends React.Component {
         {header("Color By")}
         <ColorBy/>
 
-        {header("Panel Layout")}
-        <PanelLayout/>
+        {mapAndTree ? (header("Panel Layout")) : null}
+        {mapAndTree ? (<PanelLayout/>) : null}
 
         {header("Tree Options")}
 
