@@ -62,6 +62,7 @@ const styliseDateRange = (dateStr) => {
     nodes: state.tree.nodes,
     idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
     visibleStateCounts: state.tree.visibleStateCounts,
+    totalStateCounts: state.tree.totalStateCounts,
     visibility: state.tree.visibility,
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
@@ -156,7 +157,7 @@ class Info extends React.Component {
       const display = (
         <g>
           {prettyString(itemName)}
-          {" (" + this.props.visibleStateCounts[filterName][itemName] + ")"}
+          {" (" + this.props.totalStateCounts[filterName][itemName] + ")"}
         </g>
       );
       buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));
@@ -183,7 +184,7 @@ class Info extends React.Component {
     /* case 1 (no selected authors) - return now. */
     if (nTotalAuthors === nSelectedAuthors) {return;}
     const authorInfo = this.props.filters.authors.map((v) => {
-      const n = this.props.visibleStateCounts.authors[v] ? this.props.visibleStateCounts.authors[v] : 0;
+      const n = this.props.totalStateCounts.authors[v];
       return {
         name: v,
         label: (
