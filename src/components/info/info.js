@@ -21,18 +21,18 @@ const resetTreeButton = (dispatch) => {
 };
 
 const months = {
-  '01': 'January',
-  '02': 'February',
-  '03': 'March',
-  '04': 'April',
+  '01': 'Jan',
+  '02': 'Feb',
+  '03': 'Mar',
+  '04': 'Apr',
   '05': 'May',
-  '06': 'June',
-  '07': 'July',
-  '08': 'August',
-  '09': 'September',
-  '10': 'October',
-  '11': 'November',
-  '12': 'December'
+  '06': 'Jun',
+  '07': 'Jul',
+  '08': 'Aug',
+  '09': 'Sep',
+  '10': 'Oct',
+  '11': 'Nov',
+  '12': 'Dec'
 };
 
 const plurals = {
@@ -147,7 +147,7 @@ class Info extends React.Component {
           {'\xD7'}
         </div>
         <div className={"boxed-item active-with-icon"}>
-          {`${styliseDateRange(this.props.dateMin)} - ${styliseDateRange(this.props.dateMax)}`}
+          {`${styliseDateRange(this.props.dateMin)} to ${styliseDateRange(this.props.dateMax)}`}
         </div>
       </div>
     );
@@ -258,7 +258,7 @@ class Info extends React.Component {
       const n = Object.keys(this.props.visibleStateCounts[filterName]).length;
       summary.push((`from ${n} ${pluralise(filterName, n)}`));
     });
-    summary.push(`between ${styliseDateRange(this.props.dateMin)} & ${styliseDateRange(this.props.dateMax)}`);
+    summary.push(`dated ${styliseDateRange(this.props.dateMin)} to ${styliseDateRange(this.props.dateMax)}`);
 
     /* part II - the active filters */
     const filters = [];
