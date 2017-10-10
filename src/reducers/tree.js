@@ -1,6 +1,6 @@
 import { flattenTree, appendParentsToTree } from "../components/tree/treeHelpers";
 import { processNodes, calcLayouts } from "../components/tree/processNodes";
-import { getValuesAndCountsOfVisibleTraitsFromTree } from "../util/getColorScale";
+import { getValuesAndCountsOfVisibleTraitsFromTree } from "../util/tree/traversals";
 import * as types from "../actions/types";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies

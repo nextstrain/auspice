@@ -8,7 +8,6 @@ import computeResponsive from "../../util/computeResponsive";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { applyFilterQuery } from "../../actions/treeProperties";
-import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -83,6 +82,7 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
 @connect((state) => {
   return {
     tree: state.tree,
+    visibleStateCounts: state.tree.visibleStateCounts,
     metadata: state.metadata.metadata,
     colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
@@ -144,7 +144,7 @@ class Footer extends React.Component {
   }
 
   displayFilter(styles, filterName) {
-    const stateCount = getValuesAndCountsOfTraitFromTree(this.props.tree.nodes, filterName);
+    const stateCount = this.props.visibleStateCounts[filterName];
     return (
       <div>
         {`Filter by ${prettyString(filterName)}`}

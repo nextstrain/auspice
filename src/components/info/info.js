@@ -6,7 +6,6 @@ import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilterQuery, changeDateFilter } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton } from "../framework/footer";
-import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
 
 const resetTreeButton = (dispatch) => {
@@ -16,7 +15,7 @@ const resetTreeButton = (dispatch) => {
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => dispatch({type: CHANGE_TREE_ROOT_IDX, idxOfInViewRootNode: 0})}
     >
-      {"view entire tree."}
+      {"View entire tree."}
     </div>
   );
 };
@@ -153,7 +152,6 @@ class Info extends React.Component {
     );
   }
   addNonAuthorFilterButton(buttons, filterName) {
-    // const stateCount = getValuesAndCountsOfTraitFromTree(this.props.nodes, filterName);
     this.props.filters[filterName].sort().forEach((itemName) => {
       const display = (
         <g>
@@ -184,24 +182,27 @@ class Info extends React.Component {
     const nSelectedAuthors = this.getNumSelectedAuthors(); // will be equal to nTotalAuthors if none selected
     /* case 1 (no selected authors) - return now. */
     if (nTotalAuthors === nSelectedAuthors) {return;}
-    const authorInfo = this.props.filters.authors.map((v) => ({
-      name: v,
-      label: (
-        <g>
-          {prettyString(v, {stripEtAl: true})}
-          <i>{" et al, "}</i>
-          {"(n=" + this.props.metadata.author_info[v].n + ")"}
-        </g>
-      ),
-      longlabel: (
-        <g>
-          {prettyString(v, {stripEtAl: true})}
-          <i>{" et al, "}</i>
-          {prettyString(this.props.metadata.author_info[v].title)}
-          {" (n=" + this.props.metadata.author_info[v].n + ")"}
-        </g>
-      )
-    }));
+    const authorInfo = this.props.filters.authors.map((v) => {
+      const n = this.props.visibleStateCounts.authors[v] ? this.props.visibleStateCounts.authors[v] : 0;
+      return {
+        name: v,
+        label: (
+          <g>
+            {prettyString(v, {stripEtAl: true})}
+            <i>{" et al, "}</i>
+            {`(n=${n})`}
+          </g>
+        ),
+        longlabel: (
+          <g>
+            {prettyString(v, {stripEtAl: true})}
+            <i>{" et al, "}</i>
+            {prettyString(this.props.metadata.author_info[v].title)}
+            {` (n=${n})`}
+          </g>
+        )
+      };
+    });
     /* case 2: 1 or 2 authors selected */
     if (nSelectedAuthors > 0 && nSelectedAuthors < 3) {
       authorInfo.forEach((d) => (
@@ -246,9 +247,14 @@ class Info extends React.Component {
     (2) The active filters: Filtered to [[Metsky et al Zika Virus Evolution And Spread In The Americas (76)]], [[Colombia (28)]].
     */
 
-    const summary = [(`Showing ${nSelectedSamples} of ${nTotalSamples} genomes`)];
+    const summary = [];
+    if (this.props.idxOfInViewRootNode === 0) {
+      summary.push(`Showing ${nSelectedSamples} of ${nTotalSamples} genomes`);
+    } else {
+      summary.push(`Showing ${nSelectedSamples} of ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} genomes in the selected clade`);
+    }
     Object.keys(this.props.filters).forEach((filterName) => {
-      const n = Object.keys(getValuesAndCountsOfTraitFromTree(this.props.nodes, filterName)).length;
+      const n = Object.keys(this.props.visibleStateCounts[filterName]).length;
       summary.push((`from ${n} ${pluralise(filterName, n)}`));
     });
     summary.push(`between ${styliseDateRange(this.props.dateMin)} & ${styliseDateRange(this.props.dateMax)}`);
@@ -283,8 +289,6 @@ class Info extends React.Component {
               </span>
             ) : null}
             {/* finally - is a branch selected? */}
-            {this.props.idxOfInViewRootNode === 0 ? null :
-              `Currently viewing a clade with ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} descendants, `}
             {this.props.idxOfInViewRootNode === 0 ? null :
               resetTreeButton(this.props.dispatch)}
           </div>
