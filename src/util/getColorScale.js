@@ -4,7 +4,7 @@ import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors, reallySmallNumber, reallyBigNumber } from "./globals";
 import { parseGenotype, getGenotype } from "./getGenotype";
-import { getAllValuesAndCountsOfTraitFromTree } from "./tree/traversals";
+import { getAllValuesAndCountsOfTraitsFromTree } from "./tree/traversals";
 
 /* this checks if there are more items in the tree compared
    to associated colours in the metadata JSON
@@ -92,7 +92,7 @@ const createListOfColors = (n, range) => {
 };
 
 const discreteAttributeScale = (nodes, attr) => {
-  const stateCount = getAllValuesAndCountsOfTraitFromTree(nodes, attr);
+  const stateCount = getAllValuesAndCountsOfTraitsFromTree(nodes, attr)[attr];
   const domain = Object.keys(stateCount);
   domain.sort((a, b) => stateCount[a] > stateCount[b]);
   // note: colors[n] has n colors

@@ -143,14 +143,10 @@ export const loadJSONs = (router) => { // eslint-disable-line import/prefer-defa
         errors from the lifecycle methods of components
         that run while in the middle of this thunk */
         dispatch(errorNotification({
-          message: "Couldn't load data JSONs",
-          details: router.history.location.pathname.replace(/^\//, '') + " doesn't exist."
+          message: "Couldn't load " + router.history.location.pathname.replace(/^\//, '') + " dataset"
         }));
-        router.history.push({pathname: '/', search: ''});
         console.error("loadMetaAndTreeJSONs error:", err);
-        // dispatch error notification
-        // but, it would seem, you can't have the reducer return AND
-        // also get a notification dispatched :(
+        router.history.push({pathname: '/', search: ''});
       });
   };
 };

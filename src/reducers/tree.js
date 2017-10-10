@@ -1,10 +1,11 @@
 import { flattenTree, appendParentsToTree } from "../components/tree/treeHelpers";
 import { processNodes, calcLayouts } from "../components/tree/processNodes";
-import { getValuesAndCountsOfVisibleTraitsFromTree } from "../util/tree/traversals";
+import { getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/tree/traversals";
 import * as types from "../actions/types";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
-that the tree is loaded as they are set on the same action */
+that the tree is loaded as they are set on the same action
+*/
 
 const getDefaultState = () => {
   return {
@@ -20,7 +21,8 @@ const getDefaultState = () => {
     branchThicknessVersion: 0,
     version: 0,
     idxOfInViewRootNode: 0,
-    visibleStateCounts: {}
+    visibleStateCounts: {},
+    totalStateCounts: {}
   };
 };
 
@@ -42,9 +44,12 @@ const Tree = (state = getDefaultState(), action) => {
       const nodesArray = flattenTree(action.tree);
       const nodes = processNodes(nodesArray);
       calcLayouts(nodes, ["div", "num_date"]);
+      // getAllValuesAndCountsOfTraitFromTree
       return Object.assign({}, getDefaultState(), {
         nodes: nodes,
-        attrs: getAttrsOnTerminalNodes(nodes)
+        attrs: getAttrsOnTerminalNodes(nodes),
+        totalStateCounts: {},
+        visibleStateCounts: {}
       });
     }
     case types.DATA_VALID:
@@ -62,14 +67,19 @@ const Tree = (state = getDefaultState(), action) => {
       });
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
-      return Object.assign({}, state, {
+      const newStates = {
         visibility: action.visibility,
         visibilityVersion: action.visibilityVersion,
         branchThickness: action.branchThickness,
         branchThicknessVersion: action.branchThicknessVersion,
         idxOfInViewRootNode: action.idxOfInViewRootNode,
         visibleStateCounts: getValuesAndCountsOfVisibleTraitsFromTree(state.nodes, action.visibility, action.stateCountAttrs)
-      });
+      }
+      /* we only want to calculate totalStateCounts on the first pass */
+      if (!state.loaded) {
+        newStates.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(state.nodes, action.stateCountAttrs);
+      }
+      return Object.assign({}, state, newStates);
     case types.UPDATE_TIP_RADII:
       return Object.assign({}, state, {
         tipRadii: action.data,
