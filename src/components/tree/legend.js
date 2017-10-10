@@ -44,8 +44,8 @@ class Legend extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.browserDimensions && nextProps.browserDimensions
         && this.props.colorScale && nextProps.colorScale) {
-      if (this.props.browserDimensions.width != nextProps.browserDimensions.width
-        || this.props.colorScale.scale != nextProps.colorScale.scale) {
+      if (this.props.browserDimensions.width !== nextProps.browserDimensions.width
+        || this.props.colorScale.scale !== nextProps.colorScale.scale) {
         this.updateLegendVisibility(nextProps.browserDimensions.width, nextProps.sidebar, nextProps.colorScale);
       }
     }
@@ -54,13 +54,13 @@ class Legend extends React.Component {
   updateLegendVisibility(currentWidth, sidebar, colorScale) {
     const sidebarPadding = sidebar ? controlsWidth + 55 : 0;
     if (currentWidth < 600 + sidebarPadding) {
-      this.setState({"legendVisible": false});
+      this.setState({legendVisible: false});
     } else {
-      this.setState({"legendVisible": true});
+      this.setState({legendVisible: true});
     }
     if (colorScale) {
       if (colorScale.scale.domain().length > 32) {
-        this.setState({"legendVisible": false});
+        this.setState({legendVisible: false});
       }
     }
   }
@@ -101,8 +101,8 @@ class Legend extends React.Component {
     return 10 + 5.3 * this.getTitleString().length;
   }
   toggleLegend() {
-    const newState = this.state.legendVisible ? false : true;
-    this.setState({"legendVisible": newState});
+    const newState = !this.state.legendVisible;
+    this.setState({legendVisible: newState});
   }
 
   /*
@@ -121,7 +121,8 @@ class Legend extends React.Component {
             fill: darkGrey,
             fontFamily: headerFont,
             backgroundColor: "#fff"
-          }}>
+          }}
+        >
           {this.getTitleString()}
         </text>
       </g>
@@ -149,7 +150,8 @@ class Legend extends React.Component {
               transformOrigin: "50% 50%",
               transition: `${fastTransitionDuration}ms ease-in-out`
             }}
-            d="M1683 808l-742 741q-19 19-45 19t-45-19l-742-741q-19-19-19-45.5t19-45.5l166-165q19-19 45-19t45 19l531 531 531-531q19-19 45-19t45 19l166 165q19 19 19 45.5t-19 45.5z"/>
+            d="M1683 808l-742 741q-19 19-45 19t-45-19l-742-741q-19-19-19-45.5t19-45.5l166-165q19-19 45-19t45 19l531 531 531-531q19-19 45-19t45 19l166 165q19 19 19 45.5t-19 45.5z"
+          />
         </svg>
       </g>
     );
@@ -160,26 +162,28 @@ class Legend extends React.Component {
    * coordinate system from top,left of parent SVG
    */
   legendItems() {
-    const opacity = this.state.legendVisible ? 1 : 0;
-    const offset = this.state.legendVisible ? 0 : -0.25 * this.getSVGHeight();
+    // const opacity = this.state.legendVisible ? 1 : 0;
+    // const offset = this.state.legendVisible ? 0 : -0.25 * this.getSVGHeight();
     let items = [];
     if (this.props.colorScale.scale) {
-      items = this.props.colorScale.scale.domain().map((d, i) => {
-        return (
-          <LegendItem
-            dispatch={this.props.dispatch}
-            legendRectSize={legendRectSize}
-            legendSpacing={legendSpacing}
-            rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
-            rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
-            transform={this.getTransformationForLegendItem(i)}
-            dFreq={this.props.colorScale.colorBy === "dfreq"}
-            key={i}
-            label={d}
-            index={i}
-          />
-        );
-      });
+      items = this.props.colorScale.scale.domain()
+        .filter((d) => d !== undefined)
+        .map((d, i) => {
+          return (
+            <LegendItem
+              dispatch={this.props.dispatch}
+              legendRectSize={legendRectSize}
+              legendSpacing={legendSpacing}
+              rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
+              rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
+              transform={this.getTransformationForLegendItem(i)}
+              dFreq={this.props.colorScale.colorBy === "dfreq"}
+              key={d}
+              label={d}
+              index={i}
+            />
+          );
+        });
     }
     // This gives the nice looking show/hide animation. Should restore while maintaining
     // legend collapse functionality.
@@ -214,10 +218,11 @@ class Legend extends React.Component {
     if (!this.props.colorScale) {return (<g/>);}
     const styles = this.getStyles();
     return (
-      <svg width = "280" height = {this.getSVGHeight()} style={styles.svg}>
+      <svg width="280" height={this.getSVGHeight()} style={styles.svg}>
         {this.legendItems()}
         <g onClick={() => { this.toggleLegend(); }}
-          style={{cursor: "pointer"}}>
+          style={{cursor: "pointer"}}
+        >
           {this.legendTitle()}
           {this.legendChevron()}
         </g>
