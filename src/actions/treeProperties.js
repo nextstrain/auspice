@@ -9,7 +9,7 @@ const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInVie
   const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);
-  /* re-calculate branchThickness (inline)*/
+  /* re-calculate branchThickness (inline) */
   return {
     visibility: visibility,
     visibilityVersion: tree.visibilityVersion + 1,
@@ -29,8 +29,9 @@ const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInVie
  * @param  {int} tipSelectedIdx idx of the selected tip. If not 0 will highlight path to this tip.
  * @return {null} side effects: a single action
  */
-export const updateVisibleTipsAndBranchThicknesses = function (
-  {idxOfInViewRootNode = undefined, tipSelectedIdx = 0} = {}) {
+export const updateVisibleTipsAndBranchThicknesses = (
+  {idxOfInViewRootNode = undefined, tipSelectedIdx = 0} = {}
+) => {
   return (dispatch, getState) => {
     const { tree, controls } = getState();
     if (!tree.nodes) {return;}
@@ -42,7 +43,8 @@ export const updateVisibleTipsAndBranchThicknesses = function (
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
-      idxOfInViewRootNode: validIdxRoot
+      idxOfInViewRootNode: validIdxRoot,
+      stateCountAttrs: Object.keys(controls.filters)
     });
   };
 };
@@ -55,7 +57,7 @@ export const updateVisibleTipsAndBranchThicknesses = function (
  * @param  {string|false} newMax optional
  * @return {null} side-effects: a single action
  */
-export const changeDateFilter = function ({newMin = false, newMax = false, quickdraw = false}) {
+export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = false}) => {
   return (dispatch, getState) => {
     const { tree, controls } = getState();
     if (!tree.nodes) {return;}
@@ -73,12 +75,13 @@ export const changeDateFilter = function ({newMin = false, newMax = false, quick
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
-      idxOfInViewRootNode: tree.idxOfInViewRootNode
+      idxOfInViewRootNode: tree.idxOfInViewRootNode,
+      stateCountAttrs: Object.keys(controls.filters)
     });
   };
 };
 
-export const changeAnalysisSliderValue = function (value) {
+export const changeAnalysisSliderValue = (value) => {
   return (dispatch) => {
     dispatch({type: types.CHANGE_ANALYSIS_VALUE, value});
     dispatch(updateVisibleTipsAndBranchThicknesses());
@@ -100,7 +103,7 @@ const updateTipRadii = () => {
 (a) update the controls reducer with the new value
 (b)change the tipRadii
 */
-export const legendMouseEnterExit = function (label = null) {
+export const legendMouseEnterExit = (label = null) => {
   return (dispatch) => {
     if (label) {
       dispatch({type: types.LEGEND_ITEM_MOUSEENTER,

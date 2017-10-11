@@ -8,7 +8,6 @@ import computeResponsive from "../../util/computeResponsive";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { applyFilterQuery } from "../../actions/treeProperties";
-import { getValuesAndCountsOfTraitFromTree } from "../../util/getColorScale";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -83,6 +82,7 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
 @connect((state) => {
   return {
     tree: state.tree,
+    totalStateCounts: state.tree.totalStateCounts,
     metadata: state.metadata,
     colorOptions: state.metadata.colorOptions,
     browserDimensions: state.browserDimensions.browserDimensions,
@@ -146,26 +146,26 @@ class Footer extends React.Component {
   }
 
   displayFilter(styles, filterName) {
-    const stateCount = getValuesAndCountsOfTraitFromTree(this.props.tree.nodes, filterName);
+    const totalStateCount = this.props.totalStateCounts[filterName];
     return (
       <div>
         {`Filter by ${prettyString(filterName)}`}
         {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-          {Object.keys(stateCount).sort().map((itemName) => {
+          {Object.keys(totalStateCount).sort().map((itemName) => {
             let display;
             if (filterName === "authors") {
               display = (
                 <g>
                   {prettyString(itemName, {stripEtAl: true})}
-                  {" et al (" + stateCount[itemName] + ")"}
+                  {" et al (" + totalStateCount[itemName] + ")"}
                 </g>
               );
             } else {
               display = (
                 <g>
                   {prettyString(itemName)}
-                  {" (" + stateCount[itemName] + ")"}
+                  {" (" + totalStateCount[itemName] + ")"}
                 </g>
               );
             }
