@@ -35,7 +35,7 @@ const devServer = process.argv.indexOf("dev") !== -1;
 global.LOCAL_DATA = process.argv.indexOf("localData") !== -1;
 global.LOCAL_DATA_PATH = path.join(__dirname, "/data/");
 global.REMOTE_DATA_LIVE_BASEURL = "http://data.nextstrain.org/";
-global.REMOTE_DATA_STAGING_BASEURL = "http://data.nextstrain.org/";
+global.REMOTE_DATA_STAGING_BASEURL = "http://staging.nextstrain.org/";
 global.LOCAL_STATIC = process.argv.indexOf("localStatic") !== -1;
 global.LOCAL_STATIC_PATH = path.join(__dirname, "/static/");
 global.REMOTE_STATIC_BASEURL = "http://cdn.rawgit.com/nextstrain/themis/master/files/";

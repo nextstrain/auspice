@@ -11,11 +11,11 @@ const getDataFile = (res, filePath, s3) => {
   if (global.LOCAL_DATA) {
     res.sendFile(path.join(global.LOCAL_DATA_PATH, filePath));
   } else if (s3 === "staging") {
-    request(global.REMOTE_DATA_LIVE_BASEURL + filePath).pipe(res);
+    request(global.REMOTE_DATA_STAGING_BASEURL + filePath).pipe(res);
     /* TODO explore https://www.npmjs.com/package/cached-request */
   } else {
     // we deliberately don't ensure that s3===live, as this should be the default
-    request(global.REMOTE_DATA_STAGING_BASEURL + filePath).pipe(res);
+    request(global.REMOTE_DATA_LIVE_BASEURL + filePath).pipe(res);
     /* TODO explore https://www.npmjs.com/package/cached-request */
   }
 };
