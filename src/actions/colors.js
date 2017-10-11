@@ -3,8 +3,8 @@ import getColorScale from "../util/getColorScale";
 import { calcNodeColor } from "../components/tree/treeHelpers";
 import * as types from "./types";
 
-export const updateColors = function (providedColorBy = undefined) {
-  return function (dispatch, getState) {
+export const updateColors = (providedColorBy = undefined) => {
+  return (dispatch, getState) => {
     const { controls, tree, sequences, metadata } = getState();
     /* step 0: bail if all required params aren't (yet) available! */
     /* note this *can* run before the tree is loaded - we only need the nodes */
@@ -44,8 +44,8 @@ export const updateColors = function (providedColorBy = undefined) {
 };
 
 /* changeColorBy is just a wrapper for updateColors */
-export const changeColorBy = function (colorBy) {
-  return function (dispatch) {
+export const changeColorBy = (colorBy) => {
+  return (dispatch) => {
     dispatch(updateColors(colorBy));
   };
 };
