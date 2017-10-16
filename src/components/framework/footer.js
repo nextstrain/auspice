@@ -224,11 +224,11 @@ class Footer extends React.Component {
   downloadDataButton() {
     return (
       <button
-        style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", margin: 0, padding: 0})}
+        style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", color: medGrey, margin: 0, padding: 0})}
         onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
       >
         <i className="fa fa-download" aria-hidden="true"/>
-        <span style={{position: "relative"}}>{" Data download"}</span>
+        <span style={{position: "relative"}}>{" download data"}</span>
       </button>
     );
   }
