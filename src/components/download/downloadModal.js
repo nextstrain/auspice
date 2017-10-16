@@ -7,6 +7,7 @@ import { stopProp } from "../tree/tipSelectedPanel";
 import { authorString, formatURLString } from "../../util/stringHelpers";
 import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";
+import { getAcknowledgments, preambleText} from "../framework/footer";
 
 
 @connect((state) => ({
@@ -48,7 +49,9 @@ class DownloadModal extends React.Component {
     datasetPathName: PropTypes.string,
     browserDimensions: PropTypes.object.isRequired
   }
-
+  static contextTypes = {
+    router: PropTypes.object.isRequired
+  }
   relevantPublications() {
     const titer_related_keys = ["cTiter", "rb", "ep", "ne"];
     const titer = (titer_related_keys.indexOf(this.props.colorBy) !== -1) ?
@@ -123,15 +126,10 @@ class DownloadModal extends React.Component {
               <h2>Data usage policy</h2>
               To Write
 
-              <h2>Data contributed by the following authors</h2>
-              {Object.keys(meta.author_info).sort((a, b) => {
-                return meta.author_info[a].n > meta.author_info[b].n ? -1 : 1;
-              }).map((k) => (
-                <span key={k}>
-                  {helpers.getAuthor(meta.author_info, k)}
-                  {" (n=" + meta.author_info[k].n + "), "}
-                </span>
-              ))}
+              <h2>Data sources</h2>
+              {preambleText}
+              {" A full list of sequence authors is available via the CSV files below."}
+              {getAcknowledgments(this.context.router, {})}
 
               {this.relevantPublications()}
 
