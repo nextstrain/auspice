@@ -50,9 +50,9 @@ class DownloadModal extends React.Component {
   }
 
   relevantPublications() {
-    const titer_related_keys = ["antigenic_advance"];
+    const titer_related_keys = ["cTiter", "rb", "ep", "ne"];
     const titer = (titer_related_keys.indexOf(this.props.colorBy) !== -1) ?
-      (<li><a href="http://www.biorxiv.org/content/early/2017/06/21/153494">
+      (<li><a href="http://www.pnas.org/content/113/12/E1701.abstract">
         {authorString("Neher et al")}, Prediction, dynamics, and visualization of antigenic phenotypes of seasonal influenza viruses, PNAS, 2016
       </a></li>) : null;
     return (
