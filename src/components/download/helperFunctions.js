@@ -105,10 +105,18 @@ export const turnAttrsIntoHeaderArray = (attrs) => {
   return ["Strain"].concat(attrs.map((v) => prettyString(v)));
 };
 
-export const strainCSV = (dispatch, filePrefix, nodes, attrs) => {
+export const strainCSV = (dispatch, filePrefix, nodes, rawAttrs) => {
   // dont need to traverse the tree - can just loop the nodes
   const filename = filePrefix + "_metadata.csv";
   const data = [];
+  const includeAttr = (v) => (!(v.includes("entropy") || v.includes("confidence") || v === "div" || v === "paper_url"));
+  const attrs = ["accession", "date", "region", "country", "division", "authors", "journal", "title", "url"];
+  attrs.filter((v) => rawAttrs.indexOf(v) !== -1); // remove those "ideal" atttrs not actually present
+  rawAttrs.forEach((v) => {
+    if (attrs.indexOf(v) === -1 && includeAttr(v)) {
+      attrs.push(v);
+    }
+  });
   for (const node of nodes) {
     if (node.hasChildren) {
       continue;
