@@ -82,7 +82,9 @@ class Map extends React.Component {
       https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
       https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
       */
-      window.L.save = (data) => {
+    }
+    if (!window.L.save) {
+      window.L.save = (data, errorCallback) => {
         leafletImage(this.state.map, (err, canvas) => {
           canvas.toBlob((blob) => {
             const reader = new FileReader();
@@ -92,6 +94,7 @@ class Map extends React.Component {
                 mapDimensions: this.state.map.getSize()
               }));
             });
+            reader.addEventListener('onerror', errorCallback);
             reader.readAsDataURL(blob);
           }, "image/png;base64;", 1);
         });

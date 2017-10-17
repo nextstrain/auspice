@@ -70,9 +70,9 @@ const write = (filename, type, content) => {
   document.body.removeChild(link);
 };
 
-export const authorCSV = (dispatch, dataset, metadata) => {
+export const authorCSV = (dispatch, filePrefix, metadata) => {
   const lineArray = [["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"]];
-  const filename = "nextstrain_" + dataset + "_authors.csv";
+  const filename = filePrefix + "_authors.csv";
 
   const authors = {};
   for (const strain of Object.keys(metadata.seq_author_map)) {
@@ -92,7 +92,7 @@ export const authorCSV = (dispatch, dataset, metadata) => {
       prettyString(metadata.author_info[author].title, {removeComma: true}),
       prettyString(metadata.author_info[author].journal, {removeComma: true}),
       isPaperURLValid(metadata.author_info[author]) ? formatURLString(metadata.author_info[author].paper_url) : "unknown",
-      authors[author].join("\t")
+      authors[author].join(" ")
     ]);
   }
 
@@ -105,10 +105,18 @@ export const turnAttrsIntoHeaderArray = (attrs) => {
   return ["Strain"].concat(attrs.map((v) => prettyString(v)));
 };
 
-export const strainCSV = (dispatch, dataset, nodes, attrs) => {
+export const strainCSV = (dispatch, filePrefix, nodes, rawAttrs) => {
   // dont need to traverse the tree - can just loop the nodes
-  const filename = "nextstrain_" + dataset + "_metadata.csv";
+  const filename = filePrefix + "_metadata.csv";
   const data = [];
+  const includeAttr = (v) => (!(v.includes("entropy") || v.includes("confidence") || v === "div" || v === "paper_url"));
+  const attrs = ["accession", "date", "region", "country", "division", "authors", "journal", "title", "url"];
+  attrs.filter((v) => rawAttrs.indexOf(v) !== -1); // remove those "ideal" atttrs not actually present
+  rawAttrs.forEach((v) => {
+    if (attrs.indexOf(v) === -1 && includeAttr(v)) {
+      attrs.push(v);
+    }
+  });
   for (const node of nodes) {
     if (node.hasChildren) {
       continue;
@@ -161,8 +169,8 @@ export const strainCSV = (dispatch, dataset, nodes, attrs) => {
   dispatch(infoNotification({message: "Metadata exported to " + filename}));
 };
 
-export const newick = (dispatch, dataset, root, temporal) => {
-  const fName = temporal ? "nextstrain_" + dataset + "_timetree.new" : "nextstrain_" + dataset + "_tree.new";
+export const newick = (dispatch, filePrefix, root, temporal) => {
+  const fName = temporal ? filePrefix + "_timetree.new" : filePrefix + "_tree.new";
   const message = temporal ? "TimeTree" : "Tree";
   write(fName, MIME.text, treeToNewick(root, temporal));
   dispatch(infoNotification({message: message + " written to " + fName}));
@@ -194,26 +202,61 @@ const fixSVGString = (svgBroken) => {
   return '<?xml version="1.0" standalone="no"?>\r\n' + svgFixed;
 };
 
-export const SVG = (dispatch, dataset) => {
-  const files = [];
-  /* tree */
-  const svg_tree = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
-  files.unshift("nextstrain_tree.svg");
-  write(files[0], MIME, svg_tree);
-  /* map */
-  const demes_transmissions_xml = (new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions"));
-  const groups = demes_transmissions_xml.match(/^<svg(.*?)>(.*?)<\/svg>/);
-  files.unshift("nextstrain_" + dataset + "_map.svg");
-  /* window.L.save triggers the incommingMapPNG callback, with the data given here passed through */
-  window.L.save({
-    fileName: files[0],
-    demes_transmissions_header: groups[1],
-    demes_transmissions_path: groups[2]
-  });
-  /* entropy panel */
-  const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
-  files.unshift("nextstrain_entropy.svg");
-  write(files[0], MIME.svg, svg_entropy);
-  /* notification */
-  dispatch(infoNotification({message: "Vector images saved", details: files.join(", ")}));
+export const SVG = (dispatch, filePrefix, panels) => {
+  const successes = [];
+  const errors = [];
+
+  if (panels.indexOf("tree") !== -1) {
+    try {
+      const svg_tree = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
+      const fileName = filePrefix + "_tree.svg";
+      write(fileName, MIME, svg_tree);
+      successes.push(fileName);
+    } catch (e) {
+      errors.push("tree");
+      console.error("Tree SVG save error:", e);
+    }
+  }
+
+  if (panels.indexOf("map") !== -1) {
+    try {
+      const errorCallback = () => {
+        dispatch(warningNotification({message: "Errors while saving map SVG"}));
+      };
+      const demes_transmissions_xml = (new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions"));
+      const groups = demes_transmissions_xml.match(/^<svg(.*?)>(.*?)<\/svg>/);
+      const fileName = filePrefix + "_map.svg";
+      /* window.L.save triggers the incommingMapPNG callback, with the data given here passed through */
+      window.L.save({
+        fileName,
+        demes_transmissions_header: groups[1],
+        demes_transmissions_path: groups[2]
+      }, errorCallback);
+      successes.push(fileName);
+    } catch (e) {
+      /* note that errors in L.save are in a callback so aren't caught here */
+      errors.push("map");
+      console.error("Map SVG save error:", e);
+    }
+  }
+
+  if (panels.indexOf("entropy") !== -1) {
+    try {
+      const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
+      const fileName = filePrefix + "_entropy.svg";
+      write(fileName, MIME.svg, svg_entropy);
+      successes.push(fileName);
+    } catch (e) {
+      errors.push("entropy");
+      console.error("Entropy SVG save error:", e);
+    }
+  }
+
+  /* notifications */
+  if (successes.length) {
+    dispatch(infoNotification({message: "Vector images saved", details: successes}));
+  }
+  if (errors.length) {
+    dispatch(warningNotification({message: "Errors saving SVG images", details: errors}));
+  }
 };

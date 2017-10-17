@@ -53,6 +53,30 @@ const styliseDateRange = (dateStr) => {
   return `${months[fields[1]]} ${fields[0]}`;
 };
 
+const getNumSelectedTips = (nodes, visibility) => {
+  let count = 0;
+  nodes.forEach((d, idx) => {
+    if (!d.hasChildren && visibility[idx] === "visible") count += 1;
+  });
+  return count;
+};
+
+export const createSummary = (virus_count, nodes, filters, visibility, visibleStateCounts, idxOfInViewRootNode, dateMin, dateMax) => {
+  const nSelectedSamples = getNumSelectedTips(nodes, visibility);
+  const summary = [];
+  if (idxOfInViewRootNode === 0) {
+    summary.push(`Showing ${nSelectedSamples} of ${virus_count} genomes`);
+  } else {
+    summary.push(`Showing ${nSelectedSamples} of ${nodes[idxOfInViewRootNode].fullTipCount} genomes in the selected clade`);
+  }
+  Object.keys(filters).forEach((filterName) => {
+    const n = Object.keys(visibleStateCounts[filterName]).length;
+    summary.push((`from ${n} ${pluralise(filterName, n)}`));
+  });
+  summary.push(`dated ${styliseDateRange(dateMin)} to ${styliseDateRange(dateMax)}`);
+  return summary;
+};
+
 @connect((state) => {
   return {
     browserDimensions: state.browserDimensions.browserDimensions,
@@ -131,13 +155,6 @@ class Info extends React.Component {
       return Object.keys(this.props.metadata.author_info).length;
     }
     return this.props.filters.authors.length;
-  }
-  getNumSelectedTips() {
-    let count = 0;
-    this.props.nodes.forEach((d, idx) => {
-      if (!d.hasChildren && this.props.visibility[idx] === "visible") count += 1;
-    });
-    return count;
   }
   addFilteredDatesButton(buttons) {
     buttons.push(
@@ -236,8 +253,6 @@ class Info extends React.Component {
       maxAspectRatio: 1.0
     });
     const styles = this.getStyles(responsive);
-    const nTotalSamples = this.props.metadata.virus_count;
-    const nSelectedSamples = this.getNumSelectedTips();
     // const nSelectedAuthors = this.getNumSelectedAuthors();
     // const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
     const animating = this.props.mapAnimationPlayPauseButton === "Pause";
@@ -252,17 +267,7 @@ class Info extends React.Component {
     (2) The active filters: Filtered to [[Metsky et al Zika Virus Evolution And Spread In The Americas (76)]], [[Colombia (28)]].
     */
 
-    const summary = [];
-    if (this.props.idxOfInViewRootNode === 0) {
-      summary.push(`Showing ${nSelectedSamples} of ${nTotalSamples} genomes`);
-    } else {
-      summary.push(`Showing ${nSelectedSamples} of ${this.props.nodes[this.props.idxOfInViewRootNode].fullTipCount} genomes in the selected clade`);
-    }
-    Object.keys(this.props.filters).forEach((filterName) => {
-      const n = Object.keys(this.props.visibleStateCounts[filterName]).length;
-      summary.push((`from ${n} ${pluralise(filterName, n)}`));
-    });
-    summary.push(`dated ${styliseDateRange(this.props.dateMin)} to ${styliseDateRange(this.props.dateMax)}`);
+    const summary = createSummary(this.props.metadata.virus_count, this.props.nodes, this.props.filters, this.props.visibility, this.props.visibleStateCounts, this.props.idxOfInViewRootNode, this.props.dateMin, this.props.dateMax);
 
     /* part II - the active filters */
     const filters = [];
