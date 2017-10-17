@@ -194,26 +194,61 @@ const fixSVGString = (svgBroken) => {
   return '<?xml version="1.0" standalone="no"?>\r\n' + svgFixed;
 };
 
-export const SVG = (dispatch, filePrefix) => {
-  const files = [];
-  /* tree */
-  const svg_tree = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
-  files.unshift(filePrefix + "_tree.svg");
-  write(files[0], MIME, svg_tree);
-  /* map */
-  const demes_transmissions_xml = (new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions"));
-  const groups = demes_transmissions_xml.match(/^<svg(.*?)>(.*?)<\/svg>/);
-  files.unshift(filePrefix + "_map.svg");
-  /* window.L.save triggers the incommingMapPNG callback, with the data given here passed through */
-  window.L.save({
-    fileName: files[0],
-    demes_transmissions_header: groups[1],
-    demes_transmissions_path: groups[2]
-  });
-  /* entropy panel */
-  const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
-  files.unshift(filePrefix + "_entropy.svg");
-  write(files[0], MIME.svg, svg_entropy);
-  /* notification */
-  dispatch(infoNotification({message: "Vector images saved", details: files.join(", ")}));
+export const SVG = (dispatch, filePrefix, panels) => {
+  const successes = [];
+  const errors = [];
+
+  if (panels.indexOf("tree") !== -1) {
+    try {
+      const svg_tree = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
+      const fileName = filePrefix + "_tree.svg";
+      write(fileName, MIME, svg_tree);
+      successes.push(fileName);
+    } catch (e) {
+      errors.push("tree");
+      console.error("Tree SVG save error:", e);
+    }
+  }
+
+  if (panels.indexOf("map") !== -1) {
+    try {
+      const errorCallback = () => {
+        dispatch(warningNotification({message: "Errors while saving map SVG"}));
+      };
+      const demes_transmissions_xml = (new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions"));
+      const groups = demes_transmissions_xml.match(/^<svg(.*?)>(.*?)<\/svg>/);
+      const fileName = filePrefix + "_map.svg";
+      /* window.L.save triggers the incommingMapPNG callback, with the data given here passed through */
+      window.L.save({
+        fileName,
+        demes_transmissions_header: groups[1],
+        demes_transmissions_path: groups[2]
+      }, errorCallback);
+      successes.push(fileName);
+    } catch (e) {
+      /* note that errors in L.save are in a callback so aren't caught here */
+      errors.push("map");
+      console.error("Map SVG save error:", e);
+    }
+  }
+
+  if (panels.indexOf("entropy") !== -1) {
+    try {
+      const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
+      const fileName = filePrefix + "_entropy.svg";
+      write(fileName, MIME.svg, svg_entropy);
+      successes.push(fileName);
+    } catch (e) {
+      errors.push("entropy");
+      console.error("Entropy SVG save error:", e);
+    }
+  }
+
+  /* notifications */
+  if (successes.length) {
+    dispatch(infoNotification({message: "Vector images saved", details: successes}));
+  }
+  if (errors.length) {
+    dispatch(warningNotification({message: "Errors saving SVG images", details: errors}));
+  }
 };
