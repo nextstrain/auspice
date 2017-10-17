@@ -92,7 +92,7 @@ export const authorCSV = (dispatch, filePrefix, metadata) => {
       prettyString(metadata.author_info[author].title, {removeComma: true}),
       prettyString(metadata.author_info[author].journal, {removeComma: true}),
       isPaperURLValid(metadata.author_info[author]) ? formatURLString(metadata.author_info[author].paper_url) : "unknown",
-      authors[author].join("\t")
+      authors[author].join(" ")
     ]);
   }
 
