@@ -4,11 +4,11 @@ import { connect } from "react-redux";
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, medGrey, infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/tipSelectedPanel";
-import { authorString, formatURLString } from "../../util/stringHelpers";
+import { authorString } from "../../util/stringHelpers";
 import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";
 import { getAcknowledgments, preambleText} from "../framework/footer";
-
+import { createSummary } from "../info/info";
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -16,7 +16,15 @@ import { getAcknowledgments, preambleText} from "../framework/footer";
   colorBy: state.controls.colorBy,
   datasetPathName: state.controls.datasetPathName,
   metadata: state.metadata,
-  tree: state.tree
+  tree: state.tree,
+  dateMin: state.controls.dateMin,
+  dateMax: state.controls.dateMax,
+  nodes: state.tree.nodes,
+  idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
+  visibleStateCounts: state.tree.visibleStateCounts,
+  filters: state.controls.filters,
+  visibility: state.tree.visibility,
+  treeAttrs: state.tree.attrs
 }))
 class DownloadModal extends React.Component {
   constructor(props) {
@@ -30,6 +38,17 @@ class DownloadModal extends React.Component {
           zIndex: 10000,
           backgroundColor: "rgba(0, 0, 0, 0.3)"
         },
+        title: {
+          fontWeight: 500,
+          fontSize: 32,
+          marginTop: "20px",
+          marginBottom: "20px"
+        },
+        secondTitle: {
+          fontWeight: 500,
+          marginTop: "0px",
+          marginBottom: "20px"
+        },
         modal: {
           marginLeft: 200,
           marginTop: 130,
@@ -38,16 +57,12 @@ class DownloadModal extends React.Component {
           borderRadius: 2,
           backgroundColor: "rgba(250, 250, 250, 1)",
           overflowY: "auto"
+        },
+        break: {
+          marginBottom: "10px"
         }
       };
     };
-  }
-  static propTypes = {
-    show: PropTypes.bool.isRequired,
-    dispatch: PropTypes.func.isRequired,
-    metadata: PropTypes.object.isRequired,
-    datasetPathName: PropTypes.string,
-    browserDimensions: PropTypes.object.isRequired
   }
   static contextTypes = {
     router: PropTypes.object.isRequired
@@ -60,13 +75,12 @@ class DownloadModal extends React.Component {
       </a></li>) : null;
     return (
       <g>
-        <h2>The current data analysis relies on</h2>
         <ul>
           <li><a href="https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btv381">
-            Neher & Bedford, Nextflu: real-time tracking of seasonal influenza virus evolution in humans, Bioinformatics, 2015
+            Neher & Bedford, Nextflu: real-time tracking of seasonal influenza virus evolution in humans, Bioinformatics (2015)
           </a></li>
           <li><a href="http://www.biorxiv.org/content/early/2017/06/21/153494">
-            {authorString("Sagulenko et al")}, TreeTime: maximum likelihood phylodynamic analysis, bioRxiv, 2017
+            {authorString("Sagulenko et al")}, TreeTime: maximum likelihood phylodynamic analysis, bioRxiv (2017)
           </a></li>
           {titer}
         </ul>
@@ -79,9 +93,9 @@ class DownloadModal extends React.Component {
     const iconWidth = 25;
     const iconStroke = medGrey;
     const buttons = [
-      ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, dataset, this.props.tree.nodes[0], false)],
-      ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, dataset, this.props.tree.nodes[0], true)],
-      ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.strainCSV(this.props.dispatch, dataset, this.props.tree.nodes, this.props.tree.attrs)],
+      ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, dataset, this.props.nodes[0], false)],
+      ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, dataset, this.props.nodes[0], true)],
+      ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.strainCSV(this.props.dispatch, dataset, this.props.nodes, this.props.treeAttrs)],
       ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorCSV(this.props.dispatch, dataset, this.props.metadata)],
       ["Screenshot (SGV)", (<icons.PanelsGrid width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, dataset)]
     ];
@@ -107,30 +121,46 @@ class DownloadModal extends React.Component {
     }
     const styles = this.getStyles(this.props.browserDimensions.width, this.props.browserDimensions.height);
     const meta = this.props.metadata;
+
+
+    const summary = createSummary(
+      this.props.metadata.virus_count,
+      this.props.nodes,
+      this.props.filters,
+      this.props.visibility,
+      this.props.visibleStateCounts,
+      this.props.idxOfInViewRootNode,
+      this.props.dateMin,
+      this.props.dateMax
+    );
     return (
       <div style={styles.behind} onClick={this.dismissModal.bind(this)}>
         <div className="static container" style={styles.modal} onClick={(e) => stopProp(e)}>
           <div className="row">
             <div className="col-md-1"/>
-            <div className="col-md-7">
-              <h1>Download Data</h1>
+            <div className="col-md-7" style={styles.title}>
+              Download Data
             </div>
           </div>
           <div className="row">
             <div className="col-md-1" />
             <div className="col-md-10">
-              <h2>Dataset details</h2>
-              {meta.title} (last updated {meta.updated}) contains {meta.virus_count} sequences from {Object.keys(meta.author_info).length} authors, some of which may be unpublished.
-              <br />
+              <div style={styles.secondTitle}>
+                {meta.title} (last updated {meta.updated})
+              </div>
+              {summary.map((d, i) =>
+                (i + 1 !== summary.length ? <span key={i}>{`${d}, `}</span> : <span key={i}>{`${d}. `}</span>)
+              )}
+              <div style={styles.break}/>
+              {preambleText}
+              {" A full list of sequence authors is available via the CSV files below."}
+              <div style={styles.break}/>
+              {getAcknowledgments(this.context.router, {})}
 
               <h2>Data usage policy</h2>
               To Write
 
-              <h2>Data sources</h2>
-              {preambleText}
-              {" A full list of sequence authors is available via the CSV files below."}
-              {getAcknowledgments(this.context.router, {})}
-
+              <h2>The current data analysis relies on</h2>
               {this.relevantPublications()}
 
               <h2>Download data as</h2>
