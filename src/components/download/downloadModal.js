@@ -96,22 +96,22 @@ class DownloadModal extends React.Component {
   }
 
   downloadButtons() {
-    const dataset = this.props.datasetPathName.replace(/^\//, '').replace(/\//, '_');
+    const filePrefix = "nextstrain_" + this.props.datasetPathName.replace(/^\//, '').replace(/\//g, '_');
     const iconWidth = 25;
     const iconStroke = medGrey;
     const buttons = [
-      ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, dataset, this.props.nodes[0], false)],
-      ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, dataset, this.props.nodes[0], true)],
-      ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.strainCSV(this.props.dispatch, dataset, this.props.nodes, this.props.treeAttrs)],
-      ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorCSV(this.props.dispatch, dataset, this.props.metadata)],
-      ["Screenshot (SGV)", (<icons.PanelsGrid width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, dataset)]
+      ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
+      ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
+      ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.strainCSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.treeAttrs)],
+      ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorCSV(this.props.dispatch, filePrefix, this.props.metadata)],
+      ["Screenshot (SGV)", (<icons.PanelsGrid width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, filePrefix)]
     ];
     return (
       <div className="row">
         {buttons.map((data) => (
           <div key={data[0]} className="col-md-5" onClick={data[2]} style={{cursor: 'pointer'}}>
             {data[1]}
-            <button style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px"})} onClick={data[2]}>
+            <button style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px"})}>
               {data[0]}
             </button>
           </div>
