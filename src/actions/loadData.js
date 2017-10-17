@@ -5,6 +5,7 @@ import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { turnURLtoDataPath } from "../util/urlHelpers";
 import { charonAPIAddress } from "../util/globals";
 import { errorNotification } from "./notifications";
+import { getManifest } from "../util/clientAPIInterface";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {
@@ -85,7 +86,7 @@ const populateEntropyStore = (paths) => {
   };
 };
 
-export const loadJSONs = (router) => { // eslint-disable-line import/prefer-default-export
+export const loadJSONs = (router, s3override = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
 
     const { datasets } = getState();
@@ -95,12 +96,13 @@ export const loadJSONs = (router) => { // eslint-disable-line import/prefer-defa
     }
 
     dispatch({type: types.DATA_INVALID});
+    const s3bucket = s3override ? s3override : datasets.s3bucket;
     const data_path = turnURLtoDataPath(router, {pathogen: datasets.pathogen});
     const paths = {
-      meta: charonAPIAddress + "request=json&path=" + data_path + "_meta.json",
-      tree: charonAPIAddress + "request=json&path=" + data_path + "_tree.json",
-      seqs: charonAPIAddress + "request=json&path=" + data_path + "_sequences.json",
-      entropy: charonAPIAddress + "request=json&path=" + data_path + "_entropy.json"
+      meta: charonAPIAddress + "request=json&path=" + data_path + "_meta.json&s3=" + s3bucket,
+      tree: charonAPIAddress + "request=json&path=" + data_path + "_tree.json&s3=" + s3bucket,
+      seqs: charonAPIAddress + "request=json&path=" + data_path + "_sequences.json&s3=" + s3bucket,
+      entropy: charonAPIAddress + "request=json&path=" + data_path + "_entropy.json&s3=" + s3bucket
     };
     const metaJSONpromise = fetch(paths.meta)
       .then((res) => res.json());
@@ -148,5 +150,17 @@ export const loadJSONs = (router) => { // eslint-disable-line import/prefer-defa
         console.error("loadMetaAndTreeJSONs error:", err);
         router.history.push({pathname: '/', search: ''});
       });
+  };
+};
+
+
+export const changeS3Bucket = (router) => {
+  return (dispatch, getState) => {
+    const {datasets} = getState();
+    const newBucket = datasets.s3bucket === "live" ? "staging" : "live";
+    // 1. re-fetch the manifest
+    getManifest(router, dispatch, newBucket);
+    // 2. this can *only* be toggled through the app, so we must reload data
+    dispatch(loadJSONs(router, newBucket));
   };
 };

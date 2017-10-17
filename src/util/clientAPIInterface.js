@@ -3,7 +3,7 @@ import { MANIFEST_RECEIVED, POSTS_MANIFEST_RECEIVED } from "../actions/types";
 import { errorNotification } from "../actions/notifications";
 import { charonAPIAddress } from "./globals";
 
-export const getManifest = (router, dispatch) => {
+export const getManifest = (router, dispatch, s3bucket = "live") => {
   const charonErrorHandler = (e) => {
     dispatch(errorNotification({message: "Failed to get datasets from server"}));
     console.error(e);
@@ -13,6 +13,7 @@ export const getManifest = (router, dispatch) => {
     // console.log("SERVER API REQUEST RETURNED:", datasets);
     dispatch({
       type: MANIFEST_RECEIVED,
+      s3bucket,
       splash: datasets.splash,
       pathogen: datasets.pathogen,
       user: "guest"
@@ -33,7 +34,7 @@ export const getManifest = (router, dispatch) => {
     }
   };
   xmlHttp.onerror = charonErrorHandler;
-  xmlHttp.open("get", charonAPIAddress + 'request=manifest&user=' + user, true); // true for asynchronous
+  xmlHttp.open("get", `${charonAPIAddress}request=manifest&user=${user}&s3=${s3bucket}`, true); // true for asynchronous
   xmlHttp.send(null);
 };
 

@@ -7,11 +7,15 @@ const request = require('request');
 
 const validUsers = ['guest', 'mumps'];
 
-const getDataFile = (res, filePath) => {
+const getDataFile = (res, filePath, s3) => {
   if (global.LOCAL_DATA) {
     res.sendFile(path.join(global.LOCAL_DATA_PATH, filePath));
+  } else if (s3 === "staging") {
+    request(global.REMOTE_DATA_STAGING_BASEURL + filePath).pipe(res);
+    /* TODO explore https://www.npmjs.com/package/cached-request */
   } else {
-    request(global.REMOTE_DATA_BASEURL + filePath).pipe(res);
+    // we deliberately don't ensure that s3===live, as this should be the default
+    request(global.REMOTE_DATA_LIVE_BASEURL + filePath).pipe(res);
     /* TODO explore https://www.npmjs.com/package/cached-request */
   }
 };
@@ -47,7 +51,7 @@ const getManifest = (query, res) => {
     res.status(404).send('Invalid user');
     return;
   }
-  getDataFile(res, 'manifest_' + query.user + '.json');
+  getDataFile(res, 'manifest_' + query.user + '.json', query.s3);
 };
 
 const getPostsManifest = (query, res) => {
@@ -55,7 +59,7 @@ const getPostsManifest = (query, res) => {
 };
 
 const getSplashImage = (query, res) => {
-  getDataFile(res, query.src);
+  getDataFile(res, query.src, query.s3);
 };
 
 const getImage = (query, res) => {
@@ -63,7 +67,7 @@ const getImage = (query, res) => {
 };
 
 const getDatasetJson = (query, res) => {
-  getDataFile(res, query.path);
+  getDataFile(res, query.path, query.s3);
 };
 
 module.exports = {

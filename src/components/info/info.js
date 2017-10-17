@@ -79,6 +79,7 @@ export const createSummary = (virus_count, nodes, filters, visibility, visibleSt
 
 @connect((state) => {
   return {
+    s3bucket: state.datasets.s3bucket,
     browserDimensions: state.browserDimensions.browserDimensions,
     filters: state.controls.filters,
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
@@ -285,6 +286,10 @@ class Info extends React.Component {
             {title}
           </div>
           <div width={responsive.width} style={styles.n}>
+            {/* if staging, let the user know */}
+            {this.props.s3bucket === "staging" ? (
+              <span style={{color: darkGrey}}>{"Currently viewing data from the staging server. "}</span>
+            ) : null}
             {animating ? `Map animation in progress. ` : null}
             {/* part 1 - the summary */}
             {!animating ? summary.map((d, i) =>

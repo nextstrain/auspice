@@ -14,6 +14,7 @@ import GeoResolution from "./geo-resolution";
 import MapAnimationControls from "./map-animation";
 import { controlsWidth, enableAnimationDisplay } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
+import DataSource from "./data-source";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -27,8 +28,7 @@ const header = (text) => (
 }))
 class Controls extends React.Component {
   static propTypes = {
-    analysisSlider: PropTypes.any,
-    dispatch: PropTypes.func
+    analysisSlider: PropTypes.any
   }
   getStyles() {
     return {};
@@ -85,6 +85,10 @@ class Controls extends React.Component {
         <SelectLabel text="Geographic resolution"/>
         <GeoResolution/>
         {enableAnimationDisplay ? <MapAnimationControls/> : null}
+
+        <div/>
+        {header("Data Source")}
+        <DataSource/>
 
       </Flex>
     );
