@@ -14,7 +14,7 @@ const dataUsage = `
   The data presented here is intended to rapidly disseminate analysis of important pathogens.
   Unpublished data is included with permission of the data generators, and does not impact their right to publish.
   Please contact the respective authors (available via the CSV files below) if you intend to carry out further research using their data.
-  Derived data, such as phylogenies, may be used and can be downloaded below - please cite the relevant authors where appropriate.
+  Derived data, such as phylogenies, can be downloaded below - please contact the relevant authors where appropriate.
 `;
 
 @connect((state) => ({
