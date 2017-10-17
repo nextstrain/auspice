@@ -88,9 +88,9 @@ class DownloadModal extends React.Component {
     return (
       <div className="row">
         {buttons.map((data) => (
-          <div key={data[0]} className="col-md-5">
+          <div key={data[0]} className="col-md-5" onClick={data[2]} style={{cursor: 'pointer'}}>
             {data[1]}
-            <button style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)"})} onClick={data[2]}>
+            <button style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px"})} onClick={data[2]}>
               {data[0]}
             </button>
           </div>
