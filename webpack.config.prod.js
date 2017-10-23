@@ -1,6 +1,7 @@
 const path = require("path");
 const webpack = require("webpack");
 const CompressionPlugin = require('compression-webpack-plugin');
+const WebpackMonitor = require('webpack-monitor');
 
 module.exports = {
   entry: [
@@ -25,6 +26,12 @@ module.exports = {
       test: /\.js$|\.css$|\.html$/,
       threshold: 10240,
       minRatio: 0.8
+    }),
+    new WebpackMonitor({
+      capture: true, // -> default 'true'
+      target: 'monitorStats.json', // default -> '../monitor/stats.json'
+      launch: true, // -> default 'false'
+      port: 3030 // default -> 8081
     })
   ],
   module: {
