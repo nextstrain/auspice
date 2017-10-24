@@ -15,6 +15,7 @@ import MapAnimationControls from "./map-animation";
 import { controlsWidth, enableAnimationDisplay } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import DataSource from "./data-source";
+import Narrative from "../narrative";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -48,6 +49,8 @@ class Controls extends React.Component {
   // restore <ToggleBranchLabels/> below when perf is improved
   render() {
     const mapAndTree = this.props.panels !== undefined && this.props.panels.indexOf("map") !== -1 && this.props.panels.indexOf("tree") !== -1;
+
+    return(<Narrative/>);
     return (
       <Flex
         direction="column"
