@@ -27,7 +27,14 @@ export const getAcknowledgments = (router, style) => {
   if (router.history.location.pathname.includes("zika")) {
     return (
       <div style={style}>
-        Special thanks to Nick Loman, Nathan Grubaugh, Kristof Theys, Nuno Faria, Kristian Andersen, Andrew Rambaut and Karl Erlandson for comments and suggestions.
+        Special thanks to Nick Loman, Nathan Grubaugh, Kristof Theys, Nuno Faria, Kristian Andersen, Andrew Rambaut and Karl Erlandson for data sharing, comments and suggestions.
+      </div>
+    );
+  }
+  if (router.history.location.pathname.includes("mumps")) {
+    return (
+      <div style={style}>
+        Special thanks to Jennifer Gardy, Shirlee Wohl, Jeff Joy, Nathan Yozwiak, Hayden Metsky, Agatha Jassem, Louise Moncla, Gytis Dudas and Pardis Sabeti for data sharing, comments and suggestions.
       </div>
     );
   }
