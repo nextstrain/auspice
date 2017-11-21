@@ -209,6 +209,12 @@ const Controls = (state = getDefaultState(), action) => {
       return Object.assign({}, state, {
         datasetPathName: undefined
       });
+    case types.URL_QUERY_CHANGE: {
+      let newState = Object.assign({}, state);
+      newState = modifyStateViaURLQuery(newState, action.query);
+      newState = checkAndCorrectErrorsInState(newState, action.metadata);
+      return newState;
+    }
     case types.NEW_DATASET: {
       let base = getDefaultState();
       base["datasetPathName"] = action.datasetPathName;

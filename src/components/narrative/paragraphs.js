@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import PropTypes from 'prop-types';
-import { changeURLAndState } from "../../util/urlHelpers";
+import { changeURLQueryAndUpdateState } from "../../util/urlHelpers";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 
 
@@ -36,7 +36,7 @@ export class LinkedParagraph extends React.Component {
   }
   delayedAction = () => {
     const ref = setTimeout(
-      () => {changeURLAndState(this.context.router, this.props.dispatch, this.props.url);},
+      () => {changeURLQueryAndUpdateState(this.context.router, this.props.dispatch, this.props.url);},
       this.props.delay
     );
     this.setState({timeoutRef: ref});

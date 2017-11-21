@@ -15,16 +15,35 @@ const Narrative = () => {
     <div className={"narrative"} style={styles}>
       <p/>
       <NormalParagraph
-        title={"Something normal"}
-        content={"some normal content"}
+        title={"Introduction"}
+        content={"A paragraph which has no effect on state"}
       />
       <LinkedParagraph
-        title={"Some header"}
+        title={"Colorby #1"}
         url={"http://localhost:4000/zika?c=region"}
         content={
-          `something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something
-          something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something something
-          `
+          `hover over this paragrapha and change the colorBy to region`
+        }
+      />
+      <LinkedParagraph
+        title={"Colorby #2 (can click also...)"}
+        url={"http://localhost:4000/zika?c=country"}
+        content={
+          `change the colorBy to country`
+        }
+      />
+      <LinkedParagraph
+        title={"Look at the recent sequences"}
+        url={"http://localhost:4000/zika?c=num_date&dmax=2017-04-20&dmin=2016-09-19"}
+        content={
+          `Recently...`
+        }
+      />
+      <LinkedParagraph
+        title={"Finally"}
+        url={"http://localhost:4000/zika?"}
+        content={
+          `return back to normal / no URL query`
         }
       />
     </div>

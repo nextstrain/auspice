@@ -153,6 +153,20 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
   };
 };
 
+export const urlQueryChange = (query) => {
+  return (dispatch, getState) => {
+    const { metadata } = getState();
+    dispatch({
+      type: types.URL_QUERY_CHANGE,
+      query,
+      metadata
+    });
+    /* perhaps check if the following two are actually necessary?!?!?! */
+    dispatch(updateVisibleTipsAndBranchThicknesses());
+    dispatch(updateColors());
+  };
+};
+
 
 export const changeS3Bucket = (router) => {
   return (dispatch, getState) => {

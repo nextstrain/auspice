@@ -31,7 +31,7 @@ const header = (text) => (
 class Controls extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {narrativeOpen: false};
+    this.state = {narrativeOpen: true};
   }
   static propTypes = {
     analysisSlider: PropTypes.any
