@@ -90,3 +90,12 @@ export const determineColorByGenotypeType = (colorBy) => {
   }
   return false;
 };
+
+export const changeURLAndState = (router, dispatch, url) => {
+  const query = queryString.parse(url.split('?')[1]);
+  router.history.push({
+    pathname: router.history.location.pathname,
+    search: queryString.stringify(query)
+  });
+  console.log("Changed URL to ", query, "->", queryString.stringify(query))
+};
