@@ -40,6 +40,13 @@ const Narrative = () => {
         }
       />
       <LinkedParagraph
+        title={"Now for something different"}
+        url={"http://localhost:4000/zika?l=radial&m=div"}
+        content={
+          `let's look at a radial tree with divergence instead of time...`
+        }
+      />
+      <LinkedParagraph
         title={"Finally"}
         url={"http://localhost:4000/zika?"}
         content={

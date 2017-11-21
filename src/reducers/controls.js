@@ -37,6 +37,7 @@ const getMaxCalDateViaTree = (tree) => {
   return numericToCalendar(maxNumDate);
 };
 
+/* need a (better) way to keep the queryParams all in "sync" */
 const modifyStateViaURLQuery = (state, query) => {
   if (query.l) {
     state["layout"] = query.l;
@@ -56,6 +57,22 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.dmax) {
     state["dateMax"] = query.dmax;
   }
+  return state;
+};
+
+const restoreQueryableStateToDefaults = (state) => {
+  /* layout (l) */
+  state["layout"] = state["defaultLayout"];
+  /* distanceMeasure (m) */
+  state["distanceMeasure"] = state["defaultDistanceMeasure"];
+  /* colorBy (c) */
+  state["colorBy"] = state["defaultColorBy"];
+  /* geoResolution (r) */
+  state["geoResolution"] = state["defaultGeoResolution"];
+  /* dateMin (dmin) */
+  state["dateMin"] = state["absoluteDateMin"];
+  /* dateMax (dmax) */
+  state["dateMax"] = state["absoluteDateMax"];
   return state;
 };
 
@@ -94,6 +111,8 @@ const modifyStateViaMetadata = (state, metadata) => {
       if (metadata.defaults[keysToCheckFor[i]]) {
         if (typeof metadata.defaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
           state[keysToCheckFor[i]] = metadata.defaults[keysToCheckFor[i]];
+          /* as well as state[geoResolution], set state[defaultGeoResolution] */
+          state[`default${keysToCheckFor[i][0].toUpperCase()}${keysToCheckFor[i].substring(1)}`] = state[keysToCheckFor[i]];
         } else {
           console.error("Skipping (meta.json) default for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
         }
@@ -137,8 +156,6 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
     state["defaultColorBy"] = availableNonGenotypeColorBys[0];
     state["colorBy"] = state["defaultColorBy"];
     console.error("Error detected. Setting colorBy to ", state["colorBy"]);
-  } else {
-    state["defaultColorBy"] = state["colorBy"]; // set this so that we can always go back to the initial value
   }
 
   /* colorBy confidence */
@@ -180,7 +197,9 @@ const getDefaultState = () => {
     mutType: mutType,
     temporalConfidence: {exists: false, display: false, on: false},
     layout: defaultLayout,
+    defaultLayout: defaultLayout,
     distanceMeasure: defaultDistanceMeasure,
+    defaultDistanceMeasure: defaultDistanceMeasure,
     dateMin: numericToCalendar(currentNumDate() - defaultDateRange),
     dateMax: currentCalDate(),
     absoluteDateMin: numericToCalendar(currentNumDate() - defaultDateRange),
@@ -191,6 +210,7 @@ const getDefaultState = () => {
     colorScale: undefined,
     analysisSlider: false,
     geoResolution: defaultGeoResolution,
+    defaultGeoResolution: defaultGeoResolution,
     datasetPathName: "",
     filters: {},
     showDownload: false,
@@ -210,7 +230,9 @@ const Controls = (state = getDefaultState(), action) => {
         datasetPathName: undefined
       });
     case types.URL_QUERY_CHANGE: {
+      /* the general pattern is to reset as much as possible to the "base" state, then rehydrate it from the query */
       let newState = Object.assign({}, state);
+      newState = restoreQueryableStateToDefaults(newState);
       newState = modifyStateViaURLQuery(newState, action.query);
       newState = checkAndCorrectErrorsInState(newState, action.metadata);
       return newState;
