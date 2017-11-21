@@ -16,6 +16,7 @@ import { controlsWidth, enableAnimationDisplay } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import DataSource from "./data-source";
 import Narrative from "../narrative";
+import Toggle from "./toggle";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -28,6 +29,10 @@ const header = (text) => (
   panels: state.metadata.panels
 }))
 class Controls extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {narrativeOpen: false};
+  }
   static propTypes = {
     analysisSlider: PropTypes.any
   }
@@ -46,11 +51,20 @@ class Controls extends React.Component {
     }
     return null;
   }
+  narrativeToggle() {
+    return (
+      <Toggle
+        display
+        on={this.state.narrativeOpen}
+        callback={() => this.setState({narrativeOpen: !this.state.narrativeOpen})}
+        label="Show Narrative"
+      />
+    );
+  }
   // restore <ToggleBranchLabels/> below when perf is improved
   render() {
     const mapAndTree = this.props.panels !== undefined && this.props.panels.indexOf("map") !== -1 && this.props.panels.indexOf("tree") !== -1;
 
-    return(<Narrative/>);
     return (
       <Flex
         direction="column"
@@ -61,6 +75,10 @@ class Controls extends React.Component {
           padding: "0px 20px 20px 20px"
         }}
       >
+        {/* following two lines temporary solution */}
+        {this.narrativeToggle()}
+        {this.state.narrativeOpen ? <Narrative/> : null}
+
 
         {header("Dataset")}
         <ChooseDataset/>

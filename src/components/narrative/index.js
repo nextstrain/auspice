@@ -6,13 +6,8 @@ import { LinkedParagraph, NormalParagraph } from "./paragraphs";
 const styles = {
   fontFamily: headerFont,
   fontSize: 16,
-  // marginLeft: 10,
-  // marginTop: 5,
-  // marginBottom: 5,
   fontWeight: 300,
-  color: medGrey,
-  width: controlsWidth,
-  padding: "0px 20px 20px 20px"
+  color: medGrey
 };
 
 const Narrative = () => {
