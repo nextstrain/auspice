@@ -4,7 +4,7 @@ const ReactDOMServer = require('react-dom/server');
 const ReactMarkdown = require('react-markdown'); /* https://github.com/rexxars/react-markdown */
 const fs = require('fs');
 const path = require("path");
-// const request = require('request');
+const request = require('request');
 
 const makeBlock = (type = "normal", url = false) => {
   return ({lines: [], type, url});
@@ -37,7 +37,6 @@ const convertBlocksToHTML = (blocks) => {
   }
 };
 
-
 const serveNarrative = (query, res) => {
   if (global.LOCAL_STATIC) {
     /* this code is syncronous, but that's ok since this is never used in production */
@@ -46,7 +45,16 @@ const serveNarrative = (query, res) => {
     convertBlocksToHTML(blocks);
     res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
   } else {
-    console.error("NARRATIVES ONLY WORK LOCALLY AT THE MOMENT");
+    request(global.REMOTE_STATIC_BASEURL + "narratives/" + query.name + ".md", (err, response, body) => {
+      if (err || body.startsWith("404") || body.split("\n")[1].startsWith('<head><title>404')) {
+        res.status(404).send('Post not found.');
+        return;
+      }
+      const mdArr = body.split("\n");
+      const blocks = parseMarkdownArray(mdArr);
+      convertBlocksToHTML(blocks);
+      res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
+    });
   }
 };
 
