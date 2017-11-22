@@ -5,7 +5,6 @@ import Select from "react-select";
 import { sidebarField } from "../../globalStyles";
 import { defaultColorBy, controlsWidth } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
-import { modifyURLquery } from "../../util/urlHelpers";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
 /* Why does this have colorBy set as state (here) and in redux?
@@ -51,8 +50,7 @@ class ColorBy extends React.Component {
   setColorBy(colorBy) {
     if (colorBy.slice(0, 2) !== "gt") {
       analyticsControlsEvent(`color-by-${colorBy}`);
-      this.props.dispatch(changeColorBy(colorBy));
-      modifyURLquery(this.context.router, {c: colorBy}, true);
+      this.props.dispatch(changeColorBy(colorBy, this.context.router));
       this.setState({colorBySelected: colorBy});
     } else {
       // don't update colorBy yet, genotype still needs to be specified
@@ -140,8 +138,7 @@ class ColorBy extends React.Component {
     }
     const colorBy = "gt-" + gene + "_" + position;
     analyticsControlsEvent("color-by-genotype");
-    this.props.dispatch(changeColorBy(colorBy));
-    modifyURLquery(this.context.router, {c: colorBy}, true);
+    this.props.dispatch(changeColorBy(colorBy, this.context.router));
   }
 
   getStyles() {

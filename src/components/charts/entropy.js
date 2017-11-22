@@ -11,7 +11,6 @@ import EntropyChart from "./entropyD3";
 import InfoPanel from "./entropyInfoPanel";
 import { TOGGLE_MUT_TYPE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { modifyURLquery } from "../../util/urlHelpers";
 import "../../css/entropy.css";
 
 const calcEntropy = (entropy) => {
@@ -148,19 +147,16 @@ class Entropy extends React.Component {
   onClick(d) {
     const colorBy = constructEncodedGenotype(this.props.mutType === "aa", d);
     analyticsControlsEvent("color-by-genotype");
-    this.props.dispatch(changeColorBy(colorBy));
-    modifyURLquery(this.context.router, {c: colorBy}, true);
+    this.props.dispatch(changeColorBy(colorBy, this.context.router));
     this.setState({hovered: false});
   }
 
   changeMutTypeCallback(newMutType) {
     if (newMutType !== this.props.mutType) {
-      /* 1. switch the redux colorBy back to the default */
-      this.props.dispatch(changeColorBy(this.props.defaultColorBy));
+      /* 1. switch the redux colorBy back to the default & update the URL */
+      this.props.dispatch(changeColorBy(this.props.defaultColorBy, this.context.router));
       /* 2. update the mut type in redux */
       this.props.dispatch({type: TOGGLE_MUT_TYPE, data: newMutType});
-      /* 3. modify the URL */
-      modifyURLquery(this.context.router, {c: this.props.defaultColorBy}, true);
     }
   }
 
