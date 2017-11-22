@@ -12,7 +12,7 @@ import ChooseMetric from "./choose-metric";
 import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
 import MapAnimationControls from "./map-animation";
-import { controlsWidth, enableAnimationDisplay } from "../../util/globals";
+import { controlsWidth, enableAnimationDisplay, enableNarratives } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import DataSource from "./data-source";
 import Narrative from "../narrative";
@@ -76,8 +76,8 @@ class Controls extends React.Component {
         }}
       >
         {/* following two lines temporary solution */}
-        {this.narrativeToggle()}
-        {this.state.narrativeOpen ? <Narrative/> : null}
+        {enableNarratives ? this.narrativeToggle() : null}
+        {enableNarratives && this.state.narrativeOpen ? <Narrative/> : null}
 
 
         {header("Dataset")}
