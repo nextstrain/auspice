@@ -110,6 +110,7 @@ class Entropy extends React.Component {
         vertical: 0.3,
         browserDimensions: p.browserDimensions,
         sidebar: p.sidebar,
+        sidebarRight: p.sidebarRight,
         minHeight: 150
       });
       return {
@@ -212,7 +213,7 @@ class Entropy extends React.Component {
     }
     if (this.state.chart) {
       if ((this.props.browserDimensions !== nextProps.browserDimensions) ||
-         (this.props.sidebar !== nextProps.sidebar)) {
+         (this.props.sidebar !== nextProps.sidebar || this.props.sidebarRight !== nextProps.sidebarRight)) {
         if (nextProps.colorBy.startsWith("gt")) {
           this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa", parseEncodedGenotype(nextProps.colorBy));
         } else {

@@ -48,7 +48,13 @@ class Narrative extends React.Component {
       return null;
     }
     return (
-      <div className={"static narrative"}>
+      <div
+        className={"static narrative"}
+        style={{
+          width: "300px",
+          padding: "0px 20px 20px 20px"
+        }}
+      >
         {this.state.blocks.map((block, idx) => {
           if (block.type === "action") {
             return (

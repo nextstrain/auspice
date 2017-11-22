@@ -20,6 +20,7 @@ import Footer from "./framework/footer";
 import DownloadModal from "./download/downloadModal";
 import { analyticsNewPage } from "../util/googleAnalytics";
 import filesDropped from "../actions/filesDropped";
+import Narrative from "./narrative";
 
 const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
@@ -49,11 +50,16 @@ class App extends React.Component {
     to be connected to here, triggering an app render anyways
     */
     const mql = window.matchMedia(`(min-width: ${controlsHiddenWidth}px)`);
-    mql.addListener(() => this.setState({sidebarDocked: this.state.mql.matches}));
+    mql.addListener(() => this.setState({
+      sidebarDocked: this.state.mql.matches,
+      rightSidebarDocked: !this.state.mql.matches
+    }));
     this.state = {
       mql,
       sidebarDocked: mql.matches,
-      sidebarOpen: false
+      sidebarOpen: false,
+      rightSidebarDocked: false, /* right reverses things i think... */
+      rightSidebarOpen: true
     };
     analyticsNewPage();
   }
@@ -96,6 +102,12 @@ class App extends React.Component {
         <ToggleSidebarTab
           open={this.state.sidebarDocked}
           handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
+          side={"left"}
+        />
+        <ToggleSidebarTab
+          open={!this.state.rightSidebarDocked}
+          handler={() => {this.setState({rightSidebarDocked: !this.state.rightSidebarDocked});}}
+          side={"right"}
         />
         <Sidebar
           sidebar={
@@ -114,37 +126,59 @@ class App extends React.Component {
             }
           }}
         >
-          {
-            (!this.props.treeLoaded || !this.props.metadata.loaded) ? (
-              <img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${this.props.browserDimensions.height / 2 - 100}px`}}/>
-            ) : (
-              <Background>
-                <Info
-                  sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-                />
-                {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
-                  <TreeView
-                    query={queryString.parse(this.context.router.history.location.search)}
+          {/* sidebar #2 (narratives) - on the right! */}
+          <Sidebar
+            sidebar={
+              <Narrative/>
+            }
+            pullRight
+            open={this.state.rightSidebarOpen}
+            docked={this.state.rightSidebarDocked}
+            onSetOpen={(a) => {this.setState({rightSidebarOpen: a});}}
+            sidebarClassName={"sidebarr"}
+            styles={{
+              sidebar: {
+                backgroundColor: sidebarColor
+              }
+            }}
+          >
+            {
+              (!this.props.treeLoaded || !this.props.metadata.loaded) ? (
+                <img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${this.props.browserDimensions.height / 2 - 100}px`}}/>
+              ) : (
+                <Background>
+                  <Info
                     sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+                    sidebarRight={!this.state.rightSidebarOpen || !this.state.rightSidebarDocked}
                   />
-                )}
-                {this.props.metadata.panels.indexOf("map") === -1 ? null : (
-                  <Map
+                  {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
+                    <TreeView
+                      query={queryString.parse(this.context.router.history.location.search)}
+                      sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+                      sidebarRight={!this.state.rightSidebarOpen || !this.state.rightSidebarDocked}
+                    />
+                  )}
+                  {this.props.metadata.panels.indexOf("map") === -1 ? null : (
+                    <Map
+                      sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+                      sidebarRight={!this.state.rightSidebarOpen || !this.state.rightSidebarDocked}
+                      justGotNewDatasetRenderNewMap={false}
+                    />
+                  )}
+                  {this.props.metadata.panels.indexOf("entropy") === -1 ? null : (
+                    <Entropy
+                      sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
+                      sidebarRight={!this.state.rightSidebarOpen || !this.state.rightSidebarDocked}
+                    />
+                  )}
+                  <Footer
                     sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-                    justGotNewDatasetRenderNewMap={false}
+                    sidebarRight={!this.state.rightSidebarOpen || !this.state.rightSidebarDocked}
                   />
-                )}
-                {this.props.metadata.panels.indexOf("entropy") === -1 ? null : (
-                  <Entropy
-                    sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-                  />
-                )}
-                <Footer
-                  sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-                />
-              </Background>
-            )
-          }
+                </Background>
+              )
+            }
+          </Sidebar>
         </Sidebar>
       </g>
     );

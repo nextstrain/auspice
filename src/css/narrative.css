@@ -10,10 +10,6 @@
   background-color: orange;
 }
 
-.narrative {
-  max-width: 220px; /* temporary */
-}
-
 .narrative p {
   text-align: justify;
   font-size: 13px;

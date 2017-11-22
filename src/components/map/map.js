@@ -149,7 +149,7 @@ class Map extends React.Component {
       dimensionsChanged: this.props.browserDimensions.width !== nextProps.browserDimensions.width || this.props.browserDimensions.height !== nextProps.browserDimensions.height,
       responsiveNotSet: !this.state.responsive,
       treeChanged: this.props.treeVersion !== nextProps.treeVersion, // treeVersion change implies tree is ready (modified by the same action)
-      sidebarChanged: this.props.sidebar !== nextProps.sidebar,
+      sidebarChanged: this.props.sidebar !== nextProps.sidebar || this.props.sidebarRight !== nextProps.sidebarRight,
       panelLayout: this.props.panelLayout !== nextProps.panelLayout,
     };
 
@@ -169,7 +169,8 @@ class Map extends React.Component {
       horizontal: grid ? 0.5 : 1,
       vertical: grid ? 0.7 : 0.88, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
-      sidebar: nextProps.sidebar
+      sidebar: nextProps.sidebar,
+      sidebarRight: nextProps.sidebarRight
     });
   }
   maybeSetupD3DOMNode() {

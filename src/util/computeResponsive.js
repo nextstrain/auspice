@@ -29,7 +29,8 @@ const computeResponsive = ({
   horizontal, /* multiplicative 1 (mobile, tablet, laptop) or .5 (2 column big monitor) */
   vertical, /* multiplicative .5 (if splitting with another pane) or 1 (if full height of browser window) */
   browserDimensions, /* window.innerWidth & window.innerHeight as an object */
-  sidebar, /* if open, subtract sidebar width from browser width? */
+  sidebar, /* if open, subtract sidebar width from browser width */
+  sidebarRight, /* if open, subtract right sidebar width from browser width */
   minHeight, /* minimum height of element */
   maxAspectRatio /* maximum aspect ratio of element */
 }) => {
@@ -48,7 +49,13 @@ const computeResponsive = ({
   }
 
   if (browserDimensions) {
-    const computedControlWidth = sidebar ? controlsWidth + controlsPadding + scrollbarWidth : 0;
+    let computedControlWidth = 0;
+    if (sidebar) {
+      computedControlWidth += controlsWidth + controlsPadding + scrollbarWidth;
+    }
+    if (sidebarRight) {
+      computedControlWidth += 300 + controlsPadding + scrollbarWidth;
+    }
     width = horizontal * (browserDimensions.width - computedControlWidth - horizontalPadding - scrollbarWidth);
     if (width < cardMinimumWidth) {
       width = horizontal * (browserDimensions.width - horizontalPadding - scrollbarWidth);
