@@ -135,7 +135,8 @@ class App extends React.Component {
             open={this.state.rightSidebarOpen}
             docked={this.state.rightSidebarDocked}
             onSetOpen={(a) => {this.setState({rightSidebarOpen: a});}}
-            sidebarClassName={"sidebarr"}
+            sidebarClassName={"sidebar"}
+            overlayClassName={"noBackground"}
             styles={{
               sidebar: {
                 backgroundColor: sidebarColor

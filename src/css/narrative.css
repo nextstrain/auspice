@@ -19,3 +19,10 @@
   color: var(--darkGrey);
   line-height: 1.42857143;
 }
+
+/* there appears to be a bug in react-sidebar where, if it's coming from the right,
+the open / docked booleans are flipped. Thus, it's "open" as if it were on mobile
+and so the background colour is rgba(0, 0, 0, 0.3). This gets around this.*/
+.noBackground {
+  background-color: rgba(0, 0, 0, 0) !important;
+}
