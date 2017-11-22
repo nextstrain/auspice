@@ -17,7 +17,10 @@ const parseMarkdownArray = (mdArr) => {
   let n = 0;
   let block = makeBlock(); /* initialise */
   while (n < nMax) {
-    if (mdArr[n].startsWith('[NEXTSTRAIN_URL]')) {
+    if (mdArr[n].startsWith('[NEXTSTRAIN_NO_ACTION]')) {
+      blocks.push(block); /* push the previous block onto the stack */
+      block = makeBlock();
+    } else if (mdArr[n].startsWith('[NEXTSTRAIN_URL]')) {
       blocks.push(block); /* push the previous block onto the stack */
       block = makeBlock("action", mdArr[n].match(re)[1]);
     } else {
