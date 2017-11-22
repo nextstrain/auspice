@@ -48,7 +48,7 @@ class Narrative extends React.Component {
       return null;
     }
     return (
-      <div className={"narrative"}>
+      <div className={"static narrative"}>
         {this.state.blocks.map((block, idx) => {
           if (block.type === "action") {
             return (
