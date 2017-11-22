@@ -1,59 +1,71 @@
 import React from "react";
+import { connect } from "react-redux";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { controlsWidth } from "../../util/globals";
+import { controlsWidth, charonAPIAddress } from "../../util/globals";
 import { LinkedParagraph, NormalParagraph } from "./paragraphs";
+import { warningNotification } from "../../actions/notifications";
 
-const styles = {
-  fontFamily: headerFont,
-  fontSize: 16,
-  fontWeight: 300,
-  color: medGrey
-};
-
-const Narrative = () => {
-  return (
-    <div className={"narrative"} style={styles}>
-      <p/>
-      <NormalParagraph
-        title={"Introduction"}
-        content={"A paragraph which has no effect on state"}
-      />
-      <LinkedParagraph
-        title={"Colorby #1"}
-        url={"http://localhost:4000/zika?c=region"}
-        content={
-          `hover over this paragrapha and change the colorBy to region`
-        }
-      />
-      <LinkedParagraph
-        title={"Colorby #2 (can click also...)"}
-        url={"http://localhost:4000/zika?c=country"}
-        content={
-          `change the colorBy to country`
-        }
-      />
-      <LinkedParagraph
-        title={"Look at the recent sequences"}
-        url={"http://localhost:4000/zika?c=num_date&dmax=2017-04-20&dmin=2016-09-19"}
-        content={
-          `Recently...`
-        }
-      />
-      <LinkedParagraph
-        title={"Now for something different"}
-        url={"http://localhost:4000/zika?l=radial&m=div"}
-        content={
-          `let's look at a radial tree with divergence instead of time...`
-        }
-      />
-      <LinkedParagraph
-        title={"Finally"}
-        url={"http://localhost:4000/zika?"}
-        content={
-          `return back to normal / no URL query`
-        }
-      />
-    </div>
-  );
-};
+@connect((state) => ({
+  datasetPathName: state.controls.datasetPathName
+}))
+class Narrative extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      blocks: undefined
+    };
+  }
+  getDataFromServer(datasetPathName) {
+    const errorHandler = (e) => {
+      this.props.dispatch(warningNotification({message: "Failed to get narrative from server"}));
+      console.error(e);
+    };
+    const xmlHttp = new XMLHttpRequest();
+    xmlHttp.onload = () => {
+      if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+        this.setState({blocks: JSON.parse(xmlHttp.responseText)});
+      } else {
+        errorHandler(xmlHttp);
+      }
+    };
+    xmlHttp.onerror = errorHandler;
+    const name = datasetPathName.replace(/^\//, '').replace(/\//, '_');
+    xmlHttp.open("get", `${charonAPIAddress}request=narrative&name=${name}`, true);
+    xmlHttp.send(null);
+  }
+  componentDidMount() {
+    if (this.props.datasetPathName && this.props.datasetPathName !== "") {
+      this.getDataFromServer(this.props.datasetPathName);
+    }
+  }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.datasetPathName && this.props.datasetPathName !== nextProps.datasetPathName) {
+      this.getDataFromServer(nextProps.datasetPathName);
+    }
+  }
+  render() {
+    if (this.state.blocks === undefined) {
+      return null;
+    }
+    return (
+      <div className={"narrative"}>
+        {this.state.blocks.map((block, idx) => {
+          if (block.type === "action") {
+            return (
+              <LinkedParagraph
+                url={block.url}
+                content={{__html: block.__html}} // eslint-disable-line no-underscore-dangle
+                key={idx.toString()}
+              />
+            );
+          }
+          return (
+            // eslint-disable-next-line react/no-danger
+            <div dangerouslySetInnerHTML={block} key={idx.toString()}/>
+          );
+        })}
+      </div>
+    );
+  }
+}
 export default Narrative;
