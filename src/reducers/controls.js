@@ -39,7 +39,6 @@ const getMaxCalDateViaTree = (tree) => {
 
 /* need a (better) way to keep the queryParams all in "sync" */
 const modifyStateViaURLQuery = (state, query) => {
-  console.log("modifyStateViaURLQuery query:", query);
   if (query.l) {
     state["layout"] = query.l;
   }
@@ -59,27 +58,31 @@ const modifyStateViaURLQuery = (state, query) => {
     state["dateMax"] = query.dmax;
   }
   for (const filterKey of Object.keys(query).filter((c) => c.startsWith('f_'))) {
-    state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',')
+    state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',');
   }
   return state;
 };
 
 const restoreQueryableStateToDefaults = (state) => {
-  /* layout (l) */
-  state["layout"] = state["defaultLayout"];
-  /* distanceMeasure (m) */
-  state["distanceMeasure"] = state["defaultDistanceMeasure"];
-  /* colorBy (c) */
-  state["colorBy"] = state["defaultColorBy"];
-  /* geoResolution (r) */
-  state["geoResolution"] = state["defaultGeoResolution"];
-  /* dateMin (dmin) */
+  for (const key of Object.keys(state.defaults)) {
+    switch (typeof state.defaults[key]) {
+      case "string": {
+        state[key] = state.defaults[key];
+        break;
+      }
+      case "object": { /* can't use Object.assign, must deep clone instead */
+        state[key] = JSON.parse(JSON.stringify(state.defaults[key]));
+        break;
+      }
+      default: {
+        console.error("unknown typeof for default state of ", key);
+      }
+    }
+  }
+  /* dateMin & dateMax get set to their bounds */
   state["dateMin"] = state["absoluteDateMin"];
-  /* dateMax (dmax) */
   state["dateMax"] = state["absoluteDateMax"];
-  /* filters */
-  state.filters = {};
-  state.defaultFilterNames.forEach((n) => {state.filters[n] = [];});
+  // console.log("state now", state);
   return state;
 };
 
@@ -102,14 +105,14 @@ const modifyStateViaMetadata = (state, metadata) => {
   }
   if (metadata.author_info) {
     state.filters.authors = [];
+    state.defaults.filters.authors = [];
   } else {
     console.error("update meta.json to include author_info.");
   }
   if (metadata.filters) {
-    state.defaultFilterNames = [];
     metadata.filters.forEach((v) => {
       state.filters[v] = [];
-      state.defaultFilterNames.push(v);
+      state.defaults.filters[v] = [];
     });
   } else {
     console.warn("the meta.json did not include any filters");
@@ -121,9 +124,9 @@ const modifyStateViaMetadata = (state, metadata) => {
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (metadata.defaults[keysToCheckFor[i]]) {
         if (typeof metadata.defaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
+          /* e.g. if key=geoResoltion, set both state.geoResolution and state.defaults.geoResolution */
           state[keysToCheckFor[i]] = metadata.defaults[keysToCheckFor[i]];
-          /* as well as state[geoResolution], set state[defaultGeoResolution] */
-          state[`default${keysToCheckFor[i][0].toUpperCase()}${keysToCheckFor[i].substring(1)}`] = state[keysToCheckFor[i]];
+          state.defaults[keysToCheckFor[i]] = metadata.defaults[keysToCheckFor[i]];
         } else {
           console.error("Skipping (meta.json) default for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
         }
@@ -156,17 +159,16 @@ const modifyStateViaTree = (state, tree) => {
 };
 
 const checkAndCorrectErrorsInState = (state, metadata) => {
-
   /* colorBy */
-  const availableNonGenotypeColorBys = Object.keys(metadata.color_options);
-  if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
-    availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
-  }
   const colorByValid = Object.keys(metadata.color_options).indexOf(state["colorBy"]) !== -1;
   if (!colorByValid || state["colorBy"].startsWith("gt-")) {
-    state["defaultColorBy"] = availableNonGenotypeColorBys[0];
-    state["colorBy"] = state["defaultColorBy"];
-    console.error("Error detected. Setting colorBy to ", state["colorBy"]);
+    const availableNonGenotypeColorBys = Object.keys(metadata.color_options);
+    if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
+      availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
+    }
+    state.colorBy = availableNonGenotypeColorBys[0];
+    state.defaults.colorBy = availableNonGenotypeColorBys[0];
+    console.error("Error detected. Setting colorBy to ", state.colorBy);
   }
 
   /* colorBy confidence */
@@ -197,7 +199,15 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
 const getDefaultState = () => {
+  const defaults = {
+    distanceMeasure: defaultDistanceMeasure,
+    layout: defaultLayout,
+    geoResolution: defaultGeoResolution,
+    filters: {},
+    colorBy: defaultColorBy
+  };
   return {
+    defaults,
     showBranchLabels: false,
     selectedLegendItem: null,
     selectedBranch: null,
@@ -207,21 +217,17 @@ const getDefaultState = () => {
     strain: null,
     mutType: mutType,
     temporalConfidence: {exists: false, display: false, on: false},
-    layout: defaultLayout,
-    defaultLayout: defaultLayout,
-    distanceMeasure: defaultDistanceMeasure,
-    defaultDistanceMeasure: defaultDistanceMeasure,
+    layout: defaults.layout,
+    distanceMeasure: defaults.distanceMeasure,
     dateMin: numericToCalendar(currentNumDate() - defaultDateRange),
     dateMax: currentCalDate(),
     absoluteDateMin: numericToCalendar(currentNumDate() - defaultDateRange),
     absoluteDateMax: currentCalDate(),
-    colorBy: defaultColorBy,
-    defaultColorBy: defaultColorBy,
+    colorBy: defaults.colorBy,
     colorByConfidence: {display: false, on: false},
     colorScale: undefined,
     analysisSlider: false,
-    geoResolution: defaultGeoResolution,
-    defaultGeoResolution: defaultGeoResolution,
+    geoResolution: defaults.geoResolution,
     datasetPathName: "",
     filters: {},
     showDownload: false,

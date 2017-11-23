@@ -92,7 +92,7 @@ const parseEncodedGenotype = (colorBy) => {
     browserDimensions: state.browserDimensions.browserDimensions,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
-    defaultColorBy: state.controls.defaultColorBy,
+    defaultColorBy: state.controls.defaults.colorBy,
     shouldReRender: false,
     panelLayout: state.controls.panelLayout
   };

@@ -1,5 +1,4 @@
 import { calcFullTipCounts, calcBranchLength, calcDates } from "./treeHelpers";
-import { defaultDistanceMeasures } from "../../util/globals";
 
 export const processNodes = (nodes) => {
   const rootNode = nodes[0];
@@ -47,12 +46,9 @@ const radialLayout = (node, distanceMeasure, nTips, rootVal) => {
  * nodes: array of nodes for which x/y coordinates are to be calculated
  * nTips: total number of tips  (optional)
  * distanceMeasures: the different types of distances used to measure
-                     distances on the tree (date, mutations, etc) (optional)
+                     distances on the tree (date, mutations, etc)
 */
 export const calcLayouts = (nodes, distanceMeasures, nTips) => {
-    if (typeof distanceMeasures==='undefined'){
-        distanceMeasures = defaultDistanceMeasures;
-    }
     if (typeof nTips==='undefined'){
         nTips = nodes.filter((d) => {return !d.hasChildren;} ).length;
     }

@@ -7,10 +7,9 @@ import { defaultColorBy, controlsWidth } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
-/* Why does this have colorBy set as state (here) and in redux?
-   it's for the case where we select genotype, then wait for the
-   base to be selected, so we modify state but not yet dispatch
-*/
+/* the reason why we have colorBy as state (here) and in redux
+   is for the case where we select genotype, then wait for the
+   base to be selected, so we modify state but not yet dispatch */
 
 @connect((state) => {
   return {
@@ -24,7 +23,7 @@ class ColorBy extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      colorBySelected: defaultColorBy,
+      colorBySelected: defaultColorBy, /* the default is irrelevent unless the default is genotype */
       geneSelected: "nuc",
       positionSelected: ""
     };
