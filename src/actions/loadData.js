@@ -159,15 +159,18 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
 
 export const urlQueryChange = (query) => {
   return (dispatch, getState) => {
-    const { metadata } = getState();
+    const { controls, metadata } = getState();
     dispatch({
       type: types.URL_QUERY_CHANGE,
       query,
       metadata
     });
-    /* perhaps check if the following two are actually necessary?!?!?! */
+    const newState = getState();
+    /* working out whether visibility / thickness needs updating is tricky */
     dispatch(updateVisibleTipsAndBranchThicknesses());
-    dispatch(updateColors());
+    if (controls.colorBy !== newState.controls.colorBy) {
+      dispatch(updateColors());
+    }
   };
 };
 
