@@ -7,6 +7,7 @@ import { applyFilterQuery, changeDateFilter } from "../../actions/treeProperties
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton } from "../framework/footer";
 import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
+import { modifyURLquery } from "../../util/urlHelpers";
 
 const resetTreeButton = (dispatch) => {
   return (
@@ -166,7 +167,10 @@ class Info extends React.Component {
       <div key={"timefilter"} style={{display: "inline-block"}}>
         <div
           className={'boxed-item-icon'}
-          onClick={() => this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}))}
+          onClick={() => {
+            modifyURLquery(this.context.router, {dmin: '', dmax: ''}, true);
+            this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
+          }}
           role="button"
           tabIndex={0}
         >
