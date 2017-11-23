@@ -58,8 +58,8 @@ class App extends React.Component {
       mql,
       sidebarDocked: mql.matches,
       sidebarOpen: false,
-      rightSidebarDocked: false, /* right reverses things i think... */
-      rightSidebarOpen: true
+      rightSidebarDocked: true,
+      rightSidebarOpen: false
     };
     analyticsNewPage();
   }
@@ -105,7 +105,7 @@ class App extends React.Component {
           side={"left"}
         />
         <ToggleSidebarTab
-          open={!this.state.rightSidebarDocked}
+          open={this.state.rightSidebarDocked}
           handler={() => {this.setState({rightSidebarDocked: !this.state.rightSidebarDocked});}}
           side={"right"}
         />
@@ -136,10 +136,10 @@ class App extends React.Component {
             docked={this.state.rightSidebarDocked}
             onSetOpen={(a) => {this.setState({rightSidebarOpen: a});}}
             sidebarClassName={"sidebar"}
-            overlayClassName={"noBackground"}
             styles={{
               sidebar: {
-                backgroundColor: sidebarColor
+                backgroundColor: sidebarColor,
+                width: "300px"
               }
             }}
           >
@@ -150,31 +150,31 @@ class App extends React.Component {
                 <Background>
                   <Info
                     sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-                    sidebarRight={!this.state.rightSidebarOpen || !this.state.rightSidebarDocked}
+                    sidebarRight={this.state.rightSidebarOpen || this.state.rightSidebarDocked}
                   />
                   {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
                     <TreeView
                       query={queryString.parse(this.context.router.history.location.search)}
                       sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-                      sidebarRight={!this.state.rightSidebarOpen || !this.state.rightSidebarDocked}
+                      sidebarRight={this.state.rightSidebarOpen || this.state.rightSidebarDocked}
                     />
                   )}
                   {this.props.metadata.panels.indexOf("map") === -1 ? null : (
                     <Map
                       sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-                      sidebarRight={!this.state.rightSidebarOpen || !this.state.rightSidebarDocked}
+                      sidebarRight={this.state.rightSidebarOpen || this.state.rightSidebarDocked}
                       justGotNewDatasetRenderNewMap={false}
                     />
                   )}
                   {this.props.metadata.panels.indexOf("entropy") === -1 ? null : (
                     <Entropy
                       sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-                      sidebarRight={!this.state.rightSidebarOpen || !this.state.rightSidebarDocked}
+                      sidebarRight={this.state.rightSidebarOpen || this.state.rightSidebarDocked}
                     />
                   )}
                   <Footer
                     sidebar={this.state.sidebarOpen || this.state.sidebarDocked}
-                    sidebarRight={!this.state.rightSidebarOpen || !this.state.rightSidebarDocked}
+                    sidebarRight={this.state.rightSidebarOpen || this.state.rightSidebarDocked}
                   />
                 </Background>
               )

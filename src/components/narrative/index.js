@@ -51,7 +51,6 @@ class Narrative extends React.Component {
       <div
         className={"static narrative"}
         style={{
-          width: "300px",
           padding: "0px 20px 20px 20px"
         }}
       >
