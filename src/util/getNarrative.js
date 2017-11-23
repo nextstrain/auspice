@@ -5,7 +5,8 @@ import { NEW_NARRATIVE } from "../actions/types";
 // eslint-disable-next-line
 export const getNarrative = (dispatch, datasetPathName) => {
   const errorHandler = (e) => {
-    this.props.dispatch(warningNotification({message: "Failed to get narrative from server"}));
+    // dispatch(warningNotification({message: "Failed to get narrative from server"}));
+    console.error("Failed to get narrative from server");
     console.error(e);
   };
   const xmlHttp = new XMLHttpRequest();
