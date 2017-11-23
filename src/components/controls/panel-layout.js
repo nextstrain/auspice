@@ -1,9 +1,11 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { materialButton, materialButtonSelected, brandColor, lightGrey, darkGrey } from "../../globalStyles";
 import * as icons from "../framework/svg-icons";
 import { CHANGE_PANEL_LAYOUT } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import { modifyURLquery } from "../../util/urlHelpers";
 
 @connect((state) => {
   return {
@@ -11,6 +13,9 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
   };
 })
 class PanelLayouts extends React.Component {
+  static contextTypes = {
+    router: PropTypes.object.isRequired
+  }
   getStyles() {
     return {
       container: {
@@ -37,6 +42,7 @@ class PanelLayouts extends React.Component {
           style={this.props.panelLayout === "full" ? materialButtonSelected : materialButton}
           onClick={() => {
             analyticsControlsEvent("change-layout-full");
+            modifyURLquery(this.context.router, {p: "full"}, true);
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "full" });
           }}
         >
@@ -48,6 +54,7 @@ class PanelLayouts extends React.Component {
           style={this.props.panelLayout === "grid" ? materialButtonSelected : materialButton}
           onClick={() => {
             analyticsControlsEvent("change-layout-grid");
+            modifyURLquery(this.context.router, {p: "grid"}, true);
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "grid" });
           }}
         >

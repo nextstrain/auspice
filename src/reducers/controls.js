@@ -52,6 +52,9 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.r) {
     state["geoResolution"] = query.r;
   }
+  if (query.p && state.canTogglePanelLayout && (query.p === "full" || query.p === "grid")) {
+    state["panelLayout"] = query.p;
+  }
   if (query.dmin) {
     state["dateMin"] = query.dmin;
   }
@@ -83,6 +86,9 @@ const restoreQueryableStateToDefaults = (state) => {
   /* dateMin & dateMax get set to their bounds */
   state["dateMin"] = state["absoluteDateMin"];
   state["dateMax"] = state["absoluteDateMax"];
+
+  state["panelLayout"] = calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full";
+
   // console.log("state now", state);
   return state;
 };
@@ -142,7 +148,8 @@ const modifyStateViaMetadata = (state, metadata) => {
 
   /* if only map or only tree, then panelLayout must be full */
   if (metadata.panels.indexOf("map") === -1 || metadata.panels.indexOf("tree") === -1) {
-    state["panelLayout"] = "full";
+    state.panelLayout = "full";
+    state.canTogglePanelLayout = false;
   }
   return state;
 };
@@ -208,6 +215,7 @@ const getDefaultState = () => {
   };
   return {
     defaults,
+    canTogglePanelLayout: true,
     showBranchLabels: false,
     selectedLegendItem: null,
     selectedBranch: null,

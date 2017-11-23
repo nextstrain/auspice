@@ -25,6 +25,7 @@ const header = (text) => (
 
 @connect((state) => ({
   analysisSlider: state.controls.analysisSlider,
+  canTogglePanelLayout: state.controls.canTogglePanelLayout,
   panels: state.metadata.panels
 }))
 class Controls extends React.Component {
@@ -72,8 +73,8 @@ class Controls extends React.Component {
         {header("Color By")}
         <ColorBy/>
 
-        {mapAndTree ? (header("Panel Layout")) : null}
-        {mapAndTree ? (<PanelLayout/>) : null}
+        {mapAndTree && this.props.canTogglePanelLayout ? (header("Panel Layout")) : null}
+        {mapAndTree && this.props.canTogglePanelLayout ? (<PanelLayout/>) : null}
 
         {header("Tree Options")}
 

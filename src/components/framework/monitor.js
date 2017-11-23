@@ -5,9 +5,11 @@ import _throttle from "lodash/throttle";
 import { BROWSER_DIMENSIONS, CHANGE_PANEL_LAYOUT } from "../../actions/types";
 import { getManifest, getPostsManifest } from "../../util/clientAPIInterface";
 import { twoColumnBreakpoint } from "../../util/globals";
+import { modifyURLquery } from "../../util/urlHelpers";
 
 @connect((state) => ({
-  panels: state.metadata.panels
+  panels: state.metadata.panels,
+  canTogglePanelLayout: state.controls.canTogglePanelLayout
 }))
 class Monitor extends React.Component {
   constructor(props) {
@@ -50,10 +52,12 @@ class Monitor extends React.Component {
       };
       dispatch({type: BROWSER_DIMENSIONS, data: newBrowserDimensions});
       /* only switch between grid / full if there is a map and a tree */
-      if (this.props.panels !== undefined && this.props.panels.indexOf("map") !== -1 && this.props.panels.indexOf("tree") !== -1) {
+      if (this.props.panels !== undefined && this.props.canTogglePanelLayout) {
         if (oldBrowserDimensions.width < twoColumnBreakpoint && newBrowserDimensions.width >= twoColumnBreakpoint) {
+          modifyURLquery(this.context.router, {p: ""}, true);
           dispatch({type: CHANGE_PANEL_LAYOUT, data: "grid"});
         } else if (oldBrowserDimensions.width > twoColumnBreakpoint && newBrowserDimensions.width <= twoColumnBreakpoint) {
+          modifyURLquery(this.context.router, {p: ""}, true);
           dispatch({type: CHANGE_PANEL_LAYOUT, data: "full"});
         }
       }
