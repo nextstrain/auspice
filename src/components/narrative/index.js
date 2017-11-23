@@ -6,7 +6,8 @@ import { LinkedParagraph, NormalParagraph } from "./paragraphs";
 import { warningNotification } from "../../actions/notifications";
 
 @connect((state) => ({
-  datasetPathName: state.controls.datasetPathName
+  loaded: state.narrative.loaded,
+  blocks: state.narrative.blocks
 }))
 class Narrative extends React.Component {
   constructor(props) {
@@ -15,36 +16,8 @@ class Narrative extends React.Component {
       blocks: undefined
     };
   }
-  getDataFromServer(datasetPathName) {
-    const errorHandler = (e) => {
-      this.props.dispatch(warningNotification({message: "Failed to get narrative from server"}));
-      console.error(e);
-    };
-    const xmlHttp = new XMLHttpRequest();
-    xmlHttp.onload = () => {
-      if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-        this.setState({blocks: JSON.parse(xmlHttp.responseText)});
-      } else {
-        errorHandler(xmlHttp);
-      }
-    };
-    xmlHttp.onerror = errorHandler;
-    const name = datasetPathName.replace(/^\//, '').replace(/\//, '_');
-    xmlHttp.open("get", `${charonAPIAddress}request=narrative&name=${name}`, true);
-    xmlHttp.send(null);
-  }
-  componentDidMount() {
-    if (this.props.datasetPathName && this.props.datasetPathName !== "") {
-      this.getDataFromServer(this.props.datasetPathName);
-    }
-  }
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.datasetPathName && this.props.datasetPathName !== nextProps.datasetPathName) {
-      this.getDataFromServer(nextProps.datasetPathName);
-    }
-  }
   render() {
-    if (this.state.blocks === undefined) {
+    if (!this.props.loaded) {
       return null;
     }
     return (
@@ -54,7 +27,7 @@ class Narrative extends React.Component {
           padding: "0px 20px 20px 20px"
         }}
       >
-        {this.state.blocks.map((block, idx) => {
+        {this.props.blocks.map((block, idx) => {
           if (block.type === "action") {
             return (
               <LinkedParagraph

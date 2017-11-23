@@ -6,6 +6,7 @@ import { turnURLtoDataPath } from "../util/urlHelpers";
 import { charonAPIAddress } from "../util/globals";
 import { errorNotification } from "./notifications";
 import { getManifest } from "../util/clientAPIInterface";
+import { getNarrative } from "../util/getNarrative";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {
@@ -137,6 +138,7 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
         if (values[0].panels.indexOf("entropy") !== -1) {
           dispatch(populateEntropyStore(paths));
         }
+        getNarrative(dispatch, router.history.location.pathname);
 
       })
       .catch((err) => {
