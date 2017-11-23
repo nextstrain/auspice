@@ -109,6 +109,9 @@ class Info extends React.Component {
     dispatch: React.PropTypes.func.isRequired,
     idxOfInViewRootNode: React.PropTypes.number
   }
+  static contextTypes = {
+    router: React.PropTypes.object.isRequired
+  }
   getStyles(responsive) {
     let fontSize = 32;
     if (this.props.browserDimensions.width < 1000) {
@@ -183,7 +186,7 @@ class Info extends React.Component {
           {" (" + this.props.totalStateCounts[filterName][itemName] + ")"}
         </g>
       );
-      buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));
+      buttons.push(displayFilterValueAsButton(this.context.router, this.props.dispatch, this.props.filters, filterName, itemName, display, true));
     });
   }
   clearFilterButton(field) {
@@ -191,7 +194,7 @@ class Info extends React.Component {
       <span
         style={{cursor: "pointer", color: '#5097BA'}}
         key={field}
-        onClick={() => this.props.dispatch(applyFilterQuery(field, []))}
+        onClick={() => this.props.dispatch(applyFilterQuery(this.context.router, field, []))}
         role="button"
         tabIndex={0}
       >
@@ -231,7 +234,7 @@ class Info extends React.Component {
     if (nSelectedAuthors > 0 && nSelectedAuthors < 3) {
       authorInfo.forEach((d) => (
         buttons.push(
-          displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.longlabel, true)
+          displayFilterValueAsButton(this.context.router, this.props.dispatch, this.props.filters, "authors", d.name, d.longlabel, true)
         )
       ));
       return;
@@ -239,7 +242,7 @@ class Info extends React.Component {
     /* case 3: more than 2 authors selected. */
     authorInfo.forEach((d) => (
       buttons.push(
-        displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.label, true)
+        displayFilterValueAsButton(this.context.router, this.props.dispatch, this.props.filters, "authors", d.name, d.label, true)
       )
     ));
   }

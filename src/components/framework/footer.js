@@ -53,19 +53,19 @@ export const getAcknowledgments = (router, style) => {
   return null;
 }
 
-const dispatchFilter = (dispatch, activeFilters, key, value) => {
+const dispatchFilter = (router, dispatch, activeFilters, key, value) => {
   const mode = activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
-  dispatch(applyFilterQuery(key, [value], mode));
+  dispatch(applyFilterQuery(router, key, [value], mode));
 };
 
-export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, itemName, display, showX) => {
+export const displayFilterValueAsButton = (router, dispatch, activeFilters, filterName, itemName, display, showX) => {
   const active = activeFilters[filterName].indexOf(itemName) !== -1;
   if (active && showX) {
     return (
       <div key={itemName} style={{display: "inline-block"}}>
         <div
           className={'boxed-item-icon'}
-          onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
+          onClick={() => {dispatchFilter(router, dispatch, activeFilters, filterName, itemName);}}
           role="button"
           tabIndex={0}
         >
@@ -82,7 +82,7 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
       <div
         className={"boxed-item active-clickable"}
         key={itemName}
-        onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
+        onClick={() => {dispatchFilter(router, dispatch, activeFilters, filterName, itemName);}}
         role="button"
         tabIndex={0}
       >
@@ -94,7 +94,7 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
     <div
       className={"boxed-item inactive"}
       key={itemName}
-      onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
+      onClick={() => {dispatchFilter(router, dispatch, activeFilters, filterName, itemName);}}
       role="button"
       tabIndex={0}
     >
@@ -103,13 +103,13 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
   );
 };
 
-const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
+const removeFiltersButton = (router, dispatch, filterNames, outerClassName, label) => {
   return (
     <div
       className={`${outerClassName} boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => {
-        filterNames.forEach((n) => dispatch(applyFilterQuery(n, [], 'set')))
+        filterNames.forEach((n) => dispatch(applyFilterQuery(router, n, [], 'set')))
       }}
     >
       {label}
@@ -188,7 +188,7 @@ class Footer extends React.Component {
     return (
       <div>
         {`Filter by ${prettyString(filterName)}`}
-        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
+        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.context.router, this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
           {Object.keys(totalStateCount).sort().map((itemName) => {
             let display;
@@ -207,7 +207,7 @@ class Footer extends React.Component {
                 </g>
               );
             }
-            return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
+            return displayFilterValueAsButton(this.context.router, this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
           })}
         </Flex>
       </div>

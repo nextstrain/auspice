@@ -39,6 +39,7 @@ const getMaxCalDateViaTree = (tree) => {
 
 /* need a (better) way to keep the queryParams all in "sync" */
 const modifyStateViaURLQuery = (state, query) => {
+  console.log("modifyStateViaURLQuery query:", query);
   if (query.l) {
     state["layout"] = query.l;
   }
@@ -57,6 +58,9 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.dmax) {
     state["dateMax"] = query.dmax;
   }
+  for (const filterKey of Object.keys(query).filter((c) => c.startsWith('f_'))) {
+    state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',')
+  }
   return state;
 };
 
@@ -73,6 +77,9 @@ const restoreQueryableStateToDefaults = (state) => {
   state["dateMin"] = state["absoluteDateMin"];
   /* dateMax (dmax) */
   state["dateMax"] = state["absoluteDateMax"];
+  /* filters */
+  state.filters = {};
+  state.defaultFilterNames.forEach((n) => {state.filters[n] = [];});
   return state;
 };
 
@@ -99,7 +106,11 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.error("update meta.json to include author_info.");
   }
   if (metadata.filters) {
-    metadata.filters.forEach((v) => {state.filters[v] = [];});
+    state.defaultFilterNames = [];
+    metadata.filters.forEach((v) => {
+      state.filters[v] = [];
+      state.defaultFilterNames.push(v);
+    });
   } else {
     console.warn("the meta.json did not include any filters");
   }
