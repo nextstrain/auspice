@@ -37,6 +37,8 @@ data_files=( "manifest_guest.json" "manifest_mumps.json"\
 )
 
 static_files=(
+  "narratives/zika.md"\
+  "narratives/ebola.md"\
   "figures_feb-2016_h1n1pdm_6b2_tree.png"\
   "figures_feb-2016_h1n1pdm_clades.png"\
   "figures_feb-2016_h1n1pdm_counts.png"\
@@ -138,6 +140,7 @@ done
 
 rm -rf static/
 mkdir -p static/
+mkdir -p static/narratives
 for i in "${static_files[@]}"
 do
   curl https://raw.githubusercontent.com/nextstrain/themis/master/files/${i} --compressed -o static/${i}
