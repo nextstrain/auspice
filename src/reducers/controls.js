@@ -39,6 +39,7 @@ const getMaxCalDateViaTree = (tree) => {
 
 /* need a (better) way to keep the queryParams all in "sync" */
 const modifyStateViaURLQuery = (state, query) => {
+  // console.log("Query incoming: ", query);
   if (query.l) {
     state["layout"] = query.l;
   }
@@ -160,8 +161,7 @@ const modifyStateViaTree = (state, tree) => {
 
 const checkAndCorrectErrorsInState = (state, metadata) => {
   /* colorBy */
-  const colorByValid = Object.keys(metadata.color_options).indexOf(state["colorBy"]) !== -1;
-  if (!colorByValid || state["colorBy"].startsWith("gt-")) {
+  if (Object.keys(metadata.color_options).indexOf(state.colorBy) === -1 && !state["colorBy"].startsWith("gt-")) {
     const availableNonGenotypeColorBys = Object.keys(metadata.color_options);
     if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
       availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
