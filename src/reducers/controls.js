@@ -1,4 +1,3 @@
-import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { numericToCalendar, currentNumDate, currentCalDate } from "../util/dateHelpers";
 import { flattenTree } from "../components/tree/treeHelpers";
 import { defaultGeoResolution,
@@ -372,9 +371,8 @@ const Controls = (state = getDefaultState(), action) => {
         colorScale: action.colorScale,
         colorByConfidence: checkColorByConfidence(state.attrs, action.colorBy)
       });
-      /* may need to toggle the entropy selector AA <-> NUC */
-      if (determineColorByGenotypeType(action.colorBy)) {
-        newState.mutType = determineColorByGenotypeType(action.colorBy);
+      if (action.newMutType) {
+        newState.mutType = action.newMutType;
       }
       return newState;
     }

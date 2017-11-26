@@ -89,6 +89,7 @@ const parseEncodedGenotype = (colorBy) => {
   return {
     mutType: state.controls.mutType,
     entropy: state.entropy.entropy,
+    bars: state.entropy.bars,
     browserDimensions: state.browserDimensions.browserDimensions,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
@@ -189,7 +190,8 @@ class Entropy extends React.Component {
         onHover: this.onHover.bind(this),
         onLeave: this.onLeave.bind(this),
         onClick: this.onClick.bind(this)
-      }
+      },
+      props.bars
     );
     chart.render(this.getChartGeom(props), props.mutType);
     this.setState({
@@ -223,7 +225,12 @@ class Entropy extends React.Component {
         } else {
           this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
         }
-      } if (this.props.mutType !== nextProps.mutType) {
+      }
+      if (this.props.bars !== nextProps.bars) {
+        this.state.chart.changeBarData(nextProps.bars);
+        // console.log("change bar data now...")
+      }
+      if (this.props.mutType !== nextProps.mutType) {
         if (nextProps.colorBy.startsWith("gt")) {
           this.state.chart.update({aa: nextProps.mutType === "aa", selected: parseEncodedGenotype(nextProps.colorBy)});
         } else {

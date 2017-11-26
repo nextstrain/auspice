@@ -8,7 +8,7 @@ import { legendRectSize,
   legendSpacing,
   fastTransitionDuration,
   controlsWidth } from "../../util/globals";
-import { determineColorByGenotypeType } from "../../util/urlHelpers";
+import { determineColorByGenotypeType } from "../../util/colorHelpers";
 
 
 @connect((state) => {

@@ -81,17 +81,6 @@ export const turnURLtoDataPath = (router, datasets) => {
   return router.history.location.pathname.replace(/^\//, '').replace(/\/$/, '').replace('/', '_');
 };
 
-export const determineColorByGenotypeType = (colorBy) => {
-  /* note that nucleotide genotypes are either gt-nucXXX or gt-XXX */
-  if (colorBy.startsWith("gt")) {
-    if (colorBy.slice(3, 6) === "nuc" || !isNaN(parseInt(colorBy.slice(3, 4), 10))) {
-      return "nuc";
-    }
-    return "aa";
-  }
-  return false;
-};
-
 export const changeURLQueryAndUpdateState = (router, dispatch, url) => {
   const query = queryString.parse(url.split('?')[1]);
   router.history.push({

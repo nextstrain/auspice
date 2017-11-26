@@ -15,3 +15,14 @@ export const averageColors = (hexColors) => {
   const avg = rgb(mean(reds), mean(greens), mean(blues));
   return avg.toString();
 }
+
+export const determineColorByGenotypeType = (colorBy) => {
+  /* note that nucleotide genotypes are either gt-nucXXX or gt-XXX */
+  if (colorBy.startsWith("gt")) {
+    if (colorBy.slice(3, 6) === "nuc" || !isNaN(parseInt(colorBy.slice(3, 4), 10))) {
+      return "nuc";
+    }
+    return "aa";
+  }
+  return false;
+};

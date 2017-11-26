@@ -8,9 +8,10 @@ import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
 
 /* constructor - sed up data and store params */
-const EntropyChart = function EntropyChart(ref, data, callbacks) {
+const EntropyChart = function EntropyChart(ref, data, callbacks, bars) {
   this.svg = select(ref);
   this.data = data;
+  this.bars = bars;
   this.callbacks = callbacks;
   this.processAnnotations();
   for (const nt of this.data.entropyNtWithoutZeros) {
@@ -48,13 +49,18 @@ EntropyChart.prototype.intersectGenes = function intersectGenes(pos) {
   return false;
 };
 
+EntropyChart.prototype.changeBarData = function changeBarData(bars) {
+  this.bars = bars;
+};
+
 /* convert amino acid X in gene Y to a nucleotide number */
 EntropyChart.prototype.aaToNtCoord = function aaToNtCoord(gene, aaPos) {
   return this.geneMap[gene].start + fix(aaPos) * 3;
 };
 
 EntropyChart.prototype.getSelectedNode = function getSelectedNode(parsed) {
-  const data = this.aa ? this.data.aminoAcidEntropyWithoutZeros : this.data.entropyNtWithoutZeros;
+  // const data = this.aa ? this.data.aminoAcidEntropyWithoutZeros : this.data.entropyNtWithoutZeros;
+  const data = this.bars;
   if (this.aa !== parsed.aa) {
     console.error("entropy out of sync");
     return undefined;
@@ -152,7 +158,8 @@ EntropyChart.prototype.drawBars = function drawBars() {
   const chart = this.mainGraph.append("g")
     .attr("clip-path", "url(#clip)")
     .selectAll(".bar");
-  const data = this.aa ? this.data.aminoAcidEntropyWithoutZeros : this.data.entropyNtWithoutZeros;
+  // const data = this.aa ? this.data.aminoAcidEntropyWithoutZeros : this.data.entropyNtWithoutZeros;
+  const data = this.bars;
   const idfn = this.aa ? (d) => d.prot + d.codon : (d) => "nt" + fix(d.x);
   const xscale = this.aa ?
     (d) => this.scales.xMain(this.aaToNtCoord(d.prot, d.codon)) :

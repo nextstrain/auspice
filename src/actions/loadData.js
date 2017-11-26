@@ -70,13 +70,15 @@ import { getNarrative } from "../util/getNarrative";
 // };
 
 const populateEntropyStore = (paths) => {
-  return (dispatch) => {
+  return (dispatch, getState) => {
+    const { controls } = getState();
     const entropyJSONpromise = fetch(paths.entropy)
       .then((res) => res.json());
     entropyJSONpromise
       .then((data) => {
         dispatch({
           type: types.RECEIVE_ENTROPY,
+          mutType: controls.mutType,
           data: data
         });
       })
