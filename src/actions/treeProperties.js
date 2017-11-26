@@ -4,6 +4,7 @@ import { calcVisibility,
   identifyPathToTip,
   calcBranchThickness } from "../components/tree/treeHelpers";
 import * as types from "./types";
+import { updateEntropyVisibility } from "./entropy";
 import { modifyURLquery } from "../util/urlHelpers";
 
 const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
@@ -18,7 +19,6 @@ const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInVie
     branchThicknessVersion: tree.branchThicknessVersion + 1
   };
 };
-
 
 /**
  * define the visible branches and their thicknesses. This could be a path to a single tip or a selected clade.
@@ -47,6 +47,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
       idxOfInViewRootNode: validIdxRoot,
       stateCountAttrs: Object.keys(controls.filters)
     });
+    updateEntropyVisibility(dispatch);
   };
 };
 
@@ -79,6 +80,7 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       idxOfInViewRootNode: tree.idxOfInViewRootNode,
       stateCountAttrs: Object.keys(controls.filters)
     });
+    updateEntropyVisibility(dispatch);
   };
 };
 
