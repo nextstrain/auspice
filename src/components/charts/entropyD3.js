@@ -7,15 +7,12 @@ import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
 
-/* constructor - set up data and store params
-NOTE: all state here (this.X) is a duplication of redux state, and therefore a potential source of sync-related bugs
-*/
-const EntropyChart = function EntropyChart(ref, bars, annotations, geneMap, maxNt, callbacks) {
+/* constructor - set up data and store params */
+const EntropyChart = function EntropyChart(ref, annotations, geneMap, maxNt, callbacks) {
   this.svg = select(ref);
   this.annotations = annotations;
   this.geneMap = geneMap;
   this.maxNt = maxNt;
-  this.bars = bars;
   this.callbacks = callbacks;
 };
 
@@ -120,7 +117,7 @@ EntropyChart.prototype.highlightSelectedBar = function highlightSelectedBar() {
 
 /* draw the bars (for each base / aa) */
 EntropyChart.prototype.drawBars = function drawBars() {
-  // console.log("inside drawBars. this.aa:", this.aa)
+  console.log("inside drawBars. this.aa:", this.aa)
   this.mainGraph.selectAll("*").remove();
   let posInView = this.scales.xMain.domain()[1] - this.scales.xMain.domain()[0];
   if (this.aa) {
@@ -222,8 +219,9 @@ EntropyChart.prototype.calcOffsets = function calcOffsets(chartGeom) {
 };
 
 /* initial render - set up zooming etc */
-EntropyChart.prototype.render = function render(chartGeom, aa, selected = undefined) {
+EntropyChart.prototype.render = function render(chartGeom, bars, aa, selected = undefined) {
   this.aa = aa; /* bool */
+  this.bars = bars;
   this.selectedNode = selected;
   this.calcOffsets(chartGeom);
   this.setScales(

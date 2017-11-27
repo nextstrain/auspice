@@ -44,6 +44,25 @@ const parseEncodedGenotype = (colorBy) => {
   return data;
 };
 
+const getChartGeom = (props) => {
+  const responsive = computeResponsive({
+    horizontal: 1,
+    vertical: 0.3,
+    browserDimensions: props.browserDimensions,
+    sidebar: props.sidebar,
+    sidebarRight: p.sidebarRight,
+    minHeight: 150
+  });
+  return {
+    responsive,
+    width: responsive.width,
+    height: responsive.height,
+    padBottom: 50,
+    padLeft: 15,
+    padRight: 12
+  };
+};
+
 @connect((state) => {
   return {
     mutType: state.controls.mutType,
@@ -65,24 +84,6 @@ class Entropy extends React.Component {
     this.state = {
       hovered: false,
       chart: false
-    };
-    this.getChartGeom = (p) => {
-      const responsive = computeResponsive({
-        horizontal: 1,
-        vertical: 0.3,
-        browserDimensions: p.browserDimensions,
-        sidebar: p.sidebar,
-        sidebarRight: p.sidebarRight,
-        minHeight: 150
-      });
-      return {
-        responsive,
-        width: responsive.width,
-        height: responsive.height,
-        padBottom: 50,
-        padLeft: 15,
-        padRight: 12
-      };
     };
   }
   static contextTypes = {
@@ -146,7 +147,6 @@ class Entropy extends React.Component {
   setUp(props) {
     const chart = new EntropyChart(
       this.d3entropy,
-      props.bars,
       props.annotations,
       props.geneMap,
       props.maxNt,
@@ -156,16 +156,19 @@ class Entropy extends React.Component {
         onClick: this.onClick.bind(this)
       }
     );
-    chart.render(this.getChartGeom(props), props.mutType);
+    chart.render(getChartGeom(props), props.bars, props.mutType === "aa");
     this.setState({
       chart,
-      chartGeom: this.getChartGeom(props)
+      chartGeom: getChartGeom(props)
     });
+<<<<<<< HEAD
     /* unsure why this cannot be incorporated into the initial render... */
     chart.update({
       selected: parseEncodedGenotype(props.colorBy),
       aa: props.mutType === "aa"
     });
+=======
+>>>>>>> improve interface between react & D3
   }
   componentDidMount() {
     if (this.props.loaded) {
@@ -180,6 +183,7 @@ class Entropy extends React.Component {
       this.setUp(nextProps);
       return;
     }
+<<<<<<< HEAD
     if (this.state.chart) {
       if ((this.props.browserDimensions !== nextProps.browserDimensions) ||
          (this.props.sidebar !== nextProps.sidebar || this.props.sidebarRight !== nextProps.sidebarRight)) {
@@ -190,6 +194,19 @@ class Entropy extends React.Component {
         }
       }
       // can we return here?!?!?!
+=======
+    if (this.state.chart &&
+      ((this.props.browserDimensions !== nextProps.browserDimensions) || (this.props.sidebar !== nextProps.sidebar))) {
+      this.state.chart.render(
+        getChartGeom(nextProps),
+        nextProps.bars,
+        nextProps.mutType === "aa",
+        nextProps.colorBy.startsWith("gt") ? parseEncodedGenotype(nextProps.colorBy) : undefined
+      );
+      return;
+    }
+    if (this.state.chart) { /* props changed => update */
+>>>>>>> improve interface between react & D3
       const updateParams = {};
       if (this.props.mutType !== nextProps.mutType) {
         updateParams.aa = nextProps.mutType === "aa";
@@ -209,7 +226,6 @@ class Entropy extends React.Component {
           updateParams.selected = parseEncodedGenotype(nextProps.colorBy);
         }
       }
-      console.log("updating with params", updateParams);
       if (Object.keys(updateParams).length) {
         this.state.chart.update(updateParams);
       }
@@ -217,11 +233,8 @@ class Entropy extends React.Component {
   }
 
   render() {
-    /* get chart geom data */
-    const chartGeom = this.getChartGeom(this.props);
-    /* get styles */
+    const chartGeom = getChartGeom(this.props);
     const styles = getStyles(chartGeom.width);
-
     return (
       <Card title={"Diversity"}>
         {this.aaNtSwitch(styles)}
