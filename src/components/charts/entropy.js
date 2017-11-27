@@ -32,7 +32,8 @@ note that the numbering systems are not the same! */
 const constructEncodedGenotype = (aa, d) => {
   return aa ? 'gt-' + d.prot + "_" + (d.codon + 1) : 'gt-nuc_' + (d.x + 1);
 };
-const parseEncodedGenotype = (colorBy) => {
+
+export const parseEncodedGenotype = (colorBy) => {
   const [name, num] = colorBy.slice(3).split('_');
   const aa = name !== 'nuc';
   const data = {aa, prot: aa ? name : false};
@@ -44,13 +45,13 @@ const parseEncodedGenotype = (colorBy) => {
   return data;
 };
 
-const getChartGeom = (props) => {
+export const computeChartGeometry = (props) => {
   const responsive = computeResponsive({
     horizontal: 1,
     vertical: 0.3,
     browserDimensions: props.browserDimensions,
     sidebar: props.sidebar,
-    sidebarRight: p.sidebarRight,
+    sidebarRight: props.sidebarRight,
     minHeight: 150
   });
   return {
@@ -79,7 +80,7 @@ const getChartGeom = (props) => {
     panelLayout: state.controls.panelLayout
   };
 })
-class Entropy extends React.Component {
+export class Entropy extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -157,19 +158,8 @@ class Entropy extends React.Component {
         onClick: this.onClick.bind(this)
       }
     );
-    chart.render(getChartGeom(props), props.bars, props.maxYVal, props.mutType === "aa");
-    this.setState({
-      chart,
-      chartGeom: getChartGeom(props)
-    });
-<<<<<<< HEAD
-    /* unsure why this cannot be incorporated into the initial render... */
-    chart.update({
-      selected: parseEncodedGenotype(props.colorBy),
-      aa: props.mutType === "aa"
-    });
-=======
->>>>>>> improve interface between react & D3
+    chart.render(props);
+    this.setState({chart});
   }
   componentDidMount() {
     if (this.props.loaded) {
@@ -184,31 +174,11 @@ class Entropy extends React.Component {
       this.setUp(nextProps);
       return;
     }
-<<<<<<< HEAD
-    if (this.state.chart) {
-      if ((this.props.browserDimensions !== nextProps.browserDimensions) ||
-         (this.props.sidebar !== nextProps.sidebar || this.props.sidebarRight !== nextProps.sidebarRight)) {
-        if (nextProps.colorBy.startsWith("gt")) {
-          this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa", parseEncodedGenotype(nextProps.colorBy));
-        } else {
-          this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
-        }
-      }
-      // can we return here?!?!?!
-=======
-    if (this.state.chart &&
-      ((this.props.browserDimensions !== nextProps.browserDimensions) || (this.props.sidebar !== nextProps.sidebar))) {
-      this.state.chart.render(
-        getChartGeom(nextProps),
-        nextProps.bars,
-        nextProps.maxYVal,
-        nextProps.mutType === "aa",
-        nextProps.colorBy.startsWith("gt") ? parseEncodedGenotype(nextProps.colorBy) : undefined
-      );
+    if (this.state.chart && ((this.props.browserDimensions !== nextProps.browserDimensions) || (this.props.sidebar !== nextProps.sidebar || this.props.sidebarRight !== nextProps.sidebarRight))) {
+      this.state.chart.render(nextProps);
       return;
     }
     if (this.state.chart) { /* props changed => update */
->>>>>>> improve interface between react & D3
       const updateParams = {};
       if (this.props.mutType !== nextProps.mutType) {
         updateParams.aa = nextProps.mutType === "aa";
@@ -237,13 +207,14 @@ class Entropy extends React.Component {
   }
 
   render() {
-    const chartGeom = getChartGeom(this.props);
+    const chartGeom = computeChartGeometry(this.props);
     const styles = getStyles(chartGeom.width);
     return (
       <Card title={"Diversity"}>
         {this.aaNtSwitch(styles)}
         <InfoPanel
           hovered={this.state.hovered}
+          chartGeom={chartGeom}
           mutType={this.props.mutType}
         />
         <svg
@@ -258,5 +229,3 @@ class Entropy extends React.Component {
     );
   }
 }
-
-export default Entropy;

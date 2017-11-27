@@ -1,5 +1,4 @@
 /* eslint no-underscore-dangle: off */
-import _maxBy from "lodash/maxBy";
 import { select, event } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
@@ -7,6 +6,7 @@ import { zoom } from "d3-zoom";
 import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
+import { computeChartGeometry, parseEncodedGenotype } from "./entropy";
 
 /* zero-based arrays in JSON. No such thing as nucleotide 0 or amino acid 0 */
 const _fix = (x) => x + 1;
@@ -24,15 +24,15 @@ const EntropyChart = function EntropyChart(ref, annotations, geneMap, maxNt, cal
 };
 
 /* "PUBLIC" PROTOTYPES */
-EntropyChart.prototype.render = function render(chartGeom, bars, maxYVal, aa, selected = undefined) {
-  this.aa = aa; /* bool */
-  this.bars = bars;
-  this.selectedNode = selected;
+EntropyChart.prototype.render = function render(props) {
+  this.aa = props.mutType === "aa";
+  this.bars = props.bars;
+  this.selectedNode = props.colorBy.startsWith("gt") ? parseEncodedGenotype(props.colorBy) : undefined;
   this.svg.selectAll("*").remove(); /* tear things down */
-  this._calcOffsets(chartGeom);
+  this._calcOffsets(computeChartGeometry(props));
   this._drawMainNavElements();
   this._addZoomLayers();
-  this._setScales(this.maxNt + 1, maxYVal);
+  this._setScales(this.maxNt + 1, props.maxYVal);
   this._drawAxes();
   this._addBrush();
   this._addClipMask();
