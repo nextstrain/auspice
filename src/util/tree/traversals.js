@@ -84,15 +84,17 @@ export const calcEntropyInView = (nodes, visibility, mutType, geneMap) => {
     });
     const entropyNtWithoutZeros = [];
     let j = 0;
+    let m = 0;
     for (let i = 0; i < sparse.length; i++) {
       if (!sparse[i]) {continue;}
-      entropyNtWithoutZeros[j] = {x: i, y: sparse[i] / 5}; /* TODO reset y scale in D3 or compute entropy */
+      if (sparse[i] > m) {m = sparse[i];}
+      entropyNtWithoutZeros[j] = {x: i, y: sparse[i]}; /* TODO reset y scale in D3 or compute entropy */
       j++;
     }
     for (const nt of entropyNtWithoutZeros) {
       nt.prot = intersectGenes(geneMap, nt.x);
     }
-    return entropyNtWithoutZeros;
+    return [entropyNtWithoutZeros, m];
   }
   /* AMINO ACID ENTROPY */
   const sparse = {};
@@ -112,13 +114,15 @@ export const calcEntropyInView = (nodes, visibility, mutType, geneMap) => {
   const aminoAcidEntropyWithoutZeros = [];
   const prots = Object.keys(sparse);
   let j = 0;
+  let m = 0;
   for (let i = 0; i < prots.length; i++) {
     // eslint-disable-next-line guard-for-in
     for (const k in sparse[prots[i]]) { // eslint-disable-line no-restricted-syntax
       const numK = parseInt(k, 10);
+      if (sparse[prots[i]][numK] > m) {m = sparse[prots[i]][numK];}
       aminoAcidEntropyWithoutZeros[j] = {
         x: geneMap[prots[i]].start + 3 * numK - 1, // check
-        y: sparse[prots[i]][numK] / 5,
+        y: sparse[prots[i]][numK],
         codon: numK, // check
         fill: genotypeColors[i % 10],
         prot: prots[i]
@@ -127,5 +131,5 @@ export const calcEntropyInView = (nodes, visibility, mutType, geneMap) => {
     }
   }
   // console.log(aminoAcidEntropyWithoutZeros);
-  return aminoAcidEntropyWithoutZeros;
+  return [aminoAcidEntropyWithoutZeros, m];
 };

@@ -70,6 +70,7 @@ const getChartGeom = (props) => {
     annotations: state.entropy.annotations,
     geneMap: state.entropy.geneMap,
     maxNt: state.entropy.maxNt,
+    maxYVal: state.entropy.maxYVal,
     browserDimensions: state.browserDimensions.browserDimensions,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
@@ -156,7 +157,7 @@ class Entropy extends React.Component {
         onClick: this.onClick.bind(this)
       }
     );
-    chart.render(getChartGeom(props), props.bars, props.mutType === "aa");
+    chart.render(getChartGeom(props), props.bars, props.maxYVal, props.mutType === "aa");
     this.setState({
       chart,
       chartGeom: getChartGeom(props)
@@ -200,6 +201,7 @@ class Entropy extends React.Component {
       this.state.chart.render(
         getChartGeom(nextProps),
         nextProps.bars,
+        nextProps.maxYVal,
         nextProps.mutType === "aa",
         nextProps.colorBy.startsWith("gt") ? parseEncodedGenotype(nextProps.colorBy) : undefined
       );
@@ -216,8 +218,9 @@ class Entropy extends React.Component {
           updateParams.clearSelected = true;
         }
       }
-      if (this.props.bars !== nextProps.bars) {
+      if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
         updateParams.newBars = nextProps.bars;
+        updateParams.maxYVal = nextProps.maxYVal;
       }
       if (this.props.colorBy !== nextProps.colorBy && (this.props.colorBy.startsWith("gt") || nextProps.colorBy.startsWith("gt"))) {
         if (!nextProps.colorBy.startsWith("gt")) {
@@ -227,6 +230,7 @@ class Entropy extends React.Component {
         }
       }
       if (Object.keys(updateParams).length) {
+        console.log("updateParams:", updateParams)
         this.state.chart.update(updateParams);
       }
     }

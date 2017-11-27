@@ -62,7 +62,8 @@ const Entropy = (state = {loaded: false}, action) => {
     case types.ENTROPY_DATA:
       return Object.assign({}, state, {
         loaded: true,
-        bars: action.data
+        bars: action.data,
+        maxYVal: action.maxYVal
       });
     default:
       return state;

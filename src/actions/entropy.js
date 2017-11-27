@@ -4,10 +4,8 @@ import * as types from "./types";
 
 export const updateEntropyVisibility = debounce((dispatch, getState) => {
   const { entropy, controls, tree } = getState();
-  dispatch({
-    type: types.ENTROPY_DATA,
-    data: calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap)
-  });
+  const [data, maxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap);
+  dispatch({type: types.ENTROPY_DATA, data, maxYVal});
 }, 1000, { leading: false, trailing: true });
 
 export const changeMutType = (newMutType) => (dispatch, getState) => {
