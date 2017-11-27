@@ -6,7 +6,6 @@ export const updateEntropyVisibility = debounce((dispatch, getState) => {
   const { entropy, controls, tree } = getState();
   if (!tree.nodes || !tree.visibility || !entropy.geneMap) {
     console.error("skipping updateEntropyVisibility as required data not ready");
-    console.log(tree.nodes, tree.visibility, entropy.geneMap);
   } else {
     const [data, maxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap);
     dispatch({type: types.ENTROPY_DATA, data, maxYVal});

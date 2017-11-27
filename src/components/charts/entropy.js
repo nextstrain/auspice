@@ -26,11 +26,8 @@ const getStyles = (width) => {
   };
 };
 
-/* these two functions convert between the genotype naming system used in the URLs,
-e.g. 'gt-nuc_1234', 'gt-NS1-123' and the data structure used in entropy.json
-note that the numbering systems are not the same! */
 const constructEncodedGenotype = (aa, d) => {
-  return aa ? 'gt-' + d.prot + "_" + (d.codon + 1) : 'gt-nuc_' + (d.x + 1);
+  return aa ? `gt-${d.prot}_${d.codon}` : `gt-nuc_${d.x}`;
 };
 
 export const parseEncodedGenotype = (colorBy) => {
@@ -38,9 +35,9 @@ export const parseEncodedGenotype = (colorBy) => {
   const aa = name !== 'nuc';
   const data = {aa, prot: aa ? name : false};
   if (aa) {
-    data.codon = num - 1;
+    data.codon = parseInt(num, 10);
   } else {
-    data.x = num - 1;
+    data.x = parseInt(num, 10);
   }
   return data;
 };

@@ -8,9 +8,6 @@ import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
 import { computeChartGeometry, parseEncodedGenotype } from "./entropy";
 
-/* zero-based arrays in JSON. No such thing as nucleotide 0 or amino acid 0 */
-const _fix = (x) => x + 1;
-
 /* EntropChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:
  * EntropyChart.render & EntropyChartupdate
@@ -69,7 +66,7 @@ EntropyChart.prototype.update = function update({
 
 /* convert amino acid X in gene Y to a nucleotide number */
 EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
-  return this.geneMap[gene].start + _fix(aaPos) * 3;
+  return this.geneMap[gene].start + aaPos * 3;
 };
 
 EntropyChart.prototype._getSelectedNode = function _getSelectedNode(parsed) {
@@ -130,7 +127,7 @@ EntropyChart.prototype._clearSelectedBar = function _clearSelectedBar() {
       .style("fill", (node) => this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey);
   } else {
     select("#entropySelected")
-      .attr("id", (node) => "nt" + _fix(node.x))
+      .attr("id", (node) => "nt" + node.x)
       .style("fill", (node) => {
         if (node.prot) {
           return (this.geneMap[node.prot].idx % 2) ? medGrey : darkGrey;
@@ -148,7 +145,7 @@ EntropyChart.prototype._highlightSelectedBar = function _highlightSelectedBar() 
       .attr("id", "entropySelected")
       .style("fill", () => this.geneMap[d.prot].fill);
   } else {
-    select("#nt" + _fix(d.x))
+    select("#nt" + d.x)
       .attr("id", "entropySelected")
       .style("fill", () => {
         if (d.prot) {
@@ -161,6 +158,7 @@ EntropyChart.prototype._highlightSelectedBar = function _highlightSelectedBar() 
 
 /* draw the bars (for each base / aa) */
 EntropyChart.prototype._drawBars = function _drawBars() {
+  console.log("_drawBars")
   this.mainGraph.selectAll("*").remove();
   let posInView = this.scales.xMain.domain()[1] - this.scales.xMain.domain()[0];
   if (this.aa) {
@@ -170,10 +168,10 @@ EntropyChart.prototype._drawBars = function _drawBars() {
   const chart = this.mainGraph.append("g")
     .attr("clip-path", "url(#clip)")
     .selectAll(".bar");
-  const idfn = this.aa ? (d) => d.prot + d.codon : (d) => "nt" + _fix(d.x);
+  const idfn = this.aa ? (d) => d.prot + d.codon : (d) => "nt" + d.x;
   const xscale = this.aa ?
     (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon)) :
-    (d) => this.scales.xMain(_fix(d.x));
+    (d) => this.scales.xMain(d.x);
   const fillfn = this.aa ?
     (d) => this.geneMap[d.prot].idx % 2 ? medGrey : darkGrey :
     (d) => {
