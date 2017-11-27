@@ -2,7 +2,7 @@ import _filter from "lodash/filter";
 import * as types from "../actions/types";
 import { genotypeColors } from "../util/globals";
 
-const intersectGenes = function intersectGenes(geneMap, pos) {
+export const intersectGenes = function intersectGenes(geneMap, pos) {
   for (const gene of Object.keys(geneMap)) {
     if (pos >= geneMap[gene].start && pos <= geneMap[gene].end) {
       return gene;
@@ -77,10 +77,7 @@ const processAnnotations = (annotations) => {
 };
 
 
-const Entropy = (state = {
-  loaded: false,
-  bars: undefined
-}, action) => {
+const Entropy = (state = {loaded: false}, action) => {
   switch (action.type) {
     case types.DATA_INVALID:
       return {loaded: false};
@@ -96,7 +93,11 @@ const Entropy = (state = {
         geneMap
       });
     case types.ENTROPY_DATA:
-      // console.log("TO DO. new entropy data in reducer.");
+      console.log("ENTROPY DATA:", action.data)
+      if (action.data) {
+        return Object.assign({}, state, {bars: action.data});
+      }
+      console.log("TO DO. new entropy data in reducer not truthy");
       return state;
     case types.NEW_COLORS:
       if (action.newMutType) {

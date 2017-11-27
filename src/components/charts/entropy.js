@@ -191,23 +191,29 @@ class Entropy extends React.Component {
           this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa");
         }
       }
-      if (this.props.bars !== nextProps.bars) {
-        this.state.chart.changeBarData(nextProps.bars);
-        // console.log("change bar data now...")
-      }
+      // can we return here?!?!?!
+      const updateParams = {};
       if (this.props.mutType !== nextProps.mutType) {
+        updateParams.aa = nextProps.mutType === "aa";
         if (nextProps.colorBy.startsWith("gt")) {
-          this.state.chart.update({aa: nextProps.mutType === "aa", selected: parseEncodedGenotype(nextProps.colorBy)});
+          updateParams.selected = parseEncodedGenotype(nextProps.colorBy);
         } else {
-          this.state.chart.update({aa: nextProps.mutType === "aa", clearSelected: true});
+          updateParams.clearSelected = true;
         }
+      }
+      if (this.props.bars !== nextProps.bars) {
+        updateParams.newBars = nextProps.bars;
       }
       if (this.props.colorBy !== nextProps.colorBy && (this.props.colorBy.startsWith("gt") || nextProps.colorBy.startsWith("gt"))) {
         if (!nextProps.colorBy.startsWith("gt")) {
-          this.state.chart.update({clearSelected: true});
+          updateParams.clearSelected = true;
         } else {
-          this.state.chart.update({selected: parseEncodedGenotype(nextProps.colorBy)});
+          updateParams.selected = parseEncodedGenotype(nextProps.colorBy);
         }
+      }
+      console.log("updating with params", updateParams);
+      if (Object.keys(updateParams).length) {
+        this.state.chart.update(updateParams);
       }
     }
   }

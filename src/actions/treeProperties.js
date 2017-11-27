@@ -47,7 +47,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
       idxOfInViewRootNode: validIdxRoot,
       stateCountAttrs: Object.keys(controls.filters)
     });
-    updateEntropyVisibility(dispatch);
+    updateEntropyVisibility(dispatch, getState);
   };
 };
 
@@ -80,7 +80,7 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       idxOfInViewRootNode: tree.idxOfInViewRootNode,
       stateCountAttrs: Object.keys(controls.filters)
     });
-    updateEntropyVisibility(dispatch);
+    updateEntropyVisibility(dispatch, getState);
   };
 };
 

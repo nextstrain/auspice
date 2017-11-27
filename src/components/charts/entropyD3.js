@@ -24,10 +24,6 @@ const fix = (x) => {
   return x + 1;
 };
 
-EntropyChart.prototype.changeBarData = function changeBarData(bars) {
-  this.bars = bars;
-};
-
 /* convert amino acid X in gene Y to a nucleotide number */
 EntropyChart.prototype.aaToNtCoord = function aaToNtCoord(gene, aaPos) {
   return this.geneMap[gene].start + fix(aaPos) * 3;
@@ -124,6 +120,7 @@ EntropyChart.prototype.highlightSelectedBar = function highlightSelectedBar() {
 
 /* draw the bars (for each base / aa) */
 EntropyChart.prototype.drawBars = function drawBars() {
+  console.log("inside drawBars. this.aa:", this.aa)
   this.mainGraph.selectAll("*").remove();
   let posInView = this.scales.xMain.domain()[1] - this.scales.xMain.domain()[0];
   if (this.aa) {
@@ -170,10 +167,13 @@ EntropyChart.prototype.drawBars = function drawBars() {
 EntropyChart.prototype.update = function update({
   aa = undefined, /* undefined is a no-op for each optional argument */
   selected = undefined,
+  newBars = undefined,
   clearSelected = false
 }) {
-  if (aa !== undefined && aa !== this.aa) {
-    this.aa = aa;
+  const aaChange = aa !== undefined && aa !== this.aa;
+  if (newBars || aaChange) {
+    if (aaChange) {this.aa = aa;}
+    if (newBars) {this.bars = newBars;}
     this.drawBars();
   }
   if (selected !== undefined) {
