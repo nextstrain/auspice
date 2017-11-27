@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import * as types from "./types";
-import { updateColors } from "./colors";
+import { changeColorBy } from "./colors";
 import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { turnURLtoDataPath } from "../util/urlHelpers";
 import { charonAPIAddress, enableNarratives } from "../util/globals";
@@ -132,7 +132,7 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
         // }
         /* there still remain a number of actions to do with calculations */
         dispatch(updateVisibleTipsAndBranchThicknesses());
-        dispatch(updateColors());
+        dispatch(changeColorBy()); // sets colorScales etc
         /* validate the reducers */
         dispatch({type: types.DATA_VALID});
 
@@ -171,7 +171,7 @@ export const urlQueryChange = (query) => {
     /* working out whether visibility / thickness needs updating is tricky */
     dispatch(updateVisibleTipsAndBranchThicknesses());
     if (controls.colorBy !== newState.controls.colorBy) {
-      dispatch(updateColors());
+      dispatch(changeColorBy());
     }
   };
 };

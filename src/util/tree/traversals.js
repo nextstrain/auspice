@@ -70,6 +70,7 @@ export const getValuesAndCountsOfVisibleTraitsFromTree = (nodes, visibility, att
 * TODO: this algorithm can be much improved, and the data structures returned improved also
 */
 export const calcEntropyInView = (nodes, visibility, mutType, geneMap) => {
+  console.log("calcEntropyInView running");
   if (mutType === "nuc") {
     const sparse = [];
     nodes.forEach((n) => {

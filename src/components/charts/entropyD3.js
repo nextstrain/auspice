@@ -120,7 +120,7 @@ EntropyChart.prototype.highlightSelectedBar = function highlightSelectedBar() {
 
 /* draw the bars (for each base / aa) */
 EntropyChart.prototype.drawBars = function drawBars() {
-  console.log("inside drawBars. this.aa:", this.aa)
+  // console.log("inside drawBars. this.aa:", this.aa)
   this.mainGraph.selectAll("*").remove();
   let posInView = this.scales.xMain.domain()[1] - this.scales.xMain.domain()[0];
   if (this.aa) {

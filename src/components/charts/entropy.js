@@ -7,7 +7,7 @@ import { changeColorBy } from "../../actions/colors";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./entropyInfoPanel";
-import { TOGGLE_MUT_TYPE } from "../../actions/types";
+import { changeMutType } from "../../actions/entropy";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import "../../css/entropy.css";
 
@@ -116,10 +116,10 @@ class Entropy extends React.Component {
 
   changeMutTypeCallback(newMutType) {
     if (newMutType !== this.props.mutType) {
-      /* 1. switch the redux colorBy back to the default & update the URL */
+      /* 1. switch the redux colorBy back to the default */
       this.props.dispatch(changeColorBy(this.props.defaultColorBy, this.context.router));
-      /* 2. update the mut type in redux */
-      this.props.dispatch({type: TOGGLE_MUT_TYPE, data: newMutType});
+      /* 2. update the mut type in redux & re-calulate entropy */
+      this.props.dispatch(changeMutType(newMutType));
     }
   }
 

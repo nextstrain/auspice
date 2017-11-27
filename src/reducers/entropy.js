@@ -11,38 +11,6 @@ export const intersectGenes = function intersectGenes(geneMap, pos) {
   return false;
 };
 
-const getBars = (jsonData, geneMap, mutType) => {
-  console.log("getting ", mutType, " bars")
-  if (mutType === "nuc") {
-    const entropyNt = jsonData["nuc"]["val"].map((s, i) => ({x: jsonData["nuc"]["pos"][i], y: s}));
-    const entropyNtWithoutZeros = _filter(entropyNt, (e) => { return e.y !== 0; }); // formerly entropyNtWithoutZeros
-    for (const nt of entropyNtWithoutZeros) {
-      nt.prot = intersectGenes(geneMap, nt.x);
-    }
-    return entropyNtWithoutZeros;
-  }
-  // TO DO - improve the code here...
-  let aminoAcidEntropyWithoutZeros = [];
-  let aaCount = 0;
-  for (const prot of Object.keys(jsonData)) {
-    if (prot !== "nuc") {
-      const tmpProt = jsonData[prot];
-      aaCount += 1;
-      const tmpEntropy = tmpProt["val"].map((s, i) => ({ // eslint-disable-line no-loop-func
-        x: tmpProt["pos"][i],
-        y: s,
-        codon: tmpProt["codon"][i],
-        fill: genotypeColors[aaCount % 10],
-        prot: prot
-      }));
-      aminoAcidEntropyWithoutZeros = aminoAcidEntropyWithoutZeros.concat(
-        tmpEntropy.filter((e) => e.y !== 0)
-      );
-    }
-  }
-  return aminoAcidEntropyWithoutZeros;
-};
-
 const getAnnotations = (jsonData) => {
   const annotations = [];
   let aaCount = 0;
@@ -85,30 +53,16 @@ const Entropy = (state = {loaded: false}, action) => {
       const annotations = getAnnotations(action.data);
       const geneMap = processAnnotations(annotations);
       return Object.assign({}, state, {
-        loaded: true,
+        loaded: false,
         jsonData: action.data,
-        bars: getBars(action.data, geneMap, action.mutType),
         maxNt: Math.max(...action.data.nuc.pos),
         annotations,
         geneMap
       });
     case types.ENTROPY_DATA:
-      console.log("ENTROPY DATA:", action.data)
-      if (action.data) {
-        return Object.assign({}, state, {bars: action.data});
-      }
-      console.log("TO DO. new entropy data in reducer not truthy");
-      return state;
-    case types.NEW_COLORS:
-      if (action.newMutType) {
-        return Object.assign({}, state, {
-          bars: getBars(state.jsonData, state.geneMap, action.newMutType)
-        });
-      }
-      return state;
-    case types.TOGGLE_MUT_TYPE:
       return Object.assign({}, state, {
-        bars: getBars(state.jsonData, state.geneMap, action.data)
+        loaded: true,
+        bars: action.data
       });
     default:
       return state;

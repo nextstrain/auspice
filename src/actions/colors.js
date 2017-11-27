@@ -3,6 +3,7 @@ import getColorScale from "../util/getColorScale";
 import { calcNodeColor } from "../components/tree/treeHelpers";
 import { modifyURLquery } from "../util/urlHelpers";
 import { determineColorByGenotypeType } from "../util/colorHelpers";
+import { updateEntropyVisibility } from "./entropy";
 import * as types from "./types";
 
 /* providedColorBy: undefined | string
@@ -37,6 +38,9 @@ export const changeColorBy = (providedColorBy = undefined, router = undefined) =
 
     /* step 3: change in mutType? */
     const newMutType = determineColorByGenotypeType(colorBy) !== controls.mutType ? determineColorByGenotypeType(colorBy) : false;
+    if (newMutType) {
+      updateEntropyVisibility(dispatch, getState);
+    }
 
     /* step 4: dispatch */
     dispatch({
@@ -56,6 +60,3 @@ export const changeColorBy = (providedColorBy = undefined, router = undefined) =
     return null;
   };
 };
-
-/* updateColors calls changeColorBy with no args, i.e. it updates the colorScale & nodeColors */
-export const updateColors = () => (dispatch) => {dispatch(changeColorBy());};
