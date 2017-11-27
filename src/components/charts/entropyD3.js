@@ -7,7 +7,9 @@ import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
 
-/* constructor - sed up data and store params */
+/* constructor - set up data and store params
+NOTE: all state here (this.X) is a duplication of redux state, and therefore a potential source of sync-related bugs
+*/
 const EntropyChart = function EntropyChart(ref, bars, annotations, geneMap, maxNt, callbacks) {
   this.svg = select(ref);
   this.annotations = annotations;
@@ -227,12 +229,7 @@ EntropyChart.prototype.render = function render(chartGeom, aa, selected = undefi
   this.setScales(
     chartGeom,
     this.maxNt + 1,
-    // this.data.entropyNt.length + 1,
     _maxBy(this.bars, "y").y
-    // Math.max(
-    //   _maxBy(this.data.entropyNtWithoutZeros, "y").y,
-    //   _maxBy(this.data.aminoAcidEntropyWithoutZeros, "y").y
-    // )
   );
 
   /* tear things down */

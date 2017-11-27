@@ -79,15 +79,11 @@ const processAnnotations = (annotations) => {
 
 const Entropy = (state = {
   loaded: false,
-  entropy: null,
   bars: undefined
 }, action) => {
   switch (action.type) {
     case types.DATA_INVALID:
-      return {
-        loaded: false,
-        entropy: null
-      };
+      return {loaded: false};
     case types.RECEIVE_ENTROPY:
       const annotations = getAnnotations(action.data);
       const geneMap = processAnnotations(annotations);
@@ -95,7 +91,6 @@ const Entropy = (state = {
         loaded: true,
         jsonData: action.data,
         bars: getBars(action.data, geneMap, action.mutType),
-        entropy: action.data,
         maxNt: Math.max(...action.data.nuc.pos),
         annotations,
         geneMap
