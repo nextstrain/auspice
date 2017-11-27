@@ -1,8 +1,6 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import _filter from "lodash/filter";
-import { genotypeColors } from "../../util/globals";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
 import { changeColorBy } from "../../actions/colors";

@@ -1,4 +1,5 @@
 import { intersectGenes } from "../../reducers/entropy";
+import { genotypeColors } from "../globals"
 /**
 * traverse the tree and get the values -> counts for a single
 * attr. Visibility of the node is ignored. Terminal nodes only.
@@ -66,6 +67,7 @@ export const getValuesAndCountsOfVisibleTraitsFromTree = (nodes, visibility, att
 * @param {String} mutType - amino acid | nucleotide mutations - "aa" | "nuc"
 * @param {obj} geneMap used to NT fill colours. This should be imroved.
 * @return {obj} keys: the entries in attrs. Values: an object mapping values -> counts
+* TODO: this algorithm can be much improved, and the data structures returned improved also
 */
 export const calcEntropyInView = (nodes, visibility, mutType, geneMap) => {
   if (mutType === "nuc") {
@@ -92,38 +94,37 @@ export const calcEntropyInView = (nodes, visibility, mutType, geneMap) => {
     return entropyNtWithoutZeros;
   }
   /* AMINO ACID ENTROPY */
-  return undefined;
-
+  const sparse = {};
+  Object.keys(geneMap).forEach((n) => {sparse[n] = {};});
+  nodes.forEach((n) => {
+    if (visibility[n.arrayIdx] !== "visible") {return;}
+    if (n.aa_muts) {
+      // eslint-disable-next-line guard-for-in
+      for (const prot in n.aa_muts) { // eslint-disable-line no-restricted-syntax
+        n.aa_muts[prot].forEach((m) => {
+          const pos = parseInt(m.slice(1, m.length - 1), 10);
+          sparse[prot][pos] ? sparse[prot][pos]++ : sparse[prot][pos] = 1;
+        });
+      }
+    }
+  });
+  const aminoAcidEntropyWithoutZeros = [];
+  const prots = Object.keys(sparse);
+  let j = 0;
+  for (let i = 0; i < prots.length; i++) {
+    // eslint-disable-next-line guard-for-in
+    for (const k in sparse[prots[i]]) { // eslint-disable-line no-restricted-syntax
+      const numK = parseInt(k, 10);
+      aminoAcidEntropyWithoutZeros[j] = {
+        x: geneMap[prots[i]].start + 3 * numK - 1, // check
+        y: sparse[prots[i]][numK] / 5,
+        codon: numK, // check
+        fill: genotypeColors[i % 10],
+        prot: prots[i]
+      };
+      j++;
+    }
+  }
+  // console.log(aminoAcidEntropyWithoutZeros);
+  return aminoAcidEntropyWithoutZeros;
 };
-
-// const getBars = (jsonData, geneMap, mutType) => {
-//   console.log("getting ", mutType, " bars")
-//   if (mutType === "nuc") {
-//     const entropyNt = jsonData["nuc"]["val"].map((s, i) => ({x: jsonData["nuc"]["pos"][i], y: s}));
-//     const entropyNtWithoutZeros = _filter(entropyNt, (e) => { return e.y !== 0; }); // formerly entropyNtWithoutZeros
-//     for (const nt of entropyNtWithoutZeros) {
-//       nt.prot = intersectGenes(geneMap, nt.x);
-//     }
-//     return entropyNtWithoutZeros;
-//   }
-//   // TO DO - improve the code here...
-//   let aminoAcidEntropyWithoutZeros = [];
-//   let aaCount = 0;
-//   for (const prot of Object.keys(jsonData)) {
-//     if (prot !== "nuc") {
-//       const tmpProt = jsonData[prot];
-//       aaCount += 1;
-//       const tmpEntropy = tmpProt["val"].map((s, i) => ({ // eslint-disable-line no-loop-func
-//         x: tmpProt["pos"][i],
-//         y: s,
-//         codon: tmpProt["codon"][i],
-//         fill: genotypeColors[aaCount % 10],
-//         prot: prot
-//       }));
-//       aminoAcidEntropyWithoutZeros = aminoAcidEntropyWithoutZeros.concat(
-//         tmpEntropy.filter((e) => e.y !== 0)
-//       );
-//     }
-//   }
-//   return aminoAcidEntropyWithoutZeros;
-// };
