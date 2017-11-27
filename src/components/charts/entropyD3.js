@@ -8,45 +8,18 @@ import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
 
 /* constructor - sed up data and store params */
-const EntropyChart = function EntropyChart(ref, data, callbacks, bars) {
+const EntropyChart = function EntropyChart(ref, bars, annotations, geneMap, maxNt, callbacks) {
   this.svg = select(ref);
-  this.data = data;
+  this.annotations = annotations;
+  this.geneMap = geneMap;
+  this.maxNt = maxNt;
   this.bars = bars;
   this.callbacks = callbacks;
-  this.processAnnotations();
-  for (const nt of this.data.entropyNtWithoutZeros) {
-    nt.prot = this.intersectGenes(nt.x);
-  }
-  // console.log(this.data)
 };
 
 /* zero-based arrays in JSON. No such thing as nucleotide 0 or amino acid 0 */
 const fix = (x) => {
   return x + 1;
-};
-
-/* the annotation order in JSON is not necessarily sorted */
-EntropyChart.prototype.processAnnotations = function processAnnotations() {
-  const m = {};
-  this.data.annotations.forEach((d) => {
-    m[d.prot] = d;
-  });
-  const sorted = Object.keys(m).sort((a, b) =>
-    m[a].start < m[b].start ? -1 : m[a].start > m[b].start ? 1 : 0
-  );
-  for (const gene of Object.keys(m)) {
-    m[gene].idx = sorted.indexOf(gene);
-  }
-  this.geneMap = m;
-};
-
-EntropyChart.prototype.intersectGenes = function intersectGenes(pos) {
-  for (const gene of Object.keys(this.geneMap)) {
-    if (pos >= this.geneMap[gene].start && pos <= this.geneMap[gene].end) {
-      return gene;
-    }
-  }
-  return false;
 };
 
 EntropyChart.prototype.changeBarData = function changeBarData(bars) {
@@ -158,8 +131,6 @@ EntropyChart.prototype.drawBars = function drawBars() {
   const chart = this.mainGraph.append("g")
     .attr("clip-path", "url(#clip)")
     .selectAll(".bar");
-  // const data = this.aa ? this.data.aminoAcidEntropyWithoutZeros : this.data.entropyNtWithoutZeros;
-  const data = this.bars;
   const idfn = this.aa ? (d) => d.prot + d.codon : (d) => "nt" + fix(d.x);
   const xscale = this.aa ?
     (d) => this.scales.xMain(this.aaToNtCoord(d.prot, d.codon)) :
@@ -172,7 +143,7 @@ EntropyChart.prototype.drawBars = function drawBars() {
       }
       return lightGrey;
     };
-  chart.data(data)
+  chart.data(this.bars)
     .enter().append("rect")
     .attr("class", "bar")
     .attr("id", idfn)
@@ -255,11 +226,13 @@ EntropyChart.prototype.render = function render(chartGeom, aa, selected = undefi
   this.calcOffsets(chartGeom);
   this.setScales(
     chartGeom,
-    this.data.entropyNt.length + 1,
-    Math.max(
-      _maxBy(this.data.entropyNtWithoutZeros, "y").y,
-      _maxBy(this.data.aminoAcidEntropyWithoutZeros, "y").y
-    )
+    this.maxNt + 1,
+    // this.data.entropyNt.length + 1,
+    _maxBy(this.bars, "y").y
+    // Math.max(
+    //   _maxBy(this.data.entropyNtWithoutZeros, "y").y,
+    //   _maxBy(this.data.aminoAcidEntropyWithoutZeros, "y").y
+    // )
   );
 
   /* tear things down */
@@ -374,7 +347,7 @@ EntropyChart.prototype.render = function render(chartGeom, aa, selected = undefi
     .attr("height", this.offsets.heightMain);
 
   /* draw the genes */
-  this.drawGenes(this.data.annotations);
+  this.drawGenes(this.annotations);
   /* draw the data */
   this.drawBars();
 

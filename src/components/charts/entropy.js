@@ -13,44 +13,44 @@ import { TOGGLE_MUT_TYPE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import "../../css/entropy.css";
 
-const calcEntropy = (entropy) => {
-  const entropyNt = entropy["nuc"]["val"].map((s, i) => {
-    return {x: entropy["nuc"]["pos"][i], y: s};
-  });
-
-  const entropyNtWithoutZeros = _filter(entropyNt, (e) => { return e.y !== 0; });
-
-  let aminoAcidEntropyWithoutZeros = [];
-  const annotations = [];
-  let aaCount = 0;
-  for (const prot of Object.keys(entropy)) {
-    if (prot !== "nuc") {
-      const tmpProt = entropy[prot];
-      aaCount += 1;
-      annotations.push({
-        prot: prot,
-        start: tmpProt["pos"][0],
-        end: tmpProt["pos"][tmpProt["pos"].length - 1],
-        readingFrame: 1, // +tmpProt['pos'][0]%3,
-        fill: genotypeColors[aaCount % 10]
-      });
-      const tmpEntropy = tmpProt["val"].map((s, i) => ({ // eslint-disable-line no-loop-func
-        x: tmpProt["pos"][i],
-        y: s,
-        codon: tmpProt["codon"][i],
-        fill: genotypeColors[aaCount % 10],
-        prot: prot
-      }));
-      aminoAcidEntropyWithoutZeros = aminoAcidEntropyWithoutZeros.concat(
-        tmpEntropy.filter((e) => e.y !== 0)
-      );
-    }
-  }
-  return {annotations,
-    aminoAcidEntropyWithoutZeros,
-    entropyNt,
-    entropyNtWithoutZeros};
-};
+// const calcEntropy = (entropy) => {
+//   const entropyNt = entropy["nuc"]["val"].map((s, i) => {
+//     return {x: entropy["nuc"]["pos"][i], y: s};
+//   });
+//
+//   const entropyNtWithoutZeros = _filter(entropyNt, (e) => { return e.y !== 0; });
+//
+//   let aminoAcidEntropyWithoutZeros = [];
+//   const annotations = [];
+//   let aaCount = 0;
+//   for (const prot of Object.keys(entropy)) {
+//     if (prot !== "nuc") {
+//       const tmpProt = entropy[prot];
+//       aaCount += 1;
+//       annotations.push({
+//         prot: prot,
+//         start: tmpProt["pos"][0],
+//         end: tmpProt["pos"][tmpProt["pos"].length - 1],
+//         readingFrame: 1, // +tmpProt['pos'][0]%3,
+//         fill: genotypeColors[aaCount % 10]
+//       });
+//       const tmpEntropy = tmpProt["val"].map((s, i) => ({ // eslint-disable-line no-loop-func
+//         x: tmpProt["pos"][i],
+//         y: s,
+//         codon: tmpProt["codon"][i],
+//         fill: genotypeColors[aaCount % 10],
+//         prot: prot
+//       }));
+//       aminoAcidEntropyWithoutZeros = aminoAcidEntropyWithoutZeros.concat(
+//         tmpEntropy.filter((e) => e.y !== 0)
+//       );
+//     }
+//   }
+//   return {annotations,
+//     aminoAcidEntropyWithoutZeros,
+//     entropyNt,
+//     entropyNtWithoutZeros};
+// };
 
 const getStyles = (width) => {
   return {
@@ -90,6 +90,9 @@ const parseEncodedGenotype = (colorBy) => {
     mutType: state.controls.mutType,
     entropy: state.entropy.entropy,
     bars: state.entropy.bars,
+    annotations: state.entropy.annotations,
+    geneMap: state.entropy.geneMap,
+    maxNt: state.entropy.maxNt,
     browserDimensions: state.browserDimensions.browserDimensions,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
@@ -185,13 +188,16 @@ class Entropy extends React.Component {
   setUp(props) {
     const chart = new EntropyChart(
       this.d3entropy,
-      calcEntropy(props.entropy),
+      // calcEntropy(props.entropy),
+      props.bars,
+      props.annotations,
+      props.geneMap,
+      props.maxNt,
       { /* callbacks */
         onHover: this.onHover.bind(this),
         onLeave: this.onLeave.bind(this),
         onClick: this.onClick.bind(this)
-      },
-      props.bars
+      }
     );
     chart.render(this.getChartGeom(props), props.mutType);
     this.setState({
