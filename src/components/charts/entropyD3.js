@@ -18,6 +18,7 @@ const EntropyChart = function EntropyChart(ref, annotations, geneMap, maxNt, cal
   this.geneMap = geneMap;
   this.maxNt = maxNt;
   this.callbacks = callbacks;
+  this.okToDrawBars = false; /* useful as the brush setUp causes _drawBars x 2 */
 };
 
 /* "PUBLIC" PROTOTYPES */
@@ -34,6 +35,7 @@ EntropyChart.prototype.render = function render(props) {
   this._addBrush();
   this._addClipMask();
   this._drawGenes(this.annotations);
+  this.okToDrawBars = true;
   this._drawBars();
   this.zoomed = this._createZoomFn();
 };
@@ -158,7 +160,7 @@ EntropyChart.prototype._highlightSelectedBar = function _highlightSelectedBar() 
 
 /* draw the bars (for each base / aa) */
 EntropyChart.prototype._drawBars = function _drawBars() {
-  console.log("_drawBars")
+  if (!this.okToDrawBars) {return;}
   this.mainGraph.selectAll("*").remove();
   let posInView = this.scales.xMain.domain()[1] - this.scales.xMain.domain()[0];
   if (this.aa) {
@@ -245,7 +247,6 @@ EntropyChart.prototype._drawAxes = function _drawAxes() {
 };
 
 EntropyChart.prototype._updateYScaleAndAxis = function _updateYScaleAndAxis(yMax) {
-  console.log("running _updateYScaleAndAxis", yMax)
   this.scales.y = scaleLinear()
     .domain([this.scales.yMin, 1.2 * yMax])
     .range([this.offsets.y2Main, this.offsets.y1Main]);
@@ -296,14 +297,17 @@ EntropyChart.prototype._addBrush = function _addBrush() {
   this.brush = brushX()
     /* the extent is relative to the navGraph group - the constants are a bit hacky... */
     .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 30]])
-    .on("brush end", () => this.brushed());
+    .on("brush end", () => { // https://github.com/d3/d3-brush#brush_on
+      this.brushed()
+    })
   this.gBrush = this.navGraph.append("g")
     .attr("class", "brush")
     .attr("stroke-width", 0)
     .call(this.brush)
     .call(this.brush.move, () => {
       return this.scales.xMain.range();
-    });
+    })
+
   /* https://bl.ocks.org/mbostock/4349545 */
   this.brushHandle = this.gBrush.selectAll(".handle--custom")
     .data([{type: "w"}, {type: "e"}])

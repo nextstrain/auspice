@@ -177,15 +177,8 @@ export class Entropy extends React.Component {
     }
     if (this.state.chart) { /* props changed => update */
       const updateParams = {};
-      if (this.props.mutType !== nextProps.mutType) {
-        updateParams.aa = nextProps.mutType === "aa";
-        if (nextProps.colorBy.startsWith("gt")) {
-          updateParams.selected = parseEncodedGenotype(nextProps.colorBy);
-        } else {
-          updateParams.clearSelected = true;
-        }
-      }
       if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
+        updateParams.aa = nextProps.mutType === "aa";
         updateParams.newBars = nextProps.bars;
         updateParams.maxYVal = nextProps.maxYVal;
       }
@@ -197,7 +190,6 @@ export class Entropy extends React.Component {
         }
       }
       if (Object.keys(updateParams).length) {
-        console.log("updateParams:", updateParams)
         this.state.chart.update(updateParams);
       }
     }
