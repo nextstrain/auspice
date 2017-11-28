@@ -57,7 +57,7 @@ const InfoPanel = ({hovered, chartGeom, mutType}) => {
         </div>
         <p/>
         <div>
-          {`Entropy: ${hovered.d.y}`}
+          {`# mutations: ${hovered.d.y}`}
         </div>
         <div style={infoPanelStyles.comment}>
           Click to color tree & map
