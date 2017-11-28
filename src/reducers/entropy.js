@@ -54,7 +54,7 @@ const Entropy = (state = {loaded: false}, action) => {
       const geneMap = processAnnotations(annotations);
       return Object.assign({}, state, {
         loaded: false,
-        jsonData: action.data,
+        // jsonData: action.data,
         maxNt: Math.max(...action.data.nuc.pos),
         annotations,
         geneMap
