@@ -7,6 +7,7 @@ import { charonAPIAddress, enableNarratives } from "../util/globals";
 import { errorNotification } from "./notifications";
 import { getManifest } from "../util/clientAPIInterface";
 import { getNarrative } from "../util/getNarrative";
+import { updateEntropyVisibility } from "./entropy";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {
@@ -81,6 +82,7 @@ const populateEntropyStore = (paths) => {
           mutType: controls.mutType,
           data: data
         });
+        updateEntropyVisibility(dispatch, getState);
       })
       .catch((err) => {
         /* entropy reducer has already been invalidated */

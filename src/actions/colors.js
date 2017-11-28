@@ -8,7 +8,7 @@ import * as types from "./types";
 
 /* providedColorBy: undefined | string
 updateURL: undefined | router (this.context.router) */
-export const changeColorBy = (providedColorBy = undefined, router = undefined) => {
+export const changeColorBy = (providedColorBy = undefined, router = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
     const { controls, tree, sequences, metadata } = getState();
     /* step 0: bail if all required params aren't (yet) available! */
