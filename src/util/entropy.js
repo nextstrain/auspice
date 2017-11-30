@@ -66,10 +66,89 @@ export const calcAaMutationCounts = (nodes, visibility, geneMap) => {
   return [aminoAcidEntropyWithoutZeros, m];
 };
 
-export const calcNtEntropy = () => {
-  console.warn("to do");
+
+
+export const calcNtEntropy = (nodes, visibility, geneMap) => {
+  const counts = {};
+  const root = nodes[0];
+  const anc_state = {};
+  let visible_tips = 0;
+
+  const recurse = (node, state) => {
+    // if mutation observed - do something
+    if (node.muts && node.muts.length) {
+      node.muts.forEach((m) => {
+        const pos = parseInt(m.slice(1, m.length - 1), 10);
+        const A = m.slice(0, 1);
+        const B = m.slice(m.length - 1, m.length);
+        if (pos) {
+          // console.log("mut @ ", pos)
+          if (!anc_state[pos]) {
+            anc_state[pos] = A;
+          }
+          state[pos] = B;
+        }
+      });
+    }
+
+    // recurse!
+    if (node.hasChildren) {
+      for (const child of node.children) {
+        if (visibility[child.arrayIdx] === "visible") {
+          recurse(child, Object.assign({}, state));
+        }
+      }
+    } else {
+      // console.log('reached visibile tip!');
+      // console.log(state);
+      visible_tips++;
+      for (const k of Object.keys(state)) {
+        if (!counts[k]) {
+          counts[k] = {};
+          counts[k][state[k]] = 1;
+        } else if (!counts[k][state[k]]) {
+          counts[k][state[k]] = 1;
+        } else {
+          counts[k][state[k]]++;
+        }
+      }
+    }
+  };
+  recurse(root, {});
+  // console.log(counts);
+  let m = 0;
+  let i = 0;
+  const entropy = [];
+  for (const k of Object.keys(counts)) {
+    // console.log("pos ", k, ": ", counts[k]);
+    let n = 0;
+    for (const kk of Object.keys(counts[k])) {
+      n += counts[k][kk];
+    }
+    // console.log("unobserved (anc. state): ", visible_tips - n);
+    if (counts[anc_state[k]]) {
+      counts[k][anc_state[k]] += visible_tips - n;
+    } else {
+      counts[k][anc_state[k]] = visible_tips - n;
+    }
+
+    // console.log("computing entropy at ", k);
+    const t = visible_tips + n;
+    let s = 0;
+    for (const kk of Object.keys(counts[k])) {
+      const a = counts[k][kk] / t;
+      s += (-1 * a * Math.log(a));
+    }
+    if (s > m) {m = s;}
+    entropy[i] = {x: k, y: s, prot: intersectGenes(geneMap, k)};
+    i++;
+  }
+  // console.log(entropy)
+  return [entropy, m];
+
 };
 
-export const calcAaEntropy = () => {
-  console.warn("to do");
+export const calcAaEntropy = (nodes, visibility, geneMap) => {
+  console.warn("falling back");
+  return calcAaMutationCounts(nodes, visibility, geneMap)
 };
