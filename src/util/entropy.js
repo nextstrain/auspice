@@ -94,11 +94,12 @@ export const calcNtEntropy = (nodes, visibility, geneMap) => {
     // recurse!
     if (node.hasChildren) {
       for (const child of node.children) {
-        if (visibility[child.arrayIdx] === "visible") {
-          recurse(child, Object.assign({}, state));
-        }
+        recurse(child, Object.assign({}, state));
+        // if (visibility[child.arrayIdx] === "visible") {
+        //   recurse(child, Object.assign({}, state));
+        // }
       }
-    } else {
+    } else if (visibility[node.arrayIdx] === "visible") {
       // console.log('reached visibile tip!');
       // console.log(state);
       visible_tips++;
