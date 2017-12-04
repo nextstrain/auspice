@@ -139,7 +139,7 @@ export const calcNtEntropy = (nodes, visibility, geneMap) => {
       s += (-1 * a * Math.log(a));
     }
     if (s > m) {m = s;}
-    entropy[i] = {x: parseInt(k, 10), y: s, prot: intersectGenes(geneMap, k)};
+    entropy[i] = {x: parseInt(k, 10), y: s.toFixed(3), prot: intersectGenes(geneMap, k)};
     i++;
   }
   return [entropy, m];
@@ -242,7 +242,7 @@ export const calcAaEntropy = (nodes, visibility, geneMap) => {
       if (s > m) {m = s;}
       entropy[i] = {
         x: geneMap[prot].start + 3 * k - 1, // check
-        y: s,
+        y: s.toFixed(3),
         codon: parseInt(k, 10), // check
         fill: genotypeColors[i % 10],
         prot: prot
