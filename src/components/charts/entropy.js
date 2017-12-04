@@ -7,7 +7,7 @@ import { changeColorBy } from "../../actions/colors";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./entropyInfoPanel";
-import { changeMutType } from "../../actions/entropy";
+import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import "../../css/entropy.css";
 
@@ -17,6 +17,11 @@ const getStyles = (width) => {
       position: "absolute",
       marginTop: -25,
       paddingLeft: width - 100
+    },
+    switchContainerLeft: {
+      position: "absolute",
+      marginTop: -25,
+      paddingLeft: 25
     },
     switchTitle: {
       margin: 5,
@@ -69,6 +74,7 @@ export const computeChartGeometry = (props) => {
     geneMap: state.entropy.geneMap,
     maxNt: state.entropy.maxNt,
     maxYVal: state.entropy.maxYVal,
+    showCounts: state.entropy.showCounts,
     browserDimensions: state.browserDimensions.browserDimensions,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
@@ -143,6 +149,26 @@ export class Entropy extends React.Component {
       </div>
     );
   }
+  entropyCountSwitch(styles) {
+    return (
+      <div style={styles.switchContainerLeft}>
+        <button
+          key={1}
+          style={this.props.showCounts ? materialButton : materialButtonSelected}
+          onClick={() => this.props.dispatch(showCountsNotEntropy(false))}
+        >
+          <span style={styles.switchTitle}> {"entropy"} </span>
+        </button>
+        <button
+          key={2}
+          style={this.props.showCounts ? materialButtonSelected : materialButton}
+          onClick={() => this.props.dispatch(showCountsNotEntropy(true))}
+        >
+          <span style={styles.switchTitle}> {"counts"} </span>
+        </button>
+      </div>
+    );
+  }
   setUp(props) {
     const chart = new EntropyChart(
       this.d3entropy,
@@ -199,12 +225,14 @@ export class Entropy extends React.Component {
     const chartGeom = computeChartGeometry(this.props);
     const styles = getStyles(chartGeom.width);
     return (
-      <Card title={"Diversity"}>
+      <Card>
         {this.aaNtSwitch(styles)}
+        {this.entropyCountSwitch(styles)}
         <InfoPanel
           hovered={this.state.hovered}
           chartGeom={chartGeom}
           mutType={this.props.mutType}
+          showCounts={this.props.showCounts}
         />
         <svg
           id="d3entropyParent"

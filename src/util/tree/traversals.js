@@ -1,4 +1,3 @@
-import { trueEntropyCalc } from "../globals"
 import * as entropy from "../entropy";
 /**
 * traverse the tree and get the values -> counts for a single
@@ -66,11 +65,12 @@ export const getValuesAndCountsOfVisibleTraitsFromTree = (nodes, visibility, att
 * @param {Array} visibility - 1-1 correspondence with nodes. Value: "visibile" or ""
 * @param {String} mutType - amino acid | nucleotide mutations - "aa" | "nuc"
 * @param {obj} geneMap used to NT fill colours. This should be imroved.
+* @param {bool} showCounts show counts or entropy values?
 * @return {obj} keys: the entries in attrs. Values: an object mapping values -> counts
 * TODO: this algorithm can be much improved, and the data structures returned improved also
 */
-export const calcEntropyInView = (nodes, visibility, mutType, geneMap) => {
-  if (trueEntropyCalc) {
+export const calcEntropyInView = (nodes, visibility, mutType, geneMap, showCounts) => {
+  if (!showCounts) {
     if (mutType === "nuc") {
       return entropy.calcNtEntropy(nodes, visibility, geneMap);
     }

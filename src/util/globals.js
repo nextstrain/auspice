@@ -137,5 +137,3 @@ export const notificationDuration = 5000;
 
 /* server init stuff */
 export const charonAPIAddress = "/charon?"
-
-export const trueEntropyCalc = true;

@@ -1,7 +1,7 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 
-const InfoPanel = ({hovered, chartGeom, mutType}) => {
+const InfoPanel = ({hovered, chartGeom, mutType, showCounts}) => {
 
   /* this is a function - we can bail early */
   if (!hovered) {
@@ -57,7 +57,7 @@ const InfoPanel = ({hovered, chartGeom, mutType}) => {
         </div>
         <p/>
         <div>
-          {`# mutations: ${hovered.d.y}`}
+          {showCounts ? `Num mutations: ${hovered.d.y}` : `entropy: ${hovered.d.y}`}
         </div>
         <div style={infoPanelStyles.comment}>
           Click to color tree & map

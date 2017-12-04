@@ -45,10 +45,10 @@ const processAnnotations = (annotations) => {
 };
 
 
-const Entropy = (state = {loaded: false}, action) => {
+const Entropy = (state = {loaded: false, showCounts: false}, action) => {
   switch (action.type) {
     case types.DATA_INVALID:
-      return {loaded: false};
+      return Object.assign({}, state, {loaded: false});
     case types.RECEIVE_ENTROPY:
       const annotations = getAnnotations(action.data);
       const geneMap = processAnnotations(annotations);
@@ -64,6 +64,10 @@ const Entropy = (state = {loaded: false}, action) => {
         loaded: true,
         bars: action.data,
         maxYVal: action.maxYVal
+      });
+    case types.ENTROPY_COUNTS_TOGGLE:
+      return Object.assign({}, state, {
+        showCounts: action.showCounts
       });
     default:
       return state;
