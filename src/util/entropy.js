@@ -178,7 +178,15 @@ export const calcAaEntropy = (nodes, visibility, geneMap) => {
     // recurse!
     if (node.hasChildren) {
       for (const child of node.children) {
-        recurse(child, Object.assign({}, state));
+        /* if there were no changes to the state (i.e. no aa muts)
+        at the node, then we don't need to deep clone the state Object
+        (i.e. can just use references). This will be much quicker,
+        but increase programmatic complexity */
+        const newState = {};
+        arrayOfProts.forEach((p) => {
+          newState[p] = Object.assign({}, state[p]);
+        });
+        recurse(child, newState);
         // if (visibility[child.arrayIdx] === "visible") {
         //   recurse(child, Object.assign({}, state));
         // }TODO: return if node is visible, child is not...
