@@ -1,4 +1,4 @@
-import _filter from "lodash/filter";
+// import _filter from "lodash/filter";
 import * as types from "../actions/types";
 import { genotypeColors } from "../util/globals";
 
@@ -48,7 +48,7 @@ const processAnnotations = (annotations) => {
 const Entropy = (state = {loaded: false, showCounts: false}, action) => {
   switch (action.type) {
     case types.DATA_INVALID:
-      return Object.assign({}, state, {loaded: false});
+      return {loaded: false, showCounts: false};
     case types.RECEIVE_ENTROPY:
       const annotations = getAnnotations(action.data);
       const geneMap = processAnnotations(annotations);
