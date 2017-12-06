@@ -37,6 +37,7 @@ data_files=( "manifest_guest.json" "manifest_mumps.json"\
 )
 
 static_files=(
+  "manifest.json"\
   "narratives/zika.md"\
   "narratives/ebola.md"\
   "figures_feb-2016_h1n1pdm_6b2_tree.png"\
