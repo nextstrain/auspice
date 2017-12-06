@@ -1,5 +1,6 @@
 import queryString from "query-string";
 import parseParams from "./parseParams";
+import { urlQueryChange } from "../actions/loadData";
 
 /* this function takes (potentially multiple) changes you would like
 reflected in the URL and makes one change.
@@ -89,4 +90,13 @@ export const determineColorByGenotypeType = (colorBy) => {
     return "aa";
   }
   return false;
+};
+
+export const changeURLQueryAndUpdateState = (router, dispatch, url) => {
+  const query = queryString.parse(url.split('?')[1]);
+  router.history.push({
+    pathname: router.history.location.pathname,
+    search: queryString.stringify(query)
+  });
+  dispatch(urlQueryChange(query));
 };

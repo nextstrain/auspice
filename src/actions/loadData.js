@@ -3,9 +3,10 @@ import * as types from "./types";
 import { updateColors } from "./colors";
 import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { turnURLtoDataPath } from "../util/urlHelpers";
-import { charonAPIAddress } from "../util/globals";
+import { charonAPIAddress, enableNarratives } from "../util/globals";
 import { errorNotification } from "./notifications";
 import { getManifest } from "../util/clientAPIInterface";
+import { getNarrative } from "../util/getNarrative";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {
@@ -137,6 +138,9 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
         if (values[0].panels.indexOf("entropy") !== -1) {
           dispatch(populateEntropyStore(paths));
         }
+        if (enableNarratives) {
+          getNarrative(dispatch, router.history.location.pathname);
+        }
 
       })
       .catch((err) => {
@@ -150,6 +154,20 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
         console.error("loadMetaAndTreeJSONs error:", err);
         router.history.push({pathname: '/', search: ''});
       });
+  };
+};
+
+export const urlQueryChange = (query) => {
+  return (dispatch, getState) => {
+    const { metadata } = getState();
+    dispatch({
+      type: types.URL_QUERY_CHANGE,
+      query,
+      metadata
+    });
+    /* perhaps check if the following two are actually necessary?!?!?! */
+    dispatch(updateVisibleTipsAndBranchThicknesses());
+    dispatch(updateColors());
   };
 };
 

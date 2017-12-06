@@ -110,6 +110,7 @@ class TreeView extends React.Component {
         prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
         // or the sidebar's (dis)appeared
         this.props.sidebar !== prevProps.sidebar ||
+        this.props.sidebarRight !== prevProps.sidebarRight ||
         prevProps.panelLayout !== this.props.panelLayout /* full vs grid */
       )
 
@@ -164,7 +165,8 @@ class TreeView extends React.Component {
       horizontal: grid ? 0.5 : 1,
       vertical: grid ? 0.7 : 0.88,
       browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar
+      sidebar: this.props.sidebar,
+      sidebarRight: this.props.sidebarRight
     });
     const cardTitle = "Phylogeny";
 

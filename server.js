@@ -4,6 +4,7 @@ const express = require("express");
 const expressStaticGzip = require("express-static-gzip");
 const getFiles = require('./src/server/util/getFiles');
 const serverReact = require('./src/server/util/sendReactComponents');
+const serverNarratives = require('./src/server/util/narratives');
 const queryString = require("query-string");
 
 /*
@@ -86,6 +87,9 @@ app.get('/charon*', (req, res) => {
   switch (query.request) {
     case "manifest": {
       getFiles.getManifest(query, res);
+      break;
+    } case "narrative": {
+      serverNarratives.serveNarrative(query, res);
       break;
     } case "posts_manifest": {
       getFiles.getPostsManifest(query, res);

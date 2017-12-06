@@ -11,7 +11,6 @@ import EntropyChart from "./entropyD3";
 import InfoPanel from "./entropyInfoPanel";
 import { TOGGLE_MUT_TYPE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { modifyURLquery } from "../../util/urlHelpers";
 import "../../css/entropy.css";
 
 const calcEntropy = (entropy) => {
@@ -111,6 +110,7 @@ class Entropy extends React.Component {
         vertical: 0.3,
         browserDimensions: p.browserDimensions,
         sidebar: p.sidebar,
+        sidebarRight: p.sidebarRight,
         minHeight: 150
       });
       return {
@@ -148,19 +148,16 @@ class Entropy extends React.Component {
   onClick(d) {
     const colorBy = constructEncodedGenotype(this.props.mutType === "aa", d);
     analyticsControlsEvent("color-by-genotype");
-    this.props.dispatch(changeColorBy(colorBy));
-    modifyURLquery(this.context.router, {c: colorBy}, true);
+    this.props.dispatch(changeColorBy(colorBy, this.context.router));
     this.setState({hovered: false});
   }
 
   changeMutTypeCallback(newMutType) {
     if (newMutType !== this.props.mutType) {
-      /* 1. switch the redux colorBy back to the default */
-      this.props.dispatch(changeColorBy(this.props.defaultColorBy));
+      /* 1. switch the redux colorBy back to the default & update the URL */
+      this.props.dispatch(changeColorBy(this.props.defaultColorBy, this.context.router));
       /* 2. update the mut type in redux */
       this.props.dispatch({type: TOGGLE_MUT_TYPE, data: newMutType});
-      /* 3. modify the URL */
-      modifyURLquery(this.context.router, {c: this.props.defaultColorBy}, true);
     }
   }
 
@@ -216,7 +213,7 @@ class Entropy extends React.Component {
     }
     if (this.state.chart) {
       if ((this.props.browserDimensions !== nextProps.browserDimensions) ||
-         (this.props.sidebar !== nextProps.sidebar)) {
+         (this.props.sidebar !== nextProps.sidebar || this.props.sidebarRight !== nextProps.sidebarRight)) {
         if (nextProps.colorBy.startsWith("gt")) {
           this.state.chart.render(this.getChartGeom(nextProps), nextProps.mutType === "aa", parseEncodedGenotype(nextProps.colorBy));
         } else {

@@ -8,6 +8,7 @@ import controls from "./controls";
 import browserDimensions from "./browserDimensions";
 import notifications from "./notifications";
 import datasets from "./datasets";
+import narrative from "./narrative";
 
 const rootReducer = combineReducers({
   metadata,
@@ -18,7 +19,8 @@ const rootReducer = combineReducers({
   entropy,
   browserDimensions,
   notifications,
-  datasets
+  datasets,
+  narrative
 });
 
 export default rootReducer;

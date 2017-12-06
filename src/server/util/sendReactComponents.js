@@ -17,7 +17,7 @@ const serveStaticPost = (query, res) => {
     res.send(ReactDOMServer.renderToStaticMarkup(<ReactMarkdown source={md} />));
   } else {
     request(global.REMOTE_STATIC_BASEURL + query.path, (err, response, body) => {
-      if (err || body.split("\n")[1] === '<head><title>404 Not Found</title></head>') {
+      if (err || body.startsWith("404") || body.split("\n")[1].startsWith('<head><title>404')) {
         res.status(404).send('Post not found.');
         return;
       }

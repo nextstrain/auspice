@@ -1,9 +1,12 @@
 import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
 import { calcNodeColor } from "../components/tree/treeHelpers";
+import { modifyURLquery } from "../util/urlHelpers";
 import * as types from "./types";
 
-export const updateColors = (providedColorBy = undefined) => {
+/* providedColorBy: undefined | string
+updateURL: undefined | router (this.context.router) */
+export const changeColorBy = (providedColorBy = undefined, router = undefined) => {
   return (dispatch, getState) => {
     const { controls, tree, sequences, metadata } = getState();
     /* step 0: bail if all required params aren't (yet) available! */
@@ -39,13 +42,15 @@ export const updateColors = (providedColorBy = undefined) => {
       nodeColors,
       version
     });
+
+    /* step 4 (optional): update the URL query field */
+    if (router) {
+      modifyURLquery(router, {c: colorBy}, true);
+    }
+
     return null;
   };
 };
 
-/* changeColorBy is just a wrapper for updateColors */
-export const changeColorBy = (colorBy) => {
-  return (dispatch) => {
-    dispatch(updateColors(colorBy));
-  };
-};
+/* updateColors calls changeColorBy with no args, i.e. it updates the colorScale & nodeColors */
+export const updateColors = () => (dispatch) => {dispatch(changeColorBy());};

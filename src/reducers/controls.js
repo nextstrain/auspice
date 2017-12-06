@@ -37,6 +37,151 @@ const getMaxCalDateViaTree = (tree) => {
   return numericToCalendar(maxNumDate);
 };
 
+/* need a (better) way to keep the queryParams all in "sync" */
+const modifyStateViaURLQuery = (state, query) => {
+  if (query.l) {
+    state["layout"] = query.l;
+  }
+  if (query.m) {
+    state["distanceMeasure"] = query.m;
+  }
+  if (query.c) {
+    state["colorBy"] = query.c;
+  }
+  if (query.r) {
+    state["geoResolution"] = query.r;
+  }
+  if (query.dmin) {
+    state["dateMin"] = query.dmin;
+  }
+  if (query.dmax) {
+    state["dateMax"] = query.dmax;
+  }
+  return state;
+};
+
+const restoreQueryableStateToDefaults = (state) => {
+  /* layout (l) */
+  state["layout"] = state["defaultLayout"];
+  /* distanceMeasure (m) */
+  state["distanceMeasure"] = state["defaultDistanceMeasure"];
+  /* colorBy (c) */
+  state["colorBy"] = state["defaultColorBy"];
+  /* geoResolution (r) */
+  state["geoResolution"] = state["defaultGeoResolution"];
+  /* dateMin (dmin) */
+  state["dateMin"] = state["absoluteDateMin"];
+  /* dateMax (dmax) */
+  state["dateMax"] = state["absoluteDateMax"];
+  return state;
+};
+
+const modifyStateViaMetadata = (state, metadata) => {
+  if (metadata.date_range) {
+    /* this may be useful if, e.g., one were to want to display an outbreak
+    from 2000-2005 (the default is the present day) */
+    if (metadata.date_range.date_min) {
+      state["dateMin"] = metadata.date_range.date_min;
+      state["absoluteDateMin"] = metadata.date_range.date_min;
+      state["mapAnimationStartDate"] = metadata.date_range.date_min;
+    }
+    if (metadata.date_range.date_max) {
+      state["dateMax"] = metadata.date_range.date_max;
+      state["absoluteDateMax"] = metadata.date_range.date_max;
+    }
+  }
+  if (metadata.analysisSlider) {
+    state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
+  }
+  if (metadata.author_info) {
+    state.filters.authors = [];
+  } else {
+    console.error("update meta.json to include author_info.");
+  }
+  if (metadata.filters) {
+    metadata.filters.forEach((v) => {state.filters[v] = [];});
+  } else {
+    console.warn("the meta.json did not include any filters");
+  }
+  if (metadata.defaults) {
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout"];
+    const expectedTypes = ["string", "string", "string", "string"];
+
+    for (let i = 0; i < keysToCheckFor.length; i += 1) {
+      if (metadata.defaults[keysToCheckFor[i]]) {
+        if (typeof metadata.defaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
+          state[keysToCheckFor[i]] = metadata.defaults[keysToCheckFor[i]];
+          /* as well as state[geoResolution], set state[defaultGeoResolution] */
+          state[`default${keysToCheckFor[i][0].toUpperCase()}${keysToCheckFor[i].substring(1)}`] = state[keysToCheckFor[i]];
+        } else {
+          console.error("Skipping (meta.json) default for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
+        }
+      }
+    }
+    // TODO: why are these false / False
+    if (metadata.defaults.mapTriplicate) {
+      // convert string to boolean; default is true; turned off with either false (js) or False (python)
+      state["mapTriplicate"] = (metadata.defaults.mapTriplicate === 'false' || metadata.defaults.mapTriplicate === 'False') ? false : true;
+    }
+  }
+
+  /* if only map or only tree, then panelLayout must be full */
+  if (metadata.panels.indexOf("map") === -1 || metadata.panels.indexOf("tree") === -1) {
+    state["panelLayout"] = "full";
+  }
+  return state;
+};
+
+const modifyStateViaTree = (state, tree) => {
+  state["dateMin"] = getMinCalDateViaTree(tree);
+  state["absoluteDateMin"] = getMinCalDateViaTree(tree);
+  state["dateMax"] = getMaxCalDateViaTree(tree);
+  state["absoluteDateMax"] = getMaxCalDateViaTree(tree);
+  /* available tree attrs - based upon the root node */
+  state["attrs"] = Object.keys(tree.attr);
+  state["temporalConfidence"] = Object.keys(tree.attr).indexOf("num_date_confidence") > -1 ?
+    {exists: true, display: true, on: false} : {exists: false, display: false, on: false};
+  return state;
+};
+
+const checkAndCorrectErrorsInState = (state, metadata) => {
+
+  /* colorBy */
+  const availableNonGenotypeColorBys = Object.keys(metadata.color_options);
+  if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
+    availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
+  }
+  const colorByValid = Object.keys(metadata.color_options).indexOf(state["colorBy"]) !== -1;
+  if (!colorByValid || state["colorBy"].startsWith("gt-")) {
+    state["defaultColorBy"] = availableNonGenotypeColorBys[0];
+    state["colorBy"] = state["defaultColorBy"];
+    console.error("Error detected. Setting colorBy to ", state["colorBy"]);
+  }
+
+  /* colorBy confidence */
+  state["colorByConfidence"] = checkColorByConfidence(state["attrs"], state["colorBy"]);
+
+  /* distanceMeasure */
+  if (["div", "num_date"].indexOf(state["distanceMeasure"]) === -1) {
+    state["distanceMeasure"] = "num_date";
+    console.error("Error detected. Setting distanceMeasure to ", state["distanceMeasure"]);
+  }
+
+  /* geoResolution */
+  const availableGeoResultions = Object.keys(metadata.geo);
+  if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
+    state["geoResolution"] = availableGeoResultions[0];
+    console.error("Error detected. Setting geoResolution to ", state["geoResolution"]);
+  }
+
+  /* temporalConfidence */
+  if (state.temporalConfidence.exists && state.layout !== "rect") {
+    state.temporalConfidence.display = false;
+  }
+
+  return state;
+};
+
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
@@ -52,7 +197,9 @@ const getDefaultState = () => {
     mutType: mutType,
     temporalConfidence: {exists: false, display: false, on: false},
     layout: defaultLayout,
+    defaultLayout: defaultLayout,
     distanceMeasure: defaultDistanceMeasure,
+    defaultDistanceMeasure: defaultDistanceMeasure,
     dateMin: numericToCalendar(currentNumDate() - defaultDateRange),
     dateMax: currentCalDate(),
     absoluteDateMin: numericToCalendar(currentNumDate() - defaultDateRange),
@@ -63,6 +210,7 @@ const getDefaultState = () => {
     colorScale: undefined,
     analysisSlider: false,
     geoResolution: defaultGeoResolution,
+    defaultGeoResolution: defaultGeoResolution,
     datasetPathName: "",
     filters: {},
     showDownload: false,
@@ -81,120 +229,21 @@ const Controls = (state = getDefaultState(), action) => {
       return Object.assign({}, state, {
         datasetPathName: undefined
       });
+    case types.URL_QUERY_CHANGE: {
+      /* the general pattern is to reset as much as possible to the "base" state, then rehydrate it from the query */
+      let newState = Object.assign({}, state);
+      newState = restoreQueryableStateToDefaults(newState);
+      newState = modifyStateViaURLQuery(newState, action.query);
+      newState = checkAndCorrectErrorsInState(newState, action.metadata);
+      return newState;
+    }
     case types.NEW_DATASET: {
-      const base = getDefaultState();
+      let base = getDefaultState();
       base["datasetPathName"] = action.datasetPathName;
-      base["dateMin"] = getMinCalDateViaTree(action.tree);
-      base["absoluteDateMin"] = getMinCalDateViaTree(action.tree);
-      base["dateMax"] = getMaxCalDateViaTree(action.tree);
-      base["absoluteDateMax"] = getMaxCalDateViaTree(action.tree);
-      /* overwrite base state with data from the metadata JSON */
-      if (action.meta.date_range) {
-        /* this may be useful if, e.g., one were to want to display an outbreak
-        from 2000-2005 (the default is the present day) */
-        if (action.meta.date_range.date_min) {
-          base["dateMin"] = action.meta.date_range.date_min;
-          base["absoluteDateMin"] = action.meta.date_range.date_min;
-          base["mapAnimationStartDate"] = action.meta.date_range.date_min;
-        }
-        if (action.meta.date_range.date_max) {
-          base["dateMax"] = action.meta.date_range.date_max;
-          base["absoluteDateMax"] = action.meta.date_range.date_max;
-        }
-      }
-      if (action.meta.analysisSlider) {
-        base["analysisSlider"] = {key: action.meta.analysisSlider, valid: false};
-      }
-      if (action.meta.author_info) {
-        base.filters.authors = [];
-      } else {
-        console.error("update meta.json to include author_info.");
-      }
-      if (action.meta.filters) {
-        action.meta.filters.forEach((v) => {base.filters[v] = [];});
-      } else {
-        console.warn("the meta.json did not include any filters");
-      }
-      if (action.meta.defaults) {
-        const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout"];
-        const expectedTypes = ["string", "string", "string", "string"];
-
-        for (let i = 0; i < keysToCheckFor.length; i += 1) {
-          if (action.meta.defaults[keysToCheckFor[i]]) {
-            if (typeof action.meta.defaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
-              base[keysToCheckFor[i]] = action.meta.defaults[keysToCheckFor[i]];
-            } else {
-              console.error("Skipping (meta.json) default for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
-            }
-          }
-        }
-        // TODO: why are these false / False
-        if (action.meta.defaults.mapTriplicate) {
-          // convert string to boolean; default is true; turned off with either false (js) or False (python)
-          base["mapTriplicate"] = (action.meta.defaults.mapTriplicate === 'false' || action.meta.defaults.mapTriplicate === 'False') ? false : true;
-        }
-      }
-      /* now overwrite state with data from the URL */
-      if (action.query.l) {
-        base["layout"] = action.query.l;
-      }
-      if (action.query.m) {
-        base["distanceMeasure"] = action.query.m;
-      }
-      if (action.query.c) {
-        base["colorBy"] = action.query.c;
-      }
-      if (action.query.r) {
-        base["geoResolution"] = action.query.r;
-      }
-      if (action.query.dmin) {
-        base["dateMin"] = action.query.dmin;
-      }
-      if (action.query.dmax) {
-        base["dateMax"] = action.query.dmax;
-      }
-      base["temporalConfidence"] = Object.keys(action.tree.attr).indexOf("num_date_confidence") > -1 ?
-        {exists: true, display: true, on: false} : {exists: false, display: false, on: false};
-      if (base.temporalConfidence.exists && base.layout !== "rect") {
-        base.temporalConfidence.display = false;
-      }
-
-      /* if only map or only tree, then panelLayout must be full */
-      if (action.meta.panels.indexOf("map") === -1 || action.meta.panels.indexOf("tree") === -1) {
-        base["panelLayout"] = "full";
-      }
-
-      /* we now check that the set values (meta.json defaults, hardcoded defaults, URL queries) are "valid" */
-      /* colorBy */
-      const colorByValid = Object.keys(action.meta.color_options).indexOf(base["colorBy"]) !== -1;
-      const availableNonGenotypeColorBys = Object.keys(action.meta.color_options);
-      if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
-        availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
-      }
-      if (!colorByValid || base["colorBy"].startsWith("gt-")) {
-        base["defaultColorBy"] = availableNonGenotypeColorBys[0];
-        base["colorBy"] = base["defaultColorBy"];
-        console.error("Error detected. Setting colorBy to ", base["colorBy"]);
-      } else {
-        base["defaultColorBy"] = base["colorBy"]; // set this so that we can always go back to the initial value
-      }
-
-      /* geoResolution */
-      const availableGeoResultions = Object.keys(action.meta.geo);
-      if (availableGeoResultions.indexOf(base["geoResolution"]) === -1) {
-        base["geoResolution"] = availableGeoResultions[0];
-        console.error("Error detected. Setting geoResolution to ", base["geoResolution"]);
-      }
-
-      /* distanceMeasure */
-      if (["div", "num_date"].indexOf(base["distanceMeasure"]) === -1) {
-        base["distanceMeasure"] = "num_date";
-        console.error("Error detected. Setting distanceMeasure to ", base["distanceMeasure"]);
-      }
-
-      /* available tree attrs - based upon the root node */
-      base["attrs"] = Object.keys(action.tree.attr);
-      base["colorByConfidence"] = checkColorByConfidence(base["attrs"], base["colorBy"]);
+      base = modifyStateViaTree(base, action.tree);
+      base = modifyStateViaMetadata(base, action.meta);
+      base = modifyStateViaURLQuery(base, action.query);
+      base = checkAndCorrectErrorsInState(base, action.meta); /* must run last */
       return base;
     }
     case types.TOGGLE_BRANCH_LABELS:
