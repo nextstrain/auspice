@@ -1,25 +1,20 @@
 import { createStore, applyMiddleware, compose } from "redux";
 import thunk from "redux-thunk";
-// import { devTools } from 'redux-devtools';
-// import createHistory from 'history/lib/createBrowserHistory';
-
+import { changeURLMiddleware } from "../middleware/changeURL";
 import rootReducer from "../reducers";
 
-const middleware = [thunk];
+const middleware = [thunk, changeURLMiddleware];
 
-let finalCreateStore;
-
+let CreateStoreWithMiddleware;
 if (process.env.NODE_ENV === 'production') {
-  finalCreateStore = applyMiddleware(...middleware)(createStore);
+  CreateStoreWithMiddleware = applyMiddleware(...middleware)(createStore);
 } else {
-  finalCreateStore = compose(
+  CreateStoreWithMiddleware = compose(
     applyMiddleware(...middleware),
-    window.devToolsExtension ? window.devToolsExtension() : f => f
+    window.devToolsExtension ? window.devToolsExtension() : (f) => f
   )(createStore);
 }
 
-const configureStore = function (initialState) {
-  return finalCreateStore(rootReducer, initialState);
-};
+const configureStore = (initialState) => CreateStoreWithMiddleware(rootReducer, initialState);
 
 export default configureStore;
