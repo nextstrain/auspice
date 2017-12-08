@@ -11,7 +11,7 @@ reflected in the URL and makes one change.
   replace: if true, you can't go "back" to the old state via the browser
 */
 export const modifyURLquery = (router, keyValuePairs = null, replace = false) => {
-  return; // deprecated
+  console.warn("modifyURLquery is deprecated");
   let query = queryString.parse(router.history.location.search);
   // const query = queryString.parse(router.history.location.search);
   if (keyValuePairs) {
