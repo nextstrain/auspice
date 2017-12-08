@@ -28,6 +28,14 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.r = action.data === state.controls.defaults.geoResolution ? undefined : action.data;
       break;
     }
+    case types.CHANGE_DISTANCE_MEASURE: {
+      query.m = action.data === state.controls.defaults.distanceMeasure ? undefined : action.data;
+      break;
+    }
+    case types.CHANGE_PANEL_LAYOUT: {
+      query.p = action.notInURLState === true ? undefined : action.data;
+      break;
+    }
     default:
       queryModified = false;
       break;
