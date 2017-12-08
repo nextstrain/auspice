@@ -36,6 +36,22 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.p = action.notInURLState === true ? undefined : action.data;
       break;
     }
+    case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
+      if (state.controls.mapAnimationPlayPauseButton === "Pause") { // animation in progress - no dates in URL
+        query.dmin = undefined;
+        query.dmax = undefined;
+      } else {
+        query.dmin = action.dateMin === state.controls.absoluteDateMin ? undefined : action.dateMin;
+        query.dmax = action.dateMax === state.controls.absoluteDateMax ? undefined : action.dateMax;
+      }
+      break;
+    }
+    case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
+      if (action.data === "Play") { // animation stopping - restore dates in URL
+        query.dmin = state.controls.dateMin === state.controls.absoluteDateMin ? undefined : state.controls.dateMin;
+        query.dmax = state.controls.dateMax === state.controls.absoluteDateMax ? undefined : state.controls.dateMax;
+      }
+      break;
     default:
       queryModified = false;
       break;
