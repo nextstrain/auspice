@@ -68,6 +68,7 @@ class Posts extends React.Component {
   }
 
   goToPostPage(name) {
+    // TODO: this can't be handled in middleware as there's no action associated with it!
     modifyURLquery(this.context.router, {name}, false);
     this.getAndInsertPostContentViaAPI();
   }

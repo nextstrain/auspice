@@ -16,9 +16,6 @@ class TitleBar extends React.Component {
   constructor(props) {
     super(props);
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   getStyles() {
     return {
       main: {

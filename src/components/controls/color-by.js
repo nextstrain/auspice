@@ -34,9 +34,6 @@ class ColorBy extends React.Component {
     colorOptions: PropTypes.object.isRequired,
     dispatch: PropTypes.func.isRequired
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.colorBy !== nextProps.colorBy) {

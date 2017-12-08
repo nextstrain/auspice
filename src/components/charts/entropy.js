@@ -91,9 +91,6 @@ export class Entropy extends React.Component {
       chart: false
     };
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     entropy: PropTypes.object,

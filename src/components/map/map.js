@@ -50,10 +50,6 @@ import { incommingMapPNG } from "../download/helperFunctions";
 })
 
 class Map extends React.Component {
-
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   static propTypes = {
     treeVersion: PropTypes.number.isRequired,
     treeLoaded: PropTypes.bool.isRequired,

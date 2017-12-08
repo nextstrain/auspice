@@ -71,9 +71,6 @@ class DownloadModal extends React.Component {
       };
     };
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   relevantPublications() {
     const titer_related_keys = ["cTiter", "rb", "ep", "ne"];
     const titer = (titer_related_keys.indexOf(this.props.colorBy) !== -1) ?
@@ -162,7 +159,7 @@ class DownloadModal extends React.Component {
               {preambleText}
               {" A full list of sequence authors is available via the CSV files below."}
               <div style={styles.break}/>
-              {getAcknowledgments(this.context.router, {})}
+              {getAcknowledgments({})}
 
               <h2>Data usage policy</h2>
               {dataUsage}
