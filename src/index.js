@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import ReactGA from "react-ga";
+import createHistory from 'history/createBrowserHistory'
 import { BrowserRouter, Route, Switch } from "react-router-dom";
 import { Provider } from "react-redux";
 import { AppContainer } from 'react-hot-loader';
@@ -29,6 +30,9 @@ const store = configureStore();
 
 /* google analytics */
 ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-2");
+
+/* npm history package - can we avoid window here? */
+window.url = createHistory();
 
 /* Performance measurement - DEV ONLY */
 if (enableAnimationPerfTesting) {
