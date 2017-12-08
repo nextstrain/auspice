@@ -16,13 +16,17 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.NEW_COLORS:
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
       break;
+    case types.APPLY_FILTER: {
+      query[`f_${action.fields}`] = action.values.join(',');
+      break;
+    }
     default:
       queryModified = false;
       break;
   }
 
   if (queryModified) {
-    Object.keys(query).filter((k) => !k).forEach((k) => delete query[k]);
+    Object.keys(query).filter((k) => !query[k]).forEach((k) => delete query[k]);
     const newURL = {
       pathname: window.url.location.pathname,
       search: queryString.stringify(query).replace(/%2C/g, ',')

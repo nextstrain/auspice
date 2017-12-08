@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { applyFilterQuery, changeDateFilter } from "../../actions/treeProperties";
+import { applyFilter, changeDateFilter } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton } from "../framework/footer";
 import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
@@ -198,7 +198,7 @@ class Info extends React.Component {
       <span
         style={{cursor: "pointer", color: '#5097BA'}}
         key={field}
-        onClick={() => this.props.dispatch(applyFilterQuery(this.context.router, field, []))}
+        onClick={() => this.props.dispatch(applyFilter(field, []))}
         role="button"
         tabIndex={0}
       >

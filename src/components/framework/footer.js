@@ -6,7 +6,7 @@ import { prettyString } from "../../util/stringHelpers";
 import computeResponsive from "../../util/computeResponsive";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
-import { applyFilterQuery } from "../../actions/treeProperties";
+import { applyFilter } from "../../actions/treeProperties";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -55,7 +55,7 @@ export const getAcknowledgments = (router, style) => {
 
 const dispatchFilter = (router, dispatch, activeFilters, key, value) => {
   const mode = activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
-  dispatch(applyFilterQuery(router, key, [value], mode));
+  dispatch(applyFilter(key, [value], mode));
 };
 
 export const displayFilterValueAsButton = (router, dispatch, activeFilters, filterName, itemName, display, showX) => {
@@ -109,7 +109,7 @@ const removeFiltersButton = (router, dispatch, filterNames, outerClassName, labe
       className={`${outerClassName} boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => {
-        filterNames.forEach((n) => dispatch(applyFilterQuery(router, n, [], 'set')))
+        filterNames.forEach((n) => dispatch(applyFilter(n, [], 'set')))
       }}
     >
       {label}

@@ -380,7 +380,7 @@ const Controls = (state = getDefaultState(), action) => {
       return Object.assign({}, state, {
         geoResolution: action.data
       });
-    case types.APPLY_FILTER_QUERY: {
+    case types.APPLY_FILTER: {
       // values arrive as array
       const filters = Object.assign({}, state.filters, {});
       filters[action.fields] = action.values;

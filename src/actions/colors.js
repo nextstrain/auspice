@@ -1,7 +1,6 @@
 import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
 import { calcNodeColor } from "../components/tree/treeHelpers";
-import { modifyURLquery } from "../util/urlHelpers";
 import { determineColorByGenotypeType } from "../util/colorHelpers";
 import { updateEntropyVisibility } from "./entropy";
 import * as types from "./types";
