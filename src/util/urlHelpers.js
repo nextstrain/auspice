@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import parseParams from "./parseParams";
-import { urlQueryChange } from "../actions/loadData";
+import { CHANGE_URL_NOT_STATE } from "../actions/types";
 
 /* this function takes (potentially multiple) changes you would like
 reflected in the URL and makes one change.
@@ -82,11 +82,37 @@ export const turnURLtoDataPath = (router, datasets) => {
   return router.history.location.pathname.replace(/^\//, '').replace(/\/$/, '').replace('/', '_');
 };
 
-export const changeURLQueryAndUpdateState = (router, dispatch, url) => {
-  const query = queryString.parse(url.split('?')[1]);
-  router.history.push({
-    pathname: router.history.location.pathname,
-    search: queryString.stringify(query)
-  });
-  dispatch(urlQueryChange(query));
+// export const changeURLQueryAndUpdateState = (router, dispatch, url) => {
+//   const query = queryString.parse(url.split('?')[1]);
+//   router.history.push({
+//     pathname: router.history.location.pathname,
+//     search: queryString.stringify(query)
+//   });
+//   dispatch(urlQueryChange(query));
+// };
+
+/* match URL pathname to datasets (from manifest) and potentially update the URL */
+export const getPathnameAndMaybeChangeURL = (pathname, datasets) => {
+  console.log("----", pathname, datasets)
+  if (!datasets) {return undefined;}
+  // console.log("turnURLtoDataPath")
+  const parsedParams = parseParams(pathname, datasets);
+  // console.log("parsed params turned", router.history.location.pathname, "to", parsedParams)
+  // set a new URL if the dataPath is incomplete
+  if (parsedParams.incomplete) {
+    // dispatch({
+    //   type: CHANGE_URL_NOT_STATE,
+    //   path: parsedParams.fullsplat,
+    //   query: selectivelyUpdateSearch(parsedParams.search, this.url.location.search)
+    // })
+    this.url.replace({
+      pathname: parsedParams.fullsplat,
+      search: selectivelyUpdateSearch(parsedParams.search, this.url.location.search)
+    });
+  }
+  // if valid, return the data_path, else undefined
+  if (parsedParams.valid) {
+    return makeDataPathFromParsedParams(parsedParams);
+  }
+  return pathname.replace(/^\//, '').replace(/\/$/, '').replace('/', '_');
 };

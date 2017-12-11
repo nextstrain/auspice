@@ -22,17 +22,13 @@ class Posts extends React.Component {
       nameOfCurrentPost: undefined
     };
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
 
   getAndInsertPostContentViaAPI() {
 
-    const query = queryString.parse(this.context.router.history.location.search);
+    const query = queryString.parse(window.url.location.search);
     if (!query.name) {return;}
     if (this.state.nameOfCurrentPost === query.name) {return;}
     this.setState({nameOfCurrentPost: query.name});
-    // this.context.router
     const errorHandler = (e) => {
       this.props.dispatch(warningNotification({message: "Failed to get post from server"}));
       console.error(e);
@@ -69,7 +65,8 @@ class Posts extends React.Component {
 
   goToPostPage(name) {
     // TODO: this can't be handled in middleware as there's no action associated with it!
-    modifyURLquery(this.context.router, {name}, false);
+    // modifyURLquery(this.context.router, {name}, false);
+    console.error("removed modifyURLquery");
     this.getAndInsertPostContentViaAPI();
   }
 

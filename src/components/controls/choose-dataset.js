@@ -19,30 +19,22 @@ const tidyUpPathname = function (pathname) {
   return {
     datasetPathName: state.controls.datasetPathName, /* triggers component update */
     geoResolution: state.controls.geoResolution,
-    pathogen: state.datasets.pathogen
+    pathogen: state.datasets.pathogen,
+    pathname: state.datasets.pathname
   };
 })
 class ChooseDataset extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-  // static propTypes = {
-  // }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
-
   getStyles() {
     return { base: {} };
   }
-
   render() {
     /* if charon hasn't given us data yet, we should not render the dropdown */
-    if (!this.props.pathogen) return null;
+    if (!this.props.pathogen || !this.props.pathname) return null;
 
     const datasets = {pathogen: this.props.pathogen};
     const styles = this.getStyles();
-    const pathname = this.context.router.history.location.pathname;
+    // const pathname = this.context.router.history.location.pathname;
+    const pathname = this.props.pathname;
     /* analyse the current route in order to adjust the dataset selection choices.
     paramFields is an object with keys "virus" and potentially "lineage" and "duration"
     as well */

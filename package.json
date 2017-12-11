@@ -132,7 +132,6 @@
     "react-hot-loader": "^3.0.0-beta.7",
     "react-markdown": "^2.5.0",
     "react-redux": "^4.4.8",
-    "react-router-dom": "^4.2.2",
     "react-select": "^1.0.0-rc.5",
     "react-sidebar": "git://github.com/nextstrain/react-sidebar.git#inset-shadow",
     "react-svg-pan-zoom": "2.0.0",

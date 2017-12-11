@@ -24,17 +24,10 @@ import Narrative from "./narrative";
 
 const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
-/* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
-  React-Router v4 injects length, action, location, push etc into props,
-    but perhaps it's more consistent if we access these through
-    this.context.router.
-  Regardless, changes in URL will trigger the lifecycle methods
-    here as that is a prop of this component, whether we use it or not
-  see https://reacttraining.com/react-router
-*/
 @connect((state) => ({
   datasetPathName: state.controls.datasetPathName,
   readyToLoad: state.datasets.ready,
+  pathname: state.datasets.pathname,
   metadata: state.metadata,
   treeLoaded: state.tree.loaded,
   narrativeLoaded: state.narrative.loaded,
@@ -66,12 +59,10 @@ class App extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
+
   componentWillMount() {
-    if (this.props.readyToLoad) { /* charon API call loaded before the app came in - i.e. splash came first */
-      this.props.dispatch(loadJSONs(this.context.router));
+    if (this.props.pathname) { /* charon API call loaded before the app came in - i.e. splash came first */
+      this.props.dispatch(loadJSONs());
     }
   }
   componentDidMount() {
@@ -82,17 +73,23 @@ class App extends React.Component {
     }, false);
   }
   componentDidUpdate(prevProps) {
-    /* browser back / forward / prop change */
     if (
-      (prevProps.readyToLoad === false && this.props.readyToLoad === true) ||
-      (
-        this.props.readyToLoad &&
-        this.props.datasetPathName !== undefined &&
-        this.props.datasetPathName !== this.context.router.history.location.pathname
-      )
+      // (prevProps.readyToLoad === false && this.props.readyToLoad === true) ||
+      (prevProps.pathname !== this.props.pathname)
     ) {
-      this.props.dispatch(loadJSONs(this.context.router));
+      this.props.dispatch(loadJSONs());
     }
+    /* browser back / forward / prop change */
+    // if (
+    //   (prevProps.readyToLoad === false && this.props.readyToLoad === true) ||
+    //   (
+    //     this.props.readyToLoad &&
+    //     this.props.datasetPathName !== undefined &&
+    //     this.props.datasetPathName !== window.url.location.pathname
+    //   )
+    // ) {
+    //   this.props.dispatch(loadJSONs());
+    // }
   }
   componentWillReceiveProps(nextProps) {
     if (nextProps.narrativeLoaded !== this.props.narrativeLoaded) {
@@ -112,7 +109,7 @@ class App extends React.Component {
         <Info sidebar={sidebar} sidebarRight={sidebarRight} />
         {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
           <TreeView
-            query={queryString.parse(this.context.router.history.location.search)}
+            query={queryString.parse(window.url.location.search)}
             sidebar={sidebar}
             sidebarRight={sidebarRight}
           />

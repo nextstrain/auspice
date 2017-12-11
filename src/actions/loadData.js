@@ -2,7 +2,6 @@ import queryString from "query-string";
 import * as types from "./types";
 import { changeColorBy } from "./colors";
 import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
-import { turnURLtoDataPath } from "../util/urlHelpers";
 import { charonAPIAddress, enableNarratives } from "../util/globals";
 import { errorNotification } from "./notifications";
 import { getManifest } from "../util/clientAPIInterface";
@@ -33,43 +32,6 @@ import { updateEntropyVisibility } from "./entropy";
 //   }
 // };
 
-// /* request frequencies */
-// const requestFrequencies = () => {
-//   return {
-//     type: types.REQUEST_FREQUENCIES
-//   };
-// };
-//
-// const receiveFrequencies = (data) => {
-//   return {
-//     type: types.RECEIVE_FREQUENCIES,
-//     data: data
-//   };
-// };
-//
-// const frequenciesFetchError = (err) => {
-//   return {
-//     type: types.FREQUENCIES_FETCH_ERROR,
-//     data: err
-//   };
-// };
-//
-// const fetchFrequencies = (q) => {
-//   return fetch(
-//     dataURLStem + q + "_frequencies.json"
-//   );
-// };
-//
-// const populateFrequenciesStore = (queryParams) => {
-//   return (dispatch) => {
-//     dispatch(requestFrequencies());
-//     return fetchFrequencies(queryParams).then((res) => res.json()).then(
-//       (json) => dispatch(receiveFrequencies(json)),
-//       (err) => dispatch(frequenciesFetchError(err))
-//     );
-//   };
-// };
-
 const populateEntropyStore = (paths) => {
   return (dispatch, getState) => {
     const { controls } = getState();
@@ -90,19 +52,28 @@ const populateEntropyStore = (paths) => {
       });
   };
 };
+//
+// const getJSONs = () => {
+//
+// }
+//
+// export const loadNewDataset = ({dataset = undefined, query = undefined, s3override = undefined}) => (dispatch, getState) => {
+//   console.log("loadNewDataset", dataset, query)
+//   dispatch()
+// };
 
-export const loadJSONs = (router, s3override = undefined) => { // eslint-disable-line import/prefer-default-export
+export const loadJSONs = (s3override = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
-
+    console.log("loadJSONs running")
     const { datasets } = getState();
-    if (!datasets.ready) {
+    if (!datasets.pathogen) {
       console.error("Attempted to fetch JSONs before Charon returned initial data.");
       return;
     }
 
     dispatch({type: types.DATA_INVALID});
     const s3bucket = s3override ? s3override : datasets.s3bucket;
-    const data_path = turnURLtoDataPath(router, {pathogen: datasets.pathogen});
+    const data_path = datasets.pathname;
     const paths = {
       meta: charonAPIAddress + "request=json&path=" + data_path + "_meta.json&s3=" + s3bucket,
       tree: charonAPIAddress + "request=json&path=" + data_path + "_tree.json&s3=" + s3bucket,
@@ -120,11 +91,11 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
         /* initial dispatch sets most values */
         dispatch({
           type: types.NEW_DATASET,
-          datasetPathName: router.history.location.pathname,
+          datasetPathName: data_path,
           meta: values[0],
           tree: values[1],
           seqs: values[2],
-          query: queryString.parse(router.history.location.search)
+          query: queryString.parse(window.url.location.search)
         });
         /* add analysis slider (if applicable) */
         // revisit this when applicable
@@ -143,7 +114,7 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
           dispatch(populateEntropyStore(paths));
         }
         if (enableNarratives) {
-          getNarrative(dispatch, router.history.location.pathname);
+          getNarrative(dispatch, window.url.location.pathname);
         }
 
       })
@@ -153,15 +124,15 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
         errors from the lifecycle methods of components
         that run while in the middle of this thunk */
         dispatch(errorNotification({
-          message: "Couldn't load " + router.history.location.pathname.replace(/^\//, '') + " dataset"
+          message: "Couldn't load " + window.url.location.pathname.replace(/^\//, '') + " dataset"
         }));
         console.error("loadMetaAndTreeJSONs error:", err);
-        router.history.push({pathname: '/', search: ''});
+        window.url.push({pathname: '/', search: ''});
       });
   };
 };
 
-export const urlQueryChange = (query) => {
+export const changeStateViaURLQuery = (query) => {
   return (dispatch, getState) => {
     const { controls, metadata } = getState();
     dispatch({
@@ -179,13 +150,13 @@ export const urlQueryChange = (query) => {
 };
 
 
-export const changeS3Bucket = (router) => {
+export const changeS3Bucket = () => {
   return (dispatch, getState) => {
     const {datasets} = getState();
     const newBucket = datasets.s3bucket === "live" ? "staging" : "live";
     // 1. re-fetch the manifest
-    getManifest(router, dispatch, newBucket);
+    getManifest(dispatch, newBucket);
     // 2. this can *only* be toggled through the app, so we must reload data
-    dispatch(loadJSONs(router, newBucket));
+    dispatch(loadJSONs(newBucket));
   };
 };

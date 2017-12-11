@@ -1,10 +1,16 @@
 import React from "react";
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
 import Flex from "./flex";
 import { titleBarHeight, titleColors } from "../../util/globals";
 import { darkGrey, brandColor } from "../../globalStyles";
+import { changePage } from "../../actions/navigation";
+
+const InternalLink = (props) => (
+  <div style={props.style} onClick={() => props.dispatch(changePage(props.path))}>
+    {props.children}
+  </div>
+);
 
 @connect((state) => {
   return {
@@ -38,6 +44,7 @@ class TitleBar extends React.Component {
         paddingTop: "20px",
         paddingBottom: "20px",
         color: "#000",
+        cursor: "pointer",
         textDecoration: "none",
         fontSize: this.props.minified ? 12 : 16
       },
@@ -80,9 +87,9 @@ class TitleBar extends React.Component {
 
   getLogo(styles) {
     return (
-      <Link style={styles.logo} to="/">
+      <InternalLink dispatch={this.props.dispatch} style={styles.logo} path="/">
         <img alt="" width="40" src={require("../../images/nextstrain-logo-small.png")}/>
-      </Link>
+      </InternalLink>
     );
   }
 
@@ -95,9 +102,9 @@ class TitleBar extends React.Component {
       this.props.minified ?
         <div/>
         :
-        <Link style={styles.title} to="/">
+        <InternalLink style={styles.title} dispatch={this.props.dispatch} path="/">
           {rainbowTitle}
-        </Link>
+        </InternalLink>
     );
   }
 
@@ -106,7 +113,9 @@ class TitleBar extends React.Component {
     return (
       selected ?
         <div style={{ ...{color: linkCol}, ...styles.inactive }}>{name}</div> :
-        <Link style={{ ...{color: linkCol}, ...styles.link }} to={url}>{name}</Link>
+        <InternalLink dispatch={this.props.dispatch} style={{ ...{color: linkCol}, ...styles.link }} path={url}>
+          {name}
+        </InternalLink>
     );
   }
 

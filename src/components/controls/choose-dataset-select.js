@@ -3,17 +3,14 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Select from "react-select";
 import { controlsWidth } from "../../util/globals";
-import { loadJSONs } from "../../actions/loadData";
+import { changePage } from "../../actions/navigation";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { RESET_CONTROLS, MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
+import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 
 @connect() // to provide dispatch
 class ChooseDatasetSelect extends React.Component {
   constructor(props) {
     super(props);
-  }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
   }
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
@@ -44,7 +41,6 @@ class ChooseDatasetSelect extends React.Component {
     // 0 analytics (optional)
     analyticsControlsEvent(`change-virus-to-${newPath.replace(/\//g, "")}`);
     // 1 reset redux controls state in preparation for a change
-    this.props.dispatch({type: RESET_CONTROLS});
     if (window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop) {
       clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
       window.NEXTSTRAIN.mapAnimationLoop = null;
@@ -54,12 +50,14 @@ class ChooseDatasetSelect extends React.Component {
       });
     }
     // 2 change URL (push, not replace)
-    this.context.router.history.push({
-      pathname: newPath,
-      search: ""
-    });
+    // this.context.router.history.push({
+    //   pathname: newPath,
+    //   search: ""
+    // });
     // 3 load in new data (via the URL we just changed, kinda weird I know)
-    this.props.dispatch(loadJSONs(this.context.router));
+    // this.props.dispatch(loadJSONs(this.context.router));
+    // this.props.dispatch(loadNewDataset({dataset: newPath}))
+    this.props.dispatch(changePage(newPath));
   }
 
   getDatasetOptions() {

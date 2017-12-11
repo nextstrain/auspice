@@ -1,17 +1,28 @@
 import queryString from "query-string";
 import * as types from "../actions/types";
 
+/* What is this middleware?
+This middleware acts to keep the app state and the URL query state in sync by intercepting actions
+and updating the URL accordingly. Thus, in theory, this middleware can be disabled and the app will still work
+as expected
+*/
+
 // eslint-disable-next-line
 export const changeURLMiddleware = (store) => (next) => (action) => {
   const state = store.getState(); // this is "old" state, i.e. before the reducers have updated by this action
   const result = next(action); // send action to other middleware / reducers
   if (action.dontModifyURL !== undefined) {
+    console.log("changeURL middleware skipped")
     return result;
   }
 
-  const query = queryString.parse(window.url.location.search);
+  /* starting URL values & flags */
+  let query = queryString.parse(window.url.location.search);
+  let pathname = window.url.location.pathname;
   let queryModified = true;
+  let pathModified = true;
 
+  /* first switch: query change */
   switch (action.type) {
     case types.NEW_COLORS:
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
@@ -52,15 +63,38 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         query.dmax = state.controls.dateMax === state.controls.absoluteDateMax ? undefined : state.controls.dateMax;
       }
       break;
+    case types.URL_QUERY_CHANGE:
+      query = action.query;
+      break;
     default:
       queryModified = false;
       break;
   }
 
-  if (queryModified) {
+  /* second switch: path change */
+  switch (action.type) {
+    case types.PAGE_CHANGE:
+      console.log("in middleware for page change", action)
+      if (action.page === "app") {
+        pathname = action.pathname;
+      } else if (action.page === "splash") {
+        pathname = "/";
+      } else {
+        pathname = action.page;
+      }
+      break;
+    // case types.CHANGE_URL_NOT_STATE:
+    //   pathname = action.path;
+    //   break;
+    default:
+      pathModified = false;
+      break;
+  }
+
+  if (queryModified || pathModified) {
     Object.keys(query).filter((k) => !query[k]).forEach((k) => delete query[k]);
     const newURL = {
-      pathname: window.url.location.pathname,
+      pathname,
       search: queryString.stringify(query).replace(/%2C/g, ',')
     };
     window.url.replace(newURL);

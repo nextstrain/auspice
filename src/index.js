@@ -8,12 +8,8 @@ import { AppContainer } from 'react-hot-loader';
 import injectTapEventPlugin from "react-tap-event-plugin";
 import { setUpPerf } from "./util/quantify-performance";
 import { enableAnimationPerfTesting } from "./util/globals";
-import App from "./components/app";
-import About from "./static/about";
-import Methods from "./static/methods";
-import Posts from "./static/posts";
-import Splash from "./static/splash";
 import Monitor from "./components/framework/monitor";
+import PageSelect from "./components/framework/pageSelect";
 import Notifications from "./components/notifications/notifications";
 import configureStore from "./store";
 import "./css/global.css";
@@ -42,19 +38,11 @@ if (enableAnimationPerfTesting) {
 const Root = () => {
   return (
     <Provider store={store}>
-      <BrowserRouter>
-        <div>
-          <Monitor/>
-          <Notifications/>
-          <Switch>
-            <Route exact path="/" component={Splash}/>
-            <Route path="/methods" component={Methods}/>
-            <Route path="/posts" component={Posts}/>
-            <Route path="/about" component={About}/>
-            <Route path="/*" component={App}/>
-          </Switch>
-        </div>
-      </BrowserRouter>
+      <div>
+        <Monitor/>
+        <Notifications/>
+        <PageSelect/>
+      </div>
     </Provider>
   );
 };
