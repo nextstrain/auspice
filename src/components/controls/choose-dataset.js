@@ -1,18 +1,13 @@
 import React from "react";
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import ChooseDatasetSelect from "./choose-dataset-select";
 import parseParams from "../../util/parseParams";
 
-/* not sure if these functions are necessary, really. If so, i'll
-move them to util/urlHelpers.js
-*/
 // remove starting or trailing slashes from path
-const tidyUpPathname = function (pathname) {
+const tidyUpPathname = (pathname) => {
   const tmppath = pathname[0] === "/" ? pathname.substring(1) : pathname;
-  return tmppath[tmppath.length - 1] === "/"
-         ? tmppath.substring(0, tmppath.length - 1)
-         : tmppath;
+  return tmppath[tmppath.length - 1] === "/" ? tmppath.substring(0, tmppath.length - 1) : tmppath;
 };
 
 @connect((state) => {
@@ -38,6 +33,7 @@ class ChooseDataset extends React.Component {
     /* analyse the current route in order to adjust the dataset selection choices.
     paramFields is an object with keys "virus" and potentially "lineage" and "duration"
     as well */
+    // return null;
     const paramFields = parseParams(tidyUpPathname(pathname), datasets).dataset;
     // names of the different selectors in the current hierarchy: [virus, lineage, duration]
     // there will be (fields.length) dropdown boxes
@@ -46,8 +42,8 @@ class ChooseDataset extends React.Component {
     const choices = fields.map((d) => paramFields[d][1]);
     /* make a selector for each of the fields. I.e. if it's only "zika", then the
     selectors array will only have 1 element */
-    const selectors = [];   // list to contain the different data set selectors
-    let level = datasets;   // pointer used to move through the hierarchy -- currently at the top level of datasets
+    const selectors = []; // list to contain the different data set selectors
+    let level = datasets; // pointer used to move through the hierarchy -- currently at the top level of datasets
     for (let vi = 0; vi < fields.length; vi++) {
       if (choices[vi]) {
         // pull options from the current level of the dataset hierarchy, ignore 'default'
@@ -57,11 +53,11 @@ class ChooseDataset extends React.Component {
             <ChooseDatasetSelect
               title={"Choose " + fields[vi]}
               choice_tree={choices.slice(0, vi)}
-              selected = {choices[vi]}
+              selected={choices[vi]}
               options={options}
             />
           </div>
-          ));
+        ));
         // move to the next level in the data set hierarchy
         level = level[fields[vi]][choices[vi]];
       }

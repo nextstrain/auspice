@@ -41,7 +41,6 @@ class Monitor extends React.Component {
   }
 
   onURLChanged = () => {
-    console.log("onURLChanged firing from the monitor ")
     this.props.dispatch(changePage(window.url.location.pathname));
   };
 

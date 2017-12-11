@@ -52,15 +52,6 @@ const populateEntropyStore = (paths) => {
       });
   };
 };
-//
-// const getJSONs = () => {
-//
-// }
-//
-// export const loadNewDataset = ({dataset = undefined, query = undefined, s3override = undefined}) => (dispatch, getState) => {
-//   console.log("loadNewDataset", dataset, query)
-//   dispatch()
-// };
 
 export const loadJSONs = (s3override = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {

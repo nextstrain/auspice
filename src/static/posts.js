@@ -1,9 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
 import TitleBar from "../components/framework/title-bar";
-import { modifyURLquery, clearURLquery } from "../util/urlHelpers";
 // import { analyticsNewPage } from "../util/googleAnalytics";
 import { warningNotification } from "../actions/notifications";
 import { charonAPIAddress } from "../util/globals";
@@ -33,7 +32,13 @@ class Posts extends React.Component {
       this.props.dispatch(warningNotification({message: "Failed to get post from server"}));
       console.error(e);
       this.setState({showTOC: true, nameOfCurrentPost: undefined});
-      clearURLquery(this.context.router);
+      console.error("clearURL removed");
+      // clearURLquery(this.context.router);
+      // const newURL = {
+      //   pathname: router.history.location.pathname,
+      //   search: queryString.stringify({})
+      // };
+      // replace ? router.history.replace(newURL) : router.history.push(newURL);
     };
     const xmlHttp = new XMLHttpRequest();
     xmlHttp.onload = () => {

@@ -11,10 +11,10 @@ as expected
 export const changeURLMiddleware = (store) => (next) => (action) => {
   const state = store.getState(); // this is "old" state, i.e. before the reducers have updated by this action
   const result = next(action); // send action to other middleware / reducers
-  if (action.dontModifyURL !== undefined) {
-    console.log("changeURL middleware skipped")
-    return result;
-  }
+  // if (action.dontModifyURL !== undefined) {
+  //   console.log("changeURL middleware skipped")
+  //   return result;
+  // }
 
   /* starting URL values & flags */
   let query = queryString.parse(window.url.location.search);
@@ -66,6 +66,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.URL_QUERY_CHANGE:
       query = action.query;
       break;
+    case types.CHANGE_URL_NOT_STATE:
+      query = queryString.parse(action.query);
+      break;
     default:
       queryModified = false;
       break;
@@ -74,7 +77,6 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   /* second switch: path change */
   switch (action.type) {
     case types.PAGE_CHANGE:
-      console.log("in middleware for page change", action)
       if (action.page === "app") {
         pathname = action.pathname;
       } else if (action.page === "splash") {
@@ -83,9 +85,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         pathname = action.page;
       }
       break;
-    // case types.CHANGE_URL_NOT_STATE:
-    //   pathname = action.path;
-    //   break;
+    case types.CHANGE_URL_NOT_STATE:
+      pathname = action.path;
+      break;
     default:
       pathModified = false;
       break;

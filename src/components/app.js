@@ -61,7 +61,7 @@ class App extends React.Component {
   }
 
   componentWillMount() {
-    if (this.props.pathname) { /* charon API call loaded before the app came in - i.e. splash came first */
+    if (this.props.pathname) { /* pathname only appears after manifest JSON has arrived */
       this.props.dispatch(loadJSONs());
     }
   }
@@ -74,22 +74,12 @@ class App extends React.Component {
   }
   componentDidUpdate(prevProps) {
     if (
-      // (prevProps.readyToLoad === false && this.props.readyToLoad === true) ||
       (prevProps.pathname !== this.props.pathname)
+      /* before we checked if the pathname was different to the URL
+      to detrect browser back/forward. But we now need a different approach */
     ) {
       this.props.dispatch(loadJSONs());
     }
-    /* browser back / forward / prop change */
-    // if (
-    //   (prevProps.readyToLoad === false && this.props.readyToLoad === true) ||
-    //   (
-    //     this.props.readyToLoad &&
-    //     this.props.datasetPathName !== undefined &&
-    //     this.props.datasetPathName !== window.url.location.pathname
-    //   )
-    // ) {
-    //   this.props.dispatch(loadJSONs());
-    // }
   }
   componentWillReceiveProps(nextProps) {
     if (nextProps.narrativeLoaded !== this.props.narrativeLoaded) {

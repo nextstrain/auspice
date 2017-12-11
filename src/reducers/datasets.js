@@ -1,5 +1,4 @@
 import * as types from "../actions/types";
-import { getPathnameAndMaybeChangeURL } from "../util/urlHelpers";
 
 const datasets = (state = {
   s3bucket: "live",
@@ -23,10 +22,6 @@ const datasets = (state = {
         pathogen: action.pathogen,
         user: action.user
       };
-      // /* we may be on <app> already, but awaiting the manifest */
-      // if (state.page === "app") {
-      //   newState.pathname = getPathnameAndMaybeChangeURL(window.url.location.pathname, newState.pathogen);
-      // }
       return Object.assign({}, state, newState);
     } case types.POSTS_MANIFEST_RECEIVED: {
       return Object.assign({}, state, {posts: action.data});
