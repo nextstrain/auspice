@@ -11,9 +11,6 @@ export class LinkedParagraph extends React.Component { // eslint-disable-line
       timeoutRef: null
     };
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   static defaultProps = {
     delay: 500
   }

@@ -5,7 +5,7 @@ import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { charonAPIAddress, enableNarratives } from "../util/globals";
 import { errorNotification } from "./notifications";
 import { getManifest } from "../util/clientAPIInterface";
-import { getNarrative } from "../util/getNarrative";
+import { getNarrative } from "../util/getMarkdown";
 import { updateEntropyVisibility } from "./entropy";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */

@@ -20,6 +20,7 @@ export const getManifest = (dispatch, s3bucket = "live") => {
       user: "guest"
     });
     /* it's at this point we can consider loading the <app> */
+    console.log("manifest in. Calling changePage")
     dispatch(changePage(window.url.location.pathname));
   };
 

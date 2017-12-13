@@ -1,5 +1,6 @@
 import queryString from "query-string";
 import parseParams from "../util/parseParams";
+import { getPost } from "../util/getMarkdown";
 import { PAGE_CHANGE, CHANGE_URL_NOT_STATE } from "./types";
 
 
@@ -43,7 +44,7 @@ const getPathnameAndMaybeChangeURL = (dispatch, pathname, datasets) => { // esli
 };
 
 
-const getPageFromPathname = (pathname) => {
+export const getPageFromPathname = (pathname) => {
   if (pathname === "/") {
     return "splash";
   } else if (pathname.startsWith("/methods")) {
@@ -60,10 +61,15 @@ const getPageFromPathname = (pathname) => {
 /* this is an action, rather than the reducer, as it is not pure (it may change the URL) */
 // eslint-disable-next-line
 export const changePage = (pathIn) => (dispatch, getState) => {
+  console.log("changePage action", pathIn)
   const { datasets } = getState();
   const page = getPageFromPathname(pathIn);
   const pathname = page === "app" ? getPathnameAndMaybeChangeURL(dispatch, pathIn, {pathogen: datasets.pathogen}) : undefined;
   /* check if this is "valid" - we can change it here before it is dispatched */
   // console.log("ACTION chanegPAge. PAGE CHANGE TO:", page, " DATAPATH:", pathname)
   dispatch({type: PAGE_CHANGE, page, pathname});
+  /* if a specific post is specified in the URL, fetch it */
+  if (page === "posts" && pathIn !== "/posts") {
+    dispatch(getPost(`post_${pathIn.replace("/posts/", "")}.md`));
+  }
 };

@@ -17,10 +17,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   // }
 
   /* starting URL values & flags */
-  let query = queryString.parse(window.url.location.search);
-  let pathname = window.url.location.pathname;
-  let queryModified = true;
-  let pathModified = true;
+  let query = queryString.parse(window.location.search);
+  let pathname = window.location.pathname;
 
   /* first switch: query change */
   switch (action.type) {
@@ -70,17 +68,19 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query = queryString.parse(action.query);
       break;
     default:
-      queryModified = false;
       break;
   }
 
   /* second switch: path change */
   switch (action.type) {
     case types.PAGE_CHANGE:
+      /* desired behaviour depends on the page selected... */
       if (action.page === "app") {
         pathname = action.pathname;
       } else if (action.page === "splash") {
         pathname = "/";
+      } else if (pathname.startsWith(`/${action.page}`)) {
+        // leave the pathname alone!
       } else {
         pathname = action.page;
       }
@@ -88,18 +88,23 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.CHANGE_URL_NOT_STATE:
       pathname = action.path;
       break;
+    case types.NEW_POST:
+      // strip out "post_..."" and ".md" from name. Should fix elsewhere!
+      pathname = "/posts/" + action.name.replace("post_", "").replace(".md", "");
+      break;
     default:
-      pathModified = false;
       break;
   }
 
-  if (queryModified || pathModified) {
-    Object.keys(query).filter((k) => !query[k]).forEach((k) => delete query[k]);
-    const newURL = {
-      pathname,
-      search: queryString.stringify(query).replace(/%2C/g, ',')
-    };
-    window.url.replace(newURL);
+  Object.keys(query).filter((k) => !query[k]).forEach((k) => delete query[k]);
+  const search = queryString.stringify(query).replace(/%2C/g, ',');
+
+  if (pathname !== window.location.pathname || window.location.search !== search) {
+    let newURLString = pathname;
+    if (!newURLString.startsWith("/")) {newURLString = "/" + newURLString;}
+    if (search) {newURLString = newURLString + "?" + search;}
+    console.log(`Changing URL from ${window.location.href} -> ${newURLString}`);
+    window.history.replaceState({}, "", newURLString);
   }
 
   return result;

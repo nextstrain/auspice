@@ -37,10 +37,11 @@ class Monitor extends React.Component {
     The popstate event will be triggered by doing a browser action such as a click on the back or forward button
     (or calling history.back() or history.forward() in JavaScript). */
     window.addEventListener('popstate', this.onURLChanged);
-    this.onURLChanged();
+    // this.onURLChanged();
   }
 
   onURLChanged = () => {
+    console.log("popstate")
     this.props.dispatch(changePage(window.url.location.pathname));
   };
 

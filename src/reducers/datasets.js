@@ -1,12 +1,12 @@
 import * as types from "../actions/types";
+import { getPageFromPathname } from "../actions/navigation";
 
 const datasets = (state = {
   s3bucket: "live",
   pathogen: undefined, // should rename
   splash: undefined,
-  posts: undefined,
   datapath: undefined,
-  page: "splash"
+  page: getPageFromPathname(window.location.pathname)
 }, action) => {
   switch (action.type) {
     case types.PAGE_CHANGE: {
@@ -23,8 +23,6 @@ const datasets = (state = {
         user: action.user
       };
       return Object.assign({}, state, newState);
-    } case types.POSTS_MANIFEST_RECEIVED: {
-      return Object.assign({}, state, {posts: action.data});
     } default: {
       return state;
     }
