@@ -3,7 +3,7 @@ import { charonAPIAddress } from "./globals";
 import { NEW_NARRATIVE, NEW_POST } from "../actions/types";
 
 // eslint-disable-next-line
-export const getNarrative = (dispatch, datasetPathName) => {
+export const getNarrative = (dispatch, datapath) => {
   const errorHandler = (e) => {
     // dispatch(warningNotification({message: "Failed to get narrative from server"}));
     console.error("Failed to get narrative from server");
@@ -21,7 +21,7 @@ export const getNarrative = (dispatch, datasetPathName) => {
     }
   };
   xmlHttp.onerror = errorHandler;
-  const name = datasetPathName.replace(/^\//, '').replace(/\//, '_');
+  const name = datapath.replace(/^\//, '').replace(/\//, '_');
   xmlHttp.open("get", `${charonAPIAddress}request=narrative&name=${name}`, true);
   xmlHttp.send(null);
 };

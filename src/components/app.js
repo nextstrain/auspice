@@ -25,9 +25,8 @@ import Narrative from "./narrative";
 const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
 @connect((state) => ({
-  datasetPathName: state.controls.datasetPathName,
   readyToLoad: state.datasets.ready,
-  pathname: state.datasets.pathname,
+  datapath: state.datasets.datapath,
   metadata: state.metadata,
   treeLoaded: state.tree.loaded,
   narrativeLoaded: state.narrative.loaded,
@@ -61,7 +60,7 @@ class App extends React.Component {
   }
 
   componentWillMount() {
-    if (this.props.pathname) { /* pathname only appears after manifest JSON has arrived */
+    if (this.props.datapath) { /* datapath (pathname) only appears after manifest JSON has arrived */
       this.props.dispatch(loadJSONs());
     }
   }
@@ -74,8 +73,8 @@ class App extends React.Component {
   }
   componentDidUpdate(prevProps) {
     if (
-      (prevProps.pathname !== this.props.pathname)
-      /* before we checked if the pathname was different to the URL
+      (prevProps.datapath !== this.props.datapath)
+      /* before we checked if the datapath (pathname) was different to the URL
       to detrect browser back/forward. But we now need a different approach */
     ) {
       this.props.dispatch(loadJSONs());

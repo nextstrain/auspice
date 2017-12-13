@@ -14,8 +14,7 @@ const InternalLink = (props) => (
 
 @connect((state) => {
   return {
-    browserDimensions: state.browserDimensions.browserDimensions,
-    datasetPathName: state.controls.datasetPathName
+    browserDimensions: state.browserDimensions.browserDimensions
   };
 })
 class TitleBar extends React.Component {

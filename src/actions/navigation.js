@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import parseParams from "../util/parseParams";
 import { getPost } from "../util/getMarkdown";
-import { PAGE_CHANGE, CHANGE_URL_NOT_STATE } from "./types";
+import { PAGE_CHANGE } from "./types";
 
 
 // make prefix for data files with fields joined by _ instead of / as in URL
@@ -24,19 +24,10 @@ const selectivelyUpdateSearch = (defaultSearch, userSearch) => {
   return queryString.stringify(final);
 };
 
-/* match URL pathname to datasets (from manifest) and potentially update the URL */
-const getPathnameAndMaybeChangeURL = (dispatch, pathname, datasets) => { // eslint-disable-line
+/* match URL pathname to datasets (from manifest) */
+const getDatapath = (pathname, datasets) => { // eslint-disable-line
   if (!datasets) {return undefined;}
   const parsedParams = parseParams(pathname, datasets);
-  // set a new URL if the dataPath is incomplete
-  if (parsedParams.incomplete) {
-    dispatch({
-      type: CHANGE_URL_NOT_STATE,
-      path: parsedParams.fullsplat,
-      query: selectivelyUpdateSearch(parsedParams.search, window.location.search)
-    });
-  }
-  // if valid, return the data_path, else undefined
   if (parsedParams.valid) {
     return makeDataPathFromParsedParams(parsedParams);
   }
@@ -64,10 +55,10 @@ export const changePage = (pathIn) => (dispatch, getState) => {
   console.log("changePage action", pathIn)
   const { datasets } = getState();
   const page = getPageFromPathname(pathIn);
-  const pathname = page === "app" ? getPathnameAndMaybeChangeURL(dispatch, pathIn, {pathogen: datasets.pathogen}) : undefined;
+  const datapath = page === "app" ? getDatapath(pathIn, {pathogen: datasets.pathogen}) : undefined;
   /* check if this is "valid" - we can change it here before it is dispatched */
   // console.log("ACTION chanegPAge. PAGE CHANGE TO:", page, " DATAPATH:", pathname)
-  dispatch({type: PAGE_CHANGE, page, pathname});
+  dispatch({type: PAGE_CHANGE, page, datapath});
   /* if a specific post is specified in the URL, fetch it */
   if (page === "posts" && pathIn !== "/posts") {
     dispatch(getPost(`post_${pathIn.replace("/posts/", "")}.md`));

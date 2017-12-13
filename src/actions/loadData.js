@@ -62,15 +62,13 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
       console.error("Attempted to fetch JSONs before Charon returned initial data.");
       return;
     }
-
     dispatch({type: types.DATA_INVALID});
     const s3bucket = s3override ? s3override : datasets.s3bucket;
-    const data_path = datasets.pathname;
     const paths = {
-      meta: charonAPIAddress + "request=json&path=" + data_path + "_meta.json&s3=" + s3bucket,
-      tree: charonAPIAddress + "request=json&path=" + data_path + "_tree.json&s3=" + s3bucket,
-      seqs: charonAPIAddress + "request=json&path=" + data_path + "_sequences.json&s3=" + s3bucket,
-      entropy: charonAPIAddress + "request=json&path=" + data_path + "_entropy.json&s3=" + s3bucket
+      meta: charonAPIAddress + "request=json&path=" + datasets.datapath + "_meta.json&s3=" + s3bucket,
+      tree: charonAPIAddress + "request=json&path=" + datasets.datapath + "_tree.json&s3=" + s3bucket,
+      seqs: charonAPIAddress + "request=json&path=" + datasets.datapath + "_sequences.json&s3=" + s3bucket,
+      entropy: charonAPIAddress + "request=json&path=" + datasets.datapath + "_entropy.json&s3=" + s3bucket
     };
     const metaJSONpromise = fetch(paths.meta)
       .then((res) => res.json());
@@ -83,7 +81,6 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
         /* initial dispatch sets most values */
         dispatch({
           type: types.NEW_DATASET,
-          datasetPathName: data_path,
           meta: values[0],
           tree: values[1],
           seqs: values[2],
@@ -106,7 +103,7 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
           dispatch(populateEntropyStore(paths));
         }
         if (enableNarratives) {
-          getNarrative(dispatch, window.location.pathname);
+          getNarrative(dispatch, datasets.datapath);
         }
 
       })

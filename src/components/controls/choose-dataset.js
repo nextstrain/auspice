@@ -12,10 +12,9 @@ const tidyUpPathname = (pathname) => {
 
 @connect((state) => {
   return {
-    datasetPathName: state.controls.datasetPathName, /* triggers component update */
     geoResolution: state.controls.geoResolution,
     pathogen: state.datasets.pathogen,
-    pathname: state.datasets.pathname
+    datapath: state.datasets.datapath
   };
 })
 class ChooseDataset extends React.Component {

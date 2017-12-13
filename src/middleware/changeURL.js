@@ -64,8 +64,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.URL_QUERY_CHANGE:
       query = action.query;
       break;
-    case types.CHANGE_URL_NOT_STATE:
-      query = queryString.parse(action.query);
+    case types.PAGE_CHANGE:
+      if (action.page !== state.datasets.page) {
+        query = {};
+      }
       break;
     default:
       break;
@@ -76,7 +78,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.PAGE_CHANGE:
       /* desired behaviour depends on the page selected... */
       if (action.page === "app") {
-        pathname = action.pathname;
+        pathname = action.datapath.replace(/_/g, "/");
       } else if (action.page === "splash") {
         pathname = "/";
       } else if (pathname.startsWith(`/${action.page}`)) {
@@ -84,9 +86,6 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       } else {
         pathname = action.page;
       }
-      break;
-    case types.CHANGE_URL_NOT_STATE:
-      pathname = action.path;
       break;
     case types.NEW_POST:
       // strip out "post_..."" and ".md" from name. Should fix elsewhere!

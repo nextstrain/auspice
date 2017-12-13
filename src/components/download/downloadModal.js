@@ -21,7 +21,7 @@ const dataUsage = `
   browserDimensions: state.browserDimensions.browserDimensions,
   show: state.controls.showDownload,
   colorBy: state.controls.colorBy,
-  datasetPathName: state.controls.datasetPathName,
+  datapath: state.datasets.datapath,
   metadata: state.metadata,
   tree: state.tree,
   dateMin: state.controls.dateMin,
@@ -93,7 +93,7 @@ class DownloadModal extends React.Component {
   }
 
   downloadButtons() {
-    const filePrefix = "nextstrain_" + this.props.datasetPathName.replace(/^\//, '').replace(/\//g, '_');
+    const filePrefix = "nextstrain_" + this.props.datapath.replace(/^\//, '').replace(/\//g, '_');
     const iconWidth = 25;
     const iconStroke = medGrey;
     const buttons = [

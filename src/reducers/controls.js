@@ -235,7 +235,6 @@ const getDefaultState = () => {
     colorScale: undefined,
     analysisSlider: false,
     geoResolution: defaults.geoResolution,
-    datasetPathName: "",
     filters: {},
     showDownload: false,
     quickdraw: false, // if true, components may skip expensive computes.
@@ -249,10 +248,6 @@ const getDefaultState = () => {
 
 const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
-    case types.DATA_INVALID:
-      return Object.assign({}, state, {
-        datasetPathName: undefined
-      });
     case types.URL_QUERY_CHANGE: {
       /* the general pattern is to reset as much as possible to the "base" state, then rehydrate it from the query */
       let newState = Object.assign({}, state);
@@ -263,7 +258,6 @@ const Controls = (state = getDefaultState(), action) => {
     }
     case types.NEW_DATASET: {
       let base = getDefaultState();
-      base["datasetPathName"] = action.datasetPathName;
       base = modifyStateViaTree(base, action.tree);
       base = modifyStateViaMetadata(base, action.meta);
       base = modifyStateViaURLQuery(base, action.query);
