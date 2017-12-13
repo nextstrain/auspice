@@ -7,7 +7,7 @@ import { darkGrey, brandColor } from "../../globalStyles";
 import { changePage } from "../../actions/navigation";
 
 const InternalLink = (props) => (
-  <div style={props.style} onClick={() => props.dispatch(changePage(props.path))}>
+  <div style={props.style} onClick={() => props.dispatch(changePage({path: props.path}))}>
     {props.children}
   </div>
 );

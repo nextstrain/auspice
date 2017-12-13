@@ -8,7 +8,7 @@ import {generateLogos} from "./helpers/logos";
 import { changePage } from "../actions/navigation";
 
 const InternalLink = (props) => (
-  <div onClick={() => props.dispatch(changePage(props.path))}>
+  <div onClick={() => props.dispatch(changePage({path: props.path}))}>
     {props.children}
   </div>
 );

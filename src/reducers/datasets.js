@@ -3,7 +3,7 @@ import { getPageFromPathname } from "../actions/navigation";
 
 const datasets = (state = {
   s3bucket: "live",
-  pathogen: undefined, // should rename
+  availableDatasets: undefined,
   splash: undefined,
   datapath: undefined, // e.g. "zika" or "flu_h3n2_12y"
   page: getPageFromPathname(window.location.pathname)
@@ -19,7 +19,7 @@ const datasets = (state = {
       const newState = {
         s3bucket: action.s3bucket,
         splash: action.splash,
-        pathogen: action.pathogen, // CHANGE ME
+        availableDatasets: action.availableDatasets,
         user: action.user
       };
       return Object.assign({}, state, newState);

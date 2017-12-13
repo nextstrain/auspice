@@ -65,7 +65,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query = action.query;
       break;
     case types.PAGE_CHANGE:
-      if (action.page !== state.datasets.page) {
+      console.log("in PAGE_CHANGE", action)
+      if (action.query) {
+        query = action.query;
+      } else if (action.page !== state.datasets.page) {
         query = {};
       }
       break;
@@ -97,13 +100,15 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
 
   Object.keys(query).filter((k) => !query[k]).forEach((k) => delete query[k]);
   const search = queryString.stringify(query).replace(/%2C/g, ',');
+  if (!pathname.startsWith("/")) {pathname = "/" + pathname;}
 
-  if (pathname !== window.location.pathname || window.location.search !== search) {
+  if (pathname !== window.location.pathname || window.location.search !== "?" + search) {
     let newURLString = pathname;
-    if (!newURLString.startsWith("/")) {newURLString = "/" + newURLString;}
     if (search) {newURLString = newURLString + "?" + search;}
-    console.log(`Changing URL from ${window.location.href} -> ${newURLString}`);
+    console.log(`Action ${action.type} Changing URL from ${window.location.href} -> ${newURLString}`);
     window.history.replaceState({}, "", newURLString);
+    // window.history.pushState({}, "", newURLString);
+
   }
 
   return result;

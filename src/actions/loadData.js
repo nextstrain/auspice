@@ -58,7 +58,7 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
   return (dispatch, getState) => {
     console.log("loadJSONs running")
     const { datasets } = getState();
-    if (!datasets.pathogen) {
+    if (!datasets.availableDatasets) {
       console.error("Attempted to fetch JSONs before Charon returned initial data.");
       return;
     }
@@ -113,31 +113,13 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
         errors from the lifecycle methods of components
         that run while in the middle of this thunk */
         dispatch(errorNotification({
-          message: "Couldn't load " + window.location.pathname.replace(/^\//, '') + " dataset"
+          message: "Couldn't load dataset " + datasets.datapath
         }));
         console.error("loadMetaAndTreeJSONs error:", err);
-        dispatch(changePage("/"));
+        dispatch(changePage({path: "/"}));
       });
   };
 };
-
-export const changeStateViaURLQuery = (query) => {
-  return (dispatch, getState) => {
-    const { controls, metadata } = getState();
-    dispatch({
-      type: types.URL_QUERY_CHANGE,
-      query,
-      metadata
-    });
-    const newState = getState();
-    /* working out whether visibility / thickness needs updating is tricky */
-    dispatch(updateVisibleTipsAndBranchThicknesses());
-    if (controls.colorBy !== newState.controls.colorBy) {
-      dispatch(changeColorBy());
-    }
-  };
-};
-
 
 export const changeS3Bucket = () => {
   return (dispatch, getState) => {

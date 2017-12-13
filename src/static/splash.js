@@ -101,7 +101,7 @@ const generateCard = (title, imgRequired, to, outboundLink, dispatch) => {
   }
   return (
     <div style={styles.cardOuterDiv}>
-      <div style={styles.cardInnerDiv} onClick={() => dispatch(changePage(to))}>
+      <div style={styles.cardInnerDiv} onClick={() => dispatch(changePage({path: to}))}>
         {imgAndText()}
       </div>
     </div>
@@ -156,7 +156,7 @@ class Splash extends React.Component {
           </p>
 
           <Flex justifyContent="center">
-            <button style={materialButtonOutline} onClick={() => this.props.dispatch(changePage("/about"))}>
+            <button style={materialButtonOutline} onClick={() => this.props.dispatch(changePage({path: "/about"}))}>
               Read More
             </button>
           </Flex>

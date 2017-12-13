@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
-import PropTypes from 'prop-types';
-import { changeStateViaURLQuery } from "../../actions/loadData";
+// import PropTypes from 'prop-types';
+import { changePageQuery } from "../../actions/navigation";
 
 @connect()
 export class LinkedParagraph extends React.Component { // eslint-disable-line
@@ -16,7 +16,7 @@ export class LinkedParagraph extends React.Component { // eslint-disable-line
   }
   delayedAction = () => {
     const ref = setTimeout(
-      () => {this.props.dispatch(changeStateViaURLQuery(this.props.query));},
+      () => {this.props.dispatch(changePageQuery({query: this.props.query, push: true}));},
       this.props.delay
     );
     this.setState({timeoutRef: ref});

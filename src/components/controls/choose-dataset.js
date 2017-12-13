@@ -12,8 +12,7 @@ const tidyUpPathname = (pathname) => {
 
 @connect((state) => {
   return {
-    geoResolution: state.controls.geoResolution,
-    pathogen: state.datasets.pathogen,
+    availableDatasets: state.datasets.availableDatasets,
     datapath: state.datasets.datapath
   };
 })
@@ -22,18 +21,14 @@ class ChooseDataset extends React.Component {
     return { base: {} };
   }
   render() {
-    /* if charon hasn't given us data yet, we should not render the dropdown */
-    if (!this.props.pathogen || !this.props.pathname) return null;
-
-    const datasets = {pathogen: this.props.pathogen};
+    /* if the manifest file hasn't loaded (i.e. availableDatasets doesn't exist) or
+    the datapath hasn't been set (can happen on initial page load), then don't render a drop-down */
+    if (!this.props.availableDatasets || !this.props.datapath) return null;
     const styles = this.getStyles();
-    // const pathname = this.context.router.history.location.pathname;
-    const pathname = this.props.pathname;
     /* analyse the current route in order to adjust the dataset selection choices.
     paramFields is an object with keys "virus" and potentially "lineage" and "duration"
     as well */
-    // return null;
-    const paramFields = parseParams(tidyUpPathname(pathname), datasets).dataset;
+    const paramFields = parseParams(this.props.datapath, this.props.availableDatasets).dataset;
     // names of the different selectors in the current hierarchy: [virus, lineage, duration]
     // there will be (fields.length) dropdown boxes
     const fields = Object.keys(paramFields).sort((a, b) => paramFields[a][0] > paramFields[b][0]);
@@ -42,7 +37,7 @@ class ChooseDataset extends React.Component {
     /* make a selector for each of the fields. I.e. if it's only "zika", then the
     selectors array will only have 1 element */
     const selectors = []; // list to contain the different data set selectors
-    let level = datasets; // pointer used to move through the hierarchy -- currently at the top level of datasets
+    let level = this.props.availableDatasets; // pointer used to move through the hierarchy -- currently at the top level of datasets
     for (let vi = 0; vi < fields.length; vi++) {
       if (choices[vi]) {
         // pull options from the current level of the dataset hierarchy, ignore 'default'

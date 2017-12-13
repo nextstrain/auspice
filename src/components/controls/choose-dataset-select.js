@@ -49,15 +49,7 @@ class ChooseDatasetSelect extends React.Component {
         data: "Play"
       });
     }
-    // 2 change URL (push, not replace)
-    // this.context.router.history.push({
-    //   pathname: newPath,
-    //   search: ""
-    // });
-    // 3 load in new data (via the URL we just changed, kinda weird I know)
-    // this.props.dispatch(loadJSONs(this.context.router));
-    // this.props.dispatch(loadNewDataset({dataset: newPath}))
-    this.props.dispatch(changePage(newPath));
+    this.props.dispatch(changePage({path: newPath, query: {}}));
   }
 
   getDatasetOptions() {
