@@ -116,7 +116,7 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
           message: "Couldn't load dataset " + datasets.datapath
         }));
         console.error("loadMetaAndTreeJSONs error:", err);
-        dispatch(changePage({path: "/"}));
+        dispatch(changePage({path: "/", push: false}));
       });
   };
 };

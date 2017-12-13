@@ -48,3 +48,4 @@ export const ENTROPY_DATA = "ENTROPY_DATA";
 export const ENTROPY_COUNTS_TOGGLE = "ENTROPY_COUNTS_TOGGLE";
 export const PAGE_CHANGE = "PAGE_CHANGE";
 export const NEW_POST = "NEW_POST";
+export const URL = "URL";

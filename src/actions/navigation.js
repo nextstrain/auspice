@@ -1,4 +1,5 @@
 import parseParams from "../util/parseParams";
+import queryString from "query-string";
 import { getPost } from "../util/getMarkdown";
 import { PAGE_CHANGE, URL_QUERY_CHANGE } from "./types";
 import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
@@ -37,11 +38,10 @@ export const getPageFromPathname = (pathname) => {
 /* changes the state of the page and (perhaps) the dataset displayed.
 required argument path is the destination path - e.g. "zika" or "flu/..."
 optional argument query additionally changes the URL query in the middleware (has no effect on the reducers)
-         (if this is left out, then the query is left unchanged by the middleware)
+         (if this is left out, then the query is left unchanged by the middleware) (TYPE: object)
 optional argument push signals that pushState should be used (has no effect on the reducers)
 this is an action, rather than the reducer, as it is not pure (it may change the URL) */
-export const changePage = ({path, query = undefined, push = false}) => (dispatch, getState) => {
-  console.log("changePage action", path)
+export const changePage = ({path, query = undefined, push = true}) => (dispatch, getState) => {
   if (!path) {console.error("changePage called without a path"); return;}
   const { datasets } = getState();
   const d = {
@@ -49,9 +49,8 @@ export const changePage = ({path, query = undefined, push = false}) => (dispatch
     page: getPageFromPathname(path)
   };
   d.datapath = d.page === "app" ? getDatapath(path, datasets.availableDatasets) : undefined;
-  if (query !== undefined) {
-    d.query = query;
-  }
+  if (query !== undefined) { d.query = query; }
+  if (push) { d.pushState = true; }
   /* check if this is "valid" - we can change it here before it is dispatched */
   dispatch(d);
   /* if a specific post is specified in the URL, fetch it */
@@ -61,14 +60,15 @@ export const changePage = ({path, query = undefined, push = false}) => (dispatch
 };
 
 /* quite different to changePage - obviously only the query is changing, but this is sent to the reducers (it's not in changePage)
-required argument query is sent to the reducers and additionally changes the URL query in the middleware
+required argument query is sent to the reducers and additionally changes the URL query in the middleware (TYPE: object)
 optional argument push signals that pushState should be used (has no effect on the reducers) */
-export const changePageQuery = ({query, push = false}) => (dispatch, getState) => {
+export const changePageQuery = ({query, push = true}) => (dispatch, getState) => {
   const { controls, metadata } = getState();
   dispatch({
     type: URL_QUERY_CHANGE,
     query,
-    metadata
+    metadata,
+    pushState: push
   });
   const newState = getState();
   /* working out whether visibility / thickness needs updating is tricky */
@@ -77,3 +77,14 @@ export const changePageQuery = ({query, push = false}) => (dispatch, getState) =
     dispatch(changeColorBy());
   }
 };
+
+export const browserBackForward = () => (dispatch, getState) => {
+  const { datasets } = getState();
+  /* if the pathname has changed, trigger the changePage action (will trigger new post to load, new dataset to load, etc) */
+  console.log("broswer back/forward detected. From: ", datasets.urlPath, datasets.urlSearch, "to:", window.location.pathname, window.location.search)
+  if (datasets.urlPath !== window.location.pathname) {
+    dispatch(changePage({path: window.location.pathname}));
+  } else {
+    dispatch(changePageQuery({query: queryString.parse(window.location.search)}));
+  }
+}

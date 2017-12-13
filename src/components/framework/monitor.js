@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import _throttle from "lodash/throttle";
 import { BROWSER_DIMENSIONS, CHANGE_PANEL_LAYOUT } from "../../actions/types";
-import { changePage } from "../../actions/navigation";
+import { browserBackForward } from "../../actions/navigation";
 import { getManifest, getPostsManifest } from "../../util/clientAPIInterface";
 import { twoColumnBreakpoint } from "../../util/globals";
 
@@ -40,10 +40,7 @@ class Monitor extends React.Component {
     // this.onURLChanged();
   }
 
-  onURLChanged = () => {
-    console.log("popstate (calls changePage)", window.location)
-    // this.props.dispatch(changePage({path: window.location.pathname}));
-  };
+  onURLChanged = () => this.props.dispatch(browserBackForward());
 
   handleResizeByDispatching() {
     this.props.dispatch((dispatch, getState) => {

@@ -65,7 +65,6 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query = action.query;
       break;
     case types.PAGE_CHANGE:
-      console.log("in PAGE_CHANGE", action)
       if (action.query) {
         query = action.query;
       } else if (action.page !== state.datasets.page) {
@@ -99,16 +98,23 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   }
 
   Object.keys(query).filter((k) => !query[k]).forEach((k) => delete query[k]);
-  const search = queryString.stringify(query).replace(/%2C/g, ',');
+  let search = queryString.stringify(query).replace(/%2C/g, ',');
+  if (search) {search = "?" + search;}
   if (!pathname.startsWith("/")) {pathname = "/" + pathname;}
 
-  if (pathname !== window.location.pathname || window.location.search !== "?" + search) {
+  if (pathname !== window.location.pathname || window.location.search !== search) {
     let newURLString = pathname;
-    if (search) {newURLString = newURLString + "?" + search;}
-    console.log(`Action ${action.type} Changing URL from ${window.location.href} -> ${newURLString}`);
-    window.history.replaceState({}, "", newURLString);
-    // window.history.pushState({}, "", newURLString);
-
+    if (search) {newURLString += search;}
+    // if (pathname !== window.location.pathname) {console.log(pathname, window.location.pathname)}
+    // if (window.location.search !== search) {console.log(window.location.search, search)}
+    console.log(`Action ${action.type} Changing URL from ${window.location.href} -> ${newURLString} (pushState: ${action.pushState})`);
+    if (action.pushState === true) {
+      window.history.pushState({}, "", newURLString);
+    } else {
+      window.history.replaceState({}, "", newURLString);
+    }
+    console.log("changing state to ", pathname, search)
+    next({type: types.URL, path: pathname, query: search});
   }
 
   return result;
