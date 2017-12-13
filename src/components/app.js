@@ -99,7 +99,6 @@ class App extends React.Component {
         <Info sidebar={sidebar} sidebarRight={sidebarRight} />
         {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
           <TreeView
-            query={queryString.parse(window.url.location.search)}
             sidebar={sidebar}
             sidebarRight={sidebarRight}
           />

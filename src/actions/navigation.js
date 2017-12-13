@@ -33,7 +33,7 @@ const getPathnameAndMaybeChangeURL = (dispatch, pathname, datasets) => { // esli
     dispatch({
       type: CHANGE_URL_NOT_STATE,
       path: parsedParams.fullsplat,
-      query: selectivelyUpdateSearch(parsedParams.search, window.url.location.search)
+      query: selectivelyUpdateSearch(parsedParams.search, window.location.search)
     });
   }
   // if valid, return the data_path, else undefined

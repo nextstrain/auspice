@@ -42,7 +42,7 @@ class Monitor extends React.Component {
 
   onURLChanged = () => {
     console.log("popstate")
-    this.props.dispatch(changePage(window.url.location.pathname));
+    this.props.dispatch(changePage(window.location.pathname));
   };
 
   handleResizeByDispatching() {

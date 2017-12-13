@@ -7,6 +7,7 @@ import { errorNotification } from "./notifications";
 import { getManifest } from "../util/clientAPIInterface";
 import { getNarrative } from "../util/getMarkdown";
 import { updateEntropyVisibility } from "./entropy";
+import { changePage } from "./navigation";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {
@@ -86,7 +87,7 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
           meta: values[0],
           tree: values[1],
           seqs: values[2],
-          query: queryString.parse(window.url.location.search)
+          query: queryString.parse(window.location.search)
         });
         /* add analysis slider (if applicable) */
         // revisit this when applicable
@@ -105,7 +106,7 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
           dispatch(populateEntropyStore(paths));
         }
         if (enableNarratives) {
-          getNarrative(dispatch, window.url.location.pathname);
+          getNarrative(dispatch, window.location.pathname);
         }
 
       })
@@ -115,10 +116,10 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
         errors from the lifecycle methods of components
         that run while in the middle of this thunk */
         dispatch(errorNotification({
-          message: "Couldn't load " + window.url.location.pathname.replace(/^\//, '') + " dataset"
+          message: "Couldn't load " + window.location.pathname.replace(/^\//, '') + " dataset"
         }));
         console.error("loadMetaAndTreeJSONs error:", err);
-        window.url.push({pathname: '/', search: ''});
+        dispatch(changePage("/"));
       });
   };
 };

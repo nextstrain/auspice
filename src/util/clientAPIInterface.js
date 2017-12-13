@@ -20,12 +20,14 @@ export const getManifest = (dispatch, s3bucket = "live") => {
       user: "guest"
     });
     /* it's at this point we can consider loading the <app> */
+    /* i'm not sure calling changePage is the best approach here, but if we are showing the <app>
+    already, this action will update the pathname of the dataset and cause loadJSONs to run */
     console.log("manifest in. Calling changePage")
-    dispatch(changePage(window.url.location.pathname));
+    dispatch(changePage(window.location.pathname));
   };
 
   /* who am i? */
-  const query = queryString.parse(window.url.location.search);
+  const query = queryString.parse(window.location.search);
   const user = Object.keys(query).indexOf("user") === -1 ? "guest" : query.user;
 
   const xmlHttp = new XMLHttpRequest();

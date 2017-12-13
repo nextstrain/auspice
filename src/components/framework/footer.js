@@ -17,28 +17,28 @@ const dot = (
 export const preambleText = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
 
 export const getAcknowledgments = (style) => {
-  if (window.url.location.pathname.includes("ebola")) {
+  if (window.location.pathname.includes("ebola")) {
     return (
       <div style={style}>
         Special thanks to Nick Loman, Matt Cotten, Ian Goodfellow and Paul Kellam for spearheading data sharing efforts during the outbreak. For a more complete phylogeographic analysis of these data see <a target="_blank" rel="noreferrer noopener" href="http://dx.doi.org/10.1038/nature22040">Dudas et al</a>. Curated data used in the paper are available at <a target="_blank" rel="noreferrer noopener" href="https://github.com/ebov/space-time">github.com/ebov/space-time</a>. The animation shown here was inspired by <a target="_blank" rel="noreferrer noopener" href="https://youtu.be/eWnIhWUpQiQ">a work</a> by <a target="_blank" rel="noreferrer noopener" href="http://bedford.io/team/gytis-dudas/">Gytis Dudas</a>.
       </div>
     );
   }
-  if (window.url.location.pathname.includes("zika")) {
+  if (window.location.pathname.includes("zika")) {
     return (
       <div style={style}>
         Special thanks to Nick Loman, Nathan Grubaugh, Kristof Theys, Nuno Faria, Kristian Andersen, Andrew Rambaut and Karl Erlandson for comments and suggestions.
       </div>
     );
   }
-  if (window.url.location.pathname.includes("h7n9")) {
+  if (window.location.pathname.includes("h7n9")) {
     return (
       <div style={style}>
         We thank the <a target="_blank" rel="noreferrer noopener" href="https://gisaid.org">GISAID Initiative</a> for enabling genomic surveillance of influenza and for providing a critical data sharing platform.
       </div>
     );
   }
-  if (window.url.location.pathname.includes("flu")) {
+  if (window.location.pathname.includes("flu")) {
     return (
       <div>
         <div style={style}>
