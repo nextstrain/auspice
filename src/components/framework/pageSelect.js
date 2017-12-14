@@ -13,7 +13,7 @@ import Splash from "../../static/splash";
 }))
 class PageSelect extends React.Component {
   render() {
-    console.log("pageSelect running (should be infrequent!)", this.props.page)
+    // console.log("pageSelect running (should be infrequent!)", this.props.page)
     switch (this.props.page) {
       case "splash": {
         return (<Splash/>);
@@ -31,8 +31,8 @@ class PageSelect extends React.Component {
         return (<About/>);
       }
       default:
-        console.error("WTF");
-        return null;
+        console.error("trying to go to unknown page - ", this.props.page);
+        return (<Splash/>);
     }
   }
 }

@@ -107,13 +107,12 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     if (search) {newURLString += search;}
     // if (pathname !== window.location.pathname) {console.log(pathname, window.location.pathname)}
     // if (window.location.search !== search) {console.log(window.location.search, search)}
-    console.log(`Action ${action.type} Changing URL from ${window.location.href} -> ${newURLString} (pushState: ${action.pushState})`);
+    // console.log(`Action ${action.type} Changing URL from ${window.location.href} -> ${newURLString} (pushState: ${action.pushState})`);
     if (action.pushState === true) {
       window.history.pushState({}, "", newURLString);
     } else {
       window.history.replaceState({}, "", newURLString);
     }
-    console.log("changing state to ", pathname, search)
     next({type: types.URL, path: pathname, query: search});
   }
 

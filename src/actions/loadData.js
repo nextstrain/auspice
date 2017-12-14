@@ -56,7 +56,6 @@ const populateEntropyStore = (paths) => {
 
 export const loadJSONs = (s3override = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
-    console.log("loadJSONs running")
     const { datasets } = getState();
     if (!datasets.availableDatasets) {
       console.error("Attempted to fetch JSONs before Charon returned initial data.");
