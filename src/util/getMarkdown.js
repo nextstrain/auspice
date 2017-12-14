@@ -42,7 +42,8 @@ export const getPost = (name) => (dispatch) => {
       dispatch({
         type: NEW_POST,
         html: xmlHttp.responseText,
-        name: name
+        name: name,
+        pushState: true
       });
     } else {
       errorHandler(xmlHttp);
