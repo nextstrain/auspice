@@ -70,14 +70,7 @@ export const getValuesAndCountsOfVisibleTraitsFromTree = (nodes, visibility, att
 * TODO: this algorithm can be much improved, and the data structures returned improved also
 */
 export const calcEntropyInView = (nodes, visibility, mutType, geneMap, showCounts) => {
-  if (!showCounts) {
-    if (mutType === "nuc") {
-      return entropy.calcNtEntropy(nodes, visibility, geneMap);
-    }
-    return entropy.calcAaEntropy(nodes, visibility, geneMap);
-  }
-  if (mutType === "nuc") {
-    return entropy.calcNtMutationCounts(nodes, visibility, geneMap);
-  }
-  return entropy.calcAaMutationCounts(nodes, visibility, geneMap);
+  return showCounts ?
+    entropy.calcMutationCounts(nodes, visibility, geneMap, mutType === "aa") :
+    entropy.calcEntropy(nodes, visibility, geneMap, mutType === "aa");
 };
