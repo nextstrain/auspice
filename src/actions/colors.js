@@ -1,5 +1,6 @@
 import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
+import { setGenotype } from "../util/setGenotype";
 import { calcNodeColor } from "../components/tree/treeHelpers";
 import { modifyURLquery } from "../util/urlHelpers";
 import { determineColorByGenotypeType } from "../util/colorHelpers";
@@ -23,6 +24,11 @@ export const changeColorBy = (providedColorBy = undefined, router = undefined) =
       return null;
     }
     const colorBy = providedColorBy ? providedColorBy : controls.colorBy;
+
+    if (colorBy.slice(0, 3) === "gt-") {
+      const x = parseGenotype(colorBy, sequences.geneLength);
+      setGenotype(tree.nodes, x[0][0], x[0][1] + 1);
+    }
 
     /* step 1: calculate the required colour scale */
     const version = controls.colorScale === undefined ? 1 : controls.colorScale.version + 1;
