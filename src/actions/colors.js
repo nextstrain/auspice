@@ -40,7 +40,7 @@ export const changeColorBy = (providedColorBy = undefined, router = undefined) =
     }
 
     /* step 2: calculate the node colours */
-    const nodeColors = calcNodeColor(tree, colorScale, sequences);
+    const nodeColors = calcNodeColor(tree, colorScale);
 
     /* step 3: change in mutType? */
     const newMutType = determineColorByGenotypeType(colorBy) !== controls.mutType ? determineColorByGenotypeType(colorBy) : false;

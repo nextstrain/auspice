@@ -93,10 +93,10 @@ export const changeAnalysisSliderValue = (value) => {
 
 const updateTipRadii = () => {
   return (dispatch, getState) => {
-    const { controls, sequences, tree } = getState();
+    const { controls, tree } = getState();
     dispatch({
       type: types.UPDATE_TIP_RADII,
-      data: calcTipRadii(controls.selectedLegendItem, controls.colorScale, sequences, tree),
+      data: calcTipRadii(controls.selectedLegendItem, controls.colorScale, tree),
       version: tree.tipRadiiVersion + 1
     });
   };

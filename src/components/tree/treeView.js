@@ -33,7 +33,6 @@ there are actually backlinks from the phylotree tree
     showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
     mutType: state.controls.mutType,
-    sequences: state.sequences,
     colorScale: state.controls.colorScale,
     metadata: state.metadata,
     panelLayout: state.controls.panelLayout
@@ -183,7 +182,6 @@ class TreeView extends React.Component {
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
-          sequences={this.props.sequences}
         />
         <TipSelectedPanel
           goAwayCallback={(d) => funcs.clearSelectedTip.bind(this)(d)}

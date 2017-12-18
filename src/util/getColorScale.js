@@ -3,7 +3,7 @@ import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors, reallySmallNumber, reallyBigNumber } from "./globals";
-import { parseGenotype, getGenotype } from "./getGenotype";
+import { parseGenotype } from "./getGenotype";
 import { getAllValuesAndCountsOfTraitsFromTree } from "./tree/traversals";
 
 /**
@@ -129,9 +129,7 @@ const getColorScale = (colorBy, tree, sequences, colorOptions, version) => {
       if (gt) {
         const stateCount = {};
         tree.nodes.forEach((n) => {
-          stateCount[getGenotype(gt[0][0], gt[0][1], n, sequences.sequences)] ?
-            stateCount[getGenotype(gt[0][0], gt[0][1], n, sequences.sequences)] += 1 :
-            stateCount[getGenotype(gt[0][0], gt[0][1], n, sequences.sequences)] = 1;
+          stateCount[n.currentGt] ? stateCount[n.currentGt]++ : stateCount[n.currentGt] = 1;
         });
         const domain = Object.keys(stateCount);
         domain.sort((a, b) => stateCount[a] > stateCount[b]);

@@ -200,7 +200,7 @@ const getPanelStyling = (d, viewer) => {
   return styles;
 };
 
-const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale, sequences) => {
+const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale) => {
   if (colorBy === "num_date") {
     if (distanceMeasure === "num_date") {
       return null;
@@ -212,7 +212,7 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
     const key = mutType === "nuc" ?
       "Nucleotide at pos " + colorBy.replace("gt-", "").replace("nuc_", "") :
       "Amino Acid at " + colorBy.replace("gt-", "").replace("_", " site ");
-    const state = getTipColorAttribute(d.n, colorScale, sequences);
+    const state = getTipColorAttribute(d.n, colorScale);
     return infoLineJSX(key + ":", state);
   }
   return infoLineJSX(prettyString(colorBy) + ":", prettyString(d.n.attr[colorBy]));
@@ -220,7 +220,7 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
 
 /* the actual component - a pure function, so we can return early if needed */
 const InfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
-  hovered, viewer, colorBy, colorByConfidence, colorScale, sequences}) => {
+  hovered, viewer, colorBy, colorByConfidence, colorScale}) => {
   if (!(tree && hovered)) {
     return null;
   }
@@ -231,7 +231,7 @@ const InfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
   if (tip) {
     inner = (
       <p>
-        {tipDisplayColorByInfo(d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale, sequences)}
+        {tipDisplayColorByInfo(d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale)}
         {distanceMeasure === "div" ? getBranchDivJSX(d.n) : getBranchTimeJSX(d.n, temporalConfidence)}
       </p>
     );
