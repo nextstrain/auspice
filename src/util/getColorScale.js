@@ -112,7 +112,7 @@ const discreteAttributeScale = (nodes, attr) => {
     .range(colorList);
 };
 
-const getColorScale = (colorBy, tree, sequences, colorOptions, version) => {
+const getColorScale = (colorBy, tree, geneLength, colorOptions, version) => {
   let colorScale;
   let continuous = false;
   if (!tree.nodes) {
@@ -120,12 +120,12 @@ const getColorScale = (colorBy, tree, sequences, colorOptions, version) => {
     continuous = true;
     colorScale = genericScale(0, 1);
   } else if (colorBy.slice(0, 2) === "gt") {
-    if (!sequences.geneLength) {
+    if (!geneLength) {
       continuous = true;
       colorScale = genericScale(0, 1);
-    } else if (parseGenotype(colorBy, sequences.geneLength)) {
+    } else if (parseGenotype(colorBy, geneLength)) {
       // genotype coloring
-      const gt = parseGenotype(colorBy, sequences.geneLength);
+      const gt = parseGenotype(colorBy, geneLength);
       if (gt) {
         const stateCount = {};
         tree.nodes.forEach((n) => {

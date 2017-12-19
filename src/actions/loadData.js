@@ -70,27 +70,6 @@ import { updateEntropyVisibility } from "./entropy";
 //   };
 // };
 
-const populateEntropyStore = (paths) => {
-  return (dispatch, getState) => {
-    const { controls } = getState();
-    const entropyJSONpromise = fetch(paths.entropy)
-      .then((res) => res.json());
-    entropyJSONpromise
-      .then((data) => {
-        dispatch({
-          type: types.RECEIVE_ENTROPY,
-          mutType: controls.mutType,
-          data: data
-        });
-        updateEntropyVisibility(dispatch, getState);
-      })
-      .catch((err) => {
-        /* entropy reducer has already been invalidated */
-        console.error("entropyJSONpromise error", err);
-      });
-  };
-};
-
 export const loadJSONs = (router, s3override = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
 
@@ -106,16 +85,13 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
     const paths = {
       meta: charonAPIAddress + "request=json&path=" + data_path + "_meta.json&s3=" + s3bucket,
       tree: charonAPIAddress + "request=json&path=" + data_path + "_tree.json&s3=" + s3bucket,
-      seqs: charonAPIAddress + "request=json&path=" + data_path + "_sequences.json&s3=" + s3bucket,
       entropy: charonAPIAddress + "request=json&path=" + data_path + "_entropy.json&s3=" + s3bucket
     };
     const metaJSONpromise = fetch(paths.meta)
       .then((res) => res.json());
     const treeJSONpromise = fetch(paths.tree)
       .then((res) => res.json());
-    const seqsJSONpromise = fetch(paths.seqs)
-      .then((res) => res.json());
-    Promise.all([metaJSONpromise, treeJSONpromise, seqsJSONpromise])
+    Promise.all([metaJSONpromise, treeJSONpromise])
       .then((values) => {
         /* initial dispatch sets most values */
         dispatch({
@@ -123,7 +99,6 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
           datasetPathName: router.history.location.pathname,
           meta: values[0],
           tree: values[1],
-          seqs: values[2],
           query: queryString.parse(router.history.location.search)
         });
         /* add analysis slider (if applicable) */
@@ -138,9 +113,9 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
         /* validate the reducers */
         dispatch({type: types.DATA_VALID});
 
-        /* now load the secondary things */
+        /* should we display (and therefore calculate) the entropy? */
         if (values[0].panels.indexOf("entropy") !== -1) {
-          dispatch(populateEntropyStore(paths));
+          updateEntropyVisibility(dispatch, getState);
         }
         if (enableNarratives) {
           getNarrative(dispatch, router.history.location.pathname);

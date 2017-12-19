@@ -7,6 +7,7 @@ import { defaultGeoResolution,
   defaultLayout,
   mutType,
   twoColumnBreakpoint,
+  genotypeColors,
   reallySmallNumber } from "../util/globals";
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
@@ -150,6 +151,15 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelLayout = "full";
     state.canTogglePanelLayout = false;
   }
+  /* annotations in metadata */
+  if (!metadata.annotations) {console.error("Metadata needs updating with annotations field. FATAL.")}
+  for (const gene of Object.keys(metadata.annotations)) {
+    state.geneLength[gene] = metadata.annotations[gene].end - metadata.annotations[gene].start;
+    if (gene !== "nuc") {
+      state.geneLength[gene] /= 3;
+      state.geneLength[gene]++; // keeps things consistent with previous formulation. Check validity.
+    }
+  }
   return state;
 };
 
@@ -222,6 +232,7 @@ const getDefaultState = () => {
     region: null,
     search: null,
     strain: null,
+    geneLength: {},
     mutType: mutType,
     temporalConfidence: {exists: false, display: false, on: false},
     layout: defaults.layout,

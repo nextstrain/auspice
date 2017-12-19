@@ -14,7 +14,7 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 @connect((state) => {
   return {
     colorBy: state.controls.colorBy,
-    geneLength: state.sequences.geneLength,
+    geneLength: state.controls.geneLength,
     colorOptions: state.metadata.colorOptions,
     geneMap: state.entropy.geneMap
   };
@@ -30,7 +30,7 @@ class ColorBy extends React.Component {
   }
   static propTypes = {
     colorBy: PropTypes.string.isRequired,
-    geneLength: PropTypes.object,
+    geneLength: PropTypes.object.isRequired,
     colorOptions: PropTypes.object.isRequired,
     dispatch: PropTypes.func.isRequired
   }

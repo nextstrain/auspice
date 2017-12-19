@@ -16,12 +16,11 @@ const getAnnotations = (jsonData) => {
   let aaCount = 0;
   for (const prot of Object.keys(jsonData)) {
     if (prot !== "nuc") {
-      const tmpProt = jsonData[prot];
-      aaCount += 1;
+      aaCount++;
       annotations.push({
         prot: prot,
-        start: tmpProt["pos"][0],
-        end: tmpProt["pos"][tmpProt["pos"].length - 1],
+        start: jsonData[prot].start,
+        end: jsonData[prot].end,
         readingFrame: 1, // +tmpProt['pos'][0]%3,
         fill: genotypeColors[aaCount % 10]
       });
@@ -44,20 +43,16 @@ const processAnnotations = (annotations) => {
   return m;
 };
 
-
 const Entropy = (state = {loaded: false, showCounts: false}, action) => {
   switch (action.type) {
     case types.DATA_INVALID:
       return {loaded: false, showCounts: false};
-    case types.RECEIVE_ENTROPY:
-      const annotations = getAnnotations(action.data);
-      const geneMap = processAnnotations(annotations);
+    case types.NEW_DATASET:
+      const annotations = getAnnotations(action.meta.annotations);
       return Object.assign({}, state, {
         loaded: false,
-        // jsonData: action.data,
-        maxNt: Math.max(...action.data.nuc.pos),
         annotations,
-        geneMap
+        geneMap: processAnnotations(annotations)
       });
     case types.ENTROPY_DATA:
       return Object.assign({}, state, {

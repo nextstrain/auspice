@@ -72,7 +72,7 @@ export const computeChartGeometry = (props) => {
     bars: state.entropy.bars,
     annotations: state.entropy.annotations,
     geneMap: state.entropy.geneMap,
-    maxNt: state.entropy.maxNt,
+    geneLength: state.controls.geneLength,
     maxYVal: state.entropy.maxYVal,
     showCounts: state.entropy.showCounts,
     browserDimensions: state.browserDimensions.browserDimensions,
@@ -174,7 +174,7 @@ export class Entropy extends React.Component {
       this.d3entropy,
       props.annotations,
       props.geneMap,
-      props.maxNt,
+      props.geneLength.nuc,
       { /* callbacks */
         onHover: this.onHover.bind(this),
         onLeave: this.onLeave.bind(this),
