@@ -152,12 +152,11 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.canTogglePanelLayout = false;
   }
   /* annotations in metadata */
-  if (!metadata.annotations) {console.error("Metadata needs updating with annotations field. FATAL.")}
+  if (!metadata.annotations) {console.error("Metadata needs updating with annotations field. Rerun augur. FATAL.")}
   for (const gene of Object.keys(metadata.annotations)) {
     state.geneLength[gene] = metadata.annotations[gene].end - metadata.annotations[gene].start;
     if (gene !== "nuc") {
       state.geneLength[gene] /= 3;
-      state.geneLength[gene]++; // keeps things consistent with previous formulation. Check validity.
     }
   }
   return state;

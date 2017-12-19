@@ -1,6 +1,6 @@
 
 export const setGenotype = (nodes, prot, pos) => {
-  console.log('scanning for mutation', prot, pos)
+  // console.log('scanning for mutation', prot, pos)
   let ancState; // initialised to undefined
   const ancNodes = [];
   const recurse = (node, state) => {
@@ -36,5 +36,5 @@ export const setGenotype = (nodes, prot, pos) => {
   for (const node of ancNodes) {
     node.currentGt = ancState;
   }
-  console.log(`set ${ancNodes.length} nodes to the ancestral state: ${ancState}`)
+  // console.log(`set ${ancNodes.length} nodes to the ancestral state: ${ancState}`)
 };
