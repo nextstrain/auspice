@@ -17,7 +17,7 @@ export const modifyURLquery = (router, keyValuePairs = null, replace = false) =>
     // Object.keys(keyValuePairs).forEach((key, idx) => {console.log(key, idx)});
     query = Object.assign({}, query, keyValuePairs);
     for (const k of Object.keys(keyValuePairs)) {
-      if (keyValuePairs[k] === false) {
+      if (keyValuePairs[k] === false || keyValuePairs[k] === '') {
         delete query[k];
       }
     }
@@ -26,7 +26,7 @@ export const modifyURLquery = (router, keyValuePairs = null, replace = false) =>
   // console.log("query out:", query)
   const newURL = {
     pathname: router.history.location.pathname,
-    search: queryString.stringify(query)
+    search: queryString.stringify(query).replace(/%2C/g, ',')
   };
   replace ? router.history.replace(newURL) : router.history.push(newURL);
 };

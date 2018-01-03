@@ -92,7 +92,7 @@ const parseEncodedGenotype = (colorBy) => {
     browserDimensions: state.browserDimensions.browserDimensions,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
-    defaultColorBy: state.controls.defaultColorBy,
+    defaultColorBy: state.controls.defaults.colorBy,
     shouldReRender: false,
     panelLayout: state.controls.panelLayout
   };
@@ -196,7 +196,11 @@ class Entropy extends React.Component {
       chart,
       chartGeom: this.getChartGeom(props)
     });
-    chart.update({aa: props.mutType === "aa"}); // why is this necessary straight after an initial render?!
+    /* unsure why this cannot be incorporated into the initial render... */
+    chart.update({
+      selected: parseEncodedGenotype(props.colorBy),
+      aa: props.mutType === "aa"
+    });
   }
   componentDidMount() {
     if (this.props.loaded) {

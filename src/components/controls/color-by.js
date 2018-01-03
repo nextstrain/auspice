@@ -3,14 +3,13 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Select from "react-select";
 import { sidebarField } from "../../globalStyles";
-import { defaultColorBy, controlsWidth } from "../../util/globals";
+import { controlsWidth } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
-/* Why does this have colorBy set as state (here) and in redux?
-   it's for the case where we select genotype, then wait for the
-   base to be selected, so we modify state but not yet dispatch
-*/
+/* the reason why we have colorBy as state (here) and in redux
+   is for the case where we select genotype, then wait for the
+   base to be selected, so we modify state but not yet dispatch */
 
 @connect((state) => {
   return {
@@ -24,7 +23,7 @@ class ColorBy extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      colorBySelected: defaultColorBy,
+      colorBySelected: props.colorBy,
       geneSelected: "nuc",
       positionSelected: ""
     };
@@ -40,10 +39,21 @@ class ColorBy extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const colorBy = nextProps.colorBy;
-    if (colorBy) {
-      const selected = (colorBy.slice(0, 2) !== "gt") ? colorBy : "gt";
-      this.setState({colorBySelected: selected});
+    if (this.props.colorBy !== nextProps.colorBy) {
+      if (nextProps.colorBy.startsWith("gt")) {
+        const matches = nextProps.colorBy.match(/gt-(.+)_(.+)$/);
+        this.setState({
+          colorBySelected: "gt",
+          geneSelected: matches[1],
+          positionSelected: matches[2]
+        });
+      } else {
+        this.setState({
+          colorBySelected: nextProps.colorBy,
+          geneSelected: "nuc",
+          positionSelected: ""
+        });
+      }
     }
   }
 
@@ -183,7 +193,7 @@ class ColorBy extends React.Component {
             {this.gtPositionInput()}
           </div>
           :
-          <div/>
+          null
         }
       </div>
     );
