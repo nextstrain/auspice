@@ -1,4 +1,3 @@
-import { determineColorByGenotypeType } from "../util/urlHelpers";
 import { numericToCalendar, currentNumDate, currentCalDate } from "../util/dateHelpers";
 import { flattenTree } from "../components/tree/treeHelpers";
 import { defaultGeoResolution,
@@ -236,7 +235,6 @@ const getDefaultState = () => {
     colorScale: undefined,
     analysisSlider: false,
     geoResolution: defaults.geoResolution,
-    datasetPathName: "",
     filters: {},
     showDownload: false,
     quickdraw: false, // if true, components may skip expensive computes.
@@ -250,10 +248,6 @@ const getDefaultState = () => {
 
 const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
-    case types.DATA_INVALID:
-      return Object.assign({}, state, {
-        datasetPathName: undefined
-      });
     case types.URL_QUERY_CHANGE: {
       /* the general pattern is to reset as much as possible to the "base" state, then rehydrate it from the query */
       let newState = Object.assign({}, state);
@@ -264,7 +258,6 @@ const Controls = (state = getDefaultState(), action) => {
     }
     case types.NEW_DATASET: {
       let base = getDefaultState();
-      base["datasetPathName"] = action.datasetPathName;
       base = modifyStateViaTree(base, action.tree);
       base = modifyStateViaMetadata(base, action.meta);
       base = modifyStateViaURLQuery(base, action.query);
@@ -372,9 +365,8 @@ const Controls = (state = getDefaultState(), action) => {
         colorScale: action.colorScale,
         colorByConfidence: checkColorByConfidence(state.attrs, action.colorBy)
       });
-      /* may need to toggle the entropy selector AA <-> NUC */
-      if (determineColorByGenotypeType(action.colorBy)) {
-        newState.mutType = determineColorByGenotypeType(action.colorBy);
+      if (action.newMutType) {
+        newState.mutType = action.newMutType;
       }
       return newState;
     }
@@ -382,7 +374,7 @@ const Controls = (state = getDefaultState(), action) => {
       return Object.assign({}, state, {
         geoResolution: action.data
       });
-    case types.APPLY_FILTER_QUERY: {
+    case types.APPLY_FILTER: {
       // values arrive as array
       const filters = Object.assign({}, state.filters, {});
       filters[action.fields] = action.values;

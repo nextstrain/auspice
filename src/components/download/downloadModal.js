@@ -21,7 +21,7 @@ const dataUsage = `
   browserDimensions: state.browserDimensions.browserDimensions,
   show: state.controls.showDownload,
   colorBy: state.controls.colorBy,
-  datasetPathName: state.controls.datasetPathName,
+  datapath: state.datasets.datapath,
   metadata: state.metadata,
   tree: state.tree,
   dateMin: state.controls.dateMin,
@@ -71,9 +71,6 @@ class DownloadModal extends React.Component {
       };
     };
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   relevantPublications() {
     const titer_related_keys = ["cTiter", "rb", "ep", "ne"];
     const titer = (titer_related_keys.indexOf(this.props.colorBy) !== -1) ?
@@ -96,7 +93,7 @@ class DownloadModal extends React.Component {
   }
 
   downloadButtons() {
-    const filePrefix = "nextstrain_" + this.props.datasetPathName.replace(/^\//, '').replace(/\//g, '_');
+    const filePrefix = "nextstrain_" + this.props.datapath.replace(/^\//, '').replace(/\//g, '_');
     const iconWidth = 25;
     const iconStroke = medGrey;
     const buttons = [
@@ -162,7 +159,7 @@ class DownloadModal extends React.Component {
               {preambleText}
               {" A full list of sequence authors is available via the CSV files below."}
               <div style={styles.break}/>
-              {getAcknowledgments(this.context.router, {})}
+              {getAcknowledgments({})}
 
               <h2>Data usage policy</h2>
               {dataUsage}

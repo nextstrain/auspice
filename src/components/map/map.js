@@ -11,7 +11,6 @@ import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint, enableAnimationPerfTesting } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
-import { modifyURLquery } from "../../util/urlHelpers";
 import {
   createDemeAndTransmissionData,
   updateDemeAndTransmissionDataColAndVis,
@@ -51,10 +50,6 @@ import { incommingMapPNG } from "../download/helperFunctions";
 })
 
 class Map extends React.Component {
-
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   static propTypes = {
     treeVersion: PropTypes.number.isRequired,
     treeLoaded: PropTypes.bool.isRequired,
@@ -511,7 +506,6 @@ class Map extends React.Component {
         type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
         data: "Play"
       });
-      modifyURLquery(this.context.router, {dmin: this.props.dateMin, dmax: this.props.dateMax});
     }
   }
 
@@ -523,7 +517,6 @@ class Map extends React.Component {
       type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
       data: "Play"
     });
-    modifyURLquery(this.context.router, {dmin: false, dmax: false});
   }
 
   handleAnimationResetClicked() {
@@ -558,7 +551,6 @@ class Map extends React.Component {
 
       /* first pass sets the timer to absolute min and absolute min + windowRange because they reference above initial time window */
       this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max, quickdraw: true}));
-      // don't modifyURLquery
 
       if (!this.props.mapAnimationCumulative) {
         leftWindow += animationIncrement;
@@ -573,7 +565,6 @@ class Map extends React.Component {
           type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
           data: "Play"
         });
-        modifyURLquery(this.context.router, {dmin: false, dmax: false});
       }
     }, animationTick);
 

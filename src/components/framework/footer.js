@@ -6,7 +6,7 @@ import { prettyString } from "../../util/stringHelpers";
 import computeResponsive from "../../util/computeResponsive";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
-import { applyFilterQuery } from "../../actions/treeProperties";
+import { applyFilter } from "../../actions/treeProperties";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -16,15 +16,15 @@ const dot = (
 
 export const preambleText = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
 
-export const getAcknowledgments = (router, style) => {
-  if (router.history.location.pathname.includes("ebola")) {
+export const getAcknowledgments = (style) => {
+  if (window.location.pathname.includes("ebola")) {
     return (
       <div style={style}>
         Special thanks to Nick Loman, Matt Cotten, Ian Goodfellow and Paul Kellam for spearheading data sharing efforts during the outbreak. For a more complete phylogeographic analysis of these data see <a target="_blank" rel="noreferrer noopener" href="http://dx.doi.org/10.1038/nature22040">Dudas et al</a>. Curated data used in the paper are available at <a target="_blank" rel="noreferrer noopener" href="https://github.com/ebov/space-time">github.com/ebov/space-time</a>. The animation shown here was inspired by <a target="_blank" rel="noreferrer noopener" href="https://youtu.be/eWnIhWUpQiQ">a work</a> by <a target="_blank" rel="noreferrer noopener" href="http://bedford.io/team/gytis-dudas/">Gytis Dudas</a>.
       </div>
     );
   }
-  if (router.history.location.pathname.includes("zika")) {
+  if (window.location.pathname.includes("zika")) {
     return (
       <div style={style}>
         Special thanks to Nick Loman, Nathan Grubaugh, Kristof Theys, Nuno Faria, Kristian Andersen, Andrew Rambaut and Karl Erlandson for data sharing, comments and suggestions.
@@ -38,14 +38,14 @@ export const getAcknowledgments = (router, style) => {
       </div>
     );
   }
-  if (router.history.location.pathname.includes("h7n9")) {
+  if (window.location.pathname.includes("h7n9")) {
     return (
       <div style={style}>
         We thank the <a target="_blank" rel="noreferrer noopener" href="https://gisaid.org">GISAID Initiative</a> for enabling genomic surveillance of influenza and for providing a critical data sharing platform.
       </div>
     );
   }
-  if (router.history.location.pathname.includes("flu")) {
+  if (window.location.pathname.includes("flu")) {
     return (
       <div>
         <div style={style}>
@@ -60,19 +60,19 @@ export const getAcknowledgments = (router, style) => {
   return null;
 }
 
-const dispatchFilter = (router, dispatch, activeFilters, key, value) => {
+const dispatchFilter = (dispatch, activeFilters, key, value) => {
   const mode = activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
-  dispatch(applyFilterQuery(router, key, [value], mode));
+  dispatch(applyFilter(key, [value], mode));
 };
 
-export const displayFilterValueAsButton = (router, dispatch, activeFilters, filterName, itemName, display, showX) => {
+export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, itemName, display, showX) => {
   const active = activeFilters[filterName].indexOf(itemName) !== -1;
   if (active && showX) {
     return (
       <div key={itemName} style={{display: "inline-block"}}>
         <div
           className={'boxed-item-icon'}
-          onClick={() => {dispatchFilter(router, dispatch, activeFilters, filterName, itemName);}}
+          onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
           role="button"
           tabIndex={0}
         >
@@ -89,7 +89,7 @@ export const displayFilterValueAsButton = (router, dispatch, activeFilters, filt
       <div
         className={"boxed-item active-clickable"}
         key={itemName}
-        onClick={() => {dispatchFilter(router, dispatch, activeFilters, filterName, itemName);}}
+        onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
         role="button"
         tabIndex={0}
       >
@@ -101,7 +101,7 @@ export const displayFilterValueAsButton = (router, dispatch, activeFilters, filt
     <div
       className={"boxed-item inactive"}
       key={itemName}
-      onClick={() => {dispatchFilter(router, dispatch, activeFilters, filterName, itemName);}}
+      onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
       role="button"
       tabIndex={0}
     >
@@ -110,13 +110,13 @@ export const displayFilterValueAsButton = (router, dispatch, activeFilters, filt
   );
 };
 
-const removeFiltersButton = (router, dispatch, filterNames, outerClassName, label) => {
+const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
   return (
     <div
       className={`${outerClassName} boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => {
-        filterNames.forEach((n) => dispatch(applyFilterQuery(router, n, [], 'set')))
+        filterNames.forEach((n) => dispatch(applyFilter(n, [], 'set')))
       }}
     >
       {label}
@@ -171,9 +171,6 @@ class Footer extends React.Component {
       return styles;
     };
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   shouldComponentUpdate(nextProps) {
     if (this.props.tree.version !== nextProps.tree.version ||
     this.props.browserDimensions !== nextProps.browserDimensions) {
@@ -195,7 +192,7 @@ class Footer extends React.Component {
     return (
       <div>
         {`Filter by ${prettyString(filterName)}`}
-        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.context.router, this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
+        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
           {Object.keys(totalStateCount).sort().map((itemName) => {
             let display;
@@ -214,7 +211,7 @@ class Footer extends React.Component {
                 </g>
               );
             }
-            return displayFilterValueAsButton(this.context.router, this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
+            return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
           })}
         </Flex>
       </div>
@@ -271,7 +268,7 @@ class Footer extends React.Component {
           <div style={styles.preamble}>
             {preambleText}
           </div>
-          {getAcknowledgments(this.context.router, styles.acknowledgments)}
+          {getAcknowledgments(styles.acknowledgments)}
           <div style={styles.line}/>
           {Object.keys(this.props.activeFilters).map((name) => {
             return (

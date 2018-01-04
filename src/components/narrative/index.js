@@ -1,5 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
+import queryString from "query-string";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { controlsWidth, charonAPIAddress } from "../../util/globals";
 import { LinkedParagraph, NormalParagraph } from "./paragraphs";
@@ -31,7 +32,7 @@ class Narrative extends React.Component {
           if (block.type === "action") {
             return (
               <LinkedParagraph
-                url={block.url}
+                query={queryString.parse(block.url.split('?')[1])}
                 content={{__html: block.__html}} // eslint-disable-line no-underscore-dangle
                 key={idx.toString()}
               />

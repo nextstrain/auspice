@@ -16,7 +16,7 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
     colorBy: state.controls.colorBy,
     geneLength: state.sequences.geneLength,
     colorOptions: state.metadata.colorOptions,
-    entropy: state.entropy.entropy
+    geneMap: state.entropy.geneMap
   };
 })
 class ColorBy extends React.Component {
@@ -33,9 +33,6 @@ class ColorBy extends React.Component {
     geneLength: PropTypes.object,
     colorOptions: PropTypes.object.isRequired,
     dispatch: PropTypes.func.isRequired
-  }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
   }
 
   componentWillReceiveProps(nextProps) {
@@ -60,7 +57,7 @@ class ColorBy extends React.Component {
   setColorBy(colorBy) {
     if (colorBy.slice(0, 2) !== "gt") {
       analyticsControlsEvent(`color-by-${colorBy}`);
-      this.props.dispatch(changeColorBy(colorBy, this.context.router));
+      this.props.dispatch(changeColorBy(colorBy));
       this.setState({colorBySelected: colorBy});
     } else {
       // don't update colorBy yet, genotype still needs to be specified
@@ -73,13 +70,9 @@ class ColorBy extends React.Component {
 
   getGtGeneOptions() {
     let options = [];
-    if (this.props.entropy) {
-      options = Object.keys(this.props.entropy).map((prot) => {
-        return {
-          value: prot,
-          label: prot === "nuc" ? "nucleotide" : prot
-        };
-      });
+    if (this.props.geneMap) {
+      options = Object.keys(this.props.geneMap).map((prot) => ({value: prot, label: prot}));
+      options[options.length] = {value: "nuc", label: "nucleotide"};
     }
     return options;
   }
@@ -148,7 +141,7 @@ class ColorBy extends React.Component {
     }
     const colorBy = "gt-" + gene + "_" + position;
     analyticsControlsEvent("color-by-genotype");
-    this.props.dispatch(changeColorBy(colorBy, this.context.router));
+    this.props.dispatch(changeColorBy(colorBy));
   }
 
   getStyles() {

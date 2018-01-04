@@ -9,7 +9,7 @@ import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
 // import Frequencies from "./charts/frequencies";
-import Entropy from "./charts/entropy";
+import { Entropy } from "./charts/entropy";
 import Map from "./map/map";
 import Info from "./info/info";
 import TreeView from "./tree/treeView";
@@ -24,17 +24,9 @@ import Narrative from "./narrative";
 
 const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
-/* BRIEF REMINDER OF PROPS AVAILABLE TO APP:
-  React-Router v4 injects length, action, location, push etc into props,
-    but perhaps it's more consistent if we access these through
-    this.context.router.
-  Regardless, changes in URL will trigger the lifecycle methods
-    here as that is a prop of this component, whether we use it or not
-  see https://reacttraining.com/react-router
-*/
 @connect((state) => ({
-  datasetPathName: state.controls.datasetPathName,
   readyToLoad: state.datasets.ready,
+  datapath: state.datasets.datapath,
   metadata: state.metadata,
   treeLoaded: state.tree.loaded,
   narrativeLoaded: state.narrative.loaded,
@@ -66,12 +58,10 @@ class App extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
+
   componentWillMount() {
-    if (this.props.readyToLoad) { /* charon API call loaded before the app came in - i.e. splash came first */
-      this.props.dispatch(loadJSONs(this.context.router));
+    if (this.props.datapath) { /* datapath (pathname) only appears after manifest JSON has arrived */
+      this.props.dispatch(loadJSONs());
     }
   }
   componentDidMount() {
@@ -82,16 +72,12 @@ class App extends React.Component {
     }, false);
   }
   componentDidUpdate(prevProps) {
-    /* browser back / forward / prop change */
     if (
-      (prevProps.readyToLoad === false && this.props.readyToLoad === true) ||
-      (
-        this.props.readyToLoad &&
-        this.props.datasetPathName !== undefined &&
-        this.props.datasetPathName !== this.context.router.history.location.pathname
-      )
+      (prevProps.datapath !== this.props.datapath)
+      /* before we checked if the datapath (pathname) was different to the URL
+      to detrect browser back/forward. But we now need a different approach */
     ) {
-      this.props.dispatch(loadJSONs(this.context.router));
+      this.props.dispatch(loadJSONs());
     }
   }
   componentWillReceiveProps(nextProps) {
@@ -112,7 +98,6 @@ class App extends React.Component {
         <Info sidebar={sidebar} sidebarRight={sidebarRight} />
         {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
           <TreeView
-            query={queryString.parse(this.context.router.history.location.search)}
             sidebar={sidebar}
             sidebarRight={sidebarRight}
           />

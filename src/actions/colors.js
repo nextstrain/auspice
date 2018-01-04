@@ -1,12 +1,12 @@
 import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
 import { calcNodeColor } from "../components/tree/treeHelpers";
-import { modifyURLquery } from "../util/urlHelpers";
+import { determineColorByGenotypeType } from "../util/colorHelpers";
+import { updateEntropyVisibility } from "./entropy";
 import * as types from "./types";
 
-/* providedColorBy: undefined | string
-updateURL: undefined | router (this.context.router) */
-export const changeColorBy = (providedColorBy = undefined, router = undefined) => {
+/* providedColorBy: undefined | string */
+export const changeColorBy = (providedColorBy = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
     const { controls, tree, sequences, metadata } = getState();
     /* step 0: bail if all required params aren't (yet) available! */
@@ -34,23 +34,22 @@ export const changeColorBy = (providedColorBy = undefined, router = undefined) =
     /* step 2: calculate the node colours */
     const nodeColors = calcNodeColor(tree, colorScale, sequences);
 
-    /* step 3: dispatch */
+    /* step 3: change in mutType? */
+    const newMutType = determineColorByGenotypeType(colorBy) !== controls.mutType ? determineColorByGenotypeType(colorBy) : false;
+    if (newMutType) {
+      updateEntropyVisibility(dispatch, getState);
+    }
+
+    /* step 4: dispatch */
     dispatch({
       type: types.NEW_COLORS,
       colorBy,
       colorScale,
       nodeColors,
-      version
+      version,
+      newMutType
     });
-
-    /* step 4 (optional): update the URL query field */
-    if (router) {
-      modifyURLquery(router, {c: colorBy}, true);
-    }
 
     return null;
   };
 };
-
-/* updateColors calls changeColorBy with no args, i.e. it updates the colorScale & nodeColors */
-export const updateColors = () => (dispatch) => {dispatch(changeColorBy());};
