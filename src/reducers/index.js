@@ -8,6 +8,7 @@ import browserDimensions from "./browserDimensions";
 import notifications from "./notifications";
 import datasets from "./datasets";
 import narrative from "./narrative";
+import posts from "./posts";
 
 const rootReducer = combineReducers({
   metadata,
@@ -18,7 +19,8 @@ const rootReducer = combineReducers({
   browserDimensions,
   notifications,
   datasets,
-  narrative
+  narrative,
+  posts
 });
 
 export default rootReducer;

@@ -34,9 +34,6 @@ class ColorBy extends React.Component {
     colorOptions: PropTypes.object.isRequired,
     dispatch: PropTypes.func.isRequired
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
 
   componentWillReceiveProps(nextProps) {
     if (this.props.colorBy !== nextProps.colorBy) {
@@ -60,7 +57,7 @@ class ColorBy extends React.Component {
   setColorBy(colorBy) {
     if (colorBy.slice(0, 2) !== "gt") {
       analyticsControlsEvent(`color-by-${colorBy}`);
-      this.props.dispatch(changeColorBy(colorBy, this.context.router));
+      this.props.dispatch(changeColorBy(colorBy));
       this.setState({colorBySelected: colorBy});
     } else {
       // don't update colorBy yet, genotype still needs to be specified
@@ -144,7 +141,7 @@ class ColorBy extends React.Component {
     }
     const colorBy = "gt-" + gene + "_" + position;
     analyticsControlsEvent("color-by-genotype");
-    this.props.dispatch(changeColorBy(colorBy, this.context.router));
+    this.props.dispatch(changeColorBy(colorBy));
   }
 
   getStyles() {

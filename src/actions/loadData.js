@@ -2,12 +2,12 @@ import queryString from "query-string";
 import * as types from "./types";
 import { changeColorBy } from "./colors";
 import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
-import { turnURLtoDataPath } from "../util/urlHelpers";
 import { charonAPIAddress, enableNarratives } from "../util/globals";
 import { errorNotification } from "./notifications";
 import { getManifest } from "../util/clientAPIInterface";
-import { getNarrative } from "../util/getNarrative";
+import { getNarrative } from "../util/getMarkdown";
 import { updateEntropyVisibility } from "./entropy";
+import { changePage } from "./navigation";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {
@@ -70,36 +70,27 @@ import { updateEntropyVisibility } from "./entropy";
 //   };
 // };
 
-export const loadJSONs = (router, s3override = undefined) => { // eslint-disable-line import/prefer-default-export
+export const loadJSONs = (s3override = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
-
     const { datasets } = getState();
-    if (!datasets.ready) {
+    if (!datasets.availableDatasets) {
       console.error("Attempted to fetch JSONs before Charon returned initial data.");
       return;
     }
-
     dispatch({type: types.DATA_INVALID});
     const s3bucket = s3override ? s3override : datasets.s3bucket;
-    const data_path = turnURLtoDataPath(router, {pathogen: datasets.pathogen});
-    const paths = {
-      meta: charonAPIAddress + "request=json&path=" + data_path + "_meta.json&s3=" + s3bucket,
-      tree: charonAPIAddress + "request=json&path=" + data_path + "_tree.json&s3=" + s3bucket,
-      entropy: charonAPIAddress + "request=json&path=" + data_path + "_entropy.json&s3=" + s3bucket
-    };
-    const metaJSONpromise = fetch(paths.meta)
+      const metaJSONpromise = fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_meta.json&s3=" + s3bucket)
       .then((res) => res.json());
-    const treeJSONpromise = fetch(paths.tree)
+    const treeJSONpromise = fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_tree.json&s3=" + s3bucket)
       .then((res) => res.json());
     Promise.all([metaJSONpromise, treeJSONpromise])
       .then((values) => {
         /* initial dispatch sets most values */
         dispatch({
           type: types.NEW_DATASET,
-          datasetPathName: router.history.location.pathname,
           meta: values[0],
           tree: values[1],
-          query: queryString.parse(router.history.location.search)
+          query: queryString.parse(window.location.search)
         });
         /* add analysis slider (if applicable) */
         // revisit this when applicable
@@ -118,7 +109,7 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
           updateEntropyVisibility(dispatch, getState);
         }
         if (enableNarratives) {
-          getNarrative(dispatch, router.history.location.pathname);
+          getNarrative(dispatch, datasets.datapath);
         }
 
       })
@@ -128,39 +119,21 @@ export const loadJSONs = (router, s3override = undefined) => { // eslint-disable
         errors from the lifecycle methods of components
         that run while in the middle of this thunk */
         dispatch(errorNotification({
-          message: "Couldn't load " + router.history.location.pathname.replace(/^\//, '') + " dataset"
+          message: "Couldn't load dataset " + datasets.datapath
         }));
         console.error("loadMetaAndTreeJSONs error:", err);
-        router.history.push({pathname: '/', search: ''});
+        dispatch(changePage({path: "/", push: false}));
       });
   };
 };
 
-export const urlQueryChange = (query) => {
-  return (dispatch, getState) => {
-    const { controls, metadata } = getState();
-    dispatch({
-      type: types.URL_QUERY_CHANGE,
-      query,
-      metadata
-    });
-    const newState = getState();
-    /* working out whether visibility / thickness needs updating is tricky */
-    dispatch(updateVisibleTipsAndBranchThicknesses());
-    if (controls.colorBy !== newState.controls.colorBy) {
-      dispatch(changeColorBy());
-    }
-  };
-};
-
-
-export const changeS3Bucket = (router) => {
+export const changeS3Bucket = () => {
   return (dispatch, getState) => {
     const {datasets} = getState();
     const newBucket = datasets.s3bucket === "live" ? "staging" : "live";
     // 1. re-fetch the manifest
-    getManifest(router, dispatch, newBucket);
+    getManifest(dispatch, newBucket);
     // 2. this can *only* be toggled through the app, so we must reload data
-    dispatch(loadJSONs(router, newBucket));
+    dispatch(loadJSONs(newBucket));
   };
 };

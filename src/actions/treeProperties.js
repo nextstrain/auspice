@@ -5,7 +5,6 @@ import { calcVisibility,
   calcBranchThickness } from "../components/tree/treeHelpers";
 import * as types from "./types";
 import { updateEntropyVisibility } from "./entropy";
-import { modifyURLquery } from "../util/urlHelpers";
 
 const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
   const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
@@ -118,7 +117,7 @@ export const legendMouseEnterExit = (label = null) => {
   };
 };
 
-export const applyFilterQuery = (router, fields, values, mode = "set") => {
+export const applyFilter = (fields, values, mode = "set") => {
   /* fields: e.g. region || country || authors
   values: list of selected values, e.g [brazil, usa, ...]
   mode: set | add | remove
@@ -155,10 +154,7 @@ export const applyFilterQuery = (router, fields, values, mode = "set") => {
         }
       }
     }
-    dispatch({type: types.APPLY_FILTER_QUERY, fields, values: newValues});
-    const q = {};
-    q[`f_${fields}`] = newValues.join(',');
-    modifyURLquery(router, q, true);
+    dispatch({type: types.APPLY_FILTER, fields, values: newValues});
     dispatch(updateVisibleTipsAndBranchThicknesses());
   };
 };

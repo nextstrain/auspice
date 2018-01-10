@@ -17,10 +17,6 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
 })
 class MapAnimationControls extends React.Component {
 
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
-
   // checkAndTransformAnimationDuration(input) {
   //
   //   const minimumMapAnimationTimeInSeconds = 5;

@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Slider from "./slider";
 import { controlsWidth } from "../../util/globals";
-import { modifyURLquery } from "../../util/urlHelpers";
 import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
@@ -23,9 +22,6 @@ class DateRangeInputs extends React.Component {
     this.state = {
       lastSliderUpdateTime: Date.now()
     };
-  }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
   }
   static propTypes = {
     dateMin: PropTypes.string.isRequired,
@@ -76,15 +72,12 @@ class DateRangeInputs extends React.Component {
       max: numericToCalendar(numDateValues[1])};
     if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) { // update min
       this.props.dispatch(changeDateFilter({newMin: newRange.min, quickdraw: debounce}));
-      modifyURLquery(this.context.router, {dmin: newRange.min}, true);
     } else if (this.props.dateMin === newRange.min &&
                this.props.dateMax !== newRange.max) { // update max
       this.props.dispatch(changeDateFilter({newMax: newRange.max, quickdraw: debounce}));
-      modifyURLquery(this.context.router, {dmax: newRange.max}, true);
     } else if (this.props.dateMin !== newRange.min &&
                this.props.dateMax !== newRange.max) { // update both
       this.props.dispatch(changeDateFilter({newMin: newRange.min, newMax: newRange.max, quickdraw: debounce}));
-      modifyURLquery(this.context.router, {dmin: newRange.min, dmax: newRange.max}, true);
     } else if (debounce === false) {
       /* this occurs when no dates have actually changed BUT we need to redraw (e.g. quickdraw has come off) */
       this.props.dispatch(changeDateFilter({quickdraw: debounce}));

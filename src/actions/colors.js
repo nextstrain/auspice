@@ -2,14 +2,12 @@ import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
 import { setGenotype } from "../util/setGenotype";
 import { calcNodeColor } from "../components/tree/treeHelpers";
-import { modifyURLquery } from "../util/urlHelpers";
 import { determineColorByGenotypeType } from "../util/colorHelpers";
 import { updateEntropyVisibility } from "./entropy";
 import * as types from "./types";
 
-/* providedColorBy: undefined | string
-updateURL: undefined | router (this.context.router) */
-export const changeColorBy = (providedColorBy = undefined, router = undefined) => { // eslint-disable-line import/prefer-default-export
+/* providedColorBy: undefined | string */
+export const changeColorBy = (providedColorBy = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
     const { controls, tree, metadata } = getState();
     /* step 0: bail if all required params aren't (yet) available! */
@@ -56,11 +54,6 @@ export const changeColorBy = (providedColorBy = undefined, router = undefined) =
       version,
       newMutType
     });
-
-    /* step 4 (optional): update the URL query field */
-    if (router) {
-      modifyURLquery(router, {c: colorBy}, true);
-    }
 
     return null;
   };

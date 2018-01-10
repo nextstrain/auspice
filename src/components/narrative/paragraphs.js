@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
-import PropTypes from 'prop-types';
-import { changeURLQueryAndUpdateState } from "../../util/urlHelpers";
+// import PropTypes from 'prop-types';
+import { changePageQuery } from "../../actions/navigation";
 
 @connect()
 export class LinkedParagraph extends React.Component { // eslint-disable-line
@@ -11,15 +11,12 @@ export class LinkedParagraph extends React.Component { // eslint-disable-line
       timeoutRef: null
     };
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   static defaultProps = {
     delay: 500
   }
   delayedAction = () => {
     const ref = setTimeout(
-      () => {changeURLQueryAndUpdateState(this.context.router, this.props.dispatch, this.props.url);},
+      () => {this.props.dispatch(changePageQuery({query: this.props.query, push: true}));},
       this.props.delay
     );
     this.setState({timeoutRef: ref});

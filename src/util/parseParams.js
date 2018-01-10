@@ -11,10 +11,10 @@
  */
 
 const parseParams = (path, datasets) => {
-  // console.log("parseParams. path in:", path)
+  // console.log("parseParams. path in:", path, datasets)
   let params; // split path at '/', if path === "", set params to []
   if (path.length) {
-    params = path.split("/").filter((d) => d !== "");
+    params = path.replace(/_/g, "/").split("/").filter((d) => d !== "");
   } else {
     params = [];
   }

@@ -91,9 +91,6 @@ export class Entropy extends React.Component {
       chart: false
     };
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     entropy: PropTypes.object,
@@ -116,14 +113,14 @@ export class Entropy extends React.Component {
   onClick(d) {
     const colorBy = constructEncodedGenotype(this.props.mutType === "aa", d);
     analyticsControlsEvent("color-by-genotype");
-    this.props.dispatch(changeColorBy(colorBy, this.context.router));
+    this.props.dispatch(changeColorBy(colorBy));
     this.setState({hovered: false});
   }
 
   changeMutTypeCallback(newMutType) {
     if (newMutType !== this.props.mutType) {
       /* 1. switch the redux colorBy back to the default */
-      this.props.dispatch(changeColorBy(this.props.defaultColorBy, this.context.router));
+      this.props.dispatch(changeColorBy(this.props.defaultColorBy));
       /* 2. update the mut type in redux & re-calulate entropy */
       this.props.dispatch(changeMutType(newMutType));
     }

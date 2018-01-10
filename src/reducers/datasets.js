@@ -1,23 +1,34 @@
 import * as types from "../actions/types";
+import { getPageFromPathname } from "../actions/navigation";
 
 const datasets = (state = {
   s3bucket: "live",
-  pathogen: undefined,
+  availableDatasets: undefined,
   splash: undefined,
-  posts: undefined,
-  ready: false
+  datapath: undefined, // e.g. "zika" or "flu_h3n2_12y"
+  page: getPageFromPathname(window.location.pathname),
+  urlPath: window.location.pathname,
+  urlQuery: window.location.search
 }, action) => {
   switch (action.type) {
-    case types.MANIFEST_RECEIVED: {
+    case types.PAGE_CHANGE: {
       return Object.assign({}, state, {
+        page: action.page,
+        datapath: action.datapath
+      });
+    } case types.MANIFEST_RECEIVED: {
+      const newState = {
         s3bucket: action.s3bucket,
         splash: action.splash,
-        pathogen: action.pathogen,
-        user: action.user,
-        ready: true
+        availableDatasets: action.availableDatasets,
+        user: action.user
+      };
+      return Object.assign({}, state, newState);
+    } case types.URL: {
+      return Object.assign({}, state, {
+        urlPath: action.path,
+        urlSearch: action.query
       });
-    } case types.POSTS_MANIFEST_RECEIVED: {
-      return Object.assign({}, state, {posts: action.data});
     } default: {
       return state;
     }

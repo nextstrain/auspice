@@ -15,9 +15,6 @@ class DataSource extends React.Component {
     dispatch: PropTypes.func.isRequired,
     s3bucket: PropTypes.string.isRequired
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   render() {
     return (
       <Toggle
@@ -25,7 +22,7 @@ class DataSource extends React.Component {
         on={this.props.s3bucket === "staging"}
         callback={() => {
           analyticsControlsEvent("change-s3-bucket");
-          this.props.dispatch(changeS3Bucket(this.context.router));
+          this.props.dispatch(changeS3Bucket());
         }}
         label="Staging server (nightly builds)"
       />
