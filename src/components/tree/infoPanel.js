@@ -124,15 +124,20 @@ const getMutationsJSX = (d, mutType) => {
     /* are there any AA mutations? */
     if (prots.map((k) => counts[k]).reduce((a, b) => a + b, 0)) {
       const nDisplay = 3; // number of mutations to display per protein
+      const nProtsToDisplay = 7; // max number of proteins to display
+      let protsSeen = 0;
       const m = [];
       prots.forEach((prot) => {
-        if (counts[prot]) {
-          let x = prot + ":\u00A0\u00A0" +
-            d.aa_muts[prot].slice(0, Math.min(nDisplay, counts[prot])).join(", ");
+        if (counts[prot] && protsSeen < nProtsToDisplay) {
+          let x = prot + ":\u00A0\u00A0" + d.aa_muts[prot].slice(0, Math.min(nDisplay, counts[prot])).join(", ");
           if (counts[prot] > nDisplay) {
             x += " + " + (counts[prot] - nDisplay) + " more";
           }
           m.push(x);
+          protsSeen++;
+          if (protsSeen === nProtsToDisplay) {
+            m.push(`(protein mutations truncated)`);
+          }
         }
       });
       return infoBlockJSX("AA mutations:", m);
