@@ -17,13 +17,11 @@ export const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
           });
         }
       }
-    } else {
-      if (n.muts) {
-        n.muts.forEach((m) => {
-          const pos = parseInt(m.slice(1, m.length - 1), 10);
-          sparse[pos] ? sparse[pos]++ : sparse[pos] = 1;
-        });
-      }
+    } else if (n.muts) {
+      n.muts.forEach((m) => {
+        const pos = parseInt(m.slice(1, m.length - 1), 10);
+        sparse[pos] ? sparse[pos]++ : sparse[pos] = 1;
+      });
     }
   });
   const counts = [];
@@ -70,7 +68,7 @@ export const calcEntropy = (nodes, visibility, geneMap, isAA) => {
     anc_state[p] = {};
   });
   const root = nodes[0];
-  let visible_tips = 0;
+  let visibleTips = 0;
 
   /* assignFn is called by forEach to parse and assign the mutations at each node.
   It cannot use fat arrow as we need to access "this"
@@ -87,7 +85,7 @@ export const calcEntropy = (nodes, visibility, geneMap, isAA) => {
       anc_state[prot][pos] = A;
     }
     state[prot][pos] = B;
-  }
+  };
 
   const recurse = (node, state) => {
     // if mutation observed - do something
@@ -97,10 +95,8 @@ export const calcEntropy = (nodes, visibility, geneMap, isAA) => {
           node.aa_muts[prot].forEach(assignFn, [prot, state]);
         }
       }
-    } else {
-      if (node.muts && node.muts.length) {
-        node.muts.forEach(assignFn, ["nuc", state]);
-      }
+    } else if (node.muts && node.muts.length) {
+      node.muts.forEach(assignFn, ["nuc", state]);
     }
 
     if (node.hasChildren) {
@@ -116,7 +112,7 @@ export const calcEntropy = (nodes, visibility, geneMap, isAA) => {
         recurse(child, newState);
       }
     } else if (visibility[node.arrayIdx] === "visible") {
-      visible_tips++;
+      visibleTips++;
       for (const prot of arrayOfProts) {
         for (const pos of Object.keys(state[prot])) {
           // console.log(prot, k, counts[prot][k], state[prot])
@@ -139,24 +135,25 @@ export const calcEntropy = (nodes, visibility, geneMap, isAA) => {
   const entropy = [];
   for (const prot of arrayOfProts) {
     for (const k of Object.keys(counts[prot])) {
-      // console.log("pos ", k, ": ", counts[prot][k]);
-      let n = 0;
+      // console.log("computing entropy at ", prot, "pos", k);
+      let nObserved = 0;
       for (const kk of Object.keys(counts[prot][k])) {
-        n += counts[prot][k][kk];
+        nObserved += counts[prot][k][kk];
       }
-      const unobserved = visible_tips - n;
-      if (unobserved > 0) {
+      const nUnobserved = visibleTips - nObserved;
+      // console.log("\tn(visible tips):", visibleTips, "n(unobserved):", nUnobserved);
+      if (nUnobserved > 0) {
+        // console.log("\tancestral state:", anc_state[prot][k]);
         if (counts[prot][k][anc_state[prot][k]]) {
-          counts[prot][k][anc_state[prot][k]] += unobserved;
+          counts[prot][k][anc_state[prot][k]] += nUnobserved;
         } else {
-          counts[prot][k][anc_state[prot][k]] = unobserved;
+          counts[prot][k][anc_state[prot][k]] = nUnobserved;
         }
       }
-      // console.log("computing entropy at ", k);
-      const t = visible_tips + n;
+      // console.log("\tcounts (complete):", counts[prot][k], " total:", visibleTips);
       let s = 0;
       for (const kk of Object.keys(counts[prot][k])) {
-        const a = counts[prot][k][kk] / t;
+        const a = counts[prot][k][kk] / visibleTips;
         s += (-1 * a * Math.log(a));
       }
       if (s > m) {m = s;}

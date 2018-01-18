@@ -1,4 +1,4 @@
-import * as entropy from "../entropy";
+import * as entropy from "./entropy";
 /**
 * traverse the tree and get the values -> counts for a single
 * attr. Visibility of the node is ignored. Terminal nodes only.

@@ -4,7 +4,7 @@ import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors, reallySmallNumber, reallyBigNumber } from "./globals";
 import { parseGenotype } from "./getGenotype";
-import { getAllValuesAndCountsOfTraitsFromTree } from "./tree/traversals";
+import { getAllValuesAndCountsOfTraitsFromTree } from "./treeTraversals";
 
 /**
 * what values (for colorBy) are present in the tree and not in the color_map?
