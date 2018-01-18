@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import Select from "react-select";
 import { controlsWidth } from "../../util/globals";
 import { CHANGE_GEO_RESOLUTION } from "../../actions/types";
-import { modifyURLquery } from "../../util/urlHelpers";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
 @connect((state) => {
@@ -14,10 +13,6 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
   };
 })
 class GeoResolution extends React.Component {
-
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
 
   getStyles() {
     return {
@@ -45,7 +40,6 @@ class GeoResolution extends React.Component {
   changeGeoResolution(resolution) {
     analyticsControlsEvent("change-geo-resolution");
     this.props.dispatch({ type: CHANGE_GEO_RESOLUTION, data: resolution });
-    modifyURLquery(this.context.router, {r: resolution}, true);
   }
 
   render() {

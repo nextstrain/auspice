@@ -63,7 +63,7 @@ class Card extends React.Component {
     const styles = this.props.infocard ? this.getStylesInfoCard() : this.getStyles();
     return (
       <div style={{ ...styles.base, ...this.props.style }}>
-        <div style={{ ...styles.title, ...this.props.titleStyles }}>
+        <div style={{ ...styles.title, ...this.props.titleStyles, minHeight: "15px" }}>
           {this.props.title}
         </div>
         <div style={{

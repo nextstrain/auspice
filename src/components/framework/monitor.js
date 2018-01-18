@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import _throttle from "lodash/throttle";
 import { BROWSER_DIMENSIONS, CHANGE_PANEL_LAYOUT } from "../../actions/types";
+import { browserBackForward } from "../../actions/navigation";
 import { getManifest, getPostsManifest } from "../../util/clientAPIInterface";
 import { twoColumnBreakpoint } from "../../util/globals";
-import { modifyURLquery } from "../../util/urlHelpers";
 
 @connect((state) => ({
   panels: state.metadata.panels,
@@ -18,26 +18,29 @@ class Monitor extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired
   }
-  static contextTypes = {
-    router: PropTypes.object.isRequired
-  }
   componentDidMount() {
     /* API call to charon to get initial datasets etc (needed to load the splash page) */
-    getManifest(this.context.router, this.props.dispatch);
-    getPostsManifest(this.context.router, this.props.dispatch);
+    getManifest(this.props.dispatch);
+    getPostsManifest(this.props.dispatch);
     /* don't need initial dimensions - they're in the redux store on load */
     window.addEventListener( // future resizes
       "resize",
+      /* lodash throttle invokes resize event at most twice per second
+      to let redraws catch up. Could also use debounce for 'wait until resize stops' */
       _throttle(this.handleResizeByDispatching.bind(this), 500, {
         leading: true,
         trailing: true
       })
     );
-    /* lodash throttle invokes resize event at most twice per second
-    to let redraws catch up.
-    Could also use debounce for 'wait until resize stops'
-    */
+
+    /* Note that just calling history.pushState() or history.replaceState() won't trigger a popstate event.
+    The popstate event will be triggered by doing a browser action such as a click on the back or forward button
+    (or calling history.back() or history.forward() in JavaScript). */
+    window.addEventListener('popstate', this.onURLChanged);
+    // this.onURLChanged();
   }
+
+  onURLChanged = () => this.props.dispatch(browserBackForward());
 
   handleResizeByDispatching() {
     this.props.dispatch((dispatch, getState) => {
@@ -54,11 +57,9 @@ class Monitor extends React.Component {
       /* only switch between grid / full if there is a map and a tree */
       if (this.props.panels !== undefined && this.props.canTogglePanelLayout) {
         if (oldBrowserDimensions.width < twoColumnBreakpoint && newBrowserDimensions.width >= twoColumnBreakpoint) {
-          modifyURLquery(this.context.router, {p: ""}, true);
-          dispatch({type: CHANGE_PANEL_LAYOUT, data: "grid"});
+          dispatch({type: CHANGE_PANEL_LAYOUT, data: "grid", notInURLState: true});
         } else if (oldBrowserDimensions.width > twoColumnBreakpoint && newBrowserDimensions.width <= twoColumnBreakpoint) {
-          modifyURLquery(this.context.router, {p: ""}, true);
-          dispatch({type: CHANGE_PANEL_LAYOUT, data: "full"});
+          dispatch({type: CHANGE_PANEL_LAYOUT, data: "full", notInURLState: true});
         }
       }
     });

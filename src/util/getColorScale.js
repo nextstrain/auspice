@@ -3,8 +3,8 @@ import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors, reallySmallNumber, reallyBigNumber } from "./globals";
-import { parseGenotype, getGenotype } from "./getGenotype";
-import { getAllValuesAndCountsOfTraitsFromTree } from "./tree/traversals";
+import { parseGenotype } from "./getGenotype";
+import { getAllValuesAndCountsOfTraitsFromTree } from "./treeTraversals";
 
 /**
 * what values (for colorBy) are present in the tree and not in the color_map?
@@ -112,7 +112,7 @@ const discreteAttributeScale = (nodes, attr) => {
     .range(colorList);
 };
 
-const getColorScale = (colorBy, tree, sequences, colorOptions, version) => {
+const getColorScale = (colorBy, tree, geneLength, colorOptions, version) => {
   let colorScale;
   let continuous = false;
   if (!tree.nodes) {
@@ -120,18 +120,16 @@ const getColorScale = (colorBy, tree, sequences, colorOptions, version) => {
     continuous = true;
     colorScale = genericScale(0, 1);
   } else if (colorBy.slice(0, 2) === "gt") {
-    if (!sequences.geneLength) {
+    if (!geneLength) {
       continuous = true;
       colorScale = genericScale(0, 1);
-    } else if (parseGenotype(colorBy, sequences.geneLength)) {
+    } else if (parseGenotype(colorBy, geneLength)) {
       // genotype coloring
-      const gt = parseGenotype(colorBy, sequences.geneLength);
+      const gt = parseGenotype(colorBy, geneLength);
       if (gt) {
         const stateCount = {};
         tree.nodes.forEach((n) => {
-          stateCount[getGenotype(gt[0][0], gt[0][1], n, sequences.sequences)] ?
-            stateCount[getGenotype(gt[0][0], gt[0][1], n, sequences.sequences)] += 1 :
-            stateCount[getGenotype(gt[0][0], gt[0][1], n, sequences.sequences)] = 1;
+          stateCount[n.currentGt] ? stateCount[n.currentGt]++ : stateCount[n.currentGt] = 1;
         });
         const domain = Object.keys(stateCount);
         domain.sort((a, b) => stateCount[a] > stateCount[b]);

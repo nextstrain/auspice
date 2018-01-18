@@ -1,56 +1,60 @@
 import { parseGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
+import { setGenotype } from "../util/setGenotype";
 import { calcNodeColor } from "../components/tree/treeHelpers";
-import { modifyURLquery } from "../util/urlHelpers";
+import { determineColorByGenotypeType } from "../util/colorHelpers";
+import { updateEntropyVisibility } from "./entropy";
 import * as types from "./types";
 
-/* providedColorBy: undefined | string
-updateURL: undefined | router (this.context.router) */
-export const changeColorBy = (providedColorBy = undefined, router = undefined) => {
+/* providedColorBy: undefined | string */
+export const changeColorBy = (providedColorBy = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
-    const { controls, tree, sequences, metadata } = getState();
+    const { controls, tree, metadata } = getState();
     /* step 0: bail if all required params aren't (yet) available! */
     /* note this *can* run before the tree is loaded - we only need the nodes */
-    if (!(tree.nodes !== null && sequences.loaded && metadata.loaded)) {
+    if (!(tree.nodes !== null && metadata.loaded)) {
       // console.log(
       //   "updateColorScale not running due to load statuses of ",
       //   "tree nodes are null?", tree.nodes === null,
-      //   "sequences", sequences.loaded,
       //   "metadata", metadata.loaded
       // );
       return null;
     }
     const colorBy = providedColorBy ? providedColorBy : controls.colorBy;
 
+    if (colorBy.slice(0, 3) === "gt-") {
+      const x = parseGenotype(colorBy, controls.geneLength);
+      setGenotype(tree.nodes, x[0][0], x[0][1] + 1);
+    }
+
     /* step 1: calculate the required colour scale */
     const version = controls.colorScale === undefined ? 1 : controls.colorScale.version + 1;
     // console.log("updateColorScale setting colorScale to ", version);
-    const colorScale = getColorScale(colorBy, tree, sequences, metadata.colorOptions, version);
+    const colorScale = getColorScale(colorBy, tree, controls.geneLength, metadata.colorOptions, version);
     /*   */
-    if (colorBy.slice(0, 3) === "gt-" && sequences.geneLength) {
-      colorScale.genotype = parseGenotype(colorBy, sequences.geneLength);
+    if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
+      colorScale.genotype = parseGenotype(colorBy, controls.geneLength);
     }
 
     /* step 2: calculate the node colours */
-    const nodeColors = calcNodeColor(tree, colorScale, sequences);
+    const nodeColors = calcNodeColor(tree, colorScale);
 
-    /* step 3: dispatch */
+    /* step 3: change in mutType? */
+    const newMutType = determineColorByGenotypeType(colorBy) !== controls.mutType ? determineColorByGenotypeType(colorBy) : false;
+    if (newMutType) {
+      updateEntropyVisibility(dispatch, getState);
+    }
+
+    /* step 4: dispatch */
     dispatch({
       type: types.NEW_COLORS,
       colorBy,
       colorScale,
       nodeColors,
-      version
+      version,
+      newMutType
     });
-
-    /* step 4 (optional): update the URL query field */
-    if (router) {
-      modifyURLquery(router, {c: colorBy}, true);
-    }
 
     return null;
   };
 };
-
-/* updateColors calls changeColorBy with no args, i.e. it updates the colorScale & nodeColors */
-export const updateColors = () => (dispatch) => {dispatch(changeColorBy());};

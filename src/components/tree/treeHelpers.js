@@ -1,6 +1,5 @@
 import { scalePow } from "d3-scale";
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "../../util/globals";
-import { getGenotype } from "../../util/getGenotype";
 import { calendarToNumeric } from "../../util/dateHelpers";
 
 /**
@@ -207,52 +206,38 @@ export const calcBranchThickness = function (nodes, visibility, rootIdx) {
   ));
 };
 
-export const getTipColorAttribute = function (node, colorScale, sequences) {
+export const getTipColorAttribute = (node, colorScale) => {
   if (colorScale.colorBy.slice(0, 3) === "gt-" && colorScale.genotype) {
-    return getGenotype(colorScale.genotype[0][0],
-                       colorScale.genotype[0][1],
-                       node,
-                       sequences.sequences);
+    return node.currentGt;
   }
   return node.attr[colorScale.colorBy];
 };
 
-export const calcNodeColor = function (tree, colorScale, sequences) {
+export const calcNodeColor = (tree, colorScale) => {
   if (tree && tree.nodes && colorScale && colorScale.colorBy) {
-    const nodeColorAttr = tree.nodes.map((n) => getTipColorAttribute(n, colorScale, sequences));
+    const nodeColorAttr = tree.nodes.map((n) => getTipColorAttribute(n, colorScale));
     // console.log(nodeColorAttr.map((n) => colorScale.scale(n)))
     return nodeColorAttr.map((n) => colorScale.scale(n));
   }
   return null;
 };
 
-const determineLegendMatch = function (selectedLegendItem,
-                                       node,
-                                       legendBoundsMap,
-                                       colorScale,
-                                       sequences) {
-  let bool;
-  const nodeAttr = getTipColorAttribute(node, colorScale, sequences);
+const determineLegendMatch = (selectedLegendItem, node, legendBoundsMap, colorScale) => {
+  const nodeAttr = getTipColorAttribute(node, colorScale);
   // equates a tip and a legend element
   // exact match is required for categorical qunantities such as genotypes, regions
   // continuous variables need to fall into the interal (lower_bound[leg], leg]
   if (legendBoundsMap) {
-    bool = (nodeAttr <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
+    return (nodeAttr <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
            (nodeAttr > legendBoundsMap.lower_bound[selectedLegendItem]);
-  } else {
-    bool = nodeAttr === selectedLegendItem;
   }
-  return bool;
+  return nodeAttr === selectedLegendItem;
 };
 
-export const calcTipRadii = function (selectedLegendItem,
-                           colorScale,
-                           sequences,
-                           tree
-                         ) {
-  if (selectedLegendItem && tree && tree.nodes){
+export const calcTipRadii = (selectedLegendItem, colorScale, tree) => {
+  if (selectedLegendItem && tree && tree.nodes) {
     const legendMap = colorScale.continuous ? colorScale.legendBoundsMap : false;
-    return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, legendMap, colorScale, sequences) ? tipRadiusOnLegendMatch : tipRadius);
+    return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, legendMap, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (tree && tree.nodes) {
     return tree.nodes.map((d) => tipRadius);
   }

@@ -1,7 +1,7 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 
-const InfoPanel = ({hovered, mutType}) => {
+const InfoPanel = ({hovered, chartGeom, mutType, showCounts}) => {
 
   /* this is a function - we can bail early */
   if (!hovered) {
@@ -36,32 +36,28 @@ const InfoPanel = ({hovered, mutType}) => {
     y: hovered.y - bounds.top
   };
 
-  if (pos.x < hovered.chartGeom.width * 0.7) {
+  if (pos.x < chartGeom.width * 0.7) {
     styles.container.left = pos.x;
   } else {
-    styles.container.right = hovered.chartGeom.width - pos.x;
+    styles.container.right = chartGeom.width - pos.x;
   }
-  if (pos.y < hovered.chartGeom.height * 0.5) {
+  if (pos.y < chartGeom.height * 0.5) {
     styles.container.top = pos.y;
   } else {
-    styles.container.bottom = hovered.chartGeom.height - pos.y;
+    styles.container.bottom = chartGeom.height - pos.y;
   }
 
-  // heading JSX:
-  // <div style={infoPanelStyles.tooltipHeading}>
-  //   {"Entropy Bar"}
-  // </div>
   return (
     <div style={styles.container}>
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
         <div>
-          {mutType === "aa" ? `Codon ${hovered.d.codon + 1} in protein ${hovered.d.prot}` :
-            hovered.d.prot ? `Nucleotide ${hovered.d.x + 1} (in protein ${hovered.d.prot})` :
-              `Nucleotide ${hovered.d.x + 1}`}
+          {mutType === "aa" ? `Codon ${hovered.d.codon} in protein ${hovered.d.prot}` :
+            hovered.d.prot ? `Nucleotide ${hovered.d.x} (in protein ${hovered.d.prot})` :
+              `Nucleotide ${hovered.d.x}`}
         </div>
         <p/>
         <div>
-          {`Entropy: ${hovered.d.y}`}
+          {showCounts ? `Num mutations: ${hovered.d.y}` : `entropy: ${hovered.d.y}`}
         </div>
         <div style={infoPanelStyles.comment}>
           Click to color tree & map

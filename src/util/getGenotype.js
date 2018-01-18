@@ -23,10 +23,3 @@ export const parseGenotype = (colorBy, geneLength) => {
   }
   return null;
 };
-
-export const getGenotype = (gene, pos, node, sequences) => {
-  if (sequences[node.clade][gene][pos]) {
-    return sequences[node.clade][gene][pos];
-  }
-  return sequences["root"][gene][pos];
-};

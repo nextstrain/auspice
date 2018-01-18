@@ -4,7 +4,7 @@ import { calcVisibility,
   identifyPathToTip,
   calcBranchThickness } from "../components/tree/treeHelpers";
 import * as types from "./types";
-import { modifyURLquery } from "../util/urlHelpers";
+import { updateEntropyVisibility } from "./entropy";
 
 const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
   const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
@@ -18,7 +18,6 @@ const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInVie
     branchThicknessVersion: tree.branchThicknessVersion + 1
   };
 };
-
 
 /**
  * define the visible branches and their thicknesses. This could be a path to a single tip or a selected clade.
@@ -47,6 +46,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
       idxOfInViewRootNode: validIdxRoot,
       stateCountAttrs: Object.keys(controls.filters)
     });
+    updateEntropyVisibility(dispatch, getState);
   };
 };
 
@@ -79,6 +79,7 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       idxOfInViewRootNode: tree.idxOfInViewRootNode,
       stateCountAttrs: Object.keys(controls.filters)
     });
+    updateEntropyVisibility(dispatch, getState);
   };
 };
 
@@ -91,10 +92,10 @@ export const changeAnalysisSliderValue = (value) => {
 
 const updateTipRadii = () => {
   return (dispatch, getState) => {
-    const { controls, sequences, tree } = getState();
+    const { controls, tree } = getState();
     dispatch({
       type: types.UPDATE_TIP_RADII,
-      data: calcTipRadii(controls.selectedLegendItem, controls.colorScale, sequences, tree),
+      data: calcTipRadii(controls.selectedLegendItem, controls.colorScale, tree),
       version: tree.tipRadiiVersion + 1
     });
   };
@@ -116,7 +117,7 @@ export const legendMouseEnterExit = (label = null) => {
   };
 };
 
-export const applyFilterQuery = (router, fields, values, mode = "set") => {
+export const applyFilter = (fields, values, mode = "set") => {
   /* fields: e.g. region || country || authors
   values: list of selected values, e.g [brazil, usa, ...]
   mode: set | add | remove
@@ -153,10 +154,7 @@ export const applyFilterQuery = (router, fields, values, mode = "set") => {
         }
       }
     }
-    dispatch({type: types.APPLY_FILTER_QUERY, fields, values: newValues});
-    const q = {};
-    q[`f_${fields}`] = newValues.join(',');
-    modifyURLquery(router, q, true);
+    dispatch({type: types.APPLY_FILTER, fields, values: newValues});
     dispatch(updateVisibleTipsAndBranchThicknesses());
   };
 };

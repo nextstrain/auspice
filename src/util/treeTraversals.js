@@ -1,4 +1,4 @@
-
+import * as entropy from "./entropy";
 /**
 * traverse the tree and get the values -> counts for a single
 * attr. Visibility of the node is ignored. Terminal nodes only.
@@ -56,4 +56,21 @@ export const getValuesAndCountsOfVisibleTraitsFromTree = (nodes, visibility, att
     }
   });
   return stateCount;
+};
+
+
+/**
+* traverse the tree and compile the entropy data for the visibile branches
+* @param {Array} nodes - list of nodes
+* @param {Array} visibility - 1-1 correspondence with nodes. Value: "visibile" or ""
+* @param {String} mutType - amino acid | nucleotide mutations - "aa" | "nuc"
+* @param {obj} geneMap used to NT fill colours. This should be imroved.
+* @param {bool} showCounts show counts or entropy values?
+* @return {obj} keys: the entries in attrs. Values: an object mapping values -> counts
+* TODO: this algorithm can be much improved, and the data structures returned improved also
+*/
+export const calcEntropyInView = (nodes, visibility, mutType, geneMap, showCounts) => {
+  return showCounts ?
+    entropy.calcMutationCounts(nodes, visibility, geneMap, mutType === "aa") :
+    entropy.calcEntropy(nodes, visibility, geneMap, mutType === "aa");
 };

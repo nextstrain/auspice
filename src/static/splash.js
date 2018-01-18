@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Link } from "react-router-dom";
 import TitleBar from "../components/framework/title-bar";
 import Title from "../components/framework/title";
 import { headerFont, materialButtonOutline } from "../globalStyles";
@@ -9,6 +8,7 @@ import { analyticsNewPage, triggerOutboundEvent } from "../util/googleAnalytics"
 import { generateLogos } from "./helpers/logos";
 import { tweets } from "./helpers/tweets";
 import { requestImage } from "../util/clientAPIInterface";
+import { changePage } from "../actions/navigation";
 
 const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
@@ -52,7 +52,8 @@ const styles = {
     marginLeft: 10,
     marginRight: 10,
     marginTop: 5,
-    marginBottom: 5
+    marginBottom: 5,
+    cursor: "pointer"
     // display: "flex",
     // justifyContent: "center",
     // alignItems: "center",
@@ -75,7 +76,7 @@ const styles = {
   }
 };
 
-const generateCard = (title, imgRequired, to, outboundLink) => {
+const generateCard = (title, imgRequired, to, outboundLink, dispatch) => {
   function imgAndText() {
     return (
       <g>
@@ -98,13 +99,10 @@ const generateCard = (title, imgRequired, to, outboundLink) => {
       </div>
     );
   }
-  // default: use <Link> and let React Router sort it out
   return (
     <div style={styles.cardOuterDiv}>
-      <div style={styles.cardInnerDiv}>
-        <Link to={to}>
-          {imgAndText()}
-        </Link>
+      <div style={styles.cardInnerDiv} onClick={() => dispatch(changePage({path: to}))}>
+        {imgAndText()}
       </div>
     </div>
   );
@@ -117,7 +115,7 @@ const generateTiles = (props) => {
         {props.splash.map((d) => {
           return (
             <div className="col-sm-4" key={d.title}>
-              {generateCard([d.title, ""], requestImage(d.img), d.url, false)}
+              {generateCard([d.title, ""], requestImage(d.img), d.url, false, props.dispatch)}
             </div>
           );
         })}
@@ -158,11 +156,9 @@ class Splash extends React.Component {
           </p>
 
           <Flex justifyContent="center">
-            <Link to="/about">
-              <button style={materialButtonOutline}>
-                Read More
-              </button>
-            </Link>
+            <button style={materialButtonOutline} onClick={() => this.props.dispatch(changePage({path: "/about"}))}>
+              Read More
+            </button>
           </Flex>
 
           {/* THE CLICKABLE CARDS - see about page for sources & attribution */}
