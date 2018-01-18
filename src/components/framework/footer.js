@@ -31,7 +31,7 @@ export const getAcknowledgments = (style) => {
       </div>
     );
   }
-  if (router.history.location.pathname.includes("mumps")) {
+  if (window.location.pathname.includes("mumps")) {
     return (
       <div style={style}>
         Special thanks to Jennifer Gardy, Shirlee Wohl, Jeff Joy, Nathan Yozwiak, Hayden Metsky, Agatha Jassem, Louise Moncla, Gytis Dudas and Pardis Sabeti for data sharing, comments and suggestions.
