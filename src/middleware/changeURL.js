@@ -4,7 +4,10 @@ import * as types from "../actions/types";
 /* What is this middleware?
 This middleware acts to keep the app state and the URL query state in sync by intercepting actions
 and updating the URL accordingly. Thus, in theory, this middleware can be disabled and the app will still work
-as expected
+as expected.
+
+The only modification of redux state by this app is (potentially) an action of type types.URL
+which is used to "save" the current page so we can diff against a new one!
 */
 
 // eslint-disable-next-line
@@ -102,7 +105,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   if (search) {search = "?" + search;}
   if (!pathname.startsWith("/")) {pathname = "/" + pathname;}
 
-  if (pathname !== window.location.pathname || window.location.search !== search) {
+  if (pathname !== window.location.pathname || search !== window.location.search) {
     let newURLString = pathname;
     if (search) {newURLString += search;}
     // if (pathname !== window.location.pathname) {console.log(pathname, window.location.pathname)}
@@ -113,6 +116,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     } else {
       window.history.replaceState({}, "", newURLString);
     }
+    next({type: types.URL, path: pathname, query: search});
+  } else if (pathname !== state.datasets.urlPath && action.type === types.PAGE_CHANGE) {
     next({type: types.URL, path: pathname, query: search});
   }
 

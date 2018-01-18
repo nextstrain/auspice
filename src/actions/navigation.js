@@ -87,4 +87,4 @@ export const browserBackForward = () => (dispatch, getState) => {
   } else {
     dispatch(changePageQuery({query: queryString.parse(window.location.search)}));
   }
-}
+};
