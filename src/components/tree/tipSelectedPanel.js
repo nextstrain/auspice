@@ -89,7 +89,7 @@ const TipSelectedPanel = ({tip, goAwayCallback, metadata}) => {
             {item(uncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
             {uncertainty ? dateConfidence(tip.n.attr.num_date_confidence) : null}
             {/* Paper Title, Author(s), Accession + URL (if provided) - from info.json NOT tree.json */}
-            {authorInfo[author].title && validValue(authorInfo[author].title) ? item("Publication", prettyString(authorInfo[author].title, {trim: 80, camelCase: false})) : null}
+            {authorInfo[author] && authorInfo[author].title && validValue(authorInfo[author].title) ? item("Publication", prettyString(authorInfo[author].title, {trim: 80, camelCase: false})) : null}
             {validAttr(tip.n.attr, "authors") ? item("Authors", authorString(tip.n.attr.authors)) : null}
             {/* try to join URL with accession, else display the one that's available */}
             {url && validAttr(tip.n.attr, "accession") ?
