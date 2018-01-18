@@ -4,16 +4,17 @@
 read -r -d '' purposeMsg <<'EOF'
 Bumping Auspice version & deploying to Heroku
 
-This script attemps to do 9 things. It will exit if any steps fail...
+This script attemps to do 10 things. It will exit if any steps fail...
 (1) checkout master & ensure it is up to date with github
 (2) increment Version number (in `src/version.js` and `package.json`) by prompting the user
-(3) commit to master
-(4) checkout `release` branch from github (will fail if it exists locally)
-(5) merge master -> release
-(6) tag release with new version
-(7) push release branch to github
-(8) push release branch to Heroku (automagically builds & runs)
-(9) checkout `master` and remove `release` branch
+(3) add a title with the version number to the CHANGELOG
+(4) commit to master
+(5) checkout `release` branch from github (will fail if it exists locally)
+(6) merge master -> release
+(7) tag release with new version
+(8) push release branch to github
+(9) push release branch to Heroku (automagically builds & runs)
+(10) checkout `master` and remove `release` branch
 
 EOF
 
@@ -67,15 +68,20 @@ sed -i '' "s/\"version\": \"${packagesVersion}\"/\"version\": \"${newVersion}\"/
 sed -i '' "s/version = \"${srcVersion}\";/version = \"${newVersion}\";/" src/version.js
 unset packagesVersion srcVersion parts bumps yn
 
-# step 3: commit to current branch (master)
-step="3"
+# step 3: add h2 title to CHANGELOG.md with newVersion & date
+today=$(date +'%Y/%m/%d')
+echo -e "## version ${newVersion} - ${today}\n\n$(cat CHANGELOG.md)" > CHANGELOG.md
+unset today
+
+# step 4: commit to current branch (master) & push to github (origin)
+step="4"
 git add .
 git commit -m "version bump to ${newVersion} for release"
 git push origin master # push master, with the updated version number...
 echo -e "Master successfully updated and pushed to github"
 
-# step 4: checkout release branch
-step="4"
+# step 5: checkout release branch from github
+step="5"
 if git rev-parse --verify --quiet release
   then
     echo "release branch already exists locally - fatal"
@@ -83,24 +89,24 @@ if git rev-parse --verify --quiet release
 fi
 git checkout -b release origin/release
 
-# step 5: merge master
-step="5"
+# step 6: merge master into release
+step="6"
 git merge --ff-only master
 
-# # step 6: tag
-step="6"
+# # step 7: tag
+step="7"
 git tag -a v${newVersion} -m "${msg}"
 
-# step 7: push to github, including the tag
-step="7"
+# step 8: push to github, including the tag
+step="8"
 git push --follow-tags origin release
 
-# step 8: push local release branch to heroku master
-step="8"
+# step 9: push local release branch to heroku master
+step="9"
 git push -f heroku release:master
 
-# step 9: go back to master & delete release (locally)
-step="9"
+# step 10: go back to master & delete release branch (locally)
+step="10"
 git checkout master
 git branch -d release
 
