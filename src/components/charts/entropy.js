@@ -15,13 +15,13 @@ const getStyles = (width) => {
   return {
     switchContainer: {
       position: "absolute",
-      marginTop: -25,
+      marginTop: -5,
       paddingLeft: width - 100
     },
-    switchContainerLeft: {
+    switchContainerWide: {
       position: "absolute",
       marginTop: -25,
-      paddingLeft: 25
+      paddingLeft: width - 185
     },
     switchTitle: {
       margin: 5,
@@ -148,7 +148,7 @@ export class Entropy extends React.Component {
   }
   entropyCountSwitch(styles) {
     return (
-      <div style={styles.switchContainerLeft}>
+      <div style={styles.switchContainerWide}>
         <button
           key={1}
           style={this.props.showCounts ? materialButton : materialButtonSelected}
@@ -222,7 +222,7 @@ export class Entropy extends React.Component {
     const chartGeom = computeChartGeometry(this.props);
     const styles = getStyles(chartGeom.width);
     return (
-      <Card>
+      <Card title={"Diversity"}>
         {this.aaNtSwitch(styles)}
         {this.entropyCountSwitch(styles)}
         <InfoPanel
