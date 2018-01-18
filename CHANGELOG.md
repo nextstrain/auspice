@@ -1,3 +1,5 @@
+## version 1.8.0 - 2018/01/18
+
 #### entropy calculated via tree
 * The entropy panel data is now computed within auspice by examining mutations throughout the tree, and is throttled to improve speed under load.
 * Both entropy and number of mutations are available via a toggle similar to AA/NT
