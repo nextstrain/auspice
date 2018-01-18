@@ -81,7 +81,7 @@ export const changePageQuery = ({query, push = true}) => (dispatch, getState) =>
 export const browserBackForward = () => (dispatch, getState) => {
   const { datasets } = getState();
   /* if the pathname has changed, trigger the changePage action (will trigger new post to load, new dataset to load, etc) */
-  console.log("broswer back/forward detected. From: ", datasets.urlPath, datasets.urlSearch, "to:", window.location.pathname, window.location.search)
+  // console.log("broswer back/forward detected. From: ", datasets.urlPath, datasets.urlSearch, "to:", window.location.pathname, window.location.search)
   if (datasets.urlPath !== window.location.pathname) {
     dispatch(changePage({path: window.location.pathname}));
   } else {
