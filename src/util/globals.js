@@ -56,6 +56,7 @@ export const fastTransitionDuration = 350; // in milliseconds
 export const mediumTransitionDuration = 700; // in milliseconds
 export const slowTransitionDuration = 1400; // in milliseconds
 export const enableNarratives = true;
+export const narrativeWidth = 500;
 export const enableAnimationDisplay = true;
 export const enableAnimationPerfTesting = false;
 export const animationWindowWidth = 0.075; // width of animation window relative to date slider

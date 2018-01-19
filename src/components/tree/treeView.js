@@ -51,7 +51,6 @@ class TreeView extends React.Component {
     };
   }
   static propTypes = {
-    sidebar: PropTypes.bool.isRequired,
     mutType: PropTypes.string.isRequired
   }
 
@@ -107,9 +106,9 @@ class TreeView extends React.Component {
       (
         prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
         prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
-        // or the sidebar's (dis)appeared
-        this.props.sidebar !== prevProps.sidebar ||
-        this.props.sidebarRight !== prevProps.sidebarRight ||
+        // or the sidebar(s) have (dis)appeared
+        this.props.padding.left !== prevProps.padding.left ||
+        this.props.padding.right !== prevProps.padding.right ||
         prevProps.panelLayout !== this.props.panelLayout /* full vs grid */
       )
 
@@ -164,14 +163,13 @@ class TreeView extends React.Component {
       horizontal: grid ? 0.5 : 1,
       vertical: grid ? 0.7 : 0.88,
       browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar,
-      sidebarRight: this.props.sidebarRight
+      padding: this.props.padding
     });
     const cardTitle = "Phylogeny";
 
     return (
       <Card center title={cardTitle}>
-        <Legend sidebar={this.props.sidebar}/>
+        <Legend padding={this.props.padding}/>
         <InfoPanel
           tree={this.state.tree}
           mutType={this.props.mutType}

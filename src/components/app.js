@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Sidebar from "react-sidebar";
-import queryString from "query-string";
 import "whatwg-fetch"; // setup polyfill
 import { loadJSONs } from "../actions/loadData";
 import Background from "./framework/background";
@@ -13,7 +12,7 @@ import { Entropy } from "./charts/entropy";
 import Map from "./map/map";
 import Info from "./info/info";
 import TreeView from "./tree/treeView";
-import { controlsHiddenWidth } from "../util/globals";
+import { controlsHiddenWidth, narrativeWidth, controlsWidth } from "../util/globals";
 import { sidebarColor } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
@@ -50,8 +49,8 @@ class App extends React.Component {
       mql,
       sidebarDocked: mql.matches,
       sidebarOpen: false,
-      rightSidebarDocked: false,
-      rightSidebarOpen: false
+      narrativeSidebarDocked: false,
+      narrativeSidebarOpen: false
     };
     analyticsNewPage();
   }
@@ -82,7 +81,7 @@ class App extends React.Component {
   }
   componentWillReceiveProps(nextProps) {
     if (nextProps.narrativeLoaded !== this.props.narrativeLoaded) {
-      this.setState({rightSidebarDocked: nextProps.narrativeLoaded});
+      this.setState({narrativeSidebarDocked: nextProps.narrativeLoaded});
     }
   }
   renderPanels() {
@@ -91,29 +90,55 @@ class App extends React.Component {
         <img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${this.props.browserDimensions.height / 2 - 100}px`}}/>
       );
     }
-    const sidebar = this.state.sidebarOpen || this.state.sidebarDocked;
-    const sidebarRight = this.state.rightSidebarOpen || this.state.rightSidebarDocked;
+    const padding = {
+      left: (this.state.sidebarOpen || this.state.sidebarDocked ? controlsWidth : 0) + (this.state.narrativeSidebarOpen || this.state.narrativeSidebarDocked ? narrativeWidth : 0),
+      right: 0,
+      top: 0,
+      bottom: 0
+    };
     return (
       <Background>
-        <Info sidebar={sidebar} sidebarRight={sidebarRight} />
+        <Info padding={padding} />
         {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
-          <TreeView
-            sidebar={sidebar}
-            sidebarRight={sidebarRight}
-          />
+          <TreeView padding={padding} />
         )}
         {this.props.metadata.panels.indexOf("map") === -1 ? null : (
-          <Map
-            sidebar={sidebar}
-            sidebarRight={sidebarRight}
-            justGotNewDatasetRenderNewMap={false}
-          />
+          <Map padding={padding} justGotNewDatasetRenderNewMap={false} />
         )}
         {this.props.metadata.panels.indexOf("entropy") === -1 ? null : (
-          <Entropy sidebar={sidebar} sidebarRight={sidebarRight} />
+          <Entropy padding={padding} />
         )}
-        <Footer sidebar={sidebar} sidebarRight={sidebarRight} />
+        <Footer padding={padding} />
       </Background>
+    );
+  }
+  renderNarrativeSwitch() {
+    return (
+      <ToggleSidebarTab
+        open={this.state.narrativeSidebarDocked}
+        handler={() => {this.setState({narrativeSidebarDocked: !this.state.narrativeSidebarDocked});}}
+        widthWhenOpen={(this.state.sidebarOpen || this.state.sidebarDocked ? controlsWidth : 0) + narrativeWidth + 20}
+        widthWhenShut={(this.state.sidebarOpen || this.state.sidebarDocked ? controlsWidth : 0) + 40}
+      />
+    );
+  }
+  renderNarrativeAndPanels() {
+    return (
+      <Sidebar
+        sidebar={<Narrative/>}
+        open={this.state.narrativeSidebarOpen}
+        docked={this.state.narrativeSidebarDocked}
+        onSetOpen={(a) => {this.setState({narrativeSidebarOpen: a});}}
+        sidebarClassName={"sidebar"}
+        styles={{
+          sidebar: {
+            backgroundColor: sidebarColor,
+            width: `${narrativeWidth}px`
+          }
+        }}
+      >
+        {this.renderPanels()}
+      </Sidebar>
     );
   }
   render() {
@@ -123,15 +148,10 @@ class App extends React.Component {
         <ToggleSidebarTab
           open={this.state.sidebarDocked}
           handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
-          side={"left"}
+          widthWhenOpen={controlsWidth}
+          widthWhenShut={0}
         />
-        {this.props.narrativeLoaded ?
-          (<ToggleSidebarTab
-            open={this.state.rightSidebarDocked}
-            handler={() => {this.setState({rightSidebarDocked: !this.state.rightSidebarDocked});}}
-            side={"right"}
-          />) :
-          null}
+        {this.props.narrativeLoaded ? this.renderNarrativeSwitch() : null}
         <Sidebar
           sidebar={
             <div>
@@ -143,31 +163,9 @@ class App extends React.Component {
           docked={this.state.sidebarDocked}
           onSetOpen={(a) => {this.setState({sidebarOpen: a});}}
           sidebarClassName={"sidebar"}
-          styles={{
-            sidebar: {
-              backgroundColor: sidebarColor
-            }
-          }}
+          styles={{sidebar: {backgroundColor: sidebarColor}}}
         >
-          {this.props.narrativeLoaded ?
-            (<Sidebar
-              sidebar={<Narrative/>}
-              pullRight
-              open={this.state.rightSidebarOpen}
-              docked={this.state.rightSidebarDocked}
-              onSetOpen={(a) => {this.setState({rightSidebarOpen: a});}}
-              sidebarClassName={"sidebar"}
-              styles={{
-                sidebar: {
-                  backgroundColor: sidebarColor,
-                  width: "300px"
-                }
-              }}
-            >
-              {this.renderPanels()}
-            </Sidebar>) :
-            this.renderPanels()
-          }
+          {this.props.narrativeLoaded ? this.renderNarrativeAndPanels() : this.renderPanels()}
         </Sidebar>
       </g>
     );

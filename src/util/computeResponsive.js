@@ -1,4 +1,4 @@
-import { controlsWidth, controlsPadding, cardMinimumWidth } from "./globals";
+import { controlsPadding } from "./globals";
 
 /*
   Why this function is here
@@ -29,54 +29,33 @@ const computeResponsive = ({
   horizontal, /* multiplicative 1 (mobile, tablet, laptop) or .5 (2 column big monitor) */
   vertical, /* multiplicative .5 (if splitting with another pane) or 1 (if full height of browser window) */
   browserDimensions, /* window.innerWidth & window.innerHeight as an object */
-  sidebar, /* if open, subtract sidebar width from browser width */
-  sidebarRight, /* if open, subtract right sidebar width from browser width */
+  padding, /* contains things such as sidebar etc for right, left, top, bottom */
   minHeight, /* minimum height of element */
   maxAspectRatio /* maximum aspect ratio of element */
 }) => {
-
-  let width = null;
-  let height = null;
-
+  /* HARDCODED CONSTANTS */
   const horizontalPadding = horizontal === 1 ? 34 : 56; // derived from empirical testing, depends on Card margins
   const verticalPadding = 52;
 
-  // sidebar scrollbar has width equal to its offsetWidth - clientWidth
-  let scrollbarWidth = 0;
+  /* WIDTH */
+  let scrollbarWidth = 0; // sidebar scrollbar has width equal to its offsetWidth - clientWidth
   const classArray = document.getElementsByClassName("sidebar");
   if (classArray.length > 0) {
     scrollbarWidth = classArray[0].offsetWidth - classArray[0].clientWidth;
   }
+  const LRpadding = padding.left + padding.right + horizontalPadding + scrollbarWidth + (padding.left + padding.right === 0 ? 0 : controlsPadding);
+  const width = horizontal * (browserDimensions.width - LRpadding);
 
-  if (browserDimensions) {
-    let computedControlWidth = 0;
-    if (sidebar) {
-      computedControlWidth += controlsWidth + controlsPadding + scrollbarWidth;
-    }
-    if (sidebarRight) {
-      computedControlWidth += 300 + controlsPadding + scrollbarWidth;
-    }
-    width = horizontal * (browserDimensions.width - computedControlWidth - horizontalPadding - scrollbarWidth);
-    if (width < cardMinimumWidth) {
-      width = horizontal * (browserDimensions.width - horizontalPadding - scrollbarWidth);
-    }
-    height = (vertical * browserDimensions.height) - verticalPadding; // each card adds padding
-  }
-
+  /* HEIGHT */
+  let height = (vertical * browserDimensions.height - padding.top - padding.bottom) - verticalPadding; // each card adds padding
   if (maxAspectRatio && height > maxAspectRatio * width) {
     height = maxAspectRatio * width;
   }
-
   // favor minHeight over maxAspectRatio
   if (minHeight && height < minHeight) {
     height = minHeight;
   }
-
-  return {
-    width,
-    height
-  };
-
+  return {width, height};
 };
 
 export default computeResponsive;

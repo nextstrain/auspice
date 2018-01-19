@@ -100,8 +100,6 @@ class Info extends React.Component {
     super(props);
   }
   static propTypes = {
-    sidebar: React.PropTypes.bool.isRequired,
-    sidebarRight: React.PropTypes.bool.isRequired,
     filters: React.PropTypes.object.isRequired,
     metadata: React.PropTypes.object, // not required. starts as null
     nodes: React.PropTypes.array, // not required. starts as null
@@ -252,8 +250,7 @@ class Info extends React.Component {
       horizontal: 1,
       vertical: 1.0,
       browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar,
-      sidebarRight: this.props.sidebarRight,
+      padding: this.props.padding,
       minHeight: 480,
       maxAspectRatio: 1.0
     });

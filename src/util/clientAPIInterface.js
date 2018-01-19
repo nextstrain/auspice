@@ -1,12 +1,12 @@
 import queryString from "query-string";
 import { MANIFEST_RECEIVED, POSTS_MANIFEST_RECEIVED } from "../actions/types";
-import { errorNotification } from "../actions/notifications";
+import { warningNotification } from "../actions/notifications";
 import { charonAPIAddress } from "./globals";
 import { changePage } from "../actions/navigation";
 
 export const getManifest = (dispatch, s3bucket = "live") => {
   const charonErrorHandler = (e) => {
-    dispatch(errorNotification({message: "Failed to get datasets from server"}));
+    dispatch(warningNotification({message: "Failed to get datasets from server"}));
     console.error(e);
   };
   const processData = (data) => {
@@ -44,7 +44,7 @@ export const getManifest = (dispatch, s3bucket = "live") => {
 
 export const getPostsManifest = (dispatch) => {
   const charonErrorHandler = (e) => {
-    dispatch(errorNotification({message: "Failed to get list of posts from server"}));
+    dispatch(warningNotification({message: "Failed to get list of posts from server"}));
     console.error(e);
   };
   const processData = (data) => {

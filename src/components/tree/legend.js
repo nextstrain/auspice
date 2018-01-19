@@ -4,10 +4,7 @@ import { connect } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./legend-item";
 import { headerFont, darkGrey } from "../../globalStyles";
-import { legendRectSize,
-  legendSpacing,
-  fastTransitionDuration,
-  controlsWidth } from "../../util/globals";
+import { legendRectSize, legendSpacing, fastTransitionDuration } from "../../util/globals";
 import { determineColorByGenotypeType } from "../../util/colorHelpers";
 
 
@@ -33,11 +30,10 @@ class Legend extends React.Component {
     routes: PropTypes.array,
     colorBy: PropTypes.string.isRequired,
     style: PropTypes.object,
-    sidebar: PropTypes.bool
   }
   // hide/show legend based on initial browserDimensions and legend length
   componentWillMount() {
-    this.updateLegendVisibility(this.props.browserDimensions.width, this.props.sidebar, this.props.colorScale);
+    this.updateLegendVisibility(this.props.browserDimensions.width, this.props.padding, this.props.colorScale);
   }
 
   // hide/show legend based on browserDimensions and legend length
@@ -46,14 +42,13 @@ class Legend extends React.Component {
         && this.props.colorScale && nextProps.colorScale) {
       if (this.props.browserDimensions.width !== nextProps.browserDimensions.width
         || this.props.colorScale.scale !== nextProps.colorScale.scale) {
-        this.updateLegendVisibility(nextProps.browserDimensions.width, nextProps.sidebar, nextProps.colorScale);
+        this.updateLegendVisibility(nextProps.browserDimensions.width, nextProps.padding, nextProps.colorScale);
       }
     }
   }
 
-  updateLegendVisibility(currentWidth, sidebar, colorScale) {
-    const sidebarPadding = sidebar ? controlsWidth + 55 : 0;
-    if (currentWidth < 600 + sidebarPadding) {
+  updateLegendVisibility(currentWidth, padding, colorScale) {
+    if (currentWidth < 600 + padding.left + padding.right) {
       this.setState({legendVisible: false});
     } else {
       this.setState({legendVisible: true});
