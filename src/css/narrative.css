@@ -4,6 +4,7 @@
   --medGrey: #888;
   --lightGrey: #CCC;
   --brandColor: #5097BA;
+  --sidebarColor: #F2F2F2;
 }
 
 .narrative .linkedParagraph:hover {
@@ -51,4 +52,18 @@ and so the background colour is rgba(0, 0, 0, 0.3). This gets around this.*/
 .chevron.left:before {
   /* left: 0.25em; */
   transform: rotate(-135deg);
+}
+
+.narrative .fadetop {
+  background-image: linear-gradient(
+    var(--lightGrey) 70%,
+    var(--sidebarColor)
+  );
+}
+
+.narrative .fadebottom {
+  background-image: linear-gradient(
+    var(--sidebarColor),
+    var(--lightGrey) 30%
+  );
 }

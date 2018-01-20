@@ -1,13 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
 
-
 const Chevron = ({pos, height, width, callback}) => {
   const top = pos === "top" ? height - 80 : 10;
   return (
     <span
       className={`chevron ${pos}`}
-      style={{top: `${top}px`, left: "0px", minWidth: width, minHeight: "3em", position: "absolute", backgroundColor: "orange", cursor: "pointer"}}
+      style={{top: `${top}px`, left: "0px", minWidth: width, minHeight: "3em", position: "absolute", cursor: "pointer"}}
       onClick={callback}
     />
   );
@@ -71,16 +70,16 @@ export class Gutter extends React.Component { // eslint-disable-line
           </div>
         ))}
       </g>
-    )
+    );
   }
   render() {
     return (
       <div
+        className={`fade${this.props.pos}`}
         style={{
           minWidth: `${this.props.width}px`,
           minHeight: `${this.props.height}px`,
           maxHeight: `${this.props.height}px`,
-          backgroundColor: "skyblue",
           position: "relative",
           padding: "20px",
           margin: "0px"
