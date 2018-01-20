@@ -15,18 +15,18 @@ export class Focus extends React.Component { // eslint-disable-line
     delay: 500
   }
   componentWillReceiveProps(nextProps) {
-    if (this.props.content.url === nextProps.content.url) {
+    if (this.props.url === nextProps.url) {
       return;
     }
     if (this.state.timeoutRef) {
       clearTimeout(this.state.timeoutRef);
     }
-    if (!nextProps.content.url) {
+    if (!nextProps.url) {
       return;
     }
     const ref = setTimeout(
       () => {
-        this.props.dispatch(changePageQuery({query: queryString.parse(nextProps.content.url.split('?')[1]), push: true}));
+        this.props.dispatch(changePageQuery({query: queryString.parse(nextProps.url.split('?')[1]), push: true}));
         this.setState({timeoutRef: null});
       },
       this.props.delay
@@ -44,7 +44,9 @@ export class Focus extends React.Component { // eslint-disable-line
         margin: "0px",
         backgroundColor: "#bbff00"}}
       >
-        <h3>{this.props.title}</h3>
+        <div style={{fontSize: 26}}>
+          {this.props.title}
+        </div>
         <div dangerouslySetInnerHTML={this.props.content}/>
       </div>
     );

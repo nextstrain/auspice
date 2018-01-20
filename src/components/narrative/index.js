@@ -36,10 +36,9 @@ class Narrative extends React.Component {
     };
     const width = narrativeWidth;
     const numBlocks = this.props.blocks.length;
-    const titles = [];
+    const titles = this.props.blocks.map((d, i) => `${i + 1} ${d.title}`);
     const visibility = {previous: [], subsequent: []};
     for (let i = 0; i < numBlocks; i++) {
-      titles[i] = `title_${i}`;
       visibility.previous[i] = this.state.focusIdx > i ? "visible" : "hidden";
       visibility.subsequent[i] = this.state.focusIdx < i ? "visible" : "hidden";
     }
@@ -58,7 +57,8 @@ class Narrative extends React.Component {
           height={heights.focus}
           width={width}
           title={titles[this.state.focusIdx]}
-          content={this.props.blocks[this.state.focusIdx]}
+          url={this.props.blocks[this.state.focusIdx].url}
+          content={{__html: this.props.blocks[this.state.focusIdx].__html}}
         />
         <Gutter
           height={heights.gutter}

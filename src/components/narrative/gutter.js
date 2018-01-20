@@ -70,7 +70,7 @@ export class Gutter extends React.Component { // eslint-disable-line
         <Chevron pos={this.props.pos} height={this.props.height} width={this.props.width} callback={this.props.callback}/>
         {this.props.pos === "bottom" ? <div style={{minHeight: (0.2 * useableHeight + spaceRemaining) + "px"}}/> : null}
         {this.props.titles.map((t, i) => (
-          <div key={t} style={{transition: "all .3s ease", fontSize: vals[i][0], height: vals[i][1], margin: 0}}>
+          <div key={t} style={{transition: "all .3s ease", fontSize: vals[i][0], height: vals[i][1], margin: 0, whiteSpace: "nowrap"}}>
             {this.props.visibility[i] === "hidden" ? '' : t}
           </div>
         ))}

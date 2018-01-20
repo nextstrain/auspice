@@ -6,25 +6,45 @@ const fs = require('fs');
 const path = require("path");
 const request = require('request');
 
-const makeBlock = (type = "normal", url = false) => {
-  return ({lines: [], type, url});
+const makeBlock = (url = false, title = "Untitled") => {
+  return ({lines: [], url, title});
 };
 
 const parseMarkdownArray = (mdArr) => {
   const blocks = [];
   const nMax = mdArr.length;
-  const re = /\((.+?)\)/;
+  const reUrl = /url=([^\s`]+)/;
+  const reTitle = /#\s+(.+$)/;
+  let titleSet = false;
   let n = 0;
   let block = makeBlock(); /* initialise */
   while (n < nMax) {
-    if (mdArr[n].startsWith('[NEXTSTRAIN_NO_ACTION]')) {
-      blocks.push(block); /* push the previous block onto the stack */
-      block = makeBlock();
-    } else if (mdArr[n].startsWith('[NEXTSTRAIN_URL]')) {
-      blocks.push(block); /* push the previous block onto the stack */
-      block = makeBlock("action", mdArr[n].match(re)[1]);
+    const line = mdArr[n];
+    if (line.startsWith('`nextstrain')) {
+      if (line.includes("newBlock")) {
+        if (block.lines.length) {
+          blocks.push(block); /* push the previous block onto the stack */
+        }
+        block = makeBlock();
+        if (line.match(reUrl)) {
+          block.url = line.match(reUrl)[1];
+        }
+        titleSet = false;
+      } else {
+        console.warn("Narrative: ignoring nextstrain line without newBlock");
+      }
+    } else if (!titleSet) {
+      if (line.startsWith('#')) {
+        titleSet = true;
+        if (line.match(reTitle)) {
+          block.title = line.match(reTitle)[1];
+        } else {
+          console.warn("Narrative: incorrectly parsed this title:", line);
+        }
+      }
     } else {
-      block.lines.push(mdArr[n]);
+      /* title is set and it's not a instruction line */
+      block.lines.push(line);
     }
     n++;
   }
