@@ -1,4 +1,3 @@
-import { colorOptions } from "../util/globals";
 import * as types from "../actions/types";
 
 const narrative = (state = {
