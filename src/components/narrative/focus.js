@@ -40,7 +40,8 @@ export class Focus extends React.Component { // eslint-disable-line
         minWidth: `${this.props.width}px`,
         minHeight: `${this.props.height}px`,
         maxHeight: `${this.props.height}px`,
-        padding: "5px, 0px, 0px, 5px",
+        padding: "20px",
+        margin: "0px",
         backgroundColor: "#bbff00"}}
       >
         <h3>{this.props.title}</h3>

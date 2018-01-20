@@ -4,7 +4,7 @@ import { narrativeWidth } from "../../util/globals";
 import { Gutter } from "./gutter";
 import { Focus } from "./focus";
 
-const padding = {top: 0, right: 20, bottom: 20, left: 20, between: 30};
+// const padding = {top: 0, right: 20, bottom: 20, left: 20, between: 30};
 const focusFraction = 0.5;
 
 @connect((state) => ({
@@ -31,10 +31,10 @@ class Narrative extends React.Component {
   render() {
     if (!this.props.loaded) {return null;}
     const heights = {
-      focus: (this.props.browserHeight - padding.top - padding.top - 2 * padding.between) * focusFraction,
-      gutter: (this.props.browserHeight - padding.top - padding.top - 2 * padding.between) * (1 - focusFraction) / 2
+      focus: this.props.browserHeight * focusFraction,
+      gutter: this.props.browserHeight * (1 - focusFraction) / 2
     };
-    const width = narrativeWidth - padding.left - padding.right;
+    const width = narrativeWidth;
     const numBlocks = this.props.blocks.length;
     const titles = [];
     const visibility = {previous: [], subsequent: []};
@@ -45,12 +45,7 @@ class Narrative extends React.Component {
     }
 
     return (
-      <div
-        className={"static narrative"}
-        style={{
-          padding: `${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px`
-        }}
-      >
+      <div className={"static narrative"}>
         <Gutter
           height={heights.gutter}
           width={width}
