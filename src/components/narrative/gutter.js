@@ -52,9 +52,28 @@ const calculateFontSizeAndHeightOfTitles = (titles, divHeight, visibility, gutte
 
 @connect()
 export class Gutter extends React.Component { // eslint-disable-line
-  render() {
+  renderContent() {
+    if (this.props.pos === "top" && this.props.focusIdx === 0) {return null;}
+    if (this.props.pos === "bottom" && this.props.focusIdx + 1 === this.props.visibility.length) {return null;}
     const useableHeight = this.props.height - 2 * 20;
     const [vals, spaceRemaining] = calculateFontSizeAndHeightOfTitles(this.props.titles, useableHeight, this.props.visibility, this.props.pos);
+    return (
+      <g>
+        <Chevron pos={this.props.pos} height={this.props.height} width={this.props.width} callback={this.props.callbackArrow}/>
+        {this.props.pos === "bottom" ? <div style={{minHeight: (0.2 * useableHeight + spaceRemaining) + "px"}}/> : null}
+        {this.props.titles.map((t, i) => (
+          <div
+            key={t}
+            onClick={() => this.props.callbackGoto(i)}
+            style={{transition: "all .3s ease", fontSize: vals[i][0], height: vals[i][1], margin: 0, whiteSpace: "nowrap", cursor: "pointer"}}
+          >
+            {this.props.visibility[i] === "hidden" ? '' : t}
+          </div>
+        ))}
+      </g>
+    )
+  }
+  render() {
     return (
       <div
         style={{
@@ -67,13 +86,7 @@ export class Gutter extends React.Component { // eslint-disable-line
           margin: "0px"
         }}
       >
-        <Chevron pos={this.props.pos} height={this.props.height} width={this.props.width} callback={this.props.callback}/>
-        {this.props.pos === "bottom" ? <div style={{minHeight: (0.2 * useableHeight + spaceRemaining) + "px"}}/> : null}
-        {this.props.titles.map((t, i) => (
-          <div key={t} style={{transition: "all .3s ease", fontSize: vals[i][0], height: vals[i][1], margin: 0, whiteSpace: "nowrap"}}>
-            {this.props.visibility[i] === "hidden" ? '' : t}
-          </div>
-        ))}
+        {this.renderContent()}
       </div>
     );
   }

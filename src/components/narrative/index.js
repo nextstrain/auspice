@@ -19,6 +19,7 @@ class Narrative extends React.Component {
     // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md#es6-classes
     this.gotoPreviousBlock = this.gotoPreviousBlock.bind(this);
     this.gotoNextBlock = this.gotoNextBlock.bind(this);
+    this.gotoBlockX = this.gotoBlockX.bind(this);
   }
   gotoPreviousBlock() {
     if (this.state.focusIdx === 0) {return;}
@@ -27,6 +28,9 @@ class Narrative extends React.Component {
   gotoNextBlock() {
     if (this.state.focusIdx === this.props.blocks.length - 1) {return;}
     this.setState({focusIdx: this.state.focusIdx + 1});
+  }
+  gotoBlockX(x) {
+    this.setState({focusIdx: x});
   }
   render() {
     if (!this.props.loaded) {return null;}
@@ -46,10 +50,12 @@ class Narrative extends React.Component {
     return (
       <div className={"static narrative"}>
         <Gutter
+          focusIdx={this.state.focusIdx}
           height={heights.gutter}
           width={width}
           pos={"top"}
-          callback={this.gotoPreviousBlock}
+          callbackArrow={this.gotoPreviousBlock}
+          callbackGoto={this.gotoBlockX}
           visibility={visibility.previous}
           titles={titles}
         />
@@ -61,10 +67,12 @@ class Narrative extends React.Component {
           content={{__html: this.props.blocks[this.state.focusIdx].__html}}
         />
         <Gutter
+          focusIdx={this.state.focusIdx}
           height={heights.gutter}
           width={width}
           pos={"bottom"}
-          callback={this.gotoNextBlock}
+          callbackArrow={this.gotoNextBlock}
+          callbackGoto={this.gotoBlockX}
           visibility={visibility.subsequent}
           titles={titles}
         />
