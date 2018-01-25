@@ -36,11 +36,22 @@ export const getPageFromPathname = (pathname) => {
 };
 
 /* changes the state of the page and (perhaps) the dataset displayed.
-required argument path is the destination path - e.g. "zika" or "flu/..."
-optional argument query additionally changes the URL query in the middleware (has no effect on the reducers)
-         (if this is left out, then the query is left unchanged by the middleware) (TYPE: object)
-optional argument push signals that pushState should be used (has no effect on the reducers)
-this is an action, rather than the reducer, as it is not pure (it may change the URL) */
+This function is used throughout the app for all navigation to another page, (including braowserBackForward - see function below)
+The exception is for navigation requests that specify only the query changes, or that have an identical pathname to that selected.
+Note that this function is not pure, in that it may change the URL
+
+ARGUMENTS:
+(1) path - REQUIRED - the destination path - e.g. "zika" or "flu/..." (does not include query)
+(2) query - OPTIONAL (default: undefined) - see below
+(3) push - OPTIONAL (default: true) - signals that pushState should be used (has no effect on the reducers)
+
+UNDERSTANDING QUERY (SLIGHTLY CONFUSING)
+This function changes the pathname (stored in the datasets reducer) and modifies the URL pathname and query
+accordingly in the middleware. But the URL query is not processed further.
+Because the datasets reducer has changed, the <App> (or whichever page we're on) will update.
+In <App>, this causes a call to loadJSONs, which will, as part of it's dispatch, use the URL state of query.
+In this way, the URL query is "used".
+*/
 export const changePage = ({path, query = undefined, push = true}) => (dispatch, getState) => {
   if (!path) {console.error("changePage called without a path"); return;}
   const { datasets } = getState();
@@ -59,9 +70,13 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
   }
 };
 
-/* quite different to changePage - obviously only the query is changing, but this is sent to the reducers (it's not in changePage)
-required argument query is sent to the reducers and additionally changes the URL query in the middleware (TYPE: object)
-optional argument push signals that pushState should be used (has no effect on the reducers) */
+/* modify redux state and URL by specifying a new URL query string. Pathname is not considered, if you want to change that, use "changePage" instead.
+Unlike "changePage" the query is processed both by the middleware (i.e. to update the URL) AND by the reducers, to update their state accordingly.
+
+ARGUMENTS:
+(1) query - REQUIRED - {object}
+(2) push - OPTIONAL (default: true) - signals that pushState should be used (has no effect on the reducers)
+*/
 export const changePageQuery = ({query, push = true}) => (dispatch, getState) => {
   const { controls, metadata } = getState();
   dispatch({
@@ -71,7 +86,7 @@ export const changePageQuery = ({query, push = true}) => (dispatch, getState) =>
     pushState: push
   });
   const newState = getState();
-  /* working out whether visibility / thickness needs updating is tricky */
+  /* working out whether visibility / thickness needs updating is tricky - ideally we could avoid this dispatch in some situations */
   dispatch(updateVisibleTipsAndBranchThicknesses());
   if (controls.colorBy !== newState.controls.colorBy) {
     dispatch(changeColorBy());

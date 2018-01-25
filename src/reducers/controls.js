@@ -188,6 +188,10 @@ const modifyStateViaTree = (state, tree) => {
 };
 
 const checkAndCorrectErrorsInState = (state, metadata) => {
+  /* The one (bigish) problem with this being in the reducer is that
+  we can't have any side effects. So if we detect and error introduced by
+  a URL QUERY (and correct it in state), we can't correct the URL */
+
   /* colorBy */
   if (Object.keys(metadata.color_options).indexOf(state.colorBy) === -1 && !state["colorBy"].startsWith("gt-")) {
     const availableNonGenotypeColorBys = Object.keys(metadata.color_options);
@@ -273,7 +277,8 @@ const getDefaultState = () => {
 const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE: {
-      /* the general pattern is to reset as much as possible to the "base" state, then rehydrate it from the query */
+      /* because the qury isn't complete (e.g. things that are "off" or "default" aren't shown)
+      we must first reset all the state to the "base" (default) state, and then apply the changes defined in the query */
       let newState = Object.assign({}, state);
       newState = restoreQueryableStateToDefaults(newState);
       newState = modifyStateViaURLQuery(newState, action.query);
