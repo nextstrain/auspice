@@ -81,7 +81,11 @@ class App extends React.Component {
   }
   componentWillReceiveProps(nextProps) {
     if (nextProps.narrativeLoaded !== this.props.narrativeLoaded) {
-      this.setState({narrativeSidebarDocked: nextProps.narrativeLoaded});
+      this.setState({
+        narrativeSidebarDocked: nextProps.narrativeLoaded,
+        sidebarOpen: false,
+        sidebarDocked: false
+      });
     }
   }
   renderPanels() {
