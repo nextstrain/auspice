@@ -442,7 +442,7 @@ class Map extends React.Component {
             width: 56,
             padding: 15,
             borderRadius: 4,
-            backgroundColor: "rgb(124, 184, 121)",
+            backgroundColor: this.props.mapAnimationPlayPauseButton === "Pause" ? "rgb(228, 153, 56)" : "rgb(124, 184, 121)",
             fontWeight: 700,
             color: "white"
           }}
@@ -528,20 +528,30 @@ class Map extends React.Component {
     // leftWindow --- rightWindow ------------------------------- end
     // 2011.4 ------- 2011.6 ------------------------------------ 2015.4
 
+    if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};} /* centralize creation of this if we need it anywhere else */
+
     /* the animation increment (and the window range) is based upon the total range of the dataset, not the selected timeslice */
     const totalDatasetRange = calendarToNumeric(this.props.absoluteDateMax) - calendarToNumeric(this.props.absoluteDateMin); // years in the animation
     const animationIncrement = (animationTick * totalDatasetRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
     const windowRange = animationWindowWidth * totalDatasetRange;
+    const dateMinNumeric = calendarToNumeric(this.props.dateMin);
+    const dateMaxNumeric = calendarToNumeric(this.props.dateMax);
 
-    /* start & end points based on the current selection */
-    const startPoint = calendarToNumeric(this.props.dateMin);
-    let leftWindow = startPoint;
-    const endPoint = calendarToNumeric(this.props.dateMax);
-    let rightWindow = leftWindow + windowRange;
-
-    if (!window.NEXTSTRAIN) {
-      window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
+    /* the animation can resume, i.e. the start & end bounds have been set, and we continue advancing towards them,
+    or the animation starts afresh and sets the bounds as the current time slice.
+    We resume if the current time slice < 2 * windowRange (and the bounds were set)
+    if the time slice < 2 * windowRange (i.e. a small amount) and the bounds are NOT set, then set the upper bound to the max of the dataset */
+    if ((dateMaxNumeric - dateMinNumeric) < 2 * windowRange) {
+      if (!(window.NEXTSTRAIN.animationStartPoint && window.NEXTSTRAIN.animationEndPoint)) {
+        window.NEXTSTRAIN.animationStartPoint = dateMinNumeric;
+        window.NEXTSTRAIN.animationEndPoint = calendarToNumeric(this.props.absoluteDateMax);
+      }
+    } else {
+      window.NEXTSTRAIN.animationStartPoint = dateMinNumeric;
+      window.NEXTSTRAIN.animationEndPoint = dateMaxNumeric;
     }
+    let leftWindow = dateMinNumeric;
+    let rightWindow = leftWindow + windowRange;
 
     /* we should setState({reference}) so that it's not possible to create multiple */
 
@@ -560,20 +570,27 @@ class Map extends React.Component {
       rightWindow += animationIncrement;
 
       /* what happens when the animation's over!?! */
-      if (rightWindow >= endPoint) {
+      if (rightWindow >= window.NEXTSTRAIN.animationEndPoint) {
         if (this.props.mapAnimationShouldLoop) {
           /* if we are looping, just reset the window */
-          leftWindow = startPoint;
+          leftWindow = window.NEXTSTRAIN.animationStartPoint;
           rightWindow = leftWindow + windowRange;
         } else {
           /* trash the timeout & reset the timeframe to that when the animation was started */
           clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
           window.NEXTSTRAIN.mapAnimationLoop = null;
-          this.props.dispatch(changeDateFilter({newMin: numericToCalendar(startPoint), newMax: numericToCalendar(endPoint), quickdraw: false}));
+          this.props.dispatch(changeDateFilter({
+            newMin: numericToCalendar(window.NEXTSTRAIN.animationStartPoint),
+            newMax: numericToCalendar(window.NEXTSTRAIN.animationEndPoint),
+            quickdraw: false
+          }));
           this.props.dispatch({
             type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
             data: "Play"
           });
+          /* also trash the start/end bounds, as the animation has finished of its own accord */
+          window.NEXTSTRAIN.animationStartPoint = undefined;
+          window.NEXTSTRAIN.animationEndPoint = undefined;
         }
       }
     }, animationTick);
