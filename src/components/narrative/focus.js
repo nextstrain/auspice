@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import queryString from "query-string";
 import { changePageQuery } from "../../actions/navigation";
 import { Timeline } from "./extras";
+import ReactDOM from "react-dom";
 
 @connect()
 export class Focus extends React.Component { // eslint-disable-line
@@ -31,6 +32,7 @@ export class Focus extends React.Component { // eslint-disable-line
       () => {
         this.setState({timeoutRef: null, __html: this.props.blockHTML, style: {opacity: 1}});
         this.props.dispatch(changePageQuery({query: queryString.parse(nextProps.url.split('?')[1]), push: true}));
+        ReactDOM.findDOMNode(this).scrollTop = 0;
       },
       this.props.delay
     );
@@ -47,7 +49,8 @@ export class Focus extends React.Component { // eslint-disable-line
         padding: "0px",
         margin: `${margin}px`,
         borderTop: "thin solid #AAA",
-        borderBottom: "thin solid #AAA"
+        borderBottom: "thin solid #AAA",
+        overflow: "auto"
       }}
       >
         <div style={{fontSize: 26}}>
