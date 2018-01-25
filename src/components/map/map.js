@@ -7,7 +7,7 @@ import _max from "lodash/max";
 import { select } from "d3-selection";
 import leafletImage from "leaflet-image";
 import Card from "../framework/card";
-import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
+import { numericToCalendar } from "../../util/dateHelpers";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
 import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint, enableAnimationPerfTesting } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
@@ -28,6 +28,8 @@ import { incommingMapPNG } from "../download/helperFunctions";
     // datasetGuid: state.tree.datasetGuid,
     absoluteDateMin: state.controls.absoluteDateMin,
     absoluteDateMax: state.controls.absoluteDateMax,
+    absoluteDateMinNumeric: state.controls.absoluteDateMinNumeric,
+    absoluteDateMaxNumeric: state.controls.absoluteDateMaxNumeric,
     treeVersion: state.tree.version,
     treeLoaded: state.tree.loaded,
     nodes: state.tree.nodes,
@@ -44,8 +46,8 @@ import { incommingMapPNG } from "../download/helperFunctions";
     mapAnimationShouldLoop: state.controls.mapAnimationShouldLoop,
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
     mapTriplicate: state.controls.mapTriplicate,
-    dateMin: state.controls.dateMin,
-    dateMax: state.controls.dateMax,
+    dateMinNumeric: state.controls.dateMinNumeric,
+    dateMaxNumeric: state.controls.dateMaxNumeric,
     panelLayout: state.controls.panelLayout
   };
 })
@@ -223,8 +225,8 @@ class Map extends React.Component {
         this.state.d3DOMNode,
         this.state.map,
         this.props.nodes,
-        calendarToNumeric(this.props.dateMin),
-        calendarToNumeric(this.props.dateMax)
+        this.props.dateMinNumeric,
+        this.props.dateMaxNumeric
       );
 
       /* Set up leaflet events */
@@ -296,8 +298,8 @@ class Map extends React.Component {
         newDemes,
         newTransmissions,
         this.state.d3elems,
-        calendarToNumeric(this.props.dateMin),
-        calendarToNumeric(this.props.dateMax)
+        this.props.dateMinNumeric,
+        this.props.dateMaxNumeric
       );
 
 
@@ -359,8 +361,8 @@ class Map extends React.Component {
         this.state.d3elems,
         this.state.map,
         nextProps.nodes,
-        calendarToNumeric(nextProps.dateMin),
-        calendarToNumeric(nextProps.dateMax)
+        nextProps.dateMinNumeric,
+        nextProps.dateMaxNumeric
       );
 
       this.setState({
@@ -532,26 +534,24 @@ class Map extends React.Component {
     if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};} /* centralize creation of this if we need it anywhere else */
 
     /* the animation increment (and the window range) is based upon the total range of the dataset, not the selected timeslice */
-    const totalDatasetRange = calendarToNumeric(this.props.absoluteDateMax) - calendarToNumeric(this.props.absoluteDateMin); // years in the animation
+    const totalDatasetRange = this.props.absoluteDateMaxNumeric - this.props.absoluteDateMinNumeric; // years in the animation
     const animationIncrement = (animationTick * totalDatasetRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
     const windowRange = animationWindowWidth * totalDatasetRange;
-    const dateMinNumeric = calendarToNumeric(this.props.dateMin);
-    const dateMaxNumeric = calendarToNumeric(this.props.dateMax);
 
     /* the animation can resume, i.e. the start & end bounds have been set, and we continue advancing towards them,
     or the animation starts afresh and sets the bounds as the current time slice.
     We resume if the current time slice < 2 * windowRange (and the bounds were set)
     if the time slice < 2 * windowRange (i.e. a small amount) and the bounds are NOT set, then set the upper bound to the max of the dataset */
-    if ((dateMaxNumeric - dateMinNumeric) < 2 * windowRange) {
+    if ((this.props.dateMaxNumeric - this.props.dateMinNumeric) < 2 * windowRange) {
       if (!(window.NEXTSTRAIN.animationStartPoint && window.NEXTSTRAIN.animationEndPoint)) {
-        window.NEXTSTRAIN.animationStartPoint = dateMinNumeric;
-        window.NEXTSTRAIN.animationEndPoint = calendarToNumeric(this.props.absoluteDateMax);
+        window.NEXTSTRAIN.animationStartPoint = this.props.dateMinNumeric;
+        window.NEXTSTRAIN.animationEndPoint = this.props.absoluteDateMaxNumeric;
       }
     } else {
-      window.NEXTSTRAIN.animationStartPoint = dateMinNumeric;
-      window.NEXTSTRAIN.animationEndPoint = dateMaxNumeric;
+      window.NEXTSTRAIN.animationStartPoint = this.props.dateMinNumeric;
+      window.NEXTSTRAIN.animationEndPoint = this.props.dateMaxNumeric;
     }
-    let leftWindow = dateMinNumeric;
+    let leftWindow = this.props.dateMinNumeric;
     let rightWindow = leftWindow + windowRange;
 
     /* we should setState({reference}) so that it's not possible to create multiple */

@@ -1,31 +1,28 @@
 import React from "react";
 import { connect } from "react-redux";
-import { calendarToNumeric } from "../../util/dateHelpers";
 
 @connect((state) => {
   return {
-    dateMin: state.controls.dateMin,
-    dateMax: state.controls.dateMax,
+    dateMinNumeric: state.controls.dateMinNumeric,
+    dateMaxNumeric: state.controls.dateMaxNumeric,
     absoluteDateMin: state.controls.absoluteDateMin,
-    absoluteDateMax: state.controls.absoluteDateMax
+    absoluteDateMax: state.controls.absoluteDateMax,
+    absoluteDateMinNumeric: state.controls.absoluteDateMinNumeric,
+    absoluteDateMaxNumeric: state.controls.absoluteDateMaxNumeric
   };
 })
 export class Timeline extends React.Component { // eslint-disable-line
 
   render() {
-    /* to do: we use these so much that they should be in redux state */
-    const absoluteDateMinNumeric = calendarToNumeric(this.props.absoluteDateMin);
-    const absoluteDateMaxNumeric = calendarToNumeric(this.props.absoluteDateMax);
-    const dateMinNumeric = calendarToNumeric(this.props.dateMin);
-    const dateMaxNumeric = calendarToNumeric(this.props.dateMax);
+    const period = this.props.absoluteDateMaxNumeric - this.props.absoluteDateMinNumeric;
     return (
       <div style={{minWidth: this.props.w, fontSize: 12, lineHeight: 1}}>
         <svg width="100%" height="10">
           <line x1="0" y1="5" x2={this.props.w} y2="5" stroke="#AAA" strokeWidth="0.5"/>
           <rect
-            x={(dateMinNumeric - absoluteDateMinNumeric) / (absoluteDateMaxNumeric - absoluteDateMinNumeric) * this.props.w}
+            x={(this.props.dateMinNumeric - this.props.absoluteDateMinNumeric) / period * this.props.w}
             y="0"
-            width={(dateMaxNumeric - dateMinNumeric) / (absoluteDateMaxNumeric - absoluteDateMinNumeric) * this.props.w}
+            width={(this.props.dateMaxNumeric - this.props.dateMinNumeric) / period * this.props.w}
             height="10"
             fill="#AAA"
           />

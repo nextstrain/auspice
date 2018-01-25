@@ -5,6 +5,8 @@ import { calcVisibility,
   calcBranchThickness } from "../components/tree/treeHelpers";
 import * as types from "./types";
 import { updateEntropyVisibility } from "./entropy";
+import { calendarToNumeric } from "../util/dateHelpers";
+
 
 const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
   const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
@@ -36,7 +38,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
     const { tree, controls } = getState();
     if (!tree.nodes) {return;}
     const validIdxRoot = idxOfInViewRootNode !== undefined ? idxOfInViewRootNode : tree.idxOfInViewRootNode;
-    const data = calculateVisiblityAndBranchThickness(tree, controls, {dateMin: controls.dateMin, dateMax: controls.dateMax}, {tipSelectedIdx, validIdxRoot});
+    const data = calculateVisiblityAndBranchThickness(tree, controls, {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}, {tipSelectedIdx, validIdxRoot});
     dispatch({
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
       visibility: data.visibility,
@@ -63,8 +65,8 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
     const { tree, controls } = getState();
     if (!tree.nodes) {return;}
     const dates = {
-      dateMin: newMin ? newMin : controls.dateMin,
-      dateMax: newMax ? newMax : controls.dateMax
+      dateMinNumeric: newMin ? calendarToNumeric(newMin): controls.dateMinNumeric,
+      dateMaxNumeric: newMax ? calendarToNumeric(newMax): controls.dateMaxNumeric
     };
     const data = calculateVisiblityAndBranchThickness(tree, controls, dates);
     dispatch({
@@ -72,6 +74,8 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       quickdraw,
       dateMin: newMin ? newMin : controls.dateMin,
       dateMax: newMax ? newMax : controls.dateMax,
+      dateMinNumeric: dates.dateMinNumeric,
+      dateMaxNumeric: dates.dateMaxNumeric,
       visibility: data.visibility,
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
