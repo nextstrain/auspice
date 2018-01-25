@@ -102,6 +102,7 @@ class Map extends React.Component {
     this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(this.props);
+    if (this.props.mapAnimationPlayPauseButton === "Pause") {this.animateMap();}
   }
   componentWillReceiveProps(nextProps) {
     this.maybeComputeResponsive(nextProps);
