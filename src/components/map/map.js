@@ -41,6 +41,7 @@ import { incommingMapPNG } from "../download/helperFunctions";
     geoResolution: state.controls.geoResolution,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative,
+    mapAnimationShouldLoop: state.controls.mapAnimationShouldLoop,
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
     mapTriplicate: state.controls.mapTriplicate,
     dateMin: state.controls.dateMin,
@@ -523,19 +524,19 @@ class Map extends React.Component {
     this.resetAnimation();
   }
   animateMap() {
-    /* By default, start at absoluteDateMin; allow overriding via augur default export */
-
     // dates are num date format
     // leftWindow --- rightWindow ------------------------------- end
     // 2011.4 ------- 2011.6 ------------------------------------ 2015.4
 
-    const start = calendarToNumeric(this.props.absoluteDateMin);
-    let leftWindow = calendarToNumeric(this.props.dateMin);
-    const end = calendarToNumeric(this.props.absoluteDateMax);
-    const totalRange = end - start; // years in the animation
+    /* the animation increment (and the window range) is based upon the total range of the dataset, not the selected timeslice */
+    const totalDatasetRange = calendarToNumeric(this.props.absoluteDateMax) - calendarToNumeric(this.props.absoluteDateMin); // years in the animation
+    const animationIncrement = (animationTick * totalDatasetRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
+    const windowRange = animationWindowWidth * totalDatasetRange;
 
-    const animationIncrement = (animationTick * totalRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
-    const windowRange = animationWindowWidth * totalRange;
+    /* start & end points based on the current selection */
+    const startPoint = calendarToNumeric(this.props.dateMin);
+    let leftWindow = startPoint;
+    const endPoint = calendarToNumeric(this.props.dateMax);
     let rightWindow = leftWindow + windowRange;
 
     if (!window.NEXTSTRAIN) {
@@ -552,19 +553,28 @@ class Map extends React.Component {
       /* first pass sets the timer to absolute min and absolute min + windowRange because they reference above initial time window */
       this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max, quickdraw: true}));
 
+      /* bump the window along */
       if (!this.props.mapAnimationCumulative) {
         leftWindow += animationIncrement;
       }
       rightWindow += animationIncrement;
 
-      if (rightWindow >= end) {
-        clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-        window.NEXTSTRAIN.mapAnimationLoop = null;
-        this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
-        this.props.dispatch({
-          type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
-          data: "Play"
-        });
+      /* what happens when the animation's over!?! */
+      if (rightWindow >= endPoint) {
+        if (this.props.mapAnimationShouldLoop) {
+          /* if we are looping, just reset the window */
+          leftWindow = startPoint;
+          rightWindow = leftWindow + windowRange;
+        } else {
+          /* trash the timeout & reset the timeframe to that when the animation was started */
+          clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
+          window.NEXTSTRAIN.mapAnimationLoop = null;
+          this.props.dispatch(changeDateFilter({newMin: numericToCalendar(startPoint), newMax: numericToCalendar(endPoint), quickdraw: false}));
+          this.props.dispatch({
+            type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+            data: "Play"
+          });
+        }
       }
     }, animationTick);
 

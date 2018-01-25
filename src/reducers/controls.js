@@ -251,6 +251,7 @@ const getDefaultState = () => {
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
+    mapAnimationShouldLoop: false,
     mapAnimationPlayPauseButton: "Play",
     panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full"
   };
@@ -355,6 +356,10 @@ const Controls = (state = getDefaultState(), action) => {
     case types.CHANGE_ANIMATION_CUMULATIVE:
       return Object.assign({}, state, {
         mapAnimationCumulative: action.data
+      });
+    case types.CHANGE_ANIMATION_LOOP:
+      return Object.assign({}, state, {
+        mapAnimationShouldLoop: action.data
       });
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
       return Object.assign({}, state, {
