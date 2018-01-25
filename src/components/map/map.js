@@ -542,7 +542,7 @@ class Map extends React.Component {
     or the animation starts afresh and sets the bounds as the current time slice.
     We resume if the current time slice < 2 * windowRange (and the bounds were set)
     if the time slice < 2 * windowRange (i.e. a small amount) and the bounds are NOT set, then set the upper bound to the max of the dataset */
-    if ((this.props.dateMaxNumeric - this.props.dateMinNumeric) < 2 * windowRange) {
+    if ((this.props.dateMaxNumeric - this.props.dateMinNumeric) < 1.3 * windowRange) {
       if (!(window.NEXTSTRAIN.animationStartPoint && window.NEXTSTRAIN.animationEndPoint)) {
         window.NEXTSTRAIN.animationStartPoint = this.props.dateMinNumeric;
         window.NEXTSTRAIN.animationEndPoint = this.props.absoluteDateMaxNumeric;
