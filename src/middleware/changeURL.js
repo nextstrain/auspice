@@ -1,5 +1,6 @@
 import queryString from "query-string";
 import * as types from "../actions/types";
+import { numericToCalendar } from "../util/dateHelpers";
 
 /* What is this middleware?
 This middleware acts to keep the app state and the URL query state in sync by intercepting actions
@@ -60,8 +61,17 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
       if (action.data === "Play") { // animation stopping - restore dates in URL
+        query.animate = undefined;
         query.dmin = state.controls.dateMin === state.controls.absoluteDateMin ? undefined : state.controls.dateMin;
         query.dmax = state.controls.dateMax === state.controls.absoluteDateMax ? undefined : state.controls.dateMax;
+      } else {
+        /* animation started - format: start bound, end bound, loop 0|1, cumulative 0|1, speed in ms */
+        const a = numericToCalendar(window.NEXTSTRAIN.animationStartPoint);
+        const b = numericToCalendar(window.NEXTSTRAIN.animationEndPoint);
+        const c = state.controls.mapAnimationShouldLoop ? "1" : "0";
+        const d = state.controls.mapAnimationCumulative ? "1" : "0";
+        const e = state.controls.mapAnimationDurationInMilliseconds;
+        query.animate = `${a},${b},${c},${d},${e}`;
       }
       break;
     case types.URL_QUERY_CHANGE:

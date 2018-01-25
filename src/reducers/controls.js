@@ -1,4 +1,4 @@
-import { numericToCalendar, currentNumDate, currentCalDate } from "../util/dateHelpers";
+import { numericToCalendar, calendarToNumeric, currentNumDate, currentCalDate } from "../util/dateHelpers";
 import { flattenTree } from "../components/tree/treeHelpers";
 import { defaultGeoResolution,
   defaultColorBy,
@@ -63,6 +63,19 @@ const modifyStateViaURLQuery = (state, query) => {
   }
   for (const filterKey of Object.keys(query).filter((c) => c.startsWith('f_'))) {
     state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',');
+  }
+  if (query.animate) {
+    const params = query.animate.split(',');
+    // console.log("start animation!", params);
+    if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
+    window.NEXTSTRAIN.animationStartPoint = calendarToNumeric(params[0]);
+    window.NEXTSTRAIN.animationEndPoint = calendarToNumeric(params[1]);
+    state.dateMin = params[0];
+    state.dateMax = params[1];
+    state.mapAnimationShouldLoop = params[2] === "1";
+    state.mapAnimationCumulative = params[3] === "1";
+    state.mapAnimationDurationInMilliseconds = parseInt(params[4], 10);
+    state.mapAnimationPlayPauseButton = "Pause";
   }
   return state;
 };
@@ -251,6 +264,7 @@ const getDefaultState = () => {
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
+    mapAnimationShouldLoop: false,
     mapAnimationPlayPauseButton: "Play",
     panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full"
   };
@@ -355,6 +369,10 @@ const Controls = (state = getDefaultState(), action) => {
     case types.CHANGE_ANIMATION_CUMULATIVE:
       return Object.assign({}, state, {
         mapAnimationCumulative: action.data
+      });
+    case types.CHANGE_ANIMATION_LOOP:
+      return Object.assign({}, state, {
+        mapAnimationShouldLoop: action.data
       });
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
       return Object.assign({}, state, {

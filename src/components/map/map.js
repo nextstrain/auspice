@@ -41,6 +41,7 @@ import { incommingMapPNG } from "../download/helperFunctions";
     geoResolution: state.controls.geoResolution,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative,
+    mapAnimationShouldLoop: state.controls.mapAnimationShouldLoop,
     mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
     mapTriplicate: state.controls.mapTriplicate,
     dateMin: state.controls.dateMin,
@@ -101,6 +102,7 @@ class Map extends React.Component {
     this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(this.props);
+    if (this.props.mapAnimationPlayPauseButton === "Pause") {this.animateMap();}
   }
   componentWillReceiveProps(nextProps) {
     this.maybeComputeResponsive(nextProps);
@@ -441,7 +443,7 @@ class Map extends React.Component {
             width: 56,
             padding: 15,
             borderRadius: 4,
-            backgroundColor: "rgb(124, 184, 121)",
+            backgroundColor: this.props.mapAnimationPlayPauseButton === "Pause" ? "rgb(228, 153, 56)" : "rgb(124, 184, 121)",
             fontWeight: 700,
             color: "white"
           }}
@@ -493,11 +495,11 @@ class Map extends React.Component {
     ANIMATE MAP (AND THAT LINE ON TREE)
     **************************************** */
     if (this.props.mapAnimationPlayPauseButton === "Play") {
+      this.animateMap();
       this.props.dispatch({
         type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
         data: "Pause"
       });
-      this.animateMap();
     } else {
       if (enableAnimationPerfTesting) { window.Perf.resetCount(); }
       clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
@@ -523,24 +525,34 @@ class Map extends React.Component {
     this.resetAnimation();
   }
   animateMap() {
-    /* By default, start at absoluteDateMin; allow overriding via augur default export */
-
     // dates are num date format
     // leftWindow --- rightWindow ------------------------------- end
     // 2011.4 ------- 2011.6 ------------------------------------ 2015.4
 
-    const start = calendarToNumeric(this.props.absoluteDateMin);
-    let leftWindow = calendarToNumeric(this.props.dateMin);
-    const end = calendarToNumeric(this.props.absoluteDateMax);
-    const totalRange = end - start; // years in the animation
+    if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};} /* centralize creation of this if we need it anywhere else */
 
-    const animationIncrement = (animationTick * totalRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
-    const windowRange = animationWindowWidth * totalRange;
-    let rightWindow = leftWindow + windowRange;
+    /* the animation increment (and the window range) is based upon the total range of the dataset, not the selected timeslice */
+    const totalDatasetRange = calendarToNumeric(this.props.absoluteDateMax) - calendarToNumeric(this.props.absoluteDateMin); // years in the animation
+    const animationIncrement = (animationTick * totalDatasetRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
+    const windowRange = animationWindowWidth * totalDatasetRange;
+    const dateMinNumeric = calendarToNumeric(this.props.dateMin);
+    const dateMaxNumeric = calendarToNumeric(this.props.dateMax);
 
-    if (!window.NEXTSTRAIN) {
-      window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
+    /* the animation can resume, i.e. the start & end bounds have been set, and we continue advancing towards them,
+    or the animation starts afresh and sets the bounds as the current time slice.
+    We resume if the current time slice < 2 * windowRange (and the bounds were set)
+    if the time slice < 2 * windowRange (i.e. a small amount) and the bounds are NOT set, then set the upper bound to the max of the dataset */
+    if ((dateMaxNumeric - dateMinNumeric) < 2 * windowRange) {
+      if (!(window.NEXTSTRAIN.animationStartPoint && window.NEXTSTRAIN.animationEndPoint)) {
+        window.NEXTSTRAIN.animationStartPoint = dateMinNumeric;
+        window.NEXTSTRAIN.animationEndPoint = calendarToNumeric(this.props.absoluteDateMax);
+      }
+    } else {
+      window.NEXTSTRAIN.animationStartPoint = dateMinNumeric;
+      window.NEXTSTRAIN.animationEndPoint = dateMaxNumeric;
     }
+    let leftWindow = dateMinNumeric;
+    let rightWindow = leftWindow + windowRange;
 
     /* we should setState({reference}) so that it's not possible to create multiple */
 
@@ -552,19 +564,35 @@ class Map extends React.Component {
       /* first pass sets the timer to absolute min and absolute min + windowRange because they reference above initial time window */
       this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max, quickdraw: true}));
 
+      /* bump the window along */
       if (!this.props.mapAnimationCumulative) {
         leftWindow += animationIncrement;
       }
       rightWindow += animationIncrement;
 
-      if (rightWindow >= end) {
-        clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-        window.NEXTSTRAIN.mapAnimationLoop = null;
-        this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
-        this.props.dispatch({
-          type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
-          data: "Play"
-        });
+      /* what happens when the animation's over!?! */
+      if (rightWindow >= window.NEXTSTRAIN.animationEndPoint) {
+        if (this.props.mapAnimationShouldLoop) {
+          /* if we are looping, just reset the window */
+          leftWindow = window.NEXTSTRAIN.animationStartPoint;
+          rightWindow = leftWindow + windowRange;
+        } else {
+          /* trash the timeout & reset the timeframe to that when the animation was started */
+          clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
+          window.NEXTSTRAIN.mapAnimationLoop = null;
+          this.props.dispatch(changeDateFilter({
+            newMin: numericToCalendar(window.NEXTSTRAIN.animationStartPoint),
+            newMax: numericToCalendar(window.NEXTSTRAIN.animationEndPoint),
+            quickdraw: false
+          }));
+          this.props.dispatch({
+            type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
+            data: "Play"
+          });
+          /* also trash the start/end bounds, as the animation has finished of its own accord */
+          window.NEXTSTRAIN.animationStartPoint = undefined;
+          window.NEXTSTRAIN.animationEndPoint = undefined;
+        }
       }
     }, animationTick);
 

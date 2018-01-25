@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import SelectLabel from "../framework/select-label";
-import { CHANGE_ANIMATION_TIME, CHANGE_ANIMATION_CUMULATIVE } from "../../actions/types";
+import { CHANGE_ANIMATION_TIME, CHANGE_ANIMATION_CUMULATIVE, CHANGE_ANIMATION_LOOP } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import Toggle from "./toggle";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
@@ -12,7 +12,8 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
     // metadata: state.metadata,
     mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
-    mapAnimationCumulative: state.controls.mapAnimationCumulative
+    mapAnimationCumulative: state.controls.mapAnimationCumulative,
+    mapAnimationShouldLoop: state.controls.mapAnimationShouldLoop
   };
 })
 class MapAnimationControls extends React.Component {
@@ -83,6 +84,15 @@ class MapAnimationControls extends React.Component {
           Fast
         </button>
       </div>
+        <Toggle
+          display
+          on={this.props.mapAnimationShouldLoop}
+          callback={() => {
+            this.props.dispatch({ type: CHANGE_ANIMATION_LOOP, data: !this.props.mapAnimationShouldLoop });
+          }}
+          label="Loop animation"
+        />
+        <br/>
 
       <Toggle
         display={true}
@@ -93,6 +103,7 @@ class MapAnimationControls extends React.Component {
         }}
         label="Animate cumulative history"
       />
+
       </div>
     );
   }
