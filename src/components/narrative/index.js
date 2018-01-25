@@ -64,7 +64,7 @@ class Narrative extends React.Component {
           width={width}
           title={titles[this.state.focusIdx]}
           url={this.props.blocks[this.state.focusIdx].url}
-          content={{__html: this.props.blocks[this.state.focusIdx].__html}}
+          blockHTML={this.props.blocks[this.state.focusIdx].__html}
         />
         <Gutter
           focusIdx={this.state.focusIdx}

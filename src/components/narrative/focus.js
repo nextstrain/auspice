@@ -8,11 +8,14 @@ export class Focus extends React.Component { // eslint-disable-line
   constructor(props) {
     super(props);
     this.state = {
-      timeoutRef: null
+      timeoutRef: null,
+      __html: props.blockHTML,
+      style: {opacity: 1},
+      title: props.title
     };
   }
   static defaultProps = {
-    delay: 500
+    delay: 300
   }
   componentWillReceiveProps(nextProps) {
     if (this.props.url === nextProps.url) {
@@ -26,12 +29,13 @@ export class Focus extends React.Component { // eslint-disable-line
     }
     const ref = setTimeout(
       () => {
+        console.log(this.props.content)
+        this.setState({timeoutRef: null, __html: this.props.blockHTML, title: this.props.title, style: {opacity: 1}});
         this.props.dispatch(changePageQuery({query: queryString.parse(nextProps.url.split('?')[1]), push: true}));
-        this.setState({timeoutRef: null});
       },
       this.props.delay
     );
-    this.setState({timeoutRef: ref});
+    this.setState({timeoutRef: ref, style: {opacity: 0}});
   }
 
   render() {
@@ -47,12 +51,12 @@ export class Focus extends React.Component { // eslint-disable-line
         borderBottom: "thin solid #AAA"
       }}
       >
-        <div style={{fontSize: 26}}>
-          {this.props.title}
+        <div style={{...this.state.style, transition: "opacity 0.3s ease", fontSize: 26}}>
+          {this.state.title}
         </div>
         <div
-          dangerouslySetInnerHTML={this.props.content}
-          style={{transition: "all 0.5s linear"}}
+          dangerouslySetInnerHTML={this.state}
+          style={{...this.state.style, transition: "opacity 0.3s ease"}}
         />
       </div>
     );
