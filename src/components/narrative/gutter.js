@@ -64,7 +64,7 @@ export class Gutter extends React.Component { // eslint-disable-line
           <div
             key={t}
             onClick={() => this.props.callbackGoto(i)}
-            style={{transition: "all .3s ease", fontSize: vals[i][0], height: vals[i][1], margin: 0, whiteSpace: "nowrap", cursor: "pointer"}}
+            style={{transition: "all .3s ease", fontSize: vals[i][0], height: vals[i][1], margin: 0, whiteSpace: "nowrap", textOverflow: "ellipsis", overflow: "hidden", cursor: "pointer"}}
           >
             {this.props.visibility[i] === "hidden" ? '' : t}
           </div>
@@ -75,7 +75,6 @@ export class Gutter extends React.Component { // eslint-disable-line
   render() {
     return (
       <div
-        className={`fade${this.props.pos}`}
         style={{
           minWidth: `${this.props.width}px`,
           minHeight: `${this.props.height}px`,

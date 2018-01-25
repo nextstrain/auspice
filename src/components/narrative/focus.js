@@ -35,18 +35,25 @@ export class Focus extends React.Component { // eslint-disable-line
   }
 
   render() {
+    const margin = 20;
     return (
       <div style={{
-        minWidth: `${this.props.width}px`,
-        minHeight: `${this.props.height}px`,
-        maxHeight: `${this.props.height}px`,
-        padding: "20px",
-        margin: "0px"}}
+        minWidth: `${this.props.width - 2 * margin}px`,
+        minHeight: `${this.props.height - 2 * margin}px`,
+        maxHeight: `${this.props.height - 2 * margin}px`,
+        padding: "0px",
+        margin: `${margin}px`,
+        borderTop: "thin solid #AAA",
+        borderBottom: "thin solid #AAA"
+      }}
       >
         <div style={{fontSize: 26}}>
           {this.props.title}
         </div>
-        <div dangerouslySetInnerHTML={this.props.content}/>
+        <div
+          dangerouslySetInnerHTML={this.props.content}
+          style={{transition: "all 0.5s linear"}}
+        />
       </div>
     );
   }

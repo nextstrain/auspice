@@ -130,10 +130,12 @@ class App extends React.Component {
         docked={this.state.narrativeSidebarDocked}
         onSetOpen={(a) => {this.setState({narrativeSidebarOpen: a});}}
         sidebarClassName={"sidebar"}
+        shadow={false}
         styles={{
           sidebar: {
-            backgroundColor: sidebarColor,
-            width: `${narrativeWidth}px`
+            backgroundColor: "rgb(255, 255, 255)",
+            width: `${narrativeWidth}px`,
+            boxShadow: "-2px -2px 4px -2px rgba(0, 0, 0, 0.5) inset"
           }
         }}
       >
