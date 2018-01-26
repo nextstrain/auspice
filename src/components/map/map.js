@@ -111,6 +111,7 @@ class Map extends React.Component {
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(nextProps);
+    if (nextProps.mapAnimationPlayPauseButton === "Pause" && this.props.mapAnimationPlayPauseButton === "Play") {this.animateMap();}
   }
   componentDidUpdate(prevProps) {
     if (this.props.nodes === null) { return; }
@@ -558,6 +559,12 @@ class Map extends React.Component {
 
     window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
       if (enableAnimationPerfTesting) { window.Perf.bump(); }
+      /* to prevent out-of-sync bugs, this is helpful */
+      if (this.props.mapAnimationPlayPauseButton === "Play") {
+        clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
+        window.NEXTSTRAIN.mapAnimationLoop = null;
+        return;
+      }
       const newWindow = {min: numericToCalendar(leftWindow),
         max: numericToCalendar(rightWindow)};
 

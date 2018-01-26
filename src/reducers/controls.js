@@ -80,6 +80,8 @@ const modifyStateViaURLQuery = (state, query) => {
     state.mapAnimationCumulative = params[3] === "1";
     state.mapAnimationDurationInMilliseconds = parseInt(params[4], 10);
     state.mapAnimationPlayPauseButton = "Pause";
+  } else {
+    state.mapAnimationPlayPauseButton = "Play";
   }
   return state;
 };
