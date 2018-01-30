@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { narrativeWidth } from "../../util/globals";
+import { narrativeWidth, controlsWidth } from "../../util/globals";
 import { Gutter } from "./gutter";
 import { Focus } from "./focus";
 
@@ -38,7 +38,8 @@ class Narrative extends React.Component {
       focus: this.props.browserHeight * focusFraction,
       gutter: this.props.browserHeight * (1 - focusFraction) / 2
     };
-    const width = narrativeWidth;
+    // const width = narrativeWidth;
+    const width = controlsWidth + 40; /* controls sidebar has 20px L & R padding */
     const numBlocks = this.props.blocks.length;
     const titles = this.props.blocks.map((d, i) => `${i + 1} ${d.title}`);
     const visibility = {previous: [], subsequent: []};
@@ -48,7 +49,7 @@ class Narrative extends React.Component {
     }
 
     return (
-      <div className={"static narrative"}>
+      <div className={"static narrative"} style={{maxWidth: width, minWidth: width}}>
         <Gutter
           focusIdx={this.state.focusIdx}
           height={heights.gutter}

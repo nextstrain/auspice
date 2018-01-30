@@ -28,7 +28,7 @@ const nextstrainLogo = require("../images/nextstrain-logo-small.png");
   datapath: state.datasets.datapath,
   metadata: state.metadata,
   treeLoaded: state.tree.loaded,
-  narrativeLoaded: state.narrative.loaded,
+  displayNarrative: state.narrative.display,
   browserDimensions: state.browserDimensions.browserDimensions
 }))
 class App extends React.Component {
@@ -45,19 +45,12 @@ class App extends React.Component {
     mql.addListener(() => this.setState({
       sidebarDocked: this.state.mql.matches
     }));
-    this.state = {
-      mql,
-      sidebarDocked: mql.matches,
-      sidebarOpen: false,
-      narrativeSidebarDocked: false,
-      narrativeSidebarOpen: false
-    };
+    this.state = {mql, sidebarDocked: mql.matches, sidebarOpen: false};
     analyticsNewPage();
   }
   static propTypes = {
     dispatch: PropTypes.func.isRequired
   }
-
   componentWillMount() {
     if (this.props.datapath) { /* datapath (pathname) only appears after manifest JSON has arrived */
       this.props.dispatch(loadJSONs());
@@ -71,83 +64,17 @@ class App extends React.Component {
     }, false);
   }
   componentDidUpdate(prevProps) {
-    if (
-      (prevProps.datapath !== this.props.datapath)
-      /* before we checked if the datapath (pathname) was different to the URL
-      to detrect browser back/forward. But we now need a different approach */
-    ) {
+    if (prevProps.datapath !== this.props.datapath) {
       this.props.dispatch(loadJSONs());
     }
   }
-  componentWillReceiveProps(nextProps) {
-    if (nextProps.narrativeLoaded !== this.props.narrativeLoaded) {
-      this.setState({
-        narrativeSidebarDocked: nextProps.narrativeLoaded,
-        sidebarOpen: false,
-        sidebarDocked: false
-      });
-    }
-  }
-  renderPanels() {
-    if (!this.props.treeLoaded || !this.props.metadata.loaded) {
-      return (
-        <img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${this.props.browserDimensions.height / 2 - 100}px`}}/>
-      );
-    }
+  render() {
     const padding = {
-      left: (this.state.sidebarOpen || this.state.sidebarDocked ? controlsWidth : 0) + (this.state.narrativeSidebarOpen || this.state.narrativeSidebarDocked ? narrativeWidth : 0),
+      left: this.state.sidebarOpen || this.state.sidebarDocked ? controlsWidth : 0,
       right: 0,
       top: 0,
       bottom: 0
     };
-    return (
-      <Background>
-        <Info padding={padding} />
-        {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
-          <TreeView padding={padding} />
-        )}
-        {this.props.metadata.panels.indexOf("map") === -1 ? null : (
-          <Map padding={padding} justGotNewDatasetRenderNewMap={false} />
-        )}
-        {this.props.metadata.panels.indexOf("entropy") === -1 ? null : (
-          <Entropy padding={padding} />
-        )}
-        <Footer padding={padding} />
-      </Background>
-    );
-  }
-  renderNarrativeSwitch() {
-    return (
-      <ToggleSidebarTab
-        open={this.state.narrativeSidebarDocked}
-        handler={() => {this.setState({narrativeSidebarDocked: !this.state.narrativeSidebarDocked});}}
-        widthWhenOpen={(this.state.sidebarOpen || this.state.sidebarDocked ? controlsWidth : 0) + narrativeWidth + 20}
-        widthWhenShut={(this.state.sidebarOpen || this.state.sidebarDocked ? controlsWidth : 0) + 40}
-      />
-    );
-  }
-  renderNarrativeAndPanels() {
-    return (
-      <Sidebar
-        sidebar={<Narrative/>}
-        open={this.state.narrativeSidebarOpen}
-        docked={this.state.narrativeSidebarDocked}
-        onSetOpen={(a) => {this.setState({narrativeSidebarOpen: a});}}
-        sidebarClassName={"sidebar"}
-        shadow={false}
-        styles={{
-          sidebar: {
-            backgroundColor: "rgb(255, 255, 255)",
-            width: `${narrativeWidth}px`,
-            boxShadow: "-2px -2px 4px -2px rgba(0, 0, 0, 0.5) inset"
-          }
-        }}
-      >
-        {this.renderPanels()}
-      </Sidebar>
-    );
-  }
-  render() {
     return (
       <g>
         <DownloadModal/>
@@ -157,12 +84,11 @@ class App extends React.Component {
           widthWhenOpen={controlsWidth}
           widthWhenShut={0}
         />
-        {this.props.narrativeLoaded ? this.renderNarrativeSwitch() : null}
         <Sidebar
           sidebar={
             <div>
               <TitleBar minified/>
-              <Controls/>
+              {this.props.displayNarrative ? <Narrative/> : <Controls/>}
             </div>
           }
           open={this.state.sidebarOpen}
@@ -171,7 +97,25 @@ class App extends React.Component {
           sidebarClassName={"sidebar"}
           styles={{sidebar: {backgroundColor: sidebarColor}}}
         >
-          {this.props.narrativeLoaded ? this.renderNarrativeAndPanels() : this.renderPanels()}
+          {
+            (!this.props.treeLoaded || !this.props.metadata.loaded) ?
+              (<img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${this.props.browserDimensions.height / 2 - 100}px`}}/>) :
+              (
+                <Background>
+                  <Info padding={padding} />
+                  {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
+                    <TreeView padding={padding} />
+                  )}
+                  {this.props.metadata.panels.indexOf("map") === -1 ? null : (
+                    <Map padding={padding} justGotNewDatasetRenderNewMap={false} />
+                  )}
+                  {this.props.metadata.panels.indexOf("entropy") === -1 ? null : (
+                    <Entropy padding={padding} />
+                  )}
+                  <Footer padding={padding} />
+                </Background>
+              )
+          }
         </Sidebar>
       </g>
     );
