@@ -1,3 +1,13 @@
+### Animation
+* Animations can now loop! This is selected via a toggle in the sidebar.
+* While animating, the URL displays information which defines the animation (bounds, looping, cumulative, speed). This allows the animation to start automatically by linking to this URL.
+* The code for the animation (i.e. the setInterval code) has been moved out of `Map` and into a separate `AnimationController` component.
+* Animation is stopped & started by examining redux state, rather than with imperative controls.
+
+### misc
+* The narrative machinery has been moved forward, but this functionality is still disabled and not present in production code.
+* The (rather expensive) `calendarToNumeric` calculations have become part of `state.controls` so that components no longer have to calculate them from the string form.
+
 ## version 1.8.0 - 2018/01/18
 
 #### entropy calculated via tree

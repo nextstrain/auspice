@@ -291,7 +291,7 @@ class Info extends React.Component {
             {this.props.s3bucket === "staging" ? (
               <span style={{color: darkGrey}}>{"Currently viewing data from the staging server. "}</span>
             ) : null}
-            {animating ? `Map animation in progress. ` : null}
+            {animating ? `Animation in progress. ` : null}
             {/* part 1 - the summary */}
             {!animating ? summary.map((d, i) =>
               (i + 1 !== summary.length ? <span key={i}>{`${d}, `}</span> : <span key={i}>{`${d}. `}</span>)
