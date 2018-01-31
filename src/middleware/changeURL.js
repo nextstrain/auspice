@@ -1,5 +1,6 @@
 import queryString from "query-string";
 import * as types from "../actions/types";
+import { numericToCalendar } from "../util/dateHelpers";
 
 /* What is this middleware?
 This middleware acts to keep the app state and the URL query state in sync by intercepting actions
@@ -49,7 +50,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
-      if (state.controls.mapAnimationPlayPauseButton === "Pause") { // animation in progress - no dates in URL
+      if (state.controls.animationPlayPauseButton === "Pause") { // animation in progress - no dates in URL
         query.dmin = undefined;
         query.dmax = undefined;
       } else {
@@ -60,9 +61,19 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
       if (action.data === "Play") { // animation stopping - restore dates in URL
+        query.animate = undefined;
         query.dmin = state.controls.dateMin === state.controls.absoluteDateMin ? undefined : state.controls.dateMin;
         query.dmax = state.controls.dateMax === state.controls.absoluteDateMax ? undefined : state.controls.dateMax;
       }
+      break;
+    case types.MIDDLEWARE_ONLY_ANIMATION_STARTED:
+      /* animation started - format: start bound, end bound, loop 0|1, cumulative 0|1, speed in ms */
+      const a = numericToCalendar(window.NEXTSTRAIN.animationStartPoint);
+      const b = numericToCalendar(window.NEXTSTRAIN.animationEndPoint);
+      const c = state.controls.mapAnimationShouldLoop ? "1" : "0";
+      const d = state.controls.mapAnimationCumulative ? "1" : "0";
+      const e = state.controls.mapAnimationDurationInMilliseconds;
+      query.animate = `${a},${b},${c},${d},${e}`;
       break;
     case types.URL_QUERY_CHANGE:
       query = action.query;

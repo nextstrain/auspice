@@ -3,8 +3,9 @@ import React from "react";
 import { connect } from "react-redux";
 import Flex from "./flex";
 import { titleBarHeight, titleColors } from "../../util/globals";
-import { darkGrey, brandColor } from "../../globalStyles";
+import { darkGrey, brandColor, materialButton, materialButtonSelected } from "../../globalStyles";
 import { changePage } from "../../actions/navigation";
+import { TOGGLE_NARRATIVE } from "../../actions/types";
 
 const InternalLink = (props) => (
   <div style={props.style} onClick={() => props.dispatch(changePage({path: props.path}))}>
@@ -14,6 +15,8 @@ const InternalLink = (props) => (
 
 @connect((state) => {
   return {
+    narrativeLoaded: state.narrative.loaded,
+    narrativeDisplayed: state.narrative.display,
     browserDimensions: state.browserDimensions.browserDimensions
   };
 })
@@ -122,6 +125,35 @@ class TitleBar extends React.Component {
 
   render() {
     const styles = this.getStyles();
+
+    /* this if block is temporary and should be replaced by a smoother choose-narrative UI */
+    if (this.props.narrativeLoaded) {
+      const tmpTitleStyles = {margin: 5, position: "relative", top: -1};
+      return (
+        <Flex style={styles.main}>
+          {this.getLogo(styles)}
+          {this.getLogoType(styles)}
+          <div style={{flex: 5}}/>
+          <button
+            key={1}
+            style={this.props.narrativeDisplayed ? materialButtonSelected : materialButton}
+            onClick={() => {this.props.dispatch({ type: TOGGLE_NARRATIVE});}}
+          >
+            <span style={tmpTitleStyles}> {"on"} </span>
+          </button>
+          <button
+            key={2}
+            style={this.props.narrativeDisplayed ? materialButton : materialButtonSelected}
+            onClick={() => {this.props.dispatch({ type: TOGGLE_NARRATIVE});}}
+          >
+            <span style={tmpTitleStyles}> {"off"} </span>
+          </button>
+          <div style={{width: this.props.minified ? 20 : 0 }}/>
+        </Flex>
+      );
+    }
+    /* end of temporary if block */
+
     return (
       <Flex style={styles.main}>
         {this.getLogo(styles)}

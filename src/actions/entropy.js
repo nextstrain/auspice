@@ -8,7 +8,7 @@ export const updateEntropyVisibility = debounce((dispatch, getState) => {
   if (!tree.nodes ||
     !tree.visibility ||
     !entropy.geneMap ||
-    controls.mapAnimationPlayPauseButton !== "Play"
+    controls.animationPlayPauseButton !== "Play"
   ) {return;}
   const [data, maxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
   dispatch({type: types.ENTROPY_DATA, data, maxYVal});

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Slider from "./slider";
 import { controlsWidth } from "../../util/globals";
-import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
+import { numericToCalendar } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { headerFont, lightGrey, darkGrey } from "../../globalStyles";
@@ -12,8 +12,12 @@ import { headerFont, lightGrey, darkGrey } from "../../globalStyles";
   return {
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
+    dateMinNumeric: state.controls.dateMinNumeric,
+    dateMaxNumeric: state.controls.dateMaxNumeric,
     absoluteDateMin: state.controls.absoluteDateMin,
-    absoluteDateMax: state.controls.absoluteDateMax
+    absoluteDateMax: state.controls.absoluteDateMax,
+    absoluteDateMinNumeric: state.controls.absoluteDateMinNumeric,
+    absoluteDateMaxNumeric: state.controls.absoluteDateMaxNumeric
   };
 })
 class DateRangeInputs extends React.Component {
@@ -43,9 +47,9 @@ class DateRangeInputs extends React.Component {
   }
 
   maybeClearMapAnimationInterval() {
-    if (window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop) {
-      clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-      window.NEXTSTRAIN.mapAnimationLoop = null;
+    if (window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference) {
+      clearInterval(window.NEXTSTRAIN.animationTickReference);
+      window.NEXTSTRAIN.animationTickReference = null;
       this.props.dispatch({
         type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
         data: "Play"
@@ -128,10 +132,10 @@ class DateRangeInputs extends React.Component {
     const selectedMin = this.props.dateMin;
     const selectedMax = this.props.dateMax;
 
-    const absoluteMinNumDate = calendarToNumeric(absoluteMin);
-    const absoluteMaxNumDate = calendarToNumeric(absoluteMax);
-    const selectedMinNumDate = calendarToNumeric(selectedMin);
-    const selectedMaxNumDate = calendarToNumeric(selectedMax);
+    const absoluteMinNumDate = this.props.absoluteDateMinNumeric;
+    const absoluteMaxNumDate = this.props.absoluteDateMaxNumeric;
+    const selectedMinNumDate = this.props.dateMinNumeric;
+    const selectedMaxNumDate = this.props.dateMaxNumeric;
 
     const minDistance = (absoluteMaxNumDate - absoluteMinNumDate) / 10.0;
 

@@ -1,6 +1,5 @@
 import { scalePow } from "d3-scale";
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "../../util/globals";
-import { calendarToNumeric } from "../../util/dateHelpers";
 
 /**
 *  For each node visit if node not a hashMap key, insert
@@ -354,10 +353,8 @@ export const calcVisibility = function (tree, controls, dates) {
     }
 
     // TIME FILTERING (internal + terminal nodes)
-    const userDateMin = calendarToNumeric(dates.dateMin);
-    const userDateMax = calendarToNumeric(dates.dateMax);
     const timeFiltered = tree.nodes.map((d, idx) => {
-      return !(d.attr.num_date < userDateMin || d.parent.attr.num_date > userDateMax);
+      return !(d.attr.num_date < dates.dateMinNumeric || d.parent.attr.num_date > dates.dateMaxNumeric);
     });
     visibility = visibility.map((cv, idx) => (cv && timeFiltered[idx]));
 

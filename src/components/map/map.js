@@ -7,9 +7,7 @@ import _max from "lodash/max";
 import { select } from "d3-selection";
 import leafletImage from "leaflet-image";
 import Card from "../framework/card";
-import { numericToCalendar, calendarToNumeric } from "../../util/dateHelpers";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
-import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint, enableAnimationPerfTesting } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import {
   createDemeAndTransmissionData,
@@ -39,12 +37,10 @@ import { incommingMapPNG } from "../download/helperFunctions";
     colorScaleVersion: state.controls.colorScale.version,
     map: state.map,
     geoResolution: state.controls.geoResolution,
-    mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
-    mapAnimationCumulative: state.controls.mapAnimationCumulative,
-    mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
+    animationPlayPauseButton: state.controls.animationPlayPauseButton,
     mapTriplicate: state.controls.mapTriplicate,
-    dateMin: state.controls.dateMin,
-    dateMax: state.controls.dateMax,
+    dateMinNumeric: state.controls.dateMinNumeric,
+    dateMaxNumeric: state.controls.dateMaxNumeric,
     panelLayout: state.controls.panelLayout
   };
 })
@@ -67,6 +63,9 @@ class Map extends React.Component {
       demeIndices: null,
       transmissionIndices: null
     };
+    // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md#es6-classes
+    this.playPauseButtonClicked = this.playPauseButtonClicked.bind(this);
+    this.resetButtonClicked = this.resetButtonClicked.bind(this);
   }
 
   componentWillMount() {
@@ -119,7 +118,8 @@ class Map extends React.Component {
     if (
       this.state.map &&
       (
-        this.props.sidebar !== nextProps.sidebar ||
+        this.props.padding.left !== nextProps.padding.right ||
+        this.props.padding.right !== nextProps.padding.right ||
         this.props.panelLayout !== nextProps.panelLayout
       )
     ) {
@@ -144,7 +144,7 @@ class Map extends React.Component {
       dimensionsChanged: this.props.browserDimensions.width !== nextProps.browserDimensions.width || this.props.browserDimensions.height !== nextProps.browserDimensions.height,
       responsiveNotSet: !this.state.responsive,
       treeChanged: this.props.treeVersion !== nextProps.treeVersion, // treeVersion change implies tree is ready (modified by the same action)
-      sidebarChanged: this.props.sidebar !== nextProps.sidebar || this.props.sidebarRight !== nextProps.sidebarRight,
+      sidebarChanged: this.props.padding.left !== nextProps.padding.left || this.props.padding.right !== nextProps.padding.right,
       panelLayout: this.props.panelLayout !== nextProps.panelLayout,
     };
 
@@ -164,8 +164,7 @@ class Map extends React.Component {
       horizontal: grid ? 0.5 : 1,
       vertical: grid ? 0.7 : 0.88, /* if we are in single column, full height */
       browserDimensions: nextProps.browserDimensions,
-      sidebar: nextProps.sidebar,
-      sidebarRight: nextProps.sidebarRight
+      padding: nextProps.padding
     });
   }
   maybeSetupD3DOMNode() {
@@ -221,8 +220,8 @@ class Map extends React.Component {
         this.state.d3DOMNode,
         this.state.map,
         this.props.nodes,
-        calendarToNumeric(this.props.dateMin),
-        calendarToNumeric(this.props.dateMax)
+        this.props.dateMinNumeric,
+        this.props.dateMaxNumeric
       );
 
       /* Set up leaflet events */
@@ -294,8 +293,8 @@ class Map extends React.Component {
         newDemes,
         newTransmissions,
         this.state.d3elems,
-        calendarToNumeric(this.props.dateMin),
-        calendarToNumeric(this.props.dateMax)
+        this.props.dateMinNumeric,
+        this.props.dateMaxNumeric
       );
 
 
@@ -357,8 +356,8 @@ class Map extends React.Component {
         this.state.d3elems,
         this.state.map,
         nextProps.nodes,
-        calendarToNumeric(nextProps.dateMin),
-        calendarToNumeric(nextProps.dateMax)
+        nextProps.dateMinNumeric,
+        nextProps.dateMaxNumeric
       );
 
       this.setState({
@@ -430,45 +429,29 @@ class Map extends React.Component {
   }
 
   animationButtons() {
-    if (enableAnimationDisplay) {
-      return (
-        <div>
-          <button style={{position: "absolute",
-            left: 25,
-            top: 25,
-            zIndex: 9999,
-            border: "none",
-            width: 56,
-            padding: 15,
-            borderRadius: 4,
-            backgroundColor: "rgb(124, 184, 121)",
-            fontWeight: 700,
-            color: "white"
-          }}
-            onClick={this.handleAnimationPlayPauseClicked.bind(this)}
-          >
-            {this.props.mapAnimationPlayPauseButton}
-          </button>
-          <button style={{
-            position: "absolute",
-            left: 90,
-            top: 25,
-            zIndex: 9999,
-            border: "none",
-            padding: 15,
-            borderRadius: 4,
-            backgroundColor: "rgb(230, 230, 230)",
-            fontWeight: 700,
-            color: "white"
-          }}
-            onClick={this.handleAnimationResetClicked.bind(this)}
-          >
-            Reset
-          </button>
-        </div>
-      );
-    }
-    return null;
+    const baseStyle = {
+      color: "white",
+      fontWeight: 700,
+      borderRadius: 4,
+      padding: 15,
+      border: "none",
+      zIndex: 9999,
+      position: "absolute",
+      top: 25
+    };
+    return (
+      <div>
+        <button
+          style={{...baseStyle, left: 25, width: 56, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? "rgb(228, 153, 56)" : "rgb(124, 184, 121)"}}
+          onClick={this.playPauseButtonClicked}
+        >
+          {this.props.animationPlayPauseButton}
+        </button>
+        <button style={{...baseStyle, left: 90, backgroundColor: "rgb(230, 230, 230)"}} onClick={this.resetButtonClicked}>
+          Reset
+        </button>
+      </div>
+    );
   }
 
   maybeCreateMapDiv() {
@@ -488,86 +471,16 @@ class Map extends React.Component {
     }
     return container;
   }
-  handleAnimationPlayPauseClicked() {
-    /* *****************************************
-    ANIMATE MAP (AND THAT LINE ON TREE)
-    **************************************** */
-    if (this.props.mapAnimationPlayPauseButton === "Play") {
-      this.props.dispatch({
-        type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
-        data: "Pause"
-      });
-      this.animateMap();
+  playPauseButtonClicked() {
+    if (this.props.animationPlayPauseButton === "Play") {
+      this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Pause"});
     } else {
-      if (enableAnimationPerfTesting) { window.Perf.resetCount(); }
-      clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-      window.NEXTSTRAIN.mapAnimationLoop = null;
-      this.props.dispatch({
-        type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
-        data: "Play"
-      });
+      this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
     }
   }
-
-  resetAnimation() {
-    clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-    window.NEXTSTRAIN.mapAnimationLoop = null;
+  resetButtonClicked() {
+    this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
     this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
-    this.props.dispatch({
-      type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
-      data: "Play"
-    });
-  }
-
-  handleAnimationResetClicked() {
-    this.resetAnimation();
-  }
-  animateMap() {
-    /* By default, start at absoluteDateMin; allow overriding via augur default export */
-
-    // dates are num date format
-    // leftWindow --- rightWindow ------------------------------- end
-    // 2011.4 ------- 2011.6 ------------------------------------ 2015.4
-
-    const start = calendarToNumeric(this.props.absoluteDateMin);
-    let leftWindow = calendarToNumeric(this.props.dateMin);
-    const end = calendarToNumeric(this.props.absoluteDateMax);
-    const totalRange = end - start; // years in the animation
-
-    const animationIncrement = (animationTick * totalRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
-    const windowRange = animationWindowWidth * totalRange;
-    let rightWindow = leftWindow + windowRange;
-
-    if (!window.NEXTSTRAIN) {
-      window.NEXTSTRAIN = {}; /* centralize creation of this if we need it anywhere else */
-    }
-
-    /* we should setState({reference}) so that it's not possible to create multiple */
-
-    window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
-      if (enableAnimationPerfTesting) { window.Perf.bump(); }
-      const newWindow = {min: numericToCalendar(leftWindow),
-        max: numericToCalendar(rightWindow)};
-
-      /* first pass sets the timer to absolute min and absolute min + windowRange because they reference above initial time window */
-      this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max, quickdraw: true}));
-
-      if (!this.props.mapAnimationCumulative) {
-        leftWindow += animationIncrement;
-      }
-      rightWindow += animationIncrement;
-
-      if (rightWindow >= end) {
-        clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-        window.NEXTSTRAIN.mapAnimationLoop = null;
-        this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
-        this.props.dispatch({
-          type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
-          data: "Play"
-        });
-      }
-    }, animationTick);
-
   }
   render() {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011

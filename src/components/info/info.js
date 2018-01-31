@@ -82,7 +82,7 @@ export const createSummary = (virus_count, nodes, filters, visibility, visibleSt
     s3bucket: state.datasets.s3bucket,
     browserDimensions: state.browserDimensions.browserDimensions,
     filters: state.controls.filters,
-    mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
+    animationPlayPauseButton: state.controls.animationPlayPauseButton,
     metadata: state.metadata,
     nodes: state.tree.nodes,
     idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
@@ -100,8 +100,6 @@ class Info extends React.Component {
     super(props);
   }
   static propTypes = {
-    sidebar: React.PropTypes.bool.isRequired,
-    sidebarRight: React.PropTypes.bool.isRequired,
     filters: React.PropTypes.object.isRequired,
     metadata: React.PropTypes.object, // not required. starts as null
     nodes: React.PropTypes.array, // not required. starts as null
@@ -252,15 +250,14 @@ class Info extends React.Component {
       horizontal: 1,
       vertical: 1.0,
       browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar,
-      sidebarRight: this.props.sidebarRight,
+      padding: this.props.padding,
       minHeight: 480,
       maxAspectRatio: 1.0
     });
     const styles = this.getStyles(responsive);
     // const nSelectedAuthors = this.getNumSelectedAuthors();
     // const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
-    const animating = this.props.mapAnimationPlayPauseButton === "Pause";
+    const animating = this.props.animationPlayPauseButton === "Pause";
     const datesMaxed = this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax;
     let title = "";
     if (this.props.metadata.title) {

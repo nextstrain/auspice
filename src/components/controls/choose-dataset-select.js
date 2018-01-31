@@ -41,9 +41,9 @@ class ChooseDatasetSelect extends React.Component {
     // 0 analytics (optional)
     analyticsControlsEvent(`change-virus-to-${newPath.replace(/\//g, "")}`);
     // 1 reset redux controls state in preparation for a change
-    if (window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop) {
-      clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-      window.NEXTSTRAIN.mapAnimationLoop = null;
+    if (window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference) {
+      clearInterval(window.NEXTSTRAIN.animationTickReference);
+      window.NEXTSTRAIN.animationTickReference = null;
       this.props.dispatch({
         type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
         data: "Play"

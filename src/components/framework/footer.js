@@ -257,8 +257,7 @@ class Footer extends React.Component {
       horizontal: 1,
       vertical: 0.3333333,
       browserDimensions: this.props.browserDimensions,
-      sidebar: this.props.sidebar,
-      sidebarRight: this.props.sidebarRight
+      padding: this.props.padding
     });
     const width = responsive.width - 30; // need to subtract margin when calculating div width
     return (

@@ -40,7 +40,7 @@ class ChooseLayout extends React.Component {
             key={1}
             style={selected === "rect" ? materialButtonSelected : materialButton}
             onClick={() => {
-              const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop;
+              const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
               if (!loopRunning) {
                 analyticsControlsEvent("change-layout-rectangular");
                 this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });
@@ -56,7 +56,7 @@ class ChooseLayout extends React.Component {
             key={2}
             style={selected === "radial" ? materialButtonSelected : materialButton}
             onClick={() => {
-              const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop;
+              const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
               if (!loopRunning) {
                 analyticsControlsEvent("change-layout-radial");
                 this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });
@@ -72,7 +72,7 @@ class ChooseLayout extends React.Component {
             key={3}
             style={selected === "unrooted" ? materialButtonSelected : materialButton}
             onClick={() => {
-              const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop;
+              const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
               if (!loopRunning) {
                 analyticsControlsEvent("change-layout-unrooted");
                 this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });
@@ -88,7 +88,7 @@ class ChooseLayout extends React.Component {
             key={4}
             style={selected === "clock" ? materialButtonSelected : materialButton}
             onClick={() => {
-              const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop;
+              const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
               if (!loopRunning) {
                 analyticsControlsEvent("change-layout-clock");
                 this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });

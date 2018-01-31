@@ -52,8 +52,7 @@ export const computeChartGeometry = (props) => {
     horizontal: 1,
     vertical: 0.3,
     browserDimensions: props.browserDimensions,
-    sidebar: props.sidebar,
-    sidebarRight: props.sidebarRight,
+    padding: props.padding,
     minHeight: 150
   });
   return {
@@ -94,7 +93,6 @@ export class Entropy extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     entropy: PropTypes.object,
-    sidebar: PropTypes.bool.isRequired,
     browserDimensions: PropTypes.object.isRequired,
     loaded: PropTypes.bool.isRequired,
     colorBy: PropTypes.string,
@@ -194,7 +192,7 @@ export class Entropy extends React.Component {
       this.setUp(nextProps);
       return;
     }
-    if (this.state.chart && ((this.props.browserDimensions !== nextProps.browserDimensions) || (this.props.sidebar !== nextProps.sidebar || this.props.sidebarRight !== nextProps.sidebarRight))) {
+    if (this.state.chart && ((this.props.browserDimensions !== nextProps.browserDimensions) || (this.props.padding.left !== nextProps.padding.left || this.props.padding.right !== nextProps.padding.right))) {
       this.state.chart.render(nextProps);
       return;
     }

@@ -1,4 +1,4 @@
-import { numericToCalendar, currentNumDate, currentCalDate } from "../util/dateHelpers";
+import { numericToCalendar, calendarToNumeric, currentNumDate, currentCalDate } from "../util/dateHelpers";
 import { flattenTree } from "../components/tree/treeHelpers";
 import { defaultGeoResolution,
   defaultColorBy,
@@ -57,12 +57,30 @@ const modifyStateViaURLQuery = (state, query) => {
   }
   if (query.dmin) {
     state["dateMin"] = query.dmin;
+    state["dateMinNumeric"] = calendarToNumeric(query.dmin);
   }
   if (query.dmax) {
     state["dateMax"] = query.dmax;
+    state["dateMaxNumeric"] = calendarToNumeric(query.dmax);
   }
   for (const filterKey of Object.keys(query).filter((c) => c.startsWith('f_'))) {
     state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',');
+  }
+  if (query.animate) {
+    const params = query.animate.split(',');
+    // console.log("start animation!", params);
+    window.NEXTSTRAIN.animationStartPoint = calendarToNumeric(params[0]);
+    window.NEXTSTRAIN.animationEndPoint = calendarToNumeric(params[1]);
+    state.dateMin = params[0];
+    state.dateMax = params[1];
+    state.dateMinNumeric = calendarToNumeric(params[0]);
+    state.dateMaxNumeric = calendarToNumeric(params[1]);
+    state.mapAnimationShouldLoop = params[2] === "1";
+    state.mapAnimationCumulative = params[3] === "1";
+    state.mapAnimationDurationInMilliseconds = parseInt(params[4], 10);
+    state.animationPlayPauseButton = "Pause";
+  } else {
+    state.animationPlayPauseButton = "Play";
   }
   return state;
 };
@@ -86,6 +104,8 @@ const restoreQueryableStateToDefaults = (state) => {
   /* dateMin & dateMax get set to their bounds */
   state["dateMin"] = state["absoluteDateMin"];
   state["dateMax"] = state["absoluteDateMax"];
+  state["dateMinNumeric"] = state["absoluteDateMinNumeric"];
+  state["dateMaxNumeric"] = state["absoluteDateMaxNumeric"];
 
   state["panelLayout"] = calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full";
 
@@ -99,12 +119,16 @@ const modifyStateViaMetadata = (state, metadata) => {
     from 2000-2005 (the default is the present day) */
     if (metadata.date_range.date_min) {
       state["dateMin"] = metadata.date_range.date_min;
+      state["dateMinNumeric"] = calendarToNumeric(state["dateMin"]);
       state["absoluteDateMin"] = metadata.date_range.date_min;
+      state["absoluteDateMinNumeric"] = calendarToNumeric(state["absoluteDateMin"]);
       state["mapAnimationStartDate"] = metadata.date_range.date_min;
     }
     if (metadata.date_range.date_max) {
       state["dateMax"] = metadata.date_range.date_max;
+      state["dateMaxNumeric"] = calendarToNumeric(state["dateMax"]);
       state["absoluteDateMax"] = metadata.date_range.date_max;
+      state["absoluteDateMaxNumeric"] = calendarToNumeric(state["absoluteDateMax"]);
     }
   }
   if (metadata.analysisSlider) {
@@ -167,6 +191,12 @@ const modifyStateViaTree = (state, tree) => {
   state["absoluteDateMin"] = getMinCalDateViaTree(tree);
   state["dateMax"] = getMaxCalDateViaTree(tree);
   state["absoluteDateMax"] = getMaxCalDateViaTree(tree);
+  /* and their numeric conversions */
+  state.dateMinNumeric = calendarToNumeric(state.dateMin);
+  state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
+  state.dateMaxNumeric = calendarToNumeric(state.dateMax);
+  state.absoluteDateMaxNumeric = calendarToNumeric(state.absoluteDateMax);
+
   /* available tree attrs - based upon the root node */
   state["attrs"] = Object.keys(tree.attr);
   state["temporalConfidence"] = Object.keys(tree.attr).indexOf("num_date_confidence") > -1 ?
@@ -175,6 +205,10 @@ const modifyStateViaTree = (state, tree) => {
 };
 
 const checkAndCorrectErrorsInState = (state, metadata) => {
+  /* The one (bigish) problem with this being in the reducer is that
+  we can't have any side effects. So if we detect and error introduced by
+  a URL QUERY (and correct it in state), we can't correct the URL */
+
   /* colorBy */
   if (Object.keys(metadata.color_options).indexOf(state.colorBy) === -1 && !state["colorBy"].startsWith("gt-")) {
     const availableNonGenotypeColorBys = Object.keys(metadata.color_options);
@@ -221,6 +255,10 @@ const getDefaultState = () => {
     filters: {},
     colorBy: defaultColorBy
   };
+  const dateMin = numericToCalendar(currentNumDate() - defaultDateRange);
+  const dateMax = currentCalDate();
+  const dateMinNumeric = calendarToNumeric(dateMin);
+  const dateMaxNumeric = calendarToNumeric(dateMax);
   return {
     defaults,
     canTogglePanelLayout: true,
@@ -236,10 +274,14 @@ const getDefaultState = () => {
     temporalConfidence: {exists: false, display: false, on: false},
     layout: defaults.layout,
     distanceMeasure: defaults.distanceMeasure,
-    dateMin: numericToCalendar(currentNumDate() - defaultDateRange),
-    dateMax: currentCalDate(),
-    absoluteDateMin: numericToCalendar(currentNumDate() - defaultDateRange),
-    absoluteDateMax: currentCalDate(),
+    dateMin,
+    dateMinNumeric,
+    dateMax,
+    dateMaxNumeric,
+    absoluteDateMin: dateMin,
+    absoluteDateMinNumeric: dateMinNumeric,
+    absoluteDateMax: dateMax,
+    absoluteDateMaxNumeric: dateMaxNumeric,
     colorBy: defaults.colorBy,
     colorByConfidence: {display: false, on: false},
     colorScale: undefined,
@@ -251,7 +293,8 @@ const getDefaultState = () => {
     mapAnimationDurationInMilliseconds: 30000, // in milliseconds
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
-    mapAnimationPlayPauseButton: "Play",
+    mapAnimationShouldLoop: false,
+    animationPlayPauseButton: "Play",
     panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full"
   };
 };
@@ -259,7 +302,8 @@ const getDefaultState = () => {
 const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE: {
-      /* the general pattern is to reset as much as possible to the "base" state, then rehydrate it from the query */
+      /* because the qury isn't complete (e.g. things that are "off" or "default" aren't shown)
+      we must first reset all the state to the "base" (default) state, and then apply the changes defined in the query */
       let newState = Object.assign({}, state);
       newState = restoreQueryableStateToDefaults(newState);
       newState = modifyStateViaURLQuery(newState, action.query);
@@ -334,19 +378,27 @@ const Controls = (state = getDefaultState(), action) => {
       return Object.assign({}, state, {
         distanceMeasure: action.data
       });
-    case types.CHANGE_DATES_VISIBILITY_THICKNESS:
-      return Object.assign({}, state, {
-        quickdraw: action.quickdraw,
-        dateMin: action.dateMin ? action.dateMin : state.dateMin,
-        dateMax: action.dateMax ? action.dateMax : state.dateMax
-      });
+    case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
+      const newDates = {quickdraw: action.quickdraw};
+      if (action.dateMin) {
+        newDates.dateMin = action.dateMin;
+        newDates.dateMinNumeric = action.dateMinNumeric;
+      }
+      if (action.dateMax) {
+        newDates.dateMax = action.dateMax;
+        newDates.dateMaxNumeric = action.dateMaxNumeric;
+      }
+      return Object.assign({}, state, newDates);
+    }
     case types.CHANGE_ABSOLUTE_DATE_MIN:
       return Object.assign({}, state, {
-        absoluteDateMin: action.data
+        absoluteDateMin: action.data,
+        absoluteDateMinNumeric: calendarToNumeric(action.data)
       });
     case types.CHANGE_ABSOLUTE_DATE_MAX:
       return Object.assign({}, state, {
-        absoluteDateMax: action.data
+        absoluteDateMax: action.data,
+        absoluteDateMaxNumeric: calendarToNumeric(action.data)
       });
     case types.CHANGE_ANIMATION_TIME:
       return Object.assign({}, state, {
@@ -356,10 +408,14 @@ const Controls = (state = getDefaultState(), action) => {
       return Object.assign({}, state, {
         mapAnimationCumulative: action.data
       });
+    case types.CHANGE_ANIMATION_LOOP:
+      return Object.assign({}, state, {
+        mapAnimationShouldLoop: action.data
+      });
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
       return Object.assign({}, state, {
         quickdraw: action.data === "Play" ? false : true,
-        mapAnimationPlayPauseButton: action.data
+        animationPlayPauseButton: action.data
       });
     case types.CHANGE_ANIMATION_START:
       return Object.assign({}, state, {
