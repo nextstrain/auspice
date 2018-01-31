@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { animationWindowWidth, animationTick, enableAnimationPerfTesting } from "../../util/globals";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
-import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
+import { MAP_ANIMATION_PLAY_PAUSE_BUTTON, MIDDLEWARE_ONLY_ANIMATION_STARTED } from "../../actions/types";
 
 @connect((state) => ({
   animationPlayPauseButton: state.controls.animationPlayPauseButton,
@@ -65,14 +65,17 @@ class AnimationController extends React.Component {
     let leftWindow = this.props.dateMinNumeric;
     let rightWindow = leftWindow + windowRange;
 
+    /* update the URL - no reducer uses this action type */
+    this.props.dispatch({type: MIDDLEWARE_ONLY_ANIMATION_STARTED});
+
     /* tickFn is a closure, therefore defined within maybeAnimateMap */
     const tickFn = () => {
-      console.log("TICK")
+      // console.log("TICK")
       if (enableAnimationPerfTesting) { window.Perf.bump(); }
 
       /* Check (via redux) if animation should not continue. This happens when the pause or reset button has been hit. */
       if (this.props.animationPlayPauseButton === "Play") {
-        console.log("STOP. Reason: redux told me to!. Clearing loop #", window.NEXTSTRAIN.animationTickReference);
+        // console.log("STOP. Reason: redux told me to!. Clearing loop #", window.NEXTSTRAIN.animationTickReference);
         clearInterval(window.NEXTSTRAIN.animationTickReference);
         window.NEXTSTRAIN.animationTickReference = null;
         if (enableAnimationPerfTesting) { window.Perf.resetCount(); }
@@ -89,11 +92,11 @@ class AnimationController extends React.Component {
       /* another way the animation can stop is when the animationEndPoint has been exceeded. We must then loop or stop */
       if (rightWindow >= window.NEXTSTRAIN.animationEndPoint) {
         if (this.props.mapAnimationShouldLoop) { /* if we are looping, just reset the leftWindow to the startPoint */
-          console.log("LOOP.")
+          // console.log("LOOP.")
           leftWindow = window.NEXTSTRAIN.animationStartPoint;
           rightWindow = leftWindow + windowRange;
         } else { /* Animations finished! Reset the timeframe to that when the animation was started */
-          console.log("STOP. Reason: exceeded bounds. animationTickReference #", window.NEXTSTRAIN.animationTickReference);
+          // console.log("STOP. Reason: exceeded bounds. animationTickReference #", window.NEXTSTRAIN.animationTickReference);
           clearInterval(window.NEXTSTRAIN.animationTickReference);
           window.NEXTSTRAIN.animationTickReference = null;
           this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
@@ -110,12 +113,8 @@ class AnimationController extends React.Component {
     };
 
     /* start the animation */
-    if (window.NEXTSTRAIN.animationTickReference) {
-      console.warn("ANIMATION ERROR. Already a Loop (#", window.NEXTSTRAIN.animationTickReference, "), skipping setInterval");
-    } else {
-      window.NEXTSTRAIN.animationTickReference = setInterval(tickFn, animationTick);
-      console.log("SETINTERVAL START. Loop (#", window.NEXTSTRAIN.animationTickReference, "), skipping setInterval");
-    }
+    window.NEXTSTRAIN.animationTickReference = setInterval(tickFn, animationTick);
+    // console.log("SETINTERVAL START. Loop (#", window.NEXTSTRAIN.animationTickReference, "), skipping setInterval");
   }
 }
 
