@@ -1,3 +1,5 @@
+## version 1.9.0 - 2018/01/30
+
 ### Animation
 * Animations can now loop! This is selected via a toggle in the sidebar.
 * While animating, the URL displays information which defines the animation (bounds, looping, cumulative, speed). This allows the animation to start automatically by linking to this URL.
