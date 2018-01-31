@@ -20,6 +20,7 @@ import DownloadModal from "./download/downloadModal";
 import { analyticsNewPage } from "../util/googleAnalytics";
 import filesDropped from "../actions/filesDropped";
 import Narrative from "./narrative";
+import AnimationController from "./framework/animationController";
 
 const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
@@ -77,6 +78,7 @@ class App extends React.Component {
     };
     return (
       <g>
+        <AnimationController/>
         <DownloadModal/>
         <ToggleSidebarTab
           open={this.state.sidebarDocked}

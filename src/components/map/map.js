@@ -7,9 +7,7 @@ import _max from "lodash/max";
 import { select } from "d3-selection";
 import leafletImage from "leaflet-image";
 import Card from "../framework/card";
-import { numericToCalendar } from "../../util/dateHelpers";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
-import { enableAnimationDisplay, animationWindowWidth, animationTick, twoColumnBreakpoint, enableAnimationPerfTesting } from "../../util/globals";
 import computeResponsive from "../../util/computeResponsive";
 import {
   createDemeAndTransmissionData,
@@ -28,8 +26,6 @@ import { incommingMapPNG } from "../download/helperFunctions";
     // datasetGuid: state.tree.datasetGuid,
     absoluteDateMin: state.controls.absoluteDateMin,
     absoluteDateMax: state.controls.absoluteDateMax,
-    absoluteDateMinNumeric: state.controls.absoluteDateMinNumeric,
-    absoluteDateMaxNumeric: state.controls.absoluteDateMaxNumeric,
     treeVersion: state.tree.version,
     treeLoaded: state.tree.loaded,
     nodes: state.tree.nodes,
@@ -41,9 +37,6 @@ import { incommingMapPNG } from "../download/helperFunctions";
     colorScaleVersion: state.controls.colorScale.version,
     map: state.map,
     geoResolution: state.controls.geoResolution,
-    mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
-    mapAnimationCumulative: state.controls.mapAnimationCumulative,
-    mapAnimationShouldLoop: state.controls.mapAnimationShouldLoop,
     animationPlayPauseButton: state.controls.animationPlayPauseButton,
     mapTriplicate: state.controls.mapTriplicate,
     dateMinNumeric: state.controls.dateMinNumeric,
@@ -107,21 +100,18 @@ class Map extends React.Component {
     this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(this.props);
-    this.maybeAnimateMap();
   }
   componentWillReceiveProps(nextProps) {
     this.maybeComputeResponsive(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(nextProps);
-    // if (nextProps.animationPlayPauseButton === "Pause" && this.props.animationPlayPauseButton === "Play") {console.log("CWRP TRIGGERING ANIMATION"); this.animateMap();}
   }
   componentDidUpdate(prevProps) {
     if (this.props.nodes === null) { return; }
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
-    this.maybeAnimateMap();
   }
   maybeInvalidateMapSize(nextProps) {
     /* when we procedurally change the size of the card, for instance, when we swap from grid to full */
@@ -449,22 +439,19 @@ class Map extends React.Component {
       position: "absolute",
       top: 25
     };
-    if (enableAnimationDisplay) {
-      return (
-        <div>
-          <button
-            style={{...baseStyle, left: 25, width: 56, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? "rgb(228, 153, 56)" : "rgb(124, 184, 121)"}}
-            onClick={this.playPauseButtonClicked}
-          >
-            {this.props.animationPlayPauseButton}
-          </button>
-          <button style={{...baseStyle, left: 90, backgroundColor: "rgb(230, 230, 230)"}} onClick={this.resetButtonClicked}>
-            Reset
-          </button>
-        </div>
-      );
-    }
-    return null;
+    return (
+      <div>
+        <button
+          style={{...baseStyle, left: 25, width: 56, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? "rgb(228, 153, 56)" : "rgb(124, 184, 121)"}}
+          onClick={this.playPauseButtonClicked}
+        >
+          {this.props.animationPlayPauseButton}
+        </button>
+        <button style={{...baseStyle, left: 90, backgroundColor: "rgb(230, 230, 230)"}} onClick={this.resetButtonClicked}>
+          Reset
+        </button>
+      </div>
+    );
   }
 
   maybeCreateMapDiv() {
@@ -494,94 +481,6 @@ class Map extends React.Component {
   resetButtonClicked() {
     this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
     this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
-  }
-  maybeAnimateMap() {
-    /* we trigger map animation when 2 criteria are met:
-    (1) this.props.animationPlayPauseButton !== "Play" (i.e. it shows "Pause")
-    (2) window.NEXTSTRAIN.animationTickReference (the setInterval reference) is _not_ set (i.e. there is no currently running loop).
-
-    The animation is stopped by the tick (loop) function when the redux state demands. I.e. this.props.animationPlayPauseButton === "Play"
-
-    dates are num date format
-    leftWindow --- rightWindow ------------------------------- end
-    2011.4 ------- 2011.6 ------------------------------------ 2015.4
-    */
-    if (this.props.animationPlayPauseButton === "Play" || window.NEXTSTRAIN.animationTickReference) {
-      return;
-    }
-
-    /* the animation increment (and the window range) is based upon the total range of the dataset, not the selected timeslice */
-    const totalDatasetRange = this.props.absoluteDateMaxNumeric - this.props.absoluteDateMinNumeric; // years in the animation
-    const animationIncrement = (animationTick * totalDatasetRange) / this.props.mapAnimationDurationInMilliseconds; // [(ms * years) / ms] = years eg 100 ms * 5 years / 30,000 ms =  0.01666666667 years
-    const windowRange = animationWindowWidth * totalDatasetRange;
-
-    /* the animation can resume, i.e. the start & end bounds have been set, and we continue advancing towards them,
-    or the animation starts afresh and sets the bounds as the current time slice.
-    We resume if the current time slice < 2 * windowRange (and the bounds were set)
-    if the time slice < 2 * windowRange (i.e. a small amount) and the bounds are NOT set, then set the upper bound to the max of the dataset */
-    if ((this.props.dateMaxNumeric - this.props.dateMinNumeric) < 1.3 * windowRange) {
-      if (!(window.NEXTSTRAIN.animationStartPoint && window.NEXTSTRAIN.animationEndPoint)) {
-        window.NEXTSTRAIN.animationStartPoint = this.props.dateMinNumeric;
-        window.NEXTSTRAIN.animationEndPoint = this.props.absoluteDateMaxNumeric;
-      }
-    } else {
-      window.NEXTSTRAIN.animationStartPoint = this.props.dateMinNumeric;
-      window.NEXTSTRAIN.animationEndPoint = this.props.dateMaxNumeric;
-    }
-    let leftWindow = this.props.dateMinNumeric;
-    let rightWindow = leftWindow + windowRange;
-
-    /* tickFn is a closure, therefore defined within maybeAnimateMap */
-    const tickFn = () => {
-      console.log("TICK")
-      if (enableAnimationPerfTesting) { window.Perf.bump(); }
-
-      /* Check (via redux) if animation should not continue. This happens when the pause or reset button has been hit. */
-      if (this.props.animationPlayPauseButton === "Play") {
-        console.log("STOP. Reason: redux told me to!. Clearing loop #", window.NEXTSTRAIN.animationTickReference);
-        clearInterval(window.NEXTSTRAIN.animationTickReference);
-        window.NEXTSTRAIN.animationTickReference = null;
-        if (enableAnimationPerfTesting) { window.Perf.resetCount(); }
-        return;
-      }
-
-      /* the main aim of this function is to simply update the dates in redux and then shift the values for the next tick */
-      this.props.dispatch(changeDateFilter({newMin: numericToCalendar(leftWindow), newMax: numericToCalendar(rightWindow), quickdraw: true}));
-      if (!this.props.mapAnimationCumulative) {
-        leftWindow += animationIncrement;
-      }
-      rightWindow += animationIncrement;
-
-      /* another way the animation can stop is when the animationEndPoint has been exceeded. We must then loop or stop */
-      if (rightWindow >= window.NEXTSTRAIN.animationEndPoint) {
-        if (this.props.mapAnimationShouldLoop) { /* if we are looping, just reset the leftWindow to the startPoint */
-          console.log("LOOP.")
-          leftWindow = window.NEXTSTRAIN.animationStartPoint;
-          rightWindow = leftWindow + windowRange;
-        } else { /* Animations finished! Reset the timeframe to that when the animation was started */
-          console.log("STOP. Reason: exceeded bounds. animationTickReference #", window.NEXTSTRAIN.animationTickReference);
-          clearInterval(window.NEXTSTRAIN.animationTickReference);
-          window.NEXTSTRAIN.animationTickReference = null;
-          this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
-          this.props.dispatch(changeDateFilter({
-            newMin: numericToCalendar(window.NEXTSTRAIN.animationStartPoint),
-            newMax: numericToCalendar(window.NEXTSTRAIN.animationEndPoint),
-            quickdraw: false
-          }));
-          /* also trash the start/end bounds, as the animation has finished of its own accord */
-          window.NEXTSTRAIN.animationStartPoint = undefined;
-          window.NEXTSTRAIN.animationEndPoint = undefined;
-        }
-      }
-    };
-
-    /* start the animation */
-    if (window.NEXTSTRAIN.animationTickReference) {
-      console.warn("ANIMATION ERROR. Already a Loop (#", window.NEXTSTRAIN.animationTickReference, "), skipping setInterval");
-    } else {
-      window.NEXTSTRAIN.animationTickReference = setInterval(tickFn, animationTick);
-      console.log("SETINTERVAL START. Loop (#", window.NEXTSTRAIN.animationTickReference, "), skipping setInterval");
-    }
   }
   render() {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011

@@ -87,7 +87,7 @@ class Controls extends React.Component {
         {header("Map Options")}
         <SelectLabel text="Geographic resolution"/>
         <GeoResolution/>
-        {enableAnimationDisplay ? <MapAnimationControls/> : null}
+        <MapAnimationControls/>
 
         <div/>
         {header("Data Source")}
