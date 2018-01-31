@@ -50,7 +50,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
-      if (state.controls.mapAnimationPlayPauseButton === "Pause") { // animation in progress - no dates in URL
+      if (state.controls.animationPlayPauseButton === "Pause") { // animation in progress - no dates in URL
         query.dmin = undefined;
         query.dmax = undefined;
       } else {

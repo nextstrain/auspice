@@ -35,7 +35,7 @@ class MapAnimationControls extends React.Component {
 
   handleChangeAnimationTimeClicked(userSelectedDuration) {
     return () => {
-      const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop;
+      const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
       if (!loopRunning) {
         analyticsControlsEvent("change-animation-time");
         let duration;
@@ -50,7 +50,7 @@ class MapAnimationControls extends React.Component {
           console.warn("Odd... controls/map-animation.js tried to set an animation speed we don't offer...")
         }
 
-        // if (window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop)
+        // if (window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference)
 
         /* cast string to num, the see if its an integer, ie., don't send the action if they type 'd' */
         this.props.dispatch({

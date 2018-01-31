@@ -69,7 +69,6 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.animate) {
     const params = query.animate.split(',');
     // console.log("start animation!", params);
-    if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
     window.NEXTSTRAIN.animationStartPoint = calendarToNumeric(params[0]);
     window.NEXTSTRAIN.animationEndPoint = calendarToNumeric(params[1]);
     state.dateMin = params[0];
@@ -79,9 +78,9 @@ const modifyStateViaURLQuery = (state, query) => {
     state.mapAnimationShouldLoop = params[2] === "1";
     state.mapAnimationCumulative = params[3] === "1";
     state.mapAnimationDurationInMilliseconds = parseInt(params[4], 10);
-    state.mapAnimationPlayPauseButton = "Pause";
+    state.animationPlayPauseButton = "Pause";
   } else {
-    state.mapAnimationPlayPauseButton = "Play";
+    state.animationPlayPauseButton = "Play";
   }
   return state;
 };
@@ -295,7 +294,7 @@ const getDefaultState = () => {
     mapAnimationStartDate: null, // Null so it can pull the absoluteDateMin as the default
     mapAnimationCumulative: false,
     mapAnimationShouldLoop: false,
-    mapAnimationPlayPauseButton: "Play",
+    animationPlayPauseButton: "Play",
     panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full"
   };
 };
@@ -416,7 +415,7 @@ const Controls = (state = getDefaultState(), action) => {
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
       return Object.assign({}, state, {
         quickdraw: action.data === "Play" ? false : true,
-        mapAnimationPlayPauseButton: action.data
+        animationPlayPauseButton: action.data
       });
     case types.CHANGE_ANIMATION_START:
       return Object.assign({}, state, {

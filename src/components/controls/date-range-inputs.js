@@ -47,9 +47,9 @@ class DateRangeInputs extends React.Component {
   }
 
   maybeClearMapAnimationInterval() {
-    if (window.NEXTSTRAIN && window.NEXTSTRAIN.mapAnimationLoop) {
-      clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-      window.NEXTSTRAIN.mapAnimationLoop = null;
+    if (window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference) {
+      clearInterval(window.NEXTSTRAIN.animationTickReference);
+      window.NEXTSTRAIN.animationTickReference = null;
       this.props.dispatch({
         type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
         data: "Play"

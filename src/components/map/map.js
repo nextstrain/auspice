@@ -44,7 +44,7 @@ import { incommingMapPNG } from "../download/helperFunctions";
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative,
     mapAnimationShouldLoop: state.controls.mapAnimationShouldLoop,
-    mapAnimationPlayPauseButton: state.controls.mapAnimationPlayPauseButton,
+    animationPlayPauseButton: state.controls.animationPlayPauseButton,
     mapTriplicate: state.controls.mapTriplicate,
     dateMinNumeric: state.controls.dateMinNumeric,
     dateMaxNumeric: state.controls.dateMaxNumeric,
@@ -70,6 +70,9 @@ class Map extends React.Component {
       demeIndices: null,
       transmissionIndices: null
     };
+    // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md#es6-classes
+    this.playPauseButtonClicked = this.playPauseButtonClicked.bind(this);
+    this.resetButtonClicked = this.resetButtonClicked.bind(this);
   }
 
   componentWillMount() {
@@ -104,20 +107,21 @@ class Map extends React.Component {
     this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(this.props);
-    if (this.props.mapAnimationPlayPauseButton === "Pause") {this.animateMap();}
+    this.maybeAnimateMap();
   }
   componentWillReceiveProps(nextProps) {
     this.maybeComputeResponsive(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(nextProps);
-    if (nextProps.mapAnimationPlayPauseButton === "Pause" && this.props.mapAnimationPlayPauseButton === "Play") {this.animateMap();}
+    // if (nextProps.animationPlayPauseButton === "Pause" && this.props.animationPlayPauseButton === "Play") {console.log("CWRP TRIGGERING ANIMATION"); this.animateMap();}
   }
   componentDidUpdate(prevProps) {
     if (this.props.nodes === null) { return; }
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
+    this.maybeAnimateMap();
   }
   maybeInvalidateMapSize(nextProps) {
     /* when we procedurally change the size of the card, for instance, when we swap from grid to full */
@@ -435,39 +439,26 @@ class Map extends React.Component {
   }
 
   animationButtons() {
+    const baseStyle = {
+      color: "white",
+      fontWeight: 700,
+      borderRadius: 4,
+      padding: 15,
+      border: "none",
+      zIndex: 9999,
+      position: "absolute",
+      top: 25
+    };
     if (enableAnimationDisplay) {
       return (
         <div>
-          <button style={{position: "absolute",
-            left: 25,
-            top: 25,
-            zIndex: 9999,
-            border: "none",
-            width: 56,
-            padding: 15,
-            borderRadius: 4,
-            backgroundColor: this.props.mapAnimationPlayPauseButton === "Pause" ? "rgb(228, 153, 56)" : "rgb(124, 184, 121)",
-            fontWeight: 700,
-            color: "white"
-          }}
-            onClick={this.handleAnimationPlayPauseClicked.bind(this)}
+          <button
+            style={{...baseStyle, left: 25, width: 56, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? "rgb(228, 153, 56)" : "rgb(124, 184, 121)"}}
+            onClick={this.playPauseButtonClicked}
           >
-            {this.props.mapAnimationPlayPauseButton}
+            {this.props.animationPlayPauseButton}
           </button>
-          <button style={{
-            position: "absolute",
-            left: 90,
-            top: 25,
-            zIndex: 9999,
-            border: "none",
-            padding: 15,
-            borderRadius: 4,
-            backgroundColor: "rgb(230, 230, 230)",
-            fontWeight: 700,
-            color: "white"
-          }}
-            onClick={this.handleAnimationResetClicked.bind(this)}
-          >
+          <button style={{...baseStyle, left: 90, backgroundColor: "rgb(230, 230, 230)"}} onClick={this.resetButtonClicked}>
             Reset
           </button>
         </div>
@@ -493,46 +484,31 @@ class Map extends React.Component {
     }
     return container;
   }
-  handleAnimationPlayPauseClicked() {
-    /* *****************************************
-    ANIMATE MAP (AND THAT LINE ON TREE)
-    **************************************** */
-    if (this.props.mapAnimationPlayPauseButton === "Play") {
-      this.animateMap();
-      this.props.dispatch({
-        type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
-        data: "Pause"
-      });
+  playPauseButtonClicked() {
+    if (this.props.animationPlayPauseButton === "Play") {
+      this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Pause"});
     } else {
-      if (enableAnimationPerfTesting) { window.Perf.resetCount(); }
-      clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-      window.NEXTSTRAIN.mapAnimationLoop = null;
-      this.props.dispatch({
-        type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
-        data: "Play"
-      });
+      this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
     }
   }
-
-  resetAnimation() {
-    clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-    window.NEXTSTRAIN.mapAnimationLoop = null;
+  resetButtonClicked() {
+    this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
     this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
-    this.props.dispatch({
-      type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
-      data: "Play"
-    });
   }
+  maybeAnimateMap() {
+    /* we trigger map animation when 2 criteria are met:
+    (1) this.props.animationPlayPauseButton !== "Play" (i.e. it shows "Pause")
+    (2) window.NEXTSTRAIN.animationTickReference (the setInterval reference) is _not_ set (i.e. there is no currently running loop).
 
-  handleAnimationResetClicked() {
-    this.resetAnimation();
-  }
-  animateMap() {
-    // dates are num date format
-    // leftWindow --- rightWindow ------------------------------- end
-    // 2011.4 ------- 2011.6 ------------------------------------ 2015.4
+    The animation is stopped by the tick (loop) function when the redux state demands. I.e. this.props.animationPlayPauseButton === "Play"
 
-    if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};} /* centralize creation of this if we need it anywhere else */
+    dates are num date format
+    leftWindow --- rightWindow ------------------------------- end
+    2011.4 ------- 2011.6 ------------------------------------ 2015.4
+    */
+    if (this.props.animationPlayPauseButton === "Play" || window.NEXTSTRAIN.animationTickReference) {
+      return;
+    }
 
     /* the animation increment (and the window range) is based upon the total range of the dataset, not the selected timeslice */
     const totalDatasetRange = this.props.absoluteDateMaxNumeric - this.props.absoluteDateMinNumeric; // years in the animation
@@ -555,54 +531,57 @@ class Map extends React.Component {
     let leftWindow = this.props.dateMinNumeric;
     let rightWindow = leftWindow + windowRange;
 
-    /* we should setState({reference}) so that it's not possible to create multiple */
-
-    window.NEXTSTRAIN.mapAnimationLoop = setInterval(() => {
+    /* tickFn is a closure, therefore defined within maybeAnimateMap */
+    const tickFn = () => {
+      console.log("TICK")
       if (enableAnimationPerfTesting) { window.Perf.bump(); }
-      /* to prevent out-of-sync bugs, this is helpful */
-      if (this.props.mapAnimationPlayPauseButton === "Play") {
-        clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-        window.NEXTSTRAIN.mapAnimationLoop = null;
+
+      /* Check (via redux) if animation should not continue. This happens when the pause or reset button has been hit. */
+      if (this.props.animationPlayPauseButton === "Play") {
+        console.log("STOP. Reason: redux told me to!. Clearing loop #", window.NEXTSTRAIN.animationTickReference);
+        clearInterval(window.NEXTSTRAIN.animationTickReference);
+        window.NEXTSTRAIN.animationTickReference = null;
+        if (enableAnimationPerfTesting) { window.Perf.resetCount(); }
         return;
       }
-      const newWindow = {min: numericToCalendar(leftWindow),
-        max: numericToCalendar(rightWindow)};
 
-      /* first pass sets the timer to absolute min and absolute min + windowRange because they reference above initial time window */
-      this.props.dispatch(changeDateFilter({newMin: newWindow.min, newMax: newWindow.max, quickdraw: true}));
-
-      /* bump the window along */
+      /* the main aim of this function is to simply update the dates in redux and then shift the values for the next tick */
+      this.props.dispatch(changeDateFilter({newMin: numericToCalendar(leftWindow), newMax: numericToCalendar(rightWindow), quickdraw: true}));
       if (!this.props.mapAnimationCumulative) {
         leftWindow += animationIncrement;
       }
       rightWindow += animationIncrement;
 
-      /* what happens when the animation's over!?! */
+      /* another way the animation can stop is when the animationEndPoint has been exceeded. We must then loop or stop */
       if (rightWindow >= window.NEXTSTRAIN.animationEndPoint) {
-        if (this.props.mapAnimationShouldLoop) {
-          /* if we are looping, just reset the window */
+        if (this.props.mapAnimationShouldLoop) { /* if we are looping, just reset the leftWindow to the startPoint */
+          console.log("LOOP.")
           leftWindow = window.NEXTSTRAIN.animationStartPoint;
           rightWindow = leftWindow + windowRange;
-        } else {
-          /* trash the timeout & reset the timeframe to that when the animation was started */
-          clearInterval(window.NEXTSTRAIN.mapAnimationLoop);
-          window.NEXTSTRAIN.mapAnimationLoop = null;
+        } else { /* Animations finished! Reset the timeframe to that when the animation was started */
+          console.log("STOP. Reason: exceeded bounds. animationTickReference #", window.NEXTSTRAIN.animationTickReference);
+          clearInterval(window.NEXTSTRAIN.animationTickReference);
+          window.NEXTSTRAIN.animationTickReference = null;
+          this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
           this.props.dispatch(changeDateFilter({
             newMin: numericToCalendar(window.NEXTSTRAIN.animationStartPoint),
             newMax: numericToCalendar(window.NEXTSTRAIN.animationEndPoint),
             quickdraw: false
           }));
-          this.props.dispatch({
-            type: MAP_ANIMATION_PLAY_PAUSE_BUTTON,
-            data: "Play"
-          });
           /* also trash the start/end bounds, as the animation has finished of its own accord */
           window.NEXTSTRAIN.animationStartPoint = undefined;
           window.NEXTSTRAIN.animationEndPoint = undefined;
         }
       }
-    }, animationTick);
+    };
 
+    /* start the animation */
+    if (window.NEXTSTRAIN.animationTickReference) {
+      console.warn("ANIMATION ERROR. Already a Loop (#", window.NEXTSTRAIN.animationTickReference, "), skipping setInterval");
+    } else {
+      window.NEXTSTRAIN.animationTickReference = setInterval(tickFn, animationTick);
+      console.log("SETINTERVAL START. Loop (#", window.NEXTSTRAIN.animationTickReference, "), skipping setInterval");
+    }
   }
   render() {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011

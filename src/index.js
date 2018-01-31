@@ -22,6 +22,9 @@ import "./css/narrative.css";
 
 const store = configureStore();
 
+/* set up non-redux state storage for the animation - use this conservitavely! */
+if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
+
 /* google analytics */
 ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-2");
 
