@@ -215,9 +215,9 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
     if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
       availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
     }
+    console.error("Error detected trying to set colorBy to", state.colorBy, "(valid options are", Object.keys(metadata.color_options).join(", "), "). Setting to", availableNonGenotypeColorBys[0]);
     state.colorBy = availableNonGenotypeColorBys[0];
     state.defaults.colorBy = availableNonGenotypeColorBys[0];
-    console.error("Error detected. Setting colorBy to ", state.colorBy);
   }
 
   /* colorBy confidence */
