@@ -840,8 +840,9 @@ PhyloTree.prototype.drawVaccines = function() {
       .attr('dominant-baseline', 'central')
       .style("font-family", this.params.fontFamily)
       .style("font-size", "20px")
-      .style("stroke", darkGrey)
-      .text('\u2573')
+      .style("stroke", "#fff")
+      .style("fill", darkGrey)
+      .text('\u2716')
       // .style("cursor", "pointer")
       .on("mouseover", (d) => console.log("vaccine", d))
 };
