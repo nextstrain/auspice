@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import { scalePow } from "d3-scale";
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "../../util/globals";
 
@@ -374,3 +376,18 @@ export const branchOpacityFunction = scalePow()
 // entropy calculation precomputed in augur
 // export const calcEntropyOfValues = (vals) =>
 //   vals.map((v) => v * Math.log(v + 1E-10)).reduce((a, b) => a + b, 0) * -1 / Math.log(vals.length);
+
+/**
+*  if the metadata JSON defines vaccine strains then create an array of the nodes
+*  @param nodes - nodes
+*  @param vaccineChoices - undefined or the object from the metadata JSON linking strain names to dates
+*  @returns array  - array of nodes that are vaccines. NOTE these are references to the nodes array
+*  side-effects: adds the vaccineDate property to the relevent nodes
+*/
+export const processVaccines = (nodes, vaccineChoices) => {
+  if (!vaccineChoices) {return false;}
+  const names = Object.keys(vaccineChoices);
+  const vaccines = nodes.filter((d) => names.indexOf(d.strain) !== -1);
+  vaccines.forEach((d) => d.vaccineDate = vaccineChoices[d.strain]);
+  return vaccines;
+}
