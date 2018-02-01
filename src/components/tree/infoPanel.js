@@ -223,6 +223,18 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
   return infoLineJSX(prettyString(colorBy) + ":", prettyString(d.n.attr[colorBy]));
 };
 
+const displayVaccineInfo = (d) => {
+  if (d.n.vaccineDate) {
+    return (
+      <g>
+        {infoLineJSX("Vaccine strain:", d.n.vaccineDate)}
+        <p/>
+      </g>
+    );
+  }
+  return null;
+};
+
 /* the actual component - a pure function, so we can return early if needed */
 const InfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
   hovered, viewer, colorBy, colorByConfidence, colorScale}) => {
@@ -236,6 +248,7 @@ const InfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
   if (tip) {
     inner = (
       <p>
+        {displayVaccineInfo(d)}
         {tipDisplayColorByInfo(d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale)}
         {distanceMeasure === "div" ? getBranchDivJSX(d.n) : getBranchTimeJSX(d.n, temporalConfidence)}
       </p>

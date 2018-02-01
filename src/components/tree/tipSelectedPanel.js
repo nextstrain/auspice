@@ -64,6 +64,18 @@ const justURL = (url) => (
   </tr>
 );
 
+const displayVaccineInfo = (d) => {
+  if (d.n.vaccineDate) {
+    return (
+      <tr>
+        <th>Vaccine strain</th>
+        <td>{d.n.vaccineDate}</td>
+      </tr>
+    );
+  }
+  return null;
+};
+
 const validValue = (value) => value !== "?" && value !== undefined && value !== "undefined";
 const validAttr = (attrs, key) => key in attrs && validValue(attrs[key]);
 
@@ -81,6 +93,7 @@ const TipSelectedPanel = ({tip, goAwayCallback, metadata}) => {
         </p>
         <table>
           <tbody>
+            {displayVaccineInfo(tip) /* vaccine information (if applicable) */}
             {/* the "basic" attributes (which may not exist in certain datasets) */}
             {["country", "region", "division"].map((x) => {
               return validAttr(tip.n.attr, x) ? item(prettyString(x), prettyString(tip.n.attr[x])) : null;
