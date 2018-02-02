@@ -12,7 +12,8 @@ import { mediumTransitionDuration } from "../../util/globals";
 import InfoPanel from "./infoPanel";
 import TipSelectedPanel from "./tipSelectedPanel";
 import computeResponsive from "../../util/computeResponsive";
-import * as funcs from "./treeViewFunctions";
+import { updateStylesAndAttrs, salientPropChanges } from "./reactD3Interface";
+import * as callbacks from "./reactD3Interface/callbacks";
 
 /*
 this.props.tree contains the nodes etc used to build the PhyloTree
@@ -58,7 +59,7 @@ class TreeView extends React.Component {
     /* This both creates the tree (when it's loaded into redux) and
     works out what to update, based upon changes to redux.control */
     let tree = this.state.tree;
-    const changes = funcs.salientPropChanges(this.props, nextProps, tree);
+    const changes = salientPropChanges(this.props, nextProps, tree);
     /* usefull for debugging: */
     // console.log("CWRP Changes:",
     //    Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {
@@ -75,7 +76,7 @@ class TreeView extends React.Component {
         changes[k] = false;
       }
       changes.colorBy = true;
-      funcs.updateStylesAndAttrs(this, changes, nextProps, tree);
+      updateStylesAndAttrs(this, changes, nextProps, tree);
       this.setState({tree});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
@@ -83,14 +84,14 @@ class TreeView extends React.Component {
       return null; /* return to avoid an unnecessary updateStylesAndAttrs call */
     }
     if (tree) {
-      funcs.updateStylesAndAttrs(this, changes, nextProps, tree);
+      updateStylesAndAttrs(this, changes, nextProps, tree);
     }
     return null;
   }
 
   componentDidMount() {
     const tree = this.makeTree(this.props);
-    funcs.updateStylesAndAttrs(this, {colorBy: true}, this.props, tree);
+    updateStylesAndAttrs(this, {colorBy: true}, this.props, tree);
     this.setState({tree});
     if (this.Viewer) {
       this.Viewer.fitToViewer();
@@ -137,16 +138,16 @@ class TreeView extends React.Component {
           showTipLabels: true   //show
         },
         { /* callbacks */
-          onTipHover: funcs.onTipHover.bind(this),
-          onTipClick: funcs.onTipClick.bind(this),
-          onBranchHover: funcs.onBranchHover.bind(this),
-          onBranchClick: funcs.onBranchClick.bind(this),
-          onBranchLeave: funcs.onBranchLeave.bind(this),
-          onTipLeave: funcs.onTipLeave.bind(this),
-          branchLabel: funcs.branchLabel,
-          branchLabelSize: funcs.branchLabelSize,
+          onTipHover: callbacks.onTipHover.bind(this),
+          onTipClick: callbacks.onTipClick.bind(this),
+          onBranchHover: callbacks.onBranchHover.bind(this),
+          onBranchClick: callbacks.onBranchClick.bind(this),
+          onBranchLeave: callbacks.onBranchLeave.bind(this),
+          onTipLeave: callbacks.onTipLeave.bind(this),
+          branchLabel: callbacks.branchLabel,
+          branchLabelSize: callbacks.branchLabelSize,
           tipLabel: (d) => d.n.strain,
-          tipLabelSize: funcs.tipLabelSize.bind(this)
+          tipLabelSize: callbacks.tipLabelSize.bind(this)
         },
         nextProps.tree.branchThickness, /* guarenteed to be in redux by now */
         nextProps.tree.visibility,
@@ -184,7 +185,7 @@ class TreeView extends React.Component {
           colorScale={this.props.colorScale}
         />
         <TipSelectedPanel
-          goAwayCallback={(d) => funcs.clearSelectedTip.bind(this)(d)}
+          goAwayCallback={(d) => callbacks.clearSelectedTip.bind(this)(d)}
           tip={this.state.selectedTip}
           metadata={this.props.metadata}
         />
@@ -203,9 +204,9 @@ class TreeView extends React.Component {
           background={"#FFF"}
           miniaturePosition={"none"}
           // onMouseDown={this.startPan.bind(this)}
-          onDoubleClick={funcs.resetView.bind(this)}
+          onDoubleClick={callbacks.resetView.bind(this)}
           //onMouseUp={this.endPan.bind(this)}
-          onChangeValue={ funcs.onViewerChange.bind(this) }
+          onChangeValue={callbacks.onViewerChange.bind(this)}
         >
           <svg style={{pointerEvents: "auto"}}
             width={responsive.width}
@@ -238,13 +239,13 @@ class TreeView extends React.Component {
               </filter>
             </defs>
           <ZoomInIcon
-            handleClick={funcs.handleIconClick.bind(this)("zoom-in")}
+            handleClick={callbacks.handleIconClick.bind(this)("zoom-in")}
             active
             x={10}
             y={50}
           />
           <ZoomOutIcon
-            handleClick={funcs.handleIconClick.bind(this)("zoom-out")}
+            handleClick={callbacks.handleIconClick.bind(this)("zoom-out")}
             active
             x={10}
             y={90}

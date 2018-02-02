@@ -1,3 +1,5 @@
+import { rgb } from "d3-color";
+import { interpolateRgb } from "d3-interpolate";
 import { scalePow } from "d3-scale";
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "../../util/globals";
 
@@ -291,9 +293,9 @@ export const calcVisibility = (tree, controls, dates) => {
   return "visible";
 };
 
-export const branchInterpolateColour = "#BBB";
-export const branchOpacityConstant = 0.4;
-export const branchOpacityFunction = scalePow()
+const branchInterpolateColour = "#BBB";
+const branchOpacityConstant = 0.4;
+const branchOpacityFunction = scalePow()
   .exponent([0.3])
   .domain([0, 1])
   .range([branchOpacityConstant, 1])
@@ -301,6 +303,27 @@ export const branchOpacityFunction = scalePow()
 // entropy calculation precomputed in augur
 // export const calcEntropyOfValues = (vals) =>
 //   vals.map((v) => v * Math.log(v + 1E-10)).reduce((a, b) => a + b, 0) * -1 / Math.log(vals.length);
+
+
+/**
+ * calculate array of HEXs to actually be displayed.
+ * (colorBy) confidences manifest as opacity ramps
+ * @param {obj} tree phyloTree object
+ * @param {bool} confidence enabled?
+ * @return {array} array of hex's. 1-1 with nodes.
+ */
+export const calcStrokeCols = (tree, confidence, colorBy) => {
+  if (confidence === true) {
+    return tree.nodeColors.map((col, idx) => {
+      const entropy = tree.nodes[idx].attr[colorBy + "_entropy"];
+      return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityFunction(entropy))).toString();
+    });
+  }
+  return tree.nodeColors.map((col) => {
+    return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString();
+  });
+};
+
 
 /**
 *  if the metadata JSON defines vaccine strains then create an array of the nodes
