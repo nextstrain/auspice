@@ -61,7 +61,7 @@ const genericScale = (cmin, cmax, vals = false) => {
 
 
 const minMaxAttributeScale = (nodes, attr, options) => {
-  if (options.vmin && options.vmax) {
+  if (Object.prototype.hasOwnProperty.call(options, "vmin") && Object.prototype.hasOwnProperty.call(options, "vmax")) {
     return genericScale(options.vmin, options.vmax);
   }
   const vals = nodes.map((n) => n.attr[attr])
@@ -143,7 +143,8 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absolut
     console.log("lbi", colorOptions[colorBy])
     try {
       setLBI(tree.nodes, absoluteDateMaxNumeric, colorOptions.lbi.tau, colorOptions.lbi.timeWindow);
-      colorScale = minMaxAttributeScale(tree.nodes, "lbi", colorOptions.lbi);
+      // colorScale = minMaxAttributeScale(tree.nodes, "lbi", colorOptions.lbi); /* colour ramp over all values */
+      colorScale = minMaxAttributeScale(undefined, undefined, {vmin: 0, vmax: 0.7}); /* ramp over [0, 0.7] like nextflu */
       continuous = true;
     } catch (e) {
       console.error("Setting LBI failed.", e);
