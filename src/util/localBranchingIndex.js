@@ -69,8 +69,7 @@ Side effects: adds the following to nodes:
 Clealy n.attr.lbi is useful, but can we avoid storing those other values?
 */
 export const setLBI = (nodes, maxDateInTree, LBItau, LBItimeWindow) => {
-  console.log("making LBI color scale")
-  console.time('LBI');
+  // console.time('LBI');
   const LBIcutoff = maxDateInTree - LBItimeWindow;
   nodes.forEach((d) => {
     if (d.children) {
@@ -96,5 +95,5 @@ export const setLBI = (nodes, maxDateInTree, LBItau, LBItimeWindow) => {
   });
   // normalize the LBI to range [0,1]
   nodes.forEach((d) => {d.attr.lbi /= maxLBI;});
-  console.timeEnd('LBI');
+  // console.timeEnd('LBI');
 };

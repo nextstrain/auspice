@@ -140,7 +140,6 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absolut
       }
     }
   } else if (colorBy === "lbi") {
-    console.log("lbi", colorOptions[colorBy])
     try {
       setLBI(tree.nodes, absoluteDateMaxNumeric, colorOptions.lbi.tau, colorOptions.lbi.timeWindow);
       // colorScale = minMaxAttributeScale(tree.nodes, "lbi", colorOptions.lbi); /* colour ramp over all values */
