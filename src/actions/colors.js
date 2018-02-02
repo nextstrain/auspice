@@ -30,7 +30,7 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
     /* step 1: calculate the required colour scale */
     const version = controls.colorScale === undefined ? 1 : controls.colorScale.version + 1;
     // console.log("updateColorScale setting colorScale to ", version);
-    const colorScale = getColorScale(colorBy, tree, controls.geneLength, metadata.colorOptions, version);
+    const colorScale = getColorScale(colorBy, tree, controls.geneLength, metadata.colorOptions, version, controls.absoluteDateMaxNumeric);
     /*   */
     if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
       colorScale.genotype = parseGenotype(colorBy, controls.geneLength);

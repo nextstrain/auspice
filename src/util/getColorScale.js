@@ -5,7 +5,7 @@ import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors, reallySmallNumber, reallyBigNumber } from "./globals";
 import { parseGenotype } from "./getGenotype";
 import { getAllValuesAndCountsOfTraitsFromTree } from "./treeTraversals";
-import { setLBI } from "./colorHelpers";
+import { setLBI } from "./localBranchingIndex";
 
 /**
 * what values (for colorBy) are present in the tree and not in the color_map?
@@ -113,9 +113,11 @@ const discreteAttributeScale = (nodes, attr) => {
     .range(colorList);
 };
 
-const getColorScale = (colorBy, tree, geneLength, colorOptions, version) => {
+const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absoluteDateMaxNumeric) => {
   let colorScale;
   let continuous = false;
+  let error = false;
+
   if (!tree.nodes) {
     // make a dummy color scale before the tree is in place
     continuous = true;
@@ -138,9 +140,15 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version) => {
       }
     }
   } else if (colorBy === "lbi") {
-    setLBI(tree.nodes);
-    colorScale = minMaxAttributeScale(tree.nodes, colorBy, colorOptions[colorBy]);
-    continuous = true;
+    console.log("lbi", colorOptions[colorBy])
+    try {
+      setLBI(tree.nodes, absoluteDateMaxNumeric, colorOptions.lbi.tau, colorOptions.lbi.timeWindow);
+      colorScale = minMaxAttributeScale(tree.nodes, "lbi", colorOptions.lbi);
+      continuous = true;
+    } catch (e) {
+      console.error("Setting LBI failed.", e);
+      error = true;
+    }
   } else if (colorOptions && colorOptions[colorBy]) {
     if (colorOptions[colorBy].color_map) {
       // console.log("Sweet - we've got a color_map for ", colorBy)
@@ -171,10 +179,15 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version) => {
       colorScale = minMaxAttributeScale(tree.nodes, colorBy, colorOptions[colorBy]);
     }
   } else {
+    error = true;
+  }
+
+  if (error) {
     console.error("no colorOptions for ", colorBy, " returning minMaxAttributeScale");
     continuous = true;
     colorScale = minMaxAttributeScale(tree.nodes, colorBy, colorOptions[colorBy]);
   }
+
   return {
     scale: colorScale,
     continuous: continuous,

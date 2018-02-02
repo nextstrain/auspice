@@ -26,9 +26,3 @@ export const determineColorByGenotypeType = (colorBy) => {
   }
   return false;
 };
-
-export const setLBI = (nodes) => {
-  console.log("making fake LBI color scale")
-  let val = 0;
-  nodes.forEach((d) => {val += 0.01; d.attr.lbi = val;});
-};
