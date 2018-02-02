@@ -1,4 +1,3 @@
-
 import { scalePow } from "d3-scale";
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "../../util/globals";
 
@@ -316,4 +315,23 @@ export const processVaccines = (nodes, vaccineChoices) => {
   const vaccines = nodes.filter((d) => names.indexOf(d.strain) !== -1);
   vaccines.forEach((d) => {d.vaccineDate = vaccineChoices[d.strain];});
   return vaccines;
+};
+
+/**
+ * Adds certain properties to the nodes array - for each node in nodes it adds
+ * node.fullTipCount - see calcFullTipCounts() description
+ * node.hasChildren {bool}
+ * node.arrayIdx  {integer} - the index of the node in the nodes array
+ * @param  {array} nodes redux tree nodes
+ * @return {array} input array (kinda unneccessary)
+ * side-effects: node.hasChildren (bool) and node.arrayIdx (INT) for each node in nodes
+ */
+export const processNodes = (nodes) => {
+  const rootNode = nodes[0];
+  nodes.forEach((d) => {if (typeof d.attr === "undefined") {d.attr = {};} });
+  calcFullTipCounts(rootNode);
+  nodes.forEach((d) => {d.hasChildren = typeof d.children !== "undefined";});
+  /* set an index so that we can access visibility / nodeColors if needed */
+  nodes.forEach((d, idx) => {d.arrayIdx = idx;});
+  return nodes;
 };
