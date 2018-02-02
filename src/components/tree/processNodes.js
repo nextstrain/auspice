@@ -1,11 +1,9 @@
-import { calcFullTipCounts, calcBranchLength, calcDates } from "./treeHelpers";
+import { calcFullTipCounts } from "./treeHelpers";
 
 export const processNodes = (nodes) => {
   const rootNode = nodes[0];
   nodes.forEach((d) => {if (typeof d.attr === "undefined") {d.attr = {};} });
   calcFullTipCounts(rootNode);
-  calcBranchLength(rootNode);
-  calcDates(nodes);
   nodes.forEach((d) => {d.hasChildren = typeof d.children !== "undefined";});
   /* set an index so that we can access visibility / nodeColors if needed */
   nodes.map((d, idx) => {d.arrayIdx = idx;});
