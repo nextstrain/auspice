@@ -1,3 +1,4 @@
+/* eslint-disable */
 import _debounce from "lodash/debounce";
 import { event } from "d3-selection";
 import { min, max, sum } from "d3-array";

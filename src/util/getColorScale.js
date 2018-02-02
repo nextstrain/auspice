@@ -5,6 +5,7 @@ import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors, reallySmallNumber, reallyBigNumber } from "./globals";
 import { parseGenotype } from "./getGenotype";
 import { getAllValuesAndCountsOfTraitsFromTree } from "./treeTraversals";
+import { setLBI } from "./colorHelpers";
 
 /**
 * what values (for colorBy) are present in the tree and not in the color_map?
@@ -136,6 +137,10 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version) => {
         colorScale = scaleOrdinal().domain(domain).range(genotypeColors);
       }
     }
+  } else if (colorBy === "lbi") {
+    setLBI(tree.nodes);
+    colorScale = minMaxAttributeScale(tree.nodes, colorBy, colorOptions[colorBy]);
+    continuous = true;
   } else if (colorOptions && colorOptions[colorBy]) {
     if (colorOptions[colorBy].color_map) {
       // console.log("Sweet - we've got a color_map for ", colorBy)
@@ -166,8 +171,7 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version) => {
       colorScale = minMaxAttributeScale(tree.nodes, colorBy, colorOptions[colorBy]);
     }
   } else {
-    // This shouldn't ever happen!
-    // console.log("no colorOptions for ", colorBy, " returning minMaxAttributeScale")
+    console.error("no colorOptions for ", colorBy, " returning minMaxAttributeScale");
     continuous = true;
     colorScale = minMaxAttributeScale(tree.nodes, colorBy, colorOptions[colorBy]);
   }
