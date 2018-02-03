@@ -158,3 +158,28 @@ export const radialLayout = function radialLayout() {
     d.smallBigArc = Math.abs(angleCBar2 - angleCBar1) > Math.PI * 1.0;
   });
 };
+
+/*
+ * set the property that is used as distance along branches
+ * this is set to "depth" of each node. depth is later used to
+ * calculate coordinates. Parent depth is assigned as well.
+ */
+export const setDistance = function setDistance(distanceAttribute) {
+  this.nodes.forEach((d) => {d.update = true;});
+  if (typeof distanceAttribute === "undefined") {
+    this.distance = "div"; // default is "div" for divergence
+  } else {
+    this.distance = distanceAttribute;
+  }
+  // assign node and parent depth
+  const tmp_dist = this.distance;
+  this.nodes.forEach((d) => {
+    d.depth = d.n.attr[tmp_dist];
+    d.pDepth = d.n.parent.attr[tmp_dist];
+    if (d.n.attr[tmp_dist + "_confidence"]) {
+      d.conf = d.n.attr[tmp_dist + "_confidence"];
+    } else {
+      d.conf = [d.depth, d.depth];
+    }
+  });
+};

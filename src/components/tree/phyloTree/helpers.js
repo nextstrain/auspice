@@ -16,3 +16,21 @@ export const addLeafCount = (node) => {
     }
   }
 };
+
+
+/*
+ * this function takes a call back and applies it recursively
+ * to all child nodes, including internal nodes
+ * @params:
+ *   node -- node to whose children the function is to be applied
+ *   func -- call back function to apply
+ */
+export const applyToChildren = (node, func) => {
+  func(node);
+  if (node.terminal) {
+    return;
+  }
+  for (let i = 0; i < node.children.length; i++) {
+    applyToChildren(node.children[i], func);
+  }
+};

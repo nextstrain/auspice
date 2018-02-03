@@ -11,28 +11,13 @@ import { addLeafCount } from "./helpers";
 /* PROTOTYPES */
 import { render } from "./renderers";
 import * as layouts from "./layouts";
-
+import * as zoom from "./zoom";
+import * as grid from "./grid";
+import * as confidence from "./confidence";
 
 const contains = function(array, elem){
   return array.some(function (d){return d===elem;});
 }
-
-/*
- * this function takes a call back and applies it recursively
- * to all child nodes, including internal nodes
- * @params:
- *   node -- node to whose children the function is to be applied
- *   func -- call back function to apply
- */
-const applyToChildren = function(node,func){
-  func(node);
-  if (node.terminal){ return;}
-  else{
-    for (let i=0; i<node.children.length; i++){
-      applyToChildren(node.children[i], func);
-    }
-  }
-};
 
 /*
  * phylogenetic tree drawing class
@@ -42,7 +27,6 @@ const applyToChildren = function(node,func){
  *   treeJson -- tree object as exported by nextstrain.
  */
 var PhyloTree = function(treeJson) {
-  this.grid = false;
   this.grid = false;
   this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
   this.params = defaultParams;
@@ -95,54 +79,13 @@ var PhyloTree = function(treeJson) {
 /* DEFINE THE PROTOTYPES */
 PhyloTree.prototype.render = render;
 
-
-
-
-/*
- * update branchThicknesses without modifying the SVG
- */
-// PhyloTree.prototype.changeBranchThicknessAttr = function (thicknesses) {
-//   this.nodes.forEach(function(d, i) {
-//     if (thicknesses[i] !== d["stroke-width"]) {
-//       d["stroke-width"] = thicknesses[i];
-//     }
-//   });
-// };
-
-/*
- * set the property that is used as distance along branches
- * this is set to "depth" of each node. depth is later used to
- * calculate coordinates. Parent depth is assigned as well.
- */
-PhyloTree.prototype.setDistance = function(distanceAttribute) {
-  this.nodes.forEach(function(d) {
-    d.update = true
-  });
-  if (typeof distanceAttribute === "undefined") {
-    this.distance = "div"; // default is "div" for divergence
-  } else {
-    this.distance = distanceAttribute;
-  }
-  // assign node and parent depth
-  var tmp_dist = this.distance;
-  this.nodes.forEach(function(d) {
-    d.depth = d.n.attr[tmp_dist];
-    d.pDepth = d.n.parent.attr[tmp_dist];
-    if (d.n.attr[tmp_dist+"_confidence"]){
-      d.conf = d.n.attr[tmp_dist+"_confidence"];
-    }else{
-      d.conf = [d.depth, d.depth];
-    }
-  });
-};
-
 /* LAYOUT PROTOTYPES */
+PhyloTree.prototype.setDistance = layouts.setDistance;
 PhyloTree.prototype.setLayout = layouts.setLayout;
 PhyloTree.prototype.rectangularLayout = layouts.rectangularLayout;
 PhyloTree.prototype.timeVsRootToTip = layouts.timeVsRootToTip;
 PhyloTree.prototype.unrootedLayout = layouts.unrootedLayout;
 PhyloTree.prototype.radialLayout = layouts.radialLayout;
-
 
 /**
  * draws the regression line in the svg and adds a text with the rate estimate
@@ -179,131 +122,15 @@ PhyloTree.prototype.drawRegression = function(){
 
 // MAPPING TO SCREEN
 
-/**
- * zoom such that a particular clade fills the svg
- * @param  clade -- branch/node at the root of the clade to zoom into
- * @param  dt -- time of the transition in milliseconds
- * @return {null}
- */
-PhyloTree.prototype.zoomIntoClade = function(clade, dt) {
-  // assign all nodes to inView false and force update
-  this.zoomNode = clade;
-  this.nodes.forEach(function(d){d.inView=false; d.update=true;});
-  // assign all child nodes of the chosen clade to inView=true
-  // if clade is terminal, apply to parent
-  if (clade.terminal){
-    applyToChildren(clade.parent, function(d){d.inView=true;});
-  }else{
-    applyToChildren(clade, function(d){d.inView=true;});
-  }
-  // redraw
-  this.mapToScreen();
-  this.updateGeometry(dt);
-  if (this.grid) this.addGrid(this.layout);
-  this.svg.selectAll(".regression").remove();
-  if (this.layout==="clock" && this.distance === "num_date") this.drawRegression();
-  if (this.params.branchLabels){
-    this.updateBranchLabels(dt);
-  }
-  this.updateTipLabels(dt);
-};
+PhyloTree.prototype.zoomIntoClade = zoom.zoomIntoClade;
+PhyloTree.prototype.zoomToParent = zoom.zoomToParent;
+PhyloTree.prototype.mapToScreen = zoom.mapToScreen;
 
 
-/**
- * zoom out a little by using the parent of the current clade
- * as a zoom focus.
- * @param  {int} dt [transition time]
- */
-PhyloTree.prototype.zoomToParent = function(dt) {
-  if (this.zoomNode){
-    this.zoomIntoClade(this.zoomNode.parent, dt);
-  }
-}
 
-/**
- * this function sets the xScale, yScale domains and maps precalculated x,y
- * coordinates to their places on the screen
- * @return {null}
- */
-PhyloTree.prototype.mapToScreen = function(){
-    this.setScales(this.params.margins);
-    // determine x,y values of visibile nodes
-    const tmp_xValues = this.nodes.filter(function(d){return d.inView;}).map(function(d){return d.x});
-    const tmp_yValues = this.nodes.filter(function(d){return d.inView;}).map(function(d){return d.y});
-    this.nNodesInView = this.nodes.filter(function(d){return d.inView&&d.terminal;}).length;
 
-    if (this.layout==="radial" || this.layout==="unrooted") {
-        // handle "radial and unrooted differently since they need to be square
-        // since branch length move in x and y direction
-        // TODO: should be tied to svg dimensions
-        const minX = min(tmp_xValues);
-        const minY = min(tmp_yValues);
-        const spanX = max(tmp_xValues)-minX;
-        const spanY = max(tmp_yValues)-minY;
-        const maxSpan = max([spanY, spanX]);
-        const ySlack = (spanX>spanY) ? (spanX-spanY)*0.5 : 0.0;
-        const xSlack = (spanX<spanY) ? (spanY-spanX)*0.5 : 0.0;
-        this.xScale.domain([minX-xSlack, minX+maxSpan-xSlack]);
-        this.yScale.domain([minY-ySlack, minY+maxSpan-ySlack]);
-    }else if (this.layout==="clock"){
-        // same as rectangular, but flipped yscale
-        this.xScale.domain([min(tmp_xValues), max(tmp_xValues)]);
-        this.yScale.domain([max(tmp_yValues), min(tmp_yValues)]);
-    }else{ //rectangular
-        this.xScale.domain([min(tmp_xValues), max(tmp_xValues)]);
-        this.yScale.domain([min(tmp_yValues), max(tmp_yValues)]);
-    }
 
-    // pass all x,y through scales and assign to xTip, xBase
-    const tmp_xScale=this.xScale;
-    const tmp_yScale=this.yScale;
-    this.nodes.forEach(function(d){d.xTip = tmp_xScale(d.x)});
-    this.nodes.forEach(function(d){d.yTip = tmp_yScale(d.y)});
-    this.nodes.forEach(function(d){d.xBase = tmp_xScale(d.px)});
-    this.nodes.forEach(function(d){d.yBase = tmp_yScale(d.py)});
-    if (this.params.confidence && this.layout==="rect"){
-      this.nodes.forEach(function(d){d.xConf = [tmp_xScale(d.conf[0]), tmp_xScale(d.conf[1])];});
-    }
 
-    // assign the branches as path to each node for the different layouts
-    if (this.layout==="clock" || this.layout==="unrooted"){
-        this.nodes.forEach(function(d){d.branch =[" M "+d.xBase.toString()+","+d.yBase.toString()+
-                                                 " L "+d.xTip.toString()+","+d.yTip.toString(),""];});
-    } else if (this.layout==="rect"){
-        const tmpStrokeWidth = this.params.branchStrokeWidth;
-        this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])})
-        this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])  });
-        //this.nodes.forEach(function(d){d.branch =[" M "+d.xBase.toString()+","+d.yBase.toString()+
-        const stem_offset = this.nodes.map(function(d){return (0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0);});
-        this.nodes.forEach(function(d,i){
-          d.branch =[" M "+(d.xBase - stem_offset[i]).toString()
-                       +","+d.yBase.toString()+
-                       " L "+d.xTip.toString()+","+d.yTip.toString(),
-                       " M "+d.xTip.toString()+","+d.cBarStart.toString()+
-                       " L "+d.xTip.toString()+","+d.cBarEnd.toString()];});
-        if (this.params.confidence){
-          this.nodes.forEach(function(d){d.confLine =" M "+d.xConf[0].toString()+","+d.yBase.toString()+
-                                                   " L "+d.xConf[1].toString()+","+d.yTip.toString();});
-        }
-    } else if (this.layout==="radial"){
-        const offset = this.nodes[0].depth;
-        const stem_offset_radial = this.nodes.map(function(d){return (0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0);});
-        this.nodes.forEach(function(d){d.cBarStart = tmp_yScale(d.yRange[0])});
-        this.nodes.forEach(function(d){d.cBarEnd = tmp_yScale(d.yRange[1])});
-        this.nodes.forEach(function(d,i){
-            d.branch =[" M "+(d.xBase-stem_offset_radial[i]*Math.sin(d.angle)).toString()
-                        +" "+(d.yBase-stem_offset_radial[i]*Math.cos(d.angle)).toString()+
-                       " L "+d.xTip.toString()+" "+d.yTip.toString(),""];
-            if (!d.terminal){
-                d.branch[1] =[" M "+tmp_xScale(d.xCBarStart).toString()+" "+tmp_yScale(d.yCBarStart).toString()+
-                           " A "+(tmp_xScale(d.depth)-tmp_xScale(offset)).toString()+" "
-                             +(tmp_yScale(d.depth)-tmp_yScale(offset)).toString()
-                             +" 0 "+(d.smallBigArc?"1 ":"0 ") +" 1 "+
-                           " "+tmp_xScale(d.xCBarEnd).toString()+","+tmp_yScale(d.yCBarEnd).toString()];
-            }
-        });
-    }
-};
 
 
 /**
@@ -338,24 +165,9 @@ PhyloTree.prototype.setScales = function(margins) {
   }
 };
 
-/**
- * remove the grid
- */
-PhyloTree.prototype.removeGrid = function() {
-  this.svg.selectAll(".majorGrid").remove();
-  this.svg.selectAll(".minorGrid").remove();
-  this.svg.selectAll(".gridTick").remove();
-  this.grid = false;
-};
-
-/**
- * hide the grid
- */
-PhyloTree.prototype.hideGrid = function() {
-  this.svg.selectAll(".majorGrid").style('visibility', 'hidden');
-  this.svg.selectAll(".minorGrid").style('visibility', 'hidden');
-  this.svg.selectAll(".gridTick").style('visibility', 'hidden');
-};
+PhyloTree.prototype.hideGrid = grid.hideGrid;
+PhyloTree.prototype.removeGrid = grid.removeGrid;
+PhyloTree.prototype.addGrid = grid.addGrid;
 
 /**
  * hide branchLabels
@@ -389,166 +201,6 @@ PhyloTree.prototype.showBranchLabels = function() {
 //   this.params.showTipLabels=true;
 //   this.svg.selectAll(".tipLabel").style('visibility', 'visible');
 // };
-
-
-/**
- * add a grid to the svg
- * @param {layout}
- */
-PhyloTree.prototype.addGrid = function(layout, yMinView, yMaxView) {
-  if (typeof layout==="undefined"){ layout=this.layout;}
-
-  const xmin = (this.xScale.domain()[0]>0)?this.xScale.domain()[0]:0.0;
-  const ymin = this.yScale.domain()[1];
-  const ymax = this.yScale.domain()[0];
-  const xmax = layout=="radial"
-                ? max([this.xScale.domain()[1], this.yScale.domain()[1],
-                          -this.xScale.domain()[0], -this.yScale.domain()[0]])
-                : this.xScale.domain()[1];
-
-  const offset = layout==="radial"?this.nodes[0].depth:0.0;
-  const viewTop = yMaxView ?    yMaxView+this.params.margins.top : this.yScale.range()[0];
-  const viewBottom = yMinView ? yMinView-this.params.margins.bottom : this.yScale.range()[1];
-
-  /* should we re-draw the grid? */
-  if (!this.gridParams) {
-    this.gridParams = [xmin, xmax, ymin, ymax, viewTop, viewBottom, layout];
-  } else if (xmin === this.gridParams[0] && xmax === this.gridParams[1] &&
-        ymin === this.gridParams[2] && ymax === this.gridParams[3] &&
-        viewTop === this.gridParams[4] && viewBottom === this.gridParams[5] &&
-        layout === this.gridParams[6]) {
-    // console.log("bailing - no difference");
-    return;
-  }
-
-  /* yes - redraw and update gridParams */
-  this.gridParams = [xmin, xmax, ymin, ymax, viewTop, viewBottom, layout];
-
-
-  const gridline = function(xScale, yScale, layout){
-      return function(x){
-          const xPos = xScale(x[0]-offset);
-          let tmp_d="";
-          if (layout==="rect" || layout==="clock"){
-            tmp_d = 'M'+xPos.toString() +
-              " " +
-              viewBottom.toString() +
-              " L " +
-              xPos.toString() +
-              " " +
-              viewTop.toString();
-          }else if (layout==="radial"){
-            tmp_d = 'M '+xPos.toString() +
-              "  " +
-              yScale(0).toString() +
-              " A " +
-              (xPos - xScale(0)).toString() +
-              " " +
-              (yScale(x[0]) - yScale(offset)).toString() +
-              " 0 1 0 " +
-              xPos.toString() +
-              " " +
-              (yScale(0)+0.001).toString();
-          }
-          return tmp_d;
-      };
-  };
-
-  const logRange = Math.floor(Math.log10(xmax - xmin));
-  const roundingLevel = Math.pow(10, logRange);
-  const gridMin = Math.floor((xmin+offset)/roundingLevel)*roundingLevel;
-  const gridPoints = [];
-  for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+10; ii++) {
-    const pos = gridMin + roundingLevel*ii;
-    if (pos>offset){
-        gridPoints.push([pos, pos-offset>xmax?"hidden":"visible", "x"]);
-    }
-  }
-
-  const majorGrid = this.svg.selectAll('.majorGrid').data(gridPoints);
-
-  majorGrid.exit().remove(); // EXIT
-  majorGrid.enter().append("path") // ENTER
-    .merge(majorGrid) // ENTER + UPDATE
-    .attr("d", gridline(this.xScale, this.yScale, layout))
-    .attr("class", "majorGrid")
-    .style("fill", "none")
-    .style("visibility", function (d){return d[1];})
-    .style("stroke",this.params.majorGridStroke)
-    .style("stroke-width",this.params.majorGridWidth);
-
-  const xTextPos = function(xScale, layout){
-      return function(x){
-          if (x[2]==="x"){
-              return layout==="radial" ? xScale(0) :  xScale(x[0]);
-          }else{
-              return xScale.range()[1];
-          }
-      }
-  };
-  const yTextPos = function(yScale, layout){
-      return function(x){
-          if (x[2]==="x"){
-              return layout==="radial" ? yScale(x[0]-offset) : viewBottom +  18;
-          }else{
-              return yScale(x[0]);
-          }
-      }
-  };
-
-  let logRangeY = 0;
-  if (this.layout==="clock"){
-      const roundingLevelY = Math.pow(10, logRangeY);
-      logRangeY = Math.floor(Math.log10(ymax - ymin));
-      const offsetY=0;
-      const gridMinY = Math.floor((ymin+offsetY)/roundingLevelY)*roundingLevelY;
-      for (let ii = 0; ii <= (ymax + offsetY - gridMinY)/roundingLevelY+10; ii++) {
-        const pos = gridMinY + roundingLevelY*ii;
-        if (pos>offsetY){
-            gridPoints.push([pos, pos-offsetY>ymax?"hidden":"visible","y"]);
-        }
-      }
-  }
-
-  const minorRoundingLevel = roundingLevel / (this.distanceMeasure === "num_date"
-                                              ? this.params.minorTicksTimeTree
-                                              : this.params.minorTicks);
-  const minorGridPoints = [];
-  for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+50; ii++) {
-    const pos = gridMin + minorRoundingLevel*ii;
-    if (pos>offset){
-        minorGridPoints.push([pos, pos-offset>xmax+minorRoundingLevel?"hidden":"visible"]);
-    }
-  }
-  const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
-  minorGrid.exit().remove(); // EXIT
-  minorGrid.enter().append("path") // ENTER
-    .merge(minorGrid) // ENTER + UPDATE
-    .attr("d", gridline(this.xScale, this.yScale, layout))
-    .attr("class", "minorGrid")
-    .style("fill", "none")
-    .style("visibility", function (d){return d[1];})
-    .style("stroke",this.params.minorGridStroke)
-    .style("stroke-width",this.params.minorGridWidth);
-
-  const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
-  const precision = Math.max(0, 1-logRange);
-  const precisionY = Math.max(0, 1-logRangeY);
-  gridLabels.exit().remove(); // EXIT
-  gridLabels.enter().append("text") // ENTER
-    .merge(gridLabels) // ENTER + UPDATE
-    .text(function(d){return d[0].toFixed(d[2]==='y'?precisionY:precision);})
-    .attr("class", "gridTick")
-    .style("font-size",this.params.tickLabelSize)
-    .style("font-family",this.params.fontFamily)
-    .style("fill",this.params.tickLabelFill)
-    .style("text-anchor", this.layout==="radial" ? "end" : "middle")
-    .style("visibility", function (d){return d[1];})
-    .attr("x", xTextPos(this.xScale, layout))
-    .attr("y", yTextPos(this.yScale, layout));
-
-  this.grid=true;
-};
 
 
 /*
@@ -741,69 +393,10 @@ PhyloTree.prototype.drawCladeLabels = function() {
 
 /* C O N F I D E N C E    I N T E R V A L S */
 
-PhyloTree.prototype.removeConfidence = function (dt) {
-  if (dt) {
-    this.svg.selectAll(".conf")
-      .transition()
-      .duration(dt)
-      .style("opacity", 0)
-    .remove();
-  } else {
-    this.svg.selectAll(".conf").remove();
-  }
-  // this.props.confidence = false;
-};
-
-PhyloTree.prototype.drawConfidence = function (dt) {
-  // this.removeConfidence(); // just in case
-  // console.log("drawing:", this.svg.selectAll(".conf"))
-  if (dt) {
-    this.confidence = this.svg.append("g").selectAll(".conf")
-      .data(this.nodes)
-      .enter()
-        .call((sel) => this.drawSingleCI(sel, 0));
-    this.svg.selectAll(".conf")
-        .transition()
-          .duration(dt)
-          .style("opacity", 0.5);
-  } else {
-    this.confidence = this.svg.append("g").selectAll(".conf")
-      .data(this.nodes)
-      .enter()
-        .call((sel) => this.drawSingleCI(sel, 0.5));
-  }
-  // this.props.confidence = true;
-};
-
-const confidenceWidth = (el) =>
-  el["stroke-width"] === 1 ? 0 :
-    el["stroke-width"] > 6 ? el["stroke-width"] + 6 : el["stroke-width"] * 2;
-
-PhyloTree.prototype.drawSingleCI = function (selection, opacity) {
-  selection.append("path")
-    .attr("class", "conf")
-    .attr("id", (d) => "conf_" + d.n.clade)
-    .attr("d", (d) => d.confLine)
-    .style("stroke", (d) => d.stroke || "#888")
-    .style("opacity", opacity)
-    .style("fill", "none")
-    .style("stroke-width", confidenceWidth);
-};
-
-
-PhyloTree.prototype.updateConfidence = function (dt) {
-  if (dt) {
-    this.svg.selectAll(".conf")
-      .transition()
-        .duration(dt)
-      .style("stroke", (el) => el.stroke)
-      .style("stroke-width", confidenceWidth);
-  } else {
-    this.svg.selectAll(".conf")
-      .style("stroke", (el) => el.stroke)
-      .style("stroke-width", confidenceWidth);
-  }
-};
+PhyloTree.prototype.removeConfidence = confidence.removeConfidence;
+PhyloTree.prototype.drawConfidence = confidence.drawConfidence;
+PhyloTree.prototype.drawSingleCI = confidence.drawSingleCI;
+PhyloTree.prototype.updateConfidence = confidence.updateConfidence;
 
 /************************************************/
 
