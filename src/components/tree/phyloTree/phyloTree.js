@@ -5,54 +5,17 @@ import { min, max, sum } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { flattenTree, appendParentsToTree } from "../treeHelpers";
 import { dataFont, darkGrey } from "../../../globalStyles";
+import { defaultParams } from "./defaultParams";
+import { addLeafCount } from "./helpers";
 
-/*
- * adds the total number of descendant leaves to each node in the tree
- * the functions works recursively.
- * @params:
- *   node -- root node of the tree.
- */
-const addLeafCount = function (node) {
-    if (node.terminal) {
-        node.leafCount=1;
-    }else{
-        node.leafCount=0;
-        for (var i=0; i<node.children.length; i++){
-            addLeafCount(node.children[i]);
-            node.leafCount += node.children[i].leafCount;
-        }
-    }
-};
+/* PROTOTYPES */
+import { render } from "./renderers";
+import * as layouts from "./layouts";
 
 
 const contains = function(array, elem){
   return array.some(function (d){return d===elem;});
 }
-
-/*
- * Utility function for the unrooted tree layout.
- * assigns x,y coordinates to the subtree starting in node
- * @params:
- *   node -- root of the subtree.
- *   nTips -- total number of tips in the tree.
- */
-const unrootedPlaceSubtree = function(node, nTips){
-  node.x = node.px+node.branchLength*Math.cos(node.tau + node.w*0.5);
-  node.y = node.py+node.branchLength*Math.sin(node.tau + node.w*0.5);
-  var eta = node.tau; //eta is the cumulative angle for the wedges in the layout
-  if (!node.terminal){
-      for (var i=0; i<node.children.length; i++){
-          var ch = node.children[i];
-          ch.w = 2*Math.PI*ch.leafCount/nTips;
-          ch.tau = eta;
-          eta += ch.w;
-          ch.px = node.x;
-          ch.py = node.y;
-          unrootedPlaceSubtree(ch, nTips);
-      }
-  }
-};
-
 
 /*
  * this function takes a call back and applies it recursively
@@ -80,7 +43,9 @@ const applyToChildren = function(node,func){
  */
 var PhyloTree = function(treeJson) {
   this.grid = false;
-  this.setDefaults();
+  this.grid = false;
+  this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
+  this.params = defaultParams;
   appendParentsToTree(treeJson); // add reference to .parent to each node in tree
   const nodesArray = flattenTree(treeJson); // convert the tree json into a flat list of nodes
   // wrap each node in a shell structure to avoid mutating the input data
@@ -127,117 +92,11 @@ var PhyloTree = function(treeJson) {
     {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
 };
 
-/*
- * set default values.
- */
-PhyloTree.prototype.setDefaults = function () {
-    this.grid = false;
-    this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
-    this.params = {
-        regressionStroke: darkGrey,
-        regressionWidth: 6,
-        majorGridStroke: "#CCC",
-        majorGridWidth: 2,
-        minorGridStroke: "#DDD",
-        minorGridWidth: 1,
-        tickLabelSize: 12,
-        tickLabelFill: darkGrey,
-        minorTicksTimeTree: 3,
-        minorTicks: 4,
-        orientation: [1,1],
-        margins: {left:25, right:15, top:5, bottom:25},
-        showGrid: true,
-        fillSelected:"#A73",
-        radiusSelected:5,
-        branchStroke: "#AAA",
-        branchStrokeWidth: 2,
-        tipStroke: "#AAA",
-        tipFill: "#CCC",
-        tipStrokeWidth: 1,
-        tipRadius: 4,
-        fontFamily: dataFont,
-        branchLabels:false,
-        showBranchLabels:false,
-        branchLabelFont: dataFont,
-        branchLabelFill: "#555",
-        branchLabelPadX: 8,
-        branchLabelPadY:5,
-        tipLabels:true,
-        // showTipLabels:true,
-        tipLabelFont: dataFont,
-        tipLabelFill: "#555",
-        tipLabelPadX: 8,
-        tipLabelPadY: 2,
-        showVaccines: false,
-        mapToScreenDebounceTime: 500
-    };
-};
+/* DEFINE THE PROTOTYPES */
+PhyloTree.prototype.render = render;
 
 
-/**
- * @param  svg    -- the svg into which the tree is drawn
- * @param  layout -- the layout to be used, e.g. "rect"
- * @param  distance   -- the property used as branch length, e.g. div or num_date
- * @param  options    -- an object that contains options that will be added to this.params
- * @param  callbacks  -- an object with call back function defining mouse behavior
- * @param  branchThickness (OPTIONAL) -- array of branch thicknesses
- * @param  visibility (OPTIONAL) -- array of "visible" or "hidden"
- * @return {null}
- */
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility, drawConfidence, vaccines) {
-  if (branchThickness) {
-    this.nodes.forEach(function(d, i) {
-      d["stroke-width"] = branchThickness[i];
-    });
-  }
-  this.svg = svg;
-  this.params = Object.assign(this.params, options);
-  this.callbacks = callbacks;
-  this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
 
-  this.clearSVG();
-  this.setDistance(distance);
-  this.setLayout(layout);
-  this.mapToScreen();
-  if (this.params.showGrid){
-      this.addGrid();
-  }
-  if (this.params.branchLabels){
-    this.drawBranches();
-  }
-  this.drawTips();
-  if (this.params.showVaccines) {
-    this.drawVaccines();
-  }
-  this.drawCladeLabels();
-  if (visibility) {
-    this.nodes.forEach(function(d, i) {
-      d["visibility"] = visibility[i];
-    });
-    this.svg.selectAll(".tip").style("visibility", (d) => d["visibility"]);
-  }
-
-  // setting branchLabels and tipLabels to false above in params is not working for some react-dimensions
-  // hence the commenting here
-  // if (this.params.branchLabels){
-  //   this.drawBranchLabels();
-  // }
-  /* don't even bother initially - there will be too many! */
-  // if (this.params.tipLabels){
-  //   this.updateTipLabels(100);
-  // }
-
-  this.updateGeometry(10);
-
-  this.svg.selectAll(".regression").remove();
-  if (this.layout === "clock" && this.distance === "num_date") {
-    this.drawRegression();
-  }
-  this.removeConfidence();
-  if (drawConfidence) {
-    this.drawConfidence();
-  }
-};
 
 /*
  * update branchThicknesses without modifying the SVG
@@ -277,82 +136,13 @@ PhyloTree.prototype.setDistance = function(distanceAttribute) {
   });
 };
 
+/* LAYOUT PROTOTYPES */
+PhyloTree.prototype.setLayout = layouts.setLayout;
+PhyloTree.prototype.rectangularLayout = layouts.rectangularLayout;
+PhyloTree.prototype.timeVsRootToTip = layouts.timeVsRootToTip;
+PhyloTree.prototype.unrootedLayout = layouts.unrootedLayout;
+PhyloTree.prototype.radialLayout = layouts.radialLayout;
 
-
-/**
- * assigns the attribute this.layout and calls the function that
- * calculates the x,y coordinates for the respective layouts
- * @param layout -- the layout to be used, has to be one of
- *                  ["rect", "radial", "unrooted", "clock"]
- */
-PhyloTree.prototype.setLayout = function(layout){
-    if (typeof layout==="undefined" || layout!==this.layout){
-        this.nodes.forEach(function(d){d.update=true});
-    }
-    if (typeof layout==="undefined"){
-        this.layout = "rect";
-    }else {
-        this.layout = layout;
-    }
-    if (this.layout==="rect"){
-        this.rectangularLayout();
-    } else if (this.layout==="clock"){
-        this.timeVsRootToTip();
-    } else if (this.layout==="radial"){
-        this.radialLayout();
-    } else if (this.layout==="unrooted"){
-        this.unrootedLayout();
-    }
-};
-
-
-
-/// ASSIGN XY COORDINATES FOR DIFFERENCE LAYOUTS
-
-/**
- * assignes x,y coordinates for a rectancular layout
- * @return {null}
- */
-PhyloTree.prototype.rectangularLayout = function() {
-  this.nodes.forEach(function(d) {
-    d.y = d.n.yvalue; // precomputed y-values
-    d.x = d.depth;    // depth according to current distance
-    d.px = d.pDepth;  // parent positions
-    d.py = d.y;
-    d.x_conf = d.conf; // assign confidence intervals
-  });
-};
-
-/**
- * assign x,y coordinates fro the root-to-tip regression layout
- * this requires a time tree with attr["num_date"] set
- * in addition, this function calculates a regression between
- * num_date and div which is saved as this.regression
- * @return {null}
- */
-PhyloTree.prototype.timeVsRootToTip = function(){
-  this.nodes.forEach(function (d) {
-    d.y = d.n.attr["div"];
-    d.x = d.n.attr["num_date"];
-    d.px = d.n.parent.attr["num_date"];
-    d.py = d.n.parent.attr["div"];
-  });
-  const nTips = this.numberOfTips;
-  // REGRESSION WITH FREE INTERCEPT
-  // const meanDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.y))/nTips;
-  // const meanTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.depth))/nTips;
-  // const covarTimeDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y-meanDiv)*(d.depth-meanTime)))/nTips;
-  // const varTime = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-meanTime)*(d.depth-meanTime)))/nTips;
-  //const slope = covarTimeDiv/varTime;
-  //const intercept = meanDiv-meanTime*slope;
-  // REGRESSION THROUGH ROOT
-  const offset = this.nodes[0].depth;
-  const XY = sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.y)*(d.depth-offset)))/nTips;
-  const secondMomentTime = sum(this.nodes.filter((d)=>d.terminal).map((d)=>(d.depth-offset)*(d.depth-offset)))/nTips;
-  const slope = XY/secondMomentTime;
-  const intercept = -offset*slope;
-  this.regression = {slope:slope, intercept: intercept};
-};
 
 /**
  * draws the regression line in the svg and adds a text with the rate estimate
@@ -384,59 +174,6 @@ PhyloTree.prototype.drawRegression = function(){
         .style("font-family",this.params.fontFamily);
 };
 
-/**
- * calculates and assigns x,y coordinates for the radial layout.
- * in addition to x,y, this calculates the end-points of the radial
- * arcs and whether that arc is more than pi or not
- * @return {null}
- */
-PhyloTree.prototype.radialLayout = function() {
-  const nTips = this.numberOfTips;
-  const offset = this.nodes[0].depth;
-  this.nodes.forEach(function(d) {
-    const angleCBar1 = 2.0 * 0.95 * Math.PI * d.yRange[0] / nTips;
-    const angleCBar2 = 2.0 * 0.95 * Math.PI * d.yRange[1] / nTips;
-    d.angle = 2.0 * 0.95 * Math.PI * d.n.yvalue / nTips;
-    d.y = (d.depth - offset) * Math.cos(d.angle);
-    d.x = (d.depth - offset) * Math.sin(d.angle);
-    d.py = d.y * (d.pDepth - offset) / (d.depth - offset + 1e-15);
-    d.px = d.x * (d.pDepth - offset) / (d.depth - offset + 1e-15);
-    d.yCBarStart = (d.depth - offset) * Math.cos(angleCBar1);
-    d.xCBarStart = (d.depth - offset) * Math.sin(angleCBar1);
-    d.yCBarEnd = (d.depth - offset) * Math.cos(angleCBar2);
-    d.xCBarEnd = (d.depth - offset) * Math.sin(angleCBar2);
-    d.smallBigArc = Math.abs(angleCBar2 - angleCBar1) > Math.PI * 1.0;
-  });
-};
-
-/**
- * calculates x,y coordinates for the unrooted layout. this is
- * done recursively via a the function unrootedPlaceSubtree
- * @return {null}
- */
-PhyloTree.prototype.unrootedLayout = function(){
-  const nTips=this.numberOfTips;
-  //postorder iteration to determine leaf count of every node
-  addLeafCount(this.nodes[0]);
-  //calculate branch length from depth
-  this.nodes.forEach(function(d){d.branchLength = d.depth - d.pDepth;});
-  //preorder iteration to layout nodes
-  this.nodes[0].x = 0;
-  this.nodes[0].y = 0;
-  this.nodes[0].px = 0;
-  this.nodes[0].py = 0;
-  this.nodes[0].w = 2*Math.PI;
-  this.nodes[0].tau = 0;
-  var eta = 1.5*Math.PI;
-  for (var i=0; i<this.nodes[0].children.length; i++){
-    this.nodes[0].children[i].px=0;
-    this.nodes[0].children[i].py=0;
-    this.nodes[0].children[i].w = 2.0*Math.PI*this.nodes[0].children[i].leafCount/nTips;
-    this.nodes[0].children[i].tau = eta;
-    eta += this.nodes[0].children[i].w;
-    unrootedPlaceSubtree(this.nodes[0].children[i], nTips);
-  }
-};
 
 ///****************************************************************
 
