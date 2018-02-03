@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, medGrey, infoPanelStyles } from "../../globalStyles";
-import { stopProp } from "../tree/tipSelectedPanel";
+import { stopProp } from "../tree/infoPanels/click";
 import { authorString } from "../../util/stringHelpers";
 import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";

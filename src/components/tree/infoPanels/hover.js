@@ -1,8 +1,8 @@
 import React from "react";
-import { infoPanelStyles } from "../../globalStyles";
-import { prettyString } from "../../util/stringHelpers";
-import { numericToCalendar } from "../../util/dateHelpers";
-import { getTipColorAttribute } from "./treeHelpers";
+import { infoPanelStyles } from "../../../globalStyles";
+import { prettyString } from "../../../util/stringHelpers";
+import { numericToCalendar } from "../../../util/dateHelpers";
+import { getTipColorAttribute } from "../treeHelpers";
 
 const infoLineJSX = (item, value) => (
   <g>
@@ -236,7 +236,7 @@ const displayVaccineInfo = (d) => {
 };
 
 /* the actual component - a pure function, so we can return early if needed */
-const InfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
+const HoverInfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
   hovered, viewer, colorBy, colorByConfidence, colorScale}) => {
   if (!(tree && hovered)) {
     return null;
@@ -280,4 +280,4 @@ const InfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
   );
 };
 
-export default InfoPanel;
+export default HoverInfoPanel;

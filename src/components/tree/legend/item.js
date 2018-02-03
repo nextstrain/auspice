@@ -1,13 +1,18 @@
 import React from "react";
-import { legendMouseEnterExit } from "../../actions/treeProperties";
-import { dataFont, darkGrey } from "../../globalStyles";
-import { prettyString } from "../../util/stringHelpers";
+import { legendMouseEnterExit } from "../../../actions/treeProperties";
+import { dataFont, darkGrey } from "../../../globalStyles";
+import { prettyString } from "../../../util/stringHelpers";
 
 const LegendItem = ({
-  dispatch, transform,
-  legendRectSize, legendSpacing,
-  rectStroke, rectFill,
-  label, dFreq}) => (
+  dispatch,
+  transform,
+  legendRectSize,
+  legendSpacing,
+  rectStroke,
+  rectFill,
+  label,
+  dFreq
+}) => (
   <g
     transform={transform}
     onMouseEnter={() => {

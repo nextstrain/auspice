@@ -1,7 +1,7 @@
 import React from "react";
-import { infoPanelStyles } from "../../globalStyles";
-import { prettyString, authorString } from "../../util/stringHelpers";
-import { numericToCalendar } from "../../util/dateHelpers";
+import { infoPanelStyles } from "../../../globalStyles";
+import { prettyString, authorString } from "../../../util/stringHelpers";
+import { numericToCalendar } from "../../../util/dateHelpers";
 // import { getAuthor } from "../download/helperFunctions";
 
 const styles = {
@@ -79,7 +79,7 @@ const displayVaccineInfo = (d) => {
 const validValue = (value) => value !== "?" && value !== undefined && value !== "undefined";
 const validAttr = (attrs, key) => key in attrs && validValue(attrs[key]);
 
-const TipSelectedPanel = ({tip, goAwayCallback, metadata}) => {
+const TipClickedPanel = ({tip, goAwayCallback, metadata}) => {
   if (!tip) {return null;}
   const url = validAttr(tip.n.attr, "url") ? formatURL(tip.n.attr.url) : false;
   const uncertainty = "num_date_confidence" in tip.n.attr && tip.n.attr.num_date_confidence[0] !== tip.n.attr.num_date_confidence[1];
@@ -121,4 +121,4 @@ const TipSelectedPanel = ({tip, goAwayCallback, metadata}) => {
   );
 };
 
-export default TipSelectedPanel;
+export default TipClickedPanel;

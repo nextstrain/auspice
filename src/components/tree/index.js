@@ -4,13 +4,13 @@ import { connect } from "react-redux";
 import { select } from "d3-selection";
 import { ReactSVGPanZoom } from "react-svg-pan-zoom";
 import Card from "../framework/card";
-import Legend from "./legend";
+import Legend from "./legend/legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
-import PhyloTree from "./phyloTree";
+import PhyloTree from "./phyloTree/phyloTree";
 import { mediumTransitionDuration } from "../../util/globals";
-import InfoPanel from "./infoPanel";
-import TipSelectedPanel from "./tipSelectedPanel";
+import HoverInfoPanel from "./infoPanels/hover";
+import TipClickedPanel from "./infoPanels/click";
 import computeResponsive from "../../util/computeResponsive";
 import { updateStylesAndAttrs, salientPropChanges } from "./reactD3Interface";
 import * as callbacks from "./reactD3Interface/callbacks";
@@ -39,7 +39,7 @@ there are actually backlinks from the phylotree tree
     panelLayout: state.controls.panelLayout
   };
 })
-class TreeView extends React.Component {
+class Tree extends React.Component {
   constructor(props) {
     super(props);
     this.Viewer = null;
@@ -173,7 +173,7 @@ class TreeView extends React.Component {
     return (
       <Card center title={cardTitle}>
         <Legend padding={this.props.padding}/>
-        <InfoPanel
+        <HoverInfoPanel
           tree={this.state.tree}
           mutType={this.props.mutType}
           temporalConfidence={this.props.temporalConfidence.display}
@@ -184,7 +184,7 @@ class TreeView extends React.Component {
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
         />
-        <TipSelectedPanel
+        <TipClickedPanel
           goAwayCallback={(d) => callbacks.clearSelectedTip.bind(this)(d)}
           tip={this.state.selectedTip}
           metadata={this.props.metadata}
@@ -256,4 +256,4 @@ class TreeView extends React.Component {
   }
 }
 
-export default TreeView;
+export default Tree;

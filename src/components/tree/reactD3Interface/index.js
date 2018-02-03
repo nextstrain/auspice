@@ -6,7 +6,7 @@ import { viewEntireTree } from "./callbacks";
  * function to help determine what parts of phylotree should update
  * @param {obj} props redux props
  * @param {obj} nextProps next redux props
- * @param {obj} tree phyloTree object (stored in the state of treeView)
+ * @param {obj} tree phyloTree object (stored in the state of the Tree component)
  * @return {obj} values are mostly bools, but not always
  */
 export const salientPropChanges = (props, nextProps, tree) => {
