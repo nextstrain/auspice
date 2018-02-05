@@ -295,7 +295,7 @@ export const calcVisibility = (tree, controls, dates) => {
 
 const branchInterpolateColour = "#BBB";
 const branchOpacityConstant = 0.4;
-const branchOpacityFunction = scalePow()
+export const branchOpacityFunction = scalePow()
   .exponent([0.3])
   .domain([0, 1])
   .range([branchOpacityConstant, 1])
