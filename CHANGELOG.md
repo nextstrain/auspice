@@ -1,3 +1,5 @@
+## version 1.10.0 - 2018/02/05
+
 ### Features
 * Local Branching Index (LBI) coloring can be calculated in auspice (code identical to nextflu) if specified in `color_options` (meta JSON) [#491](https://github.com/nextstrain/auspice/pull/491)
 
