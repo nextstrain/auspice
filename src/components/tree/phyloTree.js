@@ -168,7 +168,8 @@ PhyloTree.prototype.setDefaults = function () {
         tipLabelFill: "#555",
         tipLabelPadX: 8,
         tipLabelPadY: 2,
-      mapToScreenDebounceTime: 500
+        showVaccines: false,
+        mapToScreenDebounceTime: 500
     };
 };
 
@@ -183,16 +184,16 @@ PhyloTree.prototype.setDefaults = function () {
  * @param  visibility (OPTIONAL) -- array of "visible" or "hidden"
  * @return {null}
  */
-PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility, drawConfidence) {
+PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks, branchThickness, visibility, drawConfidence, vaccines) {
   if (branchThickness) {
     this.nodes.forEach(function(d, i) {
       d["stroke-width"] = branchThickness[i];
     });
   }
-
   this.svg = svg;
   this.params = Object.assign(this.params, options);
   this.callbacks = callbacks;
+  this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
 
   this.clearSVG();
   this.setDistance(distance);
@@ -205,6 +206,9 @@ PhyloTree.prototype.render = function(svg, layout, distance, options, callbacks,
     this.drawBranches();
   }
   this.drawTips();
+  if (this.params.showVaccines) {
+    this.drawVaccines();
+  }
   this.drawCladeLabels();
   if (visibility) {
     this.nodes.forEach(function(d, i) {
@@ -817,8 +821,31 @@ PhyloTree.prototype.clearSVG = function() {
   this.svg.selectAll('.tip').remove();
   this.svg.selectAll('.branch').remove();
   this.svg.selectAll('.branchLabel').remove();
+  this.svg.selectAll(".vaccine").remove();
 };
 
+/**
+ * adds crosses to the vaccines
+ * @return {null}
+ */
+PhyloTree.prototype.drawVaccines = function() {
+  this.tipElements = this.svg.append("g").selectAll(".vaccine")
+    .data(this.vaccines)
+    .enter()
+    .append("text")
+      .attr("class", "vaccine")
+      .attr("x", (d) => d.xTip)
+      .attr("y", (d) => d.yTip)
+      .attr('text-anchor', 'middle')
+      .attr('dominant-baseline', 'central')
+      .style("font-family", this.params.fontFamily)
+      .style("font-size", "20px")
+      .style("stroke", "#fff")
+      .style("fill", darkGrey)
+      .text('\u2716')
+      // .style("cursor", "pointer")
+      .on("mouseover", (d) => console.log("vaccine", d))
+};
 
 /**
  * adds all the tip circles to the svg, they have class tip
@@ -1117,6 +1144,12 @@ PhyloTree.prototype.updateGeometryFade = function(dt) {
         .attr("cy", function(d) {
           return d.yTip;
         });
+      svg.selectAll(".vaccine")
+        .filter((d) => d.update)
+        .transition()
+          .duration(dt)
+          .attr("x", (d) => d.xTip)
+          .attr("y", (d) => d.yTip);
     };
   };
   setTimeout(tipTrans(this.svg, dt), 0.5 * dt);
@@ -1169,6 +1202,13 @@ PhyloTree.prototype.updateGeometry = function (dt) {
       .duration(dt)
       .attr("cx", (d) => d.xTip)
       .attr("cy", (d) => d.yTip);
+
+  this.svg.selectAll(".vaccine")
+    .filter((d) => d.update)
+    .transition()
+      .duration(dt)
+      .attr("x", (d) => d.xTip)
+      .attr("y", (d) => d.yTip);
 
   const branchEls = [".S", ".T"];
   for (let i = 0; i < 2; i++) {

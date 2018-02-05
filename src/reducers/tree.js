@@ -1,4 +1,4 @@
-import { flattenTree, appendParentsToTree } from "../components/tree/treeHelpers";
+import { flattenTree, appendParentsToTree, processVaccines } from "../components/tree/treeHelpers";
 import { processNodes, calcLayouts } from "../components/tree/processNodes";
 import { getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
 import * as types from "../actions/types";
@@ -19,6 +19,7 @@ const getDefaultState = () => {
     tipRadiiVersion: 0,
     branchThickness: null,
     branchThicknessVersion: 0,
+    vaccines: false,
     version: 0,
     idxOfInViewRootNode: 0,
     visibleStateCounts: {},
@@ -43,13 +44,12 @@ const Tree = (state = getDefaultState(), action) => {
       appendParentsToTree(action.tree);
       const nodesArray = flattenTree(action.tree);
       const nodes = processNodes(nodesArray);
+      const vaccines = processVaccines(nodes, action.meta.vaccine_choices);
       calcLayouts(nodes, ["div", "num_date"]);
-      // getAllValuesAndCountsOfTraitFromTree
       return Object.assign({}, getDefaultState(), {
-        nodes: nodes,
-        attrs: getAttrsOnTerminalNodes(nodes),
-        totalStateCounts: {},
-        visibleStateCounts: {}
+        nodes,
+        vaccines,
+        attrs: getAttrsOnTerminalNodes(nodes)
       });
     }
     case types.DATA_VALID:
