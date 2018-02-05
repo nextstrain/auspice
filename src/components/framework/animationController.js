@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { animationWindowWidth, animationTick, enableAnimationPerfTesting } from "../../util/globals";
+import { animationWindowWidth, animationTick } from "../../util/globals";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/treeProperties";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON, MIDDLEWARE_ONLY_ANIMATION_STARTED } from "../../actions/types";
@@ -71,14 +71,14 @@ class AnimationController extends React.Component {
     /* tickFn is a closure, therefore defined within maybeAnimateMap */
     const tickFn = () => {
       // console.log("TICK")
-      if (enableAnimationPerfTesting) { window.Perf.bump(); }
+      // if (enableAnimationPerfTesting) { window.Perf.bump(); }
 
       /* Check (via redux) if animation should not continue. This happens when the pause or reset button has been hit. */
       if (this.props.animationPlayPauseButton === "Play") {
         // console.log("STOP. Reason: redux told me to!. Clearing loop #", window.NEXTSTRAIN.animationTickReference);
         clearInterval(window.NEXTSTRAIN.animationTickReference);
         window.NEXTSTRAIN.animationTickReference = null;
-        if (enableAnimationPerfTesting) { window.Perf.resetCount(); }
+        // if (enableAnimationPerfTesting) { window.Perf.resetCount(); }
         return;
       }
 

@@ -4,8 +4,6 @@ import ReactGA from "react-ga";
 import { Provider } from "react-redux";
 import { AppContainer } from 'react-hot-loader';
 import injectTapEventPlugin from "react-tap-event-plugin";
-import { setUpPerf } from "./util/quantify-performance";
-import { enableAnimationPerfTesting } from "./util/globals";
 import Monitor from "./components/framework/monitor";
 import PageSelect from "./components/framework/pageSelect";
 import Notifications from "./components/notifications/notifications";
@@ -27,11 +25,6 @@ if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
 
 /* google analytics */
 ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-2");
-
-/* Performance measurement - DEV ONLY */
-if (enableAnimationPerfTesting) {
-  setUpPerf();
-}
 
 const Root = () => {
   return (

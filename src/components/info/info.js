@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
@@ -100,12 +101,12 @@ class Info extends React.Component {
     super(props);
   }
   static propTypes = {
-    filters: React.PropTypes.object.isRequired,
-    metadata: React.PropTypes.object, // not required. starts as null
-    nodes: React.PropTypes.array, // not required. starts as null
-    visibility: React.PropTypes.array, // not required. starts as null
-    dispatch: React.PropTypes.func.isRequired,
-    idxOfInViewRootNode: React.PropTypes.number
+    filters: PropTypes.object.isRequired,
+    metadata: PropTypes.object, // not required. starts as null
+    nodes: PropTypes.array, // not required. starts as null
+    visibility: PropTypes.array, // not required. starts as null
+    dispatch: PropTypes.func.isRequired,
+    idxOfInViewRootNode: PropTypes.number
   }
   getStyles(responsive) {
     let fontSize = 32;
