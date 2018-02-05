@@ -244,11 +244,11 @@ const HoverInfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
   let inner;
   if (tip) {
     inner = (
-      <p>
+      <g>
         {displayVaccineInfo(d)}
         {tipDisplayColorByInfo(d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale)}
         {distanceMeasure === "div" ? getBranchDivJSX(d.n) : getBranchTimeJSX(d.n, temporalConfidence)}
-      </p>
+      </g>
     );
   } else {
     inner = (
