@@ -1,7 +1,6 @@
 import _debounce from "lodash/debounce";
 import { max } from "d3-array";
 import { scaleLinear } from "d3-scale";
-import { flattenTree, appendParentsToTree } from "../treeHelpers";
 import { defaultParams } from "./defaultParams";
 import { addLeafCount, createChildrenAndParents } from "./helpers";
 
@@ -81,7 +80,7 @@ PhyloTree.prototype.updateDistance = generalUpdates.updateDistance;
 PhyloTree.prototype.updateLayout = generalUpdates.updateLayout;
 PhyloTree.prototype.updateGeometry = generalUpdates.updateGeometry;
 PhyloTree.prototype.updateGeometryFade = generalUpdates.updateGeometryFade;
-PhyloTree.prototype.updateTimeBar = (d) => {};
+PhyloTree.prototype.updateTimeBar = () => {};
 PhyloTree.prototype.updateMultipleArray = generalUpdates.updateMultipleArray;
 PhyloTree.prototype.updateStyleOrAttribute = generalUpdates.updateStyleOrAttribute;
 PhyloTree.prototype.updateStyleOrAttributeArray = generalUpdates.updateStyleOrAttributeArray;

@@ -155,7 +155,7 @@ export const viewEntireTree = function viewEntireTree() {
   this.setState({selectedBranch: null, selectedTip: null});
 };
 
-export const handleIconClick = function handleIconClick(tool) {
+export const handleIconClickHOF = function handleIconClickHOF(tool) {
   return () => {
     const V = this.Viewer.getValue();
     if (tool === "zoom-in") {

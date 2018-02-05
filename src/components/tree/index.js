@@ -50,6 +50,11 @@ class Tree extends React.Component {
       selectedTip: null,
       tree: null
     };
+    /* bind callbacks */
+    this.clearSelectedTip = callbacks.clearSelectedTip.bind(this);
+    this.resetView = callbacks.resetView.bind(this);
+    this.onViewerChange = callbacks.onViewerChange.bind(this);
+    this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
   }
   static propTypes = {
     mutType: PropTypes.string.isRequired
@@ -72,7 +77,7 @@ class Tree extends React.Component {
     } else if (changes.newData) {
       tree = this.makeTree(nextProps);
       /* extra (initial, once only) call to update the tree colouring */
-      for (const k in changes) {
+      for (const k in changes) { // eslint-disable-line
         changes[k] = false;
       }
       changes.colorBy = true;
@@ -121,21 +126,21 @@ class Tree extends React.Component {
 
   makeTree(nextProps) {
     const nodes = nextProps.tree.nodes;
-    if (nodes && this.refs.d3TreeElement) {
+    if (nodes && this.d3ref) {
       const myTree = new PhyloTree(nodes);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
       myTree.render(
-        select(this.refs.d3TreeElement),
+        select(this.d3ref),
         this.props.layout,
         this.props.distanceMeasure,
         { /* options */
           grid: true,
           confidence: nextProps.temporalConfidence.display,
           showVaccines: !!nextProps.tree.vaccines,
-          branchLabels: true,      //generate DOM object
-          showBranchLabels: false,  //hide them initially -> couple to redux state
-          tipLabels: true,      //generate DOM object
-          showTipLabels: true   //show
+          branchLabels: true,
+          showBranchLabels: false,
+          tipLabels: true,
+          showTipLabels: true
         },
         { /* callbacks */
           onTipHover: callbacks.onTipHover.bind(this),
@@ -155,9 +160,8 @@ class Tree extends React.Component {
         nextProps.tree.vaccines
       );
       return myTree;
-    } else {
-      return null;
     }
+    return null;
   }
 
   render() {
@@ -185,7 +189,7 @@ class Tree extends React.Component {
           colorScale={this.props.colorScale}
         />
         <TipClickedPanel
-          goAwayCallback={(d) => callbacks.clearSelectedTip.bind(this)(d)}
+          goAwayCallback={this.clearSelectedTip}
           tip={this.state.selectedTip}
           metadata={this.props.metadata}
         />
@@ -203,10 +207,8 @@ class Tree extends React.Component {
           detectAutoPan={false}
           background={"#FFF"}
           miniaturePosition={"none"}
-          // onMouseDown={this.startPan.bind(this)}
-          onDoubleClick={callbacks.resetView.bind(this)}
-          //onMouseUp={this.endPan.bind(this)}
-          onChangeValue={callbacks.onViewerChange.bind(this)}
+          onDoubleClick={this.resetView}
+          onChangeValue={this.onViewerChange}
         >
           <svg style={{pointerEvents: "auto"}}
             width={responsive.width}
@@ -217,35 +219,32 @@ class Tree extends React.Component {
               height={responsive.height}
               id={"d3TreeElement"}
               style={{cursor: "default"}}
-              ref="d3TreeElement"
-            >
-            </g>
+              ref={(c) => {this.d3ref = c;}}
+            />
           </svg>
         </ReactSVGPanZoom>
-        <svg width={50} height={130}
-          style={{position: "absolute", right: 20, bottom: 20}}
-        >
-            <defs>
-              <filter id="dropshadow" height="130%">
-                <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-                <feOffset dx="2" dy="2" result="offsetblur"/>
-                <feComponentTransfer>
-                  <feFuncA type="linear" slope="0.2"/>
-                </feComponentTransfer>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
+        <svg width={50} height={130} style={{position: "absolute", right: 20, bottom: 20}}>
+          <defs>
+            <filter id="dropshadow" height="130%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+              <feOffset dx="2" dy="2" result="offsetblur"/>
+              <feComponentTransfer>
+                <feFuncA type="linear" slope="0.2"/>
+              </feComponentTransfer>
+              <feMerge>
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
           <ZoomInIcon
-            handleClick={callbacks.handleIconClick.bind(this)("zoom-in")}
+            handleClick={this.handleIconClickHOF("zoom-in")}
             active
             x={10}
             y={50}
           />
           <ZoomOutIcon
-            handleClick={callbacks.handleIconClick.bind(this)("zoom-out")}
+            handleClick={this.handleIconClickHOF("zoom-out")}
             active
             x={10}
             y={90}

@@ -24,7 +24,7 @@ const styles = {
 };
 
 export const stopProp = (e) => {
-  if (!e) {e = window.event;}
+  if (!e) {e = window.event;} // eslint-disable-line no-param-reassign
   e.cancelBubble = true;
   if (e.stopPropagation) {e.stopPropagation();}
 };
@@ -39,9 +39,9 @@ const item = (key, value) => (
 
 const formatURL = (url) => {
   if (url !== undefined && url.startsWith("https_")) {
-    url = url.replace("https_", "https:");
+    return url.replace("https_", "https:");
   } else if (url !== undefined && url.startsWith("http_")) {
-    url = url.replace("http_", "http:");
+    return url.replace("http_", "http:");
   }
   return url;
 };

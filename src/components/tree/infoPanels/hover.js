@@ -20,8 +20,8 @@ const infoBlockJSX = (item, values) => (
     <p style={{marginBottom: "-0.7em", fontWeight: "500"}}>
       {item}
     </p>
-    {values.map((k, i) => (
-      <p key={i} style={{fontWeight: "300", marginBottom: "-0.9em", marginLeft: "0em"}}>
+    {values.map((k) => (
+      <p key={k} style={{fontWeight: "300", marginBottom: "-0.9em", marginLeft: "0em"}}>
         {k}
       </p>
     ))}
@@ -69,7 +69,7 @@ const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidenc
   if (colorByConfidence === true) {
     const lkey = colorBy + "_confidence";
     if (Object.keys(d.attr).indexOf(lkey) === -1) {
-      console.log("Error - couldn't find confidence vals for ", lkey);
+      console.error("Error - couldn't find confidence vals for ", lkey);
       return null;
     }
     const vals = Object.keys(d.attr[lkey])
@@ -144,7 +144,7 @@ const getMutationsJSX = (d, mutType) => {
     }
     return infoLineJSX("No amino acid mutations", "");
   }
-  console.log("Error parsing mutations for branch", d.strain);
+  console.warn("Error parsing mutations for branch", d.strain);
   return null;
 };
 
@@ -194,7 +194,7 @@ const getPanelStyling = (d, viewer) => {
   };
   if (pos.x < viewerState.viewerWidth * 0.6) {
     styles.container.left = pos.x + xOffset;
-  }else{
+  } else {
     styles.container.right = viewerState.viewerWidth - pos.x + xOffset;
   }
   if (pos.y < viewerState.viewerHeight * 0.55) {
@@ -207,11 +207,8 @@ const getPanelStyling = (d, viewer) => {
 
 const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale) => {
   if (colorBy === "num_date") {
-    if (distanceMeasure === "num_date") {
-      return null;
-    } else {
-      return getBranchTimeJSX(d.n, temporalConfidence);
-    }
+    if (distanceMeasure === "num_date") return null;
+    return getBranchTimeJSX(d.n, temporalConfidence);
   }
   if (colorBy.slice(0, 2) === "gt") {
     const key = mutType === "nuc" ?
@@ -257,7 +254,7 @@ const HoverInfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
     inner = (
       <g>
         {getBranchDescendents(d.n)}
-        {/*getFrequenciesJSX(d.n, mutType)*/}
+        {/* getFrequenciesJSX(d.n, mutType) */}
         {getMutationsJSX(d.n, mutType)}
         {distanceMeasure === "div" ? getBranchDivJSX(d.n) : getBranchTimeJSX(d.n, temporalConfidence)}
         {displayColorBy(d.n, distanceMeasure, temporalConfidence, colorByConfidence, colorBy)}
