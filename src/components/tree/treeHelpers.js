@@ -1,5 +1,5 @@
-/* eslint-disable */
-
+import { rgb } from "d3-color";
+import { interpolateRgb } from "d3-interpolate";
 import { scalePow } from "d3-scale";
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "../../util/globals";
 
@@ -70,69 +70,11 @@ export const appendParentsToTree = (root) => {
 
 };
 
-export const gatherTips = (node, tips) => {
-
-  if (typeof node.children !== "undefined") {
-    for (let i = 0, c = node.children.length; i < c; i++) {
-      gatherTips(node.children[i], tips);
-    }
-  } else {
-    tips.push(node);
-  }
-  return tips;
-};
-
-export const getVaccines = (tips) => {
-  const v = [];
-  tips.forEach((tip) => {
-    if (vaccineStrains.indexOf(tip.strain) !== -1) {
-      tip.choice = vaccineChoice[tip.strain];
-      v.push(tip);
-    }
-  });
-  return v;
-};
-
-export const calcDates = (nodes) => {
-  nodes.forEach((d) => {
-    d.dateval = new Date(d.date);
-  });
-};
-
-export const minimumAttribute = (node, attr, min) => {
-  if (typeof node.children !== "undefined") {
-    for (let i = 0, c = node.children.length; i < c; i++) {
-      min = minimumAttribute(node.children[i], attr, min);
-    }
-  } else if (node[attr] < min) {
-    min = node[attr];
-  }
-  return min;
-};
-
-export const maximumAttribute = (node, attr, max) => {
-  if (typeof node.children !== "undefined") {
-    for (let i = 0, c = node.children.length; i < c; i++) {
-      max = maximumAttribute(node.children[i], attr, max);
-    }
-  } else if (node[attr] > max) {
-    max = node[attr];
-  }
-  return max;
-};
-
-export const calcBranchLength = (node) => {
-  if (typeof node.children !== "undefined") {
-    for (let i = 0, c = node.children.length; i < c; i++) {
-      calcBranchLength(node.children[i]);
-      node.children[i].branch_length = node.children[i].xvalue - node.xvalue;
-    }
-  }
-};
-
 /**
- * for each node, calculate the number of subtending tips (alive or dead)
-**/
+* for each node, calculate the number of subtending tips (alive or dead)
+* side effects: n.fullTipCount for each node
+*  @param root - deserialized JSON root to begin traversal
+*/
 export const calcFullTipCounts = (node) => {
   node.fullTipCount = 0;
   if (typeof node.children !== "undefined") {
@@ -145,10 +87,11 @@ export const calcFullTipCounts = (node) => {
   }
 };
 
-
 /**
- * for each node, calculate the number of tips in view.
-**/
+* for each node, calculate the number of subtending tips which are visible
+* side effects: n.tipCount for each node
+*  @param root - deserialized JSON root to begin traversal
+*/
 export const calcTipCounts = (node, visibility) => {
   node.tipCount = 0;
   if (typeof node.children !== "undefined") {
@@ -162,41 +105,15 @@ export const calcTipCounts = (node, visibility) => {
 };
 
 /**
-sets each node in the tree to alive=true if it has at least one descendent with current=true
-**/
-export const setNodeAlive = (node) => {
-  if (typeof node.children !== "undefined") {
-    let aliveChildren = false;
-    for (let i = 0, c = node.children.length; i < c; i++) {
-      setNodeAlive(node.children[i]);
-      aliveChildren = aliveChildren || node.children[i].alive;
-    }
-    node.alive = aliveChildren;
-  } else {
-    node.alive = node.current;
-  }
-};
-
-
-export const adjust_freq_by_date = (nodes, rootNode) => {
-  // console.log("all nodes and root node", nodes, rootNode)
-  return nodes.map((d) => {
-    // console.log("tipcount & rootnodeTipcount", d.tipCount, rootNode.tipCount)
-    // d.frequency = (d.tipCount) / rootNode.tipCount;
-  });
-};
-
-// export const arrayInEquality = function(a,b) {
-//   if (a&&b){
-//     const eq = a.map((d,i)=>d!==b[i]);
-//     return eq.some((d)=>d);
-//   }else{
-//     return true;
-//   }
-// };
-
-// branch thickness is from clade frequencies
-export const calcBranchThickness = function (nodes, visibility, rootIdx) {
+* calculates (and returns) an array of node (branch) thicknesses.
+* If the node isn't visible, the thickness is 1.
+* No side effects.
+* @param nodes - JSON nodes
+* @param visibility - visibility array (1-1 with nodes)
+* @param rootIdx - nodes index of the currently in-view root
+* @returns array of thicknesses (numeric)
+*/
+export const calcBranchThickness = (nodes, visibility, rootIdx) => {
   let maxTipCount = nodes[rootIdx].tipCount;
   /* edge case: no tips selected */
   if (!maxTipCount) {
@@ -207,6 +124,8 @@ export const calcBranchThickness = function (nodes, visibility, rootIdx) {
   ));
 };
 
+/* a getter for the value of the colour attribute of the node provided for the currently set colour
+note this is not the colour HEX */
 export const getTipColorAttribute = (node, colorScale) => {
   if (colorScale.colorBy.slice(0, 3) === "gt-" && colorScale.genotype) {
     return node.currentGt;
@@ -214,6 +133,8 @@ export const getTipColorAttribute = (node, colorScale) => {
   return node.attr[colorScale.colorBy];
 };
 
+/* generates and returns an array of colours (HEXs) for the nodes under the given colorScale */
+/* takes around 2ms on a 2000 tip tree */
 export const calcNodeColor = (tree, colorScale) => {
   if (tree && tree.nodes && colorScale && colorScale.colorBy) {
     const nodeColorAttr = tree.nodes.map((n) => getTipColorAttribute(n, colorScale));
@@ -223,11 +144,18 @@ export const calcNodeColor = (tree, colorScale) => {
   return null;
 };
 
+/**
+* equates a single tip and a legend element
+* exact match is required for categorical qunantities such as genotypes, regions
+* continuous variables need to fall into the interal (lower_bound[leg], leg]
+* @param selectedLegendItem - value of the selected tip attribute (numeric or string)
+* @param node - node (tip) in question
+* @param legendBoundsMap - if falsey, then exact match required. Else contains bounds for match.
+* @param colorScale - used to get the value of the attribute being used for colouring
+* @returns bool
+*/
 const determineLegendMatch = (selectedLegendItem, node, legendBoundsMap, colorScale) => {
   const nodeAttr = getTipColorAttribute(node, colorScale);
-  // equates a tip and a legend element
-  // exact match is required for categorical qunantities such as genotypes, regions
-  // continuous variables need to fall into the interal (lower_bound[leg], leg]
   if (legendBoundsMap) {
     return (nodeAttr <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
            (nodeAttr > legendBoundsMap.lower_bound[selectedLegendItem]);
@@ -235,27 +163,27 @@ const determineLegendMatch = (selectedLegendItem, node, legendBoundsMap, colorSc
   return nodeAttr === selectedLegendItem;
 };
 
+/**
+* produces the array of tip radii - if nothing's selected this is the hardcoded tipRadius
+* if there's a selectedLegendItem, then values will be small (like normal) or big (for those tips selected)
+* @param selectedLegendItem - value of the selected tip attribute (numeric or string)
+* @param colorScale - node (tip) in question
+* @param tree
+* @returns null (if data not ready) or array of tip radii
+*/
 export const calcTipRadii = (selectedLegendItem, colorScale, tree) => {
   if (selectedLegendItem && tree && tree.nodes) {
     const legendMap = colorScale.continuous ? colorScale.legendBoundsMap : false;
     return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, legendMap, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (tree && tree.nodes) {
-    return tree.nodes.map((d) => tipRadius);
+    return tree.nodes.map(() => tipRadius);
   }
   return null; // fallthrough
 };
 
-const parseFilterQuery = function (query) {
-  const tmp = query.split("-").map((d) => d.split("."));
-  return {
-    "fields": tmp.map((d) => d[0]),
-    "filters": tmp.map((d) => d[d.length - 1].split(","))
-  };
-};
-
 /* recursively mark the parents of a given node active
 by setting the node idx to true in the param visArray */
-const makeParentVisible = function (visArray, node) {
+const makeParentVisible = (visArray, node) => {
   if (node.arrayIdx === 0 || visArray[node.parent.arrayIdx]) {
     return; // this is the root of the tree or the parent was already visibile
   }
@@ -300,22 +228,21 @@ FILTERS:
  - filterPairs is a list of lists. Each list defines the filtering to do.
    i.e. [ [ region, [...values]], [authors, [...values]]]
 */
-export const calcVisibility = function (tree, controls, dates) {
+export const calcVisibility = (tree, controls, dates) => {
   if (tree.nodes) {
     /* reset visibility */
-    let visibility = tree.nodes.map((d) => {
-      return true;
-    });
+    let visibility = tree.nodes.map(() => true);
 
     // if we have an analysis slider active, then we must filter on that as well
     // note that min date for analyis doesnt apply
-    if (controls.analysisSlider && controls.analysisSlider.valid) {
-      /* extra slider is numerical rounded to 2dp */
-      const valid = tree.nodes.map((d) =>
-        d.attr[controls.analysisSlider.key] ? Math.round(d.attr[controls.analysisSlider.key] * 100) / 100 <= controls.analysisSlider.value : true
-      );
-      visibility = visibility.map((cv, idx) => (cv && valid[idx]));
-    }
+    // commented out as analysis slider will probably be removed soon!
+    // if (controls.analysisSlider && controls.analysisSlider.valid) {
+    //   /* extra slider is numerical rounded to 2dp */
+    //   const valid = tree.nodes.map((d) =>
+    //     d.attr[controls.analysisSlider.key] ? Math.round(d.attr[controls.analysisSlider.key] * 100) / 100 <= controls.analysisSlider.value : true
+    //   );
+    //   visibility = visibility.map((cv, idx) => (cv && valid[idx]));
+    // }
 
     // IN VIEW FILTERING (internal + terminal nodes)
     /* edge case: this fn may be called before the shell structure of the nodes
@@ -324,7 +251,7 @@ export const calcVisibility = function (tree, controls, dates) {
     let inView;
     try {
       inView = tree.nodes.map((d) => d.shell.inView);
-    } catch(e) {
+    } catch (e) {
       inView = tree.nodes.map(() => true);
     }
     /* intersect visibility and inView */
@@ -332,7 +259,7 @@ export const calcVisibility = function (tree, controls, dates) {
 
     // FILTERS
     const filterPairs = [];
-    Object.keys(controls.filters).map((key) => {
+    Object.keys(controls.filters).forEach((key) => {
       if (controls.filters[key].length) {
         filterPairs.push([key, controls.filters[key]]);
       }
@@ -355,7 +282,7 @@ export const calcVisibility = function (tree, controls, dates) {
     }
 
     // TIME FILTERING (internal + terminal nodes)
-    const timeFiltered = tree.nodes.map((d, idx) => {
+    const timeFiltered = tree.nodes.map((d) => {
       return !(d.attr.num_date < dates.dateMinNumeric || d.parent.attr.num_date > dates.dateMaxNumeric);
     });
     visibility = visibility.map((cv, idx) => (cv && timeFiltered[idx]));
@@ -366,9 +293,9 @@ export const calcVisibility = function (tree, controls, dates) {
   return "visible";
 };
 
-export const branchInterpolateColour = "#BBB";
-export const branchOpacityConstant = 0.4;
-export const branchOpacityFunction = scalePow()
+const branchInterpolateColour = "#BBB";
+const branchOpacityConstant = 0.4;
+const branchOpacityFunction = scalePow()
   .exponent([0.3])
   .domain([0, 1])
   .range([branchOpacityConstant, 1])
@@ -376,6 +303,27 @@ export const branchOpacityFunction = scalePow()
 // entropy calculation precomputed in augur
 // export const calcEntropyOfValues = (vals) =>
 //   vals.map((v) => v * Math.log(v + 1E-10)).reduce((a, b) => a + b, 0) * -1 / Math.log(vals.length);
+
+
+/**
+ * calculate array of HEXs to actually be displayed.
+ * (colorBy) confidences manifest as opacity ramps
+ * @param {obj} tree phyloTree object
+ * @param {bool} confidence enabled?
+ * @return {array} array of hex's. 1-1 with nodes.
+ */
+export const calcStrokeCols = (tree, confidence, colorBy) => {
+  if (confidence === true) {
+    return tree.nodeColors.map((col, idx) => {
+      const entropy = tree.nodes[idx].attr[colorBy + "_entropy"];
+      return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityFunction(entropy))).toString();
+    });
+  }
+  return tree.nodeColors.map((col) => {
+    return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString();
+  });
+};
+
 
 /**
 *  if the metadata JSON defines vaccine strains then create an array of the nodes
@@ -388,6 +336,25 @@ export const processVaccines = (nodes, vaccineChoices) => {
   if (!vaccineChoices) {return false;}
   const names = Object.keys(vaccineChoices);
   const vaccines = nodes.filter((d) => names.indexOf(d.strain) !== -1);
-  vaccines.forEach((d) => d.vaccineDate = vaccineChoices[d.strain]);
+  vaccines.forEach((d) => {d.vaccineDate = vaccineChoices[d.strain];});
   return vaccines;
-}
+};
+
+/**
+ * Adds certain properties to the nodes array - for each node in nodes it adds
+ * node.fullTipCount - see calcFullTipCounts() description
+ * node.hasChildren {bool}
+ * node.arrayIdx  {integer} - the index of the node in the nodes array
+ * @param  {array} nodes redux tree nodes
+ * @return {array} input array (kinda unneccessary)
+ * side-effects: node.hasChildren (bool) and node.arrayIdx (INT) for each node in nodes
+ */
+export const processNodes = (nodes) => {
+  const rootNode = nodes[0];
+  nodes.forEach((d) => {if (typeof d.attr === "undefined") {d.attr = {};} });
+  calcFullTipCounts(rootNode);
+  nodes.forEach((d) => {d.hasChildren = typeof d.children !== "undefined";});
+  /* set an index so that we can access visibility / nodeColors if needed */
+  nodes.forEach((d, idx) => {d.arrayIdx = idx;});
+  return nodes;
+};

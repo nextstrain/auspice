@@ -4,15 +4,16 @@ import { connect } from "react-redux";
 import { select } from "d3-selection";
 import { ReactSVGPanZoom } from "react-svg-pan-zoom";
 import Card from "../framework/card";
-import Legend from "./legend";
+import Legend from "./legend/legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
-import PhyloTree from "./phyloTree";
+import PhyloTree from "./phyloTree/phyloTree";
 import { mediumTransitionDuration } from "../../util/globals";
-import InfoPanel from "./infoPanel";
-import TipSelectedPanel from "./tipSelectedPanel";
+import HoverInfoPanel from "./infoPanels/hover";
+import TipClickedPanel from "./infoPanels/click";
 import computeResponsive from "../../util/computeResponsive";
-import * as funcs from "./treeViewFunctions";
+import { updateStylesAndAttrs, salientPropChanges } from "./reactD3Interface";
+import * as callbacks from "./reactD3Interface/callbacks";
 
 /*
 this.props.tree contains the nodes etc used to build the PhyloTree
@@ -38,7 +39,7 @@ there are actually backlinks from the phylotree tree
     panelLayout: state.controls.panelLayout
   };
 })
-class TreeView extends React.Component {
+class Tree extends React.Component {
   constructor(props) {
     super(props);
     this.Viewer = null;
@@ -49,6 +50,11 @@ class TreeView extends React.Component {
       selectedTip: null,
       tree: null
     };
+    /* bind callbacks */
+    this.clearSelectedTip = callbacks.clearSelectedTip.bind(this);
+    this.resetView = callbacks.resetView.bind(this);
+    this.onViewerChange = callbacks.onViewerChange.bind(this);
+    this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
   }
   static propTypes = {
     mutType: PropTypes.string.isRequired
@@ -58,7 +64,7 @@ class TreeView extends React.Component {
     /* This both creates the tree (when it's loaded into redux) and
     works out what to update, based upon changes to redux.control */
     let tree = this.state.tree;
-    const changes = funcs.salientPropChanges(this.props, nextProps, tree);
+    const changes = salientPropChanges(this.props, nextProps, tree);
     /* usefull for debugging: */
     // console.log("CWRP Changes:",
     //    Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {
@@ -71,11 +77,11 @@ class TreeView extends React.Component {
     } else if (changes.newData) {
       tree = this.makeTree(nextProps);
       /* extra (initial, once only) call to update the tree colouring */
-      for (const k in changes) {
+      for (const k in changes) { // eslint-disable-line
         changes[k] = false;
       }
       changes.colorBy = true;
-      funcs.updateStylesAndAttrs(this, changes, nextProps, tree);
+      updateStylesAndAttrs(this, changes, nextProps, tree);
       this.setState({tree});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
@@ -83,14 +89,14 @@ class TreeView extends React.Component {
       return null; /* return to avoid an unnecessary updateStylesAndAttrs call */
     }
     if (tree) {
-      funcs.updateStylesAndAttrs(this, changes, nextProps, tree);
+      updateStylesAndAttrs(this, changes, nextProps, tree);
     }
     return null;
   }
 
   componentDidMount() {
     const tree = this.makeTree(this.props);
-    funcs.updateStylesAndAttrs(this, {colorBy: true}, this.props, tree);
+    updateStylesAndAttrs(this, {colorBy: true}, this.props, tree);
     this.setState({tree});
     if (this.Viewer) {
       this.Viewer.fitToViewer();
@@ -120,33 +126,33 @@ class TreeView extends React.Component {
 
   makeTree(nextProps) {
     const nodes = nextProps.tree.nodes;
-    if (nodes && this.refs.d3TreeElement) {
-      const myTree = new PhyloTree(nodes[0]);
+    if (nodes && this.d3ref) {
+      const myTree = new PhyloTree(nodes);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
       myTree.render(
-        select(this.refs.d3TreeElement),
+        select(this.d3ref),
         this.props.layout,
         this.props.distanceMeasure,
         { /* options */
           grid: true,
           confidence: nextProps.temporalConfidence.display,
           showVaccines: !!nextProps.tree.vaccines,
-          branchLabels: true,      //generate DOM object
-          showBranchLabels: false,  //hide them initially -> couple to redux state
-          tipLabels: true,      //generate DOM object
-          showTipLabels: true   //show
+          branchLabels: true,
+          showBranchLabels: false,
+          tipLabels: true,
+          showTipLabels: true
         },
         { /* callbacks */
-          onTipHover: funcs.onTipHover.bind(this),
-          onTipClick: funcs.onTipClick.bind(this),
-          onBranchHover: funcs.onBranchHover.bind(this),
-          onBranchClick: funcs.onBranchClick.bind(this),
-          onBranchLeave: funcs.onBranchLeave.bind(this),
-          onTipLeave: funcs.onTipLeave.bind(this),
-          branchLabel: funcs.branchLabel,
-          branchLabelSize: funcs.branchLabelSize,
+          onTipHover: callbacks.onTipHover.bind(this),
+          onTipClick: callbacks.onTipClick.bind(this),
+          onBranchHover: callbacks.onBranchHover.bind(this),
+          onBranchClick: callbacks.onBranchClick.bind(this),
+          onBranchLeave: callbacks.onBranchLeave.bind(this),
+          onTipLeave: callbacks.onTipLeave.bind(this),
+          branchLabel: callbacks.branchLabel,
+          branchLabelSize: callbacks.branchLabelSize,
           tipLabel: (d) => d.n.strain,
-          tipLabelSize: funcs.tipLabelSize.bind(this)
+          tipLabelSize: callbacks.tipLabelSize.bind(this)
         },
         nextProps.tree.branchThickness, /* guarenteed to be in redux by now */
         nextProps.tree.visibility,
@@ -154,9 +160,8 @@ class TreeView extends React.Component {
         nextProps.tree.vaccines
       );
       return myTree;
-    } else {
-      return null;
     }
+    return null;
   }
 
   render() {
@@ -172,7 +177,7 @@ class TreeView extends React.Component {
     return (
       <Card center title={cardTitle}>
         <Legend padding={this.props.padding}/>
-        <InfoPanel
+        <HoverInfoPanel
           tree={this.state.tree}
           mutType={this.props.mutType}
           temporalConfidence={this.props.temporalConfidence.display}
@@ -183,8 +188,8 @@ class TreeView extends React.Component {
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
         />
-        <TipSelectedPanel
-          goAwayCallback={(d) => funcs.clearSelectedTip.bind(this)(d)}
+        <TipClickedPanel
+          goAwayCallback={this.clearSelectedTip}
           tip={this.state.selectedTip}
           metadata={this.props.metadata}
         />
@@ -202,10 +207,8 @@ class TreeView extends React.Component {
           detectAutoPan={false}
           background={"#FFF"}
           miniaturePosition={"none"}
-          // onMouseDown={this.startPan.bind(this)}
-          onDoubleClick={funcs.resetView.bind(this)}
-          //onMouseUp={this.endPan.bind(this)}
-          onChangeValue={ funcs.onViewerChange.bind(this) }
+          onDoubleClick={this.resetView}
+          onChangeValue={this.onViewerChange}
         >
           <svg style={{pointerEvents: "auto"}}
             width={responsive.width}
@@ -216,35 +219,32 @@ class TreeView extends React.Component {
               height={responsive.height}
               id={"d3TreeElement"}
               style={{cursor: "default"}}
-              ref="d3TreeElement"
-            >
-            </g>
+              ref={(c) => {this.d3ref = c;}}
+            />
           </svg>
         </ReactSVGPanZoom>
-        <svg width={50} height={130}
-          style={{position: "absolute", right: 20, bottom: 20}}
-        >
-            <defs>
-              <filter id="dropshadow" height="130%">
-                <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-                <feOffset dx="2" dy="2" result="offsetblur"/>
-                <feComponentTransfer>
-                  <feFuncA type="linear" slope="0.2"/>
-                </feComponentTransfer>
-                <feMerge>
-                  <feMergeNode/>
-                  <feMergeNode in="SourceGraphic"/>
-                </feMerge>
-              </filter>
-            </defs>
+        <svg width={50} height={130} style={{position: "absolute", right: 20, bottom: 20}}>
+          <defs>
+            <filter id="dropshadow" height="130%">
+              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+              <feOffset dx="2" dy="2" result="offsetblur"/>
+              <feComponentTransfer>
+                <feFuncA type="linear" slope="0.2"/>
+              </feComponentTransfer>
+              <feMerge>
+                <feMergeNode/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
           <ZoomInIcon
-            handleClick={funcs.handleIconClick.bind(this)("zoom-in")}
+            handleClick={this.handleIconClickHOF("zoom-in")}
             active
             x={10}
             y={50}
           />
           <ZoomOutIcon
-            handleClick={funcs.handleIconClick.bind(this)("zoom-out")}
+            handleClick={this.handleIconClickHOF("zoom-out")}
             active
             x={10}
             y={90}
@@ -255,4 +255,4 @@ class TreeView extends React.Component {
   }
 }
 
-export default TreeView;
+export default Tree;

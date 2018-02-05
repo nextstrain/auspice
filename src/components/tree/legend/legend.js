@@ -2,10 +2,10 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { rgb } from "d3-color";
-import LegendItem from "./legend-item";
-import { headerFont, darkGrey } from "../../globalStyles";
-import { legendRectSize, legendSpacing, fastTransitionDuration } from "../../util/globals";
-import { determineColorByGenotypeType } from "../../util/colorHelpers";
+import LegendItem from "./item";
+import { headerFont, darkGrey } from "../../../globalStyles";
+import { legendRectSize, legendSpacing, fastTransitionDuration } from "../../../util/globals";
+import { determineColorByGenotypeType } from "../../../util/colorHelpers";
 
 
 @connect((state) => {

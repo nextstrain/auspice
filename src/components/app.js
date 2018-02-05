@@ -11,7 +11,7 @@ import Controls from "./controls/controls";
 import { Entropy } from "./charts/entropy";
 import Map from "./map/map";
 import Info from "./info/info";
-import TreeView from "./tree/treeView";
+import Tree from "./tree";
 import { controlsHiddenWidth, narrativeWidth, controlsWidth } from "../util/globals";
 import { sidebarColor } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
@@ -106,7 +106,7 @@ class App extends React.Component {
                 <Background>
                   <Info padding={padding} />
                   {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
-                    <TreeView padding={padding} />
+                    <Tree padding={padding} />
                   )}
                   {this.props.metadata.panels.indexOf("map") === -1 ? null : (
                     <Map padding={padding} justGotNewDatasetRenderNewMap={false} />
