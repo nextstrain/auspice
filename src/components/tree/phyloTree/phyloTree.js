@@ -14,10 +14,8 @@ import * as layouts from "./layouts";
 import * as zoom from "./zoom";
 import * as grid from "./grid";
 import * as confidence from "./confidence";
-
-const contains = function(array, elem){
-  return array.some(function (d){return d===elem;});
-}
+import * as labels from "./labels";
+import * as generalUpdates from "./generalUpdates";
 
 /*
  * phylogenetic tree drawing class
@@ -118,10 +116,7 @@ PhyloTree.prototype.drawRegression = function(){
 };
 
 
-///****************************************************************
-
-// MAPPING TO SCREEN
-
+/* Z O O M ,    F I T     TO     S C R E E N ,     E T C */
 PhyloTree.prototype.zoomIntoClade = zoom.zoomIntoClade;
 PhyloTree.prototype.zoomToParent = zoom.zoomToParent;
 PhyloTree.prototype.mapToScreen = zoom.mapToScreen;
@@ -165,42 +160,6 @@ PhyloTree.prototype.setScales = function(margins) {
   }
 };
 
-PhyloTree.prototype.hideGrid = grid.hideGrid;
-PhyloTree.prototype.removeGrid = grid.removeGrid;
-PhyloTree.prototype.addGrid = grid.addGrid;
-
-/**
- * hide branchLabels
- */
-PhyloTree.prototype.hideBranchLabels = function() {
-  this.params.showBranchLabels=false;
-  this.svg.selectAll(".branchLabel").style('visibility', 'hidden');
-};
-
-/**
- * show branchLabels
- */
-PhyloTree.prototype.showBranchLabels = function() {
-  this.params.showBranchLabels=true;
-  this.svg.selectAll(".branchLabel").style('visibility', 'visible');
-};
-
-/* these functions are never called! */
-// /**
-//  * hide tipLabels
-//  */
-// PhyloTree.prototype.hideTipLabels = function() {
-//   this.params.showTipLabels=false;
-//   this.svg.selectAll(".tipLabel").style('visibility', 'hidden');
-// };
-//
-// /**
-//  * show tipLabels
-//  */
-// PhyloTree.prototype.showTipLabels = function() {
-//   this.params.showTipLabels=true;
-//   this.svg.selectAll(".tipLabel").style('visibility', 'visible');
-// };
 
 
 /*
@@ -352,44 +311,8 @@ PhyloTree.prototype.drawBranches = function() {
 };
 
 
-// PhyloTree.prototype.drawBranchLabels = function() {
-//   var params = this.params;
-//   const bLFunc = this.callbacks.branchLabel;
-//   this.branchLabels = this.svg.append("g").selectAll('.branchLabel')
-//     .data(this.nodes) //.filter(function (d){return bLFunc(d)!=="";}))
-//     .enter()
-//     .append("text")
-//     .text(function (d){return bLFunc(d);})
-//     .attr("class", "branchLabel")
-//     .style("text-anchor","end");
-// }
 
 
-PhyloTree.prototype.drawCladeLabels = function() {
-  this.branchLabels = this.svg.append("g").selectAll('.branchLabel')
-    .data(this.nodes.filter(function (d) { return typeof d.n.attr.clade_name !== 'undefined'; }))
-    .enter()
-    .append("text")
-    .style("visibility", "visible")
-    .text(function (d) { return d.n.attr.clade_name; })
-    .attr("class", "branchLabel")
-    .style("text-anchor", "end");
-}
-
-// PhyloTree.prototype.drawTipLabels = function() {
-//   var params = this.params;
-//   const tLFunc = this.callbacks.tipLabel;
-//   const inViewTerminalNodes = this.nodes
-//                   .filter(function(d){return d.terminal;})
-//                   .filter(function(d){return d.inView;});
-//   console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
-//   this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
-//     .data(inViewTerminalNodes)
-//     .enter()
-//     .append("text")
-//     .text(function (d){return tLFunc(d);})
-//     .attr("class", "tipLabel");
-// }
 
 /* C O N F I D E N C E    I N T E R V A L S */
 
@@ -398,319 +321,29 @@ PhyloTree.prototype.drawConfidence = confidence.drawConfidence;
 PhyloTree.prototype.drawSingleCI = confidence.drawSingleCI;
 PhyloTree.prototype.updateConfidence = confidence.updateConfidence;
 
-/************************************************/
-
-/**
- * call to change the distance measure
- * @param  attr -- attribute to be used as a distance measure, e.g. div or num_date
- * @param  dt -- time of transition in milliseconds
- * @return null
- */
-PhyloTree.prototype.updateDistance = function(attr,dt){
-  this.setDistance(attr);
-  this.setLayout(this.layout);
-  this.mapToScreen();
-  this.updateGeometry(dt);
-  if (this.grid && this.layout!=="unrooted") {this.addGrid(this.layout);}
-  else this.hideGrid()
-  this.svg.selectAll(".regression").remove();
-  if (this.layout==="clock" && this.distance === "num_date") this.drawRegression();
-};
+/* G E N E R A L    U P D A T E S */
+PhyloTree.prototype.updateDistance = generalUpdates.updateDistance;
+PhyloTree.prototype.updateLayout = generalUpdates.updateLayout;
+PhyloTree.prototype.updateGeometry = generalUpdates.updateGeometry;
+PhyloTree.prototype.updateGeometryFade = generalUpdates.updateGeometryFade;
+PhyloTree.prototype.updateTimeBar = (d) => {};
+PhyloTree.prototype.updateMultipleArray = generalUpdates.updateMultipleArray;
 
 
-/**
- * call to change the layout
- * @param  layout -- needs to be one of "rect", "radial", "unrooted", "clock"
- * @param  dt -- time of transition in milliseconds
- * @return null
- */
-PhyloTree.prototype.updateLayout = function(layout,dt){
-    this.setLayout(layout);
-    this.mapToScreen();
-    this.updateGeometryFade(dt);
-    if (this.grid && this.layout!=="unrooted") this.addGrid(layout);
-    else this.hideGrid()
-    this.svg.selectAll(".regression").remove();
-    if (this.layout==="clock" && this.distance === "num_date") this.drawRegression();
-};
+/* L A B E L S    ( T I P ,    B R A N C H ,   C O N F I D E N C E ) */
+PhyloTree.prototype.drawCladeLabels = labels.drawCladeLabels;
+PhyloTree.prototype.updateBranchLabels = labels.updateBranchLabels;
+PhyloTree.prototype.updateTipLabels = labels.updateTipLabels;
+PhyloTree.prototype.hideBranchLabels = labels.hideBranchLabels;
+PhyloTree.prototype.showBranchLabels = labels.showBranchLabels;
 
 
-/*
- * redraw the tree based on the current xTip, yTip, branch attributes
- * this function will remove branches, move the tips continuously
- * and add the new branches again after the tips arrived at their destination
- *  @params dt -- time of transition in milliseconds
- */
-PhyloTree.prototype.updateGeometryFade = function(dt) {
-  this.removeConfidence(dt)
-  // fade out branches
-  this.svg.selectAll('.branch').filter(function(d) {
-      return d.update;
-    })
-    .transition().duration(dt * 0.5)
-    .style("opacity", 0.0);
-  this.svg.selectAll('.branchLabels').filter(function(d) {
-      return d.update;
-    })
-    .transition().duration(dt * 0.5)
-    .style("opacity", 0.0);
-  this.svg.selectAll('.tipLabels').filter(function(d) {
-      return d.update;
-    })
-    .transition().duration(dt * 0.5)
-    .style("opacity", 0.0);
-
-  // closure to move the tips, called via the time out below
-  const tipTrans = function(tmp_svg, tmp_dt) {
-    const svg = tmp_svg;
-    return function() {
-      svg.selectAll('.tip').filter(function(d) {
-          return d.update;
-        })
-        .transition().duration(tmp_dt)
-        .attr("cx", function(d) {
-          return d.xTip;
-        })
-        .attr("cy", function(d) {
-          return d.yTip;
-        });
-      svg.selectAll(".vaccine")
-        .filter((d) => d.update)
-        .transition()
-          .duration(dt)
-          .attr("x", (d) => d.xTip)
-          .attr("y", (d) => d.yTip);
-    };
-  };
-  setTimeout(tipTrans(this.svg, dt), 0.5 * dt);
-
-  // closure to change the branches, called via time out after the tipTrans is done
-  const flipBranches = function(tmp_svg) {
-    const svg = tmp_svg;
-    return function() {
-      svg.selectAll('.branch').filter('.S').filter(function(d) {
-          return d.update;
-        })
-        .attr("d", function(d) {
-          return d.branch[0];
-        });
-      svg.selectAll('.branch').filter('.T').filter(function(d) {
-          return d.update;
-        })
-        .attr("d", function(d) {
-          return d.branch[1];
-        });
-    };
-  };
-  setTimeout(flipBranches(this.svg), 0.5 * dt);
-
-  // closure to add the new branches after the tipTrans
-  const fadeBack = function(tmp_svg, tmp_dt) {
-    const svg = tmp_svg;
-    return function(d) {
-      svg.selectAll('.branch').filter(function(d) {
-          return d.update;
-        })
-        .transition().duration(0.5 * tmp_dt)
-        .style("opacity", 1.0)
-    };
-  };
-  setTimeout(fadeBack(this.svg, 0.2 * dt), 1.5 * dt);
-  this.updateBranchLabels(dt);
-  this.updateTipLabels(dt);
-};
-
-/**
- * transition of branches and tips at the same time. only useful within a layout
- * @param  dt -- time of transition in milliseconds
- * @return {[type]}
- */
-PhyloTree.prototype.updateGeometry = function (dt) {
-  this.svg.selectAll(".tip")
-    .filter((d) => d.update)
-    .transition()
-      .duration(dt)
-      .attr("cx", (d) => d.xTip)
-      .attr("cy", (d) => d.yTip);
-
-  this.svg.selectAll(".vaccine")
-    .filter((d) => d.update)
-    .transition()
-      .duration(dt)
-      .attr("x", (d) => d.xTip)
-      .attr("y", (d) => d.yTip);
-
-  const branchEls = [".S", ".T"];
-  for (let i = 0; i < 2; i++) {
-    this.svg.selectAll(".branch")
-      .filter(branchEls[i])
-      .filter((d) => d.update)
-      .transition()
-        .duration(dt)
-        .attr("d", (d) => d.branch[i]);
-  }
-
-  this.svg.selectAll(".conf")
-    .filter((d) => d.update)
-    .transition()
-      .duration(dt)
-      .attr("d", (dd) => dd.confLine);
-
-  this.updateBranchLabels(dt);
-  this.updateTipLabels(dt);
-};
+/* G R I D */
+PhyloTree.prototype.hideGrid = grid.hideGrid;
+PhyloTree.prototype.removeGrid = grid.removeGrid;
+PhyloTree.prototype.addGrid = grid.addGrid;
 
 
-PhyloTree.prototype.updateBranchLabels = function(dt){
-  const xPad = this.params.branchLabelPadX, yPad = this.params.branchLabelPadY;
-  const nNIV = this.nNodesInView;
-  const bLSFunc = this.callbacks.branchLabelSize;
-  const showBL = (this.layout==="rect") && this.params.showBranchLabels;
-  const visBL = showBL ? "visible" : "hidden";
-  this.svg.selectAll('.branchLabel')
-    .transition().duration(dt)
-    .attr("x", function(d) {
-      return d.xTip - xPad;
-    })
-    .attr("y", function(d) {
-      return d.yTip - yPad;
-    })
-    .attr("visibility",visBL)
-    .style("fill", this.params.branchLabelFill)
-    .style("font-family", this.params.branchLabelFont)
-    .style("font-size", function(d) {return bLSFunc(d, nNIV).toString()+"px";});
-}
-
-
-/* this was the *old* updateTipLabels */
-// PhyloTree.prototype.updateTipLabels = function(dt){
-//   const xPad = this.params.tipLabelPadX, yPad = this.params.tipLabelPadY;
-//   const nNIV = this.nNodesInView;
-//   const tLSFunc = this.callbacks.tipLabelSize;
-//   const showTL = (this.layout==="rect") && this.params.showTipLabels;
-//   const visTL = showTL ? "visible" : "hidden";
-//   this.svg.selectAll('.tipLabel')
-//     .transition().duration(dt)
-//     .attr("x", function(d) {
-//       return d.xTip + xPad;
-//     })
-//     .attr("y", function(d) {
-//       return d.yTip + yPad;
-//     })
-//     .attr("visibility",visTL)
-//     .style("fill", this.params.tipLabelFill)
-//     .style("font-family", this.params.tipLabelFont)
-//     .style("font-size", function(d) {return tLSFunc(d, nNIV).toString()+"px";});
-// }
-/* the new updateTipLabels is here: */
-PhyloTree.prototype.updateTipLabels = function(dt) {
-  this.svg.selectAll('.tipLabel').remove()
-  var params = this.params;
-  const tLFunc = this.callbacks.tipLabel;
-  const xPad = this.params.tipLabelPadX;
-  const yPad = this.params.tipLabelPadY;
-  const inViewTerminalNodes = this.nodes
-                  .filter(function(d){return d.terminal;})
-                  .filter(function(d){return d.inView;});
-  // console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
-  if (inViewTerminalNodes.length < 50) {
-    // console.log("DRAWING!", inViewTerminalNodes)
-    window.setTimeout( () =>
-      this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
-        .data(inViewTerminalNodes)
-        .enter()
-        .append("text")
-        .attr("x", function(d) {
-          return d.xTip + xPad;
-        })
-        .attr("y", function(d) {
-          return d.yTip + yPad;
-        })
-        .text(function (d){return tLFunc(d);})
-        .attr("class", "tipLabel")
-        .style('visibility', 'visible')
-      , dt
-    )
-  }
-}
-
-PhyloTree.prototype.updateTimeBar = function(d){
-  return;
-}
-
-/**
- * Update multiple style or attributes of  tree elements at once
- * @param {string} treeElem one of .tip or .branch
- * @param {object} attr object containing the attributes to change as keys, array with values as value
- * @param {object} styles object containing the styles to change
- * @param {int} dt time in milliseconds
- */
-PhyloTree.prototype.updateMultipleArray = function(treeElem, attrs, styles, dt, quickdraw) {
-  // assign new values and decide whether to update
-  this.nodes.forEach(function(d, i) {
-    d.update = false;
-    /* note that this is not node.attr, but element attr such as <g width="100" vs style="" */
-    let newAttr;
-    for (var attr in attrs) {
-      newAttr = attrs[attr][i];
-      if (newAttr !== d[attr]) {
-        d[attr] = newAttr;
-        d.update = true;
-      }
-    }
-    let newStyle;
-    for (var prop in styles) {
-      newStyle = styles[prop][i];
-      if (newStyle !== d[prop]) {
-        d[prop] = newStyle;
-        d.update = true;
-      }
-    }
-  });
-  let updatePath = false;
-  if (styles["stroke-width"]) {
-    if (quickdraw) {
-      this.debouncedMapToScreen();
-    } else {
-      this.mapToScreen();
-    }
-    updatePath = true;
-  }
-
-  // function that return the closure object for updating the svg
-  function update(attrToSet, stylesToSet) {
-    return function(selection) {
-      for (var i=0; i<stylesToSet.length; i++) {
-        var prop = stylesToSet[i];
-        selection.style(prop, function(d) {
-          return d[prop];
-        });
-      }
-      for (var i = 0; i < attrToSet.length; i++) {
-        var prop = attrToSet[i];
-        selection.attr(prop, function(d) {
-          return d[prop];
-        });
-      }
-      if (updatePath){
-	selection.filter('.S').attr("d", function(d){return d.branch[0];})
-      }
-    };
-  };
-  // update the svg
-  if (dt) {
-    this.svg.selectAll(treeElem).filter(function(d) {
-        return d.update;
-      })
-      .transition().duration(dt)
-      .call(update(Object.keys(attrs), Object.keys(styles)));
-  } else {
-    this.svg.selectAll(treeElem).filter(function(d) {
-        return d.update;
-      })
-      .call(update(Object.keys(attrs), Object.keys(styles)));
-  }
-};
 
 /* this need a bit more work as the quickdraw functionality improves */
 PhyloTree.prototype.rerenderAllElements = function () {
@@ -726,54 +359,9 @@ PhyloTree.prototype.rerenderAllElements = function () {
 };
 
 
-/**
- * as updateAttributeArray, but accepts a callback function rather than an array
- * with the values. will create array and call updateAttributeArray
- * @param  treeElem  --- the part of the tree to update (.tip, .branch)
- * @param  attr  --- the attribute to update (e.g. r for tipRadius)
- * @param  callback -- function that assigns the attribute
- * @param  dt  --- time of transition in milliseconds
- * @return {[type]}
- */
-PhyloTree.prototype.updateStyleOrAttribute = function(treeElem, attr, callback, dt, styleOrAttribute) {
-  this.updateStyleOrAttributeArray(treeElem, attr,
-    this.nodes.map(function(d) {
-      return callback(d);
-    }), dt, styleOrAttribute);
-};
+PhyloTree.prototype.updateStyleOrAttribute = generalUpdates.updateStyleOrAttribute;
+PhyloTree.prototype.updateStyleOrAttributeArray = generalUpdates.updateStyleOrAttributeArray;
 
-/**
- * update an attribute of the tree for all nodes
- * @param  treeElem  --- the part of the tree to update (.tip, .branch)
- * @param  attr  --- the attribute to update (e.g. r for tipRadius)
- * @param  attr_array  --- an array with values for every node in the tree
- * @param  dt  --- time of transition in milliseconds
- * @return {[type]}
- */
-PhyloTree.prototype.updateStyleOrAttributeArray = function(treeElem, attr, attr_array, dt, styleOrAttribute) {
-  this.nodes.forEach(function(d, i) {
-    const newAttr = attr_array[i];
-    if (newAttr === d[attr]) {
-      d.update = false;
-    } else {
-      d[attr] = newAttr;
-      d.update = true;
-    }
-  });
-  if (typeof styleOrAttribute==="undefined"){
-    var all_attr = this.attributes;
-    if (contains(all_attr, attr)){
-      styleOrAttribute="attr";
-    }else{
-      styleOrAttribute="style";
-    }
-  }
-  if (styleOrAttribute==="style"){
-    this.redrawStyle(treeElem, attr, dt);
-  }else{
-    this.redrawAttribute(treeElem, attr, dt);
-  }
-};
 
 /**
  * update the svg after all new values have been assigned

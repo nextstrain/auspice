@@ -1,12 +1,10 @@
-/* eslint-disable */
 
 export const removeConfidence = function removeConfidence(dt) {
   if (dt) {
     this.svg.selectAll(".conf")
-      .transition()
-      .duration(dt)
+      .transition().duration(dt)
       .style("opacity", 0)
-    .remove();
+      .remove();
   } else {
     this.svg.selectAll(".conf").remove();
   }
@@ -20,16 +18,15 @@ export const drawConfidence = function drawConfidence(dt) {
     this.confidence = this.svg.append("g").selectAll(".conf")
       .data(this.nodes)
       .enter()
-        .call((sel) => this.drawSingleCI(sel, 0));
+      .call((sel) => this.drawSingleCI(sel, 0));
     this.svg.selectAll(".conf")
-        .transition()
-          .duration(dt)
-          .style("opacity", 0.5);
+      .transition().duration(dt)
+      .style("opacity", 0.5);
   } else {
     this.confidence = this.svg.append("g").selectAll(".conf")
       .data(this.nodes)
       .enter()
-        .call((sel) => this.drawSingleCI(sel, 0.5));
+      .call((sel) => this.drawSingleCI(sel, 0.5));
   }
   // this.props.confidence = true;
 };
@@ -53,8 +50,7 @@ export const drawSingleCI = function drawSingleCI(selection, opacity) {
 export const updateConfidence = function updateConfidence(dt) {
   if (dt) {
     this.svg.selectAll(".conf")
-      .transition()
-        .duration(dt)
+      .transition().duration(dt)
       .style("stroke", (el) => el.stroke)
       .style("stroke-width", confidenceWidth);
   } else {
