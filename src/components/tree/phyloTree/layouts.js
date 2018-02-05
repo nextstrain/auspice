@@ -1,5 +1,5 @@
 /* eslint-disable no-multi-spaces */
-import { sum } from "d3-array";
+import { min, sum } from "d3-array";
 import { addLeafCount } from "./helpers";
 
 /**
@@ -182,4 +182,37 @@ export const setDistance = function setDistance(distanceAttribute) {
       d.conf = [d.depth, d.depth];
     }
   });
+};
+
+
+/**
+ * sets the range of the scales used to map the x,y coordinates to the screen
+ * @param {margins} -- object with "right, left, top, bottom" margins
+ */
+export const setScales = function setScales(margins) {
+  const width = parseInt(this.svg.attr("width"), 10);
+  const height = parseInt(this.svg.attr("height"), 10);
+  if (this.layout === "radial" || this.layout === "unrooted") {
+    // Force Square: TODO, harmonize with the map to screen
+    const xExtend = width - (margins["left"] || 0) - (margins["right"] || 0);
+    const yExtend = height - (margins["top"] || 0) - (margins["top"] || 0);
+    const minExtend = min([xExtend, yExtend]);
+    const xSlack = xExtend - minExtend;
+    const ySlack = yExtend - minExtend;
+    this.xScale.range([0.5 * xSlack + margins["left"] || 0, width - 0.5 * xSlack - (margins["right"] || 0)]);
+    this.yScale.range([0.5 * ySlack + margins["top"] || 0, height - 0.5 * ySlack - (margins["bottom"] || 0)]);
+
+  } else {
+    // for rectancular layout, allow flipping orientation of left right and top/botton
+    if (this.params.orientation[0] > 0) {
+      this.xScale.range([margins["left"] || 0, width - (margins["right"] || 0)]);
+    } else {
+      this.xScale.range([width - (margins["right"] || 0), margins["left"] || 0]);
+    }
+    if (this.params.orientation[1] > 0) {
+      this.yScale.range([margins["top"] || 0, height - (margins["bottom"] || 0)]);
+    } else {
+      this.yScale.range([height - (margins["bottom"] || 0), margins["top"] || 0]);
+    }
+  }
 };

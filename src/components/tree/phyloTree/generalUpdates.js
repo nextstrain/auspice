@@ -247,3 +247,32 @@ export const updateMultipleArray = function updateMultipleArray(treeElem, attrs,
       .call(updateSVGHOF(Object.keys(attrs), Object.keys(styles)));
   }
 };
+
+
+/**
+ * update the svg after all new values have been assigned
+ * @param  treeElem -- one of .tip, .branch
+ * @param  attr  -- attribute of the tree element to update
+ * @param  dt -- transition time
+ */
+export const redrawAttribute = function redrawAttribute(treeElem, attr, dt) {
+  this.svg.selectAll(treeElem)
+    .filter((d) => d.update)
+    .transition()
+    .duration(dt)
+    .attr(attr, (d) => d[attr]);
+};
+
+
+/**
+ * update the svg after all new values have been assigned
+ * @param  treeElem -- one of .tip, .branch
+ * @param  styleElem  -- style element of the tree element to update
+ * @param  dt -- transition time
+ */
+export const redrawStyle = function redrawStyle(treeElem, styleElem, dt) {
+  this.svg.selectAll(treeElem)
+    .filter((d) => d.update)
+    .transition().duration(dt)
+    .style(styleElem, (d) => d[styleElem]);
+};
