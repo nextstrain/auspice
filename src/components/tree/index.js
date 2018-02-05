@@ -122,7 +122,7 @@ class Tree extends React.Component {
   makeTree(nextProps) {
     const nodes = nextProps.tree.nodes;
     if (nodes && this.refs.d3TreeElement) {
-      const myTree = new PhyloTree(nodes[0]);
+      const myTree = new PhyloTree(nodes);
       // https://facebook.github.io/react/docs/refs-and-the-dom.html
       myTree.render(
         select(this.refs.d3TreeElement),

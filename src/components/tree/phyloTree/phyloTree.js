@@ -1,10 +1,7 @@
-/* eslint-disable */
 import _debounce from "lodash/debounce";
-import { event } from "d3-selection";
-import { min, max, sum } from "d3-array";
+import { max } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { flattenTree, appendParentsToTree } from "../treeHelpers";
-import { dataFont, darkGrey } from "../../../globalStyles";
 import { defaultParams } from "./defaultParams";
 import { addLeafCount, createChildrenAndParents } from "./helpers";
 
@@ -17,36 +14,32 @@ import * as confidence from "./confidence";
 import * as labels from "./labels";
 import * as generalUpdates from "./generalUpdates";
 
-/*
- * phylogenetic tree drawing class
- * it is instantiated with a nested tree json.
- * the actual tree is rendered by the render method
- * @params:
- *   treeJson -- tree object as exported by nextstrain.
- */
-var PhyloTree = function(treeJson) {
+
+/* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
+const PhyloTree = function PhyloTree(reduxNodes) {
   this.grid = false;
   this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
   this.params = defaultParams;
-  appendParentsToTree(treeJson); // add reference to .parent to each node in tree
-  const nodesArray = flattenTree(treeJson); // convert the tree json into a flat list of nodes
-  // wrap each node in a shell structure to avoid mutating the input data
-  this.nodes = nodesArray.map((d) => ({
-    n: d, // .n is the original node
-    x: 0, // x,y coordinates
-    y: 0,
-    r: this.params.tipRadius // set defaults
-  }));
-  // pull out the total number of tips -- the is the maximal yvalue
-  this.numberOfTips = max(this.nodes.map((d) => d.n.yvalue));
-  this.nodes.forEach(function(d) {
-    d.inView=true; // each node is visible
-    d.n.shell = d; // a back link from the original node object to the wrapper
-    d.terminal = (typeof d.n.children === "undefined");
+
+  /* create this.nodes, which is an array of nodes with properties used by phylotree for drawing.
+   this.nodes is the same length as reduxNodes such that this.nodes[i] is related to reduxNodes[i]
+   Furthermore, these objects are linked:
+   -- this.nodes[i].n = reduxNodes[i]
+   -- reduxNodes[i].shell = this.nodes[i] */
+  this.nodes = reduxNodes.map((d) => {
+    const phyloNode = {
+      n: d, /* a back link to the redux node */
+      x: 0,
+      y: 0,
+      terminal: (typeof d.children === "undefined"),
+      inView: true, /* each node is visible */
+      r: this.params.tipRadius /* default */
+    };
+    d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
+    return phyloNode;
   });
-
+  this.numberOfTips = max(this.nodes.map((d) => d.n.yvalue)); // total number of tips (we kinda cheat by finding the maximal yvalue, made by augur)
   createChildrenAndParents(this.nodes);
-
   this.xScale = scaleLinear();
   this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
