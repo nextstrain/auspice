@@ -10,6 +10,7 @@
     "build": "npm run clean && npm run build:webpack && npm run build:server",
     "start": "babel-node server.js dev",
     "start:local": "babel-node server.js dev localData localStatic",
+    "start:local:perf": "babel-node server.js dev perf localData localStatic",
     "start:localData": "babel-node server.js dev localData",
     "start:localStatic": "babel-node server.js dev localStatic",
     "server": "node server.dist.js",

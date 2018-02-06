@@ -46,6 +46,7 @@ const endBeforeStartError = (name) => {
 };
 
 export const timerStart = (name) => {
+  if (!process.env.PERF) return;
   if (!dbsingle.hasOwnProperty(name)) {
     dbsingle[name] = [false, 0, 0];
   }
@@ -56,6 +57,7 @@ export const timerStart = (name) => {
 };
 
 export const timerEnd = (name) => {
+  if (!process.env.PERF) return;
   if (dbsingle.hasOwnProperty(name) && dbsingle[name][0] !== false) {
     const thisTook = parseInt(performance.now() - dbsingle[name][0], 10);
     dbsingle[name][0] = false;

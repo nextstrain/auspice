@@ -33,6 +33,7 @@ You probably want this on for development, off for testing before deploying.
 
 /* parse args, set some as global to be available in utility scripts */
 const devServer = process.argv.indexOf("dev") !== -1;
+const perf = process.argv.indexOf("perf") !== -1;
 global.LOCAL_DATA = process.argv.indexOf("localData") !== -1;
 global.LOCAL_DATA_PATH = path.join(__dirname, "/data/");
 global.REMOTE_DATA_LIVE_BASEURL = "http://data.nextstrain.org/";
@@ -47,10 +48,13 @@ let config;
 let webpackDevMiddleware;
 let webpackHotMiddleware;
 if (devServer) {
-  webpack = require("webpack"); // eslint-disable-line import/no-extraneous-dependencies global-require
-  config = require("./webpack.config.dev");
-  webpackDevMiddleware = require("webpack-dev-middleware");
-  webpackHotMiddleware = require("webpack-hot-middleware");
+  webpack = require("webpack"); // eslint-disable-line
+  config = require("./webpack.config.dev"); // eslint-disable-line
+  if (perf) {
+    config.plugins[1].definitions["process.env"].PERF = 'true';
+  }
+  webpackDevMiddleware = require("webpack-dev-middleware"); // eslint-disable-line
+  webpackHotMiddleware = require("webpack-hot-middleware"); // eslint-disable-line
 }
 
 const app = express();

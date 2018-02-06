@@ -13,11 +13,13 @@ module.exports = {
     filename: 'bundle.js',
     publicPath: '/dist/'
   },
+  /* ordering is relied on in server.js - cross check! */
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       "process.env": {
-        NODE_ENV: JSON.stringify("dev")
+        NODE_ENV: JSON.stringify("dev"),
+        PERF: JSON.stringify(false)
       }
     }),
     new webpack.NoEmitOnErrorsPlugin()
