@@ -1,3 +1,4 @@
+import { timerStart, timerEnd } from "../../../util/perf";
 
 const contains = (array, elem) => array.some((d) => d === elem);
 
@@ -24,6 +25,7 @@ export const updateStyleOrAttribute = function updateStyleOrAttribute(treeElem, 
  * @return {[type]}
  */
 export const updateStyleOrAttributeArray = function updateStyleOrAttributeArray(treeElem, attr, attr_array, dt, styleOrAttribute) {
+  timerStart("updateStyleOrAttributeArray");
   this.nodes.forEach((d, i) => {
     const newAttr = attr_array[i];
     if (newAttr === d[attr]) {
@@ -41,6 +43,7 @@ export const updateStyleOrAttributeArray = function updateStyleOrAttributeArray(
   } else {
     this.redrawAttribute(treeElem, attr, dt);
   }
+  timerEnd("updateStyleOrAttributeArray");
 };
 
 
@@ -190,6 +193,7 @@ export const updateGeometryFade = function updateGeometryFade(dt) {
  * @param {int} dt time in milliseconds
  */
 export const updateMultipleArray = function updateMultipleArray(treeElem, attrs, styles, dt, quickdraw) {
+  timerStart("updateMultipleArray");
   // assign new values and decide whether to update
   this.nodes.forEach((d, i) => {
     d.update = false;
@@ -246,6 +250,7 @@ export const updateMultipleArray = function updateMultipleArray(treeElem, attrs,
       .filter((d) => d.update)
       .call(updateSVGHOF(Object.keys(attrs), Object.keys(styles)));
   }
+  timerEnd("updateMultipleArray");
 };
 
 

@@ -17,6 +17,7 @@ import {
 import { changeDateFilter } from "../../actions/treeProperties";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { incommingMapPNG } from "../download/helperFunctions";
+import { timerStart, timerEnd } from "../../util/perf";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -189,6 +190,7 @@ class Map extends React.Component {
     // const newVisibilityVersion = this.props.visibilityVersion !== prevProps.visibilityVersion;
 
     if (mapIsDrawn && allDataPresent && demesTransmissionsNotComputed) {
+      timerStart("drawDemesAndTransmissions");
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
       if (!this.state.boundsSet) { // we are doing the initial render -> set map to the range of the data
         const SWNE = this.getGeoRange();
@@ -237,6 +239,7 @@ class Map extends React.Component {
         demeIndices,
         transmissionIndices
       });
+      timerEnd("drawDemesAndTransmissions");
     }
   }
   maybeRemoveAllDemesAndTransmissions(nextProps) {
@@ -337,6 +340,7 @@ class Map extends React.Component {
       colorOrVisibilityChange &&
       haveData
     ) {
+      timerStart("updateDemesAndTransmissions")
       const { newDemes, newTransmissions } = updateDemeAndTransmissionDataColAndVis(
         this.state.demeData,
         this.state.transmissionData,
@@ -364,6 +368,7 @@ class Map extends React.Component {
         demeData: newDemes,
         transmissionData: newTransmissions
       });
+      timerEnd("updateDemesAndTransmissions")
     }
   }
 
