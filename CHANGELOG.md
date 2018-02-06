@@ -1,3 +1,5 @@
+## version 1.11.0 - 2018/02/05
+
 ### Features
 * Vaccine strains are now displayed if they are specified in `metaJSON.vaccine_choices` ([PR 490](https://github.com/nextstrain/auspice/pull/490))
 
