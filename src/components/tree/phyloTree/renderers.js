@@ -1,5 +1,5 @@
 import { darkGrey } from "../../../globalStyles";
-
+import { timerStart, timerEnd } from "../../../util/perf";
 
 /**
  * @param  svg    -- the svg into which the tree is drawn
@@ -12,30 +12,33 @@ import { darkGrey } from "../../../globalStyles";
  * @return {null}
  */
 export const render = function render(svg, layout, distance, options, callbacks, branchThickness, visibility, drawConfidence, vaccines) {
+  timerStart("phyloTree render");
   if (branchThickness) {
-    this.nodes.forEach((d, i) => {
-      d["stroke-width"] = branchThickness[i];
-    });
+    this.nodes.forEach((d, i) => {d["stroke-width"] = branchThickness[i];});
   }
   this.svg = svg;
   this.params = Object.assign(this.params, options);
   this.callbacks = callbacks;
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
-
   this.clearSVG();
-  this.setDistance(distance);
-  this.setLayout(layout);
-  this.mapToScreen();
-  if (this.params.showGrid) {this.addGrid();}
-  if (this.params.branchLabels) {this.drawBranches();}
-  this.drawTips();
+  timerStart("setDistance"); this.setDistance(distance); timerEnd("setDistance");
+
+  timerStart("setLayout"); this.setLayout(layout); timerEnd("setLayout");
+
+  timerStart("mapToScreen"); this.mapToScreen(); timerEnd("mapToScreen");
+
+  if (this.params.showGrid) {timerStart("addGrid"); this.addGrid(); timerEnd("addGrid");}
+  if (this.params.branchLabels) {timerStart("drawBranches"); this.drawBranches(); timerEnd("drawBranches");}
+
+  timerStart("drawTips"); this.drawTips(); timerEnd("drawTips");
+
   if (this.params.showVaccines) {this.drawVaccines();}
   this.drawCladeLabels();
   if (visibility) {
-    this.nodes.forEach((d, i) => {
-      d["visibility"] = visibility[i];
-    });
+    timerStart("setVisibility");
+    this.nodes.forEach((d, i) => {d["visibility"] = visibility[i];});
     this.svg.selectAll(".tip").style("visibility", (d) => d["visibility"]);
+    timerEnd("setVisibility");
   }
 
   // setting branchLabels and tipLabels to false above in params is not working for some react-dimensions
@@ -48,16 +51,16 @@ export const render = function render(svg, layout, distance, options, callbacks,
   //   this.updateTipLabels(100);
   // }
 
-  this.updateGeometry(10);
+  timerStart("updateGeometry"); this.updateGeometry(10); timerEnd("updateGeometry");
 
   this.svg.selectAll(".regression").remove();
   if (this.layout === "clock" && this.distance === "num_date") {
     this.drawRegression();
   }
-  this.removeConfidence();
   if (drawConfidence) {
     this.drawConfidence();
   }
+  timerEnd("phyloTree render");
 };
 
 /**
@@ -196,4 +199,5 @@ export const clearSVG = function clearSVG() {
   this.svg.selectAll('.branch').remove();
   this.svg.selectAll('.branchLabel').remove();
   this.svg.selectAll(".vaccine").remove();
+  this.svg.selectAll(".conf").remove();
 };
