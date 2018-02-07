@@ -9,6 +9,7 @@ import EntropyChart from "./entropyD3";
 import InfoPanel from "./entropyInfoPanel";
 import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import { timerStart, timerEnd } from "../../util/perf";
 import "../../css/entropy.css";
 
 const getStyles = (width) => {
@@ -193,10 +194,11 @@ export class Entropy extends React.Component {
       return;
     }
     if (this.state.chart && ((this.props.browserDimensions !== nextProps.browserDimensions) || (this.props.padding.left !== nextProps.padding.left || this.props.padding.right !== nextProps.padding.right))) {
-      this.state.chart.render(nextProps);
+      timerStart("entropy initial render"); this.state.chart.render(nextProps); timerEnd("entropy initial render");
       return;
     }
     if (this.state.chart) { /* props changed => update */
+      timerStart("entropy D3 update");
       const updateParams = {};
       if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
         updateParams.aa = nextProps.mutType === "aa";
@@ -213,6 +215,7 @@ export class Entropy extends React.Component {
       if (Object.keys(updateParams).length) {
         this.state.chart.update(updateParams);
       }
+      timerEnd("entropy D3 update");
     }
   }
 

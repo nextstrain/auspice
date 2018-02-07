@@ -47,10 +47,10 @@ let config;
 let webpackDevMiddleware;
 let webpackHotMiddleware;
 if (devServer) {
-  webpack = require("webpack"); // eslint-disable-line import/no-extraneous-dependencies global-require
-  config = require("./webpack.config.dev");
-  webpackDevMiddleware = require("webpack-dev-middleware");
-  webpackHotMiddleware = require("webpack-hot-middleware");
+  webpack = require("webpack"); // eslint-disable-line
+  config = require("./webpack.config.dev"); // eslint-disable-line
+  webpackDevMiddleware = require("webpack-dev-middleware"); // eslint-disable-line
+  webpackHotMiddleware = require("webpack-hot-middleware"); // eslint-disable-line
 }
 
 const app = express();
