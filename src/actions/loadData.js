@@ -108,6 +108,19 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
         if (values[0].panels.indexOf("entropy") !== -1) {
           updateEntropyVisibility(dispatch, getState);
         }
+
+        /* F R E Q U E N C I E S */
+        console.log("frequencies branch. Attempting to get frequencies.");
+        fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_frequencies.json&s3=" + s3bucket)
+          .then((res) => res.json())
+          .then((data) => {
+            dispatch({type: types.FREQUENCIES_JSON_DATA, data});
+          })
+          .catch((err) => {
+            console.warn("problem fetching frequencies...", err);
+          });
+
+        /* N A R R A T I V E S */
         if (enableNarratives) {
           getNarrative(dispatch, datasets.datapath);
         }
