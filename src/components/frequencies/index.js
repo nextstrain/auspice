@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
+import { select } from "d3-selection";
 import { changeColorBy } from "../../actions/colors";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 // import EntropyChart from "./entropyD3";
@@ -9,6 +10,7 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
 import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import "../../css/entropy.css";
+import { calcScales, drawAxis } from "./functions";
 
 const getStyles = (width) => {
   return {
@@ -52,6 +54,7 @@ export const computeChartGeometry = (props) => {
   return {
     data: state.frequencies.data,
     pivots: state.frequencies.pivots,
+    ticks: state.frequencies.ticks,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorBy: state.controls.colorBy
   };
@@ -81,9 +84,14 @@ export class Frequencies extends React.Component {
   //   this.setState({chart});
   // }
   componentDidMount() {
-    // if (this.props.loaded) {
-    //   this.setUp(this.props);
-    // }
+    /* DOM element created. Render frequencies */
+    const svg = select(this.domRef);
+    const chartGeom = computeChartGeometry(this.props);
+    console.log(chartGeom)
+    const scales = calcScales(chartGeom, this.props.ticks);
+    console.log(scales)
+    drawAxis(svg, chartGeom, scales);
+
   }
   componentWillReceiveProps(nextProps) {
     // if (!nextProps.loaded) {
@@ -123,7 +131,7 @@ export class Frequencies extends React.Component {
     return (
       <Card title={"Frequencies"}>
         <svg style={{pointerEvents: "auto"}} width={chartGeom.responsive.width} height={chartGeom.height}>
-          <g ref={(c) => { this.d3frequencies = c; }} id="d3frequencies"/>
+          <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
         </svg>
       </Card>
     );
