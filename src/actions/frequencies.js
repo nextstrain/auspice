@@ -24,11 +24,11 @@ export const updateFrequencyData = debounce((dispatch, getState) => {
   console.log("updateFrequencyData")
   const { frequencies, tree, controls } = getState();
   if (!controls.colorScale) {
-    console.error("Race condition. ColourScale not Set. Frequencies can't be calculated.");
+    console.error("Race condition. ColourScale not Set. Frequency Matrix can't be calculated.");
     return;
   }
-  if (!frequencies.loaded) {
-    console.error("Race condition. Frequencies not loaded. Frequencies can't be calculated.");
+  if (!frequencies.data) {
+    console.error("Race condition. Frequencies data not in state. Matrix can't be calculated.");
     return;
   }
   if (controls.colorScale.continuous) {

@@ -31,10 +31,10 @@ const frequencies = (state = {
           }
         }
       });
-      return {loaded: true, data, pivots, ticks, matrix: undefined};
+      return {loaded: false, data, pivots, ticks, matrix: undefined};
     }
     case types.FREQUENCY_MATRIX: {
-      return Object.assign({}, state, {matrix: action.matrix});
+      return Object.assign({}, state, {loaded: true, matrix: action.matrix});
     }
     case types.DATA_INVALID: {
       return {loaded: false, data: undefined, pivots: undefined, ticks: undefined, matrix: undefined};

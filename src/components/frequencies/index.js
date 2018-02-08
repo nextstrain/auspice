@@ -10,7 +10,7 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
 import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import "../../css/entropy.css";
-import { calcScales, drawAxis } from "./functions";
+import { calcScales, drawAxis, drawStream } from "./functions";
 
 const getStyles = (width) => {
   return {
@@ -55,8 +55,10 @@ export const computeChartGeometry = (props) => {
     data: state.frequencies.data,
     pivots: state.frequencies.pivots,
     ticks: state.frequencies.ticks,
+    matrix: state.frequencies.matrix,
     browserDimensions: state.browserDimensions.browserDimensions,
-    colorBy: state.controls.colorBy
+    colorBy: state.controls.colorBy,
+    colorScale: state.controls.colorScale
   };
 })
 export class Frequencies extends React.Component {
@@ -90,7 +92,8 @@ export class Frequencies extends React.Component {
     console.log("chartGeom:", chartGeom)
     const scales = calcScales(chartGeom, this.props.ticks);
     drawAxis(svg, chartGeom, scales);
-
+    if (!this.props.matrix) {console.error("Matrix undefined"); return;}
+    drawStream(svg, scales, this.props.matrix, this.props.colorScale, this.props.pivots);
   }
   componentWillReceiveProps(nextProps) {
     // if (!nextProps.loaded) {
