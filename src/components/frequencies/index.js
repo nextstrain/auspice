@@ -87,9 +87,8 @@ export class Frequencies extends React.Component {
     /* DOM element created. Render frequencies */
     const svg = select(this.domRef);
     const chartGeom = computeChartGeometry(this.props);
-    console.log(chartGeom)
+    console.log("chartGeom:", chartGeom)
     const scales = calcScales(chartGeom, this.props.ticks);
-    console.log(scales)
     drawAxis(svg, chartGeom, scales);
 
   }

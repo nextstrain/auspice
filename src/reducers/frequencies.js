@@ -4,7 +4,8 @@ const frequencies = (state = {
   loaded: false,
   data: undefined,
   pivots: undefined,
-  ticks: undefined
+  ticks: undefined,
+  matrix: undefined
 }, action) => {
   switch (action.type) {
     case types.FREQUENCIES_JSON_DATA: {
@@ -17,23 +18,26 @@ const frequencies = (state = {
       }
       if (!action.tree.loaded) {console.error("Tree not loaded. Can't do freqs!");}
 
-      const data = {};
+      const data = [];
       action.tree.nodes.forEach((n) => {
         if (!n.hasChildren) {
           if (action.data[n.clade]) {
-            data[n.strain] = {
+            data.push({
               idx: n.arrayIdx,
-              frequencies: action.data[n.clade]
-            };
+              values: action.data[n.clade]
+            });
           } else {
             console.warn("Tip ", n.strain, "(clade ", n.clade, ") had no frequencies data");
           }
         }
       });
-      return {loaded: true, data, pivots, ticks};
+      return {loaded: true, data, pivots, ticks, matrix: undefined};
+    }
+    case types.FREQUENCY_MATRIX: {
+      return Object.assign({}, state, {matrix: action.matrix});
     }
     case types.DATA_INVALID: {
-      return {loaded: false, data: undefined, pivots: undefined, ticks: undefined};
+      return {loaded: false, data: undefined, pivots: undefined, ticks: undefined, matrix: undefined};
     }
     default:
       return state;

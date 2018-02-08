@@ -8,6 +8,7 @@ import { getManifest } from "../util/clientAPIInterface";
 import { getNarrative } from "../util/getMarkdown";
 import { updateEntropyVisibility } from "./entropy";
 import { changePage } from "./navigation";
+import { updateFrequencyData } from "./frequencies";
 
 // /* if the metadata specifies an analysis slider, this is where we process it */
 // const addAnalysisSlider = (dispatch, tree, controls) => {
@@ -116,6 +117,7 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
           .then((data) => {
             const { tree } = getState(); /* check that the tree has been updated! */
             dispatch({type: types.FREQUENCIES_JSON_DATA, data, tree});
+            updateFrequencyData(dispatch, getState);
           })
           .catch((err) => {
             console.warn("problem fetching frequencies...", err);
