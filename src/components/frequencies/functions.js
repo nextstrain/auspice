@@ -1,9 +1,8 @@
-/* eslint no-underscore-dangle: off */
 // import { select, event } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { rgb } from "d3-color";
-import { stack, area, stackOffsetNone, stackOrderNone, stackOffsetWiggle } from "d3-shape"
+import { area } from "d3-shape";
 // import { zoom } from "d3-zoom";
 // import { brushX } from "d3-brush";
 // import Mousetrap from "mousetrap";
@@ -33,53 +32,56 @@ export const drawAxis = (svg, chartGeom, scales) => {
     .call(axisLeft(scales.y).ticks(scales.numTicksY));
 };
 
-const turnMatrixIntoSeries = (categories, matrix) => {
-  /* make this part of the reducer ?!?! */
-  /* https://github.com/d3/d3-shape/blob/master/README.md#_stack */
+export const turnMatrixIntoSeries = (categories, nPivots, matrix) => {
+  /*
+  WHAT IS A SERIES?
+  this is the data structure demanded by d3 for a stream graph.
+  it is often produced by the d3.stack function - see https://github.com/d3/d3-shape/blob/master/README.md#_stack
+  but it's faster to create this ourselves.
 
-  const nPivots = matrix[categories[0]].length;
-  const data = [];
-  for (let j = 0; j < nPivots; j++) data[j] = {};
+  THIS IS THE STRUCTURE:
+    [x1, x2, ... xn] where n is the number of categories
+      xi = [y1, y2, ..., ym] where m is the number of pivots
+        yi = [z1, z2]: the (y0, y1) values of the categorie at that pivot point.
+
+  TO DO:
+  this should / could be in the reducer. But what if we want to re-order things?!?!
+  */
+  const series = [];
   for (let i = 0; i < categories.length; i++) {
+    const x = [];
     for (let j = 0; j < nPivots; j++) {
-      data[j][categories[i]] = matrix[categories[i]][j];
+      if (i === 0) {
+        x.push([0, matrix[categories[i]][j]]);
+      } else {
+        const prevY1 = series[i - 1][j][1];
+        x.push([prevY1, matrix[categories[i]][j] + prevY1]);
+      }
     }
+    series.push(x);
   }
-  const stackObj = stack()
-    .keys(categories)
-    .offset(stackOffsetNone); /* no idea */
-  const series = stackObj(data);
-  // console.log("data", data)
-  // console.log("series", series)
   return series;
 };
 
-const colourHOF = (categories, colorScale) => {
-  return (d, i) => {
-    console.log("getting color for i", i, "->", categories[i]);
-    return rgb(colorScale.scale(categories[i])).toString();
-  };
-};
+export const generateColorScaleD3 = (categories, colorScale) => (d, i) =>
+  rgb(colorScale.scale(categories[i])).toString();
 
-export const drawStream = (svg, scales, matrix, colorScale, pivots) => {
-  const categories = Object.keys(matrix);
-  console.log("CATEGORIES", categories)
-  const series = turnMatrixIntoSeries(categories, matrix);
-  const colourFn = colourHOF(categories, colorScale);
 
+export const drawStream = (svg, scales, categories, pivots, series, colourer) => {
   /* https://github.com/d3/d3-shape/blob/master/README.md#areas */
   const areaObj = area()
     .x((d, i) => scales.x(pivots[i]))
     .y0((d) => scales.y(d[0]))
     .y1((d) => scales.y(d[1]));
 
-  console.log("SERIES", series);
-
+  // console.log("SERIES", series);
+  // console.log("length", series.length)
   svg.selectAll("path")
     .data(series)
     .enter()
     .append("path")
     .attr("d", areaObj)
-    .attr("fill", colourFn);
+    .attr("fill", colourer);
+
 
 };
