@@ -5,7 +5,8 @@ const frequencies = (state = {
   data: undefined,
   pivots: undefined,
   ticks: undefined,
-  matrix: undefined
+  matrix: undefined,
+  version: 0
 }, action) => {
   switch (action.type) {
     case types.FREQUENCIES_JSON_DATA: {
@@ -31,13 +32,13 @@ const frequencies = (state = {
           }
         }
       });
-      return {loaded: false, data, pivots, ticks, matrix: undefined};
+      return {loaded: false, data, pivots, ticks, matrix: undefined, version: 0};
     }
     case types.FREQUENCY_MATRIX: {
-      return Object.assign({}, state, {loaded: true, matrix: action.matrix});
+      return Object.assign({}, state, {loaded: true, matrix: action.matrix, version: state.version + 1});
     }
     case types.DATA_INVALID: {
-      return {loaded: false, data: undefined, pivots: undefined, ticks: undefined, matrix: undefined};
+      return {loaded: false, data: undefined, pivots: undefined, ticks: undefined, matrix: undefined, version: 0};
     }
     default:
       return state;

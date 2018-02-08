@@ -10,7 +10,7 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
 import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import "../../css/entropy.css";
-import { calcScales, drawAxis, drawStream, turnMatrixIntoSeries, generateColorScaleD3 } from "./functions";
+import { calcScales, drawAxis, drawStream, turnMatrixIntoSeries, generateColorScaleD3, removeStream } from "./functions";
 
 const getStyles = (width) => {
   return {
@@ -56,6 +56,7 @@ export const computeChartGeometry = (props) => {
     pivots: state.frequencies.pivots,
     ticks: state.frequencies.ticks,
     matrix: state.frequencies.matrix,
+    version: state.frequencies.version,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorBy: state.controls.colorBy,
     colorScale: state.controls.colorScale
@@ -64,32 +65,15 @@ export const computeChartGeometry = (props) => {
 export class Frequencies extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      hovered: false,
-      chart: false
-    };
+    this.state = {};
   }
 
-  // setUp(props) {
-  //   const chart = new EntropyChart(
-  //     this.d3entropy,
-  //     props.annotations,
-  //     props.geneMap,
-  //     props.geneLength.nuc,
-  //     { /* callbacks */
-  //       onHover: this.onHover.bind(this),
-  //       onLeave: this.onLeave.bind(this),
-  //       onClick: this.onClick.bind(this)
-  //     }
-  //   );
-  //   chart.render(props);
-  //   this.setState({chart});
-  // }
   componentDidMount() {
-    /* DOM element created. Render frequencies */
+    /* Render frequencies (via D3) for the first time. DOM element exists. */
+    console.log("Calling D3 methods for frequencies version ", this.props.version);
     const svg = select(this.domRef);
     const chartGeom = computeChartGeometry(this.props);
-    console.log("chartGeom:", chartGeom)
+    // console.log("chartGeom:", chartGeom)
     const scales = calcScales(chartGeom, this.props.ticks);
     drawAxis(svg, chartGeom, scales);
     if (!this.props.matrix) {console.error("Matrix undefined"); return;}
@@ -97,10 +81,31 @@ export class Frequencies extends React.Component {
     const series = turnMatrixIntoSeries(categories, this.props.pivots.length, this.props.matrix);
     const colourer = generateColorScaleD3(categories, this.props.colorScale);
 
-    const svgPathGroup = svg.append("g");
-    drawStream(svgPathGroup, scales, categories, this.props.pivots, series, colourer);
+    const svgStreamGroup = svg.append("g");
+    drawStream(svgStreamGroup, scales, categories, this.props.pivots, series, colourer);
+
+    this.setState({svg, svgStreamGroup, chartGeom, scales, categories, series, colourer});
   }
   componentWillReceiveProps(nextProps) {
+    if (this.props.version === nextProps.version) {
+      console.log("frequencies CWRP running, but the versions haven't changed, so doing nothing");
+      return;
+    }
+    if (this.props.colorBy === nextProps.colorBy) {
+      console.log("CWRP. colorBy unchanged. Should make nice transition");
+    }
+
+    console.log("CWRP calling D3 methods");
+
+    const categories = Object.keys(nextProps.matrix);
+    const series = turnMatrixIntoSeries(categories, nextProps.pivots.length, nextProps.matrix);
+    const colourer = generateColorScaleD3(categories, nextProps.colorScale);
+    removeStream(this.state.svgStreamGroup);
+    drawStream(this.state.svgStreamGroup, this.state.scales, categories, nextProps.pivots, series, colourer);
+
+    this.setState({categories, series, colourer});
+
+
     // if (!nextProps.loaded) {
     //   this.setState({chart: false});
     // }
@@ -133,6 +138,7 @@ export class Frequencies extends React.Component {
   }
 
   render() {
+    console.log("React render of frequencies...")
     const chartGeom = computeChartGeometry(this.props);
     const styles = getStyles(chartGeom.width);
     return (

@@ -85,3 +85,8 @@ export const drawStream = (svg, scales, categories, pivots, series, colourer) =>
 
 
 };
+
+
+export const removeStream = (svg) => {
+  svg.selectAll("path").remove();
+};
