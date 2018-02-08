@@ -111,10 +111,11 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
 
         /* F R E Q U E N C I E S */
         console.log("frequencies branch. Attempting to get frequencies.");
-        fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_frequencies.json&s3=" + s3bucket)
+        fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_pivots.json&s3=" + s3bucket)
           .then((res) => res.json())
           .then((data) => {
-            dispatch({type: types.FREQUENCIES_JSON_DATA, data});
+            const { tree } = getState(); /* check that the tree has been updated! */
+            dispatch({type: types.FREQUENCIES_JSON_DATA, data, tree});
           })
           .catch((err) => {
             console.warn("problem fetching frequencies...", err);
