@@ -73,7 +73,7 @@ export const drawVaccines = function drawVaccines() {
     .enter()
     .append("text")
     .attr("class", "vaccine")
-    .attr("x", (d) => d.xTip)
+    .attr("x", (d) => d.xTipCross)
     .attr("y", (d) => d.yTip)
     .attr('text-anchor', 'middle')
     .attr('dominant-baseline', 'central')

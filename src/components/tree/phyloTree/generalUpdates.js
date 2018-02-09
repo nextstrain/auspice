@@ -99,7 +99,7 @@ export const updateGeometry = function updateGeometry(dt) {
     .filter((d) => d.update)
     .transition()
     .duration(dt)
-    .attr("x", (d) => d.xTip)
+    .attr("x", (d) => d.xTipCross)
     .attr("y", (d) => d.yTip);
 
   const branchEls = [".S", ".T"];
@@ -156,7 +156,7 @@ export const updateGeometryFade = function updateGeometryFade(dt) {
       .filter((d) => d.update)
       .transition()
       .duration(dtShadow)
-      .attr("x", (d) => d.xTip)
+      .attr("x", (d) => d.xTipCross)
       .attr("y", (d) => d.yTip);
   };
   setTimeout(tipTransHOF(this.svg, dt), 0.5 * dt);

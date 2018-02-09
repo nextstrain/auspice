@@ -2,6 +2,7 @@ import { rgb } from "d3-color";
 import { interpolateRgb } from "d3-interpolate";
 import { scalePow } from "d3-scale";
 import { tipRadius, freqScale, tipRadiusOnLegendMatch } from "../../util/globals";
+import { calendarToNumeric } from "../../util/dateHelpers";
 
 /**
 *  For each node visit if node not a hashMap key, insert
@@ -336,7 +337,10 @@ export const processVaccines = (nodes, vaccineChoices) => {
   if (!vaccineChoices) {return false;}
   const names = Object.keys(vaccineChoices);
   const vaccines = nodes.filter((d) => names.indexOf(d.strain) !== -1);
-  vaccines.forEach((d) => {d.vaccineDate = vaccineChoices[d.strain];});
+  vaccines.forEach((d) => {
+    d.vaccineDate = vaccineChoices[d.strain];
+    d.vaccineDateNumeric = calendarToNumeric(vaccineChoices[d.strain]);
+  });
   return vaccines;
 };
 

@@ -84,6 +84,7 @@ export const mapToScreen = function mapToScreen() {
   const tmp_xScale=this.xScale;
   const tmp_yScale=this.yScale;
   this.nodes.forEach((d) => {d.xTip = tmp_xScale(d.x);});
+  if (this.vaccines) this.vaccines.forEach((d) => {d.xTipCross = tmp_xScale(d.xCross);});
   this.nodes.forEach((d) => {d.yTip = tmp_yScale(d.y);});
   this.nodes.forEach((d) => {d.xBase = tmp_xScale(d.px);});
   this.nodes.forEach((d) => {d.yBase = tmp_yScale(d.py);});

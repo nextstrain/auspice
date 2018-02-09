@@ -41,6 +41,11 @@ export const rectangularLayout = function rectangularLayout() {
     d.py = d.y;
     d.x_conf = d.conf; // assign confidence intervals
   });
+  if (this.vaccines) {
+    this.vaccines.forEach((d) => {
+      d.xCross = d.crossDepth;
+    });
+  }
 };
 
 /**
@@ -57,6 +62,9 @@ export const timeVsRootToTip = function timeVsRootToTip() {
     d.px = d.n.parent.attr["num_date"];
     d.py = d.n.parent.attr["div"];
   });
+  if (this.vaccines) { /* where the tips should be */
+    this.vaccines.forEach((d) => {d.xCross = d.x;});
+  }
   const nTips = this.numberOfTips;
   // REGRESSION WITH FREE INTERCEPT
   // const meanDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.y))/nTips;
@@ -132,6 +140,11 @@ export const unrootedLayout = function unrootedLayout() {
     eta += this.nodes[0].children[i].w;
     unrootedPlaceSubtree(this.nodes[0].children[i], nTips);
   }
+  if (this.vaccines) {
+    this.vaccines.forEach((d) => {
+      d.xCross = d.x;
+    });
+  }
 };
 
 /**
@@ -157,6 +170,11 @@ export const radialLayout = function radialLayout() {
     d.xCBarEnd = (d.depth - offset) * Math.sin(angleCBar2);
     d.smallBigArc = Math.abs(angleCBar2 - angleCBar1) > Math.PI * 1.0;
   });
+  if (this.vaccines) {
+    this.vaccines.forEach((d) => {
+      d.xCross = (d.crossDepth - offset) * Math.sin(d.angle);
+    });
+  }
 };
 
 /*
@@ -182,6 +200,11 @@ export const setDistance = function setDistance(distanceAttribute) {
       d.conf = [d.depth, d.depth];
     }
   });
+  if (this.vaccines) {
+    this.vaccines.forEach((d) => {
+      d.crossDepth = tmp_dist === "div" ? d.depth : d.n.vaccineDateNumeric;
+    });
+  }
 };
 
 
