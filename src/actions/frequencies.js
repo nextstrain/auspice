@@ -18,8 +18,7 @@ export const debouncedComputationallyIntensiveMiddleware = (store) => (next) => 
 }
 */
 
-/* debounce works better than throttle, as it _won't_ update while events are still coming in (e.g. dragging the date slider) */
-export const updateFrequencyData = debounce((dispatch, getState) => {
+export const updateFrequencyData = (dispatch, getState) => {
   timerStart("updateFrequencyData");
   const { frequencies, tree, controls } = getState();
   if (!controls.colorScale) {
@@ -72,23 +71,31 @@ export const updateFrequencyData = debounce((dispatch, getState) => {
     }
   });
   console.log("Saw ", debugTipsSeen, " tips (visible) producing pre-normalisation pivots totals of", debugPivotTotals);
-  /* NORMALISE COLUMNS - i.e. each pivot point sums to 1 */
-  for (let i = 0; i < pivotsLen; i++) {
-    let columnTotal = 0;
-    for (let j = 0; j < categoriesLen; j++) {
-      columnTotal += matrix[categories[j]][i];
-    }
-    for (let j = 0; j < categoriesLen; j++) {
-      if (columnTotal !== 0) {
-        matrix[categories[j]][i] /= columnTotal;
+
+  if (frequencies.normaliseData) {
+    /* NORMALISE COLUMNS - i.e. each pivot point sums to 1 */
+    for (let i = 0; i < pivotsLen; i++) {
+      let columnTotal = 0;
+      for (let j = 0; j < categoriesLen; j++) {
+        columnTotal += matrix[categories[j]][i];
+      }
+      for (let j = 0; j < categoriesLen; j++) {
+        if (columnTotal !== 0) {
+          matrix[categories[j]][i] /= columnTotal;
+        }
       }
     }
   }
 
-  // console.log("categories:", categories);
-  // console.log(matrix);
-
   timerEnd("updateFrequencyData");
   console.log("dispatching FREQUENCY_MATRIX")
   dispatch({type: types.FREQUENCY_MATRIX, matrix});
-}, 1000, { leading: false, trailing: true });
+};
+
+/* debounce works better than throttle, as it _won't_ update while events are still coming in (e.g. dragging the date slider) */
+export const updateFrequencyDataDebounced = debounce(updateFrequencyData, 1000, { leading: false, trailing: true });
+
+export const toggleNormalization = (dispatch, getState) => {
+  dispatch({type: types.TOGGLE_FREQUENCY_NORMALIZATION});
+  updateFrequencyData(dispatch, getState);
+};

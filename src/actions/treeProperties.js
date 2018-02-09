@@ -5,7 +5,7 @@ import { calcVisibility,
   calcBranchThickness } from "../components/tree/treeHelpers";
 import * as types from "./types";
 import { updateEntropyVisibility } from "./entropy";
-import { updateFrequencyData } from "./frequencies";
+import { updateFrequencyDataDebounced } from "./frequencies";
 import { calendarToNumeric } from "../util/dateHelpers";
 
 
@@ -50,7 +50,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
       stateCountAttrs: Object.keys(controls.filters)
     });
     updateEntropyVisibility(dispatch, getState);
-    updateFrequencyData(dispatch, getState);
+    updateFrequencyDataDebounced(dispatch, getState);
   };
 };
 
@@ -86,7 +86,7 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       stateCountAttrs: Object.keys(controls.filters)
     });
     updateEntropyVisibility(dispatch, getState);
-    updateFrequencyData(dispatch, getState);
+    updateFrequencyDataDebounced(dispatch, getState);
   };
 };
 

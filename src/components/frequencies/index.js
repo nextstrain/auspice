@@ -7,7 +7,7 @@ import { changeColorBy } from "../../actions/colors";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 // import EntropyChart from "./entropyD3";
 // import InfoPanel from "./infoPanel";
-import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
+import { toggleNormalization } from "../../actions/frequencies";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import "../../css/entropy.css";
 import { calcScales, drawAxis, drawStream, turnMatrixIntoSeries, generateColorScaleD3, removeStream } from "./functions";
@@ -17,12 +17,7 @@ const getStyles = (width) => {
     switchContainer: {
       position: "absolute",
       marginTop: -5,
-      paddingLeft: width - 100
-    },
-    switchContainerWide: {
-      position: "absolute",
-      marginTop: -25,
-      paddingLeft: width - 185
+      paddingLeft: width - 300
     },
     switchTitle: {
       margin: 5,
@@ -57,6 +52,7 @@ export const computeChartGeometry = (props) => {
     ticks: state.frequencies.ticks,
     matrix: state.frequencies.matrix,
     version: state.frequencies.version,
+    normaliseData: state.frequencies.normaliseData,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorBy: state.controls.colorBy,
     colorScale: state.controls.colorScale
@@ -70,7 +66,7 @@ export class Frequencies extends React.Component {
 
   componentDidMount() {
     /* Render frequencies (via D3) for the first time. DOM element exists. */
-    console.log("Calling D3 methods for frequencies version ", this.props.version);
+    console.log("Calling D3 (initial render of frequencies) (version ", this.props.version, ")");
     const svg = select(this.domRef);
     const chartGeom = computeChartGeometry(this.props);
     // console.log("chartGeom:", chartGeom)
@@ -95,7 +91,7 @@ export class Frequencies extends React.Component {
       console.log("CWRP. colorBy unchanged. Should make nice transition");
     }
 
-    console.log("CWRP calling D3 methods");
+    console.log("Calling D3 for frequencies (version ", nextProps.version, ")");
 
     const categories = Object.keys(nextProps.matrix);
     const series = turnMatrixIntoSeries(categories, nextProps.pivots.length, nextProps.matrix);
@@ -105,44 +101,35 @@ export class Frequencies extends React.Component {
 
     this.setState({categories, series, colourer});
 
-
-    // if (!nextProps.loaded) {
-    //   this.setState({chart: false});
-    // }
-    // if (!this.state.chart && nextProps.loaded) {
-    //   this.setUp(nextProps);
-    //   return;
-    // }
-    // if (this.state.chart && ((this.props.browserDimensions !== nextProps.browserDimensions) || (this.props.padding.left !== nextProps.padding.left || this.props.padding.right !== nextProps.padding.right))) {
-    //   this.state.chart.render(nextProps);
-    //   return;
-    // }
-    // if (this.state.chart) { /* props changed => update */
-    //   const updateParams = {};
-    //   if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
-    //     updateParams.aa = nextProps.mutType === "aa";
-    //     updateParams.newBars = nextProps.bars;
-    //     updateParams.maxYVal = nextProps.maxYVal;
-    //   }
-    //   if (this.props.colorBy !== nextProps.colorBy && (this.props.colorBy.startsWith("gt") || nextProps.colorBy.startsWith("gt"))) {
-    //     if (!nextProps.colorBy.startsWith("gt")) {
-    //       updateParams.clearSelected = true;
-    //     } else {
-    //       updateParams.selected = parseEncodedGenotype(nextProps.colorBy);
-    //     }
-    //   }
-    //   if (Object.keys(updateParams).length) {
-    //     this.state.chart.update(updateParams);
-    //   }
-    // }
   }
-
+  normalizationSwitch(styles) {
+    const onClick = () => this.props.dispatch(toggleNormalization);
+    return (
+      <div style={styles.switchContainer}>
+        <button
+          key={1}
+          style={this.props.normaliseData ? materialButton : materialButtonSelected}
+          onClick={onClick}
+        >
+          <span style={styles.switchTitle}> {"raw data"} </span>
+        </button>
+        <button
+          key={2}
+          style={this.props.normaliseData ? materialButtonSelected : materialButton}
+          onClick={onClick}
+        >
+          <span style={styles.switchTitle}> {"normalised data"} </span>
+        </button>
+      </div>
+    );
+  }
   render() {
     console.log("React render of frequencies...")
     const chartGeom = computeChartGeometry(this.props);
     const styles = getStyles(chartGeom.width);
     return (
       <Card title={"Frequencies"}>
+        {this.normalizationSwitch(styles)}
         <svg style={{pointerEvents: "auto"}} width={chartGeom.responsive.width} height={chartGeom.height}>
           <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
         </svg>
