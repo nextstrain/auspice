@@ -83,7 +83,6 @@ export const drawStream = (svg, scales, categories, pivots, series, colourer) =>
     .attr("d", areaObj)
     .attr("fill", colourer);
 
-
 };
 
 

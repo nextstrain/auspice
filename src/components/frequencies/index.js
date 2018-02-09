@@ -1,14 +1,10 @@
 import React from "react";
+import { select } from "d3-selection";
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
-import { select } from "d3-selection";
-import { changeColorBy } from "../../actions/colors";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
-// import EntropyChart from "./entropyD3";
-// import InfoPanel from "./infoPanel";
 import { toggleNormalization } from "../../actions/frequencies";
-import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import "../../css/entropy.css";
 import { calcScales, drawAxis, drawStream, turnMatrixIntoSeries, generateColorScaleD3, removeStream } from "./functions";
 
@@ -16,7 +12,7 @@ const getStyles = (width) => {
   return {
     switchContainer: {
       position: "absolute",
-      marginTop: -5,
+      marginTop: -20,
       paddingLeft: width - 300
     },
     switchTitle: {

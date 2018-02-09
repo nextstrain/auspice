@@ -2,24 +2,9 @@ import { debounce } from 'lodash';
 import * as types from "./types";
 import { timerStart, timerEnd } from "../util/perf";
 
-/* maybe this could be middleware?!?!?
-export const debouncedComputationallyIntensiveMiddleware = (store) => (next) => (action) => {
-  const result = next(action); // send action to other middleware / reducers immediately
-  if (action demands that frequency recompute) {
-    if (frequency recalculation timeout waiting to run) {
-      clearInterval()
-    }
-    setTimeout(() => {
-      // calculate computationally intensive stuff.
-      // can access store (will represent updated state)
-      next(action with new frequencies data)
-    }, 500)
-  }
-}
-*/
-
 export const updateFrequencyData = (dispatch, getState) => {
   timerStart("updateFrequencyData");
+  console.time("updateFrequencyData");
   const { frequencies, tree, controls } = getState();
   if (!controls.colorScale) {
     console.error("Race condition. ColourScale not Set. Frequency Matrix can't be calculated.");
@@ -29,7 +14,6 @@ export const updateFrequencyData = (dispatch, getState) => {
     console.error("Race condition. Frequencies data not in state. Matrix can't be calculated.");
     return;
   }
-  console.log("updateFrequencyData", controls.colorBy)
   /* color scale domain forms the categories in the stream graph */
   const categories = controls.colorScale.scale.domain().filter((d) => d !== undefined);
   const assignCategory = (value) => {
@@ -70,7 +54,6 @@ export const updateFrequencyData = (dispatch, getState) => {
       }
     }
   });
-  console.log("Saw ", debugTipsSeen, " tips (visible) producing pre-normalisation pivots totals of", debugPivotTotals);
 
   if (frequencies.normaliseData) {
     /* NORMALISE COLUMNS - i.e. each pivot point sums to 1 */
@@ -87,13 +70,14 @@ export const updateFrequencyData = (dispatch, getState) => {
     }
   }
 
+  console.log("Saw ", debugTipsSeen, " tips (visible) producing pre-normalisation pivots totals of", debugPivotTotals);
+  console.timeEnd("updateFrequencyData");
   timerEnd("updateFrequencyData");
-  console.log("dispatching FREQUENCY_MATRIX")
   dispatch({type: types.FREQUENCY_MATRIX, matrix});
 };
 
 /* debounce works better than throttle, as it _won't_ update while events are still coming in (e.g. dragging the date slider) */
-export const updateFrequencyDataDebounced = debounce(updateFrequencyData, 1000, { leading: false, trailing: true });
+export const updateFrequencyDataDebounced = debounce(updateFrequencyData, 500, { leading: false, trailing: true });
 
 export const toggleNormalization = (dispatch, getState) => {
   dispatch({type: types.TOGGLE_FREQUENCY_NORMALIZATION});
