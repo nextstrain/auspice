@@ -62,7 +62,7 @@ export class Frequencies extends React.Component {
 
   componentDidMount() {
     /* Render frequencies (via D3) for the first time. DOM element exists. */
-    console.log("Calling D3 (initial render of frequencies) (version ", this.props.version, ")");
+    // console.log("Calling D3 (initial render of frequencies) (version ", this.props.version, ")");
     const svg = select(this.domRef);
     const chartGeom = computeChartGeometry(this.props);
     const scales = calcScales(chartGeom, this.props.ticks);
@@ -79,14 +79,14 @@ export class Frequencies extends React.Component {
   }
   componentWillReceiveProps(nextProps) {
     if (this.props.version === nextProps.version) {
-      console.log("frequencies CWRP running, but the versions haven't changed, so doing nothing");
+      // console.log("frequencies CWRP running, but the versions haven't changed, so doing nothing");
       return;
     }
     if (this.props.colorBy === nextProps.colorBy) {
-      console.log("CWRP. colorBy unchanged. Should make nice transition");
+      // console.log("CWRP. colorBy unchanged. Should make nice transition");
     }
-    console.log("Calling D3 for frequencies (version ", nextProps.version, ")");
-    const categories = getOrderedCategories(this.props.matrix);
+    // console.log("Calling D3 for frequencies (version ", nextProps.version, ")");
+    const categories = getOrderedCategories(nextProps.matrix);
     const series = turnMatrixIntoSeries(categories, nextProps.pivots.length, nextProps.matrix);
     const colourer = generateColorScaleD3(categories, nextProps.colorScale);
     const labels = getMeaningfulLabels(categories, nextProps.colorScale);
@@ -116,7 +116,7 @@ export class Frequencies extends React.Component {
     );
   }
   render() {
-    console.log("React render of frequencies...")
+    // console.log("React render of frequencies...")
     const chartGeom = computeChartGeometry(this.props);
     const styles = getStyles(chartGeom.width);
     return (

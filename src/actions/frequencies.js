@@ -2,6 +2,24 @@ import { debounce } from 'lodash';
 import * as types from "./types";
 import { timerStart, timerEnd } from "../util/perf";
 
+const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
+  if (isGenotype) return node.currentGt;
+
+  const value = node.attr[colorBy];
+  if (!colorScale.continuous) return value;
+
+  for (let i = 0; i < categories.length; i++) {
+    /* same logic as the determineLegendMatch function */
+    const lowerBound = colorScale.legendBoundsMap.lower_bound[categories[i]];
+    const upperBound = colorScale.legendBoundsMap.upper_bound[categories[i]];
+    if (value <= upperBound && value > lowerBound) {
+      return categories[i];
+    }
+  }
+  console.error("Could not assign", value, "to a category");
+  return undefined;
+};
+
 export const updateFrequencyData = (dispatch, getState) => {
   timerStart("updateFrequencyData");
   console.time("updateFrequencyData");
@@ -16,22 +34,8 @@ export const updateFrequencyData = (dispatch, getState) => {
   }
   /* color scale domain forms the categories in the stream graph */
   const categories = controls.colorScale.scale.domain().filter((d) => d !== undefined);
-  const assignCategory = (value) => {
-    if (!controls.colorScale.continuous) {
-      return value;
-    }
-    for (let i = 0; i < categories.length; i++) {
-      /* same logic as the determineLegendMatch function */
-      const lowerBound = controls.colorScale.legendBoundsMap.lower_bound[categories[i]];
-      const upperBound = controls.colorScale.legendBoundsMap.upper_bound[categories[i]];
-      if (value <= upperBound && value > lowerBound) {
-        return categories[i];
-      }
-    }
-    console.error("Could not assign", value, "to a category");
-    return undefined;
-  };
   const colorBy = controls.colorBy;
+  const isGenotype = colorBy.slice(0, 3) === "gt-";
   const matrix = {};
   const pivotsLen = frequencies.pivots.length;
   categories.forEach((x) => {matrix[x] = new Array(pivotsLen).fill(0);});
@@ -43,7 +47,7 @@ export const updateFrequencyData = (dispatch, getState) => {
     if (tree.visibility[d.idx] === "visible") {
       debugTipsSeen++;
       // const colour = tree.nodes[d.idx].attr[colorBy];
-      const category = assignCategory(tree.nodes[d.idx].attr[colorBy]);
+      const category = assignCategory(controls.colorScale, categories, tree.nodes[d.idx], colorBy, isGenotype);
       for (let i = 0; i < pivotsLen; i++) {
         if (d.values[i] < 0.0002) {continue;} /* skip 0.0001 values */
         matrix[category][i] += d.values[i];
@@ -70,7 +74,7 @@ export const updateFrequencyData = (dispatch, getState) => {
     }
   }
 
-  console.log("Saw ", debugTipsSeen, " tips (visible) producing pre-normalisation pivots totals of", debugPivotTotals);
+  // console.log("Saw ", debugTipsSeen, " tips (visible) producing pre-normalisation pivots totals of", debugPivotTotals);
   console.timeEnd("updateFrequencyData");
   timerEnd("updateFrequencyData");
   dispatch({type: types.FREQUENCY_MATRIX, matrix});
