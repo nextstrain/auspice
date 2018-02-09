@@ -6,7 +6,7 @@ import computeResponsive from "../../util/computeResponsive";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 import { toggleNormalization } from "../../actions/frequencies";
 import "../../css/entropy.css";
-import { calcScales, drawAxis, drawStream, turnMatrixIntoSeries, generateColorScaleD3, removeStream } from "./functions";
+import { calcScales, drawAxis, drawStream, turnMatrixIntoSeries, generateColorScaleD3, removeStream, drawTooltip, getMeaningfulLabels } from "./functions";
 
 const getStyles = (width) => {
   return {
@@ -65,17 +65,16 @@ export class Frequencies extends React.Component {
     console.log("Calling D3 (initial render of frequencies) (version ", this.props.version, ")");
     const svg = select(this.domRef);
     const chartGeom = computeChartGeometry(this.props);
-    // console.log("chartGeom:", chartGeom)
     const scales = calcScales(chartGeom, this.props.ticks);
     drawAxis(svg, chartGeom, scales);
     if (!this.props.matrix) {console.error("Matrix undefined"); return;}
     const categories = Object.keys(this.props.matrix);
     const series = turnMatrixIntoSeries(categories, this.props.pivots.length, this.props.matrix);
     const colourer = generateColorScaleD3(categories, this.props.colorScale);
-
+    drawTooltip();
+    const labels = getMeaningfulLabels(categories, this.props.colorScale);
     const svgStreamGroup = svg.append("g");
-    drawStream(svgStreamGroup, scales, categories, this.props.pivots, series, colourer);
-
+    drawStream(svgStreamGroup, scales, this.props.colorBy, labels, this.props.pivots, series, colourer);
     this.setState({svg, svgStreamGroup, chartGeom, scales, categories, series, colourer});
   }
   componentWillReceiveProps(nextProps) {
@@ -86,17 +85,14 @@ export class Frequencies extends React.Component {
     if (this.props.colorBy === nextProps.colorBy) {
       console.log("CWRP. colorBy unchanged. Should make nice transition");
     }
-
     console.log("Calling D3 for frequencies (version ", nextProps.version, ")");
-
     const categories = Object.keys(nextProps.matrix);
     const series = turnMatrixIntoSeries(categories, nextProps.pivots.length, nextProps.matrix);
     const colourer = generateColorScaleD3(categories, nextProps.colorScale);
+    const labels = getMeaningfulLabels(categories, nextProps.colorScale);
     removeStream(this.state.svgStreamGroup);
-    drawStream(this.state.svgStreamGroup, this.state.scales, categories, nextProps.pivots, series, colourer);
-
+    drawStream(this.state.svgStreamGroup, this.state.scales, nextProps.colorBy, labels, nextProps.pivots, series, colourer);
     this.setState({categories, series, colourer});
-
   }
   normalizationSwitch(styles) {
     const onClick = () => this.props.dispatch(toggleNormalization);
@@ -126,6 +122,7 @@ export class Frequencies extends React.Component {
     return (
       <Card title={"Frequencies"}>
         {this.normalizationSwitch(styles)}
+        <div id="freqinfo"/>
         <svg style={{pointerEvents: "auto"}} width={chartGeom.responsive.width} height={chartGeom.height}>
           <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
         </svg>

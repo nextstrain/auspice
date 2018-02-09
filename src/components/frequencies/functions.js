@@ -1,14 +1,11 @@
-// import { select, event } from "d3-selection";
+import { select, mouse } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { rgb } from "d3-color";
 import { area } from "d3-shape";
-// import { zoom } from "d3-zoom";
-// import { brushX } from "d3-brush";
-// import Mousetrap from "mousetrap";
-// import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
-// import { computeChartGeometry, parseEncodedGenotype } from "./index";
 
+/* C O N S T A N T S */
+const opacity = 0.85;
 
 export const calcScales = (chartGeom, ticks) => {
   const x = scaleLinear()
@@ -63,29 +60,94 @@ export const turnMatrixIntoSeries = (categories, nPivots, matrix) => {
   return series;
 };
 
+export const getMeaningfulLabels = (categories, colorScale) => {
+  if (colorScale.continuous) {
+    const labels = [];
+    for (let i = 0; i < categories.length; i++) {
+      labels[i] = `${colorScale.legendBoundsMap.lower_bound[categories[i]].toFixed(2)} - ${colorScale.legendBoundsMap.upper_bound[categories[i]].toFixed(2)}`;
+    }
+    return labels;
+  }
+  return categories.slice();
+};
+
+export const drawTooltip = () => {
+  select("#freqinfo")
+    .style("position", "absolute")
+    .style("z-index", "20")
+    .style("border-radius", "5px")
+    .style("padding", "10px")
+    .style("background-color", "hsla(0,0%,100%,.9)")
+    .style("pointer-events", "none")
+    .style("visibility", "hidden");
+};
+
 export const generateColorScaleD3 = (categories, colorScale) => (d, i) =>
   rgb(colorScale.scale(categories[i])).toString();
 
+function handleMouseOver() {
+  select(this).attr("opacity", 1);
+}
 
-export const drawStream = (svg, scales, categories, pivots, series, colourer) => {
+function handleMouseOut() {
+  select(this).attr("opacity", opacity);
+  select("#freqinfo").style("visibility", "hidden");
+  select("#vline").style("visibility", "hidden");
+}
+
+export const drawStream = (svgStreamGroup, scales, colorBy, labels, pivots, series, colourer) => {
   /* https://github.com/d3/d3-shape/blob/master/README.md#areas */
   const areaObj = area()
     .x((d, i) => scales.x(pivots[i]))
     .y0((d) => scales.y(d[0]))
     .y1((d) => scales.y(d[1]));
 
-  // console.log("SERIES", series);
-  // console.log("length", series.length)
-  svg.selectAll("path")
+  /* define handleMouseMove inside drawStream so it can access the provided arguments */
+  function handleMouseMove(d, i) {
+    const [mousex] = mouse(this); // [x, y] x starts from left, y starts from top
+    /* what's the closest pivot? */
+    const date = scales.x.invert(mousex);
+    const pivotIdx = pivots.reduce((closestIdx, val, idx, arr) => Math.abs(val - date) < Math.abs(arr[closestIdx] - date) ? idx : closestIdx, 0);
+    const freqVal = parseInt((d[pivotIdx][1] - d[pivotIdx][0]) * 100, 10) + "%";
+    const xvalueOfPivot = scales.x(pivots[pivotIdx]);
+
+    select("#vline")
+      .style("visibility", "visible")
+      .attr("x1", xvalueOfPivot)
+      .attr("x2", xvalueOfPivot);
+
+    select("#freqinfo")
+      .style("left", `${mousex + 4}px`)
+      .style("top", `${50}px`)
+      .style("visibility", "visible")
+      .html(`<p>${colorBy}: ${labels[i]}</p><p>Pivot: ${pivots[pivotIdx]}</p><p>Frequency ${freqVal}</p>`);
+  }
+
+  /* the streams */
+  svgStreamGroup.selectAll(".stream")
     .data(series)
     .enter()
     .append("path")
     .attr("d", areaObj)
-    .attr("fill", colourer);
+    .attr("fill", colourer)
+    .attr("opacity", opacity)
+    .on("mouseover", handleMouseOver)
+    .on("mouseout", handleMouseOut)
+    .on("mousemove", handleMouseMove);
 
+  /* the vertical line to indicate the pivot point */
+  svgStreamGroup.append("line")
+    .attr("id", "vline")
+    .attr("y1", scales.y(1))
+    .attr("y2", scales.y(0))
+    .style("visibility", "hidden")
+    .style("pointer-events", "none")
+    .style("stroke", "hsla(0,0%,100%,.9)")
+    .style("stroke-width", "5");
 };
 
 
 export const removeStream = (svg) => {
   svg.selectAll("path").remove();
+  svg.selectAll("line").remove();
 };
