@@ -8,8 +8,20 @@ import { area } from "d3-shape";
 const opacity = 0.85;
 
 export const getOrderedCategories = (matrix) => {
-  /* this should be better */
-  return Object.keys(matrix).reverse();
+  const categories = Object.keys(matrix);
+  const nPivots = matrix[categories[0]].length;
+  const pivotEndIdx = nPivots - 1;
+  const change = {}; /* positive: gone up over time */
+  for (let i = 0; i < categories.length; i++) {
+    change[categories[i]] = matrix[categories[i]][pivotEndIdx] - matrix[categories[i]][0];
+  }
+  /* low indexes (bottom streams) show high growth (large change) */
+  categories.sort((a, b) => {
+    if (change[a] > change[b]) return -1; /* a growing faster than b */
+    if (change[a] < change[b]) return 1;
+    return 0;
+  });
+  return categories;
 };
 
 export const calcScales = (chartGeom, ticks) => {
