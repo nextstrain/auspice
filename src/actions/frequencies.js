@@ -30,13 +30,24 @@ export const updateFrequencyData = debounce((dispatch, getState) => {
     console.error("Race condition. Frequencies data not in state. Matrix can't be calculated.");
     return;
   }
-  if (controls.colorScale.continuous) {
-    console.error("TODO: frequencies for continuous color scale.");
-    return;
-  }
   console.log("updateFrequencyData", controls.colorBy)
   /* color scale domain forms the categories in the stream graph */
   const categories = controls.colorScale.scale.domain().filter((d) => d !== undefined);
+  const assignCategory = (value) => {
+    if (!controls.colorScale.continuous) {
+      return value;
+    }
+    for (let i = 0; i < categories.length; i++) {
+      /* same logic as the determineLegendMatch function */
+      const lowerBound = controls.colorScale.legendBoundsMap.lower_bound[categories[i]];
+      const upperBound = controls.colorScale.legendBoundsMap.upper_bound[categories[i]];
+      if (value <= upperBound && value > lowerBound) {
+        return categories[i];
+      }
+    }
+    console.error("Could not assign", value, "to a category");
+    return undefined;
+  };
   const colorBy = controls.colorBy;
   const matrix = {};
   const pivotsLen = frequencies.pivots.length;
@@ -46,13 +57,13 @@ export const updateFrequencyData = debounce((dispatch, getState) => {
   let debugTipsSeen = 0;
   const debugPivotTotals = new Array(pivotsLen).fill(0);
   frequencies.data.forEach((d) => {
-    /* check the visibility of the node using tree.visibility[d.idx] */
     if (tree.visibility[d.idx] === "visible") {
       debugTipsSeen++;
-      const colour = tree.nodes[d.idx].attr[colorBy];
+      // const colour = tree.nodes[d.idx].attr[colorBy];
+      const category = assignCategory(tree.nodes[d.idx].attr[colorBy]);
       for (let i = 0; i < pivotsLen; i++) {
         if (d.values[i] < 0.0002) {continue;} /* skip 0.0001 values */
-        matrix[colour][i] += d.values[i];
+        matrix[category][i] += d.values[i];
         debugPivotTotals[i] += d.values[i];
         // if (i === pivotsLen - 1 && d.values[i] !== 0) {
         //   console.log("at final pivot some data (", d.values[i],") being added by", tree.nodes[d.idx].strain, tree.nodes[d.idx].clade)
