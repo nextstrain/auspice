@@ -49,7 +49,7 @@ export const updateFrequencyData = (dispatch, getState) => {
         matrix[category][i] += d.values[i];
         debugPivotTotals[i] += d.values[i];
         // if (i === pivotsLen - 1 && d.values[i] !== 0) {
-        //   console.log("at final pivot some data (", d.values[i],") being added by", tree.nodes[d.idx].strain, tree.nodes[d.idx].clade)
+        //   console.log("Pivot", frequencies.pivots[i], "strain", tree.nodes[d.idx].strain, "(clade #", tree.nodes[d.idx].clade, ") carried frequency of", d.values[i]);
         // }
       }
     }

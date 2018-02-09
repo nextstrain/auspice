@@ -7,6 +7,11 @@ import { area } from "d3-shape";
 /* C O N S T A N T S */
 const opacity = 0.85;
 
+export const getOrderedCategories = (matrix) => {
+  /* this should be better */
+  return Object.keys(matrix).reverse();
+};
+
 export const calcScales = (chartGeom, ticks) => {
   const x = scaleLinear()
     .domain([ticks[0], ticks[ticks.length - 1]])
