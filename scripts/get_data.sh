@@ -6,6 +6,7 @@ data_files=(
   "flu_h3n2_ha_3y_tree.json" "flu_h3n2_ha_3y_meta.json" \
   "flu_h3n2_ha_6y_tree.json" "flu_h3n2_ha_6y_meta.json" \
   "flu_h3n2_ha_12y_tree.json" "flu_h3n2_ha_12y_meta.json" \
+  "flu_h3n2_ha_3y_frequencies.json" "flu_h3n2_ha_6y_frequencies.json" "flu_h3n2_ha_12y_frequencies.json"\
   "flu_h1n1pdm_ha_3y_tree.json" "flu_h1n1pdm_ha_3y_meta.json" \
   "flu_h1n1pdm_ha_6y_tree.json" "flu_h1n1pdm_ha_6y_meta.json" \
   "flu_h1n1pdm_ha_12y_tree.json" "flu_h1n1pdm_ha_12y_meta.json" \
