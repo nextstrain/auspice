@@ -1,6 +1,7 @@
 /* eslint-disable no-multi-spaces */
 import { min, sum } from "d3-array";
 import { addLeafCount } from "./helpers";
+import { timerStart, timerEnd } from "../../../util/perf";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -9,6 +10,7 @@ import { addLeafCount } from "./helpers";
  *                  ["rect", "radial", "unrooted", "clock"]
  */
 export const setLayout = function setLayout(layout) {
+  timerStart("setLayout");
   if (typeof layout === "undefined" || layout !== this.layout) {
     this.nodes.forEach((d) => {d.update = true;});
   }
@@ -26,6 +28,7 @@ export const setLayout = function setLayout(layout) {
   } else if (this.layout === "unrooted") {
     this.unrootedLayout();
   }
+  timerEnd("setLayout");
 };
 
 
@@ -183,6 +186,7 @@ export const radialLayout = function radialLayout() {
  * calculate coordinates. Parent depth is assigned as well.
  */
 export const setDistance = function setDistance(distanceAttribute) {
+  timerStart("setDistance");
   this.nodes.forEach((d) => {d.update = true;});
   if (typeof distanceAttribute === "undefined") {
     this.distance = "div"; // default is "div" for divergence
@@ -205,6 +209,7 @@ export const setDistance = function setDistance(distanceAttribute) {
       d.crossDepth = tmp_dist === "div" ? d.depth : d.n.vaccineDateNumeric;
     });
   }
+  timerEnd("setDistance");
 };
 
 

@@ -3,12 +3,14 @@ import getColorScale from "../util/getColorScale";
 import { setGenotype } from "../util/setGenotype";
 import { calcNodeColor } from "../components/tree/treeHelpers";
 import { determineColorByGenotypeType } from "../util/colorHelpers";
+import { timerStart, timerEnd } from "../util/perf";
 import { updateEntropyVisibility } from "./entropy";
 import * as types from "./types";
 
 /* providedColorBy: undefined | string */
 export const changeColorBy = (providedColorBy = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
+    timerStart("changeColorBy calculations");
     const { controls, tree, metadata } = getState();
     /* step 0: bail if all required params aren't (yet) available! */
     /* note this *can* run before the tree is loaded - we only need the nodes */
@@ -41,6 +43,7 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
 
     /* step 3: change in mutType? */
     const newMutType = determineColorByGenotypeType(colorBy) !== controls.mutType ? determineColorByGenotypeType(colorBy) : false;
+    timerEnd("changeColorBy calculations"); /* end timer before dispatch */
     if (newMutType) {
       updateEntropyVisibility(dispatch, getState);
     }

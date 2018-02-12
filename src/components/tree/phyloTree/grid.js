@@ -1,5 +1,6 @@
 /* eslint-disable space-infix-ops */
 import { max } from "d3-array";
+import { timerStart, timerEnd } from "../../../util/perf";
 
 export const removeGrid = function removeGrid() {
   this.svg.selectAll(".majorGrid").remove();
@@ -19,6 +20,7 @@ export const hideGrid = function hideGrid() {
  * @param {layout}
  */
 export const addGrid = function addGrid(layout, yMinView, yMaxView) {
+  timerStart("addGrid");
   if (typeof layout==="undefined") {layout=this.layout;} // eslint-disable-line no-param-reassign
 
   const xmin = (this.xScale.domain()[0]>0)?this.xScale.domain()[0]:0.0;
@@ -164,4 +166,5 @@ export const addGrid = function addGrid(layout, yMinView, yMaxView) {
     .attr("y", yTextPos(this.yScale, layout));
 
   this.grid=true;
+  timerEnd("addGrid");
 };

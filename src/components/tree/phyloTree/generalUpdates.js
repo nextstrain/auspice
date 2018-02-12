@@ -88,6 +88,7 @@ export const updateLayout = function updateLayout(layout, dt) {
  * @return {[type]}
  */
 export const updateGeometry = function updateGeometry(dt) {
+  timerStart("updateGeometry");
   this.svg.selectAll(".tip")
     .filter((d) => d.update)
     .transition()
@@ -119,6 +120,7 @@ export const updateGeometry = function updateGeometry(dt) {
 
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
+  timerEnd("updateGeometry");
 };
 
 
