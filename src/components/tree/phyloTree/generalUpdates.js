@@ -96,12 +96,24 @@ export const updateGeometry = function updateGeometry(dt) {
     .attr("cx", (d) => d.xTip)
     .attr("cy", (d) => d.yTip);
 
-  this.svg.selectAll(".vaccine")
-    .filter((d) => d.update)
-    .transition()
-    .duration(dt)
-    .attr("x", (d) => d.xTipCross)
-    .attr("y", (d) => d.yTip);
+  if (this.vaccines) {
+    this.svg.selectAll(".vaccineCross")
+      .transition()
+      .duration(dt)
+      .attr("x", (d) => d.xTipCross)
+      .attr("y", (d) => d.yTip);
+    if (this.layout === "rect") {
+      this.svg.selectAll(".vaccineDottedLine")
+        .transition().duration(dt)
+        .style("opacity", 1)
+        .attr("d", (dd) => dd.vaccineLine);
+    } else {
+      this.svg.selectAll(".vaccineDottedLine")
+        .transition().duration(dt)
+        .style("opacity", 0)
+        .attr("d", (dd) => dd.vaccineLine);
+    }
+  }
 
   const branchEls = [".S", ".T"];
   for (let i = 0; i < 2; i++) {

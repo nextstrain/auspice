@@ -31,7 +31,7 @@ export const render = function render(svg, layout, distance, options, callbacks,
   if (this.params.showGrid) this.addGrid();
   if (this.params.branchLabels) this.drawBranches();
   this.drawTips();
-  if (this.params.showVaccines) this.drawVaccines();
+  if (this.vaccines) this.drawVaccines();
   this.drawCladeLabels();
 
   if (visibility) {
@@ -68,11 +68,11 @@ export const render = function render(svg, layout, distance, options, callbacks,
  * @return {null}
  */
 export const drawVaccines = function drawVaccines() {
-  this.tipElements = this.svg.append("g").selectAll(".vaccine")
+  this.svg.append("g").selectAll(".vaccine")
     .data(this.vaccines)
     .enter()
     .append("text")
-    .attr("class", "vaccine")
+    .attr("class", "vaccineCross")
     .attr("x", (d) => d.xTipCross)
     .attr("y", (d) => d.yTip)
     .attr('text-anchor', 'middle')
@@ -84,6 +84,19 @@ export const drawVaccines = function drawVaccines() {
     .text('\u2716');
   // .style("cursor", "pointer")
   // .on("mouseover", (d) => console.warn("vaccine mouseover", d));
+
+  this.svg.append("g").selectAll('.branch')
+    .data(this.vaccines)
+    .enter()
+    .append("path")
+    .attr("class", "vaccineDottedLine")
+    .attr("d", (d) => d.vaccineLine)
+    .style("stroke-dasharray", "5, 5")
+    // .style("stroke", (d) => d.stroke || this.params.branchStroke)
+    .style("stroke", "black")
+    .style("stroke-width", (d) => d['stroke-width'] || this.params.branchStrokeWidth)
+    .style("fill", "none")
+    .style("pointer-events", "none")
 };
 
 
@@ -94,7 +107,7 @@ export const drawVaccines = function drawVaccines() {
 export const drawTips = function drawTips() {
   timerStart("drawTips");
   const params = this.params;
-  this.tipElements = this.svg.append("g").selectAll(".tip")
+  this.svg.append("g").selectAll(".tip")
     .data(this.nodes.filter((d) => d.terminal))
     .enter()
     .append("circle")

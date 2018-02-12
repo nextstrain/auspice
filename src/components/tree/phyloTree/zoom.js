@@ -96,7 +96,12 @@ export const mapToScreen = function mapToScreen() {
     d.xBase = this.xScale(d.px);
     d.yBase = this.yScale(d.py);
   });
-  if (this.vaccines) this.vaccines.forEach((d) => {d.xTipCross = this.xScale(d.xCross);});
+  if (this.vaccines) {
+    this.vaccines.forEach((d) => {
+      d.xTipCross = this.xScale(d.xCross);
+      d.vaccineLine = ` M ${d.xTip},${d.yTip} L ${d.xTipCross},${d.yTip}`;
+    });
+  }
   if (this.params.confidence && this.layout==="rect") {
     this.nodes.forEach((d) => {d.xConf = [this.xScale(d.conf[0]), this.xScale(d.conf[1])];});
   }
@@ -111,12 +116,8 @@ export const mapToScreen = function mapToScreen() {
       const stem_offset = 0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0;
       const childrenY = [this.yScale(d.yRange[0]), this.yScale(d.yRange[1])];
       d.branch =[` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip} M ${d.xTip},${childrenY[0]} L ${d.xTip},${childrenY[1]}`];
+      if (this.params.confidence) d.confLine =` M ${d.xConf[0]},${d.yBase} L ${d.xConf[1]},${d.yTip}`;
     });
-    if (this.params.confidence) {
-      this.nodes.forEach((d) => {
-        d.confLine =` M ${d.xConf[0]},${d.yBase} L ${d.xConf[1]},${d.yTip}`;
-      });
-    }
   } else if (this.layout==="radial") {
     const offset = this.nodes[0].depth;
     const stem_offset_radial = this.nodes.map((d) => {return (0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0);});
