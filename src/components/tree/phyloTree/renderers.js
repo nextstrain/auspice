@@ -25,7 +25,7 @@ export const render = function render(svg, layout, distance, options, callbacks,
 
   timerStart("setLayout"); this.setLayout(layout); timerEnd("setLayout");
 
-  timerStart("mapToScreen"); this.mapToScreen(); timerEnd("mapToScreen");
+  this.mapToScreen();
 
   if (this.params.showGrid) {timerStart("addGrid"); this.addGrid(); timerEnd("addGrid");}
   if (this.params.branchLabels) {timerStart("drawBranches"); this.drawBranches(); timerEnd("drawBranches");}
