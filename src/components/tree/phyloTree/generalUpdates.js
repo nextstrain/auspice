@@ -143,7 +143,7 @@ export const updateGeometry = function updateGeometry(dt) {
 export const updateGeometryFade = function updateGeometryFade(dt) {
   this.removeConfidence(dt);
 
-  // fade out branches
+  /* fade out branches, tip & branch labels, vaccine crosses & dotted lines */
   this.svg.selectAll('.branch')
     .filter((d) => d.update)
     .transition().duration(dt * 0.5)
@@ -156,42 +156,54 @@ export const updateGeometryFade = function updateGeometryFade(dt) {
     .filter((d) => d.update)
     .transition().duration(dt * 0.5)
     .style("opacity", 0.0);
+  if (this.vaccines) {
+    this.svg.selectAll('.vaccineCross')
+      .transition().duration(dt * 0.5)
+      .style("opacity", 0.0);
+    this.svg.selectAll('.vaccineDottedLine')
+      .transition().duration(dt * 0.5)
+      .style("opacity", 0.0);
+  }
 
   // closure to move the tips, called via the time out below
-  const tipTransHOF = (svgShadow, dtShadow) => () => {
+  const moveTipsHOF = (svgShadow, dtShadow) => () => {
     svgShadow.selectAll('.tip')
       .filter((d) => d.update)
       .transition().duration(dtShadow)
       .attr("cx", (d) => d.xTip)
       .attr("cy", (d) => d.yTip);
-    svgShadow.selectAll(".vaccine")
-      .filter((d) => d.update)
-      .transition()
-      .duration(dtShadow)
-      .attr("x", (d) => d.xTipCross)
-      .attr("y", (d) => d.yTip);
   };
-  setTimeout(tipTransHOF(this.svg, dt), 0.5 * dt);
 
   // closure to change the branches, called via time out after the tipTrans is done
-  const flipBranchesHOF = (svgShadow) => () => {
+  const moveHiddenElementsHOF = (svgShadow, vaccines) => () => {
     svgShadow.selectAll('.branch').filter('.S')
       .filter((d) => d.update)
       .attr("d", (d) => d.branch[0]);
     svgShadow.selectAll('.branch').filter('.T')
       .filter((d) => d.update)
       .attr("d", (d) => d.branch[1]);
+    if (vaccines) {
+      svgShadow.selectAll('.vaccineCross').attr("d", (dd) => dd.vaccineCross);
+      svgShadow.selectAll('.vaccineDottedLine').attr("d", (dd) => dd.vaccineLine);
+    }
   };
-  setTimeout(flipBranchesHOF(this.svg), 0.5 * dt);
 
   // closure to add the new branches after the tipTrans
-  const fadeBackHOF = (svgShadow, dtShadow) => () => {
+  const fadeBackElementsHOF = (svgShadow, dtShadow, vaccines) => () => {
     svgShadow.selectAll('.branch')
       .filter((dd) => dd.update)
       .transition().duration(0.5 * dtShadow)
       .style("opacity", 1.0);
+    if (vaccines) {
+      svgShadow.selectAll('.vaccineCross, .vaccineDottedLine')
+        .transition().duration(0.5 * dtShadow)
+        .style("opacity", 1.0);
+    }
   };
-  setTimeout(fadeBackHOF(this.svg, 0.2 * dt), 1.5 * dt);
+
+  setTimeout(moveTipsHOF(this.svg, dt), 0.5 * dt);
+  setTimeout(moveHiddenElementsHOF(this.svg, this.vaccines), 0.5 * dt);
+  setTimeout(fadeBackElementsHOF(this.svg, 0.2 * dt, this.vaccines), 1.5 * dt);
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
 };
