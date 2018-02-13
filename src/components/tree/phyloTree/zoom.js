@@ -1,6 +1,6 @@
 /* eslint-disable space-infix-ops */
-import { min, max } from "d3-array";
-import { applyToChildren } from "./helpers";
+import { max } from "d3-array";
+import { applyToChildren, calcYValues } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
 
 /**
@@ -10,6 +10,7 @@ import { timerStart, timerEnd } from "../../../util/perf";
  * @return {null}
  */
 export const zoomIntoClade = function zoomIntoClade(clade, dt) {
+  timerStart("zoomIntoClade");
   // assign all nodes to inView false and force update
   this.zoomNode = clade;
   this.nodes.forEach((d) => {
@@ -23,6 +24,10 @@ export const zoomIntoClade = function zoomIntoClade(clade, dt) {
   } else {
     applyToChildren(clade, (d) => {d.inView = true;});
   }
+
+  calcYValues(this.nodes, "inView", this.numberOfTips);
+  this.setLayout(this.layout);
+
   // redraw
   this.mapToScreen();
   this.updateGeometry(dt);
@@ -33,6 +38,7 @@ export const zoomIntoClade = function zoomIntoClade(clade, dt) {
     this.updateBranchLabels(dt);
   }
   this.updateTipLabels(dt);
+  timerEnd("zoomIntoClade");
 };
 
 /**
@@ -60,7 +66,7 @@ export const mapToScreen = function mapToScreen() {
   /* find minimum & maximum x & y values, as well as # tips in view */
   this.nNodesInView = 0;
   let [minY, maxY, minX, maxX] = [1000000, 0, 1000000, 0];
-  this.nodes.filter((d) => d.inView).forEach((d) => {
+  this.nodes.forEach((d) => {
     if (d.x > maxX) maxX = d.x;
     if (d.y > maxY) maxY = d.y;
     if (d.x < minX) minX = d.x;

@@ -73,17 +73,35 @@ export const createChildrenAndParentsReturnNumTips = (nodes) => {
  * rectangularLayout, radialLayout, createChildrenAndParents
  * side effects: node.n.yvalue (i.e. in the redux node) and node.yRange (i.e. in the phyloTree node)
  */
-export const calcYValues = (nodes) => {
+export const calcYValues = (nodes, spacing = "even", numberOfTips = undefined) => {
   console.time("calcYValues")
-  let count = 0;
+  console.log("running calcYValues with spacing", spacing)
+  let total = 0; /* cumulative counter of y value at tip */
+  let calcY; /* fn called calcY(node) to return some amount of y value at a tip */
+  if (spacing === "inView") {
+    /* inView nodes get 80% of the screen real-estate */
+    let numInViewTips = 0;
+    nodes.forEach((d) => {if (!d.children && d.inView) numInViewTips++;});
+    const yPerInView = (0.8 * numberOfTips) / numInViewTips;
+    const yPerOutOfView = (0.2 * numberOfTips) / (numberOfTips - numInViewTips);
+    calcY = (node) => {
+      // console.log("node inView", node.inView, node.inView ? yPerInView : yPerOutOfView);
+      total += node.inView ? yPerInView : yPerOutOfView;
+      return total;
+    };
+  } else { /* fall back to even spacing */
+    if (spacing !== "even") console.warn("falling back to even spacing of y values. Unknown arg:", spacing);
+    calcY = () => ++total;
+  }
+
   const recurse = (node) => {
     if (node.children) {
       for (let i = node.children.length - 1; i >= 0; i--) {
         recurse(node.children[i]);
       }
     } else {
-      node.n.yvalue = ++count;
-      node.yRange = [count, count];
+      node.n.yvalue = calcY(node);
+      node.yRange = [node.n.yvalue, node.n.yvalue];
       return;
     }
     /* if here, then all children have yvalues, but we dont. */

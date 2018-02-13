@@ -37,7 +37,7 @@ const PhyloTree = function PhyloTree(reduxNodes) {
     return phyloNode;
   });
   this.numberOfTips = createChildrenAndParentsReturnNumTips(this.nodes); /* side effects: d.parent, d.children */
-  calcYValues(this.nodes);
+  calcYValues(this.nodes, this.numberOfTips);
 
   this.xScale = scaleLinear();
   this.yScale = scaleLinear();
