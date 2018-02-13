@@ -47,11 +47,13 @@ export const applyToChildren = (node, func) => {
 * modifies the nodes argument in place
 */
 export const createChildrenAndParents = (nodes) => {
+  let numTips = 0;
   nodes.forEach((d) => {
     d.parent = d.n.parent.shell;
     if (d.terminal) {
       d.yRange = [d.n.yvalue, d.n.yvalue];
       d.children = null;
+      numTips++;
     } else {
       d.yRange = [d.n.children[0].yvalue, d.n.children[d.n.children.length - 1].yvalue];
       d.children = [];
@@ -60,4 +62,5 @@ export const createChildrenAndParents = (nodes) => {
       }
     }
   });
+  return numTips;
 };

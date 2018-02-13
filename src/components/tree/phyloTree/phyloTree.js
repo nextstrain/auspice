@@ -37,8 +37,7 @@ const PhyloTree = function PhyloTree(reduxNodes) {
     d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
     return phyloNode;
   });
-  this.numberOfTips = max(this.nodes.map((d) => d.n.yvalue)); // total number of tips (we kinda cheat by finding the maximal yvalue, made by augur)
-  createChildrenAndParents(this.nodes);
+  this.numberOfTips = createChildrenAndParents(this.nodes); /* side effects: d.parent, d.children, d.yRange */
   this.xScale = scaleLinear();
   this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
