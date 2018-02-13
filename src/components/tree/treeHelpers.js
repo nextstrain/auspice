@@ -354,11 +354,14 @@ export const processVaccines = (nodes, vaccineChoices) => {
  * side-effects: node.hasChildren (bool) and node.arrayIdx (INT) for each node in nodes
  */
 export const processNodes = (nodes) => {
+  console.time("processNodes")
   const rootNode = nodes[0];
   nodes.forEach((d) => {if (typeof d.attr === "undefined") {d.attr = {};} });
   calcFullTipCounts(rootNode);
   nodes.forEach((d) => {d.hasChildren = typeof d.children !== "undefined";});
   /* set an index so that we can access visibility / nodeColors if needed */
   nodes.forEach((d, idx) => {d.arrayIdx = idx;});
+  nodes.forEach((d) => {d.yvalue = undefined; /* calculate later in auspice */});
+  console.timeEnd("processNodes")
   return nodes;
 };

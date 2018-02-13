@@ -51,11 +51,11 @@ export const createChildrenAndParents = (nodes) => {
   nodes.forEach((d) => {
     d.parent = d.n.parent.shell;
     if (d.terminal) {
-      d.yRange = [d.n.yvalue, d.n.yvalue];
+      // d.yRange = [d.n.yvalue, d.n.yvalue];
       d.children = null;
       numTips++;
     } else {
-      d.yRange = [d.n.children[0].yvalue, d.n.children[d.n.children.length - 1].yvalue];
+      // d.yRange = [d.n.children[0].yvalue, d.n.children[d.n.children.length - 1].yvalue];
       d.children = [];
       for (let i = 0; i < d.n.children.length; i++) {
         d.children.push(d.n.children[i].shell);
@@ -63,4 +63,34 @@ export const createChildrenAndParents = (nodes) => {
     }
   });
   return numTips;
+};
+
+
+/**
+ * given nodes add y values (node.yvalue) to every node
+ * Nodes are the phyloTree nodes (i.e. node.n is the redux node)
+ * Nodes must have parent child links established (via createChildrenAndParents)
+ * PhyloTree can subsequently use this information. Accessed by prototypes
+ * rectangularLayout, radialLayout, createChildrenAndParents
+ * side effects: node.n.yvalue (i.e. in the redux node) and node.yRange (i.e. in the phyloTree node)
+ */
+export const calcYValues = (nodes) => {
+  console.time("calcYValues")
+  let count = 0;
+  const recurse = (node) => {
+    if (node.children) {
+      for (let i = node.children.length - 1; i >= 0; i--) {
+        recurse(node.children[i]);
+      }
+    } else {
+      node.n.yvalue = ++count;
+      node.yRange = [count, count];
+      return;
+    }
+    /* if here, then all children have yvalues, but we dont. */
+    node.n.yvalue = node.children.reduce((acc, d) => acc + d.n.yvalue, 0) / node.children.length;
+    node.yRange = [node.n.children[0].yvalue, node.n.children[node.n.children.length - 1].yvalue];
+  };
+  recurse(nodes[0]);
+  console.timeEnd("calcYValues")
 };

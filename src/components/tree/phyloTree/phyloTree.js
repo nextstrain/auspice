@@ -1,8 +1,7 @@
 import _debounce from "lodash/debounce";
-import { max } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { defaultParams } from "./defaultParams";
-import { addLeafCount, createChildrenAndParents } from "./helpers";
+import { addLeafCount, createChildrenAndParents, calcYValues } from "./helpers";
 
 /* PROTOTYPES */
 import * as renderers from "./renderers";
@@ -38,6 +37,8 @@ const PhyloTree = function PhyloTree(reduxNodes) {
     return phyloNode;
   });
   this.numberOfTips = createChildrenAndParents(this.nodes); /* side effects: d.parent, d.children, d.yRange */
+  calcYValues(this.nodes);
+
   this.xScale = scaleLinear();
   this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
