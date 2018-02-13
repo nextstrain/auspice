@@ -1,7 +1,7 @@
 import _debounce from "lodash/debounce";
 import { scaleLinear } from "d3-scale";
 import { defaultParams } from "./defaultParams";
-import { addLeafCount, createChildrenAndParents, calcYValues } from "./helpers";
+import { addLeafCount, createChildrenAndParentsReturnNumTips, calcYValues } from "./helpers";
 
 /* PROTOTYPES */
 import * as renderers from "./renderers";
@@ -36,7 +36,7 @@ const PhyloTree = function PhyloTree(reduxNodes) {
     d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
     return phyloNode;
   });
-  this.numberOfTips = createChildrenAndParents(this.nodes); /* side effects: d.parent, d.children, d.yRange */
+  this.numberOfTips = createChildrenAndParentsReturnNumTips(this.nodes); /* side effects: d.parent, d.children */
   calcYValues(this.nodes);
 
   this.xScale = scaleLinear();

@@ -45,17 +45,16 @@ export const applyToChildren = (node, func) => {
 /*
 * given nodes, create the children and parent properties.
 * modifies the nodes argument in place
+* returns num tips
 */
-export const createChildrenAndParents = (nodes) => {
+export const createChildrenAndParentsReturnNumTips = (nodes) => {
   let numTips = 0;
   nodes.forEach((d) => {
     d.parent = d.n.parent.shell;
     if (d.terminal) {
-      // d.yRange = [d.n.yvalue, d.n.yvalue];
       d.children = null;
       numTips++;
     } else {
-      // d.yRange = [d.n.children[0].yvalue, d.n.children[d.n.children.length - 1].yvalue];
       d.children = [];
       for (let i = 0; i < d.n.children.length; i++) {
         d.children.push(d.n.children[i].shell);
