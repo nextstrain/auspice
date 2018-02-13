@@ -100,7 +100,7 @@ export const updateGeometry = function updateGeometry(dt) {
     this.svg.selectAll(".vaccineCross")
       .transition().duration(dt)
       .attr("d", (dd) => dd.vaccineCross);
-    if (this.layout === "rect") { /* we only have dotted lines on rect layout so far */
+    if (this.distance === "num_date") {
       this.svg.selectAll(".vaccineDottedLine")
         .transition().duration(dt)
         .style("opacity", 1)

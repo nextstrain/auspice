@@ -47,6 +47,7 @@ export const rectangularLayout = function rectangularLayout() {
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
       d.xCross = d.crossDepth;
+      d.yCross = d.y;
     });
   }
 };
@@ -65,8 +66,11 @@ export const timeVsRootToTip = function timeVsRootToTip() {
     d.px = d.n.parent.attr["num_date"];
     d.py = d.n.parent.attr["div"];
   });
-  if (this.vaccines) { /* where the tips should be */
-    this.vaccines.forEach((d) => {d.xCross = d.x;});
+  if (this.vaccines) { /* overlay vaccine cross on tip */
+    this.vaccines.forEach((d) => {
+      d.xCross = d.x;
+      d.yCross = d.y;
+    });
   }
   const nTips = this.numberOfTips;
   // REGRESSION WITH FREE INTERCEPT
@@ -145,7 +149,9 @@ export const unrootedLayout = function unrootedLayout() {
   }
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
-      d.xCross = d.x;
+      const bL = d.crossDepth - d.depth;
+      d.xCross = d.px + bL * Math.cos(d.tau + d.w * 0.5);
+      d.yCross = d.py + bL * Math.sin(d.tau + d.w * 0.5);
     });
   }
 };
@@ -175,7 +181,13 @@ export const radialLayout = function radialLayout() {
   });
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
-      d.xCross = (d.crossDepth - offset) * Math.sin(d.angle);
+      if (this.distance === "div") {
+        d.xCross = d.x;
+        d.yCross = d.y;
+      } else {
+        d.xCross = (d.crossDepth - offset) * Math.sin(d.angle);
+        d.yCross = (d.crossDepth - offset) * Math.cos(d.angle);
+      }
     });
   }
 };
