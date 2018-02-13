@@ -98,7 +98,9 @@ export const mapToScreen = function mapToScreen() {
   });
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
-      d.xTipCross = this.xScale(d.xCross);
+      const n = 5; /* half the number of pixels that the cross will take up */
+      d.xTipCross = this.xScale(d.xCross); /* x position of the center of the cross */
+      d.vaccineCross = ` M ${d.xTipCross-n},${d.yTip-n} L ${d.xTipCross+n},${d.yTip+n} M ${d.xTipCross-n},${d.yTip+n} L ${d.xTipCross+n},${d.yTip-n}`;
       d.vaccineLine = ` M ${d.xTip},${d.yTip} L ${d.xTipCross},${d.yTip}`;
     });
   }

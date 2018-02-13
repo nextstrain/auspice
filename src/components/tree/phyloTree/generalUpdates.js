@@ -98,11 +98,9 @@ export const updateGeometry = function updateGeometry(dt) {
 
   if (this.vaccines) {
     this.svg.selectAll(".vaccineCross")
-      .transition()
-      .duration(dt)
-      .attr("x", (d) => d.xTipCross)
-      .attr("y", (d) => d.yTip);
-    if (this.layout === "rect") {
+      .transition().duration(dt)
+      .attr("d", (dd) => dd.vaccineCross);
+    if (this.layout === "rect") { /* we only have dotted lines on rect layout so far */
       this.svg.selectAll(".vaccineDottedLine")
         .transition().duration(dt)
         .style("opacity", 1)

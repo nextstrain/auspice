@@ -68,24 +68,22 @@ export const render = function render(svg, layout, distance, options, callbacks,
  * @return {null}
  */
 export const drawVaccines = function drawVaccines() {
-  this.svg.append("g").selectAll(".vaccine")
+  this.svg.append("g").selectAll(".vaccineCross")
     .data(this.vaccines)
     .enter()
-    .append("text")
+    .append("path")
     .attr("class", "vaccineCross")
-    .attr("x", (d) => d.xTipCross)
-    .attr("y", (d) => d.yTip)
-    .attr('text-anchor', 'middle')
-    .attr('dominant-baseline', 'central')
-    .style("font-family", this.params.fontFamily)
-    .style("font-size", "20px")
-    .style("stroke", "#fff")
-    .style("fill", darkGrey)
-    .text('\u2716');
-  // .style("cursor", "pointer")
-  // .on("mouseover", (d) => console.warn("vaccine mouseover", d));
+    .attr("d", (d) => d.vaccineCross)
+    .style("stroke", "black")
+    .style("stroke-width", 2 * this.params.branchStrokeWidth)
+    .style("fill", "none")
+    .style("cursor", "pointer")
+    .style("pointer-events", "auto")
+    .on("mouseover", (d) => this.callbacks.onTipHover(d, event.pageX, event.pageY))
+    .on("mouseout", (d) => this.callbacks.onTipLeave(d))
+    .on("click", (d) => this.callbacks.onTipClick(d));
 
-  this.svg.append("g").selectAll('.branch')
+  this.svg.append("g").selectAll('.vaccineDottedLine')
     .data(this.vaccines)
     .enter()
     .append("path")
@@ -94,9 +92,9 @@ export const drawVaccines = function drawVaccines() {
     .style("stroke-dasharray", "5, 5")
     // .style("stroke", (d) => d.stroke || this.params.branchStroke)
     .style("stroke", "black")
-    .style("stroke-width", (d) => d['stroke-width'] || this.params.branchStrokeWidth)
+    .style("stroke-width", this.params.branchStrokeWidth)
     .style("fill", "none")
-    .style("pointer-events", "none")
+    .style("pointer-events", "none");
 };
 
 
