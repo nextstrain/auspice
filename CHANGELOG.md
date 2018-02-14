@@ -1,3 +1,9 @@
+### Features
+* Vaccine strains are shown at their use date (in temporal trees), with dotted lines connecting them to their tips (representing collection date) ([PR 498](https://github.com/nextstrain/auspice/pull/498))
+
+### Internals
+* `updateGeometryFade` uses counters to know when transitions are finished rather than `setTimeout`
+
 ## version 1.11.0 - 2018/02/05
 
 ### Features
