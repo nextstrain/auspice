@@ -37,6 +37,7 @@ export const setLayout = function setLayout(layout) {
  * @return {null}
  */
 export const rectangularLayout = function rectangularLayout() {
+  console.log("rectangularLayout")
   this.nodes.forEach((d) => {
     d.y = d.n.yvalue; // precomputed y-values
     d.x = d.depth;    // depth according to current distance

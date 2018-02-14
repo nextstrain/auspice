@@ -73,7 +73,7 @@ export const createChildrenAndParentsReturnNumTips = (nodes) => {
  * rectangularLayout, radialLayout, createChildrenAndParents
  * side effects: node.n.yvalue (i.e. in the redux node) and node.yRange (i.e. in the phyloTree node)
  */
-export const calcYValues = (nodes, spacing = "even", numberOfTips = undefined) => {
+export const calcYValues = (nodes, spacing = "even", numberOfTips = undefined, visibility = undefined) => {
   console.time("calcYValues")
   console.log("running calcYValues with spacing", spacing)
   let total = 0; /* cumulative counter of y value at tip */
@@ -89,6 +89,15 @@ export const calcYValues = (nodes, spacing = "even", numberOfTips = undefined) =
       total += node.inView ? yPerInView : yPerOutOfView;
       return total;
     };
+  } else if (spacing === "visibility") {
+    const numTipsVisible = nodes.map((d) => d.terminal && visibility[d.n.arrayIdx] === "visible").filter((x) => x).length
+    // console.log(`# tips visibile: ${numTipsVisible} / ${numberOfTips}`);
+    const yPerVisible = (0.8 * numberOfTips) / numTipsVisible;
+    const yPerNotVisible = (0.2 * numberOfTips) / (numberOfTips - numTipsVisible);
+    calcY = (node) => {
+      total += visibility[node.n.arrayIdx] === "visible" ? yPerVisible : yPerNotVisible;
+      return total;
+    }
   } else { /* fall back to even spacing */
     if (spacing !== "even") console.warn("falling back to even spacing of y values. Unknown arg:", spacing);
     calcY = () => ++total;

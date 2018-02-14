@@ -52,6 +52,12 @@ export const zoomToParent = function zoomToParent(dt) {
   }
 };
 
+export const recomputeYvaluesBasedOnVisibility = function recomputeYvaluesBasedOnVisibility(visibility) {
+  console.log("recomputeYvaluesBasedOnVisibility");
+  calcYValues(this.nodes, "visibility", this.numberOfTips, visibility);
+  this.setLayout(this.layout);
+};
+
 
 /**
 * this function sets the xScale, yScale domains and maps precalculated x,y
@@ -60,10 +66,12 @@ export const zoomToParent = function zoomToParent(dt) {
 */
 export const mapToScreen = function mapToScreen() {
   timerStart("mapToScreen");
+  console.log("mapToScreen")
   /* set the range of the x & y scales */
   this.setScales(this.params.margins);
 
   /* find minimum & maximum x & y values, as well as # tips in view */
+  /* TODO if we use the y-axis compression, these values can be hardcoded as "everthings" in view */
   this.nNodesInView = 0;
   let [minY, maxY, minX, maxX] = [1000000, 0, 1000000, 0];
   this.nodes.forEach((d) => {

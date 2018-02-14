@@ -69,7 +69,10 @@ export const updateStylesAndAttrs = (that, changes, nextProps, tree) => {
   const branchAttrToUpdate = {};
   const branchStyleToUpdate = {};
 
+  console.log("\n** react-D3 interface **\n\n");
+
   if (changes.visibility) {
+    tree.recomputeYvaluesBasedOnVisibility(nextProps.tree.visibility);
     tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
   }
   if (changes.tipRadii) {
@@ -125,5 +128,8 @@ export const updateStylesAndAttrs = (that, changes, nextProps, tree) => {
   }
   if (changes.rerenderAllElements) {
     tree.rerenderAllElements();
+  }
+  if (changes.visibility) {
+    tree.updateGeometry(700, true);
   }
 };

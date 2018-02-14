@@ -1,5 +1,6 @@
 import { darkGrey } from "../../../globalStyles";
 import { timerStart, timerEnd } from "../../../util/perf";
+import { calcYValues } from "./helpers";
 
 /**
  * @param  svg    -- the svg into which the tree is drawn
@@ -23,6 +24,7 @@ export const render = function render(svg, layout, distance, options, callbacks,
   this.clearSVG();
 
   /* set x, y values & scale them to the screen */
+  calcYValues(this.nodes, "visibility", this.numberOfTips, visibility);
   this.setDistance(distance);
   this.setLayout(layout);
   this.mapToScreen();

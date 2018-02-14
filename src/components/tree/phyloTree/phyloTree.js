@@ -37,7 +37,6 @@ const PhyloTree = function PhyloTree(reduxNodes) {
     return phyloNode;
   });
   this.numberOfTips = createChildrenAndParentsReturnNumTips(this.nodes); /* side effects: d.parent, d.children */
-  calcYValues(this.nodes, this.numberOfTips);
 
   this.xScale = scaleLinear();
   this.yScale = scaleLinear();
@@ -48,6 +47,8 @@ const PhyloTree = function PhyloTree(reduxNodes) {
   this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
     {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
 };
+
+PhyloTree.prototype.recomputeYvaluesBasedOnVisibility = zoom.recomputeYvaluesBasedOnVisibility;
 
 /* I N I T I A L        R E N D E R       E T C */
 PhyloTree.prototype.render = renderers.render;

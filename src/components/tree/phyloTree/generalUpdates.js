@@ -87,10 +87,12 @@ export const updateLayout = function updateLayout(layout, dt) {
  * @param  dt -- time of transition in milliseconds
  * @return {[type]}
  */
-export const updateGeometry = function updateGeometry(dt) {
+export const updateGeometry = function updateGeometry(dt, forceAll = false) {
   timerStart("updateGeometry");
+  console.log(`updateGeometry dt: ${dt} forceAll: ${forceAll}`);
+  const filterFun = forceAll ? () => true : (d) => d.update;
   this.svg.selectAll(".tip")
-    .filter((d) => d.update)
+    .filter(filterFun)
     .transition()
     .duration(dt)
     .attr("cx", (d) => d.xTip)
@@ -117,14 +119,14 @@ export const updateGeometry = function updateGeometry(dt) {
   for (let i = 0; i < 2; i++) {
     this.svg.selectAll(".branch")
       .filter(branchEls[i])
-      .filter((d) => d.update)
+      .filter(filterFun)
       .transition()
       .duration(dt)
       .attr("d", (d) => d.branch[i]);
   }
 
   this.svg.selectAll(".conf")
-    .filter((d) => d.update)
+    .filter(filterFun)
     .transition().duration(dt)
     .attr("d", (dd) => dd.confLine);
 
@@ -240,6 +242,7 @@ export const updateGeometryFade = function updateGeometryFade(dt) {
  */
 export const updateMultipleArray = function updateMultipleArray(treeElem, attrs, styles, dt, quickdraw) {
   timerStart("updateMultipleArray");
+  console.log(`updateMultipleArray ${treeElem} attrs: ${Object.keys(attrs).join(",")} styles: ${Object.keys(styles).join(",")} dt: ${dt} quickdraw: ${quickdraw}}`)
   // assign new values and decide whether to update
   this.nodes.forEach((d, i) => {
     d.update = false;
