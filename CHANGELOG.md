@@ -1,3 +1,5 @@
+## version 1.12.0 - 2018/02/14
+
 ### Features
 * Vaccine strains are shown at their use date (in temporal trees), with dotted lines connecting them to their tips (representing collection date) ([PR 498](https://github.com/nextstrain/auspice/pull/498))
 
