@@ -55,6 +55,17 @@ export const salientPropChanges = (props, nextProps, tree) => {
   };
 };
 
+const tempWrapper = (changes, nextProps, tree) => {
+  /* change salientPropChanges to output this! */
+  if (changes.colorBy === true) {
+    tree.change({
+      colorBy: nextProps.colorBy,
+      stroke: calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy),
+      fill: nextProps.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString())
+    });
+  }
+};
+
 /**
  * effect (in phyloTree) the necessary style + attr updates
  * @param {obj} changes see salientPropChanges above
@@ -63,6 +74,9 @@ export const salientPropChanges = (props, nextProps, tree) => {
  * @return {null} causes side-effects via phyloTree object
  */
 export const updateStylesAndAttrs = (that, changes, nextProps, tree) => {
+
+  tempWrapper(changes, nextProps, tree);
+  changes.colorBy = false;
   /* the objects storing the changes to make to the tree */
   const tipAttrToUpdate = {};
   const tipStyleToUpdate = {};

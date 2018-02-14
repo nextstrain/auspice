@@ -3,6 +3,7 @@ import { max } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { defaultParams } from "./defaultParams";
 import { addLeafCount, createChildrenAndParents } from "./helpers";
+import { change } from "./change";
 
 /* PROTOTYPES */
 import * as renderers from "./renderers";
@@ -43,11 +44,12 @@ const PhyloTree = function PhyloTree(reduxNodes) {
   this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
   addLeafCount(this.nodes[0]);
-
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
   this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
     {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
 };
+
+PhyloTree.prototype.change = change;
 
 /* I N I T I A L        R E N D E R       E T C */
 PhyloTree.prototype.render = renderers.render;
