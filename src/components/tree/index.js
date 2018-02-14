@@ -13,7 +13,7 @@ import { mediumTransitionDuration } from "../../util/globals";
 import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
 import computeResponsive from "../../util/computeResponsive";
-import { updateStylesAndAttrs, salientPropChanges } from "./reactD3Interface";
+import { updateStylesAndAttrs, salientPropChanges, changePhyloTreeViaPropsComparison } from "./reactD3Interface";
 import * as callbacks from "./reactD3Interface/callbacks";
 import { calcStrokeCols } from "./treeHelpers";
 
@@ -67,6 +67,7 @@ class Tree extends React.Component {
     works out what to update, based upon changes to redux.control */
     let tree = this.state.tree;
     const changes = salientPropChanges(this.props, nextProps, tree);
+    changePhyloTreeViaPropsComparison(this.props, nextProps, tree);
     /* usefull for debugging: */
     // console.log("CWRP Changes:",
     //    Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {

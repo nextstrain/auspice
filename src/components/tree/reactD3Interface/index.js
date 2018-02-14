@@ -12,11 +12,11 @@ import { viewEntireTree } from "./callbacks";
 export const salientPropChanges = (props, nextProps, tree) => {
   const dataInFlux = !nextProps.tree.loaded;
   const newData = tree === null && nextProps.tree.loaded;
-  const visibility = !!nextProps.tree.visibilityVersion && props.tree.visibilityVersion !== nextProps.tree.visibilityVersion;
-  const tipRadii = !!nextProps.tree.tipRadiiVersion && props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion;
-  const colorBy = !!nextProps.tree.nodeColorsVersion &&
-      (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
-      nextProps.colorByConfidence !== props.colorByConfidence);
+  // const visibility = !!nextProps.tree.visibilityVersion && props.tree.visibilityVersion !== nextProps.tree.visibilityVersion;
+  // const tipRadii = !!nextProps.tree.tipRadiiVersion && props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion;
+  // const colorBy = !!nextProps.tree.nodeColorsVersion &&
+  //     (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
+  //     nextProps.colorByConfidence !== props.colorByConfidence);
   const branchThickness = props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion;
   const layout = props.layout !== nextProps.layout;
   const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
@@ -39,9 +39,9 @@ export const salientPropChanges = (props, nextProps, tree) => {
   return {
     dataInFlux,
     newData,
-    visibility,
-    tipRadii,
-    colorBy,
+    visibility: false,
+    tipRadii: false,
+    colorBy: false,
     layout,
     distanceMeasure,
     branchThickness,
@@ -55,15 +55,32 @@ export const salientPropChanges = (props, nextProps, tree) => {
   };
 };
 
-const tempWrapper = (changes, nextProps, tree) => {
-  /* change salientPropChanges to output this! */
-  if (changes.colorBy === true) {
-    tree.change({
-      colorBy: nextProps.colorBy,
-      stroke: calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy),
-      fill: nextProps.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString())
-    });
+export const changePhyloTreeViaPropsComparison = (props, nextProps, tree) => {
+  console.log('changePhyloTreeViaPropsComparison')
+  const args = {};
+
+  /* colorBy change? */
+  if (!!nextProps.tree.nodeColorsVersion &&
+      (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
+      nextProps.colorByConfidence !== props.colorByConfidence)) {
+    args.changeColorBy = true;
+    args.stroke = calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy);
+    args.fill = nextProps.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString());
   }
+
+  /* visibility */
+  if (!!nextProps.tree.visibilityVersion && props.tree.visibilityVersion !== nextProps.tree.visibilityVersion) {
+    args.changeVisibility = true;
+    args.visibility = nextProps.tree.visibility;
+  }
+
+  /* tip radii */
+  if (!!nextProps.tree.tipRadiiVersion && props.tree.tipRadiiVersion !== nextProps.tree.tipRadiiVersion) {
+    args.changeTipRadii = true;
+    args.tipRadii = nextProps.tree.tipRadii;
+  }
+
+  tree.change(args);
 };
 
 /**
@@ -74,29 +91,26 @@ const tempWrapper = (changes, nextProps, tree) => {
  * @return {null} causes side-effects via phyloTree object
  */
 export const updateStylesAndAttrs = (that, changes, nextProps, tree) => {
-
-  tempWrapper(changes, nextProps, tree);
-  changes.colorBy = false;
   /* the objects storing the changes to make to the tree */
   const tipAttrToUpdate = {};
   const tipStyleToUpdate = {};
   const branchAttrToUpdate = {};
   const branchStyleToUpdate = {};
 
-  if (changes.visibility) {
-    tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
-  }
-  if (changes.tipRadii) {
-    tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
-  }
-  if (changes.colorBy) {
-    tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
-      return rgb(col).brighter([0.65]).toString();
-    });
-    const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy);
-    branchStyleToUpdate["stroke"] = branchStrokes;
-    tipStyleToUpdate["stroke"] = branchStrokes;
-  }
+  // if (changes.visibility) {
+  //   tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
+  // }
+  // if (changes.tipRadii) {
+  //   tipAttrToUpdate["r"] = nextProps.tree.tipRadii;
+  // }
+  // if (changes.colorBy) {
+  //   tipStyleToUpdate["fill"] = nextProps.tree.nodeColors.map((col) => {
+  //     return rgb(col).brighter([0.65]).toString();
+  //   });
+  //   const branchStrokes = calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy);
+  //   branchStyleToUpdate["stroke"] = branchStrokes;
+  //   tipStyleToUpdate["stroke"] = branchStrokes;
+  // }
   if (changes.branchThickness) {
     // console.log("branch width change detected - update branch stroke-widths")
     branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
