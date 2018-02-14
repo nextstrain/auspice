@@ -136,7 +136,6 @@ class Tree extends React.Component {
         { /* options */
           grid: true,
           confidence: nextProps.temporalConfidence.display,
-          showVaccines: !!nextProps.tree.vaccines,
           branchLabels: true,
           showBranchLabels: false,
           tipLabels: true,

@@ -1,6 +1,7 @@
 /* eslint-disable no-multi-spaces */
 import { min, sum } from "d3-array";
 import { addLeafCount } from "./helpers";
+import { timerStart, timerEnd } from "../../../util/perf";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -9,6 +10,7 @@ import { addLeafCount } from "./helpers";
  *                  ["rect", "radial", "unrooted", "clock"]
  */
 export const setLayout = function setLayout(layout) {
+  timerStart("setLayout");
   if (typeof layout === "undefined" || layout !== this.layout) {
     this.nodes.forEach((d) => {d.update = true;});
   }
@@ -26,6 +28,7 @@ export const setLayout = function setLayout(layout) {
   } else if (this.layout === "unrooted") {
     this.unrootedLayout();
   }
+  timerEnd("setLayout");
 };
 
 
@@ -41,6 +44,12 @@ export const rectangularLayout = function rectangularLayout() {
     d.py = d.y;
     d.x_conf = d.conf; // assign confidence intervals
   });
+  if (this.vaccines) {
+    this.vaccines.forEach((d) => {
+      d.xCross = d.crossDepth;
+      d.yCross = d.y;
+    });
+  }
 };
 
 /**
@@ -57,6 +66,12 @@ export const timeVsRootToTip = function timeVsRootToTip() {
     d.px = d.n.parent.attr["num_date"];
     d.py = d.n.parent.attr["div"];
   });
+  if (this.vaccines) { /* overlay vaccine cross on tip */
+    this.vaccines.forEach((d) => {
+      d.xCross = d.x;
+      d.yCross = d.y;
+    });
+  }
   const nTips = this.numberOfTips;
   // REGRESSION WITH FREE INTERCEPT
   // const meanDiv = d3.sum(this.nodes.filter((d)=>d.terminal).map((d)=>d.y))/nTips;
@@ -132,6 +147,13 @@ export const unrootedLayout = function unrootedLayout() {
     eta += this.nodes[0].children[i].w;
     unrootedPlaceSubtree(this.nodes[0].children[i], nTips);
   }
+  if (this.vaccines) {
+    this.vaccines.forEach((d) => {
+      const bL = d.crossDepth - d.depth;
+      d.xCross = d.px + bL * Math.cos(d.tau + d.w * 0.5);
+      d.yCross = d.py + bL * Math.sin(d.tau + d.w * 0.5);
+    });
+  }
 };
 
 /**
@@ -157,6 +179,17 @@ export const radialLayout = function radialLayout() {
     d.xCBarEnd = (d.depth - offset) * Math.sin(angleCBar2);
     d.smallBigArc = Math.abs(angleCBar2 - angleCBar1) > Math.PI * 1.0;
   });
+  if (this.vaccines) {
+    this.vaccines.forEach((d) => {
+      if (this.distance === "div") {
+        d.xCross = d.x;
+        d.yCross = d.y;
+      } else {
+        d.xCross = (d.crossDepth - offset) * Math.sin(d.angle);
+        d.yCross = (d.crossDepth - offset) * Math.cos(d.angle);
+      }
+    });
+  }
 };
 
 /*
@@ -165,6 +198,7 @@ export const radialLayout = function radialLayout() {
  * calculate coordinates. Parent depth is assigned as well.
  */
 export const setDistance = function setDistance(distanceAttribute) {
+  timerStart("setDistance");
   this.nodes.forEach((d) => {d.update = true;});
   if (typeof distanceAttribute === "undefined") {
     this.distance = "div"; // default is "div" for divergence
@@ -182,6 +216,12 @@ export const setDistance = function setDistance(distanceAttribute) {
       d.conf = [d.depth, d.depth];
     }
   });
+  if (this.vaccines) {
+    this.vaccines.forEach((d) => {
+      d.crossDepth = tmp_dist === "div" ? d.depth : d.n.vaccineDateNumeric;
+    });
+  }
+  timerEnd("setDistance");
 };
 
 

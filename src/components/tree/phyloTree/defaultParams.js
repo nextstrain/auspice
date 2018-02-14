@@ -35,6 +35,5 @@ export const defaultParams = {
   tipLabelFill: "#555",
   tipLabelPadX: 8,
   tipLabelPadY: 2,
-  showVaccines: false,
   mapToScreenDebounceTime: 500
 };

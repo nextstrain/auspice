@@ -12,7 +12,7 @@ import { timerStart, timerEnd } from "../../../util/perf";
  * @return {null}
  */
 export const render = function render(svg, layout, distance, options, callbacks, branchThickness, visibility, drawConfidence, vaccines) {
-  timerStart("phyloTree render");
+  timerStart("phyloTree render()");
   if (branchThickness) {
     this.nodes.forEach((d, i) => {d["stroke-width"] = branchThickness[i];});
   }
@@ -21,19 +21,19 @@ export const render = function render(svg, layout, distance, options, callbacks,
   this.callbacks = callbacks;
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
   this.clearSVG();
-  timerStart("setDistance"); this.setDistance(distance); timerEnd("setDistance");
 
-  timerStart("setLayout"); this.setLayout(layout); timerEnd("setLayout");
+  /* set x, y values & scale them to the screen */
+  this.setDistance(distance);
+  this.setLayout(layout);
+  this.mapToScreen();
 
-  timerStart("mapToScreen"); this.mapToScreen(); timerEnd("mapToScreen");
-
-  if (this.params.showGrid) {timerStart("addGrid"); this.addGrid(); timerEnd("addGrid");}
-  if (this.params.branchLabels) {timerStart("drawBranches"); this.drawBranches(); timerEnd("drawBranches");}
-
-  timerStart("drawTips"); this.drawTips(); timerEnd("drawTips");
-
-  if (this.params.showVaccines) {this.drawVaccines();}
+  /* draw functions */
+  if (this.params.showGrid) this.addGrid();
+  if (this.params.branchLabels) this.drawBranches();
+  this.drawTips();
+  if (this.vaccines) this.drawVaccines();
   this.drawCladeLabels();
+
   if (visibility) {
     timerStart("setVisibility");
     this.nodes.forEach((d, i) => {d["visibility"] = visibility[i];});
@@ -51,7 +51,7 @@ export const render = function render(svg, layout, distance, options, callbacks,
   //   this.updateTipLabels(100);
   // }
 
-  timerStart("updateGeometry"); this.updateGeometry(10); timerEnd("updateGeometry");
+  this.updateGeometry(10);
 
   this.svg.selectAll(".regression").remove();
   if (this.layout === "clock" && this.distance === "num_date") {
@@ -60,7 +60,7 @@ export const render = function render(svg, layout, distance, options, callbacks,
   if (drawConfidence) {
     this.drawConfidence();
   }
-  timerEnd("phyloTree render");
+  timerEnd("phyloTree render()");
 };
 
 /**
@@ -68,22 +68,33 @@ export const render = function render(svg, layout, distance, options, callbacks,
  * @return {null}
  */
 export const drawVaccines = function drawVaccines() {
-  this.tipElements = this.svg.append("g").selectAll(".vaccine")
+  this.svg.append("g").selectAll(".vaccineCross")
     .data(this.vaccines)
     .enter()
-    .append("text")
-    .attr("class", "vaccine")
-    .attr("x", (d) => d.xTip)
-    .attr("y", (d) => d.yTip)
-    .attr('text-anchor', 'middle')
-    .attr('dominant-baseline', 'central')
-    .style("font-family", this.params.fontFamily)
-    .style("font-size", "20px")
-    .style("stroke", "#fff")
-    .style("fill", darkGrey)
-    .text('\u2716');
-  // .style("cursor", "pointer")
-  // .on("mouseover", (d) => console.warn("vaccine mouseover", d));
+    .append("path")
+    .attr("class", "vaccineCross")
+    .attr("d", (d) => d.vaccineCross)
+    .style("stroke", "black")
+    .style("stroke-width", 2 * this.params.branchStrokeWidth)
+    .style("fill", "none")
+    .style("cursor", "pointer")
+    .style("pointer-events", "auto")
+    .on("mouseover", (d) => this.callbacks.onTipHover(d, event.pageX, event.pageY))
+    .on("mouseout", (d) => this.callbacks.onTipLeave(d))
+    .on("click", (d) => this.callbacks.onTipClick(d));
+
+  this.svg.append("g").selectAll('.vaccineDottedLine')
+    .data(this.vaccines)
+    .enter()
+    .append("path")
+    .attr("class", "vaccineDottedLine")
+    .attr("d", (d) => d.vaccineLine)
+    .style("stroke-dasharray", "5, 5")
+    // .style("stroke", (d) => d.stroke || this.params.branchStroke)
+    .style("stroke", "black")
+    .style("stroke-width", this.params.branchStrokeWidth)
+    .style("fill", "none")
+    .style("pointer-events", "none");
 };
 
 
@@ -92,8 +103,9 @@ export const drawVaccines = function drawVaccines() {
  * @return {null}
  */
 export const drawTips = function drawTips() {
+  timerStart("drawTips");
   const params = this.params;
-  this.tipElements = this.svg.append("g").selectAll(".tip")
+  this.svg.append("g").selectAll(".tip")
     .data(this.nodes.filter((d) => d.terminal))
     .enter()
     .append("circle")
@@ -110,6 +122,7 @@ export const drawTips = function drawTips() {
     .style("stroke", (d) => d.stroke || params.tipStroke)
     .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
     .style("cursor", "pointer");
+  timerEnd("drawTips");
 };
 
 
@@ -118,6 +131,7 @@ export const drawTips = function drawTips() {
  * @return {null}
  */
 export const drawBranches = function drawBranches() {
+  timerStart("drawBranches");
   const params = this.params;
   this.Tbranches = this.svg.append("g").selectAll('.branch')
     .data(this.nodes.filter((d) => !d.terminal))
@@ -147,6 +161,7 @@ export const drawBranches = function drawBranches() {
     .on("mouseover", (d) => this.callbacks.onBranchHover(d, event.pageX, event.pageY))
     .on("mouseout", (d) => this.callbacks.onBranchLeave(d))
     .on("click", (d) => this.callbacks.onBranchClick(d));
+  timerEnd("drawBranches");
 };
 
 

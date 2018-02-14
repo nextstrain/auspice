@@ -88,6 +88,7 @@ export const updateLayout = function updateLayout(layout, dt) {
  * @return {[type]}
  */
 export const updateGeometry = function updateGeometry(dt) {
+  timerStart("updateGeometry");
   this.svg.selectAll(".tip")
     .filter((d) => d.update)
     .transition()
@@ -95,12 +96,22 @@ export const updateGeometry = function updateGeometry(dt) {
     .attr("cx", (d) => d.xTip)
     .attr("cy", (d) => d.yTip);
 
-  this.svg.selectAll(".vaccine")
-    .filter((d) => d.update)
-    .transition()
-    .duration(dt)
-    .attr("x", (d) => d.xTip)
-    .attr("y", (d) => d.yTip);
+  if (this.vaccines) {
+    this.svg.selectAll(".vaccineCross")
+      .transition().duration(dt)
+      .attr("d", (dd) => dd.vaccineCross);
+    if (this.distance === "num_date") {
+      this.svg.selectAll(".vaccineDottedLine")
+        .transition().duration(dt)
+        .style("opacity", 1)
+        .attr("d", (dd) => dd.vaccineLine);
+    } else {
+      this.svg.selectAll(".vaccineDottedLine")
+        .transition().duration(dt)
+        .style("opacity", 0)
+        .attr("d", (dd) => dd.vaccineLine);
+    }
+  }
 
   const branchEls = [".S", ".T"];
   for (let i = 0; i < 2; i++) {
@@ -119,69 +130,104 @@ export const updateGeometry = function updateGeometry(dt) {
 
   this.updateBranchLabels(dt);
   this.updateTipLabels(dt);
+  timerEnd("updateGeometry");
 };
 
 
 /*
  * redraw the tree based on the current xTip, yTip, branch attributes
- * this function will remove branches, move the tips continuously
- * and add the new branches again after the tips arrived at their destination
- *  @params dt -- time of transition in milliseconds
+ * step 1: fade out everything except tips.
+ * step 2: when step 1 has finished, move tips across the screen.
+ * step 3: when step 2 has finished, move everything else (whilst hidden) and fasde back in.
+ *  @params dt -- time of tip move (ms). Note that this function will take a lot longer than this time!
  */
 export const updateGeometryFade = function updateGeometryFade(dt) {
-  this.removeConfidence(dt);
+  const fadeDt = dt * 0.5;
+  const moveDt = dt;
 
-  // fade out branches
+  let inProgress = 0; /* counter of transitions currently in progress */
+  const moveElementsAndFadeBackIn = () => {
+    if (!--inProgress) { /* decrement counter. When hits 0 run block */
+      this.svg.selectAll('.branch').filter('.S')
+        .filter((d) => d.update)
+        .attr("d", (d) => d.branch[0])
+        .transition()
+        .duration(fadeDt)
+        .style("opacity", 1.0);
+      this.svg.selectAll('.branch').filter('.T')
+        .filter((d) => d.update)
+        .attr("d", (d) => d.branch[1])
+        .transition()
+        .duration(fadeDt)
+        .style("opacity", 1.0);
+      if (this.vaccines) {
+        this.svg.selectAll('.vaccineCross')
+          .attr("d", (dd) => dd.vaccineCross)
+          .transition()
+          .duration(fadeDt)
+          .style("opacity", 1.0);
+        if (this.distance === "num_date") {
+          this.svg.selectAll('.vaccineDottedLine')
+            .attr("d", (dd) => dd.vaccineLine)
+            .transition()
+            .duration(fadeDt)
+            .style("opacity", 1.0);
+        } else {
+          this.svg.selectAll('.vaccineDottedLine')
+            .attr("d", (dd) => dd.vaccineLine);
+          /* opacity is already 0 */
+        }
+      }
+      this.updateBranchLabels(fadeDt);
+      this.updateTipLabels(fadeDt);
+    }
+  };
+  const moveTipsWhenFadedOut = () => {
+    if (!--inProgress) { /* decrement counter. When hits 0 run block */
+      this.svg.selectAll('.tip')
+        .filter((d) => d.update)
+        .transition()
+        .duration(moveDt)
+        .attr("cx", (d) => d.xTip)
+        .attr("cy", (d) => d.yTip)
+        .on("start", () => inProgress++)
+        .on("end", moveElementsAndFadeBackIn);
+    }
+  };
+
+  /* fade out branches, tip & branch labels, vaccine crosses & dotted lines.
+  When these fade outs are complete, the function moveTipsWhenFadedOut will fire */
+  this.removeConfidence();
   this.svg.selectAll('.branch')
     .filter((d) => d.update)
-    .transition().duration(dt * 0.5)
-    .style("opacity", 0.0);
+    .transition().duration(fadeDt)
+    .style("opacity", 0.0)
+    .on("start", () => inProgress++)
+    .on("end", moveTipsWhenFadedOut);
   this.svg.selectAll('.branchLabels')
     .filter((d) => d.update)
-    .transition().duration(dt * 0.5)
-    .style("opacity", 0.0);
+    .transition().duration(fadeDt)
+    .style("opacity", 0.0)
+    .on("start", () => inProgress++)
+    .on("end", moveTipsWhenFadedOut);
   this.svg.selectAll('.tipLabels')
     .filter((d) => d.update)
-    .transition().duration(dt * 0.5)
-    .style("opacity", 0.0);
-
-  // closure to move the tips, called via the time out below
-  const tipTransHOF = (svgShadow, dtShadow) => () => {
-    svgShadow.selectAll('.tip')
-      .filter((d) => d.update)
-      .transition().duration(dtShadow)
-      .attr("cx", (d) => d.xTip)
-      .attr("cy", (d) => d.yTip);
-    svgShadow.selectAll(".vaccine")
-      .filter((d) => d.update)
-      .transition()
-      .duration(dtShadow)
-      .attr("x", (d) => d.xTip)
-      .attr("y", (d) => d.yTip);
-  };
-  setTimeout(tipTransHOF(this.svg, dt), 0.5 * dt);
-
-  // closure to change the branches, called via time out after the tipTrans is done
-  const flipBranchesHOF = (svgShadow) => () => {
-    svgShadow.selectAll('.branch').filter('.S')
-      .filter((d) => d.update)
-      .attr("d", (d) => d.branch[0]);
-    svgShadow.selectAll('.branch').filter('.T')
-      .filter((d) => d.update)
-      .attr("d", (d) => d.branch[1]);
-  };
-  setTimeout(flipBranchesHOF(this.svg), 0.5 * dt);
-
-  // closure to add the new branches after the tipTrans
-  const fadeBackHOF = (svgShadow, dtShadow) => () => {
-    svgShadow.selectAll('.branch')
-      .filter((dd) => dd.update)
-      .transition().duration(0.5 * dtShadow)
-      .style("opacity", 1.0);
-  };
-  setTimeout(fadeBackHOF(this.svg, 0.2 * dt), 1.5 * dt);
-  this.updateBranchLabels(dt);
-  this.updateTipLabels(dt);
+    .transition().duration(fadeDt)
+    .style("opacity", 0.0)
+    .on("start", () => inProgress++)
+    .on("end", moveTipsWhenFadedOut);
+  if (this.vaccines) {
+    this.svg.selectAll('.vaccineCross')
+      .transition().duration(fadeDt)
+      .style("opacity", 0.0)
+      .on("start", () => inProgress++)
+      .on("end", moveTipsWhenFadedOut);
+    this.svg.selectAll('.vaccineDottedLine')
+      .transition().duration(fadeDt)
+      .style("opacity", 0.0)
+      .on("start", () => inProgress++)
+      .on("end", moveTipsWhenFadedOut);
+  }
 };
 
 
