@@ -11,7 +11,7 @@ import { timerStart, timerEnd } from "../../../util/perf";
  * @param  visibility (OPTIONAL) -- array of "visible" or "hidden"
  * @return {null}
  */
-export const render = function render(svg, layout, distance, options, callbacks, branchThickness, visibility, drawConfidence, vaccines) {
+export const render = function render(svg, layout, distance, options, callbacks, branchThickness, visibility, drawConfidence, vaccines, stroke, fill) {
   timerStart("phyloTree render()");
   if (branchThickness) {
     this.nodes.forEach((d, i) => {d["stroke-width"] = branchThickness[i];});
@@ -26,6 +26,12 @@ export const render = function render(svg, layout, distance, options, callbacks,
   this.setDistance(distance);
   this.setLayout(layout);
   this.mapToScreen();
+
+  /* set nodes stroke / fill */
+  this.nodes.forEach((d, i) => {
+    d.stroke = stroke[i];
+    d.fill = fill[i];
+  });
 
   /* draw functions */
   if (this.params.showGrid) this.addGrid();

@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { select } from "d3-selection";
+import { rgb } from "d3-color";
 import { ReactSVGPanZoom } from "react-svg-pan-zoom";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
@@ -14,6 +15,7 @@ import TipClickedPanel from "./infoPanels/click";
 import computeResponsive from "../../util/computeResponsive";
 import { updateStylesAndAttrs, salientPropChanges } from "./reactD3Interface";
 import * as callbacks from "./reactD3Interface/callbacks";
+import { calcStrokeCols } from "./treeHelpers";
 
 /*
 this.props.tree contains the nodes etc used to build the PhyloTree
@@ -80,8 +82,6 @@ class Tree extends React.Component {
       for (const k in changes) { // eslint-disable-line
         changes[k] = false;
       }
-      changes.colorBy = true;
-      updateStylesAndAttrs(this, changes, nextProps, tree);
       this.setState({tree});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
@@ -96,7 +96,6 @@ class Tree extends React.Component {
 
   componentDidMount() {
     const tree = this.makeTree(this.props);
-    updateStylesAndAttrs(this, {colorBy: true}, this.props, tree);
     this.setState({tree});
     if (this.Viewer) {
       this.Viewer.fitToViewer();
@@ -156,7 +155,9 @@ class Tree extends React.Component {
         nextProps.tree.branchThickness, /* guarenteed to be in redux by now */
         nextProps.tree.visibility,
         nextProps.temporalConfidence.on, /* drawConfidence? */
-        nextProps.tree.vaccines
+        nextProps.tree.vaccines,
+        calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy),
+        nextProps.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString())
       );
       return myTree;
     }
