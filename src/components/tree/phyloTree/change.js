@@ -16,10 +16,10 @@ const updateNodesWithNewData = (nodes, newNodeProps) => {
   console.log("marking ", tmp, " nodes for update");
 };
 
-const validAttrs = ["r"];
-const validStyles = ["stroke", "fill", "visibility"];
+const validAttrs = ["r", "cx", "cy", "d"];
+const validStyles = ["stroke", "fill", "visibility", "stroke-width", "opacity"];
 const validForThisElem = {
-  ".branch": ["stroke", "path"],
+  ".branch": ["stroke", "path", "stroke-width"],
   ".tip": ["stroke", "fill", "visibility", "r"]
 };
 
@@ -41,11 +41,13 @@ export const change = function change({
   changeColorBy = false,
   changeVisibility = false,
   changeTipRadii = false,
+  changeBranchThickness = false,
   /* arrays of data (the same length as nodes) */
   stroke = undefined,
   fill = undefined,
   visibility = undefined,
-  tipRadii = undefined
+  tipRadii = undefined,
+  branchThickness = undefined
 }) {
   console.log("\n** change **\n\n");
 
@@ -74,6 +76,11 @@ export const change = function change({
     svgPropsToUpdate.add("r");
     nodePropsToModify.r = tipRadii;
   }
+  if (changeBranchThickness) {
+    elemsToUpdate.add(".branch");
+    svgPropsToUpdate.add("stroke-width");
+    nodePropsToModify["stroke-width"] = branchThickness;
+  }
 
 
   /* run calculations as needed */
@@ -81,19 +88,37 @@ export const change = function change({
   /* change nodes as necessary */
   updateNodesWithNewData(this.nodes, nodePropsToModify);
 
-  /* calculate dt */
-  const dt = 700;
+  /* calculations that depend on node data appended above */
+  if (svgPropsToUpdate.has("stroke-width")) {
+    this.mapToScreen();
+  }
 
+  /* calculate dt */
+  const idealTransitionTime = 500;
+  let transitionTime = idealTransitionTime;
+  if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2) {
+    transitionTime = 0;
+  }
   /* strip out elemsToUpdate that are not necesary! */
 
   /* svg change elements */
+
+  /* there's different methods here - transition everything, snap,
+  hide-some-transition-some-show-all, etc etc */
   elemsToUpdate.forEach((treeElem) => {
-    console.log("updating treeElem", treeElem);
+    console.log("updating treeElem", treeElem, "transition:", transitionTime);
     const updateCall = createUpdateCall(treeElem, svgPropsToUpdate);
-    this.svg.selectAll(treeElem)
-      .filter((d) => d.update)
-      .transition().duration(dt)
-      .call(updateCall);
+    if (transitionTime) {
+      this.svg.selectAll(treeElem)
+        .filter((d) => d.update)
+        .transition().duration(transitionTime)
+        .call(updateCall);
+    } else {
+      this.svg.selectAll(treeElem)
+        .filter((d) => d.update)
+        .call(updateCall);
+    }
   });
+  this.timeLastRenderRequested = Date.now();
 
 };

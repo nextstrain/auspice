@@ -17,7 +17,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
   // const colorBy = !!nextProps.tree.nodeColorsVersion &&
   //     (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
   //     nextProps.colorByConfidence !== props.colorByConfidence);
-  const branchThickness = props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion;
+  // const branchThickness = props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion;
   const layout = props.layout !== nextProps.layout;
   const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
   const rerenderAllElements = nextProps.quickdraw === false && props.quickdraw === true;
@@ -44,7 +44,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
     colorBy: false,
     layout,
     distanceMeasure,
-    branchThickness,
+    branchThickness: false,
     branchTransitionTime,
     tipTransitionTime,
     branchLabels,
@@ -80,6 +80,12 @@ export const changePhyloTreeViaPropsComparison = (props, nextProps, tree) => {
     args.tipRadii = nextProps.tree.tipRadii;
   }
 
+  /* branch thickness (stroke-width) */
+  if (props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion) {
+    args.changeBranchThickness = true;
+    args.branchThickness = nextProps.tree.branchThickness;
+  }
+
   tree.change(args);
 };
 
@@ -92,10 +98,10 @@ export const changePhyloTreeViaPropsComparison = (props, nextProps, tree) => {
  */
 export const updateStylesAndAttrs = (that, changes, nextProps, tree) => {
   /* the objects storing the changes to make to the tree */
-  const tipAttrToUpdate = {};
-  const tipStyleToUpdate = {};
-  const branchAttrToUpdate = {};
-  const branchStyleToUpdate = {};
+  // const tipAttrToUpdate = {};
+  // const tipStyleToUpdate = {};
+  // const branchAttrToUpdate = {};
+  // const branchStyleToUpdate = {};
 
   // if (changes.visibility) {
   //   tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
@@ -111,19 +117,19 @@ export const updateStylesAndAttrs = (that, changes, nextProps, tree) => {
   //   branchStyleToUpdate["stroke"] = branchStrokes;
   //   tipStyleToUpdate["stroke"] = branchStrokes;
   // }
-  if (changes.branchThickness) {
-    // console.log("branch width change detected - update branch stroke-widths")
-    branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
-  }
+  // if (changes.branchThickness) {
+  //   // console.log("branch width change detected - update branch stroke-widths")
+  //   branchStyleToUpdate["stroke-width"] = nextProps.tree.branchThickness;
+  // }
   /* implement style * attr changes */
-  if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
-    // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
-    tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, changes.branchTransitionTime, changes.quickdraw);
-  }
-  if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
-    // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
-    tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, changes.tipTransitionTime, changes.quickdraw);
-  }
+  // if (Object.keys(branchAttrToUpdate).length || Object.keys(branchStyleToUpdate).length) {
+  //   // console.log("applying branch attr", Object.keys(branchAttrToUpdate), "branch style changes", Object.keys(branchStyleToUpdate))
+  //   tree.updateMultipleArray(".branch", branchAttrToUpdate, branchStyleToUpdate, changes.branchTransitionTime, changes.quickdraw);
+  // }
+  // if (Object.keys(tipAttrToUpdate).length || Object.keys(tipStyleToUpdate).length) {
+  //   // console.log("applying tip attr", Object.keys(tipAttrToUpdate), "tip style changes", Object.keys(tipStyleToUpdate))
+  //   tree.updateMultipleArray(".tip", tipAttrToUpdate, tipStyleToUpdate, changes.tipTransitionTime, changes.quickdraw);
+  // }
 
   if (changes.layout) { /* swap layouts */
     tree.updateLayout(nextProps.layout, mediumTransitionDuration);

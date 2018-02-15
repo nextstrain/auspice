@@ -66,6 +66,7 @@ export const render = function render(svg, layout, distance, options, callbacks,
   if (drawConfidence) {
     this.drawConfidence();
   }
+  this.timeLastRenderRequested = Date.now();
   timerEnd("phyloTree render()");
 };
 
