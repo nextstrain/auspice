@@ -75,6 +75,7 @@ export const updateDistance = function updateDistance(attr, dt) {
  * @return null
  */
 export const updateLayout = function updateLayout(layout, dt) {
+  console.warn("updateLayout is deprecated");
   this.setLayout(layout);
   this.mapToScreen();
   this.updateGeometryFade(dt);

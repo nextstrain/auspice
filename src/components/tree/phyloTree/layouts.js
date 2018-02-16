@@ -10,6 +10,7 @@ import { timerStart, timerEnd } from "../../../util/perf";
  *                  ["rect", "radial", "unrooted", "clock"]
  */
 export const setLayout = function setLayout(layout) {
+  console.log("set layout");
   timerStart("setLayout");
   if (typeof layout === "undefined" || layout !== this.layout) {
     this.nodes.forEach((d) => {d.update = true;});

@@ -18,7 +18,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
   //     (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
   //     nextProps.colorByConfidence !== props.colorByConfidence);
   // const branchThickness = props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion;
-  const layout = props.layout !== nextProps.layout;
+  // const layout = props.layout !== nextProps.layout;
   // const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
   const rerenderAllElements = nextProps.quickdraw === false && props.quickdraw === true;
   // const resetViewToRoot = props.tree.idxOfInViewRootNode !== 0 && nextProps.tree.idxOfInViewRootNode === 0;
@@ -31,7 +31,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
 
   /* sometimes we may want smooth transitions */
   let branchTransitionTime = false; /* false = no transition. Use when speed is critical */
-  const tipTransitionTime = false;
+  // const tipTransitionTime = false;
   if (nextProps.colorByConfidence !== props.colorByConfidence) {
     branchTransitionTime = mediumTransitionDuration;
   }
@@ -42,11 +42,11 @@ export const salientPropChanges = (props, nextProps, tree) => {
     visibility: false,
     tipRadii: false,
     colorBy: false,
-    layout,
+    layout: false,
     distanceMeasure: false,
     branchThickness: false,
     branchTransitionTime,
-    tipTransitionTime,
+    tipTransitionTime: false,
     branchLabels,
     resetViewToRoot: false,
     confidence: false,
@@ -103,16 +103,19 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
     args.showConfidences = true;
   }
 
-  /* reset the entire tree to root view */
-  if (props.tree.idxOfInViewRootNode !== 0 && nextProps.tree.idxOfInViewRootNode === 0) {
-    reactThis.Viewer.fitToViewer();
-    reactThis.setState({selectedBranch: null, selectedTip: null});
-    args.zoomIntoClade = phylotree.nodes[0]; /* the root node inside phylotree */
+  if (props.layout !== nextProps.layout) {
+    args.newLayout = nextProps.layout;
   }
 
+  if (nextProps.quickdraw === false && props.quickdraw === true) {
+    console.warn("quickdraw finished. should call rerenderAllElements");
+  }
+
+  /* zoom to a clade / reset zoom to entire tree */
   if (props.tree.idxOfInViewRootNode !== nextProps.tree.idxOfInViewRootNode) {
     const rootNode = phylotree.nodes[nextProps.tree.idxOfInViewRootNode];
     args.zoomIntoClade = rootNode;
+    reactThis.Viewer.fitToViewer();
     reactThis.setState({
       selectedBranch: nextProps.tree.idxOfInViewRootNode === 0 ? null : rootNode,
       selectedTip: null,

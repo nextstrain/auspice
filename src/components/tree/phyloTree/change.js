@@ -185,8 +185,9 @@ export const change = function change({
   showConfidences = false,
   removeConfidences = false,
   zoomIntoClade = false,
-  /* change these things to this state */
+  /* change these things to provided value */
   newDistance = undefined,
+  newLayout = undefined,
   /* arrays of data (the same length as nodes) */
   stroke = undefined,
   fill = undefined,
@@ -233,7 +234,7 @@ export const change = function change({
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || zoomIntoClade) {
+  if (newDistance || newLayout || zoomIntoClade) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -258,12 +259,14 @@ export const change = function change({
   /* distance */
   if (newDistance) this.setDistance(newDistance);
   /* layout (must run after distance) */
-  if (newDistance) this.setLayout(this.layout);
+  if (newDistance || newLayout) this.setLayout(newLayout || this.layout);
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||
     newDistance ||
-    zoomIntoClade) {
+    newLayout ||
+    zoomIntoClade
+  ) {
     this.mapToScreen();
   }
 
