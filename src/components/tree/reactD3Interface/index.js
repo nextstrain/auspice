@@ -2,7 +2,6 @@ import { rgb } from "d3-color";
 import { calcStrokeCols } from "../treeHelpers";
 
 export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
-  console.log('\nchangePhyloTreeViaPropsComparison')
   const args = {};
   const props = reactThis.props;
   const phylotree = reactThis.state.tree;
@@ -69,5 +68,9 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
     });
   }
 
-  phylotree.change(args);
+  if (Object.keys(args).length) {
+    console.log('\n\n** changePhyloTreeViaPropsComparison **', args);
+    phylotree.change(args);
+  }
+
 };

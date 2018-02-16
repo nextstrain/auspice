@@ -42,6 +42,7 @@ export const zoomIntoClade = function zoomIntoClade(clade, dt) {
  * @param  {int} dt [transition time]
  */
 export const zoomToParent = function zoomToParent(dt) {
+  console.warn("TODO: zoomToParent functionality needs to be built into phylotree.change()");
   if (this.zoomNode) {
     this.zoomIntoClade(this.zoomNode.parent, dt);
   }

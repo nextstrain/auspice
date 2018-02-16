@@ -62,7 +62,6 @@ class Tree extends React.Component {
     mutType: PropTypes.string.isRequired
   }
 
-
   /* CWRP has two tasks: (1) create the tree when it's in redux
   (2) compare props and call phylotree.change() appropritately */
   componentWillReceiveProps(nextProps) {
@@ -88,24 +87,21 @@ class Tree extends React.Component {
     }
   }
 
+  /* CDU is used to update phylotree when the SVG size _has_ changed (and this is why it's in CDU not CWRP) */
   componentDidUpdate(prevProps) {
-    /* if the  SVG has changed size, call zoomIntoClade so that the tree rescales to fit the SVG */
-    if (
-      // the tree exists AND
+    if ( // the tree exists AND
       this.state.tree &&
-      // either the browser dimensions have changed
-      (
+      ( // either the browser dimensions have changed
         prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
         prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
         // or the sidebar(s) have (dis)appeared
         this.props.padding.left !== prevProps.padding.left ||
         this.props.padding.right !== prevProps.padding.right ||
-        prevProps.panelLayout !== this.props.panelLayout /* full vs grid */
+        // or we have changed between "full" & "grid"
+        prevProps.panelLayout !== this.props.panelLayout
       )
-
     ) {
-      const baseNodeInView = this.state.selectedBranch ? this.state.selectedBranch.n.arrayIdx : 0;
-      this.state.tree.zoomIntoClade(this.state.tree.nodes[baseNodeInView], mediumTransitionDuration);
+      this.state.tree.change({svgHasChangedDimensions: true});
     }
   }
 

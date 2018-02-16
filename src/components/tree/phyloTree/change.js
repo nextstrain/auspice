@@ -60,14 +60,12 @@ const createUpdateCall = (treeElem, properties) => (selection) => {
   if (genericAttrs[treeElem]) {
     [...properties].filter((x) => genericAttrs[treeElem].has(x))
       .forEach((attrName) => {
-        console.log("\tadding node attr", attrName);
         selection.attr(attrName, (d) => d[attrName]);
       });
   }
   if (genericStyles[treeElem]) {
     [...properties].filter((x) => genericStyles[treeElem].has(x))
       .forEach((styleName) => {
-        console.log("\tadding node style", styleName);
         selection.style(styleName, (d) => d[styleName]);
       });
   }
@@ -75,14 +73,12 @@ const createUpdateCall = (treeElem, properties) => (selection) => {
   if (functionAttrs[treeElem]) {
     [...properties].filter((x) => functionAttrs[treeElem][x])
       .forEach((attrName) => {
-        console.log("\tadding fn for attr", attrName);
         selection.attr(attrName, functionAttrs[treeElem][attrName]);
       });
   }
   if (functionStyles[treeElem]) {
     [...properties].filter((x) => functionStyles[treeElem][x])
       .forEach((styleName) => {
-        console.log("\tadding fn for style ", styleName);
         selection.attr(styleName, functionStyles[treeElem][styleName]);
       });
   }
@@ -184,6 +180,7 @@ export const change = function change({
   showConfidences = false,
   removeConfidences = false,
   zoomIntoClade = false,
+  svgHasChangedDimensions = false,
   /* change these things to provided value */
   newDistance = undefined,
   newLayout = undefined,
@@ -194,7 +191,7 @@ export const change = function change({
   tipRadii = undefined,
   branchThickness = undefined
 }) {
-  console.log("\n** change **\n\n");
+  console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
 
   const elemsToUpdate = new Set();
   const nodePropsToModify = {}; /* modify the actual data structure */
@@ -233,7 +230,7 @@ export const change = function change({
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || zoomIntoClade) {
+  if (newDistance || newLayout || zoomIntoClade || svgHasChangedDimensions) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -244,6 +241,8 @@ export const change = function change({
   /* change the requested properties on the nodes */
   updateNodesWithNewData(this.nodes, nodePropsToModify);
 
+  /* some things need to update d.inView and/or d.update. This should be centralised */
+  /* TODO: list all functions which modify these */
   if (zoomIntoClade) { /* must happen below updateNodesWithNewData */
     this.nodes.forEach((d) => {
       d.inView = false;
@@ -252,6 +251,9 @@ export const change = function change({
     /* if clade is terminal, use the parent as the zoom node */
     const zoomNode = zoomIntoClade.terminal ? zoomIntoClade.parent : zoomIntoClade;
     applyToChildren(zoomNode, (d) => {d.inView = true;});
+  }
+  if (svgHasChangedDimensions) {
+    this.nodes.forEach((d) => {d.update = true;});
   }
 
   /* run calculations as needed */
@@ -264,7 +266,8 @@ export const change = function change({
     svgPropsToUpdate.has(["stroke-width"]) ||
     newDistance ||
     newLayout ||
-    zoomIntoClade
+    zoomIntoClade ||
+    svgHasChangedDimensions
   ) {
     this.mapToScreen();
   }
