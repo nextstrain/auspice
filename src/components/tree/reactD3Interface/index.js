@@ -56,7 +56,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
 };
 
 export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
-  console.log('changePhyloTreeViaPropsComparison')
+  console.log('\nchangePhyloTreeViaPropsComparison')
   const args = {};
   const props = reactThis.props;
   const phylotree = reactThis.state.tree;
@@ -110,6 +110,15 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
     args.zoomIntoClade = phylotree.nodes[0]; /* the root node inside phylotree */
   }
 
+  if (props.tree.idxOfInViewRootNode !== nextProps.tree.idxOfInViewRootNode) {
+    const rootNode = phylotree.nodes[nextProps.tree.idxOfInViewRootNode];
+    args.zoomIntoClade = rootNode;
+    reactThis.setState({
+      selectedBranch: nextProps.tree.idxOfInViewRootNode === 0 ? null : rootNode,
+      selectedTip: null,
+      hovered: null
+    });
+  }
 
   phylotree.change(args);
 };
@@ -179,9 +188,9 @@ export const updateStylesAndAttrs = (that, changes, nextProps, tree) => {
   //   /* some updates may necessitate an updating of the CIs (e.g. ∆ branch thicknesses) */
   //   tree.updateConfidence(changes.tipTransitionTime);
   // }
-  if (changes.resetViewToRoot) {
-    viewEntireTree.bind(that)();
-  }
+  // if (changes.resetViewToRoot) {
+  //   viewEntireTree.bind(that)();
+  // }
   if (changes.rerenderAllElements) {
     tree.rerenderAllElements();
   }

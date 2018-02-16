@@ -60,11 +60,13 @@ const Tree = (state = getDefaultState(), action) => {
         loaded: false
       });
     case types.CHANGE_TREE_ROOT_IDX:
+      console.warn("CHANGE_TREE_ROOT_IDX is deprecated");
       return Object.assign({}, state, {
         idxOfInViewRootNode: action.idxOfInViewRootNode
       });
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
+      console.log("UPDATE_VISIBILITY_AND_BRANCH_THICKNESS done")
       const newStates = {
         visibility: action.visibility,
         visibilityVersion: action.visibilityVersion,

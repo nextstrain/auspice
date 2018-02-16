@@ -211,8 +211,7 @@ export const change = function change({
   and what SVG elements, node properties, svg props we actually change */
   if (changeColorBy) {
     /* check that fill & stroke are defined */
-    elemsToUpdate.add(".branch").add(".tip");
-    if (this.confidencesInSVG) elemsToUpdate.add(".conf");
+    elemsToUpdate.add(".branch").add(".tip").add(".conf");
     svgPropsToUpdate.add("stroke").add("fill");
     nodePropsToModify.stroke = stroke;
     nodePropsToModify.fill = fill;
@@ -230,8 +229,7 @@ export const change = function change({
     nodePropsToModify.r = tipRadii;
   }
   if (changeBranchThickness) {
-    elemsToUpdate.add(".branch");
-    if (this.confidencesInSVG) elemsToUpdate.add(".conf");
+    elemsToUpdate.add(".branch").add(".conf");
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
@@ -243,8 +241,6 @@ export const change = function change({
     svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity");
   }
 
-
-
   /* change the requested properties on the nodes */
   updateNodesWithNewData(this.nodes, nodePropsToModify);
 
@@ -255,7 +251,6 @@ export const change = function change({
     });
     /* if clade is terminal, use the parent as the zoom node */
     const zoomNode = zoomIntoClade.terminal ? zoomIntoClade.parent : zoomIntoClade;
-    console.log("ZOOM INTO CLADE", zoomNode)
     applyToChildren(zoomNode, (d) => {d.inView = true;});
   }
 

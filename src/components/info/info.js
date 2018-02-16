@@ -4,17 +4,17 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import computeResponsive from "../../util/computeResponsive";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { applyFilter, changeDateFilter } from "../../actions/treeProperties";
+import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton } from "../framework/footer";
-import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
+// import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
 
 const resetTreeButton = (dispatch) => {
   return (
     <div
       className={`boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
-      onClick={() => dispatch({type: CHANGE_TREE_ROOT_IDX, idxOfInViewRootNode: 0})}
+      onClick={() => dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0}))}
     >
       {"View entire tree."}
     </div>
