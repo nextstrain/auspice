@@ -1,3 +1,4 @@
+import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
 import { applyToChildren } from "./helpers";
 
@@ -89,17 +90,15 @@ const createUpdateCall = (treeElem, properties) => (selection) => {
 };
 
 const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
-  if (transitionTime) {
-    console.log("general svg update for", treeElem);
-    svg.selectAll(treeElem)
-      .filter((d) => d.update)
-      .transition().duration(transitionTime)
-      .call(updateCall);
-  } else {
-    console.log("general svg update for", treeElem, " (NO TRANSITION)");
-    svg.selectAll(treeElem)
-      .filter((d) => d.update)
-      .call(updateCall);
+  console.log("general svg update for", treeElem);
+  svg.selectAll(treeElem)
+    .filter((d) => d.update)
+    .transition().duration(transitionTime)
+    .call(updateCall);
+  if (!transitionTime) {
+    /* https://github.com/d3/d3-timer#timerFlush */
+    timerFlush();
+    console.log("\t\t--FLUSHING TIMER--");
   }
 };
 
