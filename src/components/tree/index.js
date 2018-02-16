@@ -67,7 +67,7 @@ class Tree extends React.Component {
     works out what to update, based upon changes to redux.control */
     let tree = this.state.tree;
     const changes = salientPropChanges(this.props, nextProps, tree);
-    changePhyloTreeViaPropsComparison(this.props, nextProps, tree);
+    changePhyloTreeViaPropsComparison(this, nextProps);
     /* usefull for debugging: */
     // console.log("CWRP Changes:",
     //    Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {

@@ -1,5 +1,5 @@
 import { calcConfidenceWidth } from "./confidence";
-
+import { applyToChildren } from "./helpers";
 
 const updateNodesWithNewData = (nodes, newNodeProps) => {
   console.log("update nodes with data for these keys:", Object.keys(newNodeProps));
@@ -162,16 +162,12 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
     this.removeConfidence(transitionTime);
   } else if (extras.showConfidences) {
     this.drawConfidence(transitionTime);
-  } else if (elemsToUpdate.has(".conf")) {
-    if (this.confidencesInSVG) {
-      if (this.layout === "rect" && this.distance === "num_date") {
-        updateCall = createUpdateCall(".conf", svgPropsToUpdate);
-        genericSelectAndModify(this.svg, ".conf", updateCall, transitionTime);
-      } else {
-        this.removeConfidence(transitionTime);
-      }
+  } else if (elemsToUpdate.has(".conf") && this.confidencesInSVG) {
+    if (this.layout === "rect" && this.distance === "num_date") {
+      updateCall = createUpdateCall(".conf", svgPropsToUpdate);
+      genericSelectAndModify(this.svg, ".conf", updateCall, transitionTime);
     } else {
-      console.warn("can't update confidences as they don't exist in the SVG");
+      this.removeConfidence(transitionTime);
     }
   }
 };
@@ -188,6 +184,7 @@ export const change = function change({
   changeBranchThickness = false,
   showConfidences = false,
   removeConfidences = false,
+  zoomIntoClade = false,
   /* change these things to this state */
   newDistance = undefined,
   /* arrays of data (the same length as nodes) */
@@ -238,7 +235,7 @@ export const change = function change({
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance) {
+  if (newDistance || zoomIntoClade) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -247,17 +244,31 @@ export const change = function change({
   }
 
 
+
   /* change the requested properties on the nodes */
   updateNodesWithNewData(this.nodes, nodePropsToModify);
+
+  if (zoomIntoClade) { /* must happen below updateNodesWithNewData */
+    this.nodes.forEach((d) => {
+      d.inView = false;
+      d.update = true;
+    });
+    /* if clade is terminal, use the parent as the zoom node */
+    const zoomNode = zoomIntoClade.terminal ? zoomIntoClade.parent : zoomIntoClade;
+    console.log("ZOOM INTO CLADE", zoomNode)
+    applyToChildren(zoomNode, (d) => {d.inView = true;});
+  }
 
   /* run calculations as needed */
   /* distance */
   if (newDistance) this.setDistance(newDistance);
   /* layout (must run after distance) */
   if (newDistance) this.setLayout(this.layout);
-  /* mapToScreen (must run after "stroke-width" has been set on nodes) */
-  if (svgPropsToUpdate.has(["stroke-width"]) ||
-    newDistance) {
+  /* mapToScreen */
+  if (
+    svgPropsToUpdate.has(["stroke-width"]) ||
+    newDistance ||
+    zoomIntoClade) {
     this.mapToScreen();
   }
 

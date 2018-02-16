@@ -10,6 +10,7 @@ import { timerStart, timerEnd } from "../../../util/perf";
  * @return {null}
  */
 export const zoomIntoClade = function zoomIntoClade(clade, dt) {
+  console.warn("zoomIntoClade is deprecated. Please use phylotree.change()");
   // assign all nodes to inView false and force update
   this.zoomNode = clade;
   this.nodes.forEach((d) => {
@@ -53,6 +54,7 @@ export const zoomToParent = function zoomToParent(dt) {
 * @return {null}
 */
 export const mapToScreen = function mapToScreen() {
+  console.log("mapToScreen")
   timerStart("mapToScreen");
   /* set the range of the x & y scales */
   this.setScales(this.params.margins);

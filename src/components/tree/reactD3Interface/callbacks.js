@@ -52,18 +52,20 @@ export const onBranchHover = function onBranchHover(d, x, y) {
 };
 
 export const onBranchClick = function onBranchClick(d) {
-  this.Viewer.fitToViewer();
-  this.state.tree.zoomIntoClade(d, mediumTransitionDuration);
-  /* to stop multiple phyloTree updates potentially clashing,
-  we change tipVis after geometry update + transition */
-  window.setTimeout(
-    () => this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.n.arrayIdx})),
-    mediumTransitionDuration
-  );
-  this.setState({
-    hovered: null,
-    selectedBranch: d
-  });
+  this.state.tree.change({zoomIntoClade: d});
+  this.setState({hovered: null, selectedBranch: d});
+  // this.Viewer.fitToViewer();
+  // this.state.tree.zoomIntoClade(d, mediumTransitionDuration);
+  // /* to stop multiple phyloTree updates potentially clashing,
+  // we change tipVis after geometry update + transition */
+  // window.setTimeout(
+  //   () => this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.n.arrayIdx})),
+  //   mediumTransitionDuration
+  // );
+  // this.setState({
+  //   hovered: null,
+  //   selectedBranch: d
+  // });
 };
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */

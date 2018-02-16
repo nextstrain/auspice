@@ -21,13 +21,13 @@ export const salientPropChanges = (props, nextProps, tree) => {
   const layout = props.layout !== nextProps.layout;
   // const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
   const rerenderAllElements = nextProps.quickdraw === false && props.quickdraw === true;
-  const resetViewToRoot = props.tree.idxOfInViewRootNode !== 0 && nextProps.tree.idxOfInViewRootNode === 0;
+  // const resetViewToRoot = props.tree.idxOfInViewRootNode !== 0 && nextProps.tree.idxOfInViewRootNode === 0;
   /* branch labels & confidence use 0: no change, 1: turn off, 2: turn on */
   const branchLabels = props.showBranchLabels === nextProps.showBranchLabels ? 0 : nextProps.showBranchLabels ? 2 : 1;
-  const confidence = props.temporalConfidence.on === nextProps.temporalConfidence.on && props.temporalConfidence.display === nextProps.temporalConfidence.display ? 0 :
-    (props.temporalConfidence.on === false && nextProps.temporalConfidence.on === false) ? 0 :
-      (nextProps.temporalConfidence.display === false || nextProps.temporalConfidence.on === false) ? 1 :
-        (nextProps.temporalConfidence.display === true && nextProps.temporalConfidence.on === true) ? 2 : 0;
+  // const confidence = props.temporalConfidence.on === nextProps.temporalConfidence.on && props.temporalConfidence.display === nextProps.temporalConfidence.display ? 0 :
+  //   (props.temporalConfidence.on === false && nextProps.temporalConfidence.on === false) ? 0 :
+  //     (nextProps.temporalConfidence.display === false || nextProps.temporalConfidence.on === false) ? 1 :
+  //       (nextProps.temporalConfidence.display === true && nextProps.temporalConfidence.on === true) ? 2 : 0;
 
   /* sometimes we may want smooth transitions */
   let branchTransitionTime = false; /* false = no transition. Use when speed is critical */
@@ -48,16 +48,18 @@ export const salientPropChanges = (props, nextProps, tree) => {
     branchTransitionTime,
     tipTransitionTime,
     branchLabels,
-    resetViewToRoot,
-    confidence,
+    resetViewToRoot: false,
+    confidence: false,
     quickdraw: nextProps.quickdraw,
     rerenderAllElements
   };
 };
 
-export const changePhyloTreeViaPropsComparison = (props, nextProps, tree) => {
+export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
   console.log('changePhyloTreeViaPropsComparison')
   const args = {};
+  const props = reactThis.props;
+  const phylotree = reactThis.state.tree;
 
   /* colorBy change? */
   if (!!nextProps.tree.nodeColorsVersion &&
@@ -98,12 +100,18 @@ export const changePhyloTreeViaPropsComparison = (props, nextProps, tree) => {
   }
   if (nextProps.temporalConfidence.display === true &&
     (props.temporalConfidence.on === false && nextProps.temporalConfidence.on === true)) {
-      console.log('asking to show confidences')
     args.showConfidences = true;
   }
 
+  /* reset the entire tree to root view */
+  if (props.tree.idxOfInViewRootNode !== 0 && nextProps.tree.idxOfInViewRootNode === 0) {
+    reactThis.Viewer.fitToViewer();
+    reactThis.setState({selectedBranch: null, selectedTip: null});
+    args.zoomIntoClade = phylotree.nodes[0]; /* the root node inside phylotree */
+  }
 
-  tree.change(args);
+
+  phylotree.change(args);
 };
 
 /**
@@ -159,18 +167,18 @@ export const updateStylesAndAttrs = (that, changes, nextProps, tree) => {
   } else if (changes.branchLabels === 1) {
     tree.hideBranchLabels();
   }
-  if (changes.confidence === 1) {
-    tree.removeConfidence(mediumTransitionDuration);
-  } else if (changes.confidence === 2) {
-    if (changes.layout) { /* setTimeout else they come back in before the branches have transitioned */
-      setTimeout(() => tree.drawConfidence(mediumTransitionDuration), mediumTransitionDuration * 1.5);
-    } else {
-      tree.drawConfidence(mediumTransitionDuration);
-    }
-  } else if (nextProps.temporalConfidence.on && (changes.branchThickness || changes.colorBy)) {
-    /* some updates may necessitate an updating of the CIs (e.g. ∆ branch thicknesses) */
-    tree.updateConfidence(changes.tipTransitionTime);
-  }
+  // if (changes.confidence === 1) {
+  //   tree.removeConfidence(mediumTransitionDuration);
+  // } else if (changes.confidence === 2) {
+  //   if (changes.layout) { /* setTimeout else they come back in before the branches have transitioned */
+  //     setTimeout(() => tree.drawConfidence(mediumTransitionDuration), mediumTransitionDuration * 1.5);
+  //   } else {
+  //     tree.drawConfidence(mediumTransitionDuration);
+  //   }
+  // } else if (nextProps.temporalConfidence.on && (changes.branchThickness || changes.colorBy)) {
+  //   /* some updates may necessitate an updating of the CIs (e.g. ∆ branch thicknesses) */
+  //   tree.updateConfidence(changes.tipTransitionTime);
+  // }
   if (changes.resetViewToRoot) {
     viewEntireTree.bind(that)();
   }
