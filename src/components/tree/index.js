@@ -13,7 +13,7 @@ import { mediumTransitionDuration } from "../../util/globals";
 import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
 import computeResponsive from "../../util/computeResponsive";
-import { updateStylesAndAttrs, salientPropChanges, changePhyloTreeViaPropsComparison } from "./reactD3Interface";
+import { changePhyloTreeViaPropsComparison } from "./reactD3Interface";
 import * as callbacks from "./reactD3Interface/callbacks";
 import { calcStrokeCols } from "./treeHelpers";
 
@@ -62,37 +62,22 @@ class Tree extends React.Component {
     mutType: PropTypes.string.isRequired
   }
 
-  componentWillReceiveProps(nextProps) {
-    /* This both creates the tree (when it's loaded into redux) and
-    works out what to update, based upon changes to redux.control */
-    let tree = this.state.tree;
-    const changes = salientPropChanges(this.props, nextProps, tree);
-    changePhyloTreeViaPropsComparison(this, nextProps);
-    /* usefull for debugging: */
-    // console.log("CWRP Changes:",
-    //    Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {
-    //      o[k] = changes[k]; return o;
-    //    }, {}));
 
-    if (changes.dataInFlux) {
+  /* CWRP has two tasks: (1) create the tree when it's in redux
+  (2) compare props and call phylotree.change() appropritately */
+  componentWillReceiveProps(nextProps) {
+    let tree = this.state.tree;
+    if (!nextProps.tree.loaded) {
       this.setState({tree: null});
-      return null;
-    } else if (changes.newData) {
+    } else if (tree === null && nextProps.tree.loaded) {
       tree = this.makeTree(nextProps);
-      /* extra (initial, once only) call to update the tree colouring */
-      for (const k in changes) { // eslint-disable-line
-        changes[k] = false;
-      }
       this.setState({tree});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
       }
-      return null; /* return to avoid an unnecessary updateStylesAndAttrs call */
+    } else if (tree) {
+      changePhyloTreeViaPropsComparison(this, nextProps);
     }
-    if (tree) {
-      updateStylesAndAttrs(this, changes, nextProps, tree);
-    }
-    return null;
   }
 
   componentDidMount() {
