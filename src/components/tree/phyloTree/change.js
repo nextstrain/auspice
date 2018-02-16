@@ -16,32 +16,155 @@ const updateNodesWithNewData = (nodes, newNodeProps) => {
   console.log("marking ", tmp, " nodes for update");
 };
 
-const validAttrs = ["r", "cx", "cy", "d"];
-const validStyles = ["stroke", "fill", "visibility", "stroke-width", "opacity"];
-const validForThisElem = {
-  ".branch": ["stroke", "path", "stroke-width"],
-  ".tip": ["stroke", "fill", "visibility", "r"]
+const genericAttrs = {
+  ".branch": new Set(),
+  ".tip": new Set(["r"])
+};
+const genericStyles = {
+  ".branch": new Set(["stroke", "stroke-width"]),
+  ".tip": new Set(["fill", "visibility", "stroke"])
+};
+const functionAttrs = {
+  ".tip": {
+    cx: (d) => d.xTip,
+    cy: (d) => d.yTip
+  },
+  ".vaccineCross": {
+    d: (d) => d.vaccineCross
+  },
+  ".vaccineDottedLine": {
+    d: (d) => d.vaccineLine
+  },
+  ".conf": {
+    d: (d) => d.confLine
+  }
+};
+const functionStyles = {
+  ".vaccineDottedLine": {
+    opacity: (d) => d.that.distance === "num_date" ? 1 : 0
+  }
 };
 
+/* Returns a function which can be called as part of a D3 chain in order to modify
+ * the appropriate attrs & styles for this treeElem
+ */
 const createUpdateCall = (treeElem, properties) => (selection) => {
-  [...properties].filter((x) => validAttrs.indexOf(x) !== -1)
-    .filter((x) => validForThisElem[treeElem].indexOf(x) !== -1)
-    .forEach((attrName) => {
-      selection.attr(attrName, (d) => d[attrName]);
-    });
-  [...properties].filter((x) => validStyles.indexOf(x) !== -1)
-    .filter((x) => validForThisElem[treeElem].indexOf(x) !== -1)
-    .forEach((attrName) => {
-      selection.style(attrName, (d) => d[attrName]);
-    });
+  /* generics - those which are simply taken from the node! */
+  if (genericAttrs[treeElem]) {
+    [...properties].filter((x) => genericAttrs[treeElem].has(x))
+      .forEach((attrName) => {
+        console.log("\tadding node attr", attrName);
+        selection.attr(attrName, (d) => d[attrName]);
+      });
+  }
+  if (genericStyles[treeElem]) {
+    [...properties].filter((x) => genericStyles[treeElem].has(x))
+      .forEach((styleName) => {
+        console.log("\tadding node style", styleName);
+        selection.style(styleName, (d) => d[styleName]);
+      });
+  }
+  /* more complicated, functions defined above */
+  if (functionAttrs[treeElem]) {
+    [...properties].filter((x) => functionAttrs[treeElem][x])
+      .forEach((attrName) => {
+        console.log("\tadding fn for attr", attrName);
+        selection.attr(attrName, functionAttrs[treeElem][attrName]);
+      });
+  }
+  if (functionStyles[treeElem]) {
+    [...properties].filter((x) => functionStyles[treeElem][x])
+      .forEach((styleName) => {
+        console.log("\tadding fn for style ", styleName);
+        selection.attr(styleName, functionStyles[treeElem][styleName]);
+      });
+  }
+
 };
 
+const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
+  if (transitionTime) {
+    console.log("general svg update for", treeElem);
+    svg.selectAll(treeElem)
+      .filter((d) => d.update)
+      .transition().duration(transitionTime)
+      .call(updateCall);
+  } else {
+    console.log("general svg update for", treeElem, " (NO TRANSITION)");
+    svg.selectAll(treeElem)
+      .filter((d) => d.update)
+      .call(updateCall);
+  }
+};
+
+export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime) {
+  /* elements are often treated differently (of course!) */
+  let updateCall;
+
+  /* order is respected */
+  const generals = [".tip", ".vaccineDottedLine", ".vaccineCross", ".conf", ".branch"];
+
+  /* treat stem / branch different, but combine normal .branch calls */
+  if (elemsToUpdate.has(".branch.S") || elemsToUpdate.has(".branch.T")) {
+    let branchOnlyUpdate = false;
+    if (elemsToUpdate.has(".branch")) {
+      generals.splice(generals.indexOf(".branch"), 1); // remove .branch from generals
+      branchOnlyUpdate = createUpdateCall(".branch", svgPropsToUpdate);
+    }
+    const generateCombinedUpdateCall = (subClass) => (selection) => {
+      if (branchOnlyUpdate) {
+        branchOnlyUpdate(selection);
+      }
+      const subClassIdx = subClass === ".S" ? 0 : 1; /* is the path stored at d.branch[0] or d.branch[1] */
+      selection.attr("d", (d) => d.branch[subClassIdx]);
+    };
+    if (elemsToUpdate.has(".branch.S")) {
+      updateCall = generateCombinedUpdateCall(".S");
+      genericSelectAndModify(this.svg, ".branch.S", updateCall, transitionTime);
+    }
+    if (elemsToUpdate.has(".branch.T")) {
+      updateCall = generateCombinedUpdateCall(".T");
+      genericSelectAndModify(this.svg, ".branch.T", updateCall, transitionTime);
+    }
+  }
+
+  generals.forEach((el) => {
+    if (elemsToUpdate.has(el)) {
+      updateCall = createUpdateCall(el, svgPropsToUpdate);
+      genericSelectAndModify(this.svg, el, updateCall, transitionTime);
+    }
+  });
+
+  /* non general */
+  if (elemsToUpdate.has('.branchLabel')) {
+    this.updateBranchLabels();
+  }
+  if (elemsToUpdate.has('.tipLabel')) {
+    this.updateTipLabels();
+  }
+  if (elemsToUpdate.has('.grid')) {
+    if (this.grid && this.layout !== "unrooted") this.addGrid(this.layout);
+    else this.hideGrid();
+  }
+  if (elemsToUpdate.has('.regression')) {
+    this.svg.selectAll(".regression").remove();
+    if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
+  }
+
+};
+
+/* the main interface to changing a currently rendered tree.
+ * simply call change and tell it what should be changed.
+ * try to do a single change() call with as many things as possible in it
+ */
 export const change = function change({
   /* booleans for what should be changed */
   changeColorBy = false,
   changeVisibility = false,
   changeTipRadii = false,
   changeBranchThickness = false,
+  /* change these things to this state */
+  newDistance = undefined,
   /* arrays of data (the same length as nodes) */
   stroke = undefined,
   fill = undefined,
@@ -55,19 +178,26 @@ export const change = function change({
   const nodePropsToModify = {}; /* modify the actual data structure */
   const svgPropsToUpdate = new Set(); /* modify the SVG */
 
+  /* calculate dt */
+  const idealTransitionTime = 500;
+  let transitionTime = idealTransitionTime;
+  if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2) {
+    transitionTime = 0;
+  }
+
   /* the logic of converting what react is telling us to change
-  and what we actually change */
+  and what SVG elements, node properties, svg props we actually change */
   if (changeColorBy) {
     /* check that fill & stroke are defined */
+    elemsToUpdate.add(".branch").add(".tip");
     svgPropsToUpdate.add("stroke").add("fill");
     nodePropsToModify.stroke = stroke;
     nodePropsToModify.fill = fill;
-    elemsToUpdate.add(".branch").add(".tip");
   }
   if (changeVisibility) {
     /* check that visibility is not undefined */
     /* in the future we also change the branch visibility (after skeleton merge) */
-    elemsToUpdate.add(".tip");
+    elemsToUpdate.add(".tip")
     svgPropsToUpdate.add("visibility");
     nodePropsToModify.visibility = visibility;
   }
@@ -81,44 +211,30 @@ export const change = function change({
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
+  if (newDistance) {
+    elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T");
+    elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
+    elemsToUpdate.add('.branchLabel').add('.tipLabel');
+    elemsToUpdate.add(".grid").add(".regression");
+    svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity");
+  }
 
-
-  /* run calculations as needed */
-
-  /* change nodes as necessary */
+  /* change the requested properties on the nodes */
   updateNodesWithNewData(this.nodes, nodePropsToModify);
 
-  /* calculations that depend on node data appended above */
-  if (svgPropsToUpdate.has("stroke-width")) {
+  /* run calculations as needed */
+  /* distance */
+  if (newDistance) this.setDistance(newDistance);
+  /* layout (must run after distance) */
+  if (newDistance) this.setLayout(this.layout);
+  /* mapToScreen (must run after "stroke-width" has been set on nodes) */
+  if (svgPropsToUpdate.has(["stroke-width"]) ||
+    newDistance) {
     this.mapToScreen();
   }
 
-  /* calculate dt */
-  const idealTransitionTime = 500;
-  let transitionTime = idealTransitionTime;
-  if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2) {
-    transitionTime = 0;
-  }
-  /* strip out elemsToUpdate that are not necesary! */
-
   /* svg change elements */
+  this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime);
 
-  /* there's different methods here - transition everything, snap,
-  hide-some-transition-some-show-all, etc etc */
-  elemsToUpdate.forEach((treeElem) => {
-    console.log("updating treeElem", treeElem, "transition:", transitionTime);
-    const updateCall = createUpdateCall(treeElem, svgPropsToUpdate);
-    if (transitionTime) {
-      this.svg.selectAll(treeElem)
-        .filter((d) => d.update)
-        .transition().duration(transitionTime)
-        .call(updateCall);
-    } else {
-      this.svg.selectAll(treeElem)
-        .filter((d) => d.update)
-        .call(updateCall);
-    }
-  });
   this.timeLastRenderRequested = Date.now();
-
 };

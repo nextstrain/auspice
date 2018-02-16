@@ -19,7 +19,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
   //     nextProps.colorByConfidence !== props.colorByConfidence);
   // const branchThickness = props.tree.branchThicknessVersion !== nextProps.tree.branchThicknessVersion;
   const layout = props.layout !== nextProps.layout;
-  const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
+  // const distanceMeasure = props.distanceMeasure !== nextProps.distanceMeasure;
   const rerenderAllElements = nextProps.quickdraw === false && props.quickdraw === true;
   const resetViewToRoot = props.tree.idxOfInViewRootNode !== 0 && nextProps.tree.idxOfInViewRootNode === 0;
   /* branch labels & confidence use 0: no change, 1: turn off, 2: turn on */
@@ -43,7 +43,7 @@ export const salientPropChanges = (props, nextProps, tree) => {
     tipRadii: false,
     colorBy: false,
     layout,
-    distanceMeasure,
+    distanceMeasure: false,
     branchThickness: false,
     branchTransitionTime,
     tipTransitionTime,
@@ -86,6 +86,10 @@ export const changePhyloTreeViaPropsComparison = (props, nextProps, tree) => {
     args.branchThickness = nextProps.tree.branchThickness;
   }
 
+  if (props.distanceMeasure !== nextProps.distanceMeasure) {
+    args.newDistance = nextProps.distanceMeasure;
+  }
+
   tree.change(args);
 };
 
@@ -102,7 +106,7 @@ export const updateStylesAndAttrs = (that, changes, nextProps, tree) => {
   // const tipStyleToUpdate = {};
   // const branchAttrToUpdate = {};
   // const branchStyleToUpdate = {};
-
+  return;
   // if (changes.visibility) {
   //   tipStyleToUpdate["visibility"] = nextProps.tree.visibility;
   // }

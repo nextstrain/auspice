@@ -54,6 +54,7 @@ export const updateStyleOrAttributeArray = function updateStyleOrAttributeArray(
  * @return null
  */
 export const updateDistance = function updateDistance(attr, dt) {
+  console.warn("updateDistance is deprecated. use phylotree.change instead.")
   this.setDistance(attr);
   this.setLayout(this.layout);
   this.mapToScreen();
@@ -88,6 +89,7 @@ export const updateLayout = function updateLayout(layout, dt) {
  * @return {[type]}
  */
 export const updateGeometry = function updateGeometry(dt) {
+  console.warn("updateGeometry is deprecated. use phylotree.change instead.")
   timerStart("updateGeometry");
   this.svg.selectAll(".tip")
     .filter((d) => d.update)
@@ -100,17 +102,10 @@ export const updateGeometry = function updateGeometry(dt) {
     this.svg.selectAll(".vaccineCross")
       .transition().duration(dt)
       .attr("d", (dd) => dd.vaccineCross);
-    if (this.distance === "num_date") {
-      this.svg.selectAll(".vaccineDottedLine")
-        .transition().duration(dt)
-        .style("opacity", 1)
-        .attr("d", (dd) => dd.vaccineLine);
-    } else {
-      this.svg.selectAll(".vaccineDottedLine")
-        .transition().duration(dt)
-        .style("opacity", 0)
-        .attr("d", (dd) => dd.vaccineLine);
-    }
+    this.svg.selectAll(".vaccineDottedLine")
+      .transition().duration(dt)
+      .style("opacity", () => this.distance === "num_date" ? 1 : 0)
+      .attr("d", (dd) => dd.vaccineLine);
   }
 
   const branchEls = [".S", ".T"];
