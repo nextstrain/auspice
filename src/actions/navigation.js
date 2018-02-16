@@ -1,10 +1,10 @@
 import parseParams from "../util/parseParams";
 import queryString from "query-string";
 import { getPost } from "../util/getMarkdown";
-import { PAGE_CHANGE, URL_QUERY_CHANGE } from "./types";
-import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
+import { PAGE_CHANGE, URL_QUERY_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
+import { updateVisibleTipsAndBranchThicknesses, calculateVisiblityAndBranchThickness } from "./treeProperties";
 import { changeColorBy } from "./colors";
-
+import { restoreQueryableStateToDefaults, modifyStateViaURLQuery, checkAndCorrectErrorsInState } from "../reducers/controls";
 // make prefix for data files with fields joined by _ instead of / as in URL
 const makeDataPathFromParsedParams = (parsedParams) => {
   const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);
@@ -77,21 +77,67 @@ ARGUMENTS:
 (1) query - REQUIRED - {object}
 (2) push - OPTIONAL (default: true) - signals that pushState should be used (has no effect on the reducers)
 */
+// export const changePageQuery = ({query, push = true}) => (dispatch, getState) => {
+//   console.log("\t---------- change page query -------------");
+//   const { controls, metadata } = getState();
+//   dispatch({
+//     type: URL_QUERY_CHANGE,
+//     query,
+//     metadata,
+//     pushState: push
+//   });
+//   const newState = getState();
+//   /* working out whether visibility / thickness needs updating is tricky - ideally we could avoid this dispatch in some situations */
+//   dispatch(updateVisibleTipsAndBranchThicknesses());
+//   if (controls.colorBy !== newState.controls.colorBy) {
+//     dispatch(changeColorBy());
+//   }
+// };
+
+
+
+
 export const changePageQuery = ({query, push = true}) => (dispatch, getState) => {
-  const { controls, metadata } = getState();
+  console.log("\t---------- change page query -------------");
+  const { controls, metadata, tree } = getState();
+
+  /* 1 - calculate entire new state of the controls reducer */
+  let newControls = Object.assign({}, controls);
+  newControls = restoreQueryableStateToDefaults(newControls);
+  newControls = modifyStateViaURLQuery(newControls, query);
+  newControls = checkAndCorrectErrorsInState(newControls, metadata);
+
+  /* 2 - calculate new branch thicknesses & visibility */
+  const visAndThicknessData = calculateVisiblityAndBranchThickness(
+    tree,
+    newControls,
+    {dateMinNumeric: newControls.dateMinNumeric, dateMaxNumeric: newControls.dateMaxNumeric},
+    {tipSelectedIdx: 0, validIdxRoot: tree.idxOfInViewRootNode}
+  );
+  visAndThicknessData.stateCountAttrs = Object.keys(newControls.filters);
+
+  /* 3 - calculate colours */
+
+
+  /* 4 - calculate entropy in view */
+
+
+
   dispatch({
-    type: URL_QUERY_CHANGE,
-    query,
-    metadata,
-    pushState: push
+    type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+    newControls,
+    pushState: push,
+    newTree: Object.assign({}, tree, visAndThicknessData)
   });
-  const newState = getState();
-  /* working out whether visibility / thickness needs updating is tricky - ideally we could avoid this dispatch in some situations */
-  dispatch(updateVisibleTipsAndBranchThicknesses());
-  if (controls.colorBy !== newState.controls.colorBy) {
-    dispatch(changeColorBy());
-  }
+  // const newState = getState();
+  // /* working out whether visibility / thickness needs updating is tricky - ideally we could avoid this dispatch in some situations */
+  // dispatch(updateVisibleTipsAndBranchThicknesses());
+  // if (controls.colorBy !== newState.controls.colorBy) {
+  //   dispatch(changeColorBy());
+  // }
 };
+
+
 
 export const browserBackForward = () => (dispatch, getState) => {
   const { datasets } = getState();

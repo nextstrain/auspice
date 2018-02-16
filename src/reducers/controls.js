@@ -38,7 +38,7 @@ const getMaxCalDateViaTree = (tree) => {
 };
 
 /* need a (better) way to keep the queryParams all in "sync" */
-const modifyStateViaURLQuery = (state, query) => {
+export const modifyStateViaURLQuery = (state, query) => {
   // console.log("Query incoming: ", query);
   if (query.l) {
     state["layout"] = query.l;
@@ -85,7 +85,7 @@ const modifyStateViaURLQuery = (state, query) => {
   return state;
 };
 
-const restoreQueryableStateToDefaults = (state) => {
+export const restoreQueryableStateToDefaults = (state) => {
   for (const key of Object.keys(state.defaults)) {
     switch (typeof state.defaults[key]) {
       case "string": {
@@ -204,7 +204,7 @@ const modifyStateViaTree = (state, tree) => {
   return state;
 };
 
-const checkAndCorrectErrorsInState = (state, metadata) => {
+export const checkAndCorrectErrorsInState = (state, metadata) => {
   /* The one (bigish) problem with this being in the reducer is that
   we can't have any side effects. So if we detect and error introduced by
   a URL QUERY (and correct it in state), we can't correct the URL */
@@ -309,6 +309,9 @@ const Controls = (state = getDefaultState(), action) => {
       newState = modifyStateViaURLQuery(newState, action.query);
       newState = checkAndCorrectErrorsInState(newState, action.metadata);
       return newState;
+    }
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: {
+      return action.newControls;
     }
     case types.NEW_DATASET: {
       let base = getDefaultState();

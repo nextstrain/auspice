@@ -84,6 +84,8 @@ const Tree = (state = getDefaultState(), action) => {
         tipRadii: action.data,
         tipRadiiVersion: action.version
       });
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
+      return action.newTree;
     case types.NEW_COLORS:
       return Object.assign({}, state, {
         nodeColors: action.nodeColors,
