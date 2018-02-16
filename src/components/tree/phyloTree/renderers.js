@@ -63,6 +63,7 @@ export const render = function render(svg, layout, distance, options, callbacks,
   if (this.layout === "clock" && this.distance === "num_date") {
     this.drawRegression();
   }
+  this.confidencesInSVG = false;
   if (drawConfidence) {
     this.drawConfidence();
   }

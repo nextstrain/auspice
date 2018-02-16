@@ -86,9 +86,22 @@ export const changePhyloTreeViaPropsComparison = (props, nextProps, tree) => {
     args.branchThickness = nextProps.tree.branchThickness;
   }
 
+  /* change from timetree to divergence tree */
   if (props.distanceMeasure !== nextProps.distanceMeasure) {
     args.newDistance = nextProps.distanceMeasure;
   }
+
+  /* confidence intervals (on means in the SVG, display means the sidebar. TODO fix this terminology!) */
+  if ((props.temporalConfidence.display === true && nextProps.temporalConfidence.display === false) ||
+    (props.temporalConfidence.on === true && nextProps.temporalConfidence.on === false)) {
+    args.removeConfidences = true;
+  }
+  if (nextProps.temporalConfidence.display === true &&
+    (props.temporalConfidence.on === false && nextProps.temporalConfidence.on === true)) {
+      console.log('asking to show confidences')
+    args.showConfidences = true;
+  }
+
 
   tree.change(args);
 };

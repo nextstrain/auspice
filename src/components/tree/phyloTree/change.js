@@ -1,3 +1,5 @@
+import { calcConfidenceWidth } from "./confidence";
+
 
 const updateNodesWithNewData = (nodes, newNodeProps) => {
   console.log("update nodes with data for these keys:", Object.keys(newNodeProps));
@@ -42,6 +44,10 @@ const functionAttrs = {
 const functionStyles = {
   ".vaccineDottedLine": {
     opacity: (d) => d.that.distance === "num_date" ? 1 : 0
+  },
+  ".conf": {
+    stroke: (d) => d.stroke,
+    "stroke-width": calcConfidenceWidth
   }
 };
 
@@ -97,12 +103,12 @@ const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
   }
 };
 
-export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime) {
+export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras) {
   /* elements are often treated differently (of course!) */
   let updateCall;
 
   /* order is respected */
-  const generals = [".tip", ".vaccineDottedLine", ".vaccineCross", ".conf", ".branch"];
+  const generals = [".tip", ".vaccineDottedLine", ".vaccineCross", ".branch"];
 
   /* treat stem / branch different, but combine normal .branch calls */
   if (elemsToUpdate.has(".branch.S") || elemsToUpdate.has(".branch.T")) {
@@ -151,6 +157,23 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
   }
 
+  /* confidences are hard */
+  if (extras.removeConfidences) {
+    this.removeConfidence(transitionTime);
+  } else if (extras.showConfidences) {
+    this.drawConfidence(transitionTime);
+  } else if (elemsToUpdate.has(".conf")) {
+    if (this.confidencesInSVG) {
+      if (this.layout === "rect" && this.distance === "num_date") {
+        updateCall = createUpdateCall(".conf", svgPropsToUpdate);
+        genericSelectAndModify(this.svg, ".conf", updateCall, transitionTime);
+      } else {
+        this.removeConfidence(transitionTime);
+      }
+    } else {
+      console.warn("can't update confidences as they don't exist in the SVG");
+    }
+  }
 };
 
 /* the main interface to changing a currently rendered tree.
@@ -163,6 +186,8 @@ export const change = function change({
   changeVisibility = false,
   changeTipRadii = false,
   changeBranchThickness = false,
+  showConfidences = false,
+  removeConfidences = false,
   /* change these things to this state */
   newDistance = undefined,
   /* arrays of data (the same length as nodes) */
@@ -190,6 +215,7 @@ export const change = function change({
   if (changeColorBy) {
     /* check that fill & stroke are defined */
     elemsToUpdate.add(".branch").add(".tip");
+    if (this.confidencesInSVG) elemsToUpdate.add(".conf");
     svgPropsToUpdate.add("stroke").add("fill");
     nodePropsToModify.stroke = stroke;
     nodePropsToModify.fill = fill;
@@ -197,7 +223,7 @@ export const change = function change({
   if (changeVisibility) {
     /* check that visibility is not undefined */
     /* in the future we also change the branch visibility (after skeleton merge) */
-    elemsToUpdate.add(".tip")
+    elemsToUpdate.add(".tip");
     svgPropsToUpdate.add("visibility");
     nodePropsToModify.visibility = visibility;
   }
@@ -208,6 +234,7 @@ export const change = function change({
   }
   if (changeBranchThickness) {
     elemsToUpdate.add(".branch");
+    if (this.confidencesInSVG) elemsToUpdate.add(".conf");
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
@@ -218,6 +245,7 @@ export const change = function change({
     elemsToUpdate.add(".grid").add(".regression");
     svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity");
   }
+
 
   /* change the requested properties on the nodes */
   updateNodesWithNewData(this.nodes, nodePropsToModify);
@@ -234,7 +262,8 @@ export const change = function change({
   }
 
   /* svg change elements */
-  this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime);
+  const extras = {removeConfidences, showConfidences};
+  this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
 
   this.timeLastRenderRequested = Date.now();
 };

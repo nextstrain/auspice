@@ -12,6 +12,7 @@ const contains = (array, elem) => array.some((d) => d === elem);
  * @return {[type]}
  */
 export const updateStyleOrAttribute = function updateStyleOrAttribute(treeElem, attr, callback, dt, styleOrAttribute) {
+  console.warn("updateStyleOrAttribute is deprecated. use phylotree.change instead.")
   const attr_array = this.nodes.map((d) => callback(d));
   this.updateStyleOrAttributeArray(treeElem, attr, attr_array, dt, styleOrAttribute);
 };
@@ -25,6 +26,7 @@ export const updateStyleOrAttribute = function updateStyleOrAttribute(treeElem, 
  * @return {[type]}
  */
 export const updateStyleOrAttributeArray = function updateStyleOrAttributeArray(treeElem, attr, attr_array, dt, styleOrAttribute) {
+  console.warn("updateStyleOrAttributeArray is deprecated. use phylotree.change instead.")
   timerStart("updateStyleOrAttributeArray");
   this.nodes.forEach((d, i) => {
     const newAttr = attr_array[i];
@@ -234,6 +236,7 @@ export const updateGeometryFade = function updateGeometryFade(dt) {
  * @param {int} dt time in milliseconds
  */
 export const updateMultipleArray = function updateMultipleArray(treeElem, attrs, styles, dt, quickdraw) {
+  console.warn("updateMultipleArray is deprecated. use phylotree.change instead.")
   timerStart("updateMultipleArray");
   // assign new values and decide whether to update
   this.nodes.forEach((d, i) => {
@@ -302,6 +305,7 @@ export const updateMultipleArray = function updateMultipleArray(treeElem, attrs,
  * @param  dt -- transition time
  */
 export const redrawAttribute = function redrawAttribute(treeElem, attr, dt) {
+  console.warn("redrawAttribute is deprecated. use phylotree.change instead.")
   this.svg.selectAll(treeElem)
     .filter((d) => d.update)
     .transition()
@@ -317,6 +321,7 @@ export const redrawAttribute = function redrawAttribute(treeElem, attr, dt) {
  * @param  dt -- transition time
  */
 export const redrawStyle = function redrawStyle(treeElem, styleElem, dt) {
+console.warn("redrawStyle is deprecated. use phylotree.change instead.")
   this.svg.selectAll(treeElem)
     .filter((d) => d.update)
     .transition().duration(dt)
