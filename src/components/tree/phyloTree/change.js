@@ -2,6 +2,9 @@ import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
 import { applyToChildren } from "./helpers";
 
+/* loop through the nodes and update each provided prop with the new value
+ * additionally, set d.update -> whether or not the node props changed
+ */
 const updateNodesWithNewData = (nodes, newNodeProps) => {
   console.log("update nodes with data for these keys:", Object.keys(newNodeProps));
   let tmp = 0;
@@ -19,15 +22,21 @@ const updateNodesWithNewData = (nodes, newNodeProps) => {
   console.log("marking ", tmp, " nodes for update");
 };
 
-const genericAttrs = {
+
+/* the following 4 dictionaries define which attrs & styles should (potentially)
+ * be applied to which class (e.g. ".tip"). They are either taken directly from the
+ * node props (e.g. "fill" is set to the node.fill value) or a custom function
+ * is defined here
+ */
+const setAttrViaNodeProps = {
   ".branch": new Set(),
   ".tip": new Set(["r"])
 };
-const genericStyles = {
+const setStyleViaNodeProps = {
   ".branch": new Set(["stroke", "stroke-width"]),
   ".tip": new Set(["fill", "visibility", "stroke"])
 };
-const functionAttrs = {
+const setAttrViaFunction = {
   ".tip": {
     cx: (d) => d.xTip,
     cy: (d) => d.yTip
@@ -42,7 +51,7 @@ const functionAttrs = {
     d: (d) => d.confLine
   }
 };
-const functionStyles = {
+const setStyleViaFunction = {
   ".vaccineDottedLine": {
     opacity: (d) => d.that.distance === "num_date" ? 1 : 0
   },
@@ -53,36 +62,37 @@ const functionStyles = {
 };
 
 /* Returns a function which can be called as part of a D3 chain in order to modify
- * the appropriate attrs & styles for this treeElem
+ * the appropriate attrs & styles for this treeElem.
+ * This checks the above dictionaries to see which properties (attr || style) are
+ * valid for each treeElem (className).
  */
 const createUpdateCall = (treeElem, properties) => (selection) => {
   /* generics - those which are simply taken from the node! */
-  if (genericAttrs[treeElem]) {
-    [...properties].filter((x) => genericAttrs[treeElem].has(x))
+  if (setAttrViaNodeProps[treeElem]) {
+    [...properties].filter((x) => setAttrViaNodeProps[treeElem].has(x))
       .forEach((attrName) => {
         selection.attr(attrName, (d) => d[attrName]);
       });
   }
-  if (genericStyles[treeElem]) {
-    [...properties].filter((x) => genericStyles[treeElem].has(x))
+  if (setStyleViaNodeProps[treeElem]) {
+    [...properties].filter((x) => setStyleViaNodeProps[treeElem].has(x))
       .forEach((styleName) => {
         selection.style(styleName, (d) => d[styleName]);
       });
   }
   /* more complicated, functions defined above */
-  if (functionAttrs[treeElem]) {
-    [...properties].filter((x) => functionAttrs[treeElem][x])
+  if (setAttrViaFunction[treeElem]) {
+    [...properties].filter((x) => setAttrViaFunction[treeElem][x])
       .forEach((attrName) => {
-        selection.attr(attrName, functionAttrs[treeElem][attrName]);
+        selection.attr(attrName, setAttrViaFunction[treeElem][attrName]);
       });
   }
-  if (functionStyles[treeElem]) {
-    [...properties].filter((x) => functionStyles[treeElem][x])
+  if (setStyleViaFunction[treeElem]) {
+    [...properties].filter((x) => setStyleViaFunction[treeElem][x])
       .forEach((styleName) => {
-        selection.attr(styleName, functionStyles[treeElem][styleName]);
+        selection.attr(styleName, setStyleViaFunction[treeElem][styleName]);
       });
   }
-
 };
 
 const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
@@ -98,45 +108,44 @@ const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
   }
 };
 
+/* use D3 to select and modify elements, such that a given element is only ever modified _once_
+ * @elemsToUpdate {set} - the class names to select, e.g. ".tip" or ".branch"
+ * @svgPropsToUpdate {set} - the props (styles & attrs) to update. The respective functions are defined above
+ * @transitionTime {INT} - in ms. if 0 then no transition (timerFlush is used)
+ * @extras {dict} - extra keywords to tell this function to call certain phyloTree update methods. In flux.
+ */
 export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras) {
-  /* elements are often treated differently (of course!) */
   let updateCall;
+  const classesToPotentiallyUpdate = [".tip", ".vaccineDottedLine", ".vaccineCross", ".branch"]; /* order is respected */
 
-  /* order is respected */
-  const generals = [".tip", ".vaccineDottedLine", ".vaccineCross", ".branch"];
-
-  /* treat stem / branch different, but combine normal .branch calls */
+  /* treat stem / branch specially, but use these to replace a normal .branch call if that's also to be applied */
   if (elemsToUpdate.has(".branch.S") || elemsToUpdate.has(".branch.T")) {
-    let branchOnlyUpdate = false;
-    if (elemsToUpdate.has(".branch")) {
-      generals.splice(generals.indexOf(".branch"), 1); // remove .branch from generals
-      branchOnlyUpdate = createUpdateCall(".branch", svgPropsToUpdate);
-    }
-    const generateCombinedUpdateCall = (subClass) => (selection) => {
-      if (branchOnlyUpdate) {
-        branchOnlyUpdate(selection);
+    const applyBranchPropsAlso = elemsToUpdate.has(".branch");
+    if (applyBranchPropsAlso) classesToPotentiallyUpdate.splice(classesToPotentiallyUpdate.indexOf(".branch"), 1);
+    const ST = [".S", ".T"];
+    ST.forEach((x, STidx) => {
+      if (elemsToUpdate.has(`.branch${x}`)) {
+        if (applyBranchPropsAlso) {
+          updateCall = (selection) => {
+            createUpdateCall(".branch", svgPropsToUpdate)(selection); /* the "normal" branch changes to apply */
+            selection.attr("d", (d) => d.branch[STidx]); /* change the path (differs between .S and .T) */
+          };
+        } else {
+          updateCall = (selection) => {selection.attr("d", (d) => d.branch[STidx]);};
+        }
+        genericSelectAndModify(this.svg, `.branch${x}`, updateCall, transitionTime);
       }
-      const subClassIdx = subClass === ".S" ? 0 : 1; /* is the path stored at d.branch[0] or d.branch[1] */
-      selection.attr("d", (d) => d.branch[subClassIdx]);
-    };
-    if (elemsToUpdate.has(".branch.S")) {
-      updateCall = generateCombinedUpdateCall(".S");
-      genericSelectAndModify(this.svg, ".branch.S", updateCall, transitionTime);
-    }
-    if (elemsToUpdate.has(".branch.T")) {
-      updateCall = generateCombinedUpdateCall(".T");
-      genericSelectAndModify(this.svg, ".branch.T", updateCall, transitionTime);
-    }
+    });
   }
 
-  generals.forEach((el) => {
+  classesToPotentiallyUpdate.forEach((el) => {
     if (elemsToUpdate.has(el)) {
       updateCall = createUpdateCall(el, svgPropsToUpdate);
       genericSelectAndModify(this.svg, el, updateCall, transitionTime);
     }
   });
 
-  /* non general */
+  /* special cases not listed in classesToPotentiallyUpdate */
   if (elemsToUpdate.has('.branchLabel')) {
     this.updateBranchLabels();
   }
@@ -151,7 +160,6 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
     this.svg.selectAll(".regression").remove();
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
   }
-
   /* confidences are hard */
   if (extras.removeConfidences) {
     this.removeConfidence(transitionTime);
@@ -192,7 +200,7 @@ export const change = function change({
   branchThickness = undefined
 }) {
   console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
-
+  console.time("phylotree.change");
   const elemsToUpdate = new Set();
   const nodePropsToModify = {}; /* modify the actual data structure */
   const svgPropsToUpdate = new Set(); /* modify the SVG */
@@ -277,4 +285,5 @@ export const change = function change({
   this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
 
   this.timeLastRenderRequested = Date.now();
+  console.timeEnd("phylotree.change");
 };

@@ -35,7 +35,8 @@ export const render = function render(svg, layout, distance, options, callbacks,
 
   /* draw functions */
   if (this.params.showGrid) this.addGrid();
-  if (this.params.branchLabels) this.drawBranches();
+  this.drawBranches();
+  if (this.params.branchLabels) this.drawCladeLabels(); this.updateBranchLabels();
   this.drawTips();
   if (this.vaccines) this.drawVaccines();
   this.drawCladeLabels();
@@ -46,19 +47,6 @@ export const render = function render(svg, layout, distance, options, callbacks,
     this.svg.selectAll(".tip").style("visibility", (d) => d["visibility"]);
     timerEnd("setVisibility");
   }
-
-  // setting branchLabels and tipLabels to false above in params is not working for some react-dimensions
-  // hence the commenting here
-  // if (this.params.branchLabels){
-  //   this.drawBranchLabels();
-  // }
-  /* don't even bother initially - there will be too many! */
-  // if (this.params.tipLabels){
-  //   this.updateTipLabels(100);
-  // }
-
-  this.updateGeometry(10);
-
   this.svg.selectAll(".regression").remove();
   if (this.layout === "clock" && this.distance === "num_date") {
     this.drawRegression();
