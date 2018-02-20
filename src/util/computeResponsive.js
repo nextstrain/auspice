@@ -37,13 +37,7 @@ const computeResponsive = ({
   const horizontalPadding = horizontal === 1 ? 34 : 56; // derived from empirical testing, depends on Card margins
   const verticalPadding = 52;
 
-  /* WIDTH */
-  let scrollbarWidth = 0; // sidebar scrollbar has width equal to its offsetWidth - clientWidth
-  const classArray = document.getElementsByClassName("sidebar");
-  if (classArray.length > 0) {
-    scrollbarWidth = classArray[0].offsetWidth - classArray[0].clientWidth;
-  }
-  const LRpadding = padding.left + padding.right + horizontalPadding + scrollbarWidth + (padding.left + padding.right === 0 ? 0 : controlsPadding);
+  const LRpadding = padding.left + padding.right + horizontalPadding + (padding.left + padding.right === 0 ? 0 : controlsPadding);
   const width = horizontal * (browserDimensions.width - LRpadding);
 
   /* HEIGHT */
