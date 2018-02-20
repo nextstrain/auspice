@@ -75,7 +75,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       const e = state.controls.mapAnimationDurationInMilliseconds;
       query.animate = `${a},${b},${c},${d},${e}`;
       break;
-    case types.URL_QUERY_CHANGE:
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
       query = action.query;
       break;
     case types.PAGE_CHANGE:

@@ -12,7 +12,7 @@ import { defaultGeoResolution,
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 
-const checkColorByConfidence = (attrs, colorBy) => {
+export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
 };
 
@@ -301,15 +301,6 @@ const getDefaultState = () => {
 
 const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
-    case types.URL_QUERY_CHANGE: {
-      /* because the qury isn't complete (e.g. things that are "off" or "default" aren't shown)
-      we must first reset all the state to the "base" (default) state, and then apply the changes defined in the query */
-      let newState = Object.assign({}, state);
-      newState = restoreQueryableStateToDefaults(newState);
-      newState = modifyStateViaURLQuery(newState, action.query);
-      newState = checkAndCorrectErrorsInState(newState, action.metadata);
-      return newState;
-    }
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: {
       return action.newControls;
     }

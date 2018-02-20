@@ -7,6 +7,24 @@ import { timerStart, timerEnd } from "../util/perf";
 import { updateEntropyVisibility } from "./entropy";
 import * as types from "./types";
 
+export const calcColorScaleAndNodeColors = (colorBy, controls, tree, metadata) => {
+  let genotype;
+  if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
+    const x = parseGenotype(colorBy, controls.geneLength);
+    setGenotype(tree.nodes, x[0][0], x[0][1] + 1); /* modifies nodes recursively */
+    genotype = parseGenotype(colorBy, controls.geneLength);
+  }
+
+  /* step 1: calculate the required colour scale */
+  const version = controls.colorScale === undefined ? 1 : controls.colorScale.version + 1;
+  const colorScale = getColorScale(colorBy, tree, controls.geneLength, metadata.colorOptions, version, controls.absoluteDateMaxNumeric);
+  if (genotype) colorScale.genotype = genotype;
+
+  /* step 2: calculate the node colours */
+  const nodeColors = calcNodeColor(tree, colorScale);
+  return {nodeColors, colorScale, version};
+};
+
 /* providedColorBy: undefined | string */
 export const changeColorBy = (providedColorBy = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
@@ -23,23 +41,7 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
       return null;
     }
     const colorBy = providedColorBy ? providedColorBy : controls.colorBy;
-
-    if (colorBy.slice(0, 3) === "gt-") {
-      const x = parseGenotype(colorBy, controls.geneLength);
-      setGenotype(tree.nodes, x[0][0], x[0][1] + 1);
-    }
-
-    /* step 1: calculate the required colour scale */
-    const version = controls.colorScale === undefined ? 1 : controls.colorScale.version + 1;
-    // console.log("updateColorScale setting colorScale to ", version);
-    const colorScale = getColorScale(colorBy, tree, controls.geneLength, metadata.colorOptions, version, controls.absoluteDateMaxNumeric);
-    /*   */
-    if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
-      colorScale.genotype = parseGenotype(colorBy, controls.geneLength);
-    }
-
-    /* step 2: calculate the node colours */
-    const nodeColors = calcNodeColor(tree, colorScale);
+    const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(colorBy, controls, tree, metadata);
 
     /* step 3: change in mutType? */
     const newMutType = determineColorByGenotypeType(colorBy) !== controls.mutType ? determineColorByGenotypeType(colorBy) : false;
