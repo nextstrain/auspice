@@ -81,10 +81,8 @@ PhyloTree.prototype.updateConfidence = confidence.updateConfidence;
 
 /* L A B E L S    ( T I P ,    B R A N C H ,   C O N F I D E N C E ) */
 PhyloTree.prototype.drawCladeLabels = labels.drawCladeLabels;
-PhyloTree.prototype.updateBranchLabels = labels.updateBranchLabels;
+PhyloTree.prototype.updateCladeLabels = labels.updateCladeLabels;
 PhyloTree.prototype.updateTipLabels = labels.updateTipLabels;
-PhyloTree.prototype.hideBranchLabels = labels.hideBranchLabels;
-PhyloTree.prototype.showBranchLabels = labels.showBranchLabels;
 
 /* G R I D */
 PhyloTree.prototype.hideGrid = grid.hideGrid;

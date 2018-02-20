@@ -33,7 +33,6 @@ there are actually backlinks from the phylotree tree
     colorByConfidence: state.controls.colorByConfidence,
     layout: state.controls.layout,
     temporalConfidence: state.controls.temporalConfidence,
-    showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
     mutType: state.controls.mutType,
     colorScale: state.controls.colorScale,
@@ -117,8 +116,7 @@ class Tree extends React.Component {
         { /* options */
           grid: true,
           confidence: nextProps.temporalConfidence.display,
-          branchLabels: true,
-          showBranchLabels: false,
+          showCladeLabels: true,
           tipLabels: true,
           showTipLabels: true
         },
@@ -129,8 +127,6 @@ class Tree extends React.Component {
           onBranchClick: callbacks.onBranchClick.bind(this),
           onBranchLeave: callbacks.onBranchLeave.bind(this),
           onTipLeave: callbacks.onTipLeave.bind(this),
-          branchLabel: callbacks.branchLabel,
-          branchLabelSize: callbacks.branchLabelSize,
           tipLabel: (d) => d.n.strain,
           tipLabelSize: callbacks.tipLabelSize.bind(this)
         },

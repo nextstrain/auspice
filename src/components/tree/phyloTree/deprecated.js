@@ -1,6 +1,83 @@
 /* eslint-disable */
 /* these functions are either deprecated or were in the code base but never called! */
 
+/**
+ * hide branchLabels
+ */
+export const hideBranchLabels = function hideBranchLabels() {
+  this.params.showBranchLabels = false;
+  this.svg.selectAll(".branchLabel").style('visibility', 'hidden');
+};
+
+/**
+ * show branchLabels
+ */
+export const showBranchLabels = function showBranchLabels() {
+  this.params.showBranchLabels = true;
+  this.svg.selectAll(".branchLabel").style('visibility', 'visible');
+};
+
+
+/**
+ * hide tipLabels - this function is never called!
+ */
+PhyloTree.prototype.hideTipLabels = function() {
+  this.params.showTipLabels=false;
+  this.svg.selectAll(".tipLabel").style('visibility', 'hidden');
+};
+
+/**
+ * show tipLabels - this function is never called!
+ */
+PhyloTree.prototype.showTipLabels = function() {
+  this.params.showTipLabels=true;
+  this.svg.selectAll(".tipLabel").style('visibility', 'visible');
+};
+
+// CALLBACK
+/**
+ * @param  {node} d tree node object
+ * @return {string} displayed as label on the branch corresponding to the node
+ */
+export const branchLabel = function branchLabel(d) {
+  if (d.n.muts) {
+    if (d.n.muts.length > 5) {
+      return d.n.muts.slice(0, 5).join(", ") + "...";
+    }
+    return d.n.muts.join(", ");
+  }
+  return "";
+};
+
+
+PhyloTree.prototype.drawTipLabels = function() {
+  var params = this.params;
+  const tLFunc = this.callbacks.tipLabel;
+  const inViewTerminalNodes = this.nodes
+                  .filter(function(d){return d.terminal;})
+                  .filter(function(d){return d.inView;});
+  console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
+  this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
+    .data(inViewTerminalNodes)
+    .enter()
+    .append("text")
+    .text(function (d){return tLFunc(d);})
+    .attr("class", "tipLabel");
+}
+
+PhyloTree.prototype.drawBranchLabels = function() {
+  var params = this.params;
+  const bLFunc = this.callbacks.branchLabel;
+  this.branchLabels = this.svg.append("g").selectAll('.branchLabel')
+    .data(this.nodes) //.filter(function (d){return bLFunc(d)!=="";}))
+    .enter()
+    .append("text")
+    .text(function (d){return bLFunc(d);})
+    .attr("class", "branchLabel")
+    .style("text-anchor","end");
+}
+
+
 export const updateConfidence = function updateConfidence(dt) {
   console.warn("updateConfidence is deprecated.");
   if (dt) {

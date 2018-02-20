@@ -1,34 +1,4 @@
-/**
- * hide branchLabels
- */
-export const hideBranchLabels = function hideBranchLabels() {
-  this.params.showBranchLabels = false;
-  this.svg.selectAll(".branchLabel").style('visibility', 'hidden');
-};
-
-/**
- * show branchLabels
- */
-export const showBranchLabels = function showBranchLabels() {
-  this.params.showBranchLabels = true;
-  this.svg.selectAll(".branchLabel").style('visibility', 'visible');
-};
-
-/**
- * hide tipLabels - this function is never called!
- */
-// PhyloTree.prototype.hideTipLabels = function() {
-//   this.params.showTipLabels=false;
-//   this.svg.selectAll(".tipLabel").style('visibility', 'hidden');
-// };
-
-/**
- * show tipLabels - this function is never called!
- */
-// PhyloTree.prototype.showTipLabels = function() {
-//   this.params.showTipLabels=true;
-//   this.svg.selectAll(".tipLabel").style('visibility', 'visible');
-// };
+import { timerFlush } from "d3-timer";
 
 export const updateTipLabels = function updateTipLabels(dt) {
   this.svg.selectAll('.tipLabel').remove();
@@ -55,57 +25,39 @@ export const updateTipLabels = function updateTipLabels(dt) {
   }
 };
 
-export const updateBranchLabels = function updateBranchLabels(dt) {
-  const xPad = this.params.branchLabelPadX, yPad = this.params.branchLabelPadY;
-  const nNIV = this.nNodesInView;
-  const bLSFunc = this.callbacks.branchLabelSize;
-  const showBL = (this.layout === "rect") && this.params.showBranchLabels;
-  const visBL = showBL ? "visible" : "hidden";
-  this.svg.selectAll('.branchLabel')
+/** cladeLabelSize
+ * @param  {int} n total number of nodes in current view
+ * @return {str} font size of the branch label, e.g. "12px"
+ */
+const cladeLabelSize = (n) => `${n > 1000 ? 14 : n > 500 ? 18 : 22}px`;
+
+
+export const updateCladeLabels = function updateCladeLabels(dt) {
+  const visibility = this.layout === "rect" ? "visible" : "hidden";
+  const labelSize = cladeLabelSize(this.nNodesInView);
+  this.svg.selectAll('.cladeLabel')
     .transition().duration(dt)
-    .attr("x", (d) => d.xTip - xPad)
-    .attr("y", (d) => d.yTip - yPad)
-    .attr("visibility", visBL)
-    .style("fill", this.params.branchLabelFill)
-    .style("font-family", this.params.branchLabelFont)
-    .style("font-size", (d) => bLSFunc(d, nNIV).toString() + "px");
+    .attr("x", (d) => d.xTip - this.params.cladeLabelPadX)
+    .attr("y", (d) => d.yTip - this.params.cladeLabelPadY)
+    .style("visibility", visibility)
+    .style("font-size", labelSize);
+  if (!dt) timerFlush();
 };
 
 export const drawCladeLabels = function drawCladeLabels() {
-  this.branchLabels = this.svg.append("g").selectAll('.branchLabel')
+  const visibility = this.layout === "rect" ? "visible" : "hidden";
+  const labelSize = cladeLabelSize(this.nNodesInView);
+  this.svg.append("g").selectAll('.cladeLabel')
     .data(this.nodes.filter((d) => typeof d.n.attr.clade_name !== 'undefined'))
     .enter()
     .append("text")
-    .style("visibility", "visible")
-    .text((d) => d.n.attr.clade_name)
-    .attr("class", "branchLabel")
-    .style("text-anchor", "end");
+    .attr("class", "cladeLabel")
+    .attr("x", (d) => d.xTip - this.params.cladeLabelPadX)
+    .attr("y", (d) => d.yTip - this.params.cladeLabelPadY)
+    .style("visibility", visibility)
+    .style("text-anchor", "end")
+    .style("fill", this.params.cladeLabelFill)
+    .style("font-family", this.params.cladeLabelFont)
+    .style("font-size", labelSize)
+    .text((d) => d.n.attr.clade_name);
 };
-
-// PhyloTree.prototype.drawTipLabels = function() {
-//   var params = this.params;
-//   const tLFunc = this.callbacks.tipLabel;
-//   const inViewTerminalNodes = this.nodes
-//                   .filter(function(d){return d.terminal;})
-//                   .filter(function(d){return d.inView;});
-//   console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
-//   this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
-//     .data(inViewTerminalNodes)
-//     .enter()
-//     .append("text")
-//     .text(function (d){return tLFunc(d);})
-//     .attr("class", "tipLabel");
-// }
-
-
-// PhyloTree.prototype.drawBranchLabels = function() {
-//   var params = this.params;
-//   const bLFunc = this.callbacks.branchLabel;
-//   this.branchLabels = this.svg.append("g").selectAll('.branchLabel')
-//     .data(this.nodes) //.filter(function (d){return bLFunc(d)!=="";}))
-//     .enter()
-//     .append("text")
-//     .text(function (d){return bLFunc(d);})
-//     .attr("class", "branchLabel")
-//     .style("text-anchor","end");
-// }

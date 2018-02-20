@@ -28,7 +28,6 @@ export const defaultDistanceMeasure = "num_date";
 export const defaultDateRange = 6;
 export const date_select = true;
 export const file_prefix = "Zika_";
-export const branchLabels = false;
 export const restrictTo = {"region": "all"};
 export const time_window = 3.0;
 export const fullDataTimeWindow = 1.5;

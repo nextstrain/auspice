@@ -12,10 +12,9 @@ import ChooseMetric from "./choose-metric";
 import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
 import MapAnimationControls from "./map-animation";
-import { controlsWidth, enableAnimationDisplay } from "../../util/globals";
+import { controlsWidth } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import DataSource from "./data-source";
-import Toggle from "./toggle";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -47,7 +46,6 @@ class Controls extends React.Component {
     }
     return null;
   }
-  // restore <ToggleBranchLabels/> below when perf is improved
   render() {
     const mapAndTree = this.props.panels !== undefined && this.props.panels.indexOf("map") !== -1 && this.props.panels.indexOf("tree") !== -1;
 

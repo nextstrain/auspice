@@ -36,10 +36,9 @@ export const render = function render(svg, layout, distance, options, callbacks,
   /* draw functions */
   if (this.params.showGrid) this.addGrid();
   this.drawBranches();
-  if (this.params.branchLabels) this.drawCladeLabels(); this.updateBranchLabels();
+  if (this.params.showCladeLabels) this.drawCladeLabels();
   this.drawTips();
   if (this.vaccines) this.drawVaccines();
-  this.drawCladeLabels();
 
   if (visibility) {
     timerStart("setVisibility");
@@ -208,7 +207,8 @@ export const drawRegression = function drawRegression() {
 export const clearSVG = function clearSVG() {
   this.svg.selectAll('.tip').remove();
   this.svg.selectAll('.branch').remove();
-  this.svg.selectAll('.branchLabel').remove();
+  this.svg.selectAll('.cladeLabel').remove();
+  this.svg.selectAll('.tipLabel').remove();
   this.svg.selectAll(".vaccine").remove();
   this.svg.selectAll(".conf").remove();
 };

@@ -150,28 +150,6 @@ export const handleIconClickHOF = function handleIconClickHOF(tool) {
 
 /**
  * @param  {node} d tree node object
- * @return {string} displayed as label on the branch corresponding to the node
- */
-export const branchLabel = function branchLabel(d) {
-  if (d.n.muts) {
-    if (d.n.muts.length > 5) {
-      return d.n.muts.slice(0, 5).join(", ") + "...";
-    }
-    return d.n.muts.join(", ");
-  }
-  return "";
-};
-
-/**
- * @param  {node} d tree node object
- * @param  {int} n total number of nodes in current view
- * @return {int} font size of the branch label
- */
-export const branchLabelSize = (d, n) =>
-  d.leafCount > n / 10.0 ? 12 : 0;
-
-/**
- * @param  {node} d tree node object
  * @param  {int} n total number of nodes in current view
  * @return {int} font size of the tip label
  */

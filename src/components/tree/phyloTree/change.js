@@ -146,8 +146,8 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   });
 
   /* special cases not listed in classesToPotentiallyUpdate */
-  if (elemsToUpdate.has('.branchLabel')) {
-    this.updateBranchLabels();
+  if (elemsToUpdate.has('.cladeLabel')) {
+    this.updateCladeLabels(transitionTime);
   }
   if (elemsToUpdate.has('.tipLabel')) {
     this.updateTipLabels();
@@ -241,7 +241,7 @@ export const change = function change({
   if (newDistance || newLayout || zoomIntoClade || svgHasChangedDimensions) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
-    elemsToUpdate.add('.branchLabel').add('.tipLabel');
+    elemsToUpdate.add('.cladeLabel').add('.tipLabel');
     elemsToUpdate.add(".grid").add(".regression");
     svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity");
   }

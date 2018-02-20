@@ -262,7 +262,6 @@ const getDefaultState = () => {
   return {
     defaults,
     canTogglePanelLayout: true,
-    showBranchLabels: false,
     selectedLegendItem: null,
     selectedBranch: null,
     selectedNode: null,
@@ -312,10 +311,6 @@ const Controls = (state = getDefaultState(), action) => {
       base = checkAndCorrectErrorsInState(base, action.meta); /* must run last */
       return base;
     }
-    case types.TOGGLE_BRANCH_LABELS:
-      return Object.assign({}, state, {
-        showBranchLabels: !state.showBranchLabels
-      });
     case types.LEGEND_ITEM_MOUSEENTER:
       return Object.assign({}, state, {
         selectedLegendItem: action.data
