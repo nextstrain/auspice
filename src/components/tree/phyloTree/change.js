@@ -160,10 +160,11 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
     this.svg.selectAll(".regression").remove();
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
   }
-  /* confidences are hard */
-  if (extras.removeConfidences) {
+
+  /* confidence intervals */
+  if (extras.removeConfidences && this.confidencesInSVG) {
     this.removeConfidence(transitionTime);
-  } else if (extras.showConfidences) {
+  } else if (extras.showConfidences && !this.confidencesInSVG) {
     this.drawConfidence(transitionTime);
   } else if (elemsToUpdate.has(".conf") && this.confidencesInSVG) {
     if (this.layout === "rect" && this.distance === "num_date") {

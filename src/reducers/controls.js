@@ -7,7 +7,6 @@ import { defaultGeoResolution,
   defaultLayout,
   mutType,
   twoColumnBreakpoint,
-  genotypeColors,
   reallySmallNumber } from "../util/globals";
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
@@ -237,8 +236,14 @@ export const checkAndCorrectErrorsInState = (state, metadata) => {
   }
 
   /* temporalConfidence */
-  if (state.temporalConfidence.exists && state.layout !== "rect") {
-    state.temporalConfidence.display = false;
+  if (state.temporalConfidence.exists) {
+    if (state.layout !== "rect") {
+      state.temporalConfidence.display = false;
+      state.temporalConfidence.on = false;
+    } else if (state.distanceMeasure === "div") {
+      state.temporalConfidence.display = false;
+      state.temporalConfidence.on = false;
+    }
   }
 
   return state;
@@ -337,11 +342,12 @@ const Controls = (state = getDefaultState(), action) => {
       });
     case types.CHANGE_LAYOUT: {
       const layout = action.data;
-      /* if temporalConfidence and layout !== rect then disable confidence toggle */
-      const temporalConfidence = Object.assign({}, state.temporalConfidence);
-      if (temporalConfidence.exists) {
-        temporalConfidence.display = layout === "rect";
-      }
+      /* temporal confidence can only be displayed for rectangular trees */
+      const temporalConfidence = {
+        exists: state.temporalConfidence.exists,
+        display: state.temporalConfidence.exists && layout === "rect",
+        on: false
+      };
       return Object.assign({}, state, {
         layout,
         temporalConfidence
@@ -349,13 +355,12 @@ const Controls = (state = getDefaultState(), action) => {
     }
     case types.CHANGE_DISTANCE_MEASURE:
       /* while this may change, div currently doesn't have CIs,
-      so they shouldn't be displayed. The SVG el's still exist, they're just of
-      width zero */
+      so they shouldn't be displayed. */
       if (state.temporalConfidence.exists) {
         if (state.temporalConfidence.display && action.data === "div") {
           return Object.assign({}, state, {
             distanceMeasure: action.data,
-            temporalConfidence: Object.assign({}, state.temporalConfidence, {display: false})
+            temporalConfidence: Object.assign({}, state.temporalConfidence, {display: false, on: false})
           });
         } else if (state.layout === "rect" && action.data === "num_date") {
           return Object.assign({}, state, {

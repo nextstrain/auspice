@@ -38,13 +38,12 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
     args.newDistance = nextProps.distanceMeasure;
   }
 
-  /* confidence intervals (on means in the SVG, display means the sidebar. TODO fix this terminology!) */
-  if ((props.temporalConfidence.display === true && nextProps.temporalConfidence.display === false) ||
-    (props.temporalConfidence.on === true && nextProps.temporalConfidence.on === false)) {
+  /* confidence intervals (on means in the SVG, display means shown in the sidebar) */
+  if (props.temporalConfidence.display === true && nextProps.temporalConfidence.display === false) {
     args.removeConfidences = true;
-  }
-  if (nextProps.temporalConfidence.display === true &&
-    (props.temporalConfidence.on === false && nextProps.temporalConfidence.on === true)) {
+  } else if (props.temporalConfidence.on === true && nextProps.temporalConfidence.on === false) {
+    args.removeConfidences = true;
+  } else if (nextProps.temporalConfidence.display === true && props.temporalConfidence.on === false && nextProps.temporalConfidence.on === true) {
     args.showConfidences = true;
   }
 

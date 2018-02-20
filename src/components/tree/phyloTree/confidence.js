@@ -12,8 +12,6 @@ export const removeConfidence = function removeConfidence(dt) {
 };
 
 export const drawConfidence = function drawConfidence(dt) {
-  // this.removeConfidence(); // just in case
-  // console.log("drawing:", this.svg.selectAll(".conf"))
   this.confidencesInSVG = true;
   if (dt) {
     this.confidence = this.svg.append("g").selectAll(".conf")
@@ -29,7 +27,6 @@ export const drawConfidence = function drawConfidence(dt) {
       .enter()
       .call((sel) => this.drawSingleCI(sel, 0.5));
   }
-  // this.props.confidence = true;
 };
 
 export const calcConfidenceWidth = (el) =>
