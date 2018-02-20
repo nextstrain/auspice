@@ -13,6 +13,7 @@ export const removeConfidence = function removeConfidence(dt) {
 
 export const drawConfidence = function drawConfidence(dt) {
   this.confidencesInSVG = true;
+  dt = false;
   if (dt) {
     this.confidence = this.svg.append("g").selectAll(".conf")
       .data(this.nodes)

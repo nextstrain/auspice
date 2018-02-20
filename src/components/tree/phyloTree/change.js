@@ -163,15 +163,15 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
 
   /* confidence intervals */
   if (extras.removeConfidences && this.confidencesInSVG) {
-    this.removeConfidence(transitionTime);
+    this.removeConfidence(); /* do not use a transition time - it's too clunky (too many elements?) */
   } else if (extras.showConfidences && !this.confidencesInSVG) {
-    this.drawConfidence(transitionTime);
+    this.drawConfidence(); /* see comment above */
   } else if (elemsToUpdate.has(".conf") && this.confidencesInSVG) {
     if (this.layout === "rect" && this.distance === "num_date") {
       updateCall = createUpdateCall(".conf", svgPropsToUpdate);
       genericSelectAndModify(this.svg, ".conf", updateCall, transitionTime);
     } else {
-      this.removeConfidence(transitionTime);
+      this.removeConfidence(); /* see comment above */
     }
   }
 };
