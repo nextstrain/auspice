@@ -139,23 +139,9 @@ export const handleIconClickHOF = function handleIconClickHOF(tool) {
       resetView.bind(this)();
       // if we have clade zoom, zoom out to the parent clade
       if (this.state.selectedBranch && this.state.selectedBranch.n.arrayIdx) {
-        const dispatch = this.props.dispatch;
-        const arrayIdx = this.state.tree.zoomNode.parent.n.arrayIdx;
-        // reset the "clicked" branch, unset if we zoomed out all the way to the root
-        this.setState({
-          hovered: null,
-          selectedBranch: (arrayIdx) ? this.state.tree.zoomNode.parent : null
-        });
-        // clear previous timeout bc they potentially mess with the geometry update
-        if (this.timeout) {
-          clearTimeout(this.timeout);
-        }
-        // call phyloTree to zoom out, this rerenders the geometry
-        this.state.tree.zoomToParent(mediumTransitionDuration);
-        // wait and reset visibility
-        this.timeout = setTimeout(() => {
-          dispatch(updateVisibleTipsAndBranchThicknesses());
-        }, mediumTransitionDuration);
+        this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+          idxOfInViewRootNode: this.state.tree.zoomNode.parent.n.arrayIdx
+        }));
       }
     }
     resetGrid.bind(this)();

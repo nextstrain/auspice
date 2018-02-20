@@ -8,7 +8,6 @@ import { change, modifySVG } from "./change";
 /* PROTOTYPES */
 import * as renderers from "./renderers";
 import * as layouts from "./layouts";
-import * as zoom from "./zoom";
 import * as grid from "./grid";
 import * as confidence from "./confidence";
 import * as labels from "./labels";
@@ -72,6 +71,7 @@ PhyloTree.prototype.timeVsRootToTip = layouts.timeVsRootToTip;
 PhyloTree.prototype.unrootedLayout = layouts.unrootedLayout;
 PhyloTree.prototype.radialLayout = layouts.radialLayout;
 PhyloTree.prototype.setScales = layouts.setScales;
+PhyloTree.prototype.mapToScreen = layouts.mapToScreen;
 
 /* C O N F I D E N C E    I N T E R V A L S */
 PhyloTree.prototype.removeConfidence = confidence.removeConfidence;
@@ -89,10 +89,5 @@ PhyloTree.prototype.showBranchLabels = labels.showBranchLabels;
 /* G R I D */
 PhyloTree.prototype.hideGrid = grid.hideGrid;
 PhyloTree.prototype.addGrid = grid.addGrid;
-
-/* Z O O M ,    F I T     TO     S C R E E N ,     E T C */
-PhyloTree.prototype.zoomIntoClade = zoom.zoomIntoClade;
-PhyloTree.prototype.zoomToParent = zoom.zoomToParent;
-PhyloTree.prototype.mapToScreen = zoom.mapToScreen;
 
 export default PhyloTree;

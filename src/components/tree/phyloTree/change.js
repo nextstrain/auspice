@@ -257,8 +257,8 @@ export const change = function change({
       d.update = true;
     });
     /* if clade is terminal, use the parent as the zoom node */
-    const zoomNode = zoomIntoClade.terminal ? zoomIntoClade.parent : zoomIntoClade;
-    applyToChildren(zoomNode, (d) => {d.inView = true;});
+    this.zoomNode = zoomIntoClade.terminal ? zoomIntoClade.parent : zoomIntoClade;
+    applyToChildren(this.zoomNode, (d) => {d.inView = true;});
   }
   if (svgHasChangedDimensions) {
     this.nodes.forEach((d) => {d.update = true;});

@@ -30,6 +30,18 @@ export const viewEntireTree = function viewEntireTree() {
 };
 
 /**
+ * zoom out a little by using the parent of the current clade
+ * as a zoom focus.
+ * @param  {int} dt [transition time]
+ */
+export const zoomToParent = function zoomToParent(dt) {
+  console.warn("TODO: zoomToParent functionality needs to be built into phylotree.change()");
+  if (this.zoomNode) {
+    this.zoomIntoClade(this.zoomNode.parent, dt);
+  }
+};
+
+/**
  * zoom such that a particular clade fills the svg
  * @param  clade -- branch/node at the root of the clade to zoom into
  * @param  dt -- time of the transition in milliseconds
