@@ -1,13 +1,14 @@
 import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
 import { applyToChildren } from "./helpers";
+import { timerStart, timerEnd } from "../../../util/perf";
 
 /* loop through the nodes and update each provided prop with the new value
  * additionally, set d.update -> whether or not the node props changed
  */
 const updateNodesWithNewData = (nodes, newNodeProps) => {
-  console.log("update nodes with data for these keys:", Object.keys(newNodeProps));
-  let tmp = 0;
+  // console.log("update nodes with data for these keys:", Object.keys(newNodeProps));
+  // let tmp = 0;
   nodes.forEach((d, i) => {
     d.update = false;
     for (let key in newNodeProps) { // eslint-disable-line
@@ -15,11 +16,11 @@ const updateNodesWithNewData = (nodes, newNodeProps) => {
       if (val !== d[key]) {
         d[key] = val;
         d.update = true;
-        tmp++;
+        // tmp++;
       }
     }
   });
-  console.log("marking ", tmp, " nodes for update");
+  // console.log("marking ", tmp, " nodes for update");
 };
 
 
@@ -96,7 +97,7 @@ const createUpdateCall = (treeElem, properties) => (selection) => {
 };
 
 const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
-  console.log("general svg update for", treeElem);
+  // console.log("general svg update for", treeElem);
   svg.selectAll(treeElem)
     .filter((d) => d.update)
     .transition().duration(transitionTime)
@@ -104,7 +105,7 @@ const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
   if (!transitionTime) {
     /* https://github.com/d3/d3-timer#timerFlush */
     timerFlush();
-    console.log("\t\t--FLUSHING TIMER--");
+    // console.log("\t\t--FLUSHING TIMER--");
   }
 };
 
@@ -117,7 +118,7 @@ const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
 export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras) {
   let updateCall;
   const classesToPotentiallyUpdate = [".tip", ".vaccineDottedLine", ".vaccineCross", ".branch"]; /* order is respected */
-  console.log("modifying these elems", elemsToUpdate)
+  // console.log("modifying these elems", elemsToUpdate)
   /* treat stem / branch specially, but use these to replace a normal .branch call if that's also to be applied */
   if (elemsToUpdate.has(".branch.S") || elemsToUpdate.has(".branch.T")) {
     const applyBranchPropsAlso = elemsToUpdate.has(".branch");
@@ -240,8 +241,8 @@ export const change = function change({
   tipRadii = undefined,
   branchThickness = undefined
 }) {
-  console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
-  console.time("phylotree.change");
+  // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
+  timerStart("phylotree.change()");
   const elemsToUpdate = new Set();
   const nodePropsToModify = {}; /* modify the actual data structure */
   const svgPropsToUpdate = new Set(); /* modify the SVG */
@@ -334,5 +335,5 @@ export const change = function change({
   }
 
   this.timeLastRenderRequested = Date.now();
-  console.timeEnd("phylotree.change");
+  timerEnd("phylotree.change()");
 };

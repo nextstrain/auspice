@@ -68,7 +68,7 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
   }
 
   if (Object.keys(args).length) {
-    console.log('\n\n** changePhyloTreeViaPropsComparison **', args);
+    // console.log('\n\n** changePhyloTreeViaPropsComparison **', args);
     phylotree.change(args);
   }
 
