@@ -1,26 +1,25 @@
-import { darkGrey } from "../../../globalStyles";
 import { timerStart, timerEnd } from "../../../util/perf";
 
 /**
- * @param  svg    -- the svg into which the tree is drawn
- * @param  layout -- the layout to be used, e.g. "rect"
- * @param  distance   -- the property used as branch length, e.g. div or num_date
- * @param  options    -- an object that contains options that will be added to this.params
- * @param  callbacks  -- an object with call back function defining mouse behavior
- * @param  branchThickness (OPTIONAL) -- array of branch thicknesses
- * @param  visibility (OPTIONAL) -- array of "visible" or "hidden"
+ * @param {d3 selection} svg      -- the svg into which the tree is drawn
+ * @param {string} layout         -- the layout to be used, e.g. "rect"
+ * @param {string} distance       -- the property used as branch length, e.g. div or num_date
+ * @param {object} parameters     -- an object that contains options that will be added to this.params
+ * @param {object} callbacks      -- an object with call back function defining mouse behavior
+ * @param {array} branchThickness -- array of branch thicknesses (same shape as tree nodes)
+ * @param {array} visibility      -- array of "visible" or "hidden" (same shape as tree nodes)
+ * @param {bool} drawConfidence   -- should confidence intervals be drawn?
+ * @param {bool} vaccines         -- should vaccine crosses (and dotted lines if applicable) be drawn?
+ * @param {array} stroke          -- stroke colour for each node (set onto each node)
+ * @param {array} fill            -- fill colour for each node (set onto each node)
  * @return {null}
  */
-export const render = function render(svg, layout, distance, options, callbacks, branchThickness, visibility, drawConfidence, vaccines, stroke, fill) {
+export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, stroke, fill) {
   timerStart("phyloTree render()");
-  if (branchThickness) {
-    this.nodes.forEach((d, i) => {d["stroke-width"] = branchThickness[i];});
-  }
   this.svg = svg;
-  this.params = Object.assign(this.params, options);
+  this.params = Object.assign(this.params, parameters);
   this.callbacks = callbacks;
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
-  this.clearSVG();
 
   /* set x, y values & scale them to the screen */
   this.setDistance(distance);
@@ -31,6 +30,8 @@ export const render = function render(svg, layout, distance, options, callbacks,
   this.nodes.forEach((d, i) => {
     d.stroke = stroke[i];
     d.fill = fill[i];
+    d.visibility = visibility[i];
+    d["stroke-width"] = branchThickness[i];
   });
 
   /* draw functions */
@@ -39,21 +40,10 @@ export const render = function render(svg, layout, distance, options, callbacks,
   if (this.params.showCladeLabels) this.drawCladeLabels();
   this.drawTips();
   if (this.vaccines) this.drawVaccines();
-
-  if (visibility) {
-    timerStart("setVisibility");
-    this.nodes.forEach((d, i) => {d["visibility"] = visibility[i];});
-    this.svg.selectAll(".tip").style("visibility", (d) => d["visibility"]);
-    timerEnd("setVisibility");
-  }
-  this.svg.selectAll(".regression").remove();
-  if (this.layout === "clock" && this.distance === "num_date") {
-    this.drawRegression();
-  }
+  if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
   this.confidencesInSVG = false;
-  if (drawConfidence) {
-    this.drawConfidence();
-  }
+  if (drawConfidence) this.drawConfidence();
+
   this.timeLastRenderRequested = Date.now();
   timerEnd("phyloTree render()");
 };
@@ -113,6 +103,7 @@ export const drawTips = function drawTips() {
     .on("mouseout", (d) => this.callbacks.onTipLeave(d))
     .on("click", (d) => this.callbacks.onTipClick(d))
     .style("pointer-events", "auto")
+    .style("visibility", (d) => d["visibility"])
     .style("fill", (d) => d.fill || params.tipFill)
     .style("stroke", (d) => d.stroke || params.tipStroke)
     .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
@@ -159,19 +150,6 @@ export const drawBranches = function drawBranches() {
   timerEnd("drawBranches");
 };
 
-
-/* this need a bit more work as the quickdraw functionality improves */
-export const rerenderAllElements = function rerenderAllElements() {
-  // console.log("rerenderAllElements")
-  this.mapToScreen();
-  this.svg.selectAll(".branch")
-    .transition().duration(0)
-    .style("stroke-width", (d) => d["stroke-width"]);
-  this.svg.selectAll(".branch")
-    .transition().duration(0)
-    .filter(".S")
-    .attr("d", (d) => d.branch[0]);
-};
 
 /**
  * draws the regression line in the svg and adds a text with the rate estimate

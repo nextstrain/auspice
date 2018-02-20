@@ -113,7 +113,7 @@ class Tree extends React.Component {
         select(this.d3ref),
         this.props.layout,
         this.props.distanceMeasure,
-        { /* options */
+        { /* parameters (modifies PhyloTree's defaults) */
           grid: true,
           confidence: nextProps.temporalConfidence.display,
           showCladeLabels: true,

@@ -1,6 +1,20 @@
 /* eslint-disable */
 /* these functions are either deprecated or were in the code base but never called! */
 
+/* this need a bit more work as the quickdraw functionality improves */
+export const rerenderAllElements = function rerenderAllElements() {
+  // console.log("rerenderAllElements")
+  this.mapToScreen();
+  this.svg.selectAll(".branch")
+    .transition().duration(0)
+    .style("stroke-width", (d) => d["stroke-width"]);
+  this.svg.selectAll(".branch")
+    .transition().duration(0)
+    .filter(".S")
+    .attr("d", (d) => d.branch[0]);
+};
+
+
 /**
  * hide branchLabels
  */
