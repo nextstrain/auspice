@@ -3,7 +3,7 @@ import { max } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { defaultParams } from "./defaultParams";
 import { addLeafCount, createChildrenAndParents } from "./helpers";
-import { change, modifySVG } from "./change";
+import { change, modifySVG, modifySVGInStages } from "./change";
 
 /* PROTOTYPES */
 import * as renderers from "./renderers";
@@ -51,6 +51,7 @@ const PhyloTree = function PhyloTree(reduxNodes) {
 /* C H A N G E */
 PhyloTree.prototype.change = change;
 PhyloTree.prototype.modifySVG = modifySVG;
+PhyloTree.prototype.modifySVGInStages = modifySVGInStages;
 
 /* I N I T I A L        R E N D E R       E T C */
 PhyloTree.prototype.render = renderers.render;

@@ -176,6 +176,46 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   }
 };
 
+/* instead of modifying the SVG the "normal" way, this is sometimes too janky (e.g. when we need to move everything)
+ * step 1: fade out & remove everything except tips.
+ * step 2: when step 1 has finished, move tips across the screen.
+ * step 3: when step 2 has finished, redraw everything. No transition here.
+ */
+export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTimeFadeOut, transitionTimeMoveTips) {
+  elemsToUpdate.delete(".tip");
+  this.hideGrid();
+  let inProgress = 0; /* counter of transitions currently in progress */
+
+  const step3 = () => {
+    this.drawBranches();
+    if (this.params.showGrid) this.addGrid();
+    this.svg.selectAll(".tip").remove();
+    this.drawTips();
+    if (this.vaccines) this.drawVaccines();
+    if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
+  };
+
+  /* STEP 2: move tips */
+  const step2 = () => {
+    if (!--inProgress) { /* decrement counter. When hits 0 run block */
+      const updateTips = createUpdateCall(".tip", svgPropsToUpdate);
+      genericSelectAndModify(this.svg, ".tip", updateTips, transitionTimeMoveTips);
+      setTimeout(step3, transitionTimeMoveTips);
+    }
+  };
+
+  /* STEP 1. remove everything (via opacity) */
+  this.confidencesInSVG = false;
+  this.svg.selectAll([...elemsToUpdate].join(", "))
+    .transition().duration(transitionTimeFadeOut)
+    .style("opacity", 0)
+    .remove()
+    .on("start", () => inProgress++)
+    .on("end", step2);
+  if (!transitionTimeFadeOut) timerFlush();
+};
+
+
 /* the main interface to changing a currently rendered tree.
  * simply call change and tell it what should be changed.
  * try to do a single change() call with as many things as possible in it
@@ -205,6 +245,7 @@ export const change = function change({
   const elemsToUpdate = new Set();
   const nodePropsToModify = {}; /* modify the actual data structure */
   const svgPropsToUpdate = new Set(); /* modify the SVG */
+  let useModifySVGInStages = false; /* use modifySVGInStages rather than modifySVG */
 
   /* calculate dt */
   const idealTransitionTime = 500;
@@ -246,6 +287,9 @@ export const change = function change({
     elemsToUpdate.add(".grid").add(".regression");
     svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity");
   }
+  if (newLayout) {
+    useModifySVGInStages = true;
+  }
 
   /* change the requested properties on the nodes */
   updateNodesWithNewData(this.nodes, nodePropsToModify);
@@ -283,7 +327,11 @@ export const change = function change({
 
   /* svg change elements */
   const extras = {removeConfidences, showConfidences};
-  this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
+  if (useModifySVGInStages) {
+    this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000);
+  } else {
+    this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
+  }
 
   this.timeLastRenderRequested = Date.now();
   console.timeEnd("phylotree.change");
