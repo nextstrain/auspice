@@ -44,8 +44,8 @@ const PhyloTree = function PhyloTree(reduxNodes) {
   this.zoomNode = this.nodes[0];
   addLeafCount(this.nodes[0]);
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
-  this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
-    {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
+  // this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
+  //   {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
 };
 
 /* C H A N G E */

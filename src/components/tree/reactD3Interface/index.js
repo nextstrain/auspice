@@ -51,10 +51,6 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
     args.newLayout = nextProps.layout;
   }
 
-  if (nextProps.quickdraw === false && props.quickdraw === true) {
-    console.warn("quickdraw finished. should call rerenderAllElements");
-  }
-
   /* zoom to a clade / reset zoom to entire tree */
   if (props.tree.idxOfInViewRootNode !== nextProps.tree.idxOfInViewRootNode) {
     const rootNode = phylotree.nodes[nextProps.tree.idxOfInViewRootNode];
