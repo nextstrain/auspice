@@ -2,13 +2,6 @@
 import { max } from "d3-array";
 import { timerStart, timerEnd } from "../../../util/perf";
 
-export const removeGrid = function removeGrid() {
-  this.svg.selectAll(".majorGrid").remove();
-  this.svg.selectAll(".minorGrid").remove();
-  this.svg.selectAll(".gridTick").remove();
-  this.grid = false;
-};
-
 export const hideGrid = function hideGrid() {
   this.svg.selectAll(".majorGrid").style('visibility', 'hidden');
   this.svg.selectAll(".minorGrid").style('visibility', 'hidden');

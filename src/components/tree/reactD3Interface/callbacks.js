@@ -53,35 +53,7 @@ export const onBranchHover = function onBranchHover(d, x, y) {
 
 export const onBranchClick = function onBranchClick(d) {
   this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.n.arrayIdx}));
-  // this.setState({hovered: null, selectedBranch: d});
-  // this.Viewer.fitToViewer();
-  // this.state.tree.zoomIntoClade(d, mediumTransitionDuration);
-  // /* to stop multiple phyloTree updates potentially clashing,
-  // we change tipVis after geometry update + transition */
-  // window.setTimeout(
-  //   () => this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.n.arrayIdx})),
-  //   mediumTransitionDuration
-  // );
-  // this.setState({
-  //   hovered: null,
-  //   selectedBranch: d
-  // });
 };
-//
-export const viewEntireTree = function viewEntireTree() {
-  console.warn("viewEntireTree is deprecated.")
-  /* reset the SVGPanZoom */
-  this.Viewer.fitToViewer();
-  /* imperitively manipulate SVG tree elements */
-  this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
-  /* update branch thicknesses / tip vis after SVG tree elemtents have moved */
-  window.setTimeout(
-    () => this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0})),
-    mediumTransitionDuration
-  );
-  this.setState({selectedBranch: null, selectedTip: null});
-};
-
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(d) {
@@ -141,7 +113,6 @@ const resetGrid = function resetGrid() {
   }
 };
 
-
 export const onViewerChange = function onViewerChange() {
   if (this.Viewer && this.state.tree) {
     const V = this.Viewer.getValue();
@@ -156,21 +127,6 @@ export const onViewerChange = function onViewerChange() {
 export const resetView = function resetView() {
   this.Viewer.fitToViewer();
 };
-
-
-/* viewEntireTree: go back to the root! */
-// export const viewEntireTree = function viewEntireTree() {
-//   /* reset the SVGPanZoom */
-//   this.Viewer.fitToViewer();
-//   /* imperitively manipulate SVG tree elements */
-//   this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
-//   /* update branch thicknesses / tip vis after SVG tree elemtents have moved */
-//   window.setTimeout(
-//     () => this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0})),
-//     mediumTransitionDuration
-//   );
-//   this.setState({selectedBranch: null, selectedTip: null});
-// };
 
 export const handleIconClickHOF = function handleIconClickHOF(tool) {
   return () => {

@@ -4,39 +4,6 @@ import { applyToChildren } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
 
 /**
- * zoom such that a particular clade fills the svg
- * @param  clade -- branch/node at the root of the clade to zoom into
- * @param  dt -- time of the transition in milliseconds
- * @return {null}
- */
-export const zoomIntoClade = function zoomIntoClade(clade, dt) {
-  console.warn("zoomIntoClade is deprecated. Please use phylotree.change()");
-  // assign all nodes to inView false and force update
-  this.zoomNode = clade;
-  this.nodes.forEach((d) => {
-    d.inView = false;
-    d.update = true;
-  });
-  // assign all child nodes of the chosen clade to inView=true
-  // if clade is terminal, apply to parent
-  if (clade.terminal) {
-    applyToChildren(clade.parent, (d) => {d.inView = true;});
-  } else {
-    applyToChildren(clade, (d) => {d.inView = true;});
-  }
-  // redraw
-  this.mapToScreen();
-  this.updateGeometry(dt);
-  if (this.grid) this.addGrid(this.layout);
-  this.svg.selectAll(".regression").remove();
-  if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
-  if (this.params.branchLabels) {
-    this.updateBranchLabels(dt);
-  }
-  this.updateTipLabels(dt);
-};
-
-/**
  * zoom out a little by using the parent of the current clade
  * as a zoom focus.
  * @param  {int} dt [transition time]

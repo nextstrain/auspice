@@ -12,7 +12,6 @@ import * as zoom from "./zoom";
 import * as grid from "./grid";
 import * as confidence from "./confidence";
 import * as labels from "./labels";
-import * as generalUpdates from "./generalUpdates";
 
 
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
@@ -50,6 +49,7 @@ const PhyloTree = function PhyloTree(reduxNodes) {
     {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
 };
 
+/* C H A N G E */
 PhyloTree.prototype.change = change;
 PhyloTree.prototype.modifySVG = modifySVG;
 
@@ -79,18 +79,6 @@ PhyloTree.prototype.drawConfidence = confidence.drawConfidence;
 PhyloTree.prototype.drawSingleCI = confidence.drawSingleCI;
 PhyloTree.prototype.updateConfidence = confidence.updateConfidence;
 
-/* G E N E R A L    U P D A T E S */
-PhyloTree.prototype.updateDistance = generalUpdates.updateDistance;
-PhyloTree.prototype.updateLayout = generalUpdates.updateLayout;
-PhyloTree.prototype.updateGeometry = generalUpdates.updateGeometry;
-PhyloTree.prototype.updateGeometryFade = generalUpdates.updateGeometryFade;
-PhyloTree.prototype.updateTimeBar = () => {};
-PhyloTree.prototype.updateMultipleArray = generalUpdates.updateMultipleArray;
-PhyloTree.prototype.updateStyleOrAttribute = generalUpdates.updateStyleOrAttribute;
-PhyloTree.prototype.updateStyleOrAttributeArray = generalUpdates.updateStyleOrAttributeArray;
-PhyloTree.prototype.redrawAttribute = generalUpdates.redrawAttribute;
-PhyloTree.prototype.redrawStyle = generalUpdates.redrawStyle;
-
 /* L A B E L S    ( T I P ,    B R A N C H ,   C O N F I D E N C E ) */
 PhyloTree.prototype.drawCladeLabels = labels.drawCladeLabels;
 PhyloTree.prototype.updateBranchLabels = labels.updateBranchLabels;
@@ -100,7 +88,6 @@ PhyloTree.prototype.showBranchLabels = labels.showBranchLabels;
 
 /* G R I D */
 PhyloTree.prototype.hideGrid = grid.hideGrid;
-PhyloTree.prototype.removeGrid = grid.removeGrid;
 PhyloTree.prototype.addGrid = grid.addGrid;
 
 /* Z O O M ,    F I T     TO     S C R E E N ,     E T C */

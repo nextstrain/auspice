@@ -47,18 +47,3 @@ export const drawSingleCI = function drawSingleCI(selection, opacity) {
     .style("fill", "none")
     .style("stroke-width", calcConfidenceWidth);
 };
-
-
-export const updateConfidence = function updateConfidence(dt) {
-  console.warn("updateConfidence is deprecated.");
-  if (dt) {
-    this.svg.selectAll(".conf")
-      .transition().duration(dt)
-      .style("stroke", (el) => el.stroke)
-      .style("stroke-width", calcConfidenceWidth);
-  } else {
-    this.svg.selectAll(".conf")
-      .style("stroke", (el) => el.stroke)
-      .style("stroke-width", calcConfidenceWidth);
-  }
-};

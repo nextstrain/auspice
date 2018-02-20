@@ -1,6 +1,66 @@
-import { timerStart, timerEnd } from "../../../util/perf";
+/* eslint-disable */
+/* these functions are either deprecated or were in the code base but never called! */
 
-const contains = (array, elem) => array.some((d) => d === elem);
+export const updateConfidence = function updateConfidence(dt) {
+  console.warn("updateConfidence is deprecated.");
+  if (dt) {
+    this.svg.selectAll(".conf")
+      .transition().duration(dt)
+      .style("stroke", (el) => el.stroke)
+      .style("stroke-width", calcConfidenceWidth);
+  } else {
+    this.svg.selectAll(".conf")
+      .style("stroke", (el) => el.stroke)
+      .style("stroke-width", calcConfidenceWidth);
+  }
+};
+
+export const viewEntireTree = function viewEntireTree() {
+  console.warn("viewEntireTree is deprecated.")
+  /* reset the SVGPanZoom */
+  this.Viewer.fitToViewer();
+  /* imperitively manipulate SVG tree elements */
+  this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
+  /* update branch thicknesses / tip vis after SVG tree elemtents have moved */
+  window.setTimeout(
+    () => this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0})),
+    mediumTransitionDuration
+  );
+  this.setState({selectedBranch: null, selectedTip: null});
+};
+
+/**
+ * zoom such that a particular clade fills the svg
+ * @param  clade -- branch/node at the root of the clade to zoom into
+ * @param  dt -- time of the transition in milliseconds
+ * @return {null}
+ */
+export const zoomIntoClade = function zoomIntoClade(clade, dt) {
+  console.warn("zoomIntoClade is deprecated. Please use phylotree.change()");
+  // assign all nodes to inView false and force update
+  this.zoomNode = clade;
+  this.nodes.forEach((d) => {
+    d.inView = false;
+    d.update = true;
+  });
+  // assign all child nodes of the chosen clade to inView=true
+  // if clade is terminal, apply to parent
+  if (clade.terminal) {
+    applyToChildren(clade.parent, (d) => {d.inView = true;});
+  } else {
+    applyToChildren(clade, (d) => {d.inView = true;});
+  }
+  // redraw
+  this.mapToScreen();
+  this.updateGeometry(dt);
+  if (this.grid) this.addGrid(this.layout);
+  this.svg.selectAll(".regression").remove();
+  if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
+  if (this.params.branchLabels) {
+    this.updateBranchLabels(dt);
+  }
+  this.updateTipLabels(dt);
+};
 
 /**
  * as updateAttributeArray, but accepts a callback function rather than an array
@@ -16,6 +76,8 @@ export const updateStyleOrAttribute = function updateStyleOrAttribute(treeElem, 
   const attr_array = this.nodes.map((d) => callback(d));
   this.updateStyleOrAttributeArray(treeElem, attr, attr_array, dt, styleOrAttribute);
 };
+
+const contains = (array, elem) => array.some((d) => d === elem);
 
 /**
  * update an attribute of the tree for all nodes
@@ -327,4 +389,11 @@ console.warn("redrawStyle is deprecated. use phylotree.change instead.")
     .filter((d) => d.update)
     .transition().duration(dt)
     .style(styleElem, (d) => d[styleElem]);
+};
+
+export const removeGrid = function removeGrid() {
+  this.svg.selectAll(".majorGrid").remove();
+  this.svg.selectAll(".minorGrid").remove();
+  this.svg.selectAll(".gridTick").remove();
+  this.grid = false;
 };
