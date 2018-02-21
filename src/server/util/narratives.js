@@ -6,44 +6,24 @@ const fs = require('fs');
 const path = require("path");
 const request = require('request');
 
-const makeBlock = (url = false, title = "Untitled") => {
-  return ({lines: [], url, title});
+const makeBlock = (url = false) => {
+  return ({lines: [], url});
 };
 
 const parseMarkdownArray = (mdArr) => {
   const blocks = [];
   const nMax = mdArr.length;
-  const reUrl = /url=([^\s`]+)/;
-  const reTitle = /#\s+(.+$)/;
-  let titleSet = false;
+  const reUrl = /url=[^\s]+\?([^\s`]+)/;
   let n = 0;
   let block = makeBlock(); /* initialise */
   while (n < nMax) {
     const line = mdArr[n];
-    if (line.startsWith('`nextstrain')) {
-      if (line.includes("newBlock")) {
-        if (block.lines.length) {
-          blocks.push(block); /* push the previous block onto the stack */
-        }
-        block = makeBlock();
-        if (line.match(reUrl)) {
-          block.url = line.match(reUrl)[1];
-        }
-        titleSet = false;
-      } else {
-        console.warn("Narrative: ignoring nextstrain line without newBlock");
+    if (line.startsWith('`nextstrain') && line.match(reUrl)) {
+      if (block.lines.length) {
+        blocks.push(block); /* push the previous block onto the stack */
       }
-    } else if (!titleSet) {
-      if (line.startsWith('#')) {
-        titleSet = true;
-        if (line.match(reTitle)) {
-          block.title = line.match(reTitle)[1];
-        } else {
-          console.warn("Narrative: incorrectly parsed this title:", line);
-        }
-      }
+      block = makeBlock(line.match(reUrl)[1]);
     } else {
-      /* title is set and it's not a instruction line */
       block.lines.push(line);
     }
     n++;
