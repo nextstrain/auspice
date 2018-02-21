@@ -15,6 +15,7 @@ import MapAnimationControls from "./map-animation";
 import { controlsWidth } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import DataSource from "./data-source";
+import PanelToggles from "./panel-toggles";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -71,9 +72,6 @@ class Controls extends React.Component {
         {header("Color By")}
         <ColorBy/>
 
-        {mapAndTree && this.props.canTogglePanelLayout ? (header("Panel Layout")) : null}
-        {mapAndTree && this.props.canTogglePanelLayout ? (<PanelLayout/>) : null}
-
         {header("Tree Options")}
 
         <SelectLabel text="Layout"/>
@@ -86,6 +84,11 @@ class Controls extends React.Component {
         <SelectLabel text="Geographic resolution"/>
         <GeoResolution/>
         <MapAnimationControls/>
+
+        <div/>
+        {header("Panels To Display")}
+        <PanelToggles/>
+        {mapAndTree && this.props.canTogglePanelLayout ? (<PanelLayout/>) : null}
 
         <div/>
         {header("Data Source")}

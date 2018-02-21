@@ -169,8 +169,12 @@ const modifyStateViaMetadata = (state, metadata) => {
     }
   }
 
+  state.panelsAvailable = metadata.panels.slice();
+  state.panelsToDisplay = metadata.panels.slice();
+
   /* if only map or only tree, then panelLayout must be full */
-  if (metadata.panels.indexOf("map") === -1 || metadata.panels.indexOf("tree") === -1) {
+  /* note - this will be overwritten by the URL query */
+  if (state.panelsAvailable.indexOf("map") === -1 || state.panelsAvailable.indexOf("tree") === -1) {
     state.panelLayout = "full";
     state.canTogglePanelLayout = false;
   }
@@ -299,6 +303,8 @@ const getDefaultState = () => {
     mapAnimationCumulative: false,
     mapAnimationShouldLoop: false,
     animationPlayPauseButton: "Play",
+    panelsAvailable: [],
+    panelsToDisplay: [],
     panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full"
   };
 };
@@ -418,6 +424,12 @@ const Controls = (state = getDefaultState(), action) => {
     case types.CHANGE_PANEL_LAYOUT:
       return Object.assign({}, state, {
         panelLayout: action.data
+      });
+    case types.TOGGLE_PANEL_DISPLAY:
+      return Object.assign({}, state, {
+        panelsToDisplay: action.panelsToDisplay,
+        panelLayout: action.panelLayout,
+        canTogglePanelLayout: action.panelsToDisplay.indexOf("tree") !== -1 && action.panelsToDisplay.indexOf("map") !== -1
       });
     case types.NEW_COLORS: {
       const newState = Object.assign({}, state, {

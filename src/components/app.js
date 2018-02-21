@@ -27,8 +27,9 @@ const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 @connect((state) => ({
   readyToLoad: state.datasets.ready,
   datapath: state.datasets.datapath,
-  metadata: state.metadata,
+  metadataLoaded: state.metadata.loaded,
   treeLoaded: state.tree.loaded,
+  panelsToDisplay: state.controls.panelsToDisplay,
   displayNarrative: state.narrative.display,
   browserDimensions: state.browserDimensions.browserDimensions
 }))
@@ -100,18 +101,18 @@ class App extends React.Component {
           styles={{sidebar: {backgroundColor: sidebarColor}}}
         >
           {
-            (!this.props.treeLoaded || !this.props.metadata.loaded) ?
+            (!this.props.treeLoaded || !this.props.metadataLoaded) ?
               (<img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${this.props.browserDimensions.height / 2 - 100}px`}}/>) :
               (
                 <Background>
                   <Info padding={padding} />
-                  {this.props.metadata.panels.indexOf("tree") === -1 ? null : (
+                  {this.props.panelsToDisplay.indexOf("tree") === -1 ? null : (
                     <Tree padding={padding} />
                   )}
-                  {this.props.metadata.panels.indexOf("map") === -1 ? null : (
+                  {this.props.panelsToDisplay.indexOf("map") === -1 ? null : (
                     <Map padding={padding} justGotNewDatasetRenderNewMap={false} />
                   )}
-                  {this.props.metadata.panels.indexOf("entropy") === -1 ? null : (
+                  {this.props.panelsToDisplay.indexOf("entropy") === -1 ? null : (
                     <Entropy padding={padding} />
                   )}
                   <Footer padding={padding} />
