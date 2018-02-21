@@ -23,21 +23,23 @@ const getStyles = (width) => {
   };
 };
 
-export const computeChartGeometry = (props) => {
-  const responsive = computeResponsive({
-    horizontal: 1,
-    vertical: 0.3,
-    browserDimensions: props.browserDimensions,
-    padding: props.padding,
-    minHeight: 150
-  });
+const callComputeResponsive = (browserDimensions, padding) => computeResponsive({
+  horizontal: 1,
+  vertical: 0.3,
+  browserDimensions: browserDimensions,
+  padding: padding,
+  minHeight: 150
+});
+
+const computeChartGeometry = (props) => {
+  const responsive = callComputeResponsive(props.browserDimensions, props.padding);
   return {
-    responsive,
     width: responsive.width,
     height: responsive.height,
-    padBottom: 50,
-    padLeft: 15,
-    padRight: 12
+    spaceLeft: 30,
+    spaceRight: 10,
+    spaceBottom: 20,
+    spaceTop: 10
   };
 };
 
@@ -94,7 +96,8 @@ export class Frequencies extends React.Component {
     drawStream(this.state.svgStreamGroup, this.state.scales, nextProps.colorBy, labels, nextProps.pivots, series, colourer);
     this.setState({categories, series, colourer});
   }
-  normalizationSwitch(styles) {
+  normalizationSwitch(svgWidth) {
+    const styles = getStyles(svgWidth);
     const onClick = () => this.props.dispatch(toggleNormalization);
     return (
       <div style={styles.switchContainer}>
@@ -116,14 +119,12 @@ export class Frequencies extends React.Component {
     );
   }
   render() {
-    // console.log("React render of frequencies...")
-    const chartGeom = computeChartGeometry(this.props);
-    const styles = getStyles(chartGeom.width);
+    const { width, height } = callComputeResponsive(this.props.browserDimensions, this.props.padding);
     return (
       <Card title={"Frequencies"}>
-        {this.normalizationSwitch(styles)}
+        {this.normalizationSwitch(width)}
         <div id="freqinfo"/>
-        <svg style={{pointerEvents: "auto"}} width={chartGeom.responsive.width} height={chartGeom.height}>
+        <svg style={{pointerEvents: "auto"}} width={width} height={height}>
           <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
         </svg>
       </Card>

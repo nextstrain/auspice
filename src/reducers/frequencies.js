@@ -13,10 +13,11 @@ const frequencies = (state = {
     case types.FREQUENCIES_JSON_DATA: {
       /* these calculations maybe shouldn't be in the reducer */
       const pivots = action.data.pivots.map((d) => Math.round(parseFloat(d) * 100) / 100);
-      const ticks = [Math.round(pivots[0])];
-      const tick_step = Math.round((pivots[pivots.length - 1] - pivots[0]) / 6 * 10) / 10;
+      // const ticks = [Math.round(pivots[0])];
+      const ticks = [pivots[0]];
+      const tick_step = (pivots[pivots.length - 1] - pivots[0]) / 6 * 10 / 10;
       while (ticks[ticks.length - 1] < pivots[pivots.length - 1]) {
-        ticks.push(Math.round((ticks[ticks.length - 1] + tick_step) * 10) / 10);
+        ticks.push((ticks[ticks.length - 1] + tick_step) * 10 / 10);
       }
       if (!action.tree.loaded) {console.error("cannot calculate frequencies (tree not loaded)");}
       const data = [];

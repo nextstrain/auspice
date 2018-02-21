@@ -3,6 +3,7 @@ import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { rgb } from "d3-color";
 import { area } from "d3-shape";
+import { dataFont } from "../../globalStyles";
 
 /* C O N S T A N T S */
 const opacity = 0.85;
@@ -27,22 +28,26 @@ export const getOrderedCategories = (matrix) => {
 export const calcScales = (chartGeom, ticks) => {
   const x = scaleLinear()
     .domain([ticks[0], ticks[ticks.length - 1]])
-    .range([chartGeom.padLeft, chartGeom.width - chartGeom.padRight]);
+    .range([chartGeom.spaceLeft, chartGeom.width - chartGeom.spaceRight]);
   const y = scaleLinear()
     .domain([0, 1])
-    .range([chartGeom.height - chartGeom.padBottom, 10]);
+    .range([chartGeom.height - chartGeom.spaceBottom, chartGeom.spaceTop]);
   return {x, y, numTicksX: ticks.length, numTicksY: 5};
 };
 
 export const drawAxis = (svg, chartGeom, scales) => {
+  /* no idea why I need to add 15 to some of these translations... */
   svg.append("g")
     .attr("class", "x axis")
-    .attr("transform", "translate(" + (chartGeom.padLeft + 15) + "," + (chartGeom.height - chartGeom.padBottom) + ")")
-    .call(axisBottom(scales.x).ticks(scales.numTicksX));
+    .attr("transform", `translate(0,${chartGeom.height - chartGeom.spaceBottom})`)
+    .style("font-family", dataFont)
+    .style("font-size", "12px")
+    .call(axisBottom(scales.x).ticks(scales.numTicksX, ".1f"));
   svg.append("g")
     .attr("class", "y axis")
-    /* no idea why the 15 is needed here */
-    .attr("transform", "translate(" + (chartGeom.padLeft + 15) + "," + 0 + ")")
+    .attr("transform", `translate(${chartGeom.spaceLeft},0)`)
+    .style("font-family", dataFont)
+    .style("font-size", "12px")
     .call(axisLeft(scales.y).ticks(scales.numTicksY));
 };
 
