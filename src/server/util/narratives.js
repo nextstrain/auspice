@@ -13,7 +13,7 @@ const makeBlock = (url = false) => {
 const parseMarkdownArray = (mdArr) => {
   const blocks = [];
   const nMax = mdArr.length;
-  const reUrl = /url=[^\s]+\?([^\s`]+)/;
+  const reUrl = /url=[^\s]+\?([^\s`]*)/;
   let n = 0;
   let block = makeBlock(); /* initialise */
   while (n < nMax) {
