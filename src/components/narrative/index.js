@@ -1,7 +1,9 @@
 /* eslint-disable react/no-danger */
 import React from "react";
 import { connect } from "react-redux";
+import queryString from "query-string";
 import { narrativeWidth, controlsWidth, titleBarHeight, darkGrey } from "../../util/globals";
+import { changePageQuery } from "../../actions/navigation";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 
@@ -32,23 +34,44 @@ const DisplayBlock = (props) => {
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {focus: 0};
+    this.state = {
+      focus: 0, /* idx of block in focus (and url) */
+      shouldBeInFocus: 0, /* used by timeouts */
+      timeoutRef: undefined,
+      lastScroll: undefined
+    };
+    this.changeFocus = () => {
+      const idx = this.state.shouldBeInFocus;
+      const query = queryString.parse(this.props.blocks[idx].url);
+      this.props.dispatch(changePageQuery({query, push: true}));
+      this.setState({focus: idx, timeoutRef: undefined});
+    };
     this.handleScroll = () => {
+      /* handle scroll only fires (expensive) dispatches when no scroll has been observed for 250ms */
+      /* 1: clear any previous timeouts */
+      if (this.state.timeoutRef) {
+        clearTimeout(this.state.timeoutRef);
+      }
+      /* 2: calculate shouldBeInFocus index */
       const halfY = (this.props.browserHeight - titleBarHeight) / 2;
+      let shouldBeInFocus;
       for (let i = 0; i < this.blockRefs.length; i++) {
         const bounds = this.blockRefs[i].getBoundingClientRect();
         if (bounds.y < halfY && (bounds.y + bounds.height) > halfY) {
-          if (this.state.focus !== i) {
-            this.setState({focus: i});
-          }
+          shouldBeInFocus = i;
           break;
         }
       }
+      /* 2 set timeouts */
+      if (shouldBeInFocus === this.state.focus) {
+        return;
+      }
+      const timeoutRef = setTimeout(this.changeFocus, 250);
+      this.setState({timeoutRef, shouldBeInFocus});
     };
     this.blockRefs = [];
   }
   render() {
-    console.log(this.props.blocks);
     if (!this.props.loaded) {return null;}
     const width = controlsWidth + 40; /* controls sidebar has 20px L & R padding */
 
