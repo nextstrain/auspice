@@ -26,6 +26,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
 
   /* first switch: query change */
   switch (action.type) {
+    case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE:
+      query = action.query;
+      break;
     case types.NEW_COLORS:
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
       break;
@@ -85,7 +88,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.animate = `${a},${b},${c},${d},${e}`;
       break;
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
-      query = action.query;
+      if (!action.hideURL) {
+        query = action.query;
+      }
       break;
     case types.PAGE_CHANGE:
       if (action.query) {

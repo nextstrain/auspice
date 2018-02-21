@@ -4,6 +4,7 @@ import { connect } from "react-redux";
 import queryString from "query-string";
 import { narrativeWidth, controlsWidth, titleBarHeight, darkGrey } from "../../util/globals";
 import { changePageQuery } from "../../actions/navigation";
+import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 
@@ -43,7 +44,7 @@ class Narrative extends React.Component {
     this.changeFocus = () => {
       const idx = this.state.shouldBeInFocus;
       const query = queryString.parse(this.props.blocks[idx].url);
-      this.props.dispatch(changePageQuery({query, push: true}));
+      this.props.dispatch(changePageQuery({query, hideURL: true, push: true}));
       this.setState({focus: idx, timeoutRef: undefined});
     };
     this.handleScroll = () => {
@@ -70,6 +71,10 @@ class Narrative extends React.Component {
       this.setState({timeoutRef, shouldBeInFocus});
     };
     this.blockRefs = [];
+    this.props.dispatch(changePageQuery({
+      query: queryString.parse(this.props.blocks[0].url),
+      hideURL: true
+    }));
   }
   render() {
     if (!this.props.loaded) {return null;}
@@ -92,6 +97,12 @@ class Narrative extends React.Component {
         <div style={{height: this.props.browserHeight * 0.4}}/>
       </div>
     );
+  }
+  componentWillUnmount() {
+    this.props.dispatch({
+      type: CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE,
+      query: queryString.parse(this.props.blocks[this.state.focus].url)
+    });
   }
 }
 export default Narrative;

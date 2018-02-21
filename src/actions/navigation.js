@@ -79,7 +79,7 @@ ARGUMENTS:
 (1) query - REQUIRED - {object}
 (2) push - OPTIONAL (default: true) - signals that pushState should be used (has no effect on the reducers)
 */
-export const changePageQuery = ({query, push = true}) => (dispatch, getState) => {
+export const changePageQuery = ({query, hideURL = false, push = true}) => (dispatch, getState) => {
   console.log("\t---------- change page query -------------");
   const { controls, metadata, tree, entropy } = getState();
 
@@ -118,7 +118,8 @@ export const changePageQuery = ({query, push = true}) => (dispatch, getState) =>
     newTree,
     entropyBars,
     entropyMaxYVal,
-    query
+    query,
+    hideURL
   });
 };
 
