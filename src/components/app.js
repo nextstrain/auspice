@@ -24,6 +24,22 @@ import AnimationController from "./framework/animationController";
 
 const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
+const Contents = ({showSpinner, spinnerHeight, panels, padding, narrative}) => {
+  if (showSpinner) {
+    return (<img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: spinnerHeight}}/>);
+  }
+  const show = (name) => panels.indexOf(name) !== -1;
+  return (
+    <Background>
+      {narrative ? null : <Info padding={padding} />}
+      {show("tree") ? <Tree padding={padding} /> : null}
+      {show("map") ? <Map padding={padding} justGotNewDatasetRenderNewMap={false} /> : null}
+      {show("entropy") ? <Entropy padding={padding} /> : null}
+      {narrative ? null : <Footer padding={padding} />}
+    </Background>
+  );
+};
+
 @connect((state) => ({
   readyToLoad: state.datasets.ready,
   datapath: state.datasets.datapath,
@@ -100,25 +116,13 @@ class App extends React.Component {
           sidebarClassName={"sidebar"}
           styles={{sidebar: {backgroundColor: sidebarColor, height: "100%", overflow: "hidden"}}}
         >
-          {
-            (!this.props.treeLoaded || !this.props.metadataLoaded) ?
-              (<img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${this.props.browserDimensions.height / 2 - 100}px`}}/>) :
-              (
-                <Background>
-                  <Info padding={padding} />
-                  {this.props.panelsToDisplay.indexOf("tree") === -1 ? null : (
-                    <Tree padding={padding} />
-                  )}
-                  {this.props.panelsToDisplay.indexOf("map") === -1 ? null : (
-                    <Map padding={padding} justGotNewDatasetRenderNewMap={false} />
-                  )}
-                  {this.props.panelsToDisplay.indexOf("entropy") === -1 ? null : (
-                    <Entropy padding={padding} />
-                  )}
-                  <Footer padding={padding} />
-                </Background>
-              )
-          }
+          <Contents
+            showSpinner={!this.props.treeLoaded || !this.props.metadataLoaded}
+            spinnerHeight={`${this.props.browserDimensions.height / 2 - 100}px`}
+            panels={this.props.panelsToDisplay}
+            padding={padding}
+            narrative={this.props.displayNarrative}
+          />
         </Sidebar>
       </g>
     );
