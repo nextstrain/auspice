@@ -12,7 +12,7 @@ import ChooseMetric from "./choose-metric";
 import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
 import MapAnimationControls from "./map-animation";
-import { controlsWidth } from "../../util/globals";
+import { controlsWidth, titleBarHeight } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import DataSource from "./data-source";
 import PanelToggles from "./panel-toggles";
@@ -25,6 +25,7 @@ const header = (text) => (
 
 @connect((state) => ({
   analysisSlider: state.controls.analysisSlider,
+  browserHeight: state.browserDimensions.browserDimensions.height,
   canTogglePanelLayout: state.controls.canTogglePanelLayout,
   panels: state.metadata.panels
 }))
@@ -57,6 +58,8 @@ class Controls extends React.Component {
         alignItems="flex-start"
         style={{
           width: controlsWidth,
+          height: this.props.browserHeight - titleBarHeight,
+          overflowY: "scroll",
           padding: "0px 20px 20px 20px"
         }}
       >

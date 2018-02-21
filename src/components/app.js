@@ -98,7 +98,7 @@ class App extends React.Component {
           docked={this.state.sidebarDocked}
           onSetOpen={(a) => {this.setState({sidebarOpen: a});}}
           sidebarClassName={"sidebar"}
-          styles={{sidebar: {backgroundColor: sidebarColor}}}
+          styles={{sidebar: {backgroundColor: sidebarColor, height: "100%", overflow: "hidden"}}}
         >
           {
             (!this.props.treeLoaded || !this.props.metadataLoaded) ?

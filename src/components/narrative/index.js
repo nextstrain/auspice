@@ -1,7 +1,7 @@
 /* eslint-disable react/no-danger */
 import React from "react";
 import { connect } from "react-redux";
-import { narrativeWidth, controlsWidth } from "../../util/globals";
+import { narrativeWidth, controlsWidth, titleBarHeight } from "../../util/globals";
 
 const DisplayBlock = (props) => {
   return (
@@ -27,6 +27,9 @@ const DisplayBlock = (props) => {
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
+    this.handleScroll = () => {
+      console.log("scroll", this)
+    };
     // this.state = {focusIdx: 0};
   }
   render() {
@@ -35,7 +38,11 @@ class Narrative extends React.Component {
     const width = controlsWidth + 40; /* controls sidebar has 20px L & R padding */
 
     return (
-      <div className={"static narrative"} style={{maxWidth: width, minWidth: width}}>
+      <div
+        onScroll={this.handleScroll}
+        className={"static narrative"}
+        style={{height: this.props.browserHeight - titleBarHeight, maxWidth: width, minWidth: width, overflowY: "scroll"}}
+      >
         {this.props.blocks.map((b) => (
           <DisplayBlock key={b.url} block={b}/>
         ))}
