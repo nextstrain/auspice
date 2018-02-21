@@ -3,15 +3,19 @@ import React from "react";
 import { connect } from "react-redux";
 import { narrativeWidth, controlsWidth, titleBarHeight } from "../../util/globals";
 
+/* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
+
 const DisplayBlock = (props) => {
   return (
     <div
+      ref={props.inputRef}
       style={{
         margin: "0px",
         paddingLeft: "20px",
         paddingRight: "20px",
         paddingTop: "40px",
-        paddingBottom: "40px"
+        paddingBottom: "40px",
+        backgroundColor: props.focus ? "red" : "none"
       }}
       dangerouslySetInnerHTML={props.block}
     />
@@ -27,10 +31,20 @@ const DisplayBlock = (props) => {
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {focus: undefined};
     this.handleScroll = () => {
-      console.log("scroll", this)
+      const halfY = (this.props.browserHeight - titleBarHeight) / 2;
+      for (let i = 0; i < this.blockRefs.length; i++) {
+        const bounds = this.blockRefs[i].getBoundingClientRect();
+        if (bounds.y < halfY && (bounds.y + bounds.height) > halfY) {
+          if (this.state.focus !== i) {
+            this.setState({focus: i});
+          }
+          break;
+        }
+      }
     };
-    // this.state = {focusIdx: 0};
+    this.blockRefs = [];
   }
   render() {
     console.log(this.props.blocks);
@@ -43,8 +57,13 @@ class Narrative extends React.Component {
         className={"static narrative"}
         style={{height: this.props.browserHeight - titleBarHeight, maxWidth: width, minWidth: width, overflowY: "scroll"}}
       >
-        {this.props.blocks.map((b) => (
-          <DisplayBlock key={b.url} block={b}/>
+        {this.props.blocks.map((b, i) => (
+          <DisplayBlock
+            inputRef={(el) => {this.blockRefs[i] = el;}}
+            key={b.url}
+            block={b}
+            focus={i === this.state.focus}
+          />
         ))}
       </div>
     );
