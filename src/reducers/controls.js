@@ -54,6 +54,10 @@ export const modifyStateViaURLQuery = (state, query) => {
   if (query.p && state.canTogglePanelLayout && (query.p === "full" || query.p === "grid")) {
     state["panelLayout"] = query.p;
   }
+  if (query.d) {
+    const proposed = query.d.split(",");
+    state.panelsToDisplay = state.panelsAvailable.filter((n) => proposed.indexOf(n) !== -1);
+  }
   if (query.dmin) {
     state["dateMin"] = query.dmin;
     state["dateMinNumeric"] = calendarToNumeric(query.dmin);

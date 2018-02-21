@@ -49,6 +49,15 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.p = action.notInURLState === true ? undefined : action.data;
       break;
     }
+    case types.TOGGLE_PANEL_DISPLAY: {
+      if (state.controls.panelsAvailable.length === action.panelsToDisplay.length) {
+        query.d = undefined;
+      } else {
+        query.d = action.panelsToDisplay.join(",");
+      }
+      query.p = action.panelLayout;
+      break;
+    }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       if (state.controls.animationPlayPauseButton === "Pause") { // animation in progress - no dates in URL
         query.dmin = undefined;
