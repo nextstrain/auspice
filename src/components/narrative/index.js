@@ -1,22 +1,23 @@
 /* eslint-disable react/no-danger */
 import React from "react";
 import { connect } from "react-redux";
-import { narrativeWidth, controlsWidth, titleBarHeight } from "../../util/globals";
+import { narrativeWidth, controlsWidth, titleBarHeight, darkGrey } from "../../util/globals";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
+
+const blockPadding = {
+  paddingLeft: "20px",
+  paddingRight: "20px",
+  paddingTop: "40px",
+  paddingBottom: "40px"
+};
 
 const DisplayBlock = (props) => {
   return (
     <div
       ref={props.inputRef}
-      style={{
-        margin: "0px",
-        paddingLeft: "20px",
-        paddingRight: "20px",
-        paddingTop: "40px",
-        paddingBottom: "40px",
-        backgroundColor: props.focus ? "red" : "none"
-      }}
+      style={{...blockPadding}}
+      className={props.focus ? "focus" : ""}
       dangerouslySetInnerHTML={props.block}
     />
   );
@@ -31,7 +32,7 @@ const DisplayBlock = (props) => {
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {focus: undefined};
+    this.state = {focus: 0};
     this.handleScroll = () => {
       const halfY = (this.props.browserHeight - titleBarHeight) / 2;
       for (let i = 0; i < this.blockRefs.length; i++) {
@@ -65,6 +66,7 @@ class Narrative extends React.Component {
             focus={i === this.state.focus}
           />
         ))}
+        <div style={{height: this.props.browserHeight * 0.4}}/>
       </div>
     );
   }
