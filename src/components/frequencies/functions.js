@@ -8,21 +8,11 @@ import { dataFont } from "../../globalStyles";
 /* C O N S T A N T S */
 const opacity = 0.85;
 
-export const getOrderedCategories = (matrix) => {
-  const categories = Object.keys(matrix);
-  const nPivots = matrix[categories[0]].length;
-  const pivotEndIdx = nPivots - 1;
-  const change = {}; /* positive: gone up over time */
-  for (let i = 0; i < categories.length; i++) {
-    change[categories[i]] = matrix[categories[i]][pivotEndIdx] - matrix[categories[i]][0];
-  }
-  /* low indexes (bottom streams) show high growth (large change) */
-  categories.sort((a, b) => {
-    if (change[a] > change[b]) return -1; /* a growing faster than b */
-    if (change[a] < change[b]) return 1;
-    return 0;
-  });
-  return categories;
+export const getOrderedCategories = (colorScale) => {
+  /* get the colorBy's in the same order as in the tree legend */
+  return colorScale.scale.domain()
+    .filter((d) => d !== undefined)
+    .reverse();
 };
 
 export const calcScales = (chartGeom, ticks) => {

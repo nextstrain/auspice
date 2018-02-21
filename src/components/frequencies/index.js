@@ -70,7 +70,7 @@ export class Frequencies extends React.Component {
     const scales = calcScales(chartGeom, this.props.ticks);
     drawAxis(svg, chartGeom, scales);
     if (!this.props.matrix) {console.error("Matrix undefined"); return;}
-    const categories = getOrderedCategories(this.props.matrix);
+    const categories = getOrderedCategories(this.props.colorScale);
     const series = turnMatrixIntoSeries(categories, this.props.pivots.length, this.props.matrix);
     const colourer = generateColorScaleD3(categories, this.props.colorScale);
     drawTooltip();
@@ -88,7 +88,7 @@ export class Frequencies extends React.Component {
       // console.log("CWRP. colorBy unchanged. Should make nice transition");
     }
     // console.log("Calling D3 for frequencies (version ", nextProps.version, ")");
-    const categories = getOrderedCategories(nextProps.matrix);
+    const categories = getOrderedCategories(nextProps.colorScale);
     const series = turnMatrixIntoSeries(categories, nextProps.pivots.length, nextProps.matrix);
     const colourer = generateColorScaleD3(categories, nextProps.colorScale);
     const labels = getMeaningfulLabels(categories, nextProps.colorScale);
