@@ -10,67 +10,6 @@ import { updateEntropyVisibility } from "./entropy";
 import { changePage } from "./navigation";
 import { updateFrequencyData } from "./frequencies";
 
-// /* if the metadata specifies an analysis slider, this is where we process it */
-// const addAnalysisSlider = (dispatch, tree, controls) => {
-//   /* we can now get the range of values for the analysis slider */
-//   const vals = tree.nodes.map((d) => d.attr[controls.analysisSlider.key])
-//     .filter((n) => n !== undefined)
-//     .filter((item, i, ar) => ar.indexOf(item) === i);
-//   /* check that the key is found in at least some nodes */
-//   if (!vals.length) {
-//     dispatch({
-//       type: types.ANALYSIS_SLIDER,
-//       destroy: true
-//     });
-//     /* dispatch warning / error message */
-//     console.log("Analysis slider key ", controls.analysisSlider.key, " never found in tree. Skipping.");
-//   } else {
-//     dispatch({
-//       type: types.ANALYSIS_SLIDER,
-//       destroy: false,
-//       maxVal: Math.round(d3.max(vals) * 100) / 100,
-//       minVal: Math.round(d3.min(vals) * 100) / 100
-//     });
-//   }
-// };
-
-// /* request frequencies */
-// const requestFrequencies = () => {
-//   return {
-//     type: types.REQUEST_FREQUENCIES
-//   };
-// };
-//
-// const receiveFrequencies = (data) => {
-//   return {
-//     type: types.RECEIVE_FREQUENCIES,
-//     data: data
-//   };
-// };
-//
-// const frequenciesFetchError = (err) => {
-//   return {
-//     type: types.FREQUENCIES_FETCH_ERROR,
-//     data: err
-//   };
-// };
-//
-// const fetchFrequencies = (q) => {
-//   return fetch(
-//     dataURLStem + q + "_frequencies.json"
-//   );
-// };
-//
-// const populateFrequenciesStore = (queryParams) => {
-//   return (dispatch) => {
-//     dispatch(requestFrequencies());
-//     return fetchFrequencies(queryParams).then((res) => res.json()).then(
-//       (json) => dispatch(receiveFrequencies(json)),
-//       (err) => dispatch(frequenciesFetchError(err))
-//     );
-//   };
-// };
-
 export const loadJSONs = (s3override = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
     const { datasets } = getState();
@@ -80,7 +19,7 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
     }
     dispatch({type: types.DATA_INVALID});
     const s3bucket = s3override ? s3override : datasets.s3bucket;
-      const metaJSONpromise = fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_meta.json&s3=" + s3bucket)
+    const metaJSONpromise = fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_meta.json&s3=" + s3bucket)
       .then((res) => res.json());
     const treeJSONpromise = fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_tree.json&s3=" + s3bucket)
       .then((res) => res.json());
@@ -112,7 +51,7 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
 
         /* F R E Q U E N C I E S */
         console.log("frequencies branch. Attempting to get frequencies.");
-        fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_pivots.json&s3=" + s3bucket)
+        fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_tipfrequencies.json&s3=" + s3bucket)
           .then((res) => res.json())
           .then((data) => {
             const { tree } = getState(); /* check that the tree has been updated! */

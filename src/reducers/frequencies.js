@@ -18,20 +18,17 @@ const frequencies = (state = {
       while (ticks[ticks.length - 1] < pivots[pivots.length - 1]) {
         ticks.push(Math.round((ticks[ticks.length - 1] + tick_step) * 10) / 10);
       }
-      if (!action.tree.loaded) {console.error("Tree not loaded. Can't do freqs!");}
-
+      if (!action.tree.loaded) {console.error("cannot calculate frequencies (tree not loaded)");}
       const data = [];
-      action.tree.nodes.forEach((n) => {
-        if (!n.hasChildren) {
-          if (action.data[n.clade]) {
-            data.push({
-              idx: n.arrayIdx,
-              values: action.data[n.clade]
-            });
-          } else {
-            console.warn("Tip ", n.strain, "(clade ", n.clade, ") had no frequencies data");
-          }
+      action.tree.nodes.filter((d) => !d.hasChildren).forEach((n) => {
+        if (!action.data[n.strain]) {
+          console.warn("No tip frequency information for", n.strain);
+          return;
         }
+        data.push({
+          idx: n.arrayIdx,
+          values: action.data[n.strain]
+        });
       });
       return {loaded: false, data, pivots, ticks, matrix: undefined, version: 0};
     }
