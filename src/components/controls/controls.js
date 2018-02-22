@@ -39,8 +39,7 @@ class Controls extends React.Component {
         justifyContent="flex-start"
         alignItems="flex-start"
         style={{
-          width: this.props.width,
-          height: this.props.height,
+          height: "100%",
           overflowY: "scroll",
           padding: "0px 20px 20px 20px"
         }}

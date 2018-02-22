@@ -5,12 +5,11 @@ import "whatwg-fetch"; // setup polyfill
 import { loadJSONs } from "../actions/loadData";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
-// import Frequencies from "./charts/frequencies";
 import { Entropy } from "./charts/entropy";
 import Map from "./map/map";
 import Info from "./info/info";
 import Tree from "./tree";
-import { controlsHiddenWidth, controlsWidth, controlsPadding, titleBarHeight } from "../util/globals";
+import { controlsHiddenWidth, controlsWidth, controlsPadding } from "../util/globals";
 import { sidebarColor } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
@@ -65,6 +64,16 @@ const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels,
       {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
       {show("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
       {narrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
+    </div>
+  );
+};
+
+const Sidebar = ({show, narrative, styles}) => {
+  if (!show) return null;
+  return (
+    <div style={styles}>
+      <TitleBar minified/>
+      {narrative ? <Narrative/> : <Controls/>}
     </div>
   );
 };
@@ -124,15 +133,13 @@ class App extends React.Component {
       sidebarWidth += controlsPadding;
       availableWidth -= sidebarWidth;
     }
-    const sidebarWidthLessPadding = sidebarWidth - controlsPadding;
-    const sidebarHeight = availableHeight - titleBarHeight;
     /* S T Y L E S */
     const sharedStyles = {
       position: "absolute",
       top: 0,
       bottom: 0,
       right: 0,
-      transition: 'left .3s ease-out, right .3s ease-out'
+      transition: 'left .5s ease-out, right .5s ease-out'
     };
     const sidebarStyles = {
       ...sharedStyles,
@@ -140,6 +147,7 @@ class App extends React.Component {
       backgroundColor: sidebarColor,
       height: availableHeight,
       width: sidebarWidth,
+      maxWidth: sidebarWidth,
       overflow: "hidden",
       boxShadow: '-3px 0px 6px -3px rgba(0, 0, 0, 0.15) inset'
     };
@@ -164,13 +172,11 @@ class App extends React.Component {
           widthWhenShut={0}
           dontDisplay={this.props.displayNarrative}
         />
-        <div style={sidebarStyles}>
-          <TitleBar minified/>
-          {this.props.displayNarrative ?
-            <Narrative width={sidebarWidthLessPadding} height={sidebarHeight}/> :
-            <Controls width={sidebarWidthLessPadding} height={sidebarHeight}/>
-          }
-        </div>
+        <Sidebar
+          show={this.state.showSidebar}
+          narrative={this.props.displayNarrative}
+          styles={sidebarStyles}
+        />
         <Contents
           styles={contentStyles}
           showSpinner={!this.props.treeLoaded || !this.props.metadataLoaded}

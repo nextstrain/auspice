@@ -84,8 +84,7 @@ class Narrative extends React.Component {
         onScroll={this.handleScroll}
         className={"static narrative"}
         style={{
-          width: this.props.width,
-          height: this.props.height,
+          height: "100%",
           overflowY: "scroll",
           padding: "0px 20px 20px 20px"
         }}
