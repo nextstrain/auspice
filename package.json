@@ -135,7 +135,6 @@
     "react-markdown": "^2.5.0",
     "react-redux": "^5.0.6",
     "react-select": "^1.0.0-rc.5",
-    "react-sidebar": "git://github.com/nextstrain/react-sidebar.git#inset-shadow",
     "react-svg-pan-zoom": "2.15.1",
     "react-tap-event-plugin": "^3.0.2",
     "redux": "^3.7.2",

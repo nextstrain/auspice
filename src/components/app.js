@@ -1,10 +1,8 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import Sidebar from "react-sidebar";
 import "whatwg-fetch"; // setup polyfill
 import { loadJSONs } from "../actions/loadData";
-import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
 // import Frequencies from "./charts/frequencies";
@@ -28,7 +26,7 @@ const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 /* <Contents> contains the header, tree, map, footer components etc.
  * here is where the panel sizes are decided, as well as which components are displayed.
  */
-const Contents = ({showSpinner, availableWidth, availableHeight, panels, grid, narrative}) => {
+const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels, grid, narrative}) => {
   if (showSpinner) {
     return (<img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${availableHeight / 2 - 100}px`}}/>);
   }
@@ -61,13 +59,13 @@ const Contents = ({showSpinner, availableWidth, availableHeight, panels, grid, n
   const chart = computeResponsive({horizontal: chartWidthFraction, vertical: chartHeightFraction, availableWidth, availableHeight, minHeight: 150});
 
   return (
-    <Background>
+    <div style={styles}>
       {narrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
       {show("tree") ? <Tree width={big.width} height={big.height} /> : null}
       {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
       {show("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
       {narrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
-    </Background>
+    </div>
   );
 };
 
@@ -85,17 +83,11 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     /* window listener to see when width changes cross thrhershold to toggle sidebar */
-    /* A note on sidebar terminology:
-    sidebarOpen (AFAIK) is only used via touch drag events
-    sidebarDocked is the prop used on desktop.
-    While these states could be moved to redux, they would need
-    to be connected to here, triggering an app render anyways
-    */
     const mql = window.matchMedia(`(min-width: ${controlsHiddenWidth}px)`);
     mql.addListener(() => this.setState({
-      sidebarDocked: this.state.mql.matches
+      showSidebar: this.state.mql.matches
     }));
-    this.state = {mql, sidebarDocked: mql.matches, sidebarOpen: false};
+    this.state = {mql, showSidebar: mql.matches};
     analyticsNewPage();
   }
   static propTypes = {
@@ -119,9 +111,11 @@ class App extends React.Component {
     }
   }
   render() {
+    /* D I M E N S I O N S */
     let availableWidth = this.props.browserDimensions.width;
+    const availableHeight = this.props.browserDimensions.height;
     let sidebarWidth = 0;
-    if (this.state.sidebarOpen || this.state.sidebarDocked) {
+    if (this.state.showSidebar) {
       if (this.props.displayNarrative) {
         sidebarWidth = parseInt(0.27 * availableWidth, 10);
       } else {
@@ -131,47 +125,62 @@ class App extends React.Component {
       availableWidth -= sidebarWidth;
     }
     const sidebarWidthLessPadding = sidebarWidth - controlsPadding;
-    const sidebarHeight = this.props.browserDimensions.height - titleBarHeight;
+    const sidebarHeight = availableHeight - titleBarHeight;
+    /* S T Y L E S */
+    const sharedStyles = {
+      position: "absolute",
+      top: 0,
+      bottom: 0,
+      right: 0,
+      transition: 'left .3s ease-out, right .3s ease-out'
+    };
+    const sidebarStyles = {
+      ...sharedStyles,
+      left: 0,
+      backgroundColor: sidebarColor,
+      height: availableHeight,
+      width: sidebarWidth,
+      overflow: "hidden",
+      boxShadow: '-3px 0px 6px -3px rgba(0, 0, 0, 0.15) inset'
+    };
+    const contentStyles = {
+      ...sharedStyles,
+      backgroundColor: "#fff",
+      height: availableHeight,
+      width: availableWidth,
+      overflowX: "hidden",
+      overflowY: "scroll",
+      left: sidebarWidth
+    };
+
     return (
-      <g>
+      <span>
         <AnimationController/>
         <DownloadModal/>
         <ToggleSidebarTab
-          open={this.state.sidebarDocked}
-          handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
+          open={this.state.showSidebar}
+          handler={() => {this.setState({showSidebar: !this.state.showSidebar});}}
           widthWhenOpen={sidebarWidth - 15}
           widthWhenShut={0}
           dontDisplay={this.props.displayNarrative}
         />
-        <Sidebar
-          sidebar={
-            <div>
-              <TitleBar minified/>
-              {this.props.displayNarrative ?
-                <Narrative width={sidebarWidthLessPadding} height={sidebarHeight}/> :
-                <Controls width={sidebarWidthLessPadding} height={sidebarHeight}/>
-              }
-            </div>
+        <div style={sidebarStyles}>
+          <TitleBar minified/>
+          {this.props.displayNarrative ?
+            <Narrative width={sidebarWidthLessPadding} height={sidebarHeight}/> :
+            <Controls width={sidebarWidthLessPadding} height={sidebarHeight}/>
           }
-          open={this.state.sidebarOpen}
-          docked={this.state.sidebarDocked}
-          onSetOpen={(a) => {this.setState({sidebarOpen: a});}}
-          sidebarClassName={"sidebar"}
-          styles={{
-            sidebar: {backgroundColor: sidebarColor, width: sidebarWidth, height: "100%", overflow: "hidden"},
-            content: {width: availableWidth, left: sidebarWidth}
-          }}
-        >
-          <Contents
-            showSpinner={!this.props.treeLoaded || !this.props.metadataLoaded}
-            availableWidth={availableWidth}
-            availableHeight={this.props.browserDimensions.height}
-            panels={this.props.panelsToDisplay}
-            grid={this.props.panelLayout === "grid"}
-            narrative={this.props.displayNarrative}
-          />
-        </Sidebar>
-      </g>
+        </div>
+        <Contents
+          styles={contentStyles}
+          showSpinner={!this.props.treeLoaded || !this.props.metadataLoaded}
+          availableWidth={availableWidth}
+          availableHeight={availableHeight}
+          panels={this.props.panelsToDisplay}
+          grid={this.props.panelLayout === "grid"}
+          narrative={this.props.displayNarrative}
+        />
+      </span>
     );
   }
 }
