@@ -120,15 +120,18 @@ class App extends React.Component {
   }
   render() {
     let availableWidth = this.props.browserDimensions.width;
-    let sidebarWidth = controlsWidth;
-    if (this.props.displayNarrative) {
-      sidebarWidth = parseInt(0.33 * availableWidth, 10);
-    }
+    let sidebarWidth = 0;
     if (this.state.sidebarOpen || this.state.sidebarDocked) {
-      availableWidth -= (sidebarWidth + controlsPadding);
+      if (this.props.displayNarrative) {
+        sidebarWidth = parseInt(0.27 * availableWidth, 10);
+      } else {
+        sidebarWidth = controlsWidth;
+      }
+      sidebarWidth += controlsPadding;
+      availableWidth -= sidebarWidth;
     }
+    const sidebarWidthLessPadding = sidebarWidth - controlsPadding;
     const sidebarHeight = this.props.browserDimensions.height - titleBarHeight;
-
     return (
       <g>
         <AnimationController/>
@@ -136,7 +139,7 @@ class App extends React.Component {
         <ToggleSidebarTab
           open={this.state.sidebarDocked}
           handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
-          widthWhenOpen={sidebarWidth}
+          widthWhenOpen={sidebarWidth - 15}
           widthWhenShut={0}
           dontDisplay={this.props.displayNarrative}
         />
@@ -145,8 +148,8 @@ class App extends React.Component {
             <div>
               <TitleBar minified/>
               {this.props.displayNarrative ?
-                <Narrative width={sidebarWidth} height={sidebarHeight}/> :
-                <Controls width={sidebarWidth} height={sidebarHeight}/>
+                <Narrative width={sidebarWidthLessPadding} height={sidebarHeight}/> :
+                <Controls width={sidebarWidthLessPadding} height={sidebarHeight}/>
               }
             </div>
           }
@@ -154,7 +157,10 @@ class App extends React.Component {
           docked={this.state.sidebarDocked}
           onSetOpen={(a) => {this.setState({sidebarOpen: a});}}
           sidebarClassName={"sidebar"}
-          styles={{sidebar: {backgroundColor: sidebarColor, height: "100%", overflow: "hidden"}}}
+          styles={{
+            sidebar: {backgroundColor: sidebarColor, width: sidebarWidth, height: "100%", overflow: "hidden"},
+            content: {width: availableWidth, left: sidebarWidth}
+          }}
         >
           <Contents
             showSpinner={!this.props.treeLoaded || !this.props.metadataLoaded}
