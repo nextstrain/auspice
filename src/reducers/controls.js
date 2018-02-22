@@ -57,6 +57,9 @@ export const modifyStateViaURLQuery = (state, query) => {
   if (query.d) {
     const proposed = query.d.split(",");
     state.panelsToDisplay = state.panelsAvailable.filter((n) => proposed.indexOf(n) !== -1);
+    if (state.panelsToDisplay.indexOf("map") === -1 || state.panelsToDisplay.indexOf("tree") === -1) {
+      state["panelLayout"] = "full";
+    }
   }
   if (query.dmin) {
     state["dateMin"] = query.dmin;
@@ -111,7 +114,7 @@ export const restoreQueryableStateToDefaults = (state) => {
   state["dateMaxNumeric"] = state["absoluteDateMaxNumeric"];
 
   state["panelLayout"] = calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full";
-
+  state.panelsToDisplay = state.panelsAvailable.slice();
   // console.log("state now", state);
   return state;
 };
