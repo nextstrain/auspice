@@ -8,7 +8,7 @@ import { getManifest, getPostsManifest } from "../../util/clientAPIInterface";
 import { twoColumnBreakpoint } from "../../util/globals";
 
 @connect((state) => ({
-  panels: state.metadata.panels,
+  displayNarrative: state.narrative.display,
   canTogglePanelLayout: state.controls.canTogglePanelLayout
 }))
 class Monitor extends React.Component {
@@ -54,8 +54,8 @@ class Monitor extends React.Component {
         docHeight: window.document.body.clientHeight /* background needs docHeight because sidebar creates absolutely positioned container and blocks height 100% */
       };
       dispatch({type: BROWSER_DIMENSIONS, data: newBrowserDimensions});
-      /* only switch between grid / full if there is a map and a tree */
-      if (this.props.panels !== undefined && this.props.canTogglePanelLayout) {
+      /* if we are _not_ in narrative mode, then browser resizing may change between grid & full layouts automatically */
+      if (!this.props.displayNarrative && this.props.canTogglePanelLayout) {
         if (oldBrowserDimensions.width < twoColumnBreakpoint && newBrowserDimensions.width >= twoColumnBreakpoint) {
           dispatch({type: CHANGE_PANEL_LAYOUT, data: "grid", notInURLState: true});
         } else if (oldBrowserDimensions.width > twoColumnBreakpoint && newBrowserDimensions.width <= twoColumnBreakpoint) {
