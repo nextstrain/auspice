@@ -2,7 +2,10 @@ import React from "react";
 import { controlsPadding } from "../../util/globals";
 import { sidebarColor, darkGrey } from "../../globalStyles";
 
-const ToggleSidebarTab = ({open, handler, widthWhenOpen, widthWhenShut}) => {
+const ToggleSidebarTab = ({open, handler, widthWhenOpen, widthWhenShut, dontDisplay}) => {
+
+  if (dontDisplay) return null;
+
   const style = {
     width: 13,
     height: 34,

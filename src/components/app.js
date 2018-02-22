@@ -12,7 +12,7 @@ import { Entropy } from "./charts/entropy";
 import Map from "./map/map";
 import Info from "./info/info";
 import Tree from "./tree";
-import { controlsHiddenWidth, narrativeWidth, controlsWidth, controlsPadding } from "../util/globals";
+import { controlsHiddenWidth, controlsWidth, controlsPadding, titleBarHeight } from "../util/globals";
 import { sidebarColor } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
@@ -120,10 +120,15 @@ class App extends React.Component {
   }
   render() {
     let availableWidth = this.props.browserDimensions.width;
-    if (this.state.sidebarOpen || this.state.sidebarDocked) {
-      availableWidth -= this.props.displayNarrative ? controlsWidth : controlsWidth;
-      availableWidth -= controlsPadding;
+    let sidebarWidth = controlsWidth;
+    if (this.props.displayNarrative) {
+      sidebarWidth = parseInt(0.33 * availableWidth, 10);
     }
+    if (this.state.sidebarOpen || this.state.sidebarDocked) {
+      availableWidth -= (sidebarWidth + controlsPadding);
+    }
+    const sidebarHeight = this.props.browserDimensions.height - titleBarHeight;
+
     return (
       <g>
         <AnimationController/>
@@ -131,14 +136,18 @@ class App extends React.Component {
         <ToggleSidebarTab
           open={this.state.sidebarDocked}
           handler={() => {this.setState({sidebarDocked: !this.state.sidebarDocked});}}
-          widthWhenOpen={controlsWidth}
+          widthWhenOpen={sidebarWidth}
           widthWhenShut={0}
+          dontDisplay={this.props.displayNarrative}
         />
         <Sidebar
           sidebar={
             <div>
               <TitleBar minified/>
-              {this.props.displayNarrative ? <Narrative/> : <Controls/>}
+              {this.props.displayNarrative ?
+                <Narrative width={sidebarWidth} height={sidebarHeight}/> :
+                <Controls width={sidebarWidth} height={sidebarHeight}/>
+              }
             </div>
           }
           open={this.state.sidebarOpen}

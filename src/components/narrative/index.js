@@ -2,7 +2,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
-import { narrativeWidth, controlsWidth, titleBarHeight, darkGrey } from "../../util/globals";
+import { titleBarHeight } from "../../util/globals";
 import { changePageQuery } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 
@@ -29,8 +29,7 @@ const DisplayBlock = (props) => {
 
 @connect((state) => ({
   loaded: state.narrative.loaded,
-  blocks: state.narrative.blocks,
-  browserHeight: state.browserDimensions.browserDimensions.height
+  blocks: state.narrative.blocks
 }))
 class Narrative extends React.Component {
   constructor(props) {
@@ -54,7 +53,7 @@ class Narrative extends React.Component {
         clearTimeout(this.state.timeoutRef);
       }
       /* 2: calculate shouldBeInFocus index */
-      const halfY = (this.props.browserHeight - titleBarHeight) / 2;
+      const halfY = this.props.height / 2;
       let shouldBeInFocus;
       for (let i = 0; i < this.blockRefs.length; i++) {
         const bounds = this.blockRefs[i].getBoundingClientRect();
@@ -78,13 +77,18 @@ class Narrative extends React.Component {
   }
   render() {
     if (!this.props.loaded) {return null;}
-    const width = controlsWidth + 40; /* controls sidebar has 20px L & R padding */
+    // const width = narrativeWidth + 40; /* controls sidebar has 20px L & R padding */
 
     return (
       <div
         onScroll={this.handleScroll}
         className={"static narrative"}
-        style={{height: this.props.browserHeight - titleBarHeight, maxWidth: width, minWidth: width, overflowY: "scroll"}}
+        style={{
+          width: this.props.width,
+          height: this.props.height,
+          overflowY: "scroll",
+          padding: "0px 20px 20px 20px"
+        }}
       >
         {this.props.blocks.map((b, i) => (
           <DisplayBlock
@@ -94,7 +98,7 @@ class Narrative extends React.Component {
             focus={i === this.state.focus}
           />
         ))}
-        <div style={{height: this.props.browserHeight * 0.4}}/>
+        <div style={{height: this.props.height * 0.4}}/>
       </div>
     );
   }
