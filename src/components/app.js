@@ -35,17 +35,28 @@ const Contents = ({showSpinner, availableWidth, availableHeight, panels, grid, n
   const show = (name) => panels.indexOf(name) !== -1;
   /* Calculate reponsive geometries. chart: entropy, frequencies. big: map, tree */
   const chartWidthFraction = 1;
-  const bigWidthFraction = grid ? 0.5 : 1;
+  let bigWidthFraction = grid ? 0.5 : 1;
   let chartHeightFraction = 0.3;
   let bigHeightFraction = grid ? 0.7 : 0.88;
   if (narrative) {
+    /* heights */
     if (!show("entropy")) {
       bigHeightFraction = 1;
     } else {
       bigHeightFraction = 0.7;
       chartHeightFraction = 0.3;
     }
+    /* widths */
+    if (show("map") && show("tree") && !grid) {
+      console.warn("narrative mode specified full display but we have both map & tree");
+      bigWidthFraction = 0.5;
+    }
+    if (grid && (!show("map") || !show("tree"))) {
+      console.warn("narrative mode specified grid display but we are not showing both map & tree");
+      bigWidthFraction = 1;
+    }
   }
+
   const big = computeResponsive({horizontal: bigWidthFraction, vertical: bigHeightFraction, availableWidth, availableHeight});
   const chart = computeResponsive({horizontal: chartWidthFraction, vertical: chartHeightFraction, availableWidth, availableHeight, minHeight: 150});
 
