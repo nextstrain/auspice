@@ -196,17 +196,17 @@ class Footer extends React.Component {
             let display;
             if (filterName === "authors") {
               display = (
-                <g>
+                <span>
                   {prettyString(itemName, {stripEtAl: true})}
                   {" et al (" + totalStateCount[itemName] + ")"}
-                </g>
+                </span>
               );
             } else {
               display = (
-                <g>
+                <span>
                   {prettyString(itemName)}
                   {" (" + totalStateCount[itemName] + ")"}
-                </g>
+                </span>
               );
             }
             return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);

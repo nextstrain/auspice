@@ -177,10 +177,10 @@ class Info extends React.Component {
   addNonAuthorFilterButton(buttons, filterName) {
     this.props.filters[filterName].sort().forEach((itemName) => {
       const display = (
-        <g>
+        <span>
           {prettyString(itemName)}
           {" (" + this.props.totalStateCounts[filterName][itemName] + ")"}
-        </g>
+        </span>
       );
       buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));
     });
@@ -210,19 +210,19 @@ class Info extends React.Component {
       return {
         name: v,
         label: (
-          <g>
+          <span>
             {prettyString(v, {stripEtAl: true})}
             <i>{" et al, "}</i>
             {`(n=${n})`}
-          </g>
+          </span>
         ),
         longlabel: (
-          <g>
+          <span>
             {prettyString(v, {stripEtAl: true})}
             <i>{" et al, "}</i>
             {prettyString(this.props.metadata.author_info[v].title)}
             {` (n=${n})`}
-          </g>
+          </span>
         )
       };
     });
