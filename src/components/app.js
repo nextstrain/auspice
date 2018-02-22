@@ -73,7 +73,7 @@ const Sidebar = ({show, narrative, styles}) => {
   return (
     <div style={styles}>
       <TitleBar minified/>
-      {narrative ? <Narrative/> : <Controls/>}
+      {narrative ? <Narrative height={styles.height}/> : <Controls/>}
     </div>
   );
 };
