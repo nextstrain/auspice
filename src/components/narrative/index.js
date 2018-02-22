@@ -8,18 +8,11 @@ import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 
-const blockPadding = {
-  paddingLeft: "20px",
-  paddingRight: "20px",
-  paddingTop: "40px",
-  paddingBottom: "40px"
-};
-
 const DisplayBlock = (props) => {
   return (
     <div
       ref={props.inputRef}
-      style={{...blockPadding}}
+      style={props.styles}
       className={props.focus ? "focus" : ""}
       dangerouslySetInnerHTML={props.block}
     />
@@ -35,8 +28,8 @@ class Narrative extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      focus: 0, /* idx of block in focus (and url) */
-      shouldBeInFocus: 0, /* used by timeouts */
+      focus: 1, /* idx of block in focus (and url) */
+      shouldBeInFocus: 1, /* used by timeouts */
       timeoutRef: undefined,
       lastScroll: undefined
     };
@@ -78,6 +71,13 @@ class Narrative extends React.Component {
   render() {
     if (!this.props.loaded) {return null;}
     // const width = narrativeWidth + 40; /* controls sidebar has 20px L & R padding */
+    const blockStyles = {
+      paddingLeft: "20px",
+      paddingRight: "20px",
+      paddingTop: "10px",
+      paddingBottom: "10px",
+      minHeight: this.props.height * 0.33
+    };
 
     return (
       <div
@@ -92,9 +92,10 @@ class Narrative extends React.Component {
         {this.props.blocks.map((b, i) => (
           <DisplayBlock
             inputRef={(el) => {this.blockRefs[i] = el;}}
-            key={b.url}
+            key={`block${i}`}
             block={b}
             focus={i === this.state.focus}
+            styles={blockStyles}
           />
         ))}
         <div style={{height: this.props.height * 0.4}}/>
