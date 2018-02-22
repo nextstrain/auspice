@@ -2,12 +2,10 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Card from "../framework/card";
-import computeResponsive from "../../util/computeResponsive";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/treeProperties";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton } from "../framework/footer";
-// import { CHANGE_TREE_ROOT_IDX } from "../../actions/types";
 
 const resetTreeButton = (dispatch) => {
   return (
@@ -108,7 +106,7 @@ class Info extends React.Component {
     dispatch: PropTypes.func.isRequired,
     idxOfInViewRootNode: PropTypes.number
   }
-  getStyles(responsive) {
+  getStyles(width) {
     let fontSize = 32;
     if (this.props.browserDimensions.width < 1000) {
       fontSize = 30;
@@ -124,7 +122,7 @@ class Info extends React.Component {
     }
     return {
       base: {
-        width: responsive.width + 34,
+        width: width + 34,
         display: "inline-block",
         lineHeight: 1.4
       },
@@ -137,7 +135,7 @@ class Info extends React.Component {
         fontWeight: 300,
         color: darkGrey,
         letterSpacing: "-1px",
-        maxWidth: responsive.width
+        maxWidth: width
       },
       n: {
         fontFamily: headerFont,
@@ -247,15 +245,7 @@ class Info extends React.Component {
 
   render() {
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
-    const responsive = computeResponsive({
-      horizontal: 1,
-      vertical: 1.0,
-      browserDimensions: this.props.browserDimensions,
-      padding: this.props.padding,
-      minHeight: 480,
-      maxAspectRatio: 1.0
-    });
-    const styles = this.getStyles(responsive);
+    const styles = this.getStyles(this.props.width);
     // const nSelectedAuthors = this.getNumSelectedAuthors();
     // const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
     const animating = this.props.animationPlayPauseButton === "Pause";
@@ -284,10 +274,10 @@ class Info extends React.Component {
     return (
       <Card center infocard>
         <div style={styles.base}>
-          <div width={responsive.width} style={styles.title}>
+          <div width={this.props.width} style={styles.title}>
             {title}
           </div>
-          <div width={responsive.width} style={styles.n}>
+          <div width={this.props.width} style={styles.n}>
             {/* if staging, let the user know */}
             {this.props.s3bucket === "staging" ? (
               <span style={{color: darkGrey}}>{"Currently viewing data from the staging server. "}</span>

@@ -6,7 +6,7 @@ import { zoom } from "d3-zoom";
 import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
-import { computeChartGeometry, parseEncodedGenotype } from "./entropy";
+import { parseEncodedGenotype } from "./entropy";
 
 /* EntropChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:
@@ -27,7 +27,7 @@ EntropyChart.prototype.render = function render(props) {
   this.bars = props.bars;
   this.selectedNode = props.colorBy.startsWith("gt") ? parseEncodedGenotype(props.colorBy) : undefined;
   this.svg.selectAll("*").remove(); /* tear things down */
-  this._calcOffsets(computeChartGeometry(props));
+  this._calcOffsets(props.width, props.height);
   this._drawMainNavElements();
   this._addZoomLayers();
   this._setScales(this.maxNt + 1, props.maxYVal);
@@ -263,14 +263,15 @@ EntropyChart.prototype._updateYScaleAndAxis = function _updateYScaleAndAxis(yMax
 
 
 /* calculate the offsets */
-EntropyChart.prototype._calcOffsets = function _calcOffsets(chartGeom) {
+EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
+  /* hardcoded padding */
   this.offsets = {
-    x1: chartGeom.padLeft,
-    x2: chartGeom.width - chartGeom.padRight - 20,
+    x1: 15,
+    x2: width - 32,
     y1Main: 0, /* remember y1 is the top, y2 is the bottom, measured going down */
-    y1Nav: chartGeom.height - chartGeom.padBottom - 30,
-    y2Main: chartGeom.height - chartGeom.padBottom - 50,
-    y2Nav: chartGeom.height - chartGeom.padBottom
+    y1Nav: height - 80,
+    y2Main: height - 100,
+    y2Nav: height - 50
   };
   this.offsets.heightMain = this.offsets.y2Main - this.offsets.y1Main;
   this.offsets.heightNav = this.offsets.y2Nav - this.offsets.y1Nav;

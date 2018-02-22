@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./item";
@@ -12,8 +11,7 @@ import { determineColorByGenotypeType } from "../../../util/colorHelpers";
   return {
     colorBy: state.controls.colorBy,
     colorOptions: state.metadata.colorOptions,
-    colorScale: state.controls.colorScale,
-    browserDimensions: state.browserDimensions.browserDimensions
+    colorScale: state.controls.colorScale
   };
 })
 class Legend extends React.Component {
@@ -23,32 +21,20 @@ class Legend extends React.Component {
       legendVisible: true
     };
   }
-  static propTypes = {
-    colorOptions: PropTypes.object,
-    colorScale: PropTypes.object,
-    params: PropTypes.object,
-    routes: PropTypes.array,
-    colorBy: PropTypes.string.isRequired,
-    style: PropTypes.object,
-  }
-  // hide/show legend based on initial browserDimensions and legend length
+  // hide/show legend based on initial width and legend length
   componentWillMount() {
-    this.updateLegendVisibility(this.props.browserDimensions.width, this.props.padding, this.props.colorScale);
+    this.updateLegendVisibility(this.props.width, this.props.colorScale);
   }
 
-  // hide/show legend based on browserDimensions and legend length
+  // hide/show legend based on available width and legend length
   componentWillReceiveProps(nextProps) {
-    if (this.props.browserDimensions && nextProps.browserDimensions
-        && this.props.colorScale && nextProps.colorScale) {
-      if (this.props.browserDimensions.width !== nextProps.browserDimensions.width
-        || this.props.colorScale.scale !== nextProps.colorScale.scale) {
-        this.updateLegendVisibility(nextProps.browserDimensions.width, nextProps.padding, nextProps.colorScale);
-      }
+    if (this.props.width !== nextProps.width || this.props.colorScale.scale !== nextProps.colorScale.scale) {
+      this.updateLegendVisibility(nextProps.width, nextProps.colorScale);
     }
   }
 
-  updateLegendVisibility(currentWidth, padding, colorScale) {
-    if (currentWidth < 600 + padding.left + padding.right) {
+  updateLegendVisibility(width, colorScale) {
+    if (width < 600) {
       this.setState({legendVisible: false});
     } else {
       this.setState({legendVisible: true});

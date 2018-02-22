@@ -1,9 +1,7 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { prettyString } from "../../util/stringHelpers";
-import computeResponsive from "../../util/computeResponsive";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { applyFilter } from "../../actions/treeProperties";
@@ -253,13 +251,7 @@ class Footer extends React.Component {
   render() {
     if (!this.props.metadata || !this.props.tree.nodes) return null;
     const styles = this.getStyles();
-    const responsive = computeResponsive({
-      horizontal: 1,
-      vertical: 0.3333333,
-      browserDimensions: this.props.browserDimensions,
-      padding: this.props.padding
-    });
-    const width = responsive.width - 30; // need to subtract margin when calculating div width
+    const width = this.props.width - 30; // need to subtract margin when calculating div width
     return (
       <div style={styles.footer}>
         <div style={{width: width}}>

@@ -9,10 +9,8 @@ import Legend from "./legend/legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
 import PhyloTree from "./phyloTree/phyloTree";
-import { mediumTransitionDuration } from "../../util/globals";
 import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
-import computeResponsive from "../../util/computeResponsive";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface";
 import * as callbacks from "./reactD3Interface/callbacks";
 import { calcStrokeCols } from "./treeHelpers";
@@ -28,7 +26,6 @@ there are actually backlinks from the phylotree tree
   return {
     tree: state.tree,
     quickdraw: state.controls.quickdraw,
-    browserDimensions: state.browserDimensions.browserDimensions,
     colorBy: state.controls.colorBy,
     colorByConfidence: state.controls.colorByConfidence,
     layout: state.controls.layout,
@@ -88,17 +85,9 @@ class Tree extends React.Component {
 
   /* CDU is used to update phylotree when the SVG size _has_ changed (and this is why it's in CDU not CWRP) */
   componentDidUpdate(prevProps) {
-    if ( // the tree exists AND
+    if ( // the tree exists AND the width has changed (browser resize, sidebar open/close...)
       this.state.tree &&
-      ( // either the browser dimensions have changed
-        prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
-        prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
-        // or the sidebar(s) have (dis)appeared
-        this.props.padding.left !== prevProps.padding.left ||
-        this.props.padding.right !== prevProps.padding.right ||
-        // or we have changed between "full" & "grid"
-        prevProps.panelLayout !== this.props.panelLayout
-      )
+      (this.props.width !== prevProps.width || this.props.height !== prevProps.height)
     ) {
       this.state.tree.change({svgHasChangedDimensions: true});
     }
@@ -143,18 +132,9 @@ class Tree extends React.Component {
   }
 
   render() {
-    const grid = this.props.panelLayout === "grid"; /* add a check here for min browser width tbd */
-    const responsive = computeResponsive({
-      horizontal: grid ? 0.5 : 1,
-      vertical: grid ? 0.7 : 0.88,
-      browserDimensions: this.props.browserDimensions,
-      padding: this.props.padding
-    });
-    const cardTitle = "Phylogeny";
-
     return (
-      <Card center title={cardTitle}>
-        <Legend padding={this.props.padding}/>
+      <Card center title={"Phylogeny"}>
+        <Legend width={this.props.width}/>
         <HoverInfoPanel
           tree={this.state.tree}
           mutType={this.props.mutType}
@@ -172,8 +152,8 @@ class Tree extends React.Component {
           metadata={this.props.metadata}
         />
         <ReactSVGPanZoom
-          width={responsive ? responsive.width : 1}
-          height={responsive ? responsive.height : 1}
+          width={this.props.width}
+          height={this.props.height}
           ref={(Viewer) => {
             // https://facebook.github.io/react/docs/refs-and-the-dom.html
             this.Viewer = Viewer;
@@ -189,12 +169,12 @@ class Tree extends React.Component {
           onChangeValue={this.onViewerChange}
         >
           <svg style={{pointerEvents: "auto"}}
-            width={responsive.width}
-            height={responsive.height}
+            width={this.props.width}
+            height={this.props.height}
           >
             <g
-              width={responsive.width}
-              height={responsive.height}
+              width={this.props.width}
+              height={this.props.height}
               id={"d3TreeElement"}
               style={{cursor: "default"}}
               ref={(c) => {this.d3ref = c;}}

@@ -12,7 +12,7 @@ import { Entropy } from "./charts/entropy";
 import Map from "./map/map";
 import Info from "./info/info";
 import Tree from "./tree";
-import { controlsHiddenWidth, narrativeWidth, controlsWidth } from "../util/globals";
+import { controlsHiddenWidth, narrativeWidth, controlsWidth, controlsPadding } from "../util/globals";
 import { sidebarColor } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
@@ -21,21 +21,41 @@ import { analyticsNewPage } from "../util/googleAnalytics";
 import filesDropped from "../actions/filesDropped";
 import Narrative from "./narrative";
 import AnimationController from "./framework/animationController";
+import { calcUsableWidth, computeResponsive } from "../util/computeResponsive";
 
 const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
-const Contents = ({showSpinner, spinnerHeight, panels, padding, narrative}) => {
+/* <Contents> contains the header, tree, map, footer components etc.
+ * here is where the panel sizes are decided, as well as which components are displayed.
+ */
+const Contents = ({showSpinner, availableWidth, availableHeight, panels, grid, narrative}) => {
   if (showSpinner) {
-    return (<img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: spinnerHeight}}/>);
+    return (<img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${availableHeight / 2 - 100}px`}}/>);
   }
   const show = (name) => panels.indexOf(name) !== -1;
+  /* Calculate reponsive geometries. chart: entropy, frequencies. big: map, tree */
+  const chartWidthFraction = 1;
+  const bigWidthFraction = grid ? 0.5 : 1;
+  let chartHeightFraction = 0.3;
+  let bigHeightFraction = grid ? 0.7 : 0.88;
+  if (narrative) {
+    if (!show("entropy")) {
+      bigHeightFraction = 1;
+    } else {
+      bigHeightFraction = 0.7;
+      chartHeightFraction = 0.3;
+    }
+  }
+  const big = computeResponsive({horizontal: bigWidthFraction, vertical: bigHeightFraction, availableWidth, availableHeight});
+  const chart = computeResponsive({horizontal: chartWidthFraction, vertical: chartHeightFraction, availableWidth, availableHeight, minHeight: 150});
+
   return (
     <Background>
-      {narrative ? null : <Info padding={padding} />}
-      {show("tree") ? <Tree padding={padding} /> : null}
-      {show("map") ? <Map padding={padding} justGotNewDatasetRenderNewMap={false} /> : null}
-      {show("entropy") ? <Entropy padding={padding} /> : null}
-      {narrative ? null : <Footer padding={padding} />}
+      {narrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
+      {show("tree") ? <Tree width={big.width} height={big.height} /> : null}
+      {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
+      {show("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
+      {narrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
     </Background>
   );
 };
@@ -46,6 +66,7 @@ const Contents = ({showSpinner, spinnerHeight, panels, padding, narrative}) => {
   metadataLoaded: state.metadata.loaded,
   treeLoaded: state.tree.loaded,
   panelsToDisplay: state.controls.panelsToDisplay,
+  panelLayout: state.controls.panelLayout,
   displayNarrative: state.narrative.display,
   browserDimensions: state.browserDimensions.browserDimensions
 }))
@@ -87,12 +108,11 @@ class App extends React.Component {
     }
   }
   render() {
-    const padding = {
-      left: this.state.sidebarOpen || this.state.sidebarDocked ? controlsWidth : 0,
-      right: 0,
-      top: 0,
-      bottom: 0
-    };
+    let availableWidth = this.props.browserDimensions.width;
+    if (this.state.sidebarOpen || this.state.sidebarDocked) {
+      availableWidth -= this.props.displayNarrative ? controlsWidth : controlsWidth;
+      availableWidth -= controlsPadding;
+    }
     return (
       <g>
         <AnimationController/>
@@ -118,9 +138,10 @@ class App extends React.Component {
         >
           <Contents
             showSpinner={!this.props.treeLoaded || !this.props.metadataLoaded}
-            spinnerHeight={`${this.props.browserDimensions.height / 2 - 100}px`}
+            availableWidth={availableWidth}
+            availableHeight={this.props.browserDimensions.height}
             panels={this.props.panelsToDisplay}
-            padding={padding}
+            grid={this.props.panelLayout === "grid"}
             narrative={this.props.displayNarrative}
           />
         </Sidebar>

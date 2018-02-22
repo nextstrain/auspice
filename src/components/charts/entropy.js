@@ -2,7 +2,6 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Card from "../framework/card";
-import computeResponsive from "../../util/computeResponsive";
 import { changeColorBy } from "../../actions/colors";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
@@ -48,24 +47,6 @@ export const parseEncodedGenotype = (colorBy) => {
   return data;
 };
 
-export const computeChartGeometry = (props) => {
-  const responsive = computeResponsive({
-    horizontal: 1,
-    vertical: 0.3,
-    browserDimensions: props.browserDimensions,
-    padding: props.padding,
-    minHeight: 150
-  });
-  return {
-    responsive,
-    width: responsive.width,
-    height: responsive.height,
-    padBottom: 50,
-    padLeft: 15,
-    padRight: 12
-  };
-};
-
 @connect((state) => {
   return {
     mutType: state.controls.mutType,
@@ -75,7 +56,6 @@ export const computeChartGeometry = (props) => {
     geneLength: state.controls.geneLength,
     maxYVal: state.entropy.maxYVal,
     showCounts: state.entropy.showCounts,
-    browserDimensions: state.browserDimensions.browserDimensions,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
     defaultColorBy: state.controls.defaults.colorBy,
@@ -94,7 +74,6 @@ export class Entropy extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
     entropy: PropTypes.object,
-    browserDimensions: PropTypes.object.isRequired,
     loaded: PropTypes.bool.isRequired,
     colorBy: PropTypes.string,
     defaultColorBy: PropTypes.string,
@@ -104,7 +83,7 @@ export class Entropy extends React.Component {
   /* CALLBACKS */
   onHover(d, x, y) {
     // console.log("hovering @", x, y, this.state.chartGeom);
-    this.setState({hovered: {d, type: ".tip", x, y, chartGeom: this.state.chartGeom}});
+    this.setState({hovered: {d, type: ".tip", x, y}});
   }
   onLeave() {
     this.setState({hovered: false});
@@ -189,15 +168,18 @@ export class Entropy extends React.Component {
     if (!nextProps.loaded) {
       this.setState({chart: false});
     }
-    if (!this.state.chart && nextProps.loaded) {
-      this.setUp(nextProps);
+    if (!this.state.chart) {
+      if (nextProps.loaded) {
+        this.setUp(nextProps);
+      }
       return;
     }
-    if (this.state.chart && ((this.props.browserDimensions !== nextProps.browserDimensions) || (this.props.padding.left !== nextProps.padding.left || this.props.padding.right !== nextProps.padding.right))) {
-      timerStart("entropy initial render"); this.state.chart.render(nextProps); timerEnd("entropy initial render");
-      return;
-    }
-    if (this.state.chart) { /* props changed => update */
+    // if we're here, then this.state.chart exists
+    if (this.props.width !== nextProps.width || this.props.height !== nextProps.height) {
+      timerStart("entropy initial render");
+      this.state.chart.render(nextProps);
+      timerEnd("entropy initial render");
+    } else { /* props changed, but a new render isn't required */
       timerStart("entropy D3 update");
       const updateParams = {};
       if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
@@ -220,23 +202,23 @@ export class Entropy extends React.Component {
   }
 
   render() {
-    const chartGeom = computeChartGeometry(this.props);
-    const styles = getStyles(chartGeom.width);
+    const styles = getStyles(this.props.width);
     return (
       <Card title={"Diversity"}>
         {this.aaNtSwitch(styles)}
         {this.entropyCountSwitch(styles)}
         <InfoPanel
           hovered={this.state.hovered}
-          chartGeom={chartGeom}
+          width={this.props.width}
+          height={this.props.height}
           mutType={this.props.mutType}
           showCounts={this.props.showCounts}
         />
         <svg
           id="d3entropyParent"
           style={{pointerEvents: "auto"}}
-          width={chartGeom.responsive.width}
-          height={chartGeom.height}
+          width={this.props.width}
+          height={this.props.height}
         >
           <g ref={(c) => { this.d3entropy = c; }} id="d3entropy"/>
         </svg>
