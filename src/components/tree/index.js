@@ -2,18 +2,18 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { select } from "d3-selection";
+import { rgb } from "d3-color";
 import { ReactSVGPanZoom } from "react-svg-pan-zoom";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
 import ZoomOutIcon from "../framework/zoom-out-icon";
 import ZoomInIcon from "../framework/zoom-in-icon";
 import PhyloTree from "./phyloTree/phyloTree";
-import { mediumTransitionDuration } from "../../util/globals";
 import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
-import computeResponsive from "../../util/computeResponsive";
-import { updateStylesAndAttrs, salientPropChanges } from "./reactD3Interface";
+import { changePhyloTreeViaPropsComparison } from "./reactD3Interface";
 import * as callbacks from "./reactD3Interface/callbacks";
+import { calcStrokeCols } from "./treeHelpers";
 
 /*
 this.props.tree contains the nodes etc used to build the PhyloTree
@@ -26,12 +26,10 @@ there are actually backlinks from the phylotree tree
   return {
     tree: state.tree,
     quickdraw: state.controls.quickdraw,
-    browserDimensions: state.browserDimensions.browserDimensions,
     colorBy: state.controls.colorBy,
     colorByConfidence: state.controls.colorByConfidence,
     layout: state.controls.layout,
     temporalConfidence: state.controls.temporalConfidence,
-    showBranchLabels: state.controls.showBranchLabels,
     distanceMeasure: state.controls.distanceMeasure,
     mutType: state.controls.mutType,
     colorScale: state.controls.colorScale,
@@ -60,67 +58,38 @@ class Tree extends React.Component {
     mutType: PropTypes.string.isRequired
   }
 
+  /* CWRP has two tasks: (1) create the tree when it's in redux
+  (2) compare props and call phylotree.change() appropritately */
   componentWillReceiveProps(nextProps) {
-    /* This both creates the tree (when it's loaded into redux) and
-    works out what to update, based upon changes to redux.control */
     let tree = this.state.tree;
-    const changes = salientPropChanges(this.props, nextProps, tree);
-    /* usefull for debugging: */
-    // console.log("CWRP Changes:",
-    //    Object.keys(changes).filter((k) => !!changes[k]).reduce((o, k) => {
-    //      o[k] = changes[k]; return o;
-    //    }, {}));
-
-    if (changes.dataInFlux) {
+    if (!nextProps.tree.loaded) {
       this.setState({tree: null});
-      return null;
-    } else if (changes.newData) {
+    } else if (tree === null && nextProps.tree.loaded) {
       tree = this.makeTree(nextProps);
-      /* extra (initial, once only) call to update the tree colouring */
-      for (const k in changes) { // eslint-disable-line
-        changes[k] = false;
-      }
-      changes.colorBy = true;
-      updateStylesAndAttrs(this, changes, nextProps, tree);
       this.setState({tree});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
       }
-      return null; /* return to avoid an unnecessary updateStylesAndAttrs call */
+    } else if (tree) {
+      changePhyloTreeViaPropsComparison(this, nextProps);
     }
-    if (tree) {
-      updateStylesAndAttrs(this, changes, nextProps, tree);
-    }
-    return null;
   }
 
   componentDidMount() {
     const tree = this.makeTree(this.props);
-    updateStylesAndAttrs(this, {colorBy: true}, this.props, tree);
     this.setState({tree});
     if (this.Viewer) {
       this.Viewer.fitToViewer();
     }
   }
 
+  /* CDU is used to update phylotree when the SVG size _has_ changed (and this is why it's in CDU not CWRP) */
   componentDidUpdate(prevProps) {
-    /* if the  SVG has changed size, call zoomIntoClade so that the tree rescales to fit the SVG */
-    if (
-      // the tree exists AND
+    if ( // the tree exists AND the width has changed (browser resize, sidebar open/close...)
       this.state.tree &&
-      // either the browser dimensions have changed
-      (
-        prevProps.browserDimensions.width !== this.props.browserDimensions.width ||
-        prevProps.browserDimensions.height !== this.props.browserDimensions.height ||
-        // or the sidebar(s) have (dis)appeared
-        this.props.padding.left !== prevProps.padding.left ||
-        this.props.padding.right !== prevProps.padding.right ||
-        prevProps.panelLayout !== this.props.panelLayout /* full vs grid */
-      )
-
+      (this.props.width !== prevProps.width || this.props.height !== prevProps.height)
     ) {
-      const baseNodeInView = this.state.selectedBranch ? this.state.selectedBranch.n.arrayIdx : 0;
-      this.state.tree.zoomIntoClade(this.state.tree.nodes[baseNodeInView], mediumTransitionDuration);
+      this.state.tree.change({svgHasChangedDimensions: true});
     }
   }
 
@@ -133,11 +102,10 @@ class Tree extends React.Component {
         select(this.d3ref),
         this.props.layout,
         this.props.distanceMeasure,
-        { /* options */
+        { /* parameters (modifies PhyloTree's defaults) */
           grid: true,
           confidence: nextProps.temporalConfidence.display,
-          branchLabels: true,
-          showBranchLabels: false,
+          showCladeLabels: true,
           tipLabels: true,
           showTipLabels: true
         },
@@ -148,15 +116,15 @@ class Tree extends React.Component {
           onBranchClick: callbacks.onBranchClick.bind(this),
           onBranchLeave: callbacks.onBranchLeave.bind(this),
           onTipLeave: callbacks.onTipLeave.bind(this),
-          branchLabel: callbacks.branchLabel,
-          branchLabelSize: callbacks.branchLabelSize,
           tipLabel: (d) => d.n.strain,
           tipLabelSize: callbacks.tipLabelSize.bind(this)
         },
         nextProps.tree.branchThickness, /* guarenteed to be in redux by now */
         nextProps.tree.visibility,
         nextProps.temporalConfidence.on, /* drawConfidence? */
-        nextProps.tree.vaccines
+        nextProps.tree.vaccines,
+        calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy),
+        nextProps.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString())
       );
       return myTree;
     }
@@ -164,18 +132,9 @@ class Tree extends React.Component {
   }
 
   render() {
-    const grid = this.props.panelLayout === "grid"; /* add a check here for min browser width tbd */
-    const responsive = computeResponsive({
-      horizontal: grid ? 0.5 : 1,
-      vertical: grid ? 0.7 : 0.88,
-      browserDimensions: this.props.browserDimensions,
-      padding: this.props.padding
-    });
-    const cardTitle = "Phylogeny";
-
     return (
-      <Card center title={cardTitle}>
-        <Legend padding={this.props.padding}/>
+      <Card center title={"Phylogeny"}>
+        <Legend width={this.props.width}/>
         <HoverInfoPanel
           tree={this.state.tree}
           mutType={this.props.mutType}
@@ -193,8 +152,8 @@ class Tree extends React.Component {
           metadata={this.props.metadata}
         />
         <ReactSVGPanZoom
-          width={responsive ? responsive.width : 1}
-          height={responsive ? responsive.height : 1}
+          width={this.props.width}
+          height={this.props.height}
           ref={(Viewer) => {
             // https://facebook.github.io/react/docs/refs-and-the-dom.html
             this.Viewer = Viewer;
@@ -210,12 +169,12 @@ class Tree extends React.Component {
           onChangeValue={this.onViewerChange}
         >
           <svg style={{pointerEvents: "auto"}}
-            width={responsive.width}
-            height={responsive.height}
+            width={this.props.width}
+            height={this.props.height}
           >
             <g
-              width={responsive.width}
-              height={responsive.height}
+              width={this.props.width}
+              height={this.props.height}
               id={"d3TreeElement"}
               style={{cursor: "default"}}
               ref={(c) => {this.d3ref = c;}}

@@ -8,7 +8,6 @@ import { select } from "d3-selection";
 import leafletImage from "leaflet-image";
 import Card from "../framework/card";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
-import computeResponsive from "../../util/computeResponsive";
 import {
   createDemeAndTransmissionData,
   updateDemeAndTransmissionDataColAndVis,
@@ -34,7 +33,6 @@ import { timerStart, timerEnd } from "../../util/perf";
     visibility: state.tree.visibility,
     visibilityVersion: state.tree.visibilityVersion,
     metadata: state.metadata,
-    browserDimensions: state.browserDimensions.browserDimensions,
     colorScaleVersion: state.controls.colorScale.version,
     map: state.map,
     geoResolution: state.controls.geoResolution,
@@ -97,13 +95,13 @@ class Map extends React.Component {
     }
   }
   componentDidMount() {
-    this.maybeComputeResponsive(this.props);
+    this.maybeChangeSize(this.props);
     this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(this.props);
   }
   componentWillReceiveProps(nextProps) {
-    this.maybeComputeResponsive(nextProps);
+    this.maybeChangeSize(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(nextProps);
@@ -116,19 +114,12 @@ class Map extends React.Component {
   }
   maybeInvalidateMapSize(nextProps) {
     /* when we procedurally change the size of the card, for instance, when we swap from grid to full */
-    if (
-      this.state.map &&
-      (
-        this.props.padding.left !== nextProps.padding.right ||
-        this.props.padding.right !== nextProps.padding.right ||
-        this.props.panelLayout !== nextProps.panelLayout
-      )
-    ) {
+    if (this.state.map && (this.props.width !== nextProps.width || this.props.height !== nextProps.height)) {
       window.setTimeout(this.invalidateMapSize.bind(this), 1500);
     }
   }
   invalidateMapSize() {
-    this.state.map.invalidateSize()
+    this.state.map.invalidateSize();
   }
   maybeCreateLeafletMap() {
     /* first time map, this sets up leaflet */
@@ -136,37 +127,15 @@ class Map extends React.Component {
       this.createMap();
     }
   }
-  maybeComputeResponsive(nextProps) {
-    /*
-      React to browser width/height changes responsively
-      This is stored in state because it's used by both the map and the d3 overlay
-    */
-    const changes = {
-      dimensionsChanged: this.props.browserDimensions.width !== nextProps.browserDimensions.width || this.props.browserDimensions.height !== nextProps.browserDimensions.height,
-      responsiveNotSet: !this.state.responsive,
-      treeChanged: this.props.treeVersion !== nextProps.treeVersion, // treeVersion change implies tree is ready (modified by the same action)
-      sidebarChanged: this.props.padding.left !== nextProps.padding.left || this.props.padding.right !== nextProps.padding.right,
-      panelLayout: this.props.panelLayout !== nextProps.panelLayout,
-    };
-
-    // Object.values would be the obvious thing to do here
-    // but not supported in many browsers including iOS Safari
-    const values = Object.keys(changes).map((key) => {
-      return changes[key];
-    });
-
-    if (values.some(v => v === true)) {
-      this.setState({responsive: this.doComputeResponsive(nextProps)});
+  maybeChangeSize(nextProps) {
+    if (this.props.width !== nextProps.width ||
+      this.props.height !== nextProps.height ||
+      !this.state.responsive ||
+      this.props.treeVersion !== nextProps.treeVersion // treeVersion change implies tree is ready (modified by the same action)
+    ) {
+      /* This is stored in state because it's used by both the map and the d3 overlay */
+      this.setState({responsive: {width: nextProps.width, height: nextProps.height}});
     }
-  }
-  doComputeResponsive(nextProps) {
-    const grid = nextProps.panelLayout === "grid"; /* add a check here for min browser width tbd */
-    return computeResponsive({
-      horizontal: grid ? 0.5 : 1,
-      vertical: grid ? 0.7 : 0.88, /* if we are in single column, full height */
-      browserDimensions: nextProps.browserDimensions,
-      padding: nextProps.padding
-    });
   }
   maybeSetupD3DOMNode() {
     if (

@@ -133,10 +133,6 @@ const generateTiles = (props) => {
 class Splash extends React.Component {
   componentWillMount() {
     analyticsNewPage();
-    const script = document.createElement("script");
-    script.src = "https://platform.twitter.com/widgets.js";
-    script.async = true;
-    document.body.appendChild(script);
   }
   render() {
     return (

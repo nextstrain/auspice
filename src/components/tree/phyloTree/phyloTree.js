@@ -3,15 +3,14 @@ import { max } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { defaultParams } from "./defaultParams";
 import { addLeafCount, createChildrenAndParents } from "./helpers";
+import { change, modifySVG, modifySVGInStages } from "./change";
 
 /* PROTOTYPES */
 import * as renderers from "./renderers";
 import * as layouts from "./layouts";
-import * as zoom from "./zoom";
 import * as grid from "./grid";
 import * as confidence from "./confidence";
 import * as labels from "./labels";
-import * as generalUpdates from "./generalUpdates";
 
 
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
@@ -27,6 +26,7 @@ const PhyloTree = function PhyloTree(reduxNodes) {
    -- reduxNodes[i].shell = this.nodes[i] */
   this.nodes = reduxNodes.map((d) => {
     const phyloNode = {
+      that: this,
       n: d, /* a back link to the redux node */
       x: 0,
       y: 0,
@@ -43,11 +43,15 @@ const PhyloTree = function PhyloTree(reduxNodes) {
   this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
   addLeafCount(this.nodes[0]);
-
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
-  this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
-    {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
+  // this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
+  //   {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});
 };
+
+/* C H A N G E */
+PhyloTree.prototype.change = change;
+PhyloTree.prototype.modifySVG = modifySVG;
+PhyloTree.prototype.modifySVGInStages = modifySVGInStages;
 
 /* I N I T I A L        R E N D E R       E T C */
 PhyloTree.prototype.render = renderers.render;
@@ -68,6 +72,7 @@ PhyloTree.prototype.timeVsRootToTip = layouts.timeVsRootToTip;
 PhyloTree.prototype.unrootedLayout = layouts.unrootedLayout;
 PhyloTree.prototype.radialLayout = layouts.radialLayout;
 PhyloTree.prototype.setScales = layouts.setScales;
+PhyloTree.prototype.mapToScreen = layouts.mapToScreen;
 
 /* C O N F I D E N C E    I N T E R V A L S */
 PhyloTree.prototype.removeConfidence = confidence.removeConfidence;
@@ -75,33 +80,13 @@ PhyloTree.prototype.drawConfidence = confidence.drawConfidence;
 PhyloTree.prototype.drawSingleCI = confidence.drawSingleCI;
 PhyloTree.prototype.updateConfidence = confidence.updateConfidence;
 
-/* G E N E R A L    U P D A T E S */
-PhyloTree.prototype.updateDistance = generalUpdates.updateDistance;
-PhyloTree.prototype.updateLayout = generalUpdates.updateLayout;
-PhyloTree.prototype.updateGeometry = generalUpdates.updateGeometry;
-PhyloTree.prototype.updateGeometryFade = generalUpdates.updateGeometryFade;
-PhyloTree.prototype.updateTimeBar = () => {};
-PhyloTree.prototype.updateMultipleArray = generalUpdates.updateMultipleArray;
-PhyloTree.prototype.updateStyleOrAttribute = generalUpdates.updateStyleOrAttribute;
-PhyloTree.prototype.updateStyleOrAttributeArray = generalUpdates.updateStyleOrAttributeArray;
-PhyloTree.prototype.redrawAttribute = generalUpdates.redrawAttribute;
-PhyloTree.prototype.redrawStyle = generalUpdates.redrawStyle;
-
 /* L A B E L S    ( T I P ,    B R A N C H ,   C O N F I D E N C E ) */
 PhyloTree.prototype.drawCladeLabels = labels.drawCladeLabels;
-PhyloTree.prototype.updateBranchLabels = labels.updateBranchLabels;
+PhyloTree.prototype.updateCladeLabels = labels.updateCladeLabels;
 PhyloTree.prototype.updateTipLabels = labels.updateTipLabels;
-PhyloTree.prototype.hideBranchLabels = labels.hideBranchLabels;
-PhyloTree.prototype.showBranchLabels = labels.showBranchLabels;
 
 /* G R I D */
 PhyloTree.prototype.hideGrid = grid.hideGrid;
-PhyloTree.prototype.removeGrid = grid.removeGrid;
 PhyloTree.prototype.addGrid = grid.addGrid;
-
-/* Z O O M ,    F I T     TO     S C R E E N ,     E T C */
-PhyloTree.prototype.zoomIntoClade = zoom.zoomIntoClade;
-PhyloTree.prototype.zoomToParent = zoom.zoomToParent;
-PhyloTree.prototype.mapToScreen = zoom.mapToScreen;
 
 export default PhyloTree;

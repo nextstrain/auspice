@@ -6,44 +6,50 @@ const fs = require('fs');
 const path = require("path");
 const request = require('request');
 
-const makeBlock = (url = false, title = "Untitled") => {
-  return ({lines: [], url, title});
+const makeBlock = (url = "") => {
+  return ({lines: [], url});
 };
+
+const parsePreamble = (blocks, lines) => {
+  if (!lines[0].startsWith("---")) {
+    return 0;
+  }
+  const block = makeBlock(); /* initialise */
+  const contents = {title: false, author: false, date: false, category: false};
+  let n = 1;
+  while (n < lines.length) {
+    if (lines[n].startsWith("---")) {
+      break;
+    }
+    const parts = lines[n].split(': ');
+    if (parts.length === 2 && contents[parts[0]] === false) {
+      contents[parts[0]] = parts[1];
+    }
+    n++;
+  }
+  if (contents.title) block.lines.push(`# ${contents.title}`);
+  if (contents.author) block.lines.push(`* _Written by:_ **${contents.author}**`);
+  if (contents.date) block.lines.push(`* _Date:_ **${contents.date}**`);
+  if (contents.category) block.lines.push(`* _Category:_ **${contents.category}**`);
+  blocks.push(block);
+  return ++n;
+};
+
 
 const parseMarkdownArray = (mdArr) => {
   const blocks = [];
   const nMax = mdArr.length;
-  const reUrl = /url=([^\s`]+)/;
-  const reTitle = /#\s+(.+$)/;
-  let titleSet = false;
-  let n = 0;
+  const reUrl = /url=[^\s]+\?([^\s`]*)/;
+  let n = parsePreamble(blocks, mdArr); /* modifies blocks in-place */
   let block = makeBlock(); /* initialise */
   while (n < nMax) {
     const line = mdArr[n];
-    if (line.startsWith('`nextstrain')) {
-      if (line.includes("newBlock")) {
-        if (block.lines.length) {
-          blocks.push(block); /* push the previous block onto the stack */
-        }
-        block = makeBlock();
-        if (line.match(reUrl)) {
-          block.url = line.match(reUrl)[1];
-        }
-        titleSet = false;
-      } else {
-        console.warn("Narrative: ignoring nextstrain line without newBlock");
+    if (line.startsWith('`nextstrain') && line.match(reUrl)) {
+      if (block.lines.length && block.lines.filter((l) => l.length).length) {
+        blocks.push(block); /* push the previous block onto the stack */
       }
-    } else if (!titleSet) {
-      if (line.startsWith('#')) {
-        titleSet = true;
-        if (line.match(reTitle)) {
-          block.title = line.match(reTitle)[1];
-        } else {
-          console.warn("Narrative: incorrectly parsed this title:", line);
-        }
-      }
+      block = makeBlock(line.match(reUrl)[1]);
     } else {
-      /* title is set and it's not a instruction line */
       block.lines.push(line);
     }
     n++;

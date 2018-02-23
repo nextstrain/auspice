@@ -7,9 +7,9 @@ import * as types from "./types";
 import { updateEntropyVisibility } from "./entropy";
 import { updateFrequencyDataDebounced } from "./frequencies";
 import { calendarToNumeric } from "../util/dateHelpers";
+import { applyToChildren } from "../components/tree/phyloTree/helpers";
 
-
-const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
+export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
   const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);
@@ -39,6 +39,18 @@ export const updateVisibleTipsAndBranchThicknesses = (
     const { tree, controls } = getState();
     if (!tree.nodes) {return;}
     const validIdxRoot = idxOfInViewRootNode !== undefined ? idxOfInViewRootNode : tree.idxOfInViewRootNode;
+    if (idxOfInViewRootNode !== tree.idxOfInViewRootNode && tree.nodes[0].shell) {
+      /* a bit hacky, should be somewhere else */
+      tree.nodes.forEach((d) => {
+        d.shell.inView = false;
+        d.shell.update = true;
+      });
+      if (tree.nodes[validIdxRoot].shell.terminal) {
+        applyToChildren(tree.nodes[validIdxRoot].shell.parent, (d) => {d.inView = true;});
+      } else {
+        applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
+      }
+    }
     const data = calculateVisiblityAndBranchThickness(tree, controls, {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}, {tipSelectedIdx, validIdxRoot});
     dispatch({
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,

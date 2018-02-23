@@ -59,10 +59,6 @@ const Tree = (state = getDefaultState(), action) => {
       return Object.assign({}, state, {
         loaded: false
       });
-    case types.CHANGE_TREE_ROOT_IDX:
-      return Object.assign({}, state, {
-        idxOfInViewRootNode: action.idxOfInViewRootNode
-      });
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       const newStates = {
@@ -72,7 +68,7 @@ const Tree = (state = getDefaultState(), action) => {
         branchThicknessVersion: action.branchThicknessVersion,
         idxOfInViewRootNode: action.idxOfInViewRootNode,
         visibleStateCounts: getValuesAndCountsOfVisibleTraitsFromTree(state.nodes, action.visibility, action.stateCountAttrs)
-      }
+      };
       /* we only want to calculate totalStateCounts on the first pass */
       if (!state.loaded) {
         newStates.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(state.nodes, action.stateCountAttrs);
@@ -83,6 +79,8 @@ const Tree = (state = getDefaultState(), action) => {
         tipRadii: action.data,
         tipRadiiVersion: action.version
       });
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
+      return action.newTree;
     case types.NEW_COLORS:
       return Object.assign({}, state, {
         nodeColors: action.nodeColors,

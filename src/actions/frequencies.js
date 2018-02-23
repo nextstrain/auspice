@@ -22,7 +22,6 @@ const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
 
 export const updateFrequencyData = (dispatch, getState) => {
   timerStart("updateFrequencyData");
-  console.time("updateFrequencyData");
   const { frequencies, tree, controls } = getState();
   if (!controls.colorScale) {
     console.error("Race condition. ColourScale not Set. Frequency Matrix can't be calculated.");
@@ -86,7 +85,6 @@ export const updateFrequencyData = (dispatch, getState) => {
   }
 
   // console.log("Saw ", debugTipsSeen, " tips (visible) producing pre-normalisation pivots totals of", debugPivotTotals);
-  console.timeEnd("updateFrequencyData");
   timerEnd("updateFrequencyData");
   dispatch({type: types.FREQUENCY_MATRIX, matrix});
 };

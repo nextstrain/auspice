@@ -7,12 +7,11 @@ import { defaultGeoResolution,
   defaultLayout,
   mutType,
   twoColumnBreakpoint,
-  genotypeColors,
   reallySmallNumber } from "../util/globals";
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 
-const checkColorByConfidence = (attrs, colorBy) => {
+export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
 };
 
@@ -38,7 +37,7 @@ const getMaxCalDateViaTree = (tree) => {
 };
 
 /* need a (better) way to keep the queryParams all in "sync" */
-const modifyStateViaURLQuery = (state, query) => {
+export const modifyStateViaURLQuery = (state, query) => {
   // console.log("Query incoming: ", query);
   if (query.l) {
     state["layout"] = query.l;
@@ -54,6 +53,13 @@ const modifyStateViaURLQuery = (state, query) => {
   }
   if (query.p && state.canTogglePanelLayout && (query.p === "full" || query.p === "grid")) {
     state["panelLayout"] = query.p;
+  }
+  if (query.d) {
+    const proposed = query.d.split(",");
+    state.panelsToDisplay = state.panelsAvailable.filter((n) => proposed.indexOf(n) !== -1);
+    if (state.panelsToDisplay.indexOf("map") === -1 || state.panelsToDisplay.indexOf("tree") === -1) {
+      state["panelLayout"] = "full";
+    }
   }
   if (query.dmin) {
     state["dateMin"] = query.dmin;
@@ -85,7 +91,7 @@ const modifyStateViaURLQuery = (state, query) => {
   return state;
 };
 
-const restoreQueryableStateToDefaults = (state) => {
+export const restoreQueryableStateToDefaults = (state) => {
   for (const key of Object.keys(state.defaults)) {
     switch (typeof state.defaults[key]) {
       case "string": {
@@ -108,7 +114,7 @@ const restoreQueryableStateToDefaults = (state) => {
   state["dateMaxNumeric"] = state["absoluteDateMaxNumeric"];
 
   state["panelLayout"] = calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full";
-
+  state.panelsToDisplay = state.panelsAvailable.slice();
   // console.log("state now", state);
   return state;
 };
@@ -170,8 +176,12 @@ const modifyStateViaMetadata = (state, metadata) => {
     }
   }
 
+  state.panelsAvailable = metadata.panels.slice();
+  state.panelsToDisplay = metadata.panels.slice();
+
   /* if only map or only tree, then panelLayout must be full */
-  if (metadata.panels.indexOf("map") === -1 || metadata.panels.indexOf("tree") === -1) {
+  /* note - this will be overwritten by the URL query */
+  if (state.panelsAvailable.indexOf("map") === -1 || state.panelsAvailable.indexOf("tree") === -1) {
     state.panelLayout = "full";
     state.canTogglePanelLayout = false;
   }
@@ -204,7 +214,7 @@ const modifyStateViaTree = (state, tree) => {
   return state;
 };
 
-const checkAndCorrectErrorsInState = (state, metadata) => {
+export const checkAndCorrectErrorsInState = (state, metadata) => {
   /* The one (bigish) problem with this being in the reducer is that
   we can't have any side effects. So if we detect and error introduced by
   a URL QUERY (and correct it in state), we can't correct the URL */
@@ -237,8 +247,14 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
   }
 
   /* temporalConfidence */
-  if (state.temporalConfidence.exists && state.layout !== "rect") {
-    state.temporalConfidence.display = false;
+  if (state.temporalConfidence.exists) {
+    if (state.layout !== "rect") {
+      state.temporalConfidence.display = false;
+      state.temporalConfidence.on = false;
+    } else if (state.distanceMeasure === "div") {
+      state.temporalConfidence.display = false;
+      state.temporalConfidence.on = false;
+    }
   }
 
   return state;
@@ -262,7 +278,6 @@ const getDefaultState = () => {
   return {
     defaults,
     canTogglePanelLayout: true,
-    showBranchLabels: false,
     selectedLegendItem: null,
     selectedBranch: null,
     selectedNode: null,
@@ -295,20 +310,16 @@ const getDefaultState = () => {
     mapAnimationCumulative: false,
     mapAnimationShouldLoop: false,
     animationPlayPauseButton: "Play",
+    panelsAvailable: [],
+    panelsToDisplay: [],
     panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full"
   };
 };
 
 const Controls = (state = getDefaultState(), action) => {
   switch (action.type) {
-    case types.URL_QUERY_CHANGE: {
-      /* because the qury isn't complete (e.g. things that are "off" or "default" aren't shown)
-      we must first reset all the state to the "base" (default) state, and then apply the changes defined in the query */
-      let newState = Object.assign({}, state);
-      newState = restoreQueryableStateToDefaults(newState);
-      newState = modifyStateViaURLQuery(newState, action.query);
-      newState = checkAndCorrectErrorsInState(newState, action.metadata);
-      return newState;
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: {
+      return action.newControls;
     }
     case types.NEW_DATASET: {
       let base = getDefaultState();
@@ -318,10 +329,6 @@ const Controls = (state = getDefaultState(), action) => {
       base = checkAndCorrectErrorsInState(base, action.meta); /* must run last */
       return base;
     }
-    case types.TOGGLE_BRANCH_LABELS:
-      return Object.assign({}, state, {
-        showBranchLabels: !state.showBranchLabels
-      });
     case types.LEGEND_ITEM_MOUSEENTER:
       return Object.assign({}, state, {
         selectedLegendItem: action.data
@@ -348,11 +355,12 @@ const Controls = (state = getDefaultState(), action) => {
       });
     case types.CHANGE_LAYOUT: {
       const layout = action.data;
-      /* if temporalConfidence and layout !== rect then disable confidence toggle */
-      const temporalConfidence = Object.assign({}, state.temporalConfidence);
-      if (temporalConfidence.exists) {
-        temporalConfidence.display = layout === "rect";
-      }
+      /* temporal confidence can only be displayed for rectangular trees */
+      const temporalConfidence = {
+        exists: state.temporalConfidence.exists,
+        display: state.temporalConfidence.exists && layout === "rect",
+        on: false
+      };
       return Object.assign({}, state, {
         layout,
         temporalConfidence
@@ -360,13 +368,12 @@ const Controls = (state = getDefaultState(), action) => {
     }
     case types.CHANGE_DISTANCE_MEASURE:
       /* while this may change, div currently doesn't have CIs,
-      so they shouldn't be displayed. The SVG el's still exist, they're just of
-      width zero */
+      so they shouldn't be displayed. */
       if (state.temporalConfidence.exists) {
         if (state.temporalConfidence.display && action.data === "div") {
           return Object.assign({}, state, {
             distanceMeasure: action.data,
-            temporalConfidence: Object.assign({}, state.temporalConfidence, {display: false})
+            temporalConfidence: Object.assign({}, state.temporalConfidence, {display: false, on: false})
           });
         } else if (state.layout === "rect" && action.data === "num_date") {
           return Object.assign({}, state, {
@@ -424,6 +431,12 @@ const Controls = (state = getDefaultState(), action) => {
     case types.CHANGE_PANEL_LAYOUT:
       return Object.assign({}, state, {
         panelLayout: action.data
+      });
+    case types.TOGGLE_PANEL_DISPLAY:
+      return Object.assign({}, state, {
+        panelsToDisplay: action.panelsToDisplay,
+        panelLayout: action.panelLayout,
+        canTogglePanelLayout: action.panelsToDisplay.indexOf("tree") !== -1 && action.panelsToDisplay.indexOf("map") !== -1
       });
     case types.NEW_COLORS: {
       const newState = Object.assign({}, state, {

@@ -28,7 +28,6 @@ export const defaultDistanceMeasure = "num_date";
 export const defaultDateRange = 6;
 export const date_select = true;
 export const file_prefix = "Zika_";
-export const branchLabels = false;
 export const restrictTo = {"region": "all"};
 export const time_window = 3.0;
 export const fullDataTimeWindow = 1.5;
@@ -56,7 +55,6 @@ export const fastTransitionDuration = 350; // in milliseconds
 export const mediumTransitionDuration = 700; // in milliseconds
 export const slowTransitionDuration = 1400; // in milliseconds
 export const enableNarratives = false;
-export const narrativeWidth = 500;
 export const animationWindowWidth = 0.075; // width of animation window relative to date slider
 export const animationTick = 50; // animation tick in milliseconds
 export const HIColorDomain = genericDomain.map((d) => {

@@ -7,49 +7,51 @@
   --sidebarColor: #F2F2F2;
 }
 
-.narrative .linkedParagraph:hover {
-  background-color: orange;
-}
-
 .narrative p {
   text-align: justify;
   font-size: 16px;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin: 0;
+  font-weight: 200;
+  color: var(--darkGrey);
+  line-height: 1.42857143;
+}
+
+.narrative .focus p {
+  text-align: justify;
+  font-size: 16px;
+  margin: 0;
   font-weight: 300;
   color: var(--darkGrey);
   line-height: 1.42857143;
 }
 
-/* there appears to be a bug in react-sidebar where, if it's coming from the right,
-the open / docked booleans are flipped. Thus, it's "open" as if it were on mobile
-and so the background colour is rgba(0, 0, 0, 0.3). This gets around this.*/
-.noBackground {
-  background-color: rgba(0, 0, 0, 0) !important;
+
+.narrative .focus h1 {
+  font-weight: 700;
+}
+.narrative h1 {
+  font-weight: 300;
+  font-size: 1.5em;
+}
+.narrative .focus h2 {
+  font-weight: 700;
+}
+.narrative h2 {
+  font-weight: 300;
+  font-size: 1.4em;
+}
+.narrative .focus h3 {
+  font-weight: 700;
+}
+.narrative h3 {
+  font-weight: 300;
+  font-size: 1.2em;
 }
 
-.narrative .chevron::before {
-  border-style: solid;
-  border-width: 1em 1em 0 0;
-  content: '';
-  display: inline-block;
-  position: absolute;
-  height: 4em;
-  width: 4em;
-  left: calc(50% - 3em);
-  /* top: 1em; */
-  transform: rotate(-45deg);
-  vertical-align: bottom;
-}
-.chevron.right:before {
-  /* left: 0; */
-  transform: rotate(45deg);
-}
-.chevron.bottom:before {
-  /* top: 0; */
-  transform: rotate(135deg);
-}
-.chevron.left:before {
-  /* left: 0.25em; */
-  transform: rotate(-135deg);
+.narrative img {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 80%;
+  padding: 15px 0px 15px 0px;
 }

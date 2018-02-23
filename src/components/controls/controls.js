@@ -12,10 +12,9 @@ import ChooseMetric from "./choose-metric";
 import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
 import MapAnimationControls from "./map-animation";
-import { controlsWidth, enableAnimationDisplay } from "../../util/globals";
 import { titleStyles } from "../../globalStyles";
 import DataSource from "./data-source";
-import Toggle from "./toggle";
+import PanelToggles from "./panel-toggles";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -24,30 +23,13 @@ const header = (text) => (
 );
 
 @connect((state) => ({
-  analysisSlider: state.controls.analysisSlider,
   canTogglePanelLayout: state.controls.canTogglePanelLayout,
   panels: state.metadata.panels
 }))
 class Controls extends React.Component {
-  static propTypes = {
-    analysisSlider: PropTypes.any
-  }
   getStyles() {
     return {};
   }
-  analysisSlider() {
-    if (this.props.analysisSlider && this.props.analysisSlider.valid) {
-      return (
-        <g>
-          <br/>
-          {header("Analysis Date")}
-          <AnalysisDateSlider/>
-        </g>
-      );
-    }
-    return null;
-  }
-  // restore <ToggleBranchLabels/> below when perf is improved
   render() {
     const mapAndTree = this.props.panels !== undefined && this.props.panels.indexOf("map") !== -1 && this.props.panels.indexOf("tree") !== -1;
 
@@ -57,7 +39,8 @@ class Controls extends React.Component {
         justifyContent="flex-start"
         alignItems="flex-start"
         style={{
-          width: controlsWidth,
+          height: "100%",
+          overflowY: "scroll",
           padding: "0px 20px 20px 20px"
         }}
       >
@@ -68,13 +51,8 @@ class Controls extends React.Component {
         {header("Date Range")}
         <DateRangeInputs/>
 
-        {this.analysisSlider()}
-
         {header("Color By")}
         <ColorBy/>
-
-        {mapAndTree && this.props.canTogglePanelLayout ? (header("Panel Layout")) : null}
-        {mapAndTree && this.props.canTogglePanelLayout ? (<PanelLayout/>) : null}
 
         {header("Tree Options")}
 
@@ -88,6 +66,11 @@ class Controls extends React.Component {
         <SelectLabel text="Geographic resolution"/>
         <GeoResolution/>
         <MapAnimationControls/>
+
+        <div/>
+        {header("Panels To Display")}
+        <PanelToggles/>
+        {mapAndTree && this.props.canTogglePanelLayout ? (<PanelLayout/>) : null}
 
         <div/>
         {header("Data Source")}

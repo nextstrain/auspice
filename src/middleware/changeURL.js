@@ -26,6 +26,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
 
   /* first switch: query change */
   switch (action.type) {
+    case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE:
+      query = action.query;
+      break;
     case types.NEW_COLORS:
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
       break;
@@ -47,6 +50,15 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.CHANGE_PANEL_LAYOUT: {
       query.p = action.notInURLState === true ? undefined : action.data;
+      break;
+    }
+    case types.TOGGLE_PANEL_DISPLAY: {
+      if (state.controls.panelsAvailable.length === action.panelsToDisplay.length) {
+        query.d = undefined;
+      } else {
+        query.d = action.panelsToDisplay.join(",");
+      }
+      query.p = action.panelLayout;
       break;
     }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
@@ -75,8 +87,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       const e = state.controls.mapAnimationDurationInMilliseconds;
       query.animate = `${a},${b},${c},${d},${e}`;
       break;
-    case types.URL_QUERY_CHANGE:
-      query = action.query;
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
+      if (!action.hideURL) {
+        query = action.query;
+      }
       break;
     case types.PAGE_CHANGE:
       if (action.query) {

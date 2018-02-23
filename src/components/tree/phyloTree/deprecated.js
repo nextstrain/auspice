@@ -1,6 +1,169 @@
-import { timerStart, timerEnd } from "../../../util/perf";
+/* eslint-disable */
+/* these functions are either deprecated or were in the code base but never called! */
 
-const contains = (array, elem) => array.some((d) => d === elem);
+/* this need a bit more work as the quickdraw functionality improves */
+export const rerenderAllElements = function rerenderAllElements() {
+  // console.log("rerenderAllElements")
+  this.mapToScreen();
+  this.svg.selectAll(".branch")
+    .transition().duration(0)
+    .style("stroke-width", (d) => d["stroke-width"]);
+  this.svg.selectAll(".branch")
+    .transition().duration(0)
+    .filter(".S")
+    .attr("d", (d) => d.branch[0]);
+};
+
+
+/**
+ * hide branchLabels
+ */
+export const hideBranchLabels = function hideBranchLabels() {
+  this.params.showBranchLabels = false;
+  this.svg.selectAll(".branchLabel").style('visibility', 'hidden');
+};
+
+/**
+ * show branchLabels
+ */
+export const showBranchLabels = function showBranchLabels() {
+  this.params.showBranchLabels = true;
+  this.svg.selectAll(".branchLabel").style('visibility', 'visible');
+};
+
+
+/**
+ * hide tipLabels - this function is never called!
+ */
+PhyloTree.prototype.hideTipLabels = function() {
+  this.params.showTipLabels=false;
+  this.svg.selectAll(".tipLabel").style('visibility', 'hidden');
+};
+
+/**
+ * show tipLabels - this function is never called!
+ */
+PhyloTree.prototype.showTipLabels = function() {
+  this.params.showTipLabels=true;
+  this.svg.selectAll(".tipLabel").style('visibility', 'visible');
+};
+
+// CALLBACK
+/**
+ * @param  {node} d tree node object
+ * @return {string} displayed as label on the branch corresponding to the node
+ */
+export const branchLabel = function branchLabel(d) {
+  if (d.n.muts) {
+    if (d.n.muts.length > 5) {
+      return d.n.muts.slice(0, 5).join(", ") + "...";
+    }
+    return d.n.muts.join(", ");
+  }
+  return "";
+};
+
+
+PhyloTree.prototype.drawTipLabels = function() {
+  var params = this.params;
+  const tLFunc = this.callbacks.tipLabel;
+  const inViewTerminalNodes = this.nodes
+                  .filter(function(d){return d.terminal;})
+                  .filter(function(d){return d.inView;});
+  console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
+  this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
+    .data(inViewTerminalNodes)
+    .enter()
+    .append("text")
+    .text(function (d){return tLFunc(d);})
+    .attr("class", "tipLabel");
+}
+
+PhyloTree.prototype.drawBranchLabels = function() {
+  var params = this.params;
+  const bLFunc = this.callbacks.branchLabel;
+  this.branchLabels = this.svg.append("g").selectAll('.branchLabel')
+    .data(this.nodes) //.filter(function (d){return bLFunc(d)!=="";}))
+    .enter()
+    .append("text")
+    .text(function (d){return bLFunc(d);})
+    .attr("class", "branchLabel")
+    .style("text-anchor","end");
+}
+
+
+export const updateConfidence = function updateConfidence(dt) {
+  console.warn("updateConfidence is deprecated.");
+  if (dt) {
+    this.svg.selectAll(".conf")
+      .transition().duration(dt)
+      .style("stroke", (el) => el.stroke)
+      .style("stroke-width", calcConfidenceWidth);
+  } else {
+    this.svg.selectAll(".conf")
+      .style("stroke", (el) => el.stroke)
+      .style("stroke-width", calcConfidenceWidth);
+  }
+};
+
+export const viewEntireTree = function viewEntireTree() {
+  console.warn("viewEntireTree is deprecated.")
+  /* reset the SVGPanZoom */
+  this.Viewer.fitToViewer();
+  /* imperitively manipulate SVG tree elements */
+  this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
+  /* update branch thicknesses / tip vis after SVG tree elemtents have moved */
+  window.setTimeout(
+    () => this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0})),
+    mediumTransitionDuration
+  );
+  this.setState({selectedBranch: null, selectedTip: null});
+};
+
+/**
+ * zoom out a little by using the parent of the current clade
+ * as a zoom focus.
+ * @param  {int} dt [transition time]
+ */
+export const zoomToParent = function zoomToParent(dt) {
+  console.warn("TODO: zoomToParent functionality needs to be built into phylotree.change()");
+  if (this.zoomNode) {
+    this.zoomIntoClade(this.zoomNode.parent, dt);
+  }
+};
+
+/**
+ * zoom such that a particular clade fills the svg
+ * @param  clade -- branch/node at the root of the clade to zoom into
+ * @param  dt -- time of the transition in milliseconds
+ * @return {null}
+ */
+export const zoomIntoClade = function zoomIntoClade(clade, dt) {
+  console.warn("zoomIntoClade is deprecated. Please use phylotree.change()");
+  // assign all nodes to inView false and force update
+  this.zoomNode = clade;
+  this.nodes.forEach((d) => {
+    d.inView = false;
+    d.update = true;
+  });
+  // assign all child nodes of the chosen clade to inView=true
+  // if clade is terminal, apply to parent
+  if (clade.terminal) {
+    applyToChildren(clade.parent, (d) => {d.inView = true;});
+  } else {
+    applyToChildren(clade, (d) => {d.inView = true;});
+  }
+  // redraw
+  this.mapToScreen();
+  this.updateGeometry(dt);
+  if (this.grid) this.addGrid(this.layout);
+  this.svg.selectAll(".regression").remove();
+  if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
+  if (this.params.branchLabels) {
+    this.updateBranchLabels(dt);
+  }
+  this.updateTipLabels(dt);
+};
 
 /**
  * as updateAttributeArray, but accepts a callback function rather than an array
@@ -12,9 +175,12 @@ const contains = (array, elem) => array.some((d) => d === elem);
  * @return {[type]}
  */
 export const updateStyleOrAttribute = function updateStyleOrAttribute(treeElem, attr, callback, dt, styleOrAttribute) {
+  console.warn("updateStyleOrAttribute is deprecated. use phylotree.change instead.")
   const attr_array = this.nodes.map((d) => callback(d));
   this.updateStyleOrAttributeArray(treeElem, attr, attr_array, dt, styleOrAttribute);
 };
+
+const contains = (array, elem) => array.some((d) => d === elem);
 
 /**
  * update an attribute of the tree for all nodes
@@ -25,6 +191,7 @@ export const updateStyleOrAttribute = function updateStyleOrAttribute(treeElem, 
  * @return {[type]}
  */
 export const updateStyleOrAttributeArray = function updateStyleOrAttributeArray(treeElem, attr, attr_array, dt, styleOrAttribute) {
+  console.warn("updateStyleOrAttributeArray is deprecated. use phylotree.change instead.")
   timerStart("updateStyleOrAttributeArray");
   this.nodes.forEach((d, i) => {
     const newAttr = attr_array[i];
@@ -54,6 +221,7 @@ export const updateStyleOrAttributeArray = function updateStyleOrAttributeArray(
  * @return null
  */
 export const updateDistance = function updateDistance(attr, dt) {
+  console.warn("updateDistance is deprecated. use phylotree.change instead.")
   this.setDistance(attr);
   this.setLayout(this.layout);
   this.mapToScreen();
@@ -72,6 +240,7 @@ export const updateDistance = function updateDistance(attr, dt) {
  * @return null
  */
 export const updateLayout = function updateLayout(layout, dt) {
+  console.warn("updateLayout is deprecated");
   this.setLayout(layout);
   this.mapToScreen();
   this.updateGeometryFade(dt);
@@ -88,6 +257,7 @@ export const updateLayout = function updateLayout(layout, dt) {
  * @return {[type]}
  */
 export const updateGeometry = function updateGeometry(dt) {
+  console.warn("updateGeometry is deprecated. use phylotree.change instead.")
   timerStart("updateGeometry");
   this.svg.selectAll(".tip")
     .filter((d) => d.update)
@@ -100,17 +270,10 @@ export const updateGeometry = function updateGeometry(dt) {
     this.svg.selectAll(".vaccineCross")
       .transition().duration(dt)
       .attr("d", (dd) => dd.vaccineCross);
-    if (this.distance === "num_date") {
-      this.svg.selectAll(".vaccineDottedLine")
-        .transition().duration(dt)
-        .style("opacity", 1)
-        .attr("d", (dd) => dd.vaccineLine);
-    } else {
-      this.svg.selectAll(".vaccineDottedLine")
-        .transition().duration(dt)
-        .style("opacity", 0)
-        .attr("d", (dd) => dd.vaccineLine);
-    }
+    this.svg.selectAll(".vaccineDottedLine")
+      .transition().duration(dt)
+      .style("opacity", () => this.distance === "num_date" ? 1 : 0)
+      .attr("d", (dd) => dd.vaccineLine);
   }
 
   const branchEls = [".S", ".T"];
@@ -239,6 +402,7 @@ export const updateGeometryFade = function updateGeometryFade(dt) {
  * @param {int} dt time in milliseconds
  */
 export const updateMultipleArray = function updateMultipleArray(treeElem, attrs, styles, dt, quickdraw) {
+  console.warn("updateMultipleArray is deprecated. use phylotree.change instead.")
   timerStart("updateMultipleArray");
   // assign new values and decide whether to update
   this.nodes.forEach((d, i) => {
@@ -307,6 +471,7 @@ export const updateMultipleArray = function updateMultipleArray(treeElem, attrs,
  * @param  dt -- transition time
  */
 export const redrawAttribute = function redrawAttribute(treeElem, attr, dt) {
+  console.warn("redrawAttribute is deprecated. use phylotree.change instead.")
   this.svg.selectAll(treeElem)
     .filter((d) => d.update)
     .transition()
@@ -322,8 +487,16 @@ export const redrawAttribute = function redrawAttribute(treeElem, attr, dt) {
  * @param  dt -- transition time
  */
 export const redrawStyle = function redrawStyle(treeElem, styleElem, dt) {
+console.warn("redrawStyle is deprecated. use phylotree.change instead.")
   this.svg.selectAll(treeElem)
     .filter((d) => d.update)
     .transition().duration(dt)
     .style(styleElem, (d) => d[styleElem]);
+};
+
+export const removeGrid = function removeGrid() {
+  this.svg.selectAll(".majorGrid").remove();
+  this.svg.selectAll(".minorGrid").remove();
+  this.svg.selectAll(".gridTick").remove();
+  this.grid = false;
 };

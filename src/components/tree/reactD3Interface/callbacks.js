@@ -52,18 +52,7 @@ export const onBranchHover = function onBranchHover(d, x, y) {
 };
 
 export const onBranchClick = function onBranchClick(d) {
-  this.Viewer.fitToViewer();
-  this.state.tree.zoomIntoClade(d, mediumTransitionDuration);
-  /* to stop multiple phyloTree updates potentially clashing,
-  we change tipVis after geometry update + transition */
-  window.setTimeout(
-    () => this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.n.arrayIdx})),
-    mediumTransitionDuration
-  );
-  this.setState({
-    hovered: null,
-    selectedBranch: d
-  });
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.n.arrayIdx}));
 };
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
@@ -124,7 +113,6 @@ const resetGrid = function resetGrid() {
   }
 };
 
-
 export const onViewerChange = function onViewerChange() {
   if (this.Viewer && this.state.tree) {
     const V = this.Viewer.getValue();
@@ -140,21 +128,6 @@ export const resetView = function resetView() {
   this.Viewer.fitToViewer();
 };
 
-
-/* viewEntireTree: go back to the root! */
-export const viewEntireTree = function viewEntireTree() {
-  /* reset the SVGPanZoom */
-  this.Viewer.fitToViewer();
-  /* imperitively manipulate SVG tree elements */
-  this.state.tree.zoomIntoClade(this.state.tree.nodes[0], mediumTransitionDuration);
-  /* update branch thicknesses / tip vis after SVG tree elemtents have moved */
-  window.setTimeout(
-    () => this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0})),
-    mediumTransitionDuration
-  );
-  this.setState({selectedBranch: null, selectedTip: null});
-};
-
 export const handleIconClickHOF = function handleIconClickHOF(tool) {
   return () => {
     const V = this.Viewer.getValue();
@@ -166,50 +139,14 @@ export const handleIconClickHOF = function handleIconClickHOF(tool) {
       resetView.bind(this)();
       // if we have clade zoom, zoom out to the parent clade
       if (this.state.selectedBranch && this.state.selectedBranch.n.arrayIdx) {
-        const dispatch = this.props.dispatch;
-        const arrayIdx = this.state.tree.zoomNode.parent.n.arrayIdx;
-        // reset the "clicked" branch, unset if we zoomed out all the way to the root
-        this.setState({
-          hovered: null,
-          selectedBranch: (arrayIdx) ? this.state.tree.zoomNode.parent : null
-        });
-        // clear previous timeout bc they potentially mess with the geometry update
-        if (this.timeout) {
-          clearTimeout(this.timeout);
-        }
-        // call phyloTree to zoom out, this rerenders the geometry
-        this.state.tree.zoomToParent(mediumTransitionDuration);
-        // wait and reset visibility
-        this.timeout = setTimeout(() => {
-          dispatch(updateVisibleTipsAndBranchThicknesses());
-        }, mediumTransitionDuration);
+        this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+          idxOfInViewRootNode: this.state.tree.zoomNode.parent.n.arrayIdx
+        }));
       }
     }
     resetGrid.bind(this)();
   };
 };
-
-/**
- * @param  {node} d tree node object
- * @return {string} displayed as label on the branch corresponding to the node
- */
-export const branchLabel = function branchLabel(d) {
-  if (d.n.muts) {
-    if (d.n.muts.length > 5) {
-      return d.n.muts.slice(0, 5).join(", ") + "...";
-    }
-    return d.n.muts.join(", ");
-  }
-  return "";
-};
-
-/**
- * @param  {node} d tree node object
- * @param  {int} n total number of nodes in current view
- * @return {int} font size of the branch label
- */
-export const branchLabelSize = (d, n) =>
-  d.leafCount > n / 10.0 ? 12 : 0;
 
 /**
  * @param  {node} d tree node object

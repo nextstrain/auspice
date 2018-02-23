@@ -1,9 +1,11 @@
-import parseParams from "../util/parseParams";
 import queryString from "query-string";
+import parseParams from "../util/parseParams";
 import { getPost } from "../util/getMarkdown";
-import { PAGE_CHANGE, URL_QUERY_CHANGE } from "./types";
-import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
-import { changeColorBy } from "./colors";
+import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
+import { calculateVisiblityAndBranchThickness } from "./treeProperties";
+import { calcColorScaleAndNodeColors } from "./colors";
+import { restoreQueryableStateToDefaults, modifyStateViaURLQuery, checkAndCorrectErrorsInState, checkColorByConfidence } from "../reducers/controls";
+import { calcEntropyInView } from "../util/treeTraversals";
 
 // make prefix for data files with fields joined by _ instead of / as in URL
 const makeDataPathFromParsedParams = (parsedParams) => {
@@ -77,21 +79,50 @@ ARGUMENTS:
 (1) query - REQUIRED - {object}
 (2) push - OPTIONAL (default: true) - signals that pushState should be used (has no effect on the reducers)
 */
-export const changePageQuery = ({query, push = true}) => (dispatch, getState) => {
-  const { controls, metadata } = getState();
-  dispatch({
-    type: URL_QUERY_CHANGE,
-    query,
-    metadata,
-    pushState: push
-  });
-  const newState = getState();
-  /* working out whether visibility / thickness needs updating is tricky - ideally we could avoid this dispatch in some situations */
-  dispatch(updateVisibleTipsAndBranchThicknesses());
-  if (controls.colorBy !== newState.controls.colorBy) {
-    dispatch(changeColorBy());
+export const changePageQuery = ({query, hideURL = false, push = true}) => (dispatch, getState) => {
+  console.log("\t---------- change page query -------------");
+  const { controls, metadata, tree, entropy } = getState();
+
+  /* 1 - calculate entire new state of the controls reducer */
+  let newControls = Object.assign({}, controls);
+  newControls = restoreQueryableStateToDefaults(newControls);
+  newControls = modifyStateViaURLQuery(newControls, query);
+  newControls = checkAndCorrectErrorsInState(newControls, metadata);
+
+  /* 2 - calculate new branch thicknesses & visibility */
+  const visAndThicknessData = calculateVisiblityAndBranchThickness(
+    tree,
+    newControls,
+    {dateMinNumeric: newControls.dateMinNumeric, dateMaxNumeric: newControls.dateMaxNumeric},
+    {tipSelectedIdx: 0, validIdxRoot: tree.idxOfInViewRootNode}
+  );
+  visAndThicknessData.stateCountAttrs = Object.keys(newControls.filters);
+  const newTree = Object.assign({}, tree, visAndThicknessData);
+
+  /* 3 - calculate colours */
+  if (controls.colorBy !== newControls.colorBy) {
+    const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(newControls.colorBy, newControls, tree, metadata);
+    newControls.colorScale = colorScale;
+    newControls.colorByConfidence = checkColorByConfidence(newControls.attrs, newControls.colorBy);
+    newTree.nodeColorsVersion = version;
+    newTree.nodeColors = nodeColors;
   }
+
+  /* 4 - calculate entropy in view */
+  const [entropyBars, entropyMaxYVal] = calcEntropyInView(newTree.nodes, newTree.visibility, newControls.mutType, entropy.geneMap, entropy.showCounts);
+
+  dispatch({
+    type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+    newControls,
+    pushState: push,
+    newTree,
+    entropyBars,
+    entropyMaxYVal,
+    query,
+    hideURL
+  });
 };
+
 
 export const browserBackForward = () => (dispatch, getState) => {
   const { datasets } = getState();

@@ -60,6 +60,12 @@ const Entropy = (state = {loaded: false, showCounts: false}, action) => {
         bars: action.data,
         maxYVal: action.maxYVal
       });
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
+      return Object.assign({}, state, {
+        loaded: true,
+        bars: action.entropyBars,
+        maxYVal: action.entropyMaxYVal
+      });
     case types.ENTROPY_COUNTS_TOGGLE:
       return Object.assign({}, state, {
         showCounts: action.showCounts

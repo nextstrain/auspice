@@ -125,35 +125,21 @@ class TitleBar extends React.Component {
 
   render() {
     const styles = this.getStyles();
-
-    /* this if block is temporary and should be replaced by a smoother choose-narrative UI */
     if (this.props.narrativeLoaded) {
-      const tmpTitleStyles = {margin: 5, position: "relative", top: -1};
+      const onClick = () => {this.props.dispatch({ type: TOGGLE_NARRATIVE});};
+      const text = this.props.narrativeDisplayed ? "show controls" : "show narrative";
       return (
         <Flex style={styles.main}>
           {this.getLogo(styles)}
           {this.getLogoType(styles)}
           <div style={{flex: 5}}/>
-          <button
-            key={1}
-            style={this.props.narrativeDisplayed ? materialButtonSelected : materialButton}
-            onClick={() => {this.props.dispatch({ type: TOGGLE_NARRATIVE});}}
-          >
-            <span style={tmpTitleStyles}> {"on"} </span>
-          </button>
-          <button
-            key={2}
-            style={this.props.narrativeDisplayed ? materialButton : materialButtonSelected}
-            onClick={() => {this.props.dispatch({ type: TOGGLE_NARRATIVE});}}
-          >
-            <span style={tmpTitleStyles}> {"off"} </span>
+          <button style={materialButton} onClick={onClick}>
+            {text}
           </button>
           <div style={{width: this.props.minified ? 20 : 0 }}/>
         </Flex>
       );
     }
-    /* end of temporary if block */
-
     return (
       <Flex style={styles.main}>
         {this.getLogo(styles)}

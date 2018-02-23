@@ -23,28 +23,9 @@ const getStyles = (width) => {
   };
 };
 
-const callComputeResponsive = (browserDimensions, padding) => computeResponsive({
-  horizontal: 1,
-  vertical: 0.3,
-  browserDimensions: browserDimensions,
-  padding: padding,
-  minHeight: 150
-});
-
-const computeChartGeometry = (props) => {
-  const responsive = callComputeResponsive(props.browserDimensions, props.padding);
-  return {
-    width: responsive.width,
-    height: responsive.height,
-    spaceLeft: 30,
-    spaceRight: 10,
-    spaceBottom: 20,
-    spaceTop: 10
-  };
-};
-
 @connect((state) => {
   return {
+    loaded: state.frequencies.loaded,
     data: state.frequencies.data,
     pivots: state.frequencies.pivots,
     ticks: state.frequencies.ticks,
@@ -65,7 +46,7 @@ export class Frequencies extends React.Component {
   componentDidMount() {
     /* Render frequencies (via D3) for the first time. DOM element exists. */
     const svg = select(this.domRef);
-    const chartGeom = computeChartGeometry(this.props);
+    const chartGeom = {width: this.props.width, height: this.props.height, spaceLeft: 30, spaceRight: 10, spaceBottom: 20, spaceTop: 10};
     const scales = calcScales(chartGeom, this.props.ticks);
     drawAxis(svg, chartGeom, scales);
     if (!this.props.matrix) {console.error("Matrix undefined"); return;}
@@ -117,12 +98,11 @@ export class Frequencies extends React.Component {
     );
   }
   render() {
-    const { width, height } = callComputeResponsive(this.props.browserDimensions, this.props.padding);
     return (
       <Card title={"Frequencies"}>
-        {this.normalizationSwitch(width)}
+        {this.normalizationSwitch(this.props.width)}
         <div id="freqinfo"/>
-        <svg style={{pointerEvents: "auto"}} width={width} height={height}>
+        <svg style={{pointerEvents: "auto"}} width={this.props.width} height={this.props.height}>
           <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
         </svg>
       </Card>

@@ -1,18 +1,16 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 
-const InfoPanel = ({hovered, chartGeom, mutType, showCounts}) => {
-
+const InfoPanel = ({hovered, width, height, mutType, showCounts}) => {
   /* this is a function - we can bail early */
   if (!hovered) {
     return null;
   }
-  const width = 200;
 
   const styles = {
     container: {
       position: "absolute",
-      width,
+      width: 200,
       padding: "10px",
       borderRadius: 10,
       zIndex: 1000,
@@ -36,15 +34,15 @@ const InfoPanel = ({hovered, chartGeom, mutType, showCounts}) => {
     y: hovered.y - bounds.top
   };
 
-  if (pos.x < chartGeom.width * 0.7) {
+  if (pos.x < width * 0.7) {
     styles.container.left = pos.x;
   } else {
-    styles.container.right = chartGeom.width - pos.x;
+    styles.container.right = width - pos.x;
   }
-  if (pos.y < chartGeom.height * 0.5) {
+  if (pos.y < height * 0.5) {
     styles.container.top = pos.y;
   } else {
-    styles.container.bottom = chartGeom.height - pos.y;
+    styles.container.bottom = height - pos.y;
   }
 
   return (

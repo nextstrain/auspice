@@ -1,84 +1,115 @@
+/* eslint-disable react/no-danger */
 import React from "react";
 import { connect } from "react-redux";
-import { narrativeWidth, controlsWidth } from "../../util/globals";
-import { Gutter } from "./gutter";
-import { Focus } from "./focus";
+import queryString from "query-string";
+import { titleBarHeight } from "../../util/globals";
+import { changePageQuery } from "../../actions/navigation";
+import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 
-// const padding = {top: 0, right: 20, bottom: 20, left: 20, between: 30};
-const focusFraction = 0.5;
+/* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
+
+const DisplayBlock = (props) => {
+  return (
+    <div
+      ref={props.inputRef}
+      style={props.styles}
+      className={props.focus ? "focus" : ""}
+      dangerouslySetInnerHTML={props.block}
+    />
+  );
+};
+
 
 @connect((state) => ({
   loaded: state.narrative.loaded,
-  blocks: state.narrative.blocks,
-  browserHeight: state.browserDimensions.browserDimensions.height
+  blocks: state.narrative.blocks
 }))
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {focusIdx: 0};
-    // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md#es6-classes
-    this.gotoPreviousBlock = this.gotoPreviousBlock.bind(this);
-    this.gotoNextBlock = this.gotoNextBlock.bind(this);
-    this.gotoBlockX = this.gotoBlockX.bind(this);
+    this.state = {
+      focus: 1, /* idx of block in focus (and url) */
+      shouldBeInFocus: 1, /* used by timeouts */
+      timeoutRef: undefined,
+      lastScroll: undefined
+    };
+    this.changeFocus = () => {
+      const idx = this.state.shouldBeInFocus;
+      const query = queryString.parse(this.props.blocks[idx].url);
+      this.props.dispatch(changePageQuery({query, hideURL: true, push: true}));
+      this.setState({focus: idx, timeoutRef: undefined});
+    };
+    this.handleScroll = () => {
+      /* handle scroll only fires (expensive) dispatches when no scroll has been observed for 250ms */
+      /* 1: clear any previous timeouts */
+      if (this.state.timeoutRef) {
+        clearTimeout(this.state.timeoutRef);
+      }
+      /* 2: calculate shouldBeInFocus index */
+      const halfY = this.props.height / 2;
+      let shouldBeInFocus;
+      for (let i = 0; i < this.blockRefs.length; i++) {
+        const bounds = this.blockRefs[i].getBoundingClientRect();
+        if (bounds.y < halfY && (bounds.y + bounds.height) > halfY) {
+          shouldBeInFocus = i;
+          break;
+        }
+      }
+      /* 2 set timeouts */
+      if (shouldBeInFocus === this.state.focus) {
+        return;
+      }
+      const timeoutRef = setTimeout(this.changeFocus, 250);
+      this.setState({timeoutRef, shouldBeInFocus});
+    };
+    this.blockRefs = [];
+    this.props.dispatch(changePageQuery({
+      query: queryString.parse(this.props.blocks[0].url),
+      hideURL: true
+    }));
   }
-  gotoPreviousBlock() {
-    if (this.state.focusIdx === 0) {return;}
-    this.setState({focusIdx: this.state.focusIdx - 1});
-  }
-  gotoNextBlock() {
-    if (this.state.focusIdx === this.props.blocks.length - 1) {return;}
-    this.setState({focusIdx: this.state.focusIdx + 1});
-  }
-  gotoBlockX(x) {
-    this.setState({focusIdx: x});
+  componentDidMount() {
+    window.twttr.widgets.load();
   }
   render() {
     if (!this.props.loaded) {return null;}
-    const heights = {
-      focus: this.props.browserHeight * focusFraction,
-      gutter: this.props.browserHeight * (1 - focusFraction) / 2
+    // const width = narrativeWidth + 40; /* controls sidebar has 20px L & R padding */
+    const blockStyles = {
+      paddingLeft: "20px",
+      paddingRight: "20px",
+      paddingTop: "10px",
+      paddingBottom: "10px",
+      minHeight: this.props.height * 0.33
     };
-    // const width = narrativeWidth;
-    const width = controlsWidth + 40; /* controls sidebar has 20px L & R padding */
-    const numBlocks = this.props.blocks.length;
-    const titles = this.props.blocks.map((d, i) => `${i + 1} ${d.title}`);
-    const visibility = {previous: [], subsequent: []};
-    for (let i = 0; i < numBlocks; i++) {
-      visibility.previous[i] = this.state.focusIdx > i ? "visible" : "hidden";
-      visibility.subsequent[i] = this.state.focusIdx < i ? "visible" : "hidden";
-    }
 
     return (
-      <div className={"static narrative"} style={{maxWidth: width, minWidth: width}}>
-        <Gutter
-          focusIdx={this.state.focusIdx}
-          height={heights.gutter}
-          width={width}
-          pos={"top"}
-          callbackArrow={this.gotoPreviousBlock}
-          callbackGoto={this.gotoBlockX}
-          visibility={visibility.previous}
-          titles={titles}
-        />
-        <Focus
-          height={heights.focus}
-          width={width}
-          title={titles[this.state.focusIdx]}
-          url={this.props.blocks[this.state.focusIdx].url}
-          blockHTML={this.props.blocks[this.state.focusIdx].__html}
-        />
-        <Gutter
-          focusIdx={this.state.focusIdx}
-          height={heights.gutter}
-          width={width}
-          pos={"bottom"}
-          callbackArrow={this.gotoNextBlock}
-          callbackGoto={this.gotoBlockX}
-          visibility={visibility.subsequent}
-          titles={titles}
-        />
+      <div
+        onScroll={this.handleScroll}
+        className={"static narrative"}
+        style={{
+          height: "100%",
+          overflowY: "scroll",
+          padding: "0px 20px 20px 20px"
+        }}
+      >
+        {this.props.blocks.map((b, i) => (
+          <DisplayBlock
+            inputRef={(el) => {this.blockRefs[i] = el;}}
+            key={`block${i}`}
+            block={b}
+            focus={i === this.state.focus}
+            styles={blockStyles}
+          />
+        ))}
+        <div style={{height: this.props.height * 0.4}}/>
       </div>
     );
+  }
+  componentWillUnmount() {
+    this.props.dispatch({
+      type: CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE,
+      query: queryString.parse(this.props.blocks[this.state.focus].url)
+    });
   }
 }
 export default Narrative;

@@ -78,7 +78,7 @@ class DownloadModal extends React.Component {
         {authorString("Neher et al")}, Prediction, dynamics, and visualization of antigenic phenotypes of seasonal influenza viruses, PNAS, 2016
       </a></li>) : null;
     return (
-      <g>
+      <span>
         <ul>
           <li><a href="https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btv381">
             Neher & Bedford, Nextflu: real-time tracking of seasonal influenza virus evolution in humans, Bioinformatics (2015)
@@ -88,7 +88,7 @@ class DownloadModal extends React.Component {
           </a></li>
           {titer}
         </ul>
-      </g>
+      </span>
     );
   }
 
