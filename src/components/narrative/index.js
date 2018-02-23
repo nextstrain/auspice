@@ -68,6 +68,9 @@ class Narrative extends React.Component {
       hideURL: true
     }));
   }
+  componentDidMount() {
+    window.twttr.widgets.load();
+  }
   render() {
     if (!this.props.loaded) {return null;}
     // const width = narrativeWidth + 40; /* controls sidebar has 20px L & R padding */

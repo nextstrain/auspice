@@ -18,6 +18,12 @@ class Monitor extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired
   }
+  componentWillMount() {
+    const script = document.createElement("script");
+    script.src = "https://platform.twitter.com/widgets.js";
+    script.async = true;
+    document.body.appendChild(script);
+  }
   componentDidMount() {
     /* API call to charon to get initial datasets etc (needed to load the splash page) */
     getManifest(this.props.dispatch);
