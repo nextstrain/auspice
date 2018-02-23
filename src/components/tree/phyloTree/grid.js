@@ -27,16 +27,21 @@ export const addGrid = function addGrid(layout, yMinView, yMaxView) {
   const viewTop = yMaxView ? yMaxView+this.params.margins.top : this.yScale.range()[0];
   const viewBottom = yMinView ? yMinView-this.params.margins.bottom : this.yScale.range()[1];
 
+
   /* should we re-draw the grid? */
+  /* not running this block as it failed when the broswer dimensions had changed
   if (!this.gridParams) {
     this.gridParams = [xmin, xmax, ymin, ymax, viewTop, viewBottom, layout];
-  } else if (xmin === this.gridParams[0] && xmax === this.gridParams[1] &&
-        ymin === this.gridParams[2] && ymax === this.gridParams[3] &&
-        viewTop === this.gridParams[4] && viewBottom === this.gridParams[5] &&
-        layout === this.gridParams[6]) {
-    // console.log("bailing - no difference");
+  } else if (
+    xmin === this.gridParams[0] && xmax === this.gridParams[1] &&
+    ymin === this.gridParams[2] && ymax === this.gridParams[3] &&
+    viewTop === this.gridParams[4] && viewBottom === this.gridParams[5] &&
+    layout === this.gridParams[6]
+  ) {
+    console.log("bailing - no difference");
     return;
   }
+  */
 
   /* yes - redraw and update gridParams */
   this.gridParams = [xmin, xmax, ymin, ymax, viewTop, viewBottom, layout];
