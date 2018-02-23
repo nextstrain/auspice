@@ -6,7 +6,7 @@ import computeResponsive from "../../util/computeResponsive";
 import { changeColorBy } from "../../actions/colors";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
-import InfoPanel from "./entropyInfoPanel";
+import InfoPanel from "./infoPanel";
 import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { timerStart, timerEnd } from "../../util/perf";

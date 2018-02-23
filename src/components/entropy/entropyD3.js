@@ -6,7 +6,7 @@ import { zoom } from "d3-zoom";
 import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
-import { computeChartGeometry, parseEncodedGenotype } from "./entropy";
+import { computeChartGeometry, parseEncodedGenotype } from "./index";
 
 /* EntropChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:

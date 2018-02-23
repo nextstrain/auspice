@@ -7,8 +7,8 @@ import { loadJSONs } from "../actions/loadData";
 import Background from "./framework/background";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
-// import Frequencies from "./charts/frequencies";
-import { Entropy } from "./charts/entropy";
+import { Frequencies } from "./frequencies";
+import { Entropy } from "./entropy";
 import Map from "./map/map";
 import Info from "./info/info";
 import Tree from "./tree";
@@ -30,7 +30,8 @@ const nextstrainLogo = require("../images/nextstrain-logo-small.png");
   metadata: state.metadata,
   treeLoaded: state.tree.loaded,
   displayNarrative: state.narrative.display,
-  browserDimensions: state.browserDimensions.browserDimensions
+  browserDimensions: state.browserDimensions.browserDimensions,
+  frequenciesLoaded: state.frequencies.loaded
 }))
 class App extends React.Component {
   constructor(props) {
@@ -114,6 +115,7 @@ class App extends React.Component {
                   {this.props.metadata.panels.indexOf("entropy") === -1 ? null : (
                     <Entropy padding={padding} />
                   )}
+                  {this.props.frequenciesLoaded ? (<Frequencies padding={padding} />) : null}
                   <Footer padding={padding} />
                 </Background>
               )
