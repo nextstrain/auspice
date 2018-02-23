@@ -92,6 +92,12 @@ export const getMeaningfulLabels = (categories, colorScale) => {
   return categories.slice();
 };
 
+export const removeStream = (svg) => {
+  svg.selectAll("path").remove();
+  svg.selectAll("line").remove();
+  svg.selectAll("text").remove();
+};
+
 export const drawTooltip = () => {
   select("#freqinfo")
     .style("position", "absolute")
@@ -116,7 +122,39 @@ function handleMouseOut() {
   select("#vline").style("visibility", "hidden");
 }
 
+/* returns [[xval, yval], [xval, yval], ...] order: that of {series} */
+const calcBestXYPositionsForLabels = (series, pivots, scales, lookahead) => series.map((d) => {
+  for (let pivotIdx = 0; pivotIdx < d.length - lookahead; pivotIdx++) {
+    const nextIdx = pivotIdx + lookahead;
+    const displayThresh = 0.07;
+    if (d[pivotIdx][1] - d[pivotIdx][0] > displayThresh && d[nextIdx][1] - d[nextIdx][0] > displayThresh) {
+      return [
+        scales.x(pivots[pivotIdx]) + 10,
+        (scales.y((d[pivotIdx][1] + d[pivotIdx][0]) / 2) + scales.y((d[nextIdx][1] + d[nextIdx][0]) / 2)) / 2
+      ];
+    }
+  }
+  return [undefined, undefined]; /* don't display text! */
+});
+
+const drawLabelsOverStream = (svgStreamGroup, series, pivots, labels, scales) => {
+  const xyPos = calcBestXYPositionsForLabels(series, pivots, scales, 3);
+  svgStreamGroup.selectAll(".streamLabels")
+    .data(labels)
+    .enter()
+    .append("text")
+    .attr("x", (d, i) => xyPos[i][0])
+    .attr("y", (d, i) => xyPos[i][1])
+    .style("pointer-events", "none")
+    .style("fill", "white")
+    .style("font-family", dataFont)
+    .style("font-size", 14)
+    .style("alignment-baseline", "middle")
+    .text((d, i) => xyPos[i][0] ? d : "");
+};
+
 export const drawStream = (svgStreamGroup, scales, colorBy, labels, pivots, series, colourer, normalised) => {
+  removeStream(svgStreamGroup);
   /* https://github.com/d3/d3-shape/blob/master/README.md#areas */
   const areaObj = area()
     .x((d, i) => scales.x(pivots[i]))
@@ -170,10 +208,6 @@ export const drawStream = (svgStreamGroup, scales, colorBy, labels, pivots, seri
     .style("pointer-events", "none")
     .style("stroke", "hsla(0,0%,100%,.9)")
     .style("stroke-width", "5");
-};
 
-
-export const removeStream = (svg) => {
-  svg.selectAll("path").remove();
-  svg.selectAll("line").remove();
+  drawLabelsOverStream(svgStreamGroup, series, pivots, labels, scales);
 };
