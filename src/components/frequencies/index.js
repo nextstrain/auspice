@@ -75,7 +75,7 @@ export class Frequencies extends React.Component {
     drawTooltip();
     const labels = getMeaningfulLabels(categories, this.props.colorScale);
     const svgStreamGroup = svg.append("g");
-    drawStream(svgStreamGroup, scales, this.props.colorBy, labels, this.props.pivots, series, colourer);
+    drawStream(svgStreamGroup, scales, this.props.colorBy, labels, this.props.pivots, series, colourer, this.props.normaliseData);
     this.setState({svg, svgStreamGroup, chartGeom, scales, categories, series, colourer});
   }
   componentWillReceiveProps(nextProps) {
@@ -91,7 +91,7 @@ export class Frequencies extends React.Component {
     const colourer = generateColorScaleD3(categories, nextProps.colorScale);
     const labels = getMeaningfulLabels(categories, nextProps.colorScale);
     removeStream(this.state.svgStreamGroup);
-    drawStream(this.state.svgStreamGroup, this.state.scales, nextProps.colorBy, labels, nextProps.pivots, series, colourer);
+    drawStream(this.state.svgStreamGroup, this.state.scales, nextProps.colorBy, labels, nextProps.pivots, series, colourer, nextProps.normaliseData);
     this.setState({categories, series, colourer});
   }
   normalizationSwitch(svgWidth) {

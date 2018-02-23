@@ -40,7 +40,7 @@ export const updateFrequencyData = (dispatch, getState) => {
   const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */
   const pivotsLen = frequencies.pivots.length;
   categories.forEach((x) => {matrix[x] = new Array(pivotsLen).fill(0);});
-  const categoriesLen = categories.length;
+  let categoriesLen = categories.length;
 
   // let debugTipsSeen = 0;
   const debugPivotTotals = new Array(pivotsLen).fill(0);
@@ -63,7 +63,10 @@ export const updateFrequencyData = (dispatch, getState) => {
 
   if (matrix["N/A"].reduce((a, b) => a + b, 0) === 0) {
     delete matrix["N/A"];
+    categoriesLen--;
   }
+
+  const magicThreshold = 0.1; /* totals above this are normalised. Below this are nuked. */
 
   if (frequencies.normaliseData) {
     /* NORMALISE COLUMNS - i.e. each pivot point sums to 1 */
@@ -73,8 +76,10 @@ export const updateFrequencyData = (dispatch, getState) => {
         columnTotal += matrix[categories[j]][i];
       }
       for (let j = 0; j < categoriesLen; j++) {
-        if (columnTotal !== 0) {
+        if (columnTotal > magicThreshold) {
           matrix[categories[j]][i] /= columnTotal;
+        } else {
+          matrix[categories[j]][i] = 0;
         }
       }
     }

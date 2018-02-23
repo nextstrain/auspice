@@ -116,7 +116,7 @@ function handleMouseOut() {
   select("#vline").style("visibility", "hidden");
 }
 
-export const drawStream = (svgStreamGroup, scales, colorBy, labels, pivots, series, colourer) => {
+export const drawStream = (svgStreamGroup, scales, colorBy, labels, pivots, series, colourer, normalised) => {
   /* https://github.com/d3/d3-shape/blob/master/README.md#areas */
   const areaObj = area()
     .x((d, i) => scales.x(pivots[i]))
@@ -139,12 +139,13 @@ export const drawStream = (svgStreamGroup, scales, colorBy, labels, pivots, seri
 
     const left = mousex > 0.5 * scales.x.range()[1] ? "" : `${mousex + 4}px`;
     const right = mousex > 0.5 * scales.x.range()[1] ? `${scales.x.range()[1] - mousex - 4}px` : "";
+    const freqLabel = normalised ? "Normalised frequency" : "Frequency";
     select("#freqinfo")
       .style("left", left)
       .style("right", right)
       .style("top", `${50}px`)
       .style("visibility", "visible")
-      .html(`<p>${colorBy}: ${labels[i]}</p><p>Pivot: ${pivots[pivotIdx]}</p><p>Frequency ${freqVal}</p>`);
+      .html(`<p>${colorBy}: ${labels[i]}</p><p>Time point: ${pivots[pivotIdx]}</p><p>${freqLabel} ${freqVal}</p>`);
   }
 
 
