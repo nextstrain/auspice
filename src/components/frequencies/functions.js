@@ -137,12 +137,16 @@ export const drawStream = (svgStreamGroup, scales, colorBy, labels, pivots, seri
       .attr("x1", xvalueOfPivot)
       .attr("x2", xvalueOfPivot);
 
+    const left = mousex > 0.5 * scales.x.range()[1] ? "" : `${mousex + 4}px`;
+    const right = mousex > 0.5 * scales.x.range()[1] ? `${scales.x.range()[1] - mousex - 4}px` : "";
     select("#freqinfo")
-      .style("left", `${mousex + 4}px`)
+      .style("left", left)
+      .style("right", right)
       .style("top", `${50}px`)
       .style("visibility", "visible")
       .html(`<p>${colorBy}: ${labels[i]}</p><p>Pivot: ${pivots[pivotIdx]}</p><p>Frequency ${freqVal}</p>`);
   }
+
 
   /* the streams */
   svgStreamGroup.selectAll(".stream")
