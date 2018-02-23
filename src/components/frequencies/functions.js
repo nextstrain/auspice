@@ -8,11 +8,20 @@ import { dataFont } from "../../globalStyles";
 /* C O N S T A N T S */
 const opacity = 0.85;
 
-export const getOrderedCategories = (colorScale) => {
+export const getOrderedCategories = (categories, colorScale) => {
   /* get the colorBy's in the same order as in the tree legend */
-  return colorScale.scale.domain()
+  const legendOrderingReversed = colorScale.scale.domain()
     .filter((d) => d !== undefined)
-    .reverse();
+    .reverse()
+    .map((v) => v.toString());
+  if (categories.length > legendOrderingReversed.length) {
+    categories.forEach((v) => {
+      if (legendOrderingReversed.indexOf(v) === -1) {
+        legendOrderingReversed.push(v);
+      }
+    });
+  }
+  return legendOrderingReversed;
 };
 
 export const calcScales = (chartGeom, ticks) => {
@@ -95,7 +104,7 @@ export const drawTooltip = () => {
 };
 
 export const generateColorScaleD3 = (categories, colorScale) => (d, i) =>
-  rgb(colorScale.scale(categories[i])).toString();
+  categories[i] === "N/A" ? "rgb(190, 190, 190)" : rgb(colorScale.scale(categories[i])).toString();
 
 function handleMouseOver() {
   select(this).attr("opacity", 1);

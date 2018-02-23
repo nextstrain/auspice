@@ -34,20 +34,22 @@ export const updateFrequencyData = (dispatch, getState) => {
   }
   /* color scale domain forms the categories in the stream graph */
   const categories = controls.colorScale.scale.domain().filter((d) => d !== undefined);
+  categories.push("N/A"); /* for tips without a colorBy */
   const colorBy = controls.colorBy;
   const isGenotype = colorBy.slice(0, 3) === "gt-";
-  const matrix = {};
+  const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */
   const pivotsLen = frequencies.pivots.length;
   categories.forEach((x) => {matrix[x] = new Array(pivotsLen).fill(0);});
   const categoriesLen = categories.length;
 
-  let debugTipsSeen = 0;
+  // let debugTipsSeen = 0;
   const debugPivotTotals = new Array(pivotsLen).fill(0);
   frequencies.data.forEach((d) => {
     if (tree.visibility[d.idx] === "visible") {
-      debugTipsSeen++;
+      // debugTipsSeen++;
       // const colour = tree.nodes[d.idx].attr[colorBy];
-      const category = assignCategory(controls.colorScale, categories, tree.nodes[d.idx], colorBy, isGenotype);
+      const category = assignCategory(controls.colorScale, categories, tree.nodes[d.idx], colorBy, isGenotype) || "N/A";
+      // if (category === "N/A") return;
       for (let i = 0; i < pivotsLen; i++) {
         if (d.values[i] < 0.0002) {continue;} /* skip 0.0001 values */
         matrix[category][i] += d.values[i];
@@ -58,6 +60,10 @@ export const updateFrequencyData = (dispatch, getState) => {
       }
     }
   });
+
+  if (matrix["N/A"].reduce((a, b) => a + b, 0) === 0) {
+    delete matrix["N/A"];
+  }
 
   if (frequencies.normaliseData) {
     /* NORMALISE COLUMNS - i.e. each pivot point sums to 1 */

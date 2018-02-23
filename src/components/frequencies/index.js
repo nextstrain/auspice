@@ -64,13 +64,12 @@ export class Frequencies extends React.Component {
 
   componentDidMount() {
     /* Render frequencies (via D3) for the first time. DOM element exists. */
-    // console.log("Calling D3 (initial render of frequencies) (version ", this.props.version, ")");
     const svg = select(this.domRef);
     const chartGeom = computeChartGeometry(this.props);
     const scales = calcScales(chartGeom, this.props.ticks);
     drawAxis(svg, chartGeom, scales);
     if (!this.props.matrix) {console.error("Matrix undefined"); return;}
-    const categories = getOrderedCategories(this.props.colorScale);
+    const categories = getOrderedCategories(Object.keys(this.props.matrix), this.props.colorScale);
     const series = turnMatrixIntoSeries(categories, this.props.pivots.length, this.props.matrix);
     const colourer = generateColorScaleD3(categories, this.props.colorScale);
     drawTooltip();
@@ -84,11 +83,10 @@ export class Frequencies extends React.Component {
       // console.log("frequencies CWRP running, but the versions haven't changed, so doing nothing");
       return;
     }
-    if (this.props.colorBy === nextProps.colorBy) {
-      // console.log("CWRP. colorBy unchanged. Should make nice transition");
-    }
-    // console.log("Calling D3 for frequencies (version ", nextProps.version, ")");
-    const categories = getOrderedCategories(nextProps.colorScale);
+    // if (this.props.colorBy === nextProps.colorBy) {
+    //   console.log("CWRP. colorBy unchanged. Should make nice transition");
+    // }
+    const categories = getOrderedCategories(Object.keys(nextProps.matrix), nextProps.colorScale);
     const series = turnMatrixIntoSeries(categories, nextProps.pivots.length, nextProps.matrix);
     const colourer = generateColorScaleD3(categories, nextProps.colorScale);
     const labels = getMeaningfulLabels(categories, nextProps.colorScale);
