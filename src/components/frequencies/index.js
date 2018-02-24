@@ -2,11 +2,10 @@ import React from "react";
 import { select } from "d3-selection";
 import { connect } from "react-redux";
 import Card from "../framework/card";
-import computeResponsive from "../../util/computeResponsive";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 import { toggleNormalization } from "../../actions/frequencies";
 import "../../css/entropy.css";
-import { calcScales, drawAxis, drawStream, turnMatrixIntoSeries, generateColorScaleD3, removeStream, drawTooltip, getMeaningfulLabels, getOrderedCategories } from "./functions";
+import { calcScales, drawAxis, removeAxis, drawStream, drawTooltip } from "./functions";
 
 const getStyles = (width) => {
   return {
@@ -25,7 +24,6 @@ const getStyles = (width) => {
 
 @connect((state) => {
   return {
-    loaded: state.frequencies.loaded,
     data: state.frequencies.data,
     pivots: state.frequencies.pivots,
     ticks: state.frequencies.ticks,
@@ -34,7 +32,8 @@ const getStyles = (width) => {
     normaliseData: state.frequencies.normaliseData,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorBy: state.controls.colorBy,
-    colorScale: state.controls.colorScale
+    colorScale: state.controls.colorScale,
+    colorOptions: state.metadata.colorOptions
   };
 })
 export class Frequencies extends React.Component {
@@ -42,38 +41,49 @@ export class Frequencies extends React.Component {
     super(props);
     this.state = {};
   }
-
+  calcChartGeom(width, height) {
+    return {width, height, spaceLeft: 30, spaceRight: 10, spaceBottom: 20, spaceTop: 10};
+  }
   componentDidMount() {
-    /* Render frequencies (via D3) for the first time. DOM element exists. */
-    const svg = select(this.domRef);
-    const chartGeom = {width: this.props.width, height: this.props.height, spaceLeft: 30, spaceRight: 10, spaceBottom: 20, spaceTop: 10};
-    const scales = calcScales(chartGeom, this.props.ticks);
-    drawAxis(svg, chartGeom, scales);
-    if (!this.props.matrix) {console.error("Matrix undefined"); return;}
-    const categories = getOrderedCategories(Object.keys(this.props.matrix), this.props.colorScale);
-    const series = turnMatrixIntoSeries(categories, this.props.pivots.length, this.props.matrix);
-    const colourer = generateColorScaleD3(categories, this.props.colorScale);
+    /* things that only ever need to be done once, and _don't_ rely on the frequencies actually being loaded */
     drawTooltip();
-    const labels = getMeaningfulLabels(categories, this.props.colorScale);
+    const svg = select(this.domRef);
     const svgStreamGroup = svg.append("g");
-    drawStream(svgStreamGroup, scales, this.props.colorBy, labels, this.props.pivots, series, colourer, this.props.normaliseData);
-    this.setState({svg, svgStreamGroup, chartGeom, scales, categories, series, colourer});
+    const chartGeom = this.calcChartGeom(this.props.width, this.props.height);
+    const newState = {svg, svgStreamGroup};
+
+    /* things that rely on the data being available: */
+    if (this.props.matrix) {
+      newState.scales = calcScales(chartGeom, this.props.ticks);
+      drawAxis(svg, chartGeom, newState.scales);
+      drawStream(svgStreamGroup, newState.scales, {...this.props});
+    }
+    this.setState(newState);
   }
   componentWillReceiveProps(nextProps) {
     if (this.props.version === nextProps.version) {
-      // console.log("frequencies CWRP running, but the versions haven't changed, so doing nothing");
       return;
     }
-    // if (this.props.colorBy === nextProps.colorBy) {
-    //   console.log("CWRP. colorBy unchanged. Should make nice transition");
-    // }
-    const categories = getOrderedCategories(Object.keys(nextProps.matrix), nextProps.colorScale);
-    const series = turnMatrixIntoSeries(categories, nextProps.pivots.length, nextProps.matrix);
-    const colourer = generateColorScaleD3(categories, nextProps.colorScale);
-    const labels = getMeaningfulLabels(categories, nextProps.colorScale);
-    removeStream(this.state.svgStreamGroup);
-    drawStream(this.state.svgStreamGroup, this.state.scales, nextProps.colorBy, labels, nextProps.pivots, series, colourer, nextProps.normaliseData);
-    this.setState({categories, series, colourer});
+    let scales = this.state.scales;
+    if (!this.props.loaded && nextProps.loaded) {
+      const chartGeom = this.calcChartGeom(nextProps.width, nextProps.height);
+      scales = calcScales(chartGeom, nextProps.ticks);
+      drawAxis(this.state.svg, chartGeom, scales);
+    }
+    drawStream(this.state.svgStreamGroup, scales, {...nextProps});
+    if (scales !== this.state.scales) {
+      this.setState({scales});
+    }
+  }
+  componentDidUpdate(prevProps) {
+    if (prevProps.width !== this.props.width || prevProps.height !== this.props.height) {
+      removeAxis(this.state.svg);
+      const chartGeom = this.calcChartGeom(this.props.width, this.props.height);
+      const scales = calcScales(chartGeom, this.props.ticks);
+      drawAxis(this.state.svg, chartGeom, scales);
+      drawStream(this.state.svgStreamGroup, scales, {...this.props});
+      this.setState({scales});
+    }
   }
   normalizationSwitch(svgWidth) {
     const styles = getStyles(svgWidth);
@@ -99,7 +109,7 @@ export class Frequencies extends React.Component {
   }
   render() {
     return (
-      <Card title={"Frequencies"}>
+      <Card title={`Frequencies (coloured by ${this.props.colorOptions[this.props.colorBy].legendTitle})`}>
         {this.normalizationSwitch(this.props.width)}
         <div id="freqinfo"/>
         <svg style={{pointerEvents: "auto"}} width={this.props.width} height={this.props.height}>

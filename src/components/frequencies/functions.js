@@ -4,11 +4,12 @@ import { axisBottom, axisLeft } from "d3-axis";
 import { rgb } from "d3-color";
 import { area } from "d3-shape";
 import { dataFont } from "../../globalStyles";
+import { prettyString } from "../../util/stringHelpers";
 
 /* C O N S T A N T S */
 const opacity = 0.85;
 
-export const getOrderedCategories = (categories, colorScale) => {
+const getOrderedCategories = (categories, colorScale) => {
   /* get the colorBy's in the same order as in the tree legend */
   const legendOrderingReversed = colorScale.scale.domain()
     .filter((d) => d !== undefined)
@@ -34,6 +35,10 @@ export const calcScales = (chartGeom, ticks) => {
   return {x, y, numTicksX: ticks.length, numTicksY: 5};
 };
 
+export const removeAxis = (svg) => {
+  svg.selectAll(".axis").remove();
+};
+
 export const drawAxis = (svg, chartGeom, scales) => {
   /* no idea why I need to add 15 to some of these translations... */
   svg.append("g")
@@ -50,7 +55,7 @@ export const drawAxis = (svg, chartGeom, scales) => {
     .call(axisLeft(scales.y).ticks(scales.numTicksY));
 };
 
-export const turnMatrixIntoSeries = (categories, nPivots, matrix) => {
+const turnMatrixIntoSeries = (categories, nPivots, matrix) => {
   /*
   WHAT IS A SERIES?
   this is the data structure demanded by d3 for a stream graph.
@@ -81,7 +86,7 @@ export const turnMatrixIntoSeries = (categories, nPivots, matrix) => {
   return series;
 };
 
-export const getMeaningfulLabels = (categories, colorScale) => {
+const getMeaningfulLabels = (categories, colorScale) => {
   if (colorScale.continuous) {
     const labels = [];
     for (let i = 0; i < categories.length; i++) {
@@ -109,8 +114,8 @@ export const drawTooltip = () => {
     .style("visibility", "hidden");
 };
 
-export const generateColorScaleD3 = (categories, colorScale) => (d, i) =>
-  categories[i] === "N/A" ? "rgb(190, 190, 190)" : rgb(colorScale.scale(categories[i])).toString();
+const generateColorScaleD3 = (categories, colorScale) => (d, i) =>
+  categories[i] === "undefined" ? "rgb(190, 190, 190)" : rgb(colorScale.scale(categories[i])).toString();
 
 function handleMouseOver() {
   select(this).attr("opacity", 1);
@@ -129,7 +134,7 @@ const calcBestXYPositionsForLabels = (series, pivots, scales, lookahead) => seri
     const displayThresh = 0.07;
     if (d[pivotIdx][1] - d[pivotIdx][0] > displayThresh && d[nextIdx][1] - d[nextIdx][0] > displayThresh) {
       return [
-        scales.x(pivots[pivotIdx]) + 10,
+        scales.x(pivots[pivotIdx + 1]),
         (scales.y((d[pivotIdx][1] + d[pivotIdx][0]) / 2) + scales.y((d[nextIdx][1] + d[nextIdx][0]) / 2)) / 2
       ];
     }
@@ -150,11 +155,18 @@ const drawLabelsOverStream = (svgStreamGroup, series, pivots, labels, scales) =>
     .style("font-family", dataFont)
     .style("font-size", 14)
     .style("alignment-baseline", "middle")
-    .text((d, i) => xyPos[i][0] ? d : "");
+    .text((d, i) => xyPos[i][0] ? prettyString(d) : "");
 };
 
-export const drawStream = (svgStreamGroup, scales, colorBy, labels, pivots, series, colourer, normalised) => {
+export const drawStream = (svgStreamGroup, scales, {matrix, colorBy, colorScale, colorOptions, pivots, normalised}) => {
   removeStream(svgStreamGroup);
+
+  const categories = getOrderedCategories(Object.keys(matrix), colorScale);
+  const series = turnMatrixIntoSeries(categories, pivots.length, matrix);
+  const colourer = generateColorScaleD3(categories, colorScale);
+
+  const labels = getMeaningfulLabels(categories, colorScale);
+
   /* https://github.com/d3/d3-shape/blob/master/README.md#areas */
   const areaObj = area()
     .x((d, i) => scales.x(pivots[i]))
@@ -183,7 +195,7 @@ export const drawStream = (svgStreamGroup, scales, colorBy, labels, pivots, seri
       .style("right", right)
       .style("top", `${50}px`)
       .style("visibility", "visible")
-      .html(`<p>${colorBy}: ${labels[i]}</p><p>Time point: ${pivots[pivotIdx]}</p><p>${freqLabel} ${freqVal}</p>`);
+      .html(`<p>${colorOptions[colorBy].legendTitle}: ${prettyString(labels[i])}</p><p>Time point: ${pivots[pivotIdx]}</p><p>${freqLabel} ${freqVal}</p>`);
   }
 
 

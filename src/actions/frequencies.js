@@ -24,16 +24,16 @@ export const updateFrequencyData = (dispatch, getState) => {
   timerStart("updateFrequencyData");
   const { frequencies, tree, controls } = getState();
   if (!controls.colorScale) {
-    console.error("Race condition. ColourScale not Set. Frequency Matrix can't be calculated.");
+    // console.error("Race condition. ColourScale not Set. Frequency Matrix can't be calculated.");
     return;
   }
   if (!frequencies.data) {
-    console.error("Race condition. Frequencies data not in state. Matrix can't be calculated.");
+    // console.error("Race condition. Frequencies data not in state. Matrix can't be calculated.");
     return;
   }
   /* color scale domain forms the categories in the stream graph */
   const categories = controls.colorScale.scale.domain().filter((d) => d !== undefined);
-  categories.push("N/A"); /* for tips without a colorBy */
+  categories.push("undefined"); /* for tips without a colorBy */
   const colorBy = controls.colorBy;
   const isGenotype = colorBy.slice(0, 3) === "gt-";
   const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */
@@ -47,8 +47,8 @@ export const updateFrequencyData = (dispatch, getState) => {
     if (tree.visibility[d.idx] === "visible") {
       // debugTipsSeen++;
       // const colour = tree.nodes[d.idx].attr[colorBy];
-      const category = assignCategory(controls.colorScale, categories, tree.nodes[d.idx], colorBy, isGenotype) || "N/A";
-      // if (category === "N/A") return;
+      const category = assignCategory(controls.colorScale, categories, tree.nodes[d.idx], colorBy, isGenotype) || "undefined";
+      // if (category === "undefined") return;
       for (let i = 0; i < pivotsLen; i++) {
         if (d.values[i] < 0.0002) {continue;} /* skip 0.0001 values */
         matrix[category][i] += d.values[i];
@@ -60,8 +60,8 @@ export const updateFrequencyData = (dispatch, getState) => {
     }
   });
 
-  if (matrix["N/A"].reduce((a, b) => a + b, 0) === 0) {
-    delete matrix["N/A"];
+  if (matrix["undefined"].reduce((a, b) => a + b, 0) === 0) {
+    delete matrix["undefined"];
     categoriesLen--;
   }
 
