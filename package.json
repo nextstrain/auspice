@@ -98,6 +98,7 @@
     "webpack-hot-middleware": "^2.19.1"
   },
   "dependencies": {
+    "awesomplete": "^1.1.2",
     "binomial": "^0.2.0",
     "color": "^0.7.3",
     "create-react-class": "^15.6.0",
@@ -128,7 +129,6 @@
     "query-string": "^4.2.3",
     "react": "^16.2.0",
     "react-addons-css-transition-group": "^15.6.0",
-    "react-autosuggest": "^3.9.0",
     "react-dom": "^16.2.0",
     "react-ga": "^2.2.0",
     "react-hot-loader": "^3.0.0-beta.7",

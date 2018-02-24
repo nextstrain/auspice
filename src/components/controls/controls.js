@@ -15,6 +15,7 @@ import MapAnimationControls from "./map-animation";
 import { titleStyles } from "../../globalStyles";
 import DataSource from "./data-source";
 import PanelToggles from "./panel-toggles";
+import SearchStrains from "./search";
 
 const header = (text) => (
   <span style={titleStyles.small}>
@@ -61,6 +62,9 @@ class Controls extends React.Component {
 
         <SelectLabel text="Branch Length"/>
         <ChooseMetric/>
+
+        <SelectLabel text="Search Strains"/>
+        <SearchStrains/>
 
         {header("Map Options")}
         <SelectLabel text="Geographic resolution"/>
