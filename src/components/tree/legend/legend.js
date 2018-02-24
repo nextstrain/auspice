@@ -196,7 +196,7 @@ class Legend extends React.Component {
   }
   render() {
     // catch the case where we try to render before anythings ready
-    if (!this.props.colorScale) {return (<g/>);}
+    if (!this.props.colorScale) return null;
     const styles = this.getStyles();
     return (
       <svg width="280" height={this.getSVGHeight()} style={styles.svg}>

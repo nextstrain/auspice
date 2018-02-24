@@ -4,16 +4,17 @@ import { connect } from "react-redux";
 import { select } from "d3-selection";
 import { rgb } from "d3-color";
 import { ReactSVGPanZoom } from "react-svg-pan-zoom";
+import { updateVisibleTipsAndBranchThicknesses } from "../../actions/treeProperties";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
-import ZoomOutIcon from "../framework/zoom-out-icon";
-import ZoomInIcon from "../framework/zoom-in-icon";
 import PhyloTree from "./phyloTree/phyloTree";
 import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface";
 import * as callbacks from "./reactD3Interface/callbacks";
 import { calcStrokeCols } from "./treeHelpers";
+import { buttonBaseStyle } from "../map/map";
+import { darkGrey, dataFont } from "../../globalStyles";
 
 /*
 this.props.tree contains the nodes etc used to build the PhyloTree
@@ -21,7 +22,6 @@ object "tree". Those nodes are in a 1-1 ordering, and
 there are actually backlinks from the phylotree tree
 (i.e. tree.nodes[i].n links to props.tree.nodes[i])
 */
-
 @connect((state) => {
   return {
     tree: state.tree,
@@ -53,33 +53,42 @@ class Tree extends React.Component {
     this.resetView = callbacks.resetView.bind(this);
     this.onViewerChange = callbacks.onViewerChange.bind(this);
     this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
+    this.redrawTree = () => {
+      this.state.tree.clearSVG();
+      this.Viewer.fitToViewer();
+      this.renderTree(this.state.tree, this.props);
+      this.setState({hover: null, selectedBranch: null, selectedTip: null});
+      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0}));
+    };
   }
   static propTypes = {
     mutType: PropTypes.string.isRequired
   }
-
+  componentDidMount() {
+    if (this.props.tree.loaded) {
+      const tree = new PhyloTree(this.props.tree.nodes);
+      this.renderTree(tree, this.props);
+      if (this.Viewer) {
+        this.Viewer.fitToViewer();
+      }
+      this.setState({tree});
+    }
+  }
   /* CWRP has two tasks: (1) create the tree when it's in redux
   (2) compare props and call phylotree.change() appropritately */
   componentWillReceiveProps(nextProps) {
     let tree = this.state.tree;
     if (!nextProps.tree.loaded) {
       this.setState({tree: null});
-    } else if (tree === null && nextProps.tree.loaded) {
-      tree = this.makeTree(nextProps);
+    } else if (!tree && nextProps.tree.loaded) {
+      tree = new PhyloTree(nextProps.tree.nodes);
+      this.renderTree(tree, nextProps);
       this.setState({tree});
       if (this.Viewer) {
         this.Viewer.fitToViewer();
       }
     } else if (tree) {
       changePhyloTreeViaPropsComparison(this, nextProps);
-    }
-  }
-
-  componentDidMount() {
-    const tree = this.makeTree(this.props);
-    this.setState({tree});
-    if (this.Viewer) {
-      this.Viewer.fitToViewer();
     }
   }
 
@@ -92,43 +101,36 @@ class Tree extends React.Component {
       this.state.tree.change({svgHasChangedDimensions: true});
     }
   }
-
-  makeTree(nextProps) {
-    const nodes = nextProps.tree.nodes;
-    if (nodes && this.d3ref) {
-      const myTree = new PhyloTree(nodes);
-      // https://facebook.github.io/react/docs/refs-and-the-dom.html
-      myTree.render(
-        select(this.d3ref),
-        this.props.layout,
-        this.props.distanceMeasure,
-        { /* parameters (modifies PhyloTree's defaults) */
-          grid: true,
-          confidence: nextProps.temporalConfidence.display,
-          showCladeLabels: true,
-          tipLabels: true,
-          showTipLabels: true
-        },
-        { /* callbacks */
-          onTipHover: callbacks.onTipHover.bind(this),
-          onTipClick: callbacks.onTipClick.bind(this),
-          onBranchHover: callbacks.onBranchHover.bind(this),
-          onBranchClick: callbacks.onBranchClick.bind(this),
-          onBranchLeave: callbacks.onBranchLeave.bind(this),
-          onTipLeave: callbacks.onTipLeave.bind(this),
-          tipLabel: (d) => d.n.strain,
-          tipLabelSize: callbacks.tipLabelSize.bind(this)
-        },
-        nextProps.tree.branchThickness, /* guarenteed to be in redux by now */
-        nextProps.tree.visibility,
-        nextProps.temporalConfidence.on, /* drawConfidence? */
-        nextProps.tree.vaccines,
-        calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy),
-        nextProps.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString())
-      );
-      return myTree;
-    }
-    return null;
+  renderTree(tree, props) {
+    /* simply the call to phylotree.render */
+    tree.render(
+      select(this.d3ref),
+      props.layout,
+      props.distanceMeasure,
+      { /* parameters (modifies PhyloTree's defaults) */
+        grid: true,
+        confidence: props.temporalConfidence.display,
+        showCladeLabels: true,
+        tipLabels: true,
+        showTipLabels: true
+      },
+      { /* callbacks */
+        onTipHover: callbacks.onTipHover.bind(this),
+        onTipClick: callbacks.onTipClick.bind(this),
+        onBranchHover: callbacks.onBranchHover.bind(this),
+        onBranchClick: callbacks.onBranchClick.bind(this),
+        onBranchLeave: callbacks.onBranchLeave.bind(this),
+        onTipLeave: callbacks.onTipLeave.bind(this),
+        tipLabel: (d) => d.n.strain,
+        tipLabelSize: callbacks.tipLabelSize.bind(this)
+      },
+      props.tree.branchThickness, /* guarenteed to be in redux by now */
+      props.tree.visibility,
+      props.temporalConfidence.on, /* drawConfidence? */
+      props.tree.vaccines,
+      calcStrokeCols(props.tree, props.colorByConfidence, props.colorBy),
+      props.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString())
+    );
   }
 
   render() {
@@ -181,33 +183,12 @@ class Tree extends React.Component {
             />
           </svg>
         </ReactSVGPanZoom>
-        <svg width={50} height={130} style={{position: "absolute", right: 20, bottom: 20}}>
-          <defs>
-            <filter id="dropshadow" height="130%">
-              <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-              <feOffset dx="2" dy="2" result="offsetblur"/>
-              <feComponentTransfer>
-                <feFuncA type="linear" slope="0.2"/>
-              </feComponentTransfer>
-              <feMerge>
-                <feMergeNode/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
-          <ZoomInIcon
-            handleClick={this.handleIconClickHOF("zoom-in")}
-            active
-            x={10}
-            y={50}
-          />
-          <ZoomOutIcon
-            handleClick={this.handleIconClickHOF("zoom-out")}
-            active
-            x={10}
-            y={90}
-          />
-        </svg>
+        <button
+          style={{...buttonBaseStyle, right: 20, bottom: 30, backgroundColor: "rgb(230, 230, 230)", color: darkGrey, fontFamily: dataFont, fontSize: 12}}
+          onClick={this.redrawTree}
+        >
+          reset tree
+        </button>
       </Card>
     );
   }

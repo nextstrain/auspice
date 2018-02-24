@@ -183,10 +183,11 @@ export const drawRegression = function drawRegression() {
  * add and remove elements from tree, initial render
  */
 export const clearSVG = function clearSVG() {
-  this.svg.selectAll('.tip').remove();
-  this.svg.selectAll('.branch').remove();
-  this.svg.selectAll('.cladeLabel').remove();
-  this.svg.selectAll('.tipLabel').remove();
-  this.svg.selectAll(".vaccine").remove();
-  this.svg.selectAll(".conf").remove();
+  this.svg.selectAll("*").remove();
+  // this.svg.selectAll('.tip').remove();
+  // this.svg.selectAll('.branch').remove();
+  // this.svg.selectAll('.cladeLabel').remove();
+  // this.svg.selectAll('.tipLabel').remove();
+  // this.svg.selectAll(".vaccine").remove();
+  // this.svg.selectAll(".conf").remove();
 };

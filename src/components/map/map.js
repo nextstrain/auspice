@@ -18,9 +18,18 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 
+export const buttonBaseStyle = {
+  color: "white",
+  fontWeight: 700,
+  borderRadius: 4,
+  padding: 15,
+  border: "none",
+  zIndex: 9999,
+  position: "absolute"
+};
+
 /* global L */
 // L is global in scope and placed by leaflet()
-
 @connect((state) => {
   return {
     // datasetGuid: state.tree.datasetGuid,
@@ -403,25 +412,15 @@ class Map extends React.Component {
   }
 
   animationButtons() {
-    const baseStyle = {
-      color: "white",
-      fontWeight: 700,
-      borderRadius: 4,
-      padding: 15,
-      border: "none",
-      zIndex: 9999,
-      position: "absolute",
-      top: 25
-    };
     return (
       <div>
         <button
-          style={{...baseStyle, left: 25, width: 56, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? "rgb(228, 153, 56)" : "rgb(124, 184, 121)"}}
+          style={{...buttonBaseStyle, top: 25, left: 25, width: 56, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? "rgb(228, 153, 56)" : "rgb(124, 184, 121)"}}
           onClick={this.playPauseButtonClicked}
         >
           {this.props.animationPlayPauseButton}
         </button>
-        <button style={{...baseStyle, left: 90, backgroundColor: "rgb(230, 230, 230)"}} onClick={this.resetButtonClicked}>
+        <button style={{...buttonBaseStyle, top: 25, left: 90, backgroundColor: "rgb(230, 230, 230)"}} onClick={this.resetButtonClicked}>
           Reset
         </button>
       </div>
