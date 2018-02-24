@@ -9,6 +9,18 @@ import { prettyString } from "../../util/stringHelpers";
 /* C O N S T A N T S */
 const opacity = 0.85;
 
+export const parseColorBy = (colorBy, colorOptions) => {
+  if (colorOptions[colorBy]) {
+    return colorOptions[colorBy].legendTitle;
+  } else if (colorBy.startsWith("gt-nuc")) { /* gt-nuc_155 */
+    return `Genotype at Nuc. ${colorBy.split("_")[1]}`;
+  } else if (colorBy.startsWith("gt-")) { /* gt-HA2_155 */
+    const parts = colorBy.split('-')[1].split('_');
+    return `Genotype at ${parts[0]} pos ${parts[1]}`;
+  }
+  return prettyString(colorBy);
+};
+
 const getOrderedCategories = (categories, colorScale) => {
   /* get the colorBy's in the same order as in the tree legend */
   const legendOrderingReversed = colorScale.scale.domain()
@@ -193,9 +205,11 @@ export const drawStream = (svgStreamGroup, scales, {matrix, colorBy, colorScale,
     select("#freqinfo")
       .style("left", left)
       .style("right", right)
-      .style("top", `${50}px`)
+      .style("top", `${70}px`)
       .style("visibility", "visible")
-      .html(`<p>${colorOptions[colorBy].legendTitle}: ${prettyString(labels[i])}</p><p>Time point: ${pivots[pivotIdx]}</p><p>${freqLabel} ${freqVal}</p>`);
+      .html(`<p>${parseColorBy(colorBy, colorOptions)}: ${prettyString(labels[i])}</p>
+        <p>Time point: ${pivots[pivotIdx]}</p>
+        <p>${freqLabel}: ${freqVal}</p>`);
   }
 
 

@@ -4,8 +4,8 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 import { toggleNormalization } from "../../actions/frequencies";
+import { calcScales, drawAxis, removeAxis, drawStream, drawTooltip, parseColorBy } from "./functions";
 import "../../css/entropy.css";
-import { calcScales, drawAxis, removeAxis, drawStream, drawTooltip } from "./functions";
 
 const getStyles = (width) => {
   return {
@@ -109,7 +109,7 @@ export class Frequencies extends React.Component {
   }
   render() {
     return (
-      <Card title={`Frequencies (coloured by ${this.props.colorOptions[this.props.colorBy].legendTitle})`}>
+      <Card title={`Frequencies (coloured by ${parseColorBy(this.props.colorBy, this.props.colorOptions)})`}>
         {this.normalizationSwitch(this.props.width)}
         <div id="freqinfo"/>
         <svg style={{pointerEvents: "auto"}} width={this.props.width} height={this.props.height}>
