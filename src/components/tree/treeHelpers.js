@@ -362,3 +362,35 @@ export const processNodes = (nodes) => {
   nodes.forEach((d, idx) => {d.arrayIdx = idx;});
   return nodes;
 };
+
+/**
+*  this function is changing as augur changes. It will be merged with processNodes.
+*  @param nodes - nodes
+*  side-effects: deletes "clade_name", "named_clades", "clade_assignment" out of node.attrs
+*  adds node.attrs.labels {obj}.
+*/
+export const processBranchLabelsInPlace = (nodes) => nodes.forEach((n) => {
+  let muts = "";
+  if (n.aa_muts) {
+    for (const aa in n.aa_muts) { // eslint-disable-line
+      for (const mut of n.aa_muts[aa]) {
+        muts += `${aa}:${mut} `;
+      }
+    }
+  }
+  let clade;
+  if (n.attr.clade_name) {
+    clade = n.attr.clade_name;
+    delete n.attr.clade_name;
+  }
+  if (n.attr.clade_annotation) {
+    clade = n.attr.clade_annotation;
+    delete n.attr.clade_annotation;
+  }
+  if (n.attr.named_clades) delete n.attr.named_clades;
+  if (clade || muts) {
+    n.attr.labels = {};
+    if (clade) n.attr.labels.clade = clade;
+    if (muts) n.attr.labels.aa = muts;
+  }
+});
