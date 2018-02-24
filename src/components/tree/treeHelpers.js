@@ -368,13 +368,15 @@ export const processNodes = (nodes) => {
 *  @param nodes - nodes
 *  side-effects: deletes "clade_name", "named_clades", "clade_assignment" out of node.attrs
 *  adds node.attrs.labels {obj}.
+*  this should be hoisted to an action so that the keys can be send to the controls reducer (currently hardcoded)
 */
 export const processBranchLabelsInPlace = (nodes) => nodes.forEach((n) => {
   let muts = "";
   if (n.aa_muts) {
     for (const aa in n.aa_muts) { // eslint-disable-line
-      for (const mut of n.aa_muts[aa]) {
-        muts += `${aa}:${mut} `;
+      if (n.aa_muts[aa].length) {
+        muts += `${aa}: `;
+        muts += n.aa_muts[aa].join(", ");
       }
     }
   }

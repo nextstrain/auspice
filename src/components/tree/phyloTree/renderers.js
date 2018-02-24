@@ -37,7 +37,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   /* draw functions */
   if (this.params.showGrid) this.addGrid();
   this.drawBranches();
-  if (this.params.showCladeLabels) this.drawCladeLabels();
+  if (this.params.cladeLabelKey) this.drawCladeLabels(this.params.cladeLabelKey);
   this.drawTips();
   if (this.vaccines) this.drawVaccines();
   if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();

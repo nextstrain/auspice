@@ -34,7 +34,8 @@ there are actually backlinks from the phylotree tree
     mutType: state.controls.mutType,
     colorScale: state.controls.colorScale,
     metadata: state.metadata,
-    panelLayout: state.controls.panelLayout
+    panelLayout: state.controls.panelLayout,
+    selectedBranchLabel: state.controls.selectedBranchLabel
   };
 })
 class Tree extends React.Component {
@@ -110,7 +111,7 @@ class Tree extends React.Component {
       { /* parameters (modifies PhyloTree's defaults) */
         grid: true,
         confidence: props.temporalConfidence.display,
-        showCladeLabels: true,
+        cladeLabelKey: props.selectedBranchLabel,
         tipLabels: true,
         showTipLabels: true
       },

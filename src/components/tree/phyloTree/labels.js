@@ -44,11 +44,12 @@ export const updateCladeLabels = function updateCladeLabels(dt) {
   if (!dt) timerFlush();
 };
 
-export const drawCladeLabels = function drawCladeLabels() {
+export const drawCladeLabels = function drawCladeLabels(key) {
+  this.params.cladeLabelKey = key; /* deprecated */
   const visibility = this.layout === "rect" ? "visible" : "hidden";
   const labelSize = cladeLabelSize(this.nNodesInView);
   this.svg.append("g").selectAll('.cladeLabel')
-    .data(this.nodes.filter((d) => typeof d.n.attr.clade_name !== 'undefined'))
+    .data(this.nodes.filter((d) => d.n.attr.labels && d.n.attr.labels[key]))
     .enter()
     .append("text")
     .attr("class", "cladeLabel")
@@ -59,5 +60,5 @@ export const drawCladeLabels = function drawCladeLabels() {
     .style("fill", this.params.cladeLabelFill)
     .style("font-family", this.params.cladeLabelFont)
     .style("font-size", labelSize)
-    .text((d) => d.n.attr.clade_name);
+    .text((d) => d.n.attr.labels[key]);
 };

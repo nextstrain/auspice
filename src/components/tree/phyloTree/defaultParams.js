@@ -24,7 +24,7 @@ export const defaultParams = {
   tipRadius: 4,
   fontFamily: dataFont,
   /* C L A D E   L A B E L S */
-  showCladeLabels: false,
+  cladeLabelKey: false,
   cladeLabelFont: dataFont,
   cladeLabelFill: "#555",
   cladeLabelPadX: 8,
