@@ -5,6 +5,7 @@ import { rgb } from "d3-color";
 import { area } from "d3-shape";
 import { dataFont } from "../../globalStyles";
 import { prettyString } from "../../util/stringHelpers";
+import { unassigned_label } from "../../actions/frequencies";
 
 /* C O N S T A N T S */
 const opacity = 0.85;
@@ -100,11 +101,10 @@ const turnMatrixIntoSeries = (categories, nPivots, matrix) => {
 
 const getMeaningfulLabels = (categories, colorScale) => {
   if (colorScale.continuous) {
-    const labels = [];
-    for (let i = 0; i < categories.length; i++) {
-      labels[i] = `${colorScale.legendBoundsMap.lower_bound[categories[i]].toFixed(2)} - ${colorScale.legendBoundsMap.upper_bound[categories[i]].toFixed(2)}`;
-    }
-    return labels;
+    return categories.map((name) => name === unassigned_label ?
+      unassigned_label :
+      `${colorScale.legendBoundsMap.lower_bound[name].toFixed(2)} - ${colorScale.legendBoundsMap.upper_bound[name].toFixed(2)}`
+    );
   }
   return categories.slice();
 };
@@ -127,7 +127,7 @@ export const drawTooltip = () => {
 };
 
 const generateColorScaleD3 = (categories, colorScale) => (d, i) =>
-  categories[i] === "undefined" ? "rgb(190, 190, 190)" : rgb(colorScale.scale(categories[i])).toString();
+  categories[i] === unassigned_label ? "rgb(190, 190, 190)" : rgb(colorScale.scale(categories[i])).toString();
 
 function handleMouseOver() {
   select(this).attr("opacity", 1);

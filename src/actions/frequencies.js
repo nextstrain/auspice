@@ -2,10 +2,14 @@ import { debounce } from 'lodash';
 import * as types from "./types";
 import { timerStart, timerEnd } from "../util/perf";
 
+export const unassigned_label = "unassigned";
+
 const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
   if (isGenotype) return node.currentGt;
-
   const value = node.attr[colorBy];
+  if (!value || value === "unknown") {
+    return unassigned_label;
+  }
   if (!colorScale.continuous) return value;
 
   for (let i = 0; i < categories.length; i++) {
@@ -17,7 +21,7 @@ const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
     }
   }
   console.error("Could not assign", value, "to a category");
-  return undefined;
+  return unassigned_label;
 };
 
 export const updateFrequencyData = (dispatch, getState) => {
@@ -33,7 +37,7 @@ export const updateFrequencyData = (dispatch, getState) => {
   }
   /* color scale domain forms the categories in the stream graph */
   const categories = controls.colorScale.scale.domain().filter((d) => d !== undefined);
-  categories.push("undefined"); /* for tips without a colorBy */
+  categories.push(unassigned_label); /* for tips without a colorBy */
   const colorBy = controls.colorBy;
   const isGenotype = colorBy.slice(0, 3) === "gt-";
   const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */
@@ -47,8 +51,8 @@ export const updateFrequencyData = (dispatch, getState) => {
     if (tree.visibility[d.idx] === "visible") {
       // debugTipsSeen++;
       // const colour = tree.nodes[d.idx].attr[colorBy];
-      const category = assignCategory(controls.colorScale, categories, tree.nodes[d.idx], colorBy, isGenotype) || "undefined";
-      // if (category === "undefined") return;
+      const category = assignCategory(controls.colorScale, categories, tree.nodes[d.idx], colorBy, isGenotype) || unassigned_label;
+      // if (category === unassigned_label) return;
       for (let i = 0; i < pivotsLen; i++) {
         if (d.values[i] < 0.0002) {continue;} /* skip 0.0001 values */
         matrix[category][i] += d.values[i];
@@ -60,8 +64,8 @@ export const updateFrequencyData = (dispatch, getState) => {
     }
   });
 
-  if (matrix["undefined"].reduce((a, b) => a + b, 0) === 0) {
-    delete matrix["undefined"];
+  if (matrix[unassigned_label].reduce((a, b) => a + b, 0) === 0) {
+    delete matrix[unassigned_label];
     categoriesLen--;
   }
 
