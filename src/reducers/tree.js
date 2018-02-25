@@ -22,7 +22,8 @@ export const getDefaultTreeState = () => {
     version: 0,
     idxOfInViewRootNode: 0,
     visibleStateCounts: {},
-    totalStateCounts: {}
+    totalStateCounts: {},
+    availableBranchLabels: []
   };
 };
 

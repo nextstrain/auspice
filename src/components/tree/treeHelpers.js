@@ -370,29 +370,39 @@ export const processNodes = (nodes) => {
 *  adds node.attrs.labels {obj}.
 *  this should be hoisted to an action so that the keys can be send to the controls reducer (currently hardcoded)
 */
-export const processBranchLabelsInPlace = (nodes) => nodes.forEach((n) => {
-  let muts = "";
-  if (n.aa_muts) {
-    for (const aa in n.aa_muts) { // eslint-disable-line
-      if (n.aa_muts[aa].length) {
-        muts += `${aa}: `;
-        muts += n.aa_muts[aa].join(", ");
+export const processBranchLabelsInPlace = (nodes) => {
+  const availableBranchLabels = ["none"];
+  nodes.forEach((n) => {
+    let muts = "";
+    if (n.aa_muts) {
+      for (const aa in n.aa_muts) { // eslint-disable-line
+        if (n.aa_muts[aa].length) {
+          muts += `${aa}: `;
+          muts += n.aa_muts[aa].join(", ");
+        }
       }
     }
-  }
-  let clade;
-  if (n.attr.clade_name) {
-    clade = n.attr.clade_name;
-    delete n.attr.clade_name;
-  }
-  if (n.attr.clade_annotation) {
-    clade = n.attr.clade_annotation;
-    delete n.attr.clade_annotation;
-  }
-  if (n.attr.named_clades) delete n.attr.named_clades;
-  if (clade || muts) {
-    n.attr.labels = {};
-    if (clade) n.attr.labels.clade = clade;
-    if (muts) n.attr.labels.aa = muts;
-  }
-});
+    let clade;
+    if (n.attr.clade_name) {
+      clade = n.attr.clade_name;
+      delete n.attr.clade_name;
+    }
+    if (n.attr.clade_annotation) {
+      clade = n.attr.clade_annotation;
+      delete n.attr.clade_annotation;
+    }
+    if (n.attr.named_clades) delete n.attr.named_clades;
+    if (clade || muts) {
+      n.attr.labels = {};
+      if (clade) {
+        n.attr.labels.clade = clade;
+        if (availableBranchLabels.indexOf("clade") === -1) availableBranchLabels.push("clade");
+      }
+      if (muts) {
+        n.attr.labels.aa = muts;
+        if (availableBranchLabels.indexOf("aa") === -1) availableBranchLabels.push("aa");
+      }
+    }
+  });
+  return availableBranchLabels;
+};

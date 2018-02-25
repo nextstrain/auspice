@@ -59,14 +59,15 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
         const nodesArray = flattenTree(treeJSON);
         const nodes = processNodes(nodesArray);
         const vaccines = processVaccines(nodes, metaJSON.vaccine_choices);
-        processBranchLabelsInPlace(nodesArray);
+        const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
         let treeState = Object.assign({}, getDefaultTreeState(), {
           nodes,
           vaccines,
+          availableBranchLabels,
           attrs: getAttrsOnTerminalNodes(nodes),
           loaded: true
         });
-
+        console.log(availableBranchLabels)
         /* controls NEW_DATASET */
         let controlsState = getDefaultControlsState();
         controlsState = modifyStateViaTree(controlsState, treeState);

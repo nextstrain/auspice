@@ -6,7 +6,7 @@ import { CHANGE_BRANCH_LABEL } from "../../actions/types";
 
 @connect((state) => ({
   selected: state.controls.selectedBranchLabel,
-  available: state.controls.availableBranchLabels
+  available: state.tree.availableBranchLabels
 }))
 class ChooseBranchLabelling extends React.Component {
   constructor(props) {

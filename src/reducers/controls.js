@@ -1,5 +1,4 @@
 import { numericToCalendar, calendarToNumeric, currentNumDate, currentCalDate } from "../util/dateHelpers";
-import { flattenTree } from "../components/tree/treeHelpers";
 import { defaultGeoResolution,
   defaultColorBy,
   defaultDateRange,
@@ -205,8 +204,7 @@ export const modifyStateViaTree = (state, tree) => {
   state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
   state.dateMaxNumeric = calendarToNumeric(state.dateMax);
   state.absoluteDateMaxNumeric = calendarToNumeric(state.absoluteDateMax);
-  state.availableBranchLabels = ["none", "clade", "aa"];
-  state.selectedBranchLabel = "clade";
+  state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
 
   /* available tree attrs - based upon the root node */
   state["attrs"] = Object.keys(tree.nodes[0].attr);
@@ -301,7 +299,6 @@ export const getDefaultControlsState = () => {
     colorBy: defaults.colorBy,
     colorByConfidence: {display: false, on: false},
     colorScale: undefined,
-    availableBranchLabels: [],
     selectedBranchLabel: false,
     analysisSlider: false,
     geoResolution: defaults.geoResolution,
