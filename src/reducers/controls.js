@@ -15,15 +15,14 @@ export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
 };
 
-const getMinCalDateViaTree = (root) => {
-  const minNumDate = root.attr.num_date - 0.01; /* slider should be earlier than actual day */
+const getMinCalDateViaTree = (nodes) => {
+  const minNumDate = nodes[0].attr.num_date - 0.01; /* slider should be earlier than actual day */
   return numericToCalendar(minNumDate);
 };
 
-const getMaxCalDateViaTree = (tree) => {
+const getMaxCalDateViaTree = (nodes) => {
   let maxNumDate = reallySmallNumber;
-  const nodesArray = flattenTree(tree);
-  nodesArray.forEach((node) => {
+  nodes.forEach((node) => {
     if (node.attr) {
       if (node.attr.num_date) {
         if (node.attr.num_date > maxNumDate) {
@@ -119,7 +118,7 @@ export const restoreQueryableStateToDefaults = (state) => {
   return state;
 };
 
-const modifyStateViaMetadata = (state, metadata) => {
+export const modifyStateViaMetadata = (state, metadata) => {
   if (metadata.date_range) {
     /* this may be useful if, e.g., one were to want to display an outbreak
     from 2000-2005 (the default is the present day) */
@@ -196,11 +195,11 @@ const modifyStateViaMetadata = (state, metadata) => {
   return state;
 };
 
-const modifyStateViaTree = (state, tree) => {
-  state["dateMin"] = getMinCalDateViaTree(tree);
-  state["absoluteDateMin"] = getMinCalDateViaTree(tree);
-  state["dateMax"] = getMaxCalDateViaTree(tree);
-  state["absoluteDateMax"] = getMaxCalDateViaTree(tree);
+export const modifyStateViaTree = (state, tree) => {
+  state["dateMin"] = getMinCalDateViaTree(tree.nodes);
+  state["absoluteDateMin"] = getMinCalDateViaTree(tree.nodes);
+  state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
+  state["absoluteDateMax"] = getMaxCalDateViaTree(tree.nodes);
   /* and their numeric conversions */
   state.dateMinNumeric = calendarToNumeric(state.dateMin);
   state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
@@ -210,8 +209,8 @@ const modifyStateViaTree = (state, tree) => {
   state.selectedBranchLabel = "clade";
 
   /* available tree attrs - based upon the root node */
-  state["attrs"] = Object.keys(tree.attr);
-  state["temporalConfidence"] = Object.keys(tree.attr).indexOf("num_date_confidence") > -1 ?
+  state["attrs"] = Object.keys(tree.nodes[0].attr);
+  state["temporalConfidence"] = Object.keys(tree.nodes[0].attr).indexOf("num_date_confidence") > -1 ?
     {exists: true, display: true, on: false} : {exists: false, display: false, on: false};
   return state;
 };
@@ -222,12 +221,12 @@ export const checkAndCorrectErrorsInState = (state, metadata) => {
   a URL QUERY (and correct it in state), we can't correct the URL */
 
   /* colorBy */
-  if (Object.keys(metadata.color_options).indexOf(state.colorBy) === -1 && !state["colorBy"].startsWith("gt-")) {
-    const availableNonGenotypeColorBys = Object.keys(metadata.color_options);
+  if (Object.keys(metadata.colorOptions).indexOf(state.colorBy) === -1 && !state["colorBy"].startsWith("gt-")) {
+    const availableNonGenotypeColorBys = Object.keys(metadata.colorOptions);
     if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
       availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
     }
-    console.error("Error detected trying to set colorBy to", state.colorBy, "(valid options are", Object.keys(metadata.color_options).join(", "), "). Setting to", availableNonGenotypeColorBys[0]);
+    console.error("Error detected trying to set colorBy to", state.colorBy, "(valid options are", Object.keys(metadata.colorOptions).join(", "), "). Setting to", availableNonGenotypeColorBys[0]);
     state.colorBy = availableNonGenotypeColorBys[0];
     state.defaults.colorBy = availableNonGenotypeColorBys[0];
   }
@@ -265,7 +264,7 @@ export const checkAndCorrectErrorsInState = (state, metadata) => {
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
 */
-const getDefaultState = () => {
+export const getDefaultControlsState = () => {
   const defaults = {
     distanceMeasure: defaultDistanceMeasure,
     layout: defaultLayout,
@@ -320,19 +319,21 @@ const getDefaultState = () => {
   };
 };
 
-const Controls = (state = getDefaultState(), action) => {
+const Controls = (state = getDefaultControlsState(), action) => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: {
       return action.newControls;
     }
-    case types.NEW_DATASET: {
-      let base = getDefaultState();
-      base = modifyStateViaTree(base, action.tree);
-      base = modifyStateViaMetadata(base, action.meta);
-      base = modifyStateViaURLQuery(base, action.query);
-      base = checkAndCorrectErrorsInState(base, action.meta); /* must run last */
-      return base;
-    }
+    // case types.NEW_DATASET: {
+    //   let base = getDefaultControlsState();
+    //   base = modifyStateViaTree(base, action.tree);
+    //   base = modifyStateViaMetadata(base, action.meta);
+    //   base = modifyStateViaURLQuery(base, action.query);
+    //   base = checkAndCorrectErrorsInState(base, action.meta); /* must run last */
+    //   return base;
+    // }
+    case types.CLEAN_START:
+      return action.controlsState;
     case types.LEGEND_ITEM_MOUSEENTER:
       return Object.assign({}, state, {
         selectedLegendItem: action.data

@@ -11,7 +11,7 @@ export const intersectGenes = function intersectGenes(geneMap, pos) {
   return false;
 };
 
-const getAnnotations = (jsonData) => {
+export const getAnnotations = (jsonData) => {
   const annotations = [];
   let aaCount = 0;
   for (const prot of Object.keys(jsonData)) {
@@ -29,7 +29,7 @@ const getAnnotations = (jsonData) => {
   return annotations;
 };
 
-const processAnnotations = (annotations) => {
+export const processAnnotations = (annotations) => {
   const m = {}; /* m === geneMap */
   annotations.forEach((d) => {
     m[d.prot] = d;
@@ -47,13 +47,15 @@ const Entropy = (state = {loaded: false, showCounts: false}, action) => {
   switch (action.type) {
     case types.DATA_INVALID:
       return {loaded: false, showCounts: false};
-    case types.NEW_DATASET:
-      const annotations = getAnnotations(action.meta.annotations);
-      return Object.assign({}, state, {
-        loaded: false,
-        annotations,
-        geneMap: processAnnotations(annotations)
-      });
+    // case types.NEW_DATASET:
+    //   const annotations = getAnnotations(action.meta.annotations);
+    //   return Object.assign({}, state, {
+    //     loaded: false,
+    //     annotations,
+    //     geneMap: processAnnotations(annotations)
+    //   });
+    case types.CLEAN_START:
+      return action.entropyState;
     case types.ENTROPY_DATA:
       return Object.assign({}, state, {
         loaded: true,

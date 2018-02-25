@@ -6,7 +6,7 @@ import * as types from "../actions/types";
 that the tree is loaded as they are set on the same action
 */
 
-const getDefaultState = () => {
+export const getDefaultTreeState = () => {
   return {
     loaded: false,
     nodes: null,
@@ -26,7 +26,7 @@ const getDefaultState = () => {
   };
 };
 
-const getAttrsOnTerminalNodes = (nodes) => {
+export const getAttrsOnTerminalNodes = (nodes) => {
   for (const node of nodes) {
     if (!node.hasChildren) {
       return Object.keys(node.attr).filter((v) => v.toLowerCase() !== "strain");
@@ -36,21 +36,23 @@ const getAttrsOnTerminalNodes = (nodes) => {
   return undefined;
 };
 
-const Tree = (state = getDefaultState(), action) => {
+const Tree = (state = getDefaultTreeState(), action) => {
   switch (action.type) {
-    case types.NEW_DATASET: {
-      /* loaded returns to the default (false) */
-      appendParentsToTree(action.tree);
-      const nodesArray = flattenTree(action.tree);
-      const nodes = processNodes(nodesArray);
-      const vaccines = processVaccines(nodes, action.meta.vaccine_choices);
-      processBranchLabelsInPlace(nodesArray);
-      return Object.assign({}, getDefaultState(), {
-        nodes,
-        vaccines,
-        attrs: getAttrsOnTerminalNodes(nodes)
-      });
-    }
+    // case types.NEW_DATASET: {
+    //   /* loaded returns to the default (false) */
+    //   appendParentsToTree(action.tree);
+    //   const nodesArray = flattenTree(action.tree);
+    //   const nodes = processNodes(nodesArray);
+    //   const vaccines = processVaccines(nodes, action.meta.vaccine_choices);
+    //   processBranchLabelsInPlace(nodesArray);
+    //   return Object.assign({}, getDefaultTreeState(), {
+    //     nodes,
+    //     vaccines,
+    //     attrs: getAttrsOnTerminalNodes(nodes)
+    //   });
+    // }
+    case types.CLEAN_START:
+      return action.treeState;
     case types.DATA_VALID:
       return Object.assign({}, state, {
         loaded: true,
@@ -71,9 +73,9 @@ const Tree = (state = getDefaultState(), action) => {
         visibleStateCounts: getValuesAndCountsOfVisibleTraitsFromTree(state.nodes, action.visibility, action.stateCountAttrs)
       };
       /* we only want to calculate totalStateCounts on the first pass */
-      if (!state.loaded) {
-        newStates.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(state.nodes, action.stateCountAttrs);
-      }
+      // if (!state.loaded) {
+      //   newStates.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(state.nodes, action.stateCountAttrs);
+      // }
       return Object.assign({}, state, newStates);
     case types.UPDATE_TIP_RADII:
       return Object.assign({}, state, {

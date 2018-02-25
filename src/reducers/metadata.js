@@ -11,15 +11,17 @@ const Metadata = (state = {
       return Object.assign({}, state, {
         loaded: false
       });
-    case types.NEW_DATASET:
-      const ret = action.meta;
-      if (Object.prototype.hasOwnProperty.call(ret, "loaded")) {
-        console.error("Metadata JSON must not contain the key \"loaded\"");
-      }
-      ret.colorOptions = ret.color_options;
-      // delete ret.color_options;
-      ret.loaded = true;
-      return ret;
+    // case types.NEW_DATASET:
+    //   const ret = action.meta;
+    //   if (Object.prototype.hasOwnProperty.call(ret, "loaded")) {
+    //     console.error("Metadata JSON must not contain the key \"loaded\"");
+    //   }
+    //   ret.colorOptions = ret.color_options;
+    //   // delete ret.color_options;
+    //   ret.loaded = true;
+    //   return ret;
+    case types.CLEAN_START:
+      return action.metaState;
     case types.ADD_COLOR_BYS:
       const newColorOptions = JSON.parse(JSON.stringify(state.colorOptions));
       for (const v of action.newColorBys) {
