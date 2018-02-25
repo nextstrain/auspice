@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { materialButton, materialButtonSelected, brandColor, darkGrey } from "../../globalStyles";
 import * as icons from "../framework/svg-icons";
@@ -8,7 +7,8 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
 @connect((state) => {
   return {
-    panelLayout: state.controls.panelLayout
+    panelLayout: state.controls.panelLayout,
+    canTogglePanelLayout: state.controls.canTogglePanelLayout
   };
 })
 class PanelLayouts extends React.Component {
@@ -27,8 +27,11 @@ class PanelLayouts extends React.Component {
       }
     };
   }
-
   render() {
+    // const mapAndTree = this.props.panels !== undefined && this.props.panels.indexOf("map") !== -1 && this.props.panels.indexOf("tree") !== -1;
+    if (!this.props.canTogglePanelLayout) {
+      return null;
+    }
     const styles = this.getStyles();
     return (
       <div style={styles.container}>

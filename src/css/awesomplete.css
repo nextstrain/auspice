@@ -10,6 +10,8 @@
 .awesomplete {
     display: inline-block;
     position: relative;
+    width: 100%;
+    height: 100%;
 }
 
 .awesomplete > input {
@@ -33,6 +35,7 @@
 }
 
 .awesomplete > ul {
+  width: 80%;
 	border-radius: .3em;
 	margin: .2em 0 0;
 	background: hsla(0,0%,100%,.9);
@@ -89,15 +92,11 @@
 		color: white;
 	}
 
-		.awesomplete mark {
-			background: hsl(65, 100%, 50%);
-		}
+	.awesomplete mark {
+		color: rgb(80, 151, 186);
+    background: white;
+	}
 
-		.awesomplete li:hover mark {
-			background: hsl(68, 100%, 41%);
-		}
-
-		.awesomplete li[aria-selected="true"] mark {
-			background: hsl(86, 100%, 21%);
-			color: inherit;
-		}
+	.awesomplete li:hover mark {
+		background: hsl(200, 40%, 80%);
+	}

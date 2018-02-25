@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { filterAbbrFwd } from "../../util/globals";
 import RecursiveFilter from "./recursive_filter";
-import SelectLabel from "../framework/select-label";
+import { SelectLabel } from "../framework/select-label";
 
 /*
  * this component implements a series of selectors to select datasets.
