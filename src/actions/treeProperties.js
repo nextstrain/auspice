@@ -59,7 +59,8 @@ export const updateVisibleTipsAndBranchThicknesses = (
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
       idxOfInViewRootNode: validIdxRoot,
-      stateCountAttrs: Object.keys(controls.filters)
+      stateCountAttrs: Object.keys(controls.filters),
+      selectedStrain: tipSelectedIdx ? tree.nodes[tipSelectedIdx].strain : undefined
     });
     updateEntropyVisibility(dispatch, getState);
     updateFrequencyDataDebounced(dispatch, getState);

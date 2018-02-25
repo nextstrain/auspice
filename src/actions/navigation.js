@@ -90,11 +90,20 @@ export const changePageQuery = ({query, hideURL = false, push = true}) => (dispa
   newControls = checkAndCorrectErrorsInState(newControls, metadata);
 
   /* 2 - calculate new branch thicknesses & visibility */
+  let tipSelectedIdx = 0;
+  if (query.s) {
+    for (let i = 0; i < tree.nodes.length; i++) {
+      if (tree.nodes[i].strain === query.s) {
+        tipSelectedIdx = i;
+        break;
+      }
+    }
+  }
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
     tree,
     newControls,
     {dateMinNumeric: newControls.dateMinNumeric, dateMaxNumeric: newControls.dateMaxNumeric},
-    {tipSelectedIdx: 0, validIdxRoot: tree.idxOfInViewRootNode}
+    {tipSelectedIdx, validIdxRoot: tree.idxOfInViewRootNode}
   );
   visAndThicknessData.stateCountAttrs = Object.keys(newControls.filters);
   const newTree = Object.assign({}, tree, visAndThicknessData);
