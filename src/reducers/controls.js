@@ -206,6 +206,8 @@ const modifyStateViaTree = (state, tree) => {
   state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
   state.dateMaxNumeric = calendarToNumeric(state.dateMax);
   state.absoluteDateMaxNumeric = calendarToNumeric(state.absoluteDateMax);
+  state.availableBranchLabels = ["none", "clade", "aa"];
+  state.selectedBranchLabel = "clade";
 
   /* available tree attrs - based upon the root node */
   state["attrs"] = Object.keys(tree.attr);
@@ -300,6 +302,8 @@ const getDefaultState = () => {
     colorBy: defaults.colorBy,
     colorByConfidence: {display: false, on: false},
     colorScale: undefined,
+    availableBranchLabels: [],
+    selectedBranchLabel: false,
     analysisSlider: false,
     geoResolution: defaults.geoResolution,
     filters: {},
@@ -353,6 +357,8 @@ const Controls = (state = getDefaultState(), action) => {
       return Object.assign({}, state, {
         selectedNode: null
       });
+    case types.CHANGE_BRANCH_LABEL:
+      return Object.assign({}, state, {selectedBranchLabel: action.value});
     case types.CHANGE_LAYOUT: {
       const layout = action.data;
       /* temporal confidence can only be displayed for rectangular trees */

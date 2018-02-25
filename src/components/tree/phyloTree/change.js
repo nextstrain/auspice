@@ -175,6 +175,14 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
       this.removeConfidence(); /* see comment above */
     }
   }
+
+  /* branch labels */
+  if (extras.newBranchLabellingKey) {
+    this.svg.selectAll('.cladeLabel').remove();
+    if (extras.newBranchLabellingKey !== "none") {
+      this.drawCladeLabels(extras.newBranchLabellingKey);
+    }
+  }
 };
 
 /* instead of modifying the SVG the "normal" way, this is sometimes too janky (e.g. when we need to move everything)
@@ -234,6 +242,7 @@ export const change = function change({
   /* change these things to provided value */
   newDistance = undefined,
   newLayout = undefined,
+  newBranchLabellingKey = undefined,
   /* arrays of data (the same length as nodes) */
   stroke = undefined,
   fill = undefined,
@@ -327,7 +336,7 @@ export const change = function change({
   }
 
   /* svg change elements */
-  const extras = {removeConfidences, showConfidences};
+  const extras = {removeConfidences, showConfidences, newBranchLabellingKey};
   if (useModifySVGInStages) {
     this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000);
   } else {

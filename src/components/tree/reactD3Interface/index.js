@@ -38,6 +38,12 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
     args.newDistance = nextProps.distanceMeasure;
   }
 
+  /* change in cladeLabellingKey */
+  if (props.selectedBranchLabel !== nextProps.selectedBranchLabel) {
+    args.newBranchLabellingKey = nextProps.selectedBranchLabel;
+  }
+
+
   /* confidence intervals (on means in the SVG, display means shown in the sidebar) */
   if (props.temporalConfidence.display === true && nextProps.temporalConfidence.display === false) {
     args.removeConfidences = true;

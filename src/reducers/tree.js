@@ -1,4 +1,4 @@
-import { flattenTree, appendParentsToTree, processVaccines, processNodes } from "../components/tree/treeHelpers";
+import { flattenTree, appendParentsToTree, processVaccines, processNodes, processBranchLabelsInPlace } from "../components/tree/treeHelpers";
 import { getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
 import * as types from "../actions/types";
 
@@ -44,6 +44,7 @@ const Tree = (state = getDefaultState(), action) => {
       const nodesArray = flattenTree(action.tree);
       const nodes = processNodes(nodesArray);
       const vaccines = processVaccines(nodes, action.meta.vaccine_choices);
+      processBranchLabelsInPlace(nodesArray);
       return Object.assign({}, getDefaultState(), {
         nodes,
         vaccines,

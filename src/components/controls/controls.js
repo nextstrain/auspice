@@ -1,11 +1,10 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Flex from "../framework/flex";
 import SelectLabel from "../framework/select-label";
 import ColorBy from "./color-by";
 import DateRangeInputs from "./date-range-inputs";
-import AnalysisDateSlider from "./analysis-date-slider";
+import ChooseBranchLabelling from "./choose-branch-labelling";
 import ChooseLayout from "./choose-layout";
 import ChooseDataset from "./choose-dataset";
 import ChooseMetric from "./choose-metric";
@@ -62,6 +61,9 @@ class Controls extends React.Component {
 
         <SelectLabel text="Branch Length"/>
         <ChooseMetric/>
+
+        <SelectLabel text="Branch Labels"/>
+        <ChooseBranchLabelling/>
 
         <SelectLabel text="Search Strains"/>
         <SearchStrains/>
