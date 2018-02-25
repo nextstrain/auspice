@@ -8,7 +8,7 @@ import { getManifest } from "../util/clientAPIInterface";
 import { getNarrative } from "../util/getMarkdown";
 import { updateEntropyVisibility } from "./entropy";
 import { changePage } from "./navigation";
-import { updateFrequencyData } from "./frequencies";
+import { updateFrequencyData, computeMatrixFromRawData } from "./frequencies";
 import { getAnnotations, processAnnotations } from "../reducers/entropy";
 import { getDefaultTreeState, getAttrsOnTerminalNodes } from "../reducers/tree";
 import { flattenTree, appendParentsToTree, processVaccines, processNodes, processBranchLabelsInPlace } from "../components/tree/treeHelpers";
@@ -45,6 +45,7 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
         metaState.loaded = true;
 
         /* entropy NEW_DATASET */
+        /* TODO check that metadata defines the entropy panel */
         const annotations = getAnnotations(metaJSON.annotations);
         const entropyState = {
           showCounts: false,
@@ -119,13 +120,50 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
         if (values[0].panels.indexOf("frequencies") !== -1) {
           fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_tip-frequencies.json&s3=" + s3bucket)
             .then((res) => res.json())
-            .then((data) => {
-              const { tree } = getState(); /* check that the tree has been updated! */
-              dispatch({type: types.FREQUENCIES_JSON_DATA, data, tree});
-              updateFrequencyData(dispatch, getState);
+            .then((parsedJSON) => {
+              const { tree, controls } = getState(); /* check that the tree has been updated! */
+              const normaliseData = false; /* TODO */
+              const pivots = parsedJSON.pivots.map((d) => Math.round(parseFloat(d) * 100) / 100);
+              const ticks = [pivots[0]];
+              const tick_step = (pivots[pivots.length - 1] - pivots[0]) / 6 * 10 / 10;
+              while (ticks[ticks.length - 1] < pivots[pivots.length - 1]) {
+                ticks.push((ticks[ticks.length - 1] + tick_step) * 10 / 10);
+              }
+              if (!tree.loaded) {
+                throw new Error("tree not loaded");
+              }
+              const data = [];
+              tree.nodes.filter((d) => !d.hasChildren).forEach((n) => {
+                if (!parsedJSON[n.strain]) {
+                  console.warn(`No tip frequency information for ${n.strain}`);
+                  return;
+                }
+                data.push({
+                  idx: n.arrayIdx,
+                  values: parsedJSON[n.strain].frequencies,
+                  weight: parsedJSON[n.strain].weight
+                });
+              });
+              const matrix = computeMatrixFromRawData(
+                data,
+                normaliseData,
+                pivots,
+                tree.nodes,
+                tree.visibility,
+                controls.colorScale,
+                controls.colorBy
+              );
+              dispatch({
+                type: types.INITIALISE_FREQUENCIES,
+                data,
+                pivots,
+                ticks,
+                matrix,
+                normaliseData
+              });
             })
             .catch((err) => {
-              console.warn("problem fetching frequencies...", err);
+              console.warn("Problem fetching / computing frequencies:", err);
             });
         }
 
