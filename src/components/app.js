@@ -148,7 +148,7 @@ class App extends React.Component {
       ...sharedStyles,
       left: 0,
       backgroundColor: sidebarColor,
-      // height: availableHeight,
+      height: availableHeight,
       width: sidebarWidth,
       maxWidth: sidebarWidth,
       overflow: "hidden",

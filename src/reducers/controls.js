@@ -8,7 +8,7 @@ import { defaultGeoResolution,
   twoColumnBreakpoint } from "../util/globals";
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
-import { checkColorByConfidence } from "../actions/modifyControlState";
+import { checkColorByConfidence } from "../actions/recomputeReduxState";
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
@@ -69,10 +69,9 @@ export const getDefaultControlsState = () => {
 
 const Controls = (state = getDefaultControlsState(), action) => {
   switch (action.type) {
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
-      return action.newControls;
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
-      return action.controlsState;
+      return action.controls;
     case types.LEGEND_ITEM_MOUSEENTER:
       return Object.assign({}, state, {
         selectedLegendItem: action.data

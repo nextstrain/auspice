@@ -2,7 +2,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
-import { titleBarHeight } from "../../util/globals";
 import { changePageQuery } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 

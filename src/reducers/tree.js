@@ -37,13 +37,9 @@ export const getAttrsOnTerminalNodes = (nodes) => {
 
 const Tree = (state = getDefaultTreeState(), action) => {
   switch (action.type) {
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
-      return action.treeState;
-    case types.DATA_VALID:
-      return Object.assign({}, state, {
-        loaded: true,
-        version: state.version + 1
-      });
+      return action.tree;
     case types.DATA_INVALID:
       return Object.assign({}, state, {
         loaded: false
@@ -64,8 +60,6 @@ const Tree = (state = getDefaultTreeState(), action) => {
         tipRadii: action.data,
         tipRadiiVersion: action.version
       });
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
-      return action.newTree;
     case types.NEW_COLORS:
       return Object.assign({}, state, {
         nodeColors: action.nodeColors,

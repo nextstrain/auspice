@@ -12,7 +12,7 @@ const Metadata = (state = {
         loaded: false
       });
     case types.CLEAN_START:
-      return action.metaState;
+      return action.metadata;
     case types.ADD_COLOR_BYS:
       const newColorOptions = JSON.parse(JSON.stringify(state.colorOptions));
       for (const v of action.newColorBys) {

@@ -1,7 +1,7 @@
 import * as types from "../actions/types";
 
-const arrayObjectIndexOf = function (myArray, id) {
-  for(let i = 0, len = myArray.length; i < len; i++) {
+const arrayObjectIndexOf = (myArray, id) => {
+  for (let i = 0, len = myArray.length; i < len; i++) {
     if (myArray[i].id === id) {
       return i;
     }
@@ -9,7 +9,7 @@ const arrayObjectIndexOf = function (myArray, id) {
   return -1;
 };
 
-const makeNotification = function (action) {
+const makeNotification = (action) => {
   return {
     message: action.message || "",
     details: action.details || "",
@@ -25,16 +25,16 @@ const Metadata = (state = {
 }, action) => {
   let stack;
   switch (action.type) {
-  case types.ADD_NOTIFICATION:
-    stack = state.stack.slice(); // shallow copy
-    stack.push(makeNotification(action));
-    return Object.assign({}, state, {counter: action.id, stack});
-  case types.REMOVE_NOTIFICATION:
-    stack = state.stack.slice(); // shallow copy
-    stack.splice(arrayObjectIndexOf(stack, action.id), 1);
-    return Object.assign({}, state, {stack});
-  default:
-    return state;
+    case types.ADD_NOTIFICATION:
+      stack = state.stack.slice(); // shallow copy
+      stack.push(makeNotification(action));
+      return Object.assign({}, state, {counter: action.id, stack});
+    case types.REMOVE_NOTIFICATION:
+      stack = state.stack.slice(); // shallow copy
+      stack.splice(arrayObjectIndexOf(stack, action.id), 1);
+      return Object.assign({}, state, {stack});
+    default:
+      return state;
   }
 };
 

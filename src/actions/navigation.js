@@ -1,11 +1,8 @@
 import queryString from "query-string";
 import parseParams from "../util/parseParams";
 import { getPost } from "../util/getMarkdown";
+import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
-import { calculateVisiblityAndBranchThickness } from "./treeProperties";
-import { calcColorScaleAndNodeColors } from "./colors";
-import { restoreQueryableStateToDefaults, modifyStateViaURLQuery, checkAndCorrectErrorsInState, checkColorByConfidence } from "./modifyControlState";
-import { calcEntropyInView } from "../util/treeTraversals";
 
 // make prefix for data files with fields joined by _ instead of / as in URL
 const makeDataPathFromParsedParams = (parsedParams) => {
@@ -74,64 +71,20 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
 
 /* modify redux state and URL by specifying a new URL query string. Pathname is not considered, if you want to change that, use "changePage" instead.
 Unlike "changePage" the query is processed both by the middleware (i.e. to update the URL) AND by the reducers, to update their state accordingly.
-
 ARGUMENTS:
 (1) query - REQUIRED - {object}
 (2) push - OPTIONAL (default: true) - signals that pushState should be used (has no effect on the reducers)
 */
 export const changePageQuery = ({query, hideURL = false, push = true}) => (dispatch, getState) => {
-  console.log("\t---------- change page query -------------");
-  const { controls, metadata, tree, entropy } = getState();
-
-  /* 1 - calculate entire new state of the controls reducer */
-  let newControls = Object.assign({}, controls);
-  newControls = restoreQueryableStateToDefaults(newControls);
-  newControls = modifyStateViaURLQuery(newControls, query);
-  newControls = checkAndCorrectErrorsInState(newControls, metadata);
-
-  /* 2 - calculate new branch thicknesses & visibility */
-  let tipSelectedIdx = 0;
-  if (query.s) {
-    for (let i = 0; i < tree.nodes.length; i++) {
-      if (tree.nodes[i].strain === query.s) {
-        tipSelectedIdx = i;
-        break;
-      }
-    }
-  }
-  const visAndThicknessData = calculateVisiblityAndBranchThickness(
-    tree,
-    newControls,
-    {dateMinNumeric: newControls.dateMinNumeric, dateMaxNumeric: newControls.dateMaxNumeric},
-    {tipSelectedIdx, validIdxRoot: tree.idxOfInViewRootNode}
-  );
-  visAndThicknessData.stateCountAttrs = Object.keys(newControls.filters);
-  const newTree = Object.assign({}, tree, visAndThicknessData);
-
-  /* 3 - calculate colours */
-  if (controls.colorBy !== newControls.colorBy) {
-    const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(newControls.colorBy, newControls, tree, metadata);
-    newControls.colorScale = colorScale;
-    newControls.colorByConfidence = checkColorByConfidence(newControls.attrs, newControls.colorBy);
-    newTree.nodeColorsVersion = version;
-    newTree.nodeColors = nodeColors;
-  }
-
-  /* 4 - calculate entropy in view */
-  const [entropyBars, entropyMaxYVal] = calcEntropyInView(newTree.nodes, newTree.visibility, newControls.mutType, entropy.geneMap, entropy.showCounts);
-
+  const newState = createStateFromQueryOrJSONs({oldState: getState(), query});
   dispatch({
     type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
-    newControls,
+    ...newState,
     pushState: push,
-    newTree,
-    entropyBars,
-    entropyMaxYVal,
     query,
     hideURL
   });
 };
-
 
 export const browserBackForward = () => (dispatch, getState) => {
   const { datasets } = getState();

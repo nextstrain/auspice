@@ -1,6 +1,44 @@
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, genotypeColors } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
+import { flattenTree, appendParentsToTree, processVaccines, processNodes, processBranchLabelsInPlace } from "../components/tree/treeHelpers";
+import { getDefaultControlsState } from "../reducers/controls";
+import { getDefaultTreeState, getAttrsOnTerminalNodes } from "../reducers/tree";
+import { calculateVisiblityAndBranchThickness } from "./treeProperties";
+import { calcEntropyInView, getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
+import { calcColorScaleAndNodeColors } from "./colors";
+
+const getAnnotations = (jsonData) => {
+  const annotations = [];
+  let aaCount = 0;
+  for (const prot of Object.keys(jsonData)) {
+    if (prot !== "nuc") {
+      aaCount++;
+      annotations.push({
+        prot: prot,
+        start: jsonData[prot].start,
+        end: jsonData[prot].end,
+        readingFrame: 1, // +tmpProt['pos'][0]%3,
+        fill: genotypeColors[aaCount % 10]
+      });
+    }
+  }
+  return annotations;
+};
+
+const processAnnotations = (annotations) => {
+  const m = {}; /* m === geneMap */
+  annotations.forEach((d) => {
+    m[d.prot] = d;
+  });
+  const sorted = Object.keys(m).sort((a, b) =>
+    m[a].start < m[b].start ? -1 : m[a].start > m[b].start ? 1 : 0
+  );
+  for (const gene of Object.keys(m)) {
+    m[gene].idx = sorted.indexOf(gene);
+  }
+  return m;
+};
 
 export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -27,7 +65,7 @@ const getMaxCalDateViaTree = (nodes) => {
 };
 
 /* need a (better) way to keep the queryParams all in "sync" */
-export const modifyStateViaURLQuery = (state, query) => {
+const modifyStateViaURLQuery = (state, query) => {
   // console.log("Query incoming: ", query);
   if (query.l) {
     state["layout"] = query.l;
@@ -81,7 +119,7 @@ export const modifyStateViaURLQuery = (state, query) => {
   return state;
 };
 
-export const restoreQueryableStateToDefaults = (state) => {
+const restoreQueryableStateToDefaults = (state) => {
   for (const key of Object.keys(state.defaults)) {
     switch (typeof state.defaults[key]) {
       case "string": {
@@ -109,7 +147,7 @@ export const restoreQueryableStateToDefaults = (state) => {
   return state;
 };
 
-export const modifyStateViaMetadata = (state, metadata) => {
+const modifyStateViaMetadata = (state, metadata) => {
   if (metadata.date_range) {
     /* this may be useful if, e.g., one were to want to display an outbreak
     from 2000-2005 (the default is the present day) */
@@ -186,7 +224,7 @@ export const modifyStateViaMetadata = (state, metadata) => {
   return state;
 };
 
-export const modifyStateViaTree = (state, tree) => {
+const modifyStateViaTree = (state, tree) => {
   state["dateMin"] = getMinCalDateViaTree(tree.nodes);
   state["absoluteDateMin"] = getMinCalDateViaTree(tree.nodes);
   state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
@@ -205,7 +243,7 @@ export const modifyStateViaTree = (state, tree) => {
   return state;
 };
 
-export const checkAndCorrectErrorsInState = (state, metadata) => {
+const checkAndCorrectErrorsInState = (state, metadata) => {
   /* The one (bigish) problem with this being in the reducer is that
   we can't have any side effects. So if we detect and error introduced by
   a URL QUERY (and correct it in state), we can't correct the URL */
@@ -249,4 +287,99 @@ export const checkAndCorrectErrorsInState = (state, metadata) => {
   }
 
   return state;
+};
+
+export const createStateFromQueryOrJSONs = ({
+  JSONs = false, /* raw json data - completely nuke existing redux state */
+  oldState = false, /* existing redux state (instead of jsons) */
+  query
+}) => {
+  /* first task is to create metadata, entropy, controls & tree partial state */
+  let tree, entropy, controls, metadata;
+  if (JSONs) {
+    /* ceate metadata state */
+    metadata = JSONs.meta;
+    if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
+      console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
+    }
+    metadata.colorOptions = metadata.color_options;
+    delete metadata.color_options;
+    metadata.loaded = true;
+
+    /* entropy state */
+    /* TODO check that metadata defines the entropy panel */
+    const annotations = getAnnotations(JSONs.meta.annotations);
+    entropy = {
+      showCounts: false,
+      loaded: true,
+      annotations,
+      geneMap: processAnnotations(annotations)
+    };
+
+    /* new tree state */
+    appendParentsToTree(JSONs.tree);
+    const nodesArray = flattenTree(JSONs.tree);
+    const nodes = processNodes(nodesArray);
+    const vaccines = processVaccines(nodes, JSONs.meta.vaccine_choices);
+    const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
+    tree = Object.assign({}, getDefaultTreeState(), {
+      nodes,
+      vaccines,
+      availableBranchLabels,
+      attrs: getAttrsOnTerminalNodes(nodes),
+      loaded: true
+    });
+
+    /* new controls state - don't apply query yet (or error check!) */
+    controls = getDefaultControlsState();
+    controls = modifyStateViaTree(controls, tree);
+    controls = modifyStateViaMetadata(controls, metadata);
+  }
+
+  if (oldState) {
+    ({controls, entropy, tree, metadata} = oldState);
+    controls = restoreQueryableStateToDefaults(controls);
+  }
+
+  controls = modifyStateViaURLQuery(controls, query);
+  controls = checkAndCorrectErrorsInState(controls, metadata); /* must run last */
+
+  /* calculate new branch thicknesses & visibility */
+  let tipSelectedIdx = 0;
+  if (query.s) {
+    for (let i = 0; i < tree.nodes.length; i++) {
+      if (tree.nodes[i].strain === query.s) {
+        tipSelectedIdx = i;
+        break;
+      }
+    }
+  }
+  const visAndThicknessData = calculateVisiblityAndBranchThickness(
+    tree,
+    controls,
+    {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
+    {tipSelectedIdx, validIdxRoot: tree.idxOfInViewRootNode}
+  );
+  visAndThicknessData.stateCountAttrs = Object.keys(controls.filters);
+  tree = Object.assign({}, tree, visAndThicknessData);
+  tree.visibleStateCounts = getValuesAndCountsOfVisibleTraitsFromTree(tree.nodes, tree.visibility, tree.stateCountAttrs);
+  /* potentially VVVV only needs to run if using JSONs */
+  tree.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(tree.nodes, tree.stateCountAttrs);
+
+  /* calculate colours if loading from JSONs or if the query demands change */
+  if (JSONs || controls.colorBy !== oldState.colorBy) {
+    const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(controls.colorBy, controls, tree, metadata);
+    controls.colorScale = colorScale;
+    controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
+    tree.nodeColorsVersion = version;
+    tree.nodeColors = nodeColors;
+  }
+
+  /* calculate entropy in view */
+  const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
+  entropy.bars = entropyBars;
+  entropy.maxYVal = entropyMaxYVal;
+
+  return {tree, metadata, entropy, controls};
+
 };

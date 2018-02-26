@@ -80,8 +80,8 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
     const { tree, controls } = getState();
     if (!tree.nodes) {return;}
     const dates = {
-      dateMinNumeric: newMin ? calendarToNumeric(newMin): controls.dateMinNumeric,
-      dateMaxNumeric: newMax ? calendarToNumeric(newMax): controls.dateMaxNumeric
+      dateMinNumeric: newMin ? calendarToNumeric(newMin) : controls.dateMinNumeric,
+      dateMaxNumeric: newMax ? calendarToNumeric(newMax) : controls.dateMaxNumeric
     };
     const data = calculateVisiblityAndBranchThickness(tree, controls, dates);
     dispatch({
@@ -128,8 +128,7 @@ const updateTipRadii = () => {
 export const legendMouseEnterExit = (label = null) => {
   return (dispatch) => {
     if (label) {
-      dispatch({type: types.LEGEND_ITEM_MOUSEENTER,
-                data: label});
+      dispatch({type: types.LEGEND_ITEM_MOUSEENTER, data: label});
     } else {
       dispatch({type: types.LEGEND_ITEM_MOUSELEAVE});
     }
