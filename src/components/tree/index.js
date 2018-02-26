@@ -18,15 +18,15 @@ import { darkGrey, dataFont } from "../../globalStyles";
 const resetTreeButtonStyle = {
   fontWeight: 700,
   borderRadius: 4,
-  paddingTop: 5,
-  paddingBottom: 5,
+  paddingTop: 2,
+  paddingBottom: 4,
   paddingLeft: 10,
   paddingRight: 10,
   border: "none",
   zIndex: 100,
   position: "absolute",
-  right: 10,
-  bottom: 5,
+  right: 5,
+  top: 10,
   backgroundColor: "rgb(230, 230, 230)",
   color: darkGrey,
   fontFamily: dataFont,
@@ -204,7 +204,7 @@ class Tree extends React.Component {
           style={resetTreeButtonStyle}
           onClick={this.redrawTree}
         >
-          reset tree
+          reset layout
         </button>
       </Card>
     );
