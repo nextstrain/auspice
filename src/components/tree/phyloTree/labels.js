@@ -31,6 +31,12 @@ export const updateTipLabels = function updateTipLabels(dt) {
  */
 const cladeLabelSize = (n) => `${n > 1000 ? 14 : n > 500 ? 18 : 22}px`;
 
+const shouldBranchLabelBeShownHOF = (layout) => {
+  return (d) => {
+    console.log("showing ", d.n.strain);
+    return layout === "rect" ? "visible" : "hidden";
+  }
+}
 
 export const updateCladeLabels = function updateCladeLabels(dt) {
   const visibility = this.layout === "rect" ? "visible" : "hidden";
@@ -46,8 +52,8 @@ export const updateCladeLabels = function updateCladeLabels(dt) {
 
 export const drawCladeLabels = function drawCladeLabels(key) {
   this.params.cladeLabelKey = key; /* deprecated */
-  const visibility = this.layout === "rect" ? "visible" : "hidden";
   const labelSize = cladeLabelSize(this.nNodesInView);
+  const shouldBranchLabelBeShown = shouldBranchLabelBeShownHOF(this.layout);
   this.svg.append("g").selectAll('.cladeLabel')
     .data(this.nodes.filter((d) => d.n.attr.labels && d.n.attr.labels[key]))
     .enter()
@@ -55,7 +61,7 @@ export const drawCladeLabels = function drawCladeLabels(key) {
     .attr("class", "cladeLabel")
     .attr("x", (d) => d.xTip - this.params.cladeLabelPadX)
     .attr("y", (d) => d.yTip - this.params.cladeLabelPadY)
-    .style("visibility", visibility)
+    .style("visibility", shouldBranchLabelBeShown)
     .style("text-anchor", "end")
     .style("fill", this.params.cladeLabelFill)
     .style("font-family", this.params.cladeLabelFont)
