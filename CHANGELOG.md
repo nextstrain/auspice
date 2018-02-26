@@ -1,3 +1,19 @@
+
+### Features
+* Frequencies are now displayed via a stream graph panel - see [PR 497](https://github.com/nextstrain/auspice/pull/497).
+These require the fetching of a separate `tip-frequencies` JSON, and must be specified in the `panels` array of the meta.JSON.
+* "Panels To Display" toggles in the sidebar allow customisation of the display, and this is reflected in the URL.
+* The `+` `-` buttons in the tree have been replaced by a "reset tree" button.
+This resets the bounds to the entire tree & completely re-renders the tree (filters are maintained).
+Pan behaviour is unchanged.
+
+### Internals
+* React-PhyloTree interface is completely rewritten to use `phylotree.change()` - see [PR 501](https://github.com/nextstrain/auspice/pull/501) for the API.
+The new interface is both easier to understand and quicker.
+* `changePageQuery` (used for changing narrative blocks) is now a single action
+* Ongoing narrative work (still disabled).
+* React sidebar has been removed (no UI changes).
+
 ## version 1.12.0 - 2018/02/14
 
 ### Features
