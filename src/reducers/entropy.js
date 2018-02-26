@@ -47,13 +47,6 @@ const Entropy = (state = {loaded: false, showCounts: false}, action) => {
   switch (action.type) {
     case types.DATA_INVALID:
       return {loaded: false, showCounts: false};
-    // case types.NEW_DATASET:
-    //   const annotations = getAnnotations(action.meta.annotations);
-    //   return Object.assign({}, state, {
-    //     loaded: false,
-    //     annotations,
-    //     geneMap: processAnnotations(annotations)
-    //   });
     case types.CLEAN_START:
       return action.entropyState;
     case types.ENTROPY_DATA:

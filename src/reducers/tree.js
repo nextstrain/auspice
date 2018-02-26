@@ -1,10 +1,8 @@
-import { flattenTree, appendParentsToTree, processVaccines, processNodes, processBranchLabelsInPlace } from "../components/tree/treeHelpers";
-import { getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
+import { getValuesAndCountsOfVisibleTraitsFromTree } from "../util/treeTraversals";
 import * as types from "../actions/types";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
-that the tree is loaded as they are set on the same action
-*/
+that the tree is loaded as they are set on the same action */
 
 export const getDefaultTreeState = () => {
   return {
@@ -39,19 +37,6 @@ export const getAttrsOnTerminalNodes = (nodes) => {
 
 const Tree = (state = getDefaultTreeState(), action) => {
   switch (action.type) {
-    // case types.NEW_DATASET: {
-    //   /* loaded returns to the default (false) */
-    //   appendParentsToTree(action.tree);
-    //   const nodesArray = flattenTree(action.tree);
-    //   const nodes = processNodes(nodesArray);
-    //   const vaccines = processVaccines(nodes, action.meta.vaccine_choices);
-    //   processBranchLabelsInPlace(nodesArray);
-    //   return Object.assign({}, getDefaultTreeState(), {
-    //     nodes,
-    //     vaccines,
-    //     attrs: getAttrsOnTerminalNodes(nodes)
-    //   });
-    // }
     case types.CLEAN_START:
       return action.treeState;
     case types.DATA_VALID:
@@ -73,10 +58,6 @@ const Tree = (state = getDefaultTreeState(), action) => {
         idxOfInViewRootNode: action.idxOfInViewRootNode,
         visibleStateCounts: getValuesAndCountsOfVisibleTraitsFromTree(state.nodes, action.visibility, action.stateCountAttrs)
       };
-      /* we only want to calculate totalStateCounts on the first pass */
-      // if (!state.loaded) {
-      //   newStates.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(state.nodes, action.stateCountAttrs);
-      // }
       return Object.assign({}, state, newStates);
     case types.UPDATE_TIP_RADII:
       return Object.assign({}, state, {
@@ -94,7 +75,7 @@ const Tree = (state = getDefaultTreeState(), action) => {
       /* modify in place ?!?! */
       for (const node of state.nodes) {
         if (action.taxa.indexOf(node.strain) !== -1) {
-          action.newColorBys.map((colorBy, idx) => {
+          action.newColorBys.forEach((colorBy, idx) => {
             node.attr[colorBy] = action.data[node.strain][idx];
           });
         }

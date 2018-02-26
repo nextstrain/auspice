@@ -1,20 +1,19 @@
 import queryString from "query-string";
 import * as types from "./types";
-import { changeColorBy, calcColorScaleAndNodeColors } from "./colors";
-import { updateVisibleTipsAndBranchThicknesses, calculateVisiblityAndBranchThickness } from "./treeProperties";
+import { calcColorScaleAndNodeColors } from "./colors";
+import { calculateVisiblityAndBranchThickness } from "./treeProperties";
 import { charonAPIAddress, enableNarratives } from "../util/globals";
 import { errorNotification } from "./notifications";
 import { getManifest } from "../util/clientAPIInterface";
 import { getNarrative } from "../util/getMarkdown";
-import { updateEntropyVisibility } from "./entropy";
 import { changePage } from "./navigation";
-import { updateFrequencyData, computeMatrixFromRawData } from "./frequencies";
+import { processFrequenciesJSON } from "./frequencies";
 import { getAnnotations, processAnnotations } from "../reducers/entropy";
 import { getDefaultTreeState, getAttrsOnTerminalNodes } from "../reducers/tree";
 import { flattenTree, appendParentsToTree, processVaccines, processNodes, processBranchLabelsInPlace } from "../components/tree/treeHelpers";
-import { getDefaultControlsState, modifyStateViaTree, modifyStateViaMetadata, modifyStateViaURLQuery, checkAndCorrectErrorsInState, checkColorByConfidence } from "../reducers/controls";
+import { getDefaultControlsState } from "../reducers/controls";
 import { calcEntropyInView, getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
-
+import { modifyStateViaTree, modifyStateViaMetadata, modifyStateViaURLQuery, checkAndCorrectErrorsInState, checkColorByConfidence } from "./modifyControlState";
 
 export const loadJSONs = (s3override = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
@@ -38,7 +37,7 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
         /* metadata NEW_DATASET */
         const metaState = metaJSON;
         if (Object.prototype.hasOwnProperty.call(metaState, "loaded")) {
-          console.earn("Metadata JSON must not contain the key \"loaded\". Ignoring.");
+          console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
         }
         metaState.colorOptions = metaState.color_options;
         delete metaState.color_options;
@@ -67,7 +66,6 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
           attrs: getAttrsOnTerminalNodes(nodes),
           loaded: true
         });
-        console.log(availableBranchLabels)
         /* controls NEW_DATASET */
         let controlsState = getDefaultControlsState();
         controlsState = modifyStateViaTree(controlsState, treeState);
@@ -117,54 +115,16 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
           controlsState
         });
 
-        // /* F R E Q U E N C I E S */
+        /* F R E Q U E N C I E S */
         if (values[0].panels.indexOf("frequencies") !== -1) {
           fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_tip-frequencies.json&s3=" + s3bucket)
             .then((res) => res.json())
-            .then((parsedJSON) => {
-              const { tree, controls } = getState(); /* check that the tree has been updated! */
-              const normaliseData = false; /* TODO */
-              const pivots = parsedJSON.pivots.map((d) => Math.round(parseFloat(d) * 100) / 100);
-              const ticks = [pivots[0]];
-              const tick_step = (pivots[pivots.length - 1] - pivots[0]) / 6 * 10 / 10;
-              while (ticks[ticks.length - 1] < pivots[pivots.length - 1]) {
-                ticks.push((ticks[ticks.length - 1] + tick_step) * 10 / 10);
-              }
-              if (!tree.loaded) {
-                throw new Error("tree not loaded");
-              }
-              const data = [];
-              tree.nodes.filter((d) => !d.hasChildren).forEach((n) => {
-                if (!parsedJSON[n.strain]) {
-                  console.warn(`No tip frequency information for ${n.strain}`);
-                  return;
-                }
-                data.push({
-                  idx: n.arrayIdx,
-                  values: parsedJSON[n.strain].frequencies,
-                  weight: parsedJSON[n.strain].weight
-                });
-              });
-              const matrix = computeMatrixFromRawData(
-                data,
-                normaliseData,
-                pivots,
-                tree.nodes,
-                tree.visibility,
-                controls.colorScale,
-                controls.colorBy
-              );
-              dispatch({
-                type: types.INITIALISE_FREQUENCIES,
-                data,
-                pivots,
-                ticks,
-                matrix,
-                normaliseData
-              });
+            .then((rawJSON) => {
+              const freqData = processFrequenciesJSON(rawJSON, treeState, controlsState);
+              dispatch({ type: types.INITIALISE_FREQUENCIES, ...freqData });
             })
             .catch((err) => {
-              console.warn("Problem fetching / computing frequencies:", err);
+              console.warn("Problem fetching / processing frequencies JSON:", err);
             });
         }
 

@@ -4,7 +4,7 @@ import { getPost } from "../util/getMarkdown";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
 import { calculateVisiblityAndBranchThickness } from "./treeProperties";
 import { calcColorScaleAndNodeColors } from "./colors";
-import { restoreQueryableStateToDefaults, modifyStateViaURLQuery, checkAndCorrectErrorsInState, checkColorByConfidence } from "../reducers/controls";
+import { restoreQueryableStateToDefaults, modifyStateViaURLQuery, checkAndCorrectErrorsInState, checkColorByConfidence } from "./modifyControlState";
 import { calcEntropyInView } from "../util/treeTraversals";
 
 // make prefix for data files with fields joined by _ instead of / as in URL
