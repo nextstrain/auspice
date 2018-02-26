@@ -13,8 +13,25 @@ import TipClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface";
 import * as callbacks from "./reactD3Interface/callbacks";
 import { calcStrokeCols } from "./treeHelpers";
-import { buttonBaseStyle } from "../map/map";
 import { darkGrey, dataFont } from "../../globalStyles";
+
+const resetTreeButtonStyle = {
+  fontWeight: 700,
+  borderRadius: 4,
+  paddingTop: 5,
+  paddingBottom: 5,
+  paddingLeft: 10,
+  paddingRight: 10,
+  border: "none",
+  zIndex: 100,
+  position: "absolute",
+  right: 10,
+  bottom: 5,
+  backgroundColor: "rgb(230, 230, 230)",
+  color: darkGrey,
+  fontFamily: dataFont,
+  fontSize: 14
+};
 
 /*
 this.props.tree contains the nodes etc used to build the PhyloTree
@@ -184,7 +201,7 @@ class Tree extends React.Component {
           </svg>
         </ReactSVGPanZoom>
         <button
-          style={{...buttonBaseStyle, right: 20, bottom: 30, backgroundColor: "rgb(230, 230, 230)", color: darkGrey, fontFamily: dataFont, fontSize: 12}}
+          style={resetTreeButtonStyle}
           onClick={this.redrawTree}
         >
           reset tree

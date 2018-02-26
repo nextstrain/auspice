@@ -18,16 +18,6 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 
-export const buttonBaseStyle = {
-  color: "white",
-  fontWeight: 700,
-  borderRadius: 4,
-  padding: 15,
-  border: "none",
-  zIndex: 9999,
-  position: "absolute"
-};
-
 /* global L */
 // L is global in scope and placed by leaflet()
 @connect((state) => {
@@ -412,6 +402,15 @@ class Map extends React.Component {
   }
 
   animationButtons() {
+    const buttonBaseStyle = {
+      color: "white",
+      fontWeight: 700,
+      borderRadius: 4,
+      padding: 15,
+      border: "none",
+      zIndex: 9999,
+      position: "absolute"
+    };
     return (
       <div>
         <button
