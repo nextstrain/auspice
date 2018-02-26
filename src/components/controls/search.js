@@ -29,7 +29,8 @@ const Cross = ({onClick, show}) => {
 @connect((state) => ({
   nodes: state.tree.nodes,
   version: state.tree.version,
-  visibility: state.tree.visibility
+  visibility: state.tree.visibility,
+  selectedStrain: state.tree.selectedStrain
 }))
 class SearchStrains extends React.Component {
   constructor() {
@@ -37,7 +38,7 @@ class SearchStrains extends React.Component {
     this.state = {awesomplete: undefined, show: false};
     this.removeSelection = () => {
       this.ref.value = null;
-      this.props.dispatch(updateVisibleTipsAndBranchThicknesses());
+      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: -1}));
       this.setState({show: false});
     };
   }
@@ -52,12 +53,19 @@ class SearchStrains extends React.Component {
           this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
             tipSelectedIdx: this.props.nodes[i].arrayIdx
           }));
+          /* this also sets reduxState.tree.selectedStrain */
           break;
         }
       }
       this.setState({show: true});
     });
     this.setState({awesomplete});
+  }
+  componentWillReceiveProps(nextProps) {
+    if (this.props.selectedStrain && !nextProps.selectedStrain) {
+      this.ref.value = null;
+      this.setState({show: false});
+    }
   }
   // partialSelection() {
   //   /* this allows dispatches based on the the list of matches, before one is actually chosen */

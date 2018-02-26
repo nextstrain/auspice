@@ -406,3 +406,13 @@ export const processBranchLabelsInPlace = (nodes) => {
   });
   return availableBranchLabels;
 };
+
+export const strainNameToIdx = (nodes, name) => {
+  let i;
+  for (i = 0; i < nodes.length; i++) {
+    if (nodes[i].strain === name) {
+      break;
+    }
+  }
+  return i;
+};

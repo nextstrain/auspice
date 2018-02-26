@@ -1,7 +1,7 @@
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
 import { reallySmallNumber, twoColumnBreakpoint, genotypeColors } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
-import { flattenTree, appendParentsToTree, processVaccines, processNodes, processBranchLabelsInPlace } from "../components/tree/treeHelpers";
+import { flattenTree, appendParentsToTree, processVaccines, processNodes, processBranchLabelsInPlace, strainNameToIdx } from "../components/tree/treeHelpers";
 import { getDefaultControlsState } from "../reducers/controls";
 import { getDefaultTreeState, getAttrsOnTerminalNodes } from "../reducers/tree";
 import { calculateVisiblityAndBranchThickness } from "./treeProperties";
@@ -346,13 +346,10 @@ export const createStateFromQueryOrJSONs = ({
 
   /* calculate new branch thicknesses & visibility */
   let tipSelectedIdx = 0;
+  /* check if the query defines a strain to be selected */
   if (query.s) {
-    for (let i = 0; i < tree.nodes.length; i++) {
-      if (tree.nodes[i].strain === query.s) {
-        tipSelectedIdx = i;
-        break;
-      }
-    }
+    tipSelectedIdx = strainNameToIdx(tree.nodes, query.s);
+    tree.selectedStrain = query.s;
   }
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
     tree,

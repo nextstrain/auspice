@@ -2,6 +2,7 @@ import { calcVisibility,
   calcTipRadii,
   calcTipCounts,
   identifyPathToTip,
+  strainNameToIdx,
   calcBranchThickness } from "../components/tree/treeHelpers";
 import * as types from "./types";
 import { updateEntropyVisibility } from "./entropy";
@@ -29,7 +30,7 @@ export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idx
  * note that this function checks to see if the tree has been defined (different to if it's ready / loaded!)
  * for arg destructuring see https://simonsmith.io/destructuring-objects-as-function-parameters-in-es6/
  * @param  {int} idxOfInViewRootNode If clade selected then start visibility at this index. (root = 0)
- * @param  {int} tipSelectedIdx idx of the selected tip. If not 0 will highlight path to this tip.
+ * @param  {int} tipSelectedIdx idx of the selected tip. If not 0 will highlight path to this tip. -1 clears any selection.
  * @return {null} side effects: a single action
  */
 export const updateVisibleTipsAndBranchThicknesses = (
@@ -51,6 +52,11 @@ export const updateVisibleTipsAndBranchThicknesses = (
         applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
       }
     }
+    if (tipSelectedIdx === 0 && tree.selectedStrain) {
+      tipSelectedIdx = strainNameToIdx(tree.nodes, tree.selectedStrain); // eslint-disable-line
+    } else if (tipSelectedIdx === -1) {
+      tipSelectedIdx = 0;  // eslint-disable-line
+    }
     const data = calculateVisiblityAndBranchThickness(tree, controls, {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}, {tipSelectedIdx, validIdxRoot});
     dispatch({
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
@@ -60,7 +66,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
       branchThicknessVersion: data.branchThicknessVersion,
       idxOfInViewRootNode: validIdxRoot,
       stateCountAttrs: Object.keys(controls.filters),
-      selectedStrain: tipSelectedIdx ? tree.nodes[tipSelectedIdx].strain : undefined
+      selectedStrain: tipSelectedIdx > 0 ? tree.nodes[tipSelectedIdx].strain : undefined
     });
     updateEntropyVisibility(dispatch, getState);
     updateFrequencyDataDebounced(dispatch, getState);

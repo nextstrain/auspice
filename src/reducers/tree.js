@@ -21,7 +21,8 @@ export const getDefaultTreeState = () => {
     idxOfInViewRootNode: 0,
     visibleStateCounts: {},
     totalStateCounts: {},
-    availableBranchLabels: []
+    availableBranchLabels: [],
+    selectedStrain: undefined
   };
 };
 
@@ -52,7 +53,8 @@ const Tree = (state = getDefaultTreeState(), action) => {
         branchThickness: action.branchThickness,
         branchThicknessVersion: action.branchThicknessVersion,
         idxOfInViewRootNode: action.idxOfInViewRootNode,
-        visibleStateCounts: getValuesAndCountsOfVisibleTraitsFromTree(state.nodes, action.visibility, action.stateCountAttrs)
+        visibleStateCounts: getValuesAndCountsOfVisibleTraitsFromTree(state.nodes, action.visibility, action.stateCountAttrs),
+        selectedStrain: action.selectedStrain
       };
       return Object.assign({}, state, newStates);
     case types.UPDATE_TIP_RADII:

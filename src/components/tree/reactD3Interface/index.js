@@ -6,6 +6,12 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
   const props = reactThis.props;
   const phylotree = reactThis.state.tree;
 
+  /* catch selectedStrain dissapearence seperately to visibility and remove modal */
+  if (props.tree.selectedStrain && !nextProps.tree.selectedStrain) {
+    /* TODO change back the tip radius */
+    reactThis.setState({selectedTip: null, hovered: null});
+  }
+
   /* colorBy change? */
   if (!!nextProps.tree.nodeColorsVersion &&
       (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
