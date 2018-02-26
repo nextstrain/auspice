@@ -68,9 +68,9 @@ class Controls extends React.Component {
         <MapAnimationControls/>
 
         <div/>
-        {header("Panels To Display")}
-        <PanelToggles/>
+        {header("Panel Options")}
         {mapAndTree && this.props.canTogglePanelLayout ? (<PanelLayout/>) : null}
+        <PanelToggles/>
 
         <div/>
         {header("Data Source")}

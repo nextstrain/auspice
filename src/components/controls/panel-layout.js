@@ -15,7 +15,8 @@ class PanelLayouts extends React.Component {
   getStyles() {
     return {
       container: {
-        marginBottom: 0
+        marginTop: 0,
+        marginBottom: 10
       },
       title: {
         margin: 5,
