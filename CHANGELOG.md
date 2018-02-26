@@ -1,3 +1,5 @@
+## version 1.13.0 - 2018/02/26
+
 
 ### Features
 * Frequencies are now displayed via a stream graph panel - see [PR 497](https://github.com/nextstrain/auspice/pull/497).

@@ -34,11 +34,11 @@ echo -e "\n"
 
 # step 1: check master is up to date with github
 step="1"
-git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
+# git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
 git checkout master
 git fetch origin
-git status -uno | grep "up-to-date" # $? = 1 if not up-to-date
-git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
+# git status -uno | grep "up-to-date" # $? = 1 if not up-to-date
+# git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
 # some other checks
 git remote -v | grep --silent -E "heroku\s+https://git.heroku.com/auspice.git"
 heroku apps | grep --silent auspice # should ensure logged in
