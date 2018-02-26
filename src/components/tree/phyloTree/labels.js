@@ -1,6 +1,7 @@
 import { timerFlush } from "d3-timer";
 
 export const updateTipLabels = function updateTipLabels(dt) {
+  console.log("updateTipLabels called")
   this.svg.selectAll('.tipLabel').remove();
   const tLFunc = this.callbacks.tipLabel;
   const xPad = this.params.tipLabelPadX;
@@ -26,25 +27,48 @@ export const updateTipLabels = function updateTipLabels(dt) {
 };
 
 /** branchLabelSize
- * @param  {int} n total number of nodes in current view
+ * @param {str} key e.g. "aa" or "clade"
+ * @param  {int} nTips total number of nodes in current view (visible or invisible)
  * @return {str} font size of the branch label, e.g. "12px"
  */
-const branchLabelSize = (n) => `${n > 1000 ? 14 : n > 500 ? 18 : 22}px`;
+const branchLabelSize = (key, nTips) => {
+  let size;
+  size = nTips > 1000 ? 14 :
+    nTips > 500 ? 16 :
+      20;
+  if (key === "aa") size -= 4;
+  return `${size}px`;
+};
 
-const shouldBranchLabelBeShownHOF = (layout) => {
+/** createBranchLabelVisibility (the return value should be passed to d3 style call)
+ * @param {str} key e.g. "aa" or "clade"
+ * @param {str} layout
+ * @param {int} totalTipsInView visible tips also in view
+ * @return {func||str}
+ */
+const createBranchLabelVisibility = (key, layout, totalTipsInView) => {
+  if (key === "clade") return "visible";
+  const magicTipFractionToShowBranchLabel = 0.05;
   return (d) => {
-    console.log("showing ", d.n.strain);
-    return layout === "rect" ? "visible" : "hidden";
-  }
-}
+    /* if the number of _visible_ tips descending from this node are over the
+    magicTipFractionToShowBranchLabel (c/w the total numer of _visible_ and
+    _inView_ tips then display the label */
+    if (
+      d.n.tipCount > magicTipFractionToShowBranchLabel * totalTipsInView &&
+      layout === "rect"
+    ) {
+      return "visible";
+    }
+    return "hidden";
+  };
+};
 
 export const updateBranchLabels = function updateBranchLabels(dt) {
-  console.log("updateBranchLabels", dt)
-  const visibility = this.layout === "rect" ? "visible" : "hidden";
-  const labelSize = branchLabelSize(this.nNodesInView);
+  const visibility = createBranchLabelVisibility(this.params.branchLabelKey, this.layout, this.zoomNode.n.tipCount);
+  const labelSize = branchLabelSize(this.params.branchLabelKey, this.zoomNode.n.fullTipCount);
   this.svg.selectAll('.branchLabel')
     .transition().duration(dt)
-    .attr("x", (d) => d.xTip - this.params.branchLabelPadX)
+    .attr("x", (d) => ((d.xTip + d.xBase) / 2))
     .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
     .style("visibility", visibility)
     .style("font-size", labelSize);
@@ -52,18 +76,19 @@ export const updateBranchLabels = function updateBranchLabels(dt) {
 };
 
 export const drawBranchLabels = function drawBranchLabels(key) {
+  /* salient props: this.zoomNode.n.tipCount, this.zoomNode.n.fullTipCount */
   this.params.branchLabelKey = key;
-  const labelSize = branchLabelSize(this.nNodesInView);
-  const shouldBranchLabelBeShown = shouldBranchLabelBeShownHOF(this.layout);
+  const labelSize = branchLabelSize(key, this.zoomNode.n.fullTipCount);
+  const visibility = createBranchLabelVisibility(key, this.layout, this.zoomNode.n.tipCount);
   this.svg.append("g").selectAll('.branchLabel')
     .data(this.nodes.filter((d) => d.n.attr.labels && d.n.attr.labels[key]))
     .enter()
     .append("text")
     .attr("class", "branchLabel")
-    .attr("x", (d) => d.xTip - this.params.branchLabelPadX)
+    .attr("x", (d) => ((d.xTip + d.xBase) / 2))
     .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
-    .style("visibility", shouldBranchLabelBeShown)
-    .style("text-anchor", "end")
+    .style("text-anchor", "middle")
+    .style("visibility", visibility)
     .style("fill", this.params.branchLabelFill)
     .style("font-family", this.params.branchLabelFont)
     .style("font-size", labelSize)

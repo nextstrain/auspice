@@ -23,13 +23,13 @@ export const defaultParams = {
   tipStrokeWidth: 1,
   tipRadius: 4,
   fontFamily: dataFont,
-  /* C L A D E   L A B E L S */
+  /* B R A N C H   L A B E L S */
   branchLabelKey: false,
   branchLabelFont: dataFont,
   branchLabelFill: "#555",
   branchLabelPadX: 8,
   branchLabelPadY: 5,
-  /* TIP   L A B E L S */
+  /* T I P   L A B E L S */
   tipLabels: true,
   tipLabelFont: dataFont,
   tipLabelFill: "#555",
