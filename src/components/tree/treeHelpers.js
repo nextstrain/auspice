@@ -355,56 +355,59 @@ export const processVaccines = (nodes, vaccineChoices) => {
  */
 export const processNodes = (nodes) => {
   const rootNode = nodes[0];
-  nodes.forEach((d) => {if (typeof d.attr === "undefined") {d.attr = {};} });
-  calcFullTipCounts(rootNode);
-  nodes.forEach((d) => {d.hasChildren = typeof d.children !== "undefined";});
-  /* set an index so that we can access visibility / nodeColors if needed */
-  nodes.forEach((d, idx) => {d.arrayIdx = idx;});
+  calcFullTipCounts(rootNode); /* recursive. Uses d.children */
+  nodes.forEach((d, idx) => {
+    d.arrayIdx = idx;
+    if (!d.attr) d.attr = {};
+    d.hasChildren = typeof d.children !== "undefined";
+  });
   return nodes;
 };
 
 /**
-*  this function is changing as augur changes. It will be merged with processNodes.
-*  @param nodes - nodes
-*  side-effects: deletes "clade_name", "named_clades", "clade_assignment" out of node.attrs
-*  adds node.attrs.labels {obj}.
-*  this should be hoisted to an action so that the keys can be send to the controls reducer (currently hardcoded)
+*  this function is changing as augur changes
+*  @param {obj} nodes - nodes
+*  @returns {list} avialble branch labels, with "none" the first element
+*  side-effects: deletes "clade_name", "named_clades", "clade_assignment" out of node.attrs for all nodes.
+*  adds node.attrs.labels {obj} to certain nodes.
 */
 export const processBranchLabelsInPlace = (nodes) => {
-  const availableBranchLabels = ["none"];
+  const availableBranchLabels = new Set();
   nodes.forEach((n) => {
+    const labels = []; /* [clade (str), aa (str)] */
+    /* CLADE */
+    if (n.attr.clade_name) {
+      labels[0] = n.attr.clade_name;
+      delete n.attr.clade_name;
+    }
+    if (n.attr.clade_annotation) {
+      labels[0] = n.attr.clade_annotation;
+      delete n.attr.clade_annotation;
+    }
+    /* AA */
     let muts = "";
     if (n.aa_muts) {
       for (const aa in n.aa_muts) { // eslint-disable-line
         if (n.aa_muts[aa].length) {
-          muts += `${aa}: `;
-          muts += n.aa_muts[aa].join(", ");
+          muts += `${aa}: ${n.aa_muts[aa].join(", ")}`;
         }
       }
     }
-    let clade;
-    if (n.attr.clade_name) {
-      clade = n.attr.clade_name;
-      delete n.attr.clade_name;
-    }
-    if (n.attr.clade_annotation) {
-      clade = n.attr.clade_annotation;
-      delete n.attr.clade_annotation;
-    }
-    if (n.attr.named_clades) delete n.attr.named_clades;
-    if (clade || muts) {
+    if (muts !== "") labels[1] = muts;
+    /* ADD TO ATTR */
+    if (labels.length) {
       n.attr.labels = {};
-      if (clade) {
-        n.attr.labels.clade = clade;
-        if (availableBranchLabels.indexOf("clade") === -1) availableBranchLabels.push("clade");
+      if (labels[0]) {
+        n.attr.labels.clade = labels[0];
+        availableBranchLabels.add("clade");
       }
-      if (muts) {
-        n.attr.labels.aa = muts;
-        if (availableBranchLabels.indexOf("aa") === -1) availableBranchLabels.push("aa");
+      if (labels[1]) {
+        n.attr.labels.aa = labels[1];
+        availableBranchLabels.add("aa");
       }
     }
   });
-  return availableBranchLabels;
+  return ["none", ...availableBranchLabels];
 };
 
 export const strainNameToIdx = (nodes, name) => {
