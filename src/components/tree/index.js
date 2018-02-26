@@ -111,7 +111,7 @@ class Tree extends React.Component {
       { /* parameters (modifies PhyloTree's defaults) */
         grid: true,
         confidence: props.temporalConfidence.display,
-        cladeLabelKey: props.selectedBranchLabel,
+        branchLabelKey: props.selectedBranchLabel,
         tipLabels: true,
         showTipLabels: true
       },

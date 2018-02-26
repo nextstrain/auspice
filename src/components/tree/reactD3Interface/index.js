@@ -44,7 +44,7 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
     args.newDistance = nextProps.distanceMeasure;
   }
 
-  /* change in cladeLabellingKey */
+  /* change in key used to define branch labels (e.g. aa, clade...) */
   if (props.selectedBranchLabel !== nextProps.selectedBranchLabel) {
     args.newBranchLabellingKey = nextProps.selectedBranchLabel;
   }

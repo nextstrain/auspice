@@ -37,7 +37,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   /* draw functions */
   if (this.params.showGrid) this.addGrid();
   this.drawBranches();
-  if (this.params.cladeLabelKey) this.drawCladeLabels(this.params.cladeLabelKey);
+  if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   this.drawTips();
   if (this.vaccines) this.drawVaccines();
   if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
@@ -184,10 +184,4 @@ export const drawRegression = function drawRegression() {
  */
 export const clearSVG = function clearSVG() {
   this.svg.selectAll("*").remove();
-  // this.svg.selectAll('.tip').remove();
-  // this.svg.selectAll('.branch').remove();
-  // this.svg.selectAll('.cladeLabel').remove();
-  // this.svg.selectAll('.tipLabel').remove();
-  // this.svg.selectAll(".vaccine").remove();
-  // this.svg.selectAll(".conf").remove();
 };

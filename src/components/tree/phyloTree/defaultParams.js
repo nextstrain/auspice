@@ -24,11 +24,11 @@ export const defaultParams = {
   tipRadius: 4,
   fontFamily: dataFont,
   /* C L A D E   L A B E L S */
-  cladeLabelKey: false,
-  cladeLabelFont: dataFont,
-  cladeLabelFill: "#555",
-  cladeLabelPadX: 8,
-  cladeLabelPadY: 5,
+  branchLabelKey: false,
+  branchLabelFont: dataFont,
+  branchLabelFill: "#555",
+  branchLabelPadX: 8,
+  branchLabelPadY: 5,
   /* TIP   L A B E L S */
   tipLabels: true,
   tipLabelFont: dataFont,

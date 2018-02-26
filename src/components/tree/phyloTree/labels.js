@@ -25,11 +25,11 @@ export const updateTipLabels = function updateTipLabels(dt) {
   }
 };
 
-/** cladeLabelSize
+/** branchLabelSize
  * @param  {int} n total number of nodes in current view
  * @return {str} font size of the branch label, e.g. "12px"
  */
-const cladeLabelSize = (n) => `${n > 1000 ? 14 : n > 500 ? 18 : 22}px`;
+const branchLabelSize = (n) => `${n > 1000 ? 14 : n > 500 ? 18 : 22}px`;
 
 const shouldBranchLabelBeShownHOF = (layout) => {
   return (d) => {
@@ -38,33 +38,34 @@ const shouldBranchLabelBeShownHOF = (layout) => {
   }
 }
 
-export const updateCladeLabels = function updateCladeLabels(dt) {
+export const updateBranchLabels = function updateBranchLabels(dt) {
+  console.log("updateBranchLabels", dt)
   const visibility = this.layout === "rect" ? "visible" : "hidden";
-  const labelSize = cladeLabelSize(this.nNodesInView);
-  this.svg.selectAll('.cladeLabel')
+  const labelSize = branchLabelSize(this.nNodesInView);
+  this.svg.selectAll('.branchLabel')
     .transition().duration(dt)
-    .attr("x", (d) => d.xTip - this.params.cladeLabelPadX)
-    .attr("y", (d) => d.yTip - this.params.cladeLabelPadY)
+    .attr("x", (d) => d.xTip - this.params.branchLabelPadX)
+    .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
     .style("visibility", visibility)
     .style("font-size", labelSize);
   if (!dt) timerFlush();
 };
 
-export const drawCladeLabels = function drawCladeLabels(key) {
-  this.params.cladeLabelKey = key; /* deprecated */
-  const labelSize = cladeLabelSize(this.nNodesInView);
+export const drawBranchLabels = function drawBranchLabels(key) {
+  this.params.branchLabelKey = key;
+  const labelSize = branchLabelSize(this.nNodesInView);
   const shouldBranchLabelBeShown = shouldBranchLabelBeShownHOF(this.layout);
-  this.svg.append("g").selectAll('.cladeLabel')
+  this.svg.append("g").selectAll('.branchLabel')
     .data(this.nodes.filter((d) => d.n.attr.labels && d.n.attr.labels[key]))
     .enter()
     .append("text")
-    .attr("class", "cladeLabel")
-    .attr("x", (d) => d.xTip - this.params.cladeLabelPadX)
-    .attr("y", (d) => d.yTip - this.params.cladeLabelPadY)
+    .attr("class", "branchLabel")
+    .attr("x", (d) => d.xTip - this.params.branchLabelPadX)
+    .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
     .style("visibility", shouldBranchLabelBeShown)
     .style("text-anchor", "end")
-    .style("fill", this.params.cladeLabelFill)
-    .style("font-family", this.params.cladeLabelFont)
+    .style("fill", this.params.branchLabelFill)
+    .style("font-family", this.params.branchLabelFont)
     .style("font-size", labelSize)
     .text((d) => d.n.attr.labels[key]);
 };

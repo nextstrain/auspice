@@ -147,8 +147,8 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   });
 
   /* special cases not listed in classesToPotentiallyUpdate */
-  if (elemsToUpdate.has('.cladeLabel')) {
-    this.updateCladeLabels(transitionTime);
+  if (elemsToUpdate.has('.branchLabel')) {
+    this.updateBranchLabels(transitionTime);
   }
   if (elemsToUpdate.has('.tipLabel')) {
     this.updateTipLabels();
@@ -178,9 +178,9 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
 
   /* branch labels */
   if (extras.newBranchLabellingKey) {
-    this.svg.selectAll('.cladeLabel').remove();
+    this.svg.selectAll('.branchLabel').remove();
     if (extras.newBranchLabellingKey !== "none") {
-      this.drawCladeLabels(extras.newBranchLabellingKey);
+      this.drawBranchLabels(extras.newBranchLabellingKey);
     }
   }
 };
@@ -202,6 +202,7 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
     this.drawTips();
     if (this.vaccines) this.drawVaccines();
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
+    if (elemsToUpdate.has(".branchLabel")) this.drawBranchLabels(this.params.branchLabelKey);
   };
 
   /* STEP 2: move tips */
@@ -293,7 +294,7 @@ export const change = function change({
   if (newDistance || newLayout || zoomIntoClade || svgHasChangedDimensions) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
-    elemsToUpdate.add('.cladeLabel').add('.tipLabel');
+    elemsToUpdate.add('.branchLabel').add('.tipLabel');
     elemsToUpdate.add(".grid").add(".regression");
     svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity");
   }
