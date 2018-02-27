@@ -301,10 +301,11 @@ export const calcVisibility = (tree, controls, dates) => {
 
 const branchInterpolateColour = "#BBB";
 const branchOpacityConstant = 0.6;
+const branchOpacityLowerBound = 0.4;
 export const branchOpacityFunction = scalePow()
   .exponent([0.3])
   .domain([0, 1])
-  .range([branchOpacityConstant, 1])
+  .range([branchOpacityLowerBound, 1])
   .clamp(true);
 // entropy calculation precomputed in augur
 // export const calcEntropyOfValues = (vals) =>
