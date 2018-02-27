@@ -7,11 +7,13 @@ Selected strain also appears in the info panel (top of screen).
 AA labels are shown where the descendent visible tips account for more than 5% of the total visible tips (same as nextflu).
 Clade labels are always displayed.
 * Default geneotype gene is now HA1 if available (previously nucleotide).
+* ColorBy ordering (sidebar dropdown) is now ordered (via an array in `globals.js`)
 
 ### Internals
 * The JSON processing on initial load has been shifted from the reducers to a single action - fewer dispatches, fewer potential bugs, faster code.
 * Frequencies are initialised in a single action (previously 2).
-
+* tip-frequencies are now downloaded via `get_data.sh`
+* Frequency actions are not dispatched unless the frequency panel is loaded.
 
 ## version 1.13.2 - 2018/02/26
 * Improve consistency of panel controls
