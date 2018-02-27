@@ -79,7 +79,6 @@ export const drawVaccines = function drawVaccines() {
     .attr("class", "vaccineDottedLine")
     .attr("d", (d) => d.vaccineLine)
     .style("stroke-dasharray", "5, 5")
-    // .style("stroke", (d) => d.stroke || this.params.branchStroke)
     .style("stroke", "black")
     .style("stroke-width", this.params.branchStrokeWidth)
     .style("fill", "none")

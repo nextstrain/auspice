@@ -17,7 +17,8 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
       (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
       nextProps.colorByConfidence !== props.colorByConfidence)) {
     args.changeColorBy = true;
-    args.stroke = calcBranchStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy);
+    args.branchStroke = calcBranchStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy);
+    args.tipStroke = nextProps.tree.nodeColors;
     args.fill = nextProps.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString());
   }
 
