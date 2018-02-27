@@ -116,29 +116,27 @@ export const changeAnalysisSliderValue = (value) => {
   };
 };
 
-const updateTipRadii = () => {
+/**
+ * NB all params are optional - supplying none resets the tip radii to defaults
+ * @param  {string|number} selectedLegendItem value of the attr. if scale is continuous a bound will be used.
+ * @param  {int} tipSelectedIdx the strain to highlight.
+ * @return {null} side-effects: a single action
+ */
+export const updateTipRadii = (
+  {tipSelectedIdx = false, selectedLegendItem = false} = {}
+) => {
   return (dispatch, getState) => {
     const { controls, tree } = getState();
-    dispatch({
-      type: types.UPDATE_TIP_RADII,
-      data: calcTipRadii(controls.selectedLegendItem, controls.colorScale, tree),
-      version: tree.tipRadiiVersion + 1
-    });
-  };
-};
-
-/* when the selected legend item changes
-(a) update the controls reducer with the new value
-(b)change the tipRadii
-*/
-export const legendMouseEnterExit = (label = null) => {
-  return (dispatch) => {
-    if (label) {
-      dispatch({type: types.LEGEND_ITEM_MOUSEENTER, data: label});
+    const colorScale = controls.colorScale;
+    let data;
+    if (tipSelectedIdx) {
+      data = calcTipRadii({tipSelectedIdx, colorScale, tree});
+    } else if (selectedLegendItem) {
+      data = calcTipRadii({selectedLegendItem, colorScale, tree});
     } else {
-      dispatch({type: types.LEGEND_ITEM_MOUSELEAVE});
+      data = calcTipRadii({colorScale, tree});
     }
-    dispatch(updateTipRadii());
+    dispatch({type: types.UPDATE_TIP_RADII, data, version: tree.tipRadiiVersion + 1});
   };
 };
 

@@ -1,7 +1,7 @@
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
 import { reallySmallNumber, twoColumnBreakpoint, genotypeColors } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
-import { flattenTree, appendParentsToTree, processVaccines, processNodes, processBranchLabelsInPlace, strainNameToIdx } from "../components/tree/treeHelpers";
+import { flattenTree, appendParentsToTree, processVaccines, processNodes, processBranchLabelsInPlace, strainNameToIdx, calcTipRadii } from "../components/tree/treeHelpers";
 import { getDefaultControlsState } from "../reducers/controls";
 import { getDefaultTreeState, getAttrsOnTerminalNodes } from "../reducers/tree";
 import { calculateVisiblityAndBranchThickness } from "./treeProperties";
@@ -370,6 +370,11 @@ export const createStateFromQueryOrJSONs = ({
     controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
     tree.nodeColorsVersion = version;
     tree.nodeColors = nodeColors;
+  }
+
+  if (tipSelectedIdx) { /* i.e. query.s was set */
+    tree.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controls.colorScale, tree});
+    tree.tipRadiiVersion = 1;
   }
 
   /* calculate entropy in view */

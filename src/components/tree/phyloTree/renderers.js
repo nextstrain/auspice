@@ -12,9 +12,10 @@ import { timerStart, timerEnd } from "../../../util/perf";
  * @param {bool} vaccines         -- should vaccine crosses (and dotted lines if applicable) be drawn?
  * @param {array} stroke          -- stroke colour for each node (set onto each node)
  * @param {array} fill            -- fill colour for each node (set onto each node)
+ * @param {array|null} tipRadii   -- array of tip radius'
  * @return {null}
  */
-export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, stroke, fill) {
+export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, stroke, fill, tipRadii) {
   timerStart("phyloTree render()");
   this.svg = svg;
   this.params = Object.assign(this.params, parameters);
@@ -32,6 +33,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
     d.fill = fill[i];
     d.visibility = visibility[i];
     d["stroke-width"] = branchThickness[i];
+    d.r = tipRadii ? tipRadii[i] : this.params.tipRadius;
   });
 
   /* draw functions */

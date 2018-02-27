@@ -167,15 +167,20 @@ const determineLegendMatch = (selectedLegendItem, node, legendBoundsMap, colorSc
 /**
 * produces the array of tip radii - if nothing's selected this is the hardcoded tipRadius
 * if there's a selectedLegendItem, then values will be small (like normal) or big (for those tips selected)
-* @param selectedLegendItem - value of the selected tip attribute (numeric or string)
+* @param selectedLegendItem - value of the selected tip attribute (numeric or string) OPTIONAL
+* @param tipSelectedIdx - idx of a single tip to show with increased tipRadius OPTIONAL
 * @param colorScale - node (tip) in question
 * @param tree
 * @returns null (if data not ready) or array of tip radii
 */
-export const calcTipRadii = (selectedLegendItem, colorScale, tree) => {
+export const calcTipRadii = ({tipSelectedIdx = false, selectedLegendItem = false, colorScale, tree}) => {
   if (selectedLegendItem && tree && tree.nodes) {
     const legendMap = colorScale.continuous ? colorScale.legendBoundsMap : false;
     return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, legendMap, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
+  } else if (tipSelectedIdx) {
+    const radii = tree.nodes.map(() => tipRadius);
+    radii[tipSelectedIdx] = tipRadiusOnLegendMatch + 3;
+    return radii;
   } else if (tree && tree.nodes) {
     return tree.nodes.map(() => tipRadius);
   }

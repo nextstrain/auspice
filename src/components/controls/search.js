@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import Awesomplete from 'awesomplete'; /* https://leaverou.github.io/awesomplete/ */
-import { updateVisibleTipsAndBranchThicknesses } from "../../actions/treeProperties";
+import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/treeProperties";
 import { dataFont, darkGrey } from "../../globalStyles";
 import "../../css/awesomplete.css";
 
@@ -39,6 +39,7 @@ class SearchStrains extends React.Component {
     this.removeSelection = () => {
       this.ref.value = null;
       this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: -1}));
+      this.props.dispatch(updateTipRadii());
       this.setState({show: false});
     };
   }
@@ -53,7 +54,10 @@ class SearchStrains extends React.Component {
           this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
             tipSelectedIdx: this.props.nodes[i].arrayIdx
           }));
-          /* this also sets reduxState.tree.selectedStrain */
+          /* ^^^ also sets reduxState.tree.selectedStrain */
+          this.props.dispatch(updateTipRadii({
+            tipSelectedIdx: this.props.nodes[i].arrayIdx
+          }));
           break;
         }
       }
@@ -73,6 +77,8 @@ class SearchStrains extends React.Component {
   //   console.log("partialSelection", this.state.awesomplete.suggestions.map((s) => s.value));
   // }
   updateVisibleStrains() {
+    /* this tells the serch box which strains are visible
+    and therefore are eligible to be searched */
     this.state.awesomplete.list = this.props.nodes
       .filter((n) => !n.hasChildren && this.props.visibility[n.arrayIdx] === "visible")
       .map((n) => n.strain);

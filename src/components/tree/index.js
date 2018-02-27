@@ -130,7 +130,8 @@ class Tree extends React.Component {
       props.temporalConfidence.on, /* drawConfidence? */
       props.tree.vaccines,
       calcStrokeCols(props.tree, props.colorByConfidence, props.colorBy),
-      props.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString())
+      props.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString()),
+      props.tree.tipRadii /* might be null */
     );
   }
 

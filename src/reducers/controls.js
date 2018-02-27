@@ -28,7 +28,6 @@ export const getDefaultControlsState = () => {
   return {
     defaults,
     canTogglePanelLayout: true,
-    selectedLegendItem: null,
     selectedBranch: null,
     selectedNode: null,
     region: null,
@@ -72,14 +71,6 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
       return action.controls;
-    case types.LEGEND_ITEM_MOUSEENTER:
-      return Object.assign({}, state, {
-        selectedLegendItem: action.data
-      });
-    case types.LEGEND_ITEM_MOUSELEAVE:
-      return Object.assign({}, state, {
-        selectedLegendItem: null
-      });
     case types.BRANCH_MOUSEENTER:
       return Object.assign({}, state, {
         selectedBranch: action.data
