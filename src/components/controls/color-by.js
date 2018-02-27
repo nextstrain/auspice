@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Select from "react-select";
 import { sidebarField } from "../../globalStyles";
-import { controlsWidth } from "../../util/globals";
+import { controlsWidth, colorByMenuPreferredOrdering } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
@@ -159,13 +159,20 @@ class ColorBy extends React.Component {
   }
 
   getColorByOptions() {
-    const options = Object.keys(this.props.colorOptions).map((key) => {
+    return Object.keys(this.props.colorOptions).map((key) => {
       return {
         value: key,
         label: this.props.colorOptions[key].menuItem
       };
+    }).sort((a, b) => {
+      const [ia, ib] = [colorByMenuPreferredOrdering.indexOf(a.value), colorByMenuPreferredOrdering.indexOf(b.value)];
+      if (ia === -1 || ib === -1) {
+        if (ia === -1) return 1;
+        else if (ib === -1) return -1;
+        return 0;
+      }
+      return ia > ib ? 1 : -1;
     });
-    return options;
   }
 
   render() {
