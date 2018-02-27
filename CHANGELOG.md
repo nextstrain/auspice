@@ -1,3 +1,5 @@
+## version 1.14.0 - 2018/02/27
+
 ### Features
 * Strain search (using [awesomplete](https://leaverou.github.io/awesomplete/)).
 This highlights the path to a single tip and increases the tip radius.
