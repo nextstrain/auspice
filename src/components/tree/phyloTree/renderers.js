@@ -10,12 +10,13 @@ import { timerStart, timerEnd } from "../../../util/perf";
  * @param {array} visibility      -- array of "visible" or "hidden" (same shape as tree nodes)
  * @param {bool} drawConfidence   -- should confidence intervals be drawn?
  * @param {bool} vaccines         -- should vaccine crosses (and dotted lines if applicable) be drawn?
- * @param {array} stroke          -- stroke colour for each node (set onto each node)
- * @param {array} fill            -- fill colour for each node (set onto each node)
+ * @param {array} branchStroke    -- branch stroke colour for each node (set onto each node)
+ * @param {array} tipStroke       -- tip stroke colour for each node (set onto each node)
+ * @param {array} tipFill         -- tip fill colour for each node (set onto each node)
  * @param {array|null} tipRadii   -- array of tip radius'
  * @return {null}
  */
-export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, stroke, fill, tipRadii) {
+export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii) {
   timerStart("phyloTree render()");
   this.svg = svg;
   this.params = Object.assign(this.params, parameters);
@@ -29,8 +30,9 @@ export const render = function render(svg, layout, distance, parameters, callbac
 
   /* set nodes stroke / fill */
   this.nodes.forEach((d, i) => {
-    d.stroke = stroke[i];
-    d.fill = fill[i];
+    d.branchStroke = branchStroke[i];
+    d.tipStroke = tipStroke[i];
+    d.tipFill = tipFill[i];
     d.visibility = visibility[i];
     d["stroke-width"] = branchThickness[i];
     d.r = tipRadii ? tipRadii[i] : this.params.tipRadius;
@@ -106,8 +108,8 @@ export const drawTips = function drawTips() {
     .on("click", (d) => this.callbacks.onTipClick(d))
     .style("pointer-events", "auto")
     .style("visibility", (d) => d["visibility"])
-    .style("fill", (d) => d.fill || params.tipFill)
-    .style("stroke", (d) => d.stroke || params.tipStroke)
+    .style("fill", (d) => d.tipFill || params.tipFill)
+    .style("stroke", (d) => d.tipStroke || params.tipStroke)
     .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
     .style("cursor", "pointer");
   timerEnd("drawTips");
@@ -128,7 +130,7 @@ export const drawBranches = function drawBranches() {
     .attr("class", "branch T")
     .attr("id", (d) => "branch_T_" + d.n.clade)
     .attr("d", (d) => d.branch[1])
-    .style("stroke", (d) => d.stroke || params.branchStroke)
+    .style("stroke", (d) => d.branchStroke || params.branchStroke)
     .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
     .style("fill", "none")
     .style("pointer-events", "auto");
@@ -140,7 +142,7 @@ export const drawBranches = function drawBranches() {
     .attr("class", "branch S")
     .attr("id", (d) => "branch_S_" + d.n.clade)
     .attr("d", (d) => d.branch[0])
-    .style("stroke", (d) => d.stroke || params.branchStroke)
+    .style("stroke", (d) => d.branchStroke || params.branchStroke)
     .style("stroke-linecap", "round")
     .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
     .style("fill", "none")

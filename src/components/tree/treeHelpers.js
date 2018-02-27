@@ -300,7 +300,7 @@ export const calcVisibility = (tree, controls, dates) => {
 };
 
 const branchInterpolateColour = "#BBB";
-const branchOpacityConstant = 0.4;
+const branchOpacityConstant = 0.6;
 export const branchOpacityFunction = scalePow()
   .exponent([0.3])
   .domain([0, 1])
@@ -318,7 +318,7 @@ export const branchOpacityFunction = scalePow()
  * @param {bool} confidence enabled?
  * @return {array} array of hex's. 1-1 with nodes.
  */
-export const calcStrokeCols = (tree, confidence, colorBy) => {
+export const calcBranchStrokeCols = (tree, confidence, colorBy) => {
   if (confidence === true) {
     return tree.nodeColors.map((col, idx) => {
       const entropy = tree.nodes[idx].attr[colorBy + "_entropy"];

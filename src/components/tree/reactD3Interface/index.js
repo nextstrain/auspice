@@ -1,5 +1,5 @@
 import { rgb } from "d3-color";
-import { calcStrokeCols } from "../treeHelpers";
+import { calcBranchStrokeCols } from "../treeHelpers";
 
 export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
   const args = {};
@@ -17,7 +17,7 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
       (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
       nextProps.colorByConfidence !== props.colorByConfidence)) {
     args.changeColorBy = true;
-    args.stroke = calcStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy);
+    args.stroke = calcBranchStrokeCols(nextProps.tree, nextProps.colorByConfidence, nextProps.colorBy);
     args.fill = nextProps.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString());
   }
 
