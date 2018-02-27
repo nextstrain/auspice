@@ -1,9 +1,26 @@
+### Features
+* Strain search (using [awesomplete](https://leaverou.github.io/awesomplete/)).
+This highlights the path to a single tip and increases the tip radius.
+Strain is stored in the URL query (`s=...`) and can be restored via URL.
+Selected strain also appears in the info panel (top of screen).
+* Amino acid branch labels (for every tree) as well as clade labels if specified by the `clade_annotation` attribute.
+AA labels are shown where the descendent visible tips account for more than 5% of the total visible tips (same as nextflu).
+Clade labels are always displayed.
+* Default geneotype gene is now HA1 if available (previously nucleotide).
+
+### Internals
+* The JSON processing on initial load has been shifted from the reducers to a single action - fewer dispatches, fewer potential bugs, faster code.
+* Frequencies are initialised in a single action (previously 2).
+
+
 ## version 1.13.2 - 2018/02/26
+* Improve consistency of panel controls
+* Show `unassigned` in tree legend (if applicable)
 
 ## version 1.13.1 - 2018/02/26
+* Tree button "reset layout" now at top right
 
 ## version 1.13.0 - 2018/02/26
-
 
 ### Features
 * Frequencies are now displayed via a stream graph panel - see [PR 497](https://github.com/nextstrain/auspice/pull/497).
