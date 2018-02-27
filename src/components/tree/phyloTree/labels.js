@@ -68,7 +68,7 @@ export const updateBranchLabels = function updateBranchLabels(dt) {
   const labelSize = branchLabelSize(this.params.branchLabelKey, this.zoomNode.n.fullTipCount);
   this.svg.selectAll('.branchLabel')
     .transition().duration(dt)
-    .attr("x", (d) => ((d.xTip + d.xBase) / 2))
+    .attr("x", (d) => d.xTip - 5)
     .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
     .style("visibility", visibility)
     .style("font-size", labelSize);
@@ -85,9 +85,9 @@ export const drawBranchLabels = function drawBranchLabels(key) {
     .enter()
     .append("text")
     .attr("class", "branchLabel")
-    .attr("x", (d) => ((d.xTip + d.xBase) / 2))
+    .attr("x", (d) => d.xTip - 5)
     .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
-    .style("text-anchor", "middle")
+    .style("text-anchor", "end")
     .style("visibility", visibility)
     .style("fill", this.params.branchLabelFill)
     .style("font-family", this.params.branchLabelFont)
