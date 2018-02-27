@@ -133,15 +133,13 @@ export const titleBarHeight = 50;
 export const notificationDuration = 5000;
 
 /* server init stuff */
-export const charonAPIAddress = "/charon?"
+export const charonAPIAddress = "/charon?";
 
 export const colorByMenuPreferredOrdering = [
-  "HI_dist",
+  "clade_membership",
   "cHI",
   "cTiter",
   "fitness",
-  "clade",
-  "clade_membership",
   "gt",
   "ep",
   "ne",
