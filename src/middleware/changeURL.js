@@ -71,6 +71,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     }
+    case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
+      query.s = action.selectedStrain ? action.selectedStrain : undefined;
+      break;
+    }
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
       if (action.data === "Play") { // animation stopping - restore dates in URL
         query.animate = undefined;
@@ -126,7 +130,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   }
 
   Object.keys(query).filter((k) => !query[k]).forEach((k) => delete query[k]);
-  let search = queryString.stringify(query).replace(/%2C/g, ',');
+  let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/');
   if (search) {search = "?" + search;}
   if (!pathname.startsWith("/")) {pathname = "/" + pathname;}
 

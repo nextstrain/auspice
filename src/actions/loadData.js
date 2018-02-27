@@ -1,16 +1,14 @@
 import queryString from "query-string";
 import * as types from "./types";
-import { changeColorBy } from "./colors";
-import { updateVisibleTipsAndBranchThicknesses } from "./treeProperties";
 import { charonAPIAddress, enableNarratives } from "../util/globals";
 import { errorNotification } from "./notifications";
 import { getManifest } from "../util/clientAPIInterface";
 import { getNarrative } from "../util/getMarkdown";
-import { updateEntropyVisibility } from "./entropy";
 import { changePage } from "./navigation";
-import { updateFrequencyData } from "./frequencies";
+import { processFrequenciesJSON } from "./frequencies";
+import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 
-export const loadJSONs = (s3override = undefined) => { // eslint-disable-line import/prefer-default-export
+export const loadJSONs = (s3override = undefined) => {
   return (dispatch, getState) => {
     const { datasets } = getState();
     if (!datasets.availableDatasets) {
@@ -19,47 +17,30 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
     }
     dispatch({type: types.DATA_INVALID});
     const s3bucket = s3override ? s3override : datasets.s3bucket;
-    const metaJSONpromise = fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_meta.json&s3=" + s3bucket)
-      .then((res) => res.json());
-    const treeJSONpromise = fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_tree.json&s3=" + s3bucket)
-      .then((res) => res.json());
+    const apiPath = (jsonType) =>
+      `${charonAPIAddress}request=json&path=${datasets.datapath}_${jsonType}.json&s3=${s3bucket}`;
+
+    const metaJSONpromise = fetch(apiPath("meta")).then((res) => res.json());
+    const treeJSONpromise = fetch(apiPath("tree")).then((res) => res.json());
     Promise.all([metaJSONpromise, treeJSONpromise])
       .then((values) => {
-        /* initial dispatch sets most values */
-        dispatch({
-          type: types.NEW_DATASET,
-          meta: values[0],
-          tree: values[1],
-          query: queryString.parse(window.location.search)
-        });
-        /* add analysis slider (if applicable) */
-        // revisit this when applicable
-        // if (controls.analysisSlider) {
-        //   const {controls, tree} = getState(); // reflects updated data
-        //   addAnalysisSlider(dispatch, tree, controls);
-        // }
-        /* there still remain a number of actions to do with calculations */
-        dispatch(updateVisibleTipsAndBranchThicknesses());
-        dispatch(changeColorBy()); // sets colorScales etc
-        /* validate the reducers */
-        dispatch({type: types.DATA_VALID});
-
-        /* should we display (and therefore calculate) the entropy? */
-        if (values[0].panels.indexOf("entropy") !== -1) {
-          updateEntropyVisibility(dispatch, getState);
-        }
+        /* we do expensive stuff here not reducers. Allows fewer dispatches. */
+        const query = queryString.parse(window.location.search);
+        const newStates = createStateFromQueryOrJSONs(
+          {JSONs: {meta: values[0], tree: values[1]}, query}
+        );
+        dispatch({ type: types.CLEAN_START, ...newStates });
 
         /* F R E Q U E N C I E S */
         if (values[0].panels.indexOf("frequencies") !== -1) {
-          fetch(charonAPIAddress + "request=json&path=" + datasets.datapath + "_tip-frequencies.json&s3=" + s3bucket)
+          fetch(apiPath("tip-frequencies"))
             .then((res) => res.json())
-            .then((data) => {
-              const { tree } = getState(); /* check that the tree has been updated! */
-              dispatch({type: types.FREQUENCIES_JSON_DATA, data, tree});
-              updateFrequencyData(dispatch, getState);
+            .then((rawJSON) => {
+              const freqData = processFrequenciesJSON(rawJSON, newStates.tree, newStates.controls);
+              dispatch({ type: types.INITIALISE_FREQUENCIES, ...freqData });
             })
             .catch((err) => {
-              console.warn("problem fetching frequencies...", err);
+              console.warn("Problem fetching / processing frequencies JSON:", err);
             });
         }
 
@@ -67,7 +48,6 @@ export const loadJSONs = (s3override = undefined) => { // eslint-disable-line im
         if (enableNarratives) {
           getNarrative(dispatch, datasets.datapath);
         }
-
       })
       .catch((err) => {
         /* note that this catches both 404 type errors AND

@@ -167,15 +167,20 @@ const determineLegendMatch = (selectedLegendItem, node, legendBoundsMap, colorSc
 /**
 * produces the array of tip radii - if nothing's selected this is the hardcoded tipRadius
 * if there's a selectedLegendItem, then values will be small (like normal) or big (for those tips selected)
-* @param selectedLegendItem - value of the selected tip attribute (numeric or string)
+* @param selectedLegendItem - value of the selected tip attribute (numeric or string) OPTIONAL
+* @param tipSelectedIdx - idx of a single tip to show with increased tipRadius OPTIONAL
 * @param colorScale - node (tip) in question
 * @param tree
 * @returns null (if data not ready) or array of tip radii
 */
-export const calcTipRadii = (selectedLegendItem, colorScale, tree) => {
+export const calcTipRadii = ({tipSelectedIdx = false, selectedLegendItem = false, colorScale, tree}) => {
   if (selectedLegendItem && tree && tree.nodes) {
     const legendMap = colorScale.continuous ? colorScale.legendBoundsMap : false;
     return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, legendMap, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
+  } else if (tipSelectedIdx) {
+    const radii = tree.nodes.map(() => tipRadius);
+    radii[tipSelectedIdx] = tipRadiusOnLegendMatch + 3;
+    return radii;
   } else if (tree && tree.nodes) {
     return tree.nodes.map(() => tipRadius);
   }
@@ -355,10 +360,69 @@ export const processVaccines = (nodes, vaccineChoices) => {
  */
 export const processNodes = (nodes) => {
   const rootNode = nodes[0];
-  nodes.forEach((d) => {if (typeof d.attr === "undefined") {d.attr = {};} });
-  calcFullTipCounts(rootNode);
-  nodes.forEach((d) => {d.hasChildren = typeof d.children !== "undefined";});
-  /* set an index so that we can access visibility / nodeColors if needed */
-  nodes.forEach((d, idx) => {d.arrayIdx = idx;});
+  calcFullTipCounts(rootNode); /* recursive. Uses d.children */
+  nodes.forEach((d, idx) => {
+    d.arrayIdx = idx;
+    if (!d.attr) d.attr = {};
+    d.hasChildren = typeof d.children !== "undefined";
+  });
   return nodes;
+};
+
+/**
+*  this function is changing as augur changes
+*  @param {obj} nodes - nodes
+*  @returns {list} avialble branch labels, with "none" the first element
+*  side-effects: deletes "clade_name", "named_clades", "clade_assignment" out of node.attrs for all nodes.
+*  adds node.attrs.labels {obj} to certain nodes.
+*/
+export const processBranchLabelsInPlace = (nodes) => {
+  const availableBranchLabels = new Set();
+  nodes.forEach((n) => {
+    const labels = []; /* [clade (str), aa (str)] */
+    /* CLADE */
+    if (n.attr.clade_name) {
+      labels[0] = n.attr.clade_name;
+      delete n.attr.clade_name;
+    }
+    if (n.attr.clade_annotation) {
+      labels[0] = n.attr.clade_annotation;
+      delete n.attr.clade_annotation;
+    }
+    /* AA */
+    const muts = [];
+    if (n.aa_muts) {
+      for (const aa in n.aa_muts) { // eslint-disable-line
+        if (n.aa_muts[aa].length) {
+          muts.push(`${aa}: ${n.aa_muts[aa].join(", ")}`);
+        }
+      }
+    }
+    if (muts.length) {
+      labels[1] = muts.join("; ");
+    }
+    /* ADD TO ATTR */
+    if (labels.length) {
+      n.attr.labels = {};
+      if (labels[0]) {
+        n.attr.labels.clade = labels[0];
+        availableBranchLabels.add("clade");
+      }
+      if (labels[1]) {
+        n.attr.labels.aa = labels[1];
+        availableBranchLabels.add("aa");
+      }
+    }
+  });
+  return ["none", ...availableBranchLabels];
+};
+
+export const strainNameToIdx = (nodes, name) => {
+  let i;
+  for (i = 0; i < nodes.length; i++) {
+    if (nodes[i].strain === name) {
+      break;
+    }
+  }
+  return i;
 };

@@ -79,14 +79,13 @@ export const onTipLeave = function onTipLeave(d) {
   }
 };
 
-
 /* clearSelectedTip when clicking to go away */
 export const clearSelectedTip = function clearSelectedTip(d) {
   this.state.tree.svg.select("#tip_" + d.n.clade)
     .attr("r", (dd) => dd["r"]);
   this.setState({selectedTip: null, hovered: null});
   /* restore the tip visibility! */
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses());
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: -1}));
 };
 
 

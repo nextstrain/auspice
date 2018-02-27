@@ -1,147 +1,103 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import Autosuggest from 'react-autosuggest';
+import Awesomplete from 'awesomplete'; /* https://leaverou.github.io/awesomplete/ */
+import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/treeProperties";
+import { dataFont, darkGrey } from "../../globalStyles";
+import "../../css/awesomplete.css";
 
-@connect(state => {
-  return state.tree
-})
+const Cross = ({onClick, show}) => {
+  if (!show) return null;
+  return (
+    <div
+      className="boxed-item-icon"
+      style={{
+        float: "right",
+        height: "23px",
+        width: "23px",
+        borderTopRightRadius: "2px",
+        borderBottomRightRadius: "2px",
+        borderRightWidth: "1px",
+        fontSize: 18
+      }}
+      onClick={onClick}
+    >
+      {'\xD7'}
+    </div>
+  );
+};
+
+@connect((state) => ({
+  nodes: state.tree.nodes,
+  version: state.tree.version,
+  visibility: state.tree.visibility,
+  selectedStrain: state.tree.selectedStrain
+}))
 class SearchStrains extends React.Component {
-  constructor(props) {
+  constructor() {
     super();
-
-    this.state = {
-      value: "",
-      suggestions: this.getSuggestions(""),
+    this.state = {awesomplete: undefined, show: false};
+    this.removeSelection = () => {
+      this.ref.value = null;
+      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: -1}));
+      this.props.dispatch(updateTipRadii());
+      this.setState({show: false});
     };
-
-    this.onChange = this.onChange.bind(this);
-    this.onSuggestionsUpdateRequested = this.onSuggestionsUpdateRequested.bind(this);
   }
-  static propTypes = {
-    /* react */
-    dispatch: PropTypes.func,
-    params: PropTypes.object,
-    routes: PropTypes.array,
-    /* component api */
-    style: PropTypes.object,
-    tips: PropTypes.array
-    // foo: PropTypes.string
-  }
-  static defaultProps = {
-    // foo: "bar"
-  }
-
-  onSuggestionsUpdateRequested({ value }) {
-    this.setState({
-      suggestions: this.getSuggestions(value)
+  componentDidMount() {
+    const awesomplete = new Awesomplete(this.ref, {
+      maxItems: 1000
     });
-  }
-  renderSuggestion(suggestion, value) {
-    // we can use value here to highlight the letters like in the old autocomplete :)
-    return (
-      <span>{suggestion.strain}</span>
-    );
-  }
-  getSuggestionValue(suggestion) { // when suggestion selected, this function tells
-    return suggestion.strain;                 // what should be the value of the input
-  }
-  getSuggestions(value) {
-    const inputValue = value.trim().toLowerCase();
-    const inputLength = inputValue.length;
-
-    return inputLength === 0 ? [] : this.props.tips.filter((tip) =>
-      /* implement fuzzy search here to check for internal substring match */
-      tip.strain.toLowerCase().slice(0, inputLength) === inputValue
-    );
-  }
-  onChange(event, { newValue }) {
-    this.setState({
-      value: newValue
-    });
-  }
-  getTheme() {
-    return {
-      container: {
-        marginBottom: 20
-      },
-      input: {
-        padding: "10px 10px",
-        borderRadius: 4,
-        border: "1px solid rgb(200,200,200)"
-
+    this.ref.addEventListener('awesomplete-selectcomplete', (e) => {
+      const strain = e.text.value;
+      for (let i = 0; i < this.props.nodes.length; i++) {
+        if (this.props.nodes[i].strain === strain) {
+          this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+            tipSelectedIdx: this.props.nodes[i].arrayIdx
+          }));
+          /* ^^^ also sets reduxState.tree.selectedStrain */
+          this.props.dispatch(updateTipRadii({
+            tipSelectedIdx: this.props.nodes[i].arrayIdx
+          }));
+          break;
+        }
       }
-      // containerOpen
-      // suggestionsContainer
-      // suggestion
-      // suggestionFocused
-      // sectionContainer
-      // sectionTitle
-      // sectionSuggestionsContainer
-    };
+      this.setState({show: true});
+    });
+    this.setState({awesomplete});
+  }
+  componentWillReceiveProps(nextProps) {
+    if (this.props.selectedStrain && !nextProps.selectedStrain) {
+      this.ref.value = null;
+      this.setState({show: false});
+    }
+  }
+  // partialSelection() {
+  //   /* this allows dispatches based on the the list of matches, before one is actually chosen */
+  //   /* put his in the <input> onChange={() => this.partialSelection()} */
+  //   console.log("partialSelection", this.state.awesomplete.suggestions.map((s) => s.value));
+  // }
+  updateVisibleStrains() {
+    /* this tells the serch box which strains are visible
+    and therefore are eligible to be searched */
+    this.state.awesomplete.list = this.props.nodes
+      .filter((n) => !n.hasChildren && this.props.visibility[n.arrayIdx] === "visible")
+      .map((n) => n.strain);
+    this.state.awesomplete.evaluate();
   }
   render() {
-    /* docs for this component: https://github.com/moroshko/react-autosuggest */
-    const { value, suggestions } = this.state;
     return (
-      <div>
-        {
-          this.props.tips ?
-          <Autosuggest
-            theme={this.getTheme()}
-            suggestions={suggestions}
-            onSuggestionsUpdateRequested={this.onSuggestionsUpdateRequested}
-            getSuggestionValue={this.getSuggestionValue}
-            renderSuggestion={this.renderSuggestion}
-            inputProps={{
-              placeholder: "search strains...",
-              value,
-              onChange: this.onChange
-            }}/> : ""
-        }
+      <div style={{fontFamily: dataFont, color: darkGrey, fontSize: 14, display: "inline-block"}}>
+        <div style={{width: "80%", display: "inline-block"}}>
+          <input
+            style={{fontFamily: "inherit", color: "inherit", fontSize: "inherit", width: "100%", height: "23px", paddingLeft: "7px", borderRadius: "4px", border: "1px solid #ccc"}}
+            ref={(r) => {this.ref = r;}}
+            onFocus={() => this.updateVisibleStrains()}
+          />
+        </div>
+        <Cross show={this.state.show} onClick={this.removeSelection}/>
       </div>
-
     );
   }
 }
 
 export default SearchStrains;
-
-/*
-
-
-
-const mc = autocomplete(document.getElementById("straininput"))
-  .keys(tips)
-  .dataField("strain")
-  .placeHolder("search strains...")
-  .width(800)
-  .height(500)
-  .onSelected(highlightStrainSearch)
-  .render();
-
-const highlightStrainSearch = (tip) => {
-  const strainName = (tip.strain).replace(/\//g, "");
-  d3.select("#" + strainName)
-    .call((d) => {
-      markInTreeStrainSearch(tip);
-      // virusTooltip.show(tip, d[0][0]);
-    });
-};
-
-const markInTreeStrainSearch = (tip) => {
-  treeplot.selectAll(".strainmatch").data([tip])
-    .enter()
-    .append("text")
-    .attr("class", "strainmatch")
-    .text((d) => {
-      return "\uf069";
-    });
-    // .on('mouseover', function(d) {
-    //     virusTooltip.show(d, this);
-    // })
-    // .on('mouseout', virusTooltip.hide);
-  styleHighlight();
-};
-
-*/

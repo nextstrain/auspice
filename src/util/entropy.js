@@ -1,5 +1,13 @@
-import { intersectGenes } from "../reducers/entropy";
 import { genotypeColors } from "./globals";
+
+const intersectGenes = function intersectGenes(geneMap, pos) {
+  for (const gene of Object.keys(geneMap)) {
+    if (pos >= geneMap[gene].start && pos <= geneMap[gene].end) {
+      return gene;
+    }
+  }
+  return false;
+};
 
 export const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
   const sparse = isAA ? {} : [];

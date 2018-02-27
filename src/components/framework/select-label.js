@@ -1,12 +1,20 @@
 import React from "react";
-import { headerFont, lightGrey, darkGrey } from "../../globalStyles";
+import { headerFont, titleStyles, darkGrey } from "../../globalStyles";
 
-const SelectLabel = ({text, extraStyles = {}}) => {
+export const Header = ({text, extraStyles = {}}) => {
+  return (
+    <span style={{...titleStyles.small, ...extraStyles}}>
+      {text}
+    </span>
+  );
+};
+
+export const SelectLabel = ({text, extraStyles = {}}) => {
   return (
     <p
       style={Object.assign({}, {
         fontFamily: headerFont,
-        margin: "0px 0px 5px 0px",
+        margin: "7px 0px 5px 0px",
         fontSize: 12,
         fontWeight: 400,
         color: darkGrey
@@ -16,5 +24,3 @@ const SelectLabel = ({text, extraStyles = {}}) => {
     </p>
   );
 };
-
-export default SelectLabel;

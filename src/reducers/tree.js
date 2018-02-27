@@ -1,12 +1,10 @@
-import { flattenTree, appendParentsToTree, processVaccines, processNodes } from "../components/tree/treeHelpers";
-import { getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
+import { getValuesAndCountsOfVisibleTraitsFromTree } from "../util/treeTraversals";
 import * as types from "../actions/types";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
-that the tree is loaded as they are set on the same action
-*/
+that the tree is loaded as they are set on the same action */
 
-const getDefaultState = () => {
+export const getDefaultTreeState = () => {
   return {
     loaded: false,
     nodes: null,
@@ -22,11 +20,13 @@ const getDefaultState = () => {
     version: 0,
     idxOfInViewRootNode: 0,
     visibleStateCounts: {},
-    totalStateCounts: {}
+    totalStateCounts: {},
+    availableBranchLabels: [],
+    selectedStrain: undefined
   };
 };
 
-const getAttrsOnTerminalNodes = (nodes) => {
+export const getAttrsOnTerminalNodes = (nodes) => {
   for (const node of nodes) {
     if (!node.hasChildren) {
       return Object.keys(node.attr).filter((v) => v.toLowerCase() !== "strain");
@@ -36,25 +36,11 @@ const getAttrsOnTerminalNodes = (nodes) => {
   return undefined;
 };
 
-const Tree = (state = getDefaultState(), action) => {
+const Tree = (state = getDefaultTreeState(), action) => {
   switch (action.type) {
-    case types.NEW_DATASET: {
-      /* loaded returns to the default (false) */
-      appendParentsToTree(action.tree);
-      const nodesArray = flattenTree(action.tree);
-      const nodes = processNodes(nodesArray);
-      const vaccines = processVaccines(nodes, action.meta.vaccine_choices);
-      return Object.assign({}, getDefaultState(), {
-        nodes,
-        vaccines,
-        attrs: getAttrsOnTerminalNodes(nodes)
-      });
-    }
-    case types.DATA_VALID:
-      return Object.assign({}, state, {
-        loaded: true,
-        version: state.version + 1
-      });
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
+    case types.CLEAN_START:
+      return action.tree;
     case types.DATA_INVALID:
       return Object.assign({}, state, {
         loaded: false
@@ -67,20 +53,15 @@ const Tree = (state = getDefaultState(), action) => {
         branchThickness: action.branchThickness,
         branchThicknessVersion: action.branchThicknessVersion,
         idxOfInViewRootNode: action.idxOfInViewRootNode,
-        visibleStateCounts: getValuesAndCountsOfVisibleTraitsFromTree(state.nodes, action.visibility, action.stateCountAttrs)
+        visibleStateCounts: getValuesAndCountsOfVisibleTraitsFromTree(state.nodes, action.visibility, action.stateCountAttrs),
+        selectedStrain: action.selectedStrain
       };
-      /* we only want to calculate totalStateCounts on the first pass */
-      if (!state.loaded) {
-        newStates.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(state.nodes, action.stateCountAttrs);
-      }
       return Object.assign({}, state, newStates);
     case types.UPDATE_TIP_RADII:
       return Object.assign({}, state, {
         tipRadii: action.data,
         tipRadiiVersion: action.version
       });
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
-      return action.newTree;
     case types.NEW_COLORS:
       return Object.assign({}, state, {
         nodeColors: action.nodeColors,
@@ -90,7 +71,7 @@ const Tree = (state = getDefaultState(), action) => {
       /* modify in place ?!?! */
       for (const node of state.nodes) {
         if (action.taxa.indexOf(node.strain) !== -1) {
-          action.newColorBys.map((colorBy, idx) => {
+          action.newColorBys.forEach((colorBy, idx) => {
             node.attr[colorBy] = action.data[node.strain][idx];
           });
         }

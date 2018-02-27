@@ -271,15 +271,13 @@ export const mapToScreen = function mapToScreen() {
   /* set the range of the x & y scales */
   this.setScales(this.params.margins);
 
-  /* find minimum & maximum x & y values, as well as # tips in view */
-  this.nNodesInView = 0;
+  /* find minimum & maximum x & y values */
   let [minY, maxY, minX, maxX] = [1000000, 0, 1000000, 0];
   this.nodes.filter((d) => d.inView).forEach((d) => {
     if (d.x > maxX) maxX = d.x;
     if (d.y > maxY) maxY = d.y;
     if (d.x < minX) minX = d.x;
     if (d.y < minY) minY = d.y;
-    if (d.terminal) this.nNodesInView++;
   });
 
   /* set the domain of the x & y scales */

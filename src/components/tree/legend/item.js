@@ -1,5 +1,5 @@
 import React from "react";
-import { legendMouseEnterExit } from "../../../actions/treeProperties";
+import { updateTipRadii } from "../../../actions/treeProperties";
 import { dataFont, darkGrey } from "../../../globalStyles";
 import { prettyString } from "../../../util/stringHelpers";
 
@@ -16,10 +16,10 @@ const LegendItem = ({
   <g
     transform={transform}
     onMouseEnter={() => {
-      dispatch(legendMouseEnterExit(label));
+      dispatch(updateTipRadii({selectedLegendItem: label}));
     }}
     onMouseLeave={() => {
-      dispatch(legendMouseEnterExit());
+      dispatch(updateTipRadii());
     }}
   >
     <rect

@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
@@ -88,6 +87,7 @@ export const createSummary = (virus_count, nodes, filters, visibility, visibleSt
     visibleStateCounts: state.tree.visibleStateCounts,
     totalStateCounts: state.tree.totalStateCounts,
     visibility: state.tree.visibility,
+    selectedStrain: state.tree.selectedStrain,
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
     absoluteDateMin: state.controls.absoluteDateMin,
@@ -97,14 +97,6 @@ export const createSummary = (virus_count, nodes, filters, visibility, visibleSt
 class Info extends React.Component {
   constructor(props) {
     super(props);
-  }
-  static propTypes = {
-    filters: PropTypes.object.isRequired,
-    metadata: PropTypes.object, // not required. starts as null
-    nodes: PropTypes.array, // not required. starts as null
-    visibility: PropTypes.array, // not required. starts as null
-    dispatch: PropTypes.func.isRequired,
-    idxOfInViewRootNode: PropTypes.number
   }
   getStyles(width) {
     let fontSize = 32;
@@ -185,6 +177,26 @@ class Info extends React.Component {
       buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));
     });
   }
+  selectedStrainButton(strain) {
+    return (
+      <span>
+        {"Showing a single strain "}
+        <div style={{display: "inline-block"}}>
+          <div
+            className={'boxed-item-icon'}
+            onClick={() => {this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: -1}));}}
+            role="button"
+            tabIndex={0}
+          >
+            {'\xD7'}
+          </div>
+          <div className={"boxed-item active-with-icon"}>
+            {strain}
+          </div>
+        </div>
+      </span>
+    );
+  }
   clearFilterButton(field) {
     return (
       <span
@@ -249,6 +261,7 @@ class Info extends React.Component {
     // const nSelectedAuthors = this.getNumSelectedAuthors();
     // const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
     const animating = this.props.animationPlayPauseButton === "Pause";
+    const showExtended = !animating && !this.props.selectedStrain;
     const datesMaxed = this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax;
     let title = "";
     if (this.props.metadata.title) {
@@ -283,12 +296,13 @@ class Info extends React.Component {
               <span style={{color: darkGrey}}>{"Currently viewing data from the staging server. "}</span>
             ) : null}
             {animating ? `Animation in progress. ` : null}
+            {this.props.selectedStrain ? this.selectedStrainButton(this.props.selectedStrain) : null}
             {/* part 1 - the summary */}
-            {!animating ? summary.map((d, i) =>
+            {showExtended ? summary.map((d, i) =>
               (i + 1 !== summary.length ? <span key={i}>{`${d}, `}</span> : <span key={i}>{`${d}. `}</span>)
             ) : null}
             {/* part 2 - the filters */}
-            {!animating && filters.length ? (
+            {showExtended && filters.length ? (
               <span>
                 {"Filtered to "}
                 {filters.map((d) => d)}

@@ -5,14 +5,14 @@ import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../treeHelpers";
 
 const infoLineJSX = (item, value) => (
-  <g>
+  <span>
     <span style={{fontWeight: "500"}}>
       {item + " "}
     </span>
     <span style={{fontWeight: "300"}}>
       {value}
     </span>
-  </g>
+  </span>
 );
 
 const infoBlockJSX = (item, values) => (
@@ -150,9 +150,9 @@ const getMutationsJSX = (d, mutType) => {
 
 const getBranchDescendents = (n) => {
   if (n.fullTipCount === 1) {
-    return <g>{infoLineJSX("Branch leading to", n.strain)}<p/></g>;
+    return <span>{infoLineJSX("Branch leading to", n.strain)}<p/></span>;
   }
-  return <g>{infoLineJSX("Number of descendants:", n.fullTipCount)}<p/></g>;
+  return <span>{infoLineJSX("Number of descendants:", n.fullTipCount)}<p/></span>;
 };
 
 /**
@@ -223,10 +223,10 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
 const displayVaccineInfo = (d) => {
   if (d.n.vaccineDate) {
     return (
-      <g>
+      <span>
         {infoLineJSX("Vaccine strain:", d.n.vaccineDate)}
         <p/>
-      </g>
+      </span>
     );
   }
   return null;
@@ -244,21 +244,21 @@ const HoverInfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
   let inner;
   if (tip) {
     inner = (
-      <g>
+      <span>
         {displayVaccineInfo(d)}
         {tipDisplayColorByInfo(d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale)}
         {distanceMeasure === "div" ? getBranchDivJSX(d.n) : getBranchTimeJSX(d.n, temporalConfidence)}
-      </g>
+      </span>
     );
   } else {
     inner = (
-      <g>
+      <span>
         {getBranchDescendents(d.n)}
         {/* getFrequenciesJSX(d.n, mutType) */}
         {getMutationsJSX(d.n, mutType)}
         {distanceMeasure === "div" ? getBranchDivJSX(d.n) : getBranchTimeJSX(d.n, temporalConfidence)}
         {displayColorBy(d.n, distanceMeasure, temporalConfidence, colorByConfidence, colorBy)}
-      </g>
+      </span>
     );
   }
   return (

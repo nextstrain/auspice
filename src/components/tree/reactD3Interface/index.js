@@ -6,6 +6,12 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
   const props = reactThis.props;
   const phylotree = reactThis.state.tree;
 
+  /* catch selectedStrain dissapearence seperately to visibility and remove modal */
+  if (props.tree.selectedStrain && !nextProps.tree.selectedStrain) {
+    /* TODO change back the tip radius */
+    reactThis.setState({selectedTip: null, hovered: null});
+  }
+
   /* colorBy change? */
   if (!!nextProps.tree.nodeColorsVersion &&
       (props.tree.nodeColorsVersion !== nextProps.tree.nodeColorsVersion ||
@@ -37,6 +43,12 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
   if (props.distanceMeasure !== nextProps.distanceMeasure) {
     args.newDistance = nextProps.distanceMeasure;
   }
+
+  /* change in key used to define branch labels (e.g. aa, clade...) */
+  if (props.selectedBranchLabel !== nextProps.selectedBranchLabel) {
+    args.newBranchLabellingKey = nextProps.selectedBranchLabel;
+  }
+
 
   /* confidence intervals (on means in the SVG, display means shown in the sidebar) */
   if (props.temporalConfidence.display === true && nextProps.temporalConfidence.display === false) {

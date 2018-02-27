@@ -147,8 +147,8 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   });
 
   /* special cases not listed in classesToPotentiallyUpdate */
-  if (elemsToUpdate.has('.cladeLabel')) {
-    this.updateCladeLabels(transitionTime);
+  if (elemsToUpdate.has('.branchLabel')) {
+    this.updateBranchLabels(transitionTime);
   }
   if (elemsToUpdate.has('.tipLabel')) {
     this.updateTipLabels();
@@ -175,6 +175,14 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
       this.removeConfidence(); /* see comment above */
     }
   }
+
+  /* branch labels */
+  if (extras.newBranchLabellingKey) {
+    this.svg.selectAll('.branchLabel').remove();
+    if (extras.newBranchLabellingKey !== "none") {
+      this.drawBranchLabels(extras.newBranchLabellingKey);
+    }
+  }
 };
 
 /* instead of modifying the SVG the "normal" way, this is sometimes too janky (e.g. when we need to move everything)
@@ -194,6 +202,7 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
     this.drawTips();
     if (this.vaccines) this.drawVaccines();
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
+    if (elemsToUpdate.has(".branchLabel")) this.drawBranchLabels(this.params.branchLabelKey);
   };
 
   /* STEP 2: move tips */
@@ -234,6 +243,7 @@ export const change = function change({
   /* change these things to provided value */
   newDistance = undefined,
   newLayout = undefined,
+  newBranchLabellingKey = undefined,
   /* arrays of data (the same length as nodes) */
   stroke = undefined,
   fill = undefined,
@@ -284,7 +294,7 @@ export const change = function change({
   if (newDistance || newLayout || zoomIntoClade || svgHasChangedDimensions) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
-    elemsToUpdate.add('.cladeLabel').add('.tipLabel');
+    elemsToUpdate.add('.branchLabel').add('.tipLabel');
     elemsToUpdate.add(".grid").add(".regression");
     svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity");
   }
@@ -327,7 +337,7 @@ export const change = function change({
   }
 
   /* svg change elements */
-  const extras = {removeConfidences, showConfidences};
+  const extras = {removeConfidences, showConfidences, newBranchLabellingKey};
   if (useModifySVGInStages) {
     this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000);
   } else {

@@ -31,8 +31,7 @@ const PhyloTree = function PhyloTree(reduxNodes) {
       x: 0,
       y: 0,
       terminal: (typeof d.children === "undefined"),
-      inView: true, /* each node is visible */
-      r: this.params.tipRadius /* default */
+      inView: true /* each node is visible */
     };
     d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
     return phyloNode;
@@ -81,8 +80,8 @@ PhyloTree.prototype.drawSingleCI = confidence.drawSingleCI;
 PhyloTree.prototype.updateConfidence = confidence.updateConfidence;
 
 /* L A B E L S    ( T I P ,    B R A N C H ,   C O N F I D E N C E ) */
-PhyloTree.prototype.drawCladeLabels = labels.drawCladeLabels;
-PhyloTree.prototype.updateCladeLabels = labels.updateCladeLabels;
+PhyloTree.prototype.drawBranchLabels = labels.drawBranchLabels;
+PhyloTree.prototype.updateBranchLabels = labels.updateBranchLabels;
 PhyloTree.prototype.updateTipLabels = labels.updateTipLabels;
 
 /* G R I D */

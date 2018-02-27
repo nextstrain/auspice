@@ -25,39 +25,70 @@ export const updateTipLabels = function updateTipLabels(dt) {
   }
 };
 
-/** cladeLabelSize
- * @param  {int} n total number of nodes in current view
+/** branchLabelSize
+ * @param {str} key e.g. "aa" or "clade"
+ * @param  {int} nTips total number of nodes in current view (visible or invisible)
  * @return {str} font size of the branch label, e.g. "12px"
  */
-const cladeLabelSize = (n) => `${n > 1000 ? 14 : n > 500 ? 18 : 22}px`;
+const branchLabelSize = (key, nTips) => {
+  if (key === "aa") return "12px";
+  const size = nTips > 1000 ? 14 :
+    nTips > 500 ? 16 :
+      20;
+  return `${size}px`;
+};
 
+/** createBranchLabelVisibility (the return value should be passed to d3 style call)
+ * @param {str} key e.g. "aa" or "clade"
+ * @param {str} layout
+ * @param {int} totalTipsInView visible tips also in view
+ * @return {func||str}
+ */
+const createBranchLabelVisibility = (key, layout, totalTipsInView) => {
+  if (key === "clade") return "visible";
+  const magicTipFractionToShowBranchLabel = 0.05;
+  return (d) => {
+    /* if the number of _visible_ tips descending from this node are over the
+    magicTipFractionToShowBranchLabel (c/w the total numer of _visible_ and
+    _inView_ tips then display the label */
+    if (
+      d.n.tipCount > magicTipFractionToShowBranchLabel * totalTipsInView &&
+      layout === "rect"
+    ) {
+      return "visible";
+    }
+    return "hidden";
+  };
+};
 
-export const updateCladeLabels = function updateCladeLabels(dt) {
-  const visibility = this.layout === "rect" ? "visible" : "hidden";
-  const labelSize = cladeLabelSize(this.nNodesInView);
-  this.svg.selectAll('.cladeLabel')
+export const updateBranchLabels = function updateBranchLabels(dt) {
+  const visibility = createBranchLabelVisibility(this.params.branchLabelKey, this.layout, this.zoomNode.n.tipCount);
+  const labelSize = branchLabelSize(this.params.branchLabelKey, this.zoomNode.n.fullTipCount);
+  this.svg.selectAll('.branchLabel')
     .transition().duration(dt)
-    .attr("x", (d) => d.xTip - this.params.cladeLabelPadX)
-    .attr("y", (d) => d.yTip - this.params.cladeLabelPadY)
+    .attr("x", (d) => d.xTip - 5)
+    .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
     .style("visibility", visibility)
     .style("font-size", labelSize);
   if (!dt) timerFlush();
 };
 
-export const drawCladeLabels = function drawCladeLabels() {
-  const visibility = this.layout === "rect" ? "visible" : "hidden";
-  const labelSize = cladeLabelSize(this.nNodesInView);
-  this.svg.append("g").selectAll('.cladeLabel')
-    .data(this.nodes.filter((d) => typeof d.n.attr.clade_name !== 'undefined'))
+export const drawBranchLabels = function drawBranchLabels(key) {
+  /* salient props: this.zoomNode.n.tipCount, this.zoomNode.n.fullTipCount */
+  this.params.branchLabelKey = key;
+  const labelSize = branchLabelSize(key, this.zoomNode.n.fullTipCount);
+  const visibility = createBranchLabelVisibility(key, this.layout, this.zoomNode.n.tipCount);
+  this.svg.append("g").selectAll('.branchLabel')
+    .data(this.nodes.filter((d) => d.n.attr.labels && d.n.attr.labels[key]))
     .enter()
     .append("text")
-    .attr("class", "cladeLabel")
-    .attr("x", (d) => d.xTip - this.params.cladeLabelPadX)
-    .attr("y", (d) => d.yTip - this.params.cladeLabelPadY)
-    .style("visibility", visibility)
+    .attr("class", "branchLabel")
+    .attr("x", (d) => d.xTip - 5)
+    .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
     .style("text-anchor", "end")
-    .style("fill", this.params.cladeLabelFill)
-    .style("font-family", this.params.cladeLabelFont)
+    .style("visibility", visibility)
+    .style("fill", this.params.branchLabelFill)
+    .style("font-family", this.params.branchLabelFont)
     .style("font-size", labelSize)
-    .text((d) => d.n.attr.clade_name);
+    .text((d) => d.n.attr.labels[key]);
 };

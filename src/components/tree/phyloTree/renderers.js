@@ -12,9 +12,10 @@ import { timerStart, timerEnd } from "../../../util/perf";
  * @param {bool} vaccines         -- should vaccine crosses (and dotted lines if applicable) be drawn?
  * @param {array} stroke          -- stroke colour for each node (set onto each node)
  * @param {array} fill            -- fill colour for each node (set onto each node)
+ * @param {array|null} tipRadii   -- array of tip radius'
  * @return {null}
  */
-export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, stroke, fill) {
+export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, stroke, fill, tipRadii) {
   timerStart("phyloTree render()");
   this.svg = svg;
   this.params = Object.assign(this.params, parameters);
@@ -32,12 +33,13 @@ export const render = function render(svg, layout, distance, parameters, callbac
     d.fill = fill[i];
     d.visibility = visibility[i];
     d["stroke-width"] = branchThickness[i];
+    d.r = tipRadii ? tipRadii[i] : this.params.tipRadius;
   });
 
   /* draw functions */
   if (this.params.showGrid) this.addGrid();
   this.drawBranches();
-  if (this.params.showCladeLabels) this.drawCladeLabels();
+  if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   this.drawTips();
   if (this.vaccines) this.drawVaccines();
   if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
@@ -184,10 +186,4 @@ export const drawRegression = function drawRegression() {
  */
 export const clearSVG = function clearSVG() {
   this.svg.selectAll("*").remove();
-  // this.svg.selectAll('.tip').remove();
-  // this.svg.selectAll('.branch').remove();
-  // this.svg.selectAll('.cladeLabel').remove();
-  // this.svg.selectAll('.tipLabel').remove();
-  // this.svg.selectAll(".vaccine").remove();
-  // this.svg.selectAll(".conf").remove();
 };

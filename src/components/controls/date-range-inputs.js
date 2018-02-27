@@ -58,7 +58,7 @@ class DateRangeInputs extends React.Component {
   }
 
   updateFromSlider(debounce, numDateValues) {
-    /* debounce: boolean. TRUE: both debounce and quickdraw.*/
+    /* debounce: boolean. TRUE: both debounce and quickdraw. */
     this.maybeClearMapAnimationInterval()
 
     if (debounce) {
