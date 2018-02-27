@@ -3,19 +3,38 @@ data_files=(
   "img_mumps.jpg" "img_dengue.png" "img_avianinfluenza.png" "img_seasonalinfluenza.png" "img_ebola.png" "img_zika.png"\
   "ebola_tree.json" "ebola_meta.json"\
   "zika_tree.json" "zika_meta.json"\
-  "flu_h3n2_ha_3y_tree.json" "flu_h3n2_ha_3y_meta.json" \
-  "flu_h3n2_ha_6y_tree.json" "flu_h3n2_ha_6y_meta.json" \
-  "flu_h3n2_ha_12y_tree.json" "flu_h3n2_ha_12y_meta.json" \
-  "flu_h3n2_ha_3y_tip-frequencies.json" "flu_h3n2_ha_6y_tip-frequencies.json" "flu_h3n2_ha_12y_tip-frequencies.json"\
-  "flu_h1n1pdm_ha_3y_tree.json" "flu_h1n1pdm_ha_3y_meta.json" \
-  "flu_h1n1pdm_ha_6y_tree.json" "flu_h1n1pdm_ha_6y_meta.json" \
-  "flu_h1n1pdm_ha_12y_tree.json" "flu_h1n1pdm_ha_12y_meta.json" \
-  "flu_vic_ha_3y_tree.json" "flu_vic_ha_3y_meta.json" \
-  "flu_vic_ha_6y_tree.json" "flu_vic_ha_6y_meta.json" \
-  "flu_vic_ha_12y_tree.json" "flu_vic_ha_12y_meta.json" \
-  "flu_yam_ha_3y_tree.json" "flu_yam_ha_3y_meta.json" \
-  "flu_yam_ha_6y_tree.json" "flu_yam_ha_6y_meta.json" \
-  "flu_yam_ha_12y_tree.json" "flu_yam_ha_12y_meta.json" \
+  "flu_h3n2_ha_2y_tree.json" "flu_h3n2_ha_2y_meta.json" "flu_h3n2_ha_2y_tip-frequencies.json" \
+  "flu_h3n2_ha_3y_tree.json" "flu_h3n2_ha_3y_meta.json" "flu_h3n2_ha_3y_tip-frequencies.json" \
+  "flu_h3n2_ha_6y_tree.json" "flu_h3n2_ha_6y_meta.json" "flu_h3n2_ha_6y_tip-frequencies.json" \
+  "flu_h3n2_ha_12y_tree.json" "flu_h3n2_ha_12y_meta.json" "flu_h3n2_ha_12y_tip-frequencies.json" \
+  "flu_h3n2_na_2y_tree.json" "flu_h3n2_na_2y_meta.json" "flu_h3n2_na_2y_tip-frequencies.json" \
+  "flu_h3n2_na_3y_tree.json" "flu_h3n2_na_3y_meta.json" "flu_h3n2_na_3y_tip-frequencies.json" \
+  "flu_h3n2_na_6y_tree.json" "flu_h3n2_na_6y_meta.json" "flu_h3n2_na_6y_tip-frequencies.json" \
+  "flu_h3n2_na_12y_tree.json" "flu_h3n2_na_12y_meta.json" "flu_h3n2_na_12y_tip-frequencies.json" \
+  "flu_h1n1pdm_ha_2y_tree.json" "flu_h1n1pdm_ha_2y_meta.json" "flu_h1n1pdm_ha_2y_tip-frequencies.json" \
+  "flu_h1n1pdm_ha_3y_tree.json" "flu_h1n1pdm_ha_3y_meta.json" "flu_h1n1pdm_ha_3y_tip-frequencies.json" \
+  "flu_h1n1pdm_ha_6y_tree.json" "flu_h1n1pdm_ha_6y_meta.json" "flu_h1n1pdm_ha_6y_tip-frequencies.json" \
+  "flu_h1n1pdm_ha_12y_tree.json" "flu_h1n1pdm_ha_12y_meta.json" "flu_h1n1pdm_ha_12y_tip-frequencies.json" \
+  "flu_h1n1pdm_na_2y_tree.json" "flu_h1n1pdm_na_2y_meta.json" "flu_h1n1pdm_na_2y_tip-frequencies.json" \
+  "flu_h1n1pdm_na_3y_tree.json" "flu_h1n1pdm_na_3y_meta.json" "flu_h1n1pdm_na_3y_tip-frequencies.json" \
+  "flu_h1n1pdm_na_6y_tree.json" "flu_h1n1pdm_na_6y_meta.json" "flu_h1n1pdm_na_6y_tip-frequencies.json" \
+  "flu_h1n1pdm_na_12y_tree.json" "flu_h1n1pdm_na_12y_meta.json" "flu_h1n1pdm_na_12y_tip-frequencies.json" \
+  "flu_vic_ha_2y_tree.json" "flu_vic_ha_2y_meta.json" "flu_vic_ha_2y_tip-frequencies.json" \
+  "flu_vic_ha_3y_tree.json" "flu_vic_ha_3y_meta.json" "flu_vic_ha_3y_tip-frequencies.json" \
+  "flu_vic_ha_6y_tree.json" "flu_vic_ha_6y_meta.json" "flu_vic_ha_6y_tip-frequencies.json" \
+  "flu_vic_ha_12y_tree.json" "flu_vic_ha_12y_meta.json" "flu_vic_ha_12y_tip-frequencies.json" \
+  "flu_vic_na_2y_tree.json" "flu_vic_na_2y_meta.json" "flu_vic_na_2y_tip-frequencies.json" \
+  "flu_vic_na_3y_tree.json" "flu_vic_na_3y_meta.json" "flu_vic_na_3y_tip-frequencies.json" \
+  "flu_vic_na_6y_tree.json" "flu_vic_na_6y_meta.json" "flu_vic_na_6y_tip-frequencies.json" \
+  "flu_vic_na_12y_tree.json" "flu_vic_na_12y_meta.json" "flu_vic_na_12y_tip-frequencies.json" \
+  "flu_yam_ha_2y_tree.json" "flu_yam_ha_2y_meta.json" "flu_yam_ha_2y_tip-frequencies.json" \
+  "flu_yam_ha_3y_tree.json" "flu_yam_ha_3y_meta.json" "flu_yam_ha_3y_tip-frequencies.json" \
+  "flu_yam_ha_6y_tree.json" "flu_yam_ha_6y_meta.json" "flu_yam_ha_6y_tip-frequencies.json" \
+  "flu_yam_ha_12y_tree.json" "flu_yam_ha_12y_meta.json" "flu_yam_ha_12y_tip-frequencies.json" \
+  "flu_yam_na_2y_tree.json" "flu_yam_na_2y_meta.json" "flu_yam_na_2y_tip-frequencies.json" \
+  "flu_yam_na_3y_tree.json" "flu_yam_na_3y_meta.json" "flu_yam_na_3y_tip-frequencies.json" \
+  "flu_yam_na_6y_tree.json" "flu_yam_na_6y_meta.json" "flu_yam_na_6y_tip-frequencies.json" \
+  "flu_yam_na_12y_tree.json" "flu_yam_na_12y_meta.json" "flu_yam_na_12y_tip-frequencies.json" \
   "avian_h7n9_ha_tree.json" "avian_h7n9_ha_meta.json" \
   "avian_h7n9_mp_tree.json" "avian_h7n9_mp_meta.json" \
   "avian_h7n9_na_tree.json" "avian_h7n9_na_meta.json" \
