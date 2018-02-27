@@ -1,7 +1,6 @@
 import { timerFlush } from "d3-timer";
 
 export const updateTipLabels = function updateTipLabels(dt) {
-  console.log("updateTipLabels called")
   this.svg.selectAll('.tipLabel').remove();
   const tLFunc = this.callbacks.tipLabel;
   const xPad = this.params.tipLabelPadX;
