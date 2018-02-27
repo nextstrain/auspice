@@ -385,15 +385,17 @@ export const processBranchLabelsInPlace = (nodes) => {
       delete n.attr.clade_annotation;
     }
     /* AA */
-    let muts = "";
+    const muts = [];
     if (n.aa_muts) {
       for (const aa in n.aa_muts) { // eslint-disable-line
         if (n.aa_muts[aa].length) {
-          muts += `${aa}: ${n.aa_muts[aa].join(", ")}`;
+          muts.push(`${aa}: ${n.aa_muts[aa].join(", ")}`);
         }
       }
     }
-    if (muts !== "") labels[1] = muts;
+    if (muts.length) {
+      labels[1] = muts.join("; ");
+    }
     /* ADD TO ATTR */
     if (labels.length) {
       n.attr.labels = {};
