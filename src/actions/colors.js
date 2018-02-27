@@ -30,7 +30,7 @@ export const calcColorScaleAndNodeColors = (colorBy, controls, tree, metadata) =
 export const changeColorBy = (providedColorBy = undefined) => { // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
     timerStart("changeColorBy calculations");
-    const { controls, tree, metadata } = getState();
+    const { controls, tree, metadata, frequencies } = getState();
 
     /* bail if all required params aren't (yet) available! */
     if (!(tree.nodes !== null && metadata.loaded)) {
@@ -47,7 +47,9 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
     if (newMutType) {
       updateEntropyVisibility(dispatch, getState);
     }
-    updateFrequencyDataDebounced(dispatch, getState);
+    if (frequencies.loaded) {
+      updateFrequencyDataDebounced(dispatch, getState);
+    }
 
     /* step 4: dispatch */
     dispatch({

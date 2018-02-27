@@ -12,7 +12,7 @@
     "build": "npm run clean && npm run build:client && npm run build:server",
     "build:start": "npm run build && npm run server",
     "build:start:perf": "npm run clean && npm run build:client:perf && npm run build:server && npm run server",
-    "start": "babel-node server.js dev",
+    "start": "BABEL_ENV=dev babel-node server.js dev",
     "start:local": "BABEL_ENV=dev babel-node server.js dev localData localStatic",
     "start:local:perf": "BABEL_ENV=devtiming babel-node server.js dev localData localStatic",
     "start:localData": "babel-node server.js dev localData",

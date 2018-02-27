@@ -37,7 +37,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
   {idxOfInViewRootNode = undefined, tipSelectedIdx = 0} = {}
 ) => {
   return (dispatch, getState) => {
-    const { tree, controls } = getState();
+    const { tree, controls, frequencies } = getState();
     if (!tree.nodes) {return;}
     const validIdxRoot = idxOfInViewRootNode !== undefined ? idxOfInViewRootNode : tree.idxOfInViewRootNode;
     if (idxOfInViewRootNode !== tree.idxOfInViewRootNode && tree.nodes[0].shell) {
@@ -69,7 +69,9 @@ export const updateVisibleTipsAndBranchThicknesses = (
       selectedStrain: tipSelectedIdx > 0 ? tree.nodes[tipSelectedIdx].strain : undefined
     });
     updateEntropyVisibility(dispatch, getState);
-    updateFrequencyDataDebounced(dispatch, getState);
+    if (frequencies.loaded) {
+      updateFrequencyDataDebounced(dispatch, getState);
+    }
   };
 };
 
@@ -83,7 +85,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
  */
 export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = false}) => {
   return (dispatch, getState) => {
-    const { tree, controls } = getState();
+    const { tree, controls, frequencies } = getState();
     if (!tree.nodes) {return;}
     const dates = {
       dateMinNumeric: newMin ? calendarToNumeric(newMin) : controls.dateMinNumeric,
@@ -105,7 +107,9 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       stateCountAttrs: Object.keys(controls.filters)
     });
     updateEntropyVisibility(dispatch, getState);
-    updateFrequencyDataDebounced(dispatch, getState);
+    if (frequencies.loaded) {
+      updateFrequencyDataDebounced(dispatch, getState);
+    }
   };
 };
 
