@@ -22,20 +22,27 @@ export const parseColorBy = (colorBy, colorOptions) => {
   return prettyString(colorBy);
 };
 
-const getOrderedCategories = (categories, colorScale) => {
+const getOrderedCategories = (matrixCategories, colorScale) => {
   /* get the colorBy's in the same order as in the tree legend */
-  const legendOrderingReversed = colorScale.scale.domain()
+  const orderedCategories = colorScale.scale.domain()
     .filter((d) => d !== undefined)
     .reverse()
     .map((v) => v.toString());
-  if (categories.length > legendOrderingReversed.length) {
-    categories.forEach((v) => {
-      if (legendOrderingReversed.indexOf(v) === -1) {
-        legendOrderingReversed.push(v);
+  /* remove categories that (for whatever reason) are in the legend but aren't in the matrix */
+  for (let i = orderedCategories.length - 1; i >= 0; --i) {
+    if (matrixCategories.indexOf(orderedCategories[i]) === -1) {
+      orderedCategories.splice(i, 1);
+    }
+  }
+  /* add in categories that (for whatever reason) aren't in the legend */
+  if (matrixCategories.length > orderedCategories.length) {
+    matrixCategories.forEach((v) => {
+      if (orderedCategories.indexOf(v) === -1) {
+        orderedCategories.push(v);
       }
     });
   }
-  return legendOrderingReversed;
+  return orderedCategories;
 };
 
 export const calcScales = (chartGeom, ticks) => {
