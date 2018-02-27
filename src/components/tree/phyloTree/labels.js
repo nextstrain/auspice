@@ -32,11 +32,10 @@ export const updateTipLabels = function updateTipLabels(dt) {
  * @return {str} font size of the branch label, e.g. "12px"
  */
 const branchLabelSize = (key, nTips) => {
-  let size;
-  size = nTips > 1000 ? 14 :
+  if (key === "aa") return "12px";
+  const size = nTips > 1000 ? 14 :
     nTips > 500 ? 16 :
       20;
-  if (key === "aa") size -= 4;
   return `${size}px`;
 };
 
