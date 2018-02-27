@@ -39,7 +39,7 @@ export const drawSingleCI = function drawSingleCI(selection, opacity) {
     .attr("class", "conf")
     .attr("id", (d) => "conf_" + d.n.clade)
     .attr("d", (d) => d.confLine)
-    .style("stroke", (d) => d.stroke || "#888")
+    .style("stroke", (d) => d.branchStroke || "#888")
     .style("opacity", opacity)
     .style("fill", "none")
     .style("stroke-width", calcConfidenceWidth);

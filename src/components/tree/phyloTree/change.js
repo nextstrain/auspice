@@ -34,8 +34,8 @@ const setAttrViaNodeProps = {
   ".tip": new Set(["r"])
 };
 const setStyleViaNodeProps = {
-  ".branch": new Set(["stroke", "stroke-width"]),
-  ".tip": new Set(["fill", "visibility", "stroke"])
+  ".branch": new Set(["stroke-width"]),
+  ".tip": new Set(["fill", "visibility"])
 };
 const setAttrViaFunction = {
   ".tip": {
@@ -57,8 +57,14 @@ const setStyleViaFunction = {
     opacity: (d) => d.that.distance === "num_date" ? 1 : 0
   },
   ".conf": {
-    stroke: (d) => d.stroke,
+    stroke: (d) => d.branchStroke,
     "stroke-width": calcConfidenceWidth
+  },
+  ".branch": {
+    stroke: (d) => d.branchStroke
+  },
+  ".tip": {
+    stroke: (d) => d.tipStroke
   }
 };
 
@@ -91,7 +97,7 @@ const createUpdateCall = (treeElem, properties) => (selection) => {
   if (setStyleViaFunction[treeElem]) {
     [...properties].filter((x) => setStyleViaFunction[treeElem][x])
       .forEach((styleName) => {
-        selection.attr(styleName, setStyleViaFunction[treeElem][styleName]);
+        selection.style(styleName, setStyleViaFunction[treeElem][styleName]);
       });
   }
 };
@@ -245,7 +251,8 @@ export const change = function change({
   newLayout = undefined,
   newBranchLabellingKey = undefined,
   /* arrays of data (the same length as nodes) */
-  stroke = undefined,
+  branchStroke = undefined,
+  tipStroke = undefined,
   fill = undefined,
   visibility = undefined,
   tipRadii = undefined,
@@ -271,7 +278,8 @@ export const change = function change({
     /* check that fill & stroke are defined */
     elemsToUpdate.add(".branch").add(".tip").add(".conf");
     svgPropsToUpdate.add("stroke").add("fill");
-    nodePropsToModify.stroke = stroke;
+    nodePropsToModify.branchStroke = branchStroke;
+    nodePropsToModify.tipStroke = tipStroke;
     nodePropsToModify.fill = fill;
   }
   if (changeVisibility) {

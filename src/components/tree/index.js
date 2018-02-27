@@ -12,7 +12,7 @@ import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface";
 import * as callbacks from "./reactD3Interface/callbacks";
-import { calcStrokeCols } from "./treeHelpers";
+import { calcBranchStrokeCols } from "./treeHelpers";
 import { darkGrey, dataFont } from "../../globalStyles";
 
 const resetTreeButtonStyle = {
@@ -146,7 +146,8 @@ class Tree extends React.Component {
       props.tree.visibility,
       props.temporalConfidence.on, /* drawConfidence? */
       props.tree.vaccines,
-      calcStrokeCols(props.tree, props.colorByConfidence, props.colorBy),
+      calcBranchStrokeCols(props.tree, props.colorByConfidence, props.colorBy),
+      props.tree.nodeColors,
       props.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString()),
       props.tree.tipRadii /* might be null */
     );

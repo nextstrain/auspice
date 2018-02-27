@@ -32,7 +32,7 @@ export const onBranchHover = function onBranchHover(d, x, y) {
         .style("stroke", (el) => { // eslint-disable-line no-loop-func
           const ramp = branchOpacityFunction(this.props.tree.nodes[el.n.arrayIdx].attr[this.props.colorBy + "_entropy"]);
           const raw = this.props.tree.nodeColors[el.n.arrayIdx];
-          const base = el["stroke"];
+          const base = el.branchStroke;
           return rgb(interpolateRgb(raw, base)(ramp)).toString();
         });
     } else {
@@ -59,7 +59,7 @@ export const onBranchClick = function onBranchClick(d) {
 export const onBranchLeave = function onBranchLeave(d) {
   for (const id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
     this.state.tree.svg.select(id)
-      .style("stroke", (el) => el["stroke"]);
+      .style("stroke", (el) => el.branchStroke);
   }
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
     this.state.tree.removeConfidence(mediumTransitionDuration);
