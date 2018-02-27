@@ -61,8 +61,12 @@ class ColorBy extends React.Component {
       this.setState({colorBySelected: colorBy});
     } else {
       // don't update colorBy yet, genotype still needs to be specified
-      this.setState({colorBySelected: "gt"});
-      const gene = this.state.geneSelected;
+      let geneSelected = "nuc"; /* a safe default */
+      if (this.getGtGeneOptions().filter((d) => d.label === "HA1").length) {
+        geneSelected = "HA1";
+      }
+      this.setState({colorBySelected: "gt", geneSelected});
+      const gene = geneSelected;
       const position = this.state.positionSelected;
       this.setGenotypeColoring(gene, position);
     }
