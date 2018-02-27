@@ -103,7 +103,7 @@ const discreteAttributeScale = (nodes, attr) => {
   const colorList = domain.length < colors.length ? colors[domain.length] : colors[colors.length - 1];
 
   /* if NA / undefined / unknown, change the colours to grey */
-  for (const key of ["unknown", "undefined", "NA", "NaN"]) {
+  for (const key of ["unknown", "undefined", "unassigned", "NA", "NaN"]) {
     if (domain.indexOf(key) !== -1) {
       colorList[domain.indexOf(key)] = "#DDDDDD";
     }
