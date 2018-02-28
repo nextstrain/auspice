@@ -1,3 +1,5 @@
+## version 1.14.2 - 2018/02/28
+
 ## version 1.14.1 - 2018/02/27
 
 * Style tip stroke separately from branch stroke (`node.stroke` replaced with `node.branchStroke` & `node.tipStroke`)
