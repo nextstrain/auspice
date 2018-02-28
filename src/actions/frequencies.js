@@ -24,7 +24,7 @@ const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
   return unassigned_label;
 };
 
-export const computeMatrixFromRawData = (data, normaliseData, pivots, nodes, visibility, colorScale, colorBy) => {
+const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorScale, colorBy) => {
   /* color scale domain forms the categories in the stream graph */
   const categories = colorScale.scale.domain().filter((d) => d !== undefined);
   categories.push(unassigned_label); /* for tips without a colorBy */
@@ -32,7 +32,6 @@ export const computeMatrixFromRawData = (data, normaliseData, pivots, nodes, vis
   const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */
   const pivotsLen = pivots.length;
   categories.forEach((x) => {matrix[x] = new Array(pivotsLen).fill(0);});
-  let categoriesLen = categories.length;
 
   // let debugTipsSeen = 0;
   const debugPivotTotals = new Array(pivotsLen).fill(0);
@@ -55,27 +54,8 @@ export const computeMatrixFromRawData = (data, normaliseData, pivots, nodes, vis
 
   if (matrix[unassigned_label].reduce((a, b) => a + b, 0) === 0) {
     delete matrix[unassigned_label];
-    categoriesLen--;
   }
 
-  const magicThreshold = 0.1; /* totals above this are normalised. Below this are nuked. */
-
-  if (normaliseData) {
-    /* NORMALISE COLUMNS - i.e. each pivot point sums to 1 */
-    for (let i = 0; i < pivotsLen; i++) {
-      let columnTotal = 0;
-      for (let j = 0; j < categoriesLen; j++) {
-        columnTotal += matrix[categories[j]][i];
-      }
-      for (let j = 0; j < categoriesLen; j++) {
-        if (columnTotal > magicThreshold) {
-          matrix[categories[j]][i] /= columnTotal;
-        } else {
-          matrix[categories[j]][i] = 0;
-        }
-      }
-    }
-  }
   return matrix;
 };
 
@@ -92,14 +72,12 @@ export const updateFrequencyData = (dispatch, getState) => {
   }
   const matrix = computeMatrixFromRawData(
     frequencies.data,
-    frequencies.normaliseData,
     frequencies.pivots,
     tree.nodes,
     tree.visibility,
     controls.colorScale,
     controls.colorBy
   );
-  // console.log("Saw ", debugTipsSeen, " tips (visible) producing pre-normalisation pivots totals of", debugPivotTotals);
   timerEnd("updateFrequencyData");
   dispatch({type: types.FREQUENCY_MATRIX, matrix});
 };
@@ -109,14 +87,8 @@ export const updateFrequencyDataDebounced = debounce(
   updateFrequencyData, 500, { leading: false, trailing: true }
 );
 
-export const toggleNormalization = (dispatch, getState) => {
-  dispatch({type: types.TOGGLE_FREQUENCY_NORMALIZATION});
-  updateFrequencyData(dispatch, getState);
-};
-
 export const processFrequenciesJSON = (rawJSON, tree, controls) => {
   /* this function can throw */
-  const normaliseData = false;
   const pivots = rawJSON.pivots.map((d) => Math.round(parseFloat(d) * 100) / 100);
   const ticks = [pivots[0]];
   const tick_step = (pivots[pivots.length - 1] - pivots[0]) / 6 * 10 / 10;
@@ -140,7 +112,6 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
   });
   const matrix = computeMatrixFromRawData(
     data,
-    normaliseData,
     pivots,
     tree.nodes,
     tree.visibility,
@@ -151,7 +122,6 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
     data,
     pivots,
     ticks,
-    matrix,
-    normaliseData
+    matrix
   };
 };
