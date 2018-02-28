@@ -5,7 +5,7 @@ import Card from "../framework/card";
 import { materialButton, materialButtonSelected } from "../../globalStyles";
 import { toggleNormalization } from "../../actions/frequencies";
 import { calcXScale, calcYScale, drawXAxis, drawYAxis, areListsEqual,
-  drawStream, processMatrix, drawTooltip, parseColorBy } from "./functions";
+  drawStream, processMatrix, parseColorBy } from "./functions";
 import "../../css/entropy.css";
 
 const getStyles = (width) => {
@@ -80,7 +80,6 @@ export class Frequencies extends React.Component {
   }
   componentDidMount() {
     /* things that only ever need to be done once, and _don't_ rely on the frequencies actually being loaded */
-    drawTooltip();
     const svg = select(this.domRef);
     const svgStreamGroup = svg.append("g");
     const newState = {svg, svgStreamGroup};
@@ -136,7 +135,19 @@ export class Frequencies extends React.Component {
     return (
       <Card title={`Frequencies (coloured by ${parseColorBy(this.props.colorBy, this.props.colorOptions)})`}>
         {this.normalizationSwitch(this.props.width)}
-        <div id="freqinfo"/>
+        <div
+          id="freqinfo"
+          style={{
+            zIndex: 20,
+            position: "absolute",
+            borderRadius: "5px",
+            padding: "10px",
+            backgroundColor: "hsla(0,0%,100%,.9)",
+            pointerEvents: "none",
+            visibility: "hidden",
+            fontSize: "14px"
+          }}
+        />
         <svg style={{pointerEvents: "auto"}} width={this.props.width} height={this.props.height}>
           <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
         </svg>

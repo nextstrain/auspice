@@ -138,17 +138,6 @@ export const removeStream = (svg) => {
   svg.selectAll("text").remove();
 };
 
-export const drawTooltip = () => {
-  select("#freqinfo")
-    .style("position", "absolute")
-    .style("z-index", "20")
-    .style("border-radius", "5px")
-    .style("padding", "10px")
-    .style("background-color", "hsla(0,0%,100%,.9)")
-    .style("pointer-events", "none")
-    .style("visibility", "hidden");
-};
-
 const generateColorScaleD3 = (categories, colorScale) => (d, i) =>
   categories[i] === unassigned_label ? "rgb(190, 190, 190)" : rgb(colorScale.scale(categories[i])).toString();
 
@@ -206,7 +195,7 @@ export const processMatrix = ({matrix, pivots, colorScale}) => {
 };
 
 export const drawStream = (
-  svgStreamGroup, scales, {categories, series}, {colorBy, colorScale, colorOptions, pivots, normalised}
+  svgStreamGroup, scales, {categories, series}, {colorBy, colorScale, colorOptions, pivots}
 ) => {
   removeStream(svgStreamGroup);
   const colourer = generateColorScaleD3(categories, colorScale);
@@ -234,7 +223,6 @@ export const drawStream = (
 
     const left = mousex > 0.5 * scales.x.range()[1] ? "" : `${mousex + 4}px`;
     const right = mousex > 0.5 * scales.x.range()[1] ? `${scales.x.range()[1] - mousex - 4}px` : "";
-    const freqLabel = normalised ? "Normalised frequency" : "Frequency";
     select("#freqinfo")
       .style("left", left)
       .style("right", right)
@@ -242,7 +230,7 @@ export const drawStream = (
       .style("visibility", "visible")
       .html(`<p>${parseColorBy(colorBy, colorOptions)}: ${prettyString(labels[i])}</p>
         <p>Time point: ${pivots[pivotIdx]}</p>
-        <p>${freqLabel}: ${freqVal}</p>`);
+        <p>Frequency: ${freqVal}</p>`);
   }
 
 
