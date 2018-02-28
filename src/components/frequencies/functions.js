@@ -10,6 +10,11 @@ import { unassigned_label } from "../../actions/frequencies";
 /* C O N S T A N T S */
 const opacity = 0.85;
 
+export const areListsEqual = (a, b) => {
+  if (a.length !== b.length) return false;
+  return !a.filter((el, idx) => el !== b[idx]).length;
+};
+
 export const parseColorBy = (colorBy, colorOptions) => {
   if (colorOptions[colorBy]) {
     return colorOptions[colorBy].legendTitle;
@@ -45,28 +50,39 @@ const getOrderedCategories = (matrixCategories, colorScale) => {
   return orderedCategories;
 };
 
-export const calcScales = (chartGeom, ticks) => {
+export const calcXScale = (chartGeom, ticks) => {
   const x = scaleLinear()
     .domain([ticks[0], ticks[ticks.length - 1]])
     .range([chartGeom.spaceLeft, chartGeom.width - chartGeom.spaceRight]);
+  return {x, numTicksX: ticks.length};
+};
+
+export const calcYScale = (chartGeom, maxY) => {
   const y = scaleLinear()
-    .domain([0, 1])
+    .domain([0, maxY])
     .range([chartGeom.height - chartGeom.spaceBottom, chartGeom.spaceTop]);
-  return {x, y, numTicksX: ticks.length, numTicksY: 5};
+  return {y, numTicksY: 5};
 };
 
-export const removeAxis = (svg) => {
-  svg.selectAll(".axis").remove();
+const removeXAxis = (svg) => {
+  svg.selectAll(".x.axis").remove();
 };
 
-export const drawAxis = (svg, chartGeom, scales) => {
-  /* no idea why I need to add 15 to some of these translations... */
+const removeYAxis = (svg) => {
+  svg.selectAll(".y.axis").remove();
+};
+
+export const drawXAxis = (svg, chartGeom, scales) => {
+  removeXAxis(svg);
   svg.append("g")
     .attr("class", "x axis")
     .attr("transform", `translate(0,${chartGeom.height - chartGeom.spaceBottom})`)
     .style("font-family", dataFont)
     .style("font-size", "12px")
     .call(axisBottom(scales.x).ticks(scales.numTicksX, ".1f"));
+};
+export const drawYAxis = (svg, chartGeom, scales) => {
+  removeYAxis(svg);
   svg.append("g")
     .attr("class", "y axis")
     .attr("transform", `translate(${chartGeom.spaceLeft},0)`)
@@ -177,13 +193,23 @@ const drawLabelsOverStream = (svgStreamGroup, series, pivots, labels, scales) =>
     .text((d, i) => xyPos[i][0] ? prettyString(d) : "");
 };
 
-export const drawStream = (svgStreamGroup, scales, {matrix, colorBy, colorScale, colorOptions, pivots, normalised}) => {
-  removeStream(svgStreamGroup);
+const calcNiceMaxYValue = (series) => {
+  const max = series[series.length - 1].reduce((curMax, el) => Math.max(curMax, el[1]), 0);
+  return Math.ceil(max * 20) / 20;
+};
 
+export const processMatrix = ({matrix, pivots, colorScale}) => {
   const categories = getOrderedCategories(Object.keys(matrix), colorScale);
   const series = turnMatrixIntoSeries(categories, pivots.length, matrix);
-  const colourer = generateColorScaleD3(categories, colorScale);
+  const maxY = calcNiceMaxYValue(series);
+  return {categories, series, maxY};
+};
 
+export const drawStream = (
+  svgStreamGroup, scales, {categories, series}, {colorBy, colorScale, colorOptions, pivots, normalised}
+) => {
+  removeStream(svgStreamGroup);
+  const colourer = generateColorScaleD3(categories, colorScale);
   const labels = getMeaningfulLabels(categories, colorScale);
 
   /* https://github.com/d3/d3-shape/blob/master/README.md#areas */
