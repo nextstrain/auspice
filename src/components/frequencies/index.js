@@ -2,26 +2,9 @@ import React from "react";
 import { select } from "d3-selection";
 import { connect } from "react-redux";
 import Card from "../framework/card";
-import { materialButton, materialButtonSelected } from "../../globalStyles";
-import { toggleNormalization } from "../../actions/frequencies";
 import { calcXScale, calcYScale, drawXAxis, drawYAxis, areListsEqual,
   drawStream, processMatrix, parseColorBy } from "./functions";
 import "../../css/entropy.css";
-
-const getStyles = (width) => {
-  return {
-    switchContainer: {
-      position: "absolute",
-      marginTop: -20,
-      paddingLeft: width - 300
-    },
-    switchTitle: {
-      margin: 5,
-      position: "relative",
-      top: -1
-    }
-  };
-};
 
 @connect((state) => {
   return {
@@ -30,7 +13,6 @@ const getStyles = (width) => {
     ticks: state.frequencies.ticks,
     matrix: state.frequencies.matrix,
     version: state.frequencies.version,
-    normaliseData: state.frequencies.normaliseData,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorBy: state.controls.colorBy,
     colorScale: state.controls.colorScale,
@@ -109,32 +91,9 @@ export class Frequencies extends React.Component {
       this.setState(newState);
     }
   }
-  normalizationSwitch(svgWidth) {
-    const styles = getStyles(svgWidth);
-    const onClick = () => this.props.dispatch(toggleNormalization);
-    return (
-      <div style={styles.switchContainer}>
-        <button
-          key={1}
-          style={this.props.normaliseData ? materialButton : materialButtonSelected}
-          onClick={onClick}
-        >
-          <span style={styles.switchTitle}> {"raw data"} </span>
-        </button>
-        <button
-          key={2}
-          style={this.props.normaliseData ? materialButtonSelected : materialButton}
-          onClick={onClick}
-        >
-          <span style={styles.switchTitle}> {"normalised data"} </span>
-        </button>
-      </div>
-    );
-  }
   render() {
     return (
       <Card title={`Frequencies (coloured by ${parseColorBy(this.props.colorBy, this.props.colorOptions)})`}>
-        {this.normalizationSwitch(this.props.width)}
         <div
           id="freqinfo"
           style={{
