@@ -1,7 +1,12 @@
+* Bug fix where tip colours reverted to their initial colours after a layout change. [issue 519](https://github.com/nextstrain/auspice/issues/519)
+
 ## version 1.14.2 - 2018/02/28
+* [PR 518](https://github.com/nextstrain/auspice/pull/518)
+    * Frequency y-axis is now dynamic
+    * Frequency text box is more readable
+    * Frequency normalisation has been removed
 
 ## version 1.14.1 - 2018/02/27
-
 * Style tip stroke separately from branch stroke (`node.stroke` replaced with `node.branchStroke` & `node.tipStroke`)
 
 ## version 1.14.0 - 2018/02/27
