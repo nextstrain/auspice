@@ -1,25 +1,26 @@
 
-const genPosParser = (gt) => {
-  if (gt.length === 1) {
-    return ["nuc", +gt[0] - 1];
+/* genotype string examples: gt-nuc_142  gt-nuc_142,144 gt-HA1_144,142
+ * gt-HA1_144-HA2-50
+ */
+export const parseEncodedGenotype = (colorBy, geneLength) => {
+  const parts = colorBy.slice(3).split('-');
+  const ret = parts.map((part) => {
+    const gene = part.split('_')[0];
+    if (!geneLength[gene]) return false;
+    const positions = part.split('_')[1].split(',')
+      .map((x) => parseInt(x, 10))
+      .filter((x) => x > 0 && x < geneLength[gene]);
+    if (!positions.length) return false;
+    return {
+      aa: gene !== 'nuc',
+      prot: gene === 'nuc' ? false : gene,
+      positions
+    };
+  }).filter((x) => x !== false);
+  /* check that we don't have both aa & nuc parts */
+  if (colorBy.indexOf("nuc") !== -1 && ret.length !== 1) {
+    console.error("Can't specify both nuc & aa genotypes.");
   }
-  return [gt[0], +gt[1] - 1];
-};
-
-/* this function should be replaced by parseEncodedGenotype in entropy.js (or vice versa)
-any modifications here must be replicated there */
-export const parseGenotype = (colorBy, geneLength) => {
-  const gt = colorBy.split("-");
-  if (gt.length === 2) { /* currently we only allow 1 genotype to be selected */
-    const positions = gt[1].split(";");
-    const gene_pos = positions.map((d) => genPosParser(d.split("_")));
-    const valid_pos = gene_pos.filter((d) => (geneLength[d[0]]
-                                              && d[1].toString().length
-                                              && /^[0-9]+$/.test(d[1])
-                                              && (+d[1] <= geneLength[d[0]])));
-    if (valid_pos.length) {
-      return valid_pos;
-    }
-  }
-  return null;
+  // console.log("parseEncodedGenotype:", colorBy, ret)
+  return ret;
 };

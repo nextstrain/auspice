@@ -6,7 +6,7 @@ import { zoom } from "d3-zoom";
 import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
-import { parseEncodedGenotype } from "./index";
+import { parseEncodedGenotype } from "../../util/getGenotype";
 
 /* EntropChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:
@@ -25,7 +25,9 @@ const EntropyChart = function EntropyChart(ref, annotations, geneMap, maxNt, cal
 EntropyChart.prototype.render = function render(props) {
   this.aa = props.mutType === "aa";
   this.bars = props.bars;
-  this.selectedNode = props.colorBy.startsWith("gt") ? parseEncodedGenotype(props.colorBy) : undefined;
+  this.selectedNode = props.colorBy.startsWith("gt") ?
+    this._getSelectedNode(parseEncodedGenotype(props.colorBy, props.geneLength)) :
+    undefined;
   this.svg.selectAll("*").remove(); /* tear things down */
   this._calcOffsets(props.width, props.height);
   this._drawMainNavElements();
@@ -72,19 +74,24 @@ EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
 };
 
 EntropyChart.prototype._getSelectedNode = function _getSelectedNode(parsed) {
-  if (this.aa !== parsed.aa) {
+  if (parsed.length > 1 || parsed[0].positions.length > 1) {
+    console.warn("multiple genotypes not yet built into entropy. Using first only.");
+  }
+
+  if (this.aa !== parsed[0].aa) {
     console.error("entropy out of sync");
     return undefined;
   }
+  /* simply looking at the first position TODO */
   if (this.aa) {
     for (const node of this.bars) {
-      if (node.prot === parsed.prot && node.codon === parsed.codon) {
+      if (node.prot === parsed[0].prot && node.codon === parsed[0].positions[0]) {
         return node;
       }
     }
   } else {
     for (const node of this.bars) {
-      if (node.x === parsed.x) {
+      if (node.x === parsed[0].positions[0]) {
         return node;
       }
     }

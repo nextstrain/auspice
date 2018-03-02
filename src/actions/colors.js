@@ -1,4 +1,4 @@
-import { parseGenotype } from "../util/getGenotype";
+import { parseEncodedGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
 import { setGenotype } from "../util/setGenotype";
 import { calcNodeColor } from "../components/tree/treeHelpers";
@@ -11,9 +11,12 @@ import * as types from "./types";
 export const calcColorScaleAndNodeColors = (colorBy, controls, tree, metadata) => {
   let genotype;
   if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
-    const x = parseGenotype(colorBy, controls.geneLength);
-    setGenotype(tree.nodes, x[0][0], [x[0][1] + 1]); /* modifies nodes recursively */
-    genotype = parseGenotype(colorBy, controls.geneLength);
+    const x = parseEncodedGenotype(colorBy, controls.geneLength);
+    if (x.length > 1) {
+      console.warn("Cannot deal with multiple proteins yet - using first only.");
+    }
+    setGenotype(tree.nodes, x[0].prot, x[0].positions); /* modifies nodes recursively */
+    genotype = parseEncodedGenotype(colorBy, controls.geneLength);
   }
 
   /* step 1: calculate the required colour scale */
@@ -28,7 +31,6 @@ export const calcColorScaleAndNodeColors = (colorBy, controls, tree, metadata) =
 
 export const experimentalChangeColorBy = (gene, positions) => (dispatch, getState) => {
   const { controls, tree, metadata, frequencies } = getState();
-  console.log("EXP", controls.geneLength)
   const colorBy = `gt-${gene}_${positions.join(',')}`;
 
   /* this is the function calcColorScaleAndNodeColors */

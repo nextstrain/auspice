@@ -9,6 +9,7 @@ import InfoPanel from "./infoPanel";
 import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { timerStart, timerEnd } from "../../util/perf";
+import { parseEncodedGenotype } from "../../util/getGenotype";
 import "../../css/entropy.css";
 
 const getStyles = (width) => {
@@ -32,19 +33,10 @@ const getStyles = (width) => {
 };
 
 const constructEncodedGenotype = (aa, d) => {
+  // console.log("constructEncodedGenotype", aa, d)
+  // const gene = aa ? d.prot : "nuc";
+  // return `gt-${gene}_${d.positions.join(",")}`;
   return aa ? `gt-${d.prot}_${d.codon}` : `gt-nuc_${d.x}`;
-};
-
-export const parseEncodedGenotype = (colorBy) => {
-  const [name, num] = colorBy.slice(3).split('_');
-  const aa = name !== 'nuc';
-  const data = {aa, prot: aa ? name : false};
-  if (aa) {
-    data.codon = parseInt(num, 10);
-  } else {
-    data.x = parseInt(num, 10);
-  }
-  return data;
 };
 
 @connect((state) => {
@@ -191,7 +183,7 @@ export class Entropy extends React.Component {
         if (!nextProps.colorBy.startsWith("gt")) {
           updateParams.clearSelected = true;
         } else {
-          updateParams.selected = parseEncodedGenotype(nextProps.colorBy);
+          updateParams.selected = parseEncodedGenotype(nextProps.colorBy, nextProps.geneLength);
         }
       }
       if (Object.keys(updateParams).length) {
