@@ -25,9 +25,9 @@ const EntropyChart = function EntropyChart(ref, annotations, geneMap, maxNt, cal
 EntropyChart.prototype.render = function render(props) {
   this.aa = props.mutType === "aa";
   this.bars = props.bars;
-  this.selectedNode = props.colorBy.startsWith("gt") ?
-    this._getSelectedNode(parseEncodedGenotype(props.colorBy, props.geneLength)) :
-    undefined;
+  this.selectedNodes = props.colorBy.startsWith("gt") ?
+    this._getSelectedNodes(parseEncodedGenotype(props.colorBy, props.geneLength)) :
+    [];
   this.svg.selectAll("*").remove(); /* tear things down */
   this._calcOffsets(props.width, props.height);
   this._drawMainNavElements();
@@ -57,12 +57,11 @@ EntropyChart.prototype.update = function update({
     this._drawBars();
   }
   if (selected !== undefined) {
-    this.selectedNode = this._getSelectedNode(selected);
-    this._clearSelectedBar();
-    this._highlightSelectedBar();
+    this._clearSelectedBars();
+    this.selectedNodes = this._getSelectedNodes(selected);
+    this._highlightSelectedBars();
   } else if (clearSelected) {
-    this.selectedNode = undefined;
-    this._clearSelectedBar();
+    this._clearSelectedBars();
   }
 };
 
@@ -73,32 +72,36 @@ EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
   return this.geneMap[gene].start + aaPos * 3;
 };
 
-EntropyChart.prototype._getSelectedNode = function _getSelectedNode(parsed) {
-  if (parsed.length > 1 || parsed[0].positions.length > 1) {
-    console.warn("multiple genotypes not yet built into entropy. Using first only.");
-  }
-
+EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
   if (this.aa !== parsed[0].aa) {
     console.error("entropy out of sync");
     return undefined;
   }
-  /* simply looking at the first position TODO */
-  if (this.aa) {
-    for (const node of this.bars) {
-      if (node.prot === parsed[0].prot && node.codon === parsed[0].positions[0]) {
-        return node;
+  const selectedNodes = [];
+  if (this.aa) { /*     P  R  O  T  E  I  N  S    */
+    const genePosPairs = [];
+    for (const entry of parsed) {
+      for (const pos of entry.positions) {
+        genePosPairs.push([entry.prot, pos]);
       }
     }
-  } else {
     for (const node of this.bars) {
-      if (node.x === parsed[0].positions[0]) {
-        return node;
+      for (const pair of genePosPairs) {
+        if (node.prot === pair[0] && node.codon === pair[1]) {
+          selectedNodes.push(node);
+        }
+      }
+    }
+  } else { /*     N U C L E O T I D E S     */
+    for (const node of this.bars) {
+      if (parsed[0].positions.indexOf(node.x) !== -1) {
+        selectedNodes.push(node);
       }
     }
   }
   /* we fall through to here if the selected genotype (from URL or typed in)
   is not in the entropy data as it has no variation */
-  return undefined;
+  return selectedNodes;
 };
 
 /* draw the genes (annotations) */
@@ -129,39 +132,24 @@ EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
 };
 
 /* clearSelectedBar works on SVG id tags, not on this.selected */
-EntropyChart.prototype._clearSelectedBar = function _clearSelectedBar() {
-  if (this.aa) {
-    select("#entropySelected")
-      .attr("id", (node) => node.prot + node.codon)
-      .style("fill", (node) => this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey);
-  } else {
-    select("#entropySelected")
-      .attr("id", (node) => "nt" + node.x)
-      .style("fill", (node) => {
-        if (node.prot) {
-          return (this.geneMap[node.prot].idx % 2) ? medGrey : darkGrey;
-        }
-        return lightGrey;
-      });
+EntropyChart.prototype._clearSelectedBars = function _clearSelectedBars() {
+  for (const d of this.selectedNodes) {
+    const id = this.aa ? `#${d.prot}${d.codon}` : `#nt${d.x}`;
+    const fillFn = this.aa ?
+      (node) => this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey :
+      (node) => !node.prot ? lightGrey : this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey;
+    select(id).style("fill", fillFn);
   }
+  this.selectedNodes = [];
 };
 
-EntropyChart.prototype._highlightSelectedBar = function _highlightSelectedBar() {
-  const d = this.selectedNode;
-  if (d === undefined) { return; }
-  if (this.aa) {
-    select("#" + d.prot + d.codon)
-      .attr("id", "entropySelected")
-      .style("fill", () => this.geneMap[d.prot].fill);
-  } else {
-    select("#nt" + d.x)
-      .attr("id", "entropySelected")
-      .style("fill", () => {
-        if (d.prot) {
-          return this.geneMap[d.prot].fill;
-        }
-        return "red";
-      });
+EntropyChart.prototype._highlightSelectedBars = function _highlightSelectedBars() {
+  for (const d of this.selectedNodes) {
+    const id = this.aa ? `#${d.prot}${d.codon}` : `#nt${d.x}`;
+    const fillVal = this.aa ?
+      this.geneMap[d.prot].fill :
+      d.prot ? this.geneMap[d.prot].fill : "red";
+    select(id).style("fill", fillVal);
   }
 };
 
@@ -208,7 +196,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
       this.callbacks.onClick(d);
     })
     .style("cursor", "pointer");
-  this._highlightSelectedBar();
+  this._highlightSelectedBars();
 };
 
 /* set scales - normally use this.scales.y, this.scales.xMain, this.scales.xNav */
