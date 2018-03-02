@@ -1,6 +1,6 @@
 
 export const setGenotype = (nodes, prot, positions) => {
-  console.time("setGenotype")
+  // console.time("setGenotype")
   const nPositions = positions.length;
   const ancState = positions.map(() => undefined);
   const ancNodes = positions.map(() => []);
@@ -45,6 +45,6 @@ export const setGenotype = (nodes, prot, positions) => {
     }
   }
   nodes.forEach((n) => {n.currentGt = n.currentGt.join(' / ');});
-  console.timeEnd("setGenotype")
+  // console.timeEnd("setGenotype")
   // console.log(`set ${ancNodes.length} nodes to the ancestral state: ${ancState}`)
 };

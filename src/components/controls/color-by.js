@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Select from "react-select";
 import { sidebarField } from "../../globalStyles";
 import { controlsWidth, colorByMenuPreferredOrdering } from "../../util/globals";
-import { changeColorBy, experimentalChangeColorBy } from "../../actions/colors";
+import { changeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
 /* the reason why we have colorBy as state (here) and in redux
@@ -102,20 +102,12 @@ class ColorBy extends React.Component {
   }
 
   gtPositionInput() {
-
-    // let value = "";
-    // if (this.props.colorBy) {
-    //   if (this.props.colorBy.slice(0, 2) === "gt") {
-    //     value = this.props.colorBy.slice(3);
-    //   }
-    // }
-
     if (this.state.colorBySelected === "gt") {
       return (
         <input
           type="text"
           style={sidebarField}
-          placeholder={this.state.geneSelected + " position..."}
+          placeholder={this.state.geneSelected + " positions..."}
           value={this.state.positionSelected}
           onChange={(e) => {
             const gene = this.state.geneSelected;
@@ -136,20 +128,13 @@ class ColorBy extends React.Component {
   }
 
   setGenotypeColoring(gene, position) {
-    // check if this is any sort of integer
     if (!position) return;
-    if (position && !this.isNormalInteger(position)) {
-      console.log("INSIDE")
-      this.props.dispatch(experimentalChangeColorBy(
-        gene, position.split(',').map((x) => parseInt(x, 10)).filter((n) => !isNaN(parseFloat(n)) && isFinite(n))
-      ));
-      return;
-    }
-    // check if integer is in range
-    if (parseInt(position, 10) < 1 || parseInt(position, 10) > this.props.geneLength[gene]) {
-      return;
-    }
-    const colorBy = "gt-" + gene + "_" + position;
+    const positions = position.split(',').filter((x) =>
+      parseInt(x, 10) > 0 && parseInt(x, 10) < this.props.geneLength[gene]
+    );
+    if (!positions.length) return;
+    const colorBy = "gt-" + gene + "_" + positions.join(',');
+    // console.log("setting to", colorBy)
     analyticsControlsEvent("color-by-genotype");
     this.props.dispatch(changeColorBy(colorBy));
   }
