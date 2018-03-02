@@ -32,7 +32,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   this.nodes.forEach((d, i) => {
     d.branchStroke = branchStroke[i];
     d.tipStroke = tipStroke[i];
-    d.tipFill = tipFill[i];
+    d.fill = tipFill[i];
     d.visibility = visibility[i];
     d["stroke-width"] = branchThickness[i];
     d.r = tipRadii ? tipRadii[i] : this.params.tipRadius;
@@ -107,7 +107,7 @@ export const drawTips = function drawTips() {
     .on("click", (d) => this.callbacks.onTipClick(d))
     .style("pointer-events", "auto")
     .style("visibility", (d) => d["visibility"])
-    .style("fill", (d) => d.tipFill || params.tipFill)
+    .style("fill", (d) => d.fill || params.tipFill)
     .style("stroke", (d) => d.tipStroke || params.tipStroke)
     .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
     .style("cursor", "pointer");
