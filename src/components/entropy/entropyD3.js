@@ -101,6 +101,7 @@ EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
   }
   /* we fall through to here if the selected genotype (from URL or typed in)
   is not in the entropy data as it has no variation */
+  // console.log("get selected nodes returning", selectedNodes)
   return selectedNodes;
 };
 

@@ -134,7 +134,7 @@ class ColorBy extends React.Component {
     );
     if (!positions.length) return;
     const colorBy = "gt-" + gene + "_" + positions.join(',');
-    // console.log("setting to", colorBy)
+    console.log("setting to", colorBy)
     analyticsControlsEvent("color-by-genotype");
     this.props.dispatch(changeColorBy(colorBy));
   }

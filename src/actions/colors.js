@@ -15,7 +15,7 @@ export const calcColorScaleAndNodeColors = (colorBy, controls, tree, metadata) =
     if (genotype.length > 1) {
       console.warn("Cannot deal with multiple proteins yet - using first only.");
     }
-    setGenotype(tree.nodes, genotype[0].prot, genotype[0].positions); /* modifies nodes recursively */
+    setGenotype(tree.nodes, genotype[0].prot || "nuc", genotype[0].positions); /* modifies nodes recursively */
   }
 
   /* step 1: calculate the required colour scale */
@@ -44,7 +44,9 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
     const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(colorBy, controls, tree, metadata);
 
     /* step 3: change in mutType? */
-    const newMutType = determineColorByGenotypeType(colorBy) !== controls.mutType ? determineColorByGenotypeType(colorBy) : false;
+    const colorByMutType = determineColorByGenotypeType(colorBy);
+    const newMutType = colorByMutType !== controls.mutType ? colorByMutType : false;
+
     timerEnd("changeColorBy calculations"); /* end timer before dispatch */
     if (newMutType) {
       updateEntropyVisibility(dispatch, getState);

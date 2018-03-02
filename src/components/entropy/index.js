@@ -171,7 +171,7 @@ export class Entropy extends React.Component {
       timerStart("entropy initial render");
       this.state.chart.render(nextProps);
       timerEnd("entropy initial render");
-    } else { /* props changed, but a new render isn't required */
+    } else { /* props changed, but a new render probably isn't required */
       timerStart("entropy D3 update");
       const updateParams = {};
       if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
