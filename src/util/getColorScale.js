@@ -129,6 +129,7 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absolut
     } else if (parseGenotype(colorBy, geneLength)) {
       // genotype coloring
       const gt = parseGenotype(colorBy, geneLength);
+      console.log("gentoype coloring", gt)
       if (gt) {
         const stateCount = {};
         tree.nodes.forEach((n) => {
@@ -138,6 +139,18 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absolut
         domain.sort((a, b) => stateCount[a] > stateCount[b]);
         colorScale = scaleOrdinal().domain(domain).range(genotypeColors);
       }
+    } else {
+      console.log("bugger", colorBy, geneLength, parseGenotype(colorBy, geneLength));
+      const positions = colorBy.split('_')[1].split(',').map((x) => parseInt(x, 10));
+      const gene = colorBy.split('-')[1].split('_')[0];
+      const stateCount = {};
+      tree.nodes.forEach((n) => {
+        stateCount[n.currentGt] ? stateCount[n.currentGt]++ : stateCount[n.currentGt] = 1;
+      });
+      console.log("statecounts:", stateCount);
+      const domain = Object.keys(stateCount);
+      domain.sort((a, b) => stateCount[a] > stateCount[b]);
+      colorScale = scaleOrdinal().domain(domain).range(genotypeColors);
     }
   } else if (colorBy === "lbi") {
     try {

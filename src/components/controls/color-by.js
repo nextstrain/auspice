@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Select from "react-select";
 import { sidebarField } from "../../globalStyles";
 import { controlsWidth, colorByMenuPreferredOrdering } from "../../util/globals";
-import { changeColorBy } from "../../actions/colors";
+import { changeColorBy, experimentalChangeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 
 /* the reason why we have colorBy as state (here) and in redux
@@ -120,6 +120,7 @@ class ColorBy extends React.Component {
           onChange={(e) => {
             const gene = this.state.geneSelected;
             const position = e.target.value;
+            console.log("gtPositionInput -> ", gene, position);
             this.setState({positionSelected: position});
             this.setGenotypeColoring(gene, position);
           }}
@@ -136,7 +137,12 @@ class ColorBy extends React.Component {
 
   setGenotypeColoring(gene, position) {
     // check if this is any sort of integer
-    if (!this.isNormalInteger(position)) {
+    if (!position) return;
+    if (position && !this.isNormalInteger(position)) {
+      console.log("INSIDE")
+      this.props.dispatch(experimentalChangeColorBy(
+        gene, position.split(',').map((x) => parseInt(x, 10)).filter((n) => !isNaN(parseFloat(n)) && isFinite(n))
+      ));
       return;
     }
     // check if integer is in range
