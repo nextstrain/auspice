@@ -14,7 +14,6 @@ const treeToo = (state = getDefaultTreeState(), action) => {
 	loaded: false
       });
     case types.TREE_TOO_DATA:
-      console.log("TREE_TOO_DATA:", action.treeTooState)
       return action.treeTooState;
     // case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     // case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:

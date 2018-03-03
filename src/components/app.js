@@ -9,7 +9,7 @@ import { Frequencies } from "./frequencies";
 import { Entropy } from "./entropy";
 import Map from "./map/map";
 import Info from "./info/info";
-import Tree from "./tree";
+import { Tree, TreeToo } from "./tree";
 import { controlsHiddenWidth, controlsWidth, controlsPadding } from "../util/globals";
 import { sidebarColor } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
@@ -58,16 +58,26 @@ const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels,
   const big = computeResponsive({horizontal: bigWidthFraction, vertical: bigHeightFraction, availableWidth, availableHeight});
   const chart = computeResponsive({horizontal: chartWidthFraction, vertical: chartHeightFraction, availableWidth, availableHeight, minHeight: 150});
 
+  /* TODO */
   return (
     <div style={styles}>
-      {narrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
-      {show("tree") ? <Tree width={big.width} height={big.height} /> : null}
-      {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
-      {show("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
-      {show("frequencies") && frequenciesLoaded ? <Frequencies width={chart.width} height={chart.height} /> : null}
-      {narrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
+      <Info width={calcUsableWidth(availableWidth, 1)} />
+      <Tree width={big.width} height={big.height} />
+      <TreeToo width={big.width} height={big.height} orientation={[-1, 1]}/>
+      <Footer width={calcUsableWidth(availableWidth, 1)} />
     </div>
   );
+
+  // return (
+  //   <div style={styles}>
+  //     {narrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
+  //     {show("tree") ? <Tree width={big.width} height={big.height} /> : null}
+  //     {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
+  //     {show("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
+  //     {show("frequencies") && frequenciesLoaded ? <Frequencies width={chart.width} height={chart.height} /> : null}
+  //     {narrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
+  //   </div>
+  // );
 };
 
 const Sidebar = ({show, narrative, styles}) => {
