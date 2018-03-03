@@ -6,7 +6,7 @@ import { getManifest } from "../util/clientAPIInterface";
 import { getNarrative } from "../util/getMarkdown";
 import { changePage } from "./navigation";
 import { processFrequenciesJSON } from "./frequencies";
-import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
+import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 
 export const loadJSONs = (s3override = undefined) => {
   return (dispatch, getState) => {
@@ -81,7 +81,10 @@ export const loadTreeToo = (name, path) => (dispatch, getState) => {
   fetch(apiCall)
     .then((res) => res.json())
     .then((res) => {
-      console.log("JSON BACK!", res)
+      const treeTooState = createTreeTooState(
+	{treeTooJSON: res, oldState: getState()}
+      );
+      dispatch({ type: types.TREE_TOO_DATA, treeTooState });
     })
     .catch((err) => {
       console.error("Error while loading second tree", err);

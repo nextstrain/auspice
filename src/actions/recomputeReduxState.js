@@ -390,3 +390,56 @@ export const createStateFromQueryOrJSONs = ({
   return {tree, metadata, entropy, controls};
 
 };
+
+
+export const createTreeTooState = ({
+  treeTooJSON, /* raw json data */
+  oldState
+}) => {
+  /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
+  /* TODO: reconcile query with visibility etc */
+  const controls = oldState.controls;
+  /* new tree state */
+  appendParentsToTree(treeTooJSON);
+  const nodesArray = flattenTree(treeTooJSON);
+  const nodes = processNodes(nodesArray);
+  // const vaccines = processVaccines(nodes, JSONs.meta.vaccine_choices);
+  const vaccines = [...oldState.tree.vaccines];
+  const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
+  let treeToo = Object.assign({}, getDefaultTreeState(), {
+    nodes,
+    vaccines,
+    availableBranchLabels,
+    attrs: getAttrsOnTerminalNodes(nodes),
+    loaded: true
+  });
+
+  /* calculate new branch thicknesses & visibility */
+  let tipSelectedIdx = 0; // eslint-disable-line
+  let validIdxRoot = 0; // eslint-disable-line
+  const visAndThicknessData = calculateVisiblityAndBranchThickness(
+    treeToo,
+    controls,
+    {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
+    {tipSelectedIdx, validIdxRoot}
+  );
+  visAndThicknessData.stateCountAttrs = Object.keys(controls.filters);
+  treeToo = Object.assign({}, treeToo, visAndThicknessData);
+  treeToo.visibleStateCounts = getValuesAndCountsOfVisibleTraitsFromTree(treeToo.nodes, treeToo.visibility, treeToo.stateCountAttrs);
+  /* potentially VVVV only needs to run if using JSONs */
+  treeToo.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(treeToo.nodes, treeToo.stateCountAttrs);
+
+  /* calculate colours if loading from JSONs or if the query demands change */
+  const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(controls.colorBy, controls, treeToo, oldState.metadata);
+  controls.colorScale = colorScale;
+  controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
+  treeToo.nodeColorsVersion = version;
+  treeToo.nodeColors = nodeColors;
+
+  // if (tipSelectedIdx) { /* i.e. query.s was set */
+  //   tree.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controls.colorScale, tree});
+  //   tree.tipRadiiVersion = 1;
+  // }
+
+  return treeToo;
+};
