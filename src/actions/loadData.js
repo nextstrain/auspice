@@ -73,3 +73,17 @@ export const changeS3Bucket = () => {
     dispatch(loadJSONs(newBucket));
   };
 };
+
+export const loadTreeToo = (name, path) => (dispatch, getState) => {
+  const { datasets } = getState();
+  const apiCall = `${charonAPIAddress}request=json&path=${path}_tree.json&s3=${datasets.s3bucket}`;
+  console.log("request to load treeToo", name, path, apiCall);
+  fetch(apiCall)
+    .then((res) => res.json())
+    .then((res) => {
+      console.log("JSON BACK!", res)
+    })
+    .catch((err) => {
+      console.error("Error while loading second tree", err);
+    });
+};
