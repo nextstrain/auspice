@@ -175,7 +175,6 @@ class Tree extends React.Component {
 	    <g
 	      width={this.props.width}
 	      height={this.props.height}
-	      id={"d3TreeElement"}
 	      style={{cursor: "default"}}
 	      ref={(c) => {this.d3ref = c;}}
 	    />

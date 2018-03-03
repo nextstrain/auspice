@@ -8,6 +8,7 @@ import Controls from "./controls/controls";
 import { Frequencies } from "./frequencies";
 import { Entropy } from "./entropy";
 import Map from "./map/map";
+import Tangle from "./tree/tangle";
 import Info from "./info/info";
 import { Tree, TreeToo } from "./tree";
 import { controlsHiddenWidth, controlsWidth, controlsPadding } from "../util/globals";
@@ -64,7 +65,7 @@ const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels,
       <Info width={calcUsableWidth(availableWidth, 1)} />
       <Tree width={big.width} height={big.height} />
       <TreeToo width={big.width} height={big.height} orientation={[-1, 1]}/>
-      <Footer width={calcUsableWidth(availableWidth, 1)} />
+      <Tangle/>
     </div>
   );
 
