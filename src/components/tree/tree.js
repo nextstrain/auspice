@@ -10,6 +10,7 @@ import { changePhyloTreeViaPropsComparison } from "./reactD3Interface/change";
 import * as callbacks from "./reactD3Interface/callbacks";
 import { resetTreeButtonStyle } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
+import Tangle from "./tangle";
 
 class Tree extends React.Component {
   constructor(props) {
@@ -32,6 +33,11 @@ class Tree extends React.Component {
       this.state.tree.clearSVG();
       this.Viewer.fitToViewer();
       renderTree(this, true, this.state.tree, this.props);
+      if (this.props.showTreeToo) {
+        this.state.treeToo.clearSVG();
+        this.ViewerToo.fitToViewer();
+        renderTree(this, false, this.state.treeToo, this.props);
+      }
       this.setState({hover: null, selectedBranch: null, selectedTip: null});
       this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0}));
     };
@@ -42,7 +48,7 @@ class Tree extends React.Component {
       window.tree = tree;
       renderTree(this, true, tree, this.props);
       if (this.Viewer) {
-	this.Viewer.fitToViewer();
+        this.Viewer.fitToViewer();
       }
       this.setState({tree});
     }
@@ -62,7 +68,7 @@ class Tree extends React.Component {
     } else {
       const newState = changePhyloTreeViaPropsComparison(true, this.state, this.props, nextProps);
       if (this.state.treeToo) {
-	changePhyloTreeViaPropsComparison(false, this.state, this.props, nextProps);
+        changePhyloTreeViaPropsComparison(false, this.state, this.props, nextProps);
       }
       if (newState) this.setState(newState);
     }
@@ -88,30 +94,30 @@ class Tree extends React.Component {
   renderTreeDiv({width, height, d3ref, viewerRef}) {
     return (
       <ReactSVGPanZoom
-	width={width}
-	height={height}
-	ref={(Viewer) => {this[viewerRef] = Viewer;}}
-	style={{cursor: "default"}}
-	tool={'pan'}
-	detectWheel={false}
-	toolbarPosition={"none"}
-	detectAutoPan={false}
-	background={"#FFF"}
-	miniaturePosition={"none"}
-	onDoubleClick={this.resetView}
-	onChangeValue={this.onViewerChange}
+        width={width}
+        height={height}
+        ref={(Viewer) => {this[viewerRef] = Viewer;}}
+        style={{cursor: "default"}}
+        tool={'pan'}
+        detectWheel={false}
+        toolbarPosition={"none"}
+        detectAutoPan={false}
+        background={"#FFF"}
+        miniaturePosition={"none"}
+        onDoubleClick={this.resetView}
+        onChangeValue={this.onViewerChange}
       >
-	<svg style={{pointerEvents: "auto"}}
-	  width={width}
-	  height={height}
-	>
-	  <g
-	    width={width}
-	    height={height}
-	    style={{cursor: "default"}}
-	    ref={(c) => {this[d3ref] = c;}}
-	  />
-	</svg>
+        <svg style={{pointerEvents: "auto"}}
+          width={width}
+          height={height}
+        >
+          <g
+            width={width}
+            height={height}
+            style={{cursor: "default"}}
+            ref={(c) => {this[d3ref] = c;}}
+          />
+        </svg>
       </ReactSVGPanZoom>
     );
   }
@@ -121,35 +127,48 @@ class Tree extends React.Component {
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
       <Card center title={"Phylogeny"}>
-	<Legend width={this.props.width}/>
-	<HoverInfoPanel
-	  tree={this.state.tree}
-	  mutType={this.props.mutType}
-	  temporalConfidence={this.props.temporalConfidence.display}
-	  distanceMeasure={this.props.distanceMeasure}
-	  hovered={this.state.hovered}
-	  viewer={this.Viewer}
-	  colorBy={this.props.colorBy}
-	  colorByConfidence={this.props.colorByConfidence}
-	  colorScale={this.props.colorScale}
-	/>
-	<TipClickedPanel
-	  goAwayCallback={this.clearSelectedTip}
-	  tip={this.state.selectedTip}
-	  metadata={this.props.metadata}
-	/>
-	{this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3ref", viewerRef: "Viewer"})}
-	{this.props.showTreeToo ? <div style={{width: spaceBetweenTrees}}/> : null}
-	{this.props.showTreeToo ?
-	  this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3refToo", viewerRef: "ViewerToo"}) :
-	  null
-	}
-	<button
-	  style={resetTreeButtonStyle}
-	  onClick={this.redrawTree}
-	>
-	  reset layout
-	</button>
+        <Legend width={this.props.width}/>
+        <HoverInfoPanel
+          tree={this.state.tree}
+          mutType={this.props.mutType}
+          temporalConfidence={this.props.temporalConfidence.display}
+          distanceMeasure={this.props.distanceMeasure}
+          hovered={this.state.hovered}
+          viewer={this.Viewer}
+          colorBy={this.props.colorBy}
+          colorByConfidence={this.props.colorByConfidence}
+          colorScale={this.props.colorScale}
+        />
+        <TipClickedPanel
+          goAwayCallback={this.clearSelectedTip}
+          tip={this.state.selectedTip}
+          metadata={this.props.metadata}
+        />
+        {this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3ref", viewerRef: "Viewer"})}
+        {this.props.showTreeToo ? <div style={{width: spaceBetweenTrees}}/> : null}
+        {this.props.showTreeToo ?
+          this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3refToo", viewerRef: "ViewerToo"}) :
+          null
+        }
+        {this.props.showTreeToo ? (
+          <Tangle
+            width={this.props.width}
+            height={this.props.height}
+            lookup={this.props.treeToo.tangleTipLookup}
+            leftNodes={this.props.tree.nodes}
+            rightNodes={this.props.treeToo.nodes}
+            colors={this.props.tree.nodeColors}
+            cVersion={this.props.tree.nodeColorsVersion}
+            vVersion={this.props.tree.visibilityVersion}
+            spaceBetweenTrees={spaceBetweenTrees}
+          />
+        ) : null }
+        <button
+          style={resetTreeButtonStyle}
+          onClick={this.redrawTree}
+        >
+          reset layout
+        </button>
       </Card>
     );
   }
