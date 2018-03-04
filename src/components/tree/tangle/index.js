@@ -1,3 +1,4 @@
+/* eslint-disable space-infix-ops */
 import React from "react";
 import { select } from "d3-selection";
 
@@ -19,7 +20,8 @@ class Tangle extends React.Component {
       const tip2 = props.rightNodes[idxs[1]].shell;
       // console.log("tip1:", tip1.xTip, tip1.yTip)
       // console.log("tip2:", tip2.xTip, tip2.yTip)
-      return `M ${tip1.xTip},${tip1.yTip} L ${(props.width + props.spaceBetweenTrees) / 2 + tip2.xTip},${tip2.yTip}`;
+      // return `M ${tip1.xTip},${tip1.yTip} L ${(props.width + props.spaceBetweenTrees) / 2 + tip2.xTip},${tip2.yTip}`;
+      return `M ${tip1.xTip},${tip1.yTip} H ${props.width/2 - props.spaceBetweenTrees/2} L ${props.width/2 + props.spaceBetweenTrees/2},${tip2.yTip} H ${props.width/2 + props.spaceBetweenTrees/2 + tip2.xTip}`;
     };
     select(this.d3ref)
       .append("g")
@@ -30,7 +32,8 @@ class Tangle extends React.Component {
       .attr("class", "tangleLine")
       .attr("d", makeD)
       .attr("stroke-width", 0.25)
-      .attr("stroke", (idxs) => props.colors[idxs[0]]);
+      .attr("stroke", (idxs) => props.colors[idxs[0]])
+      .attr("fill", 'none');
   }
   transitionColors(newColors) {
     select(this.d3ref).selectAll(".tangleLine")
@@ -62,7 +65,7 @@ class Tangle extends React.Component {
   render() {
     console.log("tangle render");
     return (
-      <div style={{position: "absolute", left: this.state.left, top: this.state.top, zIndex: 1000, pointerEvents: "none"}}>
+      <div style={{position: "absolute", left: this.state.left, top: this.state.top, zIndex: 100, pointerEvents: "none"}}>
         <svg
           style={{cursor: "default", width: this.props.width, height: this.props.height}}
           ref={(c) => {this.d3ref = c;}}
