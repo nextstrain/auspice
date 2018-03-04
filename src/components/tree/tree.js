@@ -1,7 +1,4 @@
 import React from "react";
-import PropTypes from 'prop-types';
-import { select } from "d3-selection";
-import { rgb } from "d3-color";
 import { ReactSVGPanZoom } from "react-svg-pan-zoom";
 import { updateVisibleTipsAndBranchThicknesses } from "../../actions/treeProperties";
 import Card from "../framework/card";
@@ -9,28 +6,10 @@ import Legend from "./legend/legend";
 import PhyloTree from "./phyloTree/phyloTree";
 import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
-import { changePhyloTreeViaPropsComparison } from "./reactD3Interface";
+import { changePhyloTreeViaPropsComparison } from "./reactD3Interface/change";
 import * as callbacks from "./reactD3Interface/callbacks";
-import { calcBranchStrokeCols } from "./treeHelpers";
-import { darkGrey, dataFont } from "../../globalStyles";
-
-const resetTreeButtonStyle = {
-  fontWeight: 700,
-  borderRadius: 4,
-  paddingTop: 2,
-  paddingBottom: 4,
-  paddingLeft: 10,
-  paddingRight: 10,
-  border: "none",
-  zIndex: 100,
-  position: "absolute",
-  right: 5,
-  top: 10,
-  backgroundColor: "rgb(230, 230, 230)",
-  color: darkGrey,
-  fontFamily: dataFont,
-  fontSize: 14
-};
+import { resetTreeButtonStyle } from "../../globalStyles";
+import { renderTree } from "./reactD3Interface/initialRender";
 
 class Tree extends React.Component {
   constructor(props) {
@@ -41,7 +20,8 @@ class Tree extends React.Component {
       hover: null,
       selectedBranch: null,
       selectedTip: null,
-      tree: null
+      tree: null,
+      treeToo: null
     };
     /* bind callbacks */
     this.clearSelectedTip = callbacks.clearSelectedTip.bind(this);
@@ -51,18 +31,16 @@ class Tree extends React.Component {
     this.redrawTree = () => {
       this.state.tree.clearSVG();
       this.Viewer.fitToViewer();
-      this.renderTree(this.state.tree, this.props);
+      renderTree(this, true, this.state.tree, this.props);
       this.setState({hover: null, selectedBranch: null, selectedTip: null});
       this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0}));
     };
   }
-  static propTypes = {
-    mutType: PropTypes.string.isRequired
-  }
   componentDidMount() {
     if (this.props.tree.loaded) {
-      const tree = new PhyloTree(this.props.tree.nodes);
-      this.renderTree(tree, this.props);
+      const tree = new PhyloTree(this.props.tree.nodes, "LEFT");
+      window.tree = tree;
+      renderTree(this, true, tree, this.props);
       if (this.Viewer) {
 	this.Viewer.fitToViewer();
       }
@@ -72,66 +50,75 @@ class Tree extends React.Component {
   /* CWRP has two tasks: (1) create the tree when it's in redux
   (2) compare props and call phylotree.change() appropritately */
   componentWillReceiveProps(nextProps) {
-    let tree = this.state.tree;
     if (!nextProps.tree.loaded) {
-      this.setState({tree: null});
-    } else if (!tree && nextProps.tree.loaded) {
-      tree = new PhyloTree(nextProps.tree.nodes);
-      this.renderTree(tree, nextProps);
+      this.setState({tree: null, treeToo: null});
+      return;
+    }
+    if (!this.state.tree && nextProps.tree.loaded) {
+      const tree = new PhyloTree(nextProps.tree.nodes, "LEFT");
+      renderTree(this, true, tree, nextProps);
+      this.Viewer.fitToViewer();
       this.setState({tree});
-      if (this.Viewer) {
-	this.Viewer.fitToViewer();
+    } else {
+      const newState = changePhyloTreeViaPropsComparison(true, this.state, this.props, nextProps);
+      if (this.state.treeToo) {
+	changePhyloTreeViaPropsComparison(false, this.state, this.props, nextProps);
       }
-    } else if (tree) {
-      changePhyloTreeViaPropsComparison(this, nextProps);
+      if (newState) this.setState(newState);
     }
   }
 
   /* CDU is used to update phylotree when the SVG size _has_ changed (and this is why it's in CDU not CWRP) */
   componentDidUpdate(prevProps) {
-    if ( // the tree exists AND the width has changed (browser resize, sidebar open/close...)
-      this.state.tree &&
-      (this.props.width !== prevProps.width || this.props.height !== prevProps.height)
-    ) {
+    if (!prevProps.showTreeToo && this.props.showTreeToo) {
+      const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
+      renderTree(this, false, treeToo, this.props);
+      this.ViewerToo.fitToViewer();
+      this.state.tree.change({svgHasChangedDimensions: true}); /* the main tree */
+      this.setState({treeToo}); // eslint-disable-line
+      window.treeToo = treeToo;
+      return;
+    }
+    const browserResize = this.props.width !== prevProps.width || this.props.height !== prevProps.height;
+    if (this.state.tree && browserResize) {
       this.state.tree.change({svgHasChangedDimensions: true});
+      if (this.props.showTreeToo) this.state.treeToo.change({svgHasChangedDimensions: true});
     }
   }
-  renderTree(tree, props) {
-    /* simply the call to phylotree.render */
-    tree.render(
-      select(this.d3ref),
-      props.layout,
-      props.distanceMeasure,
-      { /* parameters (modifies PhyloTree's defaults) */
-	grid: true,
-	confidence: props.temporalConfidence.display,
-	branchLabelKey: props.selectedBranchLabel,
-	orientation: props.orientation || [1, 1],
-	tipLabels: true,
-	showTipLabels: true
-      },
-      { /* callbacks */
-	onTipHover: callbacks.onTipHover.bind(this),
-	onTipClick: callbacks.onTipClick.bind(this),
-	onBranchHover: callbacks.onBranchHover.bind(this),
-	onBranchClick: callbacks.onBranchClick.bind(this),
-	onBranchLeave: callbacks.onBranchLeave.bind(this),
-	onTipLeave: callbacks.onTipLeave.bind(this),
-	tipLabel: (d) => d.n.strain,
-	tipLabelSize: callbacks.tipLabelSize.bind(this)
-      },
-      props.tree.branchThickness, /* guarenteed to be in redux by now */
-      props.tree.visibility,
-      props.temporalConfidence.on, /* drawConfidence? */
-      props.tree.vaccines,
-      calcBranchStrokeCols(props.tree, props.colorByConfidence, props.colorBy),
-      props.tree.nodeColors,
-      props.tree.nodeColors.map((col) => rgb(col).brighter([0.65]).toString()),
-      props.tree.tipRadii /* might be null */
+  renderTreeDiv({width, height, d3ref, viewerRef}) {
+    return (
+      <ReactSVGPanZoom
+	width={width}
+	height={height}
+	ref={(Viewer) => {this[viewerRef] = Viewer;}}
+	style={{cursor: "default"}}
+	tool={'pan'}
+	detectWheel={false}
+	toolbarPosition={"none"}
+	detectAutoPan={false}
+	background={"#FFF"}
+	miniaturePosition={"none"}
+	onDoubleClick={this.resetView}
+	onChangeValue={this.onViewerChange}
+      >
+	<svg style={{pointerEvents: "auto"}}
+	  width={width}
+	  height={height}
+	>
+	  <g
+	    width={width}
+	    height={height}
+	    style={{cursor: "default"}}
+	    ref={(c) => {this[d3ref] = c;}}
+	  />
+	</svg>
+      </ReactSVGPanZoom>
     );
   }
 
   render() {
+    const spaceBetweenTrees = 100;
+    const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
       <Card center title={"Phylogeny"}>
 	<Legend width={this.props.width}/>
@@ -151,35 +138,12 @@ class Tree extends React.Component {
 	  tip={this.state.selectedTip}
 	  metadata={this.props.metadata}
 	/>
-	<ReactSVGPanZoom
-	  width={this.props.width}
-	  height={this.props.height}
-	  ref={(Viewer) => {
-	    // https://facebook.github.io/react/docs/refs-and-the-dom.html
-	    this.Viewer = Viewer;
-	  }}
-	  style={{cursor: "default"}}
-	  tool={'pan'}
-	  detectWheel={false}
-	  toolbarPosition={"none"}
-	  detectAutoPan={false}
-	  background={"#FFF"}
-	  miniaturePosition={"none"}
-	  onDoubleClick={this.resetView}
-	  onChangeValue={this.onViewerChange}
-	>
-	  <svg style={{pointerEvents: "auto"}}
-	    width={this.props.width}
-	    height={this.props.height}
-	  >
-	    <g
-	      width={this.props.width}
-	      height={this.props.height}
-	      style={{cursor: "default"}}
-	      ref={(c) => {this.d3ref = c;}}
-	    />
-	  </svg>
-	</ReactSVGPanZoom>
+	{this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3ref", viewerRef: "Viewer"})}
+	{this.props.showTreeToo ? <div style={{width: spaceBetweenTrees}}/> : null}
+	{this.props.showTreeToo ?
+	  this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3refToo", viewerRef: "ViewerToo"}) :
+	  null
+	}
 	<button
 	  style={resetTreeButtonStyle}
 	  onClick={this.redrawTree}

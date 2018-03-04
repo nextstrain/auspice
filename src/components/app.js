@@ -10,7 +10,7 @@ import { Entropy } from "./entropy";
 import Map from "./map/map";
 import Tangle from "./tree/tangle";
 import Info from "./info/info";
-import { Tree, TreeToo } from "./tree";
+import Tree from "./tree";
 import { controlsHiddenWidth, controlsWidth, controlsPadding } from "../util/globals";
 import { sidebarColor } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
@@ -64,8 +64,6 @@ const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels,
     <div style={styles}>
       <Info width={calcUsableWidth(availableWidth, 1)} />
       <Tree width={big.width} height={big.height} />
-      <TreeToo width={big.width} height={big.height} orientation={[-1, 1]}/>
-      <Tangle/>
     </div>
   );
 

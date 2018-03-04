@@ -62,7 +62,8 @@ export const getDefaultControlsState = () => {
     animationPlayPauseButton: "Play",
     panelsAvailable: [],
     panelsToDisplay: [],
-    panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full"
+    panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full",
+    showTreeToo: false
   };
 };
 
@@ -168,6 +169,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         panelLayout: action.data
       });
+    case types.TREE_TOO_DATA:
+      return Object.assign({}, state, {showTreeToo: true});
     case types.TOGGLE_PANEL_DISPLAY:
       return Object.assign({}, state, {
         panelsToDisplay: action.panelsToDisplay,

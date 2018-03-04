@@ -1,6 +1,6 @@
 import { dataFont, darkGrey } from "../../../globalStyles";
 
-export const defaultParams = {
+export const createDefaultParams = () => ({
   regressionStroke: darkGrey,
   regressionWidth: 6,
   majorGridStroke: "#CCC",
@@ -36,4 +36,4 @@ export const defaultParams = {
   tipLabelPadX: 8,
   tipLabelPadY: 2,
   mapToScreenDebounceTime: 500
-};
+});

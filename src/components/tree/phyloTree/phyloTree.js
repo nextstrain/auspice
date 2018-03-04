@@ -1,7 +1,7 @@
 import _debounce from "lodash/debounce";
 import { max } from "d3-array";
 import { scaleLinear } from "d3-scale";
-import { defaultParams } from "./defaultParams";
+import { createDefaultParams } from "./defaultParams";
 import { addLeafCount, createChildrenAndParents } from "./helpers";
 import { change, modifySVG, modifySVGInStages } from "./change";
 
@@ -14,11 +14,11 @@ import * as labels from "./labels";
 
 
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
-const PhyloTree = function PhyloTree(reduxNodes) {
+const PhyloTree = function PhyloTree(reduxNodes, debugId) {
   this.grid = false;
   this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
-  this.params = defaultParams;
-
+  this.params = createDefaultParams();
+  this.debugId = debugId; /* super useful when one is trying to debug multiple trees! */
   /* create this.nodes, which is an array of nodes with properties used by phylotree for drawing.
    this.nodes is the same length as reduxNodes such that this.nodes[i] is related to reduxNodes[i]
    Furthermore, these objects are linked:

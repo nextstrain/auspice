@@ -13,7 +13,8 @@ const getBounds = () => {
   return {
     treeLoaded: state.tree.loaded,
     treeTooLoaded: state.treeToo.loaded,
-    treeNodeColours: state.tree.nodeColors,
+    strokeColors: state.tree.nodeColors,
+    strokeVersion: state.tree.nodeColorsVersion,
     treeNodes: state.tree.nodes,
     treeTooNodes: state.treeToo.nodes
   };
@@ -78,7 +79,7 @@ class Tangle extends React.Component {
       .attr("class", "tangleLine")
       .attr("d", makeD)
       .attr("stroke-width", 0.25)
-      .attr("stroke", (idxs) => props.treeNodeColours[idxs[0]]);
+      .attr("stroke", (idxs) => props.strokeColors[idxs[0]]);
 
   }
   componentDidMount() {
@@ -93,6 +94,9 @@ class Tangle extends React.Component {
       const bounds = this.updateBounds();
       const lookup = this.constructNodeMap(nextProps.treeNodes, nextProps.treeTooNodes);
       this.drawLines(nextProps, lookup, bounds);
+    } else if (this.props.strokeVersion !== nextProps.strokeVersion) {
+      const lookup = this.constructNodeMap(nextProps.treeNodes, nextProps.treeTooNodes);
+      this.drawLines(nextProps, lookup, this.state);
     }
   }
   /* CDU is used to update phylotree when the SVG size _has_ changed (and this is why it's in CDU not CWRP) */

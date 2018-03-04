@@ -386,7 +386,7 @@ export const createStateFromQueryOrJSONs = ({
   const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
   entropy.bars = entropyBars;
   entropy.maxYVal = entropyMaxYVal;
-
+  tree.debug = "LEFT";
   return {tree, metadata, entropy, controls};
 
 };
@@ -440,6 +440,6 @@ export const createTreeTooState = ({
   //   tree.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controls.colorScale, tree});
   //   tree.tipRadiiVersion = 1;
   // }
-
+  treeToo.debug = "RIGHT";
   return treeToo;
 };

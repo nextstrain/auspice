@@ -331,8 +331,10 @@ export const change = function change({
   /* run calculations as needed */
   /* distance */
   if (newDistance) this.setDistance(newDistance);
+
   /* layout (must run after distance) */
   if (newDistance || newLayout) this.setLayout(newLayout || this.layout);
+
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||
@@ -351,7 +353,6 @@ export const change = function change({
   } else {
     this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
   }
-
   this.timeLastRenderRequested = Date.now();
   timerEnd("phylotree.change()");
 };
