@@ -163,6 +163,7 @@ class Tree extends React.Component {
             colors={this.props.tree.nodeColors}
             cVersion={this.props.tree.nodeColorsVersion}
             vVersion={this.props.tree.visibilityVersion}
+	    metric={this.props.distanceMeasure}
             spaceBetweenTrees={spaceBetweenTrees}
           />
         ) : null }

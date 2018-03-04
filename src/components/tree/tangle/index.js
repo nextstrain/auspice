@@ -2,6 +2,13 @@
 import React from "react";
 import { select } from "d3-selection";
 
+const makeTipPathGenerator = (props) => (idxs) => {
+  const tip1 = props.leftNodes[idxs[0]].shell;
+  const tip2 = props.rightNodes[idxs[1]].shell;
+  // return `M ${tip1.xTip},${tip1.yTip} L ${(props.width + props.spaceBetweenTrees) / 2 + tip2.xTip},${tip2.yTip}`;
+  return `M ${tip1.xTip},${tip1.yTip} H ${props.width/2 - props.spaceBetweenTrees/2} L ${props.width/2 + props.spaceBetweenTrees/2},${tip2.yTip} H ${props.width/2 + props.spaceBetweenTrees/2 + tip2.xTip}`;
+};
+
 class Tangle extends React.Component {
   constructor(props) {
     super(props);
@@ -14,15 +21,7 @@ class Tangle extends React.Component {
   drawLines(props) {
     if (!props) props = this.props; // eslint-disable-line
     select(this.d3ref).selectAll(".tangleLine").remove();
-
-    const makeD = (idxs) => {
-      const tip1 = props.leftNodes[idxs[0]].shell;
-      const tip2 = props.rightNodes[idxs[1]].shell;
-      // console.log("tip1:", tip1.xTip, tip1.yTip)
-      // console.log("tip2:", tip2.xTip, tip2.yTip)
-      // return `M ${tip1.xTip},${tip1.yTip} L ${(props.width + props.spaceBetweenTrees) / 2 + tip2.xTip},${tip2.yTip}`;
-      return `M ${tip1.xTip},${tip1.yTip} H ${props.width/2 - props.spaceBetweenTrees/2} L ${props.width/2 + props.spaceBetweenTrees/2},${tip2.yTip} H ${props.width/2 + props.spaceBetweenTrees/2 + tip2.xTip}`;
-    };
+    const makeTipPath = makeTipPathGenerator(props);
     select(this.d3ref)
       .append("g")
       .selectAll(".tangleLine")
@@ -30,7 +29,7 @@ class Tangle extends React.Component {
       .enter()
       .append("path")
       .attr("class", "tangleLine")
-      .attr("d", makeD)
+      .attr("d", makeTipPath)
       .attr("stroke-width", 0.25)
       .attr("stroke", (idxs) => props.colors[idxs[0]])
       .attr("fill", 'none');
@@ -40,6 +39,12 @@ class Tangle extends React.Component {
       .transition().duration(500)
       .attr("stroke", (idxs) => newColors[idxs[0]]);
   }
+  transitionPath(props) {
+    const makeTipPath = makeTipPathGenerator(props);
+    select(this.d3ref).selectAll(".tangleLine")
+      .transition().duration(500)
+      .attr("d", makeTipPath);
+  }
   componentWillReceiveProps(nextProps) {
     if (!this.state.drawn && nextProps.rightNodes[0].shell) {
       this.drawLines(nextProps);
@@ -48,6 +53,8 @@ class Tangle extends React.Component {
       this.transitionColors(nextProps.colors);
     } else if (this.props.vVersion !== nextProps.vVersion) {
       this.drawLines(nextProps);
+    } else if (this.props.metric !== nextProps.metric) {
+      this.transitionPath(nextProps);
     }
   }
 

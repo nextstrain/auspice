@@ -346,6 +346,9 @@ export const createStateFromQueryOrJSONs = ({
   } else if (oldState) {
     ({controls, entropy, tree, treeToo, metadata} = oldState);
     controls = restoreQueryableStateToDefaults(controls);
+    if (query.tt && !treeToo.loaded) {
+      console.log("TO DO - loAd 2nD tree (via a delayed fetch / now?!?!)");
+    }
   } else {
     console.error("no JSONs / oldState provided");
     return;
@@ -393,10 +396,12 @@ export const createTreeTooState = ({
 }) => {
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
-  const controls = oldState.controls;
+  let controls = oldState.controls;
   /* new tree state */
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, oldState.controls);
+
+  controls = modifyStateViaTree(controls, oldState.tree, treeToo);
 
   /* calculate colours if loading from JSONs or if the query demands change */
   const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(controls.colorBy, controls, treeToo, oldState.metadata);
@@ -414,5 +419,5 @@ export const createTreeTooState = ({
   //   tree.tipRadiiVersion = 1;
   // }
   treeToo.debug = "RIGHT";
-  return treeToo;
+  return {treeToo, controls};
 };

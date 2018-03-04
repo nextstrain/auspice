@@ -88,10 +88,10 @@ export const loadTreeToo = (name, path) => (dispatch, getState) => {
   fetch(apiCall)
     .then((res) => res.json())
     .then((res) => {
-      const treeTooState = createTreeTooState(
+      const newState = createTreeTooState(
 	{treeTooJSON: res, oldState: getState()}
       );
-      dispatch({ type: types.TREE_TOO_DATA, treeTooState, segment: name});
+      dispatch({ type: types.TREE_TOO_DATA, treeToo: newState.treeToo, controls: newState.controls, segment: name});
     })
     .catch((err) => {
       console.error("Error while loading second tree", err);

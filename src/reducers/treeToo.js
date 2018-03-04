@@ -19,7 +19,7 @@ const treeToo = (state = getDefaultTreeState(), action) => {
       }
       return state;
     case types.TREE_TOO_DATA:
-      return action.treeTooState;
+      return action.treeToo;
     // case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     // case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
     //   const newStates = {
