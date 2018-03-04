@@ -195,21 +195,43 @@ const modifyStateViaMetadata = (state, metadata) => {
   return state;
 };
 
-const modifyStateViaTree = (state, tree) => {
+const modifyStateViaTree = (state, tree, treeToo) => {
   state["dateMin"] = getMinCalDateViaTree(tree.nodes);
-  state["absoluteDateMin"] = getMinCalDateViaTree(tree.nodes);
   state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
-  state["absoluteDateMax"] = getMaxCalDateViaTree(tree.nodes);
-  /* and their numeric conversions */
   state.dateMinNumeric = calendarToNumeric(state.dateMin);
-  state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
   state.dateMaxNumeric = calendarToNumeric(state.dateMax);
+
+  if (treeToo) {
+    const min = getMinCalDateViaTree(treeToo.nodes);
+    const max = getMaxCalDateViaTree(treeToo.nodes);
+    const minNumeric = calendarToNumeric(min);
+    const maxNumeric = calendarToNumeric(max);
+    if (minNumeric < state.dateMinNumeric) {
+      state.dateMinNumeric = minNumeric;
+      state.dateMin = min;
+    }
+    if (maxNumeric > state.dateMaxNumeric) {
+      state.dateMaxNumeric = maxNumeric;
+      state.dateMax = max;
+    }
+  }
+
+  /* set absolutes */
+  state["absoluteDateMin"] = state["dateMin"];
+  state["absoluteDateMax"] = state["dateMax"];
+  state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
   state.absoluteDateMaxNumeric = calendarToNumeric(state.absoluteDateMax);
-  state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
+
 
   /* available tree attrs - based upon the root node */
-  state["attrs"] = Object.keys(tree.nodes[0].attr);
-  state["temporalConfidence"] = Object.keys(tree.nodes[0].attr).indexOf("num_date_confidence") > -1 ?
+  if (treeToo) {
+    state.attrs = [...new Set([...Object.keys(tree.nodes[0].attr), ...Object.keys(treeToo.nodes[0].attr)])];
+  } else {
+    state.attrs = Object.keys(tree.nodes[0].attr);
+  }
+
+  state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
+  state.temporalConfidence = Object.keys(tree.nodes[0].attr).indexOf("num_date_confidence") > -1 ?
     {exists: true, display: true, on: false} : {exists: false, display: false, on: false};
   return state;
 };
@@ -319,7 +341,7 @@ export const createStateFromQueryOrJSONs = ({
     }
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
-    controls = modifyStateViaTree(controls, tree);
+    controls = modifyStateViaTree(controls, tree, treeToo);
     controls = modifyStateViaMetadata(controls, metadata);
   } else if (oldState) {
     ({controls, entropy, tree, treeToo, metadata} = oldState);
