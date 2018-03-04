@@ -1,15 +1,13 @@
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
 import { reallySmallNumber, twoColumnBreakpoint, genotypeColors } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
-import { flattenTree, appendParentsToTree, processVaccines, processNodes,
-  processBranchLabelsInPlace, strainNameToIdx, calcTipRadii,
-  constructVisibleTipLookupBetweenTrees } from "../components/tree/treeHelpers";
+import { strainNameToIdx, calcTipRadii, constructVisibleTipLookupBetweenTrees } from "../components/tree/treeHelpers";
 import { getDefaultControlsState } from "../reducers/controls";
-import { getDefaultTreeState, getAttrsOnTerminalNodes } from "../reducers/tree";
 import { calculateVisiblityAndBranchThickness } from "./treeProperties";
 import { calcEntropyInView, getValuesAndCountsOfVisibleTraitsFromTree,
   getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
 import { calcColorScaleAndNodeColors } from "./colors";
+import { treeJsonToState } from "../util/treeJsonProcessing";
 import { determineColorByGenotypeType } from "../util/colorHelpers";
 
 const getAnnotations = (jsonData) => {
@@ -325,18 +323,7 @@ export const createStateFromQueryOrJSONs = ({
     };
 
     /* new tree state */
-    appendParentsToTree(JSONs.tree);
-    const nodesArray = flattenTree(JSONs.tree);
-    const nodes = processNodes(nodesArray);
-    const vaccines = processVaccines(nodes, JSONs.meta.vaccine_choices);
-    const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
-    tree = Object.assign({}, getDefaultTreeState(), {
-      nodes,
-      vaccines,
-      availableBranchLabels,
-      attrs: getAttrsOnTerminalNodes(nodes),
-      loaded: true
-    });
+    tree = treeJsonToState(JSONs.tree, JSONs.meta.vaccine_choices);
 
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
@@ -403,19 +390,7 @@ export const createTreeTooState = ({
   /* TODO: reconcile query with visibility etc */
   const controls = oldState.controls;
   /* new tree state */
-  appendParentsToTree(treeTooJSON);
-  const nodesArray = flattenTree(treeTooJSON);
-  const nodes = processNodes(nodesArray);
-  // const vaccines = processVaccines(nodes, JSONs.meta.vaccine_choices);
-  const vaccines = [...oldState.tree.vaccines];
-  const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
-  let treeToo = Object.assign({}, getDefaultTreeState(), {
-    nodes,
-    vaccines,
-    availableBranchLabels,
-    attrs: getAttrsOnTerminalNodes(nodes),
-    loaded: true
-  });
+  let treeToo = treeJsonToState(treeTooJSON);
 
   /* calculate new branch thicknesses & visibility */
   let tipSelectedIdx = 0; // eslint-disable-line
