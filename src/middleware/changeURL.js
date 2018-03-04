@@ -36,6 +36,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query[`f_${action.fields}`] = action.values.join(',');
       break;
     }
+    case types.TREE_TOO_DATA: {
+      query.tt = action.segment;
+      break;
+    }
     case types.CHANGE_LAYOUT: {
       query.l = action.data === state.controls.defaults.layout ? undefined : action.data;
       break;

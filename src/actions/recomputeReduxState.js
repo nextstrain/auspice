@@ -1,5 +1,5 @@
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, genotypeColors } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { strainNameToIdx, calcTipRadii, constructVisibleTipLookupBetweenTrees } from "../components/tree/treeHelpers";
 import { getDefaultControlsState } from "../reducers/controls";
@@ -8,39 +8,8 @@ import { calcEntropyInView, getValuesAndCountsOfVisibleTraitsFromTree,
   getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
 import { calcColorScaleAndNodeColors } from "./colors";
 import { treeJsonToState } from "../util/treeJsonProcessing";
+import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeType } from "../util/colorHelpers";
-
-const getAnnotations = (jsonData) => {
-  const annotations = [];
-  let aaCount = 0;
-  for (const prot of Object.keys(jsonData)) {
-    if (prot !== "nuc") {
-      aaCount++;
-      annotations.push({
-        prot: prot,
-        start: jsonData[prot].start,
-        end: jsonData[prot].end,
-        readingFrame: 1, // +tmpProt['pos'][0]%3,
-        fill: genotypeColors[aaCount % 10]
-      });
-    }
-  }
-  return annotations;
-};
-
-const processAnnotations = (annotations) => {
-  const m = {}; /* m === geneMap */
-  annotations.forEach((d) => {
-    m[d.prot] = d;
-  });
-  const sorted = Object.keys(m).sort((a, b) =>
-    m[a].start < m[b].start ? -1 : m[a].start > m[b].start ? 1 : 0
-  );
-  for (const gene of Object.keys(m)) {
-    m[gene].idx = sorted.indexOf(gene);
-  }
-  return m;
-};
 
 export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -295,13 +264,41 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
   return state;
 };
 
+const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, controlsState) => {
+  /* calculate new branch thicknesses & visibility */
+  let tipSelectedIdx = 0;
+  /* check if the query defines a strain to be selected */
+  if (tipSelected) {
+    tipSelectedIdx = strainNameToIdx(oldState.nodes, tipSelected);
+    oldState.selectedStrain = tipSelected;
+  }
+  const visAndThicknessData = calculateVisiblityAndBranchThickness(
+    oldState,
+    controlsState,
+    {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric},
+    {tipSelectedIdx, validIdxRoot: oldState.idxOfInViewRootNode}
+  );
+  visAndThicknessData.stateCountAttrs = Object.keys(controlsState.filters);
+  const newState = Object.assign({}, oldState, visAndThicknessData);
+  newState.visibleStateCounts = getValuesAndCountsOfVisibleTraitsFromTree(
+    newState.nodes, newState.visibility, newState.stateCountAttrs);
+  /* potentially VVVV only needs to run if using JSONs */
+  newState.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(newState.nodes, newState.stateCountAttrs);
+
+  if (tipSelectedIdx) { /* i.e. query.s was set */
+    newState.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controlsState.colorScale, newState});
+    newState.tipRadiiVersion = 1;
+  }
+  return newState;
+};
+
 export const createStateFromQueryOrJSONs = ({
   JSONs = false, /* raw json data - completely nuke existing redux state */
   oldState = false, /* existing redux state (instead of jsons) */
   query
 }) => {
+  let tree, treeToo, entropy, controls, metadata;
   /* first task is to create metadata, entropy, controls & tree partial state */
-  let tree, entropy, controls, metadata;
   if (JSONs) {
     /* ceate metadata state */
     metadata = JSONs.meta;
@@ -311,52 +308,30 @@ export const createStateFromQueryOrJSONs = ({
     metadata.colorOptions = metadata.color_options;
     delete metadata.color_options;
     metadata.loaded = true;
-
     /* entropy state */
-    /* TODO check that metadata defines the entropy panel */
-    const annotations = getAnnotations(JSONs.meta.annotations);
-    entropy = {
-      showCounts: false,
-      loaded: true,
-      annotations,
-      geneMap: processAnnotations(annotations)
-    };
-
-    /* new tree state */
+    entropy = entropyCreateStateFromJsons(JSONs.meta);
+    /* new tree state(s) */
     tree = treeJsonToState(JSONs.tree, JSONs.meta.vaccine_choices);
-
+    tree.debug = "LEFT";
+    if (JSONs.treeToo) {
+      treeToo = treeJsonToState(JSONs.treeToo, JSONs.meta.vaccine_choices);
+      treeToo.debug = "RIGHT";
+    }
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
     controls = modifyStateViaTree(controls, tree);
     controls = modifyStateViaMetadata(controls, metadata);
-  }
-
-  if (oldState) {
-    ({controls, entropy, tree, metadata} = oldState);
+  } else if (oldState) {
+    ({controls, entropy, tree, treeToo, metadata} = oldState);
     controls = restoreQueryableStateToDefaults(controls);
+  } else {
+    console.error("no JSONs / oldState provided");
+    return;
   }
 
+  /* reconcile control state and URL query */
   controls = modifyStateViaURLQuery(controls, query);
-  controls = checkAndCorrectErrorsInState(controls, metadata); /* must run last */
-
-  /* calculate new branch thicknesses & visibility */
-  let tipSelectedIdx = 0;
-  /* check if the query defines a strain to be selected */
-  if (query.s) {
-    tipSelectedIdx = strainNameToIdx(tree.nodes, query.s);
-    tree.selectedStrain = query.s;
-  }
-  const visAndThicknessData = calculateVisiblityAndBranchThickness(
-    tree,
-    controls,
-    {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-    {tipSelectedIdx, validIdxRoot: tree.idxOfInViewRootNode}
-  );
-  visAndThicknessData.stateCountAttrs = Object.keys(controls.filters);
-  tree = Object.assign({}, tree, visAndThicknessData);
-  tree.visibleStateCounts = getValuesAndCountsOfVisibleTraitsFromTree(tree.nodes, tree.visibility, tree.stateCountAttrs);
-  /* potentially VVVV only needs to run if using JSONs */
-  tree.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(tree.nodes, tree.stateCountAttrs);
+  controls = checkAndCorrectErrorsInState(controls, metadata);
 
   /* calculate colours if loading from JSONs or if the query demands change */
   if (JSONs || controls.colorBy !== oldState.colorBy) {
@@ -367,18 +342,26 @@ export const createStateFromQueryOrJSONs = ({
     tree.nodeColors = nodeColors;
   }
 
-  if (tipSelectedIdx) { /* i.e. query.s was set */
-    tree.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controls.colorScale, tree});
-    tree.tipRadiiVersion = 1;
+  /* TEMPORARY ONLY */
+  if (treeToo) {
+    const tmp = calcColorScaleAndNodeColors(controls.colorBy, controls, treeToo, metadata);
+    treeToo.nodeColorsVersion = tmp.version;
+    treeToo.nodeColors = tmp.nodeColors;
+  }
+
+  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, controls);
+  if (treeToo) {
+    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, controls);
+    treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility);
+    controls.showTreeToo = true;
   }
 
   /* calculate entropy in view */
   const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
   entropy.bars = entropyBars;
   entropy.maxYVal = entropyMaxYVal;
-  tree.debug = "LEFT";
-  return {tree, metadata, entropy, controls};
-
+  console.log("treetoo:", treeToo);
+  return {tree, treeToo, metadata, entropy, controls}; // eslint-disable-line
 };
 
 
@@ -391,21 +374,7 @@ export const createTreeTooState = ({
   const controls = oldState.controls;
   /* new tree state */
   let treeToo = treeJsonToState(treeTooJSON);
-
-  /* calculate new branch thicknesses & visibility */
-  let tipSelectedIdx = 0; // eslint-disable-line
-  let validIdxRoot = 0; // eslint-disable-line
-  const visAndThicknessData = calculateVisiblityAndBranchThickness(
-    treeToo,
-    controls,
-    {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-    {tipSelectedIdx, validIdxRoot}
-  );
-  visAndThicknessData.stateCountAttrs = Object.keys(controls.filters);
-  treeToo = Object.assign({}, treeToo, visAndThicknessData);
-  treeToo.visibleStateCounts = getValuesAndCountsOfVisibleTraitsFromTree(treeToo.nodes, treeToo.visibility, treeToo.stateCountAttrs);
-  /* potentially VVVV only needs to run if using JSONs */
-  treeToo.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(treeToo.nodes, treeToo.stateCountAttrs);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, oldState.controls);
 
   /* calculate colours if loading from JSONs or if the query demands change */
   const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(controls.colorBy, controls, treeToo, oldState.metadata);

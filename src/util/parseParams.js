@@ -19,16 +19,16 @@ const parseParams = (path, datasets) => {
     params = [];
   }
   const config = {
-    "valid": true, // the URL is incorrect and we don't know what to do!
-    "incomplete": false, // the URL, as passed in, is incomplete
-    "dataset": {}, // see above
-    "fullsplat": "", // just the URL
-    "search": "" // the URL search query
+    valid: true, // the URL is incorrect and we don't know what to do!
+    incomplete: false, // the URL, as passed in, is incomplete
+    dataset: {}, // see above
+    fullsplat: "", // just the URL
+    search: "" // the URL search query
   };
 
   let elemType; // object whose keys are the available choices (e.g. "zika" and "ebola")
-  let idx;      // the index of the current param (of params)
-  let elem;     // the choice (e.g. "flu", "h7n9", "ebola")
+  let idx; // the index of the current param (of params)
+  let elem; // the choice (e.g. "flu", "h7n9", "ebola")
   let datasetSlice = datasets; // This is usually an object, sometimes a string
   for (idx = 0; idx < params.length; idx++) {
     elem = params[idx];
@@ -63,7 +63,7 @@ const parseParams = (path, datasets) => {
   // this stops when we encounter 'xx: {}' as Object.keys({}).length==0
   // this both populates the dataset property, and sets defaults,
   // else the URL wouldn't be valid so the data request would 404
-  while(typeof datasetSlice !== "string" && Object.keys(datasetSlice).length) {
+  while (typeof datasetSlice !== "string" && Object.keys(datasetSlice).length) {
     elemType = Object.keys(datasetSlice)[0];
     elem = datasetSlice[elemType]["default"];
     // console.log("filling default ", elemType," as ", elem);
@@ -71,7 +71,7 @@ const parseParams = (path, datasets) => {
     // double check specified default is actually valid
     if (typeof datasetSlice[elemType][elem] === "undefined") {
       config.valid = false;
-      console.log("incorrect / no default set");
+      console.warn("incorrect / no default set");
       return config;
     }
     config.incomplete = true; // i.e. the url, as specified, needs to be updated
@@ -88,6 +88,29 @@ const parseParams = (path, datasets) => {
   }
 
   return config;
+};
+
+export const createDatapathForSecondSegment = (newSegment, datapath, availableDatasets) => {
+  const parts = datapath.split('_');
+  let level = availableDatasets['pathogen'];
+  let i = 0;
+  let key;
+  for (;;) {
+    key = parts[i++];
+    if (Object.keys(level).indexOf(key) === -1) {
+      console.error(`Second segment ${newSegment} not found in available datasets!`);
+      return false; /* ERROR */
+    }
+    /* jump to the level and through the next one (singleton) */
+    level = level[key];
+    level = level[Object.keys(level)[0]];
+    if (Object.keys(level).indexOf(newSegment) !== -1) {
+      break;
+    }
+  }
+  parts[i] = newSegment;
+  // console.log("NEW PARTS:", parts);
+  return parts.join('_');
 };
 
 export default parseParams;

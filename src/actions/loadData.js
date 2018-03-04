@@ -7,6 +7,7 @@ import { getNarrative } from "../util/getMarkdown";
 import { changePage } from "./navigation";
 import { processFrequenciesJSON } from "./frequencies";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
+import { createDatapathForSecondSegment } from "../util/parseParams";
 
 export const loadJSONs = (s3override = undefined) => {
   return (dispatch, getState) => {
@@ -16,19 +17,26 @@ export const loadJSONs = (s3override = undefined) => {
       return;
     }
     dispatch({type: types.DATA_INVALID});
+    const query = queryString.parse(window.location.search);
     const s3bucket = s3override ? s3override : datasets.s3bucket;
-    const apiPath = (jsonType) =>
-      `${charonAPIAddress}request=json&path=${datasets.datapath}_${jsonType}.json&s3=${s3bucket}`;
-
-    const metaJSONpromise = fetch(apiPath("meta")).then((res) => res.json());
-    const treeJSONpromise = fetch(apiPath("tree")).then((res) => res.json());
-    Promise.all([metaJSONpromise, treeJSONpromise])
+    const apiPath = (datapath, jsonType) =>
+      `${charonAPIAddress}request=json&path=${datapath}_${jsonType}.json&s3=${s3bucket}`;
+    const promises = [
+      fetch(apiPath(datasets.datapath, "meta")).then((res) => res.json()), /* META */
+      fetch(apiPath(datasets.datapath, "tree")).then((res) => res.json()) /* TREE */
+    ];
+    if (query.tt) { /* SECOND TREE */
+      const secondPath = createDatapathForSecondSegment(query.tt, datasets.datapath, datasets.availableDatasets);
+      if (secondPath) {
+	promises.push(fetch(apiPath(secondPath, "tree")).then((res) => res.json()));
+      }
+    }
+    Promise.all(promises)
       .then((values) => {
         /* we do expensive stuff here not reducers. Allows fewer dispatches. */
-        const query = queryString.parse(window.location.search);
-        const newStates = createStateFromQueryOrJSONs(
-          {JSONs: {meta: values[0], tree: values[1]}, query}
-        );
+	const JSONs = {meta: values[0], tree: values[1]};
+	if (values.length === 3) JSONs.treeToo = values[2];
+	const newStates = createStateFromQueryOrJSONs({JSONs, query});
         dispatch({ type: types.CLEAN_START, ...newStates });
 
         /* F R E Q U E N C I E S */
@@ -77,14 +85,13 @@ export const changeS3Bucket = () => {
 export const loadTreeToo = (name, path) => (dispatch, getState) => {
   const { datasets } = getState();
   const apiCall = `${charonAPIAddress}request=json&path=${path}_tree.json&s3=${datasets.s3bucket}`;
-  console.log("request to load treeToo", name, path, apiCall);
   fetch(apiCall)
     .then((res) => res.json())
     .then((res) => {
       const treeTooState = createTreeTooState(
 	{treeTooJSON: res, oldState: getState()}
       );
-      dispatch({ type: types.TREE_TOO_DATA, treeTooState });
+      dispatch({ type: types.TREE_TOO_DATA, treeTooState, segment: name});
     })
     .catch((err) => {
       console.error("Error while loading second tree", err);

@@ -62,21 +62,14 @@ const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels,
   /* TODO */
   return (
     <div style={styles}>
-      <Info width={calcUsableWidth(availableWidth, 1)} />
-      <Tree width={big.width} height={big.height} />
+      {narrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
+      {show("tree") ? <Tree width={big.width} height={big.height} /> : null}
+      {/* {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null} */}
+      {show("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
+      {show("frequencies") && frequenciesLoaded ? <Frequencies width={chart.width} height={chart.height} /> : null}
+      {narrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
     </div>
   );
-
-  // return (
-  //   <div style={styles}>
-  //     {narrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
-  //     {show("tree") ? <Tree width={big.width} height={big.height} /> : null}
-  //     {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
-  //     {show("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
-  //     {show("frequencies") && frequenciesLoaded ? <Frequencies width={chart.width} height={chart.height} /> : null}
-  //     {narrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
-  //   </div>
-  // );
 };
 
 const Sidebar = ({show, narrative, styles}) => {

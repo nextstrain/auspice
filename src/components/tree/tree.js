@@ -45,12 +45,16 @@ class Tree extends React.Component {
   componentDidMount() {
     if (this.props.tree.loaded) {
       const tree = new PhyloTree(this.props.tree.nodes, "LEFT");
-      window.tree = tree;
       renderTree(this, true, tree, this.props);
-      if (this.Viewer) {
-        this.Viewer.fitToViewer();
+      this.Viewer.fitToViewer();
+      const newState = {tree};
+      if (this.props.showTreeToo) {
+	const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
+	renderTree(this, false, treeToo, this.props);
+	this.ViewerToo.fitToViewer();
+	newState.treeToo = treeToo;
       }
-      this.setState({tree});
+      this.setState(newState);
     }
   }
   /* CWRP has two tasks: (1) create the tree when it's in redux
@@ -82,7 +86,6 @@ class Tree extends React.Component {
       this.ViewerToo.fitToViewer();
       this.state.tree.change({svgHasChangedDimensions: true}); /* the main tree */
       this.setState({treeToo}); // eslint-disable-line
-      window.treeToo = treeToo;
       return;
     }
     const browserResize = this.props.width !== prevProps.width || this.props.height !== prevProps.height;

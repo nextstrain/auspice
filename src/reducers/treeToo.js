@@ -13,6 +13,11 @@ const treeToo = (state = getDefaultTreeState(), action) => {
       return Object.assign({}, state, {
 	loaded: false
       });
+    case types.CLEAN_START:
+      if (action.treeToo) {
+	return action.treeToo;
+      }
+      return state;
     case types.TREE_TOO_DATA:
       return action.treeTooState;
     // case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
