@@ -70,9 +70,9 @@ class Tree extends React.Component {
       this.Viewer.fitToViewer();
       this.setState({tree});
     } else {
-      const newState = changePhyloTreeViaPropsComparison(true, this.state, this.props, nextProps);
+      const newState = changePhyloTreeViaPropsComparison(true, this.state.tree, this.Viewer, this.props, nextProps);
       if (this.state.treeToo) {
-        changePhyloTreeViaPropsComparison(false, this.state, this.props, nextProps);
+	changePhyloTreeViaPropsComparison(false, this.state.treeToo, this.ViewerToo, this.props, nextProps);
       }
       if (newState) this.setState(newState);
     }

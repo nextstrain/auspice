@@ -1,12 +1,10 @@
 import { rgb } from "d3-color";
 import { calcBranchStrokeCols } from "../treeHelpers";
 
-export const changePhyloTreeViaPropsComparison = (mainTree, state, oldProps, newProps) => {
+export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, viewer, oldProps, newProps) => {
   const args = {};
   const newState = {};
   /* do not use oldProps.tree or newTreeRedux */
-  const phylotree = mainTree ? state.tree : state.treeToo;
-  const viewer = mainTree ? state.Viewer : state.ViewerToo;
   const oldTreeRedux = mainTree ? oldProps.tree : oldProps.treeToo;
   const newTreeRedux = mainTree ? newProps.tree : newProps.treeToo;
 
