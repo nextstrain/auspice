@@ -1,3 +1,5 @@
+* Restore staging server toggle [issue 514](https://github.com/nextstrain/auspice/issues/514)
+
 ## version 1.14.3 - 2018/03/01
 
 * Bug fix where tip colours reverted to their initial colours after a layout change. [issue 519](https://github.com/nextstrain/auspice/issues/519)

@@ -12,6 +12,7 @@ import MapAnimationControls from "./map-animation";
 import DataSource from "./data-source";
 import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
+import { titleBarHeight } from "../../util/globals";
 
 const Controls = () => (
   <div
@@ -68,6 +69,7 @@ const Controls = () => (
     <Header text="Data Source" extraStyles={{paddingTop: "10px"}}/>
     <DataSource/>
 
+    <div style={{minHeight: `${titleBarHeight + 20}px`}}/>
   </div>
 );
 

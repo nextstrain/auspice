@@ -10,7 +10,7 @@ import { Entropy } from "./entropy";
 import Map from "./map/map";
 import Info from "./info/info";
 import Tree from "./tree";
-import { controlsHiddenWidth, controlsWidth, controlsPadding } from "../util/globals";
+import { controlsHiddenWidth, controlsWidth, controlsPadding, titleBarHeight } from "../util/globals";
 import { sidebarColor } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
 import Footer from "./framework/footer";
@@ -72,10 +72,11 @@ const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels,
 
 const Sidebar = ({show, narrative, styles}) => {
   if (!show) return null;
+  const innerH = styles.height - titleBarHeight;
   return (
     <div style={styles}>
       <TitleBar minified/>
-      {narrative ? <Narrative height={styles.height}/> : <Controls/>}
+      {narrative ? <Narrative height={innerH}/> : <Controls/>}
     </div>
   );
 };

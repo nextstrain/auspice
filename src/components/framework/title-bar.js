@@ -3,7 +3,7 @@ import React from "react";
 import { connect } from "react-redux";
 import Flex from "./flex";
 import { titleBarHeight, titleColors } from "../../util/globals";
-import { darkGrey, brandColor, materialButton, materialButtonSelected } from "../../globalStyles";
+import { darkGrey, brandColor, materialButton } from "../../globalStyles";
 import { changePage } from "../../actions/navigation";
 import { TOGGLE_NARRATIVE } from "../../actions/types";
 
