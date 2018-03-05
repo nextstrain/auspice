@@ -1,3 +1,5 @@
+## version 1.14.4 - 2018/03/05
+
 * Restore staging server toggle [issue 514](https://github.com/nextstrain/auspice/issues/514)
 
 ## version 1.14.3 - 2018/03/01
