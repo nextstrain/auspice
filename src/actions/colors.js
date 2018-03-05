@@ -48,12 +48,6 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
     const newMutType = colorByMutType !== controls.mutType ? colorByMutType : false;
 
     timerEnd("changeColorBy calculations"); /* end timer before dispatch */
-    if (newMutType) {
-      updateEntropyVisibility(dispatch, getState);
-    }
-    if (frequencies.loaded) {
-      updateFrequencyDataDebounced(dispatch, getState);
-    }
 
     /* step 4: dispatch */
     dispatch({
@@ -64,6 +58,14 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
       version,
       newMutType
     });
+
+    /* step 5 - entropy & frequency dispatches (maybe these could be combined) */
+    if (newMutType) {
+      updateEntropyVisibility(dispatch, getState);
+    }
+    if (frequencies.loaded) {
+      updateFrequencyDataDebounced(dispatch, getState);
+    }
 
     return null;
   };
