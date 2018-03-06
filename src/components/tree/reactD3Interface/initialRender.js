@@ -1,6 +1,6 @@
 import { select } from "d3-selection";
 import { rgb } from "d3-color";
-import { calcBranchStrokeCols } from "../treeHelpers";
+import { calcBranchStrokeCols } from "../../../util/colorHelpers";
 import * as callbacks from "./callbacks";
 
 export const renderTree = (that, main, phylotree, props) => {

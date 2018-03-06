@@ -1,32 +1,8 @@
-import { parseEncodedGenotype } from "../util/getGenotype";
-import getColorScale from "../util/getColorScale";
-import { setGenotype } from "../util/setGenotype";
-import { calcNodeColor } from "../components/tree/treeHelpers";
-import { determineColorByGenotypeType } from "../util/colorHelpers";
+import { determineColorByGenotypeType, calcColorScaleAndNodeColors } from "../util/colorHelpers";
 import { timerStart, timerEnd } from "../util/perf";
 import { updateEntropyVisibility } from "./entropy";
 import { updateFrequencyDataDebounced } from "./frequencies";
 import * as types from "./types";
-
-export const calcColorScaleAndNodeColors = (colorBy, controls, tree, metadata) => {
-  let genotype;
-  if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
-    genotype = parseEncodedGenotype(colorBy, controls.geneLength);
-    if (genotype.length > 1) {
-      console.warn("Cannot deal with multiple proteins yet - using first only.");
-    }
-    setGenotype(tree.nodes, genotype[0].prot || "nuc", genotype[0].positions); /* modifies nodes recursively */
-  }
-
-  /* step 1: calculate the required colour scale */
-  const version = controls.colorScale === undefined ? 1 : controls.colorScale.version + 1;
-  const colorScale = getColorScale(colorBy, tree, controls.geneLength, metadata.colorOptions, version, controls.absoluteDateMaxNumeric);
-  if (genotype) colorScale.genotype = genotype;
-
-  /* step 2: calculate the node colours */
-  const nodeColors = calcNodeColor(tree, colorScale);
-  return {nodeColors, colorScale, version};
-};
 
 /* providedColorBy: undefined | string */
 export const changeColorBy = (providedColorBy = undefined) => { // eslint-disable-line import/prefer-default-export

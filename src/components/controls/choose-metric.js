@@ -5,7 +5,7 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
 import Toggle from "./toggle";
 import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { toggleTemporalConfidence } from "../../actions/treeProperties";
+import { toggleTemporalConfidence } from "../../actions/tree";
 
 /*
  * implements a pair of buttons the toggle between timetree and divergence tree

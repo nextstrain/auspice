@@ -13,7 +13,7 @@ import {
   updateDemeAndTransmissionDataColAndVis,
   updateDemeAndTransmissionDataLatLong
 } from "./mapHelpersLatLong";
-import { changeDateFilter } from "../../actions/treeProperties";
+import { changeDateFilter } from "../../actions/tree";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";

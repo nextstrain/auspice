@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/treeProperties";
+import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton } from "../framework/footer";
 

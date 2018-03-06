@@ -3,25 +3,10 @@ import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors, reallySmallNumber, reallyBigNumber } from "./globals";
-import { getAllValuesAndCountsOfTraitsFromTree } from "./treeTraversals";
+import { getAllValuesAndCountsOfTraitsFromTree } from "./treeCountingHelpers";
 import { setLBI } from "./localBranchingIndex";
+import { getExtraVals } from "./colorHelpers";
 
-/**
-* what values (for colorBy) are present in the tree and not in the color_map?
-* @param {Array} nodes - list of nodes
-* @param {string} colorBy -
-* @param {Array} color_map - list of colorBy values with colours
-* @return {list}
-*/
-const getExtraVals = (nodes, colorBy, color_map) => {
-  let valsInTree = [];
-  nodes.forEach((n) => valsInTree.push(n.attr[colorBy]));
-  valsInTree = [...new Set(valsInTree)];
-  const valsInMeta = color_map.map((d) => { return d[0];});
-  // console.log("here", valsInMeta, valsInTree, valsInTree.filter((x) => valsInMeta.indexOf(x) === -1))
-  // only care about values in tree NOT in metadata
-  return valsInTree.filter((x) => valsInMeta.indexOf(x) === -1);
-};
 
 const createLegendMatchBound = (colorScale) => {
   const lower_bound = {};

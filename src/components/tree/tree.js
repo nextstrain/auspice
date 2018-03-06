@@ -1,6 +1,6 @@
 import React from "react";
 import { ReactSVGPanZoom } from "react-svg-pan-zoom";
-import { updateVisibleTipsAndBranchThicknesses } from "../../actions/treeProperties";
+import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
 import PhyloTree from "./phyloTree/phyloTree";

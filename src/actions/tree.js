@@ -1,27 +1,10 @@
-import { calcVisibility,
-  calcTipRadii,
-  calcTipCounts,
-  identifyPathToTip,
-  strainNameToIdx,
-  calcBranchThickness } from "../components/tree/treeHelpers";
+import { calcTipRadii } from "../util/tipRadiusHelpers";
+import { strainNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import * as types from "./types";
 import { updateEntropyVisibility } from "./entropy";
 import { updateFrequencyDataDebounced } from "./frequencies";
 import { calendarToNumeric } from "../util/dateHelpers";
 import { applyToChildren } from "../components/tree/phyloTree/helpers";
-
-export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
-  const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
-  /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
-  calcTipCounts(tree.nodes[0], visibility);
-  /* re-calculate branchThickness (inline) */
-  return {
-    visibility: visibility,
-    visibilityVersion: tree.visibilityVersion + 1,
-    branchThickness: calcBranchThickness(tree.nodes, visibility, idxOfInViewRootNode),
-    branchThicknessVersion: tree.branchThicknessVersion + 1
-  };
-};
 
 /**
  * define the visible branches and their thicknesses. This could be a path to a single tip or a selected clade.

@@ -9,7 +9,7 @@ const intersectGenes = function intersectGenes(geneMap, pos) {
   return false;
 };
 
-export const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
+const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
   const sparse = isAA ? {} : [];
   if (isAA) {
     Object.keys(geneMap).forEach((n) => {sparse[n] = {};});
@@ -65,7 +65,7 @@ export const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
   return [counts, m];
 };
 
-export const calcEntropy = (nodes, visibility, geneMap, isAA) => {
+const calcEntropy = (nodes, visibility, geneMap, isAA) => {
   const arrayOfProts = isAA ? Object.keys(geneMap) : ["nuc"];
   const initialState = {};
   const anc_state = {};
@@ -181,4 +181,20 @@ export const calcEntropy = (nodes, visibility, geneMap, isAA) => {
   }
   // console.log(entropy)
   return [entropy, m];
+};
+
+/**
+* traverse the tree and compile the entropy data for the visibile branches
+* @param {Array} nodes - list of nodes
+* @param {Array} visibility - 1-1 correspondence with nodes. Value: "visibile" or ""
+* @param {String} mutType - amino acid | nucleotide mutations - "aa" | "nuc"
+* @param {obj} geneMap used to NT fill colours. This should be imroved.
+* @param {bool} showCounts show counts or entropy values?
+* @return {obj} keys: the entries in attrs. Values: an object mapping values -> counts
+* TODO: this algorithm can be much improved, and the data structures returned improved also
+*/
+export const calcEntropyInView = (nodes, visibility, mutType, geneMap, showCounts) => {
+  return showCounts ?
+    calcMutationCounts(nodes, visibility, geneMap, mutType === "aa") :
+    calcEntropy(nodes, visibility, geneMap, mutType === "aa");
 };

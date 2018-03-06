@@ -1,5 +1,5 @@
 import { rgb } from "d3-color";
-import { calcBranchStrokeCols } from "../treeHelpers";
+import { calcBranchStrokeCols } from "../../../util/colorHelpers";
 
 export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, viewer, oldProps, newProps) => {
   const args = {};

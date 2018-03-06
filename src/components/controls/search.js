@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import Awesomplete from 'awesomplete'; /* https://leaverou.github.io/awesomplete/ */
-import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/treeProperties";
+import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/tree";
 import { dataFont, darkGrey } from "../../globalStyles";
 import "../../css/awesomplete.css";
 

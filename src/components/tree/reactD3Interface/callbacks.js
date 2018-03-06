@@ -1,8 +1,8 @@
 import { rgb } from "d3-color";
 import { interpolateRgb } from "d3-interpolate";
-import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/treeProperties";
+import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
 import { mediumTransitionDuration } from "../../../util/globals";
-import { branchOpacityFunction } from "../treeHelpers";
+import { branchOpacityFunction } from "../../../util/colorHelpers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 

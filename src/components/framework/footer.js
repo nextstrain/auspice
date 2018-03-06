@@ -4,7 +4,7 @@ import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { prettyString } from "../../util/stringHelpers";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
-import { applyFilter } from "../../actions/treeProperties";
+import { applyFilter } from "../../actions/tree";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>

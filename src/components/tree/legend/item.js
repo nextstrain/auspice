@@ -1,5 +1,5 @@
 import React from "react";
-import { updateTipRadii } from "../../../actions/treeProperties";
+import { updateTipRadii } from "../../../actions/tree";
 import { dataFont, darkGrey } from "../../../globalStyles";
 import { prettyString } from "../../../util/stringHelpers";
 

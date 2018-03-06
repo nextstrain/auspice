@@ -1,4 +1,4 @@
-import { getValuesAndCountsOfVisibleTraitsFromTree } from "../util/treeTraversals";
+import { getValuesAndCountsOfVisibleTraitsFromTree } from "../util/treeCountingHelpers";
 import * as types from "../actions/types";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies

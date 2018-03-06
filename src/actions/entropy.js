@@ -1,5 +1,5 @@
 import { debounce } from 'lodash';
-import { calcEntropyInView } from "../util/treeTraversals";
+import { calcEntropyInView } from "../util/entropy";
 import * as types from "./types";
 
 /* debounce works better than throttle, as it _won't_ update while events are still coming in (e.g. dragging the date slider) */

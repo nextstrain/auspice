@@ -1,15 +1,16 @@
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
 import { reallySmallNumber, twoColumnBreakpoint } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
-import { strainNameToIdx, calcTipRadii, constructVisibleTipLookupBetweenTrees } from "../components/tree/treeHelpers";
+import { strainNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
+import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
+import { calcTipRadii } from "../util/tipRadiusHelpers";
 import { getDefaultControlsState } from "../reducers/controls";
-import { calculateVisiblityAndBranchThickness } from "./treeProperties";
-import { calcEntropyInView, getValuesAndCountsOfVisibleTraitsFromTree,
-  getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
-import { calcColorScaleAndNodeColors } from "./colors";
+import { getValuesAndCountsOfVisibleTraitsFromTree,
+  getAllValuesAndCountsOfTraitsFromTree } from "../util/treeCountingHelpers";
+import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons";
-import { determineColorByGenotypeType } from "../util/colorHelpers";
+import { determineColorByGenotypeType, calcColorScaleAndNodeColors } from "../util/colorHelpers";
 
 export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;

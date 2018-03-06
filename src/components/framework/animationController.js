@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import { animationWindowWidth, animationTick } from "../../util/globals";
 import { numericToCalendar } from "../../util/dateHelpers";
-import { changeDateFilter } from "../../actions/treeProperties";
+import { changeDateFilter } from "../../actions/tree";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON, MIDDLEWARE_ONLY_ANIMATION_STARTED } from "../../actions/types";
 import { timerStart, timerEnd } from "../../util/perf";
 
