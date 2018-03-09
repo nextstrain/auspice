@@ -5,6 +5,7 @@ import { updateEntropyVisibility } from "./entropy";
 import { updateFrequencyDataDebounced } from "./frequencies";
 import { calendarToNumeric } from "../util/dateHelpers";
 import { applyToChildren } from "../components/tree/phyloTree/helpers";
+import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 
 /**
  * define the visible branches and their thicknesses. This could be a path to a single tip or a selected clade.
@@ -20,7 +21,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
   {idxOfInViewRootNode = undefined, tipSelectedIdx = 0} = {}
 ) => {
   return (dispatch, getState) => {
-    const { tree, controls, frequencies } = getState();
+    const { tree, treeToo, controls, frequencies } = getState();
     if (!tree.nodes) {return;}
     const validIdxRoot = idxOfInViewRootNode !== undefined ? idxOfInViewRootNode : tree.idxOfInViewRootNode;
     if (idxOfInViewRootNode !== tree.idxOfInViewRootNode && tree.nodes[0].shell) {
@@ -41,12 +42,16 @@ export const updateVisibleTipsAndBranchThicknesses = (
       tipSelectedIdx = 0;  // eslint-disable-line
     }
     const data = calculateVisiblityAndBranchThickness(tree, controls, {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}, {tipSelectedIdx, validIdxRoot});
+    const tangleTipLookup = controls.showTreeToo ?
+      constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility) :
+      undefined;
     dispatch({
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
       visibility: data.visibility,
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
+      tangleTipLookup,
       idxOfInViewRootNode: validIdxRoot,
       stateCountAttrs: Object.keys(controls.filters),
       selectedStrain: tipSelectedIdx > 0 ? tree.nodes[tipSelectedIdx].strain : undefined
@@ -68,13 +73,16 @@ export const updateVisibleTipsAndBranchThicknesses = (
  */
 export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = false}) => {
   return (dispatch, getState) => {
-    const { tree, controls, frequencies } = getState();
+    const { tree, treeToo, controls, frequencies } = getState();
     if (!tree.nodes) {return;}
     const dates = {
       dateMinNumeric: newMin ? calendarToNumeric(newMin) : controls.dateMinNumeric,
       dateMaxNumeric: newMax ? calendarToNumeric(newMax) : controls.dateMaxNumeric
     };
     const data = calculateVisiblityAndBranchThickness(tree, controls, dates);
+    const tangleTipLookup = controls.showTreeToo ?
+      constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility) :
+      undefined;
     dispatch({
       type: types.CHANGE_DATES_VISIBILITY_THICKNESS,
       quickdraw,
@@ -86,6 +94,7 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
+      tangleTipLookup,
       idxOfInViewRootNode: tree.idxOfInViewRootNode,
       stateCountAttrs: Object.keys(controls.filters)
     });

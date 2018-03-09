@@ -11,17 +11,21 @@ const treeToo = (state = getDefaultTreeState(), action) => {
     //   return action.tree;
     case types.DATA_INVALID:
       return Object.assign({}, state, {
-	loaded: false
+        loaded: false
       });
     case types.CLEAN_START:
       if (action.treeToo) {
-	return action.treeToo;
+        return action.treeToo;
       }
       return state;
     case types.TREE_TOO_DATA:
       return action.treeToo;
-    // case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
-    // case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
+    case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
+    case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
+      if (action.tangleTipLookup) {
+        return Object.assign({}, state, {tangleTipLookup: action.tangleTipLookup});
+      }
+      return state;
     //   const newStates = {
     //     visibility: action.visibility,
     //     visibilityVersion: action.visibilityVersion,
