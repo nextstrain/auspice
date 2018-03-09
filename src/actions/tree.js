@@ -7,6 +7,35 @@ import { calendarToNumeric } from "../util/dateHelpers";
 import { applyToChildren } from "../components/tree/phyloTree/helpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 
+
+const applyInViewNodesToTree = (idx, tree) => {
+  const validIdxRoot = idx !== undefined ? idx : tree.idxOfInViewRootNode;
+  if (idx !== tree.idxOfInViewRootNode && tree.nodes[0].shell) {
+    /* a bit hacky, should be somewhere else */
+    tree.nodes.forEach((d) => {
+      d.shell.inView = false;
+      d.shell.update = true;
+    });
+    if (tree.nodes[validIdxRoot].shell.terminal) {
+      applyToChildren(tree.nodes[validIdxRoot].shell.parent, (d) => {d.inView = true;});
+    } else {
+      applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
+    }
+  }
+  return validIdxRoot;
+};
+
+const calcTipSelIdx = (tipSelectedIdx, tree) => {
+  let idx;
+  if (idx === 0 && tree.selectedStrain) {
+    idx = strainNameToIdx(tree.nodes, tree.selectedStrain);
+  } else if (idx === -1) {
+    idx = 0;
+  }
+  const strain = idx > 0 ? tree.nodes[idx].strain : undefined;
+  return [idx, strain];
+};
+
 /**
  * define the visible branches and their thicknesses. This could be a path to a single tip or a selected clade.
  * filtering etc will "turn off" branches, etc etc
@@ -15,47 +44,57 @@ import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers
  * for arg destructuring see https://simonsmith.io/destructuring-objects-as-function-parameters-in-es6/
  * @param  {int} idxOfInViewRootNode If clade selected then start visibility at this index. (root = 0)
  * @param  {int} tipSelectedIdx idx of the selected tip. If not 0 will highlight path to this tip. -1 clears any selection.
+ * @param  {int} idxOfInViewRootNodeTreeToo
+ * @param  {int} tipSelectedIdxTreeToo
  * @return {null} side effects: a single action
  */
 export const updateVisibleTipsAndBranchThicknesses = (
-  {idxOfInViewRootNode = undefined, tipSelectedIdx = 0} = {}
+  {idxOfInViewRootNode = undefined, tipSelectedIdx = 0, idxOfInViewRootNodeTreeToo = undefined, tipSelectedIdxTreeToo = 0} = {}
 ) => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
     if (!tree.nodes) {return;}
-    const validIdxRoot = idxOfInViewRootNode !== undefined ? idxOfInViewRootNode : tree.idxOfInViewRootNode;
-    if (idxOfInViewRootNode !== tree.idxOfInViewRootNode && tree.nodes[0].shell) {
-      /* a bit hacky, should be somewhere else */
-      tree.nodes.forEach((d) => {
-        d.shell.inView = false;
-        d.shell.update = true;
-      });
-      if (tree.nodes[validIdxRoot].shell.terminal) {
-        applyToChildren(tree.nodes[validIdxRoot].shell.parent, (d) => {d.inView = true;});
-      } else {
-        applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
-      }
-    }
-    if (tipSelectedIdx === 0 && tree.selectedStrain) {
-      tipSelectedIdx = strainNameToIdx(tree.nodes, tree.selectedStrain); // eslint-disable-line
-    } else if (tipSelectedIdx === -1) {
-      tipSelectedIdx = 0;  // eslint-disable-line
-    }
-    const data = calculateVisiblityAndBranchThickness(tree, controls, {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric}, {tipSelectedIdx, validIdxRoot});
-    const tangleTipLookup = controls.showTreeToo ?
-      constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility) :
-      undefined;
-    dispatch({
+
+    const validIdxRoot = applyInViewNodesToTree(idxOfInViewRootNode, tree);
+    const [tipIdx, tipName] = calcTipSelIdx(tipSelectedIdx, tree);
+
+    const data = calculateVisiblityAndBranchThickness(
+      tree,
+      controls,
+      {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
+      {tipSelectedIdx: tipIdx, validIdxRoot}
+    );
+    const dispatchObj = {
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
       visibility: data.visibility,
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
-      tangleTipLookup,
       idxOfInViewRootNode: validIdxRoot,
       stateCountAttrs: Object.keys(controls.filters),
-      selectedStrain: tipSelectedIdx > 0 ? tree.nodes[tipSelectedIdx].strain : undefined
-    });
+      selectedStrain: tipName
+    };
+
+    if (controls.showTreeToo) {
+      dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility);
+      const validIdxRootToo = applyInViewNodesToTree(idxOfInViewRootNodeTreeToo, treeToo);
+      const [tipIdxToo, tipNameToo] = calcTipSelIdx(tipSelectedIdxTreeToo, treeToo);
+      const dataToo = calculateVisiblityAndBranchThickness(
+        treeToo,
+        controls,
+        {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
+        {tipSelectedIdx: tipIdxToo, validIdxRoot: validIdxRootToo}
+      );
+      dispatchObj.visibilityToo = dataToo.visibility;
+      dispatchObj.visibilityVersionToo = dataToo.visibilityVersion;
+      dispatchObj.branchThicknessToo = dataToo.branchThickness;
+      dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
+      dispatchObj.idxOfInViewRootNodeToo = validIdxRootToo;
+      dispatchObj.selectedStrainToo = tipNameToo;
+    }
+
+    /* D I S P A T C H */
+    dispatch(dispatchObj);
     updateEntropyVisibility(dispatch, getState);
     if (frequencies.loaded) {
       updateFrequencyDataDebounced(dispatch, getState);
@@ -80,10 +119,7 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       dateMaxNumeric: newMax ? calendarToNumeric(newMax) : controls.dateMaxNumeric
     };
     const data = calculateVisiblityAndBranchThickness(tree, controls, dates);
-    const tangleTipLookup = controls.showTreeToo ?
-      constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility) :
-      undefined;
-    dispatch({
+    const dispatchObj = {
       type: types.CHANGE_DATES_VISIBILITY_THICKNESS,
       quickdraw,
       dateMin: newMin ? newMin : controls.dateMin,
@@ -94,10 +130,20 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
-      tangleTipLookup,
       idxOfInViewRootNode: tree.idxOfInViewRootNode,
       stateCountAttrs: Object.keys(controls.filters)
-    });
+    };
+    if (controls.showTreeToo) {
+      dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility);
+      const dataToo = calculateVisiblityAndBranchThickness(treeToo, controls, dates);
+      dispatchObj.visibilityToo = dataToo.visibility;
+      dispatchObj.visibilityVersionToo = dataToo.visibilityVersion;
+      dispatchObj.branchThicknessToo = dataToo.branchThickness;
+      dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
+    }
+
+    /* D I S P A T C H */
+    dispatch(dispatchObj);
     updateEntropyVisibility(dispatch, getState);
     if (frequencies.loaded) {
       updateFrequencyDataDebounced(dispatch, getState);

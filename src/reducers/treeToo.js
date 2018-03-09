@@ -23,7 +23,16 @@ const treeToo = (state = getDefaultTreeState(), action) => {
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       if (action.tangleTipLookup) {
-        return Object.assign({}, state, {tangleTipLookup: action.tangleTipLookup});
+        console.log("action", action)
+        return Object.assign({}, state, {
+          tangleTipLookup: action.tangleTipLookup,
+          visibility: action.visibilityToo,
+          visibilityVersion: action.visibilityVersionToo,
+          branchThickness: action.branchThicknessToo,
+          branchThicknessVersion: action.branchThicknessVersionToo,
+          idxOfInViewRootNode: action.idxOfInViewRootNodeToo,
+          selectedStrain: action.selectedStrainToo
+        });
       }
       return state;
     //   const newStates = {
