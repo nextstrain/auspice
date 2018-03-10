@@ -2,9 +2,6 @@ import { rgb } from "d3-color";
 import { mean } from "d3-array";
 import { interpolateRgb } from "d3-interpolate";
 import { scalePow } from "d3-scale";
-import { parseEncodedGenotype } from "./getGenotype";
-import getColorScale from "./colorScale";
-import { setGenotype } from "./setGenotype";
 
 /**
 * Takes an array of color hex strings.
@@ -34,13 +31,15 @@ export const determineColorByGenotypeType = (colorBy) => {
 /**
 * what values (for colorBy) are present in the tree and not in the color_map?
 * @param {Array} nodes - list of nodes
+* @param {Array|undefined} nodesToo - list of nodes for the second tree
 * @param {string} colorBy -
 * @param {Array} color_map - list of colorBy values with colours
 * @return {list}
 */
-export const getExtraVals = (nodes, colorBy, color_map) => {
+export const getExtraVals = (nodes, nodesToo, colorBy, color_map) => {
   let valsInTree = [];
   nodes.forEach((n) => valsInTree.push(n.attr[colorBy]));
+  if (nodesToo) nodesToo.forEach((n) => valsInTree.push(n.attr[colorBy]));
   valsInTree = [...new Set(valsInTree)];
   const valsInMeta = color_map.map((d) => { return d[0];});
   // console.log("here", valsInMeta, valsInTree, valsInTree.filter((x) => valsInMeta.indexOf(x) === -1))
@@ -60,7 +59,7 @@ export const getTipColorAttribute = (node, colorScale) => {
 
 /* generates and returns an array of colours (HEXs) for the nodes under the given colorScale */
 /* takes around 2ms on a 2000 tip tree */
-const calcNodeColor = (tree, colorScale) => {
+export const calcNodeColor = (tree, colorScale) => {
   if (tree && tree.nodes && colorScale && colorScale.colorBy) {
     const nodeColorAttr = tree.nodes.map((n) => getTipColorAttribute(n, colorScale));
     // console.log(nodeColorAttr.map((n) => colorScale.scale(n)))
@@ -99,24 +98,4 @@ export const calcBranchStrokeCols = (tree, confidence, colorBy) => {
   return tree.nodeColors.map((col) => {
     return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString();
   });
-};
-
-export const calcColorScaleAndNodeColors = (colorBy, controls, tree, metadata) => {
-  let genotype;
-  if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
-    genotype = parseEncodedGenotype(colorBy, controls.geneLength);
-    if (genotype.length > 1) {
-      console.warn("Cannot deal with multiple proteins yet - using first only.");
-    }
-    setGenotype(tree.nodes, genotype[0].prot || "nuc", genotype[0].positions); /* modifies nodes recursively */
-  }
-
-  /* step 1: calculate the required colour scale */
-  const version = controls.colorScale === undefined ? 1 : controls.colorScale.version + 1;
-  const colorScale = getColorScale(colorBy, tree, controls.geneLength, metadata.colorOptions, version, controls.absoluteDateMaxNumeric);
-  if (genotype) colorScale.genotype = genotype;
-
-  /* step 2: calculate the node colours */
-  const nodeColors = calcNodeColor(tree, colorScale);
-  return {nodeColors, colorScale, version};
 };

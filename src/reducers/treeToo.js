@@ -50,11 +50,14 @@ const treeToo = (state = getDefaultTreeState(), action) => {
     //     tipRadii: action.data,
     //     tipRadiiVersion: action.version
     //   });
-    // case types.NEW_COLORS:
-    //   return Object.assign({}, state, {
-    //     nodeColors: action.nodeColors,
-    //     nodeColorsVersion: action.version
-    //   });
+    case types.NEW_COLORS:
+      if (action.nodeColorsToo) {
+        return Object.assign({}, state, {
+          nodeColors: action.nodeColorsToo,
+          nodeColorsVersion: action.version
+        });
+      }
+      return state;
     // case types.ADD_COLOR_BYS:
     //   /* modify in place ?!?! */
     //   for (const node of state.nodes) {

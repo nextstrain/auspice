@@ -10,7 +10,8 @@ import { getValuesAndCountsOfVisibleTraitsFromTree,
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons";
-import { determineColorByGenotypeType, calcColorScaleAndNodeColors } from "../util/colorHelpers";
+import { determineColorByGenotypeType, calcNodeColor } from "../util/colorHelpers";
+import { calcColorScale } from "../util/colorScale";
 
 export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -361,7 +362,8 @@ export const createStateFromQueryOrJSONs = ({
 
   /* calculate colours if loading from JSONs or if the query demands change */
   if (JSONs || controls.colorBy !== oldState.colorBy) {
-    const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(controls.colorBy, controls, tree, metadata);
+    const {colorScale, version} = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
+    const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;
     controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
     tree.nodeColorsVersion = version;
@@ -370,9 +372,9 @@ export const createStateFromQueryOrJSONs = ({
 
   /* TEMPORARY ONLY */
   if (treeToo) {
-    const tmp = calcColorScaleAndNodeColors(controls.colorBy, controls, treeToo, metadata);
-    treeToo.nodeColorsVersion = tmp.version;
-    treeToo.nodeColors = tmp.nodeColors;
+    // const tmp = calcColorScaleAndNodeColors(controls.colorBy, controls, treeToo, metadata);
+    treeToo.nodeColorsVersion = tree.nodeColorsVersion;
+    treeToo.nodeColors = calcNodeColor(tree, controls.colorScale);
   }
 
   tree = modifyTreeStateVisAndBranchThickness(tree, query.s, controls);
@@ -401,11 +403,11 @@ export const createTreeTooState = ({
   /* new tree state */
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, oldState.controls);
-
   controls = modifyStateViaTree(controls, oldState.tree, treeToo);
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(controls.colorBy, controls, treeToo, oldState.metadata);
+  const {colorScale, version} = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);
+  const nodeColors = calcNodeColor(treeToo, colorScale);
   controls.colorScale = colorScale;
   controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
   treeToo.nodeColorsVersion = version;
