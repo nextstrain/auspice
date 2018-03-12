@@ -1,4 +1,4 @@
-import { parseGenotype } from "../util/getGenotype";
+import { parseEncodedGenotype } from "../util/getGenotype";
 import getColorScale from "../util/getColorScale";
 import { setGenotype } from "../util/setGenotype";
 import { calcNodeColor } from "../components/tree/treeHelpers";
@@ -11,9 +11,11 @@ import * as types from "./types";
 export const calcColorScaleAndNodeColors = (colorBy, controls, tree, metadata) => {
   let genotype;
   if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
-    const x = parseGenotype(colorBy, controls.geneLength);
-    setGenotype(tree.nodes, x[0][0], x[0][1] + 1); /* modifies nodes recursively */
-    genotype = parseGenotype(colorBy, controls.geneLength);
+    genotype = parseEncodedGenotype(colorBy, controls.geneLength);
+    if (genotype.length > 1) {
+      console.warn("Cannot deal with multiple proteins yet - using first only.");
+    }
+    setGenotype(tree.nodes, genotype[0].prot || "nuc", genotype[0].positions); /* modifies nodes recursively */
   }
 
   /* step 1: calculate the required colour scale */
@@ -42,14 +44,10 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
     const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(colorBy, controls, tree, metadata);
 
     /* step 3: change in mutType? */
-    const newMutType = determineColorByGenotypeType(colorBy) !== controls.mutType ? determineColorByGenotypeType(colorBy) : false;
+    const colorByMutType = determineColorByGenotypeType(colorBy);
+    const newMutType = colorByMutType !== controls.mutType ? colorByMutType : false;
+
     timerEnd("changeColorBy calculations"); /* end timer before dispatch */
-    if (newMutType) {
-      updateEntropyVisibility(dispatch, getState);
-    }
-    if (frequencies.loaded) {
-      updateFrequencyDataDebounced(dispatch, getState);
-    }
 
     /* step 4: dispatch */
     dispatch({
@@ -60,6 +58,14 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
       version,
       newMutType
     });
+
+    /* step 5 - entropy & frequency dispatches (maybe these could be combined) */
+    if (newMutType) {
+      updateEntropyVisibility(dispatch, getState);
+    }
+    if (frequencies.loaded) {
+      updateFrequencyDataDebounced(dispatch, getState);
+    }
 
     return null;
   };

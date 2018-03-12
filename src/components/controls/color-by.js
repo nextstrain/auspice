@@ -102,24 +102,17 @@ class ColorBy extends React.Component {
   }
 
   gtPositionInput() {
-
-    // let value = "";
-    // if (this.props.colorBy) {
-    //   if (this.props.colorBy.slice(0, 2) === "gt") {
-    //     value = this.props.colorBy.slice(3);
-    //   }
-    // }
-
     if (this.state.colorBySelected === "gt") {
       return (
         <input
           type="text"
           style={sidebarField}
-          placeholder={this.state.geneSelected + " position..."}
+          placeholder={this.state.geneSelected + " positions..."}
           value={this.state.positionSelected}
           onChange={(e) => {
             const gene = this.state.geneSelected;
             const position = e.target.value;
+            console.log("gtPositionInput -> ", gene, position);
             this.setState({positionSelected: position});
             this.setGenotypeColoring(gene, position);
           }}
@@ -135,15 +128,12 @@ class ColorBy extends React.Component {
   }
 
   setGenotypeColoring(gene, position) {
-    // check if this is any sort of integer
-    if (!this.isNormalInteger(position)) {
-      return;
-    }
-    // check if integer is in range
-    if (parseInt(position, 10) < 1 || parseInt(position, 10) > this.props.geneLength[gene]) {
-      return;
-    }
-    const colorBy = "gt-" + gene + "_" + position;
+    if (!position) return;
+    const positions = position.split(',').filter((x) =>
+      parseInt(x, 10) > 0 && parseInt(x, 10) < this.props.geneLength[gene]
+    );
+    if (!positions.length) return;
+    const colorBy = "gt-" + gene + "_" + positions.join(',');
     analyticsControlsEvent("color-by-genotype");
     this.props.dispatch(changeColorBy(colorBy));
   }

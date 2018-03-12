@@ -7,6 +7,7 @@ import { getDefaultTreeState, getAttrsOnTerminalNodes } from "../reducers/tree";
 import { calculateVisiblityAndBranchThickness } from "./treeProperties";
 import { calcEntropyInView, getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
 import { calcColorScaleAndNodeColors } from "./colors";
+import { determineColorByGenotypeType } from "../util/colorHelpers";
 
 const getAnnotations = (jsonData) => {
   const annotations = [];
@@ -285,6 +286,10 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
       state.temporalConfidence.on = false;
     }
   }
+
+  /* if colorBy is a genotype then we need to set mutType */
+  const maybeMutType = determineColorByGenotypeType(state.colorBy);
+  if (maybeMutType) state.mutType = maybeMutType;
 
   return state;
 };

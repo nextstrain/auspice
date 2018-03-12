@@ -3,7 +3,6 @@ import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors, reallySmallNumber, reallyBigNumber } from "./globals";
-import { parseGenotype } from "./getGenotype";
 import { getAllValuesAndCountsOfTraitsFromTree } from "./treeTraversals";
 import { setLBI } from "./localBranchingIndex";
 
@@ -126,18 +125,15 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absolut
     if (!geneLength) {
       continuous = true;
       colorScale = genericScale(0, 1);
-    } else if (parseGenotype(colorBy, geneLength)) {
-      // genotype coloring
-      const gt = parseGenotype(colorBy, geneLength);
-      if (gt) {
-        const stateCount = {};
-        tree.nodes.forEach((n) => {
-          stateCount[n.currentGt] ? stateCount[n.currentGt]++ : stateCount[n.currentGt] = 1;
-        });
-        const domain = Object.keys(stateCount);
-        domain.sort((a, b) => stateCount[a] > stateCount[b]);
-        colorScale = scaleOrdinal().domain(domain).range(genotypeColors);
-      }
+    } else {
+      const stateCount = {};
+      tree.nodes.forEach((n) => {
+        stateCount[n.currentGt] ? stateCount[n.currentGt]++ : stateCount[n.currentGt] = 1;
+      });
+      // console.log("statecounts:", stateCount);
+      const domain = Object.keys(stateCount);
+      domain.sort((a, b) => stateCount[a] > stateCount[b]);
+      colorScale = scaleOrdinal().domain(domain).range(genotypeColors);
     }
   } else if (colorBy === "lbi") {
     try {
