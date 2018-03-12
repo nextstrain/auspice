@@ -13,6 +13,8 @@ const treeToo = (state = getDefaultTreeState(), action) => {
       return Object.assign({}, state, {
         loaded: false
       });
+    case types.REMOVE_TREE_TOO:
+      return getDefaultTreeState();
     case types.CLEAN_START:
       if (action.treeToo) {
         return action.treeToo;
@@ -23,7 +25,8 @@ const treeToo = (state = getDefaultTreeState(), action) => {
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: /* fall-through */
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS:
       if (action.tangleTipLookup) {
-        console.log("action", action)
+        console.log("action", action);
+        console.warn("NB missing visibleStateCounts from treeToo here");
         return Object.assign({}, state, {
           tangleTipLookup: action.tangleTipLookup,
           visibility: action.visibilityToo,
@@ -35,16 +38,6 @@ const treeToo = (state = getDefaultTreeState(), action) => {
         });
       }
       return state;
-    //   const newStates = {
-    //     visibility: action.visibility,
-    //     visibilityVersion: action.visibilityVersion,
-    //     branchThickness: action.branchThickness,
-    //     branchThicknessVersion: action.branchThicknessVersion,
-    //     idxOfInViewRootNode: action.idxOfInViewRootNode,
-    //     visibleStateCounts: getValuesAndCountsOfVisibleTraitsFromTree(state.nodes, action.visibility, action.stateCountAttrs),
-    //     selectedStrain: action.selectedStrain
-    //   };
-    //   return Object.assign({}, state, newStates);
     // case types.UPDATE_TIP_RADII:
     //   return Object.assign({}, state, {
     //     tipRadii: action.data,
@@ -58,18 +51,6 @@ const treeToo = (state = getDefaultTreeState(), action) => {
         });
       }
       return state;
-    // case types.ADD_COLOR_BYS:
-    //   /* modify in place ?!?! */
-    //   for (const node of state.nodes) {
-    //     if (action.taxa.indexOf(node.strain) !== -1) {
-    //       action.newColorBys.forEach((colorBy, idx) => {
-    //         node.attr[colorBy] = action.data[node.strain][idx];
-    //       });
-    //     }
-    //   }
-    //   return Object.assign({}, state, {
-    //     attrs: getAttrsOnTerminalNodes(state.nodes)
-    //   });
     default:
       return state;
   }

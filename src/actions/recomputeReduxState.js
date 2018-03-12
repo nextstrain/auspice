@@ -381,7 +381,7 @@ export const createStateFromQueryOrJSONs = ({
   if (treeToo) {
     treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, controls);
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility);
-    controls.showTreeToo = true;
+    controls.showTreeToo = query.tt;
   }
 
   /* calculate entropy in view */
@@ -395,7 +395,8 @@ export const createStateFromQueryOrJSONs = ({
 
 export const createTreeTooState = ({
   treeTooJSON, /* raw json data */
-  oldState
+  oldState,
+  segment /* name of the treeToo segment */
 }) => {
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
@@ -404,6 +405,7 @@ export const createTreeTooState = ({
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, oldState.controls);
   controls = modifyStateViaTree(controls, oldState.tree, treeToo);
+  controls.showTreeToo = segment;
 
   /* calculate colours if loading from JSONs or if the query demands change */
   const {colorScale, version} = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);

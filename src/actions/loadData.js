@@ -28,15 +28,15 @@ export const loadJSONs = (s3override = undefined) => {
     if (query.tt) { /* SECOND TREE */
       const secondPath = createDatapathForSecondSegment(query.tt, datasets.datapath, datasets.availableDatasets);
       if (secondPath) {
-	promises.push(fetch(apiPath(secondPath, "tree")).then((res) => res.json()));
+        promises.push(fetch(apiPath(secondPath, "tree")).then((res) => res.json()));
       }
     }
     Promise.all(promises)
       .then((values) => {
         /* we do expensive stuff here not reducers. Allows fewer dispatches. */
-	const JSONs = {meta: values[0], tree: values[1]};
-	if (values.length === 3) JSONs.treeToo = values[2];
-	const newStates = createStateFromQueryOrJSONs({JSONs, query});
+        const JSONs = {meta: values[0], tree: values[1]};
+        if (values.length === 3) JSONs.treeToo = values[2];
+        const newStates = createStateFromQueryOrJSONs({JSONs, query});
         dispatch({ type: types.CLEAN_START, ...newStates });
 
         /* F R E Q U E N C I E S */
@@ -89,7 +89,7 @@ export const loadTreeToo = (name, path) => (dispatch, getState) => {
     .then((res) => res.json())
     .then((res) => {
       const newState = createTreeTooState(
-	{treeTooJSON: res, oldState: getState()}
+        {treeTooJSON: res, oldState: getState(), segment: name}
       );
       dispatch({ type: types.TREE_TOO_DATA, treeToo: newState.treeToo, controls: newState.controls, segment: name});
     })

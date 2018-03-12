@@ -6,6 +6,7 @@ import parseParams from "../../util/parseParams";
 import { SelectLabel } from "../framework/select-label";
 import { loadTreeToo } from "../../actions/loadData";
 import { controlsWidth } from "../../util/globals";
+import { REMOVE_TREE_TOO } from "../../actions/types";
 
 // // remove starting or trailing slashes from path
 // const tidyUpPathname = (pathname) => {
@@ -16,7 +17,8 @@ import { controlsWidth } from "../../util/globals";
 @connect((state) => {
   return {
     availableDatasets: state.datasets.availableDatasets,
-    datapath: state.datasets.datapath
+    datapath: state.datasets.datapath,
+    showTreeToo: state.controls.showTreeToo
   };
 })
 class ChooseDataset extends React.Component {
@@ -56,13 +58,17 @@ class ChooseDataset extends React.Component {
             />
           </div>
         ));
-	if (Object.keys(level).indexOf("segment") !== -1 && options.length > 1) {
-	  treeToo = {
-	    fieldIdx: vi,
-	    options: options.filter((v) => v !== choices[vi]),
-	    treeOne: choices[vi] // the option chosen for tree one (e.g. NA, PB1...)
-	  };
-	}
+        if (Object.keys(level).indexOf("segment") !== -1 && options.length > 1) {
+          const treeTooOptions = options.filter((v) => v !== choices[vi]);
+          if (this.props.showTreeToo) {
+            treeTooOptions.unshift("REMOVE");
+          }
+          treeToo = {
+            fieldIdx: vi,
+            options: treeTooOptions,
+            treeOne: choices[vi] // the option chosen for tree one (e.g. NA, PB1...)
+          };
+        }
         // move to the next level in the data set hierarchy
         level = level[fields[vi]][choices[vi]];
       }
@@ -71,24 +77,28 @@ class ChooseDataset extends React.Component {
     /* second tree? */
     if (treeToo) {
       selectors.push((
-	<SelectLabel key="treetootitle" text="Second Tree"/>
+        <SelectLabel key="treetootitle" text="Second Tree"/>
       ));
       selectors.push((
-	<div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
-	  <Select
-	    name="selectTreeToo"
-	    id="selectTreeToo"
-	    value={"...unknown..."}
-	    options={treeToo.options.map((opt) => ({value: opt, label: opt}))}
-	    clearable={false}
-	    multi={false}
-	    onChange={(opt) => {
-	      const dataPath = [...choices];
-	      dataPath.splice(treeToo.fieldIdx, 1, opt.value);
-	      this.props.dispatch(loadTreeToo(opt.value, dataPath.join("_")));
-	    }}
-	  />
-	</div>
+        <div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
+          <Select
+            name="selectTreeToo"
+            id="selectTreeToo"
+            value={this.props.showTreeToo}
+            options={treeToo.options.map((opt) => ({value: opt, label: opt}))}
+            clearable={false}
+            multi={false}
+            onChange={(opt) => {
+              if (opt.value === "REMOVE") {
+                this.props.dispatch({type: REMOVE_TREE_TOO});
+              } else {
+                const dataPath = [...choices];
+                dataPath.splice(treeToo.fieldIdx, 1, opt.value);
+                this.props.dispatch(loadTreeToo(opt.value, dataPath.join("_")));
+              }
+            }}
+          />
+        </div>
       ));
     }
 

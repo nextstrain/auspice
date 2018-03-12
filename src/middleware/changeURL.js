@@ -36,8 +36,12 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query[`f_${action.fields}`] = action.values.join(',');
       break;
     }
-    case types.TREE_TOO_DATA: {
+    case types.REMOVE_TREE_TOO: {
       query.tt = action.segment;
+      break;
+    }
+    case types.TREE_TOO_DATA: {
+      query.tt = undefined;
       break;
     }
     case types.CHANGE_LAYOUT: {

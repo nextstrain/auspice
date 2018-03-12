@@ -49,10 +49,10 @@ class Tree extends React.Component {
       this.Viewer.fitToViewer();
       const newState = {tree};
       if (this.props.showTreeToo) {
-	const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
-	renderTree(this, false, treeToo, this.props);
-	this.ViewerToo.fitToViewer();
-	newState.treeToo = treeToo;
+        const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
+        renderTree(this, false, treeToo, this.props);
+        this.ViewerToo.fitToViewer();
+        newState.treeToo = treeToo;
       }
       this.setState(newState);
     }
@@ -70,9 +70,15 @@ class Tree extends React.Component {
       this.Viewer.fitToViewer();
       this.setState({tree});
     } else {
-      const newState = changePhyloTreeViaPropsComparison(true, this.state.tree, this.Viewer, this.props, nextProps);
+      let newState = changePhyloTreeViaPropsComparison(true, this.state.tree, this.Viewer, this.props, nextProps);
       if (this.state.treeToo) {
-	changePhyloTreeViaPropsComparison(false, this.state.treeToo, this.ViewerToo, this.props, nextProps);
+        if (nextProps.showTreeToo) {
+          changePhyloTreeViaPropsComparison(false, this.state.treeToo, this.ViewerToo, this.props, nextProps);
+        } else if (newState) { /* tree too has been removed */
+          newState.treeToo = null;
+        } else {
+          newState = {treeToo: null};
+        }
       }
       if (newState) this.setState(newState);
     }
@@ -86,6 +92,10 @@ class Tree extends React.Component {
       this.ViewerToo.fitToViewer();
       this.state.tree.change({svgHasChangedDimensions: true}); /* the main tree */
       this.setState({treeToo}); // eslint-disable-line
+      return;
+    }
+    if (prevProps.showTreeToo && !this.props.showTreeToo) {
+      this.state.tree.change({svgHasChangedDimensions: true});
       return;
     }
     const browserResize = this.props.width !== prevProps.width || this.props.height !== prevProps.height;
@@ -163,7 +173,7 @@ class Tree extends React.Component {
             colors={this.props.tree.nodeColors}
             cVersion={this.props.tree.nodeColorsVersion}
             vVersion={this.props.tree.visibilityVersion}
-	    metric={this.props.distanceMeasure}
+            metric={this.props.distanceMeasure}
             spaceBetweenTrees={spaceBetweenTrees}
           />
         ) : null }
