@@ -1,5 +1,5 @@
 /* eslint no-underscore-dangle: off */
-import { select, event } from "d3-selection";
+import { select, event as d3event } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { zoom } from "d3-zoom";
@@ -188,7 +188,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
     .attr("height", (d) => this.offsets.heightMain - this.scales.y(d.y))
     .style("fill", fillfn)
     .on("mouseover", (d) => {
-      this.callbacks.onHover(d, event.pageX, event.pageY);
+      this.callbacks.onHover(d, d3event.pageX, d3event.pageY);
     })
     .on("mouseout", (d) => {
       this.callbacks.onLeave(d);
@@ -278,7 +278,7 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
 EntropyChart.prototype._addBrush = function _addBrush() {
   this.brushed = function brushed() {
     /* this block called when the brush is manipulated */
-    const s = event.selection || this.scales.xNav.range();
+    const s = d3event.selection || this.scales.xNav.range();
     // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
     this.xModified = this.scales.xMain.domain(s.map(this.scales.xNav.invert, this.scales.xNav));
     this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
@@ -343,7 +343,7 @@ EntropyChart.prototype._addZoomLayers = function _addZoomLayers() {
       .attr("width", this.offsets.width)
       .attr("height", this.offsets.y2Nav + 30 - this.offsets.y1Main)
       .call(this.zoom)
-      .on("wheel", () => { event.preventDefault(); });
+      .on("wheel", () => { d3event.preventDefault(); });
   }, "keydown");
   Mousetrap.bind(zoomKeys, () => {
     this.svg.selectAll(".overlay").remove();
@@ -352,7 +352,7 @@ EntropyChart.prototype._addZoomLayers = function _addZoomLayers() {
 
 EntropyChart.prototype._createZoomFn = function _createZoomFn() {
   return function zoomed() {
-    const t = event.transform;
+    const t = d3event.transform;
     /* rescale the x axis (not y) */
     this.xModified = t.rescaleX(this.scales.xMainOriginal);
     this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);

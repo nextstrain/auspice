@@ -1,5 +1,6 @@
-## version 1.15.0 - 2018/03/12
+* Fix Firefox branch / tip hover bug [Issue 525](https://github.com/nextstrain/auspice/issues/525)
 
+## version 1.15.0 - 2018/03/12
 * Multiple genotypes (for the same amino acid) by typing in multiple comma separated AA/nuc positions.
 [PR 523](https://github.com/nextstrain/auspice/pull/523).
 
