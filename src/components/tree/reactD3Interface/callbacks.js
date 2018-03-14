@@ -24,7 +24,7 @@ export const onTipClick = function onTipClick(d) {
 };
 
 
-export const onBranchHover = function onBranchHover(d, x, y) {
+export const onBranchHover = function onBranchHover(d) {
   /* emphasize the color of the branch */
   for (const id of ["#branch_S_" + d.n.clade, "#branch_T_" + d.n.clade]) {
     if (this.props.colorByConfidence) {
@@ -47,7 +47,7 @@ export const onBranchHover = function onBranchHover(d, x, y) {
       .call((sel) => this.state.tree.drawSingleCI(sel, 0.5));
   }
   this.setState({
-    hovered: {d, type: ".branch", x, y}
+    hovered: {d, type: ".branch"}
   });
 };
 

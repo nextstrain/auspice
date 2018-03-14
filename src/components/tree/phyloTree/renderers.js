@@ -147,7 +147,7 @@ export const drawBranches = function drawBranches() {
     .style("fill", "none")
     .style("cursor", "pointer")
     .style("pointer-events", "auto")
-    .on("mouseover", (d) => this.callbacks.onBranchHover(d, event.pageX, event.pageY))
+    .on("mouseover", this.callbacks.onBranchHover)
     .on("mouseout", (d) => this.callbacks.onBranchLeave(d))
     .on("click", (d) => this.callbacks.onBranchClick(d));
   timerEnd("drawBranches");

@@ -78,7 +78,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, viewer, o
   }
 
   if (Object.keys(args).length) {
-    console.log('\n\n** ', phylotree.debugId, 'changePhyloTreeViaPropsComparison **', args);
+    // console.log('\n\n** ', phylotree.debugId, 'changePhyloTreeViaPropsComparison **', args);
     phylotree.change(args);
   }
   return Object.keys(newState).length ? newState : false;

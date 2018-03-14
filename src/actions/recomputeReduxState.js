@@ -388,7 +388,7 @@ export const createStateFromQueryOrJSONs = ({
   const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
   entropy.bars = entropyBars;
   entropy.maxYVal = entropyMaxYVal;
-  console.log("treetoo:", treeToo);
+  // console.log("treetoo:", treeToo);
   return {tree, treeToo, metadata, entropy, controls}; // eslint-disable-line
 };
 

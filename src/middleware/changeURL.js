@@ -37,11 +37,11 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.REMOVE_TREE_TOO: {
-      query.tt = action.segment;
+      query.tt = undefined;
       break;
     }
     case types.TREE_TOO_DATA: {
-      query.tt = undefined;
+      query.tt = action.segment;
       break;
     }
     case types.CHANGE_LAYOUT: {

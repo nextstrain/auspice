@@ -3,13 +3,32 @@ import { rgb } from "d3-color";
 import { calcBranchStrokeCols } from "../../../util/colorHelpers";
 import * as callbacks from "./callbacks";
 
-export const renderTree = (that, main, phylotree, props) => {
+export const renderTree = (that, main, phylotree, props, useCallbacks) => {
   const ref = main ? that.d3ref : that.d3refToo;
   const treeState = main ? props.tree : props.treeToo;
   if (!treeState.loaded) {
     console.warn("can't run renderTree (not loaded)");
     return;
   }
+  const undefinedCallback = () => {console.log("Not yet implemented.");}
+  const callbackObj = useCallbacks ?
+    { /* callbacks */
+      onTipHover: callbacks.onTipHover.bind(that),
+      onTipClick: callbacks.onTipClick.bind(that),
+      onBranchHover: callbacks.onBranchHover.bind(that),
+      onBranchClick: callbacks.onBranchClick.bind(that),
+      onBranchLeave: callbacks.onBranchLeave.bind(that),
+      onTipLeave: callbacks.onTipLeave.bind(that),
+      tipLabel: (d) => d.n.strain
+    } : {
+      onTipHover: undefinedCallback,
+      onTipClick: undefinedCallback,
+      onBranchHover: undefinedCallback,
+      onBranchClick: undefinedCallback,
+      onBranchLeave: undefinedCallback,
+      onTipLeave: undefinedCallback,
+      tipLabel: undefinedCallback
+    };
   /* simply the call to phylotree.render */
   phylotree.render(
     select(ref),
@@ -23,16 +42,7 @@ export const renderTree = (that, main, phylotree, props) => {
       tipLabels: true,
       showTipLabels: true
     },
-    { /* callbacks */
-      onTipHover: callbacks.onTipHover.bind(that),
-      onTipClick: callbacks.onTipClick.bind(that),
-      onBranchHover: callbacks.onBranchHover.bind(that),
-      onBranchClick: callbacks.onBranchClick.bind(that),
-      onBranchLeave: callbacks.onBranchLeave.bind(that),
-      onTipLeave: callbacks.onTipLeave.bind(that),
-      tipLabel: (d) => d.n.strain,
-      tipLabelSize: callbacks.tipLabelSize.bind(that)
-    },
+    callbackObj,
     treeState.branchThickness, /* guarenteed to be in redux by now */
     treeState.visibility,
     props.temporalConfidence.on, /* drawConfidence? */

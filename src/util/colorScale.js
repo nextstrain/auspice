@@ -85,8 +85,10 @@ const createListOfColors = (n, range) => {
 
 const discreteAttributeScale = (nodes, nodesToo, attr) => {
   const stateCount = getAllValuesAndCountsOfTraitsFromTree(nodes, attr)[attr];
-  const stateCountToo = getAllValuesAndCountsOfTraitsFromTree(nodesToo, attr)[attr];
-  console.log("TODO discreteAttributeScale", stateCount, stateCountToo)
+  if (nodesToo) {
+    const stateCountToo = getAllValuesAndCountsOfTraitsFromTree(nodesToo, attr)[attr];
+    console.log("TODO discreteAttributeScale", stateCount, stateCountToo)
+  }
   const domain = Object.keys(stateCount);
   domain.sort((a, b) => stateCount[a] > stateCount[b]);
   // note: colors[n] has n colors
@@ -105,7 +107,7 @@ const discreteAttributeScale = (nodes, nodesToo, attr) => {
 
 
 export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
-  console.log("calcColorScale", treeToo)
+  // console.log("calcColorScale", treeToo)
   let genotype;
   if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
     genotype = parseEncodedGenotype(colorBy, controls.geneLength);
