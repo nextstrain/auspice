@@ -1,3 +1,5 @@
+## version 1.15.1 - 2018/03/14
+
 * Fix Firefox branch / tip hover bug [Issue 525](https://github.com/nextstrain/auspice/issues/525)
 
 ## version 1.15.0 - 2018/03/12
