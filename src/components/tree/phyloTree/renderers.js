@@ -68,9 +68,9 @@ export const drawVaccines = function drawVaccines() {
     .style("fill", "none")
     .style("cursor", "pointer")
     .style("pointer-events", "auto")
-    .on("mouseover", (d) => this.callbacks.onTipHover(d, event.pageX, event.pageY))
-    .on("mouseout", (d) => this.callbacks.onTipLeave(d))
-    .on("click", (d) => this.callbacks.onTipClick(d));
+    .on("mouseover", this.callbacks.onTipHover)
+    .on("mouseout", this.callbacks.onTipLeave)
+    .on("click", this.callbacks.onTipClick);
 
   this.svg.append("g").selectAll('.vaccineDottedLine')
     .data(this.vaccines)
@@ -102,9 +102,9 @@ export const drawTips = function drawTips() {
     .attr("cx", (d) => d.xTip)
     .attr("cy", (d) => d.yTip)
     .attr("r", (d) => d.r)
-    .on("mouseover", (d) => this.callbacks.onTipHover(d, event.pageX, event.pageY))
-    .on("mouseout", (d) => this.callbacks.onTipLeave(d))
-    .on("click", (d) => this.callbacks.onTipClick(d))
+    .on("mouseover", this.callbacks.onTipHover)
+    .on("mouseout", this.callbacks.onTipLeave)
+    .on("click", this.callbacks.onTipClick)
     .style("pointer-events", "auto")
     .style("visibility", (d) => d["visibility"])
     .style("fill", (d) => d.fill || params.tipFill)
@@ -148,8 +148,8 @@ export const drawBranches = function drawBranches() {
     .style("cursor", "pointer")
     .style("pointer-events", "auto")
     .on("mouseover", this.callbacks.onBranchHover)
-    .on("mouseout", (d) => this.callbacks.onBranchLeave(d))
-    .on("click", (d) => this.callbacks.onBranchClick(d));
+    .on("mouseout", this.callbacks.onBranchLeave)
+    .on("click", this.callbacks.onBranchClick);
   timerEnd("drawBranches");
 };
 

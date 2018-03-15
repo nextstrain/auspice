@@ -6,11 +6,11 @@ import { branchOpacityFunction } from "../../../util/colorHelpers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
-export const onTipHover = function onTipHover(d, x, y) {
+export const onTipHover = function onTipHover(d) {
   this.state.tree.svg.select("#tip_" + d.n.clade)
     .attr("r", (e) => e["r"] + 4);
   this.setState({
-    hovered: {d, type: ".tip", x, y}
+    hovered: {d, type: ".tip"}
   });
 };
 

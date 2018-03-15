@@ -32,11 +32,11 @@ class Tree extends React.Component {
     this.redrawTree = () => {
       this.state.tree.clearSVG();
       this.Viewer.fitToViewer();
-      renderTree(this, true, this.state.tree, this.props, true);
+      renderTree(this, true, this.state.tree, this.props);
       if (this.props.showTreeToo) {
         this.state.treeToo.clearSVG();
         this.ViewerToo.fitToViewer();
-        renderTree(this, false, this.state.treeToo, this.props, false);
+        renderTree(this, false, this.state.treeToo, this.props);
       }
       this.setState({hover: null, selectedBranch: null, selectedTip: null});
       this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0}));
@@ -45,12 +45,12 @@ class Tree extends React.Component {
   componentDidMount() {
     if (this.props.tree.loaded) {
       const tree = new PhyloTree(this.props.tree.nodes, "LEFT");
-      renderTree(this, true, tree, this.props, true);
+      renderTree(this, true, tree, this.props);
       this.Viewer.fitToViewer();
       const newState = {tree};
       if (this.props.showTreeToo) {
         const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
-        renderTree(this, false, treeToo, this.props, false);
+        renderTree(this, false, treeToo, this.props);
         this.ViewerToo.fitToViewer();
         newState.treeToo = treeToo;
       }
@@ -66,7 +66,7 @@ class Tree extends React.Component {
     }
     if (!this.state.tree && nextProps.tree.loaded) {
       const tree = new PhyloTree(nextProps.tree.nodes, "LEFT");
-      renderTree(this, true, tree, nextProps, true);
+      renderTree(this, true, tree, nextProps);
       this.Viewer.fitToViewer();
       this.setState({tree});
     } else {
@@ -88,7 +88,7 @@ class Tree extends React.Component {
   componentDidUpdate(prevProps) {
     if (!prevProps.showTreeToo && this.props.showTreeToo) {
       const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
-      renderTree(this, false, treeToo, this.props, false);
+      renderTree(this, false, treeToo, this.props);
       this.ViewerToo.fitToViewer();
       this.state.tree.change({svgHasChangedDimensions: true}); /* the main tree */
       this.setState({treeToo}); // eslint-disable-line
@@ -150,7 +150,7 @@ class Tree extends React.Component {
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
-          panelDims={{width: this.props.width, height: this.props.height}}
+          panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
         />
         <TipClickedPanel
           goAwayCallback={this.clearSelectedTip}

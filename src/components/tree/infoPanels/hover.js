@@ -173,7 +173,12 @@ const getPanelStyling = (d, viewer, panelDims) => {
   const xOffset = 10;
   const yOffset = 10;
   const width = 200;
-  const pos = treePosToViewer(d.xTip, d.yTip, viewerState);
+
+  /* this adjusts the x-axis for the right tree in dual tree view */
+  const xPos = d.that.params.orientation[0] === -1 ?
+    panelDims.width / 2 + panelDims.spaceBetweenTrees + d.xTip :
+    d.xTip;
+  const pos = treePosToViewer(xPos, d.yTip, viewerState);
   const styles = {
     container: {
       position: "absolute",
