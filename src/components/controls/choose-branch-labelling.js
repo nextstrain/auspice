@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import Select from "react-select";
 import { controlsWidth } from "../../util/globals";
 import { CHANGE_BRANCH_LABEL } from "../../actions/types";
+import { SelectLabel } from "../framework/select-label";
 
 @connect((state) => ({
   selected: state.controls.selectedBranchLabel,
@@ -27,6 +28,7 @@ class ChooseBranchLabelling extends React.Component {
     const styles = this.getStyles();
     return (
       <div style={styles.base}>
+        <SelectLabel text="Branch Labels"/>
         <Select
           name="selectedBranchLabel"
           id="selectedBranchLabel"

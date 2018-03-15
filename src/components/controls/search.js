@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import Awesomplete from 'awesomplete'; /* https://leaverou.github.io/awesomplete/ */
 import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/tree";
 import { dataFont, darkGrey } from "../../globalStyles";
+import { SelectLabel } from "../framework/select-label";
 import "../../css/awesomplete.css";
 
 const Cross = ({onClick, show}) => {
@@ -87,6 +88,7 @@ class SearchStrains extends React.Component {
   render() {
     return (
       <div style={{fontFamily: dataFont, color: darkGrey, fontSize: 14, display: "inline-block"}}>
+        <SelectLabel text="Search Strains"/>
         <div style={{width: "80%", display: "inline-block"}}>
           <input
             style={{fontFamily: "inherit", color: "inherit", fontSize: "inherit", width: "100%", height: "23px", paddingLeft: "7px", borderRadius: "4px", border: "1px solid #ccc"}}

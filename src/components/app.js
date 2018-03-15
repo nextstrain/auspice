@@ -7,8 +7,6 @@ import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
 import { Frequencies } from "./frequencies";
 import { Entropy } from "./entropy";
-import Map from "./map/map";
-import Tangle from "./tree/tangle";
 import Info from "./info/info";
 import Tree from "./tree";
 import { controlsHiddenWidth, controlsWidth, controlsPadding } from "../util/globals";
@@ -72,12 +70,15 @@ const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels,
   );
 };
 
-const Sidebar = ({show, narrative, styles}) => {
+const Sidebar = ({show, narrative, styles, mapOn}) => {
   if (!show) return null;
   return (
     <div style={styles}>
       <TitleBar minified/>
-      {narrative ? <Narrative height={styles.height}/> : <Controls/>}
+      {narrative ?
+        <Narrative height={styles.height}/> :
+        <Controls mapOn={mapOn}/>
+      }
     </div>
   );
 };
@@ -138,6 +139,7 @@ class App extends React.Component {
       sidebarWidth += controlsPadding;
       availableWidth -= sidebarWidth;
     }
+    const mapOn = this.props.panelsToDisplay.indexOf("map") !== -1;
     /* S T Y L E S */
     const sharedStyles = {
       position: "absolute",
@@ -181,6 +183,7 @@ class App extends React.Component {
           show={this.state.showSidebar}
           narrative={this.props.displayNarrative}
           styles={sidebarStyles}
+          mapOn={mapOn}
         />
         <Contents
           styles={contentStyles}

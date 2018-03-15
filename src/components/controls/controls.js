@@ -13,7 +13,7 @@ import DataSource from "./data-source";
 import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
 
-const Controls = () => (
+const Controls = ({mapOn}) => (
   <div
     style={{
       display: "flex",
@@ -34,31 +34,29 @@ const Controls = () => (
     <Header text="Dataset"/>
     <ChooseDataset/>
 
+
     <Header text="Date Range"/>
     <DateRangeInputs/>
+
 
     <Header text="Color By"/>
     <ColorBy/>
 
+
     <Header text="Tree Options"/>
-
-    <SelectLabel text="Layout" extraStyles={{marginTop: "0px"}}/>
     <ChooseLayout/>
-
-    <SelectLabel text="Branch Length"/>
     <ChooseMetric/>
-
-    <SelectLabel text="Branch Labels"/>
     <ChooseBranchLabelling/>
-
-    <SelectLabel text="Search Strains"/>
     <SearchStrains/>
 
-    <Header text="Map Options"/>
-
-    <SelectLabel text="Geographic resolution" extraStyles={{marginTop: "0px"}}/>
-    <GeoResolution/>
-    <MapAnimationControls/>
+    { mapOn ? (
+      <span>
+        <Header text="Map Options"/>
+        <SelectLabel text="Geographic resolution" extraStyles={{marginTop: "0px"}}/>
+        <GeoResolution/>
+        <MapAnimationControls/>
+      </span>
+    ) : null}
 
     <Header text="Panel Options" extraStyles={{paddingTop: "10px"}}/>
     <PanelLayout/>

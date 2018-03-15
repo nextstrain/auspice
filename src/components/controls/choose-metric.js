@@ -6,6 +6,7 @@ import Toggle from "./toggle";
 import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { toggleTemporalConfidence } from "../../actions/tree";
+import { SelectLabel } from "../framework/select-label";
 
 /*
  * implements a pair of buttons the toggle between timetree and divergence tree
@@ -13,6 +14,7 @@ import { toggleTemporalConfidence } from "../../actions/tree";
  @connect((state) => {
    return {
      distanceMeasure: state.controls.distanceMeasure,
+     showTreeToo: state.controls.showTreeToo,
      temporalConfidence: state.controls.temporalConfidence
    };
  })
@@ -40,8 +42,10 @@ class ChooseMetric extends React.Component {
   render() {
     const styles = this.getStyles();
     const selected = this.props.distanceMeasure;
+    const potentialOffset = this.props.showTreeToo ? {marginTop: "0px"} : {};
     return (
       <div style={styles.container}>
+        <SelectLabel text="Branch Length" extraStyles={potentialOffset}/>
         <button
           key={1}
           style={selected === "num_date" ? materialButtonSelected : materialButton}
@@ -62,14 +66,18 @@ class ChooseMetric extends React.Component {
         >
           <span style={styles.title}> {"divergence"} </span>
         </button>
-        <div style={styles.toggle}>
-          <Toggle
-            display={this.props.temporalConfidence.display}
-            on={this.props.temporalConfidence.on}
-            callback={() => this.props.dispatch(toggleTemporalConfidence())}
-            label="Show confidence intervals"
-          />
-        </div>
+        {this.props.showTreeToo ?
+          null : (
+            <div style={styles.toggle}>
+              <Toggle
+                display={this.props.temporalConfidence.display}
+                on={this.props.temporalConfidence.on}
+                callback={() => this.props.dispatch(toggleTemporalConfidence())}
+                label="Show confidence intervals"
+              />
+            </div>
+          )
+        }
       </div>
     );
   }
