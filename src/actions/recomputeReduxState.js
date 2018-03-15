@@ -383,6 +383,7 @@ export const createStateFromQueryOrJSONs = ({
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility);
     controls.showTreeToo = query.tt;
     controls.showTangle = true;
+    controls.layout = "rect"; /* must be rectangular for two trees */
   }
 
   /* calculate entropy in view */
@@ -408,6 +409,7 @@ export const createTreeTooState = ({
   controls = modifyStateViaTree(controls, oldState.tree, treeToo);
   controls.showTreeToo = segment;
   controls.showTangle = true;
+  controls.layout = "rect"; /* must be rectangular for two trees */
 
   /* calculate colours if loading from JSONs or if the query demands change */
   const {colorScale, version} = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);
