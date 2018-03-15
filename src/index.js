@@ -1,8 +1,6 @@
 /* eslint-disable import/first */
 /* P O L Y F I L L S */
-require('es6-object-assign/auto'); // eslint-disable-line
-import "whatwg-fetch";
-import "./util/polyfills";
+import "./util/polyfills"; // eslint-disable-line
 /* L I B R A R I E S */
 import React from "react";
 import ReactDOM from "react-dom";

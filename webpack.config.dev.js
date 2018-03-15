@@ -4,6 +4,7 @@ const webpack = require('webpack');
 module.exports = {
   devtool: 'eval-source-map',
   entry: [
+    "babel-polyfill",
     'react-hot-loader/patch',
     'webpack-hot-middleware/client',
     './src/index'
