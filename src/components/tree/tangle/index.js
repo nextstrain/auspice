@@ -57,7 +57,12 @@ class Tangle extends React.Component {
       this.transitionPath(nextProps);
     }
   }
-
+  componentDidMount() {
+    if (!this.state.drawn && this.props.rightNodes[0].shell) {
+      this.drawLines(this.props);
+      this.setState({drawn: true});
+    }
+  }
   /* CDU is used to update phylotree when the SVG size _has_ changed (and this is why it's in CDU not CWRP) */
   componentDidUpdate(prevProps) {
     if (this.props.width !== prevProps.width || this.props.height !== prevProps.height) {

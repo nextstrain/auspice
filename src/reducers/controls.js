@@ -63,7 +63,8 @@ export const getDefaultControlsState = () => {
     panelsAvailable: [],
     panelsToDisplay: [],
     panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full",
-    showTreeToo: undefined
+    showTreeToo: undefined,
+    showTangle: false
   };
 };
 
@@ -242,7 +243,12 @@ const Controls = (state = getDefaultControlsState(), action) => {
         showDownload: false
       });
     case types.REMOVE_TREE_TOO:
-      return Object.assign({}, state, {showTreeToo: undefined});
+      return Object.assign({}, state, {showTreeToo: undefined, showTangle: false});
+    case types.TOGGLE_TANGLE:
+      if (state.showTreeToo) {
+        return Object.assign({}, state, {showTangle: !state.showTangle});
+      }
+      return state;
     default:
       return state;
   }

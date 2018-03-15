@@ -14,6 +14,7 @@ const Tree = connect((state) => ({
   colorScale: state.controls.colorScale,
   metadata: state.metadata,
   showTreeToo: state.controls.showTreeToo,
+  showTangle: state.controls.showTangle,
   panelsToDisplay: state.controls.panelsToDisplay,
   selectedBranchLabel: state.controls.selectedBranchLabel
 }))(UnconnectedTree);

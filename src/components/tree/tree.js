@@ -163,7 +163,7 @@ class Tree extends React.Component {
           this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3refToo", viewerRef: "ViewerToo"}) :
           null
         }
-        {this.props.showTreeToo ? (
+        {this.props.showTangle ? (
           <Tangle
             width={this.props.width}
             height={this.props.height}

@@ -12,6 +12,7 @@ import MapAnimationControls from "./map-animation";
 import DataSource from "./data-source";
 import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
+import ToggleTangle from "./toggle-tangle";
 
 const Controls = ({mapOn}) => (
   <div
@@ -33,7 +34,7 @@ const Controls = ({mapOn}) => (
 
     <Header text="Dataset"/>
     <ChooseDataset/>
-
+    <ToggleTangle/>
 
     <Header text="Date Range"/>
     <DateRangeInputs/>
