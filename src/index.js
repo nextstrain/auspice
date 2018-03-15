@@ -1,3 +1,9 @@
+/* eslint-disable import/first */
+/* P O L Y F I L L S */
+// require('es6-object-assign').polyfill(); // eslint-disable-line
+require('es6-object-assign/auto');
+import "whatwg-fetch";
+/* L I B R A R I E S */
 import React from "react";
 import ReactDOM from "react-dom";
 import ReactGA from "react-ga";
@@ -8,6 +14,7 @@ import Monitor from "./components/framework/monitor";
 import PageSelect from "./components/framework/pageSelect";
 import Notifications from "./components/notifications/notifications";
 import configureStore from "./store";
+/* S T Y L E S H E E T S */
 import "./css/global.css";
 import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";

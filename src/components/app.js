@@ -1,7 +1,6 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import "whatwg-fetch"; // setup polyfill
 import { loadJSONs } from "../actions/loadData";
 import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
 import Controls from "./controls/controls";
