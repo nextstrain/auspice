@@ -12,7 +12,7 @@ const makeTipPathGenerator = (props) => (idxs) => {
 class Tangle extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {left: 0, top: 25, lookup: undefined, drawn: false};
+    this.state = {left: 0, top: 31, lookup: undefined, drawn: false};
     this.timeout = false;
   }
   shouldComponentUpdate(nextProps) {

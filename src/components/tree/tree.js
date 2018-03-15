@@ -157,12 +157,6 @@ class Tree extends React.Component {
           tip={this.state.selectedTip}
           metadata={this.props.metadata}
         />
-        {this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3ref", viewerRef: "Viewer"})}
-        {this.props.showTreeToo ? <div style={{width: spaceBetweenTrees}}/> : null}
-        {this.props.showTreeToo ?
-          this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3refToo", viewerRef: "ViewerToo"}) :
-          null
-        }
         {this.props.showTangle ? (
           <Tangle
             width={this.props.width}
@@ -177,6 +171,12 @@ class Tree extends React.Component {
             spaceBetweenTrees={spaceBetweenTrees}
           />
         ) : null }
+        {this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3ref", viewerRef: "Viewer"})}
+        {this.props.showTreeToo ? <div style={{width: spaceBetweenTrees}}/> : null}
+        {this.props.showTreeToo ?
+          this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3refToo", viewerRef: "ViewerToo"}) :
+          null
+        }
         <button
           style={resetTreeButtonStyle}
           onClick={this.redrawTree}
