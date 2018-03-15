@@ -86,13 +86,20 @@ const createListOfColors = (n, range) => {
 const discreteAttributeScale = (nodes, nodesToo, attr) => {
   const stateCount = getAllValuesAndCountsOfTraitsFromTree(nodes, attr)[attr];
   if (nodesToo) {
-    const stateCountToo = getAllValuesAndCountsOfTraitsFromTree(nodesToo, attr)[attr];
-    console.log("TODO discreteAttributeScale", stateCount, stateCountToo)
+    const sc = getAllValuesAndCountsOfTraitsFromTree(nodesToo, attr)[attr];
+    for (let state in sc) { // eslint-disable-line
+      if (stateCount[state]) {
+        stateCount[state] += sc[state];
+      } else {
+        stateCount[state] = sc[state];
+      }
+    }
   }
   const domain = Object.keys(stateCount);
-  domain.sort((a, b) => stateCount[a] > stateCount[b]);
+  domain.sort((a, b) => stateCount[a] > stateCount[b] ? -1 : 1);
+
   // note: colors[n] has n colors
-  const colorList = domain.length < colors.length ? colors[domain.length] : colors[colors.length - 1];
+  const colorList = domain.length <= colors.length ? colors[domain.length] : colors[colors.length - 1];
 
   /* if NA / undefined / unknown, change the colours to grey */
   for (const key of ["unknown", "undefined", "unassigned", "NA", "NaN"]) {
@@ -107,7 +114,7 @@ const discreteAttributeScale = (nodes, nodesToo, attr) => {
 
 
 export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
-  // console.log("calcColorScale", treeToo)
+  console.log("calcColorScale. TreeToo?", !!treeToo)
   let genotype;
   if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
     genotype = parseEncodedGenotype(colorBy, controls.geneLength);
@@ -131,6 +138,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   let error = false;
 
   if (!tree.nodes) {
+    console.warn("calcColorScale called before tree is ready.");
     // make a dummy color scale before the tree is in place
     continuous = true;
     colorScale = genericScale(0, 1);
@@ -160,7 +168,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     }
   } else if (colorOptions && colorOptions[colorBy]) {
     if (colorOptions[colorBy].color_map) {
-      // console.log("Sweet - we've got a color_map for ", colorBy)
+      console.log("Sweet - we've got a color_map for ", colorBy)
       let domain = colorOptions[colorBy].color_map.map((d) => { return d[0]; });
       let range = colorOptions[colorBy].color_map.map((d) => { return d[1]; });
       const extraVals = getExtraVals(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy].color_map);
@@ -175,15 +183,15 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         .domain(domain)
         .range(range);
     } else if (colorOptions && colorOptions[colorBy].type === "discrete") {
-      // console.log("making a discrete color scale for ", colorBy)
+      console.log("making a discrete color scale for ", colorBy)
       continuous = false;
       colorScale = discreteAttributeScale(tree.nodes, treeTooNodes, colorBy);
     } else if (colorOptions && colorOptions[colorBy].type === "integer") {
-      // console.log("making an integer color scale for ", colorBy)
+      console.log("making an integer color scale for ", colorBy)
       continuous = false;
       colorScale = integerAttributeScale(tree.nodes, colorBy);
     } else if (colorOptions && colorOptions[colorBy].type === "continuous") {
-      // console.log("making a continuous color scale for ", colorBy)
+      console.log("making a continuous color scale for ", colorBy)
       continuous = true;
       colorScale = minMaxAttributeScale(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy]);
     }

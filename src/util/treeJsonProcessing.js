@@ -62,9 +62,9 @@ const processBranchLabelsInPlace = (nodes) => {
     const muts = [];
     if (n.aa_muts) {
       for (const aa in n.aa_muts) { // eslint-disable-line
-	if (n.aa_muts[aa].length) {
-	  muts.push(`${aa}: ${n.aa_muts[aa].join(", ")}`);
-	}
+        if (n.aa_muts[aa].length) {
+          muts.push(`${aa}: ${n.aa_muts[aa].join(", ")}`);
+        }
       }
     }
     if (muts.length) {
@@ -74,12 +74,12 @@ const processBranchLabelsInPlace = (nodes) => {
     if (labels.length) {
       n.attr.labels = {};
       if (labels[0]) {
-	n.attr.labels.clade = labels[0];
-	availableBranchLabels.add("clade");
+        n.attr.labels.clade = labels[0];
+        availableBranchLabels.add("clade");
       }
       if (labels[1]) {
-	n.attr.labels.aa = labels[1];
-	availableBranchLabels.add("aa");
+        n.attr.labels.aa = labels[1];
+        availableBranchLabels.add("aa");
       }
     }
   });
@@ -116,7 +116,7 @@ const flattenTree = (root) => {
     visitNode(node, hashMap, array);
     if (node.children) {
       for (let i = node.children.length - 1; i >= 0; i -= 1) {
-	stack.push(node.children[i]);
+        stack.push(node.children[i]);
       }
     }
   }
@@ -140,8 +140,8 @@ const appendParentsToTree = (root) => {
     const node = stack.pop();
     if (node.children) {
       for (let i = node.children.length - 1; i >= 0; i -= 1) {
-	node.children[i].parent = node;
-	stack.push(node.children[i]);
+        node.children[i].parent = node;
+        stack.push(node.children[i]);
       }
     }
   }

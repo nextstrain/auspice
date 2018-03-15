@@ -374,7 +374,7 @@ export const createStateFromQueryOrJSONs = ({
   if (treeToo) {
     // const tmp = calcColorScaleAndNodeColors(controls.colorBy, controls, treeToo, metadata);
     treeToo.nodeColorsVersion = tree.nodeColorsVersion;
-    treeToo.nodeColors = calcNodeColor(tree, controls.colorScale);
+    treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
   }
 
   tree = modifyTreeStateVisAndBranchThickness(tree, query.s, controls);
