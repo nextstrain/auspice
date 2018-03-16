@@ -4,6 +4,7 @@ const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = {
   entry: [
+    "babel-polyfill",
     "./src/index"
   ],
   output: {
