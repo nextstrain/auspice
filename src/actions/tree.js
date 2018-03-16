@@ -25,16 +25,26 @@ const applyInViewNodesToTree = (idx, tree) => {
   return validIdxRoot;
 };
 
-const calcTipSelIdx = (x, tree) => {
-  if (x === -1) { // clear any selection
-    return [undefined, undefined];
-  } else if (x === 0) { // maintain current selection (if any)
-    if (tree.selectedStrain) {
-      return [strainNameToIdx(tree.nodes, tree.selectedStrain), tree.selectedStrain];
-    }
-    return [undefined, undefined];
+const processSelectedTip = (d, tree, treeToo) => {
+  if (d.clear) {
+    return [undefined, undefined, undefined];
   }
-  return [x, tree.nodes[x].strain];
+  if (d.treeIdx) {
+    const name = tree.nodes[d.treeIdx].strain;
+    const idx2 = treeToo ? strainNameToIdx(treeToo.nodes, name) : undefined;
+    return [d.treeIdx, idx2, name];
+  }
+  if (d.treeTooIdx) {
+    const name = treeToo.nodes[d.treeTooIdx].strain;
+    const idx1 = strainNameToIdx(tree.nodes, name);
+    return [idx1, d.treeTooIdx, name];
+  }
+  if (tree.selectedStrain) {
+    const idx1 = strainNameToIdx(tree.nodes, tree.selectedStrain);
+    const idx2 = treeToo ? strainNameToIdx(treeToo.nodes, tree.selectedStrain) : undefined;
+    return [idx1, idx2, tree.selectedStrain];
+  }
+  return [undefined, undefined, undefined];
 };
 
 /**
@@ -44,26 +54,25 @@ const calcTipSelIdx = (x, tree) => {
  * note that this function checks to see if the tree has been defined (different to if it's ready / loaded!)
  * for arg destructuring see https://simonsmith.io/destructuring-objects-as-function-parameters-in-es6/
  * @param  {int} idxOfInViewRootNode If clade selected then start visibility at this index. (root = 0)
- * @param  {int} tipSelectedIdx idx of the selected tip. If not 0 will highlight path to this tip. -1 clears any selection.
+ * @param  {object} tipSelected
  * @param  {int} idxOfInViewRootNodeTreeToo
- * @param  {int} tipSelectedIdxTreeToo
- * @return {null} side effects: a single action
+= * @return {null} side effects: a single action
  */
 export const updateVisibleTipsAndBranchThicknesses = (
-  {idxOfInViewRootNode = undefined, tipSelectedIdx = 0, idxOfInViewRootNodeTreeToo = undefined, tipSelectedIdxTreeToo = 0} = {}
+  {idxOfInViewRootNode = undefined, tipSelected = undefined, idxOfInViewRootNodeTreeToo = undefined} = {}
 ) => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
     if (!tree.nodes) {return;}
 
     const validIdxRoot = applyInViewNodesToTree(idxOfInViewRootNode, tree);
-    const [tipIdx, tipName] = calcTipSelIdx(tipSelectedIdx, tree);
+    const [tipIdx1, tipIdx2, tipName] = processSelectedTip(tipSelected, tree, controls.showTreeToo ? treeToo : undefined);
 
     const data = calculateVisiblityAndBranchThickness(
       tree,
       controls,
       {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-      {tipSelectedIdx: tipIdx, validIdxRoot}
+      {tipSelectedIdx: tipIdx1, validIdxRoot}
     );
     const dispatchObj = {
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
@@ -79,19 +88,19 @@ export const updateVisibleTipsAndBranchThicknesses = (
     if (controls.showTreeToo) {
       dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility);
       const validIdxRootToo = applyInViewNodesToTree(idxOfInViewRootNodeTreeToo, treeToo);
-      const [tipIdxToo, tipNameToo] = calcTipSelIdx(tipSelectedIdxTreeToo, treeToo);
+
       const dataToo = calculateVisiblityAndBranchThickness(
         treeToo,
         controls,
         {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-        {tipSelectedIdx: tipIdxToo, validIdxRoot: validIdxRootToo}
+        {tipSelectedIdx: tipIdx2, validIdxRoot: validIdxRootToo}
       );
       dispatchObj.visibilityToo = dataToo.visibility;
       dispatchObj.visibilityVersionToo = dataToo.visibilityVersion;
       dispatchObj.branchThicknessToo = dataToo.branchThickness;
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
       dispatchObj.idxOfInViewRootNodeToo = validIdxRootToo;
-      dispatchObj.selectedStrainToo = tipNameToo;
+      /* tip selected is the same as the first tree - the reducer uses that */
     }
 
     /* D I S P A T C H */

@@ -20,7 +20,11 @@ export const onTipClick = function onTipClick(d) {
     hovered: null,
     selectedTip: d
   });
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: d.n.arrayIdx}));
+  /* are we clicking from tree1 or tree2? */
+  const tipSelected = d.that.params.orientation[0] === 1 ?
+    {treeIdx: d.n.arrayIdx} :
+    {treeTooIdx: d.n.arrayIdx};
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelected}));
 };
 
 
@@ -85,7 +89,9 @@ export const clearSelectedTip = function clearSelectedTip(d) {
     .attr("r", (dd) => dd["r"]);
   this.setState({selectedTip: null, hovered: null});
   /* restore the tip visibility! */
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: -1}));
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses(
+    {tipSelected: {clear: true}}
+  ));
 };
 
 

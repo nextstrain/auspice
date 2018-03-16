@@ -184,7 +184,11 @@ class Info extends React.Component {
         <div style={{display: "inline-block"}}>
           <div
             className={'boxed-item-icon'}
-            onClick={() => {this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: -1}));}}
+            onClick={() => {
+              this.props.dispatch(
+                updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}})
+              );
+            }}
             role="button"
             tabIndex={0}
           >

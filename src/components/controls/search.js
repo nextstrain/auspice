@@ -39,7 +39,7 @@ class SearchStrains extends React.Component {
     this.state = {awesomplete: undefined, show: false};
     this.removeSelection = () => {
       this.ref.value = null;
-      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: -1}));
+      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}}));
       this.props.dispatch(updateTipRadii());
       this.setState({show: false});
     };
@@ -53,7 +53,7 @@ class SearchStrains extends React.Component {
       for (let i = 0; i < this.props.nodes.length; i++) {
         if (this.props.nodes[i].strain === strain) {
           this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
-            tipSelectedIdx: this.props.nodes[i].arrayIdx
+            tipSelected: {treeIdx: this.props.nodes[i].arrayIdx}
           }));
           /* ^^^ also sets reduxState.tree.selectedStrain */
           this.props.dispatch(updateTipRadii({
