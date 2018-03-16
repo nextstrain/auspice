@@ -99,7 +99,9 @@ const discreteAttributeScale = (nodes, nodesToo, attr) => {
   domain.sort((a, b) => stateCount[a] > stateCount[b] ? -1 : 1);
 
   // note: colors[n] has n colors
-  const colorList = domain.length <= colors.length ? colors[domain.length] : colors[colors.length - 1];
+  const colorList = domain.length <= colors.length ?
+    colors[domain.length].slice() :
+    colors[colors.length - 1].slice();
 
   /* if NA / undefined / unknown, change the colours to grey */
   for (const key of ["unknown", "undefined", "unassigned", "NA", "NaN"]) {
