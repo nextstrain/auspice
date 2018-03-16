@@ -25,15 +25,16 @@ const applyInViewNodesToTree = (idx, tree) => {
   return validIdxRoot;
 };
 
-const calcTipSelIdx = (tipSelectedIdx, tree) => {
-  let idx;
-  if (idx === 0 && tree.selectedStrain) {
-    idx = strainNameToIdx(tree.nodes, tree.selectedStrain);
-  } else if (idx === -1) {
-    idx = 0;
+const calcTipSelIdx = (x, tree) => {
+  if (x === -1) { // clear any selection
+    return [undefined, undefined];
+  } else if (x === 0) { // maintain current selection (if any)
+    if (tree.selectedStrain) {
+      return [strainNameToIdx(tree.nodes, tree.selectedStrain), tree.selectedStrain];
+    }
+    return [undefined, undefined];
   }
-  const strain = idx > 0 ? tree.nodes[idx].strain : undefined;
-  return [idx, strain];
+  return [x, tree.nodes[x].strain];
 };
 
 /**
