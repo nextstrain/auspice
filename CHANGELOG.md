@@ -1,5 +1,9 @@
-## version 1.15.1 - 2018/03/14
+### Browser support
+* Now works on Internet Explorer 11 (tested on windows 7)
+* Grid layout issue fixed for Firefox on linux/windows
+* Embedding Nextstrain in an iFrame works - see `/scripts/gisaid_iframe.html`
 
+## version 1.15.1 - 2018/03/14
 * Fix Firefox branch / tip hover bug [Issue 525](https://github.com/nextstrain/auspice/issues/525)
 
 ## version 1.15.0 - 2018/03/12
