@@ -1,3 +1,5 @@
+## version 1.16.1 - 2018/03/16
+
 * Fix bug in the color scales where clade's were coloured white after switching trees.
 
 ## version 1.16.0 - 2018/03/16
