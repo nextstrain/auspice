@@ -133,25 +133,25 @@ export const resetView = function resetView() {
   this.Viewer.fitToViewer();
 };
 
-export const handleIconClickHOF = function handleIconClickHOF(tool) {
-  return () => {
-    const V = this.Viewer.getValue();
-    if (tool === "zoom-in") {
-      this.Viewer.zoomOnViewerCenter(1.4);
-    } else if (V.a > 1.0) { // if there is room to zoom out via the SVGPanZoom, do
-      this.Viewer.zoomOnViewerCenter(0.71);
-    } else { // otherwise reset view to have SVG fit the viewer
-      resetView.bind(this)();
-      // if we have clade zoom, zoom out to the parent clade
-      if (this.state.selectedBranch && this.state.selectedBranch.n.arrayIdx) {
-        this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
-          idxOfInViewRootNode: this.state.tree.zoomNode.parent.n.arrayIdx
-        }));
-      }
-    }
-    resetGrid.bind(this)();
-  };
-};
+// export const handleIconClickHOF = function handleIconClickHOF(tool) {
+//   return () => {
+//     const V = this.Viewer.getValue();
+//     if (tool === "zoom-in") {
+//       this.Viewer.zoomOnViewerCenter(1.4);
+//     } else if (V.a > 1.0) { // if there is room to zoom out via the SVGPanZoom, do
+//       this.Viewer.zoomOnViewerCenter(0.71);
+//     } else { // otherwise reset view to have SVG fit the viewer
+//       resetView.bind(this)();
+//       // if we have clade zoom, zoom out to the parent clade
+//       if (this.state.selectedBranch && this.state.selectedBranch.n.arrayIdx) {
+//         this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+//           idxOfInViewRootNode: this.state.tree.zoomNode.parent.n.arrayIdx
+//         }));
+//       }
+//     }
+//     resetGrid.bind(this)();
+//   };
+// };
 
 /**
  * @param  {node} d tree node object

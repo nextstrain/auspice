@@ -28,7 +28,7 @@ class Tree extends React.Component {
     this.clearSelectedTip = callbacks.clearSelectedTip.bind(this);
     this.resetView = callbacks.resetView.bind(this);
     this.onViewerChange = callbacks.onViewerChange.bind(this);
-    this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
+    // this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
     this.redrawTree = () => {
       this.state.tree.clearSVG();
       this.Viewer.fitToViewer();
