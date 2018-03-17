@@ -7,7 +7,10 @@ import { branchOpacityFunction } from "../../../util/colorHelpers";
 /* Callbacks used by the tips / branches when hovered / selected */
 
 export const onTipHover = function onTipHover(d) {
-  this.state.tree.svg.select("#tip_" + d.n.clade)
+  const phylotree = d.that.params.orientation[0] === 1 ?
+    this.state.tree :
+    this.state.treeToo;
+  phylotree.svg.select("#tip_" + d.n.clade)
     .attr("r", (e) => e["r"] + 4);
   this.setState({
     hovered: {d, type: ".tip"}
@@ -74,8 +77,11 @@ export const onBranchLeave = function onBranchLeave(d) {
 };
 
 export const onTipLeave = function onTipLeave(d) {
+  const phylotree = d.that.params.orientation[0] === 1 ?
+    this.state.tree :
+    this.state.treeToo;
   if (!this.state.selectedTip) {
-    this.state.tree.svg.select("#tip_" + d.n.clade)
+    phylotree.svg.select("#tip_" + d.n.clade)
       .attr("r", (dd) => dd["r"]);
   }
   if (this.state.hovered) {
@@ -85,7 +91,10 @@ export const onTipLeave = function onTipLeave(d) {
 
 /* clearSelectedTip when clicking to go away */
 export const clearSelectedTip = function clearSelectedTip(d) {
-  this.state.tree.svg.select("#tip_" + d.n.clade)
+  const phylotree = d.that.params.orientation[0] === 1 ?
+    this.state.tree :
+    this.state.treeToo;
+  phylotree.svg.select("#tip_" + d.n.clade)
     .attr("r", (dd) => dd["r"]);
   this.setState({selectedTip: null, hovered: null});
   /* restore the tip visibility! */

@@ -171,24 +171,33 @@ export const changeAnalysisSliderValue = (value) => {
 /**
  * NB all params are optional - supplying none resets the tip radii to defaults
  * @param  {string|number} selectedLegendItem value of the attr. if scale is continuous a bound will be used.
- * @param  {int} tipSelectedIdx the strain to highlight.
+ * @param  {int} tipSelectedIdx the strain to highlight (always tree 1)
  * @return {null} side-effects: a single action
  */
 export const updateTipRadii = (
   {tipSelectedIdx = false, selectedLegendItem = false} = {}
 ) => {
   return (dispatch, getState) => {
-    const { controls, tree } = getState();
+    const { controls, tree, treeToo } = getState();
     const colorScale = controls.colorScale;
-    let data;
+    const d = {
+      type: types.UPDATE_TIP_RADII, version: tree.tipRadiiVersion + 1
+    };
+    const tt = controls.showTreeToo;
     if (tipSelectedIdx) {
-      data = calcTipRadii({tipSelectedIdx, colorScale, tree});
+      d.data = calcTipRadii({tipSelectedIdx, colorScale, tree});
+      if (tt) {
+        const idx = strainNameToIdx(treeToo.nodes, tree.nodes[tipSelectedIdx].strain);
+        d.dataToo = calcTipRadii({idx, colorScale, tree: treeToo});
+      }
     } else if (selectedLegendItem) {
-      data = calcTipRadii({selectedLegendItem, colorScale, tree});
+      d.data = calcTipRadii({selectedLegendItem, colorScale, tree});
+      if (tt) d.dataToo = calcTipRadii({selectedLegendItem, colorScale, tree: treeToo});
     } else {
-      data = calcTipRadii({colorScale, tree});
+      d.data = calcTipRadii({colorScale, tree});
+      if (tt) d.dataToo = calcTipRadii({colorScale, tree: treeToo});
     }
-    dispatch({type: types.UPDATE_TIP_RADII, data, version: tree.tipRadiiVersion + 1});
+    dispatch(d);
   };
 };
 

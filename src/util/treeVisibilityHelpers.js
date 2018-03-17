@@ -5,10 +5,11 @@ export const strainNameToIdx = (nodes, name) => {
   let i;
   for (i = 0; i < nodes.length; i++) {
     if (nodes[i].strain === name) {
-      break;
+      return i;
     }
   }
-  return i;
+  console.error("strainNameToIdx couldn't find strain");
+  return 0;
 };
 
 /** calcBranchThickness **

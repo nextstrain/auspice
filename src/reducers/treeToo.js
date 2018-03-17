@@ -38,11 +38,11 @@ const treeToo = (state = getDefaultTreeState(), action) => {
         });
       }
       return state;
-    // case types.UPDATE_TIP_RADII:
-    //   return Object.assign({}, state, {
-    //     tipRadii: action.data,
-    //     tipRadiiVersion: action.version
-    //   });
+    case types.UPDATE_TIP_RADII:
+      return Object.assign({}, state, {
+        tipRadii: action.dataToo,
+        tipRadiiVersion: action.version
+      });
     case types.NEW_COLORS:
       if (action.nodeColorsToo) {
         return Object.assign({}, state, {

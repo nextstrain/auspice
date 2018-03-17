@@ -40,6 +40,7 @@ class SearchStrains extends React.Component {
     this.removeSelection = () => {
       this.ref.value = null;
       this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}}));
+      console.log("clear tip radiiiii")
       this.props.dispatch(updateTipRadii());
       this.setState({show: false});
     };
