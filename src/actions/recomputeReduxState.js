@@ -384,6 +384,13 @@ export const createStateFromQueryOrJSONs = ({
     controls.showTreeToo = query.tt;
     controls.showTangle = true;
     controls.layout = "rect"; /* must be rectangular for two trees */
+    const mapIdx = controls.panelsToDisplay.indexOf("map");
+    if (mapIdx !== -1) {
+      controls.panelsToDisplay = controls.panelsToDisplay.slice();
+      controls.panelsToDisplay.splice(mapIdx, 1);
+    }
+    controls.canTogglePanelLayout = false;
+    controls.panelLayout = "full";
   }
 
   /* calculate entropy in view */
@@ -419,6 +426,13 @@ export const createTreeTooState = ({
   treeToo.nodeColorsVersion = version;
   treeToo.nodeColors = nodeColors;
 
+  const mapIdx = controls.panelsToDisplay.indexOf("map");
+  if (mapIdx !== -1) {
+    controls.panelsToDisplay = controls.panelsToDisplay.slice();
+    controls.panelsToDisplay.splice(mapIdx, 1);
+  }
+  controls.canTogglePanelLayout = false;
+  controls.panelLayout = "full";
   treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
     oldState.tree.nodes, treeToo.nodes, oldState.tree.visibility
   );

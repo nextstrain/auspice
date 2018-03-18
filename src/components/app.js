@@ -9,6 +9,7 @@ import { Frequencies } from "./frequencies";
 import { Entropy } from "./entropy";
 import Info from "./info/info";
 import Tree from "./tree";
+import Map from "./map/map";
 import { controlsHiddenWidth, controlsWidth, controlsPadding } from "../util/globals";
 import { sidebarColor } from "../globalStyles";
 import TitleBar from "./framework/title-bar";
@@ -62,7 +63,7 @@ const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels,
     <div style={styles}>
       {narrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
       {show("tree") ? <Tree width={big.width} height={big.height} /> : null}
-      {/* {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null} */}
+      {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
       {show("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
       {show("frequencies") && frequenciesLoaded ? <Frequencies width={chart.width} height={chart.height} /> : null}
       {narrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
@@ -140,6 +141,7 @@ class App extends React.Component {
       availableWidth -= sidebarWidth;
     }
     const mapOn = this.props.panelsToDisplay.indexOf("map") !== -1;
+    console.log("Hey... map on?", mapOn)
     /* S T Y L E S */
     const sharedStyles = {
       position: "absolute",

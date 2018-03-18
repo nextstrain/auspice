@@ -243,7 +243,12 @@ const Controls = (state = getDefaultControlsState(), action) => {
         showDownload: false
       });
     case types.REMOVE_TREE_TOO:
-      return Object.assign({}, state, {showTreeToo: undefined, showTangle: false});
+      return Object.assign({}, state, {
+        showTreeToo: undefined,
+        showTangle: false,
+        canTogglePanelLayout: state.panelsAvailable.indexOf("map") !== -1,
+        panelsToDisplay: state.panelsAvailable.slice()
+      });
     case types.TOGGLE_TANGLE:
       if (state.showTreeToo) {
         return Object.assign({}, state, {showTangle: !state.showTangle});

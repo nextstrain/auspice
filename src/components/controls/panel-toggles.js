@@ -5,11 +5,16 @@ import { togglePanelDisplay } from "../../actions/misc";
 
 @connect((state) => ({
   panelsAvailable: state.controls.panelsAvailable,
-  panelsToDisplay: state.controls.panelsToDisplay
+  panelsToDisplay: state.controls.panelsToDisplay,
+  showTreeToo: state.controls.showTreeToo
 }))
 class PanelToggles extends React.Component {
   render() {
-    return this.props.panelsAvailable.map((n) => (
+    const panels = this.props.panelsAvailable.slice();
+    if (this.props.showTreeToo && panels.indexOf("map") !== -1) {
+      panels.splice(panels.indexOf("map"), 1);
+    }
+    return panels.map((n) => (
       <Toggle
         key={n}
         display
