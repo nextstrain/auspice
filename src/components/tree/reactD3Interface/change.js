@@ -68,6 +68,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, viewer, o
   }
 
   /* zoom to a clade / reset zoom to entire tree */
+  console.log(mainTree, oldTreeRedux.idxOfInViewRootNode, newTreeRedux.idxOfInViewRootNode)
   if (oldTreeRedux.idxOfInViewRootNode !== newTreeRedux.idxOfInViewRootNode) {
     const rootNode = phylotree.nodes[newTreeRedux.idxOfInViewRootNode];
     args.zoomIntoClade = rootNode;
@@ -78,7 +79,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, viewer, o
   }
 
   if (Object.keys(args).length) {
-    // console.log('\n\n** ', phylotree.debugId, 'changePhyloTreeViaPropsComparison **', args);
+    console.log('\n\n** ', phylotree.debugId, 'changePhyloTreeViaPropsComparison **', args);
     phylotree.change(args);
   }
   return Object.keys(newState).length ? newState : false;

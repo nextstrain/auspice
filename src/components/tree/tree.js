@@ -39,7 +39,7 @@ class Tree extends React.Component {
         renderTree(this, false, this.state.treeToo, this.props);
       }
       this.setState({hover: null, selectedBranch: null, selectedTip: null});
-      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0}));
+      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root: [0, 0]}));
     };
   }
   componentDidMount() {

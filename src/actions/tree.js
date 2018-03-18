@@ -26,6 +26,9 @@ const applyInViewNodesToTree = (idx, tree) => {
 };
 
 const processSelectedTip = (d, tree, treeToo) => {
+  if (!d) {
+    return [undefined, undefined, undefined];
+  }
   if (d.clear) {
     return [undefined, undefined, undefined];
   }
@@ -53,26 +56,28 @@ const processSelectedTip = (d, tree, treeToo) => {
  * this fn relies on the "inView" attr of nodes
  * note that this function checks to see if the tree has been defined (different to if it's ready / loaded!)
  * for arg destructuring see https://simonsmith.io/destructuring-objects-as-function-parameters-in-es6/
- * @param  {int} idxOfInViewRootNode If clade selected then start visibility at this index. (root = 0)
+ * @param  {array|undefined} root Change the in-view part of the tree. [root idx tree1, root idx tree2].
+ *                                [0, 0]: reset. [undefined, undefined]: do nothing
  * @param  {object} tipSelected
  * @param  {int} idxOfInViewRootNodeTreeToo
 = * @return {null} side effects: a single action
  */
 export const updateVisibleTipsAndBranchThicknesses = (
-  {idxOfInViewRootNode = undefined, tipSelected = undefined, idxOfInViewRootNodeTreeToo = undefined} = {}
+  {root = [undefined, undefined], tipSelected = undefined} = {}
 ) => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
     if (!tree.nodes) {return;}
-
-    const validIdxRoot = applyInViewNodesToTree(idxOfInViewRootNode, tree);
+    console.log("ROOT SETTING TO", root)
+    /* mark nodes as "in view" as applicable */
+    let rootIdx = applyInViewNodesToTree(root[0], tree);
     const [tipIdx1, tipIdx2, tipName] = processSelectedTip(tipSelected, tree, controls.showTreeToo ? treeToo : undefined);
 
     const data = calculateVisiblityAndBranchThickness(
       tree,
       controls,
       {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-      {tipSelectedIdx: tipIdx1, validIdxRoot}
+      {tipSelectedIdx: tipIdx1, validIdxRoot: rootIdx}
     );
     const dispatchObj = {
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
@@ -80,29 +85,28 @@ export const updateVisibleTipsAndBranchThicknesses = (
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
-      idxOfInViewRootNode: validIdxRoot,
+      idxOfInViewRootNode: rootIdx,
       stateCountAttrs: Object.keys(controls.filters),
       selectedStrain: tipName
     };
 
     if (controls.showTreeToo) {
+      rootIdx = applyInViewNodesToTree(root[1], tree);
       dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility);
-      const validIdxRootToo = applyInViewNodesToTree(idxOfInViewRootNodeTreeToo, treeToo);
-
       const dataToo = calculateVisiblityAndBranchThickness(
         treeToo,
         controls,
         {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-        {tipSelectedIdx: tipIdx2, validIdxRoot: validIdxRootToo}
+        {tipSelectedIdx: tipIdx2, validIdxRoot: rootIdx}
       );
       dispatchObj.visibilityToo = dataToo.visibility;
       dispatchObj.visibilityVersionToo = dataToo.visibilityVersion;
       dispatchObj.branchThicknessToo = dataToo.branchThickness;
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
-      dispatchObj.idxOfInViewRootNodeToo = validIdxRootToo;
+      dispatchObj.idxOfInViewRootNodeToo = rootIdx;
       /* tip selected is the same as the first tree - the reducer uses that */
     }
-
+    console.log("dispatching", dispatchObj)
     /* D I S P A T C H */
     dispatch(dispatchObj);
     updateEntropyVisibility(dispatch, getState);
@@ -161,12 +165,12 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
   };
 };
 
-export const changeAnalysisSliderValue = (value) => {
-  return (dispatch) => {
-    dispatch({type: types.CHANGE_ANALYSIS_VALUE, value});
-    dispatch(updateVisibleTipsAndBranchThicknesses());
-  };
-};
+// export const changeAnalysisSliderValue = (value) => {
+//   return (dispatch) => {
+//     dispatch({type: types.CHANGE_ANALYSIS_VALUE, value});
+//     dispatch(updateVisibleTipsAndBranchThicknesses());
+//   };
+// };
 
 /**
  * NB all params are optional - supplying none resets the tip radii to defaults

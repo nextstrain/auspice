@@ -28,7 +28,7 @@ export const renderTree = (that, main, phylotree, props) => {
       onTipHover: callbacks.onTipHover.bind(that),
       onTipClick: callbacks.onTipClick.bind(that),
       onBranchHover: callbacks.onBranchHover.bind(that),
-      onBranchClick: main ? callbacks.onBranchClick.bind(that) : () => {},
+      onBranchClick: callbacks.onBranchClick.bind(that),
       onBranchLeave: callbacks.onBranchLeave.bind(that),
       onTipLeave: callbacks.onTipLeave.bind(that),
       tipLabel: (d) => d.n.strain

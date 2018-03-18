@@ -59,7 +59,10 @@ export const onBranchHover = function onBranchHover(d) {
 };
 
 export const onBranchClick = function onBranchClick(d) {
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.n.arrayIdx}));
+  const root = [undefined, undefined];
+  if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
+  else root[1] = d.n.arrayIdx;
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
 };
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */

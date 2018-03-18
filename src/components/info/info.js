@@ -11,7 +11,7 @@ const resetTreeButton = (dispatch) => {
     <div
       className={`boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
-      onClick={() => dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0}))}
+      onClick={() => dispatch(updateVisibleTipsAndBranchThicknesses({root: [0, 0]}))}
     >
       {"View entire tree."}
     </div>
@@ -84,6 +84,7 @@ export const createSummary = (virus_count, nodes, filters, visibility, visibleSt
     metadata: state.metadata,
     nodes: state.tree.nodes,
     idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
+    idxOfInViewRootNodeToo: state.treeToo.idxOfInViewRootNode,
     visibleStateCounts: state.tree.visibleStateCounts,
     totalStateCounts: state.tree.totalStateCounts,
     visibility: state.tree.visibility,
@@ -314,7 +315,7 @@ class Info extends React.Component {
               </span>
             ) : null}
             {/* finally - is a branch selected? */}
-            {this.props.idxOfInViewRootNode === 0 ? null :
+            {this.props.idxOfInViewRootNode === 0 && this.props.idxOfInViewRootNodeToo === 0 ? null :
               resetTreeButton(this.props.dispatch)}
           </div>
         </div>
