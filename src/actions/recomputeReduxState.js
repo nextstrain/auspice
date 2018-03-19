@@ -316,6 +316,20 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, controlsSta
   return newState;
 };
 
+const modifyControlsViaTreeToo = (controls, treeToo, name) => {
+  controls.showTreeToo = name;
+  controls.showTangle = true;
+  controls.layout = "rect"; /* must be rectangular for two trees */
+  const mapIdx = controls.panelsToDisplay.indexOf("map");
+  if (mapIdx !== -1) {
+    controls.panelsToDisplay = controls.panelsToDisplay.slice();
+    controls.panelsToDisplay.splice(mapIdx, 1);
+  }
+  controls.canTogglePanelLayout = false;
+  controls.panelLayout = "full";
+  return controls;
+};
+
 export const createStateFromQueryOrJSONs = ({
   JSONs = false, /* raw json data - completely nuke existing redux state */
   oldState = false, /* existing redux state (instead of jsons) */
@@ -370,27 +384,13 @@ export const createStateFromQueryOrJSONs = ({
     tree.nodeColors = nodeColors;
   }
 
-  /* TEMPORARY ONLY */
-  if (treeToo) {
-    // const tmp = calcColorScaleAndNodeColors(controls.colorBy, controls, treeToo, metadata);
-    treeToo.nodeColorsVersion = tree.nodeColorsVersion;
-    treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
-  }
-
   tree = modifyTreeStateVisAndBranchThickness(tree, query.s, controls);
   if (treeToo) {
+    treeToo.nodeColorsVersion = tree.nodeColorsVersion;
+    treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
     treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, controls);
+    controls = modifyControlsViaTreeToo(controls, treeToo, query.tt);
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility);
-    controls.showTreeToo = query.tt;
-    controls.showTangle = true;
-    controls.layout = "rect"; /* must be rectangular for two trees */
-    const mapIdx = controls.panelsToDisplay.indexOf("map");
-    if (mapIdx !== -1) {
-      controls.panelsToDisplay = controls.panelsToDisplay.slice();
-      controls.panelsToDisplay.splice(mapIdx, 1);
-    }
-    controls.canTogglePanelLayout = false;
-    controls.panelLayout = "full";
   }
 
   /* calculate entropy in view */
@@ -410,13 +410,11 @@ export const createTreeTooState = ({
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
   let controls = oldState.controls;
-  /* new tree state */
   let treeToo = treeJsonToState(treeTooJSON);
+  treeToo.debug = "RIGHT";
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, oldState.controls);
   controls = modifyStateViaTree(controls, oldState.tree, treeToo);
-  controls.showTreeToo = segment;
-  controls.showTangle = true;
-  controls.layout = "rect"; /* must be rectangular for two trees */
+  controls = modifyControlsViaTreeToo(controls, treeToo, segment);
 
   /* calculate colours if loading from JSONs or if the query demands change */
   const {colorScale, version} = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);
@@ -426,13 +424,6 @@ export const createTreeTooState = ({
   treeToo.nodeColorsVersion = version;
   treeToo.nodeColors = nodeColors;
 
-  const mapIdx = controls.panelsToDisplay.indexOf("map");
-  if (mapIdx !== -1) {
-    controls.panelsToDisplay = controls.panelsToDisplay.slice();
-    controls.panelsToDisplay.splice(mapIdx, 1);
-  }
-  controls.canTogglePanelLayout = false;
-  controls.panelLayout = "full";
   treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
     oldState.tree.nodes, treeToo.nodes, oldState.tree.visibility
   );
@@ -441,6 +432,5 @@ export const createTreeTooState = ({
   //   tree.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controls.colorScale, tree});
   //   tree.tipRadiiVersion = 1;
   // }
-  treeToo.debug = "RIGHT";
   return {treeToo, controls};
 };
