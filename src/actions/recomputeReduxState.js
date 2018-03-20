@@ -8,6 +8,7 @@ import { calculateVisiblityAndBranchThickness } from "./treeProperties";
 import { calcEntropyInView, getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
 import { calcColorScaleAndNodeColors } from "./colors";
 import { determineColorByGenotypeType } from "../util/colorHelpers";
+import { computeMatrixFromRawData } from "./frequencies";
 
 const getAnnotations = (jsonData) => {
   const annotations = [];
@@ -300,7 +301,7 @@ export const createStateFromQueryOrJSONs = ({
   query
 }) => {
   /* first task is to create metadata, entropy, controls & tree partial state */
-  let tree, entropy, controls, metadata;
+  let tree, entropy, controls, metadata, frequencies;
   if (JSONs) {
     /* ceate metadata state */
     metadata = JSONs.meta;
@@ -342,7 +343,7 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   if (oldState) {
-    ({controls, entropy, tree, metadata} = oldState);
+    ({controls, entropy, tree, metadata, frequencies} = oldState);
     controls = restoreQueryableStateToDefaults(controls);
   }
 
@@ -387,6 +388,18 @@ export const createStateFromQueryOrJSONs = ({
   entropy.bars = entropyBars;
   entropy.maxYVal = entropyMaxYVal;
 
-  return {tree, metadata, entropy, controls};
+  /* potentially calculate frequency updates */
+  const frequencyMatrix = frequencies && frequencies.loaded ?
+    computeMatrixFromRawData(
+      frequencies.data,
+      frequencies.pivots,
+      tree.nodes,
+      tree.visibility,
+      controls.colorScale,
+      controls.colorBy
+    ) :
+    undefined;
+
+  return {tree, metadata, entropy, controls, frequencyMatrix};
 
 };

@@ -18,6 +18,13 @@ const frequencies = (state = {
     case types.DATA_INVALID: {
       return {loaded: false, data: undefined, pivots: undefined, ticks: undefined, matrix: undefined, version: 0};
     }
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: {
+      if (action.frequencyMatrix) {
+        console.log("reducing")
+        return Object.assign({}, state, {loaded: true, matrix: action.frequencyMatrix, version: state.version + 1});
+      }
+      return state;
+    }
     default:
       return state;
   }

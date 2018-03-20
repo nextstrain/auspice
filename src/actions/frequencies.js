@@ -24,7 +24,7 @@ const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
   return unassigned_label;
 };
 
-const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorScale, colorBy) => {
+export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorScale, colorBy) => {
   /* color scale domain forms the categories in the stream graph */
   const categories = colorScale.scale.domain().filter((d) => d !== undefined);
   categories.push(unassigned_label); /* for tips without a colorBy */
