@@ -32,6 +32,13 @@ trap 'errorFound $LINENO' ERR
 echo "$purposeMsg"
 echo -e "\n"
 
+# exit if release branch exists locally
+if git rev-parse --verify --quiet release
+  then
+    echo "release branch already exists locally - fatal"
+    exit 2
+fi
+
 # step 1: check master is up to date with github
 step="1"
 git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
@@ -82,11 +89,6 @@ echo -e "Master successfully updated and pushed to github"
 
 # step 5: checkout release branch from github
 step="5"
-if git rev-parse --verify --quiet release
-  then
-    echo "release branch already exists locally - fatal"
-    exit 2
-fi
 git checkout -b release origin/release
 
 # step 6: merge master into release

@@ -1,7 +1,7 @@
 ## version 1.16.2 - 2018/03/21
+* Add redirect of www.nextstrain.org to nextstrain.org via express middleware.
 
 ## version 1.16.1 - 2018/03/16
-
 * Fix bug in the color scales where clade's were coloured white after switching trees.
 
 ## version 1.16.0 - 2018/03/16
