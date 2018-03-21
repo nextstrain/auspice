@@ -106,18 +106,23 @@ class Tree extends React.Component {
         this.Viewer.fitToViewer();
       }
     } else if (tree) {
-      changePhyloTreeViaPropsComparison(this, nextProps);
+      // changePhyloTreeViaPropsComparison(this, nextProps);
     }
   }
 
   /* CDU is used to update phylotree when the SVG size _has_ changed (and this is why it's in CDU not CWRP) */
   componentDidUpdate(prevProps) {
-    if ( // the tree exists AND the width has changed (browser resize, sidebar open/close...)
-      this.state.tree &&
-      (this.props.width !== prevProps.width || this.props.height !== prevProps.height)
-    ) {
-      this.state.tree.change({svgHasChangedDimensions: true});
+    if (this.state.tree) {
+      changePhyloTreeViaPropsComparison(this, prevProps, this.props);
     }
+
+
+    // if ( // the tree exists AND the width has changed (browser resize, sidebar open/close...)
+    //   this.state.tree &&
+    //   (this.props.width !== prevProps.width || this.props.height !== prevProps.height)
+    // ) {
+    //   this.state.tree.change({svgHasChangedDimensions: true});
+    // }
   }
   renderTree(tree, props) {
     /* simply the call to phylotree.render */
