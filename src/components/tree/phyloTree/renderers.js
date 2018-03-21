@@ -64,7 +64,7 @@ export const drawVaccines = function drawVaccines() {
     .append("path")
     .attr("class", "vaccineCross")
     .attr("d", (d) => d.vaccineCross)
-    .style("stroke", "black")
+    .style("stroke", "#333")
     .style("stroke-width", 2 * this.params.branchStrokeWidth)
     .style("fill", "none")
     .style("cursor", "pointer")

@@ -220,7 +220,8 @@ export const setDistance = function setDistance(distanceAttribute) {
   });
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
-      d.crossDepth = tmp_dist === "div" ? d.depth : d.n.vaccineDateNumeric;
+      // this was d.n.vaccineDateNumeric, setting to d.depth for reasons of clarity
+      d.crossDepth = tmp_dist === "div" ? d.depth : d.depth;
     });
   }
   timerEnd("setDistance");
@@ -310,7 +311,7 @@ export const mapToScreen = function mapToScreen() {
   });
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
-      const n = 5; /* half the number of pixels that the cross will take up */
+      const n = 6; /* half the number of pixels that the cross will take up */
       const xTipCross = this.xScale(d.xCross); /* x position of the center of the cross */
       const yTipCross = this.yScale(d.yCross); /* x position of the center of the cross */
       d.vaccineCross = ` M ${xTipCross-n},${yTipCross-n} L ${xTipCross+n},${yTipCross+n} M ${xTipCross-n},${yTipCross+n} L ${xTipCross+n},${yTipCross-n}`;
