@@ -26,7 +26,8 @@ export const defaultParams = {
   /* B R A N C H   L A B E L S */
   branchLabelKey: false,
   branchLabelFont: dataFont,
-  branchLabelFill: "#555",
+  branchLabelFill: "#777",
+  branchLabelFontWeight: 500,
   branchLabelPadX: 8,
   branchLabelPadY: 5,
   /* T I P   L A B E L S */
