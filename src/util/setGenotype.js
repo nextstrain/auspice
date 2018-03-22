@@ -12,7 +12,7 @@ export const setGenotype = (nodes, prot, positions) => {
     } else if (node.aa_muts && node.aa_muts[prot]) {
       data = node.aa_muts[prot];
     }
-    if (data) {
+    if (data && data.length) {
       for (let i = 0; i < data.length; i++) {
         const m = data[i];
         const mPos = parseInt(m.slice(1, m.length - 1), 10);
@@ -34,7 +34,7 @@ export const setGenotype = (nodes, prot, positions) => {
     }
     if (node.hasChildren) {
       for (const child of node.children) {
-        recurse(child, newState);
+        recurse(child, [...newState]);
       }
     }
   };
