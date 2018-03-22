@@ -42,8 +42,8 @@ export const render = function render(svg, layout, distance, parameters, callbac
   /* draw functions */
   if (this.params.showGrid) this.addGrid();
   this.drawBranches();
-  if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   this.drawTips();
+  if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   if (this.vaccines) this.drawVaccines();
   if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
   this.confidencesInSVG = false;
@@ -64,7 +64,7 @@ export const drawVaccines = function drawVaccines() {
     .append("path")
     .attr("class", "vaccineCross")
     .attr("d", (d) => d.vaccineCross)
-    .style("stroke", "black")
+    .style("stroke", "#333")
     .style("stroke-width", 2 * this.params.branchStrokeWidth)
     .style("fill", "none")
     .style("cursor", "pointer")

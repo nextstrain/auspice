@@ -27,15 +27,20 @@ export const updateTipLabels = function updateTipLabels(dt) {
 
 /** branchLabelSize
  * @param {str} key e.g. "aa" or "clade"
- * @param  {int} nTips total number of nodes in current view (visible or invisible)
  * @return {str} font size of the branch label, e.g. "12px"
  */
-const branchLabelSize = (key, nTips) => {
-  if (key === "aa") return "12px";
-  const size = nTips > 1000 ? 14 :
-    nTips > 500 ? 16 :
-      20;
-  return `${size}px`;
+const branchLabelSize = (key) => {
+  if (key === "aa") return "10px";
+  return "14px";
+};
+
+/** branchLabelFontWeight
+ * @param {str} key e.g. "aa" or "clade"
+ * @return {str} font weight of the branch label, e.g. "500"
+ */
+const branchLabelFontWeight = (key) => {
+  if (key === "aa") return "500";
+  return "700";
 };
 
 /** createBranchLabelVisibility (the return value should be passed to d3 style call)
@@ -63,12 +68,14 @@ const createBranchLabelVisibility = (key, layout, totalTipsInView) => {
 
 export const updateBranchLabels = function updateBranchLabels(dt) {
   const visibility = createBranchLabelVisibility(this.params.branchLabelKey, this.layout, this.zoomNode.n.tipCount);
-  const labelSize = branchLabelSize(this.params.branchLabelKey, this.zoomNode.n.fullTipCount);
+  const labelSize = branchLabelSize(this.params.branchLabelKey);
+  const fontWeight = branchLabelFontWeight(this.params.branchLabelKey);
   this.svg.selectAll('.branchLabel')
     .transition().duration(dt)
     .attr("x", (d) => d.xTip - 5)
     .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
     .style("visibility", visibility)
+    .style("font-weight", fontWeight)
     .style("font-size", labelSize);
   if (!dt) timerFlush();
 };
@@ -76,7 +83,8 @@ export const updateBranchLabels = function updateBranchLabels(dt) {
 export const drawBranchLabels = function drawBranchLabels(key) {
   /* salient props: this.zoomNode.n.tipCount, this.zoomNode.n.fullTipCount */
   this.params.branchLabelKey = key;
-  const labelSize = branchLabelSize(key, this.zoomNode.n.fullTipCount);
+  const labelSize = branchLabelSize(key);
+  const fontWeight = branchLabelFontWeight(key);
   const visibility = createBranchLabelVisibility(key, this.layout, this.zoomNode.n.tipCount);
   this.svg.append("g").selectAll('.branchLabel')
     .data(this.nodes.filter((d) => d.n.attr.labels && d.n.attr.labels[key]))
@@ -89,6 +97,7 @@ export const drawBranchLabels = function drawBranchLabels(key) {
     .style("visibility", visibility)
     .style("fill", this.params.branchLabelFill)
     .style("font-family", this.params.branchLabelFont)
+    .style("font-weight", fontWeight)
     .style("font-size", labelSize)
     .text((d) => d.n.attr.labels[key]);
 };
