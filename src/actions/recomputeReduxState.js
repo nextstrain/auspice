@@ -170,10 +170,10 @@ const modifyStateViaMetadata = (state, metadata) => {
     state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
   }
   if (metadata.author_info) {
-    state.filters.authors = [];
-    state.defaults.filters.authors = [];
+    // need authors in metadata.filters to include as filter
+    // but metadata.author_info is generally required for app functioning
   } else {
-    console.error("update meta.json to include author_info.");
+    console.error("the meta.json must include author_info");
   }
   if (metadata.filters) {
     metadata.filters.forEach((v) => {
