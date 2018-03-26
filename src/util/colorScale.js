@@ -128,7 +128,6 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
 
   /* step 1: calculate the required colour scale */
   const version = controls.colorScale === undefined ? 1 : controls.colorScale.version + 1;
-
   const geneLength = controls.geneLength;
   const colorOptions = metadata.colorOptions;
   const absoluteDateMaxNumeric = controls.absoluteDateMaxNumeric;

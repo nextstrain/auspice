@@ -364,14 +364,18 @@ export const createStateFromQueryOrJSONs = ({
     controls = modifyStateViaTree(controls, tree, treeToo);
     controls = modifyStateViaMetadata(controls, metadata);
   } else if (oldState) {
-    ({controls, entropy, tree, treeToo, metadata, frequencies} = oldState);
+    /* revisit this - but it helps prevent bugs */
+    controls = {...oldState.controls};
+    entropy = {...oldState.entropy};
+    tree = {...oldState.tree};
+    treeToo = {...oldState.treeToo};
+    metadata = {...oldState.metadata};
+    frequencies = {...oldState.frequencies};
+
     controls = restoreQueryableStateToDefaults(controls);
     if (query.tt && !treeToo.loaded) {
       console.log("TO DO - loAd 2nD tree (via a delayed fetch / now?!?!)");
     }
-  } else {
-    console.error("no JSONs / oldState provided");
-    return;
   }
 
   if (narrative) {
@@ -396,7 +400,7 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   tree = modifyTreeStateVisAndBranchThickness(tree, query.s, controls);
-  if (treeToo) {
+  if (treeToo && treeToo.loaded) {
     treeToo.nodeColorsVersion = tree.nodeColorsVersion;
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
     treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, controls);
@@ -425,7 +429,7 @@ export const createStateFromQueryOrJSONs = ({
     );
   }
   return {tree, treeToo, metadata, entropy, controls, frequencies, narrative, query};
-}
+};
 
 export const createTreeTooState = ({
   treeTooJSON, /* raw json data */

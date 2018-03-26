@@ -14,7 +14,6 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, viewer, o
     newState.selectedTip = null;
     newState.hovered = null;
   }
-
   /* colorBy change? */
   if (!!newTreeRedux.nodeColorsVersion &&
       (oldTreeRedux.nodeColorsVersion !== newTreeRedux.nodeColorsVersion ||
