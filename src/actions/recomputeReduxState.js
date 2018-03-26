@@ -301,8 +301,9 @@ export const createStateFromQueryOrJSONs = ({
   query
 }) => {
   /* first task is to create metadata, entropy, controls & tree partial state */
-  let tree, entropy, controls, metadata, frequencies;
+  let tree, entropy, controls, metadata, frequencies, narrative;
   if (JSONs) {
+    if (JSONs.narrative) narrative = JSONs.narrative;
     /* ceate metadata state */
     metadata = JSONs.meta;
     if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
@@ -400,6 +401,6 @@ export const createStateFromQueryOrJSONs = ({
     ) :
     undefined;
 
-  return {tree, metadata, entropy, controls, frequencyMatrix};
+  return {tree, metadata, entropy, controls, frequencyMatrix, narrative};
 
 };
