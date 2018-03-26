@@ -27,6 +27,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   /* first switch: query change */
   switch (action.type) {
     case types.CLEAN_START: // fallthrough
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: // fallthrough
     case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE:
       query = action.query;
       break;
@@ -91,11 +92,6 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       const d = state.controls.mapAnimationCumulative ? "1" : "0";
       const e = state.controls.mapAnimationDurationInMilliseconds;
       query.animate = `${a},${b},${c},${d},${e}`;
-      break;
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
-      if (!action.hideURL) {
-        query = action.query;
-      }
       break;
     case types.PAGE_CHANGE:
       if (action.query) {
