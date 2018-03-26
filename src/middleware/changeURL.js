@@ -26,6 +26,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
 
   /* first switch: query change */
   switch (action.type) {
+    case types.CLEAN_START: // fallthrough
     case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE:
       query = action.query;
       break;

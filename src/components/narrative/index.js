@@ -62,10 +62,6 @@ class Narrative extends React.Component {
       this.setState({timeoutRef, shouldBeInFocus});
     };
     this.blockRefs = [];
-    this.props.dispatch(changePageQuery({
-      query: queryString.parse(this.props.blocks[0].url),
-      hideURL: true
-    }));
   }
   componentDidMount() {
     window.twttr.widgets.load();

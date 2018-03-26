@@ -76,6 +76,7 @@ ARGUMENTS:
 (2) push - OPTIONAL (default: true) - signals that pushState should be used (has no effect on the reducers)
 */
 export const changePageQuery = ({query, hideURL = false, push = true}) => (dispatch, getState) => {
+  console.log("changePageQuery")
   const newState = createStateFromQueryOrJSONs({oldState: getState(), query});
   dispatch({
     type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,

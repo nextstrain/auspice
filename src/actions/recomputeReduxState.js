@@ -1,3 +1,4 @@
+import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
 import { reallySmallNumber, twoColumnBreakpoint, genotypeColors } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
@@ -349,7 +350,13 @@ export const createStateFromQueryOrJSONs = ({
     controls = restoreQueryableStateToDefaults(controls);
   }
 
-  controls = modifyStateViaURLQuery(controls, query);
+  if (narrative) {
+    controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[1].url));
+    query = {n: query.n}; // eslint-disable-line
+  } else {
+    controls = modifyStateViaURLQuery(controls, query);
+  }
+
   controls = checkAndCorrectErrorsInState(controls, metadata); /* must run last */
 
   /* calculate new branch thicknesses & visibility */
@@ -405,5 +412,5 @@ export const createStateFromQueryOrJSONs = ({
       controls.colorBy
     );
   }
-  return {tree, metadata, entropy, controls, frequencies, narrative};
+  return {tree, metadata, entropy, controls, frequencies, narrative, query};
 };
