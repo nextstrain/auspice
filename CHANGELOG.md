@@ -1,14 +1,34 @@
+#### Narrative
+* Now exposed via a "hidden" URL query. E.g. flu/h3n2/3y?n=1
+* Frequencies added to narrative
+* block in focus is part of the URL query, and can be reloaded via the URL
+
+#### Internals
+* All JSONs (incl. frequencies, narrative) are loaded within a single Promise & dispatch
+* `phylotree.change()` only ever called once, and always in componentDidUpdate (fixes bugs where it fired in both CWRP and CDU)
+
+
 ## version 1.16.5 - 2018/03/26
+* Authors filter is now an explicit setting in the JSONs [PR 532](https://github.com/nextstrain/auspice/pull/532)
+
 
 ## version 1.16.4 - 2018/03/22
+* Flu footer updated
+* Fix bug in genotype colouring [PR 531](https://github.com/nextstrain/auspice/pull/531)
+* Adjust vaccine cross styling & remove dashed line [PR 529](https://github.com/nextstrain/auspice/pull/529)
+
 
 ## version 1.16.3 - 2018/03/21
+* Flu footer updated
+
 
 ## version 1.16.2 - 2018/03/21
-* Add redirect of www.nextstrain.org to nextstrain.org via express middleware.
+* Add redirect of www.nextstrain.org to nextstrain.org via express middleware [PR 528](https://github.com/nextstrain/auspice/pull/528)
+
 
 ## version 1.16.1 - 2018/03/16
-* Fix bug in the color scales where clade's were coloured white after switching trees.
+* Fix bug in the color scales where clades were coloured white after switching trees.
+
 
 ## version 1.16.0 - 2018/03/16
 ### Browser support
@@ -16,15 +36,19 @@
 * Grid layout issue fixed for Firefox on linux/windows
 * Embedding Nextstrain in an iFrame works - see `/scripts/gisaid_iframe.html`
 
+
 ## version 1.15.1 - 2018/03/14
 * Fix Firefox branch / tip hover bug [Issue 525](https://github.com/nextstrain/auspice/issues/525)
+
 
 ## version 1.15.0 - 2018/03/12
 * Multiple genotypes (for the same amino acid) by typing in multiple comma separated AA/nuc positions.
 [PR 523](https://github.com/nextstrain/auspice/pull/523).
 
+
 ## version 1.14.4 - 2018/03/05
 * Restore staging server toggle [issue 514](https://github.com/nextstrain/auspice/issues/514)
+
 
 ## version 1.14.3 - 2018/03/01
 * Bug fix where tip colours reverted to their initial colours after a layout change. [issue 519](https://github.com/nextstrain/auspice/issues/519)
