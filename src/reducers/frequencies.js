@@ -1,5 +1,6 @@
 import * as types from "../actions/types";
 
+/* TODO: initial dtate should simply be {loaded: false} */
 const frequencies = (state = {
   loaded: false,
   data: undefined,
@@ -9,20 +10,15 @@ const frequencies = (state = {
   version: 0
 }, action) => {
   switch (action.type) {
-    case types.INITIALISE_FREQUENCIES: {
-      return {loaded: true, data: action.data, pivots: action.pivots, ticks: action.ticks, matrix: action.matrix, version: 1};
-    }
+    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: // fallthrough
+    case types.CLEAN_START:
+      if (action.frequencies) return action.frequencies;
+      return state;
     case types.FREQUENCY_MATRIX: {
       return Object.assign({}, state, {loaded: true, matrix: action.matrix, version: state.version + 1});
     }
     case types.DATA_INVALID: {
       return {loaded: false, data: undefined, pivots: undefined, ticks: undefined, matrix: undefined, version: 0};
-    }
-    case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: {
-      if (action.frequencyMatrix) {
-        return Object.assign({}, state, {loaded: true, matrix: action.frequencyMatrix, version: state.version + 1});
-      }
-      return state;
     }
     default:
       return state;

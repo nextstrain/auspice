@@ -8,7 +8,7 @@ import { calculateVisiblityAndBranchThickness } from "./treeProperties";
 import { calcEntropyInView, getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
 import { calcColorScaleAndNodeColors } from "./colors";
 import { determineColorByGenotypeType } from "../util/colorHelpers";
-import { computeMatrixFromRawData } from "./frequencies";
+import { processFrequenciesJSON, computeMatrixFromRawData } from "../util/processFrequencies";
 
 const getAnnotations = (jsonData) => {
   const annotations = [];
@@ -304,6 +304,7 @@ export const createStateFromQueryOrJSONs = ({
   let tree, entropy, controls, metadata, frequencies, narrative;
   if (JSONs) {
     if (JSONs.narrative) narrative = JSONs.narrative;
+
     /* ceate metadata state */
     metadata = JSONs.meta;
     if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
@@ -389,18 +390,20 @@ export const createStateFromQueryOrJSONs = ({
   entropy.bars = entropyBars;
   entropy.maxYVal = entropyMaxYVal;
 
-  /* potentially calculate frequency updates */
-  const frequencyMatrix = frequencies && frequencies.loaded ?
-    computeMatrixFromRawData(
+  /* potentially calculate frequency (or update it!)
+  this needs to come after the colorscale & tree is set */
+  if (JSONs && JSONs.frequencies) {
+    frequencies = {loaded: true, version: 1, ...processFrequenciesJSON(JSONs.frequencies, tree, controls)};
+  } else if (frequencies && frequencies.loaded) { /* oldState */
+    frequencies.version++;
+    frequencies.matrix = computeMatrixFromRawData(
       frequencies.data,
       frequencies.pivots,
       tree.nodes,
       tree.visibility,
       controls.colorScale,
       controls.colorBy
-    ) :
-    undefined;
-
-  return {tree, metadata, entropy, controls, frequencyMatrix, narrative};
-
+    );
+  }
+  return {tree, metadata, entropy, controls, frequencies, narrative};
 };
