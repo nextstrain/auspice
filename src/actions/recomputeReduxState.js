@@ -310,7 +310,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, controlsSta
   newState.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(newState.nodes, newState.stateCountAttrs);
 
   if (tipSelectedIdx) { /* i.e. query.s was set */
-    newState.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controlsState.colorScale, newState});
+    newState.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controlsState.colorScale, tree: newState});
     newState.tipRadiiVersion = 1;
   }
   return newState;

@@ -116,7 +116,7 @@ const discreteAttributeScale = (nodes, nodesToo, attr) => {
 
 
 export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
-  console.log("calcColorScale. TreeToo?", !!treeToo)
+  // console.log("calcColorScale. TreeToo?", !!treeToo)
   let genotype;
   if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
     genotype = parseEncodedGenotype(colorBy, controls.geneLength);
@@ -170,7 +170,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     }
   } else if (colorOptions && colorOptions[colorBy]) {
     if (colorOptions[colorBy].color_map) {
-      console.log("Sweet - we've got a color_map for ", colorBy)
+      // console.log("Sweet - we've got a color_map for ", colorBy)
       let domain = colorOptions[colorBy].color_map.map((d) => { return d[0]; });
       let range = colorOptions[colorBy].color_map.map((d) => { return d[1]; });
       const extraVals = getExtraVals(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy].color_map);
@@ -185,15 +185,15 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         .domain(domain)
         .range(range);
     } else if (colorOptions && colorOptions[colorBy].type === "discrete") {
-      console.log("making a discrete color scale for ", colorBy)
+      // console.log("making a discrete color scale for ", colorBy)
       continuous = false;
       colorScale = discreteAttributeScale(tree.nodes, treeTooNodes, colorBy);
     } else if (colorOptions && colorOptions[colorBy].type === "integer") {
-      console.log("making an integer color scale for ", colorBy)
+      // console.log("making an integer color scale for ", colorBy)
       continuous = false;
       colorScale = integerAttributeScale(tree.nodes, colorBy);
     } else if (colorOptions && colorOptions[colorBy].type === "continuous") {
-      console.log("making a continuous color scale for ", colorBy)
+      // console.log("making a continuous color scale for ", colorBy)
       continuous = true;
       colorScale = minMaxAttributeScale(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy]);
     }

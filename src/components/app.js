@@ -141,7 +141,6 @@ class App extends React.Component {
       availableWidth -= sidebarWidth;
     }
     const mapOn = this.props.panelsToDisplay.indexOf("map") !== -1;
-    console.log("Hey... map on?", mapOn)
     /* S T Y L E S */
     const sharedStyles = {
       position: "absolute",

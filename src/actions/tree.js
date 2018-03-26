@@ -68,7 +68,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
     if (!tree.nodes) {return;}
-    console.log("ROOT SETTING TO", root)
+    // console.log("ROOT SETTING TO", root)
     /* mark nodes as "in view" as applicable */
     let rootIdx = applyInViewNodesToTree(root[0], tree);
     const [tipIdx1, tipIdx2, tipName] = processSelectedTip(tipSelected, tree, controls.showTreeToo ? treeToo : undefined);
@@ -106,7 +106,6 @@ export const updateVisibleTipsAndBranchThicknesses = (
       dispatchObj.idxOfInViewRootNodeToo = rootIdx;
       /* tip selected is the same as the first tree - the reducer uses that */
     }
-    console.log("dispatching", dispatchObj)
     /* D I S P A T C H */
     dispatch(dispatchObj);
     updateEntropyVisibility(dispatch, getState);
