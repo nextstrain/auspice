@@ -38,11 +38,17 @@ export const loadJSONs = (s3override = undefined) => {
       const secondPath = createDatapathForSecondSegment(query.tt, datasets.datapath, datasets.availableDatasets);
       if (secondPath) {
         promisesOrder.push("treeToo");
-        promises.push(fetch(apiPath(secondPath, "tree")).then((res) => res.json()));
+        promises.push(
+          fetch(`${charonAPIAddress}request=json&path=${secondPath}_tree.json&s3=${s3bucket}`)
+            .then((res) => res.json())
+            // don't need to catch - it'll be handled in the promises.map below
+        );
+        // promises.push(fetch(secondPath).then((res) => res.json()));
       }
     }
     Promise.all(promises.map((promise) => promise.catch(() => undefined)))
       .then((values) => {
+        console.log(values)
         // all promises have not resolved or rejected (value[x] = undefined upon rejection)
         // you must check for undefined here, they won't go to the following catch
         const data = {JSONs: {}, query};
