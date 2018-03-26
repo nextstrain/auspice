@@ -162,7 +162,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     try {
       setLBI(tree.nodes, absoluteDateMaxNumeric, colorOptions.lbi.tau, colorOptions.lbi.timeWindow);
       // colorScale = minMaxAttributeScale(tree.nodes, "lbi", colorOptions.lbi); /* colour ramp over all values */
-      colorScale = minMaxAttributeScale(undefined, undefined, {vmin: 0, vmax: 0.7}); /* ramp over [0, 0.7] like nextflu */
+      colorScale = minMaxAttributeScale(undefined, undefined, "lbi", {vmin: 0, vmax: 0.7}); /* ramp over [0, 0.7] like nextflu */
       continuous = true;
     } catch (e) {
       console.error("Setting LBI failed.", e);
@@ -204,7 +204,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   if (error) {
     console.error("no colorOptions for ", colorBy, " returning minMaxAttributeScale");
     continuous = true;
-    colorScale = minMaxAttributeScale(tree.nodes, nodesToo, colorBy, colorOptions[colorBy]);
+    colorScale = minMaxAttributeScale(tree.nodes, undefined, colorBy, colorOptions[colorBy]);
   }
 
 
