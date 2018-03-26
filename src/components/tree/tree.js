@@ -77,7 +77,6 @@ class Tree extends React.Component {
     let newState;
     if (this.state.tree) {
       newState = changePhyloTreeViaPropsComparison(true, this.state.tree, this.Viewer, prevProps, this.props);
-      changePhyloTreeViaPropsComparison(this, prevProps, this.props);
       if (prevProps.showTreeToo !== this.props.showTreeToo) {
         console.warn("potential race condition");
         this.state.tree.change({svgHasChangedDimensions: true});

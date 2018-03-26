@@ -5,7 +5,7 @@ import { rgb } from "d3-color";
 import { area } from "d3-shape";
 import { dataFont } from "../../globalStyles";
 import { prettyString } from "../../util/stringHelpers";
-import { unassigned_label } from "../../actions/frequencies";
+import { unassigned_label } from "../../util/processFrequencies";
 
 /* C O N S T A N T S */
 const opacity = 0.85;
