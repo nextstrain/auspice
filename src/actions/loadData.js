@@ -48,7 +48,6 @@ export const loadJSONs = (s3override = undefined) => {
     }
     Promise.all(promises.map((promise) => promise.catch(() => undefined)))
       .then((values) => {
-        console.log(values)
         // all promises have not resolved or rejected (value[x] = undefined upon rejection)
         // you must check for undefined here, they won't go to the following catch
         const data = {JSONs: {}, query};

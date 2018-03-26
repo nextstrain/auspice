@@ -1,11 +1,18 @@
 #### Narrative
-* Now exposed via a "hidden" URL query. E.g. flu/h3n2/3y?n=1
+* Now exposed via a "hidden" URL query. E.g. `flu/h3n2/3y?n=1`
 * Frequencies added to narrative
 * block in focus is part of the URL query, and can be reloaded via the URL
+
+#### Second Tree / Tanglegram
+* Second tree can be loaded via a URL (e.g. `?tt=na`). Sidebar dropdown currently disabled.
+* In this mode, trees are forced to be rectangular, and the map & frequencies are not displayed.
+* Tanglegram exists, but no untangling (yet)
+* Bugs still exist (which is why the sidebar has been disabled)
 
 #### Internals
 * All JSONs (incl. frequencies, narrative) are loaded within a single Promise & dispatch
 * `phylotree.change()` only ever called once, and always in componentDidUpdate (fixes bugs where it fired in both CWRP and CDU)
+* old & deprecated code removed
 
 
 ## version 1.16.5 - 2018/03/26
