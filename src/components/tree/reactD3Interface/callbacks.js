@@ -1,16 +1,19 @@
 import { rgb } from "d3-color";
 import { interpolateRgb } from "d3-interpolate";
-import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/treeProperties";
+import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
 import { mediumTransitionDuration } from "../../../util/globals";
-import { branchOpacityFunction } from "../treeHelpers";
+import { branchOpacityFunction } from "../../../util/colorHelpers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
-export const onTipHover = function onTipHover(d, x, y) {
-  this.state.tree.svg.select("#tip_" + d.n.clade)
+export const onTipHover = function onTipHover(d) {
+  const phylotree = d.that.params.orientation[0] === 1 ?
+    this.state.tree :
+    this.state.treeToo;
+  phylotree.svg.select("#tip_" + d.n.clade)
     .attr("r", (e) => e["r"] + 4);
   this.setState({
-    hovered: {d, type: ".tip", x, y}
+    hovered: {d, type: ".tip"}
   });
 };
 
@@ -20,11 +23,15 @@ export const onTipClick = function onTipClick(d) {
     hovered: null,
     selectedTip: d
   });
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: d.n.arrayIdx}));
+  /* are we clicking from tree1 or tree2? */
+  const tipSelected = d.that.params.orientation[0] === 1 ?
+    {treeIdx: d.n.arrayIdx} :
+    {treeTooIdx: d.n.arrayIdx};
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelected}));
 };
 
 
-export const onBranchHover = function onBranchHover(d, x, y) {
+export const onBranchHover = function onBranchHover(d) {
   /* emphasize the color of the branch */
   for (const id of ["#branch_S_" + d.n.clade, "#branch_T_" + d.n.clade]) {
     if (this.props.colorByConfidence) {
@@ -47,12 +54,15 @@ export const onBranchHover = function onBranchHover(d, x, y) {
       .call((sel) => this.state.tree.drawSingleCI(sel, 0.5));
   }
   this.setState({
-    hovered: {d, type: ".branch", x, y}
+    hovered: {d, type: ".branch"}
   });
 };
 
 export const onBranchClick = function onBranchClick(d) {
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: d.n.arrayIdx}));
+  const root = [undefined, undefined];
+  if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
+  else root[1] = d.n.arrayIdx;
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
 };
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
@@ -70,8 +80,11 @@ export const onBranchLeave = function onBranchLeave(d) {
 };
 
 export const onTipLeave = function onTipLeave(d) {
+  const phylotree = d.that.params.orientation[0] === 1 ?
+    this.state.tree :
+    this.state.treeToo;
   if (!this.state.selectedTip) {
-    this.state.tree.svg.select("#tip_" + d.n.clade)
+    phylotree.svg.select("#tip_" + d.n.clade)
       .attr("r", (dd) => dd["r"]);
   }
   if (this.state.hovered) {
@@ -81,11 +94,16 @@ export const onTipLeave = function onTipLeave(d) {
 
 /* clearSelectedTip when clicking to go away */
 export const clearSelectedTip = function clearSelectedTip(d) {
-  this.state.tree.svg.select("#tip_" + d.n.clade)
+  const phylotree = d.that.params.orientation[0] === 1 ?
+    this.state.tree :
+    this.state.treeToo;
+  phylotree.svg.select("#tip_" + d.n.clade)
     .attr("r", (dd) => dd["r"]);
   this.setState({selectedTip: null, hovered: null});
   /* restore the tip visibility! */
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: -1}));
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses(
+    {tipSelected: {clear: true}}
+  ));
 };
 
 
@@ -127,25 +145,25 @@ export const resetView = function resetView() {
   this.Viewer.fitToViewer();
 };
 
-export const handleIconClickHOF = function handleIconClickHOF(tool) {
-  return () => {
-    const V = this.Viewer.getValue();
-    if (tool === "zoom-in") {
-      this.Viewer.zoomOnViewerCenter(1.4);
-    } else if (V.a > 1.0) { // if there is room to zoom out via the SVGPanZoom, do
-      this.Viewer.zoomOnViewerCenter(0.71);
-    } else { // otherwise reset view to have SVG fit the viewer
-      resetView.bind(this)();
-      // if we have clade zoom, zoom out to the parent clade
-      if (this.state.selectedBranch && this.state.selectedBranch.n.arrayIdx) {
-        this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
-          idxOfInViewRootNode: this.state.tree.zoomNode.parent.n.arrayIdx
-        }));
-      }
-    }
-    resetGrid.bind(this)();
-  };
-};
+// export const handleIconClickHOF = function handleIconClickHOF(tool) {
+//   return () => {
+//     const V = this.Viewer.getValue();
+//     if (tool === "zoom-in") {
+//       this.Viewer.zoomOnViewerCenter(1.4);
+//     } else if (V.a > 1.0) { // if there is room to zoom out via the SVGPanZoom, do
+//       this.Viewer.zoomOnViewerCenter(0.71);
+//     } else { // otherwise reset view to have SVG fit the viewer
+//       resetView.bind(this)();
+//       // if we have clade zoom, zoom out to the parent clade
+//       if (this.state.selectedBranch && this.state.selectedBranch.n.arrayIdx) {
+//         this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+//           idxOfInViewRootNode: this.state.tree.zoomNode.parent.n.arrayIdx
+//         }));
+//       }
+//     }
+//     resetGrid.bind(this)();
+//   };
+// };
 
 /**
  * @param  {node} d tree node object

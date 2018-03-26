@@ -1,47 +1,19 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, genotypeColors } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
-import { flattenTree, appendParentsToTree, processVaccines, processNodes, processBranchLabelsInPlace, strainNameToIdx, calcTipRadii } from "../components/tree/treeHelpers";
+import { strainNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
+import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
+import { calcTipRadii } from "../util/tipRadiusHelpers";
 import { getDefaultControlsState } from "../reducers/controls";
-import { getDefaultTreeState, getAttrsOnTerminalNodes } from "../reducers/tree";
-import { calculateVisiblityAndBranchThickness } from "./treeProperties";
-import { calcEntropyInView, getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
-import { calcColorScaleAndNodeColors } from "./colors";
-import { determineColorByGenotypeType } from "../util/colorHelpers";
+import { getValuesAndCountsOfVisibleTraitsFromTree,
+  getAllValuesAndCountsOfTraitsFromTree } from "../util/treeCountingHelpers";
+import { calcEntropyInView } from "../util/entropy";
+import { treeJsonToState } from "../util/treeJsonProcessing";
+import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons";
+import { determineColorByGenotypeType, calcNodeColor } from "../util/colorHelpers";
+import { calcColorScale } from "../util/colorScale";
 import { processFrequenciesJSON, computeMatrixFromRawData } from "../util/processFrequencies";
-
-const getAnnotations = (jsonData) => {
-  const annotations = [];
-  let aaCount = 0;
-  for (const prot of Object.keys(jsonData)) {
-    if (prot !== "nuc") {
-      aaCount++;
-      annotations.push({
-        prot: prot,
-        start: jsonData[prot].start,
-        end: jsonData[prot].end,
-        readingFrame: 1, // +tmpProt['pos'][0]%3,
-        fill: genotypeColors[aaCount % 10]
-      });
-    }
-  }
-  return annotations;
-};
-
-const processAnnotations = (annotations) => {
-  const m = {}; /* m === geneMap */
-  annotations.forEach((d) => {
-    m[d.prot] = d;
-  });
-  const sorted = Object.keys(m).sort((a, b) =>
-    m[a].start < m[b].start ? -1 : m[a].start > m[b].start ? 1 : 0
-  );
-  for (const gene of Object.keys(m)) {
-    m[gene].idx = sorted.indexOf(gene);
-  }
-  return m;
-};
 
 export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -227,21 +199,43 @@ const modifyStateViaMetadata = (state, metadata) => {
   return state;
 };
 
-const modifyStateViaTree = (state, tree) => {
+const modifyStateViaTree = (state, tree, treeToo) => {
   state["dateMin"] = getMinCalDateViaTree(tree.nodes);
-  state["absoluteDateMin"] = getMinCalDateViaTree(tree.nodes);
   state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
-  state["absoluteDateMax"] = getMaxCalDateViaTree(tree.nodes);
-  /* and their numeric conversions */
   state.dateMinNumeric = calendarToNumeric(state.dateMin);
-  state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
   state.dateMaxNumeric = calendarToNumeric(state.dateMax);
+
+  if (treeToo) {
+    const min = getMinCalDateViaTree(treeToo.nodes);
+    const max = getMaxCalDateViaTree(treeToo.nodes);
+    const minNumeric = calendarToNumeric(min);
+    const maxNumeric = calendarToNumeric(max);
+    if (minNumeric < state.dateMinNumeric) {
+      state.dateMinNumeric = minNumeric;
+      state.dateMin = min;
+    }
+    if (maxNumeric > state.dateMaxNumeric) {
+      state.dateMaxNumeric = maxNumeric;
+      state.dateMax = max;
+    }
+  }
+
+  /* set absolutes */
+  state["absoluteDateMin"] = state["dateMin"];
+  state["absoluteDateMax"] = state["dateMax"];
+  state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
   state.absoluteDateMaxNumeric = calendarToNumeric(state.absoluteDateMax);
-  state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
+
 
   /* available tree attrs - based upon the root node */
-  state["attrs"] = Object.keys(tree.nodes[0].attr);
-  state["temporalConfidence"] = Object.keys(tree.nodes[0].attr).indexOf("num_date_confidence") > -1 ?
+  if (treeToo) {
+    state.attrs = [...new Set([...Object.keys(tree.nodes[0].attr), ...Object.keys(treeToo.nodes[0].attr)])];
+  } else {
+    state.attrs = Object.keys(tree.nodes[0].attr);
+  }
+
+  state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
+  state.temporalConfidence = Object.keys(tree.nodes[0].attr).indexOf("num_date_confidence") > -1 ?
     {exists: true, display: true, on: false} : {exists: false, display: false, on: false};
   return state;
 };
@@ -296,13 +290,55 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
   return state;
 };
 
+const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, controlsState) => {
+  /* calculate new branch thicknesses & visibility */
+  let tipSelectedIdx = 0;
+  /* check if the query defines a strain to be selected */
+  if (tipSelected) {
+    tipSelectedIdx = strainNameToIdx(oldState.nodes, tipSelected);
+    oldState.selectedStrain = tipSelected;
+  }
+  const visAndThicknessData = calculateVisiblityAndBranchThickness(
+    oldState,
+    controlsState,
+    {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric},
+    {tipSelectedIdx, validIdxRoot: oldState.idxOfInViewRootNode}
+  );
+  visAndThicknessData.stateCountAttrs = Object.keys(controlsState.filters);
+  const newState = Object.assign({}, oldState, visAndThicknessData);
+  newState.visibleStateCounts = getValuesAndCountsOfVisibleTraitsFromTree(
+    newState.nodes, newState.visibility, newState.stateCountAttrs);
+  /* potentially VVVV only needs to run if using JSONs */
+  newState.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(newState.nodes, newState.stateCountAttrs);
+
+  if (tipSelectedIdx) { /* i.e. query.s was set */
+    newState.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controlsState.colorScale, tree: newState});
+    newState.tipRadiiVersion = 1;
+  }
+  return newState;
+};
+
+const modifyControlsViaTreeToo = (controls, treeToo, name) => {
+  controls.showTreeToo = name;
+  controls.showTangle = true;
+  controls.layout = "rect"; /* must be rectangular for two trees */
+  const mapIdx = controls.panelsToDisplay.indexOf("map");
+  if (mapIdx !== -1) {
+    controls.panelsToDisplay = controls.panelsToDisplay.slice();
+    controls.panelsToDisplay.splice(mapIdx, 1);
+  }
+  controls.canTogglePanelLayout = false;
+  controls.panelLayout = "full";
+  return controls;
+};
+
 export const createStateFromQueryOrJSONs = ({
   JSONs = false, /* raw json data - completely nuke existing redux state */
   oldState = false, /* existing redux state (instead of jsons) */
   query
 }) => {
+  let tree, treeToo, entropy, controls, metadata, frequencies, narrative;
   /* first task is to create metadata, entropy, controls & tree partial state */
-  let tree, entropy, controls, metadata, frequencies, narrative;
   if (JSONs) {
     if (JSONs.narrative) narrative = JSONs.narrative;
 
@@ -314,40 +350,28 @@ export const createStateFromQueryOrJSONs = ({
     metadata.colorOptions = metadata.color_options;
     delete metadata.color_options;
     metadata.loaded = true;
-
     /* entropy state */
-    /* TODO check that metadata defines the entropy panel */
-    const annotations = getAnnotations(JSONs.meta.annotations);
-    entropy = {
-      showCounts: false,
-      loaded: true,
-      annotations,
-      geneMap: processAnnotations(annotations)
-    };
-
-    /* new tree state */
-    appendParentsToTree(JSONs.tree);
-    const nodesArray = flattenTree(JSONs.tree);
-    const nodes = processNodes(nodesArray);
-    const vaccines = processVaccines(nodes, JSONs.meta.vaccine_choices);
-    const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
-    tree = Object.assign({}, getDefaultTreeState(), {
-      nodes,
-      vaccines,
-      availableBranchLabels,
-      attrs: getAttrsOnTerminalNodes(nodes),
-      loaded: true
-    });
-
+    entropy = entropyCreateStateFromJsons(JSONs.meta);
+    /* new tree state(s) */
+    tree = treeJsonToState(JSONs.tree, JSONs.meta.vaccine_choices);
+    tree.debug = "LEFT";
+    if (JSONs.treeToo) {
+      treeToo = treeJsonToState(JSONs.treeToo, JSONs.meta.vaccine_choices);
+      treeToo.debug = "RIGHT";
+    }
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
-    controls = modifyStateViaTree(controls, tree);
+    controls = modifyStateViaTree(controls, tree, treeToo);
     controls = modifyStateViaMetadata(controls, metadata);
-  }
-
-  if (oldState) {
-    ({controls, entropy, tree, metadata, frequencies} = oldState);
+  } else if (oldState) {
+    ({controls, entropy, tree, treeToo, metadata, frequencies} = oldState);
     controls = restoreQueryableStateToDefaults(controls);
+    if (query.tt && !treeToo.loaded) {
+      console.log("TO DO - loAd 2nD tree (via a delayed fetch / now?!?!)");
+    }
+  } else {
+    console.error("no JSONs / oldState provided");
+    return;
   }
 
   if (narrative) {
@@ -360,37 +384,24 @@ export const createStateFromQueryOrJSONs = ({
 
   controls = checkAndCorrectErrorsInState(controls, metadata); /* must run last */
 
-  /* calculate new branch thicknesses & visibility */
-  let tipSelectedIdx = 0;
-  /* check if the query defines a strain to be selected */
-  if (query.s) {
-    tipSelectedIdx = strainNameToIdx(tree.nodes, query.s);
-    tree.selectedStrain = query.s;
-  }
-  const visAndThicknessData = calculateVisiblityAndBranchThickness(
-    tree,
-    controls,
-    {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-    {tipSelectedIdx, validIdxRoot: tree.idxOfInViewRootNode}
-  );
-  visAndThicknessData.stateCountAttrs = Object.keys(controls.filters);
-  tree = Object.assign({}, tree, visAndThicknessData);
-  tree.visibleStateCounts = getValuesAndCountsOfVisibleTraitsFromTree(tree.nodes, tree.visibility, tree.stateCountAttrs);
-  /* potentially VVVV only needs to run if using JSONs */
-  tree.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(tree.nodes, tree.stateCountAttrs);
 
   /* calculate colours if loading from JSONs or if the query demands change */
   if (JSONs || controls.colorBy !== oldState.colorBy) {
-    const {nodeColors, colorScale, version} = calcColorScaleAndNodeColors(controls.colorBy, controls, tree, metadata);
+    const {colorScale, version} = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
+    const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;
     controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
     tree.nodeColorsVersion = version;
     tree.nodeColors = nodeColors;
   }
 
-  if (tipSelectedIdx) { /* i.e. query.s was set */
-    tree.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controls.colorScale, tree});
-    tree.tipRadiiVersion = 1;
+  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, controls);
+  if (treeToo) {
+    treeToo.nodeColorsVersion = tree.nodeColorsVersion;
+    treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
+    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, controls);
+    controls = modifyControlsViaTreeToo(controls, treeToo, query.tt);
+    treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility);
   }
 
   /* calculate entropy in view */
@@ -413,5 +424,38 @@ export const createStateFromQueryOrJSONs = ({
       controls.colorBy
     );
   }
-  return {tree, metadata, entropy, controls, frequencies, narrative, query};
+  return {tree, treeToo, metadata, entropy, controls, frequencies, narrative, query};
+}
+
+export const createTreeTooState = ({
+  treeTooJSON, /* raw json data */
+  oldState,
+  segment /* name of the treeToo segment */
+}) => {
+  /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
+  /* TODO: reconcile query with visibility etc */
+  let controls = oldState.controls;
+  let treeToo = treeJsonToState(treeTooJSON);
+  treeToo.debug = "RIGHT";
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, oldState.controls);
+  controls = modifyStateViaTree(controls, oldState.tree, treeToo);
+  controls = modifyControlsViaTreeToo(controls, treeToo, segment);
+
+  /* calculate colours if loading from JSONs or if the query demands change */
+  const {colorScale, version} = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);
+  const nodeColors = calcNodeColor(treeToo, colorScale);
+  controls.colorScale = colorScale;
+  controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
+  treeToo.nodeColorsVersion = version;
+  treeToo.nodeColors = nodeColors;
+
+  treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
+    oldState.tree.nodes, treeToo.nodes, oldState.tree.visibility
+  );
+
+  // if (tipSelectedIdx) { /* i.e. query.s was set */
+  //   tree.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controls.colorScale, tree});
+  //   tree.tipRadiiVersion = 1;
+  // }
+  return {treeToo, controls};
 };

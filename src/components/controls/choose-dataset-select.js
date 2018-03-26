@@ -78,6 +78,7 @@ class ChooseDatasetSelect extends React.Component {
           clearable={false}
           multi={false}
           onChange={(opt) => {
+	    console.log("on change", opt.value, datasetOptions)
             this.changeDataset(this.createDataPath(opt.value));
           }}
         />

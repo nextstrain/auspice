@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Slider from "./slider";
 import { controlsWidth } from "../../util/globals";
 import { numericToCalendar } from "../../util/dateHelpers";
-import { changeDateFilter } from "../../actions/treeProperties";
+import { changeDateFilter } from "../../actions/tree";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { headerFont, lightGrey, darkGrey } from "../../globalStyles";
 

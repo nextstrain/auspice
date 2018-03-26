@@ -37,12 +37,6 @@ export const applyToChildren = (node, func) => {
 
 
 /*
-* given nodes, create the shell property, which links the redux properties
-* (theoretically immutable) with the phylotree properties (changeable)
-*/
-
-
-/*
 * given nodes, create the children and parent properties.
 * modifies the nodes argument in place
 */

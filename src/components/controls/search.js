@@ -1,8 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
 import Awesomplete from 'awesomplete'; /* https://leaverou.github.io/awesomplete/ */
-import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/treeProperties";
+import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/tree";
 import { dataFont, darkGrey } from "../../globalStyles";
+import { SelectLabel } from "../framework/select-label";
 import "../../css/awesomplete.css";
 
 const Cross = ({onClick, show}) => {
@@ -38,7 +39,7 @@ class SearchStrains extends React.Component {
     this.state = {awesomplete: undefined, show: false};
     this.removeSelection = () => {
       this.ref.value = null;
-      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: -1}));
+      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}}));
       this.props.dispatch(updateTipRadii());
       this.setState({show: false});
     };
@@ -52,7 +53,7 @@ class SearchStrains extends React.Component {
       for (let i = 0; i < this.props.nodes.length; i++) {
         if (this.props.nodes[i].strain === strain) {
           this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
-            tipSelectedIdx: this.props.nodes[i].arrayIdx
+            tipSelected: {treeIdx: this.props.nodes[i].arrayIdx}
           }));
           /* ^^^ also sets reduxState.tree.selectedStrain */
           this.props.dispatch(updateTipRadii({
@@ -87,6 +88,7 @@ class SearchStrains extends React.Component {
   render() {
     return (
       <div style={{fontFamily: dataFont, color: darkGrey, fontSize: 14, display: "inline-block"}}>
+        <SelectLabel text="Search Strains"/>
         <div style={{width: "80%", display: "inline-block"}}>
           <input
             style={{fontFamily: "inherit", color: "inherit", fontSize: "inherit", width: "100%", height: "23px", paddingLeft: "7px", borderRadius: "4px", border: "1px solid #ccc"}}

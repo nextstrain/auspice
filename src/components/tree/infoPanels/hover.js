@@ -2,7 +2,7 @@ import React from "react";
 import { infoPanelStyles } from "../../../globalStyles";
 import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
-import { getTipColorAttribute } from "../treeHelpers";
+import { getTipColorAttribute } from "../../../util/colorHelpers";
 
 const infoLineJSX = (item, value) => (
   <span>
@@ -163,17 +163,22 @@ const getBranchDescendents = (n) => {
  * @return {[x,y]} point on plane
  */
 const treePosToViewer = (x, y, V) => {
-  const dx = (x * V.a + V.e); // this is the distance form the upper left corner
-  const dy = (y * V.d + V.f); // at the current zoom level
-  return {x: dx, y: dy};
+  // const dx = (x * V.a + V.e); // this is the distance form the upper left corner
+  // const dy = (y * V.d + V.f); // at the current zoom level
+  return {x: x + V.e, y: y + V.f};
 };
 
-const getPanelStyling = (d, viewer) => {
+const getPanelStyling = (d, viewer, panelDims) => {
   const viewerState = viewer.getValue();
   const xOffset = 10;
   const yOffset = 10;
   const width = 200;
-  const pos = treePosToViewer(d.xTip, d.yTip, viewerState);
+
+  /* this adjusts the x-axis for the right tree in dual tree view */
+  const xPos = d.that.params.orientation[0] === -1 ?
+    panelDims.width / 2 + panelDims.spaceBetweenTrees + d.xTip :
+    d.xTip;
+  const pos = treePosToViewer(xPos, d.yTip, viewerState);
   const styles = {
     container: {
       position: "absolute",
@@ -192,15 +197,15 @@ const getPanelStyling = (d, viewer) => {
       wordBreak: "break-word"
     }
   };
-  if (pos.x < viewerState.viewerWidth * 0.6) {
+  if (pos.x < panelDims.width * 0.6) {
     styles.container.left = pos.x + xOffset;
   } else {
-    styles.container.right = viewerState.viewerWidth - pos.x + xOffset;
+    styles.container.right = panelDims.width - pos.x + xOffset;
   }
-  if (pos.y < viewerState.viewerHeight * 0.55) {
+  if (pos.y < panelDims.height * 0.55) {
     styles.container.top = pos.y + 4 * yOffset;
   } else {
-    styles.container.bottom = viewerState.viewerHeight - pos.y + yOffset;
+    styles.container.bottom = panelDims.height - pos.y + yOffset;
   }
   return styles;
 };
@@ -233,14 +238,14 @@ const displayVaccineInfo = (d) => {
 };
 
 /* the actual component - a pure function, so we can return early if needed */
-const HoverInfoPanel = ({tree, mutType, temporalConfidence, distanceMeasure,
-  hovered, viewer, colorBy, colorByConfidence, colorScale}) => {
-  if (!(tree && hovered)) {
-    return null;
-  }
+const HoverInfoPanel = ({mutType, temporalConfidence, distanceMeasure,
+  hovered, viewer, colorBy, colorByConfidence, colorScale, panelDims}) => {
+
+  if (!hovered) return null;
+
   const tip = hovered.type === ".tip";
   const d = hovered.d;
-  const styles = getPanelStyling(d, viewer);
+  const styles = getPanelStyling(d, viewer, panelDims);
   let inner;
   if (tip) {
     inner = (

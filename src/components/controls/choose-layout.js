@@ -5,10 +5,12 @@ import * as icons from "../framework/svg-icons";
 import { materialButton, materialButtonSelected, brandColor, darkGrey } from "../../globalStyles";
 import { CHANGE_LAYOUT } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import { SelectLabel } from "../framework/select-label";
 
 @connect((state) => {
   return {
-    layout: state.controls.layout
+    layout: state.controls.layout,
+    showTreeToo: state.controls.showTreeToo
   };
 })
 class ChooseLayout extends React.Component {
@@ -30,10 +32,12 @@ class ChooseLayout extends React.Component {
   }
 
   render() {
+    if (this.props.showTreeToo) return null;
     const styles = this.getStyles();
     const selected = this.props.layout;
     return (
       <div style={styles.container}>
+        <SelectLabel text="Layout" extraStyles={{marginTop: "0px"}}/>
         <div style={{margin: 5}}>
           <icons.RectangularTree width={25} stroke={selected === "rect" ? brandColor : darkGrey}/>
           <button

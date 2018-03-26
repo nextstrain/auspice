@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/treeProperties";
+import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import { prettyString } from "../../util/stringHelpers";
 import { displayFilterValueAsButton } from "../framework/footer";
 
@@ -11,7 +11,7 @@ const resetTreeButton = (dispatch) => {
     <div
       className={`boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
-      onClick={() => dispatch(updateVisibleTipsAndBranchThicknesses({idxOfInViewRootNode: 0}))}
+      onClick={() => dispatch(updateVisibleTipsAndBranchThicknesses({root: [0, 0]}))}
     >
       {"View entire tree."}
     </div>
@@ -84,6 +84,7 @@ export const createSummary = (virus_count, nodes, filters, visibility, visibleSt
     metadata: state.metadata,
     nodes: state.tree.nodes,
     idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
+    idxOfInViewRootNodeToo: state.treeToo.idxOfInViewRootNode,
     visibleStateCounts: state.tree.visibleStateCounts,
     totalStateCounts: state.tree.totalStateCounts,
     visibility: state.tree.visibility,
@@ -184,7 +185,11 @@ class Info extends React.Component {
         <div style={{display: "inline-block"}}>
           <div
             className={'boxed-item-icon'}
-            onClick={() => {this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelectedIdx: -1}));}}
+            onClick={() => {
+              this.props.dispatch(
+                updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}})
+              );
+            }}
             role="button"
             tabIndex={0}
           >
@@ -310,7 +315,7 @@ class Info extends React.Component {
               </span>
             ) : null}
             {/* finally - is a branch selected? */}
-            {this.props.idxOfInViewRootNode === 0 ? null :
+            {this.props.idxOfInViewRootNode === 0 && this.props.idxOfInViewRootNodeToo === 0 ? null :
               resetTreeButton(this.props.dispatch)}
           </div>
         </div>

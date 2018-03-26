@@ -3,7 +3,8 @@ import * as types from "./types";
 import { charonAPIAddress } from "../util/globals";
 import { getManifest } from "../util/clientAPIInterface";
 import { changePage } from "./navigation";
-import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
+import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
+import { createDatapathForSecondSegment } from "../util/parseParams";
 
 export const loadJSONs = (s3override = undefined) => {
   return (dispatch, getState) => {
@@ -13,6 +14,7 @@ export const loadJSONs = (s3override = undefined) => {
       return;
     }
     dispatch({type: types.DATA_INVALID});
+    const query = queryString.parse(window.location.search);
     const s3bucket = s3override ? s3override : datasets.s3bucket;
     const apiPath = (jsonType) =>
       `${charonAPIAddress}request=json&path=${datasets.datapath}_${jsonType}.json&s3=${s3bucket}`;
@@ -24,7 +26,6 @@ export const loadJSONs = (s3override = undefined) => {
       fetch(apiPath("tip-frequencies")).then((res) => res.json())
     ];
     /* add promises according to the URL */
-    const query = queryString.parse(window.location.search);
     if (query.n) { /* narrative */
       promisesOrder.push("narrative");
       promises.push(
@@ -32,6 +33,13 @@ export const loadJSONs = (s3override = undefined) => {
           .then((res) => res.json())
           // don't need to catch - it'll be handled in the promises.map below
       );
+    }
+    if (query.tt) { /* SECOND TREE */
+      const secondPath = createDatapathForSecondSegment(query.tt, datasets.datapath, datasets.availableDatasets);
+      if (secondPath) {
+        promisesOrder.push("treeToo");
+        promises.push(fetch(apiPath(secondPath, "tree")).then((res) => res.json()));
+      }
     }
     Promise.all(promises.map((promise) => promise.catch(() => undefined)))
       .then((values) => {
@@ -68,4 +76,20 @@ export const changeS3Bucket = () => {
     // 2. this can *only* be toggled through the app, so we must reload data
     dispatch(loadJSONs(newBucket));
   };
+};
+
+export const loadTreeToo = (name, path) => (dispatch, getState) => {
+  const { datasets } = getState();
+  const apiCall = `${charonAPIAddress}request=json&path=${path}_tree.json&s3=${datasets.s3bucket}`;
+  fetch(apiCall)
+    .then((res) => res.json())
+    .then((res) => {
+      const newState = createTreeTooState(
+        {treeTooJSON: res, oldState: getState(), segment: name}
+      );
+      dispatch({ type: types.TREE_TOO_DATA, treeToo: newState.treeToo, controls: newState.controls, segment: name});
+    })
+    .catch((err) => {
+      console.error("Error while loading second tree", err);
+    });
 };

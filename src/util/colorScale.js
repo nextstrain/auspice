@@ -3,25 +3,11 @@ import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors, reallySmallNumber, reallyBigNumber } from "./globals";
-import { getAllValuesAndCountsOfTraitsFromTree } from "./treeTraversals";
+import { getAllValuesAndCountsOfTraitsFromTree } from "./treeCountingHelpers";
 import { setLBI } from "./localBranchingIndex";
-
-/**
-* what values (for colorBy) are present in the tree and not in the color_map?
-* @param {Array} nodes - list of nodes
-* @param {string} colorBy -
-* @param {Array} color_map - list of colorBy values with colours
-* @return {list}
-*/
-const getExtraVals = (nodes, colorBy, color_map) => {
-  let valsInTree = [];
-  nodes.forEach((n) => valsInTree.push(n.attr[colorBy]));
-  valsInTree = [...new Set(valsInTree)];
-  const valsInMeta = color_map.map((d) => { return d[0];});
-  // console.log("here", valsInMeta, valsInTree, valsInTree.filter((x) => valsInMeta.indexOf(x) === -1))
-  // only care about values in tree NOT in metadata
-  return valsInTree.filter((x) => valsInMeta.indexOf(x) === -1);
-};
+import { getExtraVals } from "./colorHelpers";
+import { parseEncodedGenotype } from "./getGenotype";
+import { setGenotype } from "./setGenotype";
 
 const createLegendMatchBound = (colorScale) => {
   const lower_bound = {};
@@ -59,12 +45,15 @@ const genericScale = (cmin, cmax, vals = false) => {
 };
 
 
-const minMaxAttributeScale = (nodes, attr, options) => {
+const minMaxAttributeScale = (nodes, nodesToo, attr, options) => {
   if (Object.prototype.hasOwnProperty.call(options, "vmin") && Object.prototype.hasOwnProperty.call(options, "vmax")) {
     return genericScale(options.vmin, options.vmax);
   }
-  const vals = nodes.map((n) => n.attr[attr])
-    .filter((n) => n !== undefined)
+  const vals = nodes.map((n) => n.attr[attr]);
+  if (nodesToo) {
+    nodesToo.forEach((n) => vals.push(n.attr[attr]));
+  }
+  vals.filter((n) => n !== undefined)
     .filter((item, i, ar) => ar.indexOf(item) === i);
   return genericScale(min(vals), max(vals), vals);
 };
@@ -94,12 +83,25 @@ const createListOfColors = (n, range) => {
   return d3Range(0, n).map(scale);
 };
 
-const discreteAttributeScale = (nodes, attr) => {
+const discreteAttributeScale = (nodes, nodesToo, attr) => {
   const stateCount = getAllValuesAndCountsOfTraitsFromTree(nodes, attr)[attr];
+  if (nodesToo) {
+    const sc = getAllValuesAndCountsOfTraitsFromTree(nodesToo, attr)[attr];
+    for (let state in sc) { // eslint-disable-line
+      if (stateCount[state]) {
+        stateCount[state] += sc[state];
+      } else {
+        stateCount[state] = sc[state];
+      }
+    }
+  }
   const domain = Object.keys(stateCount);
-  domain.sort((a, b) => stateCount[a] > stateCount[b]);
+  domain.sort((a, b) => stateCount[a] > stateCount[b] ? -1 : 1);
+
   // note: colors[n] has n colors
-  const colorList = domain.length < colors.length ? colors[domain.length].slice() : colors[colors.length - 1].slice();
+  const colorList = domain.length <= colors.length ?
+    colors[domain.length].slice() :
+    colors[colors.length - 1].slice();
 
   /* if NA / undefined / unknown, change the colours to grey */
   for (const key of ["unknown", "undefined", "unassigned", "NA", "NaN"]) {
@@ -112,12 +114,33 @@ const discreteAttributeScale = (nodes, attr) => {
     .range(colorList);
 };
 
-const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absoluteDateMaxNumeric) => {
+
+export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
+  // console.log("calcColorScale. TreeToo?", !!treeToo)
+  let genotype;
+  if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
+    genotype = parseEncodedGenotype(colorBy, controls.geneLength);
+    if (genotype.length > 1) {
+      console.warn("Cannot deal with multiple proteins yet - using first only.");
+    }
+    setGenotype(tree.nodes, genotype[0].prot || "nuc", genotype[0].positions); /* modifies nodes recursively */
+  }
+
+  /* step 1: calculate the required colour scale */
+  const version = controls.colorScale === undefined ? 1 : controls.colorScale.version + 1;
+
+  const geneLength = controls.geneLength;
+  const colorOptions = metadata.colorOptions;
+  const absoluteDateMaxNumeric = controls.absoluteDateMaxNumeric;
+
+  const treeTooNodes = treeToo ? treeToo.nodes : undefined;
+
   let colorScale;
   let continuous = false;
   let error = false;
 
   if (!tree.nodes) {
+    console.warn("calcColorScale called before tree is ready.");
     // make a dummy color scale before the tree is in place
     continuous = true;
     colorScale = genericScale(0, 1);
@@ -139,7 +162,7 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absolut
     try {
       setLBI(tree.nodes, absoluteDateMaxNumeric, colorOptions.lbi.tau, colorOptions.lbi.timeWindow);
       // colorScale = minMaxAttributeScale(tree.nodes, "lbi", colorOptions.lbi); /* colour ramp over all values */
-      colorScale = minMaxAttributeScale(undefined, undefined, {vmin: 0, vmax: 0.7}); /* ramp over [0, 0.7] like nextflu */
+      colorScale = minMaxAttributeScale(undefined, undefined, "lbi", {vmin: 0, vmax: 0.7}); /* ramp over [0, 0.7] like nextflu */
       continuous = true;
     } catch (e) {
       console.error("Setting LBI failed.", e);
@@ -150,7 +173,7 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absolut
       // console.log("Sweet - we've got a color_map for ", colorBy)
       let domain = colorOptions[colorBy].color_map.map((d) => { return d[0]; });
       let range = colorOptions[colorBy].color_map.map((d) => { return d[1]; });
-      const extraVals = getExtraVals(tree.nodes, colorBy, colorOptions[colorBy].color_map);
+      const extraVals = getExtraVals(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy].color_map);
       if (extraVals.length) {
         // we must add these to the domain + provide a value in the range
         domain = domain.concat(extraVals);
@@ -164,7 +187,7 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absolut
     } else if (colorOptions && colorOptions[colorBy].type === "discrete") {
       // console.log("making a discrete color scale for ", colorBy)
       continuous = false;
-      colorScale = discreteAttributeScale(tree.nodes, colorBy);
+      colorScale = discreteAttributeScale(tree.nodes, treeTooNodes, colorBy);
     } else if (colorOptions && colorOptions[colorBy].type === "integer") {
       // console.log("making an integer color scale for ", colorBy)
       continuous = false;
@@ -172,7 +195,7 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absolut
     } else if (colorOptions && colorOptions[colorBy].type === "continuous") {
       // console.log("making a continuous color scale for ", colorBy)
       continuous = true;
-      colorScale = minMaxAttributeScale(tree.nodes, colorBy, colorOptions[colorBy]);
+      colorScale = minMaxAttributeScale(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy]);
     }
   } else {
     error = true;
@@ -181,17 +204,19 @@ const getColorScale = (colorBy, tree, geneLength, colorOptions, version, absolut
   if (error) {
     console.error("no colorOptions for ", colorBy, " returning minMaxAttributeScale");
     continuous = true;
-    colorScale = minMaxAttributeScale(tree.nodes, colorBy, colorOptions[colorBy]);
+    colorScale = minMaxAttributeScale(tree.nodes, undefined, colorBy, colorOptions[colorBy]);
   }
 
+
   return {
-    scale: colorScale,
-    continuous: continuous,
-    colorBy: colorBy, // this should be removed
-    legendBoundsMap: createLegendMatchBound(colorScale),
+    colorScale: {
+      scale: colorScale,
+      continuous: continuous,
+      colorBy: colorBy, // this should be removed
+      legendBoundsMap: createLegendMatchBound(colorScale),
+      version,
+      genotype
+    },
     version
   };
 };
-
-
-export default getColorScale;

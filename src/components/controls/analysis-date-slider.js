@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Slider from "./slider";
 import { controlsWidth } from "../../util/globals";
-import { changeAnalysisSliderValue } from "../../actions/treeProperties";
+import { changeAnalysisSliderValue } from "../../actions/tree";
 import { dataFont, darkGrey } from "../../globalStyles";
 
 @connect((state) => {
