@@ -54,7 +54,6 @@ export const defaultDistanceMeasures = ["num_date", "div"];
 export const fastTransitionDuration = 350; // in milliseconds
 export const mediumTransitionDuration = 700; // in milliseconds
 export const slowTransitionDuration = 1400; // in milliseconds
-export const enableNarratives = false;
 export const animationWindowWidth = 0.075; // width of animation window relative to date slider
 export const animationTick = 50; // animation tick in milliseconds
 export const HIColorDomain = genericDomain.map((d) => {

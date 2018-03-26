@@ -1,9 +1,9 @@
 import { rgb } from "d3-color";
 import { calcBranchStrokeCols } from "../treeHelpers";
 
-export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
+export const changePhyloTreeViaPropsComparison = (reactThis, props, nextProps) => {
   const args = {};
-  const props = reactThis.props;
+  // const props = reactThis.props;
   const phylotree = reactThis.state.tree;
 
   /* catch selectedStrain dissapearence seperately to visibility and remove modal */
@@ -74,6 +74,10 @@ export const changePhyloTreeViaPropsComparison = (reactThis, nextProps) => {
       selectedTip: null,
       hovered: null
     });
+  }
+
+  if (props.width !== nextProps.width || props.height !== nextProps.height) {
+    args.svgHasChangedDimensions = true;
   }
 
   if (Object.keys(args).length) {

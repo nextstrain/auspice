@@ -37,11 +37,15 @@ const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels,
   let bigHeightFraction = grid ? 0.7 : 0.88;
   if (narrative) {
     /* heights */
-    if (!show("entropy")) {
+    const numThinPanels = true + show("entropy") + show("frequencies") - 1;
+    if (numThinPanels === 0) {
       bigHeightFraction = 1;
-    } else {
+    } else if (numThinPanels === 1) {
       bigHeightFraction = 0.7;
       chartHeightFraction = 0.3;
+    } else {
+      bigHeightFraction = 0.5;
+      chartHeightFraction = 0.25;
     }
     /* widths */
     if (show("map") && show("tree") && !grid) {

@@ -26,16 +26,20 @@ const DisplayBlock = (props) => {
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
+    const focus = parseInt(queryString.parse(window.location.search).n, 10) || 1;
     this.state = {
-      focus: 1, /* idx of block in focus (and url) */
-      shouldBeInFocus: 1, /* used by timeouts */
+      focus, /* idx of block in focus (and url) */
+      shouldBeInFocus: focus, /* used by timeouts */
       timeoutRef: undefined,
       lastScroll: undefined
     };
     this.changeFocus = () => {
       const idx = this.state.shouldBeInFocus;
-      const query = queryString.parse(this.props.blocks[idx].url);
-      this.props.dispatch(changePageQuery({query, hideURL: true, push: true}));
+      this.props.dispatch(changePageQuery({
+        queryToUse: queryString.parse(this.props.blocks[idx].url),
+        queryToDisplay: {n: idx},
+        push: true
+      }));
       this.setState({focus: idx, timeoutRef: undefined});
     };
     this.handleScroll = () => {
@@ -62,13 +66,12 @@ class Narrative extends React.Component {
       this.setState({timeoutRef, shouldBeInFocus});
     };
     this.blockRefs = [];
-    this.props.dispatch(changePageQuery({
-      query: queryString.parse(this.props.blocks[0].url),
-      hideURL: true
-    }));
   }
   componentDidMount() {
     window.twttr.widgets.load();
+    if (this.state.focus !== 1) {
+      this.blockRefs[this.state.focus].scrollIntoView({behavior: "instant", block: "center", inline: "center"});
+    }
   }
   render() {
     if (!this.props.loaded) {return null;}

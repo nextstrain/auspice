@@ -10,12 +10,15 @@ const narrative = (state = {
         loaded: false,
         display: false
       });
-    case types.NEW_NARRATIVE:
-      return {
-        loaded: true,
-        display: true,
-        blocks: action.blocks
-      };
+    case types.CLEAN_START:
+      if (action.narrative) {
+        return {
+          loaded: true,
+          display: true,
+          blocks: action.narrative
+        };
+      }
+      return state;
     case types.TOGGLE_NARRATIVE:
       if (state.loaded) {
         return Object.assign({}, state, {display: !state.display});

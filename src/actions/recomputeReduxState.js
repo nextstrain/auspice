@@ -1,3 +1,4 @@
+import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
 import { reallySmallNumber, twoColumnBreakpoint, genotypeColors } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
@@ -8,6 +9,7 @@ import { calculateVisiblityAndBranchThickness } from "./treeProperties";
 import { calcEntropyInView, getValuesAndCountsOfVisibleTraitsFromTree, getAllValuesAndCountsOfTraitsFromTree } from "../util/treeTraversals";
 import { calcColorScaleAndNodeColors } from "./colors";
 import { determineColorByGenotypeType } from "../util/colorHelpers";
+import { processFrequenciesJSON, computeMatrixFromRawData } from "../util/processFrequencies";
 
 const getAnnotations = (jsonData) => {
   const annotations = [];
@@ -300,8 +302,10 @@ export const createStateFromQueryOrJSONs = ({
   query
 }) => {
   /* first task is to create metadata, entropy, controls & tree partial state */
-  let tree, entropy, controls, metadata;
+  let tree, entropy, controls, metadata, frequencies, narrative;
   if (JSONs) {
+    if (JSONs.narrative) narrative = JSONs.narrative;
+
     /* ceate metadata state */
     metadata = JSONs.meta;
     if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
@@ -342,11 +346,18 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   if (oldState) {
-    ({controls, entropy, tree, metadata} = oldState);
+    ({controls, entropy, tree, metadata, frequencies} = oldState);
     controls = restoreQueryableStateToDefaults(controls);
   }
 
-  controls = modifyStateViaURLQuery(controls, query);
+  if (narrative) {
+    const n = parseInt(query.n, 10) || 1;
+    controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].url));
+    query = {n}; // eslint-disable-line
+  } else {
+    controls = modifyStateViaURLQuery(controls, query);
+  }
+
   controls = checkAndCorrectErrorsInState(controls, metadata); /* must run last */
 
   /* calculate new branch thicknesses & visibility */
@@ -387,6 +398,20 @@ export const createStateFromQueryOrJSONs = ({
   entropy.bars = entropyBars;
   entropy.maxYVal = entropyMaxYVal;
 
-  return {tree, metadata, entropy, controls};
-
+  /* potentially calculate frequency (or update it!)
+  this needs to come after the colorscale & tree is set */
+  if (JSONs && JSONs.frequencies) {
+    frequencies = {loaded: true, version: 1, ...processFrequenciesJSON(JSONs.frequencies, tree, controls)};
+  } else if (frequencies && frequencies.loaded) { /* oldState */
+    frequencies.version++;
+    frequencies.matrix = computeMatrixFromRawData(
+      frequencies.data,
+      frequencies.pivots,
+      tree.nodes,
+      tree.visibility,
+      controls.colorScale,
+      controls.colorBy
+    );
+  }
+  return {tree, metadata, entropy, controls, frequencies, narrative, query};
 };
