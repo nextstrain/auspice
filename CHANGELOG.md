@@ -1,3 +1,5 @@
+## version 1.17.0 - 2018/03/26
+
 #### Narrative
 * Now exposed via a "hidden" URL query. E.g. `flu/h3n2/3y?n=1`
 * Frequencies added to narrative
