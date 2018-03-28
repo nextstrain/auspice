@@ -1,3 +1,5 @@
+## version 1.17.1 - 2018/03/28
+
 * Fix tree SVG bug [Issue 535](https://github.com/nextstrain/auspice/issues/535)
 
 ## version 1.17.0 - 2018/03/26
