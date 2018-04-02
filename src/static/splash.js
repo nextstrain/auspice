@@ -157,6 +157,12 @@ class Splash extends React.Component {
             </button>
           </Flex>
 
+          <Flex justifyContent="center">
+            <a style={{color: "#4B8EC1", paddingTop: 25, marginBottom: -25, fontWeight: 500, fontSize: 18}} href="http://bedford.io/blog/programmer-nextstrain-backend/">
+              {"P.S. we're looking for a developer to ramp up our efforts with nextstrain - click for details."}
+            </a>
+          </Flex>
+
           {/* THE CLICKABLE CARDS - see about page for sources & attribution */}
 
           <div className="bigspacer"/>
