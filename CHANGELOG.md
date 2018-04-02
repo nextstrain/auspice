@@ -1,3 +1,5 @@
+## version 1.17.2 - 2018/04/02
+
 * Job ad on splash page.
 
 ## version 1.17.1 - 2018/03/28
