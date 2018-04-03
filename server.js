@@ -96,9 +96,6 @@ app.get('/charon*', (req, res) => {
     } case "narrative": {
       serverNarratives.serveNarrative(query, res);
       break;
-    } case "posts_manifest": {
-      getFiles.getPostsManifest(query, res);
-      break;
     } case "splashimage": {
       getFiles.getSplashImage(query, res);
       break;
@@ -107,9 +104,6 @@ app.get('/charon*', (req, res) => {
       break;
     } case "json": {
       getFiles.getDatasetJson(query, res);
-      break;
-    } case "post": {
-      serverReact.serveStaticPost(query, res);
       break;
     } default: {
       console.warn("Query rejected (unknown want) -- " + req.originalUrl);

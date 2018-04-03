@@ -126,10 +126,6 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         pathname = action.page;
       }
       break;
-    case types.NEW_POST:
-      // strip out "post_..."" and ".md" from name. Should fix elsewhere!
-      pathname = "/posts/" + action.name.replace("post_", "").replace(".md", "");
-      break;
     default:
       break;
   }

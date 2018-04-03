@@ -54,10 +54,6 @@ const getManifest = (query, res) => {
   getDataFile(res, 'manifest_' + query.user + '.json', query.s3);
 };
 
-const getPostsManifest = (query, res) => {
-  getStaticFile(res, 'manifest.json');
-};
-
 const getSplashImage = (query, res) => {
   getDataFile(res, query.src, query.s3);
 };
@@ -72,7 +68,6 @@ const getDatasetJson = (query, res) => {
 
 module.exports = {
   getManifest,
-  getPostsManifest,
   getSplashImage,
   getImage,
   getDatasetJson
