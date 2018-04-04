@@ -1,5 +1,9 @@
-## version 1.17.2 - 2018/04/02
+* Allowed arbitrary user manifests to be served
+* Changed how the tanglegram updates, so that it is now triggered straight after the trees update.
+* Updated the files downloaded from `get_data.sh`
+* Add lassa (LASV) footer acknowledgments.
 
+## version 1.17.2 - 2018/04/02
 * Job ad on splash page.
 
 ## version 1.17.1 - 2018/03/28
