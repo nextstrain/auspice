@@ -1,6 +1,5 @@
 
 export const constructVisibleTipLookupBetweenTrees = (nodesLeft, nodesRight, visibility) => {
-  console.log("constructVisibleTipLookupBetweenTrees");
   const rightStrainIndexMap = {};
   for (let i = 0; i < nodesRight.length; i++) {
     if (!nodesRight[i].hasChildren) {

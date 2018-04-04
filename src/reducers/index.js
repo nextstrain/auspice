@@ -8,7 +8,6 @@ import browserDimensions from "./browserDimensions";
 import notifications from "./notifications";
 import datasets from "./datasets";
 import narrative from "./narrative";
-import posts from "./posts";
 import treeToo from "./treeToo";
 
 const rootReducer = combineReducers({
@@ -21,7 +20,6 @@ const rootReducer = combineReducers({
   notifications,
   datasets,
   narrative,
-  posts,
   treeToo
 });
 

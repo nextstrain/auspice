@@ -1,6 +1,5 @@
 import queryString from "query-string";
 import parseParams from "../util/parseParams";
-import { getPost } from "../util/getMarkdown";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
 
@@ -27,7 +26,8 @@ export const getPageFromPathname = (pathname) => {
   } else if (pathname.startsWith("/methods")) {
     return "methods";
   } else if (pathname.startsWith("/posts")) {
-    return "posts";
+    console.error("Posts have been removed from auspice.");
+    return "splash";
   } else if (pathname.startsWith("/about")) {
     return "about";
   }
@@ -63,10 +63,6 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
   if (push) { d.pushState = true; }
   /* check if this is "valid" - we can change it here before it is dispatched */
   dispatch(d);
-  /* if a specific post is specified in the URL, fetch it */
-  if (d.page === "posts" && path !== "/posts") {
-    dispatch(getPost(`post_${path.replace("/posts/", "")}.md`));
-  }
 };
 
 /* modify redux state and URL by specifying a new URL query string. Pathname is not considered, if you want to change that, use "changePage" instead.

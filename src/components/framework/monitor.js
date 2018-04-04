@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import _throttle from "lodash/throttle";
 import { BROWSER_DIMENSIONS, CHANGE_PANEL_LAYOUT } from "../../actions/types";
 import { browserBackForward } from "../../actions/navigation";
-import { getManifest, getPostsManifest } from "../../util/clientAPIInterface";
+import { getManifest } from "../../util/clientAPIInterface";
 import { twoColumnBreakpoint } from "../../util/globals";
 
 @connect((state) => ({
@@ -27,7 +27,6 @@ class Monitor extends React.Component {
   componentDidMount() {
     /* API call to charon to get initial datasets etc (needed to load the splash page) */
     getManifest(this.props.dispatch);
-    getPostsManifest(this.props.dispatch);
     /* don't need initial dimensions - they're in the redux store on load */
     window.addEventListener( // future resizes
       "resize",

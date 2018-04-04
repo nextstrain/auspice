@@ -121,8 +121,6 @@ class TitleBar extends React.Component {
     );
   }
 
-  // {this.getLink("Posts", "/posts", this.props.postsSelected, styles)}
-
   render() {
     const styles = this.getStyles();
     if (this.props.narrativeLoaded) {

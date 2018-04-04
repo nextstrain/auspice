@@ -1,5 +1,5 @@
 import queryString from "query-string";
-import { MANIFEST_RECEIVED, POSTS_MANIFEST_RECEIVED } from "../actions/types";
+import { MANIFEST_RECEIVED } from "../actions/types";
 import { warningNotification } from "../actions/notifications";
 import { charonAPIAddress } from "./globals";
 import { changePage } from "../actions/navigation";
@@ -39,32 +39,6 @@ export const getManifest = (dispatch, s3bucket = "live") => {
   };
   xmlHttp.onerror = charonErrorHandler;
   xmlHttp.open("get", `${charonAPIAddress}request=manifest&user=${user}&s3=${s3bucket}`, true); // true for asynchronous
-  xmlHttp.send(null);
-};
-
-export const getPostsManifest = (dispatch) => {
-  const charonErrorHandler = (e) => {
-    dispatch(warningNotification({message: "Failed to get list of posts from server"}));
-    console.error(e);
-  };
-  const processData = (data) => {
-    const datasets = JSON.parse(data);
-    // console.log("SERVER POSTS MANIFEST API REQUEST RETURNED:", datasets);
-    dispatch({
-      type: POSTS_MANIFEST_RECEIVED,
-      data: datasets
-    });
-  };
-  const xmlHttp = new XMLHttpRequest();
-  xmlHttp.onload = () => {
-    if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
-      processData(xmlHttp.responseText);
-    } else {
-      charonErrorHandler(xmlHttp);
-    }
-  };
-  xmlHttp.onerror = charonErrorHandler;
-  xmlHttp.open("get", charonAPIAddress + 'request=posts_manifest', true); // true for asynchronous
   xmlHttp.send(null);
 };
 

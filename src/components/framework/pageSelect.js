@@ -1,10 +1,8 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import App from "../app";
 import About from "../../static/about";
 import Methods from "../../static/methods";
-import Posts from "../../static/posts";
 import Splash from "../../static/splash";
 
 
@@ -23,9 +21,6 @@ class PageSelect extends React.Component {
       }
       case "methods" : {
         return (<Methods/>);
-      }
-      case "posts" : {
-        return (<Posts/>);
       }
       case "about" : {
         return (<About/>);

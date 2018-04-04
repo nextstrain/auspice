@@ -20,7 +20,6 @@ import "./css/static.css";
 import "./css/notifications.css";
 import "./css/boxed.css";
 import "./css/select.css";
-import "./css/posts.css";
 import "./css/narrative.css";
 
 const store = configureStore();

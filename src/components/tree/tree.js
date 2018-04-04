@@ -15,6 +15,7 @@ import Tangle from "./tangle";
 class Tree extends React.Component {
   constructor(props) {
     super(props);
+    this.tangleRef = undefined;
     this.Viewer = null;
     this.state = {
       tool: "pan", // one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
@@ -75,8 +76,11 @@ class Tree extends React.Component {
   /* CDU is used to update phylotree when the SVG size _has_ changed (and this is why it's in CDU not CWRP) */
   componentDidUpdate(prevProps) {
     let newState;
+    let leftTreeUpdated;
+    let rightTreeUpdated;
+    let _;
     if (this.state.tree) {
-      newState = changePhyloTreeViaPropsComparison(true, this.state.tree, this.Viewer, prevProps, this.props);
+      [newState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(true, this.state.tree, this.Viewer, prevProps, this.props);
       if (prevProps.showTreeToo !== this.props.showTreeToo) {
         console.warn("potential race condition");
         this.state.tree.change({svgHasChangedDimensions: true});
@@ -92,8 +96,12 @@ class Tree extends React.Component {
       } else if (!this.props.showTreeToo) {
         newState.treeToo = null;
       } else {
-        changePhyloTreeViaPropsComparison(false, this.state.treeToo, this.ViewerToo, prevProps, this.props);
+        [_, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, this.ViewerToo, prevProps, this.props);
       }
+    }
+    /* we may need to (imperitively) tell the tangle to redraw */
+    if (this.tangleRef && (leftTreeUpdated || rightTreeUpdated)) {
+      this.tangleRef.drawLines();
     }
     if (newState) this.setState(newState);
   }
@@ -151,8 +159,9 @@ class Tree extends React.Component {
           tip={this.state.selectedTip}
           metadata={this.props.metadata}
         />
-        {this.props.showTangle ? (
+        {this.props.showTangle && this.state.tree && this.state.treeToo ? (
           <Tangle
+            ref={(r) => {this.tangleRef = r;}}
             width={this.props.width}
             height={this.props.height}
             lookup={this.props.treeToo.tangleTipLookup}
