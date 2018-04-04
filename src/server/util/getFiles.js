@@ -5,7 +5,7 @@ const fetch = require('node-fetch'); // not needed for local data
 const request = require('request');
 // const prettyjson = require('prettyjson');
 
-const validUsers = ['guest', 'mumps'];
+// const validUsers = ['guest', 'mumps', 'lassa'];
 
 const getDataFile = (res, filePath, s3) => {
   if (global.LOCAL_DATA) {
@@ -47,10 +47,10 @@ const getManifest = (query, res) => {
     res.status(404).send('No user defined');
     return;
   }
-  if (validUsers.indexOf(query.user) === -1) {
-    res.status(404).send('Invalid user');
-    return;
-  }
+  // if (validUsers.indexOf(query.user) === -1) {
+  //   res.status(404).send('Invalid user');
+  //   return;
+  // }
   getDataFile(res, 'manifest_' + query.user + '.json', query.s3);
 };
 
