@@ -267,7 +267,6 @@ export const setScales = function setScales(margins) {
 * @return {null}
 */
 export const mapToScreen = function mapToScreen() {
-  // console.log("mapToScreen")
   timerStart("mapToScreen");
   /* set the range of the x & y scales */
   this.setScales(this.params.margins);
