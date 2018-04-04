@@ -1,3 +1,5 @@
+## version 1.17.3 - 2018/04/04
+
 * Allowed arbitrary user manifests to be served
 * Changed how the tanglegram updates, so that it is now triggered straight after the trees update.
 * Updated the files downloaded from `get_data.sh`
