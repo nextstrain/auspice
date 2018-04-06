@@ -5,6 +5,7 @@ import { prettyString } from "../../util/stringHelpers";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { applyFilter } from "../../actions/tree";
+import { changeColorBy } from "../../actions/colors";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -14,7 +15,7 @@ const dot = (
 
 export const preambleText = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
 
-export const getAcknowledgments = (style) => {
+export const getAcknowledgments = (dispatch, style) => {
   if (window.location.pathname.includes("ebola")) {
     return (
       <div style={style}>
@@ -51,6 +52,27 @@ export const getAcknowledgments = (style) => {
       </div>
     );
   }
+  if (window.location.pathname.includes("WNV/NA")) {
+    return (
+      <div style={style}>
+        {"Special thanks to "}
+        <a href="https://twitter.com/NathanGrubaugh">{"Nathan Graubaugh"}</a>
+        {" and colleagues for making their data available."}
+        <p/>
+        {"Three genotypes are of particular importance to this dataset (clicking will change the colouring of the tree): "}
+        <ul>
+          <li>
+            <span className={"link"} onClick={() => dispatch(changeColorBy("gt-env_159"))}>{"env-V159A"}</span>
+            {" designates the switch from NY99 (the original sequence) to WN02."}
+          </li>
+          <li>
+            <span className={"link"} onClick={() => dispatch(changeColorBy("gt-NS4A_85"))}>{"NS4A-A85T"}</span>
+            {" designates the switch from WN02 to SW03 (WN02 displaced NY99; WN02 and SW03 co-circulate)."}
+          </li>
+        </ul>
+      </div>
+    );
+  }
   if (window.location.pathname.includes("h7n9")) {
     return (
       <div style={style}>
@@ -68,7 +90,7 @@ export const getAcknowledgments = (style) => {
     );
   }
   return null;
-}
+};
 
 const dispatchFilter = (dispatch, activeFilters, key, value) => {
   const mode = activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
@@ -271,7 +293,7 @@ class Footer extends React.Component {
           <div style={styles.preamble}>
             {preambleText}
           </div>
-          {getAcknowledgments(styles.acknowledgments)}
+          {getAcknowledgments(this.props.dispatch, styles.acknowledgments)}
           <div style={styles.line}/>
           {Object.keys(this.props.activeFilters).map((name) => {
             return (
