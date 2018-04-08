@@ -75,7 +75,7 @@ class ChooseDataset extends React.Component {
     }
 
     /* second tree? */
-    if (false && treeToo) { /* TEMP - HIDE SELECTOR */
+    if (treeToo) {
       selectors.push((
         <SelectLabel key="treetootitle" text="Second Tree"/>
       ));
