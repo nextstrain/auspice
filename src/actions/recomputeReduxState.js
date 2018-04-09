@@ -318,15 +318,21 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, controlsSta
   return newState;
 };
 
+const removePanelIfPossible = (panels, name) => {
+  const idx = panels.indexOf(name);
+  if (idx !== -1) {
+    panels.splice(idx, 1);
+  }
+};
+
 const modifyControlsViaTreeToo = (controls, treeToo, name) => {
   controls.showTreeToo = name;
   controls.showTangle = true;
   controls.layout = "rect"; /* must be rectangular for two trees */
-  const mapIdx = controls.panelsToDisplay.indexOf("map");
-  if (mapIdx !== -1) {
-    controls.panelsToDisplay = controls.panelsToDisplay.slice();
-    controls.panelsToDisplay.splice(mapIdx, 1);
-  }
+  controls.panelsToDisplay = controls.panelsToDisplay.slice();
+  removePanelIfPossible(controls.panelsToDisplay, "map");
+  removePanelIfPossible(controls.panelsToDisplay, "entropy");
+  removePanelIfPossible(controls.panelsToDisplay, "frequencies");
   controls.canTogglePanelLayout = false;
   controls.panelLayout = "full";
   return controls;
