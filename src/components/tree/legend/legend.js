@@ -28,7 +28,7 @@ class Legend extends React.Component {
 
   // hide/show legend based on available width and legend length
   componentWillReceiveProps(nextProps) {
-    if (this.props.width !== nextProps.width || this.props.colorScale.scale !== nextProps.colorScale.scale) {
+    if (this.props.width !== nextProps.width || this.props.colorScale.version !== nextProps.colorScale.version) {
       this.updateLegendVisibility(nextProps.width, nextProps.colorScale);
     }
   }
@@ -39,27 +39,27 @@ class Legend extends React.Component {
     } else {
       this.setState({legendVisible: true});
     }
-    if (colorScale) {
-      if (colorScale.scale.domain().length > 32) {
-        this.setState({legendVisible: false});
-      }
-    }
+    // if (colorScale) {
+    //   if (colorScale.scale.domain().length > 32) {
+    //     this.setState({legendVisible: false});
+    //   }
+    // }
   }
 
   getSVGHeight() {
     if (!this.state.legendVisible) {
       return 18;
     }
-    let nItems = 10;
+    const nItems = this.props.colorScale.legendValues.length;
     const titlePadding = 20;
-    if (this.props.colorScale.scale) {
-      nItems = this.props.colorScale.scale.domain().length;
-    }
+    // if (this.props.colorScale.scale) {
+      // nItems = this.props.colorScale.scale.domain().length;
+    // }
     return Math.ceil(nItems / 2) *
       (legendRectSize + legendSpacing) + legendSpacing + titlePadding || 100;
   }
   getTransformationForLegendItem(i) {
-    const count = this.props.colorScale.scale.domain().length;
+    const count = this.props.colorScale.legendValues.length;
     const stack = Math.ceil(count / 2);
     const fromRight = Math.floor(i / stack);
     const fromTop = (i % stack);
@@ -143,29 +143,24 @@ class Legend extends React.Component {
    * coordinate system from top,left of parent SVG
    */
   legendItems() {
-    // const opacity = this.state.legendVisible ? 1 : 0;
-    // const offset = this.state.legendVisible ? 0 : -0.25 * this.getSVGHeight();
-    let items = [];
-    if (this.props.colorScale.scale) {
-      items = this.props.colorScale.scale.domain()
-        .filter((d) => d !== undefined)
-        .map((d, i) => {
-          return (
-            <LegendItem
-              dispatch={this.props.dispatch}
-              legendRectSize={legendRectSize}
-              legendSpacing={legendSpacing}
-              rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
-              rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
-              transform={this.getTransformationForLegendItem(i)}
-              dFreq={this.props.colorScale.colorBy === "dfreq"}
-              key={d}
-              label={d}
-              index={i}
-            />
-          );
-        });
-    }
+    const items = this.props.colorScale.legendValues
+      .filter((d) => d !== undefined)
+      .map((d, i) => {
+        return (
+          <LegendItem
+            dispatch={this.props.dispatch}
+            legendRectSize={legendRectSize}
+            legendSpacing={legendSpacing}
+            rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
+            rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
+            transform={this.getTransformationForLegendItem(i)}
+            dFreq={this.props.colorScale.colorBy === "dfreq"}
+            key={d}
+            label={d}
+            index={i}
+          />
+        );
+      });
     // This gives the nice looking show/hide animation. Should restore while maintaining
     // legend collapse functionality.
     // <g style={{

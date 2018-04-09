@@ -11,11 +11,11 @@ import { getTipColorAttribute } from "./colorHelpers";
 * @param colorScale - used to get the value of the attribute being used for colouring
 * @returns bool
 */
-const determineLegendMatch = (selectedLegendItem, node, legendBoundsMap, colorScale) => {
+const determineLegendMatch = (selectedLegendItem, node, colorScale) => {
   const nodeAttr = getTipColorAttribute(node, colorScale);
-  if (legendBoundsMap) {
-    return (nodeAttr <= legendBoundsMap.upper_bound[selectedLegendItem]) &&
-           (nodeAttr > legendBoundsMap.lower_bound[selectedLegendItem]);
+  if (colorScale.continuous) {
+    return (nodeAttr <= colorScale.legendBounds[selectedLegendItem][1]) &&
+           (nodeAttr > colorScale.legendBounds[selectedLegendItem][0]);
   }
   return nodeAttr === selectedLegendItem;
 };
@@ -31,8 +31,7 @@ const determineLegendMatch = (selectedLegendItem, node, legendBoundsMap, colorSc
 */
 export const calcTipRadii = ({tipSelectedIdx = false, selectedLegendItem = false, colorScale, tree}) => {
   if (selectedLegendItem && tree && tree.nodes) {
-    const legendMap = colorScale.continuous ? colorScale.legendBoundsMap : false;
-    return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, legendMap, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
+    return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (tipSelectedIdx) {
     const radii = tree.nodes.map(() => tipRadius);
     radii[tipSelectedIdx] = tipRadiusOnLegendMatch + 3;

@@ -11,8 +11,8 @@ const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
 
   for (let i = 0; i < categories.length; i++) {
     /* same logic as the determineLegendMatch function */
-    const lowerBound = colorScale.legendBoundsMap.lower_bound[categories[i]];
-    const upperBound = colorScale.legendBoundsMap.upper_bound[categories[i]];
+    const lowerBound = colorScale.legendBounds[categories[i]][0];
+    const upperBound = colorScale.legendBounds[categories[i]][1];
     if (value <= upperBound && value > lowerBound) {
       return categories[i];
     }
@@ -23,7 +23,7 @@ const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
 
 export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorScale, colorBy) => {
   /* color scale domain forms the categories in the stream graph */
-  const categories = colorScale.scale.domain().filter((d) => d !== undefined);
+  const categories = colorScale.legendValues.filter((d) => d !== undefined);
   categories.push(unassigned_label); /* for tips without a colorBy */
   const isGenotype = colorBy.slice(0, 3) === "gt-";
   const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */

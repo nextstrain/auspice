@@ -1,7 +1,6 @@
 import React from "react";
 import { updateTipRadii } from "../../../actions/tree";
 import { dataFont, darkGrey } from "../../../globalStyles";
-import { prettyString } from "../../../util/stringHelpers";
 
 const LegendItem = ({
   dispatch,
@@ -10,8 +9,7 @@ const LegendItem = ({
   legendSpacing,
   rectStroke,
   rectFill,
-  label,
-  dFreq
+  label
 }) => (
   <g
     transform={transform}
@@ -34,7 +32,7 @@ const LegendItem = ({
       y={legendRectSize - legendSpacing}
       style={{fontSize: 12, fill: darkGrey, fontFamily: dataFont}}
     >
-      {prettyString(label, {multiplier: dFreq})}
+      {label}
     </text>
   </g>
 );

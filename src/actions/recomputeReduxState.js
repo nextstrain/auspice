@@ -390,11 +390,11 @@ export const createStateFromQueryOrJSONs = ({
 
   /* calculate colours if loading from JSONs or if the query demands change */
   if (JSONs || controls.colorBy !== oldState.colorBy) {
-    const {colorScale, version} = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
+    const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
     const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;
     controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
-    tree.nodeColorsVersion = version;
+    tree.nodeColorsVersion = colorScale.version;
     tree.nodeColors = nodeColors;
   }
 
@@ -445,11 +445,11 @@ export const createTreeTooState = ({
   controls = modifyControlsViaTreeToo(controls, treeToo, segment);
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  const {colorScale, version} = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);
+  const colorScale = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);
   const nodeColors = calcNodeColor(treeToo, colorScale);
   controls.colorScale = colorScale;
   controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
-  treeToo.nodeColorsVersion = version;
+  treeToo.nodeColorsVersion = colorScale.version;
   treeToo.nodeColors = nodeColors;
 
   treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
