@@ -446,9 +446,9 @@ export const createTreeTooState = ({
   let controls = oldState.controls;
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo.debug = "RIGHT";
-  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, oldState.controls);
   controls = modifyStateViaTree(controls, oldState.tree, treeToo);
   controls = modifyControlsViaTreeToo(controls, treeToo, segment);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, controls);
 
   /* calculate colours if loading from JSONs or if the query demands change */
   const colorScale = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);
