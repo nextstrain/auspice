@@ -410,7 +410,7 @@ export const createStateFromQueryOrJSONs = ({
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
     treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, controls);
     controls = modifyControlsViaTreeToo(controls, treeToo, query.tt);
-    treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility);
+    treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
   }
 
   /* calculate entropy in view */
@@ -459,7 +459,7 @@ export const createTreeTooState = ({
   treeToo.nodeColors = nodeColors;
 
   treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
-    oldState.tree.nodes, treeToo.nodes, oldState.tree.visibility
+    oldState.tree.nodes, treeToo.nodes, oldState.tree.visibility, treeToo.visibility
   );
 
   // if (tipSelectedIdx) { /* i.e. query.s was set */

@@ -70,14 +70,14 @@ export const updateVisibleTipsAndBranchThicknesses = (
     if (!tree.nodes) {return;}
     // console.log("ROOT SETTING TO", root)
     /* mark nodes as "in view" as applicable */
-    let rootIdx = applyInViewNodesToTree(root[0], tree);
+    const rootIdxTree1 = applyInViewNodesToTree(root[0], tree);
     const [tipIdx1, tipIdx2, tipName] = processSelectedTip(tipSelected, tree, controls.showTreeToo ? treeToo : undefined);
 
     const data = calculateVisiblityAndBranchThickness(
       tree,
       controls,
       {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-      {tipSelectedIdx: tipIdx1, validIdxRoot: rootIdx}
+      {tipSelectedIdx: tipIdx1, validIdxRoot: rootIdxTree1}
     );
     const dispatchObj = {
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
@@ -85,25 +85,25 @@ export const updateVisibleTipsAndBranchThicknesses = (
       visibilityVersion: data.visibilityVersion,
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
-      idxOfInViewRootNode: rootIdx,
+      idxOfInViewRootNode: rootIdxTree1,
       stateCountAttrs: Object.keys(controls.filters),
       selectedStrain: tipName
     };
 
     if (controls.showTreeToo) {
-      rootIdx = applyInViewNodesToTree(root[1], tree);
-      dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility);
+      const rootIdxTree2 = applyInViewNodesToTree(root[1], treeToo);
       const dataToo = calculateVisiblityAndBranchThickness(
         treeToo,
         controls,
         {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-        {tipSelectedIdx: tipIdx2, validIdxRoot: rootIdx}
+        {tipSelectedIdx: tipIdx2, validIdxRoot: rootIdxTree2}
       );
+      dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility, dataToo.visibility);
       dispatchObj.visibilityToo = dataToo.visibility;
       dispatchObj.visibilityVersionToo = dataToo.visibilityVersion;
       dispatchObj.branchThicknessToo = dataToo.branchThickness;
       dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
-      dispatchObj.idxOfInViewRootNodeToo = rootIdx;
+      dispatchObj.idxOfInViewRootNodeToo = rootIdxTree2;
       /* tip selected is the same as the first tree - the reducer uses that */
     }
     /* D I S P A T C H */
@@ -147,8 +147,8 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       stateCountAttrs: Object.keys(controls.filters)
     };
     if (controls.showTreeToo) {
-      dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility);
       const dataToo = calculateVisiblityAndBranchThickness(treeToo, controls, dates);
+      dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility, dataToo.visibility);
       dispatchObj.visibilityToo = dataToo.visibility;
       dispatchObj.visibilityVersionToo = dataToo.visibilityVersion;
       dispatchObj.branchThicknessToo = dataToo.branchThickness;
