@@ -9,12 +9,13 @@ const LegendItem = ({
   legendSpacing,
   rectStroke,
   rectFill,
-  label
+  label,
+  value
 }) => (
   <g
     transform={transform}
     onMouseEnter={() => {
-      dispatch(updateTipRadii({selectedLegendItem: label}));
+      dispatch(updateTipRadii({selectedLegendItem: value}));
     }}
     onMouseLeave={() => {
       dispatch(updateTipRadii());

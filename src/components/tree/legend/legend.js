@@ -3,8 +3,10 @@ import { connect } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./item";
 import { headerFont, darkGrey } from "../../../globalStyles";
-import { legendRectSize, legendSpacing, fastTransitionDuration } from "../../../util/globals";
+import { legendRectSize, legendSpacing, fastTransitionDuration, months } from "../../../util/globals";
 import { determineColorByGenotypeType } from "../../../util/colorHelpers";
+import { prettyString } from "../../../util/stringHelpers";
+import { numericToCalendar } from "../../../util/dateHelpers";
 
 
 @connect((state) => {
@@ -34,16 +36,11 @@ class Legend extends React.Component {
   }
 
   updateLegendVisibility(width, colorScale) {
-    if (width < 600) {
+    if (width < 600 || colorScale.legendValues.length > 32) {
       this.setState({legendVisible: false});
     } else {
       this.setState({legendVisible: true});
     }
-    // if (colorScale) {
-    //   if (colorScale.scale.domain().length > 32) {
-    //     this.setState({legendVisible: false});
-    //   }
-    // }
   }
 
   getSVGHeight() {
@@ -52,9 +49,6 @@ class Legend extends React.Component {
     }
     const nItems = this.props.colorScale.legendValues.length;
     const titlePadding = 20;
-    // if (this.props.colorScale.scale) {
-      // nItems = this.props.colorScale.scale.domain().length;
-    // }
     return Math.ceil(nItems / 2) *
       (legendRectSize + legendSpacing) + legendSpacing + titlePadding || 100;
   }
@@ -138,6 +132,22 @@ class Legend extends React.Component {
     );
   }
 
+  styleLabelText(label) {
+    if (this.props.colorBy === "clade_membership") {
+      return label; /* unchanged */
+    } else if (this.props.colorBy === "num_date") {
+      const vals = this.props.colorScale.legendValues;
+      if (vals[vals.length - 1] - vals[0] > 10) {
+        return parseInt(label, 10);
+      }
+      const [yyyy, mm, dd] = numericToCalendar(label).split('-'); // eslint-disable-line
+      return `${months[mm]} ${yyyy}`;
+    } else if (this.props.colorScale.continuous) {
+      return label;
+    }
+    return prettyString(label);
+  }
+
   /*
    * draws rects and titles for each legend item
    * coordinate system from top,left of parent SVG
@@ -154,9 +164,9 @@ class Legend extends React.Component {
             rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
             rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
             transform={this.getTransformationForLegendItem(i)}
-            dFreq={this.props.colorScale.colorBy === "dfreq"}
             key={d}
-            label={d}
+            value={d}
+            label={this.styleLabelText(d)}
             index={i}
           />
         );
