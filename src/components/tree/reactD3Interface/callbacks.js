@@ -48,7 +48,8 @@ export const onBranchHover = function onBranchHover(d) {
     }
   }
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
-    this.state.tree.svg.append("g").selectAll(".conf")
+    const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;
+    tree.svg.append("g").selectAll(".conf")
       .data([d])
       .enter()
       .call((sel) => this.state.tree.drawSingleCI(sel, 0.5));
