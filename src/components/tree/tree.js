@@ -69,8 +69,12 @@ class Tree extends React.Component {
       if (prevProps.showTreeToo !== this.props.showTreeToo) {
         this.state.tree.change({svgHasChangedDimensions: true});
         if (this.props.showTreeToo) {
+          if (this.state.treeToo) { /* remove the old tree */
+            this.state.treeToo.clearSVG();
+          }
           const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
           renderTree(this, false, treeToo, this.props);
+          if (this.tangleRef) this.tangleRef.drawLines();
           this.setState({treeToo});
         } else {
           this.setState({treeToo: null});
