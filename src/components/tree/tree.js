@@ -18,7 +18,6 @@ class Tree extends React.Component {
     this.tangleRef = undefined;
     this.Viewer = null;
     this.state = {
-      tool: "pan", // one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
       hover: null,
       selectedBranch: null,
       selectedTip: null,
@@ -74,6 +73,7 @@ class Tree extends React.Component {
           }
           const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
           renderTree(this, false, treeToo, this.props);
+          this.resetView(); // reset the position of the left tree
           if (this.tangleRef) this.tangleRef.drawLines();
           this.setState({treeToo});
         } else {
@@ -107,7 +107,7 @@ class Tree extends React.Component {
         height={height}
         ref={(Viewer) => {this[viewerRef] = Viewer;}}
         style={{cursor: "default"}}
-        tool={'pan'}
+        tool={this.props.showTreeToo ? "none" : "pan"}
         detectWheel={false}
         toolbarPosition={"none"}
         detectAutoPan={false}
