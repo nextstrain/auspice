@@ -5,6 +5,7 @@ import DateRangeInputs from "./date-range-inputs";
 import ChooseBranchLabelling from "./choose-branch-labelling";
 import ChooseLayout from "./choose-layout";
 import ChooseDataset from "./choose-dataset";
+import ChooseSecondTree from "./choose-second-tree";
 import ChooseMetric from "./choose-metric";
 import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
@@ -35,7 +36,6 @@ const Controls = ({mapOn}) => (
 
     <Header text="Dataset"/>
     <ChooseDataset/>
-    <ToggleTangle/>
 
     <Header text="Date Range"/>
     <DateRangeInputs/>
@@ -50,6 +50,8 @@ const Controls = ({mapOn}) => (
     <ChooseMetric/>
     <ChooseBranchLabelling/>
     <SearchStrains/>
+    <ChooseSecondTree/>
+    <ToggleTangle/>
 
     { mapOn ? (
       <span>
