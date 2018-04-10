@@ -73,7 +73,8 @@ export const onBranchLeave = function onBranchLeave(d) {
       .style("stroke", (el) => el.branchStroke);
   }
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
-    this.state.tree.removeConfidence(mediumTransitionDuration);
+    const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;
+    tree.removeConfidence(mediumTransitionDuration);
   }
   if (this.state.hovered) {
     this.setState({hovered: null});
