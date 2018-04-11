@@ -40,11 +40,11 @@ export const getAcknowledgments = (style) => {
     return (
       <div style={style}>
         {"Special thanks to "}
-        <a href="emailto:happic@run.edu.ng">{"Christian Happi"}</a>
+        <a href="http://acegid.org/">{"Christian Happi"}</a>
         {", "}
-        <a href="emailto:pardis@broadinstitute.org">{"Pardis Sabeti"}</a>
+        <a href="https://www.sabetilab.org/">{"Pardis Sabeti"}</a>
         {" and "}
-        <a href="emailto:kjsiddle@broadinstitute.org">{"Katherine Siddle"}</a>
+        <a href="https://www.sabetilab.org/katherine-siddle/">{"Katherine Siddle"}</a>
         {" for sharing unpublished data collected in Nigeria between 2015 and 2016 and first shared via "}
         <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/new-lassa-virus-genomes-from-nigeria-2015-2016/191">{"this viroligical.org post. "}</a>
         If you intend to use these sequences prior to publication, please contact them directly to coordinate.
