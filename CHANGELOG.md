@@ -1,3 +1,5 @@
+## version 1.17.4 - 2018/04/10
+
 ## version 1.17.3 - 2018/04/04
 
 * Allowed arbitrary user manifests to be served
