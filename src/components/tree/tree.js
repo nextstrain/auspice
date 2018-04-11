@@ -107,7 +107,7 @@ class Tree extends React.Component {
         height={height}
         ref={(Viewer) => {this[viewerRef] = Viewer;}}
         style={{cursor: "default"}}
-        tool={this.props.showTreeToo ? "none" : "pan"}
+        tool={"pan"}
         detectWheel={false}
         toolbarPosition={"none"}
         detectAutoPan={false}
