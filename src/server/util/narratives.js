@@ -74,9 +74,11 @@ const serveNarrative = (query, res) => {
     convertBlocksToHTML(blocks);
     res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
   } else {
-    request(global.REMOTE_STATIC_BASEURL + "narratives/" + query.name + ".md", (err, response, body) => {
+    const reqURL = global.REMOTE_STATIC_BASEURL + "narratives/" + query.name + ".md";
+    request(reqURL, (err, response, body) => {
       if (err || body.startsWith("404") || body.split("\n")[1].startsWith('<head><title>404')) {
         res.status(404).send('Post not found.');
+        // console.error("Narrative file 404", reqURL, err)
         return;
       }
       const mdArr = body.split("\n");

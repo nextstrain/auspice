@@ -55,11 +55,11 @@ data_files=(
   "lassa_L_tree.json" "lassa_L_meta.json"\
 )
 
-static_files=(
-  "narratives/zika.md"\
-  "narratives/ebola.md"\
-  "narratives/flu_h3n2_ha_3y.md"\
-  "narratives/mumps_na.md"\
+narratives=(
+  "zika.md"\
+  "ebola.md"\
+  "flu_h3n2_ha_3y.md"\
+  "mumps_na.md"\
   )
 
 rm -rf data/
@@ -74,5 +74,5 @@ mkdir -p static/
 mkdir -p static/narratives
 for i in "${static_files[@]}"
 do
-  curl https://raw.githubusercontent.com/nextstrain/themis/master/files/${i} --compressed -o static/${i}
+  curl https://raw.githubusercontent.com/nextstrain/nextstrain.org/master/narratives/${i} --compressed -o static/narratives/${i}
 done

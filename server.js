@@ -26,7 +26,7 @@ This works even if you've built the bundle, as the API calls are handled by the 
 You probably want this on for development, off for testing before deploying.
 
 "localStatic"
-Sources the Static posts (reports) from /static/ rather than github->themis.
+Sources the Static posts (reports) from /static/ rather than github.com/nextstrain/nextstrain.org.
 This works even if you've built the bundle, as the API calls are handled by the same server.
 You probably want this on for development, off for testing before deploying.
 */
@@ -39,7 +39,7 @@ global.REMOTE_DATA_LIVE_BASEURL = "http://data.nextstrain.org/";
 global.REMOTE_DATA_STAGING_BASEURL = "http://staging.nextstrain.org/";
 global.LOCAL_STATIC = process.argv.indexOf("localStatic") !== -1;
 global.LOCAL_STATIC_PATH = path.join(__dirname, "/static/");
-global.REMOTE_STATIC_BASEURL = "http://cdn.rawgit.com/nextstrain/themis/master/files/";
+global.REMOTE_STATIC_BASEURL = "http://cdn.rawgit.com/nextstrain/nextstrain.org/master/";
 
 /* dev-specific libraries & imports */
 let webpack;
