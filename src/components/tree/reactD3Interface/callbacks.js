@@ -48,7 +48,8 @@ export const onBranchHover = function onBranchHover(d) {
     }
   }
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
-    this.state.tree.svg.append("g").selectAll(".conf")
+    const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;
+    tree.svg.append("g").selectAll(".conf")
       .data([d])
       .enter()
       .call((sel) => this.state.tree.drawSingleCI(sel, 0.5));
@@ -72,7 +73,8 @@ export const onBranchLeave = function onBranchLeave(d) {
       .style("stroke", (el) => el.branchStroke);
   }
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
-    this.state.tree.removeConfidence(mediumTransitionDuration);
+    const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;
+    tree.removeConfidence(mediumTransitionDuration);
   }
   if (this.state.hovered) {
     this.setState({hovered: null});
@@ -131,6 +133,22 @@ const resetGrid = function resetGrid() {
 };
 
 export const onViewerChange = function onViewerChange() {
+  if (this.Viewer && this.ViewerToo) {
+    /* effectively disable pan when 2 trees are displayed.
+    You can't do this in the svg-pan-zoom settings
+    as there seems to be a bug whereby the onBranchClick behaviour dissapears */
+    if (this.Viewer.getValue().mode === "panning" || this.ViewerToo.getValue().mode === "panning") {
+      if (this.resetViewersAfterPanTimeoutRef) {
+        clearTimeout(this.resetViewersAfterPanTimeoutRef);
+      }
+      this.resetViewersAfterPanTimeoutRef = setTimeout(() => {
+        this.Viewer.fitToViewer();
+        this.ViewerToo.fitToViewer();
+        this.resetViewersAfterPanTimeoutRef = undefined;
+      }, 300);
+    }
+    return;
+  }
   if (this.Viewer && this.state.tree) {
     const V = this.Viewer.getValue();
     if (V.mode === "panning") {

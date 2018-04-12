@@ -18,7 +18,7 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
       return null;
     }
     const colorBy = providedColorBy ? providedColorBy : controls.colorBy;
-    const {colorScale, version} = calcColorScale(colorBy, controls, tree, treeToo, metadata);
+    const colorScale = calcColorScale(colorBy, controls, tree, treeToo, metadata);
     const nodeColors = calcNodeColor(tree, colorScale);
     const nodeColorsToo = treeToo.loaded ? calcNodeColor(treeToo, colorScale) : undefined;
 
@@ -35,7 +35,7 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
       colorScale,
       nodeColors,
       nodeColorsToo,
-      version,
+      version: colorScale.version,
       newMutType
     });
 

@@ -29,7 +29,7 @@ export const parseColorBy = (colorBy, colorOptions) => {
 
 const getOrderedCategories = (matrixCategories, colorScale) => {
   /* get the colorBy's in the same order as in the tree legend */
-  const orderedCategories = colorScale.scale.domain()
+  const orderedCategories = colorScale.legendValues
     .filter((d) => d !== undefined)
     .reverse()
     .map((v) => v.toString());
@@ -126,7 +126,7 @@ const getMeaningfulLabels = (categories, colorScale) => {
   if (colorScale.continuous) {
     return categories.map((name) => name === unassigned_label ?
       unassigned_label :
-      `${colorScale.legendBoundsMap.lower_bound[name].toFixed(2)} - ${colorScale.legendBoundsMap.upper_bound[name].toFixed(2)}`
+      `${colorScale.legendBounds[name][0].toFixed(2)} - ${colorScale.legendBounds[name][1].toFixed(2)}`
     );
   }
   return categories.slice();

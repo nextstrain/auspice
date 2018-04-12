@@ -25,6 +25,7 @@ class Tangle extends React.Component {
   }
   drawLines(props) {
     if (!props) props = this.props; // eslint-disable-line
+    const thickness = props.lookup.length > 750 ? 0.25 : props.lookup.length > 100 ? 0.5 : 1;
     select(this.d3ref).selectAll(".tangleLine").remove();
     const makeTipPath = makeTipPathGenerator(props);
     select(this.d3ref)
@@ -35,7 +36,7 @@ class Tangle extends React.Component {
       .append("path")
       .attr("class", "tangleLine")
       .attr("d", makeTipPath)
-      .attr("stroke-width", 0.25)
+      .attr("stroke-width", thickness)
       .attr("stroke", (idxs) => props.colors[idxs[0]])
       .attr("fill", 'none');
   }

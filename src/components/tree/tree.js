@@ -18,7 +18,6 @@ class Tree extends React.Component {
     this.tangleRef = undefined;
     this.Viewer = null;
     this.state = {
-      tool: "pan", // one of `none`, `pan`, `zoom`, `zoom-in`, `zoom-out`
       hover: null,
       selectedBranch: null,
       selectedTip: null,
@@ -58,32 +57,28 @@ class Tree extends React.Component {
       this.setState(newState);
     }
   }
-  /* CWRP has two tasks: (1) create the tree when it's in redux
-  (2) compare props and call phylotree.change() appropritately */
-  componentWillReceiveProps(nextProps) {
-    if (!nextProps.tree.loaded) {
-      this.setState({tree: null, treeToo: null});
-      return;
-    }
-    if (!this.state.tree && nextProps.tree.loaded) {
-      const tree = new PhyloTree(nextProps.tree.nodes, "LEFT");
-      renderTree(this, true, tree, nextProps);
-      this.Viewer.fitToViewer();
-      this.setState({tree});
-    }
-  }
-
-  /* CDU is used to update phylotree when the SVG size _has_ changed (and this is why it's in CDU not CWRP) */
   componentDidUpdate(prevProps) {
     let newState;
     let leftTreeUpdated;
     let rightTreeUpdated;
-    let _;
+    let _; // eslint-disable-line
+
     if (this.state.tree) {
       [newState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(true, this.state.tree, this.Viewer, prevProps, this.props);
       if (prevProps.showTreeToo !== this.props.showTreeToo) {
-        console.warn("potential race condition");
         this.state.tree.change({svgHasChangedDimensions: true});
+        if (this.props.showTreeToo) {
+          if (this.state.treeToo) { /* remove the old tree */
+            this.state.treeToo.clearSVG();
+          }
+          const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
+          renderTree(this, false, treeToo, this.props);
+          this.resetView(); // reset the position of the left tree
+          if (this.tangleRef) this.tangleRef.drawLines();
+          this.setState({treeToo});
+        } else {
+          this.setState({treeToo: null});
+        }
         return;
       }
     }
@@ -112,7 +107,7 @@ class Tree extends React.Component {
         height={height}
         ref={(Viewer) => {this[viewerRef] = Viewer;}}
         style={{cursor: "default"}}
-        tool={'pan'}
+        tool={"pan"}
         detectWheel={false}
         toolbarPosition={"none"}
         detectAutoPan={false}

@@ -4,6 +4,7 @@ import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import { prettyString } from "../../util/stringHelpers";
+import { months } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
 
 const resetTreeButton = (dispatch) => {
@@ -16,21 +17,6 @@ const resetTreeButton = (dispatch) => {
       {"View entire tree."}
     </div>
   );
-};
-
-const months = {
-  '01': 'Jan',
-  '02': 'Feb',
-  '03': 'Mar',
-  '04': 'Apr',
-  '05': 'May',
-  '06': 'Jun',
-  '07': 'Jul',
-  '08': 'Aug',
-  '09': 'Sep',
-  '10': 'Oct',
-  '11': 'Nov',
-  '12': 'Dec'
 };
 
 const plurals = {

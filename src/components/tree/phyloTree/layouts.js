@@ -44,7 +44,7 @@ export const rectangularLayout = function rectangularLayout() {
     d.x = d.depth;    // depth according to current distance
     d.px = d.pDepth;  // parent positions
     d.py = d.y;
-    d.x_conf = d.conf; // assign confidence intervals
+    // d.x_conf = d.conf; // assign confidence intervals
   });
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
@@ -317,9 +317,6 @@ export const mapToScreen = function mapToScreen() {
       d.vaccineLine = ` M ${d.xTip},${d.yTip} L ${xTipCross},${yTipCross}`;
     });
   }
-  if (this.params.confidence && this.layout==="rect") {
-    this.nodes.forEach((d) => {d.xConf = [this.xScale(d.conf[0]), this.xScale(d.conf[1])];});
-  }
 
   // assign the branches as path to each node for the different layouts
   if (this.layout==="clock" || this.layout==="unrooted") {
@@ -331,7 +328,9 @@ export const mapToScreen = function mapToScreen() {
       const stem_offset = 0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0;
       const childrenY = [this.yScale(d.yRange[0]), this.yScale(d.yRange[1])];
       d.branch =[` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip} M ${d.xTip},${childrenY[0]} L ${d.xTip},${childrenY[1]}`];
-      if (this.params.confidence) d.confLine =` M ${d.xConf[0]},${d.yBase} L ${d.xConf[1]},${d.yTip}`;
+      if (this.params.confidence) {
+        d.confLine =` M ${this.xScale(d.conf[0])},${d.yBase} L ${this.xScale(d.conf[1])},${d.yTip}`;
+      }
     });
   } else if (this.layout==="radial") {
     const offset = this.nodes[0].depth;

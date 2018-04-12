@@ -1,7 +1,6 @@
 import React from "react";
 import { updateTipRadii } from "../../../actions/tree";
 import { dataFont, darkGrey } from "../../../globalStyles";
-import { prettyString } from "../../../util/stringHelpers";
 
 const LegendItem = ({
   dispatch,
@@ -11,12 +10,12 @@ const LegendItem = ({
   rectStroke,
   rectFill,
   label,
-  dFreq
+  value
 }) => (
   <g
     transform={transform}
     onMouseEnter={() => {
-      dispatch(updateTipRadii({selectedLegendItem: label}));
+      dispatch(updateTipRadii({selectedLegendItem: value}));
     }}
     onMouseLeave={() => {
       dispatch(updateTipRadii());
@@ -34,7 +33,7 @@ const LegendItem = ({
       y={legendRectSize - legendSpacing}
       style={{fontSize: 12, fill: darkGrey, fontFamily: dataFont}}
     >
-      {prettyString(label, {multiplier: dFreq})}
+      {label}
     </text>
   </g>
 );

@@ -8,7 +8,7 @@ import React from "react";
  * @returns {string|float} to display
  */
 export const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false, stripEtAl = false} = {}) => {
-  if (!x) {
+  if (!x && x!== 0) {
     return "";
   }
   if (typeof x === "string") {

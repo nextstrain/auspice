@@ -48,3 +48,15 @@ export const setGenotype = (nodes, prot, positions) => {
   // console.timeEnd("setGenotype")
   // console.log(`set ${ancNodes.length} nodes to the ancestral state: ${ancState}`)
 };
+
+export const orderOfGenotypeAppearance = (nodes) => {
+  const seen = {};
+  nodes.forEach((n) => {
+    if (!seen[n.currentGt] || n.attr.num_date < seen[n.currentGt]) {
+      seen[n.currentGt] = n.attr.num_date;
+    }
+  });
+  const ordered = Object.keys(seen);
+  ordered.sort((a, b) => seen[a] < seen[b] ? -1 : 1);
+  return ordered;
+};

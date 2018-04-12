@@ -318,15 +318,21 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, controlsSta
   return newState;
 };
 
+const removePanelIfPossible = (panels, name) => {
+  const idx = panels.indexOf(name);
+  if (idx !== -1) {
+    panels.splice(idx, 1);
+  }
+};
+
 const modifyControlsViaTreeToo = (controls, treeToo, name) => {
   controls.showTreeToo = name;
   controls.showTangle = true;
   controls.layout = "rect"; /* must be rectangular for two trees */
-  const mapIdx = controls.panelsToDisplay.indexOf("map");
-  if (mapIdx !== -1) {
-    controls.panelsToDisplay = controls.panelsToDisplay.slice();
-    controls.panelsToDisplay.splice(mapIdx, 1);
-  }
+  controls.panelsToDisplay = controls.panelsToDisplay.slice();
+  removePanelIfPossible(controls.panelsToDisplay, "map");
+  removePanelIfPossible(controls.panelsToDisplay, "entropy");
+  removePanelIfPossible(controls.panelsToDisplay, "frequencies");
   controls.canTogglePanelLayout = false;
   controls.panelLayout = "full";
   return controls;
@@ -390,11 +396,11 @@ export const createStateFromQueryOrJSONs = ({
 
   /* calculate colours if loading from JSONs or if the query demands change */
   if (JSONs || controls.colorBy !== oldState.colorBy) {
-    const {colorScale, version} = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
+    const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
     const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;
     controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
-    tree.nodeColorsVersion = version;
+    tree.nodeColorsVersion = colorScale.version;
     tree.nodeColors = nodeColors;
   }
 
@@ -404,7 +410,7 @@ export const createStateFromQueryOrJSONs = ({
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
     treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, controls);
     controls = modifyControlsViaTreeToo(controls, treeToo, query.tt);
-    treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility);
+    treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
   }
 
   /* calculate entropy in view */
@@ -440,20 +446,20 @@ export const createTreeTooState = ({
   let controls = oldState.controls;
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo.debug = "RIGHT";
-  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, oldState.controls);
   controls = modifyStateViaTree(controls, oldState.tree, treeToo);
   controls = modifyControlsViaTreeToo(controls, treeToo, segment);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, controls);
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  const {colorScale, version} = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);
+  const colorScale = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);
   const nodeColors = calcNodeColor(treeToo, colorScale);
   controls.colorScale = colorScale;
   controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
-  treeToo.nodeColorsVersion = version;
+  treeToo.nodeColorsVersion = colorScale.version;
   treeToo.nodeColors = nodeColors;
 
   treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
-    oldState.tree.nodes, treeToo.nodes, oldState.tree.visibility
+    oldState.tree.nodes, treeToo.nodes, oldState.tree.visibility, treeToo.visibility
   );
 
   // if (tipSelectedIdx) { /* i.e. query.s was set */
