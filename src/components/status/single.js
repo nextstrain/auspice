@@ -76,6 +76,7 @@ class SingleDataset extends React.Component {
   }
 
   render() {
+    const s = {flex: "0 0 20%"};
     return (
       <div style={{
         display: "flex",
@@ -84,12 +85,12 @@ class SingleDataset extends React.Component {
         margin: "10px 10px 10px 10px"
       }}
       >
-        <h3>{this.props.path}</h3>
-        <h3>{this.state.status}</h3>
+        <h3 style={s}>{this.props.path}</h3>
+        <h3 style={s}>{this.state.status}</h3>
         {this.state.status === "loaded" ? (
           [
-            <h3 key={"tips"}>{`${this.state.numTips} tips span ${this.state.minDate} - ${this.state.maxDate}`}</h3>,
-            <h3 key={"updated"}>{`Last updated: ${this.state.lastUpdated}`}</h3>
+            <h3 style={s} key={"tips"}>{`${this.state.numTips} tips span ${this.state.minDate} - ${this.state.maxDate}`}</h3>,
+            <h3 style={s} key={"updated"}>{`Last updated: ${this.state.lastUpdated}`}</h3>
           ]
         ) : null}
       </div>
