@@ -19,12 +19,12 @@ export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
 };
 
-const getMinCalDateViaTree = (nodes) => {
+export const getMinCalDateViaTree = (nodes) => {
   const minNumDate = nodes[0].attr.num_date - 0.01; /* slider should be earlier than actual day */
   return numericToCalendar(minNumDate);
 };
 
-const getMaxCalDateViaTree = (nodes) => {
+export const getMaxCalDateViaTree = (nodes) => {
   let maxNumDate = reallySmallNumber;
   nodes.forEach((node) => {
     if (node.attr) {
