@@ -30,6 +30,8 @@ export const getPageFromPathname = (pathname) => {
     return "splash";
   } else if (pathname.startsWith("/about")) {
     return "about";
+  } else if (pathname.startsWith("/status")) {
+    return "status";
   }
   return "app"; // fallthrough
 };
