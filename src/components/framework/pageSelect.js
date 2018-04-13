@@ -4,7 +4,7 @@ import App from "../app";
 import About from "../../static/about";
 import Methods from "../../static/methods";
 import Splash from "../../static/splash";
-
+import Status from "../status";
 
 @connect((state) => ({
   page: state.datasets.page
@@ -24,6 +24,9 @@ class PageSelect extends React.Component {
       }
       case "about" : {
         return (<About/>);
+      }
+      case "status" : {
+        return (<Status/>);
       }
       default:
         console.error("trying to go to unknown page - ", this.props.page);
