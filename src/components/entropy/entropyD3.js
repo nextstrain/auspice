@@ -295,15 +295,15 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     /* the extent is relative to the navGraph group - the constants are a bit hacky... */
     .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 30]])
     .on("brush end", () => { // https://github.com/d3/d3-brush#brush_on
-      this.brushed()
-    })
+      this.brushed();
+    });
   this.gBrush = this.navGraph.append("g")
     .attr("class", "brush")
     .attr("stroke-width", 0)
     .call(this.brush)
     .call(this.brush.move, () => {
       return this.scales.xMain.range();
-    })
+    });
 
   /* https://bl.ocks.org/mbostock/4349545 */
   this.brushHandle = this.gBrush.selectAll(".handle--custom")

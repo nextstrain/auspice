@@ -1,14 +1,14 @@
 import { scaleLinear, scaleSqrt } from "d3-scale";
 
 export const colorOptions = {
-    "country":{"key":"country", "legendTitle":"Country", "menuItem":"country", "type":"discrete"},
-    "region":{"key":"region", "legendTitle":"Region", "menuItem":"region", "type":"discrete"},
-    "num_date":{"key":"num_date", "legendTitle":"Sampling date", "menuItem":"date", "type":"continuous"},
-    "ep":{"key":"ep", "legendTitle":"Epitope Mutations", "menuItem":"epitope mutations", "type":"continuous"},
-    "ne":{"key":"ne", "legendTitle":"Non-epitope Mutations", "menuItem":"nonepitope mutations", "type":"continuous"},
-    "rb":{"key":"rb", "legendTitle":"Receptor Binding Mutations", "menuItem":"RBS mutations", "type":"continuous"},
-    "gt":{"key":"genotype", "legendTitle":"Genotype", "menuItem":"genotype", "type":"discrete"}
-  }
+  "country": {"key": "country", "legendTitle": "Country", "menuItem": "country", "type": "discrete"},
+  "region": {"key": "region", "legendTitle": "Region", "menuItem": "region", "type": "discrete"},
+  "num_date": {"key": "num_date", "legendTitle": "Sampling date", "menuItem": "date", "type": "continuous"},
+  "ep": {"key": "ep", "legendTitle": "Epitope Mutations", "menuItem": "epitope mutations", "type": "continuous"},
+  "ne": {"key": "ne", "legendTitle": "Non-epitope Mutations", "menuItem": "nonepitope mutations", "type": "continuous"},
+  "rb": {"key": "rb", "legendTitle": "Receptor Binding Mutations", "menuItem": "RBS mutations", "type": "continuous"},
+  "gt": {"key": "genotype", "legendTitle": "Genotype", "menuItem": "genotype", "type": "discrete"}
+};
 
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
 export const width = 1126; /* no longer used */
@@ -40,7 +40,7 @@ export const LBItau = 0.0005;
 export const mutType = "aa";
 export const default_gene = "nuc";
 export const plot_frequencies = false;
-export const genericDomain = [ 0, 0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0 ];
+export const genericDomain = [0, 0.111, 0.222, 0.333, 0.444, 0.555, 0.666, 0.777, 0.888, 1.0];
 export const epiColorDomain = genericDomain;
 export const nonEpiColorDomain = genericDomain;
 export const rbsColorDomain = genericDomain;
@@ -92,7 +92,7 @@ export const colors = [
   ["#4580CA", "#6BB28D", "#AABD52", "#DFA43B"],
   ["#4377CD", "#61AB9D", "#94BD61", "#CDB642", "#E68133"],
   ["#416DCE", "#59A3AA", "#84BA6F", "#BBBC49", "#E29D39", "#E1502A"],
-  ["#3F63CF", "#529AB6", "#75B681", "#A6BE55", "#D4B13F", "#E68133", "#DC2F24"]
+  ["#3F63CF", "#529AB6", "#75B681", "#A6BE55", "#D4B13F", "#E68133", "#DC2F24"],
   ["#3E58CF", "#4B8EC1", "#65AE96", "#8CBB69", "#B8BC4A", "#DCAB3C", "#E67932", "#DC2F24"],
   ["#3F4DCB", "#4681C9", "#5AA4A8", "#78B67E", "#9EBE5A", "#C5B945", "#E0A23A", "#E67231", "#DC2F24"],
   ["#4042C7", "#4274CE", "#5199B7", "#69B091", "#88BB6C", "#ADBD51", "#CEB541", "#E39B39", "#E56C2F", "#DC2F24"],
@@ -124,9 +124,8 @@ export const colors = [
   ["#511EA8", "#4928B4", "#4334BF", "#4041C7", "#3F50CC", "#3F5ED0", "#416CCE", "#4379CD", "#4784C7", "#4B8FC1", "#5098B9", "#56A0AF", "#5CA7A4", "#63AC99", "#6BB18E", "#73B583", "#7CB878", "#86BB6E", "#90BC65", "#9ABD5C", "#A4BE56", "#AFBD4F", "#B9BC4A", "#C2BA46", "#CCB742", "#D3B240", "#DAAC3D", "#DFA43B", "#E39B39", "#E68F36", "#E68234", "#E67431", "#E4632E", "#E1512A", "#DF4027", "#DC2F24"]
 ];
 
-//const filterAbbr = [["geo", "geographic location"]];
-export const filterAbbrFwd = {"geo":"geographic location", "all":"all"};
-export const filterAbbrRev = {"geographic location":"geo", "all":"all"};
+export const filterAbbrFwd = {"geo": "geographic location", "all": "all"};
+export const filterAbbrRev = {"geographic location": "geo", "all": "all"};
 
 export const titleColors = ["#4377CD", "#5097BA", "#63AC9A", "#7CB879", "#9ABE5C", "#B9BC4A", "#D4B13F", "#E49938", "#E67030", "#DE3C26"];
 export const titleBarHeight = 50;

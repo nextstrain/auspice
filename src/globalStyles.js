@@ -1,7 +1,6 @@
 import { controlsWidth } from "./util/globals";
 
 /* IF YOU CHANGE THINGS HERE CHANGE THEM IN static.css AS WELL! */
-//export const titleFont = "aw-conqueror-sans, sans-serif";
 export const titleFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const headerFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const dataFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
@@ -125,7 +124,6 @@ export const infoPanelStyles = {
     color: "white", // link color
     cursor: "pointer",
     textTransform: "uppercase",
-    border: "none",
     borderRadius: 2,
     border: "1px solid #CCC",
     verticalAlign: "middle"

@@ -73,7 +73,7 @@ class AnimationController extends React.Component {
     const tickFn = () => {
       // console.log("TICK")
       // if (enableAnimationPerfTesting) { window.Perf.bump(); }
-      timerStart("animation tick")
+      timerStart("animation tick");
 
       /* Check (via redux) if animation should not continue. This happens when the pause or reset button has been hit. */
       if (this.props.animationPlayPauseButton === "Play") {
@@ -81,7 +81,7 @@ class AnimationController extends React.Component {
         clearInterval(window.NEXTSTRAIN.animationTickReference);
         window.NEXTSTRAIN.animationTickReference = null;
         // if (enableAnimationPerfTesting) { window.Perf.resetCount(); }
-        timerEnd("animation tick")
+        timerEnd("animation tick");
         return;
       }
 
@@ -91,7 +91,7 @@ class AnimationController extends React.Component {
         leftWindow += animationIncrement;
       }
       rightWindow += animationIncrement;
-      timerEnd("animation tick")
+      timerEnd("animation tick");
       /* another way the animation can stop is when the animationEndPoint has been exceeded. We must then loop or stop */
       if (rightWindow >= window.NEXTSTRAIN.animationEndPoint) {
         if (this.props.mapAnimationShouldLoop) { /* if we are looping, just reset the leftWindow to the startPoint */
