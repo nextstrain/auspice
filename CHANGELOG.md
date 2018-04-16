@@ -1,6 +1,8 @@
 ## version 1.18.2 - 2018/04/16
-
-* bugfix: undefined color traits are now grey on a discrete scale
+* LBI color scale domain is [0, 0.7] [Issue 541](https://github.com/nextstrain/auspice/issues/541)
+* Fix bug with antigenic advance & frequencies [Issue 540](https://github.com/nextstrain/auspice/issues/540)
+* Hovering over a tree legend value of zero now correctly highlights matching tips
+* Undefined color traits are now grey on a discrete scale
 * Removed all references to `node.attr.strain` (tree JSON) and `seq_author_map` (meta JSON)
 
 ## version 1.18.1 - 2018/04/15
