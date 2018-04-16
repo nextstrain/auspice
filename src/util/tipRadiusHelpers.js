@@ -15,7 +15,7 @@ const determineLegendMatch = (selectedLegendItem, node, colorScale) => {
   const nodeAttr = getTipColorAttribute(node, colorScale);
   if (colorScale.continuous) {
     return (nodeAttr <= colorScale.legendBounds[selectedLegendItem][1]) &&
-           (nodeAttr > colorScale.legendBounds[selectedLegendItem][0]);
+           (nodeAttr >= colorScale.legendBounds[selectedLegendItem][0]);
   }
   return nodeAttr === selectedLegendItem;
 };
@@ -30,7 +30,7 @@ const determineLegendMatch = (selectedLegendItem, node, colorScale) => {
 * @returns null (if data not ready) or array of tip radii
 */
 export const calcTipRadii = ({tipSelectedIdx = false, selectedLegendItem = false, colorScale, tree}) => {
-  if (selectedLegendItem && tree && tree.nodes) {
+  if (selectedLegendItem !== false && tree && tree.nodes) {
     return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (tipSelectedIdx) {
     const radii = tree.nodes.map(() => tipRadius);
