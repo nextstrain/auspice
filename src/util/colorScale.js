@@ -137,6 +137,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       legendValues = colorBy === "lbi" ?
         [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7] :
         genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
+      if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
       /* sort out ranges */
       const len = legendValues.length;
       legendBounds = {};

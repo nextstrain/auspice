@@ -60,7 +60,7 @@ const processSelectedTip = (d, tree, treeToo) => {
  *                                [0, 0]: reset. [undefined, undefined]: do nothing
  * @param  {object} tipSelected
  * @param  {int} idxOfInViewRootNodeTreeToo
-= * @return {null} side effects: a single action
+ * @return {null} side effects: a single action
  */
 export const updateVisibleTipsAndBranchThicknesses = (
   {root = [undefined, undefined], tipSelected = undefined} = {}

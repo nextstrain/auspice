@@ -1,6 +1,12 @@
 
 export const unassigned_label = "unassigned";
 
+/**
+ * assign a given node to a category
+ * Find the colorBy value of the node and, using the colorScale and the provided categories,
+ * assign the correct category.
+ * @return {string} category or the unassigned label
+ */
 const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
   if (isGenotype) return node.currentGt;
   const value = node.attr[colorBy];
@@ -10,11 +16,15 @@ const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
   if (!colorScale.continuous) return value;
 
   for (let i = 0; i < categories.length; i++) {
-    /* same logic as the determineLegendMatch function */
-    const lowerBound = colorScale.legendBounds[categories[i]][0];
-    const upperBound = colorScale.legendBounds[categories[i]][1];
+    /* roughly the same logic as the determineLegendMatch function */
+    const category = categories[i];
+    if (category === unassigned_label) {
+      return unassigned_label;
+    }
+    const lowerBound = colorScale.legendBounds[category][0];
+    const upperBound = colorScale.legendBounds[category][1];
     if (value <= upperBound && value > lowerBound) {
-      return categories[i];
+      return category;
     }
   }
   console.error("Could not assign", value, "to a category");
@@ -29,7 +39,6 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */
   const pivotsLen = pivots.length;
   categories.forEach((x) => {matrix[x] = new Array(pivotsLen).fill(0);});
-
   // let debugTipsSeen = 0;
   const debugPivotTotals = new Array(pivotsLen).fill(0);
   data.forEach((d) => {
