@@ -128,11 +128,15 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     } else if (colorOptions && colorOptions[colorBy].type === "continuous") {
       // console.log("making a continuous color scale for ", colorBy)
       continuous = true;
-      const minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy]);
+      const minMax = colorBy === "lbi" ?
+        [0, 0.7] :
+        getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy]);
       colorScale = continuousScale(...minMax);
       const spread = minMax[1] - minMax[0];
       const dp = spread > 5 ? 2 : 3;
-      legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
+      legendValues = colorBy === "lbi" ?
+        [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7] :
+        genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
       /* sort out ranges */
       const len = legendValues.length;
       legendBounds = {};
