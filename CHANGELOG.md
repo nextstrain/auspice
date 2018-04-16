@@ -1,3 +1,5 @@
+## version 1.18.2 - 2018/04/16
+
 * bugfix: undefined color traits are now grey on a discrete scale
 * Removed all references to `node.attr.strain` (tree JSON) and `seq_author_map` (meta JSON)
 
