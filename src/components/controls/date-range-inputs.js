@@ -2,11 +2,11 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Slider from "./slider";
-import { controlsWidth } from "../../util/globals";
+import { controlsWidth, minDistanceDateSlider } from "../../util/globals";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/tree";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
-import { headerFont, lightGrey, darkGrey } from "../../globalStyles";
+import { headerFont, darkGrey } from "../../globalStyles";
 
 @connect((state) => {
   return {
@@ -59,7 +59,7 @@ class DateRangeInputs extends React.Component {
 
   updateFromSlider(debounce, numDateValues) {
     /* debounce: boolean. TRUE: both debounce and quickdraw. */
-    this.maybeClearMapAnimationInterval()
+    this.maybeClearMapAnimationInterval();
 
     if (debounce) {
       // simple debounce @ 100ms
@@ -127,8 +127,6 @@ class DateRangeInputs extends React.Component {
 
     */
 
-    const absoluteMin = this.props.absoluteDateMin;
-    const absoluteMax = this.props.absoluteDateMax;
     const selectedMin = this.props.dateMin;
     const selectedMax = this.props.dateMax;
 
@@ -137,26 +135,27 @@ class DateRangeInputs extends React.Component {
     const selectedMinNumDate = this.props.dateMinNumeric;
     const selectedMaxNumDate = this.props.dateMaxNumeric;
 
-    const minDistance = (absoluteMaxNumDate - absoluteMinNumDate) / 10.0;
+    const minDistance = minDistanceDateSlider * (absoluteMaxNumDate - absoluteMinNumDate);
 
     const styles = this.getStyles();
 
     return (
       <div>
         <div style={{width: controlsWidth}}>
-        <Slider                                       // numDates are handed to Slider
-          min={absoluteMinNumDate}
-          max={absoluteMaxNumDate}
-          defaultValue={[absoluteMinNumDate, absoluteMaxNumDate]}
-          value={[selectedMinNumDate, selectedMaxNumDate]}
-          /* debounce the onChange event, but ensure the final one goes through */
-          onChange={this.updateFromSlider.bind(this, true)}
-          onAfterChange={this.updateFromSlider.bind(this, false)}
-          minDistance={minDistance}
-          pearling
-          withBars/>
+          <Slider // numDates are handed to Slider
+            min={absoluteMinNumDate}
+            max={absoluteMaxNumDate}
+            defaultValue={[absoluteMinNumDate, absoluteMaxNumDate]}
+            value={[selectedMinNumDate, selectedMaxNumDate]}
+            /* debounce the onChange event, but ensure the final one goes through */
+            onChange={this.updateFromSlider.bind(this, true)}
+            onAfterChange={this.updateFromSlider.bind(this, false)}
+            minDistance={minDistance}
+            pearling
+            withBars
+          />
         </div>
-        <div style={{height: 5}}> </div>
+        <div style={{height: 5}}/>
         <div style={{width: controlsWidth}}>
           <div style={{ ...styles.base, float: "left" }}>
             {selectedMin}
