@@ -70,20 +70,18 @@ const write = (filename, type, content) => {
   document.body.removeChild(link);
 };
 
-export const authorCSV = (dispatch, filePrefix, metadata) => {
+export const authorCSV = (dispatch, filePrefix, metadata, tree) => {
   const lineArray = [["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"]];
   const filename = filePrefix + "_authors.csv";
 
   const authors = {};
-  for (const strain of Object.keys(metadata.seq_author_map)) {
-    const author = metadata.seq_author_map[strain];
-    if (Object.prototype.hasOwnProperty.call(authors, author)) {
-      authors[author].push(strain);
+  tree.nodes.filter((n) => !n.hasChildren && n.attr.authors).forEach((n) => {
+    if (!authors[n.attr.authors]) {
+      authors[n.attr.authors] = [n.strain];
     } else {
-      authors[author] = [strain];
+      authors[n.attr.authors].push(n.strain);
     }
-  }
-
+  });
   const body = [];
   for (const author of Object.keys(metadata.author_info)) {
     body.push([

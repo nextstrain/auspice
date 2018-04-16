@@ -270,7 +270,7 @@ const HoverInfoPanel = ({mutType, temporalConfidence, distanceMeasure,
     <div style={styles.container}>
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
         <div style={infoPanelStyles.tooltipHeading}>
-          {tip ? d.n.attr.strain : null}
+          {tip ? d.n.strain : null}
         </div>
         {inner}
         <p/>

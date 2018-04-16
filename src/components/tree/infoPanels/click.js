@@ -83,7 +83,7 @@ const TipClickedPanel = ({tip, goAwayCallback, metadata}) => {
   if (!tip) {return null;}
   const url = validAttr(tip.n.attr, "url") ? formatURL(tip.n.attr.url) : false;
   const uncertainty = "num_date_confidence" in tip.n.attr && tip.n.attr.num_date_confidence[0] !== tip.n.attr.num_date_confidence[1];
-  const author = metadata.seq_author_map[tip.n.strain];
+  const author = tip.n.attr.authors || undefined;
   const authorInfo = metadata.author_info;
   return (
     <div style={styles.container} onClick={() => goAwayCallback(tip)}>
