@@ -1,6 +1,5 @@
 data_files=(
   "manifest_guest.json" \
-  "manifest_lassa.json" \
   "img_mumps.jpg" "img_dengue.png" "img_avianinfluenza.png" "img_seasonalinfluenza.png" "img_ebola.png" "img_zika.png" "img_measles.png" "img_lassa.png"\
   "ebola_tree.json" "ebola_meta.json"\
   "zika_tree.json" "zika_meta.json"\
