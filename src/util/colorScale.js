@@ -71,9 +71,8 @@ const createDiscreteScale = (domain) => {
       colorList[domain.indexOf(key)] = unknownColor;
     }
   }
-  return scaleOrdinal()
-    .domain(domain)
-    .range(colorList);
+  const scale = scaleOrdinal().domain(domain).range(colorList);
+  return (val) => (val === undefined || val === false) ? unknownColor : scale(val);
 };
 
 const valBetween = (x0, x1) => {
