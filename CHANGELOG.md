@@ -1,8 +1,16 @@
+* bugfix: undefined color traits are now grey on a discrete scale
+* Removed all references to `node.attr.strain` (tree JSON) and `seq_author_map` (meta JSON)
+
 ## version 1.18.1 - 2018/04/15
+* Make date slider spacing consistent between animation and drag
 
 ## version 1.18.0 - 2018/04/14
+* Tanglegrams enabled! (bugfixes & reinstate controls dropdown)
+* Status pages: nextstrain.org/status & nextstrain.org/status/staging
+* Narrative files are sourced from nextstrain.org repository
 
 ## version 1.17.4 - 2018/04/10
+* Updated LASV footer
 
 ## version 1.17.3 - 2018/04/04
 
