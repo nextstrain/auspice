@@ -10,9 +10,8 @@ import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 
 const unknownColor = "#DDDDDD";
 
-const getMinMaxFromTree = (nodes, nodesToo, attr, tipsOnly) => {
-  let arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
-  if (tipsOnly) arr = arr.filter((n) => !n.hasChildren);
+const getMinMaxFromTree = (nodes, nodesToo, attr) => {
+  const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
   const vals = arr.map((n) => n.attr[attr]);
   vals.filter((n) => n !== undefined)
     .filter((item, i, ar) => ar.indexOf(item) === i);
@@ -135,28 +134,44 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           minMax = [0, 0.7];
           break;
         case "num_date":
-          minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy], true);
-          break;
+          break; /* minMax not needed for num_date */
         default:
-          minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy], false);
+          minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy]);
       }
 
       /* make the continuous scale */
-      let domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
-      const cols = colors[9];
-      /* for num_date we need to extend the domain to the root, even tho we don't want the colorScale to "focus" on that */
-      if (colorBy === "num_date") {
-        let rootDate = tree.nodes[0].attr.num_date;
-        if (treeTooNodes && treeTooNodes[0].attr.num_date < rootDate) rootDate = treeTooNodes[0].attr.num_date;
-        domain = [rootDate].concat(domain);
+      let domain, range;
+      switch (colorBy) {
+        case "num_date":
+          /* we want the colorScale to "focus" on the tip dates, and be spaced according to sampling */
+          let rootDate = tree.nodes[0].attr.num_date;
+          let vals = tree.nodes.filter((n) => !n.hasChildren).map((n) => n.attr.num_date);
+          if (treeTooNodes) {
+            if (treeTooNodes[0].attr.num_date < rootDate) rootDate = treeTooNodes[0].attr.num_date;
+            vals.concat(treeTooNodes.filter((n) => !n.hasChildren).map((n) => n.attr.num_date));
+          }
+          vals = vals.sort();
+          domain = [rootDate];
+          const n = 10;
+          const spaceBetween = parseInt(vals.length / (n - 1), 10);
+          for (let i = 0; i < (n-1); i++) domain.push(vals[spaceBetween*i]);
+          domain.push(vals[vals.length-1]);
+          range = colors[n]; /* contains n+1 values */
+          break;
+        default:
+          range = colors[9];
+          domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
       }
-      const scale = scaleLinear().domain(domain).range(cols);
+      const scale = scaleLinear().domain(domain).range(range);
       colorScale = (val) => (val === undefined || val === false) ? unknownColor : scale(val);
 
       /* construct the legend values & their respective bounds */
       switch (colorBy) {
         case "lbi":
           legendValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
+          break;
+        case "num_date":
+          legendValues = domain.slice(1);
           break;
         default:
           const spread = minMax[1] - minMax[0];
