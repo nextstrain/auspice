@@ -1,3 +1,5 @@
+* Updated the footer for LASV & WNV
+
 ## version 1.18.2 - 2018/04/16
 * LBI color scale domain is [0, 0.7] [Issue 541](https://github.com/nextstrain/auspice/issues/541)
 * Fix bug with antigenic advance & frequencies [Issue 540](https://github.com/nextstrain/auspice/issues/540)
