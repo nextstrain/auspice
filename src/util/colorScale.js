@@ -10,18 +10,10 @@ import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 
 const unknownColor = "#DDDDDD";
 
-const continuousScale = (x0, x1) => {
-  const scale = scaleLinear()
-    .domain(genericDomain.map((d) => x0 + d * (x1 - x0)))
-    .range(colors[9]);
-  return (val) => (val === undefined || val === false) ? unknownColor : scale(val);
-};
-
-const getMinMaxFromTree = (nodes, nodesToo, attr) => {
-  const vals = nodes.map((n) => n.attr[attr]);
-  if (nodesToo) {
-    nodesToo.forEach((n) => vals.push(n.attr[attr]));
-  }
+const getMinMaxFromTree = (nodes, nodesToo, attr, tipsOnly) => {
+  let arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
+  if (tipsOnly) arr = arr.filter((n) => !n.hasChildren);
+  const vals = arr.map((n) => n.attr[attr]);
   vals.filter((n) => n !== undefined)
     .filter((item, i, ar) => ar.indexOf(item) === i);
   return [min(vals), max(vals)];
@@ -75,9 +67,18 @@ const createDiscreteScale = (domain) => {
   return (val) => (val === undefined || val === false) ? unknownColor : scale(val);
 };
 
-const valBetween = (x0, x1) => {
-  return x0 + 0.5*(x1-x0);
+const createLegendBounds = (legendValues) => {
+  const valBetween = (x0, x1) => x0 + 0.5*(x1-x0);
+  const len = legendValues.length;
+  const legendBounds = {};
+  legendBounds[legendValues[0]] = [0, valBetween(legendValues[0], legendValues[1])];
+  for (let i = 1; i < len - 1; i++) {
+    legendBounds[legendValues[i]] = [valBetween(legendValues[i-1], legendValues[i]), valBetween(legendValues[i], legendValues[i+1])];
+  }
+  legendBounds[legendValues[len-1]] = [valBetween(legendValues[len-2], legendValues[len-1]), 10000];
+  return legendBounds;
 };
+
 
 export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   // console.log(`calcColorScale for ${colorBy}. TreeToo? ${!!treeToo}`)
@@ -128,24 +129,42 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     } else if (colorOptions && colorOptions[colorBy].type === "continuous") {
       // console.log("making a continuous color scale for ", colorBy)
       continuous = true;
-      const minMax = colorBy === "lbi" ?
-        [0, 0.7] :
-        getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy]);
-      colorScale = continuousScale(...minMax);
-      const spread = minMax[1] - minMax[0];
-      const dp = spread > 5 ? 2 : 3;
-      legendValues = colorBy === "lbi" ?
-        [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7] :
-        genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
-      if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
-      /* sort out ranges */
-      const len = legendValues.length;
-      legendBounds = {};
-      legendBounds[legendValues[0]] = [0, valBetween(legendValues[0], legendValues[1])];
-      for (let i = 1; i < len - 1; i++) {
-        legendBounds[legendValues[i]] = [valBetween(legendValues[i-1], legendValues[i]), valBetween(legendValues[i], legendValues[i+1])];
+      let minMax;
+      switch (colorBy) {
+        case "lbi":
+          minMax = [0, 0.7];
+          break;
+        case "num_date":
+          minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy], true);
+          break;
+        default:
+          minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy], false);
       }
-      legendBounds[legendValues[len-1]] = [valBetween(legendValues[len-2], legendValues[len-1]), 10000];
+
+      /* make the continuous scale */
+      let domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
+      const cols = colors[9];
+      /* for num_date we need to extend the domain to the root, even tho we don't want the colorScale to "focus" on that */
+      if (colorBy === "num_date") {
+        let rootDate = tree.nodes[0].attr.num_date;
+        if (treeTooNodes && treeTooNodes[0].attr.num_date < rootDate) rootDate = treeTooNodes[0].attr.num_date;
+        domain = [rootDate].concat(domain);
+      }
+      const scale = scaleLinear().domain(domain).range(cols);
+      colorScale = (val) => (val === undefined || val === false) ? unknownColor : scale(val);
+
+      /* construct the legend values & their respective bounds */
+      switch (colorBy) {
+        case "lbi":
+          legendValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
+          break;
+        default:
+          const spread = minMax[1] - minMax[0];
+          const dp = spread > 5 ? 2 : 3;
+          legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
+      }
+      if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
+      legendBounds = createLegendBounds(legendValues);
     }
   } else {
     error = true;
