@@ -14,11 +14,8 @@ const dot = (
 );
 
 export const getAcknowledgments = (dispatch, styles) => {
-  const genericPreamble = (
-    <div style={styles.preamble}>
-      {"This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions."}
-    </div>
-  );
+  const preambleContent = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
+  const genericPreamble = (<div style={styles.preamble}>{preambleContent}</div>);
 
   if (window.location.pathname.includes("ebola")) {
     return (
@@ -52,19 +49,38 @@ export const getAcknowledgments = (dispatch, styles) => {
   }
   if (window.location.pathname.includes("lassa")) {
     return (
-      <div>
-        {genericPreamble}
-        <div style={styles.acknowledgments}>
-          {"Special thanks to "}
-          <a href="http://acegid.org/">{"Christian Happi"}</a>
-          {", "}
-          <a href="https://www.sabetilab.org/">{"Pardis Sabeti"}</a>
-          {" and "}
-          <a href="https://www.sabetilab.org/katherine-siddle/">{"Katherine Siddle"}</a>
-          {" for sharing unpublished data collected in Nigeria between 2015 and 2016 and first shared via "}
-          <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/new-lassa-virus-genomes-from-nigeria-2015-2016/191">{"this viroligical.org post. "}</a>
-          If you intend to use these sequences prior to publication, please contact them directly to coordinate.
-        </div>
+      <div style={styles.acknowledgments}>
+        {"This work is made possible by the open sharing of genetic data by research groups, including these groups currently collecting Lassa sequences:"}
+        <p/>
+        <a href="http://acegid.org/">{"Christian Happi"}</a>
+        {", "}
+        <a href="https://www.sabetilab.org/">{"Pardis Sabeti"}</a>
+        {", "}
+        <a href="https://www.sabetilab.org/katherine-siddle/">{"Katherine Siddle"}</a>
+        {" and colleagues, whose data was shared via "}
+        <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/new-lassa-virus-genomes-from-nigeria-2015-2016/191">{"this viroligical.org post. "}</a>
+        {"If you intend to use these sequences prior to publication, please contact them directly to coordinate. "}
+        <span className={"link"} onClick={() => dispatch(applyFilter("authors", ["Odia_et_al"], 'set'))}>{"Click here"}</span>
+        {" here to see these sequences in isolation."}
+
+        <p/>
+
+        {`The Irrua specialist Teaching Hospital (ISTH) and Institute for Lassa Fever Research and Control (ILFRC), Irrua, Edo State, Nigeria;
+          The Bernhard-Nocht Institute for Tropical Medicine (BNITM), Hamburg, Germany;
+          Public Health England (PHE);
+          African Center of Excellence for Genomics of Infectious Disease (ACEGID ), Redeemer’s University, Ede, Nigeria;
+          Broad Institute of MIT and Harvard University (Cambridge, MA, USA).
+          For further details, including conditions of reuse, please contact `}
+        <a href="mailto:epogbaini@yahoo.com">{"Ephraim Epogbaini"}</a>
+        {", "}
+        <a href="http://www.who.int/blueprint/about/stephan-gunther/en/">{"Stephan Günther"}</a>
+        {" and "}
+        <a href="https://rega.kuleuven.be/cev/ecv/lab-members/PhilippeLemey.html">{"Philippe Lemey"}</a>
+        {". Their data was first shared via "}
+        <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/2018-lasv-sequencing-continued/192/8">{"this viroligical.org post"}</a>
+        {', which is continually updated. '}
+        <span className={"link"} onClick={() => dispatch(applyFilter("authors", ["ISTH-BNITM-PHE"], 'set'))}>{"Click here"}</span>
+        {" here to see these sequences in isolation."}
       </div>
     );
   }
@@ -120,6 +136,7 @@ export const getAcknowledgments = (dispatch, styles) => {
 
 const dispatchFilter = (dispatch, activeFilters, key, value) => {
   const mode = activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
+  console.log(key, value)
   dispatch(applyFilter(key, [value], mode));
 };
 
