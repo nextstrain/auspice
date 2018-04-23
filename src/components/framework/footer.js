@@ -5,6 +5,7 @@ import { prettyString } from "../../util/stringHelpers";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { applyFilter } from "../../actions/tree";
+import { changeColorBy } from "../../actions/colors";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -12,63 +13,110 @@ const dot = (
   </span>
 );
 
-export const preambleText = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
+export const getAcknowledgments = (dispatch, styles) => {
+  const genericPreamble = (
+    <div style={styles.preamble}>
+      {"This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions."}
+    </div>
+  );
 
-export const getAcknowledgments = (style) => {
   if (window.location.pathname.includes("ebola")) {
     return (
-      <div style={style}>
-        Special thanks to Nick Loman, Matt Cotten, Ian Goodfellow and Paul Kellam for spearheading data sharing efforts during the outbreak. For a more complete phylogeographic analysis of these data see <a target="_blank" rel="noreferrer noopener" href="http://dx.doi.org/10.1038/nature22040">Dudas et al</a>. Curated data used in the paper are available at <a target="_blank" rel="noreferrer noopener" href="https://github.com/ebov/space-time">github.com/ebov/space-time</a>. The animation shown here was inspired by <a target="_blank" rel="noreferrer noopener" href="https://youtu.be/eWnIhWUpQiQ">a work</a> by <a target="_blank" rel="noreferrer noopener" href="http://bedford.io/team/gytis-dudas/">Gytis Dudas</a>.
+      <div>
+        {genericPreamble}
+        <div style={styles.acknowledgments}>
+          Special thanks to Nick Loman, Matt Cotten, Ian Goodfellow and Paul Kellam for spearheading data sharing efforts during the outbreak. For a more complete phylogeographic analysis of these data see <a target="_blank" rel="noreferrer noopener" href="http://dx.doi.org/10.1038/nature22040">Dudas et al</a>. Curated data used in the paper are available at <a target="_blank" rel="noreferrer noopener" href="https://github.com/ebov/space-time">github.com/ebov/space-time</a>. The animation shown here was inspired by <a target="_blank" rel="noreferrer noopener" href="https://youtu.be/eWnIhWUpQiQ">a work</a> by <a target="_blank" rel="noreferrer noopener" href="http://bedford.io/team/gytis-dudas/">Gytis Dudas</a>.
+        </div>
       </div>
     );
   }
   if (window.location.pathname.includes("zika")) {
     return (
-      <div style={style}>
-        Special thanks to Nick Loman, Nathan Grubaugh, Kristof Theys, Nuno Faria, Kristian Andersen, Andrew Rambaut and Karl Erlandson for data sharing, comments and suggestions.
+      <div>
+        {genericPreamble}
+        <div style={styles.acknowledgments}>
+          Special thanks to Nick Loman, Nathan Grubaugh, Kristof Theys, Nuno Faria, Kristian Andersen, Andrew Rambaut and Karl Erlandson for data sharing, comments and suggestions.
+        </div>
       </div>
     );
   }
   if (window.location.pathname.includes("mumps")) {
     return (
-      <div style={style}>
-        Special thanks to Jennifer Gardy, Shirlee Wohl, Jeff Joy, Nathan Yozwiak, Hayden Metsky, Agatha Jassem, Louise Moncla, Gytis Dudas and Pardis Sabeti for data sharing, comments and suggestions.
+      <div>
+        {genericPreamble}
+        <div style={styles.acknowledgments}>
+          Special thanks to Jennifer Gardy, Shirlee Wohl, Jeff Joy, Nathan Yozwiak, Hayden Metsky, Agatha Jassem, Louise Moncla, Gytis Dudas and Pardis Sabeti for data sharing, comments and suggestions.
+        </div>
       </div>
     );
   }
   if (window.location.pathname.includes("lassa")) {
     return (
-      <div style={style}>
-        {"Special thanks to "}
-        <a href="http://acegid.org/">{"Christian Happi"}</a>
-        {", "}
-        <a href="https://www.sabetilab.org/">{"Pardis Sabeti"}</a>
-        {" and "}
-        <a href="https://www.sabetilab.org/katherine-siddle/">{"Katherine Siddle"}</a>
-        {" for sharing unpublished data collected in Nigeria between 2015 and 2016 and first shared via "}
-        <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/new-lassa-virus-genomes-from-nigeria-2015-2016/191">{"this viroligical.org post. "}</a>
-        If you intend to use these sequences prior to publication, please contact them directly to coordinate.
+      <div>
+        {genericPreamble}
+        <div style={styles.acknowledgments}>
+          {"Special thanks to "}
+          <a href="http://acegid.org/">{"Christian Happi"}</a>
+          {", "}
+          <a href="https://www.sabetilab.org/">{"Pardis Sabeti"}</a>
+          {" and "}
+          <a href="https://www.sabetilab.org/katherine-siddle/">{"Katherine Siddle"}</a>
+          {" for sharing unpublished data collected in Nigeria between 2015 and 2016 and first shared via "}
+          <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/new-lassa-virus-genomes-from-nigeria-2015-2016/191">{"this viroligical.org post. "}</a>
+          If you intend to use these sequences prior to publication, please contact them directly to coordinate.
+        </div>
+      </div>
+    );
+  }
+  if (window.location.pathname.includes("WNV/NA")) {
+    return (
+      <div style={styles.acknowledgments}>
+        {`This work is possible due to the goups who have made their data openly available for analysis -
+          with a special thanks to Nathan Grubaugh and his lab.
+          The Grubaugh Lab's goal is to promote sequencing and sharing of West Nile virus genomes to improve our understanding of virus spread and evolution.
+          To aid in this effort, they have adapted their highly multiplexed PCR approach for `}
+        <a target="_blank" rel="noreferrer noopener" href="https://www.nature.com/articles/nprot.2017.066">{"Zika virus sequencing"}</a>
+        {` on the Illumina and Minion platforms for West Nile Virus circulating in North America. Their `}
+        <a target="_blank" rel="noreferrer noopener" href="http://grubaughlab.com/open-science/">{"sequencing protocol and primers"}</a>
+        {` are free to use. If you have any questions about West Nile virus sequencing, or if you have unpublished data that you would like to share, please email `}
+        <a href="emailto:grubaughlab@gmail.com">{"grubaughlab@gmail.com"}</a>{`.`}
+        <p/>
+        {"Three genotypes are of particular importance to this dataset (clicking will change the colouring of the tree): "}
+        <ul>
+          <li>
+            <span className={"link"} onClick={() => dispatch(changeColorBy("gt-env_159"))}>{"env-V159A"}</span>
+            {" designates the switch from NY99 (the original sequence) to WN02."}
+          </li>
+          <li>
+            <span className={"link"} onClick={() => dispatch(changeColorBy("gt-NS4A_85"))}>{"NS4A-A85T"}</span>
+            {" designates the switch from WN02 to SW03 (WN02 displaced NY99; WN02 and SW03 co-circulate)."}
+          </li>
+        </ul>
       </div>
     );
   }
   if (window.location.pathname.includes("h7n9")) {
     return (
-      <div style={style}>
-        We thank the <a target="_blank" rel="noreferrer noopener" href="https://gisaid.org">GISAID Initiative</a> for enabling genomic surveillance of influenza and for providing a critical data sharing platform.
+      <div style={styles.acknowledgments}>
+        We thank the <a target="_blank" rel="noreferrer noopener" href="https://gisaid.org">GISAID Initiative</a> for enabling genomic surveillance of influenza and for providing a critical data sharing platform, and all of the groups who contribute to it.
       </div>
     );
   }
   if (window.location.pathname.includes("flu")) {
     return (
       <div>
-        <div style={style}>
+        <div style={styles.acknowledgments}>
           We thank the <a target="_blank" rel="noreferrer noopener" href="https://gisaid.org">GISAID Initiative</a> and the <a target="_blank" rel="noreferrer noopener" href="http://www.who.int/influenza/gisrs_laboratory/en/">GISRS Network</a> for critical surveillance efforts and open data sharing. Titer data used in antigenic analysis was generated by the <a target="_blank" rel="noreferrer noopener" href="https://www.crick.ac.uk/research/worldwide-influenza-centre">Worldwide Influenza Centre at the Francis Crick Institute</a> and the <a target="_blank" rel="noreferrer noopener" href="https://www.cdc.gov/flu/">Influenza Division at the US Centers for Disease Control and Prevention</a>. Special thanks to Jackie Katz, Dave Wentworth, Becky Garten, Vivien Dugan, John McCauley, Rod Daniels, Vicki Gregory, Kanta Subbarao, Ian Barr, Aeron Hurt, Takato Odagiri, Shinji Watanabe, Tomoko Kuwahara, Michael Lässig, Marta Łuksza, Richard Reeve, Colin Russell, Sebastian Maurer-Stroh and Peter Bogner for feedback and advice. This analysis represents an updated frontend to the Nextflu informatic pipeline. This site is now our canonical analysis of seasonal influenza evolution. The old frontend can be found at <a target="_blank" rel="noreferrer noopener" href="https://nextflu.org/deprecated/">nextflu.org/deprecated/</a> for the intermediate future.
         </div>
       </div>
     );
   }
-  return null;
-}
+  return (
+    <div>
+      {genericPreamble}
+    </div>
+  );
+};
 
 const dispatchFilter = (dispatch, activeFilters, key, value) => {
   const mode = activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
@@ -268,10 +316,7 @@ class Footer extends React.Component {
       <div style={styles.footer}>
         <div style={{width: width}}>
           <div style={styles.line}/>
-          <div style={styles.preamble}>
-            {preambleText}
-          </div>
-          {getAcknowledgments(styles.acknowledgments)}
+          {getAcknowledgments(this.props.dispatch, styles)}
           <div style={styles.line}/>
           {Object.keys(this.props.activeFilters).map((name) => {
             return (
