@@ -119,8 +119,6 @@ class Tree extends React.Component {
                 return 0;
               }
             });
-            console.log(n);
-            console.log(n.children.map(function(d){d.otherYvalue;}));
           }
         }
         calculateNodeRank(this.props.treeToo.nodes);
