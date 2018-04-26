@@ -1,5 +1,6 @@
-## version 1.18.3 - 2018/04/23
+* Use exponential notation for the clock rate
 
+## version 1.18.3 - 2018/04/23
 * Updated the footer for LASV & WNV
 
 ## version 1.18.2 - 2018/04/16
