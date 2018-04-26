@@ -12,6 +12,62 @@ import { resetTreeButtonStyle } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
 
+
+const postOrderIteration = function(node, callback){
+    if (node.children){
+        for (var i=0; i<node.children.length; i++){
+            postOrderIteration(node.children[i], callback);
+        }
+    }
+    callback(node);
+}
+
+const calculateNodeRank = function(nodes){
+  let yvalue = nodes[0].fullTipCount;
+  const assignNodeOrder = function(node){
+    if (!node.children){
+      yvalue--;
+      node.yvalue = yvalue
+      node.maxYvalue = yvalue;
+      node.minYvalue = yvalue;
+    }else{
+      let s=0;
+      for (let i=0;i<node.children.length; i++){
+        s+=node.children[i].yvalue;
+      }
+      s/=node.children.length;
+      node.yvalue = s;
+      node.maxYvalue = node.children[node.children.length-1].yvalue;
+      node.minYvalue = node.children[0].yvalue;
+    }
+  }
+  postOrderIteration(nodes[0], assignNodeOrder);
+}
+
+const calculateOtherTreeRank = function(nodes, nameToNode){
+  let yvalue = 0;
+  const assignNodeOrder = function(node){
+    if (!node.children){
+      yvalue++;
+      if (nameToNode[node.strain]){
+        node.otherYvalue = nameToNode[node.strain].yvalue;
+      }else{
+        node.otherYvalue = undefined;
+      }
+    }else{
+      let s=0, count=0;
+      for (let i=0;i<node.children.length; i++){
+        if (node.children[i].otherYvalue){
+          s+=node.children[i].otherYvalue;
+          count++;
+        }
+      }
+      node.otherYvalue = s/count;
+    }
+  }
+  postOrderIteration(nodes[0], assignNodeOrder);
+}
+
 class Tree extends React.Component {
   constructor(props) {
     super(props);
@@ -44,11 +100,32 @@ class Tree extends React.Component {
   }
   componentDidMount() {
     if (this.props.tree.loaded) {
+      calculateNodeRank(this.props.tree.nodes);
       const tree = new PhyloTree(this.props.tree.nodes, "LEFT");
+      const nameToNode = {};
+      for (let i=0;i<this.props.tree.nodes.length;i++){
+        nameToNode[this.props.tree.nodes[i].strain] = this.props.tree.nodes[i];
+      }
       renderTree(this, true, tree, this.props);
       this.Viewer.fitToViewer();
       const newState = {tree};
       if (this.props.showTreeToo) {
+        calculateOtherTreeRank(this.props.treeToo.nodes, nameToNode);
+        for (let i=0;i<this.props.treeToo.nodes.length;i++){
+          let n=this.props.treeToo.nodes[i];
+          if (n.children){
+            // console.log(n.strain, n.children);
+            n.children.sort(function(a,b){
+              if (nameToNode[b.strain]&&nameToNode[a.strain]){
+                return -(a.otherYvalue - b.otherYvalue);
+              }else{
+                return 0;
+              }
+            });
+
+          }
+        }
+        calculateNodeRank(this.props.treeToo.nodes);
         const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
         renderTree(this, false, treeToo, this.props);
         this.ViewerToo.fitToViewer();

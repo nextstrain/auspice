@@ -12,7 +12,6 @@ import * as grid from "./grid";
 import * as confidence from "./confidence";
 import * as labels from "./labels";
 
-
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
 const PhyloTree = function PhyloTree(reduxNodes, debugId) {
   this.grid = false;
