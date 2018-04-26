@@ -45,27 +45,24 @@ const calculateNodeRank = function(nodes){
 }
 
 const calculateOtherTreeRank = function(nodes, nameToNode){
-  let yvalue = 0;
+  nodes.forEach(function(n){n.otherYvalue=0;});
   const assignNodeOrder = function(node){
     if (!node.children){
-      yvalue++;
       if (nameToNode[node.strain]){
-        node.otherYvalue = nameToNode[node.strain].yvalue;
-      }else{
-        node.otherYvalue = undefined;
+        node.otherYvalue += nameToNode[node.strain].yvalue;
       }
     }else{
-      let s=0, count=0;
+      let s=0;
       for (let i=0;i<node.children.length; i++){
         if (node.children[i].otherYvalue){
-          s+=node.children[i].otherYvalue;
-          count++;
+          s += node.children[i].otherYvalue;
         }
       }
-      node.otherYvalue = s/count;
+      node.otherYvalue = 1.0*s;
     }
   }
   postOrderIteration(nodes[0], assignNodeOrder);
+  nodes.forEach(function(n){n.otherYvalue/=n.fullTipCount;});
 }
 
 class Tree extends React.Component {
@@ -122,7 +119,8 @@ class Tree extends React.Component {
                 return 0;
               }
             });
-
+            console.log(n);
+            console.log(n.children.map(function(d){d.otherYvalue;}));
           }
         }
         calculateNodeRank(this.props.treeToo.nodes);
