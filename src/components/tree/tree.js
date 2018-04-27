@@ -12,6 +12,31 @@ import { resetTreeButtonStyle } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
 
+const tangle_score = function(nodes1, nodes2, nameToNode){
+  let sq_dev = 0, count=0;
+  let my1=0, my2=0, sqy1=0,sqy2=0, y12=0;
+  for (let i=0;i<nodes2.length; i++){
+    let n=nodes2[i];
+    if ((!n.children) && nameToNode[n.strain]){
+      let y1 = n.yvalue, y2=nameToNode[n.strain].yvalue;
+      sq_dev += (y1 - y2)*(y1 - y2);
+      count++;
+      my1+=y1;
+      my2+=y2;
+      sqy1+=y1**2;
+      sqy2+=y2**2;
+      y12 += y1*y2
+    }
+  }
+  my1/=count;
+  my2/=count;
+  sqy1/=count;
+  sqy2/=count;
+  y12/=count
+  const corr = (y12-my1*my2)/Math.sqrt((sqy1 - my1**2)*(sqy2 - my2**2))
+  // console.log("tangle score:", sq_dev/count, count, corr);
+  return corr;
+}
 
 const postOrderIteration = function(node, callback){
     if (node.children){
@@ -106,8 +131,12 @@ class Tree extends React.Component {
       renderTree(this, true, tree, this.props);
       this.Viewer.fitToViewer();
       const newState = {tree};
+      let corr=-1, new_corr=-1;
       if (this.props.showTreeToo) {
         calculateOtherTreeRank(this.props.treeToo.nodes, nameToNode);
+        calculateNodeRank(this.props.treeToo.nodes);
+        corr = tangle_score(this.props.tree.nodes, this.props.treeToo.nodes, nameToNode);
+        console.log("Initial tangle rank correlation:",corr);
         for (let i=0;i<this.props.treeToo.nodes.length;i++){
           let n=this.props.treeToo.nodes[i];
           if (n.children){
@@ -122,10 +151,30 @@ class Tree extends React.Component {
           }
         }
         calculateNodeRank(this.props.treeToo.nodes);
+        corr = tangle_score(this.props.tree.nodes, this.props.treeToo.nodes, nameToNode);
+        console.log("Pre optimized tangle rank correlation:",corr);
+        for (let i=0;i<this.props.treeToo.nodes.length;i++){
+          let n=this.props.treeToo.nodes[i];
+          if (n.children){
+            n.children.reverse();
+            calculateNodeRank(this.props.treeToo.nodes);
+            new_corr = tangle_score(this.props.tree.nodes, this.props.treeToo.nodes, nameToNode)
+            if (corr>new_corr){
+              n.children.reverse();
+              calculateNodeRank(this.props.treeToo.nodes);
+            }else{
+              corr = new_corr;
+            }
+
+          }
+        }
+        calculateNodeRank(this.props.treeToo.nodes);
+        tangle_score(this.props.tree.nodes, this.props.treeToo.nodes, nameToNode);
         const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
         renderTree(this, false, treeToo, this.props);
         this.ViewerToo.fitToViewer();
         newState.treeToo = treeToo;
+        console.log("Optimized tangle rank correlation:",corr);
       }
       this.setState(newState);
     }
