@@ -87,20 +87,30 @@ export const getAcknowledgments = (dispatch, styles) => {
   if (window.location.pathname.includes("WNV/NA")) {
     return (
       <div style={styles.acknowledgments}>
-        {`This work is possible due to the goups who have made their data openly available for analysis -
-          with a special thanks to Nathan Grubaugh and his lab.
-          The Grubaugh Lab's goal is to promote sequencing and sharing of West Nile virus genomes to improve our understanding of virus spread and evolution.
+        {`This work is possible due to the groups who have made their data openly available for analysis -
+          with a special thanks to Nikos Gurfield, Saran Grewal, Chris Barker, and the Andersen Lab for making `}
+        <a href="https://andersen-lab.com/secrets/data/west-nile-genomics/">{"their data"}</a>
+        {` available ahead of publication. `}
+        {`We also thank Simon Dellicour, Sebastian Lequime, Philippe Lemey, Karthik Gangavarapu, Nate Matteson, Sharada Saraf,
+          Kristian Andersen, and Nathan Grubaugh for curating the original dataset.
+          The data is being maintained by Nathan Grubaugh and his lab.
+          Our goal is to promote sequencing and sharing of West Nile virus genomes to improve our understanding of virus spread and evolution.
           To aid in this effort, they have adapted their highly multiplexed PCR approach for `}
         <a target="_blank" rel="noreferrer noopener" href="https://www.nature.com/articles/nprot.2017.066">{"Zika virus sequencing"}</a>
         {` on the Illumina and Minion platforms for West Nile Virus circulating in North America. Their `}
         <a target="_blank" rel="noreferrer noopener" href="http://grubaughlab.com/open-science/">{"sequencing protocol and primers"}</a>
-        {` are free to use. If you have any questions about West Nile virus sequencing, or if you have unpublished data that you would like to share, please email `}
+        {` are free to use.
+          If you have any questions about West Nile virus sequencing, or if you have unpublished data that you would like to share, please email `}
         <a href="emailto:grubaughlab@gmail.com">{"grubaughlab@gmail.com"}</a>
-        {`. All data shown here are coding-complete genomes.`}
+        {"."}
+
         <p/>
-        {"WNV is split into three lineages - NY99, WN02 and SW03 ("}
+        {`All data shown here are coding-complete genomes.`}
+
+        <p/>
+        {"WNV is split into three phenotypically relevant strains - NY99, WN02 and SW03 ("}
         <span className={"link"} onClick={() => dispatch(changeColorBy("lineage"))}>{"click here"}</span>
-        {" to colour the tree by this). These lineages are defined by these mutations (click to change the colouring of the tree):"}
+        {" to colour the tree by this). These strains are defined by these mutations (click to change the colouring of the tree):"}
         <ul>
           <li>
             <span className={"link"} onClick={() => dispatch(changeColorBy("gt-env_159"))}>{"env-V159A"}</span>
