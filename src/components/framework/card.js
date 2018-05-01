@@ -26,7 +26,8 @@ class Card extends React.Component {
         marginBottom: 5,
         fontWeight: 500,
         backgroundColor: "#FFFFFF",
-        borderTop: "thin solid #AAA"
+        borderTop: "thin solid #AAA",
+        minHeight: "15px"
       }
     };
   }
@@ -52,8 +53,8 @@ class Card extends React.Component {
         color: "#fff",
         fontSize: 16,
         marginLeft: 2,
-        marginTop: 2,
-        marginBottom: 5,
+        marginTop: 0,
+        marginBottom: 0,
         fontWeight: 500,
         backgroundColor: "#FFFFFF"
       }
@@ -63,7 +64,7 @@ class Card extends React.Component {
     const styles = this.props.infocard ? this.getStylesInfoCard() : this.getStyles();
     return (
       <div style={{ ...styles.base, ...this.props.style }}>
-        <div style={{ ...styles.title, ...this.props.titleStyles, minHeight: "15px" }}>
+        <div style={{ ...styles.title, ...this.props.titleStyles }}>
           {this.props.title}
         </div>
         <div style={{
