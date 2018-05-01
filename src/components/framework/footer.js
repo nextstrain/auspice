@@ -149,7 +149,6 @@ export const getAcknowledgments = (dispatch, styles) => {
 
 const dispatchFilter = (dispatch, activeFilters, key, value) => {
   const mode = activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
-  console.log(key, value)
   dispatch(applyFilter(key, [value], mode));
 };
 
@@ -204,7 +203,7 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
       className={`${outerClassName} boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => {
-        filterNames.forEach((n) => dispatch(applyFilter(n, [], 'set')))
+        filterNames.forEach((n) => dispatch(applyFilter(n, [], 'set')));
       }}
     >
       {label}
