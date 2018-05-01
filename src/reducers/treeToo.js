@@ -1,6 +1,5 @@
-import { getValuesAndCountsOfVisibleTraitsFromTree } from "../util/treeCountingHelpers";
 import * as types from "../actions/types";
-import {getDefaultTreeState, getAttrsOnTerminalNodes} from "./tree";
+import { getDefaultTreeState } from "./tree";
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
 that the tree is loaded as they are set on the same action */
 

@@ -204,7 +204,7 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
       className={`${outerClassName} boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => {
-        filterNames.forEach((n) => dispatch(applyFilter(n, [], 'set')))
+        filterNames.forEach((n) => dispatch(applyFilter(n, [], 'set')));
       }}
     >
       {label}

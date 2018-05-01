@@ -11,13 +11,13 @@ import { SelectLabel } from "../framework/select-label";
 /*
  * implements a pair of buttons the toggle between timetree and divergence tree
  */
- @connect((state) => {
-   return {
-     distanceMeasure: state.controls.distanceMeasure,
-     showTreeToo: state.controls.showTreeToo,
-     temporalConfidence: state.controls.temporalConfidence
-   };
- })
+@connect((state) => {
+  return {
+    distanceMeasure: state.controls.distanceMeasure,
+    showTreeToo: state.controls.showTreeToo,
+    temporalConfidence: state.controls.temporalConfidence
+  };
+})
 class ChooseMetric extends React.Component {
   static propTypes = {
     // analysisSlider: PropTypes.any,

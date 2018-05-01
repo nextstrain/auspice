@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 
-/**
+/*
 
   flex-direction: row | row-reverse | column | column-reverse;
   flex-wrap: nowrap | wrap | wrap-reverse;
@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
   align-content: flex-start | flex-end | center | space-between | space-around | stretch;
   flex is growShrinkBasis
 
-**/
+*/
 
 class Flex extends React.Component {
   static propTypes = {
@@ -66,10 +66,10 @@ class Flex extends React.Component {
         flexGrow: this.props.grow,
         flexShrink: this.props.shrink,
         flexBasis: this.props.basis,
-        alignSelf: this.props.alignSelf,
+        alignSelf: this.props.alignSelf
       },
       style: this.props.style
-    }
+    };
   }
 
   render() {
@@ -78,7 +78,8 @@ class Flex extends React.Component {
     return (
       <div
         onClick={this.props.clickHandler}
-        style={{ ...styles.base, ...styles.style }}>
+        style={{ ...styles.base, ...styles.style }}
+      >
         {this.props.children}
       </div>
     );
