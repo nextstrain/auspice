@@ -50,9 +50,9 @@ const getOrderedCategories = (matrixCategories, colorScale) => {
   return orderedCategories;
 };
 
-export const calcXScale = (chartGeom, ticks) => {
+export const calcXScale = (chartGeom, pivots, ticks) => {
   const x = scaleLinear()
-    .domain([ticks[0], ticks[ticks.length - 1]])
+    .domain([pivots[0], pivots[pivots.length - 1]])
     .range([chartGeom.spaceLeft, chartGeom.width - chartGeom.spaceRight]);
   return {x, numTicksX: ticks.length};
 };

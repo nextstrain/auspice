@@ -33,8 +33,8 @@ export class Frequencies extends React.Component {
     const data = processMatrix({...props});
     newState.maxY = data.maxY;
     newState.categories = data.categories;
+    const scalesX = calcXScale(chartGeom, props.pivots, props.ticks);
     const scalesY = calcYScale(chartGeom, data.maxY);
-    const scalesX = calcXScale(chartGeom, props.ticks);
     newState.scales = {...scalesX, ...scalesY};
     drawXAxis(newState.svg, chartGeom, scalesX);
     drawYAxis(newState.svg, chartGeom, scalesY);
