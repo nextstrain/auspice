@@ -179,7 +179,7 @@ class App extends React.Component {
         <ToggleSidebarTab
           open={this.state.showSidebar}
           handler={() => {this.setState({showSidebar: !this.state.showSidebar});}}
-          widthWhenOpen={sidebarWidth - 15}
+          widthWhenOpen={sidebarWidth - 40}
           widthWhenShut={0}
           dontDisplay={this.props.displayNarrative}
         />
