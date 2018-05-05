@@ -108,18 +108,18 @@ class Info extends React.Component {
       title: {
         fontFamily: titleFont,
         fontSize: fontSize,
-        marginLeft: 5,
+        marginLeft: 0,
         marginTop: 0,
         marginBottom: 5,
-        fontWeight: 600,
+        fontWeight: 500,
         color: darkGrey,
-        letterSpacing: "-1px",
+        letterSpacing: "-0.5px",
         maxWidth: width
       },
       n: {
         fontFamily: headerFont,
         fontSize: 14,
-        marginLeft: 10,
+        marginLeft: 2,
         marginTop: 5,
         marginBottom: 5,
         fontWeight: 500,

@@ -11,9 +11,9 @@ class Card extends React.Component {
         marginRight: 0,
         marginTop: 0,
         marginBottom: 10,
-        // boxShadow: "0px 0px 4px 2px rgba(215,215,215,0.55)",
-        borderRadius: 2,
-        padding: 5,
+        paddingLeft: 6,
+        paddingRight: 6,
+        paddingBottom: 6,
         overflow: "hidden",
         position: "relative"
       },
@@ -21,12 +21,12 @@ class Card extends React.Component {
         fontFamily: headerFont,
         color: darkGrey,
         fontSize: 16,
-        marginLeft: 2,
-        marginTop: 2,
-        marginBottom: 5,
+        marginLeft: 0,
+        marginTop: 0,
+        marginBottom: 8,
         fontWeight: 500,
         backgroundColor: "#FFFFFF",
-        borderTop: "thin solid #AAA",
+        borderTop: "thin solid #BBB",
         minHeight: "15px"
       }
     };
@@ -36,15 +36,13 @@ class Card extends React.Component {
       base: {
         backgroundColor: "#FFFFFF",
         display: "inline-block",
-        marginLeft: 0,
+        marginLeft: 12,
         marginRight: 0,
         marginTop: 0,
         marginBottom: 10,
-        borderRadius: 2,
-        paddingLeft: 17,
-        paddingRight: 5,
-        paddingTop: 5,
-        paddingBottom: 5,
+        paddingLeft: 6,
+        paddingRight: 6,
+        paddingBottom: 6,
         overflow: "hidden",
         position: "relative"
       },
@@ -52,9 +50,9 @@ class Card extends React.Component {
         fontFamily: headerFont,
         color: "#fff",
         fontSize: 16,
-        marginLeft: 2,
+        marginLeft: 0,
         marginTop: 0,
-        marginBottom: 0,
+        marginBottom: 8,
         fontWeight: 500,
         backgroundColor: "#FFFFFF"
       }

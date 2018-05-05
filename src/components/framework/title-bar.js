@@ -55,7 +55,8 @@ class TitleBar extends React.Component {
         color: "#000",
         textDecoration: "none",
         fontSize: 20,
-        fontWeight: 400
+        fontWeight: 400,
+        cursor: "pointer"
       },
       link: {
         paddingLeft: this.props.minified ? "6px" : "12px",
@@ -65,9 +66,7 @@ class TitleBar extends React.Component {
         textDecoration: "none",
         cursor: "pointer",
         fontSize: this.props.minified ? 12 : 16,
-        ':hover': {
-          color: "#5097BA"
-        }
+        textTransform: "uppercase"
       },
       inactive: {
         paddingLeft: "8px",
@@ -76,7 +75,8 @@ class TitleBar extends React.Component {
         paddingBottom: "20px",
         color: "#5097BA",
         textDecoration: "none",
-        fontSize: this.props.minified ? 12 : 16
+        fontSize: this.props.minified ? 12 : 16,
+        textTransform: "uppercase"
       },
       alerts: {
         textAlign: "center",

@@ -8,9 +8,20 @@ import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface/change";
 import * as callbacks from "./reactD3Interface/callbacks";
-import { resetTreeButtonStyle } from "../../globalStyles";
+import { tabSingle } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
+
+const getStyles = () => {
+  return {
+    resetTreeButton: {
+      zIndex: 100,
+      position: "absolute",
+      right: 5,
+      top: 0
+    }
+  };
+};
 
 class Tree extends React.Component {
   constructor(props) {
@@ -133,6 +144,7 @@ class Tree extends React.Component {
   }
 
   render() {
+    const styles = getStyles();
     const spaceBetweenTrees = 100;
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
@@ -176,7 +188,7 @@ class Tree extends React.Component {
           null
         }
         <button
-          style={resetTreeButtonStyle}
+          style={{...tabSingle, ...styles.resetTreeButton}}
           onClick={this.redrawTree}
         >
           reset layout

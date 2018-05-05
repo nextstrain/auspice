@@ -70,7 +70,7 @@ export const materialButtonSelected = {
 export const materialButtonOutline = {
   border: "1px solid #CCC",
   backgroundColor: "inherit",
-  borderRadius: 2,
+  borderRadius: 3,
   cursor: "pointer",
   paddingTop: 5,
   paddingBottom: 5,
@@ -83,6 +83,64 @@ export const materialButtonOutline = {
   fontSize: 14,
   verticalAlign: "top"
 };
+
+export const tabSingle = {
+  borderTop: "1px solid #BBB",
+  borderLeft: "1px solid #CCC",
+  borderRight: "1px solid #CCC",
+  borderBottom: "1px solid #CCC",
+  borderRadius: "0px 0px 3px 3px",
+  paddingTop: 3,
+  paddingBottom: 3,
+  paddingLeft: 6,
+  paddingRight: 6,
+  backgroundColor: "#fff",
+  fontWeight: 400,
+  color: darkGrey,
+  fontFamily: dataFont,
+  fontSize: 12,
+  textTransform: "uppercase"
+};
+
+export const tabGroup = {
+  borderTop: "1px solid #BBB",
+  borderLeft: "1px solid #CCC",
+  borderRight: "1px solid #CCC",
+  borderBottom: "1px solid #CCC",
+  borderRadius: "0px 0px 3px 3px",
+  paddingTop: 3,
+  paddingBottom: 3,
+  paddingLeft: 6,
+  paddingRight: 6,
+  backgroundColor: "#fff"
+};
+
+export const tabGroupMember = {
+  border: "none",
+  backgroundColor: "inherit",
+  padding: 0,
+  margin: 0,
+  cursor: "pointer",
+  fontFamily: dataFont,
+  color: darkGrey,
+  fontWeight: 400,
+  textTransform: "uppercase",
+  fontSize: 12
+};
+
+export const tabGroupMemberSelected = {
+  border: "none",
+  backgroundColor: "inherit",
+  padding: 0,
+  margin: 0,
+  cursor: "pointer",
+  fontFamily: dataFont,
+  color: brandColor,
+  fontWeight: 400,
+  textTransform: "uppercase",
+  fontSize: 12
+};
+
 
 export const titleStyles = {
   big: {
@@ -174,22 +232,4 @@ export const infoPanelStyles = {
     paddingBottom: 4,
     minWidth: 120
   }
-};
-
-export const resetTreeButtonStyle = {
-  fontWeight: 700,
-  borderRadius: 4,
-  paddingTop: 2,
-  paddingBottom: 4,
-  paddingLeft: 10,
-  paddingRight: 10,
-  border: "none",
-  zIndex: 100,
-  position: "absolute",
-  right: 5,
-  top: 10,
-  backgroundColor: "rgb(230, 230, 230)",
-  color: darkGrey,
-  fontFamily: dataFont,
-  fontSize: 14
 };

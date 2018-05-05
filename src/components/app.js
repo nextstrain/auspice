@@ -160,7 +160,7 @@ class App extends React.Component {
       width: sidebarWidth,
       maxWidth: sidebarWidth,
       overflow: "hidden",
-      boxShadow: '-3px 0px 3px -3px rgba(0, 0, 0, 0.15) inset'
+      boxShadow: '-3px 0px 3px -3px rgba(0, 0, 0, 0.2) inset'
     };
     const contentStyles = {
       ...sharedStyles,

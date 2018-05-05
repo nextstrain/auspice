@@ -17,6 +17,7 @@ import { changeDateFilter } from "../../actions/tree";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
+import { lightGrey } from "../../globalStyles";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -403,23 +404,25 @@ class Map extends React.Component {
 
   animationButtons() {
     const buttonBaseStyle = {
-      color: "white",
-      fontWeight: 700,
-      borderRadius: 4,
-      padding: 15,
+      color: "#FFFFFF",
+      fontWeight: 400,
+      fontSize: 12,
+      borderRadius: 3,
+      padding: 12,
       border: "none",
       zIndex: 9999,
-      position: "absolute"
+      position: "absolute",
+      textTransform: "uppercase"
     };
     return (
       <div>
         <button
-          style={{...buttonBaseStyle, top: 25, left: 25, width: 56, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? "rgb(228, 153, 56)" : "rgb(124, 184, 121)"}}
+          style={{...buttonBaseStyle, top: 20, left: 20, width: 60, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? "#E39B39" : "#89B77F"}}
           onClick={this.playPauseButtonClicked}
         >
           {this.props.animationPlayPauseButton}
         </button>
-        <button style={{...buttonBaseStyle, top: 25, left: 90, backgroundColor: "rgb(230, 230, 230)"}} onClick={this.resetButtonClicked}>
+        <button style={{...buttonBaseStyle, top: 20, left: 88, width: 60, backgroundColor: lightGrey}} onClick={this.resetButtonClicked}>
           Reset
         </button>
       </div>
