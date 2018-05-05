@@ -86,18 +86,18 @@ class Info extends React.Component {
     super(props);
   }
   getStyles(width) {
-    let fontSize = 32;
+    let fontSize = 28;
     if (this.props.browserDimensions.width < 1000) {
-      fontSize = 30;
-    }
-    if (this.props.browserDimensions.width < 800) {
-      fontSize = 28;
-    }
-    if (this.props.browserDimensions.width < 600) {
       fontSize = 26;
     }
-    if (this.props.browserDimensions.width < 400) {
+    if (this.props.browserDimensions.width < 800) {
       fontSize = 24;
+    }
+    if (this.props.browserDimensions.width < 600) {
+      fontSize = 22;
+    }
+    if (this.props.browserDimensions.width < 400) {
+      fontSize = 20;
     }
     return {
       base: {
@@ -111,7 +111,7 @@ class Info extends React.Component {
         marginLeft: 5,
         marginTop: 0,
         marginBottom: 5,
-        fontWeight: 300,
+        fontWeight: 600,
         color: darkGrey,
         letterSpacing: "-1px",
         maxWidth: width

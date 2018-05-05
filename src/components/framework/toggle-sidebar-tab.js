@@ -7,20 +7,21 @@ const ToggleSidebarTab = ({open, handler, widthWhenOpen, widthWhenShut, dontDisp
   if (dontDisplay) return null;
 
   const style = {
-    width: 13,
+    width: 20,
     height: 34,
     position: "fixed",
     top: 0,
     zIndex: 1001,
     color: darkGrey,
     backgroundColor: open ? "inherit" : sidebarColor,
-    boxShadow: open ? "none" : "-2px -2px 4px -2px rgba(0, 0, 0, 0.15) inset", // from react-sidebar
+    boxShadow: open ? "none" : "0px 0px 6px 2px rgba(0, 0, 0, 0.15)",
     cursor: "pointer",
     paddingTop: 17,
     fontSize: 14,
-    paddingLeft: open ? 1 : 4,
+    paddingLeft: open ? 1 : 13,
     transition: "left .3s ease-out",
-    left: open ? widthWhenOpen + controlsPadding - 19 : widthWhenShut
+    left: open ? widthWhenOpen + controlsPadding - 19 : widthWhenShut,
+    borderRadius: "0px 12px 12px 0px"
   };
 
 
