@@ -410,7 +410,7 @@ class Map extends React.Component {
       borderRadius: 3,
       padding: 12,
       border: "none",
-      zIndex: 9999,
+      zIndex: 100,
       position: "absolute",
       textTransform: "uppercase"
     };

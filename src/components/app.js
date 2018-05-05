@@ -25,7 +25,7 @@ const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 /* <Contents> contains the header, tree, map, footer components etc.
  * here is where the panel sizes are decided, as well as which components are displayed.
  */
-const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels, grid, narrative, frequenciesLoaded}) => {
+const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHeight, panels, grid, narrative, frequenciesLoaded}) => {
   if (showSpinner) {
     return (<img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${availableHeight / 2 - 100}px`}}/>);
   }
@@ -64,7 +64,7 @@ const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels,
   /* TODO */
   return (
     <div style={styles}>
-      {narrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
+      {narrative ? null : <Info sidebarOpen={sidebarOpen} width={calcUsableWidth(availableWidth, 1)} />}
       {show("tree") ? <Tree width={big.width} height={big.height} /> : null}
       {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
       {show("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
@@ -74,8 +74,7 @@ const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels,
   );
 };
 
-const Sidebar = ({show, narrative, styles, mapOn}) => {
-  if (!show) return null;
+const Sidebar = ({narrative, styles, mapOn}) => {
   return (
     <div style={styles}>
       <TitleBar minified/>
@@ -104,9 +103,9 @@ class App extends React.Component {
     /* window listener to see when width changes cross thrhershold to toggle sidebar */
     const mql = window.matchMedia(`(min-width: ${controlsHiddenWidth}px)`);
     mql.addListener(() => this.setState({
-      showSidebar: this.state.mql.matches
+      sidebarOpen: this.state.mql.matches
     }));
-    this.state = {mql, showSidebar: mql.matches};
+    this.state = {mql, sidebarOpen: mql.matches};
     analyticsNewPage();
   }
   static propTypes = {
@@ -133,16 +132,18 @@ class App extends React.Component {
     /* D I M E N S I O N S */
     let availableWidth = this.props.browserDimensions.width;
     const availableHeight = this.props.browserDimensions.height;
-    let sidebarWidth = 0;
-    if (this.state.showSidebar) {
-      if (this.props.displayNarrative) {
-        sidebarWidth = parseInt(0.27 * availableWidth, 10);
-      } else {
-        sidebarWidth = controlsWidth;
-      }
-      sidebarWidth += controlsPadding;
-      availableWidth -= sidebarWidth;
+
+    let actualSidebarWidth = 0;
+    if (this.props.displayNarrative) {
+      actualSidebarWidth = parseInt(0.27 * availableWidth, 10);
+    } else {
+      actualSidebarWidth = controlsWidth;
     }
+    actualSidebarWidth += controlsPadding;
+
+    const visibleSidebarWidth = this.state.sidebarOpen ? actualSidebarWidth : 0;
+    availableWidth -= visibleSidebarWidth;
+
     const mapOn = this.props.panelsToDisplay.indexOf("map") !== -1;
     /* S T Y L E S */
     const sharedStyles = {
@@ -150,15 +151,15 @@ class App extends React.Component {
       top: 0,
       bottom: 0,
       right: 0,
-      transition: 'left .5s ease-out, right .5s ease-out'
+      transition: 'left 0.4s ease-out'
     };
     const sidebarStyles = {
       ...sharedStyles,
-      left: 0,
+      left: this.state.sidebarOpen ? 0 : -1 * actualSidebarWidth,
       backgroundColor: sidebarColor,
       height: availableHeight,
-      width: sidebarWidth,
-      maxWidth: sidebarWidth,
+      width: actualSidebarWidth,
+      maxWidth: actualSidebarWidth,
       overflow: "hidden",
       boxShadow: '-3px 0px 3px -3px rgba(0, 0, 0, 0.2) inset'
     };
@@ -169,7 +170,7 @@ class App extends React.Component {
       width: availableWidth,
       overflowX: "hidden",
       overflowY: "scroll",
-      left: sidebarWidth
+      left: this.state.sidebarOpen ? actualSidebarWidth : 0
     };
 
     return (
@@ -177,19 +178,19 @@ class App extends React.Component {
         <AnimationController/>
         <DownloadModal/>
         <ToggleSidebarTab
-          open={this.state.showSidebar}
-          handler={() => {this.setState({showSidebar: !this.state.showSidebar});}}
-          widthWhenOpen={sidebarWidth - 40}
+          sidebarOpen={this.state.sidebarOpen}
+          handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
+          widthWhenOpen={actualSidebarWidth - 40}
           widthWhenShut={0}
           dontDisplay={this.props.displayNarrative}
         />
         <Sidebar
-          show={this.state.showSidebar}
           narrative={this.props.displayNarrative}
           styles={sidebarStyles}
           mapOn={mapOn}
         />
         <Contents
+          sidebarOpen={this.state.sidebarOpen}
           styles={contentStyles}
           showSpinner={!this.props.treeLoaded || !this.props.metadataLoaded}
           availableWidth={availableWidth}

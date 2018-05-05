@@ -88,22 +88,23 @@ class Info extends React.Component {
   getStyles(width) {
     let fontSize = 28;
     if (this.props.browserDimensions.width < 1000) {
-      fontSize = 26;
+      fontSize = 27;
     }
     if (this.props.browserDimensions.width < 800) {
-      fontSize = 24;
+      fontSize = 26;
     }
     if (this.props.browserDimensions.width < 600) {
-      fontSize = 22;
+      fontSize = 25;
     }
     if (this.props.browserDimensions.width < 400) {
-      fontSize = 20;
+      fontSize = 24;
     }
     return {
       base: {
         width: width + 34,
         display: "inline-block",
-        lineHeight: 1.4
+        maxWidth: this.props.sidebarOpen ? width : width - 20,
+        marginTop: this.props.sidebarOpen ? 0 : 45
       },
       title: {
         fontFamily: titleFont,
@@ -114,7 +115,7 @@ class Info extends React.Component {
         fontWeight: 500,
         color: darkGrey,
         letterSpacing: "-0.5px",
-        maxWidth: width
+        lineHeight: 1.2
       },
       n: {
         fontFamily: headerFont,
@@ -123,7 +124,8 @@ class Info extends React.Component {
         marginTop: 5,
         marginBottom: 5,
         fontWeight: 500,
-        color: medGrey
+        color: medGrey,
+        lineHeight: 1.4
       }
     };
   }
