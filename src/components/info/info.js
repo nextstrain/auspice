@@ -7,18 +7,6 @@ import { prettyString } from "../../util/stringHelpers";
 import { months } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
 
-const resetTreeButton = (dispatch) => {
-  return (
-    <div
-      className={`boxed-item active-clickable`}
-      style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
-      onClick={() => dispatch(updateVisibleTipsAndBranchThicknesses({root: [0, 0]}))}
-    >
-      {"View entire tree."}
-    </div>
-  );
-};
-
 const plurals = {
   country: "countries",
   authors: "authors"
@@ -48,11 +36,7 @@ const getNumSelectedTips = (nodes, visibility) => {
 export const createSummary = (virus_count, nodes, filters, visibility, visibleStateCounts, idxOfInViewRootNode, dateMin, dateMax) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
   const summary = [];
-  if (idxOfInViewRootNode === 0) {
-    summary.push(`Showing ${nSelectedSamples} of ${virus_count} genomes`);
-  } else {
-    summary.push(`Showing ${nSelectedSamples} of ${nodes[idxOfInViewRootNode].fullTipCount} genomes in the selected clade`);
-  }
+  summary.push(`Showing ${nSelectedSamples} of ${virus_count} genomes`);
   Object.keys(filters).forEach((filterName) => {
     const n = Object.keys(visibleStateCounts[filterName]).length;
     summary.push((`from ${n} ${pluralise(filterName, n)}`));
@@ -300,9 +284,6 @@ class Info extends React.Component {
                 {". "}
               </span>
             ) : null}
-            {/* finally - is a branch selected? */}
-            {this.props.idxOfInViewRootNode === 0 && this.props.idxOfInViewRootNodeToo === 0 ? null :
-              resetTreeButton(this.props.dispatch)}
           </div>
         </div>
       </Card>
