@@ -160,7 +160,7 @@ export const titleStyles = {
     fontSize: 16,
     lineHeight: "28px",
     marginTop: 15,
-    marginBottom: 10,
+    marginBottom: 5,
     fontWeight: 500,
     color: "#000"
   }

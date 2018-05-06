@@ -38,7 +38,7 @@ class DateRangeInputs extends React.Component {
     return {
       base: {
         fontFamily: headerFont,
-        margin: "0px 0px 5px 0px",
+        marginBottom: "5px",
         fontSize: 12,
         fontWeight: 400,
         color: darkGrey
@@ -141,6 +141,7 @@ class DateRangeInputs extends React.Component {
 
     return (
       <div>
+        <div style={{height: 5}}/>
         <div style={{width: controlsWidth}}>
           <Slider // numDates are handed to Slider
             min={absoluteMinNumDate}

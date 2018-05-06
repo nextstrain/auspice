@@ -53,9 +53,9 @@ const Controls = ({mapOn}) => (
     <ToggleTangle/>
 
     { mapOn ? (
-      <span>
+      <span style={{marginTop: "15px"}}>
         <Header text="Map Options"/>
-        <SelectLabel text="Geographic resolution" extraStyles={{marginTop: "0px"}}/>
+        <SelectLabel text="Geographic resolution" extraStyles={{marginTop: "5px"}}/>
         <GeoResolution/>
         <MapAnimationControls/>
       </span>
@@ -64,7 +64,6 @@ const Controls = ({mapOn}) => (
     <Header text="Panel Options" extraStyles={{paddingTop: "10px"}}/>
     <PanelLayout/>
     <PanelToggles/>
-
 
     <Header text="Data Source" extraStyles={{paddingTop: "10px"}}/>
     <DataSource/>
