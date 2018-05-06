@@ -280,6 +280,10 @@ export const mapToScreen = function mapToScreen() {
     if (d.y < minY) minY = d.y;
   });
 
+  /* slightly pad min and max y to account for small clades */
+  minY -= 0.2;
+  maxY += 0.2;
+
   /* set the domain of the x & y scales */
   if (this.layout === "radial" || this.layout === "unrooted") {
     // handle "radial and unrooted differently since they need to be square
