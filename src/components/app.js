@@ -211,6 +211,7 @@ class App extends React.Component {
         <DownloadModal/>
         <ToggleSidebarButton
           sidebarOpen={this.state.sidebarOpen}
+          mobileDisplay={this.state.mobileDisplay}
           handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
         />
         <Sidebar

@@ -1,11 +1,11 @@
 import React from "react";
 import { goColor } from "../../globalStyles";
 
-const ToggleSidebarButton = ({sidebarOpen, handler}) => {
+const ToggleSidebarButton = ({sidebarOpen, mobileDisplay, handler}) => {
 
   const containerStyle = {
-    width: 60,
-    height: 60,
+    width: mobileDisplay ? 60 : 0,
+    height: mobileDisplay ? 60 : 0,
     position: "absolute",
     right: 20,
     top: 15,
