@@ -182,15 +182,14 @@ const drawLabelsOverStream = (svgStreamGroup, series, pivots, labels, scales) =>
     .text((d, i) => xyPos[i][0] ? prettyString(d) : "");
 };
 
-const calcNiceMaxYValue = (series) => {
-  const max = series[series.length - 1].reduce((curMax, el) => Math.max(curMax, el[1]), 0);
-  return Math.ceil(max * 20) / 20;
+const calcMaxYValue = (series) => {
+  return series[series.length - 1].reduce((curMax, el) => Math.max(curMax, el[1]), 0);
 };
 
 export const processMatrix = ({matrix, pivots, colorScale}) => {
   const categories = getOrderedCategories(Object.keys(matrix), colorScale);
   const series = turnMatrixIntoSeries(categories, pivots.length, matrix);
-  const maxY = calcNiceMaxYValue(series);
+  const maxY = calcMaxYValue(series);
   return {categories, series, maxY};
 };
 
