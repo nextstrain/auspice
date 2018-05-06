@@ -288,6 +288,14 @@ export const change = function change({
     elemsToUpdate.add(".tip");
     svgPropsToUpdate.add("visibility");
     nodePropsToModify.visibility = visibility;
+    this.nodes.forEach((d, index) => {
+      d.inView = visibility[index] === "visible";
+    });
+    elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T");
+    elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
+    elemsToUpdate.add('.branchLabel').add('.tipLabel');
+    elemsToUpdate.add(".grid").add(".regression");
+    svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity");
   }
   if (changeTipRadii) {
     elemsToUpdate.add(".tip");
@@ -306,7 +314,7 @@ export const change = function change({
     elemsToUpdate.add(".grid").add(".regression");
     svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity");
   }
-  if (newLayout) {
+  if (newLayout || changeVisibility) {
     useModifySVGInStages = true;
   }
 
@@ -341,7 +349,8 @@ export const change = function change({
     newDistance ||
     newLayout ||
     zoomIntoClade ||
-    svgHasChangedDimensions
+    svgHasChangedDimensions ||
+    changeVisibility
   ) {
     this.mapToScreen();
   }

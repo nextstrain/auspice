@@ -100,14 +100,14 @@ const calcVisibility = (tree, controls, dates) => {
     /* edge case: this fn may be called before the shell structure of the nodes
     has been created (i.e. phyloTree's not run yet). In this case, it's
     safe to assume that everything's in view */
-    let inView;
-    try {
-      inView = tree.nodes.map((d) => d.shell.inView);
-    } catch (e) {
-      inView = tree.nodes.map(() => true);
-    }
-    /* intersect visibility and inView */
-    visibility = visibility.map((cv, idx) => (cv && inView[idx]));
+    // let inView;
+    // try {
+    //   inView = tree.nodes.map((d) => d.shell.inView);
+    // } catch (e) {
+    //   inView = tree.nodes.map(() => true);
+    // }
+    // /* intersect visibility and inView */
+    // visibility = visibility.map((cv, idx) => (cv && inView[idx]));
 
     // FILTERS
     const filterPairs = [];
@@ -154,7 +154,7 @@ export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idx
   return {
     visibility: visibility,
     visibilityVersion: tree.visibilityVersion + 1,
-    branchThickness: calcBranchThickness(tree.nodes, visibility, idxOfInViewRootNode),
+    branchThickness: calcBranchThickness(tree.nodes, visibility, 0),
     branchThicknessVersion: tree.branchThicknessVersion + 1
   };
 };
