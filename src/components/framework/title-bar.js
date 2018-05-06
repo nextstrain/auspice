@@ -134,7 +134,7 @@ class TitleBar extends React.Component {
           <button style={materialButton} onClick={onClick}>
             {text}
           </button>
-          <div style={{width: this.props.minified ? 20 : 0 }}/>
+          <div style={{width: this.props.minified ? 8 : 0 }}/>
         </Flex>
       );
     }
@@ -145,7 +145,7 @@ class TitleBar extends React.Component {
         <div style={{flex: 5}}/>
         {this.getLink("About", "/about", this.props.aboutSelected, styles)}
         {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
-        <div style={{width: this.props.minified ? 22 : 0 }}/>
+        <div style={{width: this.props.minified ? 8 : 0 }}/>
       </Flex>
     );
   }

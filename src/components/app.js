@@ -192,7 +192,7 @@ class App extends React.Component {
       height: availableHeight,
       width: sidebarWidth,
       maxWidth: sidebarWidth,
-      overflow: "hidden",
+      overflowY: "scroll",
       boxShadow: '-3px 0px 3px -3px rgba(0, 0, 0, 0.2) inset'
     };
     const contentStyles = {

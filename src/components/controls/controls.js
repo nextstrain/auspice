@@ -28,7 +28,6 @@ const Controls = ({mapOn}) => (
       flexGrow: 0,
       flexShrink: 1,
       flexBasis: "auto",
-      overflowY: "scroll",
       alignSelf: "auto",
       padding: "0px 20px 20px 20px"
     }}
