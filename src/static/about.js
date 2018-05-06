@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import Flex from "../components/framework/flex";
-import TitleBar from "../components/framework/title-bar";
+import NavBar from "../components/framework/nav-bar";
 // import { analyticsNewPage, triggerOutboundEvent } from "../util/googleAnalytics";
 import { version } from "../version";
 import {generateLogos} from "./helpers/logos";
@@ -20,7 +20,7 @@ class About extends React.Component {
   render() {
     return (
       <g>
-        <TitleBar dataNameHidden aboutSelected/>
+        <NavBar aboutSelected/>
 
         <div className="static container">
 

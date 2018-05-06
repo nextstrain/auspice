@@ -2,14 +2,14 @@
 /*eslint max-len: 0*/
 import React from "react";
 // import Flex from "./framework/flex";
-import TitleBar from "../components/framework/title-bar";
+import NavBar from "../components/framework/nav-bar";
 import { analyticsNewPage } from "../util/googleAnalytics";
 
 const Methods = () => {
   analyticsNewPage();
   return (
 		<g>
-			<TitleBar dataNameHidden={true} methodsSelected={true}/>
+			<NavBar methodsSelected={true}/>
 
 			<div className="static container">
 

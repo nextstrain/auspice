@@ -20,7 +20,7 @@ const InternalLink = (props) => (
     browserDimensions: state.browserDimensions.browserDimensions
   };
 })
-class TitleBar extends React.Component {
+class NavBar extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -151,4 +151,4 @@ class TitleBar extends React.Component {
   }
 }
 
-export default TitleBar;
+export default NavBar;

@@ -11,7 +11,7 @@ import Tree from "./tree";
 import Map from "./map/map";
 import { controlsHiddenWidth, controlsWidth, controlsPadding } from "../util/globals";
 import { sidebarColor } from "../globalStyles";
-import TitleBar from "./framework/title-bar";
+import NavBar from "./framework/nav-bar";
 import Footer from "./framework/footer";
 import DownloadModal from "./download/downloadModal";
 import { analyticsNewPage } from "../util/googleAnalytics";
@@ -77,7 +77,7 @@ const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHe
 const Sidebar = ({narrative, styles, mapOn}) => {
   return (
     <div style={styles}>
-      <TitleBar minified/>
+      <NavBar minified/>
       {narrative ?
         <Narrative height={styles.height}/> :
         <Controls mapOn={mapOn}/>

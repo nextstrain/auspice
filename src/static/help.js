@@ -1,7 +1,7 @@
 /*eslint-env browser*/
 /*eslint max-len: 0*/
 import React from "react";
-import TitleBar from "../components/framework/title-bar";
+import NavBar from "../components/framework/nav-bar";
 import { analyticsNewPage } from "../util/googleAnalytics";
 
 
@@ -9,7 +9,7 @@ const Help = () => {
   analyticsNewPage();
   return (
 		<g>
-			<TitleBar dataNameHidden={true} helpSelected={true}/>
+			<NavBar helpSelected={true}/>
 
 			<div className="static container">
 
