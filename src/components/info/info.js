@@ -103,8 +103,8 @@ class Info extends React.Component {
       base: {
         width: width + 34,
         display: "inline-block",
-        maxWidth: this.props.sidebarOpen ? width : width - 20,
-        marginTop: this.props.sidebarOpen ? 0 : 45
+        maxWidth: width,
+        marginTop: 0
       },
       title: {
         fontFamily: titleFont,

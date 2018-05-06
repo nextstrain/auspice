@@ -64,7 +64,7 @@ const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHe
   /* TODO */
   return (
     <div style={styles}>
-      {narrative ? null : <Info sidebarOpen={sidebarOpen} width={calcUsableWidth(availableWidth, 1)} />}
+      {narrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
       {show("tree") ? <Tree width={big.width} height={big.height} /> : null}
       {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
       {show("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
@@ -86,6 +86,14 @@ const Sidebar = ({narrative, styles, mapOn}) => {
   );
 };
 
+const Overlay = ({styles, sidebarOpen, mobileDisplay, handler}) => {
+  return (
+    mobileDisplay ?
+      <div style={styles} onClick={handler}/> :
+      <div/>
+  );
+};
+
 @connect((state) => ({
   readyToLoad: state.datasets.ready,
   datapath: state.datasets.datapath,
@@ -100,12 +108,17 @@ const Sidebar = ({narrative, styles, mapOn}) => {
 class App extends React.Component {
   constructor(props) {
     super(props);
-    /* window listener to see when width changes cross thrhershold to toggle sidebar */
+    /* window listener to see when width changes cross threshold to toggle sidebar */
     const mql = window.matchMedia(`(min-width: ${controlsHiddenWidth}px)`);
     mql.addListener(() => this.setState({
-      sidebarOpen: this.state.mql.matches
+      sidebarOpen: this.state.mql.matches,
+      mobileDisplay: !this.state.mql.matches
     }));
-    this.state = {mql, sidebarOpen: mql.matches};
+    this.state = {
+      mql,
+      sidebarOpen: mql.matches,
+      mobileDisplay: !mql.matches
+    };
     analyticsNewPage();
   }
   static propTypes = {
@@ -133,33 +146,52 @@ class App extends React.Component {
     let availableWidth = this.props.browserDimensions.width;
     const availableHeight = this.props.browserDimensions.height;
 
-    let actualSidebarWidth = 0;
+    let sidebarWidth = 0;
     if (this.props.displayNarrative) {
-      actualSidebarWidth = parseInt(0.27 * availableWidth, 10);
+      sidebarWidth = parseInt(0.27 * availableWidth, 10);
     } else {
-      actualSidebarWidth = controlsWidth;
+      sidebarWidth = controlsWidth;
     }
-    actualSidebarWidth += controlsPadding;
+    sidebarWidth += controlsPadding;
 
-    const visibleSidebarWidth = this.state.sidebarOpen ? actualSidebarWidth : 0;
-    availableWidth -= visibleSidebarWidth;
+    const visibleSidebarWidth = this.state.sidebarOpen ? sidebarWidth : 0;
+    if (!this.state.mobileDisplay) {
+      availableWidth -= visibleSidebarWidth;
+    }
 
     const mapOn = this.props.panelsToDisplay.indexOf("map") !== -1;
+
     /* S T Y L E S */
     const sharedStyles = {
       position: "absolute",
       top: 0,
       bottom: 0,
       right: 0,
-      transition: 'left 0.4s ease-out'
+      transition: 'left 0.3s ease-out'
+    };
+    const overlayStyles = {
+      ...sharedStyles,
+      position: "absolute",
+      display: "block",
+      width: "100%",
+      height: "100%",
+      left: this.state.sidebarOpen ? visibleSidebarWidth : 0,
+      opacity: this.state.sidebarOpen ? 1 : 0,
+      visibility: this.state.sidebarOpen ? "visible" : "hidden",
+      zIndex: 9999,
+      backgroundColor: "rgba(0,0,0,0.5)",
+      cursor: "pointer",
+      transition: this.state.sidebarOpen ?
+        'visibility 0s ease-out, left 0.3s ease-out, opacity 0.3s ease-out' :
+        'left 0.3s ease-out, opacity 0.3s ease-out, visibility 0s ease-out 0.3s'
     };
     const sidebarStyles = {
       ...sharedStyles,
-      left: this.state.sidebarOpen ? 0 : -1 * actualSidebarWidth,
+      left: this.state.sidebarOpen ? 0 : -1 * sidebarWidth,
       backgroundColor: sidebarColor,
       height: availableHeight,
-      width: actualSidebarWidth,
-      maxWidth: actualSidebarWidth,
+      width: sidebarWidth,
+      maxWidth: sidebarWidth,
       overflow: "hidden",
       boxShadow: '-3px 0px 3px -3px rgba(0, 0, 0, 0.2) inset'
     };
@@ -170,7 +202,7 @@ class App extends React.Component {
       width: availableWidth,
       overflowX: "hidden",
       overflowY: "scroll",
-      left: this.state.sidebarOpen ? actualSidebarWidth : 0
+      left: this.state.sidebarOpen ? sidebarWidth : 0
     };
 
     return (
@@ -180,9 +212,8 @@ class App extends React.Component {
         <ToggleSidebarTab
           sidebarOpen={this.state.sidebarOpen}
           handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
-          widthWhenOpen={actualSidebarWidth - 40}
+          widthWhenOpen={sidebarWidth - 40}
           widthWhenShut={0}
-          dontDisplay={this.props.displayNarrative}
         />
         <Sidebar
           narrative={this.props.displayNarrative}
@@ -199,6 +230,12 @@ class App extends React.Component {
           grid={this.props.panelLayout === "grid"}
           narrative={this.props.displayNarrative}
           frequenciesLoaded={this.props.frequenciesLoaded}
+        />
+        <Overlay
+          styles={overlayStyles}
+          sidebarOpen={this.state.sidebarOpen}
+          mobileDisplay={this.state.mobileDisplay}
+          handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
         />
       </span>
     );
