@@ -1,7 +1,7 @@
 import React from "react";
 import { goColor } from "../../globalStyles";
 
-const ToggleSidebarButton = ({sidebarOpen, mobileDisplay, handler}) => {
+const SidebarToggle = ({sidebarOpen, mobileDisplay, handler}) => {
 
   const containerStyle = {
     width: mobileDisplay ? 60 : 0,
@@ -47,4 +47,4 @@ const ToggleSidebarButton = ({sidebarOpen, mobileDisplay, handler}) => {
   );
 };
 
-export default ToggleSidebarButton;
+export default SidebarToggle;

@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { loadJSONs } from "../actions/loadData";
-import ToggleSidebarButton from "./framework/toggle-sidebar-button";
+import SidebarToggle from "./framework/sidebar-toggle";
 import Controls from "./controls/controls";
 import { Frequencies } from "./frequencies";
 import { Entropy } from "./entropy";
@@ -209,7 +209,7 @@ class App extends React.Component {
       <span>
         <AnimationController/>
         <DownloadModal/>
-        <ToggleSidebarButton
+        <SidebarToggle
           sidebarOpen={this.state.sidebarOpen}
           mobileDisplay={this.state.mobileDisplay}
           handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
