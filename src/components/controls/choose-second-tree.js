@@ -56,6 +56,7 @@ class ChooseSecondTree extends React.Component {
               value={this.props.showTreeToo}
               options={treeToo.options.map((opt) => ({value: opt, label: opt}))}
               clearable={false}
+              searchable={false}
               multi={false}
               onChange={(opt) => {
                 if (opt.value === "REMOVE") {

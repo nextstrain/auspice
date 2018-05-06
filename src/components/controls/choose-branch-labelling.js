@@ -35,6 +35,7 @@ class ChooseBranchLabelling extends React.Component {
           value={this.props.selected}
           options={this.props.available.map((x) => ({value: x, label: x}))}
           clearable={false}
+          searchable={false}
           multi={false}
           onChange={(choice) => {this.change(choice);}}
         />
