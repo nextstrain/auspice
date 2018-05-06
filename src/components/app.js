@@ -2,7 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { loadJSONs } from "../actions/loadData";
-import ToggleSidebarTab from "./framework/toggle-sidebar-tab";
+import ToggleSidebarButton from "./framework/toggle-sidebar-button";
 import Controls from "./controls/controls";
 import { Frequencies } from "./frequencies";
 import { Entropy } from "./entropy";
@@ -178,7 +178,7 @@ class App extends React.Component {
       left: this.state.sidebarOpen ? visibleSidebarWidth : 0,
       opacity: this.state.sidebarOpen ? 1 : 0,
       visibility: this.state.sidebarOpen ? "visible" : "hidden",
-      zIndex: 9999,
+      zIndex: 8000,
       backgroundColor: "rgba(0,0,0,0.5)",
       cursor: "pointer",
       transition: this.state.sidebarOpen ?
@@ -209,11 +209,9 @@ class App extends React.Component {
       <span>
         <AnimationController/>
         <DownloadModal/>
-        <ToggleSidebarTab
+        <ToggleSidebarButton
           sidebarOpen={this.state.sidebarOpen}
           handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
-          widthWhenOpen={sidebarWidth - 40}
-          widthWhenShut={0}
         />
         <Sidebar
           narrative={this.props.displayNarrative}

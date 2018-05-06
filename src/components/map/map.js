@@ -17,7 +17,7 @@ import { changeDateFilter } from "../../actions/tree";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
-import { lightGrey } from "../../globalStyles";
+import { lightGrey, goColor, pauseColor } from "../../globalStyles";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -417,7 +417,7 @@ class Map extends React.Component {
     return (
       <div>
         <button
-          style={{...buttonBaseStyle, top: 20, left: 20, width: 60, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? "#E39B39" : "#89B77F"}}
+          style={{...buttonBaseStyle, top: 20, left: 20, width: 60, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? pauseColor : goColor}}
           onClick={this.playPauseButtonClicked}
         >
           {this.props.animationPlayPauseButton}
