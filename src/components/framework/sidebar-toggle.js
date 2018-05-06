@@ -35,10 +35,7 @@ const SidebarToggle = ({sidebarOpen, mobileDisplay, handler}) => {
   };
 
   return (
-    <div
-      onClick={handler}
-      style={containerStyle}
-    >
+    <div style={containerStyle} onClick={handler}>
       {sidebarOpen ?
         <div style={iconStyle}><i className={"fa fa-times"} aria-hidden="true"/></div> :
         <div style={iconStyle}><i className={"fa fa-sliders"} aria-hidden="true"/></div>
