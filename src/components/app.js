@@ -86,10 +86,10 @@ const Sidebar = ({narrative, styles, mapOn}) => {
   );
 };
 
-const Overlay = ({styles, sidebarOpen, mobileDisplay, handler}) => {
+const Overlay = ({styles, mobileDisplay, handler}) => {
   return (
     mobileDisplay ?
-      <div style={styles} onClick={handler}/> :
+      <div style={styles} onClick={handler} onTouchStart={handler}/> :
       <div/>
   );
 };
@@ -181,6 +181,7 @@ class App extends React.Component {
       zIndex: 8000,
       backgroundColor: "rgba(0,0,0,0.5)",
       cursor: "pointer",
+      overflow: "scroll",
       transition: this.state.sidebarOpen ?
         'visibility 0s ease-out, left 0.3s ease-out, opacity 0.3s ease-out' :
         'left 0.3s ease-out, opacity 0.3s ease-out, visibility 0s ease-out 0.3s'
@@ -192,7 +193,7 @@ class App extends React.Component {
       height: availableHeight,
       width: sidebarWidth,
       maxWidth: sidebarWidth,
-      overflowY: "scroll",
+      overflow: "scroll",
       boxShadow: '-3px 0px 3px -3px rgba(0, 0, 0, 0.2) inset'
     };
     const contentStyles = {
