@@ -133,6 +133,7 @@ class Tree extends React.Component {
       const newState = {tree};
       let corr=-1, new_corr=-1;
       if (this.props.showTreeToo) {
+        console.time("tangle")
         calculateOtherTreeRank(this.props.treeToo.nodes, nameToNode);
         calculateNodeRank(this.props.treeToo.nodes);
         corr = tangle_score(this.props.tree.nodes, this.props.treeToo.nodes, nameToNode);
@@ -170,6 +171,8 @@ class Tree extends React.Component {
         }
         calculateNodeRank(this.props.treeToo.nodes);
         tangle_score(this.props.tree.nodes, this.props.treeToo.nodes, nameToNode);
+        console.timeEnd("tangle")
+
         const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
         renderTree(this, false, treeToo, this.props);
         this.ViewerToo.fitToViewer();

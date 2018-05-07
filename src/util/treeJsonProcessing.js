@@ -28,12 +28,12 @@ const calcFullTipCounts = (node) => {
  * side-effects: node.hasChildren (bool) and node.arrayIdx (INT) for each node in nodes
  */
 const processNodes = (nodes) => {
-  const rootNode = nodes[0];
-  calcFullTipCounts(rootNode); /* recursive. Uses d.children */
+  calcFullTipCounts(nodes[0]); /* recursive. Uses d.children */
   nodes.forEach((d, idx) => {
-    d.arrayIdx = idx;
-    if (!d.attr) d.attr = {};
+    if (typeof d.attr === "undefined") d.attr = {};
+    d.arrayIdx = idx; /* set an index so that we can access visibility / nodeColors if needed */
     d.hasChildren = typeof d.children !== "undefined";
+    d.yvalue = undefined; /* calculate later in auspice */
   });
   return nodes;
 };

@@ -1,8 +1,6 @@
-import _debounce from "lodash/debounce";
-import { max } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { createDefaultParams } from "./defaultParams";
-import { addLeafCount, createChildrenAndParents } from "./helpers";
+import { addLeafCount, createChildrenAndParentsReturnNumTips, calcYValues } from "./helpers";
 import { change, modifySVG, modifySVGInStages } from "./change";
 
 /* PROTOTYPES */
@@ -35,8 +33,8 @@ const PhyloTree = function PhyloTree(reduxNodes, debugId) {
     d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
     return phyloNode;
   });
-  this.numberOfTips = max(this.nodes.map((d) => d.n.yvalue)); // total number of tips (we kinda cheat by finding the maximal yvalue, made by augur)
-  createChildrenAndParents(this.nodes);
+  this.numberOfTips = createChildrenAndParentsReturnNumTips(this.nodes);
+  calcYValues(this.nodes);
   this.xScale = scaleLinear();
   this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
