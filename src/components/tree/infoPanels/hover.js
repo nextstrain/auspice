@@ -108,10 +108,36 @@ const getMutationsJSX = (d, mutType) => {
   if (mutType === "nuc") {
     if (typeof d.muts !== "undefined" && d.muts.length) {
       const nDisplay = 9; // max number of mutations to display
-      const n = d.muts.length; // number of mutations that exist
-      let m = d.muts.slice(0, Math.min(nDisplay, n)).join(", ");
-      m += n > nDisplay ? " + " + (n - nDisplay) + " more" : "";
-      return infoLineJSX("Nucleotide mutations:", m);
+	  const nGapDisp = 4; // max number of gaps/Ns to display
+
+	  //gather muts with N/-
+	  let ngaps = d.muts.filter(mut => {return mut.slice(-1) == "N" || mut.slice(-1) == "-"
+										|| mut.slice(0) == "N" || mut.slice(0) == "-";})
+	  const gapLen = ngaps.length; // number of mutations that exist with N/-
+	  //gather muts without N/-
+	  let nucs = d.muts.filter(mut => {return mut.slice(-1) != "N" && mut.slice(-1) != "-"
+										&& mut.slice(0) != "N" && mut.slice(0) != "-";})
+	  const nucLen = nucs.length; //number of mutations that exist without N/-
+	  
+	  let m = nucs.slice(0, Math.min(nDisplay, nucLen)).join(", ");
+	  m += nucLen > nDisplay ? " + " + (nucLen - nDisplay) + " more" : "";
+	  let mGap = ngaps.slice(0, Math.min(nGapDisp, gapLen)).join(", ");
+	  mGap += gapLen > nGapDisp ? " + " + (gapLen - nGapDisp) + " more" : "";
+	  
+	  if (gapLen == 0) {
+		return infoLineJSX("Nucleotide mutations:", m);
+	  }
+	  if (nucLen == 0) {
+		return infoLineJSX("Gap/N mutations:", mGap);
+	  }
+	  return (
+	    <p>
+		  {infoLineJSX("Nucleotide mutations:", m)}
+		  <br/><br/>
+		  {infoLineJSX("Gap/N mutations:", mGap)}
+		</p>
+	  );
+
     }
     return infoLineJSX("No nucleotide mutations", "");
   } else if (typeof d.aa_muts !== "undefined") {
