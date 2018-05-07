@@ -14,7 +14,6 @@ import DataSource from "./data-source";
 import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
-import { titleBarHeight } from "../../util/globals";
 
 const Controls = ({mapOn}) => (
   <div
@@ -68,7 +67,6 @@ const Controls = ({mapOn}) => (
     <Header text="Data Source" extraStyles={{paddingTop: "10px"}}/>
     <DataSource/>
 
-    <div style={{minHeight: `${titleBarHeight + 20}px`}}/>
   </div>
 );
 

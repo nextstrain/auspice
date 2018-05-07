@@ -2,7 +2,7 @@ import React from "react";
 // import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Flex from "./flex";
-import { titleBarHeight, titleColors } from "../../util/globals";
+import { titleColors } from "../../util/globals";
 import { darkGrey, brandColor, materialButton } from "../../globalStyles";
 import { changePage } from "../../actions/navigation";
 import { TOGGLE_NARRATIVE } from "../../actions/types";
@@ -32,7 +32,7 @@ class NavBar extends React.Component {
         marginRight: "auto",
         marginBottom: "auto",
         marginLeft: "auto",
-        height: titleBarHeight,
+        height: 50,
         justifyContent: "space-between",
         alignItems: "center",
         overflow: "hidden",
@@ -66,16 +66,18 @@ class NavBar extends React.Component {
         textDecoration: "none",
         cursor: "pointer",
         fontSize: this.props.minified ? 12 : 16,
+        fontWeight: 400,
         textTransform: "uppercase"
       },
       inactive: {
-        paddingLeft: "8px",
-        paddingRight: "8px",
+        paddingLeft: this.props.minified ? "6px" : "12px",
+        paddingRight: this.props.minified ? "6px" : "12px",
         paddingTop: "20px",
         paddingBottom: "20px",
         color: "#5097BA",
         textDecoration: "none",
         fontSize: this.props.minified ? 12 : 16,
+        fontWeight: 400,
         textTransform: "uppercase"
       },
       alerts: {
