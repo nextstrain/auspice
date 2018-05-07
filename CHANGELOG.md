@@ -1,3 +1,5 @@
+## version 1.18.10 - 2018/05/07
+
 * Separate Nucleotide mutations from gaps / Ns in info-box - thanks @emmahodcroft [PR 552](https://github.com/nextstrain/auspice/pull/552)
 * Frequencies y-axis is no longer rounded to the nearest 0.05
 
