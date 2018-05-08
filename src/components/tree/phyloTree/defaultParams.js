@@ -13,7 +13,6 @@ export const createDefaultParams = () => ({
   minorTicks: 4,
   orientation: [1, 1],
   margins: {left: 25, right: 15, top: 5, bottom: 25},
-  tipLabelMarginPaddingPerCharacter: 6.5,
   showGrid: true,
   fillSelected: "#A73",
   radiusSelected: 5,
@@ -37,5 +36,11 @@ export const createDefaultParams = () => ({
   tipLabelFill: "#555",
   tipLabelPadX: 8,
   tipLabelPadY: 2,
-  mapToScreenDebounceTime: 500
+  mapToScreenDebounceTime: 500,
+  tipLabelFontSizeL1: 8,
+  tipLabelFontSizeL2: 10,
+  tipLabelFontSizeL3: 12,
+  tipLabelBreakL1: 75,
+  tipLabelBreakL2: 50,
+  tipLabelBreakL3: 25
 });

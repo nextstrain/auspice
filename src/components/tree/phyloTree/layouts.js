@@ -276,11 +276,20 @@ export const mapToScreen = function mapToScreen() {
     top: this.params.margins.top,
     bottom: this.params.margins.bottom};
   const inViewTerminalNodes = this.nodes.filter((d) => d.terminal).filter((d) => d.inView);
-  if (inViewTerminalNodes.length < 50) {
+  if (inViewTerminalNodes.length < this.params.tipLabelBreakL1) {
+
+    let fontSize = this.params.tipLabelFontSizeL1;
+    if (inViewTerminalNodes.length < this.params.tipLabelBreakL2) {
+      fontSize = this.params.tipLabelFontSizeL2;
+    }
+    if (inViewTerminalNodes.length < this.params.tipLabelBreakL3) {
+      fontSize = this.params.tipLabelFontSizeL3;
+    }
+
     let padBy = 0;
     inViewTerminalNodes.forEach((d) => {
       if (padBy < d.n.strain.length) {
-        padBy = d.n.strain.length * this.params.tipLabelMarginPaddingPerCharacter;
+        padBy = 0.65 * d.n.strain.length * fontSize;
       }
     });
     tmpMargins.right += padBy;
