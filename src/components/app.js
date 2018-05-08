@@ -235,7 +235,7 @@ class App extends React.Component {
           styles={overlayStyles}
           sidebarOpen={this.state.sidebarOpen}
           mobileDisplay={this.state.mobileDisplay}
-          handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
+          handler={() => {this.setState({sidebarOpen: false});}}
         />
       </span>
     );
