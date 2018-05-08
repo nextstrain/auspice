@@ -186,21 +186,7 @@ const getBranchDescendents = (n) => {
   return <span>{infoLineJSX("Number of descendants:", n.fullTipCount)}<p/></span>;
 };
 
-/**
- * This maps tree coordinates to coordinates on the svg.
- * @param  {float} x x
- * @param  {float} y y
- * @param  {reactSVGpanZoom} V viewer state
- * @return {[x,y]} point on plane
- */
-const treePosToViewer = (x, y, V) => {
-  // const dx = (x * V.a + V.e); // this is the distance form the upper left corner
-  // const dy = (y * V.d + V.f); // at the current zoom level
-  return {x: x + V.e, y: y + V.f};
-};
-
-const getPanelStyling = (d, viewer, panelDims) => {
-  const viewerState = viewer.getValue();
+const getPanelStyling = (d, panelDims) => {
   const xOffset = 10;
   const yOffset = 10;
   const width = 200;
@@ -209,7 +195,7 @@ const getPanelStyling = (d, viewer, panelDims) => {
   const xPos = d.that.params.orientation[0] === -1 ?
     panelDims.width / 2 + panelDims.spaceBetweenTrees + d.xTip :
     d.xTip;
-  const pos = treePosToViewer(xPos, d.yTip, viewerState);
+  const yPos = d.yTip;
   const styles = {
     container: {
       position: "absolute",
@@ -228,15 +214,15 @@ const getPanelStyling = (d, viewer, panelDims) => {
       wordBreak: "break-word"
     }
   };
-  if (pos.x < panelDims.width * 0.6) {
-    styles.container.left = pos.x + xOffset;
+  if (xPos < panelDims.width * 0.6) {
+    styles.container.left = xPos + xOffset;
   } else {
-    styles.container.right = panelDims.width - pos.x + xOffset;
+    styles.container.right = panelDims.width - xPos + xOffset;
   }
-  if (pos.y < panelDims.height * 0.55) {
-    styles.container.top = pos.y + 4 * yOffset;
+  if (yPos < panelDims.height * 0.55) {
+    styles.container.top = yPos + 4 * yOffset;
   } else {
-    styles.container.bottom = panelDims.height - pos.y + yOffset;
+    styles.container.bottom = panelDims.height - yPos + yOffset;
   }
   return styles;
 };
@@ -270,13 +256,13 @@ const displayVaccineInfo = (d) => {
 
 /* the actual component - a pure function, so we can return early if needed */
 const HoverInfoPanel = ({mutType, temporalConfidence, distanceMeasure,
-  hovered, viewer, colorBy, colorByConfidence, colorScale, panelDims}) => {
+  hovered, colorBy, colorByConfidence, colorScale, panelDims}) => {
 
   if (!hovered) return null;
 
   const tip = hovered.type === ".tip";
   const d = hovered.d;
-  const styles = getPanelStyling(d, viewer, panelDims);
+  const styles = getPanelStyling(d, panelDims);
   let inner;
   if (tip) {
     inner = (
