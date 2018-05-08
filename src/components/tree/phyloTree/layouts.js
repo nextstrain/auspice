@@ -260,7 +260,6 @@ export const setScales = function setScales(margins) {
   }
 };
 
-
 /**
 * this function sets the xScale, yScale domains and maps precalculated x,y
 * coordinates to their places on the screen
@@ -270,6 +269,7 @@ export const mapToScreen = function mapToScreen() {
   timerStart("mapToScreen");
 
   /* pad margins if tip labels are visible */
+  /* padding width based on character count */
   const tmpMargins = {
     left: this.params.margins.left,
     right: this.params.margins.right,
@@ -277,7 +277,13 @@ export const mapToScreen = function mapToScreen() {
     bottom: this.params.margins.bottom};
   const inViewTerminalNodes = this.nodes.filter((d) => d.terminal).filter((d) => d.inView);
   if (inViewTerminalNodes.length < 50) {
-    tmpMargins.right += this.params.tipLabelMarginPadding;
+    let padBy = 0;
+    inViewTerminalNodes.forEach((d) => {
+      if (padBy < d.n.strain.length) {
+        padBy = d.n.strain.length * this.params.tipLabelMarginPaddingPerCharacter;
+      }
+    });
+    tmpMargins.right += padBy;
   }
 
   /* set the range of the x & y scales */
