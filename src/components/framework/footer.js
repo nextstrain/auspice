@@ -88,17 +88,18 @@ export const getAcknowledgments = (dispatch, styles) => {
     return (
       <div style={styles.acknowledgments}>
         {`This work is possible due to the groups who have made their data openly available for analysis -
-          with a special thanks to Nikos Gurfield, Saran Grewal, Chris Barker, and the Andersen Lab for making `}
+          with a special thanks to Nikos Gurfield, Saran Grewal, Chris Barker, Ying Fang and the Andersen Lab for making `}
         <a href="https://andersen-lab.com/secrets/data/west-nile-genomics/">{"their data"}</a>
         {` available ahead of publication. `}
-        {`We also thank Simon Dellicour, Sebastian Lequime, Philippe Lemey, Karthik Gangavarapu, Nate Matteson, Sharada Saraf,
+        {`We also thank Simon Dellicour, Sebastian Lequime, Bram Vrancken, Philippe Lemey, Karthik Gangavarapu, Nate Matteson, Sharada Saraf,
           Kristian Andersen, and Nathan Grubaugh for curating the original dataset.
-          The data is being maintained by Nathan Grubaugh and his lab.
-          Our goal is to promote sequencing and sharing of West Nile virus genomes to improve our understanding of virus spread and evolution.
+          The data is being maintained by `}
+        <a target="_blank" rel="noreferrer noopener" href="http://grubaughlab.com">{"Nathan Grubaugh and his lab"}</a>
+        {`. Our goal is to promote sequencing and sharing of West Nile virus genomes to improve our understanding of virus spread and evolution.
           To aid in this effort, they have adapted their highly multiplexed PCR approach for `}
         <a target="_blank" rel="noreferrer noopener" href="https://www.nature.com/articles/nprot.2017.066">{"Zika virus sequencing"}</a>
         {` on the Illumina and Minion platforms for West Nile Virus circulating in North America. Their `}
-        <a target="_blank" rel="noreferrer noopener" href="http://grubaughlab.com/open-science/">{"sequencing protocol and primers"}</a>
+        <a target="_blank" rel="noreferrer noopener" href="http://grubaughlab.com/open-science/amplicon-sequencing/">{"sequencing protocol and primers"}</a>
         {` are free to use.
           If you have any questions about West Nile virus sequencing, or if you have unpublished data that you would like to share, please email `}
         <a href="emailto:grubaughlab@gmail.com">{"grubaughlab@gmail.com"}</a>
