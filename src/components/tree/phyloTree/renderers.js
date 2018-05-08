@@ -143,7 +143,7 @@ export const drawBranches = function drawBranches() {
     .attr("d", (d) => d.branch[0])
     .style("stroke", (d) => d.branchStroke || params.branchStroke)
     .style("stroke-linecap", "round")
-    .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+    .style("stroke-width", (d) => d['stroke-width']+"px" || params.branchStrokeWidth)
     .style("fill", "none")
     .style("cursor", "pointer")
     .style("pointer-events", "auto")

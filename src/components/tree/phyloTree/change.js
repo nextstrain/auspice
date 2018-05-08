@@ -24,80 +24,74 @@ const updateNodesWithNewData = (nodes, newNodeProps) => {
 };
 
 
-/* the following 4 dictionaries define which attrs & styles should (potentially)
- * be applied to which class (e.g. ".tip"). They are either taken directly from the
- * node props (e.g. "fill" is set to the node.fill value) or a custom function
- * is defined here
+/* svgSetters defines how attrs & styles should be applied to which class (e.g. ".tip").
+ * E.g. which node attribute should be used?!?
+ * Note that only the relevant functions are called on a transition.
  */
-const setAttrViaNodeProps = {
-  ".branch": new Set(),
-  ".tip": new Set(["r"])
-};
-const setStyleViaNodeProps = {
-  ".branch": new Set(["stroke-width"]),
-  ".tip": new Set(["fill", "visibility"])
-};
-const setAttrViaFunction = {
-  ".tip": {
-    cx: (d) => d.xTip,
-    cy: (d) => d.yTip
+const svgSetters = {
+  "attrs": {
+    ".tip": {
+      r: (d) => d.r,
+      cx: (d) => d.xTip,
+      cy: (d) => d.yTip
+    },
+    ".branch": {
+    },
+    ".vaccineCross": {
+      d: (d) => d.vaccineCross
+    },
+    ".vaccineDottedLine": {
+      d: (d) => d.vaccineLine
+    },
+    ".conf": {
+      d: (d) => d.confLine
+    }
   },
-  ".vaccineCross": {
-    d: (d) => d.vaccineCross
-  },
-  ".vaccineDottedLine": {
-    d: (d) => d.vaccineLine
-  },
-  ".conf": {
-    d: (d) => d.confLine
-  }
-};
-const setStyleViaFunction = {
-  ".vaccineDottedLine": {
-    opacity: (d) => d.that.distance === "num_date" ? 1 : 0
-  },
-  ".conf": {
-    stroke: (d) => d.branchStroke,
-    "stroke-width": calcConfidenceWidth
-  },
-  ".branch": {
-    stroke: (d) => d.branchStroke
-  },
-  ".tip": {
-    stroke: (d) => d.tipStroke
+  "styles": {
+    ".tip": {
+      "fill": (d) => d.fill,
+      "stroke": (d) => d.tipStroke,
+      "visibility": (d) => d["visibility"]
+    },
+    ".vaccineDottedLine": {
+      opacity: (d) => d.that.distance === "num_date" ? 1 : 0
+    },
+    ".conf": {
+      "stroke": (d) => d.branchStroke,
+      "stroke-width": calcConfidenceWidth
+    },
+    ".branch": {
+      "stroke": (d) => d.branchStroke,
+      "stroke-width": (d) => d["stroke-width"] + "px" // style - as per drawBranches()
+    }
   }
 };
 
-/* Returns a function which can be called as part of a D3 chain in order to modify
- * the appropriate attrs & styles for this treeElem.
- * This checks the above dictionaries to see which properties (attr || style) are
- * valid for each treeElem (className).
+
+/** createUpdateCall
+ * returns a function which can be called as part of a D3 chain in order to modify
+ * the SVG elements.
+ * svgSetters (see above) are used to actually modify the property on the element,
+ * so the given property must also be present there!
+ * @param {string} treeElem (e.g. ".tip" or ".branch")
+ * @param {list} properties (e.g. ["visibiliy", "stroke-width"])
+ * @return {function} used in a d3 selection, i.e. d3.selection().methods().call(X)
  */
 const createUpdateCall = (treeElem, properties) => (selection) => {
-  /* generics - those which are simply taken from the node! */
-  if (setAttrViaNodeProps[treeElem]) {
-    [...properties].filter((x) => setAttrViaNodeProps[treeElem].has(x))
+  // First: the properties to update via d3Selection.attr call
+  if (svgSetters.attrs[treeElem]) {
+    [...properties].filter((x) => svgSetters.attrs[treeElem][x])
       .forEach((attrName) => {
-        selection.attr(attrName, (d) => d[attrName]);
+        // console.log(`applying attr ${attrName} to ${treeElem}`)
+        selection.attr(attrName, svgSetters.attrs[treeElem][attrName]);
       });
   }
-  if (setStyleViaNodeProps[treeElem]) {
-    [...properties].filter((x) => setStyleViaNodeProps[treeElem].has(x))
+  // Second: the properties to update via d3Selection.style call
+  if (svgSetters.styles[treeElem]) {
+    [...properties].filter((x) => svgSetters.styles[treeElem][x])
       .forEach((styleName) => {
-        selection.style(styleName, (d) => d[styleName]);
-      });
-  }
-  /* more complicated, functions defined above */
-  if (setAttrViaFunction[treeElem]) {
-    [...properties].filter((x) => setAttrViaFunction[treeElem][x])
-      .forEach((attrName) => {
-        selection.attr(attrName, setAttrViaFunction[treeElem][attrName]);
-      });
-  }
-  if (setStyleViaFunction[treeElem]) {
-    [...properties].filter((x) => setStyleViaFunction[treeElem][x])
-      .forEach((styleName) => {
-        selection.style(styleName, setStyleViaFunction[treeElem][styleName]);
+        // console.log(`applying style ${styleName} to ${treeElem}`)
+        selection.style(styleName, svgSetters.styles[treeElem][styleName]);
       });
   }
 };
@@ -125,6 +119,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   let updateCall;
   const classesToPotentiallyUpdate = [".tip", ".vaccineDottedLine", ".vaccineCross", ".branch"]; /* order is respected */
   // console.log("modifying these elems", elemsToUpdate)
+
   /* treat stem / branch specially, but use these to replace a normal .branch call if that's also to be applied */
   if (elemsToUpdate.has(".branch.S") || elemsToUpdate.has(".branch.T")) {
     const applyBranchPropsAlso = elemsToUpdate.has(".branch");
@@ -260,10 +255,10 @@ export const change = function change({
 }) {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
   timerStart("phylotree.change()");
-  const elemsToUpdate = new Set();
-  const nodePropsToModify = {}; /* modify the actual data structure */
-  const svgPropsToUpdate = new Set(); /* modify the SVG */
-  let useModifySVGInStages = false; /* use modifySVGInStages rather than modifySVG */
+  const elemsToUpdate = new Set(); /* what needs updating? E.g. ".branch", ".tip" etc */
+  const nodePropsToModify = {}; /* which properties (keys) on the nodes should be updated (before the SVG) */
+  const svgPropsToUpdate = new Set(); /* which SVG properties shall be changed. E.g. "fill", "stroke" */
+  let useModifySVGInStages = false; /* use modifySVGInStages rather than modifySVG. Not used often. */
 
   /* calculate dt */
   const idealTransitionTime = 500;
@@ -328,13 +323,11 @@ export const change = function change({
     this.nodes.forEach((d) => {d.update = true;});
   }
 
-  /* run calculations as needed */
+  /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
   /* distance */
   if (newDistance) this.setDistance(newDistance);
-
   /* layout (must run after distance) */
   if (newDistance || newLayout) this.setLayout(newLayout || this.layout);
-
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||
@@ -346,7 +339,7 @@ export const change = function change({
     this.mapToScreen();
   }
 
-  /* svg change elements */
+  /* Finally, actually change the SVG elements themselves */
   const extras = {removeConfidences, showConfidences, newBranchLabellingKey};
   if (useModifySVGInStages) {
     this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000);
