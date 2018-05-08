@@ -13,6 +13,7 @@ export const createDefaultParams = () => ({
   minorTicks: 4,
   orientation: [1, 1],
   margins: {left: 25, right: 15, top: 5, bottom: 25},
+  tipLabelMarginPadding: 100,
   showGrid: true,
   fillSelected: "#A73",
   radiusSelected: 5,

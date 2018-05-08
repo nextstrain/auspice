@@ -268,8 +268,20 @@ export const setScales = function setScales(margins) {
 */
 export const mapToScreen = function mapToScreen() {
   timerStart("mapToScreen");
+
+  /* pad margins if tip labels are visible */
+  const tmpMargins = {
+    left: this.params.margins.left,
+    right: this.params.margins.right,
+    top: this.params.margins.top,
+    bottom: this.params.margins.bottom};
+  const inViewTerminalNodes = this.nodes.filter((d) => d.terminal).filter((d) => d.inView);
+  if (inViewTerminalNodes.length < 50) {
+    tmpMargins.right += this.params.tipLabelMarginPadding;
+  }
+
   /* set the range of the x & y scales */
-  this.setScales(this.params.margins);
+  this.setScales(tmpMargins);
 
   /* find minimum & maximum x & y values */
   let [minY, maxY, minX, maxX] = [1000000, 0, 1000000, 0];
@@ -279,6 +291,12 @@ export const mapToScreen = function mapToScreen() {
     if (d.x < minX) minX = d.x;
     if (d.y < minY) minY = d.y;
   });
+
+  /* fixes state of 0 length domain */
+  if (minX === maxX) {
+    minX -= 0.005;
+    maxX += 0.005;
+  }
 
   /* slightly pad min and max y to account for small clades */
   minY -= 0.2;
