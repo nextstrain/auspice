@@ -314,8 +314,11 @@ export const mapToScreen = function mapToScreen() {
   }
 
   /* slightly pad min and max y to account for small clades */
-  minY -= 0.2;
-  maxY += 0.2;
+  if (inViewTerminalNodes.length < 30) {
+    const delta = 0.05 * (maxY - minY);
+    minY -= delta;
+    maxY += delta;
+  }
 
   /* set the domain of the x & y scales */
   if (this.layout === "radial" || this.layout === "unrooted") {
