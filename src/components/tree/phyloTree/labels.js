@@ -12,6 +12,12 @@ export const updateTipLabels = function updateTipLabels(dt) {
   // console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
   if (inViewTerminalNodes.length < tipThresholdToDisplayLabels) {
     // console.log("DRAWING!", inViewTerminalNodes)
+    let fontSize = "12px";
+    if (inViewTerminalNodes.length > 50) {
+      fontSize = "8px";
+    } else if (inViewTerminalNodes.length > 25) {
+      fontSize = "10px";
+    }
     window.setTimeout(() => {
       this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
         .data(inViewTerminalNodes)
@@ -21,7 +27,7 @@ export const updateTipLabels = function updateTipLabels(dt) {
         .attr("y", (d) => d.yTip + yPad)
         .text((d) => tLFunc(d))
         .attr("class", "tipLabel")
-        .style("font-size", inViewTerminalNodes.length > 80 ? "8px" : "10px")
+        .style("font-size", fontSize)
         .style('visibility', 'visible');
     }, dt);
   }
