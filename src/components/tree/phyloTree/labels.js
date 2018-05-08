@@ -1,4 +1,5 @@
 import { timerFlush } from "d3-timer";
+import { tipThresholdToDisplayLabels } from "../../../util/globals";
 
 export const updateTipLabels = function updateTipLabels(dt) {
   this.svg.selectAll('.tipLabel').remove();
@@ -9,7 +10,7 @@ export const updateTipLabels = function updateTipLabels(dt) {
     .filter((d) => d.terminal)
     .filter((d) => d.inView);
   // console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
-  if (inViewTerminalNodes.length < 50) {
+  if (inViewTerminalNodes.length < tipThresholdToDisplayLabels) {
     // console.log("DRAWING!", inViewTerminalNodes)
     window.setTimeout(() => {
       this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
@@ -20,6 +21,7 @@ export const updateTipLabels = function updateTipLabels(dt) {
         .attr("y", (d) => d.yTip + yPad)
         .text((d) => tLFunc(d))
         .attr("class", "tipLabel")
+        .style("font-size", inViewTerminalNodes.length > 80 ? "8px" : "10px")
         .style('visibility', 'visible');
     }, dt);
   }
