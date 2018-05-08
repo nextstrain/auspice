@@ -11,7 +11,6 @@ export const colorOptions = {
 };
 
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
-export const tipThresholdToDisplayLabels = 75;
 export const width = 1126; /* no longer used */
 export const margin = 60;
 export const controlsWidth = 220;

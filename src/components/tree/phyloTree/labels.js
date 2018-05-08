@@ -1,5 +1,4 @@
 import { timerFlush } from "d3-timer";
-import { tipThresholdToDisplayLabels } from "../../../util/globals";
 
 export const updateTipLabels = function updateTipLabels(dt) {
   this.svg.selectAll('.tipLabel').remove();
@@ -10,14 +9,16 @@ export const updateTipLabels = function updateTipLabels(dt) {
     .filter((d) => d.terminal)
     .filter((d) => d.inView);
   // console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
-  if (inViewTerminalNodes.length < tipThresholdToDisplayLabels) {
-    // console.log("DRAWING!", inViewTerminalNodes)
-    let fontSize = "12px";
-    if (inViewTerminalNodes.length > 50) {
-      fontSize = "8px";
-    } else if (inViewTerminalNodes.length > 25) {
-      fontSize = "10px";
+  if (inViewTerminalNodes.length < this.params.tipLabelBreakL1) {
+
+    let fontSize = this.params.tipLabelFontSizeL1;
+    if (inViewTerminalNodes.length < this.params.tipLabelBreakL2) {
+      fontSize = this.params.tipLabelFontSizeL2;
     }
+    if (inViewTerminalNodes.length < this.params.tipLabelBreakL3) {
+      fontSize = this.params.tipLabelFontSizeL3;
+    }
+
     window.setTimeout(() => {
       this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
         .data(inViewTerminalNodes)
@@ -27,7 +28,7 @@ export const updateTipLabels = function updateTipLabels(dt) {
         .attr("y", (d) => d.yTip + yPad)
         .text((d) => tLFunc(d))
         .attr("class", "tipLabel")
-        .style("font-size", fontSize)
+        .style("font-size", fontSize.toString()+"px")
         .style('visibility', 'visible');
     }, dt);
   }

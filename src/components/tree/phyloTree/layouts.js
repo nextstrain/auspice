@@ -3,7 +3,6 @@
 import { min, max, sum } from "d3-array";
 import { addLeafCount } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
-import { tipThresholdToDisplayLabels } from "../../../util/globals";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -277,13 +276,16 @@ export const mapToScreen = function mapToScreen() {
     top: this.params.margins.top,
     bottom: this.params.margins.bottom};
   const inViewTerminalNodes = this.nodes.filter((d) => d.terminal).filter((d) => d.inView);
-  if (inViewTerminalNodes.length < tipThresholdToDisplayLabels) {
-    let fontSize = 12;
-    if (inViewTerminalNodes.length > 50) {
-      fontSize = 8;
-    } else if (inViewTerminalNodes.length > 25) {
-      fontSize = 10;
+  if (inViewTerminalNodes.length < this.params.tipLabelBreakL1) {
+
+    let fontSize = this.params.tipLabelFontSizeL1;
+    if (inViewTerminalNodes.length < this.params.tipLabelBreakL2) {
+      fontSize = this.params.tipLabelFontSizeL2;
     }
+    if (inViewTerminalNodes.length < this.params.tipLabelBreakL3) {
+      fontSize = this.params.tipLabelFontSizeL3;
+    }
+
     let padBy = 0;
     inViewTerminalNodes.forEach((d) => {
       if (padBy < d.n.strain.length) {
