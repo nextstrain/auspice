@@ -30,16 +30,9 @@ class Tree extends React.Component {
     this.onViewerChange = callbacks.onViewerChange.bind(this);
     // this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
     this.redrawTree = () => {
-      this.state.tree.clearSVG();
-      this.Viewer.fitToViewer();
-      renderTree(this, true, this.state.tree, this.props);
-      if (this.props.showTreeToo) {
-        this.state.treeToo.clearSVG();
-        this.ViewerToo.fitToViewer();
-        renderTree(this, false, this.state.treeToo, this.props);
-      }
-      this.setState({hover: null, selectedBranch: null, selectedTip: null});
-      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root: [0, 0]}));
+      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+        root: [0, 0]
+      }));
     };
   }
   componentDidMount() {
