@@ -1,6 +1,6 @@
 const path = require("path");
 
-const setGlobals = ({localStatic=false, localData=false}) => {
+const setGlobals = ({localStatic=false, localData=false} = {}) => {
   global.LOCAL_DATA = localData;
   global.LOCAL_DATA_PATH = path.join(__dirname, "/data/");
   global.REMOTE_DATA_LIVE_BASEURL = "http://data.nextstrain.org/";
