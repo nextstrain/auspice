@@ -1,6 +1,6 @@
 data_files=(
   "manifest_guest.json" \
-  "img_mumps.jpg" "img_dengue.png" "img_avianinfluenza.png" "img_seasonalinfluenza.png" "img_ebola.png" "img_zika.png" "img_measles.png" "img_lassa.png"\
+  "img_mumps.png" "img_dengue.png" "img_avianinfluenza.png" "img_seasonalinfluenza.png" "img_ebola.png" "img_zika.png" "img_measles.png" "img_lassa.jpg" "img_wnv.png"\
   "ebola_tree.json" "ebola_meta.json"\
   "zika_tree.json" "zika_meta.json"\
   "flu_h3n2_ha_2y_tree.json" "flu_h3n2_ha_2y_meta.json" "flu_h3n2_ha_2y_tip-frequencies.json" \
