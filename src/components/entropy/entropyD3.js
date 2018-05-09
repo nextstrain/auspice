@@ -135,7 +135,7 @@ EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
 /* clearSelectedBar works on SVG id tags, not on this.selected */
 EntropyChart.prototype._clearSelectedBars = function _clearSelectedBars() {
   for (const d of this.selectedNodes) {
-    const id = this.aa ? `#${d.prot}${d.codon}` : `#nt${d.x}`;
+    const id = this.aa ? `#prot${d.prot}${d.codon}` : `#nt${d.x}`;
     const fillFn = this.aa ?
       (node) => this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey :
       (node) => !node.prot ? lightGrey : this.geneMap[node.prot].idx % 2 ? medGrey : darkGrey;
@@ -146,7 +146,7 @@ EntropyChart.prototype._clearSelectedBars = function _clearSelectedBars() {
 
 EntropyChart.prototype._highlightSelectedBars = function _highlightSelectedBars() {
   for (const d of this.selectedNodes) {
-    const id = this.aa ? `#${d.prot}${d.codon}` : `#nt${d.x}`;
+    const id = this.aa ? `#prot${d.prot}${d.codon}` : `#nt${d.x}`;
     const fillVal = this.aa ?
       this.geneMap[d.prot].fill :
       d.prot ? this.geneMap[d.prot].fill : "red";
@@ -166,7 +166,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
   const chart = this.mainGraph.append("g")
     .attr("clip-path", "url(#clip)")
     .selectAll(".bar");
-  const idfn = this.aa ? (d) => d.prot + d.codon : (d) => "nt" + d.x;
+  const idfn = this.aa ? (d) => "prot" + d.prot + d.codon : (d) => "nt" + d.x;
   const xscale = this.aa ?
     (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon)) :
     (d) => this.scales.xMain(d.x);
