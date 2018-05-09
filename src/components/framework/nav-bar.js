@@ -2,6 +2,7 @@ import React from "react";
 // import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Flex from "./flex";
+import SidebarChevron from "./sidebar-chevron";
 import { titleColors } from "../../util/globals";
 import { darkGrey, brandColor, materialButton } from "../../globalStyles";
 import { changePage } from "../../actions/navigation";
@@ -123,6 +124,18 @@ class NavBar extends React.Component {
     );
   }
 
+  getChevron() {
+    return (
+      this.props.minified ?
+        <SidebarChevron
+          mobileDisplay={this.props.mobileDisplay}
+          handler={this.props.toggleHandler}
+        />
+        :
+        <div/>
+    );
+  }
+
   render() {
     const styles = this.getStyles();
     if (this.props.narrativeLoaded) {
@@ -147,6 +160,7 @@ class NavBar extends React.Component {
         <div style={{flex: 5}}/>
         {this.getLink("About", "/about", this.props.aboutSelected, styles)}
         {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
+        {this.getChevron()}
         <div style={{width: this.props.minified ? 8 : 0 }}/>
       </Flex>
     );

@@ -7,7 +7,7 @@ class Card extends React.Component {
       base: {
         backgroundColor: "#FFFFFF",
         display: "inline-block",
-        marginLeft: 12,
+        marginLeft: 14,
         marginRight: 0,
         marginTop: 0,
         marginBottom: 10,
@@ -36,7 +36,7 @@ class Card extends React.Component {
       base: {
         backgroundColor: "#FFFFFF",
         display: "inline-block",
-        marginLeft: 12,
+        marginLeft: 14,
         marginRight: 0,
         marginTop: 0,
         marginBottom: 10,
