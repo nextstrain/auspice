@@ -7,7 +7,7 @@ import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface/change";
 import * as callbacks from "./reactD3Interface/callbacks";
-import { resetTreeButtonStyle } from "../../globalStyles";
+import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
 
@@ -85,7 +85,23 @@ class Tree extends React.Component {
     }
     if (newState) this.setState(newState);
   }
-  renderTreeDiv({width, height, d3ref}) {
+
+  getStyles = () => {
+    const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0
+      || this.props.treeToo.idxOfInViewRootNode !== 0;
+    return {
+      resetTreeButton: {
+        zIndex: 100,
+        position: "absolute",
+        right: 5,
+        top: 0,
+        cursor: activeResetTreeButton ? "pointer" : "auto",
+        color: activeResetTreeButton ? darkGrey : lightGrey
+      }
+    };
+  };
+
+  renderTreeDiv({width, height, d3ref, viewerRef}) {
     return (
       <svg style={{pointerEvents: "auto"}}
         width={width}
@@ -103,6 +119,7 @@ class Tree extends React.Component {
   }
 
   render() {
+    const styles = this.getStyles();
     const spaceBetweenTrees = 100;
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
@@ -145,7 +162,7 @@ class Tree extends React.Component {
           null
         }
         <button
-          style={resetTreeButtonStyle}
+          style={{...tabSingle, ...styles.resetTreeButton}}
           onClick={this.redrawTree}
         >
           reset layout

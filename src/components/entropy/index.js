@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import { changeColorBy } from "../../actions/colors";
-import { materialButton, materialButtonSelected } from "../../globalStyles";
+import { tabGroup, tabGroupMember, tabGroupMemberSelected } from "../../globalStyles";
 import EntropyChart from "./entropyD3";
 import InfoPanel from "./infoPanel";
 import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
@@ -28,6 +28,18 @@ const getStyles = (width) => {
       margin: 5,
       position: "relative",
       top: -1
+    },
+    aaNtSwitch: {
+      position: "absolute",
+      right: 5,
+      top: 0,
+      zIndex: 100
+    },
+    entropyCountSwitch: {
+      position: "absolute",
+      right: 74,
+      top: 0,
+      zIndex: 100
     }
   };
 };
@@ -98,17 +110,17 @@ export class Entropy extends React.Component {
 
   aaNtSwitch(styles) {
     return (
-      <div style={styles.switchContainer}>
+      <div style={{...tabGroup, ...styles.aaNtSwitch}}>
         <button
           key={1}
-          style={this.props.mutType === "aa" ? materialButtonSelected : materialButton}
+          style={this.props.mutType === "aa" ? tabGroupMemberSelected : tabGroupMember}
           onClick={() => this.changeMutTypeCallback("aa")}
         >
           <span style={styles.switchTitle}> {"AA"} </span>
         </button>
         <button
           key={2}
-          style={this.props.mutType !== "aa" ? materialButtonSelected : materialButton}
+          style={this.props.mutType !== "aa" ? tabGroupMemberSelected : tabGroupMember}
           onClick={() => this.changeMutTypeCallback("nuc")}
         >
           <span style={styles.switchTitle}> {"NT"} </span>
@@ -118,20 +130,20 @@ export class Entropy extends React.Component {
   }
   entropyCountSwitch(styles) {
     return (
-      <div style={styles.switchContainerWide}>
+      <div style={{...tabGroup, ...styles.entropyCountSwitch}}>
         <button
           key={1}
-          style={this.props.showCounts ? materialButton : materialButtonSelected}
+          style={this.props.showCounts ? tabGroupMember : tabGroupMemberSelected}
           onClick={() => this.props.dispatch(showCountsNotEntropy(false))}
         >
           <span style={styles.switchTitle}> {"entropy"} </span>
         </button>
         <button
           key={2}
-          style={this.props.showCounts ? materialButtonSelected : materialButton}
+          style={this.props.showCounts ? tabGroupMemberSelected : tabGroupMember}
           onClick={() => this.props.dispatch(showCountsNotEntropy(true))}
         >
-          <span style={styles.switchTitle}> {"counts"} </span>
+          <span style={styles.switchTitle}> {"events"} </span>
         </button>
       </div>
     );
@@ -197,8 +209,6 @@ export class Entropy extends React.Component {
     const styles = getStyles(this.props.width);
     return (
       <Card title={"Diversity"}>
-        {this.aaNtSwitch(styles)}
-        {this.entropyCountSwitch(styles)}
         <InfoPanel
           hovered={this.state.hovered}
           width={this.props.width}
@@ -214,6 +224,8 @@ export class Entropy extends React.Component {
         >
           <g ref={(c) => { this.d3entropy = c; }} id="d3entropy"/>
         </svg>
+        {this.aaNtSwitch(styles)}
+        {this.entropyCountSwitch(styles)}
       </Card>
     );
   }

@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import TitleBar from "../framework/title-bar";
+import NavBar from "../framework/nav-bar";
 import SingleDataset from "./single";
 
 
@@ -36,7 +36,7 @@ class Status extends React.Component {
     const queries = this.getAllQueries();
     return (
       <div>
-        <TitleBar dataNameHidden/>
+        <NavBar/>
 
         <h1 style={{margin: "20px 20px 20px 20px", textAlign: "center"}}>
           {`Status page (s3 bucket: ${s3bucket})`}

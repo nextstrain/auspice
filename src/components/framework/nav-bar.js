@@ -2,7 +2,7 @@ import React from "react";
 // import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Flex from "./flex";
-import { titleBarHeight, titleColors } from "../../util/globals";
+import { titleColors } from "../../util/globals";
 import { darkGrey, brandColor, materialButton } from "../../globalStyles";
 import { changePage } from "../../actions/navigation";
 import { TOGGLE_NARRATIVE } from "../../actions/types";
@@ -20,7 +20,7 @@ const InternalLink = (props) => (
     browserDimensions: state.browserDimensions.browserDimensions
   };
 })
-class TitleBar extends React.Component {
+class NavBar extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -32,7 +32,7 @@ class TitleBar extends React.Component {
         marginRight: "auto",
         marginBottom: "auto",
         marginLeft: "auto",
-        height: titleBarHeight,
+        height: 50,
         justifyContent: "space-between",
         alignItems: "center",
         overflow: "hidden",
@@ -55,7 +55,8 @@ class TitleBar extends React.Component {
         color: "#000",
         textDecoration: "none",
         fontSize: 20,
-        fontWeight: 400
+        fontWeight: 400,
+        cursor: "pointer"
       },
       link: {
         paddingLeft: this.props.minified ? "6px" : "12px",
@@ -65,18 +66,19 @@ class TitleBar extends React.Component {
         textDecoration: "none",
         cursor: "pointer",
         fontSize: this.props.minified ? 12 : 16,
-        ':hover': {
-          color: "#5097BA"
-        }
+        fontWeight: 400,
+        textTransform: "uppercase"
       },
       inactive: {
-        paddingLeft: "8px",
-        paddingRight: "8px",
+        paddingLeft: this.props.minified ? "6px" : "12px",
+        paddingRight: this.props.minified ? "6px" : "12px",
         paddingTop: "20px",
         paddingBottom: "20px",
         color: "#5097BA",
         textDecoration: "none",
-        fontSize: this.props.minified ? 12 : 16
+        fontSize: this.props.minified ? 12 : 16,
+        fontWeight: 400,
+        textTransform: "uppercase"
       },
       alerts: {
         textAlign: "center",
@@ -134,7 +136,7 @@ class TitleBar extends React.Component {
           <button style={materialButton} onClick={onClick}>
             {text}
           </button>
-          <div style={{width: this.props.minified ? 20 : 0 }}/>
+          <div style={{width: this.props.minified ? 8 : 0 }}/>
         </Flex>
       );
     }
@@ -145,10 +147,10 @@ class TitleBar extends React.Component {
         <div style={{flex: 5}}/>
         {this.getLink("About", "/about", this.props.aboutSelected, styles)}
         {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
-        <div style={{width: this.props.minified ? 20 : 0 }}/>
+        <div style={{width: this.props.minified ? 8 : 0 }}/>
       </Flex>
     );
   }
 }
 
-export default TitleBar;
+export default NavBar;

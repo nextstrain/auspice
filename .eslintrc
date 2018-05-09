@@ -42,7 +42,7 @@ rules:
   no-labels: off
   no-continue: off
   no-unneeded-ternary: ["error", { "defaultAssignment": true }]
-  quote-props: ["error", "consistent"]
+  quote-props: ["error", "as-needed"]
 parserOptions:
   ecmaVersion: 6
   sourceType: module

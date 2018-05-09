@@ -70,15 +70,15 @@ class Info extends React.Component {
     super(props);
   }
   getStyles(width) {
-    let fontSize = 32;
+    let fontSize = 28;
     if (this.props.browserDimensions.width < 1000) {
-      fontSize = 30;
+      fontSize = 27;
     }
     if (this.props.browserDimensions.width < 800) {
-      fontSize = 28;
+      fontSize = 26;
     }
     if (this.props.browserDimensions.width < 600) {
-      fontSize = 26;
+      fontSize = 25;
     }
     if (this.props.browserDimensions.width < 400) {
       fontSize = 24;
@@ -87,27 +87,29 @@ class Info extends React.Component {
       base: {
         width: width + 34,
         display: "inline-block",
-        lineHeight: 1.4
+        maxWidth: width,
+        marginTop: 0
       },
       title: {
         fontFamily: titleFont,
         fontSize: fontSize,
-        marginLeft: 5,
+        marginLeft: 0,
         marginTop: 0,
         marginBottom: 5,
-        fontWeight: 300,
+        fontWeight: 500,
         color: darkGrey,
-        letterSpacing: "-1px",
-        maxWidth: width
+        letterSpacing: "-0.5px",
+        lineHeight: 1.2
       },
       n: {
         fontFamily: headerFont,
         fontSize: 14,
-        marginLeft: 10,
+        marginLeft: 2,
         marginTop: 5,
         marginBottom: 5,
         fontWeight: 500,
-        color: medGrey
+        color: medGrey,
+        lineHeight: 1.4
       }
     };
   }

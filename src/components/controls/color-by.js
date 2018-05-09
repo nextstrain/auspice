@@ -90,6 +90,7 @@ class ColorBy extends React.Component {
         value={this.state.geneSelected}
         options={gtGeneOptions}
         clearable={false}
+        searchable={false}
         multi={false}
         onChange={(opt) => {
           const gene = opt.value;
@@ -176,6 +177,7 @@ class ColorBy extends React.Component {
           value={this.state.colorBySelected}
           options={colorOptions}
           clearable={false}
+          searchable={false}
           multi={false}
           onChange={(opt) => {
             this.setColorBy(opt.value);

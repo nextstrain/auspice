@@ -14,7 +14,6 @@ import DataSource from "./data-source";
 import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
-import { titleBarHeight } from "../../util/globals";
 
 const Controls = ({mapOn}) => (
   <div
@@ -28,7 +27,6 @@ const Controls = ({mapOn}) => (
       flexGrow: 0,
       flexShrink: 1,
       flexBasis: "auto",
-      overflowY: "scroll",
       alignSelf: "auto",
       padding: "0px 20px 20px 20px"
     }}
@@ -54,9 +52,9 @@ const Controls = ({mapOn}) => (
     <ToggleTangle/>
 
     { mapOn ? (
-      <span>
+      <span style={{marginTop: "15px"}}>
         <Header text="Map Options"/>
-        <SelectLabel text="Geographic resolution" extraStyles={{marginTop: "0px"}}/>
+        <SelectLabel text="Geographic resolution" extraStyles={{marginTop: "5px"}}/>
         <GeoResolution/>
         <MapAnimationControls/>
       </span>
@@ -66,11 +64,9 @@ const Controls = ({mapOn}) => (
     <PanelLayout/>
     <PanelToggles/>
 
-
     <Header text="Data Source" extraStyles={{paddingTop: "10px"}}/>
     <DataSource/>
 
-    <div style={{minHeight: `${titleBarHeight + 20}px`}}/>
   </div>
 );
 

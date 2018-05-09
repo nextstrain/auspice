@@ -52,6 +52,7 @@ class GeoResolution extends React.Component {
           value={this.props.geoResolution}
           options={geoResolutionOptions}
           clearable={false}
+          searchable={false}
           multi={false}
           onChange={(opt) => {
             this.changeGeoResolution(opt.value);
