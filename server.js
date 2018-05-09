@@ -13,11 +13,8 @@ globals.setGlobals({
   localData: process.argv.indexOf("localData") !== -1
 });
 
-/* dev-specific libraries & imports */
-let webpack;
-let config;
-let webpackDevMiddleware;
-let webpackHotMiddleware;
+/* if we are in dev-mode, we need to import specific libraries & set flags */
+let webpack, config, webpackDevMiddleware, webpackHotMiddleware;
 if (devServer) {
   webpack = require("webpack"); // eslint-disable-line
   config = require("./webpack.config.dev"); // eslint-disable-line
@@ -37,13 +34,11 @@ if (devServer) {
   app.use(webpackHotMiddleware(compiler));
 } else {
   app.use("/dist", expressStaticGzip("dist"));
-  app.use('/dist', express.static('dist')); // why is this line here?
+  app.use(express.static(path.join(__dirname, "dist")));
 }
 
 /* redirect www.nextstrain.org to nextstrain.org */
-app.use(require('express-naked-redirect')({
-  reverse: true
-}));
+app.use(require('express-naked-redirect')({reverse: true}));
 
 app.get("/favicon.png", (req, res) => {
   res.sendFile(path.join(__dirname, "favicon.png"));
@@ -52,7 +47,6 @@ app.get("/favicon.png", (req, res) => {
 charon.applyCharonToApp(app);
 
 app.get("*", (req, res) => {
-  // console.log("Fallthrough request for " + req.originalUrl);
   res.sendFile(path.join(__dirname, "index.html"));
 });
 
