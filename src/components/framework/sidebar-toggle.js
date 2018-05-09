@@ -1,9 +1,8 @@
 import React from "react";
-import { goColor } from "../../globalStyles";
-import { controlsWidth } from "../../util/globals";
+import { goColor, sidebarColor } from "../../globalStyles";
 
 /*
-sidebarOpen and !mobileDisplay: chevron inset in sidebar
+sidebarOpen and !mobileDisplay: hide, SidebarChevron component visible instead
 !sidebarOpen and !mobileDisplay: tab with chevron in top left of display
 sidebarOpen and mobileDisplay: green button with "close" icon
 !sidebarOpen and mobileDisplay: green button with "sliders" icon
@@ -12,22 +11,24 @@ sidebarOpen and mobileDisplay: green button with "close" icon
 const SidebarToggle = ({sidebarOpen, mobileDisplay, handler}) => {
 
   const containerStyle = {
-    width: mobileDisplay ? 60 : 15,
-    height: mobileDisplay ? 60 : 15,
+    visibility: mobileDisplay ? "visible" : sidebarOpen ? "hidden" : "visible",
+    width: mobileDisplay ? 60 : 14,
+    height: mobileDisplay ? 60 : 44,
     position: "absolute",
-    top: mobileDisplay ? 15 : 0,
-    left: mobileDisplay ? "auto" : sidebarOpen ? controlsWidth + 24 : 0,
+    top: mobileDisplay ? 15 : 4,
+    left: mobileDisplay ? "auto" : 0,
     right: mobileDisplay ? 20 : "auto",
     zIndex: 9000,
-    backgroundColor: mobileDisplay ? goColor : "#E1E1E1",
-    boxShadow: mobileDisplay ? "2px 4px 10px 1px rgba(0, 0, 0, 0.15)" : "none",
+    backgroundColor: mobileDisplay ? goColor : sidebarColor,
+    boxShadow: mobileDisplay ? "2px 4px 10px 1px rgba(0, 0, 0, 0.15)" : "0px 0px 5px 1px rgba(0, 0, 0, 0.2)",
     cursor: "pointer",
     padding: 0,
     transition: "top 0.3s ease-out, left 0.3s ease-out, width 0.3s ease-out, height 0.3s ease-out",
-    borderRadius: mobileDisplay ? "45px" : sidebarOpen ? "0px 0px 0px 2px" : "0px 0px 2px 0px"
+    borderRadius: mobileDisplay ? "45px" : "0px 6px 6px 0px"
   };
 
   const iconStyle = {
+    visibility: mobileDisplay ? "visible" : sidebarOpen ? "hidden" : "visible",
     position: "absolute",
     width: 30,
     height: 30,

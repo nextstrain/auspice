@@ -74,10 +74,15 @@ const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHe
   );
 };
 
-const Sidebar = ({narrative, styles, mapOn}) => {
+const Sidebar = ({styles, sidebarOpen, mobileDisplay, narrative, mapOn, toggleHandler}) => {
   return (
     <div style={styles}>
-      <NavBar minified/>
+      <NavBar
+        minified
+        sidebarOpen={sidebarOpen}
+        mobileDisplay={mobileDisplay}
+        toggleHandler={toggleHandler}
+      />
       {narrative ?
         <Narrative height={styles.height}/> :
         <Controls mapOn={mapOn}/>
@@ -216,9 +221,12 @@ class App extends React.Component {
           handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
         />
         <Sidebar
-          narrative={this.props.displayNarrative}
           styles={sidebarStyles}
+          sidebarOpen={this.state.sidebarOpen}
+          mobileDisplay={this.state.mobileDisplay}
+          narrative={this.props.displayNarrative}
           mapOn={mapOn}
+          toggleHandler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
         />
         <Contents
           sidebarOpen={this.state.sidebarOpen}
