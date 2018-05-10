@@ -1,7 +1,7 @@
 /* eslint no-console: off */
-const fs = require('fs');
+// const fs = require('fs');
 const path = require("path");
-const fetch = require('node-fetch'); // not needed for local data
+// const fetch = require('node-fetch'); // not needed for local data
 const request = require('request');
 // const prettyjson = require('prettyjson');
 
