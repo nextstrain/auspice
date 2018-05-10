@@ -18,7 +18,7 @@
     "start:localData": "babel-node server.js dev localData",
     "start:localStatic": "babel-node server.js dev localStatic",
     "lint": "eslint src",
-    "postinstall": "npm run build",
+    "heroku-postbuild": "npm run build",
     "getdata": "sh scripts/get_data.sh",
     "run:electron": "npm run clean && npm run build:electron && npm run getdata && ./node_modules/.bin/electron . ",
     "dist:electron": "npm run clean && npm run build:electron && npm run getdata && electron-builder",
