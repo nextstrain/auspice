@@ -1,6 +1,7 @@
 import React from "react";
 import {processAvailableDatasets} from "../status";
 import { changePage } from "../../actions/navigation";
+import { red } from "./displayError";
 
 const formatDataset = (fields, dispatch) => {
   const path = fields.join("/");
@@ -17,6 +18,13 @@ const formatDataset = (fields, dispatch) => {
 };
 
 export const displayAvailableDatasets = (availableDatasets, dispatch) => {
+  if (!availableDatasets) {
+    return (
+      <div style={{fontSize: "20px", fontWeight: 400, color: red}}>
+        {"There was an error getting the manifest JSON, which defines the available datasets"}
+      </div>
+    );
+  }
   const queries = processAvailableDatasets(availableDatasets);
   return (
     <div>

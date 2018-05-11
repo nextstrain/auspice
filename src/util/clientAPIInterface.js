@@ -1,13 +1,11 @@
 import queryString from "query-string";
 import { MANIFEST_RECEIVED } from "../actions/types";
-import { warningNotification } from "../actions/notifications";
 import { charonAPIAddress } from "./globals";
 import { changePage } from "../actions/navigation";
 
 export const getManifest = (dispatch, s3bucket = "live") => {
-  const charonErrorHandler = (e) => {
-    dispatch(warningNotification({message: "Failed to get datasets from server"}));
-    console.error(e);
+  const charonErrorHandler = () => {
+    console.warn("Failed to get manifest JSON from server");
   };
   const processData = (data) => {
     const datasets = JSON.parse(data);
@@ -36,7 +34,7 @@ export const getManifest = (dispatch, s3bucket = "live") => {
     if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
       processData(xmlHttp.responseText);
     } else {
-      charonErrorHandler(xmlHttp);
+      charonErrorHandler();
     }
   };
   xmlHttp.onerror = charonErrorHandler;

@@ -1,6 +1,6 @@
 import React from "react";
 
-const red = "rgb(222, 60, 38)";
+export const red = "rgb(222, 60, 38)";
 
 export const displayError = (errorMessage) => (
   <div style={{color: red}}>

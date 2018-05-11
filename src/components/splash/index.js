@@ -33,14 +33,11 @@ class Splash extends React.Component {
               Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data. We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread. Our goal is to aid epidemiological understanding and improve outbreak response.
             </p>
           )}
-          {/* Secondly, list the available datasets, if the manifest was parsed OK */}
-          {this.props.availableDatasets ? (
-            <CenterContent>
-              {displayAvailableDatasets(this.props.availableDatasets, this.props.dispatch)}
-            </CenterContent>
-          ) : null}
+          {/* Secondly, list the available datasets */}
+          <CenterContent>
+            {displayAvailableDatasets(this.props.availableDatasets, this.props.dispatch)}
+          </CenterContent>
           {/* Finally, the footer (logos) */}
-          <div className="bigspacer"/>
           <CenterContent>
             {logos}
           </CenterContent>
