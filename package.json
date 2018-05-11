@@ -29,7 +29,7 @@
     "run:electron": "npm run clean && npm run build:electron && npm run getdata && ./node_modules/.bin/electron . ",
     "dist:electron": "npm run clean && npm run build:electron && npm run getdata && electron-builder",
     "test": "npm run build",
-    "heroku-postbuild": "npm run build",    
+    "heroku-postbuild": "npm run build",
     "redeploy-site": "./redeploy-site.sh"
   },
   "dependencies": {
