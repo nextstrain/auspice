@@ -1,7 +1,14 @@
 {
-  "name": "nextstrain-auspice",
+  "name": "auspice",
   "version": "1.19.1",
-  "description": "Nextstrain auspice",
+  "description": "Web app for visualizing pathogen evolution",
+  "author": "James Hadfield, Trevor Bedford and Richard Neher",
+  "license": "AGPL",
+  "homepage": "./",
+  "engines": {
+    "node": "9.6.x",
+    "npm": "5.6.x"
+  },
   "scripts": {
     "clean": "rimraf dist",
     "server": "node server.dist.js",
@@ -18,85 +25,12 @@
     "start:localData": "babel-node server.js dev localData",
     "start:localStatic": "babel-node server.js dev localStatic",
     "lint": "eslint src",
-    "heroku-postbuild": "npm run build",
     "getdata": "sh scripts/get_data.sh",
     "run:electron": "npm run clean && npm run build:electron && npm run getdata && ./node_modules/.bin/electron . ",
     "dist:electron": "npm run clean && npm run build:electron && npm run getdata && electron-builder",
-    "test": "npm run build"
-  },
-  "author": "Trevor Bedford and Richard Neher",
-  "license": "AGPL",
-  "homepage": "./",
-  "build": {
-    "appId": "nextstrain",
-    "directories": {
-      "output": "releases"
-    },
-    "files": [
-      "data/*",
-      "dist/*",
-      "index.html",
-      "index.js",
-      "package.json"
-    ],
-    "dmg": {
-      "contents": [
-        {
-          "x": 110,
-          "y": 150
-        },
-        {
-          "x": 240,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ]
-    }
-  },
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-eslint": "^8.2.1",
-    "babel-loader": "^7.1.2",
-    "babel-plugin-react-transform": "^2.0.2",
-    "babel-plugin-strip-function-call": "^1.0.2",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-react": "^6.24.1",
-    "babel-preset-stage-0": "^6.24.1",
-    "chai": "^4.1.2",
-    "chai-http": "^3.0.0",
-    "compression-webpack-plugin": "^1.0.0",
-    "css-loader": "^0.26.1",
-    "electron": "^1.6.11",
-    "electron-builder": "next",
-    "es6-promise": "~1.0.0",
-    "eslint": "^4.4.1",
-    "eslint-config-airbnb": "^15.1.0",
-    "eslint-config-defaults": "^7.0.1",
-    "eslint-plugin-filenames": "^0.1.2",
-    "eslint-plugin-import": "^2.7.0",
-    "eslint-plugin-jsx-a11y": "^5.1.1",
-    "eslint-plugin-react": "^7.2.1",
-    "express": "^4.13.3",
-    "file-loader": "^0.10.0",
-    "json-loader": "^0.5.1",
-    "mocha": "^3.5.3",
-    "prettyjson": "^1.2.1",
-    "redux-devtools": "^3.3.2",
-    "rimraf": "^2.4.3",
-    "run-sequence": "~0.3.6",
-    "style-loader": "^0.13.2",
-    "webpack": "^3.5.5",
-    "webpack-dev-middleware": "^1.2.0",
-    "webpack-hot-middleware": "^2.19.1"
+    "test": "npm run build",
+    "heroku-postbuild": "npm run build",    
+    "redeploy-site": "./redeploy-site.sh"
   },
   "dependencies": {
     "awesomplete": "^1.1.2",
@@ -146,5 +80,76 @@
     "redux-thunk": "^2.2.0",
     "request": "^2.65.0",
     "whatwg-fetch": "^0.10.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-eslint": "^8.2.1",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-react-transform": "^2.0.2",
+    "babel-plugin-strip-function-call": "^1.0.2",
+    "babel-plugin-transform-decorators-legacy": "^1.3.4",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
+    "chai": "^4.1.2",
+    "chai-http": "^3.0.0",
+    "compression-webpack-plugin": "^1.0.0",
+    "css-loader": "^0.26.1",
+    "electron": "^1.6.11",
+    "electron-builder": "next",
+    "es6-promise": "~1.0.0",
+    "eslint": "^4.4.1",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-config-defaults": "^7.0.1",
+    "eslint-plugin-filenames": "^0.1.2",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-react": "^7.2.1",
+    "express": "^4.13.3",
+    "file-loader": "^0.10.0",
+    "json-loader": "^0.5.1",
+    "mocha": "^3.5.3",
+    "prettyjson": "^1.2.1",
+    "redux-devtools": "^3.3.2",
+    "rimraf": "^2.4.3",
+    "run-sequence": "~0.3.6",
+    "style-loader": "^0.13.2",
+    "webpack": "^3.5.5",
+    "webpack-dev-middleware": "^1.2.0",
+    "webpack-hot-middleware": "^2.19.1"
+  },
+  "build": {
+    "appId": "nextstrain",
+    "directories": {
+      "output": "releases"
+    },
+    "files": [
+      "data/*",
+      "dist/*",
+      "index.html",
+      "index.js",
+      "package.json"
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 110,
+          "y": 150
+        },
+        {
+          "x": 240,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
+    }
   }
 }
