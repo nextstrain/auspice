@@ -8,13 +8,15 @@ const datasets = (state = {
   datapath: undefined, // e.g. "zika" or "flu_h3n2_12y"
   page: getPageFromPathname(window.location.pathname),
   urlPath: window.location.pathname,
-  urlQuery: window.location.search
+  urlQuery: window.location.search,
+  errorMessage: undefined
 }, action) => {
   switch (action.type) {
     case types.PAGE_CHANGE: {
       return Object.assign({}, state, {
         page: action.page,
-        datapath: action.datapath
+        datapath: action.datapath,
+        errorMessage: action.errorMessage
       });
     } case types.MANIFEST_RECEIVED: {
       const newState = {

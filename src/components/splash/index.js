@@ -1,19 +1,16 @@
 import React from "react";
 import { connect } from "react-redux";
 import Title from "../framework/title";
-// import { headerFont, materialButtonOutline } from "../../globalStyles";
 import Flex from "../../components/framework/flex";
-// import { analyticsNewPage, triggerOutboundEvent } from "../util/googleAnalytics";
 import { logos } from "./logos";
-// import { requestImage } from "../../util/clientAPIInterface";
-// import { changePage } from "../../actions/navigation";
 import { displayAvailableDatasets } from "./availableDatasets";
 import { CenterContent } from "./centerContent";
-
+import { displayError } from "./displayError";
 
 @connect((state) => ({
   splash: state.datasets.splash,
-  availableDatasets: state.datasets.availableDatasets
+  availableDatasets: state.datasets.availableDatasets,
+  errorMessage: state.datasets.errorMessage
 }))
 class Splash extends React.Component {
   render() {
@@ -26,21 +23,24 @@ class Splash extends React.Component {
           <div className="row">
             <h1 style={{textAlign: "center", marginTop: "-10px", fontSize: "29px"}}> Real-time tracking of virus evolution </h1>
           </div>
-
-          <p style={{maxWidth: 600, marginTop: 0, marginRight: "auto", marginBottom: 20, marginLeft: "auto", textAlign: "center", fontSize: 16, fontWeight: 300, lineHeight: 1.42857143}}>
-            Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data. We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread. Our goal is to aid epidemiological understanding and improve outbreak response.
-          </p>
-
-          <CenterContent>
-            <div>{"error message?!?!"}</div>
-          </CenterContent>
-
-          <CenterContent>
-            {displayAvailableDatasets(this.props.availableDatasets, this.props.dispatch)}
-          </CenterContent>
-
+          {/* First: either display the error message or the intro-paragraph */}
+          {this.props.errorMessage ? (
+            <CenterContent>
+              {displayError(this.props.errorMessage)}
+            </CenterContent>
+          ) : (
+            <p style={{maxWidth: 600, marginTop: 0, marginRight: "auto", marginBottom: 20, marginLeft: "auto", textAlign: "center", fontSize: 16, fontWeight: 300, lineHeight: 1.42857143}}>
+              Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data. We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread. Our goal is to aid epidemiological understanding and improve outbreak response.
+            </p>
+          )}
+          {/* Secondly, list the available datasets, if the manifest was parsed OK */}
+          {this.props.availableDatasets ? (
+            <CenterContent>
+              {displayAvailableDatasets(this.props.availableDatasets, this.props.dispatch)}
+            </CenterContent>
+          ) : null}
+          {/* Finally, the footer (logos) */}
           <div className="bigspacer"/>
-
           <CenterContent>
             {logos}
           </CenterContent>

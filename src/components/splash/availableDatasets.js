@@ -2,7 +2,6 @@ import React from "react";
 import {processAvailableDatasets} from "../status";
 import { changePage } from "../../actions/navigation";
 
-
 const formatDataset = (fields, dispatch) => {
   const path = fields.join("/");
   return (
@@ -18,13 +17,6 @@ const formatDataset = (fields, dispatch) => {
 };
 
 export const displayAvailableDatasets = (availableDatasets, dispatch) => {
-  if (!availableDatasets) {
-    return (
-      <div>
-        {"There was a problem sourcing manifest.json"}
-      </div>
-    );
-  }
   const queries = processAvailableDatasets(availableDatasets);
   return (
     <div>

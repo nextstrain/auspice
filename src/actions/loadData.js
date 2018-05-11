@@ -2,7 +2,7 @@ import queryString from "query-string";
 import * as types from "./types";
 import { charonAPIAddress } from "../util/globals";
 import { getManifest } from "../util/clientAPIInterface";
-import { changePage } from "./navigation";
+import { goTo404 } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 import { createDatapathForSecondSegment } from "../util/parseParams";
 
@@ -57,7 +57,9 @@ export const loadJSONs = (s3override = undefined) => {
         // console.log(data);
         if (!(data.JSONs.meta && data.JSONs.tree)) {
           console.error("Tree & Meta JSONs could not be loaded.");
-          dispatch(changePage({path: "/", push: false}));
+          dispatch(goTo404(`
+            Auspice attempted to load JSONs for the dataset "${datasets.datapath.replace(/_/, '/')}", but they couldn't be found.
+          `));
           return;
         }
         dispatch({

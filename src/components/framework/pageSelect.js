@@ -28,11 +28,7 @@ class PageSelect extends React.Component {
       case "app" : return (<App/>);
       case "status" : return (<Status/>);
       default:
-        this.props.dispatch(errorNotification({
-          message: "404",
-          details: `${this.props.page} doesn't exist!`
-        }));
-        console.error("trying to go to unknown page - ", this.props.page);
+        console.error(`reduxStore.datasets.page is invalid (${this.props.page})`);
         return (<Splash/>);
     }
   }

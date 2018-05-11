@@ -44,7 +44,8 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
   const { datasets } = getState();
   const d = {
     type: PAGE_CHANGE,
-    page: getPageFromPathname(path)
+    page: getPageFromPathname(path),
+    errorMessage: undefined
   };
   d.datapath = d.page === "app" ? getDatapath(path, datasets.availableDatasets) : undefined;
   if (query !== undefined) { d.query = query; }
@@ -52,6 +53,14 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
   /* check if this is "valid" - we can change it here before it is dispatched */
   dispatch(d);
 };
+
+/* a 404 uses the same machinery as changePage, but it's not a thunk */
+export const goTo404 = (errorMessage) => ({
+  type: PAGE_CHANGE,
+  page: "/",
+  errorMessage,
+  pushState: true
+});
 
 /* modify redux state and URL by specifying a new URL query string. Pathname is not considered, if you want to change that, use "changePage" instead.
 Unlike "changePage" the query is processed both by the middleware (i.e. to update the URL) AND by the reducers, to update their state accordingly.
