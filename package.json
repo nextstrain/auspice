@@ -30,7 +30,8 @@
     "dist:electron": "npm run clean && npm run build:electron && npm run getdata && electron-builder",
     "test": "npm run build",
     "heroku-postbuild": "npm run build",
-    "redeploy-site": "./redeploy-site.sh"
+    "redeploy-site": "./redeploy-site.sh",
+    "gzip-and-upload": "./gzip-and-upload.sh"
   },
   "dependencies": {
     "awesomplete": "^1.1.2",
