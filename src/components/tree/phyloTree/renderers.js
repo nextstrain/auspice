@@ -47,6 +47,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
   this.confidencesInSVG = false;
   if (drawConfidence) this.drawConfidence();
+  this.updateTipLabels();
 
   this.timeLastRenderRequested = Date.now();
   timerEnd("phyloTree render()");
