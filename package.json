@@ -27,7 +27,7 @@
     "run:electron": "npm run clean && npm run build:electron && npm run getdata && ./node_modules/.bin/electron . ",
     "dist:electron": "npm run clean && npm run build:electron && npm run getdata && electron-builder",
     "heroku-postbuild": "npm run build",
-    "getdata": "./scripts/get-data.sh",
+    "get-data": "./scripts/get-data.sh",
     "redeploy-site": "./scripts/redeploy-site.sh",
     "gzip-and-upload": "./scripts/gzip-and-upload.sh",
     "create-data-dir": "./scripts/create-data-dir.sh"
