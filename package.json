@@ -10,6 +10,7 @@
     "npm": "5.6.x"
   },
   "scripts": {
+    "postinstall": "npm run create-data-dir",
     "clean": "rimraf dist",
     "server": "node server.dist.js",
     "build:client": "NODE_ENV=production BABEL_ENV=production webpack --config webpack.config.prod.js",
@@ -22,16 +23,14 @@
     "start": "BABEL_ENV=dev babel-node server.js dev",
     "start:local": "BABEL_ENV=dev babel-node server.js dev localData localStatic",
     "start:local:perf": "BABEL_ENV=devtiming babel-node server.js dev localData localStatic",
-    "start:localData": "babel-node server.js dev localData",
-    "start:localStatic": "babel-node server.js dev localStatic",
     "lint": "eslint src",
-    "getdata": "sh scripts/get_data.sh",
     "run:electron": "npm run clean && npm run build:electron && npm run getdata && ./node_modules/.bin/electron . ",
     "dist:electron": "npm run clean && npm run build:electron && npm run getdata && electron-builder",
-    "test": "npm run build",
     "heroku-postbuild": "npm run build",
-    "redeploy-site": "./redeploy-site.sh",
-    "gzip-and-upload": "./gzip-and-upload.sh"
+    "getdata": "./scripts/get-data.sh",
+    "redeploy-site": "./scripts/redeploy-site.sh",
+    "gzip-and-upload": "./scripts/gzip-and-upload.sh",
+    "create-data-dir": "./scripts/create-data-dir.sh"
   },
   "dependencies": {
     "awesomplete": "^1.1.2",
