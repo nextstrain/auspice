@@ -12,7 +12,7 @@ export const createDefaultParams = () => ({
   minorTicksTimeTree: 3,
   minorTicks: 4,
   orientation: [1, 1],
-  margins: {left: 25, right: 15, top: 5, bottom: 25},
+  margins: {left: 25, right: 15, top: 10, bottom: 30},
   showGrid: true,
   fillSelected: "#A73",
   radiusSelected: 5,
