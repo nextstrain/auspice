@@ -5,14 +5,14 @@ import Flex from "./flex";
 import SidebarChevron from "./sidebar-chevron";
 import { titleColors } from "../../util/globals";
 import { darkGrey, brandColor, materialButton } from "../../globalStyles";
-import { changePage } from "../../actions/navigation";
+// import { changePage } from "../../actions/navigation";
 import { TOGGLE_NARRATIVE } from "../../actions/types";
 
-const InternalLink = (props) => (
-  <div style={props.style} onClick={() => props.dispatch(changePage({path: props.path}))}>
-    {props.children}
-  </div>
-);
+// const InternalLink = (props) => (
+//   <div style={props.style} onClick={() => props.dispatch(changePage({path: props.path}))}>
+//     {props.children}
+//   </div>
+// );
 
 @connect((state) => {
   return {
@@ -92,14 +92,14 @@ class NavBar extends React.Component {
 
   getLogo(styles) {
     return (
-      <InternalLink dispatch={this.props.dispatch} style={styles.logo} path="/">
+      <a style={styles.logo} href="/">
         <img alt="" width="40" src={require("../../images/nextstrain-logo-small.png")}/>
-      </InternalLink>
+      </a>
     );
   }
 
   getLogoType(styles) {
-    const title = "nextstrain";
+    const title = "Nextstrain";
     const rainbowTitle = title.split("").map((letter, i) =>
       <span key={i} style={{color: titleColors[i] }}>{letter}</span>
     );
@@ -107,20 +107,18 @@ class NavBar extends React.Component {
       this.props.minified ?
         <div/>
         :
-        <InternalLink style={styles.title} dispatch={this.props.dispatch} path="/">
+        <a style={styles.title} href="/">
           {rainbowTitle}
-        </InternalLink>
+        </a>
     );
   }
 
-  getLink(name, url, selected, styles) {
+  getLink(name, url, styles) {
     const linkCol = this.props.minified ? "#000" : darkGrey;
     return (
-      selected ?
-        <div style={{ ...{color: linkCol}, ...styles.inactive }}>{name}</div> :
-        <InternalLink dispatch={this.props.dispatch} style={{ ...{color: linkCol}, ...styles.link }} path={url}>
-          {name}
-        </InternalLink>
+      <a style={{ ...{color: linkCol}, ...styles.link }} href={url}>
+        {name}
+      </a>
     );
   }
 
@@ -158,13 +156,17 @@ class NavBar extends React.Component {
         {this.getLogo(styles)}
         {this.getLogoType(styles)}
         <div style={{flex: 5}}/>
-        {this.getLink("About", "/about", this.props.aboutSelected, styles)}
-        {this.getLink("Methods", "/methods", this.props.methodsSelected, styles)}
+        {this.getLink("About", "/about/overview/introduction", styles)}
+        {this.getLink("Docs", "/docs/getting-started/install", styles)}
+        {this.getLink("Blog", "/blog", styles)}
         {this.getChevron()}
         <div style={{width: this.props.minified ? 8 : 0 }}/>
       </Flex>
     );
   }
 }
+
+// include this as part of navbar when help page is complete on static
+// {this.getLink("Help", "/help", styles)}
 
 export default NavBar;

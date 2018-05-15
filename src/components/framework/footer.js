@@ -6,6 +6,7 @@ import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { applyFilter } from "../../actions/tree";
 import { changeColorBy } from "../../actions/colors";
+import { version } from "../../version";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -366,12 +367,15 @@ class Footer extends React.Component {
             {dot}
             {this.getUpdated()}
             {dot}
-            {this.downloadDataButton()}
+            {"Auspice " + version}
           </Flex>
         </div>
       </div>
     );
   }
 }
+
+// {dot}
+// {this.downloadDataButton()}
 
 export default Footer;

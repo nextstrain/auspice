@@ -2,6 +2,7 @@ import queryString from "query-string";
 import parseParams from "../util/parseParams";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
+import { getPageFromPathname } from "../components/framework/pageSelect";
 
 // make prefix for data files with fields joined by _ instead of / as in URL
 const makeDataPathFromParsedParams = (parsedParams) => {
@@ -20,21 +21,6 @@ const getDatapath = (pathname, availableDatasets) => {
   return pathname.replace(/^\//, '').replace(/\/$/, '').replace('/', '_');
 };
 
-export const getPageFromPathname = (pathname) => {
-  if (pathname === "/") {
-    return "splash";
-  } else if (pathname.startsWith("/methods")) {
-    return "methods";
-  } else if (pathname.startsWith("/posts")) {
-    console.error("Posts have been removed from auspice.");
-    return "splash";
-  } else if (pathname.startsWith("/about")) {
-    return "about";
-  } else if (pathname.startsWith("/status")) {
-    return "status";
-  }
-  return "app"; // fallthrough
-};
 
 /* changes the state of the page and (perhaps) the dataset displayed.
 This function is used throughout the app for all navigation to another page, (including braowserBackForward - see function below)
@@ -58,7 +44,8 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
   const { datasets } = getState();
   const d = {
     type: PAGE_CHANGE,
-    page: getPageFromPathname(path)
+    page: getPageFromPathname(path),
+    errorMessage: undefined
   };
   d.datapath = d.page === "app" ? getDatapath(path, datasets.availableDatasets) : undefined;
   if (query !== undefined) { d.query = query; }
@@ -66,6 +53,14 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
   /* check if this is "valid" - we can change it here before it is dispatched */
   dispatch(d);
 };
+
+/* a 404 uses the same machinery as changePage, but it's not a thunk */
+export const goTo404 = (errorMessage) => ({
+  type: PAGE_CHANGE,
+  page: "/",
+  errorMessage,
+  pushState: true
+});
 
 /* modify redux state and URL by specifying a new URL query string. Pathname is not considered, if you want to change that, use "changePage" instead.
 Unlike "changePage" the query is processed both by the middleware (i.e. to update the URL) AND by the reducers, to update their state accordingly.
