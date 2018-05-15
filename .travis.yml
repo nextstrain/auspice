@@ -8,8 +8,8 @@ install:
 script:
   - npm run build
 after_success:
-  - test $TRAVIS_BRANCH = "prerelease" && npm run gzip-and-upload
-  - test $TRAVIS_BRANCH = "prerelease" && npm run redeploy-site
+  - test $TRAVIS_BRANCH = "release" && npm run gzip-and-upload
+  - test $TRAVIS_BRANCH = "release" && npm run redeploy-site
 notifications:
   email:
     on_success: never
