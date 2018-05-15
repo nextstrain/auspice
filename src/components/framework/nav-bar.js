@@ -156,8 +156,8 @@ class NavBar extends React.Component {
         {this.getLogo(styles)}
         {this.getLogoType(styles)}
         <div style={{flex: 5}}/>
-        {this.getLink("About", "/about", styles)}
-        {this.getLink("Docs", "/docs", styles)}
+        {this.getLink("About", "/about/overview/introduction", styles)}
+        {this.getLink("Docs", "/docs/getting-started/install", styles)}
         {this.getLink("Blog", "/blog", styles)}
         {this.getChevron()}
         <div style={{width: this.props.minified ? 8 : 0 }}/>
