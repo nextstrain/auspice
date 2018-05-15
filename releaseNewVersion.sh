@@ -45,9 +45,6 @@ git checkout master
 git fetch origin
 git status -uno | grep "up-to-date\|up to date" # $? = 1 if not up-to-date OR up to date
 git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
-# some other checks
-git remote -v | grep --silent -E "heroku\s+https://git.heroku.com/auspice.git"
-heroku apps | grep --silent auspice # should ensure logged in
 
 # step 2: increment version number (req user input)
 step="2"
@@ -107,4 +104,4 @@ step="9"
 git checkout master
 git branch -d release
 
-echo -e "\nScript completed. $msg (version ${newVersion}) pushed to github:release, github:master and heroku:master\n"
+echo -e "\nScript completed. $msg (version ${newVersion}) pushed to github:release and github:master\n"
