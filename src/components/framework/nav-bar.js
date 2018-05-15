@@ -99,7 +99,7 @@ class NavBar extends React.Component {
   }
 
   getLogoType(styles) {
-    const title = "nextstrain";
+    const title = "Nextstrain";
     const rainbowTitle = title.split("").map((letter, i) =>
       <span key={i} style={{color: titleColors[i] }}>{letter}</span>
     );
