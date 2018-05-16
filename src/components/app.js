@@ -20,6 +20,8 @@ import Narrative from "./narrative";
 import AnimationController from "./framework/animationController";
 import { calcUsableWidth, computeResponsive } from "../util/computeResponsive";
 
+/* This comment will obviously not break anything. */
+
 const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
 /* <Contents> contains the header, tree, map, footer components etc.
