@@ -9,7 +9,6 @@ const globals = require("./src/server/globals");
 
 const devServer = process.argv.indexOf("dev") !== -1;
 globals.setGlobals({
-  localStatic: process.argv.indexOf("localStatic") !== -1,
   localData: process.argv.indexOf("localData") !== -1
 });
 

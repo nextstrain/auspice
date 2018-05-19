@@ -72,11 +72,8 @@ for i in "${data_files[@]}"
 do
   curl http://data.nextstrain.org/${i} --compressed -o data/${i}
 done
-
-rm -rf static/
-mkdir -p static/
-mkdir -p static/narratives
-for i in "${static_files[@]}"
+mkdir -p data/narratives
+for i in "${narratives[@]}"
 do
-  curl https://raw.githubusercontent.com/nextstrain/nextstrain.org/master/narratives/${i} --compressed -o static/narratives/${i}
+  curl https://raw.githubusercontent.com/nextstrain/static/master/narratives/${i} --compressed -o data/narratives/${i}
 done

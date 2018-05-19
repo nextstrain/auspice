@@ -67,9 +67,9 @@ const convertBlocksToHTML = (blocks) => {
 };
 
 const serveNarrative = (query, res) => {
-  if (global.LOCAL_STATIC) {
+  if (global.LOCAL_DATA) {
     /* this code is syncronous, but that's ok since this is never used in production */
-    const mdArr = fs.readFileSync(path.join(global.LOCAL_STATIC_PATH, "narratives", query.name + ".md"), 'utf8').split("\n");
+    const mdArr = fs.readFileSync(path.join(global.LOCAL_DATA_PATH, "narratives", query.name + ".md"), 'utf8').split("\n");
     const blocks = parseMarkdownArray(mdArr);
     convertBlocksToHTML(blocks);
     res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));

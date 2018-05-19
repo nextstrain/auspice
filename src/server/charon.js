@@ -20,9 +20,9 @@ const applyCharonToApp = (app) => {
       } case "splashimage": {
         getFiles.getSplashImage(query, res);
         break;
-      } case "image": {
-        getFiles.getImage(query, res);
-        break;
+      // } case "image": {
+      //   getFiles.getImage(query, res);
+      //   break;
       } case "json": {
         getFiles.getDatasetJson(query, res);
         break;
