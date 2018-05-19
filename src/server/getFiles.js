@@ -20,14 +20,14 @@ const getDataFile = (res, filePath, s3) => {
   }
 };
 
-const getStaticFile = (res, filePath) => {
-  if (global.LOCAL_STATIC) {
-    res.sendFile(path.join(global.LOCAL_STATIC_PATH, filePath));
-  } else {
-    request(global.REMOTE_STATIC_BASEURL + filePath).pipe(res);
-    /* TODO explore https://www.npmjs.com/package/cached-request */
-  }
-};
+// const getStaticFile = (res, filePath) => {
+//   if (global.LOCAL_STATIC) {
+//     res.sendFile(path.join(global.LOCAL_STATIC_PATH, filePath));
+//   } else {
+//     request(global.REMOTE_STATIC_BASEURL + filePath).pipe(res);
+//     /* TODO explore https://www.npmjs.com/package/cached-request */
+//   }
+// };
 
 // const fetchS3 = (res, filePath) => {
 //   fetch(s3 + filePath)
@@ -58,9 +58,9 @@ const getSplashImage = (query, res) => {
   getDataFile(res, query.src, query.s3);
 };
 
-const getImage = (query, res) => {
-  getStaticFile(res, query.src);
-};
+// const getImage = (query, res) => {
+//   getStaticFile(res, query.src);
+// };
 
 const getDatasetJson = (query, res) => {
   getDataFile(res, query.path, query.s3);
@@ -69,6 +69,6 @@ const getDatasetJson = (query, res) => {
 module.exports = {
   getManifest,
   getSplashImage,
-  getImage,
+  // getImage,
   getDatasetJson
 };
