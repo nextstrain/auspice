@@ -48,7 +48,6 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
       const category = assignCategory(colorScale, categories, nodes[d.idx], colorBy, isGenotype) || unassigned_label;
       // if (category === unassigned_label) return;
       for (let i = 0; i < pivotsLen; i++) {
-        if (d.values[i] < 0.0002) {continue;} /* skip 0.0001 values */
         matrix[category][i] += d.values[i];
         debugPivotTotals[i] += d.values[i];
         // if (i === pivotsLen - 1 && d.values[i] !== 0) {
