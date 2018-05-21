@@ -153,9 +153,10 @@ function handleMouseOut() {
 
 /* returns [[xval, yval], [xval, yval], ...] order: that of {series} */
 const calcBestXYPositionsForLabels = (series, pivots, scales, lookahead) => series.map((d) => {
+  const maxY = scales.y.domain()[1];
+  const displayThresh = 0.15 * maxY;
   for (let pivotIdx = 0; pivotIdx < d.length - lookahead; pivotIdx++) {
     const nextIdx = pivotIdx + lookahead;
-    const displayThresh = 0.07;
     if (d[pivotIdx][1] - d[pivotIdx][0] > displayThresh && d[nextIdx][1] - d[nextIdx][0] > displayThresh) {
       return [
         scales.x(pivots[pivotIdx + 1]),
