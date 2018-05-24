@@ -23,7 +23,8 @@ const datasets = (state = {
         s3bucket: action.s3bucket,
         splash: action.splash,
         availableDatasets: action.availableDatasets,
-        user: action.user
+        user: action.user,
+        datapath: action.datapath
       };
       return Object.assign({}, state, newState);
     } case types.URL: {

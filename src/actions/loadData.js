@@ -1,10 +1,48 @@
 import queryString from "query-string";
 import * as types from "./types";
 import { charonAPIAddress } from "../util/globals";
-import { getManifest } from "../util/clientAPIInterface";
-import { getDatapath, goTo404 } from "./navigation";
+import { getDatapath, goTo404, getPageFromPathname } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 import { createDatapathForSecondSegment } from "../util/parseParams";
+
+export const getManifest = (dispatch, s3bucket = "live") => {
+  const charonErrorHandler = () => {
+    console.warn("Failed to get manifest JSON from server");
+  };
+  const processData = (data) => {
+    const datasets = JSON.parse(data);
+    // console.log("SERVER API REQUEST RETURNED:", datasets);
+    const availableDatasets = {pathogen: datasets.pathogen};
+    const datapath = getPageFromPathname(window.location.pathname) === "app" ?
+      getDatapath(window.location.pathname, availableDatasets) :
+      undefined;
+    dispatch({
+      type: types.MANIFEST_RECEIVED,
+      s3bucket,
+      splash: datasets.splash,
+      availableDatasets,
+      user: "guest",
+      datapath
+    });
+  };
+
+  /* who am i? */
+  const query = queryString.parse(window.location.search);
+  const user = Object.keys(query).indexOf("user") === -1 ? "guest" : query.user;
+
+  const xmlHttp = new XMLHttpRequest();
+  xmlHttp.onload = () => {
+    if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
+      processData(xmlHttp.responseText);
+    } else {
+      charonErrorHandler();
+    }
+  };
+  xmlHttp.onerror = charonErrorHandler;
+  xmlHttp.open("get", `${charonAPIAddress}request=manifest&user=${user}&s3=${s3bucket}`, true); // true for asynchronous
+  xmlHttp.send(null);
+};
+
 
 const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON) => {
   const apiPath = (jsonType) =>
