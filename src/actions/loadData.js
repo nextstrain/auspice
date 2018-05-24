@@ -86,7 +86,6 @@ const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON
       if (narrativeJSON) {
         data.JSONs.narrative = narrativeJSON;
       }
-      console.log(data)
       dispatch({
         type: types.CLEAN_START,
         ...createStateFromQueryOrJSONs(data)
@@ -102,7 +101,6 @@ const fetchNarrativesAndDispatch = (dispatch, datasets, query, s3bucket) => {
   fetch(`${charonAPIAddress}request=narrative&name=${datasets.datapath.replace(/^\//, '').replace(/\//, '_').replace(/narratives_/, '')}`)
     .then((res) => res.json())
     .then((blocks) => {
-      console.log("blocks", blocks);
       const newDatasets = {datasets};
       newDatasets.datapath = getDatapath(blocks[0].dataset, datasets.availableDatasets);
       fetchDataAndDispatch(dispatch, newDatasets, query, s3bucket, blocks);
@@ -117,18 +115,17 @@ const fetchNarrativesAndDispatch = (dispatch, datasets, query, s3bucket) => {
 
 export const loadJSONs = (s3override = undefined) => {
   return (dispatch, getState) => {
-    const { datasets } = getState();
+    const { datasets, tree } = getState();
     if (!datasets.availableDatasets) {
       console.error("Attempted to fetch JSONs before Charon returned initial data.");
       return;
     }
-    dispatch({type: types.DATA_INVALID});
+    if (tree.loaded) {
+      dispatch({type: types.DATA_INVALID});
+    }
     const query = queryString.parse(window.location.search);
     const s3bucket = s3override ? s3override : datasets.s3bucket;
-    console.log("LOAD JSONS", datasets)
-
     if (datasets.datapath.startsWith("narrative")) {
-      console.log("NARRATIVE! fetchNarrativesAndDispatch")
       fetchNarrativesAndDispatch(dispatch, datasets, query, s3bucket);
     } else {
       fetchDataAndDispatch(dispatch, datasets, query, s3bucket, false);
