@@ -12,7 +12,7 @@ const makeDataPathFromParsedParams = (parsedParams) => {
 };
 
 /* match URL pathname to datasets (from manifest) */
-const getDatapath = (pathname, availableDatasets) => {
+export const getDatapath = (pathname, availableDatasets) => {
   if (!availableDatasets) {return undefined;}
   const parsedParams = parseParams(pathname, availableDatasets);
   if (parsedParams.valid) {

@@ -2,9 +2,80 @@ import queryString from "query-string";
 import * as types from "./types";
 import { charonAPIAddress } from "../util/globals";
 import { getManifest } from "../util/clientAPIInterface";
-import { goTo404 } from "./navigation";
+import { getDatapath, goTo404 } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 import { createDatapathForSecondSegment } from "../util/parseParams";
+
+const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON) => {
+  const apiPath = (jsonType) =>
+    `${charonAPIAddress}request=json&path=${datasets.datapath}_${jsonType}.json&s3=${s3bucket}`;
+
+  const promisesOrder = ["meta", "tree", "frequencies"];
+  const promises = [
+    fetch(apiPath("meta")).then((res) => res.json()),
+    fetch(apiPath("tree")).then((res) => res.json()),
+    fetch(apiPath("tip-frequencies")).then((res) => res.json())
+  ];
+  /* add promises according to the URL */
+  if (query.tt) { /* SECOND TREE */
+    const secondPath = createDatapathForSecondSegment(query.tt, datasets.datapath, datasets.availableDatasets);
+    if (secondPath) {
+      promisesOrder.push("treeToo");
+      promises.push(
+        fetch(`${charonAPIAddress}request=json&path=${secondPath}_tree.json&s3=${s3bucket}`)
+          .then((res) => res.json())
+          // don't need to catch - it'll be handled in the promises.map below
+      );
+      // promises.push(fetch(secondPath).then((res) => res.json()));
+    }
+  }
+  Promise.all(promises.map((promise) => promise.catch(() => undefined)))
+    .then((values) => {
+      // all promises have not resolved or rejected (value[x] = undefined upon rejection)
+      // you must check for undefined here, they won't go to the following catch
+      const data = {JSONs: {}, query};
+      values.forEach((v, i) => {
+        if (v) data.JSONs[promisesOrder[i]] = v; // if statement removes undefinds
+      });
+      // console.log(data);
+      if (!(data.JSONs.meta && data.JSONs.tree)) {
+        console.error("Tree & Meta JSONs could not be loaded.");
+        dispatch(goTo404(`
+          Auspice attempted to load JSONs for the dataset "${datasets.datapath.replace(/_/, '/')}", but they couldn't be found.
+        `));
+        return;
+      }
+      if (narrativeJSON) {
+        data.JSONs.narrative = narrativeJSON;
+      }
+      console.log(data)
+      dispatch({
+        type: types.CLEAN_START,
+        ...createStateFromQueryOrJSONs(data)
+      });
+    })
+    .catch((err) => {
+      // some coding error in handling happened. This is not the rejection of the promise you think it is!
+      console.error("Code error. This should not happen.", err);
+    });
+};
+
+const fetchNarrativesAndDispatch = (dispatch, datasets, query, s3bucket) => {
+  fetch(`${charonAPIAddress}request=narrative&name=${datasets.datapath.replace(/^\//, '').replace(/\//, '_').replace(/narratives_/, '')}`)
+    .then((res) => res.json())
+    .then((blocks) => {
+      console.log("blocks", blocks);
+      const newDatasets = {datasets};
+      newDatasets.datapath = getDatapath(blocks[0].dataset, datasets.availableDatasets);
+      fetchDataAndDispatch(dispatch, newDatasets, query, s3bucket, blocks);
+    })
+    .catch((err) => {
+      // some coding error in handling happened. This is not the rejection of the promise you think it is!
+      // syntax error is akin to a 404
+      console.error("Error in fetchNarrativesAndDispatch", err);
+    });
+
+};
 
 export const loadJSONs = (s3override = undefined) => {
   return (dispatch, getState) => {
@@ -16,61 +87,14 @@ export const loadJSONs = (s3override = undefined) => {
     dispatch({type: types.DATA_INVALID});
     const query = queryString.parse(window.location.search);
     const s3bucket = s3override ? s3override : datasets.s3bucket;
-    const apiPath = (jsonType) =>
-      `${charonAPIAddress}request=json&path=${datasets.datapath}_${jsonType}.json&s3=${s3bucket}`;
+    console.log("LOAD JSONS", datasets)
 
-    const promisesOrder = ["meta", "tree", "frequencies"];
-    const promises = [
-      fetch(apiPath("meta")).then((res) => res.json()),
-      fetch(apiPath("tree")).then((res) => res.json()),
-      fetch(apiPath("tip-frequencies")).then((res) => res.json())
-    ];
-    /* add promises according to the URL */
-    if (query.n) { /* narrative */
-      promisesOrder.push("narrative");
-      promises.push(
-        fetch(`${charonAPIAddress}request=narrative&name=${datasets.datapath.replace(/^\//, '').replace(/\//, '_')}`)
-          .then((res) => res.json())
-          // don't need to catch - it'll be handled in the promises.map below
-      );
+    if (datasets.datapath.startsWith("narrative")) {
+      console.log("NARRATIVE! fetchNarrativesAndDispatch")
+      fetchNarrativesAndDispatch(dispatch, datasets, query, s3bucket);
+    } else {
+      fetchDataAndDispatch(dispatch, datasets, query, s3bucket, false);
     }
-    if (query.tt) { /* SECOND TREE */
-      const secondPath = createDatapathForSecondSegment(query.tt, datasets.datapath, datasets.availableDatasets);
-      if (secondPath) {
-        promisesOrder.push("treeToo");
-        promises.push(
-          fetch(`${charonAPIAddress}request=json&path=${secondPath}_tree.json&s3=${s3bucket}`)
-            .then((res) => res.json())
-            // don't need to catch - it'll be handled in the promises.map below
-        );
-        // promises.push(fetch(secondPath).then((res) => res.json()));
-      }
-    }
-    Promise.all(promises.map((promise) => promise.catch(() => undefined)))
-      .then((values) => {
-        // all promises have not resolved or rejected (value[x] = undefined upon rejection)
-        // you must check for undefined here, they won't go to the following catch
-        const data = {JSONs: {}, query};
-        values.forEach((v, i) => {
-          if (v) data.JSONs[promisesOrder[i]] = v; // if statement removes undefinds
-        });
-        // console.log(data);
-        if (!(data.JSONs.meta && data.JSONs.tree)) {
-          console.error("Tree & Meta JSONs could not be loaded.");
-          dispatch(goTo404(`
-            Auspice attempted to load JSONs for the dataset "${datasets.datapath.replace(/_/, '/')}", but they couldn't be found.
-          `));
-          return;
-        }
-        dispatch({
-          type: types.CLEAN_START,
-          ...createStateFromQueryOrJSONs(data)
-        });
-      })
-      .catch((err) => {
-        // some coding error in handling happened. This is not the rejection of the promise you think it is!
-        console.error("Code error. This should not happen.", err);
-      });
   };
 };
 

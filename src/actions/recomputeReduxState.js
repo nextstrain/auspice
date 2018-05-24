@@ -385,7 +385,7 @@ export const createStateFromQueryOrJSONs = ({
 
   if (narrative) {
     const n = parseInt(query.n, 10) || 1;
-    controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].url));
+    controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
     query = {n}; // eslint-disable-line
   } else {
     controls = modifyStateViaURLQuery(controls, query);

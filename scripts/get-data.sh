@@ -64,6 +64,7 @@ narratives=(
   "ebola.md"\
   "flu_seasonal_h3n2_ha_3y.md"\
   "mumps_na.md"\
+  "test.md"
   )
 
 rm -rf data/
