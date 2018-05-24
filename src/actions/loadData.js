@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import * as types from "./types";
 import { charonAPIAddress } from "../util/globals";
-import { getDatapath, goTo404, getPageFromPathname } from "./navigation";
+import { getDatapath, goTo404, chooseDisplayComponentFromPathname } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 import { createDatapathForSecondSegment } from "../util/parseParams";
 
@@ -13,7 +13,7 @@ export const getManifest = (dispatch, s3bucket = "live") => {
     const datasets = JSON.parse(data);
     // console.log("SERVER API REQUEST RETURNED:", datasets);
     const availableDatasets = {pathogen: datasets.pathogen};
-    const datapath = getPageFromPathname(window.location.pathname) === "app" ?
+    const datapath = chooseDisplayComponentFromPathname(window.location.pathname) === "app" ?
       getDatapath(window.location.pathname, availableDatasets) :
       undefined;
     dispatch({

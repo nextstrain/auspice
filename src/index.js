@@ -32,16 +32,16 @@ if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
 /* google analytics */
 ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-2");
 
-@connect((state) => ({page: state.datasets.page}))
+@connect((state) => ({displayComponent: state.datasets.displayComponent}))
 class MainComponentSwitch extends React.Component {
   render() {
-    // console.log("MainComponentSwitch running (should be infrequent!)", this.props.page)
-    switch (this.props.page) {
+    // console.log("MainComponentSwitch running (should be infrequent!)", this.props.displayComponent)
+    switch (this.props.displayComponent) {
       case "splash": return (<Splash/>);
       case "app" : return (<App/>);
       case "status" : return (<Status/>);
       default:
-        console.error(`reduxStore.datasets.page is invalid (${this.props.page})`);
+        console.error(`reduxStore.datasets.displayComponent is invalid (${this.props.displayComponent})`);
         return (<Splash/>);
     }
   }

@@ -1,12 +1,12 @@
 import * as types from "../actions/types";
-import { getPageFromPathname } from "../actions/navigation";
+import { chooseDisplayComponentFromPathname } from "../actions/navigation";
 
 const datasets = (state = {
   s3bucket: "live",
   availableDatasets: undefined,
   splash: undefined,
   datapath: undefined, // e.g. "zika" or "flu_h3n2_12y"
-  page: getPageFromPathname(window.location.pathname),
+  displayComponent: chooseDisplayComponentFromPathname(window.location.pathname),
   urlPath: window.location.pathname,
   urlQuery: window.location.search,
   errorMessage: undefined
@@ -14,7 +14,7 @@ const datasets = (state = {
   switch (action.type) {
     case types.PAGE_CHANGE: {
       return Object.assign({}, state, {
-        page: action.page,
+        displayComponent: action.displayComponent,
         datapath: action.datapath,
         errorMessage: action.errorMessage
       });
