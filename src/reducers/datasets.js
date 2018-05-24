@@ -1,5 +1,5 @@
 import * as types from "../actions/types";
-import { getPageFromPathname } from "../components/framework/pageSelect";
+import { getPageFromPathname } from "../actions/navigation";
 
 const datasets = (state = {
   s3bucket: "live",
