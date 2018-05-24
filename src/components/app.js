@@ -121,13 +121,18 @@ class App extends React.Component {
     }));
     this.state = {
       mql,
-      sidebarOpen: mql.matches,
+      sidebarOpen: props.treeLoaded ? mql.matches : false,
       mobileDisplay: !mql.matches
     };
     analyticsNewPage();
   }
   static propTypes = {
     dispatch: PropTypes.func.isRequired
+  }
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.treeLoaded && this.state.mql.matches) {
+      this.setState({sidebarOpen: true});
+    }
   }
   componentWillMount() {
     if (this.props.datapath) { /* datapath (pathname) only appears after manifest JSON has arrived */
