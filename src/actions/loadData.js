@@ -8,6 +8,8 @@ import { createDatapathForSecondSegment } from "../util/parseParams";
 export const getManifest = (dispatch, s3bucket = "live") => {
   const charonErrorHandler = () => {
     console.warn("Failed to get manifest JSON from server");
+    const datapath = window.location.pathname.replace(/^\//, '').replace(/\/$/, '').replace('/', '_');
+    dispatch({type: types.PROCEED_SANS_MANIFEST, datapath});
   };
   const processData = (data) => {
     const datasets = JSON.parse(data);
@@ -116,10 +118,6 @@ const fetchNarrativesAndDispatch = (dispatch, datasets, query, s3bucket) => {
 export const loadJSONs = (s3override = undefined) => {
   return (dispatch, getState) => {
     const { datasets, tree } = getState();
-    if (!datasets.availableDatasets) {
-      console.error("Attempted to fetch JSONs before Charon returned initial data.");
-      return;
-    }
     if (tree.loaded) {
       dispatch({type: types.DATA_INVALID});
     }

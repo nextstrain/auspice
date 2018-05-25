@@ -27,6 +27,8 @@ const datasets = (state = {
         datapath: action.datapath
       };
       return Object.assign({}, state, newState);
+    } case types.PROCEED_SANS_MANIFEST: {
+      return Object.assign({}, state, {datapath: action.datapath});
     } case types.URL: {
       return Object.assign({}, state, {
         urlPath: action.path,
