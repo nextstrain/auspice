@@ -1,6 +1,6 @@
 import { scaleLinear } from "d3-scale";
 import { createDefaultParams } from "./defaultParams";
-import { addLeafCount, createChildrenAndParentsReturnNumTips, calcYValues } from "./helpers";
+import { addLeafCount, createChildrenAndParentsReturnNumTips, setYValues } from "./helpers";
 import { change, modifySVG, modifySVGInStages } from "./change";
 
 /* PROTOTYPES */
@@ -34,11 +34,14 @@ const PhyloTree = function PhyloTree(reduxNodes, debugId) {
     return phyloNode;
   });
   this.numberOfTips = createChildrenAndParentsReturnNumTips(this.nodes);
-  calcYValues(this.nodes);
+  setYValues(this.nodes);
   this.xScale = scaleLinear();
   this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
   addLeafCount(this.nodes[0]);
+  this.strainToNode = {};
+  this.nodes.forEach((n) => {this.strainToNode[n.strain] = n;});
+
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
   // this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
   //   {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});

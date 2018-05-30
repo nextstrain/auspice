@@ -59,7 +59,7 @@ export const createChildrenAndParentsReturnNumTips = (nodes) => {
   return numTips;
 };
 
-/**
+/** setYValues
  * given nodes, this fn sets node.yvalue for each node
  * Nodes are the phyloTree nodes (i.e. node.n is the redux node)
  * Nodes must have parent child links established (via createChildrenAndParents)
@@ -67,7 +67,8 @@ export const createChildrenAndParentsReturnNumTips = (nodes) => {
  * rectangularLayout, radialLayout, createChildrenAndParents
  * side effects: node.n.yvalue (i.e. in the redux node) and node.yRange (i.e. in the phyloTree node)
  */
-export const calcYValues = (nodes) => {
+export const setYValues = (nodes) => {
+  console.log("set Y values")
   let count = 0;
   const recurse = (node) => {
     if (node.children) {

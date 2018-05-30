@@ -12,84 +12,6 @@ import { resetTreeButtonStyle } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
 
-const tangle_score = function(nodes1, nodes2, nameToNode){
-  let sq_dev = 0, count=0;
-  let my1=0, my2=0, sqy1=0,sqy2=0, y12=0;
-  for (let i=0;i<nodes2.length; i++){
-    let n=nodes2[i];
-    if ((!n.children) && nameToNode[n.strain]){
-      let y1 = n.yvalue, y2=nameToNode[n.strain].yvalue;
-      sq_dev += (y1 - y2)*(y1 - y2);
-      count++;
-      my1+=y1;
-      my2+=y2;
-      sqy1+=y1**2;
-      sqy2+=y2**2;
-      y12 += y1*y2
-    }
-  }
-  my1/=count;
-  my2/=count;
-  sqy1/=count;
-  sqy2/=count;
-  y12/=count
-  const corr = (y12-my1*my2)/Math.sqrt((sqy1 - my1**2)*(sqy2 - my2**2))
-  // console.log("tangle score:", sq_dev/count, count, corr);
-  return corr;
-}
-
-const postOrderIteration = function(node, callback){
-    if (node.children){
-        for (var i=0; i<node.children.length; i++){
-            postOrderIteration(node.children[i], callback);
-        }
-    }
-    callback(node);
-}
-
-const calculateNodeRank = function(nodes){
-  let yvalue = nodes[0].fullTipCount;
-  const assignNodeOrder = function(node){
-    if (!node.children){
-      yvalue--;
-      node.yvalue = yvalue
-      node.maxYvalue = yvalue;
-      node.minYvalue = yvalue;
-    }else{
-      let s=0;
-      for (let i=0;i<node.children.length; i++){
-        s+=node.children[i].yvalue;
-      }
-      s/=node.children.length;
-      node.yvalue = s;
-      node.maxYvalue = node.children[node.children.length-1].yvalue;
-      node.minYvalue = node.children[0].yvalue;
-    }
-  }
-  postOrderIteration(nodes[0], assignNodeOrder);
-}
-
-const calculateOtherTreeRank = function(nodes, nameToNode){
-  nodes.forEach(function(n){n.otherYvalue=0;});
-  const assignNodeOrder = function(node){
-    if (!node.children){
-      if (nameToNode[node.strain]){
-        node.otherYvalue += nameToNode[node.strain].yvalue;
-      }
-    }else{
-      let s=0;
-      for (let i=0;i<node.children.length; i++){
-        if (node.children[i].otherYvalue){
-          s += node.children[i].otherYvalue;
-        }
-      }
-      node.otherYvalue = 1.0*s;
-    }
-  }
-  postOrderIteration(nodes[0], assignNodeOrder);
-  nodes.forEach(function(n){n.otherYvalue/=n.fullTipCount;});
-}
-
 class Tree extends React.Component {
   constructor(props) {
     super(props);
@@ -120,110 +42,58 @@ class Tree extends React.Component {
       this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root: [0, 0]}));
     };
   }
+  setUpAndRenderTreeToo(props, newState) {
+    /* this.setState(newState) will be run sometime after this returns */
+    /* modifies newState in place */
+    console.log("setUpAndRenderTreeToo");
+    newState.treeToo = new PhyloTree(props.treeToo.nodes, "RIGHT");
+    renderTree(this, false, newState.treeToo, props);
+    this.ViewerToo.fitToViewer();
+  }
   componentDidMount() {
     if (this.props.tree.loaded) {
-      calculateNodeRank(this.props.tree.nodes);
-      const tree = new PhyloTree(this.props.tree.nodes, "LEFT");
-      const nameToNode = {};
-      for (let i=0;i<this.props.tree.nodes.length;i++){
-        nameToNode[this.props.tree.nodes[i].strain] = this.props.tree.nodes[i];
-      }
-      renderTree(this, true, tree, this.props);
+      const newState = {};
+      newState.tree = new PhyloTree(this.props.tree.nodes, "LEFT");
+      renderTree(this, true, newState.tree, this.props);
       this.Viewer.fitToViewer();
-      const newState = {tree};
-      let corr=-1, new_corr=-1;
       if (this.props.showTreeToo) {
-        console.time("tangle")
-        calculateOtherTreeRank(this.props.treeToo.nodes, nameToNode);
-        calculateNodeRank(this.props.treeToo.nodes);
-        corr = tangle_score(this.props.tree.nodes, this.props.treeToo.nodes, nameToNode);
-        console.log("Initial tangle rank correlation:",corr);
-        for (let i=0;i<this.props.treeToo.nodes.length;i++){
-          let n=this.props.treeToo.nodes[i];
-          if (n.children){
-            // console.log(n.strain, n.children);
-            n.children.sort(function(a,b){
-              if (nameToNode[b.strain]&&nameToNode[a.strain]){
-                return -(a.otherYvalue - b.otherYvalue);
-              }else{
-                return 0;
-              }
-            });
-          }
-        }
-        calculateNodeRank(this.props.treeToo.nodes);
-        corr = tangle_score(this.props.tree.nodes, this.props.treeToo.nodes, nameToNode);
-        console.log("Pre optimized tangle rank correlation:",corr);
-        for (let i=0;i<this.props.treeToo.nodes.length;i++){
-          let n=this.props.treeToo.nodes[i];
-          if (n.children){
-            n.children.reverse();
-            calculateNodeRank(this.props.treeToo.nodes);
-            new_corr = tangle_score(this.props.tree.nodes, this.props.treeToo.nodes, nameToNode)
-            if (corr>new_corr){
-              n.children.reverse();
-              calculateNodeRank(this.props.treeToo.nodes);
-            }else{
-              corr = new_corr;
-            }
-
-          }
-        }
-        calculateNodeRank(this.props.treeToo.nodes);
-        tangle_score(this.props.tree.nodes, this.props.treeToo.nodes, nameToNode);
-        console.timeEnd("tangle")
-
-        const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
-        renderTree(this, false, treeToo, this.props);
-        this.ViewerToo.fitToViewer();
-        newState.treeToo = treeToo;
-        console.log("Optimized tangle rank correlation:",corr);
+        this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
       }
-      this.setState(newState);
+      this.setState(newState); /* this will trigger an unneccessary CDU :( */
     }
   }
   componentDidUpdate(prevProps) {
-    let newState;
-    let leftTreeUpdated;
-    let rightTreeUpdated;
-    let _; // eslint-disable-line
+    let newState = {};
+    let rightTreeUpdated = false;
 
-    if (this.state.tree) {
-      [newState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(true, this.state.tree, this.Viewer, prevProps, this.props);
-      if (prevProps.showTreeToo !== this.props.showTreeToo) {
-        this.state.tree.change({svgHasChangedDimensions: true});
-        if (this.props.showTreeToo) {
-          if (this.state.treeToo) { /* remove the old tree */
-            this.state.treeToo.clearSVG();
-          }
-          const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
-          renderTree(this, false, treeToo, this.props);
-          this.resetView(); // reset the position of the left tree
-          if (this.tangleRef) this.tangleRef.drawLines();
-          this.setState({treeToo});
-        } else {
-          this.setState({treeToo: null});
-        }
-        return;
-      }
-    }
-    /* tree too */
-    if (this.state.treeToo) {
-      if (!prevProps.showTreeToo && this.props.showTreeToo) {
-        newState.treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
-        renderTree(this, false, newState.treeToo, this.props);
-        this.ViewerToo.fitToViewer();
-      } else if (!this.props.showTreeToo) {
+    /* potentially change the (main / left hand) tree */
+    const [potentialNewState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(true, this.state.tree, this.Viewer, prevProps, this.props);
+    if (potentialNewState) newState = potentialNewState;
+
+    /* has the 2nd (right hand) tree just been turned on, off or swapped? */
+    if (prevProps.showTreeToo !== this.props.showTreeToo) {
+      this.state.tree.change({svgHasChangedDimensions: true}); /* readjust co-ordinates */
+      if (!this.props.showTreeToo) { /* turned off -> remove the 2nd tree */
         newState.treeToo = null;
-      } else {
-        [_, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, this.ViewerToo, prevProps, this.props);
+      } else { /* turned on -> render the 2nd tree */
+        if (this.state.treeToo) { /* tree has been swapped -> remove the old tree */
+          this.state.treeToo.clearSVG();
+        }
+        this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
+        this.resetView(); /* reset the position of the left tree */
+        if (this.tangleRef) this.tangleRef.drawLines();
       }
+    } else if (this.state.treeToo) { /* the tree hasn't just been swapped, but it does exist and may need updating */
+      let unusedNewState; // eslint-disable-line
+      [unusedNewState, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, this.ViewerToo, prevProps, this.props);
+      /* note, we don't incorporate unusedNewState into the state? why not? */
     }
+
     /* we may need to (imperitively) tell the tangle to redraw */
     if (this.tangleRef && (leftTreeUpdated || rightTreeUpdated)) {
       this.tangleRef.drawLines();
     }
-    if (newState) this.setState(newState);
+    if (Object.keys(newState).length) this.setState(newState);
   }
   renderTreeDiv({width, height, d3ref, viewerRef}) {
     return (
