@@ -6,13 +6,13 @@ const fs = require('fs');
 const path = require("path");
 const request = require('request');
 
-const makeBlock = (url = "") => {
-  return ({lines: [], url});
+const makeBlock = (dataset = undefined, query = "") => {
+  return ({lines: [], dataset, query});
 };
 
-const parsePreamble = (blocks, lines) => {
+const parsePreamble = (lines) => {
   if (!lines[0].startsWith("---")) {
-    return 0;
+    return [undefined, 0];
   }
   const block = makeBlock(); /* initialise */
   const contents = {title: false, author: false, date: false, category: false};
@@ -31,24 +31,31 @@ const parsePreamble = (blocks, lines) => {
   if (contents.author) block.lines.push(`* _Written by:_ **${contents.author}**`);
   if (contents.date) block.lines.push(`* _Date:_ **${contents.date}**`);
   if (contents.category) block.lines.push(`* _Category:_ **${contents.category}**`);
-  blocks.push(block);
-  return ++n;
+  return [block, ++n];
 };
 
 
 const parseMarkdownArray = (mdArr) => {
   const blocks = [];
   const nMax = mdArr.length;
-  const reUrl = /url=[^\s]+\?([^\s`]*)/;
-  let n = parsePreamble(blocks, mdArr); /* modifies blocks in-place */
+  const reUrl = /url=[^\s/]*\/([^\s]+)\?([^\s`]*)/;
+  let [preambleBlock, n] = parsePreamble(mdArr); /* modifies blocks in-place */
+  if (preambleBlock) {
+    blocks.push(preambleBlock);
+  }
   let block = makeBlock(); /* initialise */
   while (n < nMax) {
     const line = mdArr[n];
-    if (line.startsWith('`nextstrain') && line.match(reUrl)) {
+    const reMatch = line.match(reUrl);
+    if (line.startsWith('`nextstrain') && reMatch) {
       if (block.lines.length && block.lines.filter((l) => l.length).length) {
         blocks.push(block); /* push the previous block onto the stack */
       }
-      block = makeBlock(line.match(reUrl)[1]);
+      block = makeBlock(reMatch[1], reMatch[2]);
+      if (blocks.length === 1) { // i.e. just the preamble, give it the URL of this block
+        blocks[0].dataset = reMatch[1];
+        blocks[0].query = reMatch[2];
+      }
     } else {
       block.lines.push(line);
     }

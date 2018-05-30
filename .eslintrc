@@ -43,6 +43,7 @@ rules:
   no-continue: off
   no-unneeded-ternary: ["error", { "defaultAssignment": true }]
   quote-props: ["error", "as-needed"]
+  prefer-const: ["error", {"destructuring": "all"}]
 parserOptions:
   ecmaVersion: 6
   sourceType: module

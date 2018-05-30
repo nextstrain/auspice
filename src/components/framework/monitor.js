@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import _throttle from "lodash/throttle";
 import { BROWSER_DIMENSIONS, CHANGE_PANEL_LAYOUT } from "../../actions/types";
 import { browserBackForward } from "../../actions/navigation";
-import { getManifest } from "../../util/clientAPIInterface";
+import { getManifest } from "../../actions/loadData";
 import { twoColumnBreakpoint } from "../../util/globals";
 
 @connect((state) => ({

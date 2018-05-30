@@ -35,7 +35,7 @@ class Narrative extends React.Component {
     this.changeFocus = () => {
       // console.log("Changing to", this.shouldBeInFocus)
       this.props.dispatch(changePageQuery({
-        queryToUse: queryString.parse(this.props.blocks[this.shouldBeInFocus].url),
+        queryToUse: queryString.parse(this.props.blocks[this.shouldBeInFocus].query),
         queryToDisplay: {n: this.shouldBeInFocus},
         push: true
       }));

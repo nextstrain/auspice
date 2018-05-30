@@ -5,11 +5,13 @@ import "./util/polyfills"; // eslint-disable-line
 import React from "react";
 import ReactDOM from "react-dom";
 import ReactGA from "react-ga";
-import { Provider } from "react-redux";
+import { connect, Provider } from "react-redux";
 import { AppContainer } from 'react-hot-loader';
 import injectTapEventPlugin from "react-tap-event-plugin";
 import Monitor from "./components/framework/monitor";
-import PageSelect from "./components/framework/pageSelect";
+import App from "./components/app";
+import Splash from "./components/splash";
+import Status from "./components/status";
 import Notifications from "./components/notifications/notifications";
 import configureStore from "./store";
 /* S T Y L E S H E E T S */
@@ -30,13 +32,29 @@ if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
 /* google analytics */
 ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-2");
 
+@connect((state) => ({displayComponent: state.datasets.displayComponent}))
+class MainComponentSwitch extends React.Component {
+  render() {
+    // console.log("MainComponentSwitch running (should be infrequent!)", this.props.displayComponent)
+    switch (this.props.displayComponent) {
+      case "splash": return (<Splash/>);
+      case "app" : return (<App/>);
+      case "status" : return (<Status/>);
+      default:
+        console.error(`reduxStore.datasets.displayComponent is invalid (${this.props.displayComponent})`);
+        return (<Splash/>);
+    }
+  }
+}
+
+
 const Root = () => {
   return (
     <Provider store={store}>
       <div>
         <Monitor/>
         <Notifications/>
-        <PageSelect/>
+        <MainComponentSwitch/>
       </div>
     </Provider>
   );

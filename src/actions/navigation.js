@@ -2,7 +2,6 @@ import queryString from "query-string";
 import parseParams from "../util/parseParams";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
-import { getPageFromPathname } from "../components/framework/pageSelect";
 
 // make prefix for data files with fields joined by _ instead of / as in URL
 const makeDataPathFromParsedParams = (parsedParams) => {
@@ -12,7 +11,7 @@ const makeDataPathFromParsedParams = (parsedParams) => {
 };
 
 /* match URL pathname to datasets (from manifest) */
-const getDatapath = (pathname, availableDatasets) => {
+export const getDatapath = (pathname, availableDatasets) => {
   if (!availableDatasets) {return undefined;}
   const parsedParams = parseParams(pathname, availableDatasets);
   if (parsedParams.valid) {
@@ -21,6 +20,11 @@ const getDatapath = (pathname, availableDatasets) => {
   return pathname.replace(/^\//, '').replace(/\/$/, '').replace('/', '_');
 };
 
+export const chooseDisplayComponentFromPathname = (pathname) => {
+  if (pathname === "/" || pathname === "/all") return "splash";
+  else if (pathname.startsWith("/status")) return "status";
+  return "app"; // fallthrough
+};
 
 /* changes the state of the page and (perhaps) the dataset displayed.
 This function is used throughout the app for all navigation to another page, (including braowserBackForward - see function below)
@@ -35,7 +39,7 @@ ARGUMENTS:
 UNDERSTANDING QUERY (SLIGHTLY CONFUSING)
 This function changes the pathname (stored in the datasets reducer) and modifies the URL pathname and query
 accordingly in the middleware. But the URL query is not processed further.
-Because the datasets reducer has changed, the <App> (or whichever page we're on) will update.
+Because the datasets reducer has changed, the <App> (or whichever display component we're on) will update.
 In <App>, this causes a call to loadJSONs, which will, as part of it's dispatch, use the URL state of query.
 In this way, the URL query is "used".
 */
@@ -44,10 +48,10 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
   const { datasets } = getState();
   const d = {
     type: PAGE_CHANGE,
-    page: getPageFromPathname(path),
+    displayComponent: chooseDisplayComponentFromPathname(path),
     errorMessage: undefined
   };
-  d.datapath = d.page === "app" ? getDatapath(path, datasets.availableDatasets) : undefined;
+  d.datapath = d.displayComponent === "app" ? getDatapath(path, datasets.availableDatasets) : undefined;
   if (query !== undefined) { d.query = query; }
   if (push) { d.pushState = true; }
   /* check if this is "valid" - we can change it here before it is dispatched */
@@ -57,7 +61,7 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
 /* a 404 uses the same machinery as changePage, but it's not a thunk */
 export const goTo404 = (errorMessage) => ({
   type: PAGE_CHANGE,
-  page: "/",
+  displayComponent: "splash",
   errorMessage,
   pushState: true
 });

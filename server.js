@@ -53,7 +53,6 @@ const server = app.listen(app.get('port'), () => {
   console.log("-----------------------------------");
   console.log("Auspice server started on port " + server.address().port);
   console.log(devServer ? "Serving dev bundle with hot-reloading enabled" : "Serving compiled bundle from /dist");
-  console.log(global.LOCAL_DATA ? "Data is being sourced from /data" : "Data is being sourced from data.nextstrain.org (S3)");
-  console.log(global.LOCAL_STATIC ? "Static content is being sourced from /static" : "Static content is being sourced from cdn.rawgit.com");
+  console.log(global.LOCAL_DATA ? "Data is being sourced from /data" : "Dataset JSONs are being sourced from S3, narratives via the static github repo");
   console.log("-----------------------------------\n\n");
 });
