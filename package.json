@@ -1,6 +1,6 @@
 {
   "name": "auspice",
-  "version": "1.20.2",
+  "version": "1.20.3",
   "description": "Web app for visualizing pathogen evolution",
   "author": "James Hadfield, Trevor Bedford and Richard Neher",
   "license": "AGPL",
