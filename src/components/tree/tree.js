@@ -11,6 +11,7 @@ import * as callbacks from "./reactD3Interface/callbacks";
 import { resetTreeButtonStyle } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
+import { untangleTreeToo } from "./tangle/untangling";
 
 class Tree extends React.Component {
   constructor(props) {
@@ -47,6 +48,7 @@ class Tree extends React.Component {
     /* modifies newState in place */
     console.log("setUpAndRenderTreeToo");
     newState.treeToo = new PhyloTree(props.treeToo.nodes, "RIGHT");
+    untangleTreeToo(newState.tree, newState.treeToo);
     renderTree(this, false, newState.treeToo, props);
     this.ViewerToo.fitToViewer();
   }

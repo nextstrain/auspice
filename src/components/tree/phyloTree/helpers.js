@@ -68,7 +68,7 @@ export const createChildrenAndParentsReturnNumTips = (nodes) => {
  * side effects: node.n.yvalue (i.e. in the redux node) and node.yRange (i.e. in the phyloTree node)
  */
 export const setYValues = (nodes) => {
-  console.log("set Y values")
+  // console.log("set Y values")
   let count = 0;
   const recurse = (node) => {
     if (node.children) {
