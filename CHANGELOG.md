@@ -1,14 +1,42 @@
+* Untangling via a simple algorithm upon 2nd tree load
+* Segment names displayed above trees (if 2 trees)
+* Fix hover-info-box date bug -- [issue 572](https://github.com/nextstrain/auspice/pull/572)
+
 ## version 1.20.3 - 2018/05/30
+* Narratives now accessed via `/narratives/...` URLs
+* App now works without needing a manifest file (but the datasets dropdown needs it)
+* Initial load simplified
+* Sidebar doesn't appear until the data is ready to be displayed
+
 
 ## version 1.20.2 - 2018/05/21
+* Changes to the frequencies threshold
 
 ## version 1.20.1 - 2018/05/21
+* Changes to the frequencies threshold
+* Narratives restored
 
 ## version 1.20.0 - 2018/05/15
+**Auspice is now served via the nextstrain.org server together with the static (gatsbyjs) site**
+* Changes to the server code organisation
+* Static content removed
+* New splash page listing the (should only be accessed from local instances or 404s, live site splash is via the static site)
+* Improved page navigation API
+* Travis CI 🎉
+* Auspice version is displayed in the footer
+* Release script modified (Travis CI listens to `release` and pushes a successful build to S3 which is fetched by the live server)
+
 
 ## version 1.19.1 - 2018/05/09
+* Fixed a bug where proteins starting with a number (e.g. 2K) were assumed to be nucleotide genotypes.
 
 ## version 1.19.0 - 2018/05/09
+* Improved sidebar styling on both mobile & desktop
+* Reset layout button doesn't re-instantiate the PhyloTree object, rather it resets the branch thicknesses & sets the whole tree to be in view
+* Padding improvements - tip labels are now visible, and small clades render better.
+* Tip names now shown for up to 100 taxa
+* Branch thickness restored -- [issue 544](https://github.com/nextstrain/auspice/pull/544)
+* Tree panning has been removed (we no longer use `react-svg-pan-zoom`)
 
 ## version 1.18.10 - 2018/05/07
 
