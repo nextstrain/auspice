@@ -104,7 +104,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.PAGE_CHANGE:
       if (action.query) {
         query = action.query;
-      } else if (action.page !== state.datasets.page) {
+      } else if (action.displayComponent !== state.datasets.displayComponent) {
         query = {};
       }
       break;
@@ -115,15 +115,15 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   /* second switch: path change */
   switch (action.type) {
     case types.PAGE_CHANGE:
-      /* desired behaviour depends on the page selected... */
-      if (action.page === "app") {
+      /* desired behaviour depends on the displayComponent selected... */
+      if (action.displayComponent === "app") {
         pathname = action.datapath.replace(/_/g, "/");
-      } else if (action.page === "splash") {
+      } else if (action.displayComponent === "splash") {
         pathname = "/";
-      } else if (pathname.startsWith(`/${action.page}`)) {
+      } else if (pathname.startsWith(`/${action.displayComponent}`)) {
         // leave the pathname alone!
       } else {
-        pathname = action.page;
+        pathname = action.displayComponent;
       }
       break;
     default:

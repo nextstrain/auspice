@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Select from "react-select";
 import { controlsWidth } from "../../util/globals";
@@ -53,6 +52,7 @@ class GeoResolution extends React.Component {
           value={this.props.geoResolution}
           options={geoResolutionOptions}
           clearable={false}
+          searchable={false}
           multi={false}
           onChange={(opt) => {
             this.changeGeoResolution(opt.value);

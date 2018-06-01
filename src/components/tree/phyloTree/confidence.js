@@ -42,5 +42,6 @@ export const drawSingleCI = function drawSingleCI(selection, opacity) {
     .style("stroke", (d) => d.branchStroke || "#888")
     .style("opacity", opacity)
     .style("fill", "none")
-    .style("stroke-width", calcConfidenceWidth);
+    .style("stroke-width", calcConfidenceWidth)
+    .style("pointer-events", "none"); // setting to "none" to prevent CIs from grabbing branch hovers
 };

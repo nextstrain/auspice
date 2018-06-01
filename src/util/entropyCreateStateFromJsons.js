@@ -7,11 +7,11 @@ const getAnnotations = (jsonData) => {
     if (prot !== "nuc") {
       aaCount++;
       annotations.push({
-	prot: prot,
-	start: jsonData[prot].start,
-	end: jsonData[prot].end,
-	readingFrame: 1, // +tmpProt['pos'][0]%3,
-	fill: genotypeColors[aaCount % 10]
+        prot: prot,
+        start: jsonData[prot].start,
+        end: jsonData[prot].end,
+        readingFrame: 1, // +tmpProt['pos'][0]%3,
+        fill: genotypeColors[aaCount % 10]
       });
     }
   }

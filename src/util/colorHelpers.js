@@ -20,7 +20,7 @@ export const averageColors = (hexColors) => {
 export const determineColorByGenotypeType = (colorBy) => {
   /* note that nucleotide genotypes are either gt-nucXXX or gt-XXX */
   if (colorBy.startsWith("gt")) {
-    if (colorBy.slice(3, 6) === "nuc" || !isNaN(parseInt(colorBy.slice(3, 4), 10))) {
+    if (colorBy.slice(3, 6) === "nuc") {
       return "nuc";
     }
     return "aa";

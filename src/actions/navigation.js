@@ -11,7 +11,7 @@ const makeDataPathFromParsedParams = (parsedParams) => {
 };
 
 /* match URL pathname to datasets (from manifest) */
-const getDatapath = (pathname, availableDatasets) => {
+export const getDatapath = (pathname, availableDatasets) => {
   if (!availableDatasets) {return undefined;}
   const parsedParams = parseParams(pathname, availableDatasets);
   if (parsedParams.valid) {
@@ -20,19 +20,9 @@ const getDatapath = (pathname, availableDatasets) => {
   return pathname.replace(/^\//, '').replace(/\/$/, '').replace('/', '_');
 };
 
-export const getPageFromPathname = (pathname) => {
-  if (pathname === "/") {
-    return "splash";
-  } else if (pathname.startsWith("/methods")) {
-    return "methods";
-  } else if (pathname.startsWith("/posts")) {
-    console.error("Posts have been removed from auspice.");
-    return "splash";
-  } else if (pathname.startsWith("/about")) {
-    return "about";
-  } else if (pathname.startsWith("/status")) {
-    return "status";
-  }
+export const chooseDisplayComponentFromPathname = (pathname) => {
+  if (pathname === "/" || pathname === "/all") return "splash";
+  else if (pathname.startsWith("/status")) return "status";
   return "app"; // fallthrough
 };
 
@@ -49,7 +39,7 @@ ARGUMENTS:
 UNDERSTANDING QUERY (SLIGHTLY CONFUSING)
 This function changes the pathname (stored in the datasets reducer) and modifies the URL pathname and query
 accordingly in the middleware. But the URL query is not processed further.
-Because the datasets reducer has changed, the <App> (or whichever page we're on) will update.
+Because the datasets reducer has changed, the <App> (or whichever display component we're on) will update.
 In <App>, this causes a call to loadJSONs, which will, as part of it's dispatch, use the URL state of query.
 In this way, the URL query is "used".
 */
@@ -58,14 +48,23 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
   const { datasets } = getState();
   const d = {
     type: PAGE_CHANGE,
-    page: getPageFromPathname(path)
+    displayComponent: chooseDisplayComponentFromPathname(path),
+    errorMessage: undefined
   };
-  d.datapath = d.page === "app" ? getDatapath(path, datasets.availableDatasets) : undefined;
+  d.datapath = d.displayComponent === "app" ? getDatapath(path, datasets.availableDatasets) : undefined;
   if (query !== undefined) { d.query = query; }
   if (push) { d.pushState = true; }
   /* check if this is "valid" - we can change it here before it is dispatched */
   dispatch(d);
 };
+
+/* a 404 uses the same machinery as changePage, but it's not a thunk */
+export const goTo404 = (errorMessage) => ({
+  type: PAGE_CHANGE,
+  displayComponent: "splash",
+  errorMessage,
+  pushState: true
+});
 
 /* modify redux state and URL by specifying a new URL query string. Pathname is not considered, if you want to change that, use "changePage" instead.
 Unlike "changePage" the query is processed both by the middleware (i.e. to update the URL) AND by the reducers, to update their state accordingly.

@@ -5,11 +5,11 @@ big_flu
 /releases/
 server.dist.js
 /static/
+s3/
 
 ### OSX ###
 .DS_Store
 
 ### npm ###
-package-lock.json
 node_modules/
 npm-debug.log

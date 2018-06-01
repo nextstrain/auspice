@@ -9,8 +9,16 @@ export const updateTipLabels = function updateTipLabels(dt) {
     .filter((d) => d.terminal)
     .filter((d) => d.inView);
   // console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
-  if (inViewTerminalNodes.length < 50) {
-    // console.log("DRAWING!", inViewTerminalNodes)
+  if (inViewTerminalNodes.length < this.params.tipLabelBreakL1) {
+
+    let fontSize = this.params.tipLabelFontSizeL1;
+    if (inViewTerminalNodes.length < this.params.tipLabelBreakL2) {
+      fontSize = this.params.tipLabelFontSizeL2;
+    }
+    if (inViewTerminalNodes.length < this.params.tipLabelBreakL3) {
+      fontSize = this.params.tipLabelFontSizeL3;
+    }
+
     window.setTimeout(() => {
       this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
         .data(inViewTerminalNodes)
@@ -20,6 +28,7 @@ export const updateTipLabels = function updateTipLabels(dt) {
         .attr("y", (d) => d.yTip + yPad)
         .text((d) => tLFunc(d))
         .attr("class", "tipLabel")
+        .style("font-size", fontSize.toString()+"px")
         .style('visibility', 'visible');
     }, dt);
   }

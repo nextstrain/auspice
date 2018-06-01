@@ -1,6 +1,6 @@
 import * as types from "../actions/types";
 
-/* TODO: initial dtate should simply be {loaded: false} */
+/* TODO: initial data should simply be {loaded: false} */
 const frequencies = (state = {
   loaded: false,
   data: undefined,

@@ -10,18 +10,9 @@ import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 
 const unknownColor = "#DDDDDD";
 
-const continuousScale = (x0, x1) => {
-  const scale = scaleLinear()
-    .domain(genericDomain.map((d) => x0 + d * (x1 - x0)))
-    .range(colors[9]);
-  return (val) => (val === undefined || val === false) ? unknownColor : scale(val);
-};
-
 const getMinMaxFromTree = (nodes, nodesToo, attr) => {
-  const vals = nodes.map((n) => n.attr[attr]);
-  if (nodesToo) {
-    nodesToo.forEach((n) => vals.push(n.attr[attr]));
-  }
+  const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
+  const vals = arr.map((n) => n.attr[attr]);
   vals.filter((n) => n !== undefined)
     .filter((item, i, ar) => ar.indexOf(item) === i);
   return [min(vals), max(vals)];
@@ -75,9 +66,18 @@ const createDiscreteScale = (domain) => {
   return (val) => (val === undefined || val === false) ? unknownColor : scale(val);
 };
 
-const valBetween = (x0, x1) => {
-  return x0 + 0.5*(x1-x0);
+const createLegendBounds = (legendValues) => {
+  const valBetween = (x0, x1) => x0 + 0.5*(x1-x0);
+  const len = legendValues.length;
+  const legendBounds = {};
+  legendBounds[legendValues[0]] = [0, valBetween(legendValues[0], legendValues[1])];
+  for (let i = 1; i < len - 1; i++) {
+    legendBounds[legendValues[i]] = [valBetween(legendValues[i-1], legendValues[i]), valBetween(legendValues[i], legendValues[i+1])];
+  }
+  legendBounds[legendValues[len-1]] = [valBetween(legendValues[len-2], legendValues[len-1]), 10000];
+  return legendBounds;
 };
+
 
 export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   // console.log(`calcColorScale for ${colorBy}. TreeToo? ${!!treeToo}`)
@@ -128,24 +128,58 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     } else if (colorOptions && colorOptions[colorBy].type === "continuous") {
       // console.log("making a continuous color scale for ", colorBy)
       continuous = true;
-      const minMax = colorBy === "lbi" ?
-        [0, 0.7] :
-        getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy]);
-      colorScale = continuousScale(...minMax);
-      const spread = minMax[1] - minMax[0];
-      const dp = spread > 5 ? 2 : 3;
-      legendValues = colorBy === "lbi" ?
-        [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7] :
-        genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
-      if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
-      /* sort out ranges */
-      const len = legendValues.length;
-      legendBounds = {};
-      legendBounds[legendValues[0]] = [0, valBetween(legendValues[0], legendValues[1])];
-      for (let i = 1; i < len - 1; i++) {
-        legendBounds[legendValues[i]] = [valBetween(legendValues[i-1], legendValues[i]), valBetween(legendValues[i], legendValues[i+1])];
+      let minMax;
+      switch (colorBy) {
+        case "lbi":
+          minMax = [0, 0.7];
+          break;
+        case "num_date":
+          break; /* minMax not needed for num_date */
+        default:
+          minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy]);
       }
-      legendBounds[legendValues[len-1]] = [valBetween(legendValues[len-2], legendValues[len-1]), 10000];
+
+      /* make the continuous scale */
+      let domain, range;
+      switch (colorBy) {
+        case "num_date":
+          /* we want the colorScale to "focus" on the tip dates, and be spaced according to sampling */
+          let rootDate = tree.nodes[0].attr.num_date;
+          let vals = tree.nodes.filter((n) => !n.hasChildren).map((n) => n.attr.num_date);
+          if (treeTooNodes) {
+            if (treeTooNodes[0].attr.num_date < rootDate) rootDate = treeTooNodes[0].attr.num_date;
+            vals.concat(treeTooNodes.filter((n) => !n.hasChildren).map((n) => n.attr.num_date));
+          }
+          vals = vals.sort();
+          domain = [rootDate];
+          const n = 10;
+          const spaceBetween = parseInt(vals.length / (n - 1), 10);
+          for (let i = 0; i < (n-1); i++) domain.push(vals[spaceBetween*i]);
+          domain.push(vals[vals.length-1]);
+          range = colors[n]; /* contains n+1 values */
+          break;
+        default:
+          range = colors[9];
+          domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
+      }
+      const scale = scaleLinear().domain(domain).range(range);
+      colorScale = (val) => (val === undefined || val === false) ? unknownColor : scale(val);
+
+      /* construct the legend values & their respective bounds */
+      switch (colorBy) {
+        case "lbi":
+          legendValues = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7];
+          break;
+        case "num_date":
+          legendValues = domain.slice(1);
+          break;
+        default:
+          const spread = minMax[1] - minMax[0];
+          const dp = spread > 5 ? 2 : 3;
+          legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
+      }
+      if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
+      legendBounds = createLegendBounds(legendValues);
     }
   } else {
     error = true;

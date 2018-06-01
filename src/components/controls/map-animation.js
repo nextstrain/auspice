@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { SelectLabel } from "../framework/select-label";
 import { CHANGE_ANIMATION_TIME, CHANGE_ANIMATION_CUMULATIVE, CHANGE_ANIMATION_LOOP } from "../../actions/types";
@@ -47,7 +46,7 @@ class MapAnimationControls extends React.Component {
         } else if (userSelectedDuration === "fast") {
           duration = 15000;
         } else {
-          console.warn("Odd... controls/map-animation.js tried to set an animation speed we don't offer...")
+          console.warn("Odd... controls/map-animation.js tried to set an animation speed we don't offer...");
         }
 
         // if (window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference)
@@ -58,32 +57,35 @@ class MapAnimationControls extends React.Component {
           data: duration /* this.checkAndTransformAnimationDuration(+e.target.value) */
         });
       }
-    }
+    };
   }
 
   render() {
 
     return (
-      <div id='mapAnimationControls'>
+      <div id="mapAnimationControls">
 
-      <div style={{marginTop: 5, marginBottom: 5}}>
-        <SelectLabel text="Animation speed"/>
-        <button
-          style={this.props.mapAnimationDurationInMilliseconds === 60000 ? materialButtonSelected : materialButton}
-          onClick={this.handleChangeAnimationTimeClicked("slow")}>
-          Slow
-        </button>
-        <button
-          style={this.props.mapAnimationDurationInMilliseconds === 30000 ? materialButtonSelected : materialButton}
-          onClick={this.handleChangeAnimationTimeClicked("medium")}>
-          Medium
-        </button>
-        <button
-          style={this.props.mapAnimationDurationInMilliseconds === 15000 ? materialButtonSelected : materialButton}
-          onClick={this.handleChangeAnimationTimeClicked("fast")}>
-          Fast
-        </button>
-      </div>
+        <div style={{marginTop: 5, marginBottom: 5}}>
+          <SelectLabel text="Animation speed"/>
+          <button
+            style={this.props.mapAnimationDurationInMilliseconds === 60000 ? materialButtonSelected : materialButton}
+            onClick={this.handleChangeAnimationTimeClicked("slow")}
+          >
+            Slow
+          </button>
+          <button
+            style={this.props.mapAnimationDurationInMilliseconds === 30000 ? materialButtonSelected : materialButton}
+            onClick={this.handleChangeAnimationTimeClicked("medium")}
+          >
+            Medium
+          </button>
+          <button
+            style={this.props.mapAnimationDurationInMilliseconds === 15000 ? materialButtonSelected : materialButton}
+            onClick={this.handleChangeAnimationTimeClicked("fast")}
+          >
+            Fast
+          </button>
+        </div>
         <Toggle
           display
           on={this.props.mapAnimationShouldLoop}
@@ -94,19 +96,19 @@ class MapAnimationControls extends React.Component {
         />
         <br/>
 
-      <Toggle
-        display={true}
-        on={this.props.mapAnimationCumulative}
-        callback={(e) => {
-          analyticsControlsEvent("change-animation-cumulative");
-          this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
-        }}
-        label="Animate cumulative history"
-      />
+        <Toggle
+          display
+          on={this.props.mapAnimationCumulative}
+          callback={() => {
+            analyticsControlsEvent("change-animation-cumulative");
+            this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
+          }}
+          label="Animate cumulative history"
+        />
 
       </div>
     );
   }
 }
 
-export default MapAnimationControls
+export default MapAnimationControls;

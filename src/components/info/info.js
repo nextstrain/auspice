@@ -7,18 +7,6 @@ import { prettyString } from "../../util/stringHelpers";
 import { months } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
 
-const resetTreeButton = (dispatch) => {
-  return (
-    <div
-      className={`boxed-item active-clickable`}
-      style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
-      onClick={() => dispatch(updateVisibleTipsAndBranchThicknesses({root: [0, 0]}))}
-    >
-      {"View entire tree."}
-    </div>
-  );
-};
-
 const plurals = {
   country: "countries",
   authors: "authors"
@@ -48,11 +36,7 @@ const getNumSelectedTips = (nodes, visibility) => {
 export const createSummary = (virus_count, nodes, filters, visibility, visibleStateCounts, idxOfInViewRootNode, dateMin, dateMax) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
   const summary = [];
-  if (idxOfInViewRootNode === 0) {
-    summary.push(`Showing ${nSelectedSamples} of ${virus_count} genomes`);
-  } else {
-    summary.push(`Showing ${nSelectedSamples} of ${nodes[idxOfInViewRootNode].fullTipCount} genomes in the selected clade`);
-  }
+  summary.push(`Showing ${nSelectedSamples} of ${virus_count} genomes`);
   Object.keys(filters).forEach((filterName) => {
     const n = Object.keys(visibleStateCounts[filterName]).length;
     summary.push((`from ${n} ${pluralise(filterName, n)}`));
@@ -86,15 +70,15 @@ class Info extends React.Component {
     super(props);
   }
   getStyles(width) {
-    let fontSize = 32;
+    let fontSize = 28;
     if (this.props.browserDimensions.width < 1000) {
-      fontSize = 30;
+      fontSize = 27;
     }
     if (this.props.browserDimensions.width < 800) {
-      fontSize = 28;
+      fontSize = 26;
     }
     if (this.props.browserDimensions.width < 600) {
-      fontSize = 26;
+      fontSize = 25;
     }
     if (this.props.browserDimensions.width < 400) {
       fontSize = 24;
@@ -103,27 +87,29 @@ class Info extends React.Component {
       base: {
         width: width + 34,
         display: "inline-block",
-        lineHeight: 1.4
+        maxWidth: width,
+        marginTop: 0
       },
       title: {
         fontFamily: titleFont,
         fontSize: fontSize,
-        marginLeft: 5,
+        marginLeft: 0,
         marginTop: 0,
         marginBottom: 5,
-        fontWeight: 300,
+        fontWeight: 500,
         color: darkGrey,
-        letterSpacing: "-1px",
-        maxWidth: width
+        letterSpacing: "-0.5px",
+        lineHeight: 1.2
       },
       n: {
         fontFamily: headerFont,
         fontSize: 14,
-        marginLeft: 10,
+        marginLeft: 2,
         marginTop: 5,
         marginBottom: 5,
         fontWeight: 500,
-        color: medGrey
+        color: medGrey,
+        lineHeight: 1.4
       }
     };
   }
@@ -300,9 +286,6 @@ class Info extends React.Component {
                 {". "}
               </span>
             ) : null}
-            {/* finally - is a branch selected? */}
-            {this.props.idxOfInViewRootNode === 0 && this.props.idxOfInViewRootNodeToo === 0 ? null :
-              resetTreeButton(this.props.dispatch)}
           </div>
         </div>
       </Card>

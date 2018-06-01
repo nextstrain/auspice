@@ -50,9 +50,9 @@ const getOrderedCategories = (matrixCategories, colorScale) => {
   return orderedCategories;
 };
 
-export const calcXScale = (chartGeom, ticks) => {
+export const calcXScale = (chartGeom, pivots, ticks) => {
   const x = scaleLinear()
-    .domain([ticks[0], ticks[ticks.length - 1]])
+    .domain([pivots[0], pivots[pivots.length - 1]])
     .range([chartGeom.spaceLeft, chartGeom.width - chartGeom.spaceRight]);
   return {x, numTicksX: ticks.length};
 };
@@ -153,9 +153,10 @@ function handleMouseOut() {
 
 /* returns [[xval, yval], [xval, yval], ...] order: that of {series} */
 const calcBestXYPositionsForLabels = (series, pivots, scales, lookahead) => series.map((d) => {
+  const maxY = scales.y.domain()[1];
+  const displayThresh = 0.15 * maxY;
   for (let pivotIdx = 0; pivotIdx < d.length - lookahead; pivotIdx++) {
     const nextIdx = pivotIdx + lookahead;
-    const displayThresh = 0.07;
     if (d[pivotIdx][1] - d[pivotIdx][0] > displayThresh && d[nextIdx][1] - d[nextIdx][0] > displayThresh) {
       return [
         scales.x(pivots[pivotIdx + 1]),
@@ -182,15 +183,14 @@ const drawLabelsOverStream = (svgStreamGroup, series, pivots, labels, scales) =>
     .text((d, i) => xyPos[i][0] ? prettyString(d) : "");
 };
 
-const calcNiceMaxYValue = (series) => {
-  const max = series[series.length - 1].reduce((curMax, el) => Math.max(curMax, el[1]), 0);
-  return Math.ceil(max * 20) / 20;
+const calcMaxYValue = (series) => {
+  return series[series.length - 1].reduce((curMax, el) => Math.max(curMax, el[1]), 0);
 };
 
 export const processMatrix = ({matrix, pivots, colorScale}) => {
   const categories = getOrderedCategories(Object.keys(matrix), colorScale);
   const series = turnMatrixIntoSeries(categories, pivots.length, matrix);
-  const maxY = calcNiceMaxYValue(series);
+  const maxY = calcMaxYValue(series);
   return {categories, series, maxY};
 };
 

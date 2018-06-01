@@ -76,6 +76,7 @@ class ChooseDatasetSelect extends React.Component {
           value={this.props.selected}
           options={datasetOptions}
           clearable={false}
+          searchable={false}
           multi={false}
           onChange={(opt) => {
             // console.log("on change", opt.value, datasetOptions)

@@ -1,5 +1,4 @@
 import React from "react";
-import { ReactSVGPanZoom } from "react-svg-pan-zoom";
 import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
@@ -8,7 +7,7 @@ import HoverInfoPanel from "./infoPanels/hover";
 import TipClickedPanel from "./infoPanels/click";
 import { changePhyloTreeViaPropsComparison } from "./reactD3Interface/change";
 import * as callbacks from "./reactD3Interface/callbacks";
-import { resetTreeButtonStyle } from "../../globalStyles";
+import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
 import { untangleTreeToo } from "./tangle/untangling";
@@ -17,7 +16,6 @@ class Tree extends React.Component {
   constructor(props) {
     super(props);
     this.tangleRef = undefined;
-    this.Viewer = null;
     this.state = {
       hover: null,
       selectedBranch: null,
@@ -27,20 +25,11 @@ class Tree extends React.Component {
     };
     /* bind callbacks */
     this.clearSelectedTip = callbacks.clearSelectedTip.bind(this);
-    this.resetView = callbacks.resetView.bind(this);
-    this.onViewerChange = callbacks.onViewerChange.bind(this);
     // this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
     this.redrawTree = () => {
-      this.state.tree.clearSVG();
-      this.Viewer.fitToViewer();
-      renderTree(this, true, this.state.tree, this.props);
-      if (this.props.showTreeToo) {
-        this.state.treeToo.clearSVG();
-        this.ViewerToo.fitToViewer();
-        renderTree(this, false, this.state.treeToo, this.props);
-      }
-      this.setState({hover: null, selectedBranch: null, selectedTip: null});
-      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root: [0, 0]}));
+      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
+        root: [0, 0]
+      }));
     };
   }
   setUpAndRenderTreeToo(props, newState) {
@@ -49,14 +38,12 @@ class Tree extends React.Component {
     newState.treeToo = new PhyloTree(props.treeToo.nodes, "RIGHT");
     untangleTreeToo(newState.tree, newState.treeToo);
     renderTree(this, false, newState.treeToo, props);
-    this.ViewerToo.fitToViewer();
   }
   componentDidMount() {
     if (this.props.tree.loaded) {
       const newState = {};
       newState.tree = new PhyloTree(this.props.tree.nodes, "LEFT");
       renderTree(this, true, newState.tree, this.props);
-      this.Viewer.fitToViewer();
       if (this.props.showTreeToo) {
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
       }
@@ -68,7 +55,7 @@ class Tree extends React.Component {
     let rightTreeUpdated = false;
 
     /* potentially change the (main / left hand) tree */
-    const [potentialNewState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(true, this.state.tree, this.Viewer, prevProps, this.props);
+    const [potentialNewState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(true, this.state.tree, prevProps, this.props);
     if (potentialNewState) newState = potentialNewState;
 
     /* has the 2nd (right hand) tree just been turned on, off or swapped? */
@@ -81,12 +68,12 @@ class Tree extends React.Component {
           this.state.treeToo.clearSVG();
         }
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
-        this.resetView(); /* reset the position of the left tree */
+        // this.resetView(); /* reset the position of the left tree */
         if (this.tangleRef) this.tangleRef.drawLines();
       }
     } else if (this.state.treeToo) { /* the tree hasn't just been swapped, but it does exist and may need updating */
       let unusedNewState; // eslint-disable-line
-      [unusedNewState, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, this.ViewerToo, prevProps, this.props);
+      [unusedNewState, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props);
       /* note, we don't incorporate unusedNewState into the state? why not? */
     }
 
@@ -96,39 +83,41 @@ class Tree extends React.Component {
     }
     if (Object.keys(newState).length) this.setState(newState);
   }
-  renderTreeDiv({width, height, d3ref, viewerRef}) {
+
+  getStyles = () => {
+    const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0
+      || this.props.treeToo.idxOfInViewRootNode !== 0;
+    return {
+      resetTreeButton: {
+        zIndex: 100,
+        position: "absolute",
+        right: 5,
+        top: 0,
+        cursor: activeResetTreeButton ? "pointer" : "auto",
+        color: activeResetTreeButton ? darkGrey : lightGrey
+      }
+    };
+  };
+
+  renderTreeDiv({width, height, d3ref}) {
     return (
-      <ReactSVGPanZoom
+      <svg style={{pointerEvents: "auto"}}
         width={width}
         height={height}
-        ref={(Viewer) => {this[viewerRef] = Viewer;}}
-        style={{cursor: "default"}}
-        tool={"pan"}
-        detectWheel={false}
-        toolbarPosition={"none"}
-        detectAutoPan={false}
-        background={"#FFF"}
-        miniaturePosition={"none"}
-        onDoubleClick={this.resetView}
-        onChangeValue={this.onViewerChange}
       >
-        <svg style={{pointerEvents: "auto"}}
+        <g
+          id={"d3TreeElement"}
           width={width}
           height={height}
-        >
-          <g
-            id={"d3TreeElement"}
-            width={width}
-            height={height}
-            style={{cursor: "default"}}
-            ref={(c) => {this[d3ref] = c;}}
-          />
-        </svg>
-      </ReactSVGPanZoom>
+          style={{cursor: "default"}}
+          ref={(c) => {this[d3ref] = c;}}
+        />
+      </svg>
     );
   }
 
   render() {
+    const styles = this.getStyles();
     const spaceBetweenTrees = 100;
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
@@ -139,7 +128,6 @@ class Tree extends React.Component {
           temporalConfidence={this.props.temporalConfidence.display}
           distanceMeasure={this.props.distanceMeasure}
           hovered={this.state.hovered}
-          viewer={this.Viewer}
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
@@ -165,14 +153,14 @@ class Tree extends React.Component {
             spaceBetweenTrees={spaceBetweenTrees}
           />
         ) : null }
-        {this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3ref", viewerRef: "Viewer"})}
+        {this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3ref"})}
         {this.props.showTreeToo ? <div style={{width: spaceBetweenTrees}}/> : null}
         {this.props.showTreeToo ?
-          this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3refToo", viewerRef: "ViewerToo"}) :
+          this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3refToo"}) :
           null
         }
         <button
-          style={resetTreeButtonStyle}
+          style={{...tabSingle, ...styles.resetTreeButton}}
           onClick={this.redrawTree}
         >
           reset layout

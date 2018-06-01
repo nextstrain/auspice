@@ -1,5 +1,42 @@
-## version 1.18.3 - 2018/04/23
+## version 1.20.3 - 2018/05/30
 
+## version 1.20.2 - 2018/05/21
+
+## version 1.20.1 - 2018/05/21
+
+## version 1.20.0 - 2018/05/15
+
+## version 1.19.1 - 2018/05/09
+
+## version 1.19.0 - 2018/05/09
+
+## version 1.18.10 - 2018/05/07
+
+* Separate Nucleotide mutations from gaps / Ns in info-box - thanks @emmahodcroft [PR 552](https://github.com/nextstrain/auspice/pull/552)
+* Frequencies y-axis is no longer rounded to the nearest 0.05
+
+## version 1.18.9 - 2018/05/03
+* update flu footer
+* start using travis CI
+
+## version 1.18.8 - 2018/05/02
+* temporary fix for map transmissionIndices errors (bug still exists, [issue 547](https://github.com/nextstrain/auspice/issues/547))
+
+## version 1.18.7 - 2018/05/02
+* Fix frequencies panel x-axis bug
+* Linting
+* Minor style changes
+
+## version 1.18.6 - 2018/04/30
+* update WNV footer
+
+## version 1.18.5 - 2018/04/27
+* update WNV footer
+
+## version 1.18.4 - 2018/04/26
+* Use exponential notation for the clock rate
+
+## version 1.18.3 - 2018/04/23
 * Updated the footer for LASV & WNV
 
 ## version 1.18.2 - 2018/04/16

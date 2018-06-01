@@ -4,7 +4,7 @@
 read -r -d '' purposeMsg <<'EOF'
 Bumping Auspice version & deploying to Heroku
 
-This script attemps to do 10 things. It will exit if any steps fail...
+This script attempts to do 9 things. It will exit if any steps fail...
 (1) checkout master & ensure it is up to date with github
 (2) increment Version number (in `src/version.js` and `package.json`) by prompting the user
 (3) add a title with the version number to the CHANGELOG
@@ -12,9 +12,8 @@ This script attemps to do 10 things. It will exit if any steps fail...
 (5) checkout `release` branch from github (will fail if it exists locally)
 (6) merge master -> release
 (7) tag release with new version
-(8) push release branch to github
-(9) push release branch to Heroku (automagically builds & runs)
-(10) checkout `master` and remove `release` branch
+(8) push release branch to github (this triggers Travis CI to build, upload and trigger Heroku deploy)
+(9) checkout `master` and remove local `release` branch
 
 EOF
 
@@ -46,9 +45,6 @@ git checkout master
 git fetch origin
 git status -uno | grep "up-to-date\|up to date" # $? = 1 if not up-to-date OR up to date
 git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
-# some other checks
-git remote -v | grep --silent -E "heroku\s+https://git.heroku.com/auspice.git"
-heroku apps | grep --silent auspice # should ensure logged in
 
 # step 2: increment version number (req user input)
 step="2"
@@ -103,13 +99,9 @@ git tag -a v${newVersion} -m "${msg}"
 step="8"
 git push --follow-tags origin release
 
-# step 9: push local release branch to heroku master
-step="9"
-git push -f heroku release:master
-
 # step 10: go back to master & delete release branch (locally)
-step="10"
+step="9"
 git checkout master
 git branch -d release
 
-echo -e "\nScript completed. $msg (version ${newVersion}) pushed to github:release, github:master and heroku:master\n"
+echo -e "\nScript completed. $msg (version ${newVersion}) pushed to github:release and github:master\n"

@@ -16,7 +16,7 @@ class MonoFont extends React.Component {
     return {
       base: {
         fontFamily: "fira-mono, monospace",
-        fontSize: 16,
+        fontSize: 16
       }
     };
   }

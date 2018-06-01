@@ -1,17 +1,18 @@
 import { controlsWidth } from "./util/globals";
 
 /* IF YOU CHANGE THINGS HERE CHANGE THEM IN static.css AS WELL! */
-//export const titleFont = "aw-conqueror-sans, sans-serif";
 export const titleFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const headerFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const dataFont = "Lato, Helvetica Neue, Helvetica, sans-serif";
 export const lighterGrey = "rgb(200, 200, 200)";
 export const darkGrey = "#333";
 export const medGrey = "#888";
-export const lightGrey = "#D3D3D3";
+export const lightGrey = "#BBB";
 export const extraLightGrey = "#F1F1F1";
 export const brandColor = "#5097BA"; // #5DA8A3 (green) or #5097BA (blue)
 export const sidebarColor = "#F2F2F2"; // #F4F4F4
+export const goColor = "#89B77F"; // green
+export const pauseColor = "#E39B39"; // orange
 
 // http://stackoverflow.com/questions/1895476/how-to-style-a-select-dropdown-with-css-only-without-javascript
 export const sidebarField = {
@@ -71,7 +72,7 @@ export const materialButtonSelected = {
 export const materialButtonOutline = {
   border: "1px solid #CCC",
   backgroundColor: "inherit",
-  borderRadius: 2,
+  borderRadius: 3,
   cursor: "pointer",
   paddingTop: 5,
   paddingBottom: 5,
@@ -84,6 +85,64 @@ export const materialButtonOutline = {
   fontSize: 14,
   verticalAlign: "top"
 };
+
+export const tabSingle = {
+  borderTop: "1px solid #BBB",
+  borderLeft: "1px solid #CCC",
+  borderRight: "1px solid #CCC",
+  borderBottom: "1px solid #CCC",
+  borderRadius: "0px 0px 3px 3px",
+  paddingTop: 3,
+  paddingBottom: 3,
+  paddingLeft: 6,
+  paddingRight: 6,
+  backgroundColor: "#fff",
+  fontWeight: 400,
+  color: darkGrey,
+  fontFamily: dataFont,
+  fontSize: 12,
+  textTransform: "uppercase"
+};
+
+export const tabGroup = {
+  borderTop: "1px solid #BBB",
+  borderLeft: "1px solid #CCC",
+  borderRight: "1px solid #CCC",
+  borderBottom: "1px solid #CCC",
+  borderRadius: "0px 0px 3px 3px",
+  paddingTop: 3,
+  paddingBottom: 3,
+  paddingLeft: 6,
+  paddingRight: 6,
+  backgroundColor: "#fff"
+};
+
+export const tabGroupMember = {
+  border: "none",
+  backgroundColor: "inherit",
+  padding: 0,
+  margin: 0,
+  cursor: "pointer",
+  fontFamily: dataFont,
+  color: darkGrey,
+  fontWeight: 400,
+  textTransform: "uppercase",
+  fontSize: 12
+};
+
+export const tabGroupMemberSelected = {
+  border: "none",
+  backgroundColor: "inherit",
+  padding: 0,
+  margin: 0,
+  cursor: "pointer",
+  fontFamily: dataFont,
+  color: brandColor,
+  fontWeight: 400,
+  textTransform: "uppercase",
+  fontSize: 12
+};
+
 
 export const titleStyles = {
   big: {
@@ -101,7 +160,7 @@ export const titleStyles = {
     fontSize: 16,
     lineHeight: "28px",
     marginTop: 15,
-    marginBottom: 10,
+    marginBottom: 5,
     fontWeight: 500,
     color: "#000"
   }
@@ -125,7 +184,6 @@ export const infoPanelStyles = {
     color: "white", // link color
     cursor: "pointer",
     textTransform: "uppercase",
-    border: "none",
     borderRadius: 2,
     border: "1px solid #CCC",
     verticalAlign: "middle"
@@ -176,22 +234,4 @@ export const infoPanelStyles = {
     paddingBottom: 4,
     minWidth: 120
   }
-};
-
-export const resetTreeButtonStyle = {
-  fontWeight: 700,
-  borderRadius: 4,
-  paddingTop: 2,
-  paddingBottom: 4,
-  paddingLeft: 10,
-  paddingRight: 10,
-  border: "none",
-  zIndex: 100,
-  position: "absolute",
-  right: 5,
-  top: 10,
-  backgroundColor: "rgb(230, 230, 230)",
-  color: darkGrey,
-  fontFamily: dataFont,
-  fontSize: 14
 };

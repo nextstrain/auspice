@@ -1,7 +1,7 @@
 import { rgb } from "d3-color";
 import { calcBranchStrokeCols } from "../../../util/colorHelpers";
 
-export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, viewer, oldProps, newProps) => {
+export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps, newProps) => {
   const args = {};
   const newState = {};
   /* do not use oldProps.tree or newTreeRedux */
@@ -70,7 +70,6 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, viewer, o
   if (oldTreeRedux.idxOfInViewRootNode !== newTreeRedux.idxOfInViewRootNode) {
     const rootNode = phylotree.nodes[newTreeRedux.idxOfInViewRootNode];
     args.zoomIntoClade = rootNode;
-    viewer.fitToViewer();
     newState.selectedBranch = newTreeRedux.idxOfInViewRootNode === 0 ? null : rootNode;
     newState.selectedTip = null;
     newState.hovered = null;

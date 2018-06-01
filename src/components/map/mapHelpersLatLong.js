@@ -383,7 +383,6 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
 const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
 
   const transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
-
   nodes.forEach((node) => {
     if (node.children) {
       node.children.forEach((child) => {
@@ -399,11 +398,14 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
           const vis = visibility[child.arrayIdx] === "visible" ? "visible" : "hidden"; // transmission visible if child is visible
 
           // update transmissionData via index lookup
-          transmissionIndices[id].forEach((index) => {
-            transmissionDataCopy[index].color = col;
-            transmissionDataCopy[index].visible = vis;
-          });
-
+          try {
+            transmissionIndices[id].forEach((index) => {
+              transmissionDataCopy[index].color = col;
+              transmissionDataCopy[index].visible = vis;
+            });
+          } catch (err) {
+            console.warn(`Error trying to access ${id} in transmissionIndices. Map transmissions may be wrong.`);
+          }
         }
       });
     }

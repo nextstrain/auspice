@@ -27,43 +27,45 @@ class Narrative extends React.Component {
   constructor(props) {
     super(props);
     const focus = parseInt(queryString.parse(window.location.search).n, 10) || 1;
+    this.timeoutRef = undefined;
+    this.shouldBeInFocus = undefined;
     this.state = {
-      focus, /* idx of block in focus (and url) */
-      shouldBeInFocus: focus, /* used by timeouts */
-      timeoutRef: undefined,
-      lastScroll: undefined
+      focus /* idx of block in focus (and url) */
     };
     this.changeFocus = () => {
-      const idx = this.state.shouldBeInFocus;
+      // console.log("Changing to", this.shouldBeInFocus)
       this.props.dispatch(changePageQuery({
-        queryToUse: queryString.parse(this.props.blocks[idx].url),
-        queryToDisplay: {n: idx},
+        queryToUse: queryString.parse(this.props.blocks[this.shouldBeInFocus].query),
+        queryToDisplay: {n: this.shouldBeInFocus},
         push: true
       }));
-      this.setState({focus: idx, timeoutRef: undefined});
+      this.timeoutRef = undefined;
+      this.setState({focus: this.shouldBeInFocus});
     };
     this.handleScroll = () => {
       /* handle scroll only fires (expensive) dispatches when no scroll has been observed for 250ms */
       /* 1: clear any previous timeouts */
-      if (this.state.timeoutRef) {
-        clearTimeout(this.state.timeoutRef);
+      if (this.timeoutRef) {
+        clearTimeout(this.timeoutRef);
+        this.timeoutRef = undefined;
       }
       /* 2: calculate shouldBeInFocus index */
       const halfY = this.props.height / 2;
-      let shouldBeInFocus;
       for (let i = 0; i < this.blockRefs.length; i++) {
         const bounds = this.blockRefs[i].getBoundingClientRect();
         if (bounds.y < halfY && (bounds.y + bounds.height) > halfY) {
-          shouldBeInFocus = i;
+          this.shouldBeInFocus = i;
           break;
         }
       }
+      // console.log("handleScroll ->", this.shouldBeInFocus)
+
       /* 2 set timeouts */
-      if (shouldBeInFocus === this.state.focus) {
+      if (this.shouldBeInFocus === this.state.focus) {
         return;
       }
-      const timeoutRef = setTimeout(this.changeFocus, 250);
-      this.setState({timeoutRef, shouldBeInFocus});
+      // console.log("SETTING TIMEOUT TO CHANGE FOCUS")
+      this.timeoutRef = setTimeout(this.changeFocus, 100);
     };
     this.blockRefs = [];
   }

@@ -47,6 +47,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
   this.confidencesInSVG = false;
   if (drawConfidence) this.drawConfidence();
+  this.updateTipLabels();
 
   this.timeLastRenderRequested = Date.now();
   timerEnd("phyloTree render()");
@@ -143,7 +144,7 @@ export const drawBranches = function drawBranches() {
     .attr("d", (d) => d.branch[0])
     .style("stroke", (d) => d.branchStroke || params.branchStroke)
     .style("stroke-linecap", "round")
-    .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+    .style("stroke-width", (d) => d['stroke-width']+"px" || params.branchStrokeWidth)
     .style("fill", "none")
     .style("cursor", "pointer")
     .style("pointer-events", "auto")
@@ -172,7 +173,7 @@ export const drawRegression = function drawRegression() {
     .style("stroke", this.params.regressionStroke)
     .style("stroke-width", this.params.regressionWidth);
   this.svg.append("text")
-    .text("rate estimate: " + this.regression.slope.toFixed(4) + ' / year')
+    .text(`rate estimate: ${this.regression.slope.toExponential(2)} subs/year`)
     .attr("class", "regression")
     .attr("x", this.xScale.range()[1] / 2 - 75)
     .attr("y", this.yScale.range()[0] + 50)

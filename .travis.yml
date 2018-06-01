@@ -1,0 +1,16 @@
+language: node_js
+sudo: false
+node_js:
+  - "9"
+install:
+  - npm install
+  - pip install --user awscli
+script:
+  - npm run build
+after_success:
+  - test $TRAVIS_BRANCH = "release" && npm run gzip-and-upload
+  - test $TRAVIS_BRANCH = "release" && npm run redeploy-site
+notifications:
+  email:
+    on_success: never
+    on_failure: always
