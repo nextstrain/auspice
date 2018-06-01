@@ -32,10 +32,32 @@ const calculatePearsonCorrelationCoefficient = (phylotree1, phylotree2) => {
   return corr;
 };
 
+
+// diff is an array of length 1 so it sticks around as a reference
+const appendTerminalYValuesRecursive = (phylotree1, phyloNodeT2, idx, diff) => {
+  if (phyloNodeT2.children) {
+    phyloNodeT2.children.forEach((childNode) => appendTerminalYValuesRecursive(phylotree1, childNode, idx, diff));
+  } else {
+    const phyloNodeT1 = phylotree1.strainToNode[phyloNodeT2.n.strain];
+    if (phyloNodeT1) {
+      diff[idx] += phyloNodeT2.n.yvalue - phyloNodeT1.n.yvalue;
+    }
+  }
+};
+
 // phyloNode is a node in tree 2
 // may return false (i.e. keep the same)
-const findBestOrderForChildren = (phylotree1, phyloNode) => {
-  return phyloNode.children.map((cv, idx) => idx).reverse();
+const findBestOrderForChildren = (phylotree1, phyloNodeT2) => {
+  if (phyloNodeT2.children.length > 2) {
+    const diff = phyloNodeT2.children.map(() => 0); // init with zeros
+    phyloNodeT2.children.forEach((child, idx) => appendTerminalYValuesRecursive(phylotree1, child, idx, diff));
+    // want to order the diffs so that they are increasing for best acceptance rate
+    const order = diff.map((_, idx) => idx);
+    order.sort((a, b) => diff[a] > diff[b] ? -1 : diff[b] > diff[a] ? 1 : 0);
+    // console.log("diffs defore reverse", diff, "order", order)
+    return order;
+  }
+  return phyloNodeT2.children.map((cv, idx) => idx).reverse();
 };
 
 const applyOrdering = (node, ordering) => {
@@ -84,6 +106,7 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
         unApplyOrdering(reduxNode, newOrdering);
         setYValuesRecursively(phyloNode, originalStartingY);
       } else {
+        // console.log("^^^ accepted after reverse")
         correlation = new_corr;
       }
     }
