@@ -35,7 +35,6 @@ const calculatePearsonCorrelationCoefficient = (phylotree1, phylotree2) => {
 
 /** flipChildrenPostorder
  * re-order the children - if the correlation is improved, keep the flip, else restore original
- * TODO: speed up the
  */
 const flipChildrenPostorder = (phylotree1, phylotree2) => {
   let correlation = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
@@ -76,12 +75,11 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
   }
 };
 
-
 export const untangleTreeToo = (phylotree1, phylotree2) => {
-  console.time("untangle");
-  console.log("beginning to untangle. Initial correlation", calculatePearsonCorrelationCoefficient(phylotree1, phylotree2));
+  // console.time("untangle");
+  const init_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
   flipChildrenPostorder(phylotree1, phylotree2);
-  console.log("Finished untangling. correlation", calculatePearsonCorrelationCoefficient(phylotree1, phylotree2));
+  console.log(`Untangling ${init_corr} -> ${calculatePearsonCorrelationCoefficient(phylotree1, phylotree2)}`);
   setYValues(phylotree2.nodes);
-  console.timeEnd("untangle");
+  // console.timeEnd("untangle");
 };
