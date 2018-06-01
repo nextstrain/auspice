@@ -32,6 +32,21 @@ const calculatePearsonCorrelationCoefficient = (phylotree1, phylotree2) => {
   return corr;
 };
 
+// phyloNode is a node in tree 2
+// may return false (i.e. keep the same)
+const findBestOrderForChildren = (phylotree1, phyloNode) => {
+  return phyloNode.children.map((cv, idx) => idx).reverse();
+};
+
+const applyOrdering = (node, ordering) => {
+  node.children = ordering.map((accessIdx) => node.children[accessIdx]);
+};
+
+const unApplyOrdering = (node, ordering) => {
+  const newChildren = new Array(ordering.length);
+  node.children.forEach((child, idx) => {newChildren[ordering[idx]] = child;});
+  node.children = newChildren;
+};
 
 /** flipChildrenPostorder
  * re-order the children - if the correlation is improved, keep the flip, else restore original
@@ -59,15 +74,15 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
       const originalStartingY = leftMostNode.yvalue - 1; // setYValuesRecursively expects the previous Y value
 
       /* step 2: reverse the children, recalc the y-values, and see if things improved */
-      phyloNode.children.reverse();
-      reduxNode.children.reverse();
+      const newOrdering = findBestOrderForChildren(phylotree1, phyloNode);
+      applyOrdering(phyloNode, newOrdering);
+      applyOrdering(reduxNode, newOrdering);
       setYValuesRecursively(phyloNode, originalStartingY);
       const new_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
       if (correlation > new_corr) {
-        phyloNode.children.reverse();
-        reduxNode.children.reverse();
+        unApplyOrdering(phyloNode, newOrdering);
+        unApplyOrdering(reduxNode, newOrdering);
         setYValuesRecursively(phyloNode, originalStartingY);
-        // setYValuesRecursively(phylotree2.nodes[0], 0);
       } else {
         correlation = new_corr;
       }
