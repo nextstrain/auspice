@@ -341,6 +341,7 @@ const modifyControlsViaTreeToo = (controls, treeToo, name) => {
 export const createStateFromQueryOrJSONs = ({
   JSONs = false, /* raw json data - completely nuke existing redux state */
   oldState = false, /* existing redux state (instead of jsons) */
+  treeName = undefined,
   query
 }) => {
   let tree, treeToo, entropy, controls, metadata, frequencies, narrative;
@@ -432,6 +433,10 @@ export const createStateFromQueryOrJSONs = ({
       controls.colorScale,
       controls.colorBy
     );
+  }
+
+  if (treeName) {
+    tree.name = treeName;
   }
   return {tree, treeToo, metadata, entropy, controls, frequencies, narrative, query};
 };

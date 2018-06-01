@@ -75,12 +75,22 @@ class Tangle extends React.Component {
     }
   }
   render() {
+    const textStyles = {position: "absolute", top: 5, zIndex: 100, fontSize: 16, color: "#000", fontWeight: 500};
+    const lefts = [this.props.width/2 - this.props.spaceBetweenTrees/2, this.props.width/2 + this.props.spaceBetweenTrees/2];
     return (
-      <div style={{position: "absolute", left: this.state.left, top: this.state.top, zIndex: 100, pointerEvents: "none"}}>
-        <svg
-          style={{cursor: "default", width: this.props.width, height: this.props.height}}
-          ref={(c) => {this.d3ref = c;}}
-        />
+      <div>
+        <div style={{...textStyles, left: lefts[0]-100, width: 100, textAlign: "right"}}>
+          {this.props.leftTreeName}
+        </div>
+        <div style={{...textStyles, left: lefts[1], textAlign: "left"}}>
+          {this.props.rightTreeName}
+        </div>
+        <div style={{position: "absolute", left: this.state.left, top: this.state.top, zIndex: 100, pointerEvents: "none"}}>
+          <svg
+            style={{cursor: "default", width: this.props.width, height: this.props.height}}
+            ref={(c) => {this.d3ref = c;}}
+          />
+        </div>
       </div>
     );
   }

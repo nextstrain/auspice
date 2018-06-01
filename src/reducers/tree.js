@@ -8,6 +8,7 @@ export const getDefaultTreeState = () => {
   return {
     loaded: false,
     nodes: null,
+    name: undefined,
     visibility: null,
     visibilityVersion: 0,
     nodeColors: null,

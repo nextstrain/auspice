@@ -3,7 +3,7 @@ import * as types from "./types";
 import { charonAPIAddress } from "../util/globals";
 import { getDatapath, goTo404, chooseDisplayComponentFromPathname } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
-import { createDatapathForSecondSegment } from "../util/parseParams";
+import parseParams, { createDatapathForSecondSegment } from "../util/parseParams";
 
 export const getManifest = (dispatch, s3bucket = "live") => {
   const charonErrorHandler = () => {
@@ -45,12 +45,32 @@ export const getManifest = (dispatch, s3bucket = "live") => {
   xmlHttp.send(null);
 };
 
+const getSegmentName = (datapath, availableDatasets) => {
+  /* this code is duplicated too many times. TODO */
+  const paramFields = parseParams(datapath, availableDatasets).dataset;
+  const fields = Object.keys(paramFields).sort((a, b) => paramFields[a][0] > paramFields[b][0]);
+  const choices = fields.map((d) => paramFields[d][1]);
+  let level = availableDatasets;
+  for (let vi = 0; vi < fields.length; vi++) {
+    if (choices[vi]) {
+      const options = Object.keys(level[fields[vi]]).filter((d) => d !== "default");
+      if (Object.keys(level).indexOf("segment") !== -1 && options.length > 1) {
+        return choices[vi];
+      }
+      // move to the next level in the data set hierarchy
+      level = level[fields[vi]][choices[vi]];
+    }
+  }
+  return undefined;
+};
+
 
 const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON) => {
   const apiPath = (jsonType) =>
     `${charonAPIAddress}request=json&path=${datasets.datapath}_${jsonType}.json&s3=${s3bucket}`;
 
   const promisesOrder = ["meta", "tree", "frequencies"];
+  const treeName = getSegmentName(datasets.datapath, datasets.availableDatasets);
   const promises = [
     fetch(apiPath("meta")).then((res) => res.json()),
     fetch(apiPath("tree")).then((res) => res.json()),
@@ -73,7 +93,7 @@ const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON
     .then((values) => {
       // all promises have not resolved or rejected (value[x] = undefined upon rejection)
       // you must check for undefined here, they won't go to the following catch
-      const data = {JSONs: {}, query};
+      const data = {JSONs: {}, query, treeName};
       values.forEach((v, i) => {
         if (v) data.JSONs[promisesOrder[i]] = v; // if statement removes undefinds
       });

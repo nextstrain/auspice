@@ -12,8 +12,7 @@ import parseParams from "../../util/parseParams";
 @connect((state) => {
   return {
     availableDatasets: state.datasets.availableDatasets,
-    datapath: state.datasets.datapath,
-    showTreeToo: state.controls.showTreeToo
+    datapath: state.datasets.datapath
   };
 })
 class ChooseDataset extends React.Component {

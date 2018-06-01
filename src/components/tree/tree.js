@@ -152,6 +152,8 @@ class Tree extends React.Component {
             vVersion={this.props.tree.visibilityVersion}
             metric={this.props.distanceMeasure}
             spaceBetweenTrees={spaceBetweenTrees}
+            leftTreeName={this.props.tree.name.toUpperCase()}
+            rightTreeName={this.props.showTreeToo.toUpperCase()}
           />
         ) : null }
         {this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3ref"})}
