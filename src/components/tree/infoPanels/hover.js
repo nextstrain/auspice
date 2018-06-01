@@ -33,22 +33,24 @@ const getBranchDivJSX = (d) =>
   <p>{infoLineJSX("Divergence:", prettyString(d.attr.div.toExponential(3)))}</p>;
 
 const getBranchTimeJSX = (d, temporalConfidence) => {
-  const dates = [numericToCalendar(d.attr.num_date)];
+  const date = d.attr.date || numericToCalendar(d.attr.num_date);
+  let dateRange = false;
   if (temporalConfidence) {
-    dates[1] = numericToCalendar(d.attr.num_date_confidence[0]);
-    dates[2] = numericToCalendar(d.attr.num_date_confidence[1]);
-    if (dates[1] === dates[2]) {
-      return <p>{infoLineJSX("Date:", dates[0])}</p>;
-    }
+    dateRange = [
+      numericToCalendar(d.attr.num_date_confidence[0]),
+      numericToCalendar(d.attr.num_date_confidence[1])
+    ];
+  }
+  if (dateRange && dateRange[0] !== dateRange[1]) {
     return (
       <p>
-        {infoLineJSX("Inferred Date:", dates[0])}
+        {infoLineJSX("Inferred Date:", date)}
         <br/>
-        {infoLineJSX("Date Confidence Interval:", `(${dates[1]}, ${dates[2]})`)}
+        {infoLineJSX("Date Confidence Interval:", `(${dateRange[0]}, ${dateRange[1]})`)}
       </p>
     );
   }
-  return <p>{infoLineJSX("Date:", dates[0])}</p>;
+  return (<p>{infoLineJSX("Date:", date)}</p>);
 };
 
 /**
