@@ -67,6 +67,7 @@ class Tree extends React.Component {
         if (this.state.treeToo) { /* tree has been swapped -> remove the old tree */
           this.state.treeToo.clearSVG();
         }
+        newState.tree = this.state.tree; // setUpAndRenderTreeToo needs newState.tree
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
         // this.resetView(); /* reset the position of the left tree */
         if (this.tangleRef) this.tangleRef.drawLines();
