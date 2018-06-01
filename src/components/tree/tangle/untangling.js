@@ -1,4 +1,4 @@
-import { setYValues } from "../phyloTree/helpers";
+import { setYValuesRecursively, setYValues } from "../phyloTree/helpers";
 
 
 /** calculatePearsonCorrelationCoefficient
@@ -32,8 +32,10 @@ const calculatePearsonCorrelationCoefficient = (phylotree1, phylotree2) => {
   return corr;
 };
 
+
 /** flipChildrenPostorder
  * re-order the children - if the correlation is improved, keep the flip, else restore original
+ * TODO: speed up the
  */
 const flipChildrenPostorder = (phylotree1, phylotree2) => {
   let correlation = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
@@ -41,14 +43,32 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
     const phyloNode = phylotree2.nodes[i];
     const reduxNode = phyloNode.n;
     if (phyloNode.children) {
+
+      /* step 1: find the left-most y value descendent from this node.
+      This is needed to recursively set new y-values downstream of this node
+      instead of setting them for everything. */
+      let leftMostNode = reduxNode;
+      while (leftMostNode.hasChildren) {
+        let nodeWithSmallestY = leftMostNode.children[0];
+        leftMostNode.children.forEach((node) => {
+          if (node.yvalue < nodeWithSmallestY.yvalue) {
+            nodeWithSmallestY = node;
+          }
+        });
+        leftMostNode = nodeWithSmallestY;
+      }
+      const originalStartingY = leftMostNode.yvalue - 1; // setYValuesRecursively expects the previous Y value
+
+      /* step 2: reverse the children, recalc the y-values, and see if things improved */
       phyloNode.children.reverse();
       reduxNode.children.reverse();
-      setYValues(phylotree2.nodes); // looks at the order of the phylotree nodes
+      setYValuesRecursively(phyloNode, originalStartingY);
       const new_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
       if (correlation > new_corr) {
         phyloNode.children.reverse();
         reduxNode.children.reverse();
-        setYValues(phylotree2.nodes);
+        setYValuesRecursively(phyloNode, originalStartingY);
+        // setYValuesRecursively(phylotree2.nodes[0], 0);
       } else {
         correlation = new_corr;
       }
@@ -62,5 +82,6 @@ export const untangleTreeToo = (phylotree1, phylotree2) => {
   console.log("beginning to untangle. Initial correlation", calculatePearsonCorrelationCoefficient(phylotree1, phylotree2));
   flipChildrenPostorder(phylotree1, phylotree2);
   console.log("Finished untangling. correlation", calculatePearsonCorrelationCoefficient(phylotree1, phylotree2));
+  setYValues(phylotree2.nodes);
   console.timeEnd("untangle");
 };

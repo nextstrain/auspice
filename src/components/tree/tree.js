@@ -46,7 +46,6 @@ class Tree extends React.Component {
   setUpAndRenderTreeToo(props, newState) {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
-    console.log("setUpAndRenderTreeToo");
     newState.treeToo = new PhyloTree(props.treeToo.nodes, "RIGHT");
     untangleTreeToo(newState.tree, newState.treeToo);
     renderTree(this, false, newState.treeToo, props);

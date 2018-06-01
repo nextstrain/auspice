@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 
 /*
  * adds the total number of descendant leaves to each node in the tree
@@ -59,6 +60,24 @@ export const createChildrenAndParentsReturnNumTips = (nodes) => {
   return numTips;
 };
 
+/** setYValuesRecursively
+ */
+export const setYValuesRecursively = (node, yCounter) => {
+  if (node.children) {
+    for (let i = node.children.length - 1; i >= 0; i--) {
+      yCounter = setYValuesRecursively(node.children[i], yCounter);
+    }
+  } else {
+    node.n.yvalue = ++yCounter;
+    node.yRange = [yCounter, yCounter];
+    return yCounter;
+  }
+  /* if here, then all children have yvalues, but we dont. */
+  node.n.yvalue = node.children.reduce((acc, d) => acc + d.n.yvalue, 0) / node.children.length;
+  node.yRange = [node.n.children[0].yvalue, node.n.children[node.n.children.length - 1].yvalue];
+  return yCounter;
+};
+
 /** setYValues
  * given nodes, this fn sets node.yvalue for each node
  * Nodes are the phyloTree nodes (i.e. node.n is the redux node)
@@ -67,22 +86,4 @@ export const createChildrenAndParentsReturnNumTips = (nodes) => {
  * rectangularLayout, radialLayout, createChildrenAndParents
  * side effects: node.n.yvalue (i.e. in the redux node) and node.yRange (i.e. in the phyloTree node)
  */
-export const setYValues = (nodes) => {
-  // console.log("set Y values")
-  let count = 0;
-  const recurse = (node) => {
-    if (node.children) {
-      for (let i = node.children.length - 1; i >= 0; i--) {
-        recurse(node.children[i]);
-      }
-    } else {
-      node.n.yvalue = ++count;
-      node.yRange = [count, count];
-      return;
-    }
-    /* if here, then all children have yvalues, but we dont. */
-    node.n.yvalue = node.children.reduce((acc, d) => acc + d.n.yvalue, 0) / node.children.length;
-    node.yRange = [node.n.children[0].yvalue, node.n.children[node.n.children.length - 1].yvalue];
-  };
-  recurse(nodes[0]);
-};
+export const setYValues = (nodes) => setYValuesRecursively(nodes[0], 0);
