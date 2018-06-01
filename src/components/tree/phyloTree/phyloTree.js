@@ -1,8 +1,6 @@
-import _debounce from "lodash/debounce";
-import { max } from "d3-array";
 import { scaleLinear } from "d3-scale";
 import { createDefaultParams } from "./defaultParams";
-import { addLeafCount, createChildrenAndParents } from "./helpers";
+import { addLeafCount, createChildrenAndParentsReturnNumTips, setYValues } from "./helpers";
 import { change, modifySVG, modifySVGInStages } from "./change";
 
 /* PROTOTYPES */
@@ -11,7 +9,6 @@ import * as layouts from "./layouts";
 import * as grid from "./grid";
 import * as confidence from "./confidence";
 import * as labels from "./labels";
-
 
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
 const PhyloTree = function PhyloTree(reduxNodes, debugId) {
@@ -36,12 +33,14 @@ const PhyloTree = function PhyloTree(reduxNodes, debugId) {
     d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
     return phyloNode;
   });
-  this.numberOfTips = max(this.nodes.map((d) => d.n.yvalue)); // total number of tips (we kinda cheat by finding the maximal yvalue, made by augur)
-  createChildrenAndParents(this.nodes);
+  this.numberOfTips = createChildrenAndParentsReturnNumTips(this.nodes);
+  setYValues(this.nodes);
   this.xScale = scaleLinear();
   this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
   addLeafCount(this.nodes[0]);
+  this.strainToNode = {};
+  this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.strain] = phylonode;});
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
   // this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
   //   {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});

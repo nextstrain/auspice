@@ -10,6 +10,7 @@ import * as callbacks from "./reactD3Interface/callbacks";
 import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
+import { untangleTreeToo } from "./tangle/untangling";
 
 class Tree extends React.Component {
   constructor(props) {
@@ -31,59 +32,56 @@ class Tree extends React.Component {
       }));
     };
   }
+  setUpAndRenderTreeToo(props, newState) {
+    /* this.setState(newState) will be run sometime after this returns */
+    /* modifies newState in place */
+    newState.treeToo = new PhyloTree(props.treeToo.nodes, "RIGHT");
+    untangleTreeToo(newState.tree, newState.treeToo);
+    renderTree(this, false, newState.treeToo, props);
+  }
   componentDidMount() {
     if (this.props.tree.loaded) {
-      const tree = new PhyloTree(this.props.tree.nodes, "LEFT");
-      renderTree(this, true, tree, this.props);
-      const newState = {tree};
+      const newState = {};
+      newState.tree = new PhyloTree(this.props.tree.nodes, "LEFT");
+      renderTree(this, true, newState.tree, this.props);
       if (this.props.showTreeToo) {
-        const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
-        renderTree(this, false, treeToo, this.props);
-        newState.treeToo = treeToo;
+        this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
       }
-      this.setState(newState);
+      this.setState(newState); /* this will trigger an unneccessary CDU :( */
     }
   }
   componentDidUpdate(prevProps) {
-    let newState;
-    let leftTreeUpdated;
-    let rightTreeUpdated;
-    let _; // eslint-disable-line
+    let newState = {};
+    let rightTreeUpdated = false;
 
-    if (this.state.tree) {
-      [newState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(true, this.state.tree, prevProps, this.props);
-      if (prevProps.showTreeToo !== this.props.showTreeToo) {
-        this.state.tree.change({svgHasChangedDimensions: true});
-        if (this.props.showTreeToo) {
-          if (this.state.treeToo) { /* remove the old tree */
-            this.state.treeToo.clearSVG();
-          }
-          const treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
-          renderTree(this, false, treeToo, this.props);
-          if (this.tangleRef) this.tangleRef.drawLines();
-          this.setState({treeToo});
-        } else {
-          this.setState({treeToo: null});
-        }
-        return;
-      }
-    }
-    /* tree too */
-    if (this.state.treeToo) {
-      if (!prevProps.showTreeToo && this.props.showTreeToo) {
-        newState.treeToo = new PhyloTree(this.props.treeToo.nodes, "RIGHT");
-        renderTree(this, false, newState.treeToo, this.props);
-      } else if (!this.props.showTreeToo) {
+    /* potentially change the (main / left hand) tree */
+    const [potentialNewState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(true, this.state.tree, prevProps, this.props);
+    if (potentialNewState) newState = potentialNewState;
+
+    /* has the 2nd (right hand) tree just been turned on, off or swapped? */
+    if (prevProps.showTreeToo !== this.props.showTreeToo) {
+      this.state.tree.change({svgHasChangedDimensions: true}); /* readjust co-ordinates */
+      if (!this.props.showTreeToo) { /* turned off -> remove the 2nd tree */
         newState.treeToo = null;
-      } else {
-        [_, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props);
+      } else { /* turned on -> render the 2nd tree */
+        if (this.state.treeToo) { /* tree has been swapped -> remove the old tree */
+          this.state.treeToo.clearSVG();
+        }
+        this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
+        // this.resetView(); /* reset the position of the left tree */
+        if (this.tangleRef) this.tangleRef.drawLines();
       }
+    } else if (this.state.treeToo) { /* the tree hasn't just been swapped, but it does exist and may need updating */
+      let unusedNewState; // eslint-disable-line
+      [unusedNewState, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props);
+      /* note, we don't incorporate unusedNewState into the state? why not? */
     }
+
     /* we may need to (imperitively) tell the tangle to redraw */
     if (this.tangleRef && (leftTreeUpdated || rightTreeUpdated)) {
       this.tangleRef.drawLines();
     }
-    if (newState) this.setState(newState);
+    if (Object.keys(newState).length) this.setState(newState);
   }
 
   getStyles = () => {
@@ -101,7 +99,7 @@ class Tree extends React.Component {
     };
   };
 
-  renderTreeDiv({width, height, d3ref, viewerRef}) {
+  renderTreeDiv({width, height, d3ref}) {
     return (
       <svg style={{pointerEvents: "auto"}}
         width={width}
