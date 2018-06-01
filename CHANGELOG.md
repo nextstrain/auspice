@@ -1,3 +1,5 @@
+## version 1.21.0 - 2018/06/01
+
 * Untangling via a simple algorithm upon 2nd tree load
 * Segment names displayed above trees (if 2 trees)
 * Fix hover-info-box date bug -- [issue 572](https://github.com/nextstrain/auspice/pull/572)
