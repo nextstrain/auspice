@@ -123,7 +123,7 @@ const fetchNarrativesAndDispatch = (dispatch, datasets, query, s3bucket) => {
   fetch(`${charonAPIAddress}request=narrative&name=${datasets.datapath.replace(/^\//, '').replace(/\//, '_').replace(/narratives_/, '')}`)
     .then((res) => res.json())
     .then((blocks) => {
-      const newDatasets = {datasets};
+      const newDatasets = {...datasets};
       newDatasets.datapath = getDatapath(blocks[0].dataset, datasets.availableDatasets);
       fetchDataAndDispatch(dispatch, newDatasets, query, s3bucket, blocks);
     })
