@@ -1,3 +1,5 @@
+## version 1.21.1 - 2018/06/04
+
 ## version 1.21.0 - 2018/06/01
 
 * Untangling via a simple algorithm upon 2nd tree load
