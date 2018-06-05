@@ -17,7 +17,7 @@ export const getDatapath = (pathname, availableDatasets) => {
   if (parsedParams.valid) {
     return makeDataPathFromParsedParams(parsedParams);
   }
-  return pathname.replace(/^\//, '').replace(/\/$/, '').replace('/', '_');
+  return pathname.replace(/^\//, '').replace(/\/$/, '').replace(/\//g, '_');
 };
 
 export const chooseDisplayComponentFromPathname = (pathname) => {
