@@ -10,6 +10,7 @@ import * as callbacks from "./reactD3Interface/callbacks";
 import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
+import { attemptUntangle } from "../../util/globals";
 import { untangleTreeToo } from "./tangle/untangling";
 
 class Tree extends React.Component {
@@ -36,7 +37,9 @@ class Tree extends React.Component {
     /* this.setState(newState) will be run sometime after this returns */
     /* modifies newState in place */
     newState.treeToo = new PhyloTree(props.treeToo.nodes, "RIGHT");
-    untangleTreeToo(newState.tree, newState.treeToo);
+    if (attemptUntangle) {
+      untangleTreeToo(newState.tree, newState.treeToo);
+    }
     renderTree(this, false, newState.treeToo, props);
   }
   componentDidMount() {

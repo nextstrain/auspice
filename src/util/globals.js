@@ -37,6 +37,7 @@ export const reallySmallNumber = -100000000;
 export const reallyBigNumber = 10000000;
 export const LBItime_window = 0.5;
 export const LBItau = 0.0005;
+export const attemptUntangle = false;
 export const mutType = "aa";
 export const default_gene = "nuc";
 export const plot_frequencies = false;
