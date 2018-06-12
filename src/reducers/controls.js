@@ -171,7 +171,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
         panelLayout: action.data
       });
     case types.TREE_TOO_DATA:
-      return Object.assign({}, state);
+      return action.controls;
     case types.TOGGLE_PANEL_DISPLAY:
       return Object.assign({}, state, {
         panelsToDisplay: action.panelsToDisplay,

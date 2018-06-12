@@ -21,7 +21,12 @@ class Tangle extends React.Component {
     this.timeout = false;
   }
   shouldComponentUpdate(nextProps) {
-    return (this.props.width !== nextProps.width || this.props.height !== nextProps.height);
+    return (
+      this.props.width !== nextProps.width ||
+      this.props.height !== nextProps.height ||
+      this.props.leftTreeName !== nextProps.leftTreeName ||
+      this.props.rightTreeName !== nextProps.rightTreeName
+    );
   }
   drawLines(props) {
     if (!props) props = this.props; // eslint-disable-line
