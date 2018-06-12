@@ -70,7 +70,9 @@ class Narrative extends React.Component {
     this.blockRefs = [];
   }
   componentDidMount() {
-    window.twttr.widgets.load();
+    if (window.twttr && window.twttr.ready) {
+      window.twttr.widgets.load();
+    }
     if (this.state.focus !== 1) {
       this.blockRefs[this.state.focus].scrollIntoView({behavior: "instant", block: "center", inline: "center"});
     }
