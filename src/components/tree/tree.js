@@ -41,6 +41,8 @@ class Tree extends React.Component {
       untangleTreeToo(newState.tree, newState.treeToo);
     }
     renderTree(this, false, newState.treeToo, props);
+    newState.tree.clearSVG();
+    renderTree(this, true, newState.tree, props);
   }
   componentDidMount() {
     if (this.props.tree.loaded) {
