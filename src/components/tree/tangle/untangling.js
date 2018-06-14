@@ -46,6 +46,7 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
       /* step 1: find the left-most y value descendent from this node.
       This is needed to recursively set new y-values downstream of this node
       instead of setting them for everything. */
+
       let leftMostNode = reduxNode;
       while (leftMostNode.hasChildren) {
         let nodeWithSmallestY = leftMostNode.children[0];
@@ -58,28 +59,85 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
       }
       const originalStartingY = leftMostNode.yvalue - 1; // setYValuesRecursively expects the previous Y value
 
-      /* step 2: reverse the children, recalc the y-values, and see if things improved */
-      phyloNode.children.reverse();
-      reduxNode.children.reverse();
-      setYValuesRecursively(phyloNode, originalStartingY);
-      const new_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
-      if (correlation > new_corr) {
+      if (phyloNode.children.length <= 2) {
+        // console.log("bifurcation")
+        /* step 2: reverse the children, recalc the y-values, and see if things improved */
         phyloNode.children.reverse();
-        reduxNode.children.reverse();
+        // if (phyloNode.children.length > 2) {console.log(phyloNode.children.length);}
+        // reduxNode.children.reverse();
         setYValuesRecursively(phyloNode, originalStartingY);
-        // setYValuesRecursively(phylotree2.nodes[0], 0);
+        const new_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
+        if (correlation > new_corr) {
+          phyloNode.children.reverse();
+          // reduxNode.children.reverse();
+          setYValuesRecursively(phyloNode, originalStartingY);
+          // setYValuesRecursively(phylotree2.nodes[0], 0);
+        } else {
+          correlation = new_corr;
+        }
       } else {
-        correlation = new_corr;
+        // console.log(phyloNode.children.length)
+        // loop over all children
+        for (let ii = 0; ii < phyloNode.children.length-1; ii++) {
+
+          let bestChildren = [...phyloNode.children];
+          const oldChildren = [...phyloNode.children];
+          // try all the ones downstream of the outer loop
+          // console.log(phyloNode.children.length, bestChildren.length )
+          let innerCorr = 0;
+          for (let j = ii; j < oldChildren.length; j++) {
+
+            const newChildren = [];
+            for (let k=0; k<ii; k++) {
+              newChildren.push(oldChildren[k]);
+            }
+            newChildren.push(oldChildren[j]);
+            for (let k=ii; k<oldChildren.length; k++) {
+              if (k !== j) newChildren.push(oldChildren[k]);
+            }
+
+            // must set to calc Y
+            phyloNode.children = newChildren;
+            setYValuesRecursively(phyloNode, originalStartingY);
+            const new_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
+            if (new_corr > innerCorr) {
+              innerCorr = new_corr;
+              bestChildren = [...newChildren];
+            }
+          }
+
+          // set (potentially) new bestChildren as children and recalculate calues
+          phyloNode.children = bestChildren;
+          setYValuesRecursively(phyloNode, originalStartingY);
+        }
+        correlation = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
+
+
       }
+      //
+      // /* step 2: reverse the children, recalc the y-values, and see if things improved */
+      // phyloNode.children.reverse();
+      // // if (phyloNode.children.length > 2) {console.log(phyloNode.children.length);}
+      // // reduxNode.children.reverse();
+      // setYValuesRecursively(phyloNode, originalStartingY);
+      // const new_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
+      // if (correlation > new_corr) {
+      //   phyloNode.children.reverse();
+      //   // reduxNode.children.reverse();
+      //   setYValuesRecursively(phyloNode, originalStartingY);
+      //   // setYValuesRecursively(phylotree2.nodes[0], 0);
+      // } else {
+      //   correlation = new_corr;
+      // }
     }
   }
 };
 
 export const untangleTreeToo = (phylotree1, phylotree2) => {
-  // console.time("untangle");
+  console.time("untangle");
   const init_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
   flipChildrenPostorder(phylotree1, phylotree2);
   console.log(`Untangling ${init_corr} -> ${calculatePearsonCorrelationCoefficient(phylotree1, phylotree2)}`);
   setYValues(phylotree2.nodes);
-  // console.timeEnd("untangle");
+  console.timeEnd("untangle");
 };
