@@ -41,7 +41,7 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
   for (let i=0; i<phylotree2.nodes.length; i++) {
     const phyloNode = phylotree2.nodes[i];
     const reduxNode = phyloNode.n;
-    if (phyloNode.children) {
+    if (phyloNode.children && phyloNode.leafCount < 250) {
 
       /* step 1: find the left-most y value descendent from this node.
       This is needed to recursively set new y-values downstream of this node
