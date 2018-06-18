@@ -173,7 +173,7 @@ export const drawRegression = function drawRegression() {
     .style("stroke", this.params.regressionStroke)
     .style("stroke-width", this.params.regressionWidth);
   this.svg.append("text")
-    .text(`rate estimate: ${this.regression.slope.toExponential(2)} subs/year`)
+    .text(`rate estimate: ${this.regression.slope.toExponential(2)} subs per site per year`)
     .attr("class", "regression")
     .attr("x", this.xScale.range()[1] / 2 - 75)
     .attr("y", this.yScale.range()[0] + 50)
