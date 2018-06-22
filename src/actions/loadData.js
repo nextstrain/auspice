@@ -47,6 +47,10 @@ export const getManifest = (dispatch, s3bucket = "live") => {
 
 const getSegmentName = (datapath, availableDatasets) => {
   /* this code is duplicated too many times. TODO */
+  if (!availableDatasets || !datapath) {
+    return undefined;
+  }
+
   const paramFields = parseParams(datapath, availableDatasets).dataset;
   const fields = Object.keys(paramFields).sort((a, b) => paramFields[a][0] > paramFields[b][0]);
   const choices = fields.map((d) => paramFields[d][1]);
