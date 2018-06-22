@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import * as types from "./types";
 import { charonAPIAddress } from "../util/globals";
-import { getDatapath, goTo404, chooseDisplayComponentFromPathname } from "./navigation";
+import { getDatapath, goTo404, chooseDisplayComponentFromPathname, makeDataPathFromPathname } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 import parseParams, { createDatapathForSecondSegment } from "../util/parseParams";
 
@@ -9,11 +9,7 @@ export const getManifest = (dispatch, s3bucket = "live") => {
   const charonErrorHandler = () => {
     console.warn("Failed to get manifest JSON from server");
 
-    const datapath =
-      window.location.pathname
-        .replace(/^\//, '')    // strip leading
-        .replace(/\/$/, '')    //   and trailing slashes
-        .replace(/\//g, '_');  // replacing all internal ones with underscores
+    const datapath = makeDataPathFromPathname(window.location.pathname);
 
     dispatch({type: types.PROCEED_SANS_MANIFEST, datapath});
   };

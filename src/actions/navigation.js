@@ -10,14 +10,20 @@ const makeDataPathFromParsedParams = (parsedParams) => {
   return tmp_levels.map((d) => d[1]).join("_");
 };
 
+export const makeDataPathFromPathname = (pathname) => {
+  return pathname
+    .replace(/^\//, '')    // strip leading
+    .replace(/\/$/, '')    //   and trailing slashes
+    .replace(/\//g, '_');  // replacing all internal ones with underscores
+};
+
 /* match URL pathname to datasets (from manifest) */
 export const getDatapath = (pathname, availableDatasets) => {
   if (!availableDatasets) {return undefined;}
   const parsedParams = parseParams(pathname, availableDatasets);
-  if (parsedParams.valid) {
-    return makeDataPathFromParsedParams(parsedParams);
-  }
-  return pathname.replace(/^\//, '').replace(/\/$/, '').replace(/\//g, '_');
+  return parsedParams.valid
+    ? makeDataPathFromParsedParams(parsedParams)
+    : makeDataPathFromPathname(pathname);
 };
 
 export const chooseDisplayComponentFromPathname = (pathname) => {
