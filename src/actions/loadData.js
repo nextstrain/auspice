@@ -8,7 +8,13 @@ import parseParams, { createDatapathForSecondSegment } from "../util/parseParams
 export const getManifest = (dispatch, s3bucket = "live") => {
   const charonErrorHandler = () => {
     console.warn("Failed to get manifest JSON from server");
-    const datapath = window.location.pathname.replace(/^\//, '').replace(/\/$/, '').replace('/', '_');
+
+    const datapath =
+      window.location.pathname
+        .replace(/^\//, '')    // strip leading
+        .replace(/\/$/, '')    //   and trailing slashes
+        .replace(/\//g, '_');  // replacing all internal ones with underscores
+
     dispatch({type: types.PROCEED_SANS_MANIFEST, datapath});
   };
   const processData = (data) => {
