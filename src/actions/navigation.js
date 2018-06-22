@@ -12,9 +12,9 @@ const makeDataPathFromParsedParams = (parsedParams) => {
 
 export const makeDataPathFromPathname = (pathname) => {
   return pathname
-    .replace(/^\//, '')    // strip leading
-    .replace(/\/$/, '')    //   and trailing slashes
-    .replace(/\//g, '_');  // replacing all internal ones with underscores
+    .replace(/^\/+/, '')    // strip leading
+    .replace(/\/+$/, '')    //   and trailing slashes
+    .replace(/\/+/g, '_');  // replacing all internal ones with underscores
 };
 
 /* match URL pathname to datasets (from manifest) */
