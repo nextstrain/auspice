@@ -39,6 +39,7 @@ rules:
   react/sort-comp: off # possibly reinstate
   jsx-a11y/no-static-element-interactions: off
   import/prefer-default-export: off
+  no-multi-spaces: ["error", { ignoreEOLComments: true }]
   no-labels: off
   no-continue: off
   no-unneeded-ternary: ["error", { "defaultAssignment": true }]

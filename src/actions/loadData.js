@@ -1,14 +1,16 @@
 import queryString from "query-string";
 import * as types from "./types";
 import { charonAPIAddress } from "../util/globals";
-import { getDatapath, goTo404, chooseDisplayComponentFromPathname } from "./navigation";
+import { getDatapath, goTo404, chooseDisplayComponentFromPathname, makeDataPathFromPathname } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 import parseParams, { createDatapathForSecondSegment } from "../util/parseParams";
 
 export const getManifest = (dispatch, s3bucket = "live") => {
   const charonErrorHandler = () => {
     console.warn("Failed to get manifest JSON from server");
-    const datapath = window.location.pathname.replace(/^\//, '').replace(/\/$/, '').replace('/', '_');
+
+    const datapath = makeDataPathFromPathname(window.location.pathname);
+
     dispatch({type: types.PROCEED_SANS_MANIFEST, datapath});
   };
   const processData = (data) => {
@@ -47,6 +49,10 @@ export const getManifest = (dispatch, s3bucket = "live") => {
 
 const getSegmentName = (datapath, availableDatasets) => {
   /* this code is duplicated too many times. TODO */
+  if (!availableDatasets || !datapath) {
+    return undefined;
+  }
+
   const paramFields = parseParams(datapath, availableDatasets).dataset;
   const fields = Object.keys(paramFields).sort((a, b) => paramFields[a][0] > paramFields[b][0]);
   const choices = fields.map((d) => paramFields[d][1]);
@@ -101,7 +107,7 @@ const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON
       if (!(data.JSONs.meta && data.JSONs.tree)) {
         console.error("Tree & Meta JSONs could not be loaded.");
         dispatch(goTo404(`
-          Auspice attempted to load JSONs for the dataset "${datasets.datapath.replace(/_/, '/')}", but they couldn't be found.
+          Auspice attempted to load JSONs for the dataset "${datasets.datapath.replace(/_/g, '/')}", but they couldn't be found.
         `));
         return;
       }
