@@ -7,7 +7,7 @@ import { stopProp } from "../tree/infoPanels/click";
 import { authorString } from "../../util/stringHelpers";
 import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";
-import { getAcknowledgments, preambleText} from "../framework/footer";
+import { getAcknowledgments, preambleText, footerStyles} from "../framework/footer";
 import { createSummary } from "../info/info";
 
 const dataUsage = `
@@ -159,7 +159,7 @@ class DownloadModal extends React.Component {
               {preambleText}
               {" A full list of sequence authors is available via the CSV files below."}
               <div style={styles.break}/>
-              {getAcknowledgments({})}
+              {getAcknowledgments({}, footerStyles)}
 
               <h2>Data usage policy</h2>
               {dataUsage}
