@@ -156,7 +156,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           const spaceBetween = parseInt(vals.length / (n - 1), 10);
           for (let i = 0; i < (n-1); i++) domain.push(vals[spaceBetween*i]);
           domain.push(vals[vals.length-1]);
-          range = colors[n]; /* contains n+1 values */
+          range = colors[n+1];
           break;
         default:
           range = colors[9];
