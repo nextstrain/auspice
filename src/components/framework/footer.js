@@ -313,14 +313,10 @@ class Footer extends React.Component {
   }
 
   getUpdated() {
-    let updated = null;
     if (this.props.metadata.updated) {
-      updated = this.props.metadata.updated;
+      return (<span>Data updated {this.props.metadata.updated}</span>);
     }
-    if (!updated) return null;
-    return (
-      <span>Data updated {updated}</span>
-    );
+    return null;
   }
   downloadDataButton() {
     return (
@@ -342,6 +338,17 @@ class Footer extends React.Component {
       );
     }
     return null;
+  }
+  getCitation() {
+    const url = "https://doi.org/10.1093/bioinformatics/bty407";
+    return (
+      <span>
+        {"Please cite "}
+        <a href={url} target="_blank">
+          {"Hadfield et al., "}<i>Bioinformatics</i>{" (2018)"}
+        </a>
+      </span>
+    );
   }
 
   render() {
@@ -367,7 +374,12 @@ class Footer extends React.Component {
             {dot}
             {this.getUpdated()}
             {dot}
-            {"Auspice " + version}
+            {this.downloadDataButton()}
+          </Flex>
+          <Flex style={styles.fineprint}>
+            {this.getCitation()}
+            {dot}
+            {"Auspice v" + version}
           </Flex>
         </div>
       </div>
@@ -376,6 +388,6 @@ class Footer extends React.Component {
 }
 
 // {dot}
-// {this.downloadDataButton()}
+//
 
 export default Footer;
