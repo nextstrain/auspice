@@ -114,6 +114,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
 
   /* second switch: path change */
   switch (action.type) {
+    case types.MANIFEST_RECEIVED:
+      pathname = action.datapath.replace(/_/g, "/");
+      break;
     case types.PAGE_CHANGE:
       /* desired behaviour depends on the displayComponent selected... */
       if (action.displayComponent === "app") {
