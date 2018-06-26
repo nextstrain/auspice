@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, medGrey, infoPanelStyles } from "../../globalStyles";
@@ -70,6 +69,7 @@ class DownloadModal extends React.Component {
         }
       };
     };
+    this.dismissModal = this.dismissModal.bind(this);
   }
   relevantPublications() {
     const titer_related_keys = ["cTiter", "rb", "ep", "ne"];
@@ -80,11 +80,11 @@ class DownloadModal extends React.Component {
     return (
       <span>
         <ul>
-          <li><a href="https://academic.oup.com/bioinformatics/article-lookup/doi/10.1093/bioinformatics/btv381">
-            Neher & Bedford, Nextflu: real-time tracking of seasonal influenza virus evolution in humans, Bioinformatics (2015)
+          <li><a href="https://doi.org/10.1093/bioinformatics/bty407" target="_blank" rel="noreferrer noopener">
+            {authorString("Hadfield et al")}, Nextstrain: real-time tracking of pathogen evolution, <i>Bioinformatics</i> (2018)
           </a></li>
-          <li><a href="http://www.biorxiv.org/content/early/2017/06/21/153494">
-            {authorString("Sagulenko et al")}, TreeTime: maximum likelihood phylodynamic analysis, bioRxiv (2017)
+          <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5758920/" target="_blank" rel="noreferrer noopener">
+            {authorString("Sagulenko et al")}, TreeTime: Maximum-likelihood phylodynamic analysis, <i>Virus Evolution</i> (2017)
           </a></li>
           {titer}
         </ul>
@@ -138,7 +138,7 @@ class DownloadModal extends React.Component {
       this.props.dateMax
     );
     return (
-      <div style={styles.behind} onClick={this.dismissModal.bind(this)}>
+      <div style={styles.behind} onClick={this.dismissModal}>
         <div className="static container" style={styles.modal} onClick={(e) => stopProp(e)}>
           <div className="row">
             <div className="col-md-1"/>
@@ -153,7 +153,7 @@ class DownloadModal extends React.Component {
                 {meta.title} (last updated {meta.updated})
               </div>
               {summary.map((d, i) =>
-                (i + 1 !== summary.length ? <span key={i}>{`${d}, `}</span> : <span key={i}>{`${d}. `}</span>)
+                (i + 1 !== summary.length ? <span key={d}>{`${d}, `}</span> : <span key={d}>{`${d}. `}</span>)
               )}
               <div style={styles.break}/>
               {preambleText}
@@ -164,7 +164,7 @@ class DownloadModal extends React.Component {
               <h2>Data usage policy</h2>
               {dataUsage}
 
-              <h2>The current data analysis relies on</h2>
+              <h2>Please cite the authors who contributed genomic data (where relevant), as well as:</h2>
               {this.relevantPublications()}
 
               <h2>Download data as</h2>
