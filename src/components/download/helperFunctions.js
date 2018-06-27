@@ -184,13 +184,12 @@ export const incommingMapPNG = (data) => {
 };
 
 const processXMLString = (input) => {
-  /* split into bounding <g> tag, and inner paths / shapes etc */
-  const parts = input.match(/^(<g.+?>)(.+)<\/g>$/);
+  /* split into bounding <g> (or <svg>) tag, and inner paths / shapes etc */
+  const parts = input.match(/^(<s?v?g.+?>)(.+)<\/s?v?g>$/);
   if (!parts) return undefined;
   /* extract width & height from the initial <g> bounding group */
   const dimensions = parts[1].match(/width="([0-9.]+)".+height="([0-9.]+)"/);
   if (!dimensions) return undefined;
-
   return {
     transform: [0, 0],
     width: parseFloat(dimensions[1]),
@@ -221,6 +220,17 @@ const createBoundingSVGStringAndPositionPanels = (panels) => {
     if (height) {
       panels.entropy.transform[1] = height + padding;
       height += padding + panels.entropy.height;
+    } else {
+      height = panels.entropy.height;
+    }
+  }
+  if (panels.frequencies) {
+    if (width < panels.frequencies.width) width = panels.frequencies.width;
+    if (height) {
+      panels.frequencies.transform[1] = height + padding;
+      height += padding + panels.frequencies.height;
+    } else {
+      height = panels.frequencies.height;
     }
   }
   return `<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`;
@@ -236,12 +246,25 @@ export const SVG = (dispatch, filePrefix, panelsInDOM) => {
   const successes = [];
   const errors = [];
   const panels = {tree: undefined, map: undefined, entropy: undefined, frequencies: undefined};
-
   if (panelsInDOM.indexOf("tree") !== -1) {
     try {
       panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
     } catch (e) {
       console.error("Tree SVG save error:", e);
+    }
+  }
+  if (panelsInDOM.indexOf("entropy") !== -1) {
+    try {
+      panels.entropy = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
+    } catch (e) {
+      console.error("Entropy SVG save error:", e);
+    }
+  }
+  if (panelsInDOM.indexOf("frequencies") !== -1) {
+    try {
+      panels.frequencies = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3frequenciesSVG")));
+    } catch (e) {
+      console.error("Frequencies SVG save error:", e);
     }
   }
 
@@ -280,18 +303,6 @@ export const SVG = (dispatch, filePrefix, panelsInDOM) => {
   //     /* note that errors in L.save are in a callback so aren't caught here */
   //     errors.push("map");
   //     console.error("Map SVG save error:", e);
-  //   }
-  // }
-  //
-  // if (panels.indexOf("entropy") !== -1) {
-  //   try {
-  //     const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
-  //     const fileName = filePrefix + "_entropy.svg";
-  //     write(fileName, MIME.svg, svg_entropy);
-  //     successes.push(fileName);
-  //   } catch (e) {
-  //     errors.push("entropy");
-  //     console.error("Entropy SVG save error:", e);
   //   }
   // }
 
