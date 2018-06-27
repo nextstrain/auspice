@@ -1,4 +1,5 @@
 import React from "react";
+import Mousetrap from "mousetrap";
 import { connect } from "react-redux";
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, medGrey, infoPanelStyles } from "../../globalStyles";
@@ -71,6 +72,11 @@ class DownloadModal extends React.Component {
     };
     this.dismissModal = this.dismissModal.bind(this);
   }
+  componentDidMount() {
+    Mousetrap.bind('d', () => {
+      helpers.SVG(this.props.dispatch, this.getFilePrefix(), this.props.metadata.panels);
+    });
+  }
   relevantPublications() {
     const titer_related_keys = ["cTiter", "rb", "ep", "ne"];
     const titer = (titer_related_keys.indexOf(this.props.colorBy) !== -1) ?
@@ -91,9 +97,12 @@ class DownloadModal extends React.Component {
       </span>
     );
   }
+  getFilePrefix() {
+    return "nextstrain_" + this.props.datapath.replace(/^\//, '').replace(/\//g, '_');
+  }
 
   downloadButtons() {
-    const filePrefix = "nextstrain_" + this.props.datapath.replace(/^\//, '').replace(/\//g, '_');
+    const filePrefix = this.getFilePrefix();
     const iconWidth = 25;
     const iconStroke = medGrey;
     const buttons = [
