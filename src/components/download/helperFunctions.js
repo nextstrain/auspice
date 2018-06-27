@@ -183,72 +183,117 @@ export const incommingMapPNG = (data) => {
   write(data.fileName, "image/svg", svg);
 };
 
-const fixSVGString = (svgBroken) => {
-  let svgFixed = svgBroken;
-  if (svgFixed.match(/^<g/)) {
-    svgFixed = svgFixed.replace(/^<g/, '<svg');
-    svgFixed = svgFixed.replace(/<\/g>$/, '</svg>');
-  }
-  svgFixed = svgFixed.replace("cursor: pointer;", "");
-  /* https://stackoverflow.com/questions/23218174/how-do-i-save-export-an-svg-file-after-creating-an-svg-with-d3-js-ie-safari-an */
-  if (!svgFixed.match(/^<svg[^>]+xmlns="http\:\/\/www\.w3\.org\/2000\/svg"/)) {
-    svgFixed = svgFixed.replace(/^<svg/, '<svg xmlns="http://www.w3.org/2000/svg"');
-  }
-  if (!svgFixed.match(/^<svg[^>]+"http\:\/\/www\.w3\.org\/1999\/xlink"/)) {
-    svgFixed = svgFixed.replace(/^<svg/, '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
-  }
-  return '<?xml version="1.0" standalone="no"?>\r\n' + svgFixed;
+const processXMLString = (input) => {
+  /* split into bounding <g> tag, and inner paths / shapes etc */
+  const parts = input.match(/^(<g.+?>)(.+)<\/g>$/);
+  if (!parts) return undefined;
+  /* extract width & height from the initial <g> bounding group */
+  const dimensions = parts[1].match(/width="([0-9.]+)".+height="([0-9.]+)"/);
+  if (!dimensions) return undefined;
+
+  return {
+    transform: [0, 0],
+    width: parseFloat(dimensions[1]),
+    height: parseFloat(dimensions[2]),
+    inner: parts[2]
+  };
 };
 
-export const SVG = (dispatch, filePrefix, panels) => {
+/* take the panels (see processXMLString for struct) and calculate the overall size of the SVG
+as well as the offsets (transforms) to position panels appropriately within this */
+const createBoundingSVGStringAndPositionPanels = (panels) => {
+  const padding = 50;
+  let width = 0;
+  let height = 0;
+  if (panels.tree && panels.map) {
+    width = panels.tree.width + padding + panels.map.width;
+    height = panels.tree.height;
+    panels.map.transform[0] = panels.tree.width + padding;
+  } else if (panels.tree) {
+    width = panels.tree.width;
+    height = panels.tree.height;
+  } else if (panels.map) {
+    width = panels.map.width;
+    height = panels.map.height;
+  }
+  if (panels.entropy) {
+    if (width < panels.entropy.width) width = panels.entropy.width;
+    if (height) {
+      panels.entropy.transform[1] = height + padding;
+      height += padding + panels.entropy.height;
+    }
+  }
+  return `<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`;
+};
+
+const injectAsSVGStrings = (output, key, data) => {
+  output.push(`<svg id="${key}" width="${data.width}" height="${data.height}" transform="translate(${data.transform[0]} ${data.transform[1]})">`);
+  output.push(data.inner);
+  output.push("</svg>");
+};
+
+export const SVG = (dispatch, filePrefix, panelsInDOM) => {
   const successes = [];
   const errors = [];
+  const panels = {tree: undefined, map: undefined, entropy: undefined, frequencies: undefined};
 
-  if (panels.indexOf("tree") !== -1) {
+  if (panelsInDOM.indexOf("tree") !== -1) {
     try {
-      const svg_tree = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
-      const fileName = filePrefix + "_tree.svg";
-      write(fileName, MIME, svg_tree);
-      successes.push(fileName);
+      panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
     } catch (e) {
-      errors.push("tree");
       console.error("Tree SVG save error:", e);
     }
   }
 
-  if (panels.indexOf("map") !== -1) {
-    try {
-      const errorCallback = () => {
-        dispatch(warningNotification({message: "Errors while saving map SVG"}));
-      };
-      const demes_transmissions_xml = (new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions"));
-      const groups = demes_transmissions_xml.match(/^<svg(.*?)>(.*?)<\/svg>/);
-      const fileName = filePrefix + "_map.svg";
-      /* window.L.save triggers the incommingMapPNG callback, with the data given here passed through */
-      window.L.save({
-        fileName,
-        demes_transmissions_header: groups[1],
-        demes_transmissions_path: groups[2]
-      }, errorCallback);
-      successes.push(fileName);
-    } catch (e) {
-      /* note that errors in L.save are in a callback so aren't caught here */
-      errors.push("map");
-      console.error("Map SVG save error:", e);
+  /* collect all panels inside a bounding <svg> tag, and write to file */
+  const output = [];
+  /* logic for extracting the overall width etc */
+  output.push(createBoundingSVGStringAndPositionPanels(panels));
+  for (let key in panels) { // eslint-disable-line
+    if (panels[key]) {
+      injectAsSVGStrings(output, key, panels[key]); // modifies output in place
     }
   }
+  output.push("</svg>");
+  console.log(panels)
+  console.log(output)
+  write(filePrefix + ".svg", MIME.svg, output.join("\n"));
 
-  if (panels.indexOf("entropy") !== -1) {
-    try {
-      const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
-      const fileName = filePrefix + "_entropy.svg";
-      write(fileName, MIME.svg, svg_entropy);
-      successes.push(fileName);
-    } catch (e) {
-      errors.push("entropy");
-      console.error("Entropy SVG save error:", e);
-    }
-  }
+  // if (panels.indexOf("map") !== -1) {
+  //   try {
+  //     const errorCallback = () => {
+  //       dispatch(warningNotification({message: "Errors while saving map SVG"}));
+  //     };
+  //     const demes_transmissions_xml = (new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions"));
+  //     const groups = demes_transmissions_xml.match(/^<svg(.*?)>(.*?)<\/svg>/);
+  //     const fileName = filePrefix + "_map.svg";
+  //     /* window.L.save triggers the incommingMapPNG callback, with the data given here passed through */
+  //     console.log("groups:", groups)
+  //     console.log("calling windlow.L.save")
+  //     window.L.save({
+  //       fileName,
+  //       demes_transmissions_header: groups[1],
+  //       demes_transmissions_path: groups[2]
+  //     }, errorCallback);
+  //     successes.push(fileName);
+  //   } catch (e) {
+  //     /* note that errors in L.save are in a callback so aren't caught here */
+  //     errors.push("map");
+  //     console.error("Map SVG save error:", e);
+  //   }
+  // }
+  //
+  // if (panels.indexOf("entropy") !== -1) {
+  //   try {
+  //     const svg_entropy = fixSVGString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
+  //     const fileName = filePrefix + "_entropy.svg";
+  //     write(fileName, MIME.svg, svg_entropy);
+  //     successes.push(fileName);
+  //   } catch (e) {
+  //     errors.push("entropy");
+  //     console.error("Entropy SVG save error:", e);
+  //   }
+  // }
 
   /* notifications */
   if (successes.length) {
