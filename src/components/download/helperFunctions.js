@@ -184,7 +184,8 @@ const processXMLString = (input) => {
   /* the map uses transform3d & viewbox */
   const viewbox = parts[1].match(/viewBox="([0-9-]+)\s([0-9-]+)\s([0-9-]+)\s([0-9-]+)"/);
   return {
-    transform: [0, 0],
+    x: 0,
+    y: 0,
     viewbox: viewbox ? viewbox.slice(1) : undefined,
     width: parseFloat(dimensions[1]),
     height: parseFloat(dimensions[2]),
@@ -193,7 +194,7 @@ const processXMLString = (input) => {
 };
 
 /* take the panels (see processXMLString for struct) and calculate the overall size of the SVG
-as well as the offsets (transforms) to position panels appropriately within this */
+as well as the offsets (x, y) to position panels appropriately within this */
 const createBoundingSVGStringAndPositionPanels = (panels) => {
   const padding = 50;
   let width = 0;
@@ -201,8 +202,9 @@ const createBoundingSVGStringAndPositionPanels = (panels) => {
   if (panels.tree && panels.mapD3 && panels.mapTiles) {
     width = panels.tree.width + padding + panels.mapTiles.width;
     height = panels.tree.height;
-    panels.mapD3.transform[0] = panels.tree.width + padding;
-    panels.mapTiles.transform = panels.mapD3.transform;
+    panels.mapD3.x = panels.tree.width + padding;
+    panels.mapTiles.x = panels.mapD3.x;
+    panels.mapTiles.y = panels.mapD3.y;
   } else if (panels.tree) {
     width = panels.tree.width;
     height = panels.tree.height;
@@ -210,10 +212,17 @@ const createBoundingSVGStringAndPositionPanels = (panels) => {
     width = panels.mapTiles.width;
     height = panels.mapTiles.height;
   }
+  /* need to adjust map demes & transmissions to account for panning */
+  if (panels.mapD3) {
+    console.log("adding offsets to mapD3 x,y ", panels.mapD3._panOffsets.x, panels.mapD3._panOffsets.y);
+    panels.mapD3.x += panels.mapD3._panOffsets.x;
+    panels.mapD3.y += panels.mapD3._panOffsets.y;
+  }
+
   if (panels.entropy) {
     if (width < panels.entropy.width) width = panels.entropy.width;
     if (height) {
-      panels.entropy.transform[1] = height + padding;
+      panels.entropy.y = height + padding;
       height += padding + panels.entropy.height;
     } else {
       height = panels.entropy.height;
@@ -222,7 +231,7 @@ const createBoundingSVGStringAndPositionPanels = (panels) => {
   if (panels.frequencies) {
     if (width < panels.frequencies.width) width = panels.frequencies.width;
     if (height) {
-      panels.frequencies.transform[1] = height + padding;
+      panels.frequencies.y = height + padding;
       height += padding + panels.frequencies.height;
     } else {
       height = panels.frequencies.height;
@@ -232,8 +241,8 @@ const createBoundingSVGStringAndPositionPanels = (panels) => {
 };
 
 const injectAsSVGStrings = (output, key, data) => {
-  let svgTag = `<svg id="${key}" width="${data.width}" height="${data.height}" x="${data.transform[0]}" y="${data.transform[1]}">`;
-  if (data.viewbox) svgTag = svgTag.replace(">", ` viewBox="${data.viewbox.join(" ")}">`);
+  const svgTag = `<svg id="${key}" width="${data.width}" height="${data.height}" x="${data.x}" y="${data.y}">`;
+  // if (data.viewbox) svgTag = svgTag.replace(">", ` viewBox="${data.viewbox.join(" ")}">`);
   console.log(`${key} HEADER: `, svgTag);
   output.push(svgTag);
   output.push(data.inner);
@@ -269,7 +278,8 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, mapT
   }
   if (panelsInDOM.indexOf("map") !== -1 && mapTiles) {
     panels.mapTiles = {
-      transform: [0, 0],
+      x: 0,
+      y: 0,
       viewbox: undefined,
       width: parseFloat(mapTiles.mapDimensions.x),
       height: parseFloat(mapTiles.mapDimensions.y),
@@ -280,6 +290,7 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, mapT
       // modify the width & height of the mapD3 to match the tiles (not sure how this actually works in the DOM)
       panels.mapD3.width = panels.mapTiles.width;
       panels.mapD3.height = panels.mapTiles.height;
+      panels.mapD3._panOffsets = mapTiles.panOffsets;
     } catch (e) {
       console.error("Map demes & tranmisions SVG save error:", e);
     }
@@ -295,33 +306,9 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, mapT
     }
   }
   output.push("</svg>");
-  console.log(panels)
-  console.log(output)
+  // console.log(panels)
+  // console.log(output)
   write(filePrefix + ".svg", MIME.svg, output.join("\n"));
-
-  // if (panels.indexOf("map") !== -1) {
-  //   try {
-  //     const errorCallback = () => {
-  //       dispatch(warningNotification({message: "Errors while saving map SVG"}));
-  //     };
-  //     const demes_transmissions_xml = (new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions"));
-  //     const groups = demes_transmissions_xml.match(/^<svg(.*?)>(.*?)<\/svg>/);
-  //     const fileName = filePrefix + "_map.svg";
-  //     /* window.L.save triggers the incommingMapPNG callback, with the data given here passed through */
-  //     console.log("groups:", groups)
-  //     console.log("calling windlow.L.save")
-  //     window.L.save({
-  //       fileName,
-  //       demes_transmissions_header: groups[1],
-  //       demes_transmissions_path: groups[2]
-  //     }, errorCallback);
-  //     successes.push(fileName);
-  //   } catch (e) {
-  //     /* note that errors in L.save are in a callback so aren't caught here */
-  //     errors.push("map");
-  //     console.error("Map SVG save error:", e);
-  //   }
-  // }
 
   /* notifications */
   if (successes.length) {

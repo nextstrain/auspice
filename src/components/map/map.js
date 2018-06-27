@@ -86,7 +86,11 @@ class Map extends React.Component {
           const mapDimensions = this.state.map.getSize();
           const loadendCallbackWrapper = (e) => {
             // loadendCallback is a curried version of writeSVGPossiblyIncludingMapPNG
-            loadendCallback({base64map: e.srcElement.result, mapDimensions});
+            loadendCallback({
+              base64map: e.srcElement.result,
+              mapDimensions,
+              panOffsets: this.state.map._getMapPanePos()
+            });
           };
           canvas.toBlob((blob) => {
             const reader = new FileReader();
@@ -272,8 +276,6 @@ class Map extends React.Component {
         this.props.dateMinNumeric,
         this.props.dateMaxNumeric
       );
-
-
     }
   }
   getGeoRange() {
