@@ -33,7 +33,7 @@ const processAnnotations = (annotations) => {
 };
 
 export const entropyCreateStateFromJsons = (metaJSON) => {
-  if (metaJSON.panels.includes("entropy") && metaJSON.annotations) {
+  if (metaJSON.annotations) {
     const annotations = getAnnotations(metaJSON.annotations);
     return {
       showCounts: false,
@@ -42,9 +42,11 @@ export const entropyCreateStateFromJsons = (metaJSON) => {
       geneMap: processAnnotations(annotations)
     };
   }
+  const annotations = [];
   return {
     showCounts: false,
     loaded: false,
+    annotations,
     geneMap: {}
   };
 };

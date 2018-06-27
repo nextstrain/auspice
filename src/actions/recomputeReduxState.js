@@ -182,6 +182,12 @@ const modifyStateViaMetadata = (state, metadata) => {
   state.panelsAvailable = metadata.panels.slice();
   state.panelsToDisplay = metadata.panels.slice();
 
+  /* if metadata lacks annotations, remove entropy from panels to display */
+  if (!metadata.annotations) {
+    state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
+    state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
+  }
+
   /* if only map or only tree, then panelLayout must be full */
   /* note - this will be overwritten by the URL query */
   if (state.panelsAvailable.indexOf("map") === -1 || state.panelsAvailable.indexOf("tree") === -1) {
@@ -197,7 +203,7 @@ const modifyStateViaMetadata = (state, metadata) => {
       }
     }
   } else {
-    console.error("The meta.json did not include annotations. FATAL.");
+    console.warn("The meta.json did not include annotations.");
   }
 
   return state;
