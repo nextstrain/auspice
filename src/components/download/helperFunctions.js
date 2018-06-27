@@ -83,15 +83,17 @@ export const authorCSV = (dispatch, filePrefix, metadata, tree) => {
     }
   });
   const body = [];
-  for (const author of Object.keys(metadata.author_info)) {
-    body.push([
-      prettyString(author, {camelCase: false}),
-      metadata.author_info[author].n,
-      prettyString(metadata.author_info[author].title, {removeComma: true}),
-      prettyString(metadata.author_info[author].journal, {removeComma: true}),
-      isPaperURLValid(metadata.author_info[author]) ? formatURLString(metadata.author_info[author].paper_url) : "unknown",
-      authors[author].join(" ")
-    ]);
+  if (metadata.author_info) {
+    for (const author of Object.keys(metadata.author_info)) {
+      body.push([
+        prettyString(author, {camelCase: false}),
+        metadata.author_info[author].n,
+        prettyString(metadata.author_info[author].title, {removeComma: true}),
+        prettyString(metadata.author_info[author].journal, {removeComma: true}),
+        isPaperURLValid(metadata.author_info[author]) ? formatURLString(metadata.author_info[author].paper_url) : "unknown",
+        authors[author].join(" ")
+      ]);
+    }
   }
 
   body.forEach((line) => { lineArray.push(line.join(",")); });

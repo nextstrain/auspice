@@ -115,8 +115,10 @@ class Info extends React.Component {
   }
 
   getNumSelectedAuthors() {
-    if (!Object.prototype.hasOwnProperty.call(this.props.filters, "authors") || this.props.filters.authors.length === 0) {
-      return Object.keys(this.props.metadata.author_info).length;
+    if (this.props.metadata.author_info) {
+      if (!Object.prototype.hasOwnProperty.call(this.props.filters, "authors") || this.props.filters.authors.length === 0) {
+        return Object.keys(this.props.metadata.author_info).length;
+      }
     }
     return this.props.filters.authors.length;
   }

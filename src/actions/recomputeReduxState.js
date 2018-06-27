@@ -147,7 +147,7 @@ const modifyStateViaMetadata = (state, metadata) => {
     // need authors in metadata.filters to include as filter
     // but metadata.author_info is generally required for app functioning
   } else {
-    console.error("the meta.json must include author_info");
+    console.warn("the meta.json did not include author_info");
   }
   if (metadata.filters) {
     metadata.filters.forEach((v) => {

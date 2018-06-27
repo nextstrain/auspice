@@ -84,7 +84,17 @@ const TipClickedPanel = ({tip, goAwayCallback, metadata}) => {
   const url = validAttr(tip.n.attr, "url") ? formatURL(tip.n.attr.url) : false;
   const uncertainty = "num_date_confidence" in tip.n.attr && tip.n.attr.num_date_confidence[0] !== tip.n.attr.num_date_confidence[1];
   const author = tip.n.attr.authors || undefined;
-  const authorInfo = metadata.author_info;
+  let authorInfo = {
+    author: {
+      n: null,
+      title: null,
+      journal: null,
+      paper_url: null
+    }
+  };
+  if (metadata.author_info) {
+    authorInfo = metadata.author_info;
+  }
   return (
     <div style={styles.container} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
