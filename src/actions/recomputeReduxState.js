@@ -189,13 +189,17 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.canTogglePanelLayout = false;
   }
   /* annotations in metadata */
-  if (!metadata.annotations) {console.error("Metadata needs updating with annotations field. Rerun augur. FATAL.");}
-  for (const gene of Object.keys(metadata.annotations)) {
-    state.geneLength[gene] = metadata.annotations[gene].end - metadata.annotations[gene].start;
-    if (gene !== "nuc") {
-      state.geneLength[gene] /= 3;
+  if (metadata.annotations) {
+    for (const gene of Object.keys(metadata.annotations)) {
+      state.geneLength[gene] = metadata.annotations[gene].end - metadata.annotations[gene].start;
+      if (gene !== "nuc") {
+        state.geneLength[gene] /= 3;
+      }
     }
+  } else {
+    console.error("The meta.json did not include annotations. FATAL.");
   }
+
   return state;
 };
 
@@ -415,9 +419,11 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   /* calculate entropy in view */
-  const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
-  entropy.bars = entropyBars;
-  entropy.maxYVal = entropyMaxYVal;
+  if (entropy.loaded) {
+    const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
+    entropy.bars = entropyBars;
+    entropy.maxYVal = entropyMaxYVal;
+  }
 
   /* potentially calculate frequency (or update it!)
   this needs to come after the colorscale & tree is set */
