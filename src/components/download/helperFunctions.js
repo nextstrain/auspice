@@ -192,16 +192,9 @@ const processXMLString = (input) => {
   };
 };
 
-// width="3070" height="2945"
-// viewBox="-1228 -1187 3070 2945" style="transform: translate3d(-1228px, -1187px, 0px);"
-
-
 /* take the panels (see processXMLString for struct) and calculate the overall size of the SVG
 as well as the offsets (transforms) to position panels appropriately within this */
 const createBoundingSVGStringAndPositionPanels = (panels) => {
-
-  if (panels.mapD3) console.log(`DEBUG: mapD3 is ${panels.mapD3.width}x${panels.mapD3.height}, mapTiles is ${panels.mapTiles.width}x${panels.mapTiles.height}`)
-
   const padding = 50;
   let width = 0;
   let height = 0;
@@ -239,20 +232,16 @@ const createBoundingSVGStringAndPositionPanels = (panels) => {
 };
 
 const injectAsSVGStrings = (output, key, data) => {
-  let header = `<svg id="${key}" width="${data.width}" height="${data.height}" transform="translate(${data.transform[0]} ${data.transform[1]})"`;
-  if (data.viewbox) {
-    header += ` viewBox="${data.viewbox.join(" ")}"`;
-  }
-  header += ">";
-  console.log("HEADER", header)
-  output.push(header);
+  let svgTag = `<svg id="${key}" width="${data.width}" height="${data.height}" x="${data.transform[0]}" y="${data.transform[1]}">`;
+  if (data.viewbox) svgTag = svgTag.replace(">", ` viewBox="${data.viewbox.join(" ")}">`);
+  console.log(`${key} HEADER: `, svgTag);
+  output.push(svgTag);
   output.push(data.inner);
   output.push("</svg>");
 };
 
 /* define actual writer as a closure, because it may need to be triggered asyncronously */
 const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, mapTiles) => {
-  console.log("writeSVGPossiblyIncludingMapPNG()")
   const successes = [];
   const errors = [];
   /* for each panel present in the DOM, create a data structure with the dimensions & the paths/shapes etc */
@@ -288,6 +277,9 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, mapT
     };
     try {
       panels.mapD3 = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions")));
+      // modify the width & height of the mapD3 to match the tiles (not sure how this actually works in the DOM)
+      panels.mapD3.width = panels.mapTiles.width;
+      panels.mapD3.height = panels.mapTiles.height;
     } catch (e) {
       console.error("Map demes & tranmisions SVG save error:", e);
     }
