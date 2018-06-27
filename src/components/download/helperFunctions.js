@@ -174,15 +174,6 @@ export const newick = (dispatch, filePrefix, root, temporal) => {
   dispatch(infoNotification({message: message + " written to " + fName}));
 };
 
-export const incommingMapPNG = (data) => {
-  let svg = '<?xml version="1.0" standalone="no"?>';
-  svg += `<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${data.mapDimensions.x}" height="${data.mapDimensions.y}">\n`;
-  svg += `<image width="${data.mapDimensions.x}" height="${data.mapDimensions.y}" xlink:href="${data.base64map}"/>\n`;
-  svg += data.demes_transmissions_path;
-  svg += "</svg>";
-  write(data.fileName, "image/svg", svg);
-};
-
 const processXMLString = (input) => {
   /* split into bounding <g> (or <svg>) tag, and inner paths / shapes etc */
   const parts = input.match(/^(<s?v?g.+?>)(.+)<\/s?v?g>$/);
@@ -190,30 +181,41 @@ const processXMLString = (input) => {
   /* extract width & height from the initial <g> bounding group */
   const dimensions = parts[1].match(/width="([0-9.]+)".+height="([0-9.]+)"/);
   if (!dimensions) return undefined;
+  /* the map uses transform3d & viewbox */
+  const viewbox = parts[1].match(/viewBox="([0-9-]+)\s([0-9-]+)\s([0-9-]+)\s([0-9-]+)"/);
   return {
     transform: [0, 0],
+    viewbox: viewbox ? viewbox.slice(1) : undefined,
     width: parseFloat(dimensions[1]),
     height: parseFloat(dimensions[2]),
     inner: parts[2]
   };
 };
 
+// width="3070" height="2945"
+// viewBox="-1228 -1187 3070 2945" style="transform: translate3d(-1228px, -1187px, 0px);"
+
+
 /* take the panels (see processXMLString for struct) and calculate the overall size of the SVG
 as well as the offsets (transforms) to position panels appropriately within this */
 const createBoundingSVGStringAndPositionPanels = (panels) => {
+
+  if (panels.mapD3) console.log(`DEBUG: mapD3 is ${panels.mapD3.width}x${panels.mapD3.height}, mapTiles is ${panels.mapTiles.width}x${panels.mapTiles.height}`)
+
   const padding = 50;
   let width = 0;
   let height = 0;
-  if (panels.tree && panels.map) {
-    width = panels.tree.width + padding + panels.map.width;
+  if (panels.tree && panels.mapD3 && panels.mapTiles) {
+    width = panels.tree.width + padding + panels.mapTiles.width;
     height = panels.tree.height;
-    panels.map.transform[0] = panels.tree.width + padding;
+    panels.mapD3.transform[0] = panels.tree.width + padding;
+    panels.mapTiles.transform = panels.mapD3.transform;
   } else if (panels.tree) {
     width = panels.tree.width;
     height = panels.tree.height;
-  } else if (panels.map) {
-    width = panels.map.width;
-    height = panels.map.height;
+  } else if (panels.mapD3 && panels.mapTiles) {
+    width = panels.mapTiles.width;
+    height = panels.mapTiles.height;
   }
   if (panels.entropy) {
     if (width < panels.entropy.width) width = panels.entropy.width;
@@ -237,15 +239,24 @@ const createBoundingSVGStringAndPositionPanels = (panels) => {
 };
 
 const injectAsSVGStrings = (output, key, data) => {
-  output.push(`<svg id="${key}" width="${data.width}" height="${data.height}" transform="translate(${data.transform[0]} ${data.transform[1]})">`);
+  let header = `<svg id="${key}" width="${data.width}" height="${data.height}" transform="translate(${data.transform[0]} ${data.transform[1]})"`;
+  if (data.viewbox) {
+    header += ` viewBox="${data.viewbox.join(" ")}"`;
+  }
+  header += ">";
+  console.log("HEADER", header)
+  output.push(header);
   output.push(data.inner);
   output.push("</svg>");
 };
 
-export const SVG = (dispatch, filePrefix, panelsInDOM) => {
+/* define actual writer as a closure, because it may need to be triggered asyncronously */
+const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, mapTiles) => {
+  console.log("writeSVGPossiblyIncludingMapPNG()")
   const successes = [];
   const errors = [];
-  const panels = {tree: undefined, map: undefined, entropy: undefined, frequencies: undefined};
+  /* for each panel present in the DOM, create a data structure with the dimensions & the paths/shapes etc */
+  const panels = {tree: undefined, mapTiles: undefined, mapD3: undefined, entropy: undefined, frequencies: undefined};
   if (panelsInDOM.indexOf("tree") !== -1) {
     try {
       panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
@@ -267,8 +278,22 @@ export const SVG = (dispatch, filePrefix, panelsInDOM) => {
       console.error("Frequencies SVG save error:", e);
     }
   }
+  if (panelsInDOM.indexOf("map") !== -1 && mapTiles) {
+    panels.mapTiles = {
+      transform: [0, 0],
+      viewbox: undefined,
+      width: parseFloat(mapTiles.mapDimensions.x),
+      height: parseFloat(mapTiles.mapDimensions.y),
+      inner: `<image width="${mapTiles.mapDimensions.x}" height="${mapTiles.mapDimensions.y}" xlink:href="${mapTiles.base64map}"/>`
+    };
+    try {
+      panels.mapD3 = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions")));
+    } catch (e) {
+      console.error("Map demes & tranmisions SVG save error:", e);
+    }
+  }
 
-  /* collect all panels inside a bounding <svg> tag, and write to file */
+  /* collect all panels as individual <svg> elements inside a bounding <svg> tag, and write to file */
   const output = [];
   /* logic for extracting the overall width etc */
   output.push(createBoundingSVGStringAndPositionPanels(panels));
@@ -312,5 +337,18 @@ export const SVG = (dispatch, filePrefix, panelsInDOM) => {
   }
   if (errors.length) {
     dispatch(warningNotification({message: "Errors saving SVG images", details: errors}));
+  }
+};
+
+const getMapTilesErrorCallback = (e) => {
+  console.warn("getMapTiles errorCallback", e);
+};
+
+export const SVG = (dispatch, filePrefix, panelsInDOM) => {
+  /* downloading the map tiles is an async call */
+  if (panelsInDOM.indexOf("map") !== -1) {
+    window.L.getMapTiles(writeSVGPossiblyIncludingMapPNG.bind(this, dispatch, filePrefix, panelsInDOM), getMapTilesErrorCallback);
+  } else {
+    writeSVGPossiblyIncludingMapPNG(dispatch, filePrefix, panelsInDOM, undefined);
   }
 };
