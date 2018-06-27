@@ -182,6 +182,12 @@ const modifyStateViaMetadata = (state, metadata) => {
   state.panelsAvailable = metadata.panels.slice();
   state.panelsToDisplay = metadata.panels.slice();
 
+  /* if metadata lacks geo, remove map from panels to display */
+  if (!metadata.geo) {
+    state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "map");
+    state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "map");
+  }
+
   /* if metadata lacks annotations, remove entropy from panels to display */
   if (!metadata.annotations) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
@@ -276,10 +282,14 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
   }
 
   /* geoResolution */
-  const availableGeoResultions = Object.keys(metadata.geo);
-  if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
-    state["geoResolution"] = availableGeoResultions[0];
-    console.error("Error detected. Setting geoResolution to ", state["geoResolution"]);
+  if (metadata.geo) {
+    const availableGeoResultions = Object.keys(metadata.geo);
+    if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
+      state["geoResolution"] = availableGeoResultions[0];
+      console.error("Error detected. Setting geoResolution to ", state["geoResolution"]);
+    }
+  } else {
+    console.warn("The meta.json did not include geo info.");
   }
 
   /* temporalConfidence */
