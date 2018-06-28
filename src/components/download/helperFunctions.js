@@ -195,7 +195,7 @@ const processXMLString = (input) => {
 
 /* take the panels (see processXMLString for struct) and calculate the overall size of the SVG
 as well as the offsets (x, y) to position panels appropriately within this */
-const createBoundingSVGStringAndPositionPanels = (panels, panelLayout) => {
+const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLinesOfText) => {
   const padding = 50;
   let width = 0;
   let height = 0;
@@ -259,8 +259,16 @@ const createBoundingSVGStringAndPositionPanels = (panels, panelLayout) => {
   if (panels.frequencies) {panels.frequencies.x += padding; panels.frequencies.y += padding;}
   width += padding*2;
   height += padding*2;
+  const textHeight = numLinesOfText * 36 + 20;
+  height += textHeight;
 
-  return `<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`;
+  return {
+    width,
+    height,
+    padding,
+    textY: height - textHeight,
+    textHeight
+  };
 };
 
 const injectAsSVGStrings = (output, key, data) => {
@@ -273,7 +281,7 @@ const injectAsSVGStrings = (output, key, data) => {
 };
 
 /* define actual writer as a closure, because it may need to be triggered asyncronously */
-const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, panelLayout, mapTiles) => {
+const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, mapTiles) => {
   console.log("panelLayout", panelLayout)
   const successes = [];
   const errors = [];
@@ -323,13 +331,22 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
   /* collect all panels as individual <svg> elements inside a bounding <svg> tag, and write to file */
   const output = [];
   /* logic for extracting the overall width etc */
-  const overallSVGTag = createBoundingSVGStringAndPositionPanels(panels, panelLayout);
-  output.push(overallSVGTag);
+  const overallDimensions = createBoundingDimensionsAndPositionPanels(panels, panelLayout, textStrings.length);
+  output.push(`<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${overallDimensions.width}" height="${overallDimensions.height}">`);
   for (let key in panels) { // eslint-disable-line
     if (panels[key]) {
       injectAsSVGStrings(output, key, panels[key]); // modifies output in place
     }
   }
+  /* add text to bottom of SVG in HTML format */
+  output.push(`<foreignObject x="${overallDimensions.padding}" y="${overallDimensions.height - overallDimensions.textHeight}" height="${overallDimensions.textHeight}" width="${overallDimensions.width - 2*overallDimensions.padding}">`);
+  textStrings.forEach((s) => {
+    output.push(`<p xmlns="http://www.w3.org/1999/xhtml" style="font-family:lato,sans-serif;">`);
+    output.push(s);
+    output.push("</p>");
+  });
+  output.push("</foreignObject>");
+
   output.push("</svg>");
   // console.log(panels)
   // console.log(output)
@@ -348,11 +365,11 @@ const getMapTilesErrorCallback = (e) => {
   console.warn("getMapTiles errorCallback", e);
 };
 
-export const SVG = (dispatch, filePrefix, panelsInDOM, panelLayout) => {
+export const SVG = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings) => {
   /* downloading the map tiles is an async call */
   if (panelsInDOM.indexOf("map") !== -1) {
-    window.L.getMapTiles(writeSVGPossiblyIncludingMapPNG.bind(this, dispatch, filePrefix, panelsInDOM, panelLayout), getMapTilesErrorCallback);
+    window.L.getMapTiles(writeSVGPossiblyIncludingMapPNG.bind(this, dispatch, filePrefix, panelsInDOM, panelLayout, textStrings), getMapTilesErrorCallback);
   } else {
-    writeSVGPossiblyIncludingMapPNG(dispatch, filePrefix, panelsInDOM, panelLayout, undefined);
+    writeSVGPossiblyIncludingMapPNG(dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, undefined);
   }
 };

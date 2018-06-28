@@ -7,15 +7,39 @@ import { stopProp } from "../tree/infoPanels/click";
 import { authorString } from "../../util/stringHelpers";
 import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";
-import { getAcknowledgments, preambleText, footerStyles} from "../framework/footer";
+import { getAcknowledgments, footerStyles} from "../framework/footer";
 import { createSummary } from "../info/info";
 
-const dataUsage = `
-  The data presented here is intended to rapidly disseminate analysis of important pathogens.
-  Unpublished data is included with permission of the data generators, and does not impact their right to publish.
-  Please contact the respective authors (available via the CSV files below) if you intend to carry out further research using their data.
-  Derived data, such as phylogenies, can be downloaded below - please contact the relevant authors where appropriate.
-`;
+const dataUsage = [
+  `The data presented here is intended to rapidly disseminate analysis of important pathogens.
+  Unpublished data is included with permission of the data generators, and does not impact their right to publish.`,
+  `Please contact the respective authors (available via the CSV files below) if you intend to carry out further research using their data.
+  Derived data, such as phylogenies, can be downloaded below - please contact the relevant authors where appropriate.`
+];
+
+export const publications = {
+  nextstrain: {
+    author: "Hadfield et al",
+    title: "Nextstrain: real-time tracking of pathogen evolution",
+    year: "2018",
+    journal: "Bioinformatics",
+    href: "https://doi.org/10.1093/bioinformatics/bty407"
+  },
+  treetime: {
+    author: "Sagulenko et al",
+    title: "TreeTime: Maximum-likelihood phylodynamic analysis",
+    journal: "Virus Evolution",
+    year: "2017",
+    href: "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5758920/"
+  },
+  titers: {
+    author: "Neher et al",
+    titleJournalYear: "Prediction, dynamics, and visualization of antigenic phenotypes of seasonal influenza viruses",
+    journal: "PNAS",
+    year: "2016",
+    href: "http://www.pnas.org/content/113/12/E1701.abstract"
+  }
+};
 
 @connect((state) => ({
   browserDimensions: state.browserDimensions.browserDimensions,
@@ -76,8 +100,30 @@ class DownloadModal extends React.Component {
   }
   componentDidMount() {
     Mousetrap.bind('d', () => {
-      helpers.SVG(this.props.dispatch, this.getFilePrefix(), this.props.panelsToDisplay, this.props.panelLayout);
+      helpers.SVG(this.props.dispatch, this.getFilePrefix(), this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport());
     });
+  }
+  getRelevantPublications() {
+    const x = [publications.nextstrain, publications.treetime];
+    if (["cTiter", "rb", "ep", "ne"].indexOf(this.props.colorBy) !== -1) {
+      x.push(publications.titers);
+    }
+    return x;
+  }
+  formatPublications(pubs) {
+    return (
+      <span>
+        <ul>
+          {pubs.map((pub) => (
+            <li key={pub.href}>
+              <a href={pub.href} target="_blank" rel="noreferrer noopener">
+                {authorString(pub.author)}, {pub.title}, <i>{pub.journal}</i> ({pub.year})
+              </a>
+            </li>
+          ))}
+        </ul>
+      </span>
+    );
   }
   relevantPublications() {
     const titer_related_keys = ["cTiter", "rb", "ep", "ne"];
@@ -102,6 +148,21 @@ class DownloadModal extends React.Component {
   getFilePrefix() {
     return "nextstrain_" + this.props.datapath.replace(/^\//, '').replace(/\//g, '_');
   }
+  makeTextStringsForSVGExport() {
+    const x = [];
+    x.push(this.props.metadata.title);
+    x.push(`Last updated ${this.props.metadata.updated}`);
+    const address = window.location.href.replace(/&/g, '&amp;');
+    x.push(`Downloaded from <a href="${address}">${address}</a> on ${new Date().toLocaleString()}`);
+    x.push(this.createSummaryWrapper().join(", "));
+    x.push("");
+    x.push(dataUsage[0] + ` A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
+    x.push(`Relevant publications:`);
+    this.getRelevantPublications().forEach((pub) => {
+      x.push(`<a href="${pub.href}">${pub.author}, ${pub.title}, ${pub.journal} (${pub.year})</a>`);
+    });
+    return x;
+  }
 
   downloadButtons() {
     const filePrefix = this.getFilePrefix();
@@ -112,7 +173,7 @@ class DownloadModal extends React.Component {
       ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
       ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.strainCSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.treeAttrs)],
       ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorCSV(this.props.dispatch, filePrefix, this.props.metadata, this.props.tree)],
-      ["Screenshot (SGV)", (<icons.PanelsGrid width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout)]
+      ["Screenshot (SGV)", (<icons.PanelsGrid width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
     ];
     return (
       <div className="row">
@@ -130,15 +191,8 @@ class DownloadModal extends React.Component {
   dismissModal() {
     this.props.dispatch({ type: DISMISS_DOWNLOAD_MODAL });
   }
-  render() {
-    if (!this.props.show) {
-      return null;
-    }
-    const styles = this.getStyles(this.props.browserDimensions.width, this.props.browserDimensions.height);
-    const meta = this.props.metadata;
-
-
-    const summary = createSummary(
+  createSummaryWrapper() {
+    return createSummary(
       this.props.metadata.virus_count,
       this.props.nodes,
       this.props.filters,
@@ -148,6 +202,14 @@ class DownloadModal extends React.Component {
       this.props.dateMin,
       this.props.dateMax
     );
+  }
+  render() {
+    if (!this.props.show) {
+      return null;
+    }
+    const styles = this.getStyles(this.props.browserDimensions.width, this.props.browserDimensions.height);
+    const meta = this.props.metadata;
+    const summary = this.createSummaryWrapper();
     return (
       <div style={styles.behind} onClick={this.dismissModal}>
         <div className="static container" style={styles.modal} onClick={(e) => stopProp(e)}>
@@ -167,16 +229,15 @@ class DownloadModal extends React.Component {
                 (i + 1 !== summary.length ? <span key={d}>{`${d}, `}</span> : <span key={d}>{`${d}. `}</span>)
               )}
               <div style={styles.break}/>
-              {preambleText}
               {" A full list of sequence authors is available via the CSV files below."}
               <div style={styles.break}/>
               {getAcknowledgments({}, footerStyles)}
 
               <h2>Data usage policy</h2>
-              {dataUsage}
+              {dataUsage.join(" ")}
 
               <h2>Please cite the authors who contributed genomic data (where relevant), as well as:</h2>
-              {this.relevantPublications()}
+              {this.formatPublications(this.getRelevantPublications())}
 
               <h2>Download data as</h2>
               {this.downloadButtons()}

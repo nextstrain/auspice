@@ -7,7 +7,7 @@ import Flex from "./flex";
 import { applyFilter } from "../../actions/tree";
 import { changeColorBy } from "../../actions/colors";
 import { version } from "../../version";
-
+import { publications } from "../download/downloadModal";
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
     •
@@ -334,12 +334,11 @@ class Footer extends React.Component {
     return null;
   }
   getCitation() {
-    const url = "https://doi.org/10.1093/bioinformatics/bty407";
     return (
       <span>
-        {"Please cite "}
-        <a href={url} target="_blank">
-          {"Hadfield et al., "}<i>Bioinformatics</i>{" (2018)"}
+        {"Nextstrain: "}
+        <a href={publications.nextstrain.href} target="_blank">
+          {publications.nextstrain.author}, <i>{publications.nextstrain.journal}</i>{` (${publications.nextstrain.year})`}
         </a>
       </span>
     );
@@ -370,6 +369,7 @@ class Footer extends React.Component {
             {dot}
             {this.downloadDataButton()}
           </Flex>
+          <div style={{height: "3px"}}/>
           <Flex style={styles.fineprint}>
             {this.getCitation()}
             {dot}
