@@ -220,7 +220,7 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
   }
   /* need to adjust map demes & transmissions to account for panning */
   if (panels.mapD3) {
-    console.log("adding offsets to mapD3 x,y ", panels.mapD3._panOffsets.x, panels.mapD3._panOffsets.y);
+    // console.log("adding offsets to mapD3 x,y ", panels.mapD3._panOffsets.x, panels.mapD3._panOffsets.y);
     panels.mapD3.x += panels.mapD3._panOffsets.x;
     panels.mapD3.y += panels.mapD3._panOffsets.y;
   }
@@ -274,7 +274,6 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
 const injectAsSVGStrings = (output, key, data) => {
   const svgTag = `<svg id="${key}" width="${data.width}" height="${data.height}" x="${data.x}" y="${data.y}">`;
   // if (data.viewbox) svgTag = svgTag.replace(">", ` viewBox="${data.viewbox.join(" ")}">`);
-  console.log(`${key} HEADER: `, svgTag);
   output.push(svgTag);
   output.push(data.inner);
   output.push("</svg>");
@@ -282,7 +281,6 @@ const injectAsSVGStrings = (output, key, data) => {
 
 /* define actual writer as a closure, because it may need to be triggered asyncronously */
 const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, mapTiles) => {
-  console.log("panelLayout", panelLayout)
   const errors = [];
   /* for each panel present in the DOM, create a data structure with the dimensions & the paths/shapes etc */
   const panels = {tree: undefined, mapTiles: undefined, mapD3: undefined, entropy: undefined, frequencies: undefined};
