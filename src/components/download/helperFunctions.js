@@ -226,7 +226,11 @@ const createBoundingSVGStringAndPositionPanels = (panels, panelLayout) => {
   }
 
   if (panels.entropy) {
-    if (width < panels.entropy.width) width = panels.entropy.width;
+    if (width < panels.entropy.width) {
+      width = panels.entropy.width;
+    } else {
+      panels.entropy.x = (width - panels.entropy.width) / 2;
+    }
     if (height) {
       panels.entropy.y = height + padding;
       height += padding + panels.entropy.height;
@@ -235,7 +239,11 @@ const createBoundingSVGStringAndPositionPanels = (panels, panelLayout) => {
     }
   }
   if (panels.frequencies) {
-    if (width < panels.frequencies.width) width = panels.frequencies.width;
+    if (width < panels.frequencies.width) {
+      width = panels.frequencies.width;
+    } else {
+      panels.frequencies.x = (width - panels.frequencies.width) / 2;
+    }
     if (height) {
       panels.frequencies.y = height + padding;
       height += padding + panels.frequencies.height;
@@ -243,6 +251,15 @@ const createBoundingSVGStringAndPositionPanels = (panels, panelLayout) => {
       height = panels.frequencies.height;
     }
   }
+  /* add top&left padding */
+  if (panels.tree) {panels.tree.x += padding; panels.tree.y += padding;}
+  if (panels.mapD3) {panels.mapD3.x += padding; panels.mapD3.y += padding;}
+  if (panels.mapTiles) {panels.mapTiles.x += padding; panels.mapTiles.y += padding;}
+  if (panels.entropy) {panels.entropy.x += padding; panels.entropy.y += padding;}
+  if (panels.frequencies) {panels.frequencies.x += padding; panels.frequencies.y += padding;}
+  width += padding*2;
+  height += padding*2;
+
   return `<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`;
 };
 
