@@ -267,14 +267,22 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
   a URL QUERY (and correct it in state), we can't correct the URL */
 
   /* colorBy */
+  if (!metadata.colorOptions) {
+    metadata.colorOptions = {};
+  }
   if (Object.keys(metadata.colorOptions).indexOf(state.colorBy) === -1 && !state["colorBy"].startsWith("gt-")) {
     const availableNonGenotypeColorBys = Object.keys(metadata.colorOptions);
     if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
       availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
     }
     console.error("Error detected trying to set colorBy to", state.colorBy, "(valid options are", Object.keys(metadata.colorOptions).join(", "), "). Setting to", availableNonGenotypeColorBys[0]);
-    state.colorBy = availableNonGenotypeColorBys[0];
-    state.defaults.colorBy = availableNonGenotypeColorBys[0];
+    if (Object.keys(metadata.colorOptions).length > 0) {
+      state.colorBy = availableNonGenotypeColorBys[0];
+      state.defaults.colorBy = availableNonGenotypeColorBys[0];
+    } else {
+      state.colorBy = "none";
+      state.defaults.colorBy = "none";
+    }
   }
 
   /* colorBy confidence */
@@ -309,8 +317,12 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
   }
 
   /* if colorBy is a genotype then we need to set mutType */
-  const maybeMutType = determineColorByGenotypeType(state.colorBy);
-  if (maybeMutType) state.mutType = maybeMutType;
+  if (state.colorBy) {
+    const maybeMutType = determineColorByGenotypeType(state.colorBy);
+    if (maybeMutType) {
+      state.mutType = maybeMutType;
+    }
+  }
 
   return state;
 };
