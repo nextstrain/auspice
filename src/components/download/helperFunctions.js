@@ -1,6 +1,6 @@
 /* eslint no-restricted-syntax: 0 */
 import React from "react";
-import { infoNotification, errorNotification, successNotification, warningNotification } from "../../actions/notifications";
+import { infoNotification, warningNotification } from "../../actions/notifications";
 import { prettyString, formatURLString, authorString } from "../../util/stringHelpers";
 
 export const isPaperURLValid = (d) => {
@@ -283,7 +283,6 @@ const injectAsSVGStrings = (output, key, data) => {
 /* define actual writer as a closure, because it may need to be triggered asyncronously */
 const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, mapTiles) => {
   console.log("panelLayout", panelLayout)
-  const successes = [];
   const errors = [];
   /* for each panel present in the DOM, create a data structure with the dimensions & the paths/shapes etc */
   const panels = {tree: undefined, mapTiles: undefined, mapD3: undefined, entropy: undefined, frequencies: undefined};
@@ -291,6 +290,8 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
     try {
       panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
     } catch (e) {
+      panels.tree = undefined;
+      errors.push("tree");
       console.error("Tree SVG save error:", e);
     }
   }
@@ -298,6 +299,8 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
     try {
       panels.entropy = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
     } catch (e) {
+      panels.entropy = undefined;
+      errors.push("entropy");
       console.error("Entropy SVG save error:", e);
     }
   }
@@ -305,6 +308,8 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
     try {
       panels.frequencies = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3frequenciesSVG")));
     } catch (e) {
+      panels.frequencies = undefined;
+      errors.push("frequencies");
       console.error("Frequencies SVG save error:", e);
     }
   }
@@ -324,6 +329,9 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
       panels.mapD3.height = panels.mapTiles.height;
       panels.mapD3._panOffsets = mapTiles.panOffsets;
     } catch (e) {
+      panels.mapD3 = undefined;
+      panels.mapTiles = undefined;
+      errors.push("map");
       console.error("Map demes & tranmisions SVG save error:", e);
     }
   }
@@ -352,12 +360,16 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
   // console.log(output)
   write(filePrefix + ".svg", MIME.svg, output.join("\n"));
 
-  /* notifications */
-  if (successes.length) {
-    dispatch(infoNotification({message: "Vector images saved", details: successes}));
-  }
-  if (errors.length) {
-    dispatch(warningNotification({message: "Errors saving SVG images", details: errors}));
+  if (!errors.length) {
+    dispatch(infoNotification({
+      message: "Vector image saved",
+      details: filePrefix + ".svg"
+    }));
+  } else {
+    dispatch(warningNotification({
+      message: "Vector image saved",
+      details: `Saved to ${filePrefix}.svg, however there were errors with ${errors.join(", ")}`
+    }));
   }
 };
 
