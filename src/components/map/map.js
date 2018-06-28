@@ -85,7 +85,7 @@ class Map extends React.Component {
           }
           const mapDimensions = this.state.map.getSize();
           const loadendCallbackWrapper = (e) => {
-            // loadendCallback is a curried version of writeSVGPossiblyIncludingMapPNG
+            // loadendCallback is a bound version of writeSVGPossiblyIncludingMapPNG
             loadendCallback({
               base64map: e.srcElement.result,
               mapDimensions,

@@ -31,7 +31,9 @@ const dataUsage = `
   visibleStateCounts: state.tree.visibleStateCounts,
   filters: state.controls.filters,
   visibility: state.tree.visibility,
-  treeAttrs: state.tree.attrs
+  treeAttrs: state.tree.attrs,
+  panelsToDisplay: state.controls.panelsToDisplay,
+  panelLayout: state.controls.panelLayout
 }))
 class DownloadModal extends React.Component {
   constructor(props) {
@@ -74,7 +76,7 @@ class DownloadModal extends React.Component {
   }
   componentDidMount() {
     Mousetrap.bind('d', () => {
-      helpers.SVG(this.props.dispatch, this.getFilePrefix(), this.props.metadata.panels);
+      helpers.SVG(this.props.dispatch, this.getFilePrefix(), this.props.panelsToDisplay, this.props.panelLayout);
     });
   }
   relevantPublications() {
@@ -110,7 +112,7 @@ class DownloadModal extends React.Component {
       ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
       ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.strainCSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.treeAttrs)],
       ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorCSV(this.props.dispatch, filePrefix, this.props.metadata, this.props.tree)],
-      ["Screenshot (SGV)", (<icons.PanelsGrid width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.metadata.panels)]
+      ["Screenshot (SGV)", (<icons.PanelsGrid width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout)]
     ];
     return (
       <div className="row">
