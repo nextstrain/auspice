@@ -296,6 +296,8 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
   if (panelsInDOM.indexOf("entropy") !== -1) {
     try {
       panels.entropy = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
+      panels.entropy.inner = panels.entropy.inner.replace(/<text/g, `<text class="txt"`);
+      panels.entropy.inner = `<style>.txt { font-family: "Lato", "Helvetica Neue", "Helvetica", "sans-serif"; }</style>${panels.entropy.inner}`;
     } catch (e) {
       panels.entropy = undefined;
       errors.push("entropy");
