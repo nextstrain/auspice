@@ -179,8 +179,13 @@ const modifyStateViaMetadata = (state, metadata) => {
     }
   }
 
-  state.panelsAvailable = metadata.panels.slice();
-  state.panelsToDisplay = metadata.panels.slice();
+  if (metadata.panels) {
+    state.panelsAvailable = metadata.panels.slice();
+    state.panelsToDisplay = metadata.panels.slice();
+  } else {
+    state.panelsAvailable = ["tree"];
+    state.panelsToDisplay = ["tree"];
+  }
 
   /* if metadata lacks geo, remove map from panels to display */
   if (!metadata.geo) {
