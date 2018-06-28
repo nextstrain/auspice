@@ -103,9 +103,8 @@ const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON
       values.forEach((v, i) => {
         if (v) data.JSONs[promisesOrder[i]] = v; // if statement removes undefinds
       });
-      // console.log(data);
-      if (!(data.JSONs.meta && data.JSONs.tree)) {
-        console.error("Tree & Meta JSONs could not be loaded.");
+      if (!data.JSONs.tree) {
+        console.error("Tree JSON could not be loaded.");
         dispatch(goTo404(`
           Auspice attempted to load JSONs for the dataset "${datasets.datapath.replace(/_/g, '/')}", but they couldn't be found.
         `));

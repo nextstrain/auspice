@@ -385,8 +385,11 @@ export const createStateFromQueryOrJSONs = ({
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (JSONs) {
     if (JSONs.narrative) narrative = JSONs.narrative;
-    /* ceate metadata state */
+    /* create metadata state */
     metadata = JSONs.meta;
+    if (metadata === undefined) {
+      metadata = {};
+    }
     if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
       console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
     }
@@ -394,12 +397,12 @@ export const createStateFromQueryOrJSONs = ({
     delete metadata.color_options;
     metadata.loaded = true;
     /* entropy state */
-    entropy = entropyCreateStateFromJsons(JSONs.meta);
+    entropy = entropyCreateStateFromJsons(metadata);
     /* new tree state(s) */
-    tree = treeJsonToState(JSONs.tree, JSONs.meta.vaccine_choices);
+    tree = treeJsonToState(JSONs.tree, metadata.vaccine_choices);
     tree.debug = "LEFT";
     if (JSONs.treeToo) {
-      treeToo = treeJsonToState(JSONs.treeToo, JSONs.meta.vaccine_choices);
+      treeToo = treeJsonToState(JSONs.treeToo, metadata.vaccine_choices);
       treeToo.debug = "RIGHT";
     }
     /* new controls state - don't apply query yet (or error check!) */
