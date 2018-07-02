@@ -53,6 +53,7 @@ const treeToNewick = (root, temporal) => {
 const MIME = {
   text: "text/plain;charset=utf-8;",
   csv: 'text/csv;charset=utf-8;',
+  tsv: `text/tab-separated-values;charset=utf-8;`,
   svg: "image/svg+xml;charset=utf-8"
 };
 
@@ -70,9 +71,9 @@ const write = (filename, type, content) => {
   document.body.removeChild(link);
 };
 
-export const authorCSV = (dispatch, filePrefix, metadata, tree) => {
-  const lineArray = [["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"]];
-  const filename = filePrefix + "_authors.csv";
+export const authorTSV = (dispatch, filePrefix, metadata, tree) => {
+  const lineArray = [["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"].join("\t")];
+  const filename = filePrefix + "_authors.tsv";
 
   const authors = {};
   tree.nodes.filter((n) => !n.hasChildren && n.attr.authors).forEach((n) => {
@@ -90,12 +91,12 @@ export const authorCSV = (dispatch, filePrefix, metadata, tree) => {
       prettyString(metadata.author_info[author].title, {removeComma: true}),
       prettyString(metadata.author_info[author].journal, {removeComma: true}),
       isPaperURLValid(metadata.author_info[author]) ? formatURLString(metadata.author_info[author].paper_url) : "unknown",
-      authors[author].join(" ")
+      authors[author].join(",")
     ]);
   }
 
-  body.forEach((line) => { lineArray.push(line.join(",")); });
-  write(filename, MIME.csv, lineArray.join("\n"));
+  body.forEach((line) => { lineArray.push(line.join("\t")); });
+  write(filename, MIME.tsv, lineArray.join("\n"));
   dispatch(infoNotification({message: "Author metadata exported", details: filename}));
 };
 
@@ -103,9 +104,9 @@ export const turnAttrsIntoHeaderArray = (attrs) => {
   return ["Strain"].concat(attrs.map((v) => prettyString(v)));
 };
 
-export const strainCSV = (dispatch, filePrefix, nodes, rawAttrs) => {
+export const strainTSV = (dispatch, filePrefix, nodes, rawAttrs) => {
   // dont need to traverse the tree - can just loop the nodes
-  const filename = filePrefix + "_metadata.csv";
+  const filename = filePrefix + "_metadata.tsv";
   const data = [];
   const includeAttr = (v) => (!(v.includes("entropy") || v.includes("confidence") || v === "div" || v === "paper_url"));
   const attrs = ["accession", "date", "region", "country", "division", "authors", "journal", "title", "url"];
@@ -157,13 +158,13 @@ export const strainCSV = (dispatch, filePrefix, nodes, rawAttrs) => {
     }
     data.push(line);
   }
-  const lineArray = [turnAttrsIntoHeaderArray(attrs)];
+  const lineArray = [turnAttrsIntoHeaderArray(attrs).join("\t")];
   data.forEach((line) => {
-    const lineString = line.join(",");
+    const lineString = line.join("\t");
     lineArray.push(lineString);
   });
-  const csvContent = lineArray.join("\n");
-  write(filename, MIME.csv, csvContent);
+  const tsvContent = lineArray.join("\n");
+  write(filename, MIME.tsv, tsvContent);
   dispatch(infoNotification({message: "Metadata exported to " + filename}));
 };
 

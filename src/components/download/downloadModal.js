@@ -13,7 +13,7 @@ import { createSummary } from "../info/info";
 const dataUsage = [
   `The data presented here is intended to rapidly disseminate analysis of important pathogens.
   Unpublished data is included with permission of the data generators, and does not impact their right to publish.`,
-  `Please contact the respective authors (available via the CSV files below) if you intend to carry out further research using their data.
+  `Please contact the respective authors (available via the TSV files below) if you intend to carry out further research using their data.
   Derived data, such as phylogenies, can be downloaded below - please contact the relevant authors where appropriate.`
 ];
 
@@ -171,8 +171,8 @@ class DownloadModal extends React.Component {
     const buttons = [
       ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
       ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
-      ["Strain Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.strainCSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.treeAttrs)],
-      ["Author Metadata (CSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorCSV(this.props.dispatch, filePrefix, this.props.metadata, this.props.tree)],
+      ["Strain Metadata (TSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.treeAttrs)],
+      ["Author Metadata (TSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.metadata, this.props.tree)],
       ["Screenshot (SGV)", (<icons.PanelsGrid width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
     ];
     return (
@@ -229,7 +229,7 @@ class DownloadModal extends React.Component {
                 (i + 1 !== summary.length ? <span key={d}>{`${d}, `}</span> : <span key={d}>{`${d}. `}</span>)
               )}
               <div style={styles.break}/>
-              {" A full list of sequence authors is available via the CSV files below."}
+              {" A full list of sequence authors is available via the TSV files below."}
               <div style={styles.break}/>
               {getAcknowledgments({}, footerStyles)}
 
