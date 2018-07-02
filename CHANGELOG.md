@@ -1,11 +1,17 @@
+* Auspice can now run with an incomplete metadata file, or even without a metadata file at all! [PR 586](https://github.com/nextstrain/auspice/pull/586)
+
 ## version 1.21.3 - 2018/06/27
+* Show tree titles (e.g. `NA`) when two trees are displayed
+* Multi-part datasets (e.g. `flu/seasonal/h3n2...`) which are not in the manifest file can now be loaded; various bugs fixed for running locally without a manifest file.
+* Other minor bugfixes & package upgrades
 
 ## version 1.21.2 - 2018/06/07
+* Disable Untangling
 
 ## version 1.21.1 - 2018/06/04
+* Narratives are now sourced from [the static github repo](https://github.com/nextstrain/static/tree/master/narratives)
 
 ## version 1.21.0 - 2018/06/01
-
 * Untangling via a simple algorithm upon 2nd tree load
 * Segment names displayed above trees (if 2 trees)
 * Fix hover-info-box date bug -- [issue 572](https://github.com/nextstrain/auspice/pull/572)
