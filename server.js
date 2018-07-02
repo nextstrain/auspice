@@ -33,20 +33,20 @@ if (devServer) {
   app.use(webpackHotMiddleware(compiler));
 } else {
   app.use("/dist", expressStaticGzip("dist"));
-  app.use(express.static(path.join(__dirname, "dist")));
+  app.use(express.static(path.resolve(__dirname, "dist")));
 }
 
 /* redirect www.nextstrain.org to nextstrain.org */
 app.use(require('express-naked-redirect')({reverse: true}));
 
 app.get("/favicon.png", (req, res) => {
-  res.sendFile(path.join(__dirname, "favicon.png"));
+  res.sendFile(path.resolve(__dirname, "favicon.png"));
 });
 
 charon.applyCharonToApp(app);
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "index.html"));
+  res.sendFile(path.resolve(__dirname, "index.html"));
 });
 
 const server = app.listen(app.get('port'), () => {
