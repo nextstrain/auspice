@@ -2,7 +2,7 @@ import React from "react";
 import Mousetrap from "mousetrap";
 import { connect } from "react-redux";
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
-import { materialButton, medGrey, infoPanelStyles } from "../../globalStyles";
+import { materialButton, extraLightGrey, infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
 import { authorString } from "../../util/stringHelpers";
 import * as helpers from "./helperFunctions";
@@ -66,10 +66,18 @@ class DownloadModal extends React.Component {
       return {
         behind: { /* covers the screen */
           position: "absolute",
-          width: bw,
-          height: bh,
-          zIndex: 10000,
-          backgroundColor: "rgba(0, 0, 0, 0.3)"
+          top: 0,
+          left: 0,
+          width: "100%",
+          height: "100%",
+          pointerEvents: "all",
+          zIndex: 2000,
+          backgroundColor: "rgba(80, 80, 80, .20)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          wordWrap: "break-word",
+          wordBreak: "break-word"
         },
         title: {
           fontWeight: 500,
@@ -167,7 +175,7 @@ class DownloadModal extends React.Component {
   downloadButtons() {
     const filePrefix = this.getFilePrefix();
     const iconWidth = 25;
-    const iconStroke = medGrey;
+    const iconStroke = extraLightGrey;
     const buttons = [
       ["Tree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
       ["TimeTree (newick)", (<icons.RectangularTree width={iconWidth} stroke={iconStroke} />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
@@ -175,12 +183,13 @@ class DownloadModal extends React.Component {
       ["Author Metadata (TSV)", (<icons.Meta width={iconWidth} stroke={iconStroke} />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.metadata, this.props.tree)],
       ["Screenshot (SGV)", (<icons.PanelsGrid width={iconWidth} stroke={iconStroke} />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
     ];
+    const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white"});
     return (
-      <div className="row">
+      <div style={{display: "flex", flexWrap: "wrap", justifyContent: "space-around"}}>
         {buttons.map((data) => (
-          <div key={data[0]} className="col-md-5" onClick={data[2]} style={{cursor: 'pointer'}}>
+          <div key={data[0]} onClick={data[2]} style={{cursor: 'pointer'}}>
             {data[1]}
-            <button style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px"})}>
+            <button style={buttonTextStyle}>
               {data[0]}
             </button>
           </div>
@@ -207,46 +216,50 @@ class DownloadModal extends React.Component {
     if (!this.props.show) {
       return null;
     }
-    const styles = this.getStyles(this.props.browserDimensions.width, this.props.browserDimensions.height);
+    const panelStyle = {...infoPanelStyles.panel};
+    panelStyle.width = this.props.browserDimensions.width * 0.66;
+    panelStyle.maxWidth = panelStyle.width;
+    panelStyle.maxHeight = this.props.browserDimensions.height * 0.66;
+    panelStyle.fontSize = 14;
+    panelStyle.lineHeight = 1.4;
+
     const meta = this.props.metadata;
     const summary = this.createSummaryWrapper();
     return (
-      <div style={styles.behind} onClick={this.dismissModal}>
-        <div className="static container" style={styles.modal} onClick={(e) => stopProp(e)}>
-          <div className="row">
-            <div className="col-md-1"/>
-            <div className="col-md-7" style={styles.title}>
-              Download Data
-            </div>
+      <div style={infoPanelStyles.modalContainer} onClick={this.dismissModal}>
+        <div style={panelStyle} onClick={(e) => stopProp(e)}>
+          <p style={infoPanelStyles.topRightMessage}>
+            (click outside this box to return to the app)
+          </p>
+
+          <div style={infoPanelStyles.modalSubheading}>
+            {meta.title} (last updated {meta.updated})
           </div>
-          <div className="row">
-            <div className="col-md-1" />
-            <div className="col-md-10">
-              <div style={styles.secondTitle}>
-                {meta.title} (last updated {meta.updated})
-              </div>
-              {summary.map((d, i) =>
-                (i + 1 !== summary.length ? <span key={d}>{`${d}, `}</span> : <span key={d}>{`${d}. `}</span>)
-              )}
-              <div style={styles.break}/>
-              {" A full list of sequence authors is available via the TSV files below."}
-              <div style={styles.break}/>
-              {getAcknowledgments({}, footerStyles)}
 
-              <h2>Data usage policy</h2>
-              {dataUsage.join(" ")}
+          {summary.map((d, i) =>
+            (i + 1 !== summary.length ? <span key={d}>{`${d}, `}</span> : <span key={d}>{`${d}. `}</span>)
+          )}
+          <div style={infoPanelStyles.break}/>
+          {" A full list of sequence authors is available via the TSV files below."}
+          <div style={infoPanelStyles.break}/>
+          {getAcknowledgments({}, {preamble: {fontWeight: 300}, acknowledgments: {fontWeight: 300}})}
 
-              <h2>Please cite the authors who contributed genomic data (where relevant), as well as:</h2>
-              {this.formatPublications(this.getRelevantPublications())}
-
-              <h2>Download data as</h2>
-              {this.downloadButtons()}
-
-              <p style={infoPanelStyles.comment}>
-                (click outside this box to return to the app)
-              </p>
-            </div>
+          <div style={infoPanelStyles.modalSubheading}>
+            Data usage policy
           </div>
+          {dataUsage.join(" ")}
+
+          <div style={infoPanelStyles.modalSubheading}>
+            Please cite the authors who contributed genomic data (where relevant), as well as:
+          </div>
+          {this.formatPublications(this.getRelevantPublications())}
+
+
+          <div style={infoPanelStyles.modalSubheading}>
+            Download data:
+          </div>
+          {this.downloadButtons()}
+
         </div>
       </div>
     );

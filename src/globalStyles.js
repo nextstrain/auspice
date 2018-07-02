@@ -197,22 +197,45 @@ export const infoPanelStyles = {
     lineHeight: 1,
     fontWeight: 300
   },
+  modalContainer: {
+    position: "absolute",
+    width: "100%",
+    height: "100%",
+    pointerEvents: "all",
+    top: 0,
+    left: 0,
+    zIndex: 2000,
+    backgroundColor: "rgba(80, 80, 80, .20)",
+    /* FLEXBOX */
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    wordWrap: "break-word",
+    wordBreak: "break-word"
+  },
   panel: {
     position: "relative",
     paddingLeft: 30,
     padding: "5% 5%",
     borderRadius: 5,
-    backgroundColor: "rgba(55,55,55,0.85)",
+    backgroundColor: "rgba(55,55,55,0.9)",
     color: "white",
     fontFamily: dataFont,
     fontSize: 18,
     lineHeight: 1,
     fontWeight: 300,
-    maxWidth: 500
+    maxWidth: 500,
+    overflow: "scroll"
   },
   modalHeading: {
     fontSize: 24,
     fontWeight: 400
+  },
+  modalSubheading: {
+    fontSize: 20,
+    fontWeight: 400,
+    marginTop: "20px",
+    marginBottom: "20px"
   },
   tooltipHeading: {
     fontSize: 18,
@@ -225,6 +248,13 @@ export const infoPanelStyles = {
     fontSize: 14,
     marginTop: "10px"
   },
+  topRightMessage: {
+    fontStyle: "italic",
+    fontWeight: 200,
+    fontSize: 14,
+    textAlign: "right",
+    marginTop: "-20px"
+  },
   list: {
     paddingLeft: 15,
     listStyleType: "disc"
@@ -233,5 +263,8 @@ export const infoPanelStyles = {
     paddingTop: 4,
     paddingBottom: 4,
     minWidth: 120
+  },
+  break: {
+    marginBottom: "10px"
   }
 };
