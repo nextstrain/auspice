@@ -169,7 +169,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, rawAttrs) => {
 };
 
 export const newick = (dispatch, filePrefix, root, temporal) => {
-  const fName = temporal ? filePrefix + "_timetree.new" : filePrefix + "_tree.new";
+  const fName = temporal ? filePrefix + "_timetree.nwk" : filePrefix + "_tree.nwk";
   const message = temporal ? "TimeTree" : "Tree";
   write(fName, MIME.text, treeToNewick(root, temporal));
   dispatch(infoNotification({message: message + " written to " + fName}));
