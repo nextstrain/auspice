@@ -8,7 +8,7 @@ import { getExtraVals } from "./colorHelpers";
 import { parseEncodedGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 
-const unknownColor = "#DDDDDD";
+const unknownColor = "#AAAAAA";
 
 const getMinMaxFromTree = (nodes, nodesToo, attr) => {
   const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
@@ -80,7 +80,24 @@ const createLegendBounds = (legendValues) => {
 
 
 export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
-  // console.log(`calcColorScale for ${colorBy}. TreeToo? ${!!treeToo}`)
+
+  if (colorBy === "none") {
+    console.warn("ColorScale fallthrough for colorBy set to none");
+    const colorScale = () => unknownColor;
+    const genotype = null;
+    const legendValues = ["unknown"];
+    const legendBounds = createLegendBounds(legendValues);
+    return {
+      scale: colorScale,
+      continuous: false,
+      colorBy: colorBy,
+      version: controls.colorScale === undefined ? 1 : controls.colorScale.version + 1,
+      legendValues,
+      legendBounds,
+      genotype
+    };
+  }
+
   let genotype;
   if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
     genotype = parseEncodedGenotype(colorBy, controls.geneLength);

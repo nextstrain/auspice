@@ -33,12 +33,20 @@ const processAnnotations = (annotations) => {
 };
 
 export const entropyCreateStateFromJsons = (metaJSON) => {
-  /* TODO check that metadata defines the entropy panel */
-  const annotations = getAnnotations(metaJSON.annotations);
+  if (metaJSON.annotations) {
+    const annotations = getAnnotations(metaJSON.annotations);
+    return {
+      showCounts: false,
+      loaded: true,
+      annotations,
+      geneMap: processAnnotations(annotations)
+    };
+  }
+  const annotations = [];
   return {
     showCounts: false,
-    loaded: true,
+    loaded: false,
     annotations,
-    geneMap: processAnnotations(annotations)
+    geneMap: {}
   };
 };

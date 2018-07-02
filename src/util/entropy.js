@@ -100,7 +100,9 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
     if (isAA) {
       if (node.aa_muts) {
         for (const prot in node.aa_muts) { // eslint-disable-line
-          node.aa_muts[prot].forEach(assignFn, [prot, state]);
+          if (arrayOfProts.includes(prot)) {
+            node.aa_muts[prot].forEach(assignFn, [prot, state]);
+          }
         }
       }
     } else if (node.muts && node.muts.length) {

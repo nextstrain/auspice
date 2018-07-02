@@ -147,7 +147,7 @@ const modifyStateViaMetadata = (state, metadata) => {
     // need authors in metadata.filters to include as filter
     // but metadata.author_info is generally required for app functioning
   } else {
-    console.error("the meta.json must include author_info");
+    console.warn("the meta.json did not include author_info");
   }
   if (metadata.filters) {
     metadata.filters.forEach((v) => {
@@ -179,8 +179,25 @@ const modifyStateViaMetadata = (state, metadata) => {
     }
   }
 
-  state.panelsAvailable = metadata.panels.slice();
-  state.panelsToDisplay = metadata.panels.slice();
+  if (metadata.panels) {
+    state.panelsAvailable = metadata.panels.slice();
+    state.panelsToDisplay = metadata.panels.slice();
+  } else {
+    state.panelsAvailable = ["tree"];
+    state.panelsToDisplay = ["tree"];
+  }
+
+  /* if metadata lacks geo, remove map from panels to display */
+  if (!metadata.geo) {
+    state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "map");
+    state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "map");
+  }
+
+  /* if metadata lacks annotations, remove entropy from panels to display */
+  if (!metadata.annotations) {
+    state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
+    state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
+  }
 
   /* if only map or only tree, then panelLayout must be full */
   /* note - this will be overwritten by the URL query */
@@ -189,13 +206,17 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.canTogglePanelLayout = false;
   }
   /* annotations in metadata */
-  if (!metadata.annotations) {console.error("Metadata needs updating with annotations field. Rerun augur. FATAL.");}
-  for (const gene of Object.keys(metadata.annotations)) {
-    state.geneLength[gene] = metadata.annotations[gene].end - metadata.annotations[gene].start;
-    if (gene !== "nuc") {
-      state.geneLength[gene] /= 3;
+  if (metadata.annotations) {
+    for (const gene of Object.keys(metadata.annotations)) {
+      state.geneLength[gene] = metadata.annotations[gene].end - metadata.annotations[gene].start;
+      if (gene !== "nuc") {
+        state.geneLength[gene] /= 3;
+      }
     }
+  } else {
+    console.warn("The meta.json did not include annotations.");
   }
+
   return state;
 };
 
@@ -246,14 +267,22 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
   a URL QUERY (and correct it in state), we can't correct the URL */
 
   /* colorBy */
+  if (!metadata.colorOptions) {
+    metadata.colorOptions = {};
+  }
   if (Object.keys(metadata.colorOptions).indexOf(state.colorBy) === -1 && !state["colorBy"].startsWith("gt-")) {
     const availableNonGenotypeColorBys = Object.keys(metadata.colorOptions);
     if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
       availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
     }
     console.error("Error detected trying to set colorBy to", state.colorBy, "(valid options are", Object.keys(metadata.colorOptions).join(", "), "). Setting to", availableNonGenotypeColorBys[0]);
-    state.colorBy = availableNonGenotypeColorBys[0];
-    state.defaults.colorBy = availableNonGenotypeColorBys[0];
+    if (Object.keys(metadata.colorOptions).length > 0) {
+      state.colorBy = availableNonGenotypeColorBys[0];
+      state.defaults.colorBy = availableNonGenotypeColorBys[0];
+    } else {
+      state.colorBy = "none";
+      state.defaults.colorBy = "none";
+    }
   }
 
   /* colorBy confidence */
@@ -266,10 +295,14 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
   }
 
   /* geoResolution */
-  const availableGeoResultions = Object.keys(metadata.geo);
-  if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
-    state["geoResolution"] = availableGeoResultions[0];
-    console.error("Error detected. Setting geoResolution to ", state["geoResolution"]);
+  if (metadata.geo) {
+    const availableGeoResultions = Object.keys(metadata.geo);
+    if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
+      state["geoResolution"] = availableGeoResultions[0];
+      console.error("Error detected. Setting geoResolution to ", state["geoResolution"]);
+    }
+  } else {
+    console.warn("The meta.json did not include geo info.");
   }
 
   /* temporalConfidence */
@@ -284,8 +317,12 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
   }
 
   /* if colorBy is a genotype then we need to set mutType */
-  const maybeMutType = determineColorByGenotypeType(state.colorBy);
-  if (maybeMutType) state.mutType = maybeMutType;
+  if (state.colorBy) {
+    const maybeMutType = determineColorByGenotypeType(state.colorBy);
+    if (maybeMutType) {
+      state.mutType = maybeMutType;
+    }
+  }
 
   return state;
 };
@@ -348,8 +385,11 @@ export const createStateFromQueryOrJSONs = ({
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (JSONs) {
     if (JSONs.narrative) narrative = JSONs.narrative;
-    /* ceate metadata state */
+    /* create metadata state */
     metadata = JSONs.meta;
+    if (metadata === undefined) {
+      metadata = {};
+    }
     if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
       console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
     }
@@ -357,12 +397,12 @@ export const createStateFromQueryOrJSONs = ({
     delete metadata.color_options;
     metadata.loaded = true;
     /* entropy state */
-    entropy = entropyCreateStateFromJsons(JSONs.meta);
+    entropy = entropyCreateStateFromJsons(metadata);
     /* new tree state(s) */
-    tree = treeJsonToState(JSONs.tree, JSONs.meta.vaccine_choices);
+    tree = treeJsonToState(JSONs.tree, metadata.vaccine_choices);
     tree.debug = "LEFT";
     if (JSONs.treeToo) {
-      treeToo = treeJsonToState(JSONs.treeToo, JSONs.meta.vaccine_choices);
+      treeToo = treeJsonToState(JSONs.treeToo, metadata.vaccine_choices);
       treeToo.debug = "RIGHT";
     }
     /* new controls state - don't apply query yet (or error check!) */
@@ -415,9 +455,11 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   /* calculate entropy in view */
-  const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
-  entropy.bars = entropyBars;
-  entropy.maxYVal = entropyMaxYVal;
+  if (entropy.loaded) {
+    const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
+    entropy.bars = entropyBars;
+    entropy.maxYVal = entropyMaxYVal;
+  }
 
   /* potentially calculate frequency (or update it!)
   this needs to come after the colorscale & tree is set */
