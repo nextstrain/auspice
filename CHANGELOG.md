@@ -1,4 +1,10 @@
 * Auspice can now run with an incomplete metadata file, or even without a metadata file at all! [PR 586](https://github.com/nextstrain/auspice/pull/586)
+* Download modal reinstated [PR 587](https://github.com/nextstrain/auspice/pull/587)
+  * Improved styling
+  * All panes now saved to a single SVG
+  * Map panning SVG-save bugs (mostly) fixed
+  * TSV used instead of CSV
+* Fix WNV colorBy link in footer -- [issue 590](https://github.com/nextstrain/auspice/issues/590)
 
 ## version 1.21.3 - 2018/06/27
 * Show tree titles (e.g. `NA`) when two trees are displayed
