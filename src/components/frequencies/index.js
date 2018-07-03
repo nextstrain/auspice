@@ -107,7 +107,7 @@ export class Frequencies extends React.Component {
             fontSize: "14px"
           }}
         />
-        <svg style={{pointerEvents: "auto"}} width={this.props.width} height={this.props.height}>
+        <svg style={{pointerEvents: "auto"}} width={this.props.width} height={this.props.height} id="d3frequenciesSVG">
           <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
         </svg>
       </Card>

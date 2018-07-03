@@ -60,7 +60,7 @@
     "leaflet-image": "^0.4.0",
     "linspace": "^1.0.0",
     "lodash": "4.16.4",
-    "mousetrap": "^1.6.0",
+    "mousetrap": "^1.6.2",
     "node-fetch": "^1.7.3",
     "outer-product": "0.0.4",
     "papaparse": "^4.3.5",

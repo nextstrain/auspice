@@ -15,7 +15,7 @@ import {
 } from "./mapHelpersLatLong";
 import { changeDateFilter } from "../../actions/tree";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
-import { incommingMapPNG } from "../download/helperFunctions";
+// import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { lightGrey, goColor, pauseColor } from "../../globalStyles";
 
@@ -70,23 +70,31 @@ class Map extends React.Component {
   componentWillMount() {
     if (!window.L) {
       leaflet(); /* this sets up window.L */
-      /* add a print method to leaflet. some relevent links:
+    }
+    if (!window.L.getMapTiles) {
+      /* Get the map tiles
       https://github.com/mapbox/leaflet-image
       https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
       https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
       */
-    }
-    if (!window.L.save) {
-      window.L.save = (data, errorCallback) => {
+      window.L.getMapTiles = (loadendCallback, errorCallback) => {
         leafletImage(this.state.map, (err, canvas) => {
+          if (err) {
+            errorCallback(err);
+            return;
+          }
+          const mapDimensions = this.state.map.getSize();
+          const loadendCallbackWrapper = (e) => {
+            // loadendCallback is a bound version of writeSVGPossiblyIncludingMapPNG
+            loadendCallback({
+              base64map: e.srcElement.result,
+              mapDimensions,
+              panOffsets: this.state.map._getMapPanePos()
+            });
+          };
           canvas.toBlob((blob) => {
             const reader = new FileReader();
-            reader.addEventListener('loadend', (e) => {
-              incommingMapPNG(Object.assign({}, data, {
-                base64map: e.srcElement.result,
-                mapDimensions: this.state.map.getSize()
-              }));
-            });
+            reader.addEventListener('loadend', loadendCallbackWrapper);
             reader.addEventListener('onerror', errorCallback);
             reader.readAsDataURL(blob);
           }, "image/png;base64;", 1);
@@ -268,8 +276,6 @@ class Map extends React.Component {
         this.props.dateMinNumeric,
         this.props.dateMaxNumeric
       );
-
-
     }
   }
   getGeoRange() {

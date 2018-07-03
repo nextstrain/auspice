@@ -4,7 +4,7 @@ import { prettyString, authorString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 // import { getAuthor } from "../download/helperFunctions";
 
-const styles = {
+export const styles = {
   container: {
     position: "absolute",
     width: "100%",
@@ -96,7 +96,7 @@ const TipClickedPanel = ({tip, goAwayCallback, metadata}) => {
     authorInfo = metadata.author_info;
   }
   return (
-    <div style={styles.container} onClick={() => goAwayCallback(tip)}>
+    <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
         <p style={infoPanelStyles.modalHeading}>
           {`${tip.n.strain}`}

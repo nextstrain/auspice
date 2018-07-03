@@ -7,12 +7,42 @@ import Flex from "./flex";
 import { applyFilter } from "../../actions/tree";
 import { changeColorBy } from "../../actions/colors";
 import { version } from "../../version";
-
+import { publications } from "../download/downloadModal";
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
     •
   </span>
 );
+
+export const footerStyles = {
+  footer: {
+    marginLeft: "30px",
+    paddingBottom: "30px",
+    fontFamily: dataFont,
+    fontSize: 15,
+    fontWeight: 300,
+    color: medGrey,
+    lineHeight: 1.4
+  },
+  acknowledgments: {
+    marginTop: "10px"
+  },
+  citationList: {
+    marginTop: "10px",
+    lineHeight: 1.0
+  },
+  line: {
+    marginTop: "20px",
+    marginBottom: "20px",
+    borderBottom: "1px solid #CCC"
+  },
+  preamble: {
+    fontSize: 15
+  },
+  fineprint: {
+    fontSize: 14
+  }
+};
 
 export const getAcknowledgments = (dispatch, styles) => {
   const preambleContent = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
@@ -229,42 +259,6 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
   };
 })
 class Footer extends React.Component {
-  constructor(props) {
-    super(props);
-    this.getStyles = () => {
-      /* the styles of the individual items is set in CSS */
-      const styles = {
-        footer: {
-          marginLeft: "30px",
-          paddingBottom: "30px",
-          fontFamily: dataFont,
-          fontSize: 15,
-          fontWeight: 300,
-          color: medGrey,
-          lineHeight: 1.4
-        },
-        acknowledgments: {
-          marginTop: "10px"
-        },
-        citationList: {
-          marginTop: "10px",
-          lineHeight: 1.0
-        },
-        line: {
-          marginTop: "20px",
-          marginBottom: "20px",
-          borderBottom: "1px solid #CCC"
-        },
-        preamble: {
-          fontSize: 15
-        },
-        fineprint: {
-          fontSize: 14
-        }
-      };
-      return styles;
-    };
-  }
   shouldComponentUpdate(nextProps) {
     if (this.props.tree.version !== nextProps.tree.version ||
     this.props.browserDimensions !== nextProps.browserDimensions) {
@@ -313,14 +307,10 @@ class Footer extends React.Component {
   }
 
   getUpdated() {
-    let updated = null;
     if (this.props.metadata.updated) {
-      updated = this.props.metadata.updated;
+      return (<span>Data updated {this.props.metadata.updated}</span>);
     }
-    if (!updated) return null;
-    return (
-      <span>Data updated {updated}</span>
-    );
+    return null;
   }
   downloadDataButton() {
     return (
@@ -343,10 +333,20 @@ class Footer extends React.Component {
     }
     return null;
   }
+  getCitation() {
+    return (
+      <span>
+        {"Nextstrain: "}
+        <a href={publications.nextstrain.href} target="_blank">
+          {publications.nextstrain.author}, <i>{publications.nextstrain.journal}</i>{` (${publications.nextstrain.year})`}
+        </a>
+      </span>
+    );
+  }
 
   render() {
     if (!this.props.metadata || !this.props.tree.nodes) return null;
-    const styles = this.getStyles();
+    const styles = footerStyles;
     const width = this.props.width - 30; // need to subtract margin when calculating div width
     return (
       <div style={styles.footer}>
@@ -367,7 +367,13 @@ class Footer extends React.Component {
             {dot}
             {this.getUpdated()}
             {dot}
-            {"Auspice " + version}
+            {this.downloadDataButton()}
+          </Flex>
+          <div style={{height: "3px"}}/>
+          <Flex style={styles.fineprint}>
+            {this.getCitation()}
+            {dot}
+            {"Auspice v" + version}
           </Flex>
         </div>
       </div>
@@ -376,6 +382,6 @@ class Footer extends React.Component {
 }
 
 // {dot}
-// {this.downloadDataButton()}
+//
 
 export default Footer;
