@@ -141,7 +141,7 @@ export const getAcknowledgments = (dispatch, styles) => {
 
         <p/>
         {"WNV is split into three phenotypically relevant strains - NY99, WN02 and SW03 ("}
-        <span className={"link"} onClick={() => dispatch(changeColorBy("lineage"))}>{"click here"}</span>
+        <span className={"link"} onClick={() => dispatch(changeColorBy("wnv_strain"))}>{"click here"}</span>
         {" to colour the tree by this). These strains are defined by these mutations (click to change the colouring of the tree):"}
         <ul>
           <li>
