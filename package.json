@@ -78,7 +78,7 @@
     "react-tweet-embed": "^1.1.0",
     "redux": "^3.7.2",
     "redux-thunk": "^2.2.0",
-    "request": "^2.65.0",
+    "request": "^2.87.0",
     "whatwg-fetch": "^0.10.1"
   },
   "devDependencies": {
