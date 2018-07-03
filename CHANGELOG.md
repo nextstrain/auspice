@@ -1,3 +1,5 @@
+## version 1.22.0 - 2018/07/03
+
 * Auspice can now run with an incomplete metadata file, or even without a metadata file at all! [PR 586](https://github.com/nextstrain/auspice/pull/586)
 * Download modal reinstated [PR 587](https://github.com/nextstrain/auspice/pull/587)
   * Improved styling
