@@ -138,6 +138,10 @@ class Legend extends React.Component {
     } else if (this.props.colorBy === "num_date") {
       const vals = this.props.colorScale.legendValues;
       if (vals[vals.length - 1] - vals[0] > 10) {
+        if (vals[vals.length - 1] - parseInt(label, 10) < 10) {
+          const [yyyy, mm, dd] = numericToCalendar(label).split('-'); // eslint-disable-line
+          return `${months[mm]} ${yyyy}`;
+        }
         return parseInt(label, 10);
       }
       const [yyyy, mm, dd] = numericToCalendar(label).split('-'); // eslint-disable-line
