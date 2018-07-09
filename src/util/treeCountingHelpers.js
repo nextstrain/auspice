@@ -11,7 +11,6 @@ export const getAllValuesAndCountsOfTraitsFromTree = (nodes, attrs) => {
     const attr = attrs;
     stateCount[attr] = {};
     nodes.forEach((n) => {
-      if (n.hasChildren) {return;}
       if (!n.attr[attr] || n.attr[attr] === "undefined" || n.attr[attr] === "?") {return;}
       stateCount[attr][n.attr[attr]] ? stateCount[attr][n.attr[attr]] += 1 : stateCount[attr][n.attr[attr]] = 1;
     });
@@ -20,7 +19,6 @@ export const getAllValuesAndCountsOfTraitsFromTree = (nodes, attrs) => {
       stateCount[attr] = {};
     }
     nodes.forEach((n) => {
-      if (n.hasChildren) {return;}
       for (const attr of attrs) {
         if (!n.attr[attr] || n.attr[attr] === "undefined" || n.attr[attr] === "?") {return;}
         // attr is "country" or "author" etc
