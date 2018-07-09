@@ -136,8 +136,11 @@ class Legend extends React.Component {
     if (this.props.colorBy === "clade_membership") {
       return label; /* unchanged */
     } else if (this.props.colorBy === "num_date") {
-      const vals = this.props.colorScale.legendValues;
-      if (vals[vals.length - 1] - vals[0] > 10) {
+      const legendValues = this.props.colorScale.legendValues;
+      if (
+        (legendValues[legendValues.length-1] - legendValues[0] > 10) && /* range spans more than 10 years */
+        (legendValues[legendValues.length-1] - parseInt(label, 10) >= 10) /* current label (value) is more than 10 years from the most recent */
+      ) {
         return parseInt(label, 10);
       }
       const [yyyy, mm, dd] = numericToCalendar(label).split('-'); // eslint-disable-line
