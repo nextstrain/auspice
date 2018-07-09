@@ -1,5 +1,7 @@
-## version 1.22.0 - 2018/07/03
+* Legend items no longer include duplicates, and include month for dates within the past 10 years - thanks @emmahodcroft[PR 592](https://github.com/nextstrain/auspice/pull/592)
+* Bugfix related to colorBy values only specified on internal nodes [issue 593](https://github.com/nextstrain/auspice/issues/593)
 
+## version 1.22.0 - 2018/07/03
 * Auspice can now run with an incomplete metadata file, or even without a metadata file at all! [PR 586](https://github.com/nextstrain/auspice/pull/586)
 * Download modal reinstated [PR 587](https://github.com/nextstrain/auspice/pull/587)
   * Improved styling
