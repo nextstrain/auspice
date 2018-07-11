@@ -1,3 +1,5 @@
+## version 1.22.2 - 2018/07/10
+
 * Bugfix in tip attribute counting algorithm
 
 ## version 1.22.1 - 2018/07/09
