@@ -1,5 +1,6 @@
-## version 1.22.1 - 2018/07/09
+* Bugfix in tip attribute counting algorithm
 
+## version 1.22.1 - 2018/07/09
 * Legend items no longer include duplicates, and include month for dates within the past 10 years - thanks @emmahodcroft[PR 592](https://github.com/nextstrain/auspice/pull/592)
 * Bugfix related to colorBy values only specified on internal nodes [issue 593](https://github.com/nextstrain/auspice/issues/593)
 

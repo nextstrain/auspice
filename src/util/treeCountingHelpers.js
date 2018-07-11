@@ -19,12 +19,13 @@ export const getAllValuesAndCountsOfTraitsFromTree = (nodes, attrs) => {
       stateCount[attr] = {};
     }
     nodes.forEach((n) => {
-      for (const attr of attrs) {
-        if (!n.attr[attr] || n.attr[attr] === "undefined" || n.attr[attr] === "?") {return;}
-        // attr is "country" or "author" etc
-        // n.attr[attr] is "USA", "Black et al", "USVI", etc
-        stateCount[attr][n.attr[attr]] ? stateCount[attr][n.attr[attr]] += 1 : stateCount[attr][n.attr[attr]] = 1;
-      }
+      attrs.forEach((trait) => {     // trait is "country" or "author" etc
+        const value = n.attr[trait]; // value is "USA", "Black et al" etc
+        if (!value || value === "undefined" || value === "?") {
+          return;
+        }
+        stateCount[trait][value] ? stateCount[trait][value] += 1 : stateCount[trait][value] = 1;
+      });
     });
   }
   return stateCount;

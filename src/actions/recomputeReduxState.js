@@ -341,10 +341,13 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, controlsSta
     {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric},
     {tipSelectedIdx, validIdxRoot: oldState.idxOfInViewRootNode}
   );
-  visAndThicknessData.stateCountAttrs = Object.keys(controlsState.filters);
   const newState = Object.assign({}, oldState, visAndThicknessData);
+  newState.stateCountAttrs = Object.keys(controlsState.filters);
   newState.visibleStateCounts = getValuesAndCountsOfVisibleTraitsFromTree(
-    newState.nodes, newState.visibility, newState.stateCountAttrs);
+    newState.nodes,
+    newState.visibility,
+    newState.stateCountAttrs
+  );
   /* potentially VVVV only needs to run if using JSONs */
   newState.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(newState.nodes, newState.stateCountAttrs);
 
