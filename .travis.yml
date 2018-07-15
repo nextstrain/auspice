@@ -10,7 +10,7 @@ script:
 after_success:
   - test $TRAVIS_BRANCH = "release" && npm run gzip-and-upload
   - test $TRAVIS_BRANCH = "release" && npm run redeploy-site
-  - test $TRAVIS_BRANCH = "release" && npm run rebuild-docker-image
+  - test $TRAVIS_BRANCH = "master" && npm run rebuild-docker-image
 notifications:
   email:
     on_success: never

@@ -29,7 +29,7 @@
     "heroku-postbuild": "npm run build",
     "get-data": "./scripts/get-data.sh",
     "redeploy-site": "./scripts/redeploy-site.sh",
-    "rebuild-docker-image": "./scripts/rebuild-docker-image.sh",    
+    "rebuild-docker-image": "./scripts/rebuild-docker-image.sh",
     "gzip-and-upload": "./scripts/gzip-and-upload.sh",
     "create-data-dir": "./scripts/create-data-dir.sh"
   },
