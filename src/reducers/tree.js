@@ -1,4 +1,4 @@
-import { getValuesAndCountsOfVisibleTraitsFromTree } from "../util/treeCountingHelpers";
+import { countTraitsAcrossTree } from "../util/treeCountingHelpers";
 import * as types from "../actions/types";
 
 /* A version increase (i.e. props.version !== nextProps.version) necessarily implies
@@ -54,7 +54,7 @@ const Tree = (state = getDefaultTreeState(), action) => {
         branchThickness: action.branchThickness,
         branchThicknessVersion: action.branchThicknessVersion,
         idxOfInViewRootNode: action.idxOfInViewRootNode,
-        visibleStateCounts: getValuesAndCountsOfVisibleTraitsFromTree(state.nodes, action.visibility, action.stateCountAttrs),
+        visibleStateCounts: countTraitsAcrossTree(state.nodes, action.stateCountAttrs, action.visibility, true),
         selectedStrain: action.selectedStrain
       };
       return Object.assign({}, state, newStates);

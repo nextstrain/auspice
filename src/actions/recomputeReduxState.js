@@ -6,8 +6,7 @@ import { strainNameToIdx, calculateVisiblityAndBranchThickness } from "../util/t
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { calcTipRadii } from "../util/tipRadiusHelpers";
 import { getDefaultControlsState } from "../reducers/controls";
-import { getValuesAndCountsOfVisibleTraitsFromTree,
-  getAllValuesAndCountsOfTraitsFromTree } from "../util/treeCountingHelpers";
+import { countTraitsAcrossTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons";
@@ -343,13 +342,8 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, controlsSta
   );
   const newState = Object.assign({}, oldState, visAndThicknessData);
   newState.stateCountAttrs = Object.keys(controlsState.filters);
-  newState.visibleStateCounts = getValuesAndCountsOfVisibleTraitsFromTree(
-    newState.nodes,
-    newState.visibility,
-    newState.stateCountAttrs
-  );
-  /* potentially VVVV only needs to run if using JSONs */
-  newState.totalStateCounts = getAllValuesAndCountsOfTraitsFromTree(newState.nodes, newState.stateCountAttrs);
+  newState.visibleStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, newState.visibility, true);
+  newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,               true); // eslint-disable-line
 
   if (tipSelectedIdx) { /* i.e. query.s was set */
     newState.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controlsState.colorScale, tree: newState});

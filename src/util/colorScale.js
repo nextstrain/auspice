@@ -3,7 +3,7 @@ import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors } from "./globals";
-import { getAllValuesAndCountsOfTraitsFromTree } from "./treeCountingHelpers";
+import { countTraitsAcrossTree } from "./treeCountingHelpers";
 import { getExtraVals } from "./colorHelpers";
 import { parseEncodedGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
@@ -29,9 +29,9 @@ const createListOfColors = (n, range) => {
 };
 
 const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
-  const stateCount = getAllValuesAndCountsOfTraitsFromTree(nodes, attr)[attr];
+  const stateCount = countTraitsAcrossTree(nodes, [attr], false, false)[attr];
   if (nodesToo) {
-    const sc = getAllValuesAndCountsOfTraitsFromTree(nodesToo, attr)[attr];
+    const sc = countTraitsAcrossTree(nodesToo, [attr], false, false)[attr];
     for (let state in sc) { // eslint-disable-line
       if (stateCount[state]) {
         stateCount[state] += sc[state];

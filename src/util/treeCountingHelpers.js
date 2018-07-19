@@ -1,59 +1,35 @@
 /**
-* traverse the tree and get the values -> counts for a single
-* attr. Visibility of the node is ignored. Terminal nodes only.
+* traverse the tree to get state counts for supplied traits
 * @param {Array} nodes - list of nodes
-* @param {Array | string} attrs - string (for a single attr), or list of attrs to scan the tree for their values & counts
-* @return {obj} keys: the entries in attrs. Values: an object mapping values -> counts
+* @param {Array} traits - list of traits to count across the tree
+* @param {Array | false} visibility - if Array provided then only consider visible nodes. If false, consider all nodes.
+* @param {bool} terminalOnly - only consider terminal / leaf nodes?
+* @return {obj} keys: the traits. Values: an object mapping trait values -> INT
 */
-export const getAllValuesAndCountsOfTraitsFromTree = (nodes, attrs) => {
-  const stateCount = {};
-  if (typeof attrs === "string") {
-    const attr = attrs;
-    stateCount[attr] = {};
-    nodes.forEach((n) => {
-      if (!n.attr[attr] || n.attr[attr] === "undefined" || n.attr[attr] === "?") {return;}
-      stateCount[attr][n.attr[attr]] ? stateCount[attr][n.attr[attr]] += 1 : stateCount[attr][n.attr[attr]] = 1;
-    });
-  } else {
-    for (const attr of attrs) {
-      stateCount[attr] = {};
-    }
-    nodes.forEach((n) => {
-      attrs.forEach((trait) => {     // trait is "country" or "author" etc
-        const value = n.attr[trait]; // value is "USA", "Black et al" etc
-        if (!value || value === "undefined" || value === "?") {
-          return;
-        }
-        stateCount[trait][value] ? stateCount[trait][value] += 1 : stateCount[trait][value] = 1;
-      });
-    });
-  }
-  return stateCount;
-};
+export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) => {
+  const counts = {};
+  traits.forEach((trait) => {counts[trait] = {};});
 
-/**
-* traverse the tree and get the values -> counts for each attr in attrs
-* only examine terminal nodes which are visible
-* @param {Array} nodes - list of nodes
-* @param {Array} visibility - 1-1 correspondence with nodes. Value: "visibile" or ""
-* @param {Array} attrs - list of attrs to scan the tree for their values & counts
-* @return {obj} keys: the entries in attrs. Values: an object mapping values -> counts
-*/
-export const getValuesAndCountsOfVisibleTraitsFromTree = (nodes, visibility, attrs) => {
-  const stateCount = {};
-  for (const attr of attrs) {
-    stateCount[attr] = {};
-  }
-  nodes.forEach((n) => {
-    if (n.hasChildren) {return;}
-    if (visibility[n.arrayIdx] !== "visible") {return;}
-    for (const attr of attrs) {
-      // attr is "country" or "author" etc
-      // n.attr[attr] is "USA", "Black et al", "USVI", etc
-      stateCount[attr][n.attr[attr]] ? stateCount[attr][n.attr[attr]] += 1 : stateCount[attr][n.attr[attr]] = 1;
-    }
+  nodes.forEach((node) => {
+    traits.forEach((trait) => {        // trait is "country" or "author" etc
+      const value = node.attr[trait];  // value is "USA", "Black et al" etc
+
+      if (!value || value === "undefined" || value === "?") {
+        return;
+      }
+
+      if (terminalOnly && node.hasChildren) {
+        return;
+      }
+
+      if (visibility && visibility[node.arrayIdx] !== "visible") {
+        return;
+      }
+
+      counts[trait][value] ? counts[trait][value] += 1 : counts[trait][value] = 1;
+    });
   });
-  return stateCount;
+  return counts;
 };
 
 /**
