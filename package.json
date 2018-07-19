@@ -16,7 +16,6 @@
     "server:local": "node server.dist.js localData",
     "build": "npm run clean && npm run build:client && npm run build:server",
     "build:client": "NODE_ENV=production BABEL_ENV=production webpack --config webpack.config.prod.js",
-    "build:electron": "NODE_ENV=production BABEL_ENV=production webpack --config webpack.config.electron.js",
     "build:client:perf": "NODE_ENV=production BABEL_ENV=devtiming webpack --config webpack.config.prod.js",
     "build:server": "NODE_ENV=production BABEL_ENV=production webpack --config webpack.config.server.js",
     "build:start": "npm run build && npm run server",
@@ -27,8 +26,6 @@
     "start": "echo \"DEPRECATION WARNING: please use npm run dev instead of npm run start\" && npm run dev",
     "start:local": "echo \"DEPRECATION WARNING: please use npm run dev:local instead of npm run start:local\" && npm run dev:local",
     "lint": "eslint src",
-    "run:electron": "npm run clean && npm run build:electron && npm run getdata && ./node_modules/.bin/electron . ",
-    "dist:electron": "npm run clean && npm run build:electron && npm run getdata && electron-builder",
     "heroku-postbuild": "npm run build",
     "get-data": "./scripts/get-data.sh",
     "redeploy-site": "./scripts/redeploy-site.sh",
@@ -100,8 +97,6 @@
     "chai-http": "^3.0.0",
     "compression-webpack-plugin": "^1.1.11",
     "css-loader": "^0.26.1",
-    "electron": "^1.8.7",
-    "electron-builder": "next",
     "es6-promise": "~1.0.0",
     "eslint": "^4.4.1",
     "eslint-config-airbnb": "^15.1.0",
@@ -122,38 +117,5 @@
     "webpack": "^3.5.5",
     "webpack-dev-middleware": "^1.2.0",
     "webpack-hot-middleware": "^2.19.1"
-  },
-  "build": {
-    "appId": "nextstrain",
-    "directories": {
-      "output": "releases"
-    },
-    "files": [
-      "data/*",
-      "dist/*",
-      "index.html",
-      "index.js",
-      "package.json"
-    ],
-    "dmg": {
-      "contents": [
-        {
-          "x": 110,
-          "y": 150
-        },
-        {
-          "x": 240,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        }
-      ]
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ]
-    }
   }
 }
