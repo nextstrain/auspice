@@ -72,8 +72,10 @@ const getSegmentName = (datapath, availableDatasets) => {
 
 
 const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON) => {
-  const apiPath = (jsonType) =>
-    `${charonAPIAddress}request=json&path=${datasets.datapath}_${jsonType}.json&s3=${s3bucket}`;
+  // debugger;
+  const requestJSONPath = window.location.pathname; // .slice(1).replace(/_/g, "/");
+  const apiPath = (jsonType) => `${charonAPIAddress}request=json&want=${requestJSONPath}&type=${jsonType}`;
+  //   fetch(`${charonAPIAddress}request=debug&path=${path}`).then((res) => res.json()).then((res) => console.log(res));
 
   const promisesOrder = ["meta", "tree", "frequencies"];
   const treeName = getSegmentName(datasets.datapath, datasets.availableDatasets);
@@ -103,6 +105,7 @@ const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON
       values.forEach((v, i) => {
         if (v) data.JSONs[promisesOrder[i]] = v; // if statement removes undefinds
       });
+      console.log("PROMISES IN...", values);
       if (!data.JSONs.tree) {
         console.error("Tree JSON could not be loaded.");
         dispatch(goTo404(`
