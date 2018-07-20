@@ -67,8 +67,8 @@ const parseMarkdownArray = (mdArr) => {
 
 const convertBlocksToHTML = (blocks) => {
   for (const block of blocks) {
-    // eslint-disable-next-line no-underscore-dangle
-    block.__html = ReactDOMServer.renderToStaticMarkup(<ReactMarkdown source={block.lines.join("\n")} />);
+    const markdown = React.createElement(ReactMarkdown, {source: block.lines.join("\n")});
+    block.__html = ReactDOMServer.renderToStaticMarkup(markdown);
     delete block.lines;
   }
 };
