@@ -2,11 +2,11 @@
   "presets": ["react", "es2015", "stage-0"],
   "plugins": ["transform-decorators-legacy"],
   "env": {
-    "devtiming": {
+    "timing": {
       "plugins": [
       ],
     },
-    "dev": {
+    "development": {
       "plugins": [
         ["strip-function-call", {"strip": ["timerStart", "timerEnd"]}]
       ],
