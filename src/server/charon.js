@@ -1,18 +1,21 @@
+/* eslint no-console: off */
 const queryString = require("query-string");
 const getFiles = require('./getFiles');
+const globals = require("./globals");
 const serverNarratives = require('./narratives');
 const path = require("path");
 const fs = require('fs');
 const fetch = require('node-fetch');
+const manifestHelpers = require("./manifestHelpers");
 
 
 const readFilePromise = (fileName) => {
   return new Promise((resolve, reject) => {
     fs.readFile(fileName, 'utf8', (err, data) => {
-        err ? reject(err) : resolve(data);
+      err ? reject(err) : resolve(data);
     });
   });
-}
+};
 
 const constructPathToGet = (url, jsonTypeWanted) => {
   const parts = url.replace(/^\//, '').replace(/\/$/, '').split("/");
@@ -20,17 +23,17 @@ const constructPathToGet = (url, jsonTypeWanted) => {
   const ret = {local: false};
   if (lowerParts[0] === "local") {
     ret.local = true;
-    ret.path = path.join(global.LOCAL_DATA_PATH, lowerParts.slice(1).join("_"));
+    ret.path = path.join(global.LOCAL_DATA_PATH, manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(1), ret.local));
   } else if (lowerParts[0] === "community") {
     if (parts.length < 3) {
       throw new Error("Community URLs must be of format community/githubOrgName/repoName/...");
     }
-    ret.path = `https://rawgit.com/${parts[1]}/${parts[2]}/master/auspice/${lowerParts.slice(2).join("_")}`;
+    ret.path = `https://rawgit.com/${parts[1]}/${parts[2]}/master/auspice/${manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(2), ret.local)}`;
   } else if (lowerParts[0] === "staging") {
-    ret.path = global.REMOTE_DATA_STAGING_BASEURL + lowerParts.slice(1).join("_");
+    ret.path = global.REMOTE_DATA_STAGING_BASEURL + manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(1), ret.local);
   } else {
     /* default is via global.REMOTE_DATA_LIVE_BASEURL (for nextstrain.org, this is the data.nextstrain S3 bucket) */
-    ret.path = global.REMOTE_DATA_LIVE_BASEURL + lowerParts.join("_");
+    ret.path = global.REMOTE_DATA_LIVE_BASEURL + manifestHelpers.checkFieldsAgainstManifest(lowerParts, ret.local);
   }
 
   if (jsonTypeWanted) {
@@ -38,7 +41,7 @@ const constructPathToGet = (url, jsonTypeWanted) => {
   }
   ret.path += ".json";
   return ret;
-}
+};
 
 const applyCharonToApp = (app) => {
   app.get('/charon*', (req, res) => {
@@ -55,17 +58,14 @@ const applyCharonToApp = (app) => {
       } case "narrative": {
         serverNarratives.serveNarrative(query, res);
         break;
-      } case "splashimage": {
-        getFiles.getSplashImage(query, res);
+      } case "rebuildManifest": {
+        globals.buildLiveManifest();
         break;
-      // } case "image": {
-      //   getFiles.getImage(query, res);
-      //   break;
       } case "json": {
         let pathData;
         try {
           pathData = constructPathToGet(query.want, query.type);
-        } catch(e) {
+        } catch (e) {
           console.error("Problem parsing the query (didn't attempt to fetch)\n", e.message);
           res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
           break;
@@ -75,15 +75,15 @@ const applyCharonToApp = (app) => {
 
         promise(pathData.path)
           .then((result) => {
-            return typeof result === "string" ? JSON.parse(result) : result.json()
+            return typeof result === "string" ? JSON.parse(result) : result.json();
           })
           .then((json) => {
-            console.log("successful json decoding on server. Sending", pathData.path)
-            res.json(json)
+            console.log("successful json decoding on server. Sending", pathData.path);
+            res.json(json);
           })
           .catch((err) => {
             console.log(`ERROR. ${pathData.path} --> ${err.type}`);
-            console.log("\t", err.message)
+            console.log("\t", err.message);
             res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
           });
 
