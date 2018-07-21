@@ -1,7 +1,15 @@
 import { debounce } from 'lodash';
 import * as types from "./types";
 import { timerStart, timerEnd } from "../util/perf";
-import { computeMatrixFromRawData } from "../util/processFrequencies";
+import { computeMatrixFromRawData, processFrequenciesJSON } from "../util/processFrequencies";
+
+export const loadFrequencies = (json) => (dispatch, getState) => {
+  const { tree, controls } = getState();
+  dispatch({
+    type: types.LOAD_FREQUENCIES,
+    frequencies: {loaded: true, version: 1, ...processFrequenciesJSON(json, tree, controls)}
+  });
+};
 
 const updateFrequencyData = (dispatch, getState) => {
   timerStart("updateFrequencyData");

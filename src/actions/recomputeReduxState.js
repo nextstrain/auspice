@@ -12,7 +12,7 @@ import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale } from "../util/colorScale";
-import { processFrequenciesJSON, computeMatrixFromRawData } from "../util/processFrequencies";
+import { computeMatrixFromRawData } from "../util/processFrequencies";
 
 export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -378,7 +378,7 @@ export const createStateFromQueryOrJSONs = ({
   treeName = undefined,
   query
 }) => {
-  let tree, treeToo, entropy, controls, metadata, frequencies, narrative;
+  let tree, treeToo, entropy, controls, metadata, narrative;
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (JSONs) {
     if (JSONs.narrative) narrative = JSONs.narrative;
@@ -413,7 +413,6 @@ export const createStateFromQueryOrJSONs = ({
     tree = {...oldState.tree};
     treeToo = {...oldState.treeToo};
     metadata = {...oldState.metadata};
-    frequencies = {...oldState.frequencies};
 
     controls = restoreQueryableStateToDefaults(controls);
     if (query.tt && !treeToo.loaded) {
@@ -458,26 +457,25 @@ export const createStateFromQueryOrJSONs = ({
     entropy.maxYVal = entropyMaxYVal;
   }
 
-  /* potentially calculate frequency (or update it!)
-  this needs to come after the colorscale & tree is set */
-  if (JSONs && JSONs.frequencies) {
-    frequencies = {loaded: true, version: 1, ...processFrequenciesJSON(JSONs.frequencies, tree, controls)};
-  } else if (frequencies && frequencies.loaded) { /* oldState */
-    frequencies.version++;
-    frequencies.matrix = computeMatrixFromRawData(
-      frequencies.data,
-      frequencies.pivots,
-      tree.nodes,
-      tree.visibility,
-      controls.colorScale,
-      controls.colorBy
-    );
-  }
+  // if (JSONs && JSONs.frequencies) {
+  //   NOW A SEPERATE ACTION
+  // }
+  // else if (frequencies && frequencies.loaded) { /* oldState */
+  //   frequencies.version++;
+  //   frequencies.matrix = computeMatrixFromRawData(
+  //     frequencies.data,
+  //     frequencies.pivots,
+  //     tree.nodes,
+  //     tree.visibility,
+  //     controls.colorScale,
+  //     controls.colorBy
+  //   );
+  // }
 
   if (treeName) {
     tree.name = treeName;
   }
-  return {tree, treeToo, metadata, entropy, controls, frequencies, narrative, query};
+  return {tree, treeToo, metadata, entropy, controls, narrative, query};
 };
 
 export const createTreeTooState = ({

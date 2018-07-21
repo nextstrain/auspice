@@ -4,6 +4,7 @@ import { charonAPIAddress } from "../util/globals";
 import { getDatapath, goTo404, chooseDisplayComponentFromPathname, makeDataPathFromPathname } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 import parseParams, { createDatapathForSecondSegment } from "../util/parseParams";
+import { loadFrequencies } from "./frequencies";
 
 export const getManifest = (dispatch, s3bucket = "live") => {
   const charonErrorHandler = () => {
@@ -72,47 +73,17 @@ const getSegmentName = (datapath, availableDatasets) => {
 
 
 const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON) => {
-  // debugger;
   const requestJSONPath = window.location.pathname; // .slice(1).replace(/_/g, "/");
   const apiPath = (jsonType) => `${charonAPIAddress}request=json&want=${requestJSONPath}&type=${jsonType}`;
-  //   fetch(`${charonAPIAddress}request=debug&path=${path}`).then((res) => res.json()).then((res) => console.log(res));
 
-  const promisesOrder = ["meta", "tree", "frequencies"];
+
   const treeName = getSegmentName(datasets.datapath, datasets.availableDatasets);
-  const promises = [
-    fetch(apiPath("meta")).then((res) => res.json()),
-    fetch(apiPath("tree")).then((res) => res.json()),
-    fetch(apiPath("tip-frequencies")).then((res) => res.json())
-  ];
-  /* add promises according to the URL */
   if (query.tt) { /* SECOND TREE */
-    const secondPath = createDatapathForSecondSegment(query.tt, datasets.datapath, datasets.availableDatasets);
-    if (secondPath) {
-      promisesOrder.push("treeToo");
-      promises.push(
-        fetch(`${charonAPIAddress}request=json&path=${secondPath}_tree.json&s3=${s3bucket}`)
-          .then((res) => res.json())
-          // don't need to catch - it'll be handled in the promises.map below
-      );
-      // promises.push(fetch(secondPath).then((res) => res.json()));
-    }
+    console.warn("SECOND TREE TODO -- SERVER SHOULD ADD IT TO THE TREE/UNIFIED JSON");
   }
-  Promise.all(promises.map((promise) => promise.catch(() => undefined)))
+  Promise.all([fetch(apiPath("meta")).then((res) => res.json()), fetch(apiPath("tree")).then((res) => res.json())])
     .then((values) => {
-      // all promises have not resolved or rejected (value[x] = undefined upon rejection)
-      // you must check for undefined here, they won't go to the following catch
-      const data = {JSONs: {}, query, treeName};
-      values.forEach((v, i) => {
-        if (v) data.JSONs[promisesOrder[i]] = v; // if statement removes undefinds
-      });
-      console.log("PROMISES IN...", values);
-      if (!data.JSONs.tree) {
-        console.error("Tree JSON could not be loaded.");
-        dispatch(goTo404(`
-          Auspice attempted to load JSONs for the dataset "${datasets.datapath.replace(/_/g, '/')}", but they couldn't be found.
-        `));
-        return;
-      }
+      const data = {JSONs: {meta: values[0], tree: values[1]}, query, treeName};
       if (narrativeJSON) {
         data.JSONs.narrative = narrativeJSON;
       }
@@ -120,10 +91,20 @@ const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON
         type: types.CLEAN_START,
         ...createStateFromQueryOrJSONs(data)
       });
+      return {frequencies: (data.JSONs.meta.panels && data.JSONs.meta.panels.indexOf("frequencies") !== -1)};
+    })
+    .then((result) => {
+      if (result.frequencies === true) {
+        fetch(apiPath("tip-frequencies"))
+          .then((res) => res.json())
+          .then((res) => dispatch(loadFrequencies(res)))
+          .catch((err) => console.error("Frequencies failed to fetch", err.message));
+      }
+      return false;
     })
     .catch((err) => {
-      // some coding error in handling happened. This is not the rejection of the promise you think it is!
-      console.error("Code error. This should not happen.", err);
+      console.error(err.message);
+      dispatch(goTo404(`Couldn't load JSONs for ${requestJSONPath}`));
     });
 };
 
