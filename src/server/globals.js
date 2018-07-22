@@ -35,7 +35,7 @@ const buildLiveManifest = () => {
       console.log("Successfully created live manifest");
     })
     .catch((err) => {
-      console.log("ERROR. Failed to build live manifest.", err);
+      console.log("ERROR. Failed to build live manifest.");
     });
 };
 

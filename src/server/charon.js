@@ -88,6 +88,14 @@ const applyCharonToApp = (app) => {
           });
 
         break;
+      } case "available": {
+        if (query.source === "local") res.json(global.LOCAL_MANIFEST);
+        else if (query.source === "/") res.json(global.LIVE_MANIFEST);
+        else {
+          console.log("AVAILABLE ERROR");
+          res.status(500).send('AVAILABLE ERROR');
+        }
+        break;
       } default: {
         console.warn("Query rejected (unknown want) -- " + req.originalUrl);
         res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...

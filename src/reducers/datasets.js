@@ -3,8 +3,10 @@ import { chooseDisplayComponentFromPathname } from "../actions/navigation";
 
 const datasets = (state = {
   s3bucket: "live",
+  available: undefined,
   availableDatasets: undefined,
   splash: undefined,
+  source: undefined,
   datapath: undefined, // e.g. "zika" or "flu_h3n2_12y"
   displayComponent: chooseDisplayComponentFromPathname(window.location.pathname),
   urlPath: window.location.pathname,
@@ -33,6 +35,11 @@ const datasets = (state = {
       return Object.assign({}, state, {
         urlPath: action.path,
         urlSearch: action.query
+      });
+    } case types.AVAILABLE_DATASETS: {
+      return Object.assign({}, state, {
+        source: action.source,
+        available: action.available
       });
     } default: {
       return state;

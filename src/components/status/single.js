@@ -2,6 +2,7 @@ import React from "react";
 import { charonAPIAddress } from "../../util/globals";
 import { treeJsonToState } from "../../util/treeJsonProcessing";
 import { getMinCalDateViaTree, getMaxCalDateViaTree } from "../../actions/recomputeReduxState";
+import { fetchJSON } from "../../util/serverInteraction";
 
 const errorColor = "#fc8d59";
 const fetchColor = "#ffffbf";
@@ -20,43 +21,16 @@ class SingleDataset extends React.Component {
     };
   }
   componentDidMount() {
-    const apiPath = (jsonType) =>
-      `${charonAPIAddress}request=json&path=${this.props.path}_${jsonType}.json&s3=${this.props.bucket}`;
-
-    const promises = [
-      fetch(apiPath("meta")).then((res) => res.json()),
-      fetch(apiPath("tree")).then((res) => res.json())
-    ];
-
-    Promise.all(promises)
+    const apiPath = (jsonType) => `${charonAPIAddress}request=json&want=${this.props.path}&type=${jsonType}`;
+    Promise.all([fetchJSON(apiPath("meta")), fetchJSON(apiPath("tree"))])
       .then((values) => {
-        // console.log(this.props.path, values);
         const metaJSON = values[0];
         const treeJSON = values[1];
-        let tree, minDate, maxDate, numTips, lastUpdated;
-        try {
-          tree = treeJsonToState(treeJSON, undefined);
-          minDate = getMinCalDateViaTree(tree.nodes);
-          maxDate = getMaxCalDateViaTree(tree.nodes);
-        } catch (err) {
-          console.error(this.props.path, err);
-          this.setState({
-            status: "Error processing tree JSON",
-            backgroundColor: errorColor
-          });
-          return;
-        }
-        try {
-          numTips = metaJSON.virus_count;
-          lastUpdated = metaJSON.updated;
-        } catch (err) {
-          console.error(this.props.path, err);
-          this.setState({
-            status: "Error processing meta JSON",
-            backgroundColor: errorColor
-          });
-          return;
-        }
+        const tree = treeJsonToState(treeJSON, undefined);
+        const minDate = getMinCalDateViaTree(tree.nodes);
+        const maxDate = getMaxCalDateViaTree(tree.nodes);
+        const numTips = metaJSON.virus_count;
+        const lastUpdated = metaJSON.updated;
         this.setState({
           status: "loaded",
           backgroundColor: successColor,
@@ -67,9 +41,9 @@ class SingleDataset extends React.Component {
         });
       })
       .catch((err) => {
-        console.error("PATH:", this.props.path, "ERR:", err);
+        console.error("Failed to fetch or process JSONs for", this.props.path, "ERR:", err.type);
         this.setState({
-          status: "Error fetching JSONs",
+          status: "Error fetching / processing JSONs",
           backgroundColor: errorColor
         });
       });

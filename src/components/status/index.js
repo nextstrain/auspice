@@ -3,32 +3,28 @@ import { connect } from "react-redux";
 import Flex from "../framework/flex";
 import SingleDataset from "./single";
 import { materialButton } from "../../globalStyles";
-
-export const processAvailableDatasets = (availableDatasets) => {
-  const queries = [];
-  const exploreLevel = (pathSoFar, data) => {
-    const keys = Object.keys(data).filter((v) => v !== "default");
-    for (let key of keys) { // eslint-disable-line
-      const path = [...pathSoFar, key];
-      if (typeof data[key] === "string") { // i.e. zika = ""
-        queries.push(path);
-      } else {
-        const nextLevelKey = Object.keys(data[key])[0];
-        exploreLevel(path, data[key][nextLevelKey]);
-      }
-    }
-  };
-  exploreLevel([], availableDatasets.pathogen);
-  return queries;
-};
+import { getAvailableDatasets, getSource } from "../../actions/getAvailableDatasets";
+import { goTo404 } from "../../actions/navigation";
 
 @connect((state) => {
   return {
-    availableDatasets: state.datasets.availableDatasets
+    available: state.datasets.available,
+    source: state.datasets.source
   };
 })
 class Status extends React.Component {
-
+  constructor(props) {
+    super(props);
+    this.state = {source: getSource()};
+  }
+  componentDidMount() {
+    if (!this.state.source) {
+      this.props.dispatch(goTo404("Couldn't identify source"));
+    }
+    if (this.props.source !== this.state.source) {
+      this.props.dispatch(getAvailableDatasets(this.state.source));
+    }
+  }
   getBadges() {
     return (
       <Flex wrap="wrap" justifyContent="space-between" alignItems="center">
@@ -43,7 +39,11 @@ class Status extends React.Component {
             <img alt="" width="40" src={require("../../images/nextstrain-logo-small.png")}/>
           </a>
         </div>
-        <div style={{flex: 5}}/>
+        <div style={{flex: 1}}/>
+        <div style={{fontSize: 18}}>
+          {`Status of available datasets for source "${this.props.source}"`}
+        </div>
+        <div style={{flex: 3}}/>
         <div>
           <a href="https://travis-ci.com/nextstrain/auspice">
             <button style={materialButton}>
@@ -70,24 +70,16 @@ class Status extends React.Component {
   }
 
   render() {
-    if (!this.props.availableDatasets) {
-      return null;
-    }
-    const s3bucket = window.location.pathname.includes("staging") ? "staging" : "live";
-    console.warn("SHOULD ONLY EVER RUN ONCE");
-    const queries = processAvailableDatasets(this.props.availableDatasets);
+    if (this.props.source !== this.state.source) return null;
     return (
       <div style={{maxWidth: 1020, marginLeft: "auto", marginRight: "auto"}}>
 
         {this.getBadges()}
 
-        <h1 style={{margin: "20px 20px 20px 20px", textAlign: "center"}}>
-          {`Status page (s3 bucket: ${s3bucket})`}
-        </h1>
-
-        {queries.map((q) => (
-          <SingleDataset key={q} path={q.join("_")} bucket={s3bucket}/>
-        ))}
+        {this.props.available.map((fields) => {
+          const path = `/${this.props.source}/${fields.join("/")}`.replace(/\/+/, "/");
+          return (<SingleDataset key={path} path={path}/>);
+        })}
 
       </div>
     );

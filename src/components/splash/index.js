@@ -4,7 +4,7 @@ import Title from "../framework/title";
 import NavBar from "../framework/nav-bar";
 import Flex from "../../components/framework/flex";
 import { logos } from "./logos";
-import { displayAvailableDatasets } from "./availableDatasets";
+// import { displayAvailableDatasets } from "./availableDatasets";
 import { CenterContent } from "./centerContent";
 import { displayError } from "./displayError";
 
@@ -38,7 +38,8 @@ class Splash extends React.Component {
           )}
           {/* Secondly, list the available datasets */}
           <CenterContent>
-            {displayAvailableDatasets(this.props.availableDatasets, this.props.dispatch)}
+            {"to do"}
+            {/*displayAvailableDatasets(this.props.availableDatasets, this.props.dispatch)*/}
           </CenterContent>
           {/* Finally, the footer (logos) */}
           <CenterContent>
