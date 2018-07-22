@@ -4,16 +4,44 @@ import Title from "../framework/title";
 import NavBar from "../framework/nav-bar";
 import Flex from "../../components/framework/flex";
 import { logos } from "./logos";
-// import { displayAvailableDatasets } from "./availableDatasets";
+import { getAvailableDatasets, getSource } from "../../actions/getAvailableDatasets";
 import { CenterContent } from "./centerContent";
 import { displayError } from "./displayError";
+import { goTo404, changePage } from "../../actions/navigation";
+
+const formatDataset = (fields, dispatch) => {
+  const path = fields.join("/");
+  return (
+    <li key={path}>
+      <div
+        style={{color: "#5097BA", textDecoration: "none", cursor: "pointer", fontWeight: "400", fontSize: "94%"}}
+        onClick={() => dispatch(changePage({path: `/${path}`, push: true}))}
+      >
+        {path}
+      </div>
+    </li>
+  );
+};
+
 
 @connect((state) => ({
   splash: state.datasets.splash,
-  availableDatasets: state.datasets.availableDatasets,
+  available: state.datasets.available,
   errorMessage: state.datasets.errorMessage
 }))
 class Splash extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {source: getSource()};
+  }
+  componentDidMount() {
+    if (!this.state.source && !this.props.errorMessage) {
+      this.props.dispatch(goTo404("Couldn't identify source"));
+    }
+    if (this.props.source !== this.state.source) {
+      this.props.dispatch(getAvailableDatasets(this.state.source));
+    }
+  }
   render() {
     return (
       <div>
@@ -37,10 +65,20 @@ class Splash extends React.Component {
             </p>
           )}
           {/* Secondly, list the available datasets */}
-          <CenterContent>
-            {"to do"}
-            {/*displayAvailableDatasets(this.props.availableDatasets, this.props.dispatch)*/}
-          </CenterContent>
+          {
+            this.state.source && this.props.available ? (
+              <CenterContent>
+                <div>
+                  <div style={{fontSize: "26px"}}>
+                    {`Available Datasets for source ${this.state.source}`}
+                  </div>
+                  <ul style={{marginLeft: "-22px"}}>
+                    {this.props.available.map((data) => formatDataset(data, this.props.dispatch))}
+                  </ul>
+                </div>
+              </CenterContent>
+            ) : null
+          }
           {/* Finally, the footer (logos) */}
           <CenterContent>
             {logos}
