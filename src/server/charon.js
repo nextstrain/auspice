@@ -3,10 +3,8 @@ const queryString = require("query-string");
 const getFiles = require('./getFiles');
 const globals = require("./globals");
 const serverNarratives = require('./narratives');
-const path = require("path");
 const fs = require('fs');
 const fetch = require('node-fetch');
-const manifestHelpers = require("./manifestHelpers");
 const sourceSelect = require("./sourceSelect");
 
 const readFilePromise = (fileName) => {
@@ -17,31 +15,6 @@ const readFilePromise = (fileName) => {
   });
 };
 
-const constructPathToGet = (url, jsonTypeWanted) => {
-  const parts = url.replace(/^\//, '').replace(/\/$/, '').split("/");
-  const lowerParts = parts.map((p) => p.toLowerCase());
-  const ret = {local: false};
-  if (lowerParts[0] === "local") {
-    ret.local = true;
-    ret.path = path.join(global.LOCAL_DATA_PATH, manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(1), ret.local));
-  } else if (lowerParts[0] === "community") {
-    if (parts.length < 3) {
-      throw new Error("Community URLs must be of format community/githubOrgName/repoName/...");
-    }
-    ret.path = `https://rawgit.com/${parts[1]}/${parts[2]}/master/auspice/${manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(2), ret.local)}`;
-  } else if (lowerParts[0] === "staging") {
-    ret.path = global.REMOTE_DATA_STAGING_BASEURL + manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(1), ret.local);
-  } else {
-    /* default is via global.REMOTE_DATA_LIVE_BASEURL (for nextstrain.org, this is the data.nextstrain S3 bucket) */
-    ret.path = global.REMOTE_DATA_LIVE_BASEURL + manifestHelpers.checkFieldsAgainstManifest(lowerParts, ret.local);
-  }
-
-  if (jsonTypeWanted) {
-    ret.path += "_" + jsonTypeWanted;
-  }
-  ret.path += ".json";
-  return ret;
-};
 
 const applyCharonToApp = (app) => {
   app.get('/charon*', (req, res) => {
@@ -62,27 +35,35 @@ const applyCharonToApp = (app) => {
         globals.buildLiveManifest();
         break;
       } case "json": {
-        let pathData;
+        let pathname, idealUrl;
+        const source = sourceSelect.getSource(query.want);
         try {
-          pathData = constructPathToGet(query.want, query.type);
+          [idealUrl, pathname] = sourceSelect.constructPathToGet(source, query.want, query.type);
         } catch (e) {
           console.error("Problem parsing the query (didn't attempt to fetch)\n", e.message);
           res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
           break;
         }
+        console.log("-------pathname", pathname);
+        const promise = source === "local" ? readFilePromise : fetch;
 
-        const promise = pathData.local ? readFilePromise : fetch;
-
-        promise(pathData.path)
+        promise(pathname)
           .then((result) => {
             return typeof result === "string" ? JSON.parse(result) : result.json();
           })
           .then((json) => {
-            console.log("successful json decoding on server. Sending", pathData.path);
+            if (query.type === "meta") {
+              const datasets = sourceSelect.collectDatasets(source);
+              json["_available"] = datasets.available;
+              json["_source"] = source;
+              json["_treeName"] = sourceSelect.guessTreeName(idealUrl.split("/"));
+              json["_url"] = idealUrl;
+              console.log("injected fields:", json["_source"], json["_treeName"], json["_url"]);
+            }
             res.json(json);
           })
           .catch((err) => {
-            console.log(`ERROR. ${pathData.path} --> ${err.type}`);
+            console.log(`ERROR. ${pathname} --> ${err.type}`);
             console.log("\t", err.message);
             res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
           });
@@ -90,14 +71,11 @@ const applyCharonToApp = (app) => {
         break;
       } case "available": {
         const source = sourceSelect.getSource(query.url);
-        console.log("source = ", source);
-        if (source === "local" && global.LOCAL_MANIFEST) {
-          res.json({available: global.LOCAL_MANIFEST, source});
-        } else if (source === "live" && global.LIVE_MANIFEST) {
-          res.json({available: global.LIVE_MANIFEST, source});
+        const datasets = sourceSelect.collectDatasets(source);
+        if (datasets) {
+          res.json(datasets);
         } else {
-          console.log("ERROR: Couldn't send available datasets for source", source);
-          res.status(500).send('');
+          res.status(500).send(`ERROR: Couldn't send available datasets for source ${source}`);
         }
         break;
       } default: {

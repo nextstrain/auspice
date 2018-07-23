@@ -10,7 +10,7 @@ const oldToNew = (old) => {
     }
     let keys = Object.keys(obj);
     if (keys.length === 1) {
-      obj = obj[keys[0]];
+      obj = obj[keys[0]]; // eslint-disable-line
       keys = Object.keys(obj); // skip level
     }
     const defaultValue = obj.default;
@@ -22,37 +22,49 @@ const oldToNew = (old) => {
       if (obj[k] !== defaultValue && k !== "default") {
         orderedKeys.push(k);
       }
-    })
+    });
     orderedKeys.forEach((key) => {
       const newParts = partsSoFar.slice();
       newParts.push(key);
       recurse(newParts, obj[key]);
-    })
-  }
+    });
+  };
 
   recurse([], old.pathogen);
   return allParts;
-}
+};
 
 
-const checkFieldsAgainstManifest = (fields, manifestIsLocal) => {
-  const manifest = manifestIsLocal ? global.LOCAL_MANIFEST : global.LIVE_MANIFEST;
+const checkFieldsAgainstManifest = (fields, source) => {
+  const manifest = source === "local" ? global.LOCAL_MANIFEST :
+    source === "live" ? global.LIVE_MANIFEST :
+      undefined;
 
   if (!manifest) {
-    return fields.join("_");
+    return fields;
   }
 
+  /* is there an exact match in the manifest? */
+  let exactMatch = false;
+  const matchString = fields.join("--");
+  manifest.forEach((n) => {
+    if (matchString === n.join("--")) exactMatch = true;
+  });
+  if (exactMatch) return fields;
+
+  /* is there a partial match in the manifest? If so, use the manifest to return the correct path */
   let applicable = manifest.slice(); // shallow
   fields.forEach((field, idx) => {
     applicable = applicable.filter((entry) => entry[idx] === field);
     // console.log("after idx", idx, "(", field, "), num applicable:", applicable.length);
-  })
-  if (!applicable.length) {
-    return fields.join("_");
+  });
+  if (applicable.length) {
+    return applicable[0];
   }
-  return applicable[0].join("_");
 
-}
+  /* fallthrough: return the original query */
+  return fields;
+};
 
 
 module.exports = {
