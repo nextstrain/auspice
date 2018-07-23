@@ -5,7 +5,6 @@ import NavBar from "../framework/nav-bar";
 import Flex from "../../components/framework/flex";
 import { logos } from "./logos";
 import { CenterContent } from "./centerContent";
-import { displayError } from "./displayError";
 import { changePage } from "../../actions/navigation";
 import { fetchJSON } from "../../util/serverInteraction";
 import { charonAPIAddress } from "../../util/globals";
@@ -56,7 +55,18 @@ class Splash extends React.Component {
           {/* First: either display the error message or the intro-paragraph */}
           {this.props.errorMessage || this.state.errorMessage ? (
             <CenterContent>
-              {displayError(this.state.errorMessage || this.props.errorMessage)}
+              <div>
+                <p style={{color: "rgb(222, 60, 38)", fontWeight: 600, fontSize: "24px"}}>
+                  {"404 / an error has occured."}
+                </p>
+                <p style={{color: "rgb(222, 60, 38)", fontWeight: 400, fontSize: "18px"}}>
+                  {`Details: ${this.props.errorMessage || this.state.errorMessage}`}
+                </p>
+                <p style={{fontSize: "16px"}}>
+                  {"If this keeps happening, or you believe this is a bug, please "}
+                  <a href={"mailto:hello@nextstrain.org"}>{"get in contact with us."}</a>
+                </p>
+              </div>
             </CenterContent>
           ) : (
             <p style={{maxWidth: 600, marginTop: 0, marginRight: "auto", marginBottom: 20, marginLeft: "auto", textAlign: "center", fontSize: 16, fontWeight: 300, lineHeight: 1.42857143}}>
