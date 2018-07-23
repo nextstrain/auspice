@@ -3,27 +3,23 @@ import { connect } from "react-redux";
 import Flex from "../framework/flex";
 import SingleDataset from "./single";
 import { materialButton } from "../../globalStyles";
-import { getAvailableDatasets, getSource } from "../../actions/getAvailableDatasets";
 import { goTo404 } from "../../actions/navigation";
+import { fetchJSON } from "../../util/serverInteraction";
+import { charonAPIAddress } from "../../util/globals";
 
-@connect((state) => {
-  return {
-    available: state.datasets.available,
-    source: state.datasets.source
-  };
-})
+@connect()
 class Status extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {source: getSource()};
+    this.state = {source: undefined, available: undefined};
   }
   componentDidMount() {
-    if (!this.state.source) {
-      this.props.dispatch(goTo404("Couldn't identify source"));
-    }
-    if (this.props.source !== this.state.source) {
-      this.props.dispatch(getAvailableDatasets(this.state.source));
-    }
+    fetchJSON(`${charonAPIAddress}request=available&url=${window.location.pathname}`)
+      .then((json) => {this.setState(json);})
+      .catch((err) => {
+        console.warn(err);
+        this.props.dispatch(goTo404("Error getting available datasets"));
+      });
   }
   getBadges() {
     return (
@@ -41,7 +37,7 @@ class Status extends React.Component {
         </div>
         <div style={{flex: 1}}/>
         <div style={{fontSize: 18}}>
-          {`Status of available datasets for source "${this.props.source}"`}
+          {`Status of available datasets for source "${this.state.source}"`}
         </div>
         <div style={{flex: 3}}/>
         <div>
@@ -70,14 +66,14 @@ class Status extends React.Component {
   }
 
   render() {
-    if (this.props.source !== this.state.source) return null;
+    if (!this.state.source || !this.state.available) return null;
     return (
       <div style={{maxWidth: 1020, marginLeft: "auto", marginRight: "auto"}}>
 
         {this.getBadges()}
 
-        {this.props.available.map((fields) => {
-          const path = `/${this.props.source}/${fields.join("/")}`.replace(/\/+/, "/");
+        {this.state.available.map((fields) => {
+          const path = `/${this.state.source}/${fields.join("/")}`.replace(/\/+/, "/");
           return (<SingleDataset key={path} path={path}/>);
         })}
 

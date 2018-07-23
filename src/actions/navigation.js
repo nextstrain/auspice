@@ -27,8 +27,17 @@ export const getDatapath = (pathname, availableDatasets) => {
 };
 
 export const chooseDisplayComponentFromPathname = (pathname) => {
-  if (pathname === "/" || pathname === "/all") return "splash";
-  else if (pathname.startsWith("/status")) return "status";
+  const parts = pathname.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
+  if (
+    !parts.length ||
+    (parts.length === 1 && parts[0] === "local") ||
+    (parts.length === 1 && parts[0] === "staging") ||
+    (parts.length === 1 && parts[0] === "community")
+  ) {
+    return "splash";
+  } else if (parts[0] === "status") {
+    return "status";
+  }
   return "app"; // fallthrough
 };
 

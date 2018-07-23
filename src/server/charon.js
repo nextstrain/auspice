@@ -7,7 +7,7 @@ const path = require("path");
 const fs = require('fs');
 const fetch = require('node-fetch');
 const manifestHelpers = require("./manifestHelpers");
-
+const sourceSelect = require("./sourceSelect");
 
 const readFilePromise = (fileName) => {
   return new Promise((resolve, reject) => {
@@ -89,11 +89,15 @@ const applyCharonToApp = (app) => {
 
         break;
       } case "available": {
-        if (query.source === "local") res.json(global.LOCAL_MANIFEST);
-        else if (query.source === "/") res.json(global.LIVE_MANIFEST);
-        else {
-          console.log("AVAILABLE ERROR");
-          res.status(500).send('AVAILABLE ERROR');
+        const source = sourceSelect.getSource(query.url);
+        console.log("source = ", source);
+        if (source === "local" && global.LOCAL_MANIFEST) {
+          res.json({available: global.LOCAL_MANIFEST, source});
+        } else if (source === "live" && global.LIVE_MANIFEST) {
+          res.json({available: global.LIVE_MANIFEST, source});
+        } else {
+          console.log("ERROR: Couldn't send available datasets for source", source);
+          res.status(500).send('');
         }
         break;
       } default: {

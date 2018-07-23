@@ -4,10 +4,11 @@ import Title from "../framework/title";
 import NavBar from "../framework/nav-bar";
 import Flex from "../../components/framework/flex";
 import { logos } from "./logos";
-import { getAvailableDatasets, getSource } from "../../actions/getAvailableDatasets";
 import { CenterContent } from "./centerContent";
 import { displayError } from "./displayError";
-import { goTo404, changePage } from "../../actions/navigation";
+import { changePage } from "../../actions/navigation";
+import { fetchJSON } from "../../util/serverInteraction";
+import { charonAPIAddress } from "../../util/globals";
 
 const formatDataset = (fields, dispatch) => {
   const path = fields.join("/");
@@ -25,22 +26,20 @@ const formatDataset = (fields, dispatch) => {
 
 
 @connect((state) => ({
-  splash: state.datasets.splash,
-  available: state.datasets.available,
   errorMessage: state.datasets.errorMessage
 }))
 class Splash extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {source: getSource()};
+    this.state = {source: undefined, available: undefined, errorMessage: undefined};
   }
   componentDidMount() {
-    if (!this.state.source && !this.props.errorMessage) {
-      this.props.dispatch(goTo404("Couldn't identify source"));
-    }
-    if (this.props.source !== this.state.source) {
-      this.props.dispatch(getAvailableDatasets(this.state.source));
-    }
+    fetchJSON(`${charonAPIAddress}request=available&url=${window.location.pathname}`)
+      .then((json) => {this.setState(json);})
+      .catch((err) => {
+        this.setState({errorMessage: "Error in getting available datasets"});
+        console.warn(err);
+      });
   }
   render() {
     return (
@@ -55,9 +54,9 @@ class Splash extends React.Component {
             <h1 style={{textAlign: "center", marginTop: "-10px", fontSize: "29px"}}> Real-time tracking of virus evolution </h1>
           </div>
           {/* First: either display the error message or the intro-paragraph */}
-          {this.props.errorMessage ? (
+          {this.props.errorMessage || this.state.errorMessage ? (
             <CenterContent>
-              {displayError(this.props.errorMessage)}
+              {displayError(this.state.errorMessage || this.props.errorMessage)}
             </CenterContent>
           ) : (
             <p style={{maxWidth: 600, marginTop: 0, marginRight: "auto", marginBottom: 20, marginLeft: "auto", textAlign: "center", fontSize: 16, fontWeight: 300, lineHeight: 1.42857143}}>
@@ -66,14 +65,14 @@ class Splash extends React.Component {
           )}
           {/* Secondly, list the available datasets */}
           {
-            this.state.source && this.props.available ? (
+            this.state.source && this.state.available ? (
               <CenterContent>
                 <div>
                   <div style={{fontSize: "26px"}}>
                     {`Available Datasets for source ${this.state.source}`}
                   </div>
                   <ul style={{marginLeft: "-22px"}}>
-                    {this.props.available.map((data) => formatDataset(data, this.props.dispatch))}
+                    {this.state.available.map((data) => formatDataset(data, this.props.dispatch))}
                   </ul>
                 </div>
               </CenterContent>
