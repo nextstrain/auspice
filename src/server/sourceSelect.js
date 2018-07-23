@@ -63,6 +63,7 @@ const constructPathToGet = (source, url, jsonTypeWanted) => {
 
   return [
     urlPrefix + fields.join("/"),
+    fields,
     path.join(pathPrefix, fields.join("_")+suffix)
   ];
 };

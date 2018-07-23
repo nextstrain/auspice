@@ -375,10 +375,9 @@ const modifyControlsViaTreeToo = (controls, treeToo, name) => {
 export const createStateFromQueryOrJSONs = ({
   JSONs = false, /* raw json data - completely nuke existing redux state */
   oldState = false, /* existing redux state (instead of jsons) */
-  treeName = undefined,
   query
 }) => {
-  let tree, treeToo, entropy, controls, metadata, narrative;
+  let tree, treeToo, entropy, controls, metadata, narrative, available, treeName;
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (JSONs) {
     if (JSONs.narrative) narrative = JSONs.narrative;
@@ -406,6 +405,9 @@ export const createStateFromQueryOrJSONs = ({
     controls = getDefaultControlsState();
     controls = modifyStateViaTree(controls, tree, treeToo);
     controls = modifyStateViaMetadata(controls, metadata);
+    controls.available = metadata["_available"];
+    controls.source = metadata["_source"];
+    controls.datasetFields = metadata["_datasetFields"];
   } else if (oldState) {
     /* revisit this - but it helps prevent bugs */
     controls = {...oldState.controls};
@@ -472,10 +474,11 @@ export const createStateFromQueryOrJSONs = ({
   //   );
   // }
 
-  if (treeName) {
-    tree.name = treeName;
+  if (metadata["_treeName"]) {
+    tree.name = metadata["_treeName"];
   }
-  return {tree, treeToo, metadata, entropy, controls, narrative, query};
+  const url = metadata["_url"]; // injected by the server. Will be picked up by middleware.
+  return {tree, treeToo, metadata, entropy, controls, narrative, query, url};
 };
 
 export const createTreeTooState = ({

@@ -77,13 +77,13 @@ const fetchDataAndDispatch = (dispatch, datasets, query, s3bucket, narrativeJSON
   const apiPath = (jsonType) => `${charonAPIAddress}request=json&want=${requestJSONPath}&type=${jsonType}`;
 
 
-  const treeName = getSegmentName(datasets.datapath, datasets.availableDatasets);
+  // const treeName = getSegmentName(datasets.datapath, datasets.availableDatasets);
   if (query.tt) { /* SECOND TREE */
     console.warn("SECOND TREE TODO -- SERVER SHOULD ADD IT TO THE TREE/UNIFIED JSON");
   }
   Promise.all([fetch(apiPath("meta")).then((res) => res.json()), fetch(apiPath("tree")).then((res) => res.json())])
     .then((values) => {
-      const data = {JSONs: {meta: values[0], tree: values[1]}, query, treeName};
+      const data = {JSONs: {meta: values[0], tree: values[1]}, query};
       if (narrativeJSON) {
         data.JSONs.narrative = narrativeJSON;
       }

@@ -114,6 +114,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
 
   /* second switch: path change */
   switch (action.type) {
+    case types.CLEAN_START:
+      if (action.url) pathname = action.url;
+      break;
     case types.MANIFEST_RECEIVED:
       pathname = action.datapath.replace(/_/g, "/");
       break;

@@ -35,10 +35,10 @@ const applyCharonToApp = (app) => {
         globals.buildLiveManifest();
         break;
       } case "json": {
-        let pathname, idealUrl;
+        let pathname, idealUrl, datasetFields;
         const source = sourceSelect.getSource(query.want);
         try {
-          [idealUrl, pathname] = sourceSelect.constructPathToGet(source, query.want, query.type);
+          [idealUrl, datasetFields, pathname] = sourceSelect.constructPathToGet(source, query.want, query.type);
         } catch (e) {
           console.error("Problem parsing the query (didn't attempt to fetch)\n", e.message);
           res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
@@ -58,7 +58,8 @@ const applyCharonToApp = (app) => {
               json["_source"] = source;
               json["_treeName"] = sourceSelect.guessTreeName(idealUrl.split("/"));
               json["_url"] = idealUrl;
-              console.log("injected fields:", json["_source"], json["_treeName"], json["_url"]);
+              json["_datasetFields"] = datasetFields;
+              console.log("injected fields:", json["_source"], json["_treeName"], json["_url"], json["_datasetFields"]);
             }
             res.json(json);
           })

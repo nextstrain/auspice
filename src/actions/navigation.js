@@ -29,7 +29,7 @@ export const getDatapath = (pathname, availableDatasets) => {
 export const chooseDisplayComponentFromPathname = (pathname) => {
   const parts = pathname.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
   if (
-    !parts.length ||
+    !parts.length || (parts.length === 1 && parts[0] === "") ||
     (parts.length === 1 && parts[0] === "local") ||
     (parts.length === 1 && parts[0] === "staging") ||
     (parts.length === 1 && parts[0] === "community")

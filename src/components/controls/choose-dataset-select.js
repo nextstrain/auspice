@@ -1,5 +1,4 @@
 import React from "react";
-import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Select from "react-select";
 import { controlsWidth } from "../../util/globals";
@@ -7,19 +6,7 @@ import { changePage } from "../../actions/navigation";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 
-@connect() // to provide dispatch
 class ChooseDatasetSelect extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-  static propTypes = {
-    dispatch: PropTypes.func.isRequired,
-    selected: PropTypes.string.isRequired,
-    choice_tree: PropTypes.array,
-    title: PropTypes.string.isRequired,
-    options: PropTypes.array.isRequired
-  }
-
   getStyles() {
     return {
       base: {
@@ -33,6 +20,7 @@ class ChooseDatasetSelect extends React.Component {
   // downstream choices will be set to defaults in parseParams
   createDataPath(dataset) {
     let p = (this.props.choice_tree.length > 0) ? "/" : "";
+    p += this.props.source + "/"
     p += this.props.choice_tree.join("/") + "/" + dataset;
     return p;
   }
