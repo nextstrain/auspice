@@ -17,7 +17,9 @@ class ChooseDatasetSelect extends React.Component {
 
   createDataPath(dataset) {
     let p = (this.props.choice_tree.length > 0) ? "/" : "";
-    p += this.props.source + "/";
+    if (this.props.source !== "live") {
+      p += this.props.source + "/";
+    }
     p += this.props.choice_tree.join("/") + "/" + dataset;
     p = p.replace(/\/+/, "/");
     return p;

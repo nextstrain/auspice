@@ -1,5 +1,5 @@
-const path = require("path");
 const manifestHelpers = require("./manifestHelpers");
+const path = require("path");
 
 const urlToParts = (url, lower) => {
   if (lower) return url.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
@@ -9,14 +9,16 @@ const urlToParts = (url, lower) => {
 
 const getSource = (url) => {
   let parts = urlToParts(url, true);
-  if (parts[0] === "status") parts = parts.slice(1);
-  if (!parts.length) return "live";
-  switch (parts[0]) {
-    case "local": return "local";
-    case "staging": return "staging";
-    case "community": return "github";
-    default: return undefined;
+  if (parts[0] === "status") {
+    parts = parts.slice(1);
   }
+  if (!parts.length || (parts.length === 1 && parts[0] === '')) {
+    return "live";
+  }
+  if (parts[0] === "local") return "local";
+  else if (parts[0] === "staging") return "staging";
+  else if (parts[0] === "community") return "github";
+  return "live";
 };
 
 const collectDatasets = (source) => {
@@ -24,6 +26,8 @@ const collectDatasets = (source) => {
     return {available: global.LOCAL_MANIFEST, source};
   } else if (source === "live" && global.LIVE_MANIFEST) {
     return {available: global.LIVE_MANIFEST, source};
+  } else if (source === "staging" && global.STAGING_MANIFEST) {
+    return {available: global.STAGING_MANIFEST, source};
   }
   return undefined;
 };
@@ -61,10 +65,14 @@ const constructPathToGet = (source, url, jsonTypeWanted) => {
   }
   suffix += ".json";
 
+  const pathname = source === "local" ?
+    path.join(pathPrefix, fields.join("_")+suffix) :
+    pathPrefix + fields.join("_")+suffix;
+
   return [
     urlPrefix + fields.join("/"),
     fields,
-    path.join(pathPrefix, fields.join("_")+suffix)
+    pathname
   ];
 };
 

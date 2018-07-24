@@ -1,4 +1,6 @@
 /* eslint no-console: off */
+const fetch = require('node-fetch');
+const fs = require('fs');
 
 /* this function is only temporary (I hope!) */
 const oldToNew = (old) => {
@@ -19,7 +21,7 @@ const oldToNew = (old) => {
     }
     const orderedKeys = [defaultValue];
     keys.forEach((k) => {
-      if (obj[k] !== defaultValue && k !== "default") {
+      if (k !== defaultValue && k !== "default") {
         orderedKeys.push(k);
       }
     });
@@ -34,6 +36,48 @@ const oldToNew = (old) => {
   return allParts;
 };
 
+/* We need to get lists of files available...
+Option 1: crawl the directories (S3? local?)
+Option 2: fetch pre-generated files
+For option 2, we'd have to periodically update this... or have a API trigger
+*/
+const buildManifest = (dest) => {
+  if (dest === "local") {
+    /* currently only for version 1.0 JSONs... */
+    fs.readdir(global.LOCAL_DATA_PATH, (err, files) => {
+      if (err) {
+        console.log("ERROR. Failed to build local manifest.", err);
+        return;
+      }
+      const manifest = files
+        .filter((file) => file.endsWith("_tree.json"))
+        .map((file) => file.replace("_tree.json", "").split("_"));
+      global.LOCAL_MANIFEST = manifest;
+      console.log("Successfully created local manifest");
+    });
+    return;
+  }
+  let baseUrl;
+  if (dest === "live") {
+    baseUrl = global.REMOTE_DATA_LIVE_BASEURL;
+  } else if (dest === "staging") {
+    baseUrl = global.REMOTE_DATA_STAGING_BASEURL;
+  } else {
+    console.log("ERROR: unknown manifest type requested");
+    return;
+  }
+  fetch(baseUrl + "manifest_guest.json")
+    .then((result) => result.json())
+    .then((json) => {
+      const manifest = oldToNew(json);
+      if (dest === "live") global.LIVE_MANIFEST = manifest;
+      else global.STAGING_MANIFEST = manifest;
+      console.log(`Successfully created ${dest} manifest`);
+    })
+    .catch(() => {
+      console.log(`ERROR. Failed to build ${dest} manifest.`);
+    });
+};
 
 const checkFieldsAgainstManifest = (fields, source) => {
   const manifest = source === "local" ? global.LOCAL_MANIFEST :
@@ -69,5 +113,6 @@ const checkFieldsAgainstManifest = (fields, source) => {
 
 module.exports = {
   oldToNew,
-  checkFieldsAgainstManifest
+  checkFieldsAgainstManifest,
+  buildManifest
 };

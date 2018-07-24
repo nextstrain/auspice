@@ -11,10 +11,13 @@ export const chooseDisplayComponentFromURL = (url) => {
     (parts.length === 1 && parts[0] === "staging") ||
     (parts.length === 1 && parts[0] === "community")
   ) {
+    console.log("chooseDisplayComponentFromURL --> splash");
     return "splash";
   } else if (parts[0] === "status") {
+    console.log("chooseDisplayComponentFromURL --> status");
     return "status";
   }
+  console.log("chooseDisplayComponentFromURL --> app");
   return "app"; // fallthrough
 };
 
@@ -40,13 +43,15 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
     console.error("changePage called without a path");
     return;
   }
+  console.log("changePage", path)
   const displayComponent = chooseDisplayComponentFromURL(path);
   const { general } = getState();
   if (general.displayComponent === displayComponent && displayComponent === "app") {
+    /* we're not changing component, just changing the dataset */
     dispatch(loadJSONs({url: path}));
     return;
   }
-  const action = {type: PAGE_CHANGE, displayComponent, pushState: push};
+  const action = {type: PAGE_CHANGE, path, displayComponent, pushState: push};
   if (query !== undefined) { action.query = query; }
   dispatch(action);
 };

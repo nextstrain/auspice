@@ -9,21 +9,6 @@ import { changePage } from "../../actions/navigation";
 import { fetchJSON } from "../../util/serverInteraction";
 import { charonAPIAddress } from "../../util/globals";
 
-const formatDataset = (fields, dispatch) => {
-  const path = fields.join("/");
-  return (
-    <li key={path}>
-      <div
-        style={{color: "#5097BA", textDecoration: "none", cursor: "pointer", fontWeight: "400", fontSize: "94%"}}
-        onClick={() => dispatch(changePage({path: `/${path}`, push: true}))}
-      >
-        {path}
-      </div>
-    </li>
-  );
-};
-
-
 @connect((state) => ({
   errorMessage: state.general.message
 }))
@@ -39,6 +24,22 @@ class Splash extends React.Component {
         this.setState({errorMessage: "Error in getting available datasets"});
         console.warn(err);
       });
+  }
+  formatDataset(fields) {
+    let path = fields.join("/");
+    if (this.state.source !== "live") {
+      path = this.state.source + "/" + path;
+    }
+    return (
+      <li key={path}>
+        <div
+          style={{color: "#5097BA", textDecoration: "none", cursor: "pointer", fontWeight: "400", fontSize: "94%"}}
+          onClick={() => this.props.dispatch(changePage({path, push: true}))}
+        >
+          {path}
+        </div>
+      </li>
+    );
   }
   render() {
     return (
@@ -82,7 +83,7 @@ class Splash extends React.Component {
                     {`Available Datasets for source ${this.state.source}`}
                   </div>
                   <ul style={{marginLeft: "-22px"}}>
-                    {this.state.available.map((data) => formatDataset(data, this.props.dispatch))}
+                    {this.state.available.map((data) => this.formatDataset(data))}
                   </ul>
                 </div>
               </CenterContent>

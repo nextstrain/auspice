@@ -120,9 +120,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.PAGE_CHANGE:
       /* desired behaviour depends on the displayComponent selected... */
       if (action.displayComponent === "app") {
-        // pathname = action.datapath.replace(/_/g, "/");
+        pathname = action.path;
       } else if (action.displayComponent === "splash") {
-        pathname = "/";
+        pathname = action.path;
       } else if (pathname.startsWith(`/${action.displayComponent}`)) {
         // leave the pathname alone!
       } else {

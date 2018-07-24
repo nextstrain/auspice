@@ -1,10 +1,10 @@
 /* eslint no-console: off */
 const queryString = require("query-string");
-const globals = require("./globals");
 const serverNarratives = require('./narratives');
 const fs = require('fs');
 const fetch = require('node-fetch');
 const sourceSelect = require("./sourceSelect");
+const manifestHelpers = require("./manifestHelpers");
 
 const readFilePromise = (fileName) => {
   return new Promise((resolve, reject) => {
@@ -28,7 +28,9 @@ const applyCharonToApp = (app) => {
         serverNarratives.serveNarrative(query, res);
         break;
       } case "rebuildManifest": {
-        globals.buildLiveManifest();
+        manifestHelpers.buildManifest("local");
+        manifestHelpers.buildManifest("live");
+        manifestHelpers.buildManifest("staging");
         break;
       } case "json": {
         let pathname, idealUrl, datasetFields;
@@ -40,9 +42,8 @@ const applyCharonToApp = (app) => {
           res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
           break;
         }
-        console.log("-------pathname", pathname);
+        console.log(`-------pathname ${pathname}`);
         const promise = source === "local" ? readFilePromise : fetch;
-
         promise(pathname)
           .then((result) => {
             return typeof result === "string" ? JSON.parse(result) : result.json();
