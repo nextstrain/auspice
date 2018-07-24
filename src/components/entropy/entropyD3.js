@@ -111,6 +111,7 @@ EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
 EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   this.geneGraph.selectAll("*").remove();
   const geneHeight = 20; // 20;
+  // Can we plot this differently if all genes are +1 strand - so gap isn't there?
   const readingFrameOffset = (frame) => frame===-1 ? 20 : 0; // 5*frame; // eslint-disable-line no-unused-vars
   const visibleAnnots = annotations.filter((annot) => /* try to prevent drawing genes if not visible */
     (annot.start < this.scales.xGene.domain()[1] && annot.start > this.scales.xGene.domain()[0]) ||
@@ -138,13 +139,17 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
     .attr("dy", ".7em")
     .attr("text-anchor", "middle")
     .style("fill", () => "white")
-    .text((d) => d.prot);
+    .text((d) => (endG(d)-startG(d)) > 15 ? d.prot : ""); /* only print labels if gene large enough to see */
 };
 
 /* draw the genes (annotations) */
 EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
   const geneHeight = 20;
   const readingFrameOffset = (frame) => 5; // eslint-disable-line no-unused-vars
+  const posInView = this.scales.xMain.domain()[1] - this.scales.xMain.domain()[0];
+  const strokeCol = posInView < 1e6 ? "white" : "black";
+  const startG = (d) => d.start > this.scales.xGene.domain()[0] ? this.scales.xGene(d.start) : this.offsets.x1;
+  const endG = (d) => d.end < this.scales.xGene.domain()[1] ? this.scales.xGene(d.end) : this.offsets.x2;
   const selection = this.navGraph.selectAll(".gene")
     .data(annotations)
     .enter()
@@ -156,7 +161,7 @@ EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
     .attr("width", (d) => this.scales.xNav(d.end) - this.scales.xNav(d.start))
     .attr("height", geneHeight)
     .style("fill", (d) => d.fill)
-    .style("stroke", () => "white");
+    .style("stroke", () => strokeCol);
   selection.append("text")
     .attr("x", (d) =>
       this.scales.xNav(d.start) + (this.scales.xNav(d.end) - this.scales.xNav(d.start)) / 2
@@ -165,7 +170,8 @@ EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
     .attr("dy", ".7em")
     .attr("text-anchor", "middle")
     .style("fill", () => "white")
-    .text((d) => d.prot);
+    /* this makes 2K gene in zika not show up!! */
+    .text((d) => (endG(d)-startG(d)) > 10 ? d.prot : ""); /* only print labels if gene large enough to see */
 };
 
 /* clearSelectedBar works on SVG id tags, not on this.selected */
