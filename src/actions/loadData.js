@@ -1,4 +1,5 @@
 import queryString from "query-string";
+
 import * as types from "./types";
 import { charonAPIAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
@@ -7,29 +8,28 @@ import { loadFrequencies } from "./frequencies";
 import { fetchJSON } from "../util/serverInteraction";
 
 const fetchDataAndDispatch = (dispatch, url, query) => {
-  const apiPath = (jsonType) => `${charonAPIAddress}request=json&url=${url}&type=${jsonType}`;
-
-
   // const treeName = getSegmentName(datasets.datapath, datasets.availableDatasets);
   if (query.tt) { /* SECOND TREE */
-    console.warn("SECOND TREE TODO -- SERVER SHOULD ADD IT TO THE TREE/UNIFIED JSON");
+    console.warn("DEPRECATED SECOND TREE VIA tt= -- ADD NOTIFICATION");
   }
-  Promise.all([fetchJSON(apiPath("meta")), fetchJSON(apiPath("tree"))])
-    .then((values) => {
-      const data = {JSONs: {meta: values[0], tree: values[1]}, query};
+  fetchJSON(`${charonAPIAddress}request=mainJSON&url=${url}`)
+    .then((json) => {
       // if (narrativeJSON) {
       //   data.JSONs.narrative = narrativeJSON;
       // }
       dispatch({
         type: types.CLEAN_START,
-        ...createStateFromQueryOrJSONs(data)
+        ...createStateFromQueryOrJSONs({json, query})
       });
-      return {frequencies: (data.JSONs.meta.panels && data.JSONs.meta.panels.indexOf("frequencies") !== -1)};
+      return {
+        frequencies: (json.meta.panels && json.meta.panels.indexOf("frequencies") !== -1),
+        datasetFields: json["_datasetFields"],
+        source: json["_source"]
+      };
     })
     .then((result) => {
       if (result.frequencies === true) {
-        fetch(apiPath("tip-frequencies"))
-          .then((res) => res.json())
+        fetchJSON(`${charonAPIAddress}request=additionalJSON&source=${result.source}&url=${result.datasetFields.join("/")}&type=tip-frequencies`)
           .then((res) => dispatch(loadFrequencies(res)))
           .catch((err) => console.error("Frequencies failed to fetch", err.message));
       }

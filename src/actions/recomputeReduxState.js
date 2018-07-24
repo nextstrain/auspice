@@ -373,16 +373,16 @@ const modifyControlsViaTreeToo = (controls, treeToo, name) => {
 };
 
 export const createStateFromQueryOrJSONs = ({
-  JSONs = false, /* raw json data - completely nuke existing redux state */
+  json = false, /* raw json data - completely nuke existing redux state */
   oldState = false, /* existing redux state (instead of jsons) */
   query
 }) => {
-  let tree, treeToo, entropy, controls, metadata, narrative, available, treeName;
+  let tree, treeToo, entropy, controls, metadata, narrative;
   /* first task is to create metadata, entropy, controls & tree partial state */
-  if (JSONs) {
-    if (JSONs.narrative) narrative = JSONs.narrative;
+  if (json) {
+    // if (JSONs.narrative) narrative = JSONs.narrative; // TODO reinstate
     /* create metadata state */
-    metadata = JSONs.meta;
+    metadata = json.meta;
     if (metadata === undefined) {
       metadata = {};
     }
@@ -395,19 +395,19 @@ export const createStateFromQueryOrJSONs = ({
     /* entropy state */
     entropy = entropyCreateStateFromJsons(metadata);
     /* new tree state(s) */
-    tree = treeJsonToState(JSONs.tree, metadata.vaccine_choices);
+    tree = treeJsonToState(json.tree, metadata.vaccine_choices);
     tree.debug = "LEFT";
-    if (JSONs.treeToo) {
-      treeToo = treeJsonToState(JSONs.treeToo, metadata.vaccine_choices);
+    if (json.treeToo) {
+      treeToo = treeJsonToState(json.treeToo, metadata.vaccine_choices);
       treeToo.debug = "RIGHT";
     }
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
     controls = modifyStateViaTree(controls, tree, treeToo);
     controls = modifyStateViaMetadata(controls, metadata);
-    controls.available = metadata["_available"];
-    controls.source = metadata["_source"];
-    controls.datasetFields = metadata["_datasetFields"];
+    controls.available = json["_available"];
+    controls.source = json["_source"];
+    controls.datasetFields = json["_datasetFields"];
   } else if (oldState) {
     /* revisit this - but it helps prevent bugs */
     controls = {...oldState.controls};
@@ -434,7 +434,7 @@ export const createStateFromQueryOrJSONs = ({
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  if (JSONs || controls.colorBy !== oldState.colorBy) {
+  if (json || controls.colorBy !== oldState.colorBy) {
     const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
     const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;
@@ -474,10 +474,10 @@ export const createStateFromQueryOrJSONs = ({
   //   );
   // }
 
-  if (metadata["_treeName"]) {
-    tree.name = metadata["_treeName"];
+  if (json["_treeName"]) {
+    tree.name = json["_treeName"];
   }
-  const url = metadata["_url"]; // injected by the server. Will be picked up by middleware.
+  const url = json["_url"]; // injected by the server. Will be picked up by middleware.
   return {tree, treeToo, metadata, entropy, controls, narrative, query, url};
 };
 

@@ -1,18 +1,10 @@
 /* eslint no-console: off */
 const queryString = require("query-string");
 const serverNarratives = require('./narratives');
-const fs = require('fs');
-const fetch = require('node-fetch');
 const sourceSelect = require("./sourceSelect");
 const manifestHelpers = require("./manifestHelpers");
-
-const readFilePromise = (fileName) => {
-  return new Promise((resolve, reject) => {
-    fs.readFile(fileName, 'utf8', (err, data) => {
-      err ? reject(err) : resolve(data);
-    });
-  });
-};
+const fetchV1JSONs = require("./fetchV1JSONs");
+const promises = require("./promises");
 
 
 const applyCharonToApp = (app) => {
@@ -32,40 +24,65 @@ const applyCharonToApp = (app) => {
         manifestHelpers.buildManifest("live");
         manifestHelpers.buildManifest("staging");
         break;
-      } case "json": {
+      } case "mainJSON": {
         let pathname, idealUrl, datasetFields;
         const source = sourceSelect.getSource(query.url);
         try {
-          [idealUrl, datasetFields, pathname] = sourceSelect.constructPathToGet(source, query.url, query.type);
+          [idealUrl, datasetFields, pathname] = sourceSelect.constructPathToGet(source, query.url, undefined);
         } catch (e) {
           console.error("Problem parsing the query (didn't attempt to fetch)\n", e.message);
           res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
           break;
         }
-        console.log(`-------pathname ${pathname}`);
-        const promise = source === "local" ? readFilePromise : fetch;
+        console.log(`\tpathname ${pathname}`);
+        const datasets = sourceSelect.collectDatasets(source);
+
+        const toInject = {
+          _available: datasets.available,
+          _source: source,
+          _treeName: sourceSelect.guessTreeName(idealUrl.split("/")),
+          _url: idealUrl,
+          _datasetFields: datasetFields
+        };
+
+        const errorHandler = (err) => {
+          console.log(`ERROR. ${pathname} --> ${err.type}`);
+          console.log("\t", err.message);
+          res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
+        };
+
+        /* first attempt is to load the "unified" JSON */
+        const promise = source === "local" ? promises.readFilePromise : promises.fetchJSON;
         promise(pathname)
-          .then((result) => {
-            return typeof result === "string" ? JSON.parse(result) : result.json();
-          })
           .then((json) => {
-            if (query.type === "meta") {
-              const datasets = sourceSelect.collectDatasets(source);
-              json["_available"] = datasets.available;
-              json["_source"] = source;
-              json["_treeName"] = sourceSelect.guessTreeName(idealUrl.split("/"));
-              json["_url"] = idealUrl;
-              json["_datasetFields"] = datasetFields;
-              console.log("injected fields:", json["_source"], json["_treeName"], json["_url"], json["_datasetFields"]);
+            for (const field in toInject) { // eslint-disable-line
+              json[field] = toInject[field];
             }
             res.json(json);
           })
-          .catch((err) => {
-            console.log(`ERROR. ${pathname} --> ${err.type}`);
-            console.log("\t", err.message);
+          .catch(() => {
+            console.log("\tFailed to fetch unified JSON for", pathname, "trying for v1...");
+            fetchV1JSONs.fetchTreeAndMetaJSONs(res, source, pathname, toInject, errorHandler);
+          });
+        break;
+      } case "additionalJSON": {
+        const promise = query.source === "local" ? promises.readFilePromise : promises.fetchJSON;
+        let url = query.url;
+        if (query.source !== "live") {
+          /* this might need to be turned into a function // constructPathToGet improved */
+          url = query.source + "/" + url;
+        }
+        let [idealUrl, datasetFields, pathname] = sourceSelect.constructPathToGet(query.source, url, undefined);
+        pathname = pathname.replace(".json", "_"+query.type+".json");
+
+        promise(pathname)
+          .then((json) => {
+            res.json(json);
+          })
+          .catch(() => {
+            console.log(`\tFailed to fetch ${query.type} JSON for ${url}`);
             res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
           });
-
         break;
       } case "available": {
         const source = sourceSelect.getSource(query.url);

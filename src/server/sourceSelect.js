@@ -37,18 +37,18 @@ const constructPathToGet = (source, url, jsonTypeWanted) => {
   const lowerParts = parts.map((p) => p.toLowerCase());
   let pathPrefix, fields, urlPrefix;
 
-  if (lowerParts[0] === "local") {
+  if (source === "local") {
     pathPrefix = global.LOCAL_DATA_PATH;
     urlPrefix = "local/";
     fields = manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(1), source);
-  } else if (lowerParts[0] === "community") {
+  } else if (source === "github") {
     if (parts.length < 3) {
       throw new Error("Community URLs must be of format community/githubOrgName/repoName/...");
     }
     pathPrefix = `https://rawgit.com/${parts[1]}/${parts[2]}/master/auspice/`;
     urlPrefix = `community/${parts[1]}/${parts[2]}/`;
     fields = lowerParts.slice(2);
-  } else if (lowerParts[0] === "staging") {
+  } else if (source === "staging") {
     pathPrefix = global.REMOTE_DATA_STAGING_BASEURL;
     urlPrefix = "";
     fields = manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(1), source);
