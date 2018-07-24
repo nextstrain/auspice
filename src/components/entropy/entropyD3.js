@@ -2,6 +2,7 @@
 import { select, event as d3event } from "d3-selection";
 import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
+import { format } from "d3-format";
 import { zoom } from "d3-zoom";
 import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
@@ -37,6 +38,7 @@ EntropyChart.prototype.render = function render(props) {
   this._addBrush();
   this._addClipMask();
   this._drawGenes(this.annotations);
+  this._drawZoomGenes(this.annotations);
   this.okToDrawBars = true;
   this._drawBars();
   this.zoomed = this._createZoomFn();
@@ -103,6 +105,37 @@ EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
   is not in the entropy data as it has no variation */
   // console.log("get selected nodes returning", selectedNodes)
   return selectedNodes;
+};
+
+/* draw the genes Nav2 (annotations) */
+EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
+  this.navGraph2.selectAll("*").remove();
+  const geneHeight = 20;
+  const readingFrameOffset = (frame) => 5; // eslint-disable-line no-unused-vars
+  const visibleAnnots = annotations.filter((annot) => /* try to prevent drawing genes if not visible */
+    annot.start > this.scales.xGene.domain()[0] &&
+    annot.end < this.scales.xGene.domain()[1]);
+  const selection = this.navGraph2.selectAll(".gene")
+    .data(visibleAnnots)
+    .enter()
+    .append("g");
+  selection.append("rect")
+    .attr("class", "gene")
+    .attr("x", (d) => this.scales.xGene(d.start))
+    .attr("y", (d) => readingFrameOffset(d.readingFrame))
+    .attr("width", (d) => this.scales.xGene(d.end) - this.scales.xGene(d.start))
+    .attr("height", geneHeight)
+    .style("fill", (d) => d.fill)
+    .style("stroke", () => "black");
+  selection.append("text")
+    .attr("x", (d) =>
+      this.scales.xGene(d.start) + (this.scales.xGene(d.end) - this.scales.xGene(d.start)) / 2
+    )
+    .attr("y", (d) => readingFrameOffset(d.readingFrame) + 5)
+    .attr("dy", ".7em")
+    .attr("text-anchor", "middle")
+    .style("fill", () => "white")
+    .text((d) => d.prot);
 };
 
 /* draw the genes (annotations) */
@@ -215,6 +248,10 @@ EntropyChart.prototype._setScales = function _setScales(xMax, yMax) {
   this.scales.xNav = scaleLinear()
     .domain([0, xMax])
     .range([this.offsets.x1, this.offsets.x2]);
+  this.scales.xGeneOriginal = scaleLinear()
+    .domain([0, xMax])
+    .range([this.offsets.x1, this.offsets.x2]);
+  this.scales.xGene = this.scales.xGeneOriginal;
   this.scales.y = scaleLinear()
     .domain([this.scales.yMin, 1.2 * yMax])
     .range([this.offsets.y2Main, this.offsets.y1Main]);
@@ -224,7 +261,12 @@ EntropyChart.prototype._drawAxes = function _drawAxes() {
   this.axes = {};
   this.axes.y = axisLeft(this.scales.y).ticks(4);
   this.axes.xMain = axisBottom(this.scales.xMain).ticks(20);
-  this.axes.xNav = axisBottom(this.scales.xNav).ticks(20);
+  this.axes.xNav = axisBottom(this.scales.xNav).ticks(20, ",f");
+  const visPos = this.scales.xNav.domain()[1] - this.scales.xGene.domain()[0];
+  if (visPos > 1e6) {   /* axes number differently if large genome */
+    this.axes.xNav.tickFormat(format(".1e"));
+  }
+  // this.axes.xGene = axisBottom(this.scales.xGene).ticks(20);
 
   this.svg.append("g")
     .attr("class", "y axis")
@@ -240,6 +282,10 @@ EntropyChart.prototype._drawAxes = function _drawAxes() {
     .attr("class", "xNav axis")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y2Nav + ")")
     .call(this.axes.xNav);
+  /* this.svg.append("g")
+    .attr("class", "xGene axis")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y2Nav2 + ")")
+    .call(this.axes.xGene);  */
 };
 
 EntropyChart.prototype._updateYScaleAndAxis = function _updateYScaleAndAxis(yMax) {
@@ -265,12 +311,15 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
     x1: 15,
     x2: width - 32,
     y1Main: 0, /* remember y1 is the top, y2 is the bottom, measured going down */
-    y1Nav: height - 80,
-    y2Main: height - 100,
-    y2Nav: height - 50
+    y1Nav: height - 70, /* 100, to be first */ /* 80, */
+    y2Main: height - 120, /* - 100, */
+    y2Nav: height - 40, /* 70, to be first */ /* 50, */
+    y1Nav2: height - 100, /* 40, to be second */
+    y2Nav2: height - 80 /* 10 to be second */
   };
   this.offsets.heightMain = this.offsets.y2Main - this.offsets.y1Main;
   this.offsets.heightNav = this.offsets.y2Nav - this.offsets.y1Nav;
+  this.offsets.heightNav2 = this.offsets.y2Nav2 - this.offsets.y1Nav2;
   this.offsets.width = this.offsets.x2 - this.offsets.x1;
 };
 
@@ -282,8 +331,12 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
     this.xModified = this.scales.xMain.domain(s.map(this.scales.xNav.invert, this.scales.xNav));
     this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
+    this.xGeneModified = this.scales.xGene.domain(s.map(this.scales.xNav.invert, this.scales.xNav));
+    /* this.axes.xGene = this.axes.xGene.scale(this.scales.xGene);
+    this.svg.select(".xGene.axis").call(this.axes.xGene); */
     this.svg.select(".xMain.axis").call(this.axes.xMain);
     this._drawBars();
+    this._drawZoomGenes(this.annotations);
     if (this.brushHandle) {
       this.brushHandle
         .attr("display", null)
@@ -359,6 +412,12 @@ EntropyChart.prototype._createZoomFn = function _createZoomFn() {
     this.svg.select(".xMain.axis").call(this.axes.xMain);
     this._drawBars();
 
+    const t2 = d3event.transform;
+    this.xGeneModified = t2.rescaleX(this.scales.xGeneOriginal);
+    this.axes.xGene = this.axes.xGene.scale(this.scales.xGene);
+    this.svg.select(".xGene.axis").call(this.axes.xGene);
+    this._drawZoomGenes(this.annotations);
+
     /* move the brush */
     this.navGraph.select(".brush")
       .call(this.brush.move, () => {
@@ -375,6 +434,9 @@ EntropyChart.prototype._drawMainNavElements = function _drawMainNavElements() {
   this.navGraph = this.svg.append("g")
     .attr("class", "nav")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Nav + ")");
+  this.navGraph2 = this.svg.append("g")
+    .attr("class", "nav2")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Nav2 + ")");
 };
 
 EntropyChart.prototype._addClipMask = function _addClipMask() {
