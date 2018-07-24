@@ -359,7 +359,7 @@ const removePanelIfPossible = (panels, name) => {
   }
 };
 
-const modifyControlsViaTreeToo = (controls, treeToo, name) => {
+const modifyControlsViaTreeToo = (controls, name) => {
   controls.showTreeToo = name;
   controls.showTangle = true;
   controls.layout = "rect"; /* must be rectangular for two trees */
@@ -397,9 +397,10 @@ export const createStateFromQueryOrJSONs = ({
     /* new tree state(s) */
     tree = treeJsonToState(json.tree, metadata.vaccine_choices);
     tree.debug = "LEFT";
-    if (json.treeToo) {
-      treeToo = treeJsonToState(json.treeToo, metadata.vaccine_choices);
+    if (json.treeTwo) {
+      treeToo = treeJsonToState(json.treeTwo, metadata.vaccine_choices);
       treeToo.debug = "RIGHT";
+      treeToo.name = json._treeTwoName;
     }
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
@@ -448,7 +449,7 @@ export const createStateFromQueryOrJSONs = ({
     treeToo.nodeColorsVersion = tree.nodeColorsVersion;
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
     treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, controls);
-    controls = modifyControlsViaTreeToo(controls, treeToo, query.tt);
+    controls = modifyControlsViaTreeToo(controls, treeToo.name);
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
   }
 
@@ -492,7 +493,7 @@ export const createTreeTooState = ({
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo.debug = "RIGHT";
   controls = modifyStateViaTree(controls, oldState.tree, treeToo);
-  controls = modifyControlsViaTreeToo(controls, treeToo, segment);
+  controls = modifyControlsViaTreeToo(controls, segment);
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, controls);
 
   /* calculate colours if loading from JSONs or if the query demands change */

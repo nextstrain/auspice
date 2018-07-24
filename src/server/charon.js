@@ -25,44 +25,56 @@ const applyCharonToApp = (app) => {
         manifestHelpers.buildManifest("staging");
         break;
       } case "mainJSON": {
-        let pathname, idealUrl, datasetFields;
         const source = sourceSelect.getSource(query.url);
+        let paths;
         try {
-          [idealUrl, datasetFields, pathname] = sourceSelect.constructPathToGet(source, query.url, undefined);
+          paths = sourceSelect.constructPathToGet(source, query.url);
         } catch (e) {
-          console.error("Problem parsing the query (didn't attempt to fetch)\n", e.message);
+          console.error("Problem parsing the URL (didn't attempt to fetch)\n", e.message);
           res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
           break;
         }
-        console.log(`\tpathname ${pathname}`);
+        console.log(`\tfetches: ${paths.fetchURL} ${paths.secondTreeFetchURL}`);
         const datasets = sourceSelect.collectDatasets(source);
 
+        /* what fields should be added to the JSON */
         const toInject = {
           _available: datasets.available,
           _source: source,
-          _treeName: sourceSelect.guessTreeName(idealUrl.split("/")),
-          _url: idealUrl,
-          _datasetFields: datasetFields
+          _treeName: paths.treeName,
+          _url: paths.auspiceURL,
+          _datasetFields: paths.datasetFields
         };
+        if (paths.treeTwoName) {
+          toInject._treeTwoName = paths.treeTwoName;
+        }
 
         const errorHandler = (err) => {
-          console.log(`ERROR. ${pathname} --> ${err.type}`);
+          console.log(`ERROR. ${paths.fetchURL} --> ${err.type}`);
           console.log("\t", err.message);
           res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
         };
-
+        console.log("constructPathToGet -->", paths);
         /* first attempt is to load the "unified" JSON */
-        const promise = source === "local" ? promises.readFilePromise : promises.fetchJSON;
-        promise(pathname)
-          .then((json) => {
+        const p = source === "local" ? promises.readFilePromise : promises.fetchJSON;
+        const pArr = [p(paths.fetchURL)];
+        if (paths.secondTreeFetchURL) {
+          pArr.push(p(paths.secondTreeFetchURL));
+        }
+        Promise.all(pArr)
+          .then((jsons) => {
+            const json = jsons[0]; // first is always the main JSON
             for (const field in toInject) { // eslint-disable-line
               json[field] = toInject[field];
+            }
+            if (paths.secondTreeFetchURL) {
+              json.treeTwo = jsons[1].tree;
             }
             res.json(json);
           })
           .catch(() => {
-            console.log("\tFailed to fetch unified JSON for", pathname, "trying for v1...");
-            fetchV1JSONs.fetchTreeAndMetaJSONs(res, source, pathname, toInject, errorHandler);
+            console.log("\tFailed to fetch unified JSON for", paths.fetchURL, "trying for v1...");
+            fetchV1JSONs.fetchTreeAndMetaJSONs(res, source, paths.fetchURL, paths.secondTreeFetchURL, toInject, errorHandler);
           });
         break;
       } case "additionalJSON": {
@@ -72,12 +84,15 @@ const applyCharonToApp = (app) => {
           /* this might need to be turned into a function // constructPathToGet improved */
           url = query.source + "/" + url;
         }
-        let [idealUrl, datasetFields, pathname] = sourceSelect.constructPathToGet(query.source, url, undefined);
-        pathname = pathname.replace(".json", "_"+query.type+".json");
+        const paths = sourceSelect.constructPathToGet(query.source, url, undefined);
+        paths.fetchURL = paths.fetchURL.replace(".json", "_"+query.type+".json");
 
-        promise(pathname)
+        promise(paths.fetchURL)
           .then((json) => {
-            res.json(json);
+            if (query.type === "tree") {
+              return res.json({tree: json});
+            }
+            return res.json(json);
           })
           .catch(() => {
             console.log(`\tFailed to fetch ${query.type} JSON for ${url}`);

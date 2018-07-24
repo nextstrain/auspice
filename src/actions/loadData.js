@@ -74,19 +74,12 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
   };
 };
 
-export const loadTreeToo = (name, path) => (dispatch, getState) => {
-  console.log("loadTreeToo not yet implemented");
-  // const { datasets } = getState();
-  // const apiCall = `${charonAPIAddress}request=json&path=${path}_tree.json`;
-  // fetch(apiCall)
-  //   .then((res) => res.json())
-  //   .then((res) => {
-  //     const newState = createTreeTooState(
-  //       {treeTooJSON: res, oldState: getState(), segment: name}
-  //     );
-  //     dispatch({ type: types.TREE_TOO_DATA, treeToo: newState.treeToo, controls: newState.controls, segment: name});
-  //   })
-  //   .catch((err) => {
-  //     console.error("Error while loading second tree", err);
-  //   });
+export const loadTreeToo = (name, fields) => (dispatch, getState) => {
+  const oldState = getState();
+  fetchJSON(`${charonAPIAddress}request=additionalJSON&source=${oldState.controls.source}&url=${fields.join("/")}&type=tree`)
+    .then((json) => {
+      const newState = createTreeTooState({treeTooJSON: json.tree, oldState, segment: name});
+      dispatch({type: types.TREE_TOO_DATA, treeToo: newState.treeToo, controls: newState.controls, segment: name});
+    })
+    .catch((err) => console.error("Failed to fetch additional tree", err.message));
 };

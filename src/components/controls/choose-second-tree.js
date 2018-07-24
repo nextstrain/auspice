@@ -27,7 +27,7 @@ class ChooseSecondTree extends React.Component {
       if (dataset.length !== this.props.datasetFields.length) return false;
       for (let i=0; i<dataset.length; i++) {
         if (i===idxOfTree) {
-          if (dataset[i] !== this.props.datasetFields[i]) {
+          if (dataset[i] === this.props.datasetFields[i]) {
             return false; // don't match the same tree name
           }
         } else if (dataset[i] !== this.props.datasetFields[i]) {

@@ -38,14 +38,6 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query[`f_${action.fields}`] = action.values.join(',');
       break;
     }
-    case types.REMOVE_TREE_TOO: {
-      query.tt = undefined;
-      break;
-    }
-    case types.TREE_TOO_DATA: {
-      query.tt = action.segment;
-      break;
-    }
     case types.CHANGE_LAYOUT: {
       query.l = action.data === state.controls.defaults.layout ? undefined : action.data;
       break;
@@ -129,6 +121,25 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         pathname = action.displayComponent;
       }
       break;
+    case types.REMOVE_TREE_TOO: // fallthrough
+    case types.TREE_TOO_DATA: {
+      const fields = pathname.split("/");
+      let treeIdx;
+      fields.forEach((f, i) => {
+        if (f === state.tree.name || f.startsWith(state.tree.name+"-")) {
+          treeIdx = i;
+        }
+      });
+      if (!treeIdx) {
+        console.warn("Couldn't work out tree name in URL!");
+        break;
+      }
+      fields[treeIdx] = action.type === types.TREE_TOO_DATA ?
+        `${fields[treeIdx].split("-")[0]}-${action.segment}` :
+        fields[treeIdx].split("-")[0];
+      pathname = fields.join("/");
+      break;
+    }
     default:
       break;
   }

@@ -32,49 +32,6 @@ const collectDatasets = (source) => {
   return undefined;
 };
 
-const constructPathToGet = (source, url, jsonTypeWanted) => {
-  const parts = url.replace(/^\//, '').replace(/\/$/, '').split("/");
-  const lowerParts = parts.map((p) => p.toLowerCase());
-  let pathPrefix, fields, urlPrefix;
-
-  if (source === "local") {
-    pathPrefix = global.LOCAL_DATA_PATH;
-    urlPrefix = "local/";
-    fields = manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(1), source);
-  } else if (source === "github") {
-    if (parts.length < 3) {
-      throw new Error("Community URLs must be of format community/githubOrgName/repoName/...");
-    }
-    pathPrefix = `https://rawgit.com/${parts[1]}/${parts[2]}/master/auspice/`;
-    urlPrefix = `community/${parts[1]}/${parts[2]}/`;
-    fields = lowerParts.slice(2);
-  } else if (source === "staging") {
-    pathPrefix = global.REMOTE_DATA_STAGING_BASEURL;
-    urlPrefix = "";
-    fields = manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(1), source);
-  } else {
-    /* default is via global.REMOTE_DATA_LIVE_BASEURL (for nextstrain.org, this is the data.nextstrain S3 bucket) */
-    pathPrefix = global.REMOTE_DATA_LIVE_BASEURL;
-    urlPrefix = "";
-    fields = manifestHelpers.checkFieldsAgainstManifest(lowerParts, source);
-  }
-
-  let suffix = "";
-  if (jsonTypeWanted) {
-    suffix += "_" + jsonTypeWanted;
-  }
-  suffix += ".json";
-
-  const pathname = source === "local" ?
-    path.join(pathPrefix, fields.join("_")+suffix) :
-    pathPrefix + fields.join("_")+suffix;
-
-  return [
-    urlPrefix + fields.join("/"),
-    fields,
-    pathname
-  ];
-};
 
 const guessTreeName = (parts) => {
   const guesses = ["HA", "NA", "PB1", "PB2", "PA", "NP", "NS", "MP", "L", "S"];
@@ -83,6 +40,78 @@ const guessTreeName = (parts) => {
   }
   return undefined;
 };
+
+const constructPathToGet = (source, providedUrl) => {
+  /* the path is lowercased _except for_ the github org & repo names */
+  let auspiceURL; // the URL to be displayed in Auspice
+  let fetchURL; // could be local path or http(s)://
+  let secondTreeFetchURL;
+  let datasetFields; // this _does not_ take into account the 2nd tree
+  let treeName;
+
+  const parts = providedUrl.replace(/^\//, '').replace(/\/$/, '').split("/");
+  const makeLower = (arr) => arr.map((x) => x.toLowerCase());
+
+  /* does the URL specify two trees? */
+  let treeTwoName;
+  for (let i=0; i<parts.length; i++) {
+    if (parts[i].indexOf("-") !== -1) {
+      [treeName, treeTwoName] = parts[i].split("-");
+      parts[i] = treeName; // only use the first tree from now on
+      break;
+    }
+  }
+  if (!treeName) {
+    treeName = guessTreeName(parts);
+  }
+
+
+  if (source === "local") {
+    if (parts[0].toLowerCase() !== "local") {
+      parts.unshift("local");
+    }
+    auspiceURL = "local/";
+    datasetFields = manifestHelpers.checkFieldsAgainstManifest(makeLower(parts).slice(1), source);
+    fetchURL = global.LOCAL_DATA_PATH;
+  // } else if (source === "github") {
+  //   if (parts.length < 3) {
+  //     throw new Error("Community URLs must be of format community/githubOrgName/repoName/...");
+  //   }
+  //   pathPrefix = `https://rawgit.com/${parts[1]}/${parts[2]}/master/auspice/`;
+  //   urlPrefix = `community/${parts[1]}/${parts[2]}/`;
+  //   fields = lowerParts.slice(2);
+  // } else if (source === "staging") {
+  //   pathPrefix = global.REMOTE_DATA_STAGING_BASEURL;
+  //   urlPrefix = "";
+  //   fields = manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(1), source);
+  // } else {
+  //   /* default is via global.REMOTE_DATA_LIVE_BASEURL (for nextstrain.org, this is the data.nextstrain S3 bucket) */
+  //   pathPrefix = global.REMOTE_DATA_LIVE_BASEURL;
+  //   urlPrefix = "";
+  //   fields = manifestHelpers.checkFieldsAgainstManifest(lowerParts, source);
+  // }
+  } else {
+    console.log("not yet done");
+  }
+
+  if (treeTwoName) {
+    const treeIdx = datasetFields.indexOf(treeName);
+    const fieldsTT = datasetFields.slice();
+    fieldsTT[treeIdx] = treeTwoName;
+    secondTreeFetchURL = fetchURL + "/" + fieldsTT.join("_") + ".json";
+
+    const fieldsAus = datasetFields.slice();
+    fieldsAus[treeIdx] = `${treeName}-${treeTwoName}`;
+    auspiceURL += fieldsAus.join("/");
+  } else {
+    auspiceURL += datasetFields.join("/");
+  }
+
+  fetchURL = fetchURL + "/" + datasetFields.join("_") + ".json";
+
+  return {auspiceURL, fetchURL, secondTreeFetchURL, datasetFields, treeName, treeTwoName};
+};
+
 
 module.exports = {
   getSource,
