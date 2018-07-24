@@ -110,8 +110,8 @@ EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
 /* draw the genes Gene (annotations) */
 EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   this.geneGraph.selectAll("*").remove();
-  const geneHeight = 15; // 20;
-  const readingFrameOffset = (frame) => frame===-1 ? 10 : 0; // 5*frame; // eslint-disable-line no-unused-vars
+  const geneHeight = 20; // 20;
+  const readingFrameOffset = (frame) => frame===-1 ? 20 : 0; // 5*frame; // eslint-disable-line no-unused-vars
   const visibleAnnots = annotations.filter((annot) => /* try to prevent drawing genes if not visible */
     (annot.start < this.scales.xGene.domain()[1] && annot.start > this.scales.xGene.domain()[0]) ||
     (annot.end > this.scales.xGene.domain()[0] && annot.end < this.scales.xGene.domain()[1]));
@@ -123,7 +123,7 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
     .append("g");
   selection.append("rect")
     .attr("class", "gene")
-    .attr("x", (d) => startG(d)) // d.start > this.scales.xGene.domain()[0] ? this.scales.xGene(d.start) : this.offsets.x1)
+    .attr("x", (d) => startG(d))
     .attr("y", (d) => readingFrameOffset(d.readingFrame))
     /* this ensures genes aren't drawn past the graph, but makes moving brushes less smooth? */
     .attr("width", (d) => endG(d) - startG(d))
@@ -314,11 +314,11 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
     x1: 15,
     x2: width - 32,
     y1Main: 0, /* remember y1 is the top, y2 is the bottom, measured going down */
-    y1Nav: height - 70, /* 100, to be first */ /* 80, */
-    y2Main: height - 120, /* - 100, */
-    y2Nav: height - 40, /* 70, to be first */ /* 50, */
-    y1Gene: height - 100, /* 40, to be second */
-    y2Gene: height - 80 /* 10 to be second */
+    y1Nav: height - 65, /* 100, to be first */ /* 80, */
+    y2Main: height - 130, /* - 100, */
+    y2Nav: height - 35, /* 70, to be first */ /* 50, */
+    y1Gene: height - 107, /* 40, to be second */
+    y2Gene: height - 95 /* 10 to be second */
   };
   this.offsets.heightMain = this.offsets.y2Main - this.offsets.y1Main;
   this.offsets.heightNav = this.offsets.y2Nav - this.offsets.y1Nav;
@@ -343,13 +343,13 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     if (this.brushHandle) {
       this.brushHandle
         .attr("display", null)
-        .attr("transform", (d, i) => "translate(" + s[i] + "," + (this.offsets.heightNav + 29) + ")");
+        .attr("transform", (d, i) => "translate(" + s[i] + "," + (this.offsets.heightNav + 25) + ")");
     }
   };
 
   this.brush = brushX()
     /* the extent is relative to the navGraph group - the constants are a bit hacky... */
-    .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 30]])
+    .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 25]])
     .on("brush end", () => { // https://github.com/d3/d3-brush#brush_on
       this.brushed();
     });
@@ -372,8 +372,8 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     /* see the extent x,y params in brushX() (above) */
     .attr("transform", (d) =>
       d.type === "e" ?
-        "translate(" + (this.offsets.x2 - 1) + "," + (this.offsets.heightNav + 29) + ")" :
-        "translate(" + (this.offsets.x1 + 1) + "," + (this.offsets.heightNav + 29) + ")"
+        "translate(" + (this.offsets.x2 - 1) + "," + (this.offsets.heightNav + 25) + ")" :
+        "translate(" + (this.offsets.x1 + 1) + "," + (this.offsets.heightNav + 25) + ")"
     );
 };
 

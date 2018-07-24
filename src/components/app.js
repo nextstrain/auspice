@@ -33,8 +33,8 @@ const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHe
   /* Calculate reponsive geometries. chart: entropy, frequencies. big: map, tree */
   const chartWidthFraction = 1;
   let bigWidthFraction = grid ? 0.5 : 1;
-  let chartHeightFraction = 0.32;
-  let bigHeightFraction = grid ? 0.68 : 0.88;
+  let chartHeightFraction = 0.36;
+  let bigHeightFraction = grid ? 0.64 : 0.88;
   if (narrative) {
     /* heights */
     const numThinPanels = true + show("entropy") + show("frequencies") - 1;
