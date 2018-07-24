@@ -260,9 +260,9 @@ EntropyChart.prototype._setScales = function _setScales(xMax, yMax) {
 EntropyChart.prototype._drawAxes = function _drawAxes() {
   this.axes = {};
   this.axes.y = axisLeft(this.scales.y).ticks(4);
-  this.axes.xMain = axisBottom(this.scales.xMain).ticks(20);
+  this.axes.xMain = axisBottom(this.scales.xMain).ticks(16);
   this.axes.xNav = axisBottom(this.scales.xNav).ticks(20, ",f");
-  const visPos = this.scales.xNav.domain()[1] - this.scales.xGene.domain()[0];
+  const visPos = this.scales.xNav.domain()[1] - this.scales.xNav.domain()[0];
   if (visPos > 1e6) {   /* axes number differently if large genome */
     this.axes.xNav.tickFormat(format(".1e"));
   }
