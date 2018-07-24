@@ -107,23 +107,26 @@ EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
   return selectedNodes;
 };
 
-/* draw the genes Nav2 (annotations) */
+/* draw the genes Gene (annotations) */
 EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
-  this.navGraph2.selectAll("*").remove();
-  const geneHeight = 20;
-  const readingFrameOffset = (frame) => 5; // eslint-disable-line no-unused-vars
+  this.geneGraph.selectAll("*").remove();
+  const geneHeight = 15; // 20;
+  const readingFrameOffset = (frame) => frame===-1 ? 10 : 0; // 5*frame; // eslint-disable-line no-unused-vars
   const visibleAnnots = annotations.filter((annot) => /* try to prevent drawing genes if not visible */
-    annot.start > this.scales.xGene.domain()[0] &&
-    annot.end < this.scales.xGene.domain()[1]);
-  const selection = this.navGraph2.selectAll(".gene")
+    (annot.start < this.scales.xGene.domain()[1] && annot.start > this.scales.xGene.domain()[0]) ||
+    (annot.end > this.scales.xGene.domain()[0] && annot.end < this.scales.xGene.domain()[1]));
+  const startG = (d) => d.start > this.scales.xGene.domain()[0] ? this.scales.xGene(d.start) : this.offsets.x1;
+  const endG = (d) => d.end < this.scales.xGene.domain()[1] ? this.scales.xGene(d.end) : this.offsets.x2;
+  const selection = this.geneGraph.selectAll(".gene")
     .data(visibleAnnots)
     .enter()
     .append("g");
   selection.append("rect")
     .attr("class", "gene")
-    .attr("x", (d) => this.scales.xGene(d.start))
+    .attr("x", (d) => startG(d)) // d.start > this.scales.xGene.domain()[0] ? this.scales.xGene(d.start) : this.offsets.x1)
     .attr("y", (d) => readingFrameOffset(d.readingFrame))
-    .attr("width", (d) => this.scales.xGene(d.end) - this.scales.xGene(d.start))
+    /* this ensures genes aren't drawn past the graph, but makes moving brushes less smooth? */
+    .attr("width", (d) => endG(d) - startG(d))
     .attr("height", geneHeight)
     .style("fill", (d) => d.fill)
     .style("stroke", () => "black");
@@ -284,7 +287,7 @@ EntropyChart.prototype._drawAxes = function _drawAxes() {
     .call(this.axes.xNav);
   /* this.svg.append("g")
     .attr("class", "xGene axis")
-    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y2Nav2 + ")")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y2Gene + ")")
     .call(this.axes.xGene);  */
 };
 
@@ -314,12 +317,12 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
     y1Nav: height - 70, /* 100, to be first */ /* 80, */
     y2Main: height - 120, /* - 100, */
     y2Nav: height - 40, /* 70, to be first */ /* 50, */
-    y1Nav2: height - 100, /* 40, to be second */
-    y2Nav2: height - 80 /* 10 to be second */
+    y1Gene: height - 100, /* 40, to be second */
+    y2Gene: height - 80 /* 10 to be second */
   };
   this.offsets.heightMain = this.offsets.y2Main - this.offsets.y1Main;
   this.offsets.heightNav = this.offsets.y2Nav - this.offsets.y1Nav;
-  this.offsets.heightNav2 = this.offsets.y2Nav2 - this.offsets.y1Nav2;
+  this.offsets.heightGene = this.offsets.y2Gene - this.offsets.y1Gene;
   this.offsets.width = this.offsets.x2 - this.offsets.x1;
 };
 
@@ -434,9 +437,9 @@ EntropyChart.prototype._drawMainNavElements = function _drawMainNavElements() {
   this.navGraph = this.svg.append("g")
     .attr("class", "nav")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Nav + ")");
-  this.navGraph2 = this.svg.append("g")
-    .attr("class", "nav2")
-    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Nav2 + ")");
+  this.geneGraph = this.svg.append("g")
+    .attr("class", "Gene")
+    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Gene + ")");
 };
 
 EntropyChart.prototype._addClipMask = function _addClipMask() {
