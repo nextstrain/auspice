@@ -1,7 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import ChooseDatasetSelect from "./choose-dataset-select";
-import parseParams from "../../util/parseParams";
 
 const renderBareDataPath = (source, fields) => (
   <div style={{ fontSize: 14 }}>

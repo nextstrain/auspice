@@ -6,9 +6,9 @@ import entropy from "./entropy";
 import controls from "./controls";
 import browserDimensions from "./browserDimensions";
 import notifications from "./notifications";
-import datasets from "./datasets";
 import narrative from "./narrative";
 import treeToo from "./treeToo";
+import general from "./general";
 
 const rootReducer = combineReducers({
   metadata,
@@ -18,9 +18,9 @@ const rootReducer = combineReducers({
   entropy,
   browserDimensions,
   notifications,
-  datasets,
   narrative,
-  treeToo
+  treeToo,
+  general
 });
 
 export default rootReducer;

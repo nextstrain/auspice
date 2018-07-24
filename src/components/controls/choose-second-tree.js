@@ -4,7 +4,6 @@ import { connect } from "react-redux";
 import { SelectLabel } from "../framework/select-label";
 import { loadTreeToo } from "../../actions/loadData";
 import { REMOVE_TREE_TOO } from "../../actions/types";
-import parseParams from "../../util/parseParams";
 import { controlsWidth } from "../../util/globals";
 
 @connect((state) => {
@@ -36,11 +35,10 @@ class ChooseSecondTree extends React.Component {
         }
       }
       return true;
-    })
+    });
 
     const options = matches.map((m) => m[idxOfTree]);
     if (this.props.showTreeToo) options.unshift("REMOVE");
-    console.log(idxOfTree, matches, options);
 
     return (
       <div>

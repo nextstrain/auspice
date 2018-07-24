@@ -25,7 +25,7 @@ const formatDataset = (fields, dispatch) => {
 
 
 @connect((state) => ({
-  errorMessage: state.datasets.errorMessage
+  errorMessage: state.general.message
 }))
 class Splash extends React.Component {
   constructor(props) {

@@ -75,7 +75,6 @@ const Controls = (state = getDefaultControlsState(), action) => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
-      console.log("CLEAN_START...", action.controls)
       return action.controls;
     case types.BRANCH_MOUSEENTER:
       return Object.assign({}, state, {

@@ -1,10 +1,9 @@
 import React from "react";
-import { connect } from "react-redux";
 import Select from "react-select";
 import { controlsWidth } from "../../util/globals";
-import { changePage } from "../../actions/navigation";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
+import { changePage } from "../../actions/navigation";
 
 class ChooseDatasetSelect extends React.Component {
   getStyles() {
@@ -16,12 +15,11 @@ class ChooseDatasetSelect extends React.Component {
     };
   }
 
-  // assembles a new path from the upstream choices and the new selection
-  // downstream choices will be set to defaults in parseParams
   createDataPath(dataset) {
     let p = (this.props.choice_tree.length > 0) ? "/" : "";
-    p += this.props.source + "/"
+    p += this.props.source + "/";
     p += this.props.choice_tree.join("/") + "/" + dataset;
+    p = p.replace(/\/+/, "/");
     return p;
   }
 
@@ -37,7 +35,7 @@ class ChooseDatasetSelect extends React.Component {
         data: "Play"
       });
     }
-    this.props.dispatch(changePage({path: newPath, query: {}}));
+    this.props.dispatch(changePage({path: newPath}));
   }
 
   getDatasetOptions() {

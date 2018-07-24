@@ -1,6 +1,5 @@
 /* eslint no-console: off */
 const queryString = require("query-string");
-const getFiles = require('./getFiles');
 const globals = require("./globals");
 const serverNarratives = require('./narratives');
 const fs = require('fs');
@@ -25,10 +24,7 @@ const applyCharonToApp = (app) => {
       return; // 404
     }
     switch (query.request) {
-      case "manifest": {
-        getFiles.getManifest(query, res);
-        break;
-      } case "narrative": {
+      case "narrative": {
         serverNarratives.serveNarrative(query, res);
         break;
       } case "rebuildManifest": {
@@ -36,9 +32,9 @@ const applyCharonToApp = (app) => {
         break;
       } case "json": {
         let pathname, idealUrl, datasetFields;
-        const source = sourceSelect.getSource(query.want);
+        const source = sourceSelect.getSource(query.url);
         try {
-          [idealUrl, datasetFields, pathname] = sourceSelect.constructPathToGet(source, query.want, query.type);
+          [idealUrl, datasetFields, pathname] = sourceSelect.constructPathToGet(source, query.url, query.type);
         } catch (e) {
           console.error("Problem parsing the query (didn't attempt to fetch)\n", e.message);
           res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
@@ -80,7 +76,7 @@ const applyCharonToApp = (app) => {
         }
         break;
       } default: {
-        console.warn("Query rejected (unknown want) -- " + req.originalUrl);
+        console.warn("Query rejected (unknown) -- " + req.originalUrl);
         res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
       }
     }

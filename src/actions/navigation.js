@@ -1,33 +1,10 @@
 import queryString from "query-string";
-import parseParams from "../util/parseParams";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
+import { loadJSONs } from "./loadData";
 
-// make prefix for data files with fields joined by _ instead of / as in URL
-const makeDataPathFromParsedParams = (parsedParams) => {
-  const tmp_levels = Object.keys(parsedParams.dataset).map((d) => parsedParams.dataset[d]);
-  tmp_levels.sort((x, y) => x[0] > y[0]);
-  return tmp_levels.map((d) => d[1]).join("_");
-};
-
-export const makeDataPathFromPathname = (pathname) => {
-  return pathname
-    .replace(/^\/+/, '')    // strip leading
-    .replace(/\/+$/, '')    //   and trailing slashes
-    .replace(/\/+/g, '_');  // replacing all internal ones with underscores
-};
-
-/* match URL pathname to datasets (from manifest) */
-export const getDatapath = (pathname, availableDatasets) => {
-  if (!availableDatasets) {return undefined;}
-  const parsedParams = parseParams(pathname, availableDatasets);
-  return parsedParams.valid
-    ? makeDataPathFromParsedParams(parsedParams)
-    : makeDataPathFromPathname(pathname);
-};
-
-export const chooseDisplayComponentFromPathname = (pathname) => {
-  const parts = pathname.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
+export const chooseDisplayComponentFromURL = (url) => {
+  const parts = url.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
   if (
     !parts.length || (parts.length === 1 && parts[0] === "") ||
     (parts.length === 1 && parts[0] === "local") ||
@@ -59,18 +36,19 @@ In <App>, this causes a call to loadJSONs, which will, as part of it's dispatch,
 In this way, the URL query is "used".
 */
 export const changePage = ({path, query = undefined, push = true}) => (dispatch, getState) => {
-  if (!path) {console.error("changePage called without a path"); return;}
-  const { datasets } = getState();
-  const d = {
-    type: PAGE_CHANGE,
-    displayComponent: chooseDisplayComponentFromPathname(path),
-    errorMessage: undefined
-  };
-  d.datapath = d.displayComponent === "app" ? getDatapath(path, datasets.availableDatasets) : undefined;
-  if (query !== undefined) { d.query = query; }
-  if (push) { d.pushState = true; }
-  /* check if this is "valid" - we can change it here before it is dispatched */
-  dispatch(d);
+  if (!path) {
+    console.error("changePage called without a path");
+    return;
+  }
+  const displayComponent = chooseDisplayComponentFromURL(path);
+  const { general } = getState();
+  if (general.displayComponent === displayComponent && displayComponent === "app") {
+    dispatch(loadJSONs({url: path}));
+    return;
+  }
+  const action = {type: PAGE_CHANGE, displayComponent, pushState: push};
+  if (query !== undefined) { action.query = query; }
+  dispatch(action);
 };
 
 /* a 404 uses the same machinery as changePage, but it's not a thunk */
@@ -98,10 +76,11 @@ export const changePageQuery = ({queryToUse, queryToDisplay = false, push = true
 };
 
 export const browserBackForward = () => (dispatch, getState) => {
-  const { datasets } = getState();
-  /* if the pathname has changed, trigger the changePage action (will trigger new post to load, new dataset to load, etc) */
-  // console.log("broswer back/forward detected. From: ", datasets.urlPath, datasets.urlSearch, "to:", window.location.pathname, window.location.search)
-  if (datasets.urlPath !== window.location.pathname) {
+  const { general } = getState();
+  const potentiallyOutOfDatePathname = general.pathname;
+  /* differentiate between ∆pathname and ∆query (only) */
+  console.log("broswer back/forward detected. From: ", potentiallyOutOfDatePathname, "to:", window.location.pathname, window.location.search)
+  if (potentiallyOutOfDatePathname !== window.location.pathname) {
     dispatch(changePage({path: window.location.pathname}));
   } else {
     dispatch(changePageQuery({queryToUse: queryString.parse(window.location.search)}));

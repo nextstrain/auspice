@@ -104,7 +104,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.PAGE_CHANGE:
       if (action.query) {
         query = action.query;
-      } else if (action.displayComponent !== state.datasets.displayComponent) {
+      } else if (action.displayComponent !== state.general.displayComponent) {
         query = {};
       }
       break;
@@ -117,13 +117,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.CLEAN_START:
       if (action.url) pathname = action.url;
       break;
-    case types.MANIFEST_RECEIVED:
-      pathname = action.datapath.replace(/_/g, "/");
-      break;
     case types.PAGE_CHANGE:
       /* desired behaviour depends on the displayComponent selected... */
       if (action.displayComponent === "app") {
-        pathname = action.datapath.replace(/_/g, "/");
+        // pathname = action.datapath.replace(/_/g, "/");
       } else if (action.displayComponent === "splash") {
         pathname = "/";
       } else if (pathname.startsWith(`/${action.displayComponent}`)) {
@@ -152,9 +149,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     } else {
       window.history.replaceState({}, "", newURLString);
     }
-    next({type: types.URL, path: pathname, query: search});
-  } else if (pathname !== state.datasets.urlPath && action.type === types.PAGE_CHANGE) {
-    next({type: types.URL, path: pathname, query: search});
+    next({type: types.UPDATE_PATHNAME, pathname: pathname});
+  } else if (pathname !== state.general.pathname && action.type === types.PAGE_CHANGE) {
+    next({type: types.UPDATE_PATHNAME, pathname: pathname});
   }
 
   return result;

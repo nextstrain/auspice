@@ -10,7 +10,6 @@ import ChooseMetric from "./choose-metric";
 import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
 import MapAnimationControls from "./map-animation";
-import DataSource from "./data-source";
 import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
@@ -63,9 +62,6 @@ const Controls = ({mapOn}) => (
     <Header text="Panel Options" extraStyles={{paddingTop: "10px"}}/>
     <PanelLayout/>
     <PanelToggles/>
-
-    <Header text="Data Source" extraStyles={{paddingTop: "10px"}}/>
-    <DataSource/>
 
   </div>
 );

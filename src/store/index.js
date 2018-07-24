@@ -7,7 +7,7 @@ import { loggingMiddleware } from "../middleware/logActions"; // eslint-disable-
 const middleware = [
   thunk,
   changeURLMiddleware, // eslint-disable-line comma-dangle
-  // loggingMiddleware
+  loggingMiddleware
 ];
 
 let CreateStoreWithMiddleware;
