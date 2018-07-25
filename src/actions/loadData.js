@@ -59,6 +59,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
     if (tree.loaded) {
       dispatch({type: types.DATA_INVALID});
     }
+    const query = queryString.parse(search);
 
     if (url.indexOf("narratives") !== -1) {
       /* we want to have an additional fetch to get the narrative JSON, which in turn
@@ -66,7 +67,8 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       fetchJSON(`${charonAPIAddress}request=narrative&url=${url}`)
         .then((blocks) => {
           const firstURL = blocks[0].dataset;
-          const firstQuery = blocks[0].query;
+          const firstQuery = queryString.parse(blocks[0].query);
+          if (query.n) firstQuery.n = query.n;
           fetchDataAndDispatch(dispatch, firstURL, firstQuery, blocks);
         })
         .catch((err) => {
@@ -74,7 +76,6 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
           dispatch(goTo404(`Couldn't load narrative for ${url}`));
         });
     } else {
-      const query = queryString.parse(search);
       fetchDataAndDispatch(dispatch, url, query);
     }
   };

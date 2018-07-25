@@ -49,7 +49,6 @@ const applyCharonToApp = (app) => {
         if (paths.treeTwoName) {
           toInject._treeTwoName = paths.treeTwoName;
         }
-        console.log(toInject)
 
         const errorHandler = (err) => {
           if (paths.treeTwoName) {

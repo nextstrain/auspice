@@ -18,20 +18,17 @@ const DisplayBlock = (props) => {
   );
 };
 
-
 @connect((state) => ({
   loaded: state.narrative.loaded,
-  blocks: state.narrative.blocks
+  blocks: state.narrative.blocks,
+  blockIdx: state.narrative.blockIdx
 }))
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
-    const focus = parseInt(queryString.parse(window.location.search).n, 10) || 1;
     this.timeoutRef = undefined;
     this.shouldBeInFocus = undefined;
-    this.state = {
-      focus /* idx of block in focus (and url) */
-    };
+    this.componentRef = undefined;
     this.changeFocus = () => {
       // console.log("Changing to", this.shouldBeInFocus)
       this.props.dispatch(changePageQuery({
@@ -40,7 +37,6 @@ class Narrative extends React.Component {
         push: true
       }));
       this.timeoutRef = undefined;
-      this.setState({focus: this.shouldBeInFocus});
     };
     this.handleScroll = () => {
       /* handle scroll only fires (expensive) dispatches when no scroll has been observed for 250ms */
@@ -58,13 +54,13 @@ class Narrative extends React.Component {
           break;
         }
       }
-      // console.log("handleScroll ->", this.shouldBeInFocus)
+      // console.log("handleScroll ", this.shouldBeInFocus)
 
       /* 2 set timeouts */
-      if (this.shouldBeInFocus === this.state.focus) {
+      if (this.shouldBeInFocus === this.props.blockIdx) {
         return;
       }
-      // console.log("SETTING TIMEOUT TO CHANGE FOCUS")
+      // console.log("setting timeout to change focus from ", this.props.blockIdx, "to", this.shouldBeInFocus)
       this.timeoutRef = setTimeout(this.changeFocus, 100);
     };
     this.blockRefs = [];
@@ -73,9 +69,12 @@ class Narrative extends React.Component {
     if (window.twttr && window.twttr.ready) {
       window.twttr.widgets.load();
     }
-    if (this.state.focus !== 1) {
-      this.blockRefs[this.state.focus].scrollIntoView({behavior: "instant", block: "center", inline: "center"});
+    if (this.props.blockIdx !== 1) {
+      const componentHeight = this.componentRef.getBoundingClientRect().height;
+      const yPos = this.blockRefs[this.props.blockIdx].getBoundingClientRect().y - 0.5*componentHeight + 100;
+      this.componentRef.scrollBy({top: yPos, left: 0, behavior: 'instant'});
     }
+
   }
   render() {
     if (!this.props.loaded) {return null;}
@@ -87,9 +86,9 @@ class Narrative extends React.Component {
       paddingBottom: "10px",
       minHeight: this.props.height * 0.33
     };
-
     return (
       <div
+        ref={(el) => {this.componentRef = el;}}
         onScroll={this.handleScroll}
         className={"static narrative"}
         style={{
@@ -101,9 +100,9 @@ class Narrative extends React.Component {
         {this.props.blocks.map((b, i) => (
           <DisplayBlock
             inputRef={(el) => {this.blockRefs[i] = el;}}
-            key={`block${i}`}
+            key={b.__html.slice(0, 50)}
             block={b}
-            focus={i === this.state.focus}
+            focus={i === this.props.blockIdx}
             styles={blockStyles}
           />
         ))}
@@ -114,7 +113,8 @@ class Narrative extends React.Component {
   componentWillUnmount() {
     this.props.dispatch({
       type: CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE,
-      query: queryString.parse(this.props.blocks[this.state.focus].url)
+      pathname: this.props.blocks[this.props.blockIdx].dataset,
+      query: queryString.parse(this.props.blocks[this.props.blockIdx].url)
     });
   }
 }

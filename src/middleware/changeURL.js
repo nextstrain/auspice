@@ -100,6 +100,12 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         query = {};
       }
       break;
+    case types.TOGGLE_NARRATIVE: {
+      if (action.display === true) {
+        query = {n: state.narrative.blockIdx};
+      }
+      break;
+    }
     default:
       break;
   }
@@ -107,8 +113,20 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   /* second switch: path change */
   switch (action.type) {
     case types.CLEAN_START:
-      if (action.url) pathname = action.url;
+      if (action.url && !action.narrative) {
+        pathname = action.url;
+      }
       break;
+    case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE: {
+      if (action.pathname) pathname = action.pathname;
+      break;
+    }
+    case types.TOGGLE_NARRATIVE: {
+      if (action.display === true) {
+        pathname = state.narrative.pathname;
+      }
+      break;
+    }
     case types.PAGE_CHANGE:
       /* desired behaviour depends on the displayComponent selected... */
       if (action.displayComponent === "app") {
