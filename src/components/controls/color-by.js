@@ -90,13 +90,15 @@ class ColorBy extends React.Component {
         value={this.state.geneSelected}
         options={gtGeneOptions}
         clearable={false}
-        searchable={false}
+        searchable={true}
         multi={false}
         onChange={(opt) => {
           const gene = opt.value;
           const position = this.state.positionSelected;
-          this.setState({geneSelected: gene});
-          this.setGenotypeColoring(gene, position);
+          this.setState({geneSelected: gene, positionSelected:gene+" positions..."});
+          console.log("gene", gene);
+          // console.log(annotations);
+          // this.setGenotypeColoring(gene, position);
         }}
       />
     );

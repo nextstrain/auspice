@@ -337,10 +337,17 @@ EntropyChart.prototype._addBrush = function _addBrush() {
   this.brushed = function brushed() {
     /* this block called when the brush is manipulated */
     const s = d3event.selection || this.scales.xNav.range();
+    // console.log("brushed", s, this.scales);
     // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
-    this.xModified = this.scales.xMain.domain(s.map(this.scales.xNav.invert, this.scales.xNav));
+    const start_end = s.map(this.scales.xNav.invert, this.scales.xNav);
+    this._zoom(start_end[0], start_end[1]);
+  };
+
+  this._zoom = function _zoom(start, end) {
+    const s = [start, end];
+    this.xModified = this.scales.xMain.domain(s);
     this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
-    this.xGeneModified = this.scales.xGene.domain(s.map(this.scales.xNav.invert, this.scales.xNav));
+    this.xGeneModified = this.scales.xGene.domain(s);
     /* this.axes.xGene = this.axes.xGene.scale(this.scales.xGene);
     this.svg.select(".xGene.axis").call(this.axes.xGene); */
     this.svg.select(".xMain.axis").call(this.axes.xMain);
@@ -349,7 +356,7 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     if (this.brushHandle) {
       this.brushHandle
         .attr("display", null)
-        .attr("transform", (d, i) => "translate(" + s[i] + "," + (this.offsets.heightNav + 25) + ")");
+        .attr("transform", (d, i) => "translate(" + this.scales.xNav(s[i]) + "," + (this.offsets.heightNav + 25) + ")");
     }
   };
 
