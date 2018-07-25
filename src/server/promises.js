@@ -7,9 +7,12 @@ const fetchJSON = (path) => {
   const p = fetch(path)
     .then((res) => {
       if (res.status !== 200) throw new Error(res.statusText);
-      const ctype = res.headers[Object.getOwnPropertySymbols(res.headers)[0]]["content-type"];
-      const cenc = res.headers[Object.getOwnPropertySymbols(res.headers)[0]]["content-encoding"] || "none";
-      console.log(`\tGot type ${ctype} with encoding ${cenc}`);
+      try {
+        const header = res.headers[Object.getOwnPropertySymbols(res.headers)[0]] || res.headers._headers;
+        console.log(`\tGot type ${header["content-type"]} with encoding ${header["content-encoding"] || "none"}`);
+      } catch (e) {
+        // potential errors here are inconsequential for the response
+      }
       return res;
     })
     .then((res) => res.json());
