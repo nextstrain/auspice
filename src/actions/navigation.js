@@ -11,13 +11,10 @@ export const chooseDisplayComponentFromURL = (url) => {
     (parts.length === 1 && parts[0] === "staging") ||
     (parts.length === 1 && parts[0] === "community")
   ) {
-    console.log("chooseDisplayComponentFromURL --> splash");
     return "splash";
   } else if (parts[0] === "status") {
-    console.log("chooseDisplayComponentFromURL --> status");
     return "status";
   }
-  console.log("chooseDisplayComponentFromURL --> app");
   return "app"; // fallthrough
 };
 
@@ -43,7 +40,6 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
     console.error("changePage called without a path");
     return;
   }
-  console.log("changePage", path)
   const displayComponent = chooseDisplayComponentFromURL(path);
   const { general } = getState();
   if (general.displayComponent === displayComponent && displayComponent === "app") {
@@ -59,6 +55,7 @@ export const changePage = ({path, query = undefined, push = true}) => (dispatch,
 /* a 404 uses the same machinery as changePage, but it's not a thunk */
 export const goTo404 = (errorMessage) => ({
   type: PAGE_CHANGE,
+  path: "/",
   displayComponent: "splash",
   errorMessage,
   pushState: true

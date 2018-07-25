@@ -10,7 +10,8 @@ import { fetchJSON } from "../../util/serverInteraction";
 import { charonAPIAddress } from "../../util/globals";
 
 @connect((state) => ({
-  errorMessage: state.general.message
+  errorMessage: state.general.errorMessage,
+  browserDimensions: state.browserDimensions.browserDimensions
 }))
 class Splash extends React.Component {
   constructor(props) {
@@ -41,6 +42,57 @@ class Splash extends React.Component {
       </li>
     );
   }
+  listAvailableDatasets() {
+    if (!this.state.source) return null;
+    if (!this.state.available) {
+      if (this.state.source === "live" || this.state.source === "staging") {
+        return (
+          <CenterContent>
+            <div style={{fontSize: "18px"}}>
+              {`No available ${this.state.source} datasets. Try "/local/" for local datasets.`}
+            </div>
+          </CenterContent>
+        );
+      }
+      return null;
+    }
+
+    let listJSX;
+    /* make two columns for wide screens */
+    if (this.props.browserDimensions.width > 1000) {
+      const secondColumnStart = Math.ceil(this.state.available.length / 2);
+      listJSX = (
+        <div style={{display: "flex", flexWrap: "wrap"}}>
+          <div style={{flex: "1 50%", minWidth: "0"}}>
+            <ul>
+              {this.state.available.slice(0, secondColumnStart).map((data) => this.formatDataset(data))}
+            </ul>
+          </div>
+          <div style={{flex: "1 50%", minWidth: "0"}}>
+            <ul>
+              {this.state.available.slice(secondColumnStart).map((data) => this.formatDataset(data))}
+            </ul>
+          </div>
+        </div>
+      );
+    } else {
+      listJSX = (
+        <ul style={{marginLeft: "-22px"}}>
+          {this.state.available.map((data) => this.formatDataset(data))}
+        </ul>
+      );
+    }
+    return (
+      <CenterContent>
+        <div>
+          <div style={{fontSize: "26px"}}>
+            {`Available Datasets for source ${this.state.source}`}
+          </div>
+          {listJSX}
+        </div>
+      </CenterContent>
+    );
+  }
   render() {
     return (
       <div>
@@ -58,7 +110,7 @@ class Splash extends React.Component {
             <CenterContent>
               <div>
                 <p style={{color: "rgb(222, 60, 38)", fontWeight: 600, fontSize: "24px"}}>
-                  {"404 / an error has occured."}
+                  {"😱 404, or an error has occured 😱"}
                 </p>
                 <p style={{color: "rgb(222, 60, 38)", fontWeight: 400, fontSize: "18px"}}>
                   {`Details: ${this.props.errorMessage || this.state.errorMessage}`}
@@ -75,20 +127,7 @@ class Splash extends React.Component {
             </p>
           )}
           {/* Secondly, list the available datasets */}
-          {
-            this.state.source && this.state.available ? (
-              <CenterContent>
-                <div>
-                  <div style={{fontSize: "26px"}}>
-                    {`Available Datasets for source ${this.state.source}`}
-                  </div>
-                  <ul style={{marginLeft: "-22px"}}>
-                    {this.state.available.map((data) => this.formatDataset(data))}
-                  </ul>
-                </div>
-              </CenterContent>
-            ) : null
-          }
+          {this.listAvailableDatasets()}
           {/* Finally, the footer (logos) */}
           <CenterContent>
             {logos}

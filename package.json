@@ -18,7 +18,7 @@
     "build:timing": "rimraf dist && NODE_ENV=production BABEL_ENV=timing  webpack --config webpack.config.prod.js",
     "dev": "node server.js dev",
     "start": "echo \"DEPRECATION WARNING: please use npm run dev instead of npm run start\" && npm run dev",
-    "start:local": "echo \"DEPRECATION WARNING: access local datasets via /local/... in the URL",
+    "start:local": "echo \"DEPRECATION WARNING: access local datasets via /local/... in the URL\"",
     "lint": "eslint src",
     "heroku-postbuild": "npm run build",
     "get-data": "./scripts/get-data.sh",
