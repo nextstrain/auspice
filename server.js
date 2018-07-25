@@ -4,6 +4,7 @@ const express = require("express");
 const expressStaticGzip = require("express-static-gzip");
 const charon = require("./src/server/charon");
 const globals = require("./src/server/globals");
+const compression = require('compression');
 
 /* documentation in the static site! */
 const devServer = process.argv.indexOf("dev") !== -1;
@@ -20,6 +21,7 @@ if (devServer) {
 
 const app = express();
 app.set('port', process.env.PORT || 4000);
+app.use(compression());
 
 if (devServer) {
   const compiler = webpack(config);
