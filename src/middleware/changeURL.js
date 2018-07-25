@@ -144,7 +144,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       const fields = pathname.split("/");
       let treeIdx;
       fields.forEach((f, i) => {
-        if (f === state.tree.name || f.startsWith(state.tree.name+"-")) {
+        if (f === state.tree.name || f.startsWith(state.tree.name+":")) {
           treeIdx = i;
         }
       });
@@ -153,8 +153,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         break;
       }
       fields[treeIdx] = action.type === types.TREE_TOO_DATA ?
-        `${fields[treeIdx].split("-")[0]}-${action.segment}` :
-        fields[treeIdx].split("-")[0];
+        `${fields[treeIdx].split(":")[0]}:${action.segment}` :
+        fields[treeIdx].split(":")[0];
       pathname = fields.join("/");
       break;
     }

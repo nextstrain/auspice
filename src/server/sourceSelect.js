@@ -1,5 +1,5 @@
 const manifestHelpers = require("./manifestHelpers");
-const path = require("path");
+// const path = require("path");
 
 const urlToParts = (url, lower) => {
   if (lower) return url.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
@@ -55,8 +55,8 @@ const constructPathToGet = (source, providedUrl) => {
   /* does the URL specify two trees? */
   let treeTwoName;
   for (let i=0; i<parts.length; i++) {
-    if (parts[i].indexOf("-") !== -1) {
-      [treeName, treeTwoName] = parts[i].split("-");
+    if (parts[i].indexOf(":") !== -1) {
+      [treeName, treeTwoName] = parts[i].split(":");
       parts[i] = treeName; // only use the first tree from now on
       break;
     }
@@ -97,7 +97,7 @@ const constructPathToGet = (source, providedUrl) => {
     secondTreeFetchURL = fetchURL + "/" + fieldsTT.join("_") + ".json";
 
     const fieldsAus = datasetFields.slice();
-    fieldsAus[treeIdx] = `${treeName}-${treeTwoName}`;
+    fieldsAus[treeIdx] = `${treeName}:${treeTwoName}`;
     auspiceURL += fieldsAus.join("/");
   } else {
     auspiceURL += datasetFields.join("/");
