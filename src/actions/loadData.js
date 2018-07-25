@@ -1,16 +1,13 @@
 import queryString from "query-string";
-
 import * as types from "./types";
 import { charonAPIAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
 import { fetchJSON } from "../util/serverInteraction";
+import { warningNotification } from "./notifications";
 
 const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
-  if (query.tt) { /* SECOND TREE */
-    console.warn("DEPRECATED SECOND TREE VIA tt= -- ADD NOTIFICATION");
-  }
   fetchJSON(`${charonAPIAddress}request=mainJSON&url=${url}`)
     .then((json) => {
       dispatch({
@@ -35,23 +32,13 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
       console.warn(err, err.message);
       dispatch(goTo404(`Couldn't load JSONs for ${url}`));
     });
+  if (query.tt) { /* deprecated form of adding a second tree */
+    dispatch(warningNotification({
+      message: `Specifing a second tree via "tt=${query.tt}" is deprecated.`,
+      details: "Include the second tree in the main URL, e.g., flu/seasonal/h3n2/3y/ha-na"
+    }));
+  }
 };
-
-// const fetchNarrativesAndDispatch = (dispatch, datasets, query) => {
-//   fetch(`${charonAPIAddress}request=narrative&name=${datasets.datapath.replace(/^\//, '').replace(/\//, '_').replace(/narratives_/, '')}`)
-//     .then((res) => res.json())
-//     .then((blocks) => {
-//       const newDatasets = {...datasets};
-//       newDatasets.datapath = getDatapath(blocks[0].dataset, datasets.availableDatasets);
-//       fetchDataAndDispatch(dispatch, newDatasets, query, blocks);
-//     })
-//     .catch((err) => {
-//       // some coding error in handling happened. This is not the rejection of the promise you think it is!
-//       // syntax error is akin to a 404
-//       console.error("Error in fetchNarrativesAndDispatch", err);
-//     });
-//
-// };
 
 export const loadJSONs = ({url = window.location.pathname, search = window.location.search} = {}) => {
   return (dispatch, getState) => {
