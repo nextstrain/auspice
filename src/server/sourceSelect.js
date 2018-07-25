@@ -61,9 +61,6 @@ const constructPathToGet = (source, providedUrl) => {
       break;
     }
   }
-  if (!treeName) {
-    treeName = guessTreeName(parts);
-  }
 
   if (source === "local") {
     if (parts[0].toLowerCase() !== "local") {
@@ -90,6 +87,9 @@ const constructPathToGet = (source, providedUrl) => {
     datasetFields = manifestHelpers.checkFieldsAgainstManifest(makeLower(parts), source);
   }
 
+  if (!treeName) {
+    treeName = guessTreeName(datasetFields);
+  }
   if (treeTwoName) {
     const treeIdx = datasetFields.indexOf(treeName);
     const fieldsTT = datasetFields.slice();
