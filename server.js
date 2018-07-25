@@ -6,11 +6,8 @@ const charon = require("./src/server/charon");
 const globals = require("./src/server/globals");
 
 /* documentation in the static site! */
-
 const devServer = process.argv.indexOf("dev") !== -1;
-globals.setGlobals({
-  localData: process.argv.indexOf("localData") !== -1
-});
+globals.setGlobals(process.argv);
 
 /* if we are in dev-mode, we need to import specific libraries & set flags */
 let webpack, config, webpackDevMiddleware, webpackHotMiddleware;
@@ -53,6 +50,6 @@ const server = app.listen(app.get('port'), () => {
   console.log("-----------------------------------");
   console.log("Auspice server started on port " + server.address().port);
   console.log(devServer ? "Serving dev bundle with hot-reloading enabled" : "Serving compiled bundle from /dist");
-  console.log(global.LOCAL_DATA ? `Data is being sourced from ${global.LOCAL_DATA_PATH}` : "Dataset JSONs are being sourced from S3, narratives via the static github repo");
+  console.log(`Local data is sourced from ${global.LOCAL_DATA_PATH} can be accessed via "/local/..." URLs`);
   console.log("-----------------------------------\n\n");
 });
