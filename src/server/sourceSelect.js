@@ -29,7 +29,7 @@ const collectDatasets = (source) => {
   } else if (source === "staging" && global.STAGING_MANIFEST) {
     return {available: global.STAGING_MANIFEST, source};
   }
-  return undefined;
+  return {available: undefined, source};
 };
 
 
@@ -65,7 +65,6 @@ const constructPathToGet = (source, providedUrl) => {
     treeName = guessTreeName(parts);
   }
 
-
   if (source === "local") {
     if (parts[0].toLowerCase() !== "local") {
       parts.unshift("local");
@@ -73,25 +72,22 @@ const constructPathToGet = (source, providedUrl) => {
     auspiceURL = "local/";
     datasetFields = manifestHelpers.checkFieldsAgainstManifest(makeLower(parts).slice(1), source);
     fetchURL = global.LOCAL_DATA_PATH;
-  // } else if (source === "github") {
-  //   if (parts.length < 3) {
-  //     throw new Error("Community URLs must be of format community/githubOrgName/repoName/...");
-  //   }
-  //   pathPrefix = `https://rawgit.com/${parts[1]}/${parts[2]}/master/auspice/`;
-  //   urlPrefix = `community/${parts[1]}/${parts[2]}/`;
-  //   fields = lowerParts.slice(2);
-  // } else if (source === "staging") {
-  //   pathPrefix = global.REMOTE_DATA_STAGING_BASEURL;
-  //   urlPrefix = "";
-  //   fields = manifestHelpers.checkFieldsAgainstManifest(lowerParts.slice(1), source);
-  // } else {
-  //   /* default is via global.REMOTE_DATA_LIVE_BASEURL (for nextstrain.org, this is the data.nextstrain S3 bucket) */
-  //   pathPrefix = global.REMOTE_DATA_LIVE_BASEURL;
-  //   urlPrefix = "";
-  //   fields = manifestHelpers.checkFieldsAgainstManifest(lowerParts, source);
-  // }
+  } else if (source === "github") {
+    if (parts.length < 3) {
+      throw new Error("Community URLs must be of format community/githubOrgName/repoName/...");
+    }
+    fetchURL = `https://rawgit.com/${parts[1]}/${parts[2]}/master/auspice`;
+    auspiceURL = `community/${parts[1]}/`;
+    datasetFields = parts.slice(2); // case sensitive!
+  } else if (source === "staging") {
+    fetchURL = global.REMOTE_DATA_STAGING_BASEURL;
+    auspiceURL = "staging/";
+    datasetFields = manifestHelpers.checkFieldsAgainstManifest(makeLower(parts).slice(1), source);
   } else {
-    console.log("not yet done");
+    /* default (for nextstrain.org, this is the data.nextstrain S3 bucket) */
+    fetchURL = global.REMOTE_DATA_LIVE_BASEURL;
+    auspiceURL = "";
+    datasetFields = manifestHelpers.checkFieldsAgainstManifest(makeLower(parts), source);
   }
 
   if (treeTwoName) {

@@ -1,6 +1,6 @@
 /* eslint no-console: off */
 const queryString = require("query-string");
-const serverNarratives = require('./narratives');
+const narratives = require('./narratives');
 const sourceSelect = require("./sourceSelect");
 const manifestHelpers = require("./manifestHelpers");
 const fetchV1JSONs = require("./fetchV1JSONs");
@@ -12,12 +12,14 @@ const applyCharonToApp = (app) => {
     const query = queryString.parse(req.url.split('?')[1]);
     console.log("Charon API request: " + req.originalUrl);
     if (Object.keys(query).indexOf("request") === -1) {
-      console.warn("Query rejected (nothing requested) -- " + req.originalUrl);
-      return; // 404
+      res.statusMessage = "Query rejected (nothing requested) -- " + req.originalUrl;
+      console.warn(res.statusMessage);
+      return res.status(500).end();
     }
     switch (query.request) {
       case "narrative": {
-        serverNarratives.serveNarrative(query, res);
+        const source = sourceSelect.getSource(query.url);
+        narratives.serveNarrative(source, query.url, res);
         break;
       } case "rebuildManifest": {
         manifestHelpers.buildManifest("local");
@@ -29,12 +31,11 @@ const applyCharonToApp = (app) => {
         let paths;
         try {
           paths = sourceSelect.constructPathToGet(source, query.url);
-        } catch (e) {
-          console.error("Problem parsing the URL (didn't attempt to fetch)\n", e.message);
-          res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
-          break;
+        } catch (err) {
+          res.statusMessage = `Couldn't parse the url "${query.url}" for source "${source}"`;
+          console.warn(res.statusMessage, err);
+          return res.status(500).end();
         }
-        console.log(`\tfetches: ${paths.fetchURL} ${paths.secondTreeFetchURL}`);
         const datasets = sourceSelect.collectDatasets(source);
 
         /* what fields should be added to the JSON */
@@ -48,13 +49,17 @@ const applyCharonToApp = (app) => {
         if (paths.treeTwoName) {
           toInject._treeTwoName = paths.treeTwoName;
         }
+        console.log(toInject)
 
         const errorHandler = (err) => {
-          console.log(`ERROR. ${paths.fetchURL} --> ${err.type}`);
-          console.log("\t", err.message);
-          res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
+          if (paths.treeTwoName) {
+            res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL} and/or ${paths.secondTreeFetchURL}`;
+          } else {
+            res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL}`;
+          }
+          console.warn(res.statusMessage, err.message);
+          return res.status(500).end();
         };
-        console.log("constructPathToGet -->", paths);
         /* first attempt is to load the "unified" JSON */
         const p = source === "local" ? promises.readFilePromise : promises.fetchJSON;
         const pArr = [p(paths.fetchURL)];
@@ -105,12 +110,14 @@ const applyCharonToApp = (app) => {
         if (datasets) {
           res.json(datasets);
         } else {
-          res.status(500).send(`ERROR: Couldn't send available datasets for source ${source}`);
+          res.statusMessage = `Server doesn't have the available datasets for source "${source}""`;
+          res.status(500).end();
         }
         break;
       } default: {
-        console.warn("Query rejected (unknown) -- " + req.originalUrl);
-        res.status(500).send('FETCHING ERROR'); // Perhaps handle more globally...
+        res.statusMessage = `Server doesn't know how to handle the request "${req.originalURL}"`;
+        console.warn(res.statusMessage);
+        return res.status(500).end();
       }
     }
   });

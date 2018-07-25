@@ -375,12 +375,12 @@ const modifyControlsViaTreeToo = (controls, name) => {
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
   oldState = false, /* existing redux state (instead of jsons) */
+  narrativeBlocks = false,
   query
 }) => {
   let tree, treeToo, entropy, controls, metadata, narrative;
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (json) {
-    // if (JSONs.narrative) narrative = JSONs.narrative; // TODO reinstate
     /* create metadata state */
     metadata = json.meta;
     if (metadata === undefined) {
@@ -423,7 +423,8 @@ export const createStateFromQueryOrJSONs = ({
     }
   }
 
-  if (narrative) {
+  if (narrativeBlocks) {
+    narrative = narrativeBlocks;
     const n = parseInt(query.n, 10) || 1;
     controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
     query = {n}; // eslint-disable-line

@@ -22,7 +22,7 @@ class Splash extends React.Component {
       .then((json) => {this.setState(json);})
       .catch((err) => {
         this.setState({errorMessage: "Error in getting available datasets"});
-        console.warn(err);
+        console.warn(err.message);
       });
   }
   formatDataset(fields) {

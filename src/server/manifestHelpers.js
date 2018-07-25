@@ -66,7 +66,7 @@ const buildManifest = (dest) => {
     console.log("ERROR: unknown manifest type requested");
     return;
   }
-  fetch(baseUrl + "manifest_guest.json")
+  fetch(baseUrl + "/manifest_guest.json")
     .then((result) => result.json())
     .then((json) => {
       const manifest = oldToNew(json);

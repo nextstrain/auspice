@@ -4,7 +4,7 @@ const ReactDOMServer = require('react-dom/server');
 const ReactMarkdown = require('react-markdown'); /* https://github.com/rexxars/react-markdown */
 const fs = require('fs');
 const path = require("path");
-const request = require('request');
+const fetch = require('node-fetch');
 
 const makeBlock = (dataset = undefined, query = "") => {
   return ({lines: [], dataset, query});
@@ -73,26 +73,49 @@ const convertBlocksToHTML = (blocks) => {
   }
 };
 
-const serveNarrative = (query, res) => {
-  if (global.LOCAL_DATA) {
-    /* this code is syncronous, but that's ok since this is never used in production */
-    const mdArr = fs.readFileSync(path.join(global.LOCAL_DATA_PATH, "narratives", query.name + ".md"), 'utf8').split("\n");
-    const blocks = parseMarkdownArray(mdArr);
-    convertBlocksToHTML(blocks);
-    res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
-  } else {
-    const reqURL = global.REMOTE_STATIC_BASEURL + "narratives/" + query.name + ".md";
-    request(reqURL, (err, response, body) => {
-      if (err || body.startsWith("404") || body.split("\n")[1].startsWith('<head><title>404')) {
-        res.status(404).send('Post not found.');
-        // console.error("Narrative file 404", reqURL, err)
-        return;
-      }
-      const mdArr = body.split("\n");
-      const blocks = parseMarkdownArray(mdArr);
+
+const serveLocalNarrative = (res, pathname) => {
+  /* this code is syncronous, but that's ok since this is never used in production */
+  const mdArr = fs.readFileSync(path.join(global.LOCAL_DATA_PATH, "narratives", pathname + ".md"), 'utf8').split("\n");
+  const blocks = parseMarkdownArray(mdArr);
+  convertBlocksToHTML(blocks);
+  res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
+};
+
+const serveLiveNarrative = (res, pathname, errorHandler) => {
+  const fetchURL = global.REMOTE_STATIC_BASEURL + "/narratives/" + pathname + ".md";
+  fetch(fetchURL)
+    .then((result) => result.text())
+    .then((body) => {
+      const blocks = parseMarkdownArray(body.split("\n"));
       convertBlocksToHTML(blocks);
       res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
-    });
+    })
+    .catch(errorHandler);
+};
+
+const serveNarrative = (source, url, res) => {
+  const pathname = url.replace(/.+narratives\//, "").replace(/\/$/, "").replace(/\//, "_");
+  console.log("trying to access narrative path..", pathname);
+
+  const generalErrorHandler = (err) => {
+    res.statusMessage = `Narratives couldn't be served -- ${err.message}`;
+    console.warn(res.statusMessage);
+    res.status(500).end();
+  };
+
+  try {
+    if (source === "local") {
+      serveLocalNarrative(res, pathname);
+    } else if (source === "live") {
+      serveLiveNarrative(res, pathname, generalErrorHandler);
+    } else {
+      res.statusMessage = `Narratives cannot be sourced for "${source}" yet -- only "live" and "local" are supported.`;
+      console.warn(res.statusMessage);
+      res.status(500).end();
+    }
+  } catch (err) {
+    generalErrorHandler(err);
   }
 };
 

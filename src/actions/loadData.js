@@ -7,19 +7,15 @@ import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeRedu
 import { loadFrequencies } from "./frequencies";
 import { fetchJSON } from "../util/serverInteraction";
 
-const fetchDataAndDispatch = (dispatch, url, query) => {
-  // const treeName = getSegmentName(datasets.datapath, datasets.availableDatasets);
+const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
   if (query.tt) { /* SECOND TREE */
     console.warn("DEPRECATED SECOND TREE VIA tt= -- ADD NOTIFICATION");
   }
   fetchJSON(`${charonAPIAddress}request=mainJSON&url=${url}`)
     .then((json) => {
-      // if (narrativeJSON) {
-      //   data.JSONs.narrative = narrativeJSON;
-      // }
       dispatch({
         type: types.CLEAN_START,
-        ...createStateFromQueryOrJSONs({json, query})
+        ...createStateFromQueryOrJSONs({json, query, narrativeBlocks})
       });
       return {
         frequencies: (json.meta.panels && json.meta.panels.indexOf("frequencies") !== -1),
@@ -36,7 +32,7 @@ const fetchDataAndDispatch = (dispatch, url, query) => {
       return false;
     })
     .catch((err) => {
-      console.error(err.message);
+      console.warn(err, err.message);
       dispatch(goTo404(`Couldn't load JSONs for ${url}`));
     });
 };
@@ -63,14 +59,24 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
     if (tree.loaded) {
       dispatch({type: types.DATA_INVALID});
     }
-    const query = queryString.parse(search);
-    fetchDataAndDispatch(dispatch, url, query);
 
-    // if (datasets.datapath.startsWith("narrative")) {
-    //   fetchNarrativesAndDispatch(dispatch, datasets, query);
-    // } else {
-    //   fetchDataAndDispatch(dispatch, datasets, query, false);
-    // }
+    if (url.indexOf("narratives") !== -1) {
+      /* we want to have an additional fetch to get the narrative JSON, which in turn
+      tells us which data JSON to fetch... */
+      fetchJSON(`${charonAPIAddress}request=narrative&url=${url}`)
+        .then((blocks) => {
+          const firstURL = blocks[0].dataset;
+          const firstQuery = blocks[0].query;
+          fetchDataAndDispatch(dispatch, firstURL, firstQuery, blocks);
+        })
+        .catch((err) => {
+          console.error("Error obtaining narratives", err.message);
+          dispatch(goTo404(`Couldn't load narrative for ${url}`));
+        });
+    } else {
+      const query = queryString.parse(search);
+      fetchDataAndDispatch(dispatch, url, query);
+    }
   };
 };
 
