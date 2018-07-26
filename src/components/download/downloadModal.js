@@ -153,7 +153,12 @@ class DownloadModal extends React.Component {
     );
   }
   getFilePrefix() {
-    return "nextstrain_" + window.location.pathname.replace(/^\//, '').replace(/\//g, '_');
+    return "nextstrain_"
+      + window.location.pathname
+          .replace(/^\//, '')       // Remove leading slashes
+          .replace(/:[^\/]+/g, '')  // Remove any second tree (treeTwo/treeToo) designation.
+                                    //   We only export the first tree.
+          .replace(/\//g, '_');     // Replace slashes with spaces
   }
   makeTextStringsForSVGExport() {
     const x = [];
