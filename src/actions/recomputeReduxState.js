@@ -378,7 +378,7 @@ export const createStateFromQueryOrJSONs = ({
   narrativeBlocks = false,
   query
 }) => {
-  let tree, treeToo, entropy, controls, metadata, narrative;
+  let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (json) {
     /* create metadata state */
@@ -416,11 +416,8 @@ export const createStateFromQueryOrJSONs = ({
     tree = {...oldState.tree};
     treeToo = {...oldState.treeToo};
     metadata = {...oldState.metadata};
-
+    frequencies = {...oldState.frequencies};
     controls = restoreQueryableStateToDefaults(controls);
-    if (query.tt && !treeToo.loaded) {
-      console.log("TO DO - loAd 2nD tree (via a delayed fetch / now?!?!)");
-    }
   }
 
   if (narrativeBlocks) {
@@ -461,26 +458,24 @@ export const createStateFromQueryOrJSONs = ({
     entropy.maxYVal = entropyMaxYVal;
   }
 
-  // if (JSONs && JSONs.frequencies) {
-  //   NOW A SEPERATE ACTION
-  // }
-  // else if (frequencies && frequencies.loaded) { /* oldState */
-  //   frequencies.version++;
-  //   frequencies.matrix = computeMatrixFromRawData(
-  //     frequencies.data,
-  //     frequencies.pivots,
-  //     tree.nodes,
-  //     tree.visibility,
-  //     controls.colorScale,
-  //     controls.colorBy
-  //   );
-  // }
+  /* update frequencies if they exist (not done for new JSONs) */
+  if (frequencies && frequencies.loaded) {
+    frequencies.version++;
+    frequencies.matrix = computeMatrixFromRawData(
+      frequencies.data,
+      frequencies.pivots,
+      tree.nodes,
+      tree.visibility,
+      controls.colorScale,
+      controls.colorBy
+    );
+  }
 
   if (json["_treeName"]) {
     tree.name = json["_treeName"];
   }
   const url = json["_url"]; // injected by the server. Will be picked up by middleware.
-  return {tree, treeToo, metadata, entropy, controls, narrative, query, url};
+  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query, url};
 };
 
 export const createTreeTooState = ({
