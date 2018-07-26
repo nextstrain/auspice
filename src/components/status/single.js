@@ -1,7 +1,6 @@
 import React from "react";
 import { charonAPIAddress } from "../../util/globals";
-import { treeJsonToState } from "../../util/treeJsonProcessing";
-import { getMinCalDateViaTree, getMaxCalDateViaTree } from "../../actions/recomputeReduxState";
+import { createStateFromQueryOrJSONs } from "../../actions/recomputeReduxState";
 import { fetchJSON } from "../../util/serverInteraction";
 
 const errorColor = "#fc8d59";
@@ -21,27 +20,21 @@ class SingleDataset extends React.Component {
     };
   }
   componentDidMount() {
-    const apiPath = (jsonType) => `${charonAPIAddress}request=json&want=${this.props.path}&type=${jsonType}`;
-    Promise.all([fetchJSON(apiPath("meta")), fetchJSON(apiPath("tree"))])
-      .then((values) => {
-        const metaJSON = values[0];
-        const treeJSON = values[1];
-        const tree = treeJsonToState(treeJSON, undefined);
-        const minDate = getMinCalDateViaTree(tree.nodes);
-        const maxDate = getMaxCalDateViaTree(tree.nodes);
-        const numTips = metaJSON.virus_count;
-        const lastUpdated = metaJSON.updated;
+    fetchJSON(`${charonAPIAddress}request=mainJSON&url=${this.props.path}`)
+      .then((json) => {
+        const state = createStateFromQueryOrJSONs({json, query: ""});
         this.setState({
           status: "loaded",
           backgroundColor: successColor,
-          minDate,
-          maxDate,
-          numTips,
-          lastUpdated
+          minDate: state.controls.dateMin,
+          maxDate: state.controls.dateMax,
+          numTips: json.meta.virus_count,
+          lastUpdated: json.meta.updated
         });
       })
       .catch((err) => {
-        console.error("Failed to fetch or process JSONs for", this.props.path, "ERR:", err.type);
+        console.warn("Failed to fetch or process JSONs for", this.props.path, "ERR:", err.type);
+        console.log(err)
         this.setState({
           status: "Error fetching / processing JSONs",
           backgroundColor: errorColor

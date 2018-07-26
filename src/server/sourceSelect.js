@@ -49,7 +49,11 @@ const constructPathToGet = (source, providedUrl) => {
   let datasetFields; // this _does not_ take into account the 2nd tree
   let treeName;
 
-  const parts = providedUrl.replace(/^\//, '').replace(/\/$/, '').split("/");
+  const parts = providedUrl
+    .replace(/^\//, '')
+    .replace(/\/$/, '')
+    .replace(/^live\//, "")
+    .split("/");
   const makeLower = (arr) => arr.map((x) => x.toLowerCase());
 
   /* does the URL specify two trees? */
