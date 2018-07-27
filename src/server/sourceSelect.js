@@ -1,14 +1,12 @@
 const manifestHelpers = require("./manifestHelpers");
-// const path = require("path");
 
-const urlToParts = (url, lower) => {
-  if (lower) return url.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
+const urlToParts = (url) => {
   return url.replace(/^\/+/, "").replace(/\/+$/, "").split("/");
 };
 
 
 const getSource = (url) => {
-  let parts = urlToParts(url, true);
+  let parts = urlToParts(url);
   if (parts[0] === "status") {
     parts = parts.slice(1);
   }
@@ -42,7 +40,7 @@ const guessTreeName = (parts) => {
 };
 
 const constructPathToGet = (source, providedUrl) => {
-  /* the path is lowercased _except for_ the github org & repo names */
+  /* the path / URL is case sensitive */
   let auspiceURL; // the URL to be displayed in Auspice
   let fetchURL; // could be local path or http(s)://
   let secondTreeFetchURL;
@@ -54,7 +52,6 @@ const constructPathToGet = (source, providedUrl) => {
     .replace(/\/$/, '')
     .replace(/^live\//, "")
     .split("/");
-  const makeLower = (arr) => arr.map((x) => x.toLowerCase());
 
   /* does the URL specify two trees? */
   let treeTwoName;
@@ -67,11 +64,11 @@ const constructPathToGet = (source, providedUrl) => {
   }
 
   if (source === "local") {
-    if (parts[0].toLowerCase() !== "local") {
+    if (parts[0] !== "local") {
       parts.unshift("local");
     }
     auspiceURL = "local/";
-    datasetFields = manifestHelpers.checkFieldsAgainstManifest(makeLower(parts).slice(1), source);
+    datasetFields = manifestHelpers.checkFieldsAgainstManifest(parts.slice(1), source);
     fetchURL = global.LOCAL_DATA_PATH;
   } else if (source === "github") {
     if (parts.length < 3) {
@@ -79,16 +76,16 @@ const constructPathToGet = (source, providedUrl) => {
     }
     fetchURL = `https://rawgit.com/${parts[1]}/${parts[2]}/master/auspice`;
     auspiceURL = `community/${parts[1]}/`;
-    datasetFields = parts.slice(2); // case sensitive!
+    datasetFields = parts.slice(2);
   } else if (source === "staging") {
     fetchURL = global.REMOTE_DATA_STAGING_BASEURL;
     auspiceURL = "staging/";
-    datasetFields = manifestHelpers.checkFieldsAgainstManifest(makeLower(parts).slice(1), source);
+    datasetFields = manifestHelpers.checkFieldsAgainstManifest(parts.slice(1), source);
   } else {
     /* default (for nextstrain.org, this is the data.nextstrain S3 bucket) */
     fetchURL = global.REMOTE_DATA_LIVE_BASEURL;
     auspiceURL = "";
-    datasetFields = manifestHelpers.checkFieldsAgainstManifest(makeLower(parts), source);
+    datasetFields = manifestHelpers.checkFieldsAgainstManifest(parts, source);
   }
 
   if (!treeName) {
