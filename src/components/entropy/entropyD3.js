@@ -49,7 +49,10 @@ EntropyChart.prototype.update = function update({
   selected = undefined,
   newBars = undefined,
   maxYVal = undefined,
-  clearSelected = false
+  clearSelected = false,
+  gene = undefined,
+  start = undefined,
+  end = undefined
 }) {
   const aaChange = aa !== undefined && aa !== this.aa;
   if (newBars || aaChange) {
@@ -64,6 +67,15 @@ EntropyChart.prototype.update = function update({
     this._highlightSelectedBars();
   } else if (clearSelected) {
     this._clearSelectedBars();
+  }
+  if (gene !== undefined && start !== undefined && end !== undefined) {
+    /* move the brush */
+    const geneLength = end-start;
+    this.navGraph.select(".brush")
+      .call(this.brush.move, () => {  /* scale so genes are a decent size. stop brushes going off graph */
+        return [Math.max(this.scales.xNav(start-(1.5*geneLength)), this.scales.xNav(0)),
+          Math.min(this.scales.xNav(end+(1.5*geneLength)), this.scales.xNav(this.scales.xNav.domain()[1]))];
+      });
   }
 };
 
@@ -188,6 +200,7 @@ EntropyChart.prototype._clearSelectedBars = function _clearSelectedBars() {
 
 EntropyChart.prototype._highlightSelectedBars = function _highlightSelectedBars() {
   for (const d of this.selectedNodes) {
+    if (this.aa && !d.prot) return; /*if we've switched from NT to AA by selecting a gene, don't try to highlight NT position! */
     const id = this.aa ? `#prot${d.prot}${d.codon}` : `#nt${d.x}`;
     const fillVal = this.aa ?
       this.geneMap[d.prot].fill :
@@ -336,11 +349,18 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
 EntropyChart.prototype._addBrush = function _addBrush() {
   this.brushed = function brushed() {
     /* this block called when the brush is manipulated */
-    const s = d3event.selection || this.scales.xNav.range();
-    // console.log("brushed", s, this.scales);
+    const s = d3event.selection || this.scales.xNav.range(); // (this.scales.xNav.domain()); // range();
+    // console.log("brushed", s); // , this.scales);
     // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
     const start_end = s.map(this.scales.xNav.invert, this.scales.xNav);
-    this._zoom(start_end[0], start_end[1]);
+    if (!d3event.selection) { /* This keeps brush working if user clicks rather than click-drag! */
+      this.navGraph.select(".brush")
+        .call(this.brush.move, () => {  
+          return this.scales.xNav.range();
+        });
+    } else {
+      this._zoom(start_end[0], start_end[1]);
+    }
   };
 
   this._zoom = function _zoom(start, end) {

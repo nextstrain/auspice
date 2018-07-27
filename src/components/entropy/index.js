@@ -169,6 +169,7 @@ export class Entropy extends React.Component {
     }
   }
   componentWillReceiveProps(nextProps) {
+    console.log("inside will receive");
     if (!nextProps.loaded) {
       this.setState({chart: false});
     }
@@ -195,6 +196,15 @@ export class Entropy extends React.Component {
         if (!nextProps.colorBy.startsWith("gt")) {
           updateParams.clearSelected = true;
         } else {
+          if (!nextProps.colorBy.startsWith("gt-nuc")) {  /* if it is a gene, zoom to it */
+            updateParams.gene = nextProps.colorBy.split(/-|_/)[1];
+            updateParams.start = nextProps.geneMap[updateParams.gene].start;
+            updateParams.end = nextProps.geneMap[updateParams.gene].end;
+          } else { /* if is nuc selected, zoom out! */
+            updateParams.gene = "nuc";
+            updateParams.start = 1;
+            updateParams.end = this.state.chart.maxNt;
+          }
           updateParams.selected = parseEncodedGenotype(nextProps.colorBy, nextProps.geneLength);
         }
       }

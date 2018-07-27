@@ -96,9 +96,8 @@ class ColorBy extends React.Component {
           const gene = opt.value;
           const position = this.state.positionSelected;
           this.setState({geneSelected: gene, positionSelected:gene+" positions..."});
-          console.log("gene", gene);
-          // console.log(annotations);
-          // this.setGenotypeColoring(gene, position);
+          console.log("gene position", gene, position);
+          this.setGenotypeColoring(gene, position);
         }}
       />
     );
@@ -131,12 +130,18 @@ class ColorBy extends React.Component {
   }
 
   setGenotypeColoring(gene, position) {
-    if (!position) return;
+    if (!position) {
+      if (gene==="nuc") return;
+      position = "1"; /* if it's a gene, set position to trigger zoom */
+    }
+    if (position.split(',').length === 1 && parseInt(position.split(','), 10) >= this.props.geneLength[gene]) {
+      position = "1"; /* if it's a position outside the gene, set to 1 to trigger zoom in another gene! */
+    }
     const positions = position.split(',').filter((x) =>
       parseInt(x, 10) > 0 && parseInt(x, 10) < this.props.geneLength[gene]
     );
     if (!positions.length) return;
-    const colorBy = "gt-" + gene + "_" + positions.join(',');
+    const colorBy = "gt-"+gene+"_"+positions.join(','); 
     analyticsControlsEvent("color-by-genotype");
     this.props.dispatch(changeColorBy(colorBy));
   }
