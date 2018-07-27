@@ -39,7 +39,7 @@ const guessTreeName = (parts) => {
   return undefined;
 };
 
-const constructPathToGet = (source, providedUrl) => {
+const constructPathToGet = (source, providedUrl, otherQueries) => {
   /* the path / URL is case sensitive */
   let auspiceURL; // the URL to be displayed in Auspice
   let fetchURL; // could be local path or http(s)://
@@ -61,6 +61,9 @@ const constructPathToGet = (source, providedUrl) => {
       parts[i] = treeName; // only use the first tree from now on
       break;
     }
+  }
+  if (!treeTwoName && otherQueries.deprecatedSecondTree) {
+    treeTwoName = otherQueries.deprecatedSecondTree;
   }
 
   if (source === "local") {

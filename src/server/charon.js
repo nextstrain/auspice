@@ -30,12 +30,13 @@ const applyCharonToApp = (app) => {
         const source = sourceSelect.getSource(query.url);
         let paths;
         try {
-          paths = sourceSelect.constructPathToGet(source, query.url);
+          paths = sourceSelect.constructPathToGet(source, query.url, query);
         } catch (err) {
           res.statusMessage = `Couldn't parse the url "${query.url}" for source "${source}"`;
           console.warn(res.statusMessage, err);
           return res.status(500).end();
         }
+
         const datasets = sourceSelect.collectDatasets(source);
 
         /* what fields should be added to the JSON */
@@ -88,7 +89,7 @@ const applyCharonToApp = (app) => {
           /* this might need to be turned into a function // constructPathToGet improved */
           url = query.source + "/" + url;
         }
-        const paths = sourceSelect.constructPathToGet(query.source, url, undefined);
+        const paths = sourceSelect.constructPathToGet(query.source, url, {});
         paths.fetchURL = paths.fetchURL.replace(".json", "_"+query.type+".json");
 
         promise(paths.fetchURL)

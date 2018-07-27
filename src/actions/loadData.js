@@ -8,7 +8,19 @@ import { fetchJSON } from "../util/serverInteraction";
 import { warningNotification } from "./notifications";
 
 const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
-  fetchJSON(`${charonAPIAddress}request=mainJSON&url=${url}`)
+  let warning = false;
+  let fetchExtras = "";
+  /* currently we support backwards compatability with the old (deprecated) tt=... URL query
+  syntax for defining the second tree. This is not guaranteed to stay around */
+  if (query.tt) { /* deprecated form of adding a second tree */
+    warning = {
+      message: `Specifing a second tree via "tt=${query.tt}" is deprecated.`,
+      details: "The URL has been updated to reflect the new syntax 🙂"
+    };
+    fetchExtras += `&deprecatedSecondTree=${query.tt}`;
+  }
+
+  fetchJSON(`${charonAPIAddress}request=mainJSON&url=${url}${fetchExtras}`)
     .then((json) => {
       dispatch({
         type: types.CLEAN_START,
@@ -32,11 +44,8 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
       console.warn(err, err.message);
       dispatch(goTo404(`Couldn't load JSONs for ${url}`));
     });
-  if (query.tt) { /* deprecated form of adding a second tree */
-    dispatch(warningNotification({
-      message: `Specifing a second tree via "tt=${query.tt}" is deprecated.`,
-      details: "Include the second tree in the main URL, e.g., flu/seasonal/h3n2/3y/ha-na"
-    }));
+  if (warning) {
+    dispatch(warningNotification(warning));
   }
 };
 
