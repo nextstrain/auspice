@@ -60,27 +60,31 @@ const applyCharonToApp = (app) => {
           console.warn(res.statusMessage, err.message);
           return res.status(500).end();
         };
-        /* first attempt is to load the "unified" JSON */
-        const p = source === "local" ? promises.readFilePromise : promises.fetchJSON;
-        const pArr = [p(paths.fetchURL)];
-        if (paths.secondTreeFetchURL) {
-          pArr.push(p(paths.secondTreeFetchURL));
-        }
-        Promise.all(pArr)
-          .then((jsons) => {
-            const json = jsons[0]; // first is always the main JSON
-            for (const field in toInject) { // eslint-disable-line
-              json[field] = toInject[field];
-            }
-            if (paths.secondTreeFetchURL) {
-              json.treeTwo = jsons[1].tree;
-            }
-            res.json(json);
-          })
-          .catch(() => {
-            console.log("\tFailed to fetch unified JSON for", paths.fetchURL, "trying for v1...");
-            fetchV1JSONs.fetchTreeAndMetaJSONs(res, source, paths.fetchURL, paths.secondTreeFetchURL, toInject, errorHandler);
-          });
+
+        /* replace the following fetch with the commented out code once auspice can handle v2.0 JSONs */
+        fetchV1JSONs.fetchTreeAndMetaJSONs(res, source, paths.fetchURL, paths.secondTreeFetchURL, toInject, errorHandler);
+        /* This block is deliberately commented out. Once auspice can process v2.0 JSONs,
+        this block should be re-added. Right now a "valid" 2.0 schema will actually crash auspice. */
+        // const p = source === "local" ? promises.readFilePromise : promises.fetchJSON;
+        // const pArr = [p(paths.fetchURL)];
+        // if (paths.secondTreeFetchURL) {
+        //   pArr.push(p(paths.secondTreeFetchURL));
+        // }
+        // Promise.all(pArr)
+        //   .then((jsons) => {
+        //     const json = jsons[0]; // first is always the main JSON
+        //     for (const field in toInject) { // eslint-disable-line
+        //       json[field] = toInject[field];
+        //     }
+        //     if (paths.secondTreeFetchURL) {
+        //       json.treeTwo = jsons[1].tree;
+        //     }
+        //     res.json(json);
+        //   })
+        //   .catch(() => {
+        //     console.log("\tFailed to fetch unified JSON for", paths.fetchURL, "trying for v1...");
+        //     fetchV1JSONs.fetchTreeAndMetaJSONs(res, source, paths.fetchURL, paths.secondTreeFetchURL, toInject, errorHandler);
+        //   });
         break;
       } case "additionalJSON": {
         const promise = query.source === "local" ? promises.readFilePromise : promises.fetchJSON;
