@@ -11,8 +11,6 @@ after_success:
   - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "release" ]]; then
       npm run gzip-and-upload;
       npm run redeploy-site;
-    fi
-  - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "master" ]]; then
       npm run rebuild-docker-image;
     fi
 notifications:
