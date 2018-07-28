@@ -1,3 +1,5 @@
+## version 1.23.0 - 2018/07/28
+
 * The server no longer needs to be transpiled
 * The interaction between data sources (local / staging / live) has been changed.
   * The first part of the URL now defines the source, e.g. /flu is live, /local/flu is local, /staging/flu...
