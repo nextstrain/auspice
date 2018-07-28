@@ -1,87 +1,67 @@
 import React from "react";
 import { connect } from "react-redux";
 import ChooseDatasetSelect from "./choose-dataset-select";
-import parseParams from "../../util/parseParams";
 
-// // remove starting or trailing slashes from path
-// const tidyUpPathname = (pathname) => {
-//   const tmppath = pathname[0] === "/" ? pathname.substring(1) : pathname;
-//   return tmppath[tmppath.length - 1] === "/" ? tmppath.substring(0, tmppath.length - 1) : tmppath;
-// };
-
-const renderBareDataPath = (datapath) => (
-  <span style={{ fontSize: 14 }}>
-    { datapath }
-  </span>
+const renderBareDataPath = (source, fields) => (
+  <div style={{ fontSize: 14 }}>
+    {`Source: ${source || "unknown"}`}
+    <p/>
+    {`Datapath: ${fields ? fields.join("/") : "unknown"}`}
+  </div>
 );
 
 @connect((state) => {
   return {
-    availableDatasets: state.datasets.availableDatasets,
-    datapath: state.datasets.datapath
+    available: state.controls.available,
+    datasetFields: state.controls.datasetFields,
+    source: state.controls.source
   };
 })
 class ChooseDataset extends React.Component {
-  getStyles() {
-    return { base: {} };
-  }
+
   render() {
-    /* If we're running without a manifest (or it hasn't loaded yet), show the
-       raw datapath if we have one, otherwise don't render anything.  In
-       sans-manifest mode, this helps the user know what they're looking at.
+    /* If the server hasn't yet returned the available datasets, show the
+       source & raw datapath if we have one, otherwise don't render anything.
+       This helps the user know what they're looking at.
      */
-    if (!this.props.availableDatasets) {
-      return this.props.datapath
-        ? renderBareDataPath(this.props.datapath)
-        : null;
+    if (!this.props.available) {
+      return renderBareDataPath(this.props.source, this.props.datasetFields);
     }
 
-    const styles = this.getStyles();
+    const selected = this.props.datasetFields;
+    const options = [[]];
 
-    /* analyse the current route in order to adjust the dataset selection choices.
-    paramFields is an object with keys "virus" and potentially "lineage" and "duration"
-    as well */
-    const params      = parseParams(this.props.datapath, this.props.availableDatasets);
-    const paramFields = params.dataset;
+    this.props.available.forEach((d) => {
+      if (options[0].indexOf(d[0]) === -1) options[0].push(d[0]);
+    })
 
-    /* If the parsed params aren't valid, then just show the bare datapath
-       instead of an incomplete set of dataset choosers.  This happens, for
-       example, when viewing a dataset that's not in the loaded manifest, such
-       as a local test dataset.
-     */
-    if (!params.valid) {
-      return renderBareDataPath(this.props.datapath);
+    for (let idx=1; idx<selected.length; idx++) {
+      /* going through the fields which comprise the current dataset
+      in order to create available alternatives for each field */
+      options[idx] = [];
+      this.props.available.forEach((ds) => {
+        if (ds[idx-1] === selected[idx-1] && options[idx].indexOf(ds[idx]) === -1) {
+          options[idx].push(ds[idx]);
+        }
+      })
     }
 
-    // names of the different selectors in the current hierarchy: [virus, lineage, duration]
-    // there will be (fields.length) dropdown boxes
-    const fields = Object.keys(paramFields).sort((a, b) => paramFields[a][0] > paramFields[b][0]);
-    // the current choice, e.g. [flu, h3n2, 3y] or [zika]
-    const choices = fields.map((d) => paramFields[d][1]);
-    /* make a selector for each of the fields. I.e. if it's only "zika", then the
-    selectors array will only have 1 element */
-    const selectors = []; // list to contain the different data set selectors
-    let level = this.props.availableDatasets; // pointer used to move through the hierarchy -- currently at the top level of datasets
-    for (let vi = 0; vi < fields.length; vi++) {
-      if (choices[vi]) {
-        // pull options from the current level of the dataset hierarchy, ignore 'default'
-        const options = Object.keys(level[fields[vi]]).filter((d) => d !== "default");
-        selectors.push((
-          <div key={vi} style={styles.base}>
-            <ChooseDatasetSelect
-              title={"Choose " + fields[vi]}
-              choice_tree={choices.slice(0, vi)}
-              selected={choices[vi]}
-              options={options}
-            />
-          </div>
-        ));
-        // move to the next level in the data set hierarchy
-        level = level[fields[vi]][choices[vi]];
-      }
+    const selectors = [];
+
+    for (let i=0; i<options.length; i++) {
+      selectors.push((
+        <div key={i}>
+          <ChooseDatasetSelect
+            dispatch={this.props.dispatch}
+            source={this.props.source}
+            choice_tree={selected.slice(0, i)}
+            selected={selected[i]}
+            options={options[i]}
+          />
+        </div>
+      ));
     }
 
-    // return a list of selectors in the order of the data set hierarchy
     return (
       <div>
         {selectors}

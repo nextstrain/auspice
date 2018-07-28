@@ -4,75 +4,67 @@ import { connect } from "react-redux";
 import { SelectLabel } from "../framework/select-label";
 import { loadTreeToo } from "../../actions/loadData";
 import { REMOVE_TREE_TOO } from "../../actions/types";
-import parseParams from "../../util/parseParams";
 import { controlsWidth } from "../../util/globals";
 
 @connect((state) => {
   return {
-    availableDatasets: state.datasets.availableDatasets,
-    datapath: state.datasets.datapath,
+    available: state.controls.available,
+    datasetFields: state.controls.datasetFields,
+    source: state.controls.source,
+    treeName: state.tree.name,
     showTreeToo: state.controls.showTreeToo
   };
 })
 class ChooseSecondTree extends React.Component {
-  getStyles() {
-    return { base: {} };
-  }
   render() {
-    // this logic duplicated from ChooseDataset
-    if (!this.props.availableDatasets || !this.props.datapath) return null;
-    const paramFields = parseParams(this.props.datapath, this.props.availableDatasets).dataset;
-    const fields = Object.keys(paramFields).sort((a, b) => paramFields[a][0] > paramFields[b][0]);
-    const choices = fields.map((d) => paramFields[d][1]);
-    let level = this.props.availableDatasets;
-    let treeToo;
-    for (let vi = 0; vi < fields.length; vi++) {
-      if (choices[vi]) {
-        const options = Object.keys(level[fields[vi]]).filter((d) => d !== "default");
-        if (Object.keys(level).indexOf("segment") !== -1 && options.length > 1) {
-          const treeTooOptions = options.filter((v) => v !== choices[vi]);
-          if (this.props.showTreeToo) {
-            treeTooOptions.unshift("REMOVE");
+    if (!this.props.available || !this.props.datasetFields || !this.props.source || !this.props.treeName) {
+      return null;
+    }
+
+    const idxOfTree = this.props.datasetFields.indexOf(this.props.treeName);
+
+    const matches = this.props.available.slice().filter((dataset) => {
+      if (dataset.length !== this.props.datasetFields.length) return false;
+      for (let i=0; i<dataset.length; i++) {
+        if (i===idxOfTree) {
+          if (dataset[i] === this.props.datasetFields[i]) {
+            return false; // don't match the same tree name
           }
-          treeToo = {
-            fieldIdx: vi,
-            options: treeTooOptions,
-            treeOne: choices[vi] // the option chosen for tree one (e.g. NA, PB1...)
-          };
+        } else if (dataset[i] !== this.props.datasetFields[i]) {
+          return false; // everything apart from the tree much match
         }
-        // move to the next level in the data set hierarchy
-        level = level[fields[vi]][choices[vi]];
       }
-    }
-    /* second tree? */
-    if (treeToo) {
-      return (
-        <div>
-          <SelectLabel key="treetootitle" text="Second Tree"/>
-          <div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
-            <Select
-              name="selectTreeToo"
-              id="selectTreeToo"
-              value={this.props.showTreeToo}
-              options={treeToo.options.map((opt) => ({value: opt, label: opt}))}
-              clearable={false}
-              searchable={false}
-              multi={false}
-              onChange={(opt) => {
-                if (opt.value === "REMOVE") {
-                  this.props.dispatch({type: REMOVE_TREE_TOO});
-                } else {
-                  const dataPath = [...choices];
-                  dataPath.splice(treeToo.fieldIdx, 1, opt.value);
-                  this.props.dispatch(loadTreeToo(opt.value, dataPath.join("_")));
-                }
-              }}
-            />
-          </div>
+      return true;
+    });
+
+    const options = matches.map((m) => m[idxOfTree]);
+    if (this.props.showTreeToo) options.unshift("REMOVE");
+
+    return (
+      <div>
+        <SelectLabel key="treetootitle" text="Second Tree"/>
+        <div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
+          <Select
+            name="selectTreeToo"
+            id="selectTreeToo"
+            value={this.props.showTreeToo}
+            options={options.map((opt) => ({value: opt, label: opt}))}
+            clearable={false}
+            searchable={false}
+            multi={false}
+            onChange={(opt) => {
+              if (opt.value === "REMOVE") {
+                this.props.dispatch({type: REMOVE_TREE_TOO});
+              } else {
+                const dataPath = [...this.props.datasetFields];
+                dataPath.splice(idxOfTree, 1, opt.value);
+                this.props.dispatch(loadTreeToo(opt.value, dataPath));
+              }
+            }}
+          />
         </div>
-      );
-    }
-    return null;
+      </div>
+    );
   }
 }
 

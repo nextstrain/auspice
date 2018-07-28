@@ -27,6 +27,9 @@ export const getDefaultControlsState = () => {
   const dateMaxNumeric = calendarToNumeric(dateMax);
   return {
     defaults,
+    available: undefined,
+    datasetFields: undefined,
+    source: undefined,
     canTogglePanelLayout: true,
     selectedBranch: null,
     selectedNode: null,

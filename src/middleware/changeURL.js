@@ -30,20 +30,13 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: // fallthrough
     case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE:
       query = action.query;
+      if (query.tt) delete query.tt;
       break;
     case types.NEW_COLORS:
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
       break;
     case types.APPLY_FILTER: {
       query[`f_${action.fields}`] = action.values.join(',');
-      break;
-    }
-    case types.REMOVE_TREE_TOO: {
-      query.tt = undefined;
-      break;
-    }
-    case types.TREE_TOO_DATA: {
-      query.tt = action.segment;
       break;
     }
     case types.CHANGE_LAYOUT: {
@@ -104,31 +97,68 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.PAGE_CHANGE:
       if (action.query) {
         query = action.query;
-      } else if (action.displayComponent !== state.datasets.displayComponent) {
+      } else if (action.displayComponent !== state.general.displayComponent) {
         query = {};
       }
       break;
+    case types.TOGGLE_NARRATIVE: {
+      if (action.display === true) {
+        query = {n: state.narrative.blockIdx};
+      }
+      break;
+    }
     default:
       break;
   }
 
   /* second switch: path change */
   switch (action.type) {
-    case types.MANIFEST_RECEIVED:
-      pathname = action.datapath.replace(/_/g, "/");
+    case types.CLEAN_START:
+      if (action.url && !action.narrative) {
+        pathname = action.url;
+      }
       break;
+    case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE: {
+      if (action.pathname) pathname = action.pathname;
+      break;
+    }
+    case types.TOGGLE_NARRATIVE: {
+      if (action.display === true) {
+        pathname = state.narrative.pathname;
+      }
+      break;
+    }
     case types.PAGE_CHANGE:
       /* desired behaviour depends on the displayComponent selected... */
       if (action.displayComponent === "app") {
-        pathname = action.datapath.replace(/_/g, "/");
+        pathname = action.path;
       } else if (action.displayComponent === "splash") {
-        pathname = "/";
+        pathname = action.path;
       } else if (pathname.startsWith(`/${action.displayComponent}`)) {
         // leave the pathname alone!
       } else {
         pathname = action.displayComponent;
       }
       break;
+    case types.REMOVE_TREE_TOO: // fallthrough
+    case types.TREE_TOO_DATA: {
+      const fields = pathname.split("/");
+      let treeIdx;
+      fields.forEach((f, i) => {
+        if (f === state.tree.name || f.startsWith(state.tree.name+":")) {
+          treeIdx = i;
+        }
+      });
+      if (!treeIdx) {
+        console.warn("Couldn't work out tree name in URL!");
+        break;
+      }
+      fields[treeIdx] = action.type === types.TREE_TOO_DATA ?
+        `${fields[treeIdx].split(":")[0]}:${action.segment}` :
+        fields[treeIdx].split(":")[0];
+      pathname = fields.join("/");
+      break;
+    }
     default:
       break;
   }
@@ -149,9 +179,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     } else {
       window.history.replaceState({}, "", newURLString);
     }
-    next({type: types.URL, path: pathname, query: search});
-  } else if (pathname !== state.datasets.urlPath && action.type === types.PAGE_CHANGE) {
-    next({type: types.URL, path: pathname, query: search});
+    next({type: types.UPDATE_PATHNAME, pathname: pathname});
+  } else if (pathname !== state.general.pathname && action.type === types.PAGE_CHANGE) {
+    next({type: types.UPDATE_PATHNAME, pathname: pathname});
   }
 
   return result;

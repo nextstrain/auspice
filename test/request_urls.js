@@ -39,5 +39,3 @@ const isValidURLCallback = (url) => {
 
 it('loads the spash page as expected', isValidURLCallback('http://localhost:4000'));
 it('loads /zika', isValidURLCallback('http://localhost:4000/zika'));
-it('returns a valid guest manifest (JSON) via API', isValidJSONCallback('http://localhost:4000/charon?request=manifest&user=guest'));
-it('returns a valid mumps manifest (JSON) via API', isValidJSONCallback('http://localhost:4000/charon?request=manifest&user=mumps'));

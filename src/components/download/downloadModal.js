@@ -45,7 +45,6 @@ export const publications = {
   browserDimensions: state.browserDimensions.browserDimensions,
   show: state.controls.showDownload,
   colorBy: state.controls.colorBy,
-  datapath: state.datasets.datapath,
   metadata: state.metadata,
   tree: state.tree,
   dateMin: state.controls.dateMin,
@@ -154,7 +153,12 @@ class DownloadModal extends React.Component {
     );
   }
   getFilePrefix() {
-    return "nextstrain_" + this.props.datapath.replace(/^\//, '').replace(/\//g, '_');
+    return "nextstrain_"
+      + window.location.pathname
+          .replace(/^\//, '')       // Remove leading slashes
+          .replace(/:[^\/]+/g, '')  // Remove any second tree (treeTwo/treeToo) designation.
+                                    //   We only export the first tree.
+          .replace(/\//g, '_');     // Replace slashes with spaces
   }
   makeTextStringsForSVGExport() {
     const x = [];

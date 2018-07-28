@@ -11,9 +11,8 @@ const frequencies = (state = {
 }, action) => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: // fallthrough
-    case types.CLEAN_START:
-      if (action.frequencies) return action.frequencies;
-      return state;
+    case types.LOAD_FREQUENCIES:
+      return action.frequencies ? action.frequencies : state;
     case types.FREQUENCY_MATRIX: {
       return Object.assign({}, state, {loaded: true, matrix: action.matrix, version: state.version + 1});
     }

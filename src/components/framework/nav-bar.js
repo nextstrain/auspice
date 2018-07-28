@@ -137,7 +137,9 @@ class NavBar extends React.Component {
   render() {
     const styles = this.getStyles();
     if (this.props.narrativeLoaded) {
-      const onClick = () => {this.props.dispatch({ type: TOGGLE_NARRATIVE});};
+      const onClick = () => {
+        this.props.dispatch({type: TOGGLE_NARRATIVE, display: !this.props.narrativeDisplayed});
+      };
       const text = this.props.narrativeDisplayed ? "show controls" : "show narrative";
       return (
         <Flex style={styles.main}>
