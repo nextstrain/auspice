@@ -148,11 +148,19 @@ const maybeConstructTransmissionEvent = (
     // node.attr[geoResolution] is the node's location, we're looking that up in the metadata lookup table
     latOrig = metadataGeoLookupTable[geoResolution][node.attr[geoResolution]].latitude;
     longOrig = metadataGeoLookupTable[geoResolution][node.attr[geoResolution]].longitude;
+  } catch (e) {
+    console.warn("No transmission lat/longs for ",node.attr[geoResolution], " -> ",child.attr[geoResolution], "If this wasn't fired in the context of a dataset change, it's probably a bug.")
+    latOrig = 0.0;
+    longOrig = 0.0;
+  }
+  try {
+    // node.attr[geoResolution] is the node's location, we're looking that up in the metadata lookup table
     latDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].latitude;
     longDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].longitude;
   } catch (e) {
-    // console.warn("No transmission lat/longs for ", countries[0], " -> ", countries[1], "If this wasn't fired in the context of a dataset change, it's probably a bug.")
-    return undefined;
+    console.warn("No transmission lat/longs for ",node.attr[geoResolution], " -> ",child.attr[geoResolution], "If this wasn't fired in the context of a dataset change, it's probably a bug.")
+    latDest = 0.0;
+    longDest = 0.0;
   }
 
   const validLatLongPair = maybeGetTransmissionPair(
@@ -259,7 +267,6 @@ const setupTransmissionData = (
   const metadataGeoLookupTable = metadata.geo;
   const transmissionData = []; /* edges, animation paths */
   const transmissionIndices = {}; /* map of transmission id to array of indices */
-
   nodes.forEach((n) => {
     if (n.children) {
       n.children.forEach((child) => {
@@ -381,7 +388,6 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
 };
 
 const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
-
   const transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
   nodes.forEach((node) => {
     if (node.children) {
