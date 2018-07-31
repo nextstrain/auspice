@@ -135,6 +135,8 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   this.geneGraph.selectAll("*").remove();
   const geneHeight = 20; // 20;
   // Can we plot this differently if all genes are +1 strand - so gap isn't there?
+  const posInSequence = this.scales.xNav.domain()[1] - this.scales.xNav.domain()[0];
+  const strokeCol = posInSequence < 1e6 ? "white" : "black"; /* black for large because otherwise disappear against background */
   const readingFrameOffset = (frame) => frame===-1 ? 20 : 0; // 5*frame; // eslint-disable-line no-unused-vars
   const visibleAnnots = annotations.filter((annot) => /* try to prevent drawing genes if not visible */
     (annot.start < this.scales.xGene.domain()[1] && annot.start > this.scales.xGene.domain()[0]) ||
@@ -153,7 +155,7 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
     .attr("width", (d) => endG(d) - startG(d))
     .attr("height", geneHeight)
     .style("fill", (d) => d.fill)
-    .style("stroke", () => "black");
+    .style("stroke", () => strokeCol); 
   selection.append("text")
     .attr("x", (d) =>
       this.scales.xGene(d.start) + (this.scales.xGene(d.end) - this.scales.xGene(d.start)) / 2
@@ -171,8 +173,8 @@ EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
   const readingFrameOffset = (frame) => 5; // eslint-disable-line no-unused-vars
   const posInSequence = this.scales.xNav.domain()[1] - this.scales.xNav.domain()[0];
   const strokeCol = posInSequence < 1e6 ? "white" : "black";
-  const startG = (d) => d.start > this.scales.xGene.domain()[0] ? this.scales.xGene(d.start) : this.offsets.x1;
-  const endG = (d) => d.end < this.scales.xGene.domain()[1] ? this.scales.xGene(d.end) : this.offsets.x2;
+  const startG = (d) => d.start > this.scales.xNav.domain()[0] ? this.scales.xNav(d.start) : this.offsets.x1;
+  const endG = (d) => d.end < this.scales.xNav.domain()[1] ? this.scales.xNav(d.end) : this.offsets.x2;
   const selection = this.navGraph.selectAll(".gene")
     .data(annotations)
     .enter()
