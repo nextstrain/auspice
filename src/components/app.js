@@ -100,8 +100,6 @@ const Overlay = ({styles, mobileDisplay, handler}) => {
 };
 
 @connect((state) => ({
-  readyToLoad: state.datasets.ready,
-  datapath: state.datasets.datapath,
   metadataLoaded: state.metadata.loaded,
   treeLoaded: state.tree.loaded,
   panelsToDisplay: state.controls.panelsToDisplay,
@@ -135,9 +133,7 @@ class App extends React.Component {
     }
   }
   componentWillMount() {
-    if (this.props.datapath) { /* datapath (pathname) only appears after manifest JSON has arrived */
-      this.props.dispatch(loadJSONs());
-    }
+    this.props.dispatch(loadJSONs()); // choose via URL
   }
   componentDidMount() {
     document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
@@ -145,11 +141,6 @@ class App extends React.Component {
       e.preventDefault();
       return this.props.dispatch(filesDropped(e.dataTransfer.files));
     }, false);
-  }
-  componentDidUpdate(prevProps) {
-    if (prevProps.datapath !== this.props.datapath) {
-      this.props.dispatch(loadJSONs());
-    }
   }
   render() {
     /* D I M E N S I O N S */

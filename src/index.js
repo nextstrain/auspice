@@ -32,7 +32,7 @@ if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
 /* google analytics */
 ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-2");
 
-@connect((state) => ({displayComponent: state.datasets.displayComponent}))
+@connect((state) => ({displayComponent: state.general.displayComponent}))
 class MainComponentSwitch extends React.Component {
   render() {
     // console.log("MainComponentSwitch running (should be infrequent!)", this.props.displayComponent)
@@ -41,7 +41,7 @@ class MainComponentSwitch extends React.Component {
       case "app" : return (<App/>);
       case "status" : return (<Status/>);
       default:
-        console.error(`reduxStore.datasets.displayComponent is invalid (${this.props.displayComponent})`);
+        console.error(`reduxStore.general.displayComponent is invalid (${this.props.displayComponent})`);
         return (<Splash/>);
     }
   }

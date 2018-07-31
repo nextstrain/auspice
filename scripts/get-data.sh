@@ -1,3 +1,4 @@
+#!/bin/bash
 data_files=(
   "manifest_guest.json" \
   "img_mumps.png" "img_dengue.png" "img_avianinfluenza.png" "img_seasonalinfluenza.png" "img_ebola.png" "img_zika.png" "img_measles.png" "img_lassa.jpg" "img_wnv.png"\

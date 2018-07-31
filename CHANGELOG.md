@@ -1,7 +1,30 @@
+## version 1.23.2 - 2018/07/30
+
+## version 1.23.1 - 2018/07/30
+
+## version 1.23.0 - 2018/07/28
+
+* The server no longer needs to be transpiled
+* The interaction between data sources (local / staging / live) has been changed.
+  * The first part of the URL now defines the source, e.g. /flu is live, /local/flu is local, /staging/flu...
+  * Accordingly, `npm run server.js localData` no longer has the effect it used to!
+  * Github committed JSONs are now accessible via /community/orgName/repoName (slightly experimental and subject to change)
+* JSONs are now delivered to the client using compression (when available)
+* Frequency JSONs are only fetched when the frequency panel is specified (in the meta JSON)
+* The server combines the tree & meta JSONs into a single "unified" JSON, in preparation for a move to v2.0 JSONs.
+* Manifest files / parsing have been moved from the server
+* Various improvements to the narratives (still experimental and the API is subject to change)
+* Second trees are specified by `/na:ha/` rather than `/na/...?tt=ha`. The old syntax is still supported for backwards compatibility.
+
+
 ## version 1.22.3 - 2018/07/19
+* Trigger Docker Hub automated build to rebuild via Travis CI when master branch is pushed and tests are successful
+* Simplify counting of traits across tree
+* Improve README
+* Remove Electron
+* Restored the ability to run the non-dev server with local data [PR 589](https://github.com/nextstrain/auspice/pull/589)
 
 ## version 1.22.2 - 2018/07/10
-
 * Bugfix in tip attribute counting algorithm
 
 ## version 1.22.1 - 2018/07/09

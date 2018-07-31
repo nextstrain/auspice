@@ -12,7 +12,7 @@ import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale } from "../util/colorScale";
-import { processFrequenciesJSON, computeMatrixFromRawData } from "../util/processFrequencies";
+import { computeMatrixFromRawData } from "../util/processFrequencies";
 
 export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -359,7 +359,7 @@ const removePanelIfPossible = (panels, name) => {
   }
 };
 
-const modifyControlsViaTreeToo = (controls, treeToo, name) => {
+const modifyControlsViaTreeToo = (controls, name) => {
   controls.showTreeToo = name;
   controls.showTangle = true;
   controls.layout = "rect"; /* must be rectangular for two trees */
@@ -373,17 +373,16 @@ const modifyControlsViaTreeToo = (controls, treeToo, name) => {
 };
 
 export const createStateFromQueryOrJSONs = ({
-  JSONs = false, /* raw json data - completely nuke existing redux state */
+  json = false, /* raw json data - completely nuke existing redux state */
   oldState = false, /* existing redux state (instead of jsons) */
-  treeName = undefined,
+  narrativeBlocks = false,
   query
 }) => {
-  let tree, treeToo, entropy, controls, metadata, frequencies, narrative;
+  let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
   /* first task is to create metadata, entropy, controls & tree partial state */
-  if (JSONs) {
-    if (JSONs.narrative) narrative = JSONs.narrative;
+  if (json) {
     /* create metadata state */
-    metadata = JSONs.meta;
+    metadata = json.meta;
     if (metadata === undefined) {
       metadata = {};
     }
@@ -396,16 +395,20 @@ export const createStateFromQueryOrJSONs = ({
     /* entropy state */
     entropy = entropyCreateStateFromJsons(metadata);
     /* new tree state(s) */
-    tree = treeJsonToState(JSONs.tree, metadata.vaccine_choices);
+    tree = treeJsonToState(json.tree, metadata.vaccine_choices);
     tree.debug = "LEFT";
-    if (JSONs.treeToo) {
-      treeToo = treeJsonToState(JSONs.treeToo, metadata.vaccine_choices);
+    if (json.treeTwo) {
+      treeToo = treeJsonToState(json.treeTwo, metadata.vaccine_choices);
       treeToo.debug = "RIGHT";
+      treeToo.name = json._treeTwoName;
     }
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
     controls = modifyStateViaTree(controls, tree, treeToo);
     controls = modifyStateViaMetadata(controls, metadata);
+    controls.available = json["_available"];
+    controls.source = json["_source"];
+    controls.datasetFields = json["_datasetFields"];
   } else if (oldState) {
     /* revisit this - but it helps prevent bugs */
     controls = {...oldState.controls};
@@ -414,14 +417,11 @@ export const createStateFromQueryOrJSONs = ({
     treeToo = {...oldState.treeToo};
     metadata = {...oldState.metadata};
     frequencies = {...oldState.frequencies};
-
     controls = restoreQueryableStateToDefaults(controls);
-    if (query.tt && !treeToo.loaded) {
-      console.log("TO DO - loAd 2nD tree (via a delayed fetch / now?!?!)");
-    }
   }
 
-  if (narrative) {
+  if (narrativeBlocks) {
+    narrative = narrativeBlocks;
     const n = parseInt(query.n, 10) || 1;
     controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
     query = {n}; // eslint-disable-line
@@ -433,7 +433,7 @@ export const createStateFromQueryOrJSONs = ({
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  if (JSONs || controls.colorBy !== oldState.colorBy) {
+  if (json || controls.colorBy !== oldState.colorBy) {
     const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
     const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;
@@ -447,7 +447,7 @@ export const createStateFromQueryOrJSONs = ({
     treeToo.nodeColorsVersion = tree.nodeColorsVersion;
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
     treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, controls);
-    controls = modifyControlsViaTreeToo(controls, treeToo, query.tt);
+    controls = modifyControlsViaTreeToo(controls, treeToo.name);
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
   }
 
@@ -458,11 +458,8 @@ export const createStateFromQueryOrJSONs = ({
     entropy.maxYVal = entropyMaxYVal;
   }
 
-  /* potentially calculate frequency (or update it!)
-  this needs to come after the colorscale & tree is set */
-  if (JSONs && JSONs.frequencies) {
-    frequencies = {loaded: true, version: 1, ...processFrequenciesJSON(JSONs.frequencies, tree, controls)};
-  } else if (frequencies && frequencies.loaded) { /* oldState */
+  /* update frequencies if they exist (not done for new JSONs) */
+  if (frequencies && frequencies.loaded) {
     frequencies.version++;
     frequencies.matrix = computeMatrixFromRawData(
       frequencies.data,
@@ -474,10 +471,11 @@ export const createStateFromQueryOrJSONs = ({
     );
   }
 
-  if (treeName) {
-    tree.name = treeName;
+  if (json["_treeName"]) {
+    tree.name = json["_treeName"];
   }
-  return {tree, treeToo, metadata, entropy, controls, frequencies, narrative, query};
+  const url = json["_url"]; // injected by the server. Will be picked up by middleware.
+  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query, url};
 };
 
 export const createTreeTooState = ({
@@ -491,7 +489,7 @@ export const createTreeTooState = ({
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo.debug = "RIGHT";
   controls = modifyStateViaTree(controls, oldState.tree, treeToo);
-  controls = modifyControlsViaTreeToo(controls, treeToo, segment);
+  controls = modifyControlsViaTreeToo(controls, segment);
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, controls);
 
   /* calculate colours if loading from JSONs or if the query demands change */
