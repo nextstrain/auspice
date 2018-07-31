@@ -454,14 +454,6 @@ EntropyChart.prototype._addZoomLayers = function _addZoomLayers() {
     this.svg.selectAll(".overlay").remove();
     this.svg.selectAll(".brush").remove();
     this._addBrush();
-   /* this.gBrush = this.navGraph.append("g")
-      .attr("class", "brush")
-      .attr("stroke-width", 0)
-      .call(this.brush)
-      .call(this.brush.move, () => {
-        return this.zoomCoordinates.map(this.scales.xNav);
-      // return this.scales.xMain.range();
-      }); */
   }, "keyup");
 };
 
