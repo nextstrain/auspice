@@ -34,6 +34,12 @@ EntropyChart.prototype.render = function render(props) {
   this._drawMainNavElements();
   this._addZoomLayers();
   this._setScales(this.maxNt + 1, props.maxYVal);
+  this.zoomCoordinates = props.colorBy.startsWith("gt") ?
+    this._getZoomCoordinates(parseEncodedGenotype(props.colorBy, props.geneLength), props.geneMap) :
+    this.scales.xNav.domain(); // []; /* set zoom to specified gene or to whole genome */
+  console.log("zoomCoords 1", this.zoomCoordinates);
+  console.log("xnav range: ", this.scales.xNav.domain());
+  this.zoomCoordinates = [2287838, 2290082];  // this.scales.xNav.range()
   this._drawAxes();
   this._addBrush();
   this._addClipMask();
@@ -42,6 +48,7 @@ EntropyChart.prototype.render = function render(props) {
   this.okToDrawBars = true;
   this._drawBars();
   this.zoomed = this._createZoomFn();
+  // this._zoom(2287838, 2290082);
 };
 
 EntropyChart.prototype.update = function update({
@@ -84,6 +91,16 @@ EntropyChart.prototype.update = function update({
 /* convert amino acid X in gene Y to a nucleotide number */
 EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
   return this.geneMap[gene].start + aaPos * 3;
+};
+
+EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed, geneMap) {
+  console.log("parsed", parsed);
+  if (!parsed[0].aa) return [];
+  const gene = parsed[0].prot;
+  const geneLength = geneMap[gene].end - geneMap[gene].start;
+  // return [geneMap[gene].start, geneMap[gene].end];
+  return [Math.max(geneMap[gene].start-(1.5*geneLength), 0),
+    Math.min(geneMap[gene].end+(1.5*geneLength), this.scales.xNav.domain()[1])];
 };
 
 EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
@@ -158,8 +175,8 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
 EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
   const geneHeight = 20;
   const readingFrameOffset = (frame) => 5; // eslint-disable-line no-unused-vars
-  const posInView = this.scales.xMain.domain()[1] - this.scales.xMain.domain()[0];
-  const strokeCol = posInView < 1e6 ? "white" : "black";
+  const posInSequence = this.scales.xNav.domain()[1] - this.scales.xNav.domain()[0];
+  const strokeCol = posInSequence < 1e6 ? "white" : "black";
   const startG = (d) => d.start > this.scales.xGene.domain()[0] ? this.scales.xGene(d.start) : this.offsets.x1;
   const endG = (d) => d.end < this.scales.xGene.domain()[1] ? this.scales.xGene(d.end) : this.offsets.x2;
   const selection = this.navGraph.selectAll(".gene")
@@ -200,7 +217,7 @@ EntropyChart.prototype._clearSelectedBars = function _clearSelectedBars() {
 
 EntropyChart.prototype._highlightSelectedBars = function _highlightSelectedBars() {
   for (const d of this.selectedNodes) {
-    if (this.aa && !d.prot) return; /*if we've switched from NT to AA by selecting a gene, don't try to highlight NT position! */
+    if (this.aa && !d.prot) return; /* if we've switched from NT to AA by selecting a gene, don't try to highlight NT position! */
     const id = this.aa ? `#prot${d.prot}${d.codon}` : `#nt${d.x}`;
     const fillVal = this.aa ?
       this.geneMap[d.prot].fill :
@@ -347,20 +364,35 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
 
 /* the brush is the shaded area in the nav window */
 EntropyChart.prototype._addBrush = function _addBrush() {
+  console.log("addbrush");
   this.brushed = function brushed() {
+    console.log("brushed");
     /* this block called when the brush is manipulated */
     const s = d3event.selection || this.scales.xNav.range(); // (this.scales.xNav.domain()); // range();
-    // console.log("brushed", s); // , this.scales);
+    console.log("d3event in brushed", s === d3event.selection);
+    console.log("d3event selection", d3event.selection);
+    console.log("brushed", s); // , this.scales);
     // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
     const start_end = s.map(this.scales.xNav.invert, this.scales.xNav);
+    this.zoomCoordinates = start_end;
+    console.log("start_end", start_end);
     if (!d3event.selection) { /* This keeps brush working if user clicks rather than click-drag! */
       this.navGraph.select(".brush")
-        .call(this.brush.move, () => {  
+        .call(this.brush.move, () => {
+          this.zoomCoordinates = this.scales.xNav.range();
           return this.scales.xNav.range();
         });
     } else {
+    //  if (d3event.sourceEvent === null) { /* if first load */
+    //    this.navGraph.select(".brush")
+    //    .call(this.brush.move, () => {
+    //      return this.zoomCoordinates.map(this.scales.xNav);
+    //    });
+    //  } else {
       this._zoom(start_end[0], start_end[1]);
+    //  }
     }
+    console.log("zoom coords: ", this.zoomCoordinates);
   };
 
   this._zoom = function _zoom(start, end) {
@@ -373,7 +405,9 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     this.svg.select(".xMain.axis").call(this.axes.xMain);
     this._drawBars();
     this._drawZoomGenes(this.annotations);
+    console.log("brush handle object", this.brushHandle);
     if (this.brushHandle) {
+      console.log("brush handle inside zoom");
       this.brushHandle
         .attr("display", null)
         .attr("transform", (d, i) => "translate(" + this.scales.xNav(s[i]) + "," + (this.offsets.heightNav + 25) + ")");
@@ -383,7 +417,9 @@ EntropyChart.prototype._addBrush = function _addBrush() {
   this.brush = brushX()
     /* the extent is relative to the navGraph group - the constants are a bit hacky... */
     .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 25]])
+    // .extent([[this.offsets.x1+50, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 25]])
     .on("brush end", () => { // https://github.com/d3/d3-brush#brush_on
+      console.log("brushX", this.offsets.x1, this.offsets.x2);
       this.brushed();
     });
   this.gBrush = this.navGraph.append("g")
@@ -391,7 +427,10 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     .attr("stroke-width", 0)
     .call(this.brush)
     .call(this.brush.move, () => {
-      return this.scales.xMain.range();
+      console.log("gBrush", this.scales.xMain.range());
+      console.log("gBrush2", this.zoomCoordinates.map(this.scales.xNav));
+      return this.zoomCoordinates.map(this.scales.xNav);
+      // return this.scales.xMain.range();
     });
 
   /* https://bl.ocks.org/mbostock/4349545 */
@@ -405,8 +444,10 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     /* see the extent x,y params in brushX() (above) */
     .attr("transform", (d) =>
       d.type === "e" ?
-        "translate(" + (this.offsets.x2 - 1) + "," + (this.offsets.heightNav + 25) + ")" :
-        "translate(" + (this.offsets.x1 + 1) + "," + (this.offsets.heightNav + 25) + ")"
+        "translate(" + (this.scales.xNav(this.zoomCoordinates[1]) - 1) + "," + (this.offsets.heightNav + 25) + ")" :
+        "translate(" + (this.scales.xNav(this.zoomCoordinates[0]) + 1) + "," + (this.offsets.heightNav + 25) + ")"
+        // "translate(" + (this.offsets.x2 - 1) + "," + (this.offsets.heightNav + 25) + ")" :
+        // "translate(" + (this.offsets.x1 + 1) + "," + (this.offsets.heightNav + 25) + ")"
     );
 };
 

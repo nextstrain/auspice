@@ -25,7 +25,7 @@
 
 /* HARDCODED CONSTANTS */
 const xPaddingOneCard = 40; // derived from empirical testing, depends on Card margins
-const xPaddingTwoCards = 65; // 56 works fine on chrome, mac-firefox, but not on IE, linux/windows firefox.
+const xPaddingTwoCards = 100; // 56 works fine on chrome, mac-firefox, but not on IE, linux/windows firefox.
 const verticalPadding = 52;
 
 export const calcUsableWidth = (availableWidth, fraction) => {
