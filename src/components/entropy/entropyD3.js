@@ -143,7 +143,8 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   const readingFrameOffset = (frame) => !hasTwoReadFrames ? 10 : frame===-1 ? 20 : 0;
   const visibleAnnots = annotations.filter((annot) => /* try to prevent drawing genes if not visible */
     (annot.start < this.scales.xGene.domain()[1] && annot.start > this.scales.xGene.domain()[0]) ||
-    (annot.end > this.scales.xGene.domain()[0] && annot.end < this.scales.xGene.domain()[1]));
+    (annot.end > this.scales.xGene.domain()[0] && annot.end < this.scales.xGene.domain()[1]) ||
+    (annot.start < this.scales.xGene.domain()[0] && annot.end > this.scales.xGene.domain()[1])); // for extreme zoom
   const startG = (d) => d.start > this.scales.xGene.domain()[0] ? this.scales.xGene(d.start) : this.offsets.x1;
   const endG = (d) => d.end < this.scales.xGene.domain()[1] ? this.scales.xGene(d.end) : this.offsets.x2;
   const selection = this.geneGraph.selectAll(".gene")
@@ -430,17 +431,19 @@ EntropyChart.prototype._addZoomLayers = function _addZoomLayers() {
     [this.offsets.x1, this.offsets.y1Main],
     [this.offsets.width, this.offsets.y2Main]
   ];
+
   this.zoom = zoom()
-    .scaleExtent([1, 8])
+    // .scaleExtent([1, 8]) /* seems to impact mouse scroll zooming */
     .translateExtent(zoomExtents)
     .extent(zoomExtents)
     .on("zoom", () => this.zoomed());
 
   /* the overlay should be dependent on whether you have certain keys pressed */
-  const zoomKeys = ["option"];
+  const zoomKeys = ["option", "shift"];
   Mousetrap.bind(zoomKeys, () => {
     this.svg.append("rect")
       .attr("class", "overlay")
+      .attr("text", "zoom")
       .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Main + ")")
       .attr("width", this.offsets.width)
       .attr("height", this.offsets.y2Nav + 30 - this.offsets.y1Main)
@@ -449,28 +452,45 @@ EntropyChart.prototype._addZoomLayers = function _addZoomLayers() {
   }, "keydown");
   Mousetrap.bind(zoomKeys, () => {
     this.svg.selectAll(".overlay").remove();
+    this.svg.selectAll(".brush").remove();
+    this._addBrush();
+   /* this.gBrush = this.navGraph.append("g")
+      .attr("class", "brush")
+      .attr("stroke-width", 0)
+      .call(this.brush)
+      .call(this.brush.move, () => {
+        return this.zoomCoordinates.map(this.scales.xNav);
+      // return this.scales.xMain.range();
+      }); */
   }, "keyup");
 };
 
 EntropyChart.prototype._createZoomFn = function _createZoomFn() {
   return function zoomed() {
     const t = d3event.transform;
-    /* rescale the x axis (not y) */
+    const zoomCoordLen = this.zoomCoordinates[1] - this.zoomCoordinates[0];
+    const amountZoomChange = (zoomCoordLen - (zoomCoordLen/t.k))/2;
+    const tempZoomCoordinates = [Math.max(this.zoomCoordinates[0]+amountZoomChange, this.scales.xNav(0)),
+      Math.min(this.zoomCoordinates[1]-amountZoomChange, this.scales.xNav.domain()[1])];
+    if (tempZoomCoordinates[1]-tempZoomCoordinates[0] < 30) return; // don't allow crazy zoom below basepair level
+    this.zoomCoordinates = tempZoomCoordinates;
+
+    /* rescale the x axis (not y) */  // does this do anything?? Unsure.
     this.xModified = t.rescaleX(this.scales.xMainOriginal);
     this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
     this.svg.select(".xMain.axis").call(this.axes.xMain);
     this._drawBars();
 
-    const t2 = d3event.transform;
+    /* const t2 = d3event.transform;
     this.xGeneModified = t2.rescaleX(this.scales.xGeneOriginal);
     this.axes.xGene = this.axes.xGene.scale(this.scales.xGene);
-    this.svg.select(".xGene.axis").call(this.axes.xGene);
+    this.svg.select(".xGene.axis").call(this.axes.xGene); */
     this._drawZoomGenes(this.annotations);
 
     /* move the brush */
     this.navGraph.select(".brush")
       .call(this.brush.move, () => {
-        return this.scales.xMain.range().map(t.invertX, t);
+        return this.zoomCoordinates.map(this.scales.xNav); // go wherever we're supposed to be
       });
   };
 };
@@ -492,6 +512,7 @@ EntropyChart.prototype._addClipMask = function _addClipMask() {
   /* https://bl.ocks.org/mbostock/4015254 */
   this.svg.append("g")
     .append("clipPath")
+    .attr("class", "clipPath")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y1Main + ")")
     .attr("id", "clip")
     .append("rect")
