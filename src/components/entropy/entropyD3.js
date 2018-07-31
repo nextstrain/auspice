@@ -133,11 +133,14 @@ EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
 /* draw the genes Gene (annotations) */
 EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   this.geneGraph.selectAll("*").remove();
-  const geneHeight = 20; // 20;
-  // Can we plot this differently if all genes are +1 strand - so gap isn't there?
+  const negStrand = annotations.filter((annot) =>
+    annot.readingFrame === -1);
+  /* positions seqs with genes on only 1 reading frame in middle to minimise white space */
+  const hasTwoReadFrames = negStrand.length !== 0 && negStrand.length !== annotations.length;
+  const geneHeight = 20;
   const posInSequence = this.scales.xNav.domain()[1] - this.scales.xNav.domain()[0];
   const strokeCol = posInSequence < 1e6 ? "white" : "black"; /* black for large because otherwise disappear against background */
-  const readingFrameOffset = (frame) => frame===-1 ? 20 : 0; // 5*frame; // eslint-disable-line no-unused-vars
+  const readingFrameOffset = (frame) => !hasTwoReadFrames ? 10 : frame===-1 ? 20 : 0;
   const visibleAnnots = annotations.filter((annot) => /* try to prevent drawing genes if not visible */
     (annot.start < this.scales.xGene.domain()[1] && annot.start > this.scales.xGene.domain()[0]) ||
     (annot.end > this.scales.xGene.domain()[0] && annot.end < this.scales.xGene.domain()[1]));
