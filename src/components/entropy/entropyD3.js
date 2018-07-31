@@ -37,9 +37,6 @@ EntropyChart.prototype.render = function render(props) {
   this.zoomCoordinates = props.colorBy.startsWith("gt") ?
     this._getZoomCoordinates(parseEncodedGenotype(props.colorBy, props.geneLength), props.geneMap) :
     this.scales.xNav.domain(); // []; /* set zoom to specified gene or to whole genome */
-  console.log("zoomCoords 1", this.zoomCoordinates);
-  console.log("xnav range: ", this.scales.xNav.domain());
-  this.zoomCoordinates = [2287838, 2290082];  // this.scales.xNav.range()
   this._drawAxes();
   this._addBrush();
   this._addClipMask();
@@ -48,7 +45,6 @@ EntropyChart.prototype.render = function render(props) {
   this.okToDrawBars = true;
   this._drawBars();
   this.zoomed = this._createZoomFn();
-  // this._zoom(2287838, 2290082);
 };
 
 EntropyChart.prototype.update = function update({
@@ -94,11 +90,9 @@ EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
 };
 
 EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed, geneMap) {
-  console.log("parsed", parsed);
-  if (!parsed[0].aa) return [];
+  if (!parsed[0].aa) return this.scales.xNav.domain();
   const gene = parsed[0].prot;
   const geneLength = geneMap[gene].end - geneMap[gene].start;
-  // return [geneMap[gene].start, geneMap[gene].end];
   return [Math.max(geneMap[gene].start-(1.5*geneLength), 0),
     Math.min(geneMap[gene].end+(1.5*geneLength), this.scales.xNav.domain()[1])];
 };
@@ -281,7 +275,6 @@ EntropyChart.prototype._setScales = function _setScales(xMax, yMax) {
   this.scales.xMin = 0;
   this.scales.xMainOriginal = scaleLinear()
     .domain([0, xMax])
-    // .range([0, this.offsets.width])
     .range([this.offsets.x1, this.offsets.x2]);
   this.scales.xMain = this.scales.xMainOriginal;
   this.scales.xNav = scaleLinear()
@@ -321,10 +314,6 @@ EntropyChart.prototype._drawAxes = function _drawAxes() {
     .attr("class", "xNav axis")
     .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y2Nav + ")")
     .call(this.axes.xNav);
-  /* this.svg.append("g")
-    .attr("class", "xGene axis")
-    .attr("transform", "translate(" + this.offsets.x1 + "," + this.offsets.y2Gene + ")")
-    .call(this.axes.xGene);  */
 };
 
 EntropyChart.prototype._updateYScaleAndAxis = function _updateYScaleAndAxis(yMax) {
@@ -364,18 +353,13 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
 
 /* the brush is the shaded area in the nav window */
 EntropyChart.prototype._addBrush = function _addBrush() {
-  console.log("addbrush");
   this.brushed = function brushed() {
-    console.log("brushed");
     /* this block called when the brush is manipulated */
     const s = d3event.selection || this.scales.xNav.range(); // (this.scales.xNav.domain()); // range();
-    console.log("d3event in brushed", s === d3event.selection);
-    console.log("d3event selection", d3event.selection);
-    console.log("brushed", s); // , this.scales);
+    // console.log("brushed", s); // , this.scales);
     // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
     const start_end = s.map(this.scales.xNav.invert, this.scales.xNav);
     this.zoomCoordinates = start_end;
-    console.log("start_end", start_end);
     if (!d3event.selection) { /* This keeps brush working if user clicks rather than click-drag! */
       this.navGraph.select(".brush")
         .call(this.brush.move, () => {
@@ -383,16 +367,8 @@ EntropyChart.prototype._addBrush = function _addBrush() {
           return this.scales.xNav.range();
         });
     } else {
-    //  if (d3event.sourceEvent === null) { /* if first load */
-    //    this.navGraph.select(".brush")
-    //    .call(this.brush.move, () => {
-    //      return this.zoomCoordinates.map(this.scales.xNav);
-    //    });
-    //  } else {
       this._zoom(start_end[0], start_end[1]);
-    //  }
     }
-    console.log("zoom coords: ", this.zoomCoordinates);
   };
 
   this._zoom = function _zoom(start, end) {
@@ -400,14 +376,10 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     this.xModified = this.scales.xMain.domain(s);
     this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
     this.xGeneModified = this.scales.xGene.domain(s);
-    /* this.axes.xGene = this.axes.xGene.scale(this.scales.xGene);
-    this.svg.select(".xGene.axis").call(this.axes.xGene); */
     this.svg.select(".xMain.axis").call(this.axes.xMain);
     this._drawBars();
     this._drawZoomGenes(this.annotations);
-    console.log("brush handle object", this.brushHandle);
     if (this.brushHandle) {
-      console.log("brush handle inside zoom");
       this.brushHandle
         .attr("display", null)
         .attr("transform", (d, i) => "translate(" + this.scales.xNav(s[i]) + "," + (this.offsets.heightNav + 25) + ")");
@@ -417,9 +389,7 @@ EntropyChart.prototype._addBrush = function _addBrush() {
   this.brush = brushX()
     /* the extent is relative to the navGraph group - the constants are a bit hacky... */
     .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 25]])
-    // .extent([[this.offsets.x1+50, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 25]])
     .on("brush end", () => { // https://github.com/d3/d3-brush#brush_on
-      console.log("brushX", this.offsets.x1, this.offsets.x2);
       this.brushed();
     });
   this.gBrush = this.navGraph.append("g")
@@ -427,8 +397,6 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     .attr("stroke-width", 0)
     .call(this.brush)
     .call(this.brush.move, () => {
-      console.log("gBrush", this.scales.xMain.range());
-      console.log("gBrush2", this.zoomCoordinates.map(this.scales.xNav));
       return this.zoomCoordinates.map(this.scales.xNav);
       // return this.scales.xMain.range();
     });
@@ -446,8 +414,7 @@ EntropyChart.prototype._addBrush = function _addBrush() {
       d.type === "e" ?
         "translate(" + (this.scales.xNav(this.zoomCoordinates[1]) - 1) + "," + (this.offsets.heightNav + 25) + ")" :
         "translate(" + (this.scales.xNav(this.zoomCoordinates[0]) + 1) + "," + (this.offsets.heightNav + 25) + ")"
-        // "translate(" + (this.offsets.x2 - 1) + "," + (this.offsets.heightNav + 25) + ")" :
-        // "translate(" + (this.offsets.x1 + 1) + "," + (this.offsets.heightNav + 25) + ")"
+        /* this makes handles move if initial draw is zoomed! */
     );
 };
 
