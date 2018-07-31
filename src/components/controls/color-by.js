@@ -96,7 +96,6 @@ class ColorBy extends React.Component {
           const gene = opt.value;
           const position = this.state.positionSelected;
           this.setState({geneSelected: gene, positionSelected:gene+" positions..."});
-          console.log("gene position", gene, position);
           this.setGenotypeColoring(gene, position);
         }}
       />

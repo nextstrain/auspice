@@ -169,7 +169,6 @@ export class Entropy extends React.Component {
     }
   }
   componentWillReceiveProps(nextProps) {
-    console.log("inside will receive");
     if (!nextProps.loaded) {
       this.setState({chart: false});
     }
