@@ -255,7 +255,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
   if (this.aa) {
     posInView /= 3;
   }
-  const barWidth = posInView > 10000 ? 1 : posInView > 1000 ? 2 : posInView > 100 ? 3 : 5;
+  const barWidth = posInView > 10000 ? 2 : posInView > 1000 ? 2 : posInView > 100 ? 3 : 5;
   const chart = this.mainGraph.append("g")
     .attr("clip-path", "url(#clip)")
     .selectAll(".bar");
@@ -481,11 +481,13 @@ EntropyChart.prototype._addZoomLayers = function _addZoomLayers() {
 EntropyChart.prototype._createZoomFn = function _createZoomFn() {
   return function zoomed() {
     const t = d3event.transform;
+    console.log("tk", t.k);
     const zoomCoordLen = this.zoomCoordinates[1] - this.zoomCoordinates[0];
     const amountZoomChange = (zoomCoordLen - (zoomCoordLen/t.k))/2;
     const tempZoomCoordinates = [Math.max(this.zoomCoordinates[0]+amountZoomChange, this.scales.xNav(0)),
       Math.min(this.zoomCoordinates[1]-amountZoomChange, this.scales.xNav.domain()[1])];
-    if (tempZoomCoordinates[1]-tempZoomCoordinates[0] < 30) return; // don't allow crazy zoom below basepair level
+    // don't allow to zoom below a certain level - but if below that level (clicked on gene), allow zoom out
+    if ((tempZoomCoordinates[1]-tempZoomCoordinates[0] < 500) && (t.k > 1)) return; 
     this.zoomCoordinates = tempZoomCoordinates;
 
     /* rescale the x axis (not y) */  // does this do anything?? Unsure.
