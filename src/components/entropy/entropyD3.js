@@ -74,10 +74,11 @@ EntropyChart.prototype.update = function update({
   if (gene !== undefined && start !== undefined && end !== undefined) {
     /* move the brush */
     const geneLength = end-start;
+    const multiplier = gene === "nuc" ? 0 : 1.5*geneLength; /* scale genes to decent size, don't scale nucs */
     this.navGraph.select(".brush")
       .call(this.brush.move, () => {  /* scale so genes are a decent size. stop brushes going off graph */
-        return [Math.max(this.scales.xNav(start-(1.5*geneLength)), this.scales.xNav(0)),
-          Math.min(this.scales.xNav(end+(1.5*geneLength)), this.scales.xNav(this.scales.xNav.domain()[1]))];
+        return [Math.max(this.scales.xNav(start-multiplier), this.scales.xNav(0)),
+          Math.min(this.scales.xNav(end+multiplier), this.scales.xNav(this.scales.xNav.domain()[1]))];
       });
   }
 };
@@ -90,11 +91,31 @@ EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
 };
 
 EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed, geneMap) {
-  if (!parsed[0].aa) return this.scales.xNav.domain();
-  const gene = parsed[0].prot;
-  const geneLength = geneMap[gene].end - geneMap[gene].start;
-  return [Math.max(geneMap[gene].start-(1.5*geneLength), 0),
-    Math.min(geneMap[gene].end+(1.5*geneLength), this.scales.xNav.domain()[1])];
+  let startEnd = [0, this.scales.xNav.domain()[1]];
+  let multiplier = 0;
+  if (!parsed[0].aa) {
+    const maxNt = this.scales.xNav.domain()[1];
+    if (parsed[0].positions.length === 1) {
+      const pos = parsed[0].positions[0];
+      const eitherSide = maxNt*0.1;
+      startEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
+        (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
+    } else {
+      const start = Math.min.apply(null, parsed[0].positions);
+      const end = Math.max.apply(null, parsed[0].positions);
+      startEnd = [start - (end-start)*0.1, end + (end-start)*0.1];
+      startEnd = [Math.min.apply(null, parsed[0].positions), Math.max.apply(null, parsed[0].positions)];
+    }
+  } else {
+    const gene = parsed[0].prot;
+    startEnd = [geneMap[gene].start, geneMap[gene].end];
+    multiplier = (startEnd[1]-startEnd[0])*1.5;
+  }
+  return [Math.max(startEnd[0]-multiplier, 0),
+    Math.min(startEnd[1]+multiplier, this.scales.xNav.domain()[1])];
+  //const geneLength = geneMap[gene].end - geneMap[gene].start;
+  //return [Math.max(geneMap[gene].start-(1.5*geneLength), 0),
+  //  Math.min(geneMap[gene].end+(1.5*geneLength), this.scales.xNav.domain()[1])];
 };
 
 EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
@@ -159,7 +180,7 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
     .attr("width", (d) => endG(d) - startG(d))
     .attr("height", geneHeight)
     .style("fill", (d) => d.fill)
-    .style("stroke", () => strokeCol); 
+    .style("stroke", () => strokeCol)
   selection.append("text")
     .attr("x", (d) =>
       this.scales.xGene(d.start) + (this.scales.xGene(d.end) - this.scales.xGene(d.start)) / 2
