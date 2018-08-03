@@ -13,45 +13,60 @@ export const hideGrid = function hideGrid() {
  * @param {layout}
  */
 export const addGrid = function addGrid(layout, yMinView, yMaxView) {
-  timerStart("addGrid");
   if (typeof layout==="undefined") {layout=this.layout;} // eslint-disable-line no-param-reassign
+  if (layout==="unrooted"){return;}
 
-  const xmin = (this.xScale.domain()[0]>0)?this.xScale.domain()[0]:0.0;
+  timerStart("addGrid");
   const ymin = this.yScale.domain()[1];
   const ymax = this.yScale.domain()[0];
-  const xmax = layout === "radial" ?
-    max([this.xScale.domain()[1], this.yScale.domain()[1], -this.xScale.domain()[0], -this.yScale.domain()[0]]) :
+
+  const xmin = layout==="radial" ? this.nodes[0].depth : this.xScale.domain()[0];
+  const xmax = layout==="radial" ?
+    xmin + max([this.xScale.domain()[1], this.yScale.domain()[1], -this.xScale.domain()[0], -this.yScale.domain()[0]]) :
     this.xScale.domain()[1];
 
-  const offset = layout==="radial"?this.nodes[0].depth:0.0;
+  //needed for rectangular or clock layout -- defines the ends of vertical lines
   const viewTop = yMaxView ? yMaxView+this.params.margins.top : this.yScale.range()[0];
   const viewBottom = yMinView ? yMinView-this.params.margins.bottom : this.yScale.range()[1];
-
-
-  /* should we re-draw the grid? */
-  /* not running this block as it failed when the broswer dimensions had changed
-  if (!this.gridParams) {
-    this.gridParams = [xmin, xmax, ymin, ymax, viewTop, viewBottom, layout];
-  } else if (
-    xmin === this.gridParams[0] && xmax === this.gridParams[1] &&
-    ymin === this.gridParams[2] && ymax === this.gridParams[3] &&
-    viewTop === this.gridParams[4] && viewBottom === this.gridParams[5] &&
-    layout === this.gridParams[6]
-  ) {
-    console.log("bailing - no difference");
-    return;
-  }
-  */
 
   /* yes - redraw and update gridParams */
   this.gridParams = [xmin, xmax, ymin, ymax, viewTop, viewBottom, layout];
 
+  // determine grid step
+  const range = xmax - xmin;
+  const logRange = Math.floor(Math.log10(range));
+  let step = Math.pow(10, logRange); // eslint-disable-line no-restricted-properties
+  if (range/step < 2){
+    step = step/5;
+  }else if (range/step <5){
+    step = step/2
+  }
 
+  // determine major grid points
+  const gridMin = Math.floor(xmin/step)*step;
+  const gridPoints = [];
+  const minVis = layout==="radial" ? xmin : gridMin;
+  const maxVis = xmax;
+  for (let ii = 0; ii <= (xmax - gridMin)/step+3; ii++) {
+    const pos = gridMin + step*ii;
+    gridPoints.push([pos, ((pos<minVis)||(pos>maxVis))?"hidden":"visible", "x"]);
+  }
+
+  //determine minor grid points
+  const minorStep = step /
+    (this.distanceMeasure === "num_date"? this.params.minorTicksTimeTree : this.params.minorTicks);
+  const minorGridPoints = [];
+  for (let ii = 0; ii <= (xmax - gridMin)/minorStep+30; ii++) {
+    const pos = gridMin + minorStep*ii;
+    minorGridPoints.push([pos, ((pos<minVis)||(pos>maxVis+minorStep))?"hidden":"visible", "x"]);
+  }
+
+  // function that draws grid lines are circles
   const gridline = function gridline(xScale, yScale, layoutShadow) {
     return (x) => {
-      const xPos = xScale(x[0]-offset);
       let tmp_d="";
       if (layoutShadow==="rect" || layoutShadow==="clock") {
+        const xPos = xScale(x[0]);
         tmp_d = 'M'+xPos.toString() +
           " " +
           viewBottom.toString() +
@@ -60,13 +75,14 @@ export const addGrid = function addGrid(layout, yMinView, yMaxView) {
           " " +
           viewTop.toString();
       } else if (layoutShadow==="radial") {
+        const xPos = xScale(x[0]-xmin);
         tmp_d = 'M '+xPos.toString() +
           "  " +
           yScale(0).toString() +
           " A " +
           (xPos - xScale(0)).toString() +
           " " +
-          (yScale(x[0]) - yScale(offset)).toString() +
+          (yScale(x[0]) - yScale(xmin)).toString() +
           " 0 1 0 " +
           xPos.toString() +
           " " +
@@ -76,17 +92,8 @@ export const addGrid = function addGrid(layout, yMinView, yMaxView) {
     };
   };
 
-  const logRange = Math.floor(Math.log10(xmax - xmin));
-  const roundingLevel = Math.pow(10, logRange); // eslint-disable-line no-restricted-properties
-  const gridMin = Math.floor((xmin+offset)/roundingLevel)*roundingLevel;
-  const gridPoints = [];
-  for (let ii = 0; ii <= (xmax + offset - gridMin)/roundingLevel+10; ii++) {
-    const pos = gridMin + roundingLevel*ii;
-    if (pos>offset) {
-      gridPoints.push([pos, pos-offset>xmax?"hidden":"visible", "x"]);
-    }
-  }
 
+  // add major grid to svg
   const majorGrid = this.svg.selectAll('.majorGrid').data(gridPoints);
 
   majorGrid.exit().remove(); // EXIT
@@ -99,43 +106,7 @@ export const addGrid = function addGrid(layout, yMinView, yMaxView) {
     .style("stroke", this.params.majorGridStroke)
     .style("stroke-width", this.params.majorGridWidth);
 
-  const xTextPos = (xScale, layoutShadow) => (x) => {
-    if (x[2] === "x") {
-      return layoutShadow === "radial" ? xScale(0) : xScale(x[0]);
-    }
-    return xScale.range()[1];
-  };
-  const yTextPos = (yScale, layoutShadow) => (x) => {
-    if (x[2] === "x") {
-      return layoutShadow === "radial" ? yScale(x[0]-offset) : viewBottom + 18;
-    }
-    return yScale(x[0]);
-  };
-
-
-  let logRangeY = 0;
-  if (this.layout==="clock") {
-    const roundingLevelY = Math.pow(10, logRangeY); // eslint-disable-line no-restricted-properties
-    logRangeY = Math.floor(Math.log10(ymax - ymin));
-    const offsetY=0;
-    const gridMinY = Math.floor((ymin+offsetY)/roundingLevelY)*roundingLevelY;
-    for (let ii = 0; ii <= (ymax + offsetY - gridMinY)/roundingLevelY+10; ii++) {
-      const pos = gridMinY + roundingLevelY*ii;
-      if (pos>offsetY) {
-        gridPoints.push([pos, pos-offsetY>ymax ? "hidden" : "visible", "y"]);
-      }
-    }
-  }
-
-  const minorRoundingLevel = roundingLevel /
-    (this.distanceMeasure === "num_date"? this.params.minorTicksTimeTree : this.params.minorTicks);
-  const minorGridPoints = [];
-  for (let ii = 0; ii <= (xmax + offset - gridMin)/minorRoundingLevel+50; ii++) {
-    const pos = gridMin + minorRoundingLevel*ii;
-    if (pos>offset) {
-      minorGridPoints.push([pos, pos-offset>xmax+minorRoundingLevel?"hidden":"visible"]);
-    }
-  }
+  // add minor grid to SVG
   const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
   minorGrid.exit().remove(); // EXIT
   minorGrid.enter().append("path") // ENTER
@@ -147,9 +118,55 @@ export const addGrid = function addGrid(layout, yMinView, yMaxView) {
     .style("stroke", this.params.minorGridStroke)
     .style("stroke-width", this.params.minorGridWidth);
 
+
+
+  const xTextPos = (xScale, layoutShadow) => (x) => {
+    if (x[2] === "x") {
+      if (layoutShadow==="radial"){
+        return xScale(0);
+      }else{
+        return xScale(x[0]);
+      }
+    }else{ // clock layout y ticks
+      return xScale.range()[0]-15;
+    }
+  };
+  const yTextPos = (yScale, layoutShadow) => (x) => {
+    if (x[2] === "x") {
+      return layoutShadow === "radial" ? yScale(x[0]-xmin)-5 : viewBottom + 18;
+    }
+    return yScale(x[0]);
+  };
+
+  const textAnchor = (layoutShadow) => (x) => {
+    if (x[2] === "x") {
+      return layoutShadow === "radial" ? "end" : "middle";
+    }
+    return "start";
+  };
+
+  let yStep = 0;
+  if (this.layout==="clock") {
+    const yRange = ymax-ymin;
+    const logRangeY = Math.floor(Math.log10(yRange));
+    yStep = Math.pow(10, logRangeY);
+    if (yRange/yStep < 2){
+      yStep = yStep/5;
+    }else if (yRange/yStep <5){
+      yStep = yStep/2
+    }
+    const minYVis = gridYMin;
+    const maxYVis = ymax;
+    const gridYMin = Math.floor(ymin/yStep)*yStep;
+    for (let ii = 1; ii <= (ymax - gridYMin)/yStep+10; ii++) {
+      const pos = gridYMin + yStep*ii;
+      gridPoints.push([pos, ((pos<minYVis)||(pos>maxYVis))?"hidden":"visible", "y"]);
+    }
+  }
+
   const gridLabels = this.svg.selectAll('.gridTick').data(gridPoints);
-  const precision = Math.max(0, 1-logRange);
-  const precisionY = Math.max(0, 1-logRangeY);
+  const precision = Math.max(0, -Math.floor(Math.log10(step)));
+  const precisionY = Math.max(0, -Math.floor(Math.log10(yStep)));
   gridLabels.exit().remove(); // EXIT
   gridLabels.enter().append("text") // ENTER
     .merge(gridLabels) // ENTER + UPDATE
@@ -158,7 +175,7 @@ export const addGrid = function addGrid(layout, yMinView, yMaxView) {
     .style("font-size", this.params.tickLabelSize)
     .style("font-family", this.params.fontFamily)
     .style("fill", this.params.tickLabelFill)
-    .style("text-anchor", this.layout==="radial" ? "end" : "middle")
+    .style("text-anchor", textAnchor(layout))
     .style("visibility", (d) => d[1])
     .attr("x", xTextPos(this.xScale, layout))
     .attr("y", yTextPos(this.yScale, layout));
