@@ -199,15 +199,12 @@ export class Entropy extends React.Component {
             updateParams.gene = nextProps.colorBy.split(/-|_/)[1];
             updateParams.start = nextProps.geneMap[updateParams.gene].start;
             updateParams.end = nextProps.geneMap[updateParams.gene].end;
-          } else {
+          } else { /* if a nuc, want to do different things if 1 or multiple */
             const posPos = nextProps.colorBy.split(/-|_/)[2].split(",");
             const positions = posPos.map((position) => parseInt(position, 10));
             const zoomCoord = this.state.chart.zoomCoordinates;
             const maxNt = this.state.chart.maxNt;
-            // if pos isn't visible within zoomed area, or we are zoomed all the way out, change zoom
-            /* if ((zoomCoord[0] === 0 && zoomCoord[1] >= this.state.chart.maxNt) ||
-              (!positions.every((position) => position > zoomCoord[0] && position < zoomCoord[1]))) { */
-            // find out what new coords would be, if different enough, change zoom
+            /* find out what new coords would be - if different enough, change zoom */
             const geneUpdate = "nuc";
             let startUpdate, endUpdate;
             if (positions.length > 1) {
@@ -223,8 +220,7 @@ export class Entropy extends React.Component {
               startUpdate = newStartEnd[0];
               endUpdate = newStartEnd[1];
             }
-            // }
-            // if the zoom would be different enough, change it
+            /* if the zoom would be different enough, change it */
             if (!(startUpdate > zoomCoord[0]-maxNt*0.5 && startUpdate < zoomCoord[0]+maxNt*0.5) ||
               !(endUpdate > zoomCoord[1]-maxNt*0.5 && endUpdate < zoomCoord[1]+maxNt*0.5)) {
               updateParams.gene = geneUpdate;

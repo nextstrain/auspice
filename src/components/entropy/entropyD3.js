@@ -92,30 +92,30 @@ EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
 
 EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed, geneMap) {
   let startEnd = [0, this.scales.xNav.domain()[1]];
-  let multiplier = 0;
+  let multiplier = 0; /* scale genes to nice sizes - don't scale nucs */
   if (!parsed[0].aa) {
     const maxNt = this.scales.xNav.domain()[1];
+    /* if one nuc position, pad on either side with some space */
     if (parsed[0].positions.length === 1) {
       const pos = parsed[0].positions[0];
       const eitherSide = maxNt*0.1;
       startEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
         (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
     } else {
+      /* if two nuc pos, find largest and smallest and pad slightly */
       const start = Math.min.apply(null, parsed[0].positions);
       const end = Math.max.apply(null, parsed[0].positions);
       startEnd = [start - (end-start)*0.1, end + (end-start)*0.1];
-      startEnd = [Math.min.apply(null, parsed[0].positions), Math.max.apply(null, parsed[0].positions)];
     }
   } else {
+    /* if a gene, scale to nice size */
     const gene = parsed[0].prot;
     startEnd = [geneMap[gene].start, geneMap[gene].end];
     multiplier = (startEnd[1]-startEnd[0])*1.5;
   }
+  /* ensure doesn't run off graph */
   return [Math.max(startEnd[0]-multiplier, 0),
     Math.min(startEnd[1]+multiplier, this.scales.xNav.domain()[1])];
-  //const geneLength = geneMap[gene].end - geneMap[gene].start;
-  //return [Math.max(geneMap[gene].start-(1.5*geneLength), 0),
-  //  Math.min(geneMap[gene].end+(1.5*geneLength), this.scales.xNav.domain()[1])];
 };
 
 EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
@@ -154,9 +154,9 @@ EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
 /* draw the genes Gene (annotations) */
 EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   this.geneGraph.selectAll("*").remove();
-  const negStrand = annotations.filter((annot) =>
+  const negStrand = annotations.filter((annot) => /* find out if dealing with 1 or 2 reading frames */
     annot.readingFrame === -1);
-  /* positions seqs with genes on only 1 reading frame in middle to minimise white space */
+  /* plot seqs with genes on only 1 reading frame in the middle, to minimise white space */
   const hasTwoReadFrames = negStrand.length !== 0 && negStrand.length !== annotations.length;
   const geneHeight = 20;
   const posInSequence = this.scales.xNav.domain()[1] - this.scales.xNav.domain()[0];
@@ -165,7 +165,8 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   const visibleAnnots = annotations.filter((annot) => /* try to prevent drawing genes if not visible */
     (annot.start < this.scales.xGene.domain()[1] && annot.start > this.scales.xGene.domain()[0]) ||
     (annot.end > this.scales.xGene.domain()[0] && annot.end < this.scales.xGene.domain()[1]) ||
-    (annot.start < this.scales.xGene.domain()[0] && annot.end > this.scales.xGene.domain()[1])); // for extreme zoom
+    (annot.start < this.scales.xGene.domain()[0] && annot.end > this.scales.xGene.domain()[1])); // for extreme zoom, keep plotting if both ends off graph!
+  /* stop gene plots from extending beyond axis if zoomed in */
   const startG = (d) => d.start > this.scales.xGene.domain()[0] ? this.scales.xGene(d.start) : this.offsets.x1;
   const endG = (d) => d.end < this.scales.xGene.domain()[1] ? this.scales.xGene(d.end) : this.offsets.x2;
   const selection = this.geneGraph.selectAll(".gene")
@@ -176,11 +177,11 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
     .attr("class", "gene")
     .attr("x", (d) => startG(d))
     .attr("y", (d) => readingFrameOffset(d.readingFrame))
-    /* this ensures genes aren't drawn past the graph, but makes moving brushes less smooth? */
+    /* this ensures genes aren't drawn past the graph */
     .attr("width", (d) => endG(d) - startG(d))
     .attr("height", geneHeight)
     .style("fill", (d) => d.fill)
-    .style("stroke", () => strokeCol)
+    .style("stroke", () => strokeCol);
   selection.append("text")
     .attr("x", (d) =>
       this.scales.xGene(d.start) + (this.scales.xGene(d.end) - this.scales.xGene(d.start)) / 2
@@ -325,7 +326,6 @@ EntropyChart.prototype._drawAxes = function _drawAxes() {
   if (visPos > 1e6) {   /* axes number differently if large genome */
     this.axes.xNav.tickFormat(format(".1e"));
   }
-  // this.axes.xGene = axisBottom(this.scales.xGene).ticks(20);
 
   this.svg.append("g")
     .attr("class", "y axis")
@@ -366,11 +366,11 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
     x1: 15,
     x2: width - 32,
     y1Main: 0, /* remember y1 is the top, y2 is the bottom, measured going down */
-    y1Nav: height - 65, /* 100, to be first */ /* 80, */
-    y2Main: height - 130, /* - 100, */
-    y2Nav: height - 35, /* 70, to be first */ /* 50, */
-    y1Gene: height - 107, /* 40, to be second */
-    y2Gene: height - 95 /* 10 to be second */
+    y1Nav: height - 65,
+    y2Main: height - 130,
+    y2Nav: height - 35,
+    y1Gene: height - 107,
+    y2Gene: height - 95
   };
   this.offsets.heightMain = this.offsets.y2Main - this.offsets.y1Main;
   this.offsets.heightNav = this.offsets.y2Nav - this.offsets.y1Nav;
@@ -382,12 +382,12 @@ EntropyChart.prototype._calcOffsets = function _calcOffsets(width, height) {
 EntropyChart.prototype._addBrush = function _addBrush() {
   this.brushed = function brushed() {
     /* this block called when the brush is manipulated */
-    const s = d3event.selection || this.scales.xNav.range(); // (this.scales.xNav.domain()); // range();
+    const s = d3event.selection || this.scales.xNav.range();
     // console.log("brushed", s); // , this.scales);
     // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
     const start_end = s.map(this.scales.xNav.invert, this.scales.xNav);
     this.zoomCoordinates = start_end;
-    if (!d3event.selection) { /* This keeps brush working if user clicks rather than click-drag! */
+    if (!d3event.selection) { /* This keeps brush working if user clicks (zoom out entirely) rather than click-drag! */
       this.navGraph.select(".brush")
         .call(this.brush.move, () => {
           this.zoomCoordinates = this.scales.xNav.range();
@@ -424,8 +424,7 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     .attr("stroke-width", 0)
     .call(this.brush)
     .call(this.brush.move, () => {
-      return this.zoomCoordinates.map(this.scales.xNav);
-      // return this.scales.xMain.range();
+      return this.zoomCoordinates.map(this.scales.xNav); /* coords may have been specified by URL */
     });
 
   /* https://bl.ocks.org/mbostock/4349545 */
@@ -454,7 +453,7 @@ EntropyChart.prototype._addZoomLayers = function _addZoomLayers() {
   ];
 
   this.zoom = zoom()
-    // .scaleExtent([1, 8]) /* seems to impact mouse scroll zooming */
+    // .scaleExtent([1, 8]) /* seems to limit mouse scroll zooming */
     .translateExtent(zoomExtents)
     .extent(zoomExtents)
     .on("zoom", () => this.zoomed());
@@ -487,7 +486,7 @@ EntropyChart.prototype._createZoomFn = function _createZoomFn() {
     const tempZoomCoordinates = [Math.max(this.zoomCoordinates[0]+amountZoomChange, this.scales.xNav(0)),
       Math.min(this.zoomCoordinates[1]-amountZoomChange, this.scales.xNav.domain()[1])];
     // don't allow to zoom below a certain level - but if below that level (clicked on gene), allow zoom out
-    if ((tempZoomCoordinates[1]-tempZoomCoordinates[0] < 500) && (t.k > 1)) return; 
+    if ((tempZoomCoordinates[1]-tempZoomCoordinates[0] < 500) && (t.k > 1)) return;
     this.zoomCoordinates = tempZoomCoordinates;
 
     /* rescale the x axis (not y) */  // does this do anything?? Unsure.
@@ -495,17 +494,12 @@ EntropyChart.prototype._createZoomFn = function _createZoomFn() {
     this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
     this.svg.select(".xMain.axis").call(this.axes.xMain);
     this._drawBars();
-
-    /* const t2 = d3event.transform;
-    this.xGeneModified = t2.rescaleX(this.scales.xGeneOriginal);
-    this.axes.xGene = this.axes.xGene.scale(this.scales.xGene);
-    this.svg.select(".xGene.axis").call(this.axes.xGene); */
     this._drawZoomGenes(this.annotations);
 
     /* move the brush */
     this.navGraph.select(".brush")
       .call(this.brush.move, () => {
-        return this.zoomCoordinates.map(this.scales.xNav); // go wherever we're supposed to be
+        return this.zoomCoordinates.map(this.scales.xNav); /* go wherever we're supposed to be */
       });
   };
 };
