@@ -124,22 +124,27 @@ export const drawBranches = function drawBranches() {
   timerStart("drawBranches");
   const params = this.params;
 
-  /* PART 1: draw the branch Ts (i.e. the bit connecting nodes parent branch ends to child branch beginnings) */
+  /* PART 1: draw the branch Ts (i.e. the bit connecting nodes parent branch ends to child branch beginnings)
+  Only rectangular & radial trees have this, so we remove it for clock / unrooted layouts */
   if (!("branchTee" in this.groups)) {
     this.groups.branchTee = this.svg.append("g").attr("id", "branchTee");
   }
-  this.groups.branchTee
-    .selectAll('.branch')
-    .data(this.nodes.filter((d) => !d.terminal))
-    .enter()
-      .append("path")
-        .attr("class", "branch T")
-        .attr("id", (d) => "branch_T_" + d.n.clade)
-        .attr("d", (d) => d.branch[1])
-        .style("stroke", (d) => d.branchStroke || params.branchStroke)
-        .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
-        .style("fill", "none")
-        .style("pointer-events", "auto");
+  if (this.layout === "clock" || this.layout === "unrooted") {
+    this.groups.branchTee.selectAll("*").remove();
+  } else {
+    this.groups.branchTee
+      .selectAll('.branch')
+      .data(this.nodes.filter((d) => !d.terminal))
+      .enter()
+        .append("path")
+          .attr("class", "branch T")
+          .attr("id", (d) => "branch_T_" + d.n.clade)
+          .attr("d", (d) => d.branch[1])
+          .style("stroke", (d) => d.branchStroke || params.branchStroke)
+          .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+          .style("fill", "none")
+          .style("pointer-events", "auto");
+  }
 
   /* PART 2: draw the branch stems (i.e. the actual branches) */
   if (!("branchStem" in this.groups)) {
