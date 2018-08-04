@@ -41,6 +41,7 @@ rules:
   import/prefer-default-export: off
   no-multi-spaces: ["error", { ignoreEOLComments: true }]
   no-labels: off
+  no-unused-labels: off
   no-continue: off
   no-unneeded-ternary: ["error", { "defaultAssignment": true }]
   quote-props: ["error", "as-needed"]
