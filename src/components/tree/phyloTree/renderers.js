@@ -58,32 +58,39 @@ export const render = function render(svg, layout, distance, parameters, callbac
  * @return {null}
  */
 export const drawVaccines = function drawVaccines() {
-  this.svg.append("g").selectAll(".vaccineCross")
-    .data(this.vaccines)
-    .enter()
-    .append("path")
-    .attr("class", "vaccineCross")
-    .attr("d", (d) => d.vaccineCross)
-    .style("stroke", "#333")
-    .style("stroke-width", 2 * this.params.branchStrokeWidth)
-    .style("fill", "none")
-    .style("cursor", "pointer")
-    .style("pointer-events", "auto")
-    .on("mouseover", this.callbacks.onTipHover)
-    .on("mouseout", this.callbacks.onTipLeave)
-    .on("click", this.callbacks.onTipClick);
+  if (!this.vaccines || !this.vaccines.length) return;
 
-  this.svg.append("g").selectAll('.vaccineDottedLine')
+  if (!("vaccines" in this.groups)) {
+    this.groups.vaccines = this.svg.append("g").attr("id", "vaccines");
+  }
+  this.groups.vaccines
+    .selectAll(".vaccineCross")
     .data(this.vaccines)
     .enter()
-    .append("path")
-    .attr("class", "vaccineDottedLine")
-    .attr("d", (d) => d.vaccineLine)
-    .style("stroke-dasharray", "5, 5")
-    .style("stroke", "black")
-    .style("stroke-width", this.params.branchStrokeWidth)
-    .style("fill", "none")
-    .style("pointer-events", "none");
+      .append("path")
+        .attr("class", "vaccineCross")
+        .attr("d", (d) => d.vaccineCross)
+        .style("stroke", "#333")
+        .style("stroke-width", 2 * this.params.branchStrokeWidth)
+        .style("fill", "none")
+        .style("cursor", "pointer")
+        .style("pointer-events", "auto")
+        .on("mouseover", this.callbacks.onTipHover)
+        .on("mouseout", this.callbacks.onTipLeave)
+        .on("click", this.callbacks.onTipClick);
+
+  this.groups.vaccines
+    .selectAll('.vaccineDottedLine')
+    .data(this.vaccines)
+    .enter()
+      .append("path")
+        .attr("class", "vaccineDottedLine")
+        .attr("d", (d) => d.vaccineLine)
+        .style("stroke-dasharray", "5, 5")
+        .style("stroke", "black")
+        .style("stroke-width", this.params.branchStrokeWidth)
+        .style("fill", "none")
+        .style("pointer-events", "none");
 };
 
 
@@ -94,63 +101,81 @@ export const drawVaccines = function drawVaccines() {
 export const drawTips = function drawTips() {
   timerStart("drawTips");
   const params = this.params;
-  this.svg.append("g").selectAll(".tip")
+
+  if (!("tips" in this.groups)) {
+    this.groups.tips = this.svg.append("g").attr("id", "tips");
+  }
+  this.groups.tips
+    .selectAll(".tip")
     .data(this.nodes.filter((d) => d.terminal))
     .enter()
-    .append("circle")
-    .attr("class", "tip")
-    .attr("id", (d) => "tip_" + d.n.clade)
-    .attr("cx", (d) => d.xTip)
-    .attr("cy", (d) => d.yTip)
-    .attr("r", (d) => d.r)
-    .on("mouseover", this.callbacks.onTipHover)
-    .on("mouseout", this.callbacks.onTipLeave)
-    .on("click", this.callbacks.onTipClick)
-    .style("pointer-events", "auto")
-    .style("visibility", (d) => d["visibility"])
-    .style("fill", (d) => d.fill || params.tipFill)
-    .style("stroke", (d) => d.tipStroke || params.tipStroke)
-    .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
-    .style("cursor", "pointer");
+      .append("circle")
+        .attr("class", "tip")
+        .attr("id", (d) => "tip_" + d.n.clade)
+        .attr("cx", (d) => d.xTip)
+        .attr("cy", (d) => d.yTip)
+        .attr("r", (d) => d.r)
+        .on("mouseover", this.callbacks.onTipHover)
+        .on("mouseout", this.callbacks.onTipLeave)
+        .on("click", this.callbacks.onTipClick)
+        .style("pointer-events", "auto")
+        .style("visibility", (d) => d["visibility"])
+        .style("fill", (d) => d.fill || params.tipFill)
+        .style("stroke", (d) => d.tipStroke || params.tipStroke)
+        .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
+        .style("cursor", "pointer");
+
   timerEnd("drawTips");
 };
 
 
 /**
- * adds all branches to the svg, these are paths with class branch
+ * adds all branches to the svg, these are paths with class branch, which comprise two groups
  * @return {null}
  */
 export const drawBranches = function drawBranches() {
   timerStart("drawBranches");
   const params = this.params;
-  this.Tbranches = this.svg.append("g").selectAll('.branch')
+
+  /* PART 1: draw the branch Ts (i.e. the bit connecting nodes parent branch ends to child branch beginnings) */
+  if (!("branchTee" in this.groups)) {
+    this.groups.branchTee = this.svg.append("g").attr("id", "branchTee");
+  }
+  this.groups.branchTee
+    .selectAll('.branch')
     .data(this.nodes.filter((d) => !d.terminal))
     .enter()
-    .append("path")
-    .attr("class", "branch T")
-    .attr("id", (d) => "branch_T_" + d.n.clade)
-    .attr("d", (d) => d.branch[1])
-    .style("stroke", (d) => d.branchStroke || params.branchStroke)
-    .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
-    .style("fill", "none")
-    .style("pointer-events", "auto");
+      .append("path")
+        .attr("class", "branch T")
+        .attr("id", (d) => "branch_T_" + d.n.clade)
+        .attr("d", (d) => d.branch[1])
+        .style("stroke", (d) => d.branchStroke || params.branchStroke)
+        .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+        .style("fill", "none")
+        .style("pointer-events", "auto");
 
-  this.branches = this.svg.append("g").selectAll('.branch')
+  /* PART 2: draw the branch stems (i.e. the actual branches) */
+  if (!("branchStem" in this.groups)) {
+    this.groups.branchStem = this.svg.append("g").attr("id", "branchStem");
+  }
+  this.groups.branchStem
+    .selectAll('.branch')
     .data(this.nodes)
     .enter()
-    .append("path")
-    .attr("class", "branch S")
-    .attr("id", (d) => "branch_S_" + d.n.clade)
-    .attr("d", (d) => d.branch[0])
-    .style("stroke", (d) => d.branchStroke || params.branchStroke)
-    .style("stroke-linecap", "round")
-    .style("stroke-width", (d) => d['stroke-width']+"px" || params.branchStrokeWidth)
-    .style("fill", "none")
-    .style("cursor", "pointer")
-    .style("pointer-events", "auto")
-    .on("mouseover", this.callbacks.onBranchHover)
-    .on("mouseout", this.callbacks.onBranchLeave)
-    .on("click", this.callbacks.onBranchClick);
+      .append("path")
+        .attr("class", "branch S")
+        .attr("id", (d) => "branch_S_" + d.n.clade)
+        .attr("d", (d) => d.branch[0])
+        .style("stroke", (d) => d.branchStroke || params.branchStroke)
+        .style("stroke-linecap", "round")
+        .style("stroke-width", (d) => d['stroke-width']+"px" || params.branchStrokeWidth)
+        .style("fill", "none")
+        .style("cursor", "pointer")
+        .style("pointer-events", "auto")
+        .on("mouseover", this.callbacks.onBranchHover)
+        .on("mouseout", this.callbacks.onBranchLeave)
+        .on("click", this.callbacks.onBranchClick);
+
   timerEnd("drawBranches");
 };
 
@@ -165,14 +190,21 @@ export const drawRegression = function drawRegression() {
 
   const path = "M " + this.xScale.range()[0].toString() + " " + leftY.toString() +
     " L " + this.xScale.range()[1].toString() + " " + rightY.toString();
-  this.svg.append("path")
+
+  if (!("clockRegression" in this.groups)) {
+    this.groups.clockRegression = this.svg.append("g").attr("id", "clockRegression");
+  }
+
+  this.groups.clockRegression
+    .append("path")
     .attr("d", path)
     .attr("class", "regression")
     .style("fill", "none")
     .style("visibility", "visible")
     .style("stroke", this.params.regressionStroke)
     .style("stroke-width", this.params.regressionWidth);
-  this.svg.append("text")
+  this.groups.clockRegression
+    .append("text")
     .text(`rate estimate: ${this.regression.slope.toExponential(2)} subs per site per year`)
     .attr("class", "regression")
     .attr("x", this.xScale.range()[1] / 2 - 75)
@@ -181,6 +213,12 @@ export const drawRegression = function drawRegression() {
     .style("font-size", this.params.tickLabelSize + 8)
     .style("font-weight", 400)
     .style("font-family", this.params.fontFamily);
+};
+
+export const removeRegression = function removeRegression() {
+  if ("clockRegression" in this.groups) {
+    this.groups.clockRegression.selectAll("*").remove();
+  }
 };
 
 /*

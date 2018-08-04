@@ -1,31 +1,39 @@
 
 export const removeConfidence = function removeConfidence(dt) {
   this.confidencesInSVG = false;
+  if (!("confidenceIntervals" in this.groups)) return;
+
   if (dt) {
-    this.svg.selectAll(".conf")
+    this.groups.confidenceIntervals
+      .selectAll("*")
       .transition().duration(dt)
-      .style("opacity", 0)
-      .remove();
+        .style("opacity", 0)
+        .remove();
   } else {
-    this.svg.selectAll(".conf").remove();
+    this.groups.confidenceIntervals.selectAll("*").remove();
   }
 };
 
 export const drawConfidence = function drawConfidence(dt) {
   this.confidencesInSVG = true;
+  if (!("confidenceIntervals" in this.groups)) {
+    this.groups.confidenceIntervals = this.svg.append("g").attr("id", "confidenceIntervals");
+  }
   if (dt) {
-    this.confidence = this.svg.append("g").selectAll(".conf")
+    this.groups.confidenceIntervals
+      .selectAll(".conf")
       .data(this.nodes)
       .enter()
       .call((sel) => this.drawSingleCI(sel, 0));
-    this.svg.selectAll(".conf")
+    this.groups.confidenceIntervals
       .transition().duration(dt)
-      .style("opacity", 0.5);
+        .style("opacity", 0.5);
   } else {
-    this.confidence = this.svg.append("g").selectAll(".conf")
+    this.groups.confidenceIntervals
+      .selectAll(".conf")
       .data(this.nodes)
       .enter()
-      .call((sel) => this.drawSingleCI(sel, 0.5));
+        .call((sel) => this.drawSingleCI(sel, 0.5));
   }
 };
 

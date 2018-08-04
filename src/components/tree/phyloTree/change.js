@@ -159,7 +159,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
     else this.hideGrid();
   }
   if (elemsToUpdate.has('.regression')) {
-    this.svg.selectAll(".regression").remove();
+    this.removeRegression();
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
   }
 
@@ -179,7 +179,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
 
   /* branch labels */
   if (extras.newBranchLabellingKey) {
-    this.svg.selectAll('.branchLabel').remove();
+    this.removeBranchLabels();
     if (extras.newBranchLabellingKey !== "none") {
       this.drawBranchLabels(extras.newBranchLabellingKey);
     }
