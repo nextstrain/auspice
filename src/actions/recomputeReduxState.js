@@ -269,19 +269,41 @@ const checkAndCorrectErrorsInState = (state, metadata, query) => {
   if (!metadata.colorOptions) {
     metadata.colorOptions = {};
   }
-  if (Object.keys(metadata.colorOptions).indexOf(state.colorBy) === -1 && !state["colorBy"].startsWith("gt-")) {
+  const fallBackToDefaultColorBy = () => {
     const availableNonGenotypeColorBys = Object.keys(metadata.colorOptions);
     if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
       availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
     }
-    console.error("Error detected trying to set colorBy to", state.colorBy, "(valid options are", Object.keys(metadata.colorOptions).join(", "), "). Setting to", availableNonGenotypeColorBys[0]);
-    if (Object.keys(metadata.colorOptions).length > 0) {
+    if (availableNonGenotypeColorBys.length) {
+      console.error("Error detected trying to set colorBy to", state.colorBy, "falling back to", availableNonGenotypeColorBys[0]);
       state.colorBy = availableNonGenotypeColorBys[0];
       state.defaults.colorBy = availableNonGenotypeColorBys[0];
     } else {
+      console.error("Error detected trying to set colorBy to", state.colorBy, " as there are no color options defined in the JSONs!");
       state.colorBy = "none";
       state.defaults.colorBy = "none";
     }
+    delete query.c;
+  };
+  if (state["colorBy"].startsWith("gt-")) {
+    /* Check that the genotype is valid with the current data */
+    if (!metadata.annotations) {
+      fallBackToDefaultColorBy();
+    } else {
+      const [gene, pos] = state.colorBy.split("-")[1].split("_");
+      if (!(gene in metadata.annotations)) {
+        fallBackToDefaultColorBy();
+      } else if (gene === "nuc") {
+        if ((metadata.annotations[gene].end - metadata.annotations[gene].start) < pos) {
+          fallBackToDefaultColorBy();
+        }
+      } else if ((metadata.annotations[gene].end - metadata.annotations[gene].start)/3 < pos) {
+        fallBackToDefaultColorBy();
+      }
+    }
+  } else if (Object.keys(metadata.colorOptions).indexOf(state.colorBy) === -1) {
+    /* if it's a _non_ genotype colorBy AND it's not a valid option, fall back to the default */
+    fallBackToDefaultColorBy();
   }
 
   /* colorBy confidence */
