@@ -260,7 +260,7 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   return state;
 };
 
-const checkAndCorrectErrorsInState = (state, metadata) => {
+const checkAndCorrectErrorsInState = (state, metadata, query) => {
   /* The one (bigish) problem with this being in the reducer is that
   we can't have any side effects. So if we detect and error introduced by
   a URL QUERY (and correct it in state), we can't correct the URL */
@@ -299,6 +299,7 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
       state["geoResolution"] = availableGeoResultions[0];
       console.error("Error detected. Setting geoResolution to ", state["geoResolution"]);
+      delete query.r; // no-op if query.r doesn't exist
     }
   } else {
     console.warn("The meta.json did not include geo info.");
@@ -429,7 +430,7 @@ export const createStateFromQueryOrJSONs = ({
     controls = modifyStateViaURLQuery(controls, query);
   }
 
-  controls = checkAndCorrectErrorsInState(controls, metadata); /* must run last */
+  controls = checkAndCorrectErrorsInState(controls, metadata, query); /* must run last */
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
