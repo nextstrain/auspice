@@ -69,57 +69,36 @@ export const addGrid = function addGrid(layout) {
   "gridPoint" is an element from majorGridPoints or minorGridPoints */
   const gridline = (xScale, yScale, layoutShadow) => (gridPoint) => {
     let svgPath="";
-    if (layoutShadow==="rect" || layoutShadow==="clock") {
-      const xPos = xScale(gridPoint[0]);
-      svgPath = 'M'+xPos.toString() +
-        " " +
-        yScale.range()[1].toString() +
-        " L " +
-        xPos.toString() +
-        " " +
-        yScale.range()[0].toString();
-    } else if (layoutShadow==="radial") {
-      const xPos = xScale(gridPoint[0]-xmin);
-      svgPath = 'M '+xPos.toString() +
-        "  " +
-        yScale(0).toString() +
-        " A " +
-        (xPos - xScale(0)).toString() +
-        " " +
-        (yScale(gridPoint[0]) - yScale(xmin)).toString() +
-        " 0 1 0 " +
-        xPos.toString() +
-        " " +
-        (yScale(0)+0.001).toString();
+    if (gridPoint[2] === "x") {
+      if (layoutShadow==="rect" || layoutShadow==="clock") {
+        const xPos = xScale(gridPoint[0]);
+        svgPath = 'M'+xPos.toString() +
+          " " +
+          yScale.range()[1].toString() +
+          " L " +
+          xPos.toString() +
+          " " +
+          yScale.range()[0].toString();
+      } else if (layoutShadow==="radial") {
+        const xPos = xScale(gridPoint[0]-xmin);
+        svgPath = 'M '+xPos.toString() +
+          "  " +
+          yScale(0).toString() +
+          " A " +
+          (xPos - xScale(0)).toString() +
+          " " +
+          (yScale(gridPoint[0]) - yScale(xmin)).toString() +
+          " 0 1 0 " +
+          xPos.toString() +
+          " " +
+          (yScale(0)+0.001).toString();
+      }
+    } else if (gridPoint[2] === "y") {
+      const yPos = yScale(gridPoint[0]);
+      svgPath = `M${xScale(xmin) + 20} ${yPos} L ${xScale(xmax)} ${yPos}`;
     }
     return svgPath;
   };
-
-
-  // add major grid to svg
-  const majorGrid = this.svg.selectAll('.majorGrid').data(majorGridPoints);
-  majorGrid.exit().remove(); // EXIT
-  majorGrid.enter().append("path") // ENTER
-    .merge(majorGrid) // ENTER + UPDATE
-    .attr("d", gridline(this.xScale, this.yScale, layout))
-    .attr("class", "majorGrid")
-    .style("fill", "none")
-    .style("visibility", (d) => d[1])
-    .style("stroke", this.params.majorGridStroke)
-    .style("stroke-width", this.params.majorGridWidth);
-
-  // add minor grid to SVG
-  const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
-  minorGrid.exit().remove(); // EXIT
-  minorGrid.enter().append("path") // ENTER
-    .merge(minorGrid) // ENTER + UPDATE
-    .attr("d", gridline(this.xScale, this.yScale, layout))
-    .attr("class", "minorGrid")
-    .style("fill", "none")
-    .style("visibility", (d) => d[1])
-    .style("stroke", this.params.minorGridStroke)
-    .style("stroke-width", this.params.minorGridWidth);
-
 
   /* add text labels to the major grid points */
 
@@ -161,6 +140,33 @@ export const addGrid = function addGrid(layout) {
       majorGridPoints.push([pos, ((pos<minYVis)||(pos>maxYVis))?"hidden":"visible", "y"]);
     }
   }
+
+  /* D3 commands to add grid + text to the DOM */
+
+  // add major grid to svg
+  const majorGrid = this.svg.selectAll('.majorGrid').data(majorGridPoints);
+  majorGrid.exit().remove(); // EXIT
+  majorGrid.enter().append("path") // ENTER
+    .merge(majorGrid) // ENTER + UPDATE
+    .attr("d", gridline(this.xScale, this.yScale, layout))
+    .attr("class", "majorGrid")
+    .style("fill", "none")
+    .style("visibility", (d) => d[1])
+    .style("stroke", this.params.majorGridStroke)
+    .style("stroke-width", this.params.majorGridWidth);
+
+  // add minor grid to SVG
+  const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
+  minorGrid.exit().remove(); // EXIT
+  minorGrid.enter().append("path") // ENTER
+    .merge(minorGrid) // ENTER + UPDATE
+    .attr("d", gridline(this.xScale, this.yScale, layout))
+    .attr("class", "minorGrid")
+    .style("fill", "none")
+    .style("visibility", (d) => d[1])
+    .style("stroke", this.params.minorGridStroke)
+    .style("stroke-width", this.params.minorGridWidth);
+
 
   /* draw the text labels for majorGridPoints */
   const gridLabels = this.svg.selectAll('.gridTick').data(majorGridPoints);
