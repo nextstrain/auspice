@@ -354,7 +354,6 @@ export const mapToScreen = function mapToScreen() {
       const xTipCross = this.xScale(d.xCross); /* x position of the center of the cross */
       const yTipCross = this.yScale(d.yCross); /* x position of the center of the cross */
       d.vaccineCross = ` M ${xTipCross-n},${yTipCross-n} L ${xTipCross+n},${yTipCross+n} M ${xTipCross-n},${yTipCross+n} L ${xTipCross+n},${yTipCross-n}`;
-      d.vaccineLine = ` M ${d.xTip},${d.yTip} L ${xTipCross},${yTipCross}`;
     });
   }
 

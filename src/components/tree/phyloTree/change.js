@@ -40,9 +40,6 @@ const svgSetters = {
     ".vaccineCross": {
       d: (d) => d.vaccineCross
     },
-    ".vaccineDottedLine": {
-      d: (d) => d.vaccineLine
-    },
     ".conf": {
       d: (d) => d.confLine
     }
@@ -52,9 +49,6 @@ const svgSetters = {
       "fill": (d) => d.fill,
       "stroke": (d) => d.tipStroke,
       "visibility": (d) => d["visibility"]
-    },
-    ".vaccineDottedLine": {
-      opacity: (d) => d.that.distance === "num_date" ? 1 : 0
     },
     ".conf": {
       "stroke": (d) => d.branchStroke,

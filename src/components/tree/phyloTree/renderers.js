@@ -78,19 +78,6 @@ export const drawVaccines = function drawVaccines() {
         .on("mouseover", this.callbacks.onTipHover)
         .on("mouseout", this.callbacks.onTipLeave)
         .on("click", this.callbacks.onTipClick);
-
-  this.groups.vaccines
-    .selectAll('.vaccineDottedLine')
-    .data(this.vaccines)
-    .enter()
-      .append("path")
-        .attr("class", "vaccineDottedLine")
-        .attr("d", (d) => d.vaccineLine)
-        .style("stroke-dasharray", "5, 5")
-        .style("stroke", "black")
-        .style("stroke-width", this.params.branchStrokeWidth)
-        .style("fill", "none")
-        .style("pointer-events", "none");
 };
 
 
