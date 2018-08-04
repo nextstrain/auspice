@@ -15,6 +15,9 @@ const PhyloTree = function PhyloTree(reduxNodes, debugId) {
   this.grid = false;
   this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
   this.params = createDefaultParams();
+  this.groups = {};
+  /* by storing DOM <g> elements, we can quickly refer to groups here rather than scanning the DOM.
+  It also helps preserve the initial order of groups in the DOM as we are not creating new ones upon updates */
   this.debugId = debugId; /* super useful when one is trying to debug multiple trees! */
   /* create this.nodes, which is an array of nodes with properties used by phylotree for drawing.
    this.nodes is the same length as reduxNodes such that this.nodes[i] is related to reduxNodes[i]
