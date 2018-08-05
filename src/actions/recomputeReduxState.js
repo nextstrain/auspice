@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { strainNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -260,7 +260,7 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   return state;
 };
 
-const checkAndCorrectErrorsInState = (state, metadata) => {
+const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   /* The one (bigish) problem with this being in the reducer is that
   we can't have any side effects. So if we detect and error introduced by
   a URL QUERY (and correct it in state), we can't correct the URL */
@@ -269,19 +269,51 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
   if (!metadata.colorOptions) {
     metadata.colorOptions = {};
   }
-  if (Object.keys(metadata.colorOptions).indexOf(state.colorBy) === -1 && !state["colorBy"].startsWith("gt-")) {
+  const fallBackToDefaultColorBy = () => {
     const availableNonGenotypeColorBys = Object.keys(metadata.colorOptions);
     if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
       availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
     }
-    console.error("Error detected trying to set colorBy to", state.colorBy, "(valid options are", Object.keys(metadata.colorOptions).join(", "), "). Setting to", availableNonGenotypeColorBys[0]);
-    if (Object.keys(metadata.colorOptions).length > 0) {
-      state.colorBy = availableNonGenotypeColorBys[0];
-      state.defaults.colorBy = availableNonGenotypeColorBys[0];
+
+    if (metadata.defaults && metadata.defaults.colorBy && availableNonGenotypeColorBys.indexOf(metadata.defaults.colorBy) !== -1) {
+      console.warn("colorBy falling back to", metadata.defaults.colorBy);
+      state.colorBy = metadata.defaults.colorBy;
+      state.defaults.colorBy = metadata.defaults.colorBy;
+    } else if (availableNonGenotypeColorBys.length) {
+      if (availableNonGenotypeColorBys.indexOf(defaultColorBy) !== -1) {
+        state.colorBy = defaultColorBy;
+        state.defaults.colorBy = defaultColorBy;
+      } else {
+        console.error("Error detected trying to set colorBy to", state.colorBy, "falling back to", availableNonGenotypeColorBys[0]);
+        state.colorBy = availableNonGenotypeColorBys[0];
+        state.defaults.colorBy = availableNonGenotypeColorBys[0];
+      }
     } else {
+      console.error("Error detected trying to set colorBy to", state.colorBy, " as there are no color options defined in the JSONs!");
       state.colorBy = "none";
       state.defaults.colorBy = "none";
     }
+    delete query.c;
+  };
+  if (state["colorBy"].startsWith("gt-")) {
+    /* Check that the genotype is valid with the current data */
+    if (!metadata.annotations) {
+      fallBackToDefaultColorBy();
+    } else {
+      const [gene, pos] = state.colorBy.split("-")[1].split("_");
+      if (!(gene in metadata.annotations)) {
+        fallBackToDefaultColorBy();
+      } else if (gene === "nuc") {
+        if ((metadata.annotations[gene].end - metadata.annotations[gene].start) < pos) {
+          fallBackToDefaultColorBy();
+        }
+      } else if ((metadata.annotations[gene].end - metadata.annotations[gene].start)/3 < pos) {
+        fallBackToDefaultColorBy();
+      }
+    }
+  } else if (Object.keys(metadata.colorOptions).indexOf(state.colorBy) === -1) {
+    /* if it's a _non_ genotype colorBy AND it's not a valid option, fall back to the default */
+    fallBackToDefaultColorBy();
   }
 
   /* colorBy confidence */
@@ -297,8 +329,16 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
   if (metadata.geo) {
     const availableGeoResultions = Object.keys(metadata.geo);
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
-      state["geoResolution"] = availableGeoResultions[0];
-      console.error("Error detected. Setting geoResolution to ", state["geoResolution"]);
+      /* fallbacks: JSON defined default, then hardocded default, then any available */
+      if (metadata.defaults && metadata.defaults.geoResolution && availableGeoResultions.indexOf(metadata.defaults.geoResolution) !== -1) {
+        state.geoResolution = metadata.defaults.geoResolution;
+      } else if (availableGeoResultions.indexOf(defaultGeoResolution) !== -1) {
+        state.geoResolution = defaultGeoResolution;
+      } else {
+        state.geoResolution = availableGeoResultions[0];
+      }
+      console.error("Error detected. Setting geoResolution to ", state.geoResolution);
+      delete query.r; // no-op if query.r doesn't exist
     }
   } else {
     console.warn("The meta.json did not include geo info.");
@@ -323,6 +363,19 @@ const checkAndCorrectErrorsInState = (state, metadata) => {
     }
   }
 
+  /* are filters valid? */
+  const activeFilters = Object.keys(state.filters).filter((f) => f.length);
+  const stateCounts = countTraitsAcrossTree(tree.nodes, activeFilters, false, true);
+  for (const filterType of activeFilters) {
+    const validValues = state.filters[filterType]
+      .filter((filterValue) => filterValue in stateCounts[filterType]);
+    state.filters[filterType] = validValues;
+    if (!validValues.length) {
+      delete query[`f_${filterType}`];
+    } else {
+      query[`f_${filterType}`] = validValues.join(",");
+    }
+  }
   return state;
 };
 
@@ -429,7 +482,7 @@ export const createStateFromQueryOrJSONs = ({
     controls = modifyStateViaURLQuery(controls, query);
   }
 
-  controls = checkAndCorrectErrorsInState(controls, metadata); /* must run last */
+  controls = checkAndCorrectErrorsInState(controls, metadata, query, tree); /* must run last */
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
