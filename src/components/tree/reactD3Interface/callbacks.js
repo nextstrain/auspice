@@ -49,10 +49,14 @@ export const onBranchHover = function onBranchHover(d) {
   }
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
     const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;
-    tree.svg.append("g").selectAll(".conf")
+    if (!("confidenceIntervals" in tree.groups)) {
+      tree.groups.confidenceIntervals = tree.svg.append("g").attr("id", "confidenceIntervals");
+    }
+    tree.groups.confidenceIntervals
+      .selectAll(".conf")
       .data([d])
       .enter()
-      .call((sel) => this.state.tree.drawSingleCI(sel, 0.5));
+        .call((sel) => tree.drawSingleCI(sel, 0.5));
   }
   this.setState({
     hovered: {d, type: ".branch"}
@@ -74,7 +78,7 @@ export const onBranchLeave = function onBranchLeave(d) {
   }
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
     const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;
-    tree.removeConfidence(mediumTransitionDuration);
+    tree.removeConfidence();
   }
   if (this.state.hovered) {
     this.setState({hovered: null});

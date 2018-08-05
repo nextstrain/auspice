@@ -1,7 +1,12 @@
 import { timerFlush } from "d3-timer";
 
 export const updateTipLabels = function updateTipLabels(dt) {
-  this.svg.selectAll('.tipLabel').remove();
+  if ("tipLabels" in this.groups) {
+    this.groups.tipLabels.selectAll("*").remove();
+  } else {
+    this.groups.tipLabels = this.svg.append("g").attr("id", "tipLabels");
+  }
+
   const tLFunc = this.callbacks.tipLabel;
   const xPad = this.params.tipLabelPadX;
   const yPad = this.params.tipLabelPadY;
@@ -20,7 +25,8 @@ export const updateTipLabels = function updateTipLabels(dt) {
     }
 
     window.setTimeout(() => {
-      this.tipLabels = this.svg.append("g").selectAll('.tipLabel')
+      this.groups.tipLabels
+        .selectAll('.tipLabel')
         .data(inViewTerminalNodes)
         .enter()
         .append("text")
@@ -79,7 +85,8 @@ export const updateBranchLabels = function updateBranchLabels(dt) {
   const visibility = createBranchLabelVisibility(this.params.branchLabelKey, this.layout, this.zoomNode.n.tipCount);
   const labelSize = branchLabelSize(this.params.branchLabelKey);
   const fontWeight = branchLabelFontWeight(this.params.branchLabelKey);
-  this.svg.selectAll('.branchLabel')
+  this.groups.branchLabels
+    .selectAll('.branchLabel')
     .transition().duration(dt)
     .attr("x", (d) => d.xTip - 5)
     .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
@@ -89,18 +96,29 @@ export const updateBranchLabels = function updateBranchLabels(dt) {
   if (!dt) timerFlush();
 };
 
+export const removeBranchLabels = function removeBranchLabels() {
+  if ("branchLabels" in this.groups) {
+    this.groups.branchLabels.selectAll("*").remove();
+  }
+};
+
 export const drawBranchLabels = function drawBranchLabels(key) {
   /* salient props: this.zoomNode.n.tipCount, this.zoomNode.n.fullTipCount */
   this.params.branchLabelKey = key;
   const labelSize = branchLabelSize(key);
   const fontWeight = branchLabelFontWeight(key);
   const visibility = createBranchLabelVisibility(key, this.layout, this.zoomNode.n.tipCount);
-  this.svg.append("g").selectAll('.branchLabel')
+
+  if (!("branchLabels" in this.groups)) {
+    this.groups.branchLabels = this.svg.append("g").attr("id", "branchLabels");
+  }
+  this.groups.branchLabels
+    .selectAll('.branchLabel')
     .data(this.nodes.filter((d) => d.n.attr.labels && d.n.attr.labels[key]))
     .enter()
     .append("text")
     .attr("class", "branchLabel")
-    .attr("x", (d) => d.xTip + ((this.params.orientation[0]>0)?-5:5) )
+    .attr("x", (d) => d.xTip + ((this.params.orientation[0]>0)?-5:5))
     .attr("y", (d) => d.yTip - this.params.branchLabelPadY)
     .style("text-anchor", (this.params.orientation[0]>0)?"end":"start")
     .style("visibility", visibility)

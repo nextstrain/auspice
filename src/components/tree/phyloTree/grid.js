@@ -3,9 +3,15 @@ import { min, max } from "d3-array";
 import { timerStart, timerEnd } from "../../../util/perf";
 
 export const hideGrid = function hideGrid() {
-  this.svg.selectAll(".majorGrid").style('visibility', 'hidden');
-  this.svg.selectAll(".minorGrid").style('visibility', 'hidden');
-  this.svg.selectAll(".gridTick").style('visibility', 'hidden');
+  if ("majorGrid" in this.groups) {
+    this.groups.majorGrid.selectAll("*").style('visibility', 'hidden');
+  }
+  if ("minorGrid" in this.groups) {
+    this.groups.minorGrid.selectAll("*").style('visibility', 'hidden');
+  }
+  if ("gridText" in this.groups) {
+    this.groups.gridText.selectAll("*").style('visibility', 'hidden');
+  }
 };
 
 const calculateMajorGridSeperation = (range) => {
@@ -144,46 +150,63 @@ export const addGrid = function addGrid(layout) {
   /* D3 commands to add grid + text to the DOM */
 
   // add major grid to svg
-  const majorGrid = this.svg.selectAll('.majorGrid').data(majorGridPoints);
-  majorGrid.exit().remove(); // EXIT
-  majorGrid.enter().append("path") // ENTER
-    .merge(majorGrid) // ENTER + UPDATE
-    .attr("d", gridline(this.xScale, this.yScale, layout))
-    .attr("class", "majorGrid")
-    .style("fill", "none")
-    .style("visibility", (d) => d[1])
-    .style("stroke", this.params.majorGridStroke)
-    .style("stroke-width", this.params.majorGridWidth);
+  if (!("majorGrid" in this.groups)) {
+    this.groups.majorGrid = this.svg.append("g").attr("id", "majorGrid");
+  }
+  this.groups.majorGrid.selectAll("*").remove();
+  this.groups.majorGrid
+    .selectAll('.majorGrid')
+    .data(majorGridPoints)
+    .enter()
+      .append("path")
+        .attr("d", gridline(this.xScale, this.yScale, layout))
+        .attr("class", "majorGrid")
+        .style("fill", "none")
+        .style("visibility", (d) => d[1])
+        .style("stroke", this.params.majorGridStroke)
+        .style("stroke-width", this.params.majorGridWidth);
 
   // add minor grid to SVG
-  const minorGrid = this.svg.selectAll('.minorGrid').data(minorGridPoints);
-  minorGrid.exit().remove(); // EXIT
-  minorGrid.enter().append("path") // ENTER
-    .merge(minorGrid) // ENTER + UPDATE
-    .attr("d", gridline(this.xScale, this.yScale, layout))
-    .attr("class", "minorGrid")
-    .style("fill", "none")
-    .style("visibility", (d) => d[1])
-    .style("stroke", this.params.minorGridStroke)
-    .style("stroke-width", this.params.minorGridWidth);
+  if (!("minorGrid" in this.groups)) {
+    this.groups.minorGrid = this.svg.append("g").attr("id", "minorGrid");
+  }
+  this.groups.minorGrid.selectAll("*").remove();
+  this.svg.selectAll(".minorGrid").remove();
+  this.groups.minorGrid
+    .selectAll('.minorGrid')
+    .data(minorGridPoints)
+    .enter()
+      .append("path")
+        .attr("d", gridline(this.xScale, this.yScale, layout))
+        .attr("class", "minorGrid")
+        .style("fill", "none")
+        .style("visibility", (d) => d[1])
+        .style("stroke", this.params.minorGridStroke)
+        .style("stroke-width", this.params.minorGridWidth);
 
 
   /* draw the text labels for majorGridPoints */
-  const gridLabels = this.svg.selectAll('.gridTick').data(majorGridPoints);
   const precisionX = Math.max(0, -Math.floor(Math.log10(step)));
   const precisionY = Math.max(0, -Math.floor(Math.log10(yStep)));
-  gridLabels.exit().remove(); // EXIT
-  gridLabels.enter().append("text") // ENTER
-    .merge(gridLabels) // ENTER + UPDATE
-    .text((d) => d[0].toFixed(d[2]==='y' ? precisionY : precisionX))
-    .attr("class", "gridTick")
-    .style("font-size", this.params.tickLabelSize)
-    .style("font-family", this.params.fontFamily)
-    .style("fill", this.params.tickLabelFill)
-    .style("text-anchor", textAnchor(layout))
-    .style("visibility", (d) => d[1])
-    .attr("x", xTextPos(this.xScale, layout))
-    .attr("y", yTextPos(this.yScale, layout));
+  if (!("gridText" in this.groups)) {
+    this.groups.gridText = this.svg.append("g").attr("id", "gridText");
+  }
+  this.groups.gridText.selectAll("*").remove();
+  this.svg.selectAll(".gridText").remove();
+  this.groups.gridText
+    .selectAll('.gridText')
+    .data(majorGridPoints)
+    .enter()
+      .append("text")
+        .text((d) => d[0].toFixed(d[2]==='y' ? precisionY : precisionX))
+        .attr("class", "gridText")
+        .style("font-size", this.params.tickLabelSize)
+        .style("font-family", this.params.fontFamily)
+        .style("fill", this.params.tickLabelFill)
+        .style("text-anchor", textAnchor(layout))
+        .style("visibility", (d) => d[1])
+        .attr("x", xTextPos(this.xScale, layout))
+        .attr("y", yTextPos(this.yScale, layout));
 
   this.grid=true;
   timerEnd("addGrid");

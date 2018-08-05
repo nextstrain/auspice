@@ -15,6 +15,9 @@ const PhyloTree = function PhyloTree(reduxNodes, debugId) {
   this.grid = false;
   this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
   this.params = createDefaultParams();
+  this.groups = {};
+  /* by storing DOM <g> elements, we can quickly refer to groups here rather than scanning the DOM.
+  It also helps preserve the initial order of groups in the DOM as we are not creating new ones upon updates */
   this.debugId = debugId; /* super useful when one is trying to debug multiple trees! */
   /* create this.nodes, which is an array of nodes with properties used by phylotree for drawing.
    this.nodes is the same length as reduxNodes such that this.nodes[i] is related to reduxNodes[i]
@@ -61,6 +64,7 @@ PhyloTree.prototype.drawTips = renderers.drawTips;
 PhyloTree.prototype.drawBranches = renderers.drawBranches;
 PhyloTree.prototype.drawVaccines = renderers.drawVaccines;
 PhyloTree.prototype.drawRegression = renderers.drawRegression;
+PhyloTree.prototype.removeRegression = renderers.removeRegression;
 
 /* C A L C U L A T E    G E O M E T R I E S  E T C   ( M O D I F I E S    N O D E S ,    N O T    S V G ) */
 PhyloTree.prototype.setDistance = layouts.setDistance;
@@ -80,6 +84,7 @@ PhyloTree.prototype.updateConfidence = confidence.updateConfidence;
 
 /* L A B E L S    ( T I P ,    B R A N C H ,   C O N F I D E N C E ) */
 PhyloTree.prototype.drawBranchLabels = labels.drawBranchLabels;
+PhyloTree.prototype.removeBranchLabels = labels.removeBranchLabels;
 PhyloTree.prototype.updateBranchLabels = labels.updateBranchLabels;
 PhyloTree.prototype.updateTipLabels = labels.updateTipLabels;
 
