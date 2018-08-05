@@ -1,13 +1,15 @@
 import React from "react";
 import { connect } from "react-redux";
 import ChooseDatasetSelect from "./choose-dataset-select";
+import { darkGrey } from "../../globalStyles";
 
 const renderGithubInfo = () => {
   const parts = window.location.pathname.split("/");
   const repoURL = `github.com/${parts[2]}/${parts[3]}`;
   return (
-    <div style={{ fontSize: 14 }}>
-      {"Data sourced from "}
+    <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
+      <i className="fa fa-clone fa-lg" style={{color: darkGrey}} aria-hidden="true"/>
+      <span style={{position: "relative"}}>{" "}</span>
       <a href={`https://${repoURL}`} target="_blank">{repoURL}</a>
     </div>
   );
