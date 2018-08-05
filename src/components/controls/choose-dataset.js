@@ -10,6 +10,10 @@ const renderBareDataPath = (source, fields) => (
   </div>
 );
 
+const checkEqualityOfArrays = (arr1, arr2, upToIdx) => {
+  return arr1.slice(0, upToIdx).every((value, index) => value === arr2[index]);
+};
+
 @connect((state) => {
   return {
     available: state.controls.available,
@@ -33,17 +37,19 @@ class ChooseDataset extends React.Component {
 
     this.props.available.forEach((d) => {
       if (options[0].indexOf(d[0]) === -1) options[0].push(d[0]);
-    })
+    });
 
     for (let idx=1; idx<selected.length; idx++) {
       /* going through the fields which comprise the current dataset
       in order to create available alternatives for each field */
       options[idx] = [];
-      this.props.available.forEach((ds) => {
-        if (ds[idx-1] === selected[idx-1] && options[idx].indexOf(ds[idx]) === -1) {
-          options[idx].push(ds[idx]);
+      this.props.available.forEach((query) => {
+        /* if the parents (and their parents etc) of this choice match,
+        then we add that as a valid option */
+        if (checkEqualityOfArrays(query, selected, idx) && options[idx].indexOf(query[idx]) === -1) {
+          options[idx].push(query[idx]);
         }
-      })
+      });
     }
 
     const selectors = [];
