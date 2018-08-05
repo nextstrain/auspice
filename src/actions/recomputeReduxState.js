@@ -260,7 +260,7 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   return state;
 };
 
-const checkAndCorrectErrorsInState = (state, metadata, query) => {
+const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   /* The one (bigish) problem with this being in the reducer is that
   we can't have any side effects. So if we detect and error introduced by
   a URL QUERY (and correct it in state), we can't correct the URL */
@@ -363,6 +363,19 @@ const checkAndCorrectErrorsInState = (state, metadata, query) => {
     }
   }
 
+  /* are filters valid? */
+  const activeFilters = Object.keys(state.filters).filter((f) => f.length);
+  const stateCounts = countTraitsAcrossTree(tree.nodes, activeFilters, false, true);
+  for (const filterType of activeFilters) {
+    const validValues = state.filters[filterType]
+      .filter((filterValue) => filterValue in stateCounts[filterType]);
+    state.filters[filterType] = validValues;
+    if (!validValues.length) {
+      delete query[`f_${filterType}`];
+    } else {
+      query[`f_${filterType}`] = validValues.join(",");
+    }
+  }
   return state;
 };
 
@@ -469,7 +482,7 @@ export const createStateFromQueryOrJSONs = ({
     controls = modifyStateViaURLQuery(controls, query);
   }
 
-  controls = checkAndCorrectErrorsInState(controls, metadata, query); /* must run last */
+  controls = checkAndCorrectErrorsInState(controls, metadata, query, tree); /* must run last */
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
