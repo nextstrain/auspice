@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { strainNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -274,10 +274,20 @@ const checkAndCorrectErrorsInState = (state, metadata, query) => {
     if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
       availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
     }
-    if (availableNonGenotypeColorBys.length) {
-      console.error("Error detected trying to set colorBy to", state.colorBy, "falling back to", availableNonGenotypeColorBys[0]);
-      state.colorBy = availableNonGenotypeColorBys[0];
-      state.defaults.colorBy = availableNonGenotypeColorBys[0];
+
+    if (metadata.defaults && metadata.defaults.colorBy && availableNonGenotypeColorBys.indexOf(metadata.defaults.colorBy) !== -1) {
+      console.warn("colorBy falling back to", metadata.defaults.colorBy);
+      state.colorBy = metadata.defaults.colorBy;
+      state.defaults.colorBy = metadata.defaults.colorBy;
+    } else if (availableNonGenotypeColorBys.length) {
+      if (availableNonGenotypeColorBys.indexOf(defaultColorBy) !== -1) {
+        state.colorBy = defaultColorBy;
+        state.defaults.colorBy = defaultColorBy;
+      } else {
+        console.error("Error detected trying to set colorBy to", state.colorBy, "falling back to", availableNonGenotypeColorBys[0]);
+        state.colorBy = availableNonGenotypeColorBys[0];
+        state.defaults.colorBy = availableNonGenotypeColorBys[0];
+      }
     } else {
       console.error("Error detected trying to set colorBy to", state.colorBy, " as there are no color options defined in the JSONs!");
       state.colorBy = "none";
@@ -319,8 +329,15 @@ const checkAndCorrectErrorsInState = (state, metadata, query) => {
   if (metadata.geo) {
     const availableGeoResultions = Object.keys(metadata.geo);
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
-      state["geoResolution"] = availableGeoResultions[0];
-      console.error("Error detected. Setting geoResolution to ", state["geoResolution"]);
+      /* fallbacks: JSON defined default, then hardocded default, then any available */
+      if (metadata.defaults && metadata.defaults.geoResolution && availableGeoResultions.indexOf(metadata.defaults.geoResolution) !== -1) {
+        state.geoResolution = metadata.defaults.geoResolution;
+      } else if (availableGeoResultions.indexOf(defaultGeoResolution) !== -1) {
+        state.geoResolution = defaultGeoResolution;
+      } else {
+        state.geoResolution = availableGeoResultions[0];
+      }
+      console.error("Error detected. Setting geoResolution to ", state.geoResolution);
       delete query.r; // no-op if query.r doesn't exist
     }
   } else {
