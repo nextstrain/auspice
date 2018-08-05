@@ -1,6 +1,21 @@
+* Tree grid improvements - [PR 610](https://github.com/nextstrain/auspice/pull/610)
+  * Allow negative (i.e. BCE) dates
+  * Display y-dates and horizontal lines in the clock layout view
+  * Improved spacing between grid points
+* SVG elements in the DOM are now in named groups which improves debugging and prevents incorrect-layering bugs. [PR 612](https://github.com/nextstrain/auspice/pull/612)
+* Fixed a bug where the available datasets (dropdowns in sidebar) contained invalid values [PR 614](https://github.com/nextstrain/auspice/pull/614)
+* Community sourced datasets (nextstrain.org/community/...) display a link to the github repo in the sidebar [PR 615](https://github.com/nextstrain/auspice/pull/615)
+* Since v1.22.3 changing datasets preserved the URL queries (e.g. `?l=radial`).
+A number of bugs relating to this have been fixed, where these queries were no longer valid for the new dataset.
+This also fixed potential issues related to loading datasets where the URL queries were invalid.
+[PR 613](https://github.com/nextstrain/auspice/pull/613)
+
+
 ## version 1.23.2 - 2018/07/30
+* Increase the padding when displaying two panels side by side to avoid bugs on different browsers / OSs. [issue 574](https://github.com/nextstrain/auspice/issues/574)
 
 ## version 1.23.1 - 2018/07/30
+* Improved the alignment of branch labels for the second tree
 
 ## version 1.23.0 - 2018/07/28
 
