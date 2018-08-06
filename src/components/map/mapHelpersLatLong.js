@@ -137,30 +137,27 @@ const maybeConstructTransmissionEvent = (
   visibility,
   map,
   offsetOrig,
-  offsetDest
+  offsetDest,
+  demesMissingLatLongs
 ) => {
-
   let latOrig, longOrig, latDest, longDest;
   let transmission;
-
   /* checking metadata for lat longs name match - ie., does the metadata list a latlong for Thailand? */
   try {
     // node.attr[geoResolution] is the node's location, we're looking that up in the metadata lookup table
     latOrig = metadataGeoLookupTable[geoResolution][node.attr[geoResolution]].latitude;
     longOrig = metadataGeoLookupTable[geoResolution][node.attr[geoResolution]].longitude;
   } catch (e) {
-    console.warn("No transmission lat/longs for ",node.attr[geoResolution], " -> ",child.attr[geoResolution], "If this wasn't fired in the context of a dataset change, it's probably a bug.")
-    latOrig = 0.0;
-    longOrig = 0.0;
+    // console.warn("No transmission lat/longs for ", node.attr[geoResolution], " -> ",child.attr[geoResolution], "If this wasn't fired in the context of a dataset change, it's probably a bug.")
+    demesMissingLatLongs.add(node.attr[geoResolution]);
   }
   try {
     // node.attr[geoResolution] is the node's location, we're looking that up in the metadata lookup table
     latDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].latitude;
     longDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].longitude;
   } catch (e) {
-    console.warn("No transmission lat/longs for ",node.attr[geoResolution], " -> ",child.attr[geoResolution], "If this wasn't fired in the context of a dataset change, it's probably a bug.")
-    latDest = 0.0;
-    longDest = 0.0;
+    console.warn("No transmission lat/longs for ", node.attr[geoResolution], " -> ", child.attr[geoResolution], "If this wasn't fired in the context of a dataset change, it's probably a bug.");
+    return undefined;
   }
 
   const validLatLongPair = maybeGetTransmissionPair(
@@ -219,10 +216,10 @@ const maybeGetClosestTransmissionEvent = (
   nodeColors,
   visibility,
   map,
-  offsetOrig
+  offsetOrig,
+  demesMissingLatLongs
 ) => {
   const possibleEvents = [];
-
   // iterate over offsets applied to transmission destination
   // even if map is not tripled - ie., don't let a line go across the whole world
   [-360, 0, 360].forEach((offsetDest) => {
@@ -235,7 +232,8 @@ const maybeGetClosestTransmissionEvent = (
       visibility,
       map,
       offsetOrig,
-      offsetDest
+      offsetDest,
+      demesMissingLatLongs
     );
     if (t) { possibleEvents.push(t); }
   });
@@ -267,6 +265,7 @@ const setupTransmissionData = (
   const metadataGeoLookupTable = metadata.geo;
   const transmissionData = []; /* edges, animation paths */
   const transmissionIndices = {}; /* map of transmission id to array of indices */
+  const demesMissingLatLongs = new Set();
   nodes.forEach((n) => {
     if (n.children) {
       n.children.forEach((child) => {
@@ -285,7 +284,8 @@ const setupTransmissionData = (
               nodeColors,
               visibility,
               map,
-              offsetOrig
+              offsetOrig,
+              demesMissingLatLongs
             );
             if (t) { transmissionData.push(t); }
           });
@@ -303,7 +303,8 @@ const setupTransmissionData = (
   });
   return {
     transmissionData: transmissionData,
-    transmissionIndices: transmissionIndices
+    transmissionIndices: transmissionIndices,
+    demesMissingLatLongs
   };
 };
 
@@ -331,7 +332,7 @@ export const createDemeAndTransmissionData = (
   } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
 
   /* second time so that we can get Bezier */
-  const { transmissionData, transmissionIndices } = setupTransmissionData(
+  const { transmissionData, transmissionIndices, demesMissingLatLongs } = setupTransmissionData(
     nodes,
     visibility,
     geoResolution,
@@ -345,7 +346,8 @@ export const createDemeAndTransmissionData = (
     demeData: demeData,
     transmissionData: transmissionData,
     demeIndices: demeIndices,
-    transmissionIndices: transmissionIndices
+    transmissionIndices: transmissionIndices,
+    demesMissingLatLongs
   };
 };
 

@@ -18,6 +18,7 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { lightGrey, goColor, pauseColor } from "../../globalStyles";
+import { errorNotification } from "../../actions/notifications";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -181,7 +182,8 @@ class Map extends React.Component {
         demeData,
         transmissionData,
         demeIndices,
-        transmissionIndices
+        transmissionIndices,
+        demesMissingLatLongs
       } = createDemeAndTransmissionData(
         this.props.nodes,
         this.props.visibility,
@@ -191,6 +193,12 @@ class Map extends React.Component {
         this.props.metadata,
         this.state.map
       );
+      if (demesMissingLatLongs.size) {
+        this.props.dispatch(errorNotification({
+          message: "The following demes are missing lat/long information",
+          details: [...demesMissingLatLongs].join(", ")
+        }));
+      }
 
       // const latLongs = this.latLongs(demeData, transmissionData); /* no reference stored, we recompute this for now rather than updating in place */
       const d3elems = drawDemesAndTransmissions(
