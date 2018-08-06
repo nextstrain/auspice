@@ -74,7 +74,7 @@ EntropyChart.prototype.update = function update({
   if (gene !== undefined && start !== undefined && end !== undefined) {
     /* move the brush */
     const geneLength = end-start;
-    const multiplier = gene === "nuc" ? 0 : 1.5*geneLength; /* scale genes to decent size, don't scale nucs */
+    const multiplier = gene === "nuc" ? 0 : 1*geneLength; /* scale genes to decent size, don't scale nucs */
     this.navGraph.select(".brush")
       .call(this.brush.move, () => {  /* scale so genes are a decent size. stop brushes going off graph */
         return [Math.max(this.scales.xNav(start-multiplier), this.scales.xNav(0)),
@@ -98,20 +98,20 @@ EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed
     /* if one nuc position, pad on either side with some space */
     if (parsed[0].positions.length === 1) {
       const pos = parsed[0].positions[0];
-      const eitherSide = maxNt*0.1;
+      const eitherSide = maxNt*0.05;
       startEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
         (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
     } else {
       /* if two nuc pos, find largest and smallest and pad slightly */
       const start = Math.min.apply(null, parsed[0].positions);
       const end = Math.max.apply(null, parsed[0].positions);
-      startEnd = [start - (end-start)*0.1, end + (end-start)*0.1];
+      startEnd = [start - (end-start)*0.05, end + (end-start)*0.05];
     }
   } else {
     /* if a gene, scale to nice size */
     const gene = parsed[0].prot;
     startEnd = [geneMap[gene].start, geneMap[gene].end];
-    multiplier = (startEnd[1]-startEnd[0])*1.5;
+    multiplier = (startEnd[1]-startEnd[0])*1;
   }
   /* ensure doesn't run off graph */
   return [Math.max(startEnd[0]-multiplier, 0),

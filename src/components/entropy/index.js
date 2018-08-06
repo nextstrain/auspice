@@ -210,19 +210,19 @@ export class Entropy extends React.Component {
             if (positions.length > 1) {
               const start = Math.min.apply(null, positions);
               const end = Math.max.apply(null, positions);
-              startUpdate = start - (end-start)*0.1;
-              endUpdate = end + (end-start)*0.1;
+              startUpdate = start - (end-start)*0.05;
+              endUpdate = end + (end-start)*0.05;
             } else {
               const pos = positions[0];
-              const eitherSide = maxNt*0.1;
+              const eitherSide = maxNt*0.05;
               const newStartEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
                 (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
               startUpdate = newStartEnd[0];
               endUpdate = newStartEnd[1];
             }
             /* if the zoom would be different enough, change it */
-            if (!(startUpdate > zoomCoord[0]-maxNt*0.5 && startUpdate < zoomCoord[0]+maxNt*0.5) ||
-              !(endUpdate > zoomCoord[1]-maxNt*0.5 && endUpdate < zoomCoord[1]+maxNt*0.5)) {
+            if (!(startUpdate > zoomCoord[0]-maxNt*0.4 && startUpdate < zoomCoord[0]+maxNt*0.4) ||
+              !(endUpdate > zoomCoord[1]-maxNt*0.4 && endUpdate < zoomCoord[1]+maxNt*0.4)) {
               updateParams.gene = geneUpdate;
               updateParams.start = startUpdate;
               updateParams.end = endUpdate;
