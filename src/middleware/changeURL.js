@@ -30,7 +30,6 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: // fallthrough
     case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE:
       query = action.query;
-      console.log("MIDDLEWARE", action.type, " n->", query.n)
       if (query.tt) delete query.tt;
       break;
     case types.NEW_COLORS:
@@ -105,7 +104,6 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.TOGGLE_NARRATIVE: {
       if (action.display === true) {
         query = {n: state.narrative.blockIdx};
-        console.log("TOGGLE_NARRATIVE changing n to", query.n)
       }
       break;
     }
@@ -165,7 +163,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
   }
 
-  Object.keys(query).filter((k) => !query[k]).forEach((k) => delete query[k]);
+  Object.keys(query).filter((q) => query[q] === "").forEach((k) => delete query[k]);
   let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/');
   if (search) {search = "?" + search;}
   if (!pathname.startsWith("/")) {pathname = "/" + pathname;}

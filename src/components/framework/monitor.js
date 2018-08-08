@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import _throttle from "lodash/throttle";
 import { BROWSER_DIMENSIONS, CHANGE_PANEL_LAYOUT } from "../../actions/types";
-import { browserBackForward } from "../../actions/navigation";
+import { changePage } from "../../actions/navigation";
 import { twoColumnBreakpoint } from "../../util/globals";
 
 @connect((state) => ({
@@ -42,7 +42,7 @@ class Monitor extends React.Component {
     // this.onURLChanged();
   }
 
-  onURLChanged = () => this.props.dispatch(browserBackForward());
+  onURLChanged = () => this.props.dispatch(changePage());
 
   handleResizeByDispatching() {
     this.props.dispatch((dispatch, getState) => {

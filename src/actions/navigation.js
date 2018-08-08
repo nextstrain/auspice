@@ -35,21 +35,48 @@ Because the datasets reducer has changed, the <App> (or whichever display compon
 In <App>, this causes a call to loadJSONs, which will, as part of it's dispatch, use the URL state of query.
 In this way, the URL query is "used".
 */
-export const changePage = ({path, query = undefined, push = true}) => (dispatch, getState) => {
-  if (!path) {
-    console.error("changePage called without a path");
-    return;
+export const changePage = ({
+  path = undefined,
+  query = undefined,
+  queryToDisplay = undefined, /* doesn't affect state, only URL. defaults to query unless specified */
+  push = true,
+  dontChangeDataset = false
+}) => (dispatch, getState) => {
+  const oldState = getState();
+  // console.warn("CHANGE PAGE!", path, query, queryToDisplay, push);
+
+  /* set some defaults */
+  if (!path) path = window.location.pathname;  // eslint-disable-line
+  if (!query) query = window.location.search;  // eslint-disable-line
+  if (!queryToDisplay) queryToDisplay = query; // eslint-disable-line
+  /* some booleans */
+  const pathHasChanged = oldState.general.pathname !== path;
+
+  if (!dontChangeDataset || pathHasChanged) {
+    const requestedDisplayComponent = chooseDisplayComponentFromURL(path);
+    if (requestedDisplayComponent === "app" && oldState.general.displayComponent === "app") {
+      /* we're just changing the dataset */
+      dispatch(loadJSONs({url: path, search: query})); /* this processes the query from the URL... */
+    } else {
+      const action = {
+        type: PAGE_CHANGE,
+        path,
+        displayComponent: requestedDisplayComponent,
+        pushState: push,
+        query
+      };
+      dispatch(action);
+    }
+  } else {
+    /* the path (dataset) remains the same... but the state may be modulated by the query */
+    const newState = createStateFromQueryOrJSONs({oldState, query});
+    dispatch({
+      type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+      ...newState,
+      pushState: push,
+      query: queryToDisplay
+    });
   }
-  const displayComponent = chooseDisplayComponentFromURL(path);
-  const { general } = getState();
-  if (general.displayComponent === displayComponent && displayComponent === "app") {
-    /* we're not changing component, just changing the dataset */
-    dispatch(loadJSONs({url: path}));
-    return;
-  }
-  const action = {type: PAGE_CHANGE, path, displayComponent, pushState: push};
-  if (query !== undefined) { action.query = query; }
-  dispatch(action);
 };
 
 /* a 404 uses the same machinery as changePage, but it's not a thunk */
@@ -60,31 +87,3 @@ export const goTo404 = (errorMessage) => ({
   errorMessage,
   pushState: true
 });
-
-/* modify redux state and URL by specifying a new URL query string. Pathname is not considered, if you want to change that, use "changePage" instead.
-Unlike "changePage" the query is processed both by the middleware (i.e. to update the URL) AND by the reducers, to update their state accordingly.
-ARGUMENTS:
-(1) query - REQUIRED - {object}
-(2) push - OPTIONAL (default: true) - signals that pushState should be used (has no effect on the reducers)
-*/
-export const changePageQuery = ({queryToUse, queryToDisplay = false, push = true}) => (dispatch, getState) => {
-  const newState = createStateFromQueryOrJSONs({oldState: getState(), query: queryToUse});
-  dispatch({
-    type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
-    ...newState,
-    pushState: push,
-    query: queryToDisplay ? queryToDisplay : queryToUse
-  });
-};
-
-export const browserBackForward = () => (dispatch, getState) => {
-  const { general } = getState();
-  const potentiallyOutOfDatePathname = general.pathname;
-  /* differentiate between ∆pathname and ∆query (only) */
-  console.log("broswer back/forward detected. From: ", potentiallyOutOfDatePathname, "to:", window.location.pathname, window.location.search)
-  if (potentiallyOutOfDatePathname !== window.location.pathname) {
-    dispatch(changePage({path: window.location.pathname}));
-  } else {
-    dispatch(changePageQuery({queryToUse: queryString.parse(window.location.search)}));
-  }
-};

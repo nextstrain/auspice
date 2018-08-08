@@ -13,9 +13,6 @@ const narrative = (state = {
         loaded: false,
         display: false
       });
-    case "CHANGENBLOCKIDX": {
-      return Object.assign({}, state, {blockIdx: action.blockIdx});
-    }
     case types.CLEAN_START:
       if (action.narrative) {
         return {
@@ -28,7 +25,7 @@ const narrative = (state = {
       }
       return state;
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
-      if (action.query.n) {
+      if (action.query.hasOwnProperty("n")) { // eslint-disable-line
         return Object.assign({}, state, {blockIdx: action.query.n});
       }
       return state;
