@@ -163,12 +163,12 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   const strokeCol = posInSequence < 1e6 ? "white" : "black"; /* black for large because otherwise disappear against background */
   const readingFrameOffset = (frame) => !hasTwoReadFrames ? 10 : frame===-1 ? 20 : 0;
   const visibleAnnots = annotations.filter((annot) => /* try to prevent drawing genes if not visible */
-    (annot.start < this.scales.xGene.domain()[1] && annot.start > this.scales.xGene.domain()[0]) ||
-    (annot.end > this.scales.xGene.domain()[0] && annot.end < this.scales.xGene.domain()[1]) ||
-    (annot.start < this.scales.xGene.domain()[0] && annot.end > this.scales.xGene.domain()[1])); // for extreme zoom, keep plotting if both ends off graph!
+    (annot.start < this.scales.xMain.domain()[1] && annot.start > this.scales.xMain.domain()[0]) ||
+    (annot.end > this.scales.xMain.domain()[0] && annot.end < this.scales.xMain.domain()[1]) ||
+    (annot.start < this.scales.xMain.domain()[0] && annot.end > this.scales.xMain.domain()[1])); // for extreme zoom, keep plotting if both ends off graph!
   /* stop gene plots from extending beyond axis if zoomed in */
-  const startG = (d) => d.start > this.scales.xGene.domain()[0] ? this.scales.xGene(d.start) : this.offsets.x1;
-  const endG = (d) => d.end < this.scales.xGene.domain()[1] ? this.scales.xGene(d.end) : this.offsets.x2;
+  const startG = (d) => d.start > this.scales.xMain.domain()[0] ? this.scales.xMain(d.start) : this.offsets.x1;
+  const endG = (d) => d.end < this.scales.xMain.domain()[1] ? this.scales.xMain(d.end) : this.offsets.x2;
   const selection = this.geneGraph.selectAll(".gene")
     .data(visibleAnnots)
     .enter()
@@ -184,7 +184,7 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
     .style("stroke", () => strokeCol);
   selection.append("text")
     .attr("x", (d) =>
-      this.scales.xGene(d.start) + (this.scales.xGene(d.end) - this.scales.xGene(d.start)) / 2
+      this.scales.xMain(d.start) + (this.scales.xMain(d.end) - this.scales.xMain(d.start)) / 2
     )
     .attr("y", (d) => readingFrameOffset(d.readingFrame) + 5)
     .attr("dy", ".7em")
@@ -294,24 +294,26 @@ EntropyChart.prototype._drawBars = function _drawBars() {
   this._highlightSelectedBars();
 };
 
-/* set scales - normally use this.scales.y, this.scales.xMain, this.scales.xNav */
+/* set scales
+ * yMin, yMax: [0, maximum height of any entropy bar]
+ * xMin, xMax: [0, genome length in nucleotides]
+ * xMain: the x-scale for the bar chart & upper annotation track. Rescaled upon zooming.
+ * xNav: the x-scale used to draw the entire genome with a brush & gene annotations.
+ *       this is unchanged upon zooming.
+ * y: the only y scale used
+ */
 EntropyChart.prototype._setScales = function _setScales(xMax, yMax) {
   this.scales = {};
   this.scales.xMax = xMax;
   this.scales.yMax = yMax;
   this.scales.yMin = 0; // -0.11 * yMax;
   this.scales.xMin = 0;
-  this.scales.xMainOriginal = scaleLinear()
+  this.scales.xMain = scaleLinear()
     .domain([0, xMax])
     .range([this.offsets.x1, this.offsets.x2]);
-  this.scales.xMain = this.scales.xMainOriginal;
   this.scales.xNav = scaleLinear()
     .domain([0, xMax])
     .range([this.offsets.x1, this.offsets.x2]);
-  this.scales.xGeneOriginal = scaleLinear()
-    .domain([0, xMax])
-    .range([this.offsets.x1, this.offsets.x2]);
-  this.scales.xGene = this.scales.xGeneOriginal;
   this.scales.y = scaleLinear()
     .domain([this.scales.yMin, 1.2 * yMax])
     .range([this.offsets.y2Main, this.offsets.y1Main]);
@@ -398,11 +400,11 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     }
   };
 
+  /* zooms in by modifing the domain of xMain scale */
   this._zoom = function _zoom(start, end) {
     const s = [start, end];
-    this.xModified = this.scales.xMain.domain(s);
+    this.scales.xMain.domain(s);
     this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
-    this.xGeneModified = this.scales.xGene.domain(s);
     this.svg.select(".xMain.axis").call(this.axes.xMain);
     this._drawBars();
     this._drawZoomGenes(this.annotations);
@@ -489,7 +491,7 @@ EntropyChart.prototype._createZoomFn = function _createZoomFn() {
     this.zoomCoordinates = tempZoomCoordinates;
 
     /* rescale the x axis (not y) */  // does this do anything?? Unsure.
-    this.xModified = t.rescaleX(this.scales.xMainOriginal);
+    t.rescaleX(this.scales.xMain);
     this.axes.xMain = this.axes.xMain.scale(this.scales.xMain);
     this.svg.select(".xMain.axis").call(this.axes.xMain);
     this._drawBars();
