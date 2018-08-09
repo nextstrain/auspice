@@ -480,7 +480,6 @@ EntropyChart.prototype._addZoomLayers = function _addZoomLayers() {
 EntropyChart.prototype._createZoomFn = function _createZoomFn() {
   return function zoomed() {
     const t = d3event.transform;
-    console.log("tk", t.k);
     const zoomCoordLen = this.zoomCoordinates[1] - this.zoomCoordinates[0];
     const amountZoomChange = (zoomCoordLen - (zoomCoordLen/t.k))/2;
     const tempZoomCoordinates = [Math.max(this.zoomCoordinates[0]+amountZoomChange, this.scales.xNav(0)),
