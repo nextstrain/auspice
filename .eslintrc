@@ -46,7 +46,7 @@ rules:
   no-unneeded-ternary: ["error", { "defaultAssignment": true }]
   quote-props: ["error", "as-needed"]
   prefer-const: ["error", {"destructuring": "all"}]
-  indent: ["error", 2, {"MemberExpression": "off"}]
+  indent: ["error", 2, {"MemberExpression": "off", "SwitchCase": 1}]
 parserOptions:
   ecmaVersion: 6
   sourceType: module

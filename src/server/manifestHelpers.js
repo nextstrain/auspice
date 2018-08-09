@@ -80,9 +80,20 @@ const buildManifest = (dest) => {
 };
 
 const checkFieldsAgainstManifest = (fields, source) => {
-  const manifest = source === "local" ? global.LOCAL_MANIFEST :
-    source === "live" ? global.LIVE_MANIFEST :
-      undefined;
+  let manifest;
+  switch (source) {
+    case "live":
+      manifest = global.LIVE_MANIFEST;
+      break;
+    case "staging":
+      manifest = global.STAGING_MANIFEST;
+      break;
+    case "local":
+      manifest = global.LOCAL_MANIFEST;
+      break;
+    default:
+      break;
+  }
 
   if (!manifest) {
     return fields;
