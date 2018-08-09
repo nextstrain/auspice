@@ -1,3 +1,5 @@
+## version 1.24.1 - 2018/08/08
+
 ## version 1.24.0 - 2018/08/05
 
 * Tree grid improvements - [PR 610](https://github.com/nextstrain/auspice/pull/610)
