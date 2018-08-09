@@ -195,6 +195,39 @@ export class Entropy extends React.Component {
         if (!nextProps.colorBy.startsWith("gt")) {
           updateParams.clearSelected = true;
         } else {
+          if (!nextProps.colorBy.startsWith("gt-nuc")) {  /* if it is a gene, zoom to it */
+            updateParams.gene = nextProps.colorBy.split(/-|_/)[1];
+            updateParams.start = nextProps.geneMap[updateParams.gene].start;
+            updateParams.end = nextProps.geneMap[updateParams.gene].end;
+          } else { /* if a nuc, want to do different things if 1 or multiple */
+            const posPos = nextProps.colorBy.split(/-|_/)[2].split(",");
+            const positions = posPos.map((position) => parseInt(position, 10));
+            const zoomCoord = this.state.chart.zoomCoordinates;
+            const maxNt = this.state.chart.maxNt;
+            /* find out what new coords would be - if different enough, change zoom */
+            const geneUpdate = "nuc";
+            let startUpdate, endUpdate;
+            if (positions.length > 1) {
+              const start = Math.min.apply(null, positions);
+              const end = Math.max.apply(null, positions);
+              startUpdate = start - (end-start)*0.05;
+              endUpdate = end + (end-start)*0.05;
+            } else {
+              const pos = positions[0];
+              const eitherSide = maxNt*0.05;
+              const newStartEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
+                (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
+              startUpdate = newStartEnd[0];
+              endUpdate = newStartEnd[1];
+            }
+            /* if the zoom would be different enough, change it */
+            if (!(startUpdate > zoomCoord[0]-maxNt*0.4 && startUpdate < zoomCoord[0]+maxNt*0.4) ||
+              !(endUpdate > zoomCoord[1]-maxNt*0.4 && endUpdate < zoomCoord[1]+maxNt*0.4)) {
+              updateParams.gene = geneUpdate;
+              updateParams.start = startUpdate;
+              updateParams.end = endUpdate;
+            }
+          }
           updateParams.selected = parseEncodedGenotype(nextProps.colorBy, nextProps.geneLength);
         }
       }
