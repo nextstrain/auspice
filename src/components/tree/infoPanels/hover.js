@@ -115,14 +115,14 @@ const getMutationsJSX = (d, mutType) => {
       // gather muts with N/-
       const ngaps = d.muts.filter((mut) => {
         return mut.slice(-1) === "N" || mut.slice(-1) === "-"
-          || mut.slice(0) === "N" || mut.slice(0) === "-";
+          || mut.slice(0, 1) === "N" || mut.slice(0, 1) === "-";
       });
       const gapLen = ngaps.length; // number of mutations that exist with N/-
 
       // gather muts without N/-
       const nucs = d.muts.filter((mut) => {
         return mut.slice(-1) !== "N" && mut.slice(-1) !== "-"
-          && mut.slice(0) !== "N" && mut.slice(0) !== "-";
+          && mut.slice(0, 1) !== "N" && mut.slice(0, 1) !== "-";
       });
       const nucLen = nucs.length; // number of mutations that exist without N/-
 
