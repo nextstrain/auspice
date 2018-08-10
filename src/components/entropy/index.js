@@ -222,7 +222,8 @@ export class Entropy extends React.Component {
             }
             /* if the zoom would be different enough, change it */
             if (!(startUpdate > zoomCoord[0]-maxNt*0.4 && startUpdate < zoomCoord[0]+maxNt*0.4) ||
-              !(endUpdate > zoomCoord[1]-maxNt*0.4 && endUpdate < zoomCoord[1]+maxNt*0.4)) {
+              !(endUpdate > zoomCoord[1]-maxNt*0.4 && endUpdate < zoomCoord[1]+maxNt*0.4) ||
+              !(positions.every((x) => x > zoomCoord[0]) && positions.every((x) => x < zoomCoord[1]))) {
               updateParams.gene = geneUpdate;
               updateParams.start = startUpdate;
               updateParams.end = endUpdate;
