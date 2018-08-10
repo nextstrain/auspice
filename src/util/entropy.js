@@ -28,7 +28,11 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
     } else if (n.muts) {
       n.muts.forEach((m) => {
         const pos = parseInt(m.slice(1, m.length - 1), 10);
-        sparse[pos] ? sparse[pos]++ : sparse[pos] = 1;
+        const A = m.slice(0, 1);
+        const B = m.slice(-1);
+        if (A !== "N" && A !== "-" && B !== "N" && B !== "-") {
+          sparse[pos] ? sparse[pos]++ : sparse[pos] = 1;
+        }
       });
     }
   });
@@ -88,6 +92,7 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
     const A = m.slice(0, 1);
     const B = m.slice(m.length - 1, m.length);
     // console.log("mut @ ", pos, ":", A, " -> ", B)
+    if (A === "N" || A === "-" || B === "N" || B === "-") return;
     if (!anc_state[prot][pos]) {
       // if we don't know the ancestral state, set it via the first encountered state
       anc_state[prot][pos] = A;

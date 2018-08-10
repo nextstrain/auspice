@@ -117,7 +117,6 @@ const getMutationsJSX = (d, mutType) => {
         return mut.slice(-1) === "N" || mut.slice(-1) === "-"
           || mut.slice(0, 1) === "N" || mut.slice(0, 1) === "-";
       });
-      console.log("ngaps", ngaps);
       const gapLen = ngaps.length; // number of mutations that exist with N/-
 
       // gather muts without N/-
@@ -125,7 +124,6 @@ const getMutationsJSX = (d, mutType) => {
         return mut.slice(-1) !== "N" && mut.slice(-1) !== "-"
           && mut.slice(0, 1) !== "N" && mut.slice(0, 1) !== "-";
       });
-      console.log("nucs", nucs);
       const nucLen = nucs.length; // number of mutations that exist without N/-
 
       let m = nucs.slice(0, Math.min(nDisplay, nucLen)).join(", ");
