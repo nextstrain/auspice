@@ -133,14 +133,12 @@ class ColorBy extends React.Component {
       if (gene==="nuc") return;
       position = "1"; /* if it's a gene, set position to trigger zoom */
     }
-    if (position.split(',').length === 1 && parseInt(position.split(','), 10) >= this.props.geneLength[gene]) {
-      position = "1"; /* if it's a position outside the gene, set to 1 to trigger zoom in another gene! */
+    let positions = position.split(',').filter((x) => parseInt(x, 10)); /* get rid of non-ints */
+    if (!positions.length) return; /* do nothing if no ints */
+    if (!(positions.every((x) => x > 0) && positions.every((x) => x < this.props.geneLength[gene]))) {
+      positions = [1];  /* is positions are outside gene, set to 1 to trigger zoom */
     }
-    const positions = position.split(',').filter((x) =>
-      parseInt(x, 10) > 0 && parseInt(x, 10) < this.props.geneLength[gene]
-    );
-    if (!positions.length) return;
-    const colorBy = "gt-"+gene+"_"+positions.join(','); 
+    const colorBy = "gt-"+gene+"_"+positions.join(',');
     analyticsControlsEvent("color-by-genotype");
     this.props.dispatch(changeColorBy(colorBy));
   }
