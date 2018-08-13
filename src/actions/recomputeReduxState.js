@@ -324,6 +324,11 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   /* zoom */
   if (state.zoomMax > state["absoluteZoomMax"]) { state.zoomMax = state["absoluteZoomMax"]; }
   if (state.zoomMin < state["absoluteZoomMin"]) { state.zoomMin = state["absoluteZoomMin"]; }
+  if (state.zoomMin > state.zoomMax) {
+    const tempMin = state.zoomMin;
+    state.zoomMin = state.zoomMax;
+    state.zoomMax = tempMin;
+  }
 
   /* colorBy confidence */
   state["colorByConfidence"] = checkColorByConfidence(state["attrs"], state["colorBy"]);
