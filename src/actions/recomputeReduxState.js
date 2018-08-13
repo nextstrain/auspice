@@ -270,7 +270,6 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   /* The one (bigish) problem with this being in the reducer is that
   we can't have any side effects. So if we detect and error introduced by
   a URL QUERY (and correct it in state), we can't correct the URL */
-  console.log("check correct errors");
   /* colorBy */
   if (!metadata.colorOptions) {
     metadata.colorOptions = {};
@@ -321,6 +320,10 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
     /* if it's a _non_ genotype colorBy AND it's not a valid option, fall back to the default */
     fallBackToDefaultColorBy();
   }
+
+  /* zoom */
+  if (state.zoomMax > state["absoluteZoomMax"]) { state.zoomMax = state["absoluteZoomMax"]; }
+  if (state.zoomMin < state["absoluteZoomMin"]) { state.zoomMin = state["absoluteZoomMin"]; }
 
   /* colorBy confidence */
   state["colorByConfidence"] = checkColorByConfidence(state["attrs"], state["colorBy"]);
@@ -465,6 +468,8 @@ export const createStateFromQueryOrJSONs = ({
     controls = getDefaultControlsState();
     controls = modifyStateViaTree(controls, tree, treeToo);
     controls = modifyStateViaMetadata(controls, metadata);
+    controls["absoluteZoomMin"] = 0;
+    controls["absoluteZoomMax"] = entropy.lengthSequence;
     controls.available = json["_available"];
     controls.source = json["_source"];
     controls.datasetFields = json["_datasetFields"];
@@ -516,8 +521,6 @@ export const createStateFromQueryOrJSONs = ({
     entropy.bars = entropyBars;
     entropy.maxYVal = entropyMaxYVal;
     entropy.zoomCoordinates = [controls["zoomMin"], controls["zoomMax"]];
-    controls["absoluteZoomMin"] = 0;
-    controls["absoluteZoomMax"] = entropy.lengthSequence;
   }
 
   /* update frequencies if they exist (not done for new JSONs) */
