@@ -104,7 +104,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     if (genotype.length > 1) {
       console.warn("Cannot deal with multiple proteins yet - using first only.");
     }
-    setGenotype(tree.nodes, genotype[0].prot || "nuc", genotype[0].positions); /* modifies nodes recursively */
+    setGenotype(tree.nodes, genotype[0].prot || "nuc", genotype[0].positions, metadata["ancestral_sequences"]); /* modifies nodes recursively */
   }
   const colorOptions = metadata.colorOptions;
   const treeTooNodes = treeToo ? treeToo.nodes : undefined;

@@ -1,8 +1,22 @@
 
-export const setGenotype = (nodes, prot, positions) => {
+export const setGenotype = (nodes, prot, positions, ancestral_sequences) => {
   // console.time("setGenotype")
+  let seq, ancState;
+  if (ancestral_sequences && ancestral_sequences[prot]){
+    seq = ancestral_sequences[prot];
+  }else{
+    seq = undefined;
+  }
+  //define ancestral state if ancestral sequences are provided.
+  //much of the complicated handling of unknown ancestral states
+  //could go if ancestral sequences were universally provided.
+  if (seq){
+    ancState = positions.map((i) => seq[i-1]);
+  }else{
+    ancState = positions.map(() => undefined);
+  }
+
   const nPositions = positions.length;
-  const ancState = positions.map(() => undefined);
   const ancNodes = positions.map(() => []);
   const recurse = (node, state) => {
     const newState = state; /* reference. cheap */
@@ -12,6 +26,7 @@ export const setGenotype = (nodes, prot, positions) => {
     } else if (node.aa_muts && node.aa_muts[prot]) {
       data = node.aa_muts[prot];
     }
+
     if (data && data.length) {
       for (let i = 0; i < data.length; i++) {
         const m = data[i];
