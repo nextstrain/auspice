@@ -2,6 +2,7 @@ import { genotypeColors } from "./globals";
 
 const getAnnotations = (jsonData) => {
   const annotations = [];
+  const nuc = [];
   let aaCount = 0;
   for (const prot of Object.keys(jsonData)) {
     if (prot !== "nuc") {
@@ -13,9 +14,14 @@ const getAnnotations = (jsonData) => {
         readingFrame: jsonData[prot].strand,
         fill: genotypeColors[aaCount % 10]
       });
+    } else {
+      nuc.push({
+        start: jsonData[prot].start,
+        end: jsonData[prot].end
+      });
     }
   }
-  return annotations;
+  return [annotations, nuc];
 };
 
 const processAnnotations = (annotations) => {
@@ -34,11 +40,15 @@ const processAnnotations = (annotations) => {
 
 export const entropyCreateStateFromJsons = (metaJSON) => {
   if (metaJSON.annotations) {
-    const annotations = getAnnotations(metaJSON.annotations);
+    // const annotations = getAnnotations(metaJSON.annotations);
+    const ant = getAnnotations(metaJSON.annotations);
+    const annotations = ant[0];
+    const lengthSequence = ant[1][0].end;
     return {
       showCounts: false,
       loaded: true,
       annotations,
+      lengthSequence,
       geneMap: processAnnotations(annotations)
     };
   }

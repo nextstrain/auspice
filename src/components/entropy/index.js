@@ -62,11 +62,14 @@ const constructEncodedGenotype = (aa, d) => {
     showCounts: state.entropy.showCounts,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
+    zoomMin: state.controls.zoomMin,
+    zoomMax: state.controls.zoomMax,
     defaultColorBy: state.controls.defaults.colorBy,
     shouldReRender: false,
     panelLayout: state.controls.panelLayout
   };
 })
+
 export class Entropy extends React.Component {
   constructor(props) {
     super(props);

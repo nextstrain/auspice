@@ -44,6 +44,12 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.l) {
     state["layout"] = query.l;
   }
+  if (query.zmin) {
+    state["zoomMin"] = parseInt(query.zmin, 10);
+  }
+  if (query.zmax) {
+    state["zoomMax"] = parseInt(query.zmax, 10);
+  }
   if (query.m) {
     state["distanceMeasure"] = query.m;
   }
@@ -264,7 +270,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   /* The one (bigish) problem with this being in the reducer is that
   we can't have any side effects. So if we detect and error introduced by
   a URL QUERY (and correct it in state), we can't correct the URL */
-
+  console.log("check correct errors");
   /* colorBy */
   if (!metadata.colorOptions) {
     metadata.colorOptions = {};
@@ -509,6 +515,9 @@ export const createStateFromQueryOrJSONs = ({
     const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
     entropy.bars = entropyBars;
     entropy.maxYVal = entropyMaxYVal;
+    entropy.zoomCoordinates = [controls["zoomMin"], controls["zoomMax"]];
+    controls["absoluteZoomMin"] = 0;
+    controls["absoluteZoomMax"] = entropy.lengthSequence;
   }
 
   /* update frequencies if they exist (not done for new JSONs) */
