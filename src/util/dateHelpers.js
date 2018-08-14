@@ -14,9 +14,14 @@ export const numericToCalendar = (numDate) => {
 };
 
 export const calendarToNumeric = (calDate) => {
-  const d3Date = dateParser(calDate);
-  const numDate = dateScale(d3Date);
-  return numDate;
+  if (calDate[0]==='-'){
+    const pieces = calDate.substring(1).split('-');
+    return -parseFloat(pieces[0]);
+  }else{
+    const d3Date = dateParser(calDate);
+    const numDate = dateScale(d3Date);
+    return numDate;
+  }
 };
 
 export const currentNumDate = () => {
