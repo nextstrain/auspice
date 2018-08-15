@@ -67,7 +67,9 @@ export const getDefaultControlsState = () => {
     panelsToDisplay: [],
     panelLayout: calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full",
     showTreeToo: undefined,
-    showTangle: false
+    showTangle: false,
+    zoomMin: undefined,
+    zoomMax: undefined
   };
 };
 

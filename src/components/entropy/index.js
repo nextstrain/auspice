@@ -189,6 +189,10 @@ export class Entropy extends React.Component {
     } else { /* props changed, but a new render probably isn't required */
       timerStart("entropy D3 update");
       const updateParams = {};
+      if (this.props.zoomMax !== nextProps.zoomMax || this.props.zoomMin !== nextProps.zoomMin) {
+        updateParams.zoomMax = nextProps.zoomMax;
+        updateParams.zoomMin = nextProps.zoomMin;
+      }
       if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
         updateParams.aa = nextProps.mutType === "aa";
         updateParams.newBars = nextProps.bars;

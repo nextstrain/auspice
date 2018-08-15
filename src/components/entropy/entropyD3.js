@@ -60,7 +60,9 @@ EntropyChart.prototype.update = function update({
   clearSelected = false,
   gene = undefined,
   start = undefined,
-  end = undefined
+  end = undefined,
+  zoomMax = undefined,
+  zoomMin = undefined
 }) {
   const aaChange = aa !== undefined && aa !== this.aa;
   if (newBars || aaChange) {
@@ -84,6 +86,14 @@ EntropyChart.prototype.update = function update({
       .call(this.brush.move, () => {  /* scale so genes are a decent size. stop brushes going off graph */
         return [Math.max(this.scales.xNav(start-multiplier), this.scales.xNav(0)),
           Math.min(this.scales.xNav(end+multiplier), this.scales.xNav(this.scales.xNav.domain()[1]))];
+      });
+  }
+  if (zoomMin !== undefined || zoomMax !== undefined) {
+    const zMin = zoomMin === undefined ? 0 : zoomMin;
+    const zMax = zoomMax === undefined ? this.scales.xNav.domain()[1] : zoomMax;
+    this.navGraph.select(".brush")
+      .call(this.brush.move, () => {
+        return [this.scales.xNav(zMin), this.scales.xNav(zMax)];
       });
   }
 };

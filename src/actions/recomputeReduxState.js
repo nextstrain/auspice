@@ -120,6 +120,8 @@ const restoreQueryableStateToDefaults = (state) => {
   state["dateMax"] = state["absoluteDateMax"];
   state["dateMinNumeric"] = state["absoluteDateMinNumeric"];
   state["dateMaxNumeric"] = state["absoluteDateMaxNumeric"];
+  state["zoomMax"] = undefined;
+  state["zoomMin"] = undefined;
 
   state["panelLayout"] = calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full";
   state.panelsToDisplay = state.panelsAvailable.slice();
@@ -525,6 +527,8 @@ export const createStateFromQueryOrJSONs = ({
     const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
     entropy.bars = entropyBars;
     entropy.maxYVal = entropyMaxYVal;
+    entropy.zoomMax = controls["zoomMax"];
+    entropy.zoomMin = controls["zoomMin"];
     entropy.zoomCoordinates = [controls["zoomMin"], controls["zoomMax"]];
   }
 
