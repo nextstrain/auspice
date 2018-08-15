@@ -20,9 +20,13 @@ const pluralise = (word, n) => {
 };
 
 const styliseDateRange = (dateStr) => {
-  // 2012-01-22
   const fields = dateStr.split('-');
-  return `${months[fields[1]]} ${fields[0]}`;
+  // 2012-01-22
+  if (fields.length==3){
+    return `${months[fields[1]]} ${fields[0]}`;
+  }else{ // other cases like negative numbers
+    return dateStr;
+  }
 };
 
 const getNumSelectedTips = (nodes, visibility) => {
