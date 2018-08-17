@@ -165,7 +165,7 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   const visibleAnnots = annotations.filter((annot) => /* try to prevent drawing genes if not visible */
     (annot.start < this.scales.xMain.domain()[1] && annot.start > this.scales.xMain.domain()[0]) ||
     (annot.end > this.scales.xMain.domain()[0] && annot.end < this.scales.xMain.domain()[1]) ||
-    (annot.start < this.scales.xMain.domain()[0] && annot.end > this.scales.xMain.domain()[1])); // for extreme zoom, keep plotting if both ends off graph!
+    (annot.start <= this.scales.xMain.domain()[0] && annot.end >= this.scales.xMain.domain()[1])); // for extreme zoom, keep plotting if both ends off graph!
   /* stop gene plots from extending beyond axis if zoomed in */
   const startG = (d) => d.start > this.scales.xMain.domain()[0] ? this.scales.xMain(d.start) : this.offsets.x1;
   const endG = (d) => d.end < this.scales.xMain.domain()[1] ? this.scales.xMain(d.end) : this.offsets.x2;
