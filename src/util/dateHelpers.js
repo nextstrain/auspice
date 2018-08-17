@@ -8,15 +8,23 @@ const dateScale = scaleTime()
   .range([2000, 2100]);
 
 export const numericToCalendar = (numDate) => {
+  if (numDate<0){
+    return Math.round(numDate).toString();
+  }
   const d3Date = dateScale.invert(numDate);
   const calDate = dateFormatter(d3Date);
   return calDate;
 };
 
 export const calendarToNumeric = (calDate) => {
-  const d3Date = dateParser(calDate);
-  const numDate = dateScale(d3Date);
-  return numDate;
+  if (calDate[0]==='-'){
+    const pieces = calDate.substring(1).split('-');
+    return -parseFloat(pieces[0]);
+  }else{
+    const d3Date = dateParser(calDate);
+    const numDate = dateScale(d3Date);
+    return numDate;
+  }
 };
 
 export const currentNumDate = () => {
