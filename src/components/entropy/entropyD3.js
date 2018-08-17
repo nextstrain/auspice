@@ -413,7 +413,11 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     } else {
       this._zoom(start_end[0], start_end[1]);
     }
-    /* if the brushes are moved (by box, click drag, handle, or click), update zoom coords */
+  };
+
+  this.brushFinished = function brushFinished() {
+    this.brushed();
+    /* if the brushes were moved by box, click drag, handle, or click, then update zoom coords */
     if (d3event.sourceEvent instanceof MouseEvent && (!d3event.selection || d3event.sourceEvent.srcElement.id === "d3entropyParent" ||
         d3event.sourceEvent.srcElement.id === "")) {
       this.props.dispatch(changeZoom(this.zoomCoordinates));
@@ -441,8 +445,11 @@ EntropyChart.prototype._addBrush = function _addBrush() {
   this.brush = brushX()
     /* the extent is relative to the navGraph group - the constants are a bit hacky... */
     .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 25]])
-    .on("brush end", () => { // https://github.com/d3/d3-brush#brush_on
+    .on("brush", () => { // https://github.com/d3/d3-brush#brush_on
       this.brushed();
+    })
+    .on("end", () => {
+      this.brushFinished();
     });
   this.gBrush = this.navGraph.append("g")
     .attr("class", "brush")
