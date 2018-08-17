@@ -1,11 +1,20 @@
+* Negative dates (BCE) are now handled correctly - [PR 627](https://github.com/nextstrain/auspice/pull/627)
+* Small entropy zooming fixes - [PR 624](https://github.com/nextstrain/auspice/pull/624)
+* Bugfix to prevent the grid being drawn over the branches / tips in some situations - [PR 629](https://github.com/nextstrain/auspice/pull/629)
+* Transmissions which involve demes without lat/longs now show an error notification - [PR 608](https://github.com/nextstrain/auspice/pull/608)
+
 ## version 1.25.1 - 2018/08/10
+* Small fixes to entropy zooming behaviour
+* Gaps are not counted in the entropy calculations & are not displayed in the info panel pop up
 
 ## version 1.25.0 - 2018/08/09
+* New Entropy panel zooming functionality - [PR 609](https://github.com/nextstrain/auspice/pull/609)
 
 ## version 1.24.1 - 2018/08/08
+* Upgrade dependencies
+* Bugfix when changing between staging datasets - [issue 618](https://github.com/nextstrain/auspice/issues/618)
 
 ## version 1.24.0 - 2018/08/05
-
 * Tree grid improvements - [PR 610](https://github.com/nextstrain/auspice/pull/610)
   * Allow negative (i.e. BCE) dates
   * Display y-dates and horizontal lines in the clock layout view
