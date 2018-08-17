@@ -4,7 +4,7 @@ import { calcBranchStrokeCols } from "../../../util/colorHelpers";
 import * as callbacks from "./callbacks";
 
 export const renderTree = (that, main, phylotree, props) => {
-  const ref = main ? that.d3ref : that.d3refToo;
+  const ref = main ? that.domRefs.mainTree : that.domRefs.secondTree;
   const treeState = main ? props.tree : props.treeToo;
   if (!treeState.loaded) {
     console.warn("can't run renderTree (not loaded)");

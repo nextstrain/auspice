@@ -61,14 +61,13 @@ class Card extends React.Component {
   render() {
     const styles = this.props.infocard ? this.getStylesInfoCard() : this.getStyles();
     return (
-      <div style={{ ...styles.base, ...this.props.style }}>
-        <div style={{ ...styles.title, ...this.props.titleStyles }}>
+      <div id={`${this.props.title}Card`} style={{ ...styles.base, ...this.props.style }}>
+        <div id="CardTitle" style={{ ...styles.title, ...this.props.titleStyles }}>
           {this.props.title}
         </div>
-        <div style={{
-          display: "flex",
-          justifyContent: this.props.center ? "center" : "flex-start"
-        }}
+        <div
+          id="CardContentContainer"
+          style={{display: "flex", justifyContent: this.props.center ? "center" : "flex-start"}}
         >
           {this.props.children}
         </div>
