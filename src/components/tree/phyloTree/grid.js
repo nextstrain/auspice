@@ -14,6 +14,18 @@ export const hideGrid = function hideGrid() {
   }
 };
 
+const addSVGGroupsIfNeeded = (groups, svg) => {
+  if (!("majorGrid" in groups)) {
+    groups.majorGrid = svg.append("g").attr("id", "majorGrid");
+  }
+  if (!("minorGrid" in groups)) {
+    groups.minorGrid = svg.append("g").attr("id", "minorGrid");
+  }
+  if (!("gridText" in groups)) {
+    groups.gridText = svg.append("g").attr("id", "gridText");
+  }
+};
+
 const calculateMajorGridSeperation = (range) => {
   const logRange = Math.floor(Math.log10(range));
   let step = Math.pow(10, logRange); // eslint-disable-line no-restricted-properties
@@ -31,8 +43,8 @@ const calculateMajorGridSeperation = (range) => {
  */
 export const addGrid = function addGrid(layout) {
   if (typeof layout==="undefined") {layout=this.layout;} // eslint-disable-line no-param-reassign
+  addSVGGroupsIfNeeded(this.groups, this.svg);
   if (layout==="unrooted") return;
-
   timerStart("addGrid");
 
   /* [xmin, xmax] is the domain of the x-axis (rectangular & clock layouts) or polar-axis (radial layouts)
@@ -147,12 +159,10 @@ export const addGrid = function addGrid(layout) {
     }
   }
 
-  /* D3 commands to add grid + text to the DOM */
+  /* D3 commands to add grid + text to the DOM
+  Note that the groups were created the first time this function was called */
 
   // add major grid to svg
-  if (!("majorGrid" in this.groups)) {
-    this.groups.majorGrid = this.svg.append("g").attr("id", "majorGrid");
-  }
   this.groups.majorGrid.selectAll("*").remove();
   this.groups.majorGrid
     .selectAll('.majorGrid')
@@ -167,9 +177,6 @@ export const addGrid = function addGrid(layout) {
         .style("stroke-width", this.params.majorGridWidth);
 
   // add minor grid to SVG
-  if (!("minorGrid" in this.groups)) {
-    this.groups.minorGrid = this.svg.append("g").attr("id", "minorGrid");
-  }
   this.groups.minorGrid.selectAll("*").remove();
   this.svg.selectAll(".minorGrid").remove();
   this.groups.minorGrid
@@ -188,9 +195,6 @@ export const addGrid = function addGrid(layout) {
   /* draw the text labels for majorGridPoints */
   const precisionX = Math.max(0, -Math.floor(Math.log10(step)));
   const precisionY = Math.max(0, -Math.floor(Math.log10(yStep)));
-  if (!("gridText" in this.groups)) {
-    this.groups.gridText = this.svg.append("g").attr("id", "gridText");
-  }
   this.groups.gridText.selectAll("*").remove();
   this.svg.selectAll(".gridText").remove();
   this.groups.gridText
