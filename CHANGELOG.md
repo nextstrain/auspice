@@ -1,3 +1,5 @@
+## version 1.25.2 - 2018/08/17
+
 * Negative dates (BCE) are now handled correctly - [PR 627](https://github.com/nextstrain/auspice/pull/627)
 * Small entropy zooming fixes - [PR 624](https://github.com/nextstrain/auspice/pull/624)
 * Bugfix to prevent the grid being drawn over the branches / tips in some situations - [PR 629](https://github.com/nextstrain/auspice/pull/629)
