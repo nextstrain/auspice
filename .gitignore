@@ -5,6 +5,7 @@ big_flu
 /releases/
 /static/
 s3/
+/local_narratives/
 
 ### OSX ###
 .DS_Store
