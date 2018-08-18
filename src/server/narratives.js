@@ -74,29 +74,37 @@ const convertBlocksToHTML = (blocks) => {
 };
 
 
-const serveLocalNarrative = (res, pathname) => {
+const serveLocalNarrative = (res, filename) => {
+  const pathName = path.join(global.LOCAL_NARRATIVES_PATH, filename);
+  console.log("\ttrying to access & parse local narrative file: ", pathName);
   /* this code is syncronous, but that's ok since this is never used in production */
-  const mdArr = fs.readFileSync(path.join(global.LOCAL_DATA_PATH, "narratives", pathname + ".md"), 'utf8').split("\n");
+  const mdArr = fs.readFileSync(pathName, 'utf8').split("\n");
   const blocks = parseMarkdownArray(mdArr);
   convertBlocksToHTML(blocks);
   res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
+  console.log("\tSUCCESS");
 };
 
-const serveLiveNarrative = (res, pathname, errorHandler) => {
-  const fetchURL = global.REMOTE_STATIC_BASEURL + "/narratives/" + pathname + ".md";
+const serveLiveNarrative = (res, filename, errorHandler) => {
+  const fetchURL = global.REMOTE_NARRATIVES_BASEURL + "/" + filename;
+  console.log("\ttrying to fetch & parse narrative file: ", fetchURL);
   fetch(fetchURL)
     .then((result) => result.text())
     .then((body) => {
       const blocks = parseMarkdownArray(body.split("\n"));
       convertBlocksToHTML(blocks);
       res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
+      console.log("\tSUCCESS");
     })
     .catch(errorHandler);
 };
 
 const serveNarrative = (source, url, res) => {
-  const pathname = url.replace(/.+narratives\//, "").replace(/\/$/, "").replace(/\//, "_");
-  console.log("trying to access narrative path..", pathname);
+  const filename = url
+    .replace(/.+narratives\//, "")  // remove the URL up to (& including) "narratives/"
+    .replace(/\/$/, "")             // remove ending slash
+    .replace(/\//g, "_")            // change slashes to underscores
+    .concat(".md");                 // add .md suffix
 
   const generalErrorHandler = (err) => {
     res.statusMessage = `Narratives couldn't be served -- ${err.message}`;
@@ -106,9 +114,9 @@ const serveNarrative = (source, url, res) => {
 
   try {
     if (source === "local") {
-      serveLocalNarrative(res, pathname);
+      serveLocalNarrative(res, filename);
     } else if (source === "live") {
-      serveLiveNarrative(res, pathname, generalErrorHandler);
+      serveLiveNarrative(res, filename, generalErrorHandler);
     } else {
       res.statusMessage = `Narratives cannot be sourced for "${source}" yet -- only "live" and "local" are supported.`;
       console.warn(res.statusMessage);
