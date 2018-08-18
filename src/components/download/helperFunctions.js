@@ -302,6 +302,7 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
   if (panelsInDOM.indexOf("tree") !== -1) {
     try {
       panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("MainTree")));
+      panels.treeLegend = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("TreeLegendContainer")));
     } catch (e) {
       panels.tree = undefined;
       errors.push("tree");
