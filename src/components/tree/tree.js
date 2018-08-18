@@ -13,6 +13,8 @@ import Tangle from "./tangle";
 import { attemptUntangle } from "../../util/globals";
 import { untangleTreeToo } from "./tangle/untangling";
 
+export const spaceBetweenTrees = 100;
+
 class Tree extends React.Component {
   constructor(props) {
     super(props);
@@ -121,7 +123,6 @@ class Tree extends React.Component {
 
   render() {
     const styles = this.getStyles();
-    const spaceBetweenTrees = 100;
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
       <Card center title={"Phylogeny"}>
