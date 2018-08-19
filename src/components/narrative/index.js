@@ -8,10 +8,18 @@ import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 
 const DisplayBlock = (props) => {
+  const styles = {
+    paddingLeft: "20px",
+    paddingRight: "20px",
+    paddingTop: "10px",
+    paddingBottom: "10px",
+    minHeight: props.browserHeight * 0.6
+  };
+
   return (
     <div
       ref={props.inputRef}
-      style={props.styles}
+      style={styles}
       className={props.focus ? "focus" : ""}
       dangerouslySetInnerHTML={props.block}
     />
@@ -69,6 +77,8 @@ class Narrative extends React.Component {
     if (window.twttr && window.twttr.ready) {
       window.twttr.widgets.load();
     }
+    /* if the query has defined a block to be shown (that's not the first)
+    then we must scroll to that block */
     if (this.props.blockIdx !== 1) {
       const componentHeight = this.componentRef.getBoundingClientRect().height;
       const yPos = this.blockRefs[this.props.blockIdx].getBoundingClientRect().y - 0.5*componentHeight + 100;
@@ -79,13 +89,8 @@ class Narrative extends React.Component {
   render() {
     if (!this.props.loaded) {return null;}
     // const width = narrativeWidth + 40; /* controls sidebar has 20px L & R padding */
-    const blockStyles = {
-      paddingLeft: "20px",
-      paddingRight: "20px",
-      paddingTop: "10px",
-      paddingBottom: "10px",
-      minHeight: this.props.height * 0.33
-    };
+    console.log(this.props.blocks)
+
     return (
       <div
         ref={(el) => {this.componentRef = el;}}
@@ -103,7 +108,7 @@ class Narrative extends React.Component {
             key={b.__html.slice(0, 50)}
             block={b}
             focus={i === this.props.blockIdx}
-            styles={blockStyles}
+            browserHeight={this.props.height}
           />
         ))}
         <div style={{height: this.props.height * 0.4}}/>
