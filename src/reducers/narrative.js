@@ -13,6 +13,9 @@ const narrative = (state = {
         loaded: false,
         display: false
       });
+    case "CHANGENBLOCKIDX": {
+      return Object.assign({}, state, {blockIdx: action.blockIdx});
+    }
     case types.CLEAN_START:
       if (action.narrative) {
         return {
@@ -20,7 +23,7 @@ const narrative = (state = {
           display: true,
           blocks: action.narrative,
           pathname: window.location.pathname,
-          blockIdx: parseInt(queryString.parse(window.location.search).n, 10) || 1
+          blockIdx: parseInt(queryString.parse(window.location.search).n, 10) || 0
         };
       }
       return state;

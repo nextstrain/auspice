@@ -8,6 +8,8 @@ import { darkGrey, brandColor, materialButton } from "../../globalStyles";
 // import { changePage } from "../../actions/navigation";
 import { TOGGLE_NARRATIVE } from "../../actions/types";
 
+export const navBarHeightPx = 50;
+
 // const InternalLink = (props) => (
 //   <div style={props.style} onClick={() => props.dispatch(changePage({path: props.path}))}>
 //     {props.children}
@@ -33,7 +35,7 @@ class NavBar extends React.Component {
         marginRight: "auto",
         marginBottom: "auto",
         marginLeft: "auto",
-        height: 50,
+        height: navBarHeightPx,
         justifyContent: "space-between",
         alignItems: "center",
         overflow: "hidden",
@@ -142,7 +144,7 @@ class NavBar extends React.Component {
       };
       const text = this.props.narrativeDisplayed ? "show controls" : "show narrative";
       return (
-        <Flex style={styles.main}>
+        <Flex id="NavBar" style={styles.main}>
           {this.getLogo(styles)}
           {this.getLogoType(styles)}
           <div style={{flex: 5}}/>

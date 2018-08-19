@@ -77,6 +77,7 @@ class Flex extends React.Component {
 
     return (
       <div
+        id={this.props.id}
         onClick={this.props.clickHandler}
         style={{ ...styles.base, ...styles.style }}
       >

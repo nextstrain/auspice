@@ -30,6 +30,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: // fallthrough
     case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE:
       query = action.query;
+      console.log("MIDDLEWARE", action.type, " n->", query.n)
       if (query.tt) delete query.tt;
       break;
     case types.NEW_COLORS:
@@ -104,6 +105,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.TOGGLE_NARRATIVE: {
       if (action.display === true) {
         query = {n: state.narrative.blockIdx};
+        console.log("TOGGLE_NARRATIVE changing n to", query.n)
       }
       break;
     }
