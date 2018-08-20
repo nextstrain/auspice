@@ -33,8 +33,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       if (query.tt) delete query.tt;
       break;
     case types.CHANGE_ZOOM:
-      query.zmin = action.zoomc[0] === state.controls.absoluteZoomMin ? undefined : action.zoomc[0];
-      query.zmax = action.zoomc[1] >= state.controls.absoluteZoomMax ? undefined : action.zoomc[1];
+      query.gmin = action.zoomc[0] === state.controls.absoluteZoomMin ? undefined : action.zoomc[0];
+      query.gmax = action.zoomc[1] >= state.controls.absoluteZoomMax ? undefined : action.zoomc[1];
       break;
     case types.NEW_COLORS:
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;

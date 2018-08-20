@@ -44,11 +44,11 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.l) {
     state["layout"] = query.l;
   }
-  if (query.zmin) {
-    state["zoomMin"] = parseInt(query.zmin, 10);
+  if (query.gmin) {
+    state["zoomMin"] = parseInt(query.gmin, 10);
   }
-  if (query.zmax) {
-    state["zoomMax"] = parseInt(query.zmax, 10);
+  if (query.gmax) {
+    state["zoomMax"] = parseInt(query.gmax, 10);
   }
   if (query.m) {
     state["distanceMeasure"] = query.m;
