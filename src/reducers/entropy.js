@@ -3,6 +3,11 @@ import * as types from "../actions/types";
 
 const Entropy = (state = {loaded: false, showCounts: false}, action) => {
   switch (action.type) {
+    case types.CHANGE_ZOOM:
+      return Object.assign({}, state, {
+        zoomMax: action.zoomc[1],
+        zoomMin: action.zoomc[0]
+      });
     case types.DATA_INVALID:
       return {loaded: false, showCounts: false};
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */

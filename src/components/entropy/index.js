@@ -62,11 +62,14 @@ const constructEncodedGenotype = (aa, d) => {
     showCounts: state.entropy.showCounts,
     loaded: state.entropy.loaded,
     colorBy: state.controls.colorBy,
+    zoomMin: state.controls.zoomMin,
+    zoomMax: state.controls.zoomMax,
     defaultColorBy: state.controls.defaults.colorBy,
     shouldReRender: false,
     panelLayout: state.controls.panelLayout
   };
 })
+
 export class Entropy extends React.Component {
   constructor(props) {
     super(props);
@@ -186,6 +189,10 @@ export class Entropy extends React.Component {
     } else { /* props changed, but a new render probably isn't required */
       timerStart("entropy D3 update");
       const updateParams = {};
+      if (this.props.zoomMax !== nextProps.zoomMax || this.props.zoomMin !== nextProps.zoomMin) {
+        updateParams.zoomMax = nextProps.zoomMax;
+        updateParams.zoomMin = nextProps.zoomMin;
+      }
       if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
         updateParams.aa = nextProps.mutType === "aa";
         updateParams.newBars = nextProps.bars;

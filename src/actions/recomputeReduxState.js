@@ -44,6 +44,12 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.l) {
     state["layout"] = query.l;
   }
+  if (query.gmin) {
+    state["zoomMin"] = parseInt(query.gmin, 10);
+  }
+  if (query.gmax) {
+    state["zoomMax"] = parseInt(query.gmax, 10);
+  }
   if (query.m) {
     state["distanceMeasure"] = query.m;
   }
@@ -114,6 +120,8 @@ const restoreQueryableStateToDefaults = (state) => {
   state["dateMax"] = state["absoluteDateMax"];
   state["dateMinNumeric"] = state["absoluteDateMinNumeric"];
   state["dateMaxNumeric"] = state["absoluteDateMaxNumeric"];
+  state["zoomMax"] = undefined;
+  state["zoomMin"] = undefined;
 
   state["panelLayout"] = calcBrowserDimensionsInitialState().width > twoColumnBreakpoint ? "grid" : "full";
   state.panelsToDisplay = state.panelsAvailable.slice();
@@ -264,7 +272,6 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   /* The one (bigish) problem with this being in the reducer is that
   we can't have any side effects. So if we detect and error introduced by
   a URL QUERY (and correct it in state), we can't correct the URL */
-
   /* colorBy */
   if (!metadata.colorOptions) {
     metadata.colorOptions = {};
@@ -314,6 +321,15 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   } else if (Object.keys(metadata.colorOptions).indexOf(state.colorBy) === -1) {
     /* if it's a _non_ genotype colorBy AND it's not a valid option, fall back to the default */
     fallBackToDefaultColorBy();
+  }
+
+  /* zoom */
+  if (state.zoomMax > state["absoluteZoomMax"]) { state.zoomMax = state["absoluteZoomMax"]; }
+  if (state.zoomMin < state["absoluteZoomMin"]) { state.zoomMin = state["absoluteZoomMin"]; }
+  if (state.zoomMin > state.zoomMax) {
+    const tempMin = state.zoomMin;
+    state.zoomMin = state.zoomMax;
+    state.zoomMax = tempMin;
   }
 
   /* colorBy confidence */
@@ -459,6 +475,8 @@ export const createStateFromQueryOrJSONs = ({
     controls = getDefaultControlsState();
     controls = modifyStateViaTree(controls, tree, treeToo);
     controls = modifyStateViaMetadata(controls, metadata);
+    controls["absoluteZoomMin"] = 0;
+    controls["absoluteZoomMax"] = entropy.lengthSequence;
     controls.available = json["_available"];
     controls.source = json["_source"];
     controls.datasetFields = json["_datasetFields"];
@@ -509,6 +527,9 @@ export const createStateFromQueryOrJSONs = ({
     const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
     entropy.bars = entropyBars;
     entropy.maxYVal = entropyMaxYVal;
+    entropy.zoomMax = controls["zoomMax"];
+    entropy.zoomMin = controls["zoomMin"];
+    entropy.zoomCoordinates = [controls["zoomMin"], controls["zoomMax"]];
   }
 
   /* update frequencies if they exist (not done for new JSONs) */

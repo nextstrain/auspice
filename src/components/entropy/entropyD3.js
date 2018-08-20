@@ -8,6 +8,7 @@ import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
 import { parseEncodedGenotype } from "../../util/getGenotype";
+import { changeZoom } from "../../actions/entropy";
 
 /* EntropChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:
@@ -24,6 +25,7 @@ const EntropyChart = function EntropyChart(ref, annotations, geneMap, maxNt, cal
 
 /* "PUBLIC" PROTOTYPES */
 EntropyChart.prototype.render = function render(props) {
+  this.props = props;
   this.aa = props.mutType === "aa";
   this.bars = props.bars;
   this.selectedNodes = props.colorBy.startsWith("gt") ?
@@ -34,9 +36,12 @@ EntropyChart.prototype.render = function render(props) {
   this._drawMainNavElements();
   this._addZoomLayers();
   this._setScales(this.maxNt + 1, props.maxYVal);
+  /* If only a gene/nuc, zoom to that. If zoom min/max as well, that takes precidence */
   this.zoomCoordinates = props.colorBy.startsWith("gt") ?
     this._getZoomCoordinates(parseEncodedGenotype(props.colorBy, props.geneLength), props.geneMap) :
     this.scales.xNav.domain(); // []; /* set zoom to specified gene or to whole genome */
+  this.zoomCoordinates[0] = props.zoomMin ? props.zoomMin : this.zoomCoordinates[0];
+  this.zoomCoordinates[1] = props.zoomMax ? props.zoomMax : this.zoomCoordinates[1];
   this._drawAxes();
   this._addBrush();
   this._addClipMask();
@@ -55,7 +60,9 @@ EntropyChart.prototype.update = function update({
   clearSelected = false,
   gene = undefined,
   start = undefined,
-  end = undefined
+  end = undefined,
+  zoomMax = undefined,
+  zoomMin = undefined
 }) {
   const aaChange = aa !== undefined && aa !== this.aa;
   if (newBars || aaChange) {
@@ -79,6 +86,14 @@ EntropyChart.prototype.update = function update({
       .call(this.brush.move, () => {  /* scale so genes are a decent size. stop brushes going off graph */
         return [Math.max(this.scales.xNav(start-multiplier), this.scales.xNav(0)),
           Math.min(this.scales.xNav(end+multiplier), this.scales.xNav(this.scales.xNav.domain()[1]))];
+      });
+  }
+  if (zoomMin !== undefined || zoomMax !== undefined) {
+    const zMin = zoomMin === undefined ? 0 : zoomMin;
+    const zMax = zoomMax === undefined ? this.scales.xNav.domain()[1] : zoomMax;
+    this.navGraph.select(".brush")
+      .call(this.brush.move, () => {
+        return [this.scales.xNav(zMin), this.scales.xNav(zMax)];
       });
   }
 };
@@ -388,15 +403,27 @@ EntropyChart.prototype._addBrush = function _addBrush() {
     // console.log("brushed", s); // , this.scales);
     // console.log("brushed", s.map(this.scales.xNav.invert, this.scales.xNav))
     const start_end = s.map(this.scales.xNav.invert, this.scales.xNav);
-    this.zoomCoordinates = start_end;
+    this.zoomCoordinates = start_end.map(Math.round);
     if (!d3event.selection) { /* This keeps brush working if user clicks (zoom out entirely) rather than click-drag! */
       this.navGraph.select(".brush")
         .call(this.brush.move, () => {
-          this.zoomCoordinates = this.scales.xNav.range();
+          this.zoomCoordinates = this.scales.xNav.range().map(Math.round);
           return this.scales.xNav.range();
         });
     } else {
       this._zoom(start_end[0], start_end[1]);
+    }
+  };
+
+  this.brushFinished = function brushFinished() {
+    this.brushed();
+    /* if the brushes were moved by box, click drag, handle, or click, then update zoom coords */
+    if (d3event.sourceEvent instanceof MouseEvent && (!d3event.selection || d3event.sourceEvent.srcElement.id === "d3entropyParent" ||
+        d3event.sourceEvent.srcElement.id === "")) {
+      this.props.dispatch(changeZoom(this.zoomCoordinates));
+    } else {
+      /* If selected gene or clicked on entropy, hide zoom coords */
+      this.props.dispatch(changeZoom([undefined, undefined]));
     }
   };
 
@@ -418,8 +445,11 @@ EntropyChart.prototype._addBrush = function _addBrush() {
   this.brush = brushX()
     /* the extent is relative to the navGraph group - the constants are a bit hacky... */
     .extent([[this.offsets.x1, 0], [this.offsets.width + 20, this.offsets.heightNav - 1 + 25]])
-    .on("brush end", () => { // https://github.com/d3/d3-brush#brush_on
+    .on("brush", () => { // https://github.com/d3/d3-brush#brush_on
       this.brushed();
+    })
+    .on("end", () => {
+      this.brushFinished();
     });
   this.gBrush = this.navGraph.append("g")
     .attr("class", "brush")

@@ -23,3 +23,8 @@ export const showCountsNotEntropy = (showCounts) => (dispatch, getState) => {
   dispatch({type: types.ENTROPY_COUNTS_TOGGLE, showCounts});
   updateEntropyVisibility(dispatch, getState);
 };
+
+export const changeZoom = (zoomc) => (dispatch, getState) => {
+  dispatch({type: types.CHANGE_ZOOM, zoomc});
+  updateEntropyVisibility(dispatch, getState);
+};
