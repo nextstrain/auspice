@@ -5,9 +5,65 @@ import queryString from "query-string";
 import { debounce } from 'lodash';
 import { changePage } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
-import { navBarHeightPx } from "../framework/nav-bar";
+import { getLogo } from "../framework/nav-bar";
+import { datasetToText } from "./helpers";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
+
+const headerHeight = 85;
+const progressHeight = 10;
+const blockPadding = {
+  paddingLeft: "20px",
+  paddingRight: "20px",
+  paddingTop: "10px",
+  paddingBottom: "10px"
+};
+
+const Header = (props) => {
+  let inner;
+  if (props.n !== 0) {
+    const text = datasetToText(queryString.parse(props.query));
+    inner = (
+      <div style={{flexGrow: 1, color: "red", ...blockPadding}}>
+        {text}
+      </div>
+    );
+  } else {
+    inner = (
+      <div style={{flexGrow: 1, ...blockPadding}}>
+        {"Introduction to header here?"}
+      </div>
+    );
+  }
+  return (
+    <div
+      id="Header"
+      style={{
+        height: `${headerHeight}px`,
+        display: "flex",
+        flexDirection: "row",
+        fontSize: "14px",
+        fontWeight: 100
+      }}
+    >
+      {getLogo()}
+      {inner}
+    </div>
+  );
+};
+
+const Progress = (props) => (
+  <div
+    id="Progress"
+    style={{
+      width: `${props.perc}%`,
+      height: `${progressHeight-5}px`,
+      backgroundColor: "#74a9cf",
+      marginBottom: "5px"
+    }}
+  />
+);
+
 
 const Block = (props) => {
   return (
@@ -15,10 +71,7 @@ const Block = (props) => {
       id={`NarrativeBlock_${props.n}`}
       ref={props.inputRef}
       style={{
-        paddingLeft: "20px",
-        paddingRight: "20px",
-        paddingTop: "10px",
-        paddingBottom: "10px",
+        ...blockPadding,
         flexBasis: "90%",
         flexShrink: 0
       }}
@@ -77,7 +130,7 @@ class Narrative extends React.Component {
   scrollToBlock(blockIdx, {behavior="smooth", dispatch=true} = {}) {
     this.disableScroll();
 
-    const absoluteBlockYPos = this.blockRefs[blockIdx].getBoundingClientRect().y - navBarHeightPx;
+    const absoluteBlockYPos = this.blockRefs[blockIdx].getBoundingClientRect().y - headerHeight - progressHeight;
     console.log(`scrollBy to ${parseInt(absoluteBlockYPos, 10)} (block ${blockIdx})`);
     this.componentRef.scrollBy({top: absoluteBlockYPos, behavior});
     window.setTimeout(this.enableScroll, 1000);
@@ -103,30 +156,40 @@ class Narrative extends React.Component {
   }
   render() {
     if (!this.props.loaded) {return null;}
+
     return (
-      <div
-        id="NarrativeContainer"
-        ref={(el) => {this.componentRef = el;}}
-        onScroll={this.onContainerScroll}
-        className={"static narrative"}
-        style={{
-          height: `${this.props.height}px`,
-          overflowY: "scroll",
-          padding: "0px 0px 0px 0px",
-          display: "flex",
-          flexDirection: "column"
-        }}
-      >
-        {this.props.blocks.map((b, i) => (
-          <Block
-            inputRef={(el) => {this.blockRefs[i] = el;}}
-            key={b.__html.slice(0, 50)}
-            block={b}
-            n={i}
-            focus={i === this.props.currentInFocusBlockIdx}
-          />
-        ))}
-        <div style={{height: this.props.height * 0.4}}/>
+      <div id="NarrativeContainer">
+        <Header
+          query={this.props.blocks[this.props.currentInFocusBlockIdx].query}
+          n={this.props.currentInFocusBlockIdx}
+        />
+        <Progress
+          perc={(this.props.currentInFocusBlockIdx+1)/this.props.blocks.length*100}
+        />
+        <div
+          id="BlockContainer"
+          className={"static narrative"}
+          ref={(el) => {this.componentRef = el;}}
+          onScroll={this.onContainerScroll}
+          style={{
+            height: `${this.props.height-headerHeight}px`,
+            overflowY: "scroll",
+            padding: "0px 0px 0px 0px",
+            display: "flex",
+            flexDirection: "column"
+          }}
+        >
+          {this.props.blocks.map((b, i) => (
+            <Block
+              inputRef={(el) => {this.blockRefs[i] = el;}}
+              key={b.__html.slice(0, 50)}
+              block={b}
+              n={i}
+              focus={i === this.props.currentInFocusBlockIdx}
+            />
+          ))}
+          <div style={{height: this.props.height * 0.4}}/>
+        </div>
       </div>
     );
   }

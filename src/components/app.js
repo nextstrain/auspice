@@ -75,7 +75,11 @@ const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHe
 };
 
 const Sidebar = ({styles, sidebarOpen, mobileDisplay, narrative, mapOn, toggleHandler}) => {
-  return (
+  return narrative ? (
+    <div id="SidebarContainer" style={styles}>
+      <Narrative height={styles.height}/>
+    </div>
+  ) : (
     <div id="SidebarContainer" style={styles}>
       <NavBar
         minified
@@ -83,10 +87,7 @@ const Sidebar = ({styles, sidebarOpen, mobileDisplay, narrative, mapOn, toggleHa
         mobileDisplay={mobileDisplay}
         toggleHandler={toggleHandler}
       />
-      {narrative ?
-        <Narrative height={styles.height - navBarHeightPx}/> :
-        <Controls mapOn={mapOn}/>
-      }
+      <Controls mapOn={mapOn}/>
     </div>
   );
 };

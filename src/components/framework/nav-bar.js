@@ -15,6 +15,21 @@ export const navBarHeightPx = 50;
 //   </div>
 // );
 
+export const getLogo = () => (
+  <a
+    style={{
+      paddingLeft: "8px",
+      paddingRight: "8px",
+      paddingTop: "20px",
+      paddingBottom: "20px",
+      cursor: "pointer"
+    }}
+    href="/"
+  >
+    <img alt="" width="40" src={require("../../images/nextstrain-logo-small.png")}/>
+  </a>
+);
+
 @connect((state) => {
   return {
     narrativeLoaded: state.narrative.loaded,
@@ -41,16 +56,6 @@ class NavBar extends React.Component {
         left: 0,
         zIndex: 1001,
         transition: "left .3s ease-out"
-      },
-      logo: {
-        paddingLeft: "8px",
-        paddingRight: "8px",
-        paddingTop: "20px",
-        paddingBottom: "20px",
-        color: "#000",
-        cursor: "pointer",
-        textDecoration: "none",
-        fontSize: this.props.minified ? 12 : 16
       },
       title: {
         padding: "0px",
@@ -89,14 +94,6 @@ class NavBar extends React.Component {
         color: brandColor
       }
     };
-  }
-
-  getLogo(styles) {
-    return (
-      <a style={styles.logo} href="/">
-        <img alt="" width="40" src={require("../../images/nextstrain-logo-small.png")}/>
-      </a>
-    );
   }
 
   getLogoType(styles) {
@@ -144,7 +141,7 @@ class NavBar extends React.Component {
       const text = this.props.narrativeDisplayed ? "show controls" : "show narrative";
       return (
         <Flex id="NavBar" style={styles.main}>
-          {this.getLogo(styles)}
+          {getLogo()}
           {this.getLogoType(styles)}
           <div style={{flex: 5}}/>
           <button style={materialButton} onClick={onClick}>
@@ -156,7 +153,7 @@ class NavBar extends React.Component {
     }
     return (
       <Flex style={styles.main}>
-        {this.getLogo(styles)}
+        {getLogo()}
         {this.getLogoType(styles)}
         <div style={{flex: 5}}/>
         {this.getLink("About", "/about/overview/introduction", styles)}
