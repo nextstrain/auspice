@@ -31,10 +31,9 @@ class Tangle extends React.Component {
   drawLines(props) {
     if (!props) props = this.props; // eslint-disable-line
     const thickness = props.lookup.length > 750 ? 0.25 : props.lookup.length > 100 ? 0.5 : 1;
-    select(this.d3ref).selectAll(".tangleLine").remove();
+    select(this.d3ref).selectAll("*").remove();
     const makeTipPath = makeTipPathGenerator(props);
     select(this.d3ref)
-      .append("g")
       .selectAll(".tangleLine")
       .data(props.lookup)
       .enter()
@@ -83,15 +82,19 @@ class Tangle extends React.Component {
     const textStyles = {position: "absolute", top: 5, zIndex: 100, fontSize: 16, color: "#000", fontWeight: 500};
     const lefts = [this.props.width/2 - this.props.spaceBetweenTrees/2, this.props.width/2 + this.props.spaceBetweenTrees/2];
     return (
-      <div>
-        <div style={{...textStyles, left: lefts[0]-100, width: 100, textAlign: "right"}}>
+      <div id="TangleContainer">
+        <div id="MainTreeTitle" style={{...textStyles, left: lefts[0]-100, width: 100, textAlign: "right"}}>
           {this.props.leftTreeName}
         </div>
-        <div style={{...textStyles, left: lefts[1], textAlign: "left"}}>
+        <div id="SecondTreeTitle" style={{...textStyles, left: lefts[1], textAlign: "left"}}>
           {this.props.rightTreeName}
         </div>
-        <div style={{position: "absolute", left: this.state.left, top: this.state.top, zIndex: 100, pointerEvents: "none"}}>
+        <div
+          id="TangleSvgContainer"
+          style={{position: "absolute", left: this.state.left, top: this.state.top, zIndex: 100, pointerEvents: "none"}}
+        >
           <svg
+            id="Tangle"
             style={{cursor: "default", width: this.props.width, height: this.props.height}}
             ref={(c) => {this.d3ref = c;}}
           />

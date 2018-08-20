@@ -2,6 +2,7 @@
 import React from "react";
 import { infoNotification, warningNotification } from "../../actions/notifications";
 import { prettyString, formatURLString, authorString } from "../../util/stringHelpers";
+import { spaceBetweenTrees } from "../tree/tree";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -178,11 +179,13 @@ export const newick = (dispatch, filePrefix, root, temporal) => {
 };
 
 const processXMLString = (input) => {
-  /* split into bounding <g> (or <svg>) tag, and inner paths / shapes etc */
-  const parts = input.match(/^(<s?v?g.+?>)(.+)<\/s?v?g>$/);
+  /* split into bounding tag, and inner paths / shapes etc */
+  const parts = input.match(/^(<.+?>)(.+)<\/.+?>$/);
   if (!parts) return undefined;
+
   /* extract width & height from the initial <g> bounding group */
-  const dimensions = parts[1].match(/width="([0-9.]+)".+height="([0-9.]+)"/);
+  const dimensions = parts[1].match(/width.+?([0-9.]+).+height.+?([0-9.]+)/);
+
   if (!dimensions) return undefined;
   /* the map uses transform3d & viewbox */
   const viewbox = parts[1].match(/viewBox="([0-9-]+)\s([0-9-]+)\s([0-9-]+)\s([0-9-]+)"/);
@@ -202,6 +205,13 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
   const padding = 50;
   let width = 0;
   let height = 0;
+
+  /* calculating the width of the tree panel is harder if there are two trees */
+  if (panels.secondTree) {
+    panels.secondTree.x = spaceBetweenTrees + panels.tree.width;
+    panels.tree.width += (spaceBetweenTrees + panels.secondTree.width);
+  }
+
   if (panels.tree && panels.mapD3 && panels.mapTiles) {
     if (panelLayout === "grid") {
       width = panels.tree.width + padding + panels.mapTiles.width;
@@ -254,12 +264,14 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
       height = panels.frequencies.height;
     }
   }
+
   /* add top&left padding */
-  if (panels.tree) {panels.tree.x += padding; panels.tree.y += padding;}
-  if (panels.mapD3) {panels.mapD3.x += padding; panels.mapD3.y += padding;}
-  if (panels.mapTiles) {panels.mapTiles.x += padding; panels.mapTiles.y += padding;}
-  if (panels.entropy) {panels.entropy.x += padding; panels.entropy.y += padding;}
-  if (panels.frequencies) {panels.frequencies.x += padding; panels.frequencies.y += padding;}
+  for (let key in panels) { // eslint-disable-line
+    if (panels[key]) {
+      panels[key].x += padding;
+      panels[key].y += padding;
+    }
+  }
   width += padding*2;
   height += padding*2;
   const textHeight = numLinesOfText * 36 + 20;
@@ -289,11 +301,23 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
   const panels = {tree: undefined, mapTiles: undefined, mapD3: undefined, entropy: undefined, frequencies: undefined};
   if (panelsInDOM.indexOf("tree") !== -1) {
     try {
-      panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3TreeElement")));
+      panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("MainTree")));
+      panels.treeLegend = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("TreeLegendContainer")));
     } catch (e) {
       panels.tree = undefined;
       errors.push("tree");
       console.error("Tree SVG save error:", e);
+    }
+    if (panels.tree && document.getElementById('SecondTree')) {
+      try {
+        panels.secondTree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("SecondTree")));
+        if (document.getElementById('Tangle')) {
+          panels.tangle = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("Tangle")));
+        }
+      } catch (e) {
+        errors.push("second tree / tanglegram");
+        console.error("Second Tree / tanglegram SVG save error:", e);
+      }
     }
   }
   if (panelsInDOM.indexOf("entropy") !== -1) {

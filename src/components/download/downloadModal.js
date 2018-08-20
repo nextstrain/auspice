@@ -156,8 +156,7 @@ class DownloadModal extends React.Component {
     return "nextstrain_"
       + window.location.pathname
           .replace(/^\//, '')       // Remove leading slashes
-          .replace(/:[^\/]+/g, '')  // Remove any second tree (treeTwo/treeToo) designation.
-                                    //   We only export the first tree.
+          .replace(/:/g, '-')       // Change ha:na to ha-na
           .replace(/\//g, '_');     // Replace slashes with spaces
   }
   makeTextStringsForSVGExport() {

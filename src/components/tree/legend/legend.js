@@ -86,7 +86,7 @@ class Legend extends React.Component {
    */
   legendTitle() {
     return (
-      <g>
+      <g id="Title">
         <rect width={this.getTitleWidth()} height="12" fill="rgba(255,255,255,.85)"/>
         <text
           x={0}
@@ -115,7 +115,7 @@ class Legend extends React.Component {
     // Works fine, but will need adjusting if title font is changed.
     const offset = this.getTitleWidth();
     return (
-      <g transform={`translate(${offset},0)`}>
+      <g id="Chevron" transform={`translate(${offset},0)`}>
         <svg width="12" height="12" viewBox="0 0 1792 1792">
           <rect width="1792" height="1792" fill="rgba(255,255,255,.85)"/>
           <path
@@ -182,9 +182,9 @@ class Legend extends React.Component {
     //   transition: `${fastTransitionDuration}ms ease-in-out`
     //   }}>
     return (
-      <g>
+      <g id="ItemsContainer">
         <rect width="280" height={this.getSVGHeight()} fill="rgba(255,255,255,.85)"/>
-        <g transform="translate(0,20)">
+        <g id="Items" transform="translate(0,20)">
           {items}
         </g>
       </g>
@@ -207,9 +207,16 @@ class Legend extends React.Component {
     if (!this.props.colorScale) return null;
     const styles = this.getStyles();
     return (
-      <svg width="280" height={this.getSVGHeight()} style={styles.svg}>
+      <svg
+        id="TreeLegendContainer"
+        width="280"
+        height={this.getSVGHeight()}
+        style={styles.svg}
+      >
         {this.legendItems()}
-        <g onClick={() => { this.toggleLegend(); }}
+        <g
+          id="TitleAndChevron"
+          onClick={() => this.toggleLegend()}
           style={{cursor: "pointer"}}
         >
           {this.legendTitle()}

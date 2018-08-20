@@ -13,9 +13,15 @@ import Tangle from "./tangle";
 import { attemptUntangle } from "../../util/globals";
 import { untangleTreeToo } from "./tangle/untangling";
 
+export const spaceBetweenTrees = 100;
+
 class Tree extends React.Component {
   constructor(props) {
     super(props);
+    this.domRefs = {
+      mainTree: undefined,
+      secondTree: undefined
+    };
     this.tangleRef = undefined;
     this.state = {
       hover: null,
@@ -103,26 +109,20 @@ class Tree extends React.Component {
     };
   };
 
-  renderTreeDiv({width, height, d3ref}) {
+  renderTreeDiv({width, height, mainTree}) {
     return (
-      <svg style={{pointerEvents: "auto"}}
+      <svg
+        id={mainTree ? "MainTree" : "SecondTree"}
+        style={{pointerEvents: "auto", cursor: "default"}}
         width={width}
         height={height}
-      >
-        <g
-          id={"d3TreeElement"}
-          width={width}
-          height={height}
-          style={{cursor: "default"}}
-          ref={(c) => {this[d3ref] = c;}}
-        />
-      </svg>
+        ref={(c) => {mainTree ? this.domRefs.mainTree = c : this.domRefs.secondTree = c;}}
+      />
     );
   }
 
   render() {
     const styles = this.getStyles();
-    const spaceBetweenTrees = 100;
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
       <Card center title={"Phylogeny"}>
@@ -159,10 +159,10 @@ class Tree extends React.Component {
             rightTreeName={this.props.showTreeToo.toUpperCase()}
           />
         ) : null }
-        {this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3ref"})}
-        {this.props.showTreeToo ? <div style={{width: spaceBetweenTrees}}/> : null}
+        {this.renderTreeDiv({width: widthPerTree, height: this.props.height, mainTree: true})}
+        {this.props.showTreeToo ? <div id="treeSpacer" style={{width: spaceBetweenTrees}}/> : null}
         {this.props.showTreeToo ?
-          this.renderTreeDiv({width: widthPerTree, height: this.props.height, d3ref: "d3refToo"}) :
+          this.renderTreeDiv({width: widthPerTree, height: this.props.height, mainTree: false}) :
           null
         }
         <button
