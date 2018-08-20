@@ -2,7 +2,7 @@ import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
 import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
-import { strainNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
+import { strainNameToIdx, cladeNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { calcTipRadii } from "../util/tipRadiusHelpers";
 import { getDefaultControlsState } from "../reducers/controls";
@@ -13,6 +13,7 @@ import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons
 import { determineColorByGenotypeType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
+import { applyInViewNodesToTree } from "../actions/tree";
 
 export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -379,22 +380,30 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   return state;
 };
 
-const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, controlsState) => {
+const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelected, controlsState) => {
   /* calculate new branch thicknesses & visibility */
   let tipSelectedIdx = 0;
   /* check if the query defines a strain to be selected */
+  let newIdxRoot = oldState.idxOfInViewRootNode;
   if (tipSelected) {
     tipSelectedIdx = strainNameToIdx(oldState.nodes, tipSelected);
     oldState.selectedStrain = tipSelected;
+  }
+  if (cladeSelected) {
+    const cladeSelectedIdx = cladeNameToIdx(oldState.nodes, cladeSelected);
+    oldState.selectedClade = cladeSelected;
+    newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState); // tipSelectedIdx, oldState);
   }
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
     oldState,
     controlsState,
     {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric},
-    {tipSelectedIdx, validIdxRoot: oldState.idxOfInViewRootNode}
+    {tipSelectedIdx, validIdxRoot: newIdxRoot}
   );
+
   const newState = Object.assign({}, oldState, visAndThicknessData);
   newState.stateCountAttrs = Object.keys(controlsState.filters);
+  newState.idxOfInViewRootNode = newIdxRoot;
   newState.visibleStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, newState.visibility, true);
   newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,               true); // eslint-disable-line
 
@@ -495,11 +504,14 @@ export const createStateFromQueryOrJSONs = ({
     tree.nodeColors = nodeColors;
   }
 
-  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, controls);
+  if (query.clade) {
+    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, query.clade, controls);
+  }
+  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, undefined, controls);
   if (treeToo && treeToo.loaded) {
     treeToo.nodeColorsVersion = tree.nodeColorsVersion;
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
-    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, controls);
+    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, undefined, controls);
     controls = modifyControlsViaTreeToo(controls, treeToo.name);
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
   }
@@ -543,7 +555,7 @@ export const createTreeTooState = ({
   treeToo.debug = "RIGHT";
   controls = modifyStateViaTree(controls, oldState.tree, treeToo);
   controls = modifyControlsViaTreeToo(controls, segment);
-  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, controls);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, undefined, controls);
 
   /* calculate colours if loading from JSONs or if the query demands change */
   const colorScale = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);

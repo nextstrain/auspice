@@ -28,7 +28,7 @@ export const addLeafCount = (node) => {
  */
 export const applyToChildren = (node, func) => {
   func(node);
-  if (node.terminal) {
+  if (node.terminal || node.children === undefined) { // in case clade set by URL, terminal hasn't been set yet!
     return;
   }
   for (let i = 0; i < node.children.length; i++) {

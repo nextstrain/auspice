@@ -62,6 +62,7 @@ export const createSummary = (virus_count, nodes, filters, visibility, visibleSt
     totalStateCounts: state.tree.totalStateCounts,
     visibility: state.tree.visibility,
     selectedStrain: state.tree.selectedStrain,
+    selectedClade: state.tree.selectedClade,
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
     absoluteDateMin: state.controls.absoluteDateMin,
@@ -126,6 +127,7 @@ class Info extends React.Component {
     return this.props.filters.authors.length;
   }
   addFilteredDatesButton(buttons) {
+    console.log("this.props", this.props);
     buttons.push(
       <div key={"timefilter"} style={{display: "inline-block"}}>
         <div
@@ -164,7 +166,7 @@ class Info extends React.Component {
             className={'boxed-item-icon'}
             onClick={() => {
               this.props.dispatch(
-                updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}})
+                updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}, cladeSelected: this.props.selectedClade})
               );
             }}
             role="button"

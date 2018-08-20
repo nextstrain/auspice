@@ -12,6 +12,17 @@ export const strainNameToIdx = (nodes, name) => {
   return 0;
 };
 
+export const cladeNameToIdx = (nodes, name) => {
+  let i;
+  for (i = 0; i < nodes.length; i++) {
+    if (nodes[i].attr.labels !== undefined && nodes[i].attr.labels.clade !== undefined && nodes[i].attr.labels.clade === name) {
+      return i;
+    }
+  }
+  console.error("cladeNameToIdx couldn't find clade");
+  return 0;
+};
+
 /** calcBranchThickness **
 * returns an array of node (branch) thicknesses based on the tipCount at each node
 * If the node isn't visible, the thickness is 1.
@@ -104,7 +115,7 @@ const calcVisibility = (tree, controls, dates) => {
     try {
       inView = tree.nodes.map((d) => d.shell.inView);
     } catch (e) {
-      inView = tree.nodes.map(() => true);
+      inView = tree.nodes.map((d) => d.inView !== undefined ? d.inView : true);
     }
     /* intersect visibility and inView */
     visibility = visibility.map((cv, idx) => (cv && inView[idx]));
