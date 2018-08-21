@@ -11,15 +11,17 @@ import { charonAPIAddress } from "../../util/globals";
 
 @connect((state) => ({
   errorMessage: state.general.errorMessage,
-  browserDimensions: state.browserDimensions.browserDimensions
+  browserDimensions: state.browserDimensions.browserDimensions,
+  reduxPathname: state.general.pathname
 }))
 class Splash extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {source: undefined, available: undefined, errorMessage: undefined};
+    /* state is set via the returned JSON from the server (aka charon) in the fetch in CDM */
+    this.state = {source: undefined, narratives: false, available: undefined, errorMessage: undefined};
   }
   componentDidMount() {
-    fetchJSON(`${charonAPIAddress}request=available&url=${window.location.pathname}`)
+    fetchJSON(`${charonAPIAddress}request=available&url=${this.props.reduxPathname}`)
       .then((json) => {this.setState(json);})
       .catch((err) => {
         this.setState({errorMessage: "Error in getting available datasets"});
@@ -42,7 +44,7 @@ class Splash extends React.Component {
       </li>
     );
   }
-  listAvailableDatasets() {
+  listAvailable() {
     if (!this.state.source) return null;
     if (!this.state.available) {
       if (this.state.source === "live" || this.state.source === "staging") {
@@ -86,7 +88,7 @@ class Splash extends React.Component {
       <CenterContent>
         <div>
           <div style={{fontSize: "26px"}}>
-            {`Available Datasets for source ${this.state.source}`}
+            {`Available ${this.state.narratives ? "Narratives" : "Datasets"} for source ${this.state.source}`}
           </div>
           {listJSX}
         </div>
@@ -126,8 +128,8 @@ class Splash extends React.Component {
               Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data. We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread. Our goal is to aid epidemiological understanding and improve outbreak response.
             </p>
           )}
-          {/* Secondly, list the available datasets */}
-          {this.listAvailableDatasets()}
+          {/* Secondly, list the available datasets / narratives */}
+          {this.listAvailable()}
           {/* Finally, the footer (logos) */}
           <CenterContent>
             {logos}

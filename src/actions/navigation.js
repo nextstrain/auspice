@@ -6,10 +6,13 @@ import { loadJSONs } from "./loadData";
 export const chooseDisplayComponentFromURL = (url) => {
   const parts = url.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
   if (
-    !parts.length || (parts.length === 1 && parts[0] === "") ||
+    !parts.length ||
+    (parts.length === 1 && parts[0] === "") ||
     (parts.length === 1 && parts[0] === "local") ||
     (parts.length === 1 && parts[0] === "staging") ||
-    (parts.length === 1 && parts[0] === "community")
+    (parts.length === 1 && parts[0] === "community") ||
+    (parts.length === 1 && parts[0] === "narratives") ||
+    (parts.length === 2 && parts[0] === "local" && parts[1] === "narratives")
   ) {
     return "splash";
   } else if (parts[0] === "status") {
@@ -41,7 +44,7 @@ export const changePage = ({
   queryToDisplay = undefined, /* doesn't affect state, only URL. defaults to query unless specified */
   push = true,
   dontChangeDataset = false
-}) => (dispatch, getState) => {
+} = {}) => (dispatch, getState) => {
   const oldState = getState();
   // console.warn("CHANGE PAGE!", path, query, queryToDisplay, push);
 

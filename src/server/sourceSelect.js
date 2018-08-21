@@ -1,4 +1,7 @@
+/* eslint no-console: off */
 const manifestHelpers = require("./manifestHelpers");
+const fs = require('fs');
+const fetch = require('node-fetch');
 
 const urlToParts = (url) => {
   return url.replace(/^\/+/, "").replace(/\/+$/, "").split("/");
@@ -20,14 +23,66 @@ const getSource = (url) => {
 };
 
 const collectDatasets = (source) => {
+  const datasets = {available: undefined, source};
   if (source === "local" && global.LOCAL_MANIFEST) {
-    return {available: global.LOCAL_MANIFEST, source};
+    datasets.available = global.LOCAL_MANIFEST;
   } else if (source === "live" && global.LIVE_MANIFEST) {
-    return {available: global.LIVE_MANIFEST, source};
+    datasets.available = global.LIVE_MANIFEST;
   } else if (source === "staging" && global.STAGING_MANIFEST) {
-    return {available: global.STAGING_MANIFEST, source};
+    datasets.available = global.STAGING_MANIFEST;
   }
-  return {available: undefined, source};
+  return datasets;
+};
+
+const collectAndSendDatasets = (errorMessage, res, source) => {
+  const dataToSend = collectDatasets(source);
+  if (dataToSend.available) {
+    res.json(dataToSend);
+  } else {
+    res.statusMessage = errorMessage;
+    res.status(500).end();
+  }
+};
+
+const collectAndSendNarratives = (errorMessage, res, source) => {
+  const dataToSend = {available: undefined, source, narratives: true};
+  const parseFiles = (files) => {
+    const parsed = files
+      .filter((file) => file.endsWith(".md") && file!=="README.md")
+      .map((file) => file.replace(".md", ""))
+      .map((file) => file.split("_"));
+    parsed.forEach((partsOfPath) => {partsOfPath.splice(0, 0, "narratives");});
+    return parsed;
+  };
+
+  if (source === "local") {
+    let files;
+    try {
+      files = fs.readdirSync(global.LOCAL_NARRATIVES_PATH);
+    } catch (err) {
+      console.log("local narratives readdirSync err", err);
+      res.statusMessage = errorMessage;
+      res.status(500).end();
+    }
+    dataToSend.available = parseFiles(files);
+    res.json(dataToSend);
+  } else if (source === "live") {
+    fetch("https://api.github.com/repos/nextstrain/narratives/contents")
+      .then((result) => result.json())
+      .then((json) => {
+        dataToSend.available = parseFiles(json.map((b) => b.name));
+        if (!dataToSend.available) throw new Error();
+        res.json(dataToSend);
+      })
+      .catch(() => {
+        console.log(`Error fetching github narrative list`);
+        res.statusMessage = errorMessage;
+        res.status(500).end();
+      });
+
+
+    console.log("TO DO LIVE");
+  }
 };
 
 
@@ -116,6 +171,8 @@ const constructPathToGet = (source, providedUrl, otherQueries) => {
 module.exports = {
   getSource,
   constructPathToGet,
+  collectAndSendDatasets,
   collectDatasets,
-  guessTreeName
+  guessTreeName,
+  collectAndSendNarratives
 };

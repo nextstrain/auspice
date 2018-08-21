@@ -109,13 +109,13 @@ const applyCharonToApp = (app) => {
           });
         break;
       } case "available": {
+        const isNarrative = query.url.toLowerCase().includes("narratives");
         const source = sourceSelect.getSource(query.url);
-        const datasets = sourceSelect.collectDatasets(source);
-        if (datasets) {
-          res.json(datasets);
-        } else {
-          res.statusMessage = `Server doesn't have the available datasets for source "${source}""`;
-          res.status(500).end();
+        const errorMessage = `Server doesn't have available ${isNarrative?"narratives":"datasets"} for source "${source}""`;
+        if (isNarrative) {
+          sourceSelect.collectAndSendNarratives(errorMessage, res, source);
+        } else { /* else send (JSON-format) datasets */
+          sourceSelect.collectAndSendDatasets(errorMessage, res, source);
         }
         break;
       } default: {
