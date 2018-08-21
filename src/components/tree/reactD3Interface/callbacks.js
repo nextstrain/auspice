@@ -1,7 +1,6 @@
 import { rgb } from "d3-color";
 import { interpolateRgb } from "d3-interpolate";
 import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
-import { mediumTransitionDuration } from "../../../util/globals";
 import { branchOpacityFunction } from "../../../util/colorHelpers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
@@ -18,6 +17,7 @@ export const onTipHover = function onTipHover(d) {
 };
 
 export const onTipClick = function onTipClick(d) {
+  if (this.props.narrativeMode) return;
   // console.log("tip click", d)
   this.setState({
     hovered: null,
@@ -64,6 +64,7 @@ export const onBranchHover = function onBranchHover(d) {
 };
 
 export const onBranchClick = function onBranchClick(d) {
+  if (this.props.narrativeMode) return;
   const root = [undefined, undefined];
   if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
   else root[1] = d.n.arrayIdx;

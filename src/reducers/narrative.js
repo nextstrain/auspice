@@ -5,7 +5,8 @@ const narrative = (state = {
   loaded: false,
   blocks: null, /* array of paragraphs (aka blocks) */
   blockIdx: undefined, /* which block is currently "in view" */
-  pathname: undefined  /* the pathname of the _narrative_ */
+  pathname: undefined,  /* the pathname of the _narrative_ */
+  display: false
 }, action) => {
   switch (action.type) {
     case types.DATA_INVALID:

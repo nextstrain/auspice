@@ -161,12 +161,10 @@ class Narrative extends React.Component {
           return;
         }
       }
-
       /* watch for when we should scroll back up to the previous block */
       if (this.props.currentInFocusBlockIdx !== 0) {
         const thisBlockYPos = this.blockRefs[this.props.currentInFocusBlockIdx].getBoundingClientRect().y;
         const threshold = this.props.height * 0.2;
-        // console.log("onScroll (scroll up?)", thisBlockYPos, threshold)
         if (thisBlockYPos > threshold) {
           // console.log("onScroll detected UP threshold crossed");
           this.scrollToBlock(this.props.currentInFocusBlockIdx-1);
