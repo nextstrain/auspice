@@ -77,7 +77,7 @@ const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHe
 const Sidebar = ({styles, sidebarOpen, mobileDisplay, narrative, mapOn, toggleHandler}) => {
   return narrative ? (
     <div id="SidebarContainer" style={styles}>
-      <Narrative height={styles.height}/>
+      <Narrative height={styles.height} width={styles.width}/>
     </div>
   ) : (
     <div id="SidebarContainer" style={styles}>

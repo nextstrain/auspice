@@ -1,6 +1,6 @@
 import React from "react";
 
-const SidebarChevron = ({mobileDisplay, handler}) => {
+const SidebarChevron = ({mobileDisplay, handler, extraStyles={}}) => {
 
   const chevronStyle = {
     visibility: mobileDisplay ? "hidden" : "visible",
@@ -18,7 +18,7 @@ const SidebarChevron = ({mobileDisplay, handler}) => {
   };
 
   return (
-    <div style={chevronStyle} onClick={handler}>
+    <div style={{...chevronStyle, ...extraStyles}} onClick={handler}>
       <i className="fa fa-chevron-left" aria-hidden="true"/>
     </div>
   );

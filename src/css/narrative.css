@@ -6,48 +6,26 @@
   --brandColor: #5097BA;
   --sidebarColor: #F2F2F2;
 }
-
-.narrative p {
-  text-align: justify;
-  font-size: 16px;
-  margin: 0;
-  font-weight: 200;
-  color: var(--darkGrey);
-  line-height: 1.42857143;
-}
-
-.narrative .focus p {
+.narrative div {
   text-align: justify;
   font-size: 16px;
   margin: 0;
   font-weight: 300;
   color: var(--darkGrey);
   line-height: 1.42857143;
-}
-
-
-.narrative .focus h1 {
-  font-weight: 700;
 }
 .narrative h1 {
   font-weight: 300;
   font-size: 1.5em;
 }
-.narrative .focus h2 {
-  font-weight: 700;
-}
 .narrative h2 {
   font-weight: 300;
   font-size: 1.4em;
-}
-.narrative .focus h3 {
-  font-weight: 700;
 }
 .narrative h3 {
   font-weight: 300;
   font-size: 1.2em;
 }
-
 .narrative img {
   display: block;
   margin-left: auto;

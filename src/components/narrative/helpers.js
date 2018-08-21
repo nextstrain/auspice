@@ -1,5 +1,5 @@
 export const datasetToText = (query) => {
-  let text = "Currently viewing (DATASET HERE). ";
+  let text = "";
   for (let key in query) { // eslint-disable-line
     switch (key) {
       case "c": {
@@ -18,6 +18,9 @@ export const datasetToText = (query) => {
         break;
       }
     }
+  }
+  if (!text.length) {
+    return "default";
   }
   return text;
 };

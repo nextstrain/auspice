@@ -4,8 +4,9 @@ import { connect } from "react-redux";
 import Flex from "./flex";
 import SidebarChevron from "./sidebar-chevron";
 import { titleColors } from "../../util/globals";
-import { darkGrey, brandColor, materialButton } from "../../globalStyles";
+import { darkGrey, brandColor } from "../../globalStyles";
 import { TOGGLE_NARRATIVE } from "../../actions/types";
+import { SidebarTopRightButton } from "../narrative";
 
 export const navBarHeightPx = 50;
 
@@ -32,8 +33,7 @@ export const getLogo = () => (
 
 @connect((state) => {
   return {
-    narrativeLoaded: state.narrative.loaded,
-    narrativeDisplayed: state.narrative.display,
+    showNarrativeToggle: state.narrative.loaded,
     browserDimensions: state.browserDimensions.browserDimensions
   };
 })
@@ -114,52 +114,40 @@ class NavBar extends React.Component {
   getLink(name, url, styles) {
     const linkCol = this.props.minified ? "#000" : darkGrey;
     return (
-      <a style={{ ...{color: linkCol}, ...styles.link }} href={url}>
+      <a key={name} style={{ ...{color: linkCol}, ...styles.link }} href={url}>
         {name}
       </a>
     );
   }
-
-  getChevron() {
-    return (
-      this.props.minified ?
-        <SidebarChevron
-          mobileDisplay={this.props.mobileDisplay}
-          handler={this.props.toggleHandler}
-        />
-        :
-        <div/>
-    );
-  }
-
   render() {
     const styles = this.getStyles();
-    if (this.props.narrativeLoaded) {
-      const onClick = () => {
-        this.props.dispatch({type: TOGGLE_NARRATIVE, display: !this.props.narrativeDisplayed});
-      };
-      const text = this.props.narrativeDisplayed ? "show controls" : "show narrative";
-      return (
-        <Flex id="NavBar" style={styles.main}>
-          {getLogo()}
-          {this.getLogoType(styles)}
-          <div style={{flex: 5}}/>
-          <button style={materialButton} onClick={onClick}>
-            {text}
-          </button>
-          <div style={{width: this.props.minified ? 8 : 0 }}/>
-        </Flex>
-      );
-    }
     return (
       <Flex style={styles.main}>
         {getLogo()}
         {this.getLogoType(styles)}
         <div style={{flex: 5}}/>
-        {this.getLink("About", "/about/overview/introduction", styles)}
-        {this.getLink("Docs", "/docs/getting-started/install", styles)}
-        {this.getLink("Blog", "/blog", styles)}
-        {this.getChevron()}
+        {this.props.showNarrativeToggle ?
+          (
+            <SidebarTopRightButton
+              callback={() => this.props.dispatch({type: TOGGLE_NARRATIVE, display: true})}
+              text="enter narrative mode"
+            />
+          )
+          : [
+            this.getLink("About", "/about/overview/introduction", styles),
+            this.getLink("Docs", "/docs/getting-started/install", styles),
+            this.getLink("Blog", "/blog", styles)
+          ]
+        }
+        {this.props.minified ?
+          (
+            <SidebarChevron
+              mobileDisplay={this.props.mobileDisplay}
+              handler={this.props.toggleHandler}
+              extraStyles={this.props.showNarrativeToggle ? {marginTop: 12} : {}}
+            />
+          ) : null
+        }
         <div style={{width: this.props.minified ? 8 : 0 }}/>
       </Flex>
     );
