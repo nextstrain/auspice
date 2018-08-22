@@ -4,6 +4,7 @@ const yamlFront = require('yaml-front-matter');  /* https://www.npmjs.com/packag
 const fs = require('fs');
 const path = require("path");
 const fetch = require('node-fetch');
+const sourceSelect = require("./sourceSelect");
 
 
 const blockProxyHandler = {
@@ -126,6 +127,22 @@ const serveLiveNarrative = (res, filename, errorHandler) => {
     .catch(errorHandler);
 };
 
+const serveCommunityNarrative = (res, url, errorHandler) => {
+  const urlParts = sourceSelect.splitUrlIntoParts(url);
+  const orgName = urlParts[2];
+  const repoName = urlParts[3];
+  const filename = [repoName].concat(urlParts.slice(4)).join("_")+".md";
+  const fetchURL = `https://rawgit.com/${orgName}/${repoName}/master/narratives/${filename}`;
+  fetch(fetchURL)
+    .then((result) => result.text())
+    .then((fileContents) => {
+      const blocks = markdownToBlocks({fileContents, local: false});
+      res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
+      console.log("\tSUCCESS");
+    })
+    .catch(errorHandler);
+};
+
 const serveNarrative = (source, url, res) => {
   const filename = url
     .replace(/.+narratives\//, "")  // remove the URL up to (& including) "narratives/"
@@ -148,6 +165,8 @@ const serveNarrative = (source, url, res) => {
       }
     } else if (source === "live") {
       serveLiveNarrative(res, filename, generalErrorHandler);
+    } else if (source === "github") {
+      serveCommunityNarrative(res, url, generalErrorHandler);
     } else {
       res.statusMessage = `Narratives cannot be sourced for "${source}" yet -- only "live" and "local" are supported.`;
       console.warn(res.statusMessage);

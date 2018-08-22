@@ -94,6 +94,12 @@ const guessTreeName = (parts) => {
   return undefined;
 };
 
+const splitUrlIntoParts = (url) => url
+  .replace(/^\//, '')
+  .replace(/\/$/, '')
+  .replace(/^live\//, "")
+  .split("/");
+
 const constructPathToGet = (source, providedUrl, otherQueries) => {
   /* the path / URL is case sensitive */
   let auspiceURL; // the URL to be displayed in Auspice
@@ -102,11 +108,7 @@ const constructPathToGet = (source, providedUrl, otherQueries) => {
   let datasetFields; // this _does not_ take into account the 2nd tree
   let treeName;
 
-  const parts = providedUrl
-    .replace(/^\//, '')
-    .replace(/\/$/, '')
-    .replace(/^live\//, "")
-    .split("/");
+  const parts = splitUrlIntoParts(providedUrl);
 
   /* does the URL specify two trees? */
   let treeTwoName;
@@ -174,5 +176,6 @@ module.exports = {
   collectAndSendDatasets,
   collectDatasets,
   guessTreeName,
-  collectAndSendNarratives
+  collectAndSendNarratives,
+  splitUrlIntoParts
 };
