@@ -50,6 +50,9 @@ const makeFrontMatterBlock = (frontMatter) => {
   if (frontMatter.updated && typeof frontMatter.updated === "string") {
     markdown.push(`### Updated: ${frontMatter.updated}`);
   }
+  if (frontMatter.abstract && typeof frontMatter.abstract === "string") {
+    markdown.push(`#### ${frontMatter.abstract}`);
+  }
 
   const block = new Proxy({}, blockProxyHandler);
   block.url = frontMatter.dataset;
@@ -88,7 +91,7 @@ const markdownToBlocks = ({fileContents, local}) => {
     /* want to capture the following groups:
     title text (1st element) and URL, possibly including query (2nd element) */
     const matches = titlesAndParagraphs[idx].match(/\[(.+?)\]\((\S+)\)/);
-    let paragraphContents = `## ${matches[1]}\n`; // the title text
+    let paragraphContents = `# ${matches[1]}\n`; // the title text
     /* add in the next paragraph _if_ it's not itself a title */
     if (!isTitle(titlesAndParagraphs[++idx])) {
       paragraphContents += titlesAndParagraphs[idx++];

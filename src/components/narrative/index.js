@@ -24,7 +24,7 @@ const linkStyles = { // would be better to get CSS specificity working
   cursor: "pointer",
   fontFamily: "Lato",
   fontWeight: "400",
-  fontSize: "94%"
+  fontSize: "1.8em"
 };
 
 export const SidebarTopRightButton = ({text, callback}) => (
@@ -203,7 +203,7 @@ class Narrative extends React.Component {
     const dims = {w: 30, h: 30};
     const style = {zIndex: 200, position: "absolute", cursor: "pointer"};
     style.left = `${this.props.width/2 - dims.w/2}px`;
-    if (pointUp) style.top = headerHeight - dims.h/2;
+    if (pointUp) style.top = headerHeight + 1;
     else style.bottom = 0;
     const gotoIdx = pointUp ? this.props.currentInFocusBlockIdx-1 : this.props.currentInFocusBlockIdx+1;
     return (
@@ -249,7 +249,7 @@ class Narrative extends React.Component {
               block={b}
               n={i}
               focus={i === this.props.currentInFocusBlockIdx}
-              heightPerc={i === this.props.blocks.length-1 ? "75" : "90"}
+              heightPerc={i === this.props.blocks.length-1 ? "75" : "85"}
             />
           ))}
           <div id="EndOfNarrative" style={{flexBasis: "50%", flexShrink: 0}}>
