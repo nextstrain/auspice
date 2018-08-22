@@ -7,7 +7,7 @@ import { changePage } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE, TOGGLE_NARRATIVE } from "../../actions/types";
 import { getLogo } from "../framework/nav-bar";
 import { datasetToText } from "./helpers";
-import { tabSingle, darkGrey } from "../../globalStyles";
+import { tabSingle, darkGrey, sidebarColor } from "../../globalStyles";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 
@@ -214,18 +214,27 @@ class Narrative extends React.Component {
       this.scrollToBlock(this.props.currentInFocusBlockIdx, {behavior: "instant", dispatch: false});
     }
   }
-  renderHand(pointUp) {
+  renderChevron(pointUp) {
     const dims = {w: 30, h: 30};
-    const style = {zIndex: 200, position: "absolute", cursor: "pointer"};
-    style.left = `${this.props.width/2 - dims.w/2}px`;
-    if (pointUp) style.top = headerHeight + 1;
+    const style = {
+      zIndex: 200,
+      position: "absolute",
+      cursor: "pointer",
+      left: `px`,
+      backgroundImage: `linear-gradient(to ${pointUp?"top":"bottom"}, transparent, ${sidebarColor})`,
+      width: "100%"
+    };
+    if (pointUp) style.top = headerHeight;
     else style.bottom = 0;
     const gotoIdx = pointUp ? this.props.currentInFocusBlockIdx-1 : this.props.currentInFocusBlockIdx+1;
+    const transform = `translate(${this.props.width/2 - dims.w/2}, ${pointUp ? '-5' : '5'}) ${pointUp ? 'rotate(180)' : ''}`;
     return (
-      <div id={`hand${pointUp?"Up":"Down"}`} onClick={() => this.scrollToBlock(gotoIdx)} style={style}>
-        <svg width={`${dims.w}px`} height={`${dims.h}px`} viewBox="0 0 1536 1792" transform={pointUp ? '' : 'rotate(180)'}>
-          <path d="M1280 1600C1280 1582.67 1273.67 1567.67 1261 1555C1248.33 1542.33 1233.33 1536 1216 1536C1198.67 1536 1183.67 1542.33 1171 1555C1158.33 1567.67 1152 1582.67 1152 1600C1152 1617.33 1158.33 1632.33 1171 1645C1183.67 1657.67 1198.67 1664 1216 1664C1233.33 1664 1248.33 1657.67 1261 1645C1273.67 1632.33 1280 1617.33 1280 1600ZM1408 836C1408 710 1352.33 647 1241 647C1223.67 647 1205 648.667 1185 652C1174.33 632 1156.83 616.167 1132.5 604.5C1108.17 592.833 1083.67 587 1059 587C1034.33 587 1011.33 593 990 605C956.667 569.667 917 552 871 552C854.333 552 835.833 555.333 815.5 562C795.167 568.667 779.333 577 768 587V256C768 221.333 755.333 191.333 730 166C704.667 140.667 674.667 128 640 128C606 128 576.167 141 550.5 167C524.833 193 512 222.667 512 256V832C498.667 832 482.5 827 463.5 817C444.5 807 426.167 796 408.5 784C390.833 772 368.167 761 340.5 751C312.833 741 284.667 736 256 736C211.333 736 178.833 750.833 158.5 780.5C138.167 810.167 128 848.667 128 896C128 912 174.333 942 267 986C296.333 1002 318 1014.33 332 1023C374.667 1049.67 423 1087 477 1135C531 1182.33 566.333 1216 583 1236C621 1282 640 1328.67 640 1376V1408H1280V1376C1280 1328 1290.67 1272.33 1312 1209C1333.33 1145.67 1354.67 1081.17 1376 1015.5C1397.33 949.833 1408 890 1408 836ZM1536 831C1536 919.667 1513 1027 1467 1153C1427.67 1262.33 1408 1336.67 1408 1376V1664C1408 1699.33 1395.5 1729.5 1370.5 1754.5C1345.5 1779.5 1315.33 1792 1280 1792H640C604.667 1792 574.5 1779.5 549.5 1754.5C524.5 1729.5 512 1699.33 512 1664V1376C512 1369.33 510.5 1362.17 507.5 1354.5C504.5 1346.83 499.833 1339 493.5 1331C487.167 1323 481.167 1315.5 475.5 1308.5C469.833 1301.5 462.333 1293.5 453 1284.5C443.667 1275.5 436.5 1268.67 431.5 1264C426.5 1259.33 419.333 1253 410 1245C400.667 1237 395 1232.33 393 1231C343.667 1187.67 300.667 1154.33 264 1131C250 1122.33 229.333 1111.33 202 1098C174.667 1084.67 150.667 1072.33 130 1061C109.333 1049.67 88.3333 1036.17 67 1020.5C45.6667 1004.83 29.1667 986.5 17.5 965.5C5.83333 944.5 0 921.333 0 896C0 812.667 22.3333 743.833 67 689.5C111.667 635.167 174.667 608 256 608C301.333 608 344 615.333 384 630V256C384 186.667 409.333 126.667 460 76C510.667 25.3333 570.333 0 639 0C709 0 769.333 25.1667 820 75.5C870.667 125.833 896 186 896 256V425C937.333 427.667 977 440 1015 462C1029 460 1043.33 459 1058 459C1125.33 459 1184.67 479 1236 519C1328.67 518.333 1401.83 546.667 1455.5 604C1509.17 661.333 1536 737 1536 831Z" fill="black"/>
-          <path d="M1280 1600C1280 1582.67 1273.67 1567.67 1261 1555C1248.33 1542.33 1233.33 1536 1216 1536C1198.67 1536 1183.67 1542.33 1171 1555C1158.33 1567.67 1152 1582.67 1152 1600C1152 1617.33 1158.33 1632.33 1171 1645C1183.67 1657.67 1198.67 1664 1216 1664C1233.33 1664 1248.33 1657.67 1261 1645C1273.67 1632.33 1280 1617.33 1280 1600ZM1408 836C1408 710 1352.33 647 1241 647C1223.67 647 1205 648.667 1185 652C1174.33 632 1156.83 616.167 1132.5 604.5C1108.17 592.833 1083.67 587 1059 587C1034.33 587 1011.33 593 990 605C956.667 569.667 917 552 871 552C854.333 552 835.833 555.333 815.5 562C795.167 568.667 779.333 577 768 587V256C768 221.333 755.333 191.333 730 166C704.667 140.667 674.667 128 640 128C606 128 576.167 141 550.5 167C524.833 193 512 222.667 512 256V832C498.667 832 482.5 827 463.5 817C444.5 807 426.167 796 408.5 784C390.833 772 368.167 761 340.5 751C312.833 741 284.667 736 256 736C211.333 736 178.833 750.833 158.5 780.5C138.167 810.167 128 848.667 128 896C128 912 174.333 942 267 986C296.333 1002 318 1014.33 332 1023C374.667 1049.67 423 1087 477 1135C531 1182.33 566.333 1216 583 1236C621 1282 640 1328.67 640 1376V1408H1280V1376C1280 1328 1290.67 1272.33 1312 1209C1333.33 1145.67 1354.67 1081.17 1376 1015.5C1397.33 949.833 1408 890 1408 836Z" fill="white"/>
+      <div id={`hand${pointUp?"Up":"Down"}`} style={style} onClick={() => this.scrollToBlock(gotoIdx)}>
+        <svg width={`${dims.w}px`} height={`${dims.h}px`} viewBox="0 0 448 512" transform={transform}>
+          <path
+            d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"
+            fill="black"
+          />
         </svg>
       </div>
     );
@@ -242,8 +251,8 @@ class Narrative extends React.Component {
           exitNarrativeMode={this.exitNarrativeMode}
           percProgress={(this.props.currentInFocusBlockIdx+1)/this.props.blocks.length*100}
         />
-        {this.props.currentInFocusBlockIdx !== 0 ? this.renderHand(true) : null}
-        {this.props.currentInFocusBlockIdx+1 !== this.props.blocks.length ? this.renderHand(false) : null}
+        {this.props.currentInFocusBlockIdx !== 0 ? this.renderChevron(true) : null}
+        {this.props.currentInFocusBlockIdx+1 !== this.props.blocks.length ? this.renderChevron(false) : null}
         <div
           id="BlockContainer"
           className={"narrative"}
