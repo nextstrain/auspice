@@ -143,42 +143,57 @@ class Narrative extends React.Component {
     this.enableScroll = () => {
       this.automaticScrollInProgress = false;
     };
+    this.canScroll = () => {
+      return !this.automaticScrollInProgress;
+    };
     this.exitNarrativeMode = () => {
       this.props.dispatch({type: TOGGLE_NARRATIVE, display: false});
     };
     this.debouncedScroll = debounce(() => {
-      if (this.automaticScrollInProgress) return;
-      /* watch for when we should scroll down */
-      const nextBlockIdx = this.props.currentInFocusBlockIdx+1;
-      if (this.blockRefs[nextBlockIdx]) {
-        const nextBlockYPos = this.blockRefs[nextBlockIdx].getBoundingClientRect().y;
-        const threshold = this.props.height * 0.8;
-        // console.log("onScroll (looking @ next block", this.props.currentInFocusBlockIdx+1, ")", nextBlockYPos, threshold)
-
-        if (nextBlockYPos < threshold) {
-          // console.log("onScroll detected DOWN threshold crossed");
-          this.scrollToBlock(this.props.currentInFocusBlockIdx+1);
-          return;
-        }
-      }
-      /* watch for when we should scroll back up to the previous block */
-      if (this.props.currentInFocusBlockIdx !== 0) {
-        const thisBlockYPos = this.blockRefs[this.props.currentInFocusBlockIdx].getBoundingClientRect().y;
+      if (!this.canScroll()) return;
+      /* note that only one block / paragraph can ever be within the thresholds at any one time */
+      const blockYPositions = this.blockRefs.map((ref, idx) => ({y: ref.getBoundingClientRect().y, idx}));
+      const focusZone = [headerHeight, headerHeight+this.props.height*0.8];
+      let blockInFocusZone;
+      let goToBlock = false;
+      blockInFocusZone = blockYPositions
+        .filter((b) => b.y >= focusZone[0] && b.y <= focusZone[1]);
+      if (blockInFocusZone.length) {
+        blockInFocusZone = blockInFocusZone[0];
         const threshold = this.props.height * 0.2;
-        if (thisBlockYPos > threshold) {
-          // console.log("onScroll detected UP threshold crossed");
-          this.scrollToBlock(this.props.currentInFocusBlockIdx-1);
+        // console.log("Block in zone:", blockInFocusZone, blockYPositions[blockInFocusZone.idx], threshold);
+        if (blockInFocusZone.y < threshold) {
+          if (blockInFocusZone.idx !== this.props.currentInFocusBlockIdx) {
+            goToBlock = blockInFocusZone.idx;
+          }
+        } else {
+          if (blockInFocusZone.idx > this.props.currentInFocusBlockIdx) { // eslint-disable-line no-lonely-if
+            goToBlock = blockInFocusZone.idx;
+          } else {
+            goToBlock = blockInFocusZone.idx-1;
+          }
+        }
+      } else {
+        if (blockYPositions[blockYPositions.length-1].y < focusZone[0]) {
+          /* in the footer. don't scroll */
+        }
+        /* we're in the middle of a long paragraph. Check to see if it's not in focus */
+        blockInFocusZone = blockYPositions.filter((b) => b.y < focusZone[0]).slice(-1)[0];
+        if (blockInFocusZone.idx !== this.props.currentInFocusBlockIdx) {
+          goToBlock = blockInFocusZone.idx;
         }
       }
-    }, 500, {trailing: true});
+      if (goToBlock) {
+        this.scrollToBlock(goToBlock);
+      }
+    }, 100, {trailing: true});
   }
   scrollToBlock(blockIdx, {behavior="smooth", dispatch=true} = {}) {
     this.disableScroll();
-
     const absoluteBlockYPos = this.blockRefs[blockIdx].getBoundingClientRect().y - headerHeight;
-    console.log(`scrollBy to ${parseInt(absoluteBlockYPos, 10)} (block ${blockIdx})`);
+    // console.log(`scrollBy to ${parseInt(absoluteBlockYPos, 10)} (block ${blockIdx})`);
     this.componentRef.scrollBy({top: absoluteBlockYPos, behavior});
-    window.setTimeout(this.enableScroll, 1000);
+    window.setTimeout(this.enableScroll, 1500);
     if (dispatch) {
       this.props.dispatch(changePage({
         // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
