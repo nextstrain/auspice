@@ -1,7 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import Title from "../framework/title";
-import NavBar from "../framework/nav-bar";
+import NavBar from "../navBar";
 import Flex from "../../components/framework/flex";
 import { logos } from "./logos";
 import { CenterContent } from "./centerContent";
@@ -98,7 +98,7 @@ class Splash extends React.Component {
   render() {
     return (
       <div>
-        <NavBar/>
+        <NavBar minified={false}/>
 
         <div className="static container">
           <Flex justifyContent="center">

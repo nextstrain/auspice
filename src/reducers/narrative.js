@@ -13,7 +13,8 @@ const narrative = (state = {
   blocks: null, /* array of paragraphs (aka blocks) */
   blockIdx: undefined, /* which block is currently "in view" */
   pathname: undefined,  /* the pathname of the _narrative_ */
-  display: false
+  display: false,
+  title: undefined
 }, action) => {
   switch (action.type) {
     case types.DATA_INVALID:
@@ -29,6 +30,7 @@ const narrative = (state = {
           loaded: true,
           display: true,
           blocks,
+          title: blocks[0].__html.match(/>(.+?)</)[1],
           pathname: window.location.pathname,
           blockIdx: parseInt(queryString.parse(window.location.search).n, 10) || 0
         };

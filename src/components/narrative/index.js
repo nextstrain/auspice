@@ -5,13 +5,13 @@ import queryString from "query-string";
 import { debounce } from 'lodash';
 import { changePage } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE, TOGGLE_NARRATIVE } from "../../actions/types";
-import { getLogo } from "../framework/nav-bar";
-import { datasetToText } from "./helpers";
-import { tabSingle, darkGrey, sidebarColor } from "../../globalStyles";
+import { sidebarColor } from "../../globalStyles";
+import { narrativeNavBarHeight } from "../../util/globals";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 
-const headerHeight = 90;
+const progressHeight = 25;
+
 const blockPadding = {
   paddingLeft: "20px",
   paddingRight: "20px",
@@ -26,90 +26,6 @@ const linkStyles = { // would be better to get CSS specificity working
   fontWeight: "400",
   fontSize: "1.8em"
 };
-
-export const SidebarTopRightButton = ({text, callback}) => (
-  <button
-    style={{
-      ...tabSingle,
-      backgroundColor: "inherit",
-      zIndex: 100,
-      position: "absolute",
-      right: 0,
-      top: -1,
-      cursor: "pointer",
-      color: darkGrey
-    }}
-    onClick={callback}
-  >
-    {text}
-  </button>
-);
-
-// http://localhost:4000/local/narratives/test/zika?n=0
-
-const Header = (props) => {
-  const title = props.blocks[0].__html.match(/>(.+?)</)[1];
-  const dataset = props.blocks[0].dataset; // update to per-block later
-  const queryFormatted = datasetToText(queryString.parse(props.blocks[props.n].query));
-
-  return (
-    <div
-      id="HeaderContainer"
-      style={{
-        height: `${headerHeight}px`,
-        display: "flex",
-        flexDirection: "row",
-        fontSize: "14px",
-        fontWeight: 100,
-        boxShadow: '0px -3px 3px -3px rgba(0, 0, 0, 0.2) inset'
-      }}
-    >
-      {getLogo()}
-      <SidebarTopRightButton
-        callback={props.exitNarrativeMode}
-        text="exit narrative mode"
-      />
-      <div
-        style={{
-          flexGrow: 1,
-          paddingRight: blockPadding.paddingRight,
-          paddingTop: "23px",
-          paddingLeft: "5px"
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            top: "10px"
-          }}
-        >
-          <div style={{whiteSpace: "nowrap", fontWeight: 600}}>
-            {title}
-          </div>
-          <div style={{whiteSpace: "nowrap", fontStyle: "italic"}}>
-            {`Dataset: ${dataset}`}
-          </div>
-          <div style={{whiteSpace: "nowrap", fontStyle: "italic"}}>
-            {`Settings: ${queryFormatted}`}
-          </div>
-        </div>
-      </div>
-      <div
-        id="Progress"
-        style={{
-          position: "absolute",
-          left: 0,
-          width: `${props.percProgress}%`,
-          top: `${headerHeight-3}px`,
-          height: "3px",
-          backgroundColor: "#74a9cf"
-        }}
-      />
-    </div>
-  );
-};
-
 
 const Block = (props) => {
   return (
@@ -153,7 +69,7 @@ class Narrative extends React.Component {
       if (!this.canScroll()) return;
       /* note that only one block / paragraph can ever be within the thresholds at any one time */
       const blockYPositions = this.blockRefs.map((ref, idx) => ({y: ref.getBoundingClientRect().y, idx}));
-      const focusZone = [headerHeight, headerHeight+this.props.height*0.8];
+      const focusZone = [narrativeNavBarHeight, narrativeNavBarHeight+this.props.height*0.8];
       let blockInFocusZone;
       let goToBlock = false;
       blockInFocusZone = blockYPositions
@@ -190,7 +106,7 @@ class Narrative extends React.Component {
   }
   scrollToBlock(blockIdx, {behavior="smooth", dispatch=true} = {}) {
     this.disableScroll();
-    const absoluteBlockYPos = this.blockRefs[blockIdx].getBoundingClientRect().y - headerHeight;
+    const absoluteBlockYPos = this.blockRefs[blockIdx].getBoundingClientRect().y - narrativeNavBarHeight - progressHeight;
     // console.log(`scrollBy to ${parseInt(absoluteBlockYPos, 10)} (block ${blockIdx})`);
     this.componentRef.scrollBy({top: absoluteBlockYPos, behavior});
     window.setTimeout(this.enableScroll, 1500);
@@ -214,23 +130,34 @@ class Narrative extends React.Component {
       this.scrollToBlock(this.props.currentInFocusBlockIdx, {behavior: "instant", dispatch: false});
     }
   }
+  renderOpacityFade(top) {
+    const style = {
+      zIndex: 200,
+      position: "absolute",
+      backgroundImage: `linear-gradient(to ${top?"top":"bottom"}, transparent, ${sidebarColor})`,
+      width: "100%",
+      height: "30px"
+    };
+    if (top) style.top = narrativeNavBarHeight + progressHeight;
+    else style.bottom = 0;
+    return (
+      <div id={`fade${top?"Top":"Bottom"}`} style={style}/>
+    );
+  }
   renderChevron(pointUp) {
     const dims = {w: 30, h: 30};
     const style = {
       zIndex: 200,
       position: "absolute",
       cursor: "pointer",
-      left: `px`,
-      backgroundImage: `linear-gradient(to ${pointUp?"top":"bottom"}, transparent, ${sidebarColor})`,
-      width: "100%"
+      left: `${this.props.width/2 - dims.w/2}px`
     };
-    if (pointUp) style.top = headerHeight;
+    if (pointUp) style.top = narrativeNavBarHeight + progressHeight;
     else style.bottom = 0;
     const gotoIdx = pointUp ? this.props.currentInFocusBlockIdx-1 : this.props.currentInFocusBlockIdx+1;
-    const transform = `translate(${this.props.width/2 - dims.w/2}, ${pointUp ? '-5' : '5'}) ${pointUp ? 'rotate(180)' : ''}`;
     return (
       <div id={`hand${pointUp?"Up":"Down"}`} style={style} onClick={() => this.scrollToBlock(gotoIdx)}>
-        <svg width={`${dims.w}px`} height={`${dims.h}px`} viewBox="0 0 448 512" transform={transform}>
+        <svg width={`${dims.w}px`} height={`${dims.h}px`} viewBox="0 0 448 512" transform={`${pointUp ? 'rotate(180)' : ''}`}>
           <path
             d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"
             fill="black"
@@ -239,18 +166,42 @@ class Narrative extends React.Component {
       </div>
     );
   }
+  renderProgress() {
+    return (
+      <div
+        style={{
+          height: `${progressHeight}px`,
+          width: "100%",
+          backgroundColor: "inherit",
+          boxShadow: '0px -3px 3px -3px rgba(0, 0, 0, 0.2) inset',
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-evenly",
+          alignItems: "center"
+        }}
+      >
+        {this.props.blocks.map((b, i) => {
+          const d = this.props.currentInFocusBlockIdx === i ? "14px" : "6px";
+          return (<div
+            key={b.__html.slice(0, 30)}
+            style={{width: d, height: d, background: "#74a9cf", borderRadius: "50%", cursor: "pointer"}}
+            onClick={() => this.scrollToBlock(i)}
+          />);
+        })}
+      </div>
+    );
+  }
   render() {
     if (!this.props.loaded) {return null;}
 
     return (
-      <div id="NarrativeContainer">
-        <Header
-          query={this.props.blocks[this.props.currentInFocusBlockIdx].query}
-          n={this.props.currentInFocusBlockIdx}
-          blocks={this.props.blocks}
-          exitNarrativeMode={this.exitNarrativeMode}
-          percProgress={(this.props.currentInFocusBlockIdx+1)/this.props.blocks.length*100}
-        />
+      <div
+        id="NarrativeContainer"
+        style={{top: narrativeNavBarHeight}}
+      >
+        {this.renderProgress()}
+        {this.renderOpacityFade(true)}
+        {this.renderOpacityFade(false)}
         {this.props.currentInFocusBlockIdx !== 0 ? this.renderChevron(true) : null}
         {this.props.currentInFocusBlockIdx+1 !== this.props.blocks.length ? this.renderChevron(false) : null}
         <div
@@ -259,7 +210,7 @@ class Narrative extends React.Component {
           ref={(el) => {this.componentRef = el;}}
           onScroll={this.debouncedScroll}
           style={{
-            height: `${this.props.height-headerHeight}px`,
+            height: `${this.props.height-progressHeight}px`,
             overflowY: "scroll",
             padding: "0px 0px 0px 0px",
             display: "flex",
