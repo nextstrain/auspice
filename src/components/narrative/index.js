@@ -2,22 +2,14 @@
 import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
-import { debounce } from 'lodash';
+import ReactPageScroller from "./ReactPageScroller";
 import { changePage } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE, TOGGLE_NARRATIVE } from "../../actions/types";
 import { sidebarColor } from "../../globalStyles";
 import { narrativeNavBarHeight } from "../../util/globals";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
-
 const progressHeight = 25;
-
-const blockPadding = {
-  paddingLeft: "20px",
-  paddingRight: "20px",
-  paddingTop: "10px",
-  paddingBottom: "10px"
-};
 const linkStyles = { // would be better to get CSS specificity working
   color: "#5097BA",
   textDecoration: "none",
@@ -25,21 +17,6 @@ const linkStyles = { // would be better to get CSS specificity working
   fontFamily: "Lato",
   fontWeight: "400",
   fontSize: "1.8em"
-};
-
-const Block = (props) => {
-  return (
-    <div
-      id={`NarrativeBlock_${props.n}`}
-      ref={props.inputRef}
-      style={{
-        ...blockPadding,
-        flexBasis: `${props.heightPerc}%`,
-        flexShrink: 0
-      }}
-      dangerouslySetInnerHTML={props.block}
-    />
-  );
 };
 
 @connect((state) => ({
@@ -50,75 +27,27 @@ const Block = (props) => {
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
-    this.componentRef = undefined;
-    this.blockRefs = [];
-    this.automaticScrollInProgress = false;
-    this.disableScroll = () => {
-      this.automaticScrollInProgress = true;
-    };
-    this.enableScroll = () => {
-      this.automaticScrollInProgress = false;
-    };
-    this.canScroll = () => {
-      return !this.automaticScrollInProgress;
-    };
+    this.state = {showingEndOfNarrativePage: false};
     this.exitNarrativeMode = () => {
       this.props.dispatch({type: TOGGLE_NARRATIVE, display: false});
     };
-    this.debouncedScroll = debounce(() => {
-      if (!this.canScroll()) return;
-      /* note that only one block / paragraph can ever be within the thresholds at any one time */
-      const blockYPositions = this.blockRefs.map((ref, idx) => ({y: ref.getBoundingClientRect().y, idx}));
-      const focusZone = [narrativeNavBarHeight, narrativeNavBarHeight+this.props.height*0.8];
-      let blockInFocusZone;
-      let goToBlock = false;
-      blockInFocusZone = blockYPositions
-        .filter((b) => b.y >= focusZone[0] && b.y <= focusZone[1]);
-      if (blockInFocusZone.length) {
-        blockInFocusZone = blockInFocusZone[0];
-        const threshold = this.props.height * 0.2;
-        // console.log("Block in zone:", blockInFocusZone, blockYPositions[blockInFocusZone.idx], threshold);
-        if (blockInFocusZone.y < threshold) {
-          if (blockInFocusZone.idx !== this.props.currentInFocusBlockIdx) {
-            goToBlock = blockInFocusZone.idx;
-          }
-        } else {
-          if (blockInFocusZone.idx > this.props.currentInFocusBlockIdx) { // eslint-disable-line no-lonely-if
-            goToBlock = blockInFocusZone.idx;
-          } else {
-            goToBlock = blockInFocusZone.idx-1;
-          }
-        }
+    this.changeAppStateViaBlock = (reactPageScrollerIdx) => {
+      const idx = reactPageScrollerIdx-1;
+      if (idx === this.props.blocks.length) {
+        this.setState({showingEndOfNarrativePage: true});
       } else {
-        if (blockYPositions[blockYPositions.length-1].y < focusZone[0]) {
-          /* in the footer. don't scroll */
+        if (this.state.showingEndOfNarrativePage) {
+          this.setState({showingEndOfNarrativePage: false});
         }
-        /* we're in the middle of a long paragraph. Check to see if it's not in focus */
-        blockInFocusZone = blockYPositions.filter((b) => b.y < focusZone[0]).slice(-1)[0];
-        if (blockInFocusZone.idx !== this.props.currentInFocusBlockIdx) {
-          goToBlock = blockInFocusZone.idx;
-        }
+        this.props.dispatch(changePage({
+          // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
+          dontChangeDataset: true,
+          query: queryString.parse(this.props.blocks[idx].query),
+          queryToDisplay: {n: idx},
+          push: true
+        }));
       }
-      if (goToBlock) {
-        this.scrollToBlock(goToBlock);
-      }
-    }, 100, {trailing: true});
-  }
-  scrollToBlock(blockIdx, {behavior="smooth", dispatch=true} = {}) {
-    this.disableScroll();
-    const absoluteBlockYPos = this.blockRefs[blockIdx].getBoundingClientRect().y - narrativeNavBarHeight - progressHeight;
-    // console.log(`scrollBy to ${parseInt(absoluteBlockYPos, 10)} (block ${blockIdx})`);
-    this.componentRef.scrollBy({top: absoluteBlockYPos, behavior});
-    window.setTimeout(this.enableScroll, 1500);
-    if (dispatch) {
-      this.props.dispatch(changePage({
-        // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
-        dontChangeDataset: true,
-        query: queryString.parse(this.props.blocks[blockIdx].query),
-        queryToDisplay: {n: blockIdx},
-        push: true
-      }));
-    }
+    };
   }
   componentDidMount() {
     if (window.twttr && window.twttr.ready) {
@@ -127,7 +56,7 @@ class Narrative extends React.Component {
     /* if the query has defined a block to be shown (that's not the first)
     then we must scroll to that block */
     if (this.props.currentInFocusBlockIdx !== 0) {
-      this.scrollToBlock(this.props.currentInFocusBlockIdx, {behavior: "instant", dispatch: false});
+      this.reactPageScroller.goToPage(this.props.currentInFocusBlockIdx);
     }
   }
   renderOpacityFade(top) {
@@ -154,9 +83,12 @@ class Narrative extends React.Component {
     };
     if (pointUp) style.top = narrativeNavBarHeight + progressHeight;
     else style.bottom = 0;
-    const gotoIdx = pointUp ? this.props.currentInFocusBlockIdx-1 : this.props.currentInFocusBlockIdx+1;
+    let gotoIdx = pointUp ? this.props.currentInFocusBlockIdx-1 : this.props.currentInFocusBlockIdx+1;
+    if (this.state.showingEndOfNarrativePage) {
+      gotoIdx = this.props.blocks.length-1;
+    }
     return (
-      <div id={`hand${pointUp?"Up":"Down"}`} style={style} onClick={() => this.scrollToBlock(gotoIdx)}>
+      <div id={`hand${pointUp?"Up":"Down"}`} style={style} onClick={() => this.reactPageScroller.goToPage(gotoIdx)}>
         <svg width={`${dims.w}px`} height={`${dims.h}px`} viewBox="0 0 448 512" transform={`${pointUp ? 'rotate(180)' : ''}`}>
           <path
             d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"
@@ -181,19 +113,47 @@ class Narrative extends React.Component {
         }}
       >
         {this.props.blocks.map((b, i) => {
-          const d = this.props.currentInFocusBlockIdx === i ? "14px" : "6px";
+          const d = (!this.state.showingEndOfNarrativePage) && this.props.currentInFocusBlockIdx === i ?
+            "14px" : "6px";
           return (<div
             key={b.__html.slice(0, 30)}
             style={{width: d, height: d, background: "#74a9cf", borderRadius: "50%", cursor: "pointer"}}
-            onClick={() => this.scrollToBlock(i)}
+            onClick={() => this.reactPageScroller.goToPage(i)}
           />);
         })}
       </div>
     );
   }
+  renderBlocks() {
+    const ret = this.props.blocks.map((b, i) => (
+      <div
+        id={`NarrativeBlock_${i}`}
+        key={b.__html.slice(0, 50)}
+        style={{
+          padding: "10px 20px",
+          height: "inherit",
+          overflow: "hidden"
+        }}
+        dangerouslySetInnerHTML={b}
+      />
+    ));
+    ret.push((
+      <div key="EON" id="EndOfNarrative" style={{flexBasis: "50%", flexShrink: 0}}>
+        <h3 style={{textAlign: "center"}}>
+          END OF NARRATIVE
+        </h3>
+        <div style={{...linkStyles, textAlign: "center"}} onClick={() => this.scrollToBlock(0)}>
+          Click here to Scroll back to top
+        </div>
+        <div style={{...linkStyles, textAlign: "center", marginTop: "10px"}} onClick={this.exitNarrativeMode}>
+          Click here to Exit narrative mode
+        </div>
+      </div>
+    ));
+    return ret;
+  }
   render() {
     if (!this.props.loaded) {return null;}
-
     return (
       <div
         id="NarrativeContainer"
@@ -203,42 +163,14 @@ class Narrative extends React.Component {
         {this.renderOpacityFade(true)}
         {this.renderOpacityFade(false)}
         {this.props.currentInFocusBlockIdx !== 0 ? this.renderChevron(true) : null}
-        {this.props.currentInFocusBlockIdx+1 !== this.props.blocks.length ? this.renderChevron(false) : null}
-        <div
-          id="BlockContainer"
-          className={"narrative"}
-          ref={(el) => {this.componentRef = el;}}
-          onScroll={this.debouncedScroll}
-          style={{
-            height: `${this.props.height-progressHeight}px`,
-            overflowY: "scroll",
-            padding: "0px 0px 0px 0px",
-            display: "flex",
-            flexDirection: "column"
-          }}
+        {!this.state.showingEndOfNarrativePage ? this.renderChevron(false) : null}
+        <ReactPageScroller
+          ref={(c) => {this.reactPageScroller = c;}}
+          containerHeight={this.props.height-progressHeight}
+          pageOnChange={this.changeAppStateViaBlock}
         >
-          {this.props.blocks.map((b, i) => (
-            <Block
-              inputRef={(el) => {this.blockRefs[i] = el;}}
-              key={b.__html.slice(0, 50)}
-              block={b}
-              n={i}
-              focus={i === this.props.currentInFocusBlockIdx}
-              heightPerc={i === this.props.blocks.length-1 ? "75" : "85"}
-            />
-          ))}
-          <div id="EndOfNarrative" style={{flexBasis: "50%", flexShrink: 0}}>
-            <h3 style={{textAlign: "center"}}>
-              END OF NARRATIVE
-            </h3>
-            <div style={{...linkStyles, textAlign: "center"}} onClick={() => this.scrollToBlock(0)}>
-              Click here to Scroll back to top
-            </div>
-            <div style={{...linkStyles, textAlign: "center", marginTop: "10px"}} onClick={this.exitNarrativeMode}>
-            Click here to Exit narrative mode
-            </div>
-          </div>
-        </div>
+          {this.renderBlocks()}
+        </ReactPageScroller>
       </div>
     );
   }
