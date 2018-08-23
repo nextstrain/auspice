@@ -7,7 +7,7 @@ import { logos } from "./logos";
 import { CenterContent } from "./centerContent";
 import { changePage } from "../../actions/navigation";
 import { fetchJSON } from "../../util/serverInteraction";
-import { charonAPIAddress } from "../../util/globals";
+import { charonAPIAddress, controlsHiddenWidth } from "../../util/globals";
 
 @connect((state) => ({
   errorMessage: state.general.errorMessage,
@@ -96,9 +96,10 @@ class Splash extends React.Component {
     );
   }
   render() {
+    const isMobile = this.props.browserDimensions.width < controlsHiddenWidth;
     return (
       <div>
-        <NavBar minified={false}/>
+        <NavBar minified={isMobile}/>
 
         <div className="static container">
           <Flex justifyContent="center">

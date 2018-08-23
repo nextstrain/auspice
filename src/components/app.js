@@ -75,6 +75,15 @@ const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHe
   );
 };
 
+const calculateSidebarWidth = (available, narrativeMode) => {
+  if (narrativeMode) {
+    if (available>1500) return 500;
+    else if (available>1000) return 400;
+    return 310;
+  }
+  return controlsWidth+controlsPadding;
+};
+
 const Overlay = ({styles, mobileDisplay, handler}) => {
   return (
     mobileDisplay ?
@@ -114,7 +123,10 @@ class App extends React.Component {
     dispatch: PropTypes.func.isRequired
   }
   componentWillReceiveProps(nextProps) {
-    if (nextProps.treeLoaded && this.state.mql.matches) {
+    if (
+      (nextProps.treeLoaded && this.state.mql.matches) ||
+      (nextProps.displayNarrative && !this.props.displayNarrative)
+    ) {
       this.setState({sidebarOpen: true});
     }
   }
@@ -132,20 +144,11 @@ class App extends React.Component {
     /* D I M E N S I O N S */
     let availableWidth = this.props.browserDimensions.width;
     const availableHeight = this.props.browserDimensions.height;
-
-    let sidebarWidth = 0;
-    if (this.props.displayNarrative) {
-      sidebarWidth = parseInt(0.27 * availableWidth, 10);
-    } else {
-      sidebarWidth = controlsWidth;
-    }
-    sidebarWidth += controlsPadding;
-
+    const sidebarWidth = calculateSidebarWidth(availableWidth, this.props.displayNarrative);
     const visibleSidebarWidth = this.state.sidebarOpen ? sidebarWidth : 0;
     if (!this.state.mobileDisplay) {
       availableWidth -= visibleSidebarWidth;
     }
-
     const mapOn = this.props.panelsToDisplay.indexOf("map") !== -1;
 
     /* S T Y L E S */

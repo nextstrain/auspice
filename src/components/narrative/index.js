@@ -63,7 +63,7 @@ class Narrative extends React.Component {
     const style = {
       zIndex: 200,
       position: "absolute",
-      backgroundImage: `linear-gradient(to ${top?"top":"bottom"}, transparent, ${sidebarColor})`,
+      backgroundImage: `linear-gradient(to ${top?"top":"bottom"}, rgba(255, 255, 255, 0), ${sidebarColor})`,
       width: "100%",
       height: "30px"
     };
@@ -87,13 +87,13 @@ class Narrative extends React.Component {
     if (this.state.showingEndOfNarrativePage) {
       gotoIdx = this.props.blocks.length-1;
     }
+    const svgPathD = pointUp ?
+      "M240.971 130.524l194.343 194.343c9.373 9.373 9.373 24.569 0 33.941l-22.667 22.667c-9.357 9.357-24.522 9.375-33.901.04L224 227.495 69.255 381.516c-9.379 9.335-24.544 9.317-33.901-.04l-22.667-22.667c-9.373-9.373-9.373-24.569 0-33.941L207.03 130.525c9.372-9.373 24.568-9.373 33.941-.001z" :
+      "M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z";
     return (
       <div id={`hand${pointUp?"Up":"Down"}`} style={style} onClick={() => this.reactPageScroller.goToPage(gotoIdx)}>
-        <svg width={`${dims.w}px`} height={`${dims.h}px`} viewBox="0 0 448 512" transform={`${pointUp ? 'rotate(180)' : ''}`}>
-          <path
-            d="M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z"
-            fill="black"
-          />
+        <svg width={`${dims.w}px`} height={`${dims.h}px`} viewBox="0 0 448 512">
+          <path d={svgPathD} fill="black"/>
         </svg>
       </div>
     );

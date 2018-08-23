@@ -25,7 +25,7 @@ const getStyles = ({minified=true, narrative=false, width}={}) => ({
   flexColumns: {
     display: "flex",
     flexDirection: "row",
-    wrap: "nowrap",
+    whiteSpace: "nowrap",
     justifyContent: "center",
     alignItems: "center"
   },
@@ -46,6 +46,7 @@ const getStyles = ({minified=true, narrative=false, width}={}) => ({
   link: {
     padding: minified ? "6px 12px" : "20px 20px",
     textDecoration: "none",
+    whiteSpace: "nowrap",
     cursor: "pointer",
     fontSize: minified ? 12 : 16,
     fontWeight: 400,
@@ -60,7 +61,9 @@ const getStyles = ({minified=true, narrative=false, width}={}) => ({
   narrativeTitle: {
     whiteSpace: "nowrap",
     fontSize: 16,
-    padding: "0px 15px",
+    marginLeft: "auto",
+    padding: "0px 12px",
+    float: "right",
     maxWidth: `${width-90}px`,
     overflow: "hidden",
     textOverflow: "ellipsis"
@@ -100,13 +103,17 @@ const renderViewInteractiveLink = (dispatch, style) => (
 
 const NavBar = ({minified, mobileDisplay, toggleHandler, narrativeTitle, width, dispatch}) => {
   const styles = getStyles({minified, narrative: !!narrativeTitle, width});
-  const links = [
+  let links = [
     renderLink("About", "/about/overview/introduction",  styles.link),
     renderLink("Docs",  "/docs/getting-started/install", styles.link),
     renderLink("Blog",  "/blog",                         styles.link)
   ];
   if (narrativeTitle) {
-    links.push(renderViewInteractiveLink(dispatch, styles.link));
+    if (mobileDisplay) {
+      links = [renderViewInteractiveLink(dispatch, styles.link)];
+    } else {
+      links.push(renderViewInteractiveLink(dispatch, styles.link));
+    }
   }
   return (
     <div id="NavBarContainer" style={styles.mainContainer}>
