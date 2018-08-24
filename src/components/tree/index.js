@@ -4,6 +4,8 @@ import UnconnectedTree from "./tree";
 const Tree = connect((state) => ({
   tree: state.tree,
   treeToo: state.treeToo,
+  dateMinNumeric: state.controls.dateMinNumeric,
+  dateMaxNumeric: state.controls.dateMaxNumeric,
   quickdraw: state.controls.quickdraw,
   colorBy: state.controls.colorBy,
   colorByConfidence: state.controls.colorByConfidence,

@@ -91,5 +91,7 @@ PhyloTree.prototype.updateTipLabels = labels.updateTipLabels;
 /* G R I D */
 PhyloTree.prototype.hideGrid = grid.hideGrid;
 PhyloTree.prototype.addGrid = grid.addGrid;
+PhyloTree.prototype.addTemporalSlice = grid.addTemporalSlice;
+PhyloTree.prototype.removeTemporalSlice = grid.removeTemporalSlice;
 
 export default PhyloTree;

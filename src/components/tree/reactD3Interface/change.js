@@ -8,6 +8,10 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   const oldTreeRedux = mainTree ? oldProps.tree : oldProps.treeToo;
   const newTreeRedux = mainTree ? newProps.tree : newProps.treeToo;
 
+  /* do any properties on the tree object need to be updated?
+  Note that updating properties itself won't trigger any visual changes */
+  phylotree.dateRange = [newProps.dateMinNumeric, newProps.dateMaxNumeric];
+
   /* catch selectedStrain dissapearence seperately to visibility and remove modal */
   if (oldTreeRedux.selectedStrain && !newTreeRedux.selectedStrain) {
     /* TODO change back the tip radius */

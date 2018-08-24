@@ -16,12 +16,13 @@ import { timerStart, timerEnd } from "../../../util/perf";
  * @param {array|null} tipRadii   -- array of tip radius'
  * @return {null}
  */
-export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii) {
+export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange) {
   timerStart("phyloTree render()");
   this.svg = svg;
   this.params = Object.assign(this.params, parameters);
   this.callbacks = callbacks;
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
+  this.dateRange = dateRange;
 
   /* set x, y values & scale them to the screen */
   this.setDistance(distance);
@@ -39,7 +40,10 @@ export const render = function render(svg, layout, distance, parameters, callbac
   });
 
   /* draw functions */
-  if (this.params.showGrid) this.addGrid();
+  if (this.params.showGrid) {
+    this.addGrid();
+    this.addTemporalSlice();
+  }
   this.drawBranches();
   this.drawTips();
   if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
