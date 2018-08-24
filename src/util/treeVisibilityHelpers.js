@@ -28,7 +28,7 @@ const calcBranchThickness = (nodes, visibility, rootIdx) => {
     maxTipCount = 1;
   }
   return nodes.map((d, idx) => (
-    visibility[idx] === "visible" ? freqScale((d.tipCount + 5) / (maxTipCount + 5)) : 1
+    visibility[idx] === "visible" ? freqScale((d.tipCount + 5) / (maxTipCount + 5)) : 0.5
   ));
 };
 
