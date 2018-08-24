@@ -162,7 +162,7 @@ export const drawBranches = function drawBranches() {
         .style("stroke-linecap", "round")
         .style("stroke-width", (d) => d['stroke-width']+"px" || params.branchStrokeWidth)
         .style("fill", "none")
-        .style("cursor", "pointer")
+        .style("cursor", (d) => d.visibility === "visible" ? "pointer" : "default")
         .style("pointer-events", "auto")
         .on("mouseover", this.callbacks.onBranchHover)
         .on("mouseout", this.callbacks.onBranchLeave)
