@@ -23,7 +23,8 @@ export const getDefaultTreeState = () => {
     visibleStateCounts: {},
     totalStateCounts: {},
     availableBranchLabels: [],
-    selectedStrain: undefined
+    selectedStrain: undefined,
+    selectedClade: undefined
   };
 };
 
@@ -54,6 +55,8 @@ const Tree = (state = getDefaultTreeState(), action) => {
         branchThickness: action.branchThickness,
         branchThicknessVersion: action.branchThicknessVersion,
         idxOfInViewRootNode: action.idxOfInViewRootNode,
+        cladeName: action.cladeName,
+        selectedClade: action.cladeName,
         visibleStateCounts: countTraitsAcrossTree(state.nodes, action.stateCountAttrs, action.visibility, true),
         selectedStrain: action.selectedStrain
       };

@@ -80,6 +80,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
       query.s = action.selectedStrain ? action.selectedStrain : undefined;
+      query.clade = action.cladeName ? action.cladeName : undefined;
       break;
     }
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:

@@ -31,7 +31,7 @@ const PhyloTree = function PhyloTree(reduxNodes, debugId) {
       x: 0,
       y: 0,
       terminal: (typeof d.children === "undefined"),
-      inView: true /* each node is visible */
+      inView: d.inView !== undefined ? d.inView : true /* each node is visible, unless set earlier! */
     };
     d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
     return phyloNode;

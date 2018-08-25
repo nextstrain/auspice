@@ -29,7 +29,7 @@ export const onTipClick = function onTipClick(d) {
   const tipSelected = d.that.params.orientation[0] === 1 ?
     {treeIdx: d.n.arrayIdx} :
     {treeTooIdx: d.n.arrayIdx};
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelected}));
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelected, cladeSelected: this.props.tree.selectedClade}));
 };
 
 
@@ -70,9 +70,13 @@ export const onBranchClick = function onBranchClick(d) {
   if (d.visibility !== "visible") return;
   if (this.props.narrativeMode) return;
   const root = [undefined, undefined];
+  let cladeSelected;
+  if (d.n.attr.labels !== undefined && d.n.attr.labels.clade !== undefined) {
+    cladeSelected = d.n.attr.labels.clade;
+  }
   if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
   else root[1] = d.n.arrayIdx;
-  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root}));
+  this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected}));
 };
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
@@ -113,7 +117,7 @@ export const clearSelectedTip = function clearSelectedTip(d) {
   this.setState({selectedTip: null, hovered: null});
   /* restore the tip visibility! */
   this.props.dispatch(updateVisibleTipsAndBranchThicknesses(
-    {tipSelected: {clear: true}}
+    {tipSelected: {clear: true}, cladeSelected: this.props.tree.selectedClade}
   ));
 };
 

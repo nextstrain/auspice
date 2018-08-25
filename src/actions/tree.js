@@ -8,7 +8,7 @@ import { applyToChildren } from "../components/tree/phyloTree/helpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 
 
-const applyInViewNodesToTree = (idx, tree) => {
+export const applyInViewNodesToTree = (idx, tree) => {
   const validIdxRoot = idx !== undefined ? idx : tree.idxOfInViewRootNode;
   if (idx !== tree.idxOfInViewRootNode && tree.nodes[0].shell) {
     /* a bit hacky, should be somewhere else */
@@ -21,7 +21,17 @@ const applyInViewNodesToTree = (idx, tree) => {
     } else {
       applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
     }
+  } else if (idx !== tree.idxOfInViewRootNode) { /* if shell isn't set yet - have set clade in URL */
+    tree.nodes.forEach((d) => {
+      d.inView = false;
+    });
+    if (!tree.nodes[validIdxRoot].hasChildren) {
+      applyToChildren(tree.nodes[validIdxRoot].parent, (d) => {d.inView = true;});
+    } else {
+      applyToChildren(tree.nodes[validIdxRoot], (d) => {d.inView = true;});
+    }
   }
+
   return validIdxRoot;
 };
 
@@ -63,7 +73,7 @@ const processSelectedTip = (d, tree, treeToo) => {
  * @return {null} side effects: a single action
  */
 export const updateVisibleTipsAndBranchThicknesses = (
-  {root = [undefined, undefined], tipSelected = undefined} = {}
+  {root = [undefined, undefined], tipSelected = undefined, cladeSelected = undefined} = {}
 ) => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
@@ -86,6 +96,8 @@ export const updateVisibleTipsAndBranchThicknesses = (
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion,
       idxOfInViewRootNode: rootIdxTree1,
+      cladeName: cladeSelected,
+      selectedClade: cladeSelected,
       stateCountAttrs: Object.keys(controls.filters),
       selectedStrain: tipName
     };
@@ -106,6 +118,19 @@ export const updateVisibleTipsAndBranchThicknesses = (
       dispatchObj.idxOfInViewRootNodeToo = rootIdxTree2;
       /* tip selected is the same as the first tree - the reducer uses that */
     }
+
+    /* I think this fixes bug of not resizing tipradii if in URL then deselected */
+    if (tipSelected) {
+      const newTipRadii = calcTipRadii({tipSelected, colorScale: controls.colorScale, tree: tree});
+      const newTipRadiiVersion = tree.tipRadiiVersion + 1;
+      const dispatchRadii = {
+        type: types.UPDATE_TIP_RADII,
+        data: newTipRadii,
+        version: newTipRadiiVersion
+      };
+      dispatch(dispatchRadii);
+    }
+
     /* D I S P A T C H */
     dispatch(dispatchObj);
     updateEntropyVisibility(dispatch, getState);
