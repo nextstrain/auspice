@@ -7,6 +7,7 @@ import { branchOpacityFunction } from "../../../util/colorHelpers";
 /* Callbacks used by the tips / branches when hovered / selected */
 
 export const onTipHover = function onTipHover(d) {
+  if (d.visibility !== "visible") return;
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
@@ -18,6 +19,7 @@ export const onTipHover = function onTipHover(d) {
 };
 
 export const onTipClick = function onTipClick(d) {
+  if (d.visibility !== "visible") return;
   // console.log("tip click", d)
   this.setState({
     hovered: null,
@@ -32,6 +34,7 @@ export const onTipClick = function onTipClick(d) {
 
 
 export const onBranchHover = function onBranchHover(d) {
+  if (d.visibility !== "visible") return;
   /* emphasize the color of the branch */
   for (const id of ["#branch_S_" + d.n.clade, "#branch_T_" + d.n.clade]) {
     if (this.props.colorByConfidence) {
@@ -64,6 +67,7 @@ export const onBranchHover = function onBranchHover(d) {
 };
 
 export const onBranchClick = function onBranchClick(d) {
+  if (d.visibility !== "visible") return;
   const root = [undefined, undefined];
   if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
   else root[1] = d.n.arrayIdx;

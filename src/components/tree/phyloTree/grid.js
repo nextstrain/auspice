@@ -15,6 +15,9 @@ export const hideGrid = function hideGrid() {
 };
 
 const addSVGGroupsIfNeeded = (groups, svg) => {
+  if (!("temporalWindow" in groups)) {
+    groups.temporalWindow = svg.append("g").attr("id", "temporalWindow");
+  }
   if (!("majorGrid" in groups)) {
     groups.majorGrid = svg.append("g").attr("id", "majorGrid");
   }
@@ -41,8 +44,8 @@ const calculateMajorGridSeperation = (range) => {
  * add a grid to the svg
  * @param {layout}
  */
-export const addGrid = function addGrid(layout) {
-  if (typeof layout==="undefined") {layout=this.layout;} // eslint-disable-line no-param-reassign
+export const addGrid = function addGrid() {
+  const layout = this.layout;
   addSVGGroupsIfNeeded(this.groups, this.svg);
   if (layout==="unrooted") return;
   timerStart("addGrid");
@@ -161,7 +164,6 @@ export const addGrid = function addGrid(layout) {
 
   /* D3 commands to add grid + text to the DOM
   Note that the groups were created the first time this function was called */
-
   // add major grid to svg
   this.groups.majorGrid.selectAll("*").remove();
   this.groups.majorGrid
@@ -214,4 +216,50 @@ export const addGrid = function addGrid(layout) {
 
   this.grid=true;
   timerEnd("addGrid");
+};
+
+
+export const removeTemporalSlice = function removeTemporalSlice() {
+  this.groups.temporalWindow.selectAll("*").remove();
+};
+
+/**
+ * add background grey rectangles to demarcate the temporal slice
+ */
+export const addTemporalSlice = function addTemporalSlice() {
+  this.removeTemporalSlice();
+  if (this.layout !== "rect" || this.distance !== "num_date") return;
+
+  const xWindow = [this.xScale(this.dateRange[0]), this.xScale(this.dateRange[1])];
+  const height = this.yScale.range()[1];
+  const fill = "#EEE"; // this.params.minorGridStroke
+  const minPxThreshold = 30;
+  const rightHandTree = this.params.orientation[0] === -1;
+  const rootXPos = this.xScale(this.nodes[0].x);
+  let totalWidth = rightHandTree ? this.xScale.range()[0] : this.xScale.range()[1];
+  totalWidth += (this.params.margins.left + this.params.margins.right);
+
+  /* the gray region between the root (ish) and the minimum date */
+  if (Math.abs(xWindow[0]-rootXPos) > minPxThreshold) { /* don't render anything less than this num of px */
+    this.groups.temporalWindow.append("rect")
+      .attr("x", rightHandTree ? xWindow[0] : 0)
+      .attr("width", rightHandTree ? totalWidth-xWindow[0]: xWindow[0])
+      .attr("y", 0)
+      .attr("height", height)
+      .attr("fill", fill);
+  }
+
+  /* the gray region between the maximum selected date and the last tip */
+  const startingX = rightHandTree ? this.params.margins.right : xWindow[1];
+  const rectWidth = rightHandTree ?
+    xWindow[1]-this.params.margins.right :
+    totalWidth-this.params.margins.right-xWindow[1];
+  if (rectWidth > minPxThreshold) {
+    this.groups.temporalWindow.append("rect")
+      .attr("x", startingX)
+      .attr("width", rectWidth)
+      .attr("y", 0)
+      .attr("height", height)
+      .attr("fill", fill);
+  }
 };

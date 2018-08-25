@@ -29,7 +29,7 @@ const updateNodesWithNewData = (nodes, newNodeProps) => {
  * Note that only the relevant functions are called on a transition.
  */
 const svgSetters = {
-  "attrs": {
+  attrs: {
     ".tip": {
       r: (d) => d.r,
       cx: (d) => d.xTip,
@@ -44,19 +44,20 @@ const svgSetters = {
       d: (d) => d.confLine
     }
   },
-  "styles": {
+  styles: {
     ".tip": {
-      "fill": (d) => d.fill,
-      "stroke": (d) => d.tipStroke,
-      "visibility": (d) => d["visibility"]
+      fill: (d) => d.fill,
+      stroke: (d) => d.tipStroke,
+      visibility: (d) => d["visibility"]
     },
     ".conf": {
-      "stroke": (d) => d.branchStroke,
+      stroke: (d) => d.branchStroke,
       "stroke-width": calcConfidenceWidth
     },
     ".branch": {
-      "stroke": (d) => d.branchStroke,
-      "stroke-width": (d) => d["stroke-width"] + "px" // style - as per drawBranches()
+      stroke: (d) => d.branchStroke,
+      "stroke-width": (d) => d["stroke-width"] + "px", // style - as per drawBranches()
+      cursor: (d) => d.visibility === "visible" ? "pointer" : "default"
     }
   }
 };
@@ -149,7 +150,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
     this.updateTipLabels();
   }
   if (elemsToUpdate.has('.grid')) {
-    if (this.grid && this.layout !== "unrooted") this.addGrid(this.layout);
+    if (this.grid && this.layout !== "unrooted") this.addGrid();
     else this.hideGrid();
   }
   if (elemsToUpdate.has('.regression')) {
@@ -169,6 +170,11 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
     } else {
       this.removeConfidence(); /* see comment above */
     }
+  }
+
+  /* background temporal time slice */
+  if (extras.timeSliceHasPotentiallyChanged) {
+    this.addTemporalSlice();
   }
 
   /* branch labels */
@@ -196,6 +202,7 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
     this.svg.selectAll(".tip").remove();
     this.drawTips();
     if (this.vaccines) this.drawVaccines();
+    this.addTemporalSlice();
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
     if (elemsToUpdate.has(".branchLabel")) this.drawBranchLabels(this.params.branchLabelKey);
   };
@@ -217,6 +224,7 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
     .remove()
     .on("start", () => inProgress++)
     .on("end", step2);
+  this.removeTemporalSlice();
   if (!transitionTimeFadeOut) timerFlush();
 };
 
@@ -275,7 +283,7 @@ export const change = function change({
     /* check that visibility is not undefined */
     /* in the future we also change the branch visibility (after skeleton merge) */
     elemsToUpdate.add(".tip");
-    svgPropsToUpdate.add("visibility");
+    svgPropsToUpdate.add("visibility").add("cursor");
     nodePropsToModify.visibility = visibility;
   }
   if (changeTipRadii) {
@@ -335,6 +343,7 @@ export const change = function change({
 
   /* Finally, actually change the SVG elements themselves */
   const extras = {removeConfidences, showConfidences, newBranchLabellingKey};
+  extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
   if (useModifySVGInStages) {
     this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000);
   } else {

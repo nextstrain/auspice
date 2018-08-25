@@ -10,7 +10,6 @@ export const renderTree = (that, main, phylotree, props) => {
     console.warn("can't run renderTree (not loaded)");
     return;
   }
-
   /* simply the call to phylotree.render */
   phylotree.render(
     select(ref),
@@ -40,6 +39,7 @@ export const renderTree = (that, main, phylotree, props) => {
     calcBranchStrokeCols(treeState, props.colorByConfidence, props.colorBy),
     treeState.nodeColors,
     treeState.nodeColors.map((col) => rgb(col).brighter([0.65]).toString()),
-    treeState.tipRadii /* might be null */
+    treeState.tipRadii, /* might be null */
+    [props.dateMinNumeric, props.dateMaxNumeric]
   );
 };
