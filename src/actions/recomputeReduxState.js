@@ -493,9 +493,10 @@ export const createStateFromQueryOrJSONs = ({
 
   if (narrativeBlocks) {
     narrative = narrativeBlocks;
-    const n = parseInt(query.n, 10) || 1;
+    const n = parseInt(query.n, 10) || 0;
     controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
     query = {n}; // eslint-disable-line
+    console.log("redux state changed to relfect n of", n)
   } else {
     controls = modifyStateViaURLQuery(controls, query);
   }

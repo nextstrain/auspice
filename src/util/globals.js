@@ -171,3 +171,6 @@ export const months = {
   '11': 'Nov',
   '12': 'Dec'
 };
+
+export const normalNavBarHeight = 50;
+export const narrativeNavBarHeight = 55;

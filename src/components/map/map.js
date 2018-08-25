@@ -41,7 +41,8 @@ import { errorNotification } from "../../actions/notifications";
     mapTriplicate: state.controls.mapTriplicate,
     dateMinNumeric: state.controls.dateMinNumeric,
     dateMaxNumeric: state.controls.dateMaxNumeric,
-    panelLayout: state.controls.panelLayout
+    panelLayout: state.controls.panelLayout,
+    narrativeMode: state.narrative.display
   };
 })
 
@@ -110,6 +111,7 @@ class Map extends React.Component {
     this.maybeInvalidateMapSize(this.props);
   }
   componentWillReceiveProps(nextProps) {
+    this.modulateInterfaceForNarrativeMode(nextProps);
     this.maybeChangeSize(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
@@ -154,6 +156,18 @@ class Map extends React.Component {
     ) {
       const d3DOMNode = select("#map svg").attr("id", "d3DemesTransmissions");
       this.setState({d3DOMNode});
+    }
+  }
+  modulateInterfaceForNarrativeMode(nextProps) {
+    if (this.props.narrativeMode === nextProps.narrativeMode || !this.state.map) return;
+    if (nextProps.narrativeMode) {
+      L.zoomControlButtons.remove();
+      this.state.map.dragging.disable();
+      this.state.map.doubleClickZoom.disable();
+    } else {
+      L.zoomControlButtons = L.control.zoom({position: "bottomright"}).addTo(this.state.map);
+      this.state.map.dragging.enable();
+      this.state.map.doubleClickZoom.enable();
     }
   }
 
@@ -400,8 +414,9 @@ class Map extends React.Component {
       sleepNote: true,
       // should hovering wake the map? (clicking always will)
       hoverToWake: false,
-      // if mobile, disable single finger dragging
-      dragging: !L.Browser.mobile,
+      // if mobile OR narrative mode, disable single finger dragging
+      dragging: (!L.Browser.mobile) && (!this.props.narrativeMode),
+      doubleClickZoom: !this.props.narrativeMode,
       tap: false
     });
 
@@ -411,12 +426,15 @@ class Map extends React.Component {
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
-    L.control.zoom({position: "bottomright"}).addTo(map);
+    if (!this.props.narrativeMode) {
+      L.zoomControlButtons = L.control.zoom({position: "bottomright"}).addTo(map);
+    }
 
     this.setState({map});
   }
 
   animationButtons() {
+    if (this.props.narrativeMode) return null;
     const buttonBaseStyle = {
       color: "#FFFFFF",
       fontWeight: 400,

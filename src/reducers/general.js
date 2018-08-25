@@ -13,6 +13,7 @@ const general = (state = {
   switch (action.type) {
     case types.PAGE_CHANGE:
       return Object.assign({}, state, {
+        pathname: action.path,
         displayComponent: action.displayComponent,
         errorMessage: action.errorMessage
       });

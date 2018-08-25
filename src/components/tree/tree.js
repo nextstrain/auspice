@@ -165,12 +165,14 @@ class Tree extends React.Component {
           this.renderTreeDiv({width: widthPerTree, height: this.props.height, mainTree: false}) :
           null
         }
-        <button
-          style={{...tabSingle, ...styles.resetTreeButton}}
-          onClick={this.redrawTree}
-        >
-          reset layout
-        </button>
+        {this.props.narrativeMode ? null : (
+          <button
+            style={{...tabSingle, ...styles.resetTreeButton}}
+            onClick={this.redrawTree}
+          >
+            reset layout
+          </button>
+        )}
       </Card>
     );
   }

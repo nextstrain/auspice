@@ -167,7 +167,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
   }
 
-  Object.keys(query).filter((k) => !query[k]).forEach((k) => delete query[k]);
+  Object.keys(query).filter((q) => query[q] === "").forEach((k) => delete query[k]);
   let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/');
   if (search) {search = "?" + search;}
   if (!pathname.startsWith("/")) {pathname = "/" + pathname;}

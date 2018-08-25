@@ -1,11 +1,20 @@
 import queryString from "query-string";
 import * as types from "../actions/types";
 
+const explanationParagraph=`
+  <p class="explanation">
+  Explore the content by scrolling the left hand side (or click on the fingers), and the views into the data will change accordingly.
+  Clicking "exit narrative mode" above will return the usual sidebar controls.
+  </p>
+`;
+
 const narrative = (state = {
   loaded: false,
   blocks: null, /* array of paragraphs (aka blocks) */
   blockIdx: undefined, /* which block is currently "in view" */
-  pathname: undefined  /* the pathname of the _narrative_ */
+  pathname: undefined,  /* the pathname of the _narrative_ */
+  display: false,
+  title: undefined
 }, action) => {
   switch (action.type) {
     case types.DATA_INVALID:
@@ -15,17 +24,20 @@ const narrative = (state = {
       });
     case types.CLEAN_START:
       if (action.narrative) {
+        const blocks = action.narrative;
+        blocks[0].__html = explanationParagraph + blocks[0].__html;
         return {
           loaded: true,
           display: true,
-          blocks: action.narrative,
+          blocks,
+          title: blocks[0].__html.match(/>(.+?)</)[1],
           pathname: window.location.pathname,
-          blockIdx: parseInt(queryString.parse(window.location.search).n, 10) || 1
+          blockIdx: parseInt(queryString.parse(window.location.search).n, 10) || 0
         };
       }
       return state;
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE:
-      if (action.query.n) {
+      if (action.query.hasOwnProperty("n")) { // eslint-disable-line
         return Object.assign({}, state, {blockIdx: action.query.n});
       }
       return state;

@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import { select } from "d3-selection";
 import Card from "../framework/card";
 import { changeColorBy } from "../../actions/colors";
 import { tabGroup, tabGroupMember, tabGroupMemberSelected } from "../../globalStyles";
@@ -66,7 +67,8 @@ const constructEncodedGenotype = (aa, d) => {
     zoomMax: state.controls.zoomMax,
     defaultColorBy: state.controls.defaults.colorBy,
     shouldReRender: false,
-    panelLayout: state.controls.panelLayout
+    panelLayout: state.controls.panelLayout,
+    narrativeMode: state.narrative.display
   };
 })
 
@@ -96,6 +98,7 @@ export class Entropy extends React.Component {
     this.setState({hovered: false});
   }
   onClick(d) {
+    if (this.props.narrativeMode) return;
     const colorBy = constructEncodedGenotype(this.props.mutType === "aa", d);
     analyticsControlsEvent("color-by-genotype");
     this.props.dispatch(changeColorBy(colorBy));
@@ -112,6 +115,7 @@ export class Entropy extends React.Component {
   }
 
   aaNtSwitch(styles) {
+    if (this.props.narrativeMode) return null;
     return (
       <div style={{...tabGroup, ...styles.aaNtSwitch}}>
         <button
@@ -132,6 +136,7 @@ export class Entropy extends React.Component {
     );
   }
   entropyCountSwitch(styles) {
+    if (this.props.narrativeMode) return null;
     return (
       <div style={{...tabGroup, ...styles.entropyCountSwitch}}>
         <button
@@ -164,6 +169,9 @@ export class Entropy extends React.Component {
       }
     );
     chart.render(props);
+    if (props.narrativeMode) {
+      select(this.d3entropy).selectAll(".handle--custom").style("visibility", "hidden");
+    }
     this.setState({chart});
   }
   componentDidMount() {
@@ -243,6 +251,14 @@ export class Entropy extends React.Component {
         this.state.chart.update(updateParams);
       }
       timerEnd("entropy D3 update");
+    }
+    /* perhaps hide the brush due to the narrative */
+    if (this.props.narrativeMode !== nextProps.narrativeMode) {
+      if (nextProps.narrativeMode) {
+        select(this.d3entropy).selectAll(".handle--custom").style("visibility", "hidden");
+      } else {
+        select(this.d3entropy).selectAll(".handle--custom").style("visibility", "visible");
+      }
     }
   }
 

@@ -60,22 +60,11 @@ data_files=(
   "flu_seasonal_yam_na_12y_tree.json" "flu_seasonal_yam_na_12y_meta.json" "flu_seasonal_yam_na_12y_tip-frequencies.json" \
 )
 
-narratives=(
-  "zika.md"\
-  "ebola.md"\
-  "flu_seasonal_h3n2_ha_3y.md"\
-  "mumps_na.md"\
-  "test.md"
-  )
-
 rm -rf data/
 mkdir -p data/
 for i in "${data_files[@]}"
 do
   curl http://data.nextstrain.org/${i} --compressed -o data/${i}
 done
-mkdir -p data/narratives
-for i in "${narratives[@]}"
-do
-  curl https://raw.githubusercontent.com/nextstrain/static/master/narratives/${i} --compressed -o data/narratives/${i}
-done
+
+echo "The local data directory ./data now contains up-to-date datasets from http://data.nextstrain.org"

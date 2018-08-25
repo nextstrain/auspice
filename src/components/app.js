@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { loadJSONs } from "../actions/loadData";
+import { TOGGLE_NARRATIVE } from "../actions/types";
 import SidebarToggle from "./framework/sidebar-toggle";
 import Controls from "./controls/controls";
 import { Frequencies } from "./frequencies";
@@ -9,9 +10,9 @@ import { Entropy } from "./entropy";
 import Info from "./info/info";
 import Tree from "./tree";
 import Map from "./map/map";
-import { controlsHiddenWidth, controlsWidth, controlsPadding } from "../util/globals";
+import { controlsHiddenWidth, controlsWidth, controlsPadding, narrativeNavBarHeight } from "../util/globals";
 import { sidebarColor } from "../globalStyles";
-import NavBar from "./framework/nav-bar";
+import NavBar from "./navBar";
 import Footer from "./framework/footer";
 import DownloadModal from "./download/downloadModal";
 import { analyticsNewPage } from "../util/googleAnalytics";
@@ -74,21 +75,13 @@ const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHe
   );
 };
 
-const Sidebar = ({styles, sidebarOpen, mobileDisplay, narrative, mapOn, toggleHandler}) => {
-  return (
-    <div style={styles}>
-      <NavBar
-        minified
-        sidebarOpen={sidebarOpen}
-        mobileDisplay={mobileDisplay}
-        toggleHandler={toggleHandler}
-      />
-      {narrative ?
-        <Narrative height={styles.height}/> :
-        <Controls mapOn={mapOn}/>
-      }
-    </div>
-  );
+const calculateSidebarWidth = (available, narrativeMode) => {
+  if (narrativeMode) {
+    if (available>1500) return 500;
+    else if (available>1000) return 400;
+    return 310;
+  }
+  return controlsWidth+controlsPadding;
 };
 
 const Overlay = ({styles, mobileDisplay, handler}) => {
@@ -105,6 +98,8 @@ const Overlay = ({styles, mobileDisplay, handler}) => {
   panelsToDisplay: state.controls.panelsToDisplay,
   panelLayout: state.controls.panelLayout,
   displayNarrative: state.narrative.display,
+  narrativeIsLoaded: state.narrative.loaded,
+  narrativeTitle: state.narrative.title,
   browserDimensions: state.browserDimensions.browserDimensions,
   frequenciesLoaded: state.frequencies.loaded
 }))
@@ -128,7 +123,10 @@ class App extends React.Component {
     dispatch: PropTypes.func.isRequired
   }
   componentWillReceiveProps(nextProps) {
-    if (nextProps.treeLoaded && this.state.mql.matches) {
+    if (
+      (nextProps.treeLoaded && this.state.mql.matches) ||
+      (nextProps.displayNarrative && !this.props.displayNarrative)
+    ) {
       this.setState({sidebarOpen: true});
     }
   }
@@ -146,20 +144,11 @@ class App extends React.Component {
     /* D I M E N S I O N S */
     let availableWidth = this.props.browserDimensions.width;
     const availableHeight = this.props.browserDimensions.height;
-
-    let sidebarWidth = 0;
-    if (this.props.displayNarrative) {
-      sidebarWidth = parseInt(0.27 * availableWidth, 10);
-    } else {
-      sidebarWidth = controlsWidth;
-    }
-    sidebarWidth += controlsPadding;
-
+    const sidebarWidth = calculateSidebarWidth(availableWidth, this.props.displayNarrative);
     const visibleSidebarWidth = this.state.sidebarOpen ? sidebarWidth : 0;
     if (!this.state.mobileDisplay) {
       availableWidth -= visibleSidebarWidth;
     }
-
     const mapOn = this.props.panelsToDisplay.indexOf("map") !== -1;
 
     /* S T Y L E S */
@@ -216,14 +205,28 @@ class App extends React.Component {
           mobileDisplay={this.state.mobileDisplay}
           handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
         />
-        <Sidebar
-          styles={sidebarStyles}
-          sidebarOpen={this.state.sidebarOpen}
-          mobileDisplay={this.state.mobileDisplay}
-          narrative={this.props.displayNarrative}
-          mapOn={mapOn}
-          toggleHandler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
-        />
+        <div id="SidebarContainer" style={sidebarStyles}>
+          <NavBar
+            minified
+            dispatch={this.props.dispatch}
+            mobileDisplay={this.state.mobileDisplay}
+            toggleHandler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
+            narrativeTitle={this.props.displayNarrative ? this.props.narrativeTitle : false}
+            width={sidebarWidth}
+          />
+          {this.props.displayNarrative ?
+            (<Narrative
+              height={availableHeight - narrativeNavBarHeight}
+              width={sidebarStyles.width}
+            />) :
+            (<Controls
+              mapOn={mapOn}
+              goBackToNarratives={this.props.narrativeIsLoaded && !this.props.displayNarrative ?
+                () => this.props.dispatch({type: TOGGLE_NARRATIVE, display: true}) :
+                null}
+            />)
+          }
+        </div>
         <Contents
           sidebarOpen={this.state.sidebarOpen}
           styles={contentStyles}
