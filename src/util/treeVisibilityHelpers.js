@@ -133,9 +133,9 @@ const calcVisibility = (tree, controls, dates) => {
       visibility = visibility.map((cv, idx) => (cv && filtered[idx]));
     }
 
-    // TIME FILTERING (internal + terminal nodes)
+    // TIME FILTERING: only show tips that are within the selected temporal window
     const timeFiltered = tree.nodes.map((d) => {
-      return !(d.attr.num_date < dates.dateMinNumeric || d.parent.attr.num_date > dates.dateMaxNumeric);
+      return d.attr.num_date >= dates.dateMinNumeric && d.attr.num_date <= dates.dateMaxNumeric;
     });
     visibility = visibility.map((cv, idx) => (cv && timeFiltered[idx]));
 
