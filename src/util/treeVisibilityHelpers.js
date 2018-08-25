@@ -82,32 +82,18 @@ FILTERS:
 */
 const calcVisibility = (tree, controls, dates) => {
   if (tree.nodes) {
-    /* reset visibility */
-    let visibility = tree.nodes.map(() => true);
-
-    // if we have an analysis slider active, then we must filter on that as well
-    // note that min date for analyis doesnt apply
-    // commented out as analysis slider will probably be removed soon!
-    // if (controls.analysisSlider && controls.analysisSlider.valid) {
-    //   /* extra slider is numerical rounded to 2dp */
-    //   const valid = tree.nodes.map((d) =>
-    //     d.attr[controls.analysisSlider.key] ? Math.round(d.attr[controls.analysisSlider.key] * 100) / 100 <= controls.analysisSlider.value : true
-    //   );
-    //   visibility = visibility.map((cv, idx) => (cv && valid[idx]));
-    // }
-
-    // IN VIEW FILTERING (internal + terminal nodes)
-    /* edge case: this fn may be called before the shell structure of the nodes
-    has been created (i.e. phyloTree's not run yet). In this case, it's
-    safe to assume that everything's in view */
+    /* inView represents nodes that are within the current view window (i.e. not off the screen) */
     let inView;
     try {
       inView = tree.nodes.map((d) => d.shell.inView);
     } catch (e) {
+      /* edge case: this fn may be called before the shell structure of the nodes
+      has been created (i.e. phyloTree's not run yet). In this case, it's
+      safe to assume that everything's in view */
       inView = tree.nodes.map(() => true);
     }
-    /* intersect visibility and inView */
-    visibility = visibility.map((cv, idx) => (cv && inView[idx]));
+    /* create default visibility to mirror inView (i.e. everything inView starts off visible) */
+    let visibility = inView.map((cv) => cv);
 
     // FILTERS
     const filterPairs = [];
