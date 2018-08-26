@@ -1,8 +1,16 @@
+* Narratives -- see [nextstrain.org/docs/visualisation/narratives](https://nextstrain.org/docs/visualisation/narratives) for documentation.
+* Time slicing & non-highlighted branches are now displayed in a cleaner fashion - [PR 638](https://github.com/nextstrain/auspice/pull/638)
+* Selected clades (i.e. the tree has been zoomed) are now part of URL state - [PR 633](https://github.com/nextstrain/auspice/pull/633)
+
 ## version 1.27.1 - 2018/08/24
+* Fixed broken navigation links
+* Entropy zooming bug fixed - [PR 637](https://github.com/nextstrain/auspice/pull/637)
 
 ## version 1.27.0 - 2018/08/20
+* Saved SVGs now include two trees (if displayed) - [PR 630](https://github.com/nextstrain/auspice/pull/630)
 
 ## version 1.26.0 - 2018/08/20
+* Entropy panel zoom changes are now reflected in URL state - [PR 626](https://github.com/nextstrain/auspice/pull/626)
 
 ## version 1.25.2 - 2018/08/17
 
