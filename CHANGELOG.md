@@ -1,3 +1,5 @@
+## version 1.28.0 - 2018/08/25
+
 * Narratives -- see [nextstrain.org/docs/visualisation/narratives](https://nextstrain.org/docs/visualisation/narratives) for documentation.
 * Time slicing & non-highlighted branches are now displayed in a cleaner fashion - [PR 638](https://github.com/nextstrain/auspice/pull/638)
 * Selected clades (i.e. the tree has been zoomed) are now part of URL state - [PR 633](https://github.com/nextstrain/auspice/pull/633)
