@@ -3,8 +3,8 @@ import * as types from "../actions/types";
 
 const explanationParagraph=`
   <p class="explanation">
-  Explore the content by scrolling the left hand side (or click on the fingers), and the views into the data will change accordingly.
-  Clicking "exit narrative mode" above will return the usual sidebar controls.
+  Explore the content by scrolling the left hand side (or click on the arrows), and the data visualizations will change accordingly.
+  Clicking "view interactive data" above will display sidebar controls.
   </p>
 `;
 
