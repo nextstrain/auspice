@@ -406,7 +406,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelect
     oldState.selectedStrain = tipSelected;
   }
   if (cladeSelected) {
-    const cladeSelectedIdx = cladeNameToIdx(oldState.nodes, cladeSelected);
+    const cladeSelectedIdx = cladeSelected === 'root' ? 0 : cladeNameToIdx(oldState.nodes, cladeSelected);
     oldState.selectedClade = cladeSelected;
     newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState); // tipSelectedIdx, oldState);
   }
@@ -525,6 +525,8 @@ export const createStateFromQueryOrJSONs = ({
 
   if (query.clade) {
     tree = modifyTreeStateVisAndBranchThickness(tree, undefined, query.clade, controls);
+  } else { /* if not specifically given in URL, zoom to root */
+    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, 'root', controls);
   }
   tree = modifyTreeStateVisAndBranchThickness(tree, query.s, undefined, controls);
   if (treeToo && treeToo.loaded) {
