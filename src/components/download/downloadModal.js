@@ -7,7 +7,7 @@ import { stopProp } from "../tree/infoPanels/click";
 import { authorString } from "../../util/stringHelpers";
 import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";
-import { getAcknowledgments, footerStyles} from "../framework/footer";
+import { getAcknowledgments} from "../framework/footer";
 import { createSummary } from "../info/info";
 
 const dataUsage = [
@@ -47,10 +47,7 @@ export const publications = {
   colorBy: state.controls.colorBy,
   metadata: state.metadata,
   tree: state.tree,
-  dateMin: state.controls.dateMin,
-  dateMax: state.controls.dateMax,
   nodes: state.tree.nodes,
-  idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
   visibleStateCounts: state.tree.visibleStateCounts,
   filters: state.controls.filters,
   visibility: state.tree.visibility,
@@ -165,7 +162,7 @@ class DownloadModal extends React.Component {
     x.push(`Last updated ${this.props.metadata.updated}`);
     const address = window.location.href.replace(/&/g, '&amp;');
     x.push(`Downloaded from <a href="${address}">${address}</a> on ${new Date().toLocaleString()}`);
-    x.push(this.createSummaryWrapper().join(", "));
+    x.push(this.createSummaryWrapper());
     x.push("");
     x.push(dataUsage[0] + ` A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
     x.push(`Relevant publications:`);
@@ -209,10 +206,7 @@ class DownloadModal extends React.Component {
       this.props.nodes,
       this.props.filters,
       this.props.visibility,
-      this.props.visibleStateCounts,
-      this.props.idxOfInViewRootNode,
-      this.props.dateMin,
-      this.props.dateMax
+      this.props.visibleStateCounts
     );
   }
   render() {
@@ -227,7 +221,6 @@ class DownloadModal extends React.Component {
     panelStyle.lineHeight = 1.4;
 
     const meta = this.props.metadata;
-    const summary = this.createSummaryWrapper();
     return (
       <div style={infoPanelStyles.modalContainer} onClick={this.dismissModal}>
         <div style={panelStyle} onClick={(e) => stopProp(e)}>
@@ -239,9 +232,9 @@ class DownloadModal extends React.Component {
             {meta.title} (last updated {meta.updated})
           </div>
 
-          {summary.map((d, i) =>
-            (i + 1 !== summary.length ? <span key={d}>{`${d}, `}</span> : <span key={d}>{`${d}. `}</span>)
-          )}
+          <div>
+            {this.createSummaryWrapper()}
+          </div>
           <div style={infoPanelStyles.break}/>
           {" A full list of sequence authors is available via the TSV files below."}
           <div style={infoPanelStyles.break}/>

@@ -1,6 +1,14 @@
 import { freqScale, NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE } from "./globals";
 import { calcTipCounts } from "./treeCountingHelpers";
 
+export const getVisibleDateRange = (nodes, visibility) => nodes
+  .filter((node, idx) => (visibility[idx] === NODE_VISIBLE && !node.hasChildren))
+  .reduce((acc, node) => {
+    if (node.attr.num_date < acc[0]) return [node.attr.num_date, acc[1]];
+    if (node.attr.num_date > acc[1]) return [acc[0], node.attr.num_date];
+    return acc;
+  }, [100000, -100000]);
+
 export const strainNameToIdx = (nodes, name) => {
   let i;
   for (i = 0; i < nodes.length; i++) {

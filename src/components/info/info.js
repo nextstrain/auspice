@@ -4,6 +4,8 @@ import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import { prettyString } from "../../util/stringHelpers";
+import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
+import { numericToCalendar } from "../../util/dateHelpers";
 import { months, NODE_VISIBLE } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
 
@@ -14,19 +16,26 @@ const plurals = {
 
 const pluralise = (word, n) => {
   if (n === 1) {
-    return word === "authors" ? "author" : word;
+    if (word === "authors") word = "author"; // eslint-disable-line
+  } else {
+    if (word in plurals) word = plurals[word]; // eslint-disable-line
+    if (word.slice(-1).toLowerCase() !== "s") word+="s"; // eslint-disable-line
   }
-  return plurals[word] !== undefined ? plurals[word] : word + 's';
+  word = word.replace(/_/g, " "); // eslint-disable-line
+  return word;
 };
 
-const styliseDateRange = (dateStr) => {
+const styliseDateRange = (date) => {
+  const dateStr = (typeof date === "number") ?
+    numericToCalendar(date) :
+    date;
   const fields = dateStr.split('-');
   // 2012-01-22
-  if (fields.length==3){
+  if (fields.length === 3) {
     return `${months[fields[1]]} ${fields[0]}`;
-  }else{ // other cases like negative numbers
-    return dateStr;
   }
+  // other cases like negative numbers
+  return dateStr;
 };
 
 const getNumSelectedTips = (nodes, visibility) => {
@@ -37,15 +46,40 @@ const getNumSelectedTips = (nodes, visibility) => {
   return count;
 };
 
-export const createSummary = (virus_count, nodes, filters, visibility, visibleStateCounts, idxOfInViewRootNode, dateMin, dateMax) => {
+const arrayToSentence = (arr, {prefix=undefined, suffix=undefined, capatalise=true, fullStop=true}={}) => {
+  let ret;
+  if (!arr.length) return '';
+  if (arr.length === 1) {
+    ret = arr[0];
+  } else {
+    ret = arr.slice(0, -1).join(", ") + " and " + arr[arr.length-1];
+  }
+  if (prefix) ret = prefix + " " + ret;
+  if (suffix) ret += " " + suffix;
+  if (capatalise) ret = ret.charAt(0).toUpperCase();
+  if (fullStop) ret += ".";
+  return ret + " ";
+};
+
+export const createSummary = (virus_count, nodes, filters, visibility, visibleStateCounts) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
-  const summary = [];
-  summary.push(`Showing ${nSelectedSamples} of ${virus_count} genomes`);
+  const sampledDateRange = getVisibleDateRange(nodes, visibility);
+  /* Number of genomes & their date range */
+  let summary = `Showing ${nSelectedSamples} of ${virus_count} genomes`;
+  summary += ` sampled between ${styliseDateRange(sampledDateRange[0])} and ${styliseDateRange(sampledDateRange[1])}`;
+  /* parse filters */
+  const filterTextArr = [];
   Object.keys(filters).forEach((filterName) => {
     const n = Object.keys(visibleStateCounts[filterName]).length;
-    summary.push((`from ${n} ${pluralise(filterName, n)}`));
+    if (!n) return;
+    filterTextArr.push(`${n} ${pluralise(filterName, n)}`);
   });
-  summary.push(`dated ${styliseDateRange(dateMin)} to ${styliseDateRange(dateMax)}`);
+  const filterText = arrayToSentence(filterTextArr, {prefix: "and comprising", capatalise: false});
+  if (filterText.length) {
+    summary += ` ${filterText}`;
+  } else {
+    summary += ". ";
+  }
   return summary;
 };
 
@@ -56,8 +90,6 @@ export const createSummary = (virus_count, nodes, filters, visibility, visibleSt
     animationPlayPauseButton: state.controls.animationPlayPauseButton,
     metadata: state.metadata,
     nodes: state.tree.nodes,
-    idxOfInViewRootNode: state.tree.idxOfInViewRootNode,
-    idxOfInViewRootNodeToo: state.treeToo.idxOfInViewRootNode,
     visibleStateCounts: state.tree.visibleStateCounts,
     totalStateCounts: state.tree.totalStateCounts,
     visibility: state.tree.visibility,
@@ -127,7 +159,6 @@ class Info extends React.Component {
     return this.props.filters.authors.length;
   }
   addFilteredDatesButton(buttons) {
-    console.log("this.props", this.props);
     buttons.push(
       <div key={"timefilter"} style={{display: "inline-block"}}>
         <div
@@ -257,7 +288,7 @@ class Info extends React.Component {
     (2) The active filters: Filtered to [[Metsky et al Zika Virus Evolution And Spread In The Americas (76)]], [[Colombia (28)]].
     */
 
-    const summary = createSummary(this.props.metadata.virus_count, this.props.nodes, this.props.filters, this.props.visibility, this.props.visibleStateCounts, this.props.idxOfInViewRootNode, this.props.dateMin, this.props.dateMax);
+    const summary = createSummary(this.props.metadata.virus_count, this.props.nodes, this.props.filters, this.props.visibility, this.props.visibleStateCounts);
 
     /* part II - the active filters */
     const filters = [];
@@ -278,9 +309,7 @@ class Info extends React.Component {
             {animating ? `Animation in progress. ` : null}
             {this.props.selectedStrain ? this.selectedStrainButton(this.props.selectedStrain) : null}
             {/* part 1 - the summary */}
-            {showExtended ? summary.map((d, i) =>
-              (i + 1 !== summary.length ? <span key={i}>{`${d}, `}</span> : <span key={i}>{`${d}. `}</span>)
-            ) : null}
+            {showExtended ? summary : null}
             {/* part 2 - the filters */}
             {showExtended && filters.length ? (
               <span>
