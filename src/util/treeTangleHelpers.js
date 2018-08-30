@@ -13,8 +13,8 @@ export const constructVisibleTipLookupBetweenTrees = (nodesLeft, nodesRight, vis
     if (
       !nodesLeft[i].hasChildren &&
       rightIdx &&
-      visibilityLeft[i] === "visible" &&
-      visibilityRight[rightIdx] === "visible"
+      visibilityLeft[i] === 2 &&
+      visibilityRight[rightIdx] === 2
     ) {
       lookup.push([i, tree2StrainToIdxMap[nodesLeft[i].strain]]);
     }

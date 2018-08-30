@@ -42,7 +42,7 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   // let debugTipsSeen = 0;
   const debugPivotTotals = new Array(pivotsLen).fill(0);
   data.forEach((d) => {
-    if (visibility[d.idx] === "visible") {
+    if (visibility[d.idx] === 2) {
       // debugTipsSeen++;
       // const colour = tree.nodes[d.idx].attr[colorBy];
       const category = assignCategory(colorScale, categories, nodes[d.idx], colorBy, isGenotype) || unassigned_label;

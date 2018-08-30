@@ -48,7 +48,7 @@ const svgSetters = {
     ".tip": {
       fill: (d) => d.fill,
       stroke: (d) => d.tipStroke,
-      visibility: (d) => d["visibility"]
+      visibility: (d) => d.visibility === 2 ? "visible" : "hidden"
     },
     ".conf": {
       stroke: (d) => d.branchStroke,
@@ -57,7 +57,7 @@ const svgSetters = {
     ".branch": {
       stroke: (d) => d.branchStroke,
       "stroke-width": (d) => d["stroke-width"] + "px", // style - as per drawBranches()
-      cursor: (d) => d.visibility === "visible" ? "pointer" : "default"
+      cursor: (d) => d.visibility === 2 ? "pointer" : "default"
     }
   }
 };

@@ -28,7 +28,7 @@ const calcBranchThickness = (nodes, visibility, rootIdx) => {
     maxTipCount = 1;
   }
   return nodes.map((d, idx) => (
-    visibility[idx] === "visible" ? freqScale((d.tipCount + 5) / (maxTipCount + 5)) : 0.5
+    visibility[idx] === 2 ? freqScale((d.tipCount + 5) / (maxTipCount + 5)) : 0.5
   ));
 };
 
@@ -46,13 +46,13 @@ const makeParentVisible = (visArray, node) => {
  * Create a visibility array to show the path through the tree to the selected tip
  * @param  {array} nodes redux tree nodes
  * @param  {int} tipIdx idx of the selected tip
- * @return {array} visibility array (values of "visible" | "hidden")
+ * @return {array} visibility array (values in {0, 1, 2})
  */
 const identifyPathToTip = (nodes, tipIdx) => {
   const visibility = new Array(nodes.length).fill(false);
   visibility[tipIdx] = true;
   makeParentVisible(visibility, nodes[tipIdx]); /* recursive */
-  return visibility.map((cv) => cv ? "visible" : "hidden");
+  return visibility.map((cv) => cv ? 2 : 0);
 };
 
 
@@ -64,12 +64,15 @@ controls.filters
 use dates NOT controls.dateMin & controls.dateMax
 
 RETURNS:
-visibility: array of "visible" or "hidden"
+visibility: array of integers in {0, 1, 2}
+ - 0: not displayed by map. Potentially displayed by tree as a thin branch.
+ - 1: available for display by the map. Displayed by tree as a thin branch.
+ - 2: Displayed by both the map and the tree.
 
 ROUGH DESCRIPTION OF HOW FILTERING IS APPLIED:
+ - inView filtering (reflects tree zooming): Nodes which are not inView always have visibility=0
  - time filtering is simple - all nodes (internal + terminal) not within (tmin, tmax) are excluded.
- - inView filtering is similar - nodes out of the view cannot possibly be visible
- - filters are a bit more tricky - the visibile tips are calculated, and the parent
+- filters are a bit more tricky - the visibile tips are calculated, and the parent
     branches back to the MRCA are considered visibile. This is then intersected with
     the time & inView visibile stuff
 
@@ -92,10 +95,9 @@ const calcVisibility = (tree, controls, dates) => {
       safe to assume that everything's in view */
       inView = tree.nodes.map(() => true);
     }
-    /* create default visibility to mirror inView (i.e. everything inView starts off visible) */
-    let visibility = inView.map((cv) => cv);
 
     // FILTERS
+    let filtered;
     const filterPairs = [];
     Object.keys(controls.filters).forEach((key) => {
       if (controls.filters[key].length) {
@@ -104,8 +106,8 @@ const calcVisibility = (tree, controls, dates) => {
     });
     if (filterPairs.length) {
       /* find the terminal nodes that were (a) already visibile and (b) match the filters */
-      const filtered = tree.nodes.map((d, idx) => (
-        !d.hasChildren && visibility[idx] && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
+      filtered = tree.nodes.map((d, idx) => (
+        !d.hasChildren && inView[idx] && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
       ));
       const idxsOfFilteredTips = filtered.reduce((a, e, i) => {
         if (e) {a.push(i);}
@@ -115,20 +117,27 @@ const calcVisibility = (tree, controls, dates) => {
       for (let i = 0; i < idxsOfFilteredTips.length; i++) {
         makeParentVisible(filtered, tree.nodes[idxsOfFilteredTips[i]]);
       }
-      /* intersect visibility and filtered */
-      visibility = visibility.map((cv, idx) => (cv && filtered[idx]));
     }
 
-    // TIME FILTERING: only show tips that are within the selected temporal window
-    const timeFiltered = tree.nodes.map((d) => {
-      return d.attr.num_date >= dates.dateMinNumeric && d.attr.num_date <= dates.dateMaxNumeric;
+    /* intersect the various arrays contributing to visibility */
+    const visibility = tree.nodes.map((node, idx) => {
+      if (inView[idx] && (filtered ? filtered[idx] : true)) {
+        const nodeDate = node.attr.num_date;
+        /* is the actual node date (the "end" of the branch) in the time slice? */
+        if (nodeDate >= dates.dateMinNumeric && nodeDate <= dates.dateMaxNumeric) {
+          return 2;
+        }
+        /* is any part of the (parent date -> node date) in the time slice? */
+        if (!(nodeDate < dates.dateMinNumeric || node.parent.attr.num_date > dates.dateMaxNumeric)) {
+          return 1;
+        }
+      }
+      return 0;
     });
-    visibility = visibility.map((cv, idx) => (cv && timeFiltered[idx]));
-
-    /* return array of "visible" or "hidden" values */
-    return visibility.map((cv) => cv ? "visible" : "hidden");
+    return visibility;
   }
-  return "visible";
+  console.error("calcVisibility ran without tree.nodes");
+  return 2;
 };
 
 

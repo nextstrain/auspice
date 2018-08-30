@@ -22,7 +22,7 @@ export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) =
         return;
       }
 
-      if (visibility && visibility[node.arrayIdx] !== "visible") {
+      if (visibility && visibility[node.arrayIdx] !== 2) {
         return;
       }
 
@@ -45,6 +45,6 @@ export const calcTipCounts = (node, visibility) => {
       node.tipCount += node.children[i].tipCount;
     }
   } else {
-    node.tipCount = visibility[node.arrayIdx] === "visible" ? 1 : 0;
+    node.tipCount = visibility[node.arrayIdx] === 2 ? 1 : 0;
   }
 };

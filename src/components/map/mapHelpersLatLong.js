@@ -61,7 +61,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   // second pass to fill vectors
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
-    if (!n.children && visibility[i] === "visible") {
+    if (!n.children && visibility[i] !== 0) {
       // if tip and visible, push
       if (n.attr[geoResolution]) { // check for undefined
         demeMap[n.attr[geoResolution]].push(nodeColors[i]);
@@ -202,7 +202,7 @@ const maybeConstructTransmissionEvent = (
       originNumDate: node.attr["num_date"],
       destinationNumDate: child.attr["num_date"],
       color: nodeColors[node.arrayIdx],
-      visible: visibility[child.arrayIdx] === "visible" ? "visible" : "hidden" // transmission visible if child is visible
+      visible: visibility[child.arrayIdx] !== 0 ? "visible" : "hidden" // transmission visible if child is visible
     };
   }
   return transmission;
@@ -370,7 +370,7 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
   // second pass to fill vectors
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
-    if (!n.children && visibility[i] === "visible") {
+    if (!n.children && visibility[i] !== 0) {
       // if tip and visible, push
       if (n.attr[geoResolution]) { // check for undefined
         demeMap[n.attr[geoResolution]].push(nodeColors[i]);
@@ -403,7 +403,7 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
           // this is a transmission event from n to child
           const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
           const col = nodeColors[node.arrayIdx];
-          const vis = visibility[child.arrayIdx] === "visible" ? "visible" : "hidden"; // transmission visible if child is visible
+          const vis = visibility[child.arrayIdx] !== 0 ? "visible" : "hidden"; // transmission visible if child is visible
 
           // update transmissionData via index lookup
           try {

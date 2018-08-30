@@ -32,7 +32,7 @@ const styliseDateRange = (dateStr) => {
 const getNumSelectedTips = (nodes, visibility) => {
   let count = 0;
   nodes.forEach((d, idx) => {
-    if (!d.hasChildren && visibility[idx] === "visible") count += 1;
+    if (!d.hasChildren && visibility[idx] === 2) count += 1;
   });
   return count;
 };

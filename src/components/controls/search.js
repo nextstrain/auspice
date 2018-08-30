@@ -81,7 +81,7 @@ class SearchStrains extends React.Component {
     /* this tells the serch box which strains are visible
     and therefore are eligible to be searched */
     this.state.awesomplete.list = this.props.nodes
-      .filter((n) => !n.hasChildren && this.props.visibility[n.arrayIdx] === "visible")
+      .filter((n) => !n.hasChildren && this.props.visibility[n.arrayIdx] === 2)
       .map((n) => n.strain);
     this.state.awesomplete.evaluate();
   }
