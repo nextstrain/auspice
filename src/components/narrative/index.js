@@ -143,10 +143,10 @@ class Narrative extends React.Component {
           END OF NARRATIVE
         </h3>
         <div style={{...linkStyles, textAlign: "center"}} onClick={() => this.reactPageScroller.goToPage(0)}>
-          Click here to Scroll back to top
+          Scroll back to the beginning
         </div>
         <div style={{...linkStyles, textAlign: "center", marginTop: "10px"}} onClick={this.exitNarrativeMode}>
-          Click here to Exit narrative mode
+          Leave the narrative & explore the data yourself
         </div>
       </div>
     ));

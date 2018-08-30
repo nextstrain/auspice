@@ -20,13 +20,14 @@ import filesDropped from "../actions/filesDropped";
 import Narrative from "./narrative";
 import AnimationController from "./framework/animationController";
 import { calcUsableWidth, computeResponsive } from "../util/computeResponsive";
+import { renderNarrativeToggle } from "./narrative/renderNarrativeToggle";
 
 const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
 /* <Contents> contains the header, tree, map, footer components etc.
  * here is where the panel sizes are decided, as well as which components are displayed.
  */
-const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHeight, panels, grid, narrative, frequenciesLoaded}) => {
+const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels, grid, narrativeIsLoaded, narrativeIsDisplayed, frequenciesLoaded, dispatch}) => {
   if (showSpinner) {
     return (<img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${availableHeight / 2 - 100}px`}}/>);
   }
@@ -36,7 +37,7 @@ const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHe
   let bigWidthFraction = grid ? 0.5 : 1;
   let chartHeightFraction = 0.36;
   let bigHeightFraction = grid ? 0.64 : 0.88;
-  if (narrative) {
+  if (narrativeIsDisplayed) {
     /* heights */
     const numThinPanels = true + show("entropy") + show("frequencies") - 1;
     if (numThinPanels === 0) {
@@ -65,12 +66,13 @@ const Contents = ({sidebarOpen, showSpinner, styles, availableWidth, availableHe
   /* TODO */
   return (
     <div style={styles}>
-      {narrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
+      {narrativeIsLoaded ? renderNarrativeToggle(dispatch, narrativeIsDisplayed) : null}
+      {narrativeIsDisplayed ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
       {show("tree") ? <Tree width={big.width} height={big.height} /> : null}
       {show("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
       {show("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
       {show("frequencies") && frequenciesLoaded ? <Frequencies width={chart.width} height={chart.height} /> : null}
-      {narrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
+      {narrativeIsDisplayed ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
     </div>
   );
 };
@@ -208,34 +210,29 @@ class App extends React.Component {
         <div id="SidebarContainer" style={sidebarStyles}>
           <NavBar
             minified
-            dispatch={this.props.dispatch}
             mobileDisplay={this.state.mobileDisplay}
             toggleHandler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
             narrativeTitle={this.props.displayNarrative ? this.props.narrativeTitle : false}
             width={sidebarWidth}
           />
           {this.props.displayNarrative ?
-            (<Narrative
+            <Narrative
               height={availableHeight - narrativeNavBarHeight}
               width={sidebarStyles.width}
-            />) :
-            (<Controls
-              mapOn={mapOn}
-              goBackToNarratives={this.props.narrativeIsLoaded && !this.props.displayNarrative ?
-                () => this.props.dispatch({type: TOGGLE_NARRATIVE, display: true}) :
-                null}
-            />)
+            /> :
+            <Controls mapOn={mapOn}/>
           }
         </div>
         <Contents
-          sidebarOpen={this.state.sidebarOpen}
           styles={contentStyles}
           showSpinner={!this.props.treeLoaded || !this.props.metadataLoaded}
           availableWidth={availableWidth}
           availableHeight={availableHeight}
           panels={this.props.panelsToDisplay}
           grid={this.props.panelLayout === "grid"}
-          narrative={this.props.displayNarrative}
+          narrativeIsLoaded={this.props.narrativeIsLoaded}
+          narrativeIsDisplayed={this.props.displayNarrative}
+          dispatch={this.props.dispatch}
           frequenciesLoaded={this.props.frequenciesLoaded}
         />
         <Overlay
