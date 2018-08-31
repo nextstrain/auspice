@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import Awesomplete from 'awesomplete'; /* https://leaverou.github.io/awesomplete/ */
 import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/tree";
 import { dataFont, darkGrey } from "../../globalStyles";
+import { NODE_VISIBLE } from "../../util/globals";
 import { SelectLabel } from "../framework/select-label";
 import "../../css/awesomplete.css";
 
@@ -81,7 +82,7 @@ class SearchStrains extends React.Component {
     /* this tells the serch box which strains are visible
     and therefore are eligible to be searched */
     this.state.awesomplete.list = this.props.nodes
-      .filter((n) => !n.hasChildren && this.props.visibility[n.arrayIdx] === 2)
+      .filter((n) => !n.hasChildren && this.props.visibility[n.arrayIdx] === NODE_VISIBLE)
       .map((n) => n.strain);
     this.state.awesomplete.evaluate();
   }

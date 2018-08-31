@@ -1,4 +1,4 @@
-import { freqScale } from "./globals";
+import { freqScale, NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE } from "./globals";
 import { calcTipCounts } from "./treeCountingHelpers";
 
 export const strainNameToIdx = (nodes, name) => {
@@ -125,21 +125,20 @@ const calcVisibility = (tree, controls, dates) => {
         const nodeDate = node.attr.num_date;
         /* is the actual node date (the "end" of the branch) in the time slice? */
         if (nodeDate >= dates.dateMinNumeric && nodeDate <= dates.dateMaxNumeric) {
-          return 2;
+          return NODE_VISIBLE;
         }
         /* is any part of the (parent date -> node date) in the time slice? */
         if (!(nodeDate < dates.dateMinNumeric || node.parent.attr.num_date > dates.dateMaxNumeric)) {
-          return 1;
+          return NODE_VISIBLE_TO_MAP_ONLY;
         }
       }
-      return 0;
+      return NODE_NOT_VISIBLE;
     });
     return visibility;
   }
   console.error("calcVisibility ran without tree.nodes");
-  return 2;
+  return NODE_VISIBLE;
 };
-
 
 export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
   const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);

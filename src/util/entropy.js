@@ -1,4 +1,4 @@
-import { genotypeColors } from "./globals";
+import { genotypeColors, NODE_VISIBLE } from "./globals";
 
 const intersectGenes = function intersectGenes(geneMap, pos) {
   for (const gene of Object.keys(geneMap)) {
@@ -15,7 +15,7 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
     Object.keys(geneMap).forEach((n) => {sparse[n] = {};});
   }
   nodes.forEach((n) => {
-    if (visibility[n.arrayIdx] !== 2) {return;}
+    if (visibility[n.arrayIdx] !== NODE_VISIBLE) {return;}
     if (isAA) {
       if (n.aa_muts) {
         for (const prot in n.aa_muts) { // eslint-disable-line
@@ -126,7 +126,7 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
         });
         recurse(child, newState);
       }
-    } else if (visibility[node.arrayIdx] === 2) {
+    } else if (visibility[node.arrayIdx] === NODE_VISIBLE) {
       visibleTips++;
       for (const prot of arrayOfProts) {
         for (const pos of Object.keys(state[prot])) {
@@ -193,7 +193,7 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
 /**
 * traverse the tree and compile the entropy data for the visibile branches
 * @param {Array} nodes - list of nodes
-* @param {Array} visibility - 1-1 correspondence with nodes. values: {0, 1, 2}
+* @param {Array} visibility - 1-1 correspondence with nodes.
 * @param {String} mutType - amino acid | nucleotide mutations - "aa" | "nuc"
 * @param {obj} geneMap used to NT fill colours. This should be imroved.
 * @param {bool} showCounts show counts or entropy values?

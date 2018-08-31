@@ -2,11 +2,12 @@ import { rgb } from "d3-color";
 import { interpolateRgb } from "d3-interpolate";
 import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
 import { branchOpacityFunction } from "../../../util/colorHelpers";
+import { NODE_VISIBLE } from "../../../util/globals";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
 export const onTipHover = function onTipHover(d) {
-  if (d.visibility !== 2) return;
+  if (d.visibility !== NODE_VISIBLE) return;
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
@@ -18,7 +19,7 @@ export const onTipHover = function onTipHover(d) {
 };
 
 export const onTipClick = function onTipClick(d) {
-  if (d.visibility !== 2) return;
+  if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
   // console.log("tip click", d)
   this.setState({
@@ -34,7 +35,7 @@ export const onTipClick = function onTipClick(d) {
 
 
 export const onBranchHover = function onBranchHover(d) {
-  if (d.visibility !== 2) return;
+  if (d.visibility !== NODE_VISIBLE) return;
   /* emphasize the color of the branch */
   for (const id of ["#branch_S_" + d.n.clade, "#branch_T_" + d.n.clade]) {
     if (this.props.colorByConfidence) {
@@ -67,7 +68,7 @@ export const onBranchHover = function onBranchHover(d) {
 };
 
 export const onBranchClick = function onBranchClick(d) {
-  if (d.visibility !== 2) return;
+  if (d.visibility !== NODE_VISIBLE) return;
   if (this.props.narrativeMode) return;
   const root = [undefined, undefined];
   if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;

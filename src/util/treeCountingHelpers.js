@@ -1,3 +1,5 @@
+import { NODE_VISIBLE } from "./globals";
+
 /**
 * traverse the tree to get state counts for supplied traits
 * @param {Array} nodes - list of nodes
@@ -22,7 +24,7 @@ export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) =
         return;
       }
 
-      if (visibility && visibility[node.arrayIdx] !== 2) {
+      if (visibility && visibility[node.arrayIdx] !== NODE_VISIBLE) {
         return;
       }
 
@@ -45,6 +47,6 @@ export const calcTipCounts = (node, visibility) => {
       node.tipCount += node.children[i].tipCount;
     }
   } else {
-    node.tipCount = visibility[node.arrayIdx] === 2 ? 1 : 0;
+    node.tipCount = visibility[node.arrayIdx] === NODE_VISIBLE ? 1 : 0;
   }
 };

@@ -4,7 +4,7 @@ import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import { prettyString } from "../../util/stringHelpers";
-import { months } from "../../util/globals";
+import { months, NODE_VISIBLE } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
 
 const plurals = {
@@ -32,7 +32,7 @@ const styliseDateRange = (dateStr) => {
 const getNumSelectedTips = (nodes, visibility) => {
   let count = 0;
   nodes.forEach((d, idx) => {
-    if (!d.hasChildren && visibility[idx] === 2) count += 1;
+    if (!d.hasChildren && visibility[idx] === NODE_VISIBLE) count += 1;
   });
   return count;
 };

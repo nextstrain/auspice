@@ -4,6 +4,8 @@ import _minBy from "lodash/minBy";
 import { interpolateNumber } from "d3-interpolate";
 import { averageColors } from "../../util/colorHelpers";
 import { computeMidpoint, Bezier } from "./transmissionBezier";
+import { NODE_NOT_VISIBLE } from "../../util/globals";
+
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -61,7 +63,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   // second pass to fill vectors
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
-    if (!n.children && visibility[i] !== 0) {
+    if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
       // if tip and visible, push
       if (n.attr[geoResolution]) { // check for undefined
         demeMap[n.attr[geoResolution]].push(nodeColors[i]);
@@ -202,7 +204,7 @@ const maybeConstructTransmissionEvent = (
       originNumDate: node.attr["num_date"],
       destinationNumDate: child.attr["num_date"],
       color: nodeColors[node.arrayIdx],
-      visible: visibility[child.arrayIdx] !== 0 ? "visible" : "hidden" // transmission visible if child is visible
+      visible: visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden" // transmission visible if child is visible
     };
   }
   return transmission;
@@ -370,7 +372,7 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
   // second pass to fill vectors
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
-    if (!n.children && visibility[i] !== 0) {
+    if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
       // if tip and visible, push
       if (n.attr[geoResolution]) { // check for undefined
         demeMap[n.attr[geoResolution]].push(nodeColors[i]);
@@ -403,7 +405,7 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
           // this is a transmission event from n to child
           const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
           const col = nodeColors[node.arrayIdx];
-          const vis = visibility[child.arrayIdx] !== 0 ? "visible" : "hidden"; // transmission visible if child is visible
+          const vis = visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden"; // transmission visible if child is visible
 
           // update transmissionData via index lookup
           try {
