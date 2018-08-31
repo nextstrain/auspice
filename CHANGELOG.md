@@ -1,5 +1,11 @@
-## version 1.28.0 - 2018/08/25
+* The visibility of nodes on the tree now more accurately reflects the selected date range - [PR 644](https://github.com/nextstrain/auspice/pull/644)
+* Info text is easier to read & the date range reflects the genomes in view - [PR 639](https://github.com/nextstrain/auspice/pull/639)
 
+### Narrative improvements
+* Toggle between narrative & interactive mode is much clearer - [PR 648](https://github.com/nextstrain/auspice/pull/648)
+* URL queries with no clade set zoom to the entire tree - [PR 644](https://github.com/nextstrain/auspice/pull/644)
+
+## version 1.28.0 - 2018/08/25
 * Narratives -- see [nextstrain.org/docs/visualisation/narratives](https://nextstrain.org/docs/visualisation/narratives) for documentation.
 * Time slicing & non-highlighted branches are now displayed in a cleaner fashion - [PR 638](https://github.com/nextstrain/auspice/pull/638)
 * Selected clades (i.e. the tree has been zoomed) are now part of URL state - [PR 633](https://github.com/nextstrain/auspice/pull/633)
