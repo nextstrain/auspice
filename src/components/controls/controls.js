@@ -13,10 +13,9 @@ import MapAnimationControls from "./map-animation";
 import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
-import { materialButton } from "../../globalStyles";
 
 
-const Controls = ({mapOn, goBackToNarratives}) => (
+const Controls = ({mapOn}) => (
   <div
     style={{
       display: "flex",
@@ -32,12 +31,6 @@ const Controls = ({mapOn, goBackToNarratives}) => (
       padding: "0px 20px 20px 20px"
     }}
   >
-
-    {goBackToNarratives ? (
-      <button style={{...materialButton, textAlign: "left"}} onClick={goBackToNarratives}>
-        {"Return to Narrative"}
-      </button>
-    ) : null}
 
     <Header text="Dataset"/>
     <ChooseDataset/>

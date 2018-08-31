@@ -3,7 +3,6 @@ import React from "react";
 import { normalNavBarHeight, narrativeNavBarHeight, titleColors } from "../../util/globals";
 import { darkGrey } from "../../globalStyles";
 import SidebarChevron from "../framework/sidebar-chevron";
-import { TOGGLE_NARRATIVE } from "../../actions/types";
 
 const logoPNG = require("../../images/nextstrain-logo-small.png");
 
@@ -90,31 +89,8 @@ const renderNarrativeTitle = (text, style) => (
   </div>
 );
 
-const renderViewInteractiveLink = (dispatch, style) => (
-  <div
-    key="viewinteractivedata"
-    style={style}
-    onClick={() => dispatch({type: TOGGLE_NARRATIVE, display: false})}
-  >
-    View interactive data
-  </div>
-);
-
-
-const NavBar = ({minified, mobileDisplay, toggleHandler, narrativeTitle, width, dispatch}) => {
+const NavBar = ({minified, mobileDisplay, toggleHandler, narrativeTitle, width}) => {
   const styles = getStyles({minified, narrative: !!narrativeTitle, width});
-  let links = [
-    renderLink("About", "/about",   styles.link),
-    renderLink("Docs",  "/docs",    styles.link),
-    renderLink("Blog",  "/blog",    styles.link)
-  ];
-  if (narrativeTitle) {
-    if (mobileDisplay) {
-      links = [renderViewInteractiveLink(dispatch, styles.link)];
-    } else {
-      links.push(renderViewInteractiveLink(dispatch, styles.link));
-    }
-  }
   return (
     <div id="NavBarContainer" style={styles.mainContainer}>
       <div style={styles.flexColumns}>
@@ -122,10 +98,13 @@ const NavBar = ({minified, mobileDisplay, toggleHandler, narrativeTitle, width, 
           <img alt="splashPage" width="40px" src={logoPNG}/>
         </a>
         {minified ? null : renderNextstrainTitle(styles.title)}
-        <div id="spacer" style={{flex: 5}}/>
+        <div style={{flex: 5}}/>
         <div style={styles.flexRows}>
           <div style={styles.flexColumns}>
-            {links}
+            <div style={{flex: 5}}/>
+            {renderLink("About", "/about",   styles.link)}
+            {renderLink("Docs",  "/docs",    styles.link)}
+            {renderLink("Blog",  "/blog",    styles.link)}
           </div>
           {narrativeTitle ? renderNarrativeTitle(narrativeTitle, styles.narrativeTitle) : null}
         </div>
