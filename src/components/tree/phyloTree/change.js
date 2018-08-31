@@ -2,6 +2,7 @@ import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
 import { applyToChildren } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
+import { NODE_VISIBLE } from "../../../util/globals";
 
 /* loop through the nodes and update each provided prop with the new value
  * additionally, set d.update -> whether or not the node props changed
@@ -48,7 +49,7 @@ const svgSetters = {
     ".tip": {
       fill: (d) => d.fill,
       stroke: (d) => d.tipStroke,
-      visibility: (d) => d["visibility"]
+      visibility: (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden"
     },
     ".conf": {
       stroke: (d) => d.branchStroke,
@@ -57,7 +58,7 @@ const svgSetters = {
     ".branch": {
       stroke: (d) => d.branchStroke,
       "stroke-width": (d) => d["stroke-width"] + "px", // style - as per drawBranches()
-      cursor: (d) => d.visibility === "visible" ? "pointer" : "default"
+      cursor: (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default"
     }
   }
 };

@@ -1,3 +1,4 @@
+import { NODE_VISIBLE } from "./globals";
 
 export const constructVisibleTipLookupBetweenTrees = (nodesLeft, nodesRight, visibilityLeft, visibilityRight) => {
   const tree2StrainToIdxMap = {};
@@ -13,8 +14,8 @@ export const constructVisibleTipLookupBetweenTrees = (nodesLeft, nodesRight, vis
     if (
       !nodesLeft[i].hasChildren &&
       rightIdx &&
-      visibilityLeft[i] === "visible" &&
-      visibilityRight[rightIdx] === "visible"
+      visibilityLeft[i] === NODE_VISIBLE &&
+      visibilityRight[rightIdx] === NODE_VISIBLE
     ) {
       lookup.push([i, tree2StrainToIdxMap[nodesLeft[i].strain]]);
     }

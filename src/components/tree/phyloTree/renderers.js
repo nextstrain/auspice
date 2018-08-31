@@ -1,4 +1,5 @@
 import { timerStart, timerEnd } from "../../../util/perf";
+import { NODE_VISIBLE } from "../../../util/globals";
 
 /**
  * @param {d3 selection} svg      -- the svg into which the tree is drawn
@@ -6,8 +7,8 @@ import { timerStart, timerEnd } from "../../../util/perf";
  * @param {string} distance       -- the property used as branch length, e.g. div or num_date
  * @param {object} parameters     -- an object that contains options that will be added to this.params
  * @param {object} callbacks      -- an object with call back function defining mouse behavior
- * @param {array} branchThickness -- array of branch thicknesses (same shape as tree nodes)
- * @param {array} visibility      -- array of "visible" or "hidden" (same shape as tree nodes)
+ * @param {array} branchThickness -- array of branch thicknesses (same ordering as tree nodes)
+ * @param {array} visibility      -- array of visibility of nodes(same ordering as tree nodes)
  * @param {bool} drawConfidence   -- should confidence intervals be drawn?
  * @param {bool} vaccines         -- should vaccine crosses (and dotted lines if applicable) be drawn?
  * @param {array} branchStroke    -- branch stroke colour for each node (set onto each node)
@@ -110,7 +111,7 @@ export const drawTips = function drawTips() {
         .on("mouseout", this.callbacks.onTipLeave)
         .on("click", this.callbacks.onTipClick)
         .style("pointer-events", "auto")
-        .style("visibility", (d) => d["visibility"])
+        .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden")
         .style("fill", (d) => d.fill || params.tipFill)
         .style("stroke", (d) => d.tipStroke || params.tipStroke)
         .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
@@ -166,7 +167,7 @@ export const drawBranches = function drawBranches() {
         .style("stroke-linecap", "round")
         .style("stroke-width", (d) => d['stroke-width']+"px" || params.branchStrokeWidth)
         .style("fill", "none")
-        .style("cursor", (d) => d.visibility === "visible" ? "pointer" : "default")
+        .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
         .style("pointer-events", "auto")
         .on("mouseover", this.callbacks.onBranchHover)
         .on("mouseout", this.callbacks.onBranchLeave)

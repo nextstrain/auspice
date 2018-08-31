@@ -174,3 +174,7 @@ export const months = {
 
 export const normalNavBarHeight = 50;
 export const narrativeNavBarHeight = 55;
+
+export const NODE_NOT_VISIBLE = 0;
+export const NODE_VISIBLE_TO_MAP_ONLY = 1;
+export const NODE_VISIBLE = 2;
