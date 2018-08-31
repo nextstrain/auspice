@@ -1,3 +1,5 @@
+## version 1.29.0 - 2018/08/31
+
 * The visibility of nodes on the tree now more accurately reflects the selected date range - [PR 644](https://github.com/nextstrain/auspice/pull/644)
 * Info text is easier to read & the date range reflects the genomes in view - [PR 639](https://github.com/nextstrain/auspice/pull/639)
 
