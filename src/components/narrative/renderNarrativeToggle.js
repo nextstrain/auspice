@@ -11,8 +11,8 @@ export const renderNarrativeToggle = (dispatch, narrativeIsDisplayed) => {
         fontSize: 14,
         backgroundColor: "inherit",
         zIndex: 100,
-        position: "absolute",
-        right: 20,
+        position: "fixed",
+        right: 5,
         top: -1,
         cursor: "pointer",
         color: darkGrey
