@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /* eslint no-console: off */
 const path = require("path");
 const express = require("express");

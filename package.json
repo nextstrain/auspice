@@ -9,6 +9,9 @@
     "node": "9.6.x",
     "npm": "5.6.x"
   },
+  "bin": {
+    "auspice": "./server.js"
+  },
   "scripts": {
     "postinstall": "npm run create-data-dir",
     "server": "node server.js",
