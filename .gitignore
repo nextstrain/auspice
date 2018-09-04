@@ -13,3 +13,4 @@ s3/
 ### npm ###
 node_modules/
 npm-debug.log
+*tgz

@@ -1,0 +1,16 @@
+### App specific ###
+big_flu
+/data/
+/releases/
+/static/
+s3/
+/local_narratives/
+
+src/*
+!src/server/*
+
+### OSX ###
+.DS_Store
+
+### npm ###
+npm-debug.log

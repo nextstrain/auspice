@@ -33,7 +33,7 @@ if (devServer) {
   }));
   app.use(webpackHotMiddleware(compiler));
 } else {
-  app.use("/dist", expressStaticGzip("dist"));
+  app.use("/dist", expressStaticGzip(path.resolve(__dirname, "dist")));
   app.use(express.static(path.resolve(__dirname, "dist")));
 }
 
