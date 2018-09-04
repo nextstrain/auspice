@@ -53,9 +53,8 @@ app.get("*", (req, res) => {
 const server = app.listen(app.get('port'), () => {
   console.log("-----------------------------------");
   console.log("Auspice server now running at http://localhost:" + server.address().port);
-  console.log("-----------------------------------");
-  console.log(devServer ? "Serving dev bundle with hot-reloading enabled" : "Serving compiled bundle from /dist");
-  console.log(`Local datasets sourced from ${global.LOCAL_DATA_PATH} can be accessed via "/local/..." URLs`);
-  console.log(`Local narratives sourced from ${global.LOCAL_NARRATIVES_PATH} can be accessed via "/local/narratives/..." URLs`);
+  if (devServer) console.log(`*** DEVELOPMENT MODE ***`);
+  console.log(`Local datasets at http://localhost:${server.address().port}/local are sourced from ${global.LOCAL_DATA_PATH}`);
+  console.log(`Local narratives at http://localhost:${server.address().port}/local/narratives are sourced from ${global.LOCAL_NARRATIVES_PATH}`);
   console.log("-----------------------------------\n\n");
 });
