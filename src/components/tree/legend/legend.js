@@ -52,12 +52,20 @@ class Legend extends React.Component {
     return Math.ceil(nItems / 2) *
       (legendRectSize + legendSpacing) + legendSpacing + titlePadding || 100;
   }
+
+  getSVGWidth() {
+    if (this.state.legendVisible) {
+      return 290;
+    }
+    return this.getTitleWidth() + 20;
+  }
+
   getTransformationForLegendItem(i) {
     const count = this.props.colorScale.legendValues.length;
     const stack = Math.ceil(count / 2);
     const fromRight = Math.floor(i / stack);
     const fromTop = (i % stack);
-    const horz = fromRight * 145;
+    const horz = fromRight * 145 + 10;
     const vert = fromTop * (legendRectSize + legendSpacing);
     return "translate(" + horz + "," + vert + ")";
   }
@@ -73,7 +81,7 @@ class Legend extends React.Component {
       "" : this.props.colorOptions[this.props.colorBy].legendTitle;
   }
   getTitleWidth() {
-    return 10 + 5.3 * this.getTitleString().length;
+    return 15 + 5.3 * this.getTitleString().length;
   }
   toggleLegend() {
     const newState = !this.state.legendVisible;
@@ -89,7 +97,7 @@ class Legend extends React.Component {
       <g id="Title">
         <rect width={this.getTitleWidth()} height="12" fill="rgba(255,255,255,.85)"/>
         <text
-          x={0}
+          x={5}
           y={10}
           style={{
             fontSize: 12,
@@ -183,7 +191,7 @@ class Legend extends React.Component {
     //   }}>
     return (
       <g id="ItemsContainer">
-        <rect width="280" height={this.getSVGHeight()} fill="rgba(255,255,255,.85)"/>
+        <rect width="290" height={this.getSVGHeight()} fill="rgba(255,255,255,.85)"/>
         <g id="Items" transform="translate(0,20)">
           {items}
         </g>
@@ -195,9 +203,9 @@ class Legend extends React.Component {
     return {
       svg: {
         position: "absolute",
-        left: 8,
-        top: 30,
-        borderRadius: 2,
+        left: 5,
+        top: 26,
+        borderRadius: 4,
         zIndex: 1000
       }
     };
@@ -209,7 +217,7 @@ class Legend extends React.Component {
     return (
       <svg
         id="TreeLegendContainer"
-        width="280"
+        width={this.getSVGWidth()}
         height={this.getSVGHeight()}
         style={styles.svg}
       >
