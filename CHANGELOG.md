@@ -1,5 +1,10 @@
-## version 1.29.0 - 2018/08/31
+* Auspice is now globally installable and published as a npm package [npmjs.com/package/auspice](https://www.npmjs.com/package/auspice)
+* AA entropy calculation bug fixed  - [PR 657](https://github.com/nextstrain/auspice/pull/657)
+* Narrative scroll bars are fixed for Linux & Windows browsers - [PR 653](https://github.com/nextstrain/auspice/pull/653)
+* Tree legend placement improved  - [PR 650](https://github.com/nextstrain/auspice/pull/650)
+* `npm run start` is no longer deprecated
 
+## version 1.29.0 - 2018/08/31
 * The visibility of nodes on the tree now more accurately reflects the selected date range - [PR 644](https://github.com/nextstrain/auspice/pull/644)
 * Info text is easier to read & the date range reflects the genomes in view - [PR 639](https://github.com/nextstrain/auspice/pull/639)
 
