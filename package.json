@@ -19,9 +19,9 @@
     "server:debug": "node --inspect server.js",
     "build": "rimraf dist && NODE_ENV=production BABEL_ENV=production webpack --config webpack.config.prod.js",
     "build:timing": "rimraf dist && NODE_ENV=production BABEL_ENV=timing  webpack --config webpack.config.prod.js",
-    "dev": "node server.js dev",
-    "start": "echo \"DEPRECATION WARNING: please use npm run dev instead of npm run start\" && npm run dev",
-    "start:local": "echo \"Please run 'npm run dev' and access local datasets via /local/... in the URL\"",
+    "dev": "node server.js --dev",
+    "start": "echo \"DEPRECATION WARNING: please use npm run dev instead of npm run start\" && npm run --dev",
+    "start:local": "echo \"Please run 'npm run --dev' and access local datasets via /local/... in the URL\"",
     "lint": "eslint src",
     "heroku-postbuild": "npm run build",
     "get-data": "./scripts/get-data.sh",
@@ -32,6 +32,7 @@
     "create-data-dir": "./scripts/create-data-dir.sh"
   },
   "dependencies": {
+    "argparse": "^1.0.10",
     "awesomplete": "^1.1.2",
     "babel-polyfill": "^6.26.0",
     "binomial": "^0.2.0",
