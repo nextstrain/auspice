@@ -1,3 +1,5 @@
+## version 1.30.0 - 2018/09/05
+
 * Auspice is now globally installable and published as a npm package [npmjs.com/package/auspice](https://www.npmjs.com/package/auspice)
 * AA entropy calculation bug fixed  - [PR 657](https://github.com/nextstrain/auspice/pull/657)
 * Narrative scroll bars are fixed for Linux & Windows browsers - [PR 653](https://github.com/nextstrain/auspice/pull/653)
