@@ -92,7 +92,11 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
     const A = m.slice(0, 1);
     const B = m.slice(m.length - 1, m.length);
     // console.log("mut @ ", pos, ":", A, " -> ", B)
-    if (A === "N" || A === "-" || B === "N" || B === "-") return;
+    if (isAA){
+      if (A === "X" || A === "-" || B === "X" || B === "-") return;
+    }else{
+      if (A === "N" || A === "-" || B === "N" || B === "-") return;
+    }
     if (!anc_state[prot][pos]) {
       // if we don't know the ancestral state, set it via the first encountered state
       anc_state[prot][pos] = A;
@@ -130,7 +134,6 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
       visibleTips++;
       for (const prot of arrayOfProts) {
         for (const pos of Object.keys(state[prot])) {
-          // console.log(prot, k, counts[prot][k], state[prot])
           if (!counts[prot][pos]) {
             counts[prot][pos] = {};
             counts[prot][pos][state[prot][pos]] = 1;
@@ -144,13 +147,12 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
     }
   };
   recurse(root, initialState);
-  // console.log(counts);
+
   let m = 0;
   let i = 0;
   const entropy = [];
   for (const prot of arrayOfProts) {
     for (const k of Object.keys(counts[prot])) {
-      // console.log("computing entropy at ", prot, "pos", k);
       let nObserved = 0;
       for (const kk of Object.keys(counts[prot][k])) {
         nObserved += counts[prot][k][kk];
