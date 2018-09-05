@@ -13,38 +13,39 @@ Auspice was designed to aid epidemiological understanding and improve outbreak r
 Please see [nextstrain.org/docs/visualisation/introduction](https://nextstrain.org/docs/visualisation/introduction) for more information, including input file formats.
 
 
-## Local Installs via NPM
+## Installation
 
 ```
 npm install -g auspice
 ```
 
-Then run the server via the `auspice` command and access local datasets in a web browser at [localhost:4000/local](http://localhost:4000/local).
+Note that this requires node and npm to be installed (see below for instructions).
 
-The source for the input JSONs defaults to the `<current_working_directory>/auspice` (or `<current_working_directory>` if that's not available).
+## Running Auspice
+
+`auspice` starts the server, which makes local datasets available in a browser at  [localhost:4000/local](http://localhost:4000/local).
+
+By default, the datasets are sourced from the current working directory (or an **auspice** subfolder if it exists). Please run `auspice -h` to see how to change this directory, as well as the directory where narratives are sourced from.
 
 
-## Local Installs via GitHub
+## Developing
+
+Development requires installation by cloning the github repo:
 
 ```
 cd nextstrain # or whichever folder you'd like to contain nextstrain repos in
 git clone https://github.com/nextstrain/auspice.git
 cd auspice
 npm install     # install package dependencies
-npm run build   # build the client javascript bundle
-npm run server  # start a local instance of the server
+npm run dev     # start the server (with hot-reloading)
 ```
 
 Then access the app via [localhost:4000/local](http://localhost:4000/local).
+Changes to the (client) code should automatically update the browser.
 
-By default, datasets and narratives are sourced out of the `auspice/data` and `auspice/local_narratives` directories (see below for how to change this).
+By default, datasets and narratives are sourced out of the `auspice/data` and `auspice/local_narratives` directories. Running `npm run dev -- -h` shows the available options to change these defaults.
 
-If you are modifying the code, running `npm run dev` (instead of `npm run build` and `npm run server`) will modify the bundle on-the-fly, allowing you to see changes without rebuilding. Note that changes to the server code require restarting the server to take effect.
-
-## Selecting the local datasets / narratives directory:
-The commands `auspice`, `npm run server` and `npm run dev` accept the following arguments:
-* `data:<path>` sets the source of local datasets, viewable via [localhost:4000/local](http://localhost:4000/local)
-* `narratives:<path>` sets the source of local narratives, viewable via [localhost:4000/local/narratives](http://localhost:4000/local/narratives)
+To build the production code (which is what the live site and global npm install use), run `npm run build` to transpile the client code, and `npm run server` to start the server.
 
 
 ## How to install Node.js and npm
@@ -53,8 +54,8 @@ If you'd prefer not to use conda, `nvm` is an easy way to manage nodejs & npm ve
 
 
 ## Releasing new versions.
-Make sure you are on `master` and are up-to-date with [github.com/nextstrain/auspice](http://github.com/nextstrain/auspice).
-Releasing should be as simple as then running `./releaseNewVersion` and following the prompts.
+You will need push access to [github.com/nextstrain/auspice](http://github.com/nextstrain/auspice), and local `master` must be up-to-date.
+Releasing should then be as simple as running `./releaseNewVersion` and following the prompts.
 
 
 ## Deploying to npm
