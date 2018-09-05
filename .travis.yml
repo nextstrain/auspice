@@ -1,18 +1,23 @@
 language: node_js
 sudo: false
 node_js:
-  - "9"
+- '9'
 install:
-  - npm install
-  - pip install --user awscli
+- npm install
+- pip install --user awscli
 script:
-  - npm run build
+- npm run build
 after_success:
-  - if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "release" ]]; then
-      npm run gzip-and-upload;
-      npm run redeploy-site;
-      npm run rebuild-docker-image;
-    fi
+- if [[ "$TRAVIS_PULL_REQUEST" == "false" && "$TRAVIS_BRANCH" == "release" ]]; then
+  npm run gzip-and-upload; npm run redeploy-site; npm run rebuild-docker-image; fi
+deploy:
+  provider: npm
+  email: jhadfiel@fredhutch.org
+  api_key:
+    secure: q3E48VryY2/SnW0fjuAlVbl6xoib9U6RvbuXF1hiyyuAnFq/YA3lr9sFEfQFVs6GyBZ5baus/yqWi4MNJyR3d7F89Zz2eGSLN8HdBPKk0br1xmdB8apczghzZDvSNijGVvfTneTS1WhoM+0Ta35slZ0nIBqHTfyY4sHDzaib9X6ztIdp3niwOy1/XK0W8caX32QH0q3chsE+5aLG41brLRSqMkGOx/ScNdOCnvEKd1B7NmAshcA3+vy0Ev4S1l3MMLgsXEeYEeV9dDEbGzV7vB5VLPw6oSSwK/tNgdFPtx/ycScUqT2sxmlZB2F3DD0iG1b/DoeCYby8zA801JwDCjhtbCyZDWqHuDK/PScy4VELPCVDZSGxPpuRsH8ijdsunAw3K+s1uehITGl+cJ64f3+8iymdEIcNp1moRA6YoavSYb7iar3fi1gpT3MpdYGszcpVCo7diuHCcDo19uUeevDDdTq8xXBrkqySiA3k2H2QuWyk7bzNDj3Oc+H6JoCyKvI6Jmb35Rfe87qMYCfVMCQGLCSvhLvhG3qt/AwBY4uWvubjoAZok9op1Jj8hFBiQCKzDJ492mumwVdGQ32+9qHUQIh5CMMm4cODk489DCtQ/D6CAuVzIR5ZdPeJLxRT7JGr9Zi7sZRkM+XaLzjPu0VbRTZil+7WHpVkapBnsR8=
+  skip_cleanup: true
+  on:
+    branch: release
 notifications:
   email:
     on_success: never

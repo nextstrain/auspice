@@ -1,58 +1,72 @@
 Master: [![Build Status](https://travis-ci.com/nextstrain/auspice.svg?branch=master)](https://travis-ci.com/nextstrain/auspice)
 Release: [![Build Status](https://travis-ci.com/nextstrain/auspice.svg?branch=release)](https://travis-ci.com/nextstrain/auspice)
+npm: [![NPM version](https://img.shields.io/npm/v/auspice.svg?style=flat-square)](https://www.npmjs.com/package/auspice)
+
 
 ## Introduction
 
-Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data. We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread. Our goal is to aid epidemiological understanding and improve outbreak response. See [nextstrain.org/docs](https://nextstrain.org/docs) for more details.
+Auspice is an open-source interactive web app for visualising phylogenomic data.
+It is the app that powers all the vlisualisation on [nextstrain.org](https://nextstrain.org), which aims to provide a continually-updated view of publicly available pathogen genome data.
+Auspice was designed to aid epidemiological understanding and improve outbreak response, but is able to visualise a diverse range of datasets.
 
 
-Auspice is the code which powers all the nextstrain data viz -- e.g. [nextstrain.org/zika](https://nextstrain.org/zika).
-It is a javascript-based web app that gives an interactive visualization of genomic data (which is normally, but not necessarily, produced by [augur](https://github.com/nextstrain/augur)).
+Please see [nextstrain.org/docs/visualisation/introduction](https://nextstrain.org/docs/visualisation/introduction) for more information, including input file formats.
 
 
-## Local Installs
+## Local Installs via NPM
 
-#### Step 1: clone the git repository
+```
+npm install -g auspice
+```
+
+Then run the server via the `auspice` command and access local datasets in a web browser at [localhost:4000/local](http://localhost:4000/local).
+
+The source for the input JSONs defaults to the `<current_working_directory>/auspice` (or `<current_working_directory>` if that's not available).
+
+
+## Local Installs via GitHub
 
 ```
 cd nextstrain # or whichever folder you'd like to contain nextstrain repos in
 git clone https://github.com/nextstrain/auspice.git
 cd auspice
+npm install     # install package dependencies
+npm run build   # build the client javascript bundle
+npm run server  # start a local instance of the server
 ```
 
-#### Step 2: Install Node.js
+Then access the app via [localhost:4000/local](http://localhost:4000/local).
 
-If you are comfortable using conda, installing nodejs is as simple as `conda install -c conda-forge nodejs=9.11.1`. If you'd prefer not to use conda, I recommend using `nvm` in order to manage nodejs & npm versions -- [here's](https://nodesource.com/blog/installing-node-js-tutorial-using-nvm-on-mac-os-x-and-ubuntu/) a great guide to help you do this.
+By default, datasets and narratives are sourced out of the `auspice/data` and `auspice/local_narratives` directories (see below for how to change this).
 
+If you are modifying the code, running `npm run dev` (instead of `npm run build` and `npm run server`) will modify the bundle on-the-fly, allowing you to see changes without rebuilding. Note that changes to the server code require restarting the server to take effect.
 
-#### Step 3: Install required dependencies
-
-`npm install`
-
-#### Step 4: Create / obtain data files (if you'd like to view local datasets)
-
-Auspice can either source data from your computer or from a server.
-If you'd like to view data files locally, the JSON(s) need to be present in the `data` directory (see [the docs](https://nextstrain.org/docs/bioinformatics/output-jsons) for the format of these).
-If you have local data files (e.g. produced via [augur](https://github.com/nextstrain/augur)) then copy them into this directory.
-If you'd like to download the latest JSONs which we are using for [nextstrain.org](nextstrain.org) then run `npm run get-data` which will download JSONs into `data`
-
-#### Step 5: Build auspice & server the server
-
-* Simplest: `npm run build && npm run server:local`.
-This builds the relevant bundles & starts the server accessing the datasets in `./data`.
-
-* To access datasets online (e.g. to mimic the live nextstrain site), instead run `npm run build && npm run server`.
-
-* In order to run the development server, which allows you to edit the source code on-the-fly, run `npm run dev` or `npm run dev:local` (the latter sources data from `./data`)
+## Selecting the local datasets / narratives directory:
+The commands `auspice`, `npm run server` and `npm run dev` accept the following arguments:
+* `data:<path>` sets the source of local datasets, viewable via [localhost:4000/local](http://localhost:4000/local)
+* `narratives:<path>` sets the source of local narratives, viewable via [localhost:4000/local/narratives](http://localhost:4000/local/narratives)
 
 
-#### Step 6: Open a browser
-Auspice can now be used via `localhost:4000`.
-If you have JSONS in `data` named `flu_europe_tree.json` & `flu_europe_meta.json`, then these can be viewed at `localhost:4000/flu/europe`.
+## How to install Node.js and npm
+If you are comfortable using [conda](https://bioconda.github.io/), installing nodejs is as simple as `conda install -c conda-forge nodejs=9.11.1`.
+If you'd prefer not to use conda, `nvm` is an easy way to manage nodejs & npm versions -- [this guide walks you through the installation](https://nodesource.com/blog/installing-node-js-tutorial-using-nvm-on-mac-os-x-and-ubuntu/).
+
+
+## Releasing new versions.
+Make sure you are on `master` and are up-to-date with [github.com/nextstrain/auspice](http://github.com/nextstrain/auspice).
+Releasing should be as simple as then running `./releaseNewVersion` and following the prompts.
+
+
+## Deploying to npm
+This should be handled automatically when releases happen (assuming that the TravisCI build passes).
+To do this manually:
+* ensure your npm account is registered with [npmjs.com/package/auspice](https://www.npmjs.com/package/auspice)
+* build the `bundle.js` via `npm run build`
+* ensure the version number (`node server.js --version`) is different to [npmjs.com/package/auspice](https://www.npmjs.com/package/auspice)
+* `npm publish`
 
 
 ## License and copyright
-
 Copyright 2014-2018 Trevor Bedford and Richard Neher.
 
 Source code to Nextstrain is made available under the terms of the [GNU Affero General Public License](LICENSE.txt) (AGPL). Nextstrain is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.

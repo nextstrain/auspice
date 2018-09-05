@@ -49,7 +49,7 @@ git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
 # step 2: increment version number (req user input)
 step="2"
 packagesVersion=$(grep "\"version\":" package.json | sed -E "s/.*([0-9]+.[0-9]+.[0-9]+).*/\1/")
-srcVersion=$(grep "export const version" src/version.js | sed -E "s/.*([0-9]+.[0-9]+.[0-9]+).*/\1/")
+srcVersion=$(grep "const version" src/version.js | sed -E "s/.*([0-9]+.[0-9]+.[0-9]+).*/\1/")
 if [ ${packagesVersion} != ${srcVersion} ]
   then
     echo "packages.json version (${packagesVersion}) doesn't match version.js version (${srcVersion}). Fatal."

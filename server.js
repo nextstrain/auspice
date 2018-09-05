@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /* eslint no-console: off */
 const path = require("path");
 const express = require("express");
@@ -5,14 +7,32 @@ const expressStaticGzip = require("express-static-gzip");
 const charon = require("./src/server/charon");
 const globals = require("./src/server/globals");
 const compression = require('compression');
+const argparse = require('argparse');
+const version = require('./src/version').version;
+
+const parser = new argparse.ArgumentParser({
+  version: version,
+  addHelp: true,
+  description: `Auspice version ${version}.`,
+  epilog: `
+  Auspice is an open-source interactive web app for visualising phylogenomic data.
+  This command starts the server, which will make visualisations available in your browser.
+  See nextstrain.org/docs/visualisation/introduction or github.com/nextstrain/auspice
+  for more details.
+  `
+});
+parser.addArgument('--dev', {action: "storeTrue", help: "Run (client) in development mode (hot reloading etc)"});
+parser.addArgument('--data', {help: "Directory where local datasets are sourced"});
+parser.addArgument('--narratives', {help: "Directory where local narratives are sourced"});
+const args = parser.parseArgs();
+
 
 /* documentation in the static site! */
-const devServer = process.argv.indexOf("dev") !== -1;
-globals.setGlobals(process.argv);
+globals.setGlobals(args);
 
 /* if we are in dev-mode, we need to import specific libraries & set flags */
 let webpack, config, webpackDevMiddleware, webpackHotMiddleware;
-if (devServer) {
+if (args.dev) {
   webpack = require("webpack"); // eslint-disable-line
   config = require("./webpack.config.dev"); // eslint-disable-line
   webpackDevMiddleware = require("webpack-dev-middleware"); // eslint-disable-line
@@ -23,7 +43,7 @@ const app = express();
 app.set('port', process.env.PORT || 4000);
 app.use(compression());
 
-if (devServer) {
+if (args.dev) {
   const compiler = webpack(config);
   app.use(webpackDevMiddleware(compiler, {
     noInfo: true,
@@ -31,7 +51,7 @@ if (devServer) {
   }));
   app.use(webpackHotMiddleware(compiler));
 } else {
-  app.use("/dist", expressStaticGzip("dist"));
+  app.use("/dist", expressStaticGzip(path.resolve(__dirname, "dist")));
   app.use(express.static(path.resolve(__dirname, "dist")));
 }
 
@@ -50,9 +70,9 @@ app.get("*", (req, res) => {
 
 const server = app.listen(app.get('port'), () => {
   console.log("-----------------------------------");
-  console.log("Auspice server started on port " + server.address().port);
-  console.log(devServer ? "Serving dev bundle with hot-reloading enabled" : "Serving compiled bundle from /dist");
-  console.log(`Local datasets sourced from ${global.LOCAL_DATA_PATH} can be accessed via "/local/..." URLs`);
-  console.log(`Local narratives sourced from ${global.LOCAL_NARRATIVES_PATH} can be accessed via "/local/narratives/..." URLs`);
+  console.log("Auspice server now running at http://localhost:" + server.address().port);
+  if (args.dev) console.log(`*** DEVELOPMENT MODE ***`);
+  console.log(`Local datasets at http://localhost:${server.address().port}/local are sourced from ${global.LOCAL_DATA_PATH}`);
+  console.log(`Local narratives at http://localhost:${server.address().port}/local/narratives are sourced from ${global.LOCAL_NARRATIVES_PATH}`);
   console.log("-----------------------------------\n\n");
 });
