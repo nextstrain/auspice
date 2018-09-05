@@ -65,5 +65,6 @@ const setGlobals = (args) => {
 };
 
 module.exports = {
-  setGlobals
+  setGlobals,
+  isNpmGlobalInstall
 };

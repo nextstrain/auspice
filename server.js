@@ -21,7 +21,9 @@ const parser = new argparse.ArgumentParser({
   for more details.
   `
 });
-parser.addArgument('--dev', {action: "storeTrue", help: "Run (client) in development mode (hot reloading etc)"});
+if (!globals.isNpmGlobalInstall()) {
+  parser.addArgument('--dev', {action: "storeTrue", help: "Run (client) in development mode (hot reloading etc)"});
+}
 parser.addArgument('--data', {help: "Directory where local datasets are sourced"});
 parser.addArgument('--narratives', {help: "Directory where local narratives are sourced"});
 const args = parser.parseArgs();
