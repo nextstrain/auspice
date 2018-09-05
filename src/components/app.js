@@ -185,7 +185,7 @@ class App extends React.Component {
       height: availableHeight,
       width: sidebarWidth,
       maxWidth: sidebarWidth,
-      overflowY: "scroll",
+      overflowY: "auto",
       overflowX: "hidden",
       boxShadow: '-3px 0px 3px -3px rgba(0, 0, 0, 0.2) inset'
     };
@@ -220,7 +220,6 @@ class App extends React.Component {
             <Narrative
               height={availableHeight - narrativeNavBarHeight}
               width={sidebarStyles.width}
-              style={{overflow: "hidden"}}
             /> :
             <Controls mapOn={mapOn}/>
           }
