@@ -1,5 +1,7 @@
 Master: [![Build Status](https://travis-ci.com/nextstrain/auspice.svg?branch=master)](https://travis-ci.com/nextstrain/auspice)
 Release: [![Build Status](https://travis-ci.com/nextstrain/auspice.svg?branch=release)](https://travis-ci.com/nextstrain/auspice)
+npm: [![NPM version](https://img.shields.io/npm/v/auspice.svg?style=flat-square)](https://www.npmjs.com/package/auspice)
+
 
 ## Introduction
 
@@ -44,13 +46,27 @@ The commands `auspice`, `npm run server` and `npm run dev` accept the following 
 * `data:<path>` sets the source of local datasets, viewable via [localhost:4000/local](http://localhost:4000/local)
 * `narratives:<path>` sets the source of local narratives, viewable via [localhost:4000/local/narratives](http://localhost:4000/local/narratives)
 
-## How to install Node.js and npm
 
+## How to install Node.js and npm
 If you are comfortable using [conda](https://bioconda.github.io/), installing nodejs is as simple as `conda install -c conda-forge nodejs=9.11.1`.
 If you'd prefer not to use conda, `nvm` is an easy way to manage nodejs & npm versions -- [this guide walks you through the installation](https://nodesource.com/blog/installing-node-js-tutorial-using-nvm-on-mac-os-x-and-ubuntu/).
 
-## License and copyright
 
+## Releasing new versions.
+Make sure you are on `master` and are up-to-date with [github.com/nextstrain/auspice](http://github.com/nextstrain/auspice).
+Releasing should be as simple as then running `./releaseNewVersion` and following the prompts.
+
+
+## Deploying to npm
+This should be handled automatically when releases happen (assuming that the TravisCI build passes).
+To do this manually:
+* ensure your npm account is registered with [npmjs.com/package/auspice](https://www.npmjs.com/package/auspice)
+* build the `bundle.js` via `npm run build`
+* ensure the version number (`node server.js --version`) is different to [npmjs.com/package/auspice](https://www.npmjs.com/package/auspice)
+* `npm publish`
+
+
+## License and copyright
 Copyright 2014-2018 Trevor Bedford and Richard Neher.
 
 Source code to Nextstrain is made available under the terms of the [GNU Affero General Public License](LICENSE.txt) (AGPL). Nextstrain is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
