@@ -12,5 +12,6 @@ after_success:
     npm run gzip-and-upload;
     npm run redeploy-site;
     npm run rebuild-docker-image;
+    npm config set //registry.npmjs.org/:_authToken="$NPM_TOKEN";
     npm publish;
   fi
