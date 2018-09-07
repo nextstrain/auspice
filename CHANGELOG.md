@@ -1,3 +1,6 @@
+* Publish the package to the npm registry from the release branch automatically. [[#660](https://github.com/nextstrain/auspice/pull/660), [#662](https://github.com/nextstrain/auspice/pull/662)]
+* Fix inability to run `npm` locally introduced by repo's `.npmrc` file. [[#661](https://github.com/nextstrain/auspice/issues/661)]
+
 ## version 1.30.1 - 2018/09/05
 
 ## version 1.30.0 - 2018/09/05
