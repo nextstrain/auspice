@@ -67,8 +67,8 @@ select yn in "major-new-release" "feature-release" "minor-fix"; do
 done
 echo -e "\n"
 # now replace the version in packages.json and version.js (inplace!)
-sed -i '' "s/\"version\": \"${packagesVersion}\"/\"version\": \"${newVersion}\"/" package.json
-sed -i '' "s/version = \"${srcVersion}\";/version = \"${newVersion}\";/" src/version.js
+sed -i'' "s/\"version\": \"${packagesVersion}\"/\"version\": \"${newVersion}\"/" package.json
+sed -i'' "s/version = \"${srcVersion}\";/version = \"${newVersion}\";/" src/version.js
 unset packagesVersion srcVersion parts bumps yn
 
 # step 3: add h2 title to CHANGELOG.md with newVersion & date
