@@ -15,3 +15,7 @@ after_success:
     npm config set //registry.npmjs.org/:_authToken="$NPM_TOKEN";
     npm publish;
   fi
+notifications:
+  email:
+    on_success: never
+    on_failure: always
