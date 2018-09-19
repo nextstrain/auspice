@@ -82,7 +82,7 @@ export const loadTreeToo = (name, fields) => (dispatch, getState) => {
   fetchJSON(`${charonAPIAddress}request=additionalJSON&source=${oldState.controls.source}&url=${fields.join("/")}&type=tree`)
     .then((json) => {
       const newState = createTreeTooState({treeTooJSON: json.tree, oldState, segment: name});
-      dispatch({type: types.TREE_TOO_DATA, treeToo: newState.treeToo, controls: newState.controls, segment: name});
+      dispatch({type: types.TREE_TOO_DATA, segment: name, ...newState});
     })
     .catch((err) => console.error("Failed to fetch additional tree", err.message));
 };

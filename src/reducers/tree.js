@@ -71,6 +71,8 @@ const Tree = (state = getDefaultTreeState(), action) => {
         nodeColors: action.nodeColors,
         nodeColorsVersion: action.version
       });
+    case types.TREE_TOO_DATA:
+      return action.tree;
     case types.ADD_COLOR_BYS:
       /* modify in place ?!?! */
       for (const node of state.nodes) {

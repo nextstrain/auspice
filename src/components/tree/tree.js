@@ -69,7 +69,6 @@ class Tree extends React.Component {
 
     /* has the 2nd (right hand) tree just been turned on, off or swapped? */
     if (prevProps.showTreeToo !== this.props.showTreeToo) {
-      this.state.tree.change({svgHasChangedDimensions: true}); /* readjust co-ordinates */
       if (!this.props.showTreeToo) { /* turned off -> remove the 2nd tree */
         newState.treeToo = null;
       } else { /* turned on -> render the 2nd tree */
@@ -78,7 +77,6 @@ class Tree extends React.Component {
         }
         newState.tree = this.state.tree; // setUpAndRenderTreeToo needs newState.tree
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
-        // this.resetView(); /* reset the position of the left tree */
         if (this.tangleRef) this.tangleRef.drawLines();
       }
     } else if (this.state.treeToo) { /* the tree hasn't just been swapped, but it does exist and may need updating */
