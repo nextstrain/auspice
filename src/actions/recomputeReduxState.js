@@ -575,27 +575,31 @@ export const createTreeTooState = ({
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
   let controls = oldState.controls;
+  const tree = Object.assign({}, oldState.tree);
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo.debug = "RIGHT";
-  controls = modifyStateViaTree(controls, oldState.tree, treeToo);
+  controls = modifyStateViaTree(controls, tree, treeToo);
   controls = modifyControlsViaTreeToo(controls, segment);
-  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, oldState.tree.selectedStrain, undefined, controls);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls);
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  const colorScale = calcColorScale(controls.colorBy, controls, oldState.tree, treeToo, oldState.metadata);
+  const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, oldState.metadata);
   const nodeColors = calcNodeColor(treeToo, colorScale);
+  tree.nodeColors = calcNodeColor(tree, colorScale); // also update main tree's colours
+  tree.nodeColorsVersion++;
+
   controls.colorScale = colorScale;
   controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
   treeToo.nodeColorsVersion = colorScale.version;
   treeToo.nodeColors = nodeColors;
 
   treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
-    oldState.tree.nodes, treeToo.nodes, oldState.tree.visibility, treeToo.visibility
+    tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility
   );
 
   // if (tipSelectedIdx) { /* i.e. query.s was set */
   //   tree.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controls.colorScale, tree});
   //   tree.tipRadiiVersion = 1;
   // }
-  return {treeToo, controls};
+  return {tree, treeToo, controls};
 };

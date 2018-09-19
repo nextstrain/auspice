@@ -82,6 +82,10 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   if (oldProps.width !== newProps.width || oldProps.height !== newProps.height) {
     args.svgHasChangedDimensions = true;
   }
+  if (mainTree && oldProps.showTreeToo !== newProps.showTreeToo) {
+    args.svgHasChangedDimensions = true;
+  }
+
   const change = Object.keys(args).length;
   if (change) {
     // console.log('\n\n** ', phylotree.debugId, 'changePhyloTreeViaPropsComparison **', args);
