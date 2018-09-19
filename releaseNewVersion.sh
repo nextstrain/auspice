@@ -48,8 +48,8 @@ git diff-index --quiet HEAD -- # $? = 1 if uncommited changes
 
 # step 2: increment version number (req user input)
 step="2"
-packagesVersion=$(grep "\"version\":" package.json | sed -E "s/.*([0-9]+.[0-9]+.[0-9]+).*/\1/")
-srcVersion=$(grep "const version" src/version.js | sed -E "s/.*([0-9]+.[0-9]+.[0-9]+).*/\1/")
+packagesVersion=$(grep "\"version\":" package.json | perl -pe 's/.*([0-9]+.[0-9]+.[0-9]+).*/\1/')
+srcVersion=$(grep "const version" src/version.js | perl -pe 's/.*([0-9]+.[0-9]+.[0-9]+).*/\1/')
 if [ ${packagesVersion} != ${srcVersion} ]
   then
     echo "packages.json version (${packagesVersion}) doesn't match version.js version (${srcVersion}). Fatal."
@@ -67,8 +67,8 @@ select yn in "major-new-release" "feature-release" "minor-fix"; do
 done
 echo -e "\n"
 # now replace the version in packages.json and version.js (inplace!)
-sed -i'' "s/\"version\": \"${packagesVersion}\"/\"version\": \"${newVersion}\"/" package.json
-sed -i'' "s/version = \"${srcVersion}\";/version = \"${newVersion}\";/" src/version.js
+perl -pi -e "s/\"version\": \"${packagesVersion}\"/\"version\": \"${newVersion}\"/" package.json
+perl -pi -e "s/version = \"${srcVersion}\";/version = \"${newVersion}\";/" src/version.js
 unset packagesVersion srcVersion parts bumps yn
 
 # step 3: add h2 title to CHANGELOG.md with newVersion & date
