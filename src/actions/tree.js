@@ -128,6 +128,9 @@ export const updateVisibleTipsAndBranchThicknesses = (
         data: newTipRadii,
         version: newTipRadiiVersion
       };
+      if (controls.showTreeToo) {
+        dispatchRadii.dataToo = calcTipRadii({tipSelected, colorScale: controls.colorScale, tree: treeToo});
+      }
       dispatch(dispatchRadii);
     }
 
