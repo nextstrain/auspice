@@ -9,6 +9,7 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
 @connect((state) => {
   return {
     // metadata: state.metadata,
+    displayDates: state.controls.displayDates,
     mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative,
@@ -62,52 +63,56 @@ class MapAnimationControls extends React.Component {
 
   render() {
 
-    return (
-      <div id="mapAnimationControls">
+    if (this.props.displayDates) {
+      return (
+        <div id="mapAnimationControls">
 
-        <div style={{marginTop: 5, marginBottom: 5}}>
-          <SelectLabel text="Animation speed"/>
-          <button
-            style={this.props.mapAnimationDurationInMilliseconds === 60000 ? materialButtonSelected : materialButton}
-            onClick={this.handleChangeAnimationTimeClicked("slow")}
-          >
-            Slow
-          </button>
-          <button
-            style={this.props.mapAnimationDurationInMilliseconds === 30000 ? materialButtonSelected : materialButton}
-            onClick={this.handleChangeAnimationTimeClicked("medium")}
-          >
-            Medium
-          </button>
-          <button
-            style={this.props.mapAnimationDurationInMilliseconds === 15000 ? materialButtonSelected : materialButton}
-            onClick={this.handleChangeAnimationTimeClicked("fast")}
-          >
-            Fast
-          </button>
+          <div style={{marginTop: 5, marginBottom: 5}}>
+            <SelectLabel text="Animation speed"/>
+            <button
+              style={this.props.mapAnimationDurationInMilliseconds === 60000 ? materialButtonSelected : materialButton}
+              onClick={this.handleChangeAnimationTimeClicked("slow")}
+            >
+              Slow
+            </button>
+            <button
+              style={this.props.mapAnimationDurationInMilliseconds === 30000 ? materialButtonSelected : materialButton}
+              onClick={this.handleChangeAnimationTimeClicked("medium")}
+            >
+              Medium
+            </button>
+            <button
+              style={this.props.mapAnimationDurationInMilliseconds === 15000 ? materialButtonSelected : materialButton}
+              onClick={this.handleChangeAnimationTimeClicked("fast")}
+            >
+              Fast
+            </button>
+          </div>
+          <Toggle
+            display
+            on={this.props.mapAnimationShouldLoop}
+            callback={() => {
+              this.props.dispatch({ type: CHANGE_ANIMATION_LOOP, data: !this.props.mapAnimationShouldLoop });
+            }}
+            label="Loop animation"
+          />
+          <br/>
+
+          <Toggle
+            display
+            on={this.props.mapAnimationCumulative}
+            callback={() => {
+              analyticsControlsEvent("change-animation-cumulative");
+              this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
+            }}
+            label="Animate cumulative history"
+          />
+
         </div>
-        <Toggle
-          display
-          on={this.props.mapAnimationShouldLoop}
-          callback={() => {
-            this.props.dispatch({ type: CHANGE_ANIMATION_LOOP, data: !this.props.mapAnimationShouldLoop });
-          }}
-          label="Loop animation"
-        />
-        <br/>
-
-        <Toggle
-          display
-          on={this.props.mapAnimationCumulative}
-          callback={() => {
-            analyticsControlsEvent("change-animation-cumulative");
-            this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
-          }}
-          label="Animate cumulative history"
-        />
-
-      </div>
-    );
+      );
+    }
+    /* else */
+    return (<div></div>);
   }
 }
 

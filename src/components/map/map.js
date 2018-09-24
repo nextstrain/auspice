@@ -25,6 +25,7 @@ import { errorNotification } from "../../actions/notifications";
 @connect((state) => {
   return {
     // datasetGuid: state.tree.datasetGuid,
+    displayDates: state.controls.displayDates,
     absoluteDateMin: state.controls.absoluteDateMin,
     absoluteDateMax: state.controls.absoluteDateMax,
     treeVersion: state.tree.version,
@@ -446,19 +447,23 @@ class Map extends React.Component {
       position: "absolute",
       textTransform: "uppercase"
     };
-    return (
-      <div>
-        <button
-          style={{...buttonBaseStyle, top: 20, left: 20, width: 60, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? pauseColor : goColor}}
-          onClick={this.playPauseButtonClicked}
-        >
-          {this.props.animationPlayPauseButton}
-        </button>
-        <button style={{...buttonBaseStyle, top: 20, left: 88, width: 60, backgroundColor: lightGrey}} onClick={this.resetButtonClicked}>
-          Reset
-        </button>
-      </div>
-    );
+    if (this.props.displayDates) {
+      return (
+        <div>
+          <button
+            style={{...buttonBaseStyle, top: 20, left: 20, width: 60, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? pauseColor : goColor}}
+            onClick={this.playPauseButtonClicked}
+          >
+            {this.props.animationPlayPauseButton}
+          </button>
+          <button style={{...buttonBaseStyle, top: 20, left: 88, width: 60, backgroundColor: lightGrey}} onClick={this.resetButtonClicked}>
+            Reset
+          </button>
+        </div>
+      );
+    }
+    /* else */
+    return (<div></div>);
   }
 
   maybeCreateMapDiv() {

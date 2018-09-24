@@ -69,7 +69,8 @@ export const getDefaultControlsState = () => {
     showTreeToo: undefined,
     showTangle: false,
     zoomMin: undefined,
-    zoomMax: undefined
+    zoomMax: undefined,
+    displayDates: true
   };
 };
 
@@ -116,17 +117,20 @@ const Controls = (state = getDefaultControlsState(), action) => {
         if (state.temporalConfidence.display && action.data === "div") {
           return Object.assign({}, state, {
             distanceMeasure: action.data,
+            displayDates: state.displayDates,
             temporalConfidence: Object.assign({}, state.temporalConfidence, {display: false, on: false})
           });
         } else if (state.layout === "rect" && action.data === "num_date") {
           return Object.assign({}, state, {
             distanceMeasure: action.data,
+            displayDates: state.displayDates,
             temporalConfidence: Object.assign({}, state.temporalConfidence, {display: true})
           });
         }
       }
       return Object.assign({}, state, {
-        distanceMeasure: action.data
+        distanceMeasure: action.data,
+        displayDates: state.displayDates
       });
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       const newDates = {quickdraw: action.quickdraw};

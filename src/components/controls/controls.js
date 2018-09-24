@@ -35,7 +35,6 @@ const Controls = ({mapOn}) => (
     <Header text="Dataset"/>
     <ChooseDataset/>
 
-    <Header text="Date Range"/>
     <DateRangeInputs/>
 
 

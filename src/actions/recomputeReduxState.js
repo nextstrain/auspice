@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { strainNameToIdx, cladeNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -19,8 +19,10 @@ export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
 };
 
-export const getMinCalDateViaTree = (nodes) => {
-  const minNumDate = nodes[0].attr.num_date - 0.01; /* slider should be earlier than actual day */
+export const getMinCalDateViaTree = (nodes, state) => {
+  // const minNumDate = nodes[0].attr.num_date - 0.01; /* slider should be earlier than actual day */
+  /* if no date, use some default dates - slider will not be visible */
+  const minNumDate = nodes[0].attr.num_date ? nodes[0].attr.num_date - 0.01 : state.dateMaxNumeric - defaultDateRange;
   return numericToCalendar(minNumDate);
 };
 
@@ -229,7 +231,7 @@ const modifyStateViaMetadata = (state, metadata) => {
 };
 
 const modifyStateViaTree = (state, tree, treeToo) => {
-  state["dateMin"] = getMinCalDateViaTree(tree.nodes);
+  state["dateMin"] = getMinCalDateViaTree(tree.nodes, state);
   state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
   state.dateMinNumeric = calendarToNumeric(state.dateMin);
   state.dateMaxNumeric = calendarToNumeric(state.dateMax);
@@ -261,6 +263,14 @@ const modifyStateViaTree = (state, tree, treeToo) => {
     state.attrs = [...new Set([...Object.keys(tree.nodes[0].attr), ...Object.keys(treeToo.nodes[0].attr)])];
   } else {
     state.attrs = Object.keys(tree.nodes[0].attr);
+  }
+
+  /* does the tree have date information? if not, disable controls, modify view */
+  state.displayDates = Object.keys(tree.nodes[0].attr).indexOf("num_date") > -1;
+
+  /* if no displayDates is false, force to display by divergence */
+  if (state.displayDates === false) {
+    state.distanceMeasure = "div";
   }
 
   state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";

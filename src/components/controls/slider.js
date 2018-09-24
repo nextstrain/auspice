@@ -43,7 +43,7 @@ function undoEnsureArray(x) {
 
 // undoEnsureArray(ensureArray(x)) === x
 
-var Slider = createReactClass({
+const Slider = createReactClass({
 
   propTypes: {
 

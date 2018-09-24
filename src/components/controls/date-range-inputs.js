@@ -6,10 +6,12 @@ import { controlsWidth, minDistanceDateSlider } from "../../util/globals";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { changeDateFilter } from "../../actions/tree";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
+import { Header } from "../framework/select-label";
 import { headerFont, darkGrey } from "../../globalStyles";
 
 @connect((state) => {
   return {
+    displayDates: state.controls.displayDates,
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
     dateMinNumeric: state.controls.dateMinNumeric,
@@ -134,39 +136,46 @@ class DateRangeInputs extends React.Component {
     const absoluteMaxNumDate = this.props.absoluteDateMaxNumeric;
     const selectedMinNumDate = this.props.dateMinNumeric;
     const selectedMaxNumDate = this.props.dateMaxNumeric;
+    const displayDates = this.props.displayDates;
 
     const minDistance = minDistanceDateSlider * (absoluteMaxNumDate - absoluteMinNumDate);
 
     const styles = this.getStyles();
 
-    return (
-      <div>
-        <div style={{height: 5}}/>
-        <div style={{width: controlsWidth}}>
-          <Slider // numDates are handed to Slider
-            min={absoluteMinNumDate}
-            max={absoluteMaxNumDate}
-            defaultValue={[absoluteMinNumDate, absoluteMaxNumDate]}
-            value={[selectedMinNumDate, selectedMaxNumDate]}
-            /* debounce the onChange event, but ensure the final one goes through */
-            onChange={this.updateFromSlider.bind(this, true)}
-            onAfterChange={this.updateFromSlider.bind(this, false)}
-            minDistance={minDistance}
-            pearling
-            withBars
-          />
-        </div>
-        <div style={{height: 5}}/>
-        <div style={{width: controlsWidth}}>
-          <div style={{ ...styles.base, float: "left" }}>
-            {selectedMin}
+    if (displayDates) {
+      return (
+        <span style={{marginTop: "15px"}}>
+          <Header text="Date Range"/>
+          <div>
+            <div style={{height: 5}}/>
+            <div style={{width: controlsWidth}}>
+              <Slider // numDates are handed to Slider
+                min={absoluteMinNumDate}
+                max={absoluteMaxNumDate}
+                defaultValue={[absoluteMinNumDate, absoluteMaxNumDate]}
+                value={[selectedMinNumDate, selectedMaxNumDate]}
+                /* debounce the onChange event, but ensure the final one goes through */
+                onChange={this.updateFromSlider.bind(this, true)}
+                onAfterChange={this.updateFromSlider.bind(this, false)}
+                minDistance={minDistance}
+                pearling
+                withBars
+              />
+            </div>
+            <div style={{height: 5}}/>
+            <div style={{width: controlsWidth}}>
+              <div style={{ ...styles.base, float: "left" }}>
+                {selectedMin}
+              </div>
+              <div style={{ ...styles.base, float: "right" }}>
+                {selectedMax}
+              </div>
+            </div>
           </div>
-          <div style={{ ...styles.base, float: "right" }}>
-            {selectedMax}
-          </div>
-        </div>
-      </div>
-    );
+        </span>
+      );
+    }
+    return (<div></div>);
   }
 }
 
