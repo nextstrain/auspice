@@ -213,7 +213,7 @@ export const drawStream = (
     /* what's the closest pivot? */
     const date = scales.x.invert(mousex);
     const pivotIdx = pivots.reduce((closestIdx, val, idx, arr) => Math.abs(val - date) < Math.abs(arr[closestIdx] - date) ? idx : closestIdx, 0);
-    const freqVal = parseInt((d[pivotIdx][1] - d[pivotIdx][0]) * 100, 10) + "%";
+    const freqVal = Math.round((d[pivotIdx][1] - d[pivotIdx][0]) * 100) + "%";
     const xvalueOfPivot = scales.x(pivots[pivotIdx]);
 
     select("#vline")
