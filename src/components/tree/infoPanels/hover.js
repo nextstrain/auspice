@@ -35,7 +35,7 @@ const getBranchDivJSX = (d) =>
 const getBranchTimeJSX = (d, temporalConfidence) => {
   const date = d.attr.date || numericToCalendar(d.attr.num_date);
   let dateRange = false;
-  if (temporalConfidence) {
+  if (temporalConfidence && d.attr.num_date_confidence) {
     dateRange = [
       numericToCalendar(d.attr.num_date_confidence[0]),
       numericToCalendar(d.attr.num_date_confidence[1])
