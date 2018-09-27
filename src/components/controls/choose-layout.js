@@ -11,7 +11,7 @@ import { SelectLabel } from "../framework/select-label";
   return {
     layout: state.controls.layout,
     showTreeToo: state.controls.showTreeToo,
-    displayDates: state.controls.displayDates
+    branchLengthsToDisplay: state.controls.branchLengthsToDisplay
   };
 })
 class ChooseLayout extends React.Component {
@@ -37,7 +37,7 @@ class ChooseLayout extends React.Component {
     const styles = this.getStyles();
     const selected = this.props.layout;
 
-    if (this.props.displayDates) {
+    if (this.props.branchLengthsToDisplay === "divAndDate") {
       return (
         <div style={styles.container}>
           <SelectLabel text="Layout" extraStyles={{marginTop: "0px"}}/>
@@ -108,7 +108,7 @@ class ChooseLayout extends React.Component {
         </div>
       );
     }
-    /* else */
+    /* else - if divOnly */
     return (
       <div style={styles.container}>
         <SelectLabel text="Layout" extraStyles={{marginTop: "0px"}}/>

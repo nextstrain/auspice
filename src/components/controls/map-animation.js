@@ -9,7 +9,7 @@ import { materialButton, materialButtonSelected } from "../../globalStyles";
 @connect((state) => {
   return {
     // metadata: state.metadata,
-    displayDates: state.controls.displayDates,
+    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
     mapAnimationStartDate: state.controls.mapAnimationStartDate,
     mapAnimationDurationInMilliseconds: state.controls.mapAnimationDurationInMilliseconds,
     mapAnimationCumulative: state.controls.mapAnimationCumulative,
@@ -63,7 +63,7 @@ class MapAnimationControls extends React.Component {
 
   render() {
 
-    if (this.props.displayDates) {
+    if (this.props.branchLengthsToDisplay === "divAndDate") {
       return (
         <div id="mapAnimationControls">
 
@@ -111,7 +111,7 @@ class MapAnimationControls extends React.Component {
         </div>
       );
     }
-    /* else */
+    /* else - if divOnly */
     return (<div></div>);
   }
 }

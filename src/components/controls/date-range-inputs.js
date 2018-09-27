@@ -11,7 +11,7 @@ import { headerFont, darkGrey } from "../../globalStyles";
 
 @connect((state) => {
   return {
-    displayDates: state.controls.displayDates,
+    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
     dateMin: state.controls.dateMin,
     dateMax: state.controls.dateMax,
     dateMinNumeric: state.controls.dateMinNumeric,
@@ -136,13 +136,13 @@ class DateRangeInputs extends React.Component {
     const absoluteMaxNumDate = this.props.absoluteDateMaxNumeric;
     const selectedMinNumDate = this.props.dateMinNumeric;
     const selectedMaxNumDate = this.props.dateMaxNumeric;
-    const displayDates = this.props.displayDates;
+    const branchLengthsToDisplay = this.props.branchLengthsToDisplay;
 
     const minDistance = minDistanceDateSlider * (absoluteMaxNumDate - absoluteMinNumDate);
 
     const styles = this.getStyles();
 
-    if (displayDates) {
+    if (branchLengthsToDisplay === "divAndDate") {
       return (
         <span style={{marginTop: "15px"}}>
           <Header text="Date Range"/>
@@ -175,6 +175,7 @@ class DateRangeInputs extends React.Component {
         </span>
       );
     }
+    /* else - if divOnly */
     return (<div></div>);
   }
 }

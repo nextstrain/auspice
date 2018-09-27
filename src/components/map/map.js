@@ -25,7 +25,7 @@ import { errorNotification } from "../../actions/notifications";
 @connect((state) => {
   return {
     // datasetGuid: state.tree.datasetGuid,
-    displayDates: state.controls.displayDates,
+    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
     absoluteDateMin: state.controls.absoluteDateMin,
     absoluteDateMax: state.controls.absoluteDateMax,
     treeVersion: state.tree.version,
@@ -447,7 +447,7 @@ class Map extends React.Component {
       position: "absolute",
       textTransform: "uppercase"
     };
-    if (this.props.displayDates) {
+    if (this.props.branchLengthsToDisplay === "divAndDate") {
       return (
         <div>
           <button
@@ -462,7 +462,7 @@ class Map extends React.Component {
         </div>
       );
     }
-    /* else */
+    /* else - divOnly */
     return (<div></div>);
   }
 

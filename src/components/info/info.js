@@ -61,12 +61,12 @@ const arrayToSentence = (arr, {prefix=undefined, suffix=undefined, capatalise=tr
   return ret + " ";
 };
 
-export const createSummary = (virus_count, nodes, filters, visibility, visibleStateCounts, displayDates) => {
+export const createSummary = (virus_count, nodes, filters, visibility, visibleStateCounts, branchLengthsToDisplay) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
   const sampledDateRange = getVisibleDateRange(nodes, visibility);
   /* Number of genomes & their date range */
   let summary = `Showing ${nSelectedSamples} of ${virus_count} genomes`;
-  if (displayDates) {
+  if (branchLengthsToDisplay !== "divOnly") {
     summary += ` sampled between ${styliseDateRange(sampledDateRange[0])} and ${styliseDateRange(sampledDateRange[1])}`;
   }
   /* parse filters */
@@ -76,7 +76,7 @@ export const createSummary = (virus_count, nodes, filters, visibility, visibleSt
     if (!n) return;
     filterTextArr.push(`${n} ${pluralise(filterName, n)}`);
   });
-  const prefix = displayDates ? "and comprising" : "comprising";
+  const prefix = branchLengthsToDisplay !== "divOnly" ? "and comprising" : "comprising";
   const filterText = arrayToSentence(filterTextArr, {prefix: prefix, capatalise: false});
   if (filterText.length) {
     summary += ` ${filterText}`;
@@ -102,7 +102,7 @@ export const createSummary = (virus_count, nodes, filters, visibility, visibleSt
     dateMax: state.controls.dateMax,
     absoluteDateMin: state.controls.absoluteDateMin,
     absoluteDateMax: state.controls.absoluteDateMax,
-    displayDates: state.controls.displayDates
+    branchLengthsToDisplay: state.controls.branchLengthsToDisplay
   };
 })
 class Info extends React.Component {
@@ -292,7 +292,7 @@ class Info extends React.Component {
     (2) The active filters: Filtered to [[Metsky et al Zika Virus Evolution And Spread In The Americas (76)]], [[Colombia (28)]].
     */
 
-    const summary = createSummary(this.props.metadata.virus_count, this.props.nodes, this.props.filters, this.props.visibility, this.props.visibleStateCounts, this.props.displayDates);
+    const summary = createSummary(this.props.metadata.virus_count, this.props.nodes, this.props.filters, this.props.visibility, this.props.visibleStateCounts, this.props.branchLengthsToDisplay);
 
     /* part II - the active filters */
     const filters = [];

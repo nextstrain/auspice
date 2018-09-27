@@ -20,7 +20,7 @@ export const checkColorByConfidence = (attrs, colorBy) => {
 };
 
 export const getMinCalDateViaTree = (nodes, state) => {
-  // const minNumDate = nodes[0].attr.num_date - 0.01; /* slider should be earlier than actual day */
+  /* slider should be earlier than actual day */
   /* if no date, use some default dates - slider will not be visible */
   const minNumDate = nodes[0].attr.num_date ? nodes[0].attr.num_date - 0.01 : state.dateMaxNumeric - defaultDateRange;
   return numericToCalendar(minNumDate);
@@ -266,10 +266,10 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   }
 
   /* does the tree have date information? if not, disable controls, modify view */
-  state.displayDates = Object.keys(tree.nodes[0].attr).indexOf("num_date") > -1;
+  state.branchLengthsToDisplay = Object.keys(tree.nodes[0].attr).indexOf("num_date") > -1 ? "divAndDate" : "divOnly";
 
-  /* if no displayDates is false, force to display by divergence */
-  if (state.displayDates === false) {
+  /* if branchLengthsToDisplay is divOnly, force to display by divergence */
+  if (state.branchLengthsToDisplay === "divOnly") {
     state.distanceMeasure = "div";
   }
 

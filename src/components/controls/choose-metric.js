@@ -15,7 +15,7 @@ import { SelectLabel } from "../framework/select-label";
   return {
     distanceMeasure: state.controls.distanceMeasure,
     showTreeToo: state.controls.showTreeToo,
-    displayDates: state.controls.displayDates,
+    branchLengthsToDisplay: state.controls.branchLengthsToDisplay,
     temporalConfidence: state.controls.temporalConfidence
   };
 })
@@ -44,7 +44,7 @@ class ChooseMetric extends React.Component {
     const styles = this.getStyles();
     const selected = this.props.distanceMeasure;
     const potentialOffset = this.props.showTreeToo ? {marginTop: "0px"} : {};
-    if (this.props.displayDates) {
+    if (this.props.branchLengthsToDisplay === "divAndDate") {
       return (
         <div style={styles.container}>
           <SelectLabel text="Branch Length" extraStyles={potentialOffset}/>
@@ -83,7 +83,7 @@ class ChooseMetric extends React.Component {
         </div>
       );
     }
-    /* else */
+    /* else - if divOnly */
     return (
       <div style={styles.container}>
         <SelectLabel text="Branch Length" extraStyles={potentialOffset}/>
