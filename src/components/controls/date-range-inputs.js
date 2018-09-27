@@ -142,7 +142,7 @@ class DateRangeInputs extends React.Component {
 
     const styles = this.getStyles();
 
-    if (branchLengthsToDisplay === "divAndDate") {
+    if (branchLengthsToDisplay !== "divOnly") {
       return (
         <span style={{marginTop: "15px"}}>
           <Header text="Date Range"/>

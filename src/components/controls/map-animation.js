@@ -63,7 +63,7 @@ class MapAnimationControls extends React.Component {
 
   render() {
 
-    if (this.props.branchLengthsToDisplay === "divAndDate") {
+    if (this.props.branchLengthsToDisplay !== "divOnly") {
       return (
         <div id="mapAnimationControls">
 

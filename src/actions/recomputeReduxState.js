@@ -266,12 +266,13 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   }
 
   /* does the tree have date information? if not, disable controls, modify view */
-  state.branchLengthsToDisplay = Object.keys(tree.nodes[0].attr).indexOf("num_date") > -1 ? "divAndDate" : "divOnly";
+  state.branchLengthsToDisplay = Object.keys(tree.nodes[0].attr).indexOf("num_date") === -1 ? "divOnly" :
+    Object.keys(tree.nodes[0].attr).indexOf("div") === -1 ? "dateOnly" : "divAndDate";
 
-  /* if branchLengthsToDisplay is divOnly, force to display by divergence */
-  if (state.branchLengthsToDisplay === "divOnly") {
-    state.distanceMeasure = "div";
-  }
+  /* if branchLengthsToDisplay is divOnly, force to display by divergence
+    if branchLengthsToDisplay is dateONly, force to display by date */
+  state.distanceMeasure = state.branchLengthsToDisplay === "divOnly" ? "div" :
+    state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
 
   state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
   state.temporalConfidence = Object.keys(tree.nodes[0].attr).indexOf("num_date_confidence") > -1 ?

@@ -447,7 +447,7 @@ class Map extends React.Component {
       position: "absolute",
       textTransform: "uppercase"
     };
-    if (this.props.branchLengthsToDisplay === "divAndDate") {
+    if (this.props.branchLengthsToDisplay !== "divOnly") {
       return (
         <div>
           <button
