@@ -237,7 +237,7 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   state.dateMaxNumeric = calendarToNumeric(state.dateMax);
 
   if (treeToo) {
-    const min = getMinCalDateViaTree(treeToo.nodes);
+    const min = getMinCalDateViaTree(treeToo.nodes, state);
     const max = getMaxCalDateViaTree(treeToo.nodes);
     const minNumeric = calendarToNumeric(min);
     const maxNumeric = calendarToNumeric(max);
