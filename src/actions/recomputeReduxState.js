@@ -53,7 +53,7 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.gmax) {
     state["zoomMax"] = parseInt(query.gmax, 10);
   }
-  if (query.m) {
+  if (query.m && state.branchLengthsToDisplay === "divAndDate") {
     state["distanceMeasure"] = query.m;
   }
   if (query.c) {
@@ -404,6 +404,12 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
       query[`f_${filterType}`] = validValues.join(",");
     }
   }
+
+  /* can we display branch length by div or num_date? */
+  if (query.m && state.branchLengthsToDisplay !== "divAndDate") {
+    delete query.m;
+  }
+
   return state;
 };
 
