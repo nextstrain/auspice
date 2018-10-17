@@ -14,6 +14,7 @@ import { determineColorByGenotypeType, calcNodeColor } from "../util/colorHelper
 import { calcColorScale } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
+import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
 
 export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -314,21 +315,10 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
     }
     delete query.c;
   };
-  if (state["colorBy"].startsWith("gt-")) {
+  if (isColorByGenotype(state.colorBy)) {
     /* Check that the genotype is valid with the current data */
-    if (!metadata.annotations) {
+    if (!decodeColorByGenotype(state.colorBy, state.geneLength)) {
       fallBackToDefaultColorBy();
-    } else {
-      const [gene, pos] = state.colorBy.split("-")[1].split("_");
-      if (!(gene in metadata.annotations)) {
-        fallBackToDefaultColorBy();
-      } else if (gene === "nuc") {
-        if ((metadata.annotations[gene].end - metadata.annotations[gene].start) < pos) {
-          fallBackToDefaultColorBy();
-        }
-      } else if ((metadata.annotations[gene].end - metadata.annotations[gene].start)/3 < pos) {
-        fallBackToDefaultColorBy();
-      }
     }
   } else if (Object.keys(metadata.colorOptions).indexOf(state.colorBy) === -1) {
     /* if it's a _non_ genotype colorBy AND it's not a valid option, fall back to the default */

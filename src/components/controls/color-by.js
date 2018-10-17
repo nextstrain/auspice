@@ -6,6 +6,7 @@ import { sidebarField } from "../../globalStyles";
 import { controlsWidth, colorByMenuPreferredOrdering } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype } from "../../util/getGenotype";
 
 /* the reason why we have colorBy as state (here) and in redux
    is for the case where we select genotype, then wait for the
@@ -37,13 +38,16 @@ class ColorBy extends React.Component {
 
   componentWillReceiveProps(nextProps) {
     if (this.props.colorBy !== nextProps.colorBy) {
-      if (nextProps.colorBy.startsWith("gt")) {
-        const matches = nextProps.colorBy.match(/gt-(.+)_(.+)$/);
-        this.setState({
-          colorBySelected: "gt",
-          geneSelected: matches[1],
-          positionSelected: matches[2]
-        });
+      if (isColorByGenotype(nextProps.colorBy)) {
+        const genotype = decodeColorByGenotype(nextProps.colorBy);
+
+        if (genotype) {
+          this.setState({
+            colorBySelected: "gt",
+            geneSelected: genotype.gene,
+            positionSelected: genotype.positions.join(",")
+          });
+        }
       } else {
         this.setState({
           colorBySelected: nextProps.colorBy,
@@ -55,7 +59,7 @@ class ColorBy extends React.Component {
   }
 
   setColorBy(colorBy) {
-    if (colorBy.slice(0, 2) !== "gt") {
+    if (!isColorByGenotype(colorBy)) {
       analyticsControlsEvent(`color-by-${colorBy}`);
       this.props.dispatch(changeColorBy(colorBy));
       this.setState({colorBySelected: colorBy});
@@ -138,7 +142,7 @@ class ColorBy extends React.Component {
     if (!(positions.every((x) => x > 0) && positions.every((x) => x <= this.props.geneLength[gene]))) {
       positions = [1];  /* is positions are outside gene, set to 1 to trigger zoom */
     }
-    const colorBy = "gt-"+gene+"_"+positions.join(',');
+    const colorBy = encodeColorByGenotype({ gene, positions });
     analyticsControlsEvent("color-by-genotype");
     this.props.dispatch(changeColorBy(colorBy));
   }

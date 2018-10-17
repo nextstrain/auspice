@@ -7,7 +7,7 @@ import { zoom } from "d3-zoom";
 import { brushX } from "d3-brush";
 import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
-import { parseEncodedGenotype } from "../../util/getGenotype";
+import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype";
 import { changeZoom } from "../../actions/entropy";
 
 /* EntropChart uses D3 for visualisation. There are 2 methods exposed to
@@ -28,8 +28,8 @@ EntropyChart.prototype.render = function render(props) {
   this.props = props;
   this.aa = props.mutType === "aa";
   this.bars = props.bars;
-  this.selectedNodes = props.colorBy.startsWith("gt") ?
-    this._getSelectedNodes(parseEncodedGenotype(props.colorBy, props.geneLength)) :
+  this.selectedNodes = isColorByGenotype(props.colorBy) ?
+    this._getSelectedNodes(decodeColorByGenotype(props.colorBy, props.geneLength)) :
     [];
   this.svg.selectAll("*").remove(); /* tear things down */
   this._calcOffsets(props.width, props.height);
@@ -37,8 +37,8 @@ EntropyChart.prototype.render = function render(props) {
   this._addZoomLayers();
   this._setScales(this.maxNt + 1, props.maxYVal);
   /* If only a gene/nuc, zoom to that. If zoom min/max as well, that takes precidence */
-  this.zoomCoordinates = props.colorBy.startsWith("gt") ?
-    this._getZoomCoordinates(parseEncodedGenotype(props.colorBy, props.geneLength), props.geneMap) :
+  this.zoomCoordinates = isColorByGenotype(props.colorBy) ?
+    this._getZoomCoordinates(decodeColorByGenotype(props.colorBy, props.geneLength), props.geneMap) :
     this.scales.xNav.domain(); // []; /* set zoom to specified gene or to whole genome */
   this.zoomCoordinates[0] = props.zoomMin ? props.zoomMin : this.zoomCoordinates[0];
   this.zoomCoordinates[1] = props.zoomMax ? props.zoomMax : this.zoomCoordinates[1];
@@ -108,23 +108,23 @@ EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
 EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed, geneMap) {
   let startEnd = [0, this.scales.xNav.domain()[1]];
   let multiplier = 0; /* scale genes to nice sizes - don't scale nucs */
-  if (!parsed[0].aa) {
+  if (!parsed.aa) {
     const maxNt = this.scales.xNav.domain()[1];
     /* if one nuc position, pad on either side with some space */
-    if (parsed[0].positions.length === 1) {
-      const pos = parsed[0].positions[0];
+    if (parsed.positions.length === 1) {
+      const pos = parsed.positions[0];
       const eitherSide = maxNt*0.05;
       startEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
         (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
     } else {
       /* if two nuc pos, find largest and smallest and pad slightly */
-      const start = Math.min.apply(null, parsed[0].positions);
-      const end = Math.max.apply(null, parsed[0].positions);
+      const start = Math.min.apply(null, parsed.positions);
+      const end = Math.max.apply(null, parsed.positions);
       startEnd = [start - (end-start)*0.05, end + (end-start)*0.05];
     }
   } else {
     /* if a gene, scale to nice size */
-    const gene = parsed[0].prot;
+    const gene = parsed.gene;
     startEnd = [geneMap[gene].start, geneMap[gene].end];
     multiplier = (startEnd[1]-startEnd[0])*1;
   }
@@ -134,17 +134,15 @@ EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed
 };
 
 EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
-  if (this.aa !== parsed[0].aa) {
+  if (this.aa !== parsed.aa) {
     console.error("entropy out of sync");
     return undefined;
   }
   const selectedNodes = [];
   if (this.aa) { /*     P  R  O  T  E  I  N  S    */
     const genePosPairs = [];
-    for (const entry of parsed) {
-      for (const pos of entry.positions) {
-        genePosPairs.push([entry.prot, pos]);
-      }
+    for (const pos of parsed.positions) {
+      genePosPairs.push([parsed.gene, pos]);
     }
     for (const node of this.bars) {
       for (const pair of genePosPairs) {
@@ -155,7 +153,7 @@ EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
     }
   } else { /*     N U C L E O T I D E S     */
     for (const node of this.bars) {
-      if (parsed[0].positions.indexOf(node.x) !== -1) {
+      if (parsed.positions.indexOf(node.x) !== -1) {
         selectedNodes.push(node);
       }
     }

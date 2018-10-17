@@ -3,6 +3,7 @@ import { infoPanelStyles } from "../../../globalStyles";
 import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
+import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 
 const infoLineJSX = (item, value) => (
   <span>
@@ -61,7 +62,7 @@ const getBranchTimeJSX = (d, temporalConfidence) => {
  * @return {JSX} to be displayed
  */
 const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidence, colorBy) => {
-  if (colorBy.slice(0, 2) === "gt") {
+  if (isColorByGenotype(colorBy)) {
     return null; /* muts ahave already been displayed */
   }
   if (colorBy === "num_date") {
@@ -234,10 +235,11 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
     if (distanceMeasure === "num_date") return null;
     return getBranchTimeJSX(d.n, temporalConfidence);
   }
-  if (colorBy.slice(0, 2) === "gt") {
-    const key = mutType === "nuc" ?
-      "Nucleotide at pos " + colorBy.replace("gt-", "").replace("nuc_", "") :
-      "Amino Acid at " + colorBy.replace("gt-", "").replace("_", " site ");
+  if (isColorByGenotype(colorBy)) {
+    const genotype = decodeColorByGenotype(colorBy);
+    const key = genotype.aa
+      ? `Amino Acid at ${genotype.gene} site ${genotype.positions.join(", ")}`
+      : `Nucleotide at pos ${genotype.positions.join(", ")}`;
     const state = getTipColorAttribute(d.n, colorScale);
     return infoLineJSX(key + ":", state);
   }

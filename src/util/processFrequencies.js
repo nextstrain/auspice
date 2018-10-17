@@ -1,4 +1,5 @@
 import { NODE_VISIBLE } from "./globals";
+import { isColorByGenotype } from "./getGenotype";
 
 export const unassigned_label = "unassigned";
 
@@ -36,7 +37,7 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   /* color scale domain forms the categories in the stream graph */
   const categories = colorScale.legendValues.filter((d) => d !== undefined);
   categories.push(unassigned_label); /* for tips without a colorBy */
-  const isGenotype = colorBy.slice(0, 3) === "gt-";
+  const isGenotype = isColorByGenotype(colorBy);
   const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */
   const pivotsLen = pivots.length;
   categories.forEach((x) => {matrix[x] = new Array(pivotsLen).fill(0);});
