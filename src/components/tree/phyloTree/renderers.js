@@ -5,6 +5,7 @@ import { NODE_VISIBLE } from "../../../util/globals";
  * @param {d3 selection} svg      -- the svg into which the tree is drawn
  * @param {string} layout         -- the layout to be used, e.g. "rect"
  * @param {string} distance       -- the property used as branch length, e.g. div or num_date
+ * @param {string} scatter        -- the property used as y value in scatterplot, e.g. div or num_date
  * @param {object} parameters     -- an object that contains options that will be added to this.params
  * @param {object} callbacks      -- an object with call back function defining mouse behavior
  * @param {array} branchThickness -- array of branch thicknesses (same ordering as tree nodes)
@@ -17,7 +18,7 @@ import { NODE_VISIBLE } from "../../../util/globals";
  * @param {array|null} tipRadii   -- array of tip radius'
  * @return {null}
  */
-export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange) {
+export const render = function render(svg, layout, distance, scatter, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange) {
   timerStart("phyloTree render()");
   this.svg = svg;
   this.params = Object.assign(this.params, parameters);
@@ -26,7 +27,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   this.dateRange = dateRange;
 
   /* set x, y values & scale them to the screen */
-  this.setDistance(distance);
+  this.setDistance(distance, scatter);
   this.setLayout(layout);
   this.mapToScreen();
 
@@ -199,7 +200,8 @@ export const drawRegression = function drawRegression() {
     .style("fill", "none")
     .style("visibility", "visible")
     .style("stroke", this.params.regressionStroke)
-    .style("stroke-width", this.params.regressionWidth);
+    .style("stroke-width", this.params.regressionWidth)
+    .style("stroke-dasharray", "12 4");
   this.groups.clockRegression
     .append("text")
     .text(`rate estimate: ${this.regression.slope.toExponential(2)} subs per site per year`)

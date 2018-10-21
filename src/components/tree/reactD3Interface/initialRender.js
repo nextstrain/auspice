@@ -15,6 +15,7 @@ export const renderTree = (that, main, phylotree, props) => {
     select(ref),
     props.layout,
     props.distanceMeasure,
+    props.scatter,
     { /* parameters (modifies PhyloTree's defaults) */
       grid: true,
       confidence: props.temporalConfidence.display,

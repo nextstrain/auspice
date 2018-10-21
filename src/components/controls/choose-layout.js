@@ -1,15 +1,17 @@
 import React from "react";
 import PropTypes from 'prop-types';
+import Select from "react-select";
 import { connect } from "react-redux";
 import * as icons from "../framework/svg-icons";
 import { materialButton, materialButtonSelected, brandColor, darkGrey } from "../../globalStyles";
-import { CHANGE_LAYOUT } from "../../actions/types";
+import { CHANGE_LAYOUT, CHANGE_SCATTER } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SelectLabel } from "../framework/select-label";
 
 @connect((state) => {
   return {
     layout: state.controls.layout,
+    scatter: state.controls.scatter,
     showTreeToo: state.controls.showTreeToo
   };
 })
@@ -29,6 +31,29 @@ class ChooseLayout extends React.Component {
         top: -1
       }
     };
+  }
+
+  scatterSelect() {
+    const options = [
+      { value: 'num_date', label: 'Time' },
+      { value: 'div', label: 'Divergence' },
+      { value: 'ep', label: 'Epitope mutations' },
+      { value: 'cTiterSub', label: 'Antgenic advancement' }
+    ];
+    return (
+      <Select
+        name="selectScatter"
+        id="selectScatter"
+        value={this.props.scatter !== null ? this.props.scatter : "num_date"}
+        options={options}
+        clearable={false}
+        searchable={true}
+        multi={false}
+        onChange={(opt) => {
+          this.props.dispatch({ type: CHANGE_SCATTER, data: opt.value });
+        }}
+      />
+    );
   }
 
   render() {
@@ -99,7 +124,11 @@ class ChooseLayout extends React.Component {
               }
             }}
           >
-            <span style={styles.title}> {"clock"} </span>
+            <span style={styles.title}> {"scatterplot"} </span>
+            {selected === "clock" ?
+              <div>
+                {this.scatterSelect()}
+              </div> : null}
           </button>
         </div>
       </div>

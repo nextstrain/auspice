@@ -63,10 +63,10 @@ export const rectangularLayout = function rectangularLayout() {
  */
 export const timeVsRootToTip = function timeVsRootToTip() {
   this.nodes.forEach((d) => {
-    d.y = d.n.attr["div"];
-    d.x = d.n.attr["num_date"];
-    d.px = d.n.parent.attr["num_date"];
-    d.py = d.n.parent.attr["div"];
+    d.x = d.n.attr[this.distance];
+    d.y = d.n.attr[this.scatter];
+    d.px = d.n.parent.attr[this.distance];
+    d.py = d.n.parent.attr[this.scatter];
   });
   if (this.vaccines) { /* overlay vaccine cross on tip */
     this.vaccines.forEach((d) => {
@@ -199,13 +199,14 @@ export const radialLayout = function radialLayout() {
  * this is set to "depth" of each node. depth is later used to
  * calculate coordinates. Parent depth is assigned as well.
  */
-export const setDistance = function setDistance(distanceAttribute) {
+export const setDistance = function setDistance(distanceAttribute, scatterAttribute) {
   timerStart("setDistance");
   this.nodes.forEach((d) => {d.update = true;});
-  if (typeof distanceAttribute === "undefined") {
-    this.distance = "div"; // default is "div" for divergence
-  } else {
+  if (typeof distanceAttribute !== "undefined") {
     this.distance = distanceAttribute;
+  }
+  if (typeof scatterAttribute !== "undefined") {
+    this.scatter = scatterAttribute;
   }
   // assign node and parent depth
   const tmp_dist = this.distance;

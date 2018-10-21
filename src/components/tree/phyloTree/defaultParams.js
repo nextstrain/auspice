@@ -2,7 +2,7 @@ import { dataFont, darkGrey } from "../../../globalStyles";
 
 export const createDefaultParams = () => ({
   regressionStroke: darkGrey,
-  regressionWidth: 6,
+  regressionWidth: 5,
   majorGridStroke: "#CCC",
   majorGridWidth: 2,
   minorGridStroke: "#DDD",

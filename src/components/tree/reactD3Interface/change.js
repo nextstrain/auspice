@@ -51,6 +51,11 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.newDistance = newProps.distanceMeasure;
   }
 
+  /* change scatter */
+  if (oldProps.scatter !== newProps.scatter) {
+    args.newScatter = newProps.scatter;
+  }
+
   /* change in key used to define branch labels (e.g. aa, clade...) */
   if (oldProps.selectedBranchLabel !== newProps.selectedBranchLabel) {
     args.newBranchLabellingKey = newProps.selectedBranchLabel;

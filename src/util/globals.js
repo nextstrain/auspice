@@ -24,6 +24,7 @@ export const maxMapWidth = 1000; /* just right for our default zoom level (which
 export const defaultColorBy = "country";
 export const defaultGeoResolution = "country";
 export const defaultLayout = "rect";
+export const defaultScatter = "div";
 export const defaultDistanceMeasure = "num_date";
 export const defaultDateRange = 6;
 export const date_select = true;

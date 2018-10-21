@@ -10,6 +10,7 @@ const Tree = connect((state) => ({
   colorBy: state.controls.colorBy,
   colorByConfidence: state.controls.colorByConfidence,
   layout: state.controls.layout,
+  scatter: state.controls.scatter,
   temporalConfidence: state.controls.temporalConfidence,
   distanceMeasure: state.controls.distanceMeasure,
   mutType: state.controls.mutType,

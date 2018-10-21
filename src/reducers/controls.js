@@ -4,6 +4,7 @@ import { defaultGeoResolution,
   defaultDateRange,
   defaultDistanceMeasure,
   defaultLayout,
+  defaultScatter,
   mutType,
   twoColumnBreakpoint } from "../util/globals";
 import * as types from "../actions/types";
@@ -17,6 +18,7 @@ export const getDefaultControlsState = () => {
   const defaults = {
     distanceMeasure: defaultDistanceMeasure,
     layout: defaultLayout,
+    scatter: defaultScatter,
     geoResolution: defaultGeoResolution,
     filters: {},
     colorBy: defaultColorBy
@@ -40,6 +42,7 @@ export const getDefaultControlsState = () => {
     mutType: mutType,
     temporalConfidence: {exists: false, display: false, on: false},
     layout: defaults.layout,
+    scatter: defaults.scatter,
     distanceMeasure: defaults.distanceMeasure,
     dateMin,
     dateMinNumeric,
@@ -109,6 +112,10 @@ const Controls = (state = getDefaultControlsState(), action) => {
         temporalConfidence
       });
     }
+    case types.CHANGE_SCATTER:
+      return Object.assign({}, state, {
+        scatter: action.data
+      });
     case types.CHANGE_DISTANCE_MEASURE:
       /* while this may change, div currently doesn't have CIs,
       so they shouldn't be displayed. */

@@ -247,6 +247,7 @@ export const change = function change({
   /* change these things to provided value */
   newDistance = undefined,
   newLayout = undefined,
+  newScatter = undefined,
   newBranchLabellingKey = undefined,
   /* arrays of data (the same length as nodes) */
   branchStroke = undefined,
@@ -297,7 +298,7 @@ export const change = function change({
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || zoomIntoClade || svgHasChangedDimensions) {
+  if (newDistance || newLayout || newScatter || zoomIntoClade || svgHasChangedDimensions) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -328,13 +329,14 @@ export const change = function change({
 
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
   /* distance */
-  if (newDistance) this.setDistance(newDistance);
+  if (newDistance || newScatter) this.setDistance(newDistance, newScatter);
   /* layout (must run after distance) */
-  if (newDistance || newLayout) this.setLayout(newLayout || this.layout);
+  if (newDistance || newScatter || newLayout) this.setLayout(newLayout || this.layout);
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||
     newDistance ||
+    newScatter ||
     newLayout ||
     zoomIntoClade ||
     svgHasChangedDimensions

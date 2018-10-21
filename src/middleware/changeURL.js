@@ -47,6 +47,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.l = action.data === state.controls.defaults.layout ? undefined : action.data;
       break;
     }
+    case types.CHANGE_SCATTER: {
+      query.scatter = action.data === state.controls.defaults.defaultScatter ? undefined : action.data;
+      break;
+    }
     case types.CHANGE_GEO_RESOLUTION: {
       query.r = action.data === state.controls.defaults.geoResolution ? undefined : action.data;
       break;
