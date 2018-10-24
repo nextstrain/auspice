@@ -107,24 +107,21 @@ class ColorBy extends React.Component {
   }
 
   gtPositionInput() {
-    if (this.state.colorBySelected === "gt") {
-      return (
-        <input
-          type="text"
-          style={sidebarField}
-          placeholder={this.state.geneSelected + " positions..."}
-          value={this.state.positionSelected}
-          onChange={(e) => {
-            const gene = this.state.geneSelected;
-            const position = e.target.value;
-            console.log("gtPositionInput -> ", gene, position);
-            this.setState({positionSelected: position});
-            this.setGenotypeColoring(gene, position);
-          }}
-        />
-      );
-    }
-    return null;
+    return (
+      <input
+        type="text"
+        style={sidebarField}
+        placeholder={this.state.geneSelected + " positions..."}
+        value={this.state.positionSelected}
+        onChange={(e) => {
+          const gene = this.state.geneSelected;
+          const position = e.target.value;
+          console.log("gtPositionInput -> ", gene, position);
+          this.setState({positionSelected: position});
+          this.setGenotypeColoring(gene, position);
+        }}
+      />
+    );
   }
 
   isNormalInteger(str) {
