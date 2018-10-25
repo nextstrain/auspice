@@ -1,4 +1,4 @@
-import { determineColorByGenotypeType, calcNodeColor } from "../util/colorHelpers";
+import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale } from "../util/colorScale";
 import { timerStart, timerEnd } from "../util/perf";
 import { updateEntropyVisibility } from "./entropy";
@@ -23,7 +23,7 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
     const nodeColorsToo = treeToo.loaded ? calcNodeColor(treeToo, colorScale) : undefined;
 
     /* step 3: change in mutType? */
-    const colorByMutType = determineColorByGenotypeType(colorBy);
+    const colorByMutType = determineColorByGenotypeMutType(colorBy);
     const newMutType = colorByMutType !== controls.mutType ? colorByMutType : false;
 
     timerEnd("changeColorBy calculations"); /* end timer before dispatch */

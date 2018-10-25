@@ -10,7 +10,7 @@ import { countTraitsAcrossTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons";
-import { determineColorByGenotypeType, calcNodeColor } from "../util/colorHelpers";
+import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
@@ -375,7 +375,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
 
   /* if colorBy is a genotype then we need to set mutType */
   if (state.colorBy) {
-    const maybeMutType = determineColorByGenotypeType(state.colorBy);
+    const maybeMutType = determineColorByGenotypeMutType(state.colorBy);
     if (maybeMutType) {
       state.mutType = maybeMutType;
     }

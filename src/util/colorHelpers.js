@@ -18,7 +18,7 @@ export const averageColors = (hexColors) => {
   return avg.toString();
 };
 
-export const determineColorByGenotypeType = (colorBy) => {
+export const determineColorByGenotypeMutType = (colorBy) => {
   if (isColorByGenotype(colorBy)) {
     const genotype = decodeColorByGenotype(colorBy);
     return genotype.aa
