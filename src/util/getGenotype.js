@@ -1,4 +1,4 @@
-const NUCLEOTIDE_GENE = "nuc";
+import { nucleotide_gene } from "./globals";
 
 export const isColorByGenotype = (colorBy) => colorBy === "gt" || colorBy.startsWith("gt-");
 
@@ -9,7 +9,7 @@ export const isColorByGenotype = (colorBy) => colorBy === "gt" || colorBy.starts
  */
 export const encodeColorByGenotype = ({ gene, positions }) => {
   if (!gene) {
-    gene = NUCLEOTIDE_GENE; // eslint-disable-line no-param-reassign
+    gene = nucleotide_gene; // eslint-disable-line no-param-reassign
   }
 
   if (!positions || !positions.length) {
@@ -52,7 +52,7 @@ export const decodeColorByGenotype = (colorBy, geneLengths) => {
     return {
       gene,
       positions,
-      aa: gene !== NUCLEOTIDE_GENE
+      aa: gene !== nucleotide_gene
     };
   }
 

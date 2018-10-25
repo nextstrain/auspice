@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { strainNameToIdx, cladeNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -220,7 +220,7 @@ const modifyStateViaMetadata = (state, metadata) => {
   if (metadata.annotations) {
     for (const gene of Object.keys(metadata.annotations)) {
       state.geneLength[gene] = metadata.annotations[gene].end - metadata.annotations[gene].start;
-      if (gene !== "nuc") {
+      if (gene !== nucleotide_gene) {
         state.geneLength[gene] /= 3;
       }
     }

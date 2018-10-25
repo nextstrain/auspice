@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Select from "react-select";
 import { debounce } from "lodash";
 import { sidebarField } from "../../globalStyles";
-import { controlsWidth, colorByMenuPreferredOrdering } from "../../util/globals";
+import { controlsWidth, colorByMenuPreferredOrdering, nucleotide_gene } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodePositions } from "../../util/getGenotype";
@@ -114,7 +114,7 @@ class ColorBy extends React.Component {
     let options = [];
     if (this.props.geneMap) {
       options = Object.keys(this.props.geneMap).map((prot) => ({value: prot, label: prot}));
-      options[options.length] = {value: "nuc", label: "nucleotide"};
+      options[options.length] = {value: nucleotide_gene, label: "nucleotide"};
     }
     return options;
   }

@@ -9,6 +9,7 @@ import Mousetrap from "mousetrap";
 import { lightGrey, medGrey, darkGrey } from "../../globalStyles";
 import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype";
 import { changeZoom } from "../../actions/entropy";
+import { nucleotide_gene } from "../../util/globals";
 
 /* EntropChart uses D3 for visualisation. There are 2 methods exposed to
  * keep the visualisation in sync with React:
@@ -81,7 +82,7 @@ EntropyChart.prototype.update = function update({
   if (gene !== undefined && start !== undefined && end !== undefined) {
     /* move the brush */
     const geneLength = end-start;
-    const multiplier = gene === "nuc" ? 0 : 1*geneLength; /* scale genes to decent size, don't scale nucs */
+    const multiplier = gene === nucleotide_gene ? 0 : 1*geneLength; /* scale genes to decent size, don't scale nucs */
     this.navGraph.select(".brush")
       .call(this.brush.move, () => {  /* scale so genes are a decent size. stop brushes going off graph */
         return [Math.max(this.scales.xNav(start-multiplier), this.scales.xNav(0)),

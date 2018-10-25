@@ -1,4 +1,4 @@
-import { genotypeColors, NODE_VISIBLE } from "./globals";
+import { genotypeColors, NODE_VISIBLE, nucleotide_gene } from "./globals";
 
 const intersectGenes = function intersectGenes(geneMap, pos) {
   for (const gene of Object.keys(geneMap)) {
@@ -70,7 +70,7 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
 };
 
 const calcEntropy = (nodes, visibility, geneMap, isAA) => {
-  const arrayOfProts = isAA ? Object.keys(geneMap) : ["nuc"];
+  const arrayOfProts = isAA ? Object.keys(geneMap) : [nucleotide_gene];
   const initialState = {};
   const anc_state = {};
   const counts = {}; // same struct as state, but with counts not chars
@@ -115,7 +115,7 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
         }
       }
     } else if (node.muts && node.muts.length) {
-      node.muts.forEach(assignFn, ["nuc", state]);
+      node.muts.forEach(assignFn, [nucleotide_gene, state]);
     }
 
     if (node.hasChildren) {

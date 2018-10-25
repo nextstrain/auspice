@@ -1,11 +1,11 @@
-import { genotypeColors } from "./globals";
+import { genotypeColors, nucleotide_gene } from "./globals";
 
 const getAnnotations = (jsonData) => {
   const annotations = [];
   const nuc = [];
   let aaCount = 0;
   for (const prot of Object.keys(jsonData)) {
-    if (prot !== "nuc") {
+    if (prot !== nucleotide_gene) {
       aaCount++;
       annotations.push({
         prot: prot,

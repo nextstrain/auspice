@@ -11,6 +11,7 @@ import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { timerStart, timerEnd } from "../../util/perf";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype } from "../../util/getGenotype";
+import { nucleotide_gene } from "../../util/globals";
 import "../../css/entropy.css";
 
 const getStyles = (width) => {
@@ -162,7 +163,7 @@ export class Entropy extends React.Component {
       this.d3entropy,
       props.annotations,
       props.geneMap,
-      props.geneLength.nuc,
+      props.geneLength[nucleotide_gene],
       { /* callbacks */
         onHover: this.onHover.bind(this),
         onLeave: this.onLeave.bind(this),
