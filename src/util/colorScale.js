@@ -198,6 +198,9 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       }
       if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
       legendBounds = createLegendBounds(legendValues);
+    } else {
+      console.error("ColorBy", colorBy, "invalid type --", colorOptions[colorBy].type);
+      error = true;
     }
   } else {
     error = true;
