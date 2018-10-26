@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { strainNameToIdx, cladeNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -19,8 +19,10 @@ export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
 };
 
-export const getMinCalDateViaTree = (nodes) => {
-  const minNumDate = nodes[0].attr.num_date - 0.01; /* slider should be earlier than actual day */
+export const getMinCalDateViaTree = (nodes, state) => {
+  /* slider should be earlier than actual day */
+  /* if no date, use some default dates - slider will not be visible */
+  const minNumDate = nodes[0].attr.num_date ? nodes[0].attr.num_date - 0.01 : state.dateMaxNumeric - defaultDateRange;
   return numericToCalendar(minNumDate);
 };
 
@@ -51,7 +53,7 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.gmax) {
     state["zoomMax"] = parseInt(query.gmax, 10);
   }
-  if (query.m) {
+  if (query.m && state.branchLengthsToDisplay === "divAndDate") {
     state["distanceMeasure"] = query.m;
   }
   if (query.c) {
@@ -229,13 +231,13 @@ const modifyStateViaMetadata = (state, metadata) => {
 };
 
 const modifyStateViaTree = (state, tree, treeToo) => {
-  state["dateMin"] = getMinCalDateViaTree(tree.nodes);
+  state["dateMin"] = getMinCalDateViaTree(tree.nodes, state);
   state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
   state.dateMinNumeric = calendarToNumeric(state.dateMin);
   state.dateMaxNumeric = calendarToNumeric(state.dateMax);
 
   if (treeToo) {
-    const min = getMinCalDateViaTree(treeToo.nodes);
+    const min = getMinCalDateViaTree(treeToo.nodes, state);
     const max = getMaxCalDateViaTree(treeToo.nodes);
     const minNumeric = calendarToNumeric(min);
     const maxNumeric = calendarToNumeric(max);
@@ -262,6 +264,15 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   } else {
     state.attrs = Object.keys(tree.nodes[0].attr);
   }
+
+  /* does the tree have date information? if not, disable controls, modify view */
+  state.branchLengthsToDisplay = Object.keys(tree.nodes[0].attr).indexOf("num_date") === -1 ? "divOnly" :
+    Object.keys(tree.nodes[0].attr).indexOf("div") === -1 ? "dateOnly" : "divAndDate";
+
+  /* if branchLengthsToDisplay is divOnly, force to display by divergence
+    if branchLengthsToDisplay is dateONly, force to display by date */
+  state.distanceMeasure = state.branchLengthsToDisplay === "divOnly" ? "div" :
+    state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
 
   state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
   state.temporalConfidence = Object.keys(tree.nodes[0].attr).indexOf("num_date_confidence") > -1 ?
@@ -393,6 +404,12 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
       query[`f_${filterType}`] = validValues.join(",");
     }
   }
+
+  /* can we display branch length by div or num_date? */
+  if (query.m && state.branchLengthsToDisplay !== "divAndDate") {
+    delete query.m;
+  }
+
   return state;
 };
 
