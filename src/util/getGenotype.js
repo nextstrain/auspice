@@ -9,7 +9,7 @@ export const parseEncodedGenotype = (colorBy, geneLength) => {
     if (!geneLength[gene]) return false;
     const positions = part.split('_')[1].split(',')
       .map((x) => parseInt(x, 10))
-      .filter((x) => x > 0 && x < geneLength[gene]);
+      .filter((x) => x > 0 && x <= geneLength[gene]);
     if (!positions.length) return false;
     return {
       aa: gene !== 'nuc',

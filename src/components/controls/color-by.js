@@ -135,7 +135,7 @@ class ColorBy extends React.Component {
     }
     let positions = position.split(',').filter((x) => parseInt(x, 10)); /* get rid of non-ints */
     if (!positions.length) return; /* do nothing if no ints */
-    if (!(positions.every((x) => x > 0) && positions.every((x) => x < this.props.geneLength[gene]))) {
+    if (!(positions.every((x) => x > 0) && positions.every((x) => x <= this.props.geneLength[gene]))) {
       positions = [1];  /* is positions are outside gene, set to 1 to trigger zoom */
     }
     const colorBy = "gt-"+gene+"_"+positions.join(',');
