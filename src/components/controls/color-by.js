@@ -55,6 +55,7 @@ class ColorBy extends React.Component {
     };
   }
 
+  // State from the outside world enters via props.
   componentWillReceiveProps(nextProps) {
     if (this.props.colorBy !== nextProps.colorBy) {
       if (isColorByGenotype(nextProps.colorBy)) {
@@ -75,14 +76,29 @@ class ColorBy extends React.Component {
     }
   }
 
-  setColorBy(colorBy) {
-    if (!isColorByGenotype(colorBy)) {
-      analyticsControlsEvent(`color-by-${colorBy}`);
-      this.props.dispatch(changeColorBy(colorBy));
-      this.replaceState({colorBySelected: colorBy});
+  // Our internal state is published back to the outside world when it changes.
+  componentDidUpdate() {
+    const colorBySelected = this.state.colorBySelected;
+
+    if (colorBySelected === "gt") {
+      const { geneSelected, positionSelected } = this.state;
+
+      // Only dispatch a change to the app's colorBy if we have a
+      // fully-specified genotype (gene and position).
+      if (geneSelected && positionSelected) {
+        const genotype = encodeColorByGenotype({
+          gene: geneSelected,
+          positions: decodePositions(positionSelected, this.props.geneLength[geneSelected])
+        });
+
+        if (genotype) {
+          analyticsControlsEvent("color-by-genotype");
+          this.props.dispatch(changeColorBy(genotype));
+        }
+      }
     } else {
-      // don't update colorBy yet, genotype still needs to be specified
-      this.replaceState({colorBySelected: "gt"});
+      analyticsControlsEvent(`color-by-${colorBySelected}`);
+      this.props.dispatch(changeColorBy(colorBySelected));
     }
   }
 
@@ -108,10 +124,7 @@ class ColorBy extends React.Component {
         searchable={true}
         multi={false}
         onChange={(opt) => {
-          const gene = opt.value;
-          const position = this.state.positionSelected;
-          this.setState({geneSelected: gene});
-          this.setGenotypeColoring(gene, position);
+          this.setState({ geneSelected: opt.value });
         }}
       />
     );
@@ -133,11 +146,7 @@ class ColorBy extends React.Component {
         placeholder={placeholder}
         value={this.state.positionSelected}
         onChange={(e) => {
-          const gene = this.state.geneSelected;
-          const position = e.target.value;
-          console.log("gtPositionInput -> ", gene, position);
-          this.setState({positionSelected: position});
-          this.setGenotypeColoring(gene, position);
+          this.setState({ positionSelected: e.target.value });
         }}
       />
     );
@@ -146,15 +155,6 @@ class ColorBy extends React.Component {
   isNormalInteger(str) {
     const n = Math.floor(Number(str));
     return String(n) === str && n >= 0;
-  }
-
-  setGenotypeColoring(gene, position) {
-    let positions = decodePositions(position, this.props.geneLength[gene]);
-    const colorBy = encodeColorByGenotype({ gene, positions });
-    if (colorBy) {
-      analyticsControlsEvent("color-by-genotype");
-      this.props.dispatch(changeColorBy(colorBy));
-    }
   }
 
   getStyles() {
@@ -198,7 +198,7 @@ class ColorBy extends React.Component {
           searchable={false}
           multi={false}
           onChange={(opt) => {
-            this.setColorBy(opt.value);
+            this.replaceState({ colorBySelected: opt.value });
           }}
         />
         {this.state.colorBySelected === "gt" ?
