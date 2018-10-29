@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import Select from "react-select";
+import { debounce } from "lodash";
 import { sidebarField } from "../../globalStyles";
 import { controlsWidth, colorByMenuPreferredOrdering } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
@@ -92,15 +93,22 @@ class ColorBy extends React.Component {
         });
 
         if (genotype) {
-          analyticsControlsEvent("color-by-genotype");
-          this.props.dispatch(changeColorBy(genotype));
+          this.dispatchColorByGenotype(genotype);
         }
       }
     } else {
-      analyticsControlsEvent(`color-by-${colorBySelected}`);
-      this.props.dispatch(changeColorBy(colorBySelected));
+      this.dispatchColorBy(colorBySelected);
     }
   }
+
+  dispatchColorBy(colorBy, name = colorBy) {
+    analyticsControlsEvent(`color-by-${name}`);
+    this.props.dispatch(changeColorBy(colorBy));
+  }
+
+  dispatchColorByGenotype = debounce((genotype) => {
+    this.dispatchColorBy(genotype, "genotype");
+  }, 400);
 
   getGtGeneOptions() {
     let options = [];
