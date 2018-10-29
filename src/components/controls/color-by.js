@@ -23,11 +23,17 @@ import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decode
 class ColorBy extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      colorBySelected: props.colorBy,
+
+    this.BLANK_STATE = {
+      // These are values for controlled form components, so cannot be null.
+      colorBySelected: "",
       geneSelected: "",
       positionSelected: ""
     };
+
+    this.state = this.newState({
+      colorBySelected: props.colorBy
+    });
   }
   static propTypes = {
     colorBy: PropTypes.string.isRequired,
@@ -36,23 +42,34 @@ class ColorBy extends React.Component {
     dispatch: PropTypes.func.isRequired
   }
 
+  // Applies the given state to the immutable blank state and replaces the
+  // current state with the result.
+  replaceState(state) {
+    this.setState((oldState, props) => this.newState(state)); // eslint-disable-line no-unused-vars
+  }
+
+  newState(state) {
+    return {
+      ...this.BLANK_STATE,
+      ...state
+    };
+  }
+
   componentWillReceiveProps(nextProps) {
     if (this.props.colorBy !== nextProps.colorBy) {
       if (isColorByGenotype(nextProps.colorBy)) {
         const genotype = decodeColorByGenotype(nextProps.colorBy);
 
         if (genotype) {
-          this.setState({
+          this.replaceState({
             colorBySelected: "gt",
             geneSelected: genotype.gene,
             positionSelected: genotype.positions.join(",")
           });
         }
       } else {
-        this.setState({
-          colorBySelected: nextProps.colorBy,
-          geneSelected: "",
-          positionSelected: ""
+        this.replaceState({
+          colorBySelected: nextProps.colorBy
         });
       }
     }
@@ -62,10 +79,10 @@ class ColorBy extends React.Component {
     if (!isColorByGenotype(colorBy)) {
       analyticsControlsEvent(`color-by-${colorBy}`);
       this.props.dispatch(changeColorBy(colorBy));
-      this.setState({colorBySelected: colorBy});
+      this.replaceState({colorBySelected: colorBy});
     } else {
       // don't update colorBy yet, genotype still needs to be specified
-      this.setState({colorBySelected: "gt"});
+      this.replaceState({colorBySelected: "gt"});
     }
   }
 
