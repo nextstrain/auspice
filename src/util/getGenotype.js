@@ -60,7 +60,7 @@ export const decodeColorByGenotype = (colorBy, geneLengths) => {
   return null;
 };
 
-const decodePositions = (positions, geneLength = 'Infinity') => {
+export const decodePositions = (positions, geneLength = 'Infinity') => {
   return positions
     .split(",")
     .map((x) => parseInt(x, 10))

@@ -6,7 +6,7 @@ import { sidebarField } from "../../globalStyles";
 import { controlsWidth, colorByMenuPreferredOrdering } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype } from "../../util/getGenotype";
+import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodePositions } from "../../util/getGenotype";
 
 /* the reason why we have colorBy as state (here) and in redux
    is for the case where we select genotype, then wait for the
@@ -132,7 +132,7 @@ class ColorBy extends React.Component {
   }
 
   setGenotypeColoring(gene, position) {
-    let positions = position.split(',').filter((x) => parseInt(x, 10)); /* get rid of non-ints */
+    let positions = decodePositions(position, this.props.geneLength[gene]);
     const colorBy = encodeColorByGenotype({ gene, positions });
     if (colorBy) {
       analyticsControlsEvent("color-by-genotype");
