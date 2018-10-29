@@ -25,7 +25,7 @@ class ColorBy extends React.Component {
     super(props);
     this.state = {
       colorBySelected: props.colorBy,
-      geneSelected: "nuc",
+      geneSelected: "",
       positionSelected: ""
     };
   }
@@ -51,7 +51,7 @@ class ColorBy extends React.Component {
       } else {
         this.setState({
           colorBySelected: nextProps.colorBy,
-          geneSelected: "nuc",
+          geneSelected: "",
           positionSelected: ""
         });
       }
@@ -65,14 +65,7 @@ class ColorBy extends React.Component {
       this.setState({colorBySelected: colorBy});
     } else {
       // don't update colorBy yet, genotype still needs to be specified
-      let geneSelected = "nuc"; /* a safe default */
-      if (this.getGtGeneOptions().filter((d) => d.label === "HA1").length) {
-        geneSelected = "HA1";
-      }
-      this.setState({colorBySelected: "gt", geneSelected});
-      const gene = geneSelected;
-      const position = this.state.positionSelected;
-      this.setGenotypeColoring(gene, position);
+      this.setState({colorBySelected: "gt"});
     }
   }
 
@@ -91,6 +84,7 @@ class ColorBy extends React.Component {
       <Select
         name="selectGenotype"
         id="selectGenotype"
+        placeholder="gene…"
         value={this.state.geneSelected}
         options={gtGeneOptions}
         clearable={false}
@@ -99,7 +93,7 @@ class ColorBy extends React.Component {
         onChange={(opt) => {
           const gene = opt.value;
           const position = this.state.positionSelected;
-          this.setState({geneSelected: gene, positionSelected:gene+" positions..."});
+          this.setState({geneSelected: gene});
           this.setGenotypeColoring(gene, position);
         }}
       />
@@ -107,11 +101,19 @@ class ColorBy extends React.Component {
   }
 
   gtPositionInput() {
+    const { geneSelected } = this.state;
+
+    const geneLength = Math.floor(this.props.geneLength[geneSelected]);
+
+    const placeholder = geneSelected
+      ? `${geneSelected} position (1–${geneLength})…`
+      : `position…`;
+
     return (
       <input
         type="text"
         style={sidebarField}
-        placeholder={this.state.geneSelected + " positions..."}
+        placeholder={placeholder}
         value={this.state.positionSelected}
         onChange={(e) => {
           const gene = this.state.geneSelected;
@@ -130,18 +132,12 @@ class ColorBy extends React.Component {
   }
 
   setGenotypeColoring(gene, position) {
-    if (!position) {
-      if (gene==="nuc") return;
-      position = "1"; /* if it's a gene, set position to trigger zoom */
-    }
     let positions = position.split(',').filter((x) => parseInt(x, 10)); /* get rid of non-ints */
-    if (!positions.length) return; /* do nothing if no ints */
-    if (!(positions.every((x) => x > 0) && positions.every((x) => x <= this.props.geneLength[gene]))) {
-      positions = [1];  /* is positions are outside gene, set to 1 to trigger zoom */
-    }
     const colorBy = encodeColorByGenotype({ gene, positions });
-    analyticsControlsEvent("color-by-genotype");
-    this.props.dispatch(changeColorBy(colorBy));
+    if (colorBy) {
+      analyticsControlsEvent("color-by-genotype");
+      this.props.dispatch(changeColorBy(colorBy));
+    }
   }
 
   getStyles() {
