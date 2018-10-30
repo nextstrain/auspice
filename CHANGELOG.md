@@ -1,3 +1,5 @@
+## version 1.31.0 - 2018/10/29
+
 ## version 1.30.3 - 2018/09/19
 * Colours were sometimes inconsistent when two trees were displayed -- [PR 665](https://github.com/nextstrain/auspice/pull/665)
 * Clicking on a tip while two trees were displayed no longer causes a crash -- [PR 666](https://github.com/nextstrain/auspice/pull/666)
