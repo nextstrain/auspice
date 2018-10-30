@@ -90,9 +90,11 @@ export const branchOpacityFunction = scalePow()
  */
 export const calcBranchStrokeCols = (tree, confidence, colorBy) => {
   if (confidence === true) {
+    const entropyKey = colorBy + "_entropy";
     return tree.nodeColors.map((col, idx) => {
-      const entropy = tree.nodes[idx].attr[colorBy + "_entropy"];
-      return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityFunction(entropy))).toString();
+      const entropy = tree.nodes[idx].attr[entropyKey];
+      const opacity = entropy ? branchOpacityFunction(entropy) : branchOpacityConstant;
+      return rgb(interpolateRgb(col, branchInterpolateColour)(opacity)).toString();
     });
   }
   return tree.nodeColors.map((col) => {
