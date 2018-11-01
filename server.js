@@ -28,30 +28,26 @@ parser.addArgument('--data', {help: "Directory where local datasets are sourced"
 parser.addArgument('--narratives', {help: "Directory where local narratives are sourced"});
 const args = parser.parseArgs();
 
-
 /* documentation in the static site! */
 globals.setGlobals(args);
-
-/* if we are in dev-mode, we need to import specific libraries & set flags */
-let webpack, config, webpackDevMiddleware, webpackHotMiddleware;
-if (args.dev) {
-  webpack = require("webpack"); // eslint-disable-line
-  config = require("./webpack.config.dev"); // eslint-disable-line
-  webpackDevMiddleware = require("webpack-dev-middleware"); // eslint-disable-line
-  webpackHotMiddleware = require("webpack-hot-middleware"); // eslint-disable-line
-}
 
 const app = express();
 app.set('port', process.env.PORT || 4000);
 app.use(compression());
 
 if (args.dev) {
-  const compiler = webpack(config);
-  app.use(webpackDevMiddleware(compiler, {
-    noInfo: true,
-    publicPath: config.output.publicPath
-  }));
-  app.use(webpackHotMiddleware(compiler));
+  /* if we are in dev-mode, we need to import specific libraries & set up hot reloading */
+  const webpack = require("webpack"); // eslint-disable-line
+  const webpackConfig = require(process.env.WEBPACK_CONFIG ? process.env.WEBPACK_CONFIG : './webpack.config.dev');  // eslint-disable-line
+  const compiler = webpack(webpackConfig);
+  app.use(require("webpack-dev-middleware")( // eslint-disable-line
+    compiler,
+    {logLevel: 'warn', publicPath: webpackConfig.output.publicPath}
+  ));
+  app.use(require("webpack-hot-middleware")( // eslint-disable-line
+    compiler,
+    {log: console.log, path: '/__webpack_hmr', heartbeat: 10 * 1000}
+  ));
 } else {
   app.use("/dist", expressStaticGzip(path.resolve(__dirname, "dist")));
   app.use(express.static(path.resolve(__dirname, "dist")));
