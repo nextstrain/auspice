@@ -5,7 +5,7 @@
   "author": "James Hadfield, Trevor Bedford and Richard Neher",
   "license": "AGPL-3.0-only",
   "repository": "github:nextstrain/auspice",
-  "homepage": "./",
+  "homepage": "https://www.npmjs.com/package/auspice",
   "engines": {
     "node": "9.6.x",
     "npm": "5.6.x"
