@@ -129,9 +129,9 @@ export const getBranchVisibility = (d) => {
   const hiddenSetting = d.n.hidden;
   if (hiddenSetting &&
     (
-      hiddenSetting === 1 ||
-      (hiddenSetting === 2 && d.that.distance === "num_date") ||
-      (hiddenSetting === 3 && d.that.distance === "div")
+      hiddenSetting === "always" ||
+      (hiddenSetting === "timetree" && d.that.distance === "num_date") ||
+      (hiddenSetting === "divtree" && d.that.distance === "div")
     )
   ) {
     return "hidden";
