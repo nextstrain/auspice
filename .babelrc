@@ -3,18 +3,18 @@
   "plugins": ["transform-decorators-legacy"],
   "env": {
     "timing": {
-      "plugins": [
-      ],
+      "plugins": []
     },
     "development": {
       "plugins": [
+        "react-hot-loader/babel",
         ["strip-function-call", {"strip": ["timerStart", "timerEnd"]}]
-      ],
+      ]
     },
     "production": {
       "plugins": [
-          ["strip-function-call", {"strip": ["timerStart", "timerEnd"]}]
-        ],
-      }
+        ["strip-function-call", {"strip": ["timerStart", "timerEnd"]}]
+      ]
+    }
   }
 }

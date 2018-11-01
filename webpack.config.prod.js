@@ -3,6 +3,7 @@ const webpack = require("webpack");
 const CompressionPlugin = require('compression-webpack-plugin');
 
 module.exports = {
+  mode: 'production',
   entry: [
     "babel-polyfill",
     "./src/index"
@@ -19,8 +20,6 @@ module.exports = {
         /* we don't need to define env.PERF in production as babel strips out the function calls :) */
       }
     }),
-    new webpack.optimize.UglifyJsPlugin(), // minify everything - https://webpack.js.org/plugins/uglifyjs-webpack-plugin/
-    /* Note: console.log statements are not stripped out */
     new webpack.optimize.AggressiveMergingPlugin(), // merge chunks - https://github.com/webpack/docs/wiki/list-of-plugins#aggressivemergingplugin
     new CompressionPlugin({ // gzip everything - https://github.com/webpack-contrib/compression-webpack-plugin
       asset: "[path].gz[query]",
@@ -30,6 +29,9 @@ module.exports = {
       minRatio: 0.8
     })
   ],
+  optimization: {
+    minimize: true
+  },
   module: {
     rules: [
       {

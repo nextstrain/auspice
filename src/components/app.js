@@ -1,5 +1,6 @@
 import React from "react";
 import PropTypes from 'prop-types';
+import { hot } from 'react-hot-loader';
 import { connect } from "react-redux";
 import { loadJSONs } from "../actions/loadData";
 import { TOGGLE_NARRATIVE } from "../actions/types";
@@ -247,4 +248,4 @@ class App extends React.Component {
   }
 }
 
-export default App;
+export default hot(module)(App);
