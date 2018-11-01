@@ -70,17 +70,16 @@
     "papaparse": "^4.3.5",
     "prop-types": "^15.6.0",
     "query-string": "^4.2.3",
-    "react": "^16.2.0",
+    "react": "^16.6.0",
     "react-addons-css-transition-group": "^15.6.0",
-    "react-dom": "^16.2.0",
+    "react-dom": "^16.6.0",
     "react-ga": "^2.2.0",
     "react-hot-loader": "^4.3.12",
-    "react-redux": "^5.0.6",
+    "react-redux": "^5.1.0",
     "react-select": "^1.0.0-rc.5",
-    "react-tap-event-plugin": "^3.0.2",
     "react-tweet-embed": "^1.1.0",
-    "redux": "^3.7.2",
-    "redux-thunk": "^2.2.0",
+    "redux": "^4.0.1",
+    "redux-thunk": "^2.3.0",
     "request": "^2.87.0",
     "whatwg-fetch": "^0.10.1",
     "yaml-front-matter": "^4.0.0"
@@ -119,6 +118,6 @@
     "webpack": "^4.16.5",
     "webpack-cli": "^3.1.2",
     "webpack-dev-middleware": "^3.1.3",
-    "webpack-hot-middleware": "^2.19.1"
+    "webpack-hot-middleware": "^2.24.3"
   }
 }

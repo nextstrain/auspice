@@ -7,7 +7,6 @@ import React from "react";
 import ReactDOM from "react-dom";
 import ReactGA from "react-ga";
 import { Provider } from "react-redux";
-import injectTapEventPlugin from "react-tap-event-plugin";
 import configureStore from "./store";
 /* S T Y L E S H E E T S */
 import "./css/global.css";
@@ -41,16 +40,3 @@ const renderApp = () => {
 
 renderApp();
 
-/*  to fix iOS's dreaded 300ms tap delay, we need this plugin
-NOTE Facebook is not planning on supporting tap events (#436) because browsers are fixing/removing
-the click delay. Unfortunately it will take a lot of time before all mobile
-browsers (including iOS' UIWebView) will and can be updated.
-https://github.com/zilverline/react-tap-event-plugin
-
-Following https://github.com/zilverline/react-tap-event-plugin/issues/61
-we wrap this in a try-catch as hotloading triggers errors */
-try {
-  injectTapEventPlugin();
-} catch (e) {
-  // empty
-}
