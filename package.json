@@ -4,6 +4,7 @@
   "description": "Web app for visualizing pathogen evolution",
   "author": "James Hadfield, Trevor Bedford and Richard Neher",
   "license": "AGPL-3.0-only",
+  "repository": "github:nextstrain/auspice",
   "homepage": "./",
   "engines": {
     "node": "9.6.x",
