@@ -120,6 +120,24 @@ export const drawTips = function drawTips() {
   timerEnd("drawTips");
 };
 
+/**
+ * given a tree node, decide whether the branch should be rendered
+ * This enforces the "hidden" property set in the dataset JSON
+ * @return {string}
+ */
+export const getBranchVisibility = (d) => {
+  const hiddenSetting = d.n.hidden;
+  if (hiddenSetting &&
+    (
+      hiddenSetting === "always" ||
+      (hiddenSetting === "timetree" && d.that.distance === "num_date") ||
+      (hiddenSetting === "divtree" && d.that.distance === "div")
+    )
+  ) {
+    return "hidden";
+  }
+  return "visible";
+};
 
 /**
  * adds all branches to the svg, these are paths with class branch, which comprise two groups
@@ -167,6 +185,7 @@ export const drawBranches = function drawBranches() {
         .style("stroke-linecap", "round")
         .style("stroke-width", (d) => d['stroke-width']+"px" || params.branchStrokeWidth)
         .style("fill", "none")
+        .style("visibility", getBranchVisibility)
         .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
         .style("pointer-events", "auto")
         .on("mouseover", this.callbacks.onBranchHover)

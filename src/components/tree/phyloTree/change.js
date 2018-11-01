@@ -3,6 +3,7 @@ import { calcConfidenceWidth } from "./confidence";
 import { applyToChildren } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
+import { getBranchVisibility } from "./renderers";
 
 /* loop through the nodes and update each provided prop with the new value
  * additionally, set d.update -> whether or not the node props changed
@@ -58,7 +59,8 @@ const svgSetters = {
     ".branch": {
       stroke: (d) => d.branchStroke,
       "stroke-width": (d) => d["stroke-width"] + "px", // style - as per drawBranches()
-      cursor: (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default"
+      cursor: (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default",
+      visibility: getBranchVisibility
     }
   }
 };
@@ -298,11 +300,11 @@ export const change = function change({
     nodePropsToModify["stroke-width"] = branchThickness;
   }
   if (newDistance || newLayout || zoomIntoClade || svgHasChangedDimensions) {
-    elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T");
+    elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
     elemsToUpdate.add(".grid").add(".regression");
-    svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity");
+    svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity").add("visibility");
   }
   if (newLayout) {
     useModifySVGInStages = true;
