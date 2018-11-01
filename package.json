@@ -3,7 +3,7 @@
   "version": "1.31.0",
   "description": "Web app for visualizing pathogen evolution",
   "author": "James Hadfield, Trevor Bedford and Richard Neher",
-  "license": "AGPL",
+  "license": "AGPL-3.0-only",
   "homepage": "./",
   "engines": {
     "node": "9.6.x",
