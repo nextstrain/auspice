@@ -41,7 +41,9 @@ if (args.dev) {
   /* if we are in dev-mode, we need to import specific libraries & set up hot reloading */
   const webpack = require("webpack"); // eslint-disable-line
   if (args.extend) {
-    process.env.EXTEND_AUSPICE_JSON = JSON.stringify(JSON.parse(fs.readFileSync(args.extend, {encoding: 'utf8'})));
+    const extensionData = JSON.parse(fs.readFileSync(args.extend, {encoding: 'utf8'}));
+    process.env.EXTENSION_PATH = path.dirname(args.extend);
+    process.env.EXTEND_AUSPICE_DATA = JSON.stringify(extensionData);
   }
   const webpackConfig = require(process.env.WEBPACK_CONFIG ? process.env.WEBPACK_CONFIG : './webpack.config.dev');  // eslint-disable-line
   const compiler = webpack(webpackConfig);

@@ -1,20 +1,31 @@
 
-
-/* set up time -- only runs once no matter how many components import this */
-
 const registry = (() => {
-  console.log("EXTENSTIONS.jS");
   if (!process.env.EXTENSION_DATA) {
-    console.log("no EXTENSION_DATA found")
+    console.log("no EXTENSION_DATA found");
     return {};
   }
-  const extensionJson = JSON.parse(process.env.EXTENSION_DATA);
-  console.log("extensionJson", extensionJson);
-  return extensionJson;
+  const extensions = JSON.parse(process.env.EXTENSION_DATA);
+
+  Object.keys(extensions).forEach((key) => {
+    if (key.endsWith("Component")) {
+      console.log("loading component", key);
+      /* "@extensions" is a webpack alias */
+      extensions[key] = require(`@extensions/${extensions[key]}`).default; // eslint-disable-line
+    }
+  });
+  console.log("extensions", extensions);
+  return extensions;
 })();
 
 
 export const getExtension = (what) => {
-  console.log("trying to get:", what)
-  return "something";
-}
+  if (registry[what]) {
+    return registry[what];
+  }
+  console.error("Requested non-existing extension", what);
+  return false;
+};
+
+export const hasExtension = (what) => {
+  return Object.keys(registry).includes(what);
+};

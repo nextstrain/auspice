@@ -18,8 +18,6 @@ import "./css/boxed.css";
 import "./css/select.css";
 import "./css/narrative.css";
 
-import "./util/extensions"
-
 const store = configureStore();
 
 /* set up non-redux state storage for the animation - use this conservitavely! */

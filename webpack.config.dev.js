@@ -1,6 +1,19 @@
 const path = require('path');
 const webpack = require('webpack');
 
+const directoriesToTransform = [path.join(__dirname, 'src')];
+const aliasesToResolve = {
+  "@extensions": '.', /* must provide an (unused) default, else it won't compile */
+  "@auspice": path.join(__dirname, 'src')
+};
+
+if (process.env.EXTENSION_PATH) {
+  const dir = path.resolve(__dirname, process.env.EXTENSION_PATH);
+  directoriesToTransform.push(dir);
+  aliasesToResolve["@extensions"] = dir;
+}
+
+
 module.exports = {
   mode: 'development',
   context: __dirname,
@@ -16,12 +29,15 @@ module.exports = {
     filename: 'bundle.js',
     publicPath: '/dist/'
   },
+  resolve: {
+    alias: aliasesToResolve
+  },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       "process.env": {
 	NODE_ENV: JSON.stringify("dev"),
-	EXTENSION_DATA: JSON.stringify(process.env.EXTEND_AUSPICE_JSON)
+	EXTENSION_DATA: JSON.stringify(process.env.EXTEND_AUSPICE_DATA)
       }
     }),
     new webpack.NoEmitOnErrorsPlugin()
@@ -34,7 +50,7 @@ module.exports = {
       {
         test: /\.js$/,
         use: ['babel-loader'],
-        include: path.join(__dirname, 'src')
+	include: directoriesToTransform
       },
       {
         test: /\.css$/,
@@ -43,7 +59,7 @@ module.exports = {
       {
         test: /\.(gif|png|jpe?g|svg)$/i,
         use: "file-loader",
-        include: path.join(__dirname, "src")
+	include: directoriesToTransform
       }
     ]
   },
