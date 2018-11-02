@@ -1,4 +1,11 @@
+* Allow `hidden` property on tree nodes -- [PR 676](https://github.com/nextstrain/auspice/pull/676)
+* Update packages & package.json metadata -- [PR 677](https://github.com/nextstrain/auspice/pull/677) [PR 678](https://github.com/nextstrain/auspice/pull/678) [PR 679](https://github.com/nextstrain/auspice/pull/679)
+* Restore hot-reloading ability for development (above PRs)
+
 ## version 1.31.0 - 2018/10/29
+* Allow time-only trees or div-only trees -- [PR 670](https://github.com/nextstrain/auspice/pull/670)
+* Minor fixes to handle trees with missing data -- [PR 673](https://github.com/nextstrain/auspice/pull/673)
+
 
 ## version 1.30.3 - 2018/09/19
 * Colours were sometimes inconsistent when two trees were displayed -- [PR 665](https://github.com/nextstrain/auspice/pull/665)
