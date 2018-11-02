@@ -7,6 +7,7 @@ const expressStaticGzip = require("express-static-gzip");
 const charon = require("./src/server/charon");
 const globals = require("./src/server/globals");
 const compression = require('compression');
+const fs = require('fs');
 const argparse = require('argparse');
 const version = require('./src/version').version;
 
@@ -25,6 +26,7 @@ if (!globals.isNpmGlobalInstall()) {
   parser.addArgument('--dev', {action: "storeTrue", help: "Run (client) in development mode (hot reloading etc)"});
 }
 parser.addArgument('--data', {help: "Directory where local datasets are sourced"});
+parser.addArgument('--extend', {help: "tmp / wip"});
 parser.addArgument('--narratives', {help: "Directory where local narratives are sourced"});
 const args = parser.parseArgs();
 
@@ -38,6 +40,9 @@ app.use(compression());
 if (args.dev) {
   /* if we are in dev-mode, we need to import specific libraries & set up hot reloading */
   const webpack = require("webpack"); // eslint-disable-line
+  if (args.extend) {
+    process.env.EXTEND_AUSPICE_JSON = JSON.stringify(JSON.parse(fs.readFileSync(args.extend, {encoding: 'utf8'})));
+  }
   const webpackConfig = require(process.env.WEBPACK_CONFIG ? process.env.WEBPACK_CONFIG : './webpack.config.dev');  // eslint-disable-line
   const compiler = webpack(webpackConfig);
   app.use(require("webpack-dev-middleware")( // eslint-disable-line

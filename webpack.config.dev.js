@@ -20,7 +20,8 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({
       "process.env": {
-        NODE_ENV: JSON.stringify("dev")
+	NODE_ENV: JSON.stringify("dev"),
+	EXTENSION_DATA: JSON.stringify(process.env.EXTEND_AUSPICE_JSON)
       }
     }),
     new webpack.NoEmitOnErrorsPlugin()
