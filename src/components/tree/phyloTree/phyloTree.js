@@ -56,7 +56,6 @@ PhyloTree.prototype.modifySVGInStages = modifySVGInStages;
 
 /* I N I T I A L        R E N D E R       E T C */
 PhyloTree.prototype.render = renderers.render;
-PhyloTree.prototype.rerenderAllElements = renderers.rerenderAllElements;
 PhyloTree.prototype.clearSVG = renderers.clearSVG;
 
 /* D R A W I N G    F U N C T I O N S */
@@ -80,7 +79,6 @@ PhyloTree.prototype.mapToScreen = layouts.mapToScreen;
 PhyloTree.prototype.removeConfidence = confidence.removeConfidence;
 PhyloTree.prototype.drawConfidence = confidence.drawConfidence;
 PhyloTree.prototype.drawSingleCI = confidence.drawSingleCI;
-PhyloTree.prototype.updateConfidence = confidence.updateConfidence;
 
 /* L A B E L S    ( T I P ,    B R A N C H ,   C O N F I D E N C E ) */
 PhyloTree.prototype.drawBranchLabels = labels.drawBranchLabels;

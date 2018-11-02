@@ -4,7 +4,8 @@ const webpack = require('webpack');
 const directoriesToTransform = [path.join(__dirname, 'src')];
 const aliasesToResolve = {
   "@extensions": '.', /* must provide an (unused) default, else it won't compile */
-  "@auspice": path.join(__dirname, 'src')
+  "@auspice": path.join(__dirname, 'src'),
+  "@libraries": path.join(__dirname, 'node_modules')
 };
 
 if (process.env.EXTENSION_PATH) {
@@ -20,7 +21,6 @@ module.exports = {
   devtool: 'cheap-module-source-map',
   entry: [
     "babel-polyfill",
-    'react-hot-loader/patch',
     'webpack-hot-middleware/client',
     './src/index'
   ],
@@ -62,9 +62,5 @@ module.exports = {
 	include: directoriesToTransform
       }
     ]
-  },
-  devServer: {
-    hot: true,
-    contentBase: './'
   }
 };

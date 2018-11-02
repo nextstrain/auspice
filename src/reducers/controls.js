@@ -221,28 +221,6 @@ const Controls = (state = getDefaultControlsState(), action) => {
           on: !state.temporalConfidence.on
         })
       });
-    case types.ANALYSIS_SLIDER:
-      if (action.destroy) {
-        return Object.assign({}, state, {
-          analysisSlider: false
-        });
-      }
-      return Object.assign({}, state, {
-        analysisSlider: {
-          key: state.analysisSlider.key,
-          // valid: true, // TESTING ONLY
-          valid: false, // FIXME --- This is a temporary hack to disable the analysis slider, while keeping color options
-          value: action.maxVal,
-          absoluteMinVal: action.minVal,
-          absoluteMaxVal: action.maxVal
-        }
-      });
-    case types.CHANGE_ANALYSIS_VALUE:
-      return Object.assign({}, state, {
-        analysisSlider: Object.assign({}, state.analysisSlider, {
-          value: action.value
-        })
-      });
     case types.TRIGGER_DOWNLOAD_MODAL:
       return Object.assign({}, state, {
         showDownload: true
