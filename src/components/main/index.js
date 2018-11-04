@@ -1,37 +1,30 @@
 import React from "react";
 import PropTypes from 'prop-types';
-import { hot } from 'react-hot-loader';
 import { connect } from "react-redux";
-import { loadJSONs } from "../actions/loadData";
-import { TOGGLE_NARRATIVE } from "../actions/types";
-import SidebarToggle from "./framework/sidebar-toggle";
-import Controls from "./controls/controls";
-import { Frequencies } from "./frequencies";
-import { Entropy } from "./entropy";
-import Info from "./info/info";
-import Tree from "./tree";
-import Map from "./map/map";
-import { controlsHiddenWidth, controlsWidth, controlsPadding, narrativeNavBarHeight } from "../util/globals";
-import { sidebarColor } from "../globalStyles";
-import NavBar from "./navBar";
-import Footer from "./framework/footer";
-import DownloadModal from "./download/downloadModal";
-import { analyticsNewPage } from "../util/googleAnalytics";
-import filesDropped from "../actions/filesDropped";
-import Narrative from "./narrative";
-import AnimationController from "./framework/animationController";
-import { calcUsableWidth, computeResponsive } from "../util/computeResponsive";
-import { renderNarrativeToggle } from "./narrative/renderNarrativeToggle";
+import SidebarToggle from "../framework/sidebar-toggle";
+import Controls from "../controls/controls";
+import { Frequencies } from "../frequencies";
+import { Entropy } from "../entropy";
+import Info from "../info/info";
+import Tree from "../tree";
+import Map from "../map/map";
+import { controlsHiddenWidth, controlsWidth, controlsPadding, narrativeNavBarHeight } from "../../util/globals";
+import { sidebarColor } from "../../globalStyles";
+import NavBar from "../navBar";
+import Footer from "../framework/footer";
+import DownloadModal from "../download/downloadModal";
+import { analyticsNewPage } from "../../util/googleAnalytics";
+import filesDropped from "../../actions/filesDropped";
+import Narrative from "../narrative";
+import AnimationController from "../framework/animationController";
+import { calcUsableWidth, computeResponsive } from "../../util/computeResponsive";
+import { renderNarrativeToggle } from "../narrative/renderNarrativeToggle";
 
-const nextstrainLogo = require("../images/nextstrain-logo-small.png");
 
 /* <Contents> contains the header, tree, map, footer components etc.
  * here is where the panel sizes are decided, as well as which components are displayed.
  */
-const Contents = ({showSpinner, styles, availableWidth, availableHeight, panels, grid, narrativeIsLoaded, narrativeIsDisplayed, frequenciesLoaded, dispatch}) => {
-  if (showSpinner) {
-    return (<img className={"spinner"} src={nextstrainLogo} alt="loading" style={{marginTop: `${availableHeight / 2 - 100}px`}}/>);
-  }
+const Contents = ({styles, availableWidth, availableHeight, panels, grid, narrativeIsLoaded, narrativeIsDisplayed, frequenciesLoaded, dispatch}) => {
   const show = (name) => panels.indexOf(name) !== -1;
   /* Calculate reponsive geometries. chart: entropy, frequencies. big: map, tree */
   const chartWidthFraction = 1;
@@ -96,8 +89,6 @@ const Overlay = ({styles, mobileDisplay, handler}) => {
 };
 
 @connect((state) => ({
-  metadataLoaded: state.metadata.loaded,
-  treeLoaded: state.tree.loaded,
   panelsToDisplay: state.controls.panelsToDisplay,
   panelLayout: state.controls.panelLayout,
   displayNarrative: state.narrative.display,
@@ -106,7 +97,7 @@ const Overlay = ({styles, mobileDisplay, handler}) => {
   browserDimensions: state.browserDimensions.browserDimensions,
   frequenciesLoaded: state.frequencies.loaded
 }))
-class App extends React.Component {
+class Main extends React.Component {
   constructor(props) {
     super(props);
     /* window listener to see when width changes cross threshold to toggle sidebar */
@@ -117,7 +108,7 @@ class App extends React.Component {
     }));
     this.state = {
       mql,
-      sidebarOpen: props.treeLoaded ? mql.matches : false,
+      sidebarOpen: mql.matches,
       mobileDisplay: !mql.matches
     };
     analyticsNewPage();
@@ -127,14 +118,11 @@ class App extends React.Component {
   }
   componentWillReceiveProps(nextProps) {
     if (
-      (nextProps.treeLoaded && this.state.mql.matches) ||
+      (this.state.mql.matches) ||
       (nextProps.displayNarrative && !this.props.displayNarrative)
     ) {
       this.setState({sidebarOpen: true});
     }
-  }
-  componentWillMount() {
-    this.props.dispatch(loadJSONs()); // choose via URL
   }
   componentDidMount() {
     document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
@@ -176,8 +164,8 @@ class App extends React.Component {
       cursor: "pointer",
       overflow: "scroll",
       transition: this.state.sidebarOpen ?
-        'visibility 0s ease-out, left 0.3s ease-out, opacity 0.3s ease-out' :
-        'left 0.3s ease-out, opacity 0.3s ease-out, visibility 0s ease-out 0.3s'
+	'visibility 0s ease-out, left 0.3s ease-out, opacity 0.3s ease-out' :
+	'left 0.3s ease-out, opacity 0.3s ease-out, visibility 0s ease-out 0.3s'
     };
     const sidebarStyles = {
       ...sharedStyles,
@@ -202,50 +190,49 @@ class App extends React.Component {
 
     return (
       <span>
-        <AnimationController/>
-        <DownloadModal/>
-        <SidebarToggle
-          sidebarOpen={this.state.sidebarOpen}
-          mobileDisplay={this.state.mobileDisplay}
-          handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
-        />
-        <div id="SidebarContainer" style={sidebarStyles}>
-          <NavBar
-            minified
-            mobileDisplay={this.state.mobileDisplay}
-            toggleHandler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
-            narrativeTitle={this.props.displayNarrative ? this.props.narrativeTitle : false}
-            width={sidebarWidth}
-          />
-          {this.props.displayNarrative ?
-            <Narrative
-              height={availableHeight - narrativeNavBarHeight}
-              width={sidebarStyles.width}
-            /> :
-            <Controls mapOn={mapOn}/>
-          }
-        </div>
-        <Contents
-          styles={contentStyles}
-          showSpinner={!this.props.treeLoaded || !this.props.metadataLoaded}
-          availableWidth={availableWidth}
-          availableHeight={availableHeight}
-          panels={this.props.panelsToDisplay}
-          grid={this.props.panelLayout === "grid"}
-          narrativeIsLoaded={this.props.narrativeIsLoaded}
-          narrativeIsDisplayed={this.props.displayNarrative}
-          dispatch={this.props.dispatch}
-          frequenciesLoaded={this.props.frequenciesLoaded}
-        />
-        <Overlay
-          styles={overlayStyles}
-          sidebarOpen={this.state.sidebarOpen}
-          mobileDisplay={this.state.mobileDisplay}
-          handler={() => {this.setState({sidebarOpen: false});}}
-        />
+	<AnimationController/>
+	<DownloadModal/>
+	<SidebarToggle
+	  sidebarOpen={this.state.sidebarOpen}
+	  mobileDisplay={this.state.mobileDisplay}
+	  handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
+	/>
+	<div id="SidebarContainer" style={sidebarStyles}>
+	  <NavBar
+	    minified
+	    mobileDisplay={this.state.mobileDisplay}
+	    toggleHandler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
+	    narrativeTitle={this.props.displayNarrative ? this.props.narrativeTitle : false}
+	    width={sidebarWidth}
+	  />
+	  {this.props.displayNarrative ?
+	    <Narrative
+	      height={availableHeight - narrativeNavBarHeight}
+	      width={sidebarStyles.width}
+	    /> :
+	    <Controls mapOn={mapOn}/>
+	  }
+	</div>
+	<Contents
+	  styles={contentStyles}
+	  availableWidth={availableWidth}
+	  availableHeight={availableHeight}
+	  panels={this.props.panelsToDisplay}
+	  grid={this.props.panelLayout === "grid"}
+	  narrativeIsLoaded={this.props.narrativeIsLoaded}
+	  narrativeIsDisplayed={this.props.displayNarrative}
+	  dispatch={this.props.dispatch}
+	  frequenciesLoaded={this.props.frequenciesLoaded}
+	/>
+	<Overlay
+	  styles={overlayStyles}
+	  sidebarOpen={this.state.sidebarOpen}
+	  mobileDisplay={this.state.mobileDisplay}
+	  handler={() => {this.setState({sidebarOpen: false});}}
+	/>
       </span>
     );
   }
 }
 
-export default hot(module)(App);
+export default Main;

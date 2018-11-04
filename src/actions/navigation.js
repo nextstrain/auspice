@@ -1,4 +1,3 @@
-import queryString from "query-string";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
 import { loadJSONs } from "./loadData";
@@ -18,7 +17,7 @@ export const chooseDisplayComponentFromURL = (url) => {
   } else if (parts[0] === "status") {
     return "status";
   }
-  return "app"; // fallthrough
+  return "datasetLoader"; // fallthrough
 };
 
 /* changes the state of the page and (perhaps) the dataset displayed.
@@ -56,20 +55,14 @@ export const changePage = ({
   const pathHasChanged = oldState.general.pathname !== path;
 
   if (!dontChangeDataset || pathHasChanged) {
-    const requestedDisplayComponent = chooseDisplayComponentFromURL(path);
-    if (requestedDisplayComponent === "app" && oldState.general.displayComponent === "app") {
-      /* we're just changing the dataset */
-      dispatch(loadJSONs({url: path, search: query})); /* this processes the query from the URL... */
-    } else {
-      const action = {
-        type: PAGE_CHANGE,
-        path,
-        displayComponent: requestedDisplayComponent,
-        pushState: push,
-        query
-      };
-      dispatch(action);
-    }
+    const action = {
+      type: PAGE_CHANGE,
+      path,
+      displayComponent: "datasetLoader",
+      pushState: push,
+      query
+    };
+    dispatch(action);
   } else {
     /* the path (dataset) remains the same... but the state may be modulated by the query */
     const newState = createStateFromQueryOrJSONs({oldState, query});

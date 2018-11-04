@@ -15,6 +15,16 @@ const renderGithubInfo = () => {
   );
 };
 
+const renderDroppedFiles= () => {
+  /* TODO: this shouldn't be in the auspice src, rather injected as an extension when needed */
+  return (
+    <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
+      <i className="fa fa-clone fa-lg" style={{color: darkGrey}} aria-hidden="true"/>
+      <span style={{position: "relative"}}>{" dropped files"}</span>
+    </div>
+  );
+};
+
 const renderBareDataPath = (source, fields) => (
   <div style={{ fontSize: 14 }}>
     {`Source: ${source || "unknown"}`}
@@ -42,9 +52,13 @@ class ChooseDataset extends React.Component {
        This helps the user know what they're looking at.
      */
     if (!this.props.available) {
-      return this.props.source === "github" ?
-        renderGithubInfo() :
-        renderBareDataPath(this.props.source, this.props.datasetFields);
+      /* TODO expose this to the extension API */
+      if (this.props.source === "github") {
+	return renderGithubInfo();
+      } else if (this.props.source === "dropped") {
+	return renderDroppedFiles();
+      }
+      return renderBareDataPath(this.props.source, this.props.datasetFields);
     }
 
     const selected = this.props.datasetFields;
