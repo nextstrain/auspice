@@ -6,6 +6,47 @@ import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeRedu
 import { loadFrequencies } from "./frequencies";
 import { fetchJSON } from "../util/serverInteraction";
 import { warningNotification } from "./notifications";
+import { hasExtension, getExtension } from "../util/extensions";
+
+
+/* TODO: make a default auspice server (not charon) and make charon the nextstrain server. Or vice versa. */
+const serverAddress = hasExtension("serverAddress") ? getExtension("serverAddress") : charonAPIAddress;
+
+const getDataFromServer = ({request, source, id, type}) => {
+  let path = `${serverAddress}request=${request}&source=${source}&url=${id}`;
+  if (type) path += `&type=${type}`;
+  if (source) path += `&source=${source}`;
+
+  const p = fetch(path)
+    .then((res) => {
+      if (res.status !== 200) {
+	throw new Error(res.statusText);
+      }
+      return res;
+    })
+    .then((res) => res.json());
+  return p;
+};
+
+const getHardcodedData = ({request, source, id, type}) => {
+  const datapaths = getExtension("hardcodedDataPaths");
+
+  console.log("get", request, type, datapaths);
+  console.log("FETCHING", datapaths[request])
+  const p = fetch(datapaths[request])
+    .then((res) => {
+      if (res.status !== 200) {
+	throw new Error(res.statusText);
+      }
+      return res;
+    })
+    .then((res) => res.json());
+  return p;
+
+};
+
+const fetchData = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDataFromServer;
+
 
 const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
   let warning = false;
@@ -20,7 +61,9 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
     fetchExtras += `&deprecatedSecondTree=${query.tt}`;
   }
 
-  fetchJSON(`${charonAPIAddress}request=mainJSON&url=${url}${fetchExtras}`)
+
+  // fetchJSON(`${charonAPIAddress}request=mainJSON&url=${url}${fetchExtras}`)
+  fetchData({request: "mainJSON", id: `${url}${fetchExtras}`})
     .then((json) => {
       dispatch({
         type: types.CLEAN_START,
@@ -34,7 +77,7 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
     })
     .then((result) => {
       if (result.frequencies === true) {
-        fetchJSON(`${charonAPIAddress}request=additionalJSON&source=${result.source}&url=${result.datasetFields.join("/")}&type=tip-frequencies`)
+	fetchData({request: "additionalJSON", source: result.source, id: result.datasetFields.join("/"), type: "tip-frequencies"})
           .then((res) => dispatch(loadFrequencies(res)))
           .catch((err) => console.error("Frequencies failed to fetch", err.message));
       }
@@ -60,7 +103,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
     if (url.indexOf("narratives") !== -1) {
       /* we want to have an additional fetch to get the narrative JSON, which in turn
       tells us which data JSON to fetch... */
-      fetchJSON(`${charonAPIAddress}request=narrative&url=${url}`)
+      fetchData({request: "narrative", id: url})
         .then((blocks) => {
           const firstURL = blocks[0].dataset;
           const firstQuery = queryString.parse(blocks[0].query);

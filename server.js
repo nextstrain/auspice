@@ -37,11 +37,12 @@ const app = express();
 app.set('port', process.env.PORT || 4000);
 app.use(compression());
 
+let extensionData;
 if (args.dev) {
   /* if we are in dev-mode, we need to import specific libraries & set up hot reloading */
   const webpack = require("webpack"); // eslint-disable-line
   if (args.extend) {
-    const extensionData = JSON.parse(fs.readFileSync(args.extend, {encoding: 'utf8'}));
+    extensionData = JSON.parse(fs.readFileSync(args.extend, {encoding: 'utf8'}));
     process.env.EXTENSION_PATH = path.dirname(args.extend);
     process.env.EXTEND_AUSPICE_DATA = JSON.stringify(extensionData);
   }
@@ -68,6 +69,18 @@ app.get("/favicon.png", (req, res) => {
 });
 
 charon.applyCharonToApp(app);
+
+/* hack for extensions with hardcoded data...
+this should be provided in the auspice server with a flag -- not needed in production
+as the "serverless" server should just deliver these relative paths */
+if (args.extend && args.extend.hardcodedDataPaths) {
+  app.get("*.json", (req, res) => {
+    const hardcodedDataDir = path.resolve(path.dirname(args.extend), extensionData.hardcodedDataPaths.directory);
+    console.log("Sending hardcoded json file ", path.join(hardcodedDataDir, req.originalUrl));
+    res.sendFile(path.join(hardcodedDataDir, req.originalUrl));
+  });
+}
+
 
 app.get("*", (req, res) => {
   res.sendFile(path.resolve(__dirname, "index.html"));

@@ -1,12 +1,20 @@
 import * as types from "../actions/types";
 import { chooseDisplayComponentFromURL } from "../actions/navigation";
+import { hasExtension, getExtension } from "../util/extensions";
 
 /* the store for cross-cutting state -- that is, state
 not limited to <App>
 */
 
+const getFirstPageToDisplay = () => {
+  if (hasExtension("entryPage")) {
+    return getExtension("entryPage");
+  }
+  return chooseDisplayComponentFromURL(window.location.pathname);
+};
+
 const general = (state = {
-  displayComponent: chooseDisplayComponentFromURL(window.location.pathname),
+  displayComponent: getFirstPageToDisplay(),
   errorMessage: undefined,
   pathname: window.location.pathname // keep a copy of what the app "thinks" the pathname is
 }, action) => {
