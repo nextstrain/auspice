@@ -4,13 +4,15 @@ const registry = (() => {
     console.log("no EXTENSION_DATA found");
     return {};
   }
-  const extensions = JSON.parse(process.env.EXTENSION_DATA);
+
+  const extensions = typeof process.env.EXTENSION_DATA === "string" ?
+    JSON.parse(process.env.EXTENSION_DATA) : process.env.EXTENSION_DATA;
 
   Object.keys(extensions).forEach((key) => {
     if (key.endsWith("Component")) {
       console.log("loading component", key);
       /* "@extensions" is a webpack alias */
-      extensions[key] = require(`@extensions/${extensions[key]}`).default; // eslint-disable-line
+      extensions[key] = require(`@extensions/${extensions[key]}`).default;
     }
   });
   console.log("extensions", extensions);

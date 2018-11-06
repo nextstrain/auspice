@@ -25,7 +25,7 @@ class Splash extends React.Component {
     this.state = {source: undefined, narratives: false, available: undefined, errorMessage: undefined};
   }
   componentDidMount() {
-    fetchJSON(`${charonAPIAddress}request=available&url=${this.props.reduxPathname}`)
+    fetchJSON(`${charonAPIAddress}/getAvailable?prefix=${this.props.reduxPathname}`)
       .then((json) => {this.setState(json);})
       .catch((err) => {
         this.setState({errorMessage: "Error in getting available datasets"});
@@ -38,7 +38,7 @@ class Splash extends React.Component {
 	<SplashContent
 	  isMobile={this.props.browserDimensions.width < controlsHiddenWidth}
 	  source={this.state.source}
-	  available={this.state.available}
+	  available={this.state.datasets}
 	  narratives={this.state.narratives}
 	  browserDimensions={this.props.browserDimensions}
 	  dispatch={this.props.dispatch}

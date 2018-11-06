@@ -20,7 +20,7 @@ class SingleDataset extends React.Component {
     };
   }
   componentDidMount() {
-    fetchJSON(`${charonAPIAddress}request=mainJSON&url=${this.props.path}`)
+    fetchJSON(`${charonAPIAddress}/getDataset?prefix=${this.props.path}`)
       .then((json) => {
         const state = createStateFromQueryOrJSONs({json, query: ""});
         this.setState({

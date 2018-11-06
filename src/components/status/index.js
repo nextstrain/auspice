@@ -14,7 +14,7 @@ class Status extends React.Component {
     this.state = {source: undefined, available: undefined};
   }
   componentDidMount() {
-    fetchJSON(`${charonAPIAddress}request=available&url=${window.location.pathname}`)
+    fetchJSON(`${charonAPIAddress}/getAvailable?prefix=${window.location.pathname}`)
       .then((json) => {this.setState(json);})
       .catch((err) => {
         console.warn(err);
@@ -66,13 +66,13 @@ class Status extends React.Component {
   }
 
   render() {
-    if (!this.state.source || !this.state.available) return null;
+    if (!this.state.source || !this.state.datasets) return null;
     return (
       <div style={{maxWidth: 1020, marginLeft: "auto", marginRight: "auto"}}>
 
         {this.getBadges()}
 
-        {this.state.available.map((fields) => {
+	{this.state.datasets.map((fields) => {
           const path = `/${this.state.source}/${fields.join("/")}`.replace(/\/+/, "/");
           return (<SingleDataset key={path} path={path}/>);
         })}

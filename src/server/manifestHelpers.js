@@ -1,6 +1,6 @@
-/* eslint no-console: off */
 const fetch = require('node-fetch');
 const fs = require('fs');
+const utils = require("./utils");
 
 /* this function is only temporary (I hope!) */
 const oldToNew = (old) => {
@@ -46,14 +46,14 @@ const buildManifest = (dest) => {
     /* currently only for version 1.0 JSONs... */
     fs.readdir(global.LOCAL_DATA_PATH, (err, files) => {
       if (err) {
-        console.log("ERROR. Failed to build local manifest.", err);
+	utils.warn(`Failed to build local manifest. ${err}`);
         return;
       }
       const manifest = files
         .filter((file) => file.endsWith("_tree.json"))
         .map((file) => file.replace("_tree.json", "").split("_"));
       global.LOCAL_MANIFEST = manifest;
-      console.log("Successfully created local manifest");
+      utils.verbose("Successfully created local manifest");
     });
     return;
   }
@@ -63,7 +63,7 @@ const buildManifest = (dest) => {
   } else if (dest === "staging") {
     baseUrl = global.REMOTE_DATA_STAGING_BASEURL;
   } else {
-    console.log("ERROR: unknown manifest type requested");
+    utils.warn("unknown manifest type requested"+dest);
     return;
   }
   fetch(baseUrl + "/manifest_guest.json")
@@ -72,10 +72,10 @@ const buildManifest = (dest) => {
       const manifest = oldToNew(json);
       if (dest === "live") global.LIVE_MANIFEST = manifest;
       else global.STAGING_MANIFEST = manifest;
-      console.log(`Successfully created ${dest} manifest`);
+      utils.verbose(`Successfully created ${dest} manifest`);
     })
     .catch(() => {
-      console.log(`ERROR. Failed to build ${dest} manifest.`);
+      utils.warn(`Failed to build ${dest} manifest.`);
     });
 };
 

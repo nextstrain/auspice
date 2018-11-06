@@ -12,10 +12,12 @@ import { hasExtension, getExtension } from "../util/extensions";
 /* TODO: make a default auspice server (not charon) and make charon the nextstrain server. Or vice versa. */
 const serverAddress = hasExtension("serverAddress") ? getExtension("serverAddress") : charonAPIAddress;
 
-const getDataFromServer = ({request, source, id, type}) => {
-  let path = `${serverAddress}request=${request}&source=${source}&url=${id}`;
+const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
+  // let path = `${serverAddress}request=${request}&source=${source}&url=${id}`;
+  let path = `${serverAddress}/${narrative?"getNarrative":"getDataset"}`;
+  path += `?prefix=${prefix}`;
   if (type) path += `&type=${type}`;
-  if (source) path += `&source=${source}`;
+  // if (source) path += `&source=${source}`;
 
   const p = fetch(path)
     .then((res) => {
@@ -28,12 +30,11 @@ const getDataFromServer = ({request, source, id, type}) => {
   return p;
 };
 
-const getHardcodedData = ({request, source, id, type}) => {
+const getHardcodedData = (prefix, {type="mainJSON", narrative=false}={}) => {
+  /* we currently expect a single dataset to be present in "hardcodedDataPaths".
+  This may be extended to multiple in the future... */
   const datapaths = getExtension("hardcodedDataPaths");
-
-  console.log("get", request, type, datapaths);
-  console.log("FETCHING", datapaths[request])
-  const p = fetch(datapaths[request])
+  const p = fetch(datapaths[type])
     .then((res) => {
       if (res.status !== 200) {
 	throw new Error(res.statusText);
@@ -42,10 +43,10 @@ const getHardcodedData = ({request, source, id, type}) => {
     })
     .then((res) => res.json());
   return p;
-
 };
 
-const fetchData = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDataFromServer;
+// const fetchData = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDatasetFromCharon;
+const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDatasetFromCharon;
 
 
 const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
@@ -63,7 +64,7 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
 
 
   // fetchJSON(`${charonAPIAddress}request=mainJSON&url=${url}${fetchExtras}`)
-  fetchData({request: "mainJSON", id: `${url}${fetchExtras}`})
+  getDataset(`${url}${fetchExtras}`)
     .then((json) => {
       dispatch({
         type: types.CLEAN_START,
@@ -77,9 +78,9 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
     })
     .then((result) => {
       if (result.frequencies === true) {
-	fetchData({request: "additionalJSON", source: result.source, id: result.datasetFields.join("/"), type: "tip-frequencies"})
-          .then((res) => dispatch(loadFrequencies(res)))
-          .catch((err) => console.error("Frequencies failed to fetch", err.message));
+	getDataset(url, {type: "tip-frequencies"})
+	  .then((res) => dispatch(loadFrequencies(res)))
+	  .catch((err) => console.error("Frequencies failed to fetch", err.message));
       }
       return false;
     })
@@ -103,7 +104,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
     if (url.indexOf("narratives") !== -1) {
       /* we want to have an additional fetch to get the narrative JSON, which in turn
       tells us which data JSON to fetch... */
-      fetchData({request: "narrative", id: url})
+      getDatasetFromCharon(url, {narrative: true})
         .then((blocks) => {
           const firstURL = blocks[0].dataset;
           const firstQuery = queryString.parse(blocks[0].query);
@@ -122,7 +123,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
 
 export const loadTreeToo = (name, fields) => (dispatch, getState) => {
   const oldState = getState();
-  fetchJSON(`${charonAPIAddress}request=additionalJSON&source=${oldState.controls.source}&url=${fields.join("/")}&type=tree`)
+  getDataset(fields.join("/"), {type: "tree"})
     .then((json) => {
       const newState = createTreeTooState({treeTooJSON: json.tree, oldState, segment: name});
       dispatch({type: types.TREE_TOO_DATA, segment: name, ...newState});

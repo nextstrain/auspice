@@ -32,6 +32,9 @@ module.exports = {
   resolve: {
     alias: aliasesToResolve
   },
+  node: {
+    fs: 'empty'
+  },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
     new webpack.DefinePlugin({

@@ -1,11 +1,10 @@
-/* eslint no-console: off */
 const marked = require('marked');
 const yamlFront = require('yaml-front-matter');  /* https://www.npmjs.com/package/yaml-front-matter */
 const fs = require('fs');
 const path = require("path");
 const fetch = require('node-fetch');
 const sourceSelect = require("./sourceSelect");
-
+const utils = require("./utils");
 
 const blockProxyHandler = {
   set: (target, key, value) => {
@@ -31,7 +30,7 @@ const makeFrontMatterBlock = (frontMatter) => {
   markdown.push(`# ${frontMatter.title}`);
   if (frontMatter.authors) {
     if (typeof frontMatter.authors === 'object' && Array.isArray(frontMatter.authors)) {
-      console.log("can't do arrays yet");
+      utils.warn(`Narrative parsing -- can't do author arrays yet`);
     } else if (typeof frontMatter.authors === 'string') {
       if (frontMatter.authorLinks && typeof frontMatter.authorLinks === "string") {
         markdown.push(`### Author: [${frontMatter.authors}](${frontMatter.authorLinks})`);
@@ -109,23 +108,23 @@ const markdownToBlocks = ({fileContents, local}) => {
 
 const serveLocalNarrative = (res, filename) => {
   const pathName = path.join(global.LOCAL_NARRATIVES_PATH, filename);
-  console.log("\ttrying to access & parse local narrative file: ", pathName);
+  utils.verbose("trying to access & parse local narrative file: " + pathName);
   /* this code is syncronous, but that's ok since this is never used in production */
   const fileContents = fs.readFileSync(pathName, 'utf8');
   const blocks = markdownToBlocks({fileContents, local: true});
   res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
-  console.log("\tSUCCESS");
+  utils.verbose("SUCCESS");
 };
 
 const serveLiveNarrative = (res, filename, errorHandler) => {
   const fetchURL = global.REMOTE_NARRATIVES_BASEURL + "/" + filename;
-  console.log("\ttrying to fetch & parse narrative file: ", fetchURL);
+  utils.verbose("trying to fetch & parse narrative file: ", fetchURL);
   fetch(fetchURL)
     .then((result) => result.text())
     .then((fileContents) => {
       const blocks = markdownToBlocks({fileContents, local: false});
       res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
-      console.log("\tSUCCESS");
+      utils.verbose("SUCCESS");
     })
     .catch(errorHandler);
 };
@@ -141,7 +140,7 @@ const serveCommunityNarrative = (res, url, errorHandler) => {
     .then((fileContents) => {
       const blocks = markdownToBlocks({fileContents, local: false});
       res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
-      console.log("\tSUCCESS");
+      utils.verbose("SUCCESS");
     })
     .catch(errorHandler);
 };
@@ -172,7 +171,7 @@ const serveNarrative = (source, url, res) => {
       serveCommunityNarrative(res, url, generalErrorHandler);
     } else {
       res.statusMessage = `Narratives cannot be sourced for "${source}" yet -- only "live" and "local" are supported.`;
-      console.warn(res.statusMessage);
+      utils.warn(res.statusMessage);
       res.status(500).end();
     }
   } catch (err) {

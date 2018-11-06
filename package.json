@@ -37,6 +37,7 @@
     "awesomplete": "^1.1.2",
     "babel-polyfill": "^6.26.0",
     "binomial": "^0.2.0",
+    "chalk": "^2.4.1",
     "color": "^0.7.3",
     "compression": "^1.7.3",
     "create-react-class": "^15.6.0",

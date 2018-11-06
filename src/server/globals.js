@@ -1,4 +1,3 @@
-/* eslint no-console: off */
 const path = require("path");
 const fs = require('fs');
 const manifestHelpers = require("./manifestHelpers");
@@ -59,6 +58,7 @@ const setGlobals = (args) => {
   global.LIVE_MANIFEST = undefined;
   global.LOCAL_MANIFEST = undefined;
   global.STAGING_MANIFEST = undefined;
+  global.verbose = args.verbose;
   manifestHelpers.buildManifest("local");
   manifestHelpers.buildManifest("live");
   manifestHelpers.buildManifest("staging");
