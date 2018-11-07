@@ -4,7 +4,6 @@
 const path = require("path");
 const express = require("express");
 const expressStaticGzip = require("express-static-gzip");
-const globals = require("./src/server/globals");
 const compression = require('compression');
 const fs = require('fs');
 const argparse = require('argparse');
@@ -13,6 +12,7 @@ const chalk = require('chalk');
 const getDataset = require("./src/server/getDataset").default;
 const getAvailable = require("./src/server/getAvailable").default;
 const getNarrative = require("./src/server/getNarrative").default;
+const utils = require("./src/server/utils");
 
 const parser = new argparse.ArgumentParser({
   version: version,
@@ -25,7 +25,7 @@ const parser = new argparse.ArgumentParser({
   for more details.
   `
 });
-if (!globals.isNpmGlobalInstall()) {
+if (!utils.isNpmGlobalInstall()) {
   parser.addArgument('--dev', {action: "storeTrue", help: "Run (client) in development mode (hot reloading etc)"});
 }
 parser.addArgument('--data', {help: "Directory where local datasets are sourced"});
@@ -34,8 +34,17 @@ parser.addArgument('--verbose', {action: "storeTrue", help: "verbose server logg
 parser.addArgument('--narratives', {help: "Directory where local narratives are sourced"});
 const args = parser.parseArgs();
 
-/* documentation in the static site! */
-globals.setGlobals(args);
+
+/* TO DO
+ * These "globals" are used by the auspice request handlers
+ * There must be a mechanism to store them in an object and
+ * pass them to each handler.
+ * Extensions may also want to set data which is then avaiable to handlers.
+ */
+global.LOCAL_DATA_PATH = utils.getLocalDataPath(args) || path.resolve(__dirname, "data/");
+global.LOCAL_NARRATIVES_PATH = utils.getLocalNarrativesPath(args) || path.resolve(__dirname, "local_narratives/");
+global.verbose = args.verbose;
+
 
 /* This server can be supplied with extensions, which are parsed here.
  * They are available to webpack via process.env, which injects this into the client code
@@ -62,6 +71,8 @@ app.use(require('express-naked-redirect')({reverse: true})); /* redirect www.nam
 app.get("/favicon.png", (req, res) => {
   res.sendFile(path.resolve(__dirname, "favicon.png"));
 });
+
+// app.use((req, res, next) => {utils.verbose(`request: ${req.originalUrl}`); next();});
 
 
 /* In dev mode, this server uses webpack to compile the client, and watch
@@ -97,9 +108,11 @@ if (args.dev) {
  */
 if (extensions.loaded && extensions.config.hardcodedDataPaths) {
   app.get("*.json", (req, res) => {
-    const hardcodedDataDir = path.resolve(path.dirname(args.extend), extensions.config.hardcodedDataPaths.directory);
-    const filePath = path.join(hardcodedDataDir, req.originalUrl);
-    console.log(chalk.yellow.bold(`${req.originalUrl} -> ${filePath}`));
+    /* TO DO. As we're running auspice build from the auspice directory, not the extension directory
+    we need to work out the "base" directory of the extensions */
+    const extensionBaseDir = path.join(path.resolve(path.dirname(args.extend)), extensions.config.hardcodedDataPaths.tmpPathPrefix);
+    const filePath = path.join(extensionBaseDir, req.originalUrl);
+    utils.log(`${req.originalUrl} -> ${filePath}`);
     res.sendFile(filePath);
   });
 } else {
@@ -108,7 +121,7 @@ if (extensions.loaded && extensions.config.hardcodedDataPaths) {
   app.get("/charon/getNarrative", extensions.server.getNarrative || getNarrative);
   app.get("/charon*", (req, res) => {
     res.statusMessage = "Query unhandled -- " + req.originalUrl;
-    console.warn(chalk.red.bold(res.statusMessage));
+    utils.warn(res.statusMessage);
     return res.status(500).end();
   });
 }

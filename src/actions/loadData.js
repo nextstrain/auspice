@@ -34,6 +34,7 @@ const getHardcodedData = (prefix, {type="mainJSON", narrative=false}={}) => {
   /* we currently expect a single dataset to be present in "hardcodedDataPaths".
   This may be extended to multiple in the future... */
   const datapaths = getExtension("hardcodedDataPaths");
+  console.log("FETCHING", datapaths[type]);
   const p = fetch(datapaths[type])
     .then((res) => {
       if (res.status !== 200) {

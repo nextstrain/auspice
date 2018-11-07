@@ -1,120 +1,161 @@
 const utils = require("./utils");
-const chalk = require('chalk');
 const queryString = require("query-string");
-const sourceSelect = require("./sourceSelect");
 const getAvailable = require("./getAvailable");
 
-/* fetch JSONS from schema v1 (i.e. separate meta & tree jsons) */
-const fetchTreeAndMetaJSONs = (serverRes, source, path, pathTreeTwo, toInject, errorHandler) => {
-  const paths = [
-    path.replace(".json", "_meta.json"),
-    path.replace(".json", "_tree.json")
-  ];
-  if (pathTreeTwo) paths.push(pathTreeTwo.replace(".json", "_tree.json"));
-  const promise = source === "local" ? utils.readFilePromise : utils.fetchJSON;
 
-  Promise.all(paths.map((p) => promise(p)))
-    .then((jsons) => {
-      const json = {
-	meta: jsons[0],
-	tree: jsons[1]
-      };
-      if (jsons.length === 3) json.treeTwo = jsons[2];
-      for (const field in toInject) { // eslint-disable-line
-	json[field] = toInject[field];
+/* TO DO -- this is too complicated & can be simplified */
+const constructPathToGet = (availableDatasets, providedUrl, otherQueries) => {
+  /* the path / URL is case sensitive */
+  let auspiceURL = ""; // the URL to be displayed in Auspice
+  let fetchURL = global.LOCAL_DATA_PATH;
+  let secondTreeFetchURL;
+  let datasetFields; // this _does not_ take into account the 2nd tree
+  let treeName;
+
+  const urlParts = providedUrl
+    .replace(/^\//, '')
+    .replace(/\/$/, '')
+    .split("/");
+
+  /* does the URL specify two trees? */
+  let treeTwoName;
+  for (let i=0; i<urlParts.length; i++) {
+    if (urlParts[i].indexOf(":") !== -1) {
+      [treeName, treeTwoName] = urlParts[i].split(":");
+      urlParts[i] = treeName; // only use the first tree from now on
+      break;
+    }
+  }
+
+  /* Match urlParts against available datasets */
+  {
+    /* attempt 1: is there an exact match in the available datasets? */
+    const matchString = urlParts.join("--");
+    availableDatasets.forEach((n) => {
+      if (matchString === n.join("--")) datasetFields = urlParts;
+    });
+
+    if (!datasetFields) {
+      /* attempt 2: is there a partial match in the available datasets? If so, use this to return the correct path */
+      let applicable = availableDatasets.slice(); // shallow
+      urlParts.forEach((field, idx) => {
+	applicable = applicable.filter((entry) => entry[idx] === field);
+	// console.log("after idx", idx, "(", field, "), num applicable:", applicable.length);
+      });
+      if (applicable.length) {
+	datasetFields = applicable[0];
       }
-      utils.verbose("Success fetching v1 JSONs. Sending as a single JSON.");
-      serverRes.json(json);
-    })
-    .catch(errorHandler);
+    }
+
+    if (!datasetFields) {
+      throw new Error("Didn't match available datasets");
+    }
+  }
+
+  if (!treeName) {
+    /* TO DO */
+    const guesses = ["HA", "NA", "PB1", "PB2", "PA", "NP", "NS", "MP", "L", "S"];
+    for (const part of datasetFields) {
+      if (guesses.indexOf(part.toUpperCase()) !== -1) {
+	treeName = part;
+      }
+    }
+  }
+  if (treeTwoName) {
+    const treeIdx = datasetFields.indexOf(treeName);
+    const fieldsTT = datasetFields.slice();
+    fieldsTT[treeIdx] = treeTwoName;
+    secondTreeFetchURL = fetchURL + "/" + fieldsTT.join("_") + ".json";
+
+    const fieldsAus = datasetFields.slice();
+    fieldsAus[treeIdx] = `${treeName}:${treeTwoName}`;
+    auspiceURL += fieldsAus.join("/");
+  } else {
+    auspiceURL += datasetFields.join("/");
+  }
+
+  fetchURL += `/${datasetFields.join("_")}`;
+  if (otherQueries.type) {
+    fetchURL += `_${otherQueries.type}`;
+  }
+  fetchURL += ".json";
+
+  return {auspiceURL, fetchURL, secondTreeFetchURL, datasetFields, treeName, treeTwoName};
 };
 
-/* Function to fetch unified JSON (meta+tree combined), and fallback to v1 jsons if this isn't found */
-/* Currently not implemented as we don't have any v2 JSONs, but we will... */
-// const fetchUnifiedJSON = (serverRes, source, path, pathTreeTwo, toInject, errorHandler) => {
-//   const p = source === "local" ? utils.readFilePromise : utils.fetchJSON;
-//   const pArr = [p(paths.fetchURL)];
-//   if (paths.secondTreeFetchURL) {
-//     pArr.push(p(paths.secondTreeFetchURL));
-//   }
-//   Promise.all(pArr)
-//     .then((jsons) => {
-//       const json = jsons[0]; // first is always the main JSON
-//       for (const field in toInject) { // eslint-disable-line
-//         json[field] = toInject[field];
-//       }
-//       if (paths.secondTreeFetchURL) {
-//         json.treeTwo = jsons[1].tree;
-//       }
-//       res.json(json);
-//     })
-//     .catch(() => {
-//       console.log("\tFailed to fetch unified JSON for", paths.fetchURL, "trying for v1...");
-//       fetchV1JSONs.fetchTreeAndMetaJSONs(res, source, paths.fetchURL, paths.secondTreeFetchURL, toInject, errorHandler);
-//     });
-// }
 
-const getDataset = (req, res) => {
-  const query = queryString.parse(req.url.split('?')[1]);
-  const source = sourceSelect.getSource(query.prefix);
+const getDataset = async (req, res) => {
+  const rawQuery = req.url.split('?')[1];
+  utils.log(`Getting datasets for: ${rawQuery}`);
+  const query = queryString.parse(rawQuery);
+  const availableDatasets = await getAvailable.getAvailableDatasets();
+
+  /* match the query against the available datasets */
   let paths;
-  utils.log(`Getting datasets for: ${req.url.split('?')[1]}`);
   try {
-    paths = sourceSelect.constructPathToGet(source, query.prefix, query);
+    paths = constructPathToGet(availableDatasets, query.prefix, query);
   } catch (err) {
-    res.statusMessage = `Couldn't parse the url "${query.prefix}" for source "${source}"`;
-    console.warn(chalk.red.bold("\t", res.statusMessage, "--", err));
+    res.statusMessage = `Couldn't parse the url "${query.prefix}"`;
+    utils.warn(`${res.statusMessage} -- ${err}`);
     return res.status(500).end();
   }
 
   if (query.type) {
     utils.verbose("fetching:" + paths.fetchURL);
-    const promise = source === "local" ? utils.readFilePromise : utils.fetchJSON;
-    promise(paths.fetchURL)
-      .then((json) => {
-	if (query.type === "tree") {
-	  return res.json({tree: json});
-	}
-	return res.json(json);
-      })
-      .catch((err) => {
-	res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL}`;
-	utils.warn(`${res.statusMessage} -- ${err.message}`);
-	res.status(500).end();
-      });
-    return undefined;
-  }
-
-
-  const datasets = getAvailable.collectDatasets(source);
-
-  /* what fields should be added to the JSON */
-  const toInject = {
-    _available: datasets.available,
-    _source: source,
-    _treeName: paths.treeName,
-    _url: paths.auspiceURL,
-    _datasetFields: paths.datasetFields
-  };
-  if (paths.treeTwoName) {
-    toInject._treeTwoName = paths.treeTwoName;
-  }
-
-  const errorHandler = (err) => {
-    if (paths.treeTwoName) {
-      res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL} and/or ${paths.secondTreeFetchURL}`;
-    } else {
+    try {
+      let data = await utils.readFilePromise(paths.fetchURL);
+      if (query.type === "tree") {
+	data = {tree: data};
+      }
+      return res.json(data);
+    } catch (err) {
       res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL}`;
+      utils.warn(`${res.statusMessage} -- ${err.message}`);
+      res.status(500).end();
     }
-    utils.warn(`${res.statusMessage} -- ${err.message}`);
-    return res.status(500).end();
-  };
+  } else {
+    const unifiedJson = {
+      _available: availableDatasets,
+      _source: "local",
+      _treeName: paths.treeName,
+      _url: paths.auspiceURL,
+      _datasetFields: paths.datasetFields
+    };
+    if (paths.treeTwoName) {
+      unifiedJson._treeTwoName = paths.treeTwoName;
+    }
 
-  fetchTreeAndMetaJSONs(res, source, paths.fetchURL, paths.secondTreeFetchURL, toInject, errorHandler);
-  return undefined;
+    const v1Paths = [
+      paths.fetchURL.replace(".json", "_meta.json"),
+      paths.fetchURL.replace(".json", "_tree.json")
+    ];
+    if (paths.secondTreeFetchURL) {
+      v1Paths.push(paths.secondTreeFetchURL.replace(".json", "_tree.json"));
+    }
+
+    try {
+      const v1Data = await Promise.all(v1Paths.map((p) => utils.readFilePromise(p)));
+      unifiedJson.meta = v1Data[0];
+      unifiedJson.tree = v1Data[1];
+      if (paths.secondTreeFetchURL) {
+	unifiedJson.treeTwo = v1Data[2];
+      }
+    } catch (err) {
+      if (paths.treeTwoName) {
+	res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL} and/or ${paths.secondTreeFetchURL}`;
+      } else {
+	res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL}`;
+      }
+      utils.warn(`${res.statusMessage} -- ${err.message}`);
+      return res.status(500).end();
+    }
+
+    utils.verbose("Success fetching v1 JSONs. Sending as a single JSON.");
+    res.json(unifiedJson);
+  }
 };
 
 module.exports = {
-  getDataset,
-  default: getDataset
+  default: getDataset,
+  getDataset
 };
