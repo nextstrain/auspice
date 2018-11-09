@@ -13,36 +13,21 @@ import MapAnimationControls from "./map-animation";
 import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
-
+import { SidebarHeader, ControlsContainer } from "./styles";
 
 const Controls = ({mapOn}) => (
-  <div
-    style={{
-      display: "flex",
-      flexDirection: "column",
-      alignContent: "stretch",
-      flexWrap: "nowrap",
-      height: "100%",
-      order: 0,
-      flexGrow: 0,
-      flexShrink: 1,
-      flexBasis: "auto",
-      alignSelf: "auto",
-      padding: "0px 20px 20px 20px"
-    }}
-  >
-
-    <Header text="Dataset"/>
+  <ControlsContainer>
+    <SidebarHeader>Dataset</SidebarHeader>
     <ChooseDataset/>
 
     <DateRangeInputs/>
 
 
-    <Header text="Color By"/>
+    <SidebarHeader>Color By</SidebarHeader>
     <ColorBy/>
 
 
-    <Header text="Tree Options"/>
+    <SidebarHeader>Tree Options</SidebarHeader>
     <ChooseLayout/>
     <ChooseMetric/>
     <ChooseBranchLabelling/>
@@ -59,11 +44,11 @@ const Controls = ({mapOn}) => (
       </span>
     ) : null}
 
-    <Header text="Panel Options" extraStyles={{paddingTop: "10px"}}/>
+    <span style={{paddingTop: "10px"}}/>
+    <SidebarHeader>Panel Options</SidebarHeader>
     <PanelLayout/>
     <PanelToggles/>
-
-  </div>
+  </ControlsContainer>
 );
 
 export default Controls;

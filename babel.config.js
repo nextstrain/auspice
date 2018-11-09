@@ -7,7 +7,8 @@ module.exports = function babelConfig(api) {
   ];
   const plugins = [
     ["@babel/plugin-proposal-decorators", { legacy: true }],
-    "@babel/plugin-proposal-class-properties"
+    "@babel/plugin-proposal-class-properties",
+    "babel-plugin-styled-components"
   ];
   if (api.env("development")) {
     if (process.env.EXTENSION_PATH && !path.resolve(process.env.EXTENSION_PATH).includes(__dirname)) {
