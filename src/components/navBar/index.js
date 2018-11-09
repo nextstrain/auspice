@@ -1,119 +1,41 @@
 /* eslint-disable no-multi-spaces */
 import React from "react";
-import { normalNavBarHeight, narrativeNavBarHeight, titleColors } from "../../util/globals";
-import { darkGrey } from "../../globalStyles";
+import styled from 'styled-components';
+import { normalNavBarHeight, narrativeNavBarHeight } from "../../util/globals";
 import SidebarChevron from "../framework/sidebar-chevron";
+import { AuspiceNavBar } from "./content";
+import { hasExtension, getExtension } from "../../util/extensions";
 
-const logoPNG = require("../../images/nextstrain-logo-small.png");
+const NavBarContainer = styled.div`
+  left: 0;
+  max-width: 960px;
+  margin-top: auto;
+  margin-right: auto;
+  margin-bottom: auto;
+  margin-left: auto;
+  height: ${(props) => props.narrative ? narrativeNavBarHeight : normalNavBarHeight}px;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  z-index: 100;
+  transition: left .3s ease-out;
+`;
 
-const getStyles = ({minified=true, narrative=false, width}={}) => ({
-  mainContainer: {
-    maxWidth: 960,
-    marginTop: "auto",
-    marginRight: "auto",
-    marginBottom: "auto",
-    marginLeft: "auto",
-    height: narrative ? narrativeNavBarHeight : normalNavBarHeight,
-    justifyContent: "space-between",
-    alignItems: "center",
-    overflow: "hidden",
-    left: 0,
-    zIndex: 100,
-    transition: "left .3s ease-out"
-  },
-  flexColumns: {
-    display: "flex",
-    flexDirection: "row",
-    whiteSpace: "nowrap",
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  flexRows: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  title: {
-    padding: "0px",
-    color: "#000",
-    textDecoration: "none",
-    fontSize: 20,
-    fontWeight: 400,
-    cursor: "pointer"
-  },
-  link: {
-    padding: minified ? "6px 12px" : "20px 20px",
-    textDecoration: "none",
-    whiteSpace: "nowrap",
-    cursor: "pointer",
-    fontSize: minified ? 12 : 16,
-    fontWeight: 400,
-    textTransform: "uppercase",
-    color: minified ? "#000" : darkGrey
-  },
-  logo: {
-    padding: "5px 5px",
-    width: "50px",
-    cursor: "pointer"
-  },
-  narrativeTitle: {
-    whiteSpace: "nowrap",
-    fontSize: 16,
-    marginLeft: "auto",
-    padding: "0px 12px",
-    float: "right",
-    maxWidth: `${width-90}px`,
-    overflow: "hidden",
-    textOverflow: "ellipsis"
-  }
-});
+const Content = hasExtension("navbarComponent") ?
+  getExtension("navbarComponent") : AuspiceNavBar;
 
-const renderLink = (text, url, style) => (
-  <a key={text} style={style} href={url}>
-    {text}
-  </a>
-);
 
-const renderNextstrainTitle = (style) => (
-  <a id="RainbowNextstrain" style={style} href="/">
-    {"Nextstrain".split("").map((letter, i) =>
-      <span key={i} style={{color: titleColors[i]}}>{letter}</span>
-    )}
-  </a>
-);
-
-const renderNarrativeTitle = (text, style) => (
-  <div style={style}>
-    {`Narrative: ${text}`}
-  </div>
-);
-
-const NavBar = ({minified, mobileDisplay, toggleHandler, narrativeTitle, width}) => {
-  const styles = getStyles({minified, narrative: !!narrativeTitle, width});
+const NavBar = ({sidebar, mobileDisplay, toggleHandler, narrativeTitle, width}) => {
+  // const styles = getStyles({minified, narrative: !!narrativeTitle, width});
+  const showSidebarToggle = sidebar && !narrativeTitle;
   return (
-    <div id="NavBarContainer" style={styles.mainContainer}>
-      <div style={styles.flexColumns}>
-        <a id="Logo" style={styles.logo} href="/">
-          <img alt="splashPage" width="40px" src={logoPNG}/>
-        </a>
-        {minified ? null : renderNextstrainTitle(styles.title)}
-        <div style={{flex: 5}}/>
-        <div style={styles.flexRows}>
-          <div style={styles.flexColumns}>
-            <div style={{flex: 5}}/>
-            {renderLink("About", "/about",   styles.link)}
-            {renderLink("Docs",  "/docs",    styles.link)}
-            {renderLink("Blog",  "/blog",    styles.link)}
-          </div>
-          {narrativeTitle ? renderNarrativeTitle(narrativeTitle, styles.narrativeTitle) : null}
-        </div>
-        {minified && !narrativeTitle ?
-          (<SidebarChevron mobileDisplay={mobileDisplay} handler={toggleHandler}/>) :
-          (<div id="spacer" style={{flex: 1}}/>)
-        }
-      </div>
-    </div>
+    <NavBarContainer>
+      <Content
+	narrativeTitle={narrativeTitle}
+	sidebar={sidebar}
+      />
+      <SidebarChevron navHeight={normalNavBarHeight} navWidth={width} display={showSidebarToggle} onClick={toggleHandler}/>
+    </NavBarContainer>
   );
 };
 

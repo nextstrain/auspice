@@ -1,15 +1,16 @@
 import React from "react";
 
-const SidebarChevron = ({mobileDisplay, handler, extraStyles={}}) => {
+const SidebarChevron = ({navHeight, navWidth, display, onClick}) => {
 
   const chevronStyle = {
-    visibility: mobileDisplay ? "hidden" : "visible",
-    width: mobileDisplay ? 0 : 12,
-    height: 16,
+    position: "fixed",
+    left: navWidth-12,
+    visibility: display ? "visible" : "hidden",
+    width: display ? 12 : 0,
+    top: navHeight/2-8,
     backgroundColor: "inherit",
     boxShadow: "none",
     cursor: "pointer",
-    marginTop: 2,
     borderRadius: "0px",
     fontSize: 12,
     color: "#444",
@@ -18,7 +19,7 @@ const SidebarChevron = ({mobileDisplay, handler, extraStyles={}}) => {
   };
 
   return (
-    <div style={{...chevronStyle, ...extraStyles}} onClick={handler}>
+    <div style={chevronStyle} onClick={onClick}>
       <i className="fa fa-chevron-left" aria-hidden="true"/>
     </div>
   );

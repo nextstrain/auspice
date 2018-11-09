@@ -79,7 +79,7 @@ const listAvailable = (source, available, narratives, browserDimensions, dispatc
 
 const SplashContent = ({isMobile, source, available, narratives, browserDimensions, dispatch, errorMessage, changePage}) => (
   <div>
-    <NavBar minified={isMobile}/>
+    <NavBar sidebar={false}/>
 
     <div className="static container">
       <Flex justifyContent="center">

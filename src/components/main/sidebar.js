@@ -14,7 +14,7 @@ export const Sidebar = (
     <ThemeProvider theme={sidebarTheme}>
       <SidebarContainer left={sidebarOpen ? 0 : -1 * width} width={width} height={height}>
 	<NavBar
-	  minified
+	  sidebar
 	  mobileDisplay={mobileDisplay}
 	  toggleHandler={navBarHandler}
 	  narrativeTitle={displayNarrative ? narrativeTitle : false}

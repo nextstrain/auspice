@@ -1,5 +1,4 @@
 import styled from 'styled-components';
-import { headerFont } from "../../globalStyles";
 
 /* All of these styled components are for the controls, which is part of the sidebar.
  * The sidebar is is wrapped by a <ThemeProvider> so you can access
@@ -22,7 +21,7 @@ padding: 0px 20px 20px 20px;
 
 
 export const SidebarHeader = styled.span`
-  font-family: ${headerFont};
+  font-family: ${(props) => props.theme["font-family"]};
   font-size: 16px;
   line-height: 28px;
   margin-top: 15px;

@@ -28,15 +28,18 @@ export const SidebarContainer = styled.div`
   max-width: ${(props) => props.width+"px"};
   overflow-y: auto;
   overflow-x: hidden;
-  box-shadow: -3px 0px 3px -3px rgba(0, 0, 0, 0.2) inset;
+  box-shadow: -3px 0px 3px -3px ${(props) => props.theme.sidebarBoxShadow} inset;
+  font-family: ${(props) => props.theme["font-family"]};
 `;
 
 
 /* The sidebar theme is available to all styled components in the sidebar.
  */
 const sidebarThemeDefaults = {
-  background: "#F2F2F2",
-  color: "#000"
+  background: "#30353F",
+  color: "#D3D3D3",
+  "font-family": "Lato, Helvetica Neue, Helvetica, sans-serif",
+  sidebarBoxShadow: "rgba(255, 255, 255, 1)"
 };
 let sidebarThemeExtensions = {};
 if (hasExtension("sidebarTheme")) {
