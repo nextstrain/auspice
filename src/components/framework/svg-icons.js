@@ -1,6 +1,7 @@
 import React from "react";
 
-export const RectangularTree = ({stroke = "black", width = 30}) => {
+export const RectangularTree = ({theme, selected, width}) => {
+  const stroke = selected ? theme.selectedColor : theme.unselectedColor;
   return (
     <svg width={width} height={width + 5}>
       <g transform="translate(0,2)">
@@ -19,7 +20,8 @@ export const RectangularTree = ({stroke = "black", width = 30}) => {
   );
 };
 
-export const Clock = ({stroke = "black", width = 30}) => {
+export const Clock = ({theme, selected, width}) => {
+  const stroke = selected ? theme.selectedColor : theme.unselectedColor;
   return (
     <svg width={width} height={width + 5}>
       <g transform="translate(0,4)">
@@ -40,7 +42,8 @@ export const Clock = ({stroke = "black", width = 30}) => {
   );
 };
 
-export const RadialTree = ({stroke = "black", width = 30}) => {
+export const RadialTree = ({theme, selected, width}) => {
+  const stroke = selected ? theme.selectedColor : theme.unselectedColor;
   return (
     <svg width={width} height={width + 5}>
       <g transform="translate(0,0)">
@@ -58,7 +61,8 @@ export const RadialTree = ({stroke = "black", width = 30}) => {
   );
 };
 
-export const UnrootedTree = ({stroke = "black", width = 30}) => {
+export const UnrootedTree = ({theme, selected, width}) => {
+  const stroke = selected ? theme.selectedColor : theme.unselectedColor;
   return (
     <svg width={width} height={width + 5}>
       <g transform="translate(0,2)">
@@ -92,13 +96,9 @@ export const Meta = ({stroke = "black", width = 30}) => {
   );
 };
 
-// grid v2
-// <rect fill="none" stroke={stroke} x="1" y="1" width="7" height="25"/>
-// <rect fill="none" stroke={stroke} x="8" y="1" width="10" height="17"/>
-// <rect fill="none" stroke={stroke} x="18" y="1" width="10" height="17"/>
-// <rect fill="none" stroke={stroke} x="8" y="18" width="20" height="8"/>
 
-export const PanelsGrid = ({stroke = "black", width = 30}) => {
+export const PanelsGrid = ({theme, selected, width}) => {
+  const stroke = selected ? theme.selectedColor : theme.unselectedColor;
   return (
     <svg width={width} height={width + 5}>
       <g transform="translate(0,6)">
@@ -114,7 +114,8 @@ export const PanelsGrid = ({stroke = "black", width = 30}) => {
   );
 };
 
-export const PanelsFull = ({stroke = "black", width = 30}) => {
+export const PanelsFull = ({theme, selected, width}) => {
+  const stroke = selected ? theme.selectedColor : theme.unselectedColor;
   return (
     <svg width={width} height={width + 5}>
       <g transform="translate(0,6)">

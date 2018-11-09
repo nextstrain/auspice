@@ -1,7 +1,7 @@
 import React from "react";
 
 const SidebarChevron = ({navHeight, navWidth, display, onClick}) => {
-
+  if (!navWidth) navWidth = 0;
   const chevronStyle = {
     position: "fixed",
     left: navWidth-12,

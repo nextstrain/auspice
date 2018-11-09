@@ -1,37 +1,37 @@
 import React from "react";
 import { connect } from "react-redux";
+import { withTheme } from 'styled-components';
 import ChooseDatasetSelect from "./choose-dataset-select";
-import { darkGrey } from "../../globalStyles";
 
-const renderGithubInfo = () => {
+const GithubInfo = withTheme((props) => {
   const parts = window.location.pathname.split("/");
   const repoURL = `github.com/${parts[2]}/${parts[3]}`;
   return (
-    <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
-      <i className="fa fa-clone fa-lg" style={{color: darkGrey}} aria-hidden="true"/>
-      <span style={{position: "relative"}}>{" "}</span>
+    <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5, color: props.theme.color}}>
+      <i className="fa fa-clone fa-lg" aria-hidden="true"/>
+      <span style={{position: "relative", paddingLeft: 10}}/>
       <a href={`https://${repoURL}`} target="_blank">{repoURL}</a>
     </div>
   );
-};
+});
 
-const renderDroppedFiles= () => {
+const DroppedFiles = withTheme((props) => {
   /* TODO: this shouldn't be in the auspice src, rather injected as an extension when needed */
   return (
-    <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5 }}>
-      <i className="fa fa-clone fa-lg" style={{color: darkGrey}} aria-hidden="true"/>
-      <span style={{position: "relative"}}>{" dropped files"}</span>
+    <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5, color: props.theme.color}}>
+      <i className="fa fa-clone fa-lg" aria-hidden="true"/>
+      <span style={{position: "relative", paddingLeft: 10}}>{"dropped files"}</span>
     </div>
   );
-};
+});
 
-const renderBareDataPath = (source, fields) => (
-  <div style={{ fontSize: 14 }}>
-    {`Source: ${source || "unknown"}`}
+const BareDataPath = withTheme((props) => (
+  <div style={{ fontSize: 14, color: props.theme.color }}>
+    {`Source: ${props.source || "unknown"}`}
     <p/>
-    {`Datapath: ${fields ? fields.join("/") : "unknown"}`}
+    {`Datapath: ${props.fields ? props.fields.join("/") : "unknown"}`}
   </div>
-);
+));
 
 const checkEqualityOfArrays = (arr1, arr2, upToIdx) => {
   return arr1.slice(0, upToIdx).every((value, index) => value === arr2[index]);
@@ -54,11 +54,11 @@ class ChooseDataset extends React.Component {
     if (!this.props.available) {
       /* TODO expose this to the extension API */
       if (this.props.source === "github") {
-	return renderGithubInfo();
+	return (<GithubInfo/>);
       } else if (this.props.source === "dropped") {
-	return renderDroppedFiles();
+	return (<DroppedFiles/>);
       }
-      return renderBareDataPath(this.props.source, this.props.datasetFields);
+      return (<BareDataPath source={this.props.source} fields={this.props.datasetFields}/>);
     }
 
     const selected = this.props.datasetFields;
@@ -82,7 +82,6 @@ class ChooseDataset extends React.Component {
     }
 
     const selectors = [];
-
     for (let i=0; i<options.length; i++) {
       selectors.push((
         <div key={i}>
@@ -96,12 +95,7 @@ class ChooseDataset extends React.Component {
         </div>
       ));
     }
-
-    return (
-      <div>
-        {selectors}
-      </div>
-    );
+    return selectors;
   }
 }
 

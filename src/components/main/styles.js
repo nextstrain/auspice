@@ -39,7 +39,10 @@ const sidebarThemeDefaults = {
   background: "#30353F",
   color: "#D3D3D3",
   "font-family": "Lato, Helvetica Neue, Helvetica, sans-serif",
-  sidebarBoxShadow: "rgba(255, 255, 255, 1)"
+  sidebarBoxShadow: "rgba(255, 255, 255, 1)",
+  selectedColor: "#5DA8A3",
+  unselectedColor: "#BBB",
+  unselectedBackground: "#888"
 };
 let sidebarThemeExtensions = {};
 if (hasExtension("sidebarTheme")) {

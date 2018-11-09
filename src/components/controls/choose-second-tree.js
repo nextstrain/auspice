@@ -1,10 +1,11 @@
 import React from "react";
 import Select from "react-select";
 import { connect } from "react-redux";
-import { SelectLabel } from "../framework/select-label";
 import { loadTreeToo } from "../../actions/loadData";
 import { REMOVE_TREE_TOO } from "../../actions/types";
 import { controlsWidth } from "../../util/globals";
+import { SidebarSubtitle } from "./styles";
+
 
 @connect((state) => {
   return {
@@ -42,7 +43,9 @@ class ChooseSecondTree extends React.Component {
 
     return (
       <div>
-        <SelectLabel key="treetootitle" text="Second Tree"/>
+	<SidebarSubtitle spaceAbove>
+	  Second Tree
+	</SidebarSubtitle>
         <div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
           <Select
             name="selectTreeToo"

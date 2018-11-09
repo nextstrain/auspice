@@ -1,5 +1,4 @@
 import React from "react";
-import { Header, SelectLabel } from "../framework/select-label";
 import ColorBy from "./color-by";
 import DateRangeInputs from "./date-range-inputs";
 import ChooseBranchLabelling from "./choose-branch-labelling";
@@ -20,6 +19,7 @@ const Controls = ({mapOn}) => (
     <SidebarHeader>Dataset</SidebarHeader>
     <ChooseDataset/>
 
+    <SidebarHeader>Date Range</SidebarHeader>
     <DateRangeInputs/>
 
 
@@ -37,8 +37,7 @@ const Controls = ({mapOn}) => (
 
     { mapOn ? (
       <span style={{marginTop: "15px"}}>
-        <Header text="Map Options"/>
-        <SelectLabel text="Geographic resolution" extraStyles={{marginTop: "5px"}}/>
+        <SidebarHeader>Map Options</SidebarHeader>
         <GeoResolution/>
         <MapAnimationControls/>
       </span>
