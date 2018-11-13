@@ -11,7 +11,12 @@ const getAvailableDatasets = async () => {
     datasets = await readdir(global.LOCAL_DATA_PATH);
     datasets = datasets
       .filter((file) => file.endsWith("_tree.json"))
-      .map((file) => file.replace("_tree.json", "").split("_"));
+      .map((file) => file
+	.replace("_tree.json", "")
+	.split("_")
+	.join("/")
+      )
+      .map((filepath) => ({request: filepath}));
   } catch (err) {
     utils.warn('Error getting local files');
     utils.warn(err);
@@ -26,8 +31,9 @@ const getAvailableNarratives = async () => {
     narratives = narratives
       .filter((file) => file.endsWith(".md") && file!=="README.md")
       .map((file) => file.replace(".md", ""))
-      .map((file) => file.split("_"));
-    narratives.forEach((partsOfPath) => {partsOfPath.splice(0, 0, "narratives");});
+      .map((file) => file.split("_").join("/"))
+      .map((filepath) => `narratives/${filepath}`)
+      .map((filepath) => ({request: filepath}));
   } catch (err) {
     utils.warn('Error getting local narratives');
     utils.warn(err);
@@ -37,14 +43,13 @@ const getAvailableNarratives = async () => {
 
 /* Auspice's handler for "/charon/getAvailable" requests.
  * Remember that auspice itself only serves local files.
- * It is auspice extensions (e.g. from nextstrain.org)
- * which extend this capability
+ * It is the server (e.g. nextstrain.org) which changes this capability
  */
 const getAvailable = async (req, res) => {
   utils.verbose("Returning locally available datasets & narratives");
   const datasets = await getAvailableDatasets();
   const narratives = await getAvailableNarratives();
-  res.json({datasets, narratives, source: "local"});
+  res.json({datasets, narratives});
 };
 
 module.exports = {

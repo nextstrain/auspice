@@ -30,14 +30,14 @@ const constructPathToGet = (availableDatasets, providedUrl, otherQueries) => {
   /* Match urlParts against available datasets */
   {
     /* attempt 1: is there an exact match in the available datasets? */
-    const matchString = urlParts.join("--");
+    const matchString = urlParts.join("/");
     availableDatasets.forEach((n) => {
-      if (matchString === n.join("--")) datasetFields = urlParts;
+      if (matchString === n.request) datasetFields = urlParts;
     });
 
     if (!datasetFields) {
       /* attempt 2: is there a partial match in the available datasets? If so, use this to return the correct path */
-      let applicable = availableDatasets.slice(); // shallow
+      let applicable = availableDatasets.map((d) => d.request.split("/"));
       urlParts.forEach((field, idx) => {
 	applicable = applicable.filter((entry) => entry[idx] === field);
 	// console.log("after idx", idx, "(", field, "), num applicable:", applicable.length);

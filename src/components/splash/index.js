@@ -22,11 +22,13 @@ class Splash extends React.Component {
   constructor(props) {
     super(props);
     /* state is set via the returned JSON from the server (aka charon) in the fetch in CDM */
-    this.state = {source: undefined, narratives: false, available: undefined, errorMessage: undefined};
+    this.state = {available: {}, errorMessage: undefined};
   }
   componentDidMount() {
     fetchJSON(`${charonAPIAddress}/getAvailable?prefix=${this.props.reduxPathname}`)
-      .then((json) => {this.setState(json);})
+      .then((json) => {
+	this.setState({available: json});
+      })
       .catch((err) => {
         this.setState({errorMessage: "Error in getting available datasets"});
         console.warn(err.message);
@@ -37,9 +39,7 @@ class Splash extends React.Component {
       <ErrorBoundary>
 	<SplashContent
 	  isMobile={this.props.browserDimensions.width < controlsHiddenWidth}
-	  source={this.state.source}
-	  available={this.state.datasets}
-	  narratives={this.state.narratives}
+	  available={this.state.available}
 	  browserDimensions={this.props.browserDimensions}
 	  dispatch={this.props.dispatch}
 	  errorMessage={this.props.errorMessage || this.state.errorMessage}

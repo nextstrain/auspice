@@ -13,11 +13,9 @@ import { hasExtension, getExtension } from "../util/extensions";
 const serverAddress = hasExtension("serverAddress") ? getExtension("serverAddress") : charonAPIAddress;
 
 const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
-  // let path = `${serverAddress}request=${request}&source=${source}&url=${id}`;
   let path = `${serverAddress}/${narrative?"getNarrative":"getDataset"}`;
   path += `?prefix=${prefix}`;
   if (type) path += `&type=${type}`;
-  // if (source) path += `&source=${source}`;
 
   const p = fetch(path)
     .then((res) => {

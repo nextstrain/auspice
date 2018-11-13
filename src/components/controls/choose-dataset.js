@@ -45,7 +45,6 @@ const checkEqualityOfArrays = (arr1, arr2, upToIdx) => {
   };
 })
 class ChooseDataset extends React.Component {
-
   render() {
     /* If the server hasn't yet returned the available datasets, show the
        source & raw datapath if we have one, otherwise don't render anything.
@@ -65,18 +64,22 @@ class ChooseDataset extends React.Component {
     const options = [[]];
 
     this.props.available.forEach((d) => {
-      if (options[0].indexOf(d[0]) === -1) options[0].push(d[0]);
+      const firstField = d.request.split("/")[0];
+      if (!options[0].includes(firstField)) {
+	options[0].push(firstField);
+      }
     });
 
     for (let idx=1; idx<selected.length; idx++) {
       /* going through the fields which comprise the current dataset
       in order to create available alternatives for each field */
       options[idx] = [];
-      this.props.available.forEach((query) => {
+      this.props.available.forEach((singleAvailableOption) => {
         /* if the parents (and their parents etc) of this choice match,
         then we add that as a valid option */
-        if (checkEqualityOfArrays(query, selected, idx) && options[idx].indexOf(query[idx]) === -1) {
-          options[idx].push(query[idx]);
+	const fields = singleAvailableOption.request.split("/");
+	if (checkEqualityOfArrays(fields, selected, idx) && options[idx].indexOf(fields[idx]) === -1) {
+	  options[idx].push(fields[idx]);
         }
       });
     }
