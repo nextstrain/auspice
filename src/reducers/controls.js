@@ -193,9 +193,6 @@ const Controls = (state = getDefaultControlsState(), action) => {
         colorScale: action.colorScale,
         colorByConfidence: checkColorByConfidence(state.attrs, action.colorBy)
       });
-      if (action.newMutType) {
-        newState.mutType = action.newMutType;
-      }
       return newState;
     }
     case types.CHANGE_GEO_RESOLUTION:

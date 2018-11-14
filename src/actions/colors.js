@@ -1,7 +1,7 @@
 import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale } from "../util/colorScale";
 import { timerStart, timerEnd } from "../util/perf";
-import { updateEntropyVisibility } from "./entropy";
+import { changeMutType } from "./entropy";
 import { updateFrequencyDataDebounced } from "./frequencies";
 import * as types from "./types";
 
@@ -29,20 +29,34 @@ export const changeColorBy = (providedColorBy = undefined) => { // eslint-disabl
     timerEnd("changeColorBy calculations"); /* end timer before dispatch */
 
     /* step 4: dispatch */
+
+    /*
+     * Changing the mutType must happen _before_ updating colors because the
+     * entropy bars need to be recomputed for the new mutType before applying
+     * the new genotype colorBy.  Otherwise, the entropy component tries to
+     * apply the new genotype colorBy to bars of the wrong mutType, which in
+     * turn causes all sorts of errors ("entropy out of sync" and selected
+     * positions not matching the data bars).
+     *
+     * The state dependencies are a bit tangled here, but de-tangling them is a
+     * larger project for another time.
+     *
+     *   -trs, 14 Nov 2018
+     */
+    if (newMutType) {
+      dispatch(changeMutType(newMutType));
+    }
+
     dispatch({
       type: types.NEW_COLORS,
       colorBy,
       colorScale,
       nodeColors,
       nodeColorsToo,
-      version: colorScale.version,
-      newMutType
+      version: colorScale.version
     });
 
-    /* step 5 - entropy & frequency dispatches (maybe these could be combined) */
-    if (newMutType) {
-      updateEntropyVisibility(dispatch, getState);
-    }
+    /* step 5 - frequency dispatch */
     if (frequencies.loaded) {
       updateFrequencyDataDebounced(dispatch, getState);
     }
