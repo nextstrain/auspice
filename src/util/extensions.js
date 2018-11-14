@@ -16,6 +16,11 @@ const registry = (() => {
     }
   });
   console.log("extensions", extensions);
+
+  /* potential side effect: change page title */
+  if (extensions.browserTitle) {
+    document.title = extensions.browserTitle;
+  }
   return extensions;
 })();
 
