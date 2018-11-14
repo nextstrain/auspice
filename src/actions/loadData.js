@@ -70,9 +70,7 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
         ...createStateFromQueryOrJSONs({json, query, narrativeBlocks})
       });
       return {
-        frequencies: (json.meta.panels && json.meta.panels.indexOf("frequencies") !== -1),
-        datasetFields: json["_datasetFields"],
-        source: json["_source"]
+	frequencies: (json.meta.panels && json.meta.panels.indexOf("frequencies") !== -1)
       };
     })
     .then((result) => {
@@ -82,6 +80,11 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
 	  .catch((err) => console.error("Frequencies failed to fetch", err.message));
       }
       return false;
+    })
+    .then(() => {
+      /* Get available datasets -- this is needed for the sidebar dataset-change dropdowns etc */
+      fetchJSON(`${charonAPIAddress}/getAvailable?prefix=${window.location.pathname}`)
+	.then((res) => dispatch({type: types.SET_AVAILABLE, data: res}));
     })
     .catch((err) => {
       console.warn(err, err.message);

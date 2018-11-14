@@ -28,7 +28,6 @@ export const getDefaultControlsState = () => {
   return {
     defaults,
     available: undefined,
-    datasetFields: undefined,
     source: undefined,
     canTogglePanelLayout: true,
     selectedBranch: null,
@@ -79,6 +78,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
       return action.controls;
+    case types.SET_AVAILABLE:
+      return Object.assign({}, state, {available: action.data});
     case types.BRANCH_MOUSEENTER:
       return Object.assign({}, state, {
         selectedBranch: action.data

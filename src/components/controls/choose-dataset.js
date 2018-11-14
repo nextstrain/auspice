@@ -29,7 +29,7 @@ const BareDataPath = withTheme((props) => (
   <div style={{ fontSize: 14, color: props.theme.color }}>
     {`Source: ${props.source || "unknown"}`}
     <p/>
-    {`Datapath: ${props.fields ? props.fields.join("/") : "unknown"}`}
+    {`Datapath: ${props.pathname}`}
   </div>
 ));
 
@@ -40,7 +40,6 @@ const checkEqualityOfArrays = (arr1, arr2, upToIdx) => {
 @connect((state) => {
   return {
     available: state.controls.available,
-    datasetFields: state.controls.datasetFields,
     source: state.controls.source
   };
 })
@@ -50,37 +49,46 @@ class ChooseDataset extends React.Component {
        source & raw datapath if we have one, otherwise don't render anything.
        This helps the user know what they're looking at.
      */
-    if (!this.props.available) {
+    if (!this.props.available || !this.props.available.datasets) {
       /* TODO expose this to the extension API */
       if (this.props.source === "github") {
 	return (<GithubInfo/>);
       } else if (this.props.source === "dropped") {
 	return (<DroppedFiles/>);
       }
-      return (<BareDataPath source={this.props.source} fields={this.props.datasetFields}/>);
+      return (<BareDataPath source={this.props.source} pathname={this.props.pathname}/>);
     }
 
-    const selected = this.props.datasetFields;
+    const displayedDataset = window.location.pathname
+      .replace(/^\//, '')
+      .replace(/\/$/, '')
+      .split("/");
+    displayedDataset.forEach((part, idx) => {
+      if (part.includes(":")) {
+	displayedDataset[idx] = part.split(":")[0];
+      }
+    });
+
     const options = [[]];
 
-    this.props.available.forEach((d) => {
+    this.props.available.datasets.forEach((d) => {
       const firstField = d.request.split("/")[0];
       if (!options[0].includes(firstField)) {
 	options[0].push(firstField);
       }
     });
 
-    for (let idx=1; idx<selected.length; idx++) {
+    for (let idx=1; idx<displayedDataset.length; idx++) {
       /* going through the fields which comprise the current dataset
       in order to create available alternatives for each field */
       options[idx] = [];
-      this.props.available.forEach((singleAvailableOption) => {
-        /* if the parents (and their parents etc) of this choice match,
-        then we add that as a valid option */
+      this.props.available.datasets.forEach((singleAvailableOption) => {
+	/* if the parents (and their parents etc) of this choice match,
+	then we add that as a valid option */
 	const fields = singleAvailableOption.request.split("/");
-	if (checkEqualityOfArrays(fields, selected, idx) && options[idx].indexOf(fields[idx]) === -1) {
+	if (checkEqualityOfArrays(fields, displayedDataset, idx) && options[idx].indexOf(fields[idx]) === -1) {
 	  options[idx].push(fields[idx]);
-        }
+	}
       });
     }
 
@@ -91,8 +99,8 @@ class ChooseDataset extends React.Component {
           <ChooseDatasetSelect
             dispatch={this.props.dispatch}
             source={this.props.source}
-            choice_tree={selected.slice(0, i)}
-            selected={selected[i]}
+	    choice_tree={displayedDataset.slice(0, i)}
+	    selected={displayedDataset[i]}
             options={options[i]}
           />
         </div>

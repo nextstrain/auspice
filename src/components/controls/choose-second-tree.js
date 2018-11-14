@@ -10,33 +10,41 @@ import { SidebarSubtitle } from "./styles";
 @connect((state) => {
   return {
     available: state.controls.available,
-    datasetFields: state.controls.datasetFields,
-    source: state.controls.source,
     treeName: state.tree.name,
-    showTreeToo: state.controls.showTreeToo
+    showTreeToo: state.controls.showTreeToo /* this is the name of the second tree if one is selected */
   };
 })
 class ChooseSecondTree extends React.Component {
   render() {
-    if (!this.props.available || !this.props.datasetFields || !this.props.source || !this.props.treeName) {
+    if (!this.props.available || !this.props.available.datasets || !this.props.treeName) {
       return null;
     }
-
-    const idxOfTree = this.props.datasetFields.indexOf(this.props.treeName);
-
-    const matches = this.props.available.slice().filter((dataset) => {
-      if (dataset.length !== this.props.datasetFields.length) return false;
-      for (let i=0; i<dataset.length; i++) {
-        if (i===idxOfTree) {
-          if (dataset[i] === this.props.datasetFields[i]) {
-            return false; // don't match the same tree name
-          }
-        } else if (dataset[i] !== this.props.datasetFields[i]) {
-          return false; // everything apart from the tree much match
-        }
+    const displayedDataset = window.location.pathname
+      .replace(/^\//, '')
+      .replace(/\/$/, '')
+      .split("/");
+    displayedDataset.forEach((part, idx) => {
+      if (part.includes(":")) {
+	displayedDataset[idx] = part.split(":")[0];
       }
-      return true;
     });
+    const idxOfTree = displayedDataset.indexOf(this.props.treeName);
+
+    const matches = this.props.available.datasets
+      .map((datasetObj) => datasetObj.request.split("/"))
+      .filter((dataset) => {
+	if (dataset.length !== displayedDataset.length) return false;
+	for (let i=0; i<dataset.length; i++) {
+	  if (i===idxOfTree) {
+	    if (dataset[i] === displayedDataset[i]) {
+	      return false; // don't match the same tree name
+	    }
+	  } else if (dataset[i] !== displayedDataset[i]) {
+	    return false; // everything apart from the tree much match
+          }
+        }
+	return true;
+      });
 
     const options = matches.map((m) => m[idxOfTree]);
     if (this.props.showTreeToo) options.unshift("REMOVE");
@@ -46,8 +54,8 @@ class ChooseSecondTree extends React.Component {
 	<SidebarSubtitle spaceAbove>
 	  Second Tree
 	</SidebarSubtitle>
-        <div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
-          <Select
+	<div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
+	  <Select
             name="selectTreeToo"
             id="selectTreeToo"
             value={this.props.showTreeToo}
@@ -59,7 +67,7 @@ class ChooseSecondTree extends React.Component {
               if (opt.value === "REMOVE") {
                 this.props.dispatch({type: REMOVE_TREE_TOO});
               } else {
-                const dataPath = [...this.props.datasetFields];
+		const dataPath = [...displayedDataset];
                 dataPath.splice(idxOfTree, 1, opt.value);
                 this.props.dispatch(loadTreeToo(opt.value, dataPath));
               }
