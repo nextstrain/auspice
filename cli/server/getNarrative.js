@@ -1,7 +1,7 @@
 const queryString = require("query-string");
 const parseNarrative = require('./parseNarrative').default;
 const path = require("path");
-const utils = require("./utils");
+const utils = require("../utils");
 const fs = require('fs');
 
 const getNarrative = (req, res) => {

@@ -1,6 +1,13 @@
-const path = require("path");
+const utils = require('./cli/utils');
+
+/* What variables does this config depend on?
+ * process.env.BABEL_EXTENSION_PATH -- a resolved path
+ * api.env -- this is process.env.BABEL_ENV if it exists (it should)
+ * process.env.BABEL_INCLUDE_TIMING_FUNCTIONS
+ */
 
 module.exports = function babelConfig(api) {
+  utils.verbose(`Generating Babel Config`);
   const presets = [
     "@babel/env",
     "@babel/preset-react"
@@ -11,8 +18,8 @@ module.exports = function babelConfig(api) {
     "babel-plugin-styled-components"
   ];
   if (api.env("development")) {
-    if (process.env.EXTENSION_PATH && !path.resolve(process.env.EXTENSION_PATH).includes(__dirname)) {
-      console.log("Not using react-hot-loader/babel plugin with auspice extensions as this produces an error. TO FIX.");
+    if (process.env.BABEL_EXTENSION_PATH && !process.env.BABEL_EXTENSION_PATH.includes(__dirname)) {
+      utils.verbose("Not using react-hot-loader/babel plugin with auspice extensions as this produces an error. TO FIX.");
       /* with extensions from a dir not within the main auspice directory we get the error:
        * Module not found: Error: Can't resolve 'react-hot-loader' in ...extension directory...
        * Which I can't fix. Tried:
@@ -25,7 +32,7 @@ module.exports = function babelConfig(api) {
       plugins.push("react-hot-loader/babel");
     }
   }
-  if (!api.env("timing")) {
+  if (process.env.BABEL_INCLUDE_TIMING_FUNCTIONS === "false") {
     plugins.push(["strip-function-call", {strip: ["timerStart", "timerEnd"]}]);
   }
   api.cache(true);

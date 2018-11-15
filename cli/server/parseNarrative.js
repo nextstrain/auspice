@@ -1,6 +1,6 @@
 const marked = require('marked');
 const yamlFront = require('yaml-front-matter');  /* https://www.npmjs.com/package/yaml-front-matter */
-const utils = require("./utils");
+const utils = require("../utils");
 
 const blockProxyHandler = {
   set: (target, key, value) => {

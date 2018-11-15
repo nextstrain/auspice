@@ -11,26 +11,19 @@
     "npm": "6.2.x"
   },
   "bin": {
-    "auspice": "./server.js"
+    "auspice": "./auspice.js"
   },
   "scripts": {
+    "create-data-dir": "./scripts/create-data-dir.sh",
     "postinstall": "npm run create-data-dir",
-    "server": "node server.js",
-    "server:local": "echo \"Local data is now served via 'npm run server.js' and specifying /local as the URL prefix.\"",
-    "server:debug": "node --inspect server.js",
-    "build": "rimraf dist && NODE_ENV=production BABEL_ENV=production webpack --config webpack.config.prod.js",
-    "build:timing": "rimraf dist && NODE_ENV=production BABEL_ENV=timing  webpack --config webpack.config.prod.js",
-    "dev": "node server.js --dev",
-    "start": "npm run dev",
-    "start:local": "echo \"Please run 'npm run dev' and access local datasets via /local/... in the URL\"",
+    "server": "node auspice.js view --verbose",
+    "start": "npm run server",
     "lint": "eslint src",
-    "heroku-postbuild": "npm run build",
     "get-data": "./scripts/get-data.sh",
     "get-narratives": "./scripts/get-narratives.sh",
     "redeploy-site": "./scripts/redeploy-site.sh",
     "rebuild-docker-image": "./scripts/rebuild-docker-image.sh",
-    "gzip-and-upload": "./scripts/gzip-and-upload.sh",
-    "create-data-dir": "./scripts/create-data-dir.sh"
+    "gzip-and-upload": "./scripts/gzip-and-upload.sh"
   },
   "dependencies": {
     "argparse": "^1.0.10",
