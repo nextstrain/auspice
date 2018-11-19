@@ -1,5 +1,6 @@
-## version 1.32.0 - 2018/11/02
+* Gene names can now include `-` and `_`, as well as code improvements to genotype encoding/decoding -- [PR 681](https://github.com/nextstrain/auspice/pull/681)
 
+## version 1.32.0 - 2018/11/02
 * Allow `hidden` property on tree nodes -- [PR 676](https://github.com/nextstrain/auspice/pull/676)
 * Update packages & package.json metadata -- [PR 677](https://github.com/nextstrain/auspice/pull/677) [PR 678](https://github.com/nextstrain/auspice/pull/678) [PR 679](https://github.com/nextstrain/auspice/pull/679)
 * Restore hot-reloading ability for development (above PRs)
