@@ -134,7 +134,7 @@ const constructPathToGet = (source, providedUrl, otherQueries) => {
     if (parts.length < 3) {
       throw new Error("Community URLs must be of format community/githubOrgName/repoName/...");
     }
-    fetchURL = `https://rawgit.com/${parts[1]}/${parts[2]}/master/auspice`;
+    fetchURL = `https://raw.githubusercontent.com/${parts[1]}/${parts[2]}/master/auspice`;
     auspiceURL = `community/${parts[1]}/`;
     datasetFields = parts.slice(2);
   } else if (source === "staging") {

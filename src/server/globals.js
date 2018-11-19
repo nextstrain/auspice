@@ -55,7 +55,7 @@ const setGlobals = (args) => {
   global.LOCAL_NARRATIVES_PATH = getLocalNarrativesPath(args) || path.resolve(__dirname, "..", "..", "local_narratives/");
   global.REMOTE_DATA_LIVE_BASEURL = "http://data.nextstrain.org";
   global.REMOTE_DATA_STAGING_BASEURL = "http://staging.nextstrain.org";
-  global.REMOTE_NARRATIVES_BASEURL = "http://cdn.rawgit.com/nextstrain/narratives/master";
+  global.REMOTE_NARRATIVES_BASEURL = "https://raw.githubusercontent.com/nextstrain/narratives/master";
   global.LIVE_MANIFEST = undefined;
   global.LOCAL_MANIFEST = undefined;
   global.STAGING_MANIFEST = undefined;
