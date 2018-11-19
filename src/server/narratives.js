@@ -135,7 +135,7 @@ const serveCommunityNarrative = (res, url, errorHandler) => {
   const orgName = urlParts[2];
   const repoName = urlParts[3];
   const filename = [repoName].concat(urlParts.slice(4)).join("_")+".md";
-  const fetchURL = `https://rawgit.com/${orgName}/${repoName}/master/narratives/${filename}`;
+  const fetchURL = `https://raw.githubusercontent.com/${orgName}/${repoName}/master/narratives/${filename}`;
   fetch(fetchURL)
     .then((result) => result.text())
     .then((fileContents) => {
