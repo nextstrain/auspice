@@ -5,7 +5,7 @@ import { interpolateHcl } from "d3-interpolate";
 import { genericDomain, colors, genotypeColors } from "./globals";
 import { countTraitsAcrossTree } from "./treeCountingHelpers";
 import { getExtraVals } from "./colorHelpers";
-import { parseEncodedGenotype } from "./getGenotype";
+import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 
 const unknownColor = "#AAAAAA";
@@ -99,12 +99,9 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   }
 
   let genotype;
-  if (colorBy.slice(0, 3) === "gt-" && controls.geneLength) {
-    genotype = parseEncodedGenotype(colorBy, controls.geneLength);
-    if (genotype.length > 1) {
-      console.warn("Cannot deal with multiple proteins yet - using first only.");
-    }
-    setGenotype(tree.nodes, genotype[0].prot || "nuc", genotype[0].positions); /* modifies nodes recursively */
+  if (isColorByGenotype(colorBy) && controls.geneLength) {
+    genotype = decodeColorByGenotype(colorBy, controls.geneLength);
+    setGenotype(tree.nodes, genotype.gene, genotype.positions); /* modifies nodes recursively */
   }
   const colorOptions = metadata.colorOptions;
   const treeTooNodes = treeToo ? treeToo.nodes : undefined;

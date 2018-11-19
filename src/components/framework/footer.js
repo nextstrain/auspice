@@ -8,6 +8,8 @@ import { applyFilter } from "../../actions/tree";
 import { changeColorBy } from "../../actions/colors";
 import { version } from "../../version";
 import { publications } from "../download/downloadModal";
+import { encodeColorByGenotype } from "../../util/getGenotype";
+
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
     •
@@ -145,11 +147,11 @@ export const getAcknowledgments = (dispatch, styles) => {
         {" to colour the tree by this). These strains are defined by these mutations (click to change the colouring of the tree):"}
         <ul>
           <li>
-            <span className={"link"} onClick={() => dispatch(changeColorBy("gt-env_159"))}>{"env-V159A"}</span>
+            <span className={"link"} onClick={() => dispatch(changeColorBy(encodeColorByGenotype({ gene: "env", positions: [159] })))}>{"env-V159A"}</span>
             {" designates the switch from NY99 (the original sequence) to WN02."}
           </li>
           <li>
-            <span className={"link"} onClick={() => dispatch(changeColorBy("gt-NS4A_85"))}>{"NS4A-A85T"}</span>
+            <span className={"link"} onClick={() => dispatch(changeColorBy(encodeColorByGenotype({ gene: "NS4A", positions: [85] })))}>{"NS4A-A85T"}</span>
             {" designates the switch from WN02 to SW03 (WN02 displaced NY99; WN02 and SW03 co-circulate)."}
           </li>
         </ul>
