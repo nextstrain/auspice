@@ -1,5 +1,6 @@
-## version 1.33.0 - 2018/11/18
+* Community builds are now sourced from githubusercontent, which is the official source for "raw" files from GitHub. [PR 682](https://github.com/nextstrain/auspice/pull/682)
 
+## version 1.33.0 - 2018/11/18
 * Gene names can now include `-` and `_`, as well as code improvements to genotype encoding/decoding -- [PR 681](https://github.com/nextstrain/auspice/pull/681)
 
 ## version 1.32.0 - 2018/11/02
