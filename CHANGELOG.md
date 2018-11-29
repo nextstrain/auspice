@@ -1,3 +1,5 @@
+## version 1.34.1 - 2018/11/29
+
 * Small change to make the 'Second Tree' option appear when virus segments are named according to "segment1", "segment2" etcetera. [See PR 684](https://github.com/nextstrain/auspice/pull/684)
 
 ## version 1.34.0 - 2018/11/19
