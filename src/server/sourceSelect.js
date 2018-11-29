@@ -87,7 +87,7 @@ const collectAndSendNarratives = (errorMessage, res, source) => {
 
 
 const guessTreeName = (parts) => {
-  const guesses = ["HA", "NA", "PB1", "PB2", "PA", "NP", "NS", "MP", "L", "S"];
+  const guesses = ["HA", "NA", "PB1", "PB2", "PA", "NP", "NS", "MP", "L", "S", "SEGMENT1", "SEGMENT2", "SEGMENT3", "SEGMENT4", "SEGMENT5", "SEGMENT6", "SEGMENT7", "SEGMENT8", "SEGMENT9", "SEGMENT10"];
   for (const part of parts) {
     if (guesses.indexOf(part.toUpperCase()) !== -1) return part;
   }
