@@ -1,5 +1,6 @@
-## version 1.34.0 - 2018/11/19
+* Small change to make the 'Second Tree' option appear when virus segments are named according to "segment1", "segment2" etcetera. [See PR 684](https://github.com/nextstrain/auspice/pull/684)
 
+## version 1.34.0 - 2018/11/19
 * Community builds are now sourced from githubusercontent, which is the official source for "raw" files from GitHub. [PR 682](https://github.com/nextstrain/auspice/pull/682)
 
 ## version 1.33.0 - 2018/11/18
