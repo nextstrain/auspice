@@ -141,9 +141,7 @@ class Legend extends React.Component {
   }
 
   styleLabelText(label) {
-    if (this.props.colorBy === "clade_membership") {
-      return label; /* unchanged */
-    } else if (this.props.colorBy === "num_date") {
+    if (this.props.colorBy === "num_date") {
       const legendValues = this.props.colorScale.legendValues;
       if (
         (legendValues[legendValues.length-1] - legendValues[0] > 10) && /* range spans more than 10 years */
