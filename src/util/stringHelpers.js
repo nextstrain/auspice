@@ -20,7 +20,7 @@ export const prettyString = (x, {multiplier = false, trim = 0, camelCase = true,
     }
     x = x.replace(/_/g, " ");
     if (camelCase) {
-      x = x.replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1).toLowerCase());
+      x = x.replace(/\w\S*/g, (y) => y.charAt(0).toUpperCase() + y.substr(1));
     }
     if (removeComma) {
       x = x.replace(/,/g, "");
