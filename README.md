@@ -6,7 +6,7 @@ npm: [![NPM version](https://img.shields.io/npm/v/auspice.svg?style=flat-square)
 ## Introduction
 
 Auspice is an open-source interactive web app for visualising phylogenomic data.
-It is the app that powers all the vlisualisation on [nextstrain.org](https://nextstrain.org), which aims to provide a continually-updated view of publicly available pathogen genome data.
+It is the app that powers all the visualisation on [nextstrain.org](https://nextstrain.org), which aims to provide a continually-updated view of publicly available pathogen genome data.
 Auspice was designed to aid epidemiological understanding and improve outbreak response, but is able to visualise a diverse range of datasets.
 
 
