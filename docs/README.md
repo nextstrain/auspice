@@ -1,37 +1,27 @@
----
-title: Overview
----
+# Auspice Documentation
 
-### Auspice: an open-source interactive tool for visualising phylogenomic data
+This folder contains the static site generator and the markdown files which form the auspice documentation website.
+This is currently designed to be served from github pages.
+[Docusaurus](https://docusaurus.io/) is used to generate the static site.
 
-> These docs are for a devlopment branch which is in flux. They are incomplete and will change frequently.
+### Folder structure:
+* `README.md` this file
+* `docs/` contains the raw markdown files. The filenames (and directory names) will be used as URLS.
+* `website/` the files needed to build the website.
+  * `website/sidebars.json` define the doc links in the sidebar
+  * `website/pages/index.js` the splash page
 
-Auspice is an interactive visualisation platform for phylogenomic and other other datasets related to evolution.
-It was originally designed for nextstrain.org, which aims to aims to provide a continually-updated view of publicly available pathogen genome data.
-Auspice can be used locally to view datasets, or deployed to server- or serverless-websites.
-It allows easy customisation of aesthetics and functionality, and powers the visualisations on [nextstrain.org](https://nextstrain.org).
-
-
-* [overview of functionality](tutorial/README.md)
-* [installation instructions](installation.md)
-* [customising your auspice build](customisations/README.md)
-* [deploying](deploying.md)
-* [data formats](inputs.md).
-
-
-## Running Auspice Locally
-
-Auspice by itself is a visualisation tool for local datasets.
-It runs a local server to deliver the files the the visualisation to [localhost:4000](http://localhost:4000).
-After [installing](installation.md), you can access datasets in the current directory by running
+### How to develop:
 ```bash
-auspice view
+cd website
+npx docusaurus-start
 ```
-Please see `auspice view -h` for all available options.
 
+### How to deploy:
 
-
-## License and copyright
-Copyright 2014-2018 Trevor Bedford and Richard Neher.
-
-Source code to Nextstrain is made available under the terms of the [GNU Affero General Public License](LICENSE.txt) (AGPL). Nextstrain is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Affero General Public License for more details.
+```bash
+cd website
+npx docusaurus-build # creates website/build/*
+cd ..
+mv website/build/sandbox/* . # sandbox to be renamed auspice
+```

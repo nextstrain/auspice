@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.5 (67469) - http://www.bohemiancoding.com/sketch -->
+    <title>icon</title>
+    <desc>Created with Sketch.</desc>
+    <g id="icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+	<path d="M12.5,200 L99,-2.17603713e-14" id="Line" stroke="#5DA8A3" stroke-width="23" stroke-linecap="square"></path>
+	<path d="M187.5,200 L100,1" id="Line" stroke="#5DA8A3" stroke-width="23" stroke-linecap="square"></path>
+	<path d="M135.710718,80.3357799 C133.897456,98.1073733 126.069939,112.573312 112.228168,123.733595 C98.3863964,134.893878 84.4262271,139.634851 70.34766,137.956513" id="Path-3" stroke="#5DA8A3" stroke-width="16" transform="translate(103.029189, 109.310698) rotate(6.000000) translate(-103.029189, -109.310698) "></path>
+	<path d="M12.5,201 L99,1" id="Line" stroke="#5DA8A3" stroke-width="23" stroke-linecap="square"></path>
+	<path d="M187.5,201 L100,2" id="Line" stroke="#5DA8A3" stroke-width="23" stroke-linecap="square"></path>
+	<path d="M135.710718,81.3357799 C133.897456,99.1073733 126.069939,113.573312 112.228168,124.733595 C98.3863964,135.893878 84.4262271,140.634851 70.34766,138.956513" id="Path-3" stroke="#5DA8A3" stroke-width="16" transform="translate(103.029189, 110.310698) rotate(6.000000) translate(-103.029189, -110.310698) "></path>
+	<path d="M88.5066172,153.705771 C82.9613462,148.343414 78.0156017,144.689644 73.6693836,142.744461 C69.3231656,140.799279 64.3774211,139.284902 58.8321501,138.201331 C62.4413204,136.244675 66.0674613,133.476033 69.7105727,129.895407 C73.3536842,126.314781 76.7794514,120.861382 79.9878744,113.53521" id="Path-3" stroke="#5DA8A3" stroke-width="10" stroke-linecap="round" transform="translate(73.669384, 133.620491) rotate(6.000000) translate(-73.669384, -133.620491) "></path>
+    </g>
+</svg>

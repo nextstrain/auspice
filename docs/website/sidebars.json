@@ -1,0 +1,30 @@
+{
+  "docs": {
+    "Introduction": [
+      "README",
+      "installation",
+      "inputs"
+    ],
+    "Customisations": [
+      "customisations/README",
+      "customisations/authentication",
+      {
+	"type": "subcategory",
+	"label": "Customising the Client",
+	"ids": [
+	  "customisations/client/componentInterfaces",
+	  "customisations/client/sidebarTheme"
+	]
+      },
+      {
+	"type": "subcategory",
+	"label": "Customising the Server",
+	"ids": [
+	  "customisations/server/charonAPI"
+	]
+      }
+    ],
+    "Tutorial": [
+    ]
+  }
+}
