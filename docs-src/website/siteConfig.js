@@ -10,14 +10,14 @@
 const siteConfig = {
   title: 'Auspice', // Title for your website.
   tagline: 'Interactive exploration of phylodynamic & phylogenomic data.',
-  projectName: 'sandbox',
+  projectName: 'auspice',
   organizationName: 'nextstrain',
   url: 'https://nextstrain.github.io', // Your website URL
-  baseUrl: '/sandbox/', // Base URL for your project */
+  baseUrl: '/auspice/', // Base URL for your project */
 
   // Header links in the top nav bar
   headerLinks: [
-    {doc: 'README', label: 'Docs'}
+    {doc: 'overview', label: 'Docs'}
   ],
 
   /* path to images for header/footer */

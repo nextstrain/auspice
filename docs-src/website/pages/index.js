@@ -20,22 +20,22 @@ const RenderLogos = () => (
   >
     <div className={"gridBlock"} style={{justifyContent: "space-around"}}>
       <a key={1} href="http://www.fredhutch.org/" target="_blank" rel="noopener noreferrer">
-	<img alt="logo" width="75" src={imgUrl("fred-hutch-logo-small.png")}/>
+        <img alt="logo" width="75" src={imgUrl("fred-hutch-logo-small.png")}/>
       </a>
       <a key={2} href="http://www.eb.tuebingen.mpg.de/" target="_blank" rel="noopener noreferrer">
-	<img alt="logo" width="65" src={imgUrl("max-planck-logo.png")}/>
+        <img alt="logo" width="65" src={imgUrl("max-planck-logo.png")}/>
       </a>
       <a key={3} href="https://www.nih.gov/" target="_blank" rel="noopener noreferrer">
-	<img alt="logo" width="52" src={imgUrl("nih-logo.jpg")}/>
+        <img alt="logo" width="52" src={imgUrl("nih-logo.jpg")}/>
       </a>
       <a key={4} href="https://erc.europa.eu/" target="_blank" rel="noopener noreferrer">
-	<img alt="logo" width="60" src={imgUrl("erc-logo.jpg")}/>
+        <img alt="logo" width="60" src={imgUrl("erc-logo.jpg")}/>
       </a>
       <a key={5} href="https://www.openscienceprize.org/" target="_blank" rel="noopener noreferrer">
-	<img alt="logo" width="82" src={imgUrl("osp-logo-small.png")}/>
+        <img alt="logo" width="82" src={imgUrl("osp-logo-small.png")}/>
       </a>
       <a key={6} href="http://biozentrum.org/" target="_blank" rel="noopener noreferrer">
-	<img alt="logo" width="85" src={imgUrl("bz-logo.png")} />
+        <img alt="logo" width="85" src={imgUrl("bz-logo.png")} />
       </a>
     </div>
   </Container>
@@ -45,9 +45,9 @@ class Button extends React.Component { // eslint-disable-line
   render() {
     return (
       <div className="pluginWrapper buttonWrapper" style={{paddingTop: "30px"}}>
-	<a className={`button ${this.props.className}`} href={this.props.href} target={this.props.target}>
-	  {this.props.children}
-	</a>
+        <a className={`button ${this.props.className}`} href={this.props.href} target={this.props.target}>
+          {this.props.children}
+        </a>
       </div>
     );
   }
@@ -94,12 +94,12 @@ const Block = (props) => (
   >
     <div className="gridBlock">
       {props.children.map((child) => (
-	<div className={`blockElement alignCenter ${props.layout || "fourByGridBlock"}`} key={child.title}>
-	  <div className="blockContent">
-	    <h2>{child.title}</h2>
-	    {child.content}
-	  </div>
-	</div>
+        <div className={`blockElement alignCenter ${props.layout || "fourByGridBlock"}`} key={child.title}>
+          <div className="blockContent">
+            <h2>{child.title}</h2>
+            {child.content}
+          </div>
+        </div>
       ))}
     </div>
     {props.footer || null}
@@ -119,33 +119,33 @@ const IntroBlocks = () => (
   <Block background="highlight">
     {[
       {
-	title: 'Interactive visualisation',
-	content: (
-	  <span>
-	    Visualisation of bioinformatics results is an integral part of current phylodynamics, both for data exploration and communication.
-	    We wanted to build a tool that was highly interactive, versatile and customisable.
-	    <Button href={docUrl("README")}>Find out more</Button>
-	  </span>
-	)
+        title: 'Interactive visualisation',
+        content: (
+          <span>
+            Visualisation of bioinformatics results is an integral part of current phylodynamics, both for data exploration and communication.
+            We wanted to build a tool that was highly interactive, versatile and customisable.
+            <Button href={docUrl("overview")}>Find out more</Button>
+          </span>
+        )
       },
       {
-	title: 'Run auspice locally',
-	content: (
-	  <span>
-	    Run auspice on your computer to display and interact with your own datasets.
-	    <Button href={docUrl("installation")}>Find out more</Button>
-	  </span>
-	)
+        title: 'Run auspice locally',
+        content: (
+          <span>
+            Run auspice on your computer to display and interact with your own datasets.
+            <Button href={docUrl("installation")}>Find out more</Button>
+          </span>
+        )
       },
       {
-	title: 'Build your own custom website',
-	content: (
-	  <span>
-	    Auspice is a communication platform to quickly disseminate results to the wider community.
-	    Use it to generate server-backed or serverless websites to display your own datasets, with as many customisations as you desire.
-	    <Button href={docUrl("customisations/README")}>Find out more</Button>
-	  </span>
-	)
+        title: 'Build your own custom website',
+        content: (
+          <span>
+            Auspice is a communication platform to quickly disseminate results to the wider community.
+            Use it to generate server-backed or serverless websites to display your own datasets, with as many customisations as you desire.
+            <Button href={docUrl("customisations/introduction")}>Find out more</Button>
+          </span>
+        )
       }
     ]}
   </Block>
@@ -171,25 +171,25 @@ const Philosophy = () => (
   >
     {[
       {
-	title: 'Use Augur for bioinformatics',
-	content: (
-	  <MarkdownBlock>
-	    Augur is a seperate toolkit for phylodynamic analysis with a focus on pathgen and outbreak tracking.
-	    It's designed to work seamlessly with auspice.
-	    See the [nextstrain documentation]("https://nextstrain.org/docs/bioinformatics/introduction") to find out more.
-	  </MarkdownBlock>
-	)
+        title: 'Use Augur for bioinformatics',
+        content: (
+          <MarkdownBlock>
+            Augur is a seperate toolkit for phylodynamic analysis with a focus on pathgen and outbreak tracking.
+            It's designed to work seamlessly with auspice.
+            See the [nextstrain documentation]("https://nextstrain.org/docs/bioinformatics/introduction") to find out more.
+          </MarkdownBlock>
+        )
       },
       {
-	title: 'Status: In Development',
-	content: (
-	  <MarkdownBlock>
-	    We're actively developing auspice to be more versatile and able to power many different websites.
-	    As such, the current API's are in flux while we develop this functionality.
-	    If you are interested in helping us develop these ideas and would like to use auspice to build your website
-	    then please contact us via [email](mailto:hello@nextstrain.org) or [twitter](twitter.com/hamesjadfield).
-	  </MarkdownBlock>
-	)
+        title: 'Status: In Development',
+        content: (
+          <MarkdownBlock>
+            We're actively developing auspice to be more versatile and able to power many different websites.
+            As such, the current API's are in flux while we develop this functionality.
+            If you are interested in helping us develop these ideas and would like to use auspice to build your website
+            then please contact us via [email](mailto:hello@nextstrain.org) or [twitter](twitter.com/hamesjadfield).
+          </MarkdownBlock>
+        )
       }
     ]}
   </Block>
@@ -202,19 +202,19 @@ const Showcase = () => (
     <h2>Auspice is the software which powers:</h2>
     <div className="gridBlock">
       {users.map((user) => (
-	<div className={`blockElement alignCenter fourByGridBlock`} key={user.name}>
-	  <div className="blockContent">
-	    <h3 style={{marginTop: "0px"}}>
-	      <a href={user.link} target="_blank" rel="noopener noreferrer">
-		{user.name}
-	      </a>
-	    </h3>
-	    <a href={user.link} target="_blank" rel="noopener noreferrer">
-	      <img src={user.image} alt={user.name} style={{maxHeight: "100px"}}/>
-	    </a>
-	    <p>{user.caption}</p>
-	  </div>
-	</div>
+        <div className={`blockElement alignCenter fourByGridBlock`} key={user.name}>
+          <div className="blockContent">
+            <h3 style={{marginTop: "0px"}}>
+              <a href={user.link} target="_blank" rel="noopener noreferrer">
+                {user.name}
+              </a>
+            </h3>
+            <a href={user.link} target="_blank" rel="noopener noreferrer">
+              <img src={user.image} alt={user.name} style={{maxHeight: "100px"}}/>
+            </a>
+            <p>{user.caption}</p>
+          </div>
+        </div>
       ))}
     </div>
   </Container>
@@ -224,19 +224,19 @@ class Index extends React.Component { // eslint-disable-line
   render() {
     return (
       <div>
-	<SplashContainer>
-	  <div className="inner" style={{paddingBottom: "100px", paddingTop: "100px"}}>
-	    <Logo img_src={imgUrl('icon-no-bg.svg')} />
-	    <ProjectTitle />
-	    <PromoSection>
-	      <Introduction/>
-	    </PromoSection>
-	  </div>
-	  <IntroBlocks/>
-	  <Showcase/>
-	  <Philosophy/>
-	  <RenderLogos/>
-	</SplashContainer>
+        <SplashContainer>
+          <div className="inner" style={{paddingBottom: "100px", paddingTop: "100px"}}>
+            <Logo img_src={imgUrl('icon-no-bg.svg')} />
+            <ProjectTitle />
+            <PromoSection>
+              <Introduction/>
+            </PromoSection>
+          </div>
+          <IntroBlocks/>
+          <Showcase/>
+          <Philosophy/>
+          <RenderLogos/>
+        </SplashContainer>
       </div>
     );
   }

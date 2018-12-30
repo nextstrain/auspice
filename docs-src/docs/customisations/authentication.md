@@ -3,12 +3,14 @@ title: Authentication
 ---
 
 
+> Note that this page details our proposal of how to handle authentication.
+Comments welcome.
+
+
 We understand it may be necessary to authenticate the entire auspice website, or certain datasets.
 Our proposed solution to this is to perform all authentication on the server (remember that custom server handlers are already part of the auspice extension framework).
-This relies on cookies (?) being available to the server on each and every request made from auspice, which should happen automatically.
+This relies on cookies being available to the server on each and every request made from auspice, which should happen automatically.
 
-
-> Note that this approach is still in the experimental stage. Comments welcome.
 
 
 ## Logging in / authenticating:
