@@ -2,7 +2,8 @@
 title: Auspice Server API
 ---
 
-> This API is experimental and may change frequently.
+> This API is largely based off the interface used by nextstrain.
+Most probably it will change dramatically over the coming weeks.
 
 The client (i.e. the auspice web page) makes requests to a server, for instance requesting a dataset file or requesting a listing of available datasets.
 The server is referred to as "charon".
@@ -16,11 +17,6 @@ These handlers source data from the local filesystem so that running auspice wit
 Customisations of auspice can provide their own handlers, allowing for multiple different use cases.
 For instance, **auspice.us** (currently located as a subdirectory of auspice) contains handlers to fetch datasets from github repos ("community" builds). The handlers used in **nextstrain.org** fetch datasets from S3 buckets.
 
-
-## Serverless builds
-
-You may also choose to forego the server and hardcode the paths to the datasets.
-For an example of this see [github.com/blab/ZEBOV](https://github.com/blab/ZEBOV) -- specifically [this part](https://github.com/blab/ZEBOV/blob/master/auspiceCustomisations/config.json#L3) of the auspice config.
 
 ## Where are these "handlers" used?
 During development of auspice, the dev-server needs access to these handlers in order to make process requests.

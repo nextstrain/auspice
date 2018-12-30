@@ -1,13 +1,12 @@
 {
   "docs": {
     "Introduction": [
-      "README",
+      "overview",
       "installation",
       "inputs"
     ],
     "Customisations": [
-      "customisations/README",
-      "customisations/authentication",
+      "customisations/introduction",
       {
 	"type": "subcategory",
 	"label": "Customising the Client",
@@ -20,11 +19,14 @@
 	"type": "subcategory",
 	"label": "Customising the Server",
 	"ids": [
-	  "customisations/server/charonAPI"
+	  "customisations/server/charonAPI",
+	  "customisations/server/serverless"
 	]
-      }
+      },
+      "customisations/authentication"
     ],
     "Tutorial": [
+      "tutorial/overview"
     ]
   }
 }

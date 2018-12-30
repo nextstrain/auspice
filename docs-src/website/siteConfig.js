@@ -17,7 +17,7 @@ const siteConfig = {
 
   // Header links in the top nav bar
   headerLinks: [
-    {doc: 'README', label: 'Docs'}
+    {doc: 'overview', label: 'Docs'}
   ],
 
   /* path to images for header/footer */
