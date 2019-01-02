@@ -1,7 +1,7 @@
 
 const registry = (() => {
   if (!process.env.EXTENSION_DATA) {
-    console.log("no EXTENSION_DATA found");
+    // console.log("no EXTENSION_DATA found");
     return {};
   }
 
@@ -15,7 +15,7 @@ const registry = (() => {
       extensions[key] = require(`@extensions/${extensions[key]}`).default;
     }
   });
-  console.log("extensions", extensions);
+  // console.log("extensions", extensions);
 
   /* potential side effect: change page title */
   if (extensions.browserTitle) {
