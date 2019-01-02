@@ -20,7 +20,7 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
   const p = fetch(path)
     .then((res) => {
       if (res.status !== 200) {
-	throw new Error(res.statusText);
+        throw new Error(res.statusText);
       }
       return res;
     })
@@ -36,7 +36,7 @@ const getHardcodedData = (prefix, {type="mainJSON", narrative=false}={}) => {
   const p = fetch(datapaths[type])
     .then((res) => {
       if (res.status !== 200) {
-	throw new Error(res.statusText);
+        throw new Error(res.statusText);
       }
       return res;
     })
@@ -70,21 +70,21 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
         ...createStateFromQueryOrJSONs({json, query, narrativeBlocks})
       });
       return {
-	frequencies: (json.meta.panels && json.meta.panels.indexOf("frequencies") !== -1)
+        frequencies: (json.meta.panels && json.meta.panels.indexOf("frequencies") !== -1)
       };
     })
     .then((result) => {
       if (result.frequencies === true) {
-	getDataset(url, {type: "tip-frequencies"})
-	  .then((res) => dispatch(loadFrequencies(res)))
-	  .catch((err) => console.error("Frequencies failed to fetch", err.message));
+        getDataset(url, {type: "tip-frequencies"})
+          .then((res) => dispatch(loadFrequencies(res)))
+          .catch((err) => console.error("Frequencies failed to fetch", err.message));
       }
       return false;
     })
     .then(() => {
       /* Get available datasets -- this is needed for the sidebar dataset-change dropdowns etc */
       fetchJSON(`${charonAPIAddress}/getAvailable?prefix=${window.location.pathname}`)
-	.then((res) => dispatch({type: types.SET_AVAILABLE, data: res}));
+        .then((res) => dispatch({type: types.SET_AVAILABLE, data: res}));
     })
     .catch((err) => {
       console.warn(err, err.message);

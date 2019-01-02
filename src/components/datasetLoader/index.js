@@ -24,8 +24,8 @@ class DatasetLoader extends React.Component {
   componentDidUpdate() {
     if (this.props.metadataLoaded && this.props.treeLoaded) {
       this.props.dispatch({
-	type: PAGE_CHANGE,
-	displayComponent: "main"
+        type: PAGE_CHANGE,
+        displayComponent: "main"
       });
     }
   }
