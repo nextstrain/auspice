@@ -16,8 +16,10 @@
   "scripts": {
     "create-data-dir": "./scripts/create-data-dir.sh",
     "postinstall": "npm run create-data-dir",
-    "server": "node auspice.js view --verbose",
-    "start": "npm run server",
+    "view": "node auspice.js view --verbose",
+    "start": "npm run view",
+    "build": "node auspice.js build --verbose",
+    "prepare" : "npm run build",
     "lint": "eslint src",
     "get-data": "./scripts/get-data.sh",
     "get-narratives": "./scripts/get-narratives.sh",

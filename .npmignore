@@ -7,7 +7,6 @@ s3/
 /local_narratives/
 
 src/*
-!src/server/*
 !src/version.js
 
 ### OSX ###
