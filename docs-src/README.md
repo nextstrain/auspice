@@ -23,5 +23,5 @@ npx docusaurus-start
 cd website
 npx docusaurus-build # creates website/build/*
 cd ..
-mv website/build/sandbox/* ../docs # sandbox to be renamed auspice
+cp -r website/build/auspice/* ../docs
 ```
