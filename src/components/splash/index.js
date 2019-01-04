@@ -27,7 +27,7 @@ class Splash extends React.Component {
   componentDidMount() {
     fetchJSON(`${charonAPIAddress}/getAvailable?prefix=${this.props.reduxPathname}`)
       .then((json) => {
-	this.setState({available: json});
+        this.setState({available: json});
       })
       .catch((err) => {
         this.setState({errorMessage: "Error in getting available datasets"});
@@ -37,14 +37,14 @@ class Splash extends React.Component {
   render() {
     return (
       <ErrorBoundary>
-	<SplashContent
-	  isMobile={this.props.browserDimensions.width < controlsHiddenWidth}
-	  available={this.state.available}
-	  browserDimensions={this.props.browserDimensions}
-	  dispatch={this.props.dispatch}
-	  errorMessage={this.props.errorMessage || this.state.errorMessage}
-	  changePage={changePage}
-	/>
+        <SplashContent
+          isMobile={this.props.browserDimensions.width < controlsHiddenWidth}
+          available={this.state.available}
+          browserDimensions={this.props.browserDimensions}
+          dispatch={this.props.dispatch}
+          errorMessage={this.props.errorMessage || this.state.errorMessage}
+          changePage={changePage}
+        />
       </ErrorBoundary>
     );
   }

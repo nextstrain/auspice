@@ -1,5 +1,5 @@
 const React = require('react');
-const CompLibrary = require('../core/CompLibrary.js'); // eslint-disable-line
+const CompLibrary = require('../../core/CompLibrary.js'); // eslint-disable-line
 const siteConfig = require(`${process.cwd()}/siteConfig.js`); // eslint-disable-line
 
 const MarkdownBlock = CompLibrary.MarkdownBlock; /* Used to read markdown */
@@ -226,7 +226,7 @@ class Index extends React.Component { // eslint-disable-line
       <div>
         <SplashContainer>
           <div className="inner" style={{paddingBottom: "100px", paddingTop: "100px"}}>
-            <Logo img_src={imgUrl('icon-no-bg.svg')} />
+            <Logo img_src={imgUrl('logo-light.svg')} />
             <ProjectTitle />
             <PromoSection>
               <Introduction/>
