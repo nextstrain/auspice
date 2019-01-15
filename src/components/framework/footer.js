@@ -75,7 +75,7 @@ export const getAcknowledgments = (dispatch, styles) => {
       <div>
         {genericPreamble}
         <div style={styles.acknowledgments}>
-          Special thanks to Jennifer Gardy, Shirlee Wohl, Jeff Joy, Patrick Stapleton, Nathan Yozwiak, Hayden Metsky, Agatha Jassem, Louise Moncla, Gytis Dudas and Pardis Sabeti for data sharing, comments and suggestions.
+          Special thanks to Duah Hamza Alkam, Dirk Haselow, Se-ran Jun, David Ussery, Jennifer Gardy, Shirlee Wohl, Jeff Joy, Patrick Stapleton, Nathan Yozwiak, Hayden Metsky, Agatha Jassem, Louise Moncla, Gytis Dudas and Pardis Sabeti for data sharing, comments and suggestions.
         </div>
       </div>
     );
