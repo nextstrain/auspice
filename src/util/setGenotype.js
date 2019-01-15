@@ -1,3 +1,4 @@
+import { nucleotide_gene } from "./globals";
 
 export const setGenotype = (nodes, prot, positions) => {
   // console.time("setGenotype")
@@ -7,7 +8,7 @@ export const setGenotype = (nodes, prot, positions) => {
   const recurse = (node, state) => {
     const newState = state; /* reference. cheap */
     let data; // any potential mutations that would result in a state change
-    if (prot === "nuc" && node.muts && node.muts.length) {
+    if (prot === nucleotide_gene && node.muts && node.muts.length) {
       data = node.muts;
     } else if (node.aa_muts && node.aa_muts[prot]) {
       data = node.aa_muts[prot];

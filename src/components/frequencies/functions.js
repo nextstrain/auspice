@@ -6,6 +6,7 @@ import { area } from "d3-shape";
 import { dataFont } from "../../globalStyles";
 import { prettyString } from "../../util/stringHelpers";
 import { unassigned_label } from "../../util/processFrequencies";
+import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype";
 
 /* C O N S T A N T S */
 const opacity = 0.85;
@@ -18,11 +19,11 @@ export const areListsEqual = (a, b) => {
 export const parseColorBy = (colorBy, colorOptions) => {
   if (colorOptions[colorBy]) {
     return colorOptions[colorBy].legendTitle;
-  } else if (colorBy.startsWith("gt-nuc")) { /* gt-nuc_155 */
-    return `Genotype at Nuc. ${colorBy.split("_")[1]}`;
-  } else if (colorBy.startsWith("gt-")) { /* gt-HA2_155 */
-    const parts = colorBy.split('-')[1].split('_');
-    return `Genotype at ${parts[0]} pos ${parts[1]}`;
+  } else if (isColorByGenotype(colorBy)) {
+    const genotype = decodeColorByGenotype(colorBy);
+    return genotype.aa
+      ? `Genotype at ${genotype.gene} pos ${genotype.positions.join(", ")}`
+      : `Genotype at Nuc. ${genotype.positions.join(", ")}`;
   }
   return prettyString(colorBy);
 };

@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { strainNameToIdx, cladeNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -10,10 +10,11 @@ import { countTraitsAcrossTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons";
-import { determineColorByGenotypeType, calcNodeColor } from "../util/colorHelpers";
+import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
+import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
 
 export const checkColorByConfidence = (attrs, colorBy) => {
   return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
@@ -219,7 +220,7 @@ const modifyStateViaMetadata = (state, metadata) => {
   if (metadata.annotations) {
     for (const gene of Object.keys(metadata.annotations)) {
       state.geneLength[gene] = metadata.annotations[gene].end - metadata.annotations[gene].start;
-      if (gene !== "nuc") {
+      if (gene !== nucleotide_gene) {
         state.geneLength[gene] /= 3;
       }
     }
@@ -314,21 +315,10 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
     }
     delete query.c;
   };
-  if (state["colorBy"].startsWith("gt-")) {
+  if (isColorByGenotype(state.colorBy)) {
     /* Check that the genotype is valid with the current data */
-    if (!metadata.annotations) {
+    if (!decodeColorByGenotype(state.colorBy, state.geneLength)) {
       fallBackToDefaultColorBy();
-    } else {
-      const [gene, pos] = state.colorBy.split("-")[1].split("_");
-      if (!(gene in metadata.annotations)) {
-        fallBackToDefaultColorBy();
-      } else if (gene === "nuc") {
-        if ((metadata.annotations[gene].end - metadata.annotations[gene].start) < pos) {
-          fallBackToDefaultColorBy();
-        }
-      } else if ((metadata.annotations[gene].end - metadata.annotations[gene].start)/3 < pos) {
-        fallBackToDefaultColorBy();
-      }
     }
   } else if (Object.keys(metadata.colorOptions).indexOf(state.colorBy) === -1) {
     /* if it's a _non_ genotype colorBy AND it's not a valid option, fall back to the default */
@@ -385,7 +375,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
 
   /* if colorBy is a genotype then we need to set mutType */
   if (state.colorBy) {
-    const maybeMutType = determineColorByGenotypeType(state.colorBy);
+    const maybeMutType = determineColorByGenotypeMutType(state.colorBy);
     if (maybeMutType) {
       state.mutType = maybeMutType;
     }

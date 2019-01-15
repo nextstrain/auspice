@@ -80,13 +80,15 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
     _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
       let lat = 0;
       let long = 0;
+      let goodDeme = true;
       if (geo[geoResolution][key]) {
         lat = geo[geoResolution][key].latitude;
         long = geo[geoResolution][key].longitude + OFFSET;
       } else {
+        goodDeme = false;
         console.warn("Warning: Lat/long missing from metadata for", key);
       }
-      if (long > westBound && long < eastBound) {
+      if (long > westBound && long < eastBound && goodDeme === true) {
 
         const deme = {
           name: key,
@@ -375,7 +377,9 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
     if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
       // if tip and visible, push
       if (n.attr[geoResolution]) { // check for undefined
-        demeMap[n.attr[geoResolution]].push(nodeColors[i]);
+        if (n.attr[geoResolution] in demeMap) {
+          demeMap[n.attr[geoResolution]].push(nodeColors[i]);
+        }
       }
     }
   });

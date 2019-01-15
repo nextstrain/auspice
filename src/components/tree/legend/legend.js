@@ -7,6 +7,7 @@ import { legendRectSize, legendSpacing, fastTransitionDuration, months } from ".
 import { determineColorByGenotypeType } from "../../../util/colorHelpers";
 import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
+import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 
 
 @connect((state) => {
@@ -70,12 +71,11 @@ class Legend extends React.Component {
     return "translate(" + horz + "," + vert + ")";
   }
   getTitleString() {
-    const g = determineColorByGenotypeType(this.props.colorBy); /* g = false, "aa" or "nuc" */
-    if (g) {
-      if (g === "nuc") {
-        return "Genotype at position " + this.props.colorBy.replace("gt-", "").replace("nuc_", "");
-      }
-      return "Genotype at " + this.props.colorBy.replace("gt-", "").replace("_", " site ");
+    if (isColorByGenotype(this.props.colorBy)) {
+      const genotype = decodeColorByGenotype(this.props.colorBy);
+      return genotype.aa
+        ? `Genotype at ${genotype.gene} site ${genotype.positions.join(", ")}`
+        : `Nucleotide at position ${genotype.positions.join(", ")}`;
     }
     return this.props.colorOptions[this.props.colorBy] === undefined ?
       "" : this.props.colorOptions[this.props.colorBy].legendTitle;
@@ -141,9 +141,7 @@ class Legend extends React.Component {
   }
 
   styleLabelText(label) {
-    if (this.props.colorBy === "clade_membership") {
-      return label; /* unchanged */
-    } else if (this.props.colorBy === "num_date") {
+    if (this.props.colorBy === "num_date") {
       const legendValues = this.props.colorScale.legendValues;
       if (
         (legendValues[legendValues.length-1] - legendValues[0] > 10) && /* range spans more than 10 years */

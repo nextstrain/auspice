@@ -10,7 +10,8 @@ import InfoPanel from "./infoPanel";
 import { changeMutType, showCountsNotEntropy } from "../../actions/entropy";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { timerStart, timerEnd } from "../../util/perf";
-import { parseEncodedGenotype } from "../../util/getGenotype";
+import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype } from "../../util/getGenotype";
+import { nucleotide_gene } from "../../util/globals";
 import "../../css/entropy.css";
 
 const getStyles = (width) => {
@@ -45,11 +46,12 @@ const getStyles = (width) => {
   };
 };
 
-const constructEncodedGenotype = (aa, d) => {
-  // console.log("constructEncodedGenotype", aa, d)
-  // const gene = aa ? d.prot : "nuc";
-  // return `gt-${gene}_${d.positions.join(",")}`;
-  return aa ? `gt-${d.prot}_${d.codon}` : `gt-nuc_${d.x}`;
+const constructEncodedGenotype = (mutType, d) => {
+  return encodeColorByGenotype(
+    mutType === "aa"
+      ? { gene: d.prot, positions: [d.codon] }
+      : { positions: [d.x] }
+  );
 };
 
 @connect((state) => {
@@ -99,7 +101,7 @@ export class Entropy extends React.Component {
   }
   onClick(d) {
     if (this.props.narrativeMode) return;
-    const colorBy = constructEncodedGenotype(this.props.mutType === "aa", d);
+    const colorBy = constructEncodedGenotype(this.props.mutType, d);
     analyticsControlsEvent("color-by-genotype");
     this.props.dispatch(changeColorBy(colorBy));
     this.setState({hovered: false});
@@ -161,7 +163,7 @@ export class Entropy extends React.Component {
       this.d3entropy,
       props.annotations,
       props.geneMap,
-      props.geneLength.nuc,
+      props.geneLength[nucleotide_gene],
       { /* callbacks */
         onHover: this.onHover.bind(this),
         onLeave: this.onLeave.bind(this),
@@ -206,21 +208,18 @@ export class Entropy extends React.Component {
         updateParams.newBars = nextProps.bars;
         updateParams.maxYVal = nextProps.maxYVal;
       }
-      if (this.props.colorBy !== nextProps.colorBy && (this.props.colorBy.startsWith("gt") || nextProps.colorBy.startsWith("gt"))) {
-        if (!nextProps.colorBy.startsWith("gt")) {
-          updateParams.clearSelected = true;
-        } else {
-          if (!nextProps.colorBy.startsWith("gt-nuc")) {  /* if it is a gene, zoom to it */
-            updateParams.gene = nextProps.colorBy.split(/-|_/)[1];
+      if (this.props.colorBy !== nextProps.colorBy && (isColorByGenotype(this.props.colorBy) || isColorByGenotype(nextProps.colorBy))) {
+        if (isColorByGenotype(nextProps.colorBy)) {
+          const colorByGenotype = decodeColorByGenotype(nextProps.colorBy, nextProps.geneLength);
+          if (colorByGenotype.aa) {  /* if it is a gene, zoom to it */
+            updateParams.gene = colorByGenotype.gene;
             updateParams.start = nextProps.geneMap[updateParams.gene].start;
             updateParams.end = nextProps.geneMap[updateParams.gene].end;
           } else { /* if a nuc, want to do different things if 1 or multiple */
-            const posPos = nextProps.colorBy.split(/-|_/)[2].split(",");
-            const positions = posPos.map((position) => parseInt(position, 10));
+            const positions = colorByGenotype.positions;
             const zoomCoord = this.state.chart.zoomCoordinates;
             const maxNt = this.state.chart.maxNt;
             /* find out what new coords would be - if different enough, change zoom */
-            const geneUpdate = "nuc";
             let startUpdate, endUpdate;
             if (positions.length > 1) {
               const start = Math.min.apply(null, positions);
@@ -239,12 +238,14 @@ export class Entropy extends React.Component {
             if (!(startUpdate > zoomCoord[0]-maxNt*0.4 && startUpdate < zoomCoord[0]+maxNt*0.4) ||
               !(endUpdate > zoomCoord[1]-maxNt*0.4 && endUpdate < zoomCoord[1]+maxNt*0.4) ||
               !(positions.every((x) => x > zoomCoord[0]) && positions.every((x) => x < zoomCoord[1]))) {
-              updateParams.gene = geneUpdate;
+              updateParams.gene = colorByGenotype.gene;
               updateParams.start = startUpdate;
               updateParams.end = endUpdate;
             }
           }
-          updateParams.selected = parseEncodedGenotype(nextProps.colorBy, nextProps.geneLength);
+          updateParams.selected = decodeColorByGenotype(nextProps.colorBy, nextProps.geneLength);
+        } else {
+          updateParams.clearSelected = true;
         }
       }
       if (Object.keys(updateParams).length) {

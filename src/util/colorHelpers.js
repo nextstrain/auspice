@@ -2,6 +2,7 @@ import { rgb } from "d3-color";
 import { mean } from "d3-array";
 import { interpolateRgb } from "d3-interpolate";
 import { scalePow } from "d3-scale";
+import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 
 /**
 * Takes an array of color hex strings.
@@ -17,13 +18,12 @@ export const averageColors = (hexColors) => {
   return avg.toString();
 };
 
-export const determineColorByGenotypeType = (colorBy) => {
-  /* note that nucleotide genotypes are either gt-nucXXX or gt-XXX */
-  if (colorBy.startsWith("gt")) {
-    if (colorBy.slice(3, 6) === "nuc") {
-      return "nuc";
-    }
-    return "aa";
+export const determineColorByGenotypeMutType = (colorBy) => {
+  if (isColorByGenotype(colorBy)) {
+    const genotype = decodeColorByGenotype(colorBy);
+    return genotype.aa
+      ? "aa"
+      : "nuc";
   }
   return false;
 };
@@ -51,7 +51,7 @@ export const getExtraVals = (nodes, nodesToo, colorBy, color_map) => {
 /* a getter for the value of the colour attribute of the node provided for the currently set colour
 note this is not the colour HEX */
 export const getTipColorAttribute = (node, colorScale) => {
-  if (colorScale.colorBy.slice(0, 3) === "gt-" && colorScale.genotype) {
+  if (isColorByGenotype(colorScale.colorBy) && colorScale.genotype) {
     return node.currentGt;
   }
   return node.attr[colorScale.colorBy];
