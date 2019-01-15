@@ -6,9 +6,6 @@ big_flu
 s3/
 /local_narratives/
 
-src/*
-!src/version.js
-
 ### OSX ###
 .DS_Store
 
