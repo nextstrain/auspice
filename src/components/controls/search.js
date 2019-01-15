@@ -112,10 +112,10 @@ class SearchStrains extends React.Component {
   render() {
     return (
       <Container>
-	<SidebarSubtitle spaceAbove>Search Strains</SidebarSubtitle>
-	<InputContainer>
-	  <Input ref={(r) => {this.ref = r;}} onFocus={() => this.updateVisibleStrains()}/>
-	</InputContainer>
+        <SidebarSubtitle spaceAbove>Search Strains</SidebarSubtitle>
+        <InputContainer>
+          <Input ref={(r) => {this.ref = r;}} onFocus={() => this.updateVisibleStrains()}/>
+        </InputContainer>
         <Cross show={this.state.show} onClick={this.removeSelection}/>
       </Container>
     );

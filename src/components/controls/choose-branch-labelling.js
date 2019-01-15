@@ -17,19 +17,19 @@ class ChooseBranchLabelling extends React.Component {
   render() {
     return (
       <div style={{paddingTop: 5}}>
-	<SidebarSubtitle>
-	  Branch Labels
-	</SidebarSubtitle>
-	<div style={{width: controlsWidth, fontSize: 14}}>
-	  <Select
-	    value={this.props.selected}
-	    options={this.props.available.map((x) => ({value: x, label: x}))}
-	    clearable={false}
-	    searchable={false}
-	    multi={false}
-	    onChange={this.change}
-	  />
-	</div>
+        <SidebarSubtitle>
+          Branch Labels
+        </SidebarSubtitle>
+        <div style={{width: controlsWidth, fontSize: 14}}>
+          <Select
+            value={this.props.selected}
+            options={this.props.available.map((x) => ({value: x, label: x}))}
+            clearable={false}
+            searchable={false}
+            multi={false}
+            onChange={this.change}
+          />
+        </div>
       </div>
     );
   }

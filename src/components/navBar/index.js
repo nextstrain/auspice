@@ -31,8 +31,8 @@ const NavBar = ({sidebar, mobileDisplay, toggleHandler, narrativeTitle, width}) 
   return (
     <NavBarContainer>
       <Content
-	narrativeTitle={narrativeTitle}
-	sidebar={sidebar}
+        narrativeTitle={narrativeTitle}
+        sidebar={sidebar}
       />
       <SidebarChevron navHeight={normalNavBarHeight} navWidth={width} display={showSidebarToggle} onClick={toggleHandler}/>
     </NavBarContainer>

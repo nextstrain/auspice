@@ -97,23 +97,23 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath}) => {
     },
     module: {
       rules: [
-	{
-	  test: /\.js$/,
-	  loader: 'babel-loader',
-	  include: directoriesToTransform,
-	  options: {
-	    cwd: path.resolve(__dirname)
-	  }
-	},
-	{
-	  test: /\.css$/,
-	  use: ["style-loader", "css-loader"]
-	},
-	{
-	  test: /\.(gif|png|jpe?g|svg)$/i,
-	  use: "file-loader",
-	  include: directoriesToTransform
-	}
+        {
+          test: /\.js$/,
+          loader: 'babel-loader',
+          include: directoriesToTransform,
+          options: {
+            cwd: path.resolve(__dirname)
+          }
+        },
+        {
+          test: /\.css$/,
+          use: ["style-loader", "css-loader"]
+        },
+        {
+          test: /\.(gif|png|jpe?g|svg)$/i,
+          use: "file-loader",
+          include: directoriesToTransform
+        }
       ]
     }
   };

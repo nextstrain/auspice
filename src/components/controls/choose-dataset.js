@@ -52,9 +52,9 @@ class ChooseDataset extends React.Component {
     if (!this.props.available || !this.props.available.datasets) {
       /* TODO expose this to the extension API */
       if (this.props.source === "github") {
-	return (<GithubInfo/>);
+        return (<GithubInfo/>);
       } else if (this.props.source === "dropped") {
-	return (<DroppedFiles/>);
+        return (<DroppedFiles/>);
       }
       return (<BareDataPath source={this.props.source} pathname={this.props.pathname}/>);
     }
@@ -65,7 +65,7 @@ class ChooseDataset extends React.Component {
       .split("/");
     displayedDataset.forEach((part, idx) => {
       if (part.includes(":")) {
-	displayedDataset[idx] = part.split(":")[0];
+        displayedDataset[idx] = part.split(":")[0];
       }
     });
 
@@ -74,7 +74,7 @@ class ChooseDataset extends React.Component {
     this.props.available.datasets.forEach((d) => {
       const firstField = d.request.split("/")[0];
       if (!options[0].includes(firstField)) {
-	options[0].push(firstField);
+        options[0].push(firstField);
       }
     });
 
@@ -83,12 +83,12 @@ class ChooseDataset extends React.Component {
       in order to create available alternatives for each field */
       options[idx] = [];
       this.props.available.datasets.forEach((singleAvailableOption) => {
-	/* if the parents (and their parents etc) of this choice match,
-	then we add that as a valid option */
-	const fields = singleAvailableOption.request.split("/");
-	if (checkEqualityOfArrays(fields, displayedDataset, idx) && options[idx].indexOf(fields[idx]) === -1) {
-	  options[idx].push(fields[idx]);
-	}
+        /* if the parents (and their parents etc) of this choice match,
+        then we add that as a valid option */
+        const fields = singleAvailableOption.request.split("/");
+        if (checkEqualityOfArrays(fields, displayedDataset, idx) && options[idx].indexOf(fields[idx]) === -1) {
+          options[idx].push(fields[idx]);
+        }
       });
     }
 
@@ -99,8 +99,8 @@ class ChooseDataset extends React.Component {
           <ChooseDatasetSelect
             dispatch={this.props.dispatch}
             source={this.props.source}
-	    choice_tree={displayedDataset.slice(0, i)}
-	    selected={displayedDataset[i]}
+            choice_tree={displayedDataset.slice(0, i)}
+            selected={displayedDataset[i]}
             options={options[i]}
           />
         </div>

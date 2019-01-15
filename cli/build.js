@@ -41,13 +41,13 @@ const run = (args) => {
       console.log(stats.toString({colors: true}));
     } else {
       if (stats.hasWarnings()) {
-	utils.warn("Webpack has warnings (run with '--verbose' to see them)");
+        utils.warn("Webpack has warnings (run with '--verbose' to see them)");
       }
       if (global.AUSPICE_VERBOSE) {
-	console.log(stats.toString({colors: true}));
+        console.log(stats.toString({colors: true}));
       }
       if (customOutputPath) {
-	utils.exportIndexDotHtml({relative: args.serverless});
+        utils.exportIndexDotHtml({relative: args.serverless});
       }
     }
   });

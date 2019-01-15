@@ -29,13 +29,13 @@ const makeFrontMatterBlock = (frontMatter) => {
       utils.warn(`Narrative parsing -- can't do author arrays yet`);
     } else if (typeof frontMatter.authors === 'string') {
       if (frontMatter.authorLinks && typeof frontMatter.authorLinks === "string") {
-	markdown.push(`### Author: [${frontMatter.authors}](${frontMatter.authorLinks})`);
+        markdown.push(`### Author: [${frontMatter.authors}](${frontMatter.authorLinks})`);
       } else {
-	markdown.push(`### Author: ${frontMatter.authors}`);
+        markdown.push(`### Author: ${frontMatter.authors}`);
       }
       if (frontMatter.affiliations && typeof frontMatter.affiliations === "string") {
-	markdown[markdown.length-1] += " <sup> 1 </sup>";
-	markdown.push(`<sup> 1 </sup> ${frontMatter.affiliations}`);
+        markdown[markdown.length-1] += " <sup> 1 </sup>";
+        markdown.push(`<sup> 1 </sup> ${frontMatter.affiliations}`);
       }
     }
   }

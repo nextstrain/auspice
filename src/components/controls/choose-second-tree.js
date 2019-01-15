@@ -25,7 +25,7 @@ class ChooseSecondTree extends React.Component {
       .split("/");
     displayedDataset.forEach((part, idx) => {
       if (part.includes(":")) {
-	displayedDataset[idx] = part.split(":")[0];
+        displayedDataset[idx] = part.split(":")[0];
       }
     });
     const idxOfTree = displayedDataset.indexOf(this.props.treeName);
@@ -33,17 +33,17 @@ class ChooseSecondTree extends React.Component {
     const matches = this.props.available.datasets
       .map((datasetObj) => datasetObj.request.split("/"))
       .filter((dataset) => {
-	if (dataset.length !== displayedDataset.length) return false;
-	for (let i=0; i<dataset.length; i++) {
-	  if (i===idxOfTree) {
-	    if (dataset[i] === displayedDataset[i]) {
-	      return false; // don't match the same tree name
-	    }
-	  } else if (dataset[i] !== displayedDataset[i]) {
-	    return false; // everything apart from the tree much match
+        if (dataset.length !== displayedDataset.length) return false;
+        for (let i=0; i<dataset.length; i++) {
+          if (i===idxOfTree) {
+            if (dataset[i] === displayedDataset[i]) {
+              return false; // don't match the same tree name
+            }
+          } else if (dataset[i] !== displayedDataset[i]) {
+            return false; // everything apart from the tree much match
           }
         }
-	return true;
+        return true;
       });
 
     const options = matches.map((m) => m[idxOfTree]);
@@ -51,11 +51,11 @@ class ChooseSecondTree extends React.Component {
 
     return (
       <div>
-	<SidebarSubtitle spaceAbove>
-	  Second Tree
-	</SidebarSubtitle>
-	<div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
-	  <Select
+        <SidebarSubtitle spaceAbove>
+          Second Tree
+        </SidebarSubtitle>
+        <div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
+          <Select
             name="selectTreeToo"
             id="selectTreeToo"
             value={this.props.showTreeToo}
@@ -67,7 +67,7 @@ class ChooseSecondTree extends React.Component {
               if (opt.value === "REMOVE") {
                 this.props.dispatch({type: REMOVE_TREE_TOO});
               } else {
-		const dataPath = [...displayedDataset];
+                const dataPath = [...displayedDataset];
                 dataPath.splice(idxOfTree, 1, opt.value);
                 this.props.dispatch(loadTreeToo(opt.value, dataPath));
               }

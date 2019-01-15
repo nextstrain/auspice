@@ -47,49 +47,49 @@ class MapAnimationControls extends React.Component {
     return (
       <div id="mapAnimationControls">
 
-	<SidebarSubtitle spaceAbove>
-	  Animation Speed
-	</SidebarSubtitle>
+        <SidebarSubtitle spaceAbove>
+          Animation Speed
+        </SidebarSubtitle>
 
-	<SidebarButton
-	  selected={this.props.mapAnimationDurationInMilliseconds === 60000}
-	  onClick={this.handleChangeAnimationTimeClicked("slow")}
-	>
-	  Slow
-	</SidebarButton>
-	<SidebarButton
-	  selected={this.props.mapAnimationDurationInMilliseconds === 30000}
-	  onClick={this.handleChangeAnimationTimeClicked("medium")}
-	>
-	  Medium
-	</SidebarButton>
-	<SidebarButton
-	  selected={this.props.mapAnimationDurationInMilliseconds === 15000}
-	  onClick={this.handleChangeAnimationTimeClicked("fast")}
-	>
-	  Fast
-	</SidebarButton>
+        <SidebarButton
+          selected={this.props.mapAnimationDurationInMilliseconds === 60000}
+          onClick={this.handleChangeAnimationTimeClicked("slow")}
+        >
+          Slow
+        </SidebarButton>
+        <SidebarButton
+          selected={this.props.mapAnimationDurationInMilliseconds === 30000}
+          onClick={this.handleChangeAnimationTimeClicked("medium")}
+        >
+          Medium
+        </SidebarButton>
+        <SidebarButton
+          selected={this.props.mapAnimationDurationInMilliseconds === 15000}
+          onClick={this.handleChangeAnimationTimeClicked("fast")}
+        >
+          Fast
+        </SidebarButton>
 
-	<div style={{marginBottom: 5}}/>
+        <div style={{marginBottom: 5}}/>
 
-	<Toggle
-	  display
-	  on={this.props.mapAnimationShouldLoop}
-	  callback={() => {
-	    this.props.dispatch({ type: CHANGE_ANIMATION_LOOP, data: !this.props.mapAnimationShouldLoop });
-	  }}
-	  label="Loop animation"
-	/>
-	<br/>
-	<Toggle
-	  display
-	  on={this.props.mapAnimationCumulative}
-	  callback={() => {
-	    analyticsControlsEvent("change-animation-cumulative");
-	    this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
-	  }}
-	  label="Animate cumulative history"
-	/>
+        <Toggle
+          display
+          on={this.props.mapAnimationShouldLoop}
+          callback={() => {
+            this.props.dispatch({ type: CHANGE_ANIMATION_LOOP, data: !this.props.mapAnimationShouldLoop });
+          }}
+          label="Loop animation"
+        />
+        <br/>
+        <Toggle
+          display
+          on={this.props.mapAnimationCumulative}
+          callback={() => {
+            analyticsControlsEvent("change-animation-cumulative");
+            this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
+          }}
+          label="Animate cumulative history"
+        />
 
       </div>
     );

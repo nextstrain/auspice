@@ -65,37 +65,37 @@ class Main extends React.Component {
     const {big, chart} = calcPanelDims(this.props.panelLayout === "grid", this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);
     return (
       <span>
-	<AnimationController/>
-	<DownloadModal/>
-	<SidebarToggle
-	  sidebarOpen={this.state.sidebarOpen}
-	  mobileDisplay={this.state.mobileDisplay}
-	  handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
-	/>
-	<Sidebar
-	  sidebarOpen={this.state.sidebarOpen}
-	  width={sidebarWidth}
-	  height={availableHeight}
-	  displayNarrative={this.props.displayNarrative}
-	  panelsToDisplay={this.props.panelsToDisplay}
-	  narrativeTitle={this.props.narrativeTitle}
-	  mobileDisplay={this.state.mobileDisplay}
-	  navBarHandler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
-	/>
-	<PanelsContainer width={availableWidth} height={availableHeight} left={this.state.sidebarOpen ? sidebarWidth : 0}>
-	  {this.props.narrativeIsLoaded ? renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative) : null}
-	  {this.props.displayNarrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
-	  {this.props.panelsToDisplay.includes("tree") ? <Tree width={big.width} height={big.height} /> : null}
-	  {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
-	  {this.props.panelsToDisplay.includes("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
-	  {this.props.panelsToDisplay.includes("frequencies") && this.props.frequenciesLoaded ? <Frequencies width={chart.width} height={chart.height} /> : null}
-	  {this.props.displayNarrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
-	</PanelsContainer>
-	{/* overlay (used for mobile to open / close sidebar) */}
-	{this.state.mobileDisplay ?
-	  <div style={overlayStyles} onClick={overlayHandler} onTouchStart={overlayHandler}/> :
-	  null
-	}
+        <AnimationController/>
+        <DownloadModal/>
+        <SidebarToggle
+          sidebarOpen={this.state.sidebarOpen}
+          mobileDisplay={this.state.mobileDisplay}
+          handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
+        />
+        <Sidebar
+          sidebarOpen={this.state.sidebarOpen}
+          width={sidebarWidth}
+          height={availableHeight}
+          displayNarrative={this.props.displayNarrative}
+          panelsToDisplay={this.props.panelsToDisplay}
+          narrativeTitle={this.props.narrativeTitle}
+          mobileDisplay={this.state.mobileDisplay}
+          navBarHandler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
+        />
+        <PanelsContainer width={availableWidth} height={availableHeight} left={this.state.sidebarOpen ? sidebarWidth : 0}>
+          {this.props.narrativeIsLoaded ? renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative) : null}
+          {this.props.displayNarrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
+          {this.props.panelsToDisplay.includes("tree") ? <Tree width={big.width} height={big.height} /> : null}
+          {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
+          {this.props.panelsToDisplay.includes("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
+          {this.props.panelsToDisplay.includes("frequencies") && this.props.frequenciesLoaded ? <Frequencies width={chart.width} height={chart.height} /> : null}
+          {this.props.displayNarrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
+        </PanelsContainer>
+        {/* overlay (used for mobile to open / close sidebar) */}
+        {this.state.mobileDisplay ?
+          <div style={overlayStyles} onClick={overlayHandler} onTouchStart={overlayHandler}/> :
+          null
+        }
       </span>
     );
   }
