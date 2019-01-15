@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200px" height="200px" viewBox="0 0 200 200" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 52.5 (67469) - http://www.bohemiancoding.com/sketch -->
+    <title>icon</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="200" height="201"></rect>
+    </defs>
+    <g id="icon" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <mask id="mask-2" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+        <g id="Rectangle"></g>
+        <path d="M7.5,201 L99,1" id="Line" stroke="#5DA8A3" stroke-width="15" stroke-linecap="square" mask="url(#mask-2)"></path>
+        <path d="M192.5,201 L100,2" id="Line" stroke="#5DA8A3" stroke-width="15" stroke-linecap="square" mask="url(#mask-2)"></path>
+        <path d="M134.525012,72.3545577 C131.898763,91.9778105 123.664754,107.369579 109.822982,118.529862 C95.9812106,129.690145 82.0210413,134.431118 67.9424742,132.75278" id="Path-3" stroke="#5DA8A3" stroke-width="15" mask="url(#mask-2)"></path>
+        <path d="M92.8033327,150.437802 C87.2580617,145.075444 82.3123172,141.421674 77.9660992,139.476492 C73.6198812,137.53131 68.6741366,136.016933 63.1288656,134.933362 C66.7380359,132.976705 70.3641768,130.208064 74.0072883,126.627438 C77.6503997,123.046812 81.0761669,117.593413 84.2845899,110.26724" id="Path-3" stroke="#5DA8A3" stroke-width="10" stroke-linecap="round" mask="url(#mask-2)"></path>
+    </g>
+</svg>

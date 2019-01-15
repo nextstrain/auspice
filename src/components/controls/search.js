@@ -1,10 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
 import Awesomplete from 'awesomplete'; /* https://leaverou.github.io/awesomplete/ */
+import styled from 'styled-components';
 import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/tree";
-import { dataFont, darkGrey } from "../../globalStyles";
 import { NODE_VISIBLE } from "../../util/globals";
-import { SelectLabel } from "../framework/select-label";
+import { SidebarSubtitle } from "./styles";
 import "../../css/awesomplete.css";
 
 const Cross = ({onClick, show}) => {
@@ -27,6 +27,29 @@ const Cross = ({onClick, show}) => {
     </div>
   );
 };
+
+const Container = styled.div`
+  font-family: ${(props) => props.theme["font-family"]};
+  font-size: 14px;
+  display: inline-block;
+  color: ${(props) => props.theme.color};
+`;
+
+const InputContainer = styled.div`
+  width: 80%;
+  display: inline-block;
+`;
+
+const Input = styled.input`
+  fontFamily: inherit;
+  color: inherit;
+  fontSize: inherit;
+  width: 100%;
+  height: 23px;
+  padding-left: 7px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+`;
 
 @connect((state) => ({
   nodes: state.tree.nodes,
@@ -88,17 +111,13 @@ class SearchStrains extends React.Component {
   }
   render() {
     return (
-      <div style={{fontFamily: dataFont, color: darkGrey, fontSize: 14, display: "inline-block"}}>
-        <SelectLabel text="Search Strains"/>
-        <div style={{width: "80%", display: "inline-block"}}>
-          <input
-            style={{fontFamily: "inherit", color: "inherit", fontSize: "inherit", width: "100%", height: "23px", paddingLeft: "7px", borderRadius: "4px", border: "1px solid #ccc"}}
-            ref={(r) => {this.ref = r;}}
-            onFocus={() => this.updateVisibleStrains()}
-          />
-        </div>
+      <Container>
+        <SidebarSubtitle spaceAbove>Search Strains</SidebarSubtitle>
+        <InputContainer>
+          <Input ref={(r) => {this.ref = r;}} onFocus={() => this.updateVisibleStrains()}/>
+        </InputContainer>
         <Cross show={this.state.show} onClick={this.removeSelection}/>
-      </div>
+      </Container>
     );
   }
 }

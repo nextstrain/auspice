@@ -4,6 +4,7 @@ import Select from "react-select";
 import { controlsWidth } from "../../util/globals";
 import { CHANGE_GEO_RESOLUTION } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
+import { SidebarSubtitle } from "./styles";
 
 @connect((state) => {
   return {
@@ -12,28 +13,12 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
   };
 })
 class GeoResolution extends React.Component {
-
-  getStyles() {
-    return {
-      base: {
-        marginBottom: 10,
-        width: controlsWidth,
-        fontSize: 14
-      }
-    };
-  }
-
   getGeoResolutionOptions() {
-    let options = [];
     if (this.props.metadata.loaded) {
-      options = Object.keys(this.props.metadata.geo).map((key) => {
-        return {
-          value: key,
-          label: key
-        };
-      });
+      return Object.keys(this.props.metadata.geo)
+        .map((key) => ({ value: key, label: key }));
     }
-    return options;
+    return [];
   }
 
   changeGeoResolution(resolution) {
@@ -42,23 +27,25 @@ class GeoResolution extends React.Component {
   }
 
   render() {
-    const styles = this.getStyles();
     const geoResolutionOptions = this.getGeoResolutionOptions();
     return (
-      <div style={styles.base}>
-        <Select
-          name="selectGeoResolution"
-          id="selectGeoResolution"
-          value={this.props.geoResolution}
-          options={geoResolutionOptions}
-          clearable={false}
-          searchable={false}
-          multi={false}
-          onChange={(opt) => {
-            this.changeGeoResolution(opt.value);
-          }}
-        />
-      </div>
+      <>
+        <SidebarSubtitle spaceAbove>
+          Geographic resolution
+        </SidebarSubtitle>
+        <div style={{marginBottom: 10, width: controlsWidth, fontSize: 14}}>
+          <Select
+            name="selectGeoResolution"
+            id="selectGeoResolution"
+            value={this.props.geoResolution}
+            options={geoResolutionOptions}
+            clearable={false}
+            searchable={false}
+            multi={false}
+            onChange={(opt) => {this.changeGeoResolution(opt.value);}}
+          />
+        </div>
+      </>
     );
   }
 }

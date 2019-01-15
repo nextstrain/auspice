@@ -91,31 +91,31 @@ the content, the padding and border, but not the margin.
 }
 
 .static .hugespacer {
-	height: 50px;
+  height: 50px;
 }
 
 .static .bigspacer {
-	height: 30px;
+  height: 30px;
 }
 
 .static .spacer {
-	height: 10px;
+  height: 10px;
 }
 
 .static .smallspacer {
-	height: 5px;
+  height: 5px;
 }
 
 .static .highlight {
-	background-color: white;
-	color: var(--medGrey);
-	font-size: 94%; /* same as <a>*/
+  background-color: white;
+  color: var(--medGrey);
+  font-size: 94%; /* same as <a>*/
 }
 
 strong {
-	background-color: white;
-	color: var(--medGrey);
-	font-size: 94%; /* same as <a>*/
+  background-color: white;
+  color: var(--medGrey);
+  font-size: 94%; /* same as <a>*/
 }
 
 .static.container {

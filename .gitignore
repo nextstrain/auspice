@@ -6,6 +6,11 @@ big_flu
 /static/
 s3/
 /local_narratives/
+/narratives/
+
+## docs
+build/
+i18n/
 
 ### OSX ###
 .DS_Store

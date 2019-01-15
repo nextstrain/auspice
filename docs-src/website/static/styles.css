@@ -1,0 +1,23 @@
+
+
+.highlightBackground {
+  background-color: #5DA8A3;
+}
+
+a {
+  color: #5DA8A3;
+  font-weight: 400;
+}
+
+a:hover {
+  color: #30353F;
+  text-decoration: underline;
+}
+
+button:hover {
+  background-color: #30353F;
+}
+
+header a:hover {
+  color: #5DA8A3;
+}

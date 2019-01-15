@@ -28,7 +28,6 @@ export const getDefaultControlsState = () => {
   return {
     defaults,
     available: undefined,
-    datasetFields: undefined,
     source: undefined,
     canTogglePanelLayout: true,
     selectedBranch: null,
@@ -79,6 +78,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
       return action.controls;
+    case types.SET_AVAILABLE:
+      return Object.assign({}, state, {available: action.data});
     case types.BRANCH_MOUSEENTER:
       return Object.assign({}, state, {
         selectedBranch: action.data
@@ -216,28 +217,6 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         temporalConfidence: Object.assign({}, state.temporalConfidence, {
           on: !state.temporalConfidence.on
-        })
-      });
-    case types.ANALYSIS_SLIDER:
-      if (action.destroy) {
-        return Object.assign({}, state, {
-          analysisSlider: false
-        });
-      }
-      return Object.assign({}, state, {
-        analysisSlider: {
-          key: state.analysisSlider.key,
-          // valid: true, // TESTING ONLY
-          valid: false, // FIXME --- This is a temporary hack to disable the analysis slider, while keeping color options
-          value: action.maxVal,
-          absoluteMinVal: action.minVal,
-          absoluteMaxVal: action.maxVal
-        }
-      });
-    case types.CHANGE_ANALYSIS_VALUE:
-      return Object.assign({}, state, {
-        analysisSlider: Object.assign({}, state.analysisSlider, {
-          value: action.value
         })
       });
     case types.TRIGGER_DOWNLOAD_MODAL:

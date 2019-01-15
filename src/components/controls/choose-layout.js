@@ -1,11 +1,21 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import styled from 'styled-components';
+import { withTheme } from 'styled-components';
 import * as icons from "../framework/svg-icons";
-import { materialButton, materialButtonSelected, brandColor, darkGrey } from "../../globalStyles";
 import { CHANGE_LAYOUT } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { SelectLabel } from "../framework/select-label";
+import { SidebarSubtitle, SidebarButton } from "./styles";
+
+const RectangularTreeIcon = withTheme(icons.RectangularTree);
+const RadialTreeIcon = withTheme(icons.RadialTree);
+const UnrootedTreeIcon = withTheme(icons.UnrootedTree);
+const ClockIcon = withTheme(icons.Clock);
+
+export const RowContainer = styled.div`
+  padding: 0px 5px 1px 5px;
+`;
 
 @connect((state) => {
   return {
@@ -19,147 +29,57 @@ class ChooseLayout extends React.Component {
     layout: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired
   }
-  getStyles() {
-    return {
-      container: {
-        marginBottom: 10
-      },
-      title: {
-        margin: 5,
-        position: "relative",
-        top: -1
-      }
-    };
-  }
-
   render() {
     if (this.props.showTreeToo) return null;
-    const styles = this.getStyles();
     const selected = this.props.layout;
-
-    if (this.props.branchLengthsToDisplay === "divAndDate") {
-      return (
-        <div style={styles.container}>
-          <SelectLabel text="Layout" extraStyles={{marginTop: "0px"}}/>
-          <div style={{margin: 5}}>
-            <icons.RectangularTree width={25} stroke={selected === "rect" ? brandColor : darkGrey}/>
-            <button
-              key={1}
-              style={selected === "rect" ? materialButtonSelected : materialButton}
-              onClick={() => {
-                const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
-                if (!loopRunning) {
-                  analyticsControlsEvent("change-layout-rectangular");
-                  this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });
-                }
-              }}
-            >
-              <span style={styles.title}> {"rectangular"} </span>
-            </button>
-          </div>
-          <div style={{margin: 5}}>
-            <icons.RadialTree width={25} stroke={selected === "radial" ? brandColor : darkGrey}/>
-            <button
-              key={2}
-              style={selected === "radial" ? materialButtonSelected : materialButton}
-              onClick={() => {
-                const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
-                if (!loopRunning) {
-                  analyticsControlsEvent("change-layout-radial");
-                  this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });
-                }
-              }}
-            >
-              <span style={styles.title}> {"radial"} </span>
-            </button>
-          </div>
-          <div style={{margin: 5}}>
-            <icons.UnrootedTree width={25} stroke={selected === "unrooted" ? brandColor : darkGrey}/>
-            <button
-              key={3}
-              style={selected === "unrooted" ? materialButtonSelected : materialButton}
-              onClick={() => {
-                const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
-                if (!loopRunning) {
-                  analyticsControlsEvent("change-layout-unrooted");
-                  this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });
-                }
-              }}
-            >
-              <span style={styles.title}> {"unrooted"} </span>
-            </button>
-          </div>
-          <div style={{margin: 5}}>
-            <icons.Clock width={25} stroke={selected === "clock" ? brandColor : darkGrey}/>
-            <button
-              key={4}
-              style={selected === "clock" ? materialButtonSelected : materialButton}
-              onClick={() => {
-                const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
-                if (!loopRunning) {
-                  analyticsControlsEvent("change-layout-clock");
-                  this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });
-                }
-              }}
-            >
-              <span style={styles.title}> {"clock"} </span>
-            </button>
-          </div>
-        </div>
-      );
-    }
-    /* else - if divOnly */
+    const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
     return (
-      <div style={styles.container}>
-        <SelectLabel text="Layout" extraStyles={{marginTop: "0px"}}/>
-        <div style={{margin: 5}}>
-          <icons.RectangularTree width={25} stroke={selected === "rect" ? brandColor : darkGrey}/>
-          <button
-            key={1}
-            style={selected === "rect" ? materialButtonSelected : materialButton}
-            onClick={() => {
-              const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
-              if (!loopRunning) {
-                analyticsControlsEvent("change-layout-rectangular");
-                this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });
-              }
-            }}
+      <div style={{marginBottom: 15}}>
+        <SidebarSubtitle>
+          Layout
+        </SidebarSubtitle>
+        <RowContainer>
+          <RectangularTreeIcon width={25} selected={selected === "rect"}/>
+          <SidebarButton
+            selected={selected === "rect"}
+            onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-rectangular"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });}}}
           >
-            <span style={styles.title}> {"rectangular"} </span>
-          </button>
-        </div>
-        <div style={{margin: 5}}>
-          <icons.RadialTree width={25} stroke={selected === "radial" ? brandColor : darkGrey}/>
-          <button
-            key={2}
-            style={selected === "radial" ? materialButtonSelected : materialButton}
-            onClick={() => {
-              const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
-              if (!loopRunning) {
-                analyticsControlsEvent("change-layout-radial");
-                this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });
-              }
-            }}
+            rectangular
+          </SidebarButton>
+        </RowContainer>
+        <RowContainer>
+          <RadialTreeIcon width={25} selected={selected === "radial"}/>
+          <SidebarButton
+            selected={selected === "radial"}
+            onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-radial"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });}}}
           >
-            <span style={styles.title}> {"radial"} </span>
-          </button>
-        </div>
-        <div style={{margin: 5}}>
-          <icons.UnrootedTree width={25} stroke={selected === "unrooted" ? brandColor : darkGrey}/>
-          <button
-            key={3}
-            style={selected === "unrooted" ? materialButtonSelected : materialButton}
-            onClick={() => {
-              const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
-              if (!loopRunning) {
-                analyticsControlsEvent("change-layout-unrooted");
-                this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });
-              }
-            }}
+            radial
+          </SidebarButton>
+        </RowContainer>
+        <RowContainer>
+          <UnrootedTreeIcon width={25} selected={selected === "unrooted"}/>
+          <SidebarButton
+            selected={selected === "unrooted"}
+            onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-unrooted"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });}}}
           >
-            <span style={styles.title}> {"unrooted"} </span>
-          </button>
-        </div>
+            unrooted
+          </SidebarButton>
+        </RowContainer>
+        {
+          this.props.branchLengthsToDisplay === "divAndDate" ?
+            (
+              <RowContainer>
+                <ClockIcon width={25} selected={selected === "clock"}/>
+                <SidebarButton
+                  selected={selected === "clock"}
+                  onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-clock"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });}}}
+                >
+                  clock
+                </SidebarButton>
+              </RowContainer>
+            ) :
+            null
+        }
       </div>
     );
   }

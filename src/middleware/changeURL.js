@@ -135,8 +135,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.PAGE_CHANGE:
       /* desired behaviour depends on the displayComponent selected... */
-      if (action.displayComponent === "app") {
-        pathname = action.path;
+      if (action.displayComponent === "main" || action.displayComponent === "datasetLoader") {
+        pathname = action.path || pathname;
       } else if (action.displayComponent === "splash") {
         pathname = action.path;
       } else if (pathname.startsWith(`/${action.displayComponent}`)) {

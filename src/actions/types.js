@@ -47,3 +47,4 @@ export const REMOVE_TREE_TOO = "REMOVE_TREE_TOO";
 export const TOGGLE_TANGLE = "TOGGLE_TANGLE";
 export const UPDATE_PATHNAME = "UPDATE_PATHNAME";
 export const CHANGE_ZOOM = "CHANGE_ZOOM";
+export const SET_AVAILABLE = "SET_AVAILABLE";

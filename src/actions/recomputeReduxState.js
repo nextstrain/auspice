@@ -493,9 +493,7 @@ export const createStateFromQueryOrJSONs = ({
     controls = modifyStateViaMetadata(controls, metadata);
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
-    controls.available = json["_available"];
     controls.source = json["_source"];
-    controls.datasetFields = json["_datasetFields"];
   } else if (oldState) {
     /* revisit this - but it helps prevent bugs */
     controls = {...oldState.controls};
@@ -512,7 +510,7 @@ export const createStateFromQueryOrJSONs = ({
     const n = parseInt(query.n, 10) || 0;
     controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
     query = {n}; // eslint-disable-line
-    console.log("redux state changed to relfect n of", n)
+    console.log("redux state changed to relfect n of", n);
   } else {
     controls = modifyStateViaURLQuery(controls, query);
   }
