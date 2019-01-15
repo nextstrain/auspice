@@ -3,228 +3,131 @@ const queryString = require("query-string");
 const getAvailable = require("./getAvailable");
 const path = require("path");
 
+/*
+* Note that a lot of this code is replicated in the nextstrain.org repo
+* and it could instead be exposed by "auspice" (and imported by the nextstrain.org repo)
+* Note also https://github.com/nextstrain/auspice/issues/687 which proposes
+* changing the server-client API
+*/
 
-/* TO DO -- this is too complicated & can be simplified */
-// const constructPathToGet = (availableDatasets, providedUrl, otherQueries) => {
-//   /* the path / URL is case sensitive */
-//   let auspiceURL = ""; // the URL to be displayed in Auspice
-//   let fetchURL = global.LOCAL_DATA_PATH;
-//   let secondTreeFetchURL;
-//   let datasetFields; // this _does not_ take into account the 2nd tree
-//   let treeName;
+const handleError = (res, clientMsg, serverMsg="") => {
+  res.statusMessage = clientMsg;
+  utils.warn(`${clientMsg} -- ${serverMsg}`);
+  return res.status(500).end();
+};
 
-//   const urlParts = providedUrl
-//     .replace(/^\//, '')
-//     .replace(/\/$/, '')
-//     .split("/");
+const guessTreeName = (prefixParts) => {
+  const guesses = ["HA", "NA", "PB1", "PB2", "PA", "NP", "NS", "MP", "L", "S", "SEGMENT1", "SEGMENT2", "SEGMENT3", "SEGMENT4", "SEGMENT5", "SEGMENT6", "SEGMENT7", "SEGMENT8", "SEGMENT9", "SEGMENT10"];
+  for (const part of prefixParts) {
+    if (guesses.indexOf(part.toUpperCase()) !== -1) return part;
+  }
+  return undefined;
+};
 
-//   /* does the URL specify two trees? */
-//   let treeTwoName;
-//   for (let i=0; i<urlParts.length; i++) {
-//     if (urlParts[i].indexOf(":") !== -1) {
-//       [treeName, treeTwoName] = urlParts[i].split(":");
-//       urlParts[i] = treeName; // only use the first tree from now on
-//       break;
-//     }
-//   }
+const splitPrefixIntoParts = (url) => url
+  .replace(/^\//, '')
+  .replace(/\/$/, '')
+  .split("/");
 
-//   /* Match urlParts against available datasets */
-//   {
-//     /* attempt 1: is there an exact match in the available datasets? */
-//     const matchString = urlParts.join("/");
-//     availableDatasets.forEach((n) => {
-//       if (matchString === n.request) datasetFields = urlParts;
-//     });
+const parseClientUrl = (clientUrl, otherQueries) => {
+  let auspiceDisplayUrl = "";
+  const fetchSuffixes = {};
+  let treeName;
+  const prefixParts = splitPrefixIntoParts(clientUrl);
 
-//     if (!datasetFields) {
-//       /* attempt 2: is there a partial match in the available datasets? If so, use this to return the correct path */
-//       let applicable = availableDatasets.map((d) => d.request.split("/"));
-//       urlParts.forEach((field, idx) => {
-//         applicable = applicable.filter((entry) => entry[idx] === field);
-//         // console.log("after idx", idx, "(", field, "), num applicable:", applicable.length);
-//       });
-//       if (applicable.length) {
-//         datasetFields = applicable[0];
-//       }
-//     }
+  /* does the URL specify two trees? */
+  let secondTreeName;
+  for (let i=0; i<prefixParts.length; i++) {
+    if (prefixParts[i].indexOf(":") !== -1) {
+      [treeName, secondTreeName] = prefixParts[i].split(":");
+      prefixParts[i] = treeName; // only use the first tree from now on
+      break;
+    }
+  }
+  if (!secondTreeName && otherQueries.deprecatedSecondTree) {
+    secondTreeName = otherQueries.deprecatedSecondTree;
+  }
+  if (!treeName) {
+    utils.verbose("Guessing tree name -- this should be improved");
+    treeName = guessTreeName(prefixParts);
+  }
+  auspiceDisplayUrl += prefixParts.join("/");
 
-//     if (!datasetFields) {
-//       throw new Error("Didn't match available datasets");
-//     }
-//   }
+  if (secondTreeName) {
+    const idxOfTree = prefixParts.indexOf(treeName);
+    const secondTreePrefixParts = prefixParts.slice();
+    secondTreePrefixParts[idxOfTree] = secondTreeName;
 
-//   if (!treeName) {
-//     /* TO DO */
-//     const guesses = ["HA", "NA", "PB1", "PB2", "PA", "NP", "NS", "MP", "L", "S"];
-//     for (const part of datasetFields) {
-//       if (guesses.indexOf(part.toUpperCase()) !== -1) {
-//         treeName = part;
-//       }
-//     }
-//   }
-//   if (treeTwoName) {
-//     const treeIdx = datasetFields.indexOf(treeName);
-//     const fieldsTT = datasetFields.slice();
-//     fieldsTT[treeIdx] = treeTwoName;
-//     secondTreeFetchURL = fetchURL + "/" + fieldsTT.join("_") + ".json";
+    fetchSuffixes.secondTree = `${secondTreePrefixParts.join("_")}_tree.json`;
+    // auspicePrefixParts[idxOfTree] = `${treeName}:${secondTreeName}`;
+    auspiceDisplayUrl = auspiceDisplayUrl.replace(`/${treeName}/`, `/${treeName}:${secondTreeName}/`);
+  }
 
-//     const fieldsAus = datasetFields.slice();
-//     fieldsAus[treeIdx] = `${treeName}:${treeTwoName}`;
-//     auspiceURL += fieldsAus.join("/");
-//   } else {
-//     auspiceURL += datasetFields.join("/");
-//   }
+  fetchSuffixes.tree = `${prefixParts.join("_")}_tree.json`;
+  fetchSuffixes.meta = `${prefixParts.join("_")}_meta.json`;
 
-//   fetchURL += `/${datasetFields.join("_")}`;
-//   if (otherQueries.type) {
-//     fetchURL += `_${otherQueries.type}`;
-//   }
-//   fetchURL += ".json";
+  const prefixToMatch = prefixParts.join("/");
 
-//   return {auspiceURL, fetchURL, secondTreeFetchURL, datasetFields, treeName, treeTwoName};
-// };
+  if (otherQueries.type) {
+    fetchSuffixes.additional = `${prefixParts.join("_")}_${otherQueries.type}.json`;
+  }
 
+  return ({fetchSuffixes, prefixToMatch, auspiceDisplayUrl, treeName, secondTreeName});
+};
 
 const setUpGetDatasetHandler = ({datasetsPath}) => {
-
 
   return async (req, res) => {
     const rawQuery = req.url.split('?')[1];
     utils.log(`Getting datasets for: ${rawQuery}`);
     const query = queryString.parse(rawQuery);
     const availableDatasets = await getAvailable.getAvailableDatasets(datasetsPath);
-    /* There must be an exact match in the available datasets */
-    const request = query.prefix
-      .replace(/^\//, '')
-      .replace(/\/$/, '');
-    /* to do -- second tree */
-    if (!availableDatasets.map((d) => d.request).includes(request)) {
-      res.statusMessage = `${request} not in available datasets`;
-      utils.warn(`${res.statusMessage}`);
-      return res.status(500).end();
-    }
-    const filepath = path.join(datasetsPath, `${request.split("/").join("_")}.json`);
-    console.log("GETTING", filepath);
 
-    // if (query.type) {
-    //   utils.verbose("fetching:" + paths.fetchURL);
-    //   try {
-    //     let data = await utils.readFilePromise(paths.fetchURL);
-    //     if (query.type === "tree") {
-    //       data = {tree: data};
-    //     }
-    //     return res.json(data);
-    //   } catch (err) {
-    //     res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL}`;
-    //     utils.warn(`${res.statusMessage} -- ${err.message}`);
-    //     res.status(500).end();
-    //   }
-    // }
-
-    const unifiedJson = {
-      _source: "local",
-      _url: request
-    };
-    const v1Paths = [
-      filepath.replace(".json", "_meta.json"),
-      filepath.replace(".json", "_tree.json")
-    ];
-
+    let datasetInfo;
     try {
-      const v1Data = await Promise.all(v1Paths.map((p) => utils.readFilePromise(p)));
-      unifiedJson.meta = v1Data[0];
-      unifiedJson.tree = v1Data[1];
-      // if (paths.secondTreeFetchURL) {
-      //   unifiedJson.treeTwo = v1Data[2];
-      // }
+      datasetInfo = parseClientUrl(query.prefix, query);
     } catch (err) {
-      // if (paths.treeTwoName) {
-      //   res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL} and/or ${paths.secondTreeFetchURL}`;
-      // } else {
-      //   res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL}`;
-      // }
-      res.statusMessage = `Couldn't fetch JSONs for ${filepath}`;
-      utils.warn(`${res.statusMessage} -- ${err.message}`);
-      return res.status(500).end();
+      return handleError(res, `Couldn't parse the url "${query.prefix}"`, err.message);
+    }
+
+    /* there must be an exact match in the available datasets */
+    if (!availableDatasets.map((d) => d.request).includes(datasetInfo.prefixToMatch)) {
+      return handleError(res, `${datasetInfo.prefixToMatch} not in available datasets`);
+    }
+
+    /* Are we requesting a certain file type? */
+    if (datasetInfo.fetchSuffixes.additional) {
+      try {
+        const jsonData = await utils.readFilePromise(path.join(datasetsPath, datasetInfo.fetchSuffixes.additional));
+        utils.verbose(`Success fetching ${datasetInfo.fetchSuffixes.additional} JSON.`);
+        if (query.type === "tree") {
+          return res.json({tree: jsonData});
+        }
+        return res.json(jsonData);
+      } catch (err) {
+        return handleError(res, `Couldn't fetch JSON: ${datasetInfo.fetchSuffixes.additional}`, err.message);
+      }
+    }
+
+    /* else combine the meta & tree(s) */
+    const unifiedJson = {};
+    try {
+      unifiedJson.tree = await utils.readFilePromise(path.join(datasetsPath, datasetInfo.fetchSuffixes.tree));
+      unifiedJson.meta = await utils.readFilePromise(path.join(datasetsPath, datasetInfo.fetchSuffixes.meta));
+      if (datasetInfo.fetchSuffixes.secondTree) {
+        unifiedJson.treeTwo = await utils.readFilePromise(path.join(datasetsPath, datasetInfo.fetchSuffixes.secondTree));
+        unifiedJson._treeTwoName = datasetInfo.secondTreeName;
+      }
+      unifiedJson._treeName = datasetInfo.treeName;
+      unifiedJson._url = datasetInfo.auspiceDisplayUrl;
+    } catch (err) {
+      return handleError(res, `Couldn't fetch JSONs`, err.message);
     }
 
     utils.verbose("Success fetching v1 JSONs. Sending as a single JSON.");
     res.json(unifiedJson);
-
   };
-
 };
-
-// const getDataset = async (req, res) => {
-//   const rawQuery = req.url.split('?')[1];
-//   utils.log(`Getting datasets for: ${rawQuery}`);
-//   const query = queryString.parse(rawQuery);
-//   const availableDatasets = await getAvailable.getAvailableDatasets();
-
-//   /* match the query against the available datasets */
-//   let paths;
-//   try {
-//     paths = constructPathToGet(availableDatasets, query.prefix, query);
-//   } catch (err) {
-//     res.statusMessage = `Couldn't parse the url "${query.prefix}"`;
-//     utils.warn(`${res.statusMessage} -- ${err}`);
-//     return res.status(500).end();
-//   }
-
-//   if (query.type) {
-//     utils.verbose("fetching:" + paths.fetchURL);
-//     try {
-//       let data = await utils.readFilePromise(paths.fetchURL);
-//       if (query.type === "tree") {
-//         data = {tree: data};
-//       }
-//       return res.json(data);
-//     } catch (err) {
-//       res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL}`;
-//       utils.warn(`${res.statusMessage} -- ${err.message}`);
-//       res.status(500).end();
-//     }
-//   } else {
-//     const unifiedJson = {
-//       _available: availableDatasets,
-//       _source: "local",
-//       _treeName: paths.treeName,
-//       _url: paths.auspiceURL,
-//       _datasetFields: paths.datasetFields
-//     };
-//     if (paths.treeTwoName) {
-//       unifiedJson._treeTwoName = paths.treeTwoName;
-//     }
-
-//     const v1Paths = [
-//       paths.fetchURL.replace(".json", "_meta.json"),
-//       paths.fetchURL.replace(".json", "_tree.json")
-//     ];
-//     if (paths.secondTreeFetchURL) {
-//       v1Paths.push(paths.secondTreeFetchURL.replace(".json", "_tree.json"));
-//     }
-
-//     try {
-//       const v1Data = await Promise.all(v1Paths.map((p) => utils.readFilePromise(p)));
-//       unifiedJson.meta = v1Data[0];
-//       unifiedJson.tree = v1Data[1];
-//       if (paths.secondTreeFetchURL) {
-//         unifiedJson.treeTwo = v1Data[2];
-//       }
-//     } catch (err) {
-//       if (paths.treeTwoName) {
-//         res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL} and/or ${paths.secondTreeFetchURL}`;
-//       } else {
-//         res.statusMessage = `Couldn't fetch JSONs for ${paths.fetchURL}`;
-//       }
-//       utils.warn(`${res.statusMessage} -- ${err.message}`);
-//       return res.status(500).end();
-//     }
-
-//     utils.verbose("Success fetching v1 JSONs. Sending as a single JSON.");
-//     res.json(unifiedJson);
-//   }
-// };
 
 module.exports = {
   setUpGetDatasetHandler

@@ -12,9 +12,9 @@ const getAvailableDatasets = async (localDataPath) => {
     datasets = datasets
       .filter((file) => file.endsWith("_tree.json"))
       .map((file) => file
-	.replace("_tree.json", "")
-	.split("_")
-	.join("/")
+        .replace("_tree.json", "")
+        .split("_")
+        .join("/")
       )
       .map((filepath) => ({request: filepath}));
   } catch (err) {

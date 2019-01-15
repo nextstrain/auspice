@@ -60,10 +60,10 @@ const fetchJSON = (pathIn) => {
     .then((res) => {
       if (res.status !== 200) throw new Error(res.statusText);
       try {
-	const header = res.headers[Object.getOwnPropertySymbols(res.headers)[0]] || res.headers._headers;
-	verbose(`Got type ${header["content-type"]} with encoding ${header["content-encoding"] || "none"}`);
+        const header = res.headers[Object.getOwnPropertySymbols(res.headers)[0]] || res.headers._headers;
+        verbose(`Got type ${header["content-type"]} with encoding ${header["content-encoding"] || "none"}`);
       } catch (e) {
-	// potential errors here are inconsequential for the response
+        // potential errors here are inconsequential for the response
       }
       return res;
     })
@@ -75,12 +75,12 @@ const readFilePromise = (fileName) => {
   return new Promise((resolve, reject) => {
     fs.readFile(fileName, 'utf8', (err, data) => {
       if (err) {
-	return reject(err);
+        return reject(err);
       }
       try {
-	return resolve(JSON.parse(data));
+        return resolve(JSON.parse(data));
       } catch (parseErr) {
-	return reject(parseErr);
+        return reject(parseErr);
       }
     });
   });
