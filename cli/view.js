@@ -53,7 +53,8 @@ const loadAndAddHandlers = ({app, handlersArg, datasetDir, narrativeDir}) => {
       .setUpGetAvailableHandler({datasetsPath, narrativesPath});
     handlers.getDataset = require("./server/getDataset")
       .setUpGetDatasetHandler({datasetsPath});
-    handlers.getNarrative = require("./server/getNarrative").default;
+    handlers.getNarrative = require("./server/getNarrative")
+      .setUpGetNarrativeHandler({narrativesPath});
   }
 
   /* apply handlers */
