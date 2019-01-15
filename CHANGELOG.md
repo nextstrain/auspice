@@ -1,3 +1,5 @@
+## version 1.35.0 - 2019/01/16
+
 * Auspice is now extensible (at build stage), allowing customisations and serverless builds. [See PR 688](https://github.com/nextstrain/auspice/pull/688)
 * Documentation is now available via github pages -- [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice/)
 
