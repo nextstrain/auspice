@@ -1,11 +1,17 @@
+* Auspice is now extensible (at build stage), allowing customisations and serverless builds. [See PR 688](https://github.com/nextstrain/auspice/pull/688)
+* Documentation is now available via github pages -- [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice/)
+
 ## version 1.34.4 - 2019/01/15
+* Update mumps footer
 
 ## version 1.34.3 - 2018/12/18
+* Don't display deme circle if lat/long is absent
 
 ## version 1.34.2 - 2018/12/05
+* Update mumps footer
+* Modify the casing of how labels are displayed [See PR 685](https://github.com/nextstrain/auspice/pull/685)
 
 ## version 1.34.1 - 2018/11/29
-
 * Small change to make the 'Second Tree' option appear when virus segments are named according to "segment1", "segment2" etcetera. [See PR 684](https://github.com/nextstrain/auspice/pull/684)
 
 ## version 1.34.0 - 2018/11/19
