@@ -25,7 +25,8 @@
     "get-narratives": "./scripts/get-narratives.sh",
     "redeploy-site": "./scripts/redeploy-site.sh",
     "rebuild-docker-image": "./scripts/rebuild-docker-image.sh",
-    "gzip-and-upload": "./scripts/gzip-and-upload.sh"
+    "gzip-and-upload": "./scripts/gzip-and-upload.sh",
+    "build-docs": "./scripts/build-docs.sh"
   },
   "dependencies": {
     "argparse": "^1.0.10",
