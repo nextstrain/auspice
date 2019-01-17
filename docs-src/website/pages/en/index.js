@@ -167,7 +167,7 @@ const users = [
 const Philosophy = () => (
   <Block
     background="highlight"
-    footer={(<Button className="highlightBackground" href={docUrl("README")}>go to docs</Button>)}
+    footer={(<Button className="highlightBackground" href={docUrl("overview")}>go to docs</Button>)}
   >
     {[
       {
@@ -176,7 +176,7 @@ const Philosophy = () => (
           <MarkdownBlock>
             Augur is a seperate toolkit for phylodynamic analysis with a focus on pathgen and outbreak tracking.
             It's designed to work seamlessly with auspice.
-            See the [nextstrain documentation]("https://nextstrain.org/docs/bioinformatics/introduction") to find out more.
+            See the [nextstrain documentation](https://nextstrain.org/docs/bioinformatics/introduction) to find out more.
           </MarkdownBlock>
         )
       },
@@ -187,7 +187,7 @@ const Philosophy = () => (
             We're actively developing auspice to be more versatile and able to power many different websites.
             As such, the current API's are in flux while we develop this functionality.
             If you are interested in helping us develop these ideas and would like to use auspice to build your website
-            then please contact us via [email](mailto:hello@nextstrain.org) or [twitter](twitter.com/hamesjadfield).
+            then please contact us via [email](mailto:hello@nextstrain.org) or [twitter](https://twitter.com/hamesjadfield).
           </MarkdownBlock>
         )
       }
