@@ -2,7 +2,7 @@ const utils = require("../utils");
 const queryString = require("query-string");
 const getAvailable = require("./getAvailable");
 const path = require("path");
-
+const convertJsons = require("./convertJsonSchemas").convert;
 /*
 * Note that a lot of this code is replicated in the nextstrain.org repo
 * and it could instead be exposed by "auspice" (and imported by the nextstrain.org repo)
@@ -111,16 +111,16 @@ const setUpGetDatasetHandler = ({datasetsPath}) => {
     }
 
     /* else combine the meta & tree(s) */
-    const unifiedJson = {};
+    let unifiedJson;
     try {
-      unifiedJson.tree = await utils.readFilePromise(path.join(datasetsPath, datasetInfo.fetchSuffixes.tree));
-      unifiedJson.meta = await utils.readFilePromise(path.join(datasetsPath, datasetInfo.fetchSuffixes.meta));
+      const tree = await utils.readFilePromise(path.join(datasetsPath, datasetInfo.fetchSuffixes.tree));
+      const meta = await utils.readFilePromise(path.join(datasetsPath, datasetInfo.fetchSuffixes.meta));
+      unifiedJson = convertJsons({tree, meta, treeName: datasetInfo.treeName, displayUrl: datasetInfo.auspiceDisplayUrl});
       if (datasetInfo.fetchSuffixes.secondTree) {
-        unifiedJson.treeTwo = await utils.readFilePromise(path.join(datasetsPath, datasetInfo.fetchSuffixes.secondTree));
-        unifiedJson._treeTwoName = datasetInfo.secondTreeName;
+        throw new Error("Second tree not supported in this fashion");
+        // unifiedJson.treeTwo = await utils.readFilePromise(path.join(datasetsPath, datasetInfo.fetchSuffixes.secondTree));
+        // unifiedJson._treeTwoName = datasetInfo.secondTreeName;
       }
-      unifiedJson._treeName = datasetInfo.treeName;
-      unifiedJson._url = datasetInfo.auspiceDisplayUrl;
     } catch (err) {
       return handleError(res, `Couldn't fetch JSONs`, err.message);
     }
