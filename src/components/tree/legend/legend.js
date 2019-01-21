@@ -4,7 +4,6 @@ import { rgb } from "d3-color";
 import LegendItem from "./item";
 import { headerFont, darkGrey } from "../../../globalStyles";
 import { legendRectSize, legendSpacing, fastTransitionDuration, months } from "../../../util/globals";
-import { determineColorByGenotypeType } from "../../../util/colorHelpers";
 import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
@@ -13,7 +12,7 @@ import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenot
 @connect((state) => {
   return {
     colorBy: state.controls.colorBy,
-    colorOptions: state.metadata.colorOptions,
+    colorings: state.metadata.colorings,
     colorScale: state.controls.colorScale
   };
 })
@@ -77,8 +76,8 @@ class Legend extends React.Component {
         ? `Genotype at ${genotype.gene} site ${genotype.positions.join(", ")}`
         : `Nucleotide at position ${genotype.positions.join(", ")}`;
     }
-    return this.props.colorOptions[this.props.colorBy] === undefined ?
-      "" : this.props.colorOptions[this.props.colorBy].legendTitle;
+    return this.props.colorings[this.props.colorBy] === undefined ?
+      "" : this.props.colorings[this.props.colorBy].title;
   }
   getTitleWidth() {
     return 15 + 5.3 * this.getTitleString().length;

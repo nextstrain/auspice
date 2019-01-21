@@ -29,22 +29,23 @@ export const determineColorByGenotypeMutType = (colorBy) => {
 };
 
 /**
-* what values (for colorBy) are present in the tree and not in the color_map?
+* what colorBy trait names are present in the tree but _not_ in the provided scale?
 * @param {Array} nodes - list of nodes
 * @param {Array|undefined} nodesToo - list of nodes for the second tree
 * @param {string} colorBy -
-* @param {Array} color_map - list of colorBy values with colours
+* @param {object} providedScale - links trait names to hex values
 * @return {list}
 */
-export const getExtraVals = (nodes, nodesToo, colorBy, color_map) => {
-  let valsInTree = [];
-  nodes.forEach((n) => valsInTree.push(n.attr[colorBy]));
-  if (nodesToo) nodesToo.forEach((n) => valsInTree.push(n.attr[colorBy]));
+export const getExtraVals = (nodes, nodesToo, colorBy, providedScale) => {
+  let valsInTree = nodes.map((n) => n.attr[colorBy]);
+  if (nodesToo) {
+    nodesToo.forEach((n) => valsInTree.push(n.attr[colorBy]));
+  }
   valsInTree = [...new Set(valsInTree)];
-  const valsInMeta = color_map.map((d) => { return d[0];});
+  const providedVals = Object.keys(providedScale);  
   // console.log("here", valsInMeta, valsInTree, valsInTree.filter((x) => valsInMeta.indexOf(x) === -1))
   // only care about values in tree NOT in metadata
-  return valsInTree.filter((x) => valsInMeta.indexOf(x) === -1);
+  return valsInTree.filter((x) => providedVals.indexOf(x) === -1);
 };
 
 

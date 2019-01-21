@@ -18,7 +18,7 @@ export const areListsEqual = (a, b) => {
 };
 
 export const parseColorBy = (colorBy, colorOptions) => {
-  if (colorOptions[colorBy]) {
+  if (colorOptions && colorOptions[colorBy]) {
     return colorOptions[colorBy].legendTitle;
   } else if (isColorByGenotype(colorBy)) {
     const genotype = decodeColorByGenotype(colorBy);
