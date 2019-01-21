@@ -17,7 +17,7 @@ import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decode
   return {
     colorBy: state.controls.colorBy,
     geneLength: state.controls.geneLength,
-    colorOptions: state.metadata.colorOptions,
+    colorings: state.metadata.colorings,
     geneMap: state.entropy.geneMap
   };
 })
@@ -39,7 +39,7 @@ class ColorBy extends React.Component {
   static propTypes = {
     colorBy: PropTypes.string.isRequired,
     geneLength: PropTypes.object.isRequired,
-    colorOptions: PropTypes.object.isRequired,
+    colorings: PropTypes.object.isRequired,
     dispatch: PropTypes.func.isRequired
   }
 
@@ -129,7 +129,7 @@ class ColorBy extends React.Component {
         value={this.state.geneSelected}
         options={gtGeneOptions}
         clearable={false}
-        searchable={true}
+        searchable
         multi={false}
         onChange={(opt) => {
           this.setState({ geneSelected: opt.value });
@@ -176,10 +176,10 @@ class ColorBy extends React.Component {
   }
 
   getColorByOptions() {
-    return Object.keys(this.props.colorOptions).map((key) => {
+    return Object.keys(this.props.colorings).map((key) => {
       return {
         value: key,
-        label: this.props.colorOptions[key].menuItem
+        label: this.props.colorings[key].title
       };
     }).sort((a, b) => {
       const [ia, ib] = [colorByMenuPreferredOrdering.indexOf(a.value), colorByMenuPreferredOrdering.indexOf(b.value)];

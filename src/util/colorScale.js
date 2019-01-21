@@ -78,23 +78,26 @@ const createLegendBounds = (legendValues) => {
   return legendBounds;
 };
 
-
+/**
+ * calculate the color scale.
+ * @param {string} colorBy - provided trait to use as color
+ * @param {object} controls
+ * @param {object} tree
+ * @param {object} treeToo
+ * @param {object} metadata
+ * @return {{scale: function, continuous: string, colorBy: string, version: int, legendValues: Array, legendBounds: Array, genotype: null|object}}
+ */
 export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
-
   if (colorBy === "none") {
     console.warn("ColorScale fallthrough for colorBy set to none");
-    const colorScale = () => unknownColor;
-    const genotype = null;
-    const legendValues = ["unknown"];
-    const legendBounds = createLegendBounds(legendValues);
     return {
-      scale: colorScale,
+      scale: () => unknownColor,
       continuous: false,
       colorBy: colorBy,
       version: controls.colorScale === undefined ? 1 : controls.colorScale.version + 1,
-      legendValues,
-      legendBounds,
-      genotype
+      legendValues: ["unknown"],
+      legendBounds: createLegendBounds(["unknown"]),
+      genotype: null
     };
   }
 
@@ -103,7 +106,8 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     genotype = decodeColorByGenotype(colorBy, controls.geneLength);
     setGenotype(tree.nodes, genotype.gene, genotype.positions); /* modifies nodes recursively */
   }
-  const colorOptions = metadata.colorOptions;
+  // const colorOptions = metadata.colorOptions;
+  const colorings = metadata.colorings;
   const treeTooNodes = treeToo ? treeToo.nodes : undefined;
   let error = false;
   let continuous = false;
@@ -117,13 +121,14 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     colorScale = scaleOrdinal()
       .domain([undefined, ...legendValues])
       .range([unknownColor, ...genotypeColors]);
-  } else if (colorOptions && colorOptions[colorBy]) {
-    if (colorOptions[colorBy].color_map) {
-      // console.log("Sweet - we've got a color_map for ", colorBy)
+  } else if (colorings && colorings[colorBy]) {
+    /* Is the scale set in the provided colorings object? */
+    if (colorings[colorBy].scale) {
+      // console.log(`calcColorScale: colorBy ${colorBy} provided us with a scale (traits -> hexes)`);
       continuous = false; /* colorMaps can't be continuous */
-      let domain = colorOptions[colorBy].color_map.map((d) => { return d[0]; });
-      let range = colorOptions[colorBy].color_map.map((d) => { return d[1]; });
-      const extraVals = getExtraVals(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy].color_map);
+      let domain = Object.keys(colorings[colorBy].scale);
+      let range = domain.map((key) => colorings[colorBy].scale[key]);
+      const extraVals = getExtraVals(tree.nodes, treeTooNodes, colorBy, colorings[colorBy].scale);
       if (extraVals.length) {
         // we must add these to the domain + provide a value in the range
         domain = domain.concat(extraVals);
@@ -134,13 +139,14 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         .domain(domain)
         .range(range);
       legendValues = domain;
-    } else if (colorOptions && colorOptions[colorBy].type === "discrete") {
-      // console.log("making a discrete color scale for ", colorBy)
+    } else if (colorings && (colorings[colorBy].type === "categorical" || colorings[colorBy].type === "ordinal")) {
+      // console.log("making a categorica / ordinal color scale for ", colorBy);
+      // TODO ordinal should use a different scale...
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
       colorScale = createDiscreteScale(legendValues);
-    } else if (colorOptions && colorOptions[colorBy].type === "continuous") {
-      // console.log("making a continuous color scale for ", colorBy)
+    } else if (colorings && colorings[colorBy].type === "continuous") {
+      // console.log("making a continuous color scale for ", colorBy);
       continuous = true;
       let minMax;
       switch (colorBy) {
@@ -150,7 +156,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         case "num_date":
           break; /* minMax not needed for num_date */
         default:
-          minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorOptions[colorBy]);
+          minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorings[colorBy]);
       }
 
       /* make the continuous scale */
@@ -196,7 +202,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
       legendBounds = createLegendBounds(legendValues);
     } else {
-      console.error("ColorBy", colorBy, "invalid type --", colorOptions[colorBy].type);
+      console.error("ColorBy", colorBy, "invalid type --", colorings[colorBy].type);
       error = true;
     }
   } else {
@@ -209,6 +215,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     legendValues = ["unknown"];
     colorScale = () => unknownColor;
   }
+
 
   return {
     scale: colorScale,
