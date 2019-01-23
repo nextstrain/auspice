@@ -13,7 +13,11 @@ const log = (msg) => {
   console.log(chalk.blueBright(msg));
 };
 const warn = (msg) => {
-  console.warn(chalk.redBright(`[warning]\t${msg}`));
+  console.warn(chalk.yellowBright(`[warning]\t${msg}`));
+};
+const error = (msg) => {
+  console.error(chalk.redBright(`[error]\t${msg}`));
+  process.exit();
 };
 
 const isNpmGlobalInstall = () => {
@@ -119,6 +123,7 @@ module.exports = {
   verbose,
   log,
   warn,
+  error,
   resolveLocalDirectory,
   customOutputPath,
   fetchJSON,
