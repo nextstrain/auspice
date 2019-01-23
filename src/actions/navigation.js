@@ -1,3 +1,4 @@
+import queryString from "query-string";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
 import { loadJSONs } from "./loadData";
@@ -49,7 +50,7 @@ export const changePage = ({
 
   /* set some defaults */
   if (!path) path = window.location.pathname;  // eslint-disable-line
-  if (!query) query = window.location.search;  // eslint-disable-line
+  if (!query) query = queryString.parse(window.location.search);  // eslint-disable-line
   if (!queryToDisplay) queryToDisplay = query; // eslint-disable-line
   /* some booleans */
   const pathHasChanged = oldState.general.pathname !== path;
