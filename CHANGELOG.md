@@ -1,3 +1,5 @@
+## version 1.35.3 - 2019/01/25
+
 * Show useful help message if port is in use. [See PR 694](https://github.com/nextstrain/auspice/pull/694)
 * Fixed a bug where URL query strings may become corrupted in certain cases. [See PR 695](https://github.com/nextstrain/auspice/pull/695)
 * Restore (deprecated) "npm run {server,dev}" commands. [See PR 692](https://github.com/nextstrain/auspice/pull/692)
