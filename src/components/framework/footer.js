@@ -124,12 +124,19 @@ export const getAcknowledgments = (dispatch, styles) => {
           with a special thanks to Nikos Gurfield, Saran Grewal, Chris Barker, Ying Fang and the Andersen Lab for making `}
         <a href="https://andersen-lab.com/secrets/data/west-nile-genomics/">{"their data"}</a>
         {` available ahead of publication. `}
-        {`We also thank Simon Dellicour, Sebastian Lequime, Bram Vrancken, Philippe Lemey, Karthik Gangavarapu, Nate Matteson, Sharada Saraf,
-          Kristian Andersen, and Nathan Grubaugh for curating the original dataset.
+        {`We also thank Simon Dellicour, Sebastian Lequime, Bram Vrancken, Philippe Lemey, Karthik Gangavarapu, Nate Matteson, Sharada Saraf
+          and Nathan Grubaugh for curating the original dataset; and Zhe Zheng and Anderson Brito helping with the updates
           The data is being maintained by `}
-        <a target="_blank" rel="noreferrer noopener" href="http://grubaughlab.com">{"Nathan Grubaugh and his lab"}</a>
-        {`. Our goal is to promote sequencing and sharing of West Nile virus genomes to improve our understanding of virus spread and evolution.
-          To aid in this effort, they have adapted their highly multiplexed PCR approach for `}
+        <a target="_blank" rel="noreferrer noopener" href="http://bedford.io/team/james-hadfield/">{"James Hadfield"}</a>
+        {` and `}
+        <a target="_blank" rel="noreferrer noopener" href="http://grubaughlab.com">{"Nathan Grubaugh's lab."}</a>
+        <p/>
+        {`Our goal is to promote sequencing and sharing of West Nile virus genomes to improve our understanding of virus spread and evolution.
+          To aid in this effort, Nathan Grubaugh, Ryan Smith, and Kristian Andersen have initiated a large study,
+          including >70 collaborators from >30 US states, to sequence ~4,000 West Nile virus genomes from across the country: `}
+        <a target="_blank" rel="noreferrer noopener" href="https://westnile4k.org/">{`WestNile 4K.`}</a>
+        {` Their website includes a complete list of collaborators and information on how to join the project.
+        To conduct such an ambitious sequencing project, they adapted their highly multiplexed PCR approach for `}
         <a target="_blank" rel="noreferrer noopener" href="https://www.nature.com/articles/nprot.2017.066">{"Zika virus sequencing"}</a>
         {` on the Illumina and Minion platforms for West Nile Virus circulating in North America. Their `}
         <a target="_blank" rel="noreferrer noopener" href="http://grubaughlab.com/open-science/amplicon-sequencing/">{"sequencing protocol and primers"}</a>
@@ -137,7 +144,6 @@ export const getAcknowledgments = (dispatch, styles) => {
           If you have any questions about West Nile virus sequencing, or if you have unpublished data that you would like to share, please email `}
         <a href="emailto:grubaughlab@gmail.com">{"grubaughlab@gmail.com"}</a>
         {"."}
-
         <p/>
         {`All data shown here are coding-complete genomes.`}
 
