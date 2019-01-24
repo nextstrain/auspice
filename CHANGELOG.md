@@ -1,9 +1,10 @@
+* Show useful help message if port is in use. [See PR 694](https://github.com/nextstrain/auspice/pull/694)
+* Fixed a bug where URL query strings may become corrupted in certain cases. [See PR 695](https://github.com/nextstrain/auspice/pull/695)
+* Restore (deprecated) "npm run {server,dev}" commands. [See PR 692](https://github.com/nextstrain/auspice/pull/692)
+* Fix broken links in documentation. [See PR 690](https://github.com/nextstrain/auspice/pull/690)
+* Update WNV footer text
+
 ## version 1.35.2 - 2019/01/16
-
-## version 1.35.1 - 2019/01/16
-
-## version 1.35.0 - 2019/01/16
-
 * Auspice is now extensible (at build stage), allowing customisations and serverless builds. [See PR 688](https://github.com/nextstrain/auspice/pull/688)
 * Documentation is now available via github pages -- [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice/)
 
