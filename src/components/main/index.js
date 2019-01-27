@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import { ThemeProvider } from 'styled-components';
 import SidebarToggle from "../framework/sidebar-toggle";
 import { Frequencies } from "../frequencies";
 import { Entropy } from "../entropy";
@@ -17,7 +18,8 @@ import { calcUsableWidth } from "../../util/computeResponsive";
 import { renderNarrativeToggle } from "../narrative/renderNarrativeToggle";
 import { Sidebar } from "./sidebar";
 import { calcPanelDims, calcStyles } from "./utils";
-import { PanelsContainer } from "./styles";
+import { PanelsContainer, sidebarTheme } from "./styles";
+import ErrorBoundary from "../../util/errorBoundry";
 
 @connect((state) => ({
   panelsToDisplay: state.controls.panelsToDisplay,
@@ -66,7 +68,11 @@ class Main extends React.Component {
     return (
       <span>
         <AnimationController/>
-        <DownloadModal/>
+        <ErrorBoundary showNothing>
+          <ThemeProvider theme={sidebarTheme}>
+            <DownloadModal/>
+          </ThemeProvider>
+        </ErrorBoundary>
         <SidebarToggle
           sidebarOpen={this.state.sidebarOpen}
           mobileDisplay={this.state.mobileDisplay}

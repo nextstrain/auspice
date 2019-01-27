@@ -1,7 +1,4 @@
-import React from "react";
 import styled from 'styled-components';
-import ReactSelect from "react-select";
-import sidebarTheme from "../main/styles";
 
 /* All of these styled components are for the controls, which is part of the sidebar.
  * The sidebar is is wrapped by a <ThemeProvider> so you can access

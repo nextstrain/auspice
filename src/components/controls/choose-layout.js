@@ -1,8 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
-import styled from 'styled-components';
-import { withTheme } from 'styled-components';
+import styled, { withTheme } from 'styled-components';
 import * as icons from "../framework/svg-icons";
 import { CHANGE_LAYOUT } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";

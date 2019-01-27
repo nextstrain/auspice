@@ -78,7 +78,8 @@ export const UnrootedTree = ({theme, selected, width}) => {
   );
 };
 
-export const Meta = ({stroke = "black", width = 30}) => {
+export const Meta = ({theme, selected, width}) => {
+  const stroke = selected ? theme.selectedColor : theme.unselectedColor;
   return (
     <svg width={width} height={width + 5}>
       <g transform="translate(0,7)">
@@ -95,7 +96,6 @@ export const Meta = ({stroke = "black", width = 30}) => {
     </svg>
   );
 };
-
 
 export const PanelsGrid = ({theme, selected, width}) => {
   const stroke = selected ? theme.selectedColor : theme.unselectedColor;
