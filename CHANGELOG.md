@@ -1,3 +1,5 @@
+## version 1.35.4 - 2019/01/28
+
 * Restore download modal functionality. [Issue 699](https://github.com/nextstrain/auspice/issues/699)
 
 ## version 1.35.3 - 2019/01/25
