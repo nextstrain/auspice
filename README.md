@@ -1,7 +1,7 @@
-Master: [![Build Status](https://travis-ci.com/nextstrain/auspice.svg?branch=master)](https://travis-ci.com/nextstrain/auspice)
-Release: [![Build Status](https://travis-ci.com/nextstrain/auspice.svg?branch=release)](https://travis-ci.com/nextstrain/auspice)
-npm: [![NPM version](https://img.shields.io/npm/v/auspice.svg?style=flat-square)](https://www.npmjs.com/package/auspice)
-
+[![Build Status](https://travis-ci.com/nextstrain/auspice.svg?branch=master)](https://travis-ci.com/nextstrain/auspice)
+[![NPM version](https://img.shields.io/npm/v/auspice.svg?style=flat)](https://www.npmjs.com/package/auspice)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+[![BrowserStack](src/images/Browserstack-logo.svg)](https://www.browserstack.com)
 
 ## Introduction
 
