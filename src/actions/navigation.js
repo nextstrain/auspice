@@ -1,8 +1,12 @@
 import queryString from "query-string";
 import { createStateFromQueryOrJSONs } from "./recomputeReduxState";
 import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
-import { loadJSONs } from "./loadData";
 
+/* Given a URL, what "page" should be displayed?
+ * "page" means the main app, splash page, status page etc
+ * If in doubt, we go to the datasetLoader page as this will
+ * redirect to the splash page if the datasets are unavailable
+ */
 export const chooseDisplayComponentFromURL = (url) => {
   const parts = url.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
   if (

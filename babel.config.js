@@ -15,7 +15,8 @@ module.exports = function babelConfig(api) {
   const plugins = [
     ["@babel/plugin-proposal-decorators", { legacy: true }],
     "@babel/plugin-proposal-class-properties",
-    "babel-plugin-styled-components"
+    "babel-plugin-styled-components",
+    "babel-plugin-syntax-dynamic-import"
   ];
   if (api.env("development")) {
     if (process.env.BABEL_EXTENSION_PATH && !process.env.BABEL_EXTENSION_PATH.includes(__dirname)) {

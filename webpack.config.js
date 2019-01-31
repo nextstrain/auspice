@@ -82,7 +82,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath}) => {
     entry,
     output: {
       path: outputPath,
-      filename: "bundle.js",
+      filename: "auspice.bundle.js",
+      chunkFilename: 'auspice.chunk.[name].bundle.js',
       publicPath: "/dist/"
     },
     resolve: {
@@ -118,9 +119,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath}) => {
     }
   };
 
-  if (devMode) {
-    config.devtool = 'cheap-module-source-map';
-  }
+  config.devtool = 'cheap-module-source-map';
 
   return config;
 };
