@@ -5,9 +5,10 @@ const CompressionPlugin = require('compression-webpack-plugin');
 const fs = require('fs');
 const utils = require('./cli/utils');
 
+
 /* Webpack config generator */
 
-const generateConfig = ({extensionPath, devMode=false, customOutputPath}) => {
+const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyzeBundle=false}) => {
   utils.verbose(`Generating webpack config. Extensions? ${!!extensionPath}. devMode: ${devMode}`);
 
   /* which directories should be parsed by babel and other loaders? */
@@ -56,6 +57,11 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath}) => {
     new webpack.optimize.AggressiveMergingPlugin(), // merge chunks - https://github.com/webpack/docs/wiki/list-of-plugins#aggressivemergingplugin
     pluginCompress
   ];
+
+  if (analyzeBundle) {
+    const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin; // eslint-disable-line
+    plugins.push(new BundleAnalyzerPlugin());
+  }
 
   const entry = [
     "babel-polyfill",

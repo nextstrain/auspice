@@ -119,5 +119,7 @@
     "whatwg-fetch": "^0.10.1",
     "yaml-front-matter": "^4.0.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "webpack-bundle-analyzer": "^3.0.3"
+  }
 }
