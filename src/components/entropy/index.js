@@ -73,8 +73,7 @@ const constructEncodedGenotype = (mutType, d) => {
     narrativeMode: state.narrative.display
   };
 })
-
-export class Entropy extends React.Component {
+class Entropy extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -288,3 +287,5 @@ export class Entropy extends React.Component {
     );
   }
 }
+
+export default Entropy;

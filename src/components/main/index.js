@@ -1,10 +1,8 @@
-import React from "react";
+import React, {lazy, Suspense } from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { ThemeProvider } from 'styled-components';
 import SidebarToggle from "../framework/sidebar-toggle";
-import { Frequencies } from "../frequencies";
-import { Entropy } from "../entropy";
 import Info from "../info/info";
 import Tree from "../tree";
 import Map from "../map/map";
@@ -21,6 +19,10 @@ import { calcPanelDims, calcStyles } from "./utils";
 import { PanelsContainer, sidebarTheme } from "./styles";
 import ErrorBoundary from "../../util/errorBoundry";
 import Spinner from "../framework/spinner";
+
+const Entropy = lazy(() => import("../entropy"));
+const Frequencies = lazy(() => import("../frequencies"));
+
 
 @connect((state) => ({
   panelsToDisplay: state.controls.panelsToDisplay,
@@ -107,8 +109,18 @@ class Main extends React.Component {
           {this.props.displayNarrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.panelsToDisplay.includes("tree") ? <Tree width={big.width} height={big.height} /> : null}
           {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
-          {this.props.panelsToDisplay.includes("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
-          {this.props.panelsToDisplay.includes("frequencies") && this.props.frequenciesLoaded ? <Frequencies width={chart.width} height={chart.height} /> : null}
+          {this.props.panelsToDisplay.includes("entropy") ?
+            (<Suspense fallback={null}>
+              <Entropy width={chart.width} height={chart.height} />
+            </Suspense>) :
+            null
+          }
+          {this.props.panelsToDisplay.includes("frequencies") && this.props.frequenciesLoaded ?
+            (<Suspense fallback={null}>
+              <Frequencies width={chart.width} height={chart.height} />
+            </Suspense>) :
+            null
+          }
           {this.props.displayNarrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
         </PanelsContainer>
         {/* overlay (used for mobile to open / close sidebar) */}

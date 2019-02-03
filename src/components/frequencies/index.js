@@ -19,7 +19,7 @@ import "../../css/entropy.css";
     colorOptions: state.metadata.colorOptions
   };
 })
-export class Frequencies extends React.Component {
+class Frequencies extends React.Component {
   constructor(props) {
     super(props);
     this.state = {maxY: 0};
@@ -114,3 +114,5 @@ export class Frequencies extends React.Component {
     );
   }
 }
+
+export default Frequencies;
