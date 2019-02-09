@@ -1,3 +1,6 @@
+* Add acknowledgements to mumps page.
+* Preserve URL during 404. [Issue #700](https://github.com/nextstrain/auspice/issues/700)
+
 ## version 1.35.4 - 2019/01/28
 
 * Restore download modal functionality. [Issue 699](https://github.com/nextstrain/auspice/issues/699)
