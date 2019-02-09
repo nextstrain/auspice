@@ -1,3 +1,5 @@
+## version 1.35.5 - 2019/02/08
+
 * Add acknowledgements to mumps page.
 * Preserve URL during 404. [Issue #700](https://github.com/nextstrain/auspice/issues/700)
 
