@@ -1,10 +1,8 @@
-import React from "react";
+import React, {lazy, Suspense } from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { ThemeProvider } from 'styled-components';
 import SidebarToggle from "../framework/sidebar-toggle";
-import { Frequencies } from "../frequencies";
-import { Entropy } from "../entropy";
 import Info from "../info/info";
 import Tree from "../tree";
 import Map from "../map/map";
@@ -20,6 +18,11 @@ import { Sidebar } from "./sidebar";
 import { calcPanelDims, calcStyles } from "./utils";
 import { PanelsContainer, sidebarTheme } from "./styles";
 import ErrorBoundary from "../../util/errorBoundry";
+import Spinner from "../framework/spinner";
+
+const Entropy = lazy(() => import("../entropy"));
+const Frequencies = lazy(() => import("../frequencies"));
+
 
 @connect((state) => ({
   panelsToDisplay: state.controls.panelsToDisplay,
@@ -28,7 +31,9 @@ import ErrorBoundary from "../../util/errorBoundry";
   narrativeIsLoaded: state.narrative.loaded,
   narrativeTitle: state.narrative.title,
   browserDimensions: state.browserDimensions.browserDimensions,
-  frequenciesLoaded: state.frequencies.loaded
+  frequenciesLoaded: state.frequencies.loaded,
+  metadataLoaded: state.metadata.loaded,
+  treeLoaded: state.tree.loaded
 }))
 class Main extends React.Component {
   constructor(props) {
@@ -39,13 +44,22 @@ class Main extends React.Component {
       sidebarOpen: this.state.mql.matches,
       mobileDisplay: !this.state.mql.matches
     }));
-    this.state = {mql, sidebarOpen: mql.matches, mobileDisplay: !mql.matches};
+    this.state = {
+      mql,
+      sidebarOpen: mql.matches,
+      mobileDisplay: !mql.matches,
+      showSpinner: !(this.props.metadataLoaded && this.props.treeLoaded)
+    };
     analyticsNewPage();
   }
   static propTypes = {
     dispatch: PropTypes.func.isRequired
   }
   componentWillReceiveProps(nextProps) {
+    if (this.state.showSpinner && nextProps.metadataLoaded && nextProps.treeLoaded) {
+      this.setState({showSpinner: false});
+      return;
+    }
     if (
       (this.state.mql.matches) ||
       (nextProps.displayNarrative && !this.props.displayNarrative)
@@ -61,8 +75,10 @@ class Main extends React.Component {
     }, false);
   }
   render() {
-    const {availableWidth, availableHeight, sidebarWidth, overlayStyles} =
-      calcStyles(this.props.browserDimensions, this.props.displayNarrative, this.state.sidebarOpen, this.state.mobileDisplay);
+    if (this.state.showSpinner) {
+      return (<Spinner/>);
+    }
+    const {availableWidth, availableHeight, sidebarWidth, overlayStyles} = calcStyles(this.props.browserDimensions, this.props.displayNarrative, this.state.sidebarOpen, this.state.mobileDisplay);
     const overlayHandler = () => {this.setState({sidebarOpen: false});};
     const {big, chart} = calcPanelDims(this.props.panelLayout === "grid", this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);
     return (
@@ -93,8 +109,18 @@ class Main extends React.Component {
           {this.props.displayNarrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.panelsToDisplay.includes("tree") ? <Tree width={big.width} height={big.height} /> : null}
           {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
-          {this.props.panelsToDisplay.includes("entropy") ? <Entropy width={chart.width} height={chart.height} /> : null}
-          {this.props.panelsToDisplay.includes("frequencies") && this.props.frequenciesLoaded ? <Frequencies width={chart.width} height={chart.height} /> : null}
+          {this.props.panelsToDisplay.includes("entropy") ?
+            (<Suspense fallback={null}>
+              <Entropy width={chart.width} height={chart.height} />
+            </Suspense>) :
+            null
+          }
+          {this.props.panelsToDisplay.includes("frequencies") && this.props.frequenciesLoaded ?
+            (<Suspense fallback={null}>
+              <Frequencies width={chart.width} height={chart.height} />
+            </Suspense>) :
+            null
+          }
           {this.props.displayNarrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
         </PanelsContainer>
         {/* overlay (used for mobile to open / close sidebar) */}

@@ -15,6 +15,7 @@ const addParser = (parser) => {
   subparser.addArgument('--extend', {action: "store", help: "extension config"});
   subparser.addArgument('--includeTiming', {action: "storeTrue", help: "keep timing functions (default: false for speed reasons)"});
   subparser.addArgument('--serverless', {action: "storeTrue", help: "e.g gh-pages"});
+  subparser.addArgument('--analyzeBundle', {action: "storeTrue", help: "Interactive bundle analyzer tool"});
 };
 
 const run = (args) => {
@@ -22,7 +23,7 @@ const run = (args) => {
   /* webpack set up */
   const extensionPath = args.extend ? path.resolve(args.extend) : undefined;
   const customOutputPath = utils.customOutputPath(args.extend);
-  const webpackConfig = generateWebpackConfig({extensionPath, devMode: false, customOutputPath});
+  const webpackConfig = generateWebpackConfig({extensionPath, devMode: false, customOutputPath, analyzeBundle: args.analyzeBundle});
   const compiler = webpack(webpackConfig);
 
   /* variables available to babel (which is called by webpack) */

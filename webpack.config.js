@@ -5,9 +5,10 @@ const CompressionPlugin = require('compression-webpack-plugin');
 const fs = require('fs');
 const utils = require('./cli/utils');
 
+
 /* Webpack config generator */
 
-const generateConfig = ({extensionPath, devMode=false, customOutputPath}) => {
+const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyzeBundle=false}) => {
   utils.verbose(`Generating webpack config. Extensions? ${!!extensionPath}. devMode: ${devMode}`);
 
   /* which directories should be parsed by babel and other loaders? */
@@ -57,6 +58,11 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath}) => {
     pluginCompress
   ];
 
+  if (analyzeBundle) {
+    const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin; // eslint-disable-line
+    plugins.push(new BundleAnalyzerPlugin());
+  }
+
   const entry = [
     "babel-polyfill",
     "./src/index"
@@ -82,7 +88,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath}) => {
     entry,
     output: {
       path: outputPath,
-      filename: "bundle.js",
+      filename: "auspice.bundle.js",
+      chunkFilename: 'auspice.chunk.[name].bundle.js',
       publicPath: "/dist/"
     },
     resolve: {
@@ -118,9 +125,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath}) => {
     }
   };
 
-  if (devMode) {
-    config.devtool = 'cheap-module-source-map';
-  }
+  config.devtool = 'cheap-module-source-map';
 
   return config;
 };
