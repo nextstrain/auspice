@@ -1,3 +1,5 @@
+* Improve app load times using code splitting. [See PR 701](https://github.com/nextstrain/auspice/pull/701)
+
 ## version 1.35.5 - 2019/02/08
 
 * Add acknowledgements to mumps page.
