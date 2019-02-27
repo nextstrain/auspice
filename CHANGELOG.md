@@ -1,3 +1,5 @@
+## version 1.36.1 - 2019/02/27
+
 * Update npm packages identified as security vulnerabilities 
 * Fixes a bug (only in v1.36.0) where, for some datasets, interacting with the tree would cause the app to crash. [Issue 708](https://github.com/nextstrain/auspice/issues/708)
 * `auspice build` now exits (with non-zero exit code) if there are errors during webpack bundling
