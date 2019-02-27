@@ -50,7 +50,7 @@ export const getAcknowledgments = (dispatch, styles) => {
   const preambleContent = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
   const genericPreamble = (<div style={styles.preamble}>{preambleContent}</div>);
 
-  if (window.location.pathname.includes("ebola")) {
+  if (window.location.pathname.includes("ebola") && !window.location.pathname.includes("community")) {
     return (
       <div>
         {genericPreamble}
