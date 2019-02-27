@@ -59,9 +59,10 @@ const parseClientUrl = (clientUrl, otherQueries) => {
     secondTreePrefixParts[idxOfTree] = secondTreeName;
 
     fetchSuffixes.secondTree = `${secondTreePrefixParts.join("_")}_tree.json`;
-    // auspicePrefixParts[idxOfTree] = `${treeName}:${secondTreeName}`;
-    auspiceDisplayUrl = auspiceDisplayUrl.replace(`/${treeName}/`, `/${treeName}:${secondTreeName}/`);
+    const re = new RegExp(`\\/${treeName}(/|$)`); // note the double escape for special char
+    auspiceDisplayUrl = auspiceDisplayUrl.replace(re, `/${treeName}:${secondTreeName}/`);
   }
+  auspiceDisplayUrl = auspiceDisplayUrl.replace(/\/$/, ''); // remove any trailing slash
 
   fetchSuffixes.tree = `${prefixParts.join("_")}_tree.json`;
   fetchSuffixes.meta = `${prefixParts.join("_")}_meta.json`;
