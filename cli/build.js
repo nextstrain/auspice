@@ -38,8 +38,8 @@ const run = (args) => {
       return;
     }
     if (stats.hasErrors()) {
-      utils.warn("Webpack has errors!");
       console.log(stats.toString({colors: true}));
+      utils.error("Webpack built with errors. Exiting.");
     } else {
       if (stats.hasWarnings()) {
         utils.warn("Webpack has warnings (run with '--verbose' to see them)");
