@@ -5,7 +5,7 @@ import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 
-const infoLineJSX = (item, value) => (
+const renderInfoLine = (item, value) => (
   <span>
     <span style={{fontWeight: "500"}}>
       {item + " "}
@@ -16,7 +16,7 @@ const infoLineJSX = (item, value) => (
   </span>
 );
 
-const infoBlockJSX = (item, values) => (
+const renderInfoBlock = (item, values) => (
   <div>
     <p style={{marginBottom: "-0.7em", fontWeight: "500"}}>
       {item}
@@ -30,10 +30,17 @@ const infoBlockJSX = (item, values) => (
   </div>
 );
 
-const getBranchDivJSX = (d) =>
-  <p>{infoLineJSX("Divergence:", prettyString(d.attr.div.toExponential(3)))}</p>;
+const VerticalBreak = () => (
+  <br style={{display: "block", marginTop: "10px", lineHeight: "22px"}} />
+);
 
-const getBranchTimeJSX = (d, temporalConfidence) => {
+const renderBranchDivergence = (d) => (
+  <p>
+    {renderInfoLine("Divergence:", prettyString(d.attr.div.toExponential(3)))}
+  </p>
+);
+
+const renderBranchTime = (d, temporalConfidence) => {
   const date = d.attr.date || numericToCalendar(d.attr.num_date);
   let dateRange = false;
   if (temporalConfidence && d.attr.num_date_confidence) {
@@ -45,13 +52,13 @@ const getBranchTimeJSX = (d, temporalConfidence) => {
   if (dateRange && dateRange[0] !== dateRange[1]) {
     return (
       <p>
-        {infoLineJSX("Inferred Date:", date)}
-        <br/>
-        {infoLineJSX("Date Confidence Interval:", `(${dateRange[0]}, ${dateRange[1]})`)}
+        {renderInfoLine("Inferred Date:", date)}
+        <VerticalBreak/>
+        {renderInfoLine("Date Confidence Interval:", `(${dateRange[0]}, ${dateRange[1]})`)}
       </p>
     );
   }
-  return (<p>{infoLineJSX("Date:", date)}</p>);
+  return (<p>{renderInfoLine("Date:", date)}</p>);
 };
 
 /**
@@ -67,7 +74,7 @@ const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidenc
   }
   if (colorBy === "num_date") {
     /* if colorBy is date and branch lengths are divergence we should still show node date */
-    return (colorBy !== distanceMeasure) ? getBranchTimeJSX(d, temporalConfidence) : null;
+    return (colorBy !== distanceMeasure) ? renderBranchTime(d, temporalConfidence) : null;
   }
   if (colorByConfidence === true) {
     const lkey = colorBy + "_confidence";
@@ -79,9 +86,9 @@ const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidenc
       .sort((a, b) => d.attr[lkey][a] > d.attr[lkey][b] ? -1 : 1)
       .slice(0, 4)
       .map((v) => `${prettyString(v)} (${(100 * d.attr[lkey][v]).toFixed(0)}%)`);
-    return infoBlockJSX(`${prettyString(colorBy)} (confidence):`, vals);
+    return renderInfoBlock(`${prettyString(colorBy)} (confidence):`, vals);
   }
-  return infoLineJSX(prettyString(colorBy), prettyString(d.attr[colorBy]));
+  return renderInfoLine(prettyString(colorBy), prettyString(d.attr[colorBy]));
 };
 
 /**
@@ -133,21 +140,21 @@ const getMutationsJSX = (d, mutType) => {
       mGap += gapLen > nGapDisp ? " + " + (gapLen - nGapDisp) + " more" : "";
 
       if (gapLen === 0) {
-        return infoLineJSX("Nucleotide mutations:", m);
+        return renderInfoLine("Nucleotide mutations:", m);
       }
       if (nucLen === 0) {
-        return infoLineJSX("Gap/N mutations:", mGap);
+        return renderInfoLine("Gap/N mutations:", mGap);
       }
       return (
         <p>
-          {infoLineJSX("Nucleotide mutations:", m)}
-          <div height="5"/>
-          {infoLineJSX("Gap/N mutations:", mGap)}
+          {renderInfoLine("Nucleotide mutations:", m)}
+          <VerticalBreak/>
+          {renderInfoLine("Gap/N mutations:", mGap)}
         </p>
       );
 
     }
-    return infoLineJSX("No nucleotide mutations", "");
+    return renderInfoLine("No nucleotide mutations", "");
   } else if (mutType === "aa") {
     if (typeof d.aa_muts !== "undefined") {
       /* calculate counts */
@@ -175,21 +182,24 @@ const getMutationsJSX = (d, mutType) => {
             }
           }
         });
-        return infoBlockJSX("AA mutations:", m);
+        return renderInfoBlock("AA mutations:", m);
       }
-      return infoLineJSX("No amino acid mutations", "");
+      return renderInfoLine("No amino acid mutations", "");
     }
   }
   /* if mutType is neither "aa" nor "muc" then render nothing */
   return null;
 };
 
-const getBranchDescendents = (n) => {
-  if (n.fullTipCount === 1) {
-    return <span>{infoLineJSX("Branch leading to", n.strain)}<p/></span>;
-  }
-  return <span>{infoLineJSX("Number of descendants:", n.fullTipCount)}<p/></span>;
-};
+const getBranchDescendents = (n) => (
+  <>
+    {n.fullTipCount === 1 ?
+      renderInfoLine("Branch leading to", n.strain) :
+      renderInfoLine("Number of descendants:", n.fullTipCount)
+    }
+    <VerticalBreak/>
+  </>
+);
 
 const getPanelStyling = (d, panelDims) => {
   const xOffset = 10;
@@ -235,7 +245,7 @@ const getPanelStyling = (d, panelDims) => {
 const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale) => {
   if (colorBy === "num_date") {
     if (distanceMeasure === "num_date") return null;
-    return getBranchTimeJSX(d.n, temporalConfidence);
+    return renderBranchTime(d.n, temporalConfidence);
   }
   if (isColorByGenotype(colorBy)) {
     const genotype = decodeColorByGenotype(colorBy);
@@ -243,16 +253,16 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
       ? `Amino Acid at ${genotype.gene} site ${genotype.positions.join(", ")}`
       : `Nucleotide at pos ${genotype.positions.join(", ")}`;
     const state = getTipColorAttribute(d.n, colorScale);
-    return infoLineJSX(key + ":", state);
+    return renderInfoLine(key + ":", state);
   }
-  return infoLineJSX(prettyString(colorBy) + ":", prettyString(d.n.attr[colorBy]));
+  return renderInfoLine(prettyString(colorBy) + ":", prettyString(d.n.attr[colorBy]));
 };
 
 const displayVaccineInfo = (d) => {
   if (d.n.vaccineDate) {
     return (
       <span>
-        {infoLineJSX("Vaccine strain:", d.n.vaccineDate)}
+        {renderInfoLine("Vaccine strain:", d.n.vaccineDate)}
         <p/>
       </span>
     );
@@ -275,7 +285,7 @@ const HoverInfoPanel = ({mutType, temporalConfidence, distanceMeasure,
       <span>
         {displayVaccineInfo(d)}
         {tipDisplayColorByInfo(d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale)}
-        {distanceMeasure === "div" ? getBranchDivJSX(d.n) : getBranchTimeJSX(d.n, temporalConfidence)}
+        {distanceMeasure === "div" ? renderBranchDivergence(d.n) : renderBranchTime(d.n, temporalConfidence)}
       </span>
     );
   } else {
@@ -284,7 +294,7 @@ const HoverInfoPanel = ({mutType, temporalConfidence, distanceMeasure,
         {getBranchDescendents(d.n)}
         {/* getFrequenciesJSX(d.n, mutType) */}
         {getMutationsJSX(d.n, mutType)}
-        {distanceMeasure === "div" ? getBranchDivJSX(d.n) : getBranchTimeJSX(d.n, temporalConfidence)}
+        {distanceMeasure === "div" ? renderBranchDivergence(d.n) : renderBranchTime(d.n, temporalConfidence)}
         {displayColorBy(d.n, distanceMeasure, temporalConfidence, colorByConfidence, colorBy)}
       </span>
     );
