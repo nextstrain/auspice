@@ -28,7 +28,7 @@ export const encodeColorByGenotype = ({ gene, positions }) => {
 export const decodeColorByGenotype = (colorBy, geneLengths) => {
   // If we're passed a map of gene name → length, then validate the decoded
   // gene name and positions.  Otherwise, just decode without validation.
-  const validate = geneLengths != null;
+  const validate = typeof geneLengths === "object" && Object.keys(geneLengths).length;
 
   // Split the encoded string into tokens of gene and positions.
   const match = colorBy.match(/^gt-(.+)_([0-9,]+)$/);
