@@ -5,6 +5,7 @@ import leaflet from "leaflet";
 import _min from "lodash/min";
 import _max from "lodash/max";
 import { select } from "d3-selection";
+import 'd3-transition'
 import leafletImage from "leaflet-image";
 import Card from "../framework/card";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";

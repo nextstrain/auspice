@@ -1,4 +1,5 @@
 import { select } from "d3-selection";
+import 'd3-transition';
 import { rgb } from "d3-color";
 import { calcBranchStrokeCols } from "../../../util/colorHelpers";
 import * as callbacks from "./callbacks";

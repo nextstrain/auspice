@@ -1,6 +1,7 @@
 /* eslint-disable space-infix-ops */
 import React from "react";
 import { select } from "d3-selection";
+import 'd3-transition';
 
 const makeTipPathGenerator = (props) => (idxs) => {
   const tip1 = props.leftNodes[idxs[0]].shell;

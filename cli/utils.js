@@ -17,7 +17,7 @@ const warn = (msg) => {
 };
 const error = (msg) => {
   console.error(chalk.redBright(`[error]\t${msg}`));
-  process.exit();
+  process.exit(2);
 };
 
 const isNpmGlobalInstall = () => {
