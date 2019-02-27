@@ -148,37 +148,39 @@ const getMutationsJSX = (d, mutType) => {
 
     }
     return infoLineJSX("No nucleotide mutations", "");
-  } else if (typeof d.aa_muts !== "undefined") {
-    /* calculate counts */
-    const prots = Object.keys(d.aa_muts);
-    const counts = {};
-    for (const prot of prots) {
-      counts[prot] = d.aa_muts[prot].length;
-    }
-    /* are there any AA mutations? */
-    if (prots.map((k) => counts[k]).reduce((a, b) => a + b, 0)) {
-      const nDisplay = 3; // number of mutations to display per protein
-      const nProtsToDisplay = 7; // max number of proteins to display
-      let protsSeen = 0;
-      const m = [];
-      prots.forEach((prot) => {
-        if (counts[prot] && protsSeen < nProtsToDisplay) {
-          let x = prot + ":\u00A0\u00A0" + d.aa_muts[prot].slice(0, Math.min(nDisplay, counts[prot])).join(", ");
-          if (counts[prot] > nDisplay) {
-            x += " + " + (counts[prot] - nDisplay) + " more";
+  } else if (mutType === "aa") {
+    if (typeof d.aa_muts !== "undefined") {
+      /* calculate counts */
+      const prots = Object.keys(d.aa_muts);
+      const counts = {};
+      for (const prot of prots) {
+        counts[prot] = d.aa_muts[prot].length;
+      }
+      /* are there any AA mutations? */
+      if (prots.map((k) => counts[k]).reduce((a, b) => a + b, 0)) {
+        const nDisplay = 3; // number of mutations to display per protein
+        const nProtsToDisplay = 7; // max number of proteins to display
+        let protsSeen = 0;
+        const m = [];
+        prots.forEach((prot) => {
+          if (counts[prot] && protsSeen < nProtsToDisplay) {
+            let x = prot + ":\u00A0\u00A0" + d.aa_muts[prot].slice(0, Math.min(nDisplay, counts[prot])).join(", ");
+            if (counts[prot] > nDisplay) {
+              x += " + " + (counts[prot] - nDisplay) + " more";
+            }
+            m.push(x);
+            protsSeen++;
+            if (protsSeen === nProtsToDisplay) {
+              m.push(`(protein mutations truncated)`);
+            }
           }
-          m.push(x);
-          protsSeen++;
-          if (protsSeen === nProtsToDisplay) {
-            m.push(`(protein mutations truncated)`);
-          }
-        }
-      });
-      return infoBlockJSX("AA mutations:", m);
+        });
+        return infoBlockJSX("AA mutations:", m);
+      }
+      return infoLineJSX("No amino acid mutations", "");
     }
-    return infoLineJSX("No amino acid mutations", "");
   }
-  console.warn("Error parsing mutations for branch", d.strain);
+  /* if mutType is neither "aa" nor "muc" then render nothing */
   return null;
 };
 

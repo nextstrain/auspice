@@ -258,20 +258,40 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
   state.absoluteDateMaxNumeric = calendarToNumeric(state.absoluteDateMax);
 
-
-  /* available tree attrs - based upon the root node */
+  /* collect all available tree attrs, and available mutations */
+  const attrs = new Set();
+  let [aaMuts, nucMuts] = [false, false];
+  const examineNodes = function examineNodes(nodes) {
+    nodes.forEach((node) => {
+      Object.keys(node.attr).forEach((attr) => {
+        attrs.add(attr);
+      });
+      if (node.aa_muts && Object.keys(node.aa_muts).length) aaMuts = true;
+      if (node.muts && node.muts.length) nucMuts = true;
+    });
+  };
+  examineNodes(tree.nodes);
   if (treeToo) {
-    state.attrs = [...new Set([...Object.keys(tree.nodes[0].attr), ...Object.keys(treeToo.nodes[0].attr)])];
-  } else {
-    state.attrs = Object.keys(tree.nodes[0].attr);
+    examineNodes(treeToo.nodes);
+  }
+  state.attrs = [...attrs]; /* convert to list */
+
+  /* ensure specified mutType is indeed available */
+  if (!aaMuts && !nucMuts) {
+    state.mutType = null;
+  } else if (state.mutType === "aa" && !aaMuts) {
+    state.mutType = "nuc";
+  } else if (state.mutType === "nuc" && !nucMuts) {
+    state.mutType = "aa";
   }
 
   /* does the tree have date information? if not, disable controls, modify view */
   state.branchLengthsToDisplay = Object.keys(tree.nodes[0].attr).indexOf("num_date") === -1 ? "divOnly" :
     Object.keys(tree.nodes[0].attr).indexOf("div") === -1 ? "dateOnly" : "divAndDate";
 
-  /* if branchLengthsToDisplay is divOnly, force to display by divergence
-    if branchLengthsToDisplay is dateONly, force to display by date */
+  /* if branchLengthsToDisplay is "divOnly", force to display by divergence
+   * if branchLengthsToDisplay is "dateOnly", force to display by date
+   */
   state.distanceMeasure = state.branchLengthsToDisplay === "divOnly" ? "div" :
     state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
 
@@ -282,9 +302,6 @@ const modifyStateViaTree = (state, tree, treeToo) => {
 };
 
 const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
-  /* The one (bigish) problem with this being in the reducer is that
-  we can't have any side effects. So if we detect and error introduced by
-  a URL QUERY (and correct it in state), we can't correct the URL */
   /* colorBy */
   if (!metadata.colorOptions) {
     metadata.colorOptions = {};
