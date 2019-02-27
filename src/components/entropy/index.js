@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { select } from "d3-selection";
+import 'd3-transition';
 import Card from "../framework/card";
 import { changeColorBy } from "../../actions/colors";
 import { tabGroup, tabGroupMember, tabGroupMemberSelected } from "../../globalStyles";
