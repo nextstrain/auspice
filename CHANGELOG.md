@@ -1,3 +1,5 @@
+## version 1.36.2 - 2019/03/04
+
 * Update footer information. Don't display "live" footers for "community" URLs.
 
 ## version 1.36.1 - 2019/02/27
