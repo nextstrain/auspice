@@ -18,8 +18,8 @@ const getAvailableDatasets = async (localDataPath) => {
       )
       .map((filepath) => ({request: filepath}));
   } catch (err) {
-    utils.warn('Error getting local files');
-    utils.warn(err);
+    utils.warn(`Couldn't collect available dataset files (path searched: ${localDataPath})`);
+    utils.verbose(err);
   }
   return datasets;
 };
@@ -35,8 +35,8 @@ const getAvailableNarratives = async (localNarrativesPath) => {
       .map((filepath) => `narratives/${filepath}`)
       .map((filepath) => ({request: filepath}));
   } catch (err) {
-    utils.warn('Error getting local narratives');
-    utils.warn(err);
+    utils.warn(`Couldn't collect available narratives (path searched: ${localNarrativesPath})`);
+    utils.verbose(err);
   }
   return narratives;
 };
