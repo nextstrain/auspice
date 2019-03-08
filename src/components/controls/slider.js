@@ -4,6 +4,12 @@ import createReactClass from "create-react-class";
 import _assign from "lodash/assign";
 import _isArray from "lodash/isArray";
 
+// sizing parameters
+const upperBound = 208;
+const sliderLength = 220;
+const handleSize = 12;
+const sliderStart = 20;
+
 /**
  * To prevent text selection while dragging.
  * http://stackoverflow.com/questions/5429827/how-can-i-prevent-text-element-selection-with-cursor-drag
@@ -203,11 +209,29 @@ const Slider = createReactClass({
 
     return {
       index: -1,
-      upperBound: 0,
-      sliderLength: 0,
+      upperBound: upperBound,
+      sliderLength: sliderLength,
+      handleSize: handleSize,
+      sliderStart: sliderStart,
       value: value,
       zIndices: zIndices
     };
+  },
+
+  componentDidMount: function() {
+    var value = this._or(ensureArray(newProps.value), this.state.value);
+
+    // ensure the array keeps the same size as `value`
+    this.tempArray = value.slice();
+
+    let trimmedValue = []
+
+
+    for (var i = 0; i < value.length; i++) {
+      trimmedValue[i] = this._trimAlignValue(value[i], newProps);
+    }
+
+    this.setState({value: trimmedValue});
   },
 
   // Keep the internal `value` consistent with an outside `value` if present.
@@ -218,17 +242,15 @@ const Slider = createReactClass({
     // ensure the array keeps the same size as `value`
     this.tempArray = value.slice();
 
-    for (var i = 0; i < value.length; i++) {
-      this.state.value[i] = this._trimAlignValue(value[i], newProps);
-    }
-    if (this.state.value.length > value.length)
-      this.state.value.length = value.length;
+    let trimmedValue = []
 
-    // If an upperBound has not yet been determined (due to the component being hidden
-    // during the mount event, or during the last resize), then calculate it now
-    if (this.state.upperBound === 0) {
-      this._handleResize();
+
+    for (var i = 0; i < value.length; i++) {
+      trimmedValue[i] = this._trimAlignValue(value[i], newProps);
     }
+
+    this.setState({value: trimmedValue});
+
   },
 
   // Check if the arity of `value` or `defaultValue` matches the number of children (= number of custom handles).
@@ -254,38 +276,13 @@ const Slider = createReactClass({
   },
 
   componentDidMount: function () {
-    window.addEventListener('resize', this._handleResize);
-    this._handleResize();
   },
 
   componentWillUnmount: function () {
-    clearTimeout(this.resizeTimeout);
-    window.removeEventListener('resize', this._handleResize);
   },
 
   getValue: function () {
     return undoEnsureArray(this.state.value);
-  },
-
-  _handleResize: function () {
-    // setTimeout of 0 gives element enough time to have assumed its new size if it is being resized
-    this.resizeTimeout = window.setTimeout(function() {
-      var slider = this.refs.slider;
-      var handle = this.refs.handle0;
-      var rect = slider.getBoundingClientRect();
-
-      var size = this._sizeKey();
-
-      var sliderMax = rect[this._posMaxKey()];
-      var sliderMin = rect[this._posMinKey()];
-
-      this.setState({
-        upperBound: slider[size] - handle[size],
-        sliderLength: Math.abs(sliderMax - sliderMin),
-        handleSize: handle[size],
-        sliderStart: this.props.invert ? sliderMax : sliderMin
-      });
-    }.bind(this), 0);
   },
 
   // calculates the offset of a handle in pixels based on its value.
@@ -628,21 +625,11 @@ const Slider = createReactClass({
     return parseFloat(alignValue.toFixed(5));
   },
 
-  _renderHandle: function (style, child, i) {
+  _renderHandle: function (style, i) {
     var className = this.props.handleClassName + ' ' +
       (this.props.handleClassName + '-' + i) + ' ' +
       (this.state.index === i ? this.props.handleActiveClassName : '');
 
-      // React.createElement('div', {
-      //     ref: 'handle' + i,
-      //     key: 'handle' + i,
-      //     className: className,
-      //     style: style,
-      //     onMouseDown: this._createOnMouseDown(i),
-      //     onTouchStart: this._createOnTouchStart(i)
-      //   },
-      //   child
-      // )
     return (
       <div
         ref={'handle' + i}
@@ -651,13 +638,12 @@ const Slider = createReactClass({
         style={{ ...styles.handle, ...style }}
         onMouseDown={this._createOnMouseDown(i)}
         onTouchStart={this._createOnTouchStart(i)}
-      >
-        {child}
-      </div>
+      />
     );
   },
 
   _renderHandles: function (offset) {
+
     var length = offset.length;
 
     var styles = this.tempArray;
@@ -666,16 +652,10 @@ const Slider = createReactClass({
     }
 
     var res = this.tempArray;
-    var renderHandle = this._renderHandle;
-    if (React.Children.count(this.props.children) > 0) {
-      React.Children.forEach(this.props.children, function (child, i) {
-        res[i] = renderHandle(styles[i], child, i);
-      });
-    } else {
-      for (i = 0; i < length; i++) {
-        res[i] = renderHandle(styles[i], null, i);
-      }
+    for (i = 0; i < length; i++) {
+      res[i] = this._renderHandle(styles[i], i);
     }
+
     return res;
   },
 
@@ -717,6 +697,7 @@ const Slider = createReactClass({
   },
 
   _renderBars: function (offset) {
+
     var bars = [];
     var lastIndex = offset.length - 1;
 
