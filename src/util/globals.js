@@ -51,6 +51,7 @@ export const legendSpacing = 4;
 export const nonTipNodeRadius = 0;
 export const tipRadius = 4;
 export const tipRadiusOnLegendMatch = 7;
+export const transmissionThickness = 1;
 export const defaultDistanceMeasures = ["num_date", "div"];
 export const fastTransitionDuration = 350; // in milliseconds
 export const mediumTransitionDuration = 700; // in milliseconds
