@@ -5,7 +5,7 @@ import leaflet from "leaflet";
 import _min from "lodash/min";
 import _max from "lodash/max";
 import { select } from "d3-selection";
-import 'd3-transition'
+import 'd3-transition';
 import leafletImage from "leaflet-image";
 import Card from "../framework/card";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
@@ -339,7 +339,7 @@ class Map extends React.Component {
       colorOrVisibilityChange &&
       haveData
     ) {
-      timerStart("updateDemesAndTransmissions")
+      timerStart("updateDemesAndTransmissions");
       const { newDemes, newTransmissions } = updateDemeAndTransmissionDataColAndVis(
         this.state.demeData,
         this.state.transmissionData,
@@ -367,7 +367,7 @@ class Map extends React.Component {
         demeData: newDemes,
         transmissionData: newTransmissions
       });
-      timerEnd("updateDemesAndTransmissions")
+      timerEnd("updateDemesAndTransmissions");
     }
   }
 
@@ -457,14 +457,17 @@ class Map extends React.Component {
           >
             {this.props.animationPlayPauseButton}
           </button>
-          <button style={{...buttonBaseStyle, top: 20, left: 88, width: 60, backgroundColor: lightGrey}} onClick={this.resetButtonClicked}>
+          <button
+            style={{...buttonBaseStyle, top: 20, left: 88, width: 60, backgroundColor: lightGrey}}
+            onClick={this.resetButtonClicked}
+          >
             Reset
           </button>
         </div>
       );
     }
     /* else - divOnly */
-    return (<div></div>);
+    return (<div/>);
   }
 
   maybeCreateMapDiv() {
