@@ -319,10 +319,11 @@ class Map extends React.Component {
     const minLng = _min(longitudes);
     const lngRange = (maxLng - minLng) % 360;
     const latRange = (maxLat - minLat);
-    const south = _max([-80, minLat - (0.2 * latRange)]);
-    const north = _min([80, maxLat + (0.2 * latRange)]);
-    const east = _max([-180, minLng - (0.2 * lngRange)]);
-    const west = _min([180, maxLng + (0.2 * lngRange)]);
+    const south = _max([-55, minLat - (0.1 * latRange)]);
+    const north = _min([70, maxLat + (0.1 * latRange)]);
+    const east = _max([-180, minLng - (0.1 * lngRange)]);
+    const west = _min([180, maxLng + (0.1 * lngRange)]);
+
     return [L.latLng(south, west), L.latLng(north, east)];
   }
   /**
@@ -404,6 +405,7 @@ class Map extends React.Component {
       maxBounds: this.getBounds(),
       minZoom: 2,
       maxZoom: 10,
+      zoomSnap: 0.5,
       zoomControl: false,
       /* leaflet sleep see https://cliffcloud.github.io/Leaflet.Sleep/#summary */
       // true by default, false if you want a wild map
