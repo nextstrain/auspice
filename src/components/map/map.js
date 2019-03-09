@@ -209,10 +209,15 @@ class Map extends React.Component {
         this.props.metadata,
         this.state.map
       );
-      if (demesMissingLatLongs.size) {
+
+      const filteredDemesMissingLatLongs = [...demesMissingLatLongs].filter((value) => {
+        return value !== "Unknown" || value !== "unknown";
+      });
+
+      if (filteredDemesMissingLatLongs.size) {
         this.props.dispatch(errorNotification({
           message: "The following demes are missing lat/long information",
-          details: [...demesMissingLatLongs].join(", ")
+          details: [...filteredDemesMissingLatLongs].join(", ")
         }));
       }
 
