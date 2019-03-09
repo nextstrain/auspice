@@ -1,7 +1,9 @@
 import _findIndex from "lodash/findIndex";
 import _findLastIndex from "lodash/findLastIndex";
+import _max from "lodash/max";
 import { line, curveBasis } from "d3-shape";
 import { easeLinear } from "d3-ease";
+import { demeCountMultiplier, demeCountMinimum } from "../../util/globals";
 
 /* util */
 
@@ -151,13 +153,14 @@ export const drawDemesAndTransmissions = (
     .attr("stroke-width", 1);
 
   // add demes
+  const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
   const demes = g.selectAll("demes")
     .data(demeData)
     .enter().append("circle")
     .style("stroke", "none")
     .style("fill-opacity", 0.65)
     .style("fill", (d) => { return d.color; })
-    .attr("r", (d) => { return 4 * Math.sqrt(d.count); })
+    .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); })
     .attr("transform", (d) => {
       return "translate(" + d.coords.x + "," + d.coords.y + ")";
     });
@@ -209,13 +212,14 @@ export const updateVisibility = (
   numDateMax
 ) => {
 
+  const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
   d3elems.demes
     .data(demeData)
     .transition()
     .duration(200)
     .ease(easeLinear)
     .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
-    .attr("r", (d) => { return 4 * Math.sqrt(d.count); });
+    .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); });
 
   d3elems.transmissions
     .data(transmissionData)
