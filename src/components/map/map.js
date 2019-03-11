@@ -189,10 +189,8 @@ class Map extends React.Component {
       if (!this.state.boundsSet) { // we are doing the initial render -> set map to the range of the data
         const SWNE = this.getGeoRange();
         // L. available because leaflet() was called in componentWillMount
-        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1])); // eslint-disable-line no-undef
+        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
       }
-
-      this.state.map.setMaxBounds(this.getBounds());
 
       const {
         demeData,
@@ -267,10 +265,6 @@ class Map extends React.Component {
     const mapIsDrawn = !!this.state.map;
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
     const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
-
-    // (this.props.colorBy !== nextProps.colorBy ||
-    //   this.props.visibilityVersion !== nextProps.visibilityVersion ||
-    //   this.props.colorScale.version !== nextProps.colorScale.version);
 
     if (mapIsDrawn && (geoResolutionChanged || dataChanged)) {
       this.state.d3DOMNode.selectAll("*").remove();
@@ -377,7 +371,7 @@ class Map extends React.Component {
     }
   }
 
-  getBounds() {
+  getInitialBounds() {
     let southWest;
     let northEast;
 
@@ -394,6 +388,7 @@ class Map extends React.Component {
 
     return bounds;
   }
+
   createMap() {
 
     const zoom = 2;
@@ -407,7 +402,7 @@ class Map extends React.Component {
       center: center,
       zoom: zoom,
       scrollWheelZoom: false,
-      maxBounds: this.getBounds(),
+      maxBounds: this.getInitialBounds(),
       minZoom: 2,
       maxZoom: 10,
       zoomSnap: 0.5,
