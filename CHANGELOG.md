@@ -1,3 +1,5 @@
+## version 1.36.3 - 2019/03/11
+
 * Various map improvements, including transmission ribbons, improved initial map
   bounds and improved deme circle sizing.
   [See PR 712](https://github.com/nextstrain/auspice/pull/712)
