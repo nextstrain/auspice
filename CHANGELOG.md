@@ -1,3 +1,8 @@
+* Various map improvements, including transmission ribbons, improved initial map
+  bounds and improved deme circle sizing.
+  [See PR 712](https://github.com/nextstrain/auspice/pull/712)
+* Check mutation type against tree. (See PR 709)[https://github.com/nextstrain/auspice/pull/709]
+
 ## version 1.36.2 - 2019/03/04
 
 * Update footer information. Don't display "live" footers for "community" URLs.
