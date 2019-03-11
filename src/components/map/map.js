@@ -5,7 +5,7 @@ import leaflet from "leaflet";
 import _min from "lodash/min";
 import _max from "lodash/max";
 import { select } from "d3-selection";
-import 'd3-transition'
+import 'd3-transition';
 import leafletImage from "leaflet-image";
 import Card from "../framework/card";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
@@ -189,10 +189,8 @@ class Map extends React.Component {
       if (!this.state.boundsSet) { // we are doing the initial render -> set map to the range of the data
         const SWNE = this.getGeoRange();
         // L. available because leaflet() was called in componentWillMount
-        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1])); // eslint-disable-line no-undef
+        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
       }
-
-      this.state.map.setMaxBounds(this.getBounds());
 
       const {
         demeData,
@@ -209,10 +207,15 @@ class Map extends React.Component {
         this.props.metadata,
         this.state.map
       );
-      if (demesMissingLatLongs.size) {
+
+      const filteredDemesMissingLatLongs = [...demesMissingLatLongs].filter((value) => {
+        return value !== "Unknown" || value !== "unknown";
+      });
+
+      if (filteredDemesMissingLatLongs.size) {
         this.props.dispatch(errorNotification({
           message: "The following demes are missing lat/long information",
-          details: [...demesMissingLatLongs].join(", ")
+          details: [...filteredDemesMissingLatLongs].join(", ")
         }));
       }
 
@@ -262,10 +265,6 @@ class Map extends React.Component {
     const mapIsDrawn = !!this.state.map;
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
     const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
-
-    // (this.props.colorBy !== nextProps.colorBy ||
-    //   this.props.visibilityVersion !== nextProps.visibilityVersion ||
-    //   this.props.colorScale.version !== nextProps.colorScale.version);
 
     if (mapIsDrawn && (geoResolutionChanged || dataChanged)) {
       this.state.d3DOMNode.selectAll("*").remove();
@@ -319,10 +318,11 @@ class Map extends React.Component {
     const minLng = _min(longitudes);
     const lngRange = (maxLng - minLng) % 360;
     const latRange = (maxLat - minLat);
-    const south = _max([-80, minLat - (0.2 * latRange)]);
-    const north = _min([80, maxLat + (0.2 * latRange)]);
-    const east = _max([-180, minLng - (0.2 * lngRange)]);
-    const west = _min([180, maxLng + (0.2 * lngRange)]);
+    const south = _max([-55, minLat - (0.1 * latRange)]);
+    const north = _min([70, maxLat + (0.1 * latRange)]);
+    const east = _max([-180, minLng - (0.1 * lngRange)]);
+    const west = _min([180, maxLng + (0.1 * lngRange)]);
+
     return [L.latLng(south, west), L.latLng(north, east)];
   }
   /**
@@ -339,7 +339,7 @@ class Map extends React.Component {
       colorOrVisibilityChange &&
       haveData
     ) {
-      timerStart("updateDemesAndTransmissions")
+      timerStart("updateDemesAndTransmissions");
       const { newDemes, newTransmissions } = updateDemeAndTransmissionDataColAndVis(
         this.state.demeData,
         this.state.transmissionData,
@@ -367,11 +367,11 @@ class Map extends React.Component {
         demeData: newDemes,
         transmissionData: newTransmissions
       });
-      timerEnd("updateDemesAndTransmissions")
+      timerEnd("updateDemesAndTransmissions");
     }
   }
 
-  getBounds() {
+  getInitialBounds() {
     let southWest;
     let northEast;
 
@@ -388,6 +388,7 @@ class Map extends React.Component {
 
     return bounds;
   }
+
   createMap() {
 
     const zoom = 2;
@@ -401,9 +402,10 @@ class Map extends React.Component {
       center: center,
       zoom: zoom,
       scrollWheelZoom: false,
-      maxBounds: this.getBounds(),
+      maxBounds: this.getInitialBounds(),
       minZoom: 2,
       maxZoom: 10,
+      zoomSnap: 0.5,
       zoomControl: false,
       /* leaflet sleep see https://cliffcloud.github.io/Leaflet.Sleep/#summary */
       // true by default, false if you want a wild map
@@ -457,14 +459,17 @@ class Map extends React.Component {
           >
             {this.props.animationPlayPauseButton}
           </button>
-          <button style={{...buttonBaseStyle, top: 20, left: 88, width: 60, backgroundColor: lightGrey}} onClick={this.resetButtonClicked}>
+          <button
+            style={{...buttonBaseStyle, top: 20, left: 88, width: 60, backgroundColor: lightGrey}}
+            onClick={this.resetButtonClicked}
+          >
             Reset
           </button>
         </div>
       );
     }
     /* else - divOnly */
-    return (<div></div>);
+    return (<div/>);
   }
 
   maybeCreateMapDiv() {

@@ -1,7 +1,9 @@
 import _findIndex from "lodash/findIndex";
 import _findLastIndex from "lodash/findLastIndex";
+import _max from "lodash/max";
 import { line, curveBasis } from "d3-shape";
 import { easeLinear } from "d3-ease";
+import { demeCountMultiplier, demeCountMinimum } from "../../util/globals";
 
 /* util */
 
@@ -151,13 +153,16 @@ export const drawDemesAndTransmissions = (
     .attr("stroke-width", 1);
 
   // add demes
+  const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
   const demes = g.selectAll("demes")
     .data(demeData)
     .enter().append("circle")
     .style("stroke", "none")
     .style("fill-opacity", 0.65)
     .style("fill", (d) => { return d.color; })
-    .attr("r", (d) => { return 4 * Math.sqrt(d.count); })
+    .style("stroke-opacity", 0.85)
+    .style("stroke", (d) => { return d.color; })
+    .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); })
     .attr("transform", (d) => {
       return "translate(" + d.coords.x + "," + d.coords.y + ")";
     });
@@ -209,13 +214,14 @@ export const updateVisibility = (
   numDateMax
 ) => {
 
+  const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
   d3elems.demes
     .data(demeData)
     .transition()
     .duration(200)
     .ease(easeLinear)
     .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
-    .attr("r", (d) => { return 4 * Math.sqrt(d.count); });
+    .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); });
 
   d3elems.transmissions
     .data(transmissionData)
@@ -246,39 +252,6 @@ export const updateFoo = (d3elems, latLongs) => {
     .data(latLongs.transmissions);
 };
 
-// const missiles = transmissionPaths.map((transmissionPath) => {
-//
-//   // console.log(transmissionPath)
-//
-//   const missile = g.append("circle")
-//     .attr("r", 0)
-//     .attr("fill", (d) => { return colorScale(transmissionPath.transmission.to) })
-//     .attr("transform", `translate(
-//       ${transmissionPath.partialTransmission[0].x},
-//       ${transmissionPath.partialTransmission[0].y}
-//     )`) /* begin the missile on the start of the line */
-//     // .transition()
-//     // .duration(5000)
-//     // .attrTween("transform", translateAlong(transmissionPath.elem.node()));
-//
-//   return missile;
-// })
-
-// const setTipCoords = () => {
-//   demes.attr("transform", (d) => {
-//     return "translate(" + d.coords.x + "," + d.coords.y + ")";
-//   });
-// };
-
-// const animateTransmissions = () => {
-//   /* point along path interpolation https://bl.ocks.org/mbostock/1705868 */
-//
-// }
-
-// setTipCoords();
-// map.on("viewreset", setTipCoords); /* search: -Note (A) for an idea as to why this might not be working properly */
-// animateTransmissions();
-
 /*
   http://gis.stackexchange.com/questions/49114/d3-geo-path-to-draw-a-path-from-gis-coordinates
   https://bl.ocks.org/mbostock/3916621  // Compute point-interpolators at each distance.
@@ -291,6 +264,3 @@ export const updateFoo = (d3elems, latLongs) => {
   https://github.com/d3/d3-shape/blob/master/README.md#curves
   https://github.com/d3/d3-shape/blob/master/README.md#lines
 */
-
-// since we're now using d3 we'll probably do something like http://stackoverflow.com/questions/11808860/arrow-triangles-on-my-svg-line/11809868#11809868
-// decorator docs: https://github.com/bbecquet/Leaflet.PolylineDecorator

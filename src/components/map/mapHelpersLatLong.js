@@ -3,7 +3,7 @@ import _map from "lodash/map";
 import _minBy from "lodash/minBy";
 import { interpolateNumber } from "d3-interpolate";
 import { averageColors } from "../../util/colorHelpers";
-import { computeMidpoint, Bezier } from "./transmissionBezier";
+import { bezier } from "./transmissionBezier";
 import { NODE_NOT_VISIBLE } from "../../util/globals";
 
 
@@ -119,17 +119,10 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 
 const constructBcurve = (
   originLatLongPair,
-  destinationLatLongPair
+  destinationLatLongPair,
+  extend
 ) => {
-  const midpoint = computeMidpoint(originLatLongPair, destinationLatLongPair);
-  const Bcurve = Bezier(
-    [
-      originLatLongPair,
-      midpoint,
-      destinationLatLongPair
-    ]
-  );
-  return Bcurve;
+  return bezier(originLatLongPair, destinationLatLongPair, extend);
 };
 
 const maybeConstructTransmissionEvent = (
@@ -142,7 +135,8 @@ const maybeConstructTransmissionEvent = (
   map,
   offsetOrig,
   offsetDest,
-  demesMissingLatLongs
+  demesMissingLatLongs,
+  extend
 ) => {
   let latOrig, longOrig, latDest, longDest;
   let transmission;
@@ -174,7 +168,7 @@ const maybeConstructTransmissionEvent = (
 
   if (validLatLongPair) {
 
-    const Bcurve = constructBcurve(validLatLongPair[0], validLatLongPair[1]);
+    const Bcurve = constructBcurve(validLatLongPair[0], validLatLongPair[1], extend);
 
     /* set up interpolator with origin and destination numdates */
     const interpolator = interpolateNumber(node.attr.num_date, child.attr.num_date);
@@ -206,7 +200,8 @@ const maybeConstructTransmissionEvent = (
       originNumDate: node.attr["num_date"],
       destinationNumDate: child.attr["num_date"],
       color: nodeColors[node.arrayIdx],
-      visible: visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden" // transmission visible if child is visible
+      visible: visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden", // transmission visible if child is visible
+      extend: extend
     };
   }
   return transmission;
@@ -221,7 +216,8 @@ const maybeGetClosestTransmissionEvent = (
   visibility,
   map,
   offsetOrig,
-  demesMissingLatLongs
+  demesMissingLatLongs,
+  extend
 ) => {
   const possibleEvents = [];
   // iterate over offsets applied to transmission destination
@@ -237,7 +233,8 @@ const maybeGetClosestTransmissionEvent = (
       map,
       offsetOrig,
       offsetDest,
-      demesMissingLatLongs
+      demesMissingLatLongs,
+      extend
     );
     if (t) { possibleEvents.push(t); }
   });
@@ -270,14 +267,20 @@ const setupTransmissionData = (
   const transmissionData = []; /* edges, animation paths */
   const transmissionIndices = {}; /* map of transmission id to array of indices */
   const demesMissingLatLongs = new Set();
+  const demeToDemeCounts = {};
   nodes.forEach((n) => {
+    const nodeDeme = n.attr[geoResolution];
     if (n.children) {
       n.children.forEach((child) => {
-        if (
-          n.attr[geoResolution] &&
-          child.attr[geoResolution] &&
-          n.attr[geoResolution] !== child.attr[geoResolution]
-        ) {
+        const childDeme = child.attr[geoResolution];
+        if (nodeDeme && childDeme && nodeDeme !== childDeme) {
+          // record transmission event
+          if ([nodeDeme, childDeme] in demeToDemeCounts) {
+            demeToDemeCounts[[nodeDeme, childDeme]] += 1;
+          } else {
+            demeToDemeCounts[[nodeDeme, childDeme]] = 1;
+          }
+          const extend = demeToDemeCounts[[nodeDeme, childDeme]];
           // offset is applied to transmission origin
           offsets.forEach((offsetOrig) => {
             const t = maybeGetClosestTransmissionEvent(
@@ -289,7 +292,8 @@ const setupTransmissionData = (
               visibility,
               map,
               offsetOrig,
-              demesMissingLatLongs
+              demesMissingLatLongs,
+              extend
             );
             if (t) { transmissionData.push(t); }
           });
@@ -473,7 +477,7 @@ const updateTransmissionDataLatLong = (transmissionData, map) => {
     transmission.bezierCurve = constructBcurve(
       transmission.originCoords,
       transmission.destinationCoords,
-      transmission.destinationNumDate
+      transmission.extend
     );
   });
 
