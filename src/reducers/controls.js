@@ -4,7 +4,7 @@ import { defaultGeoResolution,
   defaultDateRange,
   defaultDistanceMeasure,
   defaultLayout,
-  mutType,
+  defaultMutType,
   twoColumnBreakpoint } from "../util/globals";
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
@@ -36,7 +36,7 @@ export const getDefaultControlsState = () => {
     search: null,
     strain: null,
     geneLength: {},
-    mutType: mutType,
+    mutType: defaultMutType,
     temporalConfidence: {exists: false, display: false, on: false},
     layout: defaults.layout,
     distanceMeasure: defaults.distanceMeasure,
