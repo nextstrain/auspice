@@ -160,6 +160,8 @@ export const drawDemesAndTransmissions = (
     .style("stroke", "none")
     .style("fill-opacity", 0.65)
     .style("fill", (d) => { return d.color; })
+    .style("stroke-opacity", 0.85)
+    .style("stroke", (d) => { return d.color; })
     .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); })
     .attr("transform", (d) => {
       return "translate(" + d.coords.x + "," + d.coords.y + ")";
