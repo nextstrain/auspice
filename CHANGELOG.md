@@ -1,3 +1,5 @@
+* Fix map deme border coloring.
+
 ## version 1.36.3 - 2019/03/11
 
 * Various map improvements, including transmission ribbons, improved initial map
