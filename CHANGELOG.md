@@ -1,3 +1,5 @@
+## version 1.36.4 - 2019/03/16
+
 * Fix map deme border coloring.
 
 ## version 1.36.3 - 2019/03/11
