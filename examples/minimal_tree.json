@@ -1,0 +1,666 @@
+{
+  "attr": {
+    "clock_length": 0.001,
+    "country": "french_polynesia",
+    "div": 0,
+    "num_date": 2011.8869660756184,
+    "region": "oceania"
+  },
+  "children": [
+    {
+      "attr": {
+        "clock_length": 0.0030033462298394075,
+        "country": "singapore",
+        "div": 0.002610631813509472,
+        "num_date": 2015.0405796040964,
+        "region": "southeast_asia"
+      },
+      "children": [
+        {
+          "attr": {
+            "clock_length": 0.001708959991836725,
+            "country": "thailand",
+            "div": 0.005221788347560718,
+            "num_date": 2016.8350444900752,
+            "region": "southeast_asia"
+          },
+          "clade": 0,
+          "strain": "Thailand/1610acTw"
+        },
+        {
+          "attr": {
+            "clock_length": 0.0009481910848896627,
+            "country": "singapore",
+            "div": 0.003448533636867537,
+            "num_date": 2016.0362118103271,
+            "region": "southeast_asia"
+          },
+          "children": [
+            {
+              "attr": {
+                "clock_length": 0.0006356139820563357,
+                "country": "singapore",
+                "div": 0.004007041645876951,
+                "num_date": 2016.7036276522929,
+                "region": "southeast_asia"
+              },
+              "clade": 1,
+              "strain": "SG_018"
+            },
+            {
+              "attr": {
+                "clock_length": 0.00039170240095434423,
+                "country": "singapore",
+                "div": 0.003634646533668043,
+                "num_date": 2016.4475123718523,
+                "region": "southeast_asia"
+              },
+              "children": [
+                {
+                  "attr": {
+                    "clock_length": 0.00020219327280515459,
+                    "country": "singapore",
+                    "div": 0.003913834391451402,
+                    "num_date": 2016.6598220396988,
+                    "region": "southeast_asia"
+                  },
+                  "clade": 2,
+                  "strain": "SG_056"
+                },
+                {
+                  "attr": {
+                    "clock_length": 0.00019958587853665657,
+                    "country": "singapore",
+                    "div": 0.003913869000756373,
+                    "num_date": 2016.6570841889118,
+                    "region": "southeast_asia"
+                  },
+                  "clade": 3,
+                  "strain": "SG_027"
+                },
+                {
+                  "attr": {
+                    "clock_length": 0.00020219327280515459,
+                    "country": "singapore",
+                    "div": 0.0036346465336680464,
+                    "num_date": 2016.6598220396988,
+                    "region": "southeast_asia"
+                  },
+                  "clade": 4,
+                  "strain": "SG_074"
+                }
+              ],
+              "clade": 5,
+              "strain": "NODE_0000013"
+            }
+          ],
+          "clade": 6,
+          "strain": "NODE_0000012"
+        }
+      ],
+      "clade": 7,
+      "strain": "NODE_0000011"
+    },
+    {
+      "attr": {
+        "clock_length": 0.0015738603966407826,
+        "country": "french_polynesia",
+        "div": 0.002050093310189498,
+        "num_date": 2013.5395718889172,
+        "region": "oceania"
+      },
+      "children": [
+        {
+          "attr": {
+            "clock_length": 0.0024605233152106705,
+            "country": "american_samoa",
+            "div": 0.004473557097501246,
+            "num_date": 2016.123203285421,
+            "region": "oceania"
+          },
+          "children": [
+            {
+              "attr": {
+                "clock_length": 5.214788537212869e-06,
+                "country": "american_samoa",
+                "div": 0.00447355709750125,
+                "num_date": 2016.1286789869953,
+                "region": "oceania"
+              },
+              "clade": 8,
+              "strain": "ZKC2/2016"
+            },
+            {
+              "attr": {
+                "clock_length": 0.0,
+                "country": "american_samoa",
+                "div": 0.00447355709750125,
+                "num_date": 2016.123203285421,
+                "region": "oceania"
+              },
+              "clade": 9,
+              "strain": "SMGC_1"
+            }
+          ],
+          "clade": 10,
+          "strain": "NODE_0000010"
+        },
+        {
+          "attr": {
+            "clock_length": 0.00021370283873493184,
+            "country": "french_polynesia",
+            "div": 0.002143126864739116,
+            "num_date": 2013.7639669841656,
+            "region": "oceania"
+          },
+          "children": [
+            {
+              "attr": {
+                "clock_length": 0.00022413437264292603,
+                "country": "french_polynesia",
+                "div": 0.0024222643102972813,
+                "num_date": 2013.9993155373031,
+                "region": "oceania"
+              },
+              "clade": 11,
+              "strain": "1_0087_PF"
+            },
+            {
+              "attr": {
+                "clock_length": 5.5279015900037455e-05,
+                "country": "french_polynesia",
+                "div": 0.0022361597853983468,
+                "num_date": 2013.822011791205,
+                "region": "oceania"
+              },
+              "children": [
+                {
+                  "attr": {
+                    "clock_length": 0.00016885535674288858,
+                    "country": "french_polynesia",
+                    "div": 0.00251529569631154,
+                    "num_date": 2013.9993155373031,
+                    "region": "oceania"
+                  },
+                  "clade": 12,
+                  "strain": "1_0181_PF"
+                },
+                {
+                  "attr": {
+                    "clock_length": 8.802613441771367e-05,
+                    "country": "french_polynesia",
+                    "div": 0.002422237665143729,
+                    "num_date": 2013.914442162902,
+                    "region": "oceania"
+                  },
+                  "clade": 13,
+                  "strain": "1_0199_PF"
+                },
+                {
+                  "attr": {
+                    "clock_length": 0.0007322757967590191,
+                    "country": "brazil",
+                    "div": 0.002887664510105692,
+                    "num_date": 2014.5909257566652,
+                    "region": "south_america"
+                  },
+                  "children": [
+                    {
+                      "attr": {
+                        "clock_length": 0.00012615099514595197,
+                        "country": "brazil",
+                        "div": 0.002980698362239428,
+                        "num_date": 2014.7233885013768,
+                        "region": "south_america"
+                      },
+                      "children": [
+                        {
+                          "attr": {
+                            "clock_length": 0.001215130078018482,
+                            "country": "puerto_rico",
+                            "div": 0.0050307734451243095,
+                            "num_date": 2015.9993155373031,
+                            "region": "north_america"
+                          },
+                          "clade": 14,
+                          "strain": "PRVABC59"
+                        },
+                        {
+                          "attr": {
+                            "clock_length": 6.467651095510771e-05,
+                            "country": "brazil",
+                            "div": 0.0030737322471371597,
+                            "num_date": 2014.7913009910844,
+                            "region": "south_america"
+                          },
+                          "children": [
+                            {
+                              "attr": {
+                                "clock_length": 0.0012006459067331545,
+                                "country": "brazil",
+                                "div": 0.004470636859357974,
+                                "num_date": 2016.0520191649555,
+                                "region": "south_america"
+                              },
+                              "clade": 15,
+                              "strain": "Brazil/2016/ZBRC16"
+                            },
+                            {
+                              "attr": {
+                                "clock_length": 0.0006294124250125154,
+                                "country": "guatemala",
+                                "div": 0.00381846683206151,
+                                "num_date": 2015.4522049916925,
+                                "region": "north_america"
+                              },
+                              "children": [
+                                {
+                                  "attr": {
+                                    "clock_length": 0.00036459748593750457,
+                                    "country": "guatemala",
+                                    "div": 0.004656170467000101,
+                                    "num_date": 2015.8350444900752,
+                                    "region": "north_america"
+                                  },
+                                  "clade": 16,
+                                  "strain": "V8375"
+                                },
+                                {
+                                  "attr": {
+                                    "clock_length": 0.00011633744351611684,
+                                    "country": "honduras",
+                                    "div": 0.0038184668320615134,
+                                    "num_date": 2015.5743631804805,
+                                    "region": "north_america"
+                                  },
+                                  "children": [
+                                    {
+                                      "attr": {
+                                        "clock_length": 0.0007547463790885233,
+                                        "country": "honduras",
+                                        "div": 0.004190637164489735,
+                                        "num_date": 2016.3668720054757,
+                                        "region": "north_america"
+                                      },
+                                      "clade": 17,
+                                      "strain": "HND/2016/HU_ME59"
+                                    },
+                                    {
+                                      "attr": {
+                                        "clock_length": 0.0004548960382045222,
+                                        "country": "nicaragua",
+                                        "div": 0.0043768301798223115,
+                                        "num_date": 2016.0520191649555,
+                                        "region": "north_america"
+                                      },
+                                      "clade": 18,
+                                      "strain": "Nica1_16"
+                                    }
+                                  ],
+                                  "clade": 19,
+                                  "strain": "NODE_0000032"
+                                }
+                              ],
+                              "clade": 20,
+                              "strain": "NODE_0000018"
+                            }
+                          ],
+                          "clade": 21,
+                          "strain": "NODE_0000017"
+                        }
+                      ],
+                      "clade": 22,
+                      "strain": "NODE_0000016"
+                    },
+                    {
+                      "attr": {
+                        "clock_length": 0.00015656905283912333,
+                        "country": "brazil",
+                        "div": 0.003073744467144721,
+                        "num_date": 2014.75532847463,
+                        "region": "south_america"
+                      },
+                      "children": [
+                        {
+                          "attr": {
+                            "clock_length": 0.0005797965500203119,
+                            "country": "brazil",
+                            "div": 0.0038183967369625135,
+                            "num_date": 2015.3641341546886,
+                            "region": "south_america"
+                          },
+                          "clade": 23,
+                          "strain": "Brazil/2015/ZBRC301"
+                        },
+                        {
+                          "attr": {
+                            "clock_length": 0.00036412102633480957,
+                            "country": "brazil",
+                            "div": 0.003166777529447065,
+                            "num_date": 2015.1376676745676,
+                            "region": "south_america"
+                          },
+                          "children": [
+                            {
+                              "attr": {
+                                "clock_length": 0.00021828291795400034,
+                                "country": "brazil",
+                                "div": 0.0032598099173850505,
+                                "num_date": 2015.3668720054757,
+                                "region": "south_america"
+                              },
+                              "clade": 24,
+                              "strain": "Brazil/2015/ZBRC303"
+                            },
+                            {
+                              "attr": {
+                                "clock_length": 0.001079374875144898,
+                                "country": "brazil",
+                                "div": 0.004190866235595548,
+                                "num_date": 2016.2710472279261,
+                                "region": "south_america"
+                              },
+                              "clade": 25,
+                              "strain": "BRA/2016/FC_6706"
+                            }
+                          ],
+                          "clade": 26,
+                          "strain": "NODE_0000003"
+                        },
+                        {
+                          "attr": {
+                            "clock_length": 0.0005657180692761471,
+                            "country": "colombia",
+                            "div": 0.004097952642676596,
+                            "num_date": 2015.3493512812076,
+                            "region": "south_america"
+                          },
+                          "children": [
+                            {
+                              "attr": {
+                                "clock_length": 0.0006352901652278181,
+                                "country": "colombia",
+                                "div": 0.00447018357590089,
+                                "num_date": 2016.0164271047229,
+                                "region": "south_america"
+                              },
+                              "clade": 27,
+                              "strain": "Colombia/2016/ZC204Se"
+                            },
+                            {
+                              "attr": {
+                                "clock_length": 9.885658146343169e-05,
+                                "country": "panama",
+                                "div": 0.0042840271550496556,
+                                "num_date": 2015.453153982869,
+                                "region": "south_america"
+                              },
+                              "children": [
+                                {
+                                  "attr": {
+                                    "clock_length": 0.0004862412440946062,
+                                    "country": "panama",
+                                    "div": 0.005214981927371812,
+                                    "num_date": 2015.9637234770705,
+                                    "region": "north_america"
+                                  },
+                                  "clade": 28,
+                                  "strain": "PAN/CDC_259359_V1_V3/2015"
+                                },
+                                {
+                                  "attr": {
+                                    "clock_length": 0.0007424177309802884,
+                                    "country": "venezuela",
+                                    "div": 0.0054948000929859785,
+                                    "num_date": 2016.2327173169062,
+                                    "region": "south_america"
+                                  },
+                                  "clade": 29,
+                                  "strain": "VEN/UF_1/2016"
+                                }
+                              ],
+                              "clade": 30,
+                              "strain": "NODE_0000000"
+                            }
+                          ],
+                          "clade": 31,
+                          "strain": "NODE_0000001"
+                        }
+                      ],
+                      "clade": 32,
+                      "strain": "NODE_0000004"
+                    },
+                    {
+                      "attr": {
+                        "clock_length": 0.00012526424452569563,
+                        "country": "brazil",
+                        "div": 0.0030737447743539384,
+                        "num_date": 2014.7224573837038,
+                        "region": "south_america"
+                      },
+                      "children": [
+                        {
+                          "attr": {
+                            "clock_length": 0.001532163383701394,
+                            "country": "ecuador",
+                            "div": 0.004750802268963389,
+                            "num_date": 2016.331279945243,
+                            "region": "south_america"
+                          },
+                          "clade": 33,
+                          "strain": "EcEs062_16"
+                        },
+                        {
+                          "attr": {
+                            "clock_length": 0.00020392197662656535,
+                            "country": "brazil",
+                            "div": 0.003445956387037809,
+                            "num_date": 2014.9365822481147,
+                            "region": "south_america"
+                          },
+                          "children": [
+                            {
+                              "attr": {
+                                "clock_length": 0.00020119523449127225,
+                                "country": "brazil",
+                                "div": 0.0037250953248542423,
+                                "num_date": 2015.1478439425052,
+                                "region": "south_america"
+                              },
+                              "clade": 34,
+                              "strain": "Brazil/2015/ZBRA105"
+                            },
+                            {
+                              "attr": {
+                                "clock_length": 0.0006624130084803958,
+                                "country": "dominican_republic",
+                                "div": 0.004563321981828038,
+                                "num_date": 2015.6321379600167,
+                                "region": "north_america"
+                              },
+                              "children": [
+                                {
+                                  "attr": {
+                                    "clock_length": 0.0007805537464107338,
+                                    "country": "dominican_republic",
+                                    "div": 0.0055876083578752225,
+                                    "num_date": 2016.4517453798767,
+                                    "region": "north_america"
+                                  },
+                                  "clade": 35,
+                                  "strain": "DOM/2016/BB_0433"
+                                },
+                                {
+                                  "attr": {
+                                    "clock_length": 4.462414257609508e-05,
+                                    "country": "dominican_republic",
+                                    "div": 0.0046563618229369655,
+                                    "num_date": 2015.6789947953446,
+                                    "region": "north_america"
+                                  },
+                                  "children": [
+                                    {
+                                      "attr": {
+                                        "clock_length": 0.0005899155247954938,
+                                        "country": "dominican_republic",
+                                        "div": 0.0053079944972312856,
+                                        "num_date": 2016.2984257357973,
+                                        "region": "north_america"
+                                      },
+                                      "clade": 36,
+                                      "strain": "DOM/2016/BB_0183"
+                                    },
+                                    {
+                                      "attr": {
+                                        "clock_length": 0.0007176778439549353,
+                                        "country": "dominican_republic",
+                                        "div": 0.005307942375639782,
+                                        "num_date": 2016.432580424367,
+                                        "region": "north_america"
+                                      },
+                                      "clade": 37,
+                                      "strain": "DOM/2016/MA_WGS16_011"
+                                    },
+                                    {
+                                      "attr": {
+                                        "clock_length": 7.662254552699742e-05,
+                                        "country": "dominican_republic",
+                                        "div": 0.004749400868482979,
+                                        "num_date": 2015.7594510190593,
+                                        "region": "north_america"
+                                      },
+                                      "children": [
+                                        {
+                                          "attr": {
+                                            "clock_length": 0.0006544816140968894,
+                                            "country": "usa",
+                                            "div": 0.005773554692120901,
+                                            "num_date": 2016.4466785028071,
+                                            "region": "north_america"
+                                          },
+                                          "children": [
+                                            {
+                                              "attr": {
+                                                "clock_length": 0.00021080959142687032,
+                                                "country": "usa",
+                                                "div": 0.006145793056814776,
+                                                "num_date": 2016.6680355920603,
+                                                "region": "north_america"
+                                              },
+                                              "clade": 38,
+                                              "strain": "USA/2016/FLUR022"
+                                            },
+                                            {
+                                              "attr": {
+                                                "clock_length": 0.000234276139843787,
+                                                "country": "usa",
+                                                "div": 0.0060527157106952285,
+                                                "num_date": 2016.6926762491444,
+                                                "region": "north_america"
+                                              },
+                                              "clade": 39,
+                                              "strain": "Aedes_aegypti/USA/2016/FL05"
+                                            }
+                                          ],
+                                          "clade": 40,
+                                          "strain": "NODE_0000026"
+                                        },
+                                        {
+                                          "attr": {
+                                            "clock_length": 0.00019450504760073735,
+                                            "country": "dominican_republic",
+                                            "div": 0.00502857975359667,
+                                            "num_date": 2015.9636877944856,
+                                            "region": "north_america"
+                                          },
+                                          "children": [
+                                            {
+                                              "attr": {
+                                                "clock_length": 0.00028228441190813504,
+                                                "country": "dominican_republic",
+                                                "div": 0.005307750276566269,
+                                                "num_date": 2016.2600958247776,
+                                                "region": "north_america"
+                                              },
+                                              "clade": 41,
+                                              "strain": "DOM/2016/BB_0059"
+                                            },
+                                            {
+                                              "attr": {
+                                                "clock_length": 0.00025222765275865295,
+                                                "country": "usa",
+                                                "div": 0.00540083543540662,
+                                                "num_date": 2016.2285352270237,
+                                                "region": "north_america"
+                                              },
+                                              "children": [
+                                                {
+                                                  "attr": {
+                                                    "clock_length": 0.0003142627344220614,
+                                                    "country": "usa",
+                                                    "div": 0.006052424280998338,
+                                                    "num_date": 2016.558521560575,
+                                                    "region": "north_america"
+                                                  },
+                                                  "clade": 42,
+                                                  "strain": "USA/2016/FL022"
+                                                },
+                                                {
+                                                  "attr": {
+                                                    "clock_length": 0.0004863507561468374,
+                                                    "country": "usa",
+                                                    "div": 0.005586937649809486,
+                                                    "num_date": 2016.7392197125257,
+                                                    "region": "north_america"
+                                                  },
+                                                  "clade": 43,
+                                                  "strain": "USA/2016/FLWB042"
+                                                }
+                                              ],
+                                              "clade": 44,
+                                              "strain": "NODE_0000028"
+                                            }
+                                          ],
+                                          "clade": 45,
+                                          "strain": "NODE_0000027"
+                                        }
+                                      ],
+                                      "clade": 46,
+                                      "strain": "NODE_0000025"
+                                    }
+                                  ],
+                                  "clade": 47,
+                                  "strain": "NODE_0000023"
+                                }
+                              ],
+                              "clade": 48,
+                              "strain": "NODE_0000022"
+                            }
+                          ],
+                          "clade": 49,
+                          "strain": "NODE_0000021"
+                        }
+                      ],
+                      "clade": 50,
+                      "strain": "NODE_0000020"
+                    }
+                  ],
+                  "clade": 51,
+                  "strain": "NODE_0000005"
+                }
+              ],
+              "clade": 52,
+              "strain": "NODE_0000007"
+            }
+          ],
+          "clade": 53,
+          "strain": "NODE_0000008"
+        }
+      ],
+      "clade": 54,
+      "strain": "NODE_0000009"
+    }
+  ],
+  "clade": 55,
+  "strain": "NODE_0000031"
+}
