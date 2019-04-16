@@ -10,6 +10,62 @@ const sliderLength = 220;
 const handleSize = 12;
 const sliderStart = 20;
 
+const styles = {
+  base: {
+    position: 'relative',
+    borderRadius: 6
+  },
+  horizontalSlider: {
+    width: '100%',
+    height: 12
+  },
+  verticalSlider: {
+    maxHeight: 500,
+    width: 12,
+    border: '1px solid grey'
+  },
+  handle: {
+    fontSize: '0.9em',
+    textAlign: 'center',
+    backgroundColor: "#FAFAFA",
+    color: 'white',
+    border: '1px solid #555',
+    cursor: 'pointer',
+    height: 12,
+    width: 12,
+    borderRadius: 12,
+    top: -4
+  },
+  bar: {
+    position: 'relative',
+    backgroundColor: "rgb(200,200,200)",
+    borderRadius: 2
+  },
+  /*
+  there are a few style cases for the bars.
+
+  1. there is only 1 value.
+  - the bar to the left of the handle is colored
+  - the bar to the right of the handle is a color representing "unselected"
+
+  2. there are 2 values.
+  - the bars to the outsides of the handles are "unselected"
+  - the bar in the middle is colored
+  */
+
+  unselectedBar: {
+    backgroundColor: '#777',
+    height: 1,
+    top: 2
+  },
+  selectedBar: {
+    backgroundColor: '#CCC',
+    height: 6
+  }
+
+};
+
+
 /**
  * To prevent text selection while dragging.
  * http://stackoverflow.com/questions/5429827/how-can-i-prevent-text-element-selection-with-cursor-drag
@@ -31,9 +87,9 @@ function stopPropagation(e) {
  * Spreads `count` values equally between `min` and `max`.
  */
 function linspace(min, max, count) {
-  var range = (max - min) / (count - 1);
-  var res = [];
-  for (var i = 0; i < count; i++) {
+  const range = (max - min) / (count - 1);
+  const res = [];
+  for (let i = 0; i < count; i++) {
     res.push(min + range * i);
   }
   return res;
@@ -47,9 +103,10 @@ function undoEnsureArray(x) {
   return x != null && x.length === 1 ? x[0] : x;
 }
 
-// undoEnsureArray(ensureArray(x)) === x
-
-const Slider = createReactClass({
+// TB: I tried to convert this to a proper "class Slider extends React.Component"
+// but ran into difficulties with this bindings in functions like _getMousePosition
+// So, leaving as createReactClass for the time being.
+const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
   propTypes: {
 
@@ -175,7 +232,7 @@ const Slider = createReactClass({
     onSliderClick: PropTypes.func
   },
 
-  getDefaultProps: function () {
+  getDefaultProps() {
     return {
       min: 0,
       max: 100,
@@ -195,14 +252,14 @@ const Slider = createReactClass({
     };
   },
 
-  getInitialState: function () {
-    var value = this._or(ensureArray(this.props.value), ensureArray(this.props.defaultValue));
+  getInitialState() {
+    const value = this._or(ensureArray(this.props.value), ensureArray(this.props.defaultValue));
 
     // reused throughout the component to store results of iterations over `value`
     this.tempArray = value.slice();
 
-    var zIndices = [];
-    for (var i = 0; i < value.length; i++) {
+    const zIndices = [];
+    for (let i = 0; i < value.length; i++) {
       value[i] = this._trimAlignValue(value[i], this.props);
       zIndices.push(i);
     }
@@ -218,34 +275,17 @@ const Slider = createReactClass({
     };
   },
 
-  componentDidMount: function() {
-    var value = this._or(ensureArray(newProps.value), this.state.value);
-
-    // ensure the array keeps the same size as `value`
-    this.tempArray = value.slice();
-
-    let trimmedValue = []
-
-
-    for (var i = 0; i < value.length; i++) {
-      trimmedValue[i] = this._trimAlignValue(value[i], newProps);
-    }
-
-    this.setState({value: trimmedValue});
-  },
-
   // Keep the internal `value` consistent with an outside `value` if present.
   // This basically allows the slider to be a controlled component.
-  componentWillReceiveProps: function (newProps) {
-    var value = this._or(ensureArray(newProps.value), this.state.value);
+  componentWillReceiveProps(newProps) {
+    const value = this._or(ensureArray(newProps.value), this.state.value);
 
     // ensure the array keeps the same size as `value`
     this.tempArray = value.slice();
 
-    let trimmedValue = []
+    const trimmedValue = [];
 
-
-    for (var i = 0; i < value.length; i++) {
+    for (let i = 0; i < value.length; i++) {
       trimmedValue[i] = this._trimAlignValue(value[i], newProps);
     }
 
@@ -258,47 +298,41 @@ const Slider = createReactClass({
   // If custom handles are present but neither `value` nor `defaultValue` are applicable the handles are spread out
   // equally.
   // TODO: better name? better solution?
-  _or: function (value, defaultValue) {
-    var count = React.Children.count(this.props.children);
+  _or(value, defaultValue) {
+    const count = React.Children.count(this.props.children);
     switch (count) {
-    case 0:
-      return value.length > 0 ? value : defaultValue;
-    case value.length:
-      return value;
-    case defaultValue.length:
-      return defaultValue;
-    default:
-      if (value.length !== count || defaultValue.length !== count) {
-        console.warn(this.constructor.displayName + ': Number of values does not match number of children.');
-      }
-      return linspace(this.props.min, this.props.max, count);
+      case 0:
+        return value.length > 0 ? value : defaultValue;
+      case value.length:
+        return value;
+      case defaultValue.length:
+        return defaultValue;
+      default:
+        if (value.length !== count || defaultValue.length !== count) {
+          console.warn(this.constructor.displayName + ': Number of values does not match number of children.');
+        }
+        return linspace(this.props.min, this.props.max, count);
     }
   },
 
-  componentDidMount: function () {
-  },
-
-  componentWillUnmount: function () {
-  },
-
-  getValue: function () {
+  getValue() {
     return undoEnsureArray(this.state.value);
   },
 
   // calculates the offset of a handle in pixels based on its value.
-  _calcOffset: function (value) {
-    var ratio = (value - this.props.min) / (this.props.max - this.props.min);
+  _calcOffset(value) {
+    const ratio = (value - this.props.min) / (this.props.max - this.props.min);
     return ratio * this.state.upperBound;
   },
 
   // calculates the value corresponding to a given pixel offset, i.e. the inverse of `_calcOffset`.
-  _calcValue: function (offset) {
-    var ratio = offset / this.state.upperBound;
+  _calcValue(offset) {
+    const ratio = offset / this.state.upperBound;
     return ratio * (this.props.max - this.props.min) + this.props.min;
   },
 
-  _buildHandleStyle: function (offset, i) {
-    var style = {
+  _buildHandleStyle(offset, i) {
+    const style = {
       position: 'absolute',
       willChange: this.state.index >= 0 ? this._posMinKey() : ''
     };
@@ -306,16 +340,16 @@ const Slider = createReactClass({
     return style;
   },
 
-  _getClosestIndex: function (pixelOffset) {
-    var minDist = Number.MAX_VALUE;
-    var closestIndex = -1;
+  _getClosestIndex(pixelOffset) {
+    let minDist = Number.MAX_VALUE;
+    let closestIndex = -1;
 
-    var value = this.state.value;
-    var l = value.length;
+    const value = this.state.value;
+    const l = value.length;
 
-    for (var i = 0; i < l; i++) {
-      var offset = this._calcOffset(value[i]);
-      var dist = Math.abs(pixelOffset - offset);
+    for (let i = 0; i < l; i++) {
+      const offset = this._calcOffset(value[i]);
+      const dist = Math.abs(pixelOffset - offset);
       if (dist < minDist) {
         minDist = dist;
         closestIndex = i;
@@ -325,64 +359,64 @@ const Slider = createReactClass({
     return closestIndex;
   },
 
-  _calcOffsetFromPosition: function (position) {
-    var pixelOffset = position - this.state.sliderStart;
+  _calcOffsetFromPosition(position) {
+    let pixelOffset = position - this.state.sliderStart;
     if (this.props.invert) pixelOffset = this.state.sliderLength - pixelOffset;
     pixelOffset -= (this.state.handleSize / 2);
     return pixelOffset;
   },
 
   // Snaps the nearest handle to the value corresponding to `position` and calls `callback` with that handle's index.
-  _forceValueFromPosition: function (position, callback) {
-    var pixelOffset = this._calcOffsetFromPosition(position);
-    var closestIndex = this._getClosestIndex(pixelOffset);
-    var nextValue = this._trimAlignValue(this._calcValue(pixelOffset));
+  _forceValueFromPosition(position, callback) {
+    const pixelOffset = this._calcOffsetFromPosition(position);
+    const closestIndex = this._getClosestIndex(pixelOffset);
+    const nextValue = this._trimAlignValue(this._calcValue(pixelOffset));
 
-    var value = this.state.value.slice(); // Clone this.state.value since we'll modify it temporarily
+    const value = this.state.value.slice(); // Clone this.state.value since we'll modify it temporarily
     value[closestIndex] = nextValue;
 
     // Prevents the slider from shrinking below `props.minDistance`
-    for (var i = 0; i < value.length - 1; i += 1) {
+    for (let i = 0; i < value.length - 1; i += 1) {
       if (value[i + 1] - value[i] < this.props.minDistance) return;
     }
 
     this.setState({value: value}, callback.bind(this, closestIndex));
   },
 
-  _getMousePosition: function (e) {
+  _getMousePosition(e) {
     return [
       e['page' + this._axisKey()],
       e['page' + this._orthogonalAxisKey()]
     ];
   },
 
-  _getTouchPosition: function (e) {
-    var touch = e.touches[0];
+  _getTouchPosition(e) {
+    const touch = e.touches[0];
     return [
       touch['page' + this._axisKey()],
       touch['page' + this._orthogonalAxisKey()]
     ];
   },
 
-  _getMouseEventMap: function () {
+  _getMouseEventMap() {
     return {
-      'mousemove': this._onMouseMove,
-      'mouseup': this._onMouseUp
+      mousemove: this._onMouseMove,
+      mouseup: this._onMouseUp
     };
   },
 
-  _getTouchEventMap: function () {
+  _getTouchEventMap() {
     return {
-      'touchmove': this._onTouchMove,
-      'touchend': this._onTouchEnd
+      touchmove: this._onTouchMove,
+      touchend: this._onTouchEnd
     };
   },
 
   // create the `mousedown` handler for the i-th handle
-  _createOnMouseDown: function (i) {
+  _createOnMouseDown(i) {
     return function (e) {
       if (this.props.disabled) return;
-      var position = this._getMousePosition(e);
+      const position = this._getMousePosition(e);
       this._start(i, position[0]);
       this._addHandlers(this._getMouseEventMap());
       pauseEvent(e);
@@ -390,10 +424,10 @@ const Slider = createReactClass({
   },
 
   // create the `touchstart` handler for the i-th handle
-  _createOnTouchStart: function (i) {
+  _createOnTouchStart(i) {
     return function (e) {
       if (this.props.disabled || e.touches.length > 1) return;
-      var position = this._getTouchPosition(e);
+      const position = this._getTouchPosition(e);
       this.startPosition = position;
       this.isScrolling = undefined; // don't know yet if the user is trying to scroll
       this._start(i, position[0]);
@@ -402,21 +436,21 @@ const Slider = createReactClass({
     }.bind(this);
   },
 
-  _addHandlers: function (eventMap) {
+  _addHandlers(eventMap) {
     for (var key in eventMap) {
       document.addEventListener(key, eventMap[key], false);
     }
   },
 
-  _removeHandlers: function (eventMap) {
+  _removeHandlers(eventMap) {
     for (var key in eventMap) {
       document.removeEventListener(key, eventMap[key], false);
     }
   },
 
-  _start: function (i, position) {
+  _start(i, position) {
     // if activeElement is body window will lost focus in IE9
-    if (document.activeElement && document.activeElement != document.body) {
+    if (document.activeElement && document.activeElement !== document.body) {
       document.activeElement.blur();
     }
 
@@ -424,7 +458,7 @@ const Slider = createReactClass({
 
     this._fireChangeEvent('onBeforeChange');
 
-    var zIndices = this.state.zIndices;
+    const zIndices = this.state.zIndices;
     zIndices.splice(zIndices.indexOf(i), 1); // remove wherever the element is
     zIndices.push(i); // add to end
 
@@ -436,32 +470,32 @@ const Slider = createReactClass({
     });
   },
 
-  _onMouseUp: function () {
+  _onMouseUp() {
     this._onEnd(this._getMouseEventMap());
   },
 
-  _onTouchEnd: function () {
+  _onTouchEnd() {
     this._onEnd(this._getTouchEventMap());
   },
 
-  _onEnd: function (eventMap) {
+  _onEnd(eventMap) {
     this._removeHandlers(eventMap);
     this.setState({index: -1}, this._fireChangeEvent.bind(this, 'onAfterChange'));
   },
 
-  _onMouseMove: function (e) {
-    var position = this._getMousePosition(e);
+  _onMouseMove(e) {
+    const position = this._getMousePosition(e);
     this._move(position[0]);
   },
 
-  _onTouchMove: function (e) {
+  _onTouchMove(e) {
     if (e.touches.length > 1) return;
 
-    var position = this._getTouchPosition(e);
+    const position = this._getTouchPosition(e);
 
     if (typeof this.isScrolling === 'undefined') {
-      var diffMainDir = position[0] - this.startPosition[0];
-      var diffScrollDir = position[1] - this.startPosition[1];
+      const diffMainDir = position[0] - this.startPosition[0];
+      const diffScrollDir = position[1] - this.startPosition[1];
       this.isScrolling = Math.abs(diffScrollDir) > Math.abs(diffMainDir);
     }
 
@@ -475,37 +509,37 @@ const Slider = createReactClass({
     this._move(position[0]);
   },
 
-  _move: function (position) {
+  _move(position) {
     this.hasMoved = true;
 
-    var props = this.props;
-    var state = this.state;
-    var index = state.index;
+    const props = this.props;
+    const state = this.state;
+    const index = state.index;
 
-    var value = state.value;
-    var length = value.length;
-    var oldValue = value[index];
+    const value = state.value;
+    const length = value.length;
+    const oldValue = value[index];
 
-    var diffPosition = position - state.startPosition;
+    let diffPosition = position - state.startPosition;
     if (props.invert) diffPosition *= -1;
 
-    var diffValue = diffPosition / (state.sliderLength - state.handleSize) * (props.max - props.min);
-    var newValue = this._trimAlignValue(state.startValue + diffValue);
+    const diffValue = diffPosition / (state.sliderLength - state.handleSize) * (props.max - props.min);
+    let newValue = this._trimAlignValue(state.startValue + diffValue);
 
-    var minDistance = props.minDistance;
+    const minDistance = props.minDistance;
 
     // if "pearling" (= handles pushing each other) is disabled,
     // prevent the handle from getting closer than `minDistance` to the previous or next handle.
     if (!props.pearling) {
       if (index > 0) {
-        var valueBefore = value[index - 1];
+        const valueBefore = value[index - 1];
         if (newValue < valueBefore + minDistance) {
           newValue = valueBefore + minDistance;
         }
       }
 
       if (index < length - 1) {
-        var valueAfter = value[index + 1];
+        const valueAfter = value[index + 1];
         if (newValue > valueAfter - minDistance) {
           newValue = valueAfter - minDistance;
         }
@@ -519,8 +553,7 @@ const Slider = createReactClass({
       if (newValue > oldValue) {
         this._pushSucceeding(value, minDistance, index);
         this._trimSucceeding(length, value, minDistance, props.max);
-      }
-      else if (newValue < oldValue) {
+      } else if (newValue < oldValue) {
         this._pushPreceding(value, minDistance, index);
         this._trimPreceding(length, value, minDistance, props.min);
       }
@@ -533,77 +566,82 @@ const Slider = createReactClass({
     }
   },
 
-  _pushSucceeding: function (value, minDistance, index) {
-    var i, padding;
+  _pushSucceeding(value, minDistance, index) {
+    let i, padding;
     for (i = index, padding = value[i] + minDistance;
-         value[i + 1] != null && padding > value[i + 1];
-         i++, padding = value[i] + minDistance) {
+      value[i + 1] != null && padding > value[i + 1];
+      i++, padding = value[i] + minDistance) {
       value[i + 1] = this._alignValue(padding);
     }
   },
 
-  _trimSucceeding: function (length, nextValue, minDistance, max) {
-    for (var i = 0; i < length; i++) {
-      var padding = max - i * minDistance;
+  _trimSucceeding(length, nextValue, minDistance, max) {
+    for (let i = 0; i < length; i++) {
+      const padding = max - i * minDistance;
       if (nextValue[length - 1 - i] > padding) {
         nextValue[length - 1 - i] = padding;
       }
     }
   },
 
-  _pushPreceding: function (value, minDistance, index) {
-    var i, padding;
+  _pushPreceding(value, minDistance, index) {
+    let i, padding;
     for (i = index, padding = value[i] - minDistance;
-         value[i - 1] != null && padding < value[i - 1];
-         i--, padding = value[i] - minDistance) {
+      value[i - 1] != null && padding < value[i - 1];
+      i--, padding = value[i] - minDistance) {
       value[i - 1] = this._alignValue(padding);
     }
   },
 
-  _trimPreceding: function (length, nextValue, minDistance, min) {
-    for (var i = 0; i < length; i++) {
-      var padding = min + i * minDistance;
+  _trimPreceding(length, nextValue, minDistance, min) {
+    for (let i = 0; i < length; i++) {
+      const padding = min + i * minDistance;
       if (nextValue[i] < padding) {
         nextValue[i] = padding;
       }
     }
   },
 
-  _axisKey: function () {
-    var orientation = this.props.orientation;
+  _axisKey() {
+    const orientation = this.props.orientation;
     if (orientation === 'horizontal') return 'X';
     if (orientation === 'vertical') return 'Y';
+    return 'X';
   },
 
-  _orthogonalAxisKey: function () {
-    var orientation = this.props.orientation;
+  _orthogonalAxisKey() {
+    const orientation = this.props.orientation;
     if (orientation === 'horizontal') return 'Y';
     if (orientation === 'vertical') return 'X';
+    return 'Y';
   },
 
-  _posMinKey: function () {
-    var orientation = this.props.orientation;
+  _posMinKey() {
+    const orientation = this.props.orientation;
     if (orientation === 'horizontal') return this.props.invert ? 'right' : 'left';
     if (orientation === 'vertical') return this.props.invert ? 'bottom' : 'top';
+    return this.props.invert ? 'right' : 'left';
   },
 
-  _posMaxKey: function () {
-    var orientation = this.props.orientation;
+  _posMaxKey() {
+    const orientation = this.props.orientation;
     if (orientation === 'horizontal') return this.props.invert ? 'left' : 'right';
     if (orientation === 'vertical') return this.props.invert ? 'top' : 'bottom';
+    return this.props.invert ? 'left' : 'right';
   },
 
-  _sizeKey: function () {
-    var orientation = this.props.orientation;
+  _sizeKey() {
+    const orientation = this.props.orientation;
     if (orientation === 'horizontal') return 'clientWidth';
     if (orientation === 'vertical') return 'clientHeight';
+    return 'clientWidth';
   },
 
-  _trimAlignValue: function (val, props) {
+  _trimAlignValue(val, props) {
     return this._alignValue(this._trimValue(val, props), props);
   },
 
-  _trimValue: function (val, props) {
+  _trimValue(val, props) {
     props = props || this.props;
 
     if (val <= props.min) val = props.min;
@@ -612,11 +650,11 @@ const Slider = createReactClass({
     return val;
   },
 
-  _alignValue: function (val, props) {
+  _alignValue(val, props) {
     props = props || this.props;
 
-    var valModStep = (val - props.min) % props.step;
-    var alignValue = val - valModStep;
+    const valModStep = (val - props.min) % props.step;
+    let alignValue = val - valModStep;
 
     if (Math.abs(valModStep) * 2 >= props.step) {
       alignValue += (valModStep > 0) ? props.step : (-props.step);
@@ -625,8 +663,8 @@ const Slider = createReactClass({
     return parseFloat(alignValue.toFixed(5));
   },
 
-  _renderHandle: function (style, i) {
-    var className = this.props.handleClassName + ' ' +
+  _renderHandle(style, i) {
+    const className = this.props.handleClassName + ' ' +
       (this.props.handleClassName + '-' + i) + ' ' +
       (this.state.index === i ? this.props.handleActiveClassName : '');
 
@@ -642,25 +680,25 @@ const Slider = createReactClass({
     );
   },
 
-  _renderHandles: function (offset) {
+  _renderHandles(offset) {
 
-    var length = offset.length;
+    const length = offset.length;
 
-    var styles = this.tempArray;
-    for (var i = 0; i < length; i++) {
-      styles[i] = this._buildHandleStyle(offset[i], i);
+    const tempStyles = this.tempArray;
+    for (let i = 0; i < length; i++) {
+      tempStyles[i] = this._buildHandleStyle(offset[i], i);
     }
 
-    var res = this.tempArray;
-    for (i = 0; i < length; i++) {
-      res[i] = this._renderHandle(styles[i], i);
+    const res = this.tempArray;
+    for (let i = 0; i < length; i++) {
+      res[i] = this._renderHandle(tempStyles[i], i);
     }
 
     return res;
   },
 
-  _buildBarStyle: function (min, max) {
-    var obj = {
+  _buildBarStyle(min, max) {
+    const obj = {
       position: 'absolute',
       willChange: this.state.index >= 0 ? this._posMinKey() + ',' + this._posMaxKey() : ''
     };
@@ -669,7 +707,7 @@ const Slider = createReactClass({
     return obj;
   },
 
-  _renderBar: function (i, offsetFrom, offsetTo) {
+  _renderBar(i, offsetFrom, offsetTo) {
 
     const className = this.props.barClassName + ' ' + this.props.barClassName + '-' + i;
     let barStyle = this._buildBarStyle(offsetFrom, this.state.upperBound - offsetTo);
@@ -692,18 +730,19 @@ const Slider = createReactClass({
         key={'bar' + i}
         ref={'bar' + i}
         className={className}
-        style={{ ...styles.bar, ...barStyle }}/>
+        style={{ ...styles.bar, ...barStyle }}
+      />
     );
   },
 
-  _renderBars: function (offset) {
+  _renderBars(offset) {
 
-    var bars = [];
-    var lastIndex = offset.length - 1;
+    const bars = [];
+    const lastIndex = offset.length - 1;
 
     bars.push(this._renderBar(0, 0, offset[0]));
 
-    for (var i = 0; i < lastIndex; i++) {
+    for (let i = 0; i < lastIndex; i++) {
       bars.push(this._renderBar(i + 1, offset[i], offset[i + 1]));
     }
 
@@ -712,11 +751,11 @@ const Slider = createReactClass({
     return bars;
   },
 
-  _onSliderMouseDown: function (e) {
+  _onSliderMouseDown(e) {
     if (this.props.disabled) return;
     this.hasMoved = false;
     if (!this.props.snapDragDisabled) {
-      var position = this._getMousePosition(e);
+      const position = this._getMousePosition(e);
       this._forceValueFromPosition(position[0], function (i) {
         this._fireChangeEvent('onChange');
         this._start(i, position[0]);
@@ -727,23 +766,23 @@ const Slider = createReactClass({
     pauseEvent(e);
   },
 
-  _onSliderClick: function (e) {
+  _onSliderClick(e) {
     if (this.props.disabled) return;
 
     if (this.props.onSliderClick && !this.hasMoved) {
-      var position = this._getMousePosition(e);
-      var valueAtPos = this._trimAlignValue(this._calcValue(this._calcOffsetFromPosition(position[0])));
+      const position = this._getMousePosition(e);
+      const valueAtPos = this._trimAlignValue(this._calcValue(this._calcOffsetFromPosition(position[0])));
       this.props.onSliderClick(valueAtPos);
     }
   },
 
-  _fireChangeEvent: function (event) {
+  _fireChangeEvent(event) {
     if (this.props[event]) {
       this.props[event](undoEnsureArray(this.state.value));
     }
   },
 
-  render: function () {
+  render() {
 
     const offset = this.tempArray;
     const value = this.state.value;
@@ -753,8 +792,8 @@ const Slider = createReactClass({
     }
 
     const orientation = this.props.orientation === 'vertical' ?
-                        styles.verticalSlider :
-                        styles.horizontalSlider;
+      styles.verticalSlider :
+      styles.horizontalSlider;
 
     return (
       <div
@@ -771,58 +810,3 @@ const Slider = createReactClass({
 });
 
 export default Slider;
-
-const styles = {
-  base: {
-    position: 'relative',
-    borderRadius: 6
-  },
-  horizontalSlider: {
-    width: '100%',
-    height: 12
-  },
-  verticalSlider: {
-    maxHeight: 500,
-    width: 12,
-    border: '1px solid grey'
-  },
-  handle: {
-    fontSize: '0.9em',
-    textAlign: 'center',
-    backgroundColor: "#FAFAFA",
-    color: 'white',
-    border: '1px solid #555',
-    cursor: 'pointer',
-    height: 12,
-    width: 12,
-    borderRadius: 12,
-    top: -4
-  },
-  bar: {
-    position: 'relative',
-    backgroundColor: "rgb(200,200,200)",
-    borderRadius: 2
-  },
-  /*
-  there are a few style cases for the bars.
-
-  1. there is only 1 value.
-  - the bar to the left of the handle is colored
-  - the bar to the right of the handle is a color representing "unselected"
-
-  2. there are 2 values.
-  - the bars to the outsides of the handles are "unselected"
-  - the bar in the middle is colored
-  */
-
-  unselectedBar: {
-    backgroundColor: '#777',
-    height: 1,
-    top: 2
-  },
-  selectedBar: {
-    backgroundColor: '#CCC',
-    height: 6
-  }
-
-};
