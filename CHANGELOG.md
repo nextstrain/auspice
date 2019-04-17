@@ -1,3 +1,5 @@
+## version 1.36.5 - 2019/04/17
+
 * Fix a bug in the initial rendering of the date slider. [See PR 713](https://github.com/nextstrain/auspice/pull/713)
 
 ## version 1.36.4 - 2019/03/16
