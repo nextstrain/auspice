@@ -1,0 +1,18 @@
+{
+  "name": "auspice-documentation",
+  "version": "1.0.0",
+  "description": "source files for auspice documentation",
+  "author": "James Hadfield",
+  "license": "AGPL-3.0-only",
+  "scripts": {
+    "develop": "cd website && docusaurus-start",
+    "build": "cd website && docusaurus-build && npm run removeBuiltDocs && cp -r ./build/auspice/* ../../docs && npm run makeReadme",
+    "build-docs": "npm run build",
+    "removeBuiltDocs": "rimraf ../docs/*",
+    "makeReadme": "echo '# Auspice built documentation to be served by GitHub pages.\\n\\nFiles in this folder should not be modified by hand, they are the generated from within the `docs-src` directory.' > ../docs/README.md"
+  },
+  "devDependencies": {
+    "docusaurus": "^1.8.1",
+    "rimraf": "^2.6.3"
+  }
+}
