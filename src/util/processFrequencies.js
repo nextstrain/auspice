@@ -1,6 +1,6 @@
 import { NODE_VISIBLE } from "./globals";
 import { isColorByGenotype } from "./getGenotype";
-
+import { getTraitFromNode } from "../util/treeMiscHelpers";
 export const unassigned_label = "unassigned";
 
 /**
@@ -11,7 +11,7 @@ export const unassigned_label = "unassigned";
  */
 const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
   if (isGenotype) return node.currentGt;
-  const value = node.attr[colorBy];
+  const value = getTraitFromNode(node, colorBy);
   if (!value || value === "unknown") {
     return unassigned_label;
   }
@@ -46,7 +46,6 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   data.forEach((d) => {
     if (visibility[d.idx] === NODE_VISIBLE) {
       // debugTipsSeen++;
-      // const colour = tree.nodes[d.idx].attr[colorBy];
       const category = assignCategory(colorScale, categories, nodes[d.idx], colorBy, isGenotype) || unassigned_label;
       // if (category === unassigned_label) return;
       for (let i = 0; i < pivotsLen; i++) {

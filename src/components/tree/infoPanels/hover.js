@@ -4,6 +4,7 @@ import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
+import { getTraitFromNode } from "../../../util/treeMiscHelpers";
 
 const renderInfoLine = (item, value, {noPadding=false}={}) => {
   const style = noPadding ? {} : {paddingBottom: "7px"};
@@ -41,7 +42,7 @@ const renderBranchDivergence = (d) =>
 
 
 const renderBranchTime = (d, temporalConfidence) => {
-  const date = d.attr.date || numericToCalendar(d.num_date.value);
+  const date = numericToCalendar(d.num_date.value);
   let dateRange = false;
   if (temporalConfidence && d.num_date.confidence) {
     dateRange = [
@@ -64,7 +65,7 @@ const renderBranchTime = (d, temporalConfidence) => {
  * Display information about the colorBy, potentially in a table with confidences
  * @param  {node} d branch node currently highlighted
  * @param  {bool} colorByConfidence should these (colorBy conf) be displayed, if applicable?
- * @param  {string} colorBy must be a key of d.attr
+ * @param  {string} colorBy
  * @return {React Component} to be displayed
  */
 const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidence, colorBy) => {
@@ -76,18 +77,18 @@ const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidenc
     return (colorBy !== distanceMeasure) ? renderBranchTime(d, temporalConfidence) : null;
   }
   if (colorByConfidence === true) {
-    const lkey = colorBy + "_confidence";
-    if (Object.keys(d.attr).indexOf(lkey) === -1) {
-      console.error("Error - couldn't find confidence vals for ", lkey);
+    const confidenceData = getTraitFromNode(d, colorBy, {confidence: true});
+    if (!confidenceData) {
+      console.error("Error - couldn't find confidence vals for ", colorBy);
       return null;
     }
-    const vals = Object.keys(d.attr[lkey])
-      .sort((a, b) => d.attr[lkey][a] > d.attr[lkey][b] ? -1 : 1)
+    const vals = Object.keys(confidenceData)
+      .sort((a, b) => confidenceData[a] > confidenceData[b] ? -1 : 1)
       .slice(0, 4)
-      .map((v) => `${prettyString(v)} (${(100 * d.attr[lkey][v]).toFixed(0)}%)`);
+      .map((v) => `${prettyString(v)} (${(100 * confidenceData[v]).toFixed(0)}%)`);
     return renderInfoBlock(`${prettyString(colorBy)} (confidence):`, vals);
   }
-  return renderInfoLine(prettyString(colorBy), prettyString(d.attr[colorBy]));
+  return renderInfoLine(prettyString(colorBy), prettyString(getTraitFromNode(d, colorBy)));
 };
 
 /**
@@ -257,7 +258,7 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
     const state = getTipColorAttribute(d.n, colorScale);
     return renderInfoLine(key + ":", state);
   }
-  return renderInfoLine(prettyString(colorBy) + ":", prettyString(d.n.attr[colorBy]));
+  return renderInfoLine(prettyString(colorBy) + ":", prettyString(getTraitFromNode(d.n, colorBy)));
 };
 
 const displayVaccineInfo = (d) => {

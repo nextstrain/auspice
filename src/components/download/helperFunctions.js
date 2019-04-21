@@ -111,16 +111,20 @@ export const turnAttrsIntoHeaderArray = (attrs) => {
  * with the relevent information (accession, traits, etcetera)
  * TODO this needs testing / improving after the move to v2 JSONs
  */
-export const strainTSV = (dispatch, filePrefix, nodes, attrsSetOnTree, authorInfo) => {
+export const strainTSV = (dispatch, filePrefix, nodes, authorInfo) => {
   // dont need to traverse the tree - can just loop the nodes
   const filename = filePrefix + "_metadata.tsv";
   const data = [];
 
-  const traitsToInclude = attrsSetOnTree.filter((v) => 
-    (!(v.includes("entropy") || v.includes("confidence") || v === "div" || v === "paper_url"))
-  );
+  const traitsToInclude = new Set();
+  nodes.forEach((n) => {
+    if (n.traits) {
+      Object.keys(n.traits).forEach((t) => traitsToInclude.add(t));
+    }
+  })
+
   if (authorInfo) {
-    traitsToInclude.push("authors");
+    traitsToInclude.add("authors");
     // TODO - if journal, url etc etc are available, then push these also
   }
 
@@ -174,7 +178,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, attrsSetOnTree, authorInf
     }
     data.push(line);
   }
-  const lineArray = [turnAttrsIntoHeaderArray(traitsToInclude).join("\t")];
+  const lineArray = [turnAttrsIntoHeaderArray([...traitsToInclude]).join("\t")];
   data.forEach((line) => {
     const lineString = line.join("\t");
     lineArray.push(lineString);

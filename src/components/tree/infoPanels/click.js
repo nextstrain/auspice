@@ -160,7 +160,10 @@ const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
               return isValueValid(value) ? item(prettyString(x), prettyString(value)) : null;
             })}
             {/* Dates */}
-            {item(showUncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
+            {item(
+              showUncertainty ? "Inferred collection date" : "Collection date",
+              prettyString(numericToCalendar(tip.n.num_date.value))
+            )}
             {showUncertainty ? dateConfidence(tip.n.num_date.confidence) : null}
             {/* Author / Paper information */}
             {displayPublicationInfo(tip.n.authors, authorInfo)}

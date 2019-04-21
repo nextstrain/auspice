@@ -8,7 +8,7 @@ import { defaultGeoResolution,
   twoColumnBreakpoint } from "../util/globals";
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
-import { checkColorByConfidence } from "../actions/recomputeReduxState";
+import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
@@ -192,7 +192,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       const newState = Object.assign({}, state, {
         colorBy: action.colorBy,
         colorScale: action.colorScale,
-        colorByConfidence: checkColorByConfidence(state.attrs, action.colorBy)
+        colorByConfidence: doesColorByHaveConfidence(state, action.colorBy)
       });
       return newState;
     }
