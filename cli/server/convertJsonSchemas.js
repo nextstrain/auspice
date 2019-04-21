@@ -133,7 +133,7 @@ const setMiscMetaProperties = (v2, meta) => {
     v2.panels = meta.panels;
     delete meta.panels;
   }
-  // [DISPLAY-]DEFAULTS
+  // [DISPLAY_]DEFAULTS
   if (meta.defaults) {
     v2.display_defaults = {};
     if (meta.defaults.geoResolution) v2.display_defaults.geo_resolution = meta.defaults.geoResolution;
@@ -141,6 +141,11 @@ const setMiscMetaProperties = (v2, meta) => {
     if (meta.defaults.distanceMeasure) v2.display_defaults.distance_measure = meta.defaults.distanceMeasure;
     if (meta.defaults.mapTriplicate) v2.display_defaults.map_triplicate = meta.defaults.mapTriplicate;
     delete meta.defaults;
+  }
+  // GEO[GRAPHIC_INFO]
+  if (meta.geo) {
+    v2.geographic_info = meta.geo;
+    delete meta.geo;
   }
 };
 
