@@ -216,6 +216,14 @@ const storeTreeAsV2 = (v2, tree) => {
         delete node.attr.div;
       }
     }
+    // NUC + AA MUTATIONS
+    if (node.muts || node.aa_muts) {
+      node.mutations = {};
+      if (node.aa_muts) node.mutations = node.aa_muts;
+      if (node.muts) node.mutations.nuc = node.muts;
+      delete node.muts;
+      delete node.aa_muts;
+    }
 
   });
 

@@ -104,30 +104,30 @@ const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidenc
 // };
 
 /**
- * Display AA / NT mutations in JSX
+ * Display AA / NT mutations. If there are none, return `null`;
+ * Nt mutations are found at `d.mutations.nuc` -> Array of strings
+ * AA mutations are found at `d.mutations[prot_name]` -> Array of strings
  * @param  {node} d branch node currently highlighted
  * @param  {string} mutType "AA" or "nuc"
- * @return {JSX} to be displayed (or null)
+ * @return {React component | null}
  */
-const getMutationsJSX = (d, mutType) => {
-  /* mutations are stored at:
-  NUCLEOTIDE: d.muts = list of strings
-  AMINO ACID: d.aa_muts = dict of proteins -> list of strings
-  */
+const renderMutations = (d, mutType) => {
+  if (!d.mutations) return null;
+
   if (mutType === "nuc") {
-    if (typeof d.muts !== "undefined" && d.muts.length) {
+    if (d.mutations.nuc && d.mutations.nuc.length) {
       const nDisplay = 9; // max number of mutations to display
       const nGapDisp = 4; // max number of gaps/Ns to display
 
       // gather muts with N/-
-      const ngaps = d.muts.filter((mut) => {
+      const ngaps = d.mutations.nuc.filter((mut) => {
         return mut.slice(-1) === "N" || mut.slice(-1) === "-"
           || mut.slice(0, 1) === "N" || mut.slice(0, 1) === "-";
       });
       const gapLen = ngaps.length; // number of mutations that exist with N/-
 
       // gather muts without N/-
-      const nucs = d.muts.filter((mut) => {
+      const nucs = d.mutations.nuc.filter((mut) => {
         return mut.slice(-1) !== "N" && mut.slice(-1) !== "-"
           && mut.slice(0, 1) !== "N" && mut.slice(0, 1) !== "-";
       });
@@ -153,37 +153,37 @@ const getMutationsJSX = (d, mutType) => {
 
     }
     return renderInfoLine("No nucleotide mutations", "");
-  } else if (mutType === "aa") {
-    if (typeof d.aa_muts !== "undefined") {
-      /* calculate counts */
-      const prots = Object.keys(d.aa_muts);
-      const counts = {};
-      for (const prot of prots) {
-        counts[prot] = d.aa_muts[prot].length;
-      }
-      /* are there any AA mutations? */
-      if (prots.map((k) => counts[k]).reduce((a, b) => a + b, 0)) {
-        const nDisplay = 3; // number of mutations to display per protein
-        const nProtsToDisplay = 7; // max number of proteins to display
-        let protsSeen = 0;
-        const m = [];
-        prots.forEach((prot) => {
-          if (counts[prot] && protsSeen < nProtsToDisplay) {
-            let x = prot + ":\u00A0\u00A0" + d.aa_muts[prot].slice(0, Math.min(nDisplay, counts[prot])).join(", ");
-            if (counts[prot] > nDisplay) {
-              x += " + " + (counts[prot] - nDisplay) + " more";
-            }
-            m.push(x);
-            protsSeen++;
-            if (protsSeen === nProtsToDisplay) {
-              m.push(`(protein mutations truncated)`);
-            }
-          }
-        });
-        return renderInfoBlock("AA mutations:", m);
-      }
-      return renderInfoLine("No amino acid mutations", "");
+  }
+  if (mutType === "aa") {
+    /* calculate protein -> num(mutations) */
+    const prots = Object.keys(d.mutations).filter((v) => v !== "nuc");
+    const nMutsPerProt = {};
+    let totalMuts = 0;
+    for (const prot of prots) {
+      nMutsPerProt[prot] = d.mutations[prot].length;
+      totalMuts += d.mutations[prot].length;
     }
+    if (!totalMuts) {
+      return renderInfoLine("No amino acid mutations");
+    }
+    const nDisplay = 3; // number of mutations to display per protein
+    const nProtsToDisplay = 7; // max number of proteins to display
+    let protsRendered = 0;
+    const mutationsToRender = [];
+    prots.forEach((prot) => {
+      if (nMutsPerProt[prot] && protsRendered < nProtsToDisplay) {
+        let x = prot + ":\u00A0\u00A0" + d.mutations[prot].slice(0, Math.min(nDisplay, nMutsPerProt[prot])).join(", ");
+        if (nMutsPerProt[prot] > nDisplay) {
+          x += " + " + (nMutsPerProt[prot] - nDisplay) + " more";
+        }
+        mutationsToRender.push(x);
+        protsRendered++;
+        if (protsRendered === nProtsToDisplay) {
+          mutationsToRender.push(`(protein mutations truncated)`);
+        }
+      }
+    });
+    return renderInfoBlock("AA mutations:", mutationsToRender);
   }
   /* if mutType is neither "aa" nor "muc" then render nothing */
   return null;
@@ -303,7 +303,7 @@ const HoverInfoPanel = ({mutType, temporalConfidence, distanceMeasure,
       <span>
         {getBranchDescendents(d.n)}
         {/* getFrequenciesJSX(d.n, mutType) */}
-        {getMutationsJSX(d.n, mutType)}
+        {renderMutations(d.n, mutType)}
         {distanceMeasure === "div" ? renderBranchDivergence(d.n) : renderBranchTime(d.n, temporalConfidence)}
         {displayColorBy(d.n, distanceMeasure, temporalConfidence, colorByConfidence, colorBy)}
       </span>

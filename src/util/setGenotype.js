@@ -8,10 +8,10 @@ export const setGenotype = (nodes, prot, positions) => {
   const recurse = (node, state) => {
     const newState = state; /* reference. cheap */
     let data; // any potential mutations that would result in a state change
-    if (prot === nucleotide_gene && node.muts && node.muts.length) {
-      data = node.muts;
-    } else if (node.aa_muts && node.aa_muts[prot]) {
-      data = node.aa_muts[prot];
+    if (prot === nucleotide_gene && node.mutations && node.mutations.nuc && node.mutations.nuc.length) {
+      data = node.mutations;
+    } else if (node.mutations && node.mutations[prot]) {
+      data = node.mutations[prot];
     }
     if (data && data.length) {
       for (let i = 0; i < data.length; i++) {
