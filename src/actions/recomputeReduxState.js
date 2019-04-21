@@ -23,18 +23,16 @@ export const checkColorByConfidence = (attrs, colorBy) => {
 export const getMinCalDateViaTree = (nodes, state) => {
   /* slider should be earlier than actual day */
   /* if no date, use some default dates - slider will not be visible */
-  const minNumDate = nodes[0].attr.num_date ? nodes[0].attr.num_date - 0.01 : state.dateMaxNumeric - defaultDateRange;
+  const minNumDate = nodes[0].num_date ? nodes[0].num_date.value - 0.01 : state.dateMaxNumeric - defaultDateRange;
   return numericToCalendar(minNumDate);
 };
 
 export const getMaxCalDateViaTree = (nodes) => {
   let maxNumDate = reallySmallNumber;
   nodes.forEach((node) => {
-    if (node.attr) {
-      if (node.attr.num_date) {
-        if (node.attr.num_date > maxNumDate) {
-          maxNumDate = node.attr.num_date;
-        }
+    if (node.num_date) {
+      if (node.num_date.value > maxNumDate) {
+        maxNumDate = node.num_date.value;
       }
     }
   });
@@ -286,7 +284,7 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   }
 
   /* does the tree have date information? if not, disable controls, modify view */
-  state.branchLengthsToDisplay = Object.keys(tree.nodes[0].attr).indexOf("num_date") === -1 ? "divOnly" :
+  state.branchLengthsToDisplay = !tree.nodes[0].num_date ? "divOnly" :
     Object.keys(tree.nodes[0].attr).indexOf("div") === -1 ? "dateOnly" : "divAndDate";
 
   /* if branchLengthsToDisplay is "divOnly", force to display by divergence
@@ -296,7 +294,7 @@ const modifyStateViaTree = (state, tree, treeToo) => {
     state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
 
   state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
-  state.temporalConfidence = Object.keys(tree.nodes[0].attr).indexOf("num_date_confidence") > -1 ?
+  state.temporalConfidence = (tree.nodes[0].num_date && tree.nodes[0].num_date.confidence) ?
     {exists: true, display: true, on: false} : {exists: false, display: false, on: false};
   return state;
 };

@@ -143,7 +143,7 @@ const displayPublicationInfo = (authorKey, authorInfo) => {
 
 const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
   if (!tip) {return null;}
-  const uncertainty = "num_date_confidence" in tip.n.attr && tip.n.attr.num_date_confidence[0] !== tip.n.attr.num_date_confidence[1];
+  const showUncertainty = tip.n.num_date && tip.n.num_date.confidence && tip.n.num_date.confidence[0] !== tip.n.num_date.confidence[1];
 
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
@@ -160,8 +160,8 @@ const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
               return isValueValid(value) ? item(prettyString(x), prettyString(value)) : null;
             })}
             {/* Dates */}
-            {item(uncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
-            {uncertainty ? dateConfidence(tip.n.attr.num_date_confidence) : null}
+            {item(showUncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
+            {showUncertainty ? dateConfidence(tip.n.num_date.confidence) : null}
             {/* Author / Paper information */}
             {displayPublicationInfo(tip.n.authors, authorInfo)}
             {/* try to join URL with accession, else display the one that's available */}

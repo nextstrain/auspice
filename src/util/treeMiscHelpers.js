@@ -7,6 +7,7 @@
  */
 export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}={}) => {
   if (!entropy && !confidence) {
+    if (trait === "num_date") return node.num_date.value;
     if (node[trait]) return node[trait];
     if (node.traits && node.traits[trait]) return node.traits[trait].value;
     if (node.attr && node.attr[trait]) return node.attr[trait]; // DEPRECATED

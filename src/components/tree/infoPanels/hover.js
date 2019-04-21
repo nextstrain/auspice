@@ -41,12 +41,12 @@ const renderBranchDivergence = (d) =>
 
 
 const renderBranchTime = (d, temporalConfidence) => {
-  const date = d.attr.date || numericToCalendar(d.attr.num_date);
+  const date = d.attr.date || numericToCalendar(d.num_date.value);
   let dateRange = false;
-  if (temporalConfidence && d.attr.num_date_confidence) {
+  if (temporalConfidence && d.num_date.confidence) {
     dateRange = [
-      numericToCalendar(d.attr.num_date_confidence[0]),
-      numericToCalendar(d.attr.num_date_confidence[1])
+      numericToCalendar(d.num_date.confidence[0]),
+      numericToCalendar(d.num_date.confidence[1])
     ];
   }
   if (dateRange && dateRange[0] !== dateRange[1]) {

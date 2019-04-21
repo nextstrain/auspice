@@ -165,11 +165,11 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       switch (colorBy) {
         case "num_date":
           /* we want the colorScale to "focus" on the tip dates, and be spaced according to sampling */
-          let rootDate = tree.nodes[0].attr.num_date;
-          let vals = tree.nodes.filter((n) => !n.hasChildren).map((n) => n.attr.num_date);
+          let rootDate = tree.nodes[0].num_date.value;
+          let vals = tree.nodes.filter((n) => !n.hasChildren).map((n) => n.num_date.value);
           if (treeTooNodes) {
-            if (treeTooNodes[0].attr.num_date < rootDate) rootDate = treeTooNodes[0].attr.num_date;
-            vals.concat(treeTooNodes.filter((n) => !n.hasChildren).map((n) => n.attr.num_date));
+            if (treeTooNodes[0].num_date.value < rootDate) rootDate = treeTooNodes[0].num_date.value;
+            vals.concat(treeTooNodes.filter((n) => !n.hasChildren).map((n) => n.num_date.value));
           }
           vals = vals.sort();
           domain = [rootDate];

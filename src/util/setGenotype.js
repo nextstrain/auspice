@@ -53,8 +53,8 @@ export const setGenotype = (nodes, prot, positions) => {
 export const orderOfGenotypeAppearance = (nodes) => {
   const seen = {};
   nodes.forEach((n) => {
-    if (!seen[n.currentGt] || n.attr.num_date < seen[n.currentGt]) {
-      seen[n.currentGt] = n.attr.num_date;
+    if (!seen[n.currentGt] || n.num_date.value < seen[n.currentGt]) {
+      seen[n.currentGt] = n.num_date.value;
     }
   });
   const ordered = Object.keys(seen);
