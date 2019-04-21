@@ -29,14 +29,14 @@ const treeToNewick = (root, temporal) => {
     if (node.hasChildren) {
       const children = [];
       node.children.forEach((child) => {
-        const subsubtree = recurse(child, temporal ? node.attr.num_date : node.attr.div);
+        const subsubtree = recurse(child, temporal ? node.num_date.value : node.attr.div);
         children.push(subsubtree);
       });
       subtree += "(" + children.join(",") + ")" + node.strain + ":";
-      subtree += (temporal ? node.attr.num_date : node.attr.div) - parentX;
+      subtree += (temporal ? node.num_date.value : node.attr.div) - parentX;
     } else { /* terminal node */
       let leaf = node.strain + ":";
-      leaf += (temporal ? node.attr.num_date : node.attr.div) - parentX;
+      leaf += (temporal ? node.num_date.value : node.attr.div) - parentX;
       subtree += leaf;
     }
     return subtree;

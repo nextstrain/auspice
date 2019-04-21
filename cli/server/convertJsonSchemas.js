@@ -201,6 +201,15 @@ const storeTreeAsV2 = (v2, tree) => {
           node.labels.aa = muts.join("; ");
         }
       }
+      // num_date
+      if (node.attr.num_date) {
+        node.num_date = {value: node.attr.num_date};
+        delete node.attr.num_date;
+        if (node.attr.num_date_confidence) {
+          node.num_date.confidence = node.attr.num_date_confidence;
+          delete node.attr.num_date_confidence;
+        }
+      }
     }
 
   });

@@ -5,8 +5,8 @@ import { getTraitFromNode } from "./treeMiscHelpers";
 export const getVisibleDateRange = (nodes, visibility) => nodes
   .filter((node, idx) => (visibility[idx] === NODE_VISIBLE && !node.hasChildren))
   .reduce((acc, node) => {
-    if (node.attr.num_date < acc[0]) return [node.attr.num_date, acc[1]];
-    if (node.attr.num_date > acc[1]) return [acc[0], node.attr.num_date];
+    if (node.num_date.value < acc[0]) return [node.num_date.value, acc[1]];
+    if (node.num_date.value > acc[1]) return [acc[0], node.num_date.value];
     return acc;
   }, [100000, -100000]);
 
@@ -147,10 +147,10 @@ const calcVisibility = (tree, controls, dates) => {
     /* intersect the various arrays contributing to visibility */
     const visibility = tree.nodes.map((node, idx) => {
       if (inView[idx] && (filtered ? filtered[idx] : true)) {
-        const nodeDate = node.attr.num_date;
+        const nodeDate = node.num_date.value;
         /* if without date, treetime probably not run - or would be inferred
           so if branchLengthsToDisplay is "divOnly", then ensure node displayed */
-        if (controls.branchLengthsToDisplay === "divOnly" && node.attr.num_date === undefined) {
+        if (controls.branchLengthsToDisplay === "divOnly" && !node.num_date) {
           return NODE_VISIBLE;
         }
         /* is the actual node date (the "end" of the branch) in the time slice? */
@@ -158,7 +158,7 @@ const calcVisibility = (tree, controls, dates) => {
           return NODE_VISIBLE;
         }
         /* is any part of the (parent date -> node date) in the time slice? */
-        if (!(nodeDate < dates.dateMinNumeric || node.parent.attr.num_date > dates.dateMaxNumeric)) {
+        if (!(nodeDate < dates.dateMinNumeric || node.parent.num_date.value > dates.dateMaxNumeric)) {
           return NODE_VISIBLE_TO_MAP_ONLY;
         }
       }

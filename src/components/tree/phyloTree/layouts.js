@@ -56,7 +56,7 @@ export const rectangularLayout = function rectangularLayout() {
 
 /**
  * assign x,y coordinates fro the root-to-tip regression layout
- * this requires a time tree with attr["num_date"] set
+ * this requires a time tree with `node.num_date` set
  * in addition, this function calculates a regression between
  * num_date and div which is saved as this.regression
  * @return {null}
@@ -64,8 +64,8 @@ export const rectangularLayout = function rectangularLayout() {
 export const timeVsRootToTip = function timeVsRootToTip() {
   this.nodes.forEach((d) => {
     d.y = d.n.attr["div"];
-    d.x = d.n.attr["num_date"];
-    d.px = d.n.parent.attr["num_date"];
+    d.x = d.n.num_date.value;
+    d.px = d.n.parent.num_date.value;
     d.py = d.n.parent.attr["div"];
   });
   if (this.vaccines) { /* overlay vaccine cross on tip */
@@ -194,34 +194,35 @@ export const radialLayout = function radialLayout() {
   }
 };
 
-/*
+/**
  * set the property that is used as distance along branches
  * this is set to "depth" of each node. depth is later used to
  * calculate coordinates. Parent depth is assigned as well.
+ * @sideEffect sets this.distance -> "div" or "num_date"
  */
 export const setDistance = function setDistance(distanceAttribute) {
   timerStart("setDistance");
   this.nodes.forEach((d) => {d.update = true;});
-  if (typeof distanceAttribute === "undefined") {
-    this.distance = "div"; // default is "div" for divergence
-  } else {
-    this.distance = distanceAttribute;
-  }
+  this.distance = distanceAttribute || "div"; // div is default
+
   // assign node and parent depth
-  const tmp_dist = this.distance;
-  this.nodes.forEach((d) => {
-    d.depth = d.n.attr[tmp_dist];
-    d.pDepth = d.n.parent.attr[tmp_dist];
-    if (d.n.attr[tmp_dist + "_confidence"]) {
-      d.conf = d.n.attr[tmp_dist + "_confidence"];
-    } else {
-      d.conf = [d.depth, d.depth];
-    }
-  });
+  if (this.distance === "div") {
+    this.nodes.forEach((d) => {
+      d.depth = d.n.attr.div;
+      d.pDepth = d.n.parent.attr.div;
+      d.conf = [d.depth, d.depth]; // TO DO - shouldn't be needed, never have div confidence...
+    });
+  } else {
+    this.nodes.forEach((d) => {
+      d.depth = d.n.num_date.value;
+      d.pDepth = d.n.parent.num_date.value;
+      d.conf = d.n.num_date.confidence ? d.n.num_date.confidence : [d.depth, d.depth];
+    });
+  }
+
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
-      // this was d.n.vaccineDateNumeric, setting to d.depth for reasons of clarity
-      d.crossDepth = tmp_dist === "div" ? d.depth : d.depth;
+      d.crossDepth = d.depth;
     });
   }
   timerEnd("setDistance");
