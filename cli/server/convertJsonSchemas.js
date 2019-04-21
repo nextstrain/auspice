@@ -44,7 +44,6 @@ const traverseTree = (node, cb) => {
 const setColorings = (v2, meta) => {
   v2.colorings = {};
   const color_options = meta.color_options;
-  delete meta.color_options;
   for (const [key, value] of Object.entries(color_options)) {
     v2.colorings[key] = {};
     v2.colorings[key].title = value.legendTitle || value.menuItem;
@@ -85,7 +84,6 @@ const setAuthorInfo = (v2, meta, tree) => {
     if (v1info.paper_url) info.url = v1info.paper_url;
     v2.author_info[key] = info;
   }
-  delete meta.author_info;
 
   traverseTree(tree, (node) => {
     if (node.attr && node.attr.authors) {
@@ -97,12 +95,10 @@ const setAuthorInfo = (v2, meta, tree) => {
 const setMiscMetaProperties = (v2, meta) => {
   // TITLE (required)
   v2.title = meta.title;
-  delete meta.title;
   // VERSION (not required)
   v2.version = "2.0.alpha";
   // UPDATED (required)
   v2.updated = meta.updated;
-  delete meta.updated;
   if (!v2.updated) {
     utils.warn("\"Updated\" field not provided in v1 meta JSON but is required");
   }
@@ -116,22 +112,18 @@ const setMiscMetaProperties = (v2, meta) => {
       {name: "unknown", url: "https://nextstrain.org"}
     ];
   }
-  delete meta.maintainer;
 
   // (GENOME) ANNOTATIONS
   if (meta.annotations) {
     v2.genome_annotations = meta.annotations;
-    delete meta.annotations;
   }
   // FILTERS
   if (meta.filters) {
     v2.filters = meta.filters;
-    delete meta.filters;
   }
   // PANELS
   if (meta.panels) {
     v2.panels = meta.panels;
-    delete meta.panels;
   }
   // [DISPLAY_]DEFAULTS
   if (meta.defaults) {
@@ -145,7 +137,21 @@ const setMiscMetaProperties = (v2, meta) => {
   // GEO[GRAPHIC_INFO]
   if (meta.geo) {
     v2.geographic_info = meta.geo;
-    delete meta.geo;
+  }
+};
+
+const setVaccineChoicesOnNodes = (meta, tree) => {
+  if (meta.vaccine_choices) {
+    const cb = (n) => {
+      if (meta.vaccine_choices[n.strain]) {
+        n.vaccine = {
+          /* in v1 JSONs the only date provided was (typically) the selecion date,
+          but note that the cross is always drawn on the tip (i.e. sample date) */
+          selection_date: meta.vaccine_choices[n.strain]
+        };
+      }
+    };
+    traverseTree(tree, cb);
   }
 };
 
@@ -154,12 +160,11 @@ const convert = ({tree, meta, treeName, displayUrl}) => {
   setColorings(v2, meta);
   setMiscMetaProperties(v2, meta);
   setAuthorInfo(v2, meta, tree);
-  console.log(v2);
+  setVaccineChoicesOnNodes(meta, tree);
 
   /* add the rest in the same format as auspice currently expects
   (neither v1 nor v2!). */
   v2.tree = tree;
-  v2.meta = meta;
   v2._treeName = treeName;
   v2._displayUrl = displayUrl;
   return v2;

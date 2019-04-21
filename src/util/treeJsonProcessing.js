@@ -147,32 +147,11 @@ const appendParentsToTree = (root) => {
   }
 };
 
-/**
-*  if the metadata JSON defines vaccine strains then create an array of the nodes
-*  @param nodes - nodes
-*  @param vaccineChoices - undefined or the object from the metadata JSON linking strain names to dates
-*  @returns array  - array of nodes that are vaccines. NOTE these are references to the nodes array
-*  side-effects: adds the vaccineDate property to the relevent nodes
-*/
-const processVaccines = (nodes, vaccineChoices) => {
-  if (!vaccineChoices) {return false;}
-  const names = Object.keys(vaccineChoices);
-  const vaccines = nodes.filter((d) => names.indexOf(d.strain) !== -1);
-  vaccines.forEach((d) => {
-    d.vaccineDate = vaccineChoices[d.strain];
-    d.vaccineDateNumeric = calendarToNumeric(vaccineChoices[d.strain]);
-  });
-  return vaccines;
-};
-
-
-export const treeJsonToState = (treeJSON, vaccineChoices) => {
+export const treeJsonToState = (treeJSON) => {
   appendParentsToTree(treeJSON);
   const nodesArray = flattenTree(treeJSON);
   const nodes = processNodes(nodesArray);
-  const vaccines = vaccineChoices ?
-    processVaccines(nodes, vaccineChoices) :
-    [];
+  const vaccines = nodes.filter((d) => d.hasOwnProperty("vaccine"));
   const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
   const attrs = getAttrsOnTerminalNodes(nodes);
   return Object.assign({}, getDefaultTreeState(), {

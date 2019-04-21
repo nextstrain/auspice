@@ -482,12 +482,9 @@ export const createStateFromQueryOrJSONs = ({
   let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (json) {
+    console.log(json);
     /* create metadata state */
-    metadata = json.meta;
-    console.log("Metadata JSONs still to do:", Object.keys(metadata));
-    if (metadata === undefined) {
-      metadata = {};
-    }
+    metadata = {};
     if (json.colorings) {
       metadata.colorings = json.colorings;
     }
@@ -541,11 +538,11 @@ export const createStateFromQueryOrJSONs = ({
     /* entropy state */
     entropy = entropyCreateState(metadata.genomeAnnotations);
     /* new tree state(s) */
-    tree = treeJsonToState(json.tree, metadata.vaccine_choices);
+    tree = treeJsonToState(json.tree);
     tree.debug = "LEFT";
     metadata.mainTreeNumTips = calcTotalTipsInTree(tree.nodes);
     if (json.treeTwo) {
-      treeToo = treeJsonToState(json.treeTwo, metadata.vaccine_choices);
+      treeToo = treeJsonToState(json.treeTwo);
       treeToo.debug = "RIGHT";
       treeToo.name = json._treeTwoName;
       /* TODO: calc & display num tips in 2nd tree */
