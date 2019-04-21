@@ -285,7 +285,7 @@ const modifyStateViaTree = (state, tree, treeToo) => {
 
   /* does the tree have date information? if not, disable controls, modify view */
   state.branchLengthsToDisplay = !tree.nodes[0].num_date ? "divOnly" :
-    Object.keys(tree.nodes[0].attr).indexOf("div") === -1 ? "dateOnly" : "divAndDate";
+    tree.nodes[0].div===undefined ? "dateOnly" : "divAndDate";
 
   /* if branchLengthsToDisplay is "divOnly", force to display by divergence
    * if branchLengthsToDisplay is "dateOnly", force to display by date
