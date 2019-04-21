@@ -206,7 +206,7 @@ class DownloadModal extends React.Component {
   }
   createSummaryWrapper() {
     return createSummary(
-      this.props.metadata.virus_count,
+      this.props.metadata.mainTreeNumTips,
       this.props.nodes,
       this.props.filters,
       this.props.visibility,

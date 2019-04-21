@@ -6,7 +6,7 @@ import { strainNameToIdx, cladeNameToIdx, calculateVisiblityAndBranchThickness }
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { calcTipRadii } from "../util/tipRadiusHelpers";
 import { getDefaultControlsState } from "../reducers/controls";
-import { countTraitsAcrossTree } from "../util/treeCountingHelpers";
+import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
 import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
@@ -543,11 +543,15 @@ export const createStateFromQueryOrJSONs = ({
     /* new tree state(s) */
     tree = treeJsonToState(json.tree, metadata.vaccine_choices);
     tree.debug = "LEFT";
+    metadata.mainTreeNumTips = calcTotalTipsInTree(tree.nodes);
     if (json.treeTwo) {
       treeToo = treeJsonToState(json.treeTwo, metadata.vaccine_choices);
       treeToo.debug = "RIGHT";
       treeToo.name = json._treeTwoName;
+      /* TODO: calc & display num tips in 2nd tree */
+      // metadata.secondTreeNumTips = calcTotalTipsInTree(treeToo.nodes);
     }
+
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
     controls = modifyStateViaTree(controls, tree, treeToo);
