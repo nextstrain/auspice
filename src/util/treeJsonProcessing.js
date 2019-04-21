@@ -1,5 +1,4 @@
-import { getAttrsOnTerminalNodes, getDefaultTreeState } from "../reducers/tree";
-import { calendarToNumeric } from "./dateHelpers";
+import { getDefaultTreeState } from "../reducers/tree";
 
 /**
 * for each node, calculate the number of subtending tips (alive or dead)
@@ -30,10 +29,8 @@ const calcFullTipCounts = (node) => {
 const processNodes = (nodes) => {
   calcFullTipCounts(nodes[0]); /* recursive. Uses d.children */
   nodes.forEach((d, idx) => {
-    if (typeof d.attr === "undefined") d.attr = {};
     d.arrayIdx = idx; /* set an index so that we can access visibility / nodeColors if needed */
     d.hasChildren = typeof d.children !== "undefined";
-    d.yvalue = undefined; /* calculate later in auspice */
   });
   return nodes;
 };
@@ -122,8 +119,7 @@ export const treeJsonToState = (treeJSON) => {
     d.hasOwnProperty("vaccine") && (Object.keys(d.vaccine).length > 1 || Object.keys(d.vaccine)[0] !== "serum")
   );
   const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
-  const attrs = getAttrsOnTerminalNodes(nodes);
   return Object.assign({}, getDefaultTreeState(), {
-    nodes, vaccines, availableBranchLabels, attrs, loaded: true
+    nodes, vaccines, availableBranchLabels, loaded: true
   });
 };

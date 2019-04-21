@@ -162,11 +162,11 @@ const setVaccineChoicesOnNodes = (meta, tree) => {
 };
 
 const storeTreeAsV2 = (v2, tree) => {
-  const attrs = new Set();
-  const propsRemoved = new Set();
+  // const attrsWhichRemain = new Set();
+  // const propsRemoved = new Set();
 
-  const allowedProperties = ["strain", "div", "num_date", "vaccine", "labels", "hidden", "mutations", "url", "accession", "traits", "children"];
-  allowedProperties.push("attr"); // DEPRECATED
+  const allowedProperties = ["strain", "div", "num_date", "vaccine", "labels", "hidden", "mutations", "url", "accession", "traits", "children", "authors"];
+  const attrsToIgnore = ["clock_length", "date", "raw_date", "strain"];
 
   traverseTree(tree, (node) => {
     // strain: already set
@@ -221,9 +221,25 @@ const storeTreeAsV2 = (v2, tree) => {
         node.div = node.attr.div;
         delete node.attr.div;
       }
-      // Remove properties which are not part of the v2 spec.
-      Object.keys(node.attr).forEach((a) => {attrs.add(a)});
+
+      /* Transfer the remaining `node.attr[x]` to `node.traits[x]` (different shape) */
+      const traitKeys = Object.keys(node.attr)
+        .filter((a) => !a.endsWith("_entropy") && !a.endsWith("_confidence"))
+        .filter((a) => !attrsToIgnore.includes(a));
+      if (traitKeys.length) node.traits = {};
+      for (const trait of traitKeys) {
+        const data = {value: node.attr[trait]};
+        if (node.attr[`${trait}_confidence`]) {
+          data.confidence = node.attr[`${trait}_confidence`];
+        }
+        if (node.attr[`${trait}_entropy`]) {
+          data.entropy = node.attr[`${trait}_entropy`];
+        }
+        node.traits[trait] = data;
+      }
+      // Object.keys(node.attr).forEach((a) => {attrsWhichRemain.add(a);});
     }
+
     // NUC + AA MUTATIONS
     if (node.muts || node.aa_muts) {
       node.mutations = {};
@@ -237,31 +253,27 @@ const storeTreeAsV2 = (v2, tree) => {
     Object.keys(node)
       .filter((prop) => !allowedProperties.includes(prop))
       .forEach((prop) => {
-        propsRemoved.add(prop);
+        // propsRemoved.add(prop);
         delete node[prop];
       });
+
   });
 
-  // console.log(attrs);
-  console.log("Props removed (from v1 tree nodes):", propsRemoved);
+  // console.log("These attrs were left over:", attrsWhichRemain);
+  // console.log("Props removed (from v1 tree nodes):", propsRemoved);
 
   v2.tree = tree;
 };
 
 
-const convert = ({tree, meta, treeName, displayUrl}) => {
+const convert = ({tree, meta, treeName}) => {
   const v2 = {};
   setColorings(v2, meta);
   setMiscMetaProperties(v2, meta);
   setAuthorInfo(v2, meta, tree);
   setVaccineChoicesOnNodes(meta, tree);
   storeTreeAsV2(v2, tree);
-
-  /* add the rest in the same format as auspice currently expects
-  (neither v1 nor v2!). */
-  // v2.tree = tree;
   v2._treeName = treeName;
-  v2._displayUrl = displayUrl;
   return v2;
 };
 

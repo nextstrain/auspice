@@ -28,15 +28,6 @@ export const getDefaultTreeState = () => {
   };
 };
 
-export const getAttrsOnTerminalNodes = (nodes) => {
-  for (const node of nodes) {
-    if (!node.hasChildren) {
-      return Object.keys(node.attr).filter((v) => v.toLowerCase() !== "strain");
-    }
-  }
-  console.error("Parsed tree without terminal nodes.");
-  return undefined;
-};
 
 const Tree = (state = getDefaultTreeState(), action) => {
   switch (action.type) {
@@ -73,18 +64,19 @@ const Tree = (state = getDefaultTreeState(), action) => {
       });
     case types.TREE_TOO_DATA:
       return action.tree;
-    case types.ADD_COLOR_BYS:
-      /* modify in place ?!?! */
-      for (const node of state.nodes) {
-        if (action.taxa.indexOf(node.strain) !== -1) {
-          action.newColorBys.forEach((colorBy, idx) => {
-            node.attr[colorBy] = action.data[node.strain][idx];
-          });
-        }
-      }
-      return Object.assign({}, state, {
-        attrs: getAttrsOnTerminalNodes(state.nodes)
-      });
+    // TODO -- reinstate CSV drag & drop functionality
+    // case types.ADD_COLOR_BYS:
+    //   /* modify in place ?!?! */
+    //   for (const node of state.nodes) {
+    //     if (action.taxa.indexOf(node.strain) !== -1) {
+    //       action.newColorBys.forEach((colorBy, idx) => {
+    //         node.attr[colorBy] = action.data[node.strain][idx];
+    //       });
+    //     }
+    //   }
+    //   return Object.assign({}, state, {
+    //     attrs: getAttrsOnTerminalNodes(state.nodes)
+    //   });
     default:
       return state;
   }

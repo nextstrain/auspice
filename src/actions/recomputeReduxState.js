@@ -15,10 +15,11 @@ import { calcColorScale } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
+import { getTraitFromNode } from "../util/treeMiscHelpers";
 
-export const checkColorByConfidence = (attrs, colorBy) => {
-  return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
-};
+
+export const doesColorByHaveConfidence = (controlsState, colorBy) =>
+  controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
 
 export const getMinCalDateViaTree = (nodes, state) => {
   /* slider should be earlier than actual day */
@@ -229,7 +230,7 @@ const modifyStateViaMetadata = (state, metadata) => {
   return state;
 };
 
-const modifyControlsStateViaTree = (state, tree, treeToo) => {
+const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   state["dateMin"] = getMinCalDateViaTree(tree.nodes, state);
   state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
   state.dateMinNumeric = calendarToNumeric(state.dateMin);
@@ -256,21 +257,32 @@ const modifyControlsStateViaTree = (state, tree, treeToo) => {
   state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
   state.absoluteDateMaxNumeric = calendarToNumeric(state.absoluteDateMax);
 
-  /* collect all available tree traits, and available mutations */
-  const attrs = new Set();
+  /* For the colorings (defined in the JSON) we need to check whether they
+  (a) actually exist on the tree and (b) have confidence values.
+  TODO - this whole file should be reorganised to make things clearer.
+  perhaps there's a better place to put this... */
+  state.coloringsPresentOnTree = new Set();
+  state.coloringsPresentOnTreeWithConfidence = new Set(); // subset of above
+
+  let coloringsToCheck = [];
+  if (colorings) {
+    coloringsToCheck = Object.keys(colorings);
+  }
   let [aaMuts, nucMuts] = [false, false];
   const examineNodes = function examineNodes(nodes) {
     nodes.forEach((node) => {
-      if (node.attr) {
-        Object.keys(node.attr).forEach((attr) => {
-          attrs.add(attr);
-        });
-      }
-      if (node.traits) {
-        Object.keys(node.traits).forEach((trait) => {
-          attrs.add(trait);
-        });
-      }
+      /* check colorBys */
+      coloringsToCheck.forEach((colorBy) => {
+        if (!state.coloringsPresentOnTreeWithConfidence.has(colorBy)) {
+          if (getTraitFromNode(node, colorBy, {confidence: true})) {
+            state.coloringsPresentOnTreeWithConfidence.add(colorBy);
+            state.coloringsPresentOnTree.add(colorBy);
+          } else if (getTraitFromNode(node, colorBy)) {
+            state.coloringsPresentOnTree.add(colorBy);
+          }
+        }
+      });
+      /* check mutations */
       if (node.mutations) {
         const keys = Object.keys(node.mutations);
         if (keys.length > 1 || (keys.length === 1 && keys[0]!=="nuc")) aaMuts = true;
@@ -279,10 +291,8 @@ const modifyControlsStateViaTree = (state, tree, treeToo) => {
     });
   };
   examineNodes(tree.nodes);
-  if (treeToo) {
-    examineNodes(treeToo.nodes);
-  }
-  state.attrs = [...attrs]; /* convert to list */
+  if (treeToo) examineNodes(treeToo.nodes);
+
 
   /* ensure specified mutType is indeed available */
   if (!aaMuts && !nucMuts) {
@@ -291,6 +301,9 @@ const modifyControlsStateViaTree = (state, tree, treeToo) => {
     state.mutType = "nuc";
   } else if (state.mutType === "nuc" && !nucMuts) {
     state.mutType = "aa";
+  }
+  if (aaMuts || nucMuts) {
+    state.coloringsPresentOnTree.add("gt");
   }
 
   /* does the tree have date information? if not, disable controls, modify view */
@@ -359,7 +372,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   }
 
   /* colorBy confidence */
-  state["colorByConfidence"] = checkColorByConfidence(state["attrs"], state["colorBy"]);
+  state["colorByConfidence"] = doesColorByHaveConfidence(state, state["colorBy"]);
 
   /* distanceMeasure */
   if (["div", "num_date"].indexOf(state["distanceMeasure"]) === -1) {
@@ -490,7 +503,6 @@ export const createStateFromQueryOrJSONs = ({
   let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (json) {
-    console.log(json);
     /* create metadata state */
     metadata = {};
     if (json.colorings) {
@@ -559,7 +571,7 @@ export const createStateFromQueryOrJSONs = ({
 
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
-    controls = modifyControlsStateViaTree(controls, tree, treeToo);
+    controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata.colorings);
     controls = modifyStateViaMetadata(controls, metadata);
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
@@ -593,7 +605,7 @@ export const createStateFromQueryOrJSONs = ({
     const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
     const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;
-    controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
+    controls.colorByConfidence = doesColorByHaveConfidence(controls, controls.colorBy);
     tree.nodeColorsVersion = colorScale.version;
     tree.nodeColors = nodeColors;
   }
@@ -653,7 +665,7 @@ export const createTreeTooState = ({
   const tree = Object.assign({}, oldState.tree);
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo.debug = "RIGHT";
-  controls = modifyControlsStateViaTree(controls, tree, treeToo);
+  controls = modifyControlsStateViaTree(controls, tree, treeToo, oldState.metadata.colorings);
   controls = modifyControlsViaTreeToo(controls, segment);
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls);
 
@@ -664,7 +676,7 @@ export const createTreeTooState = ({
   tree.nodeColorsVersion++;
 
   controls.colorScale = colorScale;
-  controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
+  controls.colorByConfidence = doesColorByHaveConfidence(controls, controls.colorBy);
   treeToo.nodeColorsVersion = colorScale.version;
   treeToo.nodeColors = nodeColors;
 

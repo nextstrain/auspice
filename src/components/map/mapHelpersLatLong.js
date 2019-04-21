@@ -5,7 +5,7 @@ import { interpolateNumber } from "d3-interpolate";
 import { averageColors } from "../../util/colorHelpers";
 import { bezier } from "./transmissionBezier";
 import { NODE_NOT_VISIBLE } from "../../util/globals";
-
+import { getTraitFromNode } from "../../util/treeMiscHelpers";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -52,9 +52,10 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   const demeMap = {};
   nodes.forEach((n) => {
     if (!n.children) {
-      if (n.attr[geoResolution]) { // check for undefined
-        if (!demeMap[n.attr[geoResolution]]) {
-          demeMap[n.attr[geoResolution]] = [];
+      const location = getTraitFromNode(n, geoResolution);
+      if (location) { // check for undefined
+        if (!demeMap[location]) {
+          demeMap[location] = [];
         }
       }
     }
@@ -65,8 +66,9 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
     /* demes only count terminal nodes */
     if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
       // if tip and visible, push
-      if (n.attr[geoResolution]) { // check for undefined
-        demeMap[n.attr[geoResolution]].push(nodeColors[i]);
+      const location = getTraitFromNode(n, geoResolution);
+      if (location) { // check for undefined
+        demeMap[location].push(nodeColors[i]);
       }
     }
   });
@@ -141,21 +143,19 @@ const maybeConstructTransmissionEvent = (
   let latOrig, longOrig, latDest, longDest;
   let transmission;
   /* checking metadata for lat longs name match - ie., does the metadata list a latlong for Thailand? */
+  const nodeLocation = getTraitFromNode(node, geoResolution); //  we're looking this up in the metadata lookup table
+  const childLocation = getTraitFromNode(child, geoResolution);
   try {
-    // node.attr[geoResolution] is the node's location, we're looking that up in the metadata lookup table
-    latOrig = metadataGeoLookupTable[geoResolution][node.attr[geoResolution]].latitude;
-    longOrig = metadataGeoLookupTable[geoResolution][node.attr[geoResolution]].longitude;
+    latOrig = metadataGeoLookupTable[geoResolution][nodeLocation].latitude;
+    longOrig = metadataGeoLookupTable[geoResolution][nodeLocation].longitude;
   } catch (e) {
-    // console.warn("No transmission lat/longs for ", node.attr[geoResolution], " -> ",child.attr[geoResolution], "If this wasn't fired in the context of a dataset change, it's probably a bug.")
-    demesMissingLatLongs.add(node.attr[geoResolution]);
+    demesMissingLatLongs.add(nodeLocation);
   }
   try {
-    // node.attr[geoResolution] is the node's location, we're looking that up in the metadata lookup table
-    latDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].latitude;
-    longDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].longitude;
+    latDest = metadataGeoLookupTable[geoResolution][childLocation].latitude;
+    longDest = metadataGeoLookupTable[geoResolution][childLocation].longitude;
   } catch (e) {
-    console.warn("No transmission lat/longs for ", node.attr[geoResolution], " -> ", child.attr[geoResolution], "If this wasn't fired in the context of a dataset change, it's probably a bug.");
-    return undefined;
+    demesMissingLatLongs.add(childLocation);
   }
 
   const validLatLongPair = maybeGetTransmissionPair(
@@ -189,8 +189,8 @@ const maybeConstructTransmissionEvent = (
       destinationNode: child,
       bezierCurve: Bcurve,
       bezierDates: Bdates,
-      originName: node.attr[geoResolution],
-      destinationName: child.attr[geoResolution],
+      originName: getTraitFromNode(node, geoResolution),
+      destinationName: getTraitFromNode(child, geoResolution),
       originCoords: validLatLongPair[0], // after interchange
       destinationCoords: validLatLongPair[1], // after interchange
       originLatitude: latOrig, // raw latitude value
@@ -269,10 +269,10 @@ const setupTransmissionData = (
   const demesMissingLatLongs = new Set();
   const demeToDemeCounts = {};
   nodes.forEach((n) => {
-    const nodeDeme = n.attr[geoResolution];
+    const nodeDeme = getTraitFromNode(n, geoResolution);
     if (n.children) {
       n.children.forEach((child) => {
-        const childDeme = child.attr[geoResolution];
+        const childDeme = getTraitFromNode(child, geoResolution);
         if (nodeDeme && childDeme && nodeDeme !== childDeme) {
           // record transmission event
           if ([nodeDeme, childDeme] in demeToDemeCounts) {
@@ -380,10 +380,9 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
     /* demes only count terminal nodes */
     if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
       // if tip and visible, push
-      if (n.attr[geoResolution]) { // check for undefined
-        if (n.attr[geoResolution] in demeMap) {
-          demeMap[n.attr[geoResolution]].push(nodeColors[i]);
-        }
+      const location = getTraitFromNode(n, geoResolution);
+      if (location && location in demeMap) {
+        demeMap[location].push(nodeColors[i]);
       }
     }
   });
@@ -404,12 +403,9 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
   nodes.forEach((node) => {
     if (node.children) {
       node.children.forEach((child) => {
-        if (
-          node.attr[geoResolution] &&
-          child.attr[geoResolution] &&
-          node.attr[geoResolution] !== child.attr[geoResolution]
-        ) {
-
+        const nodeLocation = getTraitFromNode(node, geoResolution);
+        const childLocation = getTraitFromNode(node, geoResolution);
+        if (nodeLocation && childLocation && nodeLocation !== childLocation) {
           // this is a transmission event from n to child
           const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
           const col = nodeColors[node.arrayIdx];

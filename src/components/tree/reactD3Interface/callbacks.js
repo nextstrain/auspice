@@ -4,6 +4,7 @@ import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
 import { branchOpacityFunction } from "../../../util/colorHelpers";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getDomId } from "../phyloTree/helpers";
+import { getTraitFromNode } from "../../../util/treeMiscHelpers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
@@ -42,7 +43,8 @@ export const onBranchHover = function onBranchHover(d) {
     if (this.props.colorByConfidence) {
       this.state.tree.svg.select(id)
         .style("stroke", (el) => { // eslint-disable-line no-loop-func
-          const ramp = branchOpacityFunction(this.props.tree.nodes[el.n.arrayIdx].attr[this.props.colorBy + "_entropy"]);
+          const entropyValue = getTraitFromNode(this.props.tree.nodes[el.n.arrayIdx], this.props.colorBy, {entropy: true});
+          const ramp = branchOpacityFunction(entropyValue);
           const raw = this.props.tree.nodeColors[el.n.arrayIdx];
           const base = el.branchStroke;
           return rgb(interpolateRgb(raw, base)(ramp)).toString();

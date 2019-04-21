@@ -56,7 +56,6 @@ export const publications = {
   visibleStateCounts: state.tree.visibleStateCounts,
   filters: state.controls.filters,
   visibility: state.tree.visibility,
-  treeAttrs: state.tree.attrs,
   panelsToDisplay: state.controls.panelsToDisplay,
   panelLayout: state.controls.panelLayout,
   authorInfo: state.metadata.authorInfo
@@ -184,7 +183,7 @@ class DownloadModal extends React.Component {
     const buttons = [
       ["Tree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
       ["TimeTree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
-      ["Strain Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.treeAttrs, this.props.authorInfo)],
+      ["Strain Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.authorInfo)],
       ["Author Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.metadata, this.props.tree)],
       ["Screenshot (SVG)", (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
     ];
