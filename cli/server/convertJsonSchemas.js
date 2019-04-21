@@ -210,6 +210,11 @@ const storeTreeAsV2 = (v2, tree) => {
           delete node.attr.num_date_confidence;
         }
       }
+      // div (NOTE div can be 0)
+      if (node.attr.div !== undefined) {
+        node.div = node.attr.div;
+        delete node.attr.div;
+      }
     }
 
   });

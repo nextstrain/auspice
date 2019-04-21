@@ -37,7 +37,7 @@ const renderInfoBlock = (item, values) => (
 
 
 const renderBranchDivergence = (d) =>
-  renderInfoLine("Divergence:", prettyString(d.attr.div.toExponential(3)));
+  renderInfoLine("Divergence:", prettyString(d.div.toExponential(3)));
 
 
 const renderBranchTime = (d, temporalConfidence) => {

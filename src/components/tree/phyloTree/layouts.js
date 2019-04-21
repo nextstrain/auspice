@@ -63,10 +63,10 @@ export const rectangularLayout = function rectangularLayout() {
  */
 export const timeVsRootToTip = function timeVsRootToTip() {
   this.nodes.forEach((d) => {
-    d.y = d.n.attr["div"];
+    d.y = d.n.div;
     d.x = d.n.num_date.value;
     d.px = d.n.parent.num_date.value;
-    d.py = d.n.parent.attr["div"];
+    d.py = d.n.parent.div;
   });
   if (this.vaccines) { /* overlay vaccine cross on tip */
     this.vaccines.forEach((d) => {
@@ -208,8 +208,8 @@ export const setDistance = function setDistance(distanceAttribute) {
   // assign node and parent depth
   if (this.distance === "div") {
     this.nodes.forEach((d) => {
-      d.depth = d.n.attr.div;
-      d.pDepth = d.n.parent.attr.div;
+      d.depth = d.n.div;
+      d.pDepth = d.n.parent.div;
       d.conf = [d.depth, d.depth]; // TO DO - shouldn't be needed, never have div confidence...
     });
   } else {
