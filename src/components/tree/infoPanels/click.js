@@ -2,7 +2,8 @@ import React from "react";
 import { infoPanelStyles } from "../../../globalStyles";
 import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
-// import { getAuthor } from "../download/helperFunctions";
+import { getTraitFromNode } from "../../../util/treeMiscHelpers";
+import { access } from "fs";
 
 export const styles = {
   container: {
@@ -22,6 +23,8 @@ export const styles = {
     wordBreak: "break-word"
   }
 };
+
+const isValueValid = (value) => (value !== "?" && value !== undefined && value !== "undefined");
 
 export const stopProp = (e) => {
   if (!e) {e = window.event;} // eslint-disable-line no-param-reassign
@@ -50,19 +53,35 @@ const dateConfidence = (x) => (
   item("Collection date confidence", `(${numericToCalendar(x[0])}, ${numericToCalendar(x[1])})`)
 );
 
-const accessionAndURL = (url, accession) => (
-  <tr>
-    <th>Accession</th>
-    <td><a href={url} target="_blank">{accession}</a></td>
-  </tr>
-);
+const accessionAndUrl = (node) => {
+  const accession = node.accession;
+  const url = node.url;
 
-const justURL = (url) => (
-  <tr>
-    <th>URL</th>
-    <td><a href={url} target="_blank"><em>click here</em></a></td>
-  </tr>
-);
+  if (isValueValid(accession) && isValueValid(url)) {
+    return (
+      <tr>
+        <th style={infoPanelStyles.item}>Accession</th>
+        <td style={infoPanelStyles.item}>
+          <a href={formatURL(url)} target="_blank">{accession}</a>
+        </td>
+      </tr>
+    );
+  } else if (isValueValid(accession)) {
+    return (
+      item("Accession", accession)
+    );
+  } else if (isValueValid(url)) {
+    return (
+      <tr>
+        <th style={infoPanelStyles.item}>URL</th>
+        <td style={infoPanelStyles.item}>
+          <a href={formatURL(url)} target="_blank"><em>click here</em></a>
+        </td>
+      </tr>
+    );
+  }
+  return null;
+};
 
 const displayVaccineInfo = (d) => {
   if (d.n.vaccineDate) {
@@ -94,12 +113,8 @@ const displayPublicationInfo = (authorKey, authorInfo) => {
   );
 };
 
-const validValue = (value) => value !== "?" && value !== undefined && value !== "undefined";
-const validAttr = (attrs, key) => key in attrs && validValue(attrs[key]);
-
 const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
   if (!tip) {return null;}
-  const url = validAttr(tip.n.attr, "url") ? formatURL(tip.n.attr.url) : false;
   const uncertainty = "num_date_confidence" in tip.n.attr && tip.n.attr.num_date_confidence[0] !== tip.n.attr.num_date_confidence[1];
 
   return (
@@ -113,7 +128,8 @@ const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
             {displayVaccineInfo(tip) /* vaccine information (if applicable) */}
             {/* the "basic" attributes (which may not exist in certain datasets) */}
             {["country", "region", "division"].map((x) => {
-              return validAttr(tip.n.attr, x) ? item(prettyString(x), prettyString(tip.n.attr[x])) : null;
+              const value = getTraitFromNode(tip.n, x);
+              return isValueValid(value) ? item(prettyString(x), prettyString(value)) : null;
             })}
             {/* Dates */}
             {item(uncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
@@ -121,12 +137,7 @@ const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
             {/* Author / Paper information */}
             {displayPublicationInfo(tip.n.authors, authorInfo)}
             {/* try to join URL with accession, else display the one that's available */}
-            {url && validAttr(tip.n.attr, "accession") ?
-              accessionAndURL(url, tip.n.attr.accession) :
-              url ? justURL(url) :
-                validAttr(tip.n.attr, "accession") ? item("Accession", tip.n.attr.accession) :
-                  null
-            }
+            {accessionAndUrl(tip.n)}
           </tbody>
         </table>
         <p style={infoPanelStyles.comment}>

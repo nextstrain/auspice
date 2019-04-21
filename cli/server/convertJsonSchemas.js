@@ -164,6 +164,16 @@ const storeTreeAsV2 = (v2, tree) => {
       node.authors = node.attr.authors;
       delete node.attr.authors;
     }
+    // accession, likewise moves to the node (from `node.attr.accession`)
+    if (node.attr && node.attr.accession) {
+      node.accession = node.attr.accession;
+      delete node.attr.accession;
+    }
+    // url, likewise moves to the node (from `node.attr.accession`)
+    if (node.attr && node.attr.url) {
+      node.url = node.attr.url;
+      delete node.attr.url;
+    }
   });
 
 
