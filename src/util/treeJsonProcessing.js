@@ -39,48 +39,15 @@ const processNodes = (nodes) => {
 };
 
 /**
-*  this function is changing as augur changes
-*  @param {obj} nodes - nodes
-*  @returns {list} avialble branch labels, with "none" the first element
-*  side-effects: deletes "clade_name", "named_clades", "clade_assignment" out of node.attrs for all nodes.
-*  adds node.attrs.labels {obj} to certain nodes.
-*/
+ * Scan the tree for `node.labels` dictionaries and collect all available
+ * (These are the options for the "Branch Labels" sidebar dropdown)
+ * @param {Array} nodes tree nodes (flat)
+ */
 const processBranchLabelsInPlace = (nodes) => {
   const availableBranchLabels = new Set();
   nodes.forEach((n) => {
-    const labels = []; /* [clade (str), aa (str)] */
-    /* CLADE */
-    if (n.attr.clade_name) {
-      labels[0] = n.attr.clade_name;
-      delete n.attr.clade_name;
-    }
-    if (n.attr.clade_annotation) {
-      labels[0] = n.attr.clade_annotation;
-      delete n.attr.clade_annotation;
-    }
-    /* AA */
-    const muts = [];
-    if (n.aa_muts) {
-      for (const aa in n.aa_muts) { // eslint-disable-line
-        if (n.aa_muts[aa].length) {
-          muts.push(`${aa}: ${n.aa_muts[aa].join(", ")}`);
-        }
-      }
-    }
-    if (muts.length) {
-      labels[1] = muts.join("; ");
-    }
-    /* ADD TO ATTR */
-    if (labels.length) {
-      n.attr.labels = {};
-      if (labels[0]) {
-        n.attr.labels.clade = labels[0];
-        availableBranchLabels.add("clade");
-      }
-      if (labels[1]) {
-        n.attr.labels.aa = labels[1];
-        availableBranchLabels.add("aa");
-      }
+    if (n.labels) {
+      Object.keys(n.labels).forEach((labelName) => availableBranchLabels.add(labelName));
     }
   });
   return ["none", ...availableBranchLabels];

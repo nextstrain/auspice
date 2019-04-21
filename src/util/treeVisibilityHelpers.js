@@ -21,14 +21,22 @@ export const strainNameToIdx = (nodes, name) => {
   return 0;
 };
 
-export const cladeNameToIdx = (nodes, name) => {
+/**
+ * Find the node with the given label name & value
+ * NOTE: if there are multiple nodes with the same label then the first encountered is returned
+ * @param {Array} nodes tree nodes (flat)
+ * @param {string} labelName label name
+ * @param {string} labelValue label value
+ * @returns {int} the index of the matching node (0 if no match found)
+ */
+export const getIdxMatchingLabel = (nodes, labelName, labelValue) => {
   let i;
   for (i = 0; i < nodes.length; i++) {
-    if (nodes[i].attr.labels !== undefined && nodes[i].attr.labels.clade !== undefined && nodes[i].attr.labels.clade === name) {
+    if (nodes[i].labels !== undefined && nodes[i].labels[labelName] === labelValue) {
       return i;
     }
   }
-  console.error("cladeNameToIdx couldn't find clade");
+  console.error(`getIdxMatchingLabel couldn't find label ${labelName}===${labelValue}`);
   return 0;
 };
 
