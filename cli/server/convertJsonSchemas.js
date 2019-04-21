@@ -273,7 +273,7 @@ const convert = ({tree, meta, treeName}) => {
   setAuthorInfo(v2, meta, tree);
   setVaccineChoicesOnNodes(meta, tree);
   storeTreeAsV2(v2, tree);
-  v2._treeName = treeName;
+  v2.tree_name = treeName;
   return v2;
 };
 
