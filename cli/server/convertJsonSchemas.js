@@ -142,7 +142,7 @@ const setMiscMetaProperties = (v2, meta) => {
 
 const setVaccineChoicesOnNodes = (meta, tree) => {
   if (meta.vaccine_choices) {
-    const cb = (n) => {
+    traverseTree(tree, (n) => {
       if (meta.vaccine_choices[n.strain]) {
         n.vaccine = {
           /* in v1 JSONs the only date provided was (typically) the selecion date,
@@ -150,9 +150,16 @@ const setVaccineChoicesOnNodes = (meta, tree) => {
           selection_date: meta.vaccine_choices[n.strain]
         };
       }
-    };
-    traverseTree(tree, cb);
+    });
   }
+  /* move `node.serum` (if value is true) to `node.vaccine.serum` */
+  traverseTree(tree, (n) => {
+    if (n.serum) {
+      if (!n.vaccine) n.vaccine = {};
+      n.vaccine.serum = true;
+      console.log(n);
+    }
+  });
 };
 
 const storeTreeAsV2 = (v2, tree) => {

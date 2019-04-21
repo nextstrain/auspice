@@ -5,19 +5,24 @@ import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 
-const renderInfoLine = (item, value) => (
-  <span>
-    <span style={{fontWeight: "500"}}>
-      {item + " "}
-    </span>
-    <span style={{fontWeight: "300"}}>
-      {value}
-    </span>
-  </span>
-);
+const renderInfoLine = (item, value, {noPadding=false}={}) => {
+  const style = noPadding ? {} : {paddingBottom: "7px"};
+  return (
+    <div style={style} key={item}>
+      <span style={{fontWeight: "500"}}>
+        {item + " "}
+      </span>
+      {value ? (
+        <span style={{fontWeight: "300"}}>
+          {value}
+        </span>
+      ) : null}
+    </div>
+  );
+};
 
 const renderInfoBlock = (item, values) => (
-  <div>
+  <div style={{paddingBottom: "7px"}}>
     <p style={{marginBottom: "-0.7em", fontWeight: "500"}}>
       {item}
     </p>
@@ -30,15 +35,10 @@ const renderInfoBlock = (item, values) => (
   </div>
 );
 
-const VerticalBreak = () => (
-  <br style={{display: "block", marginTop: "10px", lineHeight: "22px"}} />
-);
 
-const renderBranchDivergence = (d) => (
-  <p>
-    {renderInfoLine("Divergence:", prettyString(d.attr.div.toExponential(3)))}
-  </p>
-);
+const renderBranchDivergence = (d) =>
+  renderInfoLine("Divergence:", prettyString(d.attr.div.toExponential(3)));
+
 
 const renderBranchTime = (d, temporalConfidence) => {
   const date = d.attr.date || numericToCalendar(d.attr.num_date);
@@ -51,14 +51,13 @@ const renderBranchTime = (d, temporalConfidence) => {
   }
   if (dateRange && dateRange[0] !== dateRange[1]) {
     return (
-      <p>
+      <>
         {renderInfoLine("Inferred Date:", date)}
-        <VerticalBreak/>
         {renderInfoLine("Date Confidence Interval:", `(${dateRange[0]}, ${dateRange[1]})`)}
-      </p>
+      </>
     );
   }
-  return (<p>{renderInfoLine("Date:", date)}</p>);
+  return renderInfoLine("Date:", date);
 };
 
 /**
@@ -66,7 +65,7 @@ const renderBranchTime = (d, temporalConfidence) => {
  * @param  {node} d branch node currently highlighted
  * @param  {bool} colorByConfidence should these (colorBy conf) be displayed, if applicable?
  * @param  {string} colorBy must be a key of d.attr
- * @return {JSX} to be displayed
+ * @return {React Component} to be displayed
  */
 const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidence, colorBy) => {
   if (isColorByGenotype(colorBy)) {
@@ -146,11 +145,10 @@ const getMutationsJSX = (d, mutType) => {
         return renderInfoLine("Gap/N mutations:", mGap);
       }
       return (
-        <p>
+        <>
           {renderInfoLine("Nucleotide mutations:", m)}
-          <VerticalBreak/>
           {renderInfoLine("Gap/N mutations:", mGap)}
-        </p>
+        </>
       );
 
     }
@@ -197,7 +195,7 @@ const getBranchDescendents = (n) => (
       renderInfoLine("Branch leading to", n.strain) :
       renderInfoLine("Number of descendants:", n.fullTipCount)
     }
-    <VerticalBreak/>
+    <br style={{display: "block", lineHeight: "10px"}} />
   </>
 );
 
@@ -263,13 +261,21 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
 };
 
 const displayVaccineInfo = (d) => {
-  if (d.n.vaccineDate) {
-    return (
-      <span>
-        {renderInfoLine("Vaccine strain:", d.n.vaccineDate)}
-        <p/>
-      </span>
-    );
+  if (d.n.vaccine) {
+    const items = [];
+    if (d.n.vaccine.selection_date) {
+      items.push(renderInfoLine("Vaccine selected:", d.n.vaccine.selection_date));
+    }
+    if (d.n.vaccine.start_date) {
+      items.push(renderInfoLine("Vaccine start date:", d.n.vaccine.start_date));
+    }
+    if (d.n.vaccine.end_date) {
+      items.push(renderInfoLine("Vaccine end date:", d.n.vaccine.end_date));
+    }
+    if (d.n.vaccine.serum) {
+      items.push(renderInfoLine("Serum strain", ""));
+    }
+    return items;
   }
   return null;
 };
