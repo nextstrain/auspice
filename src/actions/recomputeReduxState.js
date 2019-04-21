@@ -487,10 +487,15 @@ export const createStateFromQueryOrJSONs = ({
     if (metadata === undefined) {
       metadata = {};
     }
-
     if (json.colorings) {
       metadata.colorings = json.colorings;
     }
+    metadata.title = json.title;
+    metadata.updated = json.updated;
+    if (json.version) {
+      metadata.version = json.version;
+    }
+    metadata.maintainers = json.maintainers;
 
     if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
       console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");

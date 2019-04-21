@@ -354,12 +354,19 @@ class Footer extends React.Component {
       </button>
     );
   }
-  getMaintainer() {
-    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainer")) {
+  renderMaintainers() {
+    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainers")) {
+      const renderLink = (m) => (<a href={m.url} target="_blank">{m.name}</a>);
       return (
-        <span>
-          Build maintained by <a href={this.props.metadata.maintainer[1]} target="_blank">{this.props.metadata.maintainer[0]}</a>
-        </span>
+        <>
+          <span style={{paddingRight: "3px"}}>Build maintained by</span>
+          {this.props.metadata.maintainers.map((m, i) => (
+            <span key={m.name}>
+              {renderLink(m)}
+              {i === this.props.metadata.maintainers.length-1 ? "." : i === this.props.metadata.maintainers.length-2 ? " and " : ", "}
+            </span>
+          ))}
+        </>
       );
     }
     return null;
@@ -394,7 +401,7 @@ class Footer extends React.Component {
             );
           })}
           <Flex style={styles.fineprint}>
-            {this.getMaintainer()}
+            {this.renderMaintainers()}
             {dot}
             {this.getUpdated()}
             {dot}
