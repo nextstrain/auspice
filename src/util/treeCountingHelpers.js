@@ -1,7 +1,8 @@
 import { NODE_VISIBLE } from "./globals";
+import { getTraitFromNode } from "./treeMiscHelpers";
 
 /**
-* traverse the tree to get state counts for supplied traits
+* traverse the tree to get state counts for supplied traits.
 * @param {Array} nodes - list of nodes
 * @param {Array} traits - list of traits to count across the tree
 * @param {Array | false} visibility - if Array provided then only consider visible nodes. If false, consider all nodes.
@@ -13,8 +14,8 @@ export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) =
   traits.forEach((trait) => {counts[trait] = {};});
 
   nodes.forEach((node) => {
-    traits.forEach((trait) => {        // trait is "country" or "author" etc
-      const value = node.attr[trait];  // value is "USA", "Black et al" etc
+    traits.forEach((trait) => {                         // traits are "country" or "author" etc
+      const value = getTraitFromNode(node, trait);      // value is "USA", "black" etc
 
       if (!value || value === "undefined" || value === "?") {
         return;

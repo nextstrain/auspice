@@ -1,6 +1,6 @@
 import React from "react";
 import { infoPanelStyles } from "../../../globalStyles";
-import { prettyString, authorString } from "../../../util/stringHelpers";
+import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 // import { getAuthor } from "../download/helperFunctions";
 
@@ -119,7 +119,7 @@ const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
             {item(uncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
             {uncertainty ? dateConfidence(tip.n.attr.num_date_confidence) : null}
             {/* Author / Paper information */}
-            {displayPublicationInfo(tip.n.attr.authors, authorInfo)}
+            {displayPublicationInfo(tip.n.authors, authorInfo)}
             {/* try to join URL with accession, else display the one that's available */}
             {url && validAttr(tip.n.attr, "accession") ?
               accessionAndURL(url, tip.n.attr.accession) :
