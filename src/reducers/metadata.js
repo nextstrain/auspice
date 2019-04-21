@@ -1,6 +1,11 @@
 import { colorOptions } from "../util/globals";
 import * as types from "../actions/types";
 
+/* The metdata reducer holds data that is
+ * (a) mostly derived from the dataset JSON
+ * (b) rarely changes
+ */
+
 const Metadata = (state = {
   loaded: false, /* see comment in the sequences reducer for explination */
   metadata: null,
