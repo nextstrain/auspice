@@ -7,12 +7,13 @@ import { countTraitsAcrossTree } from "./treeCountingHelpers";
 import { getExtraVals } from "./colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
+import { getTraitFromNode } from "./treeMiscHelpers";
 
 const unknownColor = "#AAAAAA";
 
 const getMinMaxFromTree = (nodes, nodesToo, attr) => {
   const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
-  const vals = arr.map((n) => n.attr[attr]);
+  const vals = arr.map((n) => getTraitFromNode(n, attr));
   vals.filter((n) => n !== undefined)
     .filter((item, i, ar) => ar.indexOf(item) === i);
   return [min(vals), max(vals)];
@@ -215,7 +216,6 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     legendValues = ["unknown"];
     colorScale = () => unknownColor;
   }
-
 
   return {
     scale: colorScale,

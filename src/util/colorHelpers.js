@@ -3,6 +3,7 @@ import { mean } from "d3-array";
 import { interpolateRgb } from "d3-interpolate";
 import { scalePow } from "d3-scale";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
+import { getTraitFromNode } from "./treeMiscHelpers";
 
 /**
 * Takes an array of color hex strings.
@@ -28,6 +29,7 @@ export const determineColorByGenotypeMutType = (colorBy) => {
   return false;
 };
 
+
 /**
 * what colorBy trait names are present in the tree but _not_ in the provided scale?
 * @param {Array} nodes - list of nodes
@@ -37,12 +39,12 @@ export const determineColorByGenotypeMutType = (colorBy) => {
 * @return {list}
 */
 export const getExtraVals = (nodes, nodesToo, colorBy, providedScale) => {
-  let valsInTree = nodes.map((n) => n.attr[colorBy]);
+  let valsInTree = nodes.map((n) => getTraitFromNode(n, colorBy));
   if (nodesToo) {
-    nodesToo.forEach((n) => valsInTree.push(n.attr[colorBy]));
+    nodesToo.forEach((n) => valsInTree.push(getTraitFromNode(n, colorBy)));
   }
   valsInTree = [...new Set(valsInTree)];
-  const providedVals = Object.keys(providedScale);  
+  const providedVals = Object.keys(providedScale);
   // console.log("here", valsInMeta, valsInTree, valsInTree.filter((x) => valsInMeta.indexOf(x) === -1))
   // only care about values in tree NOT in metadata
   return valsInTree.filter((x) => providedVals.indexOf(x) === -1);
@@ -55,7 +57,7 @@ export const getTipColorAttribute = (node, colorScale) => {
   if (isColorByGenotype(colorScale.colorBy) && colorScale.genotype) {
     return node.currentGt;
   }
-  return node.attr[colorScale.colorBy];
+  return getTraitFromNode(node, colorScale.colorBy);
 };
 
 /* generates and returns an array of colours (HEXs) for the nodes under the given colorScale */
@@ -91,9 +93,8 @@ export const branchOpacityFunction = scalePow()
  */
 export const calcBranchStrokeCols = (tree, confidence, colorBy) => {
   if (confidence === true) {
-    const entropyKey = colorBy + "_entropy";
     return tree.nodeColors.map((col, idx) => {
-      const entropy = tree.nodes[idx].attr[entropyKey];
+      const entropy = getTraitFromNode(tree.nodes[idx], colorBy, {entropy: true});
       const opacity = entropy ? branchOpacityFunction(entropy) : branchOpacityConstant;
       return rgb(interpolateRgb(col, branchInterpolateColour)(opacity)).toString();
     });

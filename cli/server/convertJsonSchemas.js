@@ -155,16 +155,32 @@ const setVaccineChoicesOnNodes = (meta, tree) => {
   }
 };
 
+const storeTreeAsV2 = (v2, tree) => {
+  traverseTree(tree, (node) => {
+    // strain: already set
+    // vaccine: already set (see above)
+    // authors: (key modified above) needs to move to property on node
+    if (node.attr && node.attr.authors) {
+      node.authors = node.attr.authors;
+      delete node.attr.authors;
+    }
+  });
+
+
+  v2.tree = tree;
+};
+
 const convert = ({tree, meta, treeName, displayUrl}) => {
   const v2 = {};
   setColorings(v2, meta);
   setMiscMetaProperties(v2, meta);
   setAuthorInfo(v2, meta, tree);
   setVaccineChoicesOnNodes(meta, tree);
+  storeTreeAsV2(v2, tree);
 
   /* add the rest in the same format as auspice currently expects
   (neither v1 nor v2!). */
-  v2.tree = tree;
+  // v2.tree = tree;
   v2._treeName = treeName;
   v2._displayUrl = displayUrl;
   return v2;

@@ -3,6 +3,7 @@ import React from "react";
 import { infoNotification, warningNotification } from "../../actions/notifications";
 import { prettyString, formatURLString, authorString } from "../../util/stringHelpers";
 import { spaceBetweenTrees } from "../tree/tree";
+import { getTraitFromNode } from "../../util/treeMiscHelpers";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -64,13 +65,17 @@ const write = (filename, type, content) => {
   document.body.removeChild(link);
 };
 
+/**
+ * Create & write a TSV file where each row is an author,
+ * with the relevent information (num isolates, journal etcetera)
+ */
 export const authorTSV = (dispatch, filePrefix, metadata, tree) => {
   const lineArray = [["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"].join("\t")];
   const filename = filePrefix + "_authors.tsv";
 
   const samplesPerAuthor = {};
-  tree.nodes.filter((n) => !n.hasChildren && n.attr.authors).forEach((n) => {
-    const authorKey = n.attr.authors;
+  tree.nodes.filter((n) => !n.hasChildren && n.authors).forEach((n) => {
+    const authorKey = n.authors;
     if (!samplesPerAuthor[authorKey]) {
       samplesPerAuthor[authorKey] = [];
     }
@@ -101,29 +106,43 @@ export const turnAttrsIntoHeaderArray = (attrs) => {
   return ["Strain"].concat(attrs.map((v) => prettyString(v)));
 };
 
-export const strainTSV = (dispatch, filePrefix, nodes, rawAttrs) => {
+/**
+ * Create & write a TSV file where each row is a strain in the tree,
+ * with the relevent information (accession, traits, etcetera)
+ * TODO this needs testing / improving after the move to v2 JSONs
+ */
+export const strainTSV = (dispatch, filePrefix, nodes, attrsSetOnTree, authorInfo) => {
   // dont need to traverse the tree - can just loop the nodes
   const filename = filePrefix + "_metadata.tsv";
   const data = [];
-  const includeAttr = (v) => (!(v.includes("entropy") || v.includes("confidence") || v === "div" || v === "paper_url"));
-  const attrs = ["accession", "date", "region", "country", "division", "authors", "journal", "title", "url"];
-  attrs.filter((v) => rawAttrs.indexOf(v) !== -1); // remove those "ideal" atttrs not actually present
-  rawAttrs.forEach((v) => {
-    if (attrs.indexOf(v) === -1 && includeAttr(v)) {
-      attrs.push(v);
-    }
-  });
+
+  const traitsToInclude = attrsSetOnTree.filter((v) => 
+    (!(v.includes("entropy") || v.includes("confidence") || v === "div" || v === "paper_url"))
+  );
+  if (authorInfo) {
+    traitsToInclude.push("authors");
+    // TODO - if journal, url etc etc are available, then push these also
+  }
+
   for (const node of nodes) {
     if (node.hasChildren) {
       continue;
     }
+    /* line is an array of values, will be written out as a tab seperated line */
     const line = [node.strain];
-    // console.log(node.attr)
-    for (const field of attrs) {
-      if (Object.keys(node.attr).indexOf(field) === -1) {
-        line.push("unknown");
+    getTraitFromNode
+
+    for (const trait of traitsToInclude) {
+      let value = getTraitFromNode(node, trait);
+      /* special case: if trait === "authors", we don't actually want the node value,
+       * we want to match this against the authorInfo */
+      if (trait === "authors" && value) {
+        value = authorInfo[value].authors;
+      }
+
+      if (!value) {
+        line.push("unknown")
       } else {
-        const value = node.attr[field];
         if (typeof value === 'string') {
           if (value.lastIndexOf("http", 0) === 0) {
             line.push(formatURLString(value));
@@ -155,7 +174,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, rawAttrs) => {
     }
     data.push(line);
   }
-  const lineArray = [turnAttrsIntoHeaderArray(attrs).join("\t")];
+  const lineArray = [turnAttrsIntoHeaderArray(traitsToInclude).join("\t")];
   data.forEach((line) => {
     const lineString = line.join("\t");
     lineArray.push(lineString);

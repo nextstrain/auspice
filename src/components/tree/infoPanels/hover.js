@@ -247,8 +247,8 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
     if (distanceMeasure === "num_date") return null;
     return renderBranchTime(d.n, temporalConfidence);
   } else if (colorBy === "authors") {
-    if (authorInfo[d.n.attr[colorBy]]) {
-      return renderInfoLine("Authors:", authorInfo[d.n.attr[colorBy]].authors);
+    if (authorInfo[d.n.authors]) {
+      return renderInfoLine("Authors:", authorInfo[d.n.authors].authors);
     }
     return null;
   } else if (isColorByGenotype(colorBy)) {
