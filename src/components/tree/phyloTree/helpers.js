@@ -1,5 +1,13 @@
 /* eslint-disable no-param-reassign */
 
+/** get a string to be used as the DOM element ID
+ * Note that this cannot have any "special" characters
+ */
+export const getDomId = (type, strain) => {
+  const name = typeof strain === "string" ? strain.replace(/[/_.;,~|[\]-]/g, '') : strain;
+  return `${type}_${name}`;
+};
+
 /*
  * adds the total number of descendant leaves to each node in the tree
  * the functions works recursively.

@@ -1,3 +1,4 @@
+import { getDomId } from "./helpers";
 
 export const removeConfidence = function removeConfidence(dt) {
   this.confidencesInSVG = false;
@@ -45,7 +46,7 @@ export const calcConfidenceWidth = (el) =>
 export const drawSingleCI = function drawSingleCI(selection, opacity) {
   selection.append("path")
     .attr("class", "conf")
-    .attr("id", (d) => "conf_" + d.n.clade)
+    .attr("id", (d) => getDomId("conf", d.n.strain))
     .attr("d", (d) => d.confLine)
     .style("stroke", (d) => d.branchStroke || "#888")
     .style("opacity", opacity)

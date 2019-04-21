@@ -1,6 +1,6 @@
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
-
+import { getDomId } from "./helpers";
 /**
  * @param {d3 selection} svg      -- the svg into which the tree is drawn
  * @param {string} layout         -- the layout to be used, e.g. "rect"
@@ -103,7 +103,7 @@ export const drawTips = function drawTips() {
     .enter()
       .append("circle")
         .attr("class", "tip")
-        .attr("id", (d) => "tip_" + d.n.clade)
+        .attr("id", (d) => getDomId("tip", d.n.strain))
         .attr("cx", (d) => d.xTip)
         .attr("cy", (d) => d.yTip)
         .attr("r", (d) => d.r)
@@ -161,7 +161,7 @@ export const drawBranches = function drawBranches() {
       .enter()
         .append("path")
           .attr("class", "branch T")
-          .attr("id", (d) => "branch_T_" + d.n.clade)
+          .attr("id", (d) => getDomId("branchT", d.n.strain))
           .attr("d", (d) => d.branch[1])
           .style("stroke", (d) => d.branchStroke || params.branchStroke)
           .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
@@ -179,7 +179,7 @@ export const drawBranches = function drawBranches() {
     .enter()
       .append("path")
         .attr("class", "branch S")
-        .attr("id", (d) => "branch_S_" + d.n.clade)
+        .attr("id", (d) => getDomId("branchS", d.n.strain))
         .attr("d", (d) => d.branch[0])
         .style("stroke", (d) => d.branchStroke || params.branchStroke)
         .style("stroke-linecap", "round")
