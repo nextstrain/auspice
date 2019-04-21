@@ -9,7 +9,7 @@ import { getDefaultControlsState } from "../reducers/controls";
 import { countTraitsAcrossTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
-import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons";
+import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
@@ -204,8 +204,8 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "map");
   }
 
-  /* if metadata lacks annotations, remove entropy from panels to display */
-  if (!metadata.annotations) {
+  /* if we lack genome annotations, remove entropy from panels to display */
+  if (!metadata.genomeAnnotations) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
   }
@@ -216,16 +216,16 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelLayout = "full";
     state.canTogglePanelLayout = false;
   }
-  /* annotations in metadata */
-  if (metadata.annotations) {
-    for (const gene of Object.keys(metadata.annotations)) {
-      state.geneLength[gene] = metadata.annotations[gene].end - metadata.annotations[gene].start;
+  /* genome annotations in metadata */
+  if (metadata.genomeAnnotations) {
+    for (const gene of Object.keys(metadata.genomeAnnotations)) {
+      state.geneLength[gene] = metadata.genomeAnnotations[gene].end - metadata.genomeAnnotations[gene].start;
       if (gene !== nucleotide_gene) {
         state.geneLength[gene] /= 3;
       }
     }
   } else {
-    console.warn("The meta.json did not include annotations.");
+    console.warn("JSONs did not include `genome_annotations`");
   }
 
   return state;
@@ -499,6 +499,9 @@ export const createStateFromQueryOrJSONs = ({
     if (json.author_info) {
       metadata.authorInfo = json.author_info;
     }
+    if (json.genome_annotations) {
+      metadata.genomeAnnotations = json.genome_annotations;
+    }
 
 
     if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
@@ -506,7 +509,7 @@ export const createStateFromQueryOrJSONs = ({
     }
     metadata.loaded = true;
     /* entropy state */
-    entropy = entropyCreateStateFromJsons(metadata);
+    entropy = entropyCreateState(metadata.genomeAnnotations);
     /* new tree state(s) */
     tree = treeJsonToState(json.tree, metadata.vaccine_choices);
     tree.debug = "LEFT";
