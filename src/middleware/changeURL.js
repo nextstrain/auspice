@@ -40,7 +40,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
       break;
     case types.APPLY_FILTER: {
-      query[`f_${action.fields}`] = action.values.join(',');
+      query[`f_${action.trait}`] = action.values.join(',');
       break;
     }
     case types.CHANGE_LAYOUT: {

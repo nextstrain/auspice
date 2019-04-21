@@ -221,7 +221,7 @@ class Info extends React.Component {
       <span
         style={{cursor: "pointer", color: '#5097BA'}}
         key={field}
-        onClick={() => this.props.dispatch(applyFilter(field, []))}
+        onClick={() => this.props.dispatch(applyFilter("set", field, []))}
         role="button"
         tabIndex={0}
       >
