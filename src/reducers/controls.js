@@ -203,8 +203,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.APPLY_FILTER: {
       // values arrive as array
       const filters = Object.assign({}, state.filters, {});
-      filters[action.fields] = action.values;
-      // console.log(filters)
+      filters[action.trait] = action.values;
       return Object.assign({}, state, {
         filters
       });

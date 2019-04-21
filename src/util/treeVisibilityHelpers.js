@@ -1,5 +1,6 @@
 import { freqScale, NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE } from "./globals";
 import { calcTipCounts } from "./treeCountingHelpers";
+import { getTraitFromNode } from "./treeMiscHelpers";
 
 export const getVisibleDateRange = (nodes, visibility) => nodes
   .filter((node, idx) => (visibility[idx] === NODE_VISIBLE && !node.hasChildren))
@@ -96,11 +97,9 @@ ROUGH DESCRIPTION OF HOW FILTERING IS APPLIED:
     the time & inView visibile stuff
 
 FILTERS:
- - filters stored in redux - controls.filters
- - filters have 2 keys, each with an array of values
-   keys: "region" and/or "authors"
- - filterPairs is a list of lists. Each list defines the filtering to do.
-   i.e. [ [ region, [...values]], [authors, [...values]]]
+ - controls.filters (redux) is a dict of trait name -> values
+ - filters (in this code) is a list of filters to apply
+   e.g. [{trait: "country", values: [...]}, ...]
 */
 const calcVisibility = (tree, controls, dates) => {
   if (tree.nodes) {
@@ -116,17 +115,17 @@ const calcVisibility = (tree, controls, dates) => {
     }
 
     // FILTERS
-    let filtered;
-    const filterPairs = [];
-    Object.keys(controls.filters).forEach((key) => {
-      if (controls.filters[key].length) {
-        filterPairs.push([key, controls.filters[key]]);
+    let filtered; // array of bools, same length as tree.nodes. true -> that node should be visible
+    const filters = [];
+    Object.keys(controls.filters).forEach((trait) => {
+      if (controls.filters[trait].length) {
+        filters.push({trait, values: controls.filters[trait]});
       }
     });
-    if (filterPairs.length) {
+    if (filters.length) {
       /* find the terminal nodes that were (a) already visibile and (b) match the filters */
       filtered = tree.nodes.map((d, idx) => (
-        !d.hasChildren && inView[idx] && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
+        !d.hasChildren && inView[idx] && filters.every((f) => f.values.includes(getTraitFromNode(d, f.trait)))
       ));
       const idxsOfFilteredTips = filtered.reduce((a, e, i) => {
         if (e) {a.push(i);}

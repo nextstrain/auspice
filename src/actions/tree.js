@@ -192,13 +192,6 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
   };
 };
 
-// export const changeAnalysisSliderValue = (value) => {
-//   return (dispatch) => {
-//     dispatch({type: types.CHANGE_ANALYSIS_VALUE, value});
-//     dispatch(updateVisibleTipsAndBranchThicknesses());
-//   };
-// };
-
 /**
  * NB all params are optional - supplying none resets the tip radii to defaults
  * @param  {string|number} selectedLegendItem value of the attr. if scale is continuous a bound will be used.
@@ -232,44 +225,48 @@ export const updateTipRadii = (
   };
 };
 
-export const applyFilter = (fields, values, mode = "set") => {
-  /* fields: e.g. region || country || authors
-  values: list of selected values, e.g [brazil, usa, ...]
-  mode: set | add | remove
-    set: sets the filter values to those provided
-    add: adds the values to the current selection
-    remove: vice versa
-  */
+/**
+ * Apply a filter to the current selection (i.e. filtered / "on" values associated with this trait)
+ * Explanation of the modes:
+ *    "add" -> add the values to the current selection (if any exists)
+ *    "remove" -> remove the values from the current selection
+ *    "set"  -> set the values of the filter to be those provided
+ * @param {string} mode allowed values: "set", "add", "remove"
+ * @param {string} trait the trait name of the filter ("authors", "country" etcetera)
+ * @param {Array of strings} values the values (see above)
+ */
+export const applyFilter = (mode, trait, values) => {
   return (dispatch, getState) => {
+    const { controls } = getState();
+    const currentlyFilteredTraits = Object.keys(controls.filters);
     let newValues;
     if (mode === "set") {
       newValues = values;
-    } else {
-      const { controls } = getState();
-      const currentFields = Object.keys(controls.filters);
-      if (mode === "add") {
-        if (currentFields.indexOf(fields) === -1) {
-          newValues = values;
+    } else if (mode === "add") {
+      if (currentlyFilteredTraits.indexOf(trait) === -1) {
+        newValues = values;
+      } else {
+        newValues = controls.filters[trait].concat(values);
+      }
+    } else if (mode === "remove") {
+      if (currentlyFilteredTraits.indexOf(trait) === -1) {
+        console.error("trying to remove values from an un-initialised filter!");
+        return;
+      }
+      newValues = controls.filters[trait].slice();
+      for (const item of values) {
+        const idx = newValues.indexOf(item);
+        if (idx !== -1) {
+          newValues.splice(idx, 1);
         } else {
-          newValues = controls.filters[fields].concat(values);
-        }
-      } else if (mode === "remove") {
-        if (currentFields.indexOf(fields) === -1) {
-          console.error("trying to remove values from an un-initialised filter!");
-          return;
-        }
-        newValues = controls.filters[fields].slice();
-        for (const item of values) {
-          const idx = newValues.indexOf(item);
-          if (idx !== -1) {
-            newValues.splice(idx, 1);
-          } else {
-            console.error("trying to remove filter value ", item, " which was not part of the filter selection");
-          }
+          console.error("trying to remove filter value ", item, " which was not part of the filter selection");
         }
       }
+    } else {
+      console.error(`applyFilter called with invalid mode: ${mode}`);
+      return; // don't dispatch
     }
-    dispatch({type: types.APPLY_FILTER, fields, values: newValues});
+    dispatch({type: types.APPLY_FILTER, trait, values: newValues});
     dispatch(updateVisibleTipsAndBranchThicknesses());
   };
 };

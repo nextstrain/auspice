@@ -95,7 +95,7 @@ export const getAcknowledgments = (dispatch, styles) => {
           {" and colleagues, whose data was shared via "}
           <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/new-lassa-virus-genomes-from-nigeria-2015-2016/191">{"this viroligical.org post. "}</a>
           {"If you intend to use these sequences prior to publication, please contact them directly to coordinate. "}
-          <span className={"link"} onClick={() => dispatch(applyFilter("authors", ["Odia_et_al"], 'set'))}>{"Click here"}</span>
+          <span className={"link"} onClick={() => dispatch(applyFilter("set", "authors", ["Odia_et_al"]))}>{"Click here"}</span>
           {" here to see these sequences in isolation."}
 
           <p/>
@@ -114,7 +114,7 @@ export const getAcknowledgments = (dispatch, styles) => {
           {". Their data was first shared via "}
           <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/2018-lasv-sequencing-continued/192/8">{"this viroligical.org post"}</a>
           {', which is continually updated. '}
-          <span className={"link"} onClick={() => dispatch(applyFilter("authors", ["ISTH-BNITM-PHE"], 'set'))}>{"Click here"}</span>
+          <span className={"link"} onClick={() => dispatch(applyFilter("set", "authors", ["ISTH-BNITM-PHE"]))}>{"Click here"}</span>
           {" here to see these sequences in isolation."}
         </div>
       );
@@ -216,8 +216,7 @@ export const getAcknowledgments = (dispatch, styles) => {
 
 const dispatchFilter = (dispatch, activeFilters, key, value) => {
   const mode = activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
-  console.log(key, value)
-  dispatch(applyFilter(key, [value], mode));
+  dispatch(applyFilter(mode, key, [value]));
 };
 
 export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, itemName, display, showX) => {
@@ -271,7 +270,7 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
       className={`${outerClassName} boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => {
-        filterNames.forEach((n) => dispatch(applyFilter(n, [], 'set')));
+        filterNames.forEach((n) => dispatch(applyFilter("set", n, [])));
       }}
     >
       {label}
