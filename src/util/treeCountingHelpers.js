@@ -50,3 +50,16 @@ export const calcTipCounts = (node, visibility) => {
     node.tipCount = visibility[node.arrayIdx] === NODE_VISIBLE ? 1 : 0;
   }
 };
+
+/**
+ * calculate the total number of tips in the tree
+ * @param {Array} nodes flat list of all nodes
+ */
+export const calcTotalTipsInTree = (nodes) => {
+  let count = 0;
+  nodes.forEach((n) => {
+    if (!n.hasChildren) count++;
+  });
+  return count;
+};
+
