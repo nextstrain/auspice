@@ -70,7 +70,7 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
         ...createStateFromQueryOrJSONs({json, query, narrativeBlocks})
       });
       return {
-        frequencies: (json.meta.panels && json.meta.panels.indexOf("frequencies") !== -1)
+        frequencies: (json.panels && json.panels.indexOf("frequencies") !== -1)
       };
     })
     .then((result) => {
