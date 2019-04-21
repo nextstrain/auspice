@@ -123,7 +123,25 @@ const setMiscMetaProperties = (v2, meta) => {
     v2.genome_annotations = meta.annotations;
     delete meta.annotations;
   }
-
+  // FILTERS
+  if (meta.filters) {
+    v2.filters = meta.filters;
+    delete meta.filters;
+  }
+  // PANELS
+  if (meta.panels) {
+    v2.panels = meta.panels;
+    delete meta.panels;
+  }
+  // [DISPLAY-]DEFAULTS
+  if (meta.defaults) {
+    v2.display_defaults = {};
+    if (meta.defaults.geoResolution) v2.display_defaults.geo_resolution = meta.defaults.geoResolution;
+    if (meta.defaults.colorBy) v2.display_defaults.color_by = meta.defaults.colorBy;
+    if (meta.defaults.distanceMeasure) v2.display_defaults.distance_measure = meta.defaults.distanceMeasure;
+    if (meta.defaults.mapTriplicate) v2.display_defaults.map_triplicate = meta.defaults.mapTriplicate;
+    delete meta.defaults;
+  }
 };
 
 const convert = ({tree, meta, treeName, displayUrl}) => {

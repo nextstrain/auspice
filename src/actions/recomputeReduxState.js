@@ -168,25 +168,25 @@ const modifyStateViaMetadata = (state, metadata) => {
   } else {
     console.warn("JSON did not include any filters");
   }
-  if (metadata.defaults) {
+  if (metadata.displayDefaults) {
     const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout"];
     const expectedTypes = ["string", "string", "string", "string"];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
-      if (metadata.defaults[keysToCheckFor[i]]) {
-        if (typeof metadata.defaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
+      if (metadata.displayDefaults[keysToCheckFor[i]]) {
+        if (typeof metadata.displayDefaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
           /* e.g. if key=geoResoltion, set both state.geoResolution and state.defaults.geoResolution */
-          state[keysToCheckFor[i]] = metadata.defaults[keysToCheckFor[i]];
-          state.defaults[keysToCheckFor[i]] = metadata.defaults[keysToCheckFor[i]];
+          state[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
+          state.defaults[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
         } else {
           console.error("Skipping (meta.json) default for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
         }
       }
     }
     // TODO: why are these false / False
-    if (metadata.defaults.mapTriplicate) {
+    if (metadata.displayDefaults.mapTriplicate) {
       // convert string to boolean; default is true; turned off with either false (js) or False (python)
-      state["mapTriplicate"] = (metadata.defaults.mapTriplicate === 'false' || metadata.defaults.mapTriplicate === 'False') ? false : true;
+      state["mapTriplicate"] = (metadata.displayDefaults.mapTriplicate === 'false' || metadata.displayDefaults.mapTriplicate === 'False') ? false : true;
     }
   }
 
@@ -311,10 +311,10 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   const fallBackToDefaultColorBy = () => {
     const availableNonGenotypeColorBys = Object.keys(metadata.colorings)
       .filter((colorKey) => colorKey !== "gt");
-    if (metadata.defaults && metadata.defaults.colorBy && availableNonGenotypeColorBys.indexOf(metadata.defaults.colorBy) !== -1) {
-      console.warn("colorBy falling back to", metadata.defaults.colorBy);
-      state.colorBy = metadata.defaults.colorBy;
-      state.defaults.colorBy = metadata.defaults.colorBy;
+    if (metadata.displayDefaults && metadata.displayDefaults.colorBy && availableNonGenotypeColorBys.indexOf(metadata.displayDefaults.colorBy) !== -1) {
+      console.warn("colorBy falling back to", metadata.displayDefaults.colorBy);
+      state.colorBy = metadata.displayDefaults.colorBy;
+      state.defaults.colorBy = metadata.displayDefaults.colorBy;
     } else if (availableNonGenotypeColorBys.length) {
       if (availableNonGenotypeColorBys.indexOf(defaultColorBy) !== -1) {
         state.colorBy = defaultColorBy;
@@ -364,8 +364,8 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
     const availableGeoResultions = Object.keys(metadata.geo);
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
       /* fallbacks: JSON defined default, then hardocded default, then any available */
-      if (metadata.defaults && metadata.defaults.geoResolution && availableGeoResultions.indexOf(metadata.defaults.geoResolution) !== -1) {
-        state.geoResolution = metadata.defaults.geoResolution;
+      if (metadata.displayDefaults && metadata.displayDefaults.geoResolution && availableGeoResultions.indexOf(metadata.displayDefaults.geoResolution) !== -1) {
+        state.geoResolution = metadata.displayDefaults.geoResolution;
       } else if (availableGeoResultions.indexOf(defaultGeoResolution) !== -1) {
         state.geoResolution = defaultGeoResolution;
       } else {
@@ -375,7 +375,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
       delete query.r; // no-op if query.r doesn't exist
     }
   } else {
-    console.warn("The meta.json did not include geo info.");
+    console.warn("JSONs did not include geo info.");
   }
 
   /* temporalConfidence */
@@ -484,6 +484,7 @@ export const createStateFromQueryOrJSONs = ({
   if (json) {
     /* create metadata state */
     metadata = json.meta;
+    console.log("Metadata JSONs still to do:", Object.keys(metadata));
     if (metadata === undefined) {
       metadata = {};
     }
@@ -501,6 +502,32 @@ export const createStateFromQueryOrJSONs = ({
     }
     if (json.genome_annotations) {
       metadata.genomeAnnotations = json.genome_annotations;
+    }
+    if (json.filters) {
+      metadata.filters = json.filters;
+    }
+    if (json.panels) {
+      metadata.panels = json.panels;
+    }
+    if (json.display_defaults) {
+      metadata.displayDefaults = json.display_defaults;
+      /* rename to camelCase for use throughout auspice */
+      if (metadata.displayDefaults.color_by) {
+        metadata.displayDefaults.colorBy = metadata.displayDefaults.color_by;
+        delete metadata.displayDefaults.color_by;
+      }
+      if (metadata.displayDefaults.geo_resolution) {
+        metadata.displayDefaults.geoResolution = metadata.displayDefaults.geo_resolution;
+        delete metadata.displayDefaults.geo_resolution;
+      }
+      if (metadata.displayDefaults.distance_measure) {
+        metadata.displayDefaults.distanceMeasure = metadata.displayDefaults.distance_measure;
+        delete metadata.displayDefaults.distance_measure;
+      }
+      if (metadata.displayDefaults.map_triplicate) {
+        metadata.displayDefaults.mapTriplicate = metadata.displayDefaults.map_triplicate;
+        delete metadata.displayDefaults.map_triplicate;
+      }
     }
 
 
