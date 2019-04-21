@@ -162,6 +162,12 @@ const setVaccineChoicesOnNodes = (meta, tree) => {
 };
 
 const storeTreeAsV2 = (v2, tree) => {
+  const attrs = new Set();
+  const propsRemoved = new Set();
+
+  const allowedProperties = ["strain", "div", "num_date", "vaccine", "labels", "hidden", "mutations", "url", "accession", "traits", "children"];
+  allowedProperties.push("attr"); // DEPRECATED
+
   traverseTree(tree, (node) => {
     // strain: already set
     // vaccine: already set (see above)
@@ -215,6 +221,8 @@ const storeTreeAsV2 = (v2, tree) => {
         node.div = node.attr.div;
         delete node.attr.div;
       }
+      // Remove properties which are not part of the v2 spec.
+      Object.keys(node.attr).forEach((a) => {attrs.add(a)});
     }
     // NUC + AA MUTATIONS
     if (node.muts || node.aa_muts) {
@@ -225,8 +233,17 @@ const storeTreeAsV2 = (v2, tree) => {
       delete node.aa_muts;
     }
 
+    // REMOVE NON-V2 PROPS FROM EACH NODE
+    Object.keys(node)
+      .filter((prop) => !allowedProperties.includes(prop))
+      .forEach((prop) => {
+        propsRemoved.add(prop);
+        delete node[prop];
+      });
   });
 
+  // console.log(attrs);
+  console.log("Props removed (from v1 tree nodes):", propsRemoved);
 
   v2.tree = tree;
 };

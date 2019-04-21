@@ -53,7 +53,7 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
         matrix[category][i] += d.values[i];
         debugPivotTotals[i] += d.values[i];
         // if (i === pivotsLen - 1 && d.values[i] !== 0) {
-        //   console.log("Pivot", frequencies.pivots[i], "strain", tree.nodes[d.idx].strain, "(clade #", tree.nodes[d.idx].clade, ") carried frequency of", d.values[i]);
+        //   console.log("Pivot", frequencies.pivots[i], "strain", tree.nodes[d.idx].strain, "(clade #", tree.nodes[d.idx].strain, ") carried frequency of", d.values[i]);
         // }
       }
     }
