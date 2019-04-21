@@ -155,9 +155,9 @@ class Info extends React.Component {
   }
 
   getNumSelectedAuthors() {
-    if (this.props.metadata.author_info) {
+    if (this.props.metadata.authorInfo) {
       if (!Object.prototype.hasOwnProperty.call(this.props.filters, "authors") || this.props.filters.authors.length === 0) {
-        return Object.keys(this.props.metadata.author_info).length;
+        return Object.keys(this.props.metadata.authorInfo).length;
       }
     }
     return this.props.filters.authors.length;
@@ -231,8 +231,8 @@ class Info extends React.Component {
   }
 
   addFilteredAuthorsButton(buttons) {
-    if (!this.props.metadata.author_info) {return;}
-    const nTotalAuthors = Object.keys(this.props.metadata.author_info).length;
+    if (!this.props.metadata.authorInfo) {return;}
+    const nTotalAuthors = Object.keys(this.props.metadata.authorInfo).length;
     const nSelectedAuthors = this.getNumSelectedAuthors(); // will be equal to nTotalAuthors if none selected
     /* case 1 (no selected authors) - return now. */
     if (nTotalAuthors === nSelectedAuthors) {return;}
@@ -251,7 +251,7 @@ class Info extends React.Component {
           <span>
             {prettyString(v, {stripEtAl: true})}
             <i>{" et al, "}</i>
-            {prettyString(this.props.metadata.author_info[v].title)}
+            {prettyString(this.props.metadata.authorInfo[v].title)}
             {` (n=${n})`}
           </span>
         )

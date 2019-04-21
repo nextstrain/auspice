@@ -154,11 +154,11 @@ const modifyStateViaMetadata = (state, metadata) => {
   if (metadata.analysisSlider) {
     state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
   }
-  if (metadata.author_info) {
+  if (metadata.authorInfo) {
     // need authors in metadata.filters to include as filter
-    // but metadata.author_info is generally required for app functioning
+    // but metadata.authorInfo is generally required for app functioning
   } else {
-    console.warn("the meta.json did not include author_info");
+    console.warn("JSON did not include author_info");
   }
   if (metadata.filters) {
     metadata.filters.forEach((v) => {
@@ -166,7 +166,7 @@ const modifyStateViaMetadata = (state, metadata) => {
       state.defaults.filters[v] = [];
     });
   } else {
-    console.warn("the meta.json did not include any filters");
+    console.warn("JSON did not include any filters");
   }
   if (metadata.defaults) {
     const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout"];
@@ -496,6 +496,10 @@ export const createStateFromQueryOrJSONs = ({
       metadata.version = json.version;
     }
     metadata.maintainers = json.maintainers;
+    if (json.author_info) {
+      metadata.authorInfo = json.author_info;
+    }
+
 
     if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
       console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
