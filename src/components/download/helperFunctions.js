@@ -6,9 +6,9 @@ import { spaceBetweenTrees } from "../tree/tree";
 
 export const isPaperURLValid = (d) => {
   return (
-    Object.prototype.hasOwnProperty.call(d, "paper_url") &&
-    !d.paper_url.endsWith('/') &&
-    d.paper_url !== "?"
+    Object.prototype.hasOwnProperty.call(d, "url") &&
+    !d.url.endsWith('/') &&
+    d.url !== "?"
   );
 };
 
@@ -18,14 +18,6 @@ export const getAuthor = (info, k) => {
       <span>Not Available</span>
     );
   }
-  // TODO: improve this block
-  // if (isPaperURLValid(info[k])) {
-  //   return (
-  //     <a href={formatURLString(info[k].paper_url)} target="_blank">
-  //       {authorString(k)}
-  //     </a>
-  //   );
-  // }
   return authorString(k);
 };
 
@@ -76,24 +68,26 @@ export const authorTSV = (dispatch, filePrefix, metadata, tree) => {
   const lineArray = [["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"].join("\t")];
   const filename = filePrefix + "_authors.tsv";
 
-  const authors = {};
+  const samplesPerAuthor = {};
   tree.nodes.filter((n) => !n.hasChildren && n.attr.authors).forEach((n) => {
-    if (!authors[n.attr.authors]) {
-      authors[n.attr.authors] = [n.strain];
-    } else {
-      authors[n.attr.authors].push(n.strain);
+    const authorKey = n.attr.authors;
+    if (!samplesPerAuthor[authorKey]) {
+      samplesPerAuthor[authorKey] = [];
     }
+    samplesPerAuthor[authorKey].push(n.strain);
   });
+
   const body = [];
-  if (metadata.author_info) {
-    for (const author of Object.keys(metadata.author_info)) {
+  if (metadata.authorInfo) {
+    for (const [key, value] of Object.entries(metadata.authorInfo)) {
+      if (!samplesPerAuthor[key]) continue;
       body.push([
-        prettyString(author, {camelCase: false}),
-        metadata.author_info[author].n,
-        prettyString(metadata.author_info[author].title, {removeComma: true}),
-        prettyString(metadata.author_info[author].journal, {removeComma: true}),
-        isPaperURLValid(metadata.author_info[author]) ? formatURLString(metadata.author_info[author].paper_url) : "unknown",
-        authors[author].join(",")
+        value.authors,
+        samplesPerAuthor[key].length,
+        value.title || "",
+        value.journal || "",
+        isPaperURLValid(value) ? formatURLString(value.url) : "",
+        samplesPerAuthor[key].join(",")
       ]);
     }
   }

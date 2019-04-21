@@ -76,25 +76,32 @@ const displayVaccineInfo = (d) => {
   return null;
 };
 
+const displayPublicationInfo = (authorKey, authorInfo) => {
+  if (!authorKey || !authorInfo[authorKey]) {
+    return null;
+  }
+  const info = authorInfo[authorKey];
+  const itemsToRender = [];
+  itemsToRender.push(item("Authors", info.authors));
+  if (info.title && info.title !== "?") itemsToRender.push(item("Title", info.title));
+  if (info.journal && info.journal !== "?") itemsToRender.push(item("Journal", info.journal));
+  if (info.url && info.url !== "?") itemsToRender.push(item("URL", info.url));
+  if (itemsToRender.length === 1) {
+    return itemsToRender[0];
+  }
+  return (
+    itemsToRender
+  );
+};
+
 const validValue = (value) => value !== "?" && value !== undefined && value !== "undefined";
 const validAttr = (attrs, key) => key in attrs && validValue(attrs[key]);
 
-const TipClickedPanel = ({tip, goAwayCallback, metadata}) => {
+const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
   if (!tip) {return null;}
   const url = validAttr(tip.n.attr, "url") ? formatURL(tip.n.attr.url) : false;
   const uncertainty = "num_date_confidence" in tip.n.attr && tip.n.attr.num_date_confidence[0] !== tip.n.attr.num_date_confidence[1];
-  const author = tip.n.attr.authors || undefined;
-  let authorInfo = {
-    author: {
-      n: null,
-      title: null,
-      journal: null,
-      paper_url: null
-    }
-  };
-  if (metadata.author_info) {
-    authorInfo = metadata.author_info;
-  }
+
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
@@ -111,9 +118,8 @@ const TipClickedPanel = ({tip, goAwayCallback, metadata}) => {
             {/* Dates */}
             {item(uncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
             {uncertainty ? dateConfidence(tip.n.attr.num_date_confidence) : null}
-            {/* Paper Title, Author(s), Accession + URL (if provided) - from info.json NOT tree.json */}
-            {authorInfo[author] && authorInfo[author].title && validValue(authorInfo[author].title) ? item("Publication", prettyString(authorInfo[author].title, {trim: 80, camelCase: false})) : null}
-            {validAttr(tip.n.attr, "authors") ? item("Authors", authorString(tip.n.attr.authors)) : null}
+            {/* Author / Paper information */}
+            {displayPublicationInfo(tip.n.attr.authors, authorInfo)}
             {/* try to join URL with accession, else display the one that's available */}
             {url && validAttr(tip.n.attr, "accession") ?
               accessionAndURL(url, tip.n.attr.accession) :

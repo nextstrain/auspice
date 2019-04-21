@@ -19,7 +19,8 @@ const Tree = connect((state) => ({
   showTangle: state.controls.showTangle,
   panelsToDisplay: state.controls.panelsToDisplay,
   selectedBranchLabel: state.controls.selectedBranchLabel,
-  narrativeMode: state.narrative.display
+  narrativeMode: state.narrative.display,
+  authorInfo: state.metadata.authorInfo
 }))(UnconnectedTree);
 
 export default Tree;
