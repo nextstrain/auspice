@@ -72,7 +72,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   });
 
   const offsets = triplicate ? [-360, 0, 360] : [0];
-  const geo = metadata.geo;
+  const geo = metadata.geographicInfo;
 
   let index = 0;
   offsets.forEach((OFFSET) => {
@@ -263,7 +263,7 @@ const setupTransmissionData = (
 ) => {
 
   const offsets = triplicate ? [-360, 0, 360] : [0];
-  const metadataGeoLookupTable = metadata.geo;
+  const metadataGeoLookupTable = metadata.geographicInfo;
   const transmissionData = []; /* edges, animation paths */
   const transmissionIndices = {}; /* map of transmission id to array of indices */
   const demesMissingLatLongs = new Set();

@@ -198,8 +198,8 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelsToDisplay = ["tree"];
   }
 
-  /* if metadata lacks geo, remove map from panels to display */
-  if (!metadata.geo) {
+  /* if we lack geographicInfo, remove map from panels to display */
+  if (!metadata.geographicInfo) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "map");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "map");
   }
@@ -360,8 +360,8 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   }
 
   /* geoResolution */
-  if (metadata.geo) {
-    const availableGeoResultions = Object.keys(metadata.geo);
+  if (metadata.geographicInfo) {
+    const availableGeoResultions = Object.keys(metadata.geographicInfo);
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
       /* fallbacks: JSON defined default, then hardocded default, then any available */
       if (metadata.displayDefaults && metadata.displayDefaults.geoResolution && availableGeoResultions.indexOf(metadata.displayDefaults.geoResolution) !== -1) {
@@ -375,7 +375,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
       delete query.r; // no-op if query.r doesn't exist
     }
   } else {
-    console.warn("JSONs did not include geo info.");
+    console.warn("JSONs did not include geographicInfo.");
   }
 
   /* temporalConfidence */
@@ -528,6 +528,9 @@ export const createStateFromQueryOrJSONs = ({
         metadata.displayDefaults.mapTriplicate = metadata.displayDefaults.map_triplicate;
         delete metadata.displayDefaults.map_triplicate;
       }
+    }
+    if (json.geographic_info) {
+      metadata.geographicInfo = json.geographic_info;
     }
 
 

@@ -15,7 +15,7 @@ import { SidebarSubtitle } from "./styles";
 class GeoResolution extends React.Component {
   getGeoResolutionOptions() {
     if (this.props.metadata.loaded) {
-      return Object.keys(this.props.metadata.geo)
+      return Object.keys(this.props.metadata.geographicInfo)
         .map((key) => ({ value: key, label: key }));
     }
     return [];

@@ -304,11 +304,11 @@ class Map extends React.Component {
   getGeoRange() {
     const latitudes = [];
     const longitudes = [];
-
-    Object.keys(this.props.metadata.geo).forEach((geoLevel) => {
-      Object.keys(this.props.metadata.geo[geoLevel]).forEach((geoEntry) => {
-        latitudes.push(this.props.metadata.geo[geoLevel][geoEntry].latitude);
-        longitudes.push(this.props.metadata.geo[geoLevel][geoEntry].longitude);
+    const geographicInfo = this.props.metadata.geographicInfo;
+    Object.keys(geographicInfo).forEach((geoLevel) => {
+      Object.keys(geographicInfo[geoLevel]).forEach((geoEntry) => {
+        latitudes.push(geographicInfo[geoLevel][geoEntry].latitude);
+        longitudes.push(geographicInfo[geoLevel][geoEntry].longitude);
       });
     });
 
