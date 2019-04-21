@@ -38,10 +38,9 @@ const processAnnotations = (annotations) => {
   return m;
 };
 
-export const entropyCreateStateFromJsons = (metaJSON) => {
-  if (metaJSON.annotations) {
-    // const annotations = getAnnotations(metaJSON.annotations);
-    const ant = getAnnotations(metaJSON.annotations);
+export const entropyCreateState = (genomeAnnotations) => {
+  if (genomeAnnotations) {
+    const ant = getAnnotations(genomeAnnotations);
     const annotations = ant[0];
     const lengthSequence = ant[1][0].end;
     return {
@@ -52,11 +51,10 @@ export const entropyCreateStateFromJsons = (metaJSON) => {
       geneMap: processAnnotations(annotations)
     };
   }
-  const annotations = [];
   return {
     showCounts: false,
     loaded: false,
-    annotations,
+    annotations: [],
     geneMap: {}
   };
 };

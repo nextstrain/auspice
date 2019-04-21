@@ -118,6 +118,12 @@ const setMiscMetaProperties = (v2, meta) => {
   }
   delete meta.maintainer;
 
+  // (GENOME) ANNOTATIONS
+  if (meta.annotations) {
+    v2.genome_annotations = meta.annotations;
+    delete meta.annotations;
+  }
+
 };
 
 const convert = ({tree, meta, treeName, displayUrl}) => {
