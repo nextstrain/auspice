@@ -229,7 +229,7 @@ const modifyStateViaMetadata = (state, metadata) => {
   return state;
 };
 
-const modifyStateViaTree = (state, tree, treeToo) => {
+const modifyControlsStateViaTree = (state, tree, treeToo) => {
   state["dateMin"] = getMinCalDateViaTree(tree.nodes, state);
   state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
   state.dateMinNumeric = calendarToNumeric(state.dateMin);
@@ -256,16 +256,26 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
   state.absoluteDateMaxNumeric = calendarToNumeric(state.absoluteDateMax);
 
-  /* collect all available tree attrs, and available mutations */
+  /* collect all available tree traits, and available mutations */
   const attrs = new Set();
   let [aaMuts, nucMuts] = [false, false];
   const examineNodes = function examineNodes(nodes) {
     nodes.forEach((node) => {
-      Object.keys(node.attr).forEach((attr) => {
-        attrs.add(attr);
-      });
-      if (node.aa_muts && Object.keys(node.aa_muts).length) aaMuts = true;
-      if (node.muts && node.muts.length) nucMuts = true;
+      if (node.attr) {
+        Object.keys(node.attr).forEach((attr) => {
+          attrs.add(attr);
+        });
+      }
+      if (node.traits) {
+        Object.keys(node.traits).forEach((trait) => {
+          attrs.add(trait);
+        });
+      }
+      if (node.mutations) {
+        const keys = Object.keys(node.mutations);
+        if (keys.length > 1 || (keys.length === 1 && keys[0]!=="nuc")) aaMuts = true;
+        if (keys.includes("nuc")) nucMuts = true;
+      }
     });
   };
   examineNodes(tree.nodes);
@@ -549,7 +559,7 @@ export const createStateFromQueryOrJSONs = ({
 
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
-    controls = modifyStateViaTree(controls, tree, treeToo);
+    controls = modifyControlsStateViaTree(controls, tree, treeToo);
     controls = modifyStateViaMetadata(controls, metadata);
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
@@ -643,7 +653,7 @@ export const createTreeTooState = ({
   const tree = Object.assign({}, oldState.tree);
   let treeToo = treeJsonToState(treeTooJSON);
   treeToo.debug = "RIGHT";
-  controls = modifyStateViaTree(controls, tree, treeToo);
+  controls = modifyControlsStateViaTree(controls, tree, treeToo);
   controls = modifyControlsViaTreeToo(controls, segment);
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls);
 
