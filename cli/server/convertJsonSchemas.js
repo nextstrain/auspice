@@ -157,7 +157,6 @@ const setVaccineChoicesOnNodes = (meta, tree) => {
     if (n.serum) {
       if (!n.vaccine) n.vaccine = {};
       n.vaccine.serum = true;
-      console.log(n);
     }
   });
 };
@@ -166,26 +165,50 @@ const storeTreeAsV2 = (v2, tree) => {
   traverseTree(tree, (node) => {
     // strain: already set
     // vaccine: already set (see above)
-    // authors: (key modified above) needs to move to property on node
-    if (node.attr && node.attr.authors) {
-      node.authors = node.attr.authors;
-      delete node.attr.authors;
+    if (node.attr) {
+      // authors: (key modified above) needs to move to property on node
+      if (node.attr.authors) {
+        node.authors = node.attr.authors;
+        delete node.attr.authors;
+      }
+      // accession, likewise moves to the node (from `node.attr.accession`)
+      if (node.attr.accession) {
+        node.accession = node.attr.accession;
+        delete node.attr.accession;
+      }
+      // url, likewise moves to the node (from `node.attr.accession`)
+      if (node.attr.url) {
+        node.url = node.attr.url;
+        delete node.attr.url;
+      }
+      // branch labels for clade (this behaviour was hardcoded into auspice)
+      if (node.attr.clade_name || node.attr.clade_annotation) {
+        if (!node.labels) node.labels = {};
+        node.labels.clade = node.attr.clade_annotation || node.attr.clade_name;
+        delete node.attr.clade_name;
+        delete node.attr.clade_annotation;
+      }
+      // branch labels for "aa" (this behaviour was hardcoded into auspice)
+      if (node.aa_muts) {
+        const muts = [];
+        for (const aa in node.aa_muts) { // eslint-disable-line
+          if (node.aa_muts[aa].length) {
+            muts.push(`${aa}: ${node.aa_muts[aa].join(", ")}`);
+          }
+        }
+        if (muts.length) {
+          if (!node.labels) node.labels = {};
+          node.labels.aa = muts.join("; ");
+        }
+      }
     }
-    // accession, likewise moves to the node (from `node.attr.accession`)
-    if (node.attr && node.attr.accession) {
-      node.accession = node.attr.accession;
-      delete node.attr.accession;
-    }
-    // url, likewise moves to the node (from `node.attr.accession`)
-    if (node.attr && node.attr.url) {
-      node.url = node.attr.url;
-      delete node.attr.url;
-    }
+
   });
 
 
   v2.tree = tree;
 };
+
 
 const convert = ({tree, meta, treeName, displayUrl}) => {
   const v2 = {};
