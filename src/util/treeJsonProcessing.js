@@ -151,7 +151,9 @@ export const treeJsonToState = (treeJSON) => {
   appendParentsToTree(treeJSON);
   const nodesArray = flattenTree(treeJSON);
   const nodes = processNodes(nodesArray);
-  const vaccines = nodes.filter((d) => d.hasOwnProperty("vaccine"));
+  const vaccines = nodes.filter((d) =>
+    d.hasOwnProperty("vaccine") && (Object.keys(d.vaccine).length > 1 || Object.keys(d.vaccine)[0] !== "serum")
+  );
   const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
   const attrs = getAttrsOnTerminalNodes(nodes);
   return Object.assign({}, getDefaultTreeState(), {

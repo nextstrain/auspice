@@ -3,7 +3,6 @@ import { infoPanelStyles } from "../../../globalStyles";
 import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTraitFromNode } from "../../../util/treeMiscHelpers";
-import { access } from "fs";
 
 export const styles = {
   container: {
@@ -83,14 +82,43 @@ const accessionAndUrl = (node) => {
   return null;
 };
 
+
 const displayVaccineInfo = (d) => {
-  if (d.n.vaccineDate) {
-    return (
-      <tr>
-        <th>Vaccine strain</th>
-        <td>{d.n.vaccineDate}</td>
-      </tr>
-    );
+  if (d.n.vaccine) {
+    const els = [];
+    if (d.n.vaccine.selection_date) {
+      els.push(
+        <tr key={"seldate"}>
+          <th>Vaccine selected</th>
+          <td>{d.n.vaccine.selection_date}</td>
+        </tr>
+      );
+    }
+    if (d.n.vaccine.start_date) {
+      els.push(
+        <tr key={"startdate"}>
+          <th>Vaccine start date</th>
+          <td>{d.n.vaccine.start_date}</td>
+        </tr>
+      );
+    }
+    if (d.n.vaccine.end_date) {
+      els.push(
+        <tr key={"enddate"}>
+          <th>Vaccine end date</th>
+          <td>{d.n.vaccine.end_date}</td>
+        </tr>
+      );
+    }
+    if (d.n.vaccine.serum) {
+      els.push(
+        <tr key={"serum"}>
+          <th>Serum strain</th>
+          <td/>
+        </tr>
+      );
+    }
+    return els;
   }
   return null;
 };
