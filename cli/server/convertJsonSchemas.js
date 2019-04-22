@@ -96,7 +96,7 @@ const setMiscMetaProperties = (v2, meta) => {
   // TITLE (required)
   v2.title = meta.title;
   // VERSION (not required)
-  v2.version = "2.0.alpha";
+  v2.version = "2.0-alpha.0";
   // UPDATED (required)
   v2.updated = meta.updated;
   if (!v2.updated) {
