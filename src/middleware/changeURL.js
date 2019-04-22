@@ -122,6 +122,14 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       if (action.url && !action.narrative) {
         pathname = action.url;
       }
+      /* we also double check that if there are 2 trees both are represented
+      in the URL */
+      if (action.tree.name && action.treeToo && action.treeToo.name) {
+        const treeUrlShouldBe = `${action.tree.name}:${action.treeToo.name}`;
+        if (!window.location.pathname.includes(treeUrlShouldBe)) {
+          pathname = window.location.pathname.replace(action.tree.name, treeUrlShouldBe);
+        }
+      }
       break;
     case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE: {
       if (action.pathname) pathname = action.pathname;
