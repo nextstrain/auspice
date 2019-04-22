@@ -5,18 +5,34 @@ const { promisify } = require('util');
 const readdir = promisify(fs.readdir);
 
 const getAvailableDatasets = async (localDataPath) => {
-  let datasets = [];
+  const datasets = [];
   try {
-    /* currently only for version 1.0 JSONs... */
-    datasets = await readdir(localDataPath);
-    datasets = datasets
+    const files = await readdir(localDataPath);
+    /* v2 files -- match JSONs not ending with `_tree.json`, `_meta.json`,
+    `_tip-frequencies.json`. This comes first so that for two datasets with
+    the same name, the v2 JSONs will be preferentially fetched. */
+    files
+    .filter((file) => (file.endsWith(".json") && !file.includes("manifest")))
+    .filter((file) => (!file.endsWith("_tree.json") && !file.endsWith("_meta.json") && !file.endsWith("_tip-frequencies.json")))
+    .map((file) => file
+      .replace(".json", "")
+      .split("_")
+      .join("/")
+    )
+    .forEach((filepath) => {
+      datasets.push({request: filepath, v2: true});
+    });
+    /* v1 files -- match files ending with `_tree.json` */
+    files
       .filter((file) => file.endsWith("_tree.json"))
       .map((file) => file
         .replace("_tree.json", "")
         .split("_")
         .join("/")
       )
-      .map((filepath) => ({request: filepath}));
+      .forEach((filepath) => {
+        datasets.push({request: filepath, v2: false});
+      });
   } catch (err) {
     utils.warn(`Couldn't collect available dataset files (path searched: ${localDataPath})`);
     utils.verbose(err);
