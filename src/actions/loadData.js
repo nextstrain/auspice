@@ -16,7 +16,6 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
   let path = `${serverAddress}/${narrative?"getNarrative":"getDataset"}`;
   path += `?prefix=${prefix}`;
   if (type) path += `&type=${type}`;
-
   const p = fetch(path)
     .then((res) => {
       if (res.status !== 200) {

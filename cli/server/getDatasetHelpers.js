@@ -5,6 +5,7 @@
 * and it could instead be exposed by "auspice" (and imported by the nextstrain.org repo)
 * Note also https://github.com/nextstrain/auspice/issues/687 which proposes
 * changing the server-client API
+*
 */
 
 const utils = require("../utils");
@@ -35,7 +36,10 @@ const splitPrefixIntoParts = (url) => url
   .split("/");
 
 
-/* can throw */
+/**
+ * Basic interpretation of an auspice request
+ * @returns {Object} keys: `dataType`, `parts`
+ */
 const interpretRequest = (req) => {
   utils.log(`GET DATASET query received: ${req.url.split('?')[1]}`);
   const query = queryString.parse(req.url.split('?')[1]);
@@ -51,7 +55,15 @@ const interpretRequest = (req) => {
   return info;
 };
 
-/* can throw */
+/**
+ * Given a request, does the dataset exist?
+ * In the future, if there is no exact match but a partial one we
+ * should extend this. E.g. `["flu"]` -> `["flu", "h3n2", "ha", "3y"]`
+ * In that case, we should also set a custom response header which
+ * auspice will use to change the URL appearence (similar to a redirect)
+ * via `json.auspice_url_should_be`
+ * @throws
+ */
 const extendDataPathsToMatchAvailiable = (info, availableDatasets) => {
   const requestStrToMatch = info.parts.join("/"); // TO DO
   /* TODO currently there must be an _exact_ match in the available datasets */
@@ -63,8 +75,11 @@ const extendDataPathsToMatchAvailiable = (info, availableDatasets) => {
 
 /**
  * sets info.address.
- * if array then it's v1 [meta, tree] & we need to convert...
- * can throw
+ * if we need v1 datasets then `info.address` will be an object with `meta`
+ * and `tree` keys. Otherwise `info.address` will be a string of the fetch
+ * path.
+ * @sideEffect sets `info.address` {Object | string}
+ * @throws
  */
 const makeFetchAddresses = (info, datasetsPath, availableDatasets) => {
   if (info.dataType !== "dataset") {

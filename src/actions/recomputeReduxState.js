@@ -651,7 +651,13 @@ export const createStateFromQueryOrJSONs = ({
     /* setting this will enable the sidebar drop down for a 2nd tree */
     tree.name = json.tree_name;
   }
-  const url = json["_url"]; // injected by the server. Will be picked up by middleware.
+
+  /* The server is able to provide a different URL to be displayed,
+   * similar to a redirect. Note that this is completely optional
+   * this is picked up by middleware (any action with a `url` key is)
+   */
+  const url = json.auspice_url_should_be;
+
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query, url};
 };
 
