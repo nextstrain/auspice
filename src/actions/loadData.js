@@ -47,53 +47,117 @@ const getHardcodedData = (prefix, {type="mainJSON", narrative=false}={}) => {
 // const fetchData = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDatasetFromCharon;
 const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDatasetFromCharon;
 
-
-const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
-  let warning = false;
-  let fetchExtras = "";
-  /* currently we support backwards compatability with the old (deprecated) tt=... URL query
-  syntax for defining the second tree. This is not guaranteed to stay around */
-  if (query.tt) { /* deprecated form of adding a second tree */
-    warning = {
-      message: `Specifing a second tree via "tt=${query.tt}" is deprecated.`,
-      details: "The URL has been updated to reflect the new syntax 🙂"
-    };
-    fetchExtras += `&deprecatedSecondTree=${query.tt}`;
-  }
-
-
-  // fetchJSON(`${charonAPIAddress}request=mainJSON&url=${url}${fetchExtras}`)
-  getDataset(`${url}${fetchExtras}`)
-    .then((json) => {
-      dispatch({
-        type: types.CLEAN_START,
-        ...createStateFromQueryOrJSONs({json, query, narrativeBlocks})
-      });
-      return {
-        frequencies: (json.panels && json.panels.indexOf("frequencies") !== -1)
-      };
-    })
-    .then((result) => {
-      if (result.frequencies === true) {
-        getDataset(url, {type: "tip-frequencies"})
-          .then((res) => dispatch(loadFrequencies(res)))
-          .catch((err) => console.error("Frequencies failed to fetch", err.message));
+/**
+ * given a url to fetch, check if a second tree is defined.
+ * e.g. `ha:na`. If so, then we want to make two fetches,
+ * one for `ha` and one for `na`.
+ *
+ * Once upon a time one could specify a second tree via a `?tt=tree_name` query
+ * we interpret this here for backwards compatablity.
+ *
+ * @returns {Array} [0] {string} url, modified as needed to represent main tree
+ *                  [1] {object| undefined} secondTree information, if applicable
+ *                  [1].url {string | undefined} the url to fetch the 2nd tree
+ *                  [1].name {string} name of the 2nd tree
+ *                  [1].mainTreeName {string | undefined} name of the main tree
+ */
+const processSecondTree = (url, query) => {
+  let secondTree;
+  if (url.includes(":")) {
+    const parts = url.replace(/^\//, '')
+      .replace(/\/$/, '')
+      .split("/");
+    for (let i=0; i<parts.length; i++) {
+      if (parts[i].indexOf(":") !== -1) {
+        const [treeName, secondTreeName] = parts[i].split(":");
+        parts[i] = treeName;
+        url = parts.join("/"); // this is the first tree URL
+        parts[i] = secondTreeName;
+        secondTree = {
+          url: parts.join("/"), // this is the 2nd tree URL
+          name: secondTreeName,
+          mainTreeName: treeName
+        };
+        break;
       }
-      return false;
-    })
-    .then(() => {
-      /* Get available datasets -- this is needed for the sidebar dataset-change dropdowns etc */
-      fetchJSON(`${charonAPIAddress}/getAvailable?prefix=${window.location.pathname}`)
-        .then((res) => dispatch({type: types.SET_AVAILABLE, data: res}));
-    })
-    .catch((err) => {
-      console.warn(err, err.message);
-      dispatch(goTo404(`Couldn't load JSONs for ${url}`));
-    });
-  if (warning) {
-    dispatch(warningNotification(warning));
+    }
+  } else if (query.tt) {
+    secondTree = {url: undefined, name: query.tt, mainTreeName: undefined};
   }
+  return [url, secondTree];
 };
+
+const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
+  let secondTree;
+  [url, secondTree] = processSecondTree(url, query);
+
+  /* fetch the main JSON + the [main] JSON of a second tree if applicable */
+  let mainJson;
+  try {
+    mainJson = await getDataset(`${url}`);
+    if (secondTree) {
+      if (!secondTree.url) {
+        if (!mainJson.tree_name) throw new Error("Can't fetch second tree if main tree is unnamed");
+        secondTree.url = url.replace(mainJson.tree_name, secondTree.name);
+      }
+      const secondTreeJson = await getDataset(secondTree.url);
+      mainJson.treeTwo = secondTreeJson.tree;
+      /* TO DO -- we used to fetch both trees at once, and the server would provide
+       * the following info accordingly. This required `recomputeReduxState` to be
+       * overly complicated. Since we have 2 fetches, could we simplify things
+       * and make `recomputeReduxState` for the first tree followed by another
+       * state recomputation? */
+      if (!mainJson.tree_name) mainJson.tree_name = secondTree.mainTreeName; // TO DO
+      mainJson._treeTwoName = secondTree.name; // TO DO
+    }
+
+    dispatch({
+      type: types.CLEAN_START,
+      ...createStateFromQueryOrJSONs({json: mainJson, query, narrativeBlocks})
+    });
+
+  } catch (err) {
+    console.error(err, err.message);
+    dispatch(goTo404(`Couldn't load JSONs for ${url}`));
+    return;
+  }
+
+  /* do we have frequencies to display? */
+  if (mainJson.panels && mainJson.panels.indexOf("frequencies") !== -1) {
+    try {
+      const frequencyData = await getDataset(url, {type: "tip-frequencies"});
+      dispatch(loadFrequencies(frequencyData));
+    } catch (err) {
+      console.error("Failed to fetch frequencies", err.message)
+      dispatch(warningNotification({message: "Failed to fetch frequencies"}));
+    }
+  }
+
+  /* Get available datasets -- this is needed for the sidebar dataset-change dropdowns etc */
+  try {
+    const availableDatasets = await fetchJSON(`${charonAPIAddress}/getAvailable?prefix=${window.location.pathname}`)
+    dispatch({type: types.SET_AVAILABLE, data: availableDatasets});
+  } catch (err) {
+    console.error("Failed to fetch available datasets", err.message)
+    dispatch(warningNotification({message: "Failed to fetch available datasets"}));
+  }
+
+};
+
+export const loadSecondTree = (name, fields) => async (dispatch, getState) => {
+  let secondJson;
+  try {
+    secondJson = await getDataset(fields.join("/"));
+  } catch (err) {
+    console.error("Failed to fetch additional tree", err.message);
+    dispatch(warningNotification({message: "Failed to fetch second tree"}));
+    return;
+  }
+  const oldState = getState();
+  const newState = createTreeTooState({treeTooJSON: secondJson.tree, oldState, segment: name});
+  dispatch({type: types.TREE_TOO_DATA, segment: name, ...newState});
+}
+
 
 export const loadJSONs = ({url = window.location.pathname, search = window.location.search} = {}) => {
   return (dispatch, getState) => {
@@ -121,14 +185,4 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       fetchDataAndDispatch(dispatch, url, query);
     }
   };
-};
-
-export const loadTreeToo = (name, fields) => (dispatch, getState) => {
-  const oldState = getState();
-  getDataset(fields.join("/"), {type: "tree"})
-    .then((json) => {
-      const newState = createTreeTooState({treeTooJSON: json.tree, oldState, segment: name});
-      dispatch({type: types.TREE_TOO_DATA, segment: name, ...newState});
-    })
-    .catch((err) => console.error("Failed to fetch additional tree", err.message));
 };

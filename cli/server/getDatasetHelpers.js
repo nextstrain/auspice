@@ -34,27 +34,6 @@ const splitPrefixIntoParts = (url) => url
   .replace(/\/$/, '')
   .split("/");
 
-/**
- * given a "split" query (i.e. the "parts") -- check if 2 trees
- * are defined, e.g. `ha:na`. If so, then modify the split query
- * to only include the first (`ha`) and return the string of
- * the second `na`. Return `false` if no 2nd tree detected.
- */
-const checkForSecondTree = (datanameParts, query) => {
-  let secondTreeName = false;
-  let treeName;
-  for (let i=0; i<datanameParts.length; i++) {
-    if (datanameParts[i].indexOf(":") !== -1) {
-      [treeName, secondTreeName] = datanameParts[i].split(":");
-      datanameParts[i] = treeName; // only use the first tree from now on
-      break;
-    }
-  }
-  if (!secondTreeName && query.deprecatedSecondTree) {
-    secondTreeName = query.deprecatedSecondTree;
-  }
-  return [treeName, secondTreeName];
-};
 
 /* can throw */
 const interpretRequest = (req) => {
@@ -62,13 +41,8 @@ const interpretRequest = (req) => {
   const query = queryString.parse(req.url.split('?')[1]);
   if (!query.prefix) throw new Error("'prefix' not defined in request");
   const datanameParts = splitPrefixIntoParts(query.prefix);
-  const [mainTreeName, secondTreeName] = checkForSecondTree(datanameParts, query);
-  if (secondTreeName) {
-    console.log("2nd tree NAME", secondTreeName);
-    utils.warn("THE SECOND TREE WILL BE IGNORED -- TO DO");
-  }
-  const info = {parts: datanameParts, mainTreeName, secondTreeName};
-  if (query.type) {
+  const info = {parts: datanameParts};
+  if (query.type && query.type !== "tree") { // "tree" is deprecated
     info.dataType = query.type;
   } else {
     info.dataType = "dataset";
@@ -120,8 +94,9 @@ const sendJson = async (res, info) => {
   } else {
     const meta = await utils.readFilePromise(info.address.meta);
     const tree = await utils.readFilePromise(info.address.tree);
-    /* TO DO we should guess the tree name here (only v1) */
-    const v2Json = convertJsons({tree, meta, treeName: "treeNameToDo"});
+    /* v1 JSONs don't define a tree name, so we try to guess it here */
+    const mainTreeName = guessTreeName(info.parts);
+    const v2Json = convertJsons({tree, meta, treeName: mainTreeName});
     return res.json(v2Json)
   }
 }

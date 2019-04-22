@@ -63,7 +63,7 @@ const setUpGetAvailableHandler = ({datasetsPath, narrativesPath}) => {
    * Servers often use their own handler instead of this.
    */
   return async (req, res) => {
-    utils.verbose("Returning locally available datasets & narratives");
+    utils.log("GET AVAILABLE returning locally available datasets & narratives");
     const datasets = await getAvailableDatasets(datasetsPath);
     const narratives = await getAvailableNarratives(narrativesPath);
     res.json({datasets, narratives});

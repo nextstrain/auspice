@@ -1,7 +1,7 @@
 import React from "react";
 import Select from "react-select";
 import { connect } from "react-redux";
-import { loadTreeToo } from "../../actions/loadData";
+import { loadSecondTree } from "../../actions/loadData";
 import { REMOVE_TREE_TOO } from "../../actions/types";
 import { controlsWidth } from "../../util/globals";
 import { SidebarSubtitle } from "./styles";
@@ -69,7 +69,7 @@ class ChooseSecondTree extends React.Component {
               } else {
                 const dataPath = [...displayedDataset];
                 dataPath.splice(idxOfTree, 1, opt.value);
-                this.props.dispatch(loadTreeToo(opt.value, dataPath));
+                this.props.dispatch(loadSecondTree(opt.value, dataPath));
               }
             }}
           />
