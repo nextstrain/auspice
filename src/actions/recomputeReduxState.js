@@ -647,8 +647,9 @@ export const createStateFromQueryOrJSONs = ({
     );
   }
 
-  if (json["tree_name"]) {
-    tree.name = json["tree_name"];
+  if (json.tree_name) {
+    /* setting this will enable the sidebar drop down for a 2nd tree */
+    tree.name = json.tree_name;
   }
   const url = json["_url"]; // injected by the server. Will be picked up by middleware.
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query, url};
