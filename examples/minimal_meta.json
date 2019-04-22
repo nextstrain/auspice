@@ -115,7 +115,7 @@
     "tree",
     "map"
   ],
-  "title": "Minimal auspice spec based on Zika pipeline",
+  "title": "Minimal (v1) auspice spec based on Zika pipeline",
   "updated": "02 Apr 2019",
   "virus_count": 31
 }
