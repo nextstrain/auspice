@@ -266,7 +266,7 @@ const storeTreeAsV2 = (v2, tree) => {
 };
 
 
-const convert = ({tree, meta, treeName}) => {
+const convertFromV1 = ({tree, meta, treeName}) => {
   const v2 = {};
   setColorings(v2, meta);
   setMiscMetaProperties(v2, meta);
@@ -281,5 +281,5 @@ const convert = ({tree, meta, treeName}) => {
 
 
 module.exports = {
-  convert
+  convertFromV1
 };

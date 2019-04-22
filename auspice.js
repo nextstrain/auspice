@@ -5,6 +5,7 @@ const version = require('./src/version').version;
 const view = require("./cli/view");
 const build = require("./cli/build");
 const develop = require("./cli/develop");
+const convert = require("./cli/convert");
 
 const parser = new argparse.ArgumentParser({
   version: version,
@@ -22,6 +23,7 @@ const subparsers = parser.addSubparsers({title: 'Auspice commands', dest: "subco
 view.addParser(subparsers);
 build.addParser(subparsers);
 develop.addParser(subparsers);
+convert.addParser(subparsers);
 
 const args = parser.parseArgs();
 
@@ -33,6 +35,8 @@ if (args.subcommand === "build") {
   view.run(args);
 } else if (args.subcommand === "develop") {
   develop.run(args);
+} else if (args.subcommand === "convert") {
+  convert.run(args);
 }
 
 // console.dir(args);

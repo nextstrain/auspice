@@ -12,7 +12,7 @@ const utils = require("../utils");
 const queryString = require("query-string");
 const getAvailable = require("./getAvailable");
 const path = require("path");
-const convertJsons = require("./convertJsonSchemas").convert;
+const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
 
 
 const handleError = (res, clientMsg, serverMsg="") => {
@@ -111,7 +111,7 @@ const sendJson = async (res, info) => {
     const tree = await utils.readFilePromise(info.address.tree);
     /* v1 JSONs don't define a tree name, so we try to guess it here */
     const mainTreeName = guessTreeName(info.parts);
-    const v2Json = convertJsons({tree, meta, treeName: mainTreeName});
+    const v2Json = convertFromV1({tree, meta, treeName: mainTreeName});
     return res.json(v2Json)
   }
 }
