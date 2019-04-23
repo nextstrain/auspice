@@ -1,9 +1,7 @@
 /* eslint no-unused-expressions: off */
 
 /* HOW TO RUN THESE TESTS?
-./node_modules/mocha/bin/mocha
-OR
-npm run test
+npx mocha
 */
 
 const chai = require('chai');

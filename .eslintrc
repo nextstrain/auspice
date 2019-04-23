@@ -1,5 +1,6 @@
 ---
 extends: "airbnb"
+plugins: ["react-hooks"]
 parser: "babel-eslint"
 rules:
   camelcase: off # require camel case names
@@ -47,6 +48,8 @@ rules:
   quote-props: ["error", "as-needed"]
   prefer-const: ["error", {"destructuring": "all"}]
   indent: ["error", 2, {"MemberExpression": "off", "SwitchCase": 1}]
+  react-hooks/rules-of-hooks: "error"
+  react-hooks/exhaustive-deps: "warn"
 parserOptions:
   ecmaVersion: 6
   sourceType: module
