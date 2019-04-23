@@ -1,3 +1,3 @@
-## Auspice docs website.
+# Auspice built documentation to be served by GitHub pages.
 
 Files in this folder should not be modified by hand, they are the generated from within the `docs-src` directory.
