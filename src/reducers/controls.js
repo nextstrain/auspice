@@ -238,6 +238,11 @@ const Controls = (state = getDefaultControlsState(), action) => {
         return Object.assign({}, state, {showTangle: !state.showTangle});
       }
       return state;
+    case types.ADD_COLOR_BYS:
+      for (const colorBy of Object.keys(action.newColorings)) {
+        state.coloringsPresentOnTree.add(colorBy);
+      }
+      return Object.assign({}, state, {coloringsPresentOnTree: state.coloringsPresentOnTree});
     default:
       return state;
   }

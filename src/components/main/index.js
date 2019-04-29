@@ -10,7 +10,7 @@ import { controlsHiddenWidth } from "../../util/globals";
 import Footer from "../framework/footer";
 import DownloadModal from "../download/downloadModal";
 import { analyticsNewPage } from "../../util/googleAnalytics";
-import filesDropped from "../../actions/filesDropped";
+import handleFilesDropped from "../../actions/filesDropped";
 import AnimationController from "../framework/animationController";
 import { calcUsableWidth } from "../../util/computeResponsive";
 import { renderNarrativeToggle } from "../narrative/renderNarrativeToggle";
@@ -71,7 +71,7 @@ class Main extends React.Component {
     document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
     document.addEventListener("drop", (e) => {
       e.preventDefault();
-      return this.props.dispatch(filesDropped(e.dataTransfer.files));
+      return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
     }, false);
   }
   render() {
