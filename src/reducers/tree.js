@@ -64,19 +64,16 @@ const Tree = (state = getDefaultTreeState(), action) => {
       });
     case types.TREE_TOO_DATA:
       return action.tree;
-    // TODO -- reinstate CSV drag & drop functionality
-    // case types.ADD_COLOR_BYS:
-    //   /* modify in place ?!?! */
-    //   for (const node of state.nodes) {
-    //     if (action.taxa.indexOf(node.strain) !== -1) {
-    //       action.newColorBys.forEach((colorBy, idx) => {
-    //         node.attr[colorBy] = action.data[node.strain][idx];
-    //       });
-    //     }
-    //   }
-    //   return Object.assign({}, state, {
-    //     attrs: getAttrsOnTerminalNodes(state.nodes)
-    //   });
+    case types.ADD_COLOR_BYS:
+      // modify the node data in place, which will not trigger any redux updates
+      state.nodes.forEach((node) => {
+        if (action.strains.has(node.strain)) {
+          for (const [trait, obj] of Object.entries(action.traits[node.strain])) {
+            node.traits[trait] = obj;
+          }
+        }
+      });
+      return state;
     default:
       return state;
   }

@@ -102,7 +102,7 @@ export const authorTSV = (dispatch, filePrefix, metadata, tree) => {
   dispatch(infoNotification({message: "Author metadata exported", details: filename}));
 };
 
-export const turnAttrsIntoHeaderArray = (attrs) => {
+const turnAttrsIntoHeaderArray = (attrs) => {
   return ["Strain"].concat(attrs.map((v) => prettyString(v)));
 };
 
