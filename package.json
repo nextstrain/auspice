@@ -28,7 +28,9 @@
     "redeploy-site": "./scripts/redeploy-site.sh",
     "rebuild-docker-image": "./scripts/rebuild-docker-image.sh",
     "gzip-and-upload": "./scripts/gzip-and-upload.sh",
-    "build-docs": "echo 'see ./docs-src/README.md'"
+    "build-docs": "echo 'see ./docs-src/README.md'",
+    "heroku-postbuild": "cd auspice.us && node ../auspice.js build --verbose --extend client-customisations/config.json",
+    "start-auspice-us": "cd auspice.us && node ../auspice.js view --verbose --handlers server-customisations/handlers.js --customBuild"
   },
   "dependencies": {
     "@babel/core": "^7.3.4",
