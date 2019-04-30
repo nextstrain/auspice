@@ -52,9 +52,11 @@ class Main extends React.Component {
     };
     analyticsNewPage();
   }
+
   static propTypes = {
     dispatch: PropTypes.func.isRequired
   }
+
   componentWillReceiveProps(nextProps) {
     if (this.state.showSpinner && nextProps.metadataLoaded && nextProps.treeLoaded) {
       this.setState({showSpinner: false});
@@ -67,6 +69,7 @@ class Main extends React.Component {
       this.setState({sidebarOpen: true});
     }
   }
+
   componentDidMount() {
     document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
     document.addEventListener("drop", (e) => {
@@ -74,6 +77,7 @@ class Main extends React.Component {
       return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
     }, false);
   }
+
   render() {
     if (this.state.showSpinner) {
       return (<Spinner/>);
@@ -99,7 +103,6 @@ class Main extends React.Component {
           width={sidebarWidth}
           height={availableHeight}
           displayNarrative={this.props.displayNarrative}
-          panelsToDisplay={this.props.panelsToDisplay}
           narrativeTitle={this.props.narrativeTitle}
           mobileDisplay={this.state.mobileDisplay}
           navBarHandler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}

@@ -8,7 +8,7 @@ import { narrativeNavBarHeight } from "../../util/globals";
 
 
 export const Sidebar = (
-  {sidebarOpen, width, height, displayNarrative, panelsToDisplay, narrativeTitle, mobileDisplay, navBarHandler}
+  {sidebarOpen, width, height, displayNarrative, narrativeTitle, mobileDisplay, navBarHandler}
 ) => {
   return (
     <ThemeProvider theme={sidebarTheme}>
@@ -20,15 +20,14 @@ export const Sidebar = (
           narrativeTitle={displayNarrative ? narrativeTitle : false}
           width={width}
         />
-        {displayNarrative ?
+        {displayNarrative ? (
           <Narrative
             height={height - narrativeNavBarHeight}
             width={width}
-          /> :
-          <Controls
-            mapOn={panelsToDisplay.includes("map")}
           />
-        }
+        ) : (
+          <Controls/>
+        )}
       </SidebarContainer>
     </ThemeProvider>
   );

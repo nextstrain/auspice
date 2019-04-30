@@ -342,39 +342,42 @@ class Footer extends React.Component {
     }
     return null;
   }
+
   downloadDataButton() {
     return (
       <button
+        type="button"
         style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", color: medGrey, margin: 0, padding: 0})}
         onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
       >
         <i className="fa fa-download" aria-hidden="true"/>
-        <span style={{position: "relative"}}>{" download data"}</span>
+        <span style={{position: "relative"}}>
+          download data
+        </span>
       </button>
     );
   }
+
   renderMaintainers() {
-    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainers")) {
-      const renderLink = (m) => (<a href={m.url} target="_blank">{m.name}</a>);
-      return (
-        <>
-          <span style={{paddingRight: "3px"}}>Build maintained by</span>
-          {this.props.metadata.maintainers.map((m, i) => (
-            <span key={m.name}>
-              {renderLink(m)}
-              {i === this.props.metadata.maintainers.length-1 ? "." : i === this.props.metadata.maintainers.length-2 ? " and " : ", "}
-            </span>
-          ))}
-        </>
-      );
-    }
-    return null;
+    const renderLink = (m) => (<a href={m.url} target="_blank" rel='noreferrer noopener'>{m.name}</a>);
+    return (
+      <>
+        <span style={{paddingRight: "3px"}}>Build maintained by</span>
+        {this.props.metadata.maintainers.map((m, i) => (
+          <span key={m.name}>
+            {renderLink(m)}
+            {i === this.props.metadata.maintainers.length-1 ? "." : i === this.props.metadata.maintainers.length-2 ? " and " : ", "}
+          </span>
+        ))}
+      </>
+    );
   }
+
   getCitation() {
     return (
       <span>
         {"Nextstrain: "}
-        <a href={publications.nextstrain.href} target="_blank">
+        <a href={publications.nextstrain.href} target="_blank" rel='noreferrer noopener'>
           {publications.nextstrain.author}, <i>{publications.nextstrain.journal}</i>{` (${publications.nextstrain.year})`}
         </a>
       </span>
@@ -400,10 +403,21 @@ class Footer extends React.Component {
             );
           })}
           <Flex style={styles.fineprint}>
-            {this.renderMaintainers()}
-            {dot}
-            {this.getUpdated()}
-            {dot}
+
+            {this.props.metadata.maintainers ? (
+              <>
+                {this.renderMaintainers()}
+                {dot}
+              </>
+            ) : null}
+
+            {this.props.metadata.updated ? (
+              <>
+                {this.getUpdated()}
+                {dot}
+              </>
+            ) : null}
+
             {this.downloadDataButton()}
           </Flex>
           <div style={{height: "3px"}}/>

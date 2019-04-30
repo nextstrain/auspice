@@ -88,6 +88,9 @@ const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidenc
       .map((v) => `${prettyString(v)} (${(100 * confidenceData[v]).toFixed(0)}%)`);
     return renderInfoBlock(`${prettyString(colorBy)} (confidence):`, vals);
   }
+  if (colorBy === "none") {
+    return null;
+  }
   return renderInfoLine(prettyString(colorBy), prettyString(getTraitFromNode(d, colorBy)));
 };
 
@@ -245,18 +248,23 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
   if (colorBy === "num_date") {
     if (distanceMeasure === "num_date") return null;
     return renderBranchTime(d.n, temporalConfidence);
-  } else if (colorBy === "authors") {
+  }
+  if (colorBy === "authors") {
     if (authorInfo[d.n.authors]) {
       return renderInfoLine("Authors:", authorInfo[d.n.authors].authors);
     }
     return null;
-  } else if (isColorByGenotype(colorBy)) {
+  }
+  if (isColorByGenotype(colorBy)) {
     const genotype = decodeColorByGenotype(colorBy);
     const key = genotype.aa
       ? `Amino Acid at ${genotype.gene} site ${genotype.positions.join(", ")}`
       : `Nucleotide at pos ${genotype.positions.join(", ")}`;
     const state = getTipColorAttribute(d.n, colorScale);
     return renderInfoLine(key + ":", state);
+  }
+  if (colorBy === "none") {
+    return null;
   }
   return renderInfoLine(prettyString(colorBy) + ":", prettyString(getTraitFromNode(d.n, colorBy)));
 };

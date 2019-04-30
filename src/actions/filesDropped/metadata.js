@@ -1,7 +1,7 @@
 import Papa from "papaparse";
 import { errorNotification, successNotification, warningNotification } from "../notifications";
 import { ADD_COLOR_BYS } from "../types";
-
+import { changeColorBy } from "../colors";
 
 /**
  * A promise-ified version of Papa.parse()
@@ -110,6 +110,10 @@ const handleMetadata = async (dispatch, getState, file) => {
     newColorings[title] = {title, type: "categorical"};
   });
   dispatch({type: ADD_COLOR_BYS, newColorings, strains: strainsToProcess, traits: dataToProcess});
+  /* check if there was no color by set, and if so, set one now */
+  if (controls.colorBy === "none") {
+    dispatch(changeColorBy(newColorByNames[0]));
+  }
   return dispatch(successNotification({
     message: "Adding metadata from " + file.name,
     details: `${newColorByNames.length} new field${newColorByNames.length > 1 ? "s" : ""} for ${strainsToProcess.size} node${strainsToProcess.size > 1 ? "s" : ""}`

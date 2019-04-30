@@ -147,12 +147,12 @@ const calcVisibility = (tree, controls, dates) => {
     /* intersect the various arrays contributing to visibility */
     const visibility = tree.nodes.map((node, idx) => {
       if (inView[idx] && (filtered ? filtered[idx] : true)) {
-        const nodeDate = node.num_date.value;
         /* if without date, treetime probably not run - or would be inferred
           so if branchLengthsToDisplay is "divOnly", then ensure node displayed */
         if (controls.branchLengthsToDisplay === "divOnly" && !node.num_date) {
           return NODE_VISIBLE;
         }
+        const nodeDate = node.num_date.value;
         /* is the actual node date (the "end" of the branch) in the time slice? */
         if (nodeDate >= dates.dateMinNumeric && nodeDate <= dates.dateMaxNumeric) {
           return NODE_VISIBLE;

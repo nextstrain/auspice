@@ -42,7 +42,8 @@ const item = (key, value) => (
 const formatURL = (url) => {
   if (url !== undefined && url.startsWith("https_")) {
     return url.replace("https_", "https:");
-  } else if (url !== undefined && url.startsWith("http_")) {
+  }
+  if (url !== undefined && url.startsWith("http_")) {
     return url.replace("http_", "http:");
   }
   return url;
@@ -52,29 +53,31 @@ const dateConfidence = (x) => (
   item("Collection date confidence", `(${numericToCalendar(x[0])}, ${numericToCalendar(x[1])})`)
 );
 
-const accessionAndUrl = (node) => {
-  const accession = node.accession;
-  const url = node.url;
+const accessionAndUrl = (tip) => {
+  const accession = tip.n.accession;
+  const url = tip.n.url;
 
   if (isValueValid(accession) && isValueValid(url)) {
     return (
       <tr>
         <th style={infoPanelStyles.item}>Accession</th>
         <td style={infoPanelStyles.item}>
-          <a href={formatURL(url)} target="_blank">{accession}</a>
+          <a href={formatURL(url)} target="_blank" rel='noreferrer noopener'>{accession}</a>
         </td>
       </tr>
     );
-  } else if (isValueValid(accession)) {
+  }
+  if (isValueValid(accession)) {
     return (
       item("Accession", accession)
     );
-  } else if (isValueValid(url)) {
+  }
+  if (isValueValid(url)) {
     return (
       <tr>
         <th style={infoPanelStyles.item}>URL</th>
         <td style={infoPanelStyles.item}>
-          <a href={formatURL(url)} target="_blank"><em>click here</em></a>
+          <a href={formatURL(url)} target="_blank" rel='noreferrer noopener'><em>click here</em></a>
         </td>
       </tr>
     );
@@ -88,7 +91,7 @@ const displayVaccineInfo = (d) => {
     const els = [];
     if (d.n.vaccine.selection_date) {
       els.push(
-        <tr key={"seldate"}>
+        <tr key="seldate">
           <th>Vaccine selected</th>
           <td>{d.n.vaccine.selection_date}</td>
         </tr>
@@ -96,7 +99,7 @@ const displayVaccineInfo = (d) => {
     }
     if (d.n.vaccine.start_date) {
       els.push(
-        <tr key={"startdate"}>
+        <tr key="startdate">
           <th>Vaccine start date</th>
           <td>{d.n.vaccine.start_date}</td>
         </tr>
@@ -104,7 +107,7 @@ const displayVaccineInfo = (d) => {
     }
     if (d.n.vaccine.end_date) {
       els.push(
-        <tr key={"enddate"}>
+        <tr key="enddate">
           <th>Vaccine end date</th>
           <td>{d.n.vaccine.end_date}</td>
         </tr>
@@ -112,7 +115,7 @@ const displayVaccineInfo = (d) => {
     }
     if (d.n.vaccine.serum) {
       els.push(
-        <tr key={"serum"}>
+        <tr key="serum">
           <th>Serum strain</th>
           <td/>
         </tr>
@@ -123,7 +126,8 @@ const displayVaccineInfo = (d) => {
   return null;
 };
 
-const displayPublicationInfo = (authorKey, authorInfo) => {
+const displayPublicationInfo = (tip, authorInfo) => {
+  const authorKey = tip.n.authors;
   if (!authorKey || !authorInfo[authorKey]) {
     return null;
   }
@@ -141,10 +145,32 @@ const displayPublicationInfo = (authorKey, authorInfo) => {
   );
 };
 
+const displayTraits = (tip) => {
+  if (!tip.n.traits) return null;
+  return Object.keys(tip.n.traits).map((trait) => {
+    const value = getTraitFromNode(tip.n, trait);
+    return isValueValid(value) ? item(prettyString(trait), prettyString(value)) : null;
+  });
+};
+
+const showTemporalInformation = (tip) => {
+  if (!tip.n.num_date) return null;
+  const showUncertainty = tip.n.num_date.confidence && tip.n.num_date.confidence[0] !== tip.n.num_date.confidence[1];
+  if (showUncertainty) {
+    return (
+      <>
+        {item("Inferred collection date", prettyString(numericToCalendar(tip.n.num_date.value)))}
+        {dateConfidence(tip.n.num_date.confidence)}
+      </>
+    );
+  }
+  return (
+    item("Collection date", prettyString(numericToCalendar(tip.n.num_date.value)))
+  );
+};
+
 const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
   if (!tip) {return null;}
-  const showUncertainty = tip.n.num_date && tip.n.num_date.confidence && tip.n.num_date.confidence[0] !== tip.n.num_date.confidence[1];
-
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
@@ -153,22 +179,11 @@ const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
         </p>
         <table>
           <tbody>
-            {displayVaccineInfo(tip) /* vaccine information (if applicable) */}
-            {/* the "basic" attributes (which may not exist in certain datasets) */}
-            {["country", "region", "division"].map((x) => {
-              const value = getTraitFromNode(tip.n, x);
-              return isValueValid(value) ? item(prettyString(x), prettyString(value)) : null;
-            })}
-            {/* Dates */}
-            {item(
-              showUncertainty ? "Inferred collection date" : "Collection date",
-              prettyString(numericToCalendar(tip.n.num_date.value))
-            )}
-            {showUncertainty ? dateConfidence(tip.n.num_date.confidence) : null}
-            {/* Author / Paper information */}
-            {displayPublicationInfo(tip.n.authors, authorInfo)}
-            {/* try to join URL with accession, else display the one that's available */}
-            {accessionAndUrl(tip.n)}
+            {displayVaccineInfo(tip)}
+            {displayTraits(tip)}
+            {showTemporalInformation(tip)}
+            {displayPublicationInfo(tip, authorInfo)}
+            {accessionAndUrl(tip)}
           </tbody>
         </table>
         <p style={infoPanelStyles.comment}>

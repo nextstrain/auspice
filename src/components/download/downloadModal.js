@@ -3,7 +3,7 @@ import Mousetrap from "mousetrap";
 import { connect } from "react-redux";
 import { withTheme } from 'styled-components';
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
-import { materialButton, extraLightGrey, infoPanelStyles } from "../../globalStyles";
+import { materialButton, infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
 import { authorString } from "../../util/stringHelpers";
 import * as helpers from "./helperFunctions";
@@ -58,7 +58,8 @@ export const publications = {
   visibility: state.tree.visibility,
   panelsToDisplay: state.controls.panelsToDisplay,
   panelLayout: state.controls.panelLayout,
-  authorInfo: state.metadata.authorInfo
+  authorInfo: state.metadata.authorInfo,
+  branchLengthsToDisplay: state.controls.branchLengthsToDisplay
 }))
 class DownloadModal extends React.Component {
   constructor(props) {
@@ -107,18 +108,24 @@ class DownloadModal extends React.Component {
     };
     this.dismissModal = this.dismissModal.bind(this);
   }
+
   componentDidMount() {
     Mousetrap.bind('d', () => {
       helpers.SVG(this.props.dispatch, this.getFilePrefix(), this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport());
     });
   }
+
   getRelevantPublications() {
-    const x = [publications.nextstrain, publications.treetime];
+    const x = [publications.nextstrain];
+    if (this.props.branchLengthsToDisplay !== "divOnly") {
+      x.push(publications.treetime);
+    }
     if (["cTiter", "rb", "ep", "ne"].indexOf(this.props.colorBy) !== -1) {
       x.push(publications.titers);
     }
     return x;
   }
+
   formatPublications(pubs) {
     return (
       <span>
@@ -134,6 +141,7 @@ class DownloadModal extends React.Component {
       </span>
     );
   }
+
   relevantPublications() {
     const titer_related_keys = ["cTiter", "rb", "ep", "ne"];
     const titer = (titer_related_keys.indexOf(this.props.colorBy) !== -1) ?
@@ -154,6 +162,7 @@ class DownloadModal extends React.Component {
       </span>
     );
   }
+
   getFilePrefix() {
     return "nextstrain_"
       + window.location.pathname
@@ -161,6 +170,7 @@ class DownloadModal extends React.Component {
           .replace(/:/g, '-')       // Change ha:na to ha-na
           .replace(/\//g, '_');     // Replace slashes with spaces
   }
+
   makeTextStringsForSVGExport() {
     const x = [];
     x.push(this.props.metadata.title);
@@ -180,13 +190,39 @@ class DownloadModal extends React.Component {
   downloadButtons() {
     const filePrefix = this.getFilePrefix();
     const iconWidth = 25;
-    const buttons = [
-      ["Tree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
-      ["TimeTree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
-      ["Strain Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.authorInfo)],
-      ["Author Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.metadata, this.props.tree)],
-      ["Screenshot (SVG)", (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
-    ];
+    const buttons = [];
+
+    if (this.props.branchLengthsToDisplay !== "dateOnly") {
+      buttons.push([
+        "Tree (newick)",
+        (<RectangularTreeIcon width={iconWidth} selected />),
+        () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)
+      ]);
+    }
+    if (this.props.branchLengthsToDisplay !== "divOnly") {
+      buttons.push([
+        "TimeTree (newick)",
+        (<RectangularTreeIcon width={iconWidth} selected />),
+        () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)
+      ]);
+    }
+    buttons.push([
+      "Strain Metadata (TSV)",
+      (<MetaIcon width={iconWidth} selected />),
+      () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.authorInfo)
+    ]);
+    if (this.props.authorInfo) {
+      buttons.push([
+        "Author Metadata (TSV)",
+        (<MetaIcon width={iconWidth} selected />),
+        () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.metadata, this.props.tree)
+      ]);
+    }
+    buttons.push([
+      "Screenshot (SVG)",
+      (<PanelsGridIcon width={iconWidth} selected />),
+      () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())
+    ]);
     const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white"});
     return (
       <div style={{display: "flex", flexWrap: "wrap", justifyContent: "space-around"}}>
@@ -201,18 +237,22 @@ class DownloadModal extends React.Component {
       </div>
     );
   }
+
   dismissModal() {
     this.props.dispatch({ type: DISMISS_DOWNLOAD_MODAL });
   }
+
   createSummaryWrapper() {
     return createSummary(
       this.props.metadata.mainTreeNumTips,
       this.props.nodes,
       this.props.filters,
       this.props.visibility,
-      this.props.visibleStateCounts
+      this.props.visibleStateCounts,
+      this.props.branchLengthsToDisplay
     );
   }
+
   render() {
     if (!this.props.show) {
       return null;

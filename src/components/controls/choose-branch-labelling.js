@@ -14,7 +14,9 @@ class ChooseBranchLabelling extends React.Component {
     super(props);
     this.change = (value) => {this.props.dispatch({type: CHANGE_BRANCH_LABEL, value: value.value});};
   }
+
   render() {
+    if (this.props.available.length === 1) return null;
     return (
       <div style={{paddingTop: 5}}>
         <SidebarSubtitle>

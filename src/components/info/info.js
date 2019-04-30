@@ -63,10 +63,10 @@ const arrayToSentence = (arr, {prefix=undefined, suffix=undefined, capatalise=tr
 
 export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visibleStateCounts, branchLengthsToDisplay) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
-  const sampledDateRange = getVisibleDateRange(nodes, visibility);
   /* Number of genomes & their date range */
   let summary = `Showing ${nSelectedSamples} of ${mainTreeNumTips} genomes`;
   if (branchLengthsToDisplay !== "divOnly") {
+    const sampledDateRange = getVisibleDateRange(nodes, visibility);
     summary += ` sampled between ${styliseDateRange(sampledDateRange[0])} and ${styliseDateRange(sampledDateRange[1])}`;
   }
   /* parse filters */
@@ -109,6 +109,7 @@ class Info extends React.Component {
   constructor(props) {
     super(props);
   }
+
   getStyles(width) {
     let fontSize = 28;
     if (this.props.browserDimensions.width < 1000) {
@@ -162,6 +163,7 @@ class Info extends React.Component {
     }
     return this.props.filters.authors.length;
   }
+
   addFilteredDatesButton(buttons) {
     buttons.push(
       <div key={"timefilter"} style={{display: "inline-block"}}>
@@ -181,6 +183,7 @@ class Info extends React.Component {
       </div>
     );
   }
+
   addNonAuthorFilterButton(buttons, filterName) {
     this.props.filters[filterName].sort().forEach((itemName) => {
       const display = (
@@ -192,6 +195,7 @@ class Info extends React.Component {
       buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));
     });
   }
+
   selectedStrainButton(strain) {
     return (
       <span>
@@ -216,6 +220,7 @@ class Info extends React.Component {
       </span>
     );
   }
+
   clearFilterButton(field) {
     return (
       <span

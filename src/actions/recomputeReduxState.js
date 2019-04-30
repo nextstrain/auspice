@@ -346,7 +346,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
         state.defaults.colorBy = availableNonGenotypeColorBys[0];
       }
     } else {
-      console.error("Error detected trying to set colorBy to", state.colorBy, " as there are no color options defined in the JSONs!");
+      console.warn("there are no color options defined in the JSONs!");
       state.colorBy = "none";
       state.defaults.colorBy = "none";
     }
