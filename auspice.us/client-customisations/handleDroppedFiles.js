@@ -1,5 +1,5 @@
 import { createStateFromQueryOrJSONs } from "@auspice/actions/recomputeReduxState";
-
+import newickToAuspiceJson from "./newickToAuspiceJson";
 
 export const handleDroppedFiles = (dispatch, files) => {
   const file = files[0];
@@ -19,7 +19,11 @@ export const handleDroppedFiles = (dispatch, files) => {
     if (file.type === "application/json") {
       jsonData = JSON.parse(fileReader.result);
     } else if (file.name.endsWith(".new") || file.name.endsWith(".newick") || file.name.endsWith(".nwk")) {
-      console.log("attempting to parse a newick tree");
+      try {
+        jsonData = newickToAuspiceJson(file.name, fileReader.result);
+      } catch (err) {
+        return errorCB(err);
+      }
     } else {
       return errorCB("Unknown filetype");
     }
