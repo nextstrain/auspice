@@ -50,6 +50,12 @@ rules:
   indent: ["error", 2, {"MemberExpression": "off", "SwitchCase": 1}]
   react-hooks/rules-of-hooks: "error"
   react-hooks/exhaustive-deps: "warn"
+  object-curly-newline: off
+  operator-linebreak: ["error", "after", { "overrides": { "?": "ignore", ":": "ignore" } }]
+  react/destructuring-assignment: off
+  prefer-destructuring: off
+  implicit-arrow-linebreak: off
+  jsx-quotes: off
 parserOptions:
   ecmaVersion: 6
   sourceType: module
