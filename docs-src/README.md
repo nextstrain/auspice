@@ -21,6 +21,7 @@ All commands run from this directory (`docs-src`).
 #### Installing dependencies
 ```bash
 npm install
+# you must also have installed the dependencies from the parent directory (`auspice`)
 ```
 
 #### Developing (live reloading etc):

@@ -1,11 +1,32 @@
 ---
-title: Injecting custom components
+title: API
 ---
 
-> These interfaces are very experimental and will change frequently.
-Documentation is somewhat incomplete.
-Please contact us (links at the bottom of the page) if you are using these customisations as we would like to develop them in a collaborative fashion.
+> These will change 😱😱😱 this is taken from the v1 docs
 
+
+## Sidebar Theme
+
+The appearence of the sidebar can be customised by specifing a theme in the config JSON used to build auspice.
+This theme is then available (via [styled-components](https://www.styled-components.com/)) to the components rendered in the sidebar.
+It is also passed to the nav bar component as the `theme` prop.
+
+```json
+{
+  "sidebarTheme": {
+    "background": "#F2F2F2",
+    "color": "#000",
+    "sidebarBoxShadow": "rgba(0, 0, 0, 0.2)",
+    "font-family": "Lato, Helvetica Neue, Helvetica, sans-serif",
+    "selectedColor": "#5097BA",
+    "unselectedColor": "#333"
+  }
+}
+```
+
+
+
+# Components
 
 One way to extend auspice is by replacing react components with your own custom components.
 These custom components will receive props defined here, which can be used to update the rendering of the component using the normal react lifecycle methods.
@@ -46,6 +67,3 @@ Available props:
 * `sidebar` boolean. Is it to be displayed in the sidebar?
 
 The navbar also receives the (possibly customised) sidebar theme which can be used to style components.
-
-
-

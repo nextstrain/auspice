@@ -1,8 +1,10 @@
-const React = require('react');
+const React = require('react'); // eslint-disable-line
 const CompLibrary = require('../../core/CompLibrary.js'); // eslint-disable-line
 const siteConfig = require(`${process.cwd()}/siteConfig.js`); // eslint-disable-line
 
-const MarkdownBlock = CompLibrary.MarkdownBlock; /* Used to read markdown */
+/* https://docusaurus.io/docs/en/api-pages#complibrarymarkdownblock */
+const MarkdownBlock = CompLibrary.MarkdownBlock;
+/* https://docusaurus.io/docs/en/api-pages#complibrarycontainer */
 const Container = CompLibrary.Container;
 
 
@@ -15,10 +17,8 @@ function docUrl(doc) {
 }
 
 const RenderLogos = () => (
-  <Container
-    padding={['bottom', 'top']}
-  >
-    <div className={"gridBlock"} style={{justifyContent: "space-around"}}>
+  <Container padding={['bottom', 'top']}>
+    <div className="iconsRow">
       <a key={1} href="http://www.fredhutch.org/" target="_blank" rel="noopener noreferrer">
         <img alt="logo" width="75" src={imgUrl("fred-hutch-logo-small.png")}/>
       </a>
@@ -86,138 +86,131 @@ const PromoSection = (props) => (
   </div>
 );
 
-const Block = (props) => (
+const BlockContainer = (props) => (
   <Container
     padding={['bottom', 'top']}
     id={props.id}
     background={props.background}
   >
     <div className="gridBlock">
-      {props.children.map((child) => (
-        <div className={`blockElement alignCenter ${props.layout || "fourByGridBlock"}`} key={child.title}>
-          <div className="blockContent">
-            <h2>{child.title}</h2>
-            {child.content}
-          </div>
-        </div>
-      ))}
+      {props.children}
     </div>
     {props.footer || null}
   </Container>
 );
 
-const Introduction = () => (
+const Block = ({title, content, buttonText=false, buttonLink=false}) => (
+  <div className="blockElement alignCenter fourByGridBlock" key={title}>
+    <div className="blockContent">
+      <h2>{title}</h2>
+      <MarkdownBlock>
+        {content}
+      </MarkdownBlock>
+      {buttonText && buttonLink ? (
+        <Button href={buttonLink}>{buttonText}</Button>
+      ) : null}
+    </div>
+  </div>
+);
+
+const MainIntroduction = () => (
   <MarkdownBlock>
-    Communicating scientific results while also allowing interrogation of the underlying data is an integral part of the scientific process.
-    Current scientific publishing practices hinder both the rapid dissemination of epidemiologically relevant results and the ability to easily interact with the data which was used to draw the inferences.
-    Initially developed as part of the [nextstrain](https://nextstrain.org) project, it is a more general tool for building different websites to support these aims.
+    Auspice is software to display beautiful interactive visualisations of phylogenomic data.
+    Auspice can be run on your computer, used to generate static websites (e.g. GitHub pages) or integrated into larger websites.
   </MarkdownBlock>
 );
 
-
-const IntroBlocks = () => (
-  <Block background="highlight">
-    {[
-      {
-        title: 'Interactive visualisation',
-        content: (
-          <span>
-            Visualisation of bioinformatics results is an integral part of current phylodynamics, both for data exploration and communication.
-            We wanted to build a tool that was highly interactive, versatile and customisable.
-            <Button href={docUrl("overview")}>Find out more</Button>
-          </span>
-        )
-      },
-      {
-        title: 'Run auspice locally',
-        content: (
-          <span>
-            Run auspice on your computer to display and interact with your own datasets.
-            <Button href={docUrl("installation")}>Find out more</Button>
-          </span>
-        )
-      },
-      {
-        title: 'Build your own custom website',
-        content: (
-          <span>
-            Auspice is a communication platform to quickly disseminate results to the wider community.
-            Use it to generate server-backed or serverless websites to display your own datasets, with as many customisations as you desire.
-            <Button href={docUrl("customisations/introduction")}>Find out more</Button>
-          </span>
-        )
-      }
-    ]}
-  </Block>
+const SubIntroduction = () => (
+  <div style={{fontSize: "90%", lineHeight: "140%"}}>
+    <MarkdownBlock>
+      Communicating scientific results while also allowing interrogation of the underlying data is an integral part of the scientific process.
+      Current scientific publishing practices hinder both the rapid dissemination of epidemiologically relevant results and the ability to easily interact with the data which was used to draw the inferences.
+      These shortcomings motivated the [nextstrain](https://nextstrain.org) project, for which auspice was initially devloped.
+    </MarkdownBlock>
+  </div>
 );
 
-/* consider moving to siteConfig when the users >> 1, as then
- * can have a seperate "users" page. For now, having them all on
- * the splash page makes sense
- */
-const users = [
-  {
+
+const blockContent = {
+  tutorial: {
+    title: 'Why interactive visualisation?',
+    content: "What can you learn by interacting with the data? Follow these guides to learn about what auspice helped us understand about Zika in the Americas",
+    buttonText: "tutorial",
+    buttonLink: docUrl("tutorial/overview")
+  },
+  getStarted: {
+    title: "Get started locally",
+    content: "Learn how to install auspice locally and convert your datasets to the required formats",
+    buttonText: "install auspice",
+    buttonLink: docUrl("introduction/install")
+  },
+  build: {
+    title: "Build your own website",
+    content: "Learn how to use auspice to build customised websites -- either backed by a server or staticallly genenerated (e.g. for GitHub pages).",
+    buttonText: "build using github-pages",
+    buttonLink: docUrl("build-static/introduction")
+  },
+  augur: {
+    title: "Bioinformatics",
+    content: "Augur is our seperate toolkit for phylodynamic analysis with a focus on pathgen and outbreak tracking. It's designed to work seamlessly with auspice. See the [nextstrain documentation](https://nextstrain.org/docs/bioinformatics/introduction) to find out more.",
+    buttonText: "go to augur docs",
+    buttonLink: "https://nextstrain.org/docs/bioinformatics/introduction/"
+  },
+  narratives: {
+    title: "Narratives",
+    content: "Instead of simply presenting the data for someone to explore, use auspice to tell a story where _you_ control what visualisation is presented for each block of text. This allows you to present the data as you understand it.",
+    buttonText: "writing narratives",
+    buttonLink: docUrl("narratives/introduction")
+  },
+  auspiceUs: {
+    title: "Drag & Drop data",
+    content: "auspice.us is a customised build of auspice designed to allow users to drag Newick files & metadata on and visualise their data. It's that simple.",
+    buttonText: "go to auspice.us",
+    buttonLink: "https://auspice.us"
+  }
+};
+
+
+const showcaseUsers = {
+  nextstrain: {
     name: "Nextstrain",
     link: "https://nextstrain.org",
     caption: "Real-time tracking of pathogen evolution",
     image: "img/nextstrain.png"
+  },
+  auspiceUs: {
+    name: "auspice.us",
+    link: "https://auspice-us.herokuapp.com",
+    caption: "drag & drop viusualisation",
+    image: "img/logo-dark.svg"
+  },
+  ghana: {
+    name: "ARTIC workshop",
+    link: "https://artic-network.github.io/artic-workshop",
+    caption: "Simulated viral outbreak for a ARTIC workshop in Ghana, built using auspice as a static site generator",
+    image: "img/artic-logo.png"
   }
-];
+};
 
-const Philosophy = () => (
-  <Block
-    background="highlight"
-    footer={(<Button className="highlightBackground" href={docUrl("overview")}>go to docs</Button>)}
-  >
-    {[
-      {
-        title: 'Use Augur for bioinformatics',
-        content: (
-          <MarkdownBlock>
-            Augur is a seperate toolkit for phylodynamic analysis with a focus on pathgen and outbreak tracking.
-            It's designed to work seamlessly with auspice.
-            See the [nextstrain documentation](https://nextstrain.org/docs/bioinformatics/introduction) to find out more.
-          </MarkdownBlock>
-        )
-      },
-      {
-        title: 'Status: In Development',
-        content: (
-          <MarkdownBlock>
-            We're actively developing auspice to be more versatile and able to power many different websites.
-            As such, the current API's are in flux while we develop this functionality.
-            If you are interested in helping us develop these ideas and would like to use auspice to build your website
-            then please contact us via [email](mailto:hello@nextstrain.org) or [twitter](https://twitter.com/hamesjadfield).
-          </MarkdownBlock>
-        )
-      }
-    ]}
-  </Block>
-);
-
-const Showcase = () => (
-  <Container
-    padding={['top', 'bottom']}
-  >
-    <h2>Auspice is the software which powers:</h2>
+const Showcase = (props) => (
+  <Container padding={['top', 'bottom']}>
+    <h2>Auspice is behind:</h2>
     <div className="gridBlock">
-      {users.map((user) => (
-        <div className={`blockElement alignCenter fourByGridBlock`} key={user.name}>
-          <div className="blockContent">
-            <h3 style={{marginTop: "0px"}}>
-              <a href={user.link} target="_blank" rel="noopener noreferrer">
-                {user.name}
-              </a>
-            </h3>
-            <a href={user.link} target="_blank" rel="noopener noreferrer">
-              <img src={user.image} alt={user.name} style={{maxHeight: "100px"}}/>
-            </a>
-            <p>{user.caption}</p>
-          </div>
-        </div>
-      ))}
+      {props.children}
     </div>
   </Container>
+);
+
+const ShowcaseItem = ({name, link, image, caption}) => (
+  <div className="blockElement alignCenter fourByGridBlock showcaseItem" key={name}>
+    <a href={link} target="_blank" rel="noopener noreferrer">
+      <h3 style={{marginTop: "0px"}}>
+        {name}
+      </h3>
+      <img src={image} alt={name} style={{maxHeight: "100px"}}/>
+      <p>{caption}</p>
+    </a>
+  </div>
 );
 
 class Index extends React.Component { // eslint-disable-line
@@ -225,16 +218,41 @@ class Index extends React.Component { // eslint-disable-line
     return (
       <div>
         <SplashContainer>
-          <div className="inner" style={{paddingBottom: "100px", paddingTop: "100px"}}>
+
+          <div className="splashTitle">
             <Logo img_src={imgUrl('logo-light.svg')} />
             <ProjectTitle />
             <PromoSection>
-              <Introduction/>
+              <MainIntroduction/>
+              <SubIntroduction/>
             </PromoSection>
           </div>
-          <IntroBlocks/>
-          <Showcase/>
-          <Philosophy/>
+
+          <BlockContainer background="highlight">
+            <Block {...blockContent.tutorial}/>
+            <Block {...blockContent.getStarted}/>
+            <Block {...blockContent.build}/>
+          </BlockContainer>
+
+          <div style={{minHeight: "40px"}}/>
+
+          <BlockContainer background="highlight">
+            <Block {...blockContent.augur}/>
+            <Block {...blockContent.narratives}/>
+            <Block {...blockContent.auspiceUs}/>
+          </BlockContainer>
+
+          <Showcase>
+            <ShowcaseItem {...showcaseUsers.nextstrain}/>
+            <ShowcaseItem {...showcaseUsers.auspiceUs}/>
+            <ShowcaseItem {...showcaseUsers.ghana}/>
+          </Showcase>
+
+          <div className="soloButtons">
+            <Button href={docUrl("introduction/overview")}>Read the docs</Button>
+            <Button href={docUrl("tutorial/overview")}>Learn how to interpret datasets</Button>
+          </div>
+
           <RenderLogos/>
         </SplashContainer>
       </div>
