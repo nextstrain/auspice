@@ -77,7 +77,10 @@ export const addGrid = function addGrid() {
       const pos = gridMin + step*ii;
       majorGridPoints.push([pos, ((pos<minVis)||(pos>maxVis))?"hidden":"visible", "x"]);
     }
-    const numMinorTicks = this.distanceMeasure === "num_date" ? this.params.minorTicksTimeTree : this.params.minorTicks;
+    let numMinorTicks = this.distanceMeasure === "num_date" ? this.params.minorTicksTimeTree : this.params.minorTicks;
+    if (step===5 || step===10) {
+      numMinorTicks = 5;
+    }
     const minorStep = step / numMinorTicks;
     for (let ii = 0; ii <= (xmax - gridMin)/minorStep+30; ii++) {
       const pos = gridMin + minorStep*ii;
