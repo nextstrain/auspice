@@ -21,7 +21,11 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
         for (const prot in n.aa_muts) { // eslint-disable-line
           n.aa_muts[prot].forEach((m) => {
             const pos = parseInt(m.slice(1, m.length - 1), 10);
-            sparse[prot][pos] ? sparse[prot][pos]++ : sparse[prot][pos] = 1;
+            const A = m.slice(0, 1);
+            const B = m.slice(-1);
+            if (A !== 'X' && B !== 'X') {
+              sparse[prot][pos] ? sparse[prot][pos]++ : sparse[prot][pos] = 1;
+            }
           });
         }
       }
@@ -92,9 +96,9 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
     const A = m.slice(0, 1);
     const B = m.slice(m.length - 1, m.length);
     // console.log("mut @ ", pos, ":", A, " -> ", B)
-    if (isAA){
-      if (A === "X" || A === "-" || B === "X" || B === "-") return;
-    }else{
+    if (isAA) {
+      if (A === "X" || B === "X") return;
+    } else {
       if (A === "N" || A === "-" || B === "N" || B === "-") return;
     }
     if (!anc_state[prot][pos]) {
