@@ -1,24 +1,23 @@
-## version 1.36.5 - 2019/04/17
+* Improve minor axis tick spacing on tree. [See PR 725](https://github.com/nextstrain/auspice/pull/725)
+* Entropy calculations ignore ambiguous bases [See PR 723](https://github.com/nextstrain/auspice/pull/723)
 
+
+## version 1.36.5 - 2019/04/17
 * Fix a bug in the initial rendering of the date slider. [See PR 713](https://github.com/nextstrain/auspice/pull/713)
 
 ## version 1.36.4 - 2019/03/16
-
 * Fix map deme border coloring.
 
 ## version 1.36.3 - 2019/03/11
-
 * Various map improvements, including transmission ribbons, improved initial map
   bounds and improved deme circle sizing.
   [See PR 712](https://github.com/nextstrain/auspice/pull/712)
 * Check mutation type against tree. (See PR 709)[https://github.com/nextstrain/auspice/pull/709]
 
 ## version 1.36.2 - 2019/03/04
-
 * Update footer information. Don't display "live" footers for "community" URLs.
 
 ## version 1.36.1 - 2019/02/27
-
 * Update npm packages identified as security vulnerabilities
 * Fixes a bug (only in v1.36.0) where, for some datasets, interacting with the tree would cause the app to crash. [Issue 708](https://github.com/nextstrain/auspice/issues/708)
 * `auspice build` now exits (with non-zero exit code) if there are errors during webpack bundling
@@ -27,12 +26,10 @@
 * Improve app load times using code splitting. [See PR 701](https://github.com/nextstrain/auspice/pull/701)
 
 ## version 1.35.5 - 2019/02/08
-
 * Add acknowledgements to mumps page.
 * Preserve URL during 404. [Issue #700](https://github.com/nextstrain/auspice/issues/700)
 
 ## version 1.35.4 - 2019/01/28
-
 * Restore download modal functionality. [Issue 699](https://github.com/nextstrain/auspice/issues/699)
 
 ## version 1.35.3 - 2019/01/25
