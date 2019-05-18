@@ -1,3 +1,5 @@
+## version 1.36.6 - 2019/05/18
+
 * Improve minor axis tick spacing on tree. [See PR 725](https://github.com/nextstrain/auspice/pull/725)
 * Entropy calculations ignore ambiguous bases [See PR 723](https://github.com/nextstrain/auspice/pull/723)
 
