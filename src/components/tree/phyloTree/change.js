@@ -263,7 +263,7 @@ export const change = function change({
   const elemsToUpdate = new Set(); /* what needs updating? E.g. ".branch", ".tip" etc */
   const nodePropsToModify = {}; /* which properties (keys) on the nodes should be updated (before the SVG) */
   const svgPropsToUpdate = new Set(); /* which SVG properties shall be changed. E.g. "fill", "stroke" */
-  let useModifySVGInStages = false; /* use modifySVGInStages rather than modifySVG. Not used often. */
+  const useModifySVGInStages = newLayout; /* use modifySVGInStages rather than modifySVG. Not used often. */
 
   /* calculate dt */
   const idealTransitionTime = 500;
@@ -305,9 +305,6 @@ export const change = function change({
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
     elemsToUpdate.add(".grid").add(".regression");
     svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity").add("visibility");
-  }
-  if (newLayout) {
-    useModifySVGInStages = true;
   }
 
   /* change the requested properties on the nodes */
