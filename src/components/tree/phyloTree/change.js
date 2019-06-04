@@ -204,6 +204,7 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
     if (this.params.showGrid) this.addGrid();
     this.svg.selectAll(".tip").remove();
     this.drawTips();
+    this.updateTipLabels();
     if (this.vaccines) this.drawVaccines();
     this.addTemporalSlice();
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
@@ -263,7 +264,7 @@ export const change = function change({
   const elemsToUpdate = new Set(); /* what needs updating? E.g. ".branch", ".tip" etc */
   const nodePropsToModify = {}; /* which properties (keys) on the nodes should be updated (before the SVG) */
   const svgPropsToUpdate = new Set(); /* which SVG properties shall be changed. E.g. "fill", "stroke" */
-  let useModifySVGInStages = false; /* use modifySVGInStages rather than modifySVG. Not used often. */
+  const useModifySVGInStages = newLayout; /* use modifySVGInStages rather than modifySVG. Not used often. */
 
   /* calculate dt */
   const idealTransitionTime = 500;
@@ -285,7 +286,7 @@ export const change = function change({
   if (changeVisibility) {
     /* check that visibility is not undefined */
     /* in the future we also change the branch visibility (after skeleton merge) */
-    elemsToUpdate.add(".tip");
+    elemsToUpdate.add(".tip").add(".tipLabel");
     svgPropsToUpdate.add("visibility").add("cursor");
     nodePropsToModify.visibility = visibility;
   }
@@ -305,9 +306,6 @@ export const change = function change({
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
     elemsToUpdate.add(".grid").add(".regression");
     svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity").add("visibility");
-  }
-  if (newLayout) {
-    useModifySVGInStages = true;
   }
 
   /* change the requested properties on the nodes */
