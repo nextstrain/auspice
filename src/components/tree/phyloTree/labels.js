@@ -1,4 +1,5 @@
 import { timerFlush } from "d3-timer";
+import { NODE_VISIBLE } from "../../../util/globals";
 
 export const updateTipLabels = function updateTipLabels(dt) {
   if ("tipLabels" in this.groups) {
@@ -35,7 +36,7 @@ export const updateTipLabels = function updateTipLabels(dt) {
         .text((d) => tLFunc(d))
         .attr("class", "tipLabel")
         .style("font-size", fontSize.toString()+"px")
-        .style('visibility', 'visible');
+        .style('visibility', (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden");
     }, dt);
   }
 };
