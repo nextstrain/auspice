@@ -8,4 +8,4 @@ title: API
 * Customisation config
   * function to transform URLs
   * config options to transform URLs (instead of a function)
-* explination of `auspice build --static` and related
+* explanation of `auspice build --static` and related
