@@ -20,7 +20,7 @@ A narrative is simply a [markdown](https://en.wikipedia.org/wiki/Markdown) file 
 "Views" into the data are defined by specifying a nextstrain URL in each paragraph's header which represents this view -- i.e. simply manipulate the app into the view you want and copy the resulting URL into the markdown file.
 It's that simple 🎉.
 
-[This page](how-to-write.md) details excatly how to construct one.
+[This page](how-to-write.md) details exactly how to construct one.
 
 
 
