@@ -36,5 +36,4 @@ auspice view --datasetDir <dir>
 
 where `<dir>` contains the JSONs. This command makes the data available to view in a browser at [localhost:4000](http://localhost:4000).
 
-
-
+> Might be worth including another section on this page or as a new page under Introduction about how to navigate auspice in the browser. I had to ask Louise how to "zoom in" on a clade, even though once I was showed it's ridiculously obvious. -Cassia
