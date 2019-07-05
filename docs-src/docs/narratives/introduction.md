@@ -13,7 +13,7 @@ This allows you to communicate results with the appropriate views into the data,
 > Narratives are a new feature, and there may still be bugs.
 We're aiming to publicise this feature as soon as we have ensured everything's working as desired.
 
-
+> I think having an example narrative to show off here would be waay cool. This is a pretty amazing feature of auspice, and this section should make me get hyped about it. -Cassia
 
 ## How to write a narrative
 A narrative is simply a [markdown](https://en.wikipedia.org/wiki/Markdown) file with some quirks.

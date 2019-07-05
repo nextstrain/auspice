@@ -16,6 +16,7 @@ For instance, when you run `auspice` locally, the default server scans a provide
 
 > You might not need to! If all your URLs correspond directly to asset paths, or can be made to with a simple transform, then using auspice to [generate a static site](build-static/introduction.md) may be much easier. 
 
+> What's the difference between a custom server and a static site? I think more info on what a custom server is would be helpful here. -Cassia
 
 * If you want to interpret URLs (perhaps to provide redirects), or deliver JSONs from different sources then a server might be needed.
 For instance, nextstrain.org uses a server to access datasets stored on Amazon S3 buckets, and auspice.us uses a server to access community datasets on GitHub.

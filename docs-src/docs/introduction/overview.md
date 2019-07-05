@@ -7,6 +7,8 @@ hide_title: true
 
 > I think this page should describe auspice rather than how to run it.
 
+> I agree with ^. Especially as a newbie to the phylogenetics world, I'd really like to know more about the power of auspice: Why should I use it? What is its basic functionality? Even though this is the docs, I think a little bit of marketing would be appropriate. -- Cassia
+
 > Please not that these docs describe the newest version of auspice (versions 1.35+).
 The new APIs are in flux and we expect they will change before version 2.0 is released.
 If you use these versions of auspice we would love to hear about your experiences! (Contact links at the bottom of the page).
@@ -16,7 +18,7 @@ It was originally designed for nextstrain.org, which aims to aims to provide a c
 Auspice can be used locally to view datasets, or deployed to server- or serverless-websites.
 It allows easy customisation of aesthetics and functionality, and powers the visualisations on [nextstrain.org](https://nextstrain.org).
 
-
+> I think this page could also be a good place to explain how to navigate the rest of the docs. Which section do I want to go to next? Why would I use auspice.us vs. custom server vs. static-site generator vs. narratives? This doesn't have to be long, but I was just confused/overwhlemed about where/why I want to visit the different tabs. --Cassia
 
 ## Running Auspice Locally
 
