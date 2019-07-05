@@ -335,40 +335,36 @@ class Map extends React.Component {
     const colorOrVisibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion || nextProps.colorScaleVersion !== this.props.colorScaleVersion;
     const haveData = nextProps.nodes && nextProps.visibility && nextProps.geoResolution && !!nextProps.nodeColors;
 
-    if (
-      colorOrVisibilityChange &&
-      haveData
-    ) {
-      timerStart("updateDemesAndTransmissions");
-      const { newDemes, newTransmissions } = updateDemeAndTransmissionDataColAndVis(
-        this.state.demeData,
-        this.state.transmissionData,
-        this.state.demeIndices,
-        this.state.transmissionIndices,
-        nextProps.nodes,
-        nextProps.visibility,
-        nextProps.geoResolution,
-        nextProps.nodeColors
-      );
+    if (!(colorOrVisibilityChange && haveData)) { return; }
+    timerStart("updateDemesAndTransmissions");
+    const { newDemes, newTransmissions } = updateDemeAndTransmissionDataColAndVis(
+      this.state.demeData,
+      this.state.transmissionData,
+      this.state.demeIndices,
+      this.state.transmissionIndices,
+      nextProps.nodes,
+      nextProps.visibility,
+      nextProps.geoResolution,
+      nextProps.nodeColors
+    );
 
-      updateVisibility(
-        /* updated in the function above */
-        newDemes,
-        newTransmissions,
-        /* we already have all this */
-        this.state.d3elems,
-        this.state.map,
-        nextProps.nodes,
-        nextProps.dateMinNumeric,
-        nextProps.dateMaxNumeric
-      );
+    updateVisibility(
+      /* updated in the function above */
+      newDemes,
+      newTransmissions,
+      /* we already have all this */
+      this.state.d3elems,
+      this.state.map,
+      nextProps.nodes,
+      nextProps.dateMinNumeric,
+      nextProps.dateMaxNumeric
+    );
 
-      this.setState({
-        demeData: newDemes,
-        transmissionData: newTransmissions
-      });
-      timerEnd("updateDemesAndTransmissions");
-    }
+    this.setState({
+      demeData: newDemes,
+      transmissionData: newTransmissions
+    });
+    timerEnd("updateDemesAndTransmissions");
   }
 
   getInitialBounds() {
