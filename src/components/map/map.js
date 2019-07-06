@@ -19,7 +19,6 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { lightGrey, goColor, pauseColor } from "../../globalStyles";
-import { errorNotification } from "../../actions/notifications";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -192,32 +191,16 @@ class Map extends React.Component {
         this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
       }
 
-      const {
-        demeData,
-        transmissionData,
-        demeIndices,
-        transmissionIndices,
-        demesMissingLatLongs
-      } = createDemeAndTransmissionData(
+      const {demeData, transmissionData, demeIndices, transmissionIndices} = createDemeAndTransmissionData(
         this.props.nodes,
         this.props.visibility,
         this.props.geoResolution,
         this.props.nodeColors,
         this.props.mapTriplicate,
         this.props.metadata,
-        this.state.map
+        this.state.map,
+        this.props.dispatch
       );
-
-      const filteredDemesMissingLatLongs = [...demesMissingLatLongs].filter((value) => {
-        return value.toLowerCase() !== "unknown";
-      });
-
-      if (filteredDemesMissingLatLongs.size) {
-        this.props.dispatch(errorNotification({
-          message: "The following demes are missing lat/long information",
-          details: [...filteredDemesMissingLatLongs].join(", ")
-        }));
-      }
 
       // const latLongs = this.latLongs(demeData, transmissionData); /* no reference stored, we recompute this for now rather than updating in place */
       const d3elems = drawDemesAndTransmissions(
@@ -337,6 +320,45 @@ class Map extends React.Component {
 
     if (!(colorOrVisibilityChange && haveData)) { return; }
     timerStart("updateDemesAndTransmissions");
+
+    if (this.props.geoResolution !== nextProps.geoResolution) {
+      console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+      /* This `if` statement added as part of https://github.com/nextstrain/auspice/issues/722
+       * and should be a prime candidate for refactoring in https://github.com/nextstrain/auspice/issues/735
+       */
+      const {demeData, transmissionData, demeIndices, transmissionIndices} = createDemeAndTransmissionData(
+        nextProps.nodes,
+        nextProps.visibility,
+        nextProps.geoResolution,
+        nextProps.nodeColors,
+        nextProps.mapTriplicate,
+        nextProps.metadata,
+        this.state.map,
+        this.props.dispatch
+      );
+
+      const d3elems = drawDemesAndTransmissions(
+        demeData,
+        transmissionData,
+        this.state.d3DOMNode,
+        this.state.map,
+        nextProps.nodes,
+        nextProps.dateMinNumeric,
+        nextProps.dateMaxNumeric
+      );
+      this.setState({
+        d3elems,
+        demeData,
+        transmissionData,
+        demeIndices,
+        transmissionIndices
+      });
+
+      return;
+    }
+
+
+    // currently not able to assess if geo resolution changed vv
     const { newDemes, newTransmissions } = updateDemeAndTransmissionDataColAndVis(
       this.state.demeData,
       this.state.transmissionData,
@@ -347,6 +369,23 @@ class Map extends React.Component {
       nextProps.geoResolution,
       nextProps.nodeColors
     );
+
+    const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
+    const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
+    // todo new function?
+
+    if (geoResolutionChanged || dataChanged) {
+      const d3elems = drawDemesAndTransmissions(
+        newDemes,
+        newTransmissions,
+        this.state.d3DOMNode,
+        this.state.map,
+        this.props.nodes,
+        this.props.dateMinNumeric,
+        this.props.dateMaxNumeric
+      );
+      this.setState({ d3elems });
+    }
 
     updateVisibility(
       /* updated in the function above */

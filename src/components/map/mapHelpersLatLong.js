@@ -5,7 +5,7 @@ import { interpolateNumber } from "d3-interpolate";
 import { averageColors } from "../../util/colorHelpers";
 import { bezier } from "./transmissionBezier";
 import { NODE_NOT_VISIBLE } from "../../util/globals";
-
+import { errorNotification } from "../../actions/notifications";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -324,7 +324,8 @@ export const createDemeAndTransmissionData = (
   nodeColors,
   triplicate,
   metadata,
-  map
+  map,
+  dispatch
 ) => {
 
   /*
@@ -350,6 +351,17 @@ export const createDemeAndTransmissionData = (
     metadata,
     map
   );
+
+  const filteredDemesMissingLatLongs = [...demesMissingLatLongs].filter((value) => {
+    return value.toLowerCase() !== "unknown";
+  });
+
+  if (filteredDemesMissingLatLongs.size) {
+    dispatch(errorNotification({
+      message: "The following demes are missing lat/long information",
+      details: [...filteredDemesMissingLatLongs].join(", ")
+    }));
+  }
 
   return {
     demeData: demeData,
