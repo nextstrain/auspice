@@ -213,6 +213,10 @@ export const updateVisibility = (
   numDateMax
 ) => {
 
+  if (!d3elems) {
+    console.error("d3elems is not defined!");
+    return;
+  }
   const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
   d3elems.demes
     .data(demeData)
