@@ -269,37 +269,38 @@ const setupTransmissionData = (
   const demesMissingLatLongs = new Set();
   const demeToDemeCounts = {};
   nodes.forEach((n) => {
+    if (!n.children) { return; }
+
     const nodeDeme = n.attr[geoResolution];
-    if (n.children) {
-      n.children.forEach((child) => {
-        const childDeme = child.attr[geoResolution];
-        if (nodeDeme && childDeme && nodeDeme !== childDeme) {
-          // record transmission event
-          if ([nodeDeme, childDeme] in demeToDemeCounts) {
-            demeToDemeCounts[[nodeDeme, childDeme]] += 1;
-          } else {
-            demeToDemeCounts[[nodeDeme, childDeme]] = 1;
-          }
-          const extend = demeToDemeCounts[[nodeDeme, childDeme]];
-          // offset is applied to transmission origin
-          offsets.forEach((offsetOrig) => {
-            const t = maybeGetClosestTransmissionEvent(
-              n,
-              child,
-              metadataGeoLookupTable,
-              geoResolution,
-              nodeColors,
-              visibility,
-              map,
-              offsetOrig,
-              demesMissingLatLongs,
-              extend
-            );
-            if (t) { transmissionData.push(t); }
-          });
-        }
+
+    n.children.forEach((child) => {
+      const childDeme = child.attr[geoResolution];
+      if (!(nodeDeme && childDeme && nodeDeme !== childDeme)) { return; }
+
+      // record transmission event
+      if ([nodeDeme, childDeme] in demeToDemeCounts) {
+        demeToDemeCounts[[nodeDeme, childDeme]] += 1;
+      } else {
+        demeToDemeCounts[[nodeDeme, childDeme]] = 1;
+      }
+      const extend = demeToDemeCounts[[nodeDeme, childDeme]];
+      // offset is applied to transmission origin
+      offsets.forEach((offsetOrig) => {
+        const t = maybeGetClosestTransmissionEvent(
+          n,
+          child,
+          metadataGeoLookupTable,
+          geoResolution,
+          nodeColors,
+          visibility,
+          map,
+          offsetOrig,
+          demesMissingLatLongs,
+          extend
+        );
+        if (t) { transmissionData.push(t); }
       });
-    }
+    });
   });
 
   transmissionData.forEach((transmission, index) => {
