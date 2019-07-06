@@ -209,7 +209,7 @@ class Map extends React.Component {
       );
 
       const filteredDemesMissingLatLongs = [...demesMissingLatLongs].filter((value) => {
-        return value !== "Unknown" || value !== "unknown";
+        return value.toLowerCase() !== "unknown";
       });
 
       if (filteredDemesMissingLatLongs.size) {
