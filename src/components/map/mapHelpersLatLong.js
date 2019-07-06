@@ -403,31 +403,29 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
 const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
   const transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
   nodes.forEach((node) => {
-    if (node.children) {
-      node.children.forEach((child) => {
-        if (
-          node.attr[geoResolution] &&
-          child.attr[geoResolution] &&
-          node.attr[geoResolution] !== child.attr[geoResolution]
-        ) {
+    if (!(node.children)) { return; }
 
-          // this is a transmission event from n to child
-          const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
-          const col = nodeColors[node.arrayIdx];
-          const vis = visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden"; // transmission visible if child is visible
+    node.children.forEach((child) => {
+      const nodeLocation = node.attr[geoResolution];
+      const childLocation = child.attr[geoResolution];
 
-          // update transmissionData via index lookup
-          try {
-            transmissionIndices[id].forEach((index) => {
-              transmissionDataCopy[index].color = col;
-              transmissionDataCopy[index].visible = vis;
-            });
-          } catch (err) {
-            console.warn(`Error trying to access ${id} in transmissionIndices. Map transmissions may be wrong.`);
-          }
-        }
-      });
-    }
+      if (!(nodeLocation && childLocation && nodeLocation !== childLocation)) { return; }
+
+      // this is a transmission event from n to child
+      const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
+      const col = nodeColors[node.arrayIdx];
+      const vis = visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden"; // transmission visible if child is visible
+
+      // update transmissionData via index lookup
+      try {
+        transmissionIndices[id].forEach((index) => {
+          transmissionDataCopy[index].color = col;
+          transmissionDataCopy[index].visible = vis;
+        });
+      } catch (err) {
+        console.warn(`Error trying to access ${id} in transmissionIndices. Map transmissions may be wrong.`);
+      }
+    });
   });
   return transmissionDataCopy;
 };
