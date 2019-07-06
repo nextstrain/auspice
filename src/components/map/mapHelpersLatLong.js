@@ -51,11 +51,12 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   // do aggregation as intermediate step
   const demeMap = {};
   nodes.forEach((n) => {
-    if (!n.children) {
-      if (n.attr[geoResolution]) { // check for undefined
-        if (!demeMap[n.attr[geoResolution]]) {
-          demeMap[n.attr[geoResolution]] = [];
-        }
+    if (n.children) { return; }
+
+    const location = n.attr[geoResolution];
+    if (location) { // check for undefined
+      if (!demeMap[location]) {
+        demeMap[location] = [];
       }
     }
   });
@@ -88,26 +89,25 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
         goodDeme = false;
         console.warn("Warning: Lat/long missing from metadata for", key);
       }
-      if (long > westBound && long < eastBound && goodDeme === true) {
 
-        const deme = {
-          name: key,
-          count: value.length,
-          color: averageColors(value),
-          latitude: lat, // raw latitude value
-          longitude: long, // raw longitude value
-          coords: leafletLatLongToLayerPoint(lat, long, map) // coords are x,y plotted via d3
-        };
-        demeData.push(deme);
+      if (!(long > westBound && long < eastBound && goodDeme)) { return; }
 
-        if (!demeIndices[key]) {
-          demeIndices[key] = [index];
-        } else {
-          demeIndices[key].push(index);
-        }
-        index += 1;
+      const deme = {
+        name: key,
+        count: value.length,
+        color: averageColors(value),
+        latitude: lat, // raw latitude value
+        longitude: long, // raw longitude value
+        coords: leafletLatLongToLayerPoint(lat, long, map) // coords are x,y plotted via d3
+      };
+      demeData.push(deme);
 
+      if (!demeIndices[key]) {
+        demeIndices[key] = [index];
+      } else {
+        demeIndices[key].push(index);
       }
+      index += 1;
     });
   });
 
