@@ -1,3 +1,5 @@
+## version 1.37.0 - 2019/07/09
+
 * Fix two bugs relating to narratives and the Map component. [See PR 736](https://github.com/nextstrain/auspice/pull/736)
 
 ## version 1.36.6 - 2019/05/18
