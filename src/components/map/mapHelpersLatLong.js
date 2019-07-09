@@ -5,7 +5,7 @@ import { interpolateNumber } from "d3-interpolate";
 import { averageColors } from "../../util/colorHelpers";
 import { bezier } from "./transmissionBezier";
 import { NODE_NOT_VISIBLE } from "../../util/globals";
-
+import { errorNotification } from "../../actions/notifications";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -51,11 +51,12 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   // do aggregation as intermediate step
   const demeMap = {};
   nodes.forEach((n) => {
-    if (!n.children) {
-      if (n.attr[geoResolution]) { // check for undefined
-        if (!demeMap[n.attr[geoResolution]]) {
-          demeMap[n.attr[geoResolution]] = [];
-        }
+    if (n.children) { return; }
+
+    const location = n.attr[geoResolution];
+    if (location) { // check for undefined
+      if (!demeMap[location]) {
+        demeMap[location] = [];
       }
     }
   });
@@ -88,26 +89,25 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
         goodDeme = false;
         console.warn("Warning: Lat/long missing from metadata for", key);
       }
-      if (long > westBound && long < eastBound && goodDeme === true) {
 
-        const deme = {
-          name: key,
-          count: value.length,
-          color: averageColors(value),
-          latitude: lat, // raw latitude value
-          longitude: long, // raw longitude value
-          coords: leafletLatLongToLayerPoint(lat, long, map) // coords are x,y plotted via d3
-        };
-        demeData.push(deme);
+      if (!(long > westBound && long < eastBound && goodDeme)) { return; }
 
-        if (!demeIndices[key]) {
-          demeIndices[key] = [index];
-        } else {
-          demeIndices[key].push(index);
-        }
-        index += 1;
+      const deme = {
+        name: key,
+        count: value.length,
+        color: averageColors(value),
+        latitude: lat, // raw latitude value
+        longitude: long, // raw longitude value
+        coords: leafletLatLongToLayerPoint(lat, long, map) // coords are x,y plotted via d3
+      };
+      demeData.push(deme);
 
+      if (!demeIndices[key]) {
+        demeIndices[key] = [index];
+      } else {
+        demeIndices[key].push(index);
       }
+      index += 1;
     });
   });
 
@@ -269,37 +269,38 @@ const setupTransmissionData = (
   const demesMissingLatLongs = new Set();
   const demeToDemeCounts = {};
   nodes.forEach((n) => {
+    if (!n.children) { return; }
+
     const nodeDeme = n.attr[geoResolution];
-    if (n.children) {
-      n.children.forEach((child) => {
-        const childDeme = child.attr[geoResolution];
-        if (nodeDeme && childDeme && nodeDeme !== childDeme) {
-          // record transmission event
-          if ([nodeDeme, childDeme] in demeToDemeCounts) {
-            demeToDemeCounts[[nodeDeme, childDeme]] += 1;
-          } else {
-            demeToDemeCounts[[nodeDeme, childDeme]] = 1;
-          }
-          const extend = demeToDemeCounts[[nodeDeme, childDeme]];
-          // offset is applied to transmission origin
-          offsets.forEach((offsetOrig) => {
-            const t = maybeGetClosestTransmissionEvent(
-              n,
-              child,
-              metadataGeoLookupTable,
-              geoResolution,
-              nodeColors,
-              visibility,
-              map,
-              offsetOrig,
-              demesMissingLatLongs,
-              extend
-            );
-            if (t) { transmissionData.push(t); }
-          });
-        }
+
+    n.children.forEach((child) => {
+      const childDeme = child.attr[geoResolution];
+      if (!(nodeDeme && childDeme && nodeDeme !== childDeme)) { return; }
+
+      // record transmission event
+      if ([nodeDeme, childDeme] in demeToDemeCounts) {
+        demeToDemeCounts[[nodeDeme, childDeme]] += 1;
+      } else {
+        demeToDemeCounts[[nodeDeme, childDeme]] = 1;
+      }
+      const extend = demeToDemeCounts[[nodeDeme, childDeme]];
+      // offset is applied to transmission origin
+      offsets.forEach((offsetOrig) => {
+        const t = maybeGetClosestTransmissionEvent(
+          n,
+          child,
+          metadataGeoLookupTable,
+          geoResolution,
+          nodeColors,
+          visibility,
+          map,
+          offsetOrig,
+          demesMissingLatLongs,
+          extend
+        );
+        if (t) { transmissionData.push(t); }
       });
-    }
+    });
   });
 
   transmissionData.forEach((transmission, index) => {
@@ -323,7 +324,8 @@ export const createDemeAndTransmissionData = (
   nodeColors,
   triplicate,
   metadata,
-  map
+  map,
+  dispatch
 ) => {
 
   /*
@@ -349,6 +351,17 @@ export const createDemeAndTransmissionData = (
     metadata,
     map
   );
+
+  const filteredDemesMissingLatLongs = [...demesMissingLatLongs].filter((value) => {
+    return value.toLowerCase() !== "unknown";
+  });
+
+  if (filteredDemesMissingLatLongs.size) {
+    dispatch(errorNotification({
+      message: "The following demes are missing lat/long information",
+      details: [...filteredDemesMissingLatLongs].join(", ")
+    }));
+  }
 
   return {
     demeData: demeData,
@@ -402,31 +415,29 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
 const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
   const transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
   nodes.forEach((node) => {
-    if (node.children) {
-      node.children.forEach((child) => {
-        if (
-          node.attr[geoResolution] &&
-          child.attr[geoResolution] &&
-          node.attr[geoResolution] !== child.attr[geoResolution]
-        ) {
+    if (!(node.children)) { return; }
 
-          // this is a transmission event from n to child
-          const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
-          const col = nodeColors[node.arrayIdx];
-          const vis = visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden"; // transmission visible if child is visible
+    node.children.forEach((child) => {
+      const nodeLocation = node.attr[geoResolution];
+      const childLocation = child.attr[geoResolution];
 
-          // update transmissionData via index lookup
-          try {
-            transmissionIndices[id].forEach((index) => {
-              transmissionDataCopy[index].color = col;
-              transmissionDataCopy[index].visible = vis;
-            });
-          } catch (err) {
-            console.warn(`Error trying to access ${id} in transmissionIndices. Map transmissions may be wrong.`);
-          }
-        }
-      });
-    }
+      if (!(nodeLocation && childLocation && nodeLocation !== childLocation)) { return; }
+
+      // this is a transmission event from n to child
+      const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
+      const col = nodeColors[node.arrayIdx];
+      const vis = visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden"; // transmission visible if child is visible
+
+      // update transmissionData via index lookup
+      try {
+        transmissionIndices[id].forEach((index) => {
+          transmissionDataCopy[index].color = col;
+          transmissionDataCopy[index].visible = vis;
+        });
+      } catch (err) {
+        console.warn(`Error trying to access ${id} in transmissionIndices. Map transmissions may be wrong.`);
+      }
+    });
   });
   return transmissionDataCopy;
 };

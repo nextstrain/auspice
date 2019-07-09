@@ -176,32 +176,31 @@ export const drawDemesAndTransmissions = (
 
 export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin, numDateMax) => {
   /* map has moved or rescaled, make demes and transmissions line up */
-  if (d3elems) {
-    d3elems.demes
-      .data(demeData)
-      .attr("transform", (d) => {
-        return "translate(" + d.coords.x + "," + d.coords.y + ")";
-      });
+  if (!d3elems) { return; }
 
-    d3elems.transmissions
-      .data(transmissionData)
-      .attr("d", (d) => {
-        return pathStringGenerator(
-          extractLineSegmentForAnimationEffect(
-            numDateMin,
-            numDateMax,
-            d.originCoords,
-            d.destinationCoords,
-            d.originNumDate,
-            d.destinationNumDate,
-            d.visible,
-            d.bezierCurve,
-            d.bezierDates
-          )
-        );
-      }); // other attrs remain the same as they were
+  d3elems.demes
+    .data(demeData)
+    .attr("transform", (d) => {
+      return "translate(" + d.coords.x + "," + d.coords.y + ")";
+    });
 
-  }
+  d3elems.transmissions
+    .data(transmissionData)
+    .attr("d", (d) => {
+      return pathStringGenerator(
+        extractLineSegmentForAnimationEffect(
+          numDateMin,
+          numDateMax,
+          d.originCoords,
+          d.destinationCoords,
+          d.originNumDate,
+          d.destinationNumDate,
+          d.visible,
+          d.bezierCurve,
+          d.bezierDates
+        )
+      );
+    }); // other attrs remain the same as they were
 };
 
 export const updateVisibility = (
@@ -214,6 +213,10 @@ export const updateVisibility = (
   numDateMax
 ) => {
 
+  if (!d3elems) {
+    console.error("d3elems is not defined!");
+    return;
+  }
   const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
   d3elems.demes
     .data(demeData)
