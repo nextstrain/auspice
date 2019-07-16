@@ -205,7 +205,7 @@ const modifyStateViaMetadata = (state, metadata) => {
   }
 
   /* if metadata lacks annotations, remove entropy from panels to display */
-  if (!metadata.annotations) {
+  if (!metadata.annotations || !metadata.annotations.nuc) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
   }

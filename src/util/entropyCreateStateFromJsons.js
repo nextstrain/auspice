@@ -39,7 +39,7 @@ const processAnnotations = (annotations) => {
 };
 
 export const entropyCreateStateFromJsons = (metaJSON) => {
-  if (metaJSON.annotations) {
+  if (metaJSON.annotations && metaJSON.annotations.nuc) {
     // const annotations = getAnnotations(metaJSON.annotations);
     const ant = getAnnotations(metaJSON.annotations);
     const annotations = ant[0];
