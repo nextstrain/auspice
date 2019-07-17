@@ -353,22 +353,22 @@ class Footer extends React.Component {
       </button>
     );
   }
+  hasMaintainers() {
+    return Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainers")
+  }
   renderMaintainers() {
-    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainers")) {
-      const renderLink = (m) => (<a href={m.url} target="_blank">{m.name}</a>);
-      return (
-        <>
-          <span style={{paddingRight: "3px"}}>Build maintained by</span>
-          {this.props.metadata.maintainers.map((m, i) => (
-            <span key={m.name}>
-              {renderLink(m)}
-              {i === this.props.metadata.maintainers.length-1 ? "." : i === this.props.metadata.maintainers.length-2 ? " and " : ", "}
-            </span>
-          ))}
-        </>
-      );
-    }
-    return null;
+    const renderLink = (m) => (<a href={m.url} target="_blank">{m.name}</a>);
+    return (
+      <>
+        <span style={{paddingRight: "3px"}}>Build maintained by</span>
+        {this.props.metadata.maintainers.map((m, i) => (
+          <span key={m.name}>
+            {renderLink(m)}
+            {i === this.props.metadata.maintainers.length-1 ? "." : i === this.props.metadata.maintainers.length-2 ? " and " : ", "}
+          </span>
+        ))}
+      </>
+    );
   }
   getCitation() {
     return (
@@ -400,8 +400,12 @@ class Footer extends React.Component {
             );
           })}
           <Flex style={styles.fineprint}>
-            {this.renderMaintainers()}
-            {dot}
+            {this.hasMaintainers() ? (
+              <>
+                {this.renderMaintainers()}
+                {dot}
+              </>
+            ) : null}
             {this.getUpdated()}
             {dot}
             {this.downloadDataButton()}

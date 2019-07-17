@@ -513,7 +513,9 @@ export const createStateFromQueryOrJSONs = ({
     if (json.version) {
       metadata.version = json.version;
     }
-    metadata.maintainers = json.maintainers;
+    if (json.maintainers) {
+      metadata.maintainers = json.maintainers;
+    }
     if (json.author_info) {
       metadata.authorInfo = json.author_info;
     }

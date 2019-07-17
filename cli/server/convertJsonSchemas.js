@@ -107,10 +107,6 @@ const setMiscMetaProperties = (v2, meta) => {
     v2.maintainers = [
       {name: meta.maintainer[0], url: meta.maintainer[1]}
     ];
-  } else { /* while it _should_ be there, sometimes it's not */
-    v2.maintainers = [
-      {name: "unknown", url: "https://nextstrain.org"}
-    ];
   }
 
   // (GENOME) ANNOTATIONS
