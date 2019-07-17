@@ -359,15 +359,15 @@ class Footer extends React.Component {
   renderMaintainers() {
     const renderLink = (m) => (<a href={m.url} target="_blank">{m.name}</a>);
     return (
-      <>
-        <span style={{paddingRight: "3px"}}>Build maintained by</span>
+      <span style={{flexBasis: "33%", textAlign: "center"}}>
+        {"Build maintained by "}
         {this.props.metadata.maintainers.map((m, i) => (
-          <span key={m.name}>
+          <>
             {renderLink(m)}
-            {i === this.props.metadata.maintainers.length-1 ? "." : i === this.props.metadata.maintainers.length-2 ? " and " : ", "}
-          </span>
+            {i === this.props.metadata.maintainers.length-1 ? "" : i === this.props.metadata.maintainers.length-2 ? " and " : ", "}
+          </>
         ))}
-      </>
+      </span>
     );
   }
   getCitation() {
