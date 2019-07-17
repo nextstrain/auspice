@@ -6,14 +6,22 @@ const readdir = promisify(fs.readdir);
 
 const getAvailableDatasets = async (localDataPath) => {
   const datasets = [];
+  /* NOTE: if there are v1 & v2 files with the same name the v2 JSON is
+   * preferentially fetched. E.g. if `zika.json`, `zika_meta.json` and
+   * `zika_tree.json` exist then only `zika.json` is viewable in auspice.
+   */
   try {
     const files = await readdir(localDataPath);
     /* v2 files -- match JSONs not ending with `_tree.json`, `_meta.json`,
-    `_tip-frequencies.json`. This comes first so that for two datasets with
-    the same name, the v2 JSONs will be preferentially fetched. */
-    files
-    .filter((file) => (file.endsWith(".json") && !file.includes("manifest")))
-    .filter((file) => (!file.endsWith("_tree.json") && !file.endsWith("_meta.json") && !file.endsWith("_tip-frequencies.json")))
+    `_tip-frequencies.json`, `_seq.json` */
+    files.filter((file) => (
+      file.endsWith(".json") &&
+      !file.includes("manifest") &&
+      !file.endsWith("_tree.json") &&
+      !file.endsWith("_meta.json") &&
+      !file.endsWith("_tip-frequencies.json") &&
+      !file.endsWith("_seq.json")
+    ))
     .map((file) => file
       .replace(".json", "")
       .split("_")
