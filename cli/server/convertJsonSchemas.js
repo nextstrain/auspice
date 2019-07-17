@@ -58,36 +58,32 @@ const setColorings = (v2, meta) => {
         v2.colorings[key].scale[x[0]] = x[1];
       });
     }
+    if (key === "authors") {
+      v2.colorings.author = v2.colorings[key];
+      delete v2.colorings[key];
+    }
   }
-};
-
-const makeAuthorKey = (author) => {
-  /* ideally this should be unique, but since it's not unique in v1 we can't make it unique here :( */
-  return author.toLowerCase().replace("et al", "").replace(/\s/g, "").replace(/[:;,-_]/g, "");
 };
 
 const setAuthorInfo = (v2, meta, tree) => {
-  // v1: n, title, journal, paper_url
-  // v2: authors, title, journal, url
+  /* v1 had an author_info property & the node.attr.authors property
+   * v2 has all the info set on the node itself at node.author
+   */
   if (!meta.author_info) {
     return;
   }
-  v2.author_info = {};
-  for (const [v1author, v1info] of Object.entries(meta.author_info)) { // eslint-disable-line
-    const key = makeAuthorKey(v1author);
-    const info = {
-      /* in v2 schemas, the string provided is rendered as is. This fn recreates the transforms the client used to provide */
-      authors: prettyString(v1author)
-    };
-    if (v1info.title) info.title = v1info.title;
-    if (v1info.journal) info.journal = v1info.journal;
-    if (v1info.paper_url) info.url = v1info.paper_url;
-    v2.author_info[key] = info;
-  }
-
   traverseTree(tree, (node) => {
     if (node.attr && node.attr.authors) {
-      node.attr.authors = makeAuthorKey(node.attr.authors);
+      const v1author = node.attr.authors;
+      const v1info = meta.author_info[v1author];
+      delete node.attr.authors;
+      if (!v1info) return;
+      node.attr.author = {};
+      if (v1info.title) node.attr.author.title = v1info.title;
+      if (v1info.journal) node.attr.author.journal = v1info.journal;
+      if (v1info.paper_url) node.attr.author.paper_url = v1info.paper_url;
+      node.attr.author.author = prettyString(v1author);
+      node.attr.author.value = v1author;
     }
   });
 };
@@ -120,6 +116,9 @@ const setMiscMetaProperties = (v2, meta) => {
   // FILTERS
   if (meta.filters) {
     v2.filters = meta.filters;
+    if (v2.filters.includes("authors")) {
+      v2.filters.splice(v2.filters.indexOf("authors"), 1, "author");
+    }
   }
   // PANELS
   if (meta.panels) {
@@ -165,17 +164,17 @@ const storeTreeAsV2 = (v2, tree) => {
   // const attrsWhichRemain = new Set();
   // const propsRemoved = new Set();
 
-  const allowedProperties = ["strain", "div", "num_date", "vaccine", "labels", "hidden", "mutations", "url", "accession", "traits", "children", "authors"];
+  const allowedProperties = ["strain", "div", "num_date", "vaccine", "labels", "hidden", "mutations", "url", "accession", "traits", "children", "author"];
   const attrsToIgnore = ["clock_length", "date", "raw_date", "strain"];
 
   traverseTree(tree, (node) => {
     // strain: already set
     // vaccine: already set (see above)
     if (node.attr) {
-      // authors: (key modified above) needs to move to property on node
-      if (node.attr.authors) {
-        node.authors = node.attr.authors;
-        delete node.attr.authors;
+      // author: (key modified previously) needs to move to property on node
+      if (node.attr.author) {
+        node.author = node.attr.author;
+        delete node.attr.author;
       }
       // accession, likewise moves to the node (from `node.attr.accession`)
       if (node.attr.accession) {

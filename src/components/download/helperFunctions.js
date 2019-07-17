@@ -7,9 +7,9 @@ import { getTraitFromNode } from "../../util/treeMiscHelpers";
 
 export const isPaperURLValid = (d) => {
   return (
-    Object.prototype.hasOwnProperty.call(d, "url") &&
-    !d.url.endsWith('/') &&
-    d.url !== "?"
+    Object.prototype.hasOwnProperty.call(d, "paper_url") &&
+    !d.paper_url.endsWith('/') &&
+    d.paper_url !== "?"
   );
 };
 
@@ -70,34 +70,30 @@ const write = (filename, type, content) => {
  * with the relevent information (num isolates, journal etcetera)
  */
 export const authorTSV = (dispatch, filePrefix, metadata, tree) => {
-  const lineArray = [["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"].join("\t")];
+  const lineArray = [];
+  lineArray.push(["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"].join("\t"));
   const filename = filePrefix + "_authors.tsv";
-
-  const samplesPerAuthor = {};
-  tree.nodes.filter((n) => !n.hasChildren && n.authors).forEach((n) => {
-    const authorKey = n.authors;
-    if (!samplesPerAuthor[authorKey]) {
-      samplesPerAuthor[authorKey] = [];
+  const UNKNOWN = "unknown";
+  const info = {};
+  tree.nodes.filter((n) => !n.hasChildren && n.author).forEach((n) => {
+    if (info[n.author.value]) {
+      info[n.author.value].count += 1;
+      info[n.author.value].strains.push(n.strain);
+    } else {
+      info[n.author.value] = {
+        author: n.author.author || n.author.value,
+        title: n.author.title || UNKNOWN,
+        journal: n.author.title || UNKNOWN,
+        url: isPaperURLValid(n.author) ? formatURLString(n.author.paper_url) : UNKNOWN,
+        count: 1,
+        strains: [n.strain]
+      }
     }
-    samplesPerAuthor[authorKey].push(n.strain);
+  });
+  Object.values(info).forEach((v) => {
+    lineArray.push([v.author, v.count, v.title, v.journal, v.url, v.strains.join(",")].join("\t"))
   });
 
-  const body = [];
-  if (metadata.authorInfo) {
-    for (const [key, value] of Object.entries(metadata.authorInfo)) {
-      if (!samplesPerAuthor[key]) continue;
-      body.push([
-        value.authors,
-        samplesPerAuthor[key].length,
-        value.title || "",
-        value.journal || "",
-        isPaperURLValid(value) ? formatURLString(value.url) : "",
-        samplesPerAuthor[key].join(",")
-      ]);
-    }
-  }
-
-  body.forEach((line) => { lineArray.push(line.join("\t")); });
   write(filename, MIME.tsv, lineArray.join("\n"));
   dispatch(infoNotification({message: "Author metadata exported", details: filename}));
 };
@@ -111,22 +107,17 @@ const turnAttrsIntoHeaderArray = (attrs) => {
  * with the relevent information (accession, traits, etcetera)
  * TODO this needs testing / improving after the move to v2 JSONs
  */
-export const strainTSV = (dispatch, filePrefix, nodes, authorInfo) => {
+export const strainTSV = (dispatch, filePrefix, nodes) => {
   // dont need to traverse the tree - can just loop the nodes
   const filename = filePrefix + "_metadata.tsv";
   const data = [];
 
-  const traitsToInclude = new Set();
+  const traitsToInclude = new Set(["author"]);
   nodes.forEach((n) => {
     if (n.traits) {
       Object.keys(n.traits).forEach((t) => traitsToInclude.add(t));
     }
   })
-
-  if (authorInfo) {
-    traitsToInclude.add("authors");
-    // TODO - if journal, url etc etc are available, then push these also
-  }
 
   for (const node of nodes) {
     if (node.hasChildren) {
@@ -137,13 +128,18 @@ export const strainTSV = (dispatch, filePrefix, nodes, authorInfo) => {
     getTraitFromNode
 
     for (const trait of traitsToInclude) {
-      let value = getTraitFromNode(node, trait);
-      /* special case: if trait === "authors", we don't actually want the node value,
-       * we want to match this against the authorInfo */
-      if (trait === "authors" && value) {
-        value = authorInfo[value].authors;
+      if (trait === "author") {
+        if (node.author) {
+          let info = node.author.author || node.author.value;
+          if (node.author.title) info += `, ${node.author.title}.`;
+          if (node.author.journal) info += ` ${node.author.journal}`;
+          line.push(info)
+        } else {
+          line.push("unknown")
+        }
+        continue;
       }
-
+      let value = getTraitFromNode(node, trait);
       if (!value) {
         line.push("unknown")
       } else {

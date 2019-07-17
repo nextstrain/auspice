@@ -153,12 +153,6 @@ const modifyStateViaMetadata = (state, metadata) => {
   if (metadata.analysisSlider) {
     state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
   }
-  if (metadata.authorInfo) {
-    // need authors in metadata.filters to include as filter
-    // but metadata.authorInfo is generally required for app functioning
-  } else {
-    console.warn("JSON did not include author_info");
-  }
   if (metadata.filters) {
     metadata.filters.forEach((v) => {
       state.filters[v] = [];
@@ -514,9 +508,6 @@ export const createStateFromQueryOrJSONs = ({
       metadata.version = json.version;
     }
     metadata.maintainers = json.maintainers;
-    if (json.author_info) {
-      metadata.authorInfo = json.author_info;
-    }
     if (json.genome_annotations) {
       metadata.genomeAnnotations = json.genome_annotations;
     }

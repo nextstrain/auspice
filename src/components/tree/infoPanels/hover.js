@@ -241,15 +241,22 @@ const getPanelStyling = (d, panelDims) => {
   return styles;
 };
 
-const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale, authorInfo) => {
+const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale) => {
   if (colorBy === "num_date") {
     if (distanceMeasure === "num_date") return null;
     return renderBranchTime(d.n, temporalConfidence);
-  } else if (colorBy === "authors") {
-    if (authorInfo[d.n.authors]) {
-      return renderInfoLine("Authors:", authorInfo[d.n.authors].authors);
+  } else if (colorBy === "author") {
+    if (!d.n.author) return null;
+    const ret = [
+      renderInfoLine("Author:", d.n.author.author || d.n.author.value)
+    ];
+    if (d.n.author.title) {
+      ret.push(renderInfoLine("Title:", d.n.author.title));
     }
-    return null;
+    if (d.n.author.journal) {
+      ret.push(renderInfoLine("Journal:", d.n.author.journal));
+    }
+    return ret;
   } else if (isColorByGenotype(colorBy)) {
     const genotype = decodeColorByGenotype(colorBy);
     const key = genotype.aa
@@ -283,7 +290,7 @@ const displayVaccineInfo = (d) => {
 
 /* the actual component - a pure function, so we can return early if needed */
 const HoverInfoPanel = ({mutType, temporalConfidence, distanceMeasure,
-  hovered, colorBy, colorByConfidence, colorScale, panelDims, authorInfo}) => {
+  hovered, colorBy, colorByConfidence, colorScale, panelDims}) => {
 
   if (!hovered) return null;
 
@@ -295,7 +302,7 @@ const HoverInfoPanel = ({mutType, temporalConfidence, distanceMeasure,
     inner = (
       <span>
         {displayVaccineInfo(d)}
-        {tipDisplayColorByInfo(d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale, authorInfo)}
+        {tipDisplayColorByInfo(d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale)}
         {distanceMeasure === "div" ? renderBranchDivergence(d.n) : renderBranchTime(d.n, temporalConfidence)}
       </span>
     );

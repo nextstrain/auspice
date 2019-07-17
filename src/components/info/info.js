@@ -154,14 +154,6 @@ class Info extends React.Component {
     };
   }
 
-  getNumSelectedAuthors() {
-    if (this.props.metadata.authorInfo) {
-      if (!Object.prototype.hasOwnProperty.call(this.props.filters, "authors") || this.props.filters.authors.length === 0) {
-        return Object.keys(this.props.metadata.authorInfo).length;
-      }
-    }
-    return this.props.filters.authors.length;
-  }
   addFilteredDatesButton(buttons) {
     buttons.push(
       <div key={"timefilter"} style={{display: "inline-block"}}>
@@ -230,54 +222,9 @@ class Info extends React.Component {
     );
   }
 
-  addFilteredAuthorsButton(buttons) {
-    if (!this.props.metadata.authorInfo) {return;}
-    const nTotalAuthors = Object.keys(this.props.metadata.authorInfo).length;
-    const nSelectedAuthors = this.getNumSelectedAuthors(); // will be equal to nTotalAuthors if none selected
-    /* case 1 (no selected authors) - return now. */
-    if (nTotalAuthors === nSelectedAuthors) {return;}
-    const authorInfo = this.props.filters.authors.map((v) => {
-      const n = this.props.totalStateCounts.authors[v];
-      return {
-        name: v,
-        label: (
-          <span>
-            {prettyString(v, {stripEtAl: true})}
-            <i>{" et al, "}</i>
-            {`(n=${n})`}
-          </span>
-        ),
-        longlabel: (
-          <span>
-            {prettyString(v, {stripEtAl: true})}
-            <i>{" et al, "}</i>
-            {prettyString(this.props.metadata.authorInfo[v].title)}
-            {` (n=${n})`}
-          </span>
-        )
-      };
-    });
-    /* case 2: 1 or 2 authors selected */
-    if (nSelectedAuthors > 0 && nSelectedAuthors < 3) {
-      authorInfo.forEach((d) => (
-        buttons.push(
-          displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.longlabel, true)
-        )
-      ));
-      return;
-    }
-    /* case 3: more than 2 authors selected. */
-    authorInfo.forEach((d) => (
-      buttons.push(
-        displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.label, true)
-      )
-    ));
-  }
-
   render() {
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
     const styles = this.getStyles(this.props.width);
-    // const nSelectedAuthors = this.getNumSelectedAuthors();
     // const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
     const animating = this.props.animationPlayPauseButton === "Pause";
     const showExtended = !animating && !this.props.selectedStrain;
@@ -296,9 +243,7 @@ class Info extends React.Component {
 
     /* part II - the active filters */
     const filters = [];
-    this.addFilteredAuthorsButton(filters);
     Object.keys(this.props.filters)
-      .filter((n) => n !== "authors")
       .filter((n) => this.props.filters[n].length > 0)
       .forEach((n) => this.addNonAuthorFilterButton(filters, n));
     if (!datesMaxed) {this.addFilteredDatesButton(filters);}
