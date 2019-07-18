@@ -13,8 +13,7 @@ import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenot
   return {
     colorBy: state.controls.colorBy,
     colorings: state.metadata.colorings,
-    colorScale: state.controls.colorScale,
-    authorInfo: state.metadata.authorInfo
+    colorScale: state.controls.colorScale
   };
 })
 class Legend extends React.Component {
@@ -152,8 +151,6 @@ class Legend extends React.Component {
       }
       const [yyyy, mm, dd] = numericToCalendar(label).split('-'); // eslint-disable-line
       return `${months[mm]} ${yyyy}`;
-    } else if (this.props.colorBy === "authors") {
-      return this.props.authorInfo[label].authors;
     } else if (this.props.colorScale.continuous) {
       return label;
     }

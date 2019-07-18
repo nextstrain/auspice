@@ -32,10 +32,14 @@ export const stopProp = (e) => {
 };
 
 /* min width to get "collection date" on 1 line: 120 */
-const item = (key, value) => (
+const item = (key, value, href) => (
   <tr key={key}>
     <th style={infoPanelStyles.item}>{key}</th>
-    <td style={infoPanelStyles.item}>{value}</td>
+    <td style={infoPanelStyles.item}>{href ? (
+      <a href={href} target="_blank" rel="noopener noreferrer">{value}</a>
+    ) :
+      value
+    }</td>
   </tr>
 );
 
@@ -123,25 +127,26 @@ const displayVaccineInfo = (d) => {
   return null;
 };
 
-const displayPublicationInfo = (authorKey, authorInfo) => {
-  if (!authorKey || !authorInfo[authorKey]) {
+const displayPublicationInfo = (info) => {
+  if (!info) {
     return null;
   }
-  const info = authorInfo[authorKey];
   const itemsToRender = [];
-  itemsToRender.push(item("Authors", info.authors));
-  if (info.title && info.title !== "?") itemsToRender.push(item("Title", info.title));
-  if (info.journal && info.journal !== "?") itemsToRender.push(item("Journal", info.journal));
-  if (info.url && info.url !== "?") itemsToRender.push(item("URL", info.url));
-  if (itemsToRender.length === 1) {
-    return itemsToRender[0];
+  itemsToRender.push(item("Authors", info.author));
+  if (info.title && info.title !== "?") {
+    if (info.paper_url && info.paper_url !== "?") {
+      itemsToRender.push(item("Title", info.title, info.paper_url));
+    } else {
+      itemsToRender.push(item("Title", info.title));
+    }
   }
-  return (
-    itemsToRender
-  );
+  if (info.journal && info.journal !== "?") {
+    itemsToRender.push(item("Journal", info.journal));
+  }
+  return (itemsToRender.length === 1 ? itemsToRender[0] : itemsToRender);
 };
 
-const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
+const TipClickedPanel = ({tip, goAwayCallback}) => {
   if (!tip) {return null;}
   const showUncertainty = tip.n.num_date && tip.n.num_date.confidence && tip.n.num_date.confidence[0] !== tip.n.num_date.confidence[1];
 
@@ -166,7 +171,7 @@ const TipClickedPanel = ({tip, goAwayCallback, authorInfo}) => {
             )}
             {showUncertainty ? dateConfidence(tip.n.num_date.confidence) : null}
             {/* Author / Paper information */}
-            {displayPublicationInfo(tip.n.authors, authorInfo)}
+            {displayPublicationInfo(tip.n.author)}
             {/* try to join URL with accession, else display the one that's available */}
             {accessionAndUrl(tip.n)}
           </tbody>
