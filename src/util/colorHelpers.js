@@ -19,6 +19,20 @@ export const averageColors = (hexColors) => {
   return avg.toString();
 };
 
+
+export const averageColorsDict = (colorCounts) => {
+  let r=0, g=0, b=0, total=0;
+  for(let hex in colorCounts){
+    const tmpRGB=rgb(hex);
+    r += tmpRGB.r*colorCounts[hex];
+    g += tmpRGB.g*colorCounts[hex];
+    b += tmpRGB.b*colorCounts[hex];
+    total += colorCounts[hex];
+  }
+  const avg = rgb(r/total, g/total, b/total);
+  return avg.toString();
+};
+
 export const determineColorByGenotypeMutType = (colorBy) => {
   if (isColorByGenotype(colorBy)) {
     const genotype = decodeColorByGenotype(colorBy);

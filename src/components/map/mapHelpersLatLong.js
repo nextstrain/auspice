@@ -2,7 +2,7 @@ import _forOwn from "lodash/forOwn";
 import _map from "lodash/map";
 import _minBy from "lodash/minBy";
 import { interpolateNumber } from "d3-interpolate";
-import { averageColors } from "../../util/colorHelpers";
+import { averageColors, averageColorsDict } from "../../util/colorHelpers";
 import { bezier } from "./transmissionBezier";
 import { NODE_NOT_VISIBLE } from "../../util/globals";
 import { getTraitFromNode } from "../../util/treeMiscHelpers";
@@ -43,11 +43,7 @@ const maybeGetTransmissionPair = (latOrig, longOrig, latDest, longDest, map) => 
 
 };
 
-const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
-
-  const demeData = []; /* deme array */
-  const demeIndices = {}; /* map of name to indices in array */
-
+const getDemeColors = (nodes, visibility, geoResolution, nodeColors) => {
   // do aggregation as intermediate step
   const demeMap = {};
   nodes.forEach((n) => {
@@ -55,7 +51,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
       const location = getTraitFromNode(n, geoResolution);
       if (location) { // check for undefined
         if (!demeMap[location]) {
-          demeMap[location] = [];
+          demeMap[location] = {};
         }
       }
     }
@@ -68,10 +64,23 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
       // if tip and visible, push
       const location = getTraitFromNode(n, geoResolution);
       if (location) { // check for undefined
-        demeMap[location].push(nodeColors[i]);
+        if (demeMap[location][nodeColors[i]]){
+          demeMap[location][nodeColors[i]] += 1;
+        }else{
+          demeMap[location][nodeColors[i]] = 1;
+        }
       }
     }
   });
+  return demeMap;
+}
+
+const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
+
+  const demeData = []; /* deme array */
+  const demeIndices = {}; /* map of name to indices in array */
+
+  const demeMap = getDemeColors(nodes, visibility, geoResolution, nodeColors);
 
   const offsets = triplicate ? [-360, 0, 360] : [0];
   const geo = metadata.geographicInfo;
@@ -91,11 +100,11 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
         console.warn("Warning: Lat/long missing from metadata for", key);
       }
       if (long > westBound && long < eastBound && goodDeme === true) {
-
+        const total = Object.values(value).reduce((a,b)=>a+b);
         const deme = {
           name: key,
-          count: value.length,
-          color: averageColors(value),
+          count: total,
+          color: averageColorsDict(value),
           latitude: lat, // raw latitude value
           longitude: long, // raw longitude value
           coords: leafletLatLongToLayerPoint(lat, long, map) // coords are x,y plotted via d3
@@ -369,30 +378,15 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
 
   const demeDataCopy = demeData.slice();
 
-  // initialize empty map
-  const demeMap = {};
-  _forOwn(demeIndices, (value, key) => { // value: array of indices, key: deme name
-    demeMap[key] = [];
-  });
-
-  // second pass to fill vectors
-  nodes.forEach((n, i) => {
-    /* demes only count terminal nodes */
-    if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
-      // if tip and visible, push
-      const location = getTraitFromNode(n, geoResolution);
-      if (location && location in demeMap) {
-        demeMap[location].push(nodeColors[i]);
-      }
-    }
-  });
+  const demeMap = getDemeColors(nodes, visibility, geoResolution, nodeColors);
 
   // update demeData, for each deme, update all elements via demeIndices lookup
   _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
     const name = key;
+    const total = Object.values(value).reduce((a,b)=>a+b);
     demeIndices[name].forEach((index) => {
-      demeDataCopy[index].count = value.length;
-      demeDataCopy[index].color = averageColors(value);
+      demeDataCopy[index].count = total;
+      demeDataCopy[index].color = averageColorsDict(value);
     });
   });
   return demeDataCopy;
