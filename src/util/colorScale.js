@@ -33,27 +33,27 @@ const createListOfColors = (n, range) => {
  * https://watermark.silverchair.com/100743.pdf
  */
 const colorsAA = {
-  D: "#FF0000", /* Asp Aspartate */
-  S: "#FF3300", /* Ser Serine */
-  T: "#FF6600", /* Thr Threonine */
-  G: "#FF9900", /* Gly Glycine */
-  P: "#FFCC00", /* Pro Proline */
-  C: "#FFFF00", /* Cys Cystine */
-  A: "#CCFF00", /* Ala Alanine */
-  V: "#99FF00", /* Val Valine */
-  I: "#66FF00", /* Ile Isoleucine */
-  L: "#33FF00", /* Leu Leucine */
-  M: "#00FF00", /* Met Methionine */
-  F: "#00FF66", /* Phe Phenylalanine */
-  Y: "#00FFCC", /* Tyr Tyrosine */
-  W: "#00CCFF", /* Trp Tryptophan */
-  H: "#0066FF", /* His Histidine */
-  R: "#0000FF", /* Arg Argnine */
-  K: "#6600FF", /* Lys Lysine */
-  N: "#CC00FF", /* Asn Asparagine */
-  Q: "#FF00CC", /* Gln Glutamine */
-  E: "#FF0066" /* Glu Glutamate */
-};
+//   D: "#FF0000", /* Asp Aspartate */
+//   S: "#FF3300", /* Ser Serine */
+//   T: "#FF6600", /* Thr Threonine */
+//   G: "#FF9900", /* Gly Glycine */
+//   P: "#FFCC00", /* Pro Proline */
+//   C: "#FFFF00", /* Cys Cystine */
+//   A: "#CCFF00", /* Ala Alanine */
+//   V: "#99FF00", /* Val Valine */
+//   I: "#66FF00", /* Ile Isoleucine */
+//   L: "#33FF00", /* Leu Leucine */
+//   M: "#00FF00", /* Met Methionine */
+//   F: "#00FF66", /* Phe Phenylalanine */
+//   Y: "#00FFCC", /* Tyr Tyrosine */
+//   W: "#00CCFF", /* Trp Tryptophan */
+//   H: "#0066FF", /* His Histidine */
+//   R: "#0000FF", /* Arg Argnine */
+//   K: "#6600FF", /* Lys Lysine */
+//   N: "#CC00FF", /* Asn Asparagine */
+//   Q: "#FF00CC", /* Gln Glutamine */
+//   E: "#FF0066" /* Glu Glutamate */
+// };
 
 // const colorsNuc = { /* taken from https://www.umass.edu/molvis/drums/codes.html */
 //   A: "#5050ff",
@@ -79,6 +79,29 @@ const colorsNuc = { /* alternative taken from http://life.nthu.edu.tw/~fmhsu/ras
   K: "#5AA4A8", /* Keto - G or T - not taken from DRuMS */
   M: "#C5B945" /* aMino - A or C - not taken from DRuMS */
 };
+
+const colorsAA = { // modified from http://jmol.sourceforge.net/jscolors/
+"A":"#A87068", //  "#8CFF8C"  // "Ala"
+"R":"#093AAF", //  "#00007C"  // "Arg"
+"N":"#00ACBC", //  "#FF7C70"  // "Asn"
+"D":"#E60A0A", //  "#A00042"  // "Asp"
+"C":"#E6E600", //  "#FFFF70"  // "Cys"
+"Q":"#00BCBC", //  "#FF4C4C"  // "Gln"
+"E":"#E60A0A", //  "#660000"  // "Glu"
+"G":"#88AABB", //  "#FFFFFF"  // "Gly"
+"H":"#8282D2", //  "#7070FF"  // "His"
+"I":"#0C620C", //  "#004C00"  // "Ile"
+"L":"#0F820F", //  "#455E45"  // "Leu"
+"K":"#145AFF", //  "#4747B8"  // "Lys"
+"M":"#E6E600", //  "#B8A042"  // "Met"
+"F":"#3232AA", //  "#534C52"  // "Phe"
+"P":"#DC9682", //  "#525252"  // "Pro"
+"S":"#FA8600", //  "#FF7042"  // "Ser"
+"T":"#EAA600", //  "#B84C00"  // "Thr"
+"W":"#B45AB4", //  "#4F4600"  // "Trp"
+"Y":"#3232AA", //  "#8C704C"  // "Tyr"
+"V":"#20A23F" //  "#FF8CFF"  // "Val"
+}
 
 
 const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
