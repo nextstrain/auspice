@@ -58,6 +58,8 @@ data_files=(
   "flu_seasonal_yam_na_3y_tree.json" "flu_seasonal_yam_na_3y_meta.json" "flu_seasonal_yam_na_3y_tip-frequencies.json" \
   "flu_seasonal_yam_na_6y_tree.json" "flu_seasonal_yam_na_6y_meta.json" "flu_seasonal_yam_na_6y_tip-frequencies.json" \
   "flu_seasonal_yam_na_12y_tree.json" "flu_seasonal_yam_na_12y_meta.json" "flu_seasonal_yam_na_12y_tip-frequencies.json" \
+  "enterovirus_d68_genome_meta.json" "enterovirus_d68_genome_tree.json" \
+  "enterovirus_d68_vp1_meta.json" "enterovirus_d68_vp1_tree.json" \
 )
 
 rm -rf data/
