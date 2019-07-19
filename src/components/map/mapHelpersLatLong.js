@@ -6,6 +6,7 @@ import { averageColors, averageColorsDict } from "../../util/colorHelpers";
 import { bezier } from "./transmissionBezier";
 import { NODE_NOT_VISIBLE } from "../../util/globals";
 import { getTraitFromNode } from "../../util/treeMiscHelpers";
+import { pie } from "d3-shape";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -89,6 +90,12 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   offsets.forEach((OFFSET) => {
     /* count DEMES */
     _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
+      const arcs = pie()(Object.values(value));
+      let i=0;
+      for (let col in value){
+        arcs[i].color = col;
+        i++;
+      }
       let lat = 0;
       let long = 0;
       let goodDeme = true;
@@ -105,6 +112,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
           name: key,
           count: total,
           color: averageColorsDict(value),
+          arcs: arcs,
           latitude: lat, // raw latitude value
           longitude: long, // raw longitude value
           coords: leafletLatLongToLayerPoint(lat, long, map) // coords are x,y plotted via d3
