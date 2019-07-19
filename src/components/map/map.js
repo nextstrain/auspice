@@ -109,14 +109,14 @@ class Map extends React.Component {
   componentDidMount() {
     this.maybeChangeSize(this.props);
     this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
-    this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
+    // this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(this.props);
   }
   componentWillReceiveProps(nextProps) {
     this.modulateInterfaceForNarrativeMode(nextProps);
     this.maybeChangeSize(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
-    this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
+    // this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(nextProps);
   }
   componentDidUpdate(prevProps) {
@@ -268,7 +268,7 @@ class Map extends React.Component {
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
     const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
 
-    if (mapIsDrawn && (geoResolutionChanged || dataChanged)) {
+    if (mapIsDrawn) { //} && (geoResolutionChanged || dataChanged)) {
       this.state.d3DOMNode.selectAll("*").remove();
 
       /* clear references to the demes and transmissions d3 added */

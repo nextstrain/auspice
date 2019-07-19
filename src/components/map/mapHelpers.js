@@ -170,11 +170,10 @@ export const drawDemesAndTransmissions = (
 
   // add demes
   arcData.forEach((d) => {d.innerRadius = 0.0; d.outerRadius = Math.sqrt(d.count)*demeMultiplier;});
-  console.log(arcData);
   const arcs = g.selectAll('arcs')
     .data(arcData)
     .enter().append("path")
-    .attr("d", d => {console.log(d,arc()(d)); return arc()(d)})
+    .attr("d", d => arc()(d))
     .style("stroke", "none")
     .style("fill-opacity", 0.65)
     .style("fill", (d) => { return d.color; })
