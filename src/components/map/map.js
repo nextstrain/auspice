@@ -195,6 +195,7 @@ class Map extends React.Component {
       const {
         demeData,
         transmissionData,
+        arcData,
         demeIndices,
         transmissionIndices,
         demesMissingLatLongs
@@ -223,6 +224,7 @@ class Map extends React.Component {
       const d3elems = drawDemesAndTransmissions(
         demeData,
         transmissionData,
+        arcData,
         this.state.d3DOMNode,
         this.state.map,
         this.props.nodes,
@@ -285,7 +287,8 @@ class Map extends React.Component {
 
       const {
         newDemes,
-        newTransmissions
+        newTransmissions,
+        newArcs
       } = updateDemeAndTransmissionDataLatLong(
         this.state.demeData,
         this.state.transmissionData,
@@ -340,6 +343,7 @@ class Map extends React.Component {
       haveData
     ) {
       timerStart("updateDemesAndTransmissions");
+      console.log(this.props, this.state);
       const { newDemes, newTransmissions } = updateDemeAndTransmissionDataColAndVis(
         this.state.demeData,
         this.state.transmissionData,
@@ -348,8 +352,7 @@ class Map extends React.Component {
         nextProps.nodes,
         nextProps.visibility,
         nextProps.geoResolution,
-        nextProps.nodeColors
-      );
+        nextProps.nodeColors);
 
       updateVisibility(
         /* updated in the function above */

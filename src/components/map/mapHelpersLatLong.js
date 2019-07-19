@@ -79,6 +79,7 @@ const getDemeColors = (nodes, visibility, geoResolution, nodeColors) => {
 const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
 
   const demeData = []; /* deme array */
+  const arcData = [];
   const demeIndices = {}; /* map of name to indices in array */
 
   const demeMap = getDemeColors(nodes, visibility, geoResolution, nodeColors);
@@ -91,14 +92,10 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
     /* count DEMES */
     _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
       const arcs = pie()(Object.values(value));
-      let i=0;
-      for (let col in value){
-        arcs[i].color = col;
-        i++;
-      }
       let lat = 0;
       let long = 0;
       let goodDeme = true;
+
       if (geo[geoResolution][key]) {
         lat = geo[geoResolution][key].latitude;
         long = geo[geoResolution][key].longitude + OFFSET;
@@ -106,16 +103,28 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
         goodDeme = false;
         console.warn("Warning: Lat/long missing from metadata for", key);
       }
+
+      const coords = leafletLatLongToLayerPoint(lat, long, map);
+      const total = Object.values(value).reduce((a,b)=>a+b);
+      let i=0;
+      for (let col in value){
+        arcs[i].color = col;
+        arcs[i].count = total;
+        arcs[i].latitude = lat;
+        arcs[i].longitude = long;
+        arcs[i].coords = coords;
+        arcData.push(arcs[i]);
+        i++;
+      }
+
       if (long > westBound && long < eastBound && goodDeme === true) {
-        const total = Object.values(value).reduce((a,b)=>a+b);
         const deme = {
           name: key,
           count: total,
           color: averageColorsDict(value),
-          arcs: arcs,
           latitude: lat, // raw latitude value
           longitude: long, // raw longitude value
-          coords: leafletLatLongToLayerPoint(lat, long, map) // coords are x,y plotted via d3
+          coords: coords // coords are x,y plotted via d3
         };
         demeData.push(deme);
 
@@ -132,7 +141,8 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 
   return {
     demeData: demeData,
-    demeIndices: demeIndices
+    demeIndices: demeIndices,
+    arcData: arcData
   };
 };
 
@@ -353,7 +363,8 @@ export const createDemeAndTransmissionData = (
   */
   const {
     demeData,
-    demeIndices
+    demeIndices,
+    arcData
   } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
 
   /* second time so that we can get Bezier */
@@ -370,6 +381,7 @@ export const createDemeAndTransmissionData = (
   return {
     demeData: demeData,
     transmissionData: transmissionData,
+    arcData: arcData,
     demeIndices: demeIndices,
     transmissionIndices: transmissionIndices,
     demesMissingLatLongs
@@ -383,8 +395,7 @@ UPDATE DEMES & TRANSMISSIONS
 ******************************* */
 
 const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors) => {
-
-  const demeDataCopy = demeData.slice();
+ const demeDataCopy = demeData.slice();
 
   const demeMap = getDemeColors(nodes, visibility, geoResolution, nodeColors);
 

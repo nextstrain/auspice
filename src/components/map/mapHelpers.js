@@ -1,7 +1,7 @@
 import _findIndex from "lodash/findIndex";
 import _findLastIndex from "lodash/findLastIndex";
 import _max from "lodash/max";
-import { line, curveBasis } from "d3-shape";
+import { line, curveBasis, arc } from "d3-shape";
 import { easeLinear } from "d3-ease";
 import { demeCountMultiplier, demeCountMinimum } from "../../util/globals";
 
@@ -119,6 +119,7 @@ const extractLineSegmentForAnimationEffect = (
 export const drawDemesAndTransmissions = (
   demeData,
   transmissionData,
+  arcData,
   g,
   map,
   nodes,
@@ -167,9 +168,27 @@ export const drawDemesAndTransmissions = (
       return "translate(" + d.coords.x + "," + d.coords.y + ")";
     });
 
+  // add demes
+  arcData.forEach((d) => {d.innerRadius = 0.0; d.outerRadius = Math.sqrt(d.count)*demeMultiplier;});
+  console.log(arcData);
+  const arcs = g.selectAll('arcs')
+    .data(arcData)
+    .enter().append("path")
+    .attr("d", d => {console.log(d,arc()(d)); return arc()(d)})
+    .style("stroke", "none")
+    .style("fill-opacity", 0.65)
+    .style("fill", (d) => { return d.color; })
+    .style("stroke-opacity", 0.85)
+    .style("stroke", (d) => { return d.color; })
+    .attr("transform", (d) => {
+      return "translate(" + d.coords.x + "," + d.coords.y + ")";
+    });
+
+
   return {
     demes,
-    transmissions
+    transmissions,
+    arcs
   };
 
 };
