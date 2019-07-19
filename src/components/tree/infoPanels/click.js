@@ -148,7 +148,8 @@ const displayPublicationInfo = (info) => {
 
 const TipClickedPanel = ({tip, goAwayCallback}) => {
   if (!tip) {return null;}
-  const showUncertainty = tip.n.num_date && tip.n.num_date.confidence && tip.n.num_date.confidence[0] !== tip.n.num_date.confidence[1];
+  const showDates = "num_date" in tip.n;
+  const showUncertainty = showDates && tip.n.num_date.confidence && tip.n.num_date.confidence[0] !== tip.n.num_date.confidence[1];
 
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
@@ -165,10 +166,10 @@ const TipClickedPanel = ({tip, goAwayCallback}) => {
               return isValueValid(value) ? item(prettyString(x), prettyString(value)) : null;
             })}
             {/* Dates */}
-            {item(
+            {showDates ? item(
               showUncertainty ? "Inferred collection date" : "Collection date",
               prettyString(numericToCalendar(tip.n.num_date.value))
-            )}
+            ) : null}
             {showUncertainty ? dateConfidence(tip.n.num_date.confidence) : null}
             {/* Author / Paper information */}
             {displayPublicationInfo(tip.n.author)}
