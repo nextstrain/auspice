@@ -76,7 +76,6 @@ export const updateVisibleTipsAndBranchThicknesses = (
   {root = [undefined, undefined], tipSelected = undefined, cladeSelected = undefined} = {}
 ) => {
   return (dispatch, getState) => {
-    console.log("tipSelected", tipSelected)
     const { tree, treeToo, controls, frequencies } = getState();
     if (root[0] === undefined && !cladeSelected && tree.selectedClade) {
       /* if not resetting tree to root, maintain previous selectedClade if one exists */
