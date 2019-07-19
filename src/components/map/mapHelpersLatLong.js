@@ -105,7 +105,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
       }
 
       const coords = leafletLatLongToLayerPoint(lat, long, map);
-      const total = Object.values(value).reduce((a,b)=>a+b);
+      const total = Object.keys(value).length ? Object.values(value).reduce((a,b)=>a+b) : 0;
       let i=0;
       for (let col in value){
         arcs[i].color = col;
@@ -402,7 +402,7 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
   // update demeData, for each deme, update all elements via demeIndices lookup
   _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
     const name = key;
-    const total = Object.values(value).reduce((a,b)=>a+b);
+    const total = Object.keys(value).length ? Object.values(value).reduce((a,b)=>a+b) : 0;
     demeIndices[name].forEach((index) => {
       demeDataCopy[index].count = total;
       demeDataCopy[index].color = averageColorsDict(value);
