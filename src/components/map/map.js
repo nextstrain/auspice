@@ -536,9 +536,10 @@ class Map extends React.Component {
     this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
   }
   render() {
+    const transmissionsExist = this.state.transmissionData && this.state.transmissionData.length;
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
-      <Card center title="Transmissions">
+      <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
         {this.maybeCreateMapDiv()}
       </Card>
     );
