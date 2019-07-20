@@ -8,7 +8,7 @@
 export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}={}) => {
   if (!entropy && !confidence) {
     if (trait === "author") return node.author ? node.author.value : undefined;
-    if (trait === "num_date") return node.num_date.value;
+    if (trait === "num_date" && node.num_date) return node.num_date.value;
     if (node[trait]) return node[trait];
     if (node.traits && node.traits[trait]) return node.traits[trait].value;
   } else if (entropy) {
