@@ -125,21 +125,25 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   } else if (colorings && colorings[colorBy]) {
     /* Is the scale set in the provided colorings object? */
     if (colorings[colorBy].scale) {
-      // console.log(`calcColorScale: colorBy ${colorBy} provided us with a scale (traits -> hexes)`);
-      continuous = false; /* colorMaps can't be continuous */
-      let domain = Object.keys(colorings[colorBy].scale);
-      let range = domain.map((key) => colorings[colorBy].scale[key]);
-      const extraVals = getExtraVals(tree.nodes, treeTooNodes, colorBy, colorings[colorBy].scale);
-      if (extraVals.length) {
-        // we must add these to the domain + provide a value in the range
-        domain = domain.concat(extraVals);
-        const extrasColorAB = [rgb(192, 192, 192), rgb(32, 32, 32)];
-        range = range.concat(createListOfColors(extraVals.length, extrasColorAB));
+      // console.log(`calcColorScale: colorBy ${colorBy} provided us with a scale (list of [trait, hex])`);
+      const scale = colorings[colorBy].scale;
+      if (!Array.isArray(colorings[colorBy].scale)) {
+        console.error(`${colorBy} has a scale which wasn't an array`);
+        error = true;
+      } else {
+        continuous = false; /* colorMaps can't (yet) be continuous */
+        let domain = scale.map((x) => x[0]);
+        let range = scale.map((x) => x[1]);
+        const extraVals = getExtraVals(tree.nodes, treeTooNodes, colorBy, domain);
+        if (extraVals.length) { // we must add these to the domain + provide a value in the range
+          domain = domain.concat(extraVals);
+          range = range.concat(createListOfColors(extraVals.length, [rgb(192, 192, 192), rgb(32, 32, 32)]));
+        }
+        colorScale = scaleOrdinal()
+          .domain(domain)
+          .range(range);
+        legendValues = domain;
       }
-      colorScale = scaleOrdinal()
-        .domain(domain)
-        .range(range);
-      legendValues = domain;
     } else if (colorings && (colorings[colorBy].type === "categorical" || colorings[colorBy].type === "ordinal")) {
       // console.log("making a categorica / ordinal color scale for ", colorBy);
       // TODO ordinal should use a different scale...

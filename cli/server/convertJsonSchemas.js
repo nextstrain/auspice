@@ -53,10 +53,7 @@ const setColorings = (v2, meta) => {
       v2.colorings[key].type = "categorical"; // or "ordinal"
     }
     if (value.color_map) {
-      v2.colorings[key].scale = {};
-      value.color_map.forEach((x) => { // x is [<deme name>, <color hex>]
-        v2.colorings[key].scale[x[0]] = x[1];
-      });
+      v2.colorings[key].scale = value.color_map;
     }
     if (key === "authors") {
       v2.colorings.author = v2.colorings[key];
