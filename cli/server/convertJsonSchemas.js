@@ -46,7 +46,7 @@ const setColorings = (v2, meta) => {
   const color_options = meta.color_options;
   for (const [key, value] of Object.entries(color_options)) {
     v2.colorings[key] = {};
-    v2.colorings[key].title = value.legendTitle || value.menuItem;
+    v2.colorings[key].title = value.menuItem || value.legendTitle;
     if (value.type === "continuous") {
       v2.colorings[key].type = "continuous";
     } else {
