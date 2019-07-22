@@ -64,7 +64,7 @@ const createDiscreteScale = (domain) => {
     }
   }
   const scale = scaleOrdinal().domain(domain).range(colorList);
-  return (val) => (val === undefined || val === false) ? unknownColor : scale(val);
+  return (val) => (val === undefined) ? unknownColor : scale(val);
 };
 
 const createLegendBounds = (legendValues) => {

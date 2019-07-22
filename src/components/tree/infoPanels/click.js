@@ -1,4 +1,5 @@
 import React from "react";
+import { isValueValid } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
 import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
@@ -22,8 +23,6 @@ export const styles = {
     wordBreak: "break-word"
   }
 };
-
-const isValueValid = (value) => (value !== "?" && value !== undefined && value !== "undefined");
 
 export const stopProp = (e) => {
   if (!e) {e = window.event;} // eslint-disable-line no-param-reassign
