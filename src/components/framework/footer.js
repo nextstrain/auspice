@@ -359,13 +359,13 @@ class Footer extends React.Component {
   renderMaintainers() {
     const renderLink = (m) => (<a href={m.url} target="_blank">{m.name}</a>);
     return (
-      <span style={{flexBasis: "33%", textAlign: "center"}}>
+      <span style={{textAlign: "center"}}>
         {"Build maintained by "}
         {this.props.metadata.maintainers.map((m, i) => (
-          <>
-            {renderLink(m)}
+          <React.Fragment key={m.name}>
+            {m.url ? renderLink(m) : m.name}
             {i === this.props.metadata.maintainers.length-1 ? "" : i === this.props.metadata.maintainers.length-2 ? " and " : ", "}
-          </>
+          </React.Fragment>
         ))}
       </span>
     );
