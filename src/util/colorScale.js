@@ -2,7 +2,7 @@ import { scaleLinear, scaleOrdinal } from "d3-scale";
 import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
-import { genericDomain, colors, genotypeColors } from "./globals";
+import { genericDomain, colors, genotypeColors, isValueValid } from "./globals";
 import { countTraitsAcrossTree } from "./treeCountingHelpers";
 import { getExtraVals } from "./colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
@@ -65,6 +65,12 @@ const createDiscreteScale = (domain) => {
   }
   const scale = scaleOrdinal().domain(domain).range(colorList);
   return (val) => (val === undefined) ? unknownColor : scale(val);
+};
+
+const booleanColorScale = (val) => {
+  if (!isValueValid(val)) return unknownColor;
+  if (["true", "1", "yes"].includes(String(val).toLowerCase())) return "#4C90C0";
+  return "#CBB742";
 };
 
 const createLegendBounds = (legendValues) => {
@@ -146,6 +152,10 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
       colorScale = createDiscreteScale(legendValues);
+    } else if (colorings && colorings[colorBy].type === "boolean") {
+      continuous = false;
+      legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
+      colorScale = booleanColorScale;
     } else if (colorings && colorings[colorBy].type === "continuous") {
       // console.log("making a continuous color scale for ", colorBy);
       continuous = true;
