@@ -79,7 +79,7 @@ const getDemeColors = (nodes, visibility, geoResolution, nodeColors) => {
 const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
 
   const demeData = []; /* deme array */
-  const arcData = [];
+  const arcData = [];  /* array of pie chart sectors */
   const demeIndices = {}; /* map of name to indices in array */
 
   const demeMap = getDemeColors(nodes, visibility, geoResolution, nodeColors);
@@ -91,7 +91,10 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   offsets.forEach((OFFSET) => {
     /* count DEMES */
     _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
-      const arcs = pie()(Object.values(value));
+      // the pie function requires an array, returns arcs in same order
+      const colors = Object.keys(value);
+      const nDataPoints = colors.map(c => value[c]);
+      const arcs = pie()(nDataPoints);
       let lat = 0;
       let long = 0;
       let goodDeme = true;
@@ -105,16 +108,15 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
       }
 
       const coords = leafletLatLongToLayerPoint(lat, long, map);
-      const total = Object.keys(value).length ? Object.values(value).reduce((a,b)=>a+b) : 0;
-      let i=0;
-      for (let col in value){
-        arcs[i].color = col;
+      // calculate total number of data points in deme
+      const total = nDataPoints.length ? nDataPoints.reduce((a,b)=>a+b) : 0;
+      for (let i=0; i<colors.length; i++){
+        arcs[i].color = colors[i];
         arcs[i].count = total;
-        arcs[i].latitude = lat;
+        arcs[i].latitude = lat; //redundant, but simplifies matters when drawing
         arcs[i].longitude = long;
         arcs[i].coords = coords;
         arcData.push(arcs[i]);
-        i++;
       }
 
       if (long > westBound && long < eastBound && goodDeme === true) {

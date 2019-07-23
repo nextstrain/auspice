@@ -109,6 +109,7 @@ class Map extends React.Component {
   componentDidMount() {
     this.maybeChangeSize(this.props);
     this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
+    // TODO: if demes are color blended circles, updating rather than redrawing demes would do
     // this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(this.props);
   }
@@ -116,6 +117,7 @@ class Map extends React.Component {
     this.modulateInterfaceForNarrativeMode(nextProps);
     this.maybeChangeSize(nextProps);
     this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
+    // TODO: if demes are color blended circles, updating rather than redrawing demes would do
     // this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
     this.maybeInvalidateMapSize(nextProps);
   }
@@ -229,7 +231,8 @@ class Map extends React.Component {
         this.state.map,
         this.props.nodes,
         this.props.dateMinNumeric,
-        this.props.dateMaxNumeric
+        this.props.dateMaxNumeric,
+        true //pieChart -- TODO: this should come from props
       );
 
       /* Set up leaflet events */
@@ -268,6 +271,7 @@ class Map extends React.Component {
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
     const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
 
+    //TODO: this needs to be done with dataChanged, geoRes changed, or if demes are pieCharts
     if (mapIsDrawn) { //} && (geoResolutionChanged || dataChanged)) {
       this.state.d3DOMNode.selectAll("*").remove();
 

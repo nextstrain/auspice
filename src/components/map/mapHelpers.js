@@ -124,7 +124,8 @@ export const drawDemesAndTransmissions = (
   map,
   nodes,
   numDateMin,
-  numDateMax
+  numDateMax,
+  pieChart
 ) => {
 
   // add transmission lines
@@ -153,36 +154,42 @@ export const drawDemesAndTransmissions = (
     .attr("stroke", (d) => { return d.color; })
     .attr("stroke-width", 1);
 
-  // add demes
   const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
-  const demes = g.selectAll("demes")
-    .data(demeData)
-    .enter().append("circle")
-    .style("stroke", "none")
-    .style("fill-opacity", 0.65)
-    .style("fill", (d) => { return d.color; })
-    .style("stroke-opacity", 0.85)
-    .style("stroke", (d) => { return d.color; })
-    .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); })
-    .attr("transform", (d) => {
-      return "translate(" + d.coords.x + "," + d.coords.y + ")";
-    });
+  let arcs, demes;
 
-  // add demes
-  arcData.forEach((d) => {d.innerRadius = 0.0; d.outerRadius = Math.sqrt(d.count)*demeMultiplier;});
-  const arcs = g.selectAll('arcs')
-    .data(arcData)
-    .enter().append("path")
-    .attr("d", d => arc()(d))
-    .style("stroke", "none")
-    .style("fill-opacity", 0.65)
-    .style("fill", (d) => { return d.color; })
-    .style("stroke-opacity", 0.85)
-    .style("stroke", (d) => { return d.color; })
-    .attr("transform", (d) => {
-      return "translate(" + d.coords.x + "," + d.coords.y + ")";
-    });
-
+  // determine whether to draw pieChart or not (sensible for categorical data)
+  if (pieChart){
+    demes = g.selectAll("demes"); //should be empty
+    arcData.forEach((d) => {d.innerRadius = 0.0; d.outerRadius = Math.sqrt(d.count)*demeMultiplier;});
+    //add arcs of pieCharts
+    arcs = g.selectAll('arcs')
+      .data(arcData)
+      .enter().append("path")
+      .attr("d", d => arc()(d))
+      .style("stroke", "none")
+      .style("fill-opacity", 0.65)
+      .style("fill", (d) => { return d.color; })
+      .style("stroke-opacity", 0.85)
+      .style("stroke", (d) => { return d.color; })
+      .attr("transform", (d) => {
+        return "translate(" + d.coords.x + "," + d.coords.y + ")";
+      });
+  }else{
+    arcs = g.selectAll('arcs'); // should be empty
+    //add deme circles
+    demes = g.selectAll("demes")
+      .data(demeData)
+      .enter().append("circle")
+      .style("stroke", "none")
+      .style("fill-opacity", 0.65)
+      .style("fill", (d) => { return d.color; })
+      .style("stroke-opacity", 0.85)
+      .style("stroke", (d) => { return d.color; })
+      .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); })
+      .attr("transform", (d) => {
+        return "translate(" + d.coords.x + "," + d.coords.y + ")";
+      });
+  }
 
   return {
     demes,
