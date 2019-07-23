@@ -51,13 +51,9 @@ const formatURL = (url) => {
   return url;
 };
 
-const dateConfidence = (x) => (
-  item("Collection date confidence", `(${numericToCalendar(x[0])}, ${numericToCalendar(x[1])})`)
-);
-
 const accessionAndUrl = (node) => {
-  const accession = node.accession;
-  const url = node.url;
+  const accession = getTraitFromNode(node, "accession");
+  const url = getTraitFromNode(node, "url");
 
   if (isValueValid(accession) && isValueValid(url)) {
     return (
@@ -147,30 +143,36 @@ const displayPublicationInfo = (info) => {
 
 const TipClickedPanel = ({tip, goAwayCallback}) => {
   if (!tip) {return null;}
-  const showUncertainty = tip.n.num_date && tip.n.num_date.confidence && tip.n.num_date.confidence[0] !== tip.n.num_date.confidence[1];
+
+  const date = getTraitFromNode(tip.n, "num_date");
+  const dateUncertainty = getTraitFromNode(tip.n, "num_date", {confidence: true});
+  const showDateUncertainty = date && dateUncertainty && dateUncertainty[0] !== dateUncertainty[1];
 
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
         <p style={infoPanelStyles.modalHeading}>
-          {`${tip.n.strain}`}
+          {`${getTraitFromNode(tip.n, "strain")}`}
         </p>
         <table>
           <tbody>
             {displayVaccineInfo(tip) /* vaccine information (if applicable) */}
             {/* the "basic" attributes (which may not exist in certain datasets) */}
+            {/* TODO - we should scan all colorings here */}
             {["country", "region", "division"].map((x) => {
               const value = getTraitFromNode(tip.n, x);
               return isValueValid(value) ? item(prettyString(x), prettyString(value)) : null;
             })}
             {/* Dates */}
-            {item(
-              showUncertainty ? "Inferred collection date" : "Collection date",
-              prettyString(numericToCalendar(tip.n.num_date.value))
-            )}
-            {showUncertainty ? dateConfidence(tip.n.num_date.confidence) : null}
+            {date ? item(
+              showDateUncertainty ? "Inferred collection date" : "Collection date",
+              prettyString(numericToCalendar(date))
+            ) : null}
+            {showDateUncertainty ? (
+              item("Collection date confidence", `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)
+            ) : null}
             {/* Author / Paper information */}
-            {displayPublicationInfo(tip.n.author)}
+            {displayPublicationInfo(getTraitFromNode(tip.n, "author"))}
             {/* try to join URL with accession, else display the one that's available */}
             {accessionAndUrl(tip.n)}
           </tbody>
