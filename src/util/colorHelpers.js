@@ -35,18 +35,15 @@ export const determineColorByGenotypeMutType = (colorBy) => {
 * @param {Array} nodes - list of nodes
 * @param {Array|undefined} nodesToo - list of nodes for the second tree
 * @param {string} colorBy -
-* @param {object} providedScale - links trait names to hex values
+* @param {Array} providedVals - list of provided trait values
 * @return {list}
 */
-export const getExtraVals = (nodes, nodesToo, colorBy, providedScale) => {
+export const getExtraVals = (nodes, nodesToo, colorBy, providedVals) => {
   let valsInTree = nodes.map((n) => getTraitFromNode(n, colorBy));
   if (nodesToo) {
     nodesToo.forEach((n) => valsInTree.push(getTraitFromNode(n, colorBy)));
   }
   valsInTree = [...new Set(valsInTree)];
-  const providedVals = Object.keys(providedScale);
-  // console.log("here", valsInMeta, valsInTree, valsInTree.filter((x) => valsInMeta.indexOf(x) === -1))
-  // only care about values in tree NOT in metadata
   return valsInTree.filter((x) => providedVals.indexOf(x) === -1);
 };
 
