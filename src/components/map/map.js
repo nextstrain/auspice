@@ -308,20 +308,19 @@ class Map extends React.Component {
 
       const {
         newDemes,
-        newTransmissions,
-        newArcs
+        newTransmissions
       } = updateDemeAndTransmissionDataLatLong(
         this.state.demeData,
         this.state.transmissionData,
         this.state.map
       );
-
       updateOnMoveEnd(
         newDemes,
         newTransmissions,
         this.state.d3elems,
         this.props.dateMinNumeric,
-        this.props.dateMaxNumeric
+        this.props.dateMaxNumeric,
+        this.props.pieChart
       );
     }
   }

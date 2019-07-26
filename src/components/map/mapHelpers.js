@@ -116,6 +116,16 @@ const extractLineSegmentForAnimationEffect = (
   return curve;
 };
 
+const createArcsFromDemes = (demeData) => {
+  const individualArcs = [];
+  demeData.forEach((demeInfo) => {
+    demeInfo.arcs.forEach((slice) => {
+      individualArcs.push(slice);
+    });
+  });
+  return individualArcs;
+};
+
 export const drawDemesAndTransmissions = (
   demeData,
   transmissionData,
@@ -154,24 +164,21 @@ export const drawDemesAndTransmissions = (
     .attr("stroke-width", 1);
 
   const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
-  let arcs, demes;
-
+  let demes;
   // determine whether to draw pieChart or not (sensible for categorical data)
   if (pieChart) {
     /* each datapoint in `demeData` contains `arcs` which comprise n individual "slices"
      * we need to create an array of all of these slices for d3 to render
      */
-    const individualArcs = [];
-    demeData.forEach((demeInfo, demeDataIdx) => {
-      demeInfo.arcs.forEach((slice) => {
-        slice.outerRadius = Math.sqrt(demeData[demeDataIdx].count)*demeMultiplier;
-        // slice.demeDataIdx = demeDataIdx;
-        individualArcs.push(slice);
-      });
+    const individualArcs = createArcsFromDemes(demeData);
+
+    /* add `outerRadius` to all slices */
+    // TODO - move this to initial arc creation in setupDemeData as it's only ever done once
+    individualArcs.forEach((a) => {
+      a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count)*demeMultiplier;
     });
 
-    demes = g.selectAll("demes"); // should be empty
-    arcs = g.selectAll('arcs') // add individual arcs ("slices") to this selection
+    demes = g.selectAll('demes') // add individual arcs ("slices") to this selection
       .data(individualArcs)
       .enter().append("path")
       .attr("d", (d) => arc()(d))
@@ -185,7 +192,6 @@ export const drawDemesAndTransmissions = (
         "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
       );
   } else {
-    arcs = g.selectAll('arcs'); // should be empty
     demes = g.selectAll("demes") // add deme circles to this selection
       .data(demeData)
       .enter().append("circle")
@@ -201,20 +207,31 @@ export const drawDemesAndTransmissions = (
 
   return {
     demes,
-    transmissions,
-    arcs
+    transmissions
   };
 
 };
 
-export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin, numDateMax) => {
+export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin, numDateMax, pieChart) => {
   /* map has moved or rescaled, make demes and transmissions line up */
   if (d3elems) {
-    d3elems.demes
-      .data(demeData)
-      .attr("transform", (d) => {
-        return "translate(" + d.coords.x + "," + d.coords.y + ")";
-      });
+    /* move the pie charts differently to the color-blended circles */
+    if (pieChart) {
+      const individualArcs = createArcsFromDemes(demeData);
+      d3elems.demes
+        .data(individualArcs)
+        .attr("transform", (d) =>
+          /* copied from above. TODO. */
+          "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
+        );
+    } else {
+      d3elems.demes
+        .data(demeData)
+        .attr("transform", (d) =>
+          /* copied from above. TODO. */
+          "translate(" + d.coords.x + "," + d.coords.y + ")"
+        );
+    }
 
     d3elems.transmissions
       .data(transmissionData)
