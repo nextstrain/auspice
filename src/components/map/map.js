@@ -263,32 +263,25 @@ class Map extends React.Component {
       timerEnd("drawDemesAndTransmissions");
     }
   }
+  /**
+   * removing demes & transmissions, both from the react state & from the DOM.
+   * They will be created from scratch (& rendered) by `this.maybeDrawDemesAndTransmissions`
+   * This is done when
+   *    (a) the dataset has changed
+   *    (b) the geo resolution has changed (new transmissions, new deme locations)
+   *    (c) we change colorBy -- mainly as the `demeData` structure is different both
+   *        pie charts vs circles, and also between different pie charts (different num of slices)
+   *
+   * Note: we do not modify `state.boundsSet` to stop the map resetting position
+   */
   maybeRemoveAllDemesAndTransmissions(nextProps) {
-    /* as of jul 7 2017, the constructor / componentDidMount is NOT running
-    on dataset change! */
-
-    /*
-      xx dataset change or resolution change, remove all demes and transmissions d3 added
-      xx we could also make this smoother: http://bl.ocks.org/alansmithy/e984477a741bc56db5a5
-      THE ABOVE IS NO LONGER TRUE: while App remounts, this is all getting nuked, so it doesn't matter.
-      Here's what we were doing and might do again:
-
-      // this.state.map && // we have a map
-      // this.props.datasetGuid &&
-      // nextProps.datasetGuid &&
-      // this.props.datasetGuid !== nextProps.datasetGuid // and the dataset has changed
-    */
-
     const mapIsDrawn = !!this.state.map;
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
     const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
-    const pieChartsOnOrOff = (this.props.pieChart !== nextProps.pieChart);
-    // TODO: this needs to be done with dataChanged, geoRes changed, or if demes are pieCharts
-    if (mapIsDrawn && (geoResolutionChanged || dataChanged || pieChartsOnOrOff)) {
+    const colorByChanged = (nextProps.colorScaleVersion !== this.props.colorScaleVersion);
+    if (mapIsDrawn && (geoResolutionChanged || dataChanged || colorByChanged)) {
       this.state.d3DOMNode.selectAll("*").remove();
       console.log("\tmaybeRemoveAllDemesAndTransmissions");
-      /* clear references to the demes and transmissions d3 added */
-      /* NB: keep `state.boundsSet` as true to stop the map resetting position */
       this.setState({
         d3elems: null,
         demeData: null,
@@ -353,11 +346,13 @@ class Map extends React.Component {
    */
   maybeUpdateDemesAndTransmissions(nextProps) {
     if (!this.state.map || !this.props.treeLoaded || !this.state.d3elems) { return; }
-    const colorOrVisibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion || nextProps.colorScaleVersion !== this.props.colorScaleVersion;
+    // const colorOrVisibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion || nextProps.colorScaleVersion !== this.props.colorScaleVersion;
+    const visibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion;
     const haveData = nextProps.nodes && nextProps.visibility && nextProps.geoResolution && nextProps.nodeColors;
 
     if (
-      colorOrVisibilityChange &&
+      // colorOrVisibilityChange &&
+      visibilityChange &&
       haveData
     ) {
       console.log("\tmaybeUpdateDemesAndTransmissions. Probably problems. pieChart=", nextProps.pieChart);
