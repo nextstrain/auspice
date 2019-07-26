@@ -1,4 +1,4 @@
-import _forOwn from "lodash/forOwn";
+/* eslint-disable no-loop-func */
 import _map from "lodash/map";
 import _minBy from "lodash/minBy";
 import { interpolateNumber } from "d3-interpolate";
@@ -122,25 +122,25 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   let index = 0;
   offsets.forEach((OFFSET) => {
     /* count DEMES */
-    _forOwn(demeToColorMap, (value, key) => {
+    for (const [location, colorCounts] of Object.entries(demeToColorMap)) {
       let lat = 0;
       let long = 0;
       let goodDeme = true;
 
-      if (geo[geoResolution][key]) {
-        lat = geo[geoResolution][key].latitude;
-        long = geo[geoResolution][key].longitude + OFFSET;
+      if (geo[geoResolution][location]) {
+        lat = geo[geoResolution][location].latitude;
+        long = geo[geoResolution][location].longitude + OFFSET;
       } else {
         goodDeme = false;
-        console.warn("Warning: Lat/long missing from metadata for", key);
+        console.warn("Warning: Lat/long missing from metadata for", location);
       }
 
       /* get pixel coordinates. `coords`: <Point> with properties `x` & `y` */
       const coords = leafletLatLongToLayerPoint(lat, long, map);
 
       // calculate total number of data points in deme
-      const colors = Object.keys(value);
-      const nVisibleTipsInDeme = colors.reduce((acc, cv) => acc + value[cv].nVisible, 0);
+      const colors = Object.keys(colorCounts);
+      const nVisibleTipsInDeme = colors.reduce((acc, cv) => acc + colorCounts[cv].nVisible, 0);
 
       /* add entries to
        * (1) `demeIndicies` -- a dict of "deme value" to the indicies of `demeData` & `arcData` where they appear
@@ -152,7 +152,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 
         /* base deme information used for pie charts & color-blended circles */
         const deme = {
-          name: key,
+          name: location,
           count: nVisibleTipsInDeme,
           latitude: lat, // raw latitude value
           longitude: long, // raw longitude value
@@ -163,7 +163,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
           /* arcs is the data for a single pie chart -- an array of objects each representing a "slice"
           * https://github.com/d3/d3-shape#_pie
           */
-          const arcs = pie()(colors.map((c) => value[c].nVisible));
+          const arcs = pie()(colors.map((c) => colorCounts[c].nVisible));
           /* add in some more info to each "slice" (i.e. each arc in arcs) */
           for (let i=0; i<arcs.length; i++) {
             arcs[i].color = colors[i];
@@ -173,19 +173,19 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
           deme.arcs = arcs;
         } else {
           /* average out the constituent colours for a blended-colour circle */
-          deme.color = averageColorsDict(value);
+          deme.color = averageColorsDict(colorCounts);
         }
 
         demeData.push(deme);
-        if (!demeIndices[key]) {
-          demeIndices[key] = [index];
+        if (!demeIndices[location]) {
+          demeIndices[location] = [index];
         } else {
-          demeIndices[key].push(index);
+          demeIndices[location].push(index);
         }
         index += 1;
       }
 
-    });
+    }
   });
 
   return {
@@ -447,28 +447,27 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
   const demeToColorMap = getColorsForAllDemes(nodes, visibility, geoResolution, nodeColors);
 
   // update demeData, for each deme, update all elements via demeIndices lookup
-  // for (let [location, colorCounts] of Object.entries(demeToColorMap)) {
-    
-  // }
-
-  _forOwn(demeToColorMap, (value, key) => { // value: hash color array, key: deme name
-    const name = key;
-    const nVisibleTipsInDeme = Object.keys(value).reduce((acc, cv) => acc + value[cv].nVisible, 0);
-    // const total = Object.keys(value).length ? Object.values(value).reduce((a, b) => a+b) : 0;
-    demeIndices[name].forEach((index) => {
+  for (const [location, colorCounts] of Object.entries(demeToColorMap)) {
+    const nVisibleTipsInDeme = Object.keys(colorCounts)
+      .reduce((acc, cv) => acc + colorCounts[cv].nVisible, 0);
+    demeIndices[location].forEach((index) => {
       demeDataCopy[index].count = nVisibleTipsInDeme;
-      /* pie chart slices (i.e. members) depend on what's visible and so change size on updates */
       if (pieChart) {
+        /* pie chart slices (i.e. members) depend on what's visible and so change size on updates */
+        /* the arcs for all possible colours at each location have been created, but we want to modify
+        some values of them! */
+
         /* here we _recreate_ all the arcs. Why?!? Because `getVisibleColorsForAllDemes` returns a variable
         colours, depending on the what's visible when this fn is called.
         An alternative approach (probably a better one) is to create _all_ possible arcs upon first rendering
         and then here update the visible counts per arc. */
         console.log("TODO: updateDemeDataColAndVis pie chart");
       } else {
-        demeDataCopy[index].color = averageColorsDict(value);
+        demeDataCopy[index].color = averageColorsDict(colorCounts);
       }
     });
-  });
+  }
+
   return demeDataCopy;
 };
 
