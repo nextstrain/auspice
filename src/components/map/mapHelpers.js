@@ -267,16 +267,21 @@ export const updateVisibility = (
 
   const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
 
-
   if (pieChart) {
-    /* as we update things (visibility etc) the number of arcs in each pie chart may change.
-     * Why?!? Because `
-     * Instead of trying to keep track of things here we just redraw them all.
-     *
-     * Instead of this, I think it'd be better to create `demeData[i].arcs` to represent _all_
-     */
-    console.log("TO DO: RE-RENDER")
-
+    const individualArcs = createArcsFromDemes(demeData);
+    /* add `outerRadius` to all slices */
+    // TODO - move this to initial arc creation in setupDemeData as it's only ever done once
+    individualArcs.forEach((a) => {
+      a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count)*demeMultiplier;
+    });
+    d3elems.demes
+      .data(individualArcs)
+      .transition()
+      .duration(200)
+      .ease(easeLinear)
+      .attr("d", (d) => arc()(d))
+      .style("fill", (d) => { return d.color; })
+      .style("stroke", (d) => { return d.color; });
   } else {
     /* for colour blended circles we just have to update the colours & size (radius) */
     d3elems.demes

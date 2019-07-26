@@ -55,19 +55,6 @@ const maybeGetTransmissionPair = (latOrig, longOrig, latDest, longDest, map) => 
  *                                         .nTotal = 20
  */
 const getColorsForAllDemes = (nodes, visibility, geoResolution, nodeColors) => {
-  // do aggregation as intermediate step
-  // const demeMap = {};
-  // nodes.forEach((n) => {
-  //   if (!n.children) {
-  //     const location = getTraitFromNode(n, geoResolution);
-  //     if (location) { // check for undefined
-  //       if (!demeMap[location]) {
-  //         demeMap[location] = {};
-  //       }
-  //     }
-  //   }
-  // });
-
   const demeToColorMap = {};
   nodes.forEach((n, i) => {
     if (n.children) return; /* demes only count terminal nodes */
@@ -84,27 +71,6 @@ const getColorsForAllDemes = (nodes, visibility, geoResolution, nodeColors) => {
     }
   });
   return demeToColorMap;
-
-
-
-
-
-
-
-
-  //   if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
-  //     // if tip and visible, push
-  //     const location = getTraitFromNode(n, geoResolution);
-  //     if (location) { // check for undefined
-  //       if (demeMap[location][nodeColors[i]]) {
-  //         demeMap[location][nodeColors[i]] += 1;
-  //       } else {
-  //         demeMap[location][nodeColors[i]] = 1;
-  //       }
-  //     }
-  //   }
-  // });
-  // return demeMap;
 };
 
 const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart) => {
@@ -113,8 +79,6 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   const demeIndices = {}; /* map of name to indices in array */
 
   const demeToColorMap = getColorsForAllDemes(nodes, visibility, geoResolution, nodeColors);
-
-  console.log("setupDemeData demeMap n(demes):", Object.keys(demeToColorMap).length)
 
   const offsets = triplicate ? [-360, 0, 360] : [0];
   const geo = metadata.geographicInfo;
@@ -450,19 +414,26 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
   for (const [location, colorCounts] of Object.entries(demeToColorMap)) {
     const nVisibleTipsInDeme = Object.keys(colorCounts)
       .reduce((acc, cv) => acc + colorCounts[cv].nVisible, 0);
+
     demeIndices[location].forEach((index) => {
+      /* both pie charts & circles need new counts (which modify the radius) */
       demeDataCopy[index].count = nVisibleTipsInDeme;
       if (pieChart) {
-        /* pie chart slices (i.e. members) depend on what's visible and so change size on updates */
-        /* the arcs for all possible colours at each location have been created, but we want to modify
-        some values of them! */
-
-        /* here we _recreate_ all the arcs. Why?!? Because `getVisibleColorsForAllDemes` returns a variable
-        colours, depending on the what's visible when this fn is called.
-        An alternative approach (probably a better one) is to create _all_ possible arcs upon first rendering
-        and then here update the visible counts per arc. */
-        console.log("TODO: updateDemeDataColAndVis pie chart");
+        /* pie charts require updating the arcs which make up the pie chart */
+        const totalNumVisible = Object.keys(colorCounts).reduce((acc, cv) => acc+colorCounts[cv].nVisible, 0);
+        const colors = Object.keys(colorCounts);
+        let startAngle = 0.0;
+        demeDataCopy[index].arcs.forEach((a, i) => {
+          if (a.color !== colors[i]) {
+            /* TODO - remove before merge into v2 */
+            console.error("COLOR MISMATCH FATAL");
+          }
+          a.startAngle = startAngle;
+          startAngle += 2*Math.PI*colorCounts[colors[i]].nVisible/totalNumVisible;
+          a.endAngle = startAngle;
+        });
       } else {
+        /* circle demes just require a colour update */
         demeDataCopy[index].color = averageColorsDict(colorCounts);
       }
     });
