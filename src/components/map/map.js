@@ -291,8 +291,8 @@ class Map extends React.Component {
       //   console.log("\t\tDIDN'T USE TO FIRE (commented conditional)");
       // }
       /* clear references to the demes and transmissions d3 added */
+      /* NB: keep `state.boundsSet` as true to stop the map resetting position */
       this.setState({
-        boundsSet: false,
         d3elems: null,
         demeData: null,
         transmissionData: null,
