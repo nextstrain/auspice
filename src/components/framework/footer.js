@@ -400,12 +400,6 @@ class Footer extends React.Component {
             );
           })}
           <Flex style={styles.fineprint}>
-            {this.hasMaintainers() ? (
-              <>
-                {this.renderMaintainers()}
-                {dot}
-              </>
-            ) : null}
             {this.getUpdated()}
             {dot}
             {this.downloadDataButton()}

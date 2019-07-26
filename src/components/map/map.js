@@ -44,7 +44,8 @@ import { errorNotification } from "../../actions/notifications";
     dateMinNumeric: state.controls.dateMinNumeric,
     dateMaxNumeric: state.controls.dateMaxNumeric,
     panelLayout: state.controls.panelLayout,
-    narrativeMode: state.narrative.display
+    narrativeMode: state.narrative.display,
+    pieChart: !state.controls.colorScale.continuous /* continuous scales: no pie chart. Others: pie charts! */
   };
 })
 
@@ -107,21 +108,32 @@ class Map extends React.Component {
     }
   }
   componentDidMount() {
+    console.log("CDM")
     this.maybeChangeSize(this.props);
-    this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
+    const removed = this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     // TODO: if demes are color blended circles, updating rather than redrawing demes would do
-    // this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
+    if (!removed) {
+      this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
+    } else {
+      console.log("\tskipping maybeUpdate... as we've just removed everything!");
+    }
     this.maybeInvalidateMapSize(this.props);
   }
   componentWillReceiveProps(nextProps) {
+    console.log("CWRP")
     this.modulateInterfaceForNarrativeMode(nextProps);
     this.maybeChangeSize(nextProps);
-    this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
+    const removed = this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     // TODO: if demes are color blended circles, updating rather than redrawing demes would do
-    // this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
+    if (!removed) {
+      // this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
+    } else {
+      console.log("\tskipping maybeUpdate... as we've just removed everything!");
+    }
     this.maybeInvalidateMapSize(nextProps);
   }
   componentDidUpdate(prevProps) {
+    console.log("CDU")
     if (this.props.nodes === null) { return; }
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
@@ -186,6 +198,7 @@ class Map extends React.Component {
     // const newVisibilityVersion = this.props.visibilityVersion !== prevProps.visibilityVersion;
 
     if (mapIsDrawn && allDataPresent && demesTransmissionsNotComputed) {
+      console.log("\tmaybeDrawDemesAndTransmissions. pieChart=", this.props.pieChart);
       timerStart("drawDemesAndTransmissions");
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
       if (!this.state.boundsSet) { // we are doing the initial render -> set map to the range of the data
@@ -197,7 +210,6 @@ class Map extends React.Component {
       const {
         demeData,
         transmissionData,
-        arcData,
         demeIndices,
         transmissionIndices,
         demesMissingLatLongs
@@ -226,13 +238,12 @@ class Map extends React.Component {
       const d3elems = drawDemesAndTransmissions(
         demeData,
         transmissionData,
-        arcData,
         this.state.d3DOMNode,
         this.state.map,
         this.props.nodes,
         this.props.dateMinNumeric,
         this.props.dateMaxNumeric,
-        true //pieChart -- TODO: this should come from props
+        this.props.pieChart
       );
 
       /* Set up leaflet events */
@@ -270,11 +281,14 @@ class Map extends React.Component {
     const mapIsDrawn = !!this.state.map;
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
     const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
-
-    //TODO: this needs to be done with dataChanged, geoRes changed, or if demes are pieCharts
-    if (mapIsDrawn) { //} && (geoResolutionChanged || dataChanged)) {
+    const pieChartsOnOrOff = (this.props.pieChart !== nextProps.pieChart);
+    // TODO: this needs to be done with dataChanged, geoRes changed, or if demes are pieCharts
+    if (mapIsDrawn && (geoResolutionChanged || dataChanged || pieChartsOnOrOff)) {
       this.state.d3DOMNode.selectAll("*").remove();
-
+      console.log("\tmaybeRemoveAllDemesAndTransmissions");
+      // if (!(geoResolutionChanged || dataChanged)) {
+      //   console.log("\t\tDIDN'T USE TO FIRE (commented conditional)");
+      // }
       /* clear references to the demes and transmissions d3 added */
       this.setState({
         boundsSet: false,
@@ -284,7 +298,10 @@ class Map extends React.Component {
         demeIndices: null,
         transmissionIndices: null
       });
+      console.log("\t\tREMOVED EVERYTHING")
+      return true;
     }
+    return false;
   }
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
@@ -346,8 +363,9 @@ class Map extends React.Component {
       colorOrVisibilityChange &&
       haveData
     ) {
+      console.log("\tmaybeUpdateDemesAndTransmissions. Probably problems. pieChart=", nextProps.pieChart);
       timerStart("updateDemesAndTransmissions");
-      console.log(this.props, this.state);
+      // console.log(this.props, this.state);
       const { newDemes, newTransmissions } = updateDemeAndTransmissionDataColAndVis(
         this.state.demeData,
         this.state.transmissionData,

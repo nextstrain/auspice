@@ -65,21 +65,20 @@ const getDemeColors = (nodes, visibility, geoResolution, nodeColors) => {
       // if tip and visible, push
       const location = getTraitFromNode(n, geoResolution);
       if (location) { // check for undefined
-        if (demeMap[location][nodeColors[i]]){
+        if (demeMap[location][nodeColors[i]]) {
           demeMap[location][nodeColors[i]] += 1;
-        }else{
+        } else {
           demeMap[location][nodeColors[i]] = 1;
         }
       }
     }
   });
   return demeMap;
-}
+};
 
 const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
 
   const demeData = []; /* deme array */
-  const arcData = [];  /* array of pie chart sectors */
   const demeIndices = {}; /* map of name to indices in array */
 
   const demeMap = getDemeColors(nodes, visibility, geoResolution, nodeColors);
@@ -91,10 +90,11 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   offsets.forEach((OFFSET) => {
     /* count DEMES */
     _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
-      // the pie function requires an array, returns arcs in same order
-      const colors = Object.keys(value);
-      const nDataPoints = colors.map(c => value[c]);
-      const arcs = pie()(nDataPoints);
+      /* For each entry in `demeMap` we have:
+       * `value` - a dict of (keys) color RGB strings -> (INT value) num demes seen in
+       * `key` - the deme name
+       */
+
       let lat = 0;
       let long = 0;
       let goodDeme = true;
@@ -107,44 +107,56 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
         console.warn("Warning: Lat/long missing from metadata for", key);
       }
 
+      /* get pixel coordinates. `coords`: <Point> with properties `x` & `y` */
       const coords = leafletLatLongToLayerPoint(lat, long, map);
-      // calculate total number of data points in deme
-      const total = nDataPoints.length ? nDataPoints.reduce((a,b)=>a+b) : 0;
-      for (let i=0; i<colors.length; i++){
-        arcs[i].color = colors[i];
-        arcs[i].count = total;
-        arcs[i].latitude = lat; //redundant, but simplifies matters when drawing
-        arcs[i].longitude = long;
-        arcs[i].coords = coords;
-        arcData.push(arcs[i]);
-      }
 
+      // calculate total number of data points in deme
+      const colors = Object.keys(value);
+      const nPointsInDeme = colors.reduce((acc, cv) => acc + value[cv], 0);
+
+      /* add entries to
+       * (1) `demeIndicies` -- a dict of "deme value" to the indicies of `demeData` & `arcData` where they appear
+       * (2) `demeData` -- an array of objects, each with {name, arcs, count, color (etc)}
+       */
       if (long > westBound && long < eastBound && goodDeme === true) {
+        const demeDataIdx = demeData.length; // idx which `deme` will be inserted at
+
+        /* arcs is the data for a single pie chart -- an array of objects each representing a "slice"
+         * https://github.com/d3/d3-shape#_pie
+         */
+        const arcs = pie()(colors.map((c) => value[c]));
+        /* add in some more info to each "slice" (i.e. each arc in arcs) */
+        for (let i=0; i<arcs.length; i++) {
+          arcs[i].color = colors[i];
+          arcs[i].innerRadius = 0.0;
+          arcs[i].demeDataIdx = demeDataIdx;
+        }
+
         const deme = {
           name: key,
-          count: total,
+          count: nPointsInDeme,
           color: averageColorsDict(value),
           latitude: lat, // raw latitude value
           longitude: long, // raw longitude value
-          coords: coords // coords are x,y plotted via d3
+          coords: coords, // coords are x,y plotted via d3
+          arcs // see above
         };
-        demeData.push(deme);
 
+        demeData.push(deme);
         if (!demeIndices[key]) {
           demeIndices[key] = [index];
         } else {
           demeIndices[key].push(index);
         }
         index += 1;
-
       }
+
     });
   });
 
   return {
     demeData: demeData,
-    demeIndices: demeIndices,
-    arcData: arcData
+    demeIndices: demeIndices
   };
 };
 
@@ -365,8 +377,7 @@ export const createDemeAndTransmissionData = (
   */
   const {
     demeData,
-    demeIndices,
-    arcData
+    demeIndices
   } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
 
   /* second time so that we can get Bezier */
@@ -383,7 +394,6 @@ export const createDemeAndTransmissionData = (
   return {
     demeData: demeData,
     transmissionData: transmissionData,
-    arcData: arcData,
     demeIndices: demeIndices,
     transmissionIndices: transmissionIndices,
     demesMissingLatLongs

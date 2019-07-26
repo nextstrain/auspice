@@ -119,13 +119,12 @@ const extractLineSegmentForAnimationEffect = (
 export const drawDemesAndTransmissions = (
   demeData,
   transmissionData,
-  arcData,
   g,
   map,
   nodes,
   numDateMin,
   numDateMax,
-  pieChart
+  pieChart /* bool */
 ) => {
 
   // add transmission lines
@@ -158,37 +157,46 @@ export const drawDemesAndTransmissions = (
   let arcs, demes;
 
   // determine whether to draw pieChart or not (sensible for categorical data)
-  if (pieChart){
-    demes = g.selectAll("demes"); //should be empty
-    arcData.forEach((d) => {d.innerRadius = 0.0; d.outerRadius = Math.sqrt(d.count)*demeMultiplier;});
-    //add arcs of pieCharts
-    arcs = g.selectAll('arcs')
-      .data(arcData)
+  if (pieChart) {
+    /* each datapoint in `demeData` contains `arcs` which comprise n individual "slices"
+     * we need to create an array of all of these slices for d3 to render
+     */
+    const individualArcs = [];
+    demeData.forEach((demeInfo, demeDataIdx) => {
+      demeInfo.arcs.forEach((slice) => {
+        slice.outerRadius = Math.sqrt(demeData[demeDataIdx].count)*demeMultiplier;
+        // slice.demeDataIdx = demeDataIdx;
+        individualArcs.push(slice);
+      });
+    });
+
+    demes = g.selectAll("demes"); // should be empty
+    arcs = g.selectAll('arcs') // add individual arcs ("slices") to this selection
+      .data(individualArcs)
       .enter().append("path")
-      .attr("d", d => arc()(d))
+      .attr("d", (d) => arc()(d))
+      /* following calls are (almost) the same for pie charts & circles */
       .style("stroke", "none")
       .style("fill-opacity", 0.65)
       .style("fill", (d) => { return d.color; })
       .style("stroke-opacity", 0.85)
       .style("stroke", (d) => { return d.color; })
-      .attr("transform", (d) => {
-        return "translate(" + d.coords.x + "," + d.coords.y + ")";
-      });
-  }else{
+      .attr("transform", (d) =>
+        "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
+      );
+  } else {
     arcs = g.selectAll('arcs'); // should be empty
-    //add deme circles
-    demes = g.selectAll("demes")
+    demes = g.selectAll("demes") // add deme circles to this selection
       .data(demeData)
       .enter().append("circle")
+      .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); })
+      /* following calls are (almost) the same for pie charts & circles */
       .style("stroke", "none")
       .style("fill-opacity", 0.65)
       .style("fill", (d) => { return d.color; })
       .style("stroke-opacity", 0.85)
       .style("stroke", (d) => { return d.color; })
-      .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); })
-      .attr("transform", (d) => {
-        return "translate(" + d.coords.x + "," + d.coords.y + ")";
-      });
+      .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")");
   }
 
   return {
