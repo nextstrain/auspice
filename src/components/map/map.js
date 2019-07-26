@@ -220,7 +220,8 @@ class Map extends React.Component {
         this.props.nodeColors,
         this.props.mapTriplicate,
         this.props.metadata,
-        this.state.map
+        this.state.map,
+        this.props.pieChart
       );
 
       const filteredDemesMissingLatLongs = [...demesMissingLatLongs].filter((value) => {

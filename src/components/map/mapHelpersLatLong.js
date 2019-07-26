@@ -76,7 +76,7 @@ const getDemeColors = (nodes, visibility, geoResolution, nodeColors) => {
   return demeMap;
 };
 
-const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
+const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart) => {
 
   const demeData = []; /* deme array */
   const demeIndices = {}; /* map of name to indices in array */
@@ -116,31 +116,37 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 
       /* add entries to
        * (1) `demeIndicies` -- a dict of "deme value" to the indicies of `demeData` & `arcData` where they appear
-       * (2) `demeData` -- an array of objects, each with {name, arcs, count, color (etc)}
+       * (2) `demeData` -- an array of objects, each with {name, count etc.}
+       *      if pie charts, then `demeData.arcs` exists, if colour-blended circles, `demeData.color` exists
        */
       if (long > westBound && long < eastBound && goodDeme === true) {
         const demeDataIdx = demeData.length; // idx which `deme` will be inserted at
 
-        /* arcs is the data for a single pie chart -- an array of objects each representing a "slice"
-         * https://github.com/d3/d3-shape#_pie
-         */
-        const arcs = pie()(colors.map((c) => value[c]));
-        /* add in some more info to each "slice" (i.e. each arc in arcs) */
-        for (let i=0; i<arcs.length; i++) {
-          arcs[i].color = colors[i];
-          arcs[i].innerRadius = 0.0;
-          arcs[i].demeDataIdx = demeDataIdx;
-        }
-
+        /* base deme information used for pie charts & color-blended circles */
         const deme = {
           name: key,
           count: nPointsInDeme,
-          color: averageColorsDict(value),
           latitude: lat, // raw latitude value
           longitude: long, // raw longitude value
-          coords: coords, // coords are x,y plotted via d3
-          arcs // see above
+          coords: coords // coords are x,y plotted via d3
         };
+
+        if (pieChart) {
+          /* arcs is the data for a single pie chart -- an array of objects each representing a "slice"
+          * https://github.com/d3/d3-shape#_pie
+          */
+          const arcs = pie()(colors.map((c) => value[c]));
+          /* add in some more info to each "slice" (i.e. each arc in arcs) */
+          for (let i=0; i<arcs.length; i++) {
+            arcs[i].color = colors[i];
+            arcs[i].innerRadius = 0.0;
+            arcs[i].demeDataIdx = demeDataIdx;
+          }
+          deme.arcs = arcs;
+        } else {
+          /* average out the constituent colours for a blended-colour circle */
+          deme.color = averageColorsDict(value);
+        }
 
         demeData.push(deme);
         if (!demeIndices[key]) {
@@ -364,7 +370,8 @@ export const createDemeAndTransmissionData = (
   nodeColors,
   triplicate,
   metadata,
-  map
+  map,
+  pieChart
 ) => {
 
   /*
@@ -378,7 +385,7 @@ export const createDemeAndTransmissionData = (
   const {
     demeData,
     demeIndices
-  } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
+  } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart);
 
   /* second time so that we can get Bezier */
   const { transmissionData, transmissionIndices, demesMissingLatLongs } = setupTransmissionData(
