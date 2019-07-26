@@ -2,7 +2,7 @@ import _forOwn from "lodash/forOwn";
 import _map from "lodash/map";
 import _minBy from "lodash/minBy";
 import { interpolateNumber } from "d3-interpolate";
-import { averageColors, averageColorsDict } from "../../util/colorHelpers";
+import { averageColorsDict } from "../../util/colorHelpers";
 import { bezier } from "./transmissionBezier";
 import { NODE_NOT_VISIBLE } from "../../util/globals";
 import { getTraitFromNode } from "../../util/treeMiscHelpers";
@@ -44,36 +44,67 @@ const maybeGetTransmissionPair = (latOrig, longOrig, latDest, longDest, map) => 
 
 };
 
-const getDemeColors = (nodes, visibility, geoResolution, nodeColors) => {
+/**
+ * Traverses the tips of the tree to create a dict of 
+ * demes -> dict of colours present across the tips.
+ * The values of the nested dict are a dict with 2 keys:
+ * `nVisible`: num tips w. this colour visible in current view
+ * `nTotal`: total num of tips w. this colour, visible or not.
+ * E.g:
+ * demeToColorMap["new_zealand"]["#A3A3A3"].nVisible = 10
+ *                                         .nTotal = 20
+ */
+const getColorsForAllDemes = (nodes, visibility, geoResolution, nodeColors) => {
   // do aggregation as intermediate step
-  const demeMap = {};
-  nodes.forEach((n) => {
-    if (!n.children) {
-      const location = getTraitFromNode(n, geoResolution);
-      if (location) { // check for undefined
-        if (!demeMap[location]) {
-          demeMap[location] = {};
-        }
-      }
-    }
-  });
+  // const demeMap = {};
+  // nodes.forEach((n) => {
+  //   if (!n.children) {
+  //     const location = getTraitFromNode(n, geoResolution);
+  //     if (location) { // check for undefined
+  //       if (!demeMap[location]) {
+  //         demeMap[location] = {};
+  //       }
+  //     }
+  //   }
+  // });
 
-  // second pass to fill vectors
+  const demeToColorMap = {};
   nodes.forEach((n, i) => {
-    /* demes only count terminal nodes */
-    if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
-      // if tip and visible, push
-      const location = getTraitFromNode(n, geoResolution);
-      if (location) { // check for undefined
-        if (demeMap[location][nodeColors[i]]) {
-          demeMap[location][nodeColors[i]] += 1;
-        } else {
-          demeMap[location][nodeColors[i]] = 1;
-        }
-      }
+    if (n.children) return; /* demes only count terminal nodes */
+    const location = getTraitFromNode(n, geoResolution);
+    if (!location) return; /* ignore undefined locations */
+    if (!demeToColorMap[location]) demeToColorMap[location] = {};
+    const color = nodeColors[i];
+    if (!demeToColorMap[location][color]) {
+      demeToColorMap[location][color] = {nVisible: 0, nTotal: 0};
+    }
+    demeToColorMap[location][color].nTotal++;
+    if (visibility[i] !== NODE_NOT_VISIBLE) {
+      demeToColorMap[location][color].nVisible++;
     }
   });
-  return demeMap;
+  return demeToColorMap;
+
+
+
+
+
+
+
+
+  //   if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
+  //     // if tip and visible, push
+  //     const location = getTraitFromNode(n, geoResolution);
+  //     if (location) { // check for undefined
+  //       if (demeMap[location][nodeColors[i]]) {
+  //         demeMap[location][nodeColors[i]] += 1;
+  //       } else {
+  //         demeMap[location][nodeColors[i]] = 1;
+  //       }
+  //     }
+  //   }
+  // });
+  // return demeMap;
 };
 
 const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart) => {
@@ -81,7 +112,9 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   const demeData = []; /* deme array */
   const demeIndices = {}; /* map of name to indices in array */
 
-  const demeMap = getDemeColors(nodes, visibility, geoResolution, nodeColors);
+  const demeToColorMap = getColorsForAllDemes(nodes, visibility, geoResolution, nodeColors);
+
+  console.log("setupDemeData demeMap n(demes):", Object.keys(demeToColorMap).length)
 
   const offsets = triplicate ? [-360, 0, 360] : [0];
   const geo = metadata.geographicInfo;
@@ -89,12 +122,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   let index = 0;
   offsets.forEach((OFFSET) => {
     /* count DEMES */
-    _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
-      /* For each entry in `demeMap` we have:
-       * `value` - a dict of (keys) color RGB strings -> (INT value) num demes seen in
-       * `key` - the deme name
-       */
-
+    _forOwn(demeToColorMap, (value, key) => {
       let lat = 0;
       let long = 0;
       let goodDeme = true;
@@ -112,7 +140,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 
       // calculate total number of data points in deme
       const colors = Object.keys(value);
-      const nPointsInDeme = colors.reduce((acc, cv) => acc + value[cv], 0);
+      const nVisibleTipsInDeme = colors.reduce((acc, cv) => acc + value[cv].nVisible, 0);
 
       /* add entries to
        * (1) `demeIndicies` -- a dict of "deme value" to the indicies of `demeData` & `arcData` where they appear
@@ -125,7 +153,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
         /* base deme information used for pie charts & color-blended circles */
         const deme = {
           name: key,
-          count: nPointsInDeme,
+          count: nVisibleTipsInDeme,
           latitude: lat, // raw latitude value
           longitude: long, // raw longitude value
           coords: coords // coords are x,y plotted via d3
@@ -135,7 +163,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
           /* arcs is the data for a single pie chart -- an array of objects each representing a "slice"
           * https://github.com/d3/d3-shape#_pie
           */
-          const arcs = pie()(colors.map((c) => value[c]));
+          const arcs = pie()(colors.map((c) => value[c].nVisible));
           /* add in some more info to each "slice" (i.e. each arc in arcs) */
           for (let i=0; i<arcs.length; i++) {
             arcs[i].color = colors[i];
@@ -413,18 +441,32 @@ UPDATE DEMES & TRANSMISSIONS
 ********************************
 ******************************* */
 
-const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors) => {
- const demeDataCopy = demeData.slice();
+const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart) => {
+  const demeDataCopy = demeData.slice();
 
-  const demeMap = getDemeColors(nodes, visibility, geoResolution, nodeColors);
+  const demeToColorMap = getColorsForAllDemes(nodes, visibility, geoResolution, nodeColors);
 
   // update demeData, for each deme, update all elements via demeIndices lookup
-  _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
+  // for (let [location, colorCounts] of Object.entries(demeToColorMap)) {
+    
+  // }
+
+  _forOwn(demeToColorMap, (value, key) => { // value: hash color array, key: deme name
     const name = key;
-    const total = Object.keys(value).length ? Object.values(value).reduce((a,b)=>a+b) : 0;
+    const nVisibleTipsInDeme = Object.keys(value).reduce((acc, cv) => acc + value[cv].nVisible, 0);
+    // const total = Object.keys(value).length ? Object.values(value).reduce((a, b) => a+b) : 0;
     demeIndices[name].forEach((index) => {
-      demeDataCopy[index].count = total;
-      demeDataCopy[index].color = averageColorsDict(value);
+      demeDataCopy[index].count = nVisibleTipsInDeme;
+      /* pie chart slices (i.e. members) depend on what's visible and so change size on updates */
+      if (pieChart) {
+        /* here we _recreate_ all the arcs. Why?!? Because `getVisibleColorsForAllDemes` returns a variable
+        colours, depending on the what's visible when this fn is called.
+        An alternative approach (probably a better one) is to create _all_ possible arcs upon first rendering
+        and then here update the visible counts per arc. */
+        console.log("TODO: updateDemeDataColAndVis pie chart");
+      } else {
+        demeDataCopy[index].color = averageColorsDict(value);
+      }
     });
   });
   return demeDataCopy;
@@ -459,7 +501,7 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
   return transmissionDataCopy;
 };
 
-export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
+export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors, pieChart) => {
   /*
     walk through nodes and update attributes that can mutate
     for demeData we have:
@@ -472,7 +514,7 @@ export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionDat
   let newTransmissions;
 
   if (demeData && transmissionData) {
-    newDemes = updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors);
+    newDemes = updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart);
     newTransmissions = updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
   }
   return {newDemes, newTransmissions};

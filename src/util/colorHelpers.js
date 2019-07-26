@@ -1,33 +1,22 @@
 import { rgb } from "d3-color";
-import { mean } from "d3-array";
 import { interpolateRgb } from "d3-interpolate";
 import { scalePow } from "d3-scale";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
 
 /**
-* Takes an array of color hex strings.
-* Returns a color hex string representing the average of the array.
-* @param {Array} colors - array of hex strings
-*/
-export const averageColors = (hexColors) => {
-  const colors = hexColors.map((hex) => rgb(hex));
-  const reds = colors.map((col) => col.r);
-  const greens = colors.map((col) => col.g);
-  const blues = colors.map((col) => col.b);
-  const avg = rgb(mean(reds), mean(greens), mean(blues));
-  return avg.toString();
-};
-
-
+ * Average over the visible colours for a given location
+ * @param {dict} colorCounts a dict of <color (str)> -> {nVisible -> INT, nTotal -> INT}
+ * @returns {str} a color hex string representing the average of the array.
+ */
 export const averageColorsDict = (colorCounts) => {
   let r=0, g=0, b=0, total=0;
-  for(let hex in colorCounts){
-    const tmpRGB=rgb(hex);
-    r += tmpRGB.r*colorCounts[hex];
-    g += tmpRGB.g*colorCounts[hex];
-    b += tmpRGB.b*colorCounts[hex];
-    total += colorCounts[hex];
+  for (const hex of Object.keys(colorCounts)) {
+    const tmpRGB = rgb(hex);
+    r += tmpRGB.r*colorCounts[hex].nTotal;
+    g += tmpRGB.g*colorCounts[hex].nTotal;
+    b += tmpRGB.b*colorCounts[hex].nTotal;
+    total += colorCounts[hex].nTotal;
   }
   const avg = rgb(r/total, g/total, b/total);
   return avg.toString();

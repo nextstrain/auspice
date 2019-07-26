@@ -126,7 +126,7 @@ class Map extends React.Component {
     const removed = this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     // TODO: if demes are color blended circles, updating rather than redrawing demes would do
     if (!removed) {
-      // this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
+      this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
     } else {
       console.log("\tskipping maybeUpdate... as we've just removed everything!");
     }
@@ -287,9 +287,6 @@ class Map extends React.Component {
     if (mapIsDrawn && (geoResolutionChanged || dataChanged || pieChartsOnOrOff)) {
       this.state.d3DOMNode.selectAll("*").remove();
       console.log("\tmaybeRemoveAllDemesAndTransmissions");
-      // if (!(geoResolutionChanged || dataChanged)) {
-      //   console.log("\t\tDIDN'T USE TO FIRE (commented conditional)");
-      // }
       /* clear references to the demes and transmissions d3 added */
       /* NB: keep `state.boundsSet` as true to stop the map resetting position */
       this.setState({
@@ -355,7 +352,7 @@ class Map extends React.Component {
    * uses deme & transmission indicies for smart (quick) updating
    */
   maybeUpdateDemesAndTransmissions(nextProps) {
-    if (!this.state.map || !this.props.treeLoaded) { return; }
+    if (!this.state.map || !this.props.treeLoaded || !this.state.d3elems) { return; }
     const colorOrVisibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion || nextProps.colorScaleVersion !== this.props.colorScaleVersion;
     const haveData = nextProps.nodes && nextProps.visibility && nextProps.geoResolution && nextProps.nodeColors;
 
@@ -374,7 +371,9 @@ class Map extends React.Component {
         nextProps.nodes,
         nextProps.visibility,
         nextProps.geoResolution,
-        nextProps.nodeColors);
+        nextProps.nodeColors,
+        nextProps.pieChart
+      );
 
       updateVisibility(
         /* updated in the function above */
@@ -385,7 +384,8 @@ class Map extends React.Component {
         this.state.map,
         nextProps.nodes,
         nextProps.dateMinNumeric,
-        nextProps.dateMaxNumeric
+        nextProps.dateMaxNumeric,
+        nextProps.pieChart
       );
 
       this.setState({

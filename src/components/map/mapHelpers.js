@@ -261,19 +261,35 @@ export const updateVisibility = (
   map,
   nodes,
   numDateMin,
-  numDateMax
+  numDateMax,
+  pieChart
 ) => {
 
   const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
-  d3elems.demes
-    .data(demeData)
-    .transition()
-    .duration(200)
-    .ease(easeLinear)
-    .style("stroke", (d) => { return d.count > 0 ? d.color : "white"; })
-    .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
-    .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); });
 
+
+  if (pieChart) {
+    /* as we update things (visibility etc) the number of arcs in each pie chart may change.
+     * Why?!? Because `
+     * Instead of trying to keep track of things here we just redraw them all.
+     *
+     * Instead of this, I think it'd be better to create `demeData[i].arcs` to represent _all_
+     */
+    console.log("TO DO: RE-RENDER")
+
+  } else {
+    /* for colour blended circles we just have to update the colours & size (radius) */
+    d3elems.demes
+      .data(demeData)
+      .transition()
+      .duration(200)
+      .ease(easeLinear)
+      .style("stroke", (d) => { return d.count > 0 ? d.color : "white"; })
+      .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
+      .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); });
+  }
+
+  /* update the path and stroke colour of transmission lines */
   d3elems.transmissions
     .data(transmissionData)
     .attr("d", (d) => {
