@@ -283,6 +283,9 @@ export const updateVisibility = (
     /* for colour blended circles we just have to update the colours & size (radius) */
     d3elems.demes
       .data(demeData)
+      .transition()
+      .duration(200)
+      .ease(easeLinear)
       .style("stroke", (d) => { return d.count > 0 ? d.color : "white"; })
       .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
       .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); });

@@ -45,7 +45,8 @@ import { errorNotification } from "../../actions/notifications";
     dateMaxNumeric: state.controls.dateMaxNumeric,
     panelLayout: state.controls.panelLayout,
     narrativeMode: state.narrative.display,
-    pieChart: !state.controls.colorScale.continuous /* continuous scales: no pie chart. Others: pie charts! */
+    pieChart: !state.controls.colorScale.continuous                         // continuous color scale = no pie chart
+      && state.controls.geoResolution !== state.controls.colorScale.colorBy // geo circles match colorby == no pie chart
   };
 })
 
