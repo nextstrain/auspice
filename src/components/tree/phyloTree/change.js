@@ -187,6 +187,9 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
       this.drawBranchLabels(extras.newBranchLabellingKey);
     }
   }
+
+  if (this.vaccines) this.drawVaccines();
+
 };
 
 /* instead of modifying the SVG the "normal" way, this is sometimes too janky (e.g. when we need to move everything)
@@ -250,6 +253,7 @@ export const change = function change({
   /* change these things to provided value */
   newDistance = undefined,
   newLayout = undefined,
+  updateLayout = undefined,
   newBranchLabellingKey = undefined,
   /* arrays of data (the same length as nodes) */
   branchStroke = undefined,
@@ -300,7 +304,7 @@ export const change = function change({
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || zoomIntoClade || svgHasChangedDimensions) {
+  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -330,12 +334,13 @@ export const change = function change({
   /* distance */
   if (newDistance) this.setDistance(newDistance);
   /* layout (must run after distance) */
-  if (newDistance || newLayout) this.setLayout(newLayout || this.layout);
+  if (newDistance || newLayout || updateLayout) this.setLayout(newLayout || this.layout);
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||
     newDistance ||
     newLayout ||
+    updateLayout ||
     zoomIntoClade ||
     svgHasChangedDimensions
   ) {
@@ -346,7 +351,7 @@ export const change = function change({
   const extras = {removeConfidences, showConfidences, newBranchLabellingKey};
   extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
   if (useModifySVGInStages) {
-    this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000);
+    this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 750);
   } else {
     this.modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras);
   }

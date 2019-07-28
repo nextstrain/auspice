@@ -1,4 +1,4 @@
-import { freqScale, NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE } from "./globals";
+import { freqScale, NODE_NOT_VISIBLE_BASAL, NODE_NOT_VISIBLE_FILTERED, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE } from "./globals";
 import { calcTipCounts } from "./treeCountingHelpers";
 
 export const getVisibleDateRange = (nodes, visibility) => nodes
@@ -46,9 +46,14 @@ const calcBranchThickness = (nodes, visibility, rootIdx) => {
   if (!maxTipCount) {
     maxTipCount = 1;
   }
-  return nodes.map((d, idx) => (
-    visibility[idx] === 2 ? freqScale((d.tipCount + 5) / (maxTipCount + 5)) : 0.5
-  ));
+  return nodes.map((d, idx) => {
+    if (visibility[idx] === NODE_VISIBLE) {
+      return freqScale((d.tipCount + 5) / (maxTipCount + 5));
+    } else if (visibility[idx] === NODE_NOT_VISIBLE_FILTERED || visibility[idx] === NODE_VISIBLE_TO_MAP_ONLY) {
+      return 0.5;
+    }
+    return 0.0;
+  });
 };
 
 /* recursively mark the parents of a given node active
@@ -155,7 +160,10 @@ const calcVisibility = (tree, controls, dates) => {
           return NODE_VISIBLE_TO_MAP_ONLY;
         }
       }
-      return NODE_NOT_VISIBLE;
+      if (!inView[idx]) {
+        return NODE_NOT_VISIBLE_BASAL;
+      }
+      return NODE_NOT_VISIBLE_FILTERED;
     });
     return visibility;
   }

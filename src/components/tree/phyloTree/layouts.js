@@ -3,6 +3,7 @@
 import { min, max, sum } from "d3-array";
 import { addLeafCount } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
+import { NODE_VISIBLE, reallySmallNumber, reallyBigNumber } from "../../../util/globals";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -129,6 +130,14 @@ const unrootedPlaceSubtree = (node, nTips) => {
  */
 export const unrootedLayout = function unrootedLayout() {
   const nTips = this.numberOfTips;
+
+  let nVisibleTips = 0;
+  this.nodes.forEach((d) => {
+    if (d.visibility === NODE_VISIBLE && d.terminal) {
+      nVisibleTips += 1;
+    }
+  });
+
   // postorder iteration to determine leaf count of every node
   addLeafCount(this.nodes[0]);
   // calculate branch length from depth
@@ -144,10 +153,10 @@ export const unrootedLayout = function unrootedLayout() {
   for (let i = 0; i < this.nodes[0].children.length; i++) {
     this.nodes[0].children[i].px = 0;
     this.nodes[0].children[i].py = 0;
-    this.nodes[0].children[i].w = 2.0 * Math.PI * this.nodes[0].children[i].leafCount / nTips;
+    this.nodes[0].children[i].w = 2.0 * Math.PI * this.nodes[0].children[i].leafCount / nVisibleTips;
     this.nodes[0].children[i].tau = eta;
     eta += this.nodes[0].children[i].w;
-    unrootedPlaceSubtree(this.nodes[0].children[i], nTips);
+    unrootedPlaceSubtree(this.nodes[0].children[i], nVisibleTips);
   }
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
@@ -165,12 +174,21 @@ export const unrootedLayout = function unrootedLayout() {
  * @return {null}
  */
 export const radialLayout = function radialLayout() {
-  const nTips = this.numberOfTips;
-  const offset = this.nodes[0].depth;
+  let offset = reallyBigNumber;
+  let minY = reallyBigNumber;
+  let maxY = reallySmallNumber;
   this.nodes.forEach((d) => {
-    const angleCBar1 = 2.0 * 0.95 * Math.PI * d.yRange[0] / nTips;
-    const angleCBar2 = 2.0 * 0.95 * Math.PI * d.yRange[1] / nTips;
-    d.angle = 2.0 * 0.95 * Math.PI * d.n.yvalue / nTips;
+    if (d.visibility === NODE_VISIBLE) {
+      if (offset > d.depth) offset = d.depth;
+      if (minY > d.n.yvalue) minY = d.n.yvalue;
+      if (maxY < d.n.yvalue) maxY = d.n.yvalue;
+    }
+  });
+
+  this.nodes.forEach((d) => {
+    const angleCBar1 = 2.0 * 0.98 * Math.PI * (d.yRange[0] - minY) / (maxY - minY);
+    const angleCBar2 = 2.0 * 0.98 * Math.PI * (d.yRange[1] - minY) / (maxY - minY);
+    d.angle = 2.0 * 0.98 * Math.PI * (d.n.yvalue - minY) / (maxY - minY);
     d.y = (d.depth - offset) * Math.cos(d.angle);
     d.x = (d.depth - offset) * Math.sin(d.angle);
     d.py = d.y * (d.pDepth - offset) / (d.depth - offset + 1e-15);
@@ -328,8 +346,8 @@ export const mapToScreen = function mapToScreen() {
     const spanX = maxX-minX;
     const spanY = maxY-minY;
     const maxSpan = max([spanY, spanX]);
-    const ySlack = (spanX>spanY) ? (spanX-spanY)*0.5 : 0.0;
-    const xSlack = (spanX<spanY) ? (spanY-spanX)*0.5 : 0.0;
+    const xSlack = (spanX<spanY) ? 0.5 * (spanY-spanX) : 0.0;
+    const ySlack = (spanX>spanY) ? 0.5 * (spanX-spanY) : 0.0;
     this.xScale.domain([minX-xSlack, minX+maxSpan-xSlack]);
     this.yScale.domain([minY-ySlack, minY+maxSpan-ySlack]);
   } else if (this.layout==="clock") {
@@ -372,10 +390,19 @@ export const mapToScreen = function mapToScreen() {
       }
     });
   } else if (this.layout==="radial") {
-    const offset = this.nodes[0].depth;
-    const stem_offset_radial = this.nodes.map((d) => {return (0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0);});
-    this.nodes.forEach((d) => {d.cBarStart = this.yScale(d.yRange[0]);});
-    this.nodes.forEach((d) => {d.cBarEnd = this.yScale(d.yRange[1]);});
+    // offset should be dynamically calculated above in radialLayout
+    // and passed down to mapToScreen
+    let offset = reallyBigNumber;
+    this.nodes.forEach((d) => {
+      if (d.visibility === NODE_VISIBLE) {
+        if (offset > d.depth) offset = d.depth;
+      }
+    });
+    const stem_offset_radial = this.nodes.map((d) => {
+      return (0.5 * (d.parent["stroke-width"] - d["stroke-width"]) || 0.0);
+    });
+    // this.nodes.forEach((d) => {d.cBarStart = this.yScale(d.yRange[0]);}); // this seemed unnecessary
+    // this.nodes.forEach((d) => {d.cBarEnd = this.yScale(d.yRange[1]);}); // this seemed unnecessary
     this.nodes.forEach((d, i) => {
       d.branch =[
         " M "+(d.xBase-stem_offset_radial[i]*Math.sin(d.angle)).toString()

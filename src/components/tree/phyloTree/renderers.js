@@ -25,12 +25,8 @@ export const render = function render(svg, layout, distance, parameters, callbac
   this.vaccines = vaccines ? vaccines.map((d) => d.shell) : undefined;
   this.dateRange = dateRange;
 
-  /* set x, y values & scale them to the screen */
-  this.setDistance(distance);
-  this.setLayout(layout);
-  this.mapToScreen();
-
   /* set nodes stroke / fill */
+  /* visibility is used when calculating setLayout */
   this.nodes.forEach((d, i) => {
     d.branchStroke = branchStroke[i];
     d.tipStroke = tipStroke[i];
@@ -39,6 +35,11 @@ export const render = function render(svg, layout, distance, parameters, callbac
     d["stroke-width"] = branchThickness[i];
     d.r = tipRadii ? tipRadii[i] : this.params.tipRadius;
   });
+
+  /* set x, y values & scale them to the screen */
+  this.setDistance(distance);
+  this.setLayout(layout);
+  this.mapToScreen();
 
   /* draw functions */
   if (this.params.showGrid) {
@@ -72,17 +73,18 @@ export const drawVaccines = function drawVaccines() {
     .selectAll(".vaccineCross")
     .data(this.vaccines)
     .enter()
-      .append("path")
-        .attr("class", "vaccineCross")
-        .attr("d", (d) => d.vaccineCross)
-        .style("stroke", "#333")
-        .style("stroke-width", 2 * this.params.branchStrokeWidth)
-        .style("fill", "none")
-        .style("cursor", "pointer")
-        .style("pointer-events", "auto")
-        .on("mouseover", this.callbacks.onTipHover)
-        .on("mouseout", this.callbacks.onTipLeave)
-        .on("click", this.callbacks.onTipClick);
+    .append("path")
+    .attr("class", "vaccineCross")
+    .attr("d", (d) => d.vaccineCross)
+    .style("stroke", "#333")
+    .style("stroke-width", 2 * this.params.branchStrokeWidth)
+    .style("fill", "none")
+    .style("cursor", "pointer")
+    .style("pointer-events", "auto")
+    .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden")
+    .on("mouseover", this.callbacks.onTipHover)
+    .on("mouseout", this.callbacks.onTipLeave)
+    .on("click", this.callbacks.onTipClick);
 };
 
 
