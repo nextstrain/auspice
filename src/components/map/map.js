@@ -44,9 +44,13 @@ import { errorNotification } from "../../actions/notifications";
     dateMinNumeric: state.controls.dateMinNumeric,
     dateMaxNumeric: state.controls.dateMaxNumeric,
     panelLayout: state.controls.panelLayout,
+    colorBy: state.controls.colorScale.colorBy,
     narrativeMode: state.narrative.display,
-    pieChart: !state.controls.colorScale.continuous                         // continuous color scale = no pie chart
-      && state.controls.geoResolution !== state.controls.colorScale.colorBy // geo circles match colorby == no pie chart
+    pieChart: (
+      !state.controls.colorScale.continuous &&                           // continuous color scale = no pie chart
+      state.controls.geoResolution !== state.controls.colorScale.colorBy // geo circles match colorby == no pie chart
+    ),
+    legendValues: state.controls.colorScale.legendValues
   };
 })
 
@@ -214,7 +218,9 @@ class Map extends React.Component {
         this.props.mapTriplicate,
         this.props.metadata,
         this.state.map,
-        this.props.pieChart
+        this.props.pieChart,
+        this.props.legendValues,
+        this.props.colorBy
       );
 
       const filteredDemesMissingLatLongs = [...demesMissingLatLongs].filter((value) => {
@@ -356,7 +362,9 @@ class Map extends React.Component {
         nextProps.visibility,
         nextProps.geoResolution,
         nextProps.nodeColors,
-        nextProps.pieChart
+        nextProps.pieChart,
+        nextProps.colorBy,
+        nextProps.legendValues
       );
 
       updateVisibility(

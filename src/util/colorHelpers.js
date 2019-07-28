@@ -6,18 +6,19 @@ import { getTraitFromNode } from "./treeMiscHelpers";
 
 /**
  * Average over the visible colours for a given location
- * @param {dict} colorCounts a dict of <color (str)> -> {nVisible -> INT, nTotal -> INT}
+ * @param {array} nodes list of nodes whose colours we want to average over
+ * @param {array} nodeColours (redux state) -- list of node hexes. Not in 1-1 correspondence with `nodes`.
  * @returns {str} a color hex string representing the average of the array.
  */
-export const averageColorsDict = (colorCounts) => {
-  let r=0, g=0, b=0, total=0;
-  for (const hex of Object.keys(colorCounts)) {
-    const tmpRGB = rgb(hex);
-    r += tmpRGB.r*colorCounts[hex].nTotal;
-    g += tmpRGB.g*colorCounts[hex].nTotal;
-    b += tmpRGB.b*colorCounts[hex].nTotal;
-    total += colorCounts[hex].nTotal;
-  }
+export const getAverageColorFromNodes = (nodes, nodeColors) => {
+  let r=0, g=0, b=0;
+  nodes.forEach((n) => {
+    const tmpRGB = rgb(nodeColors[n.arrayIdx]);
+    r += tmpRGB.r;
+    g += tmpRGB.g;
+    b += tmpRGB.b;
+  });
+  const total = nodes.length;
   const avg = rgb(r/total, g/total, b/total);
   return avg.toString();
 };

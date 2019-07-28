@@ -2,11 +2,11 @@
 import _map from "lodash/map";
 import _minBy from "lodash/minBy";
 import { interpolateNumber } from "d3-interpolate";
-import { averageColorsDict } from "../../util/colorHelpers";
+import { getAverageColorFromNodes } from "../../util/colorHelpers";
 import { bezier } from "./transmissionBezier";
 import { NODE_NOT_VISIBLE } from "../../util/globals";
 import { getTraitFromNode } from "../../util/treeMiscHelpers";
-import { pie } from "d3-shape";
+import { isColorByGenotype } from "../../util/getGenotype";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -45,48 +45,82 @@ const maybeGetTransmissionPair = (latOrig, longOrig, latDest, longDest, map) => 
 };
 
 /**
- * Traverses the tips of the tree to create a dict of 
- * demes -> dict of colours present across the tips.
- * The values of the nested dict are a dict with 2 keys:
- * `nVisible`: num tips w. this colour visible in current view
- * `nTotal`: total num of tips w. this colour, visible or not.
- * E.g:
- * demeToColorMap["new_zealand"]["#A3A3A3"].nVisible = 10
- *                                         .nTotal = 20
+ * Traverses the tips of the tree to create a dict of
+ * location(deme) -> list of visible tips at that location
  */
-const getColorsForAllDemes = (nodes, visibility, geoResolution, nodeColors) => {
-  const demeToColorMap = {};
+const getVisibleNodesPerLocation = (nodes, visibility, geoResolution) => {
+  const locationToVisibleNodes = {};
   nodes.forEach((n, i) => {
-    if (n.children) return; /* demes only count terminal nodes */
+    if (n.children) return; /* only consider terminal nodes */
     const location = getTraitFromNode(n, geoResolution);
     if (!location) return; /* ignore undefined locations */
-    if (!demeToColorMap[location]) demeToColorMap[location] = {};
-    const color = nodeColors[i];
-    if (!demeToColorMap[location][color]) {
-      demeToColorMap[location][color] = {nVisible: 0, nTotal: 0};
-    }
-    demeToColorMap[location][color].nTotal++;
+    if (!locationToVisibleNodes[location]) locationToVisibleNodes[location]=[];
     if (visibility[i] !== NODE_NOT_VISIBLE) {
-      demeToColorMap[location][color].nVisible++;
+      locationToVisibleNodes[location].push(n);
     }
   });
-  return demeToColorMap;
+  return locationToVisibleNodes;
 };
 
-const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart) => {
+/**
+ * Either create arcs for the current `visibleNodes`, in the order of the legendValues, or update the arcs
+ * (by updating we mean changing the arc start/end angles)
+ * @param {array} visibleNodes visible nodes for this pie chart
+ * @param {array} legendValues for this colorBy
+ * @param {string} colorBy current color by
+ * @param {array} nodeColors Array of colors for all nodes (not in correspondence with `visibleNodes`)
+ * @param {array} currentArcs only used if updating. Array of current arcs.
+ * @returns {array} arcs for display
+ */
+const createOrUpdateArcs = (visibleNodes, legendValues, colorBy, nodeColors, currentArcs=undefined) => {
+  const colorByIsGenotype = isColorByGenotype(colorBy);
+  const legendValueToArcIdx = {};
+  let arcs;
+  if (currentArcs) {
+    /* updating arcs -- reset `_count` */
+    arcs = currentArcs;
+    legendValues.forEach((v, i) => {
+      legendValueToArcIdx[v] = i;
+      arcs[i]._count = 0;
+    });
+  } else {
+    /* creating arcs */
+    arcs = legendValues.map((v, i) => {
+      legendValueToArcIdx[v] = i;
+      return {innerRadius: 0, _count: 0};
+    });
+  }
+  /* traverse visible nodes (for this location) to get numbers for each arc (i.e. each slice in the pie) */
+  visibleNodes.forEach((n) => {
+    const colorByValue = colorByIsGenotype ? n.currentGt: getTraitFromNode(n, colorBy);
+    const arcIdx = legendValueToArcIdx[colorByValue];
+    arcs[arcIdx]._count++;
+    if (!arcs[arcIdx].color) arcs[arcIdx].color=nodeColors[n.arrayIdx];
+  });
+  /* turn counts into arc angles (radians) */
+  let startAngle = 0;
+  arcs.forEach((a) => {
+    a.startAngle = startAngle;
+    startAngle += 2*Math.PI*a._count/visibleNodes.length;
+    a.endAngle = startAngle;
+  });
+  return arcs;
+};
+
+
+const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart, legendValues, colorBy) => {
 
   const demeData = []; /* deme array */
   const demeIndices = {}; /* map of name to indices in array */
 
-  const demeToColorMap = getColorsForAllDemes(nodes, visibility, geoResolution, nodeColors);
-
+  const locationToVisibleNodes = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
   const offsets = triplicate ? [-360, 0, 360] : [0];
   const geo = metadata.geographicInfo;
 
   let index = 0;
   offsets.forEach((OFFSET) => {
     /* count DEMES */
-    for (const [location, colorCounts] of Object.entries(demeToColorMap)) {
+    for (const [location, visibleNodes] of Object.entries(locationToVisibleNodes)) {
       let lat = 0;
       let long = 0;
       let goodDeme = true;
@@ -102,42 +136,31 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
       /* get pixel coordinates. `coords`: <Point> with properties `x` & `y` */
       const coords = leafletLatLongToLayerPoint(lat, long, map);
 
-      // calculate total number of data points in deme
-      const colors = Object.keys(colorCounts);
-      const nVisibleTipsInDeme = colors.reduce((acc, cv) => acc + colorCounts[cv].nVisible, 0);
-
       /* add entries to
        * (1) `demeIndicies` -- a dict of "deme value" to the indicies of `demeData` & `arcData` where they appear
        * (2) `demeData` -- an array of objects, each with {name, count etc.}
        *      if pie charts, then `demeData.arcs` exists, if colour-blended circles, `demeData.color` exists
        */
       if (long > westBound && long < eastBound && goodDeme === true) {
-        const demeDataIdx = demeData.length; // idx which `deme` will be inserted at
 
         /* base deme information used for pie charts & color-blended circles */
         const deme = {
           name: location,
-          count: nVisibleTipsInDeme,
+          count: visibleNodes.length,
           latitude: lat, // raw latitude value
           longitude: long, // raw longitude value
           coords: coords // coords are x,y plotted via d3
         };
 
         if (pieChart) {
-          /* arcs is the data for a single pie chart -- an array of objects each representing a "slice"
-          * https://github.com/d3/d3-shape#_pie
-          */
-          const arcs = pie()(colors.map((c) => colorCounts[c].nVisible));
-          /* add in some more info to each "slice" (i.e. each arc in arcs) */
-          for (let i=0; i<arcs.length; i++) {
-            arcs[i].color = colors[i];
-            arcs[i].innerRadius = 0.0;
-            arcs[i].demeDataIdx = demeDataIdx;
-          }
-          deme.arcs = arcs;
+          /* create the arcs for the pie chart. NB `demeDataIdx` is the index of the deme in `demeData` where this will be inserted */
+          deme.arcs = createOrUpdateArcs(visibleNodes, legendValues, colorBy, nodeColors);
+          /* create back links between the arcs & which index of `demeData` they (will be) stored at */
+          const demeDataIdx = demeData.length;
+          deme.arcs.forEach((a) => {a.demeDataIdx = demeDataIdx;});
         } else {
           /* average out the constituent colours for a blended-colour circle */
-          deme.color = averageColorsDict(colorCounts);
+          deme.color = getAverageColorFromNodes(visibleNodes, nodeColors);
         }
 
         demeData.push(deme);
@@ -363,7 +386,9 @@ export const createDemeAndTransmissionData = (
   triplicate,
   metadata,
   map,
-  pieChart
+  pieChart,
+  legendValues,
+  colorBy
 ) => {
 
   /*
@@ -377,7 +402,7 @@ export const createDemeAndTransmissionData = (
   const {
     demeData,
     demeIndices
-  } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart);
+  } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart, legendValues, colorBy);
 
   /* second time so that we can get Bezier */
   const { transmissionData, transmissionIndices, demesMissingLatLongs } = setupTransmissionData(
@@ -405,36 +430,22 @@ UPDATE DEMES & TRANSMISSIONS
 ********************************
 ******************************* */
 
-const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart) => {
+const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) => {
   const demeDataCopy = demeData.slice();
 
-  const demeToColorMap = getColorsForAllDemes(nodes, visibility, geoResolution, nodeColors);
+  const locationToVisibleNodes = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
 
   // update demeData, for each deme, update all elements via demeIndices lookup
-  for (const [location, colorCounts] of Object.entries(demeToColorMap)) {
-    const nVisibleTipsInDeme = Object.keys(colorCounts)
-      .reduce((acc, cv) => acc + colorCounts[cv].nVisible, 0);
-
+  for (const [location, visibleNodes] of Object.entries(locationToVisibleNodes)) {
     demeIndices[location].forEach((index) => {
       /* both pie charts & circles need new counts (which modify the radius) */
-      demeDataCopy[index].count = nVisibleTipsInDeme;
+      demeDataCopy[index].count = visibleNodes.length;
       if (pieChart) {
-        /* pie charts require updating the arcs which make up the pie chart */
-        const totalNumVisible = Object.keys(colorCounts).reduce((acc, cv) => acc+colorCounts[cv].nVisible, 0);
-        const colors = Object.keys(colorCounts);
-        let startAngle = 0.0;
-        demeDataCopy[index].arcs.forEach((a, i) => {
-          if (a.color !== colors[i]) {
-            /* TODO - remove before merge into v2 */
-            console.error("COLOR MISMATCH FATAL");
-          }
-          a.startAngle = startAngle;
-          startAngle += 2*Math.PI*colorCounts[colors[i]].nVisible/totalNumVisible;
-          a.endAngle = startAngle;
-        });
+        /* update the arcs */
+        demeDataCopy[index].arcs = createOrUpdateArcs(visibleNodes, legendValues, colorBy, nodeColors, demeDataCopy[index].arcs);
       } else {
         /* circle demes just require a colour update */
-        demeDataCopy[index].color = averageColorsDict(colorCounts);
+        demeDataCopy[index].color = getAverageColorFromNodes(visibleNodes, nodeColors);
       }
     });
   }
@@ -471,7 +482,7 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
   return transmissionDataCopy;
 };
 
-export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors, pieChart) => {
+export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) => {
   /*
     walk through nodes and update attributes that can mutate
     for demeData we have:
@@ -484,7 +495,7 @@ export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionDat
   let newTransmissions;
 
   if (demeData && transmissionData) {
-    newDemes = updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart);
+    newDemes = updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues);
     newTransmissions = updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
   }
   return {newDemes, newTransmissions};
