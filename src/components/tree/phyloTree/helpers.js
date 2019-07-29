@@ -1,6 +1,4 @@
 /* eslint-disable no-param-reassign */
-import { NODE_VISIBLE } from "../../../util/globals";
-
 
 /*
  * adds the total number of descendant leaves to each node in the tree
@@ -9,10 +7,10 @@ import { NODE_VISIBLE } from "../../../util/globals";
  *   node -- root node of the tree.
  */
 export const addLeafCount = (node) => {
-  if (node.terminal && node.visibility === NODE_VISIBLE) {
+  if (node.terminal && node.inView) {
     node.leafCount = 1;
-  } else if (node.terminal && node.visibility !== NODE_VISIBLE) {
-    node.leafCount = 0.25;
+  } else if (node.terminal && !node.inView) {
+    node.leafCount = 0.15;
   } else {
     node.leafCount = 0;
     for (let i = 0; i < node.children.length; i++) {
