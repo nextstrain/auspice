@@ -1,3 +1,5 @@
+## version 1.37.3 - 2019/07/29
+
 * Reinstate github dataset link in sidebar for community builds
 
 ## version 1.37.2 - 2019/07/20
