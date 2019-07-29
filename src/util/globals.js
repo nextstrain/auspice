@@ -179,7 +179,6 @@ export const normalNavBarHeight = 50;
 export const narrativeNavBarHeight = 55;
 
 // increasing levels of "visibility"
-export const NODE_NOT_VISIBLE_BASAL = 0;    // branch thickness 0 and excluded from map
-export const NODE_NOT_VISIBLE_FILTERED = 1; // branch thickness 0.5 and excluded from map
-export const NODE_VISIBLE_TO_MAP_ONLY = 2;  // branch thickness 0.5 and included in map
-export const NODE_VISIBLE = 3;              // included on tree and map
+export const NODE_NOT_VISIBLE = 0;          // branch thickness 0 and excluded from map
+export const NODE_VISIBLE_TO_MAP_ONLY = 1;  // branch thickness 0.5 and included in map
+export const NODE_VISIBLE = 2;              // included on tree and map

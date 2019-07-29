@@ -4,7 +4,7 @@ import _minBy from "lodash/minBy";
 import { interpolateNumber } from "d3-interpolate";
 import { averageColors } from "../../util/colorHelpers";
 import { bezier } from "./transmissionBezier";
-import { NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE } from "../../util/globals";
+import { NODE_NOT_VISIBLE } from "../../util/globals";
 import { errorNotification } from "../../actions/notifications";
 
 /* global L */
@@ -64,8 +64,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   // second pass to fill vectors
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
-    if (!n.children && visibility[i] === NODE_VISIBLE_TO_MAP_ONLY
-      || !n.children && visibility[i] === NODE_VISIBLE) {
+    if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
       // if tip and visible, push
       if (n.attr[geoResolution]) { // check for undefined
         demeMap[n.attr[geoResolution]].push(nodeColors[i]);
@@ -201,7 +200,7 @@ const maybeConstructTransmissionEvent = (
       originNumDate: node.attr["num_date"],
       destinationNumDate: child.attr["num_date"],
       color: nodeColors[node.arrayIdx],
-      visible: visibility[child.arrayIdx] === NODE_VISIBLE_TO_MAP_ONLY || visibility[child.arrayIdx] === NODE_VISIBLE ? "visible" : "hidden", // transmission visible if child is visible
+      visible: visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden", // transmission visible if child is visible
       extend: extend
     };
   }
@@ -392,8 +391,7 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
   // second pass to fill vectors
   nodes.forEach((n, i) => {
     /* demes only count terminal nodes */
-    if (!n.children && visibility[i] === NODE_VISIBLE_TO_MAP_ONLY
-      || !n.children && visibility[i] === NODE_VISIBLE) {
+    if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
       // if tip and visible, push
       if (n.attr[geoResolution]) { // check for undefined
         if (n.attr[geoResolution] in demeMap) {
@@ -428,7 +426,7 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
       // this is a transmission event from n to child
       const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
       const col = nodeColors[node.arrayIdx];
-      const vis = visibility[child.arrayIdx] === NODE_VISIBLE_TO_MAP_ONLY || visibility[child.arrayIdx] === NODE_VISIBLE ? "visible" : "hidden"; // transmission visible if child is visible
+      const vis = visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden"; // transmission visible if child is visible
 
       // update transmissionData via index lookup
       try {

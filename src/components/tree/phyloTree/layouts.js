@@ -129,17 +129,11 @@ const unrootedPlaceSubtree = (node, nTips) => {
  * @return {null}
  */
 export const unrootedLayout = function unrootedLayout() {
-  const nTips = this.numberOfTips;
-
-  let nVisibleTips = 0;
-  this.nodes.forEach((d) => {
-    if (d.visibility === NODE_VISIBLE && d.terminal) {
-      nVisibleTips += 1;
-    }
-  });
 
   // postorder iteration to determine leaf count of every node
   addLeafCount(this.nodes[0]);
+  const nVisibleTips = this.nodes[0].leafCount;
+
   // calculate branch length from depth
   this.nodes.forEach((d) => {d.branchLength = d.depth - d.pDepth;});
   // preorder iteration to layout nodes
@@ -174,21 +168,12 @@ export const unrootedLayout = function unrootedLayout() {
  * @return {null}
  */
 export const radialLayout = function radialLayout() {
-  let offset = reallyBigNumber;
-  let minY = reallyBigNumber;
-  let maxY = reallySmallNumber;
+  const nTips = this.numberOfTips;
+  const offset = this.nodes[0].depth;
   this.nodes.forEach((d) => {
-    if (d.visibility === NODE_VISIBLE) {
-      if (offset > d.depth) offset = d.depth;
-      if (minY > d.n.yvalue) minY = d.n.yvalue;
-      if (maxY < d.n.yvalue) maxY = d.n.yvalue;
-    }
-  });
-
-  this.nodes.forEach((d) => {
-    const angleCBar1 = 2.0 * 0.98 * Math.PI * (d.yRange[0] - minY) / (maxY - minY);
-    const angleCBar2 = 2.0 * 0.98 * Math.PI * (d.yRange[1] - minY) / (maxY - minY);
-    d.angle = 2.0 * 0.98 * Math.PI * (d.n.yvalue - minY) / (maxY - minY);
+    const angleCBar1 = 2.0 * 0.95 * Math.PI * d.yRange[0] / nTips;
+    const angleCBar2 = 2.0 * 0.95 * Math.PI * d.yRange[1] / nTips;
+    d.angle = 2.0 * 0.95 * Math.PI * d.n.yvalue / nTips;
     d.y = (d.depth - offset) * Math.cos(d.angle);
     d.x = (d.depth - offset) * Math.sin(d.angle);
     d.py = d.y * (d.pDepth - offset) / (d.depth - offset + 1e-15);
@@ -382,7 +367,7 @@ export const mapToScreen = function mapToScreen() {
     });
   } else if (this.layout==="rect") {
     this.nodes.forEach((d) => {
-      const stem_offset = 0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0;
+      const stem_offset = 0.5 * (d.parent["stroke-width"] - d["stroke-width"]) || 0.0;
       const childrenY = [this.yScale(d.yRange[0]), this.yScale(d.yRange[1])];
       d.branch =[` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip} M ${d.xTip},${childrenY[0]} L ${d.xTip},${childrenY[1]}`];
       if (this.params.confidence) {
@@ -390,14 +375,7 @@ export const mapToScreen = function mapToScreen() {
       }
     });
   } else if (this.layout==="radial") {
-    // offset should be dynamically calculated above in radialLayout
-    // and passed down to mapToScreen
-    let offset = reallyBigNumber;
-    this.nodes.forEach((d) => {
-      if (d.visibility === NODE_VISIBLE) {
-        if (offset > d.depth) offset = d.depth;
-      }
-    });
+    const offset = this.nodes[0].depth;
     const stem_offset_radial = this.nodes.map((d) => {
       return (0.5 * (d.parent["stroke-width"] - d["stroke-width"]) || 0.0);
     });
