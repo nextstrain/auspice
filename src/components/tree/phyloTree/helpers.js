@@ -7,8 +7,10 @@
  *   node -- root node of the tree.
  */
 export const addLeafCount = (node) => {
-  if (node.terminal) {
+  if (node.terminal && node.inView) {
     node.leafCount = 1;
+  } else if (node.terminal && !node.inView) {
+    node.leafCount = 0.15;
   } else {
     node.leafCount = 0;
     for (let i = 0; i < node.children.length; i++) {

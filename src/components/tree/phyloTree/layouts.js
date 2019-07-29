@@ -128,9 +128,11 @@ const unrootedPlaceSubtree = (node, nTips) => {
  * @return {null}
  */
 export const unrootedLayout = function unrootedLayout() {
-  const nTips = this.numberOfTips;
+
   // postorder iteration to determine leaf count of every node
   addLeafCount(this.nodes[0]);
+  const nTips = this.nodes[0].leafCount;
+
   // calculate branch length from depth
   this.nodes.forEach((d) => {d.branchLength = d.depth - d.pDepth;});
   // preorder iteration to layout nodes
