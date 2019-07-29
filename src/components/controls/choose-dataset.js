@@ -25,14 +25,6 @@ const DroppedFiles = withTheme((props) => {
   );
 });
 
-const BareDataPath = withTheme((props) => (
-  <div style={{ fontSize: 14, color: props.theme.color }}>
-    {`Source: ${props.source || "unknown"}`}
-    <p/>
-    {`Datapath: ${props.pathname}`}
-  </div>
-));
-
 const checkEqualityOfArrays = (arr1, arr2, upToIdx) => {
   return arr1.slice(0, upToIdx).every((value, index) => value === arr2[index]);
 };
@@ -45,18 +37,14 @@ const checkEqualityOfArrays = (arr1, arr2, upToIdx) => {
 })
 class ChooseDataset extends React.Component {
   render() {
-    /* If the server hasn't yet returned the available datasets, show the
-       source & raw datapath if we have one, otherwise don't render anything.
-       This helps the user know what they're looking at.
-     */
+    if (this.props.source === "community") {
+      return (<GithubInfo/>);
+    } else if (this.props.source === "dropped") {
+      return (<DroppedFiles/>);
+    }
     if (!this.props.available || !this.props.available.datasets) {
-      /* TODO expose this to the extension API */
-      if (this.props.source === "github") {
-        return (<GithubInfo/>);
-      } else if (this.props.source === "dropped") {
-        return (<DroppedFiles/>);
-      }
-      return (<BareDataPath source={this.props.source} pathname={this.props.pathname}/>);
+      /* typically this is the case if the available dataset fetch hasn't returned */
+      return null;
     }
 
     const displayedDataset = window.location.pathname

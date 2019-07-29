@@ -1,5 +1,6 @@
-## version 1.37.2 - 2019/07/20
+* Reinstate github dataset link in sidebar for community builds
 
+## version 1.37.2 - 2019/07/20
 * Fix two bugs related to (a) "root" appearing as the selected clade in the URL and (b) applying filtering would remove the selected clade from the URL. See [issue #744](https://github.com/nextstrain/auspice/issues/744) and [PR 746](https://github.com/nextstrain/auspice/pull/746).
 * Fix bug where auspice would crash if the JSON contained an "annotation" property but not a "annotation.nuc" key. See [issue #732](https://github.com/nextstrain/auspice/issues/732)
 * The Map panel title is now "Grography" when transmissions are not inferred. See [issue #743](https://github.com/nextstrain/auspice/issues/743)
