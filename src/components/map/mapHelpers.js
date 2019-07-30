@@ -191,7 +191,10 @@ export const drawDemesAndTransmissions = (
       .style("stroke", (d) => { return d.color; })
       .attr("transform", (d) =>
         "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
-      );
+      )
+      .each(function (d) {
+        this._previousDatum = d;
+      });
   } else {
     demes = g.selectAll("demes") // add deme circles to this selection
       .data(demeData)
@@ -255,10 +258,15 @@ export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin,
   }
 };
 
-function arcTween(d) {
-  const i = interpolate({startAngle: 0, endAngle: 0}, d);
-  return function(t) { return arc(i(t)); };
-}
+// function arcTween(d, idx) {
+//   console.log("arcTween input", d, idx, this);
+//   // const aaa = this;
+//   // debugger;
+//   const i = interpolate({startAngle: 0, endAngle: 0}, d);
+//   return function (t) {
+//     return arc(i(t));
+//   };
+// }
 
 export const updateVisibility = (
   demeData,
@@ -281,16 +289,24 @@ export const updateVisibility = (
       a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count)*demeMultiplier;
     });
 
-    const d = individualArcs[50];
-    const a = arcTween(individualArcs[50]);
-    console.log("a(0.5)", a(0.5));
-    console.log("a(0.5)(d)", a(0.5)(d));
+    // const d = individualArcs[50];
+    // const a = arcTween(individualArcs[50]);
+    // console.log("a(0.5)", a(0.5));
+    // console.log("a(0.5)(d)", a(0.5)(d));
 
     d3elems.demes
       .data(individualArcs)
       .transition()
-      .duration(2000)
-      .attrTween("d", arcTween)
+      .duration(4000)
+      .attrTween("d", function arcTween(dd, ii) {
+        const i = interpolate(this._previousDatum, dd);
+        // if (this._previousDatum.startAngle !== dd.startAngle) {console.log(ii, this._previousDatum, dd)}
+        // const aaa = this; debugger;
+        this._previousDatum = dd;
+        return function r(t) {
+          return arc()(i(t));
+        };
+      })
       .style("fill", (d) => { return d.color; })
       .style("stroke", (d) => { return d.color; });
   } else {

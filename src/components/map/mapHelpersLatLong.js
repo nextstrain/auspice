@@ -431,8 +431,11 @@ UPDATE DEMES & TRANSMISSIONS
 ******************************* */
 
 const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) => {
-  const demeDataCopy = demeData.slice();
-
+  const demeDataCopy = demeData.map((data) => {
+    const newData = Object.assign({}, data);
+    newData.arcs = data.arcs.map((arc) => Object.assign({}, arc));
+    return newData;
+  });
   const locationToVisibleNodes = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
 
   // update demeData, for each deme, update all elements via demeIndices lookup
