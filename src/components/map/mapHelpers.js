@@ -3,6 +3,7 @@ import _findLastIndex from "lodash/findLastIndex";
 import _max from "lodash/max";
 import { line, curveBasis, arc } from "d3-shape";
 import { easeLinear } from "d3-ease";
+import { interpolate } from "d3-interpolate";
 import { demeCountMultiplier, demeCountMinimum } from "../../util/globals";
 
 /* util */
@@ -254,6 +255,11 @@ export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin,
   }
 };
 
+function arcTween(d) {
+  const i = interpolate({startAngle: 0, endAngle: 0}, d);
+  return function(t) { return arc(i(t)); };
+}
+
 export const updateVisibility = (
   demeData,
   transmissionData,
@@ -274,9 +280,17 @@ export const updateVisibility = (
     individualArcs.forEach((a) => {
       a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count)*demeMultiplier;
     });
+
+    const d = individualArcs[50];
+    const a = arcTween(individualArcs[50]);
+    console.log("a(0.5)", a(0.5));
+    console.log("a(0.5)(d)", a(0.5)(d));
+
     d3elems.demes
       .data(individualArcs)
-      .attr("d", (d) => arc()(d))
+      .transition()
+      .duration(2000)
+      .attrTween("d", arcTween)
       .style("fill", (d) => { return d.color; })
       .style("stroke", (d) => { return d.color; });
   } else {
