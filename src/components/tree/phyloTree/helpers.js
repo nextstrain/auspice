@@ -1,10 +1,12 @@
 /* eslint-disable no-param-reassign */
 
-/*
- * adds the total number of descendant leaves to each node in the tree
- * the functions works recursively.
- * @params:
- *   node -- root node of the tree.
+/**
+ * computes a measure of the total number of leaves for each node in
+ * the tree, weighting leaves differently if they are inView.
+ * Note: function is recursive
+ * @param {obj} node -- root node of the tree
+ * @returns {undefined}
+ * @sideEffects sets `node.leafCount` {number} for all nodes
  */
 export const addLeafCount = (node) => {
   if (node.terminal && node.inView) {
