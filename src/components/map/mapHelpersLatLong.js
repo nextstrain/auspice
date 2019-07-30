@@ -101,7 +101,7 @@ const createOrUpdateArcs = (visibleNodes, legendValues, colorBy, nodeColors, cur
   let startAngle = 0;
   arcs.forEach((a) => {
     a.startAngle = startAngle;
-    startAngle += 2*Math.PI*a._count/visibleNodes.length;
+    startAngle += 2*Math.PI*a._count/visibleNodes.length || 0;
     a.endAngle = startAngle;
   });
   return arcs;
