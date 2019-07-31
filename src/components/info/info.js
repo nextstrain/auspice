@@ -8,6 +8,7 @@ import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { months, NODE_VISIBLE } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
+import { SourceInfo } from "./sourceInfo";
 
 const plurals = {
   country: "countries",
@@ -250,6 +251,7 @@ class Info extends React.Component {
 
     return (
       <Card center infocard>
+        <SourceInfo/>
         <div style={styles.base}>
           <div width={this.props.width} style={styles.title}>
             {title}
