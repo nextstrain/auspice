@@ -488,6 +488,56 @@ const modifyControlsViaTreeToo = (controls, name) => {
   return controls;
 };
 
+/**
+ * TODO -- this will change with https://github.com/nextstrain/auspice/issues/755
+ * A lot of this is simply changing augur's snake_case to auspice's camelCase
+ */
+const createMetadataStateFromJSON = (json) => {
+  const metadata = {};
+  if (json.colorings) {
+    metadata.colorings = json.colorings;
+  }
+  metadata.title = json.title;
+  metadata.updated = json.updated;
+  if (json.version) {
+    metadata.version = json.version;
+  }
+  if (json.genome_annotations) {
+    metadata.genomeAnnotations = json.genome_annotations;
+  }
+  if (json.filters) {
+    metadata.filters = json.filters;
+  }
+  if (json.panels) {
+    metadata.panels = json.panels;
+  }
+  if (json.display_defaults) {
+    metadata.displayDefaults = {};
+    const jsonKeyToAuspiceKey = {
+      color_by: "colorBy",
+      geo_resolution: "geoResolution",
+      distance_measure: "distanceMeasure",
+      map_triplicate: "mapTriplicate",
+      layout: "layout"
+    };
+    for (const [jsonKey, auspiceKey] of Object.entries(jsonKeyToAuspiceKey)) {
+      if (json.display_defaults[jsonKey]) {
+        metadata.displayDefaults[auspiceKey] = json.display_defaults[jsonKey];
+      }
+    }
+  }
+  if (json.geographic_info) {
+    metadata.geographicInfo = json.geographic_info;
+  }
+
+
+  if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
+    console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
+  }
+  metadata.loaded = true;
+  return metadata;
+};
+
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
   oldState = false, /* existing redux state (instead of jsons) */
@@ -498,56 +548,7 @@ export const createStateFromQueryOrJSONs = ({
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (json) {
     /* create metadata state */
-    metadata = {};
-    if (json.colorings) {
-      metadata.colorings = json.colorings;
-    }
-    metadata.title = json.title;
-    metadata.updated = json.updated;
-    if (json.version) {
-      metadata.version = json.version;
-    }
-    if (json.maintainers) {
-      metadata.maintainers = json.maintainers;
-    }
-    if (json.genome_annotations) {
-      metadata.genomeAnnotations = json.genome_annotations;
-    }
-    if (json.filters) {
-      metadata.filters = json.filters;
-    }
-    if (json.panels) {
-      metadata.panels = json.panels;
-    }
-    if (json.display_defaults) {
-      metadata.displayDefaults = json.display_defaults;
-      /* rename to camelCase for use throughout auspice */
-      if (metadata.displayDefaults.color_by) {
-        metadata.displayDefaults.colorBy = metadata.displayDefaults.color_by;
-        delete metadata.displayDefaults.color_by;
-      }
-      if (metadata.displayDefaults.geo_resolution) {
-        metadata.displayDefaults.geoResolution = metadata.displayDefaults.geo_resolution;
-        delete metadata.displayDefaults.geo_resolution;
-      }
-      if (metadata.displayDefaults.distance_measure) {
-        metadata.displayDefaults.distanceMeasure = metadata.displayDefaults.distance_measure;
-        delete metadata.displayDefaults.distance_measure;
-      }
-      if (metadata.displayDefaults.map_triplicate) {
-        metadata.displayDefaults.mapTriplicate = metadata.displayDefaults.map_triplicate;
-        delete metadata.displayDefaults.map_triplicate;
-      }
-    }
-    if (json.geographic_info) {
-      metadata.geographicInfo = json.geographic_info;
-    }
-
-
-    if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
-      console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
-    }
-    metadata.loaded = true;
+    metadata = createMetadataStateFromJSON(json);
     /* entropy state */
     entropy = entropyCreateState(metadata.genomeAnnotations);
     /* new tree state(s) */

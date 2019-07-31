@@ -117,13 +117,21 @@ const setMiscMetaProperties = (v2, meta) => {
   if (meta.panels) {
     v2.panels = meta.panels;
   }
-  // [DISPLAY_]DEFAULTS
+  // [DISPLAY_]DEFAULTS (v1 this was `defaults`, v2 is `display_defaults`)
   if (meta.defaults) {
     v2.display_defaults = {};
-    if (meta.defaults.geoResolution) v2.display_defaults.geo_resolution = meta.defaults.geoResolution;
-    if (meta.defaults.colorBy) v2.display_defaults.color_by = meta.defaults.colorBy;
-    if (meta.defaults.distanceMeasure) v2.display_defaults.distance_measure = meta.defaults.distanceMeasure;
-    if (meta.defaults.mapTriplicate) v2.display_defaults.map_triplicate = meta.defaults.mapTriplicate;
+    const v1v2Fields = [
+      ["geoResolution", "geo_resolution"], // i.e. v1: meta.defaults.geoResultion, v2: meta.display_defaults.geo_resolution
+      ["colorBy", "color_by"],
+      ["distanceMeasure", "distance_measure"],
+      ["mapTriplicate", "map_triplicate"],
+      ["layout", "layout"]
+    ];
+    for (const v1v2 of v1v2Fields) {
+      if (meta.defaults[v1v2[0]]) {
+        v2.display_defaults[v1v2[1]] = meta.defaults[v1v2[0]];
+      }
+    }
     delete meta.defaults;
   }
   // GEO[GRAPHIC_INFO]
