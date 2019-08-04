@@ -1,3 +1,5 @@
+## version 1.37.4 - 2019/08/04
+
 * Improved layout of unrooted trees when zoomed into a clade. [See PR 754](https://github.com/nextstrain/auspice/pull/754)
 * Remove link to "deprecated" nextflu.org site from flu page footer.
 
