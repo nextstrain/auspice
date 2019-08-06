@@ -153,6 +153,8 @@ class Legend extends React.Component {
       return `${months[mm]} ${yyyy}`;
     } else if (this.props.colorScale.continuous) {
       return label;
+    } else if (this.props.colorBy === "author") {
+      return label;
     }
     return prettyString(label);
   }

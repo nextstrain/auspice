@@ -321,6 +321,13 @@ class Footer extends React.Component {
                   {" et al (" + totalStateCount[itemName] + ")"}
                 </span>
               );
+            } else if (filterName === "author") {
+              display = (
+                <span>
+                  {itemName}
+                  {" (" + totalStateCount[itemName] + ")"}
+                </span>
+              );
             } else {
               display = (
                 <span>

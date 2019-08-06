@@ -127,7 +127,7 @@ const displayPublicationInfo = (info) => {
     return null;
   }
   const itemsToRender = [];
-  itemsToRender.push(item("Authors", info.author));
+  itemsToRender.push(item("Author", info.author));
   if (info.title && info.title !== "?") {
     if (info.paper_url && info.paper_url !== "?") {
       itemsToRender.push(item("Title", info.title, info.paper_url));
@@ -172,7 +172,7 @@ const TipClickedPanel = ({tip, goAwayCallback}) => {
               item("Collection date confidence", `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)
             ) : null}
             {/* Author / Paper information */}
-            {displayPublicationInfo(getTraitFromNode(tip.n, "author"))}
+            {displayPublicationInfo(tip.n.author)}
             {/* try to join URL with accession, else display the one that's available */}
             {accessionAndUrl(tip.n)}
           </tbody>
