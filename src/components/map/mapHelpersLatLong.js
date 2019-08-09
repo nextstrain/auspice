@@ -233,7 +233,7 @@ const maybeConstructTransmissionEvent = (
     const Bcurve = constructBcurve(validLatLongPair[0], validLatLongPair[1], extend);
 
     /* set up interpolator with origin and destination numdates */
-    const interpolator = interpolateNumber(node.num_date.value, child.num_date.value);
+    const interpolator = interpolateNumber(getTraitFromNode(node, "num_date"), getTraitFromNode(child, "num_date"));
 
     /* make a Bdates array as long as Bcurve */
     const Bdates = [];
@@ -259,8 +259,8 @@ const maybeConstructTransmissionEvent = (
       destinationLatitude: latDest, // raw latitude value
       originLongitude: longOrig + offsetOrig, // raw longitude value
       destinationLongitude: longDest + offsetDest, // raw longitude value
-      originNumDate: node.num_date.value,
-      destinationNumDate: child.num_date.value,
+      originNumDate: getTraitFromNode(node, "num_date"),
+      destinationNumDate: getTraitFromNode(child, "num_date"),
       color: nodeColors[node.arrayIdx],
       visible: visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden", // transmission visible if child is visible
       extend: extend
