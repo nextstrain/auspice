@@ -439,7 +439,7 @@ class Map extends React.Component {
       scrollWheelZoom: false,
       maxBounds: this.getInitialBounds(),
       minZoom: 2,
-      maxZoom: 10,
+      maxZoom: 14,
       zoomSnap: 0.5,
       zoomControl: false,
       /* leaflet sleep see https://cliffcloud.github.io/Leaflet.Sleep/#summary */
