@@ -104,7 +104,7 @@ const setMiscMetaProperties = (v2, meta) => {
 
   // (GENOME) ANNOTATIONS
   if (meta.annotations) {
-    v2.genome_annotations = meta.annotations;
+    v2.genome_annotations = convertToGffFormat(meta.annotations);
   }
   // FILTERS
   if (meta.filters) {
@@ -138,6 +138,16 @@ const setMiscMetaProperties = (v2, meta) => {
   if (meta.geo) {
     v2.geographic_info = meta.geo;
   }
+};
+
+const convertToGffFormat = (annotations) => {
+  for(const nuc in annotations){
+    // Convert from 0-based BED format to 1-based GFF format for start position
+    annotations[nuc].start += 1;
+    // Represent forward(+) and reverse(-) strands
+    annotations[nuc].strand == 1 ? annotations[nuc].strand = "+" : annotations[nuc].strand = "-";
+  }
+  return annotations;
 };
 
 const setVaccineChoicesOnNodes = (meta, tree) => {
