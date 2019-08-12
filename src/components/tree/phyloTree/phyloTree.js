@@ -43,7 +43,7 @@ const PhyloTree = function PhyloTree(reduxNodes, debugId) {
   this.zoomNode = this.nodes[0];
   addLeafCount(this.nodes[0]);
   this.strainToNode = {};
-  this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.strain] = phylonode;});
+  this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.name] = phylonode;});
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
   // this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
   //   {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});

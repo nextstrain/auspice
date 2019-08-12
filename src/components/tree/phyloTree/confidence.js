@@ -46,7 +46,7 @@ export const calcConfidenceWidth = (el) =>
 export const drawSingleCI = function drawSingleCI(selection, opacity) {
   selection.append("path")
     .attr("class", "conf")
-    .attr("id", (d) => getDomId("conf", d.n.strain))
+    .attr("id", (d) => getDomId("conf", d.n.name))
     .attr("d", (d) => d.confLine)
     .style("stroke", (d) => d.branchStroke || "#888")
     .style("opacity", opacity)

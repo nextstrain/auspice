@@ -43,12 +43,12 @@ const processSelectedTip = (d, tree, treeToo) => {
     return [undefined, undefined, undefined];
   }
   if (d.treeIdx) {
-    const name = tree.nodes[d.treeIdx].strain;
+    const name = tree.nodes[d.treeIdx].name;
     const idx2 = treeToo ? strainNameToIdx(treeToo.nodes, name) : undefined;
     return [d.treeIdx, idx2, name];
   }
   if (d.treeTooIdx) {
-    const name = treeToo.nodes[d.treeTooIdx].strain;
+    const name = treeToo.nodes[d.treeTooIdx].name;
     const idx1 = strainNameToIdx(tree.nodes, name);
     return [idx1, d.treeTooIdx, name];
   }
@@ -211,7 +211,7 @@ export const updateTipRadii = (
     if (tipSelectedIdx) {
       d.data = calcTipRadii({tipSelectedIdx, colorScale, tree});
       if (tt) {
-        const idx = strainNameToIdx(treeToo.nodes, tree.nodes[tipSelectedIdx].strain);
+        const idx = strainNameToIdx(treeToo.nodes, tree.nodes[tipSelectedIdx].name);
         d.dataToo = calcTipRadii({idx, colorScale, tree: treeToo});
       }
     } else if (selectedLegendItem !== false) {

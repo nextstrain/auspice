@@ -52,7 +52,7 @@ const handleMetadata = async (dispatch, getState, file) => {
   const colorBysIgnored = [];
   /* currently we cannot process metadata fields which are defined as properties on a node, rather than trait properties
   These could be included on a case-by-case basis */
-  const fieldsToIgnore = new Set(["strain", "div", "num_date", "vaccine", "labels", "hidden", "mutations", "url", "authors", "accession", "traits", "children"]);
+  const fieldsToIgnore = new Set(["name", "div", "num_date", "vaccine", "labels", "hidden", "mutations", "url", "authors", "accession", "traits", "children"]);
   csvMeta.fields.slice(1).forEach((colorBy) => {
     if (controls.coloringsPresentOnTree.has(colorBy) || fieldsToIgnore.has(colorBy)) {
       colorBysIgnored.push(colorBy);
@@ -63,7 +63,7 @@ const handleMetadata = async (dispatch, getState, file) => {
   const strainsToProcess = new Set();
   const dataToProcess = {};
   const taxaInCsvButNotInTree = [];
-  const allStrainNames = new Set(tree.nodes.map((n) => n.strain)); // can be internal nodes
+  const allStrainNames = new Set(tree.nodes.map((n) => n.name)); // can be internal nodes
   csvData.forEach((d) => {
     const strain = d[strainKey];
     if (allStrainNames.has(strain)) {

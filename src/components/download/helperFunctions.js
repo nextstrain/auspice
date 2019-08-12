@@ -32,10 +32,10 @@ const treeToNewick = (root, temporal) => {
         const subsubtree = recurse(child, temporal ? node.num_date.value : node.div);
         children.push(subsubtree);
       });
-      subtree += "(" + children.join(",") + ")" + node.strain + ":";
+      subtree += "(" + children.join(",") + ")" + node.name + ":";
       subtree += (temporal ? node.num_date.value : node.div) - parentX;
     } else { /* terminal node */
-      let leaf = node.strain + ":";
+      let leaf = node.name + ":";
       leaf += (temporal ? node.num_date.value : node.div) - parentX;
       subtree += leaf;
     }
@@ -78,7 +78,7 @@ export const authorTSV = (dispatch, filePrefix, metadata, tree) => {
   tree.nodes.filter((n) => !n.hasChildren && n.author).forEach((n) => {
     if (info[n.author.value]) {
       info[n.author.value].count += 1;
-      info[n.author.value].strains.push(n.strain);
+      info[n.author.value].strains.push(n.name);
     } else {
       info[n.author.value] = {
         author: n.author.author || n.author.value,
@@ -86,7 +86,7 @@ export const authorTSV = (dispatch, filePrefix, metadata, tree) => {
         journal: n.author.title || UNKNOWN,
         url: isPaperURLValid(n.author) ? formatURLString(n.author.paper_url) : UNKNOWN,
         count: 1,
-        strains: [n.strain]
+        strains: [n.name]
       }
     }
   });
@@ -124,7 +124,7 @@ export const strainTSV = (dispatch, filePrefix, nodes) => {
       continue;
     }
     /* line is an array of values, will be written out as a tab seperated line */
-    const line = [node.strain];
+    const line = [node.name];
     getTraitFromNode
 
     for (const trait of traitsToInclude) {

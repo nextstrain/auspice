@@ -193,7 +193,7 @@ const renderMutations = (d, mutType) => {
 const getBranchDescendents = (n) => (
   <>
     {n.fullTipCount === 1 ?
-      renderInfoLine("Branch leading to", n.strain) :
+      renderInfoLine("Branch leading to", n.name) :
       renderInfoLine("Number of descendants:", n.fullTipCount)
     }
     <br style={{display: "block", lineHeight: "10px"}} />
@@ -321,7 +321,7 @@ const HoverInfoPanel = ({mutType, temporalConfidence, distanceMeasure,
     <div style={styles.container}>
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
         <div style={infoPanelStyles.tooltipHeading}>
-          {tip ? d.n.strain : null}
+          {tip ? d.n.name : null}
         </div>
         {inner}
         <p/>

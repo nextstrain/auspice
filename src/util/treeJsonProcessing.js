@@ -58,8 +58,8 @@ const processBranchLabelsInPlace = (nodes) => {
 *  @param array - final array that nodes are inserted
 */
 const visitNode = (node, hashMap, array) => {
-  if (!hashMap[node.strain]) {
-    hashMap[node.strain] = true;
+  if (!hashMap[node.name]) {
+    hashMap[node.name] = true;
     array.push(node);
   }
 };
