@@ -9,7 +9,7 @@ const getAnnotations = (jsonData) => {
       aaCount++;
       annotations.push({
         prot: prot,
-        start: jsonData[prot].start,
+        start: jsonData[prot].start - 1,
         end: jsonData[prot].end,
         readingFrame: jsonData[prot].strand,
         fill: genotypeColors[aaCount % 10]
