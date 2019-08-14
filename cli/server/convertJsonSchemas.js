@@ -88,8 +88,6 @@ const setAuthorInfo = (v2, meta, tree) => {
 const setMiscMetaProperties = (v2, meta) => {
   // TITLE (required)
   v2.title = meta.title;
-  // VERSION (not required)
-  v2.version = "2.0-alpha.0";
   // UPDATED (required)
   v2.updated = meta.updated;
   if (!v2.updated) {
@@ -271,14 +269,17 @@ const storeTreeAsV2 = (v2, tree) => {
 
 
 const convertFromV1 = ({tree, meta, treeName}) => {
-  const v2 = {};
-  setColorings(v2, meta);
-  setMiscMetaProperties(v2, meta);
-  setAuthorInfo(v2, meta, tree);
+  const v2 = {
+    "version": "2.0",
+    "meta": {}
+  };
+  setColorings(v2["meta"], meta);
+  setMiscMetaProperties(v2["meta"], meta);
+  setAuthorInfo(v2["meta"], meta, tree);
   setVaccineChoicesOnNodes(meta, tree);
   storeTreeAsV2(v2, tree);
   if (treeName) {
-    v2.tree_name = treeName;
+    v2["meta"].tree_name = treeName;
   }
   return v2;
 };
