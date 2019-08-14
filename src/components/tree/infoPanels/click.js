@@ -152,7 +152,7 @@ const TipClickedPanel = ({tip, goAwayCallback}) => {
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
         <p style={infoPanelStyles.modalHeading}>
-          {`${getTraitFromNode(tip.n, "strain")}`}
+          {`${getTraitFromNode(tip.n, "name")}`}
         </p>
         <table>
           <tbody>

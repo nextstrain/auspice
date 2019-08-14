@@ -78,14 +78,14 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
   }
   const data = [];
   tree.nodes.filter((d) => !d.hasChildren).forEach((n) => {
-    if (!rawJSON[n.strain]) {
-      console.warn(`No tip frequency information for ${n.strain}`);
+    if (!rawJSON[n.name]) {
+      console.warn(`No tip frequency information for ${n.name}`);
       return;
     }
     data.push({
       idx: n.arrayIdx,
-      values: rawJSON[n.strain].frequencies,
-      weight: rawJSON[n.strain].weight
+      values: rawJSON[n.name].frequencies,
+      weight: rawJSON[n.name].weight
     });
   });
   const matrix = computeMatrixFromRawData(

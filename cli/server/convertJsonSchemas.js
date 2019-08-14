@@ -165,11 +165,15 @@ const storeTreeAsV2 = (v2, tree) => {
   // const attrsWhichRemain = new Set();
   // const propsRemoved = new Set();
 
-  const allowedProperties = ["strain", "div", "num_date", "vaccine", "labels", "hidden", "mutations", "url", "accession", "traits", "children", "author"];
+  const allowedProperties = ["name", "div", "num_date", "vaccine", "labels", "hidden", "mutations", "url", "accession", "traits", "children", "author"];
   const attrsToIgnore = ["clock_length", "date", "raw_date", "strain"];
 
   traverseTree(tree, (node) => {
-    // strain: already set
+    // convert node.strain to node.name
+    if (node.strain){
+      node.name = node.strain;
+      delete node.strain;
+    }
     // vaccine: already set (see above)
     if (node.attr) {
       // author: (key modified previously) needs to move to property on node

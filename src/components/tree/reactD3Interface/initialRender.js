@@ -31,7 +31,7 @@ export const renderTree = (that, main, phylotree, props) => {
       onBranchClick: callbacks.onBranchClick.bind(that),
       onBranchLeave: callbacks.onBranchLeave.bind(that),
       onTipLeave: callbacks.onTipLeave.bind(that),
-      tipLabel: (d) => d.n.strain
+      tipLabel: (d) => d.n.name
     },
     treeState.branchThickness, /* guarenteed to be in redux by now */
     treeState.visibility,

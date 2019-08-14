@@ -75,7 +75,7 @@ class SearchStrains extends React.Component {
     this.ref.addEventListener('awesomplete-selectcomplete', (e) => {
       const strain = e.text.value;
       for (let i = 0; i < this.props.nodes.length; i++) {
-        if (this.props.nodes[i].strain === strain) {
+        if (this.props.nodes[i].name === strain) {
           this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
             tipSelected: {treeIdx: this.props.nodes[i].arrayIdx}
           }));
@@ -106,7 +106,7 @@ class SearchStrains extends React.Component {
     and therefore are eligible to be searched */
     this.state.awesomplete.list = this.props.nodes
       .filter((n) => !n.hasChildren && this.props.visibility[n.arrayIdx] === NODE_VISIBLE)
-      .map((n) => n.strain);
+      .map((n) => n.name);
     this.state.awesomplete.evaluate();
   }
   render() {

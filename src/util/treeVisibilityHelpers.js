@@ -14,7 +14,7 @@ export const getVisibleDateRange = (nodes, visibility) => nodes
 export const strainNameToIdx = (nodes, name) => {
   let i;
   for (i = 0; i < nodes.length; i++) {
-    if (nodes[i].strain === name) {
+    if (nodes[i].name === name) {
       return i;
     }
   }

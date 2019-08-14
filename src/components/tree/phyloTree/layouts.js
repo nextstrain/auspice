@@ -289,8 +289,8 @@ export const mapToScreen = function mapToScreen() {
 
     let padBy = 0;
     inViewTerminalNodes.forEach((d) => {
-      if (padBy < d.n.strain.length) {
-        padBy = 0.65 * d.n.strain.length * fontSize;
+      if (padBy < d.n.name.length) {
+        padBy = 0.65 * d.n.name.length * fontSize;
       }
     });
     tmpMargins.right += padBy;

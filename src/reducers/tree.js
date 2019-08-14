@@ -67,8 +67,8 @@ const Tree = (state = getDefaultTreeState(), action) => {
     case types.ADD_COLOR_BYS:
       // modify the node data in place, which will not trigger any redux updates
       state.nodes.forEach((node) => {
-        if (action.strains.has(node.strain)) {
-          for (const [trait, obj] of Object.entries(action.traits[node.strain])) {
+        if (action.strains.has(node.name)) {
+          for (const [trait, obj] of Object.entries(action.traits[node.name])) {
             node.traits[trait] = obj;
           }
         }

@@ -13,7 +13,7 @@ export const onTipHover = function onTipHover(d) {
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  phylotree.svg.select(getDomId("#tip", d.n.strain))
+  phylotree.svg.select(getDomId("#tip", d.n.name))
     .attr("r", (e) => e["r"] + 4);
   this.setState({
     hovered: {d, type: ".tip"}
@@ -39,7 +39,7 @@ export const onTipClick = function onTipClick(d) {
 export const onBranchHover = function onBranchHover(d) {
   if (d.visibility !== NODE_VISIBLE) return;
   /* emphasize the color of the branch */
-  for (const id of [getDomId("#branchS", d.n.strain), getDomId("#branchT", d.n.strain)]) {
+  for (const id of [getDomId("#branchS", d.n.name), getDomId("#branchT", d.n.name)]) {
     if (this.props.colorByConfidence) {
       this.state.tree.svg.select(id)
         .style("stroke", (el) => { // eslint-disable-line no-loop-func
@@ -85,7 +85,7 @@ export const onBranchClick = function onBranchClick(d) {
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(d) {
-  for (const id of [getDomId("#branchT", d.n.strain), getDomId("#branchS", d.n.strain)]) {
+  for (const id of [getDomId("#branchT", d.n.name), getDomId("#branchS", d.n.name)]) {
     this.state.tree.svg.select(id)
       .style("stroke", (el) => el.branchStroke);
   }
@@ -103,7 +103,7 @@ export const onTipLeave = function onTipLeave(d) {
     this.state.tree :
     this.state.treeToo;
   if (!this.state.selectedTip) {
-    phylotree.svg.select(getDomId("#tip", d.n.strain))
+    phylotree.svg.select(getDomId("#tip", d.n.name))
       .attr("r", (dd) => dd["r"]);
   }
   if (this.state.hovered) {
@@ -116,7 +116,7 @@ export const clearSelectedTip = function clearSelectedTip(d) {
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  phylotree.svg.select(getDomId("#tip", d.n.strain))
+  phylotree.svg.select(getDomId("#tip", d.n.name))
     .attr("r", (dd) => dd["r"]);
   this.setState({selectedTip: null, hovered: null});
   /* restore the tip visibility! */
