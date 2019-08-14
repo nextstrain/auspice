@@ -489,29 +489,29 @@ const modifyControlsViaTreeToo = (controls, name) => {
 };
 
 /**
- * TODO -- this will change with https://github.com/nextstrain/auspice/issues/755
+ *
  * A lot of this is simply changing augur's snake_case to auspice's camelCase
  */
 const createMetadataStateFromJSON = (json) => {
   const metadata = {};
-  if (json.colorings) {
-    metadata.colorings = json.colorings;
+  if (json.meta.colorings) {
+    metadata.colorings = json.meta.colorings;
   }
-  metadata.title = json.title;
-  metadata.updated = json.updated;
+  metadata.title = json.meta.title;
+  metadata.updated = json.meta.updated;
   if (json.version) {
     metadata.version = json.version;
   }
-  if (json.genome_annotations) {
-    metadata.genomeAnnotations = json.genome_annotations;
+  if (json.meta.genome_annotations) {
+    metadata.genomeAnnotations = json.meta.genome_annotations;
   }
-  if (json.filters) {
-    metadata.filters = json.filters;
+  if (json.meta.filters) {
+    metadata.filters = json.meta.filters;
   }
-  if (json.panels) {
-    metadata.panels = json.panels;
+  if (json.meta.panels) {
+    metadata.panels = json.meta.panels;
   }
-  if (json.display_defaults) {
+  if (json.meta.display_defaults) {
     metadata.displayDefaults = {};
     const jsonKeyToAuspiceKey = {
       color_by: "colorBy",
@@ -521,13 +521,13 @@ const createMetadataStateFromJSON = (json) => {
       layout: "layout"
     };
     for (const [jsonKey, auspiceKey] of Object.entries(jsonKeyToAuspiceKey)) {
-      if (json.display_defaults[jsonKey]) {
-        metadata.displayDefaults[auspiceKey] = json.display_defaults[jsonKey];
+      if (json.meta.display_defaults[jsonKey]) {
+        metadata.displayDefaults[auspiceKey] = json.meta.display_defaults[jsonKey];
       }
     }
   }
-  if (json.geographic_info) {
-    metadata.geographicInfo = json.geographic_info;
+  if (json.meta.geographic_info) {
+    metadata.geographicInfo = json.meta.geographic_info;
   }
 
 
