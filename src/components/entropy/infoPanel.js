@@ -1,7 +1,7 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 
-const InfoPanel = ({hovered, width, height, mutType, showCounts}) => {
+const InfoPanel = ({hovered, width, height, mutType, showCounts, geneMap}) => {
   /* this is a function - we can bail early */
   if (!hovered) {
     return null;
@@ -52,6 +52,10 @@ const InfoPanel = ({hovered, width, height, mutType, showCounts}) => {
           {mutType === "aa" ? `Codon ${hovered.d.codon} in protein ${hovered.d.prot}` :
             hovered.d.prot ? `Nucleotide ${hovered.d.x} (in protein ${hovered.d.prot})` :
               `Nucleotide ${hovered.d.x}`}
+        </div>
+        <p/>
+        <div>
+          {geneMap[hovered.d.prot].strand === "-" ? `Negative strand` : `Positive strand`}
         </div>
         <p/>
         <div>
