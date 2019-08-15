@@ -104,6 +104,9 @@ EntropyChart.prototype.update = function update({
 
 /* convert amino acid X in gene Y to a nucleotide number */
 EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
+  if (this.geneMap[gene].strand === "-") {
+    return this.geneMap[gene].end - aaPos * 3 + 1;
+  }
   return this.geneMap[gene].start + aaPos * 3;
 };
 
@@ -280,6 +283,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
     .attr("clip-path", "url(#clip)")
     .selectAll(".bar");
   const idfn = this.aa ? (d) => "prot" + d.prot + d.codon : (d) => "nt" + d.x;
+
   const xscale = this.aa ?
     (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon)) :
     (d) => this.scales.xMain(d.x);
@@ -310,6 +314,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
       this.callbacks.onClick(d);
     })
     .style("cursor", "pointer");
+
   this._highlightSelectedBars();
 };
 
