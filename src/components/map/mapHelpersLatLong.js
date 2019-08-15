@@ -437,17 +437,19 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
 
   // update demeData, for each deme, update all elements via demeIndices lookup
   for (const [location, visibleNodes] of Object.entries(locationToVisibleNodes)) {
-    demeIndices[location].forEach((index) => {
-      /* both pie charts & circles need new counts (which modify the radius) */
-      demeDataCopy[index].count = visibleNodes.length;
-      if (pieChart) {
-        /* update the arcs */
-        demeDataCopy[index].arcs = createOrUpdateArcs(visibleNodes, legendValues, colorBy, nodeColors, demeDataCopy[index].arcs);
-      } else {
-        /* circle demes just require a colour update */
-        demeDataCopy[index].color = getAverageColorFromNodes(visibleNodes, nodeColors);
-      }
-    });
+    if (demeIndices[location]) {
+      demeIndices[location].forEach((index) => {
+        /* both pie charts & circles need new counts (which modify the radius) */
+        demeDataCopy[index].count = visibleNodes.length;
+        if (pieChart) {
+          /* update the arcs */
+          demeDataCopy[index].arcs = createOrUpdateArcs(visibleNodes, legendValues, colorBy, nodeColors, demeDataCopy[index].arcs);
+        } else {
+          /* circle demes just require a colour update */
+          demeDataCopy[index].color = getAverageColorFromNodes(visibleNodes, nodeColors);
+        }
+      });
+    }
   }
 
   return demeDataCopy;
