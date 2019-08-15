@@ -104,7 +104,10 @@ EntropyChart.prototype.update = function update({
 
 /* convert amino acid X in gene Y to a nucleotide number */
 EntropyChart.prototype._aaToNtCoord = function _aaToNtCoord(gene, aaPos) {
-  return this.geneMap[gene].start + aaPos * 3;
+  if (this.geneMap[gene].strand === "-") {
+    return this.geneMap[gene].end - aaPos * 3 + 1;
+  }
+  return this.geneMap[gene].start + aaPos * 3 - 2; // Plot from 1st codon position, not last.
 };
 
 EntropyChart.prototype._getZoomCoordinates = function _getZoomCoordinates(parsed, geneMap) {
@@ -275,14 +278,30 @@ EntropyChart.prototype._drawBars = function _drawBars() {
   if (this.aa) {
     posInView /= 3;
   }
-  const barWidth = posInView > 10000 ? 2 : posInView > 1000 ? 2 : posInView > 100 ? 3 : 5;
+  let barWidth;
+  if (this.aa) {
+    if (posInView > 600) {
+      barWidth = 2;
+    } else {
+      barWidth = (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon)+2.6) - this.scales.xMain(this._aaToNtCoord(d.prot, d.codon));
+    }
+  } else {
+    if (posInView > 1000) { // eslint-disable-line no-lonely-if
+      barWidth = 2;
+    } else if (posInView > 250) {
+      barWidth = 3;
+    } else {
+      barWidth = (d) => this.scales.xMain(d.x + 0.3) - this.scales.xMain(d.x - 0.3);
+    }
+  }
   const chart = this.mainGraph.append("g")
     .attr("clip-path", "url(#clip)")
     .selectAll(".bar");
   const idfn = this.aa ? (d) => "prot" + d.prot + d.codon : (d) => "nt" + d.x;
+
   const xscale = this.aa ?
-    (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon)) :
-    (d) => this.scales.xMain(d.x);
+    (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon) - 0.3) : // shift 0.3 in order to
+    (d) => this.scales.xMain(d.x - 0.3);                                 // line up bars & ticks
   const fillfn = this.aa ?
     (d) => this.geneMap[d.prot].idx % 2 ? medGrey : darkGrey :
     (d) => {
@@ -310,6 +329,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
       this.callbacks.onClick(d);
     })
     .style("cursor", "pointer");
+
   this._highlightSelectedBars();
 };
 

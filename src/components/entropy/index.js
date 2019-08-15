@@ -273,6 +273,7 @@ class Entropy extends React.Component {
           height={this.props.height}
           mutType={this.props.mutType}
           showCounts={this.props.showCounts}
+          geneMap={this.props.geneMap}
         />
         <svg
           id="d3entropyParent"
