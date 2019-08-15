@@ -69,7 +69,7 @@ const write = (filename, type, content) => {
  * Create & write a TSV file where each row is an author,
  * with the relevent information (num isolates, journal etcetera)
  */
-export const authorTSV = (dispatch, filePrefix, metadata, tree) => {
+export const authorTSV = (dispatch, filePrefix, tree) => {
   const lineArray = [];
   lineArray.push(["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"].join("\t"));
   const filename = filePrefix + "_authors.tsv";
@@ -83,15 +83,15 @@ export const authorTSV = (dispatch, filePrefix, metadata, tree) => {
       info[n.author.value] = {
         author: n.author.author || n.author.value,
         title: n.author.title || UNKNOWN,
-        journal: n.author.title || UNKNOWN,
-        url: isPaperURLValid(n.author) ? formatURLString(n.author.paper_url) : UNKNOWN,
+        journal: n.author.journal || UNKNOWN,
+        url: isPaperURLValid(n.author) ? n.author.paper_url : UNKNOWN,
         count: 1,
         strains: [n.name]
-      }
+      };
     }
   });
   Object.values(info).forEach((v) => {
-    lineArray.push([v.author, v.count, v.title, v.journal, v.url, v.strains.join(",")].join("\t"))
+    lineArray.push([v.author, v.count, v.title, v.journal, v.url, v.strains.join(",")].join("\t"));
   });
 
   write(filename, MIME.tsv, lineArray.join("\n"));

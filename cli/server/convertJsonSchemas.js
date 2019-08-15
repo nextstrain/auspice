@@ -34,6 +34,17 @@ const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, remove
   return x;
 };
 
+const formatURLString = (x) => {
+  let url = x;
+  if (url.startsWith("https_")) {
+    url = url.replace(/^https_/, "https:");
+  } else if (url.startsWith("http_")) {
+    url = url.replace(/^https_/, "http:");
+  }
+  return url;
+};
+
+
 const traverseTree = (node, cb) => {
   cb(node);
   if (node.children) {
@@ -78,8 +89,8 @@ const setAuthorInfo = (v2, meta, tree) => {
       node.attr.author = {};
       if (v1info.title) node.attr.author.title = v1info.title;
       if (v1info.journal) node.attr.author.journal = v1info.journal;
-      if (v1info.paper_url) node.attr.author.paper_url = v1info.paper_url;
-      node.attr.author.author = prettyString(v1author);
+      if (v1info.paper_url) node.attr.author.paper_url = formatURLString(v1info.paper_url);
+      node.attr.author.author = prettyString(v1author, {camelCase: false});
       node.attr.author.value = v1author;
     }
   });
