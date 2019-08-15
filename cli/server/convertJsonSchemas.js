@@ -85,6 +85,24 @@ const setAuthorInfo = (v2, meta, tree) => {
   });
 };
 
+
+/**
+ * The v1 JSON annotations used 0-based starts for the gene positions and `1`/`-1` for
+ * the strand. This function converts those to GFF-like format.
+ * @param {object} annotations a mapping of gene name (or "nuc") to information about the feature.
+ * The feature information was an object with properties `start`, `end` and `strand`
+ */
+const convertToGffFormat = (annotations) => {
+  for (const name in annotations) { // eslint-disable-line
+    // Convert from 0-based BED format to 1-based GFF format for start position
+    annotations[name].start += 1;
+    // half-open 0-based BED end position is the same as 1-based closed ended GFF position.
+    // Represent forward(+) and reverse(-) strands
+    annotations[name].strand = annotations[name].strand === 1 ? "+" : "-";
+  }
+  return annotations;
+};
+
 const setMiscMetaProperties = (v2, meta) => {
   // TITLE (required)
   v2.title = meta.title;
@@ -138,16 +156,6 @@ const setMiscMetaProperties = (v2, meta) => {
   if (meta.geo) {
     v2.geographic_info = meta.geo;
   }
-};
-
-const convertToGffFormat = (annotations) => {
-  for(const nuc in annotations){
-    // Convert from 0-based BED format to 1-based GFF format for start position
-    annotations[nuc].start += 1;
-    // Represent forward(+) and reverse(-) strands
-    annotations[nuc].strand == 1 ? annotations[nuc].strand = "+" : annotations[nuc].strand = "-";
-  }
-  return annotations;
 };
 
 const setVaccineChoicesOnNodes = (meta, tree) => {
