@@ -1,5 +1,13 @@
 import { genotypeColors, nucleotide_gene } from "./globals";
 
+/* a Note on co-ordinates.
+Auspice v1 (and the JSONs it consumed) used 1-based mutations and
+0-based, BED-like feature annotations.
+Auspice v2 JSONs (which the client will always receive) uses GFF-like
+1-based, close ended feature annotations. We adjust the starts here so that
+the display remains unchanged, however this should be revisited at a later date.
+*/
+
 const getAnnotations = (jsonData) => {
   const annotations = [];
   const nuc = [];
@@ -9,14 +17,14 @@ const getAnnotations = (jsonData) => {
       aaCount++;
       annotations.push({
         prot: prot,
-        start: jsonData[prot].start - 1,
+        start: jsonData[prot].start - 1, // see above
         end: jsonData[prot].end,
         readingFrame: jsonData[prot].strand,
         fill: genotypeColors[aaCount % 10]
       });
     } else {
       nuc.push({
-        start: jsonData[prot].start,
+        start: jsonData[prot].start - 1, // see above
         end: jsonData[prot].end
       });
     }
