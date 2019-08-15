@@ -169,14 +169,18 @@ EntropyChart.prototype._getSelectedNodes = function _getSelectedNodes(parsed) {
 /* draw the genes Gene (annotations) */
 EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   this.geneGraph.selectAll("*").remove();
-  const negStrand = annotations.filter((annot) => /* find out if dealing with 1 or 2 reading frames */
-    annot.readingFrame === -1);
-  /* plot seqs with genes on only 1 reading frame in the middle, to minimise white space */
-  const hasTwoReadFrames = negStrand.length !== 0 && negStrand.length !== annotations.length;
   const geneHeight = 20;
   const posInSequence = this.scales.xNav.domain()[1] - this.scales.xNav.domain()[0];
   const strokeCol = posInSequence < 1e6 ? "white" : "black"; /* black for large because otherwise disappear against background */
-  const readingFrameOffset = (frame) => !hasTwoReadFrames ? 10 : frame===-1 ? 20 : 0;
+  /* check if we've got 2 reading frames (genes on both the "+" & "-" strands) and if so then modify
+  the offset accordingly. If not, plot them all in the middle to save space */
+  const genesOnBothStrands = !!annotations.filter((a) => a.strand === "-").length;
+  const readingFrameOffset = (strand) => {
+    if (genesOnBothStrands) {
+      return strand === "-" ? 20 : 0;
+    }
+    return 10;
+  };
   const visibleAnnots = annotations.filter((annot) => /* try to prevent drawing genes if not visible */
     (annot.start < this.scales.xMain.domain()[1] && annot.start > this.scales.xMain.domain()[0]) ||
     (annot.end > this.scales.xMain.domain()[0] && annot.end < this.scales.xMain.domain()[1]) ||
@@ -191,7 +195,7 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
   selection.append("rect")
     .attr("class", "gene")
     .attr("x", (d) => startG(d))
-    .attr("y", (d) => readingFrameOffset(d.readingFrame))
+    .attr("y", (d) => readingFrameOffset(d.strand))
     /* this ensures genes aren't drawn past the graph */
     .attr("width", (d) => endG(d) - startG(d))
     .attr("height", geneHeight)
@@ -201,7 +205,7 @@ EntropyChart.prototype._drawZoomGenes = function _drawZoomGenes(annotations) {
     .attr("x", (d) =>
       this.scales.xMain(d.start) + (this.scales.xMain(d.end) - this.scales.xMain(d.start)) / 2
     )
-    .attr("y", (d) => readingFrameOffset(d.readingFrame) + 5)
+    .attr("y", (d) => readingFrameOffset(d.strand) + 5)
     .attr("dy", ".7em")
     .attr("text-anchor", "middle")
     .style("fill", () => "white")
@@ -223,7 +227,7 @@ EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
   selection.append("rect")
     .attr("class", "gene")
     .attr("x", (d) => this.scales.xNav(d.start))
-    .attr("y", (d) => readingFrameOffset(d.readingFrame))
+    .attr("y", (d) => readingFrameOffset(d.strand))
     .attr("width", (d) => this.scales.xNav(d.end) - this.scales.xNav(d.start))
     .attr("height", geneHeight)
     .style("fill", (d) => d.fill)
@@ -232,7 +236,7 @@ EntropyChart.prototype._drawGenes = function _drawGenes(annotations) {
     .attr("x", (d) =>
       this.scales.xNav(d.start) + (this.scales.xNav(d.end) - this.scales.xNav(d.start)) / 2
     )
-    .attr("y", (d) => readingFrameOffset(d.readingFrame) + 5)
+    .attr("y", (d) => readingFrameOffset(d.strand) + 5)
     .attr("dy", ".7em")
     .attr("text-anchor", "middle")
     .style("fill", () => "white")
