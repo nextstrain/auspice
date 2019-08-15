@@ -19,7 +19,7 @@ const getAnnotations = (jsonData) => {
         prot: prot,
         start: jsonData[prot].start - 1, // see above
         end: jsonData[prot].end,
-        readingFrame: jsonData[prot].strand,
+        strand: jsonData[prot].strand,
         fill: genotypeColors[aaCount % 10]
       });
     } else {
