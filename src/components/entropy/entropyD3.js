@@ -283,7 +283,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
     if (posInView > 600) {
       barWidth = 2;
     } else {
-      barWidth = (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon)+2.4) - this.scales.xMain(this._aaToNtCoord(d.prot, d.codon));
+      barWidth = (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon)+2.6) - this.scales.xMain(this._aaToNtCoord(d.prot, d.codon));
     }
   } else {
     if (posInView > 1000) { // eslint-disable-line no-lonely-if
@@ -300,7 +300,7 @@ EntropyChart.prototype._drawBars = function _drawBars() {
   const idfn = this.aa ? (d) => "prot" + d.prot + d.codon : (d) => "nt" + d.x;
 
   const xscale = this.aa ?
-    (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon) + 0.3) : // shift 0.3 in order to
+    (d) => this.scales.xMain(this._aaToNtCoord(d.prot, d.codon) - 0.3) : // shift 0.3 in order to
     (d) => this.scales.xMain(d.x - 0.3);                                 // line up bars & ticks
   const fillfn = this.aa ?
     (d) => this.geneMap[d.prot].idx % 2 ? medGrey : darkGrey :

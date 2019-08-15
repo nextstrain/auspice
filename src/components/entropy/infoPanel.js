@@ -45,17 +45,33 @@ const InfoPanel = ({hovered, width, height, mutType, showCounts, geneMap}) => {
     styles.container.bottom = height - pos.y;
   }
 
+  const isNegStrand = hovered.d.prot ? geneMap[hovered.d.prot].strand === "-" : null;
+
+  const nucPos = hovered.d.prot ?
+    mutType === "aa" ?
+      isNegStrand ? geneMap[hovered.d.prot].end - hovered.d.codon * 3 + 3 :
+        geneMap[hovered.d.prot].start + hovered.d.codon * 3
+      : isNegStrand ? geneMap[hovered.d.prot].end - hovered.d.x :
+        hovered.d.x - geneMap[hovered.d.prot].start-1
+    : null;
+
+  const codonFromNuc = hovered.d.prot && mutType !== "aa" ? Math.floor((nucPos)/3) + 1 : null;
+
   return (
     <div style={styles.container}>
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
         <div>
           {mutType === "aa" ? `Codon ${hovered.d.codon} in protein ${hovered.d.prot}` :
-            hovered.d.prot ? `Nucleotide ${hovered.d.x} (in protein ${hovered.d.prot})` :
+            hovered.d.prot ? `Nucleotide ${hovered.d.x} (codon ${codonFromNuc} in protein ${hovered.d.prot})` :
               `Nucleotide ${hovered.d.x}`}
         </div>
         <p/>
         <div>
-          {geneMap[hovered.d.prot].strand === "-" ? `Negative strand` : `Positive strand`}
+          {mutType === "aa" ? `Nuc positions ${nucPos-2} to ${nucPos}` : ``}
+        </div>
+        <p/>
+        <div>
+          {isNegStrand === null ? `` : isNegStrand ? `Negative strand` : `Positive strand`}
         </div>
         <p/>
         <div>
