@@ -122,7 +122,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   }
 
   /* do we have frequencies to display? */
-  if (mainJson.panels && mainJson.panels.indexOf("frequencies") !== -1) {
+  if (mainJson.meta.panels && mainJson.meta.panels.indexOf("frequencies") !== -1) {
     try {
       const frequencyData = await getDataset(url, {type: "tip-frequencies"});
       dispatch(loadFrequencies(frequencyData));
