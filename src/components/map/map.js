@@ -315,11 +315,12 @@ class Map extends React.Component {
   getGeoRange() {
     const latitudes = [];
     const longitudes = [];
-    const geographicInfo = this.props.metadata.geographicInfo;
-    Object.keys(geographicInfo).forEach((geoLevel) => {
-      Object.keys(geographicInfo[geoLevel]).forEach((geoEntry) => {
-        latitudes.push(geographicInfo[geoLevel][geoEntry].latitude);
-        longitudes.push(geographicInfo[geoLevel][geoEntry].longitude);
+
+    this.props.metadata.geoResolutions.forEach((geoData) => {
+      const demeToLatLongs = geoData.demes;
+      Object.keys(demeToLatLongs).forEach((deme) => {
+        latitudes.push(demeToLatLongs[deme].latitude);
+        longitudes.push(demeToLatLongs[deme].longitude);
       });
     });
 

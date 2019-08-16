@@ -191,8 +191,8 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelsToDisplay = ["tree"];
   }
 
-  /* if we lack geographicInfo, remove map from panels to display */
-  if (!metadata.geographicInfo) {
+  /* if we lack geoResolutions, remove map from panels to display */
+  if (!metadata.geoResolutions || !metadata.geoResolutions.length) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "map");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "map");
   }
@@ -374,9 +374,9 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
     console.error("Error detected. Setting distanceMeasure to ", state["distanceMeasure"]);
   }
 
-  /* geoResolution */
-  if (metadata.geographicInfo) {
-    const availableGeoResultions = Object.keys(metadata.geographicInfo);
+  /* geoResolutions */
+  if (metadata.geoResolutions) {
+    const availableGeoResultions = metadata.geoResolutions.map((i) => i.name);
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
       /* fallbacks: JSON defined default, then hardocded default, then any available */
       if (metadata.displayDefaults && metadata.displayDefaults.geoResolution && availableGeoResultions.indexOf(metadata.displayDefaults.geoResolution) !== -1) {
@@ -390,7 +390,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
       delete query.r; // no-op if query.r doesn't exist
     }
   } else {
-    console.warn("JSONs did not include geographicInfo.");
+    console.warn("JSONs did not include `geoResolutions`");
   }
 
   /* temporalConfidence */
@@ -526,8 +526,8 @@ const createMetadataStateFromJSON = (json) => {
       }
     }
   }
-  if (json.meta.geographic_info) {
-    metadata.geographicInfo = json.meta.geographic_info;
+  if (json.meta.geo_resolutions) {
+    metadata.geoResolutions = json.meta.geo_resolutions;
   }
 
 

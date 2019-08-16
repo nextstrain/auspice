@@ -150,9 +150,12 @@ const setMiscMetaProperties = (v2, meta) => {
     }
     delete meta.defaults;
   }
-  // GEO[GRAPHIC_INFO]
+  // GEO -> GEO_RESOLUTIONS (note that the shape is different)
   if (meta.geo) {
-    v2.geographic_info = meta.geo;
+    v2.geo_resolutions = [];
+    for (const [name, demes] of Object.entries(meta.geo)) {
+      v2.geo_resolutions.push({name, demes});
+    }
   }
 };
 
@@ -186,7 +189,7 @@ const storeTreeAsV2 = (v2, tree) => {
 
   traverseTree(tree, (node) => {
     // convert node.strain to node.name
-    if (node.strain){
+    if (node.strain) {
       node.name = node.strain;
       delete node.strain;
     }
@@ -288,8 +291,8 @@ const storeTreeAsV2 = (v2, tree) => {
 
 const convertFromV1 = ({tree, meta, treeName}) => {
   const v2 = {
-    "version": "2.0",
-    "meta": {}
+    version: "2.0",
+    meta: {}
   };
   setColorings(v2["meta"], meta);
   setMiscMetaProperties(v2["meta"], meta);
