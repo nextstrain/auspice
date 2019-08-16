@@ -64,6 +64,9 @@ const setColorings = (v2, meta) => {
       v2.colorings[key].type = "categorical"; // or "ordinal"
     }
     if (value.color_map) {
+      for (const scale of value.color_map) {
+        scale[0] = prettyString(scale[0], {removeComma: true});
+      }
       v2.colorings[key].scale = value.color_map;
     }
     if (key === "authors") {
@@ -163,6 +166,13 @@ const setMiscMetaProperties = (v2, meta) => {
   }
   // GEO[GRAPHIC_INFO]
   if (meta.geo) {
+    Object.values(meta.geo).forEach((val) => {
+      Object.keys(val).forEach((location) => {
+        const newLocation = prettyString(location, {removeComma: true});
+        val[newLocation] = val[location];
+        delete val[location];
+      });
+    });
     v2.geographic_info = meta.geo;
   }
 };
@@ -258,8 +268,9 @@ const storeTreeAsV2 = (v2, tree) => {
         .filter((a) => !a.endsWith("_entropy") && !a.endsWith("_confidence"))
         .filter((a) => !attrsToIgnore.includes(a));
       if (traitKeys.length) node.traits = {};
+      const traitsToPretty = ["country", "region"]
       for (const trait of traitKeys) {
-        const data = {value: node.attr[trait]};
+        const data = traitsToPretty.includes(trait) ? {value: prettyString(node.attr[trait], {removeComma: true})} : {value: node.attr[trait]};
         if (node.attr[`${trait}_confidence`]) {
           data.confidence = node.attr[`${trait}_confidence`];
         }

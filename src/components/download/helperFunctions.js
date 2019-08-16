@@ -1,7 +1,7 @@
 /* eslint no-restricted-syntax: 0 */
 import React from "react";
 import { infoNotification, warningNotification } from "../../actions/notifications";
-import { prettyString, formatURLString, authorString } from "../../util/stringHelpers";
+import { prettyString, authorString } from "../../util/stringHelpers";
 import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode } from "../../util/treeMiscHelpers";
 
@@ -98,10 +98,6 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
   dispatch(infoNotification({message: "Author metadata exported", details: filename}));
 };
 
-const turnAttrsIntoHeaderArray = (attrs) => {
-  return ["Strain"].concat(attrs.map((v) => prettyString(v)));
-};
-
 /**
  * Create & write a TSV file where each row is a strain in the tree,
  * with the relevent information (accession, traits, etcetera)
@@ -117,7 +113,7 @@ export const strainTSV = (dispatch, filePrefix, nodes) => {
     if (n.traits) {
       Object.keys(n.traits).forEach((t) => traitsToInclude.add(t));
     }
-  })
+  });
 
   for (const node of nodes) {
     if (node.hasChildren) {
@@ -125,30 +121,25 @@ export const strainTSV = (dispatch, filePrefix, nodes) => {
     }
     /* line is an array of values, will be written out as a tab seperated line */
     const line = [node.name];
-    getTraitFromNode
 
     for (const trait of traitsToInclude) {
       if (trait === "author") {
         if (node.author) {
-          let info = node.author.author || node.author.value;
+          let info = node.author.value || node.author.author;
           if (node.author.title) info += `, ${node.author.title}.`;
           if (node.author.journal) info += ` ${node.author.journal}`;
-          line.push(info)
+          line.push(info);
         } else {
-          line.push("unknown")
+          line.push("unknown");
         }
         continue;
       }
-      let value = getTraitFromNode(node, trait);
+      const value = getTraitFromNode(node, trait);
       if (!value) {
-        line.push("unknown")
+        line.push("unknown");
       } else {
-        if (typeof value === 'string') {
-          if (value.lastIndexOf("http", 0) === 0) {
-            line.push(formatURLString(value));
-          } else {
-            line.push(prettyString(value, {removeComma: true}));
-          }
+        if (typeof value === 'string') {//eslint-disable-line
+          line.push(value);
         } else if (typeof value === "number") {
           line.push(parseFloat(value).toFixed(2));
         } else if (typeof value === "object") {
@@ -174,7 +165,7 @@ export const strainTSV = (dispatch, filePrefix, nodes) => {
     }
     data.push(line);
   }
-  const lineArray = [turnAttrsIntoHeaderArray([...traitsToInclude]).join("\t")];
+  const lineArray = [["Strain"].concat([...traitsToInclude]).join("\t")];
   data.forEach((line) => {
     const lineString = line.join("\t");
     lineArray.push(lineString);

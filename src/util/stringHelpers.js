@@ -44,13 +44,3 @@ export const authorString = (x) => {
   }
   return y;
 };
-
-export const formatURLString = (x) => {
-  let url = x;
-  if (url.startsWith("https_")) {
-    url = url.replace(/^https_/, "https:");
-  } else if (url.startsWith("http_")) {
-    url = url.replace(/^https_/, "http:");
-  }
-  return url;
-};
