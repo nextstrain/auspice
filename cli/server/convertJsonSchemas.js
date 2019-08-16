@@ -276,6 +276,11 @@ const storeTreeAsV2 = (v2, tree) => {
       for (const trait of traitKeys) {
         const data = traitsToPretty.includes(trait) ? {value: prettyString(node.attr[trait], {removeComma: true})} : {value: node.attr[trait]};
         if (node.attr[`${trait}_confidence`]) {
+          Object.keys(node.attr[`${trait}_confidence`]).forEach((key) => {
+            const newKey = prettyString(key);
+            node.attr[`${trait}_confidence`][newKey] = node.attr[`${trait}_confidence`][key];
+            delete node.attr[`${trait}_confidence`][key];
+          });
           data.confidence = node.attr[`${trait}_confidence`];
         }
         if (node.attr[`${trait}_entropy`]) {
