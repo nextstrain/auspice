@@ -4,7 +4,7 @@ const utils = require("../utils");
  * In v1 schemas, provided values were liable to be transformed before rendering.
  * This is not the case for v2 where we generally try to render strings as provided
  */
-const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false, stripEtAl = false} = {}) => {
+const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false, stripEtAl = false, lowerEtAl = false} = {}) => {
   if (!x && x!== 0) {
     return "";
   }
@@ -21,6 +21,9 @@ const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, remove
     }
     if (removeComma) {
       x = x.replace(/,/g, "");
+    }
+    if (lowerEtAl) {
+      x = x.replace('Et Al', 'et al');
     }
     if (stripEtAl) {
       x = x.replace('et al.', '').replace('Et Al.', '').replace('et al', '').replace('Et Al', '');
@@ -207,7 +210,7 @@ const storeTreeAsV2 = (v2, tree) => {
 
   traverseTree(tree, (node) => {
     // convert node.strain to node.name
-    if (node.strain){
+    if (node.strain) {
       node.name = node.strain;
       delete node.strain;
     }
@@ -215,6 +218,7 @@ const storeTreeAsV2 = (v2, tree) => {
     if (node.attr) {
       // author: (key modified previously) needs to move to property on node
       if (node.attr.author) {
+        node.attr.author.value = prettyString(node.attr.author.value, { lowerEtAl: true });
         node.author = node.attr.author;
         delete node.attr.author;
       }

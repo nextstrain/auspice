@@ -1,7 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
-import { prettyString } from "../../util/stringHelpers";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { applyFilter } from "../../actions/tree";
@@ -307,28 +306,19 @@ class Footer extends React.Component {
 
   displayFilter(styles, filterName) {
     const totalStateCount = this.props.totalStateCounts[filterName];
+    const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
     return (
       <div>
-        {`Filter by ${prettyString(filterName)}`}
+        {`Filter by ${filterTitle}`}
         {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
           {Object.keys(totalStateCount).sort().map((itemName) => {
-            let display;
-            if (filterName === "authors") {
-              display = (
-                <span>
-                  {prettyString(itemName, {stripEtAl: true})}
-                  {" et al (" + totalStateCount[itemName] + ")"}
-                </span>
-              );
-            } else {
-              display = (
-                <span>
-                  {prettyString(itemName)}
-                  {" (" + totalStateCount[itemName] + ")"}
-                </span>
-              );
-            }
+            const display = (
+              <span>
+                {itemName}
+                {"(" + totalStateCount[itemName] + ")"}
+              </span>
+            );
             return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
           })}
         </Flex>
