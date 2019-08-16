@@ -376,7 +376,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
 
   /* geoResolutions */
   if (metadata.geoResolutions) {
-    const availableGeoResultions = metadata.geoResolutions.map((i) => i.name);
+    const availableGeoResultions = metadata.geoResolutions.map((i) => i.key);
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
       /* fallbacks: JSON defined default, then hardocded default, then any available */
       if (metadata.displayDefaults && metadata.displayDefaults.geoResolution && availableGeoResultions.indexOf(metadata.displayDefaults.geoResolution) !== -1) {

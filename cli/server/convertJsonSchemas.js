@@ -153,8 +153,8 @@ const setMiscMetaProperties = (v2, meta) => {
   // GEO -> GEO_RESOLUTIONS (note that the shape is different)
   if (meta.geo) {
     v2.geo_resolutions = [];
-    for (const [name, demes] of Object.entries(meta.geo)) {
-      v2.geo_resolutions.push({name, demes});
+    for (const [key, demes] of Object.entries(meta.geo)) {
+      v2.geo_resolutions.push({key, demes});
     }
   }
 };

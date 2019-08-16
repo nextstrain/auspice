@@ -115,7 +115,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 
   const locationToVisibleNodes = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
   const offsets = triplicate ? [-360, 0, 360] : [0];
-  const demeToLatLongs = metadata.geoResolutions.filter((x) => x.name === geoResolution)[0].demes;
+  const demeToLatLongs = metadata.geoResolutions.filter((x) => x.key === geoResolution)[0].demes;
 
   let index = 0;
   offsets.forEach((OFFSET) => {
@@ -207,7 +207,7 @@ const maybeConstructTransmissionEvent = (
   /* checking metadata for lat longs name match - ie., does the metadata list a latlong for Thailand? */
   const nodeLocation = getTraitFromNode(node, geoResolution); //  we're looking this up in the metadata lookup table
   const childLocation = getTraitFromNode(child, geoResolution);
-  const demeToLatLongs = geoResolutions.filter((x) => x.name === geoResolution)[0].demes;
+  const demeToLatLongs = geoResolutions.filter((x) => x.key === geoResolution)[0].demes;
 
   try {
     latOrig = demeToLatLongs[nodeLocation].latitude;
