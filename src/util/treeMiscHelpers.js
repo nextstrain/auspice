@@ -5,8 +5,9 @@
  * If entropy, then extract the entropy value
  * If confidence, then extract the confidence value
  */
-export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}={}) => {
+export const getTraitFromNode = (node, trait, {entropy=false, confidence=false, fullAuthorInfo=false}={}) => {
   if (!entropy && !confidence) {
+    if (trait === "author" && fullAuthorInfo) return node.author ? node.author : undefined;
     if (trait === "author") return node.author ? node.author.value : undefined;
     if (trait === "num_date" && node.num_date) return node.num_date.value;
     if (node[trait]) return node[trait];
