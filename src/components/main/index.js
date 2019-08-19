@@ -1,10 +1,13 @@
 import React, {lazy, Suspense } from "react";
+
+
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { ThemeProvider } from 'styled-components';
 import SidebarToggle from "../framework/sidebar-toggle";
 import Info from "../info/info";
 import Tree from "../tree";
+import Table from "../table";
 import Map from "../map/map";
 import { controlsHiddenWidth } from "../../util/globals";
 import Footer from "../framework/footer";
@@ -121,6 +124,7 @@ class Main extends React.Component {
             </Suspense>) :
             null
           }
+          <Table/>
           {this.props.displayNarrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
         </PanelsContainer>
         {/* overlay (used for mobile to open / close sidebar) */}

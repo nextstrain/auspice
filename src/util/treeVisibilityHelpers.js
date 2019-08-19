@@ -50,7 +50,7 @@ export const getIdxMatchingLabel = (nodes, labelName, labelValue) => {
 * @param rootIdx - nodes index of the currently in-view root
 * @returns array of thicknesses (numeric)
 */
-const calcBranchThickness = (nodes, visibility, rootIdx) => {
+export const calcBranchThickness = (nodes, visibility, rootIdx) => {
   let maxTipCount = nodes[rootIdx].tipCount;
   /* edge case: no tips selected */
   if (!maxTipCount) {
@@ -63,7 +63,7 @@ const calcBranchThickness = (nodes, visibility, rootIdx) => {
 
 /* recursively mark the parents of a given node active
 by setting the node idx to true in the param visArray */
-const makeParentVisible = (visArray, node) => {
+export const makeParentVisible = (visArray, node) => {
   if (node.arrayIdx === 0 || visArray[node.parent.arrayIdx]) {
     return; // this is the root of the tree or the parent was already visibile
   }
