@@ -25,6 +25,7 @@ class Table extends React.Component {
     if (this.props.nodes){
       let nodes = [];
       let columns = [];
+      const makeLink = row => <a href={row.value}>{row.value}</a>;
       console.log("globbing node info:", this.props.nodes);
       // This needs to be intersected with the other filters.
       for (let i=0; i<this.props.nodes.length; i++){
@@ -38,7 +39,7 @@ class Table extends React.Component {
                 columns.push({Header:t, accessor:t});
               }
             }
-            columns.push({Header:"URL", accessor:"url"});
+            columns.push({Header:"URL", accessor:"url", Cell: makeLink});
           }
           let d = {};
           d['name'] = this.props.nodes[i].name;
