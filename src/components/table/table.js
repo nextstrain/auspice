@@ -26,6 +26,7 @@ class Table extends React.Component {
       let nodes = [];
       let columns = [];
       console.log("globbing node info:", this.props.nodes);
+      // This needs to be intersected with the other filters.
       for (let i=0; i<this.props.nodes.length; i++){
         if (!this.props.nodes[i].children){
           if (columns.length==0) {
@@ -82,6 +83,7 @@ class Table extends React.Component {
       branchThickness: data.branchThickness,
       branchThicknessVersion: data.branchThicknessVersion
     };
+    // I am not sure how to go from here...
   }
 
 
@@ -96,11 +98,11 @@ class Table extends React.Component {
             String(row[filter.id]).includes(filter.value)}
           onFilteredChange={this.onFilteredChange}
         	columns={ this.state.columns ? this.state.columns:[] }
-        defaultSorted={[
-          {
-            id: "accession",
-            desc: true
-          }
+          defaultSorted={[
+            {
+              id: "date",
+              desc: false
+            }
         ]}
         defaultPageSize={10}
         className="-striped -highlight"
