@@ -74,6 +74,10 @@ const removeYAxis = (svg) => {
   svg.selectAll(".y.axis").remove();
 };
 
+const removeProjectionPivot = (svg) => {
+  svg.selectAll(".projection-pivot").remove();
+};
+
 export const drawXAxis = (svg, chartGeom, scales) => {
   removeXAxis(svg);
   svg.append("g")
@@ -83,6 +87,7 @@ export const drawXAxis = (svg, chartGeom, scales) => {
     .style("font-size", "12px")
     .call(axisBottom(scales.x).ticks(scales.numTicksX, ".1f"));
 };
+
 export const drawYAxis = (svg, chartGeom, scales) => {
   removeYAxis(svg);
   svg.append("g")
@@ -91,6 +96,22 @@ export const drawYAxis = (svg, chartGeom, scales) => {
     .style("font-family", dataFont)
     .style("font-size", "12px")
     .call(axisLeft(scales.y).ticks(scales.numTicksY));
+};
+
+export const drawProjectionPivot = (svg, scales, projection_pivot) => {
+  if (projection_pivot) {
+    removeProjectionPivot(svg);
+    svg.append("g")
+      .attr("class", "projection-pivot")
+      .append("line")
+      .attr("x1", scales.x(parseFloat(projection_pivot)))
+      .attr("x2", scales.x(parseFloat(projection_pivot)))
+      .attr("y1", scales.y(1))
+      .attr("y2", scales.y(0))
+      .style("visibility", "visible")
+      .style("stroke", "#555")
+      .style("stroke-width", "2");
+  }
 };
 
 const turnMatrixIntoSeries = (categories, nPivots, matrix) => {

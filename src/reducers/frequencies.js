@@ -7,6 +7,7 @@ const frequencies = (state = {
   pivots: undefined,
   ticks: undefined,
   matrix: undefined,
+  projection_pivot: undefined,
   version: 0
 }, action) => {
   switch (action.type) {
@@ -17,7 +18,7 @@ const frequencies = (state = {
       return Object.assign({}, state, {loaded: true, matrix: action.matrix, version: state.version + 1});
     }
     case types.DATA_INVALID: {
-      return {loaded: false, data: undefined, pivots: undefined, ticks: undefined, matrix: undefined, version: 0};
+      return {loaded: false, data: undefined, pivots: undefined, ticks: undefined, matrix: undefined, projection_pivot: undefined, version: 0};
     }
     default:
       return state;
