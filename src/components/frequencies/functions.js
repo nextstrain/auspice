@@ -109,8 +109,9 @@ export const drawProjectionPivot = (svg, scales, projection_pivot) => {
       .attr("y1", scales.y(1))
       .attr("y2", scales.y(0))
       .style("visibility", "visible")
-      .style("stroke", "#555")
-      .style("stroke-width", "2");
+      .style("stroke", "rgba(55,55,55,0.9)")
+      .style("stroke-width", "2")
+      .style("stroke-dasharray", "4 4");
   }
 };
 
@@ -237,20 +238,35 @@ export const drawStream = (
     const date = scales.x.invert(mousex);
     const pivotIdx = pivots.reduce((closestIdx, val, idx, arr) => Math.abs(val - date) < Math.abs(arr[closestIdx] - date) ? idx : closestIdx, 0);
     const freqVal = Math.round((d[pivotIdx][1] - d[pivotIdx][0]) * 100) + "%";
-    const xvalueOfPivot = scales.x(pivots[pivotIdx]);
+    const xValueOfPivot = scales.x(pivots[pivotIdx]);
+    const y1ValueOfPivot = scales.y(d[pivotIdx][1]);
+    const y2ValueOfPivot = scales.y(d[pivotIdx][0]);
 
     select("#vline")
       .style("visibility", "visible")
-      .attr("x1", xvalueOfPivot)
-      .attr("x2", xvalueOfPivot);
+      .attr("x1", xValueOfPivot)
+      .attr("x2", xValueOfPivot)
+      .attr("y1", y1ValueOfPivot)
+      .attr("y2", y2ValueOfPivot);
 
-    const left = mousex > 0.5 * scales.x.range()[1] ? "" : `${mousex + 4}px`;
-    const right = mousex > 0.5 * scales.x.range()[1] ? `${scales.x.range()[1] - mousex - 4}px` : "";
+    const left = xValueOfPivot > 0.5 * scales.x.range()[1] ? "" : `${xValueOfPivot + 25}px`;
+    const right = xValueOfPivot > 0.5 * scales.x.range()[1] ? `${scales.x.range()[1] - xValueOfPivot + 25}px` : "";
+    const top = y1ValueOfPivot > 0.5 * scales.y(0) ? `${scales.y(0) - 50}px` : `${y1ValueOfPivot + 25}px`;
     select("#freqinfo")
       .style("left", left)
       .style("right", right)
-      .style("top", `${70}px`)
+      .style("top", top)
+      .style("padding-left", "10px")
+      .style("padding-right", "10px")
+      .style("padding-top", "0px")
+      .style("padding-bottom", "0px")
       .style("visibility", "visible")
+      .style("background-color", "rgba(55,55,55,0.9)")
+      .style("color", "white")
+      .style("font-family", "Lato, Helvetica Neue, Helvetica, sans-serif")
+      .style("font-size", 18)
+      .style("line-height", 1)
+      .style("font-weight", 300)
       .html(`<p>${parseColorBy(colorBy, colorOptions)}: ${prettyString(labels[i])}</p>
         <p>Time point: ${pivots[pivotIdx]}</p>
         <p>Frequency: ${freqVal}</p>`);
@@ -269,15 +285,13 @@ export const drawStream = (
     .on("mouseout", handleMouseOut)
     .on("mousemove", handleMouseMove);
 
-  /* the vertical line to indicate the pivot point */
+  /* the vertical line to indicate the highlighted frequency interval */
   svgStreamGroup.append("line")
     .attr("id", "vline")
-    .attr("y1", scales.y(1))
-    .attr("y2", scales.y(0))
     .style("visibility", "hidden")
     .style("pointer-events", "none")
-    .style("stroke", "hsla(0,0%,100%,.9)")
-    .style("stroke-width", "5");
+    .style("stroke", "rgba(55,55,55,0.9)")
+    .style("stroke-width", 4);
 
   drawLabelsOverStream(svgStreamGroup, series, pivots, labels, scales);
 };
