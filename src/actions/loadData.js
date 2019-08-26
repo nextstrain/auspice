@@ -12,6 +12,18 @@ import { hasExtension, getExtension } from "../util/extensions";
 /* TODO: make a default auspice server (not charon) and make charon the nextstrain server. Or vice versa. */
 const serverAddress = hasExtension("serverAddress") ? getExtension("serverAddress") : charonAPIAddress;
 
+/**
+ * Sends a GET response to the `/charon` web API endpoint requesting data.
+ * Throws an `Error` if the response is not successful or is not a redirect.
+ *
+ * Returns a `Promise` containing the `Response` object. JSON data must be
+ * accessed from the `Response` object using the `.json()` method.
+ *
+ * @param {String} prefix: the main dataset information pertaining to the query,
+ *  e.g. 'flu'
+ * @param {Object} additionalQueries: additional information to be parsed as a
+ *  query string such as `type` (`String`) or `narrative` (`Boolean`).
+ */
 const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
   let path = `${serverAddress}/${narrative?"getNarrative":"getDataset"}`;
   path += `?prefix=${prefix}`;
@@ -23,14 +35,26 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
         throw new Error(res.statusText);
       }
       return res;
-    })
-    .then((res) => res.json());
+    });
   return p;
 };
 
+/**
+ * Requests data from a hardcoded web API endpoint.
+ * Throws an `Error` if the response is not successful.
+ *
+ * Returns a `Promise` containing the `Response` object. JSON data must be
+ * accessed from the `Response` object using the `.json()` method.
+ *
+ * Note: we currently expect a single dataset to be present in "hardcodedDataPaths".
+ * This may be extended to multiple in the future...
+ *
+ * @param {String} prefix: the main dataset information pertaining to the query,
+ *  e.g. 'flu'
+ * @param {Object} additionalQueries: additional information to be parsed as a
+ *  query string such as `type` (`String`) or `narrative` (`Boolean`).
+ */
 const getHardcodedData = (prefix, {type="mainJSON", narrative=false}={}) => {
-  /* we currently expect a single dataset to be present in "hardcodedDataPaths".
-  This may be extended to multiple in the future... */
   const datapaths = getExtension("hardcodedDataPaths");
   console.log("FETCHING", datapaths[type]);
   const p = fetch(datapaths[type])
@@ -39,8 +63,7 @@ const getHardcodedData = (prefix, {type="mainJSON", narrative=false}={}) => {
         throw new Error(res.statusText);
       }
       return res;
-    })
-    .then((res) => res.json());
+    });
   return p;
 };
 
@@ -64,6 +87,9 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
 
   // fetchJSON(`${charonAPIAddress}request=mainJSON&url=${url}${fetchExtras}`)
   getDataset(`${url}${fetchExtras}`)
+    .then((res) => {
+      return res.json();
+    })
     .then((json) => {
       dispatch({
         type: types.CLEAN_START,
@@ -76,6 +102,7 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
     .then((result) => {
       if (result.frequencies === true) {
         getDataset(url, {type: "tip-frequencies"})
+          .then((res) => res.json())
           .then((res) => dispatch(loadFrequencies(res)))
           .catch((err) => console.error("Frequencies failed to fetch", err.message));
       }
@@ -107,6 +134,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       /* we want to have an additional fetch to get the narrative JSON, which in turn
       tells us which data JSON to fetch... */
       getDatasetFromCharon(url, {narrative: true})
+        .then((res) => res.json())
         .then((blocks) => {
           const firstURL = blocks[0].dataset;
           const firstQuery = queryString.parse(blocks[0].query);
@@ -126,6 +154,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
 export const loadTreeToo = (name, fields) => (dispatch, getState) => {
   const oldState = getState();
   getDataset(fields.join("/"), {type: "tree"})
+    .then((res) => res.json())
     .then((json) => {
       const newState = createTreeTooState({treeTooJSON: json.tree, oldState, segment: name});
       dispatch({type: types.TREE_TOO_DATA, segment: name, ...newState});
