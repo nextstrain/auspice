@@ -120,7 +120,6 @@ const setUpGetDatasetHandler = ({datasetsPath}) => {
         unifiedJson._treeTwoName = datasetInfo.secondTreeName;
       }
       unifiedJson._treeName = datasetInfo.treeName;
-      unifiedJson._url = datasetInfo.auspiceDisplayUrl;
     } catch (err) {
       return handleError(res, `Couldn't fetch JSONs`, err.message);
     }

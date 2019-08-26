@@ -92,7 +92,6 @@ The current main dataset response shape is:
   "meta": "the schema 1.0 metadata json object",
   "tree": "the schema 1.0 tree json object",
   "_source": "the source (e.g. live, staging, github). Only used by the sidebar dataset selector",
-  "_url": "the URL to which auspice should update. Allows flu to redirect silently to flu/seasonal/..."
 }
 ```
 

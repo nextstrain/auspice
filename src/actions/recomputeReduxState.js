@@ -585,8 +585,8 @@ export const createStateFromQueryOrJSONs = ({
   if (json["_treeName"]) {
     tree.name = json["_treeName"];
   }
-  const url = json["_url"]; // injected by the server. Will be picked up by middleware.
-  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query, url};
+
+  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };
 
 export const createTreeTooState = ({
