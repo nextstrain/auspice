@@ -55,7 +55,7 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
  */
 const getHardcodedData = (prefix, {type="mainJSON", narrative=false}={}) => {
   const datapaths = getExtension("hardcodedDataPaths");
-  console.log("FETCHING", datapaths[type]);
+
   const p = fetch(datapaths[type])
     .then((res) => {
       if (res.status !== 200) {
@@ -66,7 +66,6 @@ const getHardcodedData = (prefix, {type="mainJSON", narrative=false}={}) => {
   return p;
 };
 
-// const fetchData = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDatasetFromCharon;
 const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDatasetFromCharon;
 
 /**
@@ -194,7 +193,9 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
     }
     const query = queryString.parse(search);
 
-    if (url.indexOf("narratives") !== -1) {
+    if (url.indexOf("narratives") === -1) {
+      fetchDataAndDispatch(dispatch, url, query);
+    } else {
       /* we want to have an additional fetch to get the narrative JSON, which in turn
       tells us which data JSON to fetch... */
       getDatasetFromCharon(url, {narrative: true})
@@ -209,8 +210,6 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
           console.error("Error obtaining narratives", err.message);
           dispatch(goTo404(`Couldn't load narrative for ${url}`));
         });
-    } else {
-      fetchDataAndDispatch(dispatch, url, query);
-    }
+    };
   };
 };
