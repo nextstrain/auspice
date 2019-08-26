@@ -667,13 +667,7 @@ export const createStateFromQueryOrJSONs = ({
     tree.name = json.tree_name;
   }
 
-  /* The server is able to provide a different URL to be displayed,
-   * similar to a redirect. Note that this is completely optional
-   * this is picked up by middleware (any action with a `url` key is)
-   */
-  const url = json.auspice_url_should_be;
-
-  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query, url};
+  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };
 
 export const createTreeTooState = ({

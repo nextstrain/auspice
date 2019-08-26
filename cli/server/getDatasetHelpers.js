@@ -59,9 +59,7 @@ const interpretRequest = (req) => {
  * Given a request, does the dataset exist?
  * In the future, if there is no exact match but a partial one we
  * should extend this. E.g. `["flu"]` -> `["flu", "h3n2", "ha", "3y"]`
- * In that case, we should also set a custom response header which
- * auspice will use to change the URL appearence (similar to a redirect)
- * via `json.auspice_url_should_be`
+ * In that case, we should utilise `res.redirect` as we do in the nextstrain.org server
  * @throws
  */
 const extendDataPathsToMatchAvailiable = (info, availableDatasets) => {
