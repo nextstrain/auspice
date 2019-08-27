@@ -1,6 +1,5 @@
 import React from "react";
 import { infoPanelStyles } from "../../../globalStyles";
-import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
@@ -38,7 +37,7 @@ const renderInfoBlock = (item, values) => (
 
 
 const renderBranchDivergence = (d) =>
-  renderInfoLine("Divergence:", prettyString(d.div.toExponential(3)));
+  renderInfoLine("Divergence:", d.div.toExponential(3));
 
 
 const renderBranchTime = (d, temporalConfidence) => {

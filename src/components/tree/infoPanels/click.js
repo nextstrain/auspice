@@ -1,7 +1,6 @@
 import React from "react";
 import { isValueValid } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
-import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTraitFromNode } from "../../../util/treeMiscHelpers";
 
@@ -166,7 +165,7 @@ const TipClickedPanel = ({tip, goAwayCallback}) => {
             {/* Dates */}
             {date ? item(
               showDateUncertainty ? "Inferred collection date" : "Collection date",
-              prettyString(numericToCalendar(date))
+              numericToCalendar(date)
             ) : null}
             {showDateUncertainty ? (
               item("Collection date confidence", `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)
