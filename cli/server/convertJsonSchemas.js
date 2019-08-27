@@ -42,23 +42,21 @@ const traverseTree = (node, cb) => {
 };
 
 const setColorings = (v2, meta) => {
-  v2.colorings = {};
+  v2.colorings = [];
   const color_options = meta.color_options;
   for (const [key, value] of Object.entries(color_options)) {
-    v2.colorings[key] = {};
-    v2.colorings[key].title = value.menuItem || value.legendTitle;
-    if (value.type === "continuous") {
-      v2.colorings[key].type = "continuous";
-    } else {
-      v2.colorings[key].type = "categorical"; // or "ordinal"
-    }
+    const coloring = {
+      key,
+      title: value.menuItem || value.legendTitle,
+      type: value.type === "continous" ? "continuous" : "categorical"
+    };
     if (value.color_map) {
-      v2.colorings[key].scale = value.color_map;
+      coloring.scale = value.color_map;
     }
     if (key === "authors") {
-      v2.colorings.author = v2.colorings[key];
-      delete v2.colorings[key];
+      coloring.key = "author";
     }
+    v2.colorings.push(coloring);
   }
 };
 

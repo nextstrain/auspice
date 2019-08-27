@@ -489,13 +489,31 @@ const modifyControlsViaTreeToo = (controls, name) => {
 };
 
 /**
+ * The v2 JSON spec defines colorings as a list, so that order is guaranteed.
+ * Prior to this, we used a dict, where key insertion order is (guaranteed? essentially always?)
+ * to be respected. By simply converting it back to a dict, all the auspice
+ * code may continue to work. This should be attended to in the future.
+ * @param {obj} coloringsList list of objects
+ * @returns {obj} a dictionary representation, where the "key" property of each element
+ * in the list has become a property of the object
+ */
+const convertColoringsListToDict = (coloringsList) => {
+  const colorings = {};
+  coloringsList.forEach((coloring) => {
+    colorings[coloring.key] = coloring;
+    delete colorings[coloring.key].key;
+  });
+  return colorings;
+};
+
+/**
  *
  * A lot of this is simply changing augur's snake_case to auspice's camelCase
  */
 const createMetadataStateFromJSON = (json) => {
   const metadata = {};
   if (json.meta.colorings) {
-    metadata.colorings = json.meta.colorings;
+    metadata.colorings = convertColoringsListToDict(json.meta.colorings);
   }
   metadata.title = json.meta.title;
   metadata.updated = json.meta.updated;
