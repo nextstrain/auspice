@@ -191,8 +191,8 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelsToDisplay = ["tree"];
   }
 
-  /* if we lack geographicInfo, remove map from panels to display */
-  if (!metadata.geographicInfo) {
+  /* if we lack geoResolutions, remove map from panels to display */
+  if (!metadata.geoResolutions || !metadata.geoResolutions.length) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "map");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "map");
   }
@@ -374,9 +374,9 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
     console.error("Error detected. Setting distanceMeasure to ", state["distanceMeasure"]);
   }
 
-  /* geoResolution */
-  if (metadata.geographicInfo) {
-    const availableGeoResultions = Object.keys(metadata.geographicInfo);
+  /* geoResolutions */
+  if (metadata.geoResolutions) {
+    const availableGeoResultions = metadata.geoResolutions.map((i) => i.key);
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
       /* fallbacks: JSON defined default, then hardocded default, then any available */
       if (metadata.displayDefaults && metadata.displayDefaults.geoResolution && availableGeoResultions.indexOf(metadata.displayDefaults.geoResolution) !== -1) {
@@ -390,7 +390,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
       delete query.r; // no-op if query.r doesn't exist
     }
   } else {
-    console.warn("JSONs did not include geographicInfo.");
+    console.warn("JSONs did not include `geoResolutions`");
   }
 
   /* temporalConfidence */
@@ -489,13 +489,31 @@ const modifyControlsViaTreeToo = (controls, name) => {
 };
 
 /**
+ * The v2 JSON spec defines colorings as a list, so that order is guaranteed.
+ * Prior to this, we used a dict, where key insertion order is (guaranteed? essentially always?)
+ * to be respected. By simply converting it back to a dict, all the auspice
+ * code may continue to work. This should be attended to in the future.
+ * @param {obj} coloringsList list of objects
+ * @returns {obj} a dictionary representation, where the "key" property of each element
+ * in the list has become a property of the object
+ */
+const convertColoringsListToDict = (coloringsList) => {
+  const colorings = {};
+  coloringsList.forEach((coloring) => {
+    colorings[coloring.key] = coloring;
+    delete colorings[coloring.key].key;
+  });
+  return colorings;
+};
+
+/**
  *
  * A lot of this is simply changing augur's snake_case to auspice's camelCase
  */
 const createMetadataStateFromJSON = (json) => {
   const metadata = {};
   if (json.meta.colorings) {
-    metadata.colorings = json.meta.colorings;
+    metadata.colorings = convertColoringsListToDict(json.meta.colorings);
   }
   metadata.title = json.meta.title;
   metadata.updated = json.meta.updated;
@@ -526,8 +544,8 @@ const createMetadataStateFromJSON = (json) => {
       }
     }
   }
-  if (json.meta.geographic_info) {
-    metadata.geographicInfo = json.meta.geographic_info;
+  if (json.meta.geo_resolutions) {
+    metadata.geoResolutions = json.meta.geo_resolutions;
   }
 
 

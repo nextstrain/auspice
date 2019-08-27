@@ -115,7 +115,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 
   const locationToVisibleNodes = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
   const offsets = triplicate ? [-360, 0, 360] : [0];
-  const geo = metadata.geographicInfo;
+  const demeToLatLongs = metadata.geoResolutions.filter((x) => x.key === geoResolution)[0].demes;
 
   let index = 0;
   offsets.forEach((OFFSET) => {
@@ -125,9 +125,9 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
       let long = 0;
       let goodDeme = true;
 
-      if (geo[geoResolution][location]) {
-        lat = geo[geoResolution][location].latitude;
-        long = geo[geoResolution][location].longitude + OFFSET;
+      if (demeToLatLongs[location]) {
+        lat = demeToLatLongs[location].latitude;
+        long = demeToLatLongs[location].longitude + OFFSET;
       } else {
         goodDeme = false;
         console.warn("Warning: Lat/long missing from metadata for", location);
@@ -192,7 +192,7 @@ const constructBcurve = (
 const maybeConstructTransmissionEvent = (
   node,
   child,
-  metadataGeoLookupTable,
+  geoResolutions,
   geoResolution,
   nodeColors,
   visibility,
@@ -207,15 +207,17 @@ const maybeConstructTransmissionEvent = (
   /* checking metadata for lat longs name match - ie., does the metadata list a latlong for Thailand? */
   const nodeLocation = getTraitFromNode(node, geoResolution); //  we're looking this up in the metadata lookup table
   const childLocation = getTraitFromNode(child, geoResolution);
+  const demeToLatLongs = geoResolutions.filter((x) => x.key === geoResolution)[0].demes;
+
   try {
-    latOrig = metadataGeoLookupTable[geoResolution][nodeLocation].latitude;
-    longOrig = metadataGeoLookupTable[geoResolution][nodeLocation].longitude;
+    latOrig = demeToLatLongs[nodeLocation].latitude;
+    longOrig = demeToLatLongs[nodeLocation].longitude;
   } catch (e) {
     demesMissingLatLongs.add(nodeLocation);
   }
   try {
-    latDest = metadataGeoLookupTable[geoResolution][childLocation].latitude;
-    longDest = metadataGeoLookupTable[geoResolution][childLocation].longitude;
+    latDest = demeToLatLongs[childLocation].latitude;
+    longDest = demeToLatLongs[childLocation].longitude;
   } catch (e) {
     demesMissingLatLongs.add(childLocation);
   }
@@ -325,7 +327,6 @@ const setupTransmissionData = (
 ) => {
 
   const offsets = triplicate ? [-360, 0, 360] : [0];
-  const metadataGeoLookupTable = metadata.geographicInfo;
   const transmissionData = []; /* edges, animation paths */
   const transmissionIndices = {}; /* map of transmission id to array of indices */
   const demesMissingLatLongs = new Set();
@@ -348,7 +349,7 @@ const setupTransmissionData = (
             const t = maybeGetClosestTransmissionEvent(
               n,
               child,
-              metadataGeoLookupTable,
+              metadata.geoResolutions,
               geoResolution,
               nodeColors,
               visibility,
