@@ -1,7 +1,7 @@
 /* eslint no-restricted-syntax: 0 */
 import React from "react";
 import { infoNotification, warningNotification } from "../../actions/notifications";
-import { prettyString, authorString } from "../../util/stringHelpers";
+import { authorString } from "../../util/stringHelpers";
 import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode } from "../../util/treeMiscHelpers";
 
@@ -147,13 +147,13 @@ export const strainTSV = (dispatch, filePrefix, nodes) => {
             if (typeof value[0] === "number") {
               line.push(value.map((v) => parseFloat(v).toFixed(2)).join(" - "));
             } else {
-              line.push(value.map((v) => prettyString(v, {removeComma: true})).join(" - "));
+              line.push(value.map((v) => v.join(" - ")));
             }
           } else { /* not an array, but a relational object */
             let x = "";
             for (const k of Object.keys(value)) {
-              const v = typeof value[k] === "number" ? parseFloat(value[k]).toFixed(2) : prettyString(value[k], {removeComma: true});
-              x += prettyString(k, {removeComma: true}) + ": " + v + ";";
+              const v = typeof value[k] === "number" ? parseFloat(value[k]).toFixed(2) : value[k];
+              x += `${k}:${v};`;
             }
             line.push(x);
           }
