@@ -1,7 +1,6 @@
 /* eslint no-restricted-syntax: 0 */
 import React from "react";
 import { infoNotification, warningNotification } from "../../actions/notifications";
-import { authorString } from "../../util/stringHelpers";
 import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode } from "../../util/treeMiscHelpers";
 
@@ -11,15 +10,6 @@ export const isPaperURLValid = (d) => {
     !d.paper_url.endsWith('/') &&
     d.paper_url !== "?"
   );
-};
-
-export const getAuthor = (info, k) => {
-  if (info === undefined || k === undefined) {
-    return (
-      <span>Not Available</span>
-    );
-  }
-  return authorString(k);
 };
 
 /* this function based on https://github.com/daviddao/biojs-io-newick/blob/master/src/newick.js */
