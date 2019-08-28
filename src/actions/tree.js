@@ -75,6 +75,7 @@ const processSelectedTip = (d, tree, treeToo) => {
 export const updateVisibleTipsAndBranchThicknesses = (
   {root = [undefined, undefined], tipSelected = undefined, cladeSelected = undefined} = {}
 ) => {
+  console.log('update visibility');
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
     if (!tree.nodes) {return;}

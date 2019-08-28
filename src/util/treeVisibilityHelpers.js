@@ -123,27 +123,31 @@ const calcVisibility = (tree, controls, dates) => {
       inView = tree.nodes.map((d) => d.inView !== undefined ? d.inView : true);
     }
 
+
+    const inTable = tree.nodes.map((d) => d.inTable !== undefined ? d.inTable : true);
+
     // FILTERS
-    let filtered; // array of bools, same length as tree.nodes. true -> that node should be visible
+    let filtered = inTable; // array of bools, same length as tree.nodes. true -> that node should be visible
     const filters = [];
     Object.keys(controls.filters).forEach((trait) => {
       if (controls.filters[trait].length) {
         filters.push({trait, values: controls.filters[trait]});
       }
     });
+    console.log("filtered", filtered)
     if (filters.length) {
       /* find the terminal nodes that were (a) already visibile and (b) match the filters */
       filtered = tree.nodes.map((d, idx) => (
-        !d.hasChildren && inView[idx] && filters.every((f) => f.values.includes(getTraitFromNode(d, f.trait)))
+        !d.hasChildren && filtered[idx] && inView[idx] && filters.every((f) => f.values.includes(getTraitFromNode(d, f.trait)))
       ));
-      const idxsOfFilteredTips = filtered.reduce((a, e, i) => {
-        if (e) {a.push(i);}
-        return a;
-      }, []);
-      /* for each visibile tip, make the parent nodes visible (recursively) */
-      for (let i = 0; i < idxsOfFilteredTips.length; i++) {
-        makeParentVisible(filtered, tree.nodes[idxsOfFilteredTips[i]]);
-      }
+    }
+    const idxsOfFilteredTips = filtered.reduce((a, e, i) => {
+      if (e) {a.push(i);}
+      return a;
+    }, []);
+    /* for each visibile tip, make the parent nodes visible (recursively) */
+    for (let i = 0; i < idxsOfFilteredTips.length; i++) {
+      makeParentVisible(filtered, tree.nodes[idxsOfFilteredTips[i]]);
     }
     /* intersect the various arrays contributing to visibility */
     const visibility = tree.nodes.map((node, idx) => {
@@ -175,6 +179,7 @@ const calcVisibility = (tree, controls, dates) => {
 };
 
 export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
+  console.log('calculateVisiblityAndBranchThickness');
   const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);

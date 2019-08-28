@@ -3,7 +3,7 @@ import ReactTable from "react-table";
 import "react-table/react-table.css";
 import { makeParentVisible, calcBranchThickness } from "../../util/treeVisibilityHelpers";
 import { calcTipCounts } from "../../util/treeCountingHelpers";
-import * as types from "../../actions/types";
+import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 
 // const getVisible = (resolvedState) => {
 //   const idxsOfFilteredTips;
@@ -22,19 +22,36 @@ class Table extends React.Component {
   }
 
   componentDidMount() {
-    if (this.props.nodes){
+    this.updateTable(this.props);
+  }
+
+  componentDidUpdate(prevProps) {
+    console.log("componentDidUpdate", prevProps.visibilityVersion, this.props.visibilityVersion)
+    if (prevProps.visibilityVersion<this.props.visibilityVersion){
+      this.updateTable(this.props);
+    }
+  }
+
+  componendWillReceiveProps(nextProps){
+    // console.log("componendWillReceiveProps", nextProps)
+    // this.updateTable(nextProps);
+  }
+
+  updateTable = (props) => {
+    if (props.nodes){
       let nodes = [];
       let columns = [];
       const makeLink = row => <a href={row.value}>{row.value}</a>;
-      console.log("globbing node info:", this.props.nodes);
+      console.log("globbing node info:", props.nodes);
       // This needs to be intersected with the other filters.
-      for (let i=0; i<this.props.nodes.length; i++){
-        if (!this.props.nodes[i].children){
+      for (let i=0; i<props.nodes.length; i++){
+        if (!props.nodes[i].children){
           if (columns.length==0) {
+            columns.push({Header:"Filtered", accessor:"vis"});
             columns.push({Header:"Name", accessor:"name"});
             columns.push({Header:"Accession", accessor:"accession"});
             columns.push({Header:"Date", accessor:"date"});
-            for (let t in this.props.nodes[i].shell.n.traits){
+            for (let t in props.nodes[i].shell.n.traits){
               if (t!=="num_date"){
                 columns.push({Header:t, accessor:t});
               }
@@ -42,49 +59,31 @@ class Table extends React.Component {
             columns.push({Header:"URL", accessor:"url", Cell: makeLink});
           }
           let d = {};
-          d['name'] = this.props.nodes[i].name;
-          d['accession'] = this.props.nodes[i].accession;
-          d['url'] = this.props.nodes[i].url;
-          d['date'] = this.props.nodes[i].shell.n.num_date.value.toFixed(2);
-          d['index'] = this.props.nodes[i].arrayIdx;
-          for (let t in this.props.nodes[i].shell.n.traits){
-            d[t] = this.props.nodes[i].shell.n.traits[t].value;
+          d['vis'] = props.visibility[i] ? 'visible' : 'hidden';
+          d['name'] = props.nodes[i].name;
+          d['accession'] = props.nodes[i].accession;
+          d['url'] = props.nodes[i].url;
+          d['date'] = props.nodes[i].shell.n.num_date.value.toFixed(2);
+          d['index'] = props.nodes[i].arrayIdx;
+          for (let t in props.nodes[i].shell.n.traits){
+            d[t] = props.nodes[i].shell.n.traits[t].value;
           }
           nodes.push(d);
         }
       }
       this.setState({nodes:nodes, columns:columns});
     }
-  }
 
-  componentDidUpdate(prevProps) {
   }
-
 
   onFilteredChange = (filtered) => {
-    const visArray = this.props.nodes.map((d) => false);
+    this.props.nodes.forEach((d) => d.inTable=false);
     const filteredIndicesTree = this.reactTable.current.getResolvedState().sortedData.map((d) => d._original.index);
-    const filteredIndicesTable = this.reactTable.current.getResolvedState().sortedData.map((d) => d._index);
+    // const filteredIndicesTable = this.reactTable.current.getResolvedState().sortedData.map((d) => d._index);
     for (let i=0;i<filteredIndicesTree.length; i++){
-      visArray[filteredIndicesTree[i]] = true;
-      makeParentVisible(visArray, this.props.nodes[46]);
+      this.props.nodes[filteredIndicesTree[i]].inTable = true;
     }
-    calcTipCounts(this.props.tree.nodes[0], visArray);
-    /* re-calculate branchThickness (inline) */
-    const data = {
-      visibility: visArray,
-      visibilityVersion: this.props.tree.visibilityVersion + 1,
-      branchThickness: calcBranchThickness(this.props.tree.nodes, visArray, 0),
-      branchThicknessVersion: this.props.tree.branchThicknessVersion + 1
-    };
-    const dispatchObj = {
-      type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
-      visibility: data.visibility,
-      visibilityVersion: data.visibilityVersion,
-      branchThickness: data.branchThickness,
-      branchThicknessVersion: data.branchThicknessVersion
-    };
-    // I am not sure how to go from here...
+    this.props.dispatch(updateVisibleTipsAndBranchThicknesses());
   }
 
 
