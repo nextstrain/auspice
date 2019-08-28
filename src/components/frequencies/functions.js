@@ -74,8 +74,9 @@ const removeYAxis = (svg) => {
   svg.selectAll(".y.axis").remove();
 };
 
-const removeProjectionPivot = (svg) => {
+const removeProjectionInfo = (svg) => {
   svg.selectAll(".projection-pivot").remove();
+  svg.selectAll(".projection-text").remove();
 };
 
 export const drawXAxis = (svg, chartGeom, scales) => {
@@ -98,9 +99,11 @@ export const drawYAxis = (svg, chartGeom, scales) => {
     .call(axisLeft(scales.y).ticks(scales.numTicksY));
 };
 
-export const drawProjectionPivot = (svg, scales, projection_pivot) => {
+export const drawProjectionInfo = (svg, scales, projection_pivot) => {
   if (projection_pivot) {
-    removeProjectionPivot(svg);
+
+    removeProjectionInfo(svg);
+
     svg.append("g")
       .attr("class", "projection-pivot")
       .append("line")
@@ -112,6 +115,21 @@ export const drawProjectionPivot = (svg, scales, projection_pivot) => {
       .style("stroke", "rgba(55,55,55,0.9)")
       .style("stroke-width", "2")
       .style("stroke-dasharray", "4 4");
+
+    const midPoint = 0.5 * (scales.x(parseFloat(projection_pivot)) + scales.x.range()[1]);
+    svg.append("g")
+      .attr("class", "projection-text")
+      .append("text")
+      .attr("x", midPoint)
+      .attr("y", scales.y(1) - 3)
+      .style("pointer-events", "none")
+      .style("fill", "#555")
+      .style("font-family", dataFont)
+      .style("font-size", 12)
+      .style("alignment-baseline", "bottom")
+      .style("text-anchor", "middle")
+      .text("Projection");
+
   }
 };
 
@@ -219,7 +237,7 @@ export const processMatrix = ({matrix, pivots, colorScale}) => {
 };
 
 export const drawStream = (
-  svgStreamGroup, scales, {categories, series}, {colorBy, colorScale, colorOptions, pivots}
+  svgStreamGroup, scales, {categories, series}, {colorBy, colorScale, colorOptions, pivots, projection_pivot}
 ) => {
   removeStream(svgStreamGroup);
   const colourer = generateColorScaleD3(categories, colorScale);
@@ -252,6 +270,14 @@ export const drawStream = (
     const left = xValueOfPivot > 0.5 * scales.x.range()[1] ? "" : `${xValueOfPivot + 25}px`;
     const right = xValueOfPivot > 0.5 * scales.x.range()[1] ? `${scales.x.range()[1] - xValueOfPivot + 25}px` : "";
     const top = y1ValueOfPivot > 0.5 * scales.y(0) ? `${scales.y(0) - 50}px` : `${y1ValueOfPivot + 25}px`;
+
+    let frequencyText = "Frequency";
+    if (projection_pivot) {
+      if (pivots[pivotIdx] > projection_pivot) {
+        frequencyText = "Projected frequency";
+      }
+    }
+
     select("#freqinfo")
       .style("left", left)
       .style("right", right)
@@ -263,13 +289,13 @@ export const drawStream = (
       .style("visibility", "visible")
       .style("background-color", "rgba(55,55,55,0.9)")
       .style("color", "white")
-      .style("font-family", "Lato, Helvetica Neue, Helvetica, sans-serif")
+      .style("font-family", dataFont)
       .style("font-size", 18)
       .style("line-height", 1)
       .style("font-weight", 300)
       .html(`<p>${parseColorBy(colorBy, colorOptions)}: ${prettyString(labels[i])}</p>
         <p>Time point: ${pivots[pivotIdx]}</p>
-        <p>Frequency: ${freqVal}</p>`);
+        <p>${frequencyText}: ${freqVal}</p>`);
   }
 
 
