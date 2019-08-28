@@ -1,3 +1,5 @@
+## version 1.38.0 - 2019/08/29
+
 * Add support for frequency projections. [See PR 777](https://github.com/nextstrain/auspice/pull/777)
 * Local auspice servers listen on only localhost by default instead of all interfaces. [See PR 781](https://github.com/nextstrain/auspice/pull/781)
 * update dependencies
