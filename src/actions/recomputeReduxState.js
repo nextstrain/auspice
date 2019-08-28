@@ -520,6 +520,9 @@ const createMetadataStateFromJSON = (json) => {
   if (json.version) {
     metadata.version = json.version;
   }
+  if (json.meta.maintainers) {
+    metadata.maintainers = json.meta.maintainers;
+  }
   if (json.meta.genome_annotations) {
     metadata.genomeAnnotations = json.meta.genome_annotations;
   }
