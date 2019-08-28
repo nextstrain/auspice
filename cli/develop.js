@@ -30,6 +30,7 @@ const run = (args) => {
   /* Basic server set up */
   const app = express();
   app.set('port', process.env.PORT || 4000);
+  app.set('host', process.env.HOST || "localhost");
 
   const baseDir = path.resolve(__dirname, "..");
   utils.verbose(`Serving index / favicon etc from  "${baseDir}"`);
@@ -66,10 +67,12 @@ const run = (args) => {
     res.sendFile(path.join(baseDir, "index.html"));
   });
 
-  const server = app.listen(app.get('port'), () => {
+  const server = app.listen(app.get('port'), app.get('host'), () => {
     utils.log("\n\n---------------------------------------------------");
     utils.log("Auspice now running in development mode.");
-    console.log(chalk.blueBright("Access the client at: ") + chalk.blueBright.underline.bold("http://localhost:" + server.address().port));
+    const host = app.get('host');
+    const {port} = server.address();
+    console.log(chalk.blueBright("Access the client at: ") + chalk.blueBright.underline.bold(`http://${host}:${port}`));
     utils.log(`Serving auspice version ${version}${args.extend ? " with extensions" : ""}.`);
     utils.log(handlerMsg);
     utils.log("---------------------------------------------------\n\n");
