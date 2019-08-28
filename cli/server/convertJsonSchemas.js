@@ -1,8 +1,9 @@
 const utils = require("../utils");
 
-/* this is from "../../src/util/stringHelpers" but can't be imported here
- * In v1 schemas, provided values were liable to be transformed before rendering.
- * This is not the case for v2 where we generally try to render strings as provided
+/** In auspice v1, the `prettyString` function was used extensively to transform values
+ * for "nicer" display. v2 JSONs intentially avoid this -- the strings are intended to
+ * be displayed as-is. This function is preserved here to aid in converting v1 JSONs
+ * to v2 JSONs.
  */
 const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false, stripEtAl = false, lowerEtAl = false} = {}) => {
   if (!x && x!== 0) {
