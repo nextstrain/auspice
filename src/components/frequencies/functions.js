@@ -4,6 +4,7 @@ import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { rgb } from "d3-color";
 import { area } from "d3-shape";
+import { format } from "d3-format";
 import { dataFont } from "../../globalStyles";
 import { prettyString } from "../../util/stringHelpers";
 import { unassigned_label } from "../../util/processFrequencies";
@@ -91,12 +92,13 @@ export const drawXAxis = (svg, chartGeom, scales) => {
 
 export const drawYAxis = (svg, chartGeom, scales) => {
   removeYAxis(svg);
+  const formatPercent = format(".0%");
   svg.append("g")
     .attr("class", "y axis")
     .attr("transform", `translate(${chartGeom.spaceLeft},0)`)
     .style("font-family", dataFont)
     .style("font-size", "12px")
-    .call(axisLeft(scales.y).ticks(scales.numTicksY));
+    .call(axisLeft(scales.y).ticks(scales.numTicksY).tickFormat(formatPercent));
 };
 
 export const drawProjectionInfo = (svg, scales, projection_pivot) => {
