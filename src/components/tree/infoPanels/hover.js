@@ -1,6 +1,5 @@
 import React from "react";
 import { infoPanelStyles } from "../../../globalStyles";
-import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
@@ -38,7 +37,7 @@ const renderInfoBlock = (item, values) => (
 
 
 const renderBranchDivergence = (d) =>
-  renderInfoLine("Divergence:", prettyString(d.div.toExponential(3)));
+  renderInfoLine("Divergence:", d.div.toExponential(3));
 
 
 const renderBranchTime = (d, temporalConfidence) => {
@@ -85,10 +84,10 @@ const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidenc
     const vals = Object.keys(confidenceData)
       .sort((a, b) => confidenceData[a] > confidenceData[b] ? -1 : 1)
       .slice(0, 4)
-      .map((v) => `${prettyString(v)} (${(100 * confidenceData[v]).toFixed(0)}%)`);
-    return renderInfoBlock(`${prettyString(colorBy)} (confidence):`, vals);
+      .map((v) => `${v} (${(100 * confidenceData[v]).toFixed(0)}%)`);
+    return renderInfoBlock(`${colorBy} (confidence):`, vals);
   }
-  return renderInfoLine(prettyString(colorBy), prettyString(getTraitFromNode(d, colorBy)));
+  return renderInfoLine(colorBy, getTraitFromNode(d, colorBy));
 };
 
 /**
@@ -265,7 +264,7 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
     const state = getTipColorAttribute(d.n, colorScale);
     return renderInfoLine(key + ":", state);
   }
-  return renderInfoLine(prettyString(colorBy) + ":", prettyString(getTraitFromNode(d.n, colorBy)));
+  return renderInfoLine(colorBy + ":", getTraitFromNode(d.n, colorBy));
 };
 
 const displayVaccineInfo = (d) => {

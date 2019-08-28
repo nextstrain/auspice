@@ -1,10 +1,11 @@
 const utils = require("../utils");
 
-/* this is from "../../src/util/stringHelpers" but can't be imported here
- * In v1 schemas, provided values were liable to be transformed before rendering.
- * This is not the case for v2 where we generally try to render strings as provided
+/** In auspice v1, the `prettyString` function was used extensively to transform values
+ * for "nicer" display. v2 JSONs intentially avoid this -- the strings are intended to
+ * be displayed as-is. This function is preserved here to aid in converting v1 JSONs
+ * to v2 JSONs.
  */
-const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false, stripEtAl = false} = {}) => {
+const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false, stripEtAl = false, lowerEtAl = false} = {}) => {
   if (!x && x!== 0) {
     return "";
   }
@@ -22,6 +23,9 @@ const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, remove
     if (removeComma) {
       x = x.replace(/,/g, "");
     }
+    if (lowerEtAl) {
+      x = x.replace('Et Al', 'et al');
+    }
     if (stripEtAl) {
       x = x.replace('et al.', '').replace('Et Al.', '').replace('et al', '').replace('Et Al', '');
     }
@@ -33,6 +37,17 @@ const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, remove
   }
   return x;
 };
+
+const formatURLString = (x) => {
+  let url = x;
+  if (url.startsWith("https_")) {
+    url = url.replace(/^https_/, "https:");
+  } else if (url.startsWith("http_")) {
+    url = url.replace(/^https_/, "http:");
+  }
+  return url;
+};
+
 
 const traverseTree = (node, cb) => {
   cb(node);
@@ -47,11 +62,13 @@ const setColorings = (v2, meta) => {
   for (const [key, value] of Object.entries(color_options)) {
     const coloring = {
       key,
-      title: value.menuItem || value.legendTitle,
+      title: prettyString(value.menuItem) || prettyString(value.legendTitle),
       type: value.type === "continous" ? "continuous" : "categorical"
     };
     if (value.color_map) {
-      coloring.scale = value.color_map;
+      coloring.scale = value.color_map.map((s) =>
+        [prettyString(s[0], {removeComma: true}), s[1]]
+      );
     }
     if (key === "authors") {
       coloring.key = "author";
@@ -76,8 +93,8 @@ const setAuthorInfo = (v2, meta, tree) => {
       node.attr.author = {};
       if (v1info.title) node.attr.author.title = v1info.title;
       if (v1info.journal) node.attr.author.journal = v1info.journal;
-      if (v1info.paper_url) node.attr.author.paper_url = v1info.paper_url;
-      node.attr.author.author = prettyString(v1author);
+      if (v1info.paper_url) node.attr.author.paper_url = formatURLString(v1info.paper_url);
+      node.attr.author.author = prettyString(v1author, {camelCase: false});
       node.attr.author.value = v1author;
     }
   });
@@ -152,7 +169,11 @@ const setMiscMetaProperties = (v2, meta) => {
   if (meta.geo) {
     v2.geo_resolutions = [];
     for (const [key, demes] of Object.entries(meta.geo)) {
-      v2.geo_resolutions.push({key, demes});
+      const prettyDemes = {};
+      Object.keys(demes).forEach((location) => {
+        prettyDemes[prettyString(location, {removeComma: true})] = demes[location];
+      });
+      v2.geo_resolutions.push({key, demes: prettyDemes});
     }
   }
 };
@@ -195,6 +216,7 @@ const storeTreeAsV2 = (v2, tree) => {
     if (node.attr) {
       // author: (key modified previously) needs to move to property on node
       if (node.attr.author) {
+        node.attr.author.value = prettyString(node.attr.author.value, { lowerEtAl: true });
         node.author = node.attr.author;
         delete node.attr.author;
       }
@@ -248,9 +270,15 @@ const storeTreeAsV2 = (v2, tree) => {
         .filter((a) => !a.endsWith("_entropy") && !a.endsWith("_confidence"))
         .filter((a) => !attrsToIgnore.includes(a));
       if (traitKeys.length) node.traits = {};
+      const traitsToPretty = ["country", "region"]
       for (const trait of traitKeys) {
-        const data = {value: node.attr[trait]};
+        const data = traitsToPretty.includes(trait) ? {value: prettyString(node.attr[trait], {removeComma: true})} : {value: node.attr[trait]};
         if (node.attr[`${trait}_confidence`]) {
+          Object.keys(node.attr[`${trait}_confidence`]).forEach((key) => {
+            const newKey = prettyString(key);
+            node.attr[`${trait}_confidence`][newKey] = node.attr[`${trait}_confidence`][key];
+            delete node.attr[`${trait}_confidence`][key];
+          });
           data.confidence = node.attr[`${trait}_confidence`];
         }
         if (node.attr[`${trait}_entropy`]) {

@@ -5,7 +5,6 @@ import { axisBottom, axisLeft } from "d3-axis";
 import { rgb } from "d3-color";
 import { area } from "d3-shape";
 import { dataFont } from "../../globalStyles";
-import { prettyString } from "../../util/stringHelpers";
 import { unassigned_label } from "../../util/processFrequencies";
 import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype";
 
@@ -19,14 +18,14 @@ export const areListsEqual = (a, b) => {
 
 export const parseColorBy = (colorBy, colorOptions) => {
   if (colorOptions && colorOptions[colorBy]) {
-    return colorOptions[colorBy].legendTitle;
+    return colorOptions[colorBy].title;
   } else if (isColorByGenotype(colorBy)) {
     const genotype = decodeColorByGenotype(colorBy);
     return genotype.aa
       ? `Genotype at ${genotype.gene} pos ${genotype.positions.join(", ")}`
       : `Genotype at Nuc. ${genotype.positions.join(", ")}`;
   }
-  return prettyString(colorBy);
+  return colorBy;
 };
 
 const getOrderedCategories = (matrixCategories, colorScale) => {
@@ -182,7 +181,7 @@ const drawLabelsOverStream = (svgStreamGroup, series, pivots, labels, scales) =>
     .style("font-family", dataFont)
     .style("font-size", 14)
     .style("alignment-baseline", "middle")
-    .text((d, i) => xyPos[i][0] ? prettyString(d) : "");
+    .text((d, i) => xyPos[i][0] ? d : "");
 };
 
 const calcMaxYValue = (series) => {
@@ -230,7 +229,7 @@ export const drawStream = (
       .style("right", right)
       .style("top", `${70}px`)
       .style("visibility", "visible")
-      .html(`<p>${parseColorBy(colorBy, colorOptions)}: ${prettyString(labels[i])}</p>
+      .html(`<p>${parseColorBy(colorBy, colorOptions)}: ${labels[i]}</p>
         <p>Time point: ${pivots[pivotIdx]}</p>
         <p>Frequency: ${freqVal}</p>`);
   }

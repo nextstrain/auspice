@@ -1,7 +1,6 @@
 import React from "react";
 import { isValueValid } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
-import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTraitFromNode } from "../../../util/treeMiscHelpers";
 
@@ -127,7 +126,7 @@ const displayPublicationInfo = (info) => {
     return null;
   }
   const itemsToRender = [];
-  itemsToRender.push(item("Authors", info.author));
+  itemsToRender.push(item("Authors", info.value));
   if (info.title && info.title !== "?") {
     if (info.paper_url && info.paper_url !== "?") {
       itemsToRender.push(item("Title", info.title, info.paper_url));
@@ -161,18 +160,18 @@ const TipClickedPanel = ({tip, goAwayCallback}) => {
             {/* TODO - we should scan all colorings here */}
             {["country", "region", "division"].map((x) => {
               const value = getTraitFromNode(tip.n, x);
-              return isValueValid(value) ? item(prettyString(x), prettyString(value)) : null;
+              return isValueValid(value) ? item(x, value) : null;
             })}
             {/* Dates */}
             {date ? item(
               showDateUncertainty ? "Inferred collection date" : "Collection date",
-              prettyString(numericToCalendar(date))
+              numericToCalendar(date)
             ) : null}
             {showDateUncertainty ? (
               item("Collection date confidence", `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)
             ) : null}
             {/* Author / Paper information */}
-            {displayPublicationInfo(getTraitFromNode(tip.n, "author"))}
+            {displayPublicationInfo(getTraitFromNode(tip.n, "author", {fullAuthorInfo: true}))}
             {/* try to join URL with accession, else display the one that's available */}
             {accessionAndUrl(tip.n)}
           </tbody>

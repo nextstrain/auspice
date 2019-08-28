@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
-import { prettyString } from "../../util/stringHelpers";
 import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { months, NODE_VISIBLE } from "../../util/globals";
@@ -177,7 +176,7 @@ class Info extends React.Component {
     this.props.filters[filterName].sort().forEach((itemName) => {
       const display = (
         <span>
-          {prettyString(itemName)}
+          {itemName}
           {" (" + this.props.totalStateCounts[filterName][itemName] + ")"}
         </span>
       );
