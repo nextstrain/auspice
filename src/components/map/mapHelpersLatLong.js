@@ -93,10 +93,6 @@ const createOrUpdateArcs = (visibleNodes, legendValues, colorBy, nodeColors, cur
   /* traverse visible nodes (for this location) to get numbers for each arc (i.e. each slice in the pie) */
   visibleNodes.forEach((n) => {
     const colorByValue = colorByIsGenotype ? n.currentGt: getTraitFromNode(n, colorBy);
-    if (!colorByValue) {
-      /* node could be missing a value for this coloring */
-      return;
-    }
     const arcIdx = legendValueToArcIdx[colorByValue];
     arcs[arcIdx]._count++;
     if (!arcs[arcIdx].color) arcs[arcIdx].color=nodeColors[n.arrayIdx];

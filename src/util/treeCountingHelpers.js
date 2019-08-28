@@ -1,4 +1,4 @@
-import { NODE_VISIBLE, isValueValid } from "./globals";
+import { NODE_VISIBLE } from "./globals";
 import { getTraitFromNode } from "./treeMiscHelpers";
 
 /**
@@ -16,10 +16,6 @@ export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) =
   nodes.forEach((node) => {
     traits.forEach((trait) => {                         // traits are "country" or "author" etc
       const value = getTraitFromNode(node, trait);      // value is "USA", "black" etc
-
-      if (!isValueValid(value)) {
-        return;
-      }
 
       if (terminalOnly && node.hasChildren) {
         return;

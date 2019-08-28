@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./item";
 import { headerFont, darkGrey } from "../../../globalStyles";
-import { legendRectSize, legendSpacing, fastTransitionDuration, months } from "../../../util/globals";
+import { legendRectSize, legendSpacing, fastTransitionDuration, months, UNDEFINED_VALUE } from "../../../util/globals";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 
@@ -160,7 +160,7 @@ class Legend extends React.Component {
    */
   legendItems() {
     const items = this.props.colorScale.legendValues
-      .filter((d) => d !== undefined)
+      .filter((d) => d !== UNDEFINED_VALUE)
       .map((d, i) => {
         return (
           <LegendItem
