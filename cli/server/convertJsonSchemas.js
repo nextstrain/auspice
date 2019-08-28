@@ -63,7 +63,7 @@ const setColorings = (v2, meta) => {
     const coloring = {
       key,
       title: prettyString(value.menuItem) || prettyString(value.legendTitle),
-      type: value.type === "continous" ? "continuous" : "categorical"
+      type: value.type === "continuous" ? "continuous" : "categorical"
     };
     if (value.color_map) {
       coloring.scale = value.color_map.map((s) =>
