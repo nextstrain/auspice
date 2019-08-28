@@ -74,6 +74,10 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
   while (ticks[ticks.length - 1] < pivots[pivots.length - 1]) {
     ticks.push((ticks[ticks.length - 1] + tick_step) * 10 / 10);
   }
+  let projection_pivot = null;
+  if ("projection_pivot" in rawJSON) {
+    projection_pivot = Math.round(parseFloat(rawJSON.projection_pivot) * 100) / 100;
+  }
   if (!tree.loaded) {
     throw new Error("tree not loaded");
   }
@@ -101,6 +105,7 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
     data,
     pivots,
     ticks,
-    matrix
+    matrix,
+    projection_pivot
   };
 };
