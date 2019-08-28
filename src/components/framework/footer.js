@@ -316,7 +316,7 @@ class Footer extends React.Component {
             const display = (
               <span>
                 {itemName}
-                {"(" + totalStateCount[itemName] + ")"}
+                {" (" + totalStateCount[itemName] + ")"}
               </span>
             );
             return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
