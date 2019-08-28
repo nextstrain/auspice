@@ -1,7 +1,12 @@
+* Add support for frequency projections. [See PR 777](https://github.com/nextstrain/auspice/pull/777)
+* Local auspice servers listen on only localhost by default instead of all interfaces. [See PR 781](https://github.com/nextstrain/auspice/pull/781)
+* update dependencies
+
+
 ## version 1.37.5 - 2019/08/09
+* Allo increased zoom levels in map. [See PR 765](https://github.com/nextstrain/auspice/pull/765
 
 ## version 1.37.4 - 2019/08/04
-
 * Improved layout of unrooted trees when zoomed into a clade. [See PR 754](https://github.com/nextstrain/auspice/pull/754)
 * Remove link to "deprecated" nextflu.org site from flu page footer.
 
