@@ -13,6 +13,7 @@
   "bin": {
     "auspice": "./auspice.js"
   },
+  "main": "index.js",
   "scripts": {
     "create-data-dir": "./scripts/create-data-dir.sh",
     "postinstall": "npm run create-data-dir",
