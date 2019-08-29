@@ -268,11 +268,10 @@ const storeTreeAsV2 = (v2, tree) => {
       /* Transfer the remaining `node.attr[x]` to `node.traits[x]` (different shape) */
       const traitKeys = Object.keys(node.attr)
         .filter((a) => !a.endsWith("_entropy") && !a.endsWith("_confidence"))
-        .filter((a) => !attrsToIgnore.includes(a));
+        .filter((a) => !(attrsToIgnore.includes(a) || allowedProperties.includes(a) || a==="gt"));
       if (traitKeys.length) node.traits = {};
-      const traitsToPretty = ["country", "region"]
       for (const trait of traitKeys) {
-        const data = traitsToPretty.includes(trait) ? {value: prettyString(node.attr[trait], {removeComma: true})} : {value: node.attr[trait]};
+        const data = {value: prettyString(node.attr[trait], {removeComma: true})};
         if (node.attr[`${trait}_confidence`]) {
           Object.keys(node.attr[`${trait}_confidence`]).forEach((key) => {
             const newKey = prettyString(key);
