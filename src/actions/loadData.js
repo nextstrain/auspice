@@ -84,15 +84,17 @@ const fetchDataAndDispatch = (dispatch, url, query, narrativeBlocks) => {
     fetchExtras += `&deprecatedSecondTree=${query.tt}`;
   }
 
-
   // fetchJSON(`${charonAPIAddress}request=mainJSON&url=${url}${fetchExtras}`)
+  let pathnameShouldBe;
   getDataset(`${url}${fetchExtras}`)
     .then((res) => {
+      pathnameShouldBe = queryString.parse(res.url.split("?")[1]).prefix;
       return res.json();
     })
     .then((json) => {
       dispatch({
         type: types.CLEAN_START,
+        pathnameShouldBe,
         ...createStateFromQueryOrJSONs({json, query, narrativeBlocks})
       });
       return {

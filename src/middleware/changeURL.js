@@ -119,8 +119,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   /* second switch: path change */
   switch (action.type) {
     case types.CLEAN_START:
-      if (action.url && !action.narrative) {
-        pathname = action.url;
+      if (action.pathnameShouldBe && !action.narrative) {
+        pathname = action.pathnameShouldBe;
       }
       break;
     case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE: {
