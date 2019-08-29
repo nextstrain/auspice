@@ -13,9 +13,10 @@ const unknownColor = "#AAAAAA";
 
 const getMinMaxFromTree = (nodes, nodesToo, attr) => {
   const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
-  const vals = arr.map((n) => getTraitFromNode(n, attr));
-  vals.filter((n) => n !== undefined)
-    .filter((item, i, ar) => ar.indexOf(item) === i);
+  const vals = arr.map((n) => getTraitFromNode(n, attr))
+    .filter((n) => n !== undefined)
+    .filter((item, i, ar) => ar.indexOf(item) === i)
+    .map((v) => +v); // coerce to numeric
   return [min(vals), max(vals)];
 };
 
@@ -179,11 +180,16 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       switch (colorBy) {
         case "num_date":
           /* we want the colorScale to "focus" on the tip dates, and be spaced according to sampling */
-          let rootDate = tree.nodes[0].num_date.value;
-          let vals = tree.nodes.filter((n) => !n.hasChildren).map((n) => n.num_date.value);
+          let rootDate = getTraitFromNode(tree.nodes[0], "num_date");
+          let vals = tree.nodes.filter((n) => !n.hasChildren)
+            .map((n) => getTraitFromNode(n, "num_date"));
           if (treeTooNodes) {
-            if (treeTooNodes[0].num_date.value < rootDate) rootDate = treeTooNodes[0].num_date.value;
-            vals.concat(treeTooNodes.filter((n) => !n.hasChildren).map((n) => n.num_date.value));
+            const treeTooRootDate = getTraitFromNode(treeTooNodes.nodes[0], "num_date");
+            if (treeTooRootDate < rootDate) rootDate = treeTooRootDate;
+            vals.concat(
+              treeTooNodes.filter((n) => !n.hasChildren)
+                .map((n) => getTraitFromNode(n, "num_date"))
+            );
           }
           vals = vals.sort();
           domain = [rootDate];

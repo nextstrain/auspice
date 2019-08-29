@@ -33,7 +33,11 @@ export const strainNameToIdx = (nodes, name) => {
 export const getIdxMatchingLabel = (nodes, labelName, labelValue) => {
   let i;
   for (i = 0; i < nodes.length; i++) {
-    if (nodes[i].labels !== undefined && nodes[i].labels[labelName] === labelValue) {
+    if (
+      nodes[i].branch_attrs &&
+      nodes[i].branch_attrs.labels !== undefined &&
+      nodes[i].branch_attrs.labels[labelName] === labelValue
+    ) {
       return i;
     }
   }

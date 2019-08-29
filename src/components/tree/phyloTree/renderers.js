@@ -122,11 +122,12 @@ export const drawTips = function drawTips() {
 
 /**
  * given a tree node, decide whether the branch should be rendered
- * This enforces the "hidden" property set in the dataset JSON
+ * This enforces the "hidden" property set on `node.node_attrs.hidden`
+ * in the dataset JSON
  * @return {string}
  */
 export const getBranchVisibility = (d) => {
-  const hiddenSetting = d.n.hidden;
+  const hiddenSetting = d.n.node_attrs && d.n.node_attrs.hidden;
   if (hiddenSetting &&
     (
       hiddenSetting === "always" ||

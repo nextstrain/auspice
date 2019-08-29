@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, UNDEFINED_VALUE } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { strainNameToIdx, getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -15,7 +15,7 @@ import { calcColorScale } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
-import { getTraitFromNode } from "../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode } from "../util/treeMiscHelpers";
 
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
@@ -24,17 +24,18 @@ export const doesColorByHaveConfidence = (controlsState, colorBy) =>
 export const getMinCalDateViaTree = (nodes, state) => {
   /* slider should be earlier than actual day */
   /* if no date, use some default dates - slider will not be visible */
-  const minNumDate = nodes[0].num_date ? nodes[0].num_date.value - 0.01 : state.dateMaxNumeric - defaultDateRange;
-  return numericToCalendar(minNumDate);
+  const minNumDate = getTraitFromNode(nodes[0], "num_date")
+  return (minNumDate === UNDEFINED_VALUE) ?
+    state.dateMaxNumeric - defaultDateRange :
+    numericToCalendar(minNumDate - 0.01);
 };
 
 export const getMaxCalDateViaTree = (nodes) => {
   let maxNumDate = reallySmallNumber;
   nodes.forEach((node) => {
-    if (node.num_date) {
-      if (node.num_date.value > maxNumDate) {
-        maxNumDate = node.num_date.value;
-      }
+    const numDate = getTraitFromNode(node, "num_date");
+    if (numDate !== UNDEFINED_VALUE && numDate > maxNumDate) {
+      maxNumDate = numDate;
     }
   });
   maxNumDate += 0.01; /* slider should be later than actual day */
@@ -272,8 +273,8 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
         }
       });
       /* check mutations */
-      if (node.mutations) {
-        const keys = Object.keys(node.mutations);
+      if (node.branch_attrs && node.branch_attrs.mutations) {
+        const keys = Object.keys(node.branch_attrs.mutations);
         if (keys.length > 1 || (keys.length === 1 && keys[0]!=="nuc")) aaMuts = true;
         if (keys.includes("nuc")) nucMuts = true;
       }
@@ -296,8 +297,11 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   }
 
   /* does the tree have date information? if not, disable controls, modify view */
-  state.branchLengthsToDisplay = !tree.nodes[0].num_date ? "divOnly" :
-    tree.nodes[0].div===undefined ? "dateOnly" : "divAndDate";
+  const numDateAtRoot = getTraitFromNode(tree.nodes[0], "num_date") !== UNDEFINED_VALUE;
+  const divAtRoot = getDivFromNode(tree.nodes[0]) !== undefined;
+  state.branchLengthsToDisplay = (numDateAtRoot && divAtRoot) ? "divAndDate" :
+    numDateAtRoot ? "dateOnly" :
+      "divOnly";
 
   /* if branchLengthsToDisplay is "divOnly", force to display by divergence
    * if branchLengthsToDisplay is "dateOnly", force to display by date
@@ -306,8 +310,10 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
     state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
 
   state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
-  state.temporalConfidence = (tree.nodes[0].num_date && tree.nodes[0].num_date.confidence) ?
-    {exists: true, display: true, on: false} : {exists: false, display: false, on: false};
+
+  state.temporalConfidence = getTraitFromNode(tree.nodes[0], "num_date", {confidence: true}) ?
+    {exists: true, display: true, on: false} :
+    {exists: false, display: false, on: false};
   return state;
 };
 

@@ -2,7 +2,7 @@
 import React from "react";
 import { infoNotification, warningNotification } from "../../actions/notifications";
 import { spaceBetweenTrees } from "../tree/tree";
-import { getTraitFromNode } from "../../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode } from "../../util/treeMiscHelpers";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -19,14 +19,14 @@ const treeToNewick = (root, temporal) => {
     if (node.hasChildren) {
       const children = [];
       node.children.forEach((child) => {
-        const subsubtree = recurse(child, temporal ? node.num_date.value : node.div);
+        const subsubtree = recurse(child, temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node));
         children.push(subsubtree);
       });
       subtree += "(" + children.join(",") + ")" + node.name + ":";
-      subtree += (temporal ? node.num_date.value : node.div) - parentX;
+      subtree += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
     } else { /* terminal node */
       let leaf = node.name + ":";
-      leaf += (temporal ? node.num_date.value : node.div) - parentX;
+      leaf += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
       subtree += leaf;
     }
     return subtree;

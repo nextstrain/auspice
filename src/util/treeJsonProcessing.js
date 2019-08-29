@@ -1,4 +1,6 @@
 import { getDefaultTreeState } from "../reducers/tree";
+import { getTraitFromNode, getVaccineFromNode } from "./treeMiscHelpers";
+import { UNDEFINED_VALUE } from "./globals";
 
 /**
 * for each node, calculate the number of subtending tips (alive or dead)
@@ -36,15 +38,16 @@ const processNodes = (nodes) => {
 };
 
 /**
- * Scan the tree for `node.labels` dictionaries and collect all available
+ * Scan the tree for `node.branch_attrs.labels` dictionaries and collect all available
  * (These are the options for the "Branch Labels" sidebar dropdown)
  * @param {Array} nodes tree nodes (flat)
  */
 const processBranchLabelsInPlace = (nodes) => {
   const availableBranchLabels = new Set();
   nodes.forEach((n) => {
-    if (n.labels) {
-      Object.keys(n.labels).forEach((labelName) => availableBranchLabels.add(labelName));
+    if (n.branch_attrs && n.branch_attrs.labels) {
+      Object.keys(n.branch_attrs.labels)
+        .forEach((labelName) => availableBranchLabels.add(labelName));
     }
   });
   return ["none", ...availableBranchLabels];
@@ -115,9 +118,10 @@ export const treeJsonToState = (treeJSON) => {
   appendParentsToTree(treeJSON);
   const nodesArray = flattenTree(treeJSON);
   const nodes = processNodes(nodesArray);
-  const vaccines = nodes.filter((d) =>
-    d.hasOwnProperty("vaccine") && (Object.keys(d.vaccine).length > 1 || Object.keys(d.vaccine)[0] !== "serum")
-  );
+  const vaccines = nodes.filter((d) => {
+    const v = getVaccineFromNode(d);
+    return (v && (Object.keys(v).length > 1 || Object.keys(v)[0] !== "serum"));
+  });
   const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
   return Object.assign({}, getDefaultTreeState(), {
     nodes, vaccines, availableBranchLabels, loaded: true

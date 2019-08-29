@@ -2,7 +2,7 @@ import React from "react";
 import { isValueValid } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
-import { getTraitFromNode } from "../../../util/treeMiscHelpers";
+import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode } from "../../../util/treeMiscHelpers";
 
 export const styles = {
   container: {
@@ -82,43 +82,42 @@ const accessionAndUrl = (node) => {
 
 
 const displayVaccineInfo = (d) => {
-  if (d.n.vaccine) {
-    const els = [];
-    if (d.n.vaccine.selection_date) {
-      els.push(
-        <tr key={"seldate"}>
-          <th>Vaccine selected</th>
-          <td>{d.n.vaccine.selection_date}</td>
-        </tr>
-      );
-    }
-    if (d.n.vaccine.start_date) {
-      els.push(
-        <tr key={"startdate"}>
-          <th>Vaccine start date</th>
-          <td>{d.n.vaccine.start_date}</td>
-        </tr>
-      );
-    }
-    if (d.n.vaccine.end_date) {
-      els.push(
-        <tr key={"enddate"}>
-          <th>Vaccine end date</th>
-          <td>{d.n.vaccine.end_date}</td>
-        </tr>
-      );
-    }
-    if (d.n.vaccine.serum) {
-      els.push(
-        <tr key={"serum"}>
-          <th>Serum strain</th>
-          <td/>
-        </tr>
-      );
-    }
-    return els;
+  const vaccineInfo = getVaccineFromNode(d.n);
+  if (!vaccineInfo) return null;
+  const renderElements = [];
+  if (vaccineInfo.selection_date) {
+    renderElements.push(
+      <tr key={"seldate"}>
+        <th>Vaccine selected</th>
+        <td>{vaccineInfo.selection_date}</td>
+      </tr>
+    );
   }
-  return null;
+  if (vaccineInfo.start_date) {
+    renderElements.push(
+      <tr key={"startdate"}>
+        <th>Vaccine start date</th>
+        <td>{vaccineInfo.start_date}</td>
+      </tr>
+    );
+  }
+  if (vaccineInfo.end_date) {
+    renderElements.push(
+      <tr key={"enddate"}>
+        <th>Vaccine end date</th>
+        <td>{vaccineInfo.end_date}</td>
+      </tr>
+    );
+  }
+  if (vaccineInfo.serum) {
+    renderElements.push(
+      <tr key={"serum"}>
+        <th>Serum strain</th>
+        <td/>
+      </tr>
+    );
+  }
+  return renderElements;
 };
 
 const displayPublicationInfo = (info) => {
@@ -151,7 +150,7 @@ const TipClickedPanel = ({tip, goAwayCallback}) => {
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
         <p style={infoPanelStyles.modalHeading}>
-          {`${getTraitFromNode(tip.n, "name")}`}
+          {`${tip.n.name}`}
         </p>
         <table>
           <tbody>
@@ -171,7 +170,7 @@ const TipClickedPanel = ({tip, goAwayCallback}) => {
               item("Collection date confidence", `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)
             ) : null}
             {/* Author / Paper information */}
-            {displayPublicationInfo(getTraitFromNode(tip.n, "author", {fullAuthorInfo: true}))}
+            {displayPublicationInfo(getFullAuthorInfoFromNode(tip.n))}
             {/* try to join URL with accession, else display the one that's available */}
             {accessionAndUrl(tip.n)}
           </tbody>
