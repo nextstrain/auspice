@@ -137,6 +137,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
 
     dispatch({
       type: types.CLEAN_START,
+      pathnameShouldBe: queryString.parse(response.url.split("?")[1]).prefix,
       ...createStateFromQueryOrJSONs({json: mainJson, query, narrativeBlocks})
     });
 

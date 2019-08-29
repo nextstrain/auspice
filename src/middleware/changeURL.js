@@ -119,8 +119,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   /* second switch: path change */
   switch (action.type) {
     case types.CLEAN_START:
-      if (action.url && !action.narrative) {
-        pathname = action.url;
+      if (action.pathnameShouldBe && !action.narrative) {
+        pathname = action.pathnameShouldBe;
       }
       /* we also double check that if there are 2 trees both are represented
       in the URL */
