@@ -162,8 +162,8 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout"];
-    const expectedTypes = ["string", "string", "string", "string"];
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate"];
+    const expectedTypes = ["string", "string", "string", "string", "boolean"];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (metadata.displayDefaults[keysToCheckFor[i]]) {
@@ -175,11 +175,6 @@ const modifyStateViaMetadata = (state, metadata) => {
           console.error("Skipping (meta.json) default for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
         }
       }
-    }
-    // TODO: why are these false / False
-    if (metadata.displayDefaults.mapTriplicate) {
-      // convert string to boolean; default is true; turned off with either false (js) or False (python)
-      state["mapTriplicate"] = (metadata.displayDefaults.mapTriplicate === 'false' || metadata.displayDefaults.mapTriplicate === 'False') ? false : true;
     }
   }
 

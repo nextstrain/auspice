@@ -394,7 +394,7 @@ class Map extends React.Component {
     let northEast;
 
     /* initial map bounds */
-    if (this.props.mapTriplicate === true) {
+    if (this.props.mapTriplicate) {
       southWest = L.latLng(-70, -360);
       northEast = L.latLng(80, 360);
     } else {
