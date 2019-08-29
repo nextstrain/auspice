@@ -26,6 +26,7 @@ npm install --save auspice
 See [customising auspice](customisations/introduction.md) for more information.
 
 ## Installing from source
+> These instructions (and more!) also live at [the Nextstrain docs](https://nextstrain.org/docs/getting-started/local-installation#install-auspice-from-source)
 ```bash
 git clone git@github.com:nextstrain/auspice.git
 cd auspice
@@ -34,7 +35,14 @@ npm install -g . # make "auspice" available globally
 ```
 
 Note that (at least on MacOS) this symlinks the source directory into the global `node_modules` folder so that changes to source code are automatically reflected in the globally available `auspice` command.
-We have had good success using a conda environment for development.
+
+To separate the npm-distributed and your development version of auspice, we recommend running Auspice inside of a virtual environment such as [Conda](https://conda.io/en/latest/).
+If you have Conda installed, you can set up a Conda environment named "`auspice`" with the correct version of Node by running:
+
+    conda create -n auspice nodejs=10
+    conda activate auspice
+
+Once you're inside of your newly created Conda environment, run the code from above (starting with `git clone...` through `npm install -g .`) Now, when you run `which auspice`, you should see that your Auspice path is within your newly created Conda environment.
 
 
 ## Developing
@@ -46,6 +54,8 @@ auspice develop --verbose
 ```
 (See `auspice develop -h` for further options)
 
+Note: when running auspice locally, be mindful of the [server-side code that completes data requests within auspice](/docs-src/docs/customisations/server/charonAPI.md).
+The code for external auspice servers to be imported is not yet implemented.
 
 ## Building auspice
 Install auspice from source (see above).
@@ -57,5 +67,3 @@ auspice build --verbose
 
 ## Running auspice
 See [running locally documentation](overview.md#running-auspice-locally).
-
-

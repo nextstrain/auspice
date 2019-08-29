@@ -2,11 +2,13 @@
 title: Auspice Server API
 ---
 
+# Auspice Server API (charon)
+
 > This API is largely based off the interface used by nextstrain.
 Most probably it will change dramatically over the coming weeks.
 
 The client (i.e. the auspice web page) makes requests to a server, for instance requesting a dataset file or requesting a listing of available datasets.
-The server is referred to as "charon".
+The server is referred to as "`charon`".
 Currently the server needs to handle three requests (detailed below), which are made to the same domain as the client (this may be changeable in the future).
 
 
