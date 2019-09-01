@@ -52,15 +52,16 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
   return domain;
 };
 
-const createDiscreteScale = (domain, type='discrete') => {
+const createDiscreteScale = (domain, type='categorical') => {
   // note: colors[n] has n colors
+  let colorList;
   if (type==="ordinal"){
-    const colorList = domain.length <= colors.length ?
+    colorList = domain.length <= colors.length ?
       colors[domain.length].slice() :
       colors[colors.length - 1].slice();
   }else{
-      const colorList = genotypeColors.slice();
-   }
+    colorList = genotypeColors.slice();
+  }
   /* set unknowns which appear in the domain to the unknownColor */
   const unknowns = ["unknown", "undefined", "unassigned", "NA", "NaN", "?"];
   for (const key of unknowns) {
@@ -68,7 +69,6 @@ const createDiscreteScale = (domain, type='discrete') => {
       colorList[domain.indexOf(key)] = unknownColor;
     }
   }
-  console.log(colorList);
   const scale = scaleOrdinal().domain(domain).range(colorList);
   return (val) => ((val === undefined || domain.indexOf(val) === -1)) ? unknownColor : scale(val);
 };
@@ -156,7 +156,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           .range(range);
         legendValues = domain;
       }
-    } else if (colorings && (colorings[colorBy].type === "categorical")  || (colorings[colorBy].type === "ordinal")) {
+    } else if (colorings && (colorings[colorBy].type === "categorical")) {
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
       colorScale = createDiscreteScale(legendValues, "categorical");
