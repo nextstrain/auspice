@@ -33,7 +33,7 @@ const assignCategory = (colorScale, categories, node, colorBy, isGenotype) => {
   return unassigned_label;
 };
 
-export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorScale, colorBy) => {
+export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorScale, colorBy, renormalize=false) => {
   /* color scale domain forms the categories in the stream graph */
   const categories = colorScale.legendValues.filter((d) => d !== undefined);
   categories.push(unassigned_label); /* for tips without a colorBy */
@@ -42,7 +42,7 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   const pivotsLen = pivots.length;
   categories.forEach((x) => {matrix[x] = new Array(pivotsLen).fill(0);});
   // let debugTipsSeen = 0;
-  const debugPivotTotals = new Array(pivotsLen).fill(0);
+  const pivotTotals = new Array(pivotsLen).fill(0);
   data.forEach((d) => {
     if (visibility[d.idx] === NODE_VISIBLE) {
       // debugTipsSeen++;
@@ -50,13 +50,23 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
       // if (category === unassigned_label) return;
       for (let i = 0; i < pivotsLen; i++) {
         matrix[category][i] += d.values[i];
-        debugPivotTotals[i] += d.values[i];
+        pivotTotals[i] += d.values[i];
         // if (i === pivotsLen - 1 && d.values[i] !== 0) {
         //   console.log("Pivot", frequencies.pivots[i], "strain", tree.nodes[d.idx].strain, "(clade #", tree.nodes[d.idx].strain, ") carried frequency of", d.values[i]);
         // }
       }
     }
   });
+  // renormalize the frequencies to the total sum of visible tips at each pivot.
+  // this is desirable in most cases, but not if filters are applied on the same
+  // property as colorby (which stratifies viruses for sequencing)
+  if (renormalize){
+    for (let cat in matrix){
+      for (let i=0; i<pivotsLen; i++){
+        matrix[category][i] /= pivotTotals[i];
+      }
+    }
+  }
 
   if (matrix[unassigned_label].reduce((a, b) => a + b, 0) === 0) {
     delete matrix[unassigned_label];

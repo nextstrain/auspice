@@ -8,6 +8,7 @@ import { format } from "d3-format";
 import { dataFont } from "../../globalStyles";
 import { unassigned_label } from "../../util/processFrequencies";
 import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype";
+import { numericToCalendar } from "../../util/dateHelpers";
 
 /* C O N S T A N T S */
 const opacity = 0.85;
@@ -296,7 +297,7 @@ export const drawStream = (
       .style("font-weight", 300)
       .html(
         `<p>${parseColorBy(colorBy, colorOptions)}: ${labels[i]}</p>
-        <p>Time point: ${pivots[pivotIdx]}</p>
+        <p>Time point: ${numericToCalendar(pivots[pivotIdx])}</p>
         <p>${frequencyText}: ${freqVal}</p>`
       );
   }
