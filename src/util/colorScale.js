@@ -52,11 +52,15 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
   return domain;
 };
 
-const createDiscreteScale = (domain) => {
+const createDiscreteScale = (domain, type='discrete') => {
   // note: colors[n] has n colors
-  const colorList = domain.length <= colors.length ?
-    colors[domain.length].slice() :
-    colors[colors.length - 1].slice();
+  if (type==="ordinal"){
+    const colorList = domain.length <= colors.length ?
+      colors[domain.length].slice() :
+      colors[colors.length - 1].slice();
+  }else{
+      const colorList = genotypeColors.slice();
+   }
   /* set unknowns which appear in the domain to the unknownColor */
   const unknowns = ["unknown", "undefined", "unassigned", "NA", "NaN", "?"];
   for (const key of unknowns) {
@@ -64,6 +68,7 @@ const createDiscreteScale = (domain) => {
       colorList[domain.indexOf(key)] = unknownColor;
     }
   }
+  console.log(colorList);
   const scale = scaleOrdinal().domain(domain).range(colorList);
   return (val) => ((val === undefined || domain.indexOf(val) === -1)) ? unknownColor : scale(val);
 };
@@ -151,12 +156,27 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           .range(range);
         legendValues = domain;
       }
-    } else if (colorings && (colorings[colorBy].type === "categorical" || colorings[colorBy].type === "ordinal")) {
-      // console.log("making a categorica / ordinal color scale for ", colorBy);
-      // TODO ordinal should use a different scale...
+    } else if (colorings && (colorings[colorBy].type === "categorical")  || (colorings[colorBy].type === "ordinal")) {
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
-      colorScale = createDiscreteScale(legendValues);
+      colorScale = createDiscreteScale(legendValues, "categorical");
+    }
+    else if (colorings && (colorings[colorBy].type === "ordinal") ) {
+      minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorings[colorBy]);
+      if (minMax[1]-minMax[0]>10){
+        continuous = true;
+        const range = colors[9];
+        const domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
+        const scale = scaleLinear().domain(domain).range(range);
+        colorScale = (val) => (val === undefined || val === false) ? unknownColor : scale(val);
+      }else{
+        continuous = false;
+        legendValues = []
+        for (let i=minMax[0]; i<=minMax[1]; i++){
+          legendValues.push(i);
+        }
+        colorScale = createDiscreteScale(legendValues, "ordinal");
+      }
     } else if (colorings && colorings[colorBy].type === "boolean") {
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
