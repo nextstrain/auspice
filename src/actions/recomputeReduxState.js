@@ -194,7 +194,7 @@ const modifyStateViaMetadata = (state, metadata) => {
   }
 
   /* if we lack genome annotations, remove entropy from panels to display */
-  if (!metadata.genomeAnnotations) {
+  if (!metadata.genomeAnnotations || !metadata.genomeAnnotations.nuc) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
   }
@@ -629,7 +629,7 @@ export const createStateFromQueryOrJSONs = ({
   if (query.clade) {
     tree = modifyTreeStateVisAndBranchThickness(tree, undefined, query.clade, controls);
   } else { /* if not specifically given in URL, zoom to root */
-    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, 'root', controls);
+    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, undefined, controls);
   }
   tree = modifyTreeStateVisAndBranchThickness(tree, query.s, undefined, controls);
   if (treeToo && treeToo.loaded) {

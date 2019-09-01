@@ -60,9 +60,12 @@ const calcBranchThickness = (nodes, visibility, rootIdx) => {
   if (!maxTipCount) {
     maxTipCount = 1;
   }
-  return nodes.map((d, idx) => (
-    visibility[idx] === 2 ? freqScale((d.tipCount + 5) / (maxTipCount + 5)) : 0.5
-  ));
+  return nodes.map((d, idx) => {
+    if (visibility[idx] === NODE_VISIBLE) {
+      return freqScale((d.tipCount + 5) / (maxTipCount + 5));
+    }
+    return 0.5;
+  });
 };
 
 /* recursively mark the parents of a given node active

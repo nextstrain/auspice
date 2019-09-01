@@ -47,7 +47,7 @@ const processAnnotations = (annotations) => {
 };
 
 export const entropyCreateState = (genomeAnnotations) => {
-  if (genomeAnnotations) {
+  if (genomeAnnotations && genomeAnnotations.nuc) {
     const ant = getAnnotations(genomeAnnotations);
     const annotations = ant[0];
     const lengthSequence = ant[1][0].end;

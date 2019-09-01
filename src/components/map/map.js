@@ -12,14 +12,14 @@ import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./
 import {
   createDemeAndTransmissionData,
   updateDemeAndTransmissionDataColAndVis,
-  updateDemeAndTransmissionDataLatLong
+  updateTransmissionDataLatLong,
+  updateDemeDataLatLong
 } from "./mapHelpersLatLong";
 import { changeDateFilter } from "../../actions/tree";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { lightGrey, goColor, pauseColor } from "../../globalStyles";
-import { errorNotification } from "../../actions/notifications";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -204,13 +204,7 @@ class Map extends React.Component {
         this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
       }
 
-      const {
-        demeData,
-        transmissionData,
-        demeIndices,
-        transmissionIndices,
-        demesMissingLatLongs
-      } = createDemeAndTransmissionData(
+      const {demeData, transmissionData, demeIndices, transmissionIndices} = createDemeAndTransmissionData(
         this.props.nodes,
         this.props.visibility,
         this.props.geoResolution,
@@ -220,19 +214,9 @@ class Map extends React.Component {
         this.state.map,
         this.props.pieChart,
         this.props.legendValues,
-        this.props.colorBy
+        this.props.colorBy,
+        this.props.dispatch
       );
-
-      const filteredDemesMissingLatLongs = [...demesMissingLatLongs].filter((value) => {
-        return value !== "Unknown" || value !== "unknown";
-      });
-
-      if (filteredDemesMissingLatLongs.size) {
-        this.props.dispatch(errorNotification({
-          message: "The following demes are missing lat/long information",
-          details: [...filteredDemesMissingLatLongs].join(", ")
-        }));
-      }
 
       // const latLongs = this.latLongs(demeData, transmissionData); /* no reference stored, we recompute this for now rather than updating in place */
       const d3elems = drawDemesAndTransmissions(
@@ -294,14 +278,11 @@ class Map extends React.Component {
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
 
-      const {
-        newDemes,
-        newTransmissions
-      } = updateDemeAndTransmissionDataLatLong(
-        this.state.demeData,
-        this.state.transmissionData,
-        this.state.map
-      );
+      if (!this.state.demeData || !this.state.transmissionData) return;
+
+      const newDemes = updateDemeDataLatLong(this.state.demeData, this.state.map);
+      const newTransmissions = updateTransmissionDataLatLong(this.state.transmissionData, this.state.map);
+
       updateOnMoveEnd(
         newDemes,
         newTransmissions,
@@ -310,6 +291,8 @@ class Map extends React.Component {
         this.props.dateMaxNumeric,
         this.props.pieChart
       );
+
+      this.setState({demeData: newDemes, transmissionData: newTransmissions});
     }
   }
   getGeoRange() {
@@ -344,16 +327,47 @@ class Map extends React.Component {
    */
   maybeUpdateDemesAndTransmissions(nextProps) {
     if (!this.state.map || !this.props.treeLoaded || !this.state.d3elems) { return; }
-    // const colorOrVisibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion || nextProps.colorScaleVersion !== this.props.colorScaleVersion;
     const visibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion;
     const haveData = nextProps.nodes && nextProps.visibility && nextProps.geoResolution && nextProps.nodeColors;
 
-    if (
-      // colorOrVisibilityChange &&
-      visibilityChange &&
-      haveData
-    ) {
-      timerStart("updateDemesAndTransmissions");
+    if (!(visibilityChange && haveData)) { return; }
+
+    timerStart("updateDemesAndTransmissions");
+    if (this.props.geoResolution !== nextProps.geoResolution) {
+      /* This `if` statement added as part of https://github.com/nextstrain/auspice/issues/722
+       * and should be a prime candidate for refactoring in https://github.com/nextstrain/auspice/issues/735
+       */
+      const {demeData, transmissionData, demeIndices, transmissionIndices} = createDemeAndTransmissionData(
+        nextProps.nodes,
+        nextProps.visibility,
+        nextProps.geoResolution,
+        nextProps.nodeColors,
+        nextProps.mapTriplicate,
+        nextProps.metadata,
+        this.state.map,
+        nextProps.pieChart,
+        nextProps.legendValues,
+        nextProps.colorBy,
+        nextProps.dispatch
+      );
+      const d3elems = drawDemesAndTransmissions(
+        demeData,
+        transmissionData,
+        this.state.d3DOMNode,
+        this.state.map,
+        nextProps.nodes,
+        nextProps.dateMinNumeric,
+        nextProps.dateMaxNumeric,
+        nextProps.pieChart
+      );
+      this.setState({
+        d3elems,
+        demeData,
+        transmissionData,
+        demeIndices,
+        transmissionIndices
+      });
+    } else {
       const { newDemes, newTransmissions } = updateDemeAndTransmissionDataColAndVis(
         this.state.demeData,
         this.state.transmissionData,
@@ -367,7 +381,6 @@ class Map extends React.Component {
         nextProps.colorBy,
         nextProps.legendValues
       );
-
       updateVisibility(
         /* updated in the function above */
         newDemes,
@@ -385,8 +398,8 @@ class Map extends React.Component {
         demeData: newDemes,
         transmissionData: newTransmissions
       });
-      timerEnd("updateDemesAndTransmissions");
     }
+    timerEnd("updateDemesAndTransmissions");
   }
 
   getInitialBounds() {
@@ -422,7 +435,7 @@ class Map extends React.Component {
       scrollWheelZoom: false,
       maxBounds: this.getInitialBounds(),
       minZoom: 2,
-      maxZoom: 10,
+      maxZoom: 14,
       zoomSnap: 0.5,
       zoomControl: false,
       /* leaflet sleep see https://cliffcloud.github.io/Leaflet.Sleep/#summary */
@@ -519,9 +532,10 @@ class Map extends React.Component {
     this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
   }
   render() {
+    const transmissionsExist = this.state.transmissionData && this.state.transmissionData.length;
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
-      <Card center title="Transmissions">
+      <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
         {this.maybeCreateMapDiv()}
       </Card>
     );

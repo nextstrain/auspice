@@ -1,5 +1,33 @@
-## version 1.36.6 - 2019/05/18
+## version 1.38.0 - 2019/08/29
 
+* Add support for frequency projections. [See PR 777](https://github.com/nextstrain/auspice/pull/777)
+* Local auspice servers listen on only localhost by default instead of all interfaces. [See PR 781](https://github.com/nextstrain/auspice/pull/781)
+* update dependencies
+
+
+## version 1.37.5 - 2019/08/09
+* Allo increased zoom levels in map. [See PR 765](https://github.com/nextstrain/auspice/pull/765
+
+## version 1.37.4 - 2019/08/04
+* Improved layout of unrooted trees when zoomed into a clade. [See PR 754](https://github.com/nextstrain/auspice/pull/754)
+* Remove link to "deprecated" nextflu.org site from flu page footer.
+
+## version 1.37.3 - 2019/07/29
+* Reinstate github dataset link in sidebar for community builds
+
+## version 1.37.2 - 2019/07/20
+* Fix two bugs related to (a) "root" appearing as the selected clade in the URL and (b) applying filtering would remove the selected clade from the URL. See [issue #744](https://github.com/nextstrain/auspice/issues/744) and [PR 746](https://github.com/nextstrain/auspice/pull/746).
+* Fix bug where auspice would crash if the JSON contained an "annotation" property but not a "annotation.nuc" key. See [issue #732](https://github.com/nextstrain/auspice/issues/732)
+* The Map panel title is now "Grography" when transmissions are not inferred. See [issue #743](https://github.com/nextstrain/auspice/issues/743)
+
+## version 1.37.1 - 2019/07/13
+* Fig a bug where "unknown" values of a discrete scales (e.g. "?") could be given a colour. They are now grey.
+
+## version 1.37.0 - 2019/07/09
+* Fix two bugs relating to narratives and the Map component. [See PR 736](https://github.com/nextstrain/auspice/pull/736)
+* Improve logic behind when to display tip labels on the tree
+
+## version 1.36.6 - 2019/05/18
 * Improve minor axis tick spacing on tree. [See PR 725](https://github.com/nextstrain/auspice/pull/725)
 * Entropy calculations ignore ambiguous bases [See PR 723](https://github.com/nextstrain/auspice/pull/723)
 

@@ -76,6 +76,7 @@ const run = (args) => {
   /* Basic server set up */
   const app = express();
   app.set('port', process.env.PORT || 4000);
+  app.set('host', process.env.HOST || "localhost");
   app.use(compression());
   app.use(nakedRedirect({reverse: true})); /* redirect www.name.org to name.org */
 
@@ -99,9 +100,11 @@ const run = (args) => {
     res.sendFile(path.join(baseDir, "index.html"));
   });
 
-  const server = app.listen(app.get('port'), () => {
+  const server = app.listen(app.get('port'), app.get('host'), () => {
     utils.log("\n\n---------------------------------------------------");
-    console.log(chalk.blueBright("Auspice server now running at ") + chalk.blueBright.underline.bold("http://localhost:" + server.address().port));
+    const host = app.get('host');
+    const {port} = server.address();
+    console.log(chalk.blueBright("Auspice server now running at ") + chalk.blueBright.underline.bold(`http://${host}:${port}`));
     if (args.customBuild) {
       utils.log(`Using a customised auspice build from this directory.`);
     } else {

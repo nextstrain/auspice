@@ -57,15 +57,15 @@ const createDiscreteScale = (domain) => {
   const colorList = domain.length <= colors.length ?
     colors[domain.length].slice() :
     colors[colors.length - 1].slice();
-
-  /* if NA / undefined / unknown, change the colours to grey */
-  for (const key of ["unknown", "undefined", "unassigned", "NA", "NaN"]) {
+  /* set unknowns which appear in the domain to the unknownColor */
+  const unknowns = ["unknown", "undefined", "unassigned", "NA", "NaN", "?"];
+  for (const key of unknowns) {
     if (domain.indexOf(key) !== -1) {
       colorList[domain.indexOf(key)] = unknownColor;
     }
   }
   const scale = scaleOrdinal().domain(domain).range(colorList);
-  return (val) => (val === undefined) ? unknownColor : scale(val);
+  return (val) => ((val === undefined || domain.indexOf(val) === -1)) ? unknownColor : scale(val);
 };
 
 const booleanColorScale = (val) => {
