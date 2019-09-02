@@ -63,7 +63,7 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   if (renormalize){
     for (let cat in matrix){
       for (let i=0; i<pivotsLen; i++){
-        matrix[category][i] /= pivotTotals[i];
+        matrix[category][i] /= (1e-10 + pivotTotals[i]);
       }
     }
   }
