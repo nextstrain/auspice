@@ -61,7 +61,7 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   // this is desirable in most cases, but not if filters are applied on the same
   // property as colorby (which stratifies viruses for sequencing)
   if (renormalize){
-    for (let cat in matrix){
+    for (let category in matrix){
       for (let i=0; i<pivotsLen; i++){
         matrix[category][i] /= (1e-10 + pivotTotals[i]);
       }
