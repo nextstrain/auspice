@@ -55,12 +55,10 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
 const createDiscreteScale = (domain, type='categorical') => {
   // note: colors[n] has n colors
   let colorList;
-  if (type==="ordinal"){
+  if (type==="ordinal" || type==="categorical"){
     colorList = domain.length <= colors.length ?
       colors[domain.length].slice() :
       colors[colors.length - 1].slice();
-  }else{
-    colorList = genotypeColors.slice();
   }
   /* set unknowns which appear in the domain to the unknownColor */
   const unknowns = ["unknown", "undefined", "unassigned", "NA", "NaN", "?"];
@@ -136,6 +134,10 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       .range([unknownColor, ...genotypeColors]);
   } else if (colorings && colorings[colorBy]) {
     /* Is the scale set in the provided colorings object? */
+    let minMax;
+    if (colorings[colorBy].type==="continuous" || colorings[colorBy].type==="ordinal"){
+      minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorings[colorBy]);
+    }
     if (colorings[colorBy].scale) {
       // console.log(`calcColorScale: colorBy ${colorBy} provided us with a scale (list of [trait, hex])`);
       const scale = colorings[colorBy].scale;
@@ -156,35 +158,24 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           .range(range);
         legendValues = domain;
       }
-    } else if (colorings && (colorings[colorBy].type === "categorical")) {
+    } else if (colorings[colorBy].type === "categorical") {
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
       colorScale = createDiscreteScale(legendValues, "categorical");
-    }
-    else if (colorings && (colorings[colorBy].type === "ordinal") ) {
-      minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorings[colorBy]);
-      if (minMax[1]-minMax[0]>10){
-        continuous = true;
-        const range = colors[9];
-        const domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
-        const scale = scaleLinear().domain(domain).range(range);
-        colorScale = (val) => (val === undefined || val === false) ? unknownColor : scale(val);
-      }else{
-        continuous = false;
-        legendValues = []
-        for (let i=minMax[0]; i<=minMax[1]; i++){
-          legendValues.push(i);
-        }
-        colorScale = createDiscreteScale(legendValues, "ordinal");
+    } else if (colorings[colorBy].type === "ordinal" && minMax[1]-minMax[0]<=colors.length) {
+      continuous = false;
+      legendValues = []
+      for (let i=minMax[0]; i<=minMax[1]; i++){
+        legendValues.push(i);
       }
-    } else if (colorings && colorings[colorBy].type === "boolean") {
+      colorScale = createDiscreteScale(legendValues, "ordinal");
+    } else if (colorings[colorBy].type === "boolean") {
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
       colorScale = booleanColorScale;
-    } else if (colorings && colorings[colorBy].type === "continuous") {
+    } else if (colorings[colorBy].type === "continuous" || (colorings[colorBy].type==="ordinal" && (minMax[1]-minMax[0]>colors.length))) {
       // console.log("making a continuous color scale for ", colorBy);
       continuous = true;
-      let minMax;
       switch (colorBy) {
         case "lbi":
           minMax = [0, 0.7];
