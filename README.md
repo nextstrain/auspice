@@ -1,13 +1,12 @@
 [![Build Status](https://travis-ci.com/nextstrain/auspice.svg?branch=master)](https://travis-ci.com/nextstrain/auspice)
 [![NPM version](https://img.shields.io/npm/v/auspice.svg?style=flat)](https://www.npmjs.com/package/auspice)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![BrowserStack](src/images/Browserstack-logo.svg)](https://www.browserstack.com)
 
 ## Introduction
 
-Auspice is an open-source interactive web app for visualising phylogenomic data.
-It is the app that powers all the visualisation on [nextstrain.org](https://nextstrain.org), which aims to provide a continually-updated view of publicly available pathogen genome data.
-Auspice was designed to aid epidemiological understanding and improve outbreak response, but is able to visualise a diverse range of datasets.
+Auspice is an open-source interactive web app for visualizing phylogenomic data.
+It is the app that powers all the visualization on [nextstrain.org](https://nextstrain.org), which aims to provide a continually-updated view of publicly available pathogen genome data.
+Auspice was designed to aid epidemiological understanding and improve outbreak response, but is able to visualize a diverse range of datasets.
 
 
 **Please see [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice) for further details.**
