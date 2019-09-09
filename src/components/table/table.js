@@ -51,7 +51,7 @@ class Table extends React.Component {
             columns.push({Header:"Name", accessor:"name"});
             columns.push({Header:"Accession", accessor:"accession"});
             columns.push({Header:"Date", accessor:"date"});
-            for (let t in props.nodes[i].shell.n.traits){
+            for (let t in props.nodes[i].node_attrs){
               if (t!=="num_date"){
                 columns.push({Header:t, accessor:t});
               }
@@ -63,10 +63,10 @@ class Table extends React.Component {
           d['name'] = props.nodes[i].name;
           d['accession'] = props.nodes[i].accession;
           d['url'] = props.nodes[i].url;
-          d['date'] = props.nodes[i].shell.n.num_date.value.toFixed(2);
+          d['date'] = props.nodes[i].node_attrs.num_date.value.toFixed(2);
           d['index'] = props.nodes[i].arrayIdx;
-          for (let t in props.nodes[i].shell.n.traits){
-            d[t] = props.nodes[i].shell.n.traits[t].value;
+          for (let t in props.nodes[i].node_attrs){
+            d[t] = props.nodes[i].node_attrs[t].value;
           }
           nodes.push(d);
         }
