@@ -2,16 +2,22 @@ import queryString from "query-string";
 import * as types from "../actions/types";
 import { numericToCalendar } from "../util/dateHelpers";
 
-/* What is this middleware?
-This middleware acts to keep the app state and the URL query state in sync by intercepting actions
-and updating the URL accordingly. Thus, in theory, this middleware can be disabled and the app will still work
-as expected.
 
-The only modification of redux state by this app is (potentially) an action of type types.URL
-which is used to "save" the current page so we can diff against a new one!
-*/
-
-// eslint-disable-next-line
+/**
+ * This middleware acts to keep the app state and the URL query state in sync by
+ * intercepting actions and updating the URL accordingly. Thus, in theory, this
+ * middleware can be disabled and the app will still work as expected.
+ *
+ * The only modification of redux state by this app is (potentially) an action
+ * of type types.UPDATE_PATHNAME which is used to "save" the current pathname
+ * so we can diff against a new one.
+ *
+ * This is the way by which the URL updates (e.g. when the server auto-completes
+ * a URL from /flu -> /flu/seasonal/h3n2/ha/3y, when you change the color-by,
+ * or when you change dataset via the dropdowns)
+ *
+ * @param {store} store: a Redux store
+ */
 export const changeURLMiddleware = (store) => (next) => (action) => {
   const state = store.getState(); // this is "old" state, i.e. before the reducers have updated by this action
   const result = next(action); // send action to other middleware / reducers
@@ -119,8 +125,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   /* second switch: path change */
   switch (action.type) {
     case types.CLEAN_START:
-      if (action.url && !action.narrative) {
-        pathname = action.url;
+      if (action.pathnameShouldBe && !action.narrative) {
+        pathname = action.pathnameShouldBe;
       }
       /* we also double check that if there are 2 trees both are represented
       in the URL */
@@ -143,13 +149,12 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.PAGE_CHANGE:
       /* desired behaviour depends on the displayComponent selected... */
-      if (action.displayComponent === "main" || action.displayComponent === "datasetLoader") {
+      if (action.displayComponent === "main" || action.displayComponent === "datasetLoader" || action.displayComponent === "splash") {
         pathname = action.path || pathname;
-      } else if (action.displayComponent === "splash") {
-        pathname = action.path;
       } else if (pathname.startsWith(`/${action.displayComponent}`)) {
         // leave the pathname alone!
       } else {
+        // fallthrough
         pathname = action.displayComponent;
       }
       break;
@@ -176,18 +181,17 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
   }
 
+  /* small modifications to desired pathname / query */
   Object.keys(query).filter((q) => query[q] === "").forEach((k) => delete query[k]);
   let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/');
   if (search) {search = "?" + search;}
   if (!pathname.startsWith("/")) {pathname = "/" + pathname;}
 
+  /* now that we have determined our desired pathname & query we modify the URL */
   if (pathname !== window.location.pathname || search !== window.location.search) {
     let newURLString = pathname;
     if (search) {newURLString += search;}
-    // if (pathname !== window.location.pathname) {console.log(pathname, window.location.pathname)}
-    // if (window.location.search !== search) {console.log(window.location.search, search)}
-    // console.log(`Action ${action.type} Changing URL from ${window.location.href} -> ${newURLString} (pushState: ${action.pushState})`);
-    if (action.pushState === true) {
+    if (action.pushState) {
       window.history.pushState({}, "", newURLString);
     } else {
       window.history.replaceState({}, "", newURLString);

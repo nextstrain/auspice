@@ -2,7 +2,7 @@ import { scaleLinear, scaleOrdinal } from "d3-scale";
 import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
-import { genericDomain, colors, genotypeColors, isValueValid } from "./globals";
+import { genericDomain, colors, genotypeColors, isValueValid, UNDEFINED_VALUE } from "./globals";
 import { countTraitsAcrossTree } from "./treeCountingHelpers";
 import { getExtraVals } from "./colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
@@ -13,9 +13,10 @@ const unknownColor = "#AAAAAA";
 
 const getMinMaxFromTree = (nodes, nodesToo, attr) => {
   const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
-  const vals = arr.map((n) => getTraitFromNode(n, attr));
-  vals.filter((n) => n !== undefined)
-    .filter((item, i, ar) => ar.indexOf(item) === i);
+  const vals = arr.map((n) => getTraitFromNode(n, attr))
+    .filter((n) => n !== undefined)
+    .filter((item, i, ar) => ar.indexOf(item) === i)
+    .map((v) => +v); // coerce to numeric
   return [min(vals), max(vals)];
 };
 
@@ -56,15 +57,15 @@ const createDiscreteScale = (domain) => {
   const colorList = domain.length <= colors.length ?
     colors[domain.length].slice() :
     colors[colors.length - 1].slice();
-
-  /* if NA / undefined / unknown, change the colours to grey */
-  for (const key of ["unknown", "undefined", "unassigned", "NA", "NaN"]) {
+  /* set unknowns which appear in the domain to the unknownColor */
+  const unknowns = ["unknown", "undefined", "unassigned", "NA", "NaN", "?"];
+  for (const key of unknowns) {
     if (domain.indexOf(key) !== -1) {
       colorList[domain.indexOf(key)] = unknownColor;
     }
   }
   const scale = scaleOrdinal().domain(domain).range(colorList);
-  return (val) => (val === undefined) ? unknownColor : scale(val);
+  return (val) => ((val === undefined || domain.indexOf(val) === -1)) ? unknownColor : scale(val);
 };
 
 const booleanColorScale = (val) => {
@@ -179,11 +180,16 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       switch (colorBy) {
         case "num_date":
           /* we want the colorScale to "focus" on the tip dates, and be spaced according to sampling */
-          let rootDate = tree.nodes[0].num_date.value;
-          let vals = tree.nodes.filter((n) => !n.hasChildren).map((n) => n.num_date.value);
+          let rootDate = getTraitFromNode(tree.nodes[0], "num_date");
+          let vals = tree.nodes.filter((n) => !n.hasChildren)
+            .map((n) => getTraitFromNode(n, "num_date"));
           if (treeTooNodes) {
-            if (treeTooNodes[0].num_date.value < rootDate) rootDate = treeTooNodes[0].num_date.value;
-            vals.concat(treeTooNodes.filter((n) => !n.hasChildren).map((n) => n.num_date.value));
+            const treeTooRootDate = getTraitFromNode(treeTooNodes.nodes[0], "num_date");
+            if (treeTooRootDate < rootDate) rootDate = treeTooRootDate;
+            vals.concat(
+              treeTooNodes.filter((n) => !n.hasChildren)
+                .map((n) => getTraitFromNode(n, "num_date"))
+            );
           }
           vals = vals.sort();
           domain = [rootDate];
@@ -227,7 +233,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   if (error) {
     console.error("ColorScale fallthrough for ", colorBy);
     continuous = false;
-    legendValues = ["unknown"];
+    legendValues = [UNDEFINED_VALUE];
     colorScale = () => unknownColor;
   }
 

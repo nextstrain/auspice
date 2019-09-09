@@ -1,10 +1,11 @@
 const utils = require("../utils");
 
-/* this is from "../../src/util/stringHelpers" but can't be imported here
- * In v1 schemas, provided values were liable to be transformed before rendering.
- * This is not the case for v2 where we generally try to render strings as provided
+/** In auspice v1, the `prettyString` function was used extensively to transform values
+ * for "nicer" display. v2 JSONs intentially avoid this -- the strings are intended to
+ * be displayed as-is. This function is preserved here to aid in converting v1 JSONs
+ * to v2 JSONs.
  */
-const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false, stripEtAl = false} = {}) => {
+const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false, stripEtAl = false, lowerEtAl = false} = {}) => {
   if (!x && x!== 0) {
     return "";
   }
@@ -22,6 +23,9 @@ const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, remove
     if (removeComma) {
       x = x.replace(/,/g, "");
     }
+    if (lowerEtAl) {
+      x = x.replace('Et Al', 'et al');
+    }
     if (stripEtAl) {
       x = x.replace('et al.', '').replace('Et Al.', '').replace('et al', '').replace('Et Al', '');
     }
@@ -34,6 +38,17 @@ const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, remove
   return x;
 };
 
+const formatURLString = (x) => {
+  let url = x;
+  if (url.startsWith("https_")) {
+    url = url.replace(/^https_/, "https:");
+  } else if (url.startsWith("http_")) {
+    url = url.replace(/^https_/, "http:");
+  }
+  return url;
+};
+
+
 const traverseTree = (node, cb) => {
   cb(node);
   if (node.children) {
@@ -42,45 +57,44 @@ const traverseTree = (node, cb) => {
 };
 
 const setColorings = (v2, meta) => {
-  v2.colorings = {};
+  v2.colorings = [];
   const color_options = meta.color_options;
   for (const [key, value] of Object.entries(color_options)) {
-    v2.colorings[key] = {};
-    v2.colorings[key].title = value.menuItem || value.legendTitle;
-    if (value.type === "continuous") {
-      v2.colorings[key].type = "continuous";
-    } else {
-      v2.colorings[key].type = "categorical"; // or "ordinal"
-    }
+    const coloring = {
+      key,
+      title: prettyString(value.menuItem) || prettyString(value.legendTitle),
+      type: value.type === "continuous" ? "continuous" : "categorical"
+    };
     if (value.color_map) {
-      v2.colorings[key].scale = value.color_map;
+      coloring.scale = value.color_map.map((s) =>
+        [prettyString(s[0], {removeComma: true}), s[1]]
+      );
     }
     if (key === "authors") {
-      v2.colorings.author = v2.colorings[key];
-      delete v2.colorings[key];
+      coloring.key = "author";
     }
+    v2.colorings.push(coloring);
   }
 };
 
-const setAuthorInfo = (v2, meta, tree) => {
+const setAuthorInfoOnTree = (v2, meta) => {
   /* v1 had an author_info property & the node.attr.authors property
    * v2 has all the info set on the node itself at node.author
    */
   if (!meta.author_info) {
     return;
   }
-  traverseTree(tree, (node) => {
+  traverseTree(v2.tree, (node) => {
     if (node.attr && node.attr.authors) {
       const v1author = node.attr.authors;
       const v1info = meta.author_info[v1author];
-      delete node.attr.authors;
       if (!v1info) return;
-      node.attr.author = {};
-      if (v1info.title) node.attr.author.title = v1info.title;
-      if (v1info.journal) node.attr.author.journal = v1info.journal;
-      if (v1info.paper_url) node.attr.author.paper_url = v1info.paper_url;
-      node.attr.author.author = prettyString(v1author);
-      node.attr.author.value = v1author;
+      node.node_attrs.author = {};
+      if (v1info.title) node.node_attrs.author.title = v1info.title;
+      if (v1info.journal) node.node_attrs.author.journal = v1info.journal;
+      if (v1info.paper_url) node.node_attrs.author.paper_url = formatURLString(v1info.paper_url);
+      node.node_attrs.author.author = prettyString(v1author, {camelCase: false});
+      node.node_attrs.author.value = v1author;
     }
   });
 };
@@ -150,155 +164,192 @@ const setMiscMetaProperties = (v2, meta) => {
     }
     delete meta.defaults;
   }
-  // GEO[GRAPHIC_INFO]
+  // GEO -> GEO_RESOLUTIONS (note that the shape is different)
   if (meta.geo) {
-    v2.geographic_info = meta.geo;
+    v2.geo_resolutions = [];
+    for (const [key, demes] of Object.entries(meta.geo)) {
+      const prettyDemes = {};
+      Object.keys(demes).forEach((location) => {
+        prettyDemes[prettyString(location, {removeComma: true})] = demes[location];
+      });
+      v2.geo_resolutions.push({key, demes: prettyDemes});
+    }
   }
 };
 
-const setVaccineChoicesOnNodes = (meta, tree) => {
-  if (meta.vaccine_choices) {
-    traverseTree(tree, (n) => {
-      if (meta.vaccine_choices[n.strain]) {
-        n.vaccine = {
-          /* in v1 JSONs the only date provided was (typically) the selecion date,
-          but note that the cross is always drawn on the tip (i.e. sample date) */
-          selection_date: meta.vaccine_choices[n.strain]
-        };
+const setVaccineChoicesOnNodes = (v2, v1meta) => {
+  if (!v1meta.vaccine_choices) return;
+
+  /* vaccine choices is a dict of strain name -> selection date (string) */
+  const vaxChoices = new Set(Object.keys(v1meta.vaccine_choices));
+  traverseTree(v2.tree, (n) => {
+    if (vaxChoices.has(n.name)) {
+      if (!n.node_attrs.vaccine) n.node_attrs.vaccine = {};
+      n.node_attrs.vaccine.selection_date = v1meta.vaccine_choices[n.name];
+    }
+  });
+};
+
+
+/**
+ * Note: branch labels were hardcoded into auspice v1 (aa + clade)
+ */
+const setLabels = (v2) => {
+  traverseTree(v2.tree, (node) => {
+    /* are their aa mutations? */
+    if (node.branch_attrs && node.branch_attrs.mutations) {
+      const mutations = node.branch_attrs.mutations;
+      const aaMutsToLabel = Object.keys(mutations)
+        .filter((key) => key !== "nuc")
+        .map((aa) => `${aa}: ${mutations[aa].join(", ")}`);
+      if (aaMutsToLabel.length) {
+        if (!node.branch_attrs.labels) node.branch_attrs.labels = {};
+        node.branch_attrs.labels.aa = aaMutsToLabel.join("; ");
+      }
+    }
+
+    /* clade label */
+    if (node.attr.clade_name || node.attr.clade_annotation) {
+      if (!node.branch_attrs.labels) node.branch_attrs.labels = {};
+      node.branch_attrs.labels.clade = node.attr.clade_annotation || node.attr.clade_name;
+    }
+  });
+};
+
+/**
+ * Set the basic properties on each & every node in the tree
+ * `name` {string}, `node_attrs` {obj}, `branch_attrs` {obj}
+ * Note that `children` is not different between v1 & v2
+ * @param {*} v2 v2 JSON to be modified
+ * @param {*} tree v1 tree JSON data
+ */
+const setBasicTreeStructure = (v2, tree) => {
+  traverseTree(tree, (node) => {
+    // convert node.strain to node.name & store as a top-level property
+    if (node.strain !== undefined) {
+      node.name = node.strain;
+      delete node.strain;
+    } else {
+      throw new Error("v1-v2 conversion error -- `strain` missing from node");
+    }
+    // create `node_attrs` and `branch_attrs` (will overwrite a v1 key of the same name)
+    node.node_attrs = {};
+    node.branch_attrs = {};
+  });
+  v2.tree = tree;
+};
+
+/**
+ * v2 trees can only have 4 properties: `name`, `branch_attrs`, `node_attrs` & `children`
+ * anything else is left over from the v1 tree & is removed here
+ */
+const removeNonV2TreeProps = (v2) => {
+  const v2keys = ["name", "branch_attrs", "node_attrs", "children"];
+  traverseTree(v2.tree, (node) => {
+    Object.keys((node)).forEach((key) => {
+      if (!v2keys.includes(key)) {
+        delete node[key];
+      }
+    });
+  });
+};
+
+/**
+ * Assign most of the properties already present on the tree into their
+ * correct location as per the v2 schema.
+ * @param {object} v2 v2 dataset
+ */
+const setNodeBranchAttrs = (v2) => {
+
+  /* valid traits which have been taken care of separately */
+  const traitsToIgnore = new Set(["num_date", "gt", "div", "author"]);
+  const traitsToAssign = [];
+  if (v2.meta.colorings) {
+    v2.meta.colorings.forEach((c) => {
+      if (!traitsToIgnore.has(c.key)) traitsToAssign.push(c.key);
+    });
+  }
+  if (v2.meta.geo_resolutions) {
+    v2.meta.geo_resolutions.forEach((c) => {
+      if (!traitsToIgnore.has(c.key) && !traitsToAssign.includes(c.key)) {
+        traitsToAssign.push(c.key);
       }
     });
   }
-  /* move `node.serum` (if value is true) to `node.vaccine.serum` */
-  traverseTree(tree, (n) => {
-    if (n.serum) {
-      if (!n.vaccine) n.vaccine = {};
-      n.vaccine.serum = true;
-    }
-  });
-};
 
-const storeTreeAsV2 = (v2, tree) => {
-  // const attrsWhichRemain = new Set();
-  // const propsRemoved = new Set();
+  traverseTree(v2.tree, (node) => {
 
-  const allowedProperties = ["name", "div", "num_date", "vaccine", "labels", "hidden", "mutations", "url", "accession", "traits", "children", "author"];
-  const attrsToIgnore = ["clock_length", "date", "raw_date", "strain"];
-
-  traverseTree(tree, (node) => {
-    // convert node.strain to node.name
-    if (node.strain){
-      node.name = node.strain;
-      delete node.strain;
-    }
-    // vaccine: already set (see above)
     if (node.attr) {
-      // author: (key modified previously) needs to move to property on node
-      if (node.attr.author) {
-        node.author = node.attr.author;
-        delete node.attr.author;
-      }
-      // accession, likewise moves to the node (from `node.attr.accession`)
-      if (node.attr.accession) {
-        node.accession = node.attr.accession;
-        delete node.attr.accession;
-      }
-      // url, likewise moves to the node (from `node.attr.accession`)
-      if (node.attr.url) {
-        node.url = node.attr.url;
-        delete node.attr.url;
-      }
-      // branch labels for clade (this behaviour was hardcoded into auspice)
-      if (node.attr.clade_name || node.attr.clade_annotation) {
-        if (!node.labels) node.labels = {};
-        node.labels.clade = node.attr.clade_annotation || node.attr.clade_name;
-        delete node.attr.clade_name;
-        delete node.attr.clade_annotation;
-      }
-      // branch labels for "aa" (this behaviour was hardcoded into auspice)
-      if (node.aa_muts) {
-        const muts = [];
-        for (const aa in node.aa_muts) { // eslint-disable-line
-          if (node.aa_muts[aa].length) {
-            muts.push(`${aa}: ${node.aa_muts[aa].join(", ")}`);
-          }
-        }
-        if (muts.length) {
-          if (!node.labels) node.labels = {};
-          node.labels.aa = muts.join("; ");
-        }
-      }
-      // num_date
-      if (node.attr.num_date) {
-        node.num_date = {value: node.attr.num_date};
-        delete node.attr.num_date;
-        if (node.attr.num_date_confidence) {
-          node.num_date.confidence = node.attr.num_date_confidence;
-          delete node.attr.num_date_confidence;
-        }
-      }
-      // div (NOTE div can be 0)
-      if (node.attr.div !== undefined) {
-        node.div = node.attr.div;
-        delete node.attr.div;
-      }
-
-      /* Transfer the remaining `node.attr[x]` to `node.traits[x]` (different shape) */
-      const traitKeys = Object.keys(node.attr)
-        .filter((a) => !a.endsWith("_entropy") && !a.endsWith("_confidence"))
-        .filter((a) => !attrsToIgnore.includes(a));
-      if (traitKeys.length) node.traits = {};
-      for (const trait of traitKeys) {
-        const data = {value: node.attr[trait]};
-        if (node.attr[`${trait}_confidence`]) {
-          data.confidence = node.attr[`${trait}_confidence`];
-        }
-        if (node.attr[`${trait}_entropy`]) {
-          data.entropy = node.attr[`${trait}_entropy`];
-        }
-        node.traits[trait] = data;
-      }
-      // Object.keys(node.attr).forEach((a) => {attrsWhichRemain.add(a);});
+      if (node.attr.url) node.url = node.node_attrs.url;
+      if (node.attr.accession) node.accession = node.node_attrs.accession;
     }
 
-    // NUC + AA MUTATIONS
-    if (node.muts || node.aa_muts) {
-      node.mutations = {};
-      if (node.aa_muts) node.mutations = node.aa_muts;
-      if (node.muts) node.mutations.nuc = node.muts;
-      delete node.muts;
-      delete node.aa_muts;
-    }
 
-    // REMOVE NON-V2 PROPS FROM EACH NODE
-    Object.keys(node)
-      .filter((prop) => !allowedProperties.includes(prop))
-      .forEach((prop) => {
-        // propsRemoved.add(prop);
-        delete node[prop];
+    /* amino acid / nucleotide mutations */
+    const mutations = {};
+    if (node.aa_muts) {
+      Object.keys(node.aa_muts).forEach((aa) => {
+        if (node.aa_muts[aa].length) {
+          mutations[aa] = node.aa_muts[aa];
+        }
       });
+    }
+    if (node.muts && node.muts.length) {
+      mutations.nuc = node.muts;
+    }
+    if (mutations) {
+      node.branch_attrs.mutations = mutations;
+    }
+
+    /* num_date -- note that this can be 0 */
+    if (node.attr.num_date !== undefined) {
+      node.node_attrs.num_date = {value: node.attr.num_date};
+      if (node.attr.num_date_confidence) {
+        node.node_attrs.num_date.confidence = node.attr.num_date_confidence;
+      }
+    }
+
+    /* divergence (div) -- note 1: this can be 0. note 2: this is cumulative */
+    if (node.attr.div !== undefined) {
+      node.node_attrs.div = node.attr.div;
+    }
+
+    /* transfer the colorings & geo resolutions */
+    traitsToAssign.forEach((traitKey) => {
+      const data = {value: prettyString(node.attr[traitKey], {removeComma: true})};
+      if (node.attr[`${traitKey}_confidence`]) {
+        data.confidence = {};
+        Object.keys(node.attr[`${traitKey}_confidence`]).forEach((key) => {
+          data.confidence[prettyString(key)] = node.attr[`${traitKey}_confidence`][key];
+        });
+      }
+      if (node.attr[`${traitKey}_entropy`]) {
+        data.entropy = node.attr[`${traitKey}_entropy`];
+      }
+      node.node_attrs[traitKey] = data;
+    });
 
   });
-
-  // console.log("These attrs were left over:", attrsWhichRemain);
-  // console.log("Props removed (from v1 tree nodes):", propsRemoved);
-
-  v2.tree = tree;
 };
 
 
 const convertFromV1 = ({tree, meta, treeName}) => {
-  const v2 = {
-    "version": "2.0",
-    "meta": {}
-  };
+  const v2 = {version: "2.0", meta: {}};
+  // set metadata
   setColorings(v2["meta"], meta);
   setMiscMetaProperties(v2["meta"], meta);
-  setAuthorInfo(v2["meta"], meta, tree);
-  setVaccineChoicesOnNodes(meta, tree);
-  storeTreeAsV2(v2, tree);
+  // set tree structure
+  setBasicTreeStructure(v2, tree);
+  setNodeBranchAttrs(v2);
+  setLabels(v2);
+  setAuthorInfoOnTree(v2, meta);
+  setVaccineChoicesOnNodes(v2, meta);
   if (treeName) {
+    // TODO -- this must be removed before v2 release
+    // see https://github.com/nextstrain/auspice/issues/776
     v2["meta"].tree_name = treeName;
   }
+  removeNonV2TreeProps(v2);
   return v2;
 };
 

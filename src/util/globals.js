@@ -178,10 +178,11 @@ export const months = {
 export const normalNavBarHeight = 50;
 export const narrativeNavBarHeight = 55;
 
-export const NODE_NOT_VISIBLE = 0;
-export const NODE_VISIBLE_TO_MAP_ONLY = 1;
-export const NODE_VISIBLE = 2;
+export const NODE_NOT_VISIBLE = 0;          // branch thickness 0 and excluded from map
+export const NODE_VISIBLE_TO_MAP_ONLY = 1;  // branch thickness 0.5 and included in map
+export const NODE_VISIBLE = 2;              // included on tree and map
 
-export const invalidValues = [undefined, "undefined", "unknown", "?", "nan", "na", "n/a"];
+export const UNDEFINED_VALUE = "undefined";
+export const invalidValues = [UNDEFINED_VALUE, undefined, "unknown", "?", "nan", "na", "n/a"];
 export const isValueValid = (value) =>
   !invalidValues.includes(String(value).toLowerCase());

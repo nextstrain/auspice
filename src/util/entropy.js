@@ -9,11 +9,16 @@ const intersectGenes = function intersectGenes(geneMap, pos) {
   return false;
 };
 
-const nodeHasAaMutations = (n) =>
-  n.mutations && (Object.keys(n.mutations).length > 1 || Object.keys(n.mutations)[0] !== "div");
-
-const nodeHasNucMutations = (n) =>
-  (n.mutations && n.mutations.nuc && n.mutations.nuc.length);
+/**
+ * Get mutations on node. Returns false if mutations not set.
+ * @param {object} n node
+ */
+const getNodeMutations = (n) => {
+  if (n.branch_attrs && n.branch_attrs.mutations && Object.keys(n.branch_attrs.mutations).length) {
+    return n.branch_attrs.mutations;
+  }
+  return false;
+};
 
 const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
 
@@ -23,9 +28,11 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
   }
   nodes.forEach((n) => {
     if (visibility[n.arrayIdx] !== NODE_VISIBLE) {return;}
-    if (isAA && nodeHasAaMutations(n)) {
-      for (const prot of Object.keys(n.mutations).filter((p) => p !== "nuc")) {
-        n.mutations[prot].forEach((m) => {
+    const mutations = getNodeMutations(n);
+    if (!mutations) return;
+    if (isAA) {
+      for (const prot of Object.keys(mutations).filter((p) => p !== "nuc")) {
+        mutations[prot].forEach((m) => {
           const pos = parseInt(m.slice(1, m.length - 1), 10);
           const A = m.slice(0, 1);
           const B = m.slice(-1);
@@ -34,9 +41,9 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
           }
         });
       }
-    }
-    if (!isAA && nodeHasNucMutations(n)) {
-      n.mutations.nuc.forEach((m) => {
+    } else {
+      if (!mutations.nuc) return;
+      mutations.nuc.forEach((m) => {
         const pos = parseInt(m.slice(1, m.length - 1), 10);
         const A = m.slice(0, 1);
         const B = m.slice(-1);
@@ -116,15 +123,16 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
 
   const recurse = (node, state) => {
     // if mutation observed - do something
-    if (node.mutations) {
+    const mutations = getNodeMutations(node);
+    if (mutations) {
       if (isAA) {
-        for (const prot of Object.keys(node.mutations).filter((p) => p !== "nuc")) {
+        for (const prot of Object.keys(mutations).filter((p) => p !== "nuc")) {
           if (arrayOfProts.includes(prot)) {
-            node.mutations[prot].forEach(assignFn, [prot, state]);
+            mutations[prot].forEach(assignFn, [prot, state]);
           }
         }
-      } else if (nodeHasNucMutations(node)) {
-        node.mutations.nuc.forEach(assignFn, [nucleotide_gene, state]);
+      } else if (mutations.nuc) {
+        mutations.nuc.forEach(assignFn, [nucleotide_gene, state]);
       }
     }
 

@@ -14,11 +14,9 @@ import { SidebarSubtitle } from "./styles";
 })
 class GeoResolution extends React.Component {
   getGeoResolutionOptions() {
-    if (this.props.metadata.loaded) {
-      return Object.keys(this.props.metadata.geographicInfo)
-        .map((key) => ({ value: key, label: key }));
-    }
-    return [];
+    return this.props.metadata.loaded ?
+      this.props.metadata.geoResolutions.map((g) => ({value: g.key, label: g.title || g.key})) :
+      [];
   }
 
   changeGeoResolution(resolution) {

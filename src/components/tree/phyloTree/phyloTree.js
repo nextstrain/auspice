@@ -1,6 +1,6 @@
 import { scaleLinear } from "d3-scale";
 import { createDefaultParams } from "./defaultParams";
-import { addLeafCount, createChildrenAndParentsReturnNumTips, setYValues } from "./helpers";
+import { createChildrenAndParentsReturnNumTips, setYValues } from "./helpers";
 import { change, modifySVG, modifySVGInStages } from "./change";
 
 /* PROTOTYPES */
@@ -41,7 +41,6 @@ const PhyloTree = function PhyloTree(reduxNodes, debugId) {
   this.xScale = scaleLinear();
   this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
-  addLeafCount(this.nodes[0]);
   this.strainToNode = {};
   this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.name] = phylonode;});
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */

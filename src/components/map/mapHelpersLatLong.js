@@ -7,6 +7,7 @@ import { bezier } from "./transmissionBezier";
 import { NODE_NOT_VISIBLE } from "../../util/globals";
 import { getTraitFromNode } from "../../util/treeMiscHelpers";
 import { isColorByGenotype } from "../../util/getGenotype";
+import { errorNotification } from "../../actions/notifications";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -115,7 +116,7 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
 
   const locationToVisibleNodes = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
   const offsets = triplicate ? [-360, 0, 360] : [0];
-  const geo = metadata.geographicInfo;
+  const demeToLatLongs = metadata.geoResolutions.filter((x) => x.key === geoResolution)[0].demes;
 
   let index = 0;
   offsets.forEach((OFFSET) => {
@@ -125,9 +126,9 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
       let long = 0;
       let goodDeme = true;
 
-      if (geo[geoResolution][location]) {
-        lat = geo[geoResolution][location].latitude;
-        long = geo[geoResolution][location].longitude + OFFSET;
+      if (demeToLatLongs[location]) {
+        lat = demeToLatLongs[location].latitude;
+        long = demeToLatLongs[location].longitude + OFFSET;
       } else {
         goodDeme = false;
         console.warn("Warning: Lat/long missing from metadata for", location);
@@ -192,7 +193,7 @@ const constructBcurve = (
 const maybeConstructTransmissionEvent = (
   node,
   child,
-  metadataGeoLookupTable,
+  geoResolutions,
   geoResolution,
   nodeColors,
   visibility,
@@ -207,15 +208,17 @@ const maybeConstructTransmissionEvent = (
   /* checking metadata for lat longs name match - ie., does the metadata list a latlong for Thailand? */
   const nodeLocation = getTraitFromNode(node, geoResolution); //  we're looking this up in the metadata lookup table
   const childLocation = getTraitFromNode(child, geoResolution);
+  const demeToLatLongs = geoResolutions.filter((x) => x.key === geoResolution)[0].demes;
+
   try {
-    latOrig = metadataGeoLookupTable[geoResolution][nodeLocation].latitude;
-    longOrig = metadataGeoLookupTable[geoResolution][nodeLocation].longitude;
+    latOrig = demeToLatLongs[nodeLocation].latitude;
+    longOrig = demeToLatLongs[nodeLocation].longitude;
   } catch (e) {
     demesMissingLatLongs.add(nodeLocation);
   }
   try {
-    latDest = metadataGeoLookupTable[geoResolution][childLocation].latitude;
-    longDest = metadataGeoLookupTable[geoResolution][childLocation].longitude;
+    latDest = demeToLatLongs[childLocation].latitude;
+    longDest = demeToLatLongs[childLocation].longitude;
   } catch (e) {
     demesMissingLatLongs.add(childLocation);
   }
@@ -325,7 +328,6 @@ const setupTransmissionData = (
 ) => {
 
   const offsets = triplicate ? [-360, 0, 360] : [0];
-  const metadataGeoLookupTable = metadata.geographicInfo;
   const transmissionData = []; /* edges, animation paths */
   const transmissionIndices = {}; /* map of transmission id to array of indices */
   const demesMissingLatLongs = new Set();
@@ -348,7 +350,7 @@ const setupTransmissionData = (
             const t = maybeGetClosestTransmissionEvent(
               n,
               child,
-              metadataGeoLookupTable,
+              metadata.geoResolutions,
               geoResolution,
               nodeColors,
               visibility,
@@ -388,9 +390,9 @@ export const createDemeAndTransmissionData = (
   map,
   pieChart,
   legendValues,
-  colorBy
+  colorBy,
+  dispatch
 ) => {
-
   /*
     walk through nodes and collect all data
     for demeData we have:
@@ -414,6 +416,17 @@ export const createDemeAndTransmissionData = (
     metadata,
     map
   );
+
+  const filteredDemesMissingLatLongs = [...demesMissingLatLongs].filter((value) => {
+    return value.toLowerCase() !== "unknown";
+  });
+
+  if (filteredDemesMissingLatLongs.size) {
+    dispatch(errorNotification({
+      message: "The following demes are missing lat/long information",
+      details: [...filteredDemesMissingLatLongs].join(", ")
+    }));
+  }
 
   return {
     demeData: demeData,
@@ -458,28 +471,29 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
 const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
   const transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
   nodes.forEach((node) => {
-    if (node.children) {
-      node.children.forEach((child) => {
-        const nodeLocation = getTraitFromNode(node, geoResolution);
-        const childLocation = getTraitFromNode(node, geoResolution);
-        if (nodeLocation && childLocation && nodeLocation !== childLocation) {
-          // this is a transmission event from n to child
-          const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
-          const col = nodeColors[node.arrayIdx];
-          const vis = visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden"; // transmission visible if child is visible
+    if (!node.children) return;
 
-          // update transmissionData via index lookup
-          try {
-            transmissionIndices[id].forEach((index) => {
-              transmissionDataCopy[index].color = col;
-              transmissionDataCopy[index].visible = vis;
-            });
-          } catch (err) {
-            console.warn(`Error trying to access ${id} in transmissionIndices. Map transmissions may be wrong.`);
-          }
-        }
-      });
-    }
+    node.children.forEach((child) => {
+      const nodeLocation = getTraitFromNode(node, geoResolution);
+      const childLocation = getTraitFromNode(node, geoResolution);
+      
+      if (!(nodeLocation && childLocation && nodeLocation !== childLocation)) return;
+
+      // this is a transmission event from n to child
+      const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
+      const col = nodeColors[node.arrayIdx];
+      const vis = visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden"; // transmission visible if child is visible
+
+      // update transmissionData via index lookup
+      try {
+        transmissionIndices[id].forEach((index) => {
+          transmissionDataCopy[index].color = col;
+          transmissionDataCopy[index].visible = vis;
+        });
+      } catch (err) {
+        console.warn(`Error trying to access ${id} in transmissionIndices. Map transmissions may be wrong.`);
+      }
+    });
   });
   return transmissionDataCopy;
 };
@@ -509,7 +523,7 @@ ZOOM LEVEL CHANGE
 **********************
 ********************* */
 
-const updateDemeDataLatLong = (demeData, map) => {
+export const updateDemeDataLatLong = (demeData, map) => {
 
   // interchange for all demes
   return _map(demeData, (d) => {
@@ -519,7 +533,7 @@ const updateDemeDataLatLong = (demeData, map) => {
 
 };
 
-const updateTransmissionDataLatLong = (transmissionData, map) => {
+export const updateTransmissionDataLatLong = (transmissionData, map) => {
 
   const transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
 
@@ -536,28 +550,4 @@ const updateTransmissionDataLatLong = (transmissionData, map) => {
 
   return transmissionDataCopy;
 
-};
-
-export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData, map) => {
-
-  /*
-    walk through nodes and update attributes that can mutate
-    for demeData we have:
-      count, color
-    for transmissionData we have:
-      color, visible
-  */
-
-  let newDemes;
-  let newTransmissions;
-
-  if (demeData && transmissionData) {
-    newDemes = updateDemeDataLatLong(demeData, map);
-    newTransmissions = updateTransmissionDataLatLong(transmissionData, map);
-  }
-
-  return {
-    newDemes,
-    newTransmissions
-  };
 };

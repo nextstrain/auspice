@@ -1,10 +1,9 @@
 import React from "react";
 import { infoPanelStyles } from "../../../globalStyles";
-import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
-import { getTraitFromNode } from "../../../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode, getVaccineFromNode } from "../../../util/treeMiscHelpers";
 
 const renderInfoLine = (item, value, {noPadding=false}={}) => {
   const style = noPadding ? {} : {paddingBottom: "7px"};
@@ -38,17 +37,15 @@ const renderInfoBlock = (item, values) => (
 
 
 const renderBranchDivergence = (d) =>
-  renderInfoLine("Divergence:", prettyString(d.div.toExponential(3)));
+  renderInfoLine("Divergence:", getDivFromNode(d).toExponential(3));
 
 
 const renderBranchTime = (d, temporalConfidence) => {
-  const date = numericToCalendar(d.num_date.value);
+  const date = numericToCalendar(getTraitFromNode(d, "num_date"));
   let dateRange = false;
-  if (temporalConfidence && d.num_date.confidence) {
-    dateRange = [
-      numericToCalendar(d.num_date.confidence[0]),
-      numericToCalendar(d.num_date.confidence[1])
-    ];
+  const dConf = getTraitFromNode(d, "num_date", {confidence: true});
+  if (temporalConfidence && dConf) {
+    dateRange = [numericToCalendar(dConf[0]), numericToCalendar(dConf[1])];
   }
   if (dateRange && dateRange[0] !== dateRange[1]) {
     return (
@@ -85,10 +82,10 @@ const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidenc
     const vals = Object.keys(confidenceData)
       .sort((a, b) => confidenceData[a] > confidenceData[b] ? -1 : 1)
       .slice(0, 4)
-      .map((v) => `${prettyString(v)} (${(100 * confidenceData[v]).toFixed(0)}%)`);
-    return renderInfoBlock(`${prettyString(colorBy)} (confidence):`, vals);
+      .map((v) => `${v} (${(100 * confidenceData[v]).toFixed(0)}%)`);
+    return renderInfoBlock(`${colorBy} (confidence):`, vals);
   }
-  return renderInfoLine(prettyString(colorBy), prettyString(getTraitFromNode(d, colorBy)));
+  return renderInfoLine(colorBy, getTraitFromNode(d, colorBy));
 };
 
 /**
@@ -106,29 +103,30 @@ const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidenc
 
 /**
  * Display AA / NT mutations. If there are none, return `null`;
- * Nt mutations are found at `d.mutations.nuc` -> Array of strings
- * AA mutations are found at `d.mutations[prot_name]` -> Array of strings
+ * Nt mutations are found at `d.branch_attrs.mutations.nuc` -> Array of strings
+ * AA mutations are found at `d.branch_attrs.mutations[prot_name]` -> Array of strings
  * @param  {node} d branch node currently highlighted
  * @param  {string} mutType "AA" or "nuc"
  * @return {React component | null}
  */
 const renderMutations = (d, mutType) => {
-  if (!d.mutations) return null;
+  if (!d.branch_attrs || d.branch_attrs.mutations) return null;
+  const mutations = d.branch_attrs.mutations;
 
   if (mutType === "nuc") {
-    if (d.mutations.nuc && d.mutations.nuc.length) {
+    if (mutations.nuc && mutations.nuc.length) {
       const nDisplay = 9; // max number of mutations to display
       const nGapDisp = 4; // max number of gaps/Ns to display
 
       // gather muts with N/-
-      const ngaps = d.mutations.nuc.filter((mut) => {
+      const ngaps = mutations.nuc.filter((mut) => {
         return mut.slice(-1) === "N" || mut.slice(-1) === "-"
           || mut.slice(0, 1) === "N" || mut.slice(0, 1) === "-";
       });
       const gapLen = ngaps.length; // number of mutations that exist with N/-
 
       // gather muts without N/-
-      const nucs = d.mutations.nuc.filter((mut) => {
+      const nucs = mutations.nuc.filter((mut) => {
         return mut.slice(-1) !== "N" && mut.slice(-1) !== "-"
           && mut.slice(0, 1) !== "N" && mut.slice(0, 1) !== "-";
       });
@@ -157,12 +155,12 @@ const renderMutations = (d, mutType) => {
   }
   if (mutType === "aa") {
     /* calculate protein -> num(mutations) */
-    const prots = Object.keys(d.mutations).filter((v) => v !== "nuc");
+    const prots = Object.keys(mutations).filter((v) => v !== "nuc");
     const nMutsPerProt = {};
     let totalMuts = 0;
     for (const prot of prots) {
-      nMutsPerProt[prot] = d.mutations[prot].length;
-      totalMuts += d.mutations[prot].length;
+      nMutsPerProt[prot] = mutations[prot].length;
+      totalMuts += mutations[prot].length;
     }
     if (!totalMuts) {
       return renderInfoLine("No amino acid mutations");
@@ -173,7 +171,7 @@ const renderMutations = (d, mutType) => {
     const mutationsToRender = [];
     prots.forEach((prot) => {
       if (nMutsPerProt[prot] && protsRendered < nProtsToDisplay) {
-        let x = prot + ":\u00A0\u00A0" + d.mutations[prot].slice(0, Math.min(nDisplay, nMutsPerProt[prot])).join(", ");
+        let x = prot + ":\u00A0\u00A0" + mutations[prot].slice(0, Math.min(nDisplay, nMutsPerProt[prot])).join(", ");
         if (nMutsPerProt[prot] > nDisplay) {
           x += " + " + (nMutsPerProt[prot] - nDisplay) + " more";
         }
@@ -265,27 +263,26 @@ const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, 
     const state = getTipColorAttribute(d.n, colorScale);
     return renderInfoLine(key + ":", state);
   }
-  return renderInfoLine(prettyString(colorBy) + ":", prettyString(getTraitFromNode(d.n, colorBy)));
+  return renderInfoLine(colorBy + ":", getTraitFromNode(d.n, colorBy));
 };
 
 const displayVaccineInfo = (d) => {
-  if (d.n.vaccine) {
-    const items = [];
-    if (d.n.vaccine.selection_date) {
-      items.push(renderInfoLine("Vaccine selected:", d.n.vaccine.selection_date));
-    }
-    if (d.n.vaccine.start_date) {
-      items.push(renderInfoLine("Vaccine start date:", d.n.vaccine.start_date));
-    }
-    if (d.n.vaccine.end_date) {
-      items.push(renderInfoLine("Vaccine end date:", d.n.vaccine.end_date));
-    }
-    if (d.n.vaccine.serum) {
-      items.push(renderInfoLine("Serum strain", ""));
-    }
-    return items;
+  const vaccineInfo = getVaccineFromNode(d.n);
+  if (!vaccineInfo) return null;
+  const renderElements = [];
+  if (vaccineInfo.selection_date) {
+    renderElements.push(renderInfoLine("Vaccine selected:", vaccineInfo.selection_date));
   }
-  return null;
+  if (vaccineInfo.start_date) {
+    renderElements.push(renderInfoLine("Vaccine start date:", vaccineInfo.start_date));
+  }
+  if (vaccineInfo.end_date) {
+    renderElements.push(renderInfoLine("Vaccine end date:", vaccineInfo.end_date));
+  }
+  if (vaccineInfo.serum) {
+    renderElements.push(renderInfoLine("Serum strain", ""));
+  }
+  return renderElements;
 };
 
 /* the actual component - a pure function, so we can return early if needed */

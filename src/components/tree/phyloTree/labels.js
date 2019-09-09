@@ -115,7 +115,9 @@ export const drawBranchLabels = function drawBranchLabels(key) {
   }
   this.groups.branchLabels
     .selectAll('.branchLabel')
-    .data(this.nodes.filter((d) => d.n.labels && d.n.labels[key]))
+    .data(this.nodes.filter(
+      (d) => d.n.branch_attrs && d.n.branch_attrs.labels && d.n.branch_attrs.labels[key])
+    )
     .enter()
     .append("text")
     .attr("class", "branchLabel")
@@ -127,5 +129,5 @@ export const drawBranchLabels = function drawBranchLabels(key) {
     .style("font-family", this.params.branchLabelFont)
     .style("font-weight", fontWeight)
     .style("font-size", labelSize)
-    .text((d) => d.n.labels[key]);
+    .text((d) => d.n.branch_attrs.labels[key]);
 };

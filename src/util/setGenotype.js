@@ -1,4 +1,5 @@
-import { nucleotide_gene } from "./globals";
+import { UNDEFINED_VALUE } from "./globals";
+import { getTraitFromNode } from "./treeMiscHelpers";
 
 export const setGenotype = (nodes, prot, positions) => {
   // console.time("setGenotype")
@@ -8,8 +9,8 @@ export const setGenotype = (nodes, prot, positions) => {
   const recurse = (node, state) => {
     const newState = state; /* reference. cheap */
     let data; // any potential mutations that would result in a state change
-    if (node.mutations && node.mutations[prot]) {
-      data = node.mutations[prot];
+    if (node.branch_attrs && node.branch_attrs.mutations && node.branch_attrs.mutations[prot]) {
+      data = node.branch_attrs.mutations[prot];
     }
     if (data && data.length) {
       for (let i = 0; i < data.length; i++) {
@@ -51,8 +52,10 @@ export const setGenotype = (nodes, prot, positions) => {
 export const orderOfGenotypeAppearance = (nodes) => {
   const seen = {};
   nodes.forEach((n) => {
-    if (!seen[n.currentGt] || n.num_date.value < seen[n.currentGt]) {
-      seen[n.currentGt] = n.num_date.value;
+    let numDate = getTraitFromNode(n, "num_date");
+    if (numDate === UNDEFINED_VALUE) numDate = 0;
+    if (!seen[n.currentGt] || numDate < seen[n.currentGt]) {
+      seen[n.currentGt] = numDate;
     }
   });
   const ordered = Object.keys(seen);

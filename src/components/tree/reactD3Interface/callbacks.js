@@ -75,8 +75,12 @@ export const onBranchClick = function onBranchClick(d) {
   if (this.props.narrativeMode) return;
   const root = [undefined, undefined];
   let cladeSelected;
-  if (d.n.labels !== undefined && d.n.labels.clade !== undefined) {
-    cladeSelected = d.n.labels.clade;
+  if (
+    d.n.branch_attrs &&
+    d.n.branch_attrs.labels !== undefined &&
+    d.n.branch_attrs.labels.clade !== undefined
+  ) {
+    cladeSelected = d.n.branch_attrs.labels.clade;
   }
   if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
   else root[1] = d.n.arrayIdx;

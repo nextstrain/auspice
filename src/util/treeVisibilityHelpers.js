@@ -33,7 +33,11 @@ export const strainNameToIdx = (nodes, name) => {
 export const getIdxMatchingLabel = (nodes, labelName, labelValue) => {
   let i;
   for (i = 0; i < nodes.length; i++) {
-    if (nodes[i].labels !== undefined && nodes[i].labels[labelName] === labelValue) {
+    if (
+      nodes[i].branch_attrs &&
+      nodes[i].branch_attrs.labels !== undefined &&
+      nodes[i].branch_attrs.labels[labelName] === labelValue
+    ) {
       return i;
     }
   }
@@ -56,9 +60,12 @@ export const calcBranchThickness = (nodes, visibility, rootIdx) => {
   if (!maxTipCount) {
     maxTipCount = 1;
   }
-  return nodes.map((d, idx) => (
-    visibility[idx] === 2 ? freqScale((d.tipCount + 5) / (maxTipCount + 5)) : 0.5
-  ));
+  return nodes.map((d, idx) => {
+    if (visibility[idx] === NODE_VISIBLE) {
+      return freqScale((d.tipCount + 5) / (maxTipCount + 5));
+    }
+    return 0.5;
+  });
 };
 
 /* recursively mark the parents of a given node active

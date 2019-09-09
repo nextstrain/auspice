@@ -3,8 +3,8 @@ import { select } from "d3-selection";
 import 'd3-transition'
 import { connect } from "react-redux";
 import Card from "../framework/card";
-import { calcXScale, calcYScale, drawXAxis, drawYAxis, areListsEqual,
-  drawStream, processMatrix, parseColorBy } from "./functions";
+import { calcXScale, calcYScale, drawXAxis, drawYAxis, drawProjectionInfo,
+  areListsEqual, drawStream, processMatrix, parseColorBy } from "./functions";
 import "../../css/entropy.css";
 
 @connect((state) => {
@@ -13,11 +13,12 @@ import "../../css/entropy.css";
     pivots: state.frequencies.pivots,
     ticks: state.frequencies.ticks,
     matrix: state.frequencies.matrix,
+    projection_pivot: state.frequencies.projection_pivot,
     version: state.frequencies.version,
     browserDimensions: state.browserDimensions.browserDimensions,
     colorBy: state.controls.colorBy,
     colorScale: state.controls.colorScale,
-    colorOptions: state.metadata.colorOptions
+    colorOptions: state.metadata.colorings
   };
 })
 class Frequencies extends React.Component {
@@ -40,6 +41,7 @@ class Frequencies extends React.Component {
     drawXAxis(newState.svg, chartGeom, scalesX);
     drawYAxis(newState.svg, chartGeom, scalesY);
     drawStream(newState.svgStreamGroup, newState.scales, data, {...props});
+    drawProjectionInfo(newState.svg, newState.scales, props.projection_pivot);
   }
   recomputeRedrawPartial(oldState, oldProps, newProps) {
     /* we don't have to check width / height changes here - that's done in componentDidUpdate */
@@ -59,6 +61,9 @@ class Frequencies extends React.Component {
     }
     /* if !catChange we could transition the streams instead of redrawing them... */
     drawStream(oldState.svgStreamGroup, newScales, data, {...newProps});
+    if (maxYChange) {
+      drawProjectionInfo(oldState.svg, newScales, newProps.projection_pivot);
+    }
     return {...oldState, scales: newScales, maxY: data.maxY, categories: data.categories};
   }
   componentDidMount() {
@@ -108,7 +113,15 @@ class Frequencies extends React.Component {
             fontSize: "14px"
           }}
         />
-        <svg style={{pointerEvents: "auto"}} width={this.props.width} height={this.props.height} id="d3frequenciesSVG">
+        <svg
+          id="d3frequenciesSVG"
+          width={this.props.width}
+          height={this.props.height}
+          style={{
+            pointerEvents: "auto",
+            overflow: "visible"
+          }}
+        >
           <g ref={(c) => { this.domRef = c; }} id="d3frequencies"/>
         </svg>
       </Card>

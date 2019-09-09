@@ -4,8 +4,8 @@ import { scaleLinear } from "d3-scale";
 import { axisBottom, axisLeft } from "d3-axis";
 import { rgb } from "d3-color";
 import { area } from "d3-shape";
+import { format } from "d3-format";
 import { dataFont } from "../../globalStyles";
-import { prettyString } from "../../util/stringHelpers";
 import { unassigned_label } from "../../util/processFrequencies";
 import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype";
 
@@ -19,14 +19,14 @@ export const areListsEqual = (a, b) => {
 
 export const parseColorBy = (colorBy, colorOptions) => {
   if (colorOptions && colorOptions[colorBy]) {
-    return colorOptions[colorBy].legendTitle;
+    return colorOptions[colorBy].title;
   } else if (isColorByGenotype(colorBy)) {
     const genotype = decodeColorByGenotype(colorBy);
     return genotype.aa
       ? `Genotype at ${genotype.gene} pos ${genotype.positions.join(", ")}`
       : `Genotype at Nuc. ${genotype.positions.join(", ")}`;
   }
-  return prettyString(colorBy);
+  return colorBy;
 };
 
 const getOrderedCategories = (matrixCategories, colorScale) => {
@@ -74,6 +74,11 @@ const removeYAxis = (svg) => {
   svg.selectAll(".y.axis").remove();
 };
 
+const removeProjectionInfo = (svg) => {
+  svg.selectAll(".projection-pivot").remove();
+  svg.selectAll(".projection-text").remove();
+};
+
 export const drawXAxis = (svg, chartGeom, scales) => {
   removeXAxis(svg);
   svg.append("g")
@@ -83,14 +88,50 @@ export const drawXAxis = (svg, chartGeom, scales) => {
     .style("font-size", "12px")
     .call(axisBottom(scales.x).ticks(scales.numTicksX, ".1f"));
 };
+
 export const drawYAxis = (svg, chartGeom, scales) => {
   removeYAxis(svg);
+  const formatPercent = format(".0%");
   svg.append("g")
     .attr("class", "y axis")
     .attr("transform", `translate(${chartGeom.spaceLeft},0)`)
     .style("font-family", dataFont)
     .style("font-size", "12px")
-    .call(axisLeft(scales.y).ticks(scales.numTicksY));
+    .call(axisLeft(scales.y).ticks(scales.numTicksY).tickFormat(formatPercent));
+};
+
+export const drawProjectionInfo = (svg, scales, projection_pivot) => {
+  if (projection_pivot) {
+
+    removeProjectionInfo(svg);
+
+    svg.append("g")
+      .attr("class", "projection-pivot")
+      .append("line")
+      .attr("x1", scales.x(parseFloat(projection_pivot)))
+      .attr("x2", scales.x(parseFloat(projection_pivot)))
+      .attr("y1", scales.y(1))
+      .attr("y2", scales.y(0))
+      .style("visibility", "visible")
+      .style("stroke", "rgba(55,55,55,0.9)")
+      .style("stroke-width", "2")
+      .style("stroke-dasharray", "4 4");
+
+    const midPoint = 0.5 * (scales.x(parseFloat(projection_pivot)) + scales.x.range()[1]);
+    svg.append("g")
+      .attr("class", "projection-text")
+      .append("text")
+      .attr("x", midPoint)
+      .attr("y", scales.y(1) - 3)
+      .style("pointer-events", "none")
+      .style("fill", "#555")
+      .style("font-family", dataFont)
+      .style("font-size", 12)
+      .style("alignment-baseline", "bottom")
+      .style("text-anchor", "middle")
+      .text("Projection");
+
+  }
 };
 
 const turnMatrixIntoSeries = (categories, nPivots, matrix) => {
@@ -182,7 +223,7 @@ const drawLabelsOverStream = (svgStreamGroup, series, pivots, labels, scales) =>
     .style("font-family", dataFont)
     .style("font-size", 14)
     .style("alignment-baseline", "middle")
-    .text((d, i) => xyPos[i][0] ? prettyString(d) : "");
+    .text((d, i) => xyPos[i][0] ? d : "");
 };
 
 const calcMaxYValue = (series) => {
@@ -197,7 +238,7 @@ export const processMatrix = ({matrix, pivots, colorScale}) => {
 };
 
 export const drawStream = (
-  svgStreamGroup, scales, {categories, series}, {colorBy, colorScale, colorOptions, pivots}
+  svgStreamGroup, scales, {categories, series}, {colorBy, colorScale, colorOptions, pivots, projection_pivot}
 ) => {
   removeStream(svgStreamGroup);
   const colourer = generateColorScaleD3(categories, colorScale);
@@ -216,23 +257,48 @@ export const drawStream = (
     const date = scales.x.invert(mousex);
     const pivotIdx = pivots.reduce((closestIdx, val, idx, arr) => Math.abs(val - date) < Math.abs(arr[closestIdx] - date) ? idx : closestIdx, 0);
     const freqVal = Math.round((d[pivotIdx][1] - d[pivotIdx][0]) * 100) + "%";
-    const xvalueOfPivot = scales.x(pivots[pivotIdx]);
+    const xValueOfPivot = scales.x(pivots[pivotIdx]);
+    const y1ValueOfPivot = scales.y(d[pivotIdx][1]);
+    const y2ValueOfPivot = scales.y(d[pivotIdx][0]);
 
     select("#vline")
       .style("visibility", "visible")
-      .attr("x1", xvalueOfPivot)
-      .attr("x2", xvalueOfPivot);
+      .attr("x1", xValueOfPivot)
+      .attr("x2", xValueOfPivot)
+      .attr("y1", y1ValueOfPivot)
+      .attr("y2", y2ValueOfPivot);
 
-    const left = mousex > 0.5 * scales.x.range()[1] ? "" : `${mousex + 4}px`;
-    const right = mousex > 0.5 * scales.x.range()[1] ? `${scales.x.range()[1] - mousex - 4}px` : "";
+    const left = xValueOfPivot > 0.5 * scales.x.range()[1] ? "" : `${xValueOfPivot + 25}px`;
+    const right = xValueOfPivot > 0.5 * scales.x.range()[1] ? `${scales.x.range()[1] - xValueOfPivot + 25}px` : "";
+    const top = y1ValueOfPivot > 0.5 * scales.y(0) ? `${scales.y(0) - 50}px` : `${y1ValueOfPivot + 25}px`;
+
+    let frequencyText = "Frequency";
+    if (projection_pivot) {
+      if (pivots[pivotIdx] > projection_pivot) {
+        frequencyText = "Projected frequency";
+      }
+    }
+
     select("#freqinfo")
       .style("left", left)
       .style("right", right)
-      .style("top", `${70}px`)
+      .style("top", top)
+      .style("padding-left", "10px")
+      .style("padding-right", "10px")
+      .style("padding-top", "0px")
+      .style("padding-bottom", "0px")
       .style("visibility", "visible")
-      .html(`<p>${parseColorBy(colorBy, colorOptions)}: ${prettyString(labels[i])}</p>
+      .style("background-color", "rgba(55,55,55,0.9)")
+      .style("color", "white")
+      .style("font-family", dataFont)
+      .style("font-size", 18)
+      .style("line-height", 1)
+      .style("font-weight", 300)
+      .html(
+        `<p>${parseColorBy(colorBy, colorOptions)}: ${labels[i]}</p>
         <p>Time point: ${pivots[pivotIdx]}</p>
-        <p>Frequency: ${freqVal}</p>`);
+        <p>${frequencyText}: ${freqVal}</p>`
+      );
   }
 
 
@@ -248,15 +314,13 @@ export const drawStream = (
     .on("mouseout", handleMouseOut)
     .on("mousemove", handleMouseMove);
 
-  /* the vertical line to indicate the pivot point */
+  /* the vertical line to indicate the highlighted frequency interval */
   svgStreamGroup.append("line")
     .attr("id", "vline")
-    .attr("y1", scales.y(1))
-    .attr("y2", scales.y(0))
     .style("visibility", "hidden")
     .style("pointer-events", "none")
-    .style("stroke", "hsla(0,0%,100%,.9)")
-    .style("stroke-width", "5");
+    .style("stroke", "rgba(55,55,55,0.9)")
+    .style("stroke-width", 4);
 
   drawLabelsOverStream(svgStreamGroup, series, pivots, labels, scales);
 };

@@ -3,6 +3,7 @@
 import { min, max, sum } from "d3-array";
 import { addLeafCount } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
+import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -56,17 +57,17 @@ export const rectangularLayout = function rectangularLayout() {
 
 /**
  * assign x,y coordinates fro the root-to-tip regression layout
- * this requires a time tree with `node.num_date` set
+ * this requires a time tree with `num_date` info set
  * in addition, this function calculates a regression between
  * num_date and div which is saved as this.regression
  * @return {null}
  */
 export const timeVsRootToTip = function timeVsRootToTip() {
   this.nodes.forEach((d) => {
-    d.y = d.n.div;
-    d.x = d.n.num_date.value;
-    d.px = d.n.parent.num_date.value;
-    d.py = d.n.parent.div;
+    d.y = getDivFromNode(d.n);
+    d.x = getTraitFromNode(d.n, "num_date");
+    d.px = getTraitFromNode(d.n.parent, "num_date");
+    d.py = getDivFromNode(d.n.parent);
   });
   if (this.vaccines) { /* overlay vaccine cross on tip */
     this.vaccines.forEach((d) => {
@@ -128,9 +129,11 @@ const unrootedPlaceSubtree = (node, nTips) => {
  * @return {null}
  */
 export const unrootedLayout = function unrootedLayout() {
-  const nTips = this.numberOfTips;
+
   // postorder iteration to determine leaf count of every node
   addLeafCount(this.nodes[0]);
+  const nTips = this.nodes[0].leafCount;
+
   // calculate branch length from depth
   this.nodes.forEach((d) => {d.branchLength = d.depth - d.pDepth;});
   // preorder iteration to layout nodes
@@ -208,15 +211,15 @@ export const setDistance = function setDistance(distanceAttribute) {
   // assign node and parent depth
   if (this.distance === "div") {
     this.nodes.forEach((d) => {
-      d.depth = d.n.div;
-      d.pDepth = d.n.parent.div;
+      d.depth = getDivFromNode(d.n);
+      d.pDepth = getDivFromNode(d.n.parent);
       d.conf = [d.depth, d.depth]; // TO DO - shouldn't be needed, never have div confidence...
     });
   } else {
     this.nodes.forEach((d) => {
-      d.depth = d.n.num_date.value;
-      d.pDepth = d.n.parent.num_date.value;
-      d.conf = d.n.num_date.confidence ? d.n.num_date.confidence : [d.depth, d.depth];
+      d.depth = getTraitFromNode(d.n, "num_date");
+      d.pDepth = getTraitFromNode(d.n.parent, "num_date");
+      d.conf = getTraitFromNode(d.n, "num_date", {confidence: true}) || [d.depth, d.depth];
     });
   }
 

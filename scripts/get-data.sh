@@ -1,7 +1,6 @@
 #!/bin/bash
 data_files=(
   "manifest_guest.json" \
-  "img_mumps.png" "img_dengue.png" "img_avianinfluenza.png" "img_seasonalinfluenza.png" "img_ebola.png" "img_zika.png" "img_measles.png" "img_lassa.jpg" "img_wnv.png"\
   "dengue_all_tree.json" "dengue_all_meta.json" \
   "dengue_denv1_tree.json" "dengue_denv1_meta.json" \
   "dengue_denv2_tree.json" "dengue_denv2_meta.json" \
@@ -58,6 +57,8 @@ data_files=(
   "flu_seasonal_yam_na_3y_tree.json" "flu_seasonal_yam_na_3y_meta.json" "flu_seasonal_yam_na_3y_tip-frequencies.json" \
   "flu_seasonal_yam_na_6y_tree.json" "flu_seasonal_yam_na_6y_meta.json" "flu_seasonal_yam_na_6y_tip-frequencies.json" \
   "flu_seasonal_yam_na_12y_tree.json" "flu_seasonal_yam_na_12y_meta.json" "flu_seasonal_yam_na_12y_tip-frequencies.json" \
+  "enterovirus_d68_genome_meta.json" "enterovirus_d68_genome_tree.json" \
+  "enterovirus_d68_vp1_meta.json" "enterovirus_d68_vp1_tree.json" \
 )
 
 rm -rf data/

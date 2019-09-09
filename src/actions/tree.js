@@ -68,9 +68,9 @@ const processSelectedTip = (d, tree, treeToo) => {
  * for arg destructuring see https://simonsmith.io/destructuring-objects-as-function-parameters-in-es6/
  * @param  {array|undefined} root Change the in-view part of the tree. [root idx tree1, root idx tree2].
  *                                [0, 0]: reset. [undefined, undefined]: do nothing
- * @param  {object} tipSelected
- * @param  {int} idxOfInViewRootNodeTreeToo
- * @return {null} side effects: a single action
+ * @param  {object | undefined} tipSelected
+ * @param  {string | undefined} cladeSelected
+ * @return {function} a function to be handled by redux (thunk)
  */
 export const updateVisibleTipsAndBranchThicknesses = (
   {root = [undefined, undefined], tipSelected = undefined, cladeSelected = undefined} = {}
@@ -78,6 +78,11 @@ export const updateVisibleTipsAndBranchThicknesses = (
   console.log('update visibility');
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
+    if (root[0] === undefined && !cladeSelected && tree.selectedClade) {
+      /* if not resetting tree to root, maintain previous selectedClade if one exists */
+      cladeSelected = tree.selectedClade;
+    }
+
     if (!tree.nodes) {return;}
     // console.log("ROOT SETTING TO", root)
     /* mark nodes as "in view" as applicable */

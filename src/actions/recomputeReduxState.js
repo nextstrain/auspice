@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, UNDEFINED_VALUE } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { strainNameToIdx, getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -15,7 +15,7 @@ import { calcColorScale } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
-import { getTraitFromNode } from "../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode } from "../util/treeMiscHelpers";
 
 
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
@@ -24,17 +24,18 @@ export const doesColorByHaveConfidence = (controlsState, colorBy) =>
 export const getMinCalDateViaTree = (nodes, state) => {
   /* slider should be earlier than actual day */
   /* if no date, use some default dates - slider will not be visible */
-  const minNumDate = nodes[0].num_date ? nodes[0].num_date.value - 0.01 : state.dateMaxNumeric - defaultDateRange;
-  return numericToCalendar(minNumDate);
+  const minNumDate = getTraitFromNode(nodes[0], "num_date")
+  return (minNumDate === UNDEFINED_VALUE) ?
+    state.dateMaxNumeric - defaultDateRange :
+    numericToCalendar(minNumDate - 0.01);
 };
 
 export const getMaxCalDateViaTree = (nodes) => {
   let maxNumDate = reallySmallNumber;
   nodes.forEach((node) => {
-    if (node.num_date) {
-      if (node.num_date.value > maxNumDate) {
-        maxNumDate = node.num_date.value;
-      }
+    const numDate = getTraitFromNode(node, "num_date");
+    if (numDate !== UNDEFINED_VALUE && numDate > maxNumDate) {
+      maxNumDate = numDate;
     }
   });
   maxNumDate += 0.01; /* slider should be later than actual day */
@@ -162,8 +163,8 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout"];
-    const expectedTypes = ["string", "string", "string", "string"];
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate"];
+    const expectedTypes = ["string", "string", "string", "string", "boolean"];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (metadata.displayDefaults[keysToCheckFor[i]]) {
@@ -176,11 +177,6 @@ const modifyStateViaMetadata = (state, metadata) => {
         }
       }
     }
-    // TODO: why are these false / False
-    if (metadata.displayDefaults.mapTriplicate) {
-      // convert string to boolean; default is true; turned off with either false (js) or False (python)
-      state["mapTriplicate"] = (metadata.displayDefaults.mapTriplicate === 'false' || metadata.displayDefaults.mapTriplicate === 'False') ? false : true;
-    }
   }
 
   if (metadata.panels) {
@@ -191,14 +187,14 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelsToDisplay = ["tree"];
   }
 
-  /* if we lack geographicInfo, remove map from panels to display */
-  if (!metadata.geographicInfo) {
+  /* if we lack geoResolutions, remove map from panels to display */
+  if (!metadata.geoResolutions || !metadata.geoResolutions.length) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "map");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "map");
   }
 
   /* if we lack genome annotations, remove entropy from panels to display */
-  if (!metadata.genomeAnnotations) {
+  if (!metadata.genomeAnnotations || !metadata.genomeAnnotations.nuc) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
   }
@@ -277,8 +273,8 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
         }
       });
       /* check mutations */
-      if (node.mutations) {
-        const keys = Object.keys(node.mutations);
+      if (node.branch_attrs && node.branch_attrs.mutations) {
+        const keys = Object.keys(node.branch_attrs.mutations);
         if (keys.length > 1 || (keys.length === 1 && keys[0]!=="nuc")) aaMuts = true;
         if (keys.includes("nuc")) nucMuts = true;
       }
@@ -301,8 +297,11 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   }
 
   /* does the tree have date information? if not, disable controls, modify view */
-  state.branchLengthsToDisplay = !tree.nodes[0].num_date ? "divOnly" :
-    tree.nodes[0].div===undefined ? "dateOnly" : "divAndDate";
+  const numDateAtRoot = getTraitFromNode(tree.nodes[0], "num_date") !== UNDEFINED_VALUE;
+  const divAtRoot = getDivFromNode(tree.nodes[0]) !== undefined;
+  state.branchLengthsToDisplay = (numDateAtRoot && divAtRoot) ? "divAndDate" :
+    numDateAtRoot ? "dateOnly" :
+      "divOnly";
 
   /* if branchLengthsToDisplay is "divOnly", force to display by divergence
    * if branchLengthsToDisplay is "dateOnly", force to display by date
@@ -311,8 +310,10 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
     state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
 
   state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
-  state.temporalConfidence = (tree.nodes[0].num_date && tree.nodes[0].num_date.confidence) ?
-    {exists: true, display: true, on: false} : {exists: false, display: false, on: false};
+
+  state.temporalConfidence = getTraitFromNode(tree.nodes[0], "num_date", {confidence: true}) ?
+    {exists: true, display: true, on: false} :
+    {exists: false, display: false, on: false};
   return state;
 };
 
@@ -374,9 +375,9 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
     console.error("Error detected. Setting distanceMeasure to ", state["distanceMeasure"]);
   }
 
-  /* geoResolution */
-  if (metadata.geographicInfo) {
-    const availableGeoResultions = Object.keys(metadata.geographicInfo);
+  /* geoResolutions */
+  if (metadata.geoResolutions) {
+    const availableGeoResultions = metadata.geoResolutions.map((i) => i.key);
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
       /* fallbacks: JSON defined default, then hardocded default, then any available */
       if (metadata.displayDefaults && metadata.displayDefaults.geoResolution && availableGeoResultions.indexOf(metadata.displayDefaults.geoResolution) !== -1) {
@@ -390,7 +391,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
       delete query.r; // no-op if query.r doesn't exist
     }
   } else {
-    console.warn("JSONs did not include geographicInfo.");
+    console.warn("JSONs did not include `geoResolutions`");
   }
 
   /* temporalConfidence */
@@ -489,18 +490,39 @@ const modifyControlsViaTreeToo = (controls, name) => {
 };
 
 /**
+ * The v2 JSON spec defines colorings as a list, so that order is guaranteed.
+ * Prior to this, we used a dict, where key insertion order is (guaranteed? essentially always?)
+ * to be respected. By simply converting it back to a dict, all the auspice
+ * code may continue to work. This should be attended to in the future.
+ * @param {obj} coloringsList list of objects
+ * @returns {obj} a dictionary representation, where the "key" property of each element
+ * in the list has become a property of the object
+ */
+const convertColoringsListToDict = (coloringsList) => {
+  const colorings = {};
+  coloringsList.forEach((coloring) => {
+    colorings[coloring.key] = coloring;
+    delete colorings[coloring.key].key;
+  });
+  return colorings;
+};
+
+/**
  *
  * A lot of this is simply changing augur's snake_case to auspice's camelCase
  */
 const createMetadataStateFromJSON = (json) => {
   const metadata = {};
   if (json.meta.colorings) {
-    metadata.colorings = json.meta.colorings;
+    metadata.colorings = convertColoringsListToDict(json.meta.colorings);
   }
   metadata.title = json.meta.title;
   metadata.updated = json.meta.updated;
   if (json.version) {
     metadata.version = json.version;
+  }
+  if (json.meta.maintainers) {
+    metadata.maintainers = json.meta.maintainers;
   }
   if (json.meta.genome_annotations) {
     metadata.genomeAnnotations = json.meta.genome_annotations;
@@ -526,8 +548,8 @@ const createMetadataStateFromJSON = (json) => {
       }
     }
   }
-  if (json.meta.geographic_info) {
-    metadata.geographicInfo = json.meta.geographic_info;
+  if (json.meta.geo_resolutions) {
+    metadata.geoResolutions = json.meta.geo_resolutions;
   }
 
 
@@ -607,7 +629,7 @@ export const createStateFromQueryOrJSONs = ({
   if (query.clade) {
     tree = modifyTreeStateVisAndBranchThickness(tree, undefined, query.clade, controls);
   } else { /* if not specifically given in URL, zoom to root */
-    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, 'root', controls);
+    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, undefined, controls);
   }
   tree = modifyTreeStateVisAndBranchThickness(tree, query.s, undefined, controls);
   if (treeToo && treeToo.loaded) {
@@ -646,13 +668,7 @@ export const createStateFromQueryOrJSONs = ({
     tree.name = json.tree_name;
   }
 
-  /* The server is able to provide a different URL to be displayed,
-   * similar to a redirect. Note that this is completely optional
-   * this is picked up by middleware (any action with a `url` key is)
-   */
-  const url = json.auspice_url_should_be;
-
-  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query, url};
+  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };
 
 export const createTreeTooState = ({

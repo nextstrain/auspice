@@ -12,6 +12,18 @@ import { hasExtension, getExtension } from "../util/extensions";
 /* TODO: make a default auspice server (not charon) and make charon the nextstrain server. Or vice versa. */
 const serverAddress = hasExtension("serverAddress") ? getExtension("serverAddress") : charonAPIAddress;
 
+/**
+ * Sends a GET request to the `/charon` web API endpoint requesting data.
+ * Throws an `Error` if the response is not successful or is not a redirect.
+ *
+ * Returns a `Promise` containing the `Response` object. JSON data must be
+ * accessed from the `Response` object using the `.json()` method.
+ *
+ * @param {String} prefix: the main dataset information pertaining to the query,
+ *  e.g. 'flu'
+ * @param {Object} additionalQueries: additional information to be parsed as a
+ *  query string such as `type` (`String`) or `narrative` (`Boolean`).
+ */
 const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
   let path = `${serverAddress}/${narrative?"getNarrative":"getDataset"}`;
   path += `?prefix=${prefix}`;
@@ -22,28 +34,38 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
         throw new Error(res.statusText);
       }
       return res;
-    })
-    .then((res) => res.json());
+    });
   return p;
 };
 
+/**
+ * Requests data from a hardcoded web API endpoint.
+ * Throws an `Error` if the response is not successful.
+ *
+ * Returns a `Promise` containing the `Response` object. JSON data must be
+ * accessed from the `Response` object using the `.json()` method.
+ *
+ * Note: we currently expect a single dataset to be present in "hardcodedDataPaths".
+ * This may be extended to multiple in the future...
+ *
+ * @param {String} prefix: the main dataset information pertaining to the query,
+ *  e.g. 'flu'
+ * @param {Object} additionalQueries: additional information to be parsed as a
+ *  query string such as `type` (`String`) or `narrative` (`Boolean`).
+ */
 const getHardcodedData = (prefix, {type="mainJSON", narrative=false}={}) => {
-  /* we currently expect a single dataset to be present in "hardcodedDataPaths".
-  This may be extended to multiple in the future... */
   const datapaths = getExtension("hardcodedDataPaths");
-  console.log("FETCHING", datapaths[type]);
+
   const p = fetch(datapaths[type])
     .then((res) => {
       if (res.status !== 200) {
         throw new Error(res.statusText);
       }
       return res;
-    })
-    .then((res) => res.json());
+    });
   return p;
 };
 
-// const fetchData = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDatasetFromCharon;
 const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDatasetFromCharon;
 
 /**
@@ -93,13 +115,15 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   /* fetch the main JSON + the [main] JSON of a second tree if applicable */
   let mainJson;
   try {
-    mainJson = await getDataset(`${url}`);
+    const response = await getDataset(`${url}`);
+    mainJson = await response.json();
     if (secondTree) {
       if (!secondTree.url) {
         if (!mainJson.tree_name) throw new Error("Can't fetch second tree if main tree is unnamed");
         secondTree.url = url.replace(mainJson.tree_name, secondTree.name);
       }
-      const secondTreeJson = await getDataset(secondTree.url);
+      const secondTreeJson = await getDataset(secondTree.url)
+        .then((res) => res.json());
       mainJson.treeTwo = secondTreeJson.tree;
       /* TO DO -- we used to fetch both trees at once, and the server would provide
        * the following info accordingly. This required `recomputeReduxState` to be
@@ -112,6 +136,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
 
     dispatch({
       type: types.CLEAN_START,
+      pathnameShouldBe: queryString.parse(response.url.split("?")[1]).prefix,
       ...createStateFromQueryOrJSONs({json: mainJson, query, narrativeBlocks})
     });
 
@@ -124,7 +149,8 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   /* do we have frequencies to display? */
   if (mainJson.meta.panels && mainJson.meta.panels.indexOf("frequencies") !== -1) {
     try {
-      const frequencyData = await getDataset(url, {type: "tip-frequencies"});
+      const frequencyData = await getDataset(url, {type: "tip-frequencies"})
+        .then((res) => res.json());
       dispatch(loadFrequencies(frequencyData));
     } catch (err) {
       console.error("Failed to fetch frequencies", err.message)
@@ -146,7 +172,8 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
 export const loadSecondTree = (name, fields) => async (dispatch, getState) => {
   let secondJson;
   try {
-    secondJson = await getDataset(fields.join("/"));
+    secondJson = await getDataset(fields.join("/"))
+      .then((res) => res.json());
   } catch (err) {
     console.error("Failed to fetch additional tree", err.message);
     dispatch(warningNotification({message: "Failed to fetch second tree"}));
@@ -155,7 +182,7 @@ export const loadSecondTree = (name, fields) => async (dispatch, getState) => {
   const oldState = getState();
   const newState = createTreeTooState({treeTooJSON: secondJson.tree, oldState, segment: name});
   dispatch({type: types.TREE_TOO_DATA, segment: name, ...newState});
-}
+};
 
 
 export const loadJSONs = ({url = window.location.pathname, search = window.location.search} = {}) => {
@@ -166,10 +193,13 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
     }
     const query = queryString.parse(search);
 
-    if (url.indexOf("narratives") !== -1) {
+    if (url.indexOf("narratives") === -1) {
+      fetchDataAndDispatch(dispatch, url, query);
+    } else {
       /* we want to have an additional fetch to get the narrative JSON, which in turn
       tells us which data JSON to fetch... */
       getDatasetFromCharon(url, {narrative: true})
+        .then((res) => res.json())
         .then((blocks) => {
           const firstURL = blocks[0].dataset;
           const firstQuery = queryString.parse(blocks[0].query);
@@ -180,8 +210,6 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
           console.error("Error obtaining narratives", err.message);
           dispatch(goTo404(`Couldn't load narrative for ${url}`));
         });
-    } else {
-      fetchDataAndDispatch(dispatch, url, query);
-    }
+    };
   };
 };
