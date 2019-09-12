@@ -2,6 +2,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
+import { NarrativeStyles, linkStyles, OpacityFade } from './styles';
 import ReactPageScroller from "./ReactPageScroller";
 import { changePage } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE, TOGGLE_NARRATIVE } from "../../actions/types";
@@ -10,14 +11,7 @@ import { narrativeNavBarHeight } from "../../util/globals";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;
-const linkStyles = { // would be better to get CSS specificity working
-  color: "#5097BA",
-  textDecoration: "none",
-  cursor: "pointer",
-  fontFamily: "Lato",
-  fontWeight: "400",
-  fontSize: "1.8em"
-};
+
 
 @connect((state) => ({
   loaded: state.narrative.loaded,
@@ -58,20 +52,6 @@ class Narrative extends React.Component {
     if (this.props.currentInFocusBlockIdx !== 0) {
       this.reactPageScroller.goToPage(this.props.currentInFocusBlockIdx);
     }
-  }
-  renderOpacityFade(top) {
-    const style = {
-      zIndex: 200,
-      position: "absolute",
-      backgroundImage: `linear-gradient(to ${top?"top":"bottom"}, rgba(255, 255, 255, 0), ${sidebarColor})`,
-      width: "100%",
-      height: "30px"
-    };
-    if (top) style.top = narrativeNavBarHeight + progressHeight;
-    else style.bottom = 0;
-    return (
-      <div id={`fade${top?"Top":"Bottom"}`} style={style}/>
-    );
   }
   renderChevron(pointUp) {
     const dims = {w: 30, h: 30};
@@ -155,13 +135,13 @@ class Narrative extends React.Component {
   render() {
     if (!this.props.loaded) {return null;}
     return (
-      <div
+      <NarrativeStyles
         id="NarrativeContainer"
-        style={{top: narrativeNavBarHeight}}
+        narrativeNavBarHeight={narrativeNavBarHeight}
       >
         {this.renderProgress()}
-        {this.renderOpacityFade(true)}
-        {this.renderOpacityFade(false)}
+        <OpacityFade position="top" topHeight={narrativeNavBarHeight + progressHeight}/>
+        <OpacityFade position="bottom"/>
         {this.props.currentInFocusBlockIdx !== 0 ? this.renderChevron(true) : null}
         {!this.state.showingEndOfNarrativePage ? this.renderChevron(false) : null}
         <ReactPageScroller
@@ -171,7 +151,7 @@ class Narrative extends React.Component {
         >
           {this.renderBlocks()}
         </ReactPageScroller>
-      </div>
+      </NarrativeStyles>
     );
   }
   componentWillUnmount() {

@@ -279,7 +279,6 @@ export default class ReactPageScroller extends React.Component {
     return (
       <div
         id="PageScroller"
-        className="narrative"
         style={{height: containerHeight, width: "inherit", overflow: "hidden", padding: "0px 0px 0px 0px"}}
       >
         <div
