@@ -1,3 +1,5 @@
+## version 1.39.0 - 2019/09/12
+
 ## version 1.38.2 - 2019/09/06
 
 * Fix footer for INRB Ebola builds.
