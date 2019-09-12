@@ -77,7 +77,7 @@ const SplashContent = ({isMobile, available, browserDimensions, dispatch, errorM
   const ListAvailable = ({type, data}) => (
     <>
       <div style={{fontSize: "26px"}}>
-        {`Locally available ${type}:`}
+        {`Available ${type}:`}
       </div>
       {
         data ? (
