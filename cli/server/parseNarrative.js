@@ -10,7 +10,7 @@ const blockProxyHandler = {
       target.query = urlParts[3];
       return true;
     } else if (key === "contents") {
-      target.__html = marked(value, {sanitize: false, gfm: true, tables: true});
+      target.__html = marked(value, {sanitize: false, gfm: true});
       return true;
     }
     return false;
