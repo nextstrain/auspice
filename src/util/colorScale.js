@@ -28,6 +28,82 @@ const createListOfColors = (n, range) => {
   return d3Range(0, n).map(scale);
 };
 
+/* AA colours taken from
+ * Taylor WR (1997) Residual colours: a proposal for aminochromography. Protein Engineering 10(7) 743-746
+ * https://watermark.silverchair.com/100743.pdf
+ */
+// const colorsAA = {
+//   D: "#FF0000", /* Asp Aspartate */
+//   S: "#FF3300", /* Ser Serine */
+//   T: "#FF6600", /* Thr Threonine */
+//   G: "#FF9900", /* Gly Glycine */
+//   P: "#FFCC00", /* Pro Proline */
+//   C: "#FFFF00", /* Cys Cystine */
+//   A: "#CCFF00", /* Ala Alanine */
+//   V: "#99FF00", /* Val Valine */
+//   I: "#66FF00", /* Ile Isoleucine */
+//   L: "#33FF00", /* Leu Leucine */
+//   M: "#00FF00", /* Met Methionine */
+//   F: "#00FF66", /* Phe Phenylalanine */
+//   Y: "#00FFCC", /* Tyr Tyrosine */
+//   W: "#00CCFF", /* Trp Tryptophan */
+//   H: "#0066FF", /* His Histidine */
+//   R: "#0000FF", /* Arg Argnine */
+//   K: "#6600FF", /* Lys Lysine */
+//   N: "#CC00FF", /* Asn Asparagine */
+//   Q: "#FF00CC", /* Gln Glutamine */
+//   E: "#FF0066" /* Glu Glutamate */
+// };
+
+// const colorsNuc = { /* taken from https://www.umass.edu/molvis/drums/codes.html */
+//   A: "#5050ff",
+//   T: "#e6e600",
+//   U: "#cc9900", /* not yet in augur but is a valid code */
+//   G: "#00c000",
+//   C: "#e00000",
+//   K: "#ae00fe", /* Keto - G or T - not taken from DRuMS */
+//   M: "#fd0162", /* aMino - A or C - not taken from DRuMS */
+//   R: "#2e8b57", /* puRine - A or G */
+//   Y: "#ff8c00" /* pYramidine - C or T */
+// };
+
+
+const colorsNuc = { /* alternative taken from http://life.nthu.edu.tw/~fmhsu/rasframe/SHAPELY.HTM */
+  A: "#3F4DCB",
+  R: "#4681C9", /* puRine - A or G */
+  G: "#78B67E",
+  C: "#C5B945",
+  Y: "#E0A23A", /* pYramidine - C or T */
+  T: "#DC2F24",
+  U: "#E0A23A", /* not yet in augur but is a valid code (same as T here) */
+  K: "#5AA4A8", /* Keto - G or T - not taken from DRuMS */
+  M: "#C5B945" /* aMino - A or C - not taken from DRuMS */
+};
+
+const colorsAA = { // modified from http://jmol.sourceforge.net/jscolors/
+  A: "#A87068", //  "#8CFF8C"  // "Ala"
+  R: "#093AAF", //  "#00007C"  // "Arg"
+  N: "#00ACBC", //  "#FF7C70"  // "Asn"
+  D: "#E60A0A", //  "#A00042"  // "Asp"
+  C: "#E6E600", //  "#FFFF70"  // "Cys"
+  Q: "#00BCBC", //  "#FF4C4C"  // "Gln"
+  E: "#E60A0A", //  "#660000"  // "Glu"
+  G: "#88AABB", //  "#FFFFFF"  // "Gly"
+  H: "#8282D2", //  "#7070FF"  // "His"
+  I: "#0C620C", //  "#004C00"  // "Ile"
+  L: "#0F820F", //  "#455E45"  // "Leu"
+  K: "#145AFF", //  "#4747B8"  // "Lys"
+  M: "#E6E600", //  "#B8A042"  // "Met"
+  F: "#3232AA", //  "#534C52"  // "Phe"
+  P: "#DC9682", //  "#525252"  // "Pro"
+  S: "#FA8600", //  "#FF7042"  // "Ser"
+  T: "#EAA600", //  "#B84C00"  // "Thr"
+  W: "#B45AB4", //  "#4F4600"  // "Trp"
+  Y: "#3232AA", //  "#8C704C"  // "Tyr"
+  V: "#20A23F" //  "#FF8CFF"  // "Val"
+};
+
+
 const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
   const stateCount = countTraitsAcrossTree(nodes, [attr], false, false)[attr];
   if (nodesToo) {
@@ -113,10 +189,30 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     console.error("calcColorScale called before tree is ready.");
     error = true;
   } else if (genotype) { /* G E N O T Y P E */
-    legendValues = orderOfGenotypeAppearance(tree.nodes);
-    colorScale = scaleOrdinal()
-      .domain([undefined, ...legendValues])
-      .range([unknownColor, ...genotypeColors]);
+    const gtOrder = orderOfGenotypeAppearance(tree.nodes);
+    if (genotype.aa){
+      legendValues = gtOrder;
+    }else{ // always have ACTG, add gap, N, or ambiguous nucleotides on demand
+      legendValues = ['A', 'C', 'G', 'T'];
+      for (let ni in gtOrder){
+        if (!legendValues.includes(gtOrder[ni])){
+          legendValues.push(gtOrder[ni]);
+        }
+      }
+    }
+    console.log(legendValues);
+    if (genotype.positions.length === 1) {
+      /* use pre-set colours for single AA / NUC values */
+      colorScale = (val) => {
+        const presetColors = genotype.aa ? colorsAA : colorsNuc;
+        return presetColors[val.toUpperCase()] || unknownColor;
+      };
+    } else {
+      /* we don't have pre-set colours for multiple values. This can be improved */
+      colorScale = scaleOrdinal()
+        .domain([undefined, ...legendValues])
+        .range([unknownColor, ...genotypeColors]);
+    }
   } else if (colorOptions && colorOptions[colorBy]) {
     if (colorOptions[colorBy].color_map) {
       // console.log("Sweet - we've got a color_map for ", colorBy)
