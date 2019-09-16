@@ -110,7 +110,7 @@ const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidenc
  * @return {React component | null}
  */
 const renderMutations = (d, mutType) => {
-  if (!d.branch_attrs || d.branch_attrs.mutations) return null;
+  if (!d.branch_attrs || !d.branch_attrs.mutations) return null;
   const mutations = d.branch_attrs.mutations;
 
   if (mutType === "nuc") {
