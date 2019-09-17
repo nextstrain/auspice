@@ -114,10 +114,42 @@ const sendJson = async (res, info) => {
   }
 }
 
+const findAvailableTangleTreeOptions = (currentDatasetUrl, availableDatasetUrls) => {
+  const currentDatasetUrlArr = currentDatasetUrl.split('/');
+
+  const availableTangleTreeOptions = availableDatasetUrls.filter((datasetUrl) => {
+    const datasetUrlArr = datasetUrl.split('/');
+    // Do not return the same dataset
+    if (currentDatasetUrl === datasetUrl) return null;
+
+    // Do not return dataset if the URLs have different number of parameters
+    if (currentDatasetUrlArr.length !== datasetUrlArr.length) return null;
+
+    // Do not return dataset if different pathogens
+    if (currentDatasetUrlArr[0] !== datasetUrlArr[0]) return null;
+
+    // Find differences between the two dataset URLs
+    const urlDifferences = currentDatasetUrlArr.filter((param, index) => {
+      if (datasetUrlArr[index] !== param) {
+        return param;
+      }
+      return null;
+    });
+
+    // Do not return dataset if more than one parameter is different
+    if (urlDifferences.length > 1) return null;
+
+    return datasetUrl;
+  });
+
+  return availableTangleTreeOptions;
+};
+
 module.exports = {
   interpretRequest,
   extendDataPathsToMatchAvailiable,
   makeFetchAddresses,
   handleError,
-  sendJson
+  sendJson,
+  findAvailableTangleTreeOptions
 };
