@@ -181,7 +181,7 @@ export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, 
   }
   const oldState = getState();
   const newState = createTreeTooState({treeTooJSON: secondJson.tree, oldState, originalTreeUrl: firstTreeUrl, secondTreeUrl: secondTreeUrl});
-  dispatch({type: types.TREE_TOO_DATA, segment: name, ...newState});
+  dispatch({type: types.TREE_TOO_DATA, ...newState});
 };
 
 

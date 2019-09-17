@@ -22,19 +22,12 @@ class ChooseSecondTree extends React.Component {
     const displayedDataset = window.location.pathname
       .replace(/^\//, '')
       .replace(/\/$/, '')
-      .split("/");
+      .split(':')[0];
 
-    displayedDataset.forEach((part, idx) => {
-      if (part.includes(":")) {
-        displayedDataset[idx] = part.split(":")[0];
-      }
-    });
-
-    const displayedUrl = displayedDataset.join('/');
     let options = [];
     this.props.available.datasets
     .filter((dataset) => {
-      if (dataset.request === displayedUrl) {
+      if (dataset.request === displayedDataset) {
         options = [...dataset.tangleTreeOptions];
       }
       return null;
@@ -60,7 +53,7 @@ class ChooseSecondTree extends React.Component {
               if (opt.value === "REMOVE") {
                 this.props.dispatch({type: REMOVE_TREE_TOO});
               } else {
-                this.props.dispatch(loadSecondTree(opt.value, displayedUrl));
+                this.props.dispatch(loadSecondTree(opt.value, displayedDataset));
               }
             }}
           />
