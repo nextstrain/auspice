@@ -87,21 +87,13 @@ const processSecondTree = (url, query) => {
   if (url.includes(":")) {
     const parts = url.replace(/^\//, '')
       .replace(/\/$/, '')
-      .split("/");
-    for (let i=0; i<parts.length; i++) {
-      if (parts[i].indexOf(":") !== -1) {
-        const [treeName, secondTreeName] = parts[i].split(":");
-        parts[i] = treeName;
-        url = parts.join("/"); // this is the first tree URL
-        parts[i] = secondTreeName;
-        secondTree = {
-          url: parts.join("/"), // this is the 2nd tree URL
-          name: secondTreeName,
-          mainTreeName: treeName
-        };
-        break;
-      }
-    }
+      .split(":");
+    url = parts[0];
+    secondTree = {
+      url: parts[1],
+      name: parts[1],
+      mainTreeName: parts[0]
+    };
   } else if (query.tt) {
     secondTree = {url: undefined, name: query.tt, mainTreeName: undefined};
   }
@@ -134,9 +126,11 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
       mainJson._treeTwoName = secondTree.name; // TO DO
     }
 
+    const mainUrl = queryString.parse(response.url.split("?")[1]).prefix;
+
     dispatch({
       type: types.CLEAN_START,
-      pathnameShouldBe: queryString.parse(response.url.split("?")[1]).prefix,
+      pathnameShouldBe: secondTree ? mainUrl.concat(":", secondTree.url) : mainUrl,
       ...createStateFromQueryOrJSONs({json: mainJson, query, narrativeBlocks})
     });
 

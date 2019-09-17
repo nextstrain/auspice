@@ -576,6 +576,7 @@ export const createStateFromQueryOrJSONs = ({
     /* new tree state(s) */
     tree = treeJsonToState(json.tree);
     tree.debug = "LEFT";
+    tree.name = json.tree_name;
     metadata.mainTreeNumTips = calcTotalTipsInTree(tree.nodes);
     if (json.treeTwo) {
       treeToo = treeJsonToState(json.treeTwo);

@@ -108,7 +108,7 @@ const sendJson = async (res, info) => {
     const meta = await utils.readFilePromise(info.address.meta);
     const tree = await utils.readFilePromise(info.address.tree);
     /* v1 JSONs don't define a tree name, so we try to guess it here */
-    const mainTreeName = guessTreeName(info.parts);
+    const mainTreeName = info.parts.join('/');
     const v2Json = convertFromV1({tree, meta, treeName: mainTreeName});
     return res.json(v2Json)
   }

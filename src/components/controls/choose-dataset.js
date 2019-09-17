@@ -50,12 +50,8 @@ class ChooseDataset extends React.Component {
     const displayedDataset = window.location.pathname
       .replace(/^\//, '')
       .replace(/\/$/, '')
+      .split(":")[0]
       .split("/");
-    displayedDataset.forEach((part, idx) => {
-      if (part.includes(":")) {
-        displayedDataset[idx] = part.split(":")[0];
-      }
-    });
 
     const options = [[]];
 
