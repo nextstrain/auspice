@@ -35,7 +35,7 @@ class ChooseSecondTree extends React.Component {
     this.props.available.datasets
     .filter((dataset) => {
       if (dataset.request === displayedUrl) {
-        options = dataset.tangleTreeOptions;
+        options = [...dataset.tangleTreeOptions];
       }
       return null;
     });
@@ -60,9 +60,7 @@ class ChooseSecondTree extends React.Component {
               if (opt.value === "REMOVE") {
                 this.props.dispatch({type: REMOVE_TREE_TOO});
               } else {
-                const dataPath = [...displayedDataset];
-                dataPath.splice(idxOfTree, 1, opt.value);
-                this.props.dispatch(loadSecondTree(opt.value, dataPath));
+                this.props.dispatch(loadSecondTree(opt.value, displayedUrl));
               }
             }}
           />

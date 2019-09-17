@@ -663,27 +663,25 @@ export const createStateFromQueryOrJSONs = ({
     );
   }
 
-  if (json.tree_name) {
-    /* setting this will enable the sidebar drop down for a 2nd tree */
-    tree.name = json.tree_name;
-  }
-
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };
 
 export const createTreeTooState = ({
   treeTooJSON, /* raw json data */
   oldState,
-  segment /* name of the treeToo segment */
+  originalTreeUrl,
+  secondTreeUrl /* treeToo URL */
 }) => {
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
   let controls = oldState.controls;
   const tree = Object.assign({}, oldState.tree);
+  tree.name = originalTreeUrl;
   let treeToo = treeJsonToState(treeTooJSON);
+  treeToo.name = secondTreeUrl;
   treeToo.debug = "RIGHT";
   controls = modifyControlsStateViaTree(controls, tree, treeToo, oldState.metadata.colorings);
-  controls = modifyControlsViaTreeToo(controls, segment);
+  controls = modifyControlsViaTreeToo(controls, secondTreeUrl);
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls);
 
   /* calculate colours if loading from JSONs or if the query demands change */

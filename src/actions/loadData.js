@@ -169,10 +169,10 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
 
 };
 
-export const loadSecondTree = (name, fields) => async (dispatch, getState) => {
+export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, getState) => {
   let secondJson;
   try {
-    secondJson = await getDataset(fields.join("/"))
+    secondJson = await getDataset(secondTreeUrl)
       .then((res) => res.json());
   } catch (err) {
     console.error("Failed to fetch additional tree", err.message);
@@ -180,7 +180,7 @@ export const loadSecondTree = (name, fields) => async (dispatch, getState) => {
     return;
   }
   const oldState = getState();
-  const newState = createTreeTooState({treeTooJSON: secondJson.tree, oldState, segment: name});
+  const newState = createTreeTooState({treeTooJSON: secondJson.tree, oldState, originalTreeUrl: firstTreeUrl, secondTreeUrl: secondTreeUrl});
   dispatch({type: types.TREE_TOO_DATA, segment: name, ...newState});
 };
 
