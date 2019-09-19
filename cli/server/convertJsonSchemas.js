@@ -333,7 +333,7 @@ const setNodeBranchAttrs = (v2) => {
 };
 
 
-const convertFromV1 = ({tree, meta, treeName}) => {
+const convertFromV1 = ({tree, meta}) => {
   const v2 = {version: "2.0", meta: {}};
   // set metadata
   setColorings(v2["meta"], meta);
@@ -344,11 +344,6 @@ const convertFromV1 = ({tree, meta, treeName}) => {
   setLabels(v2);
   setAuthorInfoOnTree(v2, meta);
   setVaccineChoicesOnNodes(v2, meta);
-  if (treeName) {
-    // TODO -- this must be removed before v2 release
-    // see https://github.com/nextstrain/auspice/issues/776
-    v2["meta"].tree_name = treeName;
-  }
   removeNonV2TreeProps(v2);
   return v2;
 };

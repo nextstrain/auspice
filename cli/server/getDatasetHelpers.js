@@ -10,7 +10,6 @@
 
 const utils = require("../utils");
 const queryString = require("query-string");
-const getAvailable = require("./getAvailable");
 const path = require("path");
 const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
 
@@ -19,15 +18,6 @@ const handleError = (res, clientMsg, serverMsg="") => {
   res.statusMessage = clientMsg;
   utils.warn(`${clientMsg} -- ${serverMsg}`);
   return res.status(500).end();
-};
-
-
-const guessTreeName = (prefixParts) => {
-  const guesses = ["HA", "NA", "PB1", "PB2", "PA", "NP", "NS", "MP", "L", "S", "SEGMENT1", "SEGMENT2", "SEGMENT3", "SEGMENT4", "SEGMENT5", "SEGMENT6", "SEGMENT7", "SEGMENT8", "SEGMENT9", "SEGMENT10"];
-  for (const part of prefixParts) {
-    if (guesses.indexOf(part.toUpperCase()) !== -1) return part;
-  }
-  return undefined;
 };
 
 const splitPrefixIntoParts = (url) => url
@@ -109,7 +99,7 @@ const sendJson = async (res, info) => {
     const tree = await utils.readFilePromise(info.address.tree);
     /* v1 JSONs don't define a tree name, so we try to guess it here */
     const mainTreeName = info.parts.join('/');
-    const v2Json = convertFromV1({tree, meta, treeName: mainTreeName});
+    const v2Json = convertFromV1({tree, meta});
     return res.json(v2Json)
   }
 }
