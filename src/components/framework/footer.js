@@ -236,13 +236,22 @@ const dispatchFilter = (dispatch, activeFilters, key, value) => {
 };
 
 export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, itemName, display, showX) => {
-  const active = activeFilters[filterName].indexOf(itemName) !== -1;
+  // For 'unknown' filtering
+  // We want to store the key as unk_[filterName] to avoid same-key warning if 
+  // filtering by two "" values (ex: country == "" & host == "")
+  // BUT we want actual filter value & url to be "unk" (neater & easier to handle)
+  // so create both things here....
+  const keyName = itemName === "unk" || itemName === "" ? "unk_"+filterName : itemName;
+  const filtName = itemName === "" ? "unk" : itemName;
+  // To see if active, use "unk" (filtName)
+  const active = activeFilters[filterName].indexOf(filtName) !== -1; 
+
   if (active && showX) {
     return (
-      <div key={itemName} style={{display: "inline-block"}}>
+      <div key={keyName} style={{display: "inline-block"}}>
         <div
           className={'boxed-item-icon'}
-          onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
+          onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, filtName);}}
           role="button"
           tabIndex={0}
         >
@@ -258,8 +267,8 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
     return (
       <div
         className={"boxed-item active-clickable"}
-        key={itemName}
-        onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
+        key={keyName}
+        onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, filtName);}}
         role="button"
         tabIndex={0}
       >
@@ -270,8 +279,8 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
   return (
     <div
       className={"boxed-item inactive"}
-      key={itemName}
-      onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
+      key={keyName}
+      onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, filtName);}}
       role="button"
       tabIndex={0}
     >
@@ -324,15 +333,27 @@ class Footer extends React.Component {
   displayFilter(styles, filterName) {
     const totalStateCount = this.props.totalStateCounts[filterName];
     const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
+    let stateKeysOrdered;
+    // If has ordered colorings, use this to sort
+    if (this.props.metadata.colorings[filterName] && this.props.metadata.colorings[filterName].scale) {
+      const colorValues = this.props.metadata.colorings[filterName].scale.map(function(x) { return x[0];});
+      // Add any extra values without a set color to the end
+      stateKeysOrdered = _.union(colorValues, Object.keys(totalStateCount));
+    } else { // otherwise, sort by value
+      stateKeysOrdered = Object.keys(totalStateCount).sort();
+      // Put empty values ("") at the end - looks neater
+      const emptyVal = stateKeysOrdered.indexOf("");
+      if (emptyVal !== -1) { stateKeysOrdered.push(stateKeysOrdered.splice(emptyVal, 1)[0]); }
+    }
     return (
       <div>
         {`Filter by ${filterTitle}`}
-        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
+        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterTitle} filter`) : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-          {Object.keys(totalStateCount).sort().map((itemName) => {
+          {stateKeysOrdered.map((itemName) => { 
             const display = (
               <span>
-                {itemName}
+                {itemName !== "" ? itemName : "Unknown"}
                 {" (" + totalStateCount[itemName] + ")"}
               </span>
             );

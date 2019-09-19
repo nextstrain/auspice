@@ -173,11 +173,14 @@ class Info extends React.Component {
     );
   }
   addNonAuthorFilterButton(buttons, filterName) {
+    // Get filterTitle so we can show what unknown is being filtered by
+    // We'll display particular things if unknown. And need to get counts for "" trait, not "unk"!
+    const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
     this.props.filters[filterName].sort().forEach((itemName) => {
       const display = (
         <span>
-          {itemName}
-          {" (" + this.props.totalStateCounts[filterName][itemName] + ")"}
+          {itemName !== "unk" ? itemName : "Unknown " + filterTitle}
+          {" (" + this.props.totalStateCounts[filterName][itemName !== "unk" ? itemName : ""] + ")"}
         </span>
       );
       buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));

@@ -135,7 +135,9 @@ const calcVisibility = (tree, controls, dates) => {
     const filters = [];
     Object.keys(controls.filters).forEach((trait) => {
       if (controls.filters[trait].length) {
-        filters.push({trait, values: controls.filters[trait]});
+        // If filtering by unknown trait, check "" against node values, not "unk"!
+        const rawTraits = controls.filters[trait].map(function(x) {return x === "unk" ? "" : x; });
+        filters.push({trait, values: rawTraits});
       }
     });
     if (filters.length) {

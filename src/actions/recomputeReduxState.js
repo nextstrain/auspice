@@ -416,9 +416,10 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   /* are filters valid? */
   const activeFilters = Object.keys(state.filters).filter((f) => f.length);
   const stateCounts = countTraitsAcrossTree(tree.nodes, activeFilters, false, true);
+  // Also allow filter "unk" for unknown values!
   for (const filterType of activeFilters) {
     const validValues = state.filters[filterType]
-      .filter((filterValue) => filterValue in stateCounts[filterType]);
+      .filter((filterValue) => filterValue in stateCounts[filterType] || filterValue === "unk");
     state.filters[filterType] = validValues;
     if (!validValues.length) {
       delete query[`f_${filterType}`];

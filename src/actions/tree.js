@@ -241,17 +241,20 @@ export const updateTipRadii = (
  * @param {Array of strings} values the values (see above)
  */
 export const applyFilter = (mode, trait, values) => {
+  // If filtering by unknown values "", replace with "unk" for filter/url
+  // This makes it prettier and easier to handle (url can't have "")
+  const correctValues = values.map((x) => x === "" ? "unk" : x );
   return (dispatch, getState) => {
     const { controls } = getState();
     const currentlyFilteredTraits = Object.keys(controls.filters);
     let newValues;
     if (mode === "set") {
-      newValues = values;
+      newValues = correctValues;
     } else if (mode === "add") {
       if (currentlyFilteredTraits.indexOf(trait) === -1) {
-        newValues = values;
+        newValues = correctValues;
       } else {
-        newValues = controls.filters[trait].concat(values);
+        newValues = controls.filters[trait].concat(correctValues);
       }
     } else if (mode === "remove") {
       if (currentlyFilteredTraits.indexOf(trait) === -1) {
@@ -259,7 +262,7 @@ export const applyFilter = (mode, trait, values) => {
         return;
       }
       newValues = controls.filters[trait].slice();
-      for (const item of values) {
+      for (const item of correctValues) {
         const idx = newValues.indexOf(item);
         if (idx !== -1) {
           newValues.splice(idx, 1);
