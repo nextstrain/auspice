@@ -564,6 +564,8 @@ export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
   oldState = false, /* existing redux state (instead of jsons) */
   narrativeBlocks = false,
+  mainTreeName = false,
+  secondTreeName = false,
   query
 }) => {
   let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
@@ -576,12 +578,12 @@ export const createStateFromQueryOrJSONs = ({
     /* new tree state(s) */
     tree = treeJsonToState(json.tree);
     tree.debug = "LEFT";
-    tree.name = json.tree_name;
+    tree.name = mainTreeName;
     metadata.mainTreeNumTips = calcTotalTipsInTree(tree.nodes);
     if (json.treeTwo) {
       treeToo = treeJsonToState(json.treeTwo);
       treeToo.debug = "RIGHT";
-      treeToo.name = json._treeTwoName;
+      treeToo.name = secondTreeName;
       /* TODO: calc & display num tips in 2nd tree */
       // metadata.secondTreeNumTips = calcTotalTipsInTree(treeToo.nodes);
     }

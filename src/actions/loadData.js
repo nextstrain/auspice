@@ -122,8 +122,6 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
        * overly complicated. Since we have 2 fetches, could we simplify things
        * and make `recomputeReduxState` for the first tree followed by another
        * state recomputation? */
-      if (!mainJson.tree_name) mainJson.tree_name = secondTree.mainTreeName; // TO DO
-      mainJson._treeTwoName = secondTree.name; // TO DO
     }
 
     const mainUrl = queryString.parse(response.url.split("?")[1]).prefix;
@@ -131,7 +129,13 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
     dispatch({
       type: types.CLEAN_START,
       pathnameShouldBe: secondTree ? mainUrl.concat(":", secondTree.url) : mainUrl,
-      ...createStateFromQueryOrJSONs({json: mainJson, query, narrativeBlocks})
+      ...createStateFromQueryOrJSONs({
+        json: mainJson,
+        query,
+        narrativeBlocks,
+        mainTreeName: secondTree ? secondTree.mainTreeName : null,
+        secondTreeName: secondTree ? secondTree.url : null
+      })
     });
 
   } catch (err) {
