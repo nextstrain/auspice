@@ -5,7 +5,7 @@ import { goTo404 } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
 import { fetchJSON } from "../util/serverInteraction";
-import { warningNotification } from "./notifications";
+import { warningNotification, errorNotification } from "./notifications";
 import { hasExtension, getExtension } from "../util/extensions";
 
 
@@ -70,71 +70,119 @@ const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDa
 
 /**
  * given a url to fetch, check if a second tree is defined.
- * e.g. `ha:na`. If so, then we want to make two fetches,
- * one for `ha` and one for `na`.
- *
- * Once upon a time one could specify a second tree via a `?tt=tree_name` query
- * we interpret this here for backwards compatablity.
+ * e.g. `flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y`.
+ * If so, then we want to make two fetches,
+ * one for `flu/seasonal/h3n2/ha/2y` and one for `flu/seasonal/h3n2/na/2y`.
  *
  * @returns {Array} [0] {string} url, modified as needed to represent main tree
- *                  [1] {object| undefined} secondTree information, if applicable
- *                  [1].url {string | undefined} the url to fetch the 2nd tree
- *                  [1].name {string} name of the 2nd tree
- *                  [1].mainTreeName {string | undefined} name of the main tree
+ *                  [1] {string | undefined} secondTreeUrl, if applicable
  */
-const processSecondTree = (url, query) => {
-  let secondTree;
+const processSecondTree = (url) => {
+  let secondTreeUrl;
   if (url.includes(":")) {
     const parts = url.replace(/^\//, '')
       .replace(/\/$/, '')
       .split(":");
     url = parts[0];
-    secondTree = {
-      url: parts[1],
-      name: parts[1],
-      mainTreeName: parts[0]
-    };
-  } else if (query.tt) {
-    secondTree = {url: undefined, name: query.tt, mainTreeName: undefined};
+    secondTreeUrl = parts[1];
   }
-  return [url, secondTree];
+  return [url, secondTreeUrl];
+};
+
+/**
+ * This is for processing a second tree using the deprecated
+ * syntax of declaring second trees, e.g. `flu/seasonal/h3n2/ha:na/2y`
+ * We are keeping this to allow backwards compatibility.
+ *
+ * given a url to fetch, check if a second tree is defined.
+ * e.g. `ha:na`. If so, then we want to make two fetches,
+ * one for `ha` and one for `na`.
+ *
+ * @returns {Array} [0] {string} url, modified as needed to represent main tree
+ *                  [1] {string | undefined} secondTreeUrl
+ *                  [2] {string | undefined} string of old syntax
+ */
+const oldProcessSecondTree = (url) => {
+  let secondTreeUrl;
+  let treeName;
+  let secondTreeName;
+  const parts = url.replace(/^\//, '')
+    .replace(/\/$/, '')
+    .split("/");
+  for (let i = 0; i < parts.length; i++) {
+    if (parts[i].indexOf(":") !== -1) {
+      [treeName, secondTreeName] = parts[i].split(":");
+      parts[i] = treeName;
+      url = parts.join("/"); // this is the first tree URL
+      parts[i] = secondTreeName;
+      secondTreeUrl = parts.join("/"); // this is the second tree URL
+      break;
+    }
+  }
+  return [url, secondTreeUrl, treeName.concat(":", secondTreeName)];
 };
 
 const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
-  let secondTree;
-  [url, secondTree] = processSecondTree(url, query);
+  /* Once upon a time one could specify a second tree via a `?tt=tree_name`.
+  This has been deprecated so here we dispatch an error message. */
+  if (query.tt) {
+    dispatch(errorNotification({
+      message: `Specifing a second tree via '?tt=${query.tt}' has been deprecated.`,
+      details: "The new syntax requires the complete name for both trees.  " +
+        "Example of new syntax: 'flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y' "
+    }));
+  }
+
+  let mainTreeUrl;
+  let secondTreeUrl;
+  [mainTreeUrl, secondTreeUrl] = processSecondTree(url, query, dispatch);
 
   /* fetch the main JSON + the [main] JSON of a second tree if applicable */
   let mainJson;
   try {
-    const response = await getDataset(`${url}`);
+    let response = await getDataset(`${mainTreeUrl}`);
     mainJson = await response.json();
-    if (secondTree) {
-      if (!secondTree.url) {
-        if (!mainJson.tree_name) throw new Error("Can't fetch second tree if main tree is unnamed");
-        secondTree.url = url.replace(mainJson.tree_name, secondTree.name);
+    if (secondTreeUrl) {
+      try {
+        /* TO DO -- we used to fetch both trees at once, and the server would provide
+         * the following info accordingly. This required `recomputeReduxState` to be
+         * overly complicated. Since we have 2 fetches, could we simplify things
+         * and make `recomputeReduxState` for the first tree followed by another
+         * state recomputation? */
+        const secondTreeJson = await getDataset(secondTreeUrl)
+          .then((res) => res.json());
+        mainJson.treeTwo = secondTreeJson.tree;
+      } catch (e) {
+        /* If the url is in the old syntax (e.g. `ha:na`) then the getDataset process
+         * will not be able to find the correct dataset.
+         * In this case, we will try to parse the url again according to the old syntax
+         * and try to get the dataset for the main tree and second tree again.
+         * Also displays warning to the user to let them know the old syntax is deprecated. */
+        let oldSyntax;
+        [mainTreeUrl, secondTreeUrl, oldSyntax] = oldProcessSecondTree(url);
+        response = await getDataset(`${mainTreeUrl}`);
+        mainJson = await response.json();
+        const secondTreeJson = await getDataset(secondTreeUrl)
+          .then((res) => res.json());
+        mainJson.treeTwo = secondTreeJson.tree;
+        dispatch(warningNotification({
+          message: `Specifing a second tree via "${oldSyntax}" is deprecated.`,
+          details: "The url has been modified to reflect the new syntax."
+        }));
       }
-      const secondTreeJson = await getDataset(secondTree.url)
-        .then((res) => res.json());
-      mainJson.treeTwo = secondTreeJson.tree;
-      /* TO DO -- we used to fetch both trees at once, and the server would provide
-       * the following info accordingly. This required `recomputeReduxState` to be
-       * overly complicated. Since we have 2 fetches, could we simplify things
-       * and make `recomputeReduxState` for the first tree followed by another
-       * state recomputation? */
     }
 
     const mainUrl = queryString.parse(response.url.split("?")[1]).prefix;
 
     dispatch({
       type: types.CLEAN_START,
-      pathnameShouldBe: secondTree ? mainUrl.concat(":", secondTree.url) : mainUrl,
+      pathnameShouldBe: secondTreeUrl ? mainUrl.concat(":", secondTreeUrl) : mainUrl,
       ...createStateFromQueryOrJSONs({
         json: mainJson,
         query,
         narrativeBlocks,
-        mainTreeName: secondTree ? secondTree.mainTreeName : null,
-        secondTreeName: secondTree ? secondTree.url : null
+        mainTreeName: secondTreeUrl ? mainTreeUrl : null,
+        secondTreeName: secondTreeUrl ? secondTreeUrl : null
       })
     });
 
@@ -147,7 +195,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   /* do we have frequencies to display? */
   if (mainJson.meta.panels && mainJson.meta.panels.indexOf("frequencies") !== -1) {
     try {
-      const frequencyData = await getDataset(url, {type: "tip-frequencies"})
+      const frequencyData = await getDataset(mainTreeUrl, {type: "tip-frequencies"})
         .then((res) => res.json());
       dispatch(loadFrequencies(frequencyData));
     } catch (err) {

@@ -133,7 +133,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       if (action.tree.name && action.treeToo && action.treeToo.name) {
         const treeUrlShouldBe = `${action.tree.name}:${action.treeToo.name}`;
         if (!window.location.pathname.includes(treeUrlShouldBe)) {
-          pathname = window.location.pathname.replace(action.tree.name, treeUrlShouldBe);
+          pathname = treeUrlShouldBe;
         }
       }
       break;
