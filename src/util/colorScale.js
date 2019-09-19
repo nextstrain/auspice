@@ -14,7 +14,7 @@ const unknownColor = "#AAAAAA";
 const getMinMaxFromTree = (nodes, nodesToo, attr) => {
   const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
   const vals = arr.map((n) => getTraitFromNode(n, attr))
-    .filter((n) => n !== undefined)
+    .filter((n) => n !== undefined && n !== "") // if coerce "" to numeric, becomes 0!
     .filter((item, i, ar) => ar.indexOf(item) === i)
     .map((v) => +v); // coerce to numeric
   return [min(vals), max(vals)];
@@ -42,7 +42,9 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
       }
     }
   }
-  const domain = Object.keys(stateCount);
+  let domain = Object.keys(stateCount);
+  // Filter out undefined values
+  domain = domain.filter((x) => x !== "" && x !== "undefined" && x !== "?");
   /* sorting technique depends on the colorBy */
   if (attr === "clade_membership") {
     domain.sort();
@@ -58,7 +60,7 @@ const createDiscreteScale = (domain) => {
     colors[domain.length].slice() :
     colors[colors.length - 1].slice();
   /* set unknowns which appear in the domain to the unknownColor */
-  const unknowns = ["unknown", "undefined", "unassigned", "NA", "NaN", "?"];
+  const unknowns = ["unknown", "undefined", "", "Unassigned", "unassigned", "NA", "NaN", "?"];
   for (const key of unknowns) {
     if (domain.indexOf(key) !== -1) {
       colorList[domain.indexOf(key)] = unknownColor;
@@ -149,7 +151,8 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         colorScale = scaleOrdinal()
           .domain(domain)
           .range(range);
-        legendValues = domain;
+        // Do not include undefined/empty values in legend
+        legendValues = domain.filter((x) => x !== "" && x !== "undefined" && x !== "?");
       }
     } else if (colorings && (colorings[colorBy].type === "categorical" || colorings[colorBy].type === "ordinal")) {
       // console.log("making a categorica / ordinal color scale for ", colorBy);
@@ -205,7 +208,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
       }
       const scale = scaleLinear().domain(domain).range(range);
-      colorScale = (val) => (val === undefined || val === false) ? unknownColor : scale(val);
+      colorScale = (val) => (val === undefined || val === false || val === "") ? unknownColor : scale(val);
 
       /* construct the legend values & their respective bounds */
       switch (colorBy) {
