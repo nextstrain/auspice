@@ -179,7 +179,7 @@ class Info extends React.Component {
     this.props.filters[filterName].sort().forEach((itemName) => {
       const display = (
         <span>
-          {itemName !== "unk" ? itemName : "Unknown " + filterTitle}
+          {itemName !== "unk" && itemName !== "undefined" ? itemName : "Unknown " + filterTitle}
           {" (" + this.props.totalStateCounts[filterName][itemName !== "unk" ? itemName : ""] + ")"}
         </span>
       );
