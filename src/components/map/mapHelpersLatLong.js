@@ -76,6 +76,7 @@ const getVisibleNodesPerLocation = (nodes, visibility, geoResolution) => {
  */
 const createOrUpdateArcs = (allValues, visibleNodes, legendValues, colorBy, nodeColors, currentArcs=undefined) => {
   const colorByIsGenotype = isColorByGenotype(colorBy);
+  const useValues = colorByIsGenotype ? legendValues: allValues;
   const legendValueToArcIdx = {};
   // Don't rely on legendValues as these don't include 'unknown'/'undefined' values!
   // Instead, pull directily from tree, so have all info - passed in as 'allValues'
@@ -83,13 +84,13 @@ const createOrUpdateArcs = (allValues, visibleNodes, legendValues, colorBy, node
   if (currentArcs) {
     /* updating arcs -- reset `_count` */
     arcs = currentArcs;
-    allValues.forEach((v, i) => {
+    useValues.forEach((v, i) => {
       legendValueToArcIdx[v] = i;
       arcs[i]._count = 0;
     });
   } else {
     /* creating arcs */
-    arcs = allValues.map((v, i) => {
+    arcs = useValues.map((v, i) => {
       legendValueToArcIdx[v] = i;
       return {innerRadius: 0, _count: 0};
     });
