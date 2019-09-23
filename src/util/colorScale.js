@@ -14,7 +14,7 @@ const unknownColor = "#AAAAAA";
 const getMinMaxFromTree = (nodes, nodesToo, attr) => {
   const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
   const vals = arr.map((n) => getTraitFromNode(n, attr))
-    .filter((n) => n !== undefined && n !== "") // if coerce "" to numeric, becomes 0!
+    .filter((n) => n !== undefined && n !== "undefined" && n !== "") // if coerce "" to numeric, becomes 0!
     .filter((item, i, ar) => ar.indexOf(item) === i)
     .map((v) => +v); // coerce to numeric
   return [min(vals), max(vals)];
@@ -208,7 +208,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
       }
       const scale = scaleLinear().domain(domain).range(range);
-      colorScale = (val) => (val === undefined || val === false || val === "") ? unknownColor : scale(val);
+      colorScale = (val) => (val === "undefined" || val === undefined || val === false || val === "") ? unknownColor : scale(val);
 
       /* construct the legend values & their respective bounds */
       switch (colorBy) {
