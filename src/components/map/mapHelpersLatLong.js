@@ -78,6 +78,7 @@ const createOrUpdateArcs = (allValues, visibleNodes, legendValues, colorBy, node
   const colorByIsGenotype = isColorByGenotype(colorBy);
   const useValues = colorByIsGenotype ? legendValues: allValues;
   const legendValueToArcIdx = {};
+
   // Don't rely on legendValues as these don't include 'unknown'/'undefined' values!
   // Instead, pull directily from tree, so have all info - passed in as 'allValues'
   let arcs;
@@ -130,6 +131,10 @@ const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate,
   const demeToLatLongs = metadata.geoResolutions.filter((x) => x.key === geoResolution)[0].demes;
   // get all possible values from tree rather than relying on legend (doesn't include 'undefined', or "", etc)
   const allValues = Object.keys(countTraitsAcrossTree(nodes, [colorBy], false, false)[colorBy]);
+  // Sort values by legend order, add empty values to end (prettier)
+  allValues.sort((a, b) => {return legendValues.indexOf(a) - legendValues.indexOf(b);});
+  const emptyVal = allValues.indexOf("") !== -1 ? allValues.indexOf("") : allValues.indexOf("undefined");
+  if (emptyVal !== -1) { allValues.push(allValues.splice(emptyVal, 1)[0]); }
 
   let index = 0;
   offsets.forEach((OFFSET) => {
@@ -460,6 +465,10 @@ const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoRe
   const demeDataCopy = demeData.slice();
   // get all possible values from tree rather than relying on legend (doesn't include 'undefined', or "", etc)
   const allValues = Object.keys(countTraitsAcrossTree(nodes, [colorBy], false, false)[colorBy]);
+  // Sort values by legend order, add empty values to end (prettier)
+  allValues.sort((a, b) => {return legendValues.indexOf(a) - legendValues.indexOf(b);});
+  const emptyVal = allValues.indexOf("") !== -1 ? allValues.indexOf("") : allValues.indexOf("undefined");
+  if (emptyVal !== -1) { allValues.push(allValues.splice(emptyVal, 1)[0]); }
 
   const locationToVisibleNodes = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
 
