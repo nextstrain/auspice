@@ -11,7 +11,7 @@ import { getTraitFromNode } from "./treeMiscHelpers";
 */
 export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) => {
   const counts = {};
-  traits.forEach((trait) => {counts[trait] = {};});
+  traits.forEach((trait) => {counts[trait] = new Map();});
 
   nodes.forEach((node) => {
     traits.forEach((trait) => {                         // traits are "country" or "author" etc
@@ -25,7 +25,8 @@ export const countTraitsAcrossTree = (nodes, traits, visibility, terminalOnly) =
         return;
       }
 
-      counts[trait][value] ? counts[trait][value] += 1 : counts[trait][value] = 1;
+      const currentValue = counts[trait].get(value) || 0;
+      counts[trait].set(value, currentValue+1);
     });
   });
   return counts;

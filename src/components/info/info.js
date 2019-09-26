@@ -177,7 +177,7 @@ class Info extends React.Component {
       const display = (
         <span>
           {itemName}
-          {" (" + this.props.totalStateCounts[filterName][itemName] + ")"}
+          {` (${this.props.totalStateCounts[filterName].get(itemName)})`}
         </span>
       );
       buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));

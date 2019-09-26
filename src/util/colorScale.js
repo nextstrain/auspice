@@ -33,16 +33,14 @@ const createListOfColors = (n, range) => {
 const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
   const stateCount = countTraitsAcrossTree(nodes, [attr], false, false)[attr];
   if (nodesToo) {
-    const sc = countTraitsAcrossTree(nodesToo, [attr], false, false)[attr];
-    for (let state in sc) { // eslint-disable-line
-      if (stateCount[state]) {
-        stateCount[state] += sc[state];
-      } else {
-        stateCount[state] = sc[state];
-      }
+    const stateCountSecondTree = countTraitsAcrossTree(nodesToo, [attr], false, false)[attr];
+    for (const state of stateCountSecondTree.keys()) {
+      const currentCount = stateCount.get(state) || 0;
+      stateCount.set(state, currentCount+1);
     }
   }
-  const domain = Object.keys(stateCount);
+  console.log("stateCount", stateCount);
+  const domain = Array.from(stateCount.keys());
   /* sorting technique depends on the colorBy */
   if (attr === "clade_membership") {
     domain.sort();
