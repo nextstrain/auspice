@@ -10,7 +10,6 @@
 
 const utils = require("../utils");
 const queryString = require("query-string");
-const getAvailable = require("./getAvailable");
 const path = require("path");
 const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
 
@@ -19,15 +18,6 @@ const handleError = (res, clientMsg, serverMsg="") => {
   res.statusMessage = clientMsg;
   utils.warn(`${clientMsg} -- ${serverMsg}`);
   return res.status(500).end();
-};
-
-
-const guessTreeName = (prefixParts) => {
-  const guesses = ["HA", "NA", "PB1", "PB2", "PA", "NP", "NS", "MP", "L", "S", "SEGMENT1", "SEGMENT2", "SEGMENT3", "SEGMENT4", "SEGMENT5", "SEGMENT6", "SEGMENT7", "SEGMENT8", "SEGMENT9", "SEGMENT10"];
-  for (const part of prefixParts) {
-    if (guesses.indexOf(part.toUpperCase()) !== -1) return part;
-  }
-  return undefined;
 };
 
 const splitPrefixIntoParts = (url) => url
@@ -108,16 +98,57 @@ const sendJson = async (res, info) => {
     const meta = await utils.readFilePromise(info.address.meta);
     const tree = await utils.readFilePromise(info.address.tree);
     /* v1 JSONs don't define a tree name, so we try to guess it here */
-    const mainTreeName = guessTreeName(info.parts);
-    const v2Json = convertFromV1({tree, meta, treeName: mainTreeName});
+    const mainTreeName = info.parts.join('/');
+    const v2Json = convertFromV1({tree, meta});
     return res.json(v2Json)
   }
 }
+
+/**
+ * Return a subset of `availableDatasetUrls` which we deem to be suitable
+ * candidates to make a second tree.
+ * The current logic is to include all datasets which
+ * (a) contain the same first "part" of the URL -- interpreted here to represent the same pathogen
+ * (b) have the same number of "parts" in the URL
+ * (c) differ from the `currentDatasetUrl` by only 1 part
+ * Note: the "parts" of the URL are formed by splitting it on `"/"`
+ */
+const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls) => {
+  const currentDatasetUrlArr = currentDatasetUrl.split('/');
+
+  const availableTangleTreeOptions = availableDatasetUrls.filter((datasetUrl) => {
+    const datasetUrlArr = datasetUrl.split('/');
+    // Do not return the same dataset
+    if (currentDatasetUrl === datasetUrl) return null;
+
+    // Do not return dataset if the URLs have different number of parameters
+    if (currentDatasetUrlArr.length !== datasetUrlArr.length) return null;
+
+    // Do not return dataset if different pathogens
+    if (currentDatasetUrlArr[0] !== datasetUrlArr[0]) return null;
+
+    // Find differences between the two dataset URLs
+    const urlDifferences = currentDatasetUrlArr.filter((param, index) => {
+      if (datasetUrlArr[index] !== param) {
+        return param;
+      }
+      return null;
+    });
+
+    // Do not return dataset if more than one parameter is different
+    if (urlDifferences.length > 1) return null;
+
+    return datasetUrl;
+  });
+
+  return availableTangleTreeOptions;
+};
 
 module.exports = {
   interpretRequest,
   extendDataPathsToMatchAvailiable,
   makeFetchAddresses,
   handleError,
-  sendJson
+  sendJson,
+  findAvailableSecondTreeOptions
 };

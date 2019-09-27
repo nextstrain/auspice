@@ -562,8 +562,11 @@ const createMetadataStateFromJSON = (json) => {
 
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
+  secondTreeDataset = false,
   oldState = false, /* existing redux state (instead of jsons) */
   narrativeBlocks = false,
+  mainTreeName = false,
+  secondTreeName = false,
   query
 }) => {
   let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
@@ -576,11 +579,12 @@ export const createStateFromQueryOrJSONs = ({
     /* new tree state(s) */
     tree = treeJsonToState(json.tree);
     tree.debug = "LEFT";
+    tree.name = mainTreeName;
     metadata.mainTreeNumTips = calcTotalTipsInTree(tree.nodes);
-    if (json.treeTwo) {
-      treeToo = treeJsonToState(json.treeTwo);
+    if (secondTreeDataset) {
+      treeToo = treeJsonToState(secondTreeDataset.tree);
       treeToo.debug = "RIGHT";
-      treeToo.name = json._treeTwoName;
+      treeToo.name = secondTreeName;
       /* TODO: calc & display num tips in 2nd tree */
       // metadata.secondTreeNumTips = calcTotalTipsInTree(treeToo.nodes);
     }
@@ -663,27 +667,25 @@ export const createStateFromQueryOrJSONs = ({
     );
   }
 
-  if (json.tree_name) {
-    /* setting this will enable the sidebar drop down for a 2nd tree */
-    tree.name = json.tree_name;
-  }
-
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };
 
 export const createTreeTooState = ({
   treeTooJSON, /* raw json data */
   oldState,
-  segment /* name of the treeToo segment */
+  originalTreeUrl,
+  secondTreeUrl /* treeToo URL */
 }) => {
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
   let controls = oldState.controls;
   const tree = Object.assign({}, oldState.tree);
+  tree.name = originalTreeUrl;
   let treeToo = treeJsonToState(treeTooJSON);
+  treeToo.name = secondTreeUrl;
   treeToo.debug = "RIGHT";
   controls = modifyControlsStateViaTree(controls, tree, treeToo, oldState.metadata.colorings);
-  controls = modifyControlsViaTreeToo(controls, segment);
+  controls = modifyControlsViaTreeToo(controls, secondTreeUrl);
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls);
 
   /* calculate colours if loading from JSONs or if the query demands change */

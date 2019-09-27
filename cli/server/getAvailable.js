@@ -1,6 +1,7 @@
 const utils = require("../utils");
 const fs = require('fs');
 const { promisify } = require('util');
+const { findAvailableSecondTreeOptions } = require('./getDatasetHelpers');
 
 const readdir = promisify(fs.readdir);
 
@@ -14,7 +15,7 @@ const getAvailableDatasets = async (localDataPath) => {
     const files = await readdir(localDataPath);
     /* v2 files -- match JSONs not ending with `_tree.json`, `_meta.json`,
     `_tip-frequencies.json`, `_seq.json` */
-    files.filter((file) => (
+    const v2Files = files.filter((file) => (
       file.endsWith(".json") &&
       !file.includes("manifest") &&
       !file.endsWith("_tree.json") &&
@@ -26,21 +27,32 @@ const getAvailableDatasets = async (localDataPath) => {
       .replace(".json", "")
       .split("_")
       .join("/")
-    )
-    .forEach((filepath) => {
-      datasets.push({request: filepath, v2: true});
+    );
+
+    v2Files.forEach((filepath) => {
+      datasets.push({
+        request: filepath,
+        v2: true,
+        secondTreeOptions: findAvailableSecondTreeOptions(filepath, v2Files)
+      });
     });
+
     /* v1 files -- match files ending with `_tree.json` */
-    files
+    const v1Files = files
       .filter((file) => file.endsWith("_tree.json"))
       .map((file) => file
         .replace("_tree.json", "")
         .split("_")
         .join("/")
-      )
-      .forEach((filepath) => {
-        datasets.push({request: filepath, v2: false});
+      );
+
+    v1Files.forEach((filepath) => {
+      datasets.push({
+        request: filepath,
+        v2: false,
+        secondTreeOptions: findAvailableSecondTreeOptions(filepath, v1Files)
       });
+    });
   } catch (err) {
     utils.warn(`Couldn't collect available dataset files (path searched: ${localDataPath})`);
     utils.verbose(err);

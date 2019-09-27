@@ -16,37 +16,23 @@ import { SidebarSubtitle } from "./styles";
 })
 class ChooseSecondTree extends React.Component {
   render() {
-    if (!this.props.available || !this.props.available.datasets || !this.props.treeName) {
+    if (!this.props.available || !this.props.available.datasets) {
       return null;
     }
     const displayedDataset = window.location.pathname
       .replace(/^\//, '')
       .replace(/\/$/, '')
-      .split("/");
-    displayedDataset.forEach((part, idx) => {
-      if (part.includes(":")) {
-        displayedDataset[idx] = part.split(":")[0];
+      .split(':')[0];
+
+    let options = [];
+    this.props.available.datasets
+    .filter((dataset) => {
+      if (dataset.request === displayedDataset) {
+        options = [...dataset.secondTreeOptions];
       }
+      return null;
     });
-    const idxOfTree = displayedDataset.indexOf(this.props.treeName);
 
-    const matches = this.props.available.datasets
-      .map((datasetObj) => datasetObj.request.split("/"))
-      .filter((dataset) => {
-        if (dataset.length !== displayedDataset.length) return false;
-        for (let i=0; i<dataset.length; i++) {
-          if (i===idxOfTree) {
-            if (dataset[i] === displayedDataset[i]) {
-              return false; // don't match the same tree name
-            }
-          } else if (dataset[i] !== displayedDataset[i]) {
-            return false; // everything apart from the tree much match
-          }
-        }
-        return true;
-      });
-
-    const options = matches.map((m) => m[idxOfTree]);
     if (this.props.showTreeToo) options.unshift("REMOVE");
 
     return (
@@ -67,9 +53,7 @@ class ChooseSecondTree extends React.Component {
               if (opt.value === "REMOVE") {
                 this.props.dispatch({type: REMOVE_TREE_TOO});
               } else {
-                const dataPath = [...displayedDataset];
-                dataPath.splice(idxOfTree, 1, opt.value);
-                this.props.dispatch(loadSecondTree(opt.value, dataPath));
+                this.props.dispatch(loadSecondTree(opt.value, displayedDataset));
               }
             }}
           />

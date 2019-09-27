@@ -133,7 +133,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       if (action.tree.name && action.treeToo && action.treeToo.name) {
         const treeUrlShouldBe = `${action.tree.name}:${action.treeToo.name}`;
         if (!window.location.pathname.includes(treeUrlShouldBe)) {
-          pathname = window.location.pathname.replace(action.tree.name, treeUrlShouldBe);
+          pathname = treeUrlShouldBe;
         }
       }
       break;
@@ -158,23 +158,14 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
         pathname = action.displayComponent;
       }
       break;
-    case types.REMOVE_TREE_TOO: // fallthrough
+    case types.REMOVE_TREE_TOO: {
+      pathname = pathname.split(":")[0];
+      break;
+    }
     case types.TREE_TOO_DATA: {
-      const fields = pathname.split("/");
-      let treeIdx;
-      fields.forEach((f, i) => {
-        if (f === state.tree.name || f.startsWith(state.tree.name+":")) {
-          treeIdx = i;
-        }
-      });
-      if (!treeIdx) {
-        console.warn("Couldn't work out tree name in URL!");
-        break;
-      }
-      fields[treeIdx] = action.type === types.TREE_TOO_DATA ?
-        `${fields[treeIdx].split(":")[0]}:${action.segment}` :
-        fields[treeIdx].split(":")[0];
-      pathname = fields.join("/");
+      const treeUrl = action.tree.name;
+      const secondTreeUrl = action.treeToo.name;
+      pathname = treeUrl.concat(":", secondTreeUrl);
       break;
     }
     default:
