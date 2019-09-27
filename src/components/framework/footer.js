@@ -324,12 +324,21 @@ class Footer extends React.Component {
   displayFilter(styles, filterName) {
     const totalStateCount = this.props.totalStateCounts[filterName];
     const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
+    let stateKeysOrdered;
+    // If has ordered colorings, use this to sort
+    if (this.props.metadata.colorings[filterName] && this.props.metadata.colorings[filterName].scale) {
+      const colorValues = this.props.metadata.colorings[filterName].scale.map(function(x) { return x[0];});
+      // Add any extra values without a set color to the end
+      stateKeysOrdered = _.union(colorValues, Array.from(totalStateCount.keys()));
+    } else { // Otherwise, sort by value
+      stateKeysOrdered = Array.from(totalStateCount.keys()).sort();
+    }
     return (
       <div>
         {`Filter by ${filterTitle}`}
-        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
+        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterTitle} filter`) : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-          {Array.from(totalStateCount.keys()).sort().map((itemName) => {
+          {stateKeysOrdered.map((itemName) => {
             const display = (
               <span>
                 {itemName}
