@@ -108,6 +108,10 @@ const createOrUpdateArcs = (visibleNodes, legendValues, colorBy, nodeColors, cur
     a.startAngle = startAngle;
     startAngle += 2*Math.PI*a._count/visibleNodes.length;
     a.endAngle = startAngle;
+    if (a.startAngle === a.endAngle) {
+      // this prevents drawing a 'line' for 'empty' slices
+      a.color = "";
+    }
   });
   return arcs;
 };
