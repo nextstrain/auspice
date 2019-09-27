@@ -173,10 +173,12 @@ class Info extends React.Component {
     );
   }
   addNonAuthorFilterButton(buttons, filterName) {
+    // Get filterTitle so we can show which unknown is being filtered by
+    const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
     this.props.filters[filterName].sort().forEach((itemName) => {
       const display = (
         <span>
-          {itemName}
+          {itemName !== "undefined" ? itemName : "Unknown "+filterTitle}
           {` (${this.props.totalStateCounts[filterName].get(itemName)})`}
         </span>
       );
