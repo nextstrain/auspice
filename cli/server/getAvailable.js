@@ -21,6 +21,7 @@ const getAvailableDatasets = async (localDataPath) => {
       !file.endsWith("_tree.json") &&
       !file.endsWith("_meta.json") &&
       !file.endsWith("_tip-frequencies.json") &&
+      !file.endsWith("_root-sequence.json") &&
       !file.endsWith("_seq.json")
     ))
     .map((file) => file
