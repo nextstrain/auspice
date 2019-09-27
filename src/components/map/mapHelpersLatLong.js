@@ -76,6 +76,7 @@ const getVisibleNodesPerLocation = (nodes, visibility, geoResolution) => {
 const createOrUpdateArcs = (visibleNodes, legendValues, colorBy, nodeColors, currentArcs=undefined) => {
   const colorByIsGenotype = isColorByGenotype(colorBy);
   const legendValueToArcIdx = {};
+  const undefinedArcIdx = legendValues.length; /* the arc which is grey to represent undefined values on tips */
   let arcs;
   if (currentArcs) {
     /* updating arcs -- reset `_count` */
@@ -84,17 +85,20 @@ const createOrUpdateArcs = (visibleNodes, legendValues, colorBy, nodeColors, cur
       legendValueToArcIdx[v] = i;
       arcs[i]._count = 0;
     });
+    arcs[undefinedArcIdx]._count = 0;
   } else {
     /* creating arcs */
     arcs = legendValues.map((v, i) => {
       legendValueToArcIdx[v] = i;
       return {innerRadius: 0, _count: 0};
     });
+    arcs.push({innerRadius: 0, _count: 0}); // for the undefined arc
   }
   /* traverse visible nodes (for this location) to get numbers for each arc (i.e. each slice in the pie) */
   visibleNodes.forEach((n) => {
     const colorByValue = colorByIsGenotype ? n.currentGt: getTraitFromNode(n, colorBy);
-    const arcIdx = legendValueToArcIdx[colorByValue];
+    let arcIdx = legendValueToArcIdx[colorByValue];
+    if (arcIdx === undefined) arcIdx = undefinedArcIdx;
     arcs[arcIdx]._count++;
     if (!arcs[arcIdx].color) arcs[arcIdx].color=nodeColors[n.arrayIdx];
   });

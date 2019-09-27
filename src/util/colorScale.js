@@ -40,7 +40,7 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
     }
   }
   console.log("stateCount", stateCount);
-  const domain = Array.from(stateCount.keys());
+  const domain = Array.from(stateCount.keys()).filter((x) => isValueValid(x));
   /* sorting technique depends on the colorBy */
   if (attr === "clade_membership") {
     domain.sort();
@@ -174,7 +174,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           console.warn("Using a continous scale as there are too many values in the ordinal scale");
           continuous = true;
           const scale = scaleLinear().domain(genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]))).range(colors[9]);
-          colorScale = (val) => (val === undefined || val === false) ? unknownColor : scale(val);
+          colorScale = (val) => isValueValid(val) ? scale(val): unknownColor;
           const spread = minMax[1] - minMax[0];
           const dp = spread > 5 ? 2 : 3;
           legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
@@ -233,7 +233,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
       }
       const scale = scaleLinear().domain(domain).range(range);
-      colorScale = (val) => (val === undefined || val === false) ? unknownColor : scale(val);
+      colorScale = (val) => isValueValid(val) ? scale(val) : unknownColor;
 
       /* construct the legend values & their respective bounds */
       switch (colorBy) {
