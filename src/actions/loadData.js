@@ -69,15 +69,16 @@ const getHardcodedData = (prefix, {type="mainJSON", narrative=false}={}) => {
 const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDatasetFromCharon;
 
 /**
- * given a url to fetch, check if a second tree is defined.
- * e.g. `flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y`.
- * If so, then we want to make two fetches,
- * one for `flu/seasonal/h3n2/ha/2y` and one for `flu/seasonal/h3n2/na/2y`.
+ * given a url, which dataset fetches should be made?
+ * If a second tree is defined - e.g.
+ * `flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y`.
+ * then we want to make two fetches - one for 
+ * `flu/seasonal/h3n2/ha/2y` and one for `flu/seasonal/h3n2/na/2y`.
  *
- * @returns {Array} [0] {string} url, modified as needed to represent main tree
+ * @returns {Array} [0] {string} url, modified as needed to represent main dataset
  *                  [1] {string | undefined} secondTreeUrl, if applicable
  */
-const processSecondTree = (url) => {
+const collectDatasetFetchUrls = (url) => {
   let secondTreeUrl;
   if (url.includes(":")) {
     const parts = url.replace(/^\//, '')
@@ -102,7 +103,7 @@ const processSecondTree = (url) => {
  *                  [1] {string | undefined} secondTreeUrl
  *                  [2] {string | undefined} string of old syntax
  */
-const processDeprecatedSecondTreeSyntax = (url) => {
+const collectDatasetFetchUrlsDeprecatedSyntax = (url) => {
   let secondTreeUrl;
   let treeName;
   let secondTreeName;
@@ -133,33 +134,37 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
         "specify 'flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y' "
     }));
   }
-
-  let [mainTreeUrl, secondTreeUrl] = processSecondTree(url, query, dispatch);
+  let pathnameShouldBe = url; /* the pathname to display in the URL */
+  let [mainDatasetUrl, secondTreeUrl] = collectDatasetFetchUrls(url);
   /* fetch the dataset JSON + the dataset JSON of a second tree if applicable */
   let datasetJson;
   let secondTreeDataset = false;
   try {
-    let response = await getDataset(`${mainTreeUrl}`);
-    datasetJson = await response.json();
-    if (secondTreeUrl) {
+    if (!secondTreeUrl) {
+      const mainDatasetResponse = await getDataset(mainDatasetUrl);
+      datasetJson = await mainDatasetResponse.json();
+    } else {
       try {
         /* TO DO -- we used to fetch both trees at once, and the server would provide
          * the following info accordingly. This required `recomputeReduxState` to be
          * overly complicated. Since we have 2 fetches, could we simplify things
          * and make `recomputeReduxState` for the first tree followed by another
          * state recomputation? */
+        const mainDatasetResponse = await getDataset(mainDatasetUrl);
+        datasetJson = await mainDatasetResponse.json();
         secondTreeDataset = await getDataset(secondTreeUrl)
           .then((res) => res.json());
       } catch (e) {
-        /* If the url is in the old syntax (e.g. `ha:na`) then the getDataset process
-         * will not be able to find the correct dataset.
+        /* If the url is in the old syntax (e.g. `ha:na`) then `collectDatasetFetchUrls`
+         * will return incorrect dataset URLs (perhaps for both trees)
          * In this case, we will try to parse the url again according to the old syntax
          * and try to get the dataset for the main tree and second tree again.
          * Also displays warning to the user to let them know the old syntax is deprecated. */
         let oldSyntax;
-        [mainTreeUrl, secondTreeUrl, oldSyntax] = processDeprecatedSecondTreeSyntax(url);
-        response = await getDataset(`${mainTreeUrl}`);
-        datasetJson = await response.json();
+        [mainDatasetUrl, secondTreeUrl, oldSyntax] = collectDatasetFetchUrlsDeprecatedSyntax(url);
+        pathnameShouldBe = `${mainDatasetUrl}:${secondTreeUrl}`
+        const mainDatasetResponse = await getDataset(mainDatasetUrl);
+        datasetJson = await mainDatasetResponse.json();
         secondTreeDataset = await getDataset(secondTreeUrl)
           .then((res) => res.json());
         dispatch(warningNotification({
@@ -169,16 +174,15 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
       }
     }
 
-    const mainUrl = queryString.parse(response.url.split("?")[1]).prefix;
     dispatch({
       type: types.CLEAN_START,
-      pathnameShouldBe: secondTreeUrl ? mainUrl.concat(":", secondTreeUrl) : mainUrl,
+      pathnameShouldBe,
       ...createStateFromQueryOrJSONs({
         json: datasetJson,
         secondTreeDataset,
         query,
         narrativeBlocks,
-        mainTreeName: secondTreeUrl ? mainTreeUrl : null,
+        mainTreeName: secondTreeUrl ? mainDatasetUrl : null,
         secondTreeName: secondTreeUrl ? secondTreeUrl : null
       })
     });
@@ -192,7 +196,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   /* do we have frequencies to display? */
   if (datasetJson.meta.panels && datasetJson.meta.panels.indexOf("frequencies") !== -1) {
     try {
-      const frequencyData = await getDataset(mainTreeUrl, {type: "tip-frequencies"})
+      const frequencyData = await getDataset(mainDatasetUrl, {type: "tip-frequencies"})
         .then((res) => res.json());
       dispatch(loadFrequencies(frequencyData));
     } catch (err) {
