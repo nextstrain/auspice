@@ -143,6 +143,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
     if (!secondTreeUrl) {
       const mainDatasetResponse = await getDataset(mainDatasetUrl);
       datasetJson = await mainDatasetResponse.json();
+      pathnameShouldBe = queryString.parse(mainDatasetResponse.url.split("?")[1]).prefix;
     } else {
       try {
         /* TO DO -- we used to fetch both trees at once, and the server would provide
