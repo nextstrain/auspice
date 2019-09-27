@@ -562,6 +562,7 @@ const createMetadataStateFromJSON = (json) => {
 
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
+  secondTreeDataset = false,
   oldState = false, /* existing redux state (instead of jsons) */
   narrativeBlocks = false,
   mainTreeName = false,
@@ -580,8 +581,8 @@ export const createStateFromQueryOrJSONs = ({
     tree.debug = "LEFT";
     tree.name = mainTreeName;
     metadata.mainTreeNumTips = calcTotalTipsInTree(tree.nodes);
-    if (json.treeTwo) {
-      treeToo = treeJsonToState(json.treeTwo);
+    if (secondTreeDataset) {
+      treeToo = treeJsonToState(secondTreeDataset.tree);
       treeToo.debug = "RIGHT";
       treeToo.name = secondTreeName;
       /* TODO: calc & display num tips in 2nd tree */

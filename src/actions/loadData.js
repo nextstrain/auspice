@@ -102,7 +102,7 @@ const processSecondTree = (url) => {
  *                  [1] {string | undefined} secondTreeUrl
  *                  [2] {string | undefined} string of old syntax
  */
-const oldProcessSecondTree = (url) => {
+const processDeprecatedSecondTreeSyntax = (url) => {
   let secondTreeUrl;
   let treeName;
   let secondTreeName;
@@ -124,7 +124,7 @@ const oldProcessSecondTree = (url) => {
 
 const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   /* Once upon a time one could specify a second tree via a `?tt=tree_name`.
-  This has been deprecated so here we dispatch an error message. */
+  This is no longer supported, however we still display an error message. */
   if (query.tt) {
     dispatch(errorNotification({
       message: `Specifing a second tree via '?tt=${query.tt}' is no longer supported.`,
@@ -134,15 +134,13 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
     }));
   }
 
-  let mainTreeUrl;
-  let secondTreeUrl;
-  [mainTreeUrl, secondTreeUrl] = processSecondTree(url, query, dispatch);
-
-  /* fetch the main JSON + the [main] JSON of a second tree if applicable */
-  let mainJson;
+  let [mainTreeUrl, secondTreeUrl] = processSecondTree(url, query, dispatch);
+  /* fetch the dataset JSON + the dataset JSON of a second tree if applicable */
+  let datasetJson;
+  let secondTreeDataset = false;
   try {
     let response = await getDataset(`${mainTreeUrl}`);
-    mainJson = await response.json();
+    datasetJson = await response.json();
     if (secondTreeUrl) {
       try {
         /* TO DO -- we used to fetch both trees at once, and the server would provide
@@ -150,9 +148,8 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
          * overly complicated. Since we have 2 fetches, could we simplify things
          * and make `recomputeReduxState` for the first tree followed by another
          * state recomputation? */
-        const secondTreeJson = await getDataset(secondTreeUrl)
+        secondTreeDataset = await getDataset(secondTreeUrl)
           .then((res) => res.json());
-        mainJson.treeTwo = secondTreeJson.tree;
       } catch (e) {
         /* If the url is in the old syntax (e.g. `ha:na`) then the getDataset process
          * will not be able to find the correct dataset.
@@ -160,12 +157,11 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
          * and try to get the dataset for the main tree and second tree again.
          * Also displays warning to the user to let them know the old syntax is deprecated. */
         let oldSyntax;
-        [mainTreeUrl, secondTreeUrl, oldSyntax] = oldProcessSecondTree(url);
+        [mainTreeUrl, secondTreeUrl, oldSyntax] = processDeprecatedSecondTreeSyntax(url);
         response = await getDataset(`${mainTreeUrl}`);
-        mainJson = await response.json();
-        const secondTreeJson = await getDataset(secondTreeUrl)
+        datasetJson = await response.json();
+        secondTreeDataset = await getDataset(secondTreeUrl)
           .then((res) => res.json());
-        mainJson.treeTwo = secondTreeJson.tree;
         dispatch(warningNotification({
           message: `Specifing a second tree via "${oldSyntax}" is deprecated.`,
           details: "The url has been modified to reflect the new syntax."
@@ -174,12 +170,12 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
     }
 
     const mainUrl = queryString.parse(response.url.split("?")[1]).prefix;
-
     dispatch({
       type: types.CLEAN_START,
       pathnameShouldBe: secondTreeUrl ? mainUrl.concat(":", secondTreeUrl) : mainUrl,
       ...createStateFromQueryOrJSONs({
-        json: mainJson,
+        json: datasetJson,
+        secondTreeDataset,
         query,
         narrativeBlocks,
         mainTreeName: secondTreeUrl ? mainTreeUrl : null,
@@ -194,7 +190,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   }
 
   /* do we have frequencies to display? */
-  if (mainJson.meta.panels && mainJson.meta.panels.indexOf("frequencies") !== -1) {
+  if (datasetJson.meta.panels && datasetJson.meta.panels.indexOf("frequencies") !== -1) {
     try {
       const frequencyData = await getDataset(mainTreeUrl, {type: "tip-frequencies"})
         .then((res) => res.json());
