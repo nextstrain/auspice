@@ -127,9 +127,10 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   This has been deprecated so here we dispatch an error message. */
   if (query.tt) {
     dispatch(errorNotification({
-      message: `Specifing a second tree via '?tt=${query.tt}' has been deprecated.`,
-      details: "The new syntax requires the complete name for both trees.  " +
-        "Example of new syntax: 'flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y' "
+      message: `Specifing a second tree via '?tt=${query.tt}' is no longer supported.`,
+      details: "The new syntax requires the complete name for both trees. " +
+        "For example, instead of 'flu/seasonal/h3n2/ha/2y?tt=na' you must " +
+        "specify 'flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y' "
     }));
   }
 
