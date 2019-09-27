@@ -104,7 +104,16 @@ const sendJson = async (res, info) => {
   }
 }
 
-const findAvailableTangleTreeOptions = (currentDatasetUrl, availableDatasetUrls) => {
+/**
+ * Return a subset of `availableDatasetUrls` which we deem to be suitable
+ * candidates to make a second tree.
+ * The current logic is to include all datasets which
+ * (a) contain the same first "part" of the URL -- interpreted here to represent the same pathogen
+ * (b) have the same number of "parts" in the URL
+ * (c) differ from the `currentDatasetUrl` by only 1 part
+ * Note: the "parts" of the URL are formed by splitting it on `"/"`
+ */
+const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls) => {
   const currentDatasetUrlArr = currentDatasetUrl.split('/');
 
   const availableTangleTreeOptions = availableDatasetUrls.filter((datasetUrl) => {
@@ -141,5 +150,5 @@ module.exports = {
   makeFetchAddresses,
   handleError,
   sendJson,
-  findAvailableTangleTreeOptions
+  findAvailableSecondTreeOptions
 };

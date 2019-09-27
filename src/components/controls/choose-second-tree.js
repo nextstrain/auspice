@@ -28,7 +28,7 @@ class ChooseSecondTree extends React.Component {
     this.props.available.datasets
     .filter((dataset) => {
       if (dataset.request === displayedDataset) {
-        options = [...dataset.tangleTreeOptions];
+        options = [...dataset.secondTreeOptions];
       }
       return null;
     });

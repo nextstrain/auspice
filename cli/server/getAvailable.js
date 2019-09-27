@@ -1,7 +1,7 @@
 const utils = require("../utils");
 const fs = require('fs');
 const { promisify } = require('util');
-const { findAvailableTangleTreeOptions } = require('./getDatasetHelpers');
+const { findAvailableSecondTreeOptions } = require('./getDatasetHelpers');
 
 const readdir = promisify(fs.readdir);
 
@@ -33,7 +33,7 @@ const getAvailableDatasets = async (localDataPath) => {
       datasets.push({
         request: filepath,
         v2: true,
-        tangleTreeOptions: findAvailableTangleTreeOptions(filepath, v2Files)
+        secondTreeOptions: findAvailableSecondTreeOptions(filepath, v2Files)
       });
     });
 
@@ -50,7 +50,7 @@ const getAvailableDatasets = async (localDataPath) => {
       datasets.push({
         request: filepath,
         v2: false,
-        tangleTreeOptions: findAvailableTangleTreeOptions(filepath, v1Files)
+        secondTreeOptions: findAvailableSecondTreeOptions(filepath, v1Files)
       });
     });
   } catch (err) {
