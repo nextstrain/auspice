@@ -45,7 +45,7 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
   if (attr === "clade_membership") {
     domain.sort();
   } else {
-    domain.sort((a, b) => stateCount[a] > stateCount[b] ? -1 : 1);
+    domain.sort((a, b) => stateCount[a] > stateCount[b] ? 1 : -1);
   }
   return domain;
 };
