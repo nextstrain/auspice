@@ -33,16 +33,14 @@ const createListOfColors = (n, range) => {
 const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
   const stateCount = countTraitsAcrossTree(nodes, [attr], false, false)[attr];
   if (nodesToo) {
-    const sc = countTraitsAcrossTree(nodesToo, [attr], false, false)[attr];
-    for (let state in sc) { // eslint-disable-line
-      if (stateCount[state]) {
-        stateCount[state] += sc[state];
-      } else {
-        stateCount[state] = sc[state];
-      }
+    const stateCountSecondTree = countTraitsAcrossTree(nodesToo, [attr], false, false)[attr];
+    for (const state of stateCountSecondTree.keys()) {
+      const currentCount = stateCount.get(state) || 0;
+      stateCount.set(state, currentCount+1);
     }
   }
-  const domain = Object.keys(stateCount);
+  console.log("stateCount", stateCount);
+  const domain = Array.from(stateCount.keys());
   /* sorting technique depends on the colorBy */
   if (attr === "clade_membership") {
     domain.sort();
@@ -52,17 +50,14 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
   return domain;
 };
 
-const createDiscreteScale = (domain) => {
+const createDiscreteScale = (domain, type) => {
   // note: colors[n] has n colors
-  const colorList = domain.length <= colors.length ?
-    colors[domain.length].slice() :
-    colors[colors.length - 1].slice();
-  /* set unknowns which appear in the domain to the unknownColor */
-  const unknowns = ["unknown", "undefined", "unassigned", "NA", "NaN", "?"];
-  for (const key of unknowns) {
-    if (domain.indexOf(key) !== -1) {
-      colorList[domain.indexOf(key)] = unknownColor;
-    }
+  let colorList;
+  if (type==="ordinal" || type==="categorical") {
+    /* TODO: use different colours! */
+    colorList = domain.length <= colors.length ?
+      colors[domain.length].slice() :
+      colors[colors.length - 1].slice();
   }
   const scale = scaleOrdinal().domain(domain).range(colorList);
   return (val) => ((val === undefined || domain.indexOf(val) === -1)) ? unknownColor : scale(val);
@@ -130,6 +125,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       .domain([undefined, ...legendValues])
       .range([unknownColor, ...genotypeColors]);
   } else if (colorings && colorings[colorBy]) {
+    let minMax;
     /* Is the scale set in the provided colorings object? */
     if (colorings[colorBy].scale) {
       // console.log(`calcColorScale: colorBy ${colorBy} provided us with a scale (list of [trait, hex])`);
@@ -151,20 +147,52 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           .range(range);
         legendValues = domain;
       }
-    } else if (colorings && (colorings[colorBy].type === "categorical" || colorings[colorBy].type === "ordinal")) {
-      // console.log("making a categorica / ordinal color scale for ", colorBy);
-      // TODO ordinal should use a different scale...
+    } else if (colorings[colorBy].type === "categorical") {
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
-      colorScale = createDiscreteScale(legendValues);
-    } else if (colorings && colorings[colorBy].type === "boolean") {
+      colorScale = createDiscreteScale(legendValues, "categorical");
+    } else if (colorings[colorBy].type === "ordinal") {
+      /* currently, ordinal scales are only implemented for those with integer values.
+      TODO: we should be able to have non-numerical ordinal scales (e.g.
+      `["small", "medium", "large"]`) however we currently cannot specify this ordering
+      in the dataset JSON. Ordinal scales may also want to be used for numerical but
+      non-integer values */
+      legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
+      const allInteger = legendValues.every((x) => Number.isInteger(x));
+
+      if (allInteger) {
+        minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorings[colorBy]);
+        if (minMax[1]-minMax[0]<=colors.length) {
+          continuous = false;
+          legendValues = [];
+          for (let i=minMax[0]; i<=minMax[1]; i++) legendValues.push(i);
+          colorScale = createDiscreteScale(legendValues, "ordinal");
+        } else {
+          /* too many integers for the provided colours -- using continuous scale instead */
+          /* TODO - when we refactor this code we can abstract into functions to stop code
+          duplication, as this is identical to that of the continuous scale below */
+          console.warn("Using a continous scale as there are too many values in the ordinal scale");
+          continuous = true;
+          const scale = scaleLinear().domain(genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]))).range(colors[9]);
+          colorScale = (val) => (val === undefined || val === false) ? unknownColor : scale(val);
+          const spread = minMax[1] - minMax[0];
+          const dp = spread > 5 ? 2 : 3;
+          legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
+          if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
+          legendBounds = createLegendBounds(legendValues);
+        }
+      } else {
+        console.warn("Using a categorical scale as currently ordinal scales must only contain integers");
+        continuous = false;
+        colorScale = createDiscreteScale(legendValues, "categorical");
+      }
+    } else if (colorings[colorBy].type === "boolean") {
       continuous = false;
       legendValues = getDiscreteValuesFromTree(tree.nodes, treeTooNodes, colorBy);
       colorScale = booleanColorScale;
-    } else if (colorings && colorings[colorBy].type === "continuous") {
+    } else if (colorings[colorBy].type === "continuous") {
       // console.log("making a continuous color scale for ", colorBy);
       continuous = true;
-      let minMax;
       switch (colorBy) {
         case "lbi":
           minMax = [0, 0.7];

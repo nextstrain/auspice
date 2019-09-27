@@ -329,11 +329,11 @@ class Footer extends React.Component {
         {`Filter by ${filterTitle}`}
         {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-          {Object.keys(totalStateCount).sort().map((itemName) => {
+          {Array.from(totalStateCount.keys()).sort().map((itemName) => {
             const display = (
               <span>
                 {itemName}
-                {" (" + totalStateCount[itemName] + ")"}
+                {` (${totalStateCount.get(itemName)})`}
               </span>
             );
             return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
