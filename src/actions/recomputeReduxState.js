@@ -418,7 +418,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   const stateCounts = countTraitsAcrossTree(tree.nodes, activeFilters, false, true);
   for (const filterType of activeFilters) {
     const validValues = state.filters[filterType]
-      .filter((filterValue) => filterValue in stateCounts[filterType]);
+      .filter((filterValue) => stateCounts[filterType].has(filterValue));
     state.filters[filterType] = validValues;
     if (!validValues.length) {
       delete query[`f_${filterType}`];
