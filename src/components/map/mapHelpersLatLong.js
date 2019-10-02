@@ -483,7 +483,7 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
 
     node.children.forEach((child) => {
       const nodeLocation = getTraitFromNode(node, geoResolution);
-      const childLocation = getTraitFromNode(node, geoResolution);
+      const childLocation = getTraitFromNode(child, geoResolution);
       
       if (!(nodeLocation && childLocation && nodeLocation !== childLocation)) return;
 
@@ -491,7 +491,6 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
       const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
       const col = nodeColors[node.arrayIdx];
       const vis = visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden"; // transmission visible if child is visible
-
       // update transmissionData via index lookup
       try {
         transmissionIndices[id].forEach((index) => {

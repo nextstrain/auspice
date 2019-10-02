@@ -88,9 +88,8 @@ const identifyPathToTip = (nodes, tipIdx) => {
   const visibility = new Array(nodes.length).fill(false);
   visibility[tipIdx] = true;
   makeParentVisible(visibility, nodes[tipIdx]); /* recursive */
-  return visibility.map((cv) => cv ? 2 : 0);
+  return visibility.map((cv) => cv ? NODE_VISIBLE : NODE_NOT_VISIBLE);
 };
-
 
 /* calcVisibility
 USES:
