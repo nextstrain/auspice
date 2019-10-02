@@ -300,11 +300,13 @@ class Map extends React.Component {
     const longitudes = [];
 
     this.props.metadata.geoResolutions.forEach((geoData) => {
-      const demeToLatLongs = geoData.demes;
-      Object.keys(demeToLatLongs).forEach((deme) => {
-        latitudes.push(demeToLatLongs[deme].latitude);
-        longitudes.push(demeToLatLongs[deme].longitude);
-      });
+      if (geoData.key === this.props.geoResolution) {
+        const demeToLatLongs = geoData.demes;
+        Object.keys(demeToLatLongs).forEach((deme) => {
+          latitudes.push(demeToLatLongs[deme].latitude);
+          longitudes.push(demeToLatLongs[deme].longitude);
+        });
+      }
     });
 
     const maxLat = _max(latitudes);
