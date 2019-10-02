@@ -28,7 +28,6 @@ export const getDefaultControlsState = () => {
   return {
     defaults,
     available: undefined,
-    source: undefined,
     canTogglePanelLayout: true,
     selectedBranch: null,
     selectedNode: null,

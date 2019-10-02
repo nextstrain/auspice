@@ -595,7 +595,6 @@ export const createStateFromQueryOrJSONs = ({
     controls = modifyStateViaMetadata(controls, metadata);
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
-    controls.source = json["_source"];
   } else if (oldState) {
     /* revisit this - but it helps prevent bugs */
     controls = {...oldState.controls};
