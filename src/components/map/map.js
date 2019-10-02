@@ -75,6 +75,7 @@ class Map extends React.Component {
     // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md#es6-classes
     this.playPauseButtonClicked = this.playPauseButtonClicked.bind(this);
     this.resetButtonClicked = this.resetButtonClicked.bind(this);
+    this.resetZoomButtonClicked = this.resetZoomButtonClicked.bind(this);
   }
 
   componentWillMount() {
@@ -505,12 +506,40 @@ class Map extends React.Component {
     return (<div/>);
   }
 
+  resetZoomButton() {
+    if (this.props.narrativeMode) return null;
+    const buttonBaseStyle = {
+      color: "#FFFFFF",
+      fontWeight: 400,
+      fontSize: 12,
+      borderRadius: 3,
+      padding: 12,
+      border: "none",
+      zIndex: 900,
+      position: "absolute",
+      textTransform: "uppercase"
+    };
+
+    return (
+      <div>
+        <button
+          style={{...buttonBaseStyle, bottom: 27, right: 50, width: 60, backgroundColor: goColor}}
+          onClick={this.resetZoomButtonClicked}
+        >
+          Reset Zoom
+        </button>
+      </div>
+    );
+
+  }
+
   maybeCreateMapDiv() {
     let container = null;
     if (this.state.responsive) {
       container = (
         <div style={{position: "relative"}}>
           {this.animationButtons()}
+          {this.resetZoomButton()}
           <div id="map"
             style={{
               height: this.state.responsive.height,
@@ -532,6 +561,12 @@ class Map extends React.Component {
   resetButtonClicked() {
     this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
     this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
+  }
+  resetZoomButtonClicked() {
+    const SWNE = this.getGeoRange();
+    // L. available because leaflet() was called in componentWillMount
+    this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
+    this.maybeDrawDemesAndTransmissions();
   }
   render() {
     const transmissionsExist = this.state.transmissionData && this.state.transmissionData.length;
