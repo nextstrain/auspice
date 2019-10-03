@@ -50,7 +50,7 @@ const formatURL = (url) => {
   return url;
 };
 
-const accessionAndUrl = (node) => {
+const AccessionAndUrl = ({node}) => {
   const accession = getTraitFromNode(node, "accession");
   const url = getTraitFromNode(node, "url");
 
@@ -81,8 +81,8 @@ const accessionAndUrl = (node) => {
 };
 
 
-const displayVaccineInfo = (d) => {
-  const vaccineInfo = getVaccineFromNode(d.n);
+const VaccineInfo = ({node}) => {
+  const vaccineInfo = getVaccineFromNode(node);
   if (!vaccineInfo) return null;
   const renderElements = [];
   if (vaccineInfo.selection_date) {
@@ -120,10 +120,10 @@ const displayVaccineInfo = (d) => {
   return renderElements;
 };
 
-const displayPublicationInfo = (info) => {
-  if (!info) {
-    return null;
-  }
+const PublicationInfo = ({node}) => {
+  const info = getFullAuthorInfoFromNode(node);
+  if (!info) return null;
+
   const itemsToRender = [];
   itemsToRender.push(item("Authors", info.value));
   if (info.title && info.title !== "?") {
@@ -139,40 +139,55 @@ const displayPublicationInfo = (info) => {
   return (itemsToRender.length === 1 ? itemsToRender[0] : itemsToRender);
 };
 
+const StrainName = ({children}) => (
+  <p style={infoPanelStyles.modalHeading}>{children}</p>
+);
+
+const SampleDate = ({node}) => {
+  const date = getTraitFromNode(node, "num_date");
+  if (!date) return null;
+
+  const dateUncertainty = getTraitFromNode(node, "num_date", {confidence: true});
+  if (date && dateUncertainty && dateUncertainty[0] !== dateUncertainty[1]) {
+    return (
+      <>
+        {item("Inferred collection date", numericToCalendar(date))}
+        {item("Collection date confidence", `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)}
+      </>
+    );
+  }
+
+  return item("Collection date", numericToCalendar(date));
+};
+
+const getTraitsToDisplay = (node) => {
+  // TODO -- this should be centralised somewhere
+  if (!node.node_attrs) return [];
+  const ignore = ["author", "div", "num_date"];
+  return Object.keys(node.node_attrs).filter((k) => !ignore.includes(k));
+};
+
+const Trait = ({node, trait}) => {
+  const value = getTraitFromNode(node, trait);
+  return isValueValid(value) ? item(trait, value) : null;
+};
+
 const TipClickedPanel = ({tip, goAwayCallback}) => {
   if (!tip) {return null;}
-
-  const date = getTraitFromNode(tip.n, "num_date");
-  const dateUncertainty = getTraitFromNode(tip.n, "num_date", {confidence: true});
-  const showDateUncertainty = date && dateUncertainty && dateUncertainty[0] !== dateUncertainty[1];
-
+  const node = tip.n;
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
-        <p style={infoPanelStyles.modalHeading}>
-          {`${tip.n.name}`}
-        </p>
+        <StrainName>{node.name}</StrainName>
         <table>
           <tbody>
-            {displayVaccineInfo(tip) /* vaccine information (if applicable) */}
-            {/* the "basic" attributes (which may not exist in certain datasets) */}
-            {/* TODO - we should scan all colorings here */}
-            {["country", "region", "division"].map((x) => {
-              const value = getTraitFromNode(tip.n, x);
-              return isValueValid(value) ? item(x, value) : null;
-            })}
-            {/* Dates */}
-            {date ? item(
-              showDateUncertainty ? "Inferred collection date" : "Collection date",
-              numericToCalendar(date)
-            ) : null}
-            {showDateUncertainty ? (
-              item("Collection date confidence", `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)
-            ) : null}
-            {/* Author / Paper information */}
-            {displayPublicationInfo(getFullAuthorInfoFromNode(tip.n))}
-            {/* try to join URL with accession, else display the one that's available */}
-            {accessionAndUrl(tip.n)}
+            <VaccineInfo node={node} />
+            <SampleDate node={node}/>
+            <PublicationInfo node={node}/>
+            {getTraitsToDisplay(node).map((trait) => (
+              <Trait node={node} trait={trait}/>
+            ))}
+            <AccessionAndUrl node={node}/>
           </tbody>
         </table>
         <p style={infoPanelStyles.comment}>
