@@ -2,7 +2,7 @@
 import React from "react";
 import { infoNotification, warningNotification } from "../../actions/notifications";
 import { spaceBetweenTrees } from "../tree/tree";
-import { getTraitFromNode, getDivFromNode } from "../../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -65,16 +65,20 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
   const filename = filePrefix + "_authors.tsv";
   const UNKNOWN = "unknown";
   const info = {};
-  tree.nodes.filter((n) => !n.hasChildren && n.author).forEach((n) => {
-    if (info[n.author.value]) {
-      info[n.author.value].count += 1;
-      info[n.author.value].strains.push(n.name);
+  tree.nodes.filter((n) => !n.hasChildren).forEach((n) => {
+    const author = getFullAuthorInfoFromNode(n);
+    if (!author) return;
+    if (info[author.value]) {
+      /* this author has been seen before */
+      info[author.value].count += 1;
+      info[author.value].strains.push(n.name);
     } else {
-      info[n.author.value] = {
-        author: n.author.author || n.author.value,
-        title: n.author.title || UNKNOWN,
-        journal: n.author.journal || UNKNOWN,
-        url: isPaperURLValid(n.author) ? n.author.paper_url : UNKNOWN,
+      /* author as-yet unseen */
+      info[author.value] = {
+        author: author.value,
+        title: author.title || UNKNOWN,
+        journal: author.journal || UNKNOWN,
+        url: isPaperURLValid(author) ? author.paper_url : UNKNOWN,
         count: 1,
         strains: [n.name]
       };

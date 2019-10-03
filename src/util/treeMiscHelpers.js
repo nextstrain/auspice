@@ -18,7 +18,7 @@ import { UNDEFINED_VALUE, isValueValid } from "./globals";
  * attr then this function is not the one you are looking for.
  *
  * NOTE: do not use this for "div", "vaccine" or other traits set on `node_attrs`
- * which don't share the same structure as tratis. See the JSON spec for more details.
+ * which don't share the same structure as traits. See the JSON spec for more details.
  */
 export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}={}) => {
 
@@ -54,6 +54,6 @@ export const getVaccineFromNode = (node) => {
 };
 
 export const getFullAuthorInfoFromNode = (node) =>
-  (node.node_attrs && node.node_attrs.author) ?
+  (node.node_attrs && node.node_attrs.author && node.node_attrs.author.value) ?
     node.node_attrs.author :
     undefined;

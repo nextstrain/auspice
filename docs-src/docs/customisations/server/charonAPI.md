@@ -68,7 +68,10 @@ Response shape:
 ```json
 {
   "datasets": [
-    {"request": "URL of a dataset. Will become the prefix in a getDataset request"},
+    {
+      "request": "URL of a dataset. Will become the prefix in a getDataset request",
+      "buildUrl": "[OPTIONAL] -- a link to the build assoicated with the dataset"
+    },
     ...
   ],
   "narratives": [
@@ -93,7 +96,6 @@ The current main dataset response shape is:
 {
   "meta": "the schema 1.0 metadata json object",
   "tree": "the schema 1.0 tree json object",
-  "_source": "the source (e.g. live, staging, github). Only used by the sidebar dataset selector",
 }
 ```
 

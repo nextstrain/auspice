@@ -2,28 +2,28 @@ import React from "react";
 import { connect } from "react-redux";
 import { withTheme } from 'styled-components';
 import ChooseDatasetSelect from "./choose-dataset-select";
+import { SidebarHeader } from "./styles";
 
-const GithubInfo = withTheme((props) => {
-  const parts = window.location.pathname.split("/");
-  const repoURL = `github.com/${parts[2]}/${parts[3]}`;
+const BuildLink = withTheme((props) => {
+  const niceUrl = props.url.replace(/^(http[s]?:\/\/)/, "");
   return (
-    <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5, color: props.theme.color}}>
+    <div style={{ fontSize: 14, marginTop: 5, marginBottom: 10, color: props.theme.color}}>
       <i className="fa fa-clone fa-lg" aria-hidden="true"/>
       <span style={{position: "relative", paddingLeft: 10}}/>
-      <a href={`https://${repoURL}`} target="_blank">{repoURL}</a>
+      <a href={props.url} target="_blank">{niceUrl}</a>
     </div>
   );
 });
 
-const DroppedFiles = withTheme((props) => {
-  /* TODO: this shouldn't be in the auspice src, rather injected as an extension when needed */
-  return (
-    <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5, color: props.theme.color}}>
-      <i className="fa fa-clone fa-lg" aria-hidden="true"/>
-      <span style={{position: "relative", paddingLeft: 10}}>{"dropped files"}</span>
-    </div>
-  );
-});
+// const DroppedFiles = withTheme((props) => {
+//   /* TODO: this shouldn't be in the auspice src, rather injected as an extension when needed */
+//   return (
+//     <div style={{ fontSize: 14, marginTop: 5, marginBottom: 5, color: props.theme.color}}>
+//       <i className="fa fa-clone fa-lg" aria-hidden="true"/>
+//       <span style={{position: "relative", paddingLeft: 10}}>{"dropped files"}</span>
+//     </div>
+//   );
+// });
 
 const checkEqualityOfArrays = (arr1, arr2, upToIdx) => {
   return arr1.slice(0, upToIdx).every((value, index) => value === arr2[index]);
@@ -31,28 +31,23 @@ const checkEqualityOfArrays = (arr1, arr2, upToIdx) => {
 
 @connect((state) => {
   return {
-    available: state.controls.available,
-    source: state.controls.source
+    available: state.controls.available
   };
 })
 class ChooseDataset extends React.Component {
   render() {
-    if (this.props.source === "community") {
-      return (<GithubInfo/>);
-    } else if (this.props.source === "dropped") {
-      return (<DroppedFiles/>);
-    }
-    if (!this.props.available || !this.props.available.datasets) {
-      /* typically this is the case if the available dataset fetch hasn't returned */
+    if (!this.props.available || !this.props.available.datasets || !this.props.available.datasets.length) {
+      /* typically this is the case if the available dataset fetch hasn't returned
+      or it has returned an empty array of datasets */
       return null;
     }
 
-    const displayedDataset = window.location.pathname
+    const displayedDatasetString = window.location.pathname
       .replace(/^\//, '')
       .replace(/\/$/, '')
-      .split(":")[0]
-      .split("/");
-
+      .split(":")[0];
+    const displayedDataset = displayedDatasetString.split("/");
+    let optionForCurrentDataset = {};
     const options = [[]];
 
     this.props.available.datasets.forEach((d) => {
@@ -60,7 +55,11 @@ class ChooseDataset extends React.Component {
       if (!options[0].includes(firstField)) {
         options[0].push(firstField);
       }
+      if (displayedDatasetString === d.request) {
+        optionForCurrentDataset = d;
+      }
     });
+
 
     for (let idx=1; idx<displayedDataset.length; idx++) {
       /* going through the fields which comprise the current dataset
@@ -76,21 +75,24 @@ class ChooseDataset extends React.Component {
       });
     }
 
-    const selectors = [];
-    for (let i=0; i<options.length; i++) {
-      selectors.push((
-        <div key={i}>
+    return (
+      <>
+        <SidebarHeader>Dataset</SidebarHeader>
+        {optionForCurrentDataset.buildUrl ? (
+          <BuildLink url={optionForCurrentDataset.buildUrl}/>
+        ) : null}
+        {options.map((option, optionIdx) => (
           <ChooseDatasetSelect
+            key={option}
             dispatch={this.props.dispatch}
-            source={this.props.source}
-            choice_tree={displayedDataset.slice(0, i)}
-            selected={displayedDataset[i]}
-            options={options[i]}
+            choice_tree={displayedDataset.slice(0, optionIdx)}
+            selected={displayedDataset[optionIdx]}
+            options={option}
           />
-        </div>
-      ));
-    }
-    return selectors;
+        ))}
+      </>
+    );
+
   }
 }
 
