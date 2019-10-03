@@ -40,6 +40,61 @@ const calculateMajorGridSeperation = (range) => {
   return step;
 };
 
+const computeXGridPoints = (xmin, xmax, step, layout, distanceMeasure, minorTicksTimeTree, minorTicks) => {
+  const majorGridPoints = [];
+  const minorGridPoints = [];
+  const gridMin = Math.floor(xmin/step)*step;
+  const minVis = layout==="radial" ? xmin : gridMin;
+  const maxVis = xmax;
+  const precisionX = Math.max(0, -Math.floor(Math.log10(step)));
+  for (let ii = 0; ii <= (xmax - gridMin)/step+3; ii++) {
+    const pos = gridMin + step*ii;
+    majorGridPoints.push({
+      position: pos,
+      name: String(pos.toFixed(precisionX)),
+      visibility: ((pos<minVis) || (pos>maxVis)) ? "hidden" : "visible",
+      axis: "x"
+    });
+  }
+  let numMinorTicks = distanceMeasure === "num_date" ? minorTicksTimeTree : minorTicks;
+  if (step===5 || step===10) {
+    numMinorTicks = 5;
+  }
+  const minorStep = step / numMinorTicks;
+  for (let ii = 0; ii <= (xmax - gridMin)/minorStep+30; ii++) {
+    const pos = gridMin + minorStep*ii;
+    minorGridPoints.push({
+      position: pos,
+      name: String(pos.toFixed(precisionX)),
+      visibility: ((pos<minVis) || (pos>maxVis+minorStep)) ? "hidden" : "visible",
+      axis: "x"
+    });
+  }
+  console.log("MAJOR:", majorGridPoints);
+  console.log("MINOR:", minorGridPoints);
+  return {majorGridPoints, minorGridPoints};
+};
+
+const computeYGridPoints = (ymin, ymax) => {
+  const majorGridPoints = [];
+  let yStep = 0;
+  yStep = calculateMajorGridSeperation(ymax-ymin);
+  const precisionY = Math.max(0, -Math.floor(Math.log10(yStep)));
+  const gridYMin = Math.floor(ymin/yStep)*yStep;
+  const maxYVis = ymax;
+  const minYVis = gridYMin;
+  for (let ii = 1; ii <= (ymax - gridYMin)/yStep+10; ii++) {
+    const pos = gridYMin + yStep*ii;
+    majorGridPoints.push({
+      position: pos,
+      name: pos.toFixed(precisionY),
+      visibility: ((pos<minYVis)||(pos>maxYVis)) ? "hidden" : "visible",
+      axis: "y"
+    });
+  }
+  return {majorGridPoints};
+};
+
 /**
  * add a grid to the svg
  * @param {layout}
@@ -67,35 +122,16 @@ export const addGrid = function addGrid() {
   /* determine grid points (i.e. on the x/polar axis where lines/circles will be drawn through)
   Major grid points are thicker and have text
   Minor grid points have no text */
-  const majorGridPoints = [];
-  const minorGridPoints = [];
-  determineGridPoints: {
-    const gridMin = Math.floor(xmin/step)*step;
-    const minVis = layout==="radial" ? xmin : gridMin;
-    const maxVis = xmax;
-    for (let ii = 0; ii <= (xmax - gridMin)/step+3; ii++) {
-      const pos = gridMin + step*ii;
-      majorGridPoints.push([pos, ((pos<minVis)||(pos>maxVis))?"hidden":"visible", "x"]);
-    }
-    let numMinorTicks = this.distanceMeasure === "num_date" ? this.params.minorTicksTimeTree : this.params.minorTicks;
-    if (step===5 || step===10) {
-      numMinorTicks = 5;
-    }
-    const minorStep = step / numMinorTicks;
-    for (let ii = 0; ii <= (xmax - gridMin)/minorStep+30; ii++) {
-      const pos = gridMin + minorStep*ii;
-      minorGridPoints.push([pos, ((pos<minVis)||(pos>maxVis+minorStep))?"hidden":"visible", "x"]);
-    }
-  }
+  const {majorGridPoints, minorGridPoints} = computeXGridPoints(xmin, xmax, step, layout, this.distanceMeasure, this.params.minorTicksTimeTree, this.params.minorTicks);
 
   /* HOF, which returns the fn which constructs the SVG path string
   to draw the axis lines (circles for radial trees).
   "gridPoint" is an element from majorGridPoints or minorGridPoints */
   const gridline = (xScale, yScale, layoutShadow) => (gridPoint) => {
     let svgPath="";
-    if (gridPoint[2] === "x") {
+    if (gridPoint.axis === "x") {
       if (layoutShadow==="rect" || layoutShadow==="clock") {
-        const xPos = xScale(gridPoint[0]);
+        const xPos = xScale(gridPoint.position);
         svgPath = 'M'+xPos.toString() +
           " " +
           yScale.range()[1].toString() +
@@ -104,21 +140,21 @@ export const addGrid = function addGrid() {
           " " +
           yScale.range()[0].toString();
       } else if (layoutShadow==="radial") {
-        const xPos = xScale(gridPoint[0]-xmin);
+        const xPos = xScale(gridPoint.position-xmin);
         svgPath = 'M '+xPos.toString() +
           "  " +
           yScale(0).toString() +
           " A " +
           (xPos - xScale(0)).toString() +
           " " +
-          (yScale(gridPoint[0]) - yScale(xmin)).toString() +
+          (yScale(gridPoint.position) - yScale(xmin)).toString() +
           " 0 1 0 " +
           xPos.toString() +
           " " +
           (yScale(0)+0.001).toString();
       }
-    } else if (gridPoint[2] === "y") {
-      const yPos = yScale(gridPoint[0]);
+    } else if (gridPoint.axis === "y") {
+      const yPos = yScale(gridPoint.position);
       svgPath = `M${xScale(xmin) + 20} ${yPos} L ${xScale(xmax)} ${yPos}`;
     }
     return svgPath;
@@ -128,8 +164,8 @@ export const addGrid = function addGrid() {
 
   /* HOF which returns a function which calculates the x position of text labels */
   const xTextPos = (xScale, layoutShadow) => (gridPoint) => {
-    if (gridPoint[2] === "x") { // "normal" labels on the x-axis / polar-axis
-      return layoutShadow==="radial" ? xScale(0) : xScale(gridPoint[0]);
+    if (gridPoint.axis === "x") { // "normal" labels on the x-axis / polar-axis
+      return layoutShadow==="radial" ? xScale(0) : xScale(gridPoint.position);
     }
     // clock layout y positions (which display divergence)
     return xScale.range()[0]-15;
@@ -137,15 +173,15 @@ export const addGrid = function addGrid() {
 
   /* same as xTextPos HOF, but for y-values */
   const yTextPos = (yScale, layoutShadow) => (gridPoint) => {
-    if (gridPoint[2] === "x") {
-      return layoutShadow === "radial" ? yScale(gridPoint[0]-xmin)-5 : yScale.range()[1] + 18;
+    if (gridPoint.axis === "x") {
+      return layoutShadow === "radial" ? yScale(gridPoint.position-xmin)-5 : yScale.range()[1] + 18;
     }
-    return yScale(gridPoint[0]);
+    return yScale(gridPoint.position);
   };
 
   /* HOF which returns a function which calculates the text anchor string */
   const textAnchor = (layoutShadow) => (gridPoint) => {
-    if (gridPoint[2] === "x") {
+    if (gridPoint.axis === "x") {
       return layoutShadow === "radial" ? "end" : "middle";
     }
     return "start";
@@ -153,16 +189,8 @@ export const addGrid = function addGrid() {
 
   /* for clock layouts, add y-points to the majorGridPoints array
   Note that these don't have lines drawn, only text */
-  let yStep = 0;
   if (this.layout==="clock") {
-    yStep = calculateMajorGridSeperation(ymax-ymin);
-    const gridYMin = Math.floor(ymin/yStep)*yStep;
-    const maxYVis = ymax;
-    const minYVis = gridYMin;
-    for (let ii = 1; ii <= (ymax - gridYMin)/yStep+10; ii++) {
-      const pos = gridYMin + yStep*ii;
-      majorGridPoints.push([pos, ((pos<minYVis)||(pos>maxYVis))?"hidden":"visible", "y"]);
-    }
+    majorGridPoints.push(...computeYGridPoints(ymin, ymax).majorGridPoints);
   }
 
   /* D3 commands to add grid + text to the DOM
@@ -177,7 +205,7 @@ export const addGrid = function addGrid() {
         .attr("d", gridline(this.xScale, this.yScale, layout))
         .attr("class", "majorGrid")
         .style("fill", "none")
-        .style("visibility", (d) => d[1])
+        .style("visibility", (d) => d.visibility)
         .style("stroke", this.params.majorGridStroke)
         .style("stroke-width", this.params.majorGridWidth);
 
@@ -192,14 +220,12 @@ export const addGrid = function addGrid() {
         .attr("d", gridline(this.xScale, this.yScale, layout))
         .attr("class", "minorGrid")
         .style("fill", "none")
-        .style("visibility", (d) => d[1])
+        .style("visibility", (d) => d.visibility)
         .style("stroke", this.params.minorGridStroke)
         .style("stroke-width", this.params.minorGridWidth);
 
 
   /* draw the text labels for majorGridPoints */
-  const precisionX = Math.max(0, -Math.floor(Math.log10(step)));
-  const precisionY = Math.max(0, -Math.floor(Math.log10(yStep)));
   this.groups.gridText.selectAll("*").remove();
   this.svg.selectAll(".gridText").remove();
   this.groups.gridText
@@ -207,13 +233,13 @@ export const addGrid = function addGrid() {
     .data(majorGridPoints)
     .enter()
       .append("text")
-        .text((d) => d[0].toFixed(d[2]==='y' ? precisionY : precisionX))
+        .text((d) => d.name)
         .attr("class", "gridText")
         .style("font-size", this.params.tickLabelSize)
         .style("font-family", this.params.fontFamily)
         .style("fill", this.params.tickLabelFill)
         .style("text-anchor", textAnchor(layout))
-        .style("visibility", (d) => d[1])
+        .style("visibility", (d) => d.visibility)
         .attr("x", xTextPos(this.xScale, layout))
         .attr("y", yTextPos(this.yScale, layout));
 
