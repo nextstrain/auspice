@@ -123,13 +123,17 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     legendValues = orderOfGenotypeAppearance(tree.nodes, controls.mutType);
     const trueValues = controls.mutType === "nuc" ? legendValues.filter((x) => x !== "X" && x !== "-" && x !== "N") :
       legendValues.filter((x) => x !== "X" && x !== "-");
-    const unkValues = controls.mutType === "nuc" ? legendValues.filter((x) => x === "X" || x === "-" || x === "N") :
-      legendValues.filter((x) => x === "X" || x === "-");
-    let domain = [undefined, ...trueValues];
-    let range = [unknownColor, ...genotypeColors.slice(0, trueValues.length)];
-    if (unkValues.length) { // we must add these to the domain + provide a value in the range
-      domain = domain.concat(unkValues);
-      range = range.concat(createListOfColors(unkValues.length, [rgb(192, 192, 192), rgb(32, 32, 32)]));
+    const domain = [undefined, ...legendValues];
+    const range = [unknownColor, ...genotypeColors.slice(0, trueValues.length)];
+    // Bases are returned by orderOfGenotypeAppearance in order, unknowns at end
+    if (legendValues.indexOf("-") !== -1) {
+      range.push(rgb(217, 217, 217));
+    }
+    if (legendValues.indexOf("N") !== -1 && controls.mutType === "nuc") {
+      range.push(rgb(153, 153, 153));
+    }
+    if (legendValues.indexOf("X") !== -1) {
+      range.push(rgb(102, 102, 102));
     }
     colorScale = scaleOrdinal()
           .domain(domain)
