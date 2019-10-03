@@ -1,6 +1,8 @@
 /* eslint-disable space-infix-ops */
 import { min, max } from "d3-array";
 import { timerStart, timerEnd } from "../../../util/perf";
+import { months } from "../../../util/globals";
+import { numericToCalendar } from "../../../util/dateHelpers";
 
 export const hideGrid = function hideGrid() {
   if ("majorGrid" in this.groups) {
@@ -29,29 +31,63 @@ const addSVGGroupsIfNeeded = (groups, svg) => {
   }
 };
 
-const calculateMajorGridSeperation = (range) => {
+/**
+ * Create the major-grid-line separation.
+ * @param {numeric} range years
+ * @param {bool} isDate is the axis measuring time?
+ * @returns {numeric} spacing
+ */
+const calculateMajorGridSeperation = (range, isDate) => {
   const logRange = Math.floor(Math.log10(range));
   let step = Math.pow(10, logRange); // eslint-disable-line no-restricted-properties
-  if (range/step < 2) {
+  if (range/step < 2) { // if step > 0.5*range then make more fine-grained steps
     step /= 5;
-  } else if (range/step <5) {
+  } else if (range/step <5) { // if step > 0.2*range then make more fine grained steps
     step /= 2;
+  }
+  if (isDate && step < 1) {
+    /* we want to (attempt to) space grids according to months */
+    step = step * 10 /12;
   }
   return step;
 };
 
-const computeXGridPoints = (xmin, xmax, step, layout, distanceMeasure, minorTicksTimeTree, minorTicks) => {
+/**
+ * Format the date to be displayed below major gridlines
+ * @param {numeric} step num years between each major gridline. Can be decimal.
+ * @param {numeric} numDate date in decimal format
+ * @returns {string} date to be displayed below major gridline
+ */
+const createDisplayDate = (step, numDate) => {
+  if (step >= 1) {
+    return numDate.toFixed(Math.max(0, -Math.floor(Math.log10(step))));
+  }
+  const [year, month, day] = numericToCalendar(numDate).split("-");
+  if (step >= 1/12) {
+    return `${year}-${months[month]}`;
+  }
+  return `${year}-${months[month]}-${day}`;
+};
+
+
+const computeXGridPoints = (xmin, xmax, layout, distanceMeasure, minorTicksTimeTree, minorTicks) => {
   const majorGridPoints = [];
   const minorGridPoints = [];
+
+  /* step is the amount (same units of xmax, xmin) of seperation between major grid lines */
+  const step = calculateMajorGridSeperation(xmax-xmin, distanceMeasure === "num_date");
+
   const gridMin = Math.floor(xmin/step)*step;
   const minVis = layout==="radial" ? xmin : gridMin;
   const maxVis = xmax;
-  const precisionX = Math.max(0, -Math.floor(Math.log10(step)));
+
   for (let ii = 0; ii <= (xmax - gridMin)/step+3; ii++) {
     const pos = gridMin + step*ii;
     majorGridPoints.push({
       position: pos,
-      name: String(pos.toFixed(precisionX)),
+      name: distanceMeasure === "num_date" ?
+        createDisplayDate(step, pos) :
+        pos.toFixed(Math.max(0, -Math.floor(Math.log10(step)))),
       visibility: ((pos<minVis) || (pos>maxVis)) ? "hidden" : "visible",
       axis: "x"
     });
@@ -65,13 +101,10 @@ const computeXGridPoints = (xmin, xmax, step, layout, distanceMeasure, minorTick
     const pos = gridMin + minorStep*ii;
     minorGridPoints.push({
       position: pos,
-      name: String(pos.toFixed(precisionX)),
       visibility: ((pos<minVis) || (pos>maxVis+minorStep)) ? "hidden" : "visible",
       axis: "x"
     });
   }
-  console.log("MAJOR:", majorGridPoints);
-  console.log("MINOR:", minorGridPoints);
   return {majorGridPoints, minorGridPoints};
 };
 
@@ -116,13 +149,10 @@ export const addGrid = function addGrid() {
     xmin + max([this.xScale.domain()[1], this.yScale.domain()[1], -this.xScale.domain()[0], -this.yScale.domain()[0]]) :
     this.xScale.domain()[1];
 
-  /* step is the amount (same units of xmax, xmin) of seperation between major grid lines */
-  const step = calculateMajorGridSeperation(xmax-xmin);
-
   /* determine grid points (i.e. on the x/polar axis where lines/circles will be drawn through)
   Major grid points are thicker and have text
   Minor grid points have no text */
-  const {majorGridPoints, minorGridPoints} = computeXGridPoints(xmin, xmax, step, layout, this.distanceMeasure, this.params.minorTicksTimeTree, this.params.minorTicks);
+  const {majorGridPoints, minorGridPoints} = computeXGridPoints(xmin, xmax, layout, this.distance, this.params.minorTicksTimeTree, this.params.minorTicks);
 
   /* HOF, which returns the fn which constructs the SVG path string
   to draw the axis lines (circles for radial trees).
