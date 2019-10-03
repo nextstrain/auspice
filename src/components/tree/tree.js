@@ -129,9 +129,6 @@ class Tree extends React.Component {
           <Legend width={this.props.width}/>
         </ErrorBoundary>
         <HoverInfoPanel
-          mutType={this.props.mutType}
-          temporalConfidence={this.props.temporalConfidence.display}
-          distanceMeasure={this.props.distanceMeasure}
           hovered={this.state.hovered}
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
