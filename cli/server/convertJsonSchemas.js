@@ -93,8 +93,7 @@ const setAuthorInfoOnTree = (v2, meta) => {
       if (v1info.title) node.node_attrs.author.title = v1info.title;
       if (v1info.journal) node.node_attrs.author.journal = v1info.journal;
       if (v1info.paper_url) node.node_attrs.author.paper_url = formatURLString(v1info.paper_url);
-      node.node_attrs.author.author = prettyString(v1author, {camelCase: false});
-      node.node_attrs.author.value = v1author;
+      node.node_attrs.author.value = prettyString(v1author, {camelCase: false});
     }
   });
 };

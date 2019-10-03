@@ -3,7 +3,7 @@ import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
-import { getTraitFromNode, getDivFromNode, getVaccineFromNode } from "../../../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode, getVaccineFromNode, getFullAuthorInfoFromNode } from "../../../util/treeMiscHelpers";
 
 const InfoLine = ({name, value, padBelow=false}) => {
   return (
@@ -215,24 +215,22 @@ const TipColorBy = ({node, colorBy, distanceMeasure, temporalConfidence, colorSc
     if (distanceMeasure === "num_date") return null;
     return <BranchLength distanceMeasure={colorBy} node={node} temporalConfiden={temporalConfidence}/>;
   } else if (colorBy === "author") {
-    if (!node.author) return null;
-    const ret = [
-      <InfoLine name="Author:" value={node.author.author || node.author.value}/>
-    ];
-    if (node.author.title) {
-      ret.push(<InfoLine name="Title:" value={node.author.title}/>);
-    }
-    if (node.author.journal) {
-      ret.push(<InfoLine name="Journal:" value={node.author.journal}/>);
-    }
-    return ret;
+    const authorInfo = getFullAuthorInfoFromNode(node);
+    if (!authorInfo) return null;
+    return (
+      <>
+        <InfoLine name="Author:" value={authorInfo.value}/>
+        {authorInfo.title ? <InfoLine name="Title:" value={authorInfo.title}/> : null}
+        {authorInfo.journal ? <InfoLine name="Journal:" value={authorInfo.journal}/> : null}
+      </>
+    );
   } else if (isColorByGenotype(colorBy)) {
     const genotype = decodeColorByGenotype(colorBy);
-    const key = genotype.aa
-      ? `Amino Acid at ${genotype.gene} site ${genotype.positions.join(", ")}`
-      : `Nucleotide at pos ${genotype.positions.join(", ")}`;
+    const key = genotype.aa ?
+      `Amino Acid at ${genotype.gene} site ${genotype.positions.join(", ")}:` :
+      `Nucleotide at pos ${genotype.positions.join(", ")}:`;
     const state = getTipColorAttribute(node, colorScale);
-    return <InfoLine name={`${key}:`} value={state}/>;
+    return <InfoLine name={key} value={state}/>;
   }
   return <InfoLine name={`${colorBy}:`} value={getTraitFromNode(node, colorBy)}/>;
 };
