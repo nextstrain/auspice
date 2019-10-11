@@ -19,7 +19,7 @@ import { changeDateFilter } from "../../actions/tree";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
-import { lightGrey, goColor, pauseColor } from "../../globalStyles";
+import { tabSingle, darkGrey, lightGrey, goColor, pauseColor } from "../../globalStyles";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -75,6 +75,7 @@ class Map extends React.Component {
     // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md#es6-classes
     this.playPauseButtonClicked = this.playPauseButtonClicked.bind(this);
     this.resetButtonClicked = this.resetButtonClicked.bind(this);
+    this.resetZoomButtonClicked = this.resetZoomButtonClicked.bind(this);
   }
 
   componentWillMount() {
@@ -300,11 +301,13 @@ class Map extends React.Component {
     const longitudes = [];
 
     this.props.metadata.geoResolutions.forEach((geoData) => {
-      const demeToLatLongs = geoData.demes;
-      Object.keys(demeToLatLongs).forEach((deme) => {
-        latitudes.push(demeToLatLongs[deme].latitude);
-        longitudes.push(demeToLatLongs[deme].longitude);
-      });
+      if (geoData.key === this.props.geoResolution) {
+        const demeToLatLongs = geoData.demes;
+        Object.keys(demeToLatLongs).forEach((deme) => {
+          latitudes.push(demeToLatLongs[deme].latitude);
+          longitudes.push(demeToLatLongs[deme].longitude);
+        });
+      }
     });
 
     const maxLat = _max(latitudes);
@@ -531,12 +534,40 @@ class Map extends React.Component {
     this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
     this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
   }
+  resetZoomButtonClicked() {
+    const SWNE = this.getGeoRange();
+    // L. available because leaflet() was called in componentWillMount
+    this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
+    this.maybeDrawDemesAndTransmissions();
+  }
+  getStyles = () => {
+    const activeResetZoomButton = true;
+    return {
+      resetZoomButton: {
+        zIndex: 100,
+        position: "absolute",
+        right: 5,
+        top: 0,
+        cursor: activeResetZoomButton ? "pointer" : "auto",
+        color: activeResetZoomButton ? darkGrey : lightGrey
+      }
+    };
+  };
   render() {
+    const styles = this.getStyles();
     const transmissionsExist = this.state.transmissionData && this.state.transmissionData.length;
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
       <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
         {this.maybeCreateMapDiv()}
+        {this.props.narrativeMode ? null : (
+          <button
+            style={{...tabSingle, ...styles.resetZoomButton}}
+            onClick={this.resetZoomButtonClicked}
+          >
+            reset zoom
+          </button>
+        )}
       </Card>
     );
   }
