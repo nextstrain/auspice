@@ -161,6 +161,18 @@ export const colorByMenuPreferredOrdering = [
 ];
 
 export const months = {
+  1: 'Jan',
+  2: 'Feb',
+  3: 'Mar',
+  4: 'Apr',
+  5: 'May',
+  6: 'Jun',
+  7: 'Jul',
+  8: 'Aug',
+  9: 'Sep',
+  10: 'Oct',
+  11: 'Nov',
+  12: 'Dec',
   '01': 'Jan',
   '02': 'Feb',
   '03': 'Mar',
@@ -169,10 +181,7 @@ export const months = {
   '06': 'Jun',
   '07': 'Jul',
   '08': 'Aug',
-  '09': 'Sep',
-  '10': 'Oct',
-  '11': 'Nov',
-  '12': 'Dec'
+  '09': 'Sep'
 };
 
 export const normalNavBarHeight = 50;
