@@ -1,17 +1,25 @@
 [![Build Status](https://travis-ci.com/nextstrain/auspice.svg?branch=master)](https://travis-ci.com/nextstrain/auspice)
 [![NPM version](https://img.shields.io/npm/v/auspice.svg?style=flat)](https://www.npmjs.com/package/auspice)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![BrowserStack](src/images/Browserstack-logo.svg)](https://www.browserstack.com)
 
-## Introduction
+# Introduction
 
-Auspice is an open-source interactive web app for visualising phylogenomic data.
-It is the app that powers all the visualisation on [nextstrain.org](https://nextstrain.org), which aims to provide a continually-updated view of publicly available pathogen genome data.
-Auspice was designed to aid epidemiological understanding and improve outbreak response, but is able to visualise a diverse range of datasets.
+Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data.
+We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread.
+Our goal is to aid epidemiological understanding and improve outbreak response.
 
+Resulting data and inferences are available live at the website [nextstrain.org](https://nextstrain.org).
+Documentation is available at [nextstrain.org/docs](https://nextstrain.org/docs).
 
-**Please see [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice) for further details.**
+# Auspice
 
+*Definition: Observation by an augur, ie a prophetic sign.*
+
+Auspice is an open-source interactive web app for visualizing phylogenomic data.
+It may be used in tandem with [augur](https://github.com/nextstrain/augur) or on its own.
+It may be used to look at phylogenetic trees on your own computer or may be used as a server to share results broadly. 
+
+**Please see [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice) for auspice documentation.**
 
 ## Installation
 
@@ -19,7 +27,6 @@ Auspice was designed to aid epidemiological understanding and improve outbreak r
 npm install -g auspice
 ```
 See [here](https://nextstrain.github.io/auspice/installation) for more details.
-
 
 ## Running Auspice
 

@@ -189,6 +189,14 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
     });
 
   } catch (err) {
+    if (err.message === "No Content") { // status code 204
+      /* TODO: add more helper functions for moving between pages in auspice */
+      return dispatch({
+        type: types.PAGE_CHANGE,
+        displayComponent: "splash",
+        pushState: true
+      });
+    }
     console.error(err, err.message);
     dispatch(goTo404(`Couldn't load JSONs for ${url}`));
     return;
