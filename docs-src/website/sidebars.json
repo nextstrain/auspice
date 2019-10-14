@@ -16,14 +16,14 @@
       "server/api",
       "server/authentication"
     ],
-    "narratives": [
+    "Narratives": [
       "narratives/introduction",
       "narratives/how-to-write"
     ],
-    "release notes": [
+    "Release Notes": [
       "releases/changelog"
     ],
-    "contributing": [
+    "Contributing": [
       "contributing/documentation"
     ]
   }

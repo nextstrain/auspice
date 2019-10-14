@@ -2,46 +2,81 @@
 title: "Communicating results using Narratives"
 ---
 
-> Content taken from nextstrain.org/docs. Needs to be updated.
-
 Narratives are a method of data-driven storytelling.
-They allow scientists (or anyone!) to author content which is displayed alongside the "normal" view of the data.
+They allow scientists (or anyone!) to author content which is displayed alongside the "normal" auspice view of the data.
 This content drives the way in which data is displayed, so instead of the user changing how things are displayed, the view automatically changes as you move between paragraphs in the narrative.
 This allows you to communicate results with the appropriate views into the data, whilst maintaining the ability for the user to jump back to the "normal" viewing mode and interact with the data.
 
+## Examples
 
-> Narratives are a new feature, and there may still be bugs.
-We're aiming to publicise this feature as soon as we have ensured everything's working as desired.
+Narratives are easier to understand with examples:
 
-> I think having an example narrative to show off here would be waay cool. This is a pretty amazing feature of auspice, and this section should make me get hyped about it. -Cassia
+We've been looking into West Nile Virus (WNV) spread throughout North America and used auspice to visualise the spread of the virus from east to west over a 20 year period.
+To communicate these results, we constructed a narrative to walk people through this, which we suggest you go take a look at to grasp the power of narratives 
+
+
+> _Click the link 👇 and explore the content by scrolling the text in the left hand panel (or click on the arrows)._
+_The data visualizations will change accordingly._
+_Clicking "explore the data yourself" above will display sidebar controls._
+
+**Example #1**: [Twenty years of West Nile virus (nextstrain.org)](https://nextstrain.org/narratives/twenty-years-of-WNV)
+
+
+Hopefully that gave you an idea about how the interplay between bits of text and views into the data allows for better communication of our interpretation of the data.
+Did you notice that, at any point in the narrative, people can dive into the data themselves if they want to?
+
+---
+
+Here's another example written to show the various views you can use narratives to explain:
+
+**Example #2**: [Exploring the narrative functionality using the ongoing mumps epidemic in North America (nextstrain.org)](https://nextstrain.org/narratives/intro-to-narratives).
+
+We'll go through this in more detail in the [writing a narrative](how-to-write.md) docs.
+
+
+
+
 
 ## How to write a narrative
-A narrative is simply a [markdown](https://en.wikipedia.org/wiki/Markdown) file with some quirks.
-"Views" into the data are defined by specifying a nextstrain URL in each paragraph's header which represents this view -- i.e. simply manipulate the app into the view you want and copy the resulting URL into the markdown file.
-It's that simple 🎉.
 
-[This page](how-to-write.md) details exactly how to construct one.
+If you have a dataset that you (or anyone else) created then you can write a narrative to enhance it 💫
+
+Behind the scenes a narrative is a single markdown file written in a particular format -- i.e. each of the example narratives linked above comprised one markdown file each.
+The [writing a narrative](how-to-write.md) tutorial will use the mumps example from above to explain how you can write your own narrative.
 
 
 
 ## Sharing narratives
 
-Similar to how community datasets in GitHub repositories are automatically accessible through [nextstrain.org](https://www.nextstrain.org), so are narratives.
-Given a repository at **github.com/orgName/repoName**, if there is a folder named `narratives` with the markdown file **repoName.md**, then that dataset can be accessed via **nextstrain.org/community/narratives/orgName/repoName**.
-Additional narratives named such as **repoName\_a\_b\_c.json** are available at **nextstrain.org/community/narratives/orgName/repoName/a/b/c**.
+If you've got a narrative working locally (i.e. running auspice on your computer) and want to share the results then you have two options:
+1. Implement an auspice server yourself (the harder option) -- [see docs here](server/introduction.md).
+2. Use the community functionality of nextstrain.org (the easier option, detailed below).
 
+> A quick reminder of the difference between auspice & nextstrain.org is warrented.
+Nextstrain is a "user" of auspice, in that it uses auspice to visualise genomic data and makes it availiable via [nextstrain.org](https://nextstrain.org).
+It has additional functionality available, such as the ability to source datasets (and narratives!) from any public GitHub repo -- [see documentation here (nextstrain.org)](https://nextstrain.org/docs/contributing/community-builds).
+Note that the _dataset_ (i.e. the JSON(s)) doesn't have to live in the same github repo, in fact it doesn't even need to be a community build.
 
-Our own narratives, which are stored in [this github repo](https://github.com/nextstrain/narratives) are available to view at [nextstrain.org/narratives](https://www.nextstrain.org/narratives).
-We're currently working at adding content and tutorials to these!
+Uploading your narrative to a (public) github repo allows it to be available via nextstrain community URLs. See [the tutorial](narratives/how-to-write.md#step-6-upload-your-example-to-nextstrain-community-to-share-with-everyone) for instructions on how to do this.
+
+This is how the narrative file at [github > emmahodcroft > tb > narratives](https://github.com/emmahodcroft/tb/blob/master/narratives/tb_crispell.md) can be accessed via [nextstrain.org/community/narratives/emmahodcroft/tb/crispell](https://nextstrain.org/community/narratives/emmahodcroft/tb/crispell).
 
 
 
 ## Known Bugs / Limitations
-* Datasets cannot be changed between paragraphs (i.e. the initial dataset is used for all subsequent paragraphs).
-This will be fixed eventually.
+
+Narratives are now being used in various settings, however some bugs remain.
+Please [get in touch (email)](mailto:hello@nextstrain.org) with any and all questions about narratives, or [file an issue on GitHub](https://github.com/nextstrain/auspice/issues/new) 🙏
+
+* Datasets currently cannot be changed between paragraphs (i.e. the initial dataset is used for all subsequent paragraphs).
+
 * Text which is larger than the sidebar / page height is cut off.
-This should be fixed soon.
+
 * Styling may be slightly off on different browsers.
+
 * Not all state is mirrored in the URLs (for instance, map bounds are not set in the URL).
 This limits what views can be defined by paragraphs in the narratives.
+
 * The frontmatter parsing will be extended to allow arrays of authors (etc).
+
+Take a look at the [GitHub issues tagged as related to narrative functionality](https://github.com/nextstrain/auspice/labels/narratives) for a potentially more up-to-date list of these.
