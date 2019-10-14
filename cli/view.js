@@ -9,21 +9,23 @@ const nakedRedirect = require('express-naked-redirect');
 const utils = require("./utils");
 const version = require('../src/version').version;
 const chalk = require('chalk');
+const SUPPRESS = require('argparse').Const.SUPPRESS;
 
 
 const addParser = (parser) => {
-  const description = `Launch a local server to view datasets using auspice.
-  Note that the handlers for requests from auspice can be provided here.
-  (By default, the auspice handlers are used which access local data).
-  This can be run as a persistent auspice server, serving a custom built version of auspice`;
-
+  const description = `Launch a local server to view locally available datasets & narratives.
+  The handlers for (auspice) client requests can be overridden here (see documentation for more details).
+  This command requires that "auspice build" has been run.
+  `;
   const subparser = parser.addParser('view', {addHelp: true, description});
-  subparser.addArgument('--verbose', {action: "storeTrue", help: "verbose logging"});
-  subparser.addArgument('--handlers', {action: "store", help: "server api handlers"});
-  subparser.addArgument('--customBuild', {action: "storeTrue", help: "Look for bundle.js / index.html etc from this directory"});
-  subparser.addArgument('--datasetDir', {help: "Directory where datasets are sourced"});
-  subparser.addArgument('--narrativeDir', {help: "Directory where narratives are sourced"});
-  subparser.addArgument('--gh-pages', {action: "store", help: "Allow hardcoded file requests. Provide the path to the JSON directory."});
+  subparser.addArgument('--verbose', {action: "storeTrue", help: "Print more verbose logging messages."});
+  subparser.addArgument('--handlers', {action: "store", metavar: "JS", help: "Overwrite the provided server handlers for client requests. See documentation for more details."});
+  subparser.addArgument('--datasetDir', {metavar: "PATH", help: "Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers."});
+  subparser.addArgument('--narrativeDir', {metavar: "PATH", help: "Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers."});
+  /* there are some options which we deliberately do not document via `--help`. See build.js for explanations. */
+  /* options related to the "static-site-generation" or "github-pages" */
+  subparser.addArgument('--customBuild', {action: "storeTrue", help: SUPPRESS});
+  subparser.addArgument('--gh-pages', {action: "store", help: SUPPRESS});
 };
 
 const serveRelativeFilepaths = ({app, dir}) => {

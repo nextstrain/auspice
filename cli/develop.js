@@ -9,20 +9,23 @@ const { loadAndAddHandlers, serveRelativeFilepaths } = require("./view");
 const version = require('../src/version').version;
 const chalk = require('chalk');
 const generateWebpackConfig = require("../webpack.config.js").default;
+const SUPPRESS = require('argparse').Const.SUPPRESS;
 
 const addParser = (parser) => {
-  const description = `Launch the development server for auspice.
-  This uses hot-reloading to allow automatic updating as you edit the code, but there is a speed penalty for this.
-  This should never be used for production.`;
+  const description = `Launch auspice in development mode.
+    This runs a local server and uses hot-reloading to allow automatic updating as you edit the code.
+    NOTE: there is a speed penalty for this ability and this should never be used for production.
+    `;
 
   const subparser = parser.addParser('develop', {addHelp: true, description});
-  subparser.addArgument('--verbose', {action: "storeTrue", help: "verbose logging"});
-  subparser.addArgument('--extend', {action: "store", help: "(client) extension config"});
-  subparser.addArgument('--handlers', {action: "store", help: "(server) API handlers"});
-  subparser.addArgument('--datasetDir', {help: "Directory where datasets are sourced"});
-  subparser.addArgument('--narrativeDir', {help: "Directory where narratives are sourced"});
-  subparser.addArgument('--includeTiming', {action: "storeTrue", help: "keep timing functions (default: false for speed reasons)"});
-  subparser.addArgument('--gh-pages', {action: "store", help: "Allow hardcoded file requests. Provide the path to the JSON directory."});
+  subparser.addArgument('--verbose', {action: "storeTrue", help: "Print more verbose progress messages in the terminal."});
+  subparser.addArgument('--extend', {action: "store", metavar: "JSON", help: "Client customisations to be applied. See documentation for more details. Note that hot reloading does not currently work for these customisations."});
+  subparser.addArgument('--handlers', {action: "store", metavar: "JS", help: "Overwrite the provided server handlers for client requests. See documentation for more details."});
+  subparser.addArgument('--datasetDir', {metavar: "PATH", help: "Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers."});
+  subparser.addArgument('--narrativeDir', {metavar: "PATH", help: "Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers."});
+  /* there are some options which we deliberately do not document via `--help`. See build.js for explanations. */
+  subparser.addArgument('--includeTiming', {action: "storeTrue", help: SUPPRESS});
+  subparser.addArgument('--gh-pages', {action: "store", help: SUPPRESS});
 };
 
 
