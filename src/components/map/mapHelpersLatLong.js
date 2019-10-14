@@ -505,22 +505,18 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
   return transmissionDataCopy;
 };
 
+/**
+ * walk through nodes and update attributes that can mutate
+ * for demeData we have: count, color
+ * for transmissionData we have: color, visible
+ */
 export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) => {
-  /*
-    walk through nodes and update attributes that can mutate
-    for demeData we have:
-      count, color
-    for transmissionData we have:
-      color, visible
-  */
-
-  let newDemes;
-  let newTransmissions;
-
-  if (demeData && transmissionData) {
-    newDemes = updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues);
-    newTransmissions = updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
-  }
+  const newDemes = demeData ?
+    updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) :
+    demeData;
+  const newTransmissions = (transmissionData && transmissionData.length) ?
+    updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) :
+    transmissionData;
   return {newDemes, newTransmissions};
 };
 
