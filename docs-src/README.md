@@ -1,15 +1,19 @@
 # Auspice Documentation
 
-This folder contains the static site generator and the markdown files which form the auspice documentation website.
-This is currently designed to be served from GitHub pages using the `auspice/docs` folder.
-[Docusaurus](https://docusaurus.io/) is used to generate the static site.
+This folder contains the static site generator and the markdown files which form the auspice documentation website, served via GitHub pages at [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice).
+We are using [Docusaurus](https://docusaurus.io/) to generate the static site.
+
+
+> Note that the code & content in this folder is used to generate the files in the `auspice/docs` directory, which are served by github pages.
+Those files should not be modified, rather edit the contents of this directory & regenerate the documentation.
+
 
 ### Folder structure of `auspice/docs-src/`
 * `README.md` this file
-* `docs/` contains the raw markdown files. The filenames (and directory names) will be used as URLs.
+* `./docs/` contains the raw markdown files. The filenames (and directory names) will be used as URLs.
 New pages here should also be added to `sidebars.json`.
-* `website/` the files needed to build the website.
-  * `./sidebars.json` define the doc links in the sidebar
+* `./website/` the Docusaurus files needed to build the website.
+  * `./sidebars.json` define the links in the sidebar
   * `./pages/index.js` the splash page
   * `./siteConfig.js` docusarus configuration - [see docs here](https://docusaurus.io/docs/en/site-config)
 
