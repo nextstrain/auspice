@@ -2,6 +2,7 @@
 /* eslint global-require: off */
 
 const path = require("path");
+const fs = require("fs");
 const express = require("express");
 const expressStaticGzip = require("express-static-gzip");
 const compression = require('compression');
@@ -15,17 +16,17 @@ const SUPPRESS = require('argparse').Const.SUPPRESS;
 const addParser = (parser) => {
   const description = `Launch a local server to view locally available datasets & narratives.
   The handlers for (auspice) client requests can be overridden here (see documentation for more details).
-  This command requires that "auspice build" has been run.
+  If you want to serve a customised auspice client then you must have run "auspice build" in the same directory
+  as you run "auspice view" from.
   `;
   const subparser = parser.addParser('view', {addHelp: true, description});
   subparser.addArgument('--verbose', {action: "storeTrue", help: "Print more verbose logging messages."});
   subparser.addArgument('--handlers', {action: "store", metavar: "JS", help: "Overwrite the provided server handlers for client requests. See documentation for more details."});
   subparser.addArgument('--datasetDir', {metavar: "PATH", help: "Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers."});
   subparser.addArgument('--narrativeDir', {metavar: "PATH", help: "Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers."});
-  /* there are some options which we deliberately do not document via `--help`. See build.js for explanations. */
-  /* options related to the "static-site-generation" or "github-pages" */
-  subparser.addArgument('--customBuild', {action: "storeTrue", help: SUPPRESS});
-  subparser.addArgument('--gh-pages', {action: "store", help: SUPPRESS});
+  /* there are some options which we deliberately do not document via `--help`. */
+  subparser.addArgument('--customBuild', {action: "storeTrue", help: SUPPRESS}); /* see printed warning in the code below */
+  subparser.addArgument('--gh-pages', {action: "store", help: SUPPRESS}); /* related to the "static-site-generation" or "github-pages" */
 };
 
 const serveRelativeFilepaths = ({app, dir}) => {
@@ -74,6 +75,28 @@ const loadAndAddHandlers = ({app, handlersArg, datasetDir, narrativeDir}) => {
     `Looking for datasets in ${datasetsPath}\nLooking for narratives in ${narrativesPath}`;
 };
 
+const getAuspiceBuild = () => {
+  const cwd = path.resolve(process.cwd());
+  const sourceDir = path.resolve(__dirname, "..");
+  if (
+    cwd !== sourceDir &&
+    fs.existsSync(path.join(cwd, "index.html")) &&
+    fs.existsSync(path.join(cwd, "dist")) &&
+    fs.existsSync(path.join(cwd, "dist", "auspice.bundle.js"))
+  ) {
+    return {
+      message: "Serving the auspice build which exists in this directory.",
+      baseDir: cwd,
+      distDir: path.join(cwd, "dist")
+    };
+  }
+  return {
+    message: `Serving auspice version ${version}`,
+    baseDir: sourceDir,
+    distDir: path.join(sourceDir, "dist")
+  };
+};
+
 const run = (args) => {
   /* Basic server set up */
   const app = express();
@@ -82,13 +105,16 @@ const run = (args) => {
   app.use(compression());
   app.use(nakedRedirect({reverse: true})); /* redirect www.name.org to name.org */
 
-  const baseDir = args.customBuild ? path.resolve(process.cwd()) : path.resolve(__dirname, "..");
-  const distDir = path.join(baseDir, "dist");
-  utils.verbose(`Serving index / favicon etc from  "${baseDir}"`);
-  utils.verbose(`Serving built javascript from     "${distDir}"`);
-  app.get("/favicon.png", (req, res) => {res.sendFile(path.join(baseDir, "favicon.png"));});
-  app.use("/dist", expressStaticGzip(distDir));
-  app.use(express.static(distDir));
+  if (args.customBuild) {
+    utils.warn("--customBuild is no longer used and will be removed in a future version. We now serve a custom auspice build if one exists in the directory `auspice view` is run from");
+  }
+
+  const auspiceBuild = getAuspiceBuild();
+  utils.verbose(`Serving index / favicon etc from  "${auspiceBuild.baseDir}"`);
+  utils.verbose(`Serving built javascript from     "${auspiceBuild.distDir}"`);
+  app.get("/favicon.png", (req, res) => {res.sendFile(path.join(auspiceBuild.baseDir, "favicon.png"));});
+  app.use("/dist", expressStaticGzip(auspiceBuild.distDir));
+  app.use(express.static(auspiceBuild.distDir));
 
   let handlerMsg = "";
   if (args.gh_pages) {
@@ -99,7 +125,7 @@ const run = (args) => {
 
   /* this must be the last "get" handler, else the "*" swallows all other requests */
   app.get("*", (req, res) => {
-    res.sendFile(path.join(baseDir, "index.html"));
+    res.sendFile(path.join(auspiceBuild.baseDir, "index.html"));
   });
 
   const server = app.listen(app.get('port'), app.get('host'), () => {
@@ -107,11 +133,7 @@ const run = (args) => {
     const host = app.get('host');
     const {port} = server.address();
     console.log(chalk.blueBright("Auspice server now running at ") + chalk.blueBright.underline.bold(`http://${host}:${port}`));
-    if (args.customBuild) {
-      utils.log(`Using a customised auspice build from this directory.`);
-    } else {
-      utils.log(`Serving auspice version ${version}.`);
-    }
+    utils.log(auspiceBuild.message);
     utils.log(handlerMsg);
     utils.log("---------------------------------------------------\n\n");
   }).on('error', (err) => {
