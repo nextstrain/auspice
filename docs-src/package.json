@@ -12,7 +12,7 @@
     "makeReadme": "echo '# Auspice built documentation to be served by GitHub pages.\\n\\nFiles in this folder should not be modified by hand -- they are generated from within the `docs-src` directory.' > ../docs/README.md"
   },
   "devDependencies": {
-    "docusaurus": "^1.12.0",
+    "docusaurus": "^1.13.0",
     "rimraf": "^2.6.3"
   }
 }
