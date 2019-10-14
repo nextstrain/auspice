@@ -23,6 +23,6 @@ The available customisations are accessed through a `<clientConfig>` JSON which 
 
 
 
-See the [API docs](customise-client/api.md) for full details of each customisation, or read the [walk through](customise-client/walk-through.md) to see how we used these to create a custom version of auspice.
+See the [API docs](customise-client/api.md) for full details of each customisation.
 
 

@@ -9,7 +9,7 @@
     "Customising Auspice": [
       "customise-client/introduction",
       "customise-client/api",
-      "customise-client/walk-through"
+      "customise-client/requests"
     ],
     "Using a Custom Server": [
       "server/introduction",
