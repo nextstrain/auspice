@@ -66,6 +66,13 @@ hot-reloading to allow automatic updating as you edit the code.
 
 This is only useful if you are editing the client source code!
 
+## `auspice convert`
+
+This is a utility command to convert between dataset formats.
+Currently, it only converts "auspice v1" JSONs into "auspice v2" JSONs, using the same code that is [programatically importable](server/api.md#convertfromv1).
+
+Right now, `auspice view` will automatically convert "v1" JSONs into "v2" JSONs, so there's no need to do this yourself.
+
 
 ## Input file formats
 

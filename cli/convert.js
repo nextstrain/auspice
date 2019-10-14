@@ -5,15 +5,13 @@ const utils = require("./utils");
 
 
 const addParser = (parser) => {
-  const description = `Convert dataset JSON file(s) to the most up-to-date schema`;
+  const description = `Convert auspice dataset JSON file(s) to the most up-to-date schema (currently v2).
+  Note that in auspice v2.x, "auspice view" will convert v1 JSONs to v2 for you (using the same logic as this command).
+  `;
 
   const subparser = parser.addParser('convert', {addHelp: true, description});
-  subparser.addArgument(
-    '--input',
-    {action: "store", nargs: '+', help: "dataset JSON. If v1, then provide both meta & tree JONS, in that order"}
-  );
-  subparser.addArgument('--output', {action: "store", help: "File to write output to"});
-
+  subparser.addArgument('--v1', {action: "store", nargs: 2, metavar: ["META", "TREE"], help: "v1 dataset JSONs"});
+  subparser.addArgument('--output', {action: "store", metavar: "JSON", required: true, help: "File to write output to"});
   subparser.addArgument('--minify-json', {action: "storeTrue", help: "export JSONs without indentation or line returns"});
 };
 
@@ -23,14 +21,17 @@ const addParser = (parser) => {
  * but currently it only converts v1 meta + tree jsons -> v2
  */
 const run = (args) => {
-
-  if (args.input.length !== 2 || !args.input[0].endsWith("_meta.json") || !args.input[1].endsWith("_tree.json")) {
-    utils.error("Currently only v1 (meta + tree) JSONs are supported as valid input, and they must be in that order.");
+  if (!args.v1) {
+    utils.error("Currently v1 JSON inputs must be specified.");
+  }
+  if (!args.v1[0].endsWith("_meta.json") || !args.v1[1].endsWith("_tree.json")) {
+    utils.error("v1 JSON inputs must be specified as *_meta.json and *_tree.json");
   }
 
-  const meta = JSON.parse(fs.readFileSync(args.input[0], 'utf8'));
-  const tree = JSON.parse(fs.readFileSync(args.input[1], 'utf8'));
-  const v2 = convertFromV1({tree, meta});
+  const v2 = convertFromV1({
+    meta: JSON.parse(fs.readFileSync(args.v1[0], 'utf8')),
+    tree: JSON.parse(fs.readFileSync(args.v1[1], 'utf8'))
+  });
   fs.writeFileSync(args.output, JSON.stringify(v2, null, args.minify_json ? 0 : 2));
 };
 
