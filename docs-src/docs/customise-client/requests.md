@@ -48,5 +48,5 @@ These are requested using a hardcoded access key, however this may change to a b
 
 ### Google Analytics (optional)
 Auspice has the potential to include google analytics in a limited fashion.
-See TODO for more details.
+See [the client customisation API documentation](customise-client/api.md) for how to set this.
 Note that these requests are only made if you specify a Google Analytics key during build-time customisation of the client.

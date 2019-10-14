@@ -1,15 +1,44 @@
 ---
-title: API
+title: Client customisation API
 ---
 
-> These will change 😱😱😱 this is taken from the v1 docs
+> The functionality detailed in the page is poorly undocumented and we expect there to be some bugs and possible API changes.
+If you rely on this functionality, we recommend you pin your installation of auspice to a specific version.
+Please [get in touch with us](mailto:hello@nextstrain.org) if you are using these customisations so that we can work with you!
 
+
+This page details the available options and format of the customisations available at (client) build time.
+They are contained in a JSON file supplied to auspice via 
+```bash
+auspice build --extend <JSON>
+```
+
+
+> Note that the hot-reloading development functionality does not work for code which is included via this client customisation mecahnism.
+Thus, while you can run `auspice develop --extend <JSON>` it will not update as you may expect!
+
+
+## Available customisations
+The following are definable as top-level keys of the JSON file.
+A useful reference may be the [customisation JSON file](https://github.com/nextstrain/nextstrain.org/blob/master/auspice/client/config.json) used by nextstrain.org.
+
+* `sidebarTheme` allows modifications to the aesthetics of the sidebar. See below.
+* `navbarComponent` a (relative) path to a JS file exporting a React component to be rendered as the nav bar. See below.
+* `browserTitle` The browser title for the page. Defaults to "auspice" if not defined.
+* `googleAnalyticsKey` You can specify a google analytics key to enable (some) analytics functionality. More documentation to come.
+
+
+> For customisation code which uses [React](https://reactjs.org/) components, you must import these as `import React from "@libraries/react";` to ensure that the version of react is the same as what auspice uses!
+
+---
 
 ## Sidebar Theme
 
 The appearence of the sidebar can be customised by specifing a theme in the config JSON used to build auspice.
 This theme is then available (via [styled-components](https://www.styled-components.com/)) to the components rendered in the sidebar.
-It is also passed to the nav bar component as the `theme` prop.
+It is also passed to the nav bar component (see below) as the `theme` prop.
+
+For instance, here is the customisation used by nextstrain.org:
 
 ```json
 {
@@ -25,6 +54,15 @@ It is also passed to the nav bar component as the `theme` prop.
 ```
 
 
+| Properties         | CSS string of       | Description                                       |
+| -------------     |---------------      | ------                                            |
+| color             | color               |  Text color                                         |
+| selectedColor      | color              | Text color of selected text / button text |
+| unselectedColor   | color               | Text color of unselected text / button text |
+| font-family        | font               |  Inner shadow of the sidebar on the right hand side |
+| background        | color               | Background color                                    |
+
+
 
 # Components
 
@@ -35,35 +73,47 @@ Right now this is only available for the splash page and nav-bar components, who
 Each component must be the default export of a javascript file which is specified in the (client) config JSON passed to auspice at build time (`auspice build` or `auspice develop`).
 
 
-## Splash component
-
-Build config property:
-```json
-{
-  "splashComponent": "<javascript file>"
-}
-```
-
-Available Props:
-* `isMobile` boolean
-* `available` available datasets and narratives
-* `browserDimensions` broswer width & height
-* `dispatch` callback
-* `errorMessage` callback
-* `changePage` callback
-
-
 ## Nav-bar component
 
-Build config property:
+**Build config:**
 ```json
 {
-  "navbarComponent": "<javascript file>"
+  "navbarComponent": "<relative path to javascript file>"
 }
 ```
 
-Available props:
-* `narrativeTitle` string
-* `sidebar` boolean. Is it to be displayed in the sidebar?
+Where the javascript file contains a default export of a React component.
 
-The navbar also receives the (possibly customised) sidebar theme which can be used to style components.
+**React Props available:**
+
+|  Prop            | Type      | Description                                       |
+| -----------      |---------  | ------                                            |
+| `narrativeTitle` | String |       |
+| `sidebar        ` | Bool | Is it to be displayed in the sidebar? |
+| `theme        ` | Object | See above. Use this to style components. |
+
+
+
+## Splash component
+
+Define a custom splash page for auspice. Please note that this is extremely expirimental and the interface is expected to change.
+
+**Build config:**
+```json
+{
+  "splashComponent": "<relative path to javascript file>"
+}
+```
+Where the javascript file contains a default export of a React component.
+
+**React Props available:**
+
+|  Prop         | Type      | Description                                       |
+| -----------   |---------  | ------                                            |
+| `isMobile` | Bool |       |
+| `available` | Object |  available datasets and narratives |
+| `browserDimensions` | Object | Browser width & height |
+| `dispatch` | function | access to redux's dispatch mechanism | 
+| `errorMessage` | function | to do |
+| `changePage` | function | to do |
+
