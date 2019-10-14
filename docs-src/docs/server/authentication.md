@@ -2,14 +2,10 @@
 title: Authentication
 ---
 
-
-> Details our proposal of how to handle authentication.
-We haven't tested this technique, so we should build a version to ensure it works.
-I'm 100% sure there will be errors in what i've written here...
-
-
 While auspice was designed to facilitate open data sharing and rapid dissemination of results, it may be necessary to authenticate certain datasets (or indeed the entire instance).
 Auspice itself contains no authentication ability, but if you are running a server then it is possible -- and relatively simple -- to build in authentication.
+
+The exact implementation details are beyond the scope of this documentation, but the following provides an outline of the approach we have implemented for [nextstrain.org](https://nextstrain.org).
 
 
 ## Using the server to verify cookies

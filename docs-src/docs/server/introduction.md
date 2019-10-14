@@ -1,79 +1,54 @@
 ---
-title: Building a custom server for auspice
+title: Auspice servers
 ---
 
-> This should be about the new API, assuming that I implement it!
+The Auspice client (i.e. what you see in the web browser) requires a server behind it to
+- (a) serve the client to the browser and
+- (b) handle certain [GET requests](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods) from the client, for instance "give me the zika dataset to display".
 
-The Auspice client needs to make a number of requests to a server for:
-* available datasets & narratives
-* dataset JSON(s)
-* Narrative markdown
-
-For instance, when you run `auspice` locally, the default server scans a provided directory on your computer to create a list of available datasets, and delivers these files to the client for vizualisation when needed.
+We provide a basic server to run auspice locally -- any time you run `auspice view` or `auspice develop` you're running a server!
+Alternatively, you can build your own server -- all that is required is to satisfy the above two requirements.
 
 
-## Why would I need to create a custom server?
+## GET requests
 
-> You might not need to! If all your URLs correspond directly to asset paths, or can be made to with a simple transform, then using auspice to [generate a static site](build-static/introduction.md) may be much easier. 
+Currently the client makes three requests:
 
-> What's the difference between a custom server and a static site? I think more info on what a custom server is would be helpful here. -Cassia
+| address | description |
+| --- | --- |
+| `/charon/getAvailable` | return a list of available datasets and narratives |
+| `/charon/getDataset` | return the requested dataset |
+| `/charon/getNarrative` | return the requested narrative |
 
-* If you want to interpret URLs (perhaps to provide redirects), or deliver JSONs from different sources then a server might be needed.
-For instance, nextstrain.org uses a server to access datasets stored on Amazon S3 buckets, and auspice.us uses a server to access community datasets on GitHub.
-* If you want to generate datasets on the fly, or apply transformations to datasets.
-For instance, this is how nextstrain.org is able to serve v1 JSONs -- it transforms them to v2 spec on the server.
+For instance, when you're running `auspice view` if you access [localhost:4000/charon/getAvailable](http://localhost:4000/charon/getAvailable) you'll see a list of the avialable datasets & narratives known to the server.
 
-
-
-## Providing custom API handlers to auspice's built-in server
-
-> The following content is largely taken from the current v1 docs and needs to be update
+See [the server API](server/api.md) for details about each of these requests.
 
 
-The default auspice server contains handlers for the 3 API endpoints -- 
-* `getAvailable(req, res)` which processes requests from `/charon/getAvailable` to return a list of available datasets and narratives.
-* `getDataset(req, res)` which processes requests from `/charon/getDataset` -- return the requested dataset
-* `getNarrative(req, res)` which processes requests from `/charon/getNarrative` -- return the requested narrative
-see [the API docs](build-server/api.md) for more information on these.
-The `req` and `res` arguments are express objects (TODO: provide link).
+## The "default" auspice server
+
+The server provided with auspice is intended to be run on your local setup.
+It thus scans the directories you provide when you run it in order to find datasets & narratives to serve.
+It has "handlers" for each of the above 3 requests -- i.e. bits of code that tell it how to handle each request.
 
 
-Customisations of auspice can provide their own handlers, allowing for multiple different use cases.
-For instance, **auspice.us** (currently located as a subdirectory of auspice) contains handlers to fetch datasets from github repos ("community" builds).
+## Customising the default auspice server
 
-#### Where are these "handlers" used?
-During development of auspice, the dev-server needs access to these handlers in order to make process requests.
-Building of the auspice client (`auspice build ...`) doesn't need to know about these handlers, as the client will simply make requests to the API detailed below. (Currently this is different for serverless builds, see [github.com/blab/ZEBOV](https://github.com/blab/ZEBOV) for an example).
-Serving the auspice client (`auspice view ...`) will need to use these handlers.
+You can customise the default auspice server by supplying your own handlers for each of the three GET requests.
+See [the API documentation](server/api#suppling-custom-handlers-to-the-auspice-server) for how to define these and provide them to `auspice view`.
 
-#### Providing these handlers to `auspice build` and `auspice view`
-The handlers should be defined in a javascript file provided to those commands via the `--handlers` argument. This file should export three functions via:
-```js
-module.exports = {
-  getAvailable,
-  getDataset,
-  getNarrative
-};
-```
 
-Here's a pseudocode example of one of these functions.
 
-```js
-const getAvailable = (req, res) => {
-  try {
-    /* collect available data */
-    res.json(data);
-  } catch (err) {
-    res.statusMessage = `error message to display in client`;
-    console.log(res.statusMessage); /* printed by the server */
-    return res.status(500).end();
-  }
-};
-```
+## Writing your own custom server
+
+The provided auspice server also lets you define your own handlers, allowing plenty of flexibility in how requests are handled.
+But if you _really_ want to implement your own server, then you only need to implement two things:
+- serve the `index.html` file (and linked javascript bundles) which are created by `auspice build` _and_
+- handle the three GET requests detailed above
+
+(If you're interested, this is what we do with [nextstrain.org](https://nextstrain.org), where only some of the pages use auspice. You can see all the code behind that server [here](https://github.com/nextstrain/nextstrain.org).)
 
 
 
 
-## Building a custom server
 
-TODO

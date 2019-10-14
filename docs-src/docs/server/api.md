@@ -1,31 +1,38 @@
 ---
-title: API
+title: Server API
 ---
 
-> Should detail both the API endpoints, what's expected in the response.
-Aso detail the exposed functions from `auspice` -- e.g. what you can get from `const { x, y } = require("auspice");`
+
+## Auspice client requests
+
+The auspice server handles requests to 3 API endpoints made by the auspice client:
+* `/charon/getAvailable` (returns a list of available datasets and narratives)
+* `/charon/getDataset` (returns the requested dataset)
+* `/charon/getNarrative` (returns the requested narrative)
 
 
-# Current API description
 
-Currently the client makes three requests:
-* `/charon/getAvailable` -- return a list of available datasets and narratives
-* `/charon/getDataset` -- return the requested dataset
-* `/charon/getNarrative` -- return the requested narrative
+### `/charon/getAvailable`
 
-You can choose to handle these in your own server, or provide handlers to the auspice (dev-)server which are called whenever these requests are received (see above).
+**URL query arguments:**
 
-
-## get available datasets: `/charon/getAvailable`
-
-Query arguments:
 * `prefix` (optional) - the pathname of the requesting page in auspice.
+The `getAvailable` handler can use this to respond according appropriately.
+Unused by the default auspice handler.
 
-Response shape:
+**JSON Response (on success):**
+
 ```json
 {
   "datasets": [
-    {"request": "URL of a dataset. Will become the prefix in a getDataset request"},
+    {
+      "request": "[required] The pathname of a valid dataset. \
+          Will become the prefix of the getDataset request.",
+      "buildUrl": "[optional] A URL to display in the sidebar representing \
+          the build used to generate this analysis.",
+      "secondTreeOptions": "[optional] A list of requests which should \
+          appear as potential second-trees in the sidebar dropdown"
+    },
     ...
   ],
   "narratives": [
@@ -35,15 +42,123 @@ Response shape:
 }
 ```
 
-## get a dataset: `/charon/getDataset`
+Failure to return a valid JSON will result in a warning notification shown in auspice.
 
-Query arguments:
+### `/charon/getDataset`
+
+**URL query arguments:**
+
 * `prefix` (required) - the pathname of the requesting page in auspice. Use this to determine which dataset to return.
 * `type` (optional) -- if specified, then the request is for an additional file (e.g. "tip-frequencies"), not the main dataset.
 
-Response shape:
-Auspice v2.0 JSON -- see [data formats](introduction/data-formats.md)
+**JSON Response (on success):**
+
+The JSON response depends on the file-type being requested.
+
+If the type is not specified, i.e. we're requesting the "main" dataset JSON then [see this JSON schema](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v2.json).
+Note that the auspice client _can not_ process v1 (meta / tree) JSONs -- [see below](server/api.md#importing-code-from-auspice) for how to convert these.
+
+Alternative file type reponses are to be documented.
+
+**Alternative responses:**
+
+A `204` reponse will cause auspice to show its splash page listing the available datasets & narratives.
+Any other non-200 reponse behaves similarly but also displays a large "error" message indicating that the dataset was not valid.
 
 
-## get a narrative: `/charon/getNarrative`
-> to do
+
+### `/charon/getNarrative`
+
+**URL query arguments:**
+
+* `prefix` (required) - the pathname of the requesting page in auspice. Use this to determine which narrative to return.
+
+**JSON Response (on success):**
+
+The output from the [parseNarrativeFile](server/api.md#parsenarrativefile) function defined below.
+For instance, here is the code from the default auspice handler:
+```js
+const fileContents = fs.readFileSync(pathName, 'utf8');
+const blocks = parseNarrative(fileContents);
+res.send(JSON.stringify(blocks).replace(/</g, '\\u003c'));
+```
+
+> Note that in a future version of auspice we plan to move the parsing of the narrative to the client.
+
+---
+
+## Suppling custom handlers to the auspice server
+
+The provided auspice servers -- i.e. `auspice view` and `auspice develop` both have a `--handlers <JS>` option which allows you to define your own handlers.
+The provided JavaScript file must export three functions, each of which handles one of the GET requests described above and must respond accordingly (see above for details).
+
+| function name | arguments | API endpoint |
+| ----------    | --------- | ----------  |
+| getAvailable | req, res | /charon/getAvailable |
+| getDataset   | req, res | /charon/getDataset |
+| getNarrative | req, res | /charon/getNarrative |
+
+For information about the `req` and `res` arguments see the express documentation for the [request object](https://expressjs.com/en/api.html#req) and [response object](https://expressjs.com/en/api.html#res), respectively.
+
+You can see [nextstrain.org](https://nextstrain.org)'s implementation of these handlers [here](https://github.com/nextstrain/nextstrain.org/blob/master/auspice/server/index.js).
+
+Here's a pseudocode example of an implementation for the `getAvailable` handler which may help understanding:
+
+```js
+const getAvailable = (req, res) => {
+  try {
+    /* collect available data */
+    res.json(data);
+  } catch (err) {
+    res.statusMessage = `error message to display in client`;
+    console.log(res.statusMessage); /* printed by the server, not the client */
+    return res.status(500).end();
+  }
+};
+```
+
+---
+
+## Importing code from auspice
+
+The servers included in auspice contain lots of useful code which you may want to use to either write your own handlers or entire servers.
+For instance, the code to convert v1 dataset JSONs to v2 JSONs (which the client requires) can be imported into your code so you don't have to reinvent the wheel!
+
+
+Currently 
+```js
+const auspice = require("auspice");
+```
+returns an object with two properties:
+
+### `convertFromV1`
+
+**Signature:**
+```js
+const v2json = convertFromV1({tree, meta})
+```
+where `tree` is the v1 tree JSON, and `meta` the v1 meta JSON.
+
+**Returns:**
+
+An object representing the v2 JSON [defined by this schema](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v2.json).
+
+
+
+### `parseNarrativeFile`
+
+**Signature:**
+
+```js
+const blocks = parseNarrativeFile(fileContents);
+```
+where `fileContents` is a string representation of the narrative markdown file.
+
+**Returns:**
+
+An array of objects, each entry representing a different narrative "block" or "page".
+Each object has properties
+* `__html` -- the HTML to render in the sidebar to form the narrative
+* `dataset` -- the dataset associated with this block
+* `query` -- the query associated with this block
+

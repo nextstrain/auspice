@@ -61,7 +61,7 @@ const makeFrontMatterBlock = (frontMatter) => {
  * Returned object (blocks) has properties "__html", "dataset", "query"
  * and will be sent (in JSON form) to the client
  * @param {string} fileContents string representing the entire markdown file
- * @return {obj}
+ * @return {Array} Array of Objects. See `blockProxyHandler` for shape of each object.
  */
 const parseNarrativeFile = (fileContents) => {
   const blocks = [];
