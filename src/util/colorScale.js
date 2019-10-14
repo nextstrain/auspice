@@ -120,10 +120,24 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     console.error("calcColorScale called before tree is ready.");
     error = true;
   } else if (genotype) { /* G E N O T Y P E */
-    legendValues = orderOfGenotypeAppearance(tree.nodes);
+    legendValues = orderOfGenotypeAppearance(tree.nodes, controls.mutType);
+    const trueValues = controls.mutType === "nuc" ? legendValues.filter((x) => x !== "X" && x !== "-" && x !== "N") :
+      legendValues.filter((x) => x !== "X" && x !== "-");
+    const domain = [undefined, ...legendValues];
+    const range = [unknownColor, ...genotypeColors.slice(0, trueValues.length)];
+    // Bases are returned by orderOfGenotypeAppearance in order, unknowns at end
+    if (legendValues.indexOf("-") !== -1) {
+      range.push(rgb(217, 217, 217));
+    }
+    if (legendValues.indexOf("N") !== -1 && controls.mutType === "nuc") {
+      range.push(rgb(153, 153, 153));
+    }
+    if (legendValues.indexOf("X") !== -1) {
+      range.push(rgb(102, 102, 102));
+    }
     colorScale = scaleOrdinal()
-      .domain([undefined, ...legendValues])
-      .range([unknownColor, ...genotypeColors]);
+          .domain(domain)
+          .range(range);
   } else if (colorings && colorings[colorBy]) {
     let minMax;
     /* Is the scale set in the provided colorings object? */
