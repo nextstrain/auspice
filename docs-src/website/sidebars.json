@@ -3,8 +3,7 @@
     "Introduction": [
       "introduction/overview",
       "introduction/install",
-      "introduction/data-formats",
-      "introduction/cli"
+      "introduction/how-to-run"
     ],
     "Customising Auspice": [
       "customise-client/introduction",

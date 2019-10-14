@@ -3,7 +3,7 @@ title: Customising auspice
 ---
 
 
-Auspice allows you to customise the appearance and functionality of auspice [when the client is built](introduction/cli.md#build).
+Auspice allows you to customise the appearance and functionality of auspice [when the client is built](introduction/how-to-run.md#auspice-build).
 This is how auspice running locally and nextstrain.org look different, despite both using "auspice". 
 
 

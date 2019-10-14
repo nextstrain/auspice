@@ -1,39 +1,59 @@
 ---
-title: Installing & Running Locally
+title: Install Auspice
 ---
 
 ## Prerequisites 
 Auspice is a JavaScript program, and requires [nodejs](https://nodejs.org/) to be installed on your system.
 
-You can either install from the [nodejs website](https://nodejs.org/en/) or use [conda](https://conda.io/docs/), which is extremely popular in the bioinformatics community, to create a nodejs environment:
+We highly recommend using [conda](https://conda.io/docs/) to manage environments -- for instance to create an environment with nodejs installed
+It's possible to use other methods, but this documentation presupposes that you have conda installed.
+
+## Create a conda environment
 ```bash
-conda create --name auspice nodejs
+conda create --name auspice nodejs=10
 source activate auspice
 ```
-which has the advantage of creating an isolated environment. 
 
-## Installing
+> This parallels [the nextstrain.org docs](https://nextstrain.org/docs/getting-started/local-installation#install-augur--auspice-with-conda-recommended).
+You're welcome to use those instead!
+
+## Install auspice from npm
+
 
 ```bash
 npm install --global auspice
 ```
-Auspice should now be available as a command-line program -- check by running `auspice --version` or `auspice --help`.
+Auspice should now be available as a command-line program -- check by running `auspice --help`.
 
-> Currently [this bug](https://github.com/nextstrain/auspice/issues/689) causes issues if auspice is not installed globally, so please use the `--global` flag.
-
-Auspice may also be installed from source, but this shouldn't be necessary unless you would like to contribute to the source code 🙌. Note that auspice can be customised without needing to modify the source code -- see [customising the client](customise-client/introduction.md). See the [GitHub repo](https://github.com/nextstrain/auspice) for how to install from source.
-
-
-## Running locally
-
-> TODO: provide a script to get some datasets (from nextstrain's S3 bucket?) so that local installations can get up and running even if they don't have data. 
-
-If you have [auspice compatable JSONs](introduction/data-formats.md) then auspice can visualise these by running
+If you look at the [release notes](releases/changelog.md) you can see the changes that have been made to auspice (see your version of auspice via `auspice --version`).
+To upgrade, you can run
 
 ```bash
-auspice view --datasetDir <dir>
+npm update --global auspice
 ```
 
-where `<dir>` contains the JSONs. This command makes the data available to view in a browser at [localhost:4000](http://localhost:4000).
+## Installing from source
 
-> Might be worth including another section on this page or as a new page under Introduction about how to navigate auspice in the browser. I had to ask Louise how to "zoom in" on a clade, even though once I was showed it's ridiculously obvious. -Cassia
+
+This is useful for debugging, modifying the source code, or using an unpublished feature branch.
+We're going to assume that you have used conda to install nodejs as above.
+
+```bash
+# activate the correct conda enviornment
+conda activate auspice
+# grab the GitHub auspice repo
+git checkout https://github.com/nextstrain/auspice.git
+cd auspice
+# install dependencies
+npm install
+# make `auspice` available globally
+npm install --global .
+# build auspice
+auspice build
+# test it works
+auspice --version
+auspice --help
+```
+
+Updating auspice is as easy as pulling the new version from GitHub -- it shouldn't require any `npm` commands.
+You will, however, have to re-build auspice whenever the client-related code has changed, via `auspice build`.

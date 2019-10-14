@@ -8,6 +8,20 @@ const MarkdownBlock = CompLibrary.MarkdownBlock;
 const Container = CompLibrary.Container;
 
 
+const shortIntroduction = `
+Auspice is software to display beautiful interactive visualisations of phylogenomic data.
+`;
+
+const mainIntroduction = `
+Communicating scientific results while also allowing interrogation of the underlying data is an integral part of the scientific process.
+Current scientific publishing practices hinder both the rapid dissemination of epidemiologically relevant results and the ability to easily interact with the data which was used to draw the inferences.
+These shortcomings motivated the [nextstrain](https://nextstrain.org) project, for which auspice was initially devloped.
+
+Auspice can be run on your computer or integrated into websites.
+It allows easy customisation of aesthetics and functionality, and powers the visualisations on [nextstrain.org](https://nextstrain.org).
+`;
+
+
 function imgUrl(img) {
   return `${siteConfig.baseUrl}img/${img}`;
 }
@@ -19,6 +33,9 @@ function docUrl(doc) {
 const RenderLogos = () => (
   <Container padding={['bottom', 'top']}>
     <div className="iconsRow">
+      <a key={1} href="https://nextstrain.org/" target="_blank" rel="noopener noreferrer">
+        <img alt="logo" width="50" src={imgUrl("nextstrain.png")}/>
+      </a>
       <a key={1} href="http://www.fredhutch.org/" target="_blank" rel="noopener noreferrer">
         <img alt="logo" width="75" src={imgUrl("fred-hutch-logo-small.png")}/>
       </a>
@@ -113,24 +130,10 @@ const Block = ({title, content, buttonText=false, buttonLink=false}) => (
   </div>
 );
 
-const MainIntroduction = () => (
-  <MarkdownBlock>
-    Auspice is software to display beautiful interactive visualisations of phylogenomic data.
-    Auspice can be run on your computer, used to generate static websites (e.g. GitHub pages) or integrated into larger websites.
-  </MarkdownBlock>
-);
-
-const SubIntroduction = () => (
-  <div style={{fontSize: "90%", lineHeight: "140%"}}>
-    <MarkdownBlock>
-      Communicating scientific results while also allowing interrogation of the underlying data is an integral part of the scientific process.
-      Current scientific publishing practices hinder both the rapid dissemination of epidemiologically relevant results and the ability to easily interact with the data which was used to draw the inferences.
-      These shortcomings motivated the [nextstrain](https://nextstrain.org) project, for which auspice was initially devloped.
-    </MarkdownBlock>
-  </div>
-);
-
-
+/**
+ * The contents of the "blocks" to be displayed on the splash page.
+ * Note that most of these are currently unused, but remain here as we hope to use them in the future.
+ */
 const blockContent = {
   tutorial: {
     title: 'Why interactive visualisation?',
@@ -139,9 +142,9 @@ const blockContent = {
     buttonLink: docUrl("tutorial/overview")
   },
   getStarted: {
-    title: "Get started locally",
-    content: "Learn how to install auspice locally and convert your datasets to the required formats",
-    buttonText: "install auspice",
+    title: "Get started",
+    content: "Learn how to install auspice locally get up and running visualising phylogenomic data",
+    buttonText: "Installation",
     buttonLink: docUrl("introduction/install")
   },
   build: {
@@ -158,7 +161,7 @@ const blockContent = {
   },
   narratives: {
     title: "Narratives",
-    content: "Instead of simply presenting the data for someone to explore, use auspice to tell a story where _you_ control what visualisation is presented for each block of text. This allows you to present the data as you understand it.",
+    content: "Instead of simply presenting the data for someone to explore, use auspice to tell a story where _you_ control what visualisation is presented.",
     buttonText: "writing narratives",
     buttonLink: docUrl("narratives/introduction")
   },
@@ -167,8 +170,58 @@ const blockContent = {
     content: "auspice.us is a customised build of auspice designed to allow users to drag Newick files & metadata on and visualise their data. It's that simple.",
     buttonText: "go to auspice.us",
     buttonLink: "https://auspice.us"
+  },
+  version: {
+    title: "What's new?",
+    content: "Auspice is under continual development. See the changes that are bing made, and the version release notes.",
+    buttonText: "Release notes",
+    buttonLink: docUrl("releases/changelog")
   }
 };
+
+
+class Index extends React.Component { // eslint-disable-line
+  render() {
+    return (
+      <div>
+        <SplashContainer>
+
+          <div className="splashTitle">
+            <Logo img_src={imgUrl('logo-light.svg')} />
+            <ProjectTitle />
+            <PromoSection>
+              <MarkdownBlock>
+                {shortIntroduction}
+              </MarkdownBlock>
+              <div style={{fontSize: "90%", lineHeight: "140%"}}>
+                <MarkdownBlock>
+                  {mainIntroduction}
+                </MarkdownBlock>
+              </div>
+            </PromoSection>
+          </div>
+
+          <BlockContainer background="highlight">
+            <Block {...blockContent.getStarted}/>
+            <Block {...blockContent.narratives}/>
+            <Block {...blockContent.version}/>
+          </BlockContainer>
+
+          <div style={{minHeight: "80px"}} />
+
+          <RenderLogos/>
+        </SplashContainer>
+      </div>
+    );
+  }
+}
+
+module.exports = Index;
+
+
+/* UNUSED COMPONENTS
+These were removed for v2 release as they are incomplete, however they should reappear
+as we fill out the documentation & examples.
 
 
 const showcaseUsers = {
@@ -212,52 +265,16 @@ const ShowcaseItem = ({name, link, image, caption}) => (
     </a>
   </div>
 );
-
-class Index extends React.Component { // eslint-disable-line
-  render() {
-    return (
-      <div>
-        <SplashContainer>
-
-          <div className="splashTitle">
-            <Logo img_src={imgUrl('logo-light.svg')} />
-            <ProjectTitle />
-            <PromoSection>
-              <MainIntroduction/>
-              <SubIntroduction/>
-            </PromoSection>
-          </div>
-
-          <BlockContainer background="highlight">
-            <Block {...blockContent.tutorial}/>
-            <Block {...blockContent.getStarted}/>
-            <Block {...blockContent.build}/>
-          </BlockContainer>
-
-          <div style={{minHeight: "40px"}}/>
-
-          <BlockContainer background="highlight">
-            <Block {...blockContent.augur}/>
-            <Block {...blockContent.narratives}/>
-            <Block {...blockContent.auspiceUs}/>
-          </BlockContainer>
-
           <Showcase>
             <ShowcaseItem {...showcaseUsers.nextstrain}/>
             <ShowcaseItem {...showcaseUsers.auspiceUs}/>
             <ShowcaseItem {...showcaseUsers.ghana}/>
           </Showcase>
 
+
           <div className="soloButtons">
             <Button href={docUrl("introduction/overview")}>Read the docs</Button>
             <Button href={docUrl("tutorial/overview")}>Learn how to interpret datasets</Button>
           </div>
 
-          <RenderLogos/>
-        </SplashContainer>
-      </div>
-    );
-  }
-}
-
-module.exports = Index;
+*/
