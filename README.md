@@ -2,7 +2,6 @@
 [![NPM version](https://img.shields.io/npm/v/auspice.svg?style=flat)](https://www.npmjs.com/package/auspice)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
-# Introduction
 
 Nextstrain is an open-source project to harness the scientific and public health potential of pathogen genome data.
 We provide a continually-updated view of publicly available data with powerful analytics and visualizations showing pathogen evolution and epidemic spread.
@@ -16,24 +15,53 @@ Documentation is available at [nextstrain.org/docs](https://nextstrain.org/docs)
 *Definition: Observation by an augur, ie a prophetic sign.*
 
 Auspice is an open-source interactive web app for visualizing phylogenomic data.
-It may be used in tandem with [augur](https://github.com/nextstrain/augur) or on its own.
-It may be used to look at phylogenetic trees on your own computer or may be used as a server to share results broadly. 
+It may be used in tandem with nextstrain's bioinformatics toolkit [augur](https://github.com/nextstrain/augur) or on its own.
+Auspice may be used to explore datasets locally or run as a as a server to share results. 
 
-**Please see [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice) for auspice documentation.**
+## Documentation
+
+**Please see [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice) for auspice-specific documentation or [nextstrain.org/docs](https://nextstrain.org/docs/) for more general documentation.**
+
 
 ## Installation
 
 ```bash
-npm install -g auspice
+npm install --global auspice
 ```
-See [here](https://nextstrain.github.io/auspice/installation) for more details.
 
-## Running Auspice
+See [here](https://nextstrain.github.io/auspice/installation) for full instructions, including how to install from source.
 
-`auspice view` starts the server, which makes local datasets available in a browser at  [localhost:4000/local](http://localhost:4000/local).
 
-By default, the datasets are sourced from the current working directory (or an **auspice** subfolder if it exists).
-Please run `auspice view -h` to see how to change this directory, as well as the directory where narratives are sourced from.
+## Quickstart
+
+In order to get up & running you'll need to have some datasets to visualise.
+Please see the [nextstrain docs](https://nextstrain.org/docs/) for tutorials on how to do this.
+For the purposes of getting auspice up & running you can download the current zika dataset via:
+
+```
+mkdir datasets
+curl http://data.nextstrain.org/zika_meta.json --compressed -o datasets/zika_meta.json
+curl http://data.nextstrain.org/zika_tree.json --compressed -o datasets/zika_tree.json
+```
+
+And then run `auspice` via:
+```
+auspice view --datasetDir datasets
+```
+This will allow you to run auspice locally (i.e. from your computer) and view the dataset which is behind [nextstrain.org/zika](https://nextstrain.org/zika).
+
+
+Run `auspice --help` or visit [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice) for more information.
+
+## Development, comments, issues and bugs
+
+Auspice is developed via GitHub and issues are very welcome. Alternatively, [email us](mailto:hello@nextstrain.org) with any questions or comments you may have. 
+If you are interested in submitting a pull request please use [eslint](https://eslint.org/) as much as possible -- thanks! 
+
+New versions are released via the `./releaseNewVersion.sh` script from an up-to-date `master` branch. It will prompt you for the version number increase, push changes to the `release` branch and, as long as Travis-CI is successful then a new version will be automatically published to [npm](https://www.npmjs.com/package/auspice).
+
+Please see [docs-src/README](./docs-src/README.md) for how the auspice documentation site is built.
+
 
 
 ## License and copyright
