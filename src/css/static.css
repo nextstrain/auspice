@@ -193,25 +193,6 @@ blockquote.twitter-tweet a:focus {
   text-decoration: underline;
 }
 
-/*@media (max-width: 1100px) {
-  .static .aside {
-    font-size: 0
-  }
-}*/
-
-@media (min-width: 550px) { /* apply these styles down to/until we're at 700px */
-  .twitterRow {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    flex-wrap: wrap;
-  }
-  .twitterColumn {
-    display: flex;
-    flex-direction: column;
-  }
-}
-
 /* https://stackoverflow.com/questions/16771225/css3-rotate-animation */
 .spinner {
     position: relative;
