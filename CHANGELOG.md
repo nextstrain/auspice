@@ -1,3 +1,7 @@
+---
+title: Changelog
+---
+
 ## version 1.39.0 - 2019/09/12
 
 ## version 1.38.2 - 2019/09/06
@@ -7,7 +11,7 @@
 ## version 1.38.1 - 2019/09/06
 
 * Update footer for INRB Ebola builds.
-
+cd
 ## version 1.38.0 - 2019/08/29
 
 * Add support for frequency projections. [See PR 777](https://github.com/nextstrain/auspice/pull/777)

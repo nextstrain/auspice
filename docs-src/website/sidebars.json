@@ -20,6 +20,9 @@
       "narratives/introduction",
       "narratives/how-to-write"
     ],
+    "release notes": [
+      "releases/changelog"
+    ],
     "contributing": [
       "contributing/documentation"
     ]
