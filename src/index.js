@@ -5,9 +5,10 @@ import "./util/polyfills"; // eslint-disable-line
 /* L I B R A R I E S */
 import React from "react";
 import ReactDOM from "react-dom";
-import ReactGA from "react-ga";
 import { Provider } from "react-redux";
+/* A U S P I C E   I M P O R T S */
 import configureStore from "./store";
+import { initialiseGoogleAnalyticsIfRequired } from "./util/googleAnalytics";
 /* S T Y L E S H E E T S */
 import "./css/global.css";
 import "./css/browserCompatability.css";
@@ -23,7 +24,7 @@ const store = configureStore();
 if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
 
 /* google analytics */
-ReactGA.initialize(process.env.NODE_ENV === "production" ? "UA-92687617-1" : "UA-92687617-2");
+initialiseGoogleAnalyticsIfRequired();
 
 /* Using React Hot Loader 4 https://github.com/gaearon/react-hot-loader */
 
