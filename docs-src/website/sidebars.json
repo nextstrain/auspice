@@ -1,32 +1,46 @@
 {
   "docs": {
     "Introduction": [
-      "overview",
-      "installation",
-      "inputs"
+      "introduction/overview",
+      "introduction/install",
+      "introduction/data-formats",
+      "introduction/cli"
     ],
-    "Customisations": [
-      "customisations/introduction",
-      {
-        "type": "subcategory",
-        "label": "Customising the Client",
-        "ids": [
-          "customisations/client/componentInterfaces",
-          "customisations/client/sidebarTheme"
-        ]
-      },
-      {
-        "type": "subcategory",
-        "label": "Customising the Server",
-        "ids": [
-          "customisations/server/charonAPI",
-          "customisations/server/serverless"
-        ]
-      },
-      "customisations/authentication"
+    "Customising Auspice": [
+      "customise-client/introduction",
+      "customise-client/api",
+      "customise-client/walk-through"
     ],
+    "Using a Custom Server": [
+      "build-server/introduction",
+      "build-server/api",
+      "build-server/walk-through",
+      "build-server/authentication"
+    ],
+    "Static site generator": [
+      "build-static/introduction",
+      "build-static/api",
+      "build-static/walk-through"
+    ],
+    "narratives": [
+      "narratives/introduction",
+      "narratives/how-to-write"
+    ],   
+    "auspice.us": [
+      "auspice-us/introduction",
+      "auspice-us/community-builds"
+    ],
+    "contributing": [
+      "contributing/documentation"
+    ]
+  },
+  "tutorial": {
     "Tutorial": [
-      "tutorial/overview"
+      "tutorial/overview",
+      "tutorial/how-to-read-a-phylogenetic-tree",
+      "tutorial/interpreting-the-map",
+      "tutorial/interpreting-entropy",
+      "tutorial/interpreting-frequencies"
     ]
   }
 }
