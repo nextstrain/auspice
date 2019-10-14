@@ -12,35 +12,17 @@
       "customise-client/walk-through"
     ],
     "Using a Custom Server": [
-      "build-server/introduction",
-      "build-server/api",
-      "build-server/walk-through",
-      "build-server/authentication"
-    ],
-    "Static site generator": [
-      "build-static/introduction",
-      "build-static/api",
-      "build-static/walk-through"
+      "server/introduction",
+      "server/api",
+      "server/walk-through",
+      "server/authentication"
     ],
     "narratives": [
       "narratives/introduction",
       "narratives/how-to-write"
-    ],   
-    "auspice.us": [
-      "auspice-us/introduction",
-      "auspice-us/community-builds"
     ],
     "contributing": [
       "contributing/documentation"
-    ]
-  },
-  "tutorial": {
-    "Tutorial": [
-      "tutorial/overview",
-      "tutorial/how-to-read-a-phylogenetic-tree",
-      "tutorial/interpreting-the-map",
-      "tutorial/interpreting-entropy",
-      "tutorial/interpreting-frequencies"
     ]
   }
 }
