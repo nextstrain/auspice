@@ -20,10 +20,11 @@
       "narratives/how-to-write"
     ],
     "Release Notes": [
-      "releases/changelog"
+      "releases/changelog",
+      "releases/v2"
     ],
     "Contributing": [
-      "contributing/documentation"
+      "contributing/overview"
     ]
   }
 }
