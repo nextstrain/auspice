@@ -5,6 +5,9 @@
       "introduction/install",
       "introduction/how-to-run"
     ],
+    "Advanced Functionality": [
+      "advanced-functionality/second-trees"
+    ],
     "Customising Auspice": [
       "customise-client/introduction",
       "customise-client/api",
