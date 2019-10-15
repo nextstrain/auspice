@@ -52,7 +52,7 @@ const interpretRequest = (req) => {
  * In that case, we should utilise `res.redirect` as we do in the nextstrain.org server
  * @throws
  */
-const extendDataPathsToMatchAvailiable = (info, availableDatasets) => {
+const extendDataPathsToMatchAvailable = (info, availableDatasets) => {
   const requestStrToMatch = info.parts.join("/"); // TO DO
   /* TODO currently there must be an _exact_ match in the available datasets */
   if (!availableDatasets.map((d) => d.request).includes(requestStrToMatch)) {
@@ -146,7 +146,7 @@ const findAvailableSecondTreeOptions = (currentDatasetUrl, availableDatasetUrls)
 
 module.exports = {
   interpretRequest,
-  extendDataPathsToMatchAvailiable,
+  extendDataPathsToMatchAvailable,
   makeFetchAddresses,
   handleError,
   sendJson,

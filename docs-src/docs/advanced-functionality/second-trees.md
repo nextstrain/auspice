@@ -6,7 +6,9 @@ Auspice has the ability to display two trees side-by-side, and to draw lines bet
 This is useful to compare the shape of different trees, especially when they are from the same organism -- for instance comparing phylogenies constructed from different
 segments of the same influenza virus can tell you a lot about the different histories of the segments which have the capacity to reassort (see image below).
 
-You can compare any two datasets which you have available -- for instance if you had "flu/seasonal/h3n2/ha/2y" and "flu/seasonal/h3n2/na/2y" then entering in the URL "flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y" would load them both.
+## How to load multiple trees
+
+You can compare any two datasets which you have available -- for instance if you had "flu/seasonal/h3n2/ha/2y" and "flu/seasonal/h3n2/na/2y" then loading the URL "flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y" would load them both.
 A toggle is made available in the sidebar to turn off the lines drawn between tips.
 
 
@@ -16,6 +18,7 @@ A toggle is made available in the sidebar to turn off the lines drawn between ti
 *While the crossing of the lines between the tips doesn't always prove reassortment, it's usually a good indication that reassortment is present.*
 
 
+## Showing potential datasets in the sidebar
 Depending on the way you've labelled your datasets, potential second trees are available in a sidebar dropdown.
 These are defined by the [getAvailable API request](server/api.md#charon-getavailable).
 Currently, the logic in `auspice view` is to match all datasets which:

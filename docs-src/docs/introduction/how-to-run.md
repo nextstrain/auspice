@@ -3,41 +3,38 @@ title: Run Auspice
 ---
 
 
-Auspice is run as a command line program -- `auspice` -- with currently three subcommands.
+Auspice is run as a command line program -- `auspice` -- with various subcommands.
 You can run each command with `--help` attached to see help from the command line.
 
-* `auspice view --help` 
+* `auspice view --help` (this is the main command for interacting with auspice)
 * `auspice build --help`
 * `auspice develop --help`
+* `auspice convert --help`
 
 
 ## Get an example dataset up & running
 
 In order to get up & running you'll need to have some datasets to visualise.
-Please see the [nextstrain docs](https://nextstrain.org/docs/) for tutorials on how to do this.
 For the purposes of getting auspice up & running you can download the current zika dataset via:
 
-```
+```bash
 mkdir datasets
 curl http://data.nextstrain.org/zika_meta.json --compressed -o datasets/zika_meta.json
 curl http://data.nextstrain.org/zika_tree.json --compressed -o datasets/zika_tree.json
 ```
 
 And then run `auspice` via:
-```
+```bash
 auspice view --datasetDir datasets
 ```
 
 This will allow you to run auspice locally (i.e. from your computer) and view the dataset which is behind [nextstrain.org/zika](https://nextstrain.org/zika).
-(See below for how to get all of the data behind nextstrain.org.)
+[See below](#obtaining-a-set-of-input-files) for how to download all of the data available on [nextstrain.org](https://nextstrain.org).
+
+
+To analyse your own data, please see the tutorials on the [nextstrain docs](https://nextstrain.org/docs/).
 
 ## `auspice view`
-
-Launch a local server to view locally available datasets & narratives. The 
-handlers for (auspice) client requests can be overridden here (see 
-documentation for more details). If you want to serve a customised auspice 
-client then you must have run "auspice build" in the same directory as you 
-run "auspice view" from.
 
 This is the main command we'll run auspice with, as it makes auspice available in a web browser for you.
 There are two common arguments used:
@@ -47,7 +44,7 @@ There are two common arguments used:
 |datasetDir    | PATH   |    Directory where datasets (JSONs) are sourced. This is  ignored if you define custom handlers. |
 |narrativeDir    | PATH   |  Directory where narratives (Markdown files) are  sourced. This is ignored if you define custom handlers. |
 
-For more complicated setups, where you define your own server handlers, see [Suppling custom handlers to the auspice server](server/api.md#suppling-custom-handlers-to-the-auspice-server).
+For more complicated setups, where you define your own server handlers, see [suppling custom handlers to the auspice server](server/api.md#suppling-custom-handlers-to-the-auspice-server).
 
 ## `auspice build`
 
@@ -84,7 +81,7 @@ Auspice takes two different file types -- datasets (the tree, map etc) are defin
 ### dataset JSONs
 
 For datasets, auspice (v2.x) can currently load either
-* "auspice v1" JSONs (meta + tree JSONs) -- see the JSON shcemas [here](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v1-meta.json) and [here](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v1-tree.json).
+* "auspice v1" JSONs (meta + tree JSONs) -- see the JSON schemas [here](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v1-meta.json) and [here](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v1-tree.json).
 The zika dataset we download above is in this format.
 * "auspice v2" JSONs. See the JSON schema [here](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v2.json).
 

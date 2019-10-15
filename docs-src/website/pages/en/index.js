@@ -8,16 +8,14 @@ const MarkdownBlock = CompLibrary.MarkdownBlock;
 const Container = CompLibrary.Container;
 
 
-const shortIntroduction = `
-Auspice is software to display beautiful interactive visualisations of phylogenomic data.
-`;
-
 const mainIntroduction = `
+
 Communicating scientific results while also allowing interrogation of the underlying data is an integral part of the scientific process.
 Current scientific publishing practices hinder both the rapid dissemination of epidemiologically relevant results and the ability to easily interact with the data which was used to draw the inferences.
 These shortcomings motivated the [nextstrain](https://nextstrain.org) project, for which auspice was initially devloped.
 
-Auspice can be run on your computer or integrated into websites.
+Auspice is software to display beautiful interactive visualisations of phylogenomic data.
+It can be run on your computer or integrated into websites.
 It allows easy customisation of aesthetics and functionality, and powers the visualisations on [nextstrain.org](https://nextstrain.org).
 `;
 
@@ -73,6 +71,10 @@ class Button extends React.Component { // eslint-disable-line
 Button.defaultProps = {
   target: '_self'
 };
+
+const SplashImage = () => (
+  <img className="splashImage" alt="splash image" src={imgUrl("splash.png")}/>
+);
 
 const SplashContainer = (props) => (
   <div className="homeContainer">
@@ -173,9 +175,9 @@ const blockContent = {
   },
   version: {
     title: "What's new?",
-    content: "Auspice is under continual development. See the changes that are bing made, and the version release notes.",
-    buttonText: "Release notes",
-    buttonLink: docUrl("releases/changelog")
+    content: "We've just released version 2 of auspice with lots of new things (this website being one of them!) Click here for the release notes.",
+    buttonText: "Version 2",
+    buttonLink: docUrl("releases/v2")
   }
 };
 
@@ -190,9 +192,6 @@ class Index extends React.Component { // eslint-disable-line
             <Logo img_src={imgUrl('logo-light.svg')} />
             <ProjectTitle />
             <PromoSection>
-              <MarkdownBlock>
-                {shortIntroduction}
-              </MarkdownBlock>
               <div style={{fontSize: "90%", lineHeight: "140%"}}>
                 <MarkdownBlock>
                   {mainIntroduction}
@@ -200,6 +199,8 @@ class Index extends React.Component { // eslint-disable-line
               </div>
             </PromoSection>
           </div>
+
+          <SplashImage/>
 
           <BlockContainer background="highlight">
             <Block {...blockContent.getStarted}/>

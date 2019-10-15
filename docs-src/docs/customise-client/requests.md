@@ -28,7 +28,7 @@ See [the server API documentation](server/api.md) for more details.
 
 ### Image requests
 
-The initial auspice page (i.e. the one which displays a listing of availiable datasets) requests some images for the footer.
+The initial auspice page (i.e. the one which displays a listing of available datasets) requests some images for the footer.
 
 ## External requests
 
@@ -39,14 +39,14 @@ These in turn make a number of subsequent requests for the individual font files
 
 ### Leaflet
 We use [leaflet](https://leafletjs.com/) to display the map tiles.
-There is one initial CSS request which is always made, regardless of whether a map is displayed for the [leaflet CSS file](https://unpkg.com/leaflet@1.0.1/dist/leaflet.css).
+There is one [initial CSS request](https://unpkg.com/leaflet@1.0.1/dist/leaflet.css) which is always made, regardless of whether a map is displayed.
 
 If a map is displayed by auspice the individual tiles are requested from api.mapbox.com.
 Panning and zooming of the map result in futher requests for tiles.
-These are requested using a hardcoded access key, however this may change to a build-time-customisation.
+These are requested using our hardcoded access key, however this may change to a build-time-customisation in the future.
 
 
 ### Google Analytics (optional)
 Auspice has the potential to include google analytics in a limited fashion.
-See [the client customisation API documentation](customise-client/api.md) for how to set this.
+See [the client customisation API documentation](customise-client/api.md#available-customisations) for how to set this.
 Note that these requests are only made if you specify a Google Analytics key during build-time customisation of the client.

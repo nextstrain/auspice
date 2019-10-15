@@ -3,9 +3,10 @@ title: Install Auspice
 ---
 
 ## Prerequisites 
-Auspice is a JavaScript program, and requires [nodejs](https://nodejs.org/) to be installed on your system.
+Auspice is a JavaScript program, and requires [nodeJS](https://nodejs.org/) to be installed on your system.
+For best results, please use nodeJS version 10.
 
-We highly recommend using [conda](https://conda.io/docs/) to manage environments -- for instance to create an environment with nodejs installed
+We highly recommend using [conda](https://conda.io/docs/) to manage environments, i.e. use conda to create an environment with nodejs installed where you can use auspice.
 It's possible to use other methods, but this documentation presupposes that you have conda installed.
 
 ## Create a conda environment
@@ -14,7 +15,7 @@ conda create --name auspice nodejs=10
 source activate auspice
 ```
 
-> This parallels [the nextstrain.org docs](https://nextstrain.org/docs/getting-started/local-installation#install-augur--auspice-with-conda-recommended).
+> This parallels [the nextstrain installation docs](https://nextstrain.org/docs/getting-started/local-installation#install-augur--auspice-with-conda-recommended).
 You're welcome to use those instead!
 
 ## Install auspice from npm
@@ -36,7 +37,7 @@ npm update --global auspice
 
 
 This is useful for debugging, modifying the source code, or using an unpublished feature branch.
-We're going to assume that you have used conda to install nodejs as above.
+We're going to assume that you have used conda to install nodeJS as above.
 
 ```bash
 # activate the correct conda enviornment

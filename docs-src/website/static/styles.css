@@ -97,7 +97,7 @@ header a:hover {
 @media (min-width: 500px) {
   .splashTitle {
     padding-top: 100px;
-    padding-bottom: 100px;
+    padding-bottom: 40px;
   }
 }
 
@@ -114,4 +114,17 @@ header a:hover {
 }
 .soloButtons a:hover {
   border-color: var(--dark);
+}
+
+/* splash image */
+.splashImage {
+  max-width: 800px;
+  padding-bottom: 40px;
+}
+
+@media (min-width: 800px) {
+  .splashImage {
+    width: 90%;
+    padding-bottom: 20px;
+  }
 }

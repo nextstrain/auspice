@@ -2,7 +2,8 @@
 title: Client customisation API
 ---
 
-> The functionality detailed in the page is poorly undocumented and we expect there to be some bugs and possible API changes.
+> The functionality detailed in the page needs more attention, both from testing & code development.
+We expect there to be some bugs and possible API changes.
 If you rely on this functionality, we recommend you pin your installation of auspice to a specific version.
 Please [get in touch with us](mailto:hello@nextstrain.org) if you are using these customisations so that we can work with you!
 
@@ -14,8 +15,8 @@ auspice build --extend <JSON>
 ```
 
 
-> Note that the hot-reloading development functionality does not work for code which is included via this client customisation mecahnism.
-Thus, while you can run `auspice develop --extend <JSON>` it will not update as you may expect!
+*Note that the hot-reloading development functionality does not work for code which is included via this client customisation mecahnism.*
+*Thus, while you can run `auspice develop --extend <JSON>` it will not update as you may expect!*
 
 
 ## Available customisations

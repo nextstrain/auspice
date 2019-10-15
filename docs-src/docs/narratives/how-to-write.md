@@ -19,7 +19,7 @@ You should now be able to visualise the dataset (without any narrative functiona
 
 ## Step 2: Start a simple narrative
 
-We're going to start by creating a narrative with only one block.
+We're going to start by creating a narrative with only one page (the title page).
 
 ```bash
 mkdir narratives
@@ -32,8 +32,8 @@ Open up `narratives/example.md` and start by pasting in the following YAML front
 ---
 title: Example narrative tutorial
 authors: "your name"
-authorLinks: "<url, twitter link, mailto etc>"
-affiliations: "<your affiliation>"
+authorLinks: "url, twitter link, mailto etc"
+affiliations: "your affiliation"
 date: "August 2018"
 dataset: "http://localhost:4000/mumps/na?d=tree"
 abstract: "This narrative is going to test the potential of the auspice narrative functionality using the publicly available North American mumps dataset."
@@ -41,13 +41,13 @@ abstract: "This narrative is going to test the potential of the auspice narrativ
 ```
 
 The really important bit here is the `dataset` line -- here we're referencing the dataset we downloaded above.
-(A current limitation of narratives is that they cannot change the dataset -- [see here](narratives/introduction.md##nown-bugs-limitations).)
+(A [current limitation](narratives/introduction.md##nown-bugs-limitations) of narratives is that they cannot change the dataset.)
 
 
 ## Step 3: View the narrative so far
 
 We don't really have much, but we can still load it up in auspice and check it's working as expected -- that we see a narrative with only one page.
-```
+```bash
 auspice view --datasetDir datasets/ --narrativeDir narratives/
 ```
 And you should see something like this at [localhost:4000/narratives/example](http://localhost:4000/narratives/example)
@@ -65,7 +65,7 @@ It is these h1 headings which define when we have a new narrative pararaphs.
 The heading is itself a link, which defines the view of auspice at that time.
 You may have noticed that as you interact with auspice -- for this example at [localhost:4000/mumps/na](http://localhost:4000/mumps/na) -- then the URL changes.
 For instance, if I use the sidebar to toggle "off" the tree & entropy, just keeping the map then you'll see that the URL has changed to [localhost:4000/mumps/na?d=map](http://localhost:4000/mumps/na?d=map).
-We're going to use this functionality to "save" the view of auspice into the markdown file, so that the narrative "knows" what view to show.
+We're going to use this functionality to "save" the view of auspice into the markdown file, so that the narrative knows what view to show.
 
 Let's use this knowledge to make a page in the narrative which switches to just show the map.
 Add the following text to the narrative markdown file:
@@ -92,7 +92,7 @@ We're going to use the same iterative technique to add more pagragraphs:
 4. Repeat until happy 😁
 
 You can see the contents of the markdown file behind [the example (nextstrain.org)](https://nextstrain.org/narratives/intro-to-narratives) that we're basing this tutorial on [here](https://raw.githubusercontent.com/nextstrain/narratives/master/intro-to-narratives.md).
-You can use this markdown file as a resource for creating your own paragraph.
+You can use this markdown file as inspiration for creating your own paragraphs, or just copy and paste the contents!
 For reference, here are three paragraphs from that file:
 
 ```md
@@ -120,7 +120,14 @@ have a Methionine (`M`) at this position, while aqua nodes indicate Isoleucine (
 
 In the [narratives introduction](http://localhost:3000/auspice/narratives/introduction#sharing-narratives) we introduced the possibility of using the community functionality of nextstrain to share your narratives.
 
-> This requires knowledge of GitHub -- [see here](https://guides.github.com/activities/hello-world/) for an introduction.
+
+> A quick reminder of the difference between auspice & nextstrain.org is warrented.
+Nextstrain is a "user" of auspice, in that it uses auspice to visualise genomic data and makes it available via [nextstrain.org](https://nextstrain.org).
+It has additional functionality available, such as the ability to source datasets (and narratives!) from any public GitHub repo -- [see documentation here (nextstrain.org)](https://nextstrain.org/docs/contributing/community-builds).
+Note that the _dataset_ (i.e. the JSON(s)) doesn't have to live in the same github repo, in fact it doesn't even need to be a community build.
+
+
+> This step requires knowledge of GitHub -- [see here](https://guides.github.com/activities/hello-world/) for an introduction.
 
 If you turn the directory containing the `datasets` and `narratives` directories into a git repository and upload it to your GitHub account, then you can share your narrative with anyone through nextstrain.
 For instance, let's assume your GitHub username is "yourname" and your repo is called "auspice-narrative-example". You'll need to rename the narrative markdown to start with the repo name, e.g.
@@ -129,3 +136,5 @@ mv narratives/example.md narratives/auspice-narrative-example.md
 ```
 Then, by uploading the repo to GitHub it will be available to everyone at nextstrain.org/narratives/yourname/auspice-narrative-example.
 
+
+This is how the narrative file at [github > emmahodcroft > tb > narratives](https://github.com/emmahodcroft/tb/blob/master/narratives/tb_crispell.md) can be accessed via [nextstrain.org/community/narratives/emmahodcroft/tb/crispell](https://nextstrain.org/community/narratives/emmahodcroft/tb/crispell).

@@ -27,7 +27,7 @@ Did you notice that, at any point in the narrative, people can dive into the dat
 
 ---
 
-Here's another example written to show the various views you can use narratives to explain:
+Here's another example written to show the various auspice views you can utilise in narratives:
 
 **Example #2**: [Exploring the narrative functionality using the ongoing mumps epidemic in North America (nextstrain.org)](https://nextstrain.org/narratives/intro-to-narratives).
 
@@ -49,17 +49,9 @@ The [writing a narrative](how-to-write.md) tutorial will use the mumps example f
 ## Sharing narratives
 
 If you've got a narrative working locally (i.e. running auspice on your computer) and want to share the results then you have two options:
-1. Implement an auspice server yourself (the harder option) -- [see docs here](server/introduction.md).
-2. Use the community functionality of nextstrain.org (the easier option, detailed below).
+1. Implement an auspice server yourself (the harder option, see [the server documentation](server/introduction.md)).
+2. Use the community functionality of nextstrain.org (the easier option, detailed in [writing a narrative](narratives/how-to-write.md#step-6-upload-your-example-to-nextstrain-community-to-share-with-everyone)).
 
-> A quick reminder of the difference between auspice & nextstrain.org is warrented.
-Nextstrain is a "user" of auspice, in that it uses auspice to visualise genomic data and makes it availiable via [nextstrain.org](https://nextstrain.org).
-It has additional functionality available, such as the ability to source datasets (and narratives!) from any public GitHub repo -- [see documentation here (nextstrain.org)](https://nextstrain.org/docs/contributing/community-builds).
-Note that the _dataset_ (i.e. the JSON(s)) doesn't have to live in the same github repo, in fact it doesn't even need to be a community build.
-
-Uploading your narrative to a (public) github repo allows it to be available via nextstrain community URLs. See [the tutorial](narratives/how-to-write.md#step-6-upload-your-example-to-nextstrain-community-to-share-with-everyone) for instructions on how to do this.
-
-This is how the narrative file at [github > emmahodcroft > tb > narratives](https://github.com/emmahodcroft/tb/blob/master/narratives/tb_crispell.md) can be accessed via [nextstrain.org/community/narratives/emmahodcroft/tb/crispell](https://nextstrain.org/community/narratives/emmahodcroft/tb/crispell).
 
 
 

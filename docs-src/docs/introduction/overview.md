@@ -5,7 +5,8 @@ hide_title: true
 
 # Auspice: an open-source interactive tool for visualising phylogenomic data
 
-
+![splash](assets/splash.png)
+*Auspice being used to show the spread of influenza H7N9 virus across Asia.*
 
 **Auspice is software to display beautiful interactive visualisations of phylogenomic data.**
 

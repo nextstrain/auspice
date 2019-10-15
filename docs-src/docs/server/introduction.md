@@ -3,16 +3,17 @@ title: Auspice servers
 ---
 
 The Auspice client (i.e. what you see in the web browser) requires a server behind it to
-- (a) serve the client to the browser and
-- (b) handle certain [GET requests](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods) from the client, for instance "give me the zika dataset to display".
+- (a) serve the client HTML, CSS & JavaScript to the browser and
+- (b) handle certain [GET](https://en.wikipedia.org/wiki/Hypertext_Transfer_Protocol#Request_methods) requests from the client, for instance "give me the zika dataset to display".
 
 We provide a basic server to run auspice locally -- any time you run `auspice view` or `auspice develop` you're running a server!
+In these cases, the server is running on your computer, and sending datasets & narratives which are stored on your machine to the auspice client.
 Alternatively, you can build your own server -- all that is required is to satisfy the above two requirements.
 
 
 ## GET requests
 
-Currently the client makes three requests:
+Currently the client is able to make three requests:
 
 | address | description |
 | --- | --- |
@@ -20,7 +21,8 @@ Currently the client makes three requests:
 | `/charon/getDataset` | return the requested dataset |
 | `/charon/getNarrative` | return the requested narrative |
 
-For instance, when you're running `auspice view` if you access [localhost:4000/charon/getAvailable](http://localhost:4000/charon/getAvailable) you'll see a list of the avialable datasets & narratives known to the server.
+For instance, when you're running `auspice view` if you go to [localhost:4000/charon/getAvailable](http://localhost:4000/charon/getAvailable) you'll see a list of the avialable datasets & narratives known to the server.
+Similarly, nextstrain.org is a server which has handlers for these three API endpoints, so if you visit [nextstrain.org/charon/getAvailable](https://nextstrain.org/charon/getAvailable) you'll see nextstrain's available datasets.
 
 See [the server API](server/api.md) for details about each of these requests.
 
