@@ -62,4 +62,4 @@ auspice --help
 ```
 
 Updating Auspice should only require pulling the new version from GitHub -- it shouldn't require any `npm` commands.
-You will, however, have to re-build Auspice whenever the client-related code has changed, via `Auspice build`.
+You will, however, have to re-build Auspice whenever the client-related code has changed, via `auspice build`.

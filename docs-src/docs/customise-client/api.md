@@ -25,7 +25,7 @@ A useful reference may be the [customisation JSON file](https://github.com/nexts
 
 * `sidebarTheme` allows modifications to the aesthetics of the sidebar. See below.
 * `navbarComponent` a (relative) path to a JS file exporting a React component to be rendered as the nav bar. See below.
-* `browserTitle` The browser title for the page. Defaults to "Auspice" if not defined.
+* `browserTitle` The browser title for the page. Defaults to "auspice" if not defined.
 * `googleAnalyticsKey` You can specify a Google Analytics key to enable (some) analytics functionality. More documentation to come.
 
 
