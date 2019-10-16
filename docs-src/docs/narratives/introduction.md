@@ -1,9 +1,9 @@
 ---
-title: "Communicating results using Narratives"
+title: "Communicating Results Using Narratives"
 ---
 
 Narratives are a method of data-driven storytelling.
-They allow scientists (or anyone!) to author content which is displayed alongside the "normal" auspice view of the data.
+They allow scientists (or anyone!) to author content which is displayed alongside the "normal" Auspice view of the data.
 This content drives the way in which data is displayed, so instead of the user changing how things are displayed, the view automatically changes as you move between paragraphs in the narrative.
 This allows you to communicate results with the appropriate views into the data, whilst maintaining the ability for the user to jump back to the "normal" viewing mode and interact with the data.
 
@@ -11,8 +11,8 @@ This allows you to communicate results with the appropriate views into the data,
 
 Narratives are easier to understand with examples:
 
-We've been looking into West Nile Virus (WNV) spread throughout North America and used auspice to visualise the spread of the virus from east to west over a 20 year period.
-To communicate these results, we constructed a narrative to walk people through this, which we suggest you go take a look at to grasp the power of narratives 
+We've been looking into West Nile Virus (WNV) spread throughout North America and used Auspice to visualise the spread of the virus from east to west over a 20 year period.
+To communicate these results, we constructed a narrative to walk people through this, which we suggest taking a look at to grasp the power of narratives.
 
 
 > _Click the link 👇 and explore the content by scrolling the text in the left hand panel (or click on the arrows)._
@@ -27,7 +27,7 @@ Did you notice that, at any point in the narrative, people can dive into the dat
 
 ---
 
-Here's another example written to show the various auspice views you can utilise in narratives:
+Here's another example written to show the various Auspice views you can utilise in narratives:
 
 **Example #2**: [Exploring the narrative functionality using the ongoing mumps epidemic in North America (nextstrain.org)](https://nextstrain.org/narratives/intro-to-narratives).
 
@@ -37,21 +37,21 @@ We'll go through this in more detail in the [writing a narrative](how-to-write.m
 
 
 
-## How to write a narrative
+## How to Write a Narrative
 
 If you have a dataset that you (or anyone else) created then you can write a narrative to enhance it 💫
 
-Behind the scenes a narrative is a single markdown file written in a particular format -- i.e. each of the example narratives linked above comprised one markdown file each.
+Behind the scenes a narrative is a single Markdown file written in a particular format -- i.e. each of the example narratives linked above comprises a single Markdown file.
 The [writing a narrative](how-to-write.md) tutorial will use the mumps example from above to explain how you can write your own narrative.
 
 
 
-## Sharing narratives
+## Sharing Narratives
 
-If you've got a narrative working locally (i.e. running auspice on your computer) and want to share the results then you have two options:
-1. Implement an auspice server yourself (the harder option, see [the server documentation](server/introduction.md)).
-2. Use the community functionality of nextstrain.org (the easier option, detailed in [writing a narrative](narratives/how-to-write.md#step-6-upload-your-example-to-nextstrain-community-to-share-with-everyone)).
+If you've got a narrative working locally (i.e. running Auspice on your computer) and want to share the results then you have two options:
 
+1. Use the community functionality of nextstrain.org (the easier option, detailed in [writing a narrative](narratives/how-to-write.md#step-6-upload-your-example-to-nextstrain-community-to-share-with-everyone)).
+2. Implement an Auspice server yourself (the harder option, see [the server documentation](server/introduction.md)).
 
 
 

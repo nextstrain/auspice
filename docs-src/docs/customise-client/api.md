@@ -1,41 +1,41 @@
 ---
-title: Client customisation API
+title: Client Customisation API
 ---
 
-> The functionality detailed in the page needs more attention, both from testing & code development.
+> The functionality detailed in this page needs more attention, both in terms of testing and code development.
 We expect there to be some bugs and possible API changes.
-If you rely on this functionality, we recommend you pin your installation of auspice to a specific version.
+If you rely on this functionality, we recommend you pin your installation of Auspice to a specific version.
 Please [get in touch with us](mailto:hello@nextstrain.org) if you are using these customisations so that we can work with you!
 
 
 This page details the available options and format of the customisations available at (client) build time.
-They are contained in a JSON file supplied to auspice via 
+They are contained in a JSON file supplied to Auspice via
 ```bash
 auspice build --extend <JSON>
 ```
 
 
-*Note that the hot-reloading development functionality does not work for code which is included via this client customisation mecahnism.*
+*Note that the hot-reloading development functionality does not work for code which is included via this client customisation mechanism.*
 *Thus, while you can run `auspice develop --extend <JSON>` it will not update as you may expect!*
 
 
-## Available customisations
+## Available Customisations
 The following are definable as top-level keys of the JSON file.
 A useful reference may be the [customisation JSON file](https://github.com/nextstrain/nextstrain.org/blob/master/auspice/client/config.json) used by nextstrain.org.
 
 * `sidebarTheme` allows modifications to the aesthetics of the sidebar. See below.
 * `navbarComponent` a (relative) path to a JS file exporting a React component to be rendered as the nav bar. See below.
-* `browserTitle` The browser title for the page. Defaults to "auspice" if not defined.
-* `googleAnalyticsKey` You can specify a google analytics key to enable (some) analytics functionality. More documentation to come.
+* `browserTitle` The browser title for the page. Defaults to "Auspice" if not defined.
+* `googleAnalyticsKey` You can specify a Google Analytics key to enable (some) analytics functionality. More documentation to come.
 
 
-> For customisation code which uses [React](https://reactjs.org/) components, you must import these as `import React from "@libraries/react";` to ensure that the version of react is the same as what auspice uses!
+> For customisation code which uses [React](https://reactjs.org/) components, you must import these as `import React from "@libraries/react";` to ensure that the version of react is the same as what Auspice uses.
 
 ---
 
 ## Sidebar Theme
 
-The appearence of the sidebar can be customised by specifing a theme in the config JSON used to build auspice.
+The appearence of the sidebar can be customised by specifing a theme in the config JSON used to build Auspice.
 This theme is then available (via [styled-components](https://www.styled-components.com/)) to the components rendered in the sidebar.
 It is also passed to the nav bar component (see below) as the `theme` prop.
 
@@ -67,14 +67,14 @@ For instance, here is the customisation used by nextstrain.org:
 
 # Components
 
-One way to extend auspice is by replacing react components with your own custom components.
+One way to extend Auspice is by replacing React components with your own custom components.
 These custom components will receive props defined here, which can be used to update the rendering of the component using the normal react lifecycle methods.
 Right now this is only available for the splash page and nav-bar components, whose interfaces are defined here.
 
-Each component must be the default export of a javascript file which is specified in the (client) config JSON passed to auspice at build time (`auspice build` or `auspice develop`).
+Each component must be the default export of a javascript file which is specified in the (client) config JSON passed to Auspice at build time (`auspice build` or `auspice develop`).
 
 
-## Nav-bar component
+## Nav-bar Component
 
 **Build config:**
 ```json
@@ -85,7 +85,7 @@ Each component must be the default export of a javascript file which is specifie
 
 Where the javascript file contains a default export of a React component.
 
-**React Props available:**
+**React Props Available:**
 
 |  Prop            | Type      | Description                                       |
 | -----------      |---------  | ------                                            |
@@ -97,7 +97,7 @@ Where the javascript file contains a default export of a React component.
 
 ## Splash component
 
-Define a custom splash page for auspice. Please note that this is extremely expirimental and the interface is expected to change.
+Define a custom splash page for Auspice. Please note that this is extremely expirimental and the interface is expected to change.
 
 **Build config:**
 ```json
@@ -114,7 +114,7 @@ Where the javascript file contains a default export of a React component.
 | `isMobile` | Bool |       |
 | `available` | Object |  available datasets and narratives |
 | `browserDimensions` | Object | Browser width & height |
-| `dispatch` | function | access to redux's dispatch mechanism | 
+| `dispatch` | function | access to redux's dispatch mechanism |
 | `errorMessage` | function | to do |
 | `changePage` | function | to do |
 

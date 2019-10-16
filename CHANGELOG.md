@@ -15,7 +15,7 @@ cd
 ## version 1.38.0 - 2019/08/29
 
 * Add support for frequency projections. [See PR 777](https://github.com/nextstrain/auspice/pull/777)
-* Local auspice servers listen on only localhost by default instead of all interfaces. [See PR 781](https://github.com/nextstrain/auspice/pull/781)
+* Local Auspice servers listen on only localhost by default instead of all interfaces. [See PR 781](https://github.com/nextstrain/auspice/pull/781)
 * update dependencies
 
 
@@ -482,7 +482,7 @@ The new interface is both easier to understand and quicker.
 ## version 1.10.0 - 2018/02/05
 
 ### Features
-* Local Branching Index (LBI) coloring can be calculated in auspice (code identical to nextflu) if specified in `color_options` (meta JSON) ([PR 491](https://github.com/nextstrain/auspice/pull/491))
+* Local Branching Index (LBI) coloring can be calculated in Auspice (code identical to nextflu) if specified in `color_options` (meta JSON) ([PR 491](https://github.com/nextstrain/auspice/pull/491))
 
 ### Internals
 * `get_data.sh` script updated to no longer download sequences & entropy JSONs
@@ -503,12 +503,12 @@ The new interface is both easier to understand and quicker.
 ## version 1.8.0 - 2018/01/18
 
 #### entropy calculated via tree
-* The entropy panel data is now computed within auspice by examining mutations throughout the tree, and is throttled to improve speed under load.
+* The entropy panel data is now computed within Auspice by examining mutations throughout the tree, and is throttled to improve speed under load.
 * Both entropy and number of mutations are available via a toggle similar to AA/NT
 * This results in `entropy.JSON` no longer being fetched.
 * The entropy data is stored in redux state rather than the react component
 * The D3 code has been reorganised
-* Note that the entropy values are slightly different to those exported by augur in some situations - see https://github.com/nextstrain/auspice/pull/478#issuecomment-358496901
+* Note that the entropy values are slightly different to those exported by Augur in some situations - see https://github.com/nextstrain/auspice/pull/478#issuecomment-358496901
 
 #### genotype calculated via tree
 * This results in `sequences.JSON` no longer being fetched.
