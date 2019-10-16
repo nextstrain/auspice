@@ -313,6 +313,8 @@ const setNodeBranchAttrs = (v2) => {
       node.node_attrs.div = node.attr.div;
     }
 
+    if (node.hidden) node.node_attrs.hidden = node.hidden;
+
     /* transfer the colorings & geo resolutions */
     traitsToAssign.forEach((traitKey) => {
       const data = {value: prettyString(node.attr[traitKey], {removeComma: true})};
