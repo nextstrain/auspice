@@ -5,7 +5,7 @@ const utils = require("../utils");
  * be displayed as-is. This function is preserved here to aid in converting v1 JSONs
  * to v2 JSONs.
  */
-const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, removeComma = false, stripEtAl = false, lowerEtAl = false} = {}) => {
+const prettyString = (x, {trim = 0, camelCase = true, removeComma = false, stripEtAl = false, lowerEtAl = false} = {}) => {
   if (!x && x!== 0) {
     return "";
   }
@@ -31,9 +31,35 @@ const prettyString = (x, {multiplier = false, trim = 0, camelCase = true, remove
     }
     return x;
   } else if (typeof x === "number") {
-    const val = parseFloat(x);
-    const magnitude = Math.ceil(Math.log10(Math.abs(val) + 1e-10));
-    return multiplier ? val.toFixed(5 - magnitude) + "\u00D7" : val.toFixed(5 - magnitude);
+    /* Expected inputs & outputs: (negatives are the same, except with a preceeding `-` character)
+    100 => '100'
+    100.34 => '100'
+    185781 => '185781'
+    85.1 => '85.1'
+    85.1234 => '85.12'
+    0.1234 => '0.1234'
+    0.123456 => '0.1235'
+    0.00000000001234 => '1.234e-11'
+    0.0 => '0' // -0.0 => '0' as well
+
+    Beware that if there's a leading zero, then javascript interprets it as octal.
+    (I've never seen this intention in nextstrain.)
+    */
+    if (Number.isInteger(x)) {
+      return String(parseInt(x, 10));
+    }
+    const magnitude = Math.ceil(Math.log10(Math.abs(x) + 1e-10));
+    if (magnitude > 3) {
+      // for numbers over 100 (or under -100), we return the integer (i.e. no decimal places)
+      return String(parseInt(x, 10));
+    }
+    if (magnitude > 0) {
+      // for numbers 1 and over (or -1 and below) we'll use 2dp, but strip any trailing zeros
+      return x.toPrecision(magnitude+2).replace(/[.]0*$/, '');
+    }
+    // for numbers between -1 & 1 (not inclusive) we want to use up to 4 significant figues
+    const sigFig = String(x).replace(/-?0\.0*/, '').length;
+    return x.toPrecision(sigFig > 4 ? 4 : sigFig);
   }
   return x;
 };
