@@ -8,7 +8,6 @@ We provide a continually-updated view of publicly available data with powerful a
 Our goal is to aid epidemiological understanding and improve outbreak response.
 
 Resulting data and inferences are available live at the website [nextstrain.org](https://nextstrain.org).
-Documentation is available at [nextstrain.org/docs](https://nextstrain.org/docs).
 
 # Auspice
 
@@ -20,7 +19,7 @@ Auspice may be used to explore datasets locally or run as a as a server to share
 
 ## Documentation
 
-**Please see [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice) for auspice-specific documentation or [nextstrain.org/docs](https://nextstrain.org/docs/) for more general documentation.**
+**Please see [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice) for auspice documentation.**
 
 
 ## Installation
@@ -29,7 +28,7 @@ Auspice may be used to explore datasets locally or run as a as a server to share
 npm install --global auspice
 ```
 
-See [here](https://nextstrain.github.io/auspice/installation) for full instructions, including how to install from source.
+See [here](https://nextstrain.github.io/auspice/introduction/install) for full instructions, including how to install from source.
 
 
 ## Quickstart

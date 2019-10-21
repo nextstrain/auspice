@@ -2,7 +2,46 @@
 title: Changelog
 ---
 
+## version 2.0.0 - 2019/10/21
+
+Please see the [release notes](https://nextstrain.github.io/auspice/releases/v2) for a full list of features and changes associated with auspice's v2 release.
+Associated with the v2 release are much improved documentation at [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice)
+
+Here is a summary of the main changes:
+
+* Pie charts to represent discrete variables on a map
+* New dataset JSON format:
+    * Strings parsed unchanged
+    * Both metadata and tree data in a single JSON
+    * Gene / Genome definitions are now in GFF format
+    * Changes to how node data is stored
+    * Multiple maintainers
+    * Continous, Categorical, Ordinal, and Boolean Color Scales
+* More information in tree info boxes
+* Display of second trees
+* Display better dates on the tree axis
+* Map "reset zoom" button zooms to include all demes
+* Consistent colouring of missing data in the tree
+* Removal of Twitter & Google Analytics
+* Improvements in the entropy panel
+* Auspice responds to server redirects for datasets
+* Importing (server) code from Auspice
+* New Auspice subcommand: `auspice convert`
+* Ability to show a "build" source URL in the sidebar
+* `auspice view` uses a custom Auspice client if present
+
+## version 1.39.1 - 2019/10/21
+
+This release marks the final v1 release before auspice v2 is released.
+Auspice v1 may still receive bug-fixes, and will be [npm-tagged](https://docs.npmjs.com/cli/dist-tag) with "version1" so that it may be installed via `npm install --global auspice@version1`. 
+
+* Minor dependency version upgrades.
+
 ## version 1.39.0 - 2019/09/12
+* Slight changes to the auspice splash page wording to remove the word "Locally".
+* `getDataset` API calls may now return code 204 ("no content") resulting in the auspice splash page displayed without an error message.
+* Default styling of narrative text much improved.
+
 
 ## version 1.38.2 - 2019/09/06
 
