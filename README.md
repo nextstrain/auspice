@@ -3,9 +3,6 @@
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 
-> TODO. Release a "version1" tagged auspice before v2 is merged into master & released.
-This has not yet been done to remove the possibility of newly released v1 versions from the master branch potentially conflicting with v1 versions released from this branch.
-
 # Auspice version 1 branch notes
 
 This branch represents version 1 of auspice -- please see [the master branch](https://github.com/nextstrain/auspice/) for the latest version of auspice.

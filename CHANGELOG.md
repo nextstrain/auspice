@@ -1,11 +1,20 @@
+## version 1.39.1 - 2019/10/21
+
+This release marks the final v1 release before auspice v2 is released.
+Auspice v1 may still receive bug-fixes, and will be [npm-tagged](https://docs.npmjs.com/cli/dist-tag) with "version1" so that it may be installed via `npm install --global auspice@version1`. 
+
+* Minor dependency version upgrades.
+
 ## version 1.39.0 - 2019/09/12
+* Slight changes to the auspice splash page wording to remove the word "Locally".
+* `getDataset` API calls may now return code 204 ("no content") resulting in the auspice splash page displayed without an error message.
+* Default styling of narrative text much improved.
+
 
 ## version 1.38.2 - 2019/09/06
-
 * Fix footer for INRB Ebola builds.
 
 ## version 1.38.1 - 2019/09/06
-
 * Update footer for INRB Ebola builds.
 
 ## version 1.38.0 - 2019/08/29
