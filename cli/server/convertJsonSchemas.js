@@ -361,7 +361,7 @@ const setNodeBranchAttrs = (v2) => {
 
 
 const convertFromV1 = ({tree, meta}) => {
-  const v2 = {version: "2.0", meta: {}};
+  const v2 = {version: "v2", meta: {}};
   // set metadata
   setColorings(v2["meta"], meta);
   setMiscMetaProperties(v2["meta"], meta);
