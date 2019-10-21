@@ -39,7 +39,6 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
       stateCount.set(state, currentCount+1);
     }
   }
-  console.log("stateCount", stateCount);
   const domain = Array.from(stateCount.keys()).filter((x) => isValueValid(x));
   /* sorting technique depends on the colorBy */
   if (attr === "clade_membership") {
