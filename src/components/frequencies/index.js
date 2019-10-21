@@ -18,7 +18,7 @@ import "../../css/entropy.css";
     browserDimensions: state.browserDimensions.browserDimensions,
     colorBy: state.controls.colorBy,
     colorScale: state.controls.colorScale,
-    colorOptions: state.metadata.colorOptions
+    colorOptions: state.metadata.colorings
   };
 })
 class Frequencies extends React.Component {

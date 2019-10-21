@@ -1,6 +1,6 @@
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
-
+import { getDomId } from "./helpers";
 /**
  * @param {d3 selection} svg      -- the svg into which the tree is drawn
  * @param {string} layout         -- the layout to be used, e.g. "rect"
@@ -103,7 +103,7 @@ export const drawTips = function drawTips() {
     .enter()
       .append("circle")
         .attr("class", "tip")
-        .attr("id", (d) => "tip_" + d.n.clade)
+        .attr("id", (d) => getDomId("tip", d.n.name))
         .attr("cx", (d) => d.xTip)
         .attr("cy", (d) => d.yTip)
         .attr("r", (d) => d.r)
@@ -122,11 +122,12 @@ export const drawTips = function drawTips() {
 
 /**
  * given a tree node, decide whether the branch should be rendered
- * This enforces the "hidden" property set in the dataset JSON
+ * This enforces the "hidden" property set on `node.node_attrs.hidden`
+ * in the dataset JSON
  * @return {string}
  */
 export const getBranchVisibility = (d) => {
-  const hiddenSetting = d.n.hidden;
+  const hiddenSetting = d.n.node_attrs && d.n.node_attrs.hidden;
   if (hiddenSetting &&
     (
       hiddenSetting === "always" ||
@@ -161,7 +162,7 @@ export const drawBranches = function drawBranches() {
       .enter()
         .append("path")
           .attr("class", "branch T")
-          .attr("id", (d) => "branch_T_" + d.n.clade)
+          .attr("id", (d) => getDomId("branchT", d.n.name))
           .attr("d", (d) => d.branch[1])
           .style("stroke", (d) => d.branchStroke || params.branchStroke)
           .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
@@ -179,7 +180,7 @@ export const drawBranches = function drawBranches() {
     .enter()
       .append("path")
         .attr("class", "branch S")
-        .attr("id", (d) => "branch_S_" + d.n.clade)
+        .attr("id", (d) => getDomId("branchS", d.n.name))
         .attr("d", (d) => d.branch[0])
         .style("stroke", (d) => d.branchStroke || params.branchStroke)
         .style("stroke-linecap", "round")

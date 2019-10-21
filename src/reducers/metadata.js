@@ -1,6 +1,11 @@
 import { colorOptions } from "../util/globals";
 import * as types from "../actions/types";
 
+/* The metdata reducer holds data that is
+ * (a) mostly derived from the dataset JSON
+ * (b) rarely changes
+ */
+
 const Metadata = (state = {
   loaded: false, /* see comment in the sequences reducer for explination */
   metadata: null,
@@ -14,11 +19,8 @@ const Metadata = (state = {
     case types.CLEAN_START:
       return action.metadata;
     case types.ADD_COLOR_BYS:
-      const newColorOptions = JSON.parse(JSON.stringify(state.colorOptions));
-      for (const v of action.newColorBys) {
-        newColorOptions[v] = {menuItem: v, legendTitle: v, key: v, type: "discrete"};
-      }
-      return Object.assign({}, state, {colorOptions: newColorOptions});
+      const colorings = Object.assign({}, state.colorings, action.newColorings);
+      return Object.assign({}, state, {colorings});
     default:
       return state;
   }

@@ -1,6 +1,6 @@
 {
   "name": "auspice",
-  "version": "1.39.0",
+  "version": "2.0.0-beta.2",
   "description": "Web app for visualizing pathogen evolution",
   "author": "James Hadfield, Trevor Bedford and Richard Neher",
   "license": "AGPL-3.0-only",
@@ -13,6 +13,7 @@
   "bin": {
     "auspice": "./auspice.js"
   },
+  "main": "index.js",
   "scripts": {
     "create-data-dir": "./scripts/create-data-dir.sh",
     "postinstall": "npm run create-data-dir",

@@ -1,7 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
-import { prettyString } from "../../util/stringHelpers";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { applyFilter } from "../../actions/tree";
@@ -112,7 +111,7 @@ export const getAcknowledgments = (dispatch, styles) => {
           {" and colleagues, whose data was shared via "}
           <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/new-lassa-virus-genomes-from-nigeria-2015-2016/191">{"this viroligical.org post. "}</a>
           {"If you intend to use these sequences prior to publication, please contact them directly to coordinate. "}
-          <span className={"link"} onClick={() => dispatch(applyFilter("authors", ["Odia_et_al"], 'set'))}>{"Click here"}</span>
+          <span className={"link"} onClick={() => dispatch(applyFilter("set", "authors", ["Odia_et_al"]))}>{"Click here"}</span>
           {" here to see these sequences in isolation."}
 
           <p/>
@@ -131,7 +130,7 @@ export const getAcknowledgments = (dispatch, styles) => {
           {". Their data was first shared via "}
           <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/2018-lasv-sequencing-continued/192/8">{"this viroligical.org post"}</a>
           {', which is continually updated. '}
-          <span className={"link"} onClick={() => dispatch(applyFilter("authors", ["ISTH-BNITM-PHE"], 'set'))}>{"Click here"}</span>
+          <span className={"link"} onClick={() => dispatch(applyFilter("set", "authors", ["ISTH-BNITM-PHE"]))}>{"Click here"}</span>
           {" here to see these sequences in isolation."}
         </div>
       );
@@ -232,8 +231,7 @@ export const getAcknowledgments = (dispatch, styles) => {
 
 const dispatchFilter = (dispatch, activeFilters, key, value) => {
   const mode = activeFilters[key].indexOf(value) === -1 ? "add" : "remove";
-  console.log(key, value)
-  dispatch(applyFilter(key, [value], mode));
+  dispatch(applyFilter(mode, key, [value]));
 };
 
 export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, itemName, display, showX) => {
@@ -287,7 +285,7 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
       className={`${outerClassName} boxed-item active-clickable`}
       style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
       onClick={() => {
-        filterNames.forEach((n) => dispatch(applyFilter(n, [], 'set')));
+        filterNames.forEach((n) => dispatch(applyFilter("set", n, [])));
       }}
     >
       {label}
@@ -324,28 +322,19 @@ class Footer extends React.Component {
 
   displayFilter(styles, filterName) {
     const totalStateCount = this.props.totalStateCounts[filterName];
+    const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
     return (
       <div>
-        {`Filter by ${prettyString(filterName)}`}
+        {`Filter by ${filterTitle}`}
         {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-          {Object.keys(totalStateCount).sort().map((itemName) => {
-            let display;
-            if (filterName === "authors") {
-              display = (
-                <span>
-                  {prettyString(itemName, {stripEtAl: true})}
-                  {" et al (" + totalStateCount[itemName] + ")"}
-                </span>
-              );
-            } else {
-              display = (
-                <span>
-                  {prettyString(itemName)}
-                  {" (" + totalStateCount[itemName] + ")"}
-                </span>
-              );
-            }
+          {Array.from(totalStateCount.keys()).sort().map((itemName) => {
+            const display = (
+              <span>
+                {itemName}
+                {` (${totalStateCount.get(itemName)})`}
+              </span>
+            );
             return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
           })}
         </Flex>
@@ -370,15 +359,22 @@ class Footer extends React.Component {
       </button>
     );
   }
-  getMaintainer() {
-    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainer")) {
-      return (
-        <span>
-          Build maintained by <a href={this.props.metadata.maintainer[1]} target="_blank">{this.props.metadata.maintainer[0]}</a>
-        </span>
-      );
-    }
-    return null;
+  hasMaintainers() {
+    return Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainers")
+  }
+  renderMaintainers() {
+    const renderLink = (m) => (<a href={m.url} target="_blank">{m.name}</a>);
+    return (
+      <span style={{textAlign: "center"}}>
+        {"Build maintained by "}
+        {this.props.metadata.maintainers.map((m, i) => (
+          <React.Fragment key={m.name}>
+            {m.url ? renderLink(m) : m.name}
+            {i === this.props.metadata.maintainers.length-1 ? "" : i === this.props.metadata.maintainers.length-2 ? " and " : ", "}
+          </React.Fragment>
+        ))}
+      </span>
+    );
   }
   getCitation() {
     return (
@@ -410,8 +406,12 @@ class Footer extends React.Component {
             );
           })}
           <Flex style={styles.fineprint}>
-            {this.getMaintainer()}
-            {dot}
+            {this.hasMaintainers() ? (
+              <>
+                {this.renderMaintainers()}
+                {dot}
+              </>
+            ) : null}
             {this.getUpdated()}
             {dot}
             {this.downloadDataButton()}

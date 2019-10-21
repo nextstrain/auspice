@@ -3,9 +3,7 @@ import { connect } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./item";
 import { headerFont, darkGrey } from "../../../globalStyles";
-import { legendRectSize, legendSpacing, fastTransitionDuration, months } from "../../../util/globals";
-import { determineColorByGenotypeType } from "../../../util/colorHelpers";
-import { prettyString } from "../../../util/stringHelpers";
+import { legendRectSize, legendSpacing, fastTransitionDuration, months, UNDEFINED_VALUE } from "../../../util/globals";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 
@@ -13,7 +11,7 @@ import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenot
 @connect((state) => {
   return {
     colorBy: state.controls.colorBy,
-    colorOptions: state.metadata.colorOptions,
+    colorings: state.metadata.colorings,
     colorScale: state.controls.colorScale
   };
 })
@@ -77,8 +75,8 @@ class Legend extends React.Component {
         ? `Genotype at ${genotype.gene} site ${genotype.positions.join(", ")}`
         : `Nucleotide at position ${genotype.positions.join(", ")}`;
     }
-    return this.props.colorOptions[this.props.colorBy] === undefined ?
-      "" : this.props.colorOptions[this.props.colorBy].legendTitle;
+    return this.props.colorings[this.props.colorBy] === undefined ?
+      "" : this.props.colorings[this.props.colorBy].title;
   }
   getTitleWidth() {
     return 15 + 5.3 * this.getTitleString().length;
@@ -141,6 +139,7 @@ class Legend extends React.Component {
   }
 
   styleLabelText(label) {
+    /* depending on the colorBy, we display different labels! */
     if (this.props.colorBy === "num_date") {
       const legendValues = this.props.colorScale.legendValues;
       if (
@@ -151,10 +150,8 @@ class Legend extends React.Component {
       }
       const [yyyy, mm, dd] = numericToCalendar(label).split('-'); // eslint-disable-line
       return `${months[mm]} ${yyyy}`;
-    } else if (this.props.colorScale.continuous) {
-      return label;
     }
-    return prettyString(label);
+    return label;
   }
 
   /*
@@ -163,7 +160,7 @@ class Legend extends React.Component {
    */
   legendItems() {
     const items = this.props.colorScale.legendValues
-      .filter((d) => d !== undefined)
+      .filter((d) => d !== UNDEFINED_VALUE)
       .map((d, i) => {
         return (
           <LegendItem

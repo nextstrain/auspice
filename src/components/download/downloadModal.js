@@ -5,7 +5,6 @@ import { withTheme } from 'styled-components';
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, extraLightGrey, infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
-import { authorString } from "../../util/stringHelpers";
 import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";
 import { getAcknowledgments} from "../framework/footer";
@@ -56,7 +55,6 @@ export const publications = {
   visibleStateCounts: state.tree.visibleStateCounts,
   filters: state.controls.filters,
   visibility: state.tree.visibility,
-  treeAttrs: state.tree.attrs,
   panelsToDisplay: state.controls.panelsToDisplay,
   panelLayout: state.controls.panelLayout
 }))
@@ -126,30 +124,10 @@ class DownloadModal extends React.Component {
           {pubs.map((pub) => (
             <li key={pub.href}>
               <a href={pub.href} target="_blank" rel="noreferrer noopener">
-                {authorString(pub.author)}, {pub.title}, <i>{pub.journal}</i> ({pub.year})
+                {pub.author}, {pub.title}, <i>{pub.journal}</i> ({pub.year})
               </a>
             </li>
           ))}
-        </ul>
-      </span>
-    );
-  }
-  relevantPublications() {
-    const titer_related_keys = ["cTiter", "rb", "ep", "ne"];
-    const titer = (titer_related_keys.indexOf(this.props.colorBy) !== -1) ?
-      (<li><a href="http://www.pnas.org/content/113/12/E1701.abstract">
-        {authorString("Neher et al")}, Prediction, dynamics, and visualization of antigenic phenotypes of seasonal influenza viruses, PNAS, 2016
-      </a></li>) : null;
-    return (
-      <span>
-        <ul>
-          <li><a href="https://doi.org/10.1093/bioinformatics/bty407" target="_blank" rel="noreferrer noopener">
-            {authorString("Hadfield et al")}, Nextstrain: real-time tracking of pathogen evolution, <i>Bioinformatics</i> (2018)
-          </a></li>
-          <li><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5758920/" target="_blank" rel="noreferrer noopener">
-            {authorString("Sagulenko et al")}, TreeTime: Maximum-likelihood phylodynamic analysis, <i>Virus Evolution</i> (2017)
-          </a></li>
-          {titer}
         </ul>
       </span>
     );
@@ -183,8 +161,8 @@ class DownloadModal extends React.Component {
     const buttons = [
       ["Tree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
       ["TimeTree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
-      ["Strain Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.treeAttrs)],
-      ["Author Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.metadata, this.props.tree)],
+      ["Strain Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes)],
+      ["Author Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)],
       ["Screenshot (SVG)", (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
     ];
     const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white"});
@@ -206,7 +184,7 @@ class DownloadModal extends React.Component {
   }
   createSummaryWrapper() {
     return createSummary(
-      this.props.metadata.virus_count,
+      this.props.metadata.mainTreeNumTips,
       this.props.nodes,
       this.props.filters,
       this.props.visibility,

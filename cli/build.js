@@ -2,20 +2,26 @@ const webpack = require("webpack");
 const path = require("path");
 const generateWebpackConfig = require("../webpack.config.js").default;
 const utils = require("./utils");
+const SUPPRESS = require('argparse').Const.SUPPRESS;
 
 const addParser = (parser) => {
-  const description = `Build the client source code for auspice.
+  const description = `Build the client source code bundle.
   For development, you may want to use "auspice develop" which recompiles code on the fly as changes are made.
   You may provide customisations (e.g. code, options) to this step to modify the functionality and appearence of auspice.
-  To serve the built code, run "auspice view".
+  To serve the bundle you will need a server such as "auspice view". 
   `;
 
   const subparser = parser.addParser('build', {addHelp: true, description});
-  subparser.addArgument('--verbose', {action: "storeTrue", help: "verbose logging"});
-  subparser.addArgument('--extend', {action: "store", help: "extension config"});
-  subparser.addArgument('--includeTiming', {action: "storeTrue", help: "keep timing functions (default: false for speed reasons)"});
-  subparser.addArgument('--serverless', {action: "storeTrue", help: "e.g gh-pages"});
-  subparser.addArgument('--analyzeBundle', {action: "storeTrue", help: "Interactive bundle analyzer tool"});
+  subparser.addArgument('--verbose', {action: "storeTrue", help: "Print more verbose progress messages."});
+  subparser.addArgument('--extend', {action: "store", metavar: "JSON", help: "Build-time customisations to be applied. See documentation for more details."});
+  const testing = subparser.addArgumentGroup({title: "Testing options"});
+  testing.addArgument('--analyzeBundle', {action: "storeTrue", help: "Load an interactive bundle analyzer tool to investigate the composition of produced bundles / chunks."});
+
+  /* there are some options which we deliberately do not document via `--help` */
+  /* timing options can be left in -- these are hardcoded in the source code and (normally) removed at build-time. Keeping these is useful for profiling performance. */
+  subparser.addArgument('--includeTiming', {action: "storeTrue", help: SUPPRESS});
+  /* serverless or "static site production" functionality is for a future release (auspice v3 ?!?) */
+  subparser.addArgument('--serverless', {action: "storeTrue", help: SUPPRESS});
 };
 
 const run = (args) => {

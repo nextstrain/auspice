@@ -8,7 +8,7 @@ import { defaultGeoResolution,
   twoColumnBreakpoint } from "../util/globals";
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
-import { checkColorByConfidence } from "../actions/recomputeReduxState";
+import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
 
 /* defaultState is a fn so that we can re-create it
 at any time, e.g. if we want to revert things (e.g. on dataset change)
@@ -28,7 +28,6 @@ export const getDefaultControlsState = () => {
   return {
     defaults,
     available: undefined,
-    source: undefined,
     canTogglePanelLayout: true,
     selectedBranch: null,
     selectedNode: null,
@@ -192,7 +191,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       const newState = Object.assign({}, state, {
         colorBy: action.colorBy,
         colorScale: action.colorScale,
-        colorByConfidence: checkColorByConfidence(state.attrs, action.colorBy)
+        colorByConfidence: doesColorByHaveConfidence(state, action.colorBy)
       });
       return newState;
     }
@@ -203,8 +202,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.APPLY_FILTER: {
       // values arrive as array
       const filters = Object.assign({}, state.filters, {});
-      filters[action.fields] = action.values;
-      // console.log(filters)
+      filters[action.trait] = action.values;
       return Object.assign({}, state, {
         filters
       });
@@ -239,6 +237,11 @@ const Controls = (state = getDefaultControlsState(), action) => {
         return Object.assign({}, state, {showTangle: !state.showTangle});
       }
       return state;
+    case types.ADD_COLOR_BYS:
+      for (const colorBy of Object.keys(action.newColorings)) {
+        state.coloringsPresentOnTree.add(colorBy);
+      }
+      return Object.assign({}, state, {coloringsPresentOnTree: state.coloringsPresentOnTree});
     default:
       return state;
   }

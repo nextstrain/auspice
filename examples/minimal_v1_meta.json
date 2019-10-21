@@ -1,0 +1,121 @@
+{
+  "color_options": {
+    "country": {
+      "key": "country",
+      "legendTitle": "country",
+      "menuItem": "country",
+      "type": "discrete"      
+    },
+    "num_date": {
+      "key": "num_date",
+      "legendTitle": "Sampling date",
+      "menuItem": "date",
+      "type": "continuous"
+    },
+    "region": {
+      "key": "region",
+      "legendTitle": "region",
+      "menuItem": "region"
+    }
+  },
+  "defaults": {
+    "colorBy": "country"
+  },
+  "filters": [
+    "country",
+    "region"
+  ],
+  "geo": {
+    "country": {
+      "american_samoa": {
+        "latitude": -14.27806,
+        "longitude": -170.7025
+      },
+      "brazil": {
+        "latitude": -10.3333332,
+        "longitude": -53.1999999
+      },
+      "colombia": {
+        "latitude": 2.893108,
+        "longitude": -73.7845142
+      },
+      "dominican_republic": {
+        "latitude": 18.50012,
+        "longitude": -69.98857
+      },
+      "ecuador": {
+        "latitude": -1.3397667,
+        "longitude": -79.3666964
+      },
+      "french_polynesia": {
+        "latitude": -17.6797,
+        "longitude": -149.4068
+      },
+      "guatemala": {
+        "latitude": 15.6356088,
+        "longitude": -89.8988086
+      },
+      "honduras": {
+        "latitude": 15.0610686,
+        "longitude": -84.5978533
+      },
+      "nicaragua": {
+        "latitude": 13.0,
+        "longitude": -85.0
+      },
+      "panama": {
+        "latitude": 8.3096067,
+        "longitude": -81.3066245
+      },
+      "puerto_rico": {
+        "latitude": 18.2459121,
+        "longitude": -66.4164147
+      },
+      "singapore": {
+        "latitude": 1.2904527,
+        "longitude": 103.852038
+      },
+      "thailand": {
+        "latitude": 14.8971921,
+        "longitude": 100.83273
+      },
+      "usa": {
+        "latitude": 39.7837304,
+        "longitude": -100.4458824
+      },
+      "venezuela": {
+        "latitude": 8.0,
+        "longitude": -66.0
+      }
+    },
+    "region": {
+      "north_america": {
+        "latitude": 28.2367447,
+        "longitude": -97.738017
+      },
+      "oceania": {
+        "latitude": -25.0562891,
+        "longitude": 152.008576
+      },
+      "south_america": {
+        "latitude": -13.083583,
+        "longitude": -58.470721
+      },
+      "southeast_asia": {
+        "latitude": 3.020567,
+        "longitude": 112.390683
+      }
+    }
+  },
+  "maintainer": [
+    "Trevor Bedford",
+    "http://bedford.io/team/trevor-bedford/"
+  ],
+  "panels": [
+    "tree",
+    "map"
+  ],
+  "title": "Minimal (v1) auspice spec based on Zika pipeline",
+  "updated": "02 Apr 2019",
+  "virus_count": 31
+}

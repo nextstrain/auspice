@@ -1,20 +1,25 @@
 import { rgb } from "d3-color";
-import { mean } from "d3-array";
 import { interpolateRgb } from "d3-interpolate";
 import { scalePow } from "d3-scale";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
+import { getTraitFromNode } from "./treeMiscHelpers";
 
 /**
-* Takes an array of color hex strings.
-* Returns a color hex string representing the average of the array.
-* @param {Array} colors - array of hex strings
-*/
-export const averageColors = (hexColors) => {
-  const colors = hexColors.map((hex) => rgb(hex));
-  const reds = colors.map((col) => col.r);
-  const greens = colors.map((col) => col.g);
-  const blues = colors.map((col) => col.b);
-  const avg = rgb(mean(reds), mean(greens), mean(blues));
+ * Average over the visible colours for a given location
+ * @param {array} nodes list of nodes whose colours we want to average over
+ * @param {array} nodeColours (redux state) -- list of node hexes. Not in 1-1 correspondence with `nodes`.
+ * @returns {str} a color hex string representing the average of the array.
+ */
+export const getAverageColorFromNodes = (nodes, nodeColors) => {
+  let r=0, g=0, b=0;
+  nodes.forEach((n) => {
+    const tmpRGB = rgb(nodeColors[n.arrayIdx]);
+    r += tmpRGB.r;
+    g += tmpRGB.g;
+    b += tmpRGB.b;
+  });
+  const total = nodes.length;
+  const avg = rgb(r/total, g/total, b/total);
   return avg.toString();
 };
 
@@ -28,23 +33,22 @@ export const determineColorByGenotypeMutType = (colorBy) => {
   return false;
 };
 
+
 /**
-* what values (for colorBy) are present in the tree and not in the color_map?
+* what colorBy trait names are present in the tree but _not_ in the provided scale?
 * @param {Array} nodes - list of nodes
 * @param {Array|undefined} nodesToo - list of nodes for the second tree
 * @param {string} colorBy -
-* @param {Array} color_map - list of colorBy values with colours
+* @param {Array} providedVals - list of provided trait values
 * @return {list}
 */
-export const getExtraVals = (nodes, nodesToo, colorBy, color_map) => {
-  let valsInTree = [];
-  nodes.forEach((n) => valsInTree.push(n.attr[colorBy]));
-  if (nodesToo) nodesToo.forEach((n) => valsInTree.push(n.attr[colorBy]));
+export const getExtraVals = (nodes, nodesToo, colorBy, providedVals) => {
+  let valsInTree = nodes.map((n) => getTraitFromNode(n, colorBy));
+  if (nodesToo) {
+    nodesToo.forEach((n) => valsInTree.push(getTraitFromNode(n, colorBy)));
+  }
   valsInTree = [...new Set(valsInTree)];
-  const valsInMeta = color_map.map((d) => { return d[0];});
-  // console.log("here", valsInMeta, valsInTree, valsInTree.filter((x) => valsInMeta.indexOf(x) === -1))
-  // only care about values in tree NOT in metadata
-  return valsInTree.filter((x) => valsInMeta.indexOf(x) === -1);
+  return valsInTree.filter((x) => providedVals.indexOf(x) === -1);
 };
 
 
@@ -54,7 +58,7 @@ export const getTipColorAttribute = (node, colorScale) => {
   if (isColorByGenotype(colorScale.colorBy) && colorScale.genotype) {
     return node.currentGt;
   }
-  return node.attr[colorScale.colorBy];
+  return getTraitFromNode(node, colorScale.colorBy);
 };
 
 /* generates and returns an array of colours (HEXs) for the nodes under the given colorScale */
@@ -90,9 +94,8 @@ export const branchOpacityFunction = scalePow()
  */
 export const calcBranchStrokeCols = (tree, confidence, colorBy) => {
   if (confidence === true) {
-    const entropyKey = colorBy + "_entropy";
     return tree.nodeColors.map((col, idx) => {
-      const entropy = tree.nodes[idx].attr[entropyKey];
+      const entropy = getTraitFromNode(tree.nodes[idx], colorBy, {entropy: true});
       const opacity = entropy ? branchOpacityFunction(entropy) : branchOpacityConstant;
       return rgb(interpolateRgb(col, branchInterpolateColour)(opacity)).toString();
     });

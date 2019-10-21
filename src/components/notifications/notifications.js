@@ -86,7 +86,7 @@ class Notifications extends React.Component {
             </div>
           </div>
         </div>
-        {d.notificationType === "error" ? this.closeIcon(d) : <g/>}
+        {d.notificationType === "error" ? this.closeIcon(d) : null}
         {/* <div className="close icon icon-x"></div> */}
       </div>
     );

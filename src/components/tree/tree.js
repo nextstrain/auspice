@@ -11,6 +11,7 @@ import { tabSingle, darkGrey, lightGrey } from "../../globalStyles";
 import { renderTree } from "./reactD3Interface/initialRender";
 import Tangle from "./tangle";
 import { attemptUntangle } from "../../util/globals";
+import ErrorBoundary from "../../util/errorBoundry";
 import { untangleTreeToo } from "./tangle/untangling";
 
 export const spaceBetweenTrees = 100;
@@ -124,11 +125,10 @@ class Tree extends React.Component {
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
       <Card center title={"Phylogeny"}>
-        <Legend width={this.props.width}/>
+        <ErrorBoundary>
+          <Legend width={this.props.width}/>
+        </ErrorBoundary>
         <HoverInfoPanel
-          mutType={this.props.mutType}
-          temporalConfidence={this.props.temporalConfidence.display}
-          distanceMeasure={this.props.distanceMeasure}
           hovered={this.state.hovered}
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
@@ -138,7 +138,6 @@ class Tree extends React.Component {
         <TipClickedPanel
           goAwayCallback={this.clearSelectedTip}
           tip={this.state.selectedTip}
-          metadata={this.props.metadata}
         />
         {this.props.showTangle && this.state.tree && this.state.treeToo ? (
           <Tangle
@@ -153,8 +152,8 @@ class Tree extends React.Component {
             vVersion={this.props.tree.visibilityVersion}
             metric={this.props.distanceMeasure}
             spaceBetweenTrees={spaceBetweenTrees}
-            leftTreeName={this.props.tree.name.toUpperCase()}
-            rightTreeName={this.props.showTreeToo.toUpperCase()}
+            leftTreeName={this.props.tree.name}
+            rightTreeName={this.props.showTreeToo}
           />
         ) : null }
         {this.renderTreeDiv({width: widthPerTree, height: this.props.height, mainTree: true})}

@@ -1,8 +1,8 @@
 import React from "react";
+import { isValueValid } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
-import { prettyString, authorString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
-// import { getAuthor } from "../download/helperFunctions";
+import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode } from "../../../util/treeMiscHelpers";
 
 export const styles = {
   container: {
@@ -30,10 +30,14 @@ export const stopProp = (e) => {
 };
 
 /* min width to get "collection date" on 1 line: 120 */
-const item = (key, value) => (
+const item = (key, value, href) => (
   <tr key={key}>
     <th style={infoPanelStyles.item}>{key}</th>
-    <td style={infoPanelStyles.item}>{value}</td>
+    <td style={infoPanelStyles.item}>{href ? (
+      <a href={href} target="_blank" rel="noopener noreferrer">{value}</a>
+    ) :
+      value
+    }</td>
   </tr>
 );
 
@@ -46,81 +50,144 @@ const formatURL = (url) => {
   return url;
 };
 
-const dateConfidence = (x) => (
-  item("Collection date confidence", `(${numericToCalendar(x[0])}, ${numericToCalendar(x[1])})`)
-);
+const AccessionAndUrl = ({node}) => {
+  const accession = getTraitFromNode(node, "accession");
+  const url = getTraitFromNode(node, "url");
 
-const accessionAndURL = (url, accession) => (
-  <tr>
-    <th>Accession</th>
-    <td><a href={url} target="_blank">{accession}</a></td>
-  </tr>
-);
-
-const justURL = (url) => (
-  <tr>
-    <th>URL</th>
-    <td><a href={url} target="_blank"><em>click here</em></a></td>
-  </tr>
-);
-
-const displayVaccineInfo = (d) => {
-  if (d.n.vaccineDate) {
+  if (isValueValid(accession) && isValueValid(url)) {
     return (
       <tr>
-        <th>Vaccine strain</th>
-        <td>{d.n.vaccineDate}</td>
+        <th style={infoPanelStyles.item}>Accession</th>
+        <td style={infoPanelStyles.item}>
+          <a href={formatURL(url)} target="_blank">{accession}</a>
+        </td>
+      </tr>
+    );
+  } else if (isValueValid(accession)) {
+    return (
+      item("Accession", accession)
+    );
+  } else if (isValueValid(url)) {
+    return (
+      <tr>
+        <th style={infoPanelStyles.item}>URL</th>
+        <td style={infoPanelStyles.item}>
+          <a href={formatURL(url)} target="_blank"><em>click here</em></a>
+        </td>
       </tr>
     );
   }
   return null;
 };
 
-const validValue = (value) => value !== "?" && value !== undefined && value !== "undefined";
-const validAttr = (attrs, key) => key in attrs && validValue(attrs[key]);
 
-const TipClickedPanel = ({tip, goAwayCallback, metadata}) => {
-  if (!tip) {return null;}
-  const url = validAttr(tip.n.attr, "url") ? formatURL(tip.n.attr.url) : false;
-  const uncertainty = "num_date_confidence" in tip.n.attr && tip.n.attr.num_date_confidence[0] !== tip.n.attr.num_date_confidence[1];
-  const author = tip.n.attr.authors || undefined;
-  let authorInfo = {
-    author: {
-      n: null,
-      title: null,
-      journal: null,
-      paper_url: null
-    }
-  };
-  if (metadata.author_info) {
-    authorInfo = metadata.author_info;
+const VaccineInfo = ({node}) => {
+  const vaccineInfo = getVaccineFromNode(node);
+  if (!vaccineInfo) return null;
+  const renderElements = [];
+  if (vaccineInfo.selection_date) {
+    renderElements.push(
+      <tr key={"seldate"}>
+        <th>Vaccine selected</th>
+        <td>{vaccineInfo.selection_date}</td>
+      </tr>
+    );
   }
+  if (vaccineInfo.start_date) {
+    renderElements.push(
+      <tr key={"startdate"}>
+        <th>Vaccine start date</th>
+        <td>{vaccineInfo.start_date}</td>
+      </tr>
+    );
+  }
+  if (vaccineInfo.end_date) {
+    renderElements.push(
+      <tr key={"enddate"}>
+        <th>Vaccine end date</th>
+        <td>{vaccineInfo.end_date}</td>
+      </tr>
+    );
+  }
+  if (vaccineInfo.serum) {
+    renderElements.push(
+      <tr key={"serum"}>
+        <th>Serum strain</th>
+        <td/>
+      </tr>
+    );
+  }
+  return renderElements;
+};
+
+const PublicationInfo = ({node}) => {
+  const info = getFullAuthorInfoFromNode(node);
+  if (!info) return null;
+
+  const itemsToRender = [];
+  itemsToRender.push(item("Authors", info.value));
+  if (info.title && info.title !== "?") {
+    if (info.paper_url && info.paper_url !== "?") {
+      itemsToRender.push(item("Title", info.title, info.paper_url));
+    } else {
+      itemsToRender.push(item("Title", info.title));
+    }
+  }
+  if (info.journal && info.journal !== "?") {
+    itemsToRender.push(item("Journal", info.journal));
+  }
+  return (itemsToRender.length === 1 ? itemsToRender[0] : itemsToRender);
+};
+
+const StrainName = ({children}) => (
+  <p style={infoPanelStyles.modalHeading}>{children}</p>
+);
+
+const SampleDate = ({node}) => {
+  const date = getTraitFromNode(node, "num_date");
+  if (!date) return null;
+
+  const dateUncertainty = getTraitFromNode(node, "num_date", {confidence: true});
+  if (date && dateUncertainty && dateUncertainty[0] !== dateUncertainty[1]) {
+    return (
+      <>
+        {item("Inferred collection date", numericToCalendar(date))}
+        {item("Collection date confidence", `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)}
+      </>
+    );
+  }
+
+  return item("Collection date", numericToCalendar(date));
+};
+
+const getTraitsToDisplay = (node) => {
+  // TODO -- this should be centralised somewhere
+  if (!node.node_attrs) return [];
+  const ignore = ["author", "div", "num_date"];
+  return Object.keys(node.node_attrs).filter((k) => !ignore.includes(k));
+};
+
+const Trait = ({node, trait}) => {
+  const value = getTraitFromNode(node, trait);
+  return isValueValid(value) ? item(trait, value) : null;
+};
+
+const TipClickedPanel = ({tip, goAwayCallback}) => {
+  if (!tip) {return null;}
+  const node = tip.n;
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
       <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
-        <p style={infoPanelStyles.modalHeading}>
-          {`${tip.n.strain}`}
-        </p>
+        <StrainName>{node.name}</StrainName>
         <table>
           <tbody>
-            {displayVaccineInfo(tip) /* vaccine information (if applicable) */}
-            {/* the "basic" attributes (which may not exist in certain datasets) */}
-            {["country", "region", "division"].map((x) => {
-              return validAttr(tip.n.attr, x) ? item(prettyString(x), prettyString(tip.n.attr[x])) : null;
-            })}
-            {/* Dates */}
-            {item(uncertainty ? "Inferred collection date" : "Collection date", prettyString(tip.n.attr.date))}
-            {uncertainty ? dateConfidence(tip.n.attr.num_date_confidence) : null}
-            {/* Paper Title, Author(s), Accession + URL (if provided) - from info.json NOT tree.json */}
-            {authorInfo[author] && authorInfo[author].title && validValue(authorInfo[author].title) ? item("Publication", prettyString(authorInfo[author].title, {trim: 80, camelCase: false})) : null}
-            {validAttr(tip.n.attr, "authors") ? item("Authors", authorString(tip.n.attr.authors)) : null}
-            {/* try to join URL with accession, else display the one that's available */}
-            {url && validAttr(tip.n.attr, "accession") ?
-              accessionAndURL(url, tip.n.attr.accession) :
-              url ? justURL(url) :
-                validAttr(tip.n.attr, "accession") ? item("Accession", tip.n.attr.accession) :
-                  null
-            }
+            <VaccineInfo node={node} />
+            <SampleDate node={node}/>
+            <PublicationInfo node={node}/>
+            {getTraitsToDisplay(node).map((trait) => (
+              <Trait node={node} trait={trait}/>
+            ))}
+            <AccessionAndUrl node={node}/>
           </tbody>
         </table>
         <p style={infoPanelStyles.comment}>

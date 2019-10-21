@@ -16,7 +16,6 @@ import { SidebarHeader, ControlsContainer } from "./styles";
 
 const Controls = ({mapOn}) => (
   <ControlsContainer>
-    <SidebarHeader>Dataset</SidebarHeader>
     <ChooseDataset/>
 
     <SidebarHeader>Date Range</SidebarHeader>

@@ -1,18 +1,20 @@
 import { freqScale, NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE } from "./globals";
 import { calcTipCounts } from "./treeCountingHelpers";
+import { getTraitFromNode } from "./treeMiscHelpers";
 
 export const getVisibleDateRange = (nodes, visibility) => nodes
   .filter((node, idx) => (visibility[idx] === NODE_VISIBLE && !node.hasChildren))
   .reduce((acc, node) => {
-    if (node.attr.num_date < acc[0]) return [node.attr.num_date, acc[1]];
-    if (node.attr.num_date > acc[1]) return [acc[0], node.attr.num_date];
+    const nodeDate = getTraitFromNode(node, "num_date");
+    if (nodeDate && nodeDate < acc[0]) return [nodeDate, acc[1]];
+    if (nodeDate && nodeDate > acc[1]) return [acc[0], nodeDate];
     return acc;
   }, [100000, -100000]);
 
 export const strainNameToIdx = (nodes, name) => {
   let i;
   for (i = 0; i < nodes.length; i++) {
-    if (nodes[i].strain === name) {
+    if (nodes[i].name === name) {
       return i;
     }
   }
@@ -20,14 +22,26 @@ export const strainNameToIdx = (nodes, name) => {
   return 0;
 };
 
-export const cladeNameToIdx = (nodes, name) => {
+/**
+ * Find the node with the given label name & value
+ * NOTE: if there are multiple nodes with the same label then the first encountered is returned
+ * @param {Array} nodes tree nodes (flat)
+ * @param {string} labelName label name
+ * @param {string} labelValue label value
+ * @returns {int} the index of the matching node (0 if no match found)
+ */
+export const getIdxMatchingLabel = (nodes, labelName, labelValue) => {
   let i;
   for (i = 0; i < nodes.length; i++) {
-    if (nodes[i].attr.labels !== undefined && nodes[i].attr.labels.clade !== undefined && nodes[i].attr.labels.clade === name) {
+    if (
+      nodes[i].branch_attrs &&
+      nodes[i].branch_attrs.labels !== undefined &&
+      nodes[i].branch_attrs.labels[labelName] === labelValue
+    ) {
       return i;
     }
   }
-  console.error("cladeNameToIdx couldn't find clade");
+  console.error(`getIdxMatchingLabel couldn't find label ${labelName}===${labelValue}`);
   return 0;
 };
 
@@ -74,9 +88,8 @@ const identifyPathToTip = (nodes, tipIdx) => {
   const visibility = new Array(nodes.length).fill(false);
   visibility[tipIdx] = true;
   makeParentVisible(visibility, nodes[tipIdx]); /* recursive */
-  return visibility.map((cv) => cv ? 2 : 0);
+  return visibility.map((cv) => cv ? NODE_VISIBLE : NODE_NOT_VISIBLE);
 };
-
 
 /* calcVisibility
 USES:
@@ -99,11 +112,9 @@ ROUGH DESCRIPTION OF HOW FILTERING IS APPLIED:
     the time & inView visibile stuff
 
 FILTERS:
- - filters stored in redux - controls.filters
- - filters have 2 keys, each with an array of values
-   keys: "region" and/or "authors"
- - filterPairs is a list of lists. Each list defines the filtering to do.
-   i.e. [ [ region, [...values]], [authors, [...values]]]
+ - controls.filters (redux) is a dict of trait name -> values
+ - filters (in this code) is a list of filters to apply
+   e.g. [{trait: "country", values: [...]}, ...]
 */
 const calcVisibility = (tree, controls, dates) => {
   if (tree.nodes) {
@@ -119,17 +130,17 @@ const calcVisibility = (tree, controls, dates) => {
     }
 
     // FILTERS
-    let filtered;
-    const filterPairs = [];
-    Object.keys(controls.filters).forEach((key) => {
-      if (controls.filters[key].length) {
-        filterPairs.push([key, controls.filters[key]]);
+    let filtered; // array of bools, same length as tree.nodes. true -> that node should be visible
+    const filters = [];
+    Object.keys(controls.filters).forEach((trait) => {
+      if (controls.filters[trait].length) {
+        filters.push({trait, values: controls.filters[trait]});
       }
     });
-    if (filterPairs.length) {
+    if (filters.length) {
       /* find the terminal nodes that were (a) already visibile and (b) match the filters */
       filtered = tree.nodes.map((d, idx) => (
-        !d.hasChildren && inView[idx] && filterPairs.every((x) => x[1].indexOf(d.attr[x[0]]) > -1)
+        !d.hasChildren && inView[idx] && filters.every((f) => f.values.includes(getTraitFromNode(d, f.trait)))
       ));
       const idxsOfFilteredTips = filtered.reduce((a, e, i) => {
         if (e) {a.push(i);}
@@ -143,10 +154,13 @@ const calcVisibility = (tree, controls, dates) => {
     /* intersect the various arrays contributing to visibility */
     const visibility = tree.nodes.map((node, idx) => {
       if (inView[idx] && (filtered ? filtered[idx] : true)) {
-        const nodeDate = node.attr.num_date;
-        /* if without date, treetime probably not run - or would be inferred
-          so if branchLengthsToDisplay is "divOnly", then ensure node displayed */
-        if (controls.branchLengthsToDisplay === "divOnly" && node.attr.num_date === undefined) {
+        const nodeDate = getTraitFromNode(node, "num_date");
+        const parentNodeDate = getTraitFromNode(node.parent, "num_date");
+        if (!nodeDate || !parentNodeDate) {
+          return NODE_VISIBLE;
+        }
+        /* if branchLengthsToDisplay is "divOnly", then ensure node displayed */
+        if (controls.branchLengthsToDisplay === "divOnly") {
           return NODE_VISIBLE;
         }
         /* is the actual node date (the "end" of the branch) in the time slice? */
@@ -154,7 +168,7 @@ const calcVisibility = (tree, controls, dates) => {
           return NODE_VISIBLE;
         }
         /* is any part of the (parent date -> node date) in the time slice? */
-        if (!(nodeDate < dates.dateMinNumeric || node.parent.attr.num_date > dates.dateMaxNumeric)) {
+        if (!(nodeDate < dates.dateMinNumeric || parentNodeDate > dates.dateMaxNumeric)) {
           return NODE_VISIBLE_TO_MAP_ONLY;
         }
       }

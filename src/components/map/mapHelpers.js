@@ -1,7 +1,7 @@
 import _findIndex from "lodash/findIndex";
 import _findLastIndex from "lodash/findLastIndex";
 import _max from "lodash/max";
-import { line, curveBasis } from "d3-shape";
+import { line, curveBasis, arc } from "d3-shape";
 import { easeLinear } from "d3-ease";
 import { demeCountMultiplier, demeCountMinimum } from "../../util/globals";
 
@@ -116,6 +116,16 @@ const extractLineSegmentForAnimationEffect = (
   return curve;
 };
 
+const createArcsFromDemes = (demeData) => {
+  const individualArcs = [];
+  demeData.forEach((demeInfo) => {
+    demeInfo.arcs.forEach((slice) => {
+      individualArcs.push(slice);
+    });
+  });
+  return individualArcs;
+};
+
 export const drawDemesAndTransmissions = (
   demeData,
   transmissionData,
@@ -123,7 +133,8 @@ export const drawDemesAndTransmissions = (
   map,
   nodes,
   numDateMin,
-  numDateMax
+  numDateMax,
+  pieChart /* bool */
 ) => {
 
   // add transmission lines
@@ -152,20 +163,47 @@ export const drawDemesAndTransmissions = (
     .attr("stroke", (d) => { return d.color; })
     .attr("stroke-width", 1);
 
-  // add demes
   const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
-  const demes = g.selectAll("demes")
-    .data(demeData)
-    .enter().append("circle")
-    .style("stroke", "none")
-    .style("fill-opacity", 0.65)
-    .style("fill", (d) => { return d.color; })
-    .style("stroke-opacity", 0.85)
-    .style("stroke", (d) => { return d.color; })
-    .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); })
-    .attr("transform", (d) => {
-      return "translate(" + d.coords.x + "," + d.coords.y + ")";
+  let demes;
+  // determine whether to draw pieChart or not (sensible for categorical data)
+  if (pieChart) {
+    /* each datapoint in `demeData` contains `arcs` which comprise n individual "slices"
+     * we need to create an array of all of these slices for d3 to render
+     */
+    const individualArcs = createArcsFromDemes(demeData);
+
+    /* add `outerRadius` to all slices */
+    // TODO - move this to initial arc creation in setupDemeData as it's only ever done once
+    individualArcs.forEach((a) => {
+      a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count)*demeMultiplier;
     });
+
+    demes = g.selectAll('demes') // add individual arcs ("slices") to this selection
+      .data(individualArcs)
+      .enter().append("path")
+      .attr("d", (d) => arc()(d))
+      /* following calls are (almost) the same for pie charts & circles */
+      .style("stroke", "none")
+      .style("fill-opacity", 0.65)
+      .style("fill", (d) => { return d.color; })
+      .style("stroke-opacity", 0.85)
+      .style("stroke", (d) => { return d.color; })
+      .attr("transform", (d) =>
+        "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
+      );
+  } else {
+    demes = g.selectAll("demes") // add deme circles to this selection
+      .data(demeData)
+      .enter().append("circle")
+      .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); })
+      /* following calls are (almost) the same for pie charts & circles */
+      .style("stroke", "none")
+      .style("fill-opacity", 0.65)
+      .style("fill", (d) => { return d.color; })
+      .style("stroke-opacity", 0.85)
+      .style("stroke", (d) => { return d.color; })
+      .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")");
+  }
 
   return {
     demes,
@@ -174,15 +212,27 @@ export const drawDemesAndTransmissions = (
 
 };
 
-export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin, numDateMax) => {
+export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin, numDateMax, pieChart) => {
   /* map has moved or rescaled, make demes and transmissions line up */
   if (!d3elems) { return; }
 
-  d3elems.demes
-    .data(demeData)
-    .attr("transform", (d) => {
-      return "translate(" + d.coords.x + "," + d.coords.y + ")";
-    });
+  /* move the pie charts differently to the color-blended circles */
+  if (pieChart) {
+    const individualArcs = createArcsFromDemes(demeData);
+    d3elems.demes
+      .data(individualArcs)
+      .attr("transform", (d) =>
+        /* copied from above. TODO. */
+        "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
+      );
+  } else {
+    d3elems.demes
+      .data(demeData)
+      .attr("transform", (d) =>
+        /* copied from above. TODO. */
+        "translate(" + d.coords.x + "," + d.coords.y + ")"
+      );
+  }
 
   d3elems.transmissions
     .data(transmissionData)
@@ -210,7 +260,8 @@ export const updateVisibility = (
   map,
   nodes,
   numDateMin,
-  numDateMax
+  numDateMax,
+  pieChart
 ) => {
 
   if (!d3elems) {
@@ -218,15 +269,32 @@ export const updateVisibility = (
     return;
   }
   const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
-  d3elems.demes
-    .data(demeData)
-    .transition()
-    .duration(200)
-    .ease(easeLinear)
-    .style("stroke", (d) => { return d.count > 0 ? d.color : "white"; })
-    .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
-    .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); });
 
+  if (pieChart) {
+    const individualArcs = createArcsFromDemes(demeData);
+    /* add `outerRadius` to all slices */
+    // TODO - move this to initial arc creation in setupDemeData as it's only ever done once
+    individualArcs.forEach((a) => {
+      a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count)*demeMultiplier;
+    });
+    d3elems.demes
+      .data(individualArcs)
+      .attr("d", (d) => arc()(d))
+      .style("fill", (d) => { return d.color; })
+      .style("stroke", (d) => { return d.color; });
+  } else {
+    /* for colour blended circles we just have to update the colours & size (radius) */
+    d3elems.demes
+      .data(demeData)
+      .transition()
+      .duration(200)
+      .ease(easeLinear)
+      .style("stroke", (d) => { return d.count > 0 ? d.color : "white"; })
+      .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
+      .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); });
+  }
+
+  /* update the path and stroke colour of transmission lines */
   d3elems.transmissions
     .data(transmissionData)
     .attr("d", (d) => {

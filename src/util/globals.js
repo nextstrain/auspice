@@ -161,6 +161,18 @@ export const colorByMenuPreferredOrdering = [
 ];
 
 export const months = {
+  1: 'Jan',
+  2: 'Feb',
+  3: 'Mar',
+  4: 'Apr',
+  5: 'May',
+  6: 'Jun',
+  7: 'Jul',
+  8: 'Aug',
+  9: 'Sep',
+  10: 'Oct',
+  11: 'Nov',
+  12: 'Dec',
   '01': 'Jan',
   '02': 'Feb',
   '03': 'Mar',
@@ -169,16 +181,17 @@ export const months = {
   '06': 'Jun',
   '07': 'Jul',
   '08': 'Aug',
-  '09': 'Sep',
-  '10': 'Oct',
-  '11': 'Nov',
-  '12': 'Dec'
+  '09': 'Sep'
 };
 
 export const normalNavBarHeight = 50;
 export const narrativeNavBarHeight = 55;
 
-// increasing levels of "visibility"
 export const NODE_NOT_VISIBLE = 0;          // branch thickness 0 and excluded from map
 export const NODE_VISIBLE_TO_MAP_ONLY = 1;  // branch thickness 0.5 and included in map
 export const NODE_VISIBLE = 2;              // included on tree and map
+
+export const UNDEFINED_VALUE = "undefined";
+export const invalidValues = [UNDEFINED_VALUE, undefined, "unknown", "?", "nan", "na", "n/a", "", "unassigned"];
+export const isValueValid = (value) =>
+  !invalidValues.includes(String(value).toLowerCase());

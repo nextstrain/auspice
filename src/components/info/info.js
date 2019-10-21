@@ -3,7 +3,6 @@ import { connect } from "react-redux";
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
-import { prettyString } from "../../util/stringHelpers";
 import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { months, NODE_VISIBLE } from "../../util/globals";
@@ -61,11 +60,11 @@ const arrayToSentence = (arr, {prefix=undefined, suffix=undefined, capatalise=tr
   return ret + " ";
 };
 
-export const createSummary = (virus_count, nodes, filters, visibility, visibleStateCounts, branchLengthsToDisplay) => {
+export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visibleStateCounts, branchLengthsToDisplay) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
   const sampledDateRange = getVisibleDateRange(nodes, visibility);
   /* Number of genomes & their date range */
-  let summary = `Showing ${nSelectedSamples} of ${virus_count} genomes`;
+  let summary = `Showing ${nSelectedSamples} of ${mainTreeNumTips} genomes`;
   if (branchLengthsToDisplay !== "divOnly") {
     summary += ` sampled between ${styliseDateRange(sampledDateRange[0])} and ${styliseDateRange(sampledDateRange[1])}`;
   }
@@ -154,14 +153,6 @@ class Info extends React.Component {
     };
   }
 
-  getNumSelectedAuthors() {
-    if (this.props.metadata.author_info) {
-      if (!Object.prototype.hasOwnProperty.call(this.props.filters, "authors") || this.props.filters.authors.length === 0) {
-        return Object.keys(this.props.metadata.author_info).length;
-      }
-    }
-    return this.props.filters.authors.length;
-  }
   addFilteredDatesButton(buttons) {
     buttons.push(
       <div key={"timefilter"} style={{display: "inline-block"}}>
@@ -185,8 +176,8 @@ class Info extends React.Component {
     this.props.filters[filterName].sort().forEach((itemName) => {
       const display = (
         <span>
-          {prettyString(itemName)}
-          {" (" + this.props.totalStateCounts[filterName][itemName] + ")"}
+          {itemName}
+          {` (${this.props.totalStateCounts[filterName].get(itemName)})`}
         </span>
       );
       buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));
@@ -221,7 +212,7 @@ class Info extends React.Component {
       <span
         style={{cursor: "pointer", color: '#5097BA'}}
         key={field}
-        onClick={() => this.props.dispatch(applyFilter(field, []))}
+        onClick={() => this.props.dispatch(applyFilter("set", field, []))}
         role="button"
         tabIndex={0}
       >
@@ -230,54 +221,9 @@ class Info extends React.Component {
     );
   }
 
-  addFilteredAuthorsButton(buttons) {
-    if (!this.props.metadata.author_info) {return;}
-    const nTotalAuthors = Object.keys(this.props.metadata.author_info).length;
-    const nSelectedAuthors = this.getNumSelectedAuthors(); // will be equal to nTotalAuthors if none selected
-    /* case 1 (no selected authors) - return now. */
-    if (nTotalAuthors === nSelectedAuthors) {return;}
-    const authorInfo = this.props.filters.authors.map((v) => {
-      const n = this.props.totalStateCounts.authors[v];
-      return {
-        name: v,
-        label: (
-          <span>
-            {prettyString(v, {stripEtAl: true})}
-            <i>{" et al, "}</i>
-            {`(n=${n})`}
-          </span>
-        ),
-        longlabel: (
-          <span>
-            {prettyString(v, {stripEtAl: true})}
-            <i>{" et al, "}</i>
-            {prettyString(this.props.metadata.author_info[v].title)}
-            {` (n=${n})`}
-          </span>
-        )
-      };
-    });
-    /* case 2: 1 or 2 authors selected */
-    if (nSelectedAuthors > 0 && nSelectedAuthors < 3) {
-      authorInfo.forEach((d) => (
-        buttons.push(
-          displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.longlabel, true)
-        )
-      ));
-      return;
-    }
-    /* case 3: more than 2 authors selected. */
-    authorInfo.forEach((d) => (
-      buttons.push(
-        displayFilterValueAsButton(this.props.dispatch, this.props.filters, "authors", d.name, d.label, true)
-      )
-    ));
-  }
-
   render() {
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
     const styles = this.getStyles(this.props.width);
-    // const nSelectedAuthors = this.getNumSelectedAuthors();
     // const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
     const animating = this.props.animationPlayPauseButton === "Pause";
     const showExtended = !animating && !this.props.selectedStrain;
@@ -292,13 +238,11 @@ class Info extends React.Component {
     (2) The active filters: Filtered to [[Metsky et al Zika Virus Evolution And Spread In The Americas (76)]], [[Colombia (28)]].
     */
 
-    const summary = createSummary(this.props.metadata.virus_count, this.props.nodes, this.props.filters, this.props.visibility, this.props.visibleStateCounts, this.props.branchLengthsToDisplay);
+    const summary = createSummary(this.props.metadata.mainTreeNumTips, this.props.nodes, this.props.filters, this.props.visibility, this.props.visibleStateCounts, this.props.branchLengthsToDisplay);
 
     /* part II - the active filters */
     const filters = [];
-    this.addFilteredAuthorsButton(filters);
     Object.keys(this.props.filters)
-      .filter((n) => n !== "authors")
       .filter((n) => this.props.filters[n].length > 0)
       .forEach((n) => this.addNonAuthorFilterButton(filters, n));
     if (!datesMaxed) {this.addFilteredDatesButton(filters);}

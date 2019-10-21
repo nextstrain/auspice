@@ -1,10 +1,12 @@
-import _forOwn from "lodash/forOwn";
+/* eslint-disable no-loop-func */
 import _map from "lodash/map";
 import _minBy from "lodash/minBy";
 import { interpolateNumber } from "d3-interpolate";
-import { averageColors } from "../../util/colorHelpers";
+import { getAverageColorFromNodes } from "../../util/colorHelpers";
 import { bezier } from "./transmissionBezier";
 import { NODE_NOT_VISIBLE } from "../../util/globals";
+import { getTraitFromNode } from "../../util/treeMiscHelpers";
+import { isColorByGenotype } from "../../util/getGenotype";
 import { errorNotification } from "../../actions/notifications";
 
 /* global L */
@@ -43,72 +45,143 @@ const maybeGetTransmissionPair = (latOrig, longOrig, latDest, longDest, map) => 
 
 };
 
-const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map) => {
+/**
+ * Traverses the tips of the tree to create a dict of
+ * location(deme) -> list of visible tips at that location
+ */
+const getVisibleNodesPerLocation = (nodes, visibility, geoResolution) => {
+  const locationToVisibleNodes = {};
+  nodes.forEach((n, i) => {
+    if (n.children) return; /* only consider terminal nodes */
+    const location = getTraitFromNode(n, geoResolution);
+    if (!location) return; /* ignore undefined locations */
+    if (!locationToVisibleNodes[location]) locationToVisibleNodes[location]=[];
+    if (visibility[i] !== NODE_NOT_VISIBLE) {
+      locationToVisibleNodes[location].push(n);
+    }
+  });
+  return locationToVisibleNodes;
+};
+
+/**
+ * Either create arcs for the current `visibleNodes`, in the order of the legendValues, or update the arcs
+ * (by updating we mean changing the arc start/end angles)
+ * @param {array} visibleNodes visible nodes for this pie chart
+ * @param {array} legendValues for this colorBy
+ * @param {string} colorBy current color by
+ * @param {array} nodeColors Array of colors for all nodes (not in correspondence with `visibleNodes`)
+ * @param {array} currentArcs only used if updating. Array of current arcs.
+ * @returns {array} arcs for display
+ */
+const createOrUpdateArcs = (visibleNodes, legendValues, colorBy, nodeColors, currentArcs=undefined) => {
+  const colorByIsGenotype = isColorByGenotype(colorBy);
+  const legendValueToArcIdx = {};
+  const undefinedArcIdx = legendValues.length; /* the arc which is grey to represent undefined values on tips */
+  let arcs;
+  if (currentArcs) {
+    /* updating arcs -- reset `_count` */
+    arcs = currentArcs;
+    legendValues.forEach((v, i) => {
+      legendValueToArcIdx[v] = i;
+      arcs[i]._count = 0;
+    });
+    arcs[undefinedArcIdx]._count = 0;
+  } else {
+    /* creating arcs */
+    arcs = legendValues.map((v, i) => {
+      legendValueToArcIdx[v] = i;
+      return {innerRadius: 0, _count: 0};
+    });
+    arcs.push({innerRadius: 0, _count: 0}); // for the undefined arc
+  }
+  /* traverse visible nodes (for this location) to get numbers for each arc (i.e. each slice in the pie) */
+  visibleNodes.forEach((n) => {
+    const colorByValue = colorByIsGenotype ? n.currentGt: getTraitFromNode(n, colorBy);
+    let arcIdx = legendValueToArcIdx[colorByValue];
+    if (arcIdx === undefined) arcIdx = undefinedArcIdx;
+    arcs[arcIdx]._count++;
+    if (!arcs[arcIdx].color) arcs[arcIdx].color=nodeColors[n.arrayIdx];
+  });
+  /* turn counts into arc angles (radians) */
+  let startAngle = 0;
+  arcs.forEach((a) => {
+    a.startAngle = startAngle;
+    startAngle += 2*Math.PI*a._count/visibleNodes.length;
+    a.endAngle = startAngle;
+    if (a.startAngle === a.endAngle) {
+      // this prevents drawing a 'line' for 'empty' slices
+      a.color = "";
+    }
+  });
+  return arcs;
+};
+
+
+const setupDemeData = (nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart, legendValues, colorBy) => {
 
   const demeData = []; /* deme array */
   const demeIndices = {}; /* map of name to indices in array */
 
-  // do aggregation as intermediate step
-  const demeMap = {};
-  nodes.forEach((n) => {
-    if (n.children) { return; }
-
-    const location = n.attr[geoResolution];
-    if (location) { // check for undefined
-      if (!demeMap[location]) {
-        demeMap[location] = [];
-      }
-    }
-  });
-
-  // second pass to fill vectors
-  nodes.forEach((n, i) => {
-    /* demes only count terminal nodes */
-    if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
-      // if tip and visible, push
-      if (n.attr[geoResolution]) { // check for undefined
-        demeMap[n.attr[geoResolution]].push(nodeColors[i]);
-      }
-    }
-  });
-
+  const locationToVisibleNodes = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
   const offsets = triplicate ? [-360, 0, 360] : [0];
-  const geo = metadata.geo;
+  const demeToLatLongs = metadata.geoResolutions.filter((x) => x.key === geoResolution)[0].demes;
 
   let index = 0;
   offsets.forEach((OFFSET) => {
     /* count DEMES */
-    _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
+    for (const [location, visibleNodes] of Object.entries(locationToVisibleNodes)) {
       let lat = 0;
       let long = 0;
       let goodDeme = true;
-      if (geo[geoResolution][key]) {
-        lat = geo[geoResolution][key].latitude;
-        long = geo[geoResolution][key].longitude + OFFSET;
+
+      if (demeToLatLongs[location]) {
+        lat = demeToLatLongs[location].latitude;
+        long = demeToLatLongs[location].longitude + OFFSET;
       } else {
         goodDeme = false;
-        console.warn("Warning: Lat/long missing from metadata for", key);
+        console.warn("Warning: Lat/long missing from metadata for", location);
       }
 
-      if (!(long > westBound && long < eastBound && goodDeme)) { return; }
+      /* get pixel coordinates. `coords`: <Point> with properties `x` & `y` */
+      const coords = leafletLatLongToLayerPoint(lat, long, map);
 
-      const deme = {
-        name: key,
-        count: value.length,
-        color: averageColors(value),
-        latitude: lat, // raw latitude value
-        longitude: long, // raw longitude value
-        coords: leafletLatLongToLayerPoint(lat, long, map) // coords are x,y plotted via d3
-      };
-      demeData.push(deme);
+      /* add entries to
+       * (1) `demeIndicies` -- a dict of "deme value" to the indicies of `demeData` & `arcData` where they appear
+       * (2) `demeData` -- an array of objects, each with {name, count etc.}
+       *      if pie charts, then `demeData.arcs` exists, if colour-blended circles, `demeData.color` exists
+       */
+      if (long > westBound && long < eastBound && goodDeme === true) {
 
-      if (!demeIndices[key]) {
-        demeIndices[key] = [index];
-      } else {
-        demeIndices[key].push(index);
+        /* base deme information used for pie charts & color-blended circles */
+        const deme = {
+          name: location,
+          count: visibleNodes.length,
+          latitude: lat, // raw latitude value
+          longitude: long, // raw longitude value
+          coords: coords // coords are x,y plotted via d3
+        };
+
+        if (pieChart) {
+          /* create the arcs for the pie chart. NB `demeDataIdx` is the index of the deme in `demeData` where this will be inserted */
+          deme.arcs = createOrUpdateArcs(visibleNodes, legendValues, colorBy, nodeColors);
+          /* create back links between the arcs & which index of `demeData` they (will be) stored at */
+          const demeDataIdx = demeData.length;
+          deme.arcs.forEach((a) => {a.demeDataIdx = demeDataIdx;});
+        } else {
+          /* average out the constituent colours for a blended-colour circle */
+          deme.color = getAverageColorFromNodes(visibleNodes, nodeColors);
+        }
+
+        demeData.push(deme);
+        if (!demeIndices[location]) {
+          demeIndices[location] = [index];
+        } else {
+          demeIndices[location].push(index);
+        }
+        index += 1;
       }
-      index += 1;
-    });
+
+    }
   });
 
   return {
@@ -128,7 +201,7 @@ const constructBcurve = (
 const maybeConstructTransmissionEvent = (
   node,
   child,
-  metadataGeoLookupTable,
+  geoResolutions,
   geoResolution,
   nodeColors,
   visibility,
@@ -141,21 +214,21 @@ const maybeConstructTransmissionEvent = (
   let latOrig, longOrig, latDest, longDest;
   let transmission;
   /* checking metadata for lat longs name match - ie., does the metadata list a latlong for Thailand? */
+  const nodeLocation = getTraitFromNode(node, geoResolution); //  we're looking this up in the metadata lookup table
+  const childLocation = getTraitFromNode(child, geoResolution);
+  const demeToLatLongs = geoResolutions.filter((x) => x.key === geoResolution)[0].demes;
+
   try {
-    // node.attr[geoResolution] is the node's location, we're looking that up in the metadata lookup table
-    latOrig = metadataGeoLookupTable[geoResolution][node.attr[geoResolution]].latitude;
-    longOrig = metadataGeoLookupTable[geoResolution][node.attr[geoResolution]].longitude;
+    latOrig = demeToLatLongs[nodeLocation].latitude;
+    longOrig = demeToLatLongs[nodeLocation].longitude;
   } catch (e) {
-    // console.warn("No transmission lat/longs for ", node.attr[geoResolution], " -> ",child.attr[geoResolution], "If this wasn't fired in the context of a dataset change, it's probably a bug.")
-    demesMissingLatLongs.add(node.attr[geoResolution]);
+    demesMissingLatLongs.add(nodeLocation);
   }
   try {
-    // node.attr[geoResolution] is the node's location, we're looking that up in the metadata lookup table
-    latDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].latitude;
-    longDest = metadataGeoLookupTable[geoResolution][child.attr[geoResolution]].longitude;
+    latDest = demeToLatLongs[childLocation].latitude;
+    longDest = demeToLatLongs[childLocation].longitude;
   } catch (e) {
-    console.warn("No transmission lat/longs for ", node.attr[geoResolution], " -> ", child.attr[geoResolution], "If this wasn't fired in the context of a dataset change, it's probably a bug.");
-    return undefined;
+    demesMissingLatLongs.add(childLocation);
   }
 
   const validLatLongPair = maybeGetTransmissionPair(
@@ -171,7 +244,7 @@ const maybeConstructTransmissionEvent = (
     const Bcurve = constructBcurve(validLatLongPair[0], validLatLongPair[1], extend);
 
     /* set up interpolator with origin and destination numdates */
-    const interpolator = interpolateNumber(node.attr.num_date, child.attr.num_date);
+    const interpolator = interpolateNumber(getTraitFromNode(node, "num_date"), getTraitFromNode(child, "num_date"));
 
     /* make a Bdates array as long as Bcurve */
     const Bdates = [];
@@ -189,16 +262,16 @@ const maybeConstructTransmissionEvent = (
       destinationNode: child,
       bezierCurve: Bcurve,
       bezierDates: Bdates,
-      originName: node.attr[geoResolution],
-      destinationName: child.attr[geoResolution],
+      originName: getTraitFromNode(node, geoResolution),
+      destinationName: getTraitFromNode(child, geoResolution),
       originCoords: validLatLongPair[0], // after interchange
       destinationCoords: validLatLongPair[1], // after interchange
       originLatitude: latOrig, // raw latitude value
       destinationLatitude: latDest, // raw latitude value
       originLongitude: longOrig + offsetOrig, // raw longitude value
       destinationLongitude: longDest + offsetDest, // raw longitude value
-      originNumDate: node.attr["num_date"],
-      destinationNumDate: child.attr["num_date"],
+      originNumDate: getTraitFromNode(node, "num_date"),
+      destinationNumDate: getTraitFromNode(child, "num_date"),
       color: nodeColors[node.arrayIdx],
       visible: visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden", // transmission visible if child is visible
       extend: extend
@@ -263,44 +336,42 @@ const setupTransmissionData = (
 ) => {
 
   const offsets = triplicate ? [-360, 0, 360] : [0];
-  const metadataGeoLookupTable = metadata.geo;
   const transmissionData = []; /* edges, animation paths */
   const transmissionIndices = {}; /* map of transmission id to array of indices */
   const demesMissingLatLongs = new Set();
   const demeToDemeCounts = {};
   nodes.forEach((n) => {
-    if (!n.children) { return; }
-
-    const nodeDeme = n.attr[geoResolution];
-
-    n.children.forEach((child) => {
-      const childDeme = child.attr[geoResolution];
-      if (!(nodeDeme && childDeme && nodeDeme !== childDeme)) { return; }
-
-      // record transmission event
-      if ([nodeDeme, childDeme] in demeToDemeCounts) {
-        demeToDemeCounts[[nodeDeme, childDeme]] += 1;
-      } else {
-        demeToDemeCounts[[nodeDeme, childDeme]] = 1;
-      }
-      const extend = demeToDemeCounts[[nodeDeme, childDeme]];
-      // offset is applied to transmission origin
-      offsets.forEach((offsetOrig) => {
-        const t = maybeGetClosestTransmissionEvent(
-          n,
-          child,
-          metadataGeoLookupTable,
-          geoResolution,
-          nodeColors,
-          visibility,
-          map,
-          offsetOrig,
-          demesMissingLatLongs,
-          extend
-        );
-        if (t) { transmissionData.push(t); }
+    const nodeDeme = getTraitFromNode(n, geoResolution);
+    if (n.children) {
+      n.children.forEach((child) => {
+        const childDeme = getTraitFromNode(child, geoResolution);
+        if (nodeDeme && childDeme && nodeDeme !== childDeme) {
+          // record transmission event
+          if ([nodeDeme, childDeme] in demeToDemeCounts) {
+            demeToDemeCounts[[nodeDeme, childDeme]] += 1;
+          } else {
+            demeToDemeCounts[[nodeDeme, childDeme]] = 1;
+          }
+          const extend = demeToDemeCounts[[nodeDeme, childDeme]];
+          // offset is applied to transmission origin
+          offsets.forEach((offsetOrig) => {
+            const t = maybeGetClosestTransmissionEvent(
+              n,
+              child,
+              metadata.geoResolutions,
+              geoResolution,
+              nodeColors,
+              visibility,
+              map,
+              offsetOrig,
+              demesMissingLatLongs,
+              extend
+            );
+            if (t) { transmissionData.push(t); }
+          });
+        }
       });
-    });
+    }
   });
 
   transmissionData.forEach((transmission, index) => {
@@ -325,9 +396,11 @@ export const createDemeAndTransmissionData = (
   triplicate,
   metadata,
   map,
+  pieChart,
+  legendValues,
+  colorBy,
   dispatch
 ) => {
-
   /*
     walk through nodes and collect all data
     for demeData we have:
@@ -339,7 +412,7 @@ export const createDemeAndTransmissionData = (
   const {
     demeData,
     demeIndices
-  } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map);
+  } = setupDemeData(nodes, visibility, geoResolution, nodeColors, triplicate, metadata, map, pieChart, legendValues, colorBy);
 
   /* second time so that we can get Bezier */
   const { transmissionData, transmissionIndices, demesMissingLatLongs } = setupTransmissionData(
@@ -378,56 +451,46 @@ UPDATE DEMES & TRANSMISSIONS
 ********************************
 ******************************* */
 
-const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors) => {
-
+const updateDemeDataColAndVis = (demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) => {
   const demeDataCopy = demeData.slice();
 
-  // initialize empty map
-  const demeMap = {};
-  _forOwn(demeIndices, (value, key) => { // value: array of indices, key: deme name
-    demeMap[key] = [];
-  });
-
-  // second pass to fill vectors
-  nodes.forEach((n, i) => {
-    /* demes only count terminal nodes */
-    if (!n.children && visibility[i] !== NODE_NOT_VISIBLE) {
-      // if tip and visible, push
-      if (n.attr[geoResolution]) { // check for undefined
-        if (n.attr[geoResolution] in demeMap) {
-          demeMap[n.attr[geoResolution]].push(nodeColors[i]);
-        }
-      }
-    }
-  });
+  const locationToVisibleNodes = getVisibleNodesPerLocation(nodes, visibility, geoResolution);
 
   // update demeData, for each deme, update all elements via demeIndices lookup
-  _forOwn(demeMap, (value, key) => { // value: hash color array, key: deme name
-    const name = key;
-    demeIndices[name].forEach((index) => {
-      demeDataCopy[index].count = value.length;
-      demeDataCopy[index].color = averageColors(value);
-    });
-  });
+  for (const [location, visibleNodes] of Object.entries(locationToVisibleNodes)) {
+    if (demeIndices[location]) {
+      demeIndices[location].forEach((index) => {
+        /* both pie charts & circles need new counts (which modify the radius) */
+        demeDataCopy[index].count = visibleNodes.length;
+        if (pieChart) {
+          /* update the arcs */
+          demeDataCopy[index].arcs = createOrUpdateArcs(visibleNodes, legendValues, colorBy, nodeColors, demeDataCopy[index].arcs);
+        } else {
+          /* circle demes just require a colour update */
+          demeDataCopy[index].color = getAverageColorFromNodes(visibleNodes, nodeColors);
+        }
+      });
+    }
+  }
+
   return demeDataCopy;
 };
 
 const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
   const transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
   nodes.forEach((node) => {
-    if (!(node.children)) { return; }
+    if (!node.children) return;
 
     node.children.forEach((child) => {
-      const nodeLocation = node.attr[geoResolution];
-      const childLocation = child.attr[geoResolution];
-
-      if (!(nodeLocation && childLocation && nodeLocation !== childLocation)) { return; }
+      const nodeLocation = getTraitFromNode(node, geoResolution);
+      const childLocation = getTraitFromNode(child, geoResolution);
+      
+      if (!(nodeLocation && childLocation && nodeLocation !== childLocation)) return;
 
       // this is a transmission event from n to child
       const id = node.arrayIdx.toString() + "-" + child.arrayIdx.toString();
       const col = nodeColors[node.arrayIdx];
       const vis = visibility[child.arrayIdx] !== NODE_NOT_VISIBLE ? "visible" : "hidden"; // transmission visible if child is visible
-
       // update transmissionData via index lookup
       try {
         transmissionIndices[id].forEach((index) => {
@@ -442,22 +505,18 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
   return transmissionDataCopy;
 };
 
-export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors) => {
-  /*
-    walk through nodes and update attributes that can mutate
-    for demeData we have:
-      count, color
-    for transmissionData we have:
-      color, visible
-  */
-
-  let newDemes;
-  let newTransmissions;
-
-  if (demeData && transmissionData) {
-    newDemes = updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors);
-    newTransmissions = updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors);
-  }
+/**
+ * walk through nodes and update attributes that can mutate
+ * for demeData we have: count, color
+ * for transmissionData we have: color, visible
+ */
+export const updateDemeAndTransmissionDataColAndVis = (demeData, transmissionData, demeIndices, transmissionIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) => {
+  const newDemes = demeData ?
+    updateDemeDataColAndVis(demeData, demeIndices, nodes, visibility, geoResolution, nodeColors, pieChart, colorBy, legendValues) :
+    demeData;
+  const newTransmissions = (transmissionData && transmissionData.length) ?
+    updateTransmissionDataColAndVis(transmissionData, transmissionIndices, nodes, visibility, geoResolution, nodeColors) :
+    transmissionData;
   return {newDemes, newTransmissions};
 };
 
@@ -467,7 +526,7 @@ ZOOM LEVEL CHANGE
 **********************
 ********************* */
 
-const updateDemeDataLatLong = (demeData, map) => {
+export const updateDemeDataLatLong = (demeData, map) => {
 
   // interchange for all demes
   return _map(demeData, (d) => {
@@ -477,7 +536,7 @@ const updateDemeDataLatLong = (demeData, map) => {
 
 };
 
-const updateTransmissionDataLatLong = (transmissionData, map) => {
+export const updateTransmissionDataLatLong = (transmissionData, map) => {
 
   const transmissionDataCopy = transmissionData.slice(); /* basically, instead of _.map() since we're not mapping over the data we're mutating */
 
@@ -494,28 +553,4 @@ const updateTransmissionDataLatLong = (transmissionData, map) => {
 
   return transmissionDataCopy;
 
-};
-
-export const updateDemeAndTransmissionDataLatLong = (demeData, transmissionData, map) => {
-
-  /*
-    walk through nodes and update attributes that can mutate
-    for demeData we have:
-      count, color
-    for transmissionData we have:
-      color, visible
-  */
-
-  let newDemes;
-  let newTransmissions;
-
-  if (demeData && transmissionData) {
-    newDemes = updateDemeDataLatLong(demeData, map);
-    newTransmissions = updateTransmissionDataLatLong(transmissionData, map);
-  }
-
-  return {
-    newDemes,
-    newTransmissions
-  };
 };

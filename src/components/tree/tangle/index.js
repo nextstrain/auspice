@@ -84,10 +84,10 @@ class Tangle extends React.Component {
     const lefts = [this.props.width/2 - this.props.spaceBetweenTrees/2, this.props.width/2 + this.props.spaceBetweenTrees/2];
     return (
       <div id="TangleContainer">
-        <div id="MainTreeTitle" style={{...textStyles, left: lefts[0]-100, width: 100, textAlign: "right"}}>
+        <div id="MainTreeTitle" style={{...textStyles, left: lefts[0], transform: "translateX(-100%)"}}>
           {this.props.leftTreeName}
         </div>
-        <div id="SecondTreeTitle" style={{...textStyles, left: lefts[1], textAlign: "left"}}>
+        <div id="SecondTreeTitle" style={{...textStyles, left: lefts[1]}}>
           {this.props.rightTreeName}
         </div>
         <div

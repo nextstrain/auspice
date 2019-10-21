@@ -3,6 +3,7 @@
 import { min, max, sum } from "d3-array";
 import { addLeafCount } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
+import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
 
 /**
  * assigns the attribute this.layout and calls the function that
@@ -56,17 +57,17 @@ export const rectangularLayout = function rectangularLayout() {
 
 /**
  * assign x,y coordinates fro the root-to-tip regression layout
- * this requires a time tree with attr["num_date"] set
+ * this requires a time tree with `num_date` info set
  * in addition, this function calculates a regression between
  * num_date and div which is saved as this.regression
  * @return {null}
  */
 export const timeVsRootToTip = function timeVsRootToTip() {
   this.nodes.forEach((d) => {
-    d.y = d.n.attr["div"];
-    d.x = d.n.attr["num_date"];
-    d.px = d.n.parent.attr["num_date"];
-    d.py = d.n.parent.attr["div"];
+    d.y = getDivFromNode(d.n);
+    d.x = getTraitFromNode(d.n, "num_date");
+    d.px = getTraitFromNode(d.n.parent, "num_date");
+    d.py = getDivFromNode(d.n.parent);
   });
   if (this.vaccines) { /* overlay vaccine cross on tip */
     this.vaccines.forEach((d) => {
@@ -196,34 +197,35 @@ export const radialLayout = function radialLayout() {
   }
 };
 
-/*
+/**
  * set the property that is used as distance along branches
  * this is set to "depth" of each node. depth is later used to
  * calculate coordinates. Parent depth is assigned as well.
+ * @sideEffect sets this.distance -> "div" or "num_date"
  */
 export const setDistance = function setDistance(distanceAttribute) {
   timerStart("setDistance");
   this.nodes.forEach((d) => {d.update = true;});
-  if (typeof distanceAttribute === "undefined") {
-    this.distance = "div"; // default is "div" for divergence
-  } else {
-    this.distance = distanceAttribute;
-  }
+  this.distance = distanceAttribute || "div"; // div is default
+
   // assign node and parent depth
-  const tmp_dist = this.distance;
-  this.nodes.forEach((d) => {
-    d.depth = d.n.attr[tmp_dist];
-    d.pDepth = d.n.parent.attr[tmp_dist];
-    if (d.n.attr[tmp_dist + "_confidence"]) {
-      d.conf = d.n.attr[tmp_dist + "_confidence"];
-    } else {
-      d.conf = [d.depth, d.depth];
-    }
-  });
+  if (this.distance === "div") {
+    this.nodes.forEach((d) => {
+      d.depth = getDivFromNode(d.n);
+      d.pDepth = getDivFromNode(d.n.parent);
+      d.conf = [d.depth, d.depth]; // TO DO - shouldn't be needed, never have div confidence...
+    });
+  } else {
+    this.nodes.forEach((d) => {
+      d.depth = getTraitFromNode(d.n, "num_date");
+      d.pDepth = getTraitFromNode(d.n.parent, "num_date");
+      d.conf = getTraitFromNode(d.n, "num_date", {confidence: true}) || [d.depth, d.depth];
+    });
+  }
+
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
-      // this was d.n.vaccineDateNumeric, setting to d.depth for reasons of clarity
-      d.crossDepth = tmp_dist === "div" ? d.depth : d.depth;
+      d.crossDepth = d.depth;
     });
   }
   timerEnd("setDistance");
@@ -290,8 +292,8 @@ export const mapToScreen = function mapToScreen() {
 
     let padBy = 0;
     inViewTerminalNodes.forEach((d) => {
-      if (padBy < d.n.strain.length) {
-        padBy = 0.65 * d.n.strain.length * fontSize;
+      if (padBy < d.n.name.length) {
+        padBy = 0.65 * d.n.name.length * fontSize;
       }
     });
     tmpMargins.right += padBy;

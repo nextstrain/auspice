@@ -1,32 +1,33 @@
 {
   "docs": {
     "Introduction": [
-      "overview",
-      "installation",
-      "inputs"
+      "introduction/overview",
+      "introduction/install",
+      "introduction/how-to-run"
     ],
-    "Customisations": [
-      "customisations/introduction",
-      {
-        "type": "subcategory",
-        "label": "Customising the Client",
-        "ids": [
-          "customisations/client/componentInterfaces",
-          "customisations/client/sidebarTheme"
-        ]
-      },
-      {
-        "type": "subcategory",
-        "label": "Customising the Server",
-        "ids": [
-          "customisations/server/charonAPI",
-          "customisations/server/serverless"
-        ]
-      },
-      "customisations/authentication"
+    "Advanced Functionality": [
+      "advanced-functionality/second-trees"
     ],
-    "Tutorial": [
-      "tutorial/overview"
+    "Customising Auspice": [
+      "customise-client/introduction",
+      "customise-client/api",
+      "customise-client/requests"
+    ],
+    "Using a Custom Server": [
+      "server/introduction",
+      "server/api",
+      "server/authentication"
+    ],
+    "Narratives": [
+      "narratives/introduction",
+      "narratives/how-to-write"
+    ],
+    "Release Notes": [
+      "releases/changelog",
+      "releases/v2"
+    ],
+    "Contributing": [
+      "contributing/overview"
     ]
   }
 }

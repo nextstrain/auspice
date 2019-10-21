@@ -28,7 +28,7 @@ class SingleDataset extends React.Component {
           backgroundColor: successColor,
           minDate: state.controls.dateMin,
           maxDate: state.controls.dateMax,
-          numTips: json.meta.virus_count,
+          numTips: state.metadata.mainTreeNumTips,
           lastUpdated: json.meta.updated
         });
       })

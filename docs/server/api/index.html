@@ -1,0 +1,176 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>Server API · Auspice</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="## Auspice client requests"/><meta name="docsearch:language" content="en"/><meta property="og:title" content="Server API · Auspice"/><meta property="og:type" content="website"/><meta property="og:url" content="https://nextstrain.github.io/auspice/"/><meta property="og:description" content="## Auspice client requests"/><meta property="og:image" content="https://nextstrain.github.io/auspice/img/icon.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://nextstrain.github.io/auspice/img/icon.svg"/><link rel="shortcut icon" href="/auspice/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/solarized-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/auspice/js/scrollSpy.js"></script><link rel="stylesheet" href="/auspice/css/main.css"/><script src="/auspice/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/auspice/"><img class="logo" src="/auspice/img/logo-light.svg" alt="Auspice"/><h2 class="headerTitleWithLogo">Auspice</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/auspice/introduction/overview" target="_self">Docs</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Using a Custom Server</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/introduction/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/auspice/introduction/install">Install Auspice</a></li><li class="navListItem"><a class="navItem" href="/auspice/introduction/how-to-run">How to Run Auspice</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced Functionality</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/advanced-functionality/second-trees">Displaying mutliple trees</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Customising Auspice</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/customise-client/introduction">Customising Auspice</a></li><li class="navListItem"><a class="navItem" href="/auspice/customise-client/api">Client Customisation API</a></li><li class="navListItem"><a class="navItem" href="/auspice/customise-client/requests">Requests Made from the Client</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Using a Custom Server</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/server/introduction">Auspice servers</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/auspice/server/api">Server API</a></li><li class="navListItem"><a class="navItem" href="/auspice/server/authentication">Authentication</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Narratives</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/narratives/introduction">Communicating Results Using Narratives</a></li><li class="navListItem"><a class="navItem" href="/auspice/narratives/how-to-write">Writing a Narrative</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Release Notes</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/releases/changelog">Changelog</a></li><li class="navListItem"><a class="navItem" href="/auspice/releases/v2">Auspice Version 2.0</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Contributing</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/contributing/overview">Contributing</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">Server API</h1></header><article><div><span><h2><a class="anchor" aria-hidden="true" id="auspice-client-requests"></a><a href="#auspice-client-requests" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Auspice client requests</h2>
+<p>The Auspice server handles requests to 3 API endpoints made by the Auspice client:</p>
+<ul>
+<li><code>/charon/getAvailable</code> (returns a list of available datasets and narratives)</li>
+<li><code>/charon/getDataset</code> (returns the requested dataset)</li>
+<li><code>/charon/getNarrative</code> (returns the requested narrative)</li>
+</ul>
+<h3><a class="anchor" aria-hidden="true" id="charon-getavailable"></a><a href="#charon-getavailable" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>/charon/getAvailable</code></h3>
+<p><strong>URL query arguments:</strong></p>
+<ul>
+<li><code>prefix</code> (optional) - the pathname of the requesting page in Auspice.
+The <code>getAvailable</code> handler can use this to respond according appropriately.
+Unused by the default Auspice handler.</li>
+</ul>
+<p><strong>JSON Response (on success):</strong></p>
+<pre><code class="hljs css language-json">{
+  <span class="hljs-attr">"datasets"</span>: [
+    {
+      <span class="hljs-attr">"request"</span>: <span class="hljs-string">"[required] The pathname of a valid dataset. \
+          Will become the prefix of the getDataset request."</span>,
+      <span class="hljs-attr">"buildUrl"</span>: <span class="hljs-string">"[optional] A URL to display in the sidebar representing \
+          the build used to generate this analysis."</span>,
+      <span class="hljs-attr">"secondTreeOptions"</span>: <span class="hljs-string">"[optional] A list of requests which should \
+          appear as potential second-trees in the sidebar dropdown"</span>
+    },
+    ...
+  ],
+  <span class="hljs-attr">"narratives"</span>: [
+    {<span class="hljs-attr">"request"</span>: <span class="hljs-string">"URL of a narrative. Will become the prefix in a getNarrative request"</span>},
+    ...
+  ]
+}
+</code></pre>
+<p>Failure to return a valid JSON will result in a warning notification shown in Auspice.</p>
+<h3><a class="anchor" aria-hidden="true" id="charon-getdataset"></a><a href="#charon-getdataset" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>/charon/getDataset</code></h3>
+<p><strong>URL query arguments:</strong></p>
+<ul>
+<li><code>prefix</code> (required) - the pathname of the requesting page in Auspice. Use this to determine which dataset to return.</li>
+<li><code>type</code> (optional) -- if specified, then the request is for an additional file (e.g. &quot;tip-frequencies&quot;), not the main dataset.</li>
+</ul>
+<p><strong>JSON Response (on success):</strong></p>
+<p>The JSON response depends on the file-type being requested.</p>
+<p>If the type is not specified, i.e. we're requesting the &quot;main&quot; dataset JSON then <a href="https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v2.json">see this JSON schema</a>.
+Note that the Auspice client <em>cannot</em> process v1 (meta / tree) JSONs -- <a href="/auspice/server/api#importing-code-from-auspice">see below</a> for how to convert these.</p>
+<p>Alternative file type reponses are to be documented.</p>
+<p><strong>Alternative responses:</strong></p>
+<p>A <code>204</code> reponse will cause Auspice to show its splash page listing the available datasets &amp; narratives.
+Any other non-200 reponse behaves similarly but also displays a large &quot;error&quot; message indicating that the dataset was not valid.</p>
+<h3><a class="anchor" aria-hidden="true" id="charon-getnarrative"></a><a href="#charon-getnarrative" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>/charon/getNarrative</code></h3>
+<p><strong>URL query arguments:</strong></p>
+<ul>
+<li><code>prefix</code> (required) - the pathname of the requesting page in Auspice. Use this to determine which narrative to return.</li>
+</ul>
+<p><strong>JSON Response (on success):</strong></p>
+<p>The output from the <a href="/auspice/server/api#parsenarrativefile">parseNarrativeFile</a> function defined below.
+For instance, here is the code from the default Auspice handler:</p>
+<pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> fileContents = fs.readFileSync(pathName, <span class="hljs-string">'utf8'</span>);
+<span class="hljs-keyword">const</span> blocks = parseNarrative(fileContents);
+res.send(<span class="hljs-built_in">JSON</span>.stringify(blocks).replace(<span class="hljs-regexp">/&lt;/g</span>, <span class="hljs-string">'\\u003c'</span>));
+</code></pre>
+<blockquote>
+<p>Note that in a future version of Auspice we plan to move the parsing of the narrative to the client.</p>
+</blockquote>
+<hr>
+<h2><a class="anchor" aria-hidden="true" id="suppling-custom-handlers-to-the-auspice-server"></a><a href="#suppling-custom-handlers-to-the-auspice-server" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Suppling custom handlers to the Auspice server</h2>
+<p>The provided Auspice servers -- i.e. <code>auspice view</code> and <code>auspice develop</code> both have a <code>--handlers &lt;JS&gt;</code> option which allows you to define your own handlers.
+The provided JavaScript file must export three functions, each of which handles one of the GET requests described above and must respond accordingly (see above for details).</p>
+<table>
+<thead>
+<tr><th>function name</th><th>arguments</th><th>API endpoint</th></tr>
+</thead>
+<tbody>
+<tr><td>getAvailable</td><td>req, res</td><td>/charon/getAvailable</td></tr>
+<tr><td>getDataset</td><td>req, res</td><td>/charon/getDataset</td></tr>
+<tr><td>getNarrative</td><td>req, res</td><td>/charon/getNarrative</td></tr>
+</tbody>
+</table>
+<p>For information about the <code>req</code> and <code>res</code> arguments see the express documentation for the <a href="https://expressjs.com/en/api.html#req">request object</a> and <a href="https://expressjs.com/en/api.html#res">response object</a>, respectively.</p>
+<p>You can see <a href="https://nextstrain.org">nextstrain.org</a>'s implementation of these handlers <a href="https://github.com/nextstrain/nextstrain.org/blob/master/auspice/server/index.js">here</a>.</p>
+<p>Here's a pseudocode example of an implementation for the <code>getAvailable</code> handler which may help understanding:</p>
+<pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> getAvailable = <span class="hljs-function">(<span class="hljs-params">req, res</span>) =&gt;</span> {
+  <span class="hljs-keyword">try</span> {
+    <span class="hljs-comment">/* collect available data */</span>
+    res.json(data);
+  } <span class="hljs-keyword">catch</span> (err) {
+    res.statusMessage = <span class="hljs-string">`error message to display in client`</span>;
+    <span class="hljs-built_in">console</span>.log(res.statusMessage); <span class="hljs-comment">/* printed by the server, not the client */</span>
+    <span class="hljs-keyword">return</span> res.status(<span class="hljs-number">500</span>).end();
+  }
+};
+</code></pre>
+<hr>
+<h2><a class="anchor" aria-hidden="true" id="importing-code-from-auspice"></a><a href="#importing-code-from-auspice" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Importing code from Auspice</h2>
+<p>The servers included in Auspice contain lots of useful code which you may want to use to either write your own handlers or entire servers.
+For instance, the code to convert v1 dataset JSONs to v2 JSONs (which the client requires) can be imported into your code so you don't have to reinvent the wheel!</p>
+<p>Currently</p>
+<pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> auspice = <span class="hljs-built_in">require</span>(<span class="hljs-string">"auspice"</span>);
+</code></pre>
+<p>returns an object with two properties:</p>
+<h3><a class="anchor" aria-hidden="true" id="convertfromv1"></a><a href="#convertfromv1" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>convertFromV1</code></h3>
+<p><strong>Signature:</strong></p>
+<pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> v2json = convertFromV1({tree, meta})
+</code></pre>
+<p>where <code>tree</code> is the v1 tree JSON, and <code>meta</code> the v1 meta JSON.</p>
+<p><strong>Returns:</strong></p>
+<p>An object representing the v2 JSON <a href="https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v2.json">defined by this schema</a>.</p>
+<h3><a class="anchor" aria-hidden="true" id="parsenarrativefile"></a><a href="#parsenarrativefile" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a><code>parseNarrativeFile</code></h3>
+<p><strong>Signature:</strong></p>
+<pre><code class="hljs css language-js"><span class="hljs-keyword">const</span> blocks = parseNarrativeFile(fileContents);
+</code></pre>
+<p>where <code>fileContents</code> is a string representation of the narrative Markdown file.</p>
+<p><strong>Returns:</strong></p>
+<p>An array of objects, each entry representing a different narrative &quot;block&quot; or &quot;page&quot;.
+Each object has properties</p>
+<ul>
+<li><code>__html</code> -- the HTML to render in the sidebar to form the narrative</li>
+<li><code>dataset</code> -- the dataset associated with this block</li>
+<li><code>query</code> -- the query associated with this block</li>
+</ul>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 10/17/2019</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/auspice/server/introduction"><span class="arrow-prev">← </span><span>Auspice servers</span></a><a class="docs-next button" href="/auspice/server/authentication"><span>Authentication</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#auspice-client-requests">Auspice client requests</a><ul class="toc-headings"><li><a href="#charon-getavailable"><code>/charon/getAvailable</code></a></li><li><a href="#charon-getdataset"><code>/charon/getDataset</code></a></li><li><a href="#charon-getnarrative"><code>/charon/getNarrative</code></a></li></ul></li><li><a href="#suppling-custom-handlers-to-the-auspice-server">Suppling custom handlers to the Auspice server</a></li><li><a href="#importing-code-from-auspice">Importing code from Auspice</a><ul class="toc-headings"><li><a href="#convertfromv1"><code>convertFromV1</code></a></li><li><a href="#parsenarrativefile"><code>parseNarrativeFile</code></a></li></ul></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div><a href="/auspice/"><img style="padding-left:20px" src="/auspice/img/logo-light.svg" alt="Auspice" width="66" height="58"/></a></div><div><h5>External Links</h5><a href="https://github.com/nextstrain/auspice">GitHub repo</a><a href="https://www.npmjs.com/package/auspice">NPM package</a><a href="https://nextstrain.org">Nextstrain</a></div><div><h5>Contact Us</h5><a href="mailto:hello@nextstrain.org">email</a><a href="https://twitter.com/hamesjadfield">twitter</a></div></section><section class="copyright">Website built by <a href="https://twitter.com/hamesjadfield">James Hadfield</a> using <a href="https://docusaurus.io">Docusaurus</a></section><section class="copyright">If you use auspice, please cite <a href="https://doi.org/10.1093/bioinformatics/bty407">Hadfield et al., 2018</a></section><section class="copyright">Copyright © 2014-2019 Richard Neher &amp; Trevor Bedford</section></footer></div></body></html>

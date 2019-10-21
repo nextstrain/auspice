@@ -12,8 +12,8 @@ const calculatePearsonCorrelationCoefficient = (phylotree1, phylotree2) => {
   let count=0, my1=0, my2=0, sqy1=0, sqy2=0, y12=0;
   for (let i=0; i<phylotree2.nodes.length; i++) {
     const n2=phylotree2.nodes[i].n;
-    if ((!n2.children) && phylotree1.strainToNode[n2.strain]) {
-      const y1 = phylotree1.strainToNode[n2.strain].n.yvalue;
+    if ((!n2.children) && phylotree1.strainToNode[n2.name]) {
+      const y1 = phylotree1.strainToNode[n2.name].n.yvalue;
       const y2 = n2.yvalue;
       count++;
       my1+=y1;

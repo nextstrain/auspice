@@ -1,5 +1,13 @@
 /* eslint-disable no-param-reassign */
 
+/** get a string to be used as the DOM element ID
+ * Note that this cannot have any "special" characters
+ */
+export const getDomId = (type, strain) => {
+  const name = typeof strain === "string" ? strain.replace(/[/_.;,~|[\]-]/g, '') : strain;
+  return `${type}_${name}`;
+};
+
 /**
  * computes a measure of the total number of leaves for each node in
  * the tree, weighting leaves differently if they are inView.

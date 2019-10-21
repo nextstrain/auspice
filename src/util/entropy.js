@@ -9,28 +9,41 @@ const intersectGenes = function intersectGenes(geneMap, pos) {
   return false;
 };
 
+/**
+ * Get mutations on node. Returns false if mutations not set.
+ * @param {object} n node
+ */
+const getNodeMutations = (n) => {
+  if (n.branch_attrs && n.branch_attrs.mutations && Object.keys(n.branch_attrs.mutations).length) {
+    return n.branch_attrs.mutations;
+  }
+  return false;
+};
+
 const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
+
   const sparse = isAA ? {} : [];
   if (isAA) {
     Object.keys(geneMap).forEach((n) => {sparse[n] = {};});
   }
   nodes.forEach((n) => {
     if (visibility[n.arrayIdx] !== NODE_VISIBLE) {return;}
+    const mutations = getNodeMutations(n);
+    if (!mutations) return;
     if (isAA) {
-      if (n.aa_muts) {
-        for (const prot in n.aa_muts) { // eslint-disable-line
-          n.aa_muts[prot].forEach((m) => {
-            const pos = parseInt(m.slice(1, m.length - 1), 10);
-            const A = m.slice(0, 1);
-            const B = m.slice(-1);
-            if (A !== 'X' && B !== 'X') {
-              sparse[prot][pos] ? sparse[prot][pos]++ : sparse[prot][pos] = 1;
-            }
-          });
-        }
+      for (const prot of Object.keys(mutations).filter((p) => p !== "nuc")) {
+        mutations[prot].forEach((m) => {
+          const pos = parseInt(m.slice(1, m.length - 1), 10);
+          const A = m.slice(0, 1);
+          const B = m.slice(-1);
+          if (A !== 'X' && B !== 'X') {
+            sparse[prot][pos] ? sparse[prot][pos]++ : sparse[prot][pos] = 1;
+          }
+        });
       }
-    } else if (n.muts) {
-      n.muts.forEach((m) => {
+    } else {
+      if (!mutations.nuc) return;
+      mutations.nuc.forEach((m) => {
         const pos = parseInt(m.slice(1, m.length - 1), 10);
         const A = m.slice(0, 1);
         const B = m.slice(-1);
@@ -110,21 +123,22 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
 
   const recurse = (node, state) => {
     // if mutation observed - do something
-    if (isAA) {
-      if (node.aa_muts) {
-        for (const prot in node.aa_muts) { // eslint-disable-line
+    const mutations = getNodeMutations(node);
+    if (mutations) {
+      if (isAA) {
+        for (const prot of Object.keys(mutations).filter((p) => p !== "nuc")) {
           if (arrayOfProts.includes(prot)) {
-            node.aa_muts[prot].forEach(assignFn, [prot, state]);
+            mutations[prot].forEach(assignFn, [prot, state]);
           }
         }
+      } else if (mutations.nuc) {
+        mutations.nuc.forEach(assignFn, [nucleotide_gene, state]);
       }
-    } else if (node.muts && node.muts.length) {
-      node.muts.forEach(assignFn, [nucleotide_gene, state]);
     }
 
     if (node.hasChildren) {
       for (const child of node.children) {
-        /* if there were no changes to the state (i.e. no aa_muts / muts )
+        /* if there were no changes to the state (i.e. no mutations )
         at the node, then we don't need to deep clone the state Object
         (i.e. can just use references). This will be much quicker,
         but increase programmatic complexity. (TODO) */

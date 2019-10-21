@@ -1,0 +1,1187 @@
+{
+  "version": "2.0",
+  "meta": {
+    "colorings": [
+      {
+        "key": "country",
+        "title": "Country",
+        "type": "categorical"
+      },
+      {
+        "key": "num_date",
+        "title": "Date",
+        "type": "continuous"
+      },
+      {
+        "key": "region",
+        "title": "Region",
+        "type": "categorical"
+      }
+    ],
+    "title": "Minimal (v2) auspice spec based on Zika pipeline",
+    "updated": "02 Apr 2019",
+    "maintainers": [
+      {
+        "name": "Trevor Bedford",
+        "url": "http://bedford.io/team/trevor-bedford/"
+      }
+    ],
+    "filters": [
+      "country",
+      "region"
+    ],
+    "panels": [
+      "tree",
+      "map"
+    ],
+    "display_defaults": {
+      "color_by": "country"
+    },
+    "geo_resolutions": [
+      {
+        "key": "country",
+        "demes": {
+          "American Samoa": {
+            "latitude": -14.27806,
+            "longitude": -170.7025
+          },
+          "Brazil": {
+            "latitude": -10.3333332,
+            "longitude": -53.1999999
+          },
+          "Colombia": {
+            "latitude": 2.893108,
+            "longitude": -73.7845142
+          },
+          "Dominican Republic": {
+            "latitude": 18.50012,
+            "longitude": -69.98857
+          },
+          "Ecuador": {
+            "latitude": -1.3397667,
+            "longitude": -79.3666964
+          },
+          "French Polynesia": {
+            "latitude": -17.6797,
+            "longitude": -149.4068
+          },
+          "Guatemala": {
+            "latitude": 15.6356088,
+            "longitude": -89.8988086
+          },
+          "Honduras": {
+            "latitude": 15.0610686,
+            "longitude": -84.5978533
+          },
+          "Nicaragua": {
+            "latitude": 13,
+            "longitude": -85
+          },
+          "Panama": {
+            "latitude": 8.3096067,
+            "longitude": -81.3066245
+          },
+          "Puerto Rico": {
+            "latitude": 18.2459121,
+            "longitude": -66.4164147
+          },
+          "Singapore": {
+            "latitude": 1.2904527,
+            "longitude": 103.852038
+          },
+          "Thailand": {
+            "latitude": 14.8971921,
+            "longitude": 100.83273
+          },
+          "USA": {
+            "latitude": 39.7837304,
+            "longitude": -100.4458824
+          },
+          "Venezuela": {
+            "latitude": 8,
+            "longitude": -66
+          }
+        }
+      },
+      {
+        "key": "region",
+        "demes": {
+          "North America": {
+            "latitude": 28.2367447,
+            "longitude": -97.738017
+          },
+          "Oceania": {
+            "latitude": -25.0562891,
+            "longitude": 152.008576
+          },
+          "South America": {
+            "latitude": -13.083583,
+            "longitude": -58.470721
+          },
+          "Southeast Asia": {
+            "latitude": 3.020567,
+            "longitude": 112.390683
+          }
+        }
+      }
+    ]
+  },
+  "tree": {
+    "children": [
+      {
+        "children": [
+          {
+            "name": "Thailand/1610acTw",
+            "node_attrs": {
+              "num_date": {
+                "value": 2016.8350444900752
+              },
+              "div": 0.005221788347560718,
+              "country": {
+                "value": "Thailand"
+              },
+              "region": {
+                "value": "Southeast Asia"
+              }
+            },
+            "branch_attrs": {
+              "mutations": {}
+            }
+          },
+          {
+            "children": [
+              {
+                "name": "SG_018",
+                "node_attrs": {
+                  "num_date": {
+                    "value": 2016.7036276522929
+                  },
+                  "div": 0.004007041645876951,
+                  "country": {
+                    "value": "Singapore"
+                  },
+                  "region": {
+                    "value": "Southeast Asia"
+                  }
+                },
+                "branch_attrs": {
+                  "mutations": {}
+                }
+              },
+              {
+                "children": [
+                  {
+                    "name": "SG_056",
+                    "node_attrs": {
+                      "num_date": {
+                        "value": 2016.6598220396988
+                      },
+                      "div": 0.003913834391451402,
+                      "country": {
+                        "value": "Singapore"
+                      },
+                      "region": {
+                        "value": "Southeast Asia"
+                      }
+                    },
+                    "branch_attrs": {
+                      "mutations": {}
+                    }
+                  },
+                  {
+                    "name": "SG_027",
+                    "node_attrs": {
+                      "num_date": {
+                        "value": 2016.6570841889118
+                      },
+                      "div": 0.003913869000756373,
+                      "country": {
+                        "value": "Singapore"
+                      },
+                      "region": {
+                        "value": "Southeast Asia"
+                      }
+                    },
+                    "branch_attrs": {
+                      "mutations": {}
+                    }
+                  },
+                  {
+                    "name": "SG_074",
+                    "node_attrs": {
+                      "num_date": {
+                        "value": 2016.6598220396988
+                      },
+                      "div": 0.0036346465336680464,
+                      "country": {
+                        "value": "Singapore"
+                      },
+                      "region": {
+                        "value": "Southeast Asia"
+                      }
+                    },
+                    "branch_attrs": {
+                      "mutations": {}
+                    }
+                  }
+                ],
+                "name": "NODE_0000013",
+                "node_attrs": {
+                  "num_date": {
+                    "value": 2016.4475123718523
+                  },
+                  "div": 0.003634646533668043,
+                  "country": {
+                    "value": "Singapore"
+                  },
+                  "region": {
+                    "value": "Southeast Asia"
+                  }
+                },
+                "branch_attrs": {
+                  "mutations": {}
+                }
+              }
+            ],
+            "name": "NODE_0000012",
+            "node_attrs": {
+              "num_date": {
+                "value": 2016.0362118103271
+              },
+              "div": 0.003448533636867537,
+              "country": {
+                "value": "Singapore"
+              },
+              "region": {
+                "value": "Southeast Asia"
+              }
+            },
+            "branch_attrs": {
+              "mutations": {}
+            }
+          }
+        ],
+        "name": "NODE_0000011",
+        "node_attrs": {
+          "num_date": {
+            "value": 2015.0405796040964
+          },
+          "div": 0.002610631813509472,
+          "country": {
+            "value": "Singapore"
+          },
+          "region": {
+            "value": "Southeast Asia"
+          }
+        },
+        "branch_attrs": {
+          "mutations": {}
+        }
+      },
+      {
+        "children": [
+          {
+            "children": [
+              {
+                "name": "ZKC2/2016",
+                "node_attrs": {
+                  "num_date": {
+                    "value": 2016.1286789869953
+                  },
+                  "div": 0.00447355709750125,
+                  "country": {
+                    "value": "American Samoa"
+                  },
+                  "region": {
+                    "value": "Oceania"
+                  }
+                },
+                "branch_attrs": {
+                  "mutations": {}
+                }
+              },
+              {
+                "name": "SMGC_1",
+                "node_attrs": {
+                  "num_date": {
+                    "value": 2016.123203285421
+                  },
+                  "div": 0.00447355709750125,
+                  "country": {
+                    "value": "American Samoa"
+                  },
+                  "region": {
+                    "value": "Oceania"
+                  }
+                },
+                "branch_attrs": {
+                  "mutations": {}
+                }
+              }
+            ],
+            "name": "NODE_0000010",
+            "node_attrs": {
+              "num_date": {
+                "value": 2016.123203285421
+              },
+              "div": 0.004473557097501246,
+              "country": {
+                "value": "American Samoa"
+              },
+              "region": {
+                "value": "Oceania"
+              }
+            },
+            "branch_attrs": {
+              "mutations": {}
+            }
+          },
+          {
+            "children": [
+              {
+                "name": "1_0087_PF",
+                "node_attrs": {
+                  "num_date": {
+                    "value": 2013.9993155373031
+                  },
+                  "div": 0.0024222643102972813,
+                  "country": {
+                    "value": "French Polynesia"
+                  },
+                  "region": {
+                    "value": "Oceania"
+                  }
+                },
+                "branch_attrs": {
+                  "mutations": {}
+                }
+              },
+              {
+                "children": [
+                  {
+                    "name": "1_0181_PF",
+                    "node_attrs": {
+                      "num_date": {
+                        "value": 2013.9993155373031
+                      },
+                      "div": 0.00251529569631154,
+                      "country": {
+                        "value": "French Polynesia"
+                      },
+                      "region": {
+                        "value": "Oceania"
+                      }
+                    },
+                    "branch_attrs": {
+                      "mutations": {}
+                    }
+                  },
+                  {
+                    "name": "1_0199_PF",
+                    "node_attrs": {
+                      "num_date": {
+                        "value": 2013.914442162902
+                      },
+                      "div": 0.002422237665143729,
+                      "country": {
+                        "value": "French Polynesia"
+                      },
+                      "region": {
+                        "value": "Oceania"
+                      }
+                    },
+                    "branch_attrs": {
+                      "mutations": {}
+                    }
+                  },
+                  {
+                    "children": [
+                      {
+                        "children": [
+                          {
+                            "name": "PRVABC59",
+                            "node_attrs": {
+                              "num_date": {
+                                "value": 2015.9993155373031
+                              },
+                              "div": 0.0050307734451243095,
+                              "country": {
+                                "value": "Puerto Rico"
+                              },
+                              "region": {
+                                "value": "North America"
+                              }
+                            },
+                            "branch_attrs": {
+                              "mutations": {}
+                            }
+                          },
+                          {
+                            "children": [
+                              {
+                                "name": "Brazil/2016/ZBRC16",
+                                "node_attrs": {
+                                  "num_date": {
+                                    "value": 2016.0520191649555
+                                  },
+                                  "div": 0.004470636859357974,
+                                  "country": {
+                                    "value": "Brazil"
+                                  },
+                                  "region": {
+                                    "value": "South America"
+                                  }
+                                },
+                                "branch_attrs": {
+                                  "mutations": {}
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "name": "V8375",
+                                    "node_attrs": {
+                                      "num_date": {
+                                        "value": 2015.8350444900752
+                                      },
+                                      "div": 0.004656170467000101,
+                                      "country": {
+                                        "value": "Guatemala"
+                                      },
+                                      "region": {
+                                        "value": "North America"
+                                      }
+                                    },
+                                    "branch_attrs": {
+                                      "mutations": {}
+                                    }
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "name": "HND/2016/HU_ME59",
+                                        "node_attrs": {
+                                          "num_date": {
+                                            "value": 2016.3668720054757
+                                          },
+                                          "div": 0.004190637164489735,
+                                          "country": {
+                                            "value": "Honduras"
+                                          },
+                                          "region": {
+                                            "value": "North America"
+                                          }
+                                        },
+                                        "branch_attrs": {
+                                          "mutations": {}
+                                        }
+                                      },
+                                      {
+                                        "name": "Nica1_16",
+                                        "node_attrs": {
+                                          "num_date": {
+                                            "value": 2016.0520191649555
+                                          },
+                                          "div": 0.0043768301798223115,
+                                          "country": {
+                                            "value": "Nicaragua"
+                                          },
+                                          "region": {
+                                            "value": "North America"
+                                          }
+                                        },
+                                        "branch_attrs": {
+                                          "mutations": {}
+                                        }
+                                      }
+                                    ],
+                                    "name": "NODE_0000032",
+                                    "node_attrs": {
+                                      "num_date": {
+                                        "value": 2015.5743631804805
+                                      },
+                                      "div": 0.0038184668320615134,
+                                      "country": {
+                                        "value": "Honduras"
+                                      },
+                                      "region": {
+                                        "value": "North America"
+                                      }
+                                    },
+                                    "branch_attrs": {
+                                      "mutations": {}
+                                    }
+                                  }
+                                ],
+                                "name": "NODE_0000018",
+                                "node_attrs": {
+                                  "num_date": {
+                                    "value": 2015.4522049916925
+                                  },
+                                  "div": 0.00381846683206151,
+                                  "country": {
+                                    "value": "Guatemala"
+                                  },
+                                  "region": {
+                                    "value": "North America"
+                                  }
+                                },
+                                "branch_attrs": {
+                                  "mutations": {}
+                                }
+                              }
+                            ],
+                            "name": "NODE_0000017",
+                            "node_attrs": {
+                              "num_date": {
+                                "value": 2014.7913009910844
+                              },
+                              "div": 0.0030737322471371597,
+                              "country": {
+                                "value": "Brazil"
+                              },
+                              "region": {
+                                "value": "South America"
+                              }
+                            },
+                            "branch_attrs": {
+                              "mutations": {}
+                            }
+                          }
+                        ],
+                        "name": "NODE_0000016",
+                        "node_attrs": {
+                          "num_date": {
+                            "value": 2014.7233885013768
+                          },
+                          "div": 0.002980698362239428,
+                          "country": {
+                            "value": "Brazil"
+                          },
+                          "region": {
+                            "value": "South America"
+                          }
+                        },
+                        "branch_attrs": {
+                          "mutations": {}
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "name": "Brazil/2015/ZBRC301",
+                            "node_attrs": {
+                              "num_date": {
+                                "value": 2015.3641341546886
+                              },
+                              "div": 0.0038183967369625135,
+                              "country": {
+                                "value": "Brazil"
+                              },
+                              "region": {
+                                "value": "South America"
+                              }
+                            },
+                            "branch_attrs": {
+                              "mutations": {}
+                            }
+                          },
+                          {
+                            "children": [
+                              {
+                                "name": "Brazil/2015/ZBRC303",
+                                "node_attrs": {
+                                  "num_date": {
+                                    "value": 2015.3668720054757
+                                  },
+                                  "div": 0.0032598099173850505,
+                                  "country": {
+                                    "value": "Brazil"
+                                  },
+                                  "region": {
+                                    "value": "South America"
+                                  }
+                                },
+                                "branch_attrs": {
+                                  "mutations": {}
+                                }
+                              },
+                              {
+                                "name": "BRA/2016/FC_6706",
+                                "node_attrs": {
+                                  "num_date": {
+                                    "value": 2016.2710472279261
+                                  },
+                                  "div": 0.004190866235595548,
+                                  "country": {
+                                    "value": "Brazil"
+                                  },
+                                  "region": {
+                                    "value": "South America"
+                                  }
+                                },
+                                "branch_attrs": {
+                                  "mutations": {}
+                                }
+                              }
+                            ],
+                            "name": "NODE_0000003",
+                            "node_attrs": {
+                              "num_date": {
+                                "value": 2015.1376676745676
+                              },
+                              "div": 0.003166777529447065,
+                              "country": {
+                                "value": "Brazil"
+                              },
+                              "region": {
+                                "value": "South America"
+                              }
+                            },
+                            "branch_attrs": {
+                              "mutations": {}
+                            }
+                          },
+                          {
+                            "children": [
+                              {
+                                "name": "Colombia/2016/ZC204Se",
+                                "node_attrs": {
+                                  "num_date": {
+                                    "value": 2016.0164271047229
+                                  },
+                                  "div": 0.00447018357590089,
+                                  "country": {
+                                    "value": "Colombia"
+                                  },
+                                  "region": {
+                                    "value": "South America"
+                                  }
+                                },
+                                "branch_attrs": {
+                                  "mutations": {}
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "name": "PAN/CDC_259359_V1_V3/2015",
+                                    "node_attrs": {
+                                      "num_date": {
+                                        "value": 2015.9637234770705
+                                      },
+                                      "div": 0.005214981927371812,
+                                      "country": {
+                                        "value": "Panama"
+                                      },
+                                      "region": {
+                                        "value": "North America"
+                                      }
+                                    },
+                                    "branch_attrs": {
+                                      "mutations": {}
+                                    }
+                                  },
+                                  {
+                                    "name": "VEN/UF_1/2016",
+                                    "node_attrs": {
+                                      "num_date": {
+                                        "value": 2016.2327173169062
+                                      },
+                                      "div": 0.0054948000929859785,
+                                      "country": {
+                                        "value": "Venezuela"
+                                      },
+                                      "region": {
+                                        "value": "South America"
+                                      }
+                                    },
+                                    "branch_attrs": {
+                                      "mutations": {}
+                                    }
+                                  }
+                                ],
+                                "name": "NODE_0000000",
+                                "node_attrs": {
+                                  "num_date": {
+                                    "value": 2015.453153982869
+                                  },
+                                  "div": 0.0042840271550496556,
+                                  "country": {
+                                    "value": "Panama"
+                                  },
+                                  "region": {
+                                    "value": "South America"
+                                  }
+                                },
+                                "branch_attrs": {
+                                  "mutations": {}
+                                }
+                              }
+                            ],
+                            "name": "NODE_0000001",
+                            "node_attrs": {
+                              "num_date": {
+                                "value": 2015.3493512812076
+                              },
+                              "div": 0.004097952642676596,
+                              "country": {
+                                "value": "Colombia"
+                              },
+                              "region": {
+                                "value": "South America"
+                              }
+                            },
+                            "branch_attrs": {
+                              "mutations": {}
+                            }
+                          }
+                        ],
+                        "name": "NODE_0000004",
+                        "node_attrs": {
+                          "num_date": {
+                            "value": 2014.75532847463
+                          },
+                          "div": 0.003073744467144721,
+                          "country": {
+                            "value": "Brazil"
+                          },
+                          "region": {
+                            "value": "South America"
+                          }
+                        },
+                        "branch_attrs": {
+                          "mutations": {}
+                        }
+                      },
+                      {
+                        "children": [
+                          {
+                            "name": "EcEs062_16",
+                            "node_attrs": {
+                              "num_date": {
+                                "value": 2016.331279945243
+                              },
+                              "div": 0.004750802268963389,
+                              "country": {
+                                "value": "Ecuador"
+                              },
+                              "region": {
+                                "value": "South America"
+                              }
+                            },
+                            "branch_attrs": {
+                              "mutations": {}
+                            }
+                          },
+                          {
+                            "children": [
+                              {
+                                "name": "Brazil/2015/ZBRA105",
+                                "node_attrs": {
+                                  "num_date": {
+                                    "value": 2015.1478439425052
+                                  },
+                                  "div": 0.0037250953248542423,
+                                  "country": {
+                                    "value": "Brazil"
+                                  },
+                                  "region": {
+                                    "value": "South America"
+                                  }
+                                },
+                                "branch_attrs": {
+                                  "mutations": {}
+                                }
+                              },
+                              {
+                                "children": [
+                                  {
+                                    "name": "DOM/2016/BB_0433",
+                                    "node_attrs": {
+                                      "num_date": {
+                                        "value": 2016.4517453798767
+                                      },
+                                      "div": 0.0055876083578752225,
+                                      "country": {
+                                        "value": "Dominican Republic"
+                                      },
+                                      "region": {
+                                        "value": "North America"
+                                      }
+                                    },
+                                    "branch_attrs": {
+                                      "mutations": {}
+                                    }
+                                  },
+                                  {
+                                    "children": [
+                                      {
+                                        "name": "DOM/2016/BB_0183",
+                                        "node_attrs": {
+                                          "num_date": {
+                                            "value": 2016.2984257357973
+                                          },
+                                          "div": 0.0053079944972312856,
+                                          "country": {
+                                            "value": "Dominican Republic"
+                                          },
+                                          "region": {
+                                            "value": "North America"
+                                          }
+                                        },
+                                        "branch_attrs": {
+                                          "mutations": {}
+                                        }
+                                      },
+                                      {
+                                        "name": "DOM/2016/MA_WGS16_011",
+                                        "node_attrs": {
+                                          "num_date": {
+                                            "value": 2016.432580424367
+                                          },
+                                          "div": 0.005307942375639782,
+                                          "country": {
+                                            "value": "Dominican Republic"
+                                          },
+                                          "region": {
+                                            "value": "North America"
+                                          }
+                                        },
+                                        "branch_attrs": {
+                                          "mutations": {}
+                                        }
+                                      },
+                                      {
+                                        "children": [
+                                          {
+                                            "children": [
+                                              {
+                                                "name": "USA/2016/FLUR022",
+                                                "node_attrs": {
+                                                  "num_date": {
+                                                    "value": 2016.6680355920603
+                                                  },
+                                                  "div": 0.006145793056814776,
+                                                  "country": {
+                                                    "value": "USA"
+                                                  },
+                                                  "region": {
+                                                    "value": "North America"
+                                                  }
+                                                },
+                                                "branch_attrs": {
+                                                  "mutations": {}
+                                                }
+                                              },
+                                              {
+                                                "name": "Aedes_aegypti/USA/2016/FL05",
+                                                "node_attrs": {
+                                                  "num_date": {
+                                                    "value": 2016.6926762491444
+                                                  },
+                                                  "div": 0.0060527157106952285,
+                                                  "country": {
+                                                    "value": "USA"
+                                                  },
+                                                  "region": {
+                                                    "value": "North America"
+                                                  }
+                                                },
+                                                "branch_attrs": {
+                                                  "mutations": {}
+                                                }
+                                              }
+                                            ],
+                                            "name": "NODE_0000026",
+                                            "node_attrs": {
+                                              "num_date": {
+                                                "value": 2016.4466785028071
+                                              },
+                                              "div": 0.005773554692120901,
+                                              "country": {
+                                                "value": "USA"
+                                              },
+                                              "region": {
+                                                "value": "North America"
+                                              }
+                                            },
+                                            "branch_attrs": {
+                                              "mutations": {}
+                                            }
+                                          },
+                                          {
+                                            "children": [
+                                              {
+                                                "name": "DOM/2016/BB_0059",
+                                                "node_attrs": {
+                                                  "num_date": {
+                                                    "value": 2016.2600958247776
+                                                  },
+                                                  "div": 0.005307750276566269,
+                                                  "country": {
+                                                    "value": "Dominican Republic"
+                                                  },
+                                                  "region": {
+                                                    "value": "North America"
+                                                  }
+                                                },
+                                                "branch_attrs": {
+                                                  "mutations": {}
+                                                }
+                                              },
+                                              {
+                                                "children": [
+                                                  {
+                                                    "name": "USA/2016/FL022",
+                                                    "node_attrs": {
+                                                      "num_date": {
+                                                        "value": 2016.558521560575
+                                                      },
+                                                      "div": 0.006052424280998338,
+                                                      "country": {
+                                                        "value": "USA"
+                                                      },
+                                                      "region": {
+                                                        "value": "North America"
+                                                      }
+                                                    },
+                                                    "branch_attrs": {
+                                                      "mutations": {}
+                                                    }
+                                                  },
+                                                  {
+                                                    "name": "USA/2016/FLWB042",
+                                                    "node_attrs": {
+                                                      "num_date": {
+                                                        "value": 2016.7392197125257
+                                                      },
+                                                      "div": 0.005586937649809486,
+                                                      "country": {
+                                                        "value": "USA"
+                                                      },
+                                                      "region": {
+                                                        "value": "North America"
+                                                      }
+                                                    },
+                                                    "branch_attrs": {
+                                                      "mutations": {}
+                                                    }
+                                                  }
+                                                ],
+                                                "name": "NODE_0000028",
+                                                "node_attrs": {
+                                                  "num_date": {
+                                                    "value": 2016.2285352270237
+                                                  },
+                                                  "div": 0.00540083543540662,
+                                                  "country": {
+                                                    "value": "USA"
+                                                  },
+                                                  "region": {
+                                                    "value": "North America"
+                                                  }
+                                                },
+                                                "branch_attrs": {
+                                                  "mutations": {}
+                                                }
+                                              }
+                                            ],
+                                            "name": "NODE_0000027",
+                                            "node_attrs": {
+                                              "num_date": {
+                                                "value": 2015.9636877944856
+                                              },
+                                              "div": 0.00502857975359667,
+                                              "country": {
+                                                "value": "Dominican Republic"
+                                              },
+                                              "region": {
+                                                "value": "North America"
+                                              }
+                                            },
+                                            "branch_attrs": {
+                                              "mutations": {}
+                                            }
+                                          }
+                                        ],
+                                        "name": "NODE_0000025",
+                                        "node_attrs": {
+                                          "num_date": {
+                                            "value": 2015.7594510190593
+                                          },
+                                          "div": 0.004749400868482979,
+                                          "country": {
+                                            "value": "Dominican Republic"
+                                          },
+                                          "region": {
+                                            "value": "North America"
+                                          }
+                                        },
+                                        "branch_attrs": {
+                                          "mutations": {}
+                                        }
+                                      }
+                                    ],
+                                    "name": "NODE_0000023",
+                                    "node_attrs": {
+                                      "num_date": {
+                                        "value": 2015.6789947953446
+                                      },
+                                      "div": 0.0046563618229369655,
+                                      "country": {
+                                        "value": "Dominican Republic"
+                                      },
+                                      "region": {
+                                        "value": "North America"
+                                      }
+                                    },
+                                    "branch_attrs": {
+                                      "mutations": {}
+                                    }
+                                  }
+                                ],
+                                "name": "NODE_0000022",
+                                "node_attrs": {
+                                  "num_date": {
+                                    "value": 2015.6321379600167
+                                  },
+                                  "div": 0.004563321981828038,
+                                  "country": {
+                                    "value": "Dominican Republic"
+                                  },
+                                  "region": {
+                                    "value": "North America"
+                                  }
+                                },
+                                "branch_attrs": {
+                                  "mutations": {}
+                                }
+                              }
+                            ],
+                            "name": "NODE_0000021",
+                            "node_attrs": {
+                              "num_date": {
+                                "value": 2014.9365822481147
+                              },
+                              "div": 0.003445956387037809,
+                              "country": {
+                                "value": "Brazil"
+                              },
+                              "region": {
+                                "value": "South America"
+                              }
+                            },
+                            "branch_attrs": {
+                              "mutations": {}
+                            }
+                          }
+                        ],
+                        "name": "NODE_0000020",
+                        "node_attrs": {
+                          "num_date": {
+                            "value": 2014.7224573837038
+                          },
+                          "div": 0.0030737447743539384,
+                          "country": {
+                            "value": "Brazil"
+                          },
+                          "region": {
+                            "value": "South America"
+                          }
+                        },
+                        "branch_attrs": {
+                          "mutations": {}
+                        }
+                      }
+                    ],
+                    "name": "NODE_0000005",
+                    "node_attrs": {
+                      "num_date": {
+                        "value": 2014.5909257566652
+                      },
+                      "div": 0.002887664510105692,
+                      "country": {
+                        "value": "Brazil"
+                      },
+                      "region": {
+                        "value": "South America"
+                      }
+                    },
+                    "branch_attrs": {
+                      "mutations": {}
+                    }
+                  }
+                ],
+                "name": "NODE_0000007",
+                "node_attrs": {
+                  "num_date": {
+                    "value": 2013.822011791205
+                  },
+                  "div": 0.0022361597853983468,
+                  "country": {
+                    "value": "French Polynesia"
+                  },
+                  "region": {
+                    "value": "Oceania"
+                  }
+                },
+                "branch_attrs": {
+                  "mutations": {}
+                }
+              }
+            ],
+            "name": "NODE_0000008",
+            "node_attrs": {
+              "num_date": {
+                "value": 2013.7639669841656
+              },
+              "div": 0.002143126864739116,
+              "country": {
+                "value": "French Polynesia"
+              },
+              "region": {
+                "value": "Oceania"
+              }
+            },
+            "branch_attrs": {
+              "mutations": {}
+            }
+          }
+        ],
+        "name": "NODE_0000009",
+        "node_attrs": {
+          "num_date": {
+            "value": 2013.5395718889172
+          },
+          "div": 0.002050093310189498,
+          "country": {
+            "value": "French Polynesia"
+          },
+          "region": {
+            "value": "Oceania"
+          }
+        },
+        "branch_attrs": {
+          "mutations": {}
+        }
+      }
+    ],
+    "name": "NODE_0000031",
+    "node_attrs": {
+      "num_date": {
+        "value": 2011.8869660756184
+      },
+      "div": 0,
+      "country": {
+        "value": "French Polynesia"
+      },
+      "region": {
+        "value": "Oceania"
+      }
+    },
+    "branch_attrs": {
+      "mutations": {}
+    }
+  }
+}

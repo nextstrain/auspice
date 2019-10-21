@@ -1,41 +1,41 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, UNDEFINED_VALUE } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
-import { strainNameToIdx, cladeNameToIdx, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
+import { strainNameToIdx, getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { calcTipRadii } from "../util/tipRadiusHelpers";
 import { getDefaultControlsState } from "../reducers/controls";
-import { countTraitsAcrossTree } from "../util/treeCountingHelpers";
+import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
-import { entropyCreateStateFromJsons } from "../util/entropyCreateStateFromJsons";
+import { entropyCreateState } from "../util/entropyCreateStateFromJsons";
 import { determineColorByGenotypeMutType, calcNodeColor } from "../util/colorHelpers";
 import { calcColorScale } from "../util/colorScale";
 import { computeMatrixFromRawData } from "../util/processFrequencies";
 import { applyInViewNodesToTree } from "../actions/tree";
 import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
+import { getTraitFromNode, getDivFromNode } from "../util/treeMiscHelpers";
 
-export const checkColorByConfidence = (attrs, colorBy) => {
-  return colorBy !== "num_date" && attrs.indexOf(colorBy + "_confidence") > -1;
-};
+
+export const doesColorByHaveConfidence = (controlsState, colorBy) =>
+  controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
 
 export const getMinCalDateViaTree = (nodes, state) => {
   /* slider should be earlier than actual day */
   /* if no date, use some default dates - slider will not be visible */
-  const minNumDate = nodes[0].attr.num_date ? nodes[0].attr.num_date - 0.01 : state.dateMaxNumeric - defaultDateRange;
-  return numericToCalendar(minNumDate);
+  const minNumDate = getTraitFromNode(nodes[0], "num_date")
+  return (minNumDate === UNDEFINED_VALUE) ?
+    state.dateMaxNumeric - defaultDateRange :
+    numericToCalendar(minNumDate - 0.01);
 };
 
 export const getMaxCalDateViaTree = (nodes) => {
   let maxNumDate = reallySmallNumber;
   nodes.forEach((node) => {
-    if (node.attr) {
-      if (node.attr.num_date) {
-        if (node.attr.num_date > maxNumDate) {
-          maxNumDate = node.attr.num_date;
-        }
-      }
+    const numDate = getTraitFromNode(node, "num_date");
+    if (numDate !== UNDEFINED_VALUE && numDate > maxNumDate) {
+      maxNumDate = numDate;
     }
   });
   maxNumDate += 0.01; /* slider should be later than actual day */
@@ -154,39 +154,28 @@ const modifyStateViaMetadata = (state, metadata) => {
   if (metadata.analysisSlider) {
     state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
   }
-  if (metadata.author_info) {
-    // need authors in metadata.filters to include as filter
-    // but metadata.author_info is generally required for app functioning
-  } else {
-    console.warn("the meta.json did not include author_info");
-  }
   if (metadata.filters) {
     metadata.filters.forEach((v) => {
       state.filters[v] = [];
       state.defaults.filters[v] = [];
     });
   } else {
-    console.warn("the meta.json did not include any filters");
+    console.warn("JSON did not include any filters");
   }
-  if (metadata.defaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout"];
-    const expectedTypes = ["string", "string", "string", "string"];
+  if (metadata.displayDefaults) {
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate"];
+    const expectedTypes = ["string", "string", "string", "string", "boolean"];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
-      if (metadata.defaults[keysToCheckFor[i]]) {
-        if (typeof metadata.defaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
+      if (metadata.displayDefaults[keysToCheckFor[i]]) {
+        if (typeof metadata.displayDefaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
           /* e.g. if key=geoResoltion, set both state.geoResolution and state.defaults.geoResolution */
-          state[keysToCheckFor[i]] = metadata.defaults[keysToCheckFor[i]];
-          state.defaults[keysToCheckFor[i]] = metadata.defaults[keysToCheckFor[i]];
+          state[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
+          state.defaults[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
         } else {
           console.error("Skipping (meta.json) default for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
         }
       }
-    }
-    // TODO: why are these false / False
-    if (metadata.defaults.mapTriplicate) {
-      // convert string to boolean; default is true; turned off with either false (js) or False (python)
-      state["mapTriplicate"] = (metadata.defaults.mapTriplicate === 'false' || metadata.defaults.mapTriplicate === 'False') ? false : true;
     }
   }
 
@@ -198,14 +187,14 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelsToDisplay = ["tree"];
   }
 
-  /* if metadata lacks geo, remove map from panels to display */
-  if (!metadata.geo) {
+  /* if we lack geoResolutions, remove map from panels to display */
+  if (!metadata.geoResolutions || !metadata.geoResolutions.length) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "map");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "map");
   }
 
-  /* if metadata lacks annotations, remove entropy from panels to display */
-  if (!metadata.annotations || !metadata.annotations.nuc) {
+  /* if we lack genome annotations, remove entropy from panels to display */
+  if (!metadata.genomeAnnotations || !metadata.genomeAnnotations.nuc) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
   }
@@ -216,22 +205,22 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelLayout = "full";
     state.canTogglePanelLayout = false;
   }
-  /* annotations in metadata */
-  if (metadata.annotations) {
-    for (const gene of Object.keys(metadata.annotations)) {
-      state.geneLength[gene] = metadata.annotations[gene].end - metadata.annotations[gene].start;
+  /* genome annotations in metadata */
+  if (metadata.genomeAnnotations) {
+    for (const gene of Object.keys(metadata.genomeAnnotations)) {
+      state.geneLength[gene] = metadata.genomeAnnotations[gene].end - metadata.genomeAnnotations[gene].start;
       if (gene !== nucleotide_gene) {
         state.geneLength[gene] /= 3;
       }
     }
   } else {
-    console.warn("The meta.json did not include annotations.");
+    console.warn("JSONs did not include `genome_annotations`");
   }
 
   return state;
 };
 
-const modifyStateViaTree = (state, tree, treeToo) => {
+const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   state["dateMin"] = getMinCalDateViaTree(tree.nodes, state);
   state["dateMax"] = getMaxCalDateViaTree(tree.nodes);
   state.dateMinNumeric = calendarToNumeric(state.dateMin);
@@ -258,23 +247,42 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   state.absoluteDateMinNumeric = calendarToNumeric(state.absoluteDateMin);
   state.absoluteDateMaxNumeric = calendarToNumeric(state.absoluteDateMax);
 
-  /* collect all available tree attrs, and available mutations */
-  const attrs = new Set();
+  /* For the colorings (defined in the JSON) we need to check whether they
+  (a) actually exist on the tree and (b) have confidence values.
+  TODO - this whole file should be reorganised to make things clearer.
+  perhaps there's a better place to put this... */
+  state.coloringsPresentOnTree = new Set();
+  state.coloringsPresentOnTreeWithConfidence = new Set(); // subset of above
+
+  let coloringsToCheck = [];
+  if (colorings) {
+    coloringsToCheck = Object.keys(colorings);
+  }
   let [aaMuts, nucMuts] = [false, false];
   const examineNodes = function examineNodes(nodes) {
     nodes.forEach((node) => {
-      Object.keys(node.attr).forEach((attr) => {
-        attrs.add(attr);
+      /* check colorBys */
+      coloringsToCheck.forEach((colorBy) => {
+        if (!state.coloringsPresentOnTreeWithConfidence.has(colorBy)) {
+          if (getTraitFromNode(node, colorBy, {confidence: true})) {
+            state.coloringsPresentOnTreeWithConfidence.add(colorBy);
+            state.coloringsPresentOnTree.add(colorBy);
+          } else if (getTraitFromNode(node, colorBy)) {
+            state.coloringsPresentOnTree.add(colorBy);
+          }
+        }
       });
-      if (node.aa_muts && Object.keys(node.aa_muts).length) aaMuts = true;
-      if (node.muts && node.muts.length) nucMuts = true;
+      /* check mutations */
+      if (node.branch_attrs && node.branch_attrs.mutations) {
+        const keys = Object.keys(node.branch_attrs.mutations);
+        if (keys.length > 1 || (keys.length === 1 && keys[0]!=="nuc")) aaMuts = true;
+        if (keys.includes("nuc")) nucMuts = true;
+      }
     });
   };
   examineNodes(tree.nodes);
-  if (treeToo) {
-    examineNodes(treeToo.nodes);
-  }
-  state.attrs = [...attrs]; /* convert to list */
+  if (treeToo) examineNodes(treeToo.nodes);
+
 
   /* ensure specified mutType is indeed available */
   if (!aaMuts && !nucMuts) {
@@ -284,10 +292,16 @@ const modifyStateViaTree = (state, tree, treeToo) => {
   } else if (state.mutType === "nuc" && !nucMuts) {
     state.mutType = "aa";
   }
+  if (aaMuts || nucMuts) {
+    state.coloringsPresentOnTree.add("gt");
+  }
 
   /* does the tree have date information? if not, disable controls, modify view */
-  state.branchLengthsToDisplay = Object.keys(tree.nodes[0].attr).indexOf("num_date") === -1 ? "divOnly" :
-    Object.keys(tree.nodes[0].attr).indexOf("div") === -1 ? "dateOnly" : "divAndDate";
+  const numDateAtRoot = getTraitFromNode(tree.nodes[0], "num_date") !== UNDEFINED_VALUE;
+  const divAtRoot = getDivFromNode(tree.nodes[0]) !== undefined;
+  state.branchLengthsToDisplay = (numDateAtRoot && divAtRoot) ? "divAndDate" :
+    numDateAtRoot ? "dateOnly" :
+      "divOnly";
 
   /* if branchLengthsToDisplay is "divOnly", force to display by divergence
    * if branchLengthsToDisplay is "dateOnly", force to display by date
@@ -296,26 +310,27 @@ const modifyStateViaTree = (state, tree, treeToo) => {
     state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
 
   state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
-  state.temporalConfidence = Object.keys(tree.nodes[0].attr).indexOf("num_date_confidence") > -1 ?
-    {exists: true, display: true, on: false} : {exists: false, display: false, on: false};
+
+  state.temporalConfidence = getTraitFromNode(tree.nodes[0], "num_date", {confidence: true}) ?
+    {exists: true, display: true, on: false} :
+    {exists: false, display: false, on: false};
   return state;
 };
 
 const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
-  /* colorBy */
-  if (!metadata.colorOptions) {
-    metadata.colorOptions = {};
+  /* want to check that the (currently set) colorBy (state.colorBy) is valid,
+   * and fall-back to an available colorBy if not
+   */
+  if (!metadata.colorings) {
+    metadata.colorings = {};
   }
   const fallBackToDefaultColorBy = () => {
-    const availableNonGenotypeColorBys = Object.keys(metadata.colorOptions);
-    if (availableNonGenotypeColorBys.indexOf("gt") > -1) {
-      availableNonGenotypeColorBys.splice(availableNonGenotypeColorBys.indexOf("gt"), 1);
-    }
-
-    if (metadata.defaults && metadata.defaults.colorBy && availableNonGenotypeColorBys.indexOf(metadata.defaults.colorBy) !== -1) {
-      console.warn("colorBy falling back to", metadata.defaults.colorBy);
-      state.colorBy = metadata.defaults.colorBy;
-      state.defaults.colorBy = metadata.defaults.colorBy;
+    const availableNonGenotypeColorBys = Object.keys(metadata.colorings)
+      .filter((colorKey) => colorKey !== "gt");
+    if (metadata.displayDefaults && metadata.displayDefaults.colorBy && availableNonGenotypeColorBys.indexOf(metadata.displayDefaults.colorBy) !== -1) {
+      console.warn("colorBy falling back to", metadata.displayDefaults.colorBy);
+      state.colorBy = metadata.displayDefaults.colorBy;
+      state.defaults.colorBy = metadata.displayDefaults.colorBy;
     } else if (availableNonGenotypeColorBys.length) {
       if (availableNonGenotypeColorBys.indexOf(defaultColorBy) !== -1) {
         state.colorBy = defaultColorBy;
@@ -337,7 +352,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
     if (!decodeColorByGenotype(state.colorBy, state.geneLength)) {
       fallBackToDefaultColorBy();
     }
-  } else if (Object.keys(metadata.colorOptions).indexOf(state.colorBy) === -1) {
+  } else if (Object.keys(metadata.colorings).indexOf(state.colorBy) === -1) {
     /* if it's a _non_ genotype colorBy AND it's not a valid option, fall back to the default */
     fallBackToDefaultColorBy();
   }
@@ -352,7 +367,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   }
 
   /* colorBy confidence */
-  state["colorByConfidence"] = checkColorByConfidence(state["attrs"], state["colorBy"]);
+  state["colorByConfidence"] = doesColorByHaveConfidence(state, state["colorBy"]);
 
   /* distanceMeasure */
   if (["div", "num_date"].indexOf(state["distanceMeasure"]) === -1) {
@@ -360,13 +375,13 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
     console.error("Error detected. Setting distanceMeasure to ", state["distanceMeasure"]);
   }
 
-  /* geoResolution */
-  if (metadata.geo) {
-    const availableGeoResultions = Object.keys(metadata.geo);
+  /* geoResolutions */
+  if (metadata.geoResolutions) {
+    const availableGeoResultions = metadata.geoResolutions.map((i) => i.key);
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
       /* fallbacks: JSON defined default, then hardocded default, then any available */
-      if (metadata.defaults && metadata.defaults.geoResolution && availableGeoResultions.indexOf(metadata.defaults.geoResolution) !== -1) {
-        state.geoResolution = metadata.defaults.geoResolution;
+      if (metadata.displayDefaults && metadata.displayDefaults.geoResolution && availableGeoResultions.indexOf(metadata.displayDefaults.geoResolution) !== -1) {
+        state.geoResolution = metadata.displayDefaults.geoResolution;
       } else if (availableGeoResultions.indexOf(defaultGeoResolution) !== -1) {
         state.geoResolution = defaultGeoResolution;
       } else {
@@ -376,7 +391,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
       delete query.r; // no-op if query.r doesn't exist
     }
   } else {
-    console.warn("The meta.json did not include geo info.");
+    console.warn("JSONs did not include `geoResolutions`");
   }
 
   /* temporalConfidence */
@@ -403,7 +418,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   const stateCounts = countTraitsAcrossTree(tree.nodes, activeFilters, false, true);
   for (const filterType of activeFilters) {
     const validValues = state.filters[filterType]
-      .filter((filterValue) => filterValue in stateCounts[filterType]);
+      .filter((filterValue) => stateCounts[filterType].has(filterValue));
     state.filters[filterType] = validValues;
     if (!validValues.length) {
       delete query[`f_${filterType}`];
@@ -430,7 +445,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelect
     oldState.selectedStrain = tipSelected;
   }
   if (cladeSelected) {
-    const cladeSelectedIdx = cladeSelected === 'root' ? 0 : cladeNameToIdx(oldState.nodes, cladeSelected);
+    const cladeSelectedIdx = cladeSelected === 'root' ? 0 : getIdxMatchingLabel(oldState.nodes, "clade", cladeSelected);
     oldState.selectedClade = cladeSelected;
     newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState); // tipSelectedIdx, oldState);
   }
@@ -474,43 +489,112 @@ const modifyControlsViaTreeToo = (controls, name) => {
   return controls;
 };
 
+/**
+ * The v2 JSON spec defines colorings as a list, so that order is guaranteed.
+ * Prior to this, we used a dict, where key insertion order is (guaranteed? essentially always?)
+ * to be respected. By simply converting it back to a dict, all the auspice
+ * code may continue to work. This should be attended to in the future.
+ * @param {obj} coloringsList list of objects
+ * @returns {obj} a dictionary representation, where the "key" property of each element
+ * in the list has become a property of the object
+ */
+const convertColoringsListToDict = (coloringsList) => {
+  const colorings = {};
+  coloringsList.forEach((coloring) => {
+    colorings[coloring.key] = coloring;
+    delete colorings[coloring.key].key;
+  });
+  return colorings;
+};
+
+/**
+ *
+ * A lot of this is simply changing augur's snake_case to auspice's camelCase
+ */
+const createMetadataStateFromJSON = (json) => {
+  const metadata = {};
+  if (json.meta.colorings) {
+    metadata.colorings = convertColoringsListToDict(json.meta.colorings);
+  }
+  metadata.title = json.meta.title;
+  metadata.updated = json.meta.updated;
+  if (json.version) {
+    metadata.version = json.version;
+  }
+  if (json.meta.maintainers) {
+    metadata.maintainers = json.meta.maintainers;
+  }
+  if (json.meta.genome_annotations) {
+    metadata.genomeAnnotations = json.meta.genome_annotations;
+  }
+  if (json.meta.filters) {
+    metadata.filters = json.meta.filters;
+  }
+  if (json.meta.panels) {
+    metadata.panels = json.meta.panels;
+  }
+  if (json.meta.display_defaults) {
+    metadata.displayDefaults = {};
+    const jsonKeyToAuspiceKey = {
+      color_by: "colorBy",
+      geo_resolution: "geoResolution",
+      distance_measure: "distanceMeasure",
+      map_triplicate: "mapTriplicate",
+      layout: "layout"
+    };
+    for (const [jsonKey, auspiceKey] of Object.entries(jsonKeyToAuspiceKey)) {
+      if (json.meta.display_defaults[jsonKey]) {
+        metadata.displayDefaults[auspiceKey] = json.meta.display_defaults[jsonKey];
+      }
+    }
+  }
+  if (json.meta.geo_resolutions) {
+    metadata.geoResolutions = json.meta.geo_resolutions;
+  }
+
+
+  if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
+    console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
+  }
+  metadata.loaded = true;
+  return metadata;
+};
+
 export const createStateFromQueryOrJSONs = ({
   json = false, /* raw json data - completely nuke existing redux state */
+  secondTreeDataset = false,
   oldState = false, /* existing redux state (instead of jsons) */
   narrativeBlocks = false,
+  mainTreeName = false,
+  secondTreeName = false,
   query
 }) => {
   let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (json) {
     /* create metadata state */
-    metadata = json.meta;
-    if (metadata === undefined) {
-      metadata = {};
-    }
-    if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
-      console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
-    }
-    metadata.colorOptions = metadata.color_options;
-    delete metadata.color_options;
-    metadata.loaded = true;
+    metadata = createMetadataStateFromJSON(json);
     /* entropy state */
-    entropy = entropyCreateStateFromJsons(metadata);
+    entropy = entropyCreateState(metadata.genomeAnnotations);
     /* new tree state(s) */
-    tree = treeJsonToState(json.tree, metadata.vaccine_choices);
+    tree = treeJsonToState(json.tree);
     tree.debug = "LEFT";
-    if (json.treeTwo) {
-      treeToo = treeJsonToState(json.treeTwo, metadata.vaccine_choices);
+    tree.name = mainTreeName;
+    metadata.mainTreeNumTips = calcTotalTipsInTree(tree.nodes);
+    if (secondTreeDataset) {
+      treeToo = treeJsonToState(secondTreeDataset.tree);
       treeToo.debug = "RIGHT";
-      treeToo.name = json._treeTwoName;
+      treeToo.name = secondTreeName;
+      /* TODO: calc & display num tips in 2nd tree */
+      // metadata.secondTreeNumTips = calcTotalTipsInTree(treeToo.nodes);
     }
+
     /* new controls state - don't apply query yet (or error check!) */
     controls = getDefaultControlsState();
-    controls = modifyStateViaTree(controls, tree, treeToo);
+    controls = modifyControlsStateViaTree(controls, tree, treeToo, metadata.colorings);
     controls = modifyStateViaMetadata(controls, metadata);
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
-    controls.source = json["_source"];
   } else if (oldState) {
     /* revisit this - but it helps prevent bugs */
     controls = {...oldState.controls};
@@ -540,7 +624,7 @@ export const createStateFromQueryOrJSONs = ({
     const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
     const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;
-    controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
+    controls.colorByConfidence = doesColorByHaveConfidence(controls, controls.colorBy);
     tree.nodeColorsVersion = colorScale.version;
     tree.nodeColors = nodeColors;
   }
@@ -582,26 +666,25 @@ export const createStateFromQueryOrJSONs = ({
     );
   }
 
-  if (json["_treeName"]) {
-    tree.name = json["_treeName"];
-  }
-  const url = json["_url"]; // injected by the server. Will be picked up by middleware.
-  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query, url};
+  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };
 
 export const createTreeTooState = ({
   treeTooJSON, /* raw json data */
   oldState,
-  segment /* name of the treeToo segment */
+  originalTreeUrl,
+  secondTreeUrl /* treeToo URL */
 }) => {
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
   let controls = oldState.controls;
   const tree = Object.assign({}, oldState.tree);
+  tree.name = originalTreeUrl;
   let treeToo = treeJsonToState(treeTooJSON);
+  treeToo.name = secondTreeUrl;
   treeToo.debug = "RIGHT";
-  controls = modifyStateViaTree(controls, tree, treeToo);
-  controls = modifyControlsViaTreeToo(controls, segment);
+  controls = modifyControlsStateViaTree(controls, tree, treeToo, oldState.metadata.colorings);
+  controls = modifyControlsViaTreeToo(controls, secondTreeUrl);
   treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls);
 
   /* calculate colours if loading from JSONs or if the query demands change */
@@ -611,7 +694,7 @@ export const createTreeTooState = ({
   tree.nodeColorsVersion++;
 
   controls.colorScale = colorScale;
-  controls.colorByConfidence = checkColorByConfidence(controls.attrs, controls.colorBy);
+  controls.colorByConfidence = doesColorByHaveConfidence(controls, controls.colorBy);
   treeToo.nodeColorsVersion = colorScale.version;
   treeToo.nodeColors = nodeColors;
 

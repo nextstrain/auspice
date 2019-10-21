@@ -1,8 +1,8 @@
 /* eslint no-restricted-syntax: 0 */
 import React from "react";
 import { infoNotification, warningNotification } from "../../actions/notifications";
-import { prettyString, formatURLString, authorString } from "../../util/stringHelpers";
 import { spaceBetweenTrees } from "../tree/tree";
+import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -12,23 +12,6 @@ export const isPaperURLValid = (d) => {
   );
 };
 
-export const getAuthor = (info, k) => {
-  if (info === undefined || k === undefined) {
-    return (
-      <span>Not Available</span>
-    );
-  }
-  // TODO: improve this block
-  // if (isPaperURLValid(info[k])) {
-  //   return (
-  //     <a href={formatURLString(info[k].paper_url)} target="_blank">
-  //       {authorString(k)}
-  //     </a>
-  //   );
-  // }
-  return authorString(k);
-};
-
 /* this function based on https://github.com/daviddao/biojs-io-newick/blob/master/src/newick.js */
 const treeToNewick = (root, temporal) => {
   function recurse(node, parentX) {
@@ -36,14 +19,14 @@ const treeToNewick = (root, temporal) => {
     if (node.hasChildren) {
       const children = [];
       node.children.forEach((child) => {
-        const subsubtree = recurse(child, temporal ? node.attr.num_date : node.attr.div);
+        const subsubtree = recurse(child, temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node));
         children.push(subsubtree);
       });
-      subtree += "(" + children.join(",") + ")" + node.strain + ":";
-      subtree += (temporal ? node.attr.num_date : node.attr.div) - parentX;
+      subtree += "(" + children.join(",") + ")" + node.name + ":";
+      subtree += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
     } else { /* terminal node */
-      let leaf = node.strain + ":";
-      leaf += (temporal ? node.attr.num_date : node.attr.div) - parentX;
+      let leaf = node.name + ":";
+      leaf += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
       subtree += leaf;
     }
     return subtree;
@@ -72,70 +55,85 @@ const write = (filename, type, content) => {
   document.body.removeChild(link);
 };
 
-export const authorTSV = (dispatch, filePrefix, metadata, tree) => {
-  const lineArray = [["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"].join("\t")];
+/**
+ * Create & write a TSV file where each row is an author,
+ * with the relevent information (num isolates, journal etcetera)
+ */
+export const authorTSV = (dispatch, filePrefix, tree) => {
+  const lineArray = [];
+  lineArray.push(["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"].join("\t"));
   const filename = filePrefix + "_authors.tsv";
-
-  const authors = {};
-  tree.nodes.filter((n) => !n.hasChildren && n.attr.authors).forEach((n) => {
-    if (!authors[n.attr.authors]) {
-      authors[n.attr.authors] = [n.strain];
+  const UNKNOWN = "unknown";
+  const info = {};
+  tree.nodes.filter((n) => !n.hasChildren).forEach((n) => {
+    const author = getFullAuthorInfoFromNode(n);
+    if (!author) return;
+    if (info[author.value]) {
+      /* this author has been seen before */
+      info[author.value].count += 1;
+      info[author.value].strains.push(n.name);
     } else {
-      authors[n.attr.authors].push(n.strain);
+      /* author as-yet unseen */
+      info[author.value] = {
+        author: author.value,
+        title: author.title || UNKNOWN,
+        journal: author.journal || UNKNOWN,
+        url: isPaperURLValid(author) ? author.paper_url : UNKNOWN,
+        count: 1,
+        strains: [n.name]
+      };
     }
   });
-  const body = [];
-  if (metadata.author_info) {
-    for (const author of Object.keys(metadata.author_info)) {
-      body.push([
-        prettyString(author, {camelCase: false}),
-        metadata.author_info[author].n,
-        prettyString(metadata.author_info[author].title, {removeComma: true}),
-        prettyString(metadata.author_info[author].journal, {removeComma: true}),
-        isPaperURLValid(metadata.author_info[author]) ? formatURLString(metadata.author_info[author].paper_url) : "unknown",
-        authors[author].join(",")
-      ]);
-    }
-  }
+  Object.values(info).forEach((v) => {
+    lineArray.push([v.author, v.count, v.title, v.journal, v.url, v.strains.join(",")].join("\t"));
+  });
 
-  body.forEach((line) => { lineArray.push(line.join("\t")); });
   write(filename, MIME.tsv, lineArray.join("\n"));
   dispatch(infoNotification({message: "Author metadata exported", details: filename}));
 };
 
-export const turnAttrsIntoHeaderArray = (attrs) => {
-  return ["Strain"].concat(attrs.map((v) => prettyString(v)));
-};
-
-export const strainTSV = (dispatch, filePrefix, nodes, rawAttrs) => {
+/**
+ * Create & write a TSV file where each row is a strain in the tree,
+ * with the relevent information (accession, traits, etcetera)
+ * TODO this needs testing / improving after the move to v2 JSONs
+ */
+export const strainTSV = (dispatch, filePrefix, nodes) => {
   // dont need to traverse the tree - can just loop the nodes
   const filename = filePrefix + "_metadata.tsv";
   const data = [];
-  const includeAttr = (v) => (!(v.includes("entropy") || v.includes("confidence") || v === "div" || v === "paper_url"));
-  const attrs = ["accession", "date", "region", "country", "division", "authors", "journal", "title", "url"];
-  attrs.filter((v) => rawAttrs.indexOf(v) !== -1); // remove those "ideal" atttrs not actually present
-  rawAttrs.forEach((v) => {
-    if (attrs.indexOf(v) === -1 && includeAttr(v)) {
-      attrs.push(v);
+
+  const traitsToInclude = new Set(["author"]);
+  nodes.forEach((n) => {
+    if (n.traits) {
+      Object.keys(n.traits).forEach((t) => traitsToInclude.add(t));
     }
   });
+
   for (const node of nodes) {
     if (node.hasChildren) {
       continue;
     }
-    const line = [node.strain];
-    // console.log(node.attr)
-    for (const field of attrs) {
-      if (Object.keys(node.attr).indexOf(field) === -1) {
+    /* line is an array of values, will be written out as a tab seperated line */
+    const line = [node.name];
+
+    for (const trait of traitsToInclude) {
+      if (trait === "author") {
+        if (node.author) {
+          let info = node.author.value || node.author.author;
+          if (node.author.title) info += `, ${node.author.title}.`;
+          if (node.author.journal) info += ` ${node.author.journal}`;
+          line.push(info);
+        } else {
+          line.push("unknown");
+        }
+        continue;
+      }
+      const value = getTraitFromNode(node, trait);
+      if (!value) {
         line.push("unknown");
       } else {
-        const value = node.attr[field];
-        if (typeof value === 'string') {
-          if (value.lastIndexOf("http", 0) === 0) {
-            line.push(formatURLString(value));
-          } else {
-            line.push(prettyString(value, {removeComma: true}));
-          }
+        if (typeof value === 'string') {//eslint-disable-line
+          line.push(value);
         } else if (typeof value === "number") {
           line.push(parseFloat(value).toFixed(2));
         } else if (typeof value === "object") {
@@ -143,13 +141,13 @@ export const strainTSV = (dispatch, filePrefix, nodes, rawAttrs) => {
             if (typeof value[0] === "number") {
               line.push(value.map((v) => parseFloat(v).toFixed(2)).join(" - "));
             } else {
-              line.push(value.map((v) => prettyString(v, {removeComma: true})).join(" - "));
+              line.push(value.map((v) => v.join(" - ")));
             }
           } else { /* not an array, but a relational object */
             let x = "";
             for (const k of Object.keys(value)) {
-              const v = typeof value[k] === "number" ? parseFloat(value[k]).toFixed(2) : prettyString(value[k], {removeComma: true});
-              x += prettyString(k, {removeComma: true}) + ": " + v + ";";
+              const v = typeof value[k] === "number" ? parseFloat(value[k]).toFixed(2) : value[k];
+              x += `${k}:${v};`;
             }
             line.push(x);
           }
@@ -161,7 +159,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, rawAttrs) => {
     }
     data.push(line);
   }
-  const lineArray = [turnAttrsIntoHeaderArray(attrs).join("\t")];
+  const lineArray = [["Strain"].concat([...traitsToInclude]).join("\t")];
   data.forEach((line) => {
     const lineString = line.join("\t");
     lineArray.push(lineString);

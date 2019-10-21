@@ -1,216 +1,251 @@
 import React from "react";
 import { infoPanelStyles } from "../../../globalStyles";
-import { prettyString } from "../../../util/stringHelpers";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
+import { UNDEFINED_VALUE } from "../../../util/globals";
+import { getTraitFromNode, getDivFromNode, getVaccineFromNode, getFullAuthorInfoFromNode } from "../../../util/treeMiscHelpers";
 
-const renderInfoLine = (item, value) => (
-  <span>
-    <span style={{fontWeight: "500"}}>
-      {item + " "}
-    </span>
-    <span style={{fontWeight: "300"}}>
-      {value}
-    </span>
-  </span>
-);
+const InfoLine = ({name, value, padBelow=false}) => {
+  const renderValues = () => {
+    if (!value) return null;
+    if (Array.isArray(value)) {
+      return value.map((v) => (
+        <div key={v} style={{fontWeight: "300", marginLeft: "0em"}}>
+          {v}
+        </div>
+      ));
+    }
+    return (<span style={{fontWeight: "300"}}>{value}</span>);
+  };
 
-const renderInfoBlock = (item, values) => (
-  <div>
-    <p style={{marginBottom: "-0.7em", fontWeight: "500"}}>
-      {item}
-    </p>
-    {values.map((k) => (
-      <p key={k} style={{fontWeight: "300", marginBottom: "-0.9em", marginLeft: "0em"}}>
-        {k}
-      </p>
-    ))}
-    <br/>
+  return (
+    <div style={{paddingBottom: padBelow ? "15px" : "10px"}} key={name}>
+      <span style={{fontWeight: "500"}}>
+        {name + " "}
+      </span>
+      {renderValues()}
+    </div>
+  );
+};
+
+const StrainName = ({name}) => (
+  <div style={infoPanelStyles.tooltipHeading}>
+    {name}
   </div>
 );
 
-const VerticalBreak = () => (
-  <br style={{display: "block", marginTop: "10px", lineHeight: "22px"}} />
-);
 
-const renderBranchDivergence = (d) => (
-  <p>
-    {renderInfoLine("Divergence:", prettyString(d.attr.div.toExponential(3)))}
-  </p>
-);
+/**
+ * A React component to display information about the branch's time & divergence (where applicable)
+ * @param  {Object} props
+ * @param  {Object} props.node branch node currently highlighted
+ */
+const BranchLength = ({node}) => {
+  const elements = []; // elements to render
+  const divergence = getDivFromNode(node);
+  const numDate = getTraitFromNode(node, "num_date");
 
-const renderBranchTime = (d, temporalConfidence) => {
-  const date = d.attr.date || numericToCalendar(d.attr.num_date);
-  let dateRange = false;
-  if (temporalConfidence && d.attr.num_date_confidence) {
-    dateRange = [
-      numericToCalendar(d.attr.num_date_confidence[0]),
-      numericToCalendar(d.attr.num_date_confidence[1])
-    ];
+  if (divergence) {
+    elements.push(<InfoLine name="Divergence:" value={divergence.toExponential(3)} key="div"/>);
   }
-  if (dateRange && dateRange[0] !== dateRange[1]) {
+
+  if (numDate !== UNDEFINED_VALUE) {
+    const date = numericToCalendar(numDate);
+    const numDateConfidence = getTraitFromNode(node, "num_date", {confidence: true});
+    if (numDateConfidence) {
+      elements.push(<InfoLine name="Inferred Date:" value={date} key="inferredDate"/>);
+      const dateRange = [numericToCalendar(numDateConfidence[0]), numericToCalendar(numDateConfidence[1])];
+      if (dateRange[0] !== dateRange[1]) {
+        elements.push(<InfoLine name="Date Confidence Interval:" value={`(${dateRange[0]}, ${dateRange[1]})`} key="dateConf"/>);
+      }
+    } else {
+      elements.push(<InfoLine name="Date:" value={date} key="date"/>);
+    }
+  }
+
+  return elements;
+};
+
+/**
+ * A React component to display information about the colorBy for a tip/branch,
+ * potentially including a table with confidences.
+ * @param  {Object} props
+ * @param  {Object} props.node              branch / tip node currently highlighted
+ * @param  {string} props.colorBy
+ * @param  {bool}   props.colorByConfidence should these (colorBy conf) be displayed, if applicable?
+ * @param  {func}   props.colorScale
+ */
+const ColorBy = ({node, colorBy, colorByConfidence, colorScale}) => {
+  if (colorBy === "num_date") {
+    return null; /* date has already been displayed via <BranchLength> */
+  }
+  /* handle genotype as a special case */
+  if (isColorByGenotype(colorBy)) {
+    const genotype = decodeColorByGenotype(colorBy);
+    const name = genotype.aa ?
+      `Amino Acid at ${genotype.gene} site ${genotype.positions.join(", ")}:` :
+      `Nucleotide at pos ${genotype.positions.join(", ")}:`;
+    return <InfoLine name={name} value={getTipColorAttribute(node, colorScale)}/>;
+  }
+  /* handle author as a special case */
+  if (colorBy === "author") {
+    const authorInfo = getFullAuthorInfoFromNode(node);
+    if (!authorInfo) return null;
     return (
-      <p>
-        {renderInfoLine("Inferred Date:", date)}
-        <VerticalBreak/>
-        {renderInfoLine("Date Confidence Interval:", `(${dateRange[0]}, ${dateRange[1]})`)}
-      </p>
+      <>
+        <InfoLine name="Author:" value={authorInfo.value}/>
+        {authorInfo.title ? <InfoLine name="Title:" value={authorInfo.title}/> : null}
+        {authorInfo.journal ? <InfoLine name="Journal:" value={authorInfo.journal}/> : null}
+      </>
     );
   }
-  return (<p>{renderInfoLine("Date:", date)}</p>);
-};
-
-/**
- * Display information about the colorBy, potentially in a table with confidences
- * @param  {node} d branch node currently highlighted
- * @param  {bool} colorByConfidence should these (colorBy conf) be displayed, if applicable?
- * @param  {string} colorBy must be a key of d.attr
- * @return {JSX} to be displayed
- */
-const displayColorBy = (d, distanceMeasure, temporalConfidence, colorByConfidence, colorBy) => {
-  if (isColorByGenotype(colorBy)) {
-    return null; /* muts ahave already been displayed */
-  }
-  if (colorBy === "num_date") {
-    /* if colorBy is date and branch lengths are divergence we should still show node date */
-    return (colorBy !== distanceMeasure) ? renderBranchTime(d, temporalConfidence) : null;
-  }
+  /* general case */
+  const name = colorBy; // TODO - use meta.colorings[colorBy].title, if it exists!
   if (colorByConfidence === true) {
-    const lkey = colorBy + "_confidence";
-    if (Object.keys(d.attr).indexOf(lkey) === -1) {
-      console.error("Error - couldn't find confidence vals for ", lkey);
+    const confidenceData = getTraitFromNode(node, colorBy, {confidence: true});
+    if (!confidenceData) {
+      console.error("Error - couldn't find confidence vals for ", colorBy);
       return null;
     }
-    const vals = Object.keys(d.attr[lkey])
-      .sort((a, b) => d.attr[lkey][a] > d.attr[lkey][b] ? -1 : 1)
+    const vals = Object.keys(confidenceData)
+      .sort((a, b) => confidenceData[a] > confidenceData[b] ? -1 : 1)
       .slice(0, 4)
-      .map((v) => `${prettyString(v)} (${(100 * d.attr[lkey][v]).toFixed(0)}%)`);
-    return renderInfoBlock(`${prettyString(colorBy)} (confidence):`, vals);
+      .map((v) => `${v} (${(100 * confidenceData[v]).toFixed(0)}%)`);
+    return <InfoLine name={`${name} (confidence):`} value={vals}/>;
   }
-  return renderInfoLine(prettyString(colorBy), prettyString(d.attr[colorBy]));
+  return <InfoLine name={name} value={getTraitFromNode(node, colorBy)}/>;
 };
 
 /**
- * Currently not used - implement when augur outputs frequencies
- * @param  {node} d branch node currently highlighted
- * @return {JSX} to be displayed (or null)
+ * A React Component to Display AA / NT mutations, if present.
+ * @param  {Object} props
+ * @param  {Object} props.node     branch node which is currently highlighted
  */
-// const getFrequenciesJSX = (d) => {
-//   if (d.frequency !== undefined) {
-//     const disp = "Frequency: " + (100 * d.frequency).toFixed(1) + "%";
-//     return (<p>{disp}</p>);
-//   }
-//   return null;
-// };
+const Mutations = ({node}) => {
+  if (!node.branch_attrs || !node.branch_attrs.mutations) return null;
+  const elements = []; // elements to render
+  const mutations = node.branch_attrs.mutations;
 
-/**
- * Display AA / NT mutations in JSX
- * @param  {node} d branch node currently highlighted
- * @param  {string} mutType "AA" or "nuc"
- * @return {JSX} to be displayed (or null)
- */
-const getMutationsJSX = (d, mutType) => {
-  /* mutations are stored at:
-  NUCLEOTIDE: d.muts = list of strings
-  AMINO ACID: d.aa_muts = dict of proteins -> list of strings
-  */
-  if (mutType === "nuc") {
-    if (typeof d.muts !== "undefined" && d.muts.length) {
-      const nDisplay = 9; // max number of mutations to display
-      const nGapDisp = 4; // max number of gaps/Ns to display
+  /* --------- NUCLEOTIDE MUTATIONS --------------- */
+  /* Nt mutations are found at `mutations.nuc` -> Array of strings */
+  if (mutations.nuc && mutations.nuc.length) {
+    const nDisplay = 9; // max number of mutations to display
+    const nGapDisp = 4; // max number of gaps/Ns to display
 
-      // gather muts with N/-
-      const ngaps = d.muts.filter((mut) => {
-        return mut.slice(-1) === "N" || mut.slice(-1) === "-"
-          || mut.slice(0, 1) === "N" || mut.slice(0, 1) === "-";
-      });
-      const gapLen = ngaps.length; // number of mutations that exist with N/-
+    // gather muts with N/-
+    const ngaps = mutations.nuc.filter((mut) => {
+      return mut.slice(-1) === "N" || mut.slice(-1) === "-" ||
+        mut.slice(0, 1) === "N" || mut.slice(0, 1) === "-";
+    });
+    const gapLen = ngaps.length; // number of mutations that exist with N/-
 
-      // gather muts without N/-
-      const nucs = d.muts.filter((mut) => {
-        return mut.slice(-1) !== "N" && mut.slice(-1) !== "-"
-          && mut.slice(0, 1) !== "N" && mut.slice(0, 1) !== "-";
-      });
-      const nucLen = nucs.length; // number of mutations that exist without N/-
+    // gather muts without N/-
+    const nucs = mutations.nuc.filter((mut) => {
+      return mut.slice(-1) !== "N" && mut.slice(-1) !== "-" &&
+        mut.slice(0, 1) !== "N" && mut.slice(0, 1) !== "-";
+    });
+    const nucLen = nucs.length; // number of mutations that exist without N/-
 
-      let m = nucs.slice(0, Math.min(nDisplay, nucLen)).join(", ");
-      m += nucLen > nDisplay ? " + " + (nucLen - nDisplay) + " more" : "";
-      let mGap = ngaps.slice(0, Math.min(nGapDisp, gapLen)).join(", ");
-      mGap += gapLen > nGapDisp ? " + " + (gapLen - nGapDisp) + " more" : "";
+    let m = nucs.slice(0, Math.min(nDisplay, nucLen)).join(", ");
+    m += nucLen > nDisplay ? " + " + (nucLen - nDisplay) + " more" : "";
+    let mGap = ngaps.slice(0, Math.min(nGapDisp, gapLen)).join(", ");
+    mGap += gapLen > nGapDisp ? " + " + (gapLen - nGapDisp) + " more" : "";
 
-      if (gapLen === 0) {
-        return renderInfoLine("Nucleotide mutations:", m);
-      }
-      if (nucLen === 0) {
-        return renderInfoLine("Gap/N mutations:", mGap);
-      }
-      return (
-        <p>
-          {renderInfoLine("Nucleotide mutations:", m)}
-          <VerticalBreak/>
-          {renderInfoLine("Gap/N mutations:", mGap)}
-        </p>
-      );
-
+    if (nucLen !== 0) {
+      elements.push(<InfoLine name="Nucleotide mutations:" value={m} key="nuc"/>);
     }
-    return renderInfoLine("No nucleotide mutations", "");
-  } else if (mutType === "aa") {
-    if (typeof d.aa_muts !== "undefined") {
-      /* calculate counts */
-      const prots = Object.keys(d.aa_muts);
-      const counts = {};
-      for (const prot of prots) {
-        counts[prot] = d.aa_muts[prot].length;
-      }
-      /* are there any AA mutations? */
-      if (prots.map((k) => counts[k]).reduce((a, b) => a + b, 0)) {
-        const nDisplay = 3; // number of mutations to display per protein
-        const nProtsToDisplay = 7; // max number of proteins to display
-        let protsSeen = 0;
-        const m = [];
-        prots.forEach((prot) => {
-          if (counts[prot] && protsSeen < nProtsToDisplay) {
-            let x = prot + ":\u00A0\u00A0" + d.aa_muts[prot].slice(0, Math.min(nDisplay, counts[prot])).join(", ");
-            if (counts[prot] > nDisplay) {
-              x += " + " + (counts[prot] - nDisplay) + " more";
-            }
-            m.push(x);
-            protsSeen++;
-            if (protsSeen === nProtsToDisplay) {
-              m.push(`(protein mutations truncated)`);
-            }
-          }
-        });
-        return renderInfoBlock("AA mutations:", m);
-      }
-      return renderInfoLine("No amino acid mutations", "");
+    if (gapLen !== 0) {
+      elements.push(<InfoLine name="Gap/N mutations:" value={mGap} key="gaps"/>);
     }
+  } else {
+    elements.push(<InfoLine name="No nucleotide mutations" value="" key="nuc"/>);
   }
-  /* if mutType is neither "aa" nor "muc" then render nothing */
-  return null;
+
+  /* --------- AMINO ACID MUTATIONS --------------- */
+  /* AA mutations are found at `mutations[prot_name]` -> Array of strings */
+  const prots = Object.keys(mutations).filter((v) => v !== "nuc");
+  const nMutsPerProt = {};
+  let numberOfAaMuts = 0;
+  for (const prot of prots) {
+    nMutsPerProt[prot] = mutations[prot].length;
+    numberOfAaMuts += mutations[prot].length;
+  }
+  if (numberOfAaMuts > 0) {
+    const nDisplay = 3; // number of mutations to display per protein
+    const nProtsToDisplay = 7; // max number of proteins to display
+    let protsRendered = 0;
+    const mutationsToRender = [];
+    prots.forEach((prot) => {
+      if (nMutsPerProt[prot] && protsRendered < nProtsToDisplay) {
+        let x = prot + ":\u00A0\u00A0" + mutations[prot].slice(0, Math.min(nDisplay, nMutsPerProt[prot])).join(", ");
+        if (nMutsPerProt[prot] > nDisplay) {
+          x += " + " + (nMutsPerProt[prot] - nDisplay) + " more";
+        }
+        mutationsToRender.push(x);
+        protsRendered++;
+        if (protsRendered === nProtsToDisplay) {
+          mutationsToRender.push(`(protein mutations truncated)`);
+        }
+      }
+    });
+    elements.push(<InfoLine name="AA mutations:" value={mutationsToRender} key="aa"/>);
+  } else if (mutations.nuc && mutations.nuc.length) {
+    /* we only print "No amino acid mutations" if we didn't already print
+    "No nucleotide mutations" above */
+    elements.push(<InfoLine name="No amino acid mutations" key="aa"/>);
+  }
+
+  return elements;
 };
 
-const getBranchDescendents = (n) => (
-  <>
-    {n.fullTipCount === 1 ?
-      renderInfoLine("Branch leading to", n.strain) :
-      renderInfoLine("Number of descendants:", n.fullTipCount)
-    }
-    <VerticalBreak/>
-  </>
-);
+/**
+ * A React component to render the descendent(s) of the current branch
+ * @param  {Object} props
+ * @param  {Object} props.node  branch node which is currently highlighted
+ */
+const BranchDescendents = ({node}) => {
+  const [name, value] = node.fullTipCount === 1 ?
+    ["Branch leading to", node.name] :
+    ["Number of descendants:", node.fullTipCount];
+  return <InfoLine name={name} value={value} padBelow/>;
+};
 
-const getPanelStyling = (d, panelDims) => {
+
+/**
+ * A React component to show vaccine information, if present
+ * @param  {Object} props
+ * @param  {Object} props.node  branch node which is currently highlighted
+ */
+const VaccineInfo = ({node}) => {
+  const vaccineInfo = getVaccineFromNode(node);
+  if (!vaccineInfo) return null;
+  const renderElements = [];
+  if (vaccineInfo.selection_date) {
+    renderElements.push(<InfoLine name="Vaccine selected:" value={vaccineInfo.selection_date} key="seldate"/>);
+  }
+  if (vaccineInfo.start_date) {
+    renderElements.push(<InfoLine name="Vaccine start date:" value={vaccineInfo.start_date} key="startdate"/>);
+  }
+  if (vaccineInfo.end_date) {
+    renderElements.push(<InfoLine name="Vaccine end date:" value={vaccineInfo.end_date} key="enddate"/>);
+  }
+  if (vaccineInfo.serum) {
+    renderElements.push(<InfoLine name="Serum strain" key="serum"/>);
+  }
+  return renderElements;
+};
+
+const Container = ({node, panelDims, children}) => {
   const xOffset = 10;
   const yOffset = 10;
   const width = 200;
 
   /* this adjusts the x-axis for the right tree in dual tree view */
-  const xPos = d.that.params.orientation[0] === -1 ?
-    panelDims.width / 2 + panelDims.spaceBetweenTrees + d.xTip :
-    d.xTip;
-  const yPos = d.yTip;
+  const xPos = node.shell.that.params.orientation[0] === -1 ?
+    panelDims.width / 2 + panelDims.spaceBetweenTrees + node.shell.xTip :
+    node.shell.xTip;
+  const yPos = node.shell.yTip;
   const styles = {
     container: {
       position: "absolute",
@@ -239,79 +274,53 @@ const getPanelStyling = (d, panelDims) => {
   } else {
     styles.container.bottom = panelDims.height - yPos + yOffset;
   }
-  return styles;
-};
 
-const tipDisplayColorByInfo = (d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale) => {
-  if (colorBy === "num_date") {
-    if (distanceMeasure === "num_date") return null;
-    return renderBranchTime(d.n, temporalConfidence);
-  }
-  if (isColorByGenotype(colorBy)) {
-    const genotype = decodeColorByGenotype(colorBy);
-    const key = genotype.aa
-      ? `Amino Acid at ${genotype.gene} site ${genotype.positions.join(", ")}`
-      : `Nucleotide at pos ${genotype.positions.join(", ")}`;
-    const state = getTipColorAttribute(d.n, colorScale);
-    return renderInfoLine(key + ":", state);
-  }
-  return renderInfoLine(prettyString(colorBy) + ":", prettyString(d.n.attr[colorBy]));
-};
 
-const displayVaccineInfo = (d) => {
-  if (d.n.vaccineDate) {
-    return (
-      <span>
-        {renderInfoLine("Vaccine strain:", d.n.vaccineDate)}
-        <p/>
-      </span>
-    );
-  }
-  return null;
-};
-
-/* the actual component - a pure function, so we can return early if needed */
-const HoverInfoPanel = ({mutType, temporalConfidence, distanceMeasure,
-  hovered, colorBy, colorByConfidence, colorScale, panelDims}) => {
-
-  if (!hovered) return null;
-
-  const tip = hovered.type === ".tip";
-  const d = hovered.d;
-  const styles = getPanelStyling(d, panelDims);
-  let inner;
-  if (tip) {
-    inner = (
-      <span>
-        {displayVaccineInfo(d)}
-        {tipDisplayColorByInfo(d, colorBy, distanceMeasure, temporalConfidence, mutType, colorScale)}
-        {distanceMeasure === "div" ? renderBranchDivergence(d.n) : renderBranchTime(d.n, temporalConfidence)}
-      </span>
-    );
-  } else {
-    inner = (
-      <span>
-        {getBranchDescendents(d.n)}
-        {/* getFrequenciesJSX(d.n, mutType) */}
-        {getMutationsJSX(d.n, mutType)}
-        {distanceMeasure === "div" ? renderBranchDivergence(d.n) : renderBranchTime(d.n, temporalConfidence)}
-        {displayColorBy(d.n, distanceMeasure, temporalConfidence, colorByConfidence, colorBy)}
-      </span>
-    );
-  }
   return (
     <div style={styles.container}>
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
-        <div style={infoPanelStyles.tooltipHeading}>
-          {tip ? d.n.strain : null}
-        </div>
-        {inner}
-        <p/>
-        <div style={infoPanelStyles.comment}>
-          {tip ? "Click on tip to display more info" : "Click to zoom into clade"}
-        </div>
+        {children}
       </div>
     </div>
+  );
+};
+
+const Comment = ({children}) => (
+  <div style={infoPanelStyles.comment}>
+    {children}
+  </div>
+);
+
+const HoverInfoPanel = ({
+  hovered,
+  colorBy,
+  colorByConfidence,
+  colorScale,
+  panelDims
+}) => {
+  if (!hovered) return null;
+  const node = hovered.d.n;
+  return (
+    <Container node={node} panelDims={panelDims}>
+      {hovered.type === ".tip" ? (
+        <>
+          <StrainName name={node.name}/>
+          <VaccineInfo node={node}/>
+          <Mutations node={node}/>
+          <BranchLength node={node}/>
+          <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale}/>
+          <Comment>Click on tip to display more info</Comment>
+        </>
+      ) : (
+        <>
+          <BranchDescendents node={node}/>
+          <Mutations node={node}/>
+          <BranchLength node={node}/>
+          <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale}/>
+          <Comment>Click to zoom into clade</Comment>
+        </>
+      )}
+    </Container>
   );
 };
 

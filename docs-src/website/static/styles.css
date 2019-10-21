@@ -1,23 +1,130 @@
 
+/* see https://docusaurus.io/docs/en/api-pages#styles
+This CSS file will get concatenated to the end of Docusaurus'
+provided styles, allowing you to add to or override Docusaurus default styles as you wish.
+Here is the docusaurus CSS:
+https://github.com/facebook/docusaurus/blob/master/packages/docusaurus-1.x/lib/static/css/main.css
+*/
 
-.highlightBackground {
-  background-color: #5DA8A3;
+:root {
+  --aqua: #5DA8A3;
+  --dark: #30353F;
 }
 
+
+.highlightBackground {
+  background-color: var(--aqua);
+}
+.darkBackground {
+  background-color: var(--dark);
+}
+/* .lightBackground {
+  background-color: rgb(186, 193, 224);
+} */
+
 a {
-  color: #5DA8A3;
+  color: var(--aqua);
   font-weight: 400;
 }
 
 a:hover {
-  color: #30353F;
+  color: var(--dark);
   text-decoration: underline;
 }
 
+.nav-footer a:hover {
+  color: var(--aqua);
+}
+
 button:hover {
-  background-color: #30353F;
+  background-color: var(--dark);
 }
 
 header a:hover {
-  color: #5DA8A3;
+  color: var(--aqua);
+}
+
+
+/* Showcase items */
+.showcaseItem {
+  color: var(--dark);
+  cursor: pointer;
+  border: 1px solid white;
+}
+.showcaseItem a {
+  color: var(--dark);
+}
+.showcaseItem a:hover {
+  text-decoration: none;
+}
+.showcaseItem:hover {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+}
+
+
+.container.paddingTop {
+  padding-top: 0px;
+}
+.container.paddingBottom {
+  padding-bottom: 40px;
+}
+
+.blockContent {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: space-between
+}
+
+.container.highlightBackground h2 {
+  margin-top: 40px;
+}
+
+.iconsRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+}
+
+.navWrapper.wrapper {
+  border-right: 1px solid #e0e0e0;
+}
+
+/* add padding to splashTitle for non-mobile views */
+@media (min-width: 500px) {
+  .splashTitle {
+    padding-top: 100px;
+    padding-bottom: 40px;
+  }
+}
+
+.soloButtons {
+  padding-bottom: 60px;
+  display: flex;
+  justify-content: space-around;
+  flex-direction: column;
+}
+.soloButtons a {
+  background: var(--aqua);
+  color: white;
+  border-color: var(--aqua);
+}
+.soloButtons a:hover {
+  border-color: var(--dark);
+}
+
+/* splash image */
+.splashImage {
+  max-width: 800px;
+  padding-bottom: 40px;
+}
+
+@media (min-width: 800px) {
+  .splashImage {
+    width: 90%;
+    padding-bottom: 20px;
+  }
 }

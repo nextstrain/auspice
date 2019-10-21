@@ -3,6 +3,8 @@ import { interpolateRgb } from "d3-interpolate";
 import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
 import { branchOpacityFunction } from "../../../util/colorHelpers";
 import { NODE_VISIBLE } from "../../../util/globals";
+import { getDomId } from "../phyloTree/helpers";
+import { getTraitFromNode } from "../../../util/treeMiscHelpers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
@@ -11,7 +13,7 @@ export const onTipHover = function onTipHover(d) {
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  phylotree.svg.select("#tip_" + d.n.clade)
+  phylotree.svg.select(getDomId("#tip", d.n.name))
     .attr("r", (e) => e["r"] + 4);
   this.setState({
     hovered: {d, type: ".tip"}
@@ -37,11 +39,12 @@ export const onTipClick = function onTipClick(d) {
 export const onBranchHover = function onBranchHover(d) {
   if (d.visibility !== NODE_VISIBLE) return;
   /* emphasize the color of the branch */
-  for (const id of ["#branch_S_" + d.n.clade, "#branch_T_" + d.n.clade]) {
+  for (const id of [getDomId("#branchS", d.n.name), getDomId("#branchT", d.n.name)]) {
     if (this.props.colorByConfidence) {
       this.state.tree.svg.select(id)
         .style("stroke", (el) => { // eslint-disable-line no-loop-func
-          const ramp = branchOpacityFunction(this.props.tree.nodes[el.n.arrayIdx].attr[this.props.colorBy + "_entropy"]);
+          const entropyValue = getTraitFromNode(this.props.tree.nodes[el.n.arrayIdx], this.props.colorBy, {entropy: true});
+          const ramp = branchOpacityFunction(entropyValue);
           const raw = this.props.tree.nodeColors[el.n.arrayIdx];
           const base = el.branchStroke;
           return rgb(interpolateRgb(raw, base)(ramp)).toString();
@@ -72,8 +75,12 @@ export const onBranchClick = function onBranchClick(d) {
   if (this.props.narrativeMode) return;
   const root = [undefined, undefined];
   let cladeSelected;
-  if (d.n.attr.labels !== undefined && d.n.attr.labels.clade !== undefined) {
-    cladeSelected = d.n.attr.labels.clade;
+  if (
+    d.n.branch_attrs &&
+    d.n.branch_attrs.labels !== undefined &&
+    d.n.branch_attrs.labels.clade !== undefined
+  ) {
+    cladeSelected = d.n.branch_attrs.labels.clade;
   }
   if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
   else root[1] = d.n.arrayIdx;
@@ -82,7 +89,7 @@ export const onBranchClick = function onBranchClick(d) {
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(d) {
-  for (const id of ["#branch_T_" + d.n.clade, "#branch_S_" + d.n.clade]) {
+  for (const id of [getDomId("#branchT", d.n.name), getDomId("#branchS", d.n.name)]) {
     this.state.tree.svg.select(id)
       .style("stroke", (el) => el.branchStroke);
   }
@@ -100,7 +107,7 @@ export const onTipLeave = function onTipLeave(d) {
     this.state.tree :
     this.state.treeToo;
   if (!this.state.selectedTip) {
-    phylotree.svg.select("#tip_" + d.n.clade)
+    phylotree.svg.select(getDomId("#tip", d.n.name))
       .attr("r", (dd) => dd["r"]);
   }
   if (this.state.hovered) {
@@ -113,7 +120,7 @@ export const clearSelectedTip = function clearSelectedTip(d) {
   const phylotree = d.that.params.orientation[0] === 1 ?
     this.state.tree :
     this.state.treeToo;
-  phylotree.svg.select("#tip_" + d.n.clade)
+  phylotree.svg.select(getDomId("#tip", d.n.name))
     .attr("r", (dd) => dd["r"]);
   this.setState({selectedTip: null, hovered: null});
   /* restore the tip visibility! */

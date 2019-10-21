@@ -1,0 +1,65 @@
+---
+title: Install Auspice
+---
+
+## Prerequisites
+Auspice is a JavaScript program, and requires [Node.js](https://nodejs.org/) to be installed on your system.
+For best results, please use Node.js version 10.
+
+We highly recommend using [Conda](https://conda.io/docs/) to manage environments, i.e. use Conda to create an environment with Node.js installed where you can use Auspice.
+It's possible to use other methods, but this documentation presupposes that you have Conda installed.
+
+## Create a Conda Environment
+```bash
+conda create --name auspice nodejs=10
+source activate auspice
+```
+
+> This parallels [the Nextstrain installation docs](https://nextstrain.org/docs/getting-started/local-installation#install-augur--auspice-with-conda-recommended).
+You're welcome to use those instead!
+
+## Install Auspice from npm
+
+
+```bash
+npm install --global auspice
+```
+Auspice should now be available as a command-line program -- check by running `auspice --help`.
+
+If you look at the [release notes](releases/changelog.md) you can see the changes that have been made to Auspice (see your version of Auspice via `auspice --version`).
+To upgrade, you can run
+
+```bash
+npm update --global auspice
+```
+
+## Installing from Source
+
+
+This is useful for debugging, modifying the source code, or using an unpublished feature branch.
+We're going to assume that you have used Conda to install Node.js as above.
+
+```bash
+# activate the correct conda enviornment
+conda activate auspice
+
+# grab the GitHub auspice repo
+git checkout https://github.com/nextstrain/auspice.git
+cd auspice
+
+# install dependencies
+npm install
+
+# make `auspice` available globally
+npm install --global .
+
+# build auspice
+auspice build
+
+# test it works
+auspice --version
+auspice --help
+```
+
+Updating Auspice should only require pulling the new version from GitHub -- it shouldn't require any `npm` commands.
+You will, however, have to re-build Auspice whenever the client-related code has changed, via `auspice build`.

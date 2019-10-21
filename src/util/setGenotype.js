@@ -1,4 +1,5 @@
-import { nucleotide_gene } from "./globals";
+import { UNDEFINED_VALUE } from "./globals";
+import { getTraitFromNode } from "./treeMiscHelpers";
 
 export const setGenotype = (nodes, prot, positions) => {
   // console.time("setGenotype")
@@ -8,10 +9,8 @@ export const setGenotype = (nodes, prot, positions) => {
   const recurse = (node, state) => {
     const newState = state; /* reference. cheap */
     let data; // any potential mutations that would result in a state change
-    if (prot === nucleotide_gene && node.muts && node.muts.length) {
-      data = node.muts;
-    } else if (node.aa_muts && node.aa_muts[prot]) {
-      data = node.aa_muts[prot];
+    if (node.branch_attrs && node.branch_attrs.mutations && node.branch_attrs.mutations[prot]) {
+      data = node.branch_attrs.mutations[prot];
     }
     if (data && data.length) {
       for (let i = 0; i < data.length; i++) {
@@ -50,14 +49,33 @@ export const setGenotype = (nodes, prot, positions) => {
   // console.log(`set ${ancNodes.length} nodes to the ancestral state: ${ancState}`)
 };
 
-export const orderOfGenotypeAppearance = (nodes) => {
+export const orderOfGenotypeAppearance = (nodes, mutType) => {
   const seen = {};
   nodes.forEach((n) => {
-    if (!seen[n.currentGt] || n.attr.num_date < seen[n.currentGt]) {
-      seen[n.currentGt] = n.attr.num_date;
+    let numDate = getTraitFromNode(n, "num_date");
+    if (numDate === UNDEFINED_VALUE) numDate = 0;
+    if (!seen[n.currentGt] || numDate < seen[n.currentGt]) {
+      seen[n.currentGt] = numDate;
     }
   });
   const ordered = Object.keys(seen);
   ordered.sort((a, b) => seen[a] < seen[b] ? -1 : 1);
-  return ordered;
+  let orderedBases;
+  // remove 'non-bases' (X - N)
+  if (mutType === "nuc") {
+    orderedBases = ordered.filter((x) => x !== "X" && x !== "-" && x !== "N");
+  } else {
+    orderedBases = ordered.filter((x) => x !== "X" && x !== "-");
+  }
+  // Add back on non-bases in a specific order
+  if (ordered.indexOf("-") !== -1) {
+    orderedBases.push("-");
+  }
+  if (ordered.indexOf("N") !== -1 && mutType === "nuc") {
+    orderedBases.push("N");
+  }
+  if (ordered.indexOf("X") !== -1) {
+    orderedBases.push("X");
+  }
+  return orderedBases;
 };
