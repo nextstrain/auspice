@@ -195,7 +195,7 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings}) => {
             <SampleDate node={node}/>
             <PublicationInfo node={node}/>
             {getTraitsToDisplay(node).map((trait) => (
-              <Trait node={node} trait={trait} colorings={colorings}/>
+              <Trait node={node} trait={trait} colorings={colorings} key={trait}/>
             ))}
             <AccessionAndUrl node={node}/>
           </tbody>
