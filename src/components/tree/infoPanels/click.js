@@ -167,12 +167,22 @@ const getTraitsToDisplay = (node) => {
   return Object.keys(node.node_attrs).filter((k) => !ignore.includes(k));
 };
 
-const Trait = ({node, trait}) => {
+const Trait = ({node, trait, colorings}) => {
   const value = getTraitFromNode(node, trait);
-  return isValueValid(value) ? item(trait, value) : null;
+  const name = (colorings && colorings[trait] && colorings[trait].title) ?
+    colorings[trait].title :
+    trait;
+  return isValueValid(value) ? item(name, value) : null;
 };
 
-const TipClickedPanel = ({tip, goAwayCallback}) => {
+/**
+ * A React component to display information about a tree tip in a modal-overlay style
+ * @param  {Object}   props
+ * @param  {Object}   props.tip              tip node selected
+ * @param  {function} props.goAwayCallback
+ * @param  {object}   props.colorings
+ */
+const TipClickedPanel = ({tip, goAwayCallback, colorings}) => {
   if (!tip) {return null;}
   const node = tip.n;
   return (
@@ -185,7 +195,7 @@ const TipClickedPanel = ({tip, goAwayCallback}) => {
             <SampleDate node={node}/>
             <PublicationInfo node={node}/>
             {getTraitsToDisplay(node).map((trait) => (
-              <Trait node={node} trait={trait}/>
+              <Trait node={node} trait={trait} colorings={colorings}/>
             ))}
             <AccessionAndUrl node={node}/>
           </tbody>

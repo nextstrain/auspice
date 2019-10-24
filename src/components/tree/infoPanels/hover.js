@@ -74,8 +74,9 @@ const BranchLength = ({node}) => {
  * @param  {string} props.colorBy
  * @param  {bool}   props.colorByConfidence should these (colorBy conf) be displayed, if applicable?
  * @param  {func}   props.colorScale
+ * @param  {object} props.colorings
  */
-const ColorBy = ({node, colorBy, colorByConfidence, colorScale}) => {
+const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
   if (colorBy === "num_date") {
     return null; /* date has already been displayed via <BranchLength> */
   }
@@ -100,7 +101,9 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale}) => {
     );
   }
   /* general case */
-  const name = colorBy; // TODO - use meta.colorings[colorBy].title, if it exists!
+  const name = (colorings && colorings[colorBy] && colorings[colorBy].title) ?
+    colorings[colorBy].title :
+    colorBy;
   if (colorByConfidence === true) {
     const confidenceData = getTraitFromNode(node, colorBy, {confidence: true});
     if (!confidenceData) {
@@ -295,7 +298,8 @@ const HoverInfoPanel = ({
   colorBy,
   colorByConfidence,
   colorScale,
-  panelDims
+  panelDims,
+  colorings
 }) => {
   if (!hovered) return null;
   const node = hovered.d.n;
@@ -307,7 +311,7 @@ const HoverInfoPanel = ({
           <VaccineInfo node={node}/>
           <Mutations node={node}/>
           <BranchLength node={node}/>
-          <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale}/>
+          <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <Comment>Click on tip to display more info</Comment>
         </>
       ) : (
@@ -315,7 +319,7 @@ const HoverInfoPanel = ({
           <BranchDescendents node={node}/>
           <Mutations node={node}/>
           <BranchLength node={node}/>
-          <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale}/>
+          <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <Comment>Click to zoom into clade</Comment>
         </>
       )}
