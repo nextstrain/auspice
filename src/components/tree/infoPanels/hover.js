@@ -52,7 +52,7 @@ const BranchLength = ({node}) => {
   if (numDate !== undefined) {
     const date = numericToCalendar(numDate);
     const numDateConfidence = getTraitFromNode(node, "num_date", {confidence: true});
-    if (numDateConfidence) {
+    if (numDateConfidence && numDateConfidence[0] !== numDateConfidence[1]) {
       elements.push(<InfoLine name="Inferred Date:" value={date} key="inferredDate"/>);
       const dateRange = [numericToCalendar(numDateConfidence[0]), numericToCalendar(numDateConfidence[1])];
       if (dateRange[0] !== dateRange[1]) {
