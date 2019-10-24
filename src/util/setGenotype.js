@@ -1,4 +1,3 @@
-import { UNDEFINED_VALUE } from "./globals";
 import { getTraitFromNode } from "./treeMiscHelpers";
 
 export const setGenotype = (nodes, prot, positions) => {
@@ -53,7 +52,7 @@ export const orderOfGenotypeAppearance = (nodes, mutType) => {
   const seen = {};
   nodes.forEach((n) => {
     let numDate = getTraitFromNode(n, "num_date");
-    if (numDate === UNDEFINED_VALUE) numDate = 0;
+    if (numDate === undefined) numDate = 0;
     if (!seen[n.currentGt] || numDate < seen[n.currentGt]) {
       seen[n.currentGt] = numDate;
     }

@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene, UNDEFINED_VALUE } from "../util/globals";
+import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene } from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
 import { strainNameToIdx, getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
@@ -24,8 +24,8 @@ export const doesColorByHaveConfidence = (controlsState, colorBy) =>
 export const getMinCalDateViaTree = (nodes, state) => {
   /* slider should be earlier than actual day */
   /* if no date, use some default dates - slider will not be visible */
-  const minNumDate = getTraitFromNode(nodes[0], "num_date")
-  return (minNumDate === UNDEFINED_VALUE) ?
+  const minNumDate = getTraitFromNode(nodes[0], "num_date");
+  return (minNumDate === undefined) ?
     state.dateMaxNumeric - defaultDateRange :
     numericToCalendar(minNumDate - 0.01);
 };
@@ -34,7 +34,7 @@ export const getMaxCalDateViaTree = (nodes) => {
   let maxNumDate = reallySmallNumber;
   nodes.forEach((node) => {
     const numDate = getTraitFromNode(node, "num_date");
-    if (numDate !== UNDEFINED_VALUE && numDate > maxNumDate) {
+    if (numDate !== undefined && numDate > maxNumDate) {
       maxNumDate = numDate;
     }
   });
@@ -297,7 +297,7 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   }
 
   /* does the tree have date information? if not, disable controls, modify view */
-  const numDateAtRoot = getTraitFromNode(tree.nodes[0], "num_date") !== UNDEFINED_VALUE;
+  const numDateAtRoot = getTraitFromNode(tree.nodes[0], "num_date") !== undefined;
   const divAtRoot = getDivFromNode(tree.nodes[0]) !== undefined;
   state.branchLengthsToDisplay = (numDateAtRoot && divAtRoot) ? "divAndDate" :
     numDateAtRoot ? "dateOnly" :

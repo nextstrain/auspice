@@ -3,7 +3,6 @@ import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
-import { UNDEFINED_VALUE } from "../../../util/globals";
 import { getTraitFromNode, getDivFromNode, getVaccineFromNode, getFullAuthorInfoFromNode } from "../../../util/treeMiscHelpers";
 
 const InfoLine = ({name, value, padBelow=false}) => {
@@ -50,7 +49,7 @@ const BranchLength = ({node}) => {
     elements.push(<InfoLine name="Divergence:" value={divergence.toExponential(3)} key="div"/>);
   }
 
-  if (numDate !== UNDEFINED_VALUE) {
+  if (numDate !== undefined) {
     const date = numericToCalendar(numDate);
     const numDateConfidence = getTraitFromNode(node, "num_date", {confidence: true});
     if (numDateConfidence) {

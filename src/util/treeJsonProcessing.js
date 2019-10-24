@@ -1,6 +1,5 @@
 import { getDefaultTreeState } from "../reducers/tree";
-import { getTraitFromNode, getVaccineFromNode } from "./treeMiscHelpers";
-import { UNDEFINED_VALUE } from "./globals";
+import { getVaccineFromNode } from "./treeMiscHelpers";
 
 /**
 * for each node, calculate the number of subtending tips (alive or dead)
