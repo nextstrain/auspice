@@ -4,6 +4,7 @@ import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, getVaccineFromNode, getFullAuthorInfoFromNode } from "../../../util/treeMiscHelpers";
+import { isValueValid } from "../../../util/globals";
 
 const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
@@ -111,12 +112,17 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
       return null;
     }
     const vals = Object.keys(confidenceData)
+      .filter((v) => isValueValid(v))
       .sort((a, b) => confidenceData[a] > confidenceData[b] ? -1 : 1)
       .slice(0, 4)
       .map((v) => `${v} (${(100 * confidenceData[v]).toFixed(0)}%)`);
+    if (!vals.length) return null; // can happen if values are invalid
     return <InfoLine name={`${name} (confidence):`} value={vals}/>;
   }
-  return <InfoLine name={name} value={getTraitFromNode(node, colorBy)}/>;
+  const value = getTraitFromNode(node, colorBy);
+  return isValueValid(value) ?
+    <InfoLine name={name} value={value}/> :
+    null;
 };
 
 /**
