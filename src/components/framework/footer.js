@@ -8,6 +8,7 @@ import { changeColorBy } from "../../actions/colors";
 import { version } from "../../version";
 import { publications } from "../download/downloadModal";
 import { encodeColorByGenotype } from "../../util/getGenotype";
+import { isValueValid } from "../../util/globals";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -328,15 +329,19 @@ class Footer extends React.Component {
         {`Filter by ${filterTitle}`}
         {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
         <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-          {Array.from(totalStateCount.keys()).sort().map((itemName) => {
-            const display = (
-              <span>
-                {itemName}
-                {` (${totalStateCount.get(itemName)})`}
-              </span>
-            );
-            return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
-          })}
+          {
+            Array.from(totalStateCount.keys())
+              .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
+              .sort() // filters are sorted alphabetically
+              .map((itemName) => {
+                const display = (
+                  <span>
+                    {`${itemName} (${totalStateCount.get(itemName)})`}
+                  </span>
+                );
+                return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
+              })
+          }
         </Flex>
       </div>
     );
