@@ -2,6 +2,13 @@
 title: Changelog
 ---
 
+Improved handling of traits associated with tips:
+  * Added documentation around how auspice displays missing or unknown trait values
+  * It a trait is defined as a coloring, then use the provided title in the tree info boxes
+  * Improve logic as to whether a value is inferred (i.e. display associate confidence) or known. See [this issue](https://github.com/nextstrain/augur/issues/386) for more details.
+
+Fix a bug where two trees couldn't be colored by date.
+
 ## version 2.0.0 - 2019/10/21
 
 Please see the [release notes](https://nextstrain.github.io/auspice/releases/v2) for a full list of features and changes associated with auspice's v2 release.
