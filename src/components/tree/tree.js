@@ -133,11 +133,13 @@ class Tree extends React.Component {
           colorBy={this.props.colorBy}
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
+          colorings={this.props.metadata.colorings}
           panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
         />
         <TipClickedPanel
           goAwayCallback={this.clearSelectedTip}
           tip={this.state.selectedTip}
+          colorings={this.props.metadata.colorings}
         />
         {this.props.showTangle && this.state.tree && this.state.treeToo ? (
           <Tangle

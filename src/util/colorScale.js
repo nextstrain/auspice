@@ -2,7 +2,7 @@ import { scaleLinear, scaleOrdinal } from "d3-scale";
 import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
-import { genericDomain, colors, genotypeColors, isValueValid, UNDEFINED_VALUE } from "./globals";
+import { genericDomain, colors, genotypeColors, isValueValid } from "./globals";
 import { countTraitsAcrossTree } from "./treeCountingHelpers";
 import { getExtraVals } from "./colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
@@ -274,7 +274,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   if (error) {
     console.error("ColorScale fallthrough for ", colorBy);
     continuous = false;
-    legendValues = [UNDEFINED_VALUE];
+    legendValues = [undefined];
     colorScale = () => unknownColor;
   }
 

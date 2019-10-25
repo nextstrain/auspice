@@ -191,7 +191,25 @@ export const NODE_NOT_VISIBLE = 0;          // branch thickness 0 and excluded f
 export const NODE_VISIBLE_TO_MAP_ONLY = 1;  // branch thickness 0.5 and included in map
 export const NODE_VISIBLE = 2;              // included on tree and map
 
-export const UNDEFINED_VALUE = "undefined";
-export const invalidValues = [UNDEFINED_VALUE, undefined, "unknown", "?", "nan", "na", "n/a", "", "unassigned"];
-export const isValueValid = (value) =>
-  !invalidValues.includes(String(value).toLowerCase());
+const invalidStrings = ["unknown", "?", "nan", "na", "n/a", "", "unassigned"];
+
+/**
+ * Checks to see if a node's "trait" value, e.g. numeric date,
+ * country etc is "valid". This is necessary as missing data is often
+ * encoded in different ways such as "unknown" or "?".
+ * All numeric & boolean values are valid, including `0` & `false`.
+ * All string values are valid unless they are present in `invalidStrings` (lowercase matching).
+ * All other values are invalid.
+ * @param {any} value value to check
+ * @returns {boolean}
+ */
+export const isValueValid = (value) => {
+  if (!["number", "boolean", "string"].includes(typeof value)) {
+    return false;
+  }
+  if (typeof value === "string" && invalidStrings.includes(value.toLowerCase())) {
+    return false; // checks against list of invalid strings
+  }
+  // booleans, valid strings & numbers are valid.
+  return true;
+};

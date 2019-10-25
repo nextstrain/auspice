@@ -3,8 +3,8 @@ import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
-import { UNDEFINED_VALUE } from "../../../util/globals";
 import { getTraitFromNode, getDivFromNode, getVaccineFromNode, getFullAuthorInfoFromNode } from "../../../util/treeMiscHelpers";
+import { isValueValid } from "../../../util/globals";
 
 const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
@@ -50,10 +50,10 @@ const BranchLength = ({node}) => {
     elements.push(<InfoLine name="Divergence:" value={divergence.toExponential(3)} key="div"/>);
   }
 
-  if (numDate !== UNDEFINED_VALUE) {
+  if (numDate !== undefined) {
     const date = numericToCalendar(numDate);
     const numDateConfidence = getTraitFromNode(node, "num_date", {confidence: true});
-    if (numDateConfidence) {
+    if (numDateConfidence && numDateConfidence[0] !== numDateConfidence[1]) {
       elements.push(<InfoLine name="Inferred Date:" value={date} key="inferredDate"/>);
       const dateRange = [numericToCalendar(numDateConfidence[0]), numericToCalendar(numDateConfidence[1])];
       if (dateRange[0] !== dateRange[1]) {
@@ -75,8 +75,9 @@ const BranchLength = ({node}) => {
  * @param  {string} props.colorBy
  * @param  {bool}   props.colorByConfidence should these (colorBy conf) be displayed, if applicable?
  * @param  {func}   props.colorScale
+ * @param  {object} props.colorings
  */
-const ColorBy = ({node, colorBy, colorByConfidence, colorScale}) => {
+const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
   if (colorBy === "num_date") {
     return null; /* date has already been displayed via <BranchLength> */
   }
@@ -101,20 +102,39 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale}) => {
     );
   }
   /* general case */
-  const name = colorBy; // TODO - use meta.colorings[colorBy].title, if it exists!
+  const name = (colorings && colorings[colorBy] && colorings[colorBy].title) ?
+    colorings[colorBy].title :
+    colorBy;
+
+  /* helper function to avoid code duplication */
+  const showCurrentColorByWithoutConfidence = () => {
+    const value = getTraitFromNode(node, colorBy);
+    return isValueValid(value) ?
+      <InfoLine name={`${name}:`} value={value}/> :
+      null;
+  };
+
+  /* handle trait confidences with lots of edge cases.
+  This can be much improved upon resolution of https://github.com/nextstrain/augur/issues/386 */
   if (colorByConfidence === true) {
     const confidenceData = getTraitFromNode(node, colorBy, {confidence: true});
     if (!confidenceData) {
-      console.error("Error - couldn't find confidence vals for ", colorBy);
+      console.error("couldn't find confidence vals for ", colorBy);
       return null;
     }
+    /* if it's a tip with one confidence value > 0.99 then we interpret this as a known (i.e. not inferred) state */
+    if (!node.hasChildren && Object.keys(confidenceData).length === 1 && Object.values(confidenceData)[0] > 0.99) {
+      return showCurrentColorByWithoutConfidence();
+    }
     const vals = Object.keys(confidenceData)
+      .filter((v) => isValueValid(v))
       .sort((a, b) => confidenceData[a] > confidenceData[b] ? -1 : 1)
       .slice(0, 4)
       .map((v) => `${v} (${(100 * confidenceData[v]).toFixed(0)}%)`);
+    if (!vals.length) return null; // can happen if values are invalid
     return <InfoLine name={`${name} (confidence):`} value={vals}/>;
   }
-  return <InfoLine name={name} value={getTraitFromNode(node, colorBy)}/>;
+  return showCurrentColorByWithoutConfidence();
 };
 
 /**
@@ -296,7 +316,8 @@ const HoverInfoPanel = ({
   colorBy,
   colorByConfidence,
   colorScale,
-  panelDims
+  panelDims,
+  colorings
 }) => {
   if (!hovered) return null;
   const node = hovered.d.n;
@@ -308,7 +329,7 @@ const HoverInfoPanel = ({
           <VaccineInfo node={node}/>
           <Mutations node={node}/>
           <BranchLength node={node}/>
-          <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale}/>
+          <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <Comment>Click on tip to display more info</Comment>
         </>
       ) : (
@@ -316,7 +337,7 @@ const HoverInfoPanel = ({
           <BranchDescendents node={node}/>
           <Mutations node={node}/>
           <BranchLength node={node}/>
-          <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale}/>
+          <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <Comment>Click to zoom into clade</Comment>
         </>
       )}
