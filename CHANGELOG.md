@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.0.1 - 2019/10/25
+
+
 Improved handling of traits associated with tips:
   * Added documentation around how auspice displays missing or unknown trait values
   * It a trait is defined as a coloring, then use the provided title in the tree info boxes
