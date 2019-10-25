@@ -105,11 +105,26 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
   const name = (colorings && colorings[colorBy] && colorings[colorBy].title) ?
     colorings[colorBy].title :
     colorBy;
+
+  /* helper function to avoid code duplication */
+  const showCurrentColorByWithoutConfidence = () => {
+    const value = getTraitFromNode(node, colorBy);
+    return isValueValid(value) ?
+      <InfoLine name={`${name}:`} value={value}/> :
+      null;
+  };
+
+  /* handle trait confidences with lots of edge cases.
+  This can be much improved upon resolution of https://github.com/nextstrain/augur/issues/386 */
   if (colorByConfidence === true) {
     const confidenceData = getTraitFromNode(node, colorBy, {confidence: true});
     if (!confidenceData) {
-      console.error("Error - couldn't find confidence vals for ", colorBy);
+      console.error("couldn't find confidence vals for ", colorBy);
       return null;
+    }
+    /* if it's a tip with one confidence value > 0.99 then we interpret this as a known (i.e. not inferred) state */
+    if (!node.hasChildren && Object.keys(confidenceData).length === 1 && Object.values(confidenceData)[0] > 0.99) {
+      return showCurrentColorByWithoutConfidence();
     }
     const vals = Object.keys(confidenceData)
       .filter((v) => isValueValid(v))
@@ -119,10 +134,7 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
     if (!vals.length) return null; // can happen if values are invalid
     return <InfoLine name={`${name} (confidence):`} value={vals}/>;
   }
-  const value = getTraitFromNode(node, colorBy);
-  return isValueValid(value) ?
-    <InfoLine name={name} value={value}/> :
-    null;
+  return showCurrentColorByWithoutConfidence();
 };
 
 /**
