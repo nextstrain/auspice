@@ -225,7 +225,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           let vals = tree.nodes.filter((n) => !n.hasChildren)
             .map((n) => getTraitFromNode(n, "num_date"));
           if (treeTooNodes) {
-            const treeTooRootDate = getTraitFromNode(treeTooNodes.nodes[0], "num_date");
+            const treeTooRootDate = getTraitFromNode(treeTooNodes[0], "num_date");
             if (treeTooRootDate < rootDate) rootDate = treeTooRootDate;
             vals.concat(
               treeTooNodes.filter((n) => !n.hasChildren)
