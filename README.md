@@ -61,6 +61,7 @@ New versions are released via the `./releaseNewVersion.sh` script from an up-to-
 
 Please see [docs-src/README](./docs-src/README.md) for how the auspice documentation site is built.
 
+> Note that currently the documentation must be rebuilt & pushed to GitHub _after_ a new version is released in order for the changelog to correctly appear at [nextstrain.github.io/auspice/releases/changelog](https://nextstrain.github.io/auspice/releases/changelog).
 
 
 ## License and copyright
