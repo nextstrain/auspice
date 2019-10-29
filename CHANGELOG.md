@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+Bugfix: The ability to download per-strain metadata as a TSV file is now working again.
+See [issue #816](https://github.com/nextstrain/auspice/issues/816).
+
 ## version 2.0.1 - 2019/10/25
 
 
