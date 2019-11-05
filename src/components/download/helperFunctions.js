@@ -2,7 +2,7 @@
 import React from "react";
 import { infoNotification, warningNotification } from "../../actions/notifications";
 import { spaceBetweenTrees } from "../tree/tree";
-import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode } from "../../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 
 export const isPaperURLValid = (d) => {
@@ -111,7 +111,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings) => {
 
     /* collect values (as writable strings) of the same "traits" as can be viewed by the modal displayed
     when clicking on tips. Note that "num_date", "author" and "vaccine" are considered seperately below */
-    const nodeAttrsToIgnore = ["author", "div", "num_date", "vaccine"];
+    const nodeAttrsToIgnore = ["author", "div", "num_date", "vaccine", "accession"];
     const traits = Object.keys(node.node_attrs).filter((k) => !nodeAttrsToIgnore.includes(k));
     for (const trait of traits) {
       if (!headerFields.includes(trait)) headerFields.push(trait);
@@ -155,6 +155,14 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings) => {
       const traitName = "Vaccine Selection Date";
       if (!headerFields.includes(traitName)) headerFields.push(traitName);
       tipTraitValues[node.name][traitName] = vaccine.selection_date;
+    }
+
+    /* handle `accession` specially */
+    const accession = getAccessionFromNode(node);
+    if (accession) {
+      const traitName = "Accession";
+      if (!headerFields.includes(traitName)) headerFields.push(traitName);
+      tipTraitValues[node.name][traitName] = accession;
     }
   }
 

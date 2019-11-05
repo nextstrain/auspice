@@ -1,5 +1,13 @@
-
 import { isValueValid } from "./globals";
+
+/* --- TO IMPROVE -----
+These "getter" functions for node-related data require knowledge of
+the semantics of how data is stored on a node. For instance, you need
+to know that `num_date` is stored in a different structure to `div`.
+This logic should be encapsulated within `getTraitFromNode` so we
+don't need separate `getDivFromNode` functions etc.
+james hadfield, nov 2019.
+*/
 
 /**
  * Given a coloring key or a geographic resolution key
@@ -18,7 +26,6 @@ import { isValueValid } from "./globals";
  * which don't share the same structure as traits. See the JSON spec for more details.
  */
 export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}={}) => {
-
   if (!node.node_attrs) return undefined;
 
   if (!entropy && !confidence) {
@@ -36,6 +43,7 @@ export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}=
 };
 
 export const getDivFromNode = (node) => {
+  /* see comment at top of this file */
   if (node.node_attrs && node.node_attrs.div !== undefined) {
     return node.node_attrs.div;
   }
@@ -43,6 +51,7 @@ export const getDivFromNode = (node) => {
 };
 
 export const getVaccineFromNode = (node) => {
+  /* see comment at top of this file */
   if (node.node_attrs && node.node_attrs.vaccine) {
     return node.node_attrs.vaccine;
   }
@@ -53,3 +62,15 @@ export const getFullAuthorInfoFromNode = (node) =>
   (node.node_attrs && node.node_attrs.author && node.node_attrs.author.value) ?
     node.node_attrs.author :
     undefined;
+
+export const getAccessionFromNode = (node) => {
+  /* see comment at top of this file */
+  if (node.node_attrs && node.node_attrs.accession) {
+    return node.node_attrs.accession;
+  }
+  return undefined;
+};
+
+/* see comment at top of this file */
+export const getUrlFromNode = (node) =>
+  (node.node_attrs && node.node_attrs.url) ? node.node_attrs.url : undefined;

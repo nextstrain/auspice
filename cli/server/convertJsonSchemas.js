@@ -305,8 +305,8 @@ const setNodeBranchAttrs = (v2) => {
   traverseTree(v2.tree, (node) => {
 
     if (node.attr) {
-      if (node.attr.url) node.url = node.node_attrs.url;
-      if (node.attr.accession) node.accession = node.node_attrs.accession;
+      if (node.attr.url) node.node_attrs.url = node.attr.url;
+      if (node.attr.accession) node.node_attrs.accession = node.attr.accession;
     }
 
 

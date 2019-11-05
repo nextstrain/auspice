@@ -2,7 +2,7 @@ import React from "react";
 import { isValueValid } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
-import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode } from "../../../util/treeMiscHelpers";
+import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode, getUrlFromNode } from "../../../util/treeMiscHelpers";
 
 export const styles = {
   container: {
@@ -51,8 +51,9 @@ const formatURL = (url) => {
 };
 
 const AccessionAndUrl = ({node}) => {
-  const accession = getTraitFromNode(node, "accession");
-  const url = getTraitFromNode(node, "url");
+  const accession = getAccessionFromNode(node);
+  const url = getUrlFromNode(node);
+
 
   if (isValueValid(accession) && isValueValid(url)) {
     return (
@@ -70,7 +71,7 @@ const AccessionAndUrl = ({node}) => {
   } else if (isValueValid(url)) {
     return (
       <tr>
-        <th style={infoPanelStyles.item}>URL</th>
+        <th style={infoPanelStyles.item}>Strain URL</th>
         <td style={infoPanelStyles.item}>
           <a href={formatURL(url)} target="_blank"><em>click here</em></a>
         </td>
