@@ -18,7 +18,6 @@ import { isValueValid } from "./globals";
  * which don't share the same structure as traits. See the JSON spec for more details.
  */
 export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}={}) => {
-
   if (!node.node_attrs) return undefined;
 
   if (!entropy && !confidence) {
@@ -53,3 +52,10 @@ export const getFullAuthorInfoFromNode = (node) =>
   (node.node_attrs && node.node_attrs.author && node.node_attrs.author.value) ?
     node.node_attrs.author :
     undefined;
+
+export const getAccessionFromNode = (node) => {
+  if (node.node_attrs && node.node_attrs.accession) {
+    return node.node_attrs.accession;
+  }
+  return undefined;
+};
