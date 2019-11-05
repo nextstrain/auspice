@@ -306,7 +306,7 @@ const setNodeBranchAttrs = (v2) => {
 
     if (node.attr) {
       if (node.attr.url) node.url = node.node_attrs.url;
-      if (node.attr.accession) node.accession = node.node_attrs.accession;
+      if (node.attr.accession) node.node_attrs.accession = node.attr.accession;
     }
 
 
