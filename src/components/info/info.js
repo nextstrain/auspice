@@ -140,6 +140,10 @@ class Info extends React.Component {
         letterSpacing: "-0.5px",
         lineHeight: 1.2
       },
+      avatar: {
+        marginRight: 5,
+        marginBottom: 2
+      },
       byline: {
         fontFamily: headerFont,
         fontSize: 14,
@@ -148,7 +152,8 @@ class Info extends React.Component {
         marginBottom: 5,
         fontWeight: 700,
         color: "#777",
-        lineHeight: 1.4
+        lineHeight: 1.4,
+        verticalAlign: "middle"
       },
       bylineWeight: {
         fontFamily: headerFont,
@@ -248,6 +253,28 @@ class Info extends React.Component {
     );
   }
 
+  renderAvatar(styles) {
+    let renderAvatar = false;
+    let imageSrc = "";
+    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "repository")) {
+      const repo = this.props.metadata.repository;
+      if (typeof repo === 'string') {
+        if (repo.startsWith("https://github.com") || repo.startsWith("http://github.com")) {
+          const match = repo.match(/https?:\/\/github.com\/([^/]+)/);
+          if (match[1]) {
+            imageSrc = "https://github.com/" + match[1] + ".png?size=200";
+            renderAvatar = true;
+          }
+        }
+      }
+    }
+    return (
+      renderAvatar ?
+        <img style={styles.avatar} alt="avatar" width="28" src={imageSrc}/> :
+        <span/>
+    );
+  }
+
   renderRepository(styles) {
     const renderLink = (m) => (<a style={styles.bylineWeight} rel="noopener noreferrer" href={m.url} target="_blank">{m.name}</a>);
     let renderRepo = false;
@@ -305,6 +332,7 @@ class Info extends React.Component {
   renderByline(styles) {
     return (
       <div width={this.props.width} style={styles.byline}>
+        {this.renderAvatar(styles)}
         {this.renderRepository(styles)}
         {this.renderMaintainers(styles)}
       </div>
