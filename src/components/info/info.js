@@ -140,6 +140,21 @@ class Info extends React.Component {
         letterSpacing: "-0.5px",
         lineHeight: 1.2
       },
+      byline: {
+        fontFamily: headerFont,
+        fontSize: 14,
+        marginLeft: 2,
+        marginTop: 5,
+        marginBottom: 5,
+        fontWeight: 700,
+        color: "#777",
+        lineHeight: 1.4
+      },
+      bylineWeight: {
+        fontFamily: headerFont,
+        fontSize: 14,
+        fontWeight: 700
+      },
       n: {
         fontFamily: headerFont,
         fontSize: 14,
@@ -221,6 +236,81 @@ class Info extends React.Component {
     );
   }
 
+  renderTitle(styles) {
+    let title = "";
+    if (this.props.metadata.title) {
+      title = this.props.metadata.title;
+    }
+    return (
+      <div width={this.props.width} style={styles.title}>
+        {title}
+      </div>
+    );
+  }
+
+  renderRepository(styles) {
+    const renderLink = (m) => (<a style={styles.bylineWeight} rel="noopener noreferrer" href={m.url} target="_blank">{m.name}</a>);
+    let renderRepo = false;
+    const repoObj = {};
+    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "repository")) {
+      const repo = this.props.metadata.repository;
+      if (typeof repo === 'string') {
+        if (repo.startsWith("https://") || repo.startsWith("http://")) {
+          repoObj.url = repo;
+          repoObj.name = repo.replace("https://", "").replace("http://", "");
+          renderRepo = true;
+        }
+      }
+    }
+    return (
+      renderRepo ?
+        <span>
+          {"Built using "}
+          {renderLink(repoObj)}
+          {". "}
+        </span> :
+        <span/>
+    );
+
+  }
+
+  renderMaintainers(styles) {
+    const renderLink = (m) => (<a style={styles.bylineWeight} rel="noopener noreferrer" href={m.url} target="_blank">{m.name}</a>);
+    let renderMaintainers = false;
+    let maintainersArray = {};
+    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainers")) {
+      maintainersArray = this.props.metadata.maintainers;
+      if (Array.isArray(maintainersArray)) {
+        if (maintainersArray[0]) {
+          renderMaintainers = true;
+        }
+      }
+    }
+    return (
+      renderMaintainers ?
+        <span>
+          {"Maintained by "}
+          {maintainersArray.map((m, i) => (
+            <React.Fragment key={m.name}>
+              {m.url ? renderLink(m) : m.name}
+              {i === maintainersArray.length-1 ? "" : i === maintainersArray.length-2 ? " and " : ", "}
+            </React.Fragment>
+          ))}
+          {"."}
+        </span> :
+        <span/>
+    );
+  }
+
+  renderByline(styles) {
+    return (
+      <div width={this.props.width} style={styles.byline}>
+        {this.renderRepository(styles)}
+        {this.renderMaintainers(styles)}
+      </div>
+    );
+  }
+
   render() {
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
     const styles = this.getStyles(this.props.width);
@@ -228,10 +318,6 @@ class Info extends React.Component {
     const animating = this.props.animationPlayPauseButton === "Pause";
     const showExtended = !animating && !this.props.selectedStrain;
     const datesMaxed = this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax;
-    let title = "";
-    if (this.props.metadata.title) {
-      title = this.props.metadata.title;
-    }
 
     /* the content is made up of two parts:
     (1) the summary - e.g. Showing 4 of 379 sequences, from 1 author, 1 country and 1 region, dated Apr 2016 to Jun 2016.
@@ -250,9 +336,8 @@ class Info extends React.Component {
     return (
       <Card center infocard>
         <div style={styles.base}>
-          <div width={this.props.width} style={styles.title}>
-            {title}
-          </div>
+          {this.renderTitle(styles)}
+          {this.renderByline(styles)}
           <div width={this.props.width} style={styles.n}>
             {animating ? `Animation in progress. ` : null}
             {this.props.selectedStrain ? this.selectedStrainButton(this.props.selectedStrain) : null}

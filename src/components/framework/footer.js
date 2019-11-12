@@ -364,23 +364,6 @@ class Footer extends React.Component {
       </button>
     );
   }
-  hasMaintainers() {
-    return Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainers")
-  }
-  renderMaintainers() {
-    const renderLink = (m) => (<a href={m.url} target="_blank">{m.name}</a>);
-    return (
-      <span style={{textAlign: "center"}}>
-        {"Build maintained by "}
-        {this.props.metadata.maintainers.map((m, i) => (
-          <React.Fragment key={m.name}>
-            {m.url ? renderLink(m) : m.name}
-            {i === this.props.metadata.maintainers.length-1 ? "" : i === this.props.metadata.maintainers.length-2 ? " and " : ", "}
-          </React.Fragment>
-        ))}
-      </span>
-    );
-  }
   getCitation() {
     return (
       <span>
@@ -411,21 +394,15 @@ class Footer extends React.Component {
             );
           })}
           <Flex style={styles.fineprint}>
-            {this.hasMaintainers() ? (
-              <>
-                {this.renderMaintainers()}
-                {dot}
-              </>
-            ) : null}
             {this.getUpdated()}
             {dot}
             {this.downloadDataButton()}
+            {dot}
+            {"Auspice v" + version}
           </Flex>
           <div style={{height: "3px"}}/>
           <Flex style={styles.fineprint}>
             {this.getCitation()}
-            {dot}
-            {"Auspice v" + version}
           </Flex>
         </div>
       </div>
