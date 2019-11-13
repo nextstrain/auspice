@@ -101,6 +101,43 @@ const setColorings = (v2, meta) => {
     }
     v2.colorings.push(coloring);
   }
+
+
+  /* Auspice (until 2.0.3) changed the ordering of colors by sorting against a predefined list.
+  * The intention of v2 JSONs was that the order defined there was reflected in auspice.
+  * We still sort v1 JSONs to keep things unchanged
+  */
+  const colorByMenuPreferredOrdering = [
+    "clade_membership",
+    "cHI",
+    "cTiter",
+    "fitness",
+    "gt",
+    "ep",
+    "ne",
+    "rb",
+    "lbi",
+    "dfreq",
+    "division",
+    "country",
+    "region",
+    "date",
+    "glyc",
+    "age",
+    "age_score",
+    "gender",
+    "host",
+    "subtype"
+  ];
+  v2.colorings.sort((a, b) => {
+    const [ia, ib] = [colorByMenuPreferredOrdering.indexOf(a.key), colorByMenuPreferredOrdering.indexOf(b.key)];
+    if (ia === -1 || ib === -1) {
+      if (ia === -1) return 1;
+      else if (ib === -1) return -1;
+      return 0;
+    }
+    return ia > ib ? 1 : -1;
+  });
 };
 
 const setAuthorInfoOnTree = (v2, meta) => {
