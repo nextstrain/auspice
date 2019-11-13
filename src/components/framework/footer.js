@@ -225,13 +225,16 @@ export const getAcknowledgments = (dispatch, styles) => {
             Peter Bogner for feedback and advice. This analysis represents an updated frontend to
             the Nextflu informatic pipeline, originally available at nextflu.org.
           </div>
-          <div style={{display: "flex", justifyContent: "space-evenly"}}>
+          <div style={{display: "flex", justifyContent: "space-between"}}>
+            <div style={{flex: 5}}/>
             <a key={5} href="https://gisaid.org" target="_blank" rel="noreferrer noopener" style={{display: "flex", flexDirection: "column", justifyContent: "center"}}>
               <img alt="gisaid-logo" width="120" src={require("../../images/gisaid-logo.png")}/>
             </a>
+            <div style={{flex: 1}}/>
             <a key={6} href="http://www.who.int/influenza/gisrs_laboratory/en/" target="_blank" rel="noreferrer noopener">
               <img alt="gisrs-logo" width="120" src={require("../../images/gisrs-logo.jpg")}/>
             </a>
+            <div style={{flex: 5}}/>
           </div>
         </div>
       );
