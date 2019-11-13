@@ -161,10 +161,14 @@ class DownloadModal extends React.Component {
     const buttons = [
       ["Tree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
       ["TimeTree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
-      ["Strain Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.metadata.colorings)],
-      ["Author Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)],
-      ["Screenshot (SVG)", (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
+      ["Strain Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.metadata.colorings)]
     ];
+    if (helpers.areAuthorsPresent(this.props.tree)) {
+      buttons.push(["Author Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)]);
+    }
+    buttons.push(
+      ["Screenshot (SVG)", (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
+    );
     const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white"});
     return (
       <div style={{display: "flex", flexWrap: "wrap", justifyContent: "space-around"}}>

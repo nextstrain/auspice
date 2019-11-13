@@ -56,6 +56,15 @@ const write = (filename, type, content) => {
   document.body.removeChild(link);
 };
 
+export const areAuthorsPresent = (tree) => {
+  for (let i=0; i<tree.nodes.length; i++) {
+    if (getFullAuthorInfoFromNode(tree.nodes[i])) {
+      return true;
+    }
+  }
+  return false;
+};
+
 /**
  * Create & write a TSV file where each row is an author,
  * with the relevent information (num isolates, journal etcetera)
