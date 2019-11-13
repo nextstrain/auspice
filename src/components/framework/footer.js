@@ -47,6 +47,14 @@ export const footerStyles = {
 };
 
 export const getAcknowledgments = (dispatch, styles) => {
+  /**
+   * The hardcoding of these acknowledgements is left over from when auspice was synonymous
+   * with nextstrain.org, and lots of things were hardcoded. As auspice has become a stand-
+   * alone tool, most of these have become definable via dataset JSONs etc, but these
+   * acknowledgements have remained. It is highly desirable that they are shifted to the dataset
+   * JSONs in the future.
+   * James. November 2019.
+   */
 
   const preambleContent = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
   const genericPreamble = (<div style={styles.preamble}>{preambleContent}</div>);
@@ -216,6 +224,14 @@ export const getAcknowledgments = (dispatch, styles) => {
             Michael Lässig, Marta Łuksza, Richard Reeve, Colin Russell, Sebastian Maurer-Stroh and
             Peter Bogner for feedback and advice. This analysis represents an updated frontend to
             the Nextflu informatic pipeline, originally available at nextflu.org.
+          </div>
+          <div style={{display: "flex", justifyContent: "space-evenly"}}>
+            <a key={5} href="https://gisaid.org" target="_blank" rel="noreferrer noopener" style={{display: "flex", flexDirection: "column", justifyContent: "center"}}>
+              <img alt="gisaid-logo" width="120" src={require("../../images/gisaid-logo.png")}/>
+            </a>
+            <a key={6} href="http://www.who.int/influenza/gisrs_laboratory/en/" target="_blank" rel="noreferrer noopener">
+              <img alt="gisrs-logo" width="120" src={require("../../images/gisrs-logo.jpg")}/>
+            </a>
           </div>
         </div>
       );
