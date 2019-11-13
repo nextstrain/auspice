@@ -256,8 +256,8 @@ class Info extends React.Component {
   renderAvatar(styles) {
     let renderAvatar = false;
     let imageSrc = "";
-    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "repository")) {
-      const repo = this.props.metadata.repository;
+    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "buildUrl")) {
+      const repo = this.props.metadata.buildUrl;
       if (typeof repo === 'string') {
         if (repo.startsWith("https://github.com") || repo.startsWith("http://github.com")) {
           const match = repo.match(/https?:\/\/github.com\/([^/]+)/);
@@ -275,12 +275,12 @@ class Info extends React.Component {
     );
   }
 
-  renderRepository(styles) {
+  renderBuildInfo(styles) {
     const renderLink = (m) => (<a style={styles.bylineWeight} rel="noopener noreferrer" href={m.url} target="_blank">{m.name}</a>);
     let renderRepo = false;
     const repoObj = {};
-    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "repository")) {
-      const repo = this.props.metadata.repository;
+    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "buildUrl")) {
+      const repo = this.props.metadata.buildUrl;
       if (typeof repo === 'string') {
         if (repo.startsWith("https://") || repo.startsWith("http://")) {
           repoObj.url = repo;
@@ -333,7 +333,7 @@ class Info extends React.Component {
     return (
       <div width={this.props.width} style={styles.byline}>
         {this.renderAvatar(styles)}
-        {this.renderRepository(styles)}
+        {this.renderBuildInfo(styles)}
         {this.renderMaintainers(styles)}
       </div>
     );
