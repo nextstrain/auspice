@@ -19,8 +19,7 @@ For the purposes of getting Auspice up and running you can download the current 
 
 ```bash
 mkdir datasets
-curl http://data.nextstrain.org/zika_meta.json --compressed -o datasets/zika_meta.json
-curl http://data.nextstrain.org/zika_tree.json --compressed -o datasets/zika_tree.json
+curl http://data.nextstrain.org/zika.json --compressed -o datasets/zika.json
 ```
 
 And then run `auspice` via:

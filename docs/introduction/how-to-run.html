@@ -66,8 +66,7 @@ You can run each command with <code>--help</code> attached to see help from the 
 <p>In order to get up and running you'll need to have some datasets to visualise.
 For the purposes of getting Auspice up and running you can download the current Zika dataset via:</p>
 <pre><code class="hljs css language-bash">mkdir datasets
-curl http://data.nextstrain.org/zika_meta.json --compressed -o datasets/zika_meta.json
-curl http://data.nextstrain.org/zika_tree.json --compressed -o datasets/zika_tree.json
+curl http://data.nextstrain.org/zika.json --compressed -o datasets/zika.json
 </code></pre>
 <p>And then run <code>auspice</code> via:</p>
 <pre><code class="hljs css language-bash">auspice view --datasetDir datasets

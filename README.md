@@ -35,12 +35,11 @@ See [here](https://nextstrain.github.io/auspice/introduction/install) for full i
 
 In order to get up & running you'll need to have some datasets to visualise.
 Please see the [nextstrain docs](https://nextstrain.org/docs/) for tutorials on how to do this.
-For the purposes of getting auspice up & running you can download the current zika dataset via:
+For the purposes of getting started, you can download the current zika dataset via:
 
 ```
 mkdir datasets
-curl http://data.nextstrain.org/zika_meta.json --compressed -o datasets/zika_meta.json
-curl http://data.nextstrain.org/zika_tree.json --compressed -o datasets/zika_tree.json
+curl http://data.nextstrain.org/zika.json --compressed -o datasets/zika.json
 ```
 
 And then run `auspice` via:
