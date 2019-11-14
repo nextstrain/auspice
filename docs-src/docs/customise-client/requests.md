@@ -24,7 +24,7 @@ When a dataset, narrative, or listing of available datasets is to be displayed i
 * `/charon/getDataset` -- return the requested dataset
 * `/charon/getNarrative` -- return the requested narrative
 
-See [the server API documentation](server/api.md) for more details.
+See [the server API documentation](server/api.md) for more details about the requests, or the [client customisation API](api.md) for the ability to change "/charon" to a different value.
 
 ### Image Requests
 

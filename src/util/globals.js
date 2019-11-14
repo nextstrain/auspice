@@ -1,4 +1,5 @@
 import { scaleLinear, scaleSqrt } from "d3-scale";
+import { hasExtension, getExtension } from "../util/extensions";
 
 export const colorOptions = {
   "country": {"key": "country", "legendTitle": "Country", "menuItem": "country", "type": "discrete"},
@@ -134,8 +135,18 @@ export const filterAbbrRev = {"geographic location": "geo", "all": "all"};
 export const titleColors = ["#4377CD", "#5097BA", "#63AC9A", "#7CB879", "#9ABE5C", "#B9BC4A", "#D4B13F", "#E49938", "#E67030", "#DE3C26"];
 export const notificationDuration = 10000;
 
-/* server init stuff */
-export const charonAPIAddress = "/charon";
+/**
+ * Get the prefix for server API requests
+ * This may be provided by extensions at build time
+ * Default value: "/charon"
+ */
+export const getServerAddress = () => {
+  if (hasExtension("serverAddress")) {
+    return getExtension("serverAddress")
+      .replace(/\/$/, ""); // remove trailing slash if present
+  }
+  return "/charon"; // default
+};
 
 export const colorByMenuPreferredOrdering = [
   "clade_membership",

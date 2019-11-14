@@ -1,6 +1,6 @@
 import queryString from "query-string";
 import * as types from "./types";
-import { charonAPIAddress } from "../util/globals";
+import { getServerAddress } from "../util/globals";
 import { goTo404 } from "./navigation";
 import { createStateFromQueryOrJSONs, createTreeTooState } from "./recomputeReduxState";
 import { loadFrequencies } from "./frequencies";
@@ -8,9 +8,6 @@ import { fetchJSON } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { hasExtension, getExtension } from "../util/extensions";
 
-
-/* TODO: make a default auspice server (not charon) and make charon the nextstrain server. Or vice versa. */
-const serverAddress = hasExtension("serverAddress") ? getExtension("serverAddress") : charonAPIAddress;
 
 /**
  * Sends a GET request to the `/charon` web API endpoint requesting data.
@@ -25,7 +22,7 @@ const serverAddress = hasExtension("serverAddress") ? getExtension("serverAddres
  *  query string such as `type` (`String`) or `narrative` (`Boolean`).
  */
 const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
-  let path = `${serverAddress}/${narrative?"getNarrative":"getDataset"}`;
+  let path = `${getServerAddress()}/${narrative?"getNarrative":"getDataset"}`;
   path += `?prefix=${prefix}`;
   if (type) path += `&type=${type}`;
   const p = fetch(path)
@@ -216,7 +213,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
 
   /* Get available datasets -- this is needed for the sidebar dataset-change dropdowns etc */
   try {
-    const availableDatasets = await fetchJSON(`${charonAPIAddress}/getAvailable?prefix=${window.location.pathname}`)
+    const availableDatasets = await fetchJSON(`${getServerAddress()}/getAvailable?prefix=${window.location.pathname}`)
     dispatch({type: types.SET_AVAILABLE, data: availableDatasets});
   } catch (err) {
     console.error("Failed to fetch available datasets", err.message)
