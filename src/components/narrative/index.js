@@ -2,11 +2,11 @@
 import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
+import Mousetrap from "mousetrap";
 import { NarrativeStyles, linkStyles, OpacityFade } from './styles';
 import ReactPageScroller from "./ReactPageScroller";
 import { changePage } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE, TOGGLE_NARRATIVE } from "../../actions/types";
-import { sidebarColor } from "../../globalStyles";
 import { narrativeNavBarHeight } from "../../util/globals";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
@@ -42,6 +42,14 @@ class Narrative extends React.Component {
         }));
       }
     };
+    this.goToNextSlide = () => {
+      if (this.state.showingEndOfNarrativePage) return; // no-op
+      this.reactPageScroller.goToPage(this.props.currentInFocusBlockIdx+1);
+    };
+    this.goToPreviousSlide = () => {
+      if (this.props.currentInFocusBlockIdx === 0) return; // no-op
+      this.reactPageScroller.goToPage(this.props.currentInFocusBlockIdx-1);
+    };
   }
   componentDidMount() {
     if (window.twttr && window.twttr.ready) {
@@ -52,6 +60,11 @@ class Narrative extends React.Component {
     if (this.props.currentInFocusBlockIdx !== 0) {
       this.reactPageScroller.goToPage(this.props.currentInFocusBlockIdx);
     }
+    /* bind arrow keys to move around in narrative */
+    /* Note that "normal" page scrolling is not avaialble in narrative mode
+    and that scrolling the sidebar is associated with changing the narrative slide */
+    Mousetrap.bind(['left', 'up'], this.goToPreviousSlide);
+    Mousetrap.bind(['right', 'down'], this.goToNextSlide);
   }
   renderChevron(pointUp) {
     const dims = {w: 30, h: 30};
@@ -63,15 +76,11 @@ class Narrative extends React.Component {
     };
     if (pointUp) style.top = narrativeNavBarHeight + progressHeight;
     else style.bottom = 0;
-    let gotoIdx = pointUp ? this.props.currentInFocusBlockIdx-1 : this.props.currentInFocusBlockIdx+1;
-    if (this.state.showingEndOfNarrativePage) {
-      gotoIdx = this.props.blocks.length-1;
-    }
     const svgPathD = pointUp ?
       "M240.971 130.524l194.343 194.343c9.373 9.373 9.373 24.569 0 33.941l-22.667 22.667c-9.357 9.357-24.522 9.375-33.901.04L224 227.495 69.255 381.516c-9.379 9.335-24.544 9.317-33.901-.04l-22.667-22.667c-9.373-9.373-9.373-24.569 0-33.941L207.03 130.525c9.372-9.373 24.568-9.373 33.941-.001z" :
       "M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z";
     return (
-      <div id={`hand${pointUp?"Up":"Down"}`} style={style} onClick={() => this.reactPageScroller.goToPage(gotoIdx)}>
+      <div id={`hand${pointUp?"Up":"Down"}`} style={style} onClick={pointUp ? this.goToPreviousSlide : this.goToNextSlide}>
         <svg width={`${dims.w}px`} height={`${dims.h}px`} viewBox="0 0 448 512">
           <path d={svgPathD} fill="black"/>
         </svg>
@@ -160,6 +169,7 @@ class Narrative extends React.Component {
       pathname: this.props.blocks[this.props.currentInFocusBlockIdx].dataset,
       query: queryString.parse(this.props.blocks[this.props.currentInFocusBlockIdx].url)
     });
+    Mousetrap.unbind(['left', 'right', 'up', 'down']);
   }
 }
 export default Narrative;
