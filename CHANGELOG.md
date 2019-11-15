@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.1.0 - 2019/11/15
+
+
 * Added support in the narratives to navigate via arrow keys. In addition to improved UI, this allows `decktape` to convert narratives to PDFs, and a guide has been added to the auspice docs for this.
 [See PR 824](https://github.com/nextstrain/auspice/pull/824).
 * Added GISAID and GISRS logos to the footer for flu datasets.
