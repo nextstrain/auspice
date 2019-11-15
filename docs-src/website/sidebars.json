@@ -21,7 +21,8 @@
     ],
     "Narratives": [
       "narratives/introduction",
-      "narratives/how-to-write"
+      "narratives/how-to-write",
+      "narratives/create-pdf"
     ],
     "Release Notes": [
       "releases/changelog",

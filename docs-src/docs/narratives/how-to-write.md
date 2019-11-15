@@ -11,8 +11,7 @@ You can skip this step if you have generated your own dataset, but for the purpo
 
 ```bash
 mkdir datasets
-curl http://data.nextstrain.org/mumps_na_meta.json --compressed -o datasets/mumps_na_meta.json
-curl http://data.nextstrain.org/mumps_na_tree.json --compressed -o datasets/mumps_na_tree.json
+curl http://data.nextstrain.org/mumps_na.json --compressed -o datasets/mumps_na.json
 ```
 
 You should now be able to visualise the dataset (without any narrative functionality) via `auspice view --datasetDir datasets`
