@@ -2,6 +2,17 @@
 title: Changelog
 ---
 
+* Added support in the narratives to navigate via arrow keys. In addition to improved UI, this allows `decktape` to convert narratives to PDFs, and a guide has been added to the auspice docs for this.
+[See PR 824](https://github.com/nextstrain/auspice/pull/824).
+* Added GISAID and GISRS logos to the footer for flu datasets.
+[See PR 822](https://github.com/nextstrain/auspice/pull/822).
+* Bugfix: Fix the broken implementation of the "serverAddress" client customisation and update [the relevant documentation](https://nextstrain.github.io/auspice/customise-client/api)
+* Bugfix: Colorings in v2 JSONs were not being correctly ordered. They now maintain the order specified in the JSON.
+The ordering of v1 JSONs is still sorted, as per auspice v1 behavior.
+[See PR 823](https://github.com/nextstrain/auspice/pull/823).
+* Bugifx: The "download author data (TSV)" button no longer appears if no author information is defined in the dataset.
+* Minor auspice docs improvements.
+
 ## version 2.0.3 - 2019/11/06
 Bugfix: Correctly handle the `url` and `accession` of strains both in the tip-clicked info box and in the strain TSV download. [See PR 819](https://github.com/nextstrain/auspice/pull/819).
 
@@ -10,8 +21,6 @@ Bugfix: The ability to download per-strain metadata as a TSV file is now working
 See [issue #816](https://github.com/nextstrain/auspice/issues/816).
 
 ## version 2.0.1 - 2019/10/25
-
-
 Improved handling of traits associated with tips:
   * Added documentation around how auspice displays missing or unknown trait values
   * It a trait is defined as a coloring, then use the provided title in the tree info boxes
