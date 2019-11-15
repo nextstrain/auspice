@@ -27,7 +27,7 @@ A useful reference may be the [customisation JSON file](https://github.com/nexts
 * `navbarComponent` a (relative) path to a JS file exporting a React component to be rendered as the nav bar. See below.
 * `browserTitle` The browser title for the page. Defaults to "auspice" if not defined.
 * `googleAnalyticsKey` You can specify a Google Analytics key to enable (some) analytics functionality. More documentation to come.
-
+* `serverAddress` Specify the address / prefix which the auspice client uses for API requests.
 
 > For customisation code which uses [React](https://reactjs.org/) components, you must import these as `import React from "@libraries/react";` to ensure that the version of react is the same as what Auspice uses.
 
@@ -118,3 +118,13 @@ Where the javascript file contains a default export of a React component.
 | `errorMessage` | function | to do |
 | `changePage` | function | to do |
 
+---
+
+## Specifying the API server address
+
+By default, the client makes API requests ([as detailed here](requests.md)) to "/charon/getAvailable", "/charon/getDataset" etc.
+This is using the default server address of "/charon".
+This can be changed by specifying `serverAddress` in the customisation JSON.
+
+> Note that currently you can't specify a different domain due to CORS headers.
+This may well be a simple fix -- please get in touch if you can help here!

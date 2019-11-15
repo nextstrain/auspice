@@ -1,5 +1,5 @@
 import React from "react";
-import { charonAPIAddress } from "../../util/globals";
+import { getServerAddress } from "../../util/globals";
 import { createStateFromQueryOrJSONs } from "../../actions/recomputeReduxState";
 import { fetchJSON } from "../../util/serverInteraction";
 
@@ -20,7 +20,7 @@ class SingleDataset extends React.Component {
     };
   }
   componentDidMount() {
-    fetchJSON(`${charonAPIAddress}/getDataset?prefix=${this.props.path}`)
+    fetchJSON(`${getServerAddress()}/getDataset?prefix=${this.props.path}`)
       .then((json) => {
         const state = createStateFromQueryOrJSONs({json, query: ""});
         this.setState({

@@ -4,7 +4,7 @@ import DefaultSplashContent from "./splash";
 import { hasExtension, getExtension } from "../../util/extensions";
 import ErrorBoundary from "../../util/errorBoundry";
 import { fetchJSON } from "../../util/serverInteraction";
-import { charonAPIAddress, controlsHiddenWidth } from "../../util/globals";
+import { getServerAddress, controlsHiddenWidth } from "../../util/globals";
 import { changePage } from "../../actions/navigation";
 
 const SplashContent = hasExtension("splashComponent") ?
@@ -25,7 +25,7 @@ class Splash extends React.Component {
     this.state = {available: {}, errorMessage: undefined};
   }
   componentDidMount() {
-    fetchJSON(`${charonAPIAddress}/getAvailable?prefix=${this.props.reduxPathname}`)
+    fetchJSON(`${getServerAddress()}/getAvailable?prefix=${this.props.reduxPathname}`)
       .then((json) => {
         this.setState({available: json});
       })

@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import SingleDataset from "./single";
 import { goTo404 } from "../../actions/navigation";
 import { fetchJSON } from "../../util/serverInteraction";
-import { charonAPIAddress } from "../../util/globals";
+import { getServerAddress } from "../../util/globals";
 
 @connect()
 class Status extends React.Component {
@@ -12,7 +12,7 @@ class Status extends React.Component {
     this.state = {available: undefined};
   }
   componentDidMount() {
-    fetchJSON(`${charonAPIAddress}/getAvailable?prefix=${window.location.pathname}`)
+    fetchJSON(`${getServerAddress()}/getAvailable?prefix=${window.location.pathname}`)
       .then((json) => {this.setState({available: json});})
       .catch((err) => {
         console.warn(err);
