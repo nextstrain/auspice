@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import Select from "react-select";
 import { debounce } from "lodash";
 import { sidebarField } from "../../globalStyles";
-import { controlsWidth, colorByMenuPreferredOrdering, nucleotide_gene } from "../../util/globals";
+import { controlsWidth, nucleotide_gene } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodePositions } from "../../util/getGenotype";
@@ -175,26 +175,10 @@ class ColorBy extends React.Component {
     };
   }
 
-  getColorByOptions() {
-    return Object.keys(this.props.colorings).map((key) => {
-      return {
-        value: key,
-        label: this.props.colorings[key].title
-      };
-    }).sort((a, b) => {
-      const [ia, ib] = [colorByMenuPreferredOrdering.indexOf(a.value), colorByMenuPreferredOrdering.indexOf(b.value)];
-      if (ia === -1 || ib === -1) {
-        if (ia === -1) return 1;
-        else if (ib === -1) return -1;
-        return 0;
-      }
-      return ia > ib ? 1 : -1;
-    });
-  }
-
   render() {
     const styles = this.getStyles();
-    const colorOptions = this.getColorByOptions();
+    const colorOptions = Object.keys(this.props.colorings)
+      .map((key) => ({value: key, label: this.props.colorings[key].title}));
     return (
       <div style={styles.base}>
         <Select

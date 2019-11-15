@@ -137,29 +137,6 @@ export const notificationDuration = 10000;
 /* server init stuff */
 export const charonAPIAddress = "/charon";
 
-export const colorByMenuPreferredOrdering = [
-  "clade_membership",
-  "cHI",
-  "cTiter",
-  "fitness",
-  "gt",
-  "ep",
-  "ne",
-  "rb",
-  "lbi",
-  "dfreq",
-  "division",
-  "country",
-  "region",
-  "date",
-  "glyc",
-  "age",
-  "age_score",
-  "gender",
-  "host",
-  "subtype"
-];
-
 export const months = {
   1: 'Jan',
   2: 'Feb',
