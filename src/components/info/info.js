@@ -7,6 +7,7 @@ import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { months, NODE_VISIBLE } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
+import Byline from "./byline";
 
 const plurals = {
   country: "countries",
@@ -140,26 +141,6 @@ class Info extends React.Component {
         letterSpacing: "-0.5px",
         lineHeight: 1.2
       },
-      avatar: {
-        marginRight: 5,
-        marginBottom: 2
-      },
-      byline: {
-        fontFamily: headerFont,
-        fontSize: 14,
-        marginLeft: 2,
-        marginTop: 5,
-        marginBottom: 5,
-        fontWeight: 700,
-        color: "#777",
-        lineHeight: 1.4,
-        verticalAlign: "middle"
-      },
-      bylineWeight: {
-        fontFamily: headerFont,
-        fontSize: 14,
-        fontWeight: 700
-      },
       n: {
         fontFamily: headerFont,
         fontSize: 14,
@@ -253,92 +234,6 @@ class Info extends React.Component {
     );
   }
 
-  renderAvatar(styles) {
-    let renderAvatar = false;
-    let imageSrc = "";
-    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "buildUrl")) {
-      const repo = this.props.metadata.buildUrl;
-      if (typeof repo === 'string') {
-        if (repo.startsWith("https://github.com") || repo.startsWith("http://github.com")) {
-          const match = repo.match(/https?:\/\/github.com\/([^/]+)/);
-          if (match[1]) {
-            imageSrc = "https://github.com/" + match[1] + ".png?size=200";
-            renderAvatar = true;
-          }
-        }
-      }
-    }
-    return (
-      renderAvatar ?
-        <img style={styles.avatar} alt="avatar" width="28" src={imageSrc}/> :
-        <span/>
-    );
-  }
-
-  renderBuildInfo(styles) {
-    const renderLink = (m) => (<a style={styles.bylineWeight} rel="noopener noreferrer" href={m.url} target="_blank">{m.name}</a>);
-    let renderRepo = false;
-    const repoObj = {};
-    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "buildUrl")) {
-      const repo = this.props.metadata.buildUrl;
-      if (typeof repo === 'string') {
-        if (repo.startsWith("https://") || repo.startsWith("http://")) {
-          repoObj.url = repo;
-          repoObj.name = repo.replace("https://", "").replace("http://", "");
-          renderRepo = true;
-        }
-      }
-    }
-    return (
-      renderRepo ?
-        <span>
-          {"Built using "}
-          {renderLink(repoObj)}
-          {". "}
-        </span> :
-        <span/>
-    );
-
-  }
-
-  renderMaintainers(styles) {
-    const renderLink = (m) => (<a style={styles.bylineWeight} rel="noopener noreferrer" href={m.url} target="_blank">{m.name}</a>);
-    let renderMaintainers = false;
-    let maintainersArray = {};
-    if (Object.prototype.hasOwnProperty.call(this.props.metadata, "maintainers")) {
-      maintainersArray = this.props.metadata.maintainers;
-      if (Array.isArray(maintainersArray)) {
-        if (maintainersArray[0]) {
-          renderMaintainers = true;
-        }
-      }
-    }
-    return (
-      renderMaintainers ?
-        <span>
-          {"Maintained by "}
-          {maintainersArray.map((m, i) => (
-            <React.Fragment key={m.name}>
-              {m.url ? renderLink(m) : m.name}
-              {i === maintainersArray.length-1 ? "" : i === maintainersArray.length-2 ? " and " : ", "}
-            </React.Fragment>
-          ))}
-          {"."}
-        </span> :
-        <span/>
-    );
-  }
-
-  renderByline(styles) {
-    return (
-      <div width={this.props.width} style={styles.byline}>
-        {this.renderAvatar(styles)}
-        {this.renderBuildInfo(styles)}
-        {this.renderMaintainers(styles)}
-      </div>
-    );
-  }
-
   render() {
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
     const styles = this.getStyles(this.props.width);
@@ -365,7 +260,7 @@ class Info extends React.Component {
       <Card center infocard>
         <div style={styles.base}>
           {this.renderTitle(styles)}
-          {this.renderByline(styles)}
+          <Byline styles={styles} width={this.props.width} metadata={this.props.metadata}/>
           <div width={this.props.width} style={styles.n}>
             {animating ? `Animation in progress. ` : null}
             {this.props.selectedStrain ? this.selectedStrainButton(this.props.selectedStrain) : null}
