@@ -37,10 +37,10 @@ const Byline = ({width, metadata}) => {
 function renderAvatar(metadata) {
   const repo = metadata.buildUrl;
   if (typeof repo === 'string') {
-    const match = repo.match(/https?:\/\/github.com\/([^/]+)/);
-    if (match && match[1]) {
+    const match = repo.match(/(https?:\/\/)?(www\.)?github.com\/([^/]+)/);
+    if (match) {
       return (
-        <img style={styles.avatar} alt="avatar" width="28" src={`https://github.com/${match[1]}.png?size=200`}/>
+        <img style={styles.avatar} alt="avatar" width="28" src={`https://github.com/${match[3]}.png?size=200`}/>
       );
     }
   }
@@ -51,12 +51,12 @@ function renderBuildInfo(metadata) {
   if (Object.prototype.hasOwnProperty.call(metadata, "buildUrl")) {
     const repo = metadata.buildUrl;
     if (typeof repo === 'string') {
-      if (repo.startsWith("https://") || repo.startsWith("http://")) {
+      if (repo.startsWith("https://") || repo.startsWith("http://") || repo.startsWith("www.")) {
         return (
           <span>
             {"Built using "}
             <Link url={repo}>
-              {repo.replace(/^(http[s]?:\/\/)/, "")}
+              {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "")}
             </Link>
             {". "}
           </span>
