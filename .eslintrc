@@ -56,6 +56,7 @@ rules:
   prefer-destructuring: off
   implicit-arrow-linebreak: off
   jsx-quotes: off
+  no-use-before-define: ["error", { "functions": false }]
 parserOptions:
   ecmaVersion: 6
   sourceType: module
