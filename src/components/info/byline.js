@@ -8,19 +8,19 @@ const styles = {
   },
   byline: {
     fontFamily: headerFont,
-    fontSize: 14,
+    fontSize: 16,
     marginLeft: 2,
     marginTop: 5,
     marginBottom: 5,
-    fontWeight: 700,
+    fontWeight: 400,
     color: "#777",
     lineHeight: 1.4,
     verticalAlign: "middle"
   },
   bylineWeight: {
     fontFamily: headerFont,
-    fontSize: 14,
-    fontWeight: 700
+    fontSize: 16,
+    fontWeight: 400
   }
 };
 
