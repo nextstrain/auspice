@@ -8,7 +8,6 @@ const setUpGetDatasetHandler = ({datasetsPath}) => {
       const info = helpers.interpretRequest(req, datasetsPath);
       helpers.extendDataPathsToMatchAvailable(info, availableDatasets);
       helpers.makeFetchAddresses(info, datasetsPath, availableDatasets);
-      console.log(info);
       await helpers.sendJson(res, info);
     } catch (err) {
       console.trace(err);

@@ -12,7 +12,7 @@ const utils = require("../utils");
 const queryString = require("query-string");
 const path = require("path");
 const convertFromV1 = require("./convertJsonSchemas").convertFromV1;
-
+const fs = require("fs");
 
 const handleError = (res, clientMsg, serverMsg="") => {
   res.statusMessage = clientMsg;
@@ -85,24 +85,34 @@ const makeFetchAddresses = (info, datasetsPath, availableDatasets) => {
         meta: path.join(datasetsPath, `${info.parts.join("_")}_meta.json`),
         tree: path.join(datasetsPath, `${info.parts.join("_")}_tree.json`)
       };
-      info.address
     }
   }
 };
 
 const sendJson = async (res, info) => {
   if (typeof info.address === "string") {
-    const jsonData = await utils.readFilePromise(info.address);
-    return res.json(jsonData);
+    /* In general, JSONs are designed such that no server modifications
+    are needed by the server. This allows us to read as a stream and
+    stream the response */
+    const readStream = fs.createReadStream(info.address);
+    readStream.on('open', () => {
+      readStream.pipe(res);
+    });
+    readStream.on('error', (err) => {
+      utils.warn(`Failed to read ${info.address}`);
+      utils.verbose(err);
+      res.sendStatus(404);
+    });
   } else {
+    /* v1 JSONs require modification to the JSON data (i.e. conversion
+    into a v2 JSON!). This requires us to read both (v1) JSONs
+    into memory */
     const meta = await utils.readFilePromise(info.address.meta);
     const tree = await utils.readFilePromise(info.address.tree);
-    /* v1 JSONs don't define a tree name, so we try to guess it here */
-    const mainTreeName = info.parts.join('/');
     const v2Json = convertFromV1({tree, meta});
-    return res.json(v2Json)
+    return res.json(v2Json);
   }
-}
+};
 
 /**
  * Return a subset of `availableDatasetUrls` which we deem to be suitable
