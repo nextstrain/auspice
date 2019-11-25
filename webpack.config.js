@@ -117,9 +117,13 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
           use: ["style-loader", "css-loader"]
         },
         {
-          test: /\.(gif|png|jpe?g|svg)$/i,
+          test: /\.(gif|png|jpe?g|svg|woff2?|eot|otf|ttf)$/i,
           use: "file-loader",
-          include: [...directoriesToTransform, path.join(__dirname, 'node_modules/leaflet')]
+          include: [
+            ...directoriesToTransform,
+            path.join(__dirname, 'node_modules/font-awesome'),
+            path.join(__dirname, 'node_modules/leaflet')
+          ]
         }
       ]
     }

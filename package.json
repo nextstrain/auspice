@@ -73,6 +73,7 @@
     "express-naked-redirect": "^0.1.2",
     "express-static-gzip": "^0.2.2",
     "file-loader": "^1.1.11",
+    "font-awesome": "^4.7.0",
     "json-loader": "^0.5.1",
     "leaflet": "^1.2.0",
     "leaflet-image": "^0.4.0",

@@ -10,6 +10,7 @@ import { Provider } from "react-redux";
 import configureStore from "./store";
 import { initialiseGoogleAnalyticsIfRequired } from "./util/googleAnalytics";
 /* S T Y L E S H E E T S */
+import "font-awesome/css/font-awesome.css";
 import "leaflet/dist/leaflet.css";
 import "./css/global.css";
 import "./css/browserCompatability.css";
