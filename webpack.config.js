@@ -119,7 +119,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
         {
           test: /\.(gif|png|jpe?g|svg)$/i,
           use: "file-loader",
-          include: directoriesToTransform
+          include: [...directoriesToTransform, path.join(__dirname, 'node_modules/leaflet')]
         }
       ]
     }
