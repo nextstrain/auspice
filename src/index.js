@@ -20,6 +20,9 @@ import "./css/notifications.css";
 import "./css/boxed.css";
 import "./css/select.css";
 
+/* FONTS */
+import 'typeface-lato';
+
 const store = configureStore();
 
 /* set up non-redux state storage for the animation - use this conservitavely! */

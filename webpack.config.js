@@ -122,7 +122,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
           include: [
             ...directoriesToTransform,
             path.join(__dirname, 'node_modules/font-awesome'),
-            path.join(__dirname, 'node_modules/leaflet')
+            path.join(__dirname, 'node_modules/leaflet'),
+            path.join(__dirname, 'node_modules/typeface-lato')
           ]
         }
       ]
