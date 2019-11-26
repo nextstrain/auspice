@@ -524,6 +524,9 @@ const createMetadataStateFromJSON = (json) => {
   if (json.meta.maintainers) {
     metadata.maintainers = json.meta.maintainers;
   }
+  if (json.meta.build_url) {
+    metadata.buildUrl = json.meta.build_url;
+  }
   if (json.meta.genome_annotations) {
     metadata.genomeAnnotations = json.meta.genome_annotations;
   }

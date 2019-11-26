@@ -7,6 +7,7 @@ import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { months, NODE_VISIBLE } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
+import Byline from "./byline";
 
 const plurals = {
   country: "countries",
@@ -221,6 +222,18 @@ class Info extends React.Component {
     );
   }
 
+  renderTitle(styles) {
+    let title = "";
+    if (this.props.metadata.title) {
+      title = this.props.metadata.title;
+    }
+    return (
+      <div width={this.props.width} style={styles.title}>
+        {title}
+      </div>
+    );
+  }
+
   render() {
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
     const styles = this.getStyles(this.props.width);
@@ -228,10 +241,6 @@ class Info extends React.Component {
     const animating = this.props.animationPlayPauseButton === "Pause";
     const showExtended = !animating && !this.props.selectedStrain;
     const datesMaxed = this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax;
-    let title = "";
-    if (this.props.metadata.title) {
-      title = this.props.metadata.title;
-    }
 
     /* the content is made up of two parts:
     (1) the summary - e.g. Showing 4 of 379 sequences, from 1 author, 1 country and 1 region, dated Apr 2016 to Jun 2016.
@@ -250,9 +259,8 @@ class Info extends React.Component {
     return (
       <Card center infocard>
         <div style={styles.base}>
-          <div width={this.props.width} style={styles.title}>
-            {title}
-          </div>
+          {this.renderTitle(styles)}
+          <Byline styles={styles} width={this.props.width} metadata={this.props.metadata}/>
           <div width={this.props.width} style={styles.n}>
             {animating ? `Animation in progress. ` : null}
             {this.props.selectedStrain ? this.selectedStrainButton(this.props.selectedStrain) : null}

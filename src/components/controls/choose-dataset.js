@@ -1,19 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
-import { withTheme } from 'styled-components';
 import ChooseDatasetSelect from "./choose-dataset-select";
 import { SidebarHeader } from "./styles";
-
-const BuildLink = withTheme((props) => {
-  const niceUrl = props.url.replace(/^(http[s]?:\/\/)/, "");
-  return (
-    <div style={{ fontSize: 14, marginTop: 5, marginBottom: 10, color: props.theme.color}}>
-      <i className="fa fa-clone fa-lg" aria-hidden="true"/>
-      <span style={{position: "relative", paddingLeft: 10}}/>
-      <a href={props.url} target="_blank">{niceUrl}</a>
-    </div>
-  );
-});
 
 // const DroppedFiles = withTheme((props) => {
 //   /* TODO: this shouldn't be in the auspice src, rather injected as an extension when needed */
@@ -47,16 +35,12 @@ class ChooseDataset extends React.Component {
       .replace(/\/$/, '')
       .split(":")[0];
     const displayedDataset = displayedDatasetString.split("/");
-    let optionForCurrentDataset = {};
     const options = [[]];
 
     this.props.available.datasets.forEach((d) => {
       const firstField = d.request.split("/")[0];
       if (!options[0].includes(firstField)) {
         options[0].push(firstField);
-      }
-      if (displayedDatasetString === d.request) {
-        optionForCurrentDataset = d;
       }
     });
 
@@ -78,9 +62,6 @@ class ChooseDataset extends React.Component {
     return (
       <>
         <SidebarHeader>Dataset</SidebarHeader>
-        {optionForCurrentDataset.buildUrl ? (
-          <BuildLink url={optionForCurrentDataset.buildUrl}/>
-        ) : null}
         {options.map((option, optionIdx) => (
           <ChooseDatasetSelect
             key={option}
