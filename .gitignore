@@ -1,4 +1,5 @@
 ### App specific ###
+cache
 /dist/
 big_flu
 /data/

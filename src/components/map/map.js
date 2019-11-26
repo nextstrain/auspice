@@ -460,7 +460,8 @@ class Map extends React.Component {
 
     map.getRenderer(map).options.padding = 2;
 
-    L.tileLayer('https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2l1MDRoMzg5MDEwbjJvcXBpNnUxMXdwbCJ9.PMqX7vgORuXLXxtI3wISjw', {
+    // Proxy tile requests through backend, potentially with local caching
+    L.tileLayer('/tiles/{s}/{x}/{y}/{z}', {
       attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
