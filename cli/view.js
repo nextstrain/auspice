@@ -12,6 +12,7 @@ const version = require('../src/version').version;
 const chalk = require('chalk');
 const SUPPRESS = require('argparse').Const.SUPPRESS;
 
+const TileCache = require('./server/TileCache');
 
 const addParser = (parser) => {
   const description = `Launch a local server to view locally available datasets & narratives.
@@ -59,6 +60,9 @@ const loadAndAddHandlers = ({app, handlersArg, datasetDir, narrativeDir}) => {
     handlers.getNarrative = require("./server/getNarrative")
       .setUpGetNarrativeHandler({narrativesPath});
   }
+
+  const tileCache = new TileCache();
+  app.get("/tiles/:s/:x/:y/:z", tileCache.requestHandler);
 
   /* apply handlers */
   app.get("/charon/getAvailable", handlers.getAvailable);
