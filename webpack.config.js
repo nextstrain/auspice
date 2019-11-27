@@ -14,6 +14,22 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   /* which directories should be parsed by babel and other loaders? */
   const directoriesToTransform = [path.join(__dirname, 'src')];
 
+  /* which font modules need to be able to be loaded by auspice? */
+  const fontModules = ["font-awesome", "leaflet", "typeface-lato"];
+  /* note that the directory structure is different depending on whether auspice
+  is installed from source, a global npm install or a project's dependency. E.g.
+  Global install & from source: `${__dirname}/node_modules/font-awesome`
+  Project dependency:           `${__dirname}/../font-awesome`
+  This implementation is a short-term solution and should be improved */
+  let fileLoaderDirectoriesToTransform;
+  if (fs.existsSync(path.join(__dirname, "node_modules", fontModules[0]))) {
+    // global npm install or install from source
+    fileLoaderDirectoriesToTransform = fontModules.map((d) => path.join(__dirname, "node_modules", d));
+  } else {
+    // auspice is a project's dependency
+    fileLoaderDirectoriesToTransform = fontModules.map((d) => path.join(__dirname, "..", d));
+  }
+
   /* webpack alias' used in code import / require statements */
   const aliasesToResolve = {
     "@extensions": '.', /* must provide a default, else it won't compile */
@@ -121,9 +137,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
           use: "file-loader",
           include: [
             ...directoriesToTransform,
-            path.join(__dirname, 'node_modules/font-awesome'),
-            path.join(__dirname, 'node_modules/leaflet'),
-            path.join(__dirname, 'node_modules/typeface-lato')
+            ...fileLoaderDirectoriesToTransform
           ]
         }
       ]
