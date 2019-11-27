@@ -79,13 +79,15 @@ export const onBranchClick = function onBranchClick(d) {
   // At the moment only branches with 1 label will work - if it has 2 it won't. Could be
   // changed to just use the 'first' (unsure if that would be consistant) on multi-label branches.
   // Also, can't use the AA mut lists as zoom labels - they look really bad in URL!!
-  if (
-    d.n.branch_attrs &&
-    d.n.branch_attrs.labels !== undefined &&
-    Object.keys(d.n.branch_attrs.labels).length === 1 &&
-    Object.keys(d.n.branch_attrs.labels)[0] !== "aa"
-  ) {
-    const key = Object.keys(d.n.branch_attrs.labels)[0];
+  let legalBranchLabels;
+  // Check has some branch labels, and remove 'aa' ones.
+  if (d.n.branch_attrs &&
+      d.n.branch_attrs.labels !== undefined) {
+    legalBranchLabels = Object.keys(d.n.branch_attrs.labels).filter((label) => label !== "aa");
+  }
+  // If has some, and only 1 left, then allow to use as a clade label
+  if (legalBranchLabels && legalBranchLabels.length === 1) {
+    const key = legalBranchLabels[0];
     cladeSelected = {label: key, selected: d.n.branch_attrs.labels[key]};
   }
   if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
