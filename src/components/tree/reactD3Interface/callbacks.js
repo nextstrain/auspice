@@ -75,12 +75,18 @@ export const onBranchClick = function onBranchClick(d) {
   if (this.props.narrativeMode) return;
   const root = [undefined, undefined];
   let cladeSelected;
+  console.log("clicked branch d.n.branch_attrs.labels", d.n.branch_attrs.labels);
+  // At the moment only branches with 1 label will work - if it has 2 it won't. Could be
+  // changed to just use the 'first' (unsure if that would be consistant) on multi-label branches.
+  // Also, can't use the AA mut lists as zoom labels - they look really bad in URL!!
   if (
     d.n.branch_attrs &&
     d.n.branch_attrs.labels !== undefined &&
-    d.n.branch_attrs.labels.clade !== undefined
+    Object.keys(d.n.branch_attrs.labels).length === 1 &&
+    Object.keys(d.n.branch_attrs.labels)[0] !== "aa"
   ) {
-    cladeSelected = d.n.branch_attrs.labels.clade;
+    const key = Object.keys(d.n.branch_attrs.labels)[0];
+    cladeSelected = {label: key, selected: d.n.branch_attrs.labels[key]};
   }
   if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
   else root[1] = d.n.arrayIdx;

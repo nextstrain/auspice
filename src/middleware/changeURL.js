@@ -173,6 +173,16 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   }
 
   /* small modifications to desired pathname / query */
+
+  // Custom labels come in under 'query.clade' but have their own label (may not be 'clade')
+  // to act appropriately, put them in 'query' under their own 'label'.
+  // Ex: query.clade = {label: animal, selected: dog}   becomes   query.animal = dog
+  if (query["clade"] && query["clade"] !== "" && query["clade"]["label"]) {
+    const label = query["clade"]["label"];
+    const selected = query["clade"]["selected"];
+    if (label !== "clade") { delete query["clade"]; } // get rid of query.clade unless label is 'clade'
+    query[label] = selected; // add the new query
+  }
   Object.keys(query).filter((q) => query[q] === "").forEach((k) => delete query[k]);
   let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/');
   if (search) {search = "?" + search;}

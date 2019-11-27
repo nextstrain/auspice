@@ -445,7 +445,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelect
     oldState.selectedStrain = tipSelected;
   }
   if (cladeSelected) {
-    const cladeSelectedIdx = cladeSelected === 'root' ? 0 : getIdxMatchingLabel(oldState.nodes, "clade", cladeSelected);
+    const cladeSelectedIdx = cladeSelected === 'root' ? 0 : getIdxMatchingLabel(oldState.nodes, cladeSelected["label"], cladeSelected["selected"]);
     oldState.selectedClade = cladeSelected;
     newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState); // tipSelectedIdx, oldState);
   }
@@ -630,6 +630,18 @@ export const createStateFromQueryOrJSONs = ({
     controls.colorByConfidence = doesColorByHaveConfidence(controls, controls.colorBy);
     tree.nodeColorsVersion = colorScale.version;
     tree.nodeColors = nodeColors;
+  }
+
+  // 'clade' zoom could now be under any label - check for first available query key that
+  // matches available branch labels, and convert it to be 'query.clade'
+  // This currently leaves any other 'clade zoom' requests in the URL dangling - they do nothing but remain
+  // Don't know if there's a better way to handle this?
+  const queryKeys = Object.keys(query);
+  for (const possibleClade of queryKeys) {
+    if (tree.availableBranchLabels.includes(possibleClade)) {
+      query.clade = {label: possibleClade, selected: query[possibleClade]};
+      break;
+    }
   }
 
   if (query.clade) {
