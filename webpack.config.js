@@ -118,13 +118,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
         },
         {
           test: /\.(gif|png|jpe?g|svg|woff2?|eot|otf|ttf)$/i,
-          use: "file-loader",
-          include: [
-            ...directoriesToTransform,
-            path.join(__dirname, 'node_modules/font-awesome'),
-            path.join(__dirname, 'node_modules/leaflet'),
-            path.join(__dirname, 'node_modules/typeface-lato')
-          ]
+          use: "file-loader"
         }
       ]
     }
