@@ -1,5 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
+import marked from "marked";
+import dompurify from "dompurify";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
@@ -46,7 +48,20 @@ export const footerStyles = {
   }
 };
 
-export const getAcknowledgments = (dispatch, styles) => {
+export const getAcknowledgments = (metadata, dispatch, styles) => {
+  /**
+   * If the metadata contains a description key, then it will take precendence the hard-coded
+   * acknowledgements. Expects the text in the description to be in Mardown format.
+   * Jover. December 2019.
+  */
+  if (metadata.description) {
+    const sanitizer = dompurify.sanitize;
+    const cleanDescription = sanitizer(marked(metadata.description));
+    return (
+      <div dangerouslySetInnerHTML={{ __html: cleanDescription }}/>
+    );
+  }
+
   /**
    * The hardcoding of these acknowledgements is left over from when auspice was synonymous
    * with nextstrain.org, and lots of things were hardcoded. As auspice has become a stand-
@@ -402,7 +417,7 @@ class Footer extends React.Component {
       <div style={styles.footer}>
         <div style={{width: width}}>
           <div style={styles.line}/>
-          {getAcknowledgments(this.props.dispatch, styles)}
+          {getAcknowledgments(this.props.metadata, this.props.dispatch, styles)}
           <div style={styles.line}/>
           {Object.keys(this.props.activeFilters).map((name) => {
             return (

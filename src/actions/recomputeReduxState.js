@@ -518,6 +518,9 @@ const createMetadataStateFromJSON = (json) => {
   }
   metadata.title = json.meta.title;
   metadata.updated = json.meta.updated;
+  if (json.meta.description) {
+    metadata.description = json.meta.description;
+  }
   if (json.version) {
     metadata.version = json.version;
   }

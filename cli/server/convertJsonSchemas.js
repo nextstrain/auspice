@@ -237,6 +237,10 @@ const setMiscMetaProperties = (v2, meta) => {
       v2.geo_resolutions.push({key, demes: prettyDemes});
     }
   }
+  // FOOTER DESCRIPTION
+  if (meta.description) {
+    v2.description = meta.description;
+  }
 };
 
 const setVaccineChoicesOnNodes = (v2, v1meta) => {
