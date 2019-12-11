@@ -56,9 +56,16 @@ export const getAcknowledgments = (metadata, dispatch, styles) => {
   */
   if (metadata.description) {
     const sanitizer = dompurify.sanitize;
-    const cleanDescription = sanitizer(marked(metadata.description));
+    const sanitizerConfig = {
+      ALLOWED_TAGS: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'em', 'strong', 'del', 'ol', 'ul', 'li', 'a', '#text'],
+      ALLOWED_ATTR: ['href'],
+      KEEP_CONTENT: false,
+      ALLOW_DATA_ATTR: false
+    };
+    const rawDescription = marked(metadata.description);
+    const cleanDescription = sanitizer(rawDescription, sanitizerConfig);
     return (
-      <div dangerouslySetInnerHTML={{ __html: cleanDescription }}/>
+      <div style={styles.acknowledgments} dangerouslySetInnerHTML={{ __html: cleanDescription }}/>
     );
   }
 
