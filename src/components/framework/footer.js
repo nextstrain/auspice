@@ -55,6 +55,14 @@ export const getAcknowledgments = (metadata, dispatch, styles) => {
    * Jover. December 2019.
   */
   if (metadata.description) {
+    dompurify.addHook("afterSanitizeAttributes", (node) => {
+      // Set external links to open in a new tab
+      if ('href' in node && location.hostname !== node.hostname) {
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noreferrer nofollow');
+      }
+    });
+
     const sanitizer = dompurify.sanitize;
     const sanitizerConfig = {
       ALLOWED_TAGS: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'em', 'strong', 'del', 'ol', 'ul', 'li', 'a', 'img', '#text'],
