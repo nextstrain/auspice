@@ -82,6 +82,12 @@ const FooterStyles = styled.div`
     margin-top: 10px;
     line-height: 1.0;
   }
+
+  .imageContainer {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
 `;
 
 export const getAcknowledgments = (metadata, dispatch) => {
@@ -96,6 +102,10 @@ export const getAcknowledgments = (metadata, dispatch) => {
       if ('href' in node && location.hostname !== node.hostname) {
         node.setAttribute('target', '_blank');
         node.setAttribute('rel', 'noreferrer nofollow');
+      }
+      // Find nodes that contain images and add imageContainer class to update styling
+      if (([...node.childNodes].filter((child) => child.localName === 'img')).length > 0) {
+        node.className += ' imageContainer';
       }
     });
 
