@@ -77,7 +77,7 @@ const FooterStyles = styled.div`
     margin-top: 10px;
   }
 
-  .citationList {
+  .filterList {
     margin-top: 10px;
     line-height: 1.0;
   }
@@ -231,21 +231,23 @@ class Footer extends React.Component {
       <div>
         {`Filter by ${filterTitle}`}
         {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
-        <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" className='citationList'>
-          {
-            Array.from(totalStateCount.keys())
-              .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
-              .sort() // filters are sorted alphabetically
-              .map((itemName) => {
-                const display = (
-                  <span>
-                    {`${itemName} (${totalStateCount.get(itemName)})`}
-                  </span>
-                );
-                return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
-              })
-          }
-        </Flex>
+        <div className='filterList'>
+          <Flex wrap="wrap" justifyContent="flex-start" alignItems="center">
+            {
+              Array.from(totalStateCount.keys())
+                .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
+                .sort() // filters are sorted alphabetically
+                .map((itemName) => {
+                  const display = (
+                    <span>
+                      {`${itemName} (${totalStateCount.get(itemName)})`}
+                    </span>
+                  );
+                  return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
+                })
+            }
+          </Flex>
+        </div>
       </div>
     );
   }
