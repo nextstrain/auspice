@@ -142,7 +142,7 @@ export const getAcknowledgments = (metadata, dispatch) => {
     const sanitizer = dompurify.sanitize;
     const sanitizerConfig = {
       ALLOWED_TAGS: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'em', 'strong', 'del', 'ol', 'ul', 'li', 'a', 'img', '#text', 'code', 'pre'],
-      ALLOWED_ATTR: ['style', 'href', 'src', 'width', 'height', 'alt'],
+      ALLOWED_ATTR: ['href', 'src', 'width', 'height', 'alt'],
       KEEP_CONTENT: false,
       ALLOW_DATA_ATTR: false
     };
