@@ -63,6 +63,37 @@ const FooterStyles = styled.div`
     margin: 0.1em 0;
   }
 
+  // Style for code block
+  pre {
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f6f8fa;
+    border-radius: 3px;
+  }
+
+  // Code within code block
+  pre code {
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    font-size: 100%;
+    line-height: inherit;
+    word-wrap: normal;
+    background-color: initial;
+    border: 0;
+  }
+
+  // Inline code
+  p code {
+    padding: .2em .4em;
+    margin: 0;
+    font-size: 85%;
+    background-color: rgba(27,31,35,.05);
+    border-radius: 3px;
+  }
+
   .line {
     margin-top: 20px;
     margin-bottom: 20px;
@@ -110,7 +141,7 @@ export const getAcknowledgments = (metadata, dispatch) => {
 
     const sanitizer = dompurify.sanitize;
     const sanitizerConfig = {
-      ALLOWED_TAGS: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'em', 'strong', 'del', 'ol', 'ul', 'li', 'a', 'img', '#text'],
+      ALLOWED_TAGS: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'em', 'strong', 'del', 'ol', 'ul', 'li', 'a', 'img', '#text', 'code', 'pre'],
       ALLOWED_ATTR: ['style', 'href', 'src', 'width', 'height', 'alt'],
       KEEP_CONTENT: false,
       ALLOW_DATA_ATTR: false
