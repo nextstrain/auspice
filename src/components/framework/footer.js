@@ -115,10 +115,18 @@ const FooterStyles = styled.div`
 
   .imageContainer {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
-    margin: 0.5em 0;
+    flex-wrap: wrap;
   }
+
+  img {
+    margin-left: 30px;
+    margin-right: 30px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+  }
+
 `;
 
 export const getAcknowledgments = (metadata, dispatch) => {
