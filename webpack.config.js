@@ -42,7 +42,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   });
   /* gzip everything - https://github.com/webpack-contrib/compression-webpack-plugin */
   const pluginCompress = new CompressionPlugin({
-    asset: "[path].gz[query]",
+    filename: "[path].gz[query]",
     algorithm: "gzip",
     test: /\.js$|\.css$|\.html$/,
     threshold: 10240,
