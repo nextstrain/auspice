@@ -1,14 +1,16 @@
 import React from "react";
 import { connect } from "react-redux";
+import marked from "marked";
+import dompurify from "dompurify";
+import styled from 'styled-components';
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
 import { applyFilter } from "../../actions/tree";
-import { changeColorBy } from "../../actions/colors";
 import { version } from "../../version";
 import { publications } from "../download/downloadModal";
-import { encodeColorByGenotype } from "../../util/getGenotype";
 import { isValueValid } from "../../util/globals";
+import hardCodedFooters from "./footer-descriptions";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -16,236 +18,164 @@ const dot = (
   </span>
 );
 
-export const footerStyles = {
-  footer: {
-    marginLeft: "30px",
-    paddingBottom: "30px",
-    fontFamily: dataFont,
-    fontSize: 15,
-    fontWeight: 300,
-    color: medGrey,
-    lineHeight: 1.4
-  },
-  acknowledgments: {
-    marginTop: "10px"
-  },
-  citationList: {
-    marginTop: "10px",
-    lineHeight: 1.0
-  },
-  line: {
-    marginTop: "20px",
-    marginBottom: "20px",
-    borderBottom: "1px solid #CCC"
-  },
-  preamble: {
-    fontSize: 15
-  },
-  fineprint: {
-    fontSize: 14
+const FooterStyles = styled.div`
+  margin-left: 30px;
+  padding-bottom: 30px;
+  font-family: ${dataFont};
+  font-size: 15px;
+  font-weight: 300;
+  color: rgb(136, 136, 136);
+  line-height: 1.4;
+
+  h1 {
+    font-weight: 700;
+    font-size: 2.2em;
+    margin: 0.2em 0;
   }
-};
 
-export const getAcknowledgments = (dispatch, styles) => {
+  h2 {
+    font-weight: 600;
+    font-size: 2em;
+    margin: 0.2em 0;
+  }
+
+  h3 {
+    font-weight: 500;
+    font-size: 1.8em;
+    margin: 0.2em 0;
+  }
+
+  h4 {
+    font-weight: 500;
+    font-size: 1.6em;
+    margin: 0.1em 0;
+  }
+
+  h5 {
+    font-weight: 500;
+    font-size: 1.4em;
+    margin: 0.1em 0;
+  }
+
+  h6 {
+    font-weight: 500;
+    font-size: 1.2em;
+    margin: 0.1em 0;
+  }
+
+  // Style for code block
+  pre {
+    padding: 16px;
+    overflow: auto;
+    font-size: 85%;
+    line-height: 1.45;
+    background-color: #f6f8fa;
+    border-radius: 3px;
+  }
+
+  // Code within code block
+  pre code {
+    padding: 0;
+    margin: 0;
+    overflow: visible;
+    font-size: 100%;
+    line-height: inherit;
+    word-wrap: normal;
+    background-color: initial;
+    border: 0;
+  }
+
+  // Inline code
+  p code {
+    padding: .2em .4em;
+    margin: 0;
+    font-size: 85%;
+    background-color: rgba(27,31,35,.05);
+    border-radius: 3px;
+  }
+
+  .line {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #CCC;
+  }
+
+  .finePrint {
+    font-size: 14px;
+  }
+
+  .acknowledgments {
+    margin-top: 10px;
+  }
+
+  .filterList {
+    margin-top: 10px;
+    line-height: 1.0;
+  }
+
+  .imageContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  img {
+    margin-left: 30px;
+    margin-right: 30px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+  }
+
+`;
+
+export const getAcknowledgments = (metadata, dispatch) => {
   /**
-   * The hardcoding of these acknowledgements is left over from when auspice was synonymous
-   * with nextstrain.org, and lots of things were hardcoded. As auspice has become a stand-
-   * alone tool, most of these have become definable via dataset JSONs etc, but these
-   * acknowledgements have remained. It is highly desirable that they are shifted to the dataset
-   * JSONs in the future.
-   * James. November 2019.
-   */
+   * If the metadata contains a description key, then it will take precendence the hard-coded
+   * acknowledgements. Expects the text in the description to be in Mardown format.
+   * Jover. December 2019.
+  */
+  if (metadata.description) {
+    dompurify.addHook("afterSanitizeAttributes", (node) => {
+      // Set external links to open in a new tab
+      if ('href' in node && location.hostname !== node.hostname) {
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noreferrer nofollow');
+      }
+      // Find nodes that contain images and add imageContainer class to update styling
+      const nodeContainsImg = ([...node.childNodes].filter((child) => child.localName === 'img')).length > 0;
+      if (nodeContainsImg) {
+        // For special case of image links, set imageContainer on outer parent
+        if (node.localName === 'a') {
+          node.parentNode.className += ' imageContainer';
+        } else {
+          node.className += ' imageContainer';
+        }
+      }
+    });
 
-  const preambleContent = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
-  const genericPreamble = (<div style={styles.preamble}>{preambleContent}</div>);
-
-  // apply to /community/inrb-drc and to /inrb-drc
-  if (window.location.pathname.includes("inrb-drc")) {
+    const sanitizer = dompurify.sanitize;
+    const sanitizerConfig = {
+      ALLOWED_TAGS: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'em', 'strong', 'del', 'ol', 'ul', 'li', 'a', 'img', '#text', 'code', 'pre', 'hr'],
+      ALLOWED_ATTR: ['href', 'src', 'width', 'height', 'alt'],
+      KEEP_CONTENT: false,
+      ALLOW_DATA_ATTR: false
+    };
+    const rawDescription = marked(metadata.description);
+    const cleanDescription = sanitizer(rawDescription, sanitizerConfig);
     return (
-      <div>
-        <div style={styles.preamble}>
-          This work is made possible by the open sharing of genetic data by research groups.
-        </div>
-        <div style={styles.acknowledgments}>
-          These sequences were generated by the Democratic Republic of the Congo Sequencing Consortium led by the Institut National de Recherche Biomédicales (INRB), Kinshasa, DRC, partnered with the United States Army Medical Reseach Insititute of Infectious Diseases (USAMRIID), Maryland, USA; University of Nebraska Medical Center (UNMC), Nebraska, USA; Institut Pasteur de Dakar, Dakar, Senegal; TransVIHMI, Institut de Recherche pour le Développement (IRD), Institut National de la Santé et de la Recherche Médicale (INSERM), Université de Montpellier, Montpellier, France.
-        </div>
-        <div style={styles.acknowledgments}>
-          These data were shared with the Ministry of Health of the DRC, and with the public via this <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/drc-2018-viral-genome-characterization/230">virological.org</a> post, which is continually updated. If you intend to use these sequences prior to publication, please contact Drs. Muyembe-Tamfum and Ahuka to coordinate.
-        </div>
-      </div>
+      <div className='acknowledgments' dangerouslySetInnerHTML={{ __html: cleanDescription }}/>
     );
   }
 
-  if (!window.location.pathname.includes("community")) {
-    if (window.location.pathname.includes("ebola")) {
-      return (
-        <div>
-          {genericPreamble}
-          <div style={styles.acknowledgments}>
-            Special thanks to Nick Loman, Matt Cotten, Ian Goodfellow and Paul Kellam for spearheading data sharing efforts during the outbreak. For a more complete phylogeographic analysis of these data see <a target="_blank" rel="noreferrer noopener" href="http://dx.doi.org/10.1038/nature22040">Dudas et al</a>. Curated data used in the paper are available at <a target="_blank" rel="noreferrer noopener" href="https://github.com/ebov/space-time">github.com/ebov/space-time</a>. The animation shown here was inspired by <a target="_blank" rel="noreferrer noopener" href="https://youtu.be/eWnIhWUpQiQ">a work</a> by <a target="_blank" rel="noreferrer noopener" href="http://bedford.io/team/gytis-dudas/">Gytis Dudas</a>.
-          </div>
-        </div>
-      );
-    }
-    if (window.location.pathname.includes("zika")) {
-      return (
-        <div>
-          {genericPreamble}
-          <div style={styles.acknowledgments}>
-            Special thanks to Nick Loman, Nathan Grubaugh, Kristof Theys, Nuno Faria, Kristian Andersen, Andrew Rambaut and Karl Erlandson for data sharing, comments and suggestions.
-          </div>
-        </div>
-      );
-    }
-    if (window.location.pathname.includes("mumps")) {
-      return (
-        <div>
-          {genericPreamble}
-          <div style={styles.acknowledgments}>
-            Special thanks to Duah Alkam, Piroon Jenjaroenpun , Thidathip Wongsurawat, Zulema Udaondo, Preecha Patumcharoenpol, Michael Robeson, Dirk Haselow, William Mason, Intawat Nookaew, David Ussery, Se-Ran Jun, Jennifer Gardy, Shirlee Wohl, Jeff Joy, Patrick Stapleton, Nathan Yozwiak, Hayden Metsky, Agatha Jassem, Louise Moncla, Gytis Dudas and Pardis Sabeti for data sharing, comments and suggestions.
-          </div>
-        </div>
-      );
-    }
-    if (window.location.pathname.includes("lassa")) {
-      return (
-        <div style={styles.acknowledgments}>
-          {"This work is made possible by the open sharing of genetic data by research groups, including these groups currently collecting Lassa sequences:"}
-          <p/>
-          <a href="http://acegid.org/">{"Christian Happi"}</a>
-          {", "}
-          <a href="https://www.sabetilab.org/">{"Pardis Sabeti"}</a>
-          {", "}
-          <a href="https://www.sabetilab.org/katherine-siddle/">{"Katherine Siddle"}</a>
-          {" and colleagues, whose data was shared via "}
-          <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/new-lassa-virus-genomes-from-nigeria-2015-2016/191">{"this viroligical.org post. "}</a>
-          {"If you intend to use these sequences prior to publication, please contact them directly to coordinate. "}
-          <span className={"link"} onClick={() => dispatch(applyFilter("set", "authors", ["Odia_et_al"]))}>{"Click here"}</span>
-          {" here to see these sequences in isolation."}
+  const preambleContent = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
+  const genericPreamble = (<div>{preambleContent}</div>);
 
-          <p/>
-
-          {`The Irrua specialist Teaching Hospital (ISTH) and Institute for Lassa Fever Research and Control (ILFRC), Irrua, Edo State, Nigeria;
-            The Bernhard-Nocht Institute for Tropical Medicine (BNITM), Hamburg, Germany;
-            Public Health England (PHE);
-            African Center of Excellence for Genomics of Infectious Disease (ACEGID ), Redeemer’s University, Ede, Nigeria;
-            Broad Institute of MIT and Harvard University (Cambridge, MA, USA).
-            For further details, including conditions of reuse, please contact `}
-          <a href="mailto:epogbaini@yahoo.com">{"Ephraim Epogbaini"}</a>
-          {", "}
-          <a href="http://www.who.int/blueprint/about/stephan-gunther/en/">{"Stephan Günther"}</a>
-          {" and "}
-          <a href="https://rega.kuleuven.be/cev/ecv/lab-members/PhilippeLemey.html">{"Philippe Lemey"}</a>
-          {". Their data was first shared via "}
-          <a target="_blank" rel="noreferrer noopener" href="http://virological.org/t/2018-lasv-sequencing-continued/192/8">{"this viroligical.org post"}</a>
-          {', which is continually updated. '}
-          <span className={"link"} onClick={() => dispatch(applyFilter("set", "authors", ["ISTH-BNITM-PHE"]))}>{"Click here"}</span>
-          {" here to see these sequences in isolation."}
-        </div>
-      );
-    }
-    if (window.location.pathname.includes("WNV/NA")) {
-      return (
-        <div style={styles.acknowledgments}>
-          {`This work is possible due to the groups who have made their data openly available for analysis -
-            with a special thanks to Nikos Gurfield, Saran Grewal, Chris Barker, Ying Fang and the Andersen Lab for making `}
-          <a href="https://andersen-lab.com/secrets/data/west-nile-genomics/">{"their data"}</a>
-          {` available ahead of publication. `}
-          {`We also thank Simon Dellicour, Sebastian Lequime, Bram Vrancken, Philippe Lemey, Karthik Gangavarapu, Nate Matteson, Sharada Saraf
-            and Nathan Grubaugh for curating the original dataset; and Zhe Zheng and Anderson Brito helping with the updates
-            The data is being maintained by `}
-          <a target="_blank" rel="noreferrer noopener" href="http://bedford.io/team/james-hadfield/">{"James Hadfield"}</a>
-          {` and `}
-          <a target="_blank" rel="noreferrer noopener" href="http://grubaughlab.com">{"Nathan Grubaugh's lab."}</a>
-          <p/>
-          {`Our goal is to promote sequencing and sharing of West Nile virus genomes to improve our understanding of virus spread and evolution.
-            To aid in this effort, Nathan Grubaugh, Ryan Smith, and Kristian Andersen have initiated a large study,
-            including >70 collaborators from >30 US states, to sequence ~4,000 West Nile virus genomes from across the country: `}
-          <a target="_blank" rel="noreferrer noopener" href="https://westnile4k.org/">{`WestNile 4K.`}</a>
-          {` Their website includes a complete list of collaborators and information on how to join the project.
-          To conduct such an ambitious sequencing project, they adapted their highly multiplexed PCR approach for `}
-          <a target="_blank" rel="noreferrer noopener" href="https://www.nature.com/articles/nprot.2017.066">{"Zika virus sequencing"}</a>
-          {` on the Illumina and Minion platforms for West Nile Virus circulating in North America. Their `}
-          <a target="_blank" rel="noreferrer noopener" href="http://grubaughlab.com/open-science/amplicon-sequencing/">{"sequencing protocol and primers"}</a>
-          {` are free to use.
-            If you have any questions about West Nile virus sequencing, or if you have unpublished data that you would like to share, please email `}
-          <a href="emailto:grubaughlab@gmail.com">{"grubaughlab@gmail.com"}</a>
-          {"."}
-          <p/>
-          {`All data shown here are coding-complete genomes.`}
-
-          <p/>
-          {"WNV is split into three phenotypically relevant strains - NY99, WN02 and SW03 ("}
-          <span className={"link"} onClick={() => dispatch(changeColorBy("wnv_strain"))}>{"click here"}</span>
-          {" to colour the tree by this). These strains are defined by these mutations (click to change the colouring of the tree):"}
-          <ul>
-            <li>
-              <span className={"link"} onClick={() => dispatch(changeColorBy(encodeColorByGenotype({ gene: "env", positions: [159] })))}>{"env-V159A"}</span>
-              {" designates the switch from NY99 (the original sequence) to WN02."}
-            </li>
-            <li>
-              <span className={"link"} onClick={() => dispatch(changeColorBy(encodeColorByGenotype({ gene: "NS4A", positions: [85] })))}>{"NS4A-A85T"}</span>
-              {" designates the switch from WN02 to SW03 (WN02 displaced NY99; WN02 and SW03 co-circulate)."}
-            </li>
-          </ul>
-        </div>
-      );
-    }
-    if (window.location.pathname.includes("h7n9")) {
-      return (
-        <div style={styles.acknowledgments}>
-          We thank the <a target="_blank" rel="noreferrer noopener" href="https://gisaid.org">GISAID Initiative</a> for enabling genomic surveillance of influenza and for providing a critical data sharing platform, and all of the groups who contribute to it.
-        </div>
-      );
-    }
-    if (window.location.pathname.includes("flu")) {
-      return (
-        <div>
-          <div style={styles.acknowledgments}>
-            We thank the <a target="_blank" rel="noreferrer noopener"
-            href="https://gisaid.org">GISAID Initiative</a> and the <a target="_blank"
-            rel="noreferrer noopener" href="http://www.who.int/influenza/gisrs_laboratory/en/">GISRS
-            Network</a> for critical surveillance efforts and open data sharing. Titer data used in
-            antigenic analysis was generated by the <a target="_blank" rel="noreferrer noopener"
-            href="https://www.cdc.gov/flu/">Influenza Division at the US Centers for Disease Control
-            and Prevention</a>, the <a target="_blank" rel="noreferrer noopener"
-            href="http://www.crick.ac.uk/research/worldwide-influenza-centre">Worldwide Influenza
-            Centre at the Francis Crick Institute</a>, the <a target="_blank" rel="noreferrer
-            noopener" href="http://www.vidrl.org.au/">Victorian Infectious Diseases Reference
-            Laboratory at the Australian Peter Doherty Institute for Infection and Immunity</a> and
-            the <a target="_blank" rel="noreferrer noopener"
-            href="https://www.niid.go.jp/niid/en/flu-e.html">Influenza Virus Research Center at the
-            Japan National Institute of Infectious Diseases</a>.
-          </div>
-          <div style={styles.acknowledgments}>
-            Special thanks to Jackie Katz, Dave Wentworth, Becky Garten, Vivien Dugan, Xiyan Xu,
-            Elizabeth Neuhaus, Sujatha Seenu, John McCauley, Rod Daniels, Vicki Gregory, Kanta
-            Subbarao, Ian Barr, Aeron Hurt, Takato Odagiri, Shinji Watanabe, Tomoko Kuwahara,
-            Michael Lässig, Marta Łuksza, Richard Reeve, Colin Russell, Sebastian Maurer-Stroh and
-            Peter Bogner for feedback and advice. This analysis represents an updated frontend to
-            the Nextflu informatic pipeline, originally available at nextflu.org.
-          </div>
-          <div style={{display: "flex", justifyContent: "space-between"}}>
-            <div style={{flex: 5}}/>
-            <a key={5} href="https://gisaid.org" target="_blank" rel="noreferrer noopener" style={{display: "flex", flexDirection: "column", justifyContent: "center"}}>
-              <img alt="gisaid-logo" width="120" src={require("../../images/gisaid-logo.png")}/>
-            </a>
-            <div style={{flex: 1}}/>
-            <a key={6} href="http://www.who.int/influenza/gisrs_laboratory/en/" target="_blank" rel="noreferrer noopener">
-              <img alt="gisrs-logo" width="120" src={require("../../images/gisrs-logo.jpg")}/>
-            </a>
-            <div style={{flex: 5}}/>
-          </div>
-        </div>
-      );
-    }
+  if (window.location.hostname === 'nextstrain.org') {
+    return hardCodedFooters(dispatch, genericPreamble);
   }
 
-  return (
-    <div>
-      {genericPreamble}
-    </div>
-  );
+  return (<div>{genericPreamble}</div>);
 
 };
 
@@ -340,28 +270,30 @@ class Footer extends React.Component {
     return false;
   }
 
-  displayFilter(styles, filterName) {
+  displayFilter(filterName) {
     const totalStateCount = this.props.totalStateCounts[filterName];
     const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
     return (
       <div>
         {`Filter by ${filterTitle}`}
         {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
-        <Flex wrap="wrap" justifyContent="flex-start" alignItems="center" style={styles.citationList}>
-          {
-            Array.from(totalStateCount.keys())
-              .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
-              .sort() // filters are sorted alphabetically
-              .map((itemName) => {
-                const display = (
-                  <span>
-                    {`${itemName} (${totalStateCount.get(itemName)})`}
-                  </span>
-                );
-                return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
-              })
-          }
-        </Flex>
+        <div className='filterList'>
+          <Flex wrap="wrap" justifyContent="flex-start" alignItems="center">
+            {
+              Array.from(totalStateCount.keys())
+                .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
+                .sort() // filters are sorted alphabetically
+                .map((itemName) => {
+                  const display = (
+                    <span>
+                      {`${itemName} (${totalStateCount.get(itemName)})`}
+                    </span>
+                  );
+                  return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
+                })
+            }
+          </Flex>
+        </div>
       </div>
     );
   }
@@ -396,23 +328,22 @@ class Footer extends React.Component {
 
   render() {
     if (!this.props.metadata || !this.props.tree.nodes) return null;
-    const styles = footerStyles;
     const width = this.props.width - 30; // need to subtract margin when calculating div width
     return (
-      <div style={styles.footer}>
+      <FooterStyles>
         <div style={{width: width}}>
-          <div style={styles.line}/>
-          {getAcknowledgments(this.props.dispatch, styles)}
-          <div style={styles.line}/>
+          <div className='line'/>
+          {getAcknowledgments(this.props.metadata, this.props.dispatch)}
+          <div className='line'/>
           {Object.keys(this.props.activeFilters).map((name) => {
             return (
               <div key={name}>
-                {this.displayFilter(styles, name)}
-                <div style={styles.line}/>
+                {this.displayFilter(name)}
+                <div className='line'/>
               </div>
             );
           })}
-          <Flex style={styles.fineprint}>
+          <Flex className='finePrint'>
             {this.getUpdated()}
             {dot}
             {this.downloadDataButton()}
@@ -420,11 +351,11 @@ class Footer extends React.Component {
             {"Auspice v" + version}
           </Flex>
           <div style={{height: "3px"}}/>
-          <Flex style={styles.fineprint}>
+          <Flex className='finePrint'>
             {this.getCitation()}
           </Flex>
         </div>
-      </div>
+      </FooterStyles>
     );
   }
 }
