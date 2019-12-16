@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.2.0 - 2019/12/16
+
+
 * Update datasets fetched via `npm run get-data` to reflect the move to v2 (unified) JSONs.
 * Allow datasets to define their own footer text via a string of markdown formatted text. Harcoded footers are now only used on the nextstrain.org domain and will be removed as they are incorporated into their respective builds. See PR 834](https://github.com/nextstrain/auspice/pull/834) and [augur PR 423](https://github.com/nextstrain/augur/pull/423).
 * Copy contributing docs into a top-level CONTRIBUTING.md file. [See PR 833](https://github.com/nextstrain/auspice/pull/833).
