@@ -2,9 +2,13 @@
 title: Changelog
 ---
 
+* Allow datasets to define their own footer text via a string of markdown formatted text. Harcoded footers are now only used on the nextstrain.org domain and will be removed as they are incorporated into their respective builds. See PR 834](https://github.com/nextstrain/auspice/pull/834) and [augur PR 423](https://github.com/nextstrain/augur/pull/423).
+* Copy contributing docs into a top-level CONTRIBUTING.md file. [See PR 833](https://github.com/nextstrain/auspice/pull/833).
+* Include fonts & other CSS assets in the auspice build to improve the behavior of auspice when offline. [See PR 826](https://github.com/nextstrain/auspice/pull/826).
+* UI improvement: Display build source (if defined via `JSON.meta.build_url`), GitHub avatar (if build source is a GitHub repo) and maintainers as a byline under the title. [See PR 821](https://github.com/nextstrain/auspice/pull/821).
+* Performance improvement: Stream (v2) datasets between auspice server & auspice client. [See PR 825](https://github.com/nextstrain/auspice/pull/825).
+
 ## version 2.1.0 - 2019/11/15
-
-
 * Added support in the narratives to navigate via arrow keys. In addition to improved UI, this allows `decktape` to convert narratives to PDFs, and a guide has been added to the auspice docs for this.
 [See PR 824](https://github.com/nextstrain/auspice/pull/824).
 * Added GISAID and GISRS logos to the footer for flu datasets.
