@@ -26,6 +26,7 @@
     "lint": "eslint src",
     "get-data": "./scripts/get-data.sh",
     "get-narratives": "./scripts/get-narratives.sh",
+    "heroku-postbuild": "npm run build && npm run get-data && npm run get-narratives",
     "rebuild-docker-image": "./scripts/rebuild-docker-image.sh",
     "gzip-and-upload": "./scripts/gzip-and-upload.sh",
     "build-docs": "echo 'see ./docs-src/README.md'"
