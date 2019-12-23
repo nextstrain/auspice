@@ -1,19 +1,33 @@
 import { scaleTime } from "d3-scale";
-import { timeFormat, timeParse } from "d3-time-format";
+import { timeParse } from "d3-time-format";
 
-const dateFormatter = timeFormat("%Y-%m-%d");
 const dateParser = timeParse("%Y-%m-%d");
 const dateScale = scaleTime()
   .domain([new Date(2000, 0, 0), new Date(2100, 0, 0)])
   .range([2000, 2100]);
 
+
+/**
+ * Convert a numeric date to a calendar date (which is nicer to display)
+ * This is (for CE dates) meant to be used as the inverse ofthe TreeTime
+ * function `numeric_date` which places the numeric date at noon (12h00),
+ * i.e. Jan 1 is 0.5/365 of a year (if the year is not a leap year).
+ * @param {numeric} numDate Numeric date
+ * @returns {string} date in YYYY-MM-DD format for CE dates, YYYY for BCE dates
+ */
 export const numericToCalendar = (numDate) => {
-  if (numDate<0){
+  /* for BCE dates, return the (rounded) year */
+  if (numDate<0) {
     return Math.round(numDate).toString();
   }
-  const d3Date = dateScale.invert(numDate);
-  const calDate = dateFormatter(d3Date);
-  return calDate;
+  /* for CE dates, return string in YYYY-MM-DD format */
+  /* Beware: for `Date`, months are 0-indexed, days are 1-indexed */
+  const fracPart = numDate%1;
+  const year = parseInt(numDate, 10);
+  const nDaysInYear = isLeapYear(year) ? 366 : 365;
+  const nDays = fracPart * nDaysInYear;
+  const date = new Date((new Date(year, 0, 1)).getTime() + nDays*24*60*60*1000);
+  return dateToString(date);
 };
 
 export const calendarToNumeric = (calDate) => {
@@ -33,11 +47,15 @@ export const currentNumDate = () => {
   return dateScale(now);
 };
 
-export const currentCalDate = () => {
-  const now = new Date();
-  return dateFormatter(now);
-};
+export const currentCalDate = () => dateToString(new Date());
 
+function dateToString(date) {
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
+
+function isLeapYear(year) {
+  return ((year % 4 === 0) && (year % 100 !== 0)) || (year % 400 === 0);
+}
 
 /* ------------------------------------------------ TMP ---------------------------------------------- */
 /* Augur data taken using TreeTime v0.7 at d4450aac32cfafbb62492554d87e23ee4efa168f */
