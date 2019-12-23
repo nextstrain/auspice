@@ -1,12 +1,3 @@
-import { scaleTime } from "d3-scale";
-import { timeParse } from "d3-time-format";
-
-const dateParser = timeParse("%Y-%m-%d");
-const dateScale = scaleTime()
-  .domain([new Date(2000, 0, 0), new Date(2100, 0, 0)])
-  .range([2000, 2100]);
-
-
 /**
  * Convert a numeric date to a calendar date (which is nicer to display)
  * This is (for CE dates) meant to be used as the inverse ofthe TreeTime
@@ -30,24 +21,31 @@ export const numericToCalendar = (numDate) => {
   return dateToString(date);
 };
 
+/**
+ * Convert a calendar date to a numeric one.
+ * This function is meant to behave similarly to TreeTime's `numeric_date`
+ * as found in v0.7*. Note that for negative dates, i.e. BCE, no fraction
+ * in the year will be returned.
+ * @param {string} calDate in format YYYY-MM-DD
+ * @returns {float} YYYY.F, where F is the fraction of the year passed
+ */
 export const calendarToNumeric = (calDate) => {
-  if (calDate[0]==='-'){
+  if (calDate[0]==='-') {
     const pieces = calDate.substring(1).split('-');
     return -parseFloat(pieces[0]);
-  }else{
-    const d3Date = dateParser(calDate);
-    const numDate = dateScale(d3Date);
-    return numDate;
   }
-};
-
-
-export const currentNumDate = () => {
-  const now = new Date();
-  return dateScale(now);
+  /* Beware: for `Date`, months are 0-indexed, days are 1-indexed */
+  const [year, month, day] = calDate.split("-").map((n) => parseInt(n, 10));
+  const oneDayInMs = 86400000; // 1000 * 60 * 60 * 24
+  /* add on 1/2 day to let time represent noon (12h00) */
+  const elapsedDaysInYear = (Date.UTC(year, month-1, day) - Date.UTC(year, 0, 1)) / oneDayInMs + 0.5;
+  const fracPart = elapsedDaysInYear / (isLeapYear(year) ? 366 : 365);
+  return year + fracPart;
 };
 
 export const currentCalDate = () => dateToString(new Date());
+
+export const currentNumDate = () => calendarToNumeric(currentCalDate());
 
 function dateToString(date) {
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
