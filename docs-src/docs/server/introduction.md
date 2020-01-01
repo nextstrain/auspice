@@ -42,7 +42,6 @@ You can customise the default Auspice server by supplying your own handlers for 
 See [the API documentation](server/api#suppling-custom-handlers-to-the-auspice-server) for how to define these and provide them to `auspice view`.
 
 
-
 ## Writing Your Own Custom Server
 
 The provided Auspice server also lets you define your own handlers, allowing plenty of flexibility in how requests are handled.
@@ -53,6 +52,11 @@ But if you _really_ want to implement your own server, then you only need to imp
 (If you're interested, this is what we do with [nextstrain.org](https://nextstrain.org), where only some of the pages use Auspice. You can see all the code behind that server [here](https://github.com/nextstrain/nextstrain.org).)
 
 
+## Deploying via Heroku
 
-
-
+It should be simple to deploy a custom version of auspice to any server, but we have experience using [Heroku](https://heroku.com/) apps for this.
+Deploying to Heroku is straightforward, but there are a few points to note:
+1. You must set the config var `HOST` to `0.0.0.0` for the app.
+1. You will need to either create a `Procfile` or a `npm run start` script which calls `auspice view` (or `npx auspice view` depending on how you implement auspice)
+1. Make sure the datasets to be served are either (a) included in your git repo or (b) downloaded by the heroku build pipeline.
+[We use option (b)](https://github.com/nextstrain/auspice/blob/master/package.json) by specifing a npm script called `heroku-postbuild`.
