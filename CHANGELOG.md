@@ -2,9 +2,9 @@
 title: Changelog
 ---
 
+* Remove unnecessary console log statements.
+
 ## version 2.2.1 - 2020/01/03
-
-
 * Improve conversion functions to go between numeric & calendar dates. [See PR 839](https://github.com/nextstrain/auspice/pull/839)
 
 ## version 2.2.0 - 2019/12/16
