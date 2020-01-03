@@ -169,7 +169,13 @@ const getTraitsToDisplay = (node) => {
 };
 
 const Trait = ({node, trait, colorings}) => {
-  const value = getTraitFromNode(node, trait);
+  const value_tmp = getTraitFromNode(node, trait);
+  let value = value_tmp;
+  if (typeof value_tmp == "number"){
+    if (!Number.isInteger(value_tmp)){
+      value = Number.parseFloat(value_tmp).toPrecision(3);
+    }
+  }
   const name = (colorings && colorings[trait] && colorings[trait].title) ?
     colorings[trait].title :
     trait;
