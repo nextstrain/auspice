@@ -63,7 +63,7 @@ export const changePage = ({
     const action = {
       type: PAGE_CHANGE,
       path,
-      displayComponent: "datasetLoader",
+      displayComponent: chooseDisplayComponentFromURL(path),
       pushState: push,
       query
     };
