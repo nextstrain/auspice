@@ -12,11 +12,9 @@ export const chooseDisplayComponentFromURL = (url) => {
   if (
     !parts.length ||
     (parts.length === 1 && parts[0] === "") ||
-    (parts.length === 1 && parts[0] === "local") ||
     (parts.length === 1 && parts[0] === "staging") ||
     (parts.length === 1 && parts[0] === "community") ||
     (parts.length === 1 && parts[0] === "narratives") ||
-    (parts.length === 2 && parts[0] === "local" && parts[1] === "narratives") ||
     (parts.length === 2 && parts[0] === "groups")
   ) {
     return "splash";
