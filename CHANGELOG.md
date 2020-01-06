@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.2.3 - 2020/01/06
+
+
 * Improved display of numerical values in the tip clicked modal. [See PR 840](https://github.com/nextstrain/auspice/pull/840)
 * Fix certain cases where the back button resulted in an inconsistent state being displayed. [See PR 841](https://github.com/nextstrain/auspice/pull/841)
 
