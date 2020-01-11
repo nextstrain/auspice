@@ -26,7 +26,7 @@ export const getMinCalDateViaTree = (nodes, state) => {
   /* if no date, use some default dates - slider will not be visible */
   const minNumDate = getTraitFromNode(nodes[0], "num_date");
   return (minNumDate === undefined) ?
-    state.dateMaxNumeric - defaultDateRange :
+    numericToCalendar(state.dateMaxNumeric - defaultDateRange) :
     numericToCalendar(minNumDate - 0.01);
 };
 
