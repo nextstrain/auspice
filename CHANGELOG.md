@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.2.4 - 2020/01/11
+
+
 * Fix bug in computing state when nodes lack `num_date` attributes
 
 ## version 2.2.3 - 2020/01/06
