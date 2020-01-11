@@ -2,9 +2,9 @@
 title: Changelog
 ---
 
+* Fix bug in computing state when nodes lack `num_date` attributes
+
 ## version 2.2.3 - 2020/01/06
-
-
 * Improved display of numerical values in the tip clicked modal. [See PR 840](https://github.com/nextstrain/auspice/pull/840)
 * Fix certain cases where the back button resulted in an inconsistent state being displayed. [See PR 841](https://github.com/nextstrain/auspice/pull/841)
 
@@ -80,7 +80,7 @@ Here is a summary of the main changes:
 ## version 1.39.1 - 2019/10/21
 
 This release marks the final v1 release before auspice v2 is released.
-Auspice v1 may still receive bug-fixes, and will be [npm-tagged](https://docs.npmjs.com/cli/dist-tag) with "version1" so that it may be installed via `npm install --global auspice@version1`. 
+Auspice v1 may still receive bug-fixes, and will be [npm-tagged](https://docs.npmjs.com/cli/dist-tag) with "version1" so that it may be installed via `npm install --global auspice@version1`.
 
 * Minor dependency version upgrades.
 
