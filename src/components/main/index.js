@@ -1,12 +1,14 @@
 import React, {lazy, Suspense } from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import { Helmet } from "react-helmet";
 import { ThemeProvider } from 'styled-components';
 import SidebarToggle from "../framework/sidebar-toggle";
 import Info from "../info/info";
 import Tree from "../tree";
 import Map from "../map/map";
 import { controlsHiddenWidth } from "../../util/globals";
+import { hasExtension, getExtension } from "../../util/extensions";
 import Footer from "../framework/footer";
 import DownloadModal from "../download/downloadModal";
 import { analyticsNewPage } from "../../util/googleAnalytics";
@@ -74,6 +76,25 @@ class Main extends React.Component {
       return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
     }, false);
   }
+  renderTitle() {
+    let browserTitle = "auspice";
+    if (hasExtension("browserTitle")) {
+      browserTitle = getExtension("browserTitle");
+    }
+    const displayedDataset = window.location.pathname
+      .replace(/^\//g, '')
+      .replace(/\/$/g, '')
+      .replace(/\//g, ' / ')
+      .replace(/:/g, ' : ');
+    const pageTitle = browserTitle + " / " + displayedDataset;
+    return (
+      <Helmet>
+        <title>
+          {pageTitle}
+        </title>
+      </Helmet>
+    );
+  }
   render() {
     if (this.state.showSpinner) {
       return (<Spinner/>);
@@ -83,6 +104,7 @@ class Main extends React.Component {
     const {big, chart} = calcPanelDims(this.props.panelLayout === "grid", this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);
     return (
       <span>
+        {this.renderTitle()}
         <AnimationController/>
         <ErrorBoundary showNothing>
           <ThemeProvider theme={sidebarTheme}>
