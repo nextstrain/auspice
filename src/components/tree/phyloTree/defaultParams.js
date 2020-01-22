@@ -3,9 +3,9 @@ import { dataFont, darkGrey } from "../../../globalStyles";
 export const createDefaultParams = () => ({
   regressionStroke: darkGrey,
   regressionWidth: 6,
-  majorGridStroke: "#CCC",
+  majorGridStroke: "#DDD",
   majorGridWidth: 2,
-  minorGridStroke: "#DDD",
+  minorGridStroke: "#EEE",
   minorGridWidth: 1,
   tickLabelSize: 12,
   tickLabelFill: darkGrey,
