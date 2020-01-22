@@ -55,6 +55,7 @@ data_files=(
   "flu_seasonal_yam_na_12y.json" "flu_seasonal_yam_na_12y_tip-frequencies.json" \
   "enterovirus_d68_genome_meta.json" "enterovirus_d68_genome_tree.json" \
   "enterovirus_d68_vp1_meta.json" "enterovirus_d68_vp1_tree.json" \
+  "ncov.json" \
 )
 
 rm -rf data/
