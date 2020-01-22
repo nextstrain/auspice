@@ -7,7 +7,7 @@ const SUPPRESS = require('argparse').Const.SUPPRESS;
 const addParser = (parser) => {
   const description = `Build the client source code bundle.
   For development, you may want to use "auspice develop" which recompiles code on the fly as changes are made.
-  You may provide customisations (e.g. code, options) to this step to modify the functionality and appearence of auspice.
+  You may provide customisations (e.g. code, options) to this step to modify the functionality and appearance of auspice.
   To serve the bundle you will need a server such as "auspice view". 
   `;
 
