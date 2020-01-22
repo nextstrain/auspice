@@ -12,6 +12,9 @@ const blockProxyHandler = {
     } else if (key === "contents") {
       target.__html = marked(value, {sanitize: false, gfm: true});
       return true;
+    } else if (key === "mainDisplayMarkdown") {
+      target[key] = value;
+      return true;
     }
     return false;
   }
@@ -56,6 +59,22 @@ const makeFrontMatterBlock = (frontMatter) => {
 };
 
 /**
+ * Extract a code-block from the content, if it exists, tagged as auspiceMainDisplayMarkdown
+ * Which we send to the client under a special key for parsing in the main display
+ * This functionality is experimental, undocumented & subject to change.
+ * The implementation relies on regex matching, which is not the best long term solution.
+ */
+const extractAuspiceMainDisplayMarkdown = (paragraph) => {
+  const groups = paragraph.match(/([\s\S]*)```auspiceMainDisplayMarkdown\n([\s\S]+)\n```([\s\S]*)/);
+  if (!groups) return [paragraph, false];
+
+  return [
+    groups[1]+groups[3], // the content above & below the auspiceMainDisplayMarkdown block
+    groups[2]            // the content within the auspiceMainDisplayMarkdown block
+  ];
+};
+
+/**
  * parses text (from the narrative markdown file)
  * into blocks.
  * Returned object (blocks) has properties "__html", "dataset", "query"
@@ -91,9 +110,13 @@ const parseNarrativeFile = (fileContents) => {
       paragraphContents += titlesAndParagraphs[idx++];
     }
 
+    let mainDisplayMarkdown;
+    [paragraphContents, mainDisplayMarkdown] = extractAuspiceMainDisplayMarkdown(paragraphContents);
+
     const block = new Proxy({}, blockProxyHandler);
     block.url = matches[2];
     block.contents = paragraphContents;
+    if (mainDisplayMarkdown) block.mainDisplayMarkdown = mainDisplayMarkdown;
     blocks.push(block);
   }
 

@@ -5,7 +5,7 @@ import queryString from "query-string";
 import Mousetrap from "mousetrap";
 import { NarrativeStyles, linkStyles, OpacityFade } from './styles';
 import ReactPageScroller from "./ReactPageScroller";
-import { changePage } from "../../actions/navigation";
+import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE, TOGGLE_NARRATIVE } from "../../actions/types";
 import { narrativeNavBarHeight } from "../../util/globals";
 
@@ -33,6 +33,15 @@ class Narrative extends React.Component {
         if (this.state.showingEndOfNarrativePage) {
           this.setState({showingEndOfNarrativePage: false});
         }
+
+        if (this.props.blocks[idx].mainDisplayMarkdown) {
+          this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
+            query: queryString.parse(this.props.blocks[idx].query),
+            queryToDisplay: {n: idx}
+          }));
+          return;
+        }
+
         this.props.dispatch(changePage({
           // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
           dontChangeDataset: true,
