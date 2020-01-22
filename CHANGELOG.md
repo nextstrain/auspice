@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.3.0 - 2020/01/23
+
+
 * Improved positioning of temporal grid lines for the phylogeny [See PR 846](https://github.com/nextstrain/auspice/pull/846)
 * Improved browser title & SEO information [See PR 845](https://github.com/nextstrain/auspice/pull/845)
 * Added the nCoV dataset to the get-data script
