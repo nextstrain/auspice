@@ -9,7 +9,6 @@ export const createDefaultParams = () => ({
   minorGridWidth: 1,
   tickLabelSize: 12,
   tickLabelFill: darkGrey,
-  minorTicksTimeTree: 3,
   minorTicks: 4,
   orientation: [1, 1],
   margins: {left: 25, right: 15, top: 10, bottom: 30},
