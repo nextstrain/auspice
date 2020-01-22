@@ -91,6 +91,7 @@
     "react-addons-css-transition-group": "^15.6.0",
     "react-dom": "^16.8.6",
     "react-ga": "^2.2.0",
+    "react-helmet": "^5.2.1",
     "react-hot-loader": "^4.8.4",
     "react-redux": "^5.1.0",
     "react-select": "^1.0.0-rc.5",
