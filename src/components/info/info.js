@@ -1,6 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import { Helmet } from "react-helmet";
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
@@ -231,9 +230,6 @@ class Info extends React.Component {
     return (
       <div width={this.props.width} style={styles.title}>
         {title}
-        <Helmet>
-          <meta name="description" content={title} />
-        </Helmet>
       </div>
     );
   }
