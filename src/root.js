@@ -4,6 +4,7 @@ import { hot } from 'react-hot-loader/root';
 import Monitor from "./components/framework/monitor";
 import DatasetLoader from "./components/datasetLoader";
 import Spinner from "./components/framework/spinner";
+import Head from "./components/framework/head";
 
 const Main = lazy(() => import("./components/main"));
 const Splash = lazy(() => import("./components/splash"));
@@ -45,6 +46,7 @@ class MainComponentSwitch extends React.Component {
 const Root = () => {
   return (
     <div>
+      <Head/>
       <Monitor/>
       <Suspense fallback={null}>
         <Notifications/>
