@@ -4,6 +4,16 @@ import styled from 'styled-components';
 export const NarrativeStyles = styled.div`
   
   top: ${(props) => props.narrativeNavBarHeight+"px"};
+  font-weight: 300;
+
+  /* Use media queries to modify the font size so things look ok
+  on a range of screen sizes */
+  font-size: 14px;
+  line-height: 1.3;
+  @media (max-width: 1080px) {
+    font-size: 13px;
+    line-height: 1.1;
+  }
 
   p,h1,h2,h3,h4,li {
     color: ${(props) => props.theme.unselectedColor};
@@ -11,37 +21,49 @@ export const NarrativeStyles = styled.div`
 
   h1 {
     font-weight: 700;
-    font-size: 2.4em;
+    font-size: 2em;
+    margin-bottom: 30px;
+    @media (max-width: 1080px) {
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
   }
 
   h2 {
     font-weight: 500;
-    font-size: 2.2em;
+    font-size: 1.8em;
+    @media (max-width: 1080px) {
+      font-size: 1.6em;
+    }
   }
 
   h3 {
     font-weight: 500;
-    font-size: 2em;
+    font-size: 1.6em;
+    @media (max-width: 1080px) {
+      font-size: 1.4em;
+    }
   }
 
   h4 {
     font-weight: 500;
-    font-size: 1.8em;
+    font-size: 1.4em;
+    @media (max-width: 1080px) {
+      font-size: 1.2em;
+    }
   }
 
   div p {
     text-align: justify;
-    font-size: 16px;
     margin: 0;
-    font-weight: 300;
-    line-height: 1.3;
+    font-weight: inherit;
+    line-height: inherit;
   }
 
   li {
-    font-size: 16px;
     margin: 10px 0px 10px 0px;
-    font-weight: 300;
-    line-height: 1.3;
+    font-weight: inherit;
+    line-height: inherit;
   }
 
   strong {
@@ -61,7 +83,7 @@ export const NarrativeStyles = styled.div`
 
   figcaption {
     font-style: italic;
-    font-size: 1.2em;
+    font-size: 0.9em;
     text-align: center;
     margin-bottom: 15px;
   }
@@ -71,30 +93,34 @@ export const NarrativeStyles = styled.div`
     margin-top: 15px;
   }
 
+  /* front page authors + created */
   #NarrativeBlock_0 h3 {
-    font-weight: 300;
-    font-size: 1.8em;
+    font-weight: inherit;
+    font-size: 1.2em;
   }
 
+  /* The abstract */
   #NarrativeBlock_0 h4 {
-    font-weight: 300;
-    font-size: 1.5em;
-    margin-left: 20px;
-    margin-right: 20px;
-    font-style: italic;
-    line-height: 1.2;
     text-align: justify;
+    font-size: inherit;
+    margin: 0;
+    margin-bottom: 30px;
+    font-weight: inherit;
+    font-style: italic;
+    line-height: inherit;
   }
   
+  /* The hardcoded text at the top of the first narrative page
+  "Explore the content by scrolling the left ha..." */
   #NarrativeBlock_0 .explanation {
     text-align: justify;
-    font-size: 14px;
+    font-size: inherit;
     color: ${(props) => props.theme.selectedColor};
     margin: 0;
     margin-bottom: 30px;
-    font-weight: 400;
+    font-weight: inherit;
     font-style: italic;
-    line-height: 1.2;
+    line-height: inherit;
   }
 
   #NarrativeBlock_0 sup {
