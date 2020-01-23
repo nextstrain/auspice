@@ -18,7 +18,7 @@ const dot = (
   </span>
 );
 
-export const FooterStyles = styled.div`
+const FooterStyles = styled.div`
   margin-left: 30px;
   padding-bottom: 30px;
   font-family: ${dataFont};
