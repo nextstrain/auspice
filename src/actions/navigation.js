@@ -88,3 +88,16 @@ export const goTo404 = (errorMessage) => ({
   errorMessage,
   pushState: true
 });
+
+
+export const EXPERIMENTAL_showMainDisplayMarkdown = ({query, queryToDisplay}) =>
+  (dispatch, getState) => {
+    const newState = createStateFromQueryOrJSONs({oldState: getState(), query});
+    newState.controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
+    dispatch({
+      type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+      ...newState,
+      pushState: true,
+      query: queryToDisplay
+    });
+  };

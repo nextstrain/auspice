@@ -19,6 +19,7 @@ import { calcPanelDims, calcStyles } from "./utils";
 import { PanelsContainer, sidebarTheme } from "./styles";
 import ErrorBoundary from "../../util/errorBoundry";
 import Spinner from "../framework/spinner";
+import MainDisplayMarkdown from "../narrative/MainDisplayMarkdown";
 
 const Entropy = lazy(() => import("../entropy"));
 const Frequencies = lazy(() => import("../frequencies"));
@@ -122,6 +123,10 @@ class Main extends React.Component {
             null
           }
           {this.props.displayNarrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
+          {this.props.displayNarrative && this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown") ?
+            <MainDisplayMarkdown width={calcUsableWidth(availableWidth, 1)}/> :
+            null
+          }
         </PanelsContainer>
         {/* overlay (used for mobile to open / close sidebar) */}
         {this.state.mobileDisplay ?
