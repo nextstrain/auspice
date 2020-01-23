@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.3.1 - 2020/01/24
+
+
 * Improvements to narrative text styling with the intention that narratives are more functional on mobile devices.
 * This version introduces experimental support for writing narratives where a page may define a section of markdown to be displayed in the main panel, instead of a tree or map. Documentation is forthcoming.
 
