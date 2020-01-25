@@ -93,9 +93,9 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
   if (colorBy === "author") {
     const authorInfo = getFullAuthorInfoFromNode(node);
     if (!authorInfo) return null;
+    // <InfoLine name="Author:" value={authorInfo.value}/> This is already displayed by AttributionInfo    
     return (
       <>
-        <InfoLine name="Author:" value={authorInfo.value}/>
         {authorInfo.title ? <InfoLine name="Title:" value={authorInfo.title}/> : null}
         {authorInfo.journal ? <InfoLine name="Journal:" value={authorInfo.journal}/> : null}
       </>
@@ -256,6 +256,21 @@ const VaccineInfo = ({node}) => {
   return renderElements;
 };
 
+/**
+ * A React component to show attribution information, if present
+ * @param  {Object} props
+ * @param  {Object} props.node  branch node which is currently highlighted
+ */
+const AttributionInfo = ({node}) => {
+  const authorInfo = getFullAuthorInfoFromNode(node);
+  if (!authorInfo) return null;
+  return (
+    <>
+      <InfoLine name="Author:" value={authorInfo.value}/>
+    </>
+  );
+};
+
 const Container = ({node, panelDims, children}) => {
   const xOffset = 10;
   const yOffset = 10;
@@ -330,6 +345,7 @@ const HoverInfoPanel = ({
           <Mutations node={node}/>
           <BranchLength node={node}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
+          <AttributionInfo node={node}/>
           <Comment>Click on tip to display more info</Comment>
         </>
       ) : (

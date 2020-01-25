@@ -437,7 +437,7 @@ class Map extends React.Component {
       zoom: zoom,
       scrollWheelZoom: false,
       maxBounds: this.getInitialBounds(),
-      minZoom: 2,
+      minZoom: 1.2,
       maxZoom: 14,
       zoomSnap: 0.5,
       zoomControl: false,

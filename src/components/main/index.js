@@ -52,6 +52,9 @@ class Main extends React.Component {
       showSpinner: !(this.props.metadataLoaded && this.props.treeLoaded)
     };
     analyticsNewPage();
+    if (window.location.pathname.includes("gisaid")) { // TODO fix this hack by moving sidebar state to URL
+      this.state.sidebarOpen = false;
+    }
   }
   static propTypes = {
     dispatch: PropTypes.func.isRequired
