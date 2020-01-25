@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.3.2 - 2020/01/24
+
+
 * Minor styling changes to: (1) change min map zoom, (2) hide sidebar on GISAID pages and (3) show author in hover box. [See PR 849](https://github.com/nextstrain/auspice/pull/849)
 
 ## version 2.3.1 - 2020/01/24
