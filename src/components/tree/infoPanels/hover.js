@@ -93,7 +93,7 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
   if (colorBy === "author") {
     const authorInfo = getFullAuthorInfoFromNode(node);
     if (!authorInfo) return null;
-    // <InfoLine name="Author:" value={authorInfo.value}/> This is already displayed by AttributionInfo    
+    // <InfoLine name="Author:" value={authorInfo.value}/> This is already displayed by AttributionInfo
     return (
       <>
         {authorInfo.title ? <InfoLine name="Title:" value={authorInfo.title}/> : null}
@@ -262,13 +262,17 @@ const VaccineInfo = ({node}) => {
  * @param  {Object} props.node  branch node which is currently highlighted
  */
 const AttributionInfo = ({node}) => {
+  const renderElements = [];
   const authorInfo = getFullAuthorInfoFromNode(node);
-  if (!authorInfo) return null;
-  return (
-    <>
-      <InfoLine name="Author:" value={authorInfo.value}/>
-    </>
-  );
+  if (authorInfo.value) {
+    renderElements.push(<InfoLine name="Author:" value={authorInfo.value} key="author"/>);
+  }
+  const gisaid_epi_isl = getTraitFromNode(node, "gisaid_epi_isl");
+  if (isValueValid(gisaid_epi_isl)) {
+    const epi_isl = gisaid_epi_isl.split("_")[2];
+    renderElements.push(<InfoLine name="GISAID EPI ISL:" value={epi_isl} key="gisaid_epi_isl"/>);
+  }
+  return renderElements;
 };
 
 const Container = ({node, panelDims, children}) => {
