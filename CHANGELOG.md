@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.3.5 - 2020/01/28
+
+
 * Fix bug during branch-hover introduced in 2.3.3. [See PR 855](https://github.com/nextstrain/auspice/pull/855)
 * Fix bug related to back-button behavior. [See PR 852](https://github.com/nextstrain/auspice/pull/852)
 
