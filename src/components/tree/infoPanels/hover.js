@@ -269,7 +269,7 @@ const VaccineInfo = ({node}) => {
 const AttributionInfo = ({node}) => {
   const renderElements = [];
   const authorInfo = getFullAuthorInfoFromNode(node);
-  if (authorInfo.value) {
+  if (authorInfo) {
     renderElements.push(<InfoLine name="Author:" value={authorInfo.value} key="author"/>);
   }
 
