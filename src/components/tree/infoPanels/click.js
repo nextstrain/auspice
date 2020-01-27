@@ -53,14 +53,54 @@ const formatURL = (url) => {
 const AccessionAndUrl = ({node}) => {
   const accession = getAccessionFromNode(node);
   const url = getUrlFromNode(node);
+  const gisaid_epi_isl = getTraitFromNode(node, "gisaid_epi_isl");
+  const genbank_accession = getTraitFromNode(node, "genbank_accession");
 
-
-  if (isValueValid(accession) && isValueValid(url)) {
+  if (isValueValid(gisaid_epi_isl) && isValueValid(genbank_accession)) {
+    const epi_isl = gisaid_epi_isl.split("_")[2];
+    const genbank_url = "https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession;
+    return (
+      <React.Fragment>
+        <tr>
+          <th style={infoPanelStyles.item}>GISAID EPI ISL</th>
+          <td style={infoPanelStyles.item}>
+            <a href="https://gisaid.org" target="_blank" rel="noopener noreferrer">{epi_isl}</a>
+          </td>
+        </tr>
+        <tr>
+          <th style={infoPanelStyles.item}>Genbank accession</th>
+          <td style={infoPanelStyles.item}>
+            <a href={genbank_url} target="_blank" rel="noopener noreferrer">{genbank_accession}</a>
+          </td>
+        </tr>
+      </React.Fragment>
+    );
+  } else if (isValueValid(gisaid_epi_isl)) {
+    const epi_isl = gisaid_epi_isl.split("_")[2];
+    return (
+      <tr>
+        <th style={infoPanelStyles.item}>GISAID EPI ISL</th>
+        <td style={infoPanelStyles.item}>
+          <a href="https://gisaid.org" target="_blank" rel="noopener noreferrer">{epi_isl}</a>
+        </td>
+      </tr>
+    );
+  } else if (isValueValid(genbank_accession)) {
+    const genbank_url = "https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession;
+    return (
+      <tr>
+        <th style={infoPanelStyles.item}>Genbank accession</th>
+        <td style={infoPanelStyles.item}>
+          <a href={genbank_url} target="_blank" rel="noopener noreferrer">{genbank_accession}</a>
+        </td>
+      </tr>
+    );
+  } else if (isValueValid(accession) && isValueValid(url)) {
     return (
       <tr>
         <th style={infoPanelStyles.item}>Accession</th>
         <td style={infoPanelStyles.item}>
-          <a href={formatURL(url)} target="_blank">{accession}</a>
+          <a href={formatURL(url)} target="_blank" rel="noopener noreferrer">{accession}</a>
         </td>
       </tr>
     );
@@ -164,7 +204,7 @@ const SampleDate = ({node}) => {
 const getTraitsToDisplay = (node) => {
   // TODO -- this should be centralised somewhere
   if (!node.node_attrs) return [];
-  const ignore = ["author", "div", "num_date"];
+  const ignore = ["author", "div", "num_date", "gisaid_epi_isl", "genbank_accession"];
   return Object.keys(node.node_attrs).filter((k) => !ignore.includes(k));
 };
 
