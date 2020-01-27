@@ -50,59 +50,42 @@ const formatURL = (url) => {
   return url;
 };
 
+const Link = ({url, title, value}) => (
+  <tr>
+    <th style={infoPanelStyles.item}>{title}</th>
+    <td style={infoPanelStyles.item}>
+      <a href={url} target="_blank" rel="noopener noreferrer">{value}</a>
+    </td>
+  </tr>
+);
+
 const AccessionAndUrl = ({node}) => {
   const accession = getAccessionFromNode(node);
   const url = getUrlFromNode(node);
-  const gisaid_epi_isl = getTraitFromNode(node, "gisaid_epi_isl");
   const genbank_accession = getTraitFromNode(node, "genbank_accession");
 
-  if (isValueValid(gisaid_epi_isl) && isValueValid(genbank_accession)) {
-    const epi_isl = gisaid_epi_isl.split("_")[2];
-    const genbank_url = "https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession;
+  /* `gisaid_epi_isl` is a special value attached to nodes introduced during the 2019 nCoV outbreak.
+  If set, the display is different from the normal behavior */
+  const gisaid_epi_isl = getTraitFromNode(node, "gisaid_epi_isl");
+  if (isValueValid(gisaid_epi_isl)) {
     return (
-      <React.Fragment>
-        <tr>
-          <th style={infoPanelStyles.item}>GISAID EPI ISL</th>
-          <td style={infoPanelStyles.item}>
-            <a href="https://gisaid.org" target="_blank" rel="noopener noreferrer">{epi_isl}</a>
-          </td>
-        </tr>
-        <tr>
-          <th style={infoPanelStyles.item}>Genbank accession</th>
-          <td style={infoPanelStyles.item}>
-            <a href={genbank_url} target="_blank" rel="noopener noreferrer">{genbank_accession}</a>
-          </td>
-        </tr>
-      </React.Fragment>
+      <>
+        <Link title={"GISAID EPI ISL"} value={gisaid_epi_isl.split("_")[2]} url={"https://gisaid.org"}/>
+        {isValueValid(genbank_accession) ?
+          <Link title={"Genbank accession"} value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/> :
+          null
+        }
+      </>
     );
-  } else if (isValueValid(gisaid_epi_isl)) {
-    const epi_isl = gisaid_epi_isl.split("_")[2];
+  }
+
+  if (isValueValid(genbank_accession)) {
     return (
-      <tr>
-        <th style={infoPanelStyles.item}>GISAID EPI ISL</th>
-        <td style={infoPanelStyles.item}>
-          <a href="https://gisaid.org" target="_blank" rel="noopener noreferrer">{epi_isl}</a>
-        </td>
-      </tr>
-    );
-  } else if (isValueValid(genbank_accession)) {
-    const genbank_url = "https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession;
-    return (
-      <tr>
-        <th style={infoPanelStyles.item}>Genbank accession</th>
-        <td style={infoPanelStyles.item}>
-          <a href={genbank_url} target="_blank" rel="noopener noreferrer">{genbank_accession}</a>
-        </td>
-      </tr>
+      <Link title={"Genbank accession"} value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/>
     );
   } else if (isValueValid(accession) && isValueValid(url)) {
     return (
-      <tr>
-        <th style={infoPanelStyles.item}>Accession</th>
-        <td style={infoPanelStyles.item}>
-          <a href={formatURL(url)} target="_blank" rel="noopener noreferrer">{accession}</a>
-        </td>
-      </tr>
+      <Link url={formatURL(url)} value={accession} title={"Accession"}/>
     );
   } else if (isValueValid(accession)) {
     return (
@@ -110,12 +93,7 @@ const AccessionAndUrl = ({node}) => {
     );
   } else if (isValueValid(url)) {
     return (
-      <tr>
-        <th style={infoPanelStyles.item}>Strain URL</th>
-        <td style={infoPanelStyles.item}>
-          <a href={formatURL(url)} target="_blank"><em>click here</em></a>
-        </td>
-      </tr>
+      <Link title={"Strain URL"} url={formatURL(url)} value={"click here"}/>
     );
   }
   return null;
