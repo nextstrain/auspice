@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.3.4 - 2020/01/28
+
+
 * Reinstate `width` prop passed to nav-bar extensions & update documentation. [See PR 853](https://github.com/nextstrain/auspice/pull/853)
 
 ## version 2.3.3 - 2020/01/27
