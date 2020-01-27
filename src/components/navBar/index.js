@@ -33,6 +33,7 @@ const NavBar = ({sidebar, mobileDisplay, toggleHandler, narrativeTitle, width}) 
       <Content
         narrativeTitle={narrativeTitle}
         sidebar={sidebar}
+        width={width}
       />
       <SidebarChevron navHeight={normalNavBarHeight} navWidth={width} display={showSidebarToggle} onClick={toggleHandler}/>
     </NavBarContainer>
