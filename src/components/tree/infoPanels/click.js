@@ -50,19 +50,42 @@ const formatURL = (url) => {
   return url;
 };
 
+const Link = ({url, title, value}) => (
+  <tr>
+    <th style={infoPanelStyles.item}>{title}</th>
+    <td style={infoPanelStyles.item}>
+      <a href={url} target="_blank" rel="noopener noreferrer">{value}</a>
+    </td>
+  </tr>
+);
+
 const AccessionAndUrl = ({node}) => {
   const accession = getAccessionFromNode(node);
   const url = getUrlFromNode(node);
+  const genbank_accession = getTraitFromNode(node, "genbank_accession");
 
-
-  if (isValueValid(accession) && isValueValid(url)) {
+  /* `gisaid_epi_isl` is a special value attached to nodes introduced during the 2019 nCoV outbreak.
+  If set, the display is different from the normal behavior */
+  const gisaid_epi_isl = getTraitFromNode(node, "gisaid_epi_isl");
+  if (isValueValid(gisaid_epi_isl)) {
     return (
-      <tr>
-        <th style={infoPanelStyles.item}>Accession</th>
-        <td style={infoPanelStyles.item}>
-          <a href={formatURL(url)} target="_blank">{accession}</a>
-        </td>
-      </tr>
+      <>
+        <Link title={"GISAID EPI ISL"} value={gisaid_epi_isl.split("_")[2]} url={"https://gisaid.org"}/>
+        {isValueValid(genbank_accession) ?
+          <Link title={"Genbank accession"} value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/> :
+          null
+        }
+      </>
+    );
+  }
+
+  if (isValueValid(genbank_accession)) {
+    return (
+      <Link title={"Genbank accession"} value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/>
+    );
+  } else if (isValueValid(accession) && isValueValid(url)) {
+    return (
+      <Link url={formatURL(url)} value={accession} title={"Accession"}/>
     );
   } else if (isValueValid(accession)) {
     return (
@@ -70,12 +93,7 @@ const AccessionAndUrl = ({node}) => {
     );
   } else if (isValueValid(url)) {
     return (
-      <tr>
-        <th style={infoPanelStyles.item}>Strain URL</th>
-        <td style={infoPanelStyles.item}>
-          <a href={formatURL(url)} target="_blank"><em>click here</em></a>
-        </td>
-      </tr>
+      <Link title={"Strain URL"} url={formatURL(url)} value={"click here"}/>
     );
   }
   return null;
@@ -164,7 +182,7 @@ const SampleDate = ({node}) => {
 const getTraitsToDisplay = (node) => {
   // TODO -- this should be centralised somewhere
   if (!node.node_attrs) return [];
-  const ignore = ["author", "div", "num_date"];
+  const ignore = ["author", "div", "num_date", "gisaid_epi_isl", "genbank_accession"];
   return Object.keys(node.node_attrs).filter((k) => !ignore.includes(k));
 };
 
