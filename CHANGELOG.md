@@ -2,14 +2,15 @@
 title: Changelog
 ---
 
+* Improved display of divergence values > 0.01 when hovering on a branch
+* Modified behavior specifically related to display of nCoV datasets:
+  * Accession display modified if the node has the field `gisaid_epi_isl` [See PR 850](https://github.com/nextstrain/auspice/pull/850)
+  * GISAID attribution added to byline for nextstrain.org/ncov datasets [See PR 850](https://github.com/nextstrain/auspice/pull/850)
+
 ## version 2.3.2 - 2020/01/24
-
-
 * Minor styling changes to: (1) change min map zoom, (2) hide sidebar on GISAID pages and (3) show author in hover box. [See PR 849](https://github.com/nextstrain/auspice/pull/849)
 
 ## version 2.3.1 - 2020/01/24
-
-
 * Improvements to narrative text styling with the intention that narratives are more functional on mobile devices.
 * This version introduces experimental support for writing narratives where a page may define a section of markdown to be displayed in the main panel, instead of a tree or map. Documentation is forthcoming.
 
