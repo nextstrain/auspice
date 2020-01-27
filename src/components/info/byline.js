@@ -61,11 +61,33 @@ function renderBuildInfo(metadata) {
             <Link url={repo}>
               {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "")}
             </Link>
+            <PotentialGisaidExtraByline/>
             {". "}
           </span>
         );
       }
     }
+  }
+  return null;
+}
+
+/** Additional byline content to be added when certain criteria met.
+ * This was introduced during the 2019 nCoV outbreak. In the future this
+ * design should be switched a JSON key or a nextstrain.org auspice customisation
+ */
+function PotentialGisaidExtraByline() {
+  if (
+    window.location.hostname === "nextstrain.org" && // use "localhost" for testing
+    window.location.pathname.startsWith("/ncov")
+  ) {
+    return (
+      <span>
+        {" using data from "}
+        <a key={1} href="https://gisaid.org" target="_blank" rel="noopener noreferrer">
+          <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
+        </a>
+      </span>
+    );
   }
   return null;
 }
