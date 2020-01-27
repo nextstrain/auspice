@@ -47,7 +47,12 @@ const BranchLength = ({node}) => {
   const numDate = getTraitFromNode(node, "num_date");
 
   if (divergence) {
-    elements.push(<InfoLine name="Divergence:" value={divergence.toExponential(3)} key="div"/>);
+    const divergenceToDisplay = divergence > 1 ?
+      Math.round((divergence + Number.EPSILON) * 1000) / 1000 :
+      divergence > 0.01 ?
+        Math.round((divergence + Number.EPSILON) * 10000) / 10000 :
+        divergence.toExponential(3);
+    elements.push(<InfoLine name="Divergence:" value={divergenceToDisplay} key="div"/>);
   }
 
   if (numDate !== undefined) {
