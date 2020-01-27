@@ -91,6 +91,7 @@ Where the javascript file contains a default export of a React component.
 | -----------      |---------  | ------                                            |
 | `narrativeTitle` | String |       |
 | `sidebar        ` | Bool | Is it to be displayed in the sidebar? |
+| `width        ` | Number | Width of the sidebar, in pixels |
 | `theme        ` | Object | See above. Use this to style components. |
 
 

@@ -2,9 +2,9 @@
 title: Changelog
 ---
 
+* Reinstate `width` prop passed to nav-bar extensions & update documentation. [See PR 853](https://github.com/nextstrain/auspice/pull/853)
+
 ## version 2.3.3 - 2020/01/27
-
-
 * Improved display of divergence values > 0.01 when hovering on a branch
 * Modified behavior specifically related to display of nCoV datasets:
   * Accession display modified if the node has the field `gisaid_epi_isl` [See PR 850](https://github.com/nextstrain/auspice/pull/850)
