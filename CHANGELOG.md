@@ -2,9 +2,10 @@
 title: Changelog
 ---
 
+* Fix bug during branch-hover introduced in 2.3.3. [See PR 855](https://github.com/nextstrain/auspice/pull/855)
+* Fix bug related to back-button behavior. [See PR 852](https://github.com/nextstrain/auspice/pull/852)
+
 ## version 2.3.4 - 2020/01/28
-
-
 * Reinstate `width` prop passed to nav-bar extensions & update documentation. [See PR 853](https://github.com/nextstrain/auspice/pull/853)
 
 ## version 2.3.3 - 2020/01/27
