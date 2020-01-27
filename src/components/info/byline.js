@@ -47,6 +47,9 @@ function renderAvatar(metadata) {
   return null;
 }
 
+/**
+ * Render the byline of the page to indicate the source of the build (often a GitHub repo)
+ */
 function renderBuildInfo(metadata) {
   if (Object.prototype.hasOwnProperty.call(metadata, "buildUrl")) {
     const repo = metadata.buildUrl;
@@ -54,7 +57,7 @@ function renderBuildInfo(metadata) {
       if (repo.startsWith("https://") || repo.startsWith("http://") || repo.startsWith("www.")) {
         return (
           <span>
-            {"Built using "}
+            {"Built with "}
             <Link url={repo}>
               {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "")}
             </Link>
