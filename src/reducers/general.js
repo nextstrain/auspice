@@ -20,11 +20,14 @@ const general = (state = {
 }, action) => {
   switch (action.type) {
     case types.PAGE_CHANGE:
-      return Object.assign({}, state, {
-        pathname: action.path,
+      const stateUpdate = {
         displayComponent: action.displayComponent,
         errorMessage: action.errorMessage
-      });
+      };
+      if (action.path) {
+        stateUpdate.pathname = action.path;
+      }
+      return Object.assign({}, state, stateUpdate);
     case types.UPDATE_PATHNAME:
       return Object.assign({}, state, {
         pathname: action.pathname
