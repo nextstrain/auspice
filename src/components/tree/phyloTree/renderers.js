@@ -1,6 +1,6 @@
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
-import { getDomId } from "./helpers";
+import { getDomId, formatDivergence } from "./helpers";
 /**
  * @param {d3 selection} svg      -- the svg into which the tree is drawn
  * @param {string} layout         -- the layout to be used, e.g. "rect"
@@ -222,7 +222,7 @@ export const drawRegression = function drawRegression() {
     .style("stroke-width", this.params.regressionWidth);
   this.groups.clockRegression
     .append("text")
-    .text(`rate estimate: ${this.regression.slope.toExponential(2)} subs per site per year`)
+    .text(getRateEstimate(this.regression, this.yScale.domain()[0]))
     .attr("class", "regression")
     .attr("x", this.xScale.range()[1] / 2 - 75)
     .attr("y", this.yScale.range()[0] + 50)
@@ -244,3 +244,15 @@ export const removeRegression = function removeRegression() {
 export const clearSVG = function clearSVG() {
   this.svg.selectAll("*").remove();
 };
+
+function getRateEstimate(regression, maxDivergence) {
+  /* Prior to Jan 2020, the divergence measure was always "subs per site per year"
+  however certain datasets chaged this to "subs per genome per year". This distinction
+  is not set in the JSON, so in order to correctly display the rate we will "guess"
+  this here. A future augur update will export this in a JSON key, removing
+  the need to guess */
+  if (maxDivergence > 5) {
+    return `rate estimate: ${formatDivergence(regression.slope)} subs per genome per year`;
+  }
+  return `rate estimate: ${regression.slope.toExponential(2)} subs per site per year`;
+}

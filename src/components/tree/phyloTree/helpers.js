@@ -99,3 +99,12 @@ export const setYValuesRecursively = (node, yCounter) => {
  * side effects: node.n.yvalue (i.e. in the redux node) and node.yRange (i.e. in the phyloTree node)
  */
 export const setYValues = (nodes) => setYValuesRecursively(nodes[0], 0);
+
+
+export const formatDivergence = (divergence) => {
+  return divergence > 1 ?
+    Math.round((divergence + Number.EPSILON) * 1000) / 1000 :
+    divergence > 0.01 ?
+      Math.round((divergence + Number.EPSILON) * 10000) / 10000 :
+      divergence.toExponential(3);
+};
