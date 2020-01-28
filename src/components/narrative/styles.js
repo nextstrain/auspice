@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled, {css} from 'styled-components';
 
 
 export const NarrativeStyles = styled.div`
@@ -150,3 +150,33 @@ export const linkStyles = { // would be better to get CSS specificity working
   fontWeight: "400",
   fontSize: "1.8em"
 };
+
+
+const baseBannerStyles = css`
+  width: 100%;
+  color: white;
+  font-size: 24px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: center;
+`;
+
+export const MobileBannerTop = styled.div`
+  ${baseBannerStyles}
+  top: 0;
+  height: ${(props) => props.height}px;
+  background-color: #E67F2C;
+`;
+export const MobileBannerBottom = styled.div`
+  ${baseBannerStyles}
+  bottom: 0;
+  height: ${(props) => props.height}px;
+  background-color: #65B0A4;
+`;
+export const MobileContentContainer = styled.div`
+  min-height: ${(props) => props.height}px;
+  max-height: ${(props) => props.height}px;
+  overflow-y: scroll;
+  color: ${(props) => props.theme.unselectedColor};
+  background-color: ${(props) => props.theme.background};
+`;

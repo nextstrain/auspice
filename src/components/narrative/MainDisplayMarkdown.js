@@ -20,7 +20,7 @@ const Container = styled.div`
   padding-bottom: 30px;
   font-family: ${dataFont};
   font-weight: 300;
-  color: ${darkGrey};
+  color: ${(props) => props.theme.unselectedColor};
   line-height: 1.4;
   width: ${(props) => props.width-30}px;
 

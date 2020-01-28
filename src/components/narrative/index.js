@@ -13,7 +13,10 @@ import { narrativeNavBarHeight } from "../../util/globals";
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;
 
-
+/**
+ * A react component which renders the narrative text content in the sidebar.
+ * Controls the interactions which trigger page changes of the narrative.
+ */
 @connect((state) => ({
   loaded: state.narrative.loaded,
   blocks: state.narrative.blocks,
