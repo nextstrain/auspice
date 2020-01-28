@@ -84,6 +84,7 @@ PhyloTree.prototype.drawBranchLabels = labels.drawBranchLabels;
 PhyloTree.prototype.removeBranchLabels = labels.removeBranchLabels;
 PhyloTree.prototype.updateBranchLabels = labels.updateBranchLabels;
 PhyloTree.prototype.updateTipLabels = labels.updateTipLabels;
+PhyloTree.prototype.removeTipLabels = labels.removeTipLabels;
 
 /* G R I D */
 PhyloTree.prototype.hideGrid = grid.hideGrid;

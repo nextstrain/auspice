@@ -91,6 +91,7 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
 
   const change = Object.keys(args).length;
   if (change) {
+    args.animationInProgress = newProps.animationPlayPauseButton === "Pause";
     // console.log('\n\n** ', phylotree.debugId, 'changePhyloTreeViaPropsComparison **', args);
     phylotree.change(args);
   }
