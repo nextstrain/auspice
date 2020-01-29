@@ -435,7 +435,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   return state;
 };
 
-const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelected, controlsState) => {
+const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelected, controlsState, dispatch) => {
   /* calculate new branch thicknesses & visibility */
   let tipSelectedIdx = 0;
   /* check if the query defines a strain to be selected */
@@ -445,7 +445,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelect
     oldState.selectedStrain = tipSelected;
   }
   if (cladeSelected) {
-    const cladeSelectedIdx = cladeSelected === 'root' ? 0 : getIdxMatchingLabel(oldState.nodes, cladeSelected["label"], cladeSelected["selected"]);
+    const cladeSelectedIdx = cladeSelected === 'root' ? 0 : getIdxMatchingLabel(oldState.nodes, cladeSelected["label"], cladeSelected["selected"], dispatch);
     oldState.selectedClade = cladeSelected;
     newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState); // tipSelectedIdx, oldState);
   }
@@ -573,7 +573,8 @@ export const createStateFromQueryOrJSONs = ({
   narrativeBlocks = false,
   mainTreeName = false,
   secondTreeName = false,
-  query
+  query,
+  dispatch
 }) => {
   let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
   /* first task is to create metadata, entropy, controls & tree partial state */
@@ -654,15 +655,15 @@ export const createStateFromQueryOrJSONs = ({
   }
 
   if (query.clade) {
-    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, query.clade, controls);
+    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, query.clade, controls, dispatch);
   } else { /* if not specifically given in URL, zoom to root */
-    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, undefined, controls);
+    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, undefined, controls, dispatch);
   }
-  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, undefined, controls);
+  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, undefined, controls, dispatch);
   if (treeToo && treeToo.loaded) {
     treeToo.nodeColorsVersion = tree.nodeColorsVersion;
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
-    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, undefined, controls);
+    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, undefined, controls, dispatch);
     controls = modifyControlsViaTreeToo(controls, treeToo.name);
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
   }
@@ -697,7 +698,8 @@ export const createTreeTooState = ({
   treeTooJSON, /* raw json data */
   oldState,
   originalTreeUrl,
-  secondTreeUrl /* treeToo URL */
+  secondTreeUrl, /* treeToo URL */
+  dispatch
 }) => {
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
@@ -709,7 +711,7 @@ export const createTreeTooState = ({
   treeToo.debug = "RIGHT";
   controls = modifyControlsStateViaTree(controls, tree, treeToo, oldState.metadata.colorings);
   controls = modifyControlsViaTreeToo(controls, secondTreeUrl);
-  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls, dispatch);
 
   /* calculate colours if loading from JSONs or if the query demands change */
   const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, oldState.metadata);

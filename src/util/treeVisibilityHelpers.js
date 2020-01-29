@@ -1,6 +1,7 @@
 import { freqScale, NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE } from "./globals";
 import { calcTipCounts } from "./treeCountingHelpers";
 import { getTraitFromNode } from "./treeMiscHelpers";
+import { warningNotification } from "../actions/notifications";
 
 export const getVisibleDateRange = (nodes, visibility) => nodes
   .filter((node, idx) => (visibility[idx] === NODE_VISIBLE && !node.hasChildren))
@@ -30,7 +31,7 @@ export const strainNameToIdx = (nodes, name) => {
  * @param {string} labelValue label value
  * @returns {int} the index of the matching node (0 if no match found)
  */
-export const getIdxMatchingLabel = (nodes, labelName, labelValue) => {
+export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
   let i;
   let found = 0;
   for (i = 0; i < nodes.length; i++) {
@@ -43,11 +44,21 @@ export const getIdxMatchingLabel = (nodes, labelName, labelValue) => {
         found = i;
       } else {
         console.error(`getIdxMatchingLabel found multiple labels ${labelName}===${labelValue}`);
+        dispatch(warningNotification({
+          message: "Specified Zoom Label Found Multiple Times!",
+          details: "Multiple nodes in the tree are labelled '"+labelName+" "+labelValue+"' - no zoom performed"
+        }));
         return 0;
       }
     }
   }
-  if (found === 0) { console.error(`getIdxMatchingLabel couldn't find label ${labelName}===${labelValue}`); }
+  if (found === 0) { 
+    console.error(`getIdxMatchingLabel couldn't find label ${labelName}===${labelValue}`);
+    dispatch(warningNotification({
+      message: "Specified Zoom Label Value Not Found!",
+      details: "The label '"+labelName+"' value '"+labelValue+"' was not found in the tree - no zoom performed"
+    }));
+  }
   return found;
 };
 
