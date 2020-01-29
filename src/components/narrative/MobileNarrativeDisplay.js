@@ -53,7 +53,7 @@ class MobileNarrativeDisplay extends React.Component {
         return;
       }
       this.props.dispatch(changePage({
-        dontChangeDataset: true,
+        changeDataset: false,
         query: queryString.parse(this.props.blocks[idx].query),
         queryToDisplay: {n: idx},
         push: true

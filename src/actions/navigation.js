@@ -46,7 +46,7 @@ export const changePage = ({
   query = undefined,
   queryToDisplay = undefined, /* doesn't affect state, only URL. defaults to query unless specified */
   push = true,
-  dontChangeDataset = false
+  changeDataset = true
 } = {}) => (dispatch, getState) => {
   const oldState = getState();
   // console.warn("CHANGE PAGE!", path, query, queryToDisplay, push);
@@ -58,7 +58,7 @@ export const changePage = ({
   /* some booleans */
   const pathHasChanged = oldState.general.pathname !== path;
 
-  if (!dontChangeDataset || pathHasChanged) {
+  if (changeDataset || pathHasChanged) {
     const action = {
       type: PAGE_CHANGE,
       path,
