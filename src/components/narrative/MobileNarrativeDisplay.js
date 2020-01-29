@@ -7,7 +7,8 @@ import {
   linkStyles,
   MobileBannerTop,
   MobileBannerBottom,
-  MobileContentContainer
+  MobileContentContainer,
+  EndOfNarrative
 } from "./styles";
 import Tree from "../tree";
 import Map from "../map/map";
@@ -122,18 +123,20 @@ class MobileNarrativeDisplay extends React.Component {
           Previous
         </MobileBannerTop>
         <MobileContentContainer height={contentHeight+bannerHeight}>
-          <h1>End of Narrative</h1>
-          <a style={{...linkStyles, textAlign: "center"}}
-            onClick={() => this._goToPage(0)}
-          >
-            Jump to the beginning
-          </a>
-          <br />
-          <a style={{...linkStyles, textAlign: "center"}}
-            onClick={this.exitNarrativeMode}
-          >
-            Leave the narrative & explore the data yourself
-          </a>
+          <EndOfNarrative>
+            <h1>End of Narrative</h1>
+            <a style={{...linkStyles}}
+              onClick={() => this._goToPage(0)}
+            >
+              Jump to the beginning
+            </a>
+            <br />
+            <a style={{...linkStyles}}
+              onClick={this.exitNarrativeMode}
+            >
+              Leave the narrative & explore the data yourself
+            </a>
+          </EndOfNarrative>
         </MobileContentContainer>
       </>
     );

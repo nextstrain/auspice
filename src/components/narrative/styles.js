@@ -161,6 +161,13 @@ const baseBannerStyles = css`
   text-align: center;
 `;
 
+export const EndOfNarrative = styled.div`
+  text-align: center;
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-row-gap: 10px;
+`;
+
 export const MobileBannerTop = styled.div`
   ${baseBannerStyles}
   top: 0;

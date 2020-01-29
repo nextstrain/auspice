@@ -4,7 +4,7 @@ import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
 import Mousetrap from "mousetrap";
-import { NarrativeStyles, linkStyles, OpacityFade } from './styles';
+import { NarrativeStyles, linkStyles, OpacityFade, EndOfNarrative } from './styles';
 import ReactPageScroller from "./ReactPageScroller";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE, TOGGLE_NARRATIVE } from "../../actions/types";
@@ -146,21 +146,20 @@ class Narrative extends React.Component {
       />
     ));
     ret.push((
-      <div key="EON" id="EndOfNarrative" style={{flexBasis: "50%", flexShrink: 0}}>
-        <h3 style={{textAlign: "center"}}>
-          END OF NARRATIVE
-        </h3>
-        <div style={{...linkStyles, textAlign: "center"}}
+      <EndOfNarrative key="EON" id="EndOfNarrative">
+        <h1>END OF NARRATIVE</h1>
+        <a style={{...linkStyles}}
           onClick={() => this.reactPageScroller.goToPage(0)}
         >
           Scroll back to the beginning
-        </div>
-        <div style={{...linkStyles, textAlign: "center", marginTop: "10px"}}
+        </a>
+        <br />
+        <a style={{...linkStyles}}
           onClick={this.exitNarrativeMode}
         >
           Leave the narrative & explore the data yourself
-        </div>
-      </div>
+        </a>
+      </EndOfNarrative>
     ));
     return ret;
   }
