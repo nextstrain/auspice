@@ -106,9 +106,16 @@ class MobileNarrativeDisplay extends React.Component {
       </>
     );
   }
-  renderEndOfNarrative() {
+  renderEndOfNarrative(bannerHeight, contentHeight) {  // todo add as class properties
     return (
-      <h1>End</h1>
+      <>
+        <MobileBannerTop height={bannerHeight} onClick={this.goToPreviousPage}>
+          Previous
+        </MobileBannerTop>
+        <MobileContentContainer height={contentHeight+bannerHeight}>
+          <h1>End</h1>
+        </MobileContentContainer>
+      </>
     );
   }
 
@@ -132,16 +139,8 @@ class MobileNarrativeDisplay extends React.Component {
     const contentHeight = window.innerHeight - 2*bannerHeight;
 
     if (this.state.showingEndOfNarrativePage) {
-      return (
-        <>
-          <MobileBannerTop height={bannerHeight} onClick={this.goToPreviousPage}>
-            Previous
-          </MobileBannerTop>
-          <MobileContentContainer height={contentHeight+bannerHeight}>
-            {this.renderEndOfNarrative()}
-          </MobileContentContainer>
-        </>
-      );
+      return this.renderEndOfNarrative(bannerHeight, contentHeight);
+
     } else if (this.props.currentInFocusBlockIdx === 0) {
       return this.renderStartOfNarrative(bannerHeight, contentHeight);
     }
