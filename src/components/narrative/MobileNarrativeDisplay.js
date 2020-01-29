@@ -41,21 +41,27 @@ class MobileNarrativeDisplay extends React.Component {
       bannerHeight: BANNER_HEIGHT,
       contentHeight: window.innerHeight - 2*BANNER_HEIGHT
     };
+
     this.exitNarrativeMode = () => {
       this.props.dispatch({type: TOGGLE_NARRATIVE, display: false});
     };
+
     this.goToNextPage = () => {
       if (this.state.showingEndOfNarrativePage) return; // no-op
+
       if (this.props.currentInFocusBlockIdx+1 === this.props.blocks.length) {
         this.setState({showingEndOfNarrativePage: true});
         return;
       }
+
       this._goToPage(this.props.currentInFocusBlockIdx+1);
     };
+
     this.goToPreviousPage = () => {
       if (this.props.currentInFocusBlockIdx === 0) return; // no-op
       this._goToPage(this.props.currentInFocusBlockIdx-1);
     };
+
     this._goToPage = (idx) => {
       // TODO: this `if` statement should be moved to the `changePage` function or similar
       if (this.props.blocks[idx] && this.props.blocks[idx].mainDisplayMarkdown) {
@@ -65,6 +71,7 @@ class MobileNarrativeDisplay extends React.Component {
         }));
         return;
       }
+
       this.props.dispatch(changePage({
         changeDataset: false,
         query: queryString.parse(this.props.blocks[idx].query),
@@ -94,12 +101,14 @@ class MobileNarrativeDisplay extends React.Component {
       />
     );
   }
+
   renderMainMarkdown() {
     if (this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown")) {
       return <MainDisplayMarkdown width={window.innerWidth}/>;
     }
     return null;
   }
+
   renderVizCards(height) {
     if (this.props.blocks[this.props.currentInFocusBlockIdx].mainDisplayMarkdown) {
       /* don't display normal narrative content if the block defines `mainDisplayMarkdown` */
@@ -119,6 +128,7 @@ class MobileNarrativeDisplay extends React.Component {
       </>
     );
   }
+
   renderEndOfNarrative() {
     return (
       <>
