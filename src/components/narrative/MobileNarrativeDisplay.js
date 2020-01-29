@@ -99,8 +99,10 @@ class MobileNarrativeDisplay extends React.Component {
     const width = window.innerWidth - 50; // TODO
     return (
       <>
-        {this.props.panelsToDisplay.includes("tree") ? <Tree width={width} height={height} /> : null}
-        {this.props.panelsToDisplay.includes("map") ? <Map width={width} height={height} justGotNewDatasetRenderNewMap={false} /> : null}
+        {this.props.panelsToDisplay.includes("tree")
+          ? <Tree width={width} height={height} /> : null}
+        {this.props.panelsToDisplay.includes("map")
+          ? <Map width={width} height={height} justGotNewDatasetRenderNewMap={false} /> : null}
       </>
     );
   }
