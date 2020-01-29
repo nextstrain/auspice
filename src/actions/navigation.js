@@ -59,24 +59,24 @@ export const changePage = ({
   const pathHasChanged = oldState.general.pathname !== path;
 
   if (changeDataset || pathHasChanged) {
-    const action = {
+    dispatch({
       type: PAGE_CHANGE,
       path,
       displayComponent: chooseDisplayComponentFromURL(path),
       pushState: push,
       query
-    };
-    dispatch(action);
-  } else {
-    /* the path (dataset) remains the same... but the state may be modulated by the query */
-    const newState = createStateFromQueryOrJSONs({oldState, query});
-    dispatch({
-      type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
-      ...newState,
-      pushState: push,
-      query: queryToDisplay
     });
+    return;
   }
+
+  /* the path (dataset) remains the same... but the state may be modulated by the query */
+  const newState = createStateFromQueryOrJSONs({oldState, query});
+  dispatch({
+    type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+    ...newState,
+    pushState: push,
+    query: queryToDisplay
+  });
 };
 
 /* a 404 uses the same machinery as changePage, but it's not a thunk.
