@@ -2,7 +2,13 @@ import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
-import { MobileBannerTop, MobileBannerBottom, MobileContentContainer } from "./styles";
+import { TOGGLE_NARRATIVE } from "../../actions/types";
+import {
+  linkStyles,
+  MobileBannerTop,
+  MobileBannerBottom,
+  MobileContentContainer
+} from "./styles";
 import Tree from "../tree";
 import Map from "../map/map";
 import MainDisplayMarkdown from "./MainDisplayMarkdown";
@@ -30,6 +36,9 @@ class MobileNarrativeDisplay extends React.Component {
     super(props);
     this.state = {
       showingEndOfNarrativePage: false
+    };
+    this.exitNarrativeMode = () => {
+      this.props.dispatch({type: TOGGLE_NARRATIVE, display: false});
     };
     this.goToNextPage = () => {
       if (this.state.showingEndOfNarrativePage) return; // no-op
@@ -113,7 +122,18 @@ class MobileNarrativeDisplay extends React.Component {
           Previous
         </MobileBannerTop>
         <MobileContentContainer height={contentHeight+bannerHeight}>
-          <h1>End</h1>
+          <h1>End of Narrative</h1>
+          <a style={{...linkStyles, textAlign: "center"}}
+            onClick={() => this._goToPage(0)}
+          >
+            Jump to the beginning
+          </a>
+          <br />
+          <a style={{...linkStyles, textAlign: "center"}}
+            onClick={this.exitNarrativeMode}
+          >
+            Leave the narrative & explore the data yourself
+          </a>
         </MobileContentContainer>
       </>
     );
