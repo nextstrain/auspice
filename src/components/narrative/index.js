@@ -33,27 +33,29 @@ class Narrative extends React.Component {
       const idx = reactPageScrollerIdx-1;
       if (idx === this.props.blocks.length) {
         this.setState({showingEndOfNarrativePage: true});
-      } else {
-        if (this.state.showingEndOfNarrativePage) {
-          this.setState({showingEndOfNarrativePage: false});
-        }
-
-        if (this.props.blocks[idx].mainDisplayMarkdown) {
-          this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
-            query: queryString.parse(this.props.blocks[idx].query),
-            queryToDisplay: {n: idx}
-          }));
-          return;
-        }
-
-        this.props.dispatch(changePage({
-          // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
-          changeDataset: false,
-          query: queryString.parse(this.props.blocks[idx].query),
-          queryToDisplay: {n: idx},
-          push: true
-        }));
+        return;
       }
+
+      if (this.state.showingEndOfNarrativePage) {
+        this.setState({showingEndOfNarrativePage: false});
+      }
+
+      if (this.props.blocks[idx].mainDisplayMarkdown) {
+        this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
+          query: queryString.parse(this.props.blocks[idx].query),
+          queryToDisplay: {n: idx}
+        }));
+        return;
+      }
+
+      this.props.dispatch(changePage({
+        // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
+        changeDataset: false,
+        query: queryString.parse(this.props.blocks[idx].query),
+        queryToDisplay: {n: idx},
+        push: true
+      }));
+
     };
     this.goToNextSlide = () => {
       if (this.state.showingEndOfNarrativePage) return; // no-op
