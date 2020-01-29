@@ -149,7 +149,9 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   if (elemsToUpdate.has('.branchLabel')) {
     this.updateBranchLabels(transitionTime);
   }
-  if (elemsToUpdate.has('.tipLabel')) {
+  if (extras.hideTipLabels) {
+    this.removeTipLabels();
+  } else if (elemsToUpdate.has('.tipLabel')) {
     this.updateTipLabels();
   }
   if (elemsToUpdate.has('.grid')) {
@@ -247,6 +249,7 @@ export const change = function change({
   removeConfidences = false,
   zoomIntoClade = false,
   svgHasChangedDimensions = false,
+  animationInProgress = false,
   /* change these things to provided value */
   newDistance = undefined,
   newLayout = undefined,
@@ -347,6 +350,7 @@ export const change = function change({
   /* Finally, actually change the SVG elements themselves */
   const extras = {removeConfidences, showConfidences, newBranchLabellingKey};
   extras.timeSliceHasPotentiallyChanged = changeVisibility || newDistance;
+  extras.hideTipLabels = animationInProgress;
   if (useModifySVGInStages) {
     this.modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTime, 1000);
   } else {

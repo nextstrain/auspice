@@ -41,6 +41,12 @@ export const updateTipLabels = function updateTipLabels(dt) {
   }
 };
 
+export const removeTipLabels = function removeTipLabels() {
+  if ("tipLabels" in this.groups) {
+    this.groups.tipLabels.selectAll("*").remove();
+  }
+};
+
 /** branchLabelSize
  * @param {str} key e.g. "aa" or "clade"
  * @return {str} font size of the branch label, e.g. "12px"
