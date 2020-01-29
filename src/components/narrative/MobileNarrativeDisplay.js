@@ -189,13 +189,17 @@ class MobileNarrativeDisplay extends React.Component {
   }
 
   NextButton = (props) => (
-    <MobileBannerBottom height={this.state.bannerHeight} onClick={this.goToNextPage}>
+    <MobileBannerBottom height={this.state.bannerHeight}
+      onClick={this.goToNextPage}
+    >
       {props.children}
     </MobileBannerBottom>
   )
 
   PreviousButton = (props) => (
-    <MobileBannerTop height={this.state.bannerHeight} onClick={this.goToPreviousPage}>
+    <MobileBannerTop height={this.state.bannerHeight}
+      onClick={this.goToPreviousPage}
+    >
       {props.children}
     </MobileBannerTop>
   )
