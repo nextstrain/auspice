@@ -445,7 +445,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelect
     oldState.selectedStrain = tipSelected;
   }
   if (cladeSelected) {
-    const cladeSelectedIdx = cladeSelected === 'root' ? 0 : getIdxMatchingLabel(oldState.nodes, "clade", cladeSelected);
+    const cladeSelectedIdx = cladeSelected === 'root' ? 0 : getIdxMatchingLabel(oldState.nodes, cladeSelected["label"], cladeSelected["selected"]);
     oldState.selectedClade = cladeSelected;
     newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState); // tipSelectedIdx, oldState);
   }
@@ -633,6 +633,24 @@ export const createStateFromQueryOrJSONs = ({
     controls.colorByConfidence = doesColorByHaveConfidence(controls, controls.colorBy);
     tree.nodeColorsVersion = colorScale.version;
     tree.nodeColors = nodeColors;
+  }
+
+  // 'clade' zoom can now be under any label - check for first available query key that
+  // matches available branch labels, and convert it to be 'query.clade'
+  // If the 'label' doesnt exist on the tree (ex: in label=clade:T, if 'clade' doesn't exist) then
+  // the URL is cleared as well as the tree doing nothing.
+  // However, if the 'selection' doesnt exist on the tree (ex: in label=clade:T, if 'clade' exists but 'T' doesnt)
+  // then the tree does nothing and the URL is not cleared. (This is current behaviour.)
+  const queryKeys = Object.keys(query);
+  if (queryKeys.includes("label")) {
+    const label_parts = query["label"].split(":");
+    const possibleClade = label_parts[0];
+    if (tree.availableBranchLabels.includes(possibleClade)) {
+      query.clade = {label: possibleClade, selected: label_parts[1]};
+    } else {
+      query.clade = undefined;
+      delete query["label"];
+    }
   }
 
   if (query.clade) {

@@ -32,17 +32,23 @@ export const strainNameToIdx = (nodes, name) => {
  */
 export const getIdxMatchingLabel = (nodes, labelName, labelValue) => {
   let i;
+  let found = 0;
   for (i = 0; i < nodes.length; i++) {
     if (
       nodes[i].branch_attrs &&
       nodes[i].branch_attrs.labels !== undefined &&
       nodes[i].branch_attrs.labels[labelName] === labelValue
     ) {
-      return i;
+      if (found === 0) {
+        found = i;
+      } else {
+        console.error(`getIdxMatchingLabel found multiple labels ${labelName}===${labelValue}`);
+        return 0;
+      }
     }
   }
-  console.error(`getIdxMatchingLabel couldn't find label ${labelName}===${labelValue}`);
-  return 0;
+  if (found === 0) { console.error(`getIdxMatchingLabel couldn't find label ${labelName}===${labelValue}`); }
+  return found;
 };
 
 /** calcBranchThickness **

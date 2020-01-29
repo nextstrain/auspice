@@ -173,8 +173,20 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   }
 
   /* small modifications to desired pathname / query */
+  // Custom labels come in under 'query.clade' but have their own label (may not be 'clade')
+  // to act appropriately, put them in 'query' under their own 'label'.
+  // Ex: query.clade = {label: animal, selected: dog}   becomes   query.label = animal:dog
+  // Need to run this whether it's from a click event ('clade') or from a URL load ('label')
+  if ((query["clade"] && query["clade"] !== "" && query["clade"]["label"]) ||
+      (query["label"] && query["label"] !== "")) {
+    const label_parts = query["label"] ? query["label"].split(":") : "";
+    const label = query["clade"] ? query["clade"]["label"] : label_parts[0];
+    const selected = query["clade"] ? query["clade"]["selected"] : label_parts[1];
+    delete query["clade"]; // get rid of query.clade
+    query["label"] = selected ? ""+label+":"+selected : selected;
+  }
   Object.keys(query).filter((q) => query[q] === "").forEach((k) => delete query[k]);
-  let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/');
+  let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/').replace(/%3A/g, ':');
   if (search) {search = "?" + search;}
   if (!pathname.startsWith("/")) {pathname = "/" + pathname;}
 

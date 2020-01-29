@@ -77,6 +77,12 @@ export const updateVisibleTipsAndBranchThicknesses = (
 ) => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
+    // If going back to root or to unlabelled branch from 'custom' label branch, need to
+    // expliticly set that 'label' to undefined, so it gets deleted from URL!
+    if (tree.selectedClade && !cladeSelected) {
+      cladeSelected = tree.selectedClade;
+      cladeSelected["selected"] = undefined;
+    }
     if (root[0] === undefined && !cladeSelected && tree.selectedClade) {
       /* if not resetting tree to root, maintain previous selectedClade if one exists */
       cladeSelected = tree.selectedClade;
