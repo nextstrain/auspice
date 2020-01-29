@@ -14,6 +14,7 @@ import Tree from "../tree";
 import Map from "../map/map";
 import MainDisplayMarkdown from "./MainDisplayMarkdown";
 
+const BANNER_HEIGHT = 50;
 /**
  * A React component which takes up the entire screen and displays narratives in
  * "mobile" format. Instead of each narrative page displayed as narrative-text in
@@ -36,7 +37,9 @@ class MobileNarrativeDisplay extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showingEndOfNarrativePage: false
+      showingEndOfNarrativePage: false,
+      bannerHeight: BANNER_HEIGHT,
+      contentHeight: window.innerHeight - 2*BANNER_HEIGHT
     };
     this.exitNarrativeMode = () => {
       this.props.dispatch({type: TOGGLE_NARRATIVE, display: false});
@@ -116,13 +119,13 @@ class MobileNarrativeDisplay extends React.Component {
       </>
     );
   }
-  renderEndOfNarrative(bannerHeight, contentHeight) {  // todo add as class properties
+  renderEndOfNarrative() {
     return (
       <>
-        <MobileBannerTop height={bannerHeight} onClick={this.goToPreviousPage}>
+        <MobileBannerTop height={this.state.bannerHeight} onClick={this.goToPreviousPage}>
           Previous
         </MobileBannerTop>
-        <MobileContentContainer height={contentHeight+bannerHeight}>
+        <MobileContentContainer height={this.state.contentHeight+this.state.bannerHeight}>
           <EndOfNarrative>
             <h1>End of Narrative</h1>
             <a style={{...linkStyles}}
@@ -142,12 +145,12 @@ class MobileNarrativeDisplay extends React.Component {
     );
   }
 
-  renderStartOfNarrative(bannerHeight, contentHeight) {
+  renderStartOfNarrative() {
     return (
       <>
-        <MobileContentContainer height={contentHeight}>
+        <MobileContentContainer height={this.state.contentHeight}>
           {this.pageNarrativeContent()}
-          {this.renderVizCards(contentHeight)}
+          {this.renderVizCards(this.state.contentHeight)}
           {this.renderMainMarkdown()}
         </MobileContentContainer>
         <MobileBannerBottom height={bannerHeight} onClick={this.goToNextPage}>
@@ -158,25 +161,23 @@ class MobileNarrativeDisplay extends React.Component {
   }
 
   render() {
-    const bannerHeight = 50;
-    const contentHeight = window.innerHeight - 2*bannerHeight;
 
     if (this.state.showingEndOfNarrativePage) {
-      return this.renderEndOfNarrative(bannerHeight, contentHeight);
+      return this.renderEndOfNarrative();
 
     } else if (this.props.currentInFocusBlockIdx === 0) {
-      return this.renderStartOfNarrative(bannerHeight, contentHeight);
+      return this.renderStartOfNarrative();
     }
 
 
     return (
       <>
-        <MobileBannerTop height={bannerHeight} onClick={this.goToPreviousPage}>
+        <MobileBannerTop height={this.state.bannerHeight} onClick={this.goToPreviousPage}>
           Previous
         </MobileBannerTop>
-        <MobileContentContainer height={contentHeight}>
+        <MobileContentContainer height={this.state.contentHeight}>
           {this.pageNarrativeContent()}
-          {this.renderVizCards(contentHeight)}
+          {this.renderVizCards(this.state.contentHeight)}
           {this.renderMainMarkdown()}
         </MobileContentContainer>
         <MobileBannerBottom height={bannerHeight} onClick={this.goToNextPage}>
