@@ -122,9 +122,9 @@ class MobileNarrativeDisplay extends React.Component {
   renderEndOfNarrative() {
     return (
       <>
-        <MobileBannerTop height={this.state.bannerHeight} onClick={this.goToPreviousPage}>
+        <this.PreviousButton>
           Previous
-        </MobileBannerTop>
+        </this.PreviousButton>
         <MobileContentContainer height={this.state.contentHeight+this.state.bannerHeight}>
           <EndOfNarrative>
             <h1>End of Narrative</h1>
@@ -153,12 +153,24 @@ class MobileNarrativeDisplay extends React.Component {
           {this.renderVizCards(this.state.contentHeight)}
           {this.renderMainMarkdown()}
         </MobileContentContainer>
-        <MobileBannerBottom height={bannerHeight} onClick={this.goToNextPage}>
+        <this.NextButton>
           Next
-        </MobileBannerBottom>
+        </this.NextButton>
       </>
     );
   }
+
+  NextButton = (props) => (
+    <MobileBannerBottom height={this.state.bannerHeight} onClick={this.goToNextPage}>
+      {props.children}
+    </MobileBannerBottom>
+  )
+
+  PreviousButton = (props) => (
+    <MobileBannerTop height={this.state.bannerHeight} onClick={this.goToPreviousPage}>
+      {props.children}
+    </MobileBannerTop>
+  )
 
   render() {
 
@@ -172,17 +184,17 @@ class MobileNarrativeDisplay extends React.Component {
 
     return (
       <>
-        <MobileBannerTop height={this.state.bannerHeight} onClick={this.goToPreviousPage}>
+        <this.PreviousButton>
           Previous
-        </MobileBannerTop>
+        </this.PreviousButton>
         <MobileContentContainer height={this.state.contentHeight}>
           {this.pageNarrativeContent()}
           {this.renderVizCards(this.state.contentHeight)}
           {this.renderMainMarkdown()}
         </MobileContentContainer>
-        <MobileBannerBottom height={bannerHeight} onClick={this.goToNextPage}>
+        <this.NextButton>
           Next
-        </MobileBannerBottom>
+        </this.NextButton>
       </>
     );
   }
