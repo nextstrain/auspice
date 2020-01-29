@@ -112,6 +112,21 @@ class MobileNarrativeDisplay extends React.Component {
     );
   }
 
+  renderStartOfNarrative(bannerHeight, contentHeight) {
+    return (
+      <>
+        <MobileContentContainer height={contentHeight}>
+          {this.pageNarrativeContent()}
+          {this.renderVizCards(contentHeight)}
+          {this.renderMainMarkdown()}
+        </MobileContentContainer>
+        <MobileBannerBottom height={bannerHeight} onClick={this.goToNextPage}>
+          Next
+        </MobileBannerBottom>
+      </>
+    );
+  }
+
   render() {
     const bannerHeight = 50;
     const contentHeight = window.innerHeight - 2*bannerHeight;
@@ -127,6 +142,8 @@ class MobileNarrativeDisplay extends React.Component {
           </MobileContentContainer>
         </>
       );
+    } else if (this.props.currentInFocusBlockIdx === 0) {
+      return this.renderStartOfNarrative(bannerHeight, contentHeight);
     }
 
 
