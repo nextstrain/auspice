@@ -158,6 +158,24 @@ class MobileNarrativeDisplay extends React.Component {
   renderStartOfNarrative() {
     return (
       <>
+        <MobileContentContainer height={this.state.contentHeight + this.state.bannerHeight}>
+          {this.pageNarrativeContent()}
+          {this.renderVizCards(this.state.contentHeight)}
+          {this.renderMainMarkdown()}
+        </MobileContentContainer>
+        <this.NextButton>
+          Next
+        </this.NextButton>
+      </>
+    );
+  }
+
+  renderMiddleOfNarrative() {
+    return (
+      <>
+        <this.PreviousButton>
+          Previous
+        </this.PreviousButton>
         <MobileContentContainer height={this.state.contentHeight}>
           {this.pageNarrativeContent()}
           {this.renderVizCards(this.state.contentHeight)}
@@ -191,22 +209,7 @@ class MobileNarrativeDisplay extends React.Component {
       return this.renderStartOfNarrative();
     }
 
-
-    return (
-      <>
-        <this.PreviousButton>
-          Previous
-        </this.PreviousButton>
-        <MobileContentContainer height={this.state.contentHeight}>
-          {this.pageNarrativeContent()}
-          {this.renderVizCards(this.state.contentHeight)}
-          {this.renderMainMarkdown()}
-        </MobileContentContainer>
-        <this.NextButton>
-          Next
-        </this.NextButton>
-      </>
-    );
+    return this.renderMiddleOfNarrative();
   }
 }
 
