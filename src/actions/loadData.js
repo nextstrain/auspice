@@ -181,7 +181,8 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
         query,
         narrativeBlocks,
         mainTreeName: secondTreeUrl ? mainDatasetUrl : null,
-        secondTreeName: secondTreeUrl ? secondTreeUrl : null
+        secondTreeName: secondTreeUrl ? secondTreeUrl : null,
+        dispatch
       })
     });
 
@@ -233,7 +234,7 @@ export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, 
     return;
   }
   const oldState = getState();
-  const newState = createTreeTooState({treeTooJSON: secondJson.tree, oldState, originalTreeUrl: firstTreeUrl, secondTreeUrl: secondTreeUrl});
+  const newState = createTreeTooState({treeTooJSON: secondJson.tree, oldState, originalTreeUrl: firstTreeUrl, secondTreeUrl: secondTreeUrl, dispatch});
   dispatch({type: types.TREE_TOO_DATA, ...newState});
 };
 
