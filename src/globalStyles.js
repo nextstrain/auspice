@@ -224,8 +224,8 @@ export const infoPanelStyles = {
     fontSize: 18,
     lineHeight: 1,
     fontWeight: 300,
-    maxWidth: 500,
-    overflow: "scroll"
+    maxWidth: "80%",
+    overflowY: "auto"
   },
   modalHeading: {
     fontSize: 24,
