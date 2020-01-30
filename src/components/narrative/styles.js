@@ -2,7 +2,7 @@ import styled, {css} from 'styled-components';
 
 
 export const NarrativeStyles = styled.div`
-  
+
   top: ${(props) => props.narrativeNavBarHeight+"px"};
   font-weight: 300;
 
@@ -109,7 +109,7 @@ export const NarrativeStyles = styled.div`
     font-style: italic;
     line-height: inherit;
   }
-  
+
   /* The hardcoded text at the top of the first narrative page
   "Explore the content by scrolling the left ha..." */
   #NarrativeBlock_0 .explanation {
@@ -130,7 +130,6 @@ export const NarrativeStyles = styled.div`
 
 `;
 
-
 export const OpacityFade = styled.div`
   z-index: 200;
   position: absolute;
@@ -141,7 +140,6 @@ export const OpacityFade = styled.div`
   ${(props) => props.position === "bottom" && 'bottom: 0px;'};
 `;
 
-
 export const linkStyles = { // would be better to get CSS specificity working
   color: "#5097BA",
   textDecoration: "none",
@@ -150,7 +148,6 @@ export const linkStyles = { // would be better to get CSS specificity working
   fontWeight: "400",
   fontSize: "1.8em"
 };
-
 
 const baseBannerStyles = css`
   width: 100%;
@@ -176,12 +173,14 @@ export const MobileBannerTop = styled.nav`
   height: ${(props) => props.height}px;
   background-color: #E67F2C;
 `;
+
 export const MobileBannerBottom = styled.nav`
   ${baseBannerStyles}
   bottom: 0;
   height: ${(props) => props.height}px;
   background-color: #65B0A4;
 `;
+
 export const MobileContentContainer = styled.div`
   min-height: ${(props) => props.height}px;
   max-height: ${(props) => props.height}px;
