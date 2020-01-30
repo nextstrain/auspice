@@ -199,11 +199,6 @@ class Map extends React.Component {
     if (mapIsDrawn && allDataPresent && demesTransmissionsNotComputed) {
       timerStart("drawDemesAndTransmissions");
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
-      if (!this.state.boundsSet) { // we are doing the initial render -> set map to the range of the data
-        const SWNE = this.getGeoRange();
-        // L. available because leaflet() was called in componentWillMount
-        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
-      }
 
       const {demeData, transmissionData, demeIndices, transmissionIndices} = createDemeAndTransmissionData(
         this.props.nodes,
@@ -230,6 +225,12 @@ class Map extends React.Component {
         this.props.dateMaxNumeric,
         this.props.pieChart
       );
+
+      if (!this.state.boundsSet) { // we are doing the initial render -> set map to the range of the data
+        const SWNE = this.getGeoRange(demeIndices, demeData);
+        // L. available because leaflet() was called in componentWillMount
+        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
+      }
 
       /* Set up leaflet events */
       // this.state.map.on("viewreset", this.respondToLeafletEvent.bind(this));
