@@ -207,11 +207,6 @@ class Map extends React.Component {
     if (mapIsDrawn && allDataPresent && demesTransmissionsNotComputed) {
       timerStart("drawDemesAndTransmissions");
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
-      if (!this.state.boundsSet) { // we are doing the initial render -> set map to the range of the data
-        const SWNE = this.getGeoRange();
-        // L. available because leaflet() was called in componentWillMount
-        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
-      }
 
       const {demeData, transmissionData, demeIndices, transmissionIndices} = createDemeAndTransmissionData(
         this.props.nodes,
@@ -238,6 +233,12 @@ class Map extends React.Component {
         this.props.dateMaxNumeric,
         this.props.pieChart
       );
+
+      if (!this.state.boundsSet) { // we are doing the initial render -> set map to the range of the data
+        const SWNE = this.getGeoRange(demeIndices, demeData);
+        // L. available because leaflet() was called in componentWillMount
+        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
+      }
 
       /* Set up leaflet events */
       // this.state.map.on("viewreset", this.respondToLeafletEvent.bind(this));
@@ -304,16 +305,21 @@ class Map extends React.Component {
       this.setState({demeData: newDemes, transmissionData: newTransmissions});
     }
   }
-  getGeoRange() {
+  // Allow to pass in particular demeIndices & demeData for initial render, when these aren't officially set yet
+  getGeoRange(demeIndices = this.state.demeIndices, demeData = this.state.demeData) {
     const latitudes = [];
     const longitudes = [];
 
+    // Check the count data - if it has a count of 0, it's not being drawn, so don't include in Geo range!
     this.props.metadata.geoResolutions.forEach((geoData) => {
       if (geoData.key === this.props.geoResolution) {
         const demeToLatLongs = geoData.demes;
         Object.keys(demeToLatLongs).forEach((deme) => {
-          latitudes.push(demeToLatLongs[deme].latitude);
-          longitudes.push(demeToLatLongs[deme].longitude);
+          if ((!demeIndices && !demeData) || // if we haven't loaded these yet, take all locations
+              (demeIndices && demeData[demeIndices[deme]].count !== 0)) { // if have, only those with counts!
+            latitudes.push(demeToLatLongs[deme].latitude);
+            longitudes.push(demeToLatLongs[deme].longitude);
+          }
         });
       }
     });
