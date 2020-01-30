@@ -234,10 +234,16 @@ class Map extends React.Component {
         this.props.pieChart
       );
 
+      const SWNE = this.getGeoRange(demeIndices, demeData);
+      const maybeNewBounds = L.latLngBounds(SWNE[0], SWNE[1]);
       if (!this.state.boundsSet) { // we are doing the initial render -> set map to the range of the data
-        const SWNE = this.getGeoRange(demeIndices, demeData);
         // L. available because leaflet() was called in componentWillMount
-        this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
+        this.state.currentBounds = maybeNewBounds;
+        this.state.map.fitBounds(maybeNewBounds);
+      } else if (!this.state.currentBounds.equals(maybeNewBounds)) {
+        // check to see if the new bounds would be different for any reason - if so, change them!
+        this.state.currentBounds = maybeNewBounds;
+        this.state.map.fitBounds(maybeNewBounds);
       }
 
       /* Set up leaflet events */
@@ -551,6 +557,7 @@ class Map extends React.Component {
   fitMapBoundsToData() {
     const SWNE = this.getGeoRange();
     // window.L available because leaflet() was called in componentWillMount
+    this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);
     this.state.map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]));
   }
   resetZoomButtonClicked() {
