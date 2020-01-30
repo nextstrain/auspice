@@ -209,10 +209,12 @@ const Trait = ({node, trait, colorings}) => {
  */
 const TipClickedPanel = ({tip, goAwayCallback, colorings}) => {
   if (!tip) {return null;}
+  const panelStyle = { ...infoPanelStyles.panel};
+  panelStyle.height = "70%";
   const node = tip.n;
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
-      <div className={"panel"} style={infoPanelStyles.panel} onClick={(e) => stopProp(e)}>
+      <div className={"panel"} style={panelStyle} onClick={(e) => stopProp(e)}>
         <StrainName>{node.name}</StrainName>
         <table>
           <tbody>
