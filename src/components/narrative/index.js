@@ -113,7 +113,9 @@ class Narrative extends React.Component {
   }
   renderProgress() {
     return (
-      <ProgressBar style={{height: `${progressHeight}px`}}>
+      <ProgressBar style={{height: `${progressHeight}px`}}
+        role="navigation"
+      >
         {this.props.blocks.map((b, i) => {
           const d = (!this.state.showingEndOfNarrativePage) &&
             this.props.currentInFocusBlockIdx === i ?
