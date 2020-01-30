@@ -159,6 +159,12 @@ export const ProgressBar = styled.div`
   align-items: center;
 `;
 
+export const ProgressButton = styled.div`
+  background: #74a9cf;
+  border-radius: 50%;
+  cursor: pointer;
+`;
+
 const baseBannerStyles = css`
   width: 100%;
   color: white;

@@ -9,7 +9,8 @@ import {
   linkStyles,
   OpacityFade,
   EndOfNarrative,
-  ProgressBar
+  ProgressBar,
+  ProgressButton
 } from './styles';
 import ReactPageScroller from "./ReactPageScroller";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
@@ -120,9 +121,9 @@ class Narrative extends React.Component {
           const d = (!this.state.showingEndOfNarrativePage) &&
             this.props.currentInFocusBlockIdx === i ?
             "14px" : "6px";
-          return (<div
+          return (<ProgressButton
             key={i}
-            style={{width: d, height: d, background: "#74a9cf", borderRadius: "50%", cursor: "pointer"}}
+            style={{width: d, height: d}}
             onClick={() => this.reactPageScroller.goToPage(i)}
           />);
         })}
