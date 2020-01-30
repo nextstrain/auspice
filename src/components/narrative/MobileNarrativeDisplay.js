@@ -15,6 +15,11 @@ import Map from "../map/map";
 import MainDisplayMarkdown from "./MainDisplayMarkdown";
 
 const BANNER_HEIGHT = 50;
+
+const scrollToTop = () => {
+  document.getElementById('MobileNarrativeBlock').scrollIntoView();
+};
+
 /**
  * A React component which takes up the entire screen and displays narratives in
  * "mobile" format. Instead of each narrative page displayed as narrative-text in
@@ -78,6 +83,8 @@ class MobileNarrativeDisplay extends React.Component {
         queryToDisplay: {n: idx},
         push: true
       }));
+
+      scrollToTop();
     };
     // TODO: bind down & up arrows (is this ok since we also have scollable content?)
   }
