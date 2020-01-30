@@ -163,6 +163,11 @@ export const ProgressButton = styled.div`
   background: #74a9cf;
   border-radius: 50%;
   cursor: pointer;
+
+  // BEGIN: mitigate ie flexbug-15: https://github.com/philipwalton/flexbugs#flexbug-15
+  align-self: center;
+  margin: auto;
+  // END mitigate ie flexbug-15
 `;
 
 const baseBannerStyles = css`
