@@ -621,7 +621,12 @@ export const createStateFromQueryOrJSONs = ({
   URL query this page defines via this information */
   if (narrativeBlocks) {
     narrative = narrativeBlocks;
-    const n = parseInt(query.n, 10) || 0;
+    let n = parseInt(query.n, 10) || 0;
+    /* If the query has defined a block which doesn't exist then default to n=0 */
+    if (n >= narrative.length) {
+      console.warn(`Attempted to go to narrative page ${n} which doesn't exist`);
+      n=0;
+    }
     controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
     query = n===0 ? {} : {n}; // eslint-disable-line
     /* If the narrative block in view defines a `mainDisplayMarkdown` section, we
