@@ -210,7 +210,7 @@ const Trait = ({node, trait, colorings}) => {
 const TipClickedPanel = ({tip, goAwayCallback, colorings}) => {
   if (!tip) {return null;}
   const panelStyle = { ...infoPanelStyles.panel};
-  panelStyle.height = "70%";
+  panelStyle.maxHeight = "70%";
   const node = tip.n;
   return (
     <div style={infoPanelStyles.modalContainer} onClick={() => goAwayCallback(tip)}>
