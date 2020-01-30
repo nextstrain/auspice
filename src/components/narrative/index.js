@@ -116,7 +116,7 @@ class Narrative extends React.Component {
             "14px" : "6px";
           return (<div
             key={i}
-            style={{width: d, height: d, background: "#74a9cf", borderRadius: "50%", cursor: "pointer"}}
+            style={{width: d, height: d, background: "#74a9cf", borderRadius: "50%", cursor: "pointer", alignSelf: 'center', margin: 'auto' }}
             onClick={() => this.reactPageScroller.goToPage(i)}
           />);
         })}
