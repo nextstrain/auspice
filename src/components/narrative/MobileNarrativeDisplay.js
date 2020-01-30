@@ -8,13 +8,16 @@ import {
   MobileBannerTop,
   MobileBannerBottom,
   MobileContentContainer,
-  EndOfNarrative
+  EndOfNarrative,
+  ProgressBar,
+  ProgressButton
 } from "./styles";
 import Tree from "../tree";
 import Map from "../map/map";
 import MainDisplayMarkdown from "./MainDisplayMarkdown";
 
 const BANNER_HEIGHT = 50;
+const progressHeight = 25;
 
 const scrollToTop = () => {
   document.getElementById('MobileNarrativeBlock').scrollIntoView();
@@ -143,6 +146,7 @@ class MobileNarrativeDisplay extends React.Component {
           Previous
         </this.PreviousButton>
         <MobileContentContainer height={this.state.contentHeight+this.state.bannerHeight}>
+          {this.renderProgress()}
           <EndOfNarrative>
             <h1>End of Narrative</h1>
             <a style={{...linkStyles}}
@@ -166,6 +170,7 @@ class MobileNarrativeDisplay extends React.Component {
     return (
       <>
         <MobileContentContainer height={this.state.contentHeight + this.state.bannerHeight}>
+          {this.renderProgress()}
           {this.pageNarrativeContent()}
           {this.renderVizCards(this.state.contentHeight)}
           {this.renderMainMarkdown()}
@@ -184,6 +189,7 @@ class MobileNarrativeDisplay extends React.Component {
           Previous
         </this.PreviousButton>
         <MobileContentContainer height={this.state.contentHeight}>
+          {this.renderProgress()}
           {this.pageNarrativeContent()}
           {this.renderVizCards(this.state.contentHeight)}
           {this.renderMainMarkdown()}
@@ -210,6 +216,24 @@ class MobileNarrativeDisplay extends React.Component {
       {props.children}
     </MobileBannerTop>
   )
+
+  renderProgress() {
+    return (
+      <ProgressBar style={{height: `${progressHeight}px`}}>
+        {this.props.blocks.map((b, i) => {
+          const d = (!this.state.showingEndOfNarrativePage) &&
+            this.props.currentInFocusBlockIdx === i ?
+            "14px" : "6px";
+          return (
+            <ProgressButton
+              key={b.__html.slice(0, 30)}
+              style={{width: d, height: d}}
+              onClick={() => this._goToPage(i)}
+            />);
+        })}
+      </ProgressBar>
+    );
+  }
 
   render() {
 
