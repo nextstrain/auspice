@@ -623,6 +623,11 @@ export const createStateFromQueryOrJSONs = ({
     const n = parseInt(query.n, 10) || 0;
     controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
     query = n===0 ? {} : {n}; // eslint-disable-line
+    /* If the narrative block in view defines a `mainDisplayMarkdown` section, we
+    update `controls.panelsToDisplay` so this is displayed */
+    if (narrative[n].mainDisplayMarkdown) {
+      controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
+    }
   } else {
     controls = modifyStateViaURLQuery(controls, query);
   }
