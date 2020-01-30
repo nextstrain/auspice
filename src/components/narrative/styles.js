@@ -168,13 +168,13 @@ export const EndOfNarrative = styled.div`
   grid-row-gap: 10px;
 `;
 
-export const MobileBannerTop = styled.div`
+export const MobileBannerTop = styled.nav`
   ${baseBannerStyles}
   top: 0;
   height: ${(props) => props.height}px;
   background-color: #E67F2C;
 `;
-export const MobileBannerBottom = styled.div`
+export const MobileBannerBottom = styled.nav`
   ${baseBannerStyles}
   bottom: 0;
   height: ${(props) => props.height}px;
