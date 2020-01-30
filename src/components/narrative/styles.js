@@ -158,7 +158,9 @@ const baseBannerStyles = css`
   font-size: 24px;
   font-weight: 500;
   cursor: pointer;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `;
 
 export const EndOfNarrative = styled.div`
