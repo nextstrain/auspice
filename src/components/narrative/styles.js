@@ -149,6 +149,16 @@ export const linkStyles = { // would be better to get CSS specificity working
   fontSize: "1.8em"
 };
 
+export const ProgressBar = styled.div`
+  width: 100%;
+  background-color: inherit;
+  box-shadow: 0px -3px 3px -3px rgba(0, 0, 0, 0.2) inset;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+`;
+
 const baseBannerStyles = css`
   width: 100%;
   color: white;

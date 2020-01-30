@@ -4,7 +4,13 @@ import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
 import Mousetrap from "mousetrap";
-import { NarrativeStyles, linkStyles, OpacityFade, EndOfNarrative } from './styles';
+import {
+  NarrativeStyles,
+  linkStyles,
+  OpacityFade,
+  EndOfNarrative,
+  ProgressBar
+} from './styles';
 import ReactPageScroller from "./ReactPageScroller";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE, TOGGLE_NARRATIVE } from "../../actions/types";
@@ -107,18 +113,7 @@ class Narrative extends React.Component {
   }
   renderProgress() {
     return (
-      <div
-        style={{
-          height: `${progressHeight}px`,
-          width: "100%",
-          backgroundColor: "inherit",
-          boxShadow: '0px -3px 3px -3px rgba(0, 0, 0, 0.2) inset',
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-evenly",
-          alignItems: "center"
-        }}
-      >
+      <ProgressBar style={{height: `${progressHeight}px`}}>
         {this.props.blocks.map((b, i) => {
           const d = (!this.state.showingEndOfNarrativePage) &&
             this.props.currentInFocusBlockIdx === i ?
@@ -129,7 +124,7 @@ class Narrative extends React.Component {
             onClick={() => this.reactPageScroller.goToPage(i)}
           />);
         })}
-      </div>
+      </ProgressBar>
     );
   }
   renderBlocks() {
