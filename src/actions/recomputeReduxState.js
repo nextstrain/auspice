@@ -106,6 +106,7 @@ const modifyStateViaURLQuery = (state, query) => {
 const restoreQueryableStateToDefaults = (state) => {
   for (const key of Object.keys(state.defaults)) {
     switch (typeof state.defaults[key]) {
+      case "boolean": // fallthrough
       case "string": {
         state[key] = state.defaults[key];
         break;
@@ -115,7 +116,7 @@ const restoreQueryableStateToDefaults = (state) => {
         break;
       }
       default: {
-        console.error("unknown typeof for default state of ", key);
+        console.error("unknown typeof for default state of ", key, state.defaults[key]);
       }
     }
   }
@@ -612,12 +613,27 @@ export const createStateFromQueryOrJSONs = ({
     controls = restoreQueryableStateToDefaults(controls);
   }
 
+
+  /* For the creation of state, we want to parse out URL query parameters
+  (e.g. ?c=country means we want to color-by country) and modify the state
+  accordingly. For narratives, we _don't_ display these in the URL, instead
+  only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
+  URL query this page defines via this information */
   if (narrativeBlocks) {
     narrative = narrativeBlocks;
-    const n = parseInt(query.n, 10) || 0;
+    let n = parseInt(query.n, 10) || 0;
+    /* If the query has defined a block which doesn't exist then default to n=0 */
+    if (n >= narrative.length) {
+      console.warn(`Attempted to go to narrative page ${n} which doesn't exist`);
+      n=0;
+    }
     controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
-    query = {n}; // eslint-disable-line
-    console.log("redux state changed to relfect n of", n);
+    query = n===0 ? {} : {n}; // eslint-disable-line
+    /* If the narrative block in view defines a `mainDisplayMarkdown` section, we
+    update `controls.panelsToDisplay` so this is displayed */
+    if (narrative[n].mainDisplayMarkdown) {
+      controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
+    }
   } else {
     controls = modifyStateViaURLQuery(controls, query);
   }
