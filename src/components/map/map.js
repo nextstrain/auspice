@@ -76,6 +76,7 @@ class Map extends React.Component {
     this.playPauseButtonClicked = this.playPauseButtonClicked.bind(this);
     this.resetButtonClicked = this.resetButtonClicked.bind(this);
     this.resetZoomButtonClicked = this.resetZoomButtonClicked.bind(this);
+    this.fitMapBoundsToData = this.fitMapBoundsToData.bind(this);
   }
 
   componentWillMount() {
@@ -136,6 +137,13 @@ class Map extends React.Component {
     if (this.props.nodes === null) { return; }
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
+
+    /* If we are changing the geo resolution in a narrative, then we want to mimic the RESET ZOOM
+    button by resetting the map bounds to fit the data */
+    const mapIsDrawn = !!this.state.map;
+    if (mapIsDrawn && this.props.narrativeMode && prevProps.geoResolution !== this.props.geoResolution) {
+      this.fitMapBoundsToData();
+    }
     this.maybeDrawDemesAndTransmissions(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
   }
   maybeInvalidateMapSize(nextProps) {
@@ -534,10 +542,13 @@ class Map extends React.Component {
     this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
     this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
   }
-  resetZoomButtonClicked() {
+  fitMapBoundsToData() {
     const SWNE = this.getGeoRange();
-    // L. available because leaflet() was called in componentWillMount
-    this.state.map.fitBounds(L.latLngBounds(SWNE[0], SWNE[1]));
+    // window.L available because leaflet() was called in componentWillMount
+    this.state.map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]));
+  }
+  resetZoomButtonClicked() {
+    this.fitMapBoundsToData();
     this.maybeDrawDemesAndTransmissions();
   }
   getStyles = () => {
