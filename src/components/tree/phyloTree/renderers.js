@@ -247,12 +247,12 @@ export const clearSVG = function clearSVG() {
 
 function getRateEstimate(regression, maxDivergence) {
   /* Prior to Jan 2020, the divergence measure was always "subs per site per year"
-  however certain datasets chaged this to "subs per genome per year". This distinction
-  is not set in the JSON, so in order to correctly display the rate we will "guess"
-  this here. A future augur update will export this in a JSON key, removing
-  the need to guess */
+  however certain datasets chaged this to "subs per year" across entire sequence.
+  This distinction is not set in the JSON, so in order to correctly display the rate
+  we will "guess" this here. A future augur update will export this in a JSON key,
+  removing the need to guess */
   if (maxDivergence > 5) {
-    return `rate estimate: ${formatDivergence(regression.slope)} subs per genome per year`;
+    return `rate estimate: ${formatDivergence(regression.slope)} subs per year`;
   }
   return `rate estimate: ${regression.slope.toExponential(2)} subs per site per year`;
 }
