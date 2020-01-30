@@ -106,6 +106,7 @@ const modifyStateViaURLQuery = (state, query) => {
 const restoreQueryableStateToDefaults = (state) => {
   for (const key of Object.keys(state.defaults)) {
     switch (typeof state.defaults[key]) {
+      case "boolean": // fallthrough
       case "string": {
         state[key] = state.defaults[key];
         break;
@@ -115,7 +116,7 @@ const restoreQueryableStateToDefaults = (state) => {
         break;
       }
       default: {
-        console.error("unknown typeof for default state of ", key);
+        console.error("unknown typeof for default state of ", key, state.defaults[key]);
       }
     }
   }
