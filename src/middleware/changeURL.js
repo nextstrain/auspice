@@ -36,6 +36,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: // fallthrough
     case types.CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE:
       query = action.query;
+      if (query.n === 0) delete query.n;
       if (query.tt) delete query.tt;
       break;
     case types.CHANGE_ZOOM:
