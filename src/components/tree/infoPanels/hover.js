@@ -5,6 +5,7 @@ import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, getVaccineFromNode, getFullAuthorInfoFromNode } from "../../../util/treeMiscHelpers";
 import { isValueValid } from "../../../util/globals";
+import { formatDivergence } from "../phyloTree/helpers";
 
 const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
@@ -35,7 +36,6 @@ const StrainName = ({name}) => (
   </div>
 );
 
-
 /**
  * A React component to display information about the branch's time & divergence (where applicable)
  * @param  {Object} props
@@ -47,12 +47,7 @@ const BranchLength = ({node}) => {
   const numDate = getTraitFromNode(node, "num_date");
 
   if (divergence) {
-    const divergenceToDisplay = divergence > 1 ?
-      Math.round((divergence + Number.EPSILON) * 1000) / 1000 :
-      divergence > 0.01 ?
-        Math.round((divergence + Number.EPSILON) * 10000) / 10000 :
-        divergence.toExponential(3);
-    elements.push(<InfoLine name="Divergence:" value={divergenceToDisplay} key="div"/>);
+    elements.push(<InfoLine name="Divergence:" value={formatDivergence(divergence)} key="div"/>);
   }
 
   if (numDate !== undefined) {
