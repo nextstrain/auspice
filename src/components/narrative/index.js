@@ -1,4 +1,5 @@
 /* eslint-disable react/no-danger */
+/* eslint-disable react/no-array-index-key */
 import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
@@ -114,7 +115,7 @@ class Narrative extends React.Component {
           const d = (!this.state.showingEndOfNarrativePage) && this.props.currentInFocusBlockIdx === i ?
             "14px" : "6px";
           return (<div
-            key={b.__html.slice(0, 30)}
+            key={i}
             style={{width: d, height: d, background: "#74a9cf", borderRadius: "50%", cursor: "pointer"}}
             onClick={() => this.reactPageScroller.goToPage(i)}
           />);
@@ -126,7 +127,7 @@ class Narrative extends React.Component {
     const ret = this.props.blocks.map((b, i) => (
       <div
         id={`NarrativeBlock_${i}`}
-        key={b.__html.slice(0, 50)}
+        key={i}
         style={{
           padding: "10px 20px",
           height: "inherit",
