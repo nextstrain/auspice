@@ -1,4 +1,3 @@
-import queryString from "query-string";
 import * as types from "../actions/types";
 
 const explanationParagraph=`
@@ -32,7 +31,7 @@ const narrative = (state = {
           blocks,
           title: blocks[0].__html.match(/>(.+?)</)[1],
           pathname: window.location.pathname,
-          blockIdx: parseInt(queryString.parse(window.location.search).n, 10) || 0
+          blockIdx: action.query.n || 0
         };
       }
       return state;
