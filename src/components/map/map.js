@@ -240,7 +240,7 @@ class Map extends React.Component {
         // L. available because leaflet() was called in componentWillMount
         this.state.currentBounds = maybeNewBounds;
         this.state.map.fitBounds(maybeNewBounds);
-      } else if (!this.state.currentBounds.equals(maybeNewBounds)) {
+      } else if (this.props.narrativeMode && !this.state.currentBounds.equals(maybeNewBounds)) {
         // check to see if the new bounds would be different for any reason - if so, change them!
         this.state.currentBounds = maybeNewBounds;
         this.state.map.fitBounds(maybeNewBounds);
