@@ -20,7 +20,7 @@ const BANNER_HEIGHT = 50;
 const progressHeight = 25;
 
 const scrollToTop = () => {
-  document.getElementById('MobileNarrativeBlock').scrollIntoView();
+  document.getElementById('progress-bar').scrollIntoView();
 };
 
 /**
@@ -219,7 +219,8 @@ class MobileNarrativeDisplay extends React.Component {
 
   renderProgress() {
     return (
-      <ProgressBar style={{height: `${progressHeight}px`}}>
+      <ProgressBar id="progress-bar"
+        style={{height: `${progressHeight}px`}}>
         {this.props.blocks.map((b, i) => {
           const d = (!this.state.showingEndOfNarrativePage) &&
             this.props.currentInFocusBlockIdx === i ?
