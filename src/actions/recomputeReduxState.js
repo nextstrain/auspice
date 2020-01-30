@@ -612,12 +612,17 @@ export const createStateFromQueryOrJSONs = ({
     controls = restoreQueryableStateToDefaults(controls);
   }
 
+
+  /* For the creation of state, we want to parse out URL query parameters
+  (e.g. ?c=country means we want to color-by country) and modify the state
+  accordingly. For narratives, we _don't_ display these in the URL, instead
+  only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
+  URL query this page defines via this information */
   if (narrativeBlocks) {
     narrative = narrativeBlocks;
     const n = parseInt(query.n, 10) || 0;
     controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
     query = {n}; // eslint-disable-line
-    console.log("redux state changed to relfect n of", n);
   } else {
     controls = modifyStateViaURLQuery(controls, query);
   }
