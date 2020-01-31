@@ -70,7 +70,8 @@ class Map extends React.Component {
       demeData: null,
       transmissionData: null,
       demeIndices: null,
-      transmissionIndices: null
+      transmissionIndices: null,
+      userHasInteractedWithMap: false
     };
     // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md#es6-classes
     this.playPauseButtonClicked = this.playPauseButtonClicked.bind(this);
@@ -289,6 +290,11 @@ class Map extends React.Component {
   respondToLeafletEvent(leafletEvent) {
     if (leafletEvent.type === "moveend") { /* zooming and panning */
 
+      /* Movend: Fired when the center of the map stops changing (e.g. user stopped dragging the map). */
+      /* Note - this method is triggered when the map sets up and is essential
+      for moving the d3 elements to their correct positions. It is later
+      triggered on pan / zoom (as you'd expect) */
+
       if (!this.state.demeData || !this.state.transmissionData) return;
 
       const newDemes = updateDemeDataLatLong(this.state.demeData, this.state.map);
@@ -302,7 +308,6 @@ class Map extends React.Component {
         this.props.dateMaxNumeric,
         this.props.pieChart
       );
-
       this.setState({demeData: newDemes, transmissionData: newTransmissions});
     }
   }
@@ -567,8 +572,7 @@ class Map extends React.Component {
   }
   moveMapAccordingToData({geoResolutionChanged, visibilityChanged, demeData, demeIndices}) {
     /* Given d3 data (may not be drawn) we can compute map bounds & move as appropriate */
-    console.log("\tmoveMapAccordingToData");
-
+    console.log("\tmoveMapAccordingToData. userHasInteractedWithMap:", this.state.userHasInteractedWithMap);
     if (!this.state.boundsSet) {
       /* we are doing the initial render -> set map to the range of the data in view */
       /* P.S. This is how upon initial loading the map zooms into the data */
@@ -582,17 +586,15 @@ class Map extends React.Component {
       return;
     }
 
-    if (this.props.narrativeMode && geoResolutionChanged) {
-      /* changed geo-resolution in narrative mode => reset view */
-      this.fitMapBoundsToData(demeData, demeIndices);
-    } else if (this.props.narrativeMode && visibilityChanged) {
-      /* changed visiblity (e.g. filters applied) in narrative mode => reset view */
-      this.fitMapBoundsToData(demeData, demeIndices);
+    if (!this.state.userHasInteractedWithMap || this.props.narrative) {
+      if (geoResolutionChanged) {
+        /* changed geo-resolution in narrative mode => reset view */
+        this.fitMapBoundsToData(demeData, demeIndices);
+      } else if (visibilityChanged) {
+        /* changed visiblity (e.g. filters applied) in narrative mode => reset view */
+        this.fitMapBoundsToData(demeData, demeIndices);
+      }
     }
-
-    /* TODO - in the above if / else statements, we should check if the user has interacted with the map
-    at all (e.g. pan / zoom). If they _haven't_ then we should treat it similarly to narrative mode &
-    automagically zoom to the data */
   }
 
   fitMapBoundsToData(demeData, demeIndices) {
@@ -620,17 +622,22 @@ class Map extends React.Component {
     const transmissionsExist = this.state.transmissionData && this.state.transmissionData.length;
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
-      <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
-        {this.maybeCreateMapDiv()}
-        {this.props.narrativeMode ? null : (
-          <button
-            style={{...tabSingle, ...styles.resetZoomButton}}
-            onClick={() => this.fitMapBoundsToData(this.state.demeData, this.state.demeIndices)}
-          >
-            reset zoom
-          </button>
-        )}
-      </Card>
+      <div style={{display: "inline-block"}} onClick={() => {this.setState({userHasInteractedWithMap: true});}}>
+        <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
+          {this.maybeCreateMapDiv()}
+          {this.props.narrativeMode ? null : (
+            <button
+              style={{...tabSingle, ...styles.resetZoomButton}}
+              onClick={() => {
+                this.fitMapBoundsToData(this.state.demeData, this.state.demeIndices);
+                this.setState({userHasInteractedWithMap: false});
+              }}
+            >
+              reset zoom
+            </button>
+          )}
+        </Card>
+      </div>
     );
   }
 }
