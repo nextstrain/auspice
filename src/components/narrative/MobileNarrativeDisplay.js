@@ -25,6 +25,14 @@ const scrollToTop = () => {
   document.getElementById('progress-bar').scrollIntoView();
 };
 
+const explanationParagraph=`
+  <p class="explanation">
+  Narratives are interleaved sections of text and associated nextstrain visualisations of the genomic data.
+  Click the coloured arrows at the top & bottom of each page to move through this narrative.
+  Within each page, you can scroll through the text to see visualisations of the genomic data.
+  </p>
+`;
+
 /**
  * A React component which takes up the entire screen and displays narratives in
  * "mobile" format. Instead of each narrative page displayed as narrative-text in
@@ -100,16 +108,20 @@ class MobileNarrativeDisplay extends React.Component {
       /* don't display normal narrative content if the block defines `mainDisplayMarkdown` */
       return null;
     }
-    const block = this.props.blocks[this.props.currentInFocusBlockIdx];
+    let __html = this.props.blocks[this.props.currentInFocusBlockIdx].__html;
+    if (this.props.currentInFocusBlockIdx === 0) {
+      __html = explanationParagraph + __html;
+    }
+
     return (
       <div
-        id={`MobileNarrativeBlock_${this.props.currentInFocusBlockIdx}`}
+        id={`NarrativeBlock_${this.props.currentInFocusBlockIdx}`}
         style={{
           padding: "10px 20px",
           height: "inherit",
           overflow: "hidden"
         }}
-        dangerouslySetInnerHTML={block}
+        dangerouslySetInnerHTML={{__html}}
       />
     );
   }

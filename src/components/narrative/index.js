@@ -20,6 +20,13 @@ import { narrativeNavBarHeight } from "../../util/globals";
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;
 
+const explanationParagraph=`
+  <p class="explanation">
+  Explore the content by scrolling the left hand side (or click on the arrows), and the data visualizations will change accordingly.
+  Clicking "explore the data yourself" (top right of page) will replace this narrative with a set of controls so that you may interact with the data.
+  </p>
+`;
+
 /**
  * A react component which renders the narrative text content in the sidebar.
  * Controls the interactions which trigger page changes of the narrative.
@@ -131,18 +138,25 @@ class Narrative extends React.Component {
     );
   }
   renderBlocks() {
-    const ret = this.props.blocks.map((b, i) => (
-      <div
-        id={`NarrativeBlock_${i}`}
-        key={i}
-        style={{
-          padding: "10px 20px",
-          height: "inherit",
-          overflow: "hidden"
-        }}
-        dangerouslySetInnerHTML={b}
-      />
-    ));
+    const ret = this.props.blocks.map((b, i) => {
+
+      const __html = i === 0 ?
+        explanationParagraph + b.__html : // inject explanation to opening block
+        b.__html;
+
+      return (
+        <div
+          id={`NarrativeBlock_${i}`}
+          key={i}
+          style={{
+            padding: "10px 20px",
+            height: "inherit",
+            overflow: "hidden"
+          }}
+          dangerouslySetInnerHTML={{__html}}
+        />
+      );
+    });
     ret.push((
       <EndOfNarrative key="EON" id="EndOfNarrative">
         <h1>END OF NARRATIVE</h1>
