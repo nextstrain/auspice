@@ -3,17 +3,19 @@ title: Changelog
 ---
 
 ## version 2.4.0 - 2020/01/31
-
+* Implement a new narratives view for mobile displays. [See PR 857](https://github.com/nextstrain/auspice/pull/857)
+* Subsequent map-pages in narratives will reset the zoom if the geo resolution has changed. [See PR 866](https://github.com/nextstrain/auspice/pull/866)
+* Fix narrative progress-bar styling. [See PR 875](https://github.com/nextstrain/auspice/pull/875)
 
 ## version 2.3.7 - 2020/01/30
-
+* Fix a number of narrative bugs [See PR 865](https://github.com/nextstrain/auspice/pull/865)
 
 ## version 2.3.6 - 2020/01/30
-
+* Improve wording related to reported mutation rates. [See PR 860](https://github.com/nextstrain/auspice/pull/860)
+* Hide tip labels when animating. [See PR 859](https://github.com/nextstrain/auspice/pull/859)
+* Improve sizing of tip-clicked infobox. [See PR 862](https://github.com/nextstrain/auspice/pull/862)
 
 ## version 2.3.5 - 2020/01/28
-
-
 * Fix bug during branch-hover introduced in 2.3.3. [See PR 855](https://github.com/nextstrain/auspice/pull/855)
 * Fix bug related to back-button behavior. [See PR 852](https://github.com/nextstrain/auspice/pull/852)
 
