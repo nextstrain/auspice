@@ -1,3 +1,5 @@
+/* eslint-disable react/no-array-index-key */
+
 import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
@@ -103,7 +105,6 @@ class MobileNarrativeDisplay extends React.Component {
     return (
       <div
         id={`MobileNarrativeBlock_${this.props.currentInFocusBlockIdx}`}
-        key={block.__html}
         style={{
           padding: "10px 20px",
           height: "inherit",
@@ -229,7 +230,7 @@ class MobileNarrativeDisplay extends React.Component {
             "14px" : "6px";
           return (
             <ProgressButton
-              key={b.__html.slice(0, 30)}
+              key={i}
               style={{width: d, height: d}}
               onClick={() => this._goToPage(i)}
             />);
