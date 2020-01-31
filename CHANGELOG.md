@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.4.0 - 2020/01/31
+
+
 ## version 2.3.7 - 2020/01/30
 
 
