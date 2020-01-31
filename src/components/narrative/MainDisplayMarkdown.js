@@ -29,7 +29,6 @@ const Container = styled.div`
   font-size: 14px;
   line-height: 1.4;
   @media (max-width: 1080px) {
-    font-size: 12px;
     line-height: 1.2;
   }
 
