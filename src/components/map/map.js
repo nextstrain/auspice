@@ -553,7 +553,9 @@ class Map extends React.Component {
       container = (
         <div style={{position: "relative"}}>
           {this.animationButtons()}
-          <div id="map"
+          <div
+            onClick={() => {this.setState({userHasInteractedWithMap: true});}}
+            id="map"
             style={{
               height: this.state.responsive.height,
               width: this.state.responsive.width
@@ -628,22 +630,21 @@ class Map extends React.Component {
     const transmissionsExist = this.state.transmissionData && this.state.transmissionData.length;
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
-      <div style={{display: "inline-block"}} onClick={() => {this.setState({userHasInteractedWithMap: true});}}>
-        <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
-          {this.maybeCreateMapDiv()}
-          {this.props.narrativeMode ? null : (
-            <button
-              style={{...tabSingle, ...styles.resetZoomButton}}
-              onClick={() => {
-                this.fitMapBoundsToData(this.state.demeData, this.state.demeIndices);
-                this.setState({userHasInteractedWithMap: false});
-              }}
-            >
-              reset zoom
-            </button>
-          )}
-        </Card>
-      </div>
+      <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
+        {this.maybeCreateMapDiv()}
+        {this.props.narrativeMode ? null : (
+          <button
+            style={{...tabSingle, ...styles.resetZoomButton}}
+            onClick={() => {
+              this.fitMapBoundsToData(this.state.demeData, this.state.demeIndices);
+              console.log("Button click")
+              this.setState({userHasInteractedWithMap: false});
+            }}
+          >
+            reset zoom
+          </button>
+        )}
+      </Card>
     );
   }
 }
