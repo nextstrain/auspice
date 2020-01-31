@@ -203,6 +203,9 @@ export const MobileContentContainer = styled.div`
   overflow-y: scroll;
   color: ${(props) => props.theme.unselectedColor};
   background-color: ${(props) => props.theme.background};
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.3;
 
   p, li {
     width: 90%;
