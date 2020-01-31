@@ -81,15 +81,14 @@ class MobileNarrativeDisplay extends React.Component {
           query: queryString.parse(this.props.blocks[idx].query),
           queryToDisplay: {n: idx}
         }));
-        return;
+      } else {
+        this.props.dispatch(changePage({
+          changeDataset: false,
+          query: queryString.parse(this.props.blocks[idx].query),
+          queryToDisplay: {n: idx},
+          push: true
+        }));
       }
-
-      this.props.dispatch(changePage({
-        changeDataset: false,
-        query: queryString.parse(this.props.blocks[idx].query),
-        queryToDisplay: {n: idx},
-        push: true
-      }));
 
       scrollToTop();
     };
