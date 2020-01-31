@@ -240,11 +240,6 @@ class Map extends React.Component {
         this.props.pieChart
       );
 
-
-      /* Set up leaflet events */
-      // this.state.map.on("viewreset", this.respondToLeafletEvent.bind(this));
-      this.state.map.on("moveend", this.respondToLeafletEvent.bind(this));
-
       // don't redraw on every rerender - need to seperately handle virus change redraw
       this.setState({
         boundsSet: true,
@@ -295,11 +290,18 @@ class Map extends React.Component {
       for moving the d3 elements to their correct positions. It is later
       triggered on pan / zoom (as you'd expect) */
 
-      if (!this.state.demeData || !this.state.transmissionData) return;
+      if (!this.state.demeData || !this.state.transmissionData) {
+        /* this seems to happen when the data takes a particularly long time to create.
+        and the map is ready before the data (??). It's imperitive that this method runs
+        so if the data's not ready yet we try to rerun it after a short time.
+        This could be improved */
+        window.setTimeout(() => this.respondToLeafletEvent(leafletEvent), 50);
+        return;
+      }
 
       const newDemes = updateDemeDataLatLong(this.state.demeData, this.state.map);
       const newTransmissions = updateTransmissionDataLatLong(this.state.transmissionData, this.state.map);
-
+      console.log("\tupdateOnMoveEnd")
       updateOnMoveEnd(
         newDemes,
         newTransmissions,
@@ -504,6 +506,9 @@ class Map extends React.Component {
       L.zoomControlButtons = L.control.zoom({position: "bottomright"}).addTo(map);
     }
 
+    /* Set up leaflet events */
+    map.on("moveend", this.respondToLeafletEvent.bind(this));
+
     this.setState({map});
   }
 
@@ -574,6 +579,7 @@ class Map extends React.Component {
     /* Given d3 data (may not be drawn) we can compute map bounds & move as appropriate */
     console.log("\tmoveMapAccordingToData. userHasInteractedWithMap:", this.state.userHasInteractedWithMap);
     if (!this.state.boundsSet) {
+      console.log("\t\tSetting for the first time");
       /* we are doing the initial render -> set map to the range of the data in view */
       /* P.S. This is how upon initial loading the map zooms into the data */
       this.fitMapBoundsToData(demeData, demeIndices);
