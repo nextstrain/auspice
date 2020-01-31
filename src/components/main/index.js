@@ -128,7 +128,9 @@ class Main extends React.Component {
           navBarHandler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
         />
         <PanelsContainer width={availableWidth} height={availableHeight} left={this.state.sidebarOpen ? sidebarWidth : 0}>
-          {this.props.narrativeIsLoaded ? renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative) : null}
+          {this.props.narrativeIsLoaded && !this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown") ?
+            renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative) : null
+          }
           {this.props.displayNarrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.panelsToDisplay.includes("tree") ? <Tree width={big.width} height={big.height} /> : null}
           {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
