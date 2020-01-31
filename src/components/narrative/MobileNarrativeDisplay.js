@@ -71,6 +71,8 @@ class MobileNarrativeDisplay extends React.Component {
     };
 
     this._goToPage = (idx) => {
+      this.setState({ showingEndOfNarrativePage: false });
+
       // TODO: this `if` statement should be moved to the `changePage` function or similar
       if (this.props.blocks[idx] && this.props.blocks[idx].mainDisplayMarkdown) {
         this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
