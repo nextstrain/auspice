@@ -15,9 +15,7 @@ import { dataFont, darkGrey } from "../../globalStyles";
  */
 
 const Container = styled.div`
-  margin-left: 30px;
-  margin-top: 50px;
-  padding-bottom: 30px;
+  margin: ${(props) => props.mobile ? `10px 5% 5% 5%` : `50px 30px 30px 30px`};
   font-family: ${dataFont};
   font-weight: 300;
   color: ${(props) => props.theme.unselectedColor};
@@ -99,10 +97,10 @@ const Container = styled.div`
 
 `;
 
-const EXPERIMENTAL_MainDisplayMarkdown = ({narrativeBlock, width}) => {
+const EXPERIMENTAL_MainDisplayMarkdown = ({narrativeBlock, width, mobile}) => {
   const cleanHTML = mdToHtml(narrativeBlock.mainDisplayMarkdown);
   return (
-    <Container width={width}>
+    <Container width={width} mobile={mobile}>
       <div dangerouslySetInnerHTML={{ __html: cleanHTML }}/>
     </Container>
   );

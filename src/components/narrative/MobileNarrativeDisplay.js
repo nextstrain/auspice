@@ -117,7 +117,7 @@ class MobileNarrativeDisplay extends React.Component {
 
   renderMainMarkdown() {
     if (this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown")) {
-      return <MainDisplayMarkdown width={window.innerWidth}/>;
+      return <MainDisplayMarkdown width={window.innerWidth} mobile/>;
     }
     return null;
   }

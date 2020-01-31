@@ -211,8 +211,4 @@ export const MobileContentContainer = styled.div`
   font-weight: 300;
   font-size: 14px;
   line-height: 1.3;
-
-  p, li {
-    width: 90%;
-  }
 `;
