@@ -75,7 +75,6 @@ class Map extends React.Component {
     // https://github.com/yannickcr/eslint-plugin-react/blob/master/docs/rules/jsx-no-bind.md#es6-classes
     this.playPauseButtonClicked = this.playPauseButtonClicked.bind(this);
     this.resetButtonClicked = this.resetButtonClicked.bind(this);
-    this.resetZoomButtonClicked = this.resetZoomButtonClicked.bind(this);
     this.fitMapBoundsToData = this.fitMapBoundsToData.bind(this);
   }
 
@@ -560,10 +559,6 @@ class Map extends React.Component {
     this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);
     this.state.map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]));
   }
-  resetZoomButtonClicked() {
-    this.fitMapBoundsToData();
-    this.maybeDrawDemesAndTransmissions();
-  }
   getStyles = () => {
     const activeResetZoomButton = true;
     return {
@@ -587,7 +582,7 @@ class Map extends React.Component {
         {this.props.narrativeMode ? null : (
           <button
             style={{...tabSingle, ...styles.resetZoomButton}}
-            onClick={this.resetZoomButtonClicked}
+            onClick={this.fitMapBoundsToData}
           >
             reset zoom
           </button>
