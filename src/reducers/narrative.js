@@ -1,12 +1,5 @@
 import * as types from "../actions/types";
 
-const explanationParagraph=`
-  <p class="explanation">
-  Explore the content by scrolling the left hand side (or click on the arrows), and the data visualizations will change accordingly.
-  Clicking "explore the data yourself" above will display sidebar controls.
-  </p>
-`;
-
 const narrative = (state = {
   loaded: false,
   blocks: null, /* array of paragraphs (aka blocks) */
@@ -24,7 +17,6 @@ const narrative = (state = {
     case types.CLEAN_START:
       if (action.narrative) {
         const blocks = action.narrative;
-        blocks[0].__html = explanationParagraph + blocks[0].__html;
         return {
           loaded: true,
           display: true,

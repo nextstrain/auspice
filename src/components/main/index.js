@@ -20,6 +20,7 @@ import { PanelsContainer, sidebarTheme } from "./styles";
 import ErrorBoundary from "../../util/errorBoundry";
 import Spinner from "../framework/spinner";
 import MainDisplayMarkdown from "../narrative/MainDisplayMarkdown";
+import MobileNarrativeDisplay from "../narrative/MobileNarrativeDisplay";
 
 const Entropy = lazy(() => import("../entropy"));
 const Frequencies = lazy(() => import("../frequencies"));
@@ -82,6 +83,24 @@ class Main extends React.Component {
     if (this.state.showSpinner) {
       return (<Spinner/>);
     }
+
+    /* for mobile narratives we use a custom component as the nesting of view components is different */
+    /* TODO - the breakpoint for `mobileDisplay` needs testing */
+    if (this.state.mobileDisplay && this.props.displayNarrative) {
+      return (
+        <>
+          <AnimationController/>
+          <ThemeProvider theme={sidebarTheme}>
+            <MobileNarrativeDisplay/>
+          </ThemeProvider>
+        </>
+      );
+    }
+
+    /* The following code is employed for:
+     * (a) all non-narrative displays (including on mobile)
+     * (b) narrative display for non-mobile (i.e. display side-by-side)
+     */
     const {availableWidth, availableHeight, sidebarWidth, overlayStyles} = calcStyles(this.props.browserDimensions, this.props.displayNarrative, this.state.sidebarOpen, this.state.mobileDisplay);
     const overlayHandler = () => {this.setState({sidebarOpen: false});};
     const {big, chart} = calcPanelDims(this.props.panelLayout === "grid", this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);

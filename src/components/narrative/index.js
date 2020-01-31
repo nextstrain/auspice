@@ -4,7 +4,14 @@ import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
 import Mousetrap from "mousetrap";
-import { NarrativeStyles, linkStyles, OpacityFade } from './styles';
+import {
+  NarrativeStyles,
+  linkStyles,
+  OpacityFade,
+  EndOfNarrative,
+  ProgressBar,
+  ProgressButton
+} from './styles';
 import ReactPageScroller from "./ReactPageScroller";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE, TOGGLE_NARRATIVE } from "../../actions/types";
@@ -13,7 +20,17 @@ import { narrativeNavBarHeight } from "../../util/globals";
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;
 
+const explanationParagraph=`
+  <p class="explanation">
+  Explore the content by scrolling the left hand side (or click on the arrows), and the data visualizations will change accordingly.
+  Clicking "explore the data yourself" (top right of page) will replace this narrative with a set of controls so that you may interact with the data.
+  </p>
+`;
 
+/**
+ * A react component which renders the narrative text content in the sidebar.
+ * Controls the interactions which trigger page changes of the narrative.
+ */
 @connect((state) => ({
   loaded: state.narrative.loaded,
   blocks: state.narrative.blocks,
@@ -30,27 +47,29 @@ class Narrative extends React.Component {
       const idx = reactPageScrollerIdx-1;
       if (idx === this.props.blocks.length) {
         this.setState({showingEndOfNarrativePage: true});
-      } else {
-        if (this.state.showingEndOfNarrativePage) {
-          this.setState({showingEndOfNarrativePage: false});
-        }
-
-        if (this.props.blocks[idx].mainDisplayMarkdown) {
-          this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
-            query: queryString.parse(this.props.blocks[idx].query),
-            queryToDisplay: {n: idx}
-          }));
-          return;
-        }
-
-        this.props.dispatch(changePage({
-          // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
-          dontChangeDataset: true,
-          query: queryString.parse(this.props.blocks[idx].query),
-          queryToDisplay: {n: idx},
-          push: true
-        }));
+        return;
       }
+
+      if (this.state.showingEndOfNarrativePage) {
+        this.setState({showingEndOfNarrativePage: false});
+      }
+
+      if (this.props.blocks[idx].mainDisplayMarkdown) {
+        this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
+          query: queryString.parse(this.props.blocks[idx].query),
+          queryToDisplay: {n: idx}
+        }));
+        return;
+      }
+
+      this.props.dispatch(changePage({
+        // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
+        changeDataset: false,
+        query: queryString.parse(this.props.blocks[idx].query),
+        queryToDisplay: {n: idx},
+        push: true
+      }));
+
     };
     this.goToNextSlide = () => {
       if (this.state.showingEndOfNarrativePage) return; // no-op
@@ -90,7 +109,10 @@ class Narrative extends React.Component {
       "M240.971 130.524l194.343 194.343c9.373 9.373 9.373 24.569 0 33.941l-22.667 22.667c-9.357 9.357-24.522 9.375-33.901.04L224 227.495 69.255 381.516c-9.379 9.335-24.544 9.317-33.901-.04l-22.667-22.667c-9.373-9.373-9.373-24.569 0-33.941L207.03 130.525c9.372-9.373 24.568-9.373 33.941-.001z" :
       "M207.029 381.476L12.686 187.132c-9.373-9.373-9.373-24.569 0-33.941l22.667-22.667c9.357-9.357 24.522-9.375 33.901-.04L224 284.505l154.745-154.021c9.379-9.335 24.544-9.317 33.901.04l22.667 22.667c9.373 9.373 9.373 24.569 0 33.941L240.971 381.476c-9.373 9.372-24.569 9.372-33.942 0z";
     return (
-      <div id={`hand${pointUp?"Up":"Down"}`} style={style} onClick={pointUp ? this.goToPreviousSlide : this.goToNextSlide}>
+      <div id={`hand${pointUp?"Up":"Down"}`}
+        style={style}
+        onClick={pointUp ? this.goToPreviousSlide : this.goToNextSlide}
+      >
         <svg width={`${dims.w}px`} height={`${dims.h}px`} viewBox="0 0 448 512">
           <path d={svgPathD} fill="black"/>
         </svg>
@@ -99,55 +121,57 @@ class Narrative extends React.Component {
   }
   renderProgress() {
     return (
-      <div
-        style={{
-          height: `${progressHeight}px`,
-          width: "100%",
-          backgroundColor: "inherit",
-          boxShadow: '0px -3px 3px -3px rgba(0, 0, 0, 0.2) inset',
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-evenly",
-          alignItems: "center"
-        }}
+      <ProgressBar style={{height: `${progressHeight}px`}}
+        role="navigation"
       >
         {this.props.blocks.map((b, i) => {
-          const d = (!this.state.showingEndOfNarrativePage) && this.props.currentInFocusBlockIdx === i ?
+          const d = (!this.state.showingEndOfNarrativePage) &&
+            this.props.currentInFocusBlockIdx === i ?
             "14px" : "6px";
-          return (<div
+          return (<ProgressButton
             key={i}
-            style={{width: d, height: d, background: "#74a9cf", borderRadius: "50%", cursor: "pointer"}}
+            style={{width: d, height: d}}
             onClick={() => this.reactPageScroller.goToPage(i)}
           />);
         })}
-      </div>
+      </ProgressBar>
     );
   }
   renderBlocks() {
-    const ret = this.props.blocks.map((b, i) => (
-      <div
-        id={`NarrativeBlock_${i}`}
-        key={i}
-        style={{
-          padding: "10px 20px",
-          height: "inherit",
-          overflow: "hidden"
-        }}
-        dangerouslySetInnerHTML={b}
-      />
-    ));
+    const ret = this.props.blocks.map((b, i) => {
+
+      const __html = i === 0 ?
+        explanationParagraph + b.__html : // inject explanation to opening block
+        b.__html;
+
+      return (
+        <div
+          id={`NarrativeBlock_${i}`}
+          key={i}
+          style={{
+            padding: "10px 20px",
+            height: "inherit",
+            overflow: "hidden"
+          }}
+          dangerouslySetInnerHTML={{__html}}
+        />
+      );
+    });
     ret.push((
-      <div key="EON" id="EndOfNarrative" style={{flexBasis: "50%", flexShrink: 0}}>
-        <h3 style={{textAlign: "center"}}>
-          END OF NARRATIVE
-        </h3>
-        <div style={{...linkStyles, textAlign: "center"}} onClick={() => this.reactPageScroller.goToPage(0)}>
+      <EndOfNarrative key="EON" id="EndOfNarrative">
+        <h1>END OF NARRATIVE</h1>
+        <a style={{...linkStyles}}
+          onClick={() => this.reactPageScroller.goToPage(0)}
+        >
           Scroll back to the beginning
-        </div>
-        <div style={{...linkStyles, textAlign: "center", marginTop: "10px"}} onClick={this.exitNarrativeMode}>
+        </a>
+        <br />
+        <a style={{...linkStyles}}
+          onClick={this.exitNarrativeMode}
+        >
           Leave the narrative & explore the data yourself
-        </div>
-      </div>
+        </a>
+      </EndOfNarrative>
     ));
     return ret;
   }

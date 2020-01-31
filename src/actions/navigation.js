@@ -46,7 +46,7 @@ export const changePage = ({
   query = undefined,
   queryToDisplay = undefined, /* doesn't affect state, only URL. defaults to query unless specified */
   push = true,
-  dontChangeDataset = false
+  changeDataset = true
 } = {}) => (dispatch, getState) => {
   const oldState = getState();
   // console.warn("CHANGE PAGE!", path, query, queryToDisplay, push);
@@ -58,25 +58,25 @@ export const changePage = ({
   /* some booleans */
   const pathHasChanged = oldState.general.pathname !== path;
 
-  if (!dontChangeDataset || pathHasChanged) {
-    const action = {
+  if (changeDataset || pathHasChanged) {
+    dispatch({
       type: PAGE_CHANGE,
       path,
       displayComponent: chooseDisplayComponentFromURL(path),
       pushState: push,
       query
-    };
-    dispatch(action);
-  } else {
-    /* the path (dataset) remains the same... but the state may be modulated by the query */
-    const newState = createStateFromQueryOrJSONs({oldState, query});
-    dispatch({
-      type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
-      ...newState,
-      pushState: push,
-      query: queryToDisplay
     });
+    return;
   }
+
+  /* the path (dataset) remains the same... but the state may be modulated by the query */
+  const newState = createStateFromQueryOrJSONs({oldState, query});
+  dispatch({
+    type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+    ...newState,
+    pushState: push,
+    query: queryToDisplay
+  });
 };
 
 /* a 404 uses the same machinery as changePage, but it's not a thunk.

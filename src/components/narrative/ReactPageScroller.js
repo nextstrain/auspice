@@ -202,74 +202,74 @@ export default class ReactPageScroller extends React.Component {
 
         const componentsToRender = [...this.state.componentsToRender];
 
-        if (!_.isEqual(componentIndex, number)) {
-            if (!_.isNil(this["container_" + (number)]) && !this[scrolling]) {
+        if (!!_.isEqual(componentIndex, number)) return;
 
-                this[scrolling] = true;
+        if (!_.isNil(this["container_" + (number)]) && !this[scrolling]) {
+
+            this[scrolling] = true;
+            this._pageContainer.style.transform = `translate3d(0, ${(number) * -100}%, 0)`;
+
+            if (pageOnChange) {
+                pageOnChange(number + 1);
+            }
+
+            if (_.isNil(this["container_" + (number + 1)]) && !_.isNil(children[number + 1]))
+                componentsToRender.push(
+                    <div key={number + 1}
+                            ref={c => this["container_" + (number + 1)] = c}
+                            style={{height: "100%", width: "100%"}}>
+                        {children[number + 1]}
+                    </div>
+                );
+
+            setTimeout(() => {
+                this.setState({componentIndex: number, componentsToRender: componentsToRender}, () => {
+                    this[scrolling] = false;
+                    this[previousTouchMove] = null;
+                });
+            }, this.props.animationTimer + ANIMATION_TIMER)
+
+        } else if (!this[scrolling] && !_.isNil(children[number])) {
+
+            const componentsLength = componentsToRender.length;
+
+            for (let i = componentsLength; i <= number; i++) {
+                componentsToRender.push(
+                    <div key={i}
+                            ref={c => this["container_" + i] = c}
+                            style={{height: "100%", width: "100%"}}>
+                        {children[i]}
+                    </div>
+                );
+            }
+
+            if (!_.isNil(children[number + 1])) {
+                componentsToRender.push(
+                    <div key={number + 1}
+                            ref={c => this["container_" + (number + 1)] = c}
+                            style={{height: "100%", width: "100%"}}>
+                        {children[number + 1]}
+                    </div>
+                );
+            }
+
+            this[scrolling] = true;
+            this.setState({
+                componentsToRender
+            }, () => {
                 this._pageContainer.style.transform = `translate3d(0, ${(number) * -100}%, 0)`;
 
                 if (pageOnChange) {
                     pageOnChange(number + 1);
                 }
 
-                if (_.isNil(this["container_" + (number + 1)]) && !_.isNil(children[number + 1]))
-                    componentsToRender.push(
-                        <div key={number + 1}
-                             ref={c => this["container_" + (number + 1)] = c}
-                             style={{height: "100%", width: "100%"}}>
-                            {children[number + 1]}
-                        </div>
-                    );
-
                 setTimeout(() => {
-                    this.setState({componentIndex: number, componentsToRender: componentsToRender}, () => {
+                    this.setState({componentIndex: number}, () => {
                         this[scrolling] = false;
                         this[previousTouchMove] = null;
                     });
                 }, this.props.animationTimer + ANIMATION_TIMER)
-
-            } else if (!this[scrolling] && !_.isNil(children[number])) {
-
-                const componentsLength = componentsToRender.length;
-
-                for (let i = componentsLength; i <= number; i++) {
-                    componentsToRender.push(
-                        <div key={i}
-                             ref={c => this["container_" + i] = c}
-                             style={{height: "100%", width: "100%"}}>
-                            {children[i]}
-                        </div>
-                    );
-                }
-
-                if (!_.isNil(children[number + 1])) {
-                    componentsToRender.push(
-                        <div key={number + 1}
-                             ref={c => this["container_" + (number + 1)] = c}
-                             style={{height: "100%", width: "100%"}}>
-                            {children[number + 1]}
-                        </div>
-                    );
-                }
-
-                this[scrolling] = true;
-                this.setState({
-                    componentsToRender
-                }, () => {
-                    this._pageContainer.style.transform = `translate3d(0, ${(number) * -100}%, 0)`;
-
-                    if (pageOnChange) {
-                        pageOnChange(number + 1);
-                    }
-
-                    setTimeout(() => {
-                        this.setState({componentIndex: number}, () => {
-                            this[scrolling] = false;
-                            this[previousTouchMove] = null;
-                        });
-                    }, this.props.animationTimer + ANIMATION_TIMER)
-                });
-            }
+            });
         }
     };
 
