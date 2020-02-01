@@ -14,7 +14,7 @@ import {
 } from './styles';
 import ReactPageScroller from "./ReactPageScroller";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
-import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE, TOGGLE_NARRATIVE } from "../../actions/types";
+import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 import { narrativeNavBarHeight } from "../../util/globals";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
@@ -41,7 +41,7 @@ class Narrative extends React.Component {
     super(props);
     this.state = {showingEndOfNarrativePage: false};
     this.exitNarrativeMode = () => {
-      this.props.dispatch({type: TOGGLE_NARRATIVE, display: false});
+      this.props.dispatch(changePage({ path: this.props.blocks[0].dataset, query: true }));
     };
     this.changeAppStateViaBlock = (reactPageScrollerIdx) => {
       const idx = reactPageScrollerIdx-1;
