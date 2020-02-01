@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.4.1 - 2020/02/01
+
+
 ## version 2.4.0 - 2020/01/31
 * Implement a new narratives view for mobile displays. [See PR 857](https://github.com/nextstrain/auspice/pull/857)
 * Subsequent map-pages in narratives will reset the zoom if the geo resolution has changed. [See PR 866](https://github.com/nextstrain/auspice/pull/866)
