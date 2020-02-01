@@ -115,7 +115,6 @@ class Map extends React.Component {
     }
   }
   componentDidMount() {
-    console.log("CDM");
     this.maybeChangeSize(this.props);
     const removed = this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     // TODO: if demes are color blended circles, updating rather than redrawing demes would do
@@ -125,7 +124,6 @@ class Map extends React.Component {
     this.maybeInvalidateMapSize(this.props);
   }
   componentWillReceiveProps(nextProps) {
-    console.log("CWRP");
     this.modulateInterfaceForNarrativeMode(nextProps);
     this.maybeChangeSize(nextProps);
     const removed = this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
@@ -139,7 +137,6 @@ class Map extends React.Component {
     if (this.props.nodes === null) { return; }
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
-    console.log("CDU")
     this.maybeDrawDemesAndTransmissionsAndMoveMap(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
   }
   maybeInvalidateMapSize(nextProps) {
@@ -203,8 +200,6 @@ class Map extends React.Component {
     if (mapIsDrawn && allDataPresent && demesTransmissionsNotComputed) {
       timerStart("drawDemesAndTransmissions");
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
-      console.log("\tDrawDemesAndTransmissions");
-
 
       const {demeData, transmissionData, demeIndices, transmissionIndices} = createDemeAndTransmissionData(
         this.props.nodes,
@@ -270,7 +265,6 @@ class Map extends React.Component {
     const colorByChanged = (nextProps.colorScaleVersion !== this.props.colorScaleVersion);
     if (mapIsDrawn && (geoResolutionChanged || dataChanged || colorByChanged)) {
       this.state.d3DOMNode.selectAll("*").remove();
-      console.log("\tREMOVE")
       this.setState({
         d3elems: null,
         demeData: null,
@@ -301,7 +295,6 @@ class Map extends React.Component {
 
       const newDemes = updateDemeDataLatLong(this.state.demeData, this.state.map);
       const newTransmissions = updateTransmissionDataLatLong(this.state.transmissionData, this.state.map);
-      console.log("\tupdateOnMoveEnd")
       updateOnMoveEnd(
         newDemes,
         newTransmissions,
@@ -314,7 +307,6 @@ class Map extends React.Component {
     }
   }
   getGeoRange(demeData, demeIndices) {
-    console.log("\t\tgetGeoRange");
     const latitudes = [];
     const longitudes = [];
 
@@ -365,7 +357,6 @@ class Map extends React.Component {
 
     if (!(visibilityChange && haveData)) { return; }
 
-    console.log("\tUpdateDemesAndTransmissions")
     timerStart("updateDemesAndTransmissions");
     if (this.props.geoResolution !== nextProps.geoResolution) {
       /* This `if` statement added as part of https://github.com/nextstrain/auspice/issues/722
@@ -579,9 +570,7 @@ class Map extends React.Component {
   }
   moveMapAccordingToData({geoResolutionChanged, visibilityChanged, demeData, demeIndices}) {
     /* Given d3 data (may not be drawn) we can compute map bounds & move as appropriate */
-    console.log("\tmoveMapAccordingToData. userHasInteractedWithMap:", this.state.userHasInteractedWithMap);
     if (!this.state.boundsSet) {
-      console.log("\t\tSetting for the first time");
       /* we are doing the initial render -> set map to the range of the data in view */
       /* P.S. This is how upon initial loading the map zooms into the data */
       this.fitMapBoundsToData(demeData, demeIndices);
@@ -590,7 +579,6 @@ class Map extends React.Component {
 
     /* if we're animating, then we don't want to move the map all the time */
     if (this.props.animationPlayPauseButton === "Pause") {
-      console.log("Animating -> don't move map");
       return;
     }
 
@@ -606,7 +594,6 @@ class Map extends React.Component {
   }
 
   fitMapBoundsToData(demeData, demeIndices) {
-    console.log("\tfitMapBoundsToData");
     const SWNE = this.getGeoRange(demeData, demeIndices);
     // window.L available because leaflet() was called in componentWillMount
     this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);
@@ -637,7 +624,6 @@ class Map extends React.Component {
             style={{...tabSingle, ...styles.resetZoomButton}}
             onClick={() => {
               this.fitMapBoundsToData(this.state.demeData, this.state.demeIndices);
-              console.log("Button click")
               this.setState({userHasInteractedWithMap: false});
             }}
           >

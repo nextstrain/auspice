@@ -401,7 +401,6 @@ export const createDemeAndTransmissionData = (
   colorBy,
   dispatch
 ) => {
-  console.log("\tcreateDemeAndTransmissionData()");
   /*
     walk through nodes and collect all data
     for demeData we have:
