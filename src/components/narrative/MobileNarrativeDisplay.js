@@ -4,7 +4,6 @@ import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
-import { TOGGLE_NARRATIVE } from "../../actions/types";
 import {
   linkStyles,
   MobileBannerTop,
@@ -61,7 +60,7 @@ class MobileNarrativeDisplay extends React.Component {
     };
 
     this.exitNarrativeMode = () => {
-      this.props.dispatch({type: TOGGLE_NARRATIVE, display: false});
+      this.props.dispatch(changePage({ path: this.props.blocks[0].dataset, query: true }));
     };
 
     this.goToNextPage = () => {
