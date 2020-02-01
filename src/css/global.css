@@ -33,7 +33,7 @@ a, .link {
   color: #5097BA;
   text-decoration: none;
   cursor: pointer;
-  font-family: "Lato";
+  font-family: "Lato", "Helvetica Neue", "Helvetica", "sans-serif";
   font-weight: 400;
   font-size: 94%;
 }
