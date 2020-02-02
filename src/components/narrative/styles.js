@@ -144,7 +144,7 @@ export const linkStyles = { // would be better to get CSS specificity working
   color: "#5097BA",
   textDecoration: "none",
   cursor: "pointer",
-  fontFamily: "Lato",
+  fontFamily: `"Lato", "Helvetica Neue", "Helvetica", "sans-serif"`,
   fontWeight: "400",
   fontSize: "1.8em"
 };

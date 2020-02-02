@@ -15,7 +15,7 @@
 }
 
 #d3entropy .niceText {
-  font-family: "Lato";
+  font-family: "Lato", "Helvetica Neue", "Helvetica", "sans-serif";
   font-size: 14px;
   font-style: italic;
   color: var(--medGrey);
