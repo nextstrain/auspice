@@ -68,7 +68,7 @@ All URL queries modify the view away from the default settings -- if you change 
 | `s`        | Selected strain | `s=1_0199_PF` |
 | `clade`    | Labeled clade that tree is zoomed to | `clade=B3` (numeric values are buggy) |
 | `sidebar`  | Force the sidebar into a certain state | `sidebar=closed` or `sidebar=open` |
-
+| `onlyPanels` | Do not display the footer / header. Useful for iframes. | `onlyPanels` |
 
 
 **See this in action:**

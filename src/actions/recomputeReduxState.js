@@ -109,6 +109,10 @@ const modifyStateViaURLQuery = (state, query) => {
       state.sidebarOpen = false;
     }
   }
+  if ("onlyPanels" in query) {
+    state.showOnlyPanels = true;
+  }
+
   return state;
 };
 

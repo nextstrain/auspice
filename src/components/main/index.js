@@ -37,7 +37,8 @@ const Frequencies = lazy(() => import("../frequencies"));
   frequenciesLoaded: state.frequencies.loaded,
   metadataLoaded: state.metadata.loaded,
   treeLoaded: state.tree.loaded,
-  sidebarOpen: state.controls.sidebarOpen
+  sidebarOpen: state.controls.sidebarOpen,
+  showOnlyPanels: state.controls.showOnlyPanels
 }))
 class Main extends React.Component {
   constructor(props) {
@@ -130,7 +131,7 @@ class Main extends React.Component {
           {this.props.narrativeIsLoaded && !this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown") ?
             renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative) : null
           }
-          {this.props.displayNarrative ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
+          {this.props.displayNarrative || this.props.showOnlyPanels ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.panelsToDisplay.includes("tree") ? <Tree width={big.width} height={big.height} /> : null}
           {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
           {this.props.panelsToDisplay.includes("entropy") ?
@@ -145,7 +146,7 @@ class Main extends React.Component {
             </Suspense>) :
             null
           }
-          {this.props.displayNarrative ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
+          {this.props.displayNarrative|| this.props.showOnlyPanels ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.displayNarrative && this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown") ?
             <MainDisplayMarkdown width={calcUsableWidth(availableWidth, 1)}/> :
             null

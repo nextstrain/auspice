@@ -77,7 +77,8 @@ export const getDefaultControlsState = () => {
     zoomMin: undefined,
     zoomMax: undefined,
     branchLengthsToDisplay: "divAndDate",
-    sidebarOpen: initialSidebarState.sidebarOpen
+    sidebarOpen: initialSidebarState.sidebarOpen,
+    showOnlyPanels: false
   };
 };
 
