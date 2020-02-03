@@ -177,11 +177,20 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
   // to act appropriately, put them in 'query' under their own 'label'.
   // Ex: query.clade = {label: animal, selected: dog}   becomes   query.label = animal:dog
   // Need to run this whether it's from a click event ('clade') or from a URL load ('label')
-  if ((query["clade"] && query["clade"] !== "" && query["clade"]["label"]) ||
+  if ((query["clade"] && query["clade"] !== "") ||
       (query["label"] && query["label"] !== "")) {
     const label_parts = query["label"] ? query["label"].split(":") : "";
-    const label = query["clade"] ? query["clade"]["label"] : label_parts[0];
-    const selected = query["clade"] ? query["clade"]["selected"] : label_parts[1];
+
+    let label;
+    let selected;
+    // If old format ('?clade=B') need to recognise and act appropriately
+    if (typeof query["clade"] === 'string') {
+      label = "clade";
+      selected = query["clade"];
+    } else {
+      label = query["clade"] ? query["clade"]["label"] : label_parts[0];
+      selected = query["clade"] ? query["clade"]["selected"] : label_parts[1];
+    }
     delete query["clade"]; // get rid of query.clade
     query["label"] = selected ? ""+label+":"+selected : selected;
   }
