@@ -67,6 +67,8 @@ All URL queries modify the view away from the default settings -- if you change 
 | `n`        | Narrative page number | `n=1` goes to the first page |
 | `s`        | Selected strain | `s=1_0199_PF` |
 | `clade`    | Labeled clade that tree is zoomed to | `clade=B3` (numeric values are buggy) |
+| `sidebar`  | Force the sidebar into a certain state | `sidebar=closed` or `sidebar=open` |
+
 
 
 **See this in action:**

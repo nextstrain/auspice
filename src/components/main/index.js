@@ -11,6 +11,7 @@ import Footer from "../framework/footer";
 import DownloadModal from "../download/downloadModal";
 import { analyticsNewPage } from "../../util/googleAnalytics";
 import handleFilesDropped from "../../actions/filesDropped";
+import { TOGGLE_SIDEBAR } from "../../actions/types";
 import AnimationController from "../framework/animationController";
 import { calcUsableWidth } from "../../util/computeResponsive";
 import { renderNarrativeToggle } from "../narrative/renderNarrativeToggle";
@@ -35,27 +36,27 @@ const Frequencies = lazy(() => import("../frequencies"));
   browserDimensions: state.browserDimensions.browserDimensions,
   frequenciesLoaded: state.frequencies.loaded,
   metadataLoaded: state.metadata.loaded,
-  treeLoaded: state.tree.loaded
+  treeLoaded: state.tree.loaded,
+  sidebarOpen: state.controls.sidebarOpen
 }))
 class Main extends React.Component {
   constructor(props) {
     super(props);
-    /* window listener to see when width changes cross threshold to toggle sidebar */
+    /* window listner employed to toggle switch to mobile display.
+    NOTE: this used to toggle sidebar open boolean when that was stored
+    as state here, but his has since ben moved to redux state. The mobile
+    display should likewise be lifted to redux state */
     const mql = window.matchMedia(`(min-width: ${controlsHiddenWidth}px)`);
     mql.addListener(() => this.setState({
-      sidebarOpen: this.state.mql.matches,
       mobileDisplay: !this.state.mql.matches
     }));
     this.state = {
       mql,
-      sidebarOpen: mql.matches,
       mobileDisplay: !mql.matches,
       showSpinner: !(this.props.metadataLoaded && this.props.treeLoaded)
     };
     analyticsNewPage();
-    if (window.location.pathname.includes("gisaid")) { // TODO fix this hack by moving sidebar state to URL
-      this.state.sidebarOpen = false;
-    }
+    this.toggleSidebar = this.toggleSidebar.bind(this);
   }
   static propTypes = {
     dispatch: PropTypes.func.isRequired
@@ -63,13 +64,6 @@ class Main extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.state.showSpinner && nextProps.metadataLoaded && nextProps.treeLoaded) {
       this.setState({showSpinner: false});
-      return;
-    }
-    if (
-      (this.state.mql.matches) ||
-      (nextProps.displayNarrative && !this.props.displayNarrative)
-    ) {
-      this.setState({sidebarOpen: true});
     }
   }
   componentDidMount() {
@@ -78,6 +72,9 @@ class Main extends React.Component {
       e.preventDefault();
       return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
     }, false);
+  }
+  toggleSidebar() {
+    this.props.dispatch({type: TOGGLE_SIDEBAR, value: !this.props.sidebarOpen});
   }
   render() {
     if (this.state.showSpinner) {
@@ -101,9 +98,11 @@ class Main extends React.Component {
      * (a) all non-narrative displays (including on mobile)
      * (b) narrative display for non-mobile (i.e. display side-by-side)
      */
-    const {availableWidth, availableHeight, sidebarWidth, overlayStyles} = calcStyles(this.props.browserDimensions, this.props.displayNarrative, this.state.sidebarOpen, this.state.mobileDisplay);
-    const overlayHandler = () => {this.setState({sidebarOpen: false});};
-    const {big, chart} = calcPanelDims(this.props.panelLayout === "grid", this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);
+    const {availableWidth, availableHeight, sidebarWidth, overlayStyles} =
+      calcStyles(this.props.browserDimensions, this.props.displayNarrative, this.props.sidebarOpen, this.state.mobileDisplay);
+    const overlayHandler = () => {this.props.dispatch({type: TOGGLE_SIDEBAR, value: false});};
+    const {big, chart} =
+      calcPanelDims(this.props.panelLayout === "grid", this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);
     return (
       <span>
         <AnimationController/>
@@ -113,21 +112,21 @@ class Main extends React.Component {
           </ThemeProvider>
         </ErrorBoundary>
         <SidebarToggle
-          sidebarOpen={this.state.sidebarOpen}
+          sidebarOpen={this.props.sidebarOpen}
           mobileDisplay={this.state.mobileDisplay}
-          handler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
+          handler={this.toggleSidebar}
         />
         <Sidebar
-          sidebarOpen={this.state.sidebarOpen}
+          sidebarOpen={this.props.sidebarOpen}
           width={sidebarWidth}
           height={availableHeight}
           displayNarrative={this.props.displayNarrative}
           panelsToDisplay={this.props.panelsToDisplay}
           narrativeTitle={this.props.narrativeTitle}
           mobileDisplay={this.state.mobileDisplay}
-          navBarHandler={() => {this.setState({sidebarOpen: !this.state.sidebarOpen});}}
+          navBarHandler={this.toggleSidebar}
         />
-        <PanelsContainer width={availableWidth} height={availableHeight} left={this.state.sidebarOpen ? sidebarWidth : 0}>
+        <PanelsContainer width={availableWidth} height={availableHeight} left={this.props.sidebarOpen ? sidebarWidth : 0}>
           {this.props.narrativeIsLoaded && !this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown") ?
             renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative) : null
           }
