@@ -446,8 +446,15 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelect
     oldState.selectedStrain = tipSelected;
   }
   if (cladeSelected) {
-    const cladeSelectedIdx = cladeSelected === 'root' ? 0 : getIdxMatchingLabel(oldState.nodes, cladeSelected["label"], cladeSelected["selected"], dispatch);
-    oldState.selectedClade = cladeSelected;
+    // Check and fix old format 'clade=B' - in this case selectionClade is just 'B'
+    let safeCladeSelected = {};
+    if (typeof cladeSelected === "string" && cladeSelected !== 'root') {
+      safeCladeSelected = {label: "clade", selected: cladeSelected};
+    } else {
+      safeCladeSelected = cladeSelected;
+    }
+    const cladeSelectedIdx = safeCladeSelected === 'root' ? 0 : getIdxMatchingLabel(oldState.nodes, safeCladeSelected["label"], safeCladeSelected["selected"], dispatch);
+    oldState.selectedClade = safeCladeSelected;
     newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState); // tipSelectedIdx, oldState);
   }
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
