@@ -85,7 +85,7 @@ export const onBranchClick = function onBranchClick(d) {
     legalBranchLabels = Object.keys(d.n.branch_attrs.labels).filter((label) => label !== "aa");
   }
   // If has some, then could be clade label - but sort first
-  if (legalBranchLabels) {
+  if (legalBranchLabels && legalBranchLabels.length) {
     const availableBranchLabels = this.props.tree.availableBranchLabels;
     // sort the possible branch labels by the order of those available on the tree
     legalBranchLabels.sort((a, b) =>
