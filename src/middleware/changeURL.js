@@ -88,7 +88,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
       query.s = action.selectedStrain ? action.selectedStrain : undefined;
-      query.clade = action.cladeName ? action.cladeName : undefined;
+      query.label = action.cladeName ? action.cladeName : undefined;
       break;
     }
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
@@ -174,28 +174,6 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
   }
 
-  /* small modifications to desired pathname / query */
-  // Custom labels come in under 'query.clade' but have their own label (may not be 'clade')
-  // to act appropriately, put them in 'query' under their own 'label'.
-  // Ex: query.clade = {label: animal, selected: dog}   becomes   query.label = animal:dog
-  // Need to run this whether it's from a click event ('clade') or from a URL load ('label')
-  if ((query["clade"] && query["clade"] !== "") ||
-      (query["label"] && query["label"] !== "")) {
-    const label_parts = query["label"] ? query["label"].split(":") : "";
-
-    let label;
-    let selected;
-    // If old format ('?clade=B') need to recognise and act appropriately
-    if (typeof query["clade"] === 'string') {
-      label = "clade";
-      selected = query["clade"];
-    } else {
-      label = query["clade"] ? query["clade"]["label"] : label_parts[0];
-      selected = query["clade"] ? query["clade"]["selected"] : label_parts[1];
-    }
-    delete query["clade"]; // get rid of query.clade
-    query["label"] = selected ? ""+label+":"+selected : selected;
-  }
   Object.keys(query).filter((q) => query[q] === "").forEach((k) => delete query[k]);
   let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/').replace(/%3A/g, ':');
   if (search) {search = "?" + search;}

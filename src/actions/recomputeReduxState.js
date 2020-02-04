@@ -436,7 +436,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   return state;
 };
 
-const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelected, controlsState, dispatch) => {
+const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, zoomSelected, controlsState, dispatch) => {
   /* calculate new branch thicknesses & visibility */
   let tipSelectedIdx = 0;
   /* check if the query defines a strain to be selected */
@@ -445,17 +445,15 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelect
     tipSelectedIdx = strainNameToIdx(oldState.nodes, tipSelected);
     oldState.selectedStrain = tipSelected;
   }
-  if (cladeSelected) {
+  if (zoomSelected) {
     // Check and fix old format 'clade=B' - in this case selectionClade is just 'B'
-    let safeCladeSelected = {};
-    if (typeof cladeSelected === "string" && cladeSelected !== 'root') {
-      safeCladeSelected = {label: "clade", selected: cladeSelected};
-    } else {
-      safeCladeSelected = cladeSelected;
-    }
-    const cladeSelectedIdx = safeCladeSelected === 'root' ? 0 : getIdxMatchingLabel(oldState.nodes, safeCladeSelected["label"], safeCladeSelected["selected"], dispatch);
-    oldState.selectedClade = safeCladeSelected;
+    const [labelName, labelValue] = zoomSelected.split(":");
+    const cladeSelectedIdx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
+    oldState.selectedClade = zoomSelected;
     newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState); // tipSelectedIdx, oldState);
+  } else {
+    oldState.selectedClade = undefined;
+    newIdxRoot = applyInViewNodesToTree(0, oldState); // tipSelectedIdx, oldState);
   }
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
     oldState,
@@ -659,30 +657,25 @@ export const createStateFromQueryOrJSONs = ({
     tree.nodeColors = nodeColors;
   }
 
-  // 'clade' zoom can now be under any label - check for first available query key that
-  // matches available branch labels, and convert it to be 'query.clade'
-  // If the 'label' doesnt exist on the tree (ex: in label=clade:T, if 'clade' doesn't exist) then
-  // the URL is cleared as well as the tree doing nothing.
-  // However, if the 'selection' doesnt exist on the tree (ex: in label=clade:T, if 'clade' exists but 'T' doesnt)
-  // then the tree does nothing and the URL is not cleared. (This is current behaviour.)
-  const queryKeys = Object.keys(query);
-  if (queryKeys.includes("label")) {
-    const label_parts = query["label"].split(":");
-    const possibleClade = label_parts[0];
-    if (tree.availableBranchLabels.includes(possibleClade)) {
-      query.clade = {label: possibleClade, selected: label_parts[1]};
-    } else {
-      query.clade = undefined;
-      delete query["label"];
+  /* parse the query.label / query.clade */
+  if (query.clade) {
+    if (!query.label) query.label = `clade:${query.clade}`;
+    delete query.clade;
+  }
+  if (query.label) {
+    if (!query.label.includes(":")) {
+      console.error("Defined a label without ':' separator.");
+      delete query.label;
+    }
+    if (!tree.availableBranchLabels.includes(query.label.split(":")[0])) {
+      console.error(`Label name ${query.label.split(":")[0]} doesn't exist`);
+      delete query.label;
     }
   }
 
-  if (query.clade) {
-    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, query.clade, controls, dispatch);
-  } else { /* if not specifically given in URL, zoom to root */
-    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, undefined, controls, dispatch);
-  }
-  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, undefined, controls, dispatch);
+  /* if query.label is undefined then we intend to zoom to the root */
+  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, query.label, controls, dispatch);
+
   if (treeToo && treeToo.loaded) {
     treeToo.nodeColorsVersion = tree.nodeColorsVersion;
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);

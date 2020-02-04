@@ -93,7 +93,7 @@ export const onBranchClick = function onBranchClick(d) {
     );
     // then use the first!
     const key = legalBranchLabels[0];
-    cladeSelected = {label: key, selected: d.n.branch_attrs.labels[key]};
+    cladeSelected = `${key}:${d.n.branch_attrs.labels[key]}`;
   }
   if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
   else root[1] = d.n.arrayIdx;
