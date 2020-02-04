@@ -21,7 +21,7 @@ export const applyInViewNodesToTree = (idx, tree) => {
     } else {
       applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
     }
-  } else if (idx !== tree.idxOfInViewRootNode) { /* if shell isn't set yet - have set clade in URL */
+  } else {
     tree.nodes.forEach((d) => {
       d.inView = false;
     });
