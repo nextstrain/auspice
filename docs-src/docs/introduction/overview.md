@@ -23,7 +23,7 @@ For a more formal introduction to auspice & the wider nextstrain project, please
 
 
 ![splash](assets/v2-pie-charts.gif)
-*Exploring Enterovirus d68 by chaning between three different colorings: clades, age-ranges & mutations at a certain genome position.*
+*Exploring Enterovirus d68 by changing between three different colorings: clades, age-ranges & mutations at a certain genome position.*
 
 
 ## License and Copyright

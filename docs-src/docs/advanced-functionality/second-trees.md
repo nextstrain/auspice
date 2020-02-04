@@ -1,5 +1,5 @@
 ---
-title: "Displaying mutliple trees"
+title: "Displaying multiple trees"
 ---
 
 Auspice has the ability to display two trees side-by-side, and to draw lines between tips with the same name (aka tanglegrams).
