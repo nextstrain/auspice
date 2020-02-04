@@ -100,6 +100,10 @@ const modifyStateViaURLQuery = (state, query) => {
   } else {
     state.animationPlayPauseButton = "Play";
   }
+  if (query.branchLabel) {
+    state.selectedBranchLabel = query.branchLabel;
+    // do not modify the default (only the JSON can do this)
+  }
   return state;
 };
 
@@ -164,8 +168,8 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate"];
-    const expectedTypes = ["string", "string", "string", "string", "boolean"];
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel"];
+    const expectedTypes = ["string", "string", "string", "string", "boolean", "string"];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (metadata.displayDefaults[keysToCheckFor[i]]) {
@@ -310,7 +314,13 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   state.distanceMeasure = state.branchLengthsToDisplay === "divOnly" ? "div" :
     state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
 
-  state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
+  /* if clade is available as a branch label, then set this as the "default". This
+  is largely due to historical reasons. Note that it *can* and *will* be overridden
+  by JSON display_defaults and URL query */
+  if (tree.availableBranchLabels.indexOf("clade") !== -1) {
+    state.defaults.selectedBranchLabel = "clade";
+    state.selectedBranchLabel = "clade";
+  }
 
   state.temporalConfidence = getTraitFromNode(tree.nodes[0], "num_date", {confidence: true}) ?
     {exists: true, display: true, on: false} :
@@ -393,6 +403,13 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
     }
   } else {
     console.warn("JSONs did not include `geoResolutions`");
+  }
+
+  /* show label */
+  if (state.selectedBranchLabel && !tree.availableBranchLabels.includes(state.selectedBranchLabel)) {
+    console.error("Can't set selected branch label to ", state.selectedBranchLabel);
+    state.selectedBranchLabel = "none";
+    state.defaults.selectedBranchLabel = "none";
   }
 
   /* temporalConfidence */
@@ -551,6 +568,7 @@ const createMetadataStateFromJSON = (json) => {
       color_by: "colorBy",
       geo_resolution: "geoResolution",
       distance_measure: "distanceMeasure",
+      branch_label: "selectedBranchLabel",
       map_triplicate: "mapTriplicate",
       layout: "layout"
     };
