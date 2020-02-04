@@ -92,7 +92,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
       tree,
       controls,
       {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-      {tipSelectedIdx: tipIdx1, validIdxRoot: rootIdxTree1}
+      {tipSelectedIdx: tipIdx1}
     );
     const dispatchObj = {
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
@@ -113,7 +113,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
         treeToo,
         controls,
         {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-        {tipSelectedIdx: tipIdx2, validIdxRoot: rootIdxTree2}
+        {tipSelectedIdx: tipIdx2}
       );
       dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility, dataToo.visibility);
       dispatchObj.visibilityToo = dataToo.visibility;

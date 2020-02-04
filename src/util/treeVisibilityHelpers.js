@@ -65,14 +65,14 @@ export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
 /** calcBranchThickness **
 * returns an array of node (branch) thicknesses based on the tipCount at each node
 * If the node isn't visible, the thickness is 1.
+* Relies on the `tipCount` property of the nodes having been updated.
 * Pure.
 * @param nodes - JSON nodes
 * @param visibility - visibility array (1-1 with nodes)
-* @param rootIdx - nodes index of the currently in-view root
 * @returns array of thicknesses (numeric)
 */
-const calcBranchThickness = (nodes, visibility, rootIdx) => {
-  let maxTipCount = nodes[rootIdx].tipCount;
+const calcBranchThickness = (nodes, visibility) => {
+  let maxTipCount = nodes[0].tipCount;
   /* edge case: no tips selected */
   if (!maxTipCount) {
     maxTipCount = 1;
@@ -197,7 +197,7 @@ const calcVisibility = (tree, controls, dates) => {
   return NODE_VISIBLE;
 };
 
-export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
+export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {tipSelectedIdx = 0} = {}) => {
   const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);
@@ -205,7 +205,7 @@ export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idx
   return {
     visibility: visibility,
     visibilityVersion: tree.visibilityVersion + 1,
-    branchThickness: calcBranchThickness(tree.nodes, visibility, idxOfInViewRootNode),
+    branchThickness: calcBranchThickness(tree.nodes, visibility),
     branchThicknessVersion: tree.branchThicknessVersion + 1
   };
 };

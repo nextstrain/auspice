@@ -476,7 +476,7 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, zoomSelecte
     oldState,
     controlsState,
     {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric},
-    {tipSelectedIdx, validIdxRoot: newIdxRoot}
+    {tipSelectedIdx}
   );
 
   const newState = Object.assign({}, oldState, visAndThicknessData);
