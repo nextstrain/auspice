@@ -677,7 +677,9 @@ export const createStateFromQueryOrJSONs = ({
 
   /* parse the query.label / query.clade */
   if (query.clade) {
-    if (!query.label) query.label = `clade:${query.clade}`;
+    if (!query.label && query.clade !== "root") {
+      query.label = `clade:${query.clade}`;
+    }
     delete query.clade;
   }
   if (query.label) {
