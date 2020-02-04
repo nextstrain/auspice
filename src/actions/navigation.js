@@ -70,7 +70,7 @@ export const changePage = ({
   }
 
   /* the path (dataset) remains the same... but the state may be modulated by the query */
-  const newState = createStateFromQueryOrJSONs({oldState, query});
+  const newState = createStateFromQueryOrJSONs({oldState, query, dispatch});
   dispatch({
     type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
     ...newState,
@@ -92,7 +92,7 @@ export const goTo404 = (errorMessage) => ({
 
 export const EXPERIMENTAL_showMainDisplayMarkdown = ({query, queryToDisplay}) =>
   (dispatch, getState) => {
-    const newState = createStateFromQueryOrJSONs({oldState: getState(), query});
+    const newState = createStateFromQueryOrJSONs({oldState: getState(), query, dispatch});
     newState.controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
     dispatch({
       type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
