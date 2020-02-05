@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="en"><head><meta charSet="utf-8"/><meta http-equiv="X-UA-Compatible" content="IE=edge"/><title>View Settings · Auspice</title><meta name="viewport" content="width=device-width"/><meta name="generator" content="Docusaurus"/><meta name="description" content="View settings refer to things such as how we display the tree (radal? root-to-tip?), what panels we display (map? tree? both?), what colouring we are using etcetera."/><meta name="docsearch:language" content="en"/><meta property="og:title" content="View Settings · Auspice"/><meta property="og:type" content="website"/><meta property="og:url" content="https://nextstrain.github.io/auspice/"/><meta property="og:description" content="View settings refer to things such as how we display the tree (radal? root-to-tip?), what panels we display (map? tree? both?), what colouring we are using etcetera."/><meta property="og:image" content="https://nextstrain.github.io/auspice/img/icon.svg"/><meta name="twitter:card" content="summary"/><meta name="twitter:image" content="https://nextstrain.github.io/auspice/img/icon.svg"/><link rel="shortcut icon" href="/auspice/img/favicon.ico"/><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/solarized-dark.min.css"/><script type="text/javascript" src="https://buttons.github.io/buttons.js"></script><script src="/auspice/js/scrollSpy.js"></script><link rel="stylesheet" href="/auspice/css/main.css"/><script src="/auspice/js/codetabs.js"></script></head><body class="sideNavVisible separateOnPageNav"><div class="fixedHeaderContainer"><div class="headerWrapper wrapper"><header><a href="/auspice/"><img class="logo" src="/auspice/img/logo-light.svg" alt="Auspice"/><h2 class="headerTitleWithLogo">Auspice</h2></a><div class="navigationWrapper navigationSlider"><nav class="slidingNav"><ul class="nav-site nav-site-internal"><li class="siteNavGroupActive"><a href="/auspice/introduction/overview" target="_self">Docs</a></li></ul></nav></div></header></div></div><div class="navPusher"><div class="docMainWrapper wrapper"><div class="docsNavContainer" id="docsNav"><nav class="toc"><div class="toggleNav"><section class="navWrapper wrapper"><div class="navBreadcrumb wrapper"><div class="navToggle" id="navToggler"><div class="hamburger-menu"><div class="line1"></div><div class="line2"></div><div class="line3"></div></div></div><h2><i>›</i><span>Advanced Functionality</span></h2><div class="tocToggler" id="tocToggler"><i class="icon-toc"></i></div></div><div class="navGroups"><div class="navGroup"><h3 class="navGroupCategoryTitle">Introduction</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/introduction/overview">Overview</a></li><li class="navListItem"><a class="navItem" href="/auspice/introduction/install">Install Auspice</a></li><li class="navListItem"><a class="navItem" href="/auspice/introduction/how-to-run">How to Run Auspice</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Advanced Functionality</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/advanced-functionality/second-trees">Displaying multiple trees</a></li><li class="navListItem navListItemActive"><a class="navItem" href="/auspice/advanced-functionality/view-settings">View Settings</a></li><li class="navListItem"><a class="navItem" href="/auspice/advanced-functionality/misc">Miscellaneous</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Customising Auspice</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/customise-client/introduction">Customising Auspice</a></li><li class="navListItem"><a class="navItem" href="/auspice/customise-client/api">Client Customisation API</a></li><li class="navListItem"><a class="navItem" href="/auspice/customise-client/requests">Requests Made from the Client</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Using a Custom Server</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/server/introduction">Auspice servers</a></li><li class="navListItem"><a class="navItem" href="/auspice/server/api">Server API</a></li><li class="navListItem"><a class="navItem" href="/auspice/server/authentication">Authentication</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Narratives</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/narratives/introduction">Communicating Results Using Narratives</a></li><li class="navListItem"><a class="navItem" href="/auspice/narratives/how-to-write">Writing a Narrative</a></li><li class="navListItem"><a class="navItem" href="/auspice/narratives/create-pdf">Converting a narrative to PDF</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Release Notes</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/releases/changelog">Changelog</a></li><li class="navListItem"><a class="navItem" href="/auspice/releases/v2">Auspice Version 2.0</a></li></ul></div><div class="navGroup"><h3 class="navGroupCategoryTitle">Contributing</h3><ul class=""><li class="navListItem"><a class="navItem" href="/auspice/contributing/overview">Contributing to Auspice</a></li></ul></div></div></section></div><script>
+            var coll = document.getElementsByClassName('collapsible');
+            var checkActiveCategory = true;
+            for (var i = 0; i < coll.length; i++) {
+              var links = coll[i].nextElementSibling.getElementsByTagName('*');
+              if (checkActiveCategory){
+                for (var j = 0; j < links.length; j++) {
+                  if (links[j].classList.contains('navListItemActive')){
+                    coll[i].nextElementSibling.classList.toggle('hide');
+                    coll[i].childNodes[1].classList.toggle('rotate');
+                    checkActiveCategory = false;
+                    break;
+                  }
+                }
+              }
+
+              coll[i].addEventListener('click', function() {
+                var arrow = this.childNodes[1];
+                arrow.classList.toggle('rotate');
+                var content = this.nextElementSibling;
+                content.classList.toggle('hide');
+              });
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+              createToggler('#navToggler', '#docsNav', 'docsSliderActive');
+              createToggler('#tocToggler', 'body', 'tocActive');
+
+              var headings = document.querySelector('.toc-headings');
+              headings && headings.addEventListener('click', function(event) {
+                var el = event.target;
+                while(el !== headings){
+                  if (el.tagName === 'A') {
+                    document.body.classList.remove('tocActive');
+                    break;
+                  } else{
+                    el = el.parentNode;
+                  }
+                }
+              }, false);
+
+              function createToggler(togglerSelector, targetSelector, className) {
+                var toggler = document.querySelector(togglerSelector);
+                var target = document.querySelector(targetSelector);
+
+                if (!toggler) {
+                  return;
+                }
+
+                toggler.onclick = function(event) {
+                  event.preventDefault();
+
+                  target.classList.toggle(className);
+                };
+              }
+            });
+        </script></nav></div><div class="container mainContainer"><div class="wrapper"><div class="post"><header class="postHeader"><h1 class="postHeaderTitle">View Settings</h1></header><article><div><span><p>View settings refer to things such as how we display the tree (radal? root-to-tip?), what panels we display (map? tree? both?), what colouring we are using etcetera.
+There are three ways these can be controlled:</p>
+<ol>
+<li>The defaults are configured by the dataset creators (and stored as &quot;display defaults&quot; in the dataset JSON).
+This allows</li>
+<li>Interacting with the visualisation (e.g. changing the color-by) modifies the view, and the URL is changed accordingly.
+For instance, change <a href="https://nextstrain.org/zika">nextstrain.org/zika</a> to have a color-by of author, and you'll see the URL silently update to <a href="https://nextstrain.org/zika?c=author">?c=author</a>.
+If you reload the page or share this URL, then the color-by is set via this URL.</li>
+<li>Narratives, in which the narrative author chooses different &quot;views&quot; for each page, are created by associating each page with a URL (see (2)) which defines a specific view into the data.</li>
+</ol>
+<h2><a class="anchor" aria-hidden="true" id="auspice-hardcoded-defaults"></a><a href="#auspice-hardcoded-defaults" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Auspice (hardcoded) defaults</h2>
+<p>Auspice has some hardcoded defaults, largely for historical reasons.
+Each of these can be overridden by the JSON <code>display_defaults</code>, and then the view can be further modified by the URL query (see below).</p>
+<ul>
+<li>Default phylogeny layout is rectangular.</li>
+<li>Default phylogeny distance measure is time, if available.</li>
+<li>Default geographic resolution is &quot;country&quot;, if available.</li>
+<li>Default colouring is &quot;country&quot;, if available.</li>
+<li>Default branch labelling is &quot;clade&quot;, if available.</li>
+</ul>
+<h2><a class="anchor" aria-hidden="true" id="dataset-json-configurable-defaults"></a><a href="#dataset-json-configurable-defaults" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>Dataset (JSON) configurable defaults</h2>
+<p>These are exported as the (optional) property of the dataset JSON <code>meta.display_defaults</code> (see JSON schema <a href="https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json">here</a>).
+The defaults (as set here) will be what are displayed when the page is loaded with no URL queries, but be aware that URL queries (see below) can modify how the view looks.
+For instance, if you set <code>display_defaults.color_by</code> to <code>country</code>, but load the page with <code>?c=region</code> then the view will be coloured by region.</p>
+<table>
+<thead>
+<tr><th>Property</th><th>Description</th><th>Example</th></tr>
+</thead>
+<tbody>
+<tr><td><code>color_by</code></td><td>Colouring</td><td>&quot;country&quot;</td></tr>
+<tr><td><code>geo_resolution</code></td><td>Geographic resolution</td><td>&quot;country&quot;</td></tr>
+<tr><td><code>distance_measure</code></td><td>Phylogeny x-axis measure</td><td>&quot;div&quot; or &quot;num_date&quot;</td></tr>
+<tr><td><code>map_triplicate</code></td><td>Should the map repeat, so that you can pan further in each direction?</td><td>Boolean</td></tr>
+<tr><td><code>layout</code></td><td>Tree layout</td><td>&quot;rect&quot;, &quot;radial&quot;, &quot;clock&quot; or &quot;unrooted</td></tr>
+<tr><td><code>branch_label</code></td><td>Which set of branch labels are to be displayed</td><td>&quot;aa&quot;, &quot;lineage&quot;</td></tr>
+</tbody>
+</table>
+<p>Furthermore, a JSON property <code>meta.panels</code> lists which panels auspice displays.
+If this is not included, then auspice tries to display as many as possible.
+See the <a href="https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json">JSON schema</a> for more details.</p>
+<p><strong>See this in action:</strong></p>
+<p>For instance, go to <a href="https://nextstrain.org/flu/seasonal/h3n2/ha/2y">nextstrain.org/flu/seasonal/h3n2/ha/2y</a> and you'll see how the colouring is &quot;Clade&quot; -- this has been set via the <code>display_defaults</code> in the JSON.</p>
+<h2><a class="anchor" aria-hidden="true" id="url-query-options"></a><a href="#url-query-options" aria-hidden="true" class="hash-link"><svg class="hash-link-icon" aria-hidden="true" height="16" version="1.1" viewBox="0 0 16 16" width="16"><path fill-rule="evenodd" d="M4 9h1v1H4c-1.5 0-3-1.69-3-3.5S2.55 3 4 3h4c1.45 0 3 1.69 3 3.5 0 1.41-.91 2.72-2 3.25V8.59c.58-.45 1-1.27 1-2.09C10 5.22 8.98 4 8 4H4c-.98 0-2 1.22-2 2.5S3 9 4 9zm9-3h-1v1h1c1 0 2 1.22 2 2.5S13.98 12 13 12H9c-.98 0-2-1.22-2-2.5 0-.83.42-1.64 1-2.09V6.25c-1.09.53-2 1.84-2 3.25C6 11.31 7.55 13 9 13h4c1.45 0 3-1.69 3-3.5S14.5 6 13 6z"></path></svg></a>URL query options</h2>
+<p>URL queries are the part of the URL coming after the <code>?</code> character, and typically consist of <code>key=value</code> -- for instance <a href="https://nextstrain.org/zika?c=author">nextstrain.org/zika?c=author</a> has a query with a key <code>c</code> and value <code>author</code>.
+Multiple queries are separated by the <code>&amp;</code> character.
+All URL queries modify the view away from the default settings -- if you change back to a default then that URL query will dissapear.</p>
+<table>
+<thead>
+<tr><th>Key</th><th>Description</th><th>Example(s)</th></tr>
+</thead>
+<tbody>
+<tr><td><code>c</code></td><td>Colouring to use</td><td><code>c=author</code>, <code>c=region</code></td></tr>
+<tr><td><code>r</code></td><td>Geographic resolution</td><td><code>r=region</code></td></tr>
+<tr><td><code>m</code></td><td>Phylogeny x-axis measure</td><td><code>m=div</code></td></tr>
+<tr><td><code>l</code></td><td>Phylogeny layout</td><td><code>l=clock</code></td></tr>
+<tr><td><code>dmin</code></td><td>Temporal range (minimum)</td><td><code>dmin=2008-05-13</code></td></tr>
+<tr><td><code>dmax</code></td><td>Temporal range (maximum)</td><td><code>dmax=2010-05-13</code></td></tr>
+<tr><td><code>f_&lt;name&gt;</code></td><td>Data filter. Multiple values per key are <code>,</code> separated.</td><td><code>f_region=Oceania</code></td></tr>
+<tr><td><code>d</code></td><td>List of panels to display, <code>,</code> separated</td><td><code>d=tree,map</code></td></tr>
+<tr><td><code>p</code></td><td>Panel layout (buggy!)</td><td><code>p=full</code>, <code>p=grid</code></td></tr>
+<tr><td><code>gmin</code></td><td>Entropy panel zoom (minimum) bound</td><td><code>gmin=1000</code></td></tr>
+<tr><td><code>gmin</code></td><td>Entropy panel zoom (maximum) bound</td><td><code>gmax=2000</code></td></tr>
+<tr><td><code>animate</code></td><td>Animation settings</td><td></td></tr>
+<tr><td><code>n</code></td><td>Narrative page number</td><td><code>n=1</code> goes to the first page</td></tr>
+<tr><td><code>s</code></td><td>Selected strain</td><td><code>s=1_0199_PF</code></td></tr>
+<tr><td><code>branchLabel</code></td><td>Branch labels to display</td><td><code>branchLabel=aa</code></td></tr>
+<tr><td><code>label</code></td><td>Labeled branch that tree is zoomed to</td><td><code>label=clade:B3</code>, <code>label=lineage:relapse</code></td></tr>
+<tr><td><code>clade</code></td><td><em>DEPRECATED</em> Labeled clade that tree is zoomed to</td><td><code>clade=B3</code> should now become <code>label=clade:B3</code></td></tr>
+<tr><td><code>sidebar</code></td><td>Force the sidebar into a certain state</td><td><code>sidebar=closed</code> or <code>sidebar=open</code></td></tr>
+<tr><td><code>onlyPanels</code></td><td>Do not display the footer / header. Useful for iframes.</td><td><code>onlyPanels</code></td></tr>
+</tbody>
+</table>
+<p><strong>See this in action:</strong></p>
+<p>For instance, go to <a href="https://nextstrain.org/flu/seasonal/h3n2/ha/2y?c=num_date&amp;d=tree,map&amp;m=div&amp;p=grid&amp;r=region">nextstrain.org/flu/seasonal/h3n2/ha/2y?c=num_date&amp;d=tree,map&amp;m=div&amp;r=region</a> and you'll see how we've changed the coloring to a temporal scale (<code>c=num_date</code>), we're only showing the tree &amp; map panels (<code>d=tree,map</code>), the tree x-axis is divergence (<code>m=div</code>) and the map resolution is region (<code>r=region</code>).</p>
+</span></div></article></div><div class="docLastUpdate"><em>Last updated on 2/5/2020</em></div><div class="docs-prevnext"><a class="docs-prev button" href="/auspice/advanced-functionality/second-trees"><span class="arrow-prev">← </span><span>Displaying multiple trees</span></a><a class="docs-next button" href="/auspice/advanced-functionality/misc"><span>Miscellaneous</span><span class="arrow-next"> →</span></a></div></div></div><nav class="onPageNav"><ul class="toc-headings"><li><a href="#auspice-hardcoded-defaults">Auspice (hardcoded) defaults</a></li><li><a href="#dataset-json-configurable-defaults">Dataset (JSON) configurable defaults</a></li><li><a href="#url-query-options">URL query options</a></li></ul></nav></div><footer class="nav-footer" id="footer"><section class="sitemap"><div><a href="/auspice/"><img style="padding-left:20px" src="/auspice/img/logo-light.svg" alt="Auspice" width="66" height="58"/></a></div><div><h5>External Links</h5><a href="https://github.com/nextstrain/auspice">GitHub repo</a><a href="https://www.npmjs.com/package/auspice">NPM package</a><a href="https://nextstrain.org">Nextstrain</a></div><div><h5>Contact Us</h5><a href="mailto:hello@nextstrain.org">email</a><a href="https://twitter.com/hamesjadfield">twitter</a></div></section><section class="copyright">Website built by <a href="https://twitter.com/hamesjadfield">James Hadfield</a> using <a href="https://docusaurus.io">Docusaurus</a></section><section class="copyright">If you use auspice, please cite <a href="https://doi.org/10.1093/bioinformatics/bty407">Hadfield et al., 2018</a></section><section class="copyright">Copyright © 2014-2020 Richard Neher &amp; Trevor Bedford</section></footer></div></body></html>
