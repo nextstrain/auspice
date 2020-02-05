@@ -22,11 +22,9 @@ export const calcPanelDims = (grid, panels, narrativeIsDisplayed, availableWidth
     }
     /* widths */
     if (panels.includes("map") && panels.includes("tree") && !grid) {
-      console.warn("narrative mode specified full display but we have both map & tree");
       bigWidthFraction = 0.5;
     }
     if (grid && (!panels.includes("map") || !panels.includes("tree"))) {
-      console.warn("narrative mode specified grid display but we are not showing both map & tree");
       bigWidthFraction = 1;
     }
   }

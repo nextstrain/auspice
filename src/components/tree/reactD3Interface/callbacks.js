@@ -75,12 +75,25 @@ export const onBranchClick = function onBranchClick(d) {
   if (this.props.narrativeMode) return;
   const root = [undefined, undefined];
   let cladeSelected;
-  if (
-    d.n.branch_attrs &&
-    d.n.branch_attrs.labels !== undefined &&
-    d.n.branch_attrs.labels.clade !== undefined
-  ) {
-    cladeSelected = d.n.branch_attrs.labels.clade;
+  // Branches with multiple labels will be used in the order specified by this.props.tree.availableBranchLabels
+  // (The order of the drop-down on the menu)
+  // Can't use AA mut lists as zoom labels currently - URL is bad, but also, means every node has a label, and many conflict...
+  let legalBranchLabels;
+  // Check has some branch labels, and remove 'aa' ones.
+  if (d.n.branch_attrs &&
+    d.n.branch_attrs.labels !== undefined) {
+    legalBranchLabels = Object.keys(d.n.branch_attrs.labels).filter((label) => label !== "aa");
+  }
+  // If has some, then could be clade label - but sort first
+  if (legalBranchLabels && legalBranchLabels.length) {
+    const availableBranchLabels = this.props.tree.availableBranchLabels;
+    // sort the possible branch labels by the order of those available on the tree
+    legalBranchLabels.sort((a, b) =>
+      availableBranchLabels.indexOf(a) - availableBranchLabels.indexOf(b)
+    );
+    // then use the first!
+    const key = legalBranchLabels[0];
+    cladeSelected = `${key}:${d.n.branch_attrs.labels[key]}`;
   }
   if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
   else root[1] = d.n.arrayIdx;

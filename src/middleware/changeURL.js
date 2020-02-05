@@ -39,6 +39,11 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       if (query.n === 0) delete query.n;
       if (query.tt) delete query.tt;
       break;
+    case types.CHANGE_BRANCH_LABEL:
+      query.branchLabel = state.controls.defaults.selectedBranchLabel === action.value ?
+        undefined :
+        action.value;
+      break;
     case types.CHANGE_ZOOM:
       /* entropy panel genome zoom coordinates */ 
       query.gmin = action.zoomc[0] === state.controls.absoluteZoomMin ? undefined : action.zoomc[0];
@@ -88,7 +93,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS: {
       query.s = action.selectedStrain ? action.selectedStrain : undefined;
-      query.clade = action.cladeName ? action.cladeName : undefined;
+      query.label = action.cladeName ? action.cladeName : undefined;
       break;
     }
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
@@ -174,9 +179,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
   }
 
-  /* small modifications to desired pathname / query */
   Object.keys(query).filter((q) => query[q] === "").forEach((k) => delete query[k]);
-  let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/');
+  let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/').replace(/%3A/g, ':');
   if (search) {search = "?" + search;}
   if (!pathname.startsWith("/")) {pathname = "/" + pathname;}
 

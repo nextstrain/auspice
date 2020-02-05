@@ -20,7 +20,7 @@ Each of these can be overridden by the JSON `display_defaults`, and then the vie
 * Default phylogeny distance measure is time, if available.
 * Default geographic resolution is "country", if available.
 * Default colouring is "country", if available.
-
+* Default branch labelling is "clade", if available.
 
 ## Dataset (JSON) configurable defaults
 
@@ -35,6 +35,7 @@ For instance, if you set `display_defaults.color_by` to `country`, but load the 
 | `distance_measure`  | Phylogeny x-axis measure     | "div" or "num_date" |
 | `map_triplicate`    | Should the map repeat, so that you can pan further in each direction? | Boolean |
 | `layout`            | Tree layout        | "rect", "radial", "clock" or "unrooted |
+| `branch_label`      | Which set of branch labels are to be displayed | "aa", "lineage" |
 
 Furthermore, a JSON property `meta.panels` lists which panels auspice displays.
 If this is not included, then auspice tries to display as many as possible.
@@ -66,7 +67,9 @@ All URL queries modify the view away from the default settings -- if you change 
 | `animate`  | Animation settings | |
 | `n`        | Narrative page number | `n=1` goes to the first page |
 | `s`        | Selected strain | `s=1_0199_PF` |
-| `clade`    | Labeled clade that tree is zoomed to | `clade=B3` (numeric values are buggy) |
+| `branchLabel` | Branch labels to display | `branchLabel=aa` |
+| `label`    | Labeled branch that tree is zoomed to | `label=clade:B3`, `label=lineage:relapse` |
+| `clade`    | _DEPRECATED_ Labeled clade that tree is zoomed to | `clade=B3` should now become `label=clade:B3` |
 
 
 **See this in action:**

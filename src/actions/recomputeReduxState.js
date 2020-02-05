@@ -100,6 +100,10 @@ const modifyStateViaURLQuery = (state, query) => {
   } else {
     state.animationPlayPauseButton = "Play";
   }
+  if (query.branchLabel) {
+    state.selectedBranchLabel = query.branchLabel;
+    // do not modify the default (only the JSON can do this)
+  }
   return state;
 };
 
@@ -164,8 +168,8 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate"];
-    const expectedTypes = ["string", "string", "string", "string", "boolean"];
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel"];
+    const expectedTypes = ["string", "string", "string", "string", "boolean", "string"];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (metadata.displayDefaults[keysToCheckFor[i]]) {
@@ -310,7 +314,13 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   state.distanceMeasure = state.branchLengthsToDisplay === "divOnly" ? "div" :
     state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
 
-  state.selectedBranchLabel = tree.availableBranchLabels.indexOf("clade") !== -1 ? "clade" : "none";
+  /* if clade is available as a branch label, then set this as the "default". This
+  is largely due to historical reasons. Note that it *can* and *will* be overridden
+  by JSON display_defaults and URL query */
+  if (tree.availableBranchLabels.indexOf("clade") !== -1) {
+    state.defaults.selectedBranchLabel = "clade";
+    state.selectedBranchLabel = "clade";
+  }
 
   state.temporalConfidence = getTraitFromNode(tree.nodes[0], "num_date", {confidence: true}) ?
     {exists: true, display: true, on: false} :
@@ -395,6 +405,13 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
     console.warn("JSONs did not include `geoResolutions`");
   }
 
+  /* show label */
+  if (state.selectedBranchLabel && !tree.availableBranchLabels.includes(state.selectedBranchLabel)) {
+    console.error("Can't set selected branch label to ", state.selectedBranchLabel);
+    state.selectedBranchLabel = "none";
+    state.defaults.selectedBranchLabel = "none";
+  }
+
   /* temporalConfidence */
   if (state.temporalConfidence.exists) {
     if (state.layout !== "rect") {
@@ -436,7 +453,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   return state;
 };
 
-const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelected, controlsState) => {
+const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, zoomSelected, controlsState, dispatch) => {
   /* calculate new branch thicknesses & visibility */
   let tipSelectedIdx = 0;
   /* check if the query defines a strain to be selected */
@@ -445,16 +462,21 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, cladeSelect
     tipSelectedIdx = strainNameToIdx(oldState.nodes, tipSelected);
     oldState.selectedStrain = tipSelected;
   }
-  if (cladeSelected) {
-    const cladeSelectedIdx = cladeSelected === 'root' ? 0 : getIdxMatchingLabel(oldState.nodes, "clade", cladeSelected);
-    oldState.selectedClade = cladeSelected;
+  if (zoomSelected) {
+    // Check and fix old format 'clade=B' - in this case selectionClade is just 'B'
+    const [labelName, labelValue] = zoomSelected.split(":");
+    const cladeSelectedIdx = getIdxMatchingLabel(oldState.nodes, labelName, labelValue, dispatch);
+    oldState.selectedClade = zoomSelected;
     newIdxRoot = applyInViewNodesToTree(cladeSelectedIdx, oldState); // tipSelectedIdx, oldState);
+  } else {
+    oldState.selectedClade = undefined;
+    newIdxRoot = applyInViewNodesToTree(0, oldState); // tipSelectedIdx, oldState);
   }
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
     oldState,
     controlsState,
     {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric},
-    {tipSelectedIdx, validIdxRoot: newIdxRoot}
+    {tipSelectedIdx}
   );
 
   const newState = Object.assign({}, oldState, visAndThicknessData);
@@ -546,6 +568,7 @@ const createMetadataStateFromJSON = (json) => {
       color_by: "colorBy",
       geo_resolution: "geoResolution",
       distance_measure: "distanceMeasure",
+      branch_label: "selectedBranchLabel",
       map_triplicate: "mapTriplicate",
       layout: "layout"
     };
@@ -574,7 +597,8 @@ export const createStateFromQueryOrJSONs = ({
   narrativeBlocks = false,
   mainTreeName = false,
   secondTreeName = false,
-  query
+  query,
+  dispatch
 }) => {
   let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
   /* first task is to create metadata, entropy, controls & tree partial state */
@@ -642,7 +666,7 @@ export const createStateFromQueryOrJSONs = ({
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
-  if (json || controls.colorBy !== oldState.colorBy) {
+  if (json || controls.colorBy !== oldState.controls.colorBy) {
     const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, metadata);
     const nodeColors = calcNodeColor(tree, colorScale);
     controls.colorScale = colorScale;
@@ -651,16 +675,31 @@ export const createStateFromQueryOrJSONs = ({
     tree.nodeColors = nodeColors;
   }
 
+  /* parse the query.label / query.clade */
   if (query.clade) {
-    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, query.clade, controls);
-  } else { /* if not specifically given in URL, zoom to root */
-    tree = modifyTreeStateVisAndBranchThickness(tree, undefined, undefined, controls);
+    if (!query.label && query.clade !== "root") {
+      query.label = `clade:${query.clade}`;
+    }
+    delete query.clade;
   }
-  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, undefined, controls);
+  if (query.label) {
+    if (!query.label.includes(":")) {
+      console.error("Defined a label without ':' separator.");
+      delete query.label;
+    }
+    if (!tree.availableBranchLabels.includes(query.label.split(":")[0])) {
+      console.error(`Label name ${query.label.split(":")[0]} doesn't exist`);
+      delete query.label;
+    }
+  }
+
+  /* if query.label is undefined then we intend to zoom to the root */
+  tree = modifyTreeStateVisAndBranchThickness(tree, query.s, query.label, controls, dispatch);
+
   if (treeToo && treeToo.loaded) {
     treeToo.nodeColorsVersion = tree.nodeColorsVersion;
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
-    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, undefined, controls);
+    treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, undefined, controls, dispatch);
     controls = modifyControlsViaTreeToo(controls, treeToo.name);
     treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
   }
@@ -695,7 +734,8 @@ export const createTreeTooState = ({
   treeTooJSON, /* raw json data */
   oldState,
   originalTreeUrl,
-  secondTreeUrl /* treeToo URL */
+  secondTreeUrl, /* treeToo URL */
+  dispatch
 }) => {
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
   /* TODO: reconcile query with visibility etc */
@@ -707,7 +747,7 @@ export const createTreeTooState = ({
   treeToo.debug = "RIGHT";
   controls = modifyControlsStateViaTree(controls, tree, treeToo, oldState.metadata.colorings);
   controls = modifyControlsViaTreeToo(controls, secondTreeUrl);
-  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls);
+  treeToo = modifyTreeStateVisAndBranchThickness(treeToo, tree.selectedStrain, undefined, controls, dispatch);
 
   /* calculate colours if loading from JSONs or if the query demands change */
   const colorScale = calcColorScale(controls.colorBy, controls, tree, treeToo, oldState.metadata);

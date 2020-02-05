@@ -1,6 +1,7 @@
 import { freqScale, NODE_NOT_VISIBLE, NODE_VISIBLE_TO_MAP_ONLY, NODE_VISIBLE } from "./globals";
 import { calcTipCounts } from "./treeCountingHelpers";
 import { getTraitFromNode } from "./treeMiscHelpers";
+import { warningNotification } from "../actions/notifications";
 
 export const getVisibleDateRange = (nodes, visibility) => nodes
   .filter((node, idx) => (visibility[idx] === NODE_VISIBLE && !node.hasChildren))
@@ -30,32 +31,48 @@ export const strainNameToIdx = (nodes, name) => {
  * @param {string} labelValue label value
  * @returns {int} the index of the matching node (0 if no match found)
  */
-export const getIdxMatchingLabel = (nodes, labelName, labelValue) => {
+export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
   let i;
+  let found = 0;
   for (i = 0; i < nodes.length; i++) {
     if (
       nodes[i].branch_attrs &&
       nodes[i].branch_attrs.labels !== undefined &&
       nodes[i].branch_attrs.labels[labelName] === labelValue
     ) {
-      return i;
+      if (found === 0) {
+        found = i;
+      } else {
+        console.error(`getIdxMatchingLabel found multiple labels ${labelName}===${labelValue}`);
+        dispatch(warningNotification({
+          message: "Specified Zoom Label Found Multiple Times!",
+          details: "Multiple nodes in the tree are labelled '"+labelName+" "+labelValue+"' - no zoom performed"
+        }));
+        return 0;
+      }
     }
   }
-  console.error(`getIdxMatchingLabel couldn't find label ${labelName}===${labelValue}`);
-  return 0;
+  if (found === 0) { 
+    console.error(`getIdxMatchingLabel couldn't find label ${labelName}===${labelValue}`);
+    dispatch(warningNotification({
+      message: "Specified Zoom Label Value Not Found!",
+      details: "The label '"+labelName+"' value '"+labelValue+"' was not found in the tree - no zoom performed"
+    }));
+  }
+  return found;
 };
 
 /** calcBranchThickness **
 * returns an array of node (branch) thicknesses based on the tipCount at each node
 * If the node isn't visible, the thickness is 1.
+* Relies on the `tipCount` property of the nodes having been updated.
 * Pure.
 * @param nodes - JSON nodes
 * @param visibility - visibility array (1-1 with nodes)
-* @param rootIdx - nodes index of the currently in-view root
 * @returns array of thicknesses (numeric)
 */
-const calcBranchThickness = (nodes, visibility, rootIdx) => {
-  let maxTipCount = nodes[rootIdx].tipCount;
+const calcBranchThickness = (nodes, visibility) => {
+  let maxTipCount = nodes[0].tipCount;
   /* edge case: no tips selected */
   if (!maxTipCount) {
     maxTipCount = 1;
@@ -180,7 +197,7 @@ const calcVisibility = (tree, controls, dates) => {
   return NODE_VISIBLE;
 };
 
-export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idxOfInViewRootNode = 0, tipSelectedIdx = 0} = {}) => {
+export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {tipSelectedIdx = 0} = {}) => {
   const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);
@@ -188,7 +205,7 @@ export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {idx
   return {
     visibility: visibility,
     visibilityVersion: tree.visibilityVersion + 1,
-    branchThickness: calcBranchThickness(tree.nodes, visibility, idxOfInViewRootNode),
+    branchThickness: calcBranchThickness(tree.nodes, visibility),
     branchThicknessVersion: tree.branchThicknessVersion + 1
   };
 };

@@ -21,7 +21,7 @@ export const applyInViewNodesToTree = (idx, tree) => {
     } else {
       applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
     }
-  } else if (idx !== tree.idxOfInViewRootNode) { /* if shell isn't set yet - have set clade in URL */
+  } else {
     tree.nodes.forEach((d) => {
       d.inView = false;
     });
@@ -92,7 +92,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
       tree,
       controls,
       {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-      {tipSelectedIdx: tipIdx1, validIdxRoot: rootIdxTree1}
+      {tipSelectedIdx: tipIdx1}
     );
     const dispatchObj = {
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
@@ -113,7 +113,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
         treeToo,
         controls,
         {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-        {tipSelectedIdx: tipIdx2, validIdxRoot: rootIdxTree2}
+        {tipSelectedIdx: tipIdx2}
       );
       dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility, dataToo.visibility);
       dispatchObj.visibilityToo = dataToo.visibility;

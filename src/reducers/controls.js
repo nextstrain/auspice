@@ -19,7 +19,8 @@ export const getDefaultControlsState = () => {
     layout: defaultLayout,
     geoResolution: defaultGeoResolution,
     filters: {},
-    colorBy: defaultColorBy
+    colorBy: defaultColorBy,
+    selectedBranchLabel: "none"
   };
   const dateMin = numericToCalendar(currentNumDate() - defaultDateRange);
   const dateMax = currentCalDate();
@@ -50,7 +51,7 @@ export const getDefaultControlsState = () => {
     colorBy: defaults.colorBy,
     colorByConfidence: {display: false, on: false},
     colorScale: undefined,
-    selectedBranchLabel: false,
+    selectedBranchLabel: "none",
     analysisSlider: false,
     geoResolution: defaults.geoResolution,
     filters: {},
