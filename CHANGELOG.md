@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.5.0 - 2020/02/05
+
+
 * Add URL query options to facilitate embedding nextstrain via an iframe. [See PR 884](https://github.com/nextstrain/auspice/pull/884)
   * Sidebar state can be set via JSON & URL query.
   * A special URL query will disable rendering of the footer & header.
