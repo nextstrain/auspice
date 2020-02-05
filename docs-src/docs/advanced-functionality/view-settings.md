@@ -68,7 +68,8 @@ All URL queries modify the view away from the default settings -- if you change 
 | `n`        | Narrative page number | `n=1` goes to the first page |
 | `s`        | Selected strain | `s=1_0199_PF` |
 | `branchLabel` | Branch labels to display | `branchLabel=aa` |
-| `clade`    | Labeled clade that tree is zoomed to | `clade=B3` (numeric values are buggy) |
+| `label`    | Labeled branch that tree is zoomed to | `label=clade:B3`, `label=lineage:relapse` |
+| `clade`    | _DEPRECATED_ Labeled clade that tree is zoomed to | `clade=B3` should now become `label=clade:B3` |
 
 
 **See this in action:**
