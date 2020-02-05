@@ -72,6 +72,15 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.p = action.notInURLState === true ? undefined : action.data;
       break;
     }
+    case types.TOGGLE_SIDEBAR: {
+      // we never add this to the URL on purpose -- it should be manually set as it specifies a world
+      // where resizes can not open / close the sidebar. The exception is if it's toggled, we
+      // remove it from the URL query, as it's no longer valid to call it open if it's closed!
+      if ("sidebar" in query) {
+        query.sidebar = undefined;
+      }
+      break;
+    }
     case types.TOGGLE_PANEL_DISPLAY: {
       if (state.controls.panelsAvailable.length === action.panelsToDisplay.length) {
         query.d = undefined;

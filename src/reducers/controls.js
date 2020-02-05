@@ -5,6 +5,7 @@ import { defaultGeoResolution,
   defaultDistanceMeasure,
   defaultLayout,
   defaultMutType,
+  controlsHiddenWidth,
   twoColumnBreakpoint } from "../util/globals";
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
@@ -22,6 +23,13 @@ export const getDefaultControlsState = () => {
     colorBy: defaultColorBy,
     selectedBranchLabel: "none"
   };
+  // a default sidebarOpen status is only set via JSON, URL query
+  // _or_ if certain URL keywords are triggered
+  const initialSidebarState = getInitialSidebarState();
+  if (initialSidebarState.setDefault) {
+    defaults.sidebarOpen = initialSidebarState.sidebarOpen;
+  }
+
   const dateMin = numericToCalendar(currentNumDate() - defaultDateRange);
   const dateMax = currentCalDate();
   const dateMinNumeric = calendarToNumeric(dateMin);
@@ -69,7 +77,9 @@ export const getDefaultControlsState = () => {
     showTangle: false,
     zoomMin: undefined,
     zoomMax: undefined,
-    branchLengthsToDisplay: "divAndDate"
+    branchLengthsToDisplay: "divAndDate",
+    sidebarOpen: initialSidebarState.sidebarOpen,
+    showOnlyPanels: false
   };
 };
 
@@ -238,6 +248,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
         return Object.assign({}, state, {showTangle: !state.showTangle});
       }
       return state;
+    case types.TOGGLE_SIDEBAR:
+      return Object.assign({}, state, {sidebarOpen: action.value});
     case types.ADD_COLOR_BYS:
       for (const colorBy of Object.keys(action.newColorings)) {
         state.coloringsPresentOnTree.add(colorBy);
@@ -249,3 +261,15 @@ const Controls = (state = getDefaultControlsState(), action) => {
 };
 
 export default Controls;
+
+function getInitialSidebarState() {
+  /* The following "hack" was present when `sidebarOpen` wasn't URL customisable. It can be removed
+  from here once the GISAID URLs (iFrames) are updated */
+  if (window.location.pathname.includes("gisaid")) {
+    return {sidebarOpen: false, setDefault: true};
+  }
+  return {
+    sidebarOpen: window.innerWidth > controlsHiddenWidth,
+    setDefault: false
+  };
+}

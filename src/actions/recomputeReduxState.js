@@ -104,6 +104,19 @@ const modifyStateViaURLQuery = (state, query) => {
     state.selectedBranchLabel = query.branchLabel;
     // do not modify the default (only the JSON can do this)
   }
+  if (query.sidebar) {
+    if (query.sidebar === "open") {
+      state.defaults.sidebarOpen = true;
+      state.sidebarOpen = true;
+    } else if (query.sidebar === "closed") {
+      state.defaults.sidebarOpen = false;
+      state.sidebarOpen = false;
+    }
+  }
+  if ("onlyPanels" in query) {
+    state.showOnlyPanels = true;
+  }
+
   return state;
 };
 
@@ -168,17 +181,29 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel"];
-    const expectedTypes = ["string", "string", "string", "string", "boolean", "string"];
+    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar'];
+    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string'];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (metadata.displayDefaults[keysToCheckFor[i]]) {
         if (typeof metadata.displayDefaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
-          /* e.g. if key=geoResoltion, set both state.geoResolution and state.defaults.geoResolution */
-          state[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
-          state.defaults[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
+          if (keysToCheckFor[i] === "sidebar") {
+            if (metadata.displayDefaults[keysToCheckFor[i]] === "open") {
+              state.defaults.sidebarOpen = true;
+              state.sidebarOpen = true;
+            } else if (metadata.displayDefaults[keysToCheckFor[i]]=== "closed") {
+              state.defaults.sidebarOpen = false;
+              state.sidebarOpen = false;
+            } else {
+              console.error("Skipping 'display_default' for sidebar as it's not 'open' or 'closed'");
+            }
+          } else {
+            /* most of the time if key=geoResoltion, set both state.geoResolution and state.defaults.geoResolution */
+            state[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
+            state.defaults[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
+          }
         } else {
-          console.error("Skipping (meta.json) default for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
+          console.error("Skipping 'display_default' for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
         }
       }
     }
@@ -328,7 +353,7 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   return state;
 };
 
-const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
+const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarrative) => {
   /* want to check that the (currently set) colorBy (state.colorBy) is valid,
    * and fall-back to an available colorBy if not
    */
@@ -448,6 +473,16 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree) => {
   /* can we display branch length by div or num_date? */
   if (query.m && state.branchLengthsToDisplay !== "divAndDate") {
     delete query.m;
+  }
+
+  if (!(query.sidebar === "open" || query.sidebar === "closed")) {
+    delete query.sidebar; // invalid value
+  }
+  if (viewingNarrative) {
+    // We must prevent a narrative closing the sidebar, either via a JSON display_default
+    // or a URL query anywhere within the narrative.
+    if ("sidebarOpen" in state.defaults) delete state.defaults.sidebarOpen;
+    state.sidebarOpen=true;
   }
 
   return state;
@@ -570,7 +605,8 @@ const createMetadataStateFromJSON = (json) => {
       distance_measure: "distanceMeasure",
       branch_label: "selectedBranchLabel",
       map_triplicate: "mapTriplicate",
-      layout: "layout"
+      layout: "layout",
+      sidebar: "sidebar"
     };
     for (const [jsonKey, auspiceKey] of Object.entries(jsonKeyToAuspiceKey)) {
       if (json.meta.display_defaults[jsonKey]) {
@@ -662,7 +698,8 @@ export const createStateFromQueryOrJSONs = ({
     controls = modifyStateViaURLQuery(controls, query);
   }
 
-  controls = checkAndCorrectErrorsInState(controls, metadata, query, tree); /* must run last */
+  const viewingNarrative = (narrativeBlocks || (oldState && oldState.narrative.display));
+  controls = checkAndCorrectErrorsInState(controls, metadata, query, tree, viewingNarrative); /* must run last */
 
 
   /* calculate colours if loading from JSONs or if the query demands change */
