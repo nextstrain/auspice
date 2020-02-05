@@ -2,8 +2,18 @@
 title: Changelog
 ---
 
-## version 2.4.1 - 2020/02/01
+* Add URL query options to facilitate embedding nextstrain via an iframe. [See PR 884](https://github.com/nextstrain/auspice/pull/884)
+  * Sidebar state can be set via JSON & URL query.
+  * A special URL query will disable rendering of the footer & header.
+* Improve tree & map zooming. [See PR 886](https://github.com/nextstrain/auspice/pull/886)
+  * The map will now automatically zoom upon changes in tree visibility (e.g. filters, time scrubbing, zoom-into-branch) or geographic resolution, unless the map has been interacted with.
+  * The tree URL query for specifying which node in the tree is zoomed has been changed to `?label=<labelName>:<labelValue>`, and the docs updated accordingly. The old syntax `?clade=<cladeName>` will still work and automatically correct to the new syntax.
+  * The set of branch labels to be displayed is now customisable.
+* Add documentation surrounding auspice view-settings
+* Improve text rendering in certain situations when the lato font is not available. [See PR 882](https://github.com/nextstrain/auspice/pull/882)
 
+## version 2.4.1 - 2020/02/01
+* Fix two bigs in narrative UI. [See PR 881](https://github.com/nextstrain/auspice/pull/881)
 
 ## version 2.4.0 - 2020/01/31
 * Implement a new narratives view for mobile displays. [See PR 857](https://github.com/nextstrain/auspice/pull/857)
