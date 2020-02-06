@@ -87,6 +87,7 @@ const parseNarrativeFile = (fileContents) => {
   const frontMatter = yamlFront.loadFront(fileContents);
 
   const titlesAndParagraphs = frontMatter.__content
+    .replace(/\r\n/g, "\n")                 // handle files with CRLF endings (windows)
     .split(/\n*[#\s]+(\[.+?\]\(.+?\))\n+/)  // matches titles defined as: # [title](url)
     .filter((e) => !e.match(/^\s*$/));      // remove empty paragraphs (often leading / trailing)
 
