@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.5.1 - 2020/02/07
+
+
 * Allow narrative markdown files to have CRLF line endings.
 
 ## version 2.5.0 - 2020/02/05
