@@ -16,16 +16,11 @@ import ReactPageScroller from "./ReactPageScroller";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 import { narrativeNavBarHeight } from "../../util/globals";
+import locales from "../../locales.json";
+import { getPreferredLanguage } from "../../util/preferredLanguage";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;
-
-const explanationParagraph=`
-  <p class="explanation">
-  Explore the content by scrolling the left hand side (or click on the arrows), and the data visualizations will change accordingly.
-  Clicking "explore the data yourself" (top right of page) will replace this narrative with a set of controls so that you may interact with the data.
-  </p>
-`;
 
 /**
  * A react component which renders the narrative text content in the sidebar.
@@ -138,10 +133,12 @@ class Narrative extends React.Component {
     );
   }
   renderBlocks() {
+    const my_locale = locales[getPreferredLanguage()] || locales.en;
     const ret = this.props.blocks.map((b, i) => {
-
       const __html = i === 0 ?
-        explanationParagraph + b.__html : // inject explanation to opening block
+        `<p class="explanation">
+          ${my_locale.narrative_explanation}
+        </p>` + b.__html: // inject explanation to opening block
         b.__html;
 
       return (
@@ -163,13 +160,14 @@ class Narrative extends React.Component {
         <a style={{...linkStyles}}
           onClick={() => this.reactPageScroller.goToPage(0)}
         >
-          Scroll back to the beginning
+          {my_locale.scroll_back}
         </a>
         <br />
         <a style={{...linkStyles}}
           onClick={this.exitNarrativeMode}
         >
-          Leave the narrative & explore the data yourself
+
+          {my_locale.leave_narrative}
         </a>
       </EndOfNarrative>
     ));

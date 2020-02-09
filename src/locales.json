@@ -1,0 +1,26 @@
+{
+  "en": {
+    "geography": "Geography",
+    "phylogeny": "Phylogeny",
+    "transmissions": "Transmissions",
+    "narrative_explanation": "Explore the content by scrolling the left hand side (or click on the arrows), and the data visualizations will change accordingly.\nClicking \"explore the data yourself\" (top right of page) will replace this narrative with a set of controls so that you may interact with the data.",
+    "mobile_narrative_explanation": "Narratives are interleaved sections of text and associated nextstrain visualisations of the genomic data. Click the coloured arrows at the top & bottom of each page to move through this narrative. Within each page, you can scroll through the text to see visualisations of the genomic data.",
+    "scroll_back": "Scroll back to the beginning",
+    "mobile_scroll_back": "Jump to the beginning",
+    "leave_narrative": "Leave the narrative & explore the data yourself",
+    "explore_data": "explore the data yourself",
+    "return_to_narrative": "return to the narrative"
+  },
+  "es": {
+    "geography": "Geografía",
+    "phylogeny": "Filogenia",
+    "transmissions": "Transmisiones",
+    "narrative_explanation": "test",
+    "mobile_narrative_explanation": "test2",
+    "scroll_back": "test3",
+    "mobile_scroll_back": "ES: Jump to the beginning",
+    "leave_narrative": "ES: leave",
+    "explore_data": "ES: explore the data yourself",
+    "return_to_narrative": "ES: return to the narrative"
+  }
+}

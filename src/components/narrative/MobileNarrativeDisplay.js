@@ -16,6 +16,8 @@ import {
 import Tree from "../tree";
 import Map from "../map/map";
 import MainDisplayMarkdown from "./MainDisplayMarkdown";
+import locales from "../../locales.json";
+import { getPreferredLanguage } from "../../util/preferredLanguage";
 
 const BANNER_HEIGHT = 50;
 const progressHeight = 25;
@@ -23,14 +25,6 @@ const progressHeight = 25;
 const scrollToTop = () => {
   document.getElementById('progress-bar').scrollIntoView();
 };
-
-const explanationParagraph=`
-  <p class="explanation">
-  Narratives are interleaved sections of text and associated nextstrain visualisations of the genomic data.
-  Click the coloured arrows at the top & bottom of each page to move through this narrative.
-  Within each page, you can scroll through the text to see visualisations of the genomic data.
-  </p>
-`;
 
 /**
  * A React component which takes up the entire screen and displays narratives in
@@ -103,13 +97,14 @@ class MobileNarrativeDisplay extends React.Component {
   }
 
   pageNarrativeContent() {
+    const my_locale = locales[getPreferredLanguage()] || locales.en;
     if (this.props.blocks[this.props.currentInFocusBlockIdx].mainDisplayMarkdown) {
       /* don't display normal narrative content if the block defines `mainDisplayMarkdown` */
       return null;
     }
     let __html = this.props.blocks[this.props.currentInFocusBlockIdx].__html;
     if (this.props.currentInFocusBlockIdx === 0) {
-      __html = explanationParagraph + __html;
+      __html = `<p class="explanation">${my_locale.mobile_narrative_explanation}</p>` + __html;
     }
 
     return (
@@ -153,6 +148,7 @@ class MobileNarrativeDisplay extends React.Component {
   }
 
   renderEndOfNarrative() {
+    const my_locale = locales[getPreferredLanguage()] || locales.en;
     return (
       <>
         <this.PreviousButton>
@@ -165,13 +161,13 @@ class MobileNarrativeDisplay extends React.Component {
             <a style={{...linkStyles}}
               onClick={() => this._goToPage(0)}
             >
-              Jump to the beginning
+              {my_locale.mobile_scroll_back}
             </a>
             <br />
             <a style={{...linkStyles}}
               onClick={this.exitNarrativeMode}
             >
-              Leave the narrative & explore the data yourself
+              {my_locale.leave_narrative}
             </a>
           </EndOfNarrative>
         </MobileContentContainer>

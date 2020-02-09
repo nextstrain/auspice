@@ -13,6 +13,8 @@ import Tangle from "./tangle";
 import { attemptUntangle } from "../../util/globals";
 import ErrorBoundary from "../../util/errorBoundry";
 import { untangleTreeToo } from "./tangle/untangling";
+import locales from "../../locales.json";
+import { getPreferredLanguage } from "../../util/preferredLanguage";
 
 export const spaceBetweenTrees = 100;
 
@@ -122,9 +124,10 @@ class Tree extends React.Component {
 
   render() {
     const styles = this.getStyles();
+    const my_locale = locales[getPreferredLanguage()] || locales.en;
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
-      <Card center title={"Phylogeny"}>
+      <Card center title={my_locale.phylogeny}>
         <ErrorBoundary>
           <Legend width={this.props.width}/>
         </ErrorBoundary>
