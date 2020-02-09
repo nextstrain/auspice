@@ -152,7 +152,7 @@ class MobileNarrativeDisplay extends React.Component {
     return (
       <>
         <this.PreviousButton>
-          Previous
+          {my_locale.previous}
         </this.PreviousButton>
         <MobileContentContainer height={this.state.contentHeight+this.state.bannerHeight}>
           {this.renderProgress()}
@@ -176,6 +176,7 @@ class MobileNarrativeDisplay extends React.Component {
   }
 
   renderStartOfNarrative() {
+    const my_locale = locales[getPreferredLanguage()] || locales.en;
     return (
       <>
         <MobileContentContainer height={this.state.contentHeight + this.state.bannerHeight}>
@@ -185,17 +186,18 @@ class MobileNarrativeDisplay extends React.Component {
           {this.renderMainMarkdown()}
         </MobileContentContainer>
         <this.NextButton>
-          Next
+          {my_locale.next}
         </this.NextButton>
       </>
     );
   }
 
   renderMiddleOfNarrative() {
+    const my_locale = locales[getPreferredLanguage()] || locales.en;
     return (
       <>
         <this.PreviousButton aria-labelledby="nav1">
-          Previous
+          {my_locale.previous}
         </this.PreviousButton>
         <MobileContentContainer height={this.state.contentHeight}>
           {this.renderProgress()}
@@ -204,7 +206,7 @@ class MobileNarrativeDisplay extends React.Component {
           {this.renderMainMarkdown()}
         </MobileContentContainer>
         <this.NextButton aria-labelledby="nav2">
-          Next
+          {my_locale.next}
         </this.NextButton>
       </>
     );

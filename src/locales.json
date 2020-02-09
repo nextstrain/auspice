@@ -9,7 +9,9 @@
     "mobile_scroll_back": "Jump to the beginning",
     "leave_narrative": "Leave the narrative & explore the data yourself",
     "explore_data": "explore the data yourself",
-    "return_to_narrative": "return to the narrative"
+    "return_to_narrative": "return to the narrative",
+    "previous": "Previous",
+    "next": "Next"
   },
   "es": {
     "geography": "Geografía",
@@ -21,6 +23,8 @@
     "mobile_scroll_back": "ES: Jump to the beginning",
     "leave_narrative": "ES: leave",
     "explore_data": "ES: explore the data yourself",
-    "return_to_narrative": "ES: return to the narrative"
+    "return_to_narrative": "ES: return to the narrative",
+    "previous": "Anterior",
+    "next": "Siguiente"
   }
 }
