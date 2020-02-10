@@ -15,7 +15,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "create-data-dir": "./scripts/create-data-dir.sh",
+    "create-data-dir": "env bash ./scripts/create-data-dir.sh",
     "postinstall": "npm run create-data-dir",
     "view": "node auspice.js view --verbose",
     "dev": "node auspice.js develop --verbose",
@@ -24,11 +24,11 @@
     "build": "node auspice.js build --verbose",
     "prepare": "npm run build",
     "lint": "eslint src",
-    "get-data": "./scripts/get-data.sh",
-    "get-narratives": "./scripts/get-narratives.sh",
+    "get-data": "env bash ./scripts/get-data.sh",
+    "get-narratives": "env bash ./scripts/get-narratives.sh",
     "heroku-postbuild": "npm run build && npm run get-data && npm run get-narratives",
-    "rebuild-docker-image": "./scripts/rebuild-docker-image.sh",
-    "gzip-and-upload": "./scripts/gzip-and-upload.sh",
+    "rebuild-docker-image": "env bash ./scripts/rebuild-docker-image.sh",
+    "gzip-and-upload": "env bash ./scripts/gzip-and-upload.sh",
     "build-docs": "echo 'see ./docs-src/README.md'"
   },
   "dependencies": {
