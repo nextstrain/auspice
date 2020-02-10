@@ -592,12 +592,34 @@ class Map extends React.Component {
       }
     }
   }
-
+  getMaxZoomForFittingMapToData() {
+    /* To avoid setting the bounds too small (e.g. if restricted to one country
+      then we don't want to be at maximum zoom) we use hardcoded zoom levels which
+      depend on the geo resolution. In the future these may be settable via the dataset
+      JSON. Note that this does not change the max zoom level available when interacting
+      with the map. See https://leafletjs.com/examples/zoom-levels/ for what a zoom
+      level represents. */
+    switch (this.props.geoResolution.toLowerCase()) {
+      case "region":
+        return 4;
+      case "country":
+        return 5; // works well for "big" countries like USA / China but less well for the 13-16 EBOV data
+      case "state":
+        return 7; // designed around US states
+      case "city":
+        return 12;
+      case "block":
+        return 14; // designed around the basel-flu data
+      default:
+        return 8;
+    }
+  }
   fitMapBoundsToData(demeData, demeIndices) {
     const SWNE = this.getGeoRange(demeData, demeIndices);
     // window.L available because leaflet() was called in componentWillMount
     this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);
-    this.state.map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]));
+    const maxZoom = this.getMaxZoomForFittingMapToData();
+    this.state.map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]), {maxZoom});
   }
   getStyles = () => {
     const activeResetZoomButton = true;
