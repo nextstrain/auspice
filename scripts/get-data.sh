@@ -56,6 +56,9 @@ data_files=(
   "enterovirus_d68_genome_meta.json" "enterovirus_d68_genome_tree.json" \
   "enterovirus_d68_vp1_meta.json" "enterovirus_d68_vp1_tree.json" \
   "ncov.json" "ncov_2020-01-25.json" "ncov_2020-01-23.json" \
+  "ncov_2020-01-28.json" "ncov_2020-01-29.json" "ncov_2020-01-30.json" "ncov_2020-01-31.json" \
+  "ncov_2020-02-02.json" "ncov_2020-02-03.json" "ncov_2020-02-04.json" "ncov_2020-02-05.json" \
+  "ncov_2020-02-09.json" \
 )
 
 rm -rf data/
