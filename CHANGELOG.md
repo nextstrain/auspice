@@ -2,9 +2,10 @@
 title: Changelog
 ---
 
+* Allow npm scripts to run on windows. [See PR 868](https://github.com/nextstrain/auspice/pull/868)
+* Improve the zoom level for the map when automatically zooming to one (or very few) demes. [See PR 891](https://github.com/nextstrain/auspice/pull/891)
+
 ## version 2.5.1 - 2020/02/07
-
-
 * Allow narrative markdown files to have CRLF line endings.
 
 ## version 2.5.0 - 2020/02/05
