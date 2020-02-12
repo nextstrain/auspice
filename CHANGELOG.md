@@ -2,9 +2,11 @@
 title: Changelog
 ---
 
+* Improve how we display mutations to distinguish between gaps & Ns, and to not show undetermined AAs. [See PR 895](https://github.com/nextstrain/auspice/pull/895)
+* Improve mapbox attribution. [See PR 894](https://github.com/nextstrain/auspice/pull/894)
+* Add windows-specific documentation [See PR 893](https://github.com/nextstrain/auspice/pull/893)
+
 ## version 2.5.2 - 2020/02/11
-
-
 * Allow npm scripts to run on windows. [See PR 868](https://github.com/nextstrain/auspice/pull/868)
 * Improve the zoom level for the map when automatically zooming to one (or very few) demes. [See PR 891](https://github.com/nextstrain/auspice/pull/891)
 
