@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.5.3 - 2020/02/12
+
+
 * Improve how we display mutations to distinguish between gaps & Ns, and to not show undetermined AAs. [See PR 895](https://github.com/nextstrain/auspice/pull/895)
 * Improve mapbox attribution. [See PR 894](https://github.com/nextstrain/auspice/pull/894)
 * Add windows-specific documentation [See PR 893](https://github.com/nextstrain/auspice/pull/893)
