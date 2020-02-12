@@ -58,7 +58,7 @@ data_files=(
   "ncov.json" "ncov_2020-01-25.json" "ncov_2020-01-23.json" \
   "ncov_2020-01-28.json" "ncov_2020-01-29.json" "ncov_2020-01-30.json" "ncov_2020-01-31.json" \
   "ncov_2020-02-02.json" "ncov_2020-02-03.json" "ncov_2020-02-04.json" "ncov_2020-02-05.json" \
-  "ncov_2020-02-09.json" \
+  "ncov_2020-02-09.json" "ncov_2020-02-11.json" \
 )
 
 rm -rf data/
