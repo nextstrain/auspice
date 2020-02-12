@@ -182,28 +182,30 @@ const Mutations = ({node}) => {
   /* --------- AMINO ACID MUTATIONS --------------- */
   /* AA mutations are found at `mutations[prot_name]` -> Array of strings */
   const prots = Object.keys(mutations).filter((v) => v !== "nuc");
-  const nMutsPerProt = {};
-  let numberOfAaMuts = 0;
+
+  const mutationsToDisplay = {};
+  let shouldDisplay = false;
+
   for (const prot of prots) {
-    nMutsPerProt[prot] = mutations[prot].length;
-    numberOfAaMuts += mutations[prot].length;
+    const muts = mutations[prot].filter((mut) => !mut.endsWith("X"));
+    if (muts.length) {
+      mutationsToDisplay[prot] = muts;
+      shouldDisplay = true;
+    }
   }
-  if (numberOfAaMuts > 0) {
+  if (shouldDisplay) {
     const nDisplay = 3; // number of mutations to display per protein
     const nProtsToDisplay = 7; // max number of proteins to display
-    let protsRendered = 0;
     const mutationsToRender = [];
-    prots.forEach((prot) => {
-      if (nMutsPerProt[prot] && protsRendered < nProtsToDisplay) {
-        let x = prot + ":\u00A0\u00A0" + mutations[prot].slice(0, Math.min(nDisplay, nMutsPerProt[prot])).join(", ");
-        if (nMutsPerProt[prot] > nDisplay) {
-          x += " + " + (nMutsPerProt[prot] - nDisplay) + " more";
+    Object.keys(mutationsToDisplay).forEach((prot, idx) => {
+      if (idx < nProtsToDisplay) {
+        let x = prot + ":\u00A0\u00A0" + mutationsToDisplay[prot].slice(0, Math.min(nDisplay, mutationsToDisplay[prot].length)).join(", ");
+        if (mutationsToDisplay[prot].length > nDisplay) {
+          x += " + " + (mutationsToDisplay[prot].length - nDisplay) + " more";
         }
         mutationsToRender.push(x);
-        protsRendered++;
-        if (protsRendered === nProtsToDisplay) {
-          mutationsToRender.push(`(protein mutations truncated)`);
-        }
+      } else if (idx === nProtsToDisplay) {
+        mutationsToRender.push(`(protein mutations truncated)`);
       }
     });
     elements.push(<InfoLine name="AA mutations:" value={mutationsToRender} key="aa"/>);
