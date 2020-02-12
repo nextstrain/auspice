@@ -151,32 +151,29 @@ const Mutations = ({node}) => {
   /* Nt mutations are found at `mutations.nuc` -> Array of strings */
   if (mutations.nuc && mutations.nuc.length) {
     const nDisplay = 9; // max number of mutations to display
-    const nGapDisp = 4; // max number of gaps/Ns to display
 
-    // gather muts with N/-
-    const ngaps = mutations.nuc.filter((mut) => {
-      return mut.slice(-1) === "N" || mut.slice(-1) === "-" ||
-        mut.slice(0, 1) === "N" || mut.slice(0, 1) === "-";
-    });
-    const gapLen = ngaps.length; // number of mutations that exist with N/-
+    const isMutGap = (mut) => mut.slice(-1) === "-" || mut.slice(0, 1) === "-";
+    const isMutUnknown = (mut) => mut.slice(-1) === "N" || mut.slice(0, 1) === "N";
 
-    // gather muts without N/-
-    const nucs = mutations.nuc.filter((mut) => {
-      return mut.slice(-1) !== "N" && mut.slice(-1) !== "-" &&
-        mut.slice(0, 1) !== "N" && mut.slice(0, 1) !== "-";
-    });
+    // gather muts which aren't to/from a gap or a "N"
+    const nucs = mutations.nuc.filter((mut) => (!isMutGap(mut) && !(isMutUnknown(mut))));
     const nucLen = nucs.length; // number of mutations that exist without N/-
 
     let m = nucs.slice(0, Math.min(nDisplay, nucLen)).join(", ");
     m += nucLen > nDisplay ? " + " + (nucLen - nDisplay) + " more" : "";
-    let mGap = ngaps.slice(0, Math.min(nGapDisp, gapLen)).join(", ");
-    mGap += gapLen > nGapDisp ? " + " + (gapLen - nGapDisp) + " more" : "";
 
     if (nucLen !== 0) {
       elements.push(<InfoLine name="Nucleotide mutations:" value={m} key="nuc"/>);
     }
-    if (gapLen !== 0) {
-      elements.push(<InfoLine name="Gap/N mutations:" value={mGap} key="gaps"/>);
+
+    const nGapMutations = mutations.nuc.filter((mut) => isMutGap(mut)).length;
+    if (nGapMutations) {
+      elements.push(<InfoLine name='Gaps ("-"):' value={nGapMutations} key="gaps"/>);
+    }
+
+    const nUnknownMutations = mutations.nuc.filter((mut) => isMutUnknown(mut)).length;
+    if (nUnknownMutations) {
+      elements.push(<InfoLine name='Ns:' value={nUnknownMutations} key="Ns"/>);
     }
   } else {
     elements.push(<InfoLine name="No nucleotide mutations" value="" key="nuc"/>);
@@ -185,28 +182,30 @@ const Mutations = ({node}) => {
   /* --------- AMINO ACID MUTATIONS --------------- */
   /* AA mutations are found at `mutations[prot_name]` -> Array of strings */
   const prots = Object.keys(mutations).filter((v) => v !== "nuc");
-  const nMutsPerProt = {};
-  let numberOfAaMuts = 0;
+
+  const mutationsToDisplay = {};
+  let shouldDisplay = false;
+
   for (const prot of prots) {
-    nMutsPerProt[prot] = mutations[prot].length;
-    numberOfAaMuts += mutations[prot].length;
+    const muts = mutations[prot].filter((mut) => !mut.endsWith("X"));
+    if (muts.length) {
+      mutationsToDisplay[prot] = muts;
+      shouldDisplay = true;
+    }
   }
-  if (numberOfAaMuts > 0) {
+  if (shouldDisplay) {
     const nDisplay = 3; // number of mutations to display per protein
     const nProtsToDisplay = 7; // max number of proteins to display
-    let protsRendered = 0;
     const mutationsToRender = [];
-    prots.forEach((prot) => {
-      if (nMutsPerProt[prot] && protsRendered < nProtsToDisplay) {
-        let x = prot + ":\u00A0\u00A0" + mutations[prot].slice(0, Math.min(nDisplay, nMutsPerProt[prot])).join(", ");
-        if (nMutsPerProt[prot] > nDisplay) {
-          x += " + " + (nMutsPerProt[prot] - nDisplay) + " more";
+    Object.keys(mutationsToDisplay).forEach((prot, idx) => {
+      if (idx < nProtsToDisplay) {
+        let x = prot + ":\u00A0\u00A0" + mutationsToDisplay[prot].slice(0, Math.min(nDisplay, mutationsToDisplay[prot].length)).join(", ");
+        if (mutationsToDisplay[prot].length > nDisplay) {
+          x += " + " + (mutationsToDisplay[prot].length - nDisplay) + " more";
         }
         mutationsToRender.push(x);
-        protsRendered++;
-        if (protsRendered === nProtsToDisplay) {
-          mutationsToRender.push(`(protein mutations truncated)`);
-        }
+      } else if (idx === nProtsToDisplay) {
+        mutationsToRender.push(`(protein mutations truncated)`);
       }
     });
     elements.push(<InfoLine name="AA mutations:" value={mutationsToRender} key="aa"/>);
