@@ -9,6 +9,11 @@ For best results, please use Node.js version 10.
 We highly recommend using [Conda](https://conda.io/docs/) to manage environments, i.e. use Conda to create an environment with Node.js installed where you can use Auspice.
 It's possible to use other methods, but this documentation presupposes that you have Conda installed.
 
+To run package scripts, the [`bash` shell](https://en.wikipedia.org/wiki/Bash_(Unix_shell)) and the [`env`](https://en.wikipedia.org/wiki/Env) command need to be in your `PATH`.
+You should already have them on Unix-like systems including Linux and macOS.
+If you are working from Windows, you can run the installation under Git Bash, MSYS2, or Cygwin.
+You can also use the Windows Subsystem Linux for a fuller Linux environment.
+
 ## Create a Conda Environment
 ```bash
 conda create --name auspice nodejs=10
