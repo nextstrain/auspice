@@ -370,7 +370,10 @@ export const mapToScreen = function mapToScreen() {
     this.nodes.forEach((d) => {
       const stem_offset = 0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0;
       const childrenY = [this.yScale(d.yRange[0]), this.yScale(d.yRange[1])];
-      d.branch =[` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip} M ${d.xTip},${childrenY[0]} L ${d.xTip},${childrenY[1]}`];
+      d.branch =[
+        [` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip}`],
+        [` M ${d.xTip},${childrenY[0]} L ${d.xTip},${childrenY[1]}`]
+      ];
       if (this.params.confidence) {
         d.confLine =` M ${this.xScale(d.conf[0])},${d.yBase} L ${this.xScale(d.conf[1])},${d.yTip}`;
       }
