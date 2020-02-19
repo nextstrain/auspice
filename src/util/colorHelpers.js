@@ -1,4 +1,4 @@
-import { rgb } from "d3-color";
+import { rgb, hsl } from "d3-color";
 import { interpolateRgb } from "d3-interpolate";
 import { scalePow } from "d3-scale";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
@@ -103,4 +103,15 @@ export const calcBranchStrokeCols = (tree, confidence, colorBy) => {
   return tree.nodeColors.map((col) => {
     return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString();
   });
+};
+
+
+/**
+ * Return an emphasized color
+ */
+export const getEmphasizedColor = (color) => {
+  const hslColor = hsl(color);
+  hslColor.s *= 1.8; // more saturation
+  hslColor.l /= 1.2; // less luminance
+  return rgb(hslColor).toString();
 };
