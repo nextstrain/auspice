@@ -1,11 +1,9 @@
 import React from "react";
 import { TOGGLE_NARRATIVE } from "../../actions/types";
 import { tabSingle, darkGrey } from "../../globalStyles";
-import locales from "../../locales.json";
-import { getPreferredLanguage } from "../../util/preferredLanguage";
+import { Trans } from "react-i18next";
 
 export const renderNarrativeToggle = (dispatch, narrativeIsDisplayed) => {
-  const my_locale = locales[getPreferredLanguage()] || locales.en;
   return (
     <button
       style={{
@@ -21,7 +19,9 @@ export const renderNarrativeToggle = (dispatch, narrativeIsDisplayed) => {
       }}
       onClick={() => dispatch({type: TOGGLE_NARRATIVE, display: !narrativeIsDisplayed})}
     >
-      {narrativeIsDisplayed ? my_locale.explore_data : my_locale.return_to_narrative}
+      <Trans>
+        {narrativeIsDisplayed ? "explore_data" : "return_to_narrative"}
+      </Trans>
     </button>
   );
 };

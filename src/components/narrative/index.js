@@ -16,8 +16,7 @@ import ReactPageScroller from "./ReactPageScroller";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 import { narrativeNavBarHeight } from "../../util/globals";
-import locales from "../../locales.json";
-import { getPreferredLanguage } from "../../util/preferredLanguage";
+import { Trans } from "react-i18next";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;
@@ -133,14 +132,7 @@ class Narrative extends React.Component {
     );
   }
   renderBlocks() {
-    const my_locale = locales[getPreferredLanguage()] || locales.en;
     const ret = this.props.blocks.map((b, i) => {
-      const __html = i === 0 ?
-        `<p class="explanation">
-          ${my_locale.narrative_explanation}
-        </p>` + b.__html: // inject explanation to opening block
-        b.__html;
-
       return (
         <div
           id={`NarrativeBlock_${i}`}
@@ -150,8 +142,20 @@ class Narrative extends React.Component {
             height: "inherit",
             overflow: "hidden"
           }}
-          dangerouslySetInnerHTML={{__html}}
-        />
+        >
+          {i === 0
+            ? <p class="explanation">
+              <Trans i18nKey="narrative_explanation">
+                Explore the content by scrolling the left hand side (or click on the arrows), and
+                the data visualizations will change accordingly.\nClicking \"explore the data yourself\"
+                (top right of page) will replace this narrative with a set of controls so that you may
+                interact with the data.
+              </Trans>
+            </p>
+            : null
+          }
+          <div dangerouslySetInnerHTML={{__html: b.__html}}/>
+        </div>
       );
     });
     ret.push((
@@ -160,14 +164,14 @@ class Narrative extends React.Component {
         <a style={{...linkStyles}}
           onClick={() => this.reactPageScroller.goToPage(0)}
         >
-          {my_locale.scroll_back}
+          <Trans i18nKey="scroll_back">Scroll back to the beginning</Trans>
         </a>
         <br />
         <a style={{...linkStyles}}
           onClick={this.exitNarrativeMode}
         >
 
-          {my_locale.leave_narrative}
+          <Trans i18nKey="leave_narrative">Leave the narrative & explore the data yourself</Trans>
         </a>
       </EndOfNarrative>
     ));

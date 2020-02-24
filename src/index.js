@@ -6,6 +6,8 @@ import "./util/polyfills"; // eslint-disable-line
 import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
+/* i18n/l10n */
+import './i18n';
 /* A U S P I C E   I M P O R T S */
 import configureStore from "./store";
 import { initialiseGoogleAnalyticsIfRequired } from "./util/googleAnalytics";
@@ -44,4 +46,3 @@ const renderApp = () => {
 };
 
 renderApp();
-

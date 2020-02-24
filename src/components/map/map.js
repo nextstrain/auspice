@@ -20,8 +20,7 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey, goColor, pauseColor } from "../../globalStyles";
-import locales from "../../locales.json";
-import { getPreferredLanguage } from "../../util/preferredLanguage";
+import { Trans } from "react-i18next";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -638,11 +637,10 @@ class Map extends React.Component {
   };
   render() {
     const styles = this.getStyles();
-    const my_locale = locales[getPreferredLanguage()] || locales.en;
     const transmissionsExist = this.state.transmissionData && this.state.transmissionData.length;
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
-      <Card center title={transmissionsExist ? my_locale.transmissions : my_locale.geography}>
+      <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
         {this.maybeCreateMapDiv()}
         {this.props.narrativeMode ? null : (
           <button
@@ -652,7 +650,7 @@ class Map extends React.Component {
               this.setState({userHasInteractedWithMap: false});
             }}
           >
-            reset zoom
+            <Trans>reset zoom</Trans>
           </button>
         )}
       </Card>

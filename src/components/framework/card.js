@@ -1,4 +1,5 @@
 import React from "react";
+import { Trans } from "react-i18next";
 import { headerFont, darkGrey } from "../../globalStyles";
 
 class Card extends React.Component {
@@ -60,10 +61,11 @@ class Card extends React.Component {
   }
   render() {
     const styles = this.props.infocard ? this.getStylesInfoCard() : this.getStyles();
+    const title = this.props.title;
     return (
-      <div id={`${this.props.title}Card`} style={{ ...styles.base, ...this.props.style }}>
+      <div id={`${title}Card`} style={{ ...styles.base, ...this.props.style }}>
         <div id="CardTitle" style={{ ...styles.title, ...this.props.titleStyles }}>
-          {this.props.title}
+          <Trans>{title}</Trans>
         </div>
         <div
           id="CardContentContainer"

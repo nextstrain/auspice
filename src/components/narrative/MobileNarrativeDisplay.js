@@ -16,8 +16,7 @@ import {
 import Tree from "../tree";
 import Map from "../map/map";
 import MainDisplayMarkdown from "./MainDisplayMarkdown";
-import locales from "../../locales.json";
-import { getPreferredLanguage } from "../../util/preferredLanguage";
+import { Trans } from "react-i18next";
 
 const BANNER_HEIGHT = 50;
 const progressHeight = 25;
@@ -97,15 +96,11 @@ class MobileNarrativeDisplay extends React.Component {
   }
 
   pageNarrativeContent() {
-    const my_locale = locales[getPreferredLanguage()] || locales.en;
     if (this.props.blocks[this.props.currentInFocusBlockIdx].mainDisplayMarkdown) {
       /* don't display normal narrative content if the block defines `mainDisplayMarkdown` */
       return null;
     }
-    let __html = this.props.blocks[this.props.currentInFocusBlockIdx].__html;
-    if (this.props.currentInFocusBlockIdx === 0) {
-      __html = `<p class="explanation">${my_locale.mobile_narrative_explanation}</p>` + __html;
-    }
+    const __html = this.props.blocks[this.props.currentInFocusBlockIdx].__html;
 
     return (
       <div
@@ -115,8 +110,19 @@ class MobileNarrativeDisplay extends React.Component {
           height: "inherit",
           overflow: "hidden"
         }}
-        dangerouslySetInnerHTML={{__html}}
-      />
+      >
+        {this.props.currentInFocusBlockIdx === 0
+          ? <p class="explanation">
+              <Trans i18nKey="mobile_narrative_explanation">
+                Narratives are interleaved sections of text and associated nextstrain visualisations
+                of the genomic data. Click the coloured arrows at the top & bottom of each page to move
+                through this narrative. Within each page, you can scroll through the text to see
+                visualisations of the genomic data.
+              </Trans>
+            </p>
+          : null}
+        <div dangerouslySetInnerHTML={{__html}}/>
+      </div>
     );
   }
 
@@ -148,11 +154,10 @@ class MobileNarrativeDisplay extends React.Component {
   }
 
   renderEndOfNarrative() {
-    const my_locale = locales[getPreferredLanguage()] || locales.en;
     return (
       <>
         <this.PreviousButton>
-          {my_locale.previous}
+          <Trans>previous</Trans>
         </this.PreviousButton>
         <MobileContentContainer height={this.state.contentHeight+this.state.bannerHeight}>
           {this.renderProgress()}
@@ -161,13 +166,17 @@ class MobileNarrativeDisplay extends React.Component {
             <a style={{...linkStyles}}
               onClick={() => this._goToPage(0)}
             >
-              {my_locale.mobile_scroll_back}
+              <Trans i18nKey="mobile_scroll_back">
+                Jump to the beginning
+              </Trans>
             </a>
             <br />
             <a style={{...linkStyles}}
               onClick={this.exitNarrativeMode}
             >
-              {my_locale.leave_narrative}
+              <Trans i18nKey="leave_narrative">
+                Leave the narrative & explore the data yourself
+              </Trans>
             </a>
           </EndOfNarrative>
         </MobileContentContainer>
@@ -176,7 +185,6 @@ class MobileNarrativeDisplay extends React.Component {
   }
 
   renderStartOfNarrative() {
-    const my_locale = locales[getPreferredLanguage()] || locales.en;
     return (
       <>
         <MobileContentContainer height={this.state.contentHeight + this.state.bannerHeight}>
@@ -186,18 +194,17 @@ class MobileNarrativeDisplay extends React.Component {
           {this.renderMainMarkdown()}
         </MobileContentContainer>
         <this.NextButton>
-          {my_locale.next}
+          <Trans>next</Trans>
         </this.NextButton>
       </>
     );
   }
 
   renderMiddleOfNarrative() {
-    const my_locale = locales[getPreferredLanguage()] || locales.en;
     return (
       <>
         <this.PreviousButton aria-labelledby="nav1">
-          {my_locale.previous}
+          <Trans>previous</Trans>
         </this.PreviousButton>
         <MobileContentContainer height={this.state.contentHeight}>
           {this.renderProgress()}
@@ -206,7 +213,7 @@ class MobileNarrativeDisplay extends React.Component {
           {this.renderMainMarkdown()}
         </MobileContentContainer>
         <this.NextButton aria-labelledby="nav2">
-          {my_locale.next}
+          <Trans>next</Trans>
         </this.NextButton>
       </>
     );
