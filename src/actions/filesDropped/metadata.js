@@ -37,7 +37,8 @@ const handleMetadata = async (dispatch, getState, file) => {
   try {
     ({data: csvData, errors, meta: csvMeta} = await parseCsv(file));
     if (errors.length) {
-      console.error("Encountered the following errors during CSV parsing:", errors);
+      console.error(errors);
+      throw new Error(errors.map((e) => e.message).join(", "));
     }
   } catch (err) {
     return dispatch(errorNotification({
