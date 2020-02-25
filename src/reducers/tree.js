@@ -68,8 +68,9 @@ const Tree = (state = getDefaultTreeState(), action) => {
       // modify the node data in place, which will not trigger any redux updates
       state.nodes.forEach((node) => {
         if (action.strains.has(node.name)) {
+          if (!node.node_attrs) node.node_attrs = {};
           for (const [trait, obj] of Object.entries(action.traits[node.name])) {
-            node.traits[trait] = obj;
+            node.node_attrs[trait] = obj;
           }
         }
       });
