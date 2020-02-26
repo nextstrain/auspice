@@ -324,12 +324,20 @@ export const mapToScreen = function mapToScreen() {
     maxY += delta;
   }
 
+  /* Don't allow tiny x-axis domains -- e.g. if zoomed into a polytomy where the
+  divergence values are all tiny, then we don't want to display the tree topology */
+  const minimumXAxisSpan = 1E-8;
+  let spanX = maxX-minX;
+  if (spanX < minimumXAxisSpan) {
+    maxX = minimumXAxisSpan - minX;
+    spanX = minimumXAxisSpan;
+  }
+
   /* set the domain of the x & y scales */
   if (this.layout === "radial" || this.layout === "unrooted") {
     // handle "radial and unrooted differently since they need to be square
     // since branch length move in x and y direction
     // TODO: should be tied to svg dimensions
-    const spanX = maxX-minX;
     const spanY = maxY-minY;
     const maxSpan = max([spanY, spanX]);
     const ySlack = (spanX>spanY) ? (spanX-spanY)*0.5 : 0.0;
