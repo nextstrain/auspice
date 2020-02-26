@@ -2,9 +2,12 @@
 title: Changelog
 ---
 
+* Improve entropy blending on branches. [See PR 898](https://github.com/nextstrain/auspice/pull/898)
+* Bugfix: temporal scale was poorly displayed when a second tree was displayed ("tangletrees"). [See PR 910](https://github.com/nextstrain/auspice/pull/910)
+* Bugfix: CSV drag-and-drop now works again. [See PR 904](https://github.com/nextstrain/auspice/pull/904)
+
+
 ## version 2.5.3 - 2020/02/12
-
-
 * Improve how we display mutations to distinguish between gaps & Ns, and to not show undetermined AAs. [See PR 895](https://github.com/nextstrain/auspice/pull/895)
 * Improve mapbox attribution. [See PR 894](https://github.com/nextstrain/auspice/pull/894)
 * Add windows-specific documentation [See PR 893](https://github.com/nextstrain/auspice/pull/893)
