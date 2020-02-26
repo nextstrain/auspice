@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.5.4 - 2020/02/26
+
+
 * Improve entropy blending on branches. [See PR 898](https://github.com/nextstrain/auspice/pull/898)
 * Bugfix: temporal scale was poorly displayed when a second tree was displayed ("tangletrees"). [See PR 910](https://github.com/nextstrain/auspice/pull/910)
 * Bugfix: CSV drag-and-drop now works again. [See PR 904](https://github.com/nextstrain/auspice/pull/904)
