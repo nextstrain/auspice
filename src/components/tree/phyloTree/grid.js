@@ -134,9 +134,8 @@ const computeXGridPoints = (xmin, xmax, layout, distanceMeasure, minorTicks, pxA
 
   /* step is the amount (same units of xmax, xmin) of seperation between major grid lines */
   const [step, minorStep] = distanceMeasure === "num_date" ?
-    calculateMajorGridSeperationForTime(xmax-xmin, pxAvailable) :
+    calculateMajorGridSeperationForTime(xmax-xmin, Math.abs(pxAvailable)) :
     calculateMajorGridSeperationForDivergence(xmax-xmin, minorTicks);
-
   const gridMin = Math.floor(xmin/step)*step;
   const minVis = layout==="radial" ? xmin : gridMin;
   const maxVis = xmax;
