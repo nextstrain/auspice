@@ -59,15 +59,6 @@ class Legend extends React.Component {
     return this.getTitleWidth() + 20;
   }
 
-  getTransformationForLegendItem(i) {
-    const count = this.props.colorScale.legendValues.length;
-    const stack = Math.ceil(count / 2);
-    const fromRight = Math.floor(i / stack);
-    const fromTop = (i % stack);
-    const horz = fromRight * 145 + 10;
-    const vert = fromTop * (legendRectSize + legendSpacing);
-    return "translate(" + horz + "," + vert + ")";
-  }
   getTitleString() {
     if (isColorByGenotype(this.props.colorBy)) {
       const genotype = decodeColorByGenotype(this.props.colorBy);
@@ -169,7 +160,6 @@ class Legend extends React.Component {
             legendSpacing={legendSpacing}
             rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
             rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
-            transform={this.getTransformationForLegendItem(i)}
             key={d}
             value={d}
             label={this.styleLabelText(d)}
@@ -185,12 +175,11 @@ class Legend extends React.Component {
     //   transition: `${fastTransitionDuration}ms ease-in-out`
     //   }}>
     return (
-      <g id="ItemsContainer">
-        <rect width="290" height={this.getSVGHeight()} fill="rgba(255,255,255,.85)"/>
-        <g id="Items" transform="translate(0,20)">
+      <div id="ItemsContainer">
+        <ul id="Items" style={{"-moz-columns": 2, "-webkit-columns": 2, columns: 2, marginBlockStart: 0, marginBlockEnd: 0, paddingInlineStart: 0, background: "rgba(255,255,255,.85)"}}>
           {items}
-        </g>
-      </g>
+        </ul>
+      </div>
     );
   }
 
@@ -214,9 +203,13 @@ class Legend extends React.Component {
         id="TreeLegendContainer"
         width={this.getSVGWidth()}
         height={this.getSVGHeight()}
-        style={styles.svg}
+        style={{...styles.svg, overflow: "visible"}}
       >
-        {this.legendItems()}
+        <foreignObject x="0" y="20" width={this.getSVGWidth()} height={this.getSVGHeight()}
+          style={this.state.legendVisible ? null : {display: "none"}}
+        >
+          {this.legendItems()}
+        </foreignObject>
         <g
           id="TitleAndChevron"
           onClick={() => this.toggleLegend()}

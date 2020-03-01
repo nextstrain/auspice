@@ -392,3 +392,17 @@ optgroup {
    ==========================================================================
    MOVED TO GLOBAL.CSS
    */
+
+/**
+ * Safari and Firefox overflowing text in tree legend
+ */
+_:default:not(:root:root), #ItemsContainer li span {
+  float: left;
+  word-break: break-all;
+  max-width: 102px;
+}
+@-moz-document url-prefix() {
+  #ItemsContainer li span {
+    word-break: break-all;
+  }
+}

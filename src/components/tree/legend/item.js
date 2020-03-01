@@ -4,7 +4,6 @@ import { dataFont, darkGrey } from "../../../globalStyles";
 
 const LegendItem = ({
   dispatch,
-  transform,
   legendRectSize,
   legendSpacing,
   rectStroke,
@@ -12,30 +11,35 @@ const LegendItem = ({
   label,
   value
 }) => (
-  <g
-    transform={transform}
+  <li
     onMouseEnter={() => {
       dispatch(updateTipRadii({selectedLegendItem: value}));
     }}
     onMouseLeave={() => {
       dispatch(updateTipRadii());
     }}
+    style={{listStyleType: "none", marginLeft: "10px", marginBottom: "2px"}}
   >
-    <rect
-      style={{strokeWidth: 2}}
-      width={legendRectSize}
-      height={legendRectSize}
-      fill={rectFill}
-      stroke={rectStroke}
-    />
-    <text
+    <span
+      style={{
+        float: "left",
+        width: (legendRectSize-2) + "px",
+        height: (legendRectSize-2) + "px",
+        background: rectFill,
+        border: "2px solid " + rectStroke,
+        marginRight: "8px"
+      }}>
+    </span>
+    <span
       x={legendRectSize + legendSpacing + 5}
       y={legendRectSize - legendSpacing}
-      style={{fontSize: 12, fill: darkGrey, fontFamily: dataFont}}
+      style={{fontSize: 12, fill: darkGrey, fontFamily: dataFont, overflowWrap: "anywhere"}}
     >
       {label}
-    </text>
-  </g>
+    </span>
+    <div style={{clear:"both"}}>
+    </div>
+  </li>
 );
 
 export default LegendItem;
