@@ -17,7 +17,11 @@ const handleFilesDropped = (files) => (dispatch, getState) => {
 
   const file = files[0];
   const accepted_file_types = ["text/csv", "text/tab-separated-values", "application/vnd.ms-excel"];
-  if (accepted_file_types.includes(file.type)) {
+
+  // Handle Windows .tsv edge case
+  const is_windows_tsv = file.type === "" && file.name.endsWith('.tsv');
+
+  if (accepted_file_types.includes(file.type) || is_windows_tsv) {
     return handleMetadata(dispatch, getState, file);
   }
 

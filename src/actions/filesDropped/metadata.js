@@ -12,7 +12,8 @@ import { ADD_COLOR_BYS } from "../types";
  * @param {DataTransfer} file a DataTransfer object
  */
 const parseCsv = (file) => new Promise((resolve, reject) => {
-  if (!["text/csv", "text/tab-separated-values", "application/vnd.ms-excel"].includes(file.type)) {
+  const is_windows_tsv = file.type === "" && file.name.endsWith('.tsv');
+  if (!(["text/csv", "text/tab-separated-values", "application/vnd.ms-excel"].includes(file.type) || is_windows_tsv)) {
     reject(new Error("Cannot parse this filetype"));
   }
   Papa.parse(file, {
