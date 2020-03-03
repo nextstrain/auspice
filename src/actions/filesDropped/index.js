@@ -1,5 +1,6 @@
 import { warningNotification } from "../notifications";
 import handleMetadata from "./metadata";
+import { is_csv_or_tsv } from "./constants";
 
 
 /**
@@ -16,12 +17,8 @@ const handleFilesDropped = (files) => (dispatch, getState) => {
   }
 
   const file = files[0];
-  const accepted_file_types = ["text/csv", "text/tab-separated-values", "application/vnd.ms-excel"];
 
-  // Handle Windows .tsv edge case
-  const is_windows_tsv = file.type === "" && file.name.endsWith('.tsv');
-
-  if (accepted_file_types.includes(file.type) || is_windows_tsv) {
+  if (is_csv_or_tsv(file)) {
     return handleMetadata(dispatch, getState, file);
   }
 
