@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.5.5 - 2020/03/04
+
+
 * Improve legend display for long names. [See PR 914](https://github.com/nextstrain/auspice/pull/914)
 * Fix a bug which prevented CSV drag&drop working on Windows machines. [See PR 913](https://github.com/nextstrain/auspice/pull/913)
 * Better display clades with extremely low divergence (i.e. polytomies) [See PR 909](https://github.com/nextstrain/auspice/pull/909)
