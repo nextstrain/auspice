@@ -69,19 +69,26 @@ const branchLabelFontWeight = (key) => {
  * @param {str} key e.g. "aa" or "clade"
  * @param {str} layout
  * @param {int} totalTipsInView visible tips also in view
- * @return {func||str}
+ * @return {func||str} Returns either a string ("visible") or a function.
+ *                     The function returned is handed nodes and returns either
+ *                     "visible" or "hidden". This function should only be
+ *                     provided nodes for which the label exists on that node.
  */
 const createBranchLabelVisibility = (key, layout, totalTipsInView) => {
-  if (key === "clade") return "visible";
+  if (key !== "aa") return "visible";
   const magicTipFractionToShowBranchLabel = 0.05;
   return (d) => {
+    if (layout !== "rect") {
+      return "hidden";
+    }
+    /* if any other labelling is defined on the branch, then show AA mutations */
+    if (Object.keys(d.n.branch_attrs.labels).filter((k) => k!=="aa").length) {
+      return "visible";
+    }
     /* if the number of _visible_ tips descending from this node are over the
     magicTipFractionToShowBranchLabel (c/w the total numer of _visible_ and
     _inView_ tips then display the label */
-    if (
-      d.n.tipCount > magicTipFractionToShowBranchLabel * totalTipsInView &&
-      layout === "rect"
-    ) {
+    if (d.n.tipCount > magicTipFractionToShowBranchLabel * totalTipsInView) {
       return "visible";
     }
     return "hidden";
