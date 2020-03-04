@@ -3,6 +3,11 @@ title: Contributing to Auspice
 ---
 
 
+> We have recieved a number of generous offers to contribute developer effort to nextstrain (and auspice).
+We would be grateful for code contributions, as well as constructive criticism and advice.
+A list of potential issues is being actively maintained at https://github.com/orgs/nextstrain/projects/5.
+
+
 Auspice is developed via GitHub and issues and comments are very welcome -- [click here](https://github.com/nextstrain/auspice/issues/new) to create a new issue.
 Alternatively, you can [email us](mailto:hello@nextstrain.org) with any questions or comments you may have.
 

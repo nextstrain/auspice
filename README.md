@@ -9,6 +9,11 @@ Our goal is to aid epidemiological understanding and improve outbreak response.
 
 Resulting data and inferences are available live at the website [nextstrain.org](https://nextstrain.org).
 
+> We have recieved a number of generous offers to contribute developer effort to nextstrain (and auspice) folowing our work on [SARS-CoV-2](https://nextstrain.org/ncov).
+We are flattered and would welcome contributions!
+Please see the [contributing](./CONTRIBUTING.md) documentation for more details.
+A list of potential issues is being actively maintained at https://github.com/orgs/nextstrain/projects/5
+
 # Auspice
 
 *Definition: Observation by an augur, ie a prophetic sign.*
