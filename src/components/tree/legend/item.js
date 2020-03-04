@@ -7,6 +7,7 @@ const LegendItem = ({
   transform,
   legendRectSize,
   legendSpacing,
+  legendMaxLength,
   rectStroke,
   rectFill,
   label,
@@ -33,7 +34,8 @@ const LegendItem = ({
       y={legendRectSize - legendSpacing}
       style={{fontSize: 12, fill: darkGrey, fontFamily: dataFont}}
     >
-      {label}
+      <title>{label}</title>
+      {label.substring(0, legendMaxLength)}
     </text>
   </g>
 );

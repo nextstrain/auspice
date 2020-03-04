@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./item";
 import { headerFont, darkGrey } from "../../../globalStyles";
-import { legendRectSize, legendSpacing, fastTransitionDuration, months } from "../../../util/globals";
+import { legendRectSize, legendSpacing, legendMaxLength, fastTransitionDuration, months } from "../../../util/globals";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 
@@ -167,6 +167,7 @@ class Legend extends React.Component {
             dispatch={this.props.dispatch}
             legendRectSize={legendRectSize}
             legendSpacing={legendSpacing}
+            legendMaxLength={legendMaxLength}
             rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
             rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
             transform={this.getTransformationForLegendItem(i)}
