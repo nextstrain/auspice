@@ -1,6 +1,7 @@
 import Papa from "papaparse";
 import { errorNotification, successNotification, warningNotification } from "../notifications";
 import { ADD_COLOR_BYS } from "../types";
+import { csv_file_types, is_csv_or_tsv } from "./constants";
 
 
 /**
@@ -12,7 +13,7 @@ import { ADD_COLOR_BYS } from "../types";
  * @param {DataTransfer} file a DataTransfer object
  */
 const parseCsv = (file) => new Promise((resolve, reject) => {
-  if (!["text/csv", "text/tab-separated-values"].includes(file.type)) {
+  if (!(is_csv_or_tsv(file))) {
     reject(new Error("Cannot parse this filetype"));
   }
   Papa.parse(file, {
@@ -25,7 +26,7 @@ const parseCsv = (file) => new Promise((resolve, reject) => {
     },
     encoding: "UTF-8",
     comments: "#",
-    delimiter: file.type === "text/csv" ? "," : "\t",
+    delimiter: (csv_file_types.includes(file.type)) ? "," : "\t",
     skipEmptyLines: true,
     dynamicTyping: false
   });

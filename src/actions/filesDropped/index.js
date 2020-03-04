@@ -1,5 +1,6 @@
 import { warningNotification } from "../notifications";
 import handleMetadata from "./metadata";
+import { is_csv_or_tsv } from "./constants";
 
 
 /**
@@ -16,7 +17,8 @@ const handleFilesDropped = (files) => (dispatch, getState) => {
   }
 
   const file = files[0];
-  if (file.type === "text/csv" || file.type === "text/tab-separated-values") {
+
+  if (is_csv_or_tsv(file)) {
     return handleMetadata(dispatch, getState, file);
   }
 
