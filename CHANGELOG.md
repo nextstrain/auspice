@@ -2,9 +2,13 @@
 title: Changelog
 ---
 
+* Improve legend display for long names. [See PR 914](https://github.com/nextstrain/auspice/pull/914)
+* Fix a bug which prevented CSV drag&drop working on Windows machines. [See PR 913](https://github.com/nextstrain/auspice/pull/913)
+* Better display clades with extremely low divergence (i.e. polytomies) [See PR 909](https://github.com/nextstrain/auspice/pull/909)
+* Improved branch labeling display. [See PR 908](https://github.com/nextstrain/auspice/pull/908)
+
+
 ## version 2.5.4 - 2020/02/26
-
-
 * Improve entropy blending on branches. [See PR 898](https://github.com/nextstrain/auspice/pull/898)
 * Bugfix: temporal scale was poorly displayed when a second tree was displayed ("tangletrees"). [See PR 910](https://github.com/nextstrain/auspice/pull/910)
 * Bugfix: CSV drag-and-drop now works again. [See PR 904](https://github.com/nextstrain/auspice/pull/904)
