@@ -49,6 +49,7 @@ export const rbsColorDomain = genericDomain;
 export const dateColorDomain = genericDomain;
 export const legendRectSize = 15;
 export const legendSpacing = 4;
+export const legendMaxLength = 18;
 export const nonTipNodeRadius = 0;
 export const tipRadius = 4;
 export const tipRadiusOnLegendMatch = 7;
