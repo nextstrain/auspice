@@ -9,7 +9,7 @@ Our goal is to aid epidemiological understanding and improve outbreak response.
 
 Resulting data and inferences are available live at the website [nextstrain.org](https://nextstrain.org).
 
-> We have recieved a number of generous offers to contribute developer effort to nextstrain (and auspice) folowing our work on [SARS-CoV-2](https://nextstrain.org/ncov).
+> We have received a number of generous offers to contribute developer effort to nextstrain (and auspice) following our work on [SARS-CoV-2](https://nextstrain.org/ncov).
 We are flattered and would welcome contributions!
 Please see the [contributing](./CONTRIBUTING.md) documentation for more details.
 A list of potential issues is being actively maintained at https://github.com/orgs/nextstrain/projects/5
@@ -20,7 +20,7 @@ A list of potential issues is being actively maintained at https://github.com/or
 
 Auspice is an open-source interactive web app for visualizing phylogenomic data.
 It may be used in tandem with nextstrain's bioinformatics toolkit [augur](https://github.com/nextstrain/augur) or on its own.
-Auspice may be used to explore datasets locally or run as a as a server to share results. 
+Auspice may be used to explore datasets locally or run as a as a server to share results.
 
 ## Documentation
 
@@ -44,22 +44,27 @@ For the purposes of getting started, you can download the current zika dataset v
 
 ```
 mkdir datasets
-curl http://data.nextstrain.org/zika.json --compressed -o datasets/zika.json
+curl http://data.nextstrain.org/zika.json --compressed -o data/zika.json
 ```
 
 And then run `auspice` via:
 ```
-auspice view --datasetDir datasets
+auspice view --datasetDir data
 ```
 This will allow you to run auspice locally (i.e. from your computer) and view the dataset which is behind [nextstrain.org/zika](https://nextstrain.org/zika).
 
+To download all the datasets at once, the following helper command will populate the `/data` folder.
+
+```bash
+  npm run get-data
+```
 
 Run `auspice --help` or visit [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice) for more information.
 
 ## Development, comments, issues and bugs
 
-Auspice is developed via GitHub and issues are very welcome. Alternatively, [email us](mailto:hello@nextstrain.org) with any questions or comments you may have. 
-If you are interested in submitting a pull request please use [eslint](https://eslint.org/) as much as possible -- thanks! 
+Auspice is developed via GitHub and issues are very welcome. Alternatively, [email us](mailto:hello@nextstrain.org) with any questions or comments you may have.
+If you are interested in submitting a pull request please use [eslint](https://eslint.org/) as much as possible -- thanks!
 
 New versions are released via the `./releaseNewVersion.sh` script from an up-to-date `master` branch. It will prompt you for the version number increase, push changes to the `release` branch and, as long as Travis-CI is successful then a new version will be automatically published to [npm](https://www.npmjs.com/package/auspice).
 

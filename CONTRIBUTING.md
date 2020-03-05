@@ -3,7 +3,7 @@ title: Contributing to Auspice
 ---
 
 
-> We have recieved a number of generous offers to contribute developer effort to nextstrain (and auspice).
+> We have received a number of generous offers to contribute developer effort to nextstrain (and auspice).
 We would be grateful for code contributions, as well as constructive criticism and advice.
 A list of potential issues is being actively maintained at https://github.com/orgs/nextstrain/projects/5.
 
@@ -20,5 +20,5 @@ This documentation is all contained within the Auspice GitHub repo -- see [the R
 ## Contributing to Development
 
 We're very happy to have outside contributions to Auspice and see it grow.
-If you are interested in contrubuting code then we would recommend that you create a [GitHub issue](https://github.com/nextstrain/auspice/issues/new) before spending time in the codebase.
+If you are interested in contributing code then we would recommend that you create a [GitHub issue](https://github.com/nextstrain/auspice/issues/new) before spending time in the codebase.
 For pull requests, please use [eslint](https://eslint.org/) as much as possible -- thanks!
