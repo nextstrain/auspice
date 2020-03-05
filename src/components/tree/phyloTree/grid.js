@@ -1,7 +1,9 @@
 /* eslint-disable space-infix-ops */
 import { min, max } from "d3-array";
+import { transition } from "d3-transition";
+import { easeLinear } from "d3-ease";
 import { timerStart, timerEnd } from "../../../util/perf";
-import { months } from "../../../util/globals";
+import { months, animationInterpolationDuration } from "../../../util/globals";
 import { numericToCalendar } from "../../../util/dateHelpers";
 
 export const hideGrid = function hideGrid() {
@@ -19,6 +21,12 @@ export const hideGrid = function hideGrid() {
 const addSVGGroupsIfNeeded = (groups, svg) => {
   if (!("temporalWindow" in groups)) {
     groups.temporalWindow = svg.append("g").attr("id", "temporalWindow");
+
+    // Technically rects aren't groups, but store them to avoid searching for them on each "addTemporalSlice" render.
+    groups.temporalWindowStart = groups.temporalWindow.append('rect')
+      .attr('class', 'temporalWindowStart');
+    groups.temporalWindowEnd = groups.temporalWindow.append('rect')
+      .attr('class', 'temporalWindowEnd');
   }
   if (!("majorGrid" in groups)) {
     groups.majorGrid = svg.append("g").attr("id", "majorGrid");
@@ -334,17 +342,24 @@ export const addGrid = function addGrid() {
   timerEnd("addGrid");
 };
 
-
 export const removeTemporalSlice = function removeTemporalSlice() {
   this.groups.temporalWindow.selectAll("*").remove();
 };
+
+// d3-transition to ensure both rectangles move at the same rate
+export const temporalWindowTransition = transition('temporalWindowTransition')
+  .duration(animationInterpolationDuration)
+  .ease(easeLinear); // the underlying animation uses linear interpolation, let's override the default easeCubic
 
 /**
  * add background grey rectangles to demarcate the temporal slice
  */
 export const addTemporalSlice = function addTemporalSlice() {
-  this.removeTemporalSlice();
-  if (this.layout !== "rect" || this.distance !== "num_date") return;
+  if (this.layout !== "rect" || this.distance !== "num_date") {
+    this.groups.temporalWindow.style('visibility', 'hidden');
+    return;
+  }
+  this.groups.temporalWindow.style('visibility', 'visible');
 
   const xWindow = [this.xScale(this.dateRange[0]), this.xScale(this.dateRange[1])];
   const height = this.yScale.range()[1];
@@ -357,25 +372,29 @@ export const addTemporalSlice = function addTemporalSlice() {
 
   /* the gray region between the root (ish) and the minimum date */
   if (Math.abs(xWindow[0]-rootXPos) > minPxThreshold) { /* don't render anything less than this num of px */
-    this.groups.temporalWindow.append("rect")
-      .attr("x", rightHandTree ? xWindow[0] : 0)
-      .attr("width", rightHandTree ? totalWidth-xWindow[0]: xWindow[0])
-      .attr("y", 0)
+    const xEnd_start = rightHandTree ? totalWidth - xWindow[0] : xWindow[0]; // ending X coordinate of the "start" rectangle
+    const translateX_start = -totalWidth + xEnd_start; // translation distance for starting temporalWindow
+    this.groups.temporalWindowStart
       .attr("height", height)
-      .attr("fill", fill);
+      .attr("width", totalWidth)
+      .attr("fill", fill)
+      .transition('temporalWindowTransition')
+      .attr("transform", `translate(${translateX_start},0)`);
   }
 
   /* the gray region between the maximum selected date and the last tip */
-  const startingX = rightHandTree ? this.params.margins.right : xWindow[1];
+  const xStart_end = rightHandTree ? this.params.margins.right : xWindow[1]; // starting X coordinate of the "end" rectangle
   const rectWidth = rightHandTree ?
     xWindow[1]-this.params.margins.right :
     totalWidth-this.params.margins.right-xWindow[1];
+  const translateX_end = xStart_end + this.params.margins.left;
+
   if (rectWidth > minPxThreshold) {
-    this.groups.temporalWindow.append("rect")
-      .attr("x", startingX)
-      .attr("width", rectWidth)
-      .attr("y", 0)
+    this.groups.temporalWindowEnd
       .attr("height", height)
-      .attr("fill", fill);
+      .attr("width", totalWidth)
+      .attr("fill", fill)
+      .transition('temporalWindowTransition')
+      .attr("transform", `translate(${translateX_end},0)`);
   }
 };
