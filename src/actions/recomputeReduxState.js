@@ -113,6 +113,13 @@ const modifyStateViaURLQuery = (state, query) => {
       state.sidebarOpen = false;
     }
   }
+  if (query.legend) {
+    if (query.legend === "open") {
+      state.legendOpen = true;
+    } else if (query.legend === "closed") {
+      state.legendOpen = false;
+    }
+  }
   if ("onlyPanels" in query) {
     state.showOnlyPanels = true;
   }

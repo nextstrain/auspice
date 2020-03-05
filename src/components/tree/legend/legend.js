@@ -6,44 +6,34 @@ import { headerFont, darkGrey } from "../../../globalStyles";
 import { legendRectSize, legendSpacing, legendMaxLength, fastTransitionDuration, months } from "../../../util/globals";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
+import { TOGGLE_LEGEND } from "../../../actions/types";
 
 
 @connect((state) => {
   return {
     colorBy: state.controls.colorBy,
     colorings: state.metadata.colorings,
-    colorScale: state.controls.colorScale
+    colorScale: state.controls.colorScale,
+    legendOpen: state.controls.legendOpen
   };
 })
 class Legend extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      legendVisible: true
-    };
-  }
-  // hide/show legend based on initial width and legend length
-  componentWillMount() {
-    this.updateLegendVisibility(this.props.width, this.props.colorScale);
   }
 
-  // hide/show legend based on available width and legend length
-  componentWillReceiveProps(nextProps) {
-    if (this.props.width !== nextProps.width || this.props.colorScale.version !== nextProps.colorScale.version) {
-      this.updateLegendVisibility(nextProps.width, nextProps.colorScale);
-    }
-  }
+  showLegend() {
+    if (this.props.legendOpen !== undefined) { return this.props.legendOpen; }
 
-  updateLegendVisibility(width, colorScale) {
-    if (width < 600 || colorScale.legendValues.length > 32) {
-      this.setState({legendVisible: false});
-    } else {
-      this.setState({legendVisible: true});
+    // Our default state changes based on the size of the window or the number of items in the legend.
+    if (this.props.width < 600 || this.props.colorScale.legendValues.length > 32) {
+      return false;
     }
+    return true;
   }
 
   getSVGHeight() {
-    if (!this.state.legendVisible) {
+    if (!this.showLegend()) {
       return 18;
     }
     const nItems = this.props.colorScale.legendValues.length;
@@ -53,7 +43,7 @@ class Legend extends React.Component {
   }
 
   getSVGWidth() {
-    if (this.state.legendVisible) {
+    if (this.showLegend()) {
       return 290;
     }
     return this.getTitleWidth() + 20;
@@ -82,8 +72,7 @@ class Legend extends React.Component {
     return 15 + 5.3 * this.getTitleString().length;
   }
   toggleLegend() {
-    const newState = !this.state.legendVisible;
-    this.setState({legendVisible: newState});
+    this.props.dispatch({type: TOGGLE_LEGEND, value: !this.props.legendOpen})
   }
 
   /*
@@ -115,7 +104,7 @@ class Legend extends React.Component {
    * coordinate system from top,left of parent SVG
    */
   legendChevron() {
-    const degrees = this.state.legendVisible ? -180 : 0;
+    const degrees = this.showLegend() ? -180 : 0;
     // This is a hack because we can't use getBBox in React.
     // Lots of work to get measured width of DOM element.
     // Works fine, but will need adjusting if title font is changed.
