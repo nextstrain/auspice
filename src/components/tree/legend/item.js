@@ -35,7 +35,7 @@ const LegendItem = ({
       style={{fontSize: 12, fill: darkGrey, fontFamily: dataFont}}
     >
       <title>{label}</title>
-      {label.substring(0, legendMaxLength)}
+      {typeof label === 'string' ? label.substring(0, legendMaxLength) : label}
     </text>
   </g>
 );
