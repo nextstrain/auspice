@@ -255,12 +255,6 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
     width = panels.mapTiles.width;
     height = panels.mapTiles.height;
   }
-  /* need to adjust map demes & transmissions to account for panning */
-  if (panels.mapD3) {
-    // console.log("adding offsets to mapD3 x,y ", panels.mapD3._panOffsets.x, panels.mapD3._panOffsets.y);
-    panels.mapD3.x += panels.mapD3._panOffsets.x;
-    panels.mapD3.y += panels.mapD3._panOffsets.y;
-  }
 
   if (panels.entropy) {
     if (width < panels.entropy.width) {
@@ -378,7 +372,7 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
       // modify the width & height of the mapD3 to match the tiles (not sure how this actually works in the DOM)
       panels.mapD3.width = panels.mapTiles.width;
       panels.mapD3.height = panels.mapTiles.height;
-      panels.mapD3._panOffsets = mapTiles.panOffsets;
+      panels.mapD3.inner = `<g transform="translate(${mapTiles.panOffsets.x}, ${mapTiles.panOffsets.y})">${panels.mapD3.inner}</g>`;
     } catch (e) {
       panels.mapD3 = undefined;
       panels.mapTiles = undefined;
