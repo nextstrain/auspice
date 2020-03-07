@@ -112,6 +112,16 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
             cwd: path.resolve(__dirname)
           }
         },
+        // To regenerate the regular expression for selecting non-ES5 dependencies, run:
+        // npx are-you-es5 check . -r | tail -n 1
+        {
+          test: /\.js$/,
+          loader: 'babel-loader',
+          exclude: /[\\/]node_modules[\\/](?!(chalk|express-naked-redirect|node-fetch|typeface-lato)[\\/])/,
+          options: {
+            cwd: path.resolve(__dirname)
+          }
+        },
         {
           test: /\.css$/,
           use: ["style-loader", "css-loader"]
