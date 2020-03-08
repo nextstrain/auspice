@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.5.7 - 2020/03/09
+
+
 ## version 2.5.6 - 2020/03/09
 
 
