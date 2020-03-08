@@ -316,7 +316,7 @@ class Map extends React.Component {
       if (geoData.key === this.props.geoResolution) {
         const demeToLatLongs = geoData.demes;
         Object.keys(demeToLatLongs).forEach((deme) => {
-          if (!demeIndices || !demeData) {
+          if (!demeIndices || !demeData || !demeIndices[deme]) {
             /* include them all */
             latitudes.push(demeToLatLongs[deme].latitude);
             longitudes.push(demeToLatLongs[deme].longitude);
