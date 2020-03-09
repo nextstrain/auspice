@@ -2,15 +2,19 @@
 title: Changelog
 ---
 
-## version 2.5.7 - 2020/03/09
+* Highlight tips which (partially) match strain search. [See PR 930](https://github.com/nextstrain/auspice/pull/930)
+* Allow HTML tables in narratives (main-auspice-display-markdown). [See PR 924](https://github.com/nextstrain/auspice/pull/924)
+* Add hidden URL query to force open / close state of legend. [See PR 923](https://github.com/nextstrain/auspice/pull/923)
+* Make tree-text unselectable. [See PR 922](https://github.com/nextstrain/auspice/pull/922)
 
+## version 2.5.7 - 2020/03/09
+* Allow lat-longs for locations only set on internal nodes.
 
 ## version 2.5.6 - 2020/03/09
-
+* Fig bug in legend for numerical values (introduced in 2.5.5). [See PR 927](https://github.com/nextstrain/auspice/pull/927)
+* Improve documentation. [See PR 919](https://github.com/nextstrain/auspice/pull/919)
 
 ## version 2.5.5 - 2020/03/04
-
-
 * Improve legend display for long names. [See PR 914](https://github.com/nextstrain/auspice/pull/914)
 * Fix a bug which prevented CSV drag&drop working on Windows machines. [See PR 913](https://github.com/nextstrain/auspice/pull/913)
 * Better display clades with extremely low divergence (i.e. polytomies) [See PR 909](https://github.com/nextstrain/auspice/pull/909)
