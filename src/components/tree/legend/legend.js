@@ -23,6 +23,7 @@ class Legend extends React.Component {
   }
 
   showLegend() {
+    // redux state takes precedent
     if (this.props.legendOpen !== undefined) { return this.props.legendOpen; }
 
     // Our default state changes based on the size of the window or the number of items in the legend.

@@ -81,6 +81,13 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       }
       break;
     }
+    case types.TOGGLE_LEGEND: {
+      // we treat this the same as sidebar above -- it can only be added to the URL manually
+      if ("legend" in query) {
+        query.legend = undefined;
+      }
+      break;
+    }
     case types.TOGGLE_PANEL_DISPLAY: {
       if (state.controls.panelsAvailable.length === action.panelsToDisplay.length) {
         query.d = undefined;
