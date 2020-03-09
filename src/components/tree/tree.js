@@ -112,7 +112,7 @@ class Tree extends React.Component {
     return (
       <svg
         id={mainTree ? "MainTree" : "SecondTree"}
-        style={{pointerEvents: "auto", cursor: "default"}}
+        style={{pointerEvents: "auto", cursor: "default", "user-select": "none"}}
         width={width}
         height={height}
         ref={(c) => {mainTree ? this.domRefs.mainTree = c : this.domRefs.secondTree = c;}}
