@@ -390,15 +390,15 @@ export const mapToScreen = function mapToScreen() {
     this.nodes.forEach((d) => {d.cBarEnd = this.yScale(d.yRange[1]);});
     this.nodes.forEach((d, i) => {
       d.branch =[
-        " M "+(d.xBase-stem_offset_radial[i]*Math.sin(d.angle)).toString()
-        + " "+(d.yBase-stem_offset_radial[i]*Math.cos(d.angle)).toString()
-        + " L "+d.xTip.toString()+" "+d.yTip.toString(), ""
+        " M "+(d.xBase-stem_offset_radial[i]*Math.sin(d.angle)).toString() +
+        " "+(d.yBase-stem_offset_radial[i]*Math.cos(d.angle)).toString() +
+        " L "+d.xTip.toString()+" "+d.yTip.toString(), ""
       ];
       if (!d.terminal) {
         d.branch[1] =[" M "+this.xScale(d.xCBarStart).toString()+" "+this.yScale(d.yCBarStart).toString()+
-        " A "+(this.xScale(d.depth)-this.xScale(offset)).toString()+" "
-        +(this.yScale(d.depth)-this.yScale(offset)).toString()
-        +" 0 "+(d.smallBigArc?"1 ":"0 ") +" 1 "+
+        " A "+(this.xScale(d.depth)-this.xScale(offset)).toString()+" "+
+        (this.yScale(d.depth)-this.yScale(offset)).toString()+
+        " 0 "+(d.smallBigArc?"1 ":"0 ") +" 1 "+
         " "+this.xScale(d.xCBarEnd).toString()+","+this.yScale(d.yCBarEnd).toString()];
       }
     });

@@ -69,7 +69,7 @@ const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDa
  * given a url, which dataset fetches should be made?
  * If a second tree is defined - e.g.
  * `flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y`.
- * then we want to make two fetches - one for 
+ * then we want to make two fetches - one for
  * `flu/seasonal/h3n2/ha/2y` and one for `flu/seasonal/h3n2/na/2y`.
  *
  * @returns {Array} [0] {string} url, modified as needed to represent main dataset
@@ -160,7 +160,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
          * Also displays warning to the user to let them know the old syntax is deprecated. */
         let oldSyntax;
         [mainDatasetUrl, secondTreeUrl, oldSyntax] = collectDatasetFetchUrlsDeprecatedSyntax(url);
-        pathnameShouldBe = `${mainDatasetUrl}:${secondTreeUrl}`
+        pathnameShouldBe = `${mainDatasetUrl}:${secondTreeUrl}`;
         const mainDatasetResponse = await getDataset(mainDatasetUrl);
         datasetJson = await mainDatasetResponse.json();
         secondTreeDataset = await getDataset(secondTreeUrl)
@@ -207,17 +207,17 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
         .then((res) => res.json());
       dispatch(loadFrequencies(frequencyData));
     } catch (err) {
-      console.error("Failed to fetch frequencies", err.message)
+      console.error("Failed to fetch frequencies", err.message);
       dispatch(warningNotification({message: "Failed to fetch frequencies"}));
     }
   }
 
   /* Get available datasets -- this is needed for the sidebar dataset-change dropdowns etc */
   try {
-    const availableDatasets = await fetchJSON(`${getServerAddress()}/getAvailable?prefix=${window.location.pathname}`)
+    const availableDatasets = await fetchJSON(`${getServerAddress()}/getAvailable?prefix=${window.location.pathname}`);
     dispatch({type: types.SET_AVAILABLE, data: availableDatasets});
   } catch (err) {
-    console.error("Failed to fetch available datasets", err.message)
+    console.error("Failed to fetch available datasets", err.message);
     dispatch(warningNotification({message: "Failed to fetch available datasets"}));
   }
 
@@ -264,6 +264,6 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
           console.error("Error obtaining narratives", err.message);
           dispatch(goTo404(`Couldn't load narrative for ${url}`));
         });
-    };
+    }
   };
 };

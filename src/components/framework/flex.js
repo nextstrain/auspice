@@ -38,7 +38,7 @@ class Flex extends React.Component {
     ]),
     styleOverrides: PropTypes.object,
     children: PropTypes.node,
-    clickHandler: PropTypes.func,
+    clickHandler: PropTypes.func
   }
   static defaultProps = {
     direction: "row",

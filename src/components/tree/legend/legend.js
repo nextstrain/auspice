@@ -73,7 +73,7 @@ class Legend extends React.Component {
     return 15 + 5.3 * this.getTitleString().length;
   }
   toggleLegend() {
-    this.props.dispatch({type: TOGGLE_LEGEND, value: !this.props.legendOpen})
+    this.props.dispatch({type: TOGGLE_LEGEND, value: !this.props.legendOpen});
   }
 
   /*

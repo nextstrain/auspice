@@ -189,8 +189,8 @@ const getTraitsToDisplay = (node) => {
 const Trait = ({node, trait, colorings}) => {
   const value_tmp = getTraitFromNode(node, trait);
   let value = value_tmp;
-  if (typeof value_tmp == "number"){
-    if (!Number.isInteger(value_tmp)){
+  if (typeof value_tmp === "number") {
+    if (!Number.isInteger(value_tmp)) {
       value = Number.parseFloat(value_tmp).toPrecision(3);
     }
   }

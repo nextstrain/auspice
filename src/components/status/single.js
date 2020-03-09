@@ -34,7 +34,7 @@ class SingleDataset extends React.Component {
       })
       .catch((err) => {
         console.warn("Failed to fetch or process JSONs for", this.props.path, "ERR:", err.type);
-        console.log(err)
+        console.log(err);
         this.setState({
           status: "Error fetching / processing JSONs",
           backgroundColor: errorColor
