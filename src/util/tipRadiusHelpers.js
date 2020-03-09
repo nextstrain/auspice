@@ -29,9 +29,11 @@ const determineLegendMatch = (selectedLegendItem, node, colorScale) => {
 * @param tree
 * @returns null (if data not ready) or array of tip radii
 */
-export const calcTipRadii = ({tipSelectedIdx = false, selectedLegendItem = false, colorScale, tree}) => {
+export const calcTipRadii = ({tipSelectedIdx = false, selectedLegendItem = false, searchNodes = false, colorScale, tree}) => {
   if (selectedLegendItem !== false && tree && tree.nodes) {
     return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
+  } else if (searchNodes) {
+    return tree.nodes.map((d) => d.name.toLowerCase().includes(searchNodes) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (tipSelectedIdx) {
     const radii = tree.nodes.map(() => tipRadius);
     radii[tipSelectedIdx] = tipRadiusOnLegendMatch + 3;
