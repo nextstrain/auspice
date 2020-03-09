@@ -204,7 +204,7 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
  * @return {null} side-effects: a single action
  */
 export const updateTipRadii = (
-  {tipSelectedIdx = false, selectedLegendItem = false} = {}
+  {tipSelectedIdx = false, selectedLegendItem = false, searchNodes = false} = {}
 ) => {
   return (dispatch, getState) => {
     const { controls, tree, treeToo } = getState();
@@ -222,6 +222,9 @@ export const updateTipRadii = (
     } else if (selectedLegendItem !== false) {
       d.data = calcTipRadii({selectedLegendItem, colorScale, tree});
       if (tt) d.dataToo = calcTipRadii({selectedLegendItem, colorScale, tree: treeToo});
+    } else if (searchNodes !== false) {
+      d.data = calcTipRadii({searchNodes, colorScale, tree});
+      if (tt) d.dataToo = calcTipRadii({searchNodes, colorScale, tree: treeToo});
     } else {
       d.data = calcTipRadii({colorScale, tree});
       if (tt) d.dataToo = calcTipRadii({colorScale, tree: treeToo});

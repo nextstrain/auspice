@@ -72,6 +72,12 @@ class SearchStrains extends React.Component {
     const awesomplete = new Awesomplete(this.ref, {
       maxItems: 1000
     });
+    this.ref.addEventListener('input', (e) => {
+      const strain = e.target.value.toLowerCase().trim();
+      this.props.dispatch(updateTipRadii({
+        searchNodes: (strain.length > 1) ? strain : ""
+      }));
+    });
     this.ref.addEventListener('awesomplete-selectcomplete', (e) => {
       const strain = e.text.value;
       for (let i = 0; i < this.props.nodes.length; i++) {
