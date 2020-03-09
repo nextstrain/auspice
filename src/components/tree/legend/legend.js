@@ -203,7 +203,7 @@ class Legend extends React.Component {
         top: 26,
         borderRadius: 4,
         zIndex: 1000,
-        "user-select": "none"
+        userSelect: "none"
       }
     };
   }
