@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.6.0 - 2020/03/09
+
+
 * Highlight tips which (partially) match strain search. [See PR 930](https://github.com/nextstrain/auspice/pull/930)
 * Allow HTML tables in narratives (main-auspice-display-markdown). [See PR 924](https://github.com/nextstrain/auspice/pull/924)
 * Add hidden URL query to force open / close state of legend. [See PR 923](https://github.com/nextstrain/auspice/pull/923)
