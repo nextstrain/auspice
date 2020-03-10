@@ -20,6 +20,8 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey, goColor, pauseColor } from "../../globalStyles";
+import ErrorBoundary from "../../util/errorBoundry";
+import Legend from "../tree/legend/legend";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -640,6 +642,9 @@ class Map extends React.Component {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
       <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
+        {this.props.legend && <ErrorBoundary>
+          <Legend right width={this.props.width} for="map" />
+        </ErrorBoundary>}
         {this.maybeCreateMapDiv()}
         {this.props.narrativeMode ? null : (
           <button

@@ -79,7 +79,8 @@ export const getDefaultControlsState = () => {
     zoomMax: undefined,
     branchLengthsToDisplay: "divAndDate",
     sidebarOpen: initialSidebarState.sidebarOpen,
-    legendOpen: undefined,
+    treeLegendOpen: undefined,
+    mapLegendOpen: undefined,
     showOnlyPanels: false
   };
 };
@@ -252,7 +253,10 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.TOGGLE_SIDEBAR:
       return Object.assign({}, state, {sidebarOpen: action.value});
     case types.TOGGLE_LEGEND:
-      return Object.assign({}, state, {legendOpen: action.value});
+      if (action.for === 'tree') {
+        return Object.assign({}, state, {treeLegendOpen: action.value});
+      }
+      return Object.assign({}, state, {mapLegendOpen: action.value});
     case types.ADD_COLOR_BYS:
       for (const colorBy of Object.keys(action.newColorings)) {
         state.coloringsPresentOnTree.add(colorBy);

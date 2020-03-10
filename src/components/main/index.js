@@ -77,6 +77,14 @@ class Main extends React.Component {
   toggleSidebar() {
     this.props.dispatch({type: TOGGLE_SIDEBAR, value: !this.props.sidebarOpen});
   }
+
+  shouldShowMapLegend() {
+    const showingTree = this.props.panelsToDisplay.includes("tree");
+    const inGrid = this.props.panelLayout !== "grid";
+
+    return !showingTree || inGrid;
+  }
+
   render() {
     if (this.state.showSpinner) {
       return (<Spinner/>);
@@ -133,7 +141,7 @@ class Main extends React.Component {
           }
           {this.props.displayNarrative || this.props.showOnlyPanels ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
           {this.props.panelsToDisplay.includes("tree") ? <Tree width={big.width} height={big.height} /> : null}
-          {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} /> : null}
+          {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} legend={this.shouldShowMapLegend()} /> : null}
           {this.props.panelsToDisplay.includes("entropy") ?
             (<Suspense fallback={null}>
               <Entropy width={chart.width} height={chart.height} />

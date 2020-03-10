@@ -94,8 +94,8 @@ class Tree extends React.Component {
   }
 
   getStyles = () => {
-    const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0
-      || this.props.treeToo.idxOfInViewRootNode !== 0;
+    const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0 ||
+      this.props.treeToo.idxOfInViewRootNode !== 0;
     return {
       resetTreeButton: {
         zIndex: 100,
@@ -126,7 +126,7 @@ class Tree extends React.Component {
     return (
       <Card center title={"Phylogeny"}>
         <ErrorBoundary>
-          <Legend width={this.props.width}/>
+          <Legend width={this.props.width} for="tree"/>
         </ErrorBoundary>
         <HoverInfoPanel
           hovered={this.state.hovered}
