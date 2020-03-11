@@ -65,6 +65,8 @@ You can run and develop locally with
 npm run dev
 ```
 
+to serve the datasets in your `data` folder.
+
 To download all the example datasets at once, the following helper command will populate the `/data` folder.
 
 ```bash
