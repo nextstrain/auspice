@@ -357,7 +357,7 @@ export const temporalWindowTransition = transition('temporalWindowTransition')
  */
 export const showTemporalSlice = function showTemporalSlice() {
   if (this.layout !== "rect" || this.distance !== "num_date") {
-    this.groups.temporalWindow.style('visibility', 'hidden');
+    this.hideTemporalSlice();
     return;
   }
 
@@ -381,7 +381,7 @@ export const showTemporalSlice = function showTemporalSlice() {
       translateX_startRegion = xWindow[0];
     }
 
-    const wasStartRegionVisible = this.groups.temporalWindowStart.attr('opacity') === 1;
+    const wasStartRegionVisible = this.groups.temporalWindowStart.attr('opacity') === '1';
 
     this.groups.temporalWindowStart
       .attr('opacity', 1)
@@ -405,31 +405,36 @@ export const showTemporalSlice = function showTemporalSlice() {
   let xStart_endRegion = xWindow[1]; // starting X coordinate of the "end" rectangle
   let width_endRegion = totalWidth - this.params.margins.right - xWindow[1];
 
+  let transform_endRegion = `translate(${totalWidth - this.params.margins.right},0) scale(-1,1)`;
   // With a right hand tree, the coordinate system flips (right to left)
   if (rightHandTree) {
     xStart_endRegion = this.params.margins.right;
     width_endRegion = xWindow[1] - this.params.margins.right;
+    transform_endRegion = `translate(${xStart_endRegion},0)`;
   }
 
   if (width_endRegion > minPxThreshold) {
-    const wasEndRegionVisible = this.groups.temporalWindowEnd.attr('opacity') === 1;
+    const wasEndRegionVisible = this.groups.temporalWindowEnd.attr('opacity') === '1';
 
     this.groups.temporalWindowEnd
       .attr('opacity', 1)
       .attr("height", height)
-      .attr("fill", fill);
+      .attr("fill", fill)
+      .attr("transform", transform_endRegion);
+
+
     // Only apply animation if rectangle was already visible in the previous frame.
     // Unlike the startingRegion, this panel cannot depend
     // on letting the SVG boundaries clip part of the rectangle.
-    // As a result, we'll have to animate width AND height.
+    // As a result, we'll have to animate width instead of position
+    // If performance becomes an issue, try add a custom clip-path with
+    // a fixed-width region instead.
     if (wasEndRegionVisible) {
       this.groups.temporalWindowEnd
         .transition('temporalWindowTransition')
-        .attr("transform", `translate(${xStart_endRegion},0)`)
         .attr("width", width_endRegion);
     } else {
       this.groups.temporalWindowEnd
-        .attr("transform", `translate(${xStart_endRegion},0)`)
         .attr("width", width_endRegion);
     }
   } else {
