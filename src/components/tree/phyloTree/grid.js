@@ -372,29 +372,45 @@ export const addTemporalSlice = function addTemporalSlice() {
 
   /* the gray region between the root (ish) and the minimum date */
   if (Math.abs(xWindow[0]-rootXPos) > minPxThreshold) { /* don't render anything less than this num of px */
-    const xEnd_start = rightHandTree ? totalWidth - xWindow[0] : xWindow[0]; // ending X coordinate of the "start" rectangle
-    const translateX_start = -totalWidth + xEnd_start; // translation distance for starting temporalWindow
+    let xEnd_startRegion = xWindow[0]; // ending X coordinate of the "start" rectangle
+    let translateX_startRegion = -totalWidth + xEnd_startRegion; // translation distance for the start rectangle
+
+    // With right hand tree, the coordinate system flips (right to left)
+    if (rightHandTree) {
+      xEnd_startRegion = totalWidth - xWindow[0];
+      translateX_startRegion = xWindow[0];
+    }
+
     this.groups.temporalWindowStart
       .attr("height", height)
       .attr("width", totalWidth)
       .attr("fill", fill)
       .transition('temporalWindowTransition')
-      .attr("transform", `translate(${translateX_start},0)`);
+      .attr("transform", `translate(${translateX_startRegion},0)`);
   }
 
   /* the gray region between the maximum selected date and the last tip */
-  const xStart_end = rightHandTree ? this.params.margins.right : xWindow[1]; // starting X coordinate of the "end" rectangle
-  const rectWidth = rightHandTree ?
-    xWindow[1]-this.params.margins.right :
-    totalWidth-this.params.margins.right-xWindow[1];
-  const translateX_end = xStart_end + this.params.margins.left;
+  let xStart_endRegion = xWindow[1]; // starting X coordinate of the "end" rectangle
+  let width_endRegion = totalWidth - this.params.margins.right - xWindow[1];
 
-  if (rectWidth > minPxThreshold) {
+  // With a right hand tree, the coordinate system flips (right to left)
+  if (rightHandTree) {
+    xStart_endRegion = this.params.margins.right;
+    width_endRegion = xWindow[1] - this.params.margins.right;
+  }
+
+  if (width_endRegion > minPxThreshold) {
     this.groups.temporalWindowEnd
+      .attr('visibility', 'visible')
       .attr("height", height)
-      .attr("width", totalWidth)
       .attr("fill", fill)
       .transition('temporalWindowTransition')
-      .attr("transform", `translate(${translateX_end},0)`);
+      .attr("transform", `translate(${xStart_endRegion},0)`)
+      // Unlike the startingRegion, this panel cannot depend
+    // on letting the SVG boundaries clip part of the rectangle.
+    // As a result, we'll have to animate width AND height.
+      .attr("width", width_endRegion);
+  } else {
+    this.groups.temporalWindowEnd.attr('visibility', 'hidden');
   }
 };
