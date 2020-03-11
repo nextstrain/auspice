@@ -343,8 +343,8 @@ export const addGrid = function addGrid() {
 };
 
 export const hideTemporalSlice = function hideTemporalSlice() {
-  this.groups.temporalWindowStart.attr('visibility', 'hidden');
-  this.groups.temporalWindowEnd.attr('visibility', 'hidden');
+  this.groups.temporalWindowStart.attr('opacity', 0);
+  this.groups.temporalWindowEnd.attr('opacity', 0);
 };
 
 // d3-transition to ensure both rectangles move at the same rate
@@ -372,24 +372,33 @@ export const showTemporalSlice = function showTemporalSlice() {
 
   /* the gray region between the root (ish) and the minimum date */
   if (Math.abs(xWindow[0]-rootXPos) > minPxThreshold) { /* don't render anything less than this num of px */
-    let xEnd_startRegion = xWindow[0]; // ending X coordinate of the "start" rectangle
-    let translateX_startRegion = -totalWidth + xEnd_startRegion; // translation distance for the start rectangle
+    let width_startRegion = xWindow[0];
+    let translateX_startRegion = 0;
 
     // With right hand tree, the coordinate system flips (right to left)
     if (rightHandTree) {
-      xEnd_startRegion = totalWidth - xWindow[0];
+      width_startRegion = totalWidth - xWindow[0];
       translateX_startRegion = xWindow[0];
     }
 
+    const wasStartRegionVisible = this.groups.temporalWindowStart.attr('opacity') === 1;
+
     this.groups.temporalWindowStart
-      .attr('visibility', 'visible')
+      .attr('opacity', 1)
       .attr("height", height)
-      .attr("width", totalWidth)
-      .attr("fill", fill)
-      .transition('temporalWindowTransition')
-      .attr("transform", `translate(${translateX_startRegion},0)`);
+      .attr("transform", `translate(${translateX_startRegion},0)`)
+      .attr("fill", fill);
+
+    // Only apply animation if rectangle was already visible in the previous frame.
+    if (wasStartRegionVisible) {
+      this.groups.temporalWindowStart.transition('temporalWindowTransition')
+        .attr("width", width_startRegion);
+    } else {
+      this.groups.temporalWindowStart
+        .attr("width", width_startRegion);
+    }
   } else {
-    this.groups.temporalWindowStart.attr('visibility', 'hidden');
+    this.groups.temporalWindowStart.attr('opacity', 0);
   }
 
   /* the gray region between the maximum selected date and the last tip */
@@ -403,17 +412,27 @@ export const showTemporalSlice = function showTemporalSlice() {
   }
 
   if (width_endRegion > minPxThreshold) {
+    const wasEndRegionVisible = this.groups.temporalWindowEnd.attr('opacity') === 1;
+
     this.groups.temporalWindowEnd
-      .attr('visibility', 'visible')
+      .attr('opacity', 1)
       .attr("height", height)
-      .attr("fill", fill)
-      .transition('temporalWindowTransition')
-      .attr("transform", `translate(${xStart_endRegion},0)`)
-      // Unlike the startingRegion, this panel cannot depend
+      .attr("fill", fill);
+    // Only apply animation if rectangle was already visible in the previous frame.
+    // Unlike the startingRegion, this panel cannot depend
     // on letting the SVG boundaries clip part of the rectangle.
     // As a result, we'll have to animate width AND height.
-      .attr("width", width_endRegion);
+    if (wasEndRegionVisible) {
+      this.groups.temporalWindowEnd
+        .transition('temporalWindowTransition')
+        .attr("transform", `translate(${xStart_endRegion},0)`)
+        .attr("width", width_endRegion);
+    } else {
+      this.groups.temporalWindowEnd
+        .attr("transform", `translate(${xStart_endRegion},0)`)
+        .attr("width", width_endRegion);
+    }
   } else {
-    this.groups.temporalWindowEnd.attr('visibility', 'hidden');
+    this.groups.temporalWindowEnd.attr('opacity', 0);
   }
 };
