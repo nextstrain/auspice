@@ -39,7 +39,7 @@ See [here](https://nextstrain.github.io/auspice/introduction/install) for full i
 
 ## Quickstart
 
-Install dependencies; this will create a `/data` folder for your datasets.
+Install dependencies; this will also create a `/data` folder for your datasets.
 
 ```
 npm install
