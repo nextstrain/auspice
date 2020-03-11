@@ -29,8 +29,16 @@ npm install
 ```
 
 #### Developing (live reloading etc):
+To get started, run the following to download an example Zika dataset into the `data` folder:
+
+```
+curl http://data.nextstrain.org/zika.json --compressed -o data/zika.json
+```
+
+```
 ```bash
-npm run develop
+# This uses the `data` folder so you'll need a dataset.
+npm run dev
 ```
 
 #### (re-)build the static site
