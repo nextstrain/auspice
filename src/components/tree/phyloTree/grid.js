@@ -22,7 +22,7 @@ const addSVGGroupsIfNeeded = (groups, svg) => {
   if (!("temporalWindow" in groups)) {
     groups.temporalWindow = svg.append("g").attr("id", "temporalWindow");
 
-    // Technically rects aren't groups, but store them to avoid searching for them on each "addTemporalSlice" render.
+    // Technically rects aren't groups, but store them to avoid searching for them on each "showTemporalSlice" render.
     groups.temporalWindowStart = groups.temporalWindow.append('rect')
       .attr('class', 'temporalWindowStart');
     groups.temporalWindowEnd = groups.temporalWindow.append('rect')
@@ -342,8 +342,9 @@ export const addGrid = function addGrid() {
   timerEnd("addGrid");
 };
 
-export const removeTemporalSlice = function removeTemporalSlice() {
-  this.groups.temporalWindow.selectAll("*").remove();
+export const hideTemporalSlice = function hideTemporalSlice() {
+  this.groups.temporalWindowStart.attr('visibility', 'hidden');
+  this.groups.temporalWindowEnd.attr('visibility', 'hidden');
 };
 
 // d3-transition to ensure both rectangles move at the same rate
@@ -354,12 +355,11 @@ export const temporalWindowTransition = transition('temporalWindowTransition')
 /**
  * add background grey rectangles to demarcate the temporal slice
  */
-export const addTemporalSlice = function addTemporalSlice() {
+export const showTemporalSlice = function showTemporalSlice() {
   if (this.layout !== "rect" || this.distance !== "num_date") {
     this.groups.temporalWindow.style('visibility', 'hidden');
     return;
   }
-  this.groups.temporalWindow.style('visibility', 'visible');
 
   const xWindow = [this.xScale(this.dateRange[0]), this.xScale(this.dateRange[1])];
   const height = this.yScale.range()[1];
@@ -382,11 +382,14 @@ export const addTemporalSlice = function addTemporalSlice() {
     }
 
     this.groups.temporalWindowStart
+      .attr('visibility', 'visible')
       .attr("height", height)
       .attr("width", totalWidth)
       .attr("fill", fill)
       .transition('temporalWindowTransition')
       .attr("transform", `translate(${translateX_startRegion},0)`);
+  } else {
+    this.groups.temporalWindowStart.attr('visibility', 'hidden');
   }
 
   /* the gray region between the maximum selected date and the last tip */

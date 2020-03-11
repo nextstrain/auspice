@@ -43,7 +43,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   /* draw functions */
   if (this.params.showGrid) {
     this.addGrid();
-    this.addTemporalSlice();
+    this.showTemporalSlice();
   }
   this.drawBranches();
   this.drawTips();
