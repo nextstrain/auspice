@@ -4,6 +4,7 @@ import _max from "lodash/max";
 import { line, curveBasis, arc } from "d3-shape";
 import { easeLinear } from "d3-ease";
 import { demeCountMultiplier, demeCountMinimum } from "../../util/globals";
+import { updateTipRadii } from "../../actions/tree";
 
 /* util */
 
@@ -134,7 +135,8 @@ export const drawDemesAndTransmissions = (
   nodes,
   numDateMin,
   numDateMax,
-  pieChart /* bool */
+  pieChart, /* bool */
+  dispatch
 ) => {
 
   // add transmission lines
@@ -202,7 +204,11 @@ export const drawDemesAndTransmissions = (
       .style("fill", (d) => { return d.color; })
       .style("stroke-opacity", 0.85)
       .style("stroke", (d) => { return d.color; })
-      .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")");
+      .style("cursor", "pointer")
+      .style("pointer-events", "all")
+      .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")")
+      .on("mouseover", (d) => { dispatch(updateTipRadii({selectedLegendItem: d.name})) })
+      .on("mouseout", (d) => { dispatch(updateTipRadii()) });
   }
 
   return {
