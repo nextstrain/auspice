@@ -11,7 +11,7 @@ export const createDefaultParams = () => ({
   tickLabelFill: darkGrey,
   minorTicks: 4,
   orientation: [1, 1],
-  margins: {left: 25, right: 15, top: 10, bottom: 30},
+  margins: {left: 30, right: 15, top: 10, bottom: 40},
   showGrid: true,
   fillSelected: "#A73",
   radiusSelected: 5,
