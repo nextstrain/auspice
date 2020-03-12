@@ -1,8 +1,6 @@
 ---
 extends: "airbnb"
-plugins: [
-  "react-hooks"
-]
+plugins: ["react-hooks"]
 parser: "babel-eslint"
 env:
   jest: true
@@ -21,70 +19,27 @@ rules:
   no-confusing-arrow: off # allow (a) => a ? 1 : 2;
   no-useless-constructor: off
   no-nested-ternary: off
-  object-curly-spacing: off # allow { a: 1
-} and {a: 1
-}
+  object-curly-spacing: off # allow { a: 1 } and {a: 1}
   block-spacing: off # same as above for function blocks on a single line
-  dot-notation: off # allows someObject[
-  "a"
-] as well as someObject.a
-  comma-dangle: [
-  "error",
-  "never"
-]
+  dot-notation: off # allows someObject["a"] as well as someObject.a
+  comma-dangle: ["error", "never"]
   padded-blocks: off
   no-plusplus: off # we are old enought to use i++
   arrow-body-style: off
-  arrow-parens: [
-  "error",
-  "always"
-] # use brackets always, (a) => body // () => body // (a, b) => body
-  no-case-declarations: off # we don't surround case blocks with {} in our switch statements as we use fallthroughs deliberately
+  arrow-parens: ["error", "always"] # use brackets always, (a) => body // () => body // (a, b) => body
+  no-case-declarations: off # we don't surround case blocks with { } in our switch statements as we use fallthroughs deliberately
   one-var: off
   one-var-declaration-per-line: off
-  no-console: [
-  1,
-  {
-    "allow": [
-      "warn",
-      "error"
-    ]
-  }
-]
+  no-console: [1, { "allow": ["warn", "error"] }]
   space-infix-ops: off
-  no-param-reassign: [
-  1,
-  {
-    "props": false
-  }
-]
+  no-param-reassign: [1, { "props": false }]
   no-underscore-dangle: off
-  no-unused-expressions: ['error',
-  {
-    "allowTernary": true
-  }
-]
-  no-restricted-syntax: ['error', 'ForInStatement', 'WithStatement'
-] # allow ForOfStatement & LabeledStatement
+  no-unused-expressions: ['error', {"allowTernary": true }]
+  no-restricted-syntax: ['error', 'ForInStatement', 'WithStatement'] # allow ForOfStatement & LabeledStatement
   class-methods-use-this: off
-  react/jsx-tag-spacing: [
-  "error",
-  {
-    "closingSlash": "never",
-    "beforeSelfClosing": "allow",
-    "afterOpening": "never"
-  }
-]
+  react/jsx-tag-spacing: ["error", { "closingSlash": "never", "beforeSelfClosing": "allow", "afterOpening": "never" }]
   react/forbid-prop-types: off
-  react/jsx-filename-extension: [
-  1,
-  {
-    "extensions": [
-      ".js",
-      ".jsx"
-    ]
-  }
-]
+  react/jsx-filename-extension: [1, { "extensions": [".js", ".jsx"] }]
   react/jsx-first-prop-new-line: off
   react/no-did-mount-set-state: off
   react/no-did-update-set-state: off
@@ -92,61 +47,23 @@ rules:
   react/sort-comp: off # possibly reinstate
   jsx-a11y/no-static-element-interactions: off
   import/prefer-default-export: off
-  no-multi-spaces: [
-  "error",
-  { ignoreEOLComments: true
-  }
-]
+  no-multi-spaces: ["error", { ignoreEOLComments: true }]
   no-labels: off
   no-unused-labels: off
   no-continue: off
-  no-unneeded-ternary: [
-  "error",
-  {
-    "defaultAssignment": true
-  }
-]
-  quote-props: [
-  "error",
-  "as-needed"
-]
-  prefer-const: [
-  "error",
-  {
-    "destructuring": "all"
-  }
-]
-  indent: [
-  "error",
-  2,
-  {
-    "MemberExpression": "off",
-    "SwitchCase": 1
-  }
-]
+  no-unneeded-ternary: ["error", { "defaultAssignment": true }]
+  quote-props: ["error", "as-needed"]
+  prefer-const: ["error", {"destructuring": "all"}]
+  indent: ["error", 2, {"MemberExpression": "off", "SwitchCase": 1}]
   react-hooks/rules-of-hooks: "error"
   react-hooks/exhaustive-deps: "warn"
   object-curly-newline: off
-  operator-linebreak: [
-  "error",
-  "after",
-  {
-    "overrides": {
-      "?": "ignore",
-      ":": "ignore"
-    }
-  }
-]
+  operator-linebreak: ["error", "after", { "overrides": { "?": "ignore", ":": "ignore" } }]
   react/destructuring-assignment: off
   prefer-destructuring: off
   implicit-arrow-linebreak: off
   jsx-quotes: off
-  no-use-before-define: [
-  "error",
-  {
-    "functions": false
-  }
-]
+  no-use-before-define: ["error", { "functions": false }]
 parserOptions:
   ecmaVersion: 6
   sourceType: module
@@ -156,4 +73,4 @@ env:
   es6: true
   browser: true
 
-# https: //gist.github.com/odedw/cf14a55aa154adbc3bf7#file-eslintrc-yaml-L4
+# https://gist.github.com/odedw/cf14a55aa154adbc3bf7#file-eslintrc-yaml-L4
