@@ -6,7 +6,6 @@ import _min from "lodash/min";
 import _max from "lodash/max";
 import { select } from "d3-selection";
 import 'd3-transition';
-import leafletImage from "leaflet-image";
 import Card from "../framework/card";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
 import {
@@ -20,6 +19,7 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey, goColor, pauseColor } from "../../globalStyles";
+import domtoimage from "dom-to-image";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -83,33 +83,25 @@ class Map extends React.Component {
     if (!window.L) {
       leaflet(); /* this sets up window.L */
     }
-    if (!window.L.getMapTiles) {
-      /* Get the map tiles
-      https://github.com/mapbox/leaflet-image
-      https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
-      https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
-      */
-      window.L.getMapTiles = (loadendCallback, errorCallback) => {
-        leafletImage(this.state.map, (err, canvas) => {
-          if (err) {
-            errorCallback(err);
-            return;
-          }
-          const mapDimensions = this.state.map.getSize();
-          const loadendCallbackWrapper = (e) => {
-            // loadendCallback is a bound version of writeSVGPossiblyIncludingMapPNG
+    if (!window.L.getMapSvg) {
+      /* Get the map tiles */
+      window.L.getMapSvg = (loadendCallback) => {
+        const mapDimensions = this.state.map.getSize();
+        const panOffsets = this.state.map._getMapPanePos();
+        domtoimage.toSvg(this.state.map.getContainer(),
+          {
+            width: mapDimensions.x,
+            height: mapDimensions.y,
+            filter: (node) => {
+              return node.className !== "leaflet-control-container"
+            }
+          })
+          .then(function (image) {
             loadendCallback({
-              base64map: e.srcElement.result,
-              mapDimensions,
-              panOffsets: this.state.map._getMapPanePos()
-            });
-          };
-          canvas.toBlob((blob) => {
-            const reader = new FileReader();
-            reader.addEventListener('loadend', loadendCallbackWrapper);
-            reader.addEventListener('onerror', errorCallback);
-            reader.readAsDataURL(blob);
-          }, "image/png;base64;", 1);
+              mapSvg: image.replace('data:image/svg+xml;charset=utf-8,', ''),
+              mapDimensions: mapDimensions,
+              panOffsets: panOffsets
+          });
         });
       };
     }

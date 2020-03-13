@@ -236,24 +236,22 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
     panels.tree.width += (spaceBetweenTrees + panels.secondTree.width);
   }
 
-  if (panels.tree && panels.mapD3 && panels.mapTiles) {
+  if (panels.tree && panels.map) {
     if (panelLayout === "grid") {
-      width = panels.tree.width + padding + panels.mapTiles.width;
-      height = Math.max(panels.tree.height, panels.mapTiles.height);
-      panels.mapD3.x = panels.tree.width + padding;
+      width = panels.tree.width + padding + panels.map.width;
+      height = Math.max(panels.tree.height, panels.map.height);
+      panels.map.x = panels.tree.width + padding;
     } else {
-      width = Math.max(panels.tree.width, panels.mapTiles.width);
-      height = panels.tree.height + padding + panels.mapTiles.height;
-      panels.mapD3.y = panels.tree.height + padding;
+      width = Math.max(panels.tree.width, panels.map.width);
+      height = panels.tree.height + padding + panels.map.height;
+      panels.map.y = panels.tree.height + padding;
     }
-    panels.mapTiles.x = panels.mapD3.x;
-    panels.mapTiles.y = panels.mapD3.y;
   } else if (panels.tree) {
     width = panels.tree.width;
     height = panels.tree.height;
-  } else if (panels.mapD3 && panels.mapTiles) {
-    width = panels.mapTiles.width;
-    height = panels.mapTiles.height;
+  } else if (panels.map) {
+    width = panels.map.width;
+    height = panels.map.height;
   }
 
   if (panels.entropy) {
@@ -313,10 +311,10 @@ const injectAsSVGStrings = (output, key, data) => {
 };
 
 /* define actual writer as a closure, because it may need to be triggered asyncronously */
-const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, mapTiles) => {
+const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, map) => {
   const errors = [];
   /* for each panel present in the DOM, create a data structure with the dimensions & the paths/shapes etc */
-  const panels = {tree: undefined, mapTiles: undefined, mapD3: undefined, entropy: undefined, frequencies: undefined};
+  const panels = {tree: undefined, map: undefined, entropy: undefined, frequencies: undefined};
   if (panelsInDOM.indexOf("tree") !== -1) {
     try {
       panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("MainTree")));
@@ -358,27 +356,15 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
       console.error("Frequencies SVG save error:", e);
     }
   }
-  if (panelsInDOM.indexOf("map") !== -1 && mapTiles) {
-    panels.mapTiles = {
+  if (panelsInDOM.indexOf("map") !== -1 && map) {
+    panels.map = {
       x: 0,
       y: 0,
       viewbox: undefined,
-      width: parseFloat(mapTiles.mapDimensions.x),
-      height: parseFloat(mapTiles.mapDimensions.y),
-      inner: `<image width="${mapTiles.mapDimensions.x}" height="${mapTiles.mapDimensions.y}" xlink:href="${mapTiles.base64map}"/>`
+      width: parseFloat(map.mapDimensions.x),
+      height: parseFloat(map.mapDimensions.y),
+      inner: map.mapSvg
     };
-    try {
-      panels.mapD3 = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3DemesTransmissions")));
-      // modify the width & height of the mapD3 to match the tiles (not sure how this actually works in the DOM)
-      panels.mapD3.width = panels.mapTiles.width;
-      panels.mapD3.height = panels.mapTiles.height;
-      panels.mapD3.inner = `<g transform="translate(${mapTiles.panOffsets.x}, ${mapTiles.panOffsets.y})">${panels.mapD3.inner}</g>`;
-    } catch (e) {
-      panels.mapD3 = undefined;
-      panels.mapTiles = undefined;
-      errors.push("map");
-      console.error("Map demes & tranmisions SVG save error:", e);
-    }
   }
 
   /* collect all panels as individual <svg> elements inside a bounding <svg> tag, and write to file */
@@ -418,15 +404,11 @@ const writeSVGPossiblyIncludingMapPNG = (dispatch, filePrefix, panelsInDOM, pane
   }
 };
 
-const getMapTilesErrorCallback = (e) => {
-  console.warn("getMapTiles errorCallback", e);
-};
-
 export const SVG = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings) => {
   /* downloading the map tiles is an async call */
   if (panelsInDOM.indexOf("map") !== -1) {
-    window.L.getMapTiles(writeSVGPossiblyIncludingMapPNG.bind(this, dispatch, filePrefix, panelsInDOM, panelLayout, textStrings), getMapTilesErrorCallback);
+    window.L.getMapSvg(writeSVGPossiblyIncludingMap.bind(this, dispatch, filePrefix, panelsInDOM, panelLayout, textStrings));
   } else {
-    writeSVGPossiblyIncludingMapPNG(dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, undefined);
+    writeSVGPossiblyIncludingMap(dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, undefined);
   }
 };
