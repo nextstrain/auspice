@@ -59,7 +59,7 @@ function renderBuildInfo(metadata) {
           <span>
             {"Built with "}
             <Link url={repo}>
-              {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "")}
+              {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "").replace(/^github.com\//, "")}
             </Link>
             <PotentialGisaidExtraByline/>
             {". "}
