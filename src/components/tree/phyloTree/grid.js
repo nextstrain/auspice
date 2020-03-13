@@ -339,9 +339,9 @@ export const addGrid = function addGrid() {
   /* add axis labels */
   this.groups.axisText.selectAll("*").remove();
   this.svg.selectAll(".axisText").remove();
-  if (layout == 'rect' || layout == "clock") {
+  if (layout === 'rect' || layout === "clock") {
     let label = "Date";
-    if (this.distance == "div" || layout == 'clock') {
+    if (this.distance === "div" || layout === 'clock') {
       // This is a heuristic to determine whether this data
       // measures "substitutions per site" or "substitutions"
       if (this.yScale.domain()[0] > 5) {
@@ -351,9 +351,10 @@ export const addGrid = function addGrid() {
       }
     }
 
+    /* Add a x-axis label */
     this.groups.axisText
       .append("text")
-        .text(layout == 'rect' ? label : "Date") // Clock always has Date on the X-axis
+        .text(layout === 'rect' ? label : "Date") // Clock always has Date on the X-axis
         .attr("class", "gridText")
         .style("font-size", this.params.tickLabelSize)
         .style("font-family", this.params.fontFamily)
@@ -362,7 +363,8 @@ export const addGrid = function addGrid() {
         .attr("x", this.xScale.range()[1] / 2)
         .attr("y", this.yScale.range()[1] + this.params.margins.bottom - 6)
 
-    if (layout == 'clock') {
+    /* Add a rotated y-axis label in clock view */
+    if (layout === 'clock') {
       this.groups.axisText
         .append("text")
           .text(label) // Clock always has Date on the X-axis
