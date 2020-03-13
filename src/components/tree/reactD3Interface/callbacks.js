@@ -1,10 +1,7 @@
-import { rgb } from "d3-color";
-import { interpolateRgb } from "d3-interpolate";
 import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
-import { branchOpacityFunction } from "../../../util/colorHelpers";
+import { getEmphasizedColor } from "../../../util/colorHelpers";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getDomId } from "../phyloTree/helpers";
-import { getTraitFromNode } from "../../../util/treeMiscHelpers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
@@ -38,22 +35,24 @@ export const onTipClick = function onTipClick(d) {
 
 export const onBranchHover = function onBranchHover(d) {
   if (d.visibility !== NODE_VISIBLE) return;
-  /* emphasize the color of the branch */
+
+  /* We want to emphasize the colour of the branch. How we do this depends on how the branch was rendered in the first place! */
+  const emphasizedStrokeColor = getEmphasizedColor(d.branchStroke);
+
   for (const id of [getDomId("#branchS", d.n.name), getDomId("#branchT", d.n.name)]) {
-    if (this.props.colorByConfidence) {
-      this.state.tree.svg.select(id)
-        .style("stroke", (el) => { // eslint-disable-line no-loop-func
-          const entropyValue = getTraitFromNode(this.props.tree.nodes[el.n.arrayIdx], this.props.colorBy, {entropy: true});
-          const ramp = branchOpacityFunction(entropyValue);
-          const raw = this.props.tree.nodeColors[el.n.arrayIdx];
-          const base = el.branchStroke;
-          return rgb(interpolateRgb(raw, base)(ramp)).toString();
-        });
+    const el = this.state.tree.svg.select(id);
+    if (el.empty()) continue; // Some displays don't have S & T parts of the branch
+    const currentStroke = el.style("stroke");
+    if (currentStroke.startsWith("url")) {
+      const gradientId = `${d.parent.n.arrayIdx}:${d.n.arrayIdx}:highlighted`;
+      d.that.makeLinearGradient(gradientId, [[0, getEmphasizedColor(d.parent.branchStroke)], [100, emphasizedStrokeColor]], d.rot);
+      el.style("stroke", `url(#${gradientId})`);
     } else {
-      this.state.tree.svg.select(id)
-        .style("stroke", (el) => this.props.tree.nodeColors[el.n.arrayIdx]);
+      el.style("stroke", emphasizedStrokeColor);
     }
   }
+
+  /* if temporal confidence bounds are defined for this branch, then display them on hover */
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
     const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;
     if (!("confidenceIntervals" in tree.groups)) {
@@ -65,6 +64,8 @@ export const onBranchHover = function onBranchHover(d) {
       .enter()
         .call((sel) => tree.drawSingleCI(sel, 0.5));
   }
+
+  /* Set the hovered state so that an info box can be displayed */
   this.setState({
     hovered: {d, type: ".branch"}
   });
@@ -102,14 +103,28 @@ export const onBranchClick = function onBranchClick(d) {
 
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(d) {
+  /* Reset the stroke back to what it was before */
   for (const id of [getDomId("#branchT", d.n.name), getDomId("#branchS", d.n.name)]) {
-    this.state.tree.svg.select(id)
-      .style("stroke", (el) => el.branchStroke);
+    const el = this.state.tree.svg.select(id);
+    if (el.empty()) continue; // Some displays don't have S & T parts of the branch
+    const currentStroke = el.style("stroke");
+    if (currentStroke.startsWith("url")) {
+      el.style("stroke", `url(#${d.parent.n.arrayIdx}:${d.n.arrayIdx})`);
+      /* remove the <def> of the highlighed (hovered) state */
+      d.that.groups.branchGradientDefs
+        .selectAll("linearGradient")
+        .filter((_, i, l) => l.length-1 === i)
+        .remove();
+    } else {
+      el.style("stroke", (dd) => dd.branchStroke);
+    }
   }
+  /* Remove the temporal confidence bar unless it's meant to be displayed */
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
     const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;
     tree.removeConfidence();
   }
+  /* Set hovered state to `null`, which will remove the info box */
   if (this.state.hovered) {
     this.setState({hovered: null});
   }

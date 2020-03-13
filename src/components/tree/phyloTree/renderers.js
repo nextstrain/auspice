@@ -171,6 +171,24 @@ export const drawBranches = function drawBranches() {
   }
 
   /* PART 2: draw the branch stems (i.e. the actual branches) */
+
+  /* PART 2a: Create linear gradient definitions which can be applied to branch stems for which
+  the start & end stroke colour is different */
+  if (!this.groups.branchGradientDefs) {
+    this.groups.branchGradientDefs = this.svg.append("defs");
+  }
+  this.groups.branchGradientDefs.selectAll("*").remove();
+  // TODO -- explore if duplicate <def> elements (e.g. same colours on each end) slow things down
+  
+  this.nodes.forEach((d) => {
+    const a = d.parent.branchStroke;
+    const b = d.branchStroke;
+    if (a===b) return;
+    this.makeLinearGradient(`${d.parent.n.arrayIdx}:${d.n.arrayIdx}`, [[0, a], [100, b]], d.rot);
+  });
+  
+
+  /* PART 2b: Draw the stems */
   if (!("branchStem" in this.groups)) {
     this.groups.branchStem = this.svg.append("g").attr("id", "branchStem");
   }
@@ -182,10 +200,15 @@ export const drawBranches = function drawBranches() {
         .attr("class", "branch S")
         .attr("id", (d) => getDomId("branchS", d.n.name))
         .attr("d", (d) => d.branch[0])
-        .style("stroke", (d) => d.branchStroke || params.branchStroke)
+        .style("stroke", (d) => {
+          if (!d.branchStroke) return params.branchStroke;
+          if (d.branchStroke === d.parent.branchStroke) {
+            return d.branchStroke;
+          }
+          return `url(#${d.parent.n.arrayIdx}:${d.n.arrayIdx})`;
+        })
         .style("stroke-linecap", "round")
-        .style("stroke-width", (d) => d['stroke-width']+"px" || params.branchStrokeWidth)
-        .style("fill", "none")
+        .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
         .style("visibility", getBranchVisibility)
         .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
         .style("pointer-events", "auto")
@@ -243,6 +266,24 @@ export const removeRegression = function removeRegression() {
  */
 export const clearSVG = function clearSVG() {
   this.svg.selectAll("*").remove();
+};
+
+export const makeLinearGradient = function makeLinearGradient(id, stops, rot) {
+	
+  const linearGradient = this.groups.branchGradientDefs.append("linearGradient")
+    .attr("id", id)
+    .attr("x1", "0%") // TODO -- customise these via args, will be needed for non horizontal lines
+    .attr("x2", "100%")
+    .attr("y1", "0%")
+    .attr("y2", "0%");
+  stops.forEach((stop) => {
+    linearGradient.append("stop")
+    .attr("offset", `${stop[0]}%`)
+    .attr("stop-color", stop[1]);
+    if( rot ) {
+      linearGradient.attr("gradientTransform","rotate("+rot+")");
+    }
+  });
 };
 
 function getRateEstimate(regression, maxDivergence) {
