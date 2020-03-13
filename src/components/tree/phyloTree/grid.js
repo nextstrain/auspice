@@ -341,14 +341,14 @@ export const addGrid = function addGrid() {
   this.svg.selectAll(".axisText").remove();
   if (layout === 'rect' || layout === "clock") {
     let label = "Date";
-    if (this.distance === "div" || layout === 'clock') {
-      // This is a heuristic to determine whether this data
-      // measures "substitutions per site" or "substitutions"
-      if (this.yScale.domain()[0] > 5) {
-        label = "Mutations";
-      } else {
-        label = "Divergence";
-      }
+    // We use the same heursitic as in `getRateEstimate` to decide whether this data
+    // measures "substitutions per site" or "substitutions"
+    if (this.layout === 'clock') {
+      // In clock view the divergence / mutations axis is vertical
+      label = this.yScale.domain()[0] > 5 ? "Mutations" : "Divergence";
+    } else if (this.distance === "div") {
+      // In rectangular view the divergence / mutations axis is horizontal
+      label = this.xScale.domain()[1] > 5 ? "Mutations" : "Divergence";
     }
 
     /* Add a x-axis label */
@@ -361,7 +361,7 @@ export const addGrid = function addGrid() {
         .style("fill", this.params.tickLabelFill)
         .style("text-anchor", "middle")
         .attr("x", this.xScale.range()[1] / 2)
-        .attr("y", this.yScale.range()[1] + this.params.margins.bottom - 6)
+        .attr("y", this.yScale.range()[1] + this.params.margins.bottom - 6);
 
     /* Add a rotated y-axis label in clock view */
     if (layout === 'clock') {
@@ -373,7 +373,7 @@ export const addGrid = function addGrid() {
           .style("font-family", this.params.fontFamily)
           .style("fill", this.params.tickLabelFill)
           .style("text-anchor", "middle")
-          .attr('transform', 'translate(' + 10 + ',' + (this.yScale.range()[1] / 2) + ') rotate(-90)')
+          .attr('transform', 'translate(' + 10 + ',' + (this.yScale.range()[1] / 2) + ') rotate(-90)');
     }
   }
 
