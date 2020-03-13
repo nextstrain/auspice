@@ -350,7 +350,6 @@ export const addGrid = function addGrid() {
       // In rectangular view the divergence / mutations axis is horizontal
       label = this.xScale.domain()[1] > 5 ? "Mutations" : "Divergence";
     }
-
     /* Add a x-axis label */
     this.groups.axisText
       .append("text")
@@ -360,7 +359,7 @@ export const addGrid = function addGrid() {
         .style("font-family", this.params.fontFamily)
         .style("fill", this.params.tickLabelFill)
         .style("text-anchor", "middle")
-        .attr("x", this.xScale.range()[1] / 2)
+        .attr("x", Math.abs(this.xScale.range()[1]-this.xScale.range()[0]) / 2)
         .attr("y", this.yScale.range()[1] + this.params.margins.bottom - 6);
 
     /* Add a rotated y-axis label in clock view */
