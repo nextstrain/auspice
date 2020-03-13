@@ -271,18 +271,19 @@ export const clearSVG = function clearSVG() {
 export const makeLinearGradient = function makeLinearGradient(id, stops, rot) {
 	
   const linearGradient = this.groups.branchGradientDefs.append("linearGradient")
-    .attr("id", id)
-    .attr("x1", "0%") // TODO -- customise these via args, will be needed for non horizontal lines
-    .attr("x2", "100%")
-    .attr("y1", "0%")
-    .attr("y2", "0%");
+    .attr("id", id);
+    if( rot && typeof rot === "number") { // skip 0 rotation
+      linearGradient.attr("gradientTransform","translate(.5,.5) rotate("+rot+") translate(-.5,-.5)");
+    }
+   // .attr("x1", "0%") // TODO -- customise these via args, will be needed for non horizontal lines
+  //  .attr("x2", "100%") // these are the default values for linear gradient, so are not needed to be added
+   // .attr("y1", "0%")
+  //  .attr("y2", "0%");
   stops.forEach((stop) => {
     linearGradient.append("stop")
     .attr("offset", `${stop[0]}%`)
     .attr("stop-color", stop[1]);
-    if( rot ) {
-      linearGradient.attr("gradientTransform","rotate("+rot+")");
-    }
+    
   });
 };
 

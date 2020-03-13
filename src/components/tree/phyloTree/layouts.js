@@ -360,7 +360,7 @@ export const mapToScreen = function mapToScreen() {
     d.xBase = this.xScale(d.px);
     d.yBase = this.yScale(d.py);
     if (this.layout !=="rectangular"){
-      d.rot = Math.atan2(d.yTip-d.yBase,d.xTip-d.xBase) * 180/Math.PI;
+      d.rot = (Math.atan2(d.yTip-d.yBase,d.xTip-d.xBase) * 180/Math.PI + 360)%360;
     }
   });
   if (this.vaccines) {
