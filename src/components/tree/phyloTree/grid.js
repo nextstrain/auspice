@@ -14,6 +14,9 @@ export const hideGrid = function hideGrid() {
   if ("gridText" in this.groups) {
     this.groups.gridText.selectAll("*").style('visibility', 'hidden');
   }
+  if ("axisText" in this.groups) {
+    this.groups.axisText.selectAll("*").style('visibility', 'hidden');
+  }
 };
 
 const addSVGGroupsIfNeeded = (groups, svg) => {
@@ -28,6 +31,9 @@ const addSVGGroupsIfNeeded = (groups, svg) => {
   }
   if (!("gridText" in groups)) {
     groups.gridText = svg.append("g").attr("id", "gridText");
+  }
+  if (!("axisText" in groups)) {
+    groups.axisText = svg.append("g").attr("id", "axisText");
   }
 };
 
@@ -329,6 +335,46 @@ export const addGrid = function addGrid() {
         .style("visibility", (d) => d.visibility)
         .attr("x", xTextPos(this.xScale, layout))
         .attr("y", yTextPos(this.yScale, layout));
+
+  /* add axis labels */
+  this.groups.axisText.selectAll("*").remove();
+  this.svg.selectAll(".axisText").remove();
+  if (layout === 'rect' || layout === "clock") {
+    let label = "Date";
+    // We use the same heursitic as in `getRateEstimate` to decide whether this data
+    // measures "substitutions per site" or "substitutions"
+    if (this.layout === 'clock') {
+      // In clock view the divergence / mutations axis is vertical
+      label = this.yScale.domain()[0] > 5 ? "Mutations" : "Divergence";
+    } else if (this.distance === "div") {
+      // In rectangular view the divergence / mutations axis is horizontal
+      label = this.xScale.domain()[1] > 5 ? "Mutations" : "Divergence";
+    }
+    /* Add a x-axis label */
+    this.groups.axisText
+      .append("text")
+        .text(layout === 'rect' ? label : "Date") // Clock always has Date on the X-axis
+        .attr("class", "gridText")
+        .style("font-size", this.params.tickLabelSize)
+        .style("font-family", this.params.fontFamily)
+        .style("fill", this.params.tickLabelFill)
+        .style("text-anchor", "middle")
+        .attr("x", Math.abs(this.xScale.range()[1]-this.xScale.range()[0]) / 2)
+        .attr("y", this.yScale.range()[1] + this.params.margins.bottom - 6);
+
+    /* Add a rotated y-axis label in clock view */
+    if (layout === 'clock') {
+      this.groups.axisText
+        .append("text")
+          .text(label) // Clock always has Date on the X-axis
+          .attr("class", "gridText")
+          .style("font-size", this.params.tickLabelSize)
+          .style("font-family", this.params.fontFamily)
+          .style("fill", this.params.tickLabelFill)
+          .style("text-anchor", "middle")
+          .attr('transform', 'translate(' + 10 + ',' + (this.yScale.range()[1] / 2) + ') rotate(-90)');
+    }
+  }
 
   this.grid=true;
   timerEnd("addGrid");
