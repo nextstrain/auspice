@@ -29,6 +29,7 @@ Auspice may be used to explore datasets locally or run as a as a server to share
 
 ## Installation
 
+Install as a global command.
 ```bash
 npm install --global auspice
 ```
@@ -38,22 +39,35 @@ See [here](https://nextstrain.github.io/auspice/introduction/install) for full i
 
 ## Quickstart
 
-In order to get up & running you'll need to have some datasets to visualise.
-Please see the [nextstrain docs](https://nextstrain.org/docs/) for tutorials on how to do this.
-For the purposes of getting started, you can download the current zika dataset via:
+Install dependencies; this will also create a `/data` folder for your datasets.
 
 ```
-mkdir datasets
+npm install
+```
+
+In order to get up & running you'll need datasets to visualise.
+Please see the [nextstrain docs](https://nextstrain.org/docs/) for tutorials on how to do this.
+To get started, you can download the current zika dataset into the `data` folder:
+
+```
 curl http://data.nextstrain.org/zika.json --compressed -o data/zika.json
 ```
 
-And then run `auspice` via:
+You can then run `auspice` via:
 ```
 auspice view --datasetDir data
 ```
 This will allow you to run auspice locally (i.e. from your computer) and view the dataset which is behind [nextstrain.org/zika](https://nextstrain.org/zika).
 
-To download all the datasets at once, the following helper command will populate the `/data` folder.
+You can run and develop locally with 
+
+```
+npm run dev
+```
+
+to serve the datasets in your `data` folder.
+
+To download all the example datasets at once, the following helper command will populate the `/data` folder.
 
 ```bash
   npm run get-data
