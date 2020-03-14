@@ -142,7 +142,15 @@ class Map extends React.Component {
   maybeInvalidateMapSize(nextProps) {
     /* when we procedurally change the size of the card, for instance, when we swap from grid to full */
     if (this.state.map && (this.props.width !== nextProps.width || this.props.height !== nextProps.height)) {
-      window.setTimeout(this.invalidateMapSize.bind(this), 1500);
+      // first, clear any existing timeout
+      if (this.map_timeout) {
+        window.clearTimeout(this.map_timeout);
+      }
+      // delay to resize map (when complete, narrative will re-focus map on data)
+      this.map_timeout = window.setTimeout(
+        this.invalidateMapSize.bind(this),
+        this.props.narrativeMode ? 100 : 750
+      );
     }
   }
   invalidateMapSize() {
@@ -499,6 +507,11 @@ class Map extends React.Component {
 
     /* Set up leaflet events */
     map.on("moveend", this.respondToLeafletEvent.bind(this));
+    map.on("resize", () => {
+      if (this.props.narrativeMode) {
+        this.fitMapBoundsToData(this.state.demeData, this.state.demeIndices);
+      }
+    });
 
     this.setState({map});
   }
@@ -582,12 +595,11 @@ class Map extends React.Component {
       return;
     }
 
-    if (!this.state.userHasInteractedWithMap || this.props.narrative) {
-      if (geoResolutionChanged) {
-        /* changed geo-resolution in narrative mode => reset view */
-        this.fitMapBoundsToData(demeData, demeIndices);
-      } else if (visibilityChanged) {
-        /* changed visiblity (e.g. filters applied) in narrative mode => reset view */
+    if (geoResolutionChanged || visibilityChanged) {
+      /* changed visiblity (e.g. filters applied) in narrative mode => reset view */
+      if (this.props.narrativeMode) {
+        this.state.map.fire("resize");
+      } else if (!this.state.userHasInteractedWithMap) {
         this.fitMapBoundsToData(demeData, demeIndices);
       }
     }
