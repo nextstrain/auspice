@@ -9,10 +9,10 @@ Our goal is to aid epidemiological understanding and improve outbreak response.
 
 Resulting data and inferences are available live at the website [nextstrain.org](https://nextstrain.org).
 
-> We have received a number of generous offers to contribute developer effort to nextstrain (and auspice) following our work on [SARS-CoV-2](https://nextstrain.org/ncov).
+> We have received a number of generous offers to contribute developer effort to nextstrain (and auspice) following our work on [hCoV-19](https://nextstrain.org/ncov).
 We are flattered and would welcome contributions!
 Please see the [contributing](./CONTRIBUTING.md) documentation for more details.
-A list of potential issues is being actively maintained at https://github.com/orgs/nextstrain/projects/5
+A list of potential issues is being actively maintained at https://github.com/orgs/nextstrain/projects
 
 # Auspice
 
@@ -27,53 +27,74 @@ Auspice may be used to explore datasets locally or run as a as a server to share
 **Please see [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice) for auspice documentation.**
 
 
-## Installation
+## Quickstart
 
-Install as a global command.
+
+#### Installation
+
+Install auspice for use as a global command.
+This requires nodejs 10+. We recommend using a conda environment, but this is not the only way.
+
+```bash
+conda create --name auspice nodejs=10
+conda activate auspice
+````
+
+Install auspice from `npm`:
+
 ```bash
 npm install --global auspice
 ```
 
-See [here](https://nextstrain.github.io/auspice/introduction/install) for full instructions, including how to install from source.
-
-
-## Quickstart
-
-Install dependencies; this will also create a `/data` folder for your datasets.
-
-```
-npm install
-```
-
-In order to get up & running you'll need datasets to visualise.
-Please see the [nextstrain docs](https://nextstrain.org/docs/) for tutorials on how to do this.
-To get started, you can download the current zika dataset into the `data` folder:
-
-```
-curl http://data.nextstrain.org/zika.json --compressed -o data/zika.json
-```
-
-You can then run `auspice` via:
-```
-auspice view --datasetDir data
-```
-This will allow you to run auspice locally (i.e. from your computer) and view the dataset which is behind [nextstrain.org/zika](https://nextstrain.org/zika).
-
-You can run and develop locally with 
-
-```
-npm run dev
-```
-
-to serve the datasets in your `data` folder.
-
-To download all the example datasets at once, the following helper command will populate the `/data` folder.
+Or install auspice from source:
 
 ```bash
-  npm run get-data
+git checkout https://github.com/nextstrain/auspice.git
+cd auspice
+npm install --global .
 ```
 
-Run `auspice --help` or visit [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice) for more information.
+(See [here](https://nextstrain.github.io/auspice/introduction/install) for more installation methods & help).
+
+
+
+#### Obtain datasets to display:
+
+In order to get up & running you'll need datasets to visualise.
+(Please see the [nextstrain docs](https://nextstrain.org/docs/) for tutorials on how to run your own analyses.)
+
+If you've installed auspice from `npm` you may get datasets to display via:
+
+```bash
+mkdir data
+curl http://data.nextstrain.org/zika.json --compressed -o data/zika.json
+curl http://data.nextstrain.org/ncov.json --compressed -o data/ncov.json
+...
+```
+
+If you've installed auspice from source, we have helper scripts to make all the datasets & narratives you see on nextstrain.org available locally:
+
+```bash
+# from the auspice src directory
+npm run get-data
+npm run get-narratives
+```
+
+#### Run auspice:
+
+```bash
+auspice view --datasetDir data
+```
+And view auspice in the browser at [localhost:4000](http://localhost:4000)
+
+If you are editing source code, running the following command will allow hot-reloading.
+```
+auspice develop --datasetDir data
+```
+
+Run `auspice --help` (or `auspice view --help`) to see all the available command line options.
+Full documentation may be found at: [nextstrain.github.io/auspice](https://nextstrain.github.io/auspice).
+
 
 ## Development, comments, issues and bugs
 
