@@ -643,7 +643,8 @@ export const createStateFromQueryOrJSONs = ({
   query,
   dispatch
 }) => {
-  let tree, treeToo, entropy, controls, metadata, narrative, frequencies;
+  let tree, treeToo, entropy, general, controls, metadata, narrative, frequencies;
+  
   /* first task is to create metadata, entropy, controls & tree partial state */
   if (json) {
     /* create metadata state */

@@ -3,7 +3,40 @@ import { connect } from "react-redux";
 import { Helmet } from "react-helmet";
 import { hasExtension, getExtension } from "../../util/extensions";
 
-const Head = ({metadata}) => {
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
+
+const Head = ({metadata, general}) => {
+  let lang = general.language;
+
+  i18n
+  .use(initReactI18next) // passes i18n down to react-i18next
+  .init({
+    resources: {
+      en: {
+        translation: {
+          "Branch Labels": "Branch Labels"
+        }
+      },
+      es: {
+        translation: {
+          "Branch Labels": "es Branch Labels es"
+        }
+      },
+      de: {
+        translation: {
+          "Branch Labels": "de Branch Labels de"
+        }
+      }
+    },
+    lng: lang,
+    fallbackLng: "en",
+    debug: true,
+    interpolation: {
+      escapeValue: false
+    },
+  });
+
   let pageTitle = "auspice";
   if (hasExtension("browserTitle")) {
     pageTitle = getExtension("browserTitle");
@@ -34,6 +67,7 @@ of in state. This allows us to detect changes such as redirects such as /flu/avi
 export default connect(
   (state) => ({
     pathname: state.general.pathname,
-    metadata: state.metadata
+    metadata: state.metadata,
+    general: state.general
   })
 )(Head);

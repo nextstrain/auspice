@@ -12,6 +12,8 @@ import MapAnimationControls from "./map-animation";
 import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
+import Language from "./language";
+
 import { SidebarHeader, ControlsContainer } from "./styles";
 
 const Controls = ({mapOn}) => (
@@ -46,6 +48,9 @@ const Controls = ({mapOn}) => (
     <SidebarHeader>Panel Options</SidebarHeader>
     <PanelLayout/>
     <PanelToggles/>
+      
+    <Language/>
+
   </ControlsContainer>
 );
 

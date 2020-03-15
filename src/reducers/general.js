@@ -1,10 +1,17 @@
 import * as types from "../actions/types";
 import { chooseDisplayComponentFromURL } from "../actions/navigation";
 import { hasExtension, getExtension } from "../util/extensions";
+import queryString from "query-string";
 
 /* the store for cross-cutting state -- that is, state
 not limited to <App>
 */
+
+const query = queryString.parse(window.location.search);
+
+const defaults = {
+  language: "en",
+}; 
 
 const getFirstPageToDisplay = () => {
   if (hasExtension("entryPage")) {
@@ -13,10 +20,14 @@ const getFirstPageToDisplay = () => {
   return chooseDisplayComponentFromURL(window.location.pathname);
 };
 
+
+
 const general = (state = {
+  defaults,
   displayComponent: getFirstPageToDisplay(),
   errorMessage: undefined,
-  pathname: window.location.pathname // keep a copy of what the app "thinks" the pathname is
+  pathname: window.location.pathname, // keep a copy of what the app "thinks" the pathname is
+  language: query.lang ? query.lang : defaults.language
 }, action) => {
   switch (action.type) {
     case types.PAGE_CHANGE:
@@ -32,6 +43,10 @@ const general = (state = {
       return Object.assign({}, state, {
         pathname: action.pathname
       });
+    case types.CHANGE_LANGUAGE:
+        return Object.assign({}, state, {
+          language: action.data
+        });
     default:
       return state;
   }
