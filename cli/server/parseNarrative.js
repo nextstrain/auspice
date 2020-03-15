@@ -1,3 +1,5 @@
+/* eslint no-param-reassign: off */
+
 const marked = require('marked');
 const yamlFront = require('yaml-front-matter');  /* https://www.npmjs.com/package/yaml-front-matter */
 const utils = require("../utils");
@@ -28,18 +30,19 @@ const makeFrontMatterBlock = (frontMatter) => {
   const markdown = [];
   markdown.push(`# ${frontMatter.title}`);
   if (frontMatter.authors) {
-    if (typeof frontMatter.authors === 'object' && Array.isArray(frontMatter.authors)) {
-      utils.warn(`Narrative parsing -- can't do author arrays yet`);
-    } else if (typeof frontMatter.authors === 'string') {
-      if (frontMatter.authorLinks && typeof frontMatter.authorLinks === "string") {
-        markdown.push(`### Author: [${frontMatter.authors}](${frontMatter.authorLinks})`);
-      } else {
-        markdown.push(`### Author: ${frontMatter.authors}`);
-      }
+    const authors = parseContributors(frontMatter, "authors", "authorLinks");
+    if (authors) {
+      markdown.push(`### Author: ${authors}`);
       if (frontMatter.affiliations && typeof frontMatter.affiliations === "string") {
         markdown[markdown.length-1] += " <sup> 1 </sup>";
         markdown.push(`<sup> 1 </sup> ${frontMatter.affiliations}`);
       }
+    }
+  }
+  if (frontMatter.translators) {
+    const translators = parseContributors(frontMatter, "translators", "translatorLinks");
+    if (translators) {
+      markdown.push(`### Translators: ${translators}`);
     }
   }
   if (frontMatter.date && typeof frontMatter.date === "string") {
@@ -57,6 +60,55 @@ const makeFrontMatterBlock = (frontMatter) => {
   block.contents = markdown.join("\n");
   return block;
 };
+
+function parseContributors(frontMatter, contributorsKey, contributorLinksKey) {
+  const contributors = frontMatter[contributorsKey];
+  const contributorLinks = frontMatter[contributorLinksKey];
+
+  if (Array.isArray(contributors)) {
+    return parseContributorsArray(contributors, contributorLinks, contributorsKey, contributorLinksKey);
+  } else if (typeof contributors === 'string') {
+    return parseContributorsString(contributors, contributorLinks, contributorsKey, contributorLinksKey);
+  }
+  return undefined;
+}
+
+function parseContributorsArray(contributors, contributorLinks, contributorsKey, contributorLinksKey) {
+  // validate links
+  if (contributorLinks) {
+    if (!Array.isArray(contributorLinks)) {
+      utils.warn(`Narrative parsing - if ${contributorsKey} is an array, then ${contributorLinksKey} must also be an array. Skipping links.`);
+      contributorLinks = undefined;
+    } else if (contributorLinks.length !== contributors.length) {
+      utils.warn(`Narrative parsing - the length of ${contributorsKey} and ${contributorLinksKey} did not match. Skipping links.`);
+      contributorLinks = undefined;
+    }
+  }
+  if (contributorLinks) {
+    contributors = contributors.map((contributor, idx) => {
+      return contributorLink(contributor, contributorLinks[idx]);
+    });
+  }
+  return contributors.join(", ");
+}
+
+function parseContributorsString(contributors, contributorLinks, contributorsKey, contributorLinksKey) {
+  // validate links
+  if (contributorLinks) {
+    if (typeof contributorLinks !== "string") {
+      utils.warn(`Narrative parsing - if ${contributorsKey} is a string, then ${contributorLinksKey} must also be a string. Skipping links.`);
+      contributorLinks = undefined;
+    }
+  }
+  return contributorLink(contributors, contributorLinks);
+}
+
+function contributorLink(contributor, contributorLinkValue) {
+  if (contributorLink) {
+    return `[${contributor}](${contributorLinkValue})`;
+  }
+  return contributor;
+}
 
 /**
  * Extract a code-block from the content, if it exists, tagged as auspiceMainDisplayMarkdown
