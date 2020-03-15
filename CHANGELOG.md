@@ -2,9 +2,15 @@
 title: Changelog
 ---
 
+* Add axis labels to the tree. [See PR 942](https://github.com/nextstrain/auspice/pull/942)
+* Fix a bug where the map would jump to an incorrect view position in narratives. [See PR 950](https://github.com/nextstrain/auspice/pull/950)
+* Do not display "github.com" in the built-by byline (link is unchanged). [See PR 949](https://github.com/nextstrain/auspice/pull/949)
+* Improve the REAMDE.
+* Allow translators to be specified in narratives & translators and authors (and their links) can be set as arrays. [See PR 937](https://github.com/nextstrain/auspice/pull/937)
+* Add documentation about CSV/TSV drag-and-drop functionality
+
+
 ## version 2.6.0 - 2020/03/09
-
-
 * Highlight tips which (partially) match strain search. [See PR 930](https://github.com/nextstrain/auspice/pull/930)
 * Allow HTML tables in narratives (main-auspice-display-markdown). [See PR 924](https://github.com/nextstrain/auspice/pull/924)
 * Add hidden URL query to force open / close state of legend. [See PR 923](https://github.com/nextstrain/auspice/pull/923)
