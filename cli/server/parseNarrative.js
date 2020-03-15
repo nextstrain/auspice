@@ -1,3 +1,5 @@
+/* eslint no-param-reassign: off */
+
 const marked = require('marked');
 const yamlFront = require('yaml-front-matter');  /* https://www.npmjs.com/package/yaml-front-matter */
 const utils = require("../utils");
@@ -28,7 +30,7 @@ const makeFrontMatterBlock = (frontMatter) => {
   const markdown = [];
   markdown.push(`# ${frontMatter.title}`);
   if (frontMatter.authors) {
-    let authors = parseContributors(frontMatter, "authors", "authorLinks");
+    const authors = parseContributors(frontMatter, "authors", "authorLinks");
     if (authors) {
       markdown.push(`### Author: ${authors}`);
       if (frontMatter.affiliations && typeof frontMatter.affiliations === "string") {
@@ -38,7 +40,7 @@ const makeFrontMatterBlock = (frontMatter) => {
     }
   }
   if (frontMatter.translators) {
-    let translators = parseContributors(frontMatter, "translators", "translatorLinks");
+    const translators = parseContributors(frontMatter, "translators", "translatorLinks");
     if (translators) {
       markdown.push(`### Translators: ${translators}`);
     }
@@ -59,7 +61,7 @@ const makeFrontMatterBlock = (frontMatter) => {
   return block;
 };
 
-const parseContributors = (frontMatter, contributorsKey, contributorLinksKey) => {
+function parseContributors(frontMatter, contributorsKey, contributorLinksKey) {
   const contributors = frontMatter[contributorsKey];
   const contributorLinks = frontMatter[contributorLinksKey];
 
@@ -68,30 +70,29 @@ const parseContributors = (frontMatter, contributorsKey, contributorLinksKey) =>
   } else if (typeof contributors === 'string') {
     return parseContributorsString(contributors, contributorLinks, contributorsKey, contributorLinksKey);
   }
+  return undefined;
 }
 
-const parseContributorsArray = (contributors, contributorLinks, contributorsKey, contributorLinksKey) => {
+function parseContributorsArray(contributors, contributorLinks, contributorsKey, contributorLinksKey) {
   // validate links
   if (contributorLinks) {
     if (!Array.isArray(contributorLinks)) {
       utils.warn(`Narrative parsing - if ${contributorsKey} is an array, then ${contributorLinksKey} must also be an array. Skipping links.`);
       contributorLinks = undefined;
-    } else if (contributorLinks.length != contributors.length) {
+    } else if (contributorLinks.length !== contributors.length) {
       utils.warn(`Narrative parsing - the length of ${contributorsKey} and ${contributorLinksKey} did not match. Skipping links.`);
       contributorLinks = undefined;
     }
   }
-
   if (contributorLinks) {
     contributors = contributors.map((contributor, idx) => {
       return contributorLink(contributor, contributorLinks[idx]);
     });
   }
-
   return contributors.join(", ");
 }
 
-const parseContributorsString = (contributors, contributorLinks, contributorsKey, contributorLinksKey) => {
+function parseContributorsString(contributors, contributorLinks, contributorsKey, contributorLinksKey) {
   // validate links
   if (contributorLinks) {
     if (typeof contributorLinks !== "string") {
@@ -99,13 +100,12 @@ const parseContributorsString = (contributors, contributorLinks, contributorsKey
       contributorLinks = undefined;
     }
   }
-
   return contributorLink(contributors, contributorLinks);
 }
 
-const contributorLink = (contributor, contributorLink) => {
+function contributorLink(contributor, contributorLinkValue) {
   if (contributorLink) {
-    return `[${contributor}](${contributorLink})`;
+    return `[${contributor}](${contributorLinkValue})`;
   }
   return contributor;
 }
