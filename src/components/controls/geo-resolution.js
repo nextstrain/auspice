@@ -5,6 +5,7 @@ import { controlsWidth } from "../../util/globals";
 import { CHANGE_GEO_RESOLUTION } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarSubtitle } from "./styles";
+import { withTranslation } from "react-i18next";
 
 @connect((state) => {
   return {
@@ -25,11 +26,12 @@ class GeoResolution extends React.Component {
   }
 
   render() {
+    const { t } = this.props;
     const geoResolutionOptions = this.getGeoResolutionOptions();
     return (
       <>
         <SidebarSubtitle spaceAbove>
-          Geographic resolution
+          {t("Geographic resolution")}
         </SidebarSubtitle>
         <div style={{marginBottom: 10, width: controlsWidth, fontSize: 14}}>
           <Select
@@ -48,4 +50,5 @@ class GeoResolution extends React.Component {
   }
 }
 
-export default GeoResolution;
+const WithTranslation = withTranslation()(GeoResolution);
+export default WithTranslation;

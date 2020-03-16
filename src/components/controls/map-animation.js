@@ -4,6 +4,7 @@ import { CHANGE_ANIMATION_TIME, CHANGE_ANIMATION_CUMULATIVE, CHANGE_ANIMATION_LO
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import Toggle from "./toggle";
 import { SidebarSubtitle, SidebarButton } from "./styles";
+import { withTranslation } from 'react-i18next';
 
 @connect((state) => {
   return {
@@ -42,32 +43,33 @@ class MapAnimationControls extends React.Component {
   }
 
   render() {
+    const { t } = this.props;
     if (this.props.branchLengthsToDisplay === "divOnly") return null;
 
     return (
       <div id="mapAnimationControls">
 
         <SidebarSubtitle spaceAbove>
-          Animation Speed
+          {t("Animation Speed")}
         </SidebarSubtitle>
 
         <SidebarButton
           selected={this.props.mapAnimationDurationInMilliseconds === 60000}
           onClick={this.handleChangeAnimationTimeClicked("slow")}
         >
-          Slow
+          {t("Slow")}
         </SidebarButton>
         <SidebarButton
           selected={this.props.mapAnimationDurationInMilliseconds === 30000}
           onClick={this.handleChangeAnimationTimeClicked("medium")}
         >
-          Medium
+          {t("Medium")}
         </SidebarButton>
         <SidebarButton
           selected={this.props.mapAnimationDurationInMilliseconds === 15000}
           onClick={this.handleChangeAnimationTimeClicked("fast")}
         >
-          Fast
+          {t("Fast")}
         </SidebarButton>
 
         <div style={{marginBottom: 5}}/>
@@ -78,7 +80,7 @@ class MapAnimationControls extends React.Component {
           callback={() => {
             this.props.dispatch({ type: CHANGE_ANIMATION_LOOP, data: !this.props.mapAnimationShouldLoop });
           }}
-          label="Loop animation"
+          label={t("Loop animation")}
         />
         <br/>
         <Toggle
@@ -88,7 +90,7 @@ class MapAnimationControls extends React.Component {
             analyticsControlsEvent("change-animation-cumulative");
             this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
           }}
-          label="Animate cumulative history"
+          label={t("Animate cumulative history")}
         />
 
       </div>
@@ -96,4 +98,5 @@ class MapAnimationControls extends React.Component {
   }
 }
 
-export default MapAnimationControls;
+const WithTranslations = withTranslation()(MapAnimationControls)
+export default WithTranslations;

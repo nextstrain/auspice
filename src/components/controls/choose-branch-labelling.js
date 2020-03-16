@@ -16,7 +16,7 @@ class ChooseBranchLabelling extends React.Component {
     this.change = (value) => {this.props.dispatch({type: CHANGE_BRANCH_LABEL, value: value.value});};
   }
   render() {
-    const { t, i18n } = this.props;
+    const { t } = this.props;
     return (
       <div style={{paddingTop: 5}}>
         <SidebarSubtitle>
@@ -37,6 +37,5 @@ class ChooseBranchLabelling extends React.Component {
   }
 }
 
-const WithTranslation = withTranslation()(ChooseBranchLabelling)
-
+const WithTranslation = withTranslation()(ChooseBranchLabelling);
 export default WithTranslation;

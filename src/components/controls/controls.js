@@ -13,22 +13,27 @@ import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
+import { useTranslation } from 'react-i18next';
 
 import { SidebarHeader, ControlsContainer } from "./styles";
 
-const Controls = ({mapOn}) => (
+
+function Controls ({mapOn}) { 
+  const { t } = useTranslation();
+
+  return (
   <ControlsContainer>
     <ChooseDataset/>
 
-    <SidebarHeader>Date Range</SidebarHeader>
+    <SidebarHeader>{t("Date Range")}</SidebarHeader>
     <DateRangeInputs/>
 
 
-    <SidebarHeader>Color By</SidebarHeader>
+    <SidebarHeader>{t("Color By")}</SidebarHeader>
     <ColorBy/>
 
 
-    <SidebarHeader>Tree Options</SidebarHeader>
+    <SidebarHeader>{t("Tree Options")}</SidebarHeader>
     <ChooseLayout/>
     <ChooseMetric/>
     <ChooseBranchLabelling/>
@@ -38,20 +43,19 @@ const Controls = ({mapOn}) => (
 
     { mapOn ? (
       <span style={{marginTop: "15px"}}>
-        <SidebarHeader>Map Options</SidebarHeader>
+        <SidebarHeader>{t("Map Options")}</SidebarHeader>
         <GeoResolution/>
         <MapAnimationControls/>
       </span>
     ) : null}
 
     <span style={{paddingTop: "10px"}}/>
-    <SidebarHeader>Panel Options</SidebarHeader>
+    <SidebarHeader>{t("Panel Options")}</SidebarHeader>
     <PanelLayout/>
     <PanelToggles/>
-      
     <Language/>
-
   </ControlsContainer>
-);
+  );
+}
 
 export default Controls;

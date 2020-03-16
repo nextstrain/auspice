@@ -5,6 +5,7 @@ import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { toggleTemporalConfidence } from "../../actions/tree";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
+import { withTranslation } from "react-i18next";
 
 /* implements a pair of buttons that toggle between time & divergence tree layouts */
 @connect((state) => {
@@ -17,13 +18,14 @@ import Toggle from "./toggle";
 })
 class ChooseMetric extends React.Component {
   render() {
+    const { t } = this.props;
     if (this.props.branchLengthsToDisplay !== "divAndDate") return null;
     /* this used to be added to the first SidebarSubtitle
     const potentialOffset = this.props.showTreeToo ? {marginTop: "0px"} : {}; */
     return (
       <div style={{marginBottom: 0}}>
         <SidebarSubtitle>
-          Branch Length
+          {t("Branch Length")}
         </SidebarSubtitle>
 
         <SidebarButton
@@ -33,7 +35,7 @@ class ChooseMetric extends React.Component {
             this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "num_date" });
           }}
         >
-          time
+          {t("time")}
         </SidebarButton>
         <span style={{paddingRight: "12px"}}/>
         <SidebarButton
@@ -43,7 +45,7 @@ class ChooseMetric extends React.Component {
             this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
           }}
         >
-          divergence
+          {t("divergence")}
         </SidebarButton>
 
         {this.props.showTreeToo ?
@@ -63,4 +65,5 @@ class ChooseMetric extends React.Component {
   }
 }
 
-export default ChooseMetric;
+const WithTranslation = withTranslation()(ChooseMetric);
+export default WithTranslation;

@@ -6,6 +6,7 @@ import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../act
 import { NODE_VISIBLE } from "../../util/globals";
 import { SidebarSubtitle } from "./styles";
 import "../../css/awesomplete.css";
+import { withTranslation } from "react-i18next";
 
 const Cross = ({onClick, show}) => {
   if (!show) return null;
@@ -116,9 +117,10 @@ class SearchStrains extends React.Component {
     this.state.awesomplete.evaluate();
   }
   render() {
+    const { t } = this.props;
     return (
       <Container>
-        <SidebarSubtitle spaceAbove>Search Strains</SidebarSubtitle>
+        <SidebarSubtitle spaceAbove>{t("Search Strains")}</SidebarSubtitle>
         <InputContainer>
           <Input ref={(r) => {this.ref = r;}} onFocus={() => this.updateVisibleStrains()}/>
         </InputContainer>
@@ -128,4 +130,5 @@ class SearchStrains extends React.Component {
   }
 }
 
-export default SearchStrains;
+const WithTranslation = withTranslation()(SearchStrains);
+export default WithTranslation;
