@@ -75,6 +75,7 @@
     "file-loader": "^1.1.11",
     "font-awesome": "^4.7.0",
     "i18next": "^19.3.2",
+    "i18next-resource-store-loader": "^0.1.2",
     "json-loader": "^0.5.1",
     "leaflet": "^1.2.0",
     "leaflet-image": "^0.4.0",
