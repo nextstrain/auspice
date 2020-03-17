@@ -15,7 +15,7 @@ const Head = ({metadata, general}) => {
     resources: require("i18next-resource-store-loader!../../locales/index.js"),
     lng: lang,
     fallbackLng: "en",
-    debug: true,
+    debug: process.env.NODE_ENV !== 'production' ? true : false,
     interpolation: {
       escapeValue: false
     },
