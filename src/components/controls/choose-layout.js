@@ -37,7 +37,7 @@ class ChooseLayout extends React.Component {
     return (
       <div style={{marginBottom: 15}}>
         <SidebarSubtitle>
-          {t("Layout")}
+          {t("sidebar:Layout")}
         </SidebarSubtitle>
         <RowContainer>
           <RectangularTreeIcon width={25} selected={selected === "rect"}/>
@@ -45,7 +45,7 @@ class ChooseLayout extends React.Component {
             selected={selected === "rect"}
             onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-rectangular"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });}}}
           >
-            {t("rectangular")}
+            {t("sidebar:rectangular")}
           </SidebarButton>
         </RowContainer>
         <RowContainer>
@@ -54,7 +54,7 @@ class ChooseLayout extends React.Component {
             selected={selected === "radial"}
             onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-radial"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });}}}
           >
-            {t("radial")}
+            {t("sidebar:radial")}
           </SidebarButton>
         </RowContainer>
         <RowContainer>
@@ -63,7 +63,7 @@ class ChooseLayout extends React.Component {
             selected={selected === "unrooted"}
             onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-unrooted"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });}}}
           >
-            {t("unrooted")}
+            {t("sidebar:unrooted")}
           </SidebarButton>
         </RowContainer>
         {
@@ -75,7 +75,7 @@ class ChooseLayout extends React.Component {
                   selected={selected === "clock"}
                   onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-clock"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });}}}
                 >
-                  {t("clock")}
+                  {t("sidebar:clock")}
                 </SidebarButton>
               </RowContainer>
             ) :

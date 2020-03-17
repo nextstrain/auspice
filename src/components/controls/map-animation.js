@@ -50,26 +50,26 @@ class MapAnimationControls extends React.Component {
       <div id="mapAnimationControls">
 
         <SidebarSubtitle spaceAbove>
-          {t("Animation Speed")}
+          {t("sidebar:Animation Speed")}
         </SidebarSubtitle>
 
         <SidebarButton
           selected={this.props.mapAnimationDurationInMilliseconds === 60000}
           onClick={this.handleChangeAnimationTimeClicked("slow")}
         >
-          {t("Slow")}
+          {t("sidebar:Slow")}
         </SidebarButton>
         <SidebarButton
           selected={this.props.mapAnimationDurationInMilliseconds === 30000}
           onClick={this.handleChangeAnimationTimeClicked("medium")}
         >
-          {t("Medium")}
+          {t("sidebar:Medium")}
         </SidebarButton>
         <SidebarButton
           selected={this.props.mapAnimationDurationInMilliseconds === 15000}
           onClick={this.handleChangeAnimationTimeClicked("fast")}
         >
-          {t("Fast")}
+          {t("sidebar:Fast")}
         </SidebarButton>
 
         <div style={{marginBottom: 5}}/>
@@ -80,7 +80,7 @@ class MapAnimationControls extends React.Component {
           callback={() => {
             this.props.dispatch({ type: CHANGE_ANIMATION_LOOP, data: !this.props.mapAnimationShouldLoop });
           }}
-          label={t("Loop animation")}
+          label={t("sidebar:Loop animation")}
         />
         <br/>
         <Toggle
@@ -90,7 +90,7 @@ class MapAnimationControls extends React.Component {
             analyticsControlsEvent("change-animation-cumulative");
             this.props.dispatch({ type: CHANGE_ANIMATION_CUMULATIVE, data: !this.props.mapAnimationCumulative });
           }}
-          label={t("Animate cumulative history")}
+          label={t("sidebar:Animate cumulative history")}
         />
 
       </div>

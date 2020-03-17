@@ -23,7 +23,7 @@ class PanelToggles extends React.Component {
         display
         on={this.props.panelsToDisplay.indexOf(n) !== -1}
         callback={() => this.props.dispatch(togglePanelDisplay(n))}
-        label={t("Show " + n)}
+        label={t("sidebar:Show " + n)}
         style={{paddingBottom: "10px"}}
       />
     ));

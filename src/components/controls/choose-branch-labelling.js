@@ -20,7 +20,7 @@ class ChooseBranchLabelling extends React.Component {
     return (
       <div style={{paddingTop: 5}}>
         <SidebarSubtitle>
-          {t("Branch Labels")}
+          {t("sidebar:Branch Labels")}
         </SidebarSubtitle>
         <div style={{width: controlsWidth, fontSize: 14}}>
           <Select

@@ -1,5 +1,7 @@
 import React from "react";
 import { headerFont } from "../../globalStyles";
+//import { withTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next';
 
 const styles = {
   avatar: {
@@ -25,16 +27,17 @@ const styles = {
 };
 
 const Byline = ({width, metadata}) => {
+  const {t} = useTranslation();
   return (
     <div width={width} style={styles.byline}>
-      {renderAvatar(metadata)}
-      {renderBuildInfo(metadata)}
-      {renderMaintainers(metadata)}
+      {renderAvatar(t, metadata)}
+      {renderBuildInfo(t, metadata)}
+      {renderMaintainers(t, metadata)}
     </div>
   );
 };
 
-function renderAvatar(metadata) {
+function renderAvatar(t, metadata) {
   const repo = metadata.buildUrl;
   if (typeof repo === 'string') {
     const match = repo.match(/(https?:\/\/)?(www\.)?github.com\/([^/]+)/);
@@ -50,7 +53,7 @@ function renderAvatar(metadata) {
 /**
  * Render the byline of the page to indicate the source of the build (often a GitHub repo)
  */
-function renderBuildInfo(metadata) {
+function renderBuildInfo(t, metadata) {
   if (Object.prototype.hasOwnProperty.call(metadata, "buildUrl")) {
     const repo = metadata.buildUrl;
     if (typeof repo === 'string') {
@@ -82,7 +85,7 @@ function PotentialGisaidExtraByline() {
   ) {
     return (
       <span>
-        {" using data from "}
+        {" " + t("using data from") + " "}
         <a key={1} href="https://gisaid.org" target="_blank" rel="noopener noreferrer">
           <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
         </a>
@@ -92,14 +95,14 @@ function PotentialGisaidExtraByline() {
   return null;
 }
 
-function renderMaintainers(metadata) {
+function renderMaintainers(t, metadata) {
   let maintainersArray;
   if (Object.prototype.hasOwnProperty.call(metadata, "maintainers")) {
     maintainersArray = metadata.maintainers;
     if (Array.isArray(maintainersArray) && maintainersArray.length) {
       return (
         <span>
-          {"Maintained by "}
+          {t("Maintained by") + " "}
           {maintainersArray.map((m, i) => (
             <React.Fragment key={m.name}>
               {m.url ? <Link url={m.url}>{m.name}</Link> : m.name}
@@ -122,5 +125,5 @@ function Link({url, children}) {
   );
 }
 
-
+//const WithTranslation = withTranslation()(Byline)
 export default Byline;

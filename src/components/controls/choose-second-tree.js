@@ -40,7 +40,7 @@ class ChooseSecondTree extends React.Component {
     return (
       <div>
         <SidebarSubtitle spaceAbove>
-          {t("Second Tree")}
+          {t("sidebar:Second Tree")}
         </SidebarSubtitle>
         <div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
           <Select

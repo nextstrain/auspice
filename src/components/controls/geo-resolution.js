@@ -31,7 +31,7 @@ class GeoResolution extends React.Component {
     return (
       <>
         <SidebarSubtitle spaceAbove>
-          {t("Geographic resolution")}
+          {t("sidebar:Geographic resolution")}
         </SidebarSubtitle>
         <div style={{marginBottom: 10, width: controlsWidth, fontSize: 14}}>
           <Select

@@ -25,7 +25,7 @@ class ChooseMetric extends React.Component {
     return (
       <div style={{marginBottom: 0}}>
         <SidebarSubtitle>
-          {t("Branch Length")}
+          {t("sidebar:Branch Length")}
         </SidebarSubtitle>
 
         <SidebarButton
@@ -35,7 +35,7 @@ class ChooseMetric extends React.Component {
             this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "num_date" });
           }}
         >
-          {t("time")}
+          {t("sidebar:time")}
         </SidebarButton>
         <span style={{paddingRight: "12px"}}/>
         <SidebarButton
@@ -45,7 +45,7 @@ class ChooseMetric extends React.Component {
             this.props.dispatch({ type: CHANGE_DISTANCE_MEASURE, data: "div" });
           }}
         >
-          {t("divergence")}
+          {t("sidebar:divergence")}
         </SidebarButton>
 
         {this.props.showTreeToo ?

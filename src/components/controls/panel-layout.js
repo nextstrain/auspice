@@ -39,7 +39,7 @@ class PanelLayouts extends React.Component {
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "full" });
           }}
         >
-          <ButtonText>{t("full")}</ButtonText>
+          <ButtonText>{t("sidebar:full")}</ButtonText>
         </SidebarButton>
 
         <PanelsGridIcon width={22} selected={this.props.panelLayout === "grid"}/>
@@ -50,7 +50,7 @@ class PanelLayouts extends React.Component {
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "grid" });
           }}
         >
-          <ButtonText>{t("grid")}</ButtonText>
+          <ButtonText>{t("sidebar:grid")}</ButtonText>
         </SidebarButton>
 
       </div>

@@ -25,15 +25,15 @@ function Controls ({mapOn}) {
   <ControlsContainer>
     <ChooseDataset/>
 
-    <SidebarHeader>{t("Date Range")}</SidebarHeader>
+    <SidebarHeader>{t("sidebar:Date Range")}</SidebarHeader>
     <DateRangeInputs/>
 
 
-    <SidebarHeader>{t("Color By")}</SidebarHeader>
+    <SidebarHeader>{t("sidebar:Color By")}</SidebarHeader>
     <ColorBy/>
 
 
-    <SidebarHeader>{t("Tree Options")}</SidebarHeader>
+    <SidebarHeader>{t("sidebar:Tree Options")}</SidebarHeader>
     <ChooseLayout/>
     <ChooseMetric/>
     <ChooseBranchLabelling/>
@@ -43,14 +43,14 @@ function Controls ({mapOn}) {
 
     { mapOn ? (
       <span style={{marginTop: "15px"}}>
-        <SidebarHeader>{t("Map Options")}</SidebarHeader>
+        <SidebarHeader>{t("sidebar:Map Options")}</SidebarHeader>
         <GeoResolution/>
         <MapAnimationControls/>
       </span>
     ) : null}
 
     <span style={{paddingTop: "10px"}}/>
-    <SidebarHeader>{t("Panel Options")}</SidebarHeader>
+    <SidebarHeader>{t("sidebar:Panel Options")}</SidebarHeader>
     <PanelLayout/>
     <PanelToggles/>
     <Language/>

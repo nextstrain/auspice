@@ -64,7 +64,7 @@ class ChooseDataset extends React.Component {
 
     return (
       <>
-        <SidebarHeader>{t("Dataset")}</SidebarHeader>
+        <SidebarHeader>{t("sidebar:Dataset")}</SidebarHeader>
         {options.map((option, optionIdx) => (
           <ChooseDatasetSelect
             key={option}

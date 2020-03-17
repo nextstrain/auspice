@@ -120,7 +120,7 @@ class SearchStrains extends React.Component {
     const { t } = this.props;
     return (
       <Container>
-        <SidebarSubtitle spaceAbove>{t("Search Strains")}</SidebarSubtitle>
+        <SidebarSubtitle spaceAbove>{t("sidebar:Search Strains")}</SidebarSubtitle>
         <InputContainer>
           <Input ref={(r) => {this.ref = r;}} onFocus={() => this.updateVisibleStrains()}/>
         </InputContainer>

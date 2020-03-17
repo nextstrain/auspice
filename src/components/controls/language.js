@@ -40,7 +40,7 @@ class Language extends React.Component {
     return (
       <>
         <SidebarSubtitle spaceAbove>
-          {t("Language")}
+          {t("sidebar:Language")}
         </SidebarSubtitle>
         <div style={{marginBottom: 10, width: controlsWidth, fontSize: 14}}>
           <Select
