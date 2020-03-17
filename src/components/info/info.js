@@ -9,7 +9,6 @@ import { months, NODE_VISIBLE } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
 import Byline from "./byline"
 import { withTranslation } from 'react-i18next';
-import i18n from "i18next";
 
 
 const plurals = {

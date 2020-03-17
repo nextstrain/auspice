@@ -1,6 +1,5 @@
 import React from "react";
 import { headerFont } from "../../globalStyles";
-//import { withTranslation } from 'react-i18next';
 import { useTranslation } from 'react-i18next';
 
 const styles = {
@@ -27,7 +26,7 @@ const styles = {
 };
 
 const Byline = ({width, metadata}) => {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   return (
     <div width={width} style={styles.byline}>
       {renderAvatar(t, metadata)}
@@ -125,5 +124,4 @@ function Link({url, children}) {
   );
 }
 
-//const WithTranslation = withTranslation()(Byline)
 export default Byline;
