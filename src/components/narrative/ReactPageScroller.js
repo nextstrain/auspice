@@ -20,6 +20,7 @@ const scrollWindowDown = Symbol();
 const ANIMATION_TIMER = 200;
 const KEY_UP = 38;
 const KEY_DOWN = 40;
+const SCROLL_THRESHOLD = 25;
 
 export default class ReactPageScroller extends React.Component {
     static propTypes = {
@@ -47,9 +48,9 @@ export default class ReactPageScroller extends React.Component {
 
         this[wheelScroll] = (event) => {
             if (event.deltaY < 0) {
-                this[scrollWindowUp]();
+                this[scrollWindowUp](-event.deltaY);
             } else {
-                this[scrollWindowDown]();
+                this[scrollWindowDown](event.deltaY);
             }
 
         };
@@ -57,9 +58,9 @@ export default class ReactPageScroller extends React.Component {
         this[touchMove] = (event) => {
             if (!_.isNull(this[previousTouchMove])) {
                 if (event.touches[0].clientY > this[previousTouchMove]) {
-                    this[scrollWindowUp]();
+                    this[scrollWindowUp](SCROLL_THRESHOLD);
                 } else {
-                    this[scrollWindowDown]();
+                    this[scrollWindowDown](SCROLL_THRESHOLD);
                 }
             } else {
                 this[previousTouchMove] = event.touches[0].clientY;
@@ -68,10 +69,10 @@ export default class ReactPageScroller extends React.Component {
 
         this[keyPress] = (event) => {
             if (_.isEqual(event.keyCode, KEY_UP)) {
-                this[scrollWindowUp]();
+                this[scrollWindowUp](SCROLL_THRESHOLD);
             }
             if (_.isEqual(event.keyCode, KEY_DOWN)) {
-                this[scrollWindowDown]();
+                this[scrollWindowDown](SCROLL_THRESHOLD);
             }
         };
 
@@ -102,11 +103,11 @@ export default class ReactPageScroller extends React.Component {
             this.setState({componentsToRender: [...componentsToRender]});
         };
 
-        this[scrollWindowUp] = () => {
+        this[scrollWindowUp] = (amount) => {
             if (!_.isNil(this["container_" + (this.state.componentIndex - 1)]) && !this[scrolling]) {
 
                 var element = this["container_" + this.state.componentIndex].getElementsByTagName('div')[0];
-                if (element.scrollTop === 0) {
+                if (element.scrollTop === 0 && amount >= SCROLL_THRESHOLD) {
                   this[scrolling] = true;
                   this._pageContainer.style.transform = `translate3d(0, ${(this.state.componentIndex - 1) * -100}%, 0)`;
 
@@ -127,11 +128,11 @@ export default class ReactPageScroller extends React.Component {
             }
         };
 
-        this[scrollWindowDown] = () => {
+        this[scrollWindowDown] = (amount) => {
             if (!_.isNil(this["container_" + (this.state.componentIndex + 1)]) && !this[scrolling]) {
 
                 var element = this["container_" + this.state.componentIndex].getElementsByTagName('div')[0];
-                if (element.scrollTop === element.scrollHeight - element.clientHeight) {
+                if (element.scrollTop === element.scrollHeight - element.clientHeight && amount >= SCROLL_THRESHOLD) {
                   this[scrolling] = true;
                   this._pageContainer.style.transform = `translate3d(0, ${(this.state.componentIndex + 1) * -100}%, 0)`;
 
