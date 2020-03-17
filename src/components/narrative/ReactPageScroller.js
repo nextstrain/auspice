@@ -105,19 +105,22 @@ export default class ReactPageScroller extends React.Component {
         this[scrollWindowUp] = () => {
             if (!_.isNil(this["container_" + (this.state.componentIndex - 1)]) && !this[scrolling]) {
 
-                this[scrolling] = true;
-                this._pageContainer.style.transform = `translate3d(0, ${(this.state.componentIndex - 1) * -100}%, 0)`;
+                var element = this["container_" + this.state.componentIndex].getElementsByTagName('div')[0];
+                if (element.scrollTop === 0) {
+                  this[scrolling] = true;
+                  this._pageContainer.style.transform = `translate3d(0, ${(this.state.componentIndex - 1) * -100}%, 0)`;
 
-                if (this.props.pageOnChange) {
-                    this.props.pageOnChange(this.state.componentIndex);
+                  if (this.props.pageOnChange) {
+                      this.props.pageOnChange(this.state.componentIndex);
+                  }
+
+                  setTimeout(() => {
+                      this.setState((prevState) => ({componentIndex: prevState.componentIndex - 1}), () => {
+                          this[scrolling] = false;
+                          this[previousTouchMove] = null;
+                      });
+                  }, this.props.animationTimer + ANIMATION_TIMER)
                 }
-
-                setTimeout(() => {
-                    this.setState((prevState) => ({componentIndex: prevState.componentIndex - 1}), () => {
-                        this[scrolling] = false;
-                        this[previousTouchMove] = null;
-                    });
-                }, this.props.animationTimer + ANIMATION_TIMER)
 
             } else if (this.props.scrollUnavailable) {
                 this.props.scrollUnavailable();
@@ -127,20 +130,23 @@ export default class ReactPageScroller extends React.Component {
         this[scrollWindowDown] = () => {
             if (!_.isNil(this["container_" + (this.state.componentIndex + 1)]) && !this[scrolling]) {
 
-                this[scrolling] = true;
-                this._pageContainer.style.transform = `translate3d(0, ${(this.state.componentIndex + 1) * -100}%, 0)`;
+                var element = this["container_" + this.state.componentIndex].getElementsByTagName('div')[0];
+                if (element.scrollTop === element.scrollHeight - element.clientHeight) {
+                  this[scrolling] = true;
+                  this._pageContainer.style.transform = `translate3d(0, ${(this.state.componentIndex + 1) * -100}%, 0)`;
 
-                if (this.props.pageOnChange) {
-                    this.props.pageOnChange(this.state.componentIndex + 2);
+                  if (this.props.pageOnChange) {
+                      this.props.pageOnChange(this.state.componentIndex + 2);
+                  }
+
+                  setTimeout(() => {
+                      this.setState((prevState) => ({componentIndex: prevState.componentIndex + 1}), () => {
+                          this[scrolling] = false;
+                          this[previousTouchMove] = null;
+                          this[addNextComponent]();
+                      });
+                  }, this.props.animationTimer + ANIMATION_TIMER)
                 }
-
-                setTimeout(() => {
-                    this.setState((prevState) => ({componentIndex: prevState.componentIndex + 1}), () => {
-                        this[scrolling] = false;
-                        this[previousTouchMove] = null;
-                        this[addNextComponent]();
-                    });
-                }, this.props.animationTimer + ANIMATION_TIMER)
 
             } else if (this.props.scrollUnavailable) {
                 this.props.scrollUnavailable();
