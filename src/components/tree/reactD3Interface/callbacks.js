@@ -1,7 +1,7 @@
 import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
-import { getEmphasizedColor } from "../../../util/colorHelpers";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getDomId } from "../phyloTree/helpers";
+import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/renderers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
 
@@ -36,21 +36,7 @@ export const onTipClick = function onTipClick(d) {
 export const onBranchHover = function onBranchHover(d) {
   if (d.visibility !== NODE_VISIBLE) return;
 
-  /* We want to emphasize the colour of the branch. How we do this depends on how the branch was rendered in the first place! */
-  const emphasizedStrokeColor = getEmphasizedColor(d.branchStroke);
-
-  for (const id of [getDomId("#branchS", d.n.name), getDomId("#branchT", d.n.name)]) {
-    const el = this.state.tree.svg.select(id);
-    if (el.empty()) continue; // Some displays don't have S & T parts of the branch
-    const currentStroke = el.style("stroke");
-    if (currentStroke.startsWith("url")) {
-      const gradientId = `${d.parent.n.arrayIdx}:${d.n.arrayIdx}:highlighted`;
-      d.that.makeLinearGradient(gradientId, [[0, getEmphasizedColor(d.parent.branchStroke)], [100, emphasizedStrokeColor]], d.rot);
-      el.style("stroke", `url(#${gradientId})`);
-    } else {
-      el.style("stroke", emphasizedStrokeColor);
-    }
-  }
+    branchStrokeForHover(d);
 
   /* if temporal confidence bounds are defined for this branch, then display them on hover */
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
@@ -104,21 +90,8 @@ export const onBranchClick = function onBranchClick(d) {
 /* onBranchLeave called when mouse-off, i.e. anti-hover */
 export const onBranchLeave = function onBranchLeave(d) {
   /* Reset the stroke back to what it was before */
-  for (const id of [getDomId("#branchT", d.n.name), getDomId("#branchS", d.n.name)]) {
-    const el = this.state.tree.svg.select(id);
-    if (el.empty()) continue; // Some displays don't have S & T parts of the branch
-    const currentStroke = el.style("stroke");
-    if (currentStroke.startsWith("url")) {
-      el.style("stroke", `url(#${d.parent.n.arrayIdx}:${d.n.arrayIdx})`);
-      /* remove the <def> of the highlighed (hovered) state */
-      d.that.groups.branchGradientDefs
-        .selectAll("linearGradient")
-        .filter((_, i, l) => l.length-1 === i)
-        .remove();
-    } else {
-      el.style("stroke", (dd) => dd.branchStroke);
-    }
-  }
+  branchStrokeForLeave(d);
+
   /* Remove the temporal confidence bar unless it's meant to be displayed */
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {
     const tree = d.that.params.orientation[0] === 1 ? this.state.tree : this.state.treeToo;

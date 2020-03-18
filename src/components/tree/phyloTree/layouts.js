@@ -359,9 +359,9 @@ export const mapToScreen = function mapToScreen() {
     d.yTip = this.yScale(d.y);
     d.xBase = this.xScale(d.px);
     d.yBase = this.yScale(d.py);
-    if (this.layout !=="rectangular"){
-      d.rot = Math.atan2(d.yTip-d.yBase,d.xTip-d.xBase) * 180/Math.PI ;
-    }
+    
+    d.rot = Math.atan2(d.yTip-d.yBase,d.xTip-d.xBase) * 180/Math.PI ;
+    
   });
   if (this.vaccines) {
     this.vaccines.forEach((d) => {

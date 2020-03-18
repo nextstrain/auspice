@@ -1,6 +1,7 @@
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getDomId, formatDivergence } from "./helpers";
+import { getEmphasizedColor } from "../../../util/colorHelpers";
 /**
  * @param {d3 selection} svg      -- the svg into which the tree is drawn
  * @param {string} layout         -- the layout to be used, e.g. "rect"
@@ -72,17 +73,17 @@ export const drawVaccines = function drawVaccines() {
     .selectAll(".vaccineCross")
     .data(this.vaccines)
     .enter()
-      .append("path")
-        .attr("class", "vaccineCross")
-        .attr("d", (d) => d.vaccineCross)
-        .style("stroke", "#333")
-        .style("stroke-width", 2 * this.params.branchStrokeWidth)
-        .style("fill", "none")
-        .style("cursor", "pointer")
-        .style("pointer-events", "auto")
-        .on("mouseover", this.callbacks.onTipHover)
-        .on("mouseout", this.callbacks.onTipLeave)
-        .on("click", this.callbacks.onTipClick);
+    .append("path")
+    .attr("class", "vaccineCross")
+    .attr("d", (d) => d.vaccineCross)
+    .style("stroke", "#333")
+    .style("stroke-width", 2 * this.params.branchStrokeWidth)
+    .style("fill", "none")
+    .style("cursor", "pointer")
+    .style("pointer-events", "auto")
+    .on("mouseover", this.callbacks.onTipHover)
+    .on("mouseout", this.callbacks.onTipLeave)
+    .on("click", this.callbacks.onTipClick);
 };
 
 
@@ -101,21 +102,21 @@ export const drawTips = function drawTips() {
     .selectAll(".tip")
     .data(this.nodes.filter((d) => d.terminal))
     .enter()
-      .append("circle")
-        .attr("class", "tip")
-        .attr("id", (d) => getDomId("tip", d.n.name))
-        .attr("cx", (d) => d.xTip)
-        .attr("cy", (d) => d.yTip)
-        .attr("r", (d) => d.r)
-        .on("mouseover", this.callbacks.onTipHover)
-        .on("mouseout", this.callbacks.onTipLeave)
-        .on("click", this.callbacks.onTipClick)
-        .style("pointer-events", "auto")
-        .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden")
-        .style("fill", (d) => d.fill || params.tipFill)
-        .style("stroke", (d) => d.tipStroke || params.tipStroke)
-        .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
-        .style("cursor", "pointer");
+    .append("circle")
+    .attr("class", "tip")
+    .attr("id", (d) => getDomId("tip", d.n.name))
+    .attr("cx", (d) => d.xTip)
+    .attr("cy", (d) => d.yTip)
+    .attr("r", (d) => d.r)
+    .on("mouseover", this.callbacks.onTipHover)
+    .on("mouseout", this.callbacks.onTipLeave)
+    .on("click", this.callbacks.onTipClick)
+    .style("pointer-events", "auto")
+    .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden")
+    .style("fill", (d) => d.fill || params.tipFill)
+    .style("stroke", (d) => d.tipStroke || params.tipStroke)
+    .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
+    .style("cursor", "pointer");
 
   timerEnd("drawTips");
 };
@@ -160,14 +161,17 @@ export const drawBranches = function drawBranches() {
       .selectAll('.branch')
       .data(this.nodes.filter((d) => !d.terminal))
       .enter()
-        .append("path")
-          .attr("class", "branch T")
-          .attr("id", (d) => getDomId("branchT", d.n.name))
-          .attr("d", (d) => d.branch[1])
-          .style("stroke", (d) => d.branchStroke || params.branchStroke)
-          .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
-          .style("fill", "none")
-          .style("pointer-events", "auto");
+      .append("path")
+      .attr("class", "branch T")
+      .attr("id", (d) => getDomId("branchT", d.n.name))
+      .attr("d", (d) => d.branch[1])
+      .style("stroke", (d) => d.branchStroke || params.branchStroke)
+      .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+      .style("fill", "none")
+      .style("pointer-events", "auto")
+      .on("mouseover", this.callbacks.onBranchHover)
+      .on("mouseout", this.callbacks.onBranchLeave)
+      .on("click", this.callbacks.onBranchClick);
   }
 
   /* PART 2: draw the branch stems (i.e. the actual branches) */
@@ -179,15 +183,7 @@ export const drawBranches = function drawBranches() {
   }
   this.groups.branchGradientDefs.selectAll("*").remove();
   // TODO -- explore if duplicate <def> elements (e.g. same colours on each end) slow things down
-  
-  this.nodes.forEach((d) => {
-    const a = d.parent.branchStroke;
-    const b = d.branchStroke;
-    if (a===b) return;
-    this.makeLinearGradient(`${d.parent.n.arrayIdx}:${d.n.arrayIdx}`, [[0, a], [100, b]], d.rot);
-  });
-  
-
+  this.updateColorBy();
   /* PART 2b: Draw the stems */
   if (!("branchStem" in this.groups)) {
     this.groups.branchStem = this.svg.append("g").attr("id", "branchStem");
@@ -196,25 +192,22 @@ export const drawBranches = function drawBranches() {
     .selectAll('.branch')
     .data(this.nodes)
     .enter()
-      .append("path")
-        .attr("class", "branch S")
-        .attr("id", (d) => getDomId("branchS", d.n.name))
-        .attr("d", (d) => d.branch[0])
-        .style("stroke", (d) => {
-          if (!d.branchStroke) return params.branchStroke;
-          if (d.branchStroke === d.parent.branchStroke) {
-            return d.branchStroke;
-          }
-          return `url(#${d.parent.n.arrayIdx}:${d.n.arrayIdx})`;
-        })
-        .style("stroke-linecap", "round")
-        .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
-        .style("visibility", getBranchVisibility)
-        .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
-        .style("pointer-events", "auto")
-        .on("mouseover", this.callbacks.onBranchHover)
-        .on("mouseout", this.callbacks.onBranchLeave)
-        .on("click", this.callbacks.onBranchClick);
+    .append("path")
+    .attr("class", "branch S")
+    .attr("id", (d) => getDomId("branchS", d.n.name))
+    .attr("d", (d) => d.branch[0])
+    .style("stroke", (d) => {
+      if (!d.branchStroke) return params.branchStroke;
+      return strokeForBranch(d,"S");
+    })
+    .style("stroke-linecap", "round")
+    .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+    .style("visibility", getBranchVisibility)
+    .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
+    .style("pointer-events", "auto")
+    .on("mouseover", this.callbacks.onBranchHover)
+    .on("mouseout", this.callbacks.onBranchLeave)
+    .on("click", this.callbacks.onBranchClick);
 
   timerEnd("drawBranches");
 };
@@ -268,33 +261,97 @@ export const clearSVG = function clearSVG() {
   this.svg.selectAll("*").remove();
 };
 
-export const makeLinearGradient = function makeLinearGradient(id, stops, rot) {
-	
-  const linearGradient = this.groups.branchGradientDefs.append("linearGradient")
-    .attr("id", id);
-    if( rot && typeof rot === "number") { // skip 0 rotation
-      linearGradient.attr("gradientTransform","translate(.5,.5) rotate("+rot+") translate(-.5,-.5)");
+
+export const updateColorBy = function() {
+    //console.log("updating colorBy")
+  this.nodes.forEach((d) => {
+    const a = d.parent.branchStroke;
+    const b = d.branchStroke;
+    const id = `T${this.debugId}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
+    if (a === b) { // not a gradient // color can be computed from d alone
+      this.svg.select(`#${id}`).remove(); // remove an existing gradient for this node
+      return;
     }
-   // .attr("x1", "0%") // TODO -- customise these via args, will be needed for non horizontal lines
-  //  .attr("x2", "100%") // these are the default values for linear gradient, so are not needed to be added
-   // .attr("y1", "0%")
-  //  .attr("y2", "0%");
-  stops.forEach((stop) => {
-    linearGradient.append("stop")
-    .attr("offset", `${stop[0]}%`)
-    .attr("stop-color", stop[1]);
-    
+    if (!this.svg.select(`#${id}`).empty()) { // there an existing gradient // update its colors
+      // console.log("adjusting " + id + " " + d.parent.branchStroke + "=>" + d.branchStroke);
+      this.svg.select(`#${id}_begin`).attr("stop-color", d.parent.branchStroke);
+      this.svg.select(`#${id}_end`).attr("stop-color", d.branchStroke);
+
+    } else { // otherwise create a new gradient
+      //  console.log("new gradient " + id + " " + d.parent.branchStroke + "=>" + d.branchStroke);
+      const linearGradient = this.svg.select("defs").append("linearGradient")
+        .attr("id", id);
+      if (d.rot && typeof d.rot === "number") {
+        linearGradient.attr("gradientTransform", "translate(.5,.5) rotate(" + d.rot + ") translate(-.5,-.5)");
+      }
+      linearGradient.append("stop")
+        .attr("id", id + "_begin")
+        .attr("offset", "0")
+        .attr("stop-color", d.parent.branchStroke);
+      linearGradient.append("stop")
+        .attr("id", id + "_end")
+        .attr("offset", "1")
+        .attr("stop-color", d.branchStroke);
+    }
   });
 };
 
-function getRateEstimate(regression, maxDivergence) {
-  /* Prior to Jan 2020, the divergence measure was always "subs per site per year"
-  however certain datasets chaged this to "subs per year" across entire sequence.
-  This distinction is not set in the JSON, so in order to correctly display the rate
-  we will "guess" this here. A future augur update will export this in a JSON key,
-  removing the need to guess */
-  if (maxDivergence > 5) {
-    return `rate estimate: ${formatDivergence(regression.slope)} subs per year`;
+export const strokeForBranch = function(d, b) {
+  const id = `T${d.that.debugId}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
+  //console.log(id + " " +  b);
+  if (d.branchStroke === d.parent.branchStroke || b === "T") {
+    //console.log("stroking " + id + " " + d.branchStroke);
+    return d.branchStroke;
   }
-  return `rate estimate: ${regression.slope.toExponential(2)} subs per site per year`;
+  return `url(#${id})`;
+};
+
+export const branchStrokeForLeave = function(d) {
+  if (!d) { return; }
+  handleHoverColor(d, d.parent.branchStroke,d.branchStroke);
+};
+
+export const branchStrokeForHover = function(d) {
+  if (!d) { return; }
+  handleHoverColor(d, getEmphasizedColor(d.parent.branchStroke),getEmphasizedColor(d.branchStroke));
+};
+
+const handleHoverColor = function(d, c1, c2){
+  if (!d) { return; }
+  
+  const id = `T${d.that.debugId}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
+ 
+  /* We want to emphasize the colour of the branch. How we do this depends on how the branch was rendered in the first place! */
+  const tel = d.that.svg.select(getDomId("#branchT", d.n.name));
+
+  if (!tel.empty()) { // Some displays don't have S & T parts of the branch
+    tel.style("stroke", c2);
+  }
+  const sel = d.that.svg.select(getDomId("#branchS", d.n.name));
+  if (!sel.empty()) {
+    if (d.branchStroke === d.parent.branchStroke){
+        sel.style("stroke", c2);
+      } else {
+      //console.log("going to gradient " + el.attr("id"));
+      const begin = d.that.svg.select(`#${id}_begin`);
+      if (begin) {
+        begin.attr("stop-color", c1);
+      }
+      const end = d.that.svg.select(`#${id}_end`);
+      if (end) {
+        end.attr("stop-color", c2);
+      }
+    }
+  }
 }
+  function getRateEstimate(regression, maxDivergence) {
+    /* Prior to Jan 2020, the divergence measure was always "subs per site per year"
+    however certain datasets chaged this to "subs per year" across entire sequence.
+    This distinction is not set in the JSON, so in order to correctly display the rate
+    we will "guess" this here. A future augur update will export this in a JSON key,
+    removing the need to guess */
+    if (maxDivergence > 5) {
+      return `rate estimate: ${formatDivergence(regression.slope)} subs per year`;
+    }
+    return `rate estimate: ${regression.slope.toExponential(2)} subs per site per year`;
+  };
