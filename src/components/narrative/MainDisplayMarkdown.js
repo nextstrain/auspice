@@ -101,7 +101,7 @@ const EXPERIMENTAL_MainDisplayMarkdown = ({narrativeBlock, width, mobile}) => {
   const cleanHTML = mdToHtml(narrativeBlock.mainDisplayMarkdown);
   return (
     <Container width={width} mobile={mobile}>
-      <div dangerouslySetInnerHTML={{ __html: cleanHTML }}/>
+      <div dir="auto" dangerouslySetInnerHTML={{ __html: cleanHTML }}/>
     </Container>
   );
 };
