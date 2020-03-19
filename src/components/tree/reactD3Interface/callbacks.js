@@ -36,7 +36,7 @@ export const onTipClick = function onTipClick(d) {
 export const onBranchHover = function onBranchHover(d) {
   if (d.visibility !== NODE_VISIBLE) return;
 
-    branchStrokeForHover(d);
+  branchStrokeForHover(d);
 
   /* if temporal confidence bounds are defined for this branch, then display them on hover */
   if (this.props.temporalConfidence.exists && this.props.temporalConfidence.display && !this.props.temporalConfidence.on) {

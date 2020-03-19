@@ -141,6 +141,16 @@ export const getBranchVisibility = (d) => {
   return "visible";
 };
 
+export const strokeForBranch = (d, b) => {
+  const id = `T${d.that.debugId}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
+  // console.log(id + " " +  b);
+  if (d.branchStroke === d.parent.branchStroke || b === "T") {
+    // console.log("stroking " + id + " " + d.branchStroke);
+    return d.branchStroke;
+  }
+  return `url(#${id})`;
+};
+
 /**
  * adds all branches to the svg, these are paths with class branch, which comprise two groups
  * @return {null}
@@ -198,7 +208,7 @@ export const drawBranches = function drawBranches() {
     .attr("d", (d) => d.branch[0])
     .style("stroke", (d) => {
       if (!d.branchStroke) return params.branchStroke;
-      return strokeForBranch(d,"S");
+      return strokeForBranch(d, "S");
     })
     .style("stroke-linecap", "round")
     .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
@@ -262,8 +272,8 @@ export const clearSVG = function clearSVG() {
 };
 
 
-export const updateColorBy = function() {
-    //console.log("updating colorBy")
+export const updateColorBy = function () {
+  // console.log("updating colorBy")
   this.nodes.forEach((d) => {
     const a = d.parent.branchStroke;
     const b = d.branchStroke;
@@ -296,31 +306,11 @@ export const updateColorBy = function() {
   });
 };
 
-export const strokeForBranch = function(d, b) {
+const handleHoverColor = (d, c1, c2) => {
+  if (!d) { return; }
+
   const id = `T${d.that.debugId}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
-  //console.log(id + " " +  b);
-  if (d.branchStroke === d.parent.branchStroke || b === "T") {
-    //console.log("stroking " + id + " " + d.branchStroke);
-    return d.branchStroke;
-  }
-  return `url(#${id})`;
-};
 
-export const branchStrokeForLeave = function(d) {
-  if (!d) { return; }
-  handleHoverColor(d, d.parent.branchStroke,d.branchStroke);
-};
-
-export const branchStrokeForHover = function(d) {
-  if (!d) { return; }
-  handleHoverColor(d, getEmphasizedColor(d.parent.branchStroke),getEmphasizedColor(d.branchStroke));
-};
-
-const handleHoverColor = function(d, c1, c2){
-  if (!d) { return; }
-  
-  const id = `T${d.that.debugId}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
- 
   /* We want to emphasize the colour of the branch. How we do this depends on how the branch was rendered in the first place! */
   const tel = d.that.svg.select(getDomId("#branchT", d.n.name));
 
@@ -329,10 +319,10 @@ const handleHoverColor = function(d, c1, c2){
   }
   const sel = d.that.svg.select(getDomId("#branchS", d.n.name));
   if (!sel.empty()) {
-    if (d.branchStroke === d.parent.branchStroke){
-        sel.style("stroke", c2);
-      } else {
-      //console.log("going to gradient " + el.attr("id"));
+    if (d.branchStroke === d.parent.branchStroke) {
+      sel.style("stroke", c2);
+    } else {
+      // console.log("going to gradient " + el.attr("id"));
       const begin = d.that.svg.select(`#${id}_begin`);
       if (begin) {
         begin.attr("stop-color", c1);
@@ -343,15 +333,27 @@ const handleHoverColor = function(d, c1, c2){
       }
     }
   }
-}
-  function getRateEstimate(regression, maxDivergence) {
-    /* Prior to Jan 2020, the divergence measure was always "subs per site per year"
+};
+
+export const branchStrokeForLeave = function (d) {
+  if (!d) { return; }
+  handleHoverColor(d, d.parent.branchStroke, d.branchStroke);
+};
+
+export const branchStrokeForHover = function (d) {
+  if (!d) { return; }
+  handleHoverColor(d, getEmphasizedColor(d.parent.branchStroke), getEmphasizedColor(d.branchStroke));
+};
+
+
+function getRateEstimate(regression, maxDivergence) {
+  /* Prior to Jan 2020, the divergence measure was always "subs per site per year"
     however certain datasets chaged this to "subs per year" across entire sequence.
     This distinction is not set in the JSON, so in order to correctly display the rate
     we will "guess" this here. A future augur update will export this in a JSON key,
     removing the need to guess */
-    if (maxDivergence > 5) {
-      return `rate estimate: ${formatDivergence(regression.slope)} subs per year`;
-    }
-    return `rate estimate: ${regression.slope.toExponential(2)} subs per site per year`;
-  };
+  if (maxDivergence > 5) {
+    return `rate estimate: ${formatDivergence(regression.slope)} subs per year`;
+  }
+  return `rate estimate: ${regression.slope.toExponential(2)} subs per site per year`;
+}
