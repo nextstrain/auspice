@@ -7,6 +7,7 @@ big_flu
 s3/
 /local_narratives/
 /narratives/
+/datasets/
 
 ### OSX ###
 .DS_Store
