@@ -80,9 +80,9 @@ Auspice takes two different file types: datasets (the tree, map, etc.), which ar
 ### Dataset JSONs
 
 For datasets, Auspice (v2.x) can currently load either
-* "Auspice v1" JSONs (metadata + tree JSONs) -- see the JSON schemas [here](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v1-meta.json) and [here](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v1-tree.json).
+* "Auspice v1" JSONs (metadata + tree JSONs) -- see the JSON schemas [here](https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v1-meta.json) and [here](https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v1-tree.json).
 _The zika dataset we download above is in this format_
-* "Auspice v2" JSONs. See the JSON schema [here](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v2.json).
+* "Auspice v2" JSONs. See the JSON schema [here](https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json).
 
 See the [Server API](server/api.md) for more details about the file formats an Auspice server (e.g. `auspice view`) sends to the client.
 

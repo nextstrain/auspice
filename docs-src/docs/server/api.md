@@ -55,7 +55,7 @@ Failure to return a valid JSON will result in a warning notification shown in Au
 
 The JSON response depends on the file-type being requested.
 
-If the type is not specified, i.e. we're requesting the "main" dataset JSON then [see this JSON schema](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v2.json).
+If the type is not specified, i.e. we're requesting the "main" dataset JSON then [see this JSON schema](https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json).
 Note that the Auspice client _cannot_ process v1 (meta / tree) JSONs -- [see below](server/api.md#importing-code-from-auspice) for how to convert these.
 
 Alternative file type reponses are to be documented.
@@ -100,7 +100,7 @@ The provided JavaScript file must export three functions, each of which handles 
 
 For information about the `req` and `res` arguments see the express documentation for the [request object](https://expressjs.com/en/api.html#req) and [response object](https://expressjs.com/en/api.html#res), respectively.
 
-You can see [nextstrain.org](https://nextstrain.org)'s implementation of these handlers [here](https://github.com/nextstrain/nextstrain.org/blob/master/auspice/server/index.js).
+You can see [nextstrain.org](https://nextstrain.org)'s implementation of these handlers [here](https://github.com/nextstrain/nextstrain.org/blob/master/server.js).
 
 Here's a pseudocode example of an implementation for the `getAvailable` handler which may help understanding:
 
@@ -141,7 +141,7 @@ where `tree` is the v1 tree JSON, and `meta` the v1 meta JSON.
 
 **Returns:**
 
-An object representing the v2 JSON [defined by this schema](https://github.com/nextstrain/augur/blob/v6/augur/data/schema-export-v2.json).
+An object representing the v2 JSON [defined by this schema](https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json).
 
 
 
