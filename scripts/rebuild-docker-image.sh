@@ -1,3 +1,5 @@
+#!/bin/bash
+
 echo "Pinging Travis CI to rebuild Docker image"
 
 body='{
