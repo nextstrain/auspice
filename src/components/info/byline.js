@@ -27,6 +27,29 @@ const styles = {
 
 const Byline = ({width, metadata}) => {
   const { t } = useTranslation();
+
+  /** Render a special byline for nexstrain's nCoV (SARS-CoV-2) builds.
+   * This is somewhat temporary and may be switched to a nextstrain.org
+   * auspice customisation in the future.
+   */
+  if (
+    window.location.hostname === "nextstrain.org" && // comment out this line for testing on localhost
+    window.location.pathname.startsWith("/ncov")
+  ) {
+    return (
+      <div width={width} style={styles.byline}>
+        {renderAvatar(metadata)}
+        {renderMaintainers(metadata)}
+        <span>
+          {" Enabled by data from "}
+          <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
+        </span>
+      </div>
+    )
+  }
+  /* End nextstrain-specific ncov / SARS-CoV-2 code */
+
+
   return (
     <div width={width} style={styles.byline}>
       {renderAvatar(t, metadata)}
@@ -63,7 +86,6 @@ function renderBuildInfo(t, metadata) {
             <Link url={repo}>
               {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "").replace(/^github.com\//, "")}
             </Link>
-            <PotentialGisaidExtraByline/>
             {". "}
           </span>
         );
@@ -73,6 +95,7 @@ function renderBuildInfo(t, metadata) {
   return null;
 }
 
+<<<<<<< HEAD
 /** Additional byline content to be added when certain criteria met.
  * This was introduced during the 2019 nCoV outbreak. In the future this
  * design should be switched a JSON key or a nextstrain.org auspice customisation
@@ -95,6 +118,9 @@ function PotentialGisaidExtraByline() {
 }
 
 function renderMaintainers(t, metadata) {
+=======
+function renderMaintainers(metadata) {
+>>>>>>> 33ef6bccfc3ff92803a12f38848cfd7a04f1153d
   let maintainersArray;
   if (Object.prototype.hasOwnProperty.call(metadata, "maintainers")) {
     maintainersArray = metadata.maintainers;

@@ -2,6 +2,13 @@
 extends: "airbnb"
 plugins: ["react-hooks"]
 parser: "babel-eslint"
+env:
+  jest: true
+globals:
+  page: true
+  browser: true
+  context: true
+  jestPuppeteer: true
 rules:
   camelcase: off # require camel case names
   prefer-template: off

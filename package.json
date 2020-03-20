@@ -1,6 +1,6 @@
 {
   "name": "auspice",
-  "version": "2.7.0",
+  "version": "2.8.1",
   "description": "Web app for visualizing pathogen evolution",
   "author": "James Hadfield, Trevor Bedford and Richard Neher",
   "license": "AGPL-3.0-only",
@@ -29,12 +29,16 @@
     "heroku-postbuild": "npm run build && npm run get-data && npm run get-narratives",
     "rebuild-docker-image": "env bash ./scripts/rebuild-docker-image.sh",
     "gzip-and-upload": "env bash ./scripts/gzip-and-upload.sh",
-    "build-docs": "echo 'see ./docs-src/README.md'"
+    "build-docs": "echo 'see ./docs-src/README.md'",
+    "test": "jest",
+    "integration-test": "NODE_ENV=test ENV=dev jest --config puppeteer.config.js"
   },
   "dependencies": {
     "@babel/core": "^7.3.4",
     "@babel/plugin-proposal-class-properties": "^7.3.4",
     "@babel/plugin-proposal-decorators": "^7.3.0",
+    "@babel/plugin-transform-runtime": "^7.8.3",
+    "@babel/runtime": "^7.8.7",
     "@babel/preset-env": "^7.3.4",
     "@babel/preset-react": "^7.0.0",
     "argparse": "^1.0.10",
@@ -125,7 +129,9 @@
     "eslint-plugin-jsx-a11y": "^5.1.1",
     "eslint-plugin-react": "^7.2.1",
     "eslint-plugin-react-hooks": "^1.6.0",
-    "mocha": "^5.2.0",
+    "jest": "^25.1.0",
+    "jest-puppeteer": "^4.4.0",
+    "puppeteer": "^2.1.1",
     "webpack-bundle-analyzer": "^3.3.2"
   }
 }

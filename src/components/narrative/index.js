@@ -146,6 +146,7 @@ class Narrative extends React.Component {
 
       return (
         <div
+          dir="auto"
           id={`NarrativeBlock_${i}`}
           key={i}
           style={{
