@@ -194,6 +194,7 @@ class DownloadModal extends React.Component {
       this.props.filters,
       this.props.visibility,
       this.props.visibleStateCounts,
+      undefined, // this.props.branchLengthsToDisplay,
       this.props.t
     );
   }

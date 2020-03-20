@@ -95,7 +95,6 @@ function renderBuildInfo(t, metadata) {
   return null;
 }
 
-<<<<<<< HEAD
 /** Additional byline content to be added when certain criteria met.
  * This was introduced during the 2019 nCoV outbreak. In the future this
  * design should be switched a JSON key or a nextstrain.org auspice customisation
@@ -118,9 +117,6 @@ function PotentialGisaidExtraByline() {
 }
 
 function renderMaintainers(t, metadata) {
-=======
-function renderMaintainers(metadata) {
->>>>>>> 33ef6bccfc3ff92803a12f38848cfd7a04f1153d
   let maintainersArray;
   if (Object.prototype.hasOwnProperty.call(metadata, "maintainers")) {
     maintainersArray = metadata.maintainers;

@@ -64,10 +64,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.r = action.data === state.controls.defaults.geoResolution ? undefined : action.data;
       break;
     }
-    case types.CHANGE_LANGUAGE: {
-      query.lang = action.data === state.general.defaults.language ? undefined : action.data;
-      break;
-    }
+    // case types.CHANGE_LANGUAGE: {
+    //   query.lang = action.data === state.general.defaults.language ? undefined : action.data;
+    //   break;
+    // }
     case types.CHANGE_DISTANCE_MEASURE: {
       query.m = action.data === state.controls.defaults.distanceMeasure ? undefined : action.data;
       break;

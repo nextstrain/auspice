@@ -10,7 +10,6 @@ const version = require('../src/version').version;
 const chalk = require('chalk');
 const generateWebpackConfig = require("../webpack.config.js").default;
 const SUPPRESS = require('argparse').Const.SUPPRESS;
-const i18next = require('i18next');
 
 const addParser = (parser) => {
   const description = `Launch auspice in development mode.
@@ -87,5 +86,4 @@ const run = (args) => {
 module.exports = {
   addParser,
   run,
-  i18next
 };
