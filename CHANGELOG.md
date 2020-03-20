@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.8.0 - 2020/03/20
+
+
 * Allow right-to-left text in narratives [See PR 960](https://github.com/nextstrain/auspice/pull/960)
 * Introduce a testing framework. [See PR 943](https://github.com/nextstrain/auspice/pull/943)
 * Modify byline for SARS-CoV-2 datasets when viewed on nextstrain.org
