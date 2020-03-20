@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.8.1 - 2020/03/20
+
+
 * Fix bug in dependencies which could prevent auspice from being built
 
 ## version 2.8.0 - 2020/03/20
