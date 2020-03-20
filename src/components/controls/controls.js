@@ -1,4 +1,6 @@
 import React from "react";
+import { useTranslation } from 'react-i18next';
+
 import ColorBy from "./color-by";
 import DateRangeInputs from "./date-range-inputs";
 import ChooseBranchLabelling from "./choose-branch-labelling";
@@ -13,48 +15,46 @@ import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
-import { useTranslation } from 'react-i18next';
-
 import { SidebarHeader, ControlsContainer } from "./styles";
 
 
-function Controls ({mapOn}) { 
+function Controls({mapOn}) {
   const { t } = useTranslation();
 
   return (
-  <ControlsContainer>
-    <ChooseDataset/>
+    <ControlsContainer>
+      <ChooseDataset/>
 
-    <SidebarHeader>{t("sidebar:Date Range")}</SidebarHeader>
-    <DateRangeInputs/>
-
-
-    <SidebarHeader>{t("sidebar:Color By")}</SidebarHeader>
-    <ColorBy/>
+      <SidebarHeader>{t("sidebar:Date Range")}</SidebarHeader>
+      <DateRangeInputs/>
 
 
-    <SidebarHeader>{t("sidebar:Tree Options")}</SidebarHeader>
-    <ChooseLayout/>
-    <ChooseMetric/>
-    <ChooseBranchLabelling/>
-    <SearchStrains/>
-    <ChooseSecondTree/>
-    <ToggleTangle/>
+      <SidebarHeader>{t("sidebar:Color By")}</SidebarHeader>
+      <ColorBy/>
 
-    { mapOn ? (
-      <span style={{marginTop: "15px"}}>
-        <SidebarHeader>{t("sidebar:Map Options")}</SidebarHeader>
-        <GeoResolution/>
-        <MapAnimationControls/>
-      </span>
-    ) : null}
 
-    <span style={{paddingTop: "10px"}}/>
-    <SidebarHeader>{t("sidebar:Panel Options")}</SidebarHeader>
-    <PanelLayout/>
-    <PanelToggles/>
-    <Language/>
-  </ControlsContainer>
+      <SidebarHeader>{t("sidebar:Tree Options")}</SidebarHeader>
+      <ChooseLayout/>
+      <ChooseMetric/>
+      <ChooseBranchLabelling/>
+      <SearchStrains/>
+      <ChooseSecondTree/>
+      <ToggleTangle/>
+
+      { mapOn ? (
+        <span style={{marginTop: "15px"}}>
+          <SidebarHeader>{t("sidebar:Map Options")}</SidebarHeader>
+          <GeoResolution/>
+          <MapAnimationControls/>
+        </span>
+      ) : null}
+
+      <span style={{paddingTop: "10px"}}/>
+      <SidebarHeader>{t("sidebar:Panel Options")}</SidebarHeader>
+      <PanelLayout/>
+      <PanelToggles/>
+      <Language/>
+    </ControlsContainer>
   );
 }
 
