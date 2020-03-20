@@ -25,6 +25,29 @@ const styles = {
 };
 
 const Byline = ({width, metadata}) => {
+
+  /** Render a special byline for nexstrain's nCoV (SARS-CoV-2) builds.
+   * This is somewhat temporary and may be switched to a nextstrain.org
+   * auspice customisation in the future.
+   */
+  if (
+    window.location.hostname === "nextstrain.org" && // comment out this line for testing on localhost
+    window.location.pathname.startsWith("/ncov")
+  ) {
+    return (
+      <div width={width} style={styles.byline}>
+        {renderAvatar(metadata)}
+        {renderMaintainers(metadata)}
+        <span>
+          {" Enabled by data from "}
+          <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
+        </span>
+      </div>
+    )
+  }
+  /* End nextstrain-specific ncov / SARS-CoV-2 code */
+
+
   return (
     <div width={width} style={styles.byline}>
       {renderAvatar(metadata)}
@@ -61,33 +84,11 @@ function renderBuildInfo(metadata) {
             <Link url={repo}>
               {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "").replace(/^github.com\//, "")}
             </Link>
-            <PotentialGisaidExtraByline/>
             {". "}
           </span>
         );
       }
     }
-  }
-  return null;
-}
-
-/** Additional byline content to be added when certain criteria met.
- * This was introduced during the 2019 nCoV outbreak. In the future this
- * design should be switched a JSON key or a nextstrain.org auspice customisation
- */
-function PotentialGisaidExtraByline() {
-  if (
-    window.location.hostname === "nextstrain.org" && // use "localhost" for testing
-    window.location.pathname.startsWith("/ncov")
-  ) {
-    return (
-      <span>
-        {" using data from "}
-        <a key={1} href="https://gisaid.org" target="_blank" rel="noopener noreferrer">
-          <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
-        </a>
-      </span>
-    );
   }
   return null;
 }
