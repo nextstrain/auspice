@@ -2,9 +2,11 @@
 title: Changelog
 ---
 
+* Allow right-to-left text in narratives [See PR 960](https://github.com/nextstrain/auspice/pull/960)
+* Introduce a testing framework. [See PR 943](https://github.com/nextstrain/auspice/pull/943)
+* Modify byline for SARS-CoV-2 datasets when viewed on nextstrain.org
+
 ## version 2.7.0 - 2020/03/15
-
-
 * Add axis labels to the tree. [See PR 942](https://github.com/nextstrain/auspice/pull/942)
 * Fix a bug where the map would jump to an incorrect view position in narratives. [See PR 950](https://github.com/nextstrain/auspice/pull/950)
 * Do not display "github.com" in the built-by byline (link is unchanged). [See PR 949](https://github.com/nextstrain/auspice/pull/949)
