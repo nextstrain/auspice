@@ -1,8 +1,9 @@
 import React from "react";
 import { connect } from "react-redux";
+import { withTranslation } from 'react-i18next';
+
 import Toggle from "./toggle";
 import { togglePanelDisplay } from "../../actions/misc";
-import { withTranslation } from 'react-i18next';
 
 @connect((state) => ({
   panelsAvailable: state.controls.panelsAvailable,

@@ -367,5 +367,5 @@ class Footer extends React.Component {
 // {dot}
 //
 
-const WithTranslation = withTranslation()(Footer)
+const WithTranslation = withTranslation()(Footer);
 export default WithTranslation;

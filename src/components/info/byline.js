@@ -1,6 +1,7 @@
 import React from "react";
-import { headerFont } from "../../globalStyles";
 import { useTranslation } from 'react-i18next';
+
+import { headerFont } from "../../globalStyles";
 
 const styles = {
   avatar: {
@@ -45,7 +46,7 @@ const Byline = ({width, metadata}) => {
           <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
         </span>
       </div>
-    )
+    );
   }
   /* End nextstrain-specific ncov / SARS-CoV-2 code */
 
@@ -82,7 +83,7 @@ function renderBuildInfo(t, metadata) {
       if (repo.startsWith("https://") || repo.startsWith("http://") || repo.startsWith("www.")) {
         return (
           <span>
-            {"Built with "}
+            {t("Built with ")}
             <Link url={repo}>
               {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "").replace(/^github.com\//, "")}
             </Link>
@@ -106,7 +107,7 @@ function PotentialGisaidExtraByline() {
   ) {
     return (
       <span>
-        {" " + t("using data from") + " "}
+        {" using data from "}
         <a key={1} href="https://gisaid.org" target="_blank" rel="noopener noreferrer">
           <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
         </a>

@@ -2,6 +2,8 @@ import React from "react";
 import Mousetrap from "mousetrap";
 import { connect } from "react-redux";
 import { withTheme } from 'styled-components';
+import { withTranslation } from 'react-i18next';
+
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, extraLightGrey, infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
@@ -9,7 +11,6 @@ import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";
 import { getAcknowledgments} from "../framework/footer";
 import { createSummary } from "../info/info";
-import { withTranslation } from 'react-i18next';
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);
@@ -254,5 +255,5 @@ class DownloadModal extends React.Component {
 }
 
 
-const WithTranslation = withTranslation()(DownloadModal)
+const WithTranslation = withTranslation()(DownloadModal);
 export default WithTranslation;

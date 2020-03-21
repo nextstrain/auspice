@@ -98,5 +98,5 @@ class MapAnimationControls extends React.Component {
   }
 }
 
-const WithTranslations = withTranslation()(MapAnimationControls)
+const WithTranslations = withTranslation()(MapAnimationControls);
 export default WithTranslations;

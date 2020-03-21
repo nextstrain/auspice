@@ -1,10 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
 import Select from "react-select";
+import { withTranslation } from 'react-i18next';
+
 import { CHANGE_BRANCH_LABEL } from "../../actions/types";
 import { SidebarSubtitle } from "./styles";
 import { controlsWidth } from "../../util/globals";
-import { withTranslation } from 'react-i18next';
 
 @connect((state) => ({
   selected: state.controls.selectedBranchLabel,

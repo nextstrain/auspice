@@ -179,5 +179,5 @@ class Tree extends React.Component {
   }
 }
 
-const WithTranslation = withTranslation()(Tree)
+const WithTranslation = withTranslation()(Tree);
 export default WithTranslation;

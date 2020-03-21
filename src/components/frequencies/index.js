@@ -1,6 +1,6 @@
 import React from "react";
 import { select } from "d3-selection";
-import 'd3-transition'
+import 'd3-transition';
 import { connect } from "react-redux";
 import Card from "../framework/card";
 import { calcXScale, calcYScale, drawXAxis, drawYAxis, drawProjectionInfo,

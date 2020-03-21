@@ -1,11 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
 import Select from "react-select";
+import { withTranslation } from "react-i18next";
+
 import { controlsWidth } from "../../util/globals";
 import { CHANGE_GEO_RESOLUTION } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarSubtitle } from "./styles";
-import { withTranslation } from "react-i18next";
 
 @connect((state) => {
   return {

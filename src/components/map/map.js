@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import { withTranslation } from "react-i18next";
 import leaflet from "leaflet";
 import _min from "lodash/min";
 import _max from "lodash/max";
@@ -20,7 +21,6 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey, goColor, pauseColor } from "../../globalStyles";
-import { withTranslation } from "react-i18next";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -671,5 +671,5 @@ class Map extends React.Component {
   }
 }
 
-const WithTranslation = withTranslation()(Map)
+const WithTranslation = withTranslation()(Map);
 export default WithTranslation;

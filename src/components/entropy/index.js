@@ -293,5 +293,5 @@ class Entropy extends React.Component {
   }
 }
 
-const WithTranslation = withTranslation()(Entropy)
+const WithTranslation = withTranslation()(Entropy);
 export default WithTranslation;

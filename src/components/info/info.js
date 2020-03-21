@@ -1,5 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
+import { withTranslation } from 'react-i18next';
+
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
@@ -7,8 +9,7 @@ import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { months, NODE_VISIBLE } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
-import Byline from "./byline"
-import { withTranslation } from 'react-i18next';
+import Byline from "./byline";
 
 
 const plurals = {
@@ -71,12 +72,12 @@ export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visib
   let summary = t(
     "Showing {{nSelectedSamples}} of {{mainTreeNumTips}} genomes",
     {nSelectedSamples: nSelectedSamples, mainTreeNumTips: mainTreeNumTips}
-    );
+  );
   if (branchLengthsToDisplay !== "divOnly") {
     summary += " " + t(
       "sampled between {{from}} and {{to}}",
       {from: styliseDateRange(sampledDateRange[0]), to: styliseDateRange(sampledDateRange[1])}
-      );
+    );
   }
   /* parse filters */
   const filterTextArr = [];
@@ -299,5 +300,5 @@ class Info extends React.Component {
   }
 }
 
-const WithTranslation = withTranslation()(Info)
+const WithTranslation = withTranslation()(Info);
 export default WithTranslation;

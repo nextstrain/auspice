@@ -1,12 +1,13 @@
 import React from "react";
 import { connect } from "react-redux";
 import Select from "react-select";
+import { withTranslation } from "react-i18next";
+import i18n from "i18next";
+
 import { controlsWidth } from "../../util/globals";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarSubtitle } from "./styles";
-import i18n from "i18next";
 import { CHANGE_LANGUAGE } from "../../actions/types";
-import { withTranslation } from "react-i18next";
 
 @connect((state) => {
   return {
@@ -40,7 +41,7 @@ class Language extends React.Component {
     return (
       <>
         <SidebarSubtitle spaceAbove>
-          {t("sidebar:Language")}
+          {t("Language")}
         </SidebarSubtitle>
         <div style={{marginBottom: 10, width: controlsWidth, fontSize: 14}}>
           <Select

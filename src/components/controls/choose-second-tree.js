@@ -1,11 +1,12 @@
 import React from "react";
 import Select from "react-select";
 import { connect } from "react-redux";
+import { withTranslation } from 'react-i18next';
+
 import { loadSecondTree } from "../../actions/loadData";
 import { REMOVE_TREE_TOO } from "../../actions/types";
 import { controlsWidth } from "../../util/globals";
 import { SidebarSubtitle } from "./styles";
-import { withTranslation } from 'react-i18next';
 
 
 @connect((state) => {

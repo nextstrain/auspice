@@ -1,7 +1,8 @@
+import queryString from "query-string";
+
 import * as types from "../actions/types";
 import { chooseDisplayComponentFromURL } from "../actions/navigation";
 import { hasExtension, getExtension } from "../util/extensions";
-import queryString from "query-string";
 
 /* the store for cross-cutting state -- that is, state
 not limited to <App>
@@ -10,8 +11,8 @@ not limited to <App>
 const query = queryString.parse(window.location.search);
 
 const defaults = {
-  language: "en",
-}; 
+  language: "en"
+};
 
 const getFirstPageToDisplay = () => {
   if (hasExtension("entryPage")) {
@@ -19,7 +20,6 @@ const getFirstPageToDisplay = () => {
   }
   return chooseDisplayComponentFromURL(window.location.pathname);
 };
-
 
 
 const general = (state = {
@@ -44,9 +44,9 @@ const general = (state = {
         pathname: action.pathname
       });
     case types.CHANGE_LANGUAGE:
-        return Object.assign({}, state, {
-          language: action.data
-        });
+      return Object.assign({}, state, {
+        language: action.data
+      });
     default:
       return state;
   }
