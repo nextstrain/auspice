@@ -3,6 +3,12 @@ import { connect } from "react-redux";
 import { Helmet } from "react-helmet";
 import { hasExtension, getExtension } from "../../util/extensions";
 
+const ogImageBasePath = "https://raw.githubusercontent.com/nextstrain/nextstrain.org/master/static-site/static/";
+const ogImageDefaultFragment = "logos/icon.png"
+const ogImageDatasetFragment = "splash_images/"
+const ogImageDatasetExtension = ".png"
+const datasetNameMatcher = /^(?:\/narratives\/|\/)([^\/]+)/;
+
 const Head = ({metadata}) => {
   let pageTitle = "auspice";
   if (hasExtension("browserTitle")) {
@@ -16,14 +22,34 @@ const Head = ({metadata}) => {
   if (displayedDataset) {
     pageTitle = pageTitle + " / " + displayedDataset;
   }
+  
+  const datasetName = window.location.pathname.match(datasetNameMatcher);
+  let ogImageUrl = ogImageBasePath;
+  if (datasetName) {
+    ogImageUrl += ogImageDatasetFragment + datasetName[1] + ogImageDatasetExtension;
+  } else {
+    ogImageUrl += ogImageDefaultFragment;
+  }
+  
   return (
     <Helmet>
+      <html prefix="og: http://ogp.me/ns#" />
       <title>
         {pageTitle}
       </title>
       {metadata && metadata.title ?
         <meta name="description" content={metadata.title} /> :
         null}
+      <meta property="og:title" content={pageTitle} />
+      <meta property="og:type" content="website" />
+      <meta property="og:url" content={window.location} />
+      <meta property="og:image" content={ogImageUrl} />
+      <meta property="og:image:height" content="225" />
+      <meta property="og:image:width" content="225" />
+      {metadata && metadata.title ?
+        <meta property="og:description" content={metadata.title} /> :
+        null}
+      <meta property="twitter:site" content="nextstrain" />
     </Helmet>
   );
 };
