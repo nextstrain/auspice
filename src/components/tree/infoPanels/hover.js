@@ -5,7 +5,7 @@ import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, getVaccineFromNode, getFullAuthorInfoFromNode } from "../../../util/treeMiscHelpers";
 import { isValueValid } from "../../../util/globals";
-import { formatDivergence, isCurrentRoot } from "../phyloTree/helpers";
+import { formatDivergence } from "../phyloTree/helpers";
 
 const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
@@ -339,7 +339,8 @@ const HoverInfoPanel = ({
   colorByConfidence,
   colorScale,
   panelDims,
-  colorings
+  colorings,
+  idxOfInViewRootNode
 }) => {
   if (!hovered) return null;
   const node = hovered.d.n;
@@ -361,7 +362,7 @@ const HoverInfoPanel = ({
           <Mutations node={node}/>
           <BranchLength node={node}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
-          <Comment>Click to zoom {isCurrentRoot(node) ? 'out to parent clade' : 'into clade'}</Comment>
+          <Comment>Click to zoom {idxOfInViewRootNode == node.arrayIdx ? 'out to parent clade' : 'into clade'}</Comment>
         </>
       )}
     </Container>
