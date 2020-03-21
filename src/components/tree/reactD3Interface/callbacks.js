@@ -3,7 +3,7 @@ import { interpolateRgb } from "d3-interpolate";
 import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
 import { branchOpacityFunction } from "../../../util/colorHelpers";
 import { NODE_VISIBLE } from "../../../util/globals";
-import { getDomId } from "../phyloTree/helpers";
+import { getDomId, isCurrentRoot } from "../phyloTree/helpers";
 import { getTraitFromNode } from "../../../util/treeMiscHelpers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
@@ -95,8 +95,10 @@ export const onBranchClick = function onBranchClick(d) {
     const key = legalBranchLabels[0];
     cladeSelected = `${key}:${d.n.branch_attrs.labels[key]}`;
   }
-  if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
-  else root[1] = d.n.arrayIdx;
+  // If the root node is clicked, zoom out instead of in
+  let arrayIdx = isCurrentRoot(d.n) ? d.n.parent.arrayIdx : d.n.arrayIdx;
+  if (d.that.params.orientation[0] === 1) root[0] = arrayIdx;
+  else root[1] = arrayIdx;
   this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected}));
 };
 

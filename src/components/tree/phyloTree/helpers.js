@@ -108,3 +108,8 @@ export const formatDivergence = (divergence) => {
       Math.round((divergence + Number.EPSILON) * 10000) / 10000 :
       divergence.toExponential(3);
 };
+
+
+export const isCurrentRoot = (node) => {
+  return !node.parent.inView;
+};
