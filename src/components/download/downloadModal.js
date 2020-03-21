@@ -244,7 +244,7 @@ class DownloadModal extends React.Component {
 
 
           <div style={infoPanelStyles.modalSubheading}>
-            {t("Download data:")}
+            {t("Download data")}:
           </div>
           {this.downloadButtons()}
 

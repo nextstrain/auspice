@@ -83,7 +83,7 @@ function renderBuildInfo(t, metadata) {
       if (repo.startsWith("https://") || repo.startsWith("http://") || repo.startsWith("www.")) {
         return (
           <span>
-            {t("Built with ")}
+            {t("Built with")}
             <Link url={repo}>
               {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "").replace(/^github.com\//, "")}
             </Link>

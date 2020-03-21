@@ -2,6 +2,7 @@
   "__byline.js__": "########################################",
   "Maintained by": "Maintained by",
   "using data from": "using data from",
+  "Built with": "Built with",
 
   "__downloadModal.js__": "########################################",
   "click outside this box to return to the app": "click outside this box to return to the app",
@@ -9,7 +10,7 @@
   "A full list of sequence authors is available via the TSV files below.": "A full list of sequence authors is available via the TSV files below.",
   "Data usage policy": "Data usage policy",
   "Please cite the authors who contributed genomic data (where relevant), as well as:": "Please cite the authors who contributed genomic data (where relevant), as well as:",
-  "Download data:" : "Download data:",
+  "Download data": "Download data",
 
   "__entropy.js__": "########################################",
   "Diversity": "",
@@ -17,12 +18,12 @@
   "events": "events",
   
   "__footer.js__": "########################################",
-  "Filter by": "Filter by",
+  "Filter by {{filterTitle}}": "Filter by {{filterTitle}}",
   "Data updated": "Data updated",
 
   "__info.js__": "########################################",
   "Showing {{nSelectedSamples}} of {{mainTreeNumTips}} genomes": "Showing {{nSelectedSamples}} of {{mainTreeNumTips}} genomes",
-  "sampled between {{styliseDateRange(sampledDateRange[0])}} and {{styliseDateRange(sampledDateRange[1])}}": "sampled between {{styliseDateRange(sampledDateRange[0])}} and {{styliseDateRange(sampledDateRange[1])}}",
+  "sampled between {{from}} and {{to}}": "sampled between {{from}} and {{to}}",
   "and comprising": "and comprising",
   "comprising": "comprising",
   "Animation in progress.": "Animation in progress.",
