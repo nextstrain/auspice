@@ -49,7 +49,7 @@ npm install --global auspice
 Or install auspice from source:
 
 ```bash
-git checkout https://github.com/nextstrain/auspice.git
+git clone https://github.com/nextstrain/auspice.git
 cd auspice
 npm install --global .
 ```
