@@ -21,7 +21,7 @@ auspice build --extend <JSON>
 
 ## Available Customisations
 The following are definable as top-level keys of the JSON file.
-A useful reference may be the [customisation JSON file](https://github.com/nextstrain/nextstrain.org/blob/master/auspice/client/config.json) used by nextstrain.org.
+A useful reference may be the [customisation JSON file](https://github.com/nextstrain/nextstrain.org/blob/master/auspice-client/customisations/config.json) used by nextstrain.org.
 
 * `sidebarTheme` allows modifications to the aesthetics of the sidebar. See below.
 * `navbarComponent` a (relative) path to a JS file exporting a React component to be rendered as the nav bar. See below.
