@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.9.0 - 2020/03/23
+
+
 * Add language support for auspice! Currently we have an incomplete translation of the strings into
 Spanish, but we can now begin to crowd-source translations. [See PR 953](https://github.com/nextstrain/auspice/pull/953)
 * Add shebang to shell scripts. [See PR 962](https://github.com/nextstrain/auspice/pull/962)
