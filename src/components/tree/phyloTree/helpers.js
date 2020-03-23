@@ -108,3 +108,24 @@ export const formatDivergence = (divergence) => {
       Math.round((divergence + Number.EPSILON) * 10000) / 10000 :
       divergence.toExponential(3);
 };
+
+
+function hasSameDivergence(node, otherNode) {
+  let tolerance = 0.0001;
+  return ((node.node_attrs.div - tolerance) <= otherNode.node_attrs.div) && ((node.node_attrs.div + tolerance) >= otherNode.node_attrs.div);
+};
+
+
+export const hasSameDivergenceAsCurrentRoot = (node, tree) => {
+  return hasSameDivergence(node, tree.nodes[tree.idxOfInViewRootNode]);
+};
+
+
+export const getNextParentWithDifferentDivergence = (node) => {
+  var parent = node.parent;
+  while (hasSameDivergence(node, parent)) {
+    if (parent == parent.parent) break;
+    parent = parent.parent;
+  }
+  return parent;
+};
