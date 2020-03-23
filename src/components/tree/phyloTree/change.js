@@ -309,7 +309,8 @@ export const change = function change({
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
     elemsToUpdate.add(".grid").add(".regression");
-    svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity").add("visibility");
+    svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity")
+      .add("visibility");
   }
 
   /* change the requested properties on the nodes */

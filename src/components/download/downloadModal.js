@@ -135,8 +135,8 @@ class DownloadModal extends React.Component {
     );
   }
   getFilePrefix() {
-    return "nextstrain_"
-      + window.location.pathname
+    return "nextstrain_" +
+      window.location.pathname
           .replace(/^\//, '')       // Remove leading slashes
           .replace(/:/g, '-')       // Change ha:na to ha-na
           .replace(/\//g, '_');     // Replace slashes with spaces

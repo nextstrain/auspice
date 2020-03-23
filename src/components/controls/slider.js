@@ -437,13 +437,13 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
   },
 
   _addHandlers(eventMap) {
-    for (var key in eventMap) {
+    for (const key in eventMap) {
       document.addEventListener(key, eventMap[key], false);
     }
   },
 
   _removeHandlers(eventMap) {
-    for (var key in eventMap) {
+    for (const key in eventMap) {
       document.removeEventListener(key, eventMap[key], false);
     }
   },
@@ -756,11 +756,11 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
     this.hasMoved = false;
     if (!this.props.snapDragDisabled) {
       const position = this._getMousePosition(e);
-      this._forceValueFromPosition(position[0], function (i) {
+      this._forceValueFromPosition(position[0], (i) => {
         this._fireChangeEvent('onChange');
         this._start(i, position[0]);
         this._addHandlers(this._getMouseEventMap());
-      }.bind(this));
+      });
     }
 
     pauseEvent(e);

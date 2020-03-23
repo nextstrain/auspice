@@ -233,7 +233,8 @@ class MobileNarrativeDisplay extends React.Component {
   renderProgress() {
     return (
       <ProgressBar id="progress-bar"
-        style={{height: `${progressHeight}px`}}>
+        style={{height: `${progressHeight}px`}}
+      >
         {this.props.blocks.map((b, i) => {
           const d = (!this.state.showingEndOfNarrativePage) &&
             this.props.currentInFocusBlockIdx === i ?

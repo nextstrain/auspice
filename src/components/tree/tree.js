@@ -95,8 +95,8 @@ class Tree extends React.Component {
   }
 
   getStyles = () => {
-    const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0
-      || this.props.treeToo.idxOfInViewRootNode !== 0;
+    const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0 ||
+      this.props.treeToo.idxOfInViewRootNode !== 0;
     return {
       resetTreeButton: {
         zIndex: 100,

@@ -189,7 +189,7 @@ const modifyStateViaMetadata = (state, metadata) => {
   }
   if (metadata.displayDefaults) {
     const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar'];
-    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string'];
+    const expectedTypes = ["string", "string", "string", "string", "boolean", "string", 'string'];
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (metadata.displayDefaults[keysToCheckFor[i]]) {
