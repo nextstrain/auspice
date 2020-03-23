@@ -116,11 +116,6 @@ function hasSameDivergence(node, otherNode) {
 };
 
 
-export const hasSameDivergenceAsCurrentRoot = (node, tree) => {
-  return hasSameDivergence(node, tree.nodes[tree.idxOfInViewRootNode]);
-};
-
-
 export const getNextParentWithDifferentDivergence = (node) => {
   var parent = node.parent;
   while (hasSameDivergence(node, parent)) {

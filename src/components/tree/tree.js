@@ -135,7 +135,7 @@ class Tree extends React.Component {
           colorScale={this.props.colorScale}
           colorings={this.props.metadata.colorings}
           panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
-          tree={this.props.tree}
+          idxOfInViewRootNode={this.props.tree.idxOfInViewRootNode}
         />
         <TipClickedPanel
           goAwayCallback={this.clearSelectedTip}
