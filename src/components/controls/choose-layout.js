@@ -2,11 +2,11 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import styled, { withTheme } from 'styled-components';
+import { withTranslation } from 'react-i18next';
 import * as icons from "../framework/svg-icons";
 import { CHANGE_LAYOUT } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarSubtitle, SidebarButton } from "./styles";
-import { withTranslation } from 'react-i18next';
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const RadialTreeIcon = withTheme(icons.RadialTree);

@@ -1,12 +1,12 @@
 import React from "react";
 import { connect } from "react-redux";
 import Awesomplete from 'awesomplete'; /* https://leaverou.github.io/awesomplete/ */
+import { withTranslation } from "react-i18next";
 import styled from 'styled-components';
 import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/tree";
 import { NODE_VISIBLE } from "../../util/globals";
 import { SidebarSubtitle } from "./styles";
 import "../../css/awesomplete.css";
-import { withTranslation } from "react-i18next";
 
 const Cross = ({onClick, show}) => {
   if (!show) return null;

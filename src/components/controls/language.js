@@ -23,21 +23,20 @@ class Language extends React.Component {
 
   getlanguageOptions() {
     const languages = [
-       {value: "en", label: "English"},
-       {value: "es", label: "Español"},
-    ]
-
-    return languages
+      {value: "en", label: "English"},
+      {value: "es", label: "Español"}
+    ];
+    return languages;
   }
-  
+
   changeLanguage(language) {
     analyticsControlsEvent("change-language");
     i18n.changeLanguage(language);
     this.props.dispatch({ type: CHANGE_LANGUAGE, data: language });
   }
 
-  render() { 
-    const { t } = this.props; 
+  render() {
+    const { t } = this.props;
     return (
       <>
         <SidebarSubtitle spaceAbove>

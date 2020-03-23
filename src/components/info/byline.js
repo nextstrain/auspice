@@ -84,6 +84,7 @@ function renderBuildInfo(t, metadata) {
         return (
           <span>
             {t("Built with")}
+            {" "}
             <Link url={repo}>
               {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "").replace(/^github.com\//, "")}
             </Link>

@@ -1,11 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
+import { withTranslation } from "react-i18next";
 import { CHANGE_DISTANCE_MEASURE } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { toggleTemporalConfidence } from "../../actions/tree";
 import { SidebarSubtitle, SidebarButton } from "./styles";
 import Toggle from "./toggle";
-import { withTranslation } from "react-i18next";
 
 /* implements a pair of buttons that toggle between time & divergence tree layouts */
 @connect((state) => {

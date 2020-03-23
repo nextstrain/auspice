@@ -1,10 +1,10 @@
 import React from "react";
 import { connect } from "react-redux";
+import { withTranslation } from 'react-i18next';
 import { CHANGE_ANIMATION_TIME, CHANGE_ANIMATION_CUMULATIVE, CHANGE_ANIMATION_LOOP } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import Toggle from "./toggle";
 import { SidebarSubtitle, SidebarButton } from "./styles";
-import { withTranslation } from 'react-i18next';
 
 @connect((state) => {
   return {

@@ -1,18 +1,17 @@
 import React from 'react';
 import { connect } from "react-redux";
 import { Helmet } from "react-helmet";
-import { hasExtension, getExtension } from "../../util/extensions";
-
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import { hasExtension, getExtension } from "../../util/extensions";
 
 const Head = ({metadata, general}) => {
-  let lang = general.language;
+  const lang = general.language;
 
   i18n
   .use(initReactI18next)
   .init({
-    resources: require("i18next-resource-store-loader!../../locales/index.js"),
+    resources: require("i18next-resource-store-loader!../../locales/index.js"), // eslint-disable-line
     lng: lang,
     fallbackLng: "en",
     /* To debug any errors w.r.t. i18n, swith the second `false` to `true`
@@ -21,7 +20,7 @@ const Head = ({metadata, general}) => {
     interpolation: {
       escapeValue: false
     },
-    defaultNS: 'translation',
+    defaultNS: 'translation'
   });
 
   let pageTitle = "auspice";
