@@ -15,7 +15,9 @@ const Head = ({metadata, general}) => {
     resources: require("i18next-resource-store-loader!../../locales/index.js"),
     lng: lang,
     fallbackLng: "en",
-    debug: process.env.NODE_ENV !== 'production' ? true : false,
+    /* To debug any errors w.r.t. i18n, swith the second `false` to `true`
+    (and this can be kept even after deployment if needed) */
+    debug: process.env.NODE_ENV === 'production' ? false : false, // eslint-disable-line
     interpolation: {
       escapeValue: false
     },
