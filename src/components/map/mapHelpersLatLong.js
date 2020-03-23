@@ -484,7 +484,7 @@ const updateTransmissionDataColAndVis = (transmissionData, transmissionIndices, 
     node.children.forEach((child) => {
       const nodeLocation = getTraitFromNode(node, geoResolution);
       const childLocation = getTraitFromNode(child, geoResolution);
-      
+
       if (!(nodeLocation && childLocation && nodeLocation !== childLocation)) return;
 
       // this is a transmission event from n to child

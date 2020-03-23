@@ -1,4 +1,6 @@
 import React from "react";
+import { useTranslation } from 'react-i18next';
+
 import { headerFont } from "../../globalStyles";
 
 const styles = {
@@ -25,6 +27,7 @@ const styles = {
 };
 
 const Byline = ({width, metadata}) => {
+  const { t } = useTranslation();
 
   /** Render a special byline for nexstrain's nCoV (SARS-CoV-2) builds.
    * This is somewhat temporary and may be switched to a nextstrain.org
@@ -43,21 +46,21 @@ const Byline = ({width, metadata}) => {
           <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
         </span>
       </div>
-    )
+    );
   }
   /* End nextstrain-specific ncov / SARS-CoV-2 code */
 
 
   return (
     <div width={width} style={styles.byline}>
-      {renderAvatar(metadata)}
-      {renderBuildInfo(metadata)}
-      {renderMaintainers(metadata)}
+      {renderAvatar(t, metadata)}
+      {renderBuildInfo(t, metadata)}
+      {renderMaintainers(t, metadata)}
     </div>
   );
 };
 
-function renderAvatar(metadata) {
+function renderAvatar(t, metadata) {
   const repo = metadata.buildUrl;
   if (typeof repo === 'string') {
     const match = repo.match(/(https?:\/\/)?(www\.)?github.com\/([^/]+)/);
@@ -73,14 +76,15 @@ function renderAvatar(metadata) {
 /**
  * Render the byline of the page to indicate the source of the build (often a GitHub repo)
  */
-function renderBuildInfo(metadata) {
+function renderBuildInfo(t, metadata) {
   if (Object.prototype.hasOwnProperty.call(metadata, "buildUrl")) {
     const repo = metadata.buildUrl;
     if (typeof repo === 'string') {
       if (repo.startsWith("https://") || repo.startsWith("http://") || repo.startsWith("www.")) {
         return (
           <span>
-            {"Built with "}
+            {t("Built with")}
+            {" "}
             <Link url={repo}>
               {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "").replace(/^github.com\//, "")}
             </Link>
@@ -93,14 +97,35 @@ function renderBuildInfo(metadata) {
   return null;
 }
 
-function renderMaintainers(metadata) {
+/** Additional byline content to be added when certain criteria met.
+ * This was introduced during the 2019 nCoV outbreak. In the future this
+ * design should be switched a JSON key or a nextstrain.org auspice customisation
+ */
+function PotentialGisaidExtraByline() {
+  if (
+    window.location.hostname === "nextstrain.org" && // use "localhost" for testing
+    window.location.pathname.startsWith("/ncov")
+  ) {
+    return (
+      <span>
+        {" using data from "}
+        <a key={1} href="https://gisaid.org" target="_blank" rel="noopener noreferrer">
+          <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
+        </a>
+      </span>
+    );
+  }
+  return null;
+}
+
+function renderMaintainers(t, metadata) {
   let maintainersArray;
   if (Object.prototype.hasOwnProperty.call(metadata, "maintainers")) {
     maintainersArray = metadata.maintainers;
     if (Array.isArray(maintainersArray) && maintainersArray.length) {
       return (
         <span>
-          {"Maintained by "}
+          {t("Maintained by") + " "}
           {maintainersArray.map((m, i) => (
             <React.Fragment key={m.name}>
               {m.url ? <Link url={m.url}>{m.name}</Link> : m.name}
@@ -122,6 +147,5 @@ function Link({url, children}) {
     </a>
   );
 }
-
 
 export default Byline;

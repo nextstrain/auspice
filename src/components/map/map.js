@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import { withTranslation } from "react-i18next";
 import leaflet from "leaflet";
 import _min from "lodash/min";
 import _max from "lodash/max";
@@ -647,11 +648,12 @@ class Map extends React.Component {
     };
   };
   render() {
+    const { t } = this.props;
     const styles = this.getStyles();
     const transmissionsExist = this.state.transmissionData && this.state.transmissionData.length;
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
-      <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
+      <Card center title={transmissionsExist ? t("Transmissions") : t("Geography")}>
         {this.maybeCreateMapDiv()}
         {this.props.narrativeMode ? null : (
           <button
@@ -661,7 +663,7 @@ class Map extends React.Component {
               this.setState({userHasInteractedWithMap: false});
             }}
           >
-            reset zoom
+            {t("reset zoom")}
           </button>
         )}
       </Card>
@@ -669,4 +671,5 @@ class Map extends React.Component {
   }
 }
 
-export default Map;
+const WithTranslation = withTranslation()(Map);
+export default WithTranslation;

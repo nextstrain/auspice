@@ -1,6 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
 import Awesomplete from 'awesomplete'; /* https://leaverou.github.io/awesomplete/ */
+import { withTranslation } from "react-i18next";
 import styled from 'styled-components';
 import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/tree";
 import { NODE_VISIBLE } from "../../util/globals";
@@ -116,9 +117,10 @@ class SearchStrains extends React.Component {
     this.state.awesomplete.evaluate();
   }
   render() {
+    const { t } = this.props;
     return (
       <Container>
-        <SidebarSubtitle spaceAbove>Search Strains</SidebarSubtitle>
+        <SidebarSubtitle spaceAbove>{t("sidebar:Search Strains")}</SidebarSubtitle>
         <InputContainer>
           <Input ref={(r) => {this.ref = r;}} onFocus={() => this.updateVisibleStrains()}/>
         </InputContainer>
@@ -128,4 +130,5 @@ class SearchStrains extends React.Component {
   }
 }
 
-export default SearchStrains;
+const WithTranslation = withTranslation()(SearchStrains);
+export default WithTranslation;

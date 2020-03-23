@@ -1,5 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
+import { withTranslation } from 'react-i18next';
+
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
 import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
@@ -8,6 +10,7 @@ import { numericToCalendar } from "../../util/dateHelpers";
 import { months, NODE_VISIBLE } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
 import Byline from "./byline";
+
 
 const plurals = {
   country: "countries",
@@ -61,13 +64,20 @@ const arrayToSentence = (arr, {prefix=undefined, suffix=undefined, capatalise=tr
   return ret + " ";
 };
 
-export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visibleStateCounts, branchLengthsToDisplay) => {
+export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visibleStateCounts, branchLengthsToDisplay, t) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
   const sampledDateRange = getVisibleDateRange(nodes, visibility);
+
   /* Number of genomes & their date range */
-  let summary = `Showing ${nSelectedSamples} of ${mainTreeNumTips} genomes`;
+  let summary = t(
+    "Showing {{nSelectedSamples}} of {{mainTreeNumTips}} genomes",
+    {nSelectedSamples: nSelectedSamples, mainTreeNumTips: mainTreeNumTips}
+  );
   if (branchLengthsToDisplay !== "divOnly") {
-    summary += ` sampled between ${styliseDateRange(sampledDateRange[0])} and ${styliseDateRange(sampledDateRange[1])}`;
+    summary += " " + t(
+      "sampled between {{from}} and {{to}}",
+      {from: styliseDateRange(sampledDateRange[0]), to: styliseDateRange(sampledDateRange[1])}
+    );
   }
   /* parse filters */
   const filterTextArr = [];
@@ -76,7 +86,7 @@ export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visib
     if (!n) return;
     filterTextArr.push(`${n} ${pluralise(filterName, n)}`);
   });
-  const prefix = branchLengthsToDisplay !== "divOnly" ? "and comprising" : "comprising";
+  const prefix = branchLengthsToDisplay !== "divOnly" ? t("and comprising") : t("comprising");
   const filterText = arrayToSentence(filterTextArr, {prefix: prefix, capatalise: false});
   if (filterText.length) {
     summary += ` ${filterText}`;
@@ -235,6 +245,7 @@ class Info extends React.Component {
   }
 
   render() {
+    const { t } = this.props;
     if (!this.props.metadata || !this.props.nodes || !this.props.visibility) return null;
     const styles = this.getStyles(this.props.width);
     // const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
@@ -247,7 +258,15 @@ class Info extends React.Component {
     (2) The active filters: Filtered to [[Metsky et al Zika Virus Evolution And Spread In The Americas (76)]], [[Colombia (28)]].
     */
 
-    const summary = createSummary(this.props.metadata.mainTreeNumTips, this.props.nodes, this.props.filters, this.props.visibility, this.props.visibleStateCounts, this.props.branchLengthsToDisplay);
+    const summary = createSummary(
+      this.props.metadata.mainTreeNumTips,
+      this.props.nodes,
+      this.props.filters,
+      this.props.visibility,
+      this.props.visibleStateCounts,
+      this.props.branchLengthsToDisplay,
+      this.props.t
+    );
 
     /* part II - the active filters */
     const filters = [];
@@ -262,14 +281,14 @@ class Info extends React.Component {
           {this.renderTitle(styles)}
           <Byline styles={styles} width={this.props.width} metadata={this.props.metadata}/>
           <div width={this.props.width} style={styles.n}>
-            {animating ? `Animation in progress. ` : null}
+            {animating ? t("Animation in progress.") + " " : null}
             {this.props.selectedStrain ? this.selectedStrainButton(this.props.selectedStrain) : null}
             {/* part 1 - the summary */}
             {showExtended ? summary : null}
             {/* part 2 - the filters */}
             {showExtended && filters.length ? (
               <span>
-                {"Filtered to "}
+                {t("Filtered to") + " "}
                 {filters.map((d) => d)}
                 {". "}
               </span>
@@ -280,4 +299,6 @@ class Info extends React.Component {
     );
   }
 }
-export default Info;
+
+const WithTranslation = withTranslation()(Info);
+export default WithTranslation;

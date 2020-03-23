@@ -5,6 +5,7 @@ import * as icons from "../framework/svg-icons";
 import { CHANGE_PANEL_LAYOUT } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarButton } from "./styles";
+import { withTranslation } from "react-i18next";
 
 const ButtonText = styled.span`
   margin: 5px;
@@ -23,6 +24,7 @@ const PanelsGridIcon = withTheme(icons.PanelsGrid);
 })
 class PanelLayouts extends React.Component {
   render() {
+    const { t } = this.props;
     // const mapAndTree = this.props.panels !== undefined && this.props.panels.indexOf("map") !== -1 && this.props.panels.indexOf("tree") !== -1;
     if (!this.props.canTogglePanelLayout) {
       return null;
@@ -37,7 +39,7 @@ class PanelLayouts extends React.Component {
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "full" });
           }}
         >
-          <ButtonText>full</ButtonText>
+          <ButtonText>{t("sidebar:full")}</ButtonText>
         </SidebarButton>
 
         <PanelsGridIcon width={22} selected={this.props.panelLayout === "grid"}/>
@@ -48,7 +50,7 @@ class PanelLayouts extends React.Component {
             this.props.dispatch({ type: CHANGE_PANEL_LAYOUT, data: "grid" });
           }}
         >
-          <ButtonText>grid</ButtonText>
+          <ButtonText>{t("sidebar:grid")}</ButtonText>
         </SidebarButton>
 
       </div>
@@ -56,5 +58,5 @@ class PanelLayouts extends React.Component {
   }
 }
 
-
-export default PanelLayouts;
+const WithTranslation = withTranslation()(PanelLayouts);
+export default WithTranslation;

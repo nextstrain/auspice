@@ -14,6 +14,7 @@ import { timerStart, timerEnd } from "../../util/perf";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype } from "../../util/getGenotype";
 import { nucleotide_gene } from "../../util/globals";
 import "../../css/entropy.css";
+import { withTranslation } from "react-i18next";
 
 const getStyles = (width) => {
   return {
@@ -138,6 +139,7 @@ class Entropy extends React.Component {
     );
   }
   entropyCountSwitch(styles) {
+    const { t } = this.props;
     if (this.props.narrativeMode) return null;
     return (
       <div style={{...tabGroup, ...styles.entropyCountSwitch}}>
@@ -146,14 +148,14 @@ class Entropy extends React.Component {
           style={this.props.showCounts ? tabGroupMember : tabGroupMemberSelected}
           onClick={() => this.props.dispatch(showCountsNotEntropy(false))}
         >
-          <span style={styles.switchTitle}> {"entropy"} </span>
+          <span style={styles.switchTitle}> {t("entropy")} </span>
         </button>
         <button
           key={2}
           style={this.props.showCounts ? tabGroupMemberSelected : tabGroupMember}
           onClick={() => this.props.dispatch(showCountsNotEntropy(true))}
         >
-          <span style={styles.switchTitle}> {"events"} </span>
+          <span style={styles.switchTitle}> {t("events")} </span>
         </button>
       </div>
     );
@@ -264,9 +266,10 @@ class Entropy extends React.Component {
   }
 
   render() {
+    const { t } = this.props;
     const styles = getStyles(this.props.width);
     return (
-      <Card title={"Diversity"}>
+      <Card title={t("Diversity")}>
         <InfoPanel
           hovered={this.state.hovered}
           width={this.props.width}
@@ -290,4 +293,5 @@ class Entropy extends React.Component {
   }
 }
 
-export default Entropy;
+const WithTranslation = withTranslation()(Entropy);
+export default WithTranslation;

@@ -1,6 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
 import Select from "react-select";
+import { withTranslation } from "react-i18next";
+
 import { controlsWidth } from "../../util/globals";
 import { CHANGE_GEO_RESOLUTION } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
@@ -25,11 +27,12 @@ class GeoResolution extends React.Component {
   }
 
   render() {
+    const { t } = this.props;
     const geoResolutionOptions = this.getGeoResolutionOptions();
     return (
       <>
         <SidebarSubtitle spaceAbove>
-          Geographic resolution
+          {t("sidebar:Geographic resolution")}
         </SidebarSubtitle>
         <div style={{marginBottom: 10, width: controlsWidth, fontSize: 14}}>
           <Select
@@ -48,4 +51,5 @@ class GeoResolution extends React.Component {
   }
 }
 
-export default GeoResolution;
+const WithTranslation = withTranslation()(GeoResolution);
+export default WithTranslation;

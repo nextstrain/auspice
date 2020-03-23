@@ -2,6 +2,8 @@ import React from "react";
 import Mousetrap from "mousetrap";
 import { connect } from "react-redux";
 import { withTheme } from 'styled-components';
+import { withTranslation } from 'react-i18next';
+
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, extraLightGrey, infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
@@ -192,10 +194,14 @@ class DownloadModal extends React.Component {
       this.props.nodes,
       this.props.filters,
       this.props.visibility,
-      this.props.visibleStateCounts
+      this.props.visibleStateCounts,
+      undefined, // this.props.branchLengthsToDisplay,
+      this.props.t
     );
   }
   render() {
+    const { t } = this.props;
+
     if (!this.props.show) {
       return null;
     }
@@ -211,34 +217,34 @@ class DownloadModal extends React.Component {
       <div style={infoPanelStyles.modalContainer} onClick={this.dismissModal}>
         <div style={panelStyle} onClick={(e) => stopProp(e)}>
           <p style={infoPanelStyles.topRightMessage}>
-            (click outside this box to return to the app)
+            ({t("click outside this box to return to the app")})
           </p>
 
           <div style={infoPanelStyles.modalSubheading}>
-            {meta.title} (last updated {meta.updated})
+            {meta.title} ({t("last updated")} {meta.updated})
           </div>
 
           <div>
             {this.createSummaryWrapper()}
           </div>
           <div style={infoPanelStyles.break}/>
-          {" A full list of sequence authors is available via the TSV files below."}
+          {" " + t("A full list of sequence authors is available via the TSV files below.")}
           <div style={infoPanelStyles.break}/>
           {getAcknowledgments({}, {preamble: {fontWeight: 300}, acknowledgments: {fontWeight: 300}})}
 
           <div style={infoPanelStyles.modalSubheading}>
-            Data usage policy
+            {t("Data usage policy")}
           </div>
           {dataUsage.join(" ")}
 
           <div style={infoPanelStyles.modalSubheading}>
-            Please cite the authors who contributed genomic data (where relevant), as well as:
+            {t("Please cite the authors who contributed genomic data (where relevant), as well as:")}
           </div>
           {this.formatPublications(this.getRelevantPublications())}
 
 
           <div style={infoPanelStyles.modalSubheading}>
-            Download data:
+            {t("Download data")}:
           </div>
           {this.downloadButtons()}
 
@@ -249,4 +255,5 @@ class DownloadModal extends React.Component {
 }
 
 
-export default DownloadModal;
+const WithTranslation = withTranslation()(DownloadModal);
+export default WithTranslation;

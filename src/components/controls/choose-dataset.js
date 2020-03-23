@@ -2,6 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import ChooseDatasetSelect from "./choose-dataset-select";
 import { SidebarHeader } from "./styles";
+import { withTranslation } from "react-i18next";
 
 // const DroppedFiles = withTheme((props) => {
 //   /* TODO: this shouldn't be in the auspice src, rather injected as an extension when needed */
@@ -24,6 +25,8 @@ const checkEqualityOfArrays = (arr1, arr2, upToIdx) => {
 })
 class ChooseDataset extends React.Component {
   render() {
+    const { t } = this.props;
+
     if (!this.props.available || !this.props.available.datasets || !this.props.available.datasets.length) {
       /* typically this is the case if the available dataset fetch hasn't returned
       or it has returned an empty array of datasets */
@@ -61,7 +64,7 @@ class ChooseDataset extends React.Component {
 
     return (
       <>
-        <SidebarHeader>Dataset</SidebarHeader>
+        <SidebarHeader>{t("sidebar:Dataset")}</SidebarHeader>
         {options.map((option, optionIdx) => (
           <ChooseDatasetSelect
             key={option}
@@ -77,4 +80,5 @@ class ChooseDataset extends React.Component {
   }
 }
 
-export default ChooseDataset;
+const WithTranslation = withTranslation()(ChooseDataset);
+export default WithTranslation;

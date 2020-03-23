@@ -11,6 +11,7 @@ import { version } from "../../version";
 import { publications } from "../download/downloadModal";
 import { isValueValid } from "../../util/globals";
 import hardCodedFooters from "./footer-descriptions";
+import { withTranslation } from "react-i18next";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -271,12 +272,13 @@ class Footer extends React.Component {
   }
 
   displayFilter(filterName) {
+    const { t } = this.props
     const totalStateCount = this.props.totalStateCounts[filterName];
     const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
     return (
       <div>
-        {`Filter by ${filterTitle}`}
-        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", `Clear ${filterName} filter`) : null}
+        {t("Filter by {{filterTitle}}", {filterTitle: filterTitle})}
+        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", t("Clear {{filterName}} filter", { filterName: filterName})) : null}
         <div className='filterList'>
           <Flex wrap="wrap" justifyContent="flex-start" alignItems="center">
             {
@@ -299,19 +301,21 @@ class Footer extends React.Component {
   }
 
   getUpdated() {
+    const { t } = this.props;
     if (this.props.metadata.updated) {
-      return (<span>Data updated {this.props.metadata.updated}</span>);
+      return (<span>{t("Data updated")} {this.props.metadata.updated}</span>);
     }
     return null;
   }
   downloadDataButton() {
+    const { t } = this.props;
     return (
       <button
         style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", color: medGrey, margin: 0, padding: 0})}
         onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
       >
         <i className="fa fa-download" aria-hidden="true"/>
-        <span style={{position: "relative"}}>{" download data"}</span>
+        <span style={{position: "relative"}}>{t("Download data")}</span>
       </button>
     );
   }
@@ -363,4 +367,5 @@ class Footer extends React.Component {
 // {dot}
 //
 
-export default Footer;
+const WithTranslation = withTranslation()(Footer);
+export default WithTranslation;
