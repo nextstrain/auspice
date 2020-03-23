@@ -15,7 +15,7 @@ export const NarrativeStyles = styled.div`
     line-height: 1.1;
   }
 
-  p,h1,h2,h3,h4,li {
+  p, h1, h2, h3, h4, li, table {
     color: ${(props) => props.theme.unselectedColor};
   }
 
@@ -64,6 +64,10 @@ export const NarrativeStyles = styled.div`
     margin: 10px 0px 10px 0px;
     font-weight: inherit;
     line-height: inherit;
+  }
+
+  table {
+    width: 100%;
   }
 
   strong {
