@@ -34,13 +34,14 @@ const Byline = ({width, metadata}) => {
    * auspice customisation in the future.
    */
   if (
-    window.location.hostname === "nextstrain.org" && // comment out this line for testing on localhost
+    // comment out the next line for testing on localhost
+    (window.location.hostname === "nextstrain.org" || window.location.hostname === "dev.nextstrain.org") &&
     window.location.pathname.startsWith("/ncov")
   ) {
     return (
       <div width={width} style={styles.byline}>
-        {renderAvatar(metadata)}
-        {renderMaintainers(metadata)}
+        {renderAvatar(t, metadata)}
+        {renderMaintainers(t, metadata)}
         <span>
           {" Enabled by data from "}
           <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
