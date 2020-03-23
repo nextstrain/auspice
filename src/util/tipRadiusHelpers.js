@@ -21,6 +21,24 @@ const determineLegendMatch = (selectedLegendItem, node, colorScale) => {
 };
 
 /**
+* equates a single tip and a legend element
+* exact match on node's location attribute and geoFilter
+* @param geoFilter - value of the selected tip location attribute
+* @param node - node (tip) in question
+* @param colorScale - used to get the value of the attribute being used for colouring
+* @returns bool
+*/
+const determineLocationMatch = (geoFilter, node, colorScale) => {
+  const nodeAttr = getTipColorAttribute(node, colorScale);
+  if (nodeAttr === geoFilter) {
+    return true;
+  } else {
+    let location = node.node_attrs.location || node.node_attrs.division || node.node_attrs.country;
+    return location && location.value === geoFilter;
+  }
+};
+
+/**
 * produces the array of tip radii - if nothing's selected this is the hardcoded tipRadius
 * if there's a selectedLegendItem, then values will be small (like normal) or big (for those tips selected)
 * @param selectedLegendItem - value of the selected tip attribute (numeric or string) OPTIONAL
@@ -29,9 +47,11 @@ const determineLegendMatch = (selectedLegendItem, node, colorScale) => {
 * @param tree
 * @returns null (if data not ready) or array of tip radii
 */
-export const calcTipRadii = ({tipSelectedIdx = false, selectedLegendItem = false, searchNodes = false, colorScale, tree}) => {
+export const calcTipRadii = ({tipSelectedIdx = false, selectedLegendItem = false, geoFilter = false, searchNodes = false, colorScale, tree}) => {
   if (selectedLegendItem !== false && tree && tree.nodes) {
     return tree.nodes.map((d) => determineLegendMatch(selectedLegendItem, d, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
+  } else if (geoFilter !== false && tree && tree.nodes) {
+    return tree.nodes.map((d) => determineLocationMatch(geoFilter, d, colorScale) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (searchNodes) {
     return tree.nodes.map((d) => d.name.toLowerCase().includes(searchNodes) ? tipRadiusOnLegendMatch : tipRadius);
   } else if (tipSelectedIdx) {

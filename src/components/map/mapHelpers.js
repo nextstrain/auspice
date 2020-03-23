@@ -190,9 +190,13 @@ export const drawDemesAndTransmissions = (
       .style("fill", (d) => { return d.color; })
       .style("stroke-opacity", 0.85)
       .style("stroke", (d) => { return d.color; })
+      .style("cursor", "pointer")
+      .style("pointer-events", "all")
       .attr("transform", (d) =>
         "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
-      );
+      )
+      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: demeData[d.demeDataIdx].name})) })
+      .on("mouseout", (d) => { dispatch(updateTipRadii()) });
   } else {
     demes = g.selectAll("demes") // add deme circles to this selection
       .data(demeData)
@@ -207,7 +211,7 @@ export const drawDemesAndTransmissions = (
       .style("cursor", "pointer")
       .style("pointer-events", "all")
       .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")")
-      .on("mouseover", (d) => { dispatch(updateTipRadii({selectedLegendItem: d.name})) })
+      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: d.name})) })
       .on("mouseout", (d) => { dispatch(updateTipRadii()) });
   }
 
