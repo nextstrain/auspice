@@ -2,9 +2,17 @@
 title: Changelog
 ---
 
+* Add language support for auspice! Currently we have an incomplete translation of the strings into
+Spanish, but we can now begin to crowd-source translations. [See PR 953](https://github.com/nextstrain/auspice/pull/953)
+* Add shebang to shell scripts. [See PR 962](https://github.com/nextstrain/auspice/pull/962)
+* Add styling to tables in narratives. [See PR 966](https://github.com/nextstrain/auspice/pull/966)
+* Improve accessiblity of slide-dots in narratives. [See PR 972](https://github.com/nextstrain/auspice/pull/972)
+* Fix typo in readme. [See PR 963](https://github.com/nextstrain/auspice/pull/963)
+* Improve file modes in docs. [See PR 964](https://github.com/nextstrain/auspice/pull/964)
+* Fix broken links in docs. [See PR 967](https://github.com/nextstrain/auspice/pull/967)
+* Linting fixes. [See PR 931](https://github.com/nextstrain/auspice/pull/931)
+
 ## version 2.8.1 - 2020/03/20
-
-
 * Fix bug in dependencies which could prevent auspice from being built
 
 ## version 2.8.0 - 2020/03/20
