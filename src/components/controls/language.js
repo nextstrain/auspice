@@ -42,7 +42,7 @@ class Language extends React.Component {
         <SidebarSubtitle spaceAbove>
           {t("sidebar:Language")}
         </SidebarSubtitle>
-        <div style={{marginBottom: 10, width: controlsWidth, fontSize: 14}}>
+        <div style={{paddingBottom: 100, width: controlsWidth, fontSize: 14}}>
           <Select
             name="selectLanguage"
             id="selectLanguage"
