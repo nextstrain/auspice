@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.10.0 - 2020/03/24
+
+
 * Tree branches which have an inferred state which differes between parent & child (i.e. different colours) now show a gradient across the branch.
 [See PR 947](https://github.com/nextstrain/auspice/pull/947)
 * Hovering on a deme in the map now emphasizes the tips in the tree which make up that deme.
