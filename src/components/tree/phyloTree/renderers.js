@@ -141,11 +141,14 @@ export const getBranchVisibility = (d) => {
   return "visible";
 };
 
+/** Calculate the stroke for a given branch. May return a hex or a `url` referring to
+ * a SVG gradient definition
+ * @param {obj} d node
+ * @param {string} b branch type -- either "T" (tee) or "S" (stem)
+ */
 export const strokeForBranch = (d, b) => {
   const id = `T${d.that.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
-  // console.log(id + " " +  b);
   if (d.branchStroke === d.parent.branchStroke || b === "T") {
-    // console.log("stroking " + id + " " + d.branchStroke);
     return d.branchStroke;
   }
   return `url(#${id})`;
@@ -306,7 +309,15 @@ export const updateColorBy = function updateColorBy() {
   });
 };
 
-const handleHoverColor = (d, c1, c2) => {
+
+/** given a node `d` which is being hovered, update it's colour to emphasize
+ * that it's being hovered. This updates the SVG element stroke style in-place
+ * _or_ updates the SVG gradient def in place.
+ * @param {obj} d node
+ * @param {string} c1 colour of the parent (start of the branch)
+ * @param {string} c2 colour of the node (end of the branch)
+ */
+const handleBranchHoverColor = (d, c1, c2) => {
   if (!d) { return; }
 
   const id = `T${d.that.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
@@ -335,14 +346,14 @@ const handleHoverColor = (d, c1, c2) => {
   }
 };
 
-export const branchStrokeForLeave = function (d) {
+export const branchStrokeForLeave = function branchStrokeForLeave(d) {
   if (!d) { return; }
-  handleHoverColor(d, d.parent.branchStroke, d.branchStroke);
+  handleBranchHoverColor(d, d.parent.branchStroke, d.branchStroke);
 };
 
-export const branchStrokeForHover = function (d) {
+export const branchStrokeForHover = function branchStrokeForHover(d) {
   if (!d) { return; }
-  handleHoverColor(d, getEmphasizedColor(d.parent.branchStroke), getEmphasizedColor(d.branchStroke));
+  handleBranchHoverColor(d, getEmphasizedColor(d.parent.branchStroke), getEmphasizedColor(d.branchStroke));
 };
 
 
