@@ -1,4 +1,5 @@
 import React from "react";
+import { withTranslation } from "react-i18next";
 import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
@@ -13,7 +14,6 @@ import Tangle from "./tangle";
 import { attemptUntangle } from "../../util/globals";
 import ErrorBoundary from "../../util/errorBoundry";
 import { untangleTreeToo } from "./tangle/untangling";
-import { withTranslation } from "react-i18next";
 
 export const spaceBetweenTrees = 100;
 
@@ -137,11 +137,13 @@ class Tree extends React.Component {
           colorScale={this.props.colorScale}
           colorings={this.props.metadata.colorings}
           panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
+          t={t}
         />
         <TipClickedPanel
           goAwayCallback={this.clearSelectedTip}
           tip={this.state.selectedTip}
           colorings={this.props.metadata.colorings}
+          t={t}
         />
         {this.props.showTangle && this.state.tree && this.state.treeToo ? (
           <Tangle
@@ -171,7 +173,7 @@ class Tree extends React.Component {
             style={{...tabSingle, ...styles.resetTreeButton}}
             onClick={this.redrawTree}
           >
-            reset layout
+            {t("Reset Layout")}
           </button>
         )}
       </Card>

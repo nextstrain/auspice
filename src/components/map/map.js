@@ -537,13 +537,13 @@ class Map extends React.Component {
             style={{...buttonBaseStyle, top: 20, left: 20, width: 60, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? pauseColor : goColor}}
             onClick={this.playPauseButtonClicked}
           >
-            {this.props.animationPlayPauseButton}
+            {this.props.t(this.props.animationPlayPauseButton)}
           </button>
           <button
             style={{...buttonBaseStyle, top: 20, left: 88, width: 60, backgroundColor: lightGrey}}
             onClick={this.resetButtonClicked}
           >
-            Reset
+            {this.props.t("Reset")}
           </button>
         </div>
       );

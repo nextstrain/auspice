@@ -5,7 +5,7 @@ import { withTheme } from 'styled-components';
 import { withTranslation } from 'react-i18next';
 
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
-import { materialButton, extraLightGrey, infoPanelStyles } from "../../globalStyles";
+import { materialButton, infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
 import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";
@@ -16,12 +16,12 @@ const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);
 const MetaIcon = withTheme(icons.Meta);
 
-const dataUsage = [
-  `The data presented here is intended to rapidly disseminate analysis of important pathogens.
-  Unpublished data is included with permission of the data generators, and does not impact their right to publish.`,
-  `Please contact the respective authors (available via the TSV files below) if you intend to carry out further research using their data.
-  Derived data, such as phylogenies, can be downloaded below - please contact the relevant authors where appropriate.`
-];
+// const dataUsage = [
+//   `The data presented here is intended to rapidly disseminate analysis of important pathogens.
+//   Unpublished data is included with permission of the data generators, and does not impact their right to publish.`,
+//   `Please contact the respective authors (available via the TSV files below) if you intend to carry out further research using their data.
+//   Derived data, such as phylogenies, can be downloaded below - please contact the relevant authors where appropriate.`
+// ];
 
 export const publications = {
   nextstrain: {
@@ -149,7 +149,7 @@ class DownloadModal extends React.Component {
     x.push(`Downloaded from <a href="${address}">${address}</a> on ${new Date().toLocaleString()}`);
     x.push(this.createSummaryWrapper());
     x.push("");
-    x.push(dataUsage[0] + ` A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
+    x.push(`${this.props.t("Data usage part 1")} A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
     x.push(`Relevant publications:`);
     this.getRelevantPublications().forEach((pub) => {
       x.push(`<a href="${pub.href}">${pub.author}, ${pub.title}, ${pub.journal} (${pub.year})</a>`);
@@ -235,7 +235,7 @@ class DownloadModal extends React.Component {
           <div style={infoPanelStyles.modalSubheading}>
             {t("Data usage policy")}
           </div>
-          {dataUsage.join(" ")}
+          {t("Data usage part 1") + " " + t("Data usage part 2")}
 
           <div style={infoPanelStyles.modalSubheading}>
             {t("Please cite the authors who contributed genomic data (where relevant), as well as:")}
