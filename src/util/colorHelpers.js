@@ -76,12 +76,13 @@ export const calcNodeColor = (tree, colorScale) => {
 // scale entropy such that higher entropy maps to a grayer less-certain branch
 const branchInterpolateColour = "#BBB";
 const branchOpacityConstant = 0.6;
-const branchOpacityLowerBound = 0.4;
 export const branchOpacityFunction = scalePow()
-  .exponent([0.3])
-  .domain([0, 1])
-  .range([branchOpacityLowerBound, 1])
+  .exponent([0.6])
+  .domain([0, 2.0])
+  .range([0.4, 1])
   .clamp(true);
+
+
 // entropy calculation precomputed in augur
 // export const calcEntropyOfValues = (vals) =>
 //   vals.map((v) => v * Math.log(v + 1E-10)).reduce((a, b) => a + b, 0) * -1 / Math.log(vals.length);
