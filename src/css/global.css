@@ -38,20 +38,17 @@ a, .link {
   font-size: 94%;
 }
 
-/* Table styles: from Bootstrap and customized */
+/* from Bootstrap */
 table {
   border-collapse: collapse;
   border-spacing: 0;
 }
 
-table, th, td {
-  border: 1px solid;
+td,
+th {
+  padding: 0;
 }
-
-td, th {
-  padding: 3px;
-}
-/* end table styles */
+/* end bootstrap */
 
 .panel th {
   text-align: left;

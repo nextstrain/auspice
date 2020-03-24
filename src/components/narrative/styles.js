@@ -1,6 +1,5 @@
 import styled, {css} from 'styled-components';
 
-
 export const NarrativeStyles = styled.div`
 
   top: ${(props) => props.narrativeNavBarHeight+"px"};
@@ -17,6 +16,12 @@ export const NarrativeStyles = styled.div`
 
   p, h1, h2, h3, h4, li, table {
     color: ${(props) => props.theme.unselectedColor};
+  }
+  table, th, td {
+    border: 1px solid;
+  }
+  td, th {
+    padding: 3px;
   }
 
   h1 {

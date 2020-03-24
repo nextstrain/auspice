@@ -95,6 +95,13 @@ const Container = styled.div`
     margin-bottom: 2px;
   }
 
+  table, th, td {
+    border: 1px solid;
+  }
+  td, th {
+    padding: 3px;
+  }
+
 `;
 
 const EXPERIMENTAL_MainDisplayMarkdown = ({narrativeBlock, width, mobile}) => {
