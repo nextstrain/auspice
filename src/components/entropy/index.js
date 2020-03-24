@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { select } from "d3-selection";
+import { withTranslation } from "react-i18next";
 import 'd3-transition';
 import Card from "../framework/card";
 import { changeColorBy } from "../../actions/colors";
@@ -84,10 +85,9 @@ class Entropy extends React.Component {
   }
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    entropy: PropTypes.object,
     loaded: PropTypes.bool.isRequired,
-    colorBy: PropTypes.string,
-    defaultColorBy: PropTypes.string,
+    colorBy: PropTypes.string.isRequired,
+    defaultColorBy: PropTypes.string.isRequired,
     mutType: PropTypes.string.isRequired
   }
 
@@ -138,6 +138,7 @@ class Entropy extends React.Component {
     );
   }
   entropyCountSwitch(styles) {
+    const { t } = this.props;
     if (this.props.narrativeMode) return null;
     return (
       <div style={{...tabGroup, ...styles.entropyCountSwitch}}>
@@ -146,14 +147,14 @@ class Entropy extends React.Component {
           style={this.props.showCounts ? tabGroupMember : tabGroupMemberSelected}
           onClick={() => this.props.dispatch(showCountsNotEntropy(false))}
         >
-          <span style={styles.switchTitle}> {"entropy"} </span>
+          <span style={styles.switchTitle}> {t("entropy")} </span>
         </button>
         <button
           key={2}
           style={this.props.showCounts ? tabGroupMemberSelected : tabGroupMember}
           onClick={() => this.props.dispatch(showCountsNotEntropy(true))}
         >
-          <span style={styles.switchTitle}> {"events"} </span>
+          <span style={styles.switchTitle}> {t("events")} </span>
         </button>
       </div>
     );
@@ -264,9 +265,10 @@ class Entropy extends React.Component {
   }
 
   render() {
+    const { t } = this.props;
     const styles = getStyles(this.props.width);
     return (
-      <Card title={"Diversity"}>
+      <Card title={t("Diversity")}>
         <InfoPanel
           hovered={this.state.hovered}
           width={this.props.width}
@@ -274,6 +276,7 @@ class Entropy extends React.Component {
           mutType={this.props.mutType}
           showCounts={this.props.showCounts}
           geneMap={this.props.geneMap}
+          t={t}
         />
         <svg
           id="d3entropyParent"
@@ -290,4 +293,5 @@ class Entropy extends React.Component {
   }
 }
 
-export default Entropy;
+const WithTranslation = withTranslation()(Entropy);
+export default WithTranslation;

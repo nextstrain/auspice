@@ -2,8 +2,6 @@
 extends: "airbnb"
 plugins: ["react-hooks"]
 parser: "babel-eslint"
-env:
-  jest: true
 globals:
   page: true
   browser: true
@@ -72,5 +70,5 @@ parserOptions:
 env:
   es6: true
   browser: true
-
+  jest: true
 # https://gist.github.com/odedw/cf14a55aa154adbc3bf7#file-eslintrc-yaml-L4

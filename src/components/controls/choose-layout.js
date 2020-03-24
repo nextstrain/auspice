@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import styled, { withTheme } from 'styled-components';
+import { withTranslation } from 'react-i18next';
 import * as icons from "../framework/svg-icons";
 import { CHANGE_LAYOUT } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
@@ -29,13 +30,14 @@ class ChooseLayout extends React.Component {
     dispatch: PropTypes.func.isRequired
   }
   render() {
+    const { t } = this.props;
     if (this.props.showTreeToo) return null;
     const selected = this.props.layout;
     const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
     return (
       <div style={{marginBottom: 15}}>
         <SidebarSubtitle>
-          Layout
+          {t("sidebar:Layout")}
         </SidebarSubtitle>
         <RowContainer>
           <RectangularTreeIcon width={25} selected={selected === "rect"}/>
@@ -43,7 +45,7 @@ class ChooseLayout extends React.Component {
             selected={selected === "rect"}
             onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-rectangular"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });}}}
           >
-            rectangular
+            {t("sidebar:rectangular")}
           </SidebarButton>
         </RowContainer>
         <RowContainer>
@@ -52,7 +54,7 @@ class ChooseLayout extends React.Component {
             selected={selected === "radial"}
             onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-radial"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });}}}
           >
-            radial
+            {t("sidebar:radial")}
           </SidebarButton>
         </RowContainer>
         <RowContainer>
@@ -61,7 +63,7 @@ class ChooseLayout extends React.Component {
             selected={selected === "unrooted"}
             onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-unrooted"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });}}}
           >
-            unrooted
+            {t("sidebar:unrooted")}
           </SidebarButton>
         </RowContainer>
         {
@@ -73,7 +75,7 @@ class ChooseLayout extends React.Component {
                   selected={selected === "clock"}
                   onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-clock"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });}}}
                 >
-                  clock
+                  {t("sidebar:clock")}
                 </SidebarButton>
               </RowContainer>
             ) :
@@ -84,4 +86,5 @@ class ChooseLayout extends React.Component {
   }
 }
 
-export default ChooseLayout;
+const WithTranslation = withTranslation()(ChooseLayout);
+export default WithTranslation;

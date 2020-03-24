@@ -66,7 +66,7 @@ rm -rf data/
 mkdir -p data/
 for i in "${data_files[@]}"
 do
-  curl http://data.nextstrain.org/${i} --compressed -o data/${i}
+  curl http://data.nextstrain.org/"${i}" --compressed -o data/"${i}"
 done
 
 echo "The local data directory ./data now contains up-to-date datasets from http://data.nextstrain.org"

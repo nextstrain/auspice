@@ -1,4 +1,6 @@
 import React from "react";
+import { useTranslation } from 'react-i18next';
+
 import ColorBy from "./color-by";
 import DateRangeInputs from "./date-range-inputs";
 import ChooseBranchLabelling from "./choose-branch-labelling";
@@ -12,41 +14,48 @@ import MapAnimationControls from "./map-animation";
 import PanelToggles from "./panel-toggles";
 import SearchStrains from "./search";
 import ToggleTangle from "./toggle-tangle";
+import Language from "./language";
 import { SidebarHeader, ControlsContainer } from "./styles";
 
-const Controls = ({mapOn}) => (
-  <ControlsContainer>
-    <ChooseDataset/>
 
-    <SidebarHeader>Date Range</SidebarHeader>
-    <DateRangeInputs/>
+function Controls({mapOn}) {
+  const { t } = useTranslation();
+
+  return (
+    <ControlsContainer>
+      <ChooseDataset/>
+
+      <SidebarHeader>{t("sidebar:Date Range")}</SidebarHeader>
+      <DateRangeInputs/>
 
 
-    <SidebarHeader>Color By</SidebarHeader>
-    <ColorBy/>
+      <SidebarHeader>{t("sidebar:Color By")}</SidebarHeader>
+      <ColorBy/>
 
 
-    <SidebarHeader>Tree Options</SidebarHeader>
-    <ChooseLayout/>
-    <ChooseMetric/>
-    <ChooseBranchLabelling/>
-    <SearchStrains/>
-    <ChooseSecondTree/>
-    <ToggleTangle/>
+      <SidebarHeader>{t("sidebar:Tree Options")}</SidebarHeader>
+      <ChooseLayout/>
+      <ChooseMetric/>
+      <ChooseBranchLabelling/>
+      <SearchStrains/>
+      <ChooseSecondTree/>
+      <ToggleTangle/>
 
-    { mapOn ? (
-      <span style={{marginTop: "15px"}}>
-        <SidebarHeader>Map Options</SidebarHeader>
-        <GeoResolution/>
-        <MapAnimationControls/>
-      </span>
-    ) : null}
+      { mapOn ? (
+        <span style={{marginTop: "15px"}}>
+          <SidebarHeader>{t("sidebar:Map Options")}</SidebarHeader>
+          <GeoResolution/>
+          <MapAnimationControls/>
+        </span>
+      ) : null}
 
-    <span style={{paddingTop: "10px"}}/>
-    <SidebarHeader>Panel Options</SidebarHeader>
-    <PanelLayout/>
-    <PanelToggles/>
-  </ControlsContainer>
-);
+      <span style={{paddingTop: "10px"}}/>
+      <SidebarHeader>{t("sidebar:Panel Options")}</SidebarHeader>
+      <PanelLayout/>
+      <PanelToggles/>
+      <Language/>
+    </ControlsContainer>
+  );
+}
 
 export default Controls;

@@ -1,1 +1,1 @@
-../../../CONTRIBUTING.md
+../../../DEV_DOCS.md

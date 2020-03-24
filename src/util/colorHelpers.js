@@ -1,4 +1,4 @@
-import { rgb } from "d3-color";
+import { rgb, hsl } from "d3-color";
 import { interpolateRgb } from "d3-interpolate";
 import { scalePow } from "d3-scale";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
@@ -81,6 +81,8 @@ export const branchOpacityFunction = scalePow()
   .domain([0, 2.0])
   .range([0.4, 1])
   .clamp(true);
+
+
 // entropy calculation precomputed in augur
 // export const calcEntropyOfValues = (vals) =>
 //   vals.map((v) => v * Math.log(v + 1E-10)).reduce((a, b) => a + b, 0) * -1 / Math.log(vals.length);
@@ -103,4 +105,15 @@ export const calcBranchStrokeCols = (tree, confidence, colorBy) => {
   return tree.nodeColors.map((col) => {
     return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString();
   });
+};
+
+
+/**
+ * Return an emphasized color
+ */
+export const getEmphasizedColor = (color) => {
+  const hslColor = hsl(color);
+  hslColor.s *= 1.8; // more saturation
+  hslColor.l /= 1.2; // less luminance
+  return rgb(hslColor).toString();
 };

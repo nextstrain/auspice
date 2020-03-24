@@ -7,7 +7,7 @@ import * as types from "../actions/types";
  */
 
 const Metadata = (state = {
-  loaded: false, /* see comment in the sequences reducer for explination */
+  loaded: false, /* see comment in the sequences reducer for explanation */
   metadata: null,
   colorOptions // this can't be removed as the colorScale currently runs before it should
 }, action) => {

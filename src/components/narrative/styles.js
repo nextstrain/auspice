@@ -1,6 +1,5 @@
 import styled, {css} from 'styled-components';
 
-
 export const NarrativeStyles = styled.div`
 
   top: ${(props) => props.narrativeNavBarHeight+"px"};
@@ -15,8 +14,14 @@ export const NarrativeStyles = styled.div`
     line-height: 1.1;
   }
 
-  p,h1,h2,h3,h4,li {
+  p, h1, h2, h3, h4, li, table {
     color: ${(props) => props.theme.unselectedColor};
+  }
+  table, th, td {
+    border: 1px solid;
+  }
+  td, th {
+    padding: 3px;
   }
 
   h1 {
@@ -64,6 +69,10 @@ export const NarrativeStyles = styled.div`
     margin: 10px 0px 10px 0px;
     font-weight: inherit;
     line-height: inherit;
+  }
+
+  table {
+    width: 100%;
   }
 
   strong {
@@ -163,11 +172,16 @@ export const ProgressButton = styled.div`
   background: #74a9cf;
   border-radius: 50%;
   cursor: pointer;
+  transition: transform .1s;
 
   // BEGIN: mitigate ie flexbug-15: https://github.com/philipwalton/flexbugs#flexbug-15
   align-self: center;
   margin: auto;
   // END mitigate ie flexbug-15
+
+  &:hover {
+    transform: scale(3);
+  }
 `;
 
 const baseBannerStyles = css`

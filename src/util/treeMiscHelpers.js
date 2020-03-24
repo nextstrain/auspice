@@ -40,6 +40,7 @@ export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}=
     if (node.node_attrs[trait]) return node.node_attrs[trait].confidence;
     return undefined;
   }
+  return undefined;
 };
 
 export const getDivFromNode = (node) => {

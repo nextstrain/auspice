@@ -35,6 +35,6 @@ export const triggerOutboundEvent = (address) => {
   if (ReactGA.doNotUse) return;
   ReactGA.outboundLink(
     {label: address},
-    () => console.log("outbound event triggered", address)
+    () => console.log("outbound event triggered", address) // eslint-disable-line no-console
   );
 };

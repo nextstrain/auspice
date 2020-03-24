@@ -8,6 +8,7 @@ import { getExtraVals } from "./colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "./getGenotype";
 import { setGenotype, orderOfGenotypeAppearance } from "./setGenotype";
 import { getTraitFromNode } from "./treeMiscHelpers";
+import { sortedDomain } from "./sortedDomain";
 
 const unknownColor = "#AAAAAA";
 
@@ -39,13 +40,7 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
       stateCount.set(state, currentCount+1);
     }
   }
-  const domain = Array.from(stateCount.keys()).filter((x) => isValueValid(x));
-  /* sorting technique depends on the colorBy */
-  if (attr === "clade_membership") {
-    domain.sort();
-  } else {
-    domain.sort((a, b) => stateCount[a] > stateCount[b] ? 1 : -1);
-  }
+  const domain = sortedDomain(Array.from(stateCount.keys()).filter((x) => isValueValid(x)), attr, stateCount);
   return domain;
 };
 

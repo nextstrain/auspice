@@ -1,5 +1,7 @@
 import React from "react";
 import { connect } from "react-redux";
+import { withTranslation } from 'react-i18next';
+
 import Toggle from "./toggle";
 import { togglePanelDisplay } from "../../actions/misc";
 
@@ -10,6 +12,8 @@ import { togglePanelDisplay } from "../../actions/misc";
 }))
 class PanelToggles extends React.Component {
   render() {
+    const { t } = this.props;
+
     const panels = this.props.panelsAvailable.slice();
     if (this.props.showTreeToo && panels.indexOf("map") !== -1) {
       panels.splice(panels.indexOf("map"), 1);
@@ -20,11 +24,12 @@ class PanelToggles extends React.Component {
         display
         on={this.props.panelsToDisplay.indexOf(n) !== -1}
         callback={() => this.props.dispatch(togglePanelDisplay(n))}
-        label={"Show " + n}
+        label={t("sidebar:Show " + n)}
         style={{paddingBottom: "10px"}}
       />
     ));
   }
 }
 
-export default PanelToggles;
+const WithTranslation = withTranslation()(PanelToggles);
+export default WithTranslation;

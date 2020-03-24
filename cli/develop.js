@@ -85,5 +85,5 @@ const run = (args) => {
 
 module.exports = {
   addParser,
-  run
+  run,
 };

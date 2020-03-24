@@ -16,7 +16,7 @@ This is achieved by providing a JSON at build time to Auspice which defines the 
 auspice build --extend <JSON>
 ```
 
-[Here's](https://github.com/nextstrain/nextstrain.org/blob/master/auspice/client/config.json) the file used by nextstrain.org to change the appearance of Auspice in the above image.
+[Here's](https://github.com/nextstrain/nextstrain.org/blob/master/auspice-client/customisations/config.json) the file used by nextstrain.org to change the appearance of Auspice in the above image.
 
 
 See the [client customisation API](customise-client/api.md) for the available options.

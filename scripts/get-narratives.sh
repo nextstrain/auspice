@@ -1,7 +1,7 @@
 #!/bin/bash
 
 function errorFound {
-  echo -e "\nScript Failed at step $step (Line $1)\n"
+  echo -e "\nScript Failed at line $1\n"
   exit 2
 }
 trap 'errorFound $LINENO' ERR

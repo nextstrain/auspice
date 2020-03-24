@@ -79,7 +79,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
     const { tree, treeToo, controls, frequencies } = getState();
     if (root[0] === undefined && !cladeSelected && tree.selectedClade) {
       /* if not resetting tree to root, maintain previous selectedClade if one exists */
-      cladeSelected = tree.selectedClade;
+      cladeSelected = tree.selectedClade; // eslint-disable-line no-param-reassign
     }
 
     if (!tree.nodes) {return;}
@@ -201,10 +201,11 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
  * NB all params are optional - supplying none resets the tip radii to defaults
  * @param  {string|number} selectedLegendItem value of the attr. if scale is continuous a bound will be used.
  * @param  {int} tipSelectedIdx the strain to highlight (always tree 1)
+ * @param  {array} geoFilter a filter to apply to the strains. Empty array or array of len 2. [0]: geoResolution, [1]: value to filter to
  * @return {null} side-effects: a single action
  */
 export const updateTipRadii = (
-  {tipSelectedIdx = false, selectedLegendItem = false, searchNodes = false} = {}
+  {tipSelectedIdx = false, selectedLegendItem = false, geoFilter = [], searchNodes = false} = {}
 ) => {
   return (dispatch, getState) => {
     const { controls, tree, treeToo } = getState();
@@ -219,15 +220,9 @@ export const updateTipRadii = (
         const idx = strainNameToIdx(treeToo.nodes, tree.nodes[tipSelectedIdx].name);
         d.dataToo = calcTipRadii({idx, colorScale, tree: treeToo});
       }
-    } else if (selectedLegendItem !== false) {
-      d.data = calcTipRadii({selectedLegendItem, colorScale, tree});
-      if (tt) d.dataToo = calcTipRadii({selectedLegendItem, colorScale, tree: treeToo});
-    } else if (searchNodes !== false) {
-      d.data = calcTipRadii({searchNodes, colorScale, tree});
-      if (tt) d.dataToo = calcTipRadii({searchNodes, colorScale, tree: treeToo});
     } else {
-      d.data = calcTipRadii({colorScale, tree});
-      if (tt) d.dataToo = calcTipRadii({colorScale, tree: treeToo});
+      d.data = calcTipRadii({selectedLegendItem, geoFilter, searchNodes, colorScale, tree});
+      if (tt) d.dataToo = calcTipRadii({selectedLegendItem, geoFilter, searchNodes, colorScale, tree: treeToo});
     }
     dispatch(d);
   };

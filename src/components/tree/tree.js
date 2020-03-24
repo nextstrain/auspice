@@ -1,4 +1,5 @@
 import React from "react";
+import { withTranslation } from "react-i18next";
 import { updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
 import Card from "../framework/card";
 import Legend from "./legend/legend";
@@ -94,8 +95,8 @@ class Tree extends React.Component {
   }
 
   getStyles = () => {
-    const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0
-      || this.props.treeToo.idxOfInViewRootNode !== 0;
+    const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0 ||
+      this.props.treeToo.idxOfInViewRootNode !== 0;
     return {
       resetTreeButton: {
         zIndex: 100,
@@ -121,10 +122,11 @@ class Tree extends React.Component {
   }
 
   render() {
+    const { t } = this.props;
     const styles = this.getStyles();
     const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
     return (
-      <Card center title={"Phylogeny"}>
+      <Card center title={t("Phylogeny")}>
         <ErrorBoundary>
           <Legend width={this.props.width}/>
         </ErrorBoundary>
@@ -135,12 +137,14 @@ class Tree extends React.Component {
           colorScale={this.props.colorScale}
           colorings={this.props.metadata.colorings}
           panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
+          t={t}
           idxOfInViewRootNode={this.props.tree.idxOfInViewRootNode}
         />
         <TipClickedPanel
           goAwayCallback={this.clearSelectedTip}
           tip={this.state.selectedTip}
           colorings={this.props.metadata.colorings}
+          t={t}
         />
         {this.props.showTangle && this.state.tree && this.state.treeToo ? (
           <Tangle
@@ -170,7 +174,7 @@ class Tree extends React.Component {
             style={{...tabSingle, ...styles.resetTreeButton}}
             onClick={this.redrawTree}
           >
-            reset layout
+            {t("Reset Layout")}
           </button>
         )}
       </Card>
@@ -178,4 +182,5 @@ class Tree extends React.Component {
   }
 }
 
-export default Tree;
+const WithTranslation = withTranslation()(Tree);
+export default WithTranslation;
