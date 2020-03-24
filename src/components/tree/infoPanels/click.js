@@ -100,14 +100,14 @@ const AccessionAndUrl = ({node}) => {
 };
 
 
-const VaccineInfo = ({node}) => {
+const VaccineInfo = ({node, t}) => {
   const vaccineInfo = getVaccineFromNode(node);
   if (!vaccineInfo) return null;
   const renderElements = [];
   if (vaccineInfo.selection_date) {
     renderElements.push(
       <tr key={"seldate"}>
-        <th>Vaccine selected</th>
+        <th>{t("Vaccine selected")}</th>
         <td>{vaccineInfo.selection_date}</td>
       </tr>
     );
@@ -115,7 +115,7 @@ const VaccineInfo = ({node}) => {
   if (vaccineInfo.start_date) {
     renderElements.push(
       <tr key={"startdate"}>
-        <th>Vaccine start date</th>
+        <th>{t("Vaccine start date")}</th>
         <td>{vaccineInfo.start_date}</td>
       </tr>
     );
@@ -123,7 +123,7 @@ const VaccineInfo = ({node}) => {
   if (vaccineInfo.end_date) {
     renderElements.push(
       <tr key={"enddate"}>
-        <th>Vaccine end date</th>
+        <th>{t("Vaccine end date")}</th>
         <td>{vaccineInfo.end_date}</td>
       </tr>
     );
@@ -131,7 +131,7 @@ const VaccineInfo = ({node}) => {
   if (vaccineInfo.serum) {
     renderElements.push(
       <tr key={"serum"}>
-        <th>Serum strain</th>
+        <th>{t("Serum strain")}</th>
         <td/>
       </tr>
     );
@@ -139,21 +139,21 @@ const VaccineInfo = ({node}) => {
   return renderElements;
 };
 
-const PublicationInfo = ({node}) => {
+const PublicationInfo = ({node, t}) => {
   const info = getFullAuthorInfoFromNode(node);
   if (!info) return null;
 
   const itemsToRender = [];
-  itemsToRender.push(item("Authors", info.value));
+  itemsToRender.push(item(t("Authors"), info.value));
   if (info.title && info.title !== "?") {
     if (info.paper_url && info.paper_url !== "?") {
-      itemsToRender.push(item("Title", info.title, info.paper_url));
+      itemsToRender.push(item(t("Title"), info.title, info.paper_url));
     } else {
-      itemsToRender.push(item("Title", info.title));
+      itemsToRender.push(item(t("Title"), info.title));
     }
   }
   if (info.journal && info.journal !== "?") {
-    itemsToRender.push(item("Journal", info.journal));
+    itemsToRender.push(item(t("Journal"), info.journal));
   }
   return (itemsToRender.length === 1 ? itemsToRender[0] : itemsToRender);
 };
@@ -162,7 +162,7 @@ const StrainName = ({children}) => (
   <p style={infoPanelStyles.modalHeading}>{children}</p>
 );
 
-const SampleDate = ({node}) => {
+const SampleDate = ({node, t}) => {
   const date = getTraitFromNode(node, "num_date");
   if (!date) return null;
 
@@ -170,13 +170,13 @@ const SampleDate = ({node}) => {
   if (date && dateUncertainty && dateUncertainty[0] !== dateUncertainty[1]) {
     return (
       <>
-        {item("Inferred collection date", numericToCalendar(date))}
-        {item("Collection date confidence", `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)}
+        {item(t("Inferred collection date"), numericToCalendar(date))}
+        {item(t("Date Confidence Interval"), `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)}
       </>
     );
   }
 
-  return item("Collection date", numericToCalendar(date));
+  return item(t("Collection date"), numericToCalendar(date));
 };
 
 const getTraitsToDisplay = (node) => {
@@ -207,7 +207,7 @@ const Trait = ({node, trait, colorings}) => {
  * @param  {function} props.goAwayCallback
  * @param  {object}   props.colorings
  */
-const TipClickedPanel = ({tip, goAwayCallback, colorings}) => {
+const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
   if (!tip) {return null;}
   const panelStyle = { ...infoPanelStyles.panel};
   panelStyle.maxHeight = "70%";
@@ -218,9 +218,9 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings}) => {
         <StrainName>{node.name}</StrainName>
         <table>
           <tbody>
-            <VaccineInfo node={node} />
-            <SampleDate node={node}/>
-            <PublicationInfo node={node}/>
+            <VaccineInfo node={node} t={t}/>
+            <SampleDate node={node} t={t}/>
+            <PublicationInfo node={node} t={t}/>
             {getTraitsToDisplay(node).map((trait) => (
               <Trait node={node} trait={trait} colorings={colorings} key={trait}/>
             ))}
@@ -228,7 +228,7 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings}) => {
           </tbody>
         </table>
         <p style={infoPanelStyles.comment}>
-          Click outside this box to go back to the tree
+          {t("Click outside this box to go back to the tree")}
         </p>
       </div>
     </div>

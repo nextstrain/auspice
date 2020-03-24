@@ -315,7 +315,7 @@ class Footer extends React.Component {
         onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
       >
         <i className="fa fa-download" aria-hidden="true"/>
-        <span style={{position: "relative"}}>{t("Download data")}</span>
+        <span style={{position: "relative"}}>{" "+t("Download data")}</span>
       </button>
     );
   }

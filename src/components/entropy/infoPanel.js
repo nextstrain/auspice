@@ -1,7 +1,7 @@
 import React from "react";
 import { infoPanelStyles } from "../../globalStyles";
 
-const InfoPanel = ({hovered, width, height, mutType, showCounts, geneMap}) => {
+const InfoPanel = ({hovered, width, height, mutType, showCounts, geneMap, t}) => {
   /* this is a function - we can bail early */
   if (!hovered) {
     return null;
@@ -56,29 +56,30 @@ const InfoPanel = ({hovered, width, height, mutType, showCounts, geneMap}) => {
     : null;
 
   const codonFromNuc = hovered.d.prot && mutType !== "aa" ? Math.floor((nucPos)/3) + 1 : null;
-
   return (
     <div style={styles.container}>
       <div className={"tooltip"} style={infoPanelStyles.tooltip}>
         <div>
-          {mutType === "aa" ? `Codon ${hovered.d.codon} in protein ${hovered.d.prot}` :
-            hovered.d.prot ? `Nucleotide ${hovered.d.x} (codon ${codonFromNuc} in protein ${hovered.d.prot})` :
-              `Nucleotide ${hovered.d.x}`}
+          {
+            mutType === "aa" ? t("Codon {{codon}} in protein {{protein}}", {codon: hovered.d.codon, protein: hovered.d.prot}) :
+              hovered.d.prot ? `${t("Nucleotide {{nuc}}", {nuc: hovered.d.x})} (${t("Codon {{codon}} in protein {{protein}}", {codon: codonFromNuc, protein: hovered.d.prot})})` :
+                t("Nucleotide {{nuc}}", {nuc: hovered.d.x})
+          }
         </div>
         <p/>
         <div>
-          {mutType === "aa" ? `Nuc positions ${nucPos-2} to ${nucPos}` : ``}
+          {mutType === "aa" ? t("Nuc positions {{a}} to {{b}}", {a: nucPos-2, b: nucPos}) : ``}
         </div>
         <p/>
         <div>
-          {isNegStrand === null ? `` : isNegStrand ? `Negative strand` : `Positive strand`}
+          {isNegStrand === null ? `` : isNegStrand ? t("Negative strand") : t("Positive strand")}
         </div>
         <p/>
         <div>
-          {showCounts ? `Num mutations: ${hovered.d.y}` : `entropy: ${hovered.d.y}`}
+          {showCounts ? `${t("Num mutations")}: ${hovered.d.y}` : `${t("entropy")}: ${hovered.d.y}`}
         </div>
         <div style={infoPanelStyles.comment}>
-          Click to color tree & map
+          {t("Click to color tree & map")}
         </div>
       </div>
     </div>

@@ -70,8 +70,8 @@ export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visib
 
   /* Number of genomes & their date range */
   let summary = t(
-    "Showing {{nSelectedSamples}} of {{mainTreeNumTips}} genomes",
-    {nSelectedSamples: nSelectedSamples, mainTreeNumTips: mainTreeNumTips}
+    "Showing {{x}} of {{y}} genomes",
+    {x: nSelectedSamples, y: mainTreeNumTips}
   );
   if (branchLengthsToDisplay !== "divOnly") {
     summary += " " + t(

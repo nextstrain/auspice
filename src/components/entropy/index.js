@@ -2,6 +2,7 @@ import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { select } from "d3-selection";
+import { withTranslation } from "react-i18next";
 import 'd3-transition';
 import Card from "../framework/card";
 import { changeColorBy } from "../../actions/colors";
@@ -14,7 +15,6 @@ import { timerStart, timerEnd } from "../../util/perf";
 import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype } from "../../util/getGenotype";
 import { nucleotide_gene } from "../../util/globals";
 import "../../css/entropy.css";
-import { withTranslation } from "react-i18next";
 
 const getStyles = (width) => {
   return {
@@ -277,6 +277,7 @@ class Entropy extends React.Component {
           mutType={this.props.mutType}
           showCounts={this.props.showCounts}
           geneMap={this.props.geneMap}
+          t={t}
         />
         <svg
           id="d3entropyParent"

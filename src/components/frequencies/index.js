@@ -1,4 +1,5 @@
 import React from "react";
+import { withTranslation } from "react-i18next";
 import { select } from "d3-selection";
 import 'd3-transition';
 import { connect } from "react-redux";
@@ -41,7 +42,7 @@ class Frequencies extends React.Component {
     drawXAxis(newState.svg, chartGeom, scalesX);
     drawYAxis(newState.svg, chartGeom, scalesY);
     drawStream(newState.svgStreamGroup, newState.scales, data, {...props});
-    drawProjectionInfo(newState.svg, newState.scales, props.projection_pivot);
+    drawProjectionInfo(newState.svg, newState.scales, props.projection_pivot, props.t);
   }
   recomputeRedrawPartial(oldState, oldProps, newProps) {
     /* we don't have to check width / height changes here - that's done in componentDidUpdate */
@@ -62,7 +63,7 @@ class Frequencies extends React.Component {
     /* if !catChange we could transition the streams instead of redrawing them... */
     drawStream(oldState.svgStreamGroup, newScales, data, {...newProps});
     if (maxYChange) {
-      drawProjectionInfo(oldState.svg, newScales, newProps.projection_pivot);
+      drawProjectionInfo(oldState.svg, newScales, newProps.projection_pivot, newProps.t);
     }
     return {...oldState, scales: newScales, maxY: data.maxY, categories: data.categories};
   }
@@ -98,8 +99,9 @@ class Frequencies extends React.Component {
     }
   }
   render() {
+    const { t } = this.props;
     return (
-      <Card title={`Frequencies (coloured by ${parseColorBy(this.props.colorBy, this.props.colorOptions)})`}>
+      <Card title={`${t("Frequencies")} (${t("colored by")} ${parseColorBy(this.props.colorBy, this.props.colorOptions)})`}>
         <div
           id="freqinfo"
           style={{
@@ -129,4 +131,5 @@ class Frequencies extends React.Component {
   }
 }
 
-export default Frequencies;
+const WithTranslation = withTranslation()(Frequencies);
+export default WithTranslation;
