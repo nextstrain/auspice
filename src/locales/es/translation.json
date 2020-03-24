@@ -1,39 +1,39 @@
 {
   "__byline.js__": "########################################",
-  "Maintained by": "Maintained by",
-  "using data from": "using data from",
-  "Built with": "Built with",
+  "Maintained by": "Mantenido por",
+  "using data from": "utilizando datos de",
+  "Built with": "Desarrollado usando",
 
   "__downloadModal.js__": "########################################",
-  "click outside this box to return to the app": "click outside this box to return to the app",
-  "last updated": "last updated",
-  "A full list of sequence authors is available via the TSV files below.": "A full list of sequence authors is available via the TSV files below.",
-  "Data usage policy": "Data usage policy",
-  "Please cite the authors who contributed genomic data (where relevant), as well as:": "Please cite the authors who contributed genomic data (where relevant), as well as:",
-  "Download data": "Download data",
+  "click outside this box to return to the app": "Haz clic afuera de la casilla para regresar a la aplicación",
+  "last updated": "Última actualización",
+  "A full list of sequence authors is available via the TSV files below.": "Una lista completa de los autores de las secuencias se encuentra abajo en el archivo TSV.",
+  "Data usage policy": "Política de uso de datos",
+  "Please cite the authors who contributed genomic data (where relevant), as well as:": "Por favor citar a los autores quienes contribuyeron datos genómicos, y además a:",
+  "Download data": "Descarga los datos",
 
   "__entropy.js__": "########################################",
-  "Diversity": "",
-  "entropy": "entropy",
-  "events": "events",
-  
+  "Diversity": "Diversidad",
+  "entropy": "entropía",
+  "events": "eventos",
+
   "__footer.js__": "########################################",
-  "Filter by {{filterTitle}}": "Filter by {{filterTitle}}",
-  "Data updated": "Data updated",
+  "Filter by {{filterTitle}}": "Filtra por {{filterTitle}}",
+  "Data updated": "Datos actualizados",
 
   "__info.js__": "########################################",
-  "Showing {{nSelectedSamples}} of {{mainTreeNumTips}} genomes": "Showing {{nSelectedSamples}} of {{mainTreeNumTips}} genomes",
-  "sampled between {{from}} and {{to}}": "sampled between {{from}} and {{to}}",
-  "and comprising": "and comprising",
-  "comprising": "comprising",
-  "Animation in progress.": "Animation in progress.",
+  "Showing {{nSelectedSamples}} of {{mainTreeNumTips}} genomes": "Visualizando  {{nSelectedSamples}} de los {{mainTreeNumTips}} genomas",
+  "sampled between {{from}} and {{to}}": "aislados entre {{from}} y {{to}}",
+  "and comprising": "y compuesto de",
+  "comprising": "compuesto de",
+  "Animation in progress.": "Animación en proceso.",
   "Filtered to": "Filtered to",
 
   "__map.js__": "########################################",
-  "Transmissions": "Transmissions",
-  "Geography": "Geography",
-  "reset zoom": "reset zoom",
+  "Transmissions": "Transmisiones",
+  "Geography": "Geografía",
+  "reset zoom": "Volver al tamaño original",
 
   "__tree.js__": "########################################",
-  "Phylogeny": "Phylogeny"
+  "Phylogeny": "Filogenia"
 }
