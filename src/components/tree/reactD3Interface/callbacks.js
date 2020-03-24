@@ -1,6 +1,6 @@
 import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
 import { NODE_VISIBLE } from "../../../util/globals";
-import { getDomId, getNextParentWithDifferentDivergence } from "../phyloTree/helpers";
+import { getDomId, getFurthestParentWithNextDivergence } from "../phyloTree/helpers";
 import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/renderers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
@@ -83,7 +83,7 @@ export const onBranchClick = function onBranchClick(d) {
     cladeSelected = `${key}:${d.n.branch_attrs.labels[key]}`;
   }
   // If the root node is clicked, zoom out instead of in
-  let arrayIdx = (this.props.tree.idxOfInViewRootNode == d.n.arrayIdx) ? getNextParentWithDifferentDivergence(d.n).arrayIdx : d.n.arrayIdx;
+  let arrayIdx = (this.props.tree.idxOfInViewRootNode == d.n.arrayIdx) ? getFurthestParentWithNextDivergence(d.n).arrayIdx : d.n.arrayIdx;
   if (d.that.params.orientation[0] === 1) root[0] = arrayIdx;
   else root[1] = arrayIdx;
   this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected}));

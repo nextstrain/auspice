@@ -115,12 +115,14 @@ function hasSameDivergence(node, otherNode) {
   return ((node.node_attrs.div - tolerance) <= otherNode.node_attrs.div) && ((node.node_attrs.div + tolerance) >= otherNode.node_attrs.div);
 };
 
-
-export const getNextParentWithDifferentDivergence = (node) => {
-  var parent = node.parent;
-  while (hasSameDivergence(node, parent)) {
-    if (parent == parent.parent) break;
-    parent = parent.parent;
+function getSelfOrFurthestParentWithSameDivergence(node) {
+  while (hasSameDivergence(node, node.parent)) {
+    if (node == node.parent) break;
+    node = node.parent;
   }
-  return parent;
+  return node;
+}
+
+export const getFurthestParentWithNextDivergence = (node) => {
+  return getSelfOrFurthestParentWithSameDivergence(getSelfOrFurthestParentWithSameDivergence(node).parent);
 };
