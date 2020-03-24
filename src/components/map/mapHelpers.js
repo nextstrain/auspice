@@ -191,7 +191,6 @@ export const drawDemesAndTransmissions = (
       .style("fill", (d) => { return d.color; })
       .style("stroke-opacity", 0.85)
       .style("stroke", (d) => { return d.color; })
-      .style("cursor", "pointer")
       .style("pointer-events", "all")
       .attr("transform", (d) =>
         "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
@@ -209,7 +208,6 @@ export const drawDemesAndTransmissions = (
       .style("fill", (d) => { return d.color; })
       .style("stroke-opacity", 0.85)
       .style("stroke", (d) => { return d.color; })
-      .style("cursor", "pointer")
       .style("pointer-events", "all")
       .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")")
       .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, d.name]})); })
