@@ -359,6 +359,9 @@ export const mapToScreen = function mapToScreen() {
     d.yTip = this.yScale(d.y);
     d.xBase = this.xScale(d.px);
     d.yBase = this.yScale(d.py);
+
+    d.rot = Math.atan2(d.yTip-d.yBase, d.xTip-d.xBase) * 180/Math.PI;
+
   });
   if (this.vaccines) {
     this.vaccines.forEach((d) => {
@@ -378,7 +381,13 @@ export const mapToScreen = function mapToScreen() {
     this.nodes.forEach((d) => {
       const stem_offset = 0.5*(d.parent["stroke-width"] - d["stroke-width"]) || 0.0;
       const childrenY = [this.yScale(d.yRange[0]), this.yScale(d.yRange[1])];
-      d.branch =[` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip} M ${d.xTip},${childrenY[0]} L ${d.xTip},${childrenY[1]}`];
+      // Note that a branch cannot be perfectly horizontal and also have a (linear) gradient applied to it
+      // So we add a tiny amount of jitter (e.g 1/1000px) to the horizontal line (d.branch[0])
+      // see https://stackoverflow.com/questions/13223636/svg-gradient-for-perfectly-horizontal-path
+      d.branch =[
+        [` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip+0.001}`],
+        [` M ${d.xTip},${childrenY[0]} L ${d.xTip},${childrenY[1]}`]
+      ];
       if (this.params.confidence) {
         d.confLine =` M ${this.xScale(d.conf[0])},${d.yBase} L ${this.xScale(d.conf[1])},${d.yTip}`;
       }
