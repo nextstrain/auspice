@@ -2,6 +2,23 @@
 title: Changelog
 ---
 
+* Tree branches which have an inferred state which differes between parent & child (i.e. different colours) now show a gradient across the branch.
+[See PR 947](https://github.com/nextstrain/auspice/pull/947)
+* Hovering on a deme in the map now emphasizes the tips in the tree which make up that deme.
+[See PR 940](https://github.com/nextstrain/auspice/pull/940)
+* Fix multiple bugs related to incorrect rendering of the map when downloading the SVG.
+[See PR 925](https://github.com/nextstrain/auspice/pull/925)
+* Fix a bug relating to the ordering of legend items.
+[See PR 979](https://github.com/nextstrain/auspice/pull/979).
+* Update Spanish locale data (still in a partially complete state).
+See [commit f9c8ad2](https://github.com/nextstrain/auspice/commit/f9c8ad209a1e5d304fc6f15ec708f3d0be3dec43)
+* Reorganisation and general improvements to documentation around contributing to auspice development.
+[See PR 978](https://github.com/nextstrain/auspice/pull/978), 
+[commit 707f563](https://github.com/nextstrain/auspice/commit/707f563aab0a62e0504e393af0cd23da3e4504e0) and 
+[commit 9f002c9](https://github.com/nextstrain/auspice/commit/9f002c96a676e4603b7b9c06ef7df8a26be6d04c)
+* Fix a bug where the narrative table styling introduced in 2.9.0 were applied outside the narratives.
+* Fix all linting errors and warnings (potentially the first time this has happened!)
+
 ## version 2.9.1 - 2020/03/23
 * Bugfix related to the byline for SARS-CoV-2 datasets when viewed on nextstrain.org
 
