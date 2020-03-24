@@ -142,7 +142,7 @@ export const getBranchVisibility = (d) => {
 };
 
 export const strokeForBranch = (d, b) => {
-  const id = `T${d.that.debugId}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
+  const id = `T${d.that.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
   // console.log(id + " " +  b);
   if (d.branchStroke === d.parent.branchStroke || b === "T") {
     // console.log("stroking " + id + " " + d.branchStroke);
@@ -272,12 +272,12 @@ export const clearSVG = function clearSVG() {
 };
 
 
-export const updateColorBy = function () {
+export const updateColorBy = function updateColorBy() {
   // console.log("updating colorBy")
   this.nodes.forEach((d) => {
     const a = d.parent.branchStroke;
     const b = d.branchStroke;
-    const id = `T${this.debugId}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
+    const id = `T${this.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
     if (a === b) { // not a gradient // color can be computed from d alone
       this.svg.select(`#${id}`).remove(); // remove an existing gradient for this node
       return;
@@ -309,7 +309,7 @@ export const updateColorBy = function () {
 const handleHoverColor = (d, c1, c2) => {
   if (!d) { return; }
 
-  const id = `T${d.that.debugId}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
+  const id = `T${d.that.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
 
   /* We want to emphasize the colour of the branch. How we do this depends on how the branch was rendered in the first place! */
   const tel = d.that.svg.select(getDomId("#branchT", d.n.name));
