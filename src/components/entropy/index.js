@@ -85,10 +85,9 @@ class Entropy extends React.Component {
   }
   static propTypes = {
     dispatch: PropTypes.func.isRequired,
-    entropy: PropTypes.object,
     loaded: PropTypes.bool.isRequired,
-    colorBy: PropTypes.string,
-    defaultColorBy: PropTypes.string,
+    colorBy: PropTypes.string.isRequired,
+    defaultColorBy: PropTypes.string.isRequired,
     mutType: PropTypes.string.isRequired
   }
 

@@ -50,7 +50,7 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
  * @param {Object} additionalQueries: additional information to be parsed as a
  *  query string such as `type` (`String`) or `narrative` (`Boolean`).
  */
-const getHardcodedData = (prefix, {type="mainJSON", narrative=false}={}) => {
+const getHardcodedData = (prefix, {type="mainJSON"}={}) => {
   const datapaths = getExtension("hardcodedDataPaths");
 
   const p = fetch(datapaths[type])
@@ -81,7 +81,7 @@ const collectDatasetFetchUrls = (url) => {
     const parts = url.replace(/^\//, '')
       .replace(/\/$/, '')
       .split(":");
-    url = parts[0];
+    url = parts[0]; // eslint-disable-line no-param-reassign
     secondTreeUrl = parts[1];
   }
   return [url, secondTreeUrl];
@@ -111,7 +111,8 @@ const collectDatasetFetchUrlsDeprecatedSyntax = (url) => {
     if (parts[i].indexOf(":") !== -1) {
       [treeName, secondTreeName] = parts[i].split(":");
       parts[i] = treeName;
-      url = parts.join("/"); // this is the first tree URL
+      // this is the first tree URL
+      url = parts.join("/"); // eslint-disable-line no-param-reassign
       parts[i] = secondTreeName;
       secondTreeUrl = parts.join("/"); // this is the second tree URL
       break;
@@ -197,7 +198,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
     }
     console.error(err, err.message);
     dispatch(goTo404(`Couldn't load JSONs for ${url}`));
-    return;
+    return undefined;
   }
 
   /* do we have frequencies to display? */
@@ -220,7 +221,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
     console.error("Failed to fetch available datasets", err.message);
     dispatch(warningNotification({message: "Failed to fetch available datasets"}));
   }
-
+  return undefined;
 };
 
 export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, getState) => {

@@ -1,5 +1,4 @@
 /* eslint no-restricted-syntax: 0 */
-import React from "react";
 import { infoNotification, warningNotification } from "../../actions/notifications";
 import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";

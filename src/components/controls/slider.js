@@ -1,3 +1,7 @@
+/* eslint-disable */
+// DIsabling eslint for this file as it's not our code.
+// Todo: refactor away from `createReactClass` & apply linting rules
+
 import React from "react";
 import PropTypes from 'prop-types';
 import createReactClass from "create-react-class";

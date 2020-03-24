@@ -30,7 +30,7 @@ const formatDataset = (requestPath, dispatch, changePage) => {
   );
 };
 
-const SplashContent = ({isMobile, available, browserDimensions, dispatch, errorMessage, changePage}) => {
+const SplashContent = ({available, browserDimensions, dispatch, errorMessage, changePage}) => {
 
   const Header = () => (
     <>
@@ -43,7 +43,13 @@ const SplashContent = ({isMobile, available, browserDimensions, dispatch, errorM
             {"Interactive Visualisation of Phylogenomic data"}
           </h1>
         </div>
-        <img alt="logo" width="102" src={require("../../images/logo-light.svg")}/>
+        <img
+          alt="logo"
+          width="102"
+          src={
+            require("../../images/logo-light.svg") // eslint-disable-line global-require
+          }
+        />
       </Flex>
     </>
   );

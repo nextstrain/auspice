@@ -5,6 +5,7 @@ import { withTranslation } from "react-i18next";
 import leaflet from "leaflet";
 import _min from "lodash/min";
 import _max from "lodash/max";
+import domtoimage from "dom-to-image";
 import { select } from "d3-selection";
 import 'd3-transition';
 import Card from "../framework/card";
@@ -20,7 +21,6 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey, goColor, pauseColor } from "../../globalStyles";
-import domtoimage from "dom-to-image";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -94,16 +94,16 @@ class Map extends React.Component {
             width: mapDimensions.x,
             height: mapDimensions.y,
             filter: (node) => {
-              return node.className !== "leaflet-control-container"
+              return node.className !== "leaflet-control-container";
             }
           })
-          .then(function (image) {
+          .then((image) => {
             loadendCallback({
               mapSvg: image.replace('data:image/svg+xml;charset=utf-8,', ''),
               mapDimensions: mapDimensions,
               panOffsets: panOffsets
+            });
           });
-        });
       };
     }
   }

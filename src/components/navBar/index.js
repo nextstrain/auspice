@@ -25,7 +25,7 @@ const Content = hasExtension("navbarComponent") ?
   getExtension("navbarComponent") : AuspiceNavBar;
 
 
-const NavBar = ({sidebar, mobileDisplay, toggleHandler, narrativeTitle, width}) => {
+const NavBar = ({sidebar, toggleHandler, narrativeTitle, width}) => {
   // const styles = getStyles({minified, narrative: !!narrativeTitle, width});
   const showSidebarToggle = sidebar && !narrativeTitle;
   return (

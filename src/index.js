@@ -21,7 +21,7 @@ import "./css/boxed.css";
 import "./css/select.css";
 
 /* FONTS */
-import 'typeface-lato';
+import 'typeface-lato'; // eslint-disable-line import/extensions
 
 const store = configureStore();
 

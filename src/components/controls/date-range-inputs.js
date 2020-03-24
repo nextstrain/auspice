@@ -35,6 +35,8 @@ class DateRangeInputs extends React.Component {
     this.state = {
       lastSliderUpdateTime: Date.now()
     };
+    this.updateFromSliderNotDebounced = this.updateFromSlider.bind(this, false);
+    this.updateFromSliderDebounced = this.updateFromSlider.bind(this, true);
   }
   maybeClearMapAnimationInterval() {
     if (window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference) {
@@ -90,8 +92,8 @@ class DateRangeInputs extends React.Component {
             defaultValue={[this.props.absoluteDateMinNumeric, this.props.absoluteDateMaxNumeric]}
             value={[this.props.dateMinNumeric, this.props.dateMaxNumeric]}
             /* debounce the onChange event, but ensure the final one goes through */
-            onChange={this.updateFromSlider.bind(this, true)}
-            onAfterChange={this.updateFromSlider.bind(this, false)}
+            onChange={this.updateFromSliderDebounced}
+            onAfterChange={this.updateFromSliderNotDebounced}
             minDistance={minDistanceDateSlider * (this.props.absoluteDateMaxNumeric - this.props.absoluteDateMinNumeric)}
             pearling
             withBars

@@ -1,4 +1,5 @@
 /* eslint-disable react/no-array-index-key */
+/* eslint-disable react/no-danger */
 
 import React from "react";
 import { connect } from "react-redux";

@@ -1,8 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
+import { withTranslation } from "react-i18next";
 import ChooseDatasetSelect from "./choose-dataset-select";
 import { SidebarHeader } from "./styles";
-import { withTranslation } from "react-i18next";
 
 // const DroppedFiles = withTheme((props) => {
 //   /* TODO: this shouldn't be in the auspice src, rather injected as an extension when needed */

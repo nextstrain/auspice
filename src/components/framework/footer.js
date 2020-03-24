@@ -3,6 +3,7 @@ import { connect } from "react-redux";
 import marked from "marked";
 import dompurify from "dompurify";
 import styled from 'styled-components';
+import { withTranslation } from "react-i18next";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
@@ -11,7 +12,6 @@ import { version } from "../../version";
 import { publications } from "../download/downloadModal";
 import { isValueValid } from "../../util/globals";
 import hardCodedFooters from "./footer-descriptions";
-import { withTranslation } from "react-i18next";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -165,7 +165,10 @@ export const getAcknowledgments = (metadata, dispatch) => {
     const rawDescription = marked(metadata.description);
     const cleanDescription = sanitizer(rawDescription, sanitizerConfig);
     return (
-      <div className='acknowledgments' dangerouslySetInnerHTML={{ __html: cleanDescription }}/>
+      <div
+        className='acknowledgments'
+        dangerouslySetInnerHTML={{ __html: cleanDescription }} // eslint-disable-line react/no-danger
+      />
     );
   }
 
@@ -272,7 +275,7 @@ class Footer extends React.Component {
   }
 
   displayFilter(filterName) {
-    const { t } = this.props
+    const { t } = this.props;
     const totalStateCount = this.props.totalStateCounts[filterName];
     const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
     return (
@@ -323,7 +326,7 @@ class Footer extends React.Component {
     return (
       <span>
         {"Nextstrain: "}
-        <a href={publications.nextstrain.href} target="_blank">
+        <a href={publications.nextstrain.href} target="_blank" rel="noopener noreferrer">
           {publications.nextstrain.author}, <i>{publications.nextstrain.journal}</i>{` (${publications.nextstrain.year})`}
         </a>
       </span>

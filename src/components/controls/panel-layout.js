@@ -1,11 +1,11 @@
 import React from "react";
 import { connect } from "react-redux";
 import styled, {withTheme} from 'styled-components';
+import { withTranslation } from "react-i18next";
 import * as icons from "../framework/svg-icons";
 import { CHANGE_PANEL_LAYOUT } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { SidebarButton } from "./styles";
-import { withTranslation } from "react-i18next";
 
 const ButtonText = styled.span`
   margin: 5px;

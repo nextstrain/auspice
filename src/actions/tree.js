@@ -79,7 +79,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
     const { tree, treeToo, controls, frequencies } = getState();
     if (root[0] === undefined && !cladeSelected && tree.selectedClade) {
       /* if not resetting tree to root, maintain previous selectedClade if one exists */
-      cladeSelected = tree.selectedClade;
+      cladeSelected = tree.selectedClade; // eslint-disable-line no-param-reassign
     }
 
     if (!tree.nodes) {return;}

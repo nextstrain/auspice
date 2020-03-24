@@ -1,3 +1,4 @@
+/* eslint-disable global-require */
 import React from "react";
 import { applyFilter } from "../../actions/tree";
 import { changeColorBy } from "../../actions/colors";
@@ -167,8 +168,7 @@ const Flu = () => {
           href="http://www.crick.ac.uk/research/worldwide-influenza-centre"
         >Worldwide Influenza
         Centre at the Francis Crick Institute</a>, the <a target="_blank"
-          rel="noreferrer
-        noopener"
+          rel="noreferrer noopener"
           href="http://www.vidrl.org.au/"
         >Victorian Infectious Diseases Reference
         Laboratory at the Australian Peter Doherty Institute for Infection and Immunity</a> and
