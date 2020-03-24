@@ -233,6 +233,7 @@ class Map extends React.Component {
         this.props.dateMinNumeric,
         this.props.dateMaxNumeric,
         this.props.pieChart,
+        this.props.geoResolution,
         this.props.dispatch
       );
 
@@ -384,7 +385,9 @@ class Map extends React.Component {
         nextProps.nodes,
         nextProps.dateMinNumeric,
         nextProps.dateMaxNumeric,
-        nextProps.pieChart
+        nextProps.pieChart,
+        nextProps.geoResolution,
+        nextProps.dispatch
       );
       this.setState({
         d3elems,

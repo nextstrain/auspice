@@ -136,6 +136,7 @@ export const drawDemesAndTransmissions = (
   numDateMin,
   numDateMax,
   pieChart, /* bool */
+  geoResolution,
   dispatch
 ) => {
 
@@ -195,8 +196,8 @@ export const drawDemesAndTransmissions = (
       .attr("transform", (d) =>
         "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
       )
-      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: demeData[d.demeDataIdx].name})) })
-      .on("mouseout", (d) => { dispatch(updateTipRadii()) });
+      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, demeData[d.demeDataIdx].name]})); })
+      .on("mouseout", () => { dispatch(updateTipRadii()); });
   } else {
     demes = g.selectAll("demes") // add deme circles to this selection
       .data(demeData)
@@ -211,8 +212,8 @@ export const drawDemesAndTransmissions = (
       .style("cursor", "pointer")
       .style("pointer-events", "all")
       .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")")
-      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: d.name})) })
-      .on("mouseout", (d) => { dispatch(updateTipRadii()) });
+      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, d.name]})); })
+      .on("mouseout", () => { dispatch(updateTipRadii()); });
   }
 
   return {

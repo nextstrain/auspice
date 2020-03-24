@@ -201,10 +201,11 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
  * NB all params are optional - supplying none resets the tip radii to defaults
  * @param  {string|number} selectedLegendItem value of the attr. if scale is continuous a bound will be used.
  * @param  {int} tipSelectedIdx the strain to highlight (always tree 1)
+ * @param  {array} geoFilter a filter to apply to the strains. Empty array or array of len 2. [0]: geoResolution, [1]: value to filter to
  * @return {null} side-effects: a single action
  */
 export const updateTipRadii = (
-  {tipSelectedIdx = false, selectedLegendItem = false, geoFilter = false, searchNodes = false} = {}
+  {tipSelectedIdx = false, selectedLegendItem = false, geoFilter = [], searchNodes = false} = {}
 ) => {
   return (dispatch, getState) => {
     const { controls, tree, treeToo } = getState();
