@@ -1,3 +1,39 @@
 {
- 
+  "__byline.js__": "########################################",
+  "Maintained by": "Mantenido por",
+  "using data from": "utilizando datos de",
+  "Built with": "Desarrollado usando",
+
+  "__downloadModal.js__": "########################################",
+  "click outside this box to return to the app": "Haz clic afuera de la casilla para regresar a la aplicación",
+  "last updated": "Última actualización",
+  "A full list of sequence authors is available via the TSV files below.": "Una lista completa de los autores de las secuencias se encuentra abajo en el archivo TSV.",
+  "Data usage policy": "Política de uso de datos",
+  "Please cite the authors who contributed genomic data (where relevant), as well as:": "Por favor citar a los autores quienes contribuyeron datos genómicos, y además a:",
+  "Download data": "Descarga los datos",
+
+  "__entropy.js__": "########################################",
+  "Diversity": "Diversidad",
+  "entropy": "entropía",
+  "events": "eventos",
+
+  "__footer.js__": "########################################",
+  "Filter by {{filterTitle}}": "Filtra por {{filterTitle}}",
+  "Data updated": "Datos actualizados",
+
+  "__info.js__": "########################################",
+  "Showing {{nSelectedSamples}} of {{mainTreeNumTips}} genomes": "Visualizando  {{nSelectedSamples}} de los {{mainTreeNumTips}} genomas",
+  "sampled between {{from}} and {{to}}": "aislados entre {{from}} y {{to}}",
+  "and comprising": "y compuesto de",
+  "comprising": "compuesto de",
+  "Animation in progress.": "Animación en proceso.",
+  "Filtered to": "Filtered to",
+
+  "__map.js__": "########################################",
+  "Transmissions": "Transmisiones",
+  "Geography": "Geografía",
+  "reset zoom": "Volver al tamaño original",
+
+  "__tree.js__": "########################################",
+  "Phylogeny": "Filogenia"
 }
