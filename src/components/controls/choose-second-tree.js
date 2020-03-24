@@ -1,6 +1,8 @@
 import React from "react";
 import Select from "react-select";
 import { connect } from "react-redux";
+import { withTranslation } from 'react-i18next';
+
 import { loadSecondTree } from "../../actions/loadData";
 import { REMOVE_TREE_TOO } from "../../actions/types";
 import { controlsWidth } from "../../util/globals";
@@ -16,6 +18,7 @@ import { SidebarSubtitle } from "./styles";
 })
 class ChooseSecondTree extends React.Component {
   render() {
+    const { t } = this.props;
     if (!this.props.available || !this.props.available.datasets) {
       return null;
     }
@@ -38,7 +41,7 @@ class ChooseSecondTree extends React.Component {
     return (
       <div>
         <SidebarSubtitle spaceAbove>
-          Second Tree
+          {t("sidebar:Second Tree")}
         </SidebarSubtitle>
         <div key={"treetooselect"} style={{width: controlsWidth, fontSize: 14}}>
           <Select
@@ -63,4 +66,5 @@ class ChooseSecondTree extends React.Component {
   }
 }
 
-export default ChooseSecondTree;
+const WithTranslation = withTranslation()(ChooseSecondTree);
+export default WithTranslation;

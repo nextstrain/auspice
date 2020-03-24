@@ -49,21 +49,22 @@ We're going to assume that you have used Conda to install Node.js as above.
 conda activate auspice
 
 # grab the GitHub auspice repo
-git checkout https://github.com/nextstrain/auspice.git
+git clone https://github.com/nextstrain/auspice.git
 cd auspice
 
-# install dependencies
-npm install
-
-# make `auspice` available globally
+# install dependencies and make `auspice` available globally
 npm install --global .
 
-# build auspice
+# build auspice (builds the JS client bundle using webpack)
 auspice build
 
 # test it works
 auspice --version
 auspice --help
+
+# Obtain datasets & narratives to view locally (optional)
+npm run get-data
+npm run get-narratives
 ```
 
 Updating Auspice should only require pulling the new version from GitHub -- it shouldn't require any `npm` commands.

@@ -1,12 +1,13 @@
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
+import { withTranslation } from "react-i18next";
 import leaflet from "leaflet";
 import _min from "lodash/min";
 import _max from "lodash/max";
+import domtoimage from "dom-to-image";
 import { select } from "d3-selection";
 import 'd3-transition';
-import leafletImage from "leaflet-image";
 import Card from "../framework/card";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
 import {
@@ -83,34 +84,26 @@ class Map extends React.Component {
     if (!window.L) {
       leaflet(); /* this sets up window.L */
     }
-    if (!window.L.getMapTiles) {
-      /* Get the map tiles
-      https://github.com/mapbox/leaflet-image
-      https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
-      https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsDataURL
-      */
-      window.L.getMapTiles = (loadendCallback, errorCallback) => {
-        leafletImage(this.state.map, (err, canvas) => {
-          if (err) {
-            errorCallback(err);
-            return;
-          }
-          const mapDimensions = this.state.map.getSize();
-          const loadendCallbackWrapper = (e) => {
-            // loadendCallback is a bound version of writeSVGPossiblyIncludingMapPNG
+    if (!window.L.getMapSvg) {
+      /* Get the map tiles */
+      window.L.getMapSvg = (loadendCallback) => {
+        const mapDimensions = this.state.map.getSize();
+        const panOffsets = this.state.map._getMapPanePos();
+        domtoimage.toSvg(this.state.map.getContainer(),
+          {
+            width: mapDimensions.x,
+            height: mapDimensions.y,
+            filter: (node) => {
+              return node.className !== "leaflet-control-container";
+            }
+          })
+          .then((image) => {
             loadendCallback({
-              base64map: e.srcElement.result,
-              mapDimensions,
-              panOffsets: this.state.map._getMapPanePos()
+              mapSvg: image.replace('data:image/svg+xml;charset=utf-8,', ''),
+              mapDimensions: mapDimensions,
+              panOffsets: panOffsets
             });
-          };
-          canvas.toBlob((blob) => {
-            const reader = new FileReader();
-            reader.addEventListener('loadend', loadendCallbackWrapper);
-            reader.addEventListener('onerror', errorCallback);
-            reader.readAsDataURL(blob);
-          }, "image/png;base64;", 1);
-        });
+          });
       };
     }
   }
@@ -240,7 +233,9 @@ class Map extends React.Component {
         this.props.nodes,
         this.props.dateMinNumeric,
         this.props.dateMaxNumeric,
-        this.props.pieChart
+        this.props.pieChart,
+        this.props.geoResolution,
+        this.props.dispatch
       );
 
       // don't redraw on every rerender - need to seperately handle virus change redraw
@@ -391,7 +386,9 @@ class Map extends React.Component {
         nextProps.nodes,
         nextProps.dateMinNumeric,
         nextProps.dateMaxNumeric,
-        nextProps.pieChart
+        nextProps.pieChart,
+        nextProps.geoResolution,
+        nextProps.dispatch
       );
       this.setState({
         d3elems,
@@ -536,13 +533,13 @@ class Map extends React.Component {
             style={{...buttonBaseStyle, top: 20, left: 20, width: 60, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? pauseColor : goColor}}
             onClick={this.playPauseButtonClicked}
           >
-            {this.props.animationPlayPauseButton}
+            {this.props.t(this.props.animationPlayPauseButton)}
           </button>
           <button
             style={{...buttonBaseStyle, top: 20, left: 88, width: 60, backgroundColor: lightGrey}}
             onClick={this.resetButtonClicked}
           >
-            Reset
+            {this.props.t("Reset")}
           </button>
         </div>
       );
@@ -647,11 +644,12 @@ class Map extends React.Component {
     };
   };
   render() {
+    const { t } = this.props;
     const styles = this.getStyles();
     const transmissionsExist = this.state.transmissionData && this.state.transmissionData.length;
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
-      <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
+      <Card center title={transmissionsExist ? t("Transmissions") : t("Geography")}>
         {this.maybeCreateMapDiv()}
         {this.props.narrativeMode ? null : (
           <button
@@ -661,7 +659,7 @@ class Map extends React.Component {
               this.setState({userHasInteractedWithMap: false});
             }}
           >
-            reset zoom
+            {t("reset zoom")}
           </button>
         )}
       </Card>
@@ -669,4 +667,5 @@ class Map extends React.Component {
   }
 }
 
-export default Map;
+const WithTranslation = withTranslation()(Map);
+export default WithTranslation;

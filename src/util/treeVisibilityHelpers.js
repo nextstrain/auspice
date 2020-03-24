@@ -52,7 +52,7 @@ export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
       }
     }
   }
-  if (found === 0) { 
+  if (found === 0) {
     console.error(`getIdxMatchingLabel couldn't find label ${labelName}===${labelValue}`);
     dispatch(warningNotification({
       message: "Specified Zoom Label Value Not Found!",

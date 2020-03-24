@@ -36,9 +36,8 @@ class Flex extends React.Component {
     alignSelf: PropTypes.oneOf([
       "auto", "flex-start", "flex-end", "center", "baseline", "stretch"
     ]),
-    styleOverrides: PropTypes.object,
-    children: PropTypes.node,
-    clickHandler: PropTypes.func,
+    children: PropTypes.node.isRequired,
+    clickHandler: PropTypes.func
   }
   static defaultProps = {
     direction: "row",
@@ -51,7 +50,8 @@ class Flex extends React.Component {
     basis: "auto",
     alignSelf: "auto",
     order: 0,
-    style: {}
+    style: {},
+    clickHandler: () => {}
   }
   getStyles() {
     return {

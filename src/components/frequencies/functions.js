@@ -100,7 +100,7 @@ export const drawYAxis = (svg, chartGeom, scales) => {
     .call(axisLeft(scales.y).ticks(scales.numTicksY).tickFormat(formatPercent));
 };
 
-export const drawProjectionInfo = (svg, scales, projection_pivot) => {
+export const drawProjectionInfo = (svg, scales, projection_pivot, t) => {
   if (projection_pivot) {
 
     removeProjectionInfo(svg);
@@ -129,7 +129,7 @@ export const drawProjectionInfo = (svg, scales, projection_pivot) => {
       .style("font-size", 12)
       .style("alignment-baseline", "bottom")
       .style("text-anchor", "middle")
-      .text("Projection");
+      .text(t("Projection"));
 
   }
 };
@@ -238,7 +238,7 @@ export const processMatrix = ({matrix, pivots, colorScale}) => {
 };
 
 export const drawStream = (
-  svgStreamGroup, scales, {categories, series}, {colorBy, colorScale, colorOptions, pivots, projection_pivot}
+  svgStreamGroup, scales, {categories, series}, {colorBy, colorScale, colorOptions, pivots, projection_pivot, t}
 ) => {
   removeStream(svgStreamGroup);
   const colourer = generateColorScaleD3(categories, colorScale);
@@ -272,10 +272,10 @@ export const drawStream = (
     const right = xValueOfPivot > 0.5 * scales.x.range()[1] ? `${scales.x.range()[1] - xValueOfPivot + 25}px` : "";
     const top = y1ValueOfPivot > 0.5 * scales.y(0) ? `${scales.y(0) - 50}px` : `${y1ValueOfPivot + 25}px`;
 
-    let frequencyText = "Frequency";
+    let frequencyText = t("Frequency");
     if (projection_pivot) {
       if (pivots[pivotIdx] > projection_pivot) {
-        frequencyText = "Projected frequency";
+        frequencyText = t("Projected frequency");
       }
     }
 
@@ -296,7 +296,7 @@ export const drawStream = (
       .style("font-weight", 300)
       .html(
         `<p>${parseColorBy(colorBy, colorOptions)}: ${labels[i]}</p>
-        <p>Time point: ${pivots[pivotIdx]}</p>
+        <p>${t("Time point")}: ${pivots[pivotIdx]}</p>
         <p>${frequencyText}: ${freqVal}</p>`
       );
   }

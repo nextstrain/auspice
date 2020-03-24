@@ -111,9 +111,7 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
     // console.log("mut @ ", pos, ":", A, " -> ", B)
     if (isAA) {
       if (A === "X" || B === "X") return;
-    } else {
-      if (A === "N" || A === "-" || B === "N" || B === "-") return;
-    }
+    } else if (A === "N" || A === "-" || B === "N" || B === "-") return;
     if (!anc_state[prot][pos]) {
       // if we don't know the ancestral state, set it via the first encountered state
       anc_state[prot][pos] = A;

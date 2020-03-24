@@ -77,9 +77,9 @@ const flipChildrenPostorder = (phylotree1, phylotree2) => {
 
 export const untangleTreeToo = (phylotree1, phylotree2) => {
   // console.time("untangle");
-  const init_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
+  // const init_corr = calculatePearsonCorrelationCoefficient(phylotree1, phylotree2);
   flipChildrenPostorder(phylotree1, phylotree2);
-  console.log(`Untangling ${init_corr} -> ${calculatePearsonCorrelationCoefficient(phylotree1, phylotree2)}`);
+  // console.log(`Untangling ${init_corr} -> ${calculatePearsonCorrelationCoefficient(phylotree1, phylotree2)}`);
   setYValues(phylotree2.nodes);
   // console.timeEnd("untangle");
 };

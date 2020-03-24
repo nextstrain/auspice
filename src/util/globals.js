@@ -2,13 +2,13 @@ import { scaleLinear, scaleSqrt } from "d3-scale";
 import { hasExtension, getExtension } from "../util/extensions";
 
 export const colorOptions = {
-  "country": {"key": "country", "legendTitle": "Country", "menuItem": "country", "type": "discrete"},
-  "region": {"key": "region", "legendTitle": "Region", "menuItem": "region", "type": "discrete"},
-  "num_date": {"key": "num_date", "legendTitle": "Sampling date", "menuItem": "date", "type": "continuous"},
-  "ep": {"key": "ep", "legendTitle": "Epitope Mutations", "menuItem": "epitope mutations", "type": "continuous"},
-  "ne": {"key": "ne", "legendTitle": "Non-epitope Mutations", "menuItem": "nonepitope mutations", "type": "continuous"},
-  "rb": {"key": "rb", "legendTitle": "Receptor Binding Mutations", "menuItem": "RBS mutations", "type": "continuous"},
-  "gt": {"key": "genotype", "legendTitle": "Genotype", "menuItem": "genotype", "type": "discrete"}
+  country: {key: "country", legendTitle: "Country", menuItem: "country", type: "discrete"},
+  region: {key: "region", legendTitle: "Region", menuItem: "region", type: "discrete"},
+  num_date: {key: "num_date", legendTitle: "Sampling date", menuItem: "date", type: "continuous"},
+  ep: {key: "ep", legendTitle: "Epitope Mutations", menuItem: "epitope mutations", type: "continuous"},
+  ne: {key: "ne", legendTitle: "Non-epitope Mutations", menuItem: "nonepitope mutations", type: "continuous"},
+  rb: {key: "rb", legendTitle: "Receptor Binding Mutations", menuItem: "RBS mutations", type: "continuous"},
+  gt: {key: "genotype", legendTitle: "Genotype", menuItem: "genotype", type: "discrete"}
 };
 
 /* static for now, then hand rolled version of https://github.com/digidem/react-dimensions */
@@ -29,7 +29,7 @@ export const defaultDistanceMeasure = "num_date";
 export const defaultDateRange = 6;
 export const date_select = true;
 export const file_prefix = "Zika_";
-export const restrictTo = {"region": "all"};
+export const restrictTo = {region: "all"};
 export const time_window = 3.0;
 export const fullDataTimeWindow = 1.5;
 export const time_ticks = [2013.0, 2013.5, 2014.0, 2014.5, 2015.0, 2015.5, 2016.0];
@@ -130,8 +130,8 @@ export const colors = [
   ["#511EA8", "#4928B4", "#4334BF", "#4041C7", "#3F50CC", "#3F5ED0", "#416CCE", "#4379CD", "#4784C7", "#4B8FC1", "#5098B9", "#56A0AF", "#5CA7A4", "#63AC99", "#6BB18E", "#73B583", "#7CB878", "#86BB6E", "#90BC65", "#9ABD5C", "#A4BE56", "#AFBD4F", "#B9BC4A", "#C2BA46", "#CCB742", "#D3B240", "#DAAC3D", "#DFA43B", "#E39B39", "#E68F36", "#E68234", "#E67431", "#E4632E", "#E1512A", "#DF4027", "#DC2F24"]
 ];
 
-export const filterAbbrFwd = {"geo": "geographic location", "all": "all"};
-export const filterAbbrRev = {"geographic location": "geo", "all": "all"};
+export const filterAbbrFwd = {geo: "geographic location", all: "all"};
+export const filterAbbrRev = {"geographic location": "geo", all: "all"};
 
 export const titleColors = ["#4377CD", "#5097BA", "#63AC9A", "#7CB879", "#9ABE5C", "#B9BC4A", "#D4B13F", "#E49938", "#E67030", "#DE3C26"];
 export const notificationDuration = 10000;

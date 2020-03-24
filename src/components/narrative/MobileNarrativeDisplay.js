@@ -1,4 +1,5 @@
 /* eslint-disable react/no-array-index-key */
+/* eslint-disable react/no-danger */
 
 import React from "react";
 import { connect } from "react-redux";
@@ -233,7 +234,8 @@ class MobileNarrativeDisplay extends React.Component {
   renderProgress() {
     return (
       <ProgressBar id="progress-bar"
-        style={{height: `${progressHeight}px`}}>
+        style={{height: `${progressHeight}px`}}
+      >
         {this.props.blocks.map((b, i) => {
           const d = (!this.state.showingEndOfNarrativePage) &&
             this.props.currentInFocusBlockIdx === i ?

@@ -10,9 +10,9 @@ const registry = (() => {
 
   Object.keys(extensions).forEach((key) => {
     if (key.endsWith("Component")) {
-      console.log("loading component", key);
+      // console.log("loading component", key);
       /* "@extensions" is a webpack alias */
-      extensions[key] = require(`@extensions/${extensions[key]}`).default;
+      extensions[key] = require(`@extensions/${extensions[key]}`).default; // eslint-disable-line
     }
   });
   // console.log("extensions", extensions);

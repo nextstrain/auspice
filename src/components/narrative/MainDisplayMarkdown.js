@@ -3,7 +3,7 @@ import { connect } from "react-redux";
 import marked from "marked";
 import styled from 'styled-components';
 import dompurify from "dompurify";
-import { dataFont, darkGrey } from "../../globalStyles";
+import { dataFont } from "../../globalStyles";
 
 
 /**
@@ -95,13 +95,24 @@ const Container = styled.div`
     margin-bottom: 2px;
   }
 
+  table, th, td {
+    border: 1px solid;
+  }
+  td, th {
+    padding: 3px;
+  }
+
 `;
 
 const EXPERIMENTAL_MainDisplayMarkdown = ({narrativeBlock, width, mobile}) => {
   const cleanHTML = mdToHtml(narrativeBlock.mainDisplayMarkdown);
   return (
     <Container width={width} mobile={mobile}>
-      <div dir="auto" dangerouslySetInnerHTML={{ __html: cleanHTML }}/>
+      <div
+        dir="auto"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: cleanHTML }}
+      />
     </Container>
   );
 };

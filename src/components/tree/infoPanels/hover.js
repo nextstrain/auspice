@@ -41,26 +41,26 @@ const StrainName = ({name}) => (
  * @param  {Object} props
  * @param  {Object} props.node branch node currently highlighted
  */
-const BranchLength = ({node}) => {
+const BranchLength = ({node, t}) => {
   const elements = []; // elements to render
   const divergence = getDivFromNode(node);
   const numDate = getTraitFromNode(node, "num_date");
 
   if (divergence) {
-    elements.push(<InfoLine name="Divergence:" value={formatDivergence(divergence)} key="div"/>);
+    elements.push(<InfoLine name={t("Divergence")+":"} value={formatDivergence(divergence)} key="div"/>);
   }
 
   if (numDate !== undefined) {
     const date = numericToCalendar(numDate);
     const numDateConfidence = getTraitFromNode(node, "num_date", {confidence: true});
     if (numDateConfidence && numDateConfidence[0] !== numDateConfidence[1]) {
-      elements.push(<InfoLine name="Inferred Date:" value={date} key="inferredDate"/>);
+      elements.push(<InfoLine name={t("Inferred Date")+":"} value={date} key="inferredDate"/>);
       const dateRange = [numericToCalendar(numDateConfidence[0]), numericToCalendar(numDateConfidence[1])];
       if (dateRange[0] !== dateRange[1]) {
-        elements.push(<InfoLine name="Date Confidence Interval:" value={`(${dateRange[0]}, ${dateRange[1]})`} key="dateConf"/>);
+        elements.push(<InfoLine name={t("Date Confidence Interval")+":"} value={`(${dateRange[0]}, ${dateRange[1]})`} key="dateConf"/>);
       }
     } else {
-      elements.push(<InfoLine name="Date:" value={date} key="date"/>);
+      elements.push(<InfoLine name={t("Date")+":"} value={date} key="date"/>);
     }
   }
 
@@ -142,7 +142,7 @@ const ColorBy = ({node, colorBy, colorByConfidence, colorScale, colorings}) => {
  * @param  {Object} props
  * @param  {Object} props.node     branch node which is currently highlighted
  */
-const Mutations = ({node}) => {
+const Mutations = ({node, t}) => {
   if (!node.branch_attrs || !node.branch_attrs.mutations) return null;
   const elements = []; // elements to render
   const mutations = node.branch_attrs.mutations;
@@ -160,15 +160,15 @@ const Mutations = ({node}) => {
     const nucLen = nucs.length; // number of mutations that exist without N/-
 
     let m = nucs.slice(0, Math.min(nDisplay, nucLen)).join(", ");
-    m += nucLen > nDisplay ? " + " + (nucLen - nDisplay) + " more" : "";
+    m += nucLen > nDisplay ? " + " + (nucLen - nDisplay) + " " + t("more") : "";
 
     if (nucLen !== 0) {
-      elements.push(<InfoLine name="Nucleotide mutations:" value={m} key="nuc"/>);
+      elements.push(<InfoLine name={t("Nucleotide mutations")+":"} value={m} key="nuc"/>);
     }
 
     const nGapMutations = mutations.nuc.filter((mut) => isMutGap(mut)).length;
     if (nGapMutations) {
-      elements.push(<InfoLine name='Gaps ("-"):' value={nGapMutations} key="gaps"/>);
+      elements.push(<InfoLine name={`${t("Gaps")} ("-"):`} value={nGapMutations} key="gaps"/>);
     }
 
     const nUnknownMutations = mutations.nuc.filter((mut) => isMutUnknown(mut)).length;
@@ -176,7 +176,7 @@ const Mutations = ({node}) => {
       elements.push(<InfoLine name='Ns:' value={nUnknownMutations} key="Ns"/>);
     }
   } else {
-    elements.push(<InfoLine name="No nucleotide mutations" value="" key="nuc"/>);
+    elements.push(<InfoLine name={t("No nucleotide mutations")} value="" key="nuc"/>);
   }
 
   /* --------- AMINO ACID MUTATIONS --------------- */
@@ -201,18 +201,18 @@ const Mutations = ({node}) => {
       if (idx < nProtsToDisplay) {
         let x = prot + ":\u00A0\u00A0" + mutationsToDisplay[prot].slice(0, Math.min(nDisplay, mutationsToDisplay[prot].length)).join(", ");
         if (mutationsToDisplay[prot].length > nDisplay) {
-          x += " + " + (mutationsToDisplay[prot].length - nDisplay) + " more";
+          x += " + " + (mutationsToDisplay[prot].length - nDisplay) + " " + t("more");
         }
         mutationsToRender.push(x);
       } else if (idx === nProtsToDisplay) {
-        mutationsToRender.push(`(protein mutations truncated)`);
+        mutationsToRender.push(`(${t("protein mutations truncated")})`);
       }
     });
-    elements.push(<InfoLine name="AA mutations:" value={mutationsToRender} key="aa"/>);
+    elements.push(<InfoLine name={t("AA mutations")+":"} value={mutationsToRender} key="aa"/>);
   } else if (mutations.nuc && mutations.nuc.length) {
     /* we only print "No amino acid mutations" if we didn't already print
     "No nucleotide mutations" above */
-    elements.push(<InfoLine name="No amino acid mutations" key="aa"/>);
+    elements.push(<InfoLine name={t("No amino acid mutations")} key="aa"/>);
   }
 
   return elements;
@@ -223,10 +223,10 @@ const Mutations = ({node}) => {
  * @param  {Object} props
  * @param  {Object} props.node  branch node which is currently highlighted
  */
-const BranchDescendents = ({node}) => {
+const BranchDescendents = ({node, t}) => {
   const [name, value] = node.fullTipCount === 1 ?
-    ["Branch leading to", node.name] :
-    ["Number of descendants:", node.fullTipCount];
+    [t("Branch leading to"), node.name] :
+    [t("Number of descendants")+":", node.fullTipCount];
   return <InfoLine name={name} value={value} padBelow/>;
 };
 
@@ -236,21 +236,21 @@ const BranchDescendents = ({node}) => {
  * @param  {Object} props
  * @param  {Object} props.node  branch node which is currently highlighted
  */
-const VaccineInfo = ({node}) => {
+const VaccineInfo = ({node, t}) => {
   const vaccineInfo = getVaccineFromNode(node);
   if (!vaccineInfo) return null;
   const renderElements = [];
   if (vaccineInfo.selection_date) {
-    renderElements.push(<InfoLine name="Vaccine selected:" value={vaccineInfo.selection_date} key="seldate"/>);
+    renderElements.push(<InfoLine name={t("Vaccine selected")+":"} value={vaccineInfo.selection_date} key="seldate"/>);
   }
   if (vaccineInfo.start_date) {
-    renderElements.push(<InfoLine name="Vaccine start date:" value={vaccineInfo.start_date} key="startdate"/>);
+    renderElements.push(<InfoLine name={t("Vaccine start date")+":"} value={vaccineInfo.start_date} key="startdate"/>);
   }
   if (vaccineInfo.end_date) {
-    renderElements.push(<InfoLine name="Vaccine end date:" value={vaccineInfo.end_date} key="enddate"/>);
+    renderElements.push(<InfoLine name={t("Vaccine end date")+":"} value={vaccineInfo.end_date} key="enddate"/>);
   }
   if (vaccineInfo.serum) {
-    renderElements.push(<InfoLine name="Serum strain" key="serum"/>);
+    renderElements.push(<InfoLine name={t("Serum strain")} key="serum"/>);
   }
   return renderElements;
 };
@@ -339,7 +339,8 @@ const HoverInfoPanel = ({
   colorByConfidence,
   colorScale,
   panelDims,
-  colorings
+  colorings,
+  t
 }) => {
   if (!hovered) return null;
   const node = hovered.d.n;
@@ -348,20 +349,20 @@ const HoverInfoPanel = ({
       {hovered.type === ".tip" ? (
         <>
           <StrainName name={node.name}/>
-          <VaccineInfo node={node}/>
-          <Mutations node={node}/>
-          <BranchLength node={node}/>
+          <VaccineInfo node={node} t={t}/>
+          <Mutations node={node} t={t}/>
+          <BranchLength node={node} t={t}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
           <AttributionInfo node={node}/>
-          <Comment>Click on tip to display more info</Comment>
+          <Comment>{t("Click on tip to display more info")}</Comment>
         </>
       ) : (
         <>
-          <BranchDescendents node={node}/>
-          <Mutations node={node}/>
-          <BranchLength node={node}/>
+          <BranchDescendents node={node} t={t}/>
+          <Mutations node={node} t={t}/>
+          <BranchLength node={node} t={t}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
-          <Comment>Click to zoom into clade</Comment>
+          <Comment>{t("Click to zoom into clade")}</Comment>
         </>
       )}
     </Container>
