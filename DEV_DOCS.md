@@ -17,9 +17,9 @@ For pull requests, please use [eslint](https://eslint.org/) as much as possible 
 
 ## Contributing to Documentation
 
-This documentation is all contained within the Auspice GitHub repo -- see [the README](https://github.com/nextstrain/auspice/tree/master/docs-src) within the `docs-src` directory for more details and instructions on how to contribute.
+Nextstrain documentation is available at [nextstrain.github.io/auspice/](https://nextstrain.github.io/auspice/).
 
-Please see [docs-src/README](./docs-src/README.md) for how the auspice documentation site is built.
+This documentation is built from files contained within the Auspice GitHub repo -- see [the docs-src/README](https://github.com/nextstrain/auspice/tree/master/docs-src) within the `docs-src` directory for more details and instructions on how to contribute.
 
 Note that currently the documentation must be rebuilt & pushed to GitHub _after_ a new version is released in order for the changelog to correctly appear at [nextstrain.github.io/auspice/releases/changelog](https://nextstrain.github.io/auspice/releases/changelog).
 
