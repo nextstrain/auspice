@@ -4,6 +4,7 @@ import _max from "lodash/max";
 import { line, curveBasis, arc } from "d3-shape";
 import { easeLinear } from "d3-ease";
 import { demeCountMultiplier, demeCountMinimum } from "../../util/globals";
+import { updateTipRadii } from "../../actions/tree";
 
 /* util */
 
@@ -134,7 +135,9 @@ export const drawDemesAndTransmissions = (
   nodes,
   numDateMin,
   numDateMax,
-  pieChart /* bool */
+  pieChart, /* bool */
+  geoResolution,
+  dispatch
 ) => {
 
   // add transmission lines
@@ -188,9 +191,12 @@ export const drawDemesAndTransmissions = (
       .style("fill", (d) => { return d.color; })
       .style("stroke-opacity", 0.85)
       .style("stroke", (d) => { return d.color; })
+      .style("pointer-events", "all")
       .attr("transform", (d) =>
         "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
-      );
+      )
+      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, demeData[d.demeDataIdx].name]})); })
+      .on("mouseout", () => { dispatch(updateTipRadii()); });
   } else {
     demes = g.selectAll("demes") // add deme circles to this selection
       .data(demeData)
@@ -202,7 +208,10 @@ export const drawDemesAndTransmissions = (
       .style("fill", (d) => { return d.color; })
       .style("stroke-opacity", 0.85)
       .style("stroke", (d) => { return d.color; })
-      .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")");
+      .style("pointer-events", "all")
+      .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")")
+      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, d.name]})); })
+      .on("mouseout", () => { dispatch(updateTipRadii()); });
   }
 
   return {
