@@ -24,7 +24,8 @@ class Language extends React.Component {
   getlanguageOptions() {
     const languages = [
       {value: "en", label: "English"},
-      {value: "es", label: "Español"}
+      {value: "es", label: "Español"},
+      {value: "ru", label: "Русский"}      
     ];
     return languages;
   }
