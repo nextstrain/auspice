@@ -363,7 +363,7 @@ const HoverInfoPanel = ({
           <Mutations node={node} t={t}/>
           <BranchLength node={node} t={t}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
-          <Comment>t('Click to zoom' + (idxOfInViewRootNode == node.arrayIdx ? 'out to parent clade' : 'into clade'))}</Comment>
+          <Comment>{t('Click to zoom' + (idxOfInViewRootNode == node.arrayIdx ? 'out to parent clade' : 'into clade'))}</Comment>
         </>
       )}
     </Container>
