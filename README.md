@@ -36,12 +36,14 @@ This requires nodejs 10+. We recommend using a conda environment, but this is no
 
 #### Install with conda (Recommended)
 
+Create and activate a [conda](https://docs.conda.io) environment:
+
 ```bash
 conda create --name auspice nodejs=10
 conda activate auspice
 ```
 
-#### Install using `npm`
+Now that the conda environment is activated, install auspice:
 
 ```bash
 npm install --global auspice
