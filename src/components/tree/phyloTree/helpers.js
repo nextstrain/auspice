@@ -111,6 +111,14 @@ export const formatDivergence = (divergence) => {
 };
 
 
+/** get the idx of the zoom node (i.e. the in-view root node).
+ * This differs depending on which tree is in view so it's helpful to access it
+ * by reaching into phyotree to get it
+ */
+export const getIdxOfInViewRootNode = (node) => {
+  return node.shell.that.zoomNode.n.arrayIdx;
+};
+
 /**
  * Are the provided nodes within some divergence / time of each other?
  * NOTE: `otherNode` is always closer to the root in the tree than `node`

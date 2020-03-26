@@ -5,7 +5,7 @@ import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, getVaccineFromNode, getFullAuthorInfoFromNode } from "../../../util/treeMiscHelpers";
 import { isValueValid } from "../../../util/globals";
-import { formatDivergence } from "../phyloTree/helpers";
+import { formatDivergence, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 
 const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
@@ -340,11 +340,12 @@ const HoverInfoPanel = ({
   colorScale,
   panelDims,
   colorings,
-  t,
-  idxOfInViewRootNode
+  t
 }) => {
   if (!hovered) return null;
   const node = hovered.d.n;
+  const idxOfInViewRootNode = getIdxOfInViewRootNode(node);
+
   return (
     <Container node={node} panelDims={panelDims}>
       {hovered.type === ".tip" ? (
