@@ -31,7 +31,8 @@
     "gzip-and-upload": "env bash ./scripts/gzip-and-upload.sh",
     "build-docs": "echo 'see ./docs-src/README.md'",
     "test": "jest",
-    "integration-test": "NODE_ENV=test ENV=dev jest --config puppeteer.config.js"
+    "integration-test": "NODE_ENV=test ENV=dev jest --config puppeteer.config.js",
+    "diff-lang": "./scripts/diff-lang.js"
   },
   "dependencies": {
     "@babel/core": "^7.3.4",
