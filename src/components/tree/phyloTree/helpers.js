@@ -149,7 +149,7 @@ function isWithinBranchTolerance(node, otherNode, distanceMeasure) {
  */
 export const getParentBeyondPolytomy = (node, distanceMeasure) => {
   let potentialNode = node.parent;
-  while (isWithinBranchTolerance(potentialNode, potentialNode.parent, distanceMeasure)) {
+  while (isWithinBranchTolerance(node, potentialNode, distanceMeasure)) {
     if (potentialNode === potentialNode.parent) break; // root node of tree
     potentialNode = potentialNode.parent;
   }
