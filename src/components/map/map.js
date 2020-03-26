@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
 import leaflet from "leaflet";
+import { GestureHandling } from "leaflet-gesture-handling";
 import _min from "lodash/min";
 import _max from "lodash/max";
 import domtoimage from "dom-to-image";
@@ -466,10 +467,13 @@ class Map extends React.Component {
     GET LEAFLET IN THE DOM
     **************************************** */
 
+    L.Map.addInitHook("addHandler", "gestureHandling", GestureHandling);
+
     const map = L.map('map', {
       center: center,
       zoom: zoom,
       scrollWheelZoom: false,
+      gestureHandling: true,
       maxBounds: this.getInitialBounds(),
       minZoom: 1,
       maxZoom: 14,
