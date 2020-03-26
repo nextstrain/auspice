@@ -67,22 +67,23 @@ const arrayToSentence = (arr, {prefix=undefined, suffix=undefined, capatalise=tr
 export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visibleStateCounts, branchLengthsToDisplay, t) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
   const sampledDateRange = getVisibleDateRange(nodes, visibility);
+  let summary = ""; /* text returned from this function */
 
   /* Number of genomes & their date range */
   if (branchLengthsToDisplay !== "divOnly") {
-    let summary = t(
+    summary += t(
       "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.",
       {
-        nSelectedSamples: nSelectedSamples, mainTreeNumTips: mainTreeNumTips,
-        from: styliseDateRange(sampledDateRange[0]), to: styliseDateRange(sampledDateRange[1])
+        x: nSelectedSamples,
+        y: mainTreeNumTips,
+        from: styliseDateRange(sampledDateRange[0]),
+        to: styliseDateRange(sampledDateRange[1])
       }
     );
   } else {
-    let summary = t(
+    summary += t(
       "Showing {{x}} of {{y}} genomes.",
-      {
-        nSelectedSamples: nSelectedSamples, mainTreeNumTips: mainTreeNumTips,
-      }
+      {x: nSelectedSamples, y: mainTreeNumTips}
     );
   }
 
@@ -97,8 +98,10 @@ export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visib
   const filterText = arrayToSentence(filterTextArr, {prefix: prefix, capatalise: false});
   if (filterText.length) {
     summary += ` ${filterText}`;
-  } else {
+  } else if (summary.endsWith('.')) {
     summary += ". ";
+  } else {
+    summary += " ";
   }
   return summary;
 };
