@@ -6,10 +6,9 @@
 
 
   "__Header//Info__": "########################################",
-  "Showing {{x}} of {{y}} genomes": "Изображает {{x}} из {{y}} геномов",
+  "Showing {{x}} of {{y}} genomes.": "Изображает {{x}} из {{y}} геномов.",
   "sampled between {{from}} and {{to}}": "выборка между {{from}} и {{to}}",
-  "and comprising": "и содержащий",
-  "comprising": "содержащий",
+  "Comprising": "содержащий",
   "Animation in progress.": "Идет анимация.",
   "Filtered to": "Фильтр по",
 
