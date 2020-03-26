@@ -82,10 +82,13 @@ export const onBranchClick = function onBranchClick(d) {
     const key = legalBranchLabels[0];
     cladeSelected = `${key}:${d.n.branch_attrs.labels[key]}`;
   }
-  // If the root node is clicked, zoom out instead of in
-  let arrayIdx = (this.props.tree.idxOfInViewRootNode == d.n.arrayIdx) ? getFurthestParentWithNextDivergence(d.n).arrayIdx : d.n.arrayIdx;
-  if (d.that.params.orientation[0] === 1) root[0] = arrayIdx;
-  else root[1] = arrayIdx;
+  /* Clicking on a branch means we want to zoom into the clade defined by that branch
+  _except_ when it's the "in-view" root branch, in which case we want to zoom out */
+  const arrayIdxToZoomTo = (this.props.tree.idxOfInViewRootNode === d.n.arrayIdx) ?
+    getFurthestParentWithNextDivergence(d.n).arrayIdx :
+    d.n.arrayIdx;
+  if (d.that.params.orientation[0] === 1) root[0] = arrayIdxToZoomTo;
+  else root[1] = arrayIdxToZoomTo;
   this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected}));
 };
 

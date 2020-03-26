@@ -110,19 +110,27 @@ export const formatDivergence = (divergence) => {
 };
 
 
+/**
+ * Are the provided nodes within some divergence of each other?
+ */
 function hasSameDivergence(node, otherNode) {
-  let tolerance = 0.0001;
+  const tolerance = 0.0001;
   return ((node.node_attrs.div - tolerance) <= otherNode.node_attrs.div) && ((node.node_attrs.div + tolerance) >= otherNode.node_attrs.div);
-};
+}
 
 function getSelfOrFurthestParentWithSameDivergence(node) {
   while (hasSameDivergence(node, node.parent)) {
-    if (node == node.parent) break;
+    if (node === node.parent) break; // root node of tree
     node = node.parent;
   }
   return node;
 }
 
+/**
+ * Given a `node`, get the parent, grandparent etc node which is beyond some
+ * branch length threshold (either divergence or time)
+ * @param {object} node - tree node
+ */
 export const getFurthestParentWithNextDivergence = (node) => {
   return getSelfOrFurthestParentWithSameDivergence(getSelfOrFurthestParentWithSameDivergence(node).parent);
 };
