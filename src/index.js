@@ -12,6 +12,7 @@ import { initialiseGoogleAnalyticsIfRequired } from "./util/googleAnalytics";
 /* S T Y L E S H E E T S */
 import "font-awesome/css/font-awesome.css";
 import "leaflet/dist/leaflet.css";
+import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css";
 import "./css/global.css";
 import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";
