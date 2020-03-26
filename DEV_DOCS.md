@@ -48,6 +48,17 @@ to
   "and comprising": "y compuesto de",
 ```
 
+#### Helper script to check what parts of a translation are out-of-date or missing:
+
+Run `npm run diff-lang -- X`, where `X` is the language you wish to check, for instance `es`.
+This will display the strings which:
+* need to be added to the translation
+* are present but should be removed as they are no longer used
+* are present but are simply a copy of the English version & need to be translated
+
+
+> Running `npm run diff-lang` will check all available languages.
+
 #### Improving an existing translation:
 
 If a translation of a particular string is not yet available, then auspice will fall-back to the english version.
