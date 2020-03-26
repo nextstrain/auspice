@@ -124,14 +124,17 @@ export const getIdxOfInViewRootNode = (node) => {
  * NOTE: `otherNode` is always closer to the root in the tree than `node`
  */
 function isWithinBranchTolerance(node, otherNode, distanceMeasure) {
-  const timeTolerance = 1/12; // a month. TODO: make dataset dependent, e.g. 1/100 of the time range
-  const divTolerance = 0.0001; // TODO: make dataset dependent, e.g. 1/100 of the total divergence range
-
   if (distanceMeasure === "num_date") {
-    return (getTraitFromNode(node, "num_date") - timeTolerance < getTraitFromNode(otherNode, "num_date"));
+    /* We calculate the threshold by reaching into phylotree to extract the date range of the dataset
+    and then split the data into ~50 slices. This could be refactored to not reach into phylotree. */
+    const tolerance = (node.shell.that.dateRange[1]-node.shell.that.dateRange[0])/50;
+    return (getTraitFromNode(node, "num_date") - tolerance < getTraitFromNode(otherNode, "num_date"));
   }
-  // else: divergence
-  return (getDivFromNode(node) - divTolerance < getDivFromNode(otherNode));
+  /* Compute the divergence tolerance similarly to above. This uses the approach used to compute the
+  x-axis grid within phyotree, and could be refactored into a helper function. Note that we don't store
+  the maximum divergence on the tree so we use the in-view max instead */
+  const tolerance = (node.shell.that.xScale.domain()[1] - node.shell.that.nodes[0].depth)/50;
+  return (getDivFromNode(node) - tolerance < getDivFromNode(otherNode));
 }
 
 
