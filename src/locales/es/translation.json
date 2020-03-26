@@ -6,10 +6,9 @@
 
 
   "__Header//Info__": "########################################",
-  "Showing {{x}} of {{y}} genomes": "Visualizando  {{x}} de los {{y}} genomas",
-  "sampled between {{from}} and {{to}}": "aislados entre {{from}} y {{to}}",
-  "and comprising": "y compuesto de",
-  "comprising": "compuesto de",
+  "Showing {{x}} of {{y}} genomes.": "Visualizando {{x}} de los {{y}} genomas.",
+  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.": "Visualizando {{x}} de los {{y}} genomas aislados entre {{from}} y {{to}}",
+  "Comprising": "Compuesto de",
   "Animation in progress.": "Animación en proceso.",
   "Filtered to": "Resaltando",
 
