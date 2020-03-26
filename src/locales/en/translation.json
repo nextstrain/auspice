@@ -6,10 +6,9 @@
 
 
   "__Header//Info__": "########################################",
-  "Showing {{x}} of {{y}} genomes": "Showing {{x}} of {{y}} genomes",
-  "sampled between {{from}} and {{to}}": "sampled between {{from}} and {{to}}",
-  "and comprising": "and comprising",
-  "comprising": "comprising",
+  "Showing {{x}} of {{y}} genomes.": "Showing {{x}} of {{y}} genomes.",
+  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.": "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.",
+  "Comprising": "Comprising",
   "Animation in progress.": "Animation in progress.",
   "Filtered to": "Filtered to",
 

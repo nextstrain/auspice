@@ -67,18 +67,26 @@ const arrayToSentence = (arr, {prefix=undefined, suffix=undefined, capatalise=tr
 export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visibleStateCounts, branchLengthsToDisplay, t) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
   const sampledDateRange = getVisibleDateRange(nodes, visibility);
+  let summary = ""; /* text returned from this function */
 
   /* Number of genomes & their date range */
-  let summary = t(
-    "Showing {{x}} of {{y}} genomes",
-    {x: nSelectedSamples, y: mainTreeNumTips}
-  );
   if (branchLengthsToDisplay !== "divOnly") {
-    summary += " " + t(
-      "sampled between {{from}} and {{to}}",
-      {from: styliseDateRange(sampledDateRange[0]), to: styliseDateRange(sampledDateRange[1])}
+    summary += t(
+      "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.",
+      {
+        x: nSelectedSamples,
+        y: mainTreeNumTips,
+        from: styliseDateRange(sampledDateRange[0]),
+        to: styliseDateRange(sampledDateRange[1])
+      }
+    );
+  } else {
+    summary += t(
+      "Showing {{x}} of {{y}} genomes.",
+      {x: nSelectedSamples, y: mainTreeNumTips}
     );
   }
+
   /* parse filters */
   const filterTextArr = [];
   Object.keys(filters).forEach((filterName) => {
@@ -86,10 +94,12 @@ export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visib
     if (!n) return;
     filterTextArr.push(`${n} ${pluralise(filterName, n)}`);
   });
-  const prefix = branchLengthsToDisplay !== "divOnly" ? t("and comprising") : t("comprising");
+  const prefix = t("Comprising");
   const filterText = arrayToSentence(filterTextArr, {prefix: prefix, capatalise: false});
   if (filterText.length) {
     summary += ` ${filterText}`;
+  } else if (summary.endsWith('.')) {
+    summary += " ";
   } else {
     summary += ". ";
   }
