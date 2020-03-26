@@ -54,7 +54,7 @@ function diff(enJson, newJson) {
   /* lang-only keys */
   const keysStillEn = [...enKeysSet].filter((k) => newKeysSet.has(k) && newJson[k]===enJson[k]);
   if (keysStillEn.length) {
-    console.log("\tFollowing keys are present but are simply a copy of the English version & need to be translated:");
+    console.log("\tFollowing keys are identical to the English version & may need to be translated:");
     keysStillEn.forEach((k) => console.log(`\t\t"${k}"`));
   }
 }

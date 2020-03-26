@@ -11,6 +11,7 @@
   "and comprising": "y compuesto de",
   "comprising": "compuesto de",
   "Animation in progress.": "Animación en proceso.",
+  "Filtered to": "Resaltando",
 
 
   "__Download Modal__": "########################################",
@@ -51,11 +52,13 @@
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "Filogenia",
   "Reset Layout": "Regresar al diseño original",
+  "Click on tip to display more info": "Haz clic en la punta del árbol para más información",
   "Click to zoom into clade": "Haga clic para enfocarse en el clado",
   "Branch leading to": "Rama que conduce a",
   "Number of descendants": "Número de descendientes",
   "Nucleotide mutations": "Mutaciones de nucleótidos",
   "AA mutations": "Mutaciones de AA",
+  "protein mutations truncated": "mutaciones proteicas truncadas",
   "Gaps": "Huecos",
   "more": "mas",
   "No nucleotide mutations": "No mutaciones de nucleótidos",
@@ -65,11 +68,21 @@
   "Collection date": "Fecha de recogida",
   "Inferred collection date": "Fecha de recogida inferida",
   "Inferred Date": "Fecha inferida",
+  "Date Confidence Interval": "Intervalo de confianza de la fecha",
+  "Vaccine selected": "Vacuna seleccionada",
+  "Vaccine start date": "Fecha de inicio de la vacuna",
+  "Vaccine end date": "Fecha de finalización de la vacuna",
+  "Serum strain": "Cepa del suero",
+  "Click outside this box to go back to the tree": "Haz clic afuera de la casilla para regresar al árbol",
+  "Authors": "Autores",
+  "Title": "Título",
+  "Journal": "Publicación científica",
 
   "__Frequencies panel__": "########################################",
   "Frequencies": "Frecuencias",
   "colored by": "color asignado por",
   "Projection": "Proyección hacia el futuro",
   "Time point": "Punto de tiempo",
-  "Frequency": "Frecuencia"
+  "Frequency": "Frecuencia",
+  "Projected frequency": "Frecuencia proyectada"
 }
