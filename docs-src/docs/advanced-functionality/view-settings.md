@@ -36,9 +36,10 @@ For instance, if you set `display_defaults.color_by` to `country`, but load the 
 | `map_triplicate`    | Should the map repeat, so that you can pan further in each direction? | Boolean |
 | `layout`            | Tree layout        | "rect", "radial", "clock" or "unrooted |
 | `branch_label`      | Which set of branch labels are to be displayed | "aa", "lineage" |
+| `panels`            | List of panels which (if available) are to be displayed  | ["tree", "map"] |
 
-Furthermore, a JSON property `meta.panels` lists which panels auspice displays.
-If this is not included, then auspice tries to display as many as possible.
+
+Note that `meta.display_defaults.panels` (optional) differs from `meta.panels` (required), where the latter lists the possible panels that auspice may display for the dataset.
 See the [JSON schema](https://github.com/nextstrain/augur/blob/master/augur/data/schema-export-v2.json) for more details.
 
 **See this in action:**

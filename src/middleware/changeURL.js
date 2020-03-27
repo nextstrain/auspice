@@ -95,7 +95,11 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.TOGGLE_PANEL_DISPLAY: {
-      if (state.controls.panelsAvailable.length === action.panelsToDisplay.length) {
+      /* check this against the defaults set by the dataset (and this default is all available panels if not specifically set) */
+      if (
+        state.controls.defaults.panels.length===action.panelsToDisplay.length &&
+        state.controls.defaults.panels.filter((p) => !action.panelsToDisplay.includes(p)).length===0
+      ) {
         query.d = undefined;
       } else {
         query.d = action.panelsToDisplay.join(",");
