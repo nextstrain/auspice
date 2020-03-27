@@ -189,7 +189,7 @@ const modifyStateViaMetadata = (state, metadata) => {
   }
   if (metadata.displayDefaults) {
     const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar'];
-    const expectedTypes = ["string", "string", "string", "string", "boolean", "string", 'string'];
+    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string']; // eslint-disable-line no-multi-spaces
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (metadata.displayDefaults[keysToCheckFor[i]]) {
@@ -220,6 +220,7 @@ const modifyStateViaMetadata = (state, metadata) => {
     state.panelsAvailable = metadata.panels.slice();
     state.panelsToDisplay = metadata.panels.slice();
   } else {
+    /* while `metadata.panels` is required by the schema, every single dataset can display a tree, so this is a nice fallback */
     state.panelsAvailable = ["tree"];
     state.panelsToDisplay = ["tree"];
   }
@@ -234,6 +235,20 @@ const modifyStateViaMetadata = (state, metadata) => {
   if (!metadata.genomeAnnotations || !metadata.genomeAnnotations.nuc) {
     state.panelsAvailable = state.panelsAvailable.filter((item) => item !== "entropy");
     state.panelsToDisplay = state.panelsToDisplay.filter((item) => item !== "entropy");
+  }
+
+  /* After calculating the available panels, we check this against the display default (if that was set)
+  in order to determine which panels to display. Note that URL queries are parsed after this. */
+  if (metadata.displayDefaults && metadata.displayDefaults.panels && Array.isArray(metadata.displayDefaults.panels)) {
+    /* remove any display defaults asked for which don't exist */
+    metadata.displayDefaults.panels = metadata.displayDefaults.panels.filter((p) => state.panelsAvailable.includes(p));
+    /* only show those set via display defaults */
+    state.panelsToDisplay = state.panelsToDisplay.filter((p) => metadata.displayDefaults.panels.includes(p));
+    /* store the display defaults for use by URL middleware */
+    state.defaults.panels = metadata.displayDefaults.panels;
+  } else {
+    /* define "default" panels to show as all those available if not explicitly set */
+    state.defaults.panels = state.panelsAvailable.slice();
   }
 
   /* if only map or only tree, then panelLayout must be full */
@@ -613,7 +628,8 @@ const createMetadataStateFromJSON = (json) => {
       branch_label: "selectedBranchLabel",
       map_triplicate: "mapTriplicate",
       layout: "layout",
-      sidebar: "sidebar"
+      sidebar: "sidebar",
+      panels: "panels"
     };
     for (const [jsonKey, auspiceKey] of Object.entries(jsonKeyToAuspiceKey)) {
       if (json.meta.display_defaults[jsonKey]) {
