@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+import {getTraitFromNode, getDivFromNode} from "../../../util/treeMiscHelpers";
 
 /** get a string to be used as the DOM element ID
  * Note that this cannot have any "special" characters
@@ -107,4 +108,50 @@ export const formatDivergence = (divergence) => {
     divergence > 0.01 ?
       Math.round((divergence + Number.EPSILON) * 10000) / 10000 :
       divergence.toExponential(3);
+};
+
+
+/** get the idx of the zoom node (i.e. the in-view root node).
+ * This differs depending on which tree is in view so it's helpful to access it
+ * by reaching into phyotree to get it
+ */
+export const getIdxOfInViewRootNode = (node) => {
+  return node.shell.that.zoomNode.n.arrayIdx;
+};
+
+/**
+ * Are the provided nodes within some divergence / time of each other?
+ * NOTE: `otherNode` is always closer to the root in the tree than `node`
+ */
+function isWithinBranchTolerance(node, otherNode, distanceMeasure) {
+  if (distanceMeasure === "num_date") {
+    /* We calculate the threshold by reaching into phylotree to extract the date range of the dataset
+    and then split the data into ~50 slices. This could be refactored to not reach into phylotree. */
+    const tolerance = (node.shell.that.dateRange[1]-node.shell.that.dateRange[0])/50;
+    return (getTraitFromNode(node, "num_date") - tolerance < getTraitFromNode(otherNode, "num_date"));
+  }
+  /* Compute the divergence tolerance similarly to above. This uses the approach used to compute the
+  x-axis grid within phyotree, and could be refactored into a helper function. Note that we don't store
+  the maximum divergence on the tree so we use the in-view max instead */
+  const tolerance = (node.shell.that.xScale.domain()[1] - node.shell.that.nodes[0].depth)/50;
+  return (getDivFromNode(node) - tolerance < getDivFromNode(otherNode));
+}
+
+
+/**
+ * Given a `node`, get the parent, grandparent etc node which is beyond some
+ * branch length threshold (either divergence or time). This is useful for finding the node
+ * beyond a polytomy, or polytomy-like structure
+ * @param {object} node - tree node
+ * @param {string} getParentBeyondPolytomy -- 'num_date' or 'div'
+ * @returns {object} the closest node up the tree (towards the root) which is beyond
+ * some threshold
+ */
+export const getParentBeyondPolytomy = (node, distanceMeasure) => {
+  let potentialNode = node.parent;
+  while (isWithinBranchTolerance(node, potentialNode, distanceMeasure)) {
+    if (potentialNode === potentialNode.parent) break; // root node of tree
+    potentialNode = potentialNode.parent;
+  }
+  return potentialNode;
 };

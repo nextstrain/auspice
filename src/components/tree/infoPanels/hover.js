@@ -5,7 +5,7 @@ import { getTipColorAttribute } from "../../../util/colorHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { getTraitFromNode, getDivFromNode, getVaccineFromNode, getFullAuthorInfoFromNode } from "../../../util/treeMiscHelpers";
 import { isValueValid } from "../../../util/globals";
-import { formatDivergence } from "../phyloTree/helpers";
+import { formatDivergence, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 
 const InfoLine = ({name, value, padBelow=false}) => {
   const renderValues = () => {
@@ -344,6 +344,8 @@ const HoverInfoPanel = ({
 }) => {
   if (!hovered) return null;
   const node = hovered.d.n;
+  const idxOfInViewRootNode = getIdxOfInViewRootNode(node);
+
   return (
     <Container node={node} panelDims={panelDims}>
       {hovered.type === ".tip" ? (
@@ -362,7 +364,9 @@ const HoverInfoPanel = ({
           <Mutations node={node} t={t}/>
           <BranchLength node={node} t={t}/>
           <ColorBy node={node} colorBy={colorBy} colorByConfidence={colorByConfidence} colorScale={colorScale} colorings={colorings}/>
-          <Comment>{t("Click to zoom into clade")}</Comment>
+          <Comment>
+            {idxOfInViewRootNode === node.arrayIdx ? t('Click to zoom out to parent clade') : t('Click to zoom into clade')}
+          </Comment>
         </>
       )}
     </Container>

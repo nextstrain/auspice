@@ -1,6 +1,6 @@
 import { updateVisibleTipsAndBranchThicknesses} from "../../../actions/tree";
 import { NODE_VISIBLE } from "../../../util/globals";
-import { getDomId } from "../phyloTree/helpers";
+import { getDomId, getParentBeyondPolytomy, getIdxOfInViewRootNode } from "../phyloTree/helpers";
 import { branchStrokeForHover, branchStrokeForLeave } from "../phyloTree/renderers";
 
 /* Callbacks used by the tips / branches when hovered / selected */
@@ -82,8 +82,13 @@ export const onBranchClick = function onBranchClick(d) {
     const key = legalBranchLabels[0];
     cladeSelected = `${key}:${d.n.branch_attrs.labels[key]}`;
   }
-  if (d.that.params.orientation[0] === 1) root[0] = d.n.arrayIdx;
-  else root[1] = d.n.arrayIdx;
+  /* Clicking on a branch means we want to zoom into the clade defined by that branch
+  _except_ when it's the "in-view" root branch, in which case we want to zoom out */
+  const arrayIdxToZoomTo = (getIdxOfInViewRootNode(d.n) === d.n.arrayIdx) ?
+    getParentBeyondPolytomy(d.n, this.props.distanceMeasure).arrayIdx :
+    d.n.arrayIdx;
+  if (d.that.params.orientation[0] === 1) root[0] = arrayIdxToZoomTo;
+  else root[1] = arrayIdxToZoomTo;
   this.props.dispatch(updateVisibleTipsAndBranchThicknesses({root, cladeSelected}));
 };
 
