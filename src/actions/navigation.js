@@ -8,7 +8,11 @@ import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
  * redirect to the splash page if the datasets are unavailable
  */
 export const chooseDisplayComponentFromURL = (url) => {
-  const parts = url.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
+  const parts = url
+    .toLowerCase()
+    .replace(/^\/+/, "")
+    .replace(/\/+$/, "")
+    .split("/");
   if (
     !parts.length ||
     (parts.length === 1 && parts[0] === "") ||
@@ -44,7 +48,7 @@ In this way, the URL query is "used".
 export const changePage = ({
   path = undefined,
   query = undefined,
-  queryToDisplay = undefined, /* doesn't affect state, only URL. defaults to query unless specified */
+  queryToDisplay = undefined /* doesn't affect state, only URL. defaults to query unless specified */,
   push = true,
   changeDataset = true
 } = {}) => (dispatch, getState) => {
@@ -52,8 +56,8 @@ export const changePage = ({
   // console.warn("CHANGE PAGE!", path, query, queryToDisplay, push);
 
   /* set some defaults */
-  if (!path) path = window.location.pathname;  // eslint-disable-line
-  if (!query) query = queryString.parse(window.location.search);  // eslint-disable-line
+  if (!path) path = window.location.pathname; // eslint-disable-line
+  if (!query) query = queryString.parse(window.location.search); // eslint-disable-line
   if (!queryToDisplay) queryToDisplay = query; // eslint-disable-line
   /* some booleans */
   const pathHasChanged = oldState.general.pathname !== path;
@@ -70,7 +74,7 @@ export const changePage = ({
   }
 
   /* the path (dataset) remains the same... but the state may be modulated by the query */
-  const newState = createStateFromQueryOrJSONs({oldState, query, dispatch});
+  const newState = createStateFromQueryOrJSONs({ oldState, query, dispatch });
   dispatch({
     type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
     ...newState,
@@ -89,15 +93,16 @@ export const goTo404 = (errorMessage) => ({
   pushState: true
 });
 
-
-export const EXPERIMENTAL_showMainDisplayMarkdown = ({query, queryToDisplay}) =>
-  (dispatch, getState) => {
-    const newState = createStateFromQueryOrJSONs({oldState: getState(), query, dispatch});
-    newState.controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
-    dispatch({
-      type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
-      ...newState,
-      pushState: true,
-      query: queryToDisplay
-    });
-  };
+export const EXPERIMENTAL_showMainDisplayMarkdown = ({ query, queryToDisplay }) => (
+  dispatch,
+  getState
+) => {
+  const newState = createStateFromQueryOrJSONs({ oldState: getState(), query, dispatch });
+  newState.controls.panelsToDisplay = ["EXPERIMENTAL_MainDisplayMarkdown"];
+  dispatch({
+    type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
+    ...newState,
+    pushState: true,
+    query: queryToDisplay
+  });
+};

@@ -27,15 +27,19 @@ class ChooseDataset extends React.Component {
   render() {
     const { t } = this.props;
 
-    if (!this.props.available || !this.props.available.datasets || !this.props.available.datasets.length) {
+    if (
+      !this.props.available ||
+      !this.props.available.datasets ||
+      !this.props.available.datasets.length
+    ) {
       /* typically this is the case if the available dataset fetch hasn't returned
       or it has returned an empty array of datasets */
       return null;
     }
 
     const displayedDatasetString = window.location.pathname
-      .replace(/^\//, '')
-      .replace(/\/$/, '')
+      .replace(/^\//, "")
+      .replace(/\/$/, "")
       .split(":")[0];
     const displayedDataset = displayedDatasetString.split("/");
     const options = [[]];
@@ -47,8 +51,7 @@ class ChooseDataset extends React.Component {
       }
     });
 
-
-    for (let idx=1; idx<displayedDataset.length; idx++) {
+    for (let idx = 1; idx < displayedDataset.length; idx++) {
       /* going through the fields which comprise the current dataset
       in order to create available alternatives for each field */
       options[idx] = [];
@@ -56,7 +59,10 @@ class ChooseDataset extends React.Component {
         /* if the parents (and their parents etc) of this choice match,
         then we add that as a valid option */
         const fields = singleAvailableOption.request.split("/");
-        if (checkEqualityOfArrays(fields, displayedDataset, idx) && options[idx].indexOf(fields[idx]) === -1) {
+        if (
+          checkEqualityOfArrays(fields, displayedDataset, idx) &&
+          options[idx].indexOf(fields[idx]) === -1
+        ) {
           options[idx].push(fields[idx]);
         }
       });
@@ -76,7 +82,6 @@ class ChooseDataset extends React.Component {
         ))}
       </>
     );
-
   }
 }
 

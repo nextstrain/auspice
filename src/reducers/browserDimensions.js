@@ -6,9 +6,12 @@ export const calcBrowserDimensionsInitialState = () => ({
   docHeight: window.document.body.clientHeight
 });
 
-const BrowserDimensions = (state = {
-  browserDimensions: calcBrowserDimensionsInitialState()
-}, action) => {
+const BrowserDimensions = (
+  state = {
+    browserDimensions: calcBrowserDimensionsInitialState()
+  },
+  action
+) => {
   switch (action.type) {
     case types.BROWSER_DIMENSIONS:
       return Object.assign({}, state, {

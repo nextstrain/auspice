@@ -41,13 +41,17 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   const isGenotype = isColorByGenotype(colorBy);
   const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */
   const pivotsLen = pivots.length;
-  categories.forEach((x) => {matrix[x] = new Array(pivotsLen).fill(0);});
+  categories.forEach((x) => {
+    matrix[x] = new Array(pivotsLen).fill(0);
+  });
   // let debugTipsSeen = 0;
   const debugPivotTotals = new Array(pivotsLen).fill(0);
   data.forEach((d) => {
     if (visibility[d.idx] === NODE_VISIBLE) {
       // debugTipsSeen++;
-      const category = assignCategory(colorScale, categories, nodes[d.idx], colorBy, isGenotype) || unassigned_label;
+      const category =
+        assignCategory(colorScale, categories, nodes[d.idx], colorBy, isGenotype) ||
+        unassigned_label;
       // if (category === unassigned_label) return;
       for (let i = 0; i < pivotsLen; i++) {
         matrix[category][i] += d.values[i];

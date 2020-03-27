@@ -19,23 +19,39 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     newState.hovered = null;
   }
   /* colorBy change? */
-  if (!!newTreeRedux.nodeColorsVersion &&
-      (oldTreeRedux.nodeColorsVersion !== newTreeRedux.nodeColorsVersion ||
-      newProps.colorByConfidence !== oldProps.colorByConfidence)) {
+  if (
+    !!newTreeRedux.nodeColorsVersion &&
+    (oldTreeRedux.nodeColorsVersion !== newTreeRedux.nodeColorsVersion ||
+      newProps.colorByConfidence !== oldProps.colorByConfidence)
+  ) {
     args.changeColorBy = true;
-    args.branchStroke = calcBranchStrokeCols(newTreeRedux, newProps.colorByConfidence, newProps.colorBy);
+    args.branchStroke = calcBranchStrokeCols(
+      newTreeRedux,
+      newProps.colorByConfidence,
+      newProps.colorBy
+    );
     args.tipStroke = newTreeRedux.nodeColors;
-    args.fill = newTreeRedux.nodeColors.map((col) => rgb(col).brighter([0.65]).toString());
+    args.fill = newTreeRedux.nodeColors.map((col) =>
+      rgb(col)
+        .brighter([0.65])
+        .toString()
+    );
   }
 
   /* visibility */
-  if (!!newTreeRedux.visibilityVersion && oldTreeRedux.visibilityVersion !== newTreeRedux.visibilityVersion) {
+  if (
+    !!newTreeRedux.visibilityVersion &&
+    oldTreeRedux.visibilityVersion !== newTreeRedux.visibilityVersion
+  ) {
     args.changeVisibility = true;
     args.visibility = newTreeRedux.visibility;
   }
 
   /* tip radii */
-  if (!!newTreeRedux.tipRadiiVersion && oldTreeRedux.tipRadiiVersion !== newTreeRedux.tipRadiiVersion) {
+  if (
+    !!newTreeRedux.tipRadiiVersion &&
+    oldTreeRedux.tipRadiiVersion !== newTreeRedux.tipRadiiVersion
+  ) {
     args.changeTipRadii = true;
     args.tipRadii = newTreeRedux.tipRadii;
   }
@@ -56,13 +72,19 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.newBranchLabellingKey = newProps.selectedBranchLabel;
   }
 
-
   /* confidence intervals (on means in the SVG, display means shown in the sidebar) */
-  if (oldProps.temporalConfidence.display === true && newProps.temporalConfidence.display === false) {
+  if (
+    oldProps.temporalConfidence.display === true &&
+    newProps.temporalConfidence.display === false
+  ) {
     args.removeConfidences = true;
   } else if (oldProps.temporalConfidence.on === true && newProps.temporalConfidence.on === false) {
     args.removeConfidences = true;
-  } else if (newProps.temporalConfidence.display === true && oldProps.temporalConfidence.on === false && newProps.temporalConfidence.on === true) {
+  } else if (
+    newProps.temporalConfidence.display === true &&
+    oldProps.temporalConfidence.on === false &&
+    newProps.temporalConfidence.on === true
+  ) {
     args.showConfidences = true;
   }
 

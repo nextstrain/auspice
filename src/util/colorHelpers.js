@@ -11,7 +11,9 @@ import { getTraitFromNode } from "./treeMiscHelpers";
  * @returns {str} a color hex string representing the average of the array.
  */
 export const getAverageColorFromNodes = (nodes, nodeColors) => {
-  let r=0, g=0, b=0;
+  let r = 0,
+    g = 0,
+    b = 0;
   nodes.forEach((n) => {
     const tmpRGB = rgb(nodeColors[n.arrayIdx]);
     r += tmpRGB.r;
@@ -19,29 +21,26 @@ export const getAverageColorFromNodes = (nodes, nodeColors) => {
     b += tmpRGB.b;
   });
   const total = nodes.length;
-  const avg = rgb(r/total, g/total, b/total);
+  const avg = rgb(r / total, g / total, b / total);
   return avg.toString();
 };
 
 export const determineColorByGenotypeMutType = (colorBy) => {
   if (isColorByGenotype(colorBy)) {
     const genotype = decodeColorByGenotype(colorBy);
-    return genotype.aa
-      ? "aa"
-      : "nuc";
+    return genotype.aa ? "aa" : "nuc";
   }
   return false;
 };
 
-
 /**
-* what colorBy trait names are present in the tree but _not_ in the provided scale?
-* @param {Array} nodes - list of nodes
-* @param {Array|undefined} nodesToo - list of nodes for the second tree
-* @param {string} colorBy -
-* @param {Array} providedVals - list of provided trait values
-* @return {list}
-*/
+ * what colorBy trait names are present in the tree but _not_ in the provided scale?
+ * @param {Array} nodes - list of nodes
+ * @param {Array|undefined} nodesToo - list of nodes for the second tree
+ * @param {string} colorBy -
+ * @param {Array} providedVals - list of provided trait values
+ * @return {list}
+ */
 export const getExtraVals = (nodes, nodesToo, colorBy, providedVals) => {
   let valsInTree = nodes.map((n) => getTraitFromNode(n, colorBy));
   if (nodesToo) {
@@ -50,7 +49,6 @@ export const getExtraVals = (nodes, nodesToo, colorBy, providedVals) => {
   valsInTree = [...new Set(valsInTree)];
   return valsInTree.filter((x) => providedVals.indexOf(x) === -1);
 };
-
 
 /* a getter for the value of the colour attribute of the node provided for the currently set colour
 note this is not the colour HEX */
@@ -72,7 +70,6 @@ export const calcNodeColor = (tree, colorScale) => {
   return null;
 };
 
-
 // scale entropy such that higher entropy maps to a grayer less-certain branch
 const branchInterpolateColour = "#BBB";
 const branchOpacityConstant = 0.6;
@@ -81,7 +78,6 @@ export const branchOpacityFunction = scalePow()
   .domain([0, 2.0])
   .range([0.4, 1])
   .clamp(true);
-
 
 // entropy calculation precomputed in augur
 // export const calcEntropyOfValues = (vals) =>
@@ -97,7 +93,7 @@ export const branchOpacityFunction = scalePow()
 export const calcBranchStrokeCols = (tree, confidence, colorBy) => {
   if (confidence === true) {
     return tree.nodeColors.map((col, idx) => {
-      const entropy = getTraitFromNode(tree.nodes[idx], colorBy, {entropy: true});
+      const entropy = getTraitFromNode(tree.nodes[idx], colorBy, { entropy: true });
       const opacity = entropy ? branchOpacityFunction(entropy) : branchOpacityConstant;
       return rgb(interpolateRgb(col, branchInterpolateColour)(opacity)).toString();
     });
@@ -106,7 +102,6 @@ export const calcBranchStrokeCols = (tree, confidence, colorBy) => {
     return rgb(interpolateRgb(col, branchInterpolateColour)(branchOpacityConstant)).toString();
   });
 };
-
 
 /**
  * Return an emphasized color

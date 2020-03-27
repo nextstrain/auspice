@@ -3,14 +3,16 @@ import { calcTipCounts } from "./treeCountingHelpers";
 import { getTraitFromNode } from "./treeMiscHelpers";
 import { warningNotification } from "../actions/notifications";
 
-export const getVisibleDateRange = (nodes, visibility) => nodes
-  .filter((node, idx) => (visibility[idx] === NODE_VISIBLE && !node.hasChildren))
-  .reduce((acc, node) => {
-    const nodeDate = getTraitFromNode(node, "num_date");
-    if (nodeDate && nodeDate < acc[0]) return [nodeDate, acc[1]];
-    if (nodeDate && nodeDate > acc[1]) return [acc[0], nodeDate];
-    return acc;
-  }, [100000, -100000]);
+export const getVisibleDateRange = (nodes, visibility) =>
+  nodes.filter((node, idx) => visibility[idx] === NODE_VISIBLE && !node.hasChildren).reduce(
+    (acc, node) => {
+      const nodeDate = getTraitFromNode(node, "num_date");
+      if (nodeDate && nodeDate < acc[0]) return [nodeDate, acc[1]];
+      if (nodeDate && nodeDate > acc[1]) return [acc[0], nodeDate];
+      return acc;
+    },
+    [100000, -100000]
+  );
 
 export const strainNameToIdx = (nodes, name) => {
   let i;
@@ -44,33 +46,47 @@ export const getIdxMatchingLabel = (nodes, labelName, labelValue, dispatch) => {
         found = i;
       } else {
         console.error(`getIdxMatchingLabel found multiple labels ${labelName}===${labelValue}`);
-        dispatch(warningNotification({
-          message: "Specified Zoom Label Found Multiple Times!",
-          details: "Multiple nodes in the tree are labelled '"+labelName+" "+labelValue+"' - no zoom performed"
-        }));
+        dispatch(
+          warningNotification({
+            message: "Specified Zoom Label Found Multiple Times!",
+            details:
+              "Multiple nodes in the tree are labelled '" +
+              labelName +
+              " " +
+              labelValue +
+              "' - no zoom performed"
+          })
+        );
         return 0;
       }
     }
   }
   if (found === 0) {
     console.error(`getIdxMatchingLabel couldn't find label ${labelName}===${labelValue}`);
-    dispatch(warningNotification({
-      message: "Specified Zoom Label Value Not Found!",
-      details: "The label '"+labelName+"' value '"+labelValue+"' was not found in the tree - no zoom performed"
-    }));
+    dispatch(
+      warningNotification({
+        message: "Specified Zoom Label Value Not Found!",
+        details:
+          "The label '" +
+          labelName +
+          "' value '" +
+          labelValue +
+          "' was not found in the tree - no zoom performed"
+      })
+    );
   }
   return found;
 };
 
 /** calcBranchThickness **
-* returns an array of node (branch) thicknesses based on the tipCount at each node
-* If the node isn't visible, the thickness is 1.
-* Relies on the `tipCount` property of the nodes having been updated.
-* Pure.
-* @param nodes - JSON nodes
-* @param visibility - visibility array (1-1 with nodes)
-* @returns array of thicknesses (numeric)
-*/
+ * returns an array of node (branch) thicknesses based on the tipCount at each node
+ * If the node isn't visible, the thickness is 1.
+ * Relies on the `tipCount` property of the nodes having been updated.
+ * Pure.
+ * @param nodes - JSON nodes
+ * @param visibility - visibility array (1-1 with nodes)
+ * @returns array of thicknesses (numeric)
+ */
 const calcBranchThickness = (nodes, visibility) => {
   let maxTipCount = nodes[0].tipCount;
   /* edge case: no tips selected */
@@ -105,7 +121,7 @@ const identifyPathToTip = (nodes, tipIdx) => {
   const visibility = new Array(nodes.length).fill(false);
   visibility[tipIdx] = true;
   makeParentVisible(visibility, nodes[tipIdx]); /* recursive */
-  return visibility.map((cv) => cv ? NODE_VISIBLE : NODE_NOT_VISIBLE);
+  return visibility.map((cv) => (cv ? NODE_VISIBLE : NODE_NOT_VISIBLE));
 };
 
 /* calcVisibility
@@ -143,7 +159,7 @@ const calcVisibility = (tree, controls, dates) => {
       /* edge case: this fn may be called before the shell structure of the nodes
        * has been created (i.e. phyloTree's not run yet). In this case, it's
        * safe to assume that everything's in view */
-      inView = tree.nodes.map((d) => d.inView !== undefined ? d.inView : true);
+      inView = tree.nodes.map((d) => (d.inView !== undefined ? d.inView : true));
     }
 
     // FILTERS
@@ -151,16 +167,21 @@ const calcVisibility = (tree, controls, dates) => {
     const filters = [];
     Object.keys(controls.filters).forEach((trait) => {
       if (controls.filters[trait].length) {
-        filters.push({trait, values: controls.filters[trait]});
+        filters.push({ trait, values: controls.filters[trait] });
       }
     });
     if (filters.length) {
       /* find the terminal nodes that were (a) already visibile and (b) match the filters */
-      filtered = tree.nodes.map((d, idx) => (
-        !d.hasChildren && inView[idx] && filters.every((f) => f.values.includes(getTraitFromNode(d, f.trait)))
-      ));
+      filtered = tree.nodes.map(
+        (d, idx) =>
+          !d.hasChildren &&
+          inView[idx] &&
+          filters.every((f) => f.values.includes(getTraitFromNode(d, f.trait)))
+      );
       const idxsOfFilteredTips = filtered.reduce((a, e, i) => {
-        if (e) {a.push(i);}
+        if (e) {
+          a.push(i);
+        }
         return a;
       }, []);
       /* for each visibile tip, make the parent nodes visible (recursively) */
@@ -197,8 +218,15 @@ const calcVisibility = (tree, controls, dates) => {
   return NODE_VISIBLE;
 };
 
-export const calculateVisiblityAndBranchThickness = (tree, controls, dates, {tipSelectedIdx = 0} = {}) => {
-  const visibility = tipSelectedIdx ? identifyPathToTip(tree.nodes, tipSelectedIdx) : calcVisibility(tree, controls, dates);
+export const calculateVisiblityAndBranchThickness = (
+  tree,
+  controls,
+  dates,
+  { tipSelectedIdx = 0 } = {}
+) => {
+  const visibility = tipSelectedIdx
+    ? identifyPathToTip(tree.nodes, tipSelectedIdx)
+    : calcVisibility(tree, controls, dates);
   /* recalculate tipCounts over the tree - modifies redux tree nodes in place (yeah, I know) */
   calcTipCounts(tree.nodes[0], visibility);
   /* re-calculate branchThickness (inline) */

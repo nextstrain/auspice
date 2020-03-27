@@ -21,13 +21,16 @@ const getNodeMutations = (n) => {
 };
 
 const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
-
   const sparse = isAA ? {} : [];
   if (isAA) {
-    Object.keys(geneMap).forEach((n) => {sparse[n] = {};});
+    Object.keys(geneMap).forEach((n) => {
+      sparse[n] = {};
+    });
   }
   nodes.forEach((n) => {
-    if (visibility[n.arrayIdx] !== NODE_VISIBLE) {return;}
+    if (visibility[n.arrayIdx] !== NODE_VISIBLE) {
+      return;
+    }
     const mutations = getNodeMutations(n);
     if (!mutations) return;
     if (isAA) {
@@ -36,8 +39,8 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
           const pos = parseInt(m.slice(1, m.length - 1), 10);
           const A = m.slice(0, 1);
           const B = m.slice(-1);
-          if (A !== 'X' && B !== 'X') {
-            sparse[prot][pos] ? sparse[prot][pos]++ : sparse[prot][pos] = 1;
+          if (A !== "X" && B !== "X") {
+            sparse[prot][pos] ? sparse[prot][pos]++ : (sparse[prot][pos] = 1);
           }
         });
       }
@@ -48,7 +51,7 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
         const A = m.slice(0, 1);
         const B = m.slice(-1);
         if (A !== "N" && A !== "-" && B !== "N" && B !== "-") {
-          sparse[pos] ? sparse[pos]++ : sparse[pos] = 1;
+          sparse[pos] ? sparse[pos]++ : (sparse[pos] = 1);
         }
       });
     }
@@ -59,9 +62,12 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
   if (isAA) {
     const prots = Object.keys(sparse);
     for (let i = 0; i < prots.length; i++) {
-      for (const k in sparse[prots[i]]) { // eslint-disable-line
+      // eslint-disable-next-line
+      for (const k in sparse[prots[i]]) {
         const numK = parseInt(k, 10);
-        if (sparse[prots[i]][numK] > m) {m = sparse[prots[i]][numK];}
+        if (sparse[prots[i]][numK] > m) {
+          m = sparse[prots[i]][numK];
+        }
         counts[j] = {
           x: geneMap[prots[i]].start + 3 * numK - 1, // check
           y: sparse[prots[i]][numK],
@@ -74,9 +80,13 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
     }
   } else {
     for (let i = 0; i < sparse.length; i++) {
-      if (!sparse[i]) {continue;}
-      if (sparse[i] > m) {m = sparse[i];}
-      counts[j] = {x: i, y: sparse[i]}; /* TODO reset y scale in D3 or compute entropy */
+      if (!sparse[i]) {
+        continue;
+      }
+      if (sparse[i] > m) {
+        m = sparse[i];
+      }
+      counts[j] = { x: i, y: sparse[i] }; /* TODO reset y scale in D3 or compute entropy */
       j++;
     }
     for (const nt of counts) {
@@ -187,20 +197,24 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
       let s = 0;
       for (const kk of Object.keys(counts[prot][k])) {
         const a = counts[prot][k][kk] / visibleTips;
-        s += (-1 * a * Math.log(a));
+        s += -1 * a * Math.log(a);
       }
-      if (s > m) {m = s;}
-      entropy[i] = isAA ? {
-        x: geneMap[prot].start + 3 * k - 1, // check
-        y: s.toFixed(3),
-        codon: parseInt(k, 10), // check
-        fill: genotypeColors[i % 10],
-        prot: prot
-      } : {
-        x: parseInt(k, 10),
-        y: s.toFixed(3),
-        prot: intersectGenes(geneMap, k)
-      };
+      if (s > m) {
+        m = s;
+      }
+      entropy[i] = isAA
+        ? {
+          x: geneMap[prot].start + 3 * k - 1, // check
+          y: s.toFixed(3),
+          codon: parseInt(k, 10), // check
+          fill: genotypeColors[i % 10],
+          prot: prot
+        }
+        : {
+          x: parseInt(k, 10),
+          y: s.toFixed(3),
+          prot: intersectGenes(geneMap, k)
+        };
       i++;
     }
   }
@@ -209,17 +223,17 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
 };
 
 /**
-* traverse the tree and compile the entropy data for the visibile branches
-* @param {Array} nodes - list of nodes
-* @param {Array} visibility - 1-1 correspondence with nodes.
-* @param {String} mutType - amino acid | nucleotide mutations - "aa" | "nuc"
-* @param {obj} geneMap used to NT fill colours. This should be imroved.
-* @param {bool} showCounts show counts or entropy values?
-* @return {obj} keys: the entries in attrs. Values: an object mapping values -> counts
-* TODO: this algorithm can be much improved, and the data structures returned improved also
-*/
+ * traverse the tree and compile the entropy data for the visibile branches
+ * @param {Array} nodes - list of nodes
+ * @param {Array} visibility - 1-1 correspondence with nodes.
+ * @param {String} mutType - amino acid | nucleotide mutations - "aa" | "nuc"
+ * @param {obj} geneMap used to NT fill colours. This should be imroved.
+ * @param {bool} showCounts show counts or entropy values?
+ * @return {obj} keys: the entries in attrs. Values: an object mapping values -> counts
+ * TODO: this algorithm can be much improved, and the data structures returned improved also
+ */
 export const calcEntropyInView = (nodes, visibility, mutType, geneMap, showCounts) => {
-  return showCounts ?
-    calcMutationCounts(nodes, visibility, geneMap, mutType === "aa") :
-    calcEntropy(nodes, visibility, geneMap, mutType === "aa");
+  return showCounts
+    ? calcMutationCounts(nodes, visibility, geneMap, mutType === "aa")
+    : calcEntropy(nodes, visibility, geneMap, mutType === "aa");
 };

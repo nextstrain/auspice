@@ -3,7 +3,7 @@
 // Todo: refactor away from `createReactClass` & apply linting rules
 
 import React from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import createReactClass from "create-react-class";
 import _assign from "lodash/assign";
 import _isArray from "lodash/isArray";
@@ -16,32 +16,32 @@ const sliderStart = 20;
 
 const styles = {
   base: {
-    position: 'relative',
+    position: "relative",
     borderRadius: 6
   },
   horizontalSlider: {
-    width: '100%',
+    width: "100%",
     height: 12
   },
   verticalSlider: {
     maxHeight: 500,
     width: 12,
-    border: '1px solid grey'
+    border: "1px solid grey"
   },
   handle: {
-    fontSize: '0.9em',
-    textAlign: 'center',
+    fontSize: "0.9em",
+    textAlign: "center",
     backgroundColor: "#FAFAFA",
-    color: 'white',
-    border: '1px solid #555',
-    cursor: 'pointer',
+    color: "white",
+    border: "1px solid #555",
+    cursor: "pointer",
     height: 12,
     width: 12,
     borderRadius: 12,
     top: -4
   },
   bar: {
-    position: 'relative',
+    position: "relative",
     backgroundColor: "rgb(200,200,200)",
     borderRadius: 2
   },
@@ -58,17 +58,15 @@ const styles = {
   */
 
   unselectedBar: {
-    backgroundColor: '#777',
+    backgroundColor: "#777",
     height: 1,
     top: 2
   },
   selectedBar: {
-    backgroundColor: '#CCC',
+    backgroundColor: "#CCC",
     height: 6
   }
-
 };
-
 
 /**
  * To prevent text selection while dragging.
@@ -110,10 +108,10 @@ function undoEnsureArray(x) {
 // TB: I tried to convert this to a proper "class Slider extends React.Component"
 // but ran into difficulties with this bindings in functions like _getMousePosition
 // So, leaving as createReactClass for the time being.
-const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
+const Slider = createReactClass({
+  // eslint-disable-line react/prefer-es6-class
 
   propTypes: {
-
     /**
      * The minimum value of the slider.
      */
@@ -145,23 +143,17 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
      * The values in the array must be sorted.
      * If the component has children, the length of the array must match the number of children.
      */
-    defaultValue: PropTypes.oneOfType([
-      PropTypes.number,
-      PropTypes.arrayOf(PropTypes.number)
-    ]),
+    defaultValue: PropTypes.oneOfType([PropTypes.number, PropTypes.arrayOf(PropTypes.number)]),
 
     /**
      * Like `defaultValue` but for [controlled components](http://facebook.github.io/react/docs/forms.html#controlled-components).
      */
-    value: PropTypes.oneOfType([
-      PropTypes.number,
-      PropTypes.arrayOf(PropTypes.number)
-    ]),
+    value: PropTypes.oneOfType([PropTypes.number, PropTypes.arrayOf(PropTypes.number)]),
 
     /**
      * Determines whether the slider moves horizontally (from left to right) or vertically (from top to bottom).
      */
-    orientation: PropTypes.oneOf(['horizontal', 'vertical']),
+    orientation: PropTypes.oneOf(["horizontal", "vertical"]),
 
     /**
      * The css class set on the slider node.
@@ -243,11 +235,11 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
       step: 0.00001,
       minDistance: 0,
       defaultValue: 0,
-      orientation: 'horizontal',
-      className: 'slider',
-      handleClassName: 'handle',
-      handleActiveClassName: 'active',
-      barClassName: 'bar',
+      orientation: "horizontal",
+      className: "slider",
+      handleClassName: "handle",
+      handleActiveClassName: "active",
+      barClassName: "bar",
       withBars: false,
       pearling: false,
       disabled: false,
@@ -293,8 +285,7 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
       trimmedValue[i] = this._trimAlignValue(value[i], newProps);
     }
 
-    this.setState({value: trimmedValue});
-
+    this.setState({ value: trimmedValue });
   },
 
   // Check if the arity of `value` or `defaultValue` matches the number of children (= number of custom handles).
@@ -313,7 +304,9 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
         return defaultValue;
       default:
         if (value.length !== count || defaultValue.length !== count) {
-          console.warn(this.constructor.displayName + ': Number of values does not match number of children.');
+          console.warn(
+            this.constructor.displayName + ": Number of values does not match number of children."
+          );
         }
         return linspace(this.props.min, this.props.max, count);
     }
@@ -337,10 +330,10 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
   _buildHandleStyle(offset, i) {
     const style = {
-      position: 'absolute',
-      willChange: this.state.index >= 0 ? this._posMinKey() : ''
+      position: "absolute",
+      willChange: this.state.index >= 0 ? this._posMinKey() : ""
     };
-    style[this._posMinKey()] = offset + 'px';
+    style[this._posMinKey()] = offset + "px";
     return style;
   },
 
@@ -366,7 +359,7 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
   _calcOffsetFromPosition(position) {
     let pixelOffset = position - this.state.sliderStart;
     if (this.props.invert) pixelOffset = this.state.sliderLength - pixelOffset;
-    pixelOffset -= (this.state.handleSize / 2);
+    pixelOffset -= this.state.handleSize / 2;
     return pixelOffset;
   },
 
@@ -384,22 +377,16 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
       if (value[i + 1] - value[i] < this.props.minDistance) return;
     }
 
-    this.setState({value: value}, callback.bind(this, closestIndex));
+    this.setState({ value: value }, callback.bind(this, closestIndex));
   },
 
   _getMousePosition(e) {
-    return [
-      e['page' + this._axisKey()],
-      e['page' + this._orthogonalAxisKey()]
-    ];
+    return [e["page" + this._axisKey()], e["page" + this._orthogonalAxisKey()]];
   },
 
   _getTouchPosition(e) {
     const touch = e.touches[0];
-    return [
-      touch['page' + this._axisKey()],
-      touch['page' + this._orthogonalAxisKey()]
-    ];
+    return [touch["page" + this._axisKey()], touch["page" + this._orthogonalAxisKey()]];
   },
 
   _getMouseEventMap() {
@@ -418,7 +405,7 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
   // create the `mousedown` handler for the i-th handle
   _createOnMouseDown(i) {
-    return function (e) {
+    return function(e) {
       if (this.props.disabled) return;
       const position = this._getMousePosition(e);
       this._start(i, position[0]);
@@ -429,7 +416,7 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
   // create the `touchstart` handler for the i-th handle
   _createOnTouchStart(i) {
-    return function (e) {
+    return function(e) {
       if (this.props.disabled || e.touches.length > 1) return;
       const position = this._getTouchPosition(e);
       this.startPosition = position;
@@ -460,7 +447,7 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
     this.hasMoved = false;
 
-    this._fireChangeEvent('onBeforeChange');
+    this._fireChangeEvent("onBeforeChange");
 
     const zIndices = this.state.zIndices;
     zIndices.splice(zIndices.indexOf(i), 1); // remove wherever the element is
@@ -484,7 +471,7 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
   _onEnd(eventMap) {
     this._removeHandlers(eventMap);
-    this.setState({index: -1}, this._fireChangeEvent.bind(this, 'onAfterChange'));
+    this.setState({ index: -1 }, this._fireChangeEvent.bind(this, "onAfterChange"));
   },
 
   _onMouseMove(e) {
@@ -497,14 +484,14 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
     const position = this._getTouchPosition(e);
 
-    if (typeof this.isScrolling === 'undefined') {
+    if (typeof this.isScrolling === "undefined") {
       const diffMainDir = position[0] - this.startPosition[0];
       const diffScrollDir = position[1] - this.startPosition[1];
       this.isScrolling = Math.abs(diffScrollDir) > Math.abs(diffMainDir);
     }
 
     if (this.isScrolling) {
-      this.setState({index: -1});
+      this.setState({ index: -1 });
       return;
     }
 
@@ -527,7 +514,8 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
     let diffPosition = position - state.startPosition;
     if (props.invert) diffPosition *= -1;
 
-    const diffValue = diffPosition / (state.sliderLength - state.handleSize) * (props.max - props.min);
+    const diffValue =
+      diffPosition / (state.sliderLength - state.handleSize) * (props.max - props.min);
     let newValue = this._trimAlignValue(state.startValue + diffValue);
 
     const minDistance = props.minDistance;
@@ -566,15 +554,17 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
     // Normally you would use `shouldComponentUpdate`, but since the slider is a low-level component,
     // the extra complexity might be worth the extra performance.
     if (newValue !== oldValue) {
-      this.setState({value: value}, this._fireChangeEvent.bind(this, 'onChange'));
+      this.setState({ value: value }, this._fireChangeEvent.bind(this, "onChange"));
     }
   },
 
   _pushSucceeding(value, minDistance, index) {
     let i, padding;
-    for (i = index, padding = value[i] + minDistance;
+    for (
+      i = index, padding = value[i] + minDistance;
       value[i + 1] != null && padding > value[i + 1];
-      i++, padding = value[i] + minDistance) {
+      i++, padding = value[i] + minDistance
+    ) {
       value[i + 1] = this._alignValue(padding);
     }
   },
@@ -590,9 +580,11 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
   _pushPreceding(value, minDistance, index) {
     let i, padding;
-    for (i = index, padding = value[i] - minDistance;
+    for (
+      i = index, padding = value[i] - minDistance;
       value[i - 1] != null && padding < value[i - 1];
-      i--, padding = value[i] - minDistance) {
+      i--, padding = value[i] - minDistance
+    ) {
       value[i - 1] = this._alignValue(padding);
     }
   },
@@ -608,37 +600,37 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
   _axisKey() {
     const orientation = this.props.orientation;
-    if (orientation === 'horizontal') return 'X';
-    if (orientation === 'vertical') return 'Y';
-    return 'X';
+    if (orientation === "horizontal") return "X";
+    if (orientation === "vertical") return "Y";
+    return "X";
   },
 
   _orthogonalAxisKey() {
     const orientation = this.props.orientation;
-    if (orientation === 'horizontal') return 'Y';
-    if (orientation === 'vertical') return 'X';
-    return 'Y';
+    if (orientation === "horizontal") return "Y";
+    if (orientation === "vertical") return "X";
+    return "Y";
   },
 
   _posMinKey() {
     const orientation = this.props.orientation;
-    if (orientation === 'horizontal') return this.props.invert ? 'right' : 'left';
-    if (orientation === 'vertical') return this.props.invert ? 'bottom' : 'top';
-    return this.props.invert ? 'right' : 'left';
+    if (orientation === "horizontal") return this.props.invert ? "right" : "left";
+    if (orientation === "vertical") return this.props.invert ? "bottom" : "top";
+    return this.props.invert ? "right" : "left";
   },
 
   _posMaxKey() {
     const orientation = this.props.orientation;
-    if (orientation === 'horizontal') return this.props.invert ? 'left' : 'right';
-    if (orientation === 'vertical') return this.props.invert ? 'top' : 'bottom';
-    return this.props.invert ? 'left' : 'right';
+    if (orientation === "horizontal") return this.props.invert ? "left" : "right";
+    if (orientation === "vertical") return this.props.invert ? "top" : "bottom";
+    return this.props.invert ? "left" : "right";
   },
 
   _sizeKey() {
     const orientation = this.props.orientation;
-    if (orientation === 'horizontal') return 'clientWidth';
-    if (orientation === 'vertical') return 'clientHeight';
-    return 'clientWidth';
+    if (orientation === "horizontal") return "clientWidth";
+    if (orientation === "vertical") return "clientHeight";
+    return "clientWidth";
   },
 
   _trimAlignValue(val, props) {
@@ -661,21 +653,24 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
     let alignValue = val - valModStep;
 
     if (Math.abs(valModStep) * 2 >= props.step) {
-      alignValue += (valModStep > 0) ? props.step : (-props.step);
+      alignValue += valModStep > 0 ? props.step : -props.step;
     }
 
     return parseFloat(alignValue.toFixed(5));
   },
 
   _renderHandle(style, i) {
-    const className = this.props.handleClassName + ' ' +
-      (this.props.handleClassName + '-' + i) + ' ' +
-      (this.state.index === i ? this.props.handleActiveClassName : '');
+    const className =
+      this.props.handleClassName +
+      " " +
+      (this.props.handleClassName + "-" + i) +
+      " " +
+      (this.state.index === i ? this.props.handleActiveClassName : "");
 
     return (
       <div
-        ref={'handle' + i}
-        key={'handle' + i}
+        ref={"handle" + i}
+        key={"handle" + i}
         className={className}
         style={{ ...styles.handle, ...style }}
         onMouseDown={this._createOnMouseDown(i)}
@@ -685,7 +680,6 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
   },
 
   _renderHandles(offset) {
-
     const length = offset.length;
 
     const tempStyles = this.tempArray;
@@ -703,8 +697,8 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
   _buildBarStyle(min, max) {
     const obj = {
-      position: 'absolute',
-      willChange: this.state.index >= 0 ? this._posMinKey() + ',' + this._posMaxKey() : ''
+      position: "absolute",
+      willChange: this.state.index >= 0 ? this._posMinKey() + "," + this._posMaxKey() : ""
     };
     obj[this._posMinKey()] = min;
     obj[this._posMaxKey()] = max;
@@ -712,11 +706,13 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
   },
 
   _renderBar(i, offsetFrom, offsetTo) {
-
-    const className = this.props.barClassName + ' ' + this.props.barClassName + '-' + i;
+    const className = this.props.barClassName + " " + this.props.barClassName + "-" + i;
     let barStyle = this._buildBarStyle(offsetFrom, this.state.upperBound - offsetTo);
 
-    if ((i === 0 && !_isArray(this.props.defaultValue)) || i === 1 && _isArray(this.props.defaultValue)) {
+    if (
+      (i === 0 && !_isArray(this.props.defaultValue)) ||
+      (i === 1 && _isArray(this.props.defaultValue))
+    ) {
       barStyle = _assign({}, barStyle, styles.selectedBar);
     } else {
       barStyle = _assign({}, barStyle, styles.unselectedBar);
@@ -731,8 +727,8 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
     return (
       <div
-        key={'bar' + i}
-        ref={'bar' + i}
+        key={"bar" + i}
+        ref={"bar" + i}
         className={className}
         style={{ ...styles.bar, ...barStyle }}
       />
@@ -740,7 +736,6 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
   },
 
   _renderBars(offset) {
-
     const bars = [];
     const lastIndex = offset.length - 1;
 
@@ -760,8 +755,8 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
     this.hasMoved = false;
     if (!this.props.snapDragDisabled) {
       const position = this._getMousePosition(e);
-      this._forceValueFromPosition(position[0], (i) => {
-        this._fireChangeEvent('onChange');
+      this._forceValueFromPosition(position[0], i => {
+        this._fireChangeEvent("onChange");
         this._start(i, position[0]);
         this._addHandlers(this._getMouseEventMap());
       });
@@ -775,7 +770,9 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
 
     if (this.props.onSliderClick && !this.hasMoved) {
       const position = this._getMousePosition(e);
-      const valueAtPos = this._trimAlignValue(this._calcValue(this._calcOffsetFromPosition(position[0])));
+      const valueAtPos = this._trimAlignValue(
+        this._calcValue(this._calcOffsetFromPosition(position[0]))
+      );
       this.props.onSliderClick(valueAtPos);
     }
   },
@@ -787,7 +784,6 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
   },
 
   render() {
-
     const offset = this.tempArray;
     const value = this.state.value;
     const l = this.state.value.length;
@@ -795,9 +791,8 @@ const Slider = createReactClass({ // eslint-disable-line react/prefer-es6-class
       offset[i] = this._calcOffset(value[i], i);
     }
 
-    const orientation = this.props.orientation === 'vertical' ?
-      styles.verticalSlider :
-      styles.horizontalSlider;
+    const orientation =
+      this.props.orientation === "vertical" ? styles.verticalSlider : styles.horizontalSlider;
 
     return (
       <div

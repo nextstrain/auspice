@@ -43,7 +43,9 @@ export const setGenotype = (nodes, prot, positions) => {
       node.currentGt[j] = ancState[j];
     }
   }
-  nodes.forEach((n) => {n.currentGt = n.currentGt.join(' / ');});
+  nodes.forEach((n) => {
+    n.currentGt = n.currentGt.join(" / ");
+  });
   // console.timeEnd("setGenotype")
   // console.log(`set ${ancNodes.length} nodes to the ancestral state: ${ancState}`)
 };
@@ -58,7 +60,7 @@ export const orderOfGenotypeAppearance = (nodes, mutType) => {
     }
   });
   const ordered = Object.keys(seen);
-  ordered.sort((a, b) => seen[a] < seen[b] ? -1 : 1);
+  ordered.sort((a, b) => (seen[a] < seen[b] ? -1 : 1));
   let orderedBases;
   // remove 'non-bases' (X - N)
   if (mutType === "nuc") {

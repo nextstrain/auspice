@@ -37,8 +37,8 @@ const processAnnotations = (annotations) => {
   annotations.forEach((d) => {
     m[d.prot] = d;
   });
-  const sorted = Object.keys(m).sort((a, b) =>
-    m[a].start < m[b].start ? -1 : m[a].start > m[b].start ? 1 : 0
+  const sorted = Object.keys(m).sort(
+    (a, b) => (m[a].start < m[b].start ? -1 : m[a].start > m[b].start ? 1 : 0)
   );
   for (const gene of Object.keys(m)) {
     m[gene].idx = sorted.indexOf(gene);

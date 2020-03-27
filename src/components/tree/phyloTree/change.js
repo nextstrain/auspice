@@ -13,7 +13,8 @@ const updateNodesWithNewData = (nodes, newNodeProps) => {
   // let tmp = 0;
   nodes.forEach((d, i) => {
     d.update = false;
-    for (let key in newNodeProps) { // eslint-disable-line
+    // eslint-disable-next-line
+    for (const key in newNodeProps) {
       const val = newNodeProps[key][i];
       if (val !== d[key]) {
         d[key] = val;
@@ -24,7 +25,6 @@ const updateNodesWithNewData = (nodes, newNodeProps) => {
   });
   // console.log("marking ", tmp, " nodes for update");
 };
-
 
 /* svgSetters defines how attrs & styles should be applied to which class (e.g. ".tip").
  * E.g. which node attribute should be used?!?
@@ -37,8 +37,7 @@ const svgSetters = {
       cx: (d) => d.xTip,
       cy: (d) => d.yTip
     },
-    ".branch": {
-    },
+    ".branch": {},
     ".vaccineCross": {
       d: (d) => d.vaccineCross
     },
@@ -50,7 +49,7 @@ const svgSetters = {
     ".tip": {
       fill: (d) => d.fill,
       stroke: (d) => d.tipStroke,
-      visibility: (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden"
+      visibility: (d) => (d.visibility === NODE_VISIBLE ? "visible" : "hidden")
     },
     ".conf": {
       stroke: (d) => d.branchStroke,
@@ -59,7 +58,7 @@ const svgSetters = {
     // only allow stroke to be set on individual branches
     ".branch": {
       "stroke-width": (d) => d["stroke-width"] + "px", // style - as per drawBranches()
-      cursor: (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default",
+      cursor: (d) => (d.visibility === NODE_VISIBLE ? "pointer" : "default"),
       visibility: getBranchVisibility
     },
     ".branch.S": {
@@ -70,7 +69,6 @@ const svgSetters = {
     }
   }
 };
-
 
 /** createUpdateCall
  * returns a function which can be called as part of a D3 chain in order to modify
@@ -84,27 +82,27 @@ const svgSetters = {
 const createUpdateCall = (treeElem, properties) => (selection) => {
   // First: the properties to update via d3Selection.attr call
   if (svgSetters.attrs[treeElem]) {
-    [...properties].filter((x) => svgSetters.attrs[treeElem][x])
-      .forEach((attrName) => {
-        // console.log(`applying attr ${attrName} to ${treeElem}`)
-        selection.attr(attrName, svgSetters.attrs[treeElem][attrName]);
-      });
+    [...properties].filter((x) => svgSetters.attrs[treeElem][x]).forEach((attrName) => {
+      // console.log(`applying attr ${attrName} to ${treeElem}`)
+      selection.attr(attrName, svgSetters.attrs[treeElem][attrName]);
+    });
   }
   // Second: the properties to update via d3Selection.style call
   if (svgSetters.styles[treeElem]) {
-    [...properties].filter((x) => svgSetters.styles[treeElem][x])
-      .forEach((styleName) => {
-        // console.log(`applying style ${styleName} to ${treeElem}`)
-        selection.style(styleName, svgSetters.styles[treeElem][styleName]);
-      });
+    [...properties].filter((x) => svgSetters.styles[treeElem][x]).forEach((styleName) => {
+      // console.log(`applying style ${styleName} to ${treeElem}`)
+      selection.style(styleName, svgSetters.styles[treeElem][styleName]);
+    });
   }
 };
 
 const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
   // console.log("general svg update for", treeElem);
-  svg.selectAll(treeElem)
+  svg
+    .selectAll(treeElem)
     .filter((d) => d.update)
-    .transition().duration(transitionTime)
+    .transition()
+    .duration(transitionTime)
     .call(updateCall);
   if (!transitionTime) {
     /* https://github.com/d3/d3-timer#timerFlush */
@@ -119,23 +117,39 @@ const genericSelectAndModify = (svg, treeElem, updateCall, transitionTime) => {
  * @transitionTime {INT} - in ms. if 0 then no transition (timerFlush is used)
  * @extras {dict} - extra keywords to tell this function to call certain phyloTree update methods. In flux.
  */
-export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, transitionTime, extras) {
+export const modifySVG = function modifySVG(
+  elemsToUpdate,
+  svgPropsToUpdate,
+  transitionTime,
+  extras
+) {
   let updateCall;
-  const classesToPotentiallyUpdate = [".tip", ".vaccineDottedLine", ".vaccineCross", ".branch"]; /* order is respected */
+  const classesToPotentiallyUpdate = [
+    ".tip",
+    ".vaccineDottedLine",
+    ".vaccineCross",
+    ".branch"
+  ]; /* order is respected */
 
   /* treat stem / branch specially, but use these to replace a normal .branch call if that's also to be applied */
   if (elemsToUpdate.has(".branch.S") || elemsToUpdate.has(".branch.T")) {
     const applyBranchPropsAlso = elemsToUpdate.has(".branch");
-    if (applyBranchPropsAlso) classesToPotentiallyUpdate.splice(classesToPotentiallyUpdate.indexOf(".branch"), 1);
+    if (applyBranchPropsAlso) {classesToPotentiallyUpdate.splice(classesToPotentiallyUpdate.indexOf(".branch"), 1);}
     const ST = [".S", ".T"];
     ST.forEach((x, STidx) => {
       if (elemsToUpdate.has(`.branch${x}`)) {
         if (applyBranchPropsAlso) {
           updateCall = (selection) => {
-            createUpdateCall(".branch", svgPropsToUpdate)(selection); /* the "normal" branch changes to apply */
-            selection.attr("d", (d) => d.branch[STidx]); /* change the path (differs between .S and .T) */
+            createUpdateCall(".branch", svgPropsToUpdate)(
+              selection
+            ); /* the "normal" branch changes to apply */
+            selection.attr(
+              "d",
+              (d) => d.branch[STidx]
+            ); /* change the path (differs between .S and .T) */
           };
-        } else if (svgPropsToUpdate.has("stroke")) { /* we seed to set stroke differently on T and S branches */
+        } else if (svgPropsToUpdate.has("stroke")) {
+          /* we seed to set stroke differently on T and S branches */
           updateCall = (selection) => {
             createUpdateCall(`.branch${x}`, svgPropsToUpdate)(selection);
             selection.attr("d", (d) => d.branch[STidx]);
@@ -159,19 +173,19 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   });
 
   /* special cases not listed in classesToPotentiallyUpdate */
-  if (elemsToUpdate.has('.branchLabel')) {
+  if (elemsToUpdate.has(".branchLabel")) {
     this.updateBranchLabels(transitionTime);
   }
   if (extras.hideTipLabels) {
     this.removeTipLabels();
-  } else if (elemsToUpdate.has('.tipLabel')) {
+  } else if (elemsToUpdate.has(".tipLabel")) {
     this.updateTipLabels();
   }
-  if (elemsToUpdate.has('.grid')) {
+  if (elemsToUpdate.has(".grid")) {
     if (this.grid && this.layout !== "unrooted") this.addGrid();
     else this.hideGrid();
   }
-  if (elemsToUpdate.has('.regression')) {
+  if (elemsToUpdate.has(".regression")) {
     this.removeRegression();
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
   }
@@ -209,7 +223,12 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
  * step 2: when step 1 has finished, move tips across the screen.
  * step 3: when step 2 has finished, redraw everything. No transition here.
  */
-export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPropsToUpdate, transitionTimeFadeOut, transitionTimeMoveTips) {
+export const modifySVGInStages = function modifySVGInStages(
+  elemsToUpdate,
+  svgPropsToUpdate,
+  transitionTimeFadeOut,
+  transitionTimeMoveTips
+) {
   elemsToUpdate.delete(".tip");
   this.hideGrid();
   let inProgress = 0; /* counter of transitions currently in progress */
@@ -228,7 +247,8 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
 
   /* STEP 2: move tips */
   const step2 = () => {
-    if (!--inProgress) { /* decrement counter. When hits 0 run block */
+    if (!--inProgress) {
+      /* decrement counter. When hits 0 run block */
       const updateTips = createUpdateCall(".tip", svgPropsToUpdate);
       genericSelectAndModify(this.svg, ".tip", updateTips, transitionTimeMoveTips);
       setTimeout(step3, transitionTimeMoveTips);
@@ -237,8 +257,10 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
 
   /* STEP 1. remove everything (via opacity) */
   this.confidencesInSVG = false;
-  this.svg.selectAll([...elemsToUpdate].join(", "))
-    .transition().duration(transitionTimeFadeOut)
+  this.svg
+    .selectAll([...elemsToUpdate].join(", "))
+    .transition()
+    .duration(transitionTimeFadeOut)
     .style("opacity", 0)
     .remove()
     .on("start", () => inProgress++)
@@ -246,7 +268,6 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
   this.removeTemporalSlice();
   if (!transitionTimeFadeOut) timerFlush();
 };
-
 
 /* the main interface to changing a currently rendered tree.
  * simply call change and tell it what should be changed.
@@ -286,7 +307,7 @@ export const change = function change({
   /* calculate dt */
   const idealTransitionTime = 500;
   let transitionTime = idealTransitionTime;
-  if ((Date.now() - this.timeLastRenderRequested) < idealTransitionTime * 2) {
+  if (Date.now() - this.timeLastRenderRequested < idealTransitionTime * 2) {
     transitionTime = 0;
   }
 
@@ -294,7 +315,11 @@ export const change = function change({
   and what SVG elements, node properties, svg props we actually change */
   if (changeColorBy) {
     /* check that fill & stroke are defined */
-    elemsToUpdate.add(".branch.S").add(".branch.T").add(".tip").add(".conf");
+    elemsToUpdate
+      .add(".branch.S")
+      .add(".branch.T")
+      .add(".tip")
+      .add(".conf");
     svgPropsToUpdate.add("stroke").add("fill");
     nodePropsToModify.branchStroke = branchStroke;
     nodePropsToModify.tipStroke = tipStroke;
@@ -318,11 +343,22 @@ export const change = function change({
     nodePropsToModify["stroke-width"] = branchThickness;
   }
   if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions) {
-    elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
-    elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
-    elemsToUpdate.add('.branchLabel').add('.tipLabel');
+    elemsToUpdate
+      .add(".tip")
+      .add(".branch.S")
+      .add(".branch.T")
+      .add(".branch");
+    elemsToUpdate
+      .add(".vaccineCross")
+      .add(".vaccineDottedLine")
+      .add(".conf");
+    elemsToUpdate.add(".branchLabel").add(".tipLabel");
     elemsToUpdate.add(".grid").add(".regression");
-    svgPropsToUpdate.add("cx").add("cy").add("d").add("opacity")
+    svgPropsToUpdate
+      .add("cx")
+      .add("cy")
+      .add("d")
+      .add("opacity")
       .add("visibility");
   }
 
@@ -335,17 +371,22 @@ export const change = function change({
   }
   /* some things need to update d.inView and/or d.update. This should be centralised */
   /* TODO: list all functions which modify these */
-  if (zoomIntoClade) { /* must happen below updateNodesWithNewData */
+  if (zoomIntoClade) {
+    /* must happen below updateNodesWithNewData */
     this.nodes.forEach((d) => {
       d.inView = false;
       d.update = true;
     });
     /* if clade is terminal, use the parent as the zoom node */
     this.zoomNode = zoomIntoClade.terminal ? zoomIntoClade.parent : zoomIntoClade;
-    applyToChildren(this.zoomNode, (d) => {d.inView = true;});
+    applyToChildren(this.zoomNode, (d) => {
+      d.inView = true;
+    });
   }
   if (svgHasChangedDimensions) {
-    this.nodes.forEach((d) => {d.update = true;});
+    this.nodes.forEach((d) => {
+      d.update = true;
+    });
   }
 
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */

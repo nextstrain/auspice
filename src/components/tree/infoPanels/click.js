@@ -2,7 +2,13 @@ import React from "react";
 import { isValueValid } from "../../../util/globals";
 import { infoPanelStyles } from "../../../globalStyles";
 import { numericToCalendar } from "../../../util/dateHelpers";
-import { getTraitFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode, getUrlFromNode } from "../../../util/treeMiscHelpers";
+import {
+  getTraitFromNode,
+  getFullAuthorInfoFromNode,
+  getVaccineFromNode,
+  getAccessionFromNode,
+  getUrlFromNode
+} from "../../../util/treeMiscHelpers";
 
 export const styles = {
   container: {
@@ -24,20 +30,29 @@ export const styles = {
 };
 
 export const stopProp = (e) => {
-  if (!e) {e = window.event;} // eslint-disable-line no-param-reassign
-  e.cancelBubble = true;
-  if (e.stopPropagation) {e.stopPropagation();}
+  let stopEvent = e;
+  if (!stopEvent) {
+    stopEvent = window.event;
+  } // eslint-disable-line no-param-reassign
+  stopEvent.cancelBubble = true;
+  if (stopEvent.stopPropagation) {
+    stopEvent.stopPropagation();
+  }
 };
 
 /* min width to get "collection date" on 1 line: 120 */
 const item = (key, value, href) => (
   <tr key={key}>
     <th style={infoPanelStyles.item}>{key}</th>
-    <td style={infoPanelStyles.item}>{href ? (
-      <a href={href} target="_blank" rel="noopener noreferrer">{value}</a>
-    ) :
-      value
-    }</td>
+    <td style={infoPanelStyles.item}>
+      {href ? (
+        <a href={href} target="_blank" rel="noopener noreferrer">
+          {value}
+        </a>
+      ) : (
+        value
+      )}
+    </td>
   </tr>
 );
 
@@ -50,16 +65,18 @@ const formatURL = (url) => {
   return url;
 };
 
-const Link = ({url, title, value}) => (
+const Link = ({ url, title, value }) => (
   <tr>
     <th style={infoPanelStyles.item}>{title}</th>
     <td style={infoPanelStyles.item}>
-      <a href={url} target="_blank" rel="noopener noreferrer">{value}</a>
+      <a href={url} target="_blank" rel="noopener noreferrer">
+        {value}
+      </a>
     </td>
   </tr>
 );
 
-const AccessionAndUrl = ({node}) => {
+const AccessionAndUrl = ({ node }) => {
   const accession = getAccessionFromNode(node);
   const url = getUrlFromNode(node);
   const genbank_accession = getTraitFromNode(node, "genbank_accession");
@@ -70,37 +87,41 @@ const AccessionAndUrl = ({node}) => {
   if (isValueValid(gisaid_epi_isl)) {
     return (
       <>
-        <Link title={"GISAID EPI ISL"} value={gisaid_epi_isl.split("_")[2]} url={"https://gisaid.org"}/>
-        {isValueValid(genbank_accession) ?
-          <Link title={"Genbank accession"} value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/> :
-          null
-        }
+        <Link
+          title={"GISAID EPI ISL"}
+          value={gisaid_epi_isl.split("_")[2]}
+          url={"https://gisaid.org"}
+        />
+        {isValueValid(genbank_accession) ? (
+          <Link
+            title={"Genbank accession"}
+            value={genbank_accession}
+            url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}
+          />
+        ) : null}
       </>
     );
   }
 
   if (isValueValid(genbank_accession)) {
     return (
-      <Link title={"Genbank accession"} value={genbank_accession} url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}/>
+      <Link
+        title={"Genbank accession"}
+        value={genbank_accession}
+        url={"https://www.ncbi.nlm.nih.gov/nuccore/" + genbank_accession}
+      />
     );
   } else if (isValueValid(accession) && isValueValid(url)) {
-    return (
-      <Link url={formatURL(url)} value={accession} title={"Accession"}/>
-    );
+    return <Link url={formatURL(url)} value={accession} title={"Accession"} />;
   } else if (isValueValid(accession)) {
-    return (
-      item("Accession", accession)
-    );
+    return item("Accession", accession);
   } else if (isValueValid(url)) {
-    return (
-      <Link title={"Strain URL"} url={formatURL(url)} value={"click here"}/>
-    );
+    return <Link title={"Strain URL"} url={formatURL(url)} value={"click here"} />;
   }
   return null;
 };
 
-
-const VaccineInfo = ({node, t}) => {
+const VaccineInfo = ({ node, t }) => {
   const vaccineInfo = getVaccineFromNode(node);
   if (!vaccineInfo) return null;
   const renderElements = [];
@@ -132,14 +153,14 @@ const VaccineInfo = ({node, t}) => {
     renderElements.push(
       <tr key={"serum"}>
         <th>{t("Serum strain")}</th>
-        <td/>
+        <td />
       </tr>
     );
   }
   return renderElements;
 };
 
-const PublicationInfo = ({node, t}) => {
+const PublicationInfo = ({ node, t }) => {
   const info = getFullAuthorInfoFromNode(node);
   if (!info) return null;
 
@@ -155,23 +176,24 @@ const PublicationInfo = ({node, t}) => {
   if (info.journal && info.journal !== "?") {
     itemsToRender.push(item(t("Journal"), info.journal));
   }
-  return (itemsToRender.length === 1 ? itemsToRender[0] : itemsToRender);
+  return itemsToRender.length === 1 ? itemsToRender[0] : itemsToRender;
 };
 
-const StrainName = ({children}) => (
-  <p style={infoPanelStyles.modalHeading}>{children}</p>
-);
+const StrainName = ({ children }) => <p style={infoPanelStyles.modalHeading}>{children}</p>;
 
-const SampleDate = ({node, t}) => {
+const SampleDate = ({ node, t }) => {
   const date = getTraitFromNode(node, "num_date");
   if (!date) return null;
 
-  const dateUncertainty = getTraitFromNode(node, "num_date", {confidence: true});
+  const dateUncertainty = getTraitFromNode(node, "num_date", { confidence: true });
   if (date && dateUncertainty && dateUncertainty[0] !== dateUncertainty[1]) {
     return (
       <>
         {item(t("Inferred collection date"), numericToCalendar(date))}
-        {item(t("Date Confidence Interval"), `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`)}
+        {item(
+          t("Date Confidence Interval"),
+          `(${numericToCalendar(dateUncertainty[0])}, ${numericToCalendar(dateUncertainty[1])})`
+        )}
       </>
     );
   }
@@ -186,7 +208,7 @@ const getTraitsToDisplay = (node) => {
   return Object.keys(node.node_attrs).filter((k) => !ignore.includes(k));
 };
 
-const Trait = ({node, trait, colorings}) => {
+const Trait = ({ node, trait, colorings }) => {
   const value_tmp = getTraitFromNode(node, trait);
   let value = value_tmp;
   if (typeof value_tmp === "number") {
@@ -194,9 +216,8 @@ const Trait = ({node, trait, colorings}) => {
       value = Number.parseFloat(value_tmp).toPrecision(3);
     }
   }
-  const name = (colorings && colorings[trait] && colorings[trait].title) ?
-    colorings[trait].title :
-    trait;
+  const name =
+    colorings && colorings[trait] && colorings[trait].title ? colorings[trait].title : trait;
   return isValueValid(value) ? item(name, value) : null;
 };
 
@@ -207,9 +228,11 @@ const Trait = ({node, trait, colorings}) => {
  * @param  {function} props.goAwayCallback
  * @param  {object}   props.colorings
  */
-const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
-  if (!tip) {return null;}
-  const panelStyle = { ...infoPanelStyles.panel};
+const TipClickedPanel = ({ tip, goAwayCallback, colorings, t }) => {
+  if (!tip) {
+    return null;
+  }
+  const panelStyle = { ...infoPanelStyles.panel };
   panelStyle.maxHeight = "70%";
   const node = tip.n;
   return (
@@ -218,18 +241,16 @@ const TipClickedPanel = ({tip, goAwayCallback, colorings, t}) => {
         <StrainName>{node.name}</StrainName>
         <table>
           <tbody>
-            <VaccineInfo node={node} t={t}/>
-            <SampleDate node={node} t={t}/>
-            <PublicationInfo node={node} t={t}/>
+            <VaccineInfo node={node} t={t} />
+            <SampleDate node={node} t={t} />
+            <PublicationInfo node={node} t={t} />
             {getTraitsToDisplay(node).map((trait) => (
-              <Trait node={node} trait={trait} colorings={colorings} key={trait}/>
+              <Trait node={node} trait={trait} colorings={colorings} key={trait} />
             ))}
-            <AccessionAndUrl node={node}/>
+            <AccessionAndUrl node={node} />
           </tbody>
         </table>
-        <p style={infoPanelStyles.comment}>
-          {t("Click outside this box to go back to the tree")}
-        </p>
+        <p style={infoPanelStyles.comment}>{t("Click outside this box to go back to the tree")}</p>
       </div>
     </div>
   );

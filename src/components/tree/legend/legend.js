@@ -3,11 +3,16 @@ import { connect } from "react-redux";
 import { rgb } from "d3-color";
 import LegendItem from "./item";
 import { headerFont, darkGrey } from "../../../globalStyles";
-import { legendRectSize, legendSpacing, legendMaxLength, fastTransitionDuration, months } from "../../../util/globals";
+import {
+  legendRectSize,
+  legendSpacing,
+  legendMaxLength,
+  fastTransitionDuration,
+  months
+} from "../../../util/globals";
 import { numericToCalendar } from "../../../util/dateHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { TOGGLE_LEGEND } from "../../../actions/types";
-
 
 @connect((state) => {
   return {
@@ -24,7 +29,9 @@ class Legend extends React.Component {
 
   showLegend() {
     // redux state takes precedent
-    if (this.props.legendOpen !== undefined) { return this.props.legendOpen; }
+    if (this.props.legendOpen !== undefined) {
+      return this.props.legendOpen;
+    }
 
     // Our default state changes based on the size of the window or the number of items in the legend.
     if (this.props.width < 600 || this.props.colorScale.legendValues.length > 32) {
@@ -39,8 +46,9 @@ class Legend extends React.Component {
     }
     const nItems = this.props.colorScale.legendValues.length;
     const titlePadding = 20;
-    return Math.ceil(nItems / 2) *
-      (legendRectSize + legendSpacing) + legendSpacing + titlePadding || 100;
+    return (
+      Math.ceil(nItems / 2) * (legendRectSize + legendSpacing) + legendSpacing + titlePadding || 100
+    );
   }
 
   getSVGWidth() {
@@ -54,7 +62,7 @@ class Legend extends React.Component {
     const count = this.props.colorScale.legendValues.length;
     const stack = Math.ceil(count / 2);
     const fromRight = Math.floor(i / stack);
-    const fromTop = (i % stack);
+    const fromTop = i % stack;
     const horz = fromRight * 145 + 10;
     const vert = fromTop * (legendRectSize + legendSpacing);
     return "translate(" + horz + "," + vert + ")";
@@ -66,14 +74,15 @@ class Legend extends React.Component {
         ? `Genotype at ${genotype.gene} site ${genotype.positions.join(", ")}`
         : `Nucleotide at position ${genotype.positions.join(", ")}`;
     }
-    return this.props.colorings[this.props.colorBy] === undefined ?
-      "" : this.props.colorings[this.props.colorBy].title;
+    return this.props.colorings[this.props.colorBy] === undefined
+      ? ""
+      : this.props.colorings[this.props.colorBy].title;
   }
   getTitleWidth() {
     return 15 + 5.3 * this.getTitleString().length;
   }
   toggleLegend() {
-    this.props.dispatch({type: TOGGLE_LEGEND, value: !this.props.legendOpen});
+    this.props.dispatch({ type: TOGGLE_LEGEND, value: !this.props.legendOpen });
   }
 
   /*
@@ -83,7 +92,7 @@ class Legend extends React.Component {
   legendTitle() {
     return (
       <g id="Title">
-        <rect width={this.getTitleWidth()} height="12" fill="rgba(255,255,255,.85)"/>
+        <rect width={this.getTitleWidth()} height="12" fill="rgba(255,255,255,.85)" />
         <text
           x={5}
           y={10}
@@ -113,7 +122,7 @@ class Legend extends React.Component {
     return (
       <g id="Chevron" transform={`translate(${offset},0)`}>
         <svg width="12" height="12" viewBox="0 0 1792 1792">
-          <rect width="1792" height="1792" fill="rgba(255,255,255,.85)"/>
+          <rect width="1792" height="1792" fill="rgba(255,255,255,.85)" />
           <path
             fill={darkGrey}
             style={{
@@ -133,12 +142,14 @@ class Legend extends React.Component {
     if (this.props.colorBy === "num_date") {
       const legendValues = this.props.colorScale.legendValues;
       if (
-        (legendValues[legendValues.length-1] - legendValues[0] > 10) && /* range spans more than 10 years */
-        (legendValues[legendValues.length-1] - parseInt(label, 10) >= 10) /* current label (value) is more than 10 years from the most recent */
+        legendValues[legendValues.length - 1] - legendValues[0] >
+          10 /* range spans more than 10 years */ &&
+        legendValues[legendValues.length - 1] - parseInt(label, 10) >=
+          10 /* current label (value) is more than 10 years from the most recent */
       ) {
         return parseInt(label, 10);
       }
-      const [yyyy, mm, dd] = numericToCalendar(label).split('-'); // eslint-disable-line
+      const [yyyy, mm, dd] = numericToCalendar(label).split("-"); // eslint-disable-line
       return `${months[mm]} ${yyyy}`;
     }
     return label;
@@ -149,25 +160,25 @@ class Legend extends React.Component {
    * coordinate system from top,left of parent SVG
    */
   legendItems() {
-    const items = this.props.colorScale.legendValues
-      .filter((d) => d !== undefined)
-      .map((d, i) => {
-        return (
-          <LegendItem
-            dispatch={this.props.dispatch}
-            legendRectSize={legendRectSize}
-            legendSpacing={legendSpacing}
-            legendMaxLength={legendMaxLength}
-            rectFill={rgb(this.props.colorScale.scale(d)).brighter([0.35]).toString()}
-            rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
-            transform={this.getTransformationForLegendItem(i)}
-            key={d}
-            value={d}
-            label={this.styleLabelText(d)}
-            index={i}
-          />
-        );
-      });
+    const items = this.props.colorScale.legendValues.filter((d) => d !== undefined).map((d, i) => {
+      return (
+        <LegendItem
+          dispatch={this.props.dispatch}
+          legendRectSize={legendRectSize}
+          legendSpacing={legendSpacing}
+          legendMaxLength={legendMaxLength}
+          rectFill={rgb(this.props.colorScale.scale(d))
+            .brighter([0.35])
+            .toString()}
+          rectStroke={rgb(this.props.colorScale.scale(d)).toString()}
+          transform={this.getTransformationForLegendItem(i)}
+          key={d}
+          value={d}
+          label={this.styleLabelText(d)}
+          index={i}
+        />
+      );
+    });
     // This gives the nice looking show/hide animation. Should restore while maintaining
     // legend collapse functionality.
     // <g style={{
@@ -177,7 +188,7 @@ class Legend extends React.Component {
     //   }}>
     return (
       <g id="ItemsContainer">
-        <rect width="290" height={this.getSVGHeight()} fill="rgba(255,255,255,.85)"/>
+        <rect width="290" height={this.getSVGHeight()} fill="rgba(255,255,255,.85)" />
         <g id="Items" transform="translate(0,20)">
           {items}
         </g>
@@ -209,11 +220,7 @@ class Legend extends React.Component {
         style={styles.svg}
       >
         {this.legendItems()}
-        <g
-          id="TitleAndChevron"
-          onClick={() => this.toggleLegend()}
-          style={{cursor: "pointer"}}
-        >
+        <g id="TitleAndChevron" onClick={() => this.toggleLegend()} style={{ cursor: "pointer" }}>
           {this.legendTitle()}
           {this.legendChevron()}
         </g>

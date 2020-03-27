@@ -6,16 +6,16 @@ import { numericToCalendar } from "../../../util/dateHelpers";
 
 export const hideGrid = function hideGrid() {
   if ("majorGrid" in this.groups) {
-    this.groups.majorGrid.selectAll("*").style('visibility', 'hidden');
+    this.groups.majorGrid.selectAll("*").style("visibility", "hidden");
   }
   if ("minorGrid" in this.groups) {
-    this.groups.minorGrid.selectAll("*").style('visibility', 'hidden');
+    this.groups.minorGrid.selectAll("*").style("visibility", "hidden");
   }
   if ("gridText" in this.groups) {
-    this.groups.gridText.selectAll("*").style('visibility', 'hidden');
+    this.groups.gridText.selectAll("*").style("visibility", "hidden");
   }
   if ("axisText" in this.groups) {
-    this.groups.axisText.selectAll("*").style('visibility', 'hidden');
+    this.groups.axisText.selectAll("*").style("visibility", "hidden");
   }
 };
 
@@ -50,14 +50,16 @@ const calculateMajorGridSeperationForDivergence = (range, minorTicks) => {
   const logRange = Math.floor(Math.log10(range));
   let step = Math.pow(10, logRange); // eslint-disable-line no-restricted-properties
 
-  if (range/step < 2) { // if step > 0.5*range then make more fine-grained steps
+  if (range / step < 2) {
+    // if step > 0.5*range then make more fine-grained steps
     step /= 5;
-  } else if (range/step <5) { // if step > 0.2*range then make more fine grained steps
+  } else if (range / step < 5) {
+    // if step > 0.2*range then make more fine grained steps
     step /= 2;
   }
 
   let numMinorTicks = minorTicks;
-  if (step===5 || step===10) {
+  if (step === 5 || step === 10) {
     numMinorTicks = 5;
   }
   const minorStep = step / numMinorTicks;
@@ -73,11 +75,10 @@ const calculateMajorGridSeperationForDivergence = (range, minorTicks) => {
  *                  [1] {numeric} space between minor x-axis gridlines (measure of time)
  */
 const calculateMajorGridSeperationForTime = (timeRange, pxAvailable) => {
-
-  const rountToNearest = (n, p) => Math.ceil(n/p)*p;
+  const rountToNearest = (n, p) => Math.ceil(n / p) * p;
 
   const getMinorSpacing = (majorTimeStep) => {
-    const timesToTry = [1/365.25, 1/52, 1/12, 1, 10, 100, 1000];
+    const timesToTry = [1 / 365.25, 1 / 52, 1 / 12, 1, 10, 100, 1000];
     for (const t of timesToTry) {
       const n = majorTimeStep / t;
       // max number we allow is 12 (so that a major grid of a year can have minor grids of a month)
@@ -100,17 +101,17 @@ const calculateMajorGridSeperationForTime = (timeRange, pxAvailable) => {
     majorTimeStep = rountToNearest(majorTimeStep, 10);
   } else if (majorTimeStep > 1) {
     majorTimeStep = rountToNearest(majorTimeStep, 1);
-  } else if (majorTimeStep > (1/12)) {
+  } else if (majorTimeStep > 1 / 12) {
     /* each step is longer than a month, but shorter than a year */
-    majorTimeStep = rountToNearest(majorTimeStep, 1/12);
-  } else if (majorTimeStep > (1/52)) {
+    majorTimeStep = rountToNearest(majorTimeStep, 1 / 12);
+  } else if (majorTimeStep > 1 / 52) {
     /* each step is longer than a week, but shorter than a month */
-    majorTimeStep = rountToNearest(majorTimeStep, 1/52);
-  } else if (majorTimeStep > (1/365.25)) {
+    majorTimeStep = rountToNearest(majorTimeStep, 1 / 52);
+  } else if (majorTimeStep > 1 / 365.25) {
     /* each time step is longer than a day, but shorter than a week */
-    majorTimeStep = rountToNearest(majorTimeStep, 1/365.25);
+    majorTimeStep = rountToNearest(majorTimeStep, 1 / 365.25);
   } else {
-    majorTimeStep = 1/365.25;
+    majorTimeStep = 1 / 365.25;
   }
   const minorTimeStep = getMinorSpacing(majorTimeStep);
   return [majorTimeStep, minorTimeStep];
@@ -127,65 +128,69 @@ const createDisplayDate = (step, numDate) => {
     return numDate.toFixed(Math.max(0, -Math.floor(Math.log10(step))));
   }
   const [year, month, day] = numericToCalendar(numDate).split("-");
-  if (step >= 1/12) {
+  if (step >= 1 / 12) {
     return `${year}-${months[month]}`;
   }
   return `${year}-${months[month]}-${day}`;
 };
-
 
 const computeXGridPoints = (xmin, xmax, layout, distanceMeasure, minorTicks, pxAvailable) => {
   const majorGridPoints = [];
   const minorGridPoints = [];
 
   /* step is the amount (same units of xmax, xmin) of seperation between major grid lines */
-  const [step, minorStep] = distanceMeasure === "num_date" ?
-    calculateMajorGridSeperationForTime(xmax-xmin, Math.abs(pxAvailable)) :
-    calculateMajorGridSeperationForDivergence(xmax-xmin, minorTicks);
-  const gridMin = Math.floor(xmin/step)*step;
-  const minVis = layout==="radial" ? xmin : gridMin;
+  const [step, minorStep] =
+    distanceMeasure === "num_date"
+      ? calculateMajorGridSeperationForTime(xmax - xmin, Math.abs(pxAvailable))
+      : calculateMajorGridSeperationForDivergence(xmax - xmin, minorTicks);
+  const gridMin = Math.floor(xmin / step) * step;
+  const minVis = layout === "radial" ? xmin : gridMin;
   const maxVis = xmax;
 
-  for (let ii = 0; ii <= (xmax - gridMin)/step+3; ii++) {
-    const pos = gridMin + step*ii;
+  for (let ii = 0; ii <= (xmax - gridMin) / step + 3; ii++) {
+    const pos = gridMin + step * ii;
     majorGridPoints.push({
       position: pos,
-      name: distanceMeasure === "num_date" ?
-        createDisplayDate(step, pos) :
-        pos.toFixed(Math.max(0, -Math.floor(Math.log10(step)))),
-      visibility: ((pos<minVis) || (pos>maxVis)) ? "hidden" : "visible",
+      name:
+        distanceMeasure === "num_date"
+          ? createDisplayDate(step, pos)
+          : pos.toFixed(Math.max(0, -Math.floor(Math.log10(step)))),
+      visibility: pos < minVis || pos > maxVis ? "hidden" : "visible",
       axis: "x"
     });
-    for (let minorPos=pos+minorStep; minorPos<(pos+step) && minorPos<xmax; minorPos+=minorStep) {
+    for (
+      let minorPos = pos + minorStep;
+      minorPos < pos + step && minorPos < xmax;
+      minorPos += minorStep
+    ) {
       minorGridPoints.push({
         position: minorPos,
-        visibility: ((minorPos<minVis) || (minorPos>maxVis+minorStep)) ? "hidden" : "visible",
+        visibility: minorPos < minVis || minorPos > maxVis + minorStep ? "hidden" : "visible",
         axis: "x"
       });
     }
-
   }
-  return {majorGridPoints, minorGridPoints};
+  return { majorGridPoints, minorGridPoints };
 };
 
 const computeYGridPoints = (ymin, ymax) => {
   const majorGridPoints = [];
   let yStep = 0;
-  yStep = calculateMajorGridSeperationForDivergence(ymax-ymin)[0];
+  yStep = calculateMajorGridSeperationForDivergence(ymax - ymin)[0];
   const precisionY = Math.max(0, -Math.floor(Math.log10(yStep)));
-  const gridYMin = Math.floor(ymin/yStep)*yStep;
+  const gridYMin = Math.floor(ymin / yStep) * yStep;
   const maxYVis = ymax;
   const minYVis = gridYMin;
-  for (let ii = 1; ii <= (ymax - gridYMin)/yStep+10; ii++) {
-    const pos = gridYMin + yStep*ii;
+  for (let ii = 1; ii <= (ymax - gridYMin) / yStep + 10; ii++) {
+    const pos = gridYMin + yStep * ii;
     majorGridPoints.push({
       position: pos,
       name: pos.toFixed(precisionY),
-      visibility: ((pos<minYVis)||(pos>maxYVis)) ? "hidden" : "visible",
+      visibility: pos < minYVis || pos > maxYVis ? "hidden" : "visible",
       axis: "y"
     });
   }
-  return {majorGridPoints};
+  return { majorGridPoints };
 };
 
 /**
@@ -195,7 +200,7 @@ const computeYGridPoints = (ymin, ymax) => {
 export const addGrid = function addGrid() {
   const layout = this.layout;
   addSVGGroupsIfNeeded(this.groups, this.svg);
-  if (layout==="unrooted") return;
+  if (layout === "unrooted") return;
   timerStart("addGrid");
 
   /* [xmin, xmax] is the domain of the x-axis (rectangular & clock layouts) or polar-axis (radial layouts)
@@ -204,37 +209,53 @@ export const addGrid = function addGrid() {
                       radial layouts is the radial domain (negative means "left of north") measured in radians */
   const ymin = min(this.yScale.domain());
   const ymax = max(this.yScale.domain());
-  const xmin = layout==="radial" ? this.nodes[0].depth : this.xScale.domain()[0];
-  const xmax = layout==="radial" ?
-    xmin + max([this.xScale.domain()[1], this.yScale.domain()[1], -this.xScale.domain()[0], -this.yScale.domain()[0]]) :
-    this.xScale.domain()[1];
+  const xmin = layout === "radial" ? this.nodes[0].depth : this.xScale.domain()[0];
+  const xmax =
+    layout === "radial"
+      ? xmin +
+        max([
+          this.xScale.domain()[1],
+          this.yScale.domain()[1],
+          -this.xScale.domain()[0],
+          -this.yScale.domain()[0]
+        ])
+      : this.xScale.domain()[1];
   const xAxisPixels = this.xScale.range()[1] - this.xScale.range()[0];
 
   /* determine grid points (i.e. on the x/polar axis where lines/circles will be drawn through)
   Major grid points are thicker and have text
   Minor grid points have no text */
-  const {majorGridPoints, minorGridPoints} = computeXGridPoints(
-    xmin, xmax, layout, this.distance, this.params.minorTicks, xAxisPixels
+  const { majorGridPoints, minorGridPoints } = computeXGridPoints(
+    xmin,
+    xmax,
+    layout,
+    this.distance,
+    this.params.minorTicks,
+    xAxisPixels
   );
 
   /* HOF, which returns the fn which constructs the SVG path string
   to draw the axis lines (circles for radial trees).
   "gridPoint" is an element from majorGridPoints or minorGridPoints */
   const gridline = (xScale, yScale, layoutShadow) => (gridPoint) => {
-    let svgPath="";
+    let svgPath = "";
     if (gridPoint.axis === "x") {
-      if (layoutShadow==="rect" || layoutShadow==="clock") {
+      if (layoutShadow === "rect" || layoutShadow === "clock") {
         const xPos = xScale(gridPoint.position);
-        svgPath = 'M'+xPos.toString() +
+        svgPath =
+          "M" +
+          xPos.toString() +
           " " +
           yScale.range()[1].toString() +
           " L " +
           xPos.toString() +
           " " +
           yScale.range()[0].toString();
-      } else if (layoutShadow==="radial") {
-        const xPos = xScale(gridPoint.position-xmin);
-        svgPath = 'M '+xPos.toString() +
+      } else if (layoutShadow === "radial") {
+        const xPos = xScale(gridPoint.position - xmin);
+        svgPath =
+          "M " +
+          xPos.toString() +
           "  " +
           yScale(0).toString() +
           " A " +
@@ -244,7 +265,7 @@ export const addGrid = function addGrid() {
           " 0 1 0 " +
           xPos.toString() +
           " " +
-          (yScale(0)+0.001).toString();
+          (yScale(0) + 0.001).toString();
       }
     } else if (gridPoint.axis === "y") {
       const yPos = yScale(gridPoint.position);
@@ -257,17 +278,20 @@ export const addGrid = function addGrid() {
 
   /* HOF which returns a function which calculates the x position of text labels */
   const xTextPos = (xScale, layoutShadow) => (gridPoint) => {
-    if (gridPoint.axis === "x") { // "normal" labels on the x-axis / polar-axis
-      return layoutShadow==="radial" ? xScale(0) : xScale(gridPoint.position);
+    if (gridPoint.axis === "x") {
+      // "normal" labels on the x-axis / polar-axis
+      return layoutShadow === "radial" ? xScale(0) : xScale(gridPoint.position);
     }
     // clock layout y positions (which display divergence)
-    return xScale.range()[0]-15;
+    return xScale.range()[0] - 15;
   };
 
   /* same as xTextPos HOF, but for y-values */
   const yTextPos = (yScale, layoutShadow) => (gridPoint) => {
     if (gridPoint.axis === "x") {
-      return layoutShadow === "radial" ? yScale(gridPoint.position-xmin)-5 : yScale.range()[1] + 18;
+      return layoutShadow === "radial"
+        ? yScale(gridPoint.position - xmin) - 5
+        : yScale.range()[1] + 18;
     }
     return yScale(gridPoint.position);
   };
@@ -282,7 +306,7 @@ export const addGrid = function addGrid() {
 
   /* for clock layouts, add y-points to the majorGridPoints array
   Note that these don't have lines drawn, only text */
-  if (this.layout==="clock") {
+  if (this.layout === "clock") {
     majorGridPoints.push(...computeYGridPoints(ymin, ymax).majorGridPoints);
   }
 
@@ -291,59 +315,58 @@ export const addGrid = function addGrid() {
   // add major grid to svg
   this.groups.majorGrid.selectAll("*").remove();
   this.groups.majorGrid
-    .selectAll('.majorGrid')
+    .selectAll(".majorGrid")
     .data(majorGridPoints)
     .enter()
-      .append("path")
-        .attr("d", gridline(this.xScale, this.yScale, layout))
-        .attr("class", "majorGrid")
-        .style("fill", "none")
-        .style("visibility", (d) => d.visibility)
-        .style("stroke", this.params.majorGridStroke)
-        .style("stroke-width", this.params.majorGridWidth);
+    .append("path")
+    .attr("d", gridline(this.xScale, this.yScale, layout))
+    .attr("class", "majorGrid")
+    .style("fill", "none")
+    .style("visibility", (d) => d.visibility)
+    .style("stroke", this.params.majorGridStroke)
+    .style("stroke-width", this.params.majorGridWidth);
 
   // add minor grid to SVG
   this.groups.minorGrid.selectAll("*").remove();
   this.svg.selectAll(".minorGrid").remove();
   this.groups.minorGrid
-    .selectAll('.minorGrid')
+    .selectAll(".minorGrid")
     .data(minorGridPoints)
     .enter()
-      .append("path")
-        .attr("d", gridline(this.xScale, this.yScale, layout))
-        .attr("class", "minorGrid")
-        .style("fill", "none")
-        .style("visibility", (d) => d.visibility)
-        .style("stroke", this.params.minorGridStroke)
-        .style("stroke-width", this.params.minorGridWidth);
-
+    .append("path")
+    .attr("d", gridline(this.xScale, this.yScale, layout))
+    .attr("class", "minorGrid")
+    .style("fill", "none")
+    .style("visibility", (d) => d.visibility)
+    .style("stroke", this.params.minorGridStroke)
+    .style("stroke-width", this.params.minorGridWidth);
 
   /* draw the text labels for majorGridPoints */
   this.groups.gridText.selectAll("*").remove();
   this.svg.selectAll(".gridText").remove();
   this.groups.gridText
-    .selectAll('.gridText')
+    .selectAll(".gridText")
     .data(majorGridPoints)
     .enter()
-      .append("text")
-        .text((d) => d.name)
-        .attr("class", "gridText")
-        .style("font-size", this.params.tickLabelSize)
-        .style("font-family", this.params.fontFamily)
-        .style("fill", this.params.tickLabelFill)
-        .style("text-anchor", textAnchor(layout))
-        .style("visibility", (d) => d.visibility)
-        .attr("x", xTextPos(this.xScale, layout))
-        .attr("y", yTextPos(this.yScale, layout));
+    .append("text")
+    .text((d) => d.name)
+    .attr("class", "gridText")
+    .style("font-size", this.params.tickLabelSize)
+    .style("font-family", this.params.fontFamily)
+    .style("fill", this.params.tickLabelFill)
+    .style("text-anchor", textAnchor(layout))
+    .style("visibility", (d) => d.visibility)
+    .attr("x", xTextPos(this.xScale, layout))
+    .attr("y", yTextPos(this.yScale, layout));
 
   /* add axis labels */
   this.groups.axisText.selectAll("*").remove();
   this.svg.selectAll(".axisText").remove();
-  if (layout === 'rect' || layout === "clock") {
+  if (layout === "rect" || layout === "clock") {
     let label = "Date";
     // We use the same heursitic as in `getRateEstimate` to decide whether this data
     // measures "substitutions per site" or "substitutions"
-    if (this.layout === 'clock') {
+    if (this.layout === "clock") {
       // In clock view the divergence / mutations axis is vertical
       label = this.yScale.domain()[0] > 5 ? "Mutations" : "Divergence";
     } else if (this.distance === "div") {
@@ -353,33 +376,32 @@ export const addGrid = function addGrid() {
     /* Add a x-axis label */
     this.groups.axisText
       .append("text")
-        .text(layout === 'rect' ? label : "Date") // Clock always has Date on the X-axis
+      .text(layout === "rect" ? label : "Date") // Clock always has Date on the X-axis
+      .attr("class", "gridText")
+      .style("font-size", this.params.tickLabelSize)
+      .style("font-family", this.params.fontFamily)
+      .style("fill", this.params.tickLabelFill)
+      .style("text-anchor", "middle")
+      .attr("x", Math.abs(this.xScale.range()[1] - this.xScale.range()[0]) / 2)
+      .attr("y", this.yScale.range()[1] + this.params.margins.bottom - 6);
+
+    /* Add a rotated y-axis label in clock view */
+    if (layout === "clock") {
+      this.groups.axisText
+        .append("text")
+        .text(label) // Clock always has Date on the X-axis
         .attr("class", "gridText")
         .style("font-size", this.params.tickLabelSize)
         .style("font-family", this.params.fontFamily)
         .style("fill", this.params.tickLabelFill)
         .style("text-anchor", "middle")
-        .attr("x", Math.abs(this.xScale.range()[1]-this.xScale.range()[0]) / 2)
-        .attr("y", this.yScale.range()[1] + this.params.margins.bottom - 6);
-
-    /* Add a rotated y-axis label in clock view */
-    if (layout === 'clock') {
-      this.groups.axisText
-        .append("text")
-          .text(label) // Clock always has Date on the X-axis
-          .attr("class", "gridText")
-          .style("font-size", this.params.tickLabelSize)
-          .style("font-family", this.params.fontFamily)
-          .style("fill", this.params.tickLabelFill)
-          .style("text-anchor", "middle")
-          .attr('transform', 'translate(' + 10 + ',' + (this.yScale.range()[1] / 2) + ') rotate(-90)');
+        .attr("transform", "translate(" + 10 + "," + this.yScale.range()[1] / 2 + ") rotate(-90)");
     }
   }
 
-  this.grid=true;
+  this.grid = true;
   timerEnd("addGrid");
 };
-
 
 export const removeTemporalSlice = function removeTemporalSlice() {
   this.groups.temporalWindow.selectAll("*").remove();
@@ -399,13 +421,15 @@ export const addTemporalSlice = function addTemporalSlice() {
   const rightHandTree = this.params.orientation[0] === -1;
   const rootXPos = this.xScale(this.nodes[0].x);
   let totalWidth = rightHandTree ? this.xScale.range()[0] : this.xScale.range()[1];
-  totalWidth += (this.params.margins.left + this.params.margins.right);
+  totalWidth += this.params.margins.left + this.params.margins.right;
 
   /* the gray region between the root (ish) and the minimum date */
-  if (Math.abs(xWindow[0]-rootXPos) > minPxThreshold) { /* don't render anything less than this num of px */
-    this.groups.temporalWindow.append("rect")
+  if (Math.abs(xWindow[0] - rootXPos) > minPxThreshold) {
+    /* don't render anything less than this num of px */
+    this.groups.temporalWindow
+      .append("rect")
       .attr("x", rightHandTree ? xWindow[0] : 0)
-      .attr("width", rightHandTree ? totalWidth-xWindow[0]: xWindow[0])
+      .attr("width", rightHandTree ? totalWidth - xWindow[0] : xWindow[0])
       .attr("y", 0)
       .attr("height", height)
       .attr("fill", fill);
@@ -413,11 +437,12 @@ export const addTemporalSlice = function addTemporalSlice() {
 
   /* the gray region between the maximum selected date and the last tip */
   const startingX = rightHandTree ? this.params.margins.right : xWindow[1];
-  const rectWidth = rightHandTree ?
-    xWindow[1]-this.params.margins.right :
-    totalWidth-this.params.margins.right-xWindow[1];
+  const rectWidth = rightHandTree
+    ? xWindow[1] - this.params.margins.right
+    : totalWidth - this.params.margins.right - xWindow[1];
   if (rectWidth > minPxThreshold) {
-    this.groups.temporalWindow.append("rect")
+    this.groups.temporalWindow
+      .append("rect")
       .attr("x", startingX)
       .attr("width", rectWidth)
       .attr("y", 0)

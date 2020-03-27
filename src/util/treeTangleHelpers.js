@@ -1,6 +1,11 @@
 import { NODE_VISIBLE } from "./globals";
 
-export const constructVisibleTipLookupBetweenTrees = (nodesLeft, nodesRight, visibilityLeft, visibilityRight) => {
+export const constructVisibleTipLookupBetweenTrees = (
+  nodesLeft,
+  nodesRight,
+  visibilityLeft,
+  visibilityRight
+) => {
   const tree2StrainToIdxMap = {};
   for (let i = 0; i < nodesRight.length; i++) {
     if (!nodesRight[i].hasChildren) {

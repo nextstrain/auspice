@@ -36,9 +36,11 @@ class Tree extends React.Component {
     this.clearSelectedTip = callbacks.clearSelectedTip.bind(this);
     // this.handleIconClickHOF = callbacks.handleIconClickHOF.bind(this);
     this.redrawTree = () => {
-      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
-        root: [0, 0]
-      }));
+      this.props.dispatch(
+        updateVisibleTipsAndBranchThicknesses({
+          root: [0, 0]
+        })
+      );
     };
   }
   setUpAndRenderTreeToo(props, newState) {
@@ -66,24 +68,38 @@ class Tree extends React.Component {
     let rightTreeUpdated = false;
 
     /* potentially change the (main / left hand) tree */
-    const [potentialNewState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(true, this.state.tree, prevProps, this.props);
+    const [potentialNewState, leftTreeUpdated] = changePhyloTreeViaPropsComparison(
+      true,
+      this.state.tree,
+      prevProps,
+      this.props
+    );
     if (potentialNewState) newState = potentialNewState;
 
     /* has the 2nd (right hand) tree just been turned on, off or swapped? */
     if (prevProps.showTreeToo !== this.props.showTreeToo) {
-      if (!this.props.showTreeToo) { /* turned off -> remove the 2nd tree */
+      if (!this.props.showTreeToo) {
+        /* turned off -> remove the 2nd tree */
         newState.treeToo = null;
-      } else { /* turned on -> render the 2nd tree */
-        if (this.state.treeToo) { /* tree has been swapped -> remove the old tree */
+      } else {
+        /* turned on -> render the 2nd tree */
+        if (this.state.treeToo) {
+          /* tree has been swapped -> remove the old tree */
           this.state.treeToo.clearSVG();
         }
         newState.tree = this.state.tree; // setUpAndRenderTreeToo needs newState.tree
         this.setUpAndRenderTreeToo(this.props, newState); /* modifies newState in place */
         if (this.tangleRef) this.tangleRef.drawLines();
       }
-    } else if (this.state.treeToo) { /* the tree hasn't just been swapped, but it does exist and may need updating */
+    } else if (this.state.treeToo) {
+      /* the tree hasn't just been swapped, but it does exist and may need updating */
       let unusedNewState; // eslint-disable-line
-      [unusedNewState, rightTreeUpdated] = changePhyloTreeViaPropsComparison(false, this.state.treeToo, prevProps, this.props);
+      [unusedNewState, rightTreeUpdated] = changePhyloTreeViaPropsComparison(
+        false,
+        this.state.treeToo,
+        prevProps,
+        this.props
+      );
       /* note, we don't incorporate unusedNewState into the state? why not? */
     }
 
@@ -95,8 +111,8 @@ class Tree extends React.Component {
   }
 
   getStyles = () => {
-    const activeResetTreeButton = this.props.tree.idxOfInViewRootNode !== 0 ||
-      this.props.treeToo.idxOfInViewRootNode !== 0;
+    const activeResetTreeButton =
+      this.props.tree.idxOfInViewRootNode !== 0 || this.props.treeToo.idxOfInViewRootNode !== 0;
     return {
       resetTreeButton: {
         zIndex: 100,
@@ -109,14 +125,16 @@ class Tree extends React.Component {
     };
   };
 
-  renderTreeDiv({width, height, mainTree}) {
+  renderTreeDiv({ width, height, mainTree }) {
     return (
       <svg
         id={mainTree ? "MainTree" : "SecondTree"}
-        style={{pointerEvents: "auto", cursor: "default", userSelect: "none"}}
+        style={{ pointerEvents: "auto", cursor: "default", userSelect: "none" }}
         width={width}
         height={height}
-        ref={(c) => {mainTree ? this.domRefs.mainTree = c : this.domRefs.secondTree = c;}}
+        ref={(c) => {
+          mainTree ? (this.domRefs.mainTree = c) : (this.domRefs.secondTree = c);
+        }}
       />
     );
   }
@@ -124,11 +142,13 @@ class Tree extends React.Component {
   render() {
     const { t } = this.props;
     const styles = this.getStyles();
-    const widthPerTree = this.props.showTreeToo ? (this.props.width - spaceBetweenTrees) / 2 : this.props.width;
+    const widthPerTree = this.props.showTreeToo
+      ? (this.props.width - spaceBetweenTrees) / 2
+      : this.props.width;
     return (
       <Card center title={t("Phylogeny")}>
         <ErrorBoundary>
-          <Legend width={this.props.width}/>
+          <Legend width={this.props.width} />
         </ErrorBoundary>
         <HoverInfoPanel
           hovered={this.state.hovered}
@@ -136,7 +156,7 @@ class Tree extends React.Component {
           colorByConfidence={this.props.colorByConfidence}
           colorScale={this.props.colorScale}
           colorings={this.props.metadata.colorings}
-          panelDims={{width: this.props.width, height: this.props.height, spaceBetweenTrees}}
+          panelDims={{ width: this.props.width, height: this.props.height, spaceBetweenTrees }}
           t={t}
         />
         <TipClickedPanel
@@ -147,7 +167,9 @@ class Tree extends React.Component {
         />
         {this.props.showTangle && this.state.tree && this.state.treeToo ? (
           <Tangle
-            ref={(r) => {this.tangleRef = r;}}
+            ref={(r) => {
+              this.tangleRef = r;
+            }}
             width={this.props.width}
             height={this.props.height}
             lookup={this.props.treeToo.tangleTipLookup}
@@ -161,18 +183,16 @@ class Tree extends React.Component {
             leftTreeName={this.props.tree.name}
             rightTreeName={this.props.showTreeToo}
           />
-        ) : null }
-        {this.renderTreeDiv({width: widthPerTree, height: this.props.height, mainTree: true})}
-        {this.props.showTreeToo ? <div id="treeSpacer" style={{width: spaceBetweenTrees}}/> : null}
-        {this.props.showTreeToo ?
-          this.renderTreeDiv({width: widthPerTree, height: this.props.height, mainTree: false}) :
-          null
-        }
+        ) : null}
+        {this.renderTreeDiv({ width: widthPerTree, height: this.props.height, mainTree: true })}
+        {this.props.showTreeToo ? (
+          <div id="treeSpacer" style={{ width: spaceBetweenTrees }} />
+        ) : null}
+        {this.props.showTreeToo
+          ? this.renderTreeDiv({ width: widthPerTree, height: this.props.height, mainTree: false })
+          : null}
         {this.props.narrativeMode ? null : (
-          <button
-            style={{...tabSingle, ...styles.resetTreeButton}}
-            onClick={this.redrawTree}
-          >
+          <button style={{ ...tabSingle, ...styles.resetTreeButton }} onClick={this.redrawTree}>
             {t("Reset Layout")}
           </button>
         )}

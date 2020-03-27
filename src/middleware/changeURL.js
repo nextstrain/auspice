@@ -2,7 +2,6 @@ import queryString from "query-string";
 import * as types from "../actions/types";
 import { numericToCalendar } from "../util/dateHelpers";
 
-
 /**
  * This middleware acts to keep the app state and the URL query state in sync by
  * intercepting actions and updating the URL accordingly. Thus, in theory, this
@@ -40,9 +39,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       if (query.tt) delete query.tt;
       break;
     case types.CHANGE_BRANCH_LABEL:
-      query.branchLabel = state.controls.defaults.selectedBranchLabel === action.value ?
-        undefined :
-        action.value;
+      query.branchLabel =
+        state.controls.defaults.selectedBranchLabel === action.value ? undefined : action.value;
       break;
     case types.CHANGE_ZOOM:
       /* entropy panel genome zoom coordinates */
@@ -53,7 +51,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
       break;
     case types.APPLY_FILTER: {
-      query[`f_${action.trait}`] = action.values.join(',');
+      query[`f_${action.trait}`] = action.values.join(",");
       break;
     }
     case types.CHANGE_LAYOUT: {
@@ -97,8 +95,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.TOGGLE_PANEL_DISPLAY: {
       /* check this against the defaults set by the dataset (and this default is all available panels if not specifically set) */
       if (
-        state.controls.defaults.panels.length===action.panelsToDisplay.length &&
-        state.controls.defaults.panels.filter((p) => !action.panelsToDisplay.includes(p)).length===0
+        state.controls.defaults.panels.length === action.panelsToDisplay.length &&
+        state.controls.defaults.panels.filter((p) => !action.panelsToDisplay.includes(p)).length === 0
       ) {
         query.d = undefined;
       } else {
@@ -108,7 +106,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
-      if (state.controls.animationPlayPauseButton === "Pause") { // animation in progress - no dates in URL
+      if (state.controls.animationPlayPauseButton === "Pause") {
+        // animation in progress - no dates in URL
         query.dmin = undefined;
         query.dmax = undefined;
       } else {
@@ -123,10 +122,17 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     }
     case types.MAP_ANIMATION_PLAY_PAUSE_BUTTON:
-      if (action.data === "Play") { // animation stopping - restore dates in URL
+      if (action.data === "Play") {
+        // animation stopping - restore dates in URL
         query.animate = undefined;
-        query.dmin = state.controls.dateMin === state.controls.absoluteDateMin ? undefined : state.controls.dateMin;
-        query.dmax = state.controls.dateMax === state.controls.absoluteDateMax ? undefined : state.controls.dateMax;
+        query.dmin =
+          state.controls.dateMin === state.controls.absoluteDateMin
+            ? undefined
+            : state.controls.dateMin;
+        query.dmax =
+          state.controls.dateMax === state.controls.absoluteDateMax
+            ? undefined
+            : state.controls.dateMax;
       }
       break;
     case types.MIDDLEWARE_ONLY_ANIMATION_STARTED:
@@ -147,7 +153,7 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
     case types.TOGGLE_NARRATIVE: {
       if (action.display === true) {
-        query = {n: state.narrative.blockIdx};
+        query = { n: state.narrative.blockIdx };
       }
       break;
     }
@@ -182,7 +188,11 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.PAGE_CHANGE:
       /* desired behaviour depends on the displayComponent selected... */
-      if (action.displayComponent === "main" || action.displayComponent === "datasetLoader" || action.displayComponent === "splash") {
+      if (
+        action.displayComponent === "main" ||
+        action.displayComponent === "datasetLoader" ||
+        action.displayComponent === "splash"
+      ) {
         pathname = action.path || pathname;
       } else if (pathname.startsWith(`/${action.displayComponent}`)) {
         // leave the pathname alone!
@@ -205,23 +215,35 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       break;
   }
 
-  Object.keys(query).filter((q) => query[q] === "").forEach((k) => delete query[k]);
-  let search = queryString.stringify(query).replace(/%2C/g, ',').replace(/%2F/g, '/').replace(/%3A/g, ':');
-  if (search) {search = "?" + search;}
-  if (!pathname.startsWith("/")) {pathname = "/" + pathname;}
+  Object.keys(query)
+    .filter((q) => query[q] === "")
+    .forEach((k) => delete query[k]);
+  let search = queryString
+    .stringify(query)
+    .replace(/%2C/g, ",")
+    .replace(/%2F/g, "/")
+    .replace(/%3A/g, ":");
+  if (search) {
+    search = "?" + search;
+  }
+  if (!pathname.startsWith("/")) {
+    pathname = "/" + pathname;
+  }
 
   /* now that we have determined our desired pathname & query we modify the URL */
   if (pathname !== window.location.pathname || search !== window.location.search) {
     let newURLString = pathname;
-    if (search) {newURLString += search;}
+    if (search) {
+      newURLString += search;
+    }
     if (action.pushState) {
       window.history.pushState({}, "", newURLString);
     } else {
       window.history.replaceState({}, "", newURLString);
     }
-    next({type: types.UPDATE_PATHNAME, pathname: pathname});
+    next({ type: types.UPDATE_PATHNAME, pathname: pathname });
   } else if (pathname !== state.general.pathname && action.type === types.PAGE_CHANGE) {
-    next({type: types.UPDATE_PATHNAME, pathname: pathname});
+    next({ type: types.UPDATE_PATHNAME, pathname: pathname });
   }
 
   return result;

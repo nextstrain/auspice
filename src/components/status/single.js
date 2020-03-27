@@ -22,7 +22,7 @@ class SingleDataset extends React.Component {
   componentDidMount() {
     fetchJSON(`${getServerAddress()}/getDataset?prefix=${this.props.path}`)
       .then((json) => {
-        const state = createStateFromQueryOrJSONs({json, query: ""});
+        const state = createStateFromQueryOrJSONs({ json, query: "" });
         this.setState({
           status: "loaded",
           backgroundColor: successColor,
@@ -43,25 +43,28 @@ class SingleDataset extends React.Component {
   }
 
   render() {
-    const narrower = {flex: "0 0 15%"};
-    const wider = {flex: "0 0 30%"};
+    const narrower = { flex: "0 0 15%" };
+    const wider = { flex: "0 0 30%" };
     return (
-      <div style={{
-        display: "flex",
-        justifyContent: "space-around",
-        backgroundColor: this.state.backgroundColor,
-        margin: "10px 10px 10px 10px",
-        textAlign: "center"
-      }}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-around",
+          backgroundColor: this.state.backgroundColor,
+          margin: "10px 10px 10px 10px",
+          textAlign: "center"
+        }}
       >
         <h3 style={narrower}>{this.props.path}</h3>
         <h3 style={narrower}>{this.state.status}</h3>
-        {this.state.status === "loaded" ? (
-          [
-            <h3 style={wider} key={"tips"}>{`${this.state.numTips} tips span ${this.state.minDate} to ${this.state.maxDate}`}</h3>,
+        {this.state.status === "loaded"
+          ? [
+            <h3 style={wider} key={"tips"}>{`${this.state.numTips} tips span ${
+              this.state.minDate
+            } to ${this.state.maxDate}`}</h3>,
             <h3 style={narrower} key={"updated"}>{`Last updated: ${this.state.lastUpdated}`}</h3>
           ]
-        ) : null}
+          : null}
       </div>
     );
   }

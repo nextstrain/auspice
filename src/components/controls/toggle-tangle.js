@@ -14,9 +14,9 @@ class PanelToggles extends React.Component {
       <Toggle
         display
         on={this.props.showTangle}
-        callback={() => this.props.dispatch({type: TOGGLE_TANGLE})}
+        callback={() => this.props.dispatch({ type: TOGGLE_TANGLE })}
         label={"Show Tanglegram"}
-        style={{paddingTop: "10px"}}
+        style={{ paddingTop: "10px" }}
       />
     );
   }

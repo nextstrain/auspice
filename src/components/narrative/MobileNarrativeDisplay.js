@@ -22,10 +22,10 @@ const BANNER_HEIGHT = 50;
 const progressHeight = 25;
 
 const scrollToTop = () => {
-  document.getElementById('progress-bar').scrollIntoView();
+  document.getElementById("progress-bar").scrollIntoView();
 };
 
-const explanationParagraph=`
+const explanationParagraph = `
   <p class="explanation">
   Narratives are interleaved sections of text and associated nextstrain visualisations of the genomic data.
   Click the coloured arrows at the top & bottom of each page to move through this narrative.
@@ -57,7 +57,7 @@ class MobileNarrativeDisplay extends React.Component {
     this.state = {
       showingEndOfNarrativePage: false,
       bannerHeight: BANNER_HEIGHT,
-      contentHeight: window.innerHeight - 2*BANNER_HEIGHT
+      contentHeight: window.innerHeight - 2 * BANNER_HEIGHT
     };
 
     this.exitNarrativeMode = () => {
@@ -67,17 +67,17 @@ class MobileNarrativeDisplay extends React.Component {
     this.goToNextPage = () => {
       if (this.state.showingEndOfNarrativePage) return; // no-op
 
-      if (this.props.currentInFocusBlockIdx+1 === this.props.blocks.length) {
-        this.setState({showingEndOfNarrativePage: true});
+      if (this.props.currentInFocusBlockIdx + 1 === this.props.blocks.length) {
+        this.setState({ showingEndOfNarrativePage: true });
         return;
       }
 
-      this._goToPage(this.props.currentInFocusBlockIdx+1);
+      this._goToPage(this.props.currentInFocusBlockIdx + 1);
     };
 
     this.goToPreviousPage = () => {
       if (this.props.currentInFocusBlockIdx === 0) return; // no-op
-      this._goToPage(this.props.currentInFocusBlockIdx-1);
+      this._goToPage(this.props.currentInFocusBlockIdx - 1);
     };
 
     this._goToPage = (idx) => {
@@ -85,17 +85,21 @@ class MobileNarrativeDisplay extends React.Component {
 
       // TODO: this `if` statement should be moved to the `changePage` function or similar
       if (this.props.blocks[idx] && this.props.blocks[idx].mainDisplayMarkdown) {
-        this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
-          query: queryString.parse(this.props.blocks[idx].query),
-          queryToDisplay: {n: idx}
-        }));
+        this.props.dispatch(
+          EXPERIMENTAL_showMainDisplayMarkdown({
+            query: queryString.parse(this.props.blocks[idx].query),
+            queryToDisplay: { n: idx }
+          })
+        );
       } else {
-        this.props.dispatch(changePage({
-          changeDataset: false,
-          query: queryString.parse(this.props.blocks[idx].query),
-          queryToDisplay: {n: idx},
-          push: true
-        }));
+        this.props.dispatch(
+          changePage({
+            changeDataset: false,
+            query: queryString.parse(this.props.blocks[idx].query),
+            queryToDisplay: { n: idx },
+            push: true
+          })
+        );
       }
 
       scrollToTop();
@@ -121,14 +125,14 @@ class MobileNarrativeDisplay extends React.Component {
           height: "inherit",
           overflow: "hidden"
         }}
-        dangerouslySetInnerHTML={{__html}}
+        dangerouslySetInnerHTML={{ __html }}
       />
     );
   }
 
   renderMainMarkdown() {
     if (this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown")) {
-      return <MainDisplayMarkdown width={window.innerWidth} mobile/>;
+      return <MainDisplayMarkdown width={window.innerWidth} mobile />;
     }
     return null;
   }
@@ -145,10 +149,12 @@ class MobileNarrativeDisplay extends React.Component {
     const width = window.innerWidth - 50; // TODO
     return (
       <>
-        {this.props.panelsToDisplay.includes("tree")
-          ? <Tree width={width} height={height} /> : null}
-        {this.props.panelsToDisplay.includes("map")
-          ? <Map width={width} height={height} justGotNewDatasetRenderNewMap={false} /> : null}
+        {this.props.panelsToDisplay.includes("tree") ? (
+          <Tree width={width} height={height} />
+        ) : null}
+        {this.props.panelsToDisplay.includes("map") ? (
+          <Map width={width} height={height} justGotNewDatasetRenderNewMap={false} />
+        ) : null}
       </>
     );
   }
@@ -156,22 +162,16 @@ class MobileNarrativeDisplay extends React.Component {
   renderEndOfNarrative() {
     return (
       <>
-        <this.PreviousButton>
-          Previous
-        </this.PreviousButton>
-        <MobileContentContainer height={this.state.contentHeight+this.state.bannerHeight}>
+        <this.PreviousButton>Previous</this.PreviousButton>
+        <MobileContentContainer height={this.state.contentHeight + this.state.bannerHeight}>
           {this.renderProgress()}
           <EndOfNarrative>
             <h1>End of Narrative</h1>
-            <a style={{...linkStyles}}
-              onClick={() => this._goToPage(0)}
-            >
+            <a style={{ ...linkStyles }} onClick={() => this._goToPage(0)}>
               Jump to the beginning
             </a>
             <br />
-            <a style={{...linkStyles}}
-              onClick={this.exitNarrativeMode}
-            >
+            <a style={{ ...linkStyles }} onClick={this.exitNarrativeMode}>
               Leave the narrative & explore the data yourself
             </a>
           </EndOfNarrative>
@@ -189,9 +189,7 @@ class MobileNarrativeDisplay extends React.Component {
           {this.renderVizCards(this.state.contentHeight)}
           {this.renderMainMarkdown()}
         </MobileContentContainer>
-        <this.NextButton>
-          Next
-        </this.NextButton>
+        <this.NextButton>Next</this.NextButton>
       </>
     );
   }
@@ -199,63 +197,53 @@ class MobileNarrativeDisplay extends React.Component {
   renderMiddleOfNarrative() {
     return (
       <>
-        <this.PreviousButton aria-labelledby="nav1">
-          Previous
-        </this.PreviousButton>
+        <this.PreviousButton aria-labelledby="nav1">Previous</this.PreviousButton>
         <MobileContentContainer height={this.state.contentHeight}>
           {this.renderProgress()}
           {this.pageNarrativeContent()}
           {this.renderVizCards(this.state.contentHeight)}
           {this.renderMainMarkdown()}
         </MobileContentContainer>
-        <this.NextButton aria-labelledby="nav2">
-          Next
-        </this.NextButton>
+        <this.NextButton aria-labelledby="nav2">Next</this.NextButton>
       </>
     );
   }
 
   NextButton = (props) => (
-    <MobileBannerBottom height={this.state.bannerHeight}
-      onClick={this.goToNextPage}
-    >
+    <MobileBannerBottom height={this.state.bannerHeight} onClick={this.goToNextPage}>
       {props.children}
     </MobileBannerBottom>
-  )
+  );
 
   PreviousButton = (props) => (
-    <MobileBannerTop height={this.state.bannerHeight}
-      onClick={this.goToPreviousPage}
-    >
+    <MobileBannerTop height={this.state.bannerHeight} onClick={this.goToPreviousPage}>
       {props.children}
     </MobileBannerTop>
-  )
+  );
 
   renderProgress() {
     return (
-      <ProgressBar id="progress-bar"
-        style={{height: `${progressHeight}px`}}
-      >
+      <ProgressBar id="progress-bar" style={{ height: `${progressHeight}px` }}>
         {this.props.blocks.map((b, i) => {
-          const d = (!this.state.showingEndOfNarrativePage) &&
-            this.props.currentInFocusBlockIdx === i ?
-            "14px" : "6px";
+          const d =
+            !this.state.showingEndOfNarrativePage && this.props.currentInFocusBlockIdx === i
+              ? "14px"
+              : "6px";
           return (
             <ProgressButton
               key={i}
-              style={{width: d, height: d}}
+              style={{ width: d, height: d }}
               onClick={() => this._goToPage(i)}
-            />);
+            />
+          );
         })}
       </ProgressBar>
     );
   }
 
   render() {
-
     if (this.state.showingEndOfNarrativePage) {
       return this.renderEndOfNarrative();
-
     } else if (this.props.currentInFocusBlockIdx === 0) {
       return this.renderStartOfNarrative();
     }
@@ -263,6 +251,5 @@ class MobileNarrativeDisplay extends React.Component {
     return this.renderMiddleOfNarrative();
   }
 }
-
 
 export default MobileNarrativeDisplay;

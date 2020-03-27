@@ -7,9 +7,10 @@ export const removeConfidence = function removeConfidence(dt) {
   if (dt) {
     this.groups.confidenceIntervals
       .selectAll("*")
-      .transition().duration(dt)
-        .style("opacity", 0)
-        .remove();
+      .transition()
+      .duration(dt)
+      .style("opacity", 0)
+      .remove();
   } else {
     this.groups.confidenceIntervals.selectAll("*").remove();
   }
@@ -27,24 +28,26 @@ export const drawConfidence = function drawConfidence(dt) {
       .enter()
       .call((sel) => this.drawSingleCI(sel, 0));
     this.groups.confidenceIntervals
-      .transition().duration(dt)
-        .style("opacity", 0.5);
+      .transition()
+      .duration(dt)
+      .style("opacity", 0.5);
   } else {
     this.groups.confidenceIntervals
       .selectAll(".conf")
       .data(this.nodes)
       .enter()
-        .call((sel) => this.drawSingleCI(sel, 0.5));
+      .call((sel) => this.drawSingleCI(sel, 0.5));
   }
 };
 
 export const calcConfidenceWidth = (el) =>
-  el["stroke-width"] === 1 ? 0 :
-    el["stroke-width"] > 6 ? el["stroke-width"] + 6 :
-      el["stroke-width"] * 2;
+  el["stroke-width"] === 1
+    ? 0
+    : el["stroke-width"] > 6 ? el["stroke-width"] + 6 : el["stroke-width"] * 2;
 
 export const drawSingleCI = function drawSingleCI(selection, opacity) {
-  selection.append("path")
+  selection
+    .append("path")
     .attr("class", "conf")
     .attr("id", (d) => getDomId("conf", d.n.name))
     .attr("d", (d) => d.confLine)

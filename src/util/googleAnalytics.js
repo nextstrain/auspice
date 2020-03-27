@@ -1,7 +1,6 @@
 import ReactGA from "react-ga"; /* https://github.com/react-ga/react-ga */
 import { hasExtension, getExtension } from "./extensions";
 
-
 export const initialiseGoogleAnalyticsIfRequired = () => {
   ReactGA.doNotUse = true; // a flag to indicate whether we are using GA
   if (!hasExtension("googleAnalyticsKey")) {
@@ -34,7 +33,7 @@ export const analyticsControlsEvent = (action) => {
 export const triggerOutboundEvent = (address) => {
   if (ReactGA.doNotUse) return;
   ReactGA.outboundLink(
-    {label: address},
+    { label: address },
     () => console.log("outbound event triggered", address) // eslint-disable-line no-console
   );
 };

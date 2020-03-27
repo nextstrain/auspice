@@ -8,7 +8,6 @@ import { fetchJSON } from "../util/serverInteraction";
 import { warningNotification, errorNotification } from "./notifications";
 import { hasExtension, getExtension } from "../util/extensions";
 
-
 /**
  * Sends a GET request to the `/charon` web API endpoint requesting data.
  * Throws an `Error` if the response is not successful or is not a redirect.
@@ -21,17 +20,16 @@ import { hasExtension, getExtension } from "../util/extensions";
  * @param {Object} additionalQueries: additional information to be parsed as a
  *  query string such as `type` (`String`) or `narrative` (`Boolean`).
  */
-const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
-  let path = `${getServerAddress()}/${narrative?"getNarrative":"getDataset"}`;
+const getDatasetFromCharon = (prefix, { type, narrative = false } = {}) => {
+  let path = `${getServerAddress()}/${narrative ? "getNarrative" : "getDataset"}`;
   path += `?prefix=${prefix}`;
   if (type) path += `&type=${type}`;
-  const p = fetch(path)
-    .then((res) => {
-      if (res.status !== 200) {
-        throw new Error(res.statusText);
-      }
-      return res;
-    });
+  const p = fetch(path).then((res) => {
+    if (res.status !== 200) {
+      throw new Error(res.statusText);
+    }
+    return res;
+  });
   return p;
 };
 
@@ -50,16 +48,15 @@ const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
  * @param {Object} additionalQueries: additional information to be parsed as a
  *  query string such as `type` (`String`) or `narrative` (`Boolean`).
  */
-const getHardcodedData = (prefix, {type="mainJSON"}={}) => {
+const getHardcodedData = (prefix, { type = "mainJSON" } = {}) => {
   const datapaths = getExtension("hardcodedDataPaths");
 
-  const p = fetch(datapaths[type])
-    .then((res) => {
-      if (res.status !== 200) {
-        throw new Error(res.statusText);
-      }
-      return res;
-    });
+  const p = fetch(datapaths[type]).then((res) => {
+    if (res.status !== 200) {
+      throw new Error(res.statusText);
+    }
+    return res;
+  });
   return p;
 };
 
@@ -78,8 +75,9 @@ const getDataset = hasExtension("hardcodedDataPaths") ? getHardcodedData : getDa
 const collectDatasetFetchUrls = (url) => {
   let secondTreeUrl;
   if (url.includes(":")) {
-    const parts = url.replace(/^\//, '')
-      .replace(/\/$/, '')
+    const parts = url
+      .replace(/^\//, "")
+      .replace(/\/$/, "")
       .split(":");
     url = parts[0]; // eslint-disable-line no-param-reassign
     secondTreeUrl = parts[1];
@@ -104,8 +102,9 @@ const collectDatasetFetchUrlsDeprecatedSyntax = (url) => {
   let secondTreeUrl;
   let treeName;
   let secondTreeName;
-  const parts = url.replace(/^\//, '')
-    .replace(/\/$/, '')
+  const parts = url
+    .replace(/^\//, "")
+    .replace(/\/$/, "")
     .split("/");
   for (let i = 0; i < parts.length; i++) {
     if (parts[i].indexOf(":") !== -1) {
@@ -125,12 +124,15 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   /* Once upon a time one could specify a second tree via a `?tt=tree_name`.
   This is no longer supported, however we still display an error message. */
   if (query.tt) {
-    dispatch(errorNotification({
-      message: `Specifing a second tree via '?tt=${query.tt}' is no longer supported.`,
-      details: "The new syntax requires the complete name for both trees. " +
-        "For example, instead of 'flu/seasonal/h3n2/ha/2y?tt=na' you must " +
-        "specify 'flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y' "
-    }));
+    dispatch(
+      errorNotification({
+        message: `Specifing a second tree via '?tt=${query.tt}' is no longer supported.`,
+        details:
+          "The new syntax requires the complete name for both trees. " +
+          "For example, instead of 'flu/seasonal/h3n2/ha/2y?tt=na' you must " +
+          "specify 'flu/seasonal/h3n2/ha/2y:flu/seasonal/h3n2/na/2y' "
+      })
+    );
   }
   let pathnameShouldBe = url; /* the pathname to display in the URL */
   let [mainDatasetUrl, secondTreeUrl] = collectDatasetFetchUrls(url);
@@ -151,8 +153,7 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
          * state recomputation? */
         const mainDatasetResponse = await getDataset(mainDatasetUrl);
         datasetJson = await mainDatasetResponse.json();
-        secondTreeDataset = await getDataset(secondTreeUrl)
-          .then((res) => res.json());
+        secondTreeDataset = await getDataset(secondTreeUrl).then((res) => res.json());
       } catch (e) {
         /* If the url is in the old syntax (e.g. `ha:na`) then `collectDatasetFetchUrls`
          * will return incorrect dataset URLs (perhaps for both trees)
@@ -164,12 +165,13 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
         pathnameShouldBe = `${mainDatasetUrl}:${secondTreeUrl}`;
         const mainDatasetResponse = await getDataset(mainDatasetUrl);
         datasetJson = await mainDatasetResponse.json();
-        secondTreeDataset = await getDataset(secondTreeUrl)
-          .then((res) => res.json());
-        dispatch(warningNotification({
-          message: `Specifing a second tree via "${oldSyntax}" is deprecated.`,
-          details: "The url has been modified to reflect the new syntax."
-        }));
+        secondTreeDataset = await getDataset(secondTreeUrl).then((res) => res.json());
+        dispatch(
+          warningNotification({
+            message: `Specifing a second tree via "${oldSyntax}" is deprecated.`,
+            details: "The url has been modified to reflect the new syntax."
+          })
+        );
       }
     }
 
@@ -186,9 +188,9 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
         dispatch
       })
     });
-
   } catch (err) {
-    if (err.message === "No Content") { // status code 204
+    if (err.message === "No Content") {
+      // status code 204
       /* TODO: add more helper functions for moving between pages in auspice */
       return dispatch({
         type: types.PAGE_CHANGE,
@@ -204,22 +206,25 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   /* do we have frequencies to display? */
   if (datasetJson.meta.panels && datasetJson.meta.panels.indexOf("frequencies") !== -1) {
     try {
-      const frequencyData = await getDataset(mainDatasetUrl, {type: "tip-frequencies"})
-        .then((res) => res.json());
+      const frequencyData = await getDataset(mainDatasetUrl, { type: "tip-frequencies" }).then(
+        (res) => res.json()
+      );
       dispatch(loadFrequencies(frequencyData));
     } catch (err) {
       console.error("Failed to fetch frequencies", err.message);
-      dispatch(warningNotification({message: "Failed to fetch frequencies"}));
+      dispatch(warningNotification({ message: "Failed to fetch frequencies" }));
     }
   }
 
   /* Get available datasets -- this is needed for the sidebar dataset-change dropdowns etc */
   try {
-    const availableDatasets = await fetchJSON(`${getServerAddress()}/getAvailable?prefix=${window.location.pathname}`);
-    dispatch({type: types.SET_AVAILABLE, data: availableDatasets});
+    const availableDatasets = await fetchJSON(
+      `${getServerAddress()}/getAvailable?prefix=${window.location.pathname}`
+    );
+    dispatch({ type: types.SET_AVAILABLE, data: availableDatasets });
   } catch (err) {
     console.error("Failed to fetch available datasets", err.message);
-    dispatch(warningNotification({message: "Failed to fetch available datasets"}));
+    dispatch(warningNotification({ message: "Failed to fetch available datasets" }));
   }
   return undefined;
 };
@@ -227,24 +232,31 @@ const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
 export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, getState) => {
   let secondJson;
   try {
-    secondJson = await getDataset(secondTreeUrl)
-      .then((res) => res.json());
+    secondJson = await getDataset(secondTreeUrl).then((res) => res.json());
   } catch (err) {
     console.error("Failed to fetch additional tree", err.message);
-    dispatch(warningNotification({message: "Failed to fetch second tree"}));
+    dispatch(warningNotification({ message: "Failed to fetch second tree" }));
     return;
   }
   const oldState = getState();
-  const newState = createTreeTooState({treeTooJSON: secondJson.tree, oldState, originalTreeUrl: firstTreeUrl, secondTreeUrl: secondTreeUrl, dispatch});
-  dispatch({type: types.TREE_TOO_DATA, ...newState});
+  const newState = createTreeTooState({
+    treeTooJSON: secondJson.tree,
+    oldState,
+    originalTreeUrl: firstTreeUrl,
+    secondTreeUrl: secondTreeUrl,
+    dispatch
+  });
+  dispatch({ type: types.TREE_TOO_DATA, ...newState });
 };
 
-
-export const loadJSONs = ({url = window.location.pathname, search = window.location.search} = {}) => {
+export const loadJSONs = ({
+  url = window.location.pathname,
+  search = window.location.search
+} = {}) => {
   return (dispatch, getState) => {
     const { tree } = getState();
     if (tree.loaded) {
-      dispatch({type: types.DATA_INVALID});
+      dispatch({ type: types.DATA_INVALID });
     }
     const query = queryString.parse(search);
 
@@ -253,7 +265,7 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
     } else {
       /* we want to have an additional fetch to get the narrative JSON, which in turn
       tells us which data JSON to fetch... */
-      getDatasetFromCharon(url, {narrative: true})
+      getDatasetFromCharon(url, { narrative: true })
         .then((res) => res.json())
         .then((blocks) => {
           const firstURL = blocks[0].dataset;

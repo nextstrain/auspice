@@ -2,7 +2,6 @@ import React from "react";
 import { TOGGLE_NARRATIVE } from "../../actions/types";
 import { tabSingle, darkGrey } from "../../globalStyles";
 
-
 export const renderNarrativeToggle = (dispatch, narrativeIsDisplayed) => {
   return (
     <button
@@ -17,7 +16,7 @@ export const renderNarrativeToggle = (dispatch, narrativeIsDisplayed) => {
         cursor: "pointer",
         color: darkGrey
       }}
-      onClick={() => dispatch({type: TOGGLE_NARRATIVE, display: !narrativeIsDisplayed})}
+      onClick={() => dispatch({ type: TOGGLE_NARRATIVE, display: !narrativeIsDisplayed })}
     >
       {narrativeIsDisplayed ? "explore the data yourself" : "return to the narrative"}
     </button>

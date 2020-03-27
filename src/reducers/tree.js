@@ -28,7 +28,6 @@ export const getDefaultTreeState = () => {
   };
 };
 
-
 const Tree = (state = getDefaultTreeState(), action) => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
@@ -48,7 +47,12 @@ const Tree = (state = getDefaultTreeState(), action) => {
         idxOfInViewRootNode: action.idxOfInViewRootNode,
         cladeName: action.cladeName,
         selectedClade: action.cladeName,
-        visibleStateCounts: countTraitsAcrossTree(state.nodes, action.stateCountAttrs, action.visibility, true),
+        visibleStateCounts: countTraitsAcrossTree(
+          state.nodes,
+          action.stateCountAttrs,
+          action.visibility,
+          true
+        ),
         selectedStrain: action.selectedStrain
       };
       return Object.assign({}, state, newStates);

@@ -1,12 +1,12 @@
 import React from "react";
 
-const SidebarChevron = ({navHeight, navWidth, display, onClick}) => {
+const SidebarChevron = ({ navHeight, navWidth, display, onClick }) => {
   const chevronStyle = {
     position: "fixed",
-    left: navWidth ? navWidth-12 : -12,
+    left: navWidth ? navWidth - 12 : -12,
     visibility: display ? "visible" : "hidden",
     width: display ? 12 : 0,
-    top: navHeight/2-8,
+    top: navHeight / 2 - 8,
     backgroundColor: "inherit",
     boxShadow: "none",
     cursor: "pointer",
@@ -19,7 +19,7 @@ const SidebarChevron = ({navHeight, navWidth, display, onClick}) => {
 
   return (
     <div style={chevronStyle} onClick={onClick}>
-      <i className="fa fa-chevron-left" aria-hidden="true"/>
+      <i className="fa fa-chevron-left" aria-hidden="true" />
     </div>
   );
 };

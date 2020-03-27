@@ -1,7 +1,7 @@
 // import _filter from "lodash/filter";
 import * as types from "../actions/types";
 
-const Entropy = (state = {loaded: false, showCounts: false}, action) => {
+const Entropy = (state = { loaded: false, showCounts: false }, action) => {
   switch (action.type) {
     case types.CHANGE_ZOOM:
       return Object.assign({}, state, {
@@ -9,7 +9,7 @@ const Entropy = (state = {loaded: false, showCounts: false}, action) => {
         zoomMin: action.zoomc[0]
       });
     case types.DATA_INVALID:
-      return {loaded: false, showCounts: false};
+      return { loaded: false, showCounts: false };
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
     case types.CLEAN_START:
       return action.entropy;

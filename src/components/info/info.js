@@ -1,16 +1,19 @@
 import React from "react";
 import { connect } from "react-redux";
-import { withTranslation } from 'react-i18next';
+import { withTranslation } from "react-i18next";
 
 import Card from "../framework/card";
 import { titleFont, headerFont, medGrey, darkGrey } from "../../globalStyles";
-import { applyFilter, changeDateFilter, updateVisibleTipsAndBranchThicknesses } from "../../actions/tree";
+import {
+  applyFilter,
+  changeDateFilter,
+  updateVisibleTipsAndBranchThicknesses
+} from "../../actions/tree";
 import { getVisibleDateRange } from "../../util/treeVisibilityHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { months, NODE_VISIBLE } from "../../util/globals";
 import { displayFilterValueAsButton } from "../framework/footer";
 import Byline from "./byline";
-
 
 const plurals = {
   country: "countries",
@@ -22,17 +25,15 @@ const pluralise = (word, n) => {
     if (word === "authors") word = "author"; // eslint-disable-line
   } else {
     if (word in plurals) word = plurals[word]; // eslint-disable-line
-    if (word.slice(-1).toLowerCase() !== "s") word+="s"; // eslint-disable-line
+    if (word.slice(-1).toLowerCase() !== "s") word += "s"; // eslint-disable-line
   }
   word = word.replace(/_/g, " "); // eslint-disable-line
   return word;
 };
 
 const styliseDateRange = (date) => {
-  const dateStr = (typeof date === "number") ?
-    numericToCalendar(date) :
-    date;
-  const fields = dateStr.split('-');
+  const dateStr = typeof date === "number" ? numericToCalendar(date) : date;
+  const fields = dateStr.split("-");
   // 2012-01-22
   if (fields.length === 3) {
     return `${months[fields[1]]} ${fields[0]}`;
@@ -49,13 +50,16 @@ const getNumSelectedTips = (nodes, visibility) => {
   return count;
 };
 
-const arrayToSentence = (arr, {prefix=undefined, suffix=undefined, capatalise=true, fullStop=true}={}) => {
+const arrayToSentence = (
+  arr,
+  { prefix = undefined, suffix = undefined, capatalise = true, fullStop = true } = {}
+) => {
   let ret;
-  if (!arr.length) return '';
+  if (!arr.length) return "";
   if (arr.length === 1) {
     ret = arr[0];
   } else {
-    ret = arr.slice(0, -1).join(", ") + " and " + arr[arr.length-1];
+    ret = arr.slice(0, -1).join(", ") + " and " + arr[arr.length - 1];
   }
   if (prefix) ret = prefix + " " + ret;
   if (suffix) ret += " " + suffix;
@@ -64,27 +68,29 @@ const arrayToSentence = (arr, {prefix=undefined, suffix=undefined, capatalise=tr
   return ret + " ";
 };
 
-export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visibleStateCounts, branchLengthsToDisplay, t) => {
+export const createSummary = (
+  mainTreeNumTips,
+  nodes,
+  filters,
+  visibility,
+  visibleStateCounts,
+  branchLengthsToDisplay,
+  t
+) => {
   const nSelectedSamples = getNumSelectedTips(nodes, visibility);
   const sampledDateRange = getVisibleDateRange(nodes, visibility);
   let summary = ""; /* text returned from this function */
 
   /* Number of genomes & their date range */
   if (branchLengthsToDisplay !== "divOnly") {
-    summary += t(
-      "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.",
-      {
-        x: nSelectedSamples,
-        y: mainTreeNumTips,
-        from: styliseDateRange(sampledDateRange[0]),
-        to: styliseDateRange(sampledDateRange[1])
-      }
-    );
+    summary += t("Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.", {
+      x: nSelectedSamples,
+      y: mainTreeNumTips,
+      from: styliseDateRange(sampledDateRange[0]),
+      to: styliseDateRange(sampledDateRange[1])
+    });
   } else {
-    summary += t(
-      "Showing {{x}} of {{y}} genomes.",
-      {x: nSelectedSamples, y: mainTreeNumTips}
-    );
+    summary += t("Showing {{x}} of {{y}} genomes.", { x: nSelectedSamples, y: mainTreeNumTips });
   }
 
   /* parse filters */
@@ -95,10 +101,10 @@ export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visib
     filterTextArr.push(`${n} ${pluralise(filterName, n)}`);
   });
   const prefix = t("Comprising");
-  const filterText = arrayToSentence(filterTextArr, {prefix: prefix, capatalise: false});
+  const filterText = arrayToSentence(filterTextArr, { prefix: prefix, capatalise: false });
   if (filterText.length) {
     summary += ` ${filterText}`;
-  } else if (summary.endsWith('.')) {
+  } else if (summary.endsWith(".")) {
     summary += " ";
   } else {
     summary += ". ";
@@ -176,16 +182,21 @@ class Info extends React.Component {
 
   addFilteredDatesButton(buttons) {
     buttons.push(
-      <div key={"timefilter"} style={{display: "inline-block"}}>
+      <div key={"timefilter"} style={{ display: "inline-block" }}>
         <div
-          className={'boxed-item-icon'}
+          className={"boxed-item-icon"}
           onClick={() => {
-            this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax}));
+            this.props.dispatch(
+              changeDateFilter({
+                newMin: this.props.absoluteDateMin,
+                newMax: this.props.absoluteDateMax
+              })
+            );
           }}
           role="button"
           tabIndex={0}
         >
-          {'\xD7'}
+          {"\xD7"}
         </div>
         <div className={"boxed-item active-with-icon"}>
           {`${styliseDateRange(this.props.dateMin)} to ${styliseDateRange(this.props.dateMax)}`}
@@ -201,29 +212,39 @@ class Info extends React.Component {
           {` (${this.props.totalStateCounts[filterName].get(itemName)})`}
         </span>
       );
-      buttons.push(displayFilterValueAsButton(this.props.dispatch, this.props.filters, filterName, itemName, display, true));
+      buttons.push(
+        displayFilterValueAsButton(
+          this.props.dispatch,
+          this.props.filters,
+          filterName,
+          itemName,
+          display,
+          true
+        )
+      );
     });
   }
   selectedStrainButton(strain) {
     return (
       <span>
         {"Showing a single strain "}
-        <div style={{display: "inline-block"}}>
+        <div style={{ display: "inline-block" }}>
           <div
-            className={'boxed-item-icon'}
+            className={"boxed-item-icon"}
             onClick={() => {
               this.props.dispatch(
-                updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}, cladeSelected: this.props.selectedClade})
+                updateVisibleTipsAndBranchThicknesses({
+                  tipSelected: { clear: true },
+                  cladeSelected: this.props.selectedClade
+                })
               );
             }}
             role="button"
             tabIndex={0}
           >
-            {'\xD7'}
+            {"\xD7"}
           </div>
-          <div className={"boxed-item active-with-icon"}>
-            {strain}
-          </div>
+          <div className={"boxed-item active-with-icon"}>{strain}</div>
         </div>
       </span>
     );
@@ -231,7 +252,7 @@ class Info extends React.Component {
   clearFilterButton(field) {
     return (
       <span
-        style={{cursor: "pointer", color: '#5097BA'}}
+        style={{ cursor: "pointer", color: "#5097BA" }}
         key={field}
         onClick={() => this.props.dispatch(applyFilter("set", field, []))}
         role="button"
@@ -261,7 +282,9 @@ class Info extends React.Component {
     // const filtersWithValues = Object.keys(this.props.filters).filter((n) => this.props.filters[n].length > 0);
     const animating = this.props.animationPlayPauseButton === "Pause";
     const showExtended = !animating && !this.props.selectedStrain;
-    const datesMaxed = this.props.dateMin === this.props.absoluteDateMin && this.props.dateMax === this.props.absoluteDateMax;
+    const datesMaxed =
+      this.props.dateMin === this.props.absoluteDateMin &&
+      this.props.dateMax === this.props.absoluteDateMax;
 
     /* the content is made up of two parts:
     (1) the summary - e.g. Showing 4 of 379 sequences, from 1 author, 1 country and 1 region, dated Apr 2016 to Jun 2016.
@@ -283,16 +306,20 @@ class Info extends React.Component {
     Object.keys(this.props.filters)
       .filter((n) => this.props.filters[n].length > 0)
       .forEach((n) => this.addNonAuthorFilterButton(filters, n));
-    if (!datesMaxed) {this.addFilteredDatesButton(filters);}
+    if (!datesMaxed) {
+      this.addFilteredDatesButton(filters);
+    }
 
     return (
       <Card center infocard>
         <div style={styles.base}>
           {this.renderTitle(styles)}
-          <Byline styles={styles} width={this.props.width} metadata={this.props.metadata}/>
+          <Byline styles={styles} width={this.props.width} metadata={this.props.metadata} />
           <div width={this.props.width} style={styles.n}>
             {animating ? t("Animation in progress.") + " " : null}
-            {this.props.selectedStrain ? this.selectedStrainButton(this.props.selectedStrain) : null}
+            {this.props.selectedStrain
+              ? this.selectedStrainButton(this.props.selectedStrain)
+              : null}
             {/* part 1 - the summary */}
             {showExtended ? summary : null}
             {/* part 2 - the filters */}

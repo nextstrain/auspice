@@ -1,13 +1,19 @@
 /* eslint no-restricted-syntax: 0 */
 import { infoNotification, warningNotification } from "../../actions/notifications";
 import { spaceBetweenTrees } from "../tree/tree";
-import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
+import {
+  getTraitFromNode,
+  getDivFromNode,
+  getFullAuthorInfoFromNode,
+  getVaccineFromNode,
+  getAccessionFromNode
+} from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 
 export const isPaperURLValid = (d) => {
   return (
     Object.prototype.hasOwnProperty.call(d, "paper_url") &&
-    !d.paper_url.endsWith('/') &&
+    !d.paper_url.endsWith("/") &&
     d.paper_url !== "?"
   );
 };
@@ -19,12 +25,16 @@ const treeToNewick = (root, temporal) => {
     if (node.hasChildren) {
       const children = [];
       node.children.forEach((child) => {
-        const subsubtree = recurse(child, temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node));
+        const subsubtree = recurse(
+          child,
+          temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)
+        );
         children.push(subsubtree);
       });
       subtree += "(" + children.join(",") + ")" + node.name + ":";
       subtree += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
-    } else { /* terminal node */
+    } else {
+      /* terminal node */
       let leaf = node.name + ":";
       leaf += (temporal ? getTraitFromNode(node, "num_date") : getDivFromNode(node)) - parentX;
       subtree += leaf;
@@ -36,11 +46,10 @@ const treeToNewick = (root, temporal) => {
 
 const MIME = {
   text: "text/plain;charset=utf-8;",
-  csv: 'text/csv;charset=utf-8;',
+  csv: "text/csv;charset=utf-8;",
   tsv: `text/tab-separated-values;charset=utf-8;`,
   svg: "image/svg+xml;charset=utf-8"
 };
-
 
 const write = (filename, type, content) => {
   /* https://stackoverflow.com/questions/18848860/javascript-array-to-csv/18849208#comment59677504_18849208 */
@@ -49,14 +58,14 @@ const write = (filename, type, content) => {
   const url = URL.createObjectURL(blob);
   link.setAttribute("href", url);
   link.setAttribute("download", filename);
-  link.style.visibility = 'hidden';
+  link.style.visibility = "hidden";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 };
 
 export const areAuthorsPresent = (tree) => {
-  for (let i=0; i<tree.nodes.length; i++) {
+  for (let i = 0; i < tree.nodes.length; i++) {
     if (getFullAuthorInfoFromNode(tree.nodes[i])) {
       return true;
     }
@@ -70,7 +79,11 @@ export const areAuthorsPresent = (tree) => {
  */
 export const authorTSV = (dispatch, filePrefix, tree) => {
   const lineArray = [];
-  lineArray.push(["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"].join("\t"));
+  lineArray.push(
+    ["Author", "n (strains)", "publication title", "journal", "publication URL", "strains"].join(
+      "\t"
+    )
+  );
   const filename = filePrefix + "_authors.tsv";
   const UNKNOWN = "unknown";
   const info = {};
@@ -98,7 +111,7 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
   });
 
   write(filename, MIME.tsv, lineArray.join("\n"));
-  dispatch(infoNotification({message: "Author metadata exported", details: filename}));
+  dispatch(infoNotification({ message: "Author metadata exported", details: filename }));
 };
 
 /**
@@ -106,7 +119,6 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
  * with the relevent information (accession, traits, etcetera)
  */
 export const strainTSV = (dispatch, filePrefix, nodes, colorings) => {
-
   /* traverse the tree & store tip information. We cannot write this out as we go as we don't know
   exactly which header fields we want until the tree has been traversed. */
   const tipTraitValues = {};
@@ -114,7 +126,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings) => {
 
   for (const node of nodes) {
     if (node.hasChildren) continue; /* we only consider tips */
-    tipTraitValues[node.name] = {Strain: node.name};
+    tipTraitValues[node.name] = { Strain: node.name };
     if (!node.node_attrs) continue; /* if this is not set then we don't have any node info! */
 
     /* collect values (as writable strings) of the same "traits" as can be viewed by the modal displayed
@@ -125,7 +137,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings) => {
       if (!headerFields.includes(trait)) headerFields.push(trait);
       const value = getTraitFromNode(node, trait);
       if (value) {
-        if (typeof value === 'string') {
+        if (typeof value === "string") {
           tipTraitValues[node.name][trait] = value;
         } else if (typeof value === "number") {
           tipTraitValues[node.name][trait] = parseFloat(value).toFixed(2);
@@ -138,9 +150,11 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings) => {
     if (numDate) {
       const traitName = "Collection Data"; // can cusomise as desired. Will appear in header.
       if (!headerFields.includes(traitName)) headerFields.push(traitName);
-      const numDateConfidence = getTraitFromNode(node, "num_date", {confidence: true});
+      const numDateConfidence = getTraitFromNode(node, "num_date", { confidence: true });
       if (numDateConfidence && numDateConfidence[0] !== numDateConfidence[1]) {
-        tipTraitValues[node.name][traitName] = `${numericToCalendar(numDate)} (${numericToCalendar(numDateConfidence[0])} - ${numericToCalendar(numDateConfidence[1])})`;
+        tipTraitValues[node.name][traitName] = `${numericToCalendar(numDate)} (${numericToCalendar(
+          numDateConfidence[0]
+        )} - ${numericToCalendar(numDateConfidence[1])})`;
       } else {
         tipTraitValues[node.name][traitName] = numericToCalendar(numDate);
       }
@@ -177,7 +191,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings) => {
   /* turn the information into a string to be written */
   // for the header, attempt to use titles defined via metadata->colorings where possible
   const header = headerFields.map((n) => {
-    return (colorings && colorings[n] && colorings[n].title) ? colorings[n].title : n;
+    return colorings && colorings[n] && colorings[n].title ? colorings[n].title : n;
   });
   const linesToWrite = [header.join("\t")];
   for (const data of Object.values(tipTraitValues)) {
@@ -191,14 +205,14 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings) => {
   /* write out information we've collected */
   const filename = `${filePrefix}_metadata.tsv`;
   write(filename, MIME.tsv, linesToWrite.join("\n"));
-  dispatch(infoNotification({message: `Metadata exported to ${filename}`}));
+  dispatch(infoNotification({ message: `Metadata exported to ${filename}` }));
 };
 
 export const newick = (dispatch, filePrefix, root, temporal) => {
   const fName = temporal ? filePrefix + "_timetree.nwk" : filePrefix + "_tree.nwk";
   const message = temporal ? "TimeTree" : "Tree";
   write(fName, MIME.text, treeToNewick(root, temporal));
-  dispatch(infoNotification({message: message + " written to " + fName}));
+  dispatch(infoNotification({ message: message + " written to " + fName }));
 };
 
 const processXMLString = (input) => {
@@ -232,7 +246,7 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
   /* calculating the width of the tree panel is harder if there are two trees */
   if (panels.secondTree) {
     panels.secondTree.x = spaceBetweenTrees + panels.tree.width;
-    panels.tree.width += (spaceBetweenTrees + panels.secondTree.width);
+    panels.tree.width += spaceBetweenTrees + panels.secondTree.width;
   }
 
   if (panels.tree && panels.map) {
@@ -281,14 +295,15 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
   }
 
   /* add top&left padding */
-  for (let key in panels) { // eslint-disable-line
+  for (const key in panels) {
+    // eslint-disable-line
     if (panels[key]) {
       panels[key].x += padding;
       panels[key].y += padding;
     }
   }
-  width += padding*2;
-  height += padding*2;
+  width += padding * 2;
+  height += padding * 2;
   const textHeight = numLinesOfText * 36 + 20;
   height += textHeight;
 
@@ -302,7 +317,9 @@ const createBoundingDimensionsAndPositionPanels = (panels, panelLayout, numLines
 };
 
 const injectAsSVGStrings = (output, key, data) => {
-  const svgTag = `<svg id="${key}" width="${data.width}" height="${data.height}" x="${data.x}" y="${data.y}">`;
+  const svgTag = `<svg id="${key}" width="${data.width}" height="${data.height}" x="${data.x}" y="${
+    data.y
+  }">`;
   // if (data.viewbox) svgTag = svgTag.replace(">", ` viewBox="${data.viewbox.join(" ")}">`);
   output.push(svgTag);
   output.push(data.inner);
@@ -310,24 +327,39 @@ const injectAsSVGStrings = (output, key, data) => {
 };
 
 /* define actual writer as a closure, because it may need to be triggered asyncronously */
-const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, map) => {
+const writeSVGPossiblyIncludingMap = (
+  dispatch,
+  filePrefix,
+  panelsInDOM,
+  panelLayout,
+  textStrings,
+  map
+) => {
   const errors = [];
   /* for each panel present in the DOM, create a data structure with the dimensions & the paths/shapes etc */
-  const panels = {tree: undefined, map: undefined, entropy: undefined, frequencies: undefined};
+  const panels = { tree: undefined, map: undefined, entropy: undefined, frequencies: undefined };
   if (panelsInDOM.indexOf("tree") !== -1) {
     try {
-      panels.tree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("MainTree")));
-      panels.treeLegend = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("TreeLegendContainer")));
+      panels.tree = processXMLString(
+        new XMLSerializer().serializeToString(document.getElementById("MainTree"))
+      );
+      panels.treeLegend = processXMLString(
+        new XMLSerializer().serializeToString(document.getElementById("TreeLegendContainer"))
+      );
     } catch (e) {
       panels.tree = undefined;
       errors.push("tree");
       console.error("Tree SVG save error:", e);
     }
-    if (panels.tree && document.getElementById('SecondTree')) {
+    if (panels.tree && document.getElementById("SecondTree")) {
       try {
-        panels.secondTree = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("SecondTree")));
-        if (document.getElementById('Tangle')) {
-          panels.tangle = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("Tangle")));
+        panels.secondTree = processXMLString(
+          new XMLSerializer().serializeToString(document.getElementById("SecondTree"))
+        );
+        if (document.getElementById("Tangle")) {
+          panels.tangle = processXMLString(
+            new XMLSerializer().serializeToString(document.getElementById("Tangle"))
+          );
         }
       } catch (e) {
         errors.push("second tree / tanglegram");
@@ -337,9 +369,13 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
   if (panelsInDOM.indexOf("entropy") !== -1) {
     try {
-      panels.entropy = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3entropyParent")));
+      panels.entropy = processXMLString(
+        new XMLSerializer().serializeToString(document.getElementById("d3entropyParent"))
+      );
       panels.entropy.inner = panels.entropy.inner.replace(/<text/g, `<text class="txt"`);
-      panels.entropy.inner = `<style>.txt { font-family: "Lato", "Helvetica Neue", "Helvetica", "sans-serif"; }</style>${panels.entropy.inner}`;
+      panels.entropy.inner = `<style>.txt { font-family: "Lato", "Helvetica Neue", "Helvetica", "sans-serif"; }</style>${
+        panels.entropy.inner
+      }`;
     } catch (e) {
       panels.entropy = undefined;
       errors.push("entropy");
@@ -348,7 +384,9 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   }
   if (panelsInDOM.indexOf("frequencies") !== -1) {
     try {
-      panels.frequencies = processXMLString((new XMLSerializer()).serializeToString(document.getElementById("d3frequenciesSVG")));
+      panels.frequencies = processXMLString(
+        new XMLSerializer().serializeToString(document.getElementById("d3frequenciesSVG"))
+      );
     } catch (e) {
       panels.frequencies = undefined;
       errors.push("frequencies");
@@ -369,15 +407,29 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   /* collect all panels as individual <svg> elements inside a bounding <svg> tag, and write to file */
   const output = [];
   /* logic for extracting the overall width etc */
-  const overallDimensions = createBoundingDimensionsAndPositionPanels(panels, panelLayout, textStrings.length);
-  output.push(`<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${overallDimensions.width}" height="${overallDimensions.height}">`);
-  for (let key in panels) { // eslint-disable-line
+  const overallDimensions = createBoundingDimensionsAndPositionPanels(
+    panels,
+    panelLayout,
+    textStrings.length
+  );
+  output.push(
+    `<svg xmlns:xlink="http://www.w3.org/1999/xlink" xmlns="http://www.w3.org/2000/svg" width="${
+      overallDimensions.width
+    }" height="${overallDimensions.height}">`
+  );
+  for (const key in panels) {
+    // eslint-disable-line
     if (panels[key]) {
       injectAsSVGStrings(output, key, panels[key]); // modifies output in place
     }
   }
   /* add text to bottom of SVG in HTML format */
-  output.push(`<foreignObject x="${overallDimensions.padding}" y="${overallDimensions.height - overallDimensions.textHeight}" height="${overallDimensions.textHeight}" width="${overallDimensions.width - 2*overallDimensions.padding}">`);
+  output.push(
+    `<foreignObject x="${overallDimensions.padding}" y="${overallDimensions.height -
+      overallDimensions.textHeight}" height="${
+      overallDimensions.textHeight
+    }" width="${overallDimensions.width - 2 * overallDimensions.padding}">`
+  );
   textStrings.forEach((s) => {
     output.push(`<p xmlns="http://www.w3.org/1999/xhtml" style="font-family:lato,sans-serif;">`);
     output.push(s);
@@ -391,23 +443,43 @@ const writeSVGPossiblyIncludingMap = (dispatch, filePrefix, panelsInDOM, panelLa
   write(filePrefix + ".svg", MIME.svg, output.join("\n"));
 
   if (!errors.length) {
-    dispatch(infoNotification({
-      message: "Vector image saved",
-      details: filePrefix + ".svg"
-    }));
+    dispatch(
+      infoNotification({
+        message: "Vector image saved",
+        details: filePrefix + ".svg"
+      })
+    );
   } else {
-    dispatch(warningNotification({
-      message: "Vector image saved",
-      details: `Saved to ${filePrefix}.svg, however there were errors with ${errors.join(", ")}`
-    }));
+    dispatch(
+      warningNotification({
+        message: "Vector image saved",
+        details: `Saved to ${filePrefix}.svg, however there were errors with ${errors.join(", ")}`
+      })
+    );
   }
 };
 
 export const SVG = (dispatch, filePrefix, panelsInDOM, panelLayout, textStrings) => {
   /* downloading the map tiles is an async call */
   if (panelsInDOM.indexOf("map") !== -1) {
-    window.L.getMapSvg(writeSVGPossiblyIncludingMap.bind(this, dispatch, filePrefix, panelsInDOM, panelLayout, textStrings));
+    window.L.getMapSvg(
+      writeSVGPossiblyIncludingMap.bind(
+        this,
+        dispatch,
+        filePrefix,
+        panelsInDOM,
+        panelLayout,
+        textStrings
+      )
+    );
   } else {
-    writeSVGPossiblyIncludingMap(dispatch, filePrefix, panelsInDOM, panelLayout, textStrings, undefined);
+    writeSVGPossiblyIncludingMap(
+      dispatch,
+      filePrefix,
+      panelsInDOM,
+      panelLayout,
+      textStrings,
+      undefined
+    );
   }
 };

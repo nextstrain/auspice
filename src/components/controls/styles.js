@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 
 /* All of these styled components are for the controls, which is part of the sidebar.
  * The sidebar is is wrapped by a <ThemeProvider> so you can access
@@ -19,7 +19,6 @@ export const ControlsContainer = styled.div`
   padding: 0px 20px 20px 20px;
 `;
 
-
 export const SidebarHeader = styled.span`
   font-family: ${(props) => props.theme["font-family"]};
   font-size: 16px;
@@ -38,7 +37,7 @@ export const SidebarButton = styled.button`
   cursor: pointer;
   padding: 2px;
   font-family: ${(props) => props.theme["font-family"]};
-  color: ${(props) => props.selected ? props.theme.selectedColor : props.theme.unselectedColor};
+  color: ${(props) => (props.selected ? props.theme.selectedColor : props.theme.unselectedColor)};
   font-weight: 400;
   text-transform: uppercase;
   font-size: 14px;
@@ -49,7 +48,7 @@ export const SidebarButton = styled.button`
 /* marginTop was 7px */
 export const SidebarSubtitle = styled.div`
   font-family: ${(props) => props.theme["font-family"]};
-  margin: ${(props) => props.spaceAbove ? "5" : "0"}px 0px 5px 0px;
+  margin: ${(props) => (props.spaceAbove ? "5" : "0")}px 0px 5px 0px;
   font-size: 12px;
   font-weight: 400;
   color: ${(props) => props.theme.color};

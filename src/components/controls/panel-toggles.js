@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { withTranslation } from 'react-i18next';
+import { withTranslation } from "react-i18next";
 
 import Toggle from "./toggle";
 import { togglePanelDisplay } from "../../actions/misc";
@@ -25,7 +25,7 @@ class PanelToggles extends React.Component {
         on={this.props.panelsToDisplay.indexOf(n) !== -1}
         callback={() => this.props.dispatch(togglePanelDisplay(n))}
         label={t("sidebar:Show " + n)}
-        style={{paddingBottom: "10px"}}
+        style={{ paddingBottom: "10px" }}
       />
     ));
   }

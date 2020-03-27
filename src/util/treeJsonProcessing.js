@@ -2,10 +2,10 @@ import { getDefaultTreeState } from "../reducers/tree";
 import { getVaccineFromNode } from "./treeMiscHelpers";
 
 /**
-* for each node, calculate the number of subtending tips (alive or dead)
-* side effects: n.fullTipCount for each node
-*  @param root - deserialized JSON root to begin traversal
-*/
+ * for each node, calculate the number of subtending tips (alive or dead)
+ * side effects: n.fullTipCount for each node
+ *  @param root - deserialized JSON root to begin traversal
+ */
 const calcFullTipCounts = (node) => {
   node.fullTipCount = 0;
   if (typeof node.children !== "undefined") {
@@ -45,20 +45,19 @@ const processBranchLabelsInPlace = (nodes) => {
   const availableBranchLabels = new Set();
   nodes.forEach((n) => {
     if (n.branch_attrs && n.branch_attrs.labels) {
-      Object.keys(n.branch_attrs.labels)
-        .forEach((labelName) => availableBranchLabels.add(labelName));
+      Object.keys(n.branch_attrs.labels).forEach((labelName) => availableBranchLabels.add(labelName));
     }
   });
   return ["none", ...availableBranchLabels];
 };
 
 /**
-*  For each node visit if node not a hashMap key, insert
-*  into array.  Then append node into end of the array.
-*  @params node - object to check
-*  @param hashMap - object literal used for deduping
-*  @param array - final array that nodes are inserted
-*/
+ *  For each node visit if node not a hashMap key, insert
+ *  into array.  Then append node into end of the array.
+ *  @params node - object to check
+ *  @param hashMap - object literal used for deduping
+ *  @param array - final array that nodes are inserted
+ */
 const visitNode = (node, hashMap, array) => {
   if (!hashMap[node.name]) {
     hashMap[node.name] = true;
@@ -67,15 +66,17 @@ const visitNode = (node, hashMap, array) => {
 };
 
 /**
-*  Pre-order tree traversal visits each node using stack.
-*  Checks if leaf node based on node.children
-*  pushes all children into stack and continues traversal.
-*  hashMap object literal used for deduping.
-*  @param root - deserialized JSON root to begin traversal
-*  @returns array  - final array of nodes in order with no dups
-*/
+ *  Pre-order tree traversal visits each node using stack.
+ *  Checks if leaf node based on node.children
+ *  pushes all children into stack and continues traversal.
+ *  hashMap object literal used for deduping.
+ *  @param root - deserialized JSON root to begin traversal
+ *  @returns array  - final array of nodes in order with no dups
+ */
 const flattenTree = (root) => {
-  const stack = [], array = [], hashMap = {};
+  const stack = [],
+    array = [],
+    hashMap = {};
   stack.push(root);
   while (stack.length !== 0) {
     const node = stack.pop();
@@ -90,13 +91,13 @@ const flattenTree = (root) => {
 };
 
 /**
-*  Add reference to node.parent for each node in tree
-*  For root add root.parent = root
-*  Pre-order tree traversal visits each node using stack.
-*  Checks if leaf node based on node.children
-*  pushes all children into stack and continues traversal.
-*  @param root - deserialized JSON root to begin traversal
-*/
+ *  Add reference to node.parent for each node in tree
+ *  For root add root.parent = root
+ *  Pre-order tree traversal visits each node using stack.
+ *  Checks if leaf node based on node.children
+ *  pushes all children into stack and continues traversal.
+ *  @param root - deserialized JSON root to begin traversal
+ */
 const appendParentsToTree = (root) => {
   root.parent = root;
   const stack = [];
@@ -119,10 +120,13 @@ export const treeJsonToState = (treeJSON) => {
   const nodes = processNodes(nodesArray);
   const vaccines = nodes.filter((d) => {
     const v = getVaccineFromNode(d);
-    return (v && (Object.keys(v).length > 1 || Object.keys(v)[0] !== "serum"));
+    return v && (Object.keys(v).length > 1 || Object.keys(v)[0] !== "serum");
   });
   const availableBranchLabels = processBranchLabelsInPlace(nodesArray);
   return Object.assign({}, getDefaultTreeState(), {
-    nodes, vaccines, availableBranchLabels, loaded: true
+    nodes,
+    vaccines,
+    availableBranchLabels,
+    loaded: true
   });
 };

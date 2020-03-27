@@ -1,5 +1,5 @@
 import React from "react";
-import styled from 'styled-components';
+import styled from "styled-components";
 
 const logoPNG = require("../../images/logo-light.svg");
 
@@ -36,7 +36,6 @@ const NarrativeTitle = styled.div`
   text-overflow: ellipsis;
 `;
 
-
 const renderTitle = (narrativeTitle, width) => {
   if (narrativeTitle) {
     return (
@@ -45,24 +44,20 @@ const renderTitle = (narrativeTitle, width) => {
       </NarrativeTitle>
     );
   }
-  return (
-    <Title href="/">
-      {"auspice"}
-    </Title>
-  );
+  return <Title href="/">{"auspice"}</Title>;
 };
 
-export const AuspiceNavBar = ({narrativeTitle, sidebar, width}) => {
+export const AuspiceNavBar = ({ narrativeTitle, sidebar, width }) => {
   if (!sidebar) return null;
   return (
     <AuspiceNavBarContainer>
-      <div style={{flex: 1}}/>
+      <div style={{ flex: 1 }} />
       <LogoLink href="/">
-        <img alt="splashPage" width="40px" src={logoPNG}/>
+        <img alt="splashPage" width="40px" src={logoPNG} />
       </LogoLink>
-      <div style={{flex: 1}}/>
+      <div style={{ flex: 1 }} />
       {renderTitle(narrativeTitle, width)}
-      <div style={{flex: 1}}/>
+      <div style={{ flex: 1 }} />
     </AuspiceNavBarContainer>
   );
 };

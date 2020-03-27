@@ -1,5 +1,5 @@
 import React from "react";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 import { headerFont } from "../../globalStyles";
 
@@ -26,7 +26,7 @@ const styles = {
   }
 };
 
-const Byline = ({width, metadata}) => {
+const Byline = ({ width, metadata }) => {
   const { t } = useTranslation();
 
   /** Render a special byline for nexstrain's nCoV (SARS-CoV-2) builds.
@@ -35,25 +35,28 @@ const Byline = ({width, metadata}) => {
    */
   if (
     // comment out the next line for testing on localhost
-    (window.location.hostname === "nextstrain.org" || window.location.hostname === "dev.nextstrain.org") &&
+    (window.location.hostname === "nextstrain.org" ||
+      window.location.hostname === "dev.nextstrain.org") &&
     window.location.pathname.startsWith("/ncov")
   ) {
     return (
       <div width={width} style={styles.byline}>
         {renderAvatar(t, metadata)}
         {renderMaintainers(t, metadata)}
-        {
-          metadata.buildUrl &&
+        {metadata.buildUrl && (
           <span>
             {" Enabled by data from "}
-            <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
+            <img
+              src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png"
+              alt="gisaid-logo"
+              width="65"
+            />
           </span>
-        }
+        )}
       </div>
     );
   }
   /* End nextstrain-specific ncov / SARS-CoV-2 code */
-
 
   return (
     <div width={width} style={styles.byline}>
@@ -66,11 +69,16 @@ const Byline = ({width, metadata}) => {
 
 function renderAvatar(t, metadata) {
   const repo = metadata.buildUrl;
-  if (typeof repo === 'string') {
+  if (typeof repo === "string") {
     const match = repo.match(/(https?:\/\/)?(www\.)?github.com\/([^/]+)/);
     if (match) {
       return (
-        <img style={styles.avatar} alt="avatar" width="28" src={`https://github.com/${match[3]}.png?size=200`}/>
+        <img
+          style={styles.avatar}
+          alt="avatar"
+          width="28"
+          src={`https://github.com/${match[3]}.png?size=200`}
+        />
       );
     }
   }
@@ -83,14 +91,16 @@ function renderAvatar(t, metadata) {
 function renderBuildInfo(t, metadata) {
   if (Object.prototype.hasOwnProperty.call(metadata, "buildUrl")) {
     const repo = metadata.buildUrl;
-    if (typeof repo === 'string') {
+    if (typeof repo === "string") {
       if (repo.startsWith("https://") || repo.startsWith("http://") || repo.startsWith("www.")) {
         return (
           <span>
-            {t("Built with")}
-            {" "}
+            {t("Built with")}{" "}
             <Link url={repo}>
-              {repo.replace(/^(http[s]?:\/\/)/, "").replace(/^www\./, "").replace(/^github.com\//, "")}
+              {repo
+                .replace(/^(http[s]?:\/\/)/, "")
+                .replace(/^www\./, "")
+                .replace(/^github.com\//, "")}
             </Link>
             {". "}
           </span>
@@ -100,7 +110,6 @@ function renderBuildInfo(t, metadata) {
   }
   return null;
 }
-
 
 function renderMaintainers(t, metadata) {
   let maintainersArray;
@@ -113,7 +122,9 @@ function renderMaintainers(t, metadata) {
           {maintainersArray.map((m, i) => (
             <React.Fragment key={m.name}>
               {m.url ? <Link url={m.url}>{m.name}</Link> : m.name}
-              {i === maintainersArray.length-1 ? "" : i === maintainersArray.length-2 ? " and " : ", "}
+              {i === maintainersArray.length - 1
+                ? ""
+                : i === maintainersArray.length - 2 ? " and " : ", "}
             </React.Fragment>
           ))}
           {"."}
@@ -124,7 +135,7 @@ function renderMaintainers(t, metadata) {
   return null;
 }
 
-function Link({url, children}) {
+function Link({ url, children }) {
   return (
     <a style={styles.bylineWeight} rel="noopener noreferrer" href={url} target="_blank">
       {children}

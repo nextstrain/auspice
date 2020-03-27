@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import Select from "react-select";
 import { debounce } from "lodash";
@@ -7,7 +7,12 @@ import { sidebarField } from "../../globalStyles";
 import { controlsWidth, nucleotide_gene } from "../../util/globals";
 import { changeColorBy } from "../../actions/colors";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
-import { isColorByGenotype, decodeColorByGenotype, encodeColorByGenotype, decodePositions } from "../../util/getGenotype";
+import {
+  isColorByGenotype,
+  decodeColorByGenotype,
+  encodeColorByGenotype,
+  decodePositions
+} from "../../util/getGenotype";
 
 /* the reason why we have colorBy as state (here) and in redux
    is for the case where we select genotype, then wait for the
@@ -41,7 +46,7 @@ class ColorBy extends React.Component {
     geneLength: PropTypes.object.isRequired,
     colorings: PropTypes.object.isRequired,
     dispatch: PropTypes.func.isRequired
-  }
+  };
 
   // Applies the given state to the immutable blank state and replaces the
   // current state with the result.
@@ -113,8 +118,8 @@ class ColorBy extends React.Component {
   getGtGeneOptions() {
     let options = [];
     if (this.props.geneMap) {
-      options = Object.keys(this.props.geneMap).map((prot) => ({value: prot, label: prot}));
-      options[options.length] = {value: nucleotide_gene, label: "nucleotide"};
+      options = Object.keys(this.props.geneMap).map((prot) => ({ value: prot, label: prot }));
+      options[options.length] = { value: nucleotide_gene, label: "nucleotide" };
     }
     return options;
   }
@@ -143,9 +148,7 @@ class ColorBy extends React.Component {
 
     const geneLength = Math.floor(this.props.geneLength[geneSelected]);
 
-    const placeholder = geneSelected
-      ? `${geneSelected} position (1–${geneLength})…`
-      : `position…`;
+    const placeholder = geneSelected ? `${geneSelected} position (1–${geneLength})…` : `position…`;
 
     return (
       <input
@@ -177,8 +180,10 @@ class ColorBy extends React.Component {
 
   render() {
     const styles = this.getStyles();
-    const colorOptions = Object.keys(this.props.colorings)
-      .map((key) => ({value: key, label: this.props.colorings[key].title}));
+    const colorOptions = Object.keys(this.props.colorings).map((key) => ({
+      value: key,
+      label: this.props.colorings[key].title
+    }));
     return (
       <div style={styles.base}>
         <Select
@@ -193,14 +198,12 @@ class ColorBy extends React.Component {
             this.replaceState({ colorBySelected: opt.value });
           }}
         />
-        {this.state.colorBySelected === "gt" ?
+        {this.state.colorBySelected === "gt" ? (
           <div>
             {this.gtGeneSelect()}
             {this.gtPositionInput()}
           </div>
-          :
-          null
-        }
+        ) : null}
       </div>
     );
   }

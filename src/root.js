@@ -1,6 +1,6 @@
-import React, { lazy, Suspense } from 'react';
+import React, { lazy, Suspense } from "react";
 import { connect } from "react-redux";
-import { hot } from 'react-hot-loader/root';
+import { hot } from "react-hot-loader/root";
 import Monitor from "./components/framework/monitor";
 import DatasetLoader from "./components/datasetLoader";
 import Spinner from "./components/framework/spinner";
@@ -11,34 +11,36 @@ const Splash = lazy(() => import("./components/splash"));
 const Status = lazy(() => import("./components/status"));
 const Notifications = lazy(() => import("./components/notifications/notifications"));
 
-@connect((state) => ({displayComponent: state.general.displayComponent}))
+@connect((state) => ({ displayComponent: state.general.displayComponent }))
 class MainComponentSwitch extends React.Component {
   render() {
     // console.log("MainComponentSwitch running (should be infrequent!)", this.props.displayComponent)
     switch (this.props.displayComponent) {
       case "main":
         return (
-          <Suspense fallback={<Spinner/>}>
-            <Main/>
+          <Suspense fallback={<Spinner />}>
+            <Main />
           </Suspense>
         );
       case "splash":
         return (
           <Suspense fallback={null}>
-            <Splash/>
+            <Splash />
           </Suspense>
         );
       case "status":
         return (
-          <Suspense fallback={<Spinner/>}>
-            <Status/>
+          <Suspense fallback={<Spinner />}>
+            <Status />
           </Suspense>
         );
       case "datasetLoader":
-        return (<DatasetLoader/>);
+        return <DatasetLoader />;
       default:
-        console.error(`reduxStore.general.displayComponent is invalid (${this.props.displayComponent})`);
-        return (<Splash/>);
+        console.error(
+          `reduxStore.general.displayComponent is invalid (${this.props.displayComponent})`
+        );
+        return <Splash />;
     }
   }
 }
@@ -46,12 +48,12 @@ class MainComponentSwitch extends React.Component {
 const Root = () => {
   return (
     <div>
-      <Head/>
-      <Monitor/>
+      <Head />
+      <Monitor />
       <Suspense fallback={null}>
-        <Notifications/>
+        <Notifications />
       </Suspense>
-      <MainComponentSwitch/>
+      <MainComponentSwitch />
     </div>
   );
 };

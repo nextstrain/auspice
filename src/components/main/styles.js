@@ -1,4 +1,4 @@
-import styled from 'styled-components';
+import styled from "styled-components";
 import { hasExtension, getExtension } from "../../util/extensions";
 
 export const PanelsContainer = styled.div`
@@ -8,11 +8,11 @@ export const PanelsContainer = styled.div`
   right: 0;
   transition: left 0.3s ease-out;
   background-color: #fff;
-  height: ${(props) => props.height+"px"};
-  width: ${(props) => props.width+"px"};
+  height: ${(props) => props.height + "px"};
+  width: ${(props) => props.width + "px"};
   overflow-x: hidden;
   overflow-y: scroll;
-  left: ${(props) => props.left+"px"};
+  left: ${(props) => props.left + "px"};
 `;
 
 export const SidebarContainer = styled.div`
@@ -21,17 +21,16 @@ export const SidebarContainer = styled.div`
   bottom: 0;
   right: 0;
   transition: left 0.3s ease-out;
-  left: ${(props) => props.left+"px"};
+  left: ${(props) => props.left + "px"};
   background-color: ${(props) => props.theme.background};
-  height: ${(props) => props.height+"px"};
-  width: ${(props) => props.width+"px"};
-  max-width: ${(props) => props.width+"px"};
+  height: ${(props) => props.height + "px"};
+  width: ${(props) => props.width + "px"};
+  max-width: ${(props) => props.width + "px"};
   overflow-y: auto;
   overflow-x: hidden;
   box-shadow: -3px 0px 3px -3px ${(props) => props.theme.sidebarBoxShadow} inset;
   font-family: ${(props) => props.theme["font-family"]};
 `;
-
 
 /* The sidebar theme is available to all styled components in the sidebar.
  */
@@ -48,4 +47,4 @@ let sidebarThemeExtensions = {};
 if (hasExtension("sidebarTheme")) {
   sidebarThemeExtensions = getExtension("sidebarTheme");
 }
-export const sidebarTheme = {...sidebarThemeDefaults, ...sidebarThemeExtensions};
+export const sidebarTheme = { ...sidebarThemeDefaults, ...sidebarThemeExtensions };

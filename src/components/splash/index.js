@@ -7,11 +7,10 @@ import { fetchJSON } from "../../util/serverInteraction";
 import { getServerAddress, controlsHiddenWidth } from "../../util/globals";
 import { changePage } from "../../actions/navigation";
 
-const SplashContent = hasExtension("splashComponent") ?
-  getExtension("splashComponent") :
-  DefaultSplashContent;
+const SplashContent = hasExtension("splashComponent")
+  ? getExtension("splashComponent")
+  : DefaultSplashContent;
 /* TODO: check that when compiling DefaultSplashContent isn't included if extension is defined */
-
 
 @connect((state) => ({
   errorMessage: state.general.errorMessage,
@@ -22,15 +21,15 @@ class Splash extends React.Component {
   constructor(props) {
     super(props);
     /* state is set via the returned JSON from the server (aka charon) in the fetch in CDM */
-    this.state = {available: {}, errorMessage: undefined};
+    this.state = { available: {}, errorMessage: undefined };
   }
   componentDidMount() {
     fetchJSON(`${getServerAddress()}/getAvailable?prefix=${this.props.reduxPathname}`)
       .then((json) => {
-        this.setState({available: json});
+        this.setState({ available: json });
       })
       .catch((err) => {
-        this.setState({errorMessage: "Error in getting available datasets"});
+        this.setState({ errorMessage: "Error in getting available datasets" });
         console.warn(err.message);
       });
   }

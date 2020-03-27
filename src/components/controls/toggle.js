@@ -1,5 +1,5 @@
 import React from "react";
-import styled from 'styled-components';
+import styled from "styled-components";
 import { SidebarSubtitle } from "./styles";
 
 const ToggleBackground = styled.label`
@@ -32,8 +32,8 @@ const Slider = styled.div`
     right: 0;
     bottom: 0;
     background-color: ${(props) => props.theme.unselectedBackground};
-    -webkit-transition: .4s;
-    transition: .4s;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
     border-radius: 12px;
   }
   &:before {
@@ -43,9 +43,9 @@ const Slider = styled.div`
     width: 15px;
     left: 4px;
     bottom: 3px;
-    background-color: #FFF;
-    -webkit-transition: .4s;
-    transition: .4s;
+    background-color: #fff;
+    -webkit-transition: 0.4s;
+    transition: 0.4s;
     border-radius: 50%;
   }
   input:checked + &:before {
@@ -57,30 +57,25 @@ const Slider = styled.div`
 
 const Input = styled.input`
   & {
-    margin-left: "40px"
+    margin-left: "40px";
   }
   &:checked + ${Slider} {
     background-color: ${(props) => props.theme.selectedColor};
   }
   &:focus {
-    box-shadow: 0 0 1px #2196F3;
+    box-shadow: 0 0 1px #2196f3;
   }
 `;
 
-
-const Toggle = ({display, on, callback, label, style={}}) => {
+const Toggle = ({ display, on, callback, label, style = {} }) => {
   if (!display) return null;
 
   return (
     <div style={style}>
       <ToggleBackground>
-        <Input type="checkbox" checked={on} onChange={callback}/>
-        <Slider/>
-        {label === "" ? null : (
-          <ToggleSubtitle>
-            {label}
-          </ToggleSubtitle>
-        )}
+        <Input type="checkbox" checked={on} onChange={callback} />
+        <Slider />
+        {label === "" ? null : <ToggleSubtitle>{label}</ToggleSubtitle>}
       </ToggleBackground>
     </div>
   );
