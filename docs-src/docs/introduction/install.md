@@ -17,7 +17,7 @@ You can also use the Windows Subsystem Linux for a fuller Linux environment.
 ## Create a Conda Environment
 ```bash
 conda create --name auspice nodejs=10
-source activate auspice
+conda activate auspice
 ```
 
 > This parallels [the Nextstrain installation docs](https://nextstrain.org/docs/getting-started/local-installation#install-augur--auspice-with-conda-recommended).
