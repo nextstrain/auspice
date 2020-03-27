@@ -42,10 +42,13 @@ const Byline = ({width, metadata}) => {
       <div width={width} style={styles.byline}>
         {renderAvatar(t, metadata)}
         {renderMaintainers(t, metadata)}
-        <span>
-          {" Enabled by data from "}
-          <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
-        </span>
+        {
+          metadata.buildUrl &&
+          <span>
+            {" Enabled by data from "}
+            <img src="https://www.gisaid.org/fileadmin/gisaid/img/schild.png" alt="gisaid-logo" width="65"/>
+          </span>
+        }
       </div>
     );
   }
