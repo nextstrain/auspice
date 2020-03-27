@@ -44,7 +44,7 @@
   "__Map panel__": "########################################",
   "Transmissions": "Übertragungen",
   "Geography": "Geographie",
-  "reset zoom": "reset zoom",
+  "reset zoom": "Zoom zurücksetzen",
   "Reset": "Zurücksetzen",
   "Play": "Abspielen",
   "Pause": "Pausieren",
@@ -77,7 +77,7 @@
   "Click outside this box to go back to the tree": "Außerhalb dieser Box klicken, um zum Baum zurückzugelangen",
   "Authors": "Autoren",
   "Title": "Titel",
-  "Journal": "Journal",
+  "Journal": "Zeitschrift",
 
 
   "__Frequencies panel__": "########################################",
