@@ -22,6 +22,7 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey, goColor, pauseColor } from "../../globalStyles";
+import "../../css/mapbox.css";
 
 /* global L */
 // L is global in scope and placed by leaflet()
@@ -490,6 +491,17 @@ class Map extends React.Component {
     if (!this.props.narrativeMode) {
       L.zoomControlButtons = L.control.zoom({position: "bottomright"}).addTo(map);
     }
+
+    const Wordmark = L.Control.extend({
+      onAdd: function onAdd() {
+        const wordmark = L.DomUtil.create('a', 'mapbox-wordmark');
+        wordmark.href = "http://mapbox.com/about/maps";
+        wordmark.target = "_blank";
+        return wordmark;
+      }
+    });
+    (new Wordmark({position: 'bottomleft'})).addTo(map);
+
 
     /* Set up leaflet events */
     map.on("moveend", this.respondToLeafletEvent.bind(this));
