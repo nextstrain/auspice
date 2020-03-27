@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.11.0 - 2020/03/27
+
+
 * You can now zoom out to the parent clade in the tree by clicking on the basal in-view branch.
 [See PR 1001](https://github.com/nextstrain/auspice/pull/1001)
 * Scroll gestures can now scroll the map. [See PR 1002](https://github.com/nextstrain/auspice/pull/1002)
