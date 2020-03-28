@@ -286,12 +286,12 @@ export const updateColorBy = function updateColorBy() {
   //    this.svg.select(`#${id}`).remove(); // remove an existing gradient for this node
    //   return;
  //   }
-    if (!this.svg.select(`#${id}`).empty()) { // there an existing gradient // update its colors
+  //  if (!this.svg.select(`#${id}`).empty()) { // there an existing gradient // update its colors
       // console.log("adjusting " + id + " " + d.parent.branchStroke + "=>" + d.branchStroke);
-      this.svg.select(`#${id}_begin`).attr("stop-color", d.parent.branchStroke);
-      this.svg.select(`#${id}_end`).attr("stop-color", d.branchStroke);
+  //    this.svg.select(`#${id}_begin`).attr("stop-color", d.parent.branchStroke);
+  //    this.svg.select(`#${id}_end`).attr("stop-color", d.branchStroke);
 
-    } else { // otherwise create a new gradient
+  //  } else { // otherwise create a new gradient
       //  console.log("new gradient " + id + " " + d.parent.branchStroke + "=>" + d.branchStroke);
       const linearGradient = this.svg.select("defs").append("linearGradient")
         .attr("id", id);
@@ -306,7 +306,7 @@ export const updateColorBy = function updateColorBy() {
         .attr("id", id + "_end")
         .attr("offset", "1")
         .attr("stop-color", d.branchStroke);
-    }
+   // }
   });
 };
 
