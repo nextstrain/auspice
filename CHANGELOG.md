@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.11.1 - 2020/03/28
+
+
 * Add Lithuanian translation
 * Fig bugs in translation strings which contained `:` or `.`
 * Fix syntax error in docs - [See PR 1010](https://github.com/nextstrain/auspice/pull/1010)
