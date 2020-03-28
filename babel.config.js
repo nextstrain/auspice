@@ -18,6 +18,7 @@ module.exports = function babelConfig(api) {
     "babel-plugin-styled-components",
     "babel-plugin-syntax-dynamic-import",
     "@babel/plugin-transform-runtime",
+    "lodash"
   ];
   if (api.env("development")) {
     if (process.env.BABEL_EXTENSION_PATH && !process.env.BABEL_EXTENSION_PATH.includes(__dirname)) {
