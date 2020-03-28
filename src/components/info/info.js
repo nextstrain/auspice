@@ -83,15 +83,16 @@ export const createSummary = (
 
   /* Number of genomes & their date range */
   if (branchLengthsToDisplay !== "divOnly") {
-    summary += t("Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.", {
+    summary += t("Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}", {
       x: nSelectedSamples,
       y: mainTreeNumTips,
       from: styliseDateRange(sampledDateRange[0]),
       to: styliseDateRange(sampledDateRange[1])
     });
   } else {
-    summary += t("Showing {{x}} of {{y}} genomes.", { x: nSelectedSamples, y: mainTreeNumTips });
+    summary += t("Showing {{x}} of {{y}} genomes", { x: nSelectedSamples, y: mainTreeNumTips });
   }
+  summary += ".";
 
   /* parse filters */
   const filterTextArr = [];
@@ -316,7 +317,7 @@ class Info extends React.Component {
           {this.renderTitle(styles)}
           <Byline styles={styles} width={this.props.width} metadata={this.props.metadata} />
           <div width={this.props.width} style={styles.n}>
-            {animating ? t("Animation in progress.") + " " : null}
+            {animating ? t("Animation in progress") + ". " : null}
             {this.props.selectedStrain
               ? this.selectedStrainButton(this.props.selectedStrain)
               : null}

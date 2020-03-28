@@ -2,12 +2,17 @@
 title: Changelog
 ---
 
+## version 2.11.1 - 2020/03/28
+
+
+* Add Lithuanian translation
+* Fig bugs in translation strings which contained `:` or `.`
+* Fix syntax error in docs - [See PR 1010](https://github.com/nextstrain/auspice/pull/1010)
+
 ## version 2.11.0 - 2020/03/27
-
-
 * You can now zoom out to the parent clade in the tree by clicking on the basal in-view branch.
 [See PR 1001](https://github.com/nextstrain/auspice/pull/1001)
-* Scroll gestures can now scroll the map. [See PR 1002](https://github.com/nextstrain/auspice/pull/1002)
+* Scroll gestures can now zoom the map. [See PR 1002](https://github.com/nextstrain/auspice/pull/1002)
 * Which panels are displayed by default can now be defined by the dataset JSON.
 [See PR 1006](https://github.com/nextstrain/auspice/pull/1006)
 * Mapbox attribution logo added to the map. [See PR 1003](https://github.com/nextstrain/auspice/pull/1003)

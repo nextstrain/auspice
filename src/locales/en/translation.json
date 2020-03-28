@@ -6,25 +6,25 @@
 
 
   "__Header//Info__": "########################################",
-  "Showing {{x}} of {{y}} genomes.": "Showing {{x}} of {{y}} genomes.",
-  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.": "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.",
+  "Showing {{x}} of {{y}} genomes": "Showing {{x}} of {{y}} genomes",
+  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}",
   "Comprising": "Comprising",
-  "Animation in progress.": "Animation in progress.",
+  "Animation in progress": "Animation in progress",
   "Filtered to": "Filtered to",
 
 
   "__Download Modal__": "########################################",
   "click outside this box to return to the app": "click outside this box to return to the app",
   "last updated": "last updated",
-  "A full list of sequence authors is available via the TSV files below.": "A full list of sequence authors is available via the TSV files below.",
+  "A full list of sequence authors is available via the TSV files below": "A full list of sequence authors is available via the TSV files below",
   "Data usage policy": "Data usage policy",
-  "Please cite the authors who contributed genomic data (where relevant), as well as:": "Please cite the authors who contributed genomic data (where relevant), as well as:",
+  "Please cite the authors who contributed genomic data (where relevant), as well as": "Please cite the authors who contributed genomic data (where relevant), as well as",
   "Download data": "Download data",
   "Data usage part 1": "The data presented here is intended to rapidly disseminate analysis of important pathogens. Unpublished data is included with permission of the data generators, and does not impact their right to publish. ",
   "Data usage part 2": "Please contact the respective authors (available via the TSV files below) if you intend to carry out further research using their data. Derived data, such as phylogenies, can be downloaded below - please contact the relevant authors where appropriate.",
 
   "__Entropy Panel__": "########################################",
-  "Diversity": "",
+  "Diversity": "Diversity",
   "entropy": "entropy",
   "events": "events",
   "Codon {{codon}} in protein {{protein}}": "Codon {{codon}} in protein {{protein}}",

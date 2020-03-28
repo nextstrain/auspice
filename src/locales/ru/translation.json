@@ -6,19 +6,19 @@
 
 
   "__Header//Info__": "########################################",
-  "Showing {{x}} of {{y}} genomes.": "Показаны {{x}} из {{y}} геномов.",
-  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.": "Показаны {{x}} из {{y}} геномов собранных между {{from}} и {{to}}",
+  "Showing {{x}} of {{y}} genomes": "Показаны {{x}} из {{y}} геномов",
+  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "Показаны {{x}} из {{y}} геномов собранных между {{from}} и {{to}}",
   "Comprising": "содержащий",
-  "Animation in progress.": "Идет анимация.",
+  "Animation in progress": "Идет анимация",
   "Filtered to": "Фильтр по",
 
 
   "__Download Modal__": "########################################",
   "click outside this box to return to the app": "нажмите вне поля чтобы вернуться в приложение",
   "last updated": "последний раз обновлено",
-  "A full list of sequence authors is available via the TSV files below.": "Полный список авторов доступен в TSV файлах ниже.",
+  "A full list of sequence authors is available via the TSV files below": "Полный список авторов доступен в TSV файлах ниже",
   "Data usage policy": "Правила использования данных",
-  "Please cite the authors who contributed genomic data (where relevant), as well as:": "Пожалуйста, включайте авторов, которые предоставили генетические данные (где уместно), так же как и:",
+  "Please cite the authors who contributed genomic data (where relevant), as well as": "Пожалуйста, включайте авторов, которые предоставили генетические данные (где уместно), так же как и",
   "Download data": "Скачать данные",
   "Data usage part 1": "Данные, представленные здесь, предназначены для быстрого распространения анализа важных патогенов. Неопубликованные данные включены с разрешения создателей, что не влияет на их право публикации. ",
   "Data usage part 2": "Пожалуйста, свяжитесь с соответствующими авторами (список доступен в TSV файлах ниже), если вы собираетесь продолжать исследования используя их данные. Выводные данные, такие как филогенез, можно скачать ниже - пожалуйста, свяжитесь с авторами, если уместно.",
