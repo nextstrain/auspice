@@ -24,7 +24,7 @@
   "Data usage part 2": "Please contact the respective authors (available via the TSV files below) if you intend to carry out further research using their data. Derived data, such as phylogenies, can be downloaded below - please contact the relevant authors where appropriate.",
 
   "__Entropy Panel__": "########################################",
-  "Diversity": "",
+  "Diversity": "Diversity",
   "entropy": "entropy",
   "events": "events",
   "Codon {{codon}} in protein {{protein}}": "Codon {{codon}} in protein {{protein}}",
