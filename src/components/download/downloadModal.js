@@ -228,7 +228,7 @@ class DownloadModal extends React.Component {
             {this.createSummaryWrapper()}
           </div>
           <div style={infoPanelStyles.break}/>
-          {" " + t("A full list of sequence authors is available via the TSV files below.")}
+          {" " + t("A full list of sequence authors is available via the TSV files below")}
           <div style={infoPanelStyles.break}/>
           {getAcknowledgments({}, {preamble: {fontWeight: 300}, acknowledgments: {fontWeight: 300}})}
 
@@ -238,7 +238,7 @@ class DownloadModal extends React.Component {
           {t("Data usage part 1") + " " + t("Data usage part 2")}
 
           <div style={infoPanelStyles.modalSubheading}>
-            {t("Please cite the authors who contributed genomic data (where relevant), as well as:")}
+            {t("Please cite the authors who contributed genomic data (where relevant), as well as")+":"}
           </div>
           {this.formatPublications(this.getRelevantPublications())}
 

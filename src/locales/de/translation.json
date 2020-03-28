@@ -6,19 +6,19 @@
 
 
   "__Header//Info__": "########################################",
-  "Showing {{x}} of {{y}} genomes.": "{{x}} von {{y}} Genome werden angezeigt.",
-  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.": "{{x}} von {{y}} Genome werden angezeigt, die zwischen {{from}} und {{to}} entnommen wurden",
+  "Showing {{x}} of {{y}} genomes": "{{x}} von {{y}} Genome werden angezeigt",
+  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "{{x}} von {{y}} Genome werden angezeigt, die zwischen {{from}} und {{to}} entnommen wurden",
   "Comprising": "Bestehend aus",
-  "Animation in progress.": "Animation läuft",
+  "Animation in progress": "Animation läuft",
   "Filtered to": "Beschränkt auf",
 
 
   "__Download Modal__": "########################################",
   "click outside this box to return to the app": "Außerhalb dieser Box klicken, um zur Karte zurückzugelangen",
   "last updated": "zuletzt aktualisiert",
-  "A full list of sequence authors is available via the TSV files below.": "Eine vollständige Liste der Squenzautoren ist über die TSV-Dateien unten verfügbar.",
+  "A full list of sequence authors is available via the TSV files below": "Eine vollständige Liste der Squenzautoren ist über die TSV-Dateien unten verfügbar",
   "Data usage policy": "Datenschutzerklärung",
-  "Please cite the authors who contributed genomic data (where relevant), as well as:": "Bitte zitieren Sie die Autoren, welche zu genomische Daten beigetragen haben (wo zutreffend), sowie:",
+  "Please cite the authors who contributed genomic data (where relevant), as well as": "Bitte zitieren Sie die Autoren, welche zu genomische Daten beigetragen haben (wo zutreffend), sowie",
   "Download data": "Daten herunterladen",
   "Data usage part 1": "Die hier aufgezeigten Daten dienen dem Zweck, Analysen von wichtigen Krankheitserregern schnell zu verbreiten. Unveröffentliche Daten werden mit der Genehmigung der Datenquellen mit einbezogen. Dies hat keinen Einfluss auf ihr Recht, zu publizieren.",
   "Data usage part 2": "Bitte kontaktieren sie die entsprechenden Autoren (über die TSV Dateien unten einsehbar), wenn Sie vorhaben, weitere Untersuchungen mit den Daten durchzuführen. Abgeleitete Daten (z.B. Phylogenese), können unten heruntergeladen werden. Bitte kontaktieren Sie die entsprechenden Autoren, wo es angemessen ist.",

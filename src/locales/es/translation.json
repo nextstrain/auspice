@@ -6,19 +6,19 @@
 
 
   "__Header//Info__": "########################################",
-  "Showing {{x}} of {{y}} genomes.": "Visualizando {{x}} de los {{y}} genomas.",
-  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.": "Visualizando {{x}} de los {{y}} genomas aislados entre {{from}} y {{to}}",
+  "Showing {{x}} of {{y}} genomes": "Visualizando {{x}} de los {{y}} genomas",
+  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "Visualizando {{x}} de los {{y}} genomas aislados entre {{from}} y {{to}}",
   "Comprising": "Compuesto de",
-  "Animation in progress.": "Animación en proceso.",
+  "Animation in progress": "Animación en proceso",
   "Filtered to": "Resaltando",
 
 
   "__Download Modal__": "########################################",
   "click outside this box to return to the app": "Haz clic afuera de la casilla para regresar a la aplicación",
   "last updated": "Última actualización",
-  "A full list of sequence authors is available via the TSV files below.": "Una lista completa de los autores de las secuencias se encuentra abajo en el archivo TSV.",
+  "A full list of sequence authors is available via the TSV files below": "Una lista completa de los autores de las secuencias se encuentra abajo en el archivo TSV",
   "Data usage policy": "Política de uso de datos",
-  "Please cite the authors who contributed genomic data (where relevant), as well as:": "Por favor citar a los autores quienes contribuyeron datos genómicos, y además a:",
+  "Please cite the authors who contributed genomic data (where relevant), as well as": "Por favor citar a los autores quienes contribuyeron datos genómicos, y además a",
   "Download data": "Descarga los datos",
   "Data usage part 1": "El propósito de los datos presentados aquí es difundir rápidamente el análisis de patógenos importantes. Los datos no publicados fueron incluidos con el permiso de sus generadores y su inclusión en este análisis no afecta el derecho de los autores originales a publicarlos. ",
   "Data usage part 2": "Por favor contacta a los autores respectivos (cuya información se encuentra abajo en los archivos TSV) si tiene la intención de llevar a cabo más investigaciones utilizando sus datos. Los datos derivados, como las filogenias, se pueden descargar más abajo. Por favor póngase en contacto con los autores pertinentes cuando corresponda.",

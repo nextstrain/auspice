@@ -6,19 +6,19 @@
 
 
   "__Header//Info__": "########################################",
-  "Showing {{x}} of {{y}} genomes.": "Rodomi {{x}} iš {{y}} genomų.",
-  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}.": "Rodomi {{x}} iš {{y}} genomų surinktų tarp {{from}} ir {{to}}.",
+  "Showing {{x}} of {{y}} genomes": "Rodomi {{x}} iš {{y}} genomų",
+  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "Rodomi {{x}} iš {{y}} genomų surinktų tarp {{from}} ir {{to}}",
   "Comprising": "Sudaryti iš",
-  "Animation in progress.": "Rodoma animacija.",
+  "Animation in progress": "Rodoma animacija",
   "Filtered to": "Atrinkta",
 
 
   "__Download Modal__": "########################################",
   "click outside this box to return to the app": "Spauskite už šio lango ribos jei norite grįžti atgal į puslapį",
   "last updated": "paskutinį kartą atnaujinta",
-  "A full list of sequence authors is available via the TSV files below.": "Pilną sekų autorių sąrašą rasite TSV faile apačioje.",
+  "A full list of sequence authors is available via the TSV files below": "Pilną sekų autorių sąrašą rasite TSV faile apačioje",
   "Data usage policy": "Duomenų naudojimo taisyklės",
-  "Please cite the authors who contributed genomic data (where relevant), as well as:": "Prašome cituoti autorius prisidėjusius savo duomenimis (kur tikslinga) kartu su:",
+  "Please cite the authors who contributed genomic data (where relevant), as well as": "Prašome cituoti autorius prisidėjusius savo duomenimis (kur tikslinga) kartu su",
   "Download data": "Atsisiųsti duomenis",
   "Data usage part 1": "Duomenys rodomi čia skirti greitai platinti analizes apie svarbius patogenus. Nepublikuoti duomenys yra įtraukti su duomenų autorių leidimu ir nepaveikia jų teisės juos publikuoti. ",
   "Data usage part 2": "Prašome susisiekti su atitinkamais autoriais (jų sąrašą rasite TSV failuose apačioje) jei ketinate atlikti savo tyrimus naudodamiesi jų duomenimis. Išvestinius duomenis, tokius kaip filogenetinia medžiai, gali atsisiųsti apačioje - prašome susisiekti su atitinkamais autoriais jei reikia.",
