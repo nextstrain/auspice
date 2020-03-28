@@ -1,13 +1,13 @@
 {
   "__Header//Byline__": "########################################",
-  "Maintained by": "Entretenu par",
+  "Maintained by": "Maintenu par",
   "using data from": "utilisant des données de",
   "Built with": "Développé avec",
 
 
   "__Header//Info__": "########################################",
-  "Showing {{x}} of {{y}} genomes": "Visualisation {{x}} des {{y}} génomes",
-  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "Visualisation {{x}} des {{y}} génomes échantillonnés entre {{from}} et {{to}}",
+  "Showing {{x}} of {{y}} genomes": "Visualisation de {{x}} des {{y}} génomes",
+  "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "Visualisation de {{x}} des {{y}} génomes échantillonnés entre {{from}} et {{to}}",
   "Comprising": "Composé de",
   "Animation in progress": "Animation en cours",
   "Filtered to": "Soulignant",
