@@ -47,29 +47,34 @@ class Narrative extends React.Component {
       const idx = reactPageScrollerIdx-1;
       if (idx === this.props.blocks.length) {
         this.setState({showingEndOfNarrativePage: true});
-        return;
-      }
-
-      if (this.state.showingEndOfNarrativePage) {
-        this.setState({showingEndOfNarrativePage: false});
-      }
-
-      if (this.props.blocks[idx].mainDisplayMarkdown) {
-        this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
-          query: queryString.parse(this.props.blocks[idx].query),
-          queryToDisplay: {n: idx}
+        this.props.dispatch(changePage({
+          // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
+          changeDataset: false,
+          query: undefined,
+          queryToDisplay: {n: idx},
+          push: true
         }));
-        return;
+      } else {
+        if (this.state.showingEndOfNarrativePage) {
+          this.setState({showingEndOfNarrativePage: false});
+        }
+
+        if (this.props.blocks[idx].mainDisplayMarkdown) {
+          this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
+            query: queryString.parse(this.props.blocks[idx].query),
+            queryToDisplay: {n: idx}
+          }));
+          return;
+        }
+
+        this.props.dispatch(changePage({
+          // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
+          changeDataset: false,
+          query: queryString.parse(this.props.blocks[idx].query),
+          queryToDisplay: {n: idx},
+          push: true
+        }));
       }
-
-      this.props.dispatch(changePage({
-        // path: this.props.blocks[blockIdx].dataset, // not yet implemented properly
-        changeDataset: false,
-        query: queryString.parse(this.props.blocks[idx].query),
-        queryToDisplay: {n: idx},
-        push: true
-      }));
-
     };
     this.goToNextSlide = () => {
       if (this.state.showingEndOfNarrativePage) return; // no-op
@@ -120,20 +125,28 @@ class Narrative extends React.Component {
     );
   }
   renderProgress() {
+    const ret = this.props.blocks.map((b, i) => {
+      const d = (!this.state.showingEndOfNarrativePage) &&
+            this.props.currentInFocusBlockIdx === i ?
+            "14px" : "6px";
+      return (<ProgressButton
+              key={i}
+              style={{width: d, height: d}}
+              onClick={() => this.reactPageScroller.goToPage(i)}
+              />);
+    });
+    const d = this.state.showingEndOfNarrativePage ? "14px" : "6px";
+    ret.push((<ProgressButton
+              key={this.props.blocks.length}
+              style={{width: d, height: d}}
+              onClick={() => this.reactPageScroller.goToPage(this.props.blocks.length)}
+              />));
+
     return (
       <ProgressBar style={{height: `${progressHeight}px`}}
         role="navigation"
       >
-        {this.props.blocks.map((b, i) => {
-          const d = (!this.state.showingEndOfNarrativePage) &&
-            this.props.currentInFocusBlockIdx === i ?
-            "14px" : "6px";
-          return (<ProgressButton
-            key={i}
-            style={{width: d, height: d}}
-            onClick={() => this.reactPageScroller.goToPage(i)}
-          />);
-        })}
+        {ret}
       </ProgressBar>
     );
   }
@@ -160,7 +173,7 @@ class Narrative extends React.Component {
       );
     });
     ret.push((
-      <EndOfNarrative key="EON" id="EndOfNarrative">
+      <EndOfNarrative key={this.props.blocks.length} id={`NarrativeBlock_${this.props.blocks.length}`}>
         <h1>END OF NARRATIVE</h1>
         <a style={{...linkStyles}}
           onClick={() => this.reactPageScroller.goToPage(0)}
