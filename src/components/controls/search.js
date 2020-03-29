@@ -37,7 +37,7 @@ const Container = styled.div`
 `;
 
 const InputContainer = styled.div`
-  width: 80%;
+  width: 100%;
   display: inline-block;
 `;
 
