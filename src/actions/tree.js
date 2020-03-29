@@ -6,6 +6,7 @@ import { updateFrequencyDataDebounced } from "./frequencies";
 import { calendarToNumeric } from "../util/dateHelpers";
 import { applyToChildren } from "../components/tree/phyloTree/helpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
+import {timerEnd, timerStart} from "../util/perf";
 
 
 export const applyInViewNodesToTree = (idx, tree) => {
@@ -156,6 +157,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
  * @param  {string|false} newMax optional
  * @return {null} side-effects: a single action
  */
+let timeout;
 export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = false}) => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
@@ -164,36 +166,49 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       dateMinNumeric: newMin ? calendarToNumeric(newMin) : controls.dateMinNumeric,
       dateMaxNumeric: newMax ? calendarToNumeric(newMax) : controls.dateMaxNumeric
     };
-    const data = calculateVisiblityAndBranchThickness(tree, controls, dates);
-    const dispatchObj = {
-      type: types.CHANGE_DATES_VISIBILITY_THICKNESS,
+    const changeDateAction = {
+      type: types.CHANGE_DATES_MIN_MAX,
       quickdraw,
       dateMin: newMin ? newMin : controls.dateMin,
       dateMax: newMax ? newMax : controls.dateMax,
       dateMinNumeric: dates.dateMinNumeric,
       dateMaxNumeric: dates.dateMaxNumeric,
-      visibility: data.visibility,
-      visibilityVersion: data.visibilityVersion,
-      branchThickness: data.branchThickness,
-      branchThicknessVersion: data.branchThicknessVersion,
-      idxOfInViewRootNode: tree.idxOfInViewRootNode,
-      stateCountAttrs: Object.keys(controls.filters)
     };
-    if (controls.showTreeToo) {
-      const dataToo = calculateVisiblityAndBranchThickness(treeToo, controls, dates);
-      dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility, dataToo.visibility);
-      dispatchObj.visibilityToo = dataToo.visibility;
-      dispatchObj.visibilityVersionToo = dataToo.visibilityVersion;
-      dispatchObj.branchThicknessToo = dataToo.branchThickness;
-      dispatchObj.branchThicknessVersionToo = dataToo.branchThicknessVersion;
-    }
+    dispatch(changeDateAction);
 
-    /* D I S P A T C H */
-    dispatch(dispatchObj);
-    updateEntropyVisibility(dispatch, getState);
-    if (frequencies.loaded) {
-      updateFrequencyDataDebounced(dispatch, getState);
-    }
+    clearTimeout(timeout)
+    timeout = setTimeout(() => {
+      const data = calculateVisiblityAndBranchThickness(tree, controls, dates);
+      const changeVisibilityThicknessAction = {
+        type: types.CHANGE_DATES_VISIBILITY_THICKNESS,
+        quickdraw,
+        dateMin: newMin ? newMin : controls.dateMin,
+        dateMax: newMax ? newMax : controls.dateMax,
+        dateMinNumeric: dates.dateMinNumeric,
+        dateMaxNumeric: dates.dateMaxNumeric,
+        visibility: data.visibility,
+        visibilityVersion: data.visibilityVersion,
+        branchThickness: data.branchThickness,
+        branchThicknessVersion: data.branchThicknessVersion,
+        idxOfInViewRootNode: tree.idxOfInViewRootNode,
+        stateCountAttrs: Object.keys(controls.filters)
+      };
+      if (controls.showTreeToo) {
+        const dataToo = calculateVisiblityAndBranchThickness(treeToo, controls, dates);
+        changeVisibilityThicknessAction.tangleTipLookup =
+          constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility, dataToo.visibility);
+        changeVisibilityThicknessAction.visibilityToo = dataToo.visibility;
+        changeVisibilityThicknessAction.visibilityVersionToo = dataToo.visibilityVersion;
+        changeVisibilityThicknessAction.branchThicknessToo = dataToo.branchThickness;
+        changeVisibilityThicknessAction.branchThicknessVersionToo = dataToo.branchThicknessVersion;
+      }
+      /* D I S P A T C H */
+      dispatch(changeVisibilityThicknessAction)
+      updateEntropyVisibility(dispatch, getState);
+      if (frequencies.loaded) {
+        updateFrequencyDataDebounced(dispatch, getState);
+      }
+    }, 150)
   };
 };
 

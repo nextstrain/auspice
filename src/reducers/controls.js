@@ -144,6 +144,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
         distanceMeasure: action.data,
         branchLengthsToDisplay: state.branchLengthsToDisplay
       });
+    case types.CHANGE_DATES_MIN_MAX:
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       const newDates = {quickdraw: action.quickdraw};
       if (action.dateMin) {
