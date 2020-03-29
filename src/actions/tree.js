@@ -176,8 +176,7 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
     };
     dispatch(changeDateAction);
 
-    clearTimeout(timeout)
-    timeout = setTimeout(() => {
+    const changeVisibilityAndThickness = () => {
       const data = calculateVisiblityAndBranchThickness(tree, controls, dates);
       const changeVisibilityThicknessAction = {
         type: types.CHANGE_DATES_VISIBILITY_THICKNESS,
@@ -208,7 +207,16 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
       if (frequencies.loaded) {
         updateFrequencyDataDebounced(dispatch, getState);
       }
-    }, 150)
+    }
+
+    clearTimeout(timeout)
+    // Quickdraw also means debounce in this context, but better change it.
+    // TODO: Refactor to two seperate variables for quickdraw and debounce
+    if (quickdraw) {
+      timeout = setTimeout(() => changeVisibilityAndThickness(), 100)
+    } else {
+      changeVisibilityAndThickness()
+    }
   };
 };
 
