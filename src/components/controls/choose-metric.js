@@ -55,7 +55,7 @@ class ChooseMetric extends React.Component {
                 display={this.props.temporalConfidence.display}
                 on={this.props.temporalConfidence.on}
                 callback={() => this.props.dispatch(toggleTemporalConfidence())}
-                label={t("Show confidence intervals")}
+                label={t("sidebar:Show confidence intervals")}
               />
             </div>
           )
