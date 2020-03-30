@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.11.2 - 2020/03/30
+
+
 
 * Add French translation - [See PR 1020](https://github.com/nextstrain/auspice/pull/1020)
 * Improve rendering of long strain names in strain search - [See PR 1026](https://github.com/nextstrain/auspice/pull/1026)
