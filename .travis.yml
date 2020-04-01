@@ -1,6 +1,6 @@
 language: node_js
 sudo: false
-distro: bionic
+dist: bionic
 node_js:
 - '10'
 - '12'
