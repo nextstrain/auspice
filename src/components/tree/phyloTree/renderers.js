@@ -191,7 +191,10 @@ export const drawBranches = function drawBranches() {
 
   /* PART 2a: Create linear gradient definitions which can be applied to branch stems for which
   the start & end stroke colour is different */
- 
+  if (!this.groups.branchGradientDefs) {
+    this.groups.branchGradientDefs = this.svg.append("defs");
+  }
+  this.groups.branchGradientDefs.selectAll("*").remove();
   // TODO -- explore if duplicate <def> elements (e.g. same colours on each end) slow things down
   this.updateColorBy();
   /* PART 2b: Draw the stems */
@@ -273,25 +276,21 @@ export const clearSVG = function clearSVG() {
 
 
 export const updateColorBy = function updateColorBy() {
-   if (!this.groups.branchGradientDefs) {
-    this.groups.branchGradientDefs = this.svg.append("defs");
-  }
-  this.groups.branchGradientDefs.selectAll("*").remove();
   // console.log("updating colorBy")
   this.nodes.forEach((d) => {
-    //const a = d.parent.branchStroke;
-    //const b = d.branchStroke;
+    const a = d.parent.branchStroke;
+    const b = d.branchStroke;
     const id = `T${this.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
-   // if (a === b) { // not a gradient // color can be computed from d alone
-  //    this.svg.select(`#${id}`).remove(); // remove an existing gradient for this node
-   //   return;
- //   }
-  //  if (!this.svg.select(`#${id}`).empty()) { // there an existing gradient // update its colors
+    if (a === b) { // not a gradient // color can be computed from d alone
+      this.svg.select(`#${id}`).remove(); // remove an existing gradient for this node
+      return;
+    }
+    if (!this.svg.select(`#${id}`).empty()) { // there an existing gradient // update its colors
       // console.log("adjusting " + id + " " + d.parent.branchStroke + "=>" + d.branchStroke);
-  //    this.svg.select(`#${id}_begin`).attr("stop-color", d.parent.branchStroke);
-  //    this.svg.select(`#${id}_end`).attr("stop-color", d.branchStroke);
+      this.svg.select(`#${id}_begin`).attr("stop-color", d.parent.branchStroke);
+      this.svg.select(`#${id}_end`).attr("stop-color", d.branchStroke);
 
-  //  } else { // otherwise create a new gradient
+    } else { // otherwise create a new gradient
       //  console.log("new gradient " + id + " " + d.parent.branchStroke + "=>" + d.branchStroke);
       const linearGradient = this.svg.select("defs").append("linearGradient")
         .attr("id", id);
@@ -306,7 +305,7 @@ export const updateColorBy = function updateColorBy() {
         .attr("id", id + "_end")
         .attr("offset", "1")
         .attr("stop-color", d.branchStroke);
-   // }
+    }
   });
 };
 
