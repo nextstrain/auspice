@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.11.3 - 2020/04/02
+
+
 * Add Portuguese translation. [See PR 1017](https://github.com/nextstrain/auspice/pull/1017)
 * Fig bug where some branches would not display on certain browsers. [See PR 1022](https://github.com/nextstrain/auspice/pull/1022)
 * Fix bug with selected dates shown when no genomes were selected. [See PR 1011](https://github.com/nextstrain/auspice/pull/1011)
