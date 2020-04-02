@@ -2,10 +2,17 @@
 title: Changelog
 ---
 
+## version 2.11.3 - 2020/04/02
+
+
+* Add Portuguese translation. [See PR 1017](https://github.com/nextstrain/auspice/pull/1017)
+* Fig bug where some branches would not display on certain browsers. [See PR 1022](https://github.com/nextstrain/auspice/pull/1022)
+* Fix bug with selected dates shown when no genomes were selected. [See PR 1011](https://github.com/nextstrain/auspice/pull/1011)
+* Show `--includeTiming` argument when viewing help (`--help`).
+* Add second node version to TravisCI.  [See PR 1023](https://github.com/nextstrain/auspice/pull/1023)
+* Fix docs typo. [See PR 1027](https://github.com/nextstrain/auspice/pull/1027)
+
 ## version 2.11.2 - 2020/03/30
-
-
-
 * Add French translation - [See PR 1020](https://github.com/nextstrain/auspice/pull/1020)
 * Improve rendering of long strain names in strain search - [See PR 1026](https://github.com/nextstrain/auspice/pull/1026)
 * Lithuanian translation fixes

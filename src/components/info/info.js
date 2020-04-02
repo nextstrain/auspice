@@ -82,13 +82,16 @@ export const createSummary = (
   let summary = ""; /* text returned from this function */
 
   /* Number of genomes & their date range */
-  if (branchLengthsToDisplay !== "divOnly") {
-    summary += t("Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}", {
-      x: nSelectedSamples,
-      y: mainTreeNumTips,
-      from: styliseDateRange(sampledDateRange[0]),
-      to: styliseDateRange(sampledDateRange[1])
-    });
+  if (branchLengthsToDisplay !== "divOnly" && nSelectedSamples > 0) {
+    summary += t(
+      "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}",
+      {
+        x: nSelectedSamples,
+        y: mainTreeNumTips,
+        from: styliseDateRange(sampledDateRange[0]),
+        to: styliseDateRange(sampledDateRange[1])
+      }
+    );
   } else {
     summary += t("Showing {{x}} of {{y}} genomes", { x: nSelectedSamples, y: mainTreeNumTips });
   }
