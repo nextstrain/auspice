@@ -16,10 +16,10 @@ const addParser = (parser) => {
   subparser.addArgument('--extend', {action: "store", metavar: "JSON", help: "Build-time customisations to be applied. See documentation for more details."});
   const testing = subparser.addArgumentGroup({title: "Testing options"});
   testing.addArgument('--analyzeBundle', {action: "storeTrue", help: "Load an interactive bundle analyzer tool to investigate the composition of produced bundles / chunks."});
+  testing.addArgument('--includeTiming', {action: "storeTrue", help: "Do not strip timing functions. With these included the browser console will print timing measurements for a number of functions."});
 
   /* there are some options which we deliberately do not document via `--help` */
   /* timing options can be left in -- these are hardcoded in the source code and (normally) removed at build-time. Keeping these is useful for profiling performance. */
-  subparser.addArgument('--includeTiming', {action: "storeTrue", help: SUPPRESS});
   /* serverless or "static site production" functionality is for a future release (auspice v3 ?!?) */
   subparser.addArgument('--serverless', {action: "storeTrue", help: SUPPRESS});
 };
