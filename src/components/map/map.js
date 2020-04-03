@@ -524,20 +524,20 @@ class Map extends React.Component {
       padding: 12,
       border: "none",
       zIndex: 900,
-      position: "absolute",
+      position: "relative",
       textTransform: "uppercase"
     };
     if (this.props.branchLengthsToDisplay !== "divOnly") {
       return (
-        <div>
+        <div style={{position: "absolute"}}>
           <button
-            style={{...buttonBaseStyle, top: 20, left: 20, width: 60, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? pauseColor : goColor}}
+            style={{...buttonBaseStyle, top: 20, left: 20, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? pauseColor : goColor}}
             onClick={this.playPauseButtonClicked}
           >
             {this.props.t(this.props.animationPlayPauseButton)}
           </button>
           <button
-            style={{...buttonBaseStyle, top: 20, left: 88, width: 60, backgroundColor: lightGrey}}
+            style={{...buttonBaseStyle, top: 20, left: 30, backgroundColor: lightGrey}}
             onClick={this.resetButtonClicked}
           >
             {this.props.t("Reset")}
