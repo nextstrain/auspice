@@ -14,7 +14,7 @@ export const updateTipLabels = function updateTipLabels(dt) {
   const inViewTerminalNodes = this.nodes
     .filter((d) => d.terminal)
     .filter((d) => d.inView)
-    .filter((d) => d.visibility == NODE_VISIBLE);
+    .filter((d) => d.visibility === NODE_VISIBLE);
 
   // console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
   
