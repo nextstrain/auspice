@@ -13,8 +13,11 @@ export const updateTipLabels = function updateTipLabels(dt) {
   const yPad = this.params.tipLabelPadY;
   const inViewTerminalNodes = this.nodes
     .filter((d) => d.terminal)
-    .filter((d) => d.inView);
+    .filter((d) => d.inView)
+    .filter((d) => d.visibility == NODE_VISIBLE);
+
   // console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
+  
   if (inViewTerminalNodes.length < this.params.tipLabelBreakL1) {
 
     let fontSize = this.params.tipLabelFontSizeL1;
