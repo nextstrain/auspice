@@ -60,6 +60,9 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.c) {
     state["colorBy"] = query.c;
   }
+  if (query.ci) {
+    state["temporalConfidence"]["on"] = true;
+  }
   if (query.r) {
     state["geoResolution"] = query.r;
   }

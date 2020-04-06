@@ -52,6 +52,13 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.NEW_COLORS:
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
       break;
+    case types.TOGGLE_TEMPORAL_CONF:
+      if ("ci" in query) {
+        query.ci = undefined;
+      } else {
+        query.ci = true;
+      }
+      break;
     case types.APPLY_FILTER: {
       query[`f_${action.trait}`] = action.values.join(',');
       break;
