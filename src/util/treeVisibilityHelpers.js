@@ -7,9 +7,7 @@ export const getVisibleDateRange = (nodes, visibility) => nodes
   .filter((node, idx) => (visibility[idx] === NODE_VISIBLE && !node.hasChildren))
   .reduce((acc, node) => {
     const nodeDate = getTraitFromNode(node, "num_date");
-    if (nodeDate && nodeDate < acc[0]) return [nodeDate, acc[1]];
-    if (nodeDate && nodeDate > acc[1]) return [acc[0], nodeDate];
-    return acc;
+    return nodeDate ? [Math.min(nodeDate, acc[0]), Math.max(nodeDate, acc[1])] : acc;
   }, [100000, -100000]);
 
 export const strainNameToIdx = (nodes, name) => {
