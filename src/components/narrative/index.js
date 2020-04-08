@@ -211,11 +211,13 @@ class Narrative extends React.Component {
     );
   }
   componentWillUnmount() {
-    this.props.dispatch({
-      type: CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE,
-      pathname: this.props.blocks[this.props.currentInFocusBlockIdx].dataset,
-      query: queryString.parse(this.props.blocks[this.props.currentInFocusBlockIdx].url)
-    });
+    if (!this.state.showingEndOfNarrativePage) {
+      this.props.dispatch({
+        type: CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE,
+        pathname: this.props.blocks[this.props.currentInFocusBlockIdx].dataset,
+        query: queryString.parse(this.props.blocks[this.props.currentInFocusBlockIdx].url)
+      });
+    }
     Mousetrap.unbind(['left', 'right', 'up', 'down']);
   }
 }

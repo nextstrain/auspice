@@ -65,13 +65,7 @@ class MobileNarrativeDisplay extends React.Component {
     };
 
     this.goToNextPage = () => {
-      if (this.state.showingEndOfNarrativePage) return; // no-op
-
-      if (this.props.currentInFocusBlockIdx+1 === this.props.blocks.length) {
-        this.setState({showingEndOfNarrativePage: true});
-        return;
-      }
-
+      if (this.props.currentInFocusBlockIdx === this.props.blocks.length) return; // no-op
       this._goToPage(this.props.currentInFocusBlockIdx+1);
     };
 
@@ -80,7 +74,22 @@ class MobileNarrativeDisplay extends React.Component {
       this._goToPage(this.props.currentInFocusBlockIdx-1);
     };
 
+    this._goToEndOfNarrativePage = () => {
+      this.setState({showingEndOfNarrativePage: true});
+      this.props.dispatch(changePage({
+        changeDataset: false,
+        query: undefined,
+        queryToDisplay: {n: this.props.blocks.length},
+        push: true
+      }));
+    };
+
     this._goToPage = (idx) => {
+      if (idx === this.props.blocks.length) {
+        this._goToEndOfNarrativePage();
+        return;
+      }
+
       this.setState({ showingEndOfNarrativePage: false });
 
       // TODO: this `if` statement should be moved to the `changePage` function or similar
@@ -232,28 +241,33 @@ class MobileNarrativeDisplay extends React.Component {
   )
 
   renderProgress() {
+    const ret = this.props.blocks.map((b, i) => {
+      const d = (!this.state.showingEndOfNarrativePage) &&
+        this.props.currentInFocusBlockIdx === i ? "14px" : "6px";
+      return (<ProgressButton
+        key={i}
+        style={{width: d, height: d}}
+        onClick={() => this._goToPage(i)}
+      />);
+    });
+    const d = this.state.showingEndOfNarrativePage ? "14px" : "6px";
+    ret.push((<ProgressButton key={this.props.blocks.length}
+      style={{width: d, height: d}}
+      onClick={() => this._goToPage(this.props.blocks.length)}
+    />));
+
     return (
       <ProgressBar id="progress-bar"
         style={{height: `${progressHeight}px`}}
       >
-        {this.props.blocks.map((b, i) => {
-          const d = (!this.state.showingEndOfNarrativePage) &&
-            this.props.currentInFocusBlockIdx === i ?
-            "14px" : "6px";
-          return (
-            <ProgressButton
-              key={i}
-              style={{width: d, height: d}}
-              onClick={() => this._goToPage(i)}
-            />);
-        })}
+        {ret}
       </ProgressBar>
     );
   }
 
   render() {
 
-    if (this.state.showingEndOfNarrativePage) {
+    if (this.props.currentInFocusBlockIdx === this.props.blocks.length) {
       return this.renderEndOfNarrative();
 
     } else if (this.props.currentInFocusBlockIdx === 0) {
