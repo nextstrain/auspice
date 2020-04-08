@@ -62,7 +62,7 @@
   "AA mutations": "AA mutations",
   "protein mutations truncated": "protein mutations truncated",
   "Gaps": "Gaps",
-  "more": "more",
+  "{{x}} more": "{{x}} more",
   "No nucleotide mutations": "No nucleotide mutations",
   "No amino acid mutations": "No amino acid mutations",
   "Divergence": "Divergence",
