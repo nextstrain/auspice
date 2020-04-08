@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.12.0 - 2020/04/08
+
+
 * Add a legend to the map! [See PR 935](https://github.com/nextstrain/auspice/pull/935)
 * Improve the animation smoothness, especially for datasets with limited temporal range. [See PR 920](https://github.com/nextstrain/auspice/pull/920)
 * Add Japanese translation [See PR 1045](https://github.com/nextstrain/auspice/pull/1045)
