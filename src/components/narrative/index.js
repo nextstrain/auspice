@@ -127,20 +127,18 @@ class Narrative extends React.Component {
   renderProgress() {
     const ret = this.props.blocks.map((b, i) => {
       const d = (!this.state.showingEndOfNarrativePage) &&
-            this.props.currentInFocusBlockIdx === i ?
-            "14px" : "6px";
+            this.props.currentInFocusBlockIdx === i ? "14px" : "6px";
       return (<ProgressButton
-              key={i}
-              style={{width: d, height: d}}
-              onClick={() => this.reactPageScroller.goToPage(i)}
-              />);
+        key={i}
+        style={{width: d, height: d}}
+        onClick={() => this.reactPageScroller.goToPage(i)}
+      />);
     });
     const d = this.state.showingEndOfNarrativePage ? "14px" : "6px";
-    ret.push((<ProgressButton
-              key={this.props.blocks.length}
-              style={{width: d, height: d}}
-              onClick={() => this.reactPageScroller.goToPage(this.props.blocks.length)}
-              />));
+    ret.push((<ProgressButton key={this.props.blocks.length}
+      style={{width: d, height: d}}
+      onClick={() => this.reactPageScroller.goToPage(this.props.blocks.length)}
+    />));
 
     return (
       <ProgressBar style={{height: `${progressHeight}px`}}
