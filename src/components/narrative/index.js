@@ -102,17 +102,18 @@ class Narrative extends React.Component {
       position: "absolute",
       cursor: "pointer",
       left: `${this.props.width/2 - width/2}px`,
-      fontSize: `${width/2}px`,
+      fontSize: `${width}px`
     };
     if (pointUp) style.top = narrativeNavBarHeight + progressHeight;
+    if (!pointUp) style.bottom = "5px";
     else style.bottom = 0;
-    const iconClass = pointUp ? "fa fa-chevron-up fa-2x" : "fa fa-chevron-down fa-2x";
+    const iconClass = pointUp ? "fa fa-chevron-up" : "fa fa-chevron-down";
     return (
       <div id={`hand${pointUp?"Up":"Down"}`}
         style={style}
         onClick={pointUp ? this.goToPreviousSlide : this.goToNextSlide}
       >
-        <i className={iconClass}></i>
+        <i className={iconClass} />
       </div>
     );
   }
