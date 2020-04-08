@@ -643,7 +643,7 @@ class Map extends React.Component {
     return (
       <Card center title={transmissionsExist ? "Transmissions" : "Geography"}>
         {this.props.legend && <ErrorBoundary>
-          <Legend right width={this.props.width} for="map" />
+          <Legend right width={this.props.width} />
         </ErrorBoundary>}
         {this.maybeCreateMapDiv()}
         {this.props.narrativeMode ? null : (

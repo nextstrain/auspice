@@ -126,7 +126,7 @@ class Tree extends React.Component {
     return (
       <Card center title={"Phylogeny"}>
         <ErrorBoundary>
-          <Legend width={this.props.width} for="tree"/>
+          <Legend width={this.props.width}/>
         </ErrorBoundary>
         <HoverInfoPanel
           hovered={this.state.hovered}

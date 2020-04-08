@@ -16,12 +16,12 @@ const svg = {
   userSelect: "none"
 };
 
-@connect((state, props) => {
+@connect((state) => {
   return {
     colorBy: state.controls.colorBy,
     colorings: state.metadata.colorings,
     colorScale: state.controls.colorScale,
-    legendOpen: props.for === "tree" ? state.controls.treeLegendOpen : state.controls.mapLegendOpen
+    legendOpen: state.controls.legendOpen
   };
 })
 class Legend extends React.Component {
@@ -85,7 +85,7 @@ class Legend extends React.Component {
   }
 
   toggleLegend() {
-    this.props.dispatch({type: TOGGLE_LEGEND, value: !this.props.legendOpen, for: this.props.for || "tree"});
+    this.props.dispatch({type: TOGGLE_LEGEND, value: !this.props.legendOpen});
   }
 
   /*
