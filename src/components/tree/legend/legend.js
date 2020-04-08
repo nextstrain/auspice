@@ -8,6 +8,13 @@ import { numericToCalendar } from "../../../util/dateHelpers";
 import { isColorByGenotype, decodeColorByGenotype } from "../../../util/getGenotype";
 import { TOGGLE_LEGEND } from "../../../actions/types";
 
+const svg = {
+  position: "absolute",
+  top: 26,
+  borderRadius: 4,
+  zIndex: 1000,
+  userSelect: "none"
+};
 
 @connect((state) => {
   return {
@@ -69,9 +76,14 @@ class Legend extends React.Component {
     return this.props.colorings[this.props.colorBy] === undefined ?
       "" : this.props.colorings[this.props.colorBy].title;
   }
+
   getTitleWidth() {
+    // This is a hack because we can't use getBBox in React.
+    // Lots of work to get measured width of DOM element.
+    // Works fine, but will need adjusting if title font is changed.
     return 15 + 5.3 * this.getTitleString().length;
   }
+
   toggleLegend() {
     this.props.dispatch({type: TOGGLE_LEGEND, value: !this.props.legendOpen});
   }
@@ -85,7 +97,7 @@ class Legend extends React.Component {
       <g id="Title">
         <rect width={this.getTitleWidth()} height="12" fill="rgba(255,255,255,.85)"/>
         <text
-          x={5}
+          x={this.getTitleOffset()}
           y={10}
           style={{
             fontSize: 12,
@@ -106,10 +118,8 @@ class Legend extends React.Component {
    */
   legendChevron() {
     const degrees = this.showLegend() ? -180 : 0;
-    // This is a hack because we can't use getBBox in React.
-    // Lots of work to get measured width of DOM element.
-    // Works fine, but will need adjusting if title font is changed.
-    const offset = this.getTitleWidth();
+
+    const offset = this.getArrowOffset();
     return (
       <g id="Chevron" transform={`translate(${offset},0)`}>
         <svg width="12" height="12" viewBox="0 0 1792 1792">
@@ -187,32 +197,53 @@ class Legend extends React.Component {
 
   getStyles() {
     return {
-      svg: {
-        position: "absolute",
-        left: 5,
-        top: 26,
-        borderRadius: 4,
-        zIndex: 1000,
-        userSelect: "none"
+      svgLeft: {
+        ...svg,
+        left: 5
+      },
+      svgRight: {
+        ...svg,
+        right: 5
       }
     };
   }
+
+  getSVGStyle() {
+    const styles = this.getStyles();
+
+    if (this.props.right) { return styles.svgRight; }
+    return styles.svgLeft;
+  }
+
+  getArrowOffset() {
+    if (this.props.right) {
+      return this.getSVGWidth() - 20;
+    }
+    return this.getTitleWidth();
+  }
+
+  getTitleOffset() {
+    if (this.props.right) {
+      return this.getSVGWidth() - this.getTitleWidth() - 15;
+    }
+    return 5;
+  }
+
   render() {
     // catch the case where we try to render before anythings ready
     if (!this.props.colorScale) return null;
-    const styles = this.getStyles();
     return (
       <svg
         id="TreeLegendContainer"
         width={this.getSVGWidth()}
         height={this.getSVGHeight()}
-        style={styles.svg}
+        style={this.getSVGStyle()}
       >
         {this.legendItems()}
         <g
           id="TitleAndChevron"
           onClick={() => this.toggleLegend()}
-          style={{cursor: "pointer"}}
+          style={{cursor: "pointer", textAlign: "right" }}
         >
           {this.legendTitle()}
           {this.legendChevron()}
