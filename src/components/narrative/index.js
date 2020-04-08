@@ -152,7 +152,8 @@ class Narrative extends React.Component {
           style={{
             padding: "10px 20px",
             height: "inherit",
-            overflow: "hidden"
+            overflowX: "hidden",
+            overflowY: "auto"
           }}
           dangerouslySetInnerHTML={{__html}}
         />
