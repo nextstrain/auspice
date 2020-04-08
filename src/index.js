@@ -9,6 +9,7 @@ import { Provider } from "react-redux";
 /* A U S P I C E   I M P O R T S */
 import configureStore from "./store";
 import { initialiseGoogleAnalyticsIfRequired } from "./util/googleAnalytics";
+import Root from "./root";
 /* S T Y L E S H E E T S */
 import "font-awesome/css/font-awesome.css";
 import "leaflet/dist/leaflet.css";
@@ -35,7 +36,6 @@ initialiseGoogleAnalyticsIfRequired();
 /* Using React Hot Loader 4 https://github.com/gaearon/react-hot-loader */
 
 const renderApp = () => {
-  const Root = require("./root").default; // eslint-disable-line global-require
   ReactDOM.render(
     <Provider store={store}>
       <Root />
