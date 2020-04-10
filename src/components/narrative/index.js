@@ -16,6 +16,7 @@ import ReactPageScroller from "./ReactPageScroller";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 import { narrativeNavBarHeight } from "../../util/globals";
+import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;
@@ -107,13 +108,13 @@ class Narrative extends React.Component {
     if (pointUp) style.top = narrativeNavBarHeight + progressHeight;
     if (!pointUp) style.bottom = "5px";
     else style.bottom = 0;
-    const iconClass = pointUp ? "fa fa-chevron-up" : "fa fa-chevron-down";
+    const icon = pointUp ? <FaChevronUp /> : <FaChevronDown />;
     return (
       <div id={`hand${pointUp?"Up":"Down"}`}
         style={style}
         onClick={pointUp ? this.goToPreviousSlide : this.goToNextSlide}
       >
-        <i className={iconClass} />
+        {icon}
       </div>
     );
   }
