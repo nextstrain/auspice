@@ -60,7 +60,7 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.c) {
     state["colorBy"] = query.c;
   }
-  if (query.ci) {
+  if (query.ci !== undefined) {
     state["temporalConfidence"]["on"] = true;
   }
   if (query.r) {

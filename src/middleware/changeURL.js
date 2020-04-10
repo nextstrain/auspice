@@ -56,7 +56,8 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       if ("ci" in query) {
         query.ci = undefined;
       } else {
-        query.ci = true;
+        // We have to use null here to put "ci" in the query without an "=" after it and a value, i.e. to treat it as a boolean without having "=true"
+        query.ci = null;
       }
       break;
     case types.APPLY_FILTER: {
@@ -65,6 +66,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     }
     case types.CHANGE_LAYOUT: {
       query.l = action.data === state.controls.defaults.layout ? undefined : action.data;
+      if ( query.l !== "rect" ) {
+        query.ci = undefined;
+      }
       break;
     }
     case types.CHANGE_GEO_RESOLUTION: {
@@ -79,6 +83,9 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     // }
     case types.CHANGE_DISTANCE_MEASURE: {
       query.m = action.data === state.controls.defaults.distanceMeasure ? undefined : action.data;
+      if ( query.m == "div" ) {
+        query.ci = undefined;
+      }
       break;
     }
     case types.CHANGE_PANEL_LAYOUT: {
