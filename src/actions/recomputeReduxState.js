@@ -467,10 +467,14 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     if (state.layout !== "rect") {
       state.temporalConfidence.display = false;
       state.temporalConfidence.on = false;
+      delete query.ci; //rm ci from the query if it doesn't apply
     } else if (state.distanceMeasure === "div") {
       state.temporalConfidence.display = false;
       state.temporalConfidence.on = false;
+      delete query.ci; //rm ci from the query if it doesn't apply
     }
+  } else {
+    delete query.ci; //rm ci from the query if it doesn't exist
   }
 
   /* if colorBy is a genotype then we need to set mutType */
