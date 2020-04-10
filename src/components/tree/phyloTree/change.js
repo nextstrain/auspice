@@ -353,6 +353,9 @@ export const change = function change({
   if (newDistance) this.setDistance(newDistance);
   /* layout (must run after distance) */
   if (newDistance || newLayout || updateLayout) this.setLayout(newLayout || this.layout);
+  /* show confidences - set this param which actually adds the svg paths for
+     confidence intervals when mapToScreen() gets called below */
+  if (showConfidences) this.params.confidence = true;
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||
@@ -360,7 +363,8 @@ export const change = function change({
     newLayout ||
     updateLayout ||
     zoomIntoClade ||
-    svgHasChangedDimensions
+    svgHasChangedDimensions ||
+    showConfidences
   ) {
     this.mapToScreen();
   }
