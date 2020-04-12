@@ -197,7 +197,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesO
 
   /* write out information we've collected */
   // todo: filename for selected only
-  const filename = `${filePrefix}_metadata.tsv`;
+  const filename = `${filePrefix}${selectedNodesOnly ? "_selected_" : "_"}metadata.tsv`;
   write(filename, MIME.tsv, linesToWrite.join("\n"));
   dispatch(infoNotification({message: `Metadata exported to ${filename}`}));
 };
