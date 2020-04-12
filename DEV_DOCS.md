@@ -11,9 +11,15 @@ This project strictly adheres to the [Contributor Covenant Code of Conduct](http
 Please see the [project boards](https://github.com/orgs/nextstrain/projects) for currently available issues.
 
 ## Contributing code  
-[Please see the main auspice docs](https://nextstrain.github.io/auspice/introduction/install) for details on how to install and run auspice locally.
+Code contributions are welcomed! [Please see the main auspice docs](https://nextstrain.github.io/auspice/introduction/install) for details on how to install and run auspice from source. 
 
-For pull requests, please use [eslint](https://eslint.org/) as much as possible (via `npm run lint`).
+Please comment on an open issue if you are working on it.
+For changes unrelated to an open issue, please make an issue outlining what you would like to change/add.
+
+Please ensure there are no **linting** errors by running `npm run lint` (which uses [eslint](https://eslint.org/)).
+In the future we will make this a requirement for PRs or commits. 
+
+Where possible, **please rebase** your work onto master rather than merging changes from master into your PR.
 
 
 ## Contributing to Documentation

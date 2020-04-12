@@ -63,6 +63,7 @@ export const slowTransitionDuration = 1400; // in milliseconds
 export const animationWindowWidth = 0.075; // width of animation window relative to date slider
 export const minDistanceDateSlider = 0.075;
 export const animationTick = 50; // animation tick in milliseconds
+export const animationInterpolationDuration = 10; // how long d3 temporalWindow transitions last in milliseconds. Must be shorter than animationTick.
 export const HIColorDomain = genericDomain.map((d) => {
   return Math.round(100 * (d * 3.6)) / 100;
 });
