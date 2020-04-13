@@ -85,7 +85,7 @@ export const getDefaultControlsState = () => {
 };
 
 /* while this may change, div currently doesn't have CIs, so they shouldn't be displayed. */
-export const shouldDisplayTemporalConfidence = (exists, distMeasure, layout) => exists && distMeasure === "num_date" && layout == "rect";
+export const shouldDisplayTemporalConfidence = (exists, distMeasure, layout) => exists && distMeasure === "num_date" && layout === "rect";
 
 const Controls = (state = getDefaultControlsState(), action) => {
   switch (action.type) {

@@ -4,6 +4,7 @@ import { applyToChildren } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
+import { shouldDisplayTemporalConfidence } from "../../../reducers/controls";
 
 /* loop through the nodes and update each provided prop with the new value
  * additionally, set d.update -> whether or not the node props changed
@@ -182,7 +183,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   } else if (extras.showConfidences && !this.confidencesInSVG) {
     this.drawConfidence(); /* see comment above */
   } else if (elemsToUpdate.has(".conf") && this.confidencesInSVG) {
-    if (this.layout === "rect" && this.distance === "num_date") {
+    if (shouldDisplayTemporalConfidence(true, this.distance, this.layout)) {
       updateCall = createUpdateCall(".conf", svgPropsToUpdate);
       genericSelectAndModify(this.svg, ".conf", updateCall, transitionTime);
     } else {

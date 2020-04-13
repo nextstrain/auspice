@@ -5,7 +5,7 @@ import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions
 import { strainNameToIdx, getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { calcTipRadii } from "../util/tipRadiusHelpers";
-import { getDefaultControlsState } from "../reducers/controls";
+import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
@@ -463,18 +463,10 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
   }
 
   /* temporalConfidence */
-  if (state.temporalConfidence.exists) {
-    if (state.layout !== "rect") {
-      state.temporalConfidence.display = false;
-      state.temporalConfidence.on = false;
-      delete query.ci; //rm ci from the query if it doesn't apply
-    } else if (state.distanceMeasure === "div") {
-      state.temporalConfidence.display = false;
-      state.temporalConfidence.on = false;
-      delete query.ci; //rm ci from the query if it doesn't apply
-    }
-  } else {
-    delete query.ci; //rm ci from the query if it doesn't exist
+  if (!shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout)) {
+    state.temporalConfidence.display = false;
+    state.temporalConfidence.on = false;
+    delete query.ci; //rm ci from the query if it doesn't apply
   }
 
   /* if colorBy is a genotype then we need to set mutType */
