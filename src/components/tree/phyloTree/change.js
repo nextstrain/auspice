@@ -192,7 +192,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
 
   /* background temporal time slice */
   if (extras.timeSliceHasPotentiallyChanged) {
-    this.addTemporalSlice();
+    this.showTemporalSlice();
   }
 
   /* branch labels */
@@ -221,7 +221,7 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
     this.drawTips();
     this.updateTipLabels();
     if (this.vaccines) this.drawVaccines();
-    this.addTemporalSlice();
+    this.showTemporalSlice();
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
     if (elemsToUpdate.has(".branchLabel")) this.drawBranchLabels(this.params.branchLabelKey);
   };
@@ -243,7 +243,7 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
     .remove()
     .on("start", () => inProgress++)
     .on("end", step2);
-  this.removeTemporalSlice();
+  this.hideTemporalSlice();
   if (!transitionTimeFadeOut) timerFlush();
 };
 

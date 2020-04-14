@@ -22,6 +22,8 @@ import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 // import { incommingMapPNG } from "../download/helperFunctions";
 import { timerStart, timerEnd } from "../../util/perf";
 import { tabSingle, darkGrey, lightGrey, goColor, pauseColor } from "../../globalStyles";
+import ErrorBoundary from "../../util/errorBoundry";
+import Legend from "../tree/legend/legend";
 import "../../css/mapbox.css";
 
 /* global L */
@@ -524,20 +526,20 @@ class Map extends React.Component {
       padding: 12,
       border: "none",
       zIndex: 900,
-      position: "absolute",
+      position: "relative",
       textTransform: "uppercase"
     };
     if (this.props.branchLengthsToDisplay !== "divOnly") {
       return (
-        <div>
+        <div style={{position: "absolute"}}>
           <button
-            style={{...buttonBaseStyle, top: 20, left: 20, width: 60, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? pauseColor : goColor}}
+            style={{...buttonBaseStyle, top: 20, left: 20, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? pauseColor : goColor}}
             onClick={this.playPauseButtonClicked}
           >
             {this.props.t(this.props.animationPlayPauseButton)}
           </button>
           <button
-            style={{...buttonBaseStyle, top: 20, left: 88, width: 60, backgroundColor: lightGrey}}
+            style={{...buttonBaseStyle, top: 20, left: 30, backgroundColor: lightGrey}}
             onClick={this.resetButtonClicked}
           >
             {this.props.t("Reset")}
@@ -651,6 +653,9 @@ class Map extends React.Component {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
       <Card center title={transmissionsExist ? t("Transmissions") : t("Geography")}>
+        {this.props.legend && <ErrorBoundary>
+          <Legend right width={this.props.width} />
+        </ErrorBoundary>}
         {this.maybeCreateMapDiv()}
         {this.props.narrativeMode ? null : (
           <button

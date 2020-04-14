@@ -26,7 +26,7 @@ Similarly, nextstrain.org is a server which has handlers for these three API end
 
 See [the server API](server/api.md) for details about each of these requests.
 
-> Note that "/charon" can be changed to any address you wich by customising the client at build time.
+> Note that "/charon" can be changed to any address you wish by customising the client at build time.
 See [the client-cusomisation API](../customise-client/api) for more details.
 
 ## The "Default" Auspice Server

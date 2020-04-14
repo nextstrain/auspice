@@ -58,6 +58,7 @@ All URL queries modify the view away from the default settings -- if you change 
 | `r`        | Geographic resolution | `r=region` |
 | `m`        | Phylogeny x-axis measure | `m=div` |
 | `l`        | Phylogeny layout | `l=clock` |
+| `lang`     | Language | `lang=ja` (Japanese) |
 | `dmin`     | Temporal range (minimum) | `dmin=2008-05-13` |
 | `dmax`     | Temporal range (maximum) | `dmax=2010-05-13` |
 | `f_<name>` | Data filter. Multiple values per key are `,` separated. | `f_region=Oceania` |
