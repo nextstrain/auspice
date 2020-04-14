@@ -466,7 +466,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
   if (!shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout)) {
     state.temporalConfidence.display = false;
     state.temporalConfidence.on = false;
-    delete query.ci; //rm ci from the query if it doesn't apply
+    delete query.ci; // rm ci from the query if it doesn't apply
   }
 
   /* if colorBy is a genotype then we need to set mutType */

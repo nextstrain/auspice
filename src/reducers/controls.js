@@ -112,7 +112,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       });
     case types.CHANGE_BRANCH_LABEL:
       return Object.assign({}, state, {selectedBranchLabel: action.value});
-    case types.CHANGE_LAYOUT: 
+    case types.CHANGE_LAYOUT:
       return Object.assign({}, state, {
         layout: action.data,
         /* temporal confidence can only be displayed for rectangular trees */
