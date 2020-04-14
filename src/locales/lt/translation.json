@@ -62,7 +62,7 @@
   "AA mutations": "Amino rūgščių mutacijos",
   "protein mutations truncated": "baltymo mutacijos sutrumpintos",
   "Gaps": "Tarpai",
-  "more": "daugiau",
+  "{{x}} more": "{{x}} daugiau",
   "No nucleotide mutations": "Nėra nukelotidų mutacijų",
   "No amino acid mutations": "Nėra amino rūgščių mutacijų",
   "Divergence": "Skirtumas",

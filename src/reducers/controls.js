@@ -79,7 +79,8 @@ export const getDefaultControlsState = () => {
     zoomMax: undefined,
     branchLengthsToDisplay: "divAndDate",
     sidebarOpen: initialSidebarState.sidebarOpen,
-    legendOpen: undefined,
+    treeLegendOpen: undefined,
+    mapLegendOpen: undefined,
     showOnlyPanels: false
   };
 };

@@ -59,7 +59,7 @@
   "AA mutations": "Mutaciones de AA",
   "protein mutations truncated": "mutaciones proteicas truncadas",
   "Gaps": "Huecos",
-  "more": "mas",
+  "{{x}} more": "{{x}} mas",
   "No nucleotide mutations": "No mutaciones de nucleótidos",
   "No amino acid mutations": "No mutaciones de aminoácidos",
   "Divergence": "Divergencia",

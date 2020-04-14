@@ -28,14 +28,14 @@ const makeFrontMatterBlock = (frontMatter) => {
   }
   /* create markdown to represent the title page */
   const markdown = [];
-  markdown.push(`# ${frontMatter.title}`);
+  markdown.push(`## ${frontMatter.title}`);
   if (frontMatter.authors) {
     const authors = parseContributors(frontMatter, "authors", "authorLinks");
     if (authors) {
       markdown.push(`### Author: ${authors}`);
       if (frontMatter.affiliations && typeof frontMatter.affiliations === "string") {
         markdown[markdown.length-1] += " <sup> 1 </sup>";
-        markdown.push(`<sup> 1 </sup> ${frontMatter.affiliations}`);
+        markdown.push(`<sub><sup> 1 </sup> ${frontMatter.affiliations}</sub>`);
       }
     }
   }
@@ -45,14 +45,14 @@ const makeFrontMatterBlock = (frontMatter) => {
       markdown.push(`### Translators: ${translators}`);
     }
   }
+  if (frontMatter.abstract && typeof frontMatter.abstract === "string") {
+    markdown.push(`### ${frontMatter.abstract}`);
+  }
   if (frontMatter.date && typeof frontMatter.date === "string") {
-    markdown.push(`### Created: ${frontMatter.date}`);
+    markdown.push(`#### Created: ${frontMatter.date}`);
   }
   if (frontMatter.updated && typeof frontMatter.updated === "string") {
-    markdown.push(`### Updated: ${frontMatter.updated}`);
-  }
-  if (frontMatter.abstract && typeof frontMatter.abstract === "string") {
-    markdown.push(`#### ${frontMatter.abstract}`);
+    markdown.push(`#### Updated: ${frontMatter.updated}`);
   }
 
   const block = new Proxy({}, blockProxyHandler);
