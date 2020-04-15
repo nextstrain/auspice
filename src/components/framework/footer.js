@@ -171,7 +171,7 @@ export const getAcknowledgments = (metadata, dispatch) => {
       cleanDescription = sanitizer(rawDescription, sanitizerConfig);
     } catch (error) {
       console.error(`Error parsing footer description: ${error}`);
-      cleanDescription = (<h1>There was an error parsing the footer description.</h1>);
+      cleanDescription = '<p>There was an error parsing the footer description.</p>';
     }
 
     return (
