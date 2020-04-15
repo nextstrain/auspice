@@ -162,11 +162,9 @@ export const getAcknowledgments = (metadata, dispatch) => {
       KEEP_CONTENT: false,
       ALLOW_DATA_ATTR: false
     };
-    
-    
+
     let cleanDescription;
-    try 
-    {
+    try {
       const rawDescription = marked(metadata.description);
       cleanDescription = sanitizer(rawDescription, sanitizerConfig);
     } catch (error) {
