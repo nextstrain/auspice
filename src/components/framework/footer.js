@@ -162,8 +162,16 @@ export const getAcknowledgments = (metadata, dispatch) => {
       KEEP_CONTENT: false,
       ALLOW_DATA_ATTR: false
     };
-    const rawDescription = marked(metadata.description);
-    const cleanDescription = sanitizer(rawDescription, sanitizerConfig);
+
+    let cleanDescription;
+    try {
+      const rawDescription = marked(metadata.description);
+      cleanDescription = sanitizer(rawDescription, sanitizerConfig);
+    } catch (error) {
+      console.error(`Error parsing footer description: ${error}`);
+      cleanDescription = '<p>There was an error parsing the footer description.</p>';
+    }
+
     return (
       <div
         className='acknowledgments'
