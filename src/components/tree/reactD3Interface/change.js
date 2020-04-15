@@ -58,13 +58,9 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
 
 
   /* confidence intervals (on means in the SVG, display means shown in the sidebar)
-  This block used to include comparisons of oldProps to newProps
-  (see https://reactjs.org/docs/react-component.html#componentdidupdate for why it's good to do that)
-  but this was preventing the confidences from being added in some cases. This is probably because some intermediate
-  event set temporalConfidence.on or temporalConfidence.display to true without triggering the tree's
-  componentDidUpdate, and then when componentDidUpdate was triggered and this comparison was thereby made,
-  oldProps.temporalConfidence.on was already set to true, so confidences were not being added. Another way
-  to solve this would be to investigate that event and find out why it didn't trigger componentDidUpdate if it indeed was meant to. */
+  This block used to include comparisons of oldProps to newProps. See:
+  https://github.com/nextstrain/auspice/commit/0713e69b0707c92df806a575796e7205f08332ff
+  for an explanation of why it no longer does. */
   if (newProps.temporalConfidence.display === false) {
     args.removeConfidences = true;
   } else if (newProps.temporalConfidence.on === false) {
