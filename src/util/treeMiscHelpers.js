@@ -25,7 +25,7 @@ james hadfield, nov 2019.
  * NOTE: do not use this for "div", "vaccine" or other traits set on `node_attrs`
  * which don't share the same structure as traits. See the JSON spec for more details.
  */
-export const getTraitFromNode = (node, trait, {entropy=false, confidence=false}={}) => {
+export const getTraitFromNode = (node, trait, { entropy = false, confidence = false } = {}) => {
   if (!node.node_attrs) return undefined;
 
   if (!entropy && !confidence) {
@@ -60,9 +60,7 @@ export const getVaccineFromNode = (node) => {
 };
 
 export const getFullAuthorInfoFromNode = (node) =>
-  (node.node_attrs && node.node_attrs.author && node.node_attrs.author.value) ?
-    node.node_attrs.author :
-    undefined;
+  node.node_attrs && node.node_attrs.author && node.node_attrs.author.value ? node.node_attrs.author : undefined;
 
 export const getAccessionFromNode = (node) => {
   /* see comment at top of this file */
@@ -73,5 +71,4 @@ export const getAccessionFromNode = (node) => {
 };
 
 /* see comment at top of this file */
-export const getUrlFromNode = (node) =>
-  (node.node_attrs && node.node_attrs.url) ? node.node_attrs.url : undefined;
+export const getUrlFromNode = (node) => (node.node_attrs && node.node_attrs.url ? node.node_attrs.url : undefined);

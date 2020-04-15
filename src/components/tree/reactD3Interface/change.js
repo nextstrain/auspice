@@ -19,9 +19,11 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     newState.hovered = null;
   }
   /* colorBy change? */
-  if (!!newTreeRedux.nodeColorsVersion &&
-      (oldTreeRedux.nodeColorsVersion !== newTreeRedux.nodeColorsVersion ||
-      newProps.colorByConfidence !== oldProps.colorByConfidence)) {
+  if (
+    !!newTreeRedux.nodeColorsVersion &&
+    (oldTreeRedux.nodeColorsVersion !== newTreeRedux.nodeColorsVersion ||
+      newProps.colorByConfidence !== oldProps.colorByConfidence)
+  ) {
     args.changeColorBy = true;
     args.branchStroke = calcBranchStrokeCols(newTreeRedux, newProps.colorByConfidence, newProps.colorBy);
     args.tipStroke = newTreeRedux.nodeColors;
@@ -56,13 +58,16 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.newBranchLabellingKey = newProps.selectedBranchLabel;
   }
 
-
   /* confidence intervals (on means in the SVG, display means shown in the sidebar) */
   if (oldProps.temporalConfidence.display === true && newProps.temporalConfidence.display === false) {
     args.removeConfidences = true;
   } else if (oldProps.temporalConfidence.on === true && newProps.temporalConfidence.on === false) {
     args.removeConfidences = true;
-  } else if (newProps.temporalConfidence.display === true && oldProps.temporalConfidence.on === false && newProps.temporalConfidence.on === true) {
+  } else if (
+    newProps.temporalConfidence.display === true &&
+    oldProps.temporalConfidence.on === false &&
+    newProps.temporalConfidence.on === true
+  ) {
     args.showConfidences = true;
   }
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import styled, {withTheme} from 'styled-components';
+import styled, { withTheme } from "styled-components";
 import { withTranslation } from "react-i18next";
 import * as icons from "../framework/svg-icons";
 import { CHANGE_PANEL_LAYOUT } from "../../actions/types";
@@ -30,8 +30,8 @@ class PanelLayouts extends React.Component {
       return null;
     }
     return (
-      <div style={{marginTop: 0, marginBottom: 10}}>
-        <PanelsFullIcon width={22} selected={this.props.panelLayout === "full"}/>
+      <div style={{ marginTop: 0, marginBottom: 10 }}>
+        <PanelsFullIcon width={22} selected={this.props.panelLayout === "full"} />
         <SidebarButton
           selected={this.props.panelLayout === "full"}
           onClick={() => {
@@ -42,7 +42,7 @@ class PanelLayouts extends React.Component {
           <ButtonText>{t("sidebar:full")}</ButtonText>
         </SidebarButton>
 
-        <PanelsGridIcon width={22} selected={this.props.panelLayout === "grid"}/>
+        <PanelsGridIcon width={22} selected={this.props.panelLayout === "grid"} />
         <SidebarButton
           selected={this.props.panelLayout === "grid"}
           onClick={() => {
@@ -52,7 +52,6 @@ class PanelLayouts extends React.Component {
         >
           <ButtonText>{t("sidebar:grid")}</ButtonText>
         </SidebarButton>
-
       </div>
     );
   }

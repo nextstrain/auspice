@@ -4,14 +4,12 @@
   "using data from": "utilizando datos de",
   "Built with": "Desarrollado usando",
 
-
   "__Header//Info__": "########################################",
   "Showing {{x}} of {{y}} genomes": "Visualizando {{x}} de los {{y}} genomas",
   "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "Visualizando {{x}} de los {{y}} genomas aislados entre {{from}} y {{to}}",
   "Comprising": "Compuesto de",
   "Animation in progress": "Animación en proceso",
   "Filtered to": "Resaltando",
-
 
   "__Download Modal__": "########################################",
   "click outside this box to return to the app": "Haz clic afuera de la casilla para regresar a la aplicación",
@@ -34,7 +32,6 @@
   "Negative strand": "Cadena negativa",
   "Positive strand": "Cadena positiva",
   "Click to color tree & map": "Haga clic para colorear el árbol y el mapa",
-
 
   "__Footer__": "########################################",
   "Filter by {{filterTitle}}": "Filtra por {{filterTitle}}",

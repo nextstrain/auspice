@@ -1,7 +1,7 @@
-import React, {lazy, Suspense } from "react";
-import PropTypes from 'prop-types';
+import React, { lazy, Suspense } from "react";
+import PropTypes from "prop-types";
 import { connect } from "react-redux";
-import { ThemeProvider } from 'styled-components';
+import { ThemeProvider } from "styled-components";
 import SidebarToggle from "../framework/sidebar-toggle";
 import Info from "../info/info";
 import Tree from "../tree";
@@ -26,7 +26,6 @@ import MobileNarrativeDisplay from "../narrative/MobileNarrativeDisplay";
 const Entropy = lazy(() => import("../entropy"));
 const Frequencies = lazy(() => import("../frequencies"));
 
-
 @connect((state) => ({
   panelsToDisplay: state.controls.panelsToDisplay,
   panelLayout: state.controls.panelLayout,
@@ -48,9 +47,11 @@ class Main extends React.Component {
     as state here, but his has since ben moved to redux state. The mobile
     display should likewise be lifted to redux state */
     const mql = window.matchMedia(`(min-width: ${controlsHiddenWidth}px)`);
-    mql.addListener(() => this.setState({
-      mobileDisplay: !this.state.mql.matches
-    }));
+    mql.addListener(() =>
+      this.setState({
+        mobileDisplay: !this.state.mql.matches
+      })
+    );
     this.state = {
       mql,
       mobileDisplay: !mql.matches,
@@ -61,21 +62,31 @@ class Main extends React.Component {
   }
   static propTypes = {
     dispatch: PropTypes.func.isRequired
-  }
+  };
   componentWillReceiveProps(nextProps) {
     if (this.state.showSpinner && nextProps.metadataLoaded && nextProps.treeLoaded) {
-      this.setState({showSpinner: false});
+      this.setState({ showSpinner: false });
     }
   }
   componentDidMount() {
-    document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
-    document.addEventListener("drop", (e) => {
-      e.preventDefault();
-      return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
-    }, false);
+    document.addEventListener(
+      "dragover",
+      (e) => {
+        e.preventDefault();
+      },
+      false
+    );
+    document.addEventListener(
+      "drop",
+      (e) => {
+        e.preventDefault();
+        return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
+      },
+      false
+    );
   }
   toggleSidebar() {
-    this.props.dispatch({type: TOGGLE_SIDEBAR, value: !this.props.sidebarOpen});
+    this.props.dispatch({ type: TOGGLE_SIDEBAR, value: !this.props.sidebarOpen });
   }
 
   shouldShowMapLegend() {
@@ -87,7 +98,7 @@ class Main extends React.Component {
 
   render() {
     if (this.state.showSpinner) {
-      return (<Spinner/>);
+      return <Spinner />;
     }
 
     /* for mobile narratives we use a custom component as the nesting of view components is different */
@@ -95,9 +106,9 @@ class Main extends React.Component {
     if (this.state.mobileDisplay && this.props.displayNarrative) {
       return (
         <>
-          <AnimationController/>
+          <AnimationController />
           <ThemeProvider theme={sidebarTheme}>
-            <MobileNarrativeDisplay/>
+            <MobileNarrativeDisplay />
           </ThemeProvider>
         </>
       );
@@ -107,17 +118,28 @@ class Main extends React.Component {
      * (a) all non-narrative displays (including on mobile)
      * (b) narrative display for non-mobile (i.e. display side-by-side)
      */
-    const {availableWidth, availableHeight, sidebarWidth, overlayStyles} =
-      calcStyles(this.props.browserDimensions, this.props.displayNarrative, this.props.sidebarOpen, this.state.mobileDisplay);
-    const overlayHandler = () => {this.props.dispatch({type: TOGGLE_SIDEBAR, value: false});};
-    const {big, chart} =
-      calcPanelDims(this.props.panelLayout === "grid", this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);
+    const { availableWidth, availableHeight, sidebarWidth, overlayStyles } = calcStyles(
+      this.props.browserDimensions,
+      this.props.displayNarrative,
+      this.props.sidebarOpen,
+      this.state.mobileDisplay
+    );
+    const overlayHandler = () => {
+      this.props.dispatch({ type: TOGGLE_SIDEBAR, value: false });
+    };
+    const { big, chart } = calcPanelDims(
+      this.props.panelLayout === "grid",
+      this.props.panelsToDisplay,
+      this.props.displayNarrative,
+      availableWidth,
+      availableHeight
+    );
     return (
       <span>
-        <AnimationController/>
+        <AnimationController />
         <ErrorBoundary showNothing>
           <ThemeProvider theme={sidebarTheme}>
-            <DownloadModal/>
+            <DownloadModal />
           </ThemeProvider>
         </ErrorBoundary>
         <SidebarToggle
@@ -135,36 +157,47 @@ class Main extends React.Component {
           mobileDisplay={this.state.mobileDisplay}
           navBarHandler={this.toggleSidebar}
         />
-        <PanelsContainer width={availableWidth} height={availableHeight} left={this.props.sidebarOpen ? sidebarWidth : 0}>
-          {this.props.narrativeIsLoaded && !this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown") ?
-            renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative) : null
-          }
-          {this.props.displayNarrative || this.props.showOnlyPanels ? null : <Info width={calcUsableWidth(availableWidth, 1)} />}
+        <PanelsContainer
+          width={availableWidth}
+          height={availableHeight}
+          left={this.props.sidebarOpen ? sidebarWidth : 0}
+        >
+          {this.props.narrativeIsLoaded && !this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown")
+            ? renderNarrativeToggle(this.props.dispatch, this.props.displayNarrative)
+            : null}
+          {this.props.displayNarrative || this.props.showOnlyPanels ? null : (
+            <Info width={calcUsableWidth(availableWidth, 1)} />
+          )}
           {this.props.panelsToDisplay.includes("tree") ? <Tree width={big.width} height={big.height} /> : null}
-          {this.props.panelsToDisplay.includes("map") ? <Map width={big.width} height={big.height} justGotNewDatasetRenderNewMap={false} legend={this.shouldShowMapLegend()} /> : null}
-          {this.props.panelsToDisplay.includes("entropy") ?
-            (<Suspense fallback={null}>
+          {this.props.panelsToDisplay.includes("map") ? (
+            <Map
+              width={big.width}
+              height={big.height}
+              justGotNewDatasetRenderNewMap={false}
+              legend={this.shouldShowMapLegend()}
+            />
+          ) : null}
+          {this.props.panelsToDisplay.includes("entropy") ? (
+            <Suspense fallback={null}>
               <Entropy width={chart.width} height={chart.height} />
-            </Suspense>) :
-            null
-          }
-          {this.props.panelsToDisplay.includes("frequencies") && this.props.frequenciesLoaded ?
-            (<Suspense fallback={null}>
+            </Suspense>
+          ) : null}
+          {this.props.panelsToDisplay.includes("frequencies") && this.props.frequenciesLoaded ? (
+            <Suspense fallback={null}>
               <Frequencies width={chart.width} height={chart.height} />
-            </Suspense>) :
-            null
-          }
-          {this.props.displayNarrative|| this.props.showOnlyPanels ? null : <Footer width={calcUsableWidth(availableWidth, 1)} />}
-          {this.props.displayNarrative && this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown") ?
-            <MainDisplayMarkdown width={calcUsableWidth(availableWidth, 1)}/> :
-            null
-          }
+            </Suspense>
+          ) : null}
+          {this.props.displayNarrative || this.props.showOnlyPanels ? null : (
+            <Footer width={calcUsableWidth(availableWidth, 1)} />
+          )}
+          {this.props.displayNarrative && this.props.panelsToDisplay.includes("EXPERIMENTAL_MainDisplayMarkdown") ? (
+            <MainDisplayMarkdown width={calcUsableWidth(availableWidth, 1)} />
+          ) : null}
         </PanelsContainer>
         {/* overlay (used for mobile to open / close sidebar) */}
-        {this.state.mobileDisplay ?
-          <div style={overlayStyles} onClick={overlayHandler} onTouchStart={overlayHandler}/> :
-          null
-        }
+        {this.state.mobileDisplay ? (
+          <div style={overlayStyles} onClick={overlayHandler} onTouchStart={overlayHandler} />
+        ) : null}
       </span>
     );
   }

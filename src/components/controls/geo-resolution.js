@@ -16,9 +16,9 @@ import { SidebarSubtitle } from "./styles";
 })
 class GeoResolution extends React.Component {
   getGeoResolutionOptions() {
-    return this.props.metadata.loaded ?
-      this.props.metadata.geoResolutions.map((g) => ({value: g.key, label: g.title || g.key})) :
-      [];
+    return this.props.metadata.loaded
+      ? this.props.metadata.geoResolutions.map((g) => ({ value: g.key, label: g.title || g.key }))
+      : [];
   }
 
   changeGeoResolution(resolution) {
@@ -31,10 +31,8 @@ class GeoResolution extends React.Component {
     const geoResolutionOptions = this.getGeoResolutionOptions();
     return (
       <>
-        <SidebarSubtitle spaceAbove>
-          {t("sidebar:Geographic resolution")}
-        </SidebarSubtitle>
-        <div style={{marginBottom: 10, width: controlsWidth, fontSize: 14}}>
+        <SidebarSubtitle spaceAbove>{t("sidebar:Geographic resolution")}</SidebarSubtitle>
+        <div style={{ marginBottom: 10, width: controlsWidth, fontSize: 14 }}>
           <Select
             name="selectGeoResolution"
             id="selectGeoResolution"
@@ -43,7 +41,9 @@ class GeoResolution extends React.Component {
             clearable={false}
             searchable={false}
             multi={false}
-            onChange={(opt) => {this.changeGeoResolution(opt.value);}}
+            onChange={(opt) => {
+              this.changeGeoResolution(opt.value);
+            }}
           />
         </div>
       </>

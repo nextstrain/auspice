@@ -7,7 +7,7 @@ import { loggingMiddleware } from "../middleware/logActions"; // eslint-disable-
 const configureStore = (initialState) => {
   const middleware = [
     thunk,
-    changeURLMiddleware, // eslint-disable-line comma-dangle
+    changeURLMiddleware // eslint-disable-line comma-dangle
     // loggingMiddleware
   ];
   const composedEnhancers = compose(
@@ -15,10 +15,10 @@ const configureStore = (initialState) => {
     window.__REDUX_DEVTOOLS_EXTENSION__ ? window.__REDUX_DEVTOOLS_EXTENSION__() : (f) => f
   );
   const store = createStore(rootReducer, initialState, composedEnhancers);
-  if (process.env.NODE_ENV !== 'production' && module.hot) {
+  if (process.env.NODE_ENV !== "production" && module.hot) {
     // console.log("hot reducer reload"); // eslint-disable-line
-    module.hot.accept('../reducers', () => {
-      const nextRootReducer = require('../reducers/index');  // eslint-disable-line global-require
+    module.hot.accept("../reducers", () => {
+      const nextRootReducer = require("../reducers/index"); // eslint-disable-line global-require
       store.replaceReducer(nextRootReducer);
     });
   }

@@ -33,10 +33,7 @@ class ChooseDataset extends React.Component {
       return null;
     }
 
-    const displayedDatasetString = window.location.pathname
-      .replace(/^\//, '')
-      .replace(/\/$/, '')
-      .split(":")[0];
+    const displayedDatasetString = window.location.pathname.replace(/^\//, "").replace(/\/$/, "").split(":")[0];
     const displayedDataset = displayedDatasetString.split("/");
     const options = [[]];
 
@@ -47,8 +44,7 @@ class ChooseDataset extends React.Component {
       }
     });
 
-
-    for (let idx=1; idx<displayedDataset.length; idx++) {
+    for (let idx = 1; idx < displayedDataset.length; idx++) {
       /* going through the fields which comprise the current dataset
       in order to create available alternatives for each field */
       options[idx] = [];
@@ -76,7 +72,6 @@ class ChooseDataset extends React.Component {
         ))}
       </>
     );
-
   }
 }
 

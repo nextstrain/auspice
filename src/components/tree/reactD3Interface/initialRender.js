@@ -1,5 +1,5 @@
 import { select } from "d3-selection";
-import 'd3-transition';
+import "d3-transition";
 import { rgb } from "d3-color";
 import { calcBranchStrokeCols } from "../../../util/colorHelpers";
 import * as callbacks from "./callbacks";
@@ -16,16 +16,16 @@ export const renderTree = (that, main, phylotree, props) => {
     select(ref),
     props.layout,
     props.distanceMeasure,
-    { /* parameters (modifies PhyloTree's defaults) */
-      grid: true,
+    {
+      /* parameters (modifies PhyloTree's defaults) */ grid: true,
       confidence: props.temporalConfidence.display,
       branchLabelKey: props.selectedBranchLabel,
       orientation: main ? [1, 1] : [-1, 1],
       tipLabels: true,
       showTipLabels: true
     },
-    { /* callbacks */
-      onTipHover: callbacks.onTipHover.bind(that),
+    {
+      /* callbacks */ onTipHover: callbacks.onTipHover.bind(that),
       onTipClick: callbacks.onTipClick.bind(that),
       onBranchHover: callbacks.onBranchHover.bind(that),
       onBranchClick: callbacks.onBranchClick.bind(that),
@@ -33,14 +33,14 @@ export const renderTree = (that, main, phylotree, props) => {
       onTipLeave: callbacks.onTipLeave.bind(that),
       tipLabel: (d) => d.n.name
     },
-    treeState.branchThickness, /* guarenteed to be in redux by now */
+    treeState.branchThickness /* guarenteed to be in redux by now */,
     treeState.visibility,
-    props.temporalConfidence.on, /* drawConfidence? */
+    props.temporalConfidence.on /* drawConfidence? */,
     treeState.vaccines,
     calcBranchStrokeCols(treeState, props.colorByConfidence, props.colorBy),
     treeState.nodeColors,
     treeState.nodeColors.map((col) => rgb(col).brighter([0.65]).toString()),
-    treeState.tipRadii, /* might be null */
+    treeState.tipRadii /* might be null */,
     [props.dateMinNumeric, props.dateMaxNumeric]
   );
 };

@@ -23,12 +23,14 @@ import "./css/boxed.css";
 import "./css/select.css";
 
 /* FONTS */
-import 'typeface-lato'; // eslint-disable-line import/extensions
+import "typeface-lato"; // eslint-disable-line import/extensions
 
 const store = configureStore();
 
 /* set up non-redux state storage for the animation - use this conservitavely! */
-if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
+if (!window.NEXTSTRAIN) {
+  window.NEXTSTRAIN = {};
+}
 
 /* google analytics */
 initialiseGoogleAnalyticsIfRequired();
@@ -40,9 +42,8 @@ const renderApp = () => {
     <Provider store={store}>
       <Root />
     </Provider>,
-    document.getElementById('root')
+    document.getElementById("root")
   );
 };
 
 renderApp();
-

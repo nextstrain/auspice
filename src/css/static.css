@@ -1,10 +1,9 @@
-
 /* Variables - keep in sync with globalStyles.js*/
 :root {
   --darkGrey: #333;
   --medGrey: #888;
-  --lightGrey: #CCC;
-  --brandColor: #5097BA;
+  --lightGrey: #ccc;
+  --brandColor: #5097ba;
 }
 
 /* stop horizontal scroll bar appearing*/
@@ -30,7 +29,7 @@ the content, the padding and border, but not the margin.
 .static .line {
   margin-top: 20px;
   margin-bottom: 20px;
-  border-bottom: 1px solid #CCC;
+  border-bottom: 1px solid #ccc;
 }
 
 .static .main {
@@ -128,7 +127,7 @@ strong {
 }
 
 .static .clickable {
-  color: #5097BA;
+  color: #5097ba;
   text-decoration: none;
   cursor: pointer;
   font-family: "Lato", "Helvetica Neue", "Helvetica", "sans-serif";
@@ -161,16 +160,29 @@ strong {
 
 /* https://stackoverflow.com/questions/16771225/css3-rotate-animation */
 .spinner {
-    position: relative;
-    /*top: 50%;*/
-    left: 50%;
-    width: 80px;
-    height: 80px;
-    margin: 0px 0px 0px -40px;
-    -webkit-animation:spin 1s linear infinite;
-    -moz-animation:spin 1s linear infinite;
-    animation:spin 1s linear infinite;
+  position: relative;
+  /*top: 50%;*/
+  left: 50%;
+  width: 80px;
+  height: 80px;
+  margin: 0px 0px 0px -40px;
+  -webkit-animation: spin 1s linear infinite;
+  -moz-animation: spin 1s linear infinite;
+  animation: spin 1s linear infinite;
 }
-@-moz-keyframes spin { 100% { -moz-transform: rotate(360deg); } }
-@-webkit-keyframes spin { 100% { -webkit-transform: rotate(360deg); } }
-@keyframes spin { 100% { -webkit-transform: rotate(360deg); transform:rotate(360deg); } }
+@-moz-keyframes spin {
+  100% {
+    -moz-transform: rotate(360deg);
+  }
+}
+@-webkit-keyframes spin {
+  100% {
+    -webkit-transform: rotate(360deg);
+  }
+}
+@keyframes spin {
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}

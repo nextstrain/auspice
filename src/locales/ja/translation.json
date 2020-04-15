@@ -4,14 +4,12 @@
   "using data from": "使用データ",
   "Built with": "使用ビルド",
 
-
   "__Header//Info__": "########################################",
   "Showing {{x}} of {{y}} genomes": "{{y}} 中 {{x}} のゲノムを表示中",
   "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "{{y}} 中 {{x}} の {{from}} から {{to}} にサンプルされたゲノムを表示中",
   "Comprising": "次を含む",
   "Animation in progress": "アニメーション中",
   "Filtered to": "フィルタ条件",
-
 
   "__Download Modal__": "########################################",
   "click outside this box to return to the app": "元の画面に戻るにはこのポップアップの外側をクリック",
@@ -35,11 +33,9 @@
   "Positive strand": "正のらせん",
   "Click to color tree & map": "クリックしてツリーと地図を色分けする",
 
-
   "__Footer__": "########################################",
   "Filter by {{filterTitle}}": "{{filterTitle}} でフィルタ",
   "Data updated": "データ更新",
-
 
   "__Map panel__": "########################################",
   "Transmissions": "伝搬",
@@ -48,7 +44,6 @@
   "Reset": "リセット",
   "Play": "再生",
   "Pause": "一時停止",
-
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "発生系統",
@@ -79,7 +74,6 @@
   "Authors": "作成者",
   "Title": "タイトル",
   "Journal": "ジャーナル",
-
 
   "__Frequencies panel__": "########################################",
   "Frequencies": "頻度",

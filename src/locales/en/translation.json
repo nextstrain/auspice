@@ -4,14 +4,12 @@
   "using data from": "using data from",
   "Built with": "Built with",
 
-
   "__Header//Info__": "########################################",
   "Showing {{x}} of {{y}} genomes": "Showing {{x}} of {{y}} genomes",
   "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}",
   "Comprising": "Comprising",
   "Animation in progress": "Animation in progress",
   "Filtered to": "Filtered to",
-
 
   "__Download Modal__": "########################################",
   "click outside this box to return to the app": "click outside this box to return to the app",
@@ -35,11 +33,9 @@
   "Positive strand": "Positive strand",
   "Click to color tree & map": "Click to color tree & map",
 
-
   "__Footer__": "########################################",
   "Filter by {{filterTitle}}": "Filter by {{filterTitle}}",
   "Data updated": "Data updated",
-
 
   "__Map panel__": "########################################",
   "Transmissions": "Transmissions",
@@ -48,7 +44,6 @@
   "Reset": "Reset",
   "Play": "Play",
   "Pause": "Pause",
-
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "Phylogeny",
@@ -79,7 +74,6 @@
   "Authors": "Authors",
   "Title": "Title",
   "Journal": "Journal",
-
 
   "__Frequencies panel__": "########################################",
   "Frequencies": "Frequencies",

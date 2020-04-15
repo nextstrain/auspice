@@ -1,5 +1,5 @@
 import React from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
 import leaflet from "leaflet";
@@ -8,7 +8,7 @@ import _min from "lodash/min";
 import _max from "lodash/max";
 import domtoimage from "dom-to-image";
 import { select } from "d3-selection";
-import 'd3-transition';
+import "d3-transition";
 import Card from "../framework/card";
 import { drawDemesAndTransmissions, updateOnMoveEnd, updateVisibility } from "./mapHelpers";
 import {
@@ -51,20 +51,18 @@ import "../../css/mapbox.css";
     panelLayout: state.controls.panelLayout,
     colorBy: state.controls.colorScale.colorBy,
     narrativeMode: state.narrative.display,
-    pieChart: (
-      !state.controls.colorScale.continuous &&                           // continuous color scale = no pie chart
-      state.controls.geoResolution !== state.controls.colorScale.colorBy // geo circles match colorby == no pie chart
-    ),
+    // geo circles match colorby == no pie chart
+    pieChart:
+      !state.controls.colorScale.continuous && state.controls.geoResolution !== state.controls.colorScale.colorBy, // continuous color scale = no pie chart
     legendValues: state.controls.colorScale.legendValues
   };
 })
-
 class Map extends React.Component {
   static propTypes = {
     treeVersion: PropTypes.number.isRequired,
     treeLoaded: PropTypes.bool.isRequired,
     colorScaleVersion: PropTypes.number.isRequired
-  }
+  };
   constructor(props) {
     super(props);
     this.state = {
@@ -93,8 +91,8 @@ class Map extends React.Component {
       window.L.getMapSvg = (loadendCallback) => {
         const mapDimensions = this.state.map.getSize();
         const panOffsets = this.state.map._getMapPanePos();
-        domtoimage.toSvg(this.state.map.getContainer(),
-          {
+        domtoimage
+          .toSvg(this.state.map.getContainer(), {
             width: mapDimensions.x,
             height: mapDimensions.y,
             filter: (node) => {
@@ -103,7 +101,7 @@ class Map extends React.Component {
           })
           .then((image) => {
             loadendCallback({
-              mapSvg: image.replace('data:image/svg+xml;charset=utf-8,', ''),
+              mapSvg: image.replace("data:image/svg+xml;charset=utf-8,", ""),
               mapDimensions: mapDimensions,
               panOffsets: panOffsets
             });
@@ -113,7 +111,9 @@ class Map extends React.Component {
   }
   componentDidMount() {
     this.maybeChangeSize(this.props);
-    const removed = this.maybeRemoveAllDemesAndTransmissions(this.props); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
+    const removed = this.maybeRemoveAllDemesAndTransmissions(
+      this.props
+    ); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     // TODO: if demes are color blended circles, updating rather than redrawing demes would do
     if (!removed) {
       this.maybeUpdateDemesAndTransmissions(this.props); /* every time we change something like colorBy */
@@ -123,7 +123,9 @@ class Map extends React.Component {
   componentWillReceiveProps(nextProps) {
     this.modulateInterfaceForNarrativeMode(nextProps);
     this.maybeChangeSize(nextProps);
-    const removed = this.maybeRemoveAllDemesAndTransmissions(nextProps); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
+    const removed = this.maybeRemoveAllDemesAndTransmissions(
+      nextProps
+    ); /* geographic resolution just changed (ie., country to division), remove everything. this change is upstream of maybeDraw */
     // TODO: if demes are color blended circles, updating rather than redrawing demes would do
     if (!removed) {
       this.maybeUpdateDemesAndTransmissions(nextProps); /* every time we change something like colorBy */
@@ -131,10 +133,14 @@ class Map extends React.Component {
     this.maybeInvalidateMapSize(nextProps);
   }
   componentDidUpdate(prevProps) {
-    if (this.props.nodes === null) { return; }
+    if (this.props.nodes === null) {
+      return;
+    }
     this.maybeCreateLeafletMap(); /* puts leaflet in the DOM, only done once */
     this.maybeSetupD3DOMNode(); /* attaches the D3 SVG DOM node to the Leaflet DOM node, only done once */
-    this.maybeDrawDemesAndTransmissionsAndMoveMap(prevProps); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
+    this.maybeDrawDemesAndTransmissionsAndMoveMap(
+      prevProps
+    ); /* it's the first time, or they were just removed because we changed dataset or colorby or resolution */
   }
   maybeInvalidateMapSize(nextProps) {
     /* when we procedurally change the size of the card, for instance, when we swap from grid to full */
@@ -144,10 +150,7 @@ class Map extends React.Component {
         window.clearTimeout(this.map_timeout);
       }
       // delay to resize map (when complete, narrative will re-focus map on data)
-      this.map_timeout = window.setTimeout(
-        this.invalidateMapSize.bind(this),
-        this.props.narrativeMode ? 100 : 750
-      );
+      this.map_timeout = window.setTimeout(this.invalidateMapSize.bind(this), this.props.narrativeMode ? 100 : 750);
     }
   }
   invalidateMapSize() {
@@ -160,23 +163,20 @@ class Map extends React.Component {
     }
   }
   maybeChangeSize(nextProps) {
-    if (this.props.width !== nextProps.width ||
+    if (
+      this.props.width !== nextProps.width ||
       this.props.height !== nextProps.height ||
       !this.state.responsive ||
       this.props.treeVersion !== nextProps.treeVersion // treeVersion change implies tree is ready (modified by the same action)
     ) {
       /* This is stored in state because it's used by both the map and the d3 overlay */
-      this.setState({responsive: {width: nextProps.width, height: nextProps.height}});
+      this.setState({ responsive: { width: nextProps.width, height: nextProps.height } });
     }
   }
   maybeSetupD3DOMNode() {
-    if (
-      this.state.map &&
-      this.state.responsive &&
-      !this.state.d3DOMNode
-    ) {
+    if (this.state.map && this.state.responsive && !this.state.d3DOMNode) {
       const d3DOMNode = select("#map svg").attr("id", "d3DemesTransmissions");
-      this.setState({d3DOMNode});
+      this.setState({ d3DOMNode });
     }
   }
   modulateInterfaceForNarrativeMode(nextProps) {
@@ -186,7 +186,7 @@ class Map extends React.Component {
       this.state.map.dragging.disable();
       this.state.map.doubleClickZoom.disable();
     } else {
-      L.zoomControlButtons = L.control.zoom({position: "bottomright"}).addTo(this.state.map);
+      L.zoomControlButtons = L.control.zoom({ position: "bottomright" }).addTo(this.state.map);
       this.state.map.dragging.enable();
       this.state.map.doubleClickZoom.enable();
     }
@@ -194,7 +194,12 @@ class Map extends React.Component {
 
   maybeDrawDemesAndTransmissionsAndMoveMap(prevProps) {
     const mapIsDrawn = !!this.state.map;
-    const allDataPresent = !!(this.props.metadata.loaded && this.props.treeLoaded && this.state.responsive && this.state.d3DOMNode);
+    const allDataPresent = !!(
+      this.props.metadata.loaded &&
+      this.props.treeLoaded &&
+      this.state.responsive &&
+      this.state.d3DOMNode
+    );
     const demesTransmissionsNotComputed = !this.state.demeData && !this.state.transmissionData;
     /* if at any point we change dataset and app doesn't remount, we'll need these again */
     // const newColorScale = this.props.colorScale.version !== prevProps.colorScale.version;
@@ -206,7 +211,7 @@ class Map extends React.Component {
       timerStart("drawDemesAndTransmissions");
       /* data structures to feed to d3 latLongs = { tips: [{}, {}], transmissions: [{}, {}] } */
 
-      const {demeData, transmissionData, demeIndices, transmissionIndices} = createDemeAndTransmissionData(
+      const { demeData, transmissionData, demeIndices, transmissionIndices } = createDemeAndTransmissionData(
         this.props.nodes,
         this.props.visibility,
         this.props.geoResolution,
@@ -268,8 +273,8 @@ class Map extends React.Component {
   maybeRemoveAllDemesAndTransmissions(nextProps) {
     const mapIsDrawn = !!this.state.map;
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
-    const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
-    const colorByChanged = (nextProps.colorScaleVersion !== this.props.colorScaleVersion);
+    const dataChanged = !nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion;
+    const colorByChanged = nextProps.colorScaleVersion !== this.props.colorScaleVersion;
     if (mapIsDrawn && (geoResolutionChanged || dataChanged || colorByChanged)) {
       this.state.d3DOMNode.selectAll("*").remove();
       this.setState({
@@ -284,7 +289,8 @@ class Map extends React.Component {
     return false;
   }
   respondToLeafletEvent(leafletEvent) {
-    if (leafletEvent.type === "moveend") { /* zooming and panning */
+    if (leafletEvent.type === "moveend") {
+      /* zooming and panning */
 
       /* Movend: Fired when the center of the map stops changing (e.g. user stopped dragging the map). */
       /* Note - this method is triggered when the map sets up and is essential
@@ -310,7 +316,7 @@ class Map extends React.Component {
         this.props.dateMaxNumeric,
         this.props.pieChart
       );
-      this.setState({demeData: newDemes, transmissionData: newTransmissions});
+      this.setState({ demeData: newDemes, transmissionData: newTransmissions });
     }
   }
   getGeoRange(demeData, demeIndices) {
@@ -344,11 +350,11 @@ class Map extends React.Component {
     const maxLng = _max(longitudes);
     const minLng = _min(longitudes);
     const lngRange = (maxLng - minLng) % 360;
-    const latRange = (maxLat - minLat);
-    const south = _max([-55, minLat - (0.1 * latRange)]);
-    const north = _min([70, maxLat + (0.1 * latRange)]);
-    const east = _max([-180, minLng - (0.1 * lngRange)]);
-    const west = _min([180, maxLng + (0.1 * lngRange)]);
+    const latRange = maxLat - minLat;
+    const south = _max([-55, minLat - 0.1 * latRange]);
+    const north = _min([70, maxLat + 0.1 * latRange]);
+    const east = _max([-180, minLng - 0.1 * lngRange]);
+    const west = _min([180, maxLng + 0.1 * lngRange]);
 
     return [L.latLng(south, west), L.latLng(north, east)];
   }
@@ -358,18 +364,22 @@ class Map extends React.Component {
    * uses deme & transmission indicies for smart (quick) updating
    */
   maybeUpdateDemesAndTransmissions(nextProps) {
-    if (!this.state.map || !this.props.treeLoaded || !this.state.d3elems) { return; }
+    if (!this.state.map || !this.props.treeLoaded || !this.state.d3elems) {
+      return;
+    }
     const visibilityChange = nextProps.visibilityVersion !== this.props.visibilityVersion;
     const haveData = nextProps.nodes && nextProps.visibility && nextProps.geoResolution && nextProps.nodeColors;
 
-    if (!(visibilityChange && haveData)) { return; }
+    if (!(visibilityChange && haveData)) {
+      return;
+    }
 
     timerStart("updateDemesAndTransmissions");
     if (this.props.geoResolution !== nextProps.geoResolution) {
       /* This `if` statement added as part of https://github.com/nextstrain/auspice/issues/722
        * and should be a prime candidate for refactoring in https://github.com/nextstrain/auspice/issues/735
        */
-      const {demeData, transmissionData, demeIndices, transmissionIndices} = createDemeAndTransmissionData(
+      const { demeData, transmissionData, demeIndices, transmissionIndices } = createDemeAndTransmissionData(
         nextProps.nodes,
         nextProps.visibility,
         nextProps.geoResolution,
@@ -462,7 +472,6 @@ class Map extends React.Component {
   }
 
   createMap() {
-
     const zoom = 2;
     const center = [0, 0];
 
@@ -472,7 +481,7 @@ class Map extends React.Component {
 
     L.Map.addInitHook("addHandler", "gestureHandling", GestureHandling);
 
-    const map = L.map('map', {
+    const map = L.map("map", {
       center: center,
       zoom: zoom,
       gestureHandling: true,
@@ -486,24 +495,27 @@ class Map extends React.Component {
 
     map.getRenderer(map).options.padding = 2;
 
-    L.tileLayer('https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2l1MDRoMzg5MDEwbjJvcXBpNnUxMXdwbCJ9.PMqX7vgORuXLXxtI3wISjw', {
-      attribution: '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <a style="font-weight: 700" href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a>'
-    }).addTo(map);
+    L.tileLayer(
+      "https://api.mapbox.com/styles/v1/trvrb/ciu03v244002o2in5hlm3q6w2/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoidHJ2cmIiLCJhIjoiY2l1MDRoMzg5MDEwbjJvcXBpNnUxMXdwbCJ9.PMqX7vgORuXLXxtI3wISjw",
+      {
+        attribution:
+          '© <a href="https://www.mapbox.com/about/maps/">Mapbox</a> © <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a> <a style="font-weight: 700" href="https://www.mapbox.com/map-feedback/" target="_blank">Improve this map</a>'
+      }
+    ).addTo(map);
 
     if (!this.props.narrativeMode) {
-      L.zoomControlButtons = L.control.zoom({position: "bottomright"}).addTo(map);
+      L.zoomControlButtons = L.control.zoom({ position: "bottomright" }).addTo(map);
     }
 
     const Wordmark = L.Control.extend({
       onAdd: function onAdd() {
-        const wordmark = L.DomUtil.create('a', 'mapbox-wordmark');
+        const wordmark = L.DomUtil.create("a", "mapbox-wordmark");
         wordmark.href = "http://mapbox.com/about/maps";
         wordmark.target = "_blank";
         return wordmark;
       }
     });
-    (new Wordmark({position: 'bottomleft'})).addTo(map);
-
+    new Wordmark({ position: "bottomleft" }).addTo(map);
 
     /* Set up leaflet events */
     map.on("moveend", this.respondToLeafletEvent.bind(this));
@@ -513,7 +525,7 @@ class Map extends React.Component {
       }
     });
 
-    this.setState({map});
+    this.setState({ map });
   }
 
   animationButtons() {
@@ -531,15 +543,20 @@ class Map extends React.Component {
     };
     if (this.props.branchLengthsToDisplay !== "divOnly") {
       return (
-        <div style={{position: "absolute"}}>
+        <div style={{ position: "absolute" }}>
           <button
-            style={{...buttonBaseStyle, top: 20, left: 20, backgroundColor: this.props.animationPlayPauseButton === "Pause" ? pauseColor : goColor}}
+            style={{
+              ...buttonBaseStyle,
+              top: 20,
+              left: 20,
+              backgroundColor: this.props.animationPlayPauseButton === "Pause" ? pauseColor : goColor
+            }}
             onClick={this.playPauseButtonClicked}
           >
             {this.props.t(this.props.animationPlayPauseButton)}
           </button>
           <button
-            style={{...buttonBaseStyle, top: 20, left: 30, backgroundColor: lightGrey}}
+            style={{ ...buttonBaseStyle, top: 20, left: 30, backgroundColor: lightGrey }}
             onClick={this.resetButtonClicked}
           >
             {this.props.t("Reset")}
@@ -548,17 +565,19 @@ class Map extends React.Component {
       );
     }
     /* else - divOnly */
-    return (<div/>);
+    return <div />;
   }
 
   maybeCreateMapDiv() {
     let container = null;
     if (this.state.responsive) {
       container = (
-        <div style={{position: "relative"}}>
+        <div style={{ position: "relative" }}>
           {this.animationButtons()}
           <div
-            onClick={() => {this.setState({userHasInteractedWithMap: true});}}
+            onClick={() => {
+              this.setState({ userHasInteractedWithMap: true });
+            }}
             id="map"
             style={{
               height: this.state.responsive.height,
@@ -572,16 +591,18 @@ class Map extends React.Component {
   }
   playPauseButtonClicked() {
     if (this.props.animationPlayPauseButton === "Play") {
-      this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Pause"});
+      this.props.dispatch({ type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Pause" });
     } else {
-      this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
+      this.props.dispatch({ type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play" });
     }
   }
   resetButtonClicked() {
-    this.props.dispatch({type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play"});
-    this.props.dispatch(changeDateFilter({newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false}));
+    this.props.dispatch({ type: MAP_ANIMATION_PLAY_PAUSE_BUTTON, data: "Play" });
+    this.props.dispatch(
+      changeDateFilter({ newMin: this.props.absoluteDateMin, newMax: this.props.absoluteDateMax, quickdraw: false })
+    );
   }
-  moveMapAccordingToData({geoResolutionChanged, visibilityChanged, demeData, demeIndices}) {
+  moveMapAccordingToData({ geoResolutionChanged, visibilityChanged, demeData, demeIndices }) {
     /* Given d3 data (may not be drawn) we can compute map bounds & move as appropriate */
     if (!this.state.boundsSet) {
       /* we are doing the initial render -> set map to the range of the data in view */
@@ -631,7 +652,7 @@ class Map extends React.Component {
     // window.L available because leaflet() was called in componentWillMount
     this.state.currentBounds = window.L.latLngBounds(SWNE[0], SWNE[1]);
     const maxZoom = this.getMaxZoomForFittingMapToData();
-    this.state.map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]), {maxZoom});
+    this.state.map.fitBounds(window.L.latLngBounds(SWNE[0], SWNE[1]), { maxZoom });
   }
   getStyles = () => {
     const activeResetZoomButton = true;
@@ -653,16 +674,18 @@ class Map extends React.Component {
     // clear layers - store all markers in map state https://github.com/Leaflet/Leaflet/issues/3238#issuecomment-77061011
     return (
       <Card center title={transmissionsExist ? t("Transmissions") : t("Geography")}>
-        {this.props.legend && <ErrorBoundary>
-          <Legend right width={this.props.width} />
-        </ErrorBoundary>}
+        {this.props.legend && (
+          <ErrorBoundary>
+            <Legend right width={this.props.width} />
+          </ErrorBoundary>
+        )}
         {this.maybeCreateMapDiv()}
         {this.props.narrativeMode ? null : (
           <button
-            style={{...tabSingle, ...styles.resetZoomButton}}
+            style={{ ...tabSingle, ...styles.resetZoomButton }}
             onClick={() => {
               this.fitMapBoundsToData(this.state.demeData, this.state.demeIndices);
-              this.setState({userHasInteractedWithMap: false});
+              this.setState({ userHasInteractedWithMap: false });
             }}
           >
             {t("reset zoom")}

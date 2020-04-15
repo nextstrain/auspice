@@ -16,21 +16,20 @@ import { CHANGE_LANGUAGE } from "../../actions/types";
   };
 })
 class Language extends React.Component {
-
   componentWillMount() {
     i18n.changeLanguage(this.props.language);
   }
 
   getlanguageOptions() {
     const languages = [
-      {value: "de", label: "Deutsch"},
-      {value: "en", label: "English"},
-      {value: "es", label: "Español"},
-      {value: "ru", label: "Русский"},
-      {value: "lt", label: "Lietuvių"},
-      {value: "pt", label: "Português"},
-      {value: "fr", label: "Français"},
-      {value: "ja", label: "日本語"}
+      { value: "de", label: "Deutsch" },
+      { value: "en", label: "English" },
+      { value: "es", label: "Español" },
+      { value: "ru", label: "Русский" },
+      { value: "lt", label: "Lietuvių" },
+      { value: "pt", label: "Português" },
+      { value: "fr", label: "Français" },
+      { value: "ja", label: "日本語" }
     ];
     return languages;
   }
@@ -45,10 +44,8 @@ class Language extends React.Component {
     const { t } = this.props;
     return (
       <>
-        <SidebarSubtitle spaceAbove>
-          {t("sidebar:Language")}
-        </SidebarSubtitle>
-        <div style={{paddingBottom: 100, width: controlsWidth, fontSize: 14}}>
+        <SidebarSubtitle spaceAbove>{t("sidebar:Language")}</SidebarSubtitle>
+        <div style={{ paddingBottom: 100, width: controlsWidth, fontSize: 14 }}>
           <Select
             name="selectLanguage"
             id="selectLanguage"
@@ -57,7 +54,9 @@ class Language extends React.Component {
             clearable={false}
             searchable={false}
             multi={false}
-            onChange={(opt) => {this.changeLanguage(opt.value);}}
+            onChange={(opt) => {
+              this.changeLanguage(opt.value);
+            }}
           />
         </div>
       </>

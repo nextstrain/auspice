@@ -41,7 +41,9 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   const isGenotype = isColorByGenotype(colorBy);
   const matrix = {}; /* SHAPE: rows: categories (colorBys), columns: pivots */
   const pivotsLen = pivots.length;
-  categories.forEach((x) => {matrix[x] = new Array(pivotsLen).fill(0);});
+  categories.forEach((x) => {
+    matrix[x] = new Array(pivotsLen).fill(0);
+  });
   // let debugTipsSeen = 0;
   const debugPivotTotals = new Array(pivotsLen).fill(0);
   data.forEach((d) => {
@@ -70,9 +72,9 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
   /* this function can throw */
   const pivots = rawJSON.pivots.map((d) => Math.round(parseFloat(d) * 100) / 100);
   const ticks = [pivots[0]];
-  const tick_step = (pivots[pivots.length - 1] - pivots[0]) / 6 * 10 / 10;
+  const tick_step = (((pivots[pivots.length - 1] - pivots[0]) / 6) * 10) / 10;
   while (ticks[ticks.length - 1] < pivots[pivots.length - 1]) {
-    ticks.push((ticks[ticks.length - 1] + tick_step) * 10 / 10);
+    ticks.push(((ticks[ticks.length - 1] + tick_step) * 10) / 10);
   }
   let projection_pivot = null;
   if ("projection_pivot" in rawJSON) {
@@ -82,17 +84,19 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
     throw new Error("tree not loaded");
   }
   const data = [];
-  tree.nodes.filter((d) => !d.hasChildren).forEach((n) => {
-    if (!rawJSON[n.name]) {
-      console.warn(`No tip frequency information for ${n.name}`);
-      return;
-    }
-    data.push({
-      idx: n.arrayIdx,
-      values: rawJSON[n.name].frequencies,
-      weight: rawJSON[n.name].weight
+  tree.nodes
+    .filter((d) => !d.hasChildren)
+    .forEach((n) => {
+      if (!rawJSON[n.name]) {
+        console.warn(`No tip frequency information for ${n.name}`);
+        return;
+      }
+      data.push({
+        idx: n.arrayIdx,
+        values: rawJSON[n.name].frequencies,
+        weight: rawJSON[n.name].weight
+      });
     });
-  });
   const matrix = computeMatrixFromRawData(
     data,
     pivots,

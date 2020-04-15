@@ -1,15 +1,15 @@
 import React from "react";
 import Mousetrap from "mousetrap";
 import { connect } from "react-redux";
-import { withTheme } from 'styled-components';
-import { withTranslation } from 'react-i18next';
+import { withTheme } from "styled-components";
+import { withTranslation } from "react-i18next";
 
 import { DISMISS_DOWNLOAD_MODAL } from "../../actions/types";
 import { materialButton, infoPanelStyles } from "../../globalStyles";
 import { stopProp } from "../tree/infoPanels/click";
 import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";
-import { getAcknowledgments} from "../framework/footer";
+import { getAcknowledgments } from "../framework/footer";
 import { createSummary } from "../info/info";
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
@@ -65,8 +65,8 @@ class DownloadModal extends React.Component {
     super(props);
     this.getStyles = (bw, bh) => {
       return {
-        behind: { /* covers the screen */
-          position: "absolute",
+        behind: {
+          /* covers the screen */ position: "absolute",
           top: 0,
           left: 0,
           width: "100%",
@@ -94,8 +94,8 @@ class DownloadModal extends React.Component {
         modal: {
           marginLeft: 200,
           marginTop: 130,
-          width: bw - (2 * 200),
-          height: bh - (2 * 130),
+          width: bw - 2 * 200,
+          height: bh - 2 * 130,
           borderRadius: 2,
           backgroundColor: "rgba(250, 250, 250, 1)",
           overflowY: "auto"
@@ -108,8 +108,14 @@ class DownloadModal extends React.Component {
     this.dismissModal = this.dismissModal.bind(this);
   }
   componentDidMount() {
-    Mousetrap.bind('d', () => {
-      helpers.SVG(this.props.dispatch, this.getFilePrefix(), this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport());
+    Mousetrap.bind("d", () => {
+      helpers.SVG(
+        this.props.dispatch,
+        this.getFilePrefix(),
+        this.props.panelsToDisplay,
+        this.props.panelLayout,
+        this.makeTextStringsForSVGExport()
+      );
     });
   }
   getRelevantPublications() {
@@ -135,21 +141,27 @@ class DownloadModal extends React.Component {
     );
   }
   getFilePrefix() {
-    return "nextstrain_" +
+    return (
+      "nextstrain_" +
       window.location.pathname
-          .replace(/^\//, '')       // Remove leading slashes
-          .replace(/:/g, '-')       // Change ha:na to ha-na
-          .replace(/\//g, '_');     // Replace slashes with spaces
+        .replace(/^\//, "") // Remove leading slashes
+        .replace(/:/g, "-") // Change ha:na to ha-na
+        .replace(/\//g, "_")
+    ); // Replace slashes with spaces
   }
   makeTextStringsForSVGExport() {
     const x = [];
     x.push(this.props.metadata.title);
     x.push(`Last updated ${this.props.metadata.updated}`);
-    const address = window.location.href.replace(/&/g, '&amp;');
+    const address = window.location.href.replace(/&/g, "&amp;");
     x.push(`Downloaded from <a href="${address}">${address}</a> on ${new Date().toLocaleString()}`);
     x.push(this.createSummaryWrapper());
     x.push("");
-    x.push(`${this.props.t("Data usage part 1")} A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`);
+    x.push(
+      `${this.props.t(
+        "Data usage part 1"
+      )} A full list of sequence authors is available via <a href="https://nextstrain.org">nextstrain.org</a>.`
+    );
     x.push(`Relevant publications:`);
     this.getRelevantPublications().forEach((pub) => {
       x.push(`<a href="${pub.href}">${pub.author}, ${pub.title}, ${pub.journal} (${pub.year})</a>`);
@@ -161,25 +173,52 @@ class DownloadModal extends React.Component {
     const filePrefix = this.getFilePrefix();
     const iconWidth = 25;
     const buttons = [
-      ["Tree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
-      ["TimeTree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
-      ["Strain Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.metadata.colorings)]
+      [
+        "Tree (newick)",
+        <RectangularTreeIcon width={iconWidth} selected />,
+        () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)
+      ],
+      [
+        "TimeTree (newick)",
+        <RectangularTreeIcon width={iconWidth} selected />,
+        () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)
+      ],
+      [
+        "Strain Metadata (TSV)",
+        <MetaIcon width={iconWidth} selected />,
+        () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.metadata.colorings)
+      ]
     ];
     if (helpers.areAuthorsPresent(this.props.tree)) {
-      buttons.push(["Author Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)]);
+      buttons.push([
+        "Author Metadata (TSV)",
+        <MetaIcon width={iconWidth} selected />,
+        () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)
+      ]);
     }
-    buttons.push(
-      ["Screenshot (SVG)", (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
-    );
-    const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white"});
+    buttons.push([
+      "Screenshot (SVG)",
+      <PanelsGridIcon width={iconWidth} selected />,
+      () =>
+        helpers.SVG(
+          this.props.dispatch,
+          filePrefix,
+          this.props.panelsToDisplay,
+          this.props.panelLayout,
+          this.makeTextStringsForSVGExport()
+        )
+    ]);
+    const buttonTextStyle = Object.assign({}, materialButton, {
+      backgroundColor: "rgba(0,0,0,0)",
+      paddingLeft: "10px",
+      color: "white"
+    });
     return (
-      <div style={{display: "flex", flexWrap: "wrap", justifyContent: "space-around"}}>
+      <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-around" }}>
         {buttons.map((data) => (
-          <div key={data[0]} onClick={data[2]} style={{cursor: 'pointer'}}>
+          <div key={data[0]} onClick={data[2]} style={{ cursor: "pointer" }}>
             {data[1]}
-            <button style={buttonTextStyle}>
-              {data[0]}
-            </button>
+            <button style={buttonTextStyle}>{data[0]}</button>
           </div>
         ))}
       </div>
@@ -205,7 +244,7 @@ class DownloadModal extends React.Component {
     if (!this.props.show) {
       return null;
     }
-    const panelStyle = {...infoPanelStyles.panel};
+    const panelStyle = { ...infoPanelStyles.panel };
     panelStyle.width = this.props.browserDimensions.width * 0.66;
     panelStyle.maxWidth = panelStyle.width;
     panelStyle.maxHeight = this.props.browserDimensions.height * 0.66;
@@ -216,44 +255,33 @@ class DownloadModal extends React.Component {
     return (
       <div style={infoPanelStyles.modalContainer} onClick={this.dismissModal}>
         <div style={panelStyle} onClick={(e) => stopProp(e)}>
-          <p style={infoPanelStyles.topRightMessage}>
-            ({t("click outside this box to return to the app")})
-          </p>
+          <p style={infoPanelStyles.topRightMessage}>({t("click outside this box to return to the app")})</p>
 
           <div style={infoPanelStyles.modalSubheading}>
             {meta.title} ({t("last updated")} {meta.updated})
           </div>
 
-          <div>
-            {this.createSummaryWrapper()}
-          </div>
-          <div style={infoPanelStyles.break}/>
+          <div>{this.createSummaryWrapper()}</div>
+          <div style={infoPanelStyles.break} />
           {" " + t("A full list of sequence authors is available via the TSV files below")}
-          <div style={infoPanelStyles.break}/>
-          {getAcknowledgments({}, {preamble: {fontWeight: 300}, acknowledgments: {fontWeight: 300}})}
+          <div style={infoPanelStyles.break} />
+          {getAcknowledgments({}, { preamble: { fontWeight: 300 }, acknowledgments: { fontWeight: 300 } })}
 
-          <div style={infoPanelStyles.modalSubheading}>
-            {t("Data usage policy")}
-          </div>
+          <div style={infoPanelStyles.modalSubheading}>{t("Data usage policy")}</div>
           {t("Data usage part 1") + " " + t("Data usage part 2")}
 
           <div style={infoPanelStyles.modalSubheading}>
-            {t("Please cite the authors who contributed genomic data (where relevant), as well as")+":"}
+            {t("Please cite the authors who contributed genomic data (where relevant), as well as") + ":"}
           </div>
           {this.formatPublications(this.getRelevantPublications())}
 
-
-          <div style={infoPanelStyles.modalSubheading}>
-            {t("Download data")}:
-          </div>
+          <div style={infoPanelStyles.modalSubheading}>{t("Download data")}:</div>
           {this.downloadButtons()}
-
         </div>
       </div>
     );
   }
 }
-
 
 const WithTranslation = withTranslation()(DownloadModal);
 export default WithTranslation;

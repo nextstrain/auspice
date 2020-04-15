@@ -4,14 +4,12 @@
   "using data from": "naudojantis duomenimis iš",
   "Built with": "Sukurta iš",
 
-
   "__Header//Info__": "########################################",
   "Showing {{x}} of {{y}} genomes": "Rodomi {{x}} iš {{y}} genomų",
   "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "Rodomi {{x}} iš {{y}} genomų surinktų tarp {{from}} ir {{to}}",
   "Comprising": "Sudaryti iš",
   "Animation in progress": "Rodoma animacija",
   "Filtered to": "Atrinkta",
-
 
   "__Download Modal__": "########################################",
   "click outside this box to return to the app": "Spauskite už šio lango ribos jei norite grįžti atgal į puslapį",
@@ -35,11 +33,9 @@
   "Positive strand": "Teigiama grandinė",
   "Click to color tree & map": "Paspauskite nuspalvinti medį ir žemėlapį",
 
-
   "__Footer__": "########################################",
   "Filter by {{filterTitle}}": "Atrinkti pagal {{filterTitle}}",
   "Data updated": "Duomenys atnaujinti",
-
 
   "__Map panel__": "########################################",
   "Transmissions": "Perdavimai",
@@ -48,7 +44,6 @@
   "Reset": "Atstatyti",
   "Play": "Paleisti",
   "Pause": "Sustabdyti",
-
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "Filogenetinis medis",
@@ -79,7 +74,6 @@
   "Authors": "Autoriai",
   "Title": "Antraštė",
   "Journal": "Žurnalas",
-
 
   "__Frequencies panel__": "########################################",
   "Frequencies": "Dažniai",

@@ -4,11 +4,8 @@ export const sortedDomain = (domain, attr, stateCount) => {
   if (attr === "clade_membership") {
     sorted.sort();
   } else {
-    sorted.sort(
-      (a, b) =>
-        stateCount.get(a) === stateCount.get(b)
-          ? a < b ? -1 : 1
-          : stateCount.get(a) > stateCount.get(b) ? -1 : 1
+    sorted.sort((a, b) =>
+      stateCount.get(a) === stateCount.get(b) ? (a < b ? -1 : 1) : stateCount.get(a) > stateCount.get(b) ? -1 : 1
     );
   }
   return sorted;

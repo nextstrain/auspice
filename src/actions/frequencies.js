@@ -1,4 +1,4 @@
-import { debounce } from 'lodash';
+import { debounce } from "lodash";
 import * as types from "./types";
 import { timerStart, timerEnd } from "../util/perf";
 import { computeMatrixFromRawData, processFrequenciesJSON } from "../util/processFrequencies";
@@ -7,7 +7,7 @@ export const loadFrequencies = (json) => (dispatch, getState) => {
   const { tree, controls } = getState();
   dispatch({
     type: types.LOAD_FREQUENCIES,
-    frequencies: {loaded: true, version: 1, ...processFrequenciesJSON(json, tree, controls)}
+    frequencies: { loaded: true, version: 1, ...processFrequenciesJSON(json, tree, controls) }
   });
 };
 
@@ -31,10 +31,8 @@ const updateFrequencyData = (dispatch, getState) => {
     controls.colorBy
   );
   timerEnd("updateFrequencyData");
-  dispatch({type: types.FREQUENCY_MATRIX, matrix});
+  dispatch({ type: types.FREQUENCY_MATRIX, matrix });
 };
 
 /* debounce works better than throttle, as it _won't_ update while events are still coming in (e.g. dragging the date slider) */
-export const updateFrequencyDataDebounced = debounce(
-  updateFrequencyData, 500, { leading: false, trailing: true }
-);
+export const updateFrequencyDataDebounced = debounce(updateFrequencyData, 500, { leading: false, trailing: true });

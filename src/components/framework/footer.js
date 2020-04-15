@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import marked from "marked";
 import dompurify from "dompurify";
-import styled from 'styled-components';
+import styled from "styled-components";
 import { withTranslation } from "react-i18next";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
@@ -13,11 +13,7 @@ import { publications } from "../download/downloadModal";
 import { isValueValid } from "../../util/globals";
 import hardCodedFooters from "./footer-descriptions";
 
-const dot = (
-  <span style={{marginLeft: 10, marginRight: 10}}>
-    •
-  </span>
-);
+const dot = <span style={{ marginLeft: 10, marginRight: 10 }}>•</span>;
 
 const FooterStyles = styled.div`
   margin-left: 30px;
@@ -88,17 +84,17 @@ const FooterStyles = styled.div`
 
   // Inline code
   p code {
-    padding: .2em .4em;
+    padding: 0.2em 0.4em;
     margin: 0;
     font-size: 85%;
-    background-color: rgba(27,31,35,.05);
+    background-color: rgba(27, 31, 35, 0.05);
     border-radius: 3px;
   }
 
   .line {
     margin-top: 20px;
     margin-bottom: 20px;
-    border-bottom: 1px solid #CCC;
+    border-bottom: 1px solid #ccc;
   }
 
   .finePrint {
@@ -111,7 +107,7 @@ const FooterStyles = styled.div`
 
   .filterList {
     margin-top: 10px;
-    line-height: 1.0;
+    line-height: 1;
   }
 
   .imageContainer {
@@ -127,7 +123,6 @@ const FooterStyles = styled.div`
     margin-top: 2px;
     margin-bottom: 2px;
   }
-
 `;
 
 export const getAcknowledgments = (metadata, dispatch) => {
@@ -135,30 +130,51 @@ export const getAcknowledgments = (metadata, dispatch) => {
    * If the metadata contains a description key, then it will take precendence the hard-coded
    * acknowledgements. Expects the text in the description to be in Mardown format.
    * Jover. December 2019.
-  */
+   */
   if (metadata.description) {
     dompurify.addHook("afterSanitizeAttributes", (node) => {
       // Set external links to open in a new tab
-      if ('href' in node && location.hostname !== node.hostname) {
-        node.setAttribute('target', '_blank');
-        node.setAttribute('rel', 'noreferrer nofollow');
+      if ("href" in node && location.hostname !== node.hostname) {
+        node.setAttribute("target", "_blank");
+        node.setAttribute("rel", "noreferrer nofollow");
       }
       // Find nodes that contain images and add imageContainer class to update styling
-      const nodeContainsImg = ([...node.childNodes].filter((child) => child.localName === 'img')).length > 0;
+      const nodeContainsImg = [...node.childNodes].filter((child) => child.localName === "img").length > 0;
       if (nodeContainsImg) {
         // For special case of image links, set imageContainer on outer parent
-        if (node.localName === 'a') {
-          node.parentNode.className += ' imageContainer';
+        if (node.localName === "a") {
+          node.parentNode.className += " imageContainer";
         } else {
-          node.className += ' imageContainer';
+          node.className += " imageContainer";
         }
       }
     });
 
     const sanitizer = dompurify.sanitize;
     const sanitizerConfig = {
-      ALLOWED_TAGS: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'em', 'strong', 'del', 'ol', 'ul', 'li', 'a', 'img', '#text', 'code', 'pre', 'hr'],
-      ALLOWED_ATTR: ['href', 'src', 'width', 'height', 'alt'],
+      ALLOWED_TAGS: [
+        "div",
+        "h1",
+        "h2",
+        "h3",
+        "h4",
+        "h5",
+        "h6",
+        "p",
+        "em",
+        "strong",
+        "del",
+        "ol",
+        "ul",
+        "li",
+        "a",
+        "img",
+        "#text",
+        "code",
+        "pre",
+        "hr"
+      ],
+      ALLOWED_ATTR: ["href", "src", "width", "height", "alt"],
       KEEP_CONTENT: false,
       ALLOW_DATA_ATTR: false
     };
@@ -169,26 +185,26 @@ export const getAcknowledgments = (metadata, dispatch) => {
       cleanDescription = sanitizer(rawDescription, sanitizerConfig);
     } catch (error) {
       console.error(`Error parsing footer description: ${error}`);
-      cleanDescription = '<p>There was an error parsing the footer description.</p>';
+      cleanDescription = "<p>There was an error parsing the footer description.</p>";
     }
 
     return (
       <div
-        className='acknowledgments'
+        className="acknowledgments"
         dangerouslySetInnerHTML={{ __html: cleanDescription }} // eslint-disable-line react/no-danger
       />
     );
   }
 
-  const preambleContent = "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
-  const genericPreamble = (<div>{preambleContent}</div>);
+  const preambleContent =
+    "This work is made possible by the open sharing of genetic data by research groups from all over the world. We gratefully acknowledge their contributions.";
+  const genericPreamble = <div>{preambleContent}</div>;
 
-  if (window.location.hostname === 'nextstrain.org') {
+  if (window.location.hostname === "nextstrain.org") {
     return hardCodedFooters(dispatch, genericPreamble);
   }
 
-  return (<div>{genericPreamble}</div>);
-
+  return <div>{genericPreamble}</div>;
 };
 
 const dispatchFilter = (dispatch, activeFilters, key, value) => {
@@ -200,18 +216,18 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
   const active = activeFilters[filterName].indexOf(itemName) !== -1;
   if (active && showX) {
     return (
-      <div key={itemName} style={{display: "inline-block"}}>
+      <div key={itemName} style={{ display: "inline-block" }}>
         <div
-          className={'boxed-item-icon'}
-          onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
+          className={"boxed-item-icon"}
+          onClick={() => {
+            dispatchFilter(dispatch, activeFilters, filterName, itemName);
+          }}
           role="button"
           tabIndex={0}
         >
-          {'\xD7'}
+          {"\xD7"}
         </div>
-        <div className={"boxed-item active-with-icon"}>
-          {display}
-        </div>
+        <div className={"boxed-item active-with-icon"}>{display}</div>
       </div>
     );
   }
@@ -220,7 +236,9 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
       <div
         className={"boxed-item active-clickable"}
         key={itemName}
-        onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
+        onClick={() => {
+          dispatchFilter(dispatch, activeFilters, filterName, itemName);
+        }}
         role="button"
         tabIndex={0}
       >
@@ -232,7 +250,9 @@ export const displayFilterValueAsButton = (dispatch, activeFilters, filterName, 
     <div
       className={"boxed-item inactive"}
       key={itemName}
-      onClick={() => {dispatchFilter(dispatch, activeFilters, filterName, itemName);}}
+      onClick={() => {
+        dispatchFilter(dispatch, activeFilters, filterName, itemName);
+      }}
       role="button"
       tabIndex={0}
     >
@@ -245,7 +265,7 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
   return (
     <div
       className={`${outerClassName} boxed-item active-clickable`}
-      style={{paddingLeft: '5px', paddingRight: '5px', display: "inline-block"}}
+      style={{ paddingLeft: "5px", paddingRight: "5px", display: "inline-block" }}
       onClick={() => {
         filterNames.forEach((n) => dispatch(applyFilter("set", n, [])));
       }}
@@ -267,8 +287,10 @@ const removeFiltersButton = (dispatch, filterNames, outerClassName, label) => {
 })
 class Footer extends React.Component {
   shouldComponentUpdate(nextProps) {
-    if (this.props.tree.version !== nextProps.tree.version ||
-    this.props.browserDimensions !== nextProps.browserDimensions) {
+    if (
+      this.props.tree.version !== nextProps.tree.version ||
+      this.props.browserDimensions !== nextProps.browserDimensions
+    ) {
       return true;
     } else if (Object.keys(this.props.activeFilters) !== Object.keys(nextProps.activeFilters)) {
       return true;
@@ -285,26 +307,36 @@ class Footer extends React.Component {
   displayFilter(filterName) {
     const { t } = this.props;
     const totalStateCount = this.props.totalStateCounts[filterName];
-    const filterTitle = this.props.metadata.colorings[filterName] ? this.props.metadata.colorings[filterName].title : filterName;
+    const filterTitle = this.props.metadata.colorings[filterName]
+      ? this.props.metadata.colorings[filterName].title
+      : filterName;
     return (
       <div>
-        {t("Filter by {{filterTitle}}", {filterTitle: filterTitle})}
-        {this.props.activeFilters[filterName].length ? removeFiltersButton(this.props.dispatch, [filterName], "inlineRight", t("Clear {{filterName}} filter", { filterName: filterName})) : null}
-        <div className='filterList'>
+        {t("Filter by {{filterTitle}}", { filterTitle: filterTitle })}
+        {this.props.activeFilters[filterName].length
+          ? removeFiltersButton(
+              this.props.dispatch,
+              [filterName],
+              "inlineRight",
+              t("Clear {{filterName}} filter", { filterName: filterName })
+            )
+          : null}
+        <div className="filterList">
           <Flex wrap="wrap" justifyContent="flex-start" alignItems="center">
-            {
-              Array.from(totalStateCount.keys())
-                .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
-                .sort() // filters are sorted alphabetically
-                .map((itemName) => {
-                  const display = (
-                    <span>
-                      {`${itemName} (${totalStateCount.get(itemName)})`}
-                    </span>
-                  );
-                  return displayFilterValueAsButton(this.props.dispatch, this.props.activeFilters, filterName, itemName, display, false);
-                })
-            }
+            {Array.from(totalStateCount.keys())
+              .filter((itemName) => isValueValid(itemName)) // remove invalid values present across the tree
+              .sort() // filters are sorted alphabetically
+              .map((itemName) => {
+                const display = <span>{`${itemName} (${totalStateCount.get(itemName)})`}</span>;
+                return displayFilterValueAsButton(
+                  this.props.dispatch,
+                  this.props.activeFilters,
+                  filterName,
+                  itemName,
+                  display,
+                  false
+                );
+              })}
           </Flex>
         </div>
       </div>
@@ -314,7 +346,11 @@ class Footer extends React.Component {
   getUpdated() {
     const { t } = this.props;
     if (this.props.metadata.updated) {
-      return (<span>{t("Data updated")} {this.props.metadata.updated}</span>);
+      return (
+        <span>
+          {t("Data updated")} {this.props.metadata.updated}
+        </span>
+      );
     }
     return null;
   }
@@ -322,11 +358,18 @@ class Footer extends React.Component {
     const { t } = this.props;
     return (
       <button
-        style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", color: medGrey, margin: 0, padding: 0})}
-        onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
+        style={Object.assign({}, materialButton, {
+          backgroundColor: "rgba(0,0,0,0)",
+          color: medGrey,
+          margin: 0,
+          padding: 0
+        })}
+        onClick={() => {
+          this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL });
+        }}
       >
-        <i className="fa fa-download" aria-hidden="true"/>
-        <span style={{position: "relative"}}>{" "+t("Download data")}</span>
+        <i className="fa fa-download" aria-hidden="true" />
+        <span style={{ position: "relative" }}>{" " + t("Download data")}</span>
       </button>
     );
   }
@@ -335,7 +378,8 @@ class Footer extends React.Component {
       <span>
         {"Nextstrain: "}
         <a href={publications.nextstrain.href} target="_blank" rel="noopener noreferrer">
-          {publications.nextstrain.author}, <i>{publications.nextstrain.journal}</i>{` (${publications.nextstrain.year})`}
+          {publications.nextstrain.author}, <i>{publications.nextstrain.journal}</i>
+          {` (${publications.nextstrain.year})`}
         </a>
       </span>
     );
@@ -346,29 +390,27 @@ class Footer extends React.Component {
     const width = this.props.width - 30; // need to subtract margin when calculating div width
     return (
       <FooterStyles>
-        <div style={{width: width}}>
-          <div className='line'/>
+        <div style={{ width: width }}>
+          <div className="line" />
           {getAcknowledgments(this.props.metadata, this.props.dispatch)}
-          <div className='line'/>
+          <div className="line" />
           {Object.keys(this.props.activeFilters).map((name) => {
             return (
               <div key={name}>
                 {this.displayFilter(name)}
-                <div className='line'/>
+                <div className="line" />
               </div>
             );
           })}
-          <Flex className='finePrint'>
+          <Flex className="finePrint">
             {this.getUpdated()}
             {dot}
             {this.downloadDataButton()}
             {dot}
             {"Auspice v" + version}
           </Flex>
-          <div style={{height: "3px"}}/>
-          <Flex className='finePrint'>
-            {this.getCitation()}
-          </Flex>
+          <div style={{ height: "3px" }} />
+          <Flex className="finePrint">{this.getCitation()}</Flex>
         </div>
       </FooterStyles>
     );

@@ -1,14 +1,14 @@
 import React from "react";
 import { connect } from "react-redux";
-import Awesomplete from 'awesomplete'; /* https://leaverou.github.io/awesomplete/ */
+import Awesomplete from "awesomplete"; /* https://leaverou.github.io/awesomplete/ */
 import { withTranslation } from "react-i18next";
-import styled from 'styled-components';
+import styled from "styled-components";
 import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/tree";
 import { NODE_VISIBLE, controlsWidth } from "../../util/globals";
 import { SidebarSubtitle } from "./styles";
 import "../../css/awesomplete.css";
 
-const Cross = ({onClick, show}) => {
+const Cross = ({ onClick, show }) => {
   if (!show) return null;
   return (
     <div
@@ -24,7 +24,7 @@ const Cross = ({onClick, show}) => {
       }}
       onClick={onClick}
     >
-      {'\xD7'}
+      {"\xD7"}
     </div>
   );
 };
@@ -37,14 +37,14 @@ const Container = styled.div`
 `;
 
 const InputContainer = styled.div`
-  width: ${controlsWidth-10}px; /* awesomplete includes 10px of padding & border */
+  width: ${controlsWidth - 10}px; /* awesomplete includes 10px of padding & border */
   display: inline-block;
 `;
 
 const Input = styled.input`
-  fontFamily: inherit;
+  fontfamily: inherit;
   color: inherit;
-  fontSize: inherit;
+  fontsize: inherit;
   width: 100%;
   height: 23px;
   padding-left: 7px;
@@ -61,46 +61,52 @@ const Input = styled.input`
 class SearchStrains extends React.Component {
   constructor() {
     super();
-    this.state = {awesomplete: undefined, show: false};
+    this.state = { awesomplete: undefined, show: false };
     this.removeSelection = () => {
       this.ref.value = null;
-      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({tipSelected: {clear: true}}));
+      this.props.dispatch(updateVisibleTipsAndBranchThicknesses({ tipSelected: { clear: true } }));
       this.props.dispatch(updateTipRadii());
-      this.setState({show: false});
+      this.setState({ show: false });
     };
   }
   componentDidMount() {
     const awesomplete = new Awesomplete(this.ref, {
       maxItems: 1000
     });
-    this.ref.addEventListener('input', (e) => {
+    this.ref.addEventListener("input", (e) => {
       const strain = e.target.value.toLowerCase().trim();
-      this.props.dispatch(updateTipRadii({
-        searchNodes: (strain.length > 1) ? strain : ""
-      }));
+      this.props.dispatch(
+        updateTipRadii({
+          searchNodes: strain.length > 1 ? strain : ""
+        })
+      );
     });
-    this.ref.addEventListener('awesomplete-selectcomplete', (e) => {
+    this.ref.addEventListener("awesomplete-selectcomplete", (e) => {
       const strain = e.text.value;
       for (let i = 0; i < this.props.nodes.length; i++) {
         if (this.props.nodes[i].name === strain) {
-          this.props.dispatch(updateVisibleTipsAndBranchThicknesses({
-            tipSelected: {treeIdx: this.props.nodes[i].arrayIdx}
-          }));
+          this.props.dispatch(
+            updateVisibleTipsAndBranchThicknesses({
+              tipSelected: { treeIdx: this.props.nodes[i].arrayIdx }
+            })
+          );
           /* ^^^ also sets reduxState.tree.selectedStrain */
-          this.props.dispatch(updateTipRadii({
-            tipSelectedIdx: this.props.nodes[i].arrayIdx
-          }));
+          this.props.dispatch(
+            updateTipRadii({
+              tipSelectedIdx: this.props.nodes[i].arrayIdx
+            })
+          );
           break;
         }
       }
-      this.setState({show: true});
+      this.setState({ show: true });
     });
-    this.setState({awesomplete});
+    this.setState({ awesomplete });
   }
   componentWillReceiveProps(nextProps) {
     if (this.props.selectedStrain && !nextProps.selectedStrain) {
       this.ref.value = null;
-      this.setState({show: false});
+      this.setState({ show: false });
     }
   }
   // partialSelection() {
@@ -122,9 +128,14 @@ class SearchStrains extends React.Component {
       <Container>
         <SidebarSubtitle spaceAbove>{t("sidebar:Search Strains")}</SidebarSubtitle>
         <InputContainer>
-          <Input ref={(r) => {this.ref = r;}} onFocus={() => this.updateVisibleStrains()}/>
+          <Input
+            ref={(r) => {
+              this.ref = r;
+            }}
+            onFocus={() => this.updateVisibleStrains()}
+          />
         </InputContainer>
-        <Cross show={this.state.show} onClick={this.removeSelection}/>
+        <Cross show={this.state.show} onClick={this.removeSelection} />
       </Container>
     );
   }

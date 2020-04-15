@@ -1,11 +1,11 @@
 /* eslint-disable no-param-reassign */
-import {getTraitFromNode, getDivFromNode} from "../../../util/treeMiscHelpers";
+import { getTraitFromNode, getDivFromNode } from "../../../util/treeMiscHelpers";
 
 /** get a string to be used as the DOM element ID
  * Note that this cannot have any "special" characters
  */
 export const getDomId = (type, strain) => {
-  const name = typeof strain === "string" ? strain.replace(/[/_.;,~|[\]-]/g, '') : strain;
+  const name = typeof strain === "string" ? strain.replace(/[/_.;,~|[\]-]/g, "") : strain;
   return `${type}_${name}`;
 };
 
@@ -31,7 +31,6 @@ export const addLeafCount = (node) => {
   }
 };
 
-
 /*
  * this function takes a call back and applies it recursively
  * to all child nodes, including internal nodes
@@ -41,7 +40,8 @@ export const addLeafCount = (node) => {
  */
 export const applyToChildren = (node, func) => {
   func(node);
-  if (node.terminal || node.children === undefined) { // in case clade set by URL, terminal hasn't been set yet!
+  if (node.terminal || node.children === undefined) {
+    // in case clade set by URL, terminal hasn't been set yet!
     return;
   }
   for (let i = 0; i < node.children.length; i++) {
@@ -49,11 +49,10 @@ export const applyToChildren = (node, func) => {
   }
 };
 
-
 /*
-* given nodes, create the children and parent properties.
-* modifies the nodes argument in place
-*/
+ * given nodes, create the children and parent properties.
+ * modifies the nodes argument in place
+ */
 export const createChildrenAndParentsReturnNumTips = (nodes) => {
   let numTips = 0;
   nodes.forEach((d) => {
@@ -101,15 +100,13 @@ export const setYValuesRecursively = (node, yCounter) => {
  */
 export const setYValues = (nodes) => setYValuesRecursively(nodes[0], 0);
 
-
 export const formatDivergence = (divergence) => {
-  return divergence > 1 ?
-    Math.round((divergence + Number.EPSILON) * 1000) / 1000 :
-    divergence > 0.01 ?
-      Math.round((divergence + Number.EPSILON) * 10000) / 10000 :
-      divergence.toExponential(3);
+  return divergence > 1
+    ? Math.round((divergence + Number.EPSILON) * 1000) / 1000
+    : divergence > 0.01
+    ? Math.round((divergence + Number.EPSILON) * 10000) / 10000
+    : divergence.toExponential(3);
 };
-
 
 /** get the idx of the zoom node (i.e. the in-view root node).
  * This differs depending on which tree is in view so it's helpful to access it
@@ -127,16 +124,15 @@ function isWithinBranchTolerance(node, otherNode, distanceMeasure) {
   if (distanceMeasure === "num_date") {
     /* We calculate the threshold by reaching into phylotree to extract the date range of the dataset
     and then split the data into ~50 slices. This could be refactored to not reach into phylotree. */
-    const tolerance = (node.shell.that.dateRange[1]-node.shell.that.dateRange[0])/50;
-    return (getTraitFromNode(node, "num_date") - tolerance < getTraitFromNode(otherNode, "num_date"));
+    const tolerance = (node.shell.that.dateRange[1] - node.shell.that.dateRange[0]) / 50;
+    return getTraitFromNode(node, "num_date") - tolerance < getTraitFromNode(otherNode, "num_date");
   }
   /* Compute the divergence tolerance similarly to above. This uses the approach used to compute the
   x-axis grid within phyotree, and could be refactored into a helper function. Note that we don't store
   the maximum divergence on the tree so we use the in-view max instead */
-  const tolerance = (node.shell.that.xScale.domain()[1] - node.shell.that.nodes[0].depth)/50;
-  return (getDivFromNode(node) - tolerance < getDivFromNode(otherNode));
+  const tolerance = (node.shell.that.xScale.domain()[1] - node.shell.that.nodes[0].depth) / 50;
+  return getDivFromNode(node) - tolerance < getDivFromNode(otherNode);
 }
-
 
 /**
  * Given a `node`, get the parent, grandparent etc node which is beyond some

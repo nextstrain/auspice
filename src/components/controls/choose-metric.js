@@ -23,10 +23,8 @@ class ChooseMetric extends React.Component {
     /* this used to be added to the first SidebarSubtitle
     const potentialOffset = this.props.showTreeToo ? {marginTop: "0px"} : {}; */
     return (
-      <div style={{marginBottom: 0}}>
-        <SidebarSubtitle>
-          {t("sidebar:Branch Length")}
-        </SidebarSubtitle>
+      <div style={{ marginBottom: 0 }}>
+        <SidebarSubtitle>{t("sidebar:Branch Length")}</SidebarSubtitle>
 
         <SidebarButton
           selected={this.props.distanceMeasure === "num_date"}
@@ -37,7 +35,7 @@ class ChooseMetric extends React.Component {
         >
           {t("sidebar:time")}
         </SidebarButton>
-        <span style={{paddingRight: "12px"}}/>
+        <span style={{ paddingRight: "12px" }} />
         <SidebarButton
           selected={this.props.distanceMeasure === "div"}
           onClick={() => {
@@ -48,18 +46,16 @@ class ChooseMetric extends React.Component {
           {t("sidebar:divergence")}
         </SidebarButton>
 
-        {this.props.showTreeToo ?
-          null : (
-            <div style={{margin: 5}}>
-              <Toggle
-                display={this.props.temporalConfidence.display}
-                on={this.props.temporalConfidence.on}
-                callback={() => this.props.dispatch(toggleTemporalConfidence())}
-                label={t("sidebar:Show confidence intervals")}
-              />
-            </div>
-          )
-        }
+        {this.props.showTreeToo ? null : (
+          <div style={{ margin: 5 }}>
+            <Toggle
+              display={this.props.temporalConfidence.display}
+              on={this.props.temporalConfidence.on}
+              callback={() => this.props.dispatch(toggleTemporalConfidence())}
+              label={t("sidebar:Show confidence intervals")}
+            />
+          </div>
+        )}
       </div>
     );
   }

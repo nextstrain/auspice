@@ -1,7 +1,6 @@
 import { computeResponsive } from "../../util/computeResponsive";
 import { controlsWidth, controlsPadding } from "../../util/globals";
 
-
 export const calcPanelDims = (grid, panels, narrativeIsDisplayed, availableWidth, availableHeight) => {
   /* Calculate reponsive geometries. chart: entropy, frequencies. big: map, tree */
   const chartWidthFraction = 1;
@@ -29,20 +28,30 @@ export const calcPanelDims = (grid, panels, narrativeIsDisplayed, availableWidth
     }
   }
 
-  const big = computeResponsive({horizontal: bigWidthFraction, vertical: bigHeightFraction, availableWidth, availableHeight});
-  const chart = computeResponsive({horizontal: chartWidthFraction, vertical: chartHeightFraction, availableWidth, availableHeight, minHeight: 150});
+  const big = computeResponsive({
+    horizontal: bigWidthFraction,
+    vertical: bigHeightFraction,
+    availableWidth,
+    availableHeight
+  });
+  const chart = computeResponsive({
+    horizontal: chartWidthFraction,
+    vertical: chartHeightFraction,
+    availableWidth,
+    availableHeight,
+    minHeight: 150
+  });
 
-  return {big, chart};
-
+  return { big, chart };
 };
 
 const calculateSidebarWidth = (available, narrativeMode) => {
   if (narrativeMode) {
-    if (available>1500) return 500;
-    else if (available>1000) return 400;
+    if (available > 1500) return 500;
+    else if (available > 1000) return 400;
     return 310;
   }
-  return controlsWidth+controlsPadding;
+  return controlsWidth + controlsPadding;
 };
 
 /* move this to styled-components */
@@ -69,9 +78,9 @@ export const calcStyles = (browserDimensions, displayNarrative, sidebarOpen, mob
     backgroundColor: "rgba(0,0,0,0.5)",
     cursor: "pointer",
     overflow: "scroll",
-    transition: sidebarOpen ?
-      'visibility 0s ease-out, left 0.3s ease-out, opacity 0.3s ease-out' :
-      'left 0.3s ease-out, opacity 0.3s ease-out, visibility 0s ease-out 0.3s'
+    transition: sidebarOpen
+      ? "visibility 0s ease-out, left 0.3s ease-out, opacity 0.3s ease-out"
+      : "left 0.3s ease-out, opacity 0.3s ease-out, visibility 0s ease-out 0.3s"
   };
-  return {overlayStyles, availableWidth, availableHeight, sidebarWidth};
+  return { overlayStyles, availableWidth, availableHeight, sidebarWidth };
 };

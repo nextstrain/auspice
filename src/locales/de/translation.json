@@ -4,14 +4,12 @@
   "using data from": "basierend auf Daten von",
   "Built with": "Erstellt mit",
 
-
   "__Header//Info__": "########################################",
   "Showing {{x}} of {{y}} genomes": "{{x}} von {{y}} Genome werden angezeigt",
   "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "{{x}} von {{y}} Genome werden angezeigt, die zwischen {{from}} und {{to}} entnommen wurden",
   "Comprising": "Bestehend aus",
   "Animation in progress": "Animation läuft",
   "Filtered to": "Beschränkt auf",
-
 
   "__Download Modal__": "########################################",
   "click outside this box to return to the app": "Außerhalb dieser Box klicken, um zur Karte zurückzugelangen",
@@ -35,11 +33,9 @@
   "Positive strand": "Positiver Strang",
   "Click to color tree & map": "Klicken, um den Baum und Karte zu färben",
 
-
   "__Footer__": "########################################",
   "Filter by {{filterTitle}}": "Nach {{filterTitle}} filtern",
   "Data updated": "Daten aktualisiert am",
-
 
   "__Map panel__": "########################################",
   "Transmissions": "Übertragungen",
@@ -48,7 +44,6 @@
   "Reset": "Zurücksetzen",
   "Play": "Abspielen",
   "Pause": "Pausieren",
-
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "Phylogenese",
@@ -78,7 +73,6 @@
   "Authors": "Autoren",
   "Title": "Titel",
   "Journal": "Zeitschrift",
-
 
   "__Frequencies panel__": "########################################",
   "Frequencies": "Frequenzen",

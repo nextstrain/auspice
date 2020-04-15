@@ -14,7 +14,8 @@ const unknownColor = "#AAAAAA";
 
 const getMinMaxFromTree = (nodes, nodesToo, attr) => {
   const arr = nodesToo ? nodes.concat(nodesToo) : nodes.slice();
-  const vals = arr.map((n) => getTraitFromNode(n, attr))
+  const vals = arr
+    .map((n) => getTraitFromNode(n, attr))
     .filter((n) => n !== undefined)
     .filter((item, i, ar) => ar.indexOf(item) === i)
     .map((v) => +v); // coerce to numeric
@@ -25,9 +26,7 @@ const getMinMaxFromTree = (nodes, nodesToo, attr) => {
    this is necessary as ordinal scales can't interpololate colours.
    range: [a,b], the colours to go between */
 const createListOfColors = (n, range) => {
-  const scale = scaleLinear().domain([0, n])
-    .interpolate(interpolateHcl)
-    .range(range);
+  const scale = scaleLinear().domain([0, n]).interpolate(interpolateHcl).range(range);
   return d3Range(0, n).map(scale);
 };
 
@@ -37,24 +36,26 @@ const getDiscreteValuesFromTree = (nodes, nodesToo, attr) => {
     const stateCountSecondTree = countTraitsAcrossTree(nodesToo, [attr], false, false)[attr];
     for (const state of stateCountSecondTree.keys()) {
       const currentCount = stateCount.get(state) || 0;
-      stateCount.set(state, currentCount+1);
+      stateCount.set(state, currentCount + 1);
     }
   }
-  const domain = sortedDomain(Array.from(stateCount.keys()).filter((x) => isValueValid(x)), attr, stateCount);
+  const domain = sortedDomain(
+    Array.from(stateCount.keys()).filter((x) => isValueValid(x)),
+    attr,
+    stateCount
+  );
   return domain;
 };
 
 const createDiscreteScale = (domain, type) => {
   // note: colors[n] has n colors
   let colorList;
-  if (type==="ordinal" || type==="categorical") {
+  if (type === "ordinal" || type === "categorical") {
     /* TODO: use different colours! */
-    colorList = domain.length <= colors.length ?
-      colors[domain.length].slice() :
-      colors[colors.length - 1].slice();
+    colorList = domain.length <= colors.length ? colors[domain.length].slice() : colors[colors.length - 1].slice();
   }
   const scale = scaleOrdinal().domain(domain).range(colorList);
-  return (val) => ((val === undefined || domain.indexOf(val) === -1)) ? unknownColor : scale(val);
+  return (val) => (val === undefined || domain.indexOf(val) === -1 ? unknownColor : scale(val));
 };
 
 const booleanColorScale = (val) => {
@@ -64,14 +65,17 @@ const booleanColorScale = (val) => {
 };
 
 const createLegendBounds = (legendValues) => {
-  const valBetween = (x0, x1) => x0 + 0.5*(x1-x0);
+  const valBetween = (x0, x1) => x0 + 0.5 * (x1 - x0);
   const len = legendValues.length;
   const legendBounds = {};
   legendBounds[legendValues[0]] = [0, valBetween(legendValues[0], legendValues[1])];
   for (let i = 1; i < len - 1; i++) {
-    legendBounds[legendValues[i]] = [valBetween(legendValues[i-1], legendValues[i]), valBetween(legendValues[i], legendValues[i+1])];
+    legendBounds[legendValues[i]] = [
+      valBetween(legendValues[i - 1], legendValues[i]),
+      valBetween(legendValues[i], legendValues[i + 1])
+    ];
   }
-  legendBounds[legendValues[len-1]] = [valBetween(legendValues[len-2], legendValues[len-1]), 10000];
+  legendBounds[legendValues[len - 1]] = [valBetween(legendValues[len - 2], legendValues[len - 1]), 10000];
   return legendBounds;
 };
 
@@ -113,10 +117,13 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
   if (!tree.nodes) {
     console.error("calcColorScale called before tree is ready.");
     error = true;
-  } else if (genotype) { /* G E N O T Y P E */
+  } else if (genotype) {
+    /* G E N O T Y P E */
     legendValues = orderOfGenotypeAppearance(tree.nodes, controls.mutType);
-    const trueValues = controls.mutType === "nuc" ? legendValues.filter((x) => x !== "X" && x !== "-" && x !== "N") :
-      legendValues.filter((x) => x !== "X" && x !== "-");
+    const trueValues =
+      controls.mutType === "nuc"
+        ? legendValues.filter((x) => x !== "X" && x !== "-" && x !== "N")
+        : legendValues.filter((x) => x !== "X" && x !== "-");
     const domain = [undefined, ...legendValues];
     const range = [unknownColor, ...genotypeColors.slice(0, trueValues.length)];
     // Bases are returned by orderOfGenotypeAppearance in order, unknowns at end
@@ -129,9 +136,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
     if (legendValues.indexOf("X") !== -1) {
       range.push(rgb(102, 102, 102));
     }
-    colorScale = scaleOrdinal()
-          .domain(domain)
-          .range(range);
+    colorScale = scaleOrdinal().domain(domain).range(range);
   } else if (colorings && colorings[colorBy]) {
     let minMax;
     /* Is the scale set in the provided colorings object? */
@@ -146,13 +151,12 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         let domain = scale.map((x) => x[0]);
         let range = scale.map((x) => x[1]);
         const extraVals = getExtraVals(tree.nodes, treeTooNodes, colorBy, domain);
-        if (extraVals.length) { // we must add these to the domain + provide a value in the range
+        if (extraVals.length) {
+          // we must add these to the domain + provide a value in the range
           domain = domain.concat(extraVals);
           range = range.concat(createListOfColors(extraVals.length, [rgb(192, 192, 192), rgb(32, 32, 32)]));
         }
-        colorScale = scaleOrdinal()
-          .domain(domain)
-          .range(range);
+        colorScale = scaleOrdinal().domain(domain).range(range);
         legendValues = domain;
       }
     } else if (colorings[colorBy].type === "categorical") {
@@ -170,10 +174,10 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
 
       if (allInteger) {
         minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorings[colorBy]);
-        if (minMax[1]-minMax[0]<=colors.length) {
+        if (minMax[1] - minMax[0] <= colors.length) {
           continuous = false;
           legendValues = [];
-          for (let i=minMax[0]; i<=minMax[1]; i++) legendValues.push(i);
+          for (let i = minMax[0]; i <= minMax[1]; i++) legendValues.push(i);
           colorScale = createDiscreteScale(legendValues, "ordinal");
         } else {
           /* too many integers for the provided colours -- using continuous scale instead */
@@ -181,11 +185,13 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           duplication, as this is identical to that of the continuous scale below */
           console.warn("Using a continous scale as there are too many values in the ordinal scale");
           continuous = true;
-          const scale = scaleLinear().domain(genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]))).range(colors[9]);
-          colorScale = (val) => isValueValid(val) ? scale(val): unknownColor;
+          const scale = scaleLinear()
+            .domain(genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0])))
+            .range(colors[9]);
+          colorScale = (val) => (isValueValid(val) ? scale(val) : unknownColor);
           const spread = minMax[1] - minMax[0];
           const dp = spread > 5 ? 2 : 3;
-          legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
+          legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d * spread).toFixed(dp)));
           if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
           legendBounds = createLegendBounds(legendValues);
         }
@@ -217,22 +223,18 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         case "num_date":
           /* we want the colorScale to "focus" on the tip dates, and be spaced according to sampling */
           let rootDate = getTraitFromNode(tree.nodes[0], "num_date");
-          let vals = tree.nodes.filter((n) => !n.hasChildren)
-            .map((n) => getTraitFromNode(n, "num_date"));
+          let vals = tree.nodes.filter((n) => !n.hasChildren).map((n) => getTraitFromNode(n, "num_date"));
           if (treeTooNodes) {
             const treeTooRootDate = getTraitFromNode(treeTooNodes[0], "num_date");
             if (treeTooRootDate < rootDate) rootDate = treeTooRootDate;
-            vals.concat(
-              treeTooNodes.filter((n) => !n.hasChildren)
-                .map((n) => getTraitFromNode(n, "num_date"))
-            );
+            vals.concat(treeTooNodes.filter((n) => !n.hasChildren).map((n) => getTraitFromNode(n, "num_date")));
           }
           vals = vals.sort();
           domain = [rootDate];
           const n = 10;
           const spaceBetween = parseInt(vals.length / (n - 1), 10);
-          for (let i = 0; i < (n-1); i++) domain.push(vals[spaceBetween*i]);
-          domain.push(vals[vals.length-1]);
+          for (let i = 0; i < n - 1; i++) domain.push(vals[spaceBetween * i]);
+          domain.push(vals[vals.length - 1]);
           domain = [...new Set(domain)]; /* filter to unique values only */
           range = colors[domain.length]; /* use the right number of colours */
           break;
@@ -241,7 +243,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
           domain = genericDomain.map((d) => minMax[0] + d * (minMax[1] - minMax[0]));
       }
       const scale = scaleLinear().domain(domain).range(range);
-      colorScale = (val) => isValueValid(val) ? scale(val) : unknownColor;
+      colorScale = (val) => (isValueValid(val) ? scale(val) : unknownColor);
 
       /* construct the legend values & their respective bounds */
       switch (colorBy) {
@@ -254,7 +256,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         default:
           const spread = minMax[1] - minMax[0];
           const dp = spread > 5 ? 2 : 3;
-          legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d*spread).toFixed(dp)));
+          legendValues = genericDomain.map((d) => parseFloat((minMax[0] + d * spread).toFixed(dp)));
       }
       if (legendValues[0] === -0) legendValues[0] = 0; /* hack to avoid bugs */
       legendBounds = createLegendBounds(legendValues);

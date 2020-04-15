@@ -35,7 +35,7 @@ export const decodeColorByGenotype = (colorBy, geneLengths) => {
 
   if (match) {
     const [, gene, encodedPositions] = match;
-    const geneLength = validate ? geneLengths[gene] : 'Infinity';
+    const geneLength = validate ? geneLengths[gene] : "Infinity";
 
     if (validate && !geneLength) {
       console.error("decodeColorByGenotype failed: no gene length", colorBy, gene, geneLengths);
@@ -60,7 +60,7 @@ export const decodeColorByGenotype = (colorBy, geneLengths) => {
   return null;
 };
 
-export const decodePositions = (positions, geneLength = 'Infinity') => {
+export const decodePositions = (positions, geneLength = "Infinity") => {
   return positions
     .split(",")
     .map((x) => parseInt(x, 10))

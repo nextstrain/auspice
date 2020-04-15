@@ -13,7 +13,7 @@ import * as labels from "./labels";
 /* phylogenetic tree drawing function - the actual tree is rendered by the render prototype */
 const PhyloTree = function PhyloTree(reduxNodes, id) {
   this.grid = false;
-  this.attributes = ['r', 'cx', 'cy', 'id', 'class', 'd'];
+  this.attributes = ["r", "cx", "cy", "id", "class", "d"];
   this.params = createDefaultParams();
   this.groups = {};
   /* by storing DOM <g> elements, we can quickly refer to groups here rather than scanning the DOM.
@@ -27,10 +27,10 @@ const PhyloTree = function PhyloTree(reduxNodes, id) {
   this.nodes = reduxNodes.map((d) => {
     const phyloNode = {
       that: this,
-      n: d, /* a back link to the redux node */
+      n: d /* a back link to the redux node */,
       x: 0,
       y: 0,
-      terminal: (typeof d.children === "undefined"),
+      terminal: typeof d.children === "undefined",
       inView: d.inView !== undefined ? d.inView : true /* each node is visible, unless set earlier! */
     };
     d.shell = phyloNode; /* set the link from the redux node to the phylotree node */
@@ -42,7 +42,9 @@ const PhyloTree = function PhyloTree(reduxNodes, id) {
   this.yScale = scaleLinear();
   this.zoomNode = this.nodes[0];
   this.strainToNode = {};
-  this.nodes.forEach((phylonode) => {this.strainToNode[phylonode.n.name] = phylonode;});
+  this.nodes.forEach((phylonode) => {
+    this.strainToNode[phylonode.n.name] = phylonode;
+  });
   /* debounced functions (AFAIK you can't define these as normal prototypes as they need "this") */
   // this.debouncedMapToScreen = _debounce(this.mapToScreen, this.params.mapToScreenDebounceTime,
   //   {leading: false, trailing: true, maxWait: this.params.mapToScreenDebounceTime});

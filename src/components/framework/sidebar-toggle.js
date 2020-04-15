@@ -8,8 +8,7 @@ sidebarOpen and mobileDisplay: green button with "close" icon
 !sidebarOpen and mobileDisplay: green button with "sliders" icon
 */
 
-const SidebarToggle = ({sidebarOpen, mobileDisplay, handler}) => {
-
+const SidebarToggle = ({ sidebarOpen, mobileDisplay, handler }) => {
   const containerStyle = {
     visibility: mobileDisplay ? "visible" : sidebarOpen ? "hidden" : "visible",
     width: mobileDisplay ? 60 : 14,
@@ -36,7 +35,7 @@ const SidebarToggle = ({sidebarOpen, mobileDisplay, handler}) => {
     left: "50%",
     lineHeight: "30px",
     textAlign: "center",
-    transform: 'translate(-50%,-50%)',
+    transform: "translate(-50%,-50%)",
     marginLeft: "auto",
     marginRight: "auto",
     verticalAlign: "middle",
@@ -57,7 +56,9 @@ const SidebarToggle = ({sidebarOpen, mobileDisplay, handler}) => {
 
   return (
     <div style={containerStyle} onClick={handler}>
-      <div style={iconStyle}><i className={iconClass} aria-hidden="true"/></div>
+      <div style={iconStyle}>
+        <i className={iconClass} aria-hidden="true" />
+      </div>
     </div>
   );
 };

@@ -20,14 +20,16 @@ const getFirstPageToDisplay = () => {
   return chooseDisplayComponentFromURL(window.location.pathname);
 };
 
-
-const general = (state = {
-  defaults,
-  displayComponent: getFirstPageToDisplay(),
-  errorMessage: undefined,
-  pathname: window.location.pathname, // keep a copy of what the app "thinks" the pathname is
-  language: query.lang ? query.lang : defaults.language
-}, action) => {
+const general = (
+  state = {
+    defaults,
+    displayComponent: getFirstPageToDisplay(),
+    errorMessage: undefined,
+    pathname: window.location.pathname, // keep a copy of what the app "thinks" the pathname is
+    language: query.lang ? query.lang : defaults.language
+  },
+  action
+) => {
   switch (action.type) {
     case types.PAGE_CHANGE:
       const stateUpdate = {

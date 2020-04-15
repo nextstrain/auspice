@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import { withTranslation } from 'react-i18next';
+import { withTranslation } from "react-i18next";
 import { CHANGE_ANIMATION_TIME, CHANGE_ANIMATION_CUMULATIVE, CHANGE_ANIMATION_LOOP } from "../../actions/types";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import Toggle from "./toggle";
@@ -48,10 +48,7 @@ class MapAnimationControls extends React.Component {
 
     return (
       <div id="mapAnimationControls">
-
-        <SidebarSubtitle spaceAbove>
-          {t("sidebar:Animation Speed")}
-        </SidebarSubtitle>
+        <SidebarSubtitle spaceAbove>{t("sidebar:Animation Speed")}</SidebarSubtitle>
 
         <SidebarButton
           selected={this.props.mapAnimationDurationInMilliseconds === 60000}
@@ -72,7 +69,7 @@ class MapAnimationControls extends React.Component {
           {t("sidebar:Fast")}
         </SidebarButton>
 
-        <div style={{marginBottom: 5}}/>
+        <div style={{ marginBottom: 5 }} />
 
         <Toggle
           display
@@ -82,7 +79,7 @@ class MapAnimationControls extends React.Component {
           }}
           label={t("sidebar:Loop animation")}
         />
-        <br/>
+        <br />
         <Toggle
           display
           on={this.props.mapAnimationCumulative}
@@ -92,7 +89,6 @@ class MapAnimationControls extends React.Component {
           }}
           label={t("sidebar:Animate cumulative history")}
         />
-
       </div>
     );
   }

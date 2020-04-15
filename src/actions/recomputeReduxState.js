@@ -1,8 +1,19 @@
 import queryString from "query-string";
 import { numericToCalendar, calendarToNumeric } from "../util/dateHelpers";
-import { reallySmallNumber, twoColumnBreakpoint, defaultColorBy, defaultGeoResolution, defaultDateRange, nucleotide_gene } from "../util/globals";
+import {
+  reallySmallNumber,
+  twoColumnBreakpoint,
+  defaultColorBy,
+  defaultGeoResolution,
+  defaultDateRange,
+  nucleotide_gene
+} from "../util/globals";
 import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions";
-import { strainNameToIdx, getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
+import {
+  strainNameToIdx,
+  getIdxMatchingLabel,
+  calculateVisiblityAndBranchThickness
+} from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { calcTipRadii } from "../util/tipRadiusHelpers";
 import { getDefaultControlsState } from "../reducers/controls";
@@ -17,7 +28,6 @@ import { applyInViewNodesToTree } from "../actions/tree";
 import { isColorByGenotype, decodeColorByGenotype } from "../util/getGenotype";
 import { getTraitFromNode, getDivFromNode } from "../util/treeMiscHelpers";
 
-
 export const doesColorByHaveConfidence = (controlsState, colorBy) =>
   controlsState.coloringsPresentOnTreeWithConfidence.has(colorBy);
 
@@ -25,9 +35,9 @@ export const getMinCalDateViaTree = (nodes, state) => {
   /* slider should be earlier than actual day */
   /* if no date, use some default dates - slider will not be visible */
   const minNumDate = getTraitFromNode(nodes[0], "num_date");
-  return (minNumDate === undefined) ?
-    numericToCalendar(state.dateMaxNumeric - defaultDateRange) :
-    numericToCalendar(minNumDate - 0.01);
+  return minNumDate === undefined
+    ? numericToCalendar(state.dateMaxNumeric - defaultDateRange)
+    : numericToCalendar(minNumDate - 0.01);
 };
 
 export const getMaxCalDateViaTree = (nodes) => {
@@ -81,11 +91,11 @@ const modifyStateViaURLQuery = (state, query) => {
     state["dateMax"] = query.dmax;
     state["dateMaxNumeric"] = calendarToNumeric(query.dmax);
   }
-  for (const filterKey of Object.keys(query).filter((c) => c.startsWith('f_'))) {
-    state.filters[filterKey.replace('f_', '')] = query[filterKey].split(',');
+  for (const filterKey of Object.keys(query).filter((c) => c.startsWith("f_"))) {
+    state.filters[filterKey.replace("f_", "")] = query[filterKey].split(",");
   }
   if (query.animate) {
-    const params = query.animate.split(',');
+    const params = query.animate.split(",");
     // console.log("start animation!", params);
     window.NEXTSTRAIN.animationStartPoint = calendarToNumeric(params[0]);
     window.NEXTSTRAIN.animationEndPoint = calendarToNumeric(params[1]);
@@ -135,7 +145,8 @@ const restoreQueryableStateToDefaults = (state) => {
         state[key] = state.defaults[key];
         break;
       }
-      case "object": { /* can't use Object.assign, must deep clone instead */
+      case "object": {
+        /* can't use Object.assign, must deep clone instead */
         state[key] = JSON.parse(JSON.stringify(state.defaults[key]));
         break;
       }
@@ -177,7 +188,7 @@ const modifyStateViaMetadata = (state, metadata) => {
     }
   }
   if (metadata.analysisSlider) {
-    state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
+    state["analysisSlider"] = { key: metadata.analysisSlider, valid: false };
   }
   if (metadata.filters) {
     metadata.filters.forEach((v) => {
@@ -188,17 +199,26 @@ const modifyStateViaMetadata = (state, metadata) => {
     console.warn("JSON did not include any filters");
   }
   if (metadata.displayDefaults) {
-    const keysToCheckFor = ["geoResolution", "colorBy", "distanceMeasure", "layout", "mapTriplicate", "selectedBranchLabel", 'sidebar'];
-    const expectedTypes =  ["string",        "string",  "string",          "string", "boolean",       "string",              'string']; // eslint-disable-line no-multi-spaces
+    const keysToCheckFor = [
+      "geoResolution",
+      "colorBy",
+      "distanceMeasure",
+      "layout",
+      "mapTriplicate",
+      "selectedBranchLabel",
+      "sidebar"
+    ];
+    const expectedTypes = ["string", "string", "string", "string", "boolean", "string", "string"]; // eslint-disable-line no-multi-spaces
 
     for (let i = 0; i < keysToCheckFor.length; i += 1) {
       if (metadata.displayDefaults[keysToCheckFor[i]]) {
-        if (typeof metadata.displayDefaults[keysToCheckFor[i]] === expectedTypes[i]) { // eslint-disable-line valid-typeof
+        if (typeof metadata.displayDefaults[keysToCheckFor[i]] === expectedTypes[i]) {
+          // eslint-disable-line valid-typeof
           if (keysToCheckFor[i] === "sidebar") {
             if (metadata.displayDefaults[keysToCheckFor[i]] === "open") {
               state.defaults.sidebarOpen = true;
               state.sidebarOpen = true;
-            } else if (metadata.displayDefaults[keysToCheckFor[i]]=== "closed") {
+            } else if (metadata.displayDefaults[keysToCheckFor[i]] === "closed") {
               state.defaults.sidebarOpen = false;
               state.sidebarOpen = false;
             } else {
@@ -210,7 +230,12 @@ const modifyStateViaMetadata = (state, metadata) => {
             state.defaults[keysToCheckFor[i]] = metadata.displayDefaults[keysToCheckFor[i]];
           }
         } else {
-          console.error("Skipping 'display_default' for ", keysToCheckFor[i], "as it is not of type ", expectedTypes[i]);
+          console.error(
+            "Skipping 'display_default' for ",
+            keysToCheckFor[i],
+            "as it is not of type ",
+            expectedTypes[i]
+          );
         }
       }
     }
@@ -316,7 +341,7 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
       /* check colorBys */
       coloringsToCheck.forEach((colorBy) => {
         if (!state.coloringsPresentOnTreeWithConfidence.has(colorBy)) {
-          if (getTraitFromNode(node, colorBy, {confidence: true})) {
+          if (getTraitFromNode(node, colorBy, { confidence: true })) {
             state.coloringsPresentOnTreeWithConfidence.add(colorBy);
             state.coloringsPresentOnTree.add(colorBy);
           } else if (getTraitFromNode(node, colorBy)) {
@@ -327,14 +352,13 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
       /* check mutations */
       if (node.branch_attrs && node.branch_attrs.mutations) {
         const keys = Object.keys(node.branch_attrs.mutations);
-        if (keys.length > 1 || (keys.length === 1 && keys[0]!=="nuc")) aaMuts = true;
+        if (keys.length > 1 || (keys.length === 1 && keys[0] !== "nuc")) aaMuts = true;
         if (keys.includes("nuc")) nucMuts = true;
       }
     });
   };
   examineNodes(tree.nodes);
   if (treeToo) examineNodes(treeToo.nodes);
-
 
   /* ensure specified mutType is indeed available */
   if (!aaMuts && !nucMuts) {
@@ -351,15 +375,17 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
   /* does the tree have date information? if not, disable controls, modify view */
   const numDateAtRoot = getTraitFromNode(tree.nodes[0], "num_date") !== undefined;
   const divAtRoot = getDivFromNode(tree.nodes[0]) !== undefined;
-  state.branchLengthsToDisplay = (numDateAtRoot && divAtRoot) ? "divAndDate" :
-    numDateAtRoot ? "dateOnly" :
-      "divOnly";
+  state.branchLengthsToDisplay = numDateAtRoot && divAtRoot ? "divAndDate" : numDateAtRoot ? "dateOnly" : "divOnly";
 
   /* if branchLengthsToDisplay is "divOnly", force to display by divergence
    * if branchLengthsToDisplay is "dateOnly", force to display by date
    */
-  state.distanceMeasure = state.branchLengthsToDisplay === "divOnly" ? "div" :
-    state.branchLengthsToDisplay === "dateOnly" ? "num_date" : state.distanceMeasure;
+  state.distanceMeasure =
+    state.branchLengthsToDisplay === "divOnly"
+      ? "div"
+      : state.branchLengthsToDisplay === "dateOnly"
+      ? "num_date"
+      : state.distanceMeasure;
 
   /* if clade is available as a branch label, then set this as the "default". This
   is largely due to historical reasons. Note that it *can* and *will* be overridden
@@ -369,9 +395,9 @@ const modifyControlsStateViaTree = (state, tree, treeToo, colorings) => {
     state.selectedBranchLabel = "clade";
   }
 
-  state.temporalConfidence = getTraitFromNode(tree.nodes[0], "num_date", {confidence: true}) ?
-    {exists: true, display: true, on: false} :
-    {exists: false, display: false, on: false};
+  state.temporalConfidence = getTraitFromNode(tree.nodes[0], "num_date", { confidence: true })
+    ? { exists: true, display: true, on: false }
+    : { exists: false, display: false, on: false };
   return state;
 };
 
@@ -383,9 +409,12 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     metadata.colorings = {};
   }
   const fallBackToDefaultColorBy = () => {
-    const availableNonGenotypeColorBys = Object.keys(metadata.colorings)
-      .filter((colorKey) => colorKey !== "gt");
-    if (metadata.displayDefaults && metadata.displayDefaults.colorBy && availableNonGenotypeColorBys.indexOf(metadata.displayDefaults.colorBy) !== -1) {
+    const availableNonGenotypeColorBys = Object.keys(metadata.colorings).filter((colorKey) => colorKey !== "gt");
+    if (
+      metadata.displayDefaults &&
+      metadata.displayDefaults.colorBy &&
+      availableNonGenotypeColorBys.indexOf(metadata.displayDefaults.colorBy) !== -1
+    ) {
       console.warn("colorBy falling back to", metadata.displayDefaults.colorBy);
       state.colorBy = metadata.displayDefaults.colorBy;
       state.defaults.colorBy = metadata.displayDefaults.colorBy;
@@ -394,12 +423,21 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
         state.colorBy = defaultColorBy;
         state.defaults.colorBy = defaultColorBy;
       } else {
-        console.error("Error detected trying to set colorBy to", state.colorBy, "falling back to", availableNonGenotypeColorBys[0]);
+        console.error(
+          "Error detected trying to set colorBy to",
+          state.colorBy,
+          "falling back to",
+          availableNonGenotypeColorBys[0]
+        );
         state.colorBy = availableNonGenotypeColorBys[0];
         state.defaults.colorBy = availableNonGenotypeColorBys[0];
       }
     } else {
-      console.error("Error detected trying to set colorBy to", state.colorBy, " as there are no color options defined in the JSONs!");
+      console.error(
+        "Error detected trying to set colorBy to",
+        state.colorBy,
+        " as there are no color options defined in the JSONs!"
+      );
       state.colorBy = "none";
       state.defaults.colorBy = "none";
     }
@@ -416,8 +454,12 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
   }
 
   /* zoom */
-  if (state.zoomMax > state["absoluteZoomMax"]) { state.zoomMax = state["absoluteZoomMax"]; }
-  if (state.zoomMin < state["absoluteZoomMin"]) { state.zoomMin = state["absoluteZoomMin"]; }
+  if (state.zoomMax > state["absoluteZoomMax"]) {
+    state.zoomMax = state["absoluteZoomMax"];
+  }
+  if (state.zoomMin < state["absoluteZoomMin"]) {
+    state.zoomMin = state["absoluteZoomMin"];
+  }
   if (state.zoomMin > state.zoomMax) {
     const tempMin = state.zoomMin;
     state.zoomMin = state.zoomMax;
@@ -438,7 +480,11 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     const availableGeoResultions = metadata.geoResolutions.map((i) => i.key);
     if (availableGeoResultions.indexOf(state["geoResolution"]) === -1) {
       /* fallbacks: JSON defined default, then hardocded default, then any available */
-      if (metadata.displayDefaults && metadata.displayDefaults.geoResolution && availableGeoResultions.indexOf(metadata.displayDefaults.geoResolution) !== -1) {
+      if (
+        metadata.displayDefaults &&
+        metadata.displayDefaults.geoResolution &&
+        availableGeoResultions.indexOf(metadata.displayDefaults.geoResolution) !== -1
+      ) {
         state.geoResolution = metadata.displayDefaults.geoResolution;
       } else if (availableGeoResultions.indexOf(defaultGeoResolution) !== -1) {
         state.geoResolution = defaultGeoResolution;
@@ -482,8 +528,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
   const activeFilters = Object.keys(state.filters).filter((f) => f.length);
   const stateCounts = countTraitsAcrossTree(tree.nodes, activeFilters, false, true);
   for (const filterType of activeFilters) {
-    const validValues = state.filters[filterType]
-      .filter((filterValue) => stateCounts[filterType].has(filterValue));
+    const validValues = state.filters[filterType].filter((filterValue) => stateCounts[filterType].has(filterValue));
     state.filters[filterType] = validValues;
     if (!validValues.length) {
       delete query[`f_${filterType}`];
@@ -504,7 +549,7 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
     // We must prevent a narrative closing the sidebar, either via a JSON display_default
     // or a URL query anywhere within the narrative.
     if ("sidebarOpen" in state.defaults) delete state.defaults.sidebarOpen;
-    state.sidebarOpen=true;
+    state.sidebarOpen = true;
   }
 
   return state;
@@ -532,18 +577,24 @@ const modifyTreeStateVisAndBranchThickness = (oldState, tipSelected, zoomSelecte
   const visAndThicknessData = calculateVisiblityAndBranchThickness(
     oldState,
     controlsState,
-    {dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric},
-    {tipSelectedIdx}
+    { dateMinNumeric: controlsState.dateMinNumeric, dateMaxNumeric: controlsState.dateMaxNumeric },
+    { tipSelectedIdx }
   );
 
   const newState = Object.assign({}, oldState, visAndThicknessData);
   newState.stateCountAttrs = Object.keys(controlsState.filters);
   newState.idxOfInViewRootNode = newIdxRoot;
-  newState.visibleStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, newState.visibility, true);
-  newState.totalStateCounts   = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false,               true); // eslint-disable-line
+  newState.visibleStateCounts = countTraitsAcrossTree(
+    newState.nodes,
+    newState.stateCountAttrs,
+    newState.visibility,
+    true
+  );
+  newState.totalStateCounts = countTraitsAcrossTree(newState.nodes, newState.stateCountAttrs, false, true); // eslint-disable-line
 
-  if (tipSelectedIdx) { /* i.e. query.s was set */
-    newState.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controlsState.colorScale, tree: newState});
+  if (tipSelectedIdx) {
+    /* i.e. query.s was set */
+    newState.tipRadii = calcTipRadii({ tipSelectedIdx, colorScale: controlsState.colorScale, tree: newState });
     newState.tipRadiiVersion = 1;
   }
   return newState;
@@ -641,18 +692,17 @@ const createMetadataStateFromJSON = (json) => {
     metadata.geoResolutions = json.meta.geo_resolutions;
   }
 
-
   if (Object.prototype.hasOwnProperty.call(metadata, "loaded")) {
-    console.error("Metadata JSON must not contain the key \"loaded\". Ignoring.");
+    console.error('Metadata JSON must not contain the key "loaded". Ignoring.');
   }
   metadata.loaded = true;
   return metadata;
 };
 
 export const createStateFromQueryOrJSONs = ({
-  json = false, /* raw json data - completely nuke existing redux state */
+  json = false /* raw json data - completely nuke existing redux state */,
   secondTreeDataset = false,
-  oldState = false, /* existing redux state (instead of jsons) */
+  oldState = false /* existing redux state (instead of jsons) */,
   narrativeBlocks = false,
   mainTreeName = false,
   secondTreeName = false,
@@ -687,15 +737,14 @@ export const createStateFromQueryOrJSONs = ({
     controls["absoluteZoomMax"] = entropy.lengthSequence;
   } else if (oldState) {
     /* revisit this - but it helps prevent bugs */
-    controls = {...oldState.controls};
-    entropy = {...oldState.entropy};
-    tree = {...oldState.tree};
-    treeToo = {...oldState.treeToo};
-    metadata = {...oldState.metadata};
-    frequencies = {...oldState.frequencies};
+    controls = { ...oldState.controls };
+    entropy = { ...oldState.entropy };
+    tree = { ...oldState.tree };
+    treeToo = { ...oldState.treeToo };
+    metadata = { ...oldState.metadata };
+    frequencies = { ...oldState.frequencies };
     controls = restoreQueryableStateToDefaults(controls);
   }
-
 
   /* For the creation of state, we want to parse out URL query parameters
   (e.g. ?c=country means we want to color-by country) and modify the state
@@ -708,10 +757,10 @@ export const createStateFromQueryOrJSONs = ({
     /* If the query has defined a block which doesn't exist then default to n=0 */
     if (n >= narrative.length) {
       console.warn(`Attempted to go to narrative page ${n} which doesn't exist`);
-      n=0;
+      n = 0;
     }
     controls = modifyStateViaURLQuery(controls, queryString.parse(narrative[n].query));
-    query = n===0 ? {} : {n}; // eslint-disable-line
+    query = n === 0 ? {} : { n }; // eslint-disable-line
     /* If the narrative block in view defines a `mainDisplayMarkdown` section, we
     update `controls.panelsToDisplay` so this is displayed */
     if (narrative[n].mainDisplayMarkdown) {
@@ -721,9 +770,8 @@ export const createStateFromQueryOrJSONs = ({
     controls = modifyStateViaURLQuery(controls, query);
   }
 
-  const viewingNarrative = (narrativeBlocks || (oldState && oldState.narrative.display));
+  const viewingNarrative = narrativeBlocks || (oldState && oldState.narrative.display);
   controls = checkAndCorrectErrorsInState(controls, metadata, query, tree, viewingNarrative); /* must run last */
-
 
   /* calculate colours if loading from JSONs or if the query demands change */
   if (json || controls.colorBy !== oldState.controls.colorBy) {
@@ -761,12 +809,23 @@ export const createStateFromQueryOrJSONs = ({
     treeToo.nodeColors = calcNodeColor(treeToo, controls.colorScale);
     treeToo = modifyTreeStateVisAndBranchThickness(treeToo, query.s, undefined, controls, dispatch);
     controls = modifyControlsViaTreeToo(controls, treeToo.name);
-    treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility);
+    treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
+      tree.nodes,
+      treeToo.nodes,
+      tree.visibility,
+      treeToo.visibility
+    );
   }
 
   /* calculate entropy in view */
   if (entropy.loaded) {
-    const [entropyBars, entropyMaxYVal] = calcEntropyInView(tree.nodes, tree.visibility, controls.mutType, entropy.geneMap, entropy.showCounts);
+    const [entropyBars, entropyMaxYVal] = calcEntropyInView(
+      tree.nodes,
+      tree.visibility,
+      controls.mutType,
+      entropy.geneMap,
+      entropy.showCounts
+    );
     entropy.bars = entropyBars;
     entropy.maxYVal = entropyMaxYVal;
     entropy.zoomMax = controls["zoomMax"];
@@ -787,14 +846,14 @@ export const createStateFromQueryOrJSONs = ({
     );
   }
 
-  return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
+  return { tree, treeToo, metadata, entropy, controls, narrative, frequencies, query };
 };
 
 export const createTreeTooState = ({
-  treeTooJSON, /* raw json data */
+  treeTooJSON /* raw json data */,
   oldState,
   originalTreeUrl,
-  secondTreeUrl, /* treeToo URL */
+  secondTreeUrl /* treeToo URL */,
   dispatch
 }) => {
   /* TODO: reconsile choices (filters, colorBys etc) with this new tree */
@@ -821,12 +880,15 @@ export const createTreeTooState = ({
   treeToo.nodeColors = nodeColors;
 
   treeToo.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
-    tree.nodes, treeToo.nodes, tree.visibility, treeToo.visibility
+    tree.nodes,
+    treeToo.nodes,
+    tree.visibility,
+    treeToo.visibility
   );
 
   // if (tipSelectedIdx) { /* i.e. query.s was set */
   //   tree.tipRadii = calcTipRadii({tipSelectedIdx, colorScale: controls.colorScale, tree});
   //   tree.tipRadiiVersion = 1;
   // }
-  return {tree, treeToo, controls};
+  return { tree, treeToo, controls };
 };

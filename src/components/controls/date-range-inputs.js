@@ -1,6 +1,6 @@
 import React from "react";
 import { connect } from "react-redux";
-import styled from 'styled-components';
+import styled from "styled-components";
 import Slider from "./slider";
 import { controlsWidth, minDistanceDateSlider } from "../../util/globals";
 import { numericToCalendar } from "../../util/dateHelpers";
@@ -13,7 +13,7 @@ const DateLabel = styled.div`
   font-size: 12px;
   font-weight: 400;
   color: ${(props) => props.theme.color};
-  float: ${(props) => props.right ? "right" : "left"};
+  float: ${(props) => (props.right ? "right" : "left")};
 `;
 
 @connect((state) => {
@@ -59,23 +59,23 @@ class DateRangeInputs extends React.Component {
         return null;
       }
       // console.log("UPDATING", currentTime, this.state.lastSliderUpdateTime)
-      this.setState({lastSliderUpdateTime: currentTime});
+      this.setState({ lastSliderUpdateTime: currentTime });
     }
     // {numDateValues} is an array of numDates received from Slider
     // [numDateStart, numDateEnd]
-    const newRange = {min: numericToCalendar(numDateValues[0]),
-      max: numericToCalendar(numDateValues[1])};
-    if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) { // update min
-      this.props.dispatch(changeDateFilter({newMin: newRange.min, quickdraw: debounce}));
-    } else if (this.props.dateMin === newRange.min &&
-               this.props.dateMax !== newRange.max) { // update max
-      this.props.dispatch(changeDateFilter({newMax: newRange.max, quickdraw: debounce}));
-    } else if (this.props.dateMin !== newRange.min &&
-               this.props.dateMax !== newRange.max) { // update both
-      this.props.dispatch(changeDateFilter({newMin: newRange.min, newMax: newRange.max, quickdraw: debounce}));
+    const newRange = { min: numericToCalendar(numDateValues[0]), max: numericToCalendar(numDateValues[1]) };
+    if (this.props.dateMin !== newRange.min && this.props.dateMax === newRange.max) {
+      // update min
+      this.props.dispatch(changeDateFilter({ newMin: newRange.min, quickdraw: debounce }));
+    } else if (this.props.dateMin === newRange.min && this.props.dateMax !== newRange.max) {
+      // update max
+      this.props.dispatch(changeDateFilter({ newMax: newRange.max, quickdraw: debounce }));
+    } else if (this.props.dateMin !== newRange.min && this.props.dateMax !== newRange.max) {
+      // update both
+      this.props.dispatch(changeDateFilter({ newMin: newRange.min, newMax: newRange.max, quickdraw: debounce }));
     } else if (debounce === false) {
       /* this occurs when no dates have actually changed BUT we need to redraw (e.g. quickdraw has come off) */
-      this.props.dispatch(changeDateFilter({quickdraw: debounce}));
+      this.props.dispatch(changeDateFilter({ quickdraw: debounce }));
     }
     return null;
   }
@@ -85,7 +85,7 @@ class DateRangeInputs extends React.Component {
     }
     return (
       <div>
-        <div style={{width: controlsWidth}}>
+        <div style={{ width: controlsWidth }}>
           <Slider // numDates are handed to Slider
             min={this.props.absoluteDateMinNumeric}
             max={this.props.absoluteDateMaxNumeric}
@@ -94,13 +94,15 @@ class DateRangeInputs extends React.Component {
             /* debounce the onChange event, but ensure the final one goes through */
             onChange={this.updateFromSliderDebounced}
             onAfterChange={this.updateFromSliderNotDebounced}
-            minDistance={minDistanceDateSlider * (this.props.absoluteDateMaxNumeric - this.props.absoluteDateMinNumeric)}
+            minDistance={
+              minDistanceDateSlider * (this.props.absoluteDateMaxNumeric - this.props.absoluteDateMinNumeric)
+            }
             pearling
             withBars
           />
         </div>
-        <div style={{height: 5}}/>
-        <div style={{width: controlsWidth}}>
+        <div style={{ height: 5 }} />
+        <div style={{ width: controlsWidth }}>
           <DateLabel>{this.props.dateMin}</DateLabel>
           <DateLabel right>{this.props.dateMax}</DateLabel>
         </div>

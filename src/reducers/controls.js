@@ -1,12 +1,14 @@
 import { numericToCalendar, calendarToNumeric, currentNumDate, currentCalDate } from "../util/dateHelpers";
-import { defaultGeoResolution,
+import {
+  defaultGeoResolution,
   defaultColorBy,
   defaultDateRange,
   defaultDistanceMeasure,
   defaultLayout,
   defaultMutType,
   controlsHiddenWidth,
-  twoColumnBreakpoint } from "../util/globals";
+  twoColumnBreakpoint
+} from "../util/globals";
 import * as types from "../actions/types";
 import { calcBrowserDimensionsInitialState } from "./browserDimensions";
 import { doesColorByHaveConfidence } from "../actions/recomputeReduxState";
@@ -45,7 +47,7 @@ export const getDefaultControlsState = () => {
     strain: null,
     geneLength: {},
     mutType: defaultMutType,
-    temporalConfidence: {exists: false, display: false, on: false},
+    temporalConfidence: { exists: false, display: false, on: false },
     layout: defaults.layout,
     distanceMeasure: defaults.distanceMeasure,
     dateMin,
@@ -57,7 +59,7 @@ export const getDefaultControlsState = () => {
     absoluteDateMax: dateMax,
     absoluteDateMaxNumeric: dateMaxNumeric,
     colorBy: defaults.colorBy,
-    colorByConfidence: {display: false, on: false},
+    colorByConfidence: { display: false, on: false },
     colorScale: undefined,
     selectedBranchLabel: "none",
     analysisSlider: false,
@@ -91,7 +93,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
     case types.CLEAN_START:
       return action.controls;
     case types.SET_AVAILABLE:
-      return Object.assign({}, state, {available: action.data});
+      return Object.assign({}, state, { available: action.data });
     case types.BRANCH_MOUSEENTER:
       return Object.assign({}, state, {
         selectedBranch: action.data
@@ -109,7 +111,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
         selectedNode: null
       });
     case types.CHANGE_BRANCH_LABEL:
-      return Object.assign({}, state, {selectedBranchLabel: action.value});
+      return Object.assign({}, state, { selectedBranchLabel: action.value });
     case types.CHANGE_LAYOUT: {
       const layout = action.data;
       /* temporal confidence can only be displayed for rectangular trees */
@@ -131,13 +133,13 @@ const Controls = (state = getDefaultControlsState(), action) => {
           return Object.assign({}, state, {
             distanceMeasure: action.data,
             branchLengthsToDisplay: state.branchLengthsToDisplay,
-            temporalConfidence: Object.assign({}, state.temporalConfidence, {display: false, on: false})
+            temporalConfidence: Object.assign({}, state.temporalConfidence, { display: false, on: false })
           });
         } else if (state.layout === "rect" && action.data === "num_date") {
           return Object.assign({}, state, {
             distanceMeasure: action.data,
             branchLengthsToDisplay: state.branchLengthsToDisplay,
-            temporalConfidence: Object.assign({}, state.temporalConfidence, {display: true})
+            temporalConfidence: Object.assign({}, state.temporalConfidence, { display: true })
           });
         }
       }
@@ -146,7 +148,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
         branchLengthsToDisplay: state.branchLengthsToDisplay
       });
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
-      const newDates = {quickdraw: action.quickdraw};
+      const newDates = { quickdraw: action.quickdraw };
       if (action.dateMin) {
         newDates.dateMin = action.dateMin;
         newDates.dateMinNumeric = action.dateMinNumeric;
@@ -198,7 +200,8 @@ const Controls = (state = getDefaultControlsState(), action) => {
       return Object.assign({}, state, {
         panelsToDisplay: action.panelsToDisplay,
         panelLayout: action.panelLayout,
-        canTogglePanelLayout: action.panelsToDisplay.indexOf("tree") !== -1 && action.panelsToDisplay.indexOf("map") !== -1
+        canTogglePanelLayout:
+          action.panelsToDisplay.indexOf("tree") !== -1 && action.panelsToDisplay.indexOf("map") !== -1
       });
     case types.NEW_COLORS: {
       const newState = Object.assign({}, state, {
@@ -247,18 +250,18 @@ const Controls = (state = getDefaultControlsState(), action) => {
       });
     case types.TOGGLE_TANGLE:
       if (state.showTreeToo) {
-        return Object.assign({}, state, {showTangle: !state.showTangle});
+        return Object.assign({}, state, { showTangle: !state.showTangle });
       }
       return state;
     case types.TOGGLE_SIDEBAR:
-      return Object.assign({}, state, {sidebarOpen: action.value});
+      return Object.assign({}, state, { sidebarOpen: action.value });
     case types.TOGGLE_LEGEND:
-      return Object.assign({}, state, {legendOpen: action.value});
+      return Object.assign({}, state, { legendOpen: action.value });
     case types.ADD_COLOR_BYS:
       for (const colorBy of Object.keys(action.newColorings)) {
         state.coloringsPresentOnTree.add(colorBy);
       }
-      return Object.assign({}, state, {coloringsPresentOnTree: state.coloringsPresentOnTree});
+      return Object.assign({}, state, { coloringsPresentOnTree: state.coloringsPresentOnTree });
     default:
       return state;
   }
@@ -270,7 +273,7 @@ function getInitialSidebarState() {
   /* The following "hack" was present when `sidebarOpen` wasn't URL customisable. It can be removed
   from here once the GISAID URLs (iFrames) are updated */
   if (window.location.pathname.includes("gisaid")) {
-    return {sidebarOpen: false, setDefault: true};
+    return { sidebarOpen: false, setDefault: true };
   }
   return {
     sidebarOpen: window.innerWidth > controlsHiddenWidth,

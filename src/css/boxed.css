@@ -1,17 +1,16 @@
-
 /* http://jedwatson.github.io/react-select/ */
 
 .boxed-item {
   margin: 1px 2px 1px 2px;
   padding: 0px 2px 0px 2px;
-  color: #5097BA;
+  color: #5097ba;
 }
 
 .boxed-item.active-with-icon {
-  background-color: #E9F2F6;
+  background-color: #e9f2f6;
   border-bottom-right-radius: 2px;
   border-top-right-radius: 2px;
-  border: 1px solid #BDD8E5;
+  border: 1px solid #bdd8e5;
   font-weight: 300;
   cursor: "pointer";
   display: inline-block;
@@ -20,9 +19,9 @@
 }
 
 .boxed-item.active-clickable {
-  background-color: #E9F2F6;
+  background-color: #e9f2f6;
   border-radius: 2px;
-  border: 1px solid #BDD8E5;
+  border: 1px solid #bdd8e5;
   font-weight: 300;
   cursor: "pointer";
   display: inline-block;
@@ -41,27 +40,30 @@
 
 .boxed-item-icon {
   cursor: pointer;
-  color: #5097BA;
+  color: #5097ba;
   border-bottom-left-radius: 2px;
   border-top-left-radius: 2px;
   border-width: 1px 0px 1px 1px;
   border-style: solid;
-  border-color: #BDD8E5;
+  border-color: #bdd8e5;
   min-width: 15px;
-  background-color: #E9F2F6;
+  background-color: #e9f2f6;
   padding: 0px 0px 0px 2px;
   margin: 1px 0px 1px 2px;
   display: inline-block;
   text-align: center;
 }
 
-.boxed-item-icon:hover, .boxed-item-icon:focus {
+.boxed-item-icon:hover,
+.boxed-item-icon:focus {
   background-color: #d8eafd;
   color: #0071e6;
 }
 
-.boxed-item.inactive:focus, .boxed-item-icon:focus, .active-clickable:focus {
-  outline:0;
+.boxed-item.inactive:focus,
+.boxed-item-icon:focus,
+.active-clickable:focus {
+  outline: 0;
 }
 
 div.inlineRight {

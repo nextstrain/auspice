@@ -40,7 +40,7 @@ class Title extends React.Component {
     return title.split("").map((letter, i) => (
       <span
         key={i} // eslint-disable-line react/no-array-index-key
-        style={{color: titleColors[i] }}
+        style={{ color: titleColors[i] }}
       >
         {letter}
       </span>
@@ -48,11 +48,7 @@ class Title extends React.Component {
   }
   render() {
     const styles = this.getStyles();
-    return (
-      <span style={{ ...styles.title, ...this.props.style }}>
-        {this.createTitle()}
-      </span>
-    );
+    return <span style={{ ...styles.title, ...this.props.style }}>{this.createTitle()}</span>;
   }
 }
 

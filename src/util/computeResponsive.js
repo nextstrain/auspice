@@ -34,18 +34,18 @@ export const calcUsableWidth = (availableWidth, fraction) => {
 };
 
 export const computeResponsive = ({
-  horizontal, /* multiplicative 1 (mobile, tablet, laptop) or .5 (2 column big monitor) */
-  vertical, /* multiplicative .5 (if splitting with another pane) or 1 (if full height of browser window) */
-  availableWidth, /* after sidebar etc taken away */
+  horizontal /* multiplicative 1 (mobile, tablet, laptop) or .5 (2 column big monitor) */,
+  vertical /* multiplicative .5 (if splitting with another pane) or 1 (if full height of browser window) */,
+  availableWidth /* after sidebar etc taken away */,
   availableHeight,
-  minHeight = undefined, /* minimum height of element */
+  minHeight = undefined /* minimum height of element */,
   maxAspectRatio = undefined /* maximum aspect ratio of element */
 }) => {
   /* HARDCODED CONSTANTS */
   const horizontalPadding = horizontal === 1 ? xPaddingOneCard : xPaddingTwoCards;
 
   const width = horizontal * (availableWidth - horizontalPadding);
-  let height = (vertical * availableHeight) - verticalPadding;
+  let height = vertical * availableHeight - verticalPadding;
 
   if (maxAspectRatio && height > maxAspectRatio * width) {
     height = maxAspectRatio * width;
@@ -54,5 +54,5 @@ export const computeResponsive = ({
   if (minHeight && height < minHeight) {
     height = minHeight;
   }
-  return {width, height};
+  return { width, height };
 };

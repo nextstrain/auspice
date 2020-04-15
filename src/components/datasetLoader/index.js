@@ -14,7 +14,7 @@ class DatasetLoader extends React.Component {
   }
   componentWillMount() {
     this.props.dispatch(loadJSONs()); // choose via URL
-    this.props.dispatch({type: PAGE_CHANGE, displayComponent: "main"});
+    this.props.dispatch({ type: PAGE_CHANGE, displayComponent: "main" });
   }
   render() {
     return null;

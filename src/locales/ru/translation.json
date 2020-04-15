@@ -4,14 +4,12 @@
   "using data from": "используя данные из ",
   "Built with": "Сделано с",
 
-
   "__Header//Info__": "########################################",
   "Showing {{x}} of {{y}} genomes": "Показаны {{x}} из {{y}} геномов",
   "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}": "Показаны {{x}} из {{y}} геномов собранных между {{from}} и {{to}}",
   "Comprising": "содержащий",
   "Animation in progress": "Идет анимация",
   "Filtered to": "Фильтр по",
-
 
   "__Download Modal__": "########################################",
   "click outside this box to return to the app": "нажмите вне поля чтобы вернуться в приложение",
@@ -35,11 +33,9 @@
   "Positive strand": "Положительная цепь",
   "Click to color tree & map": "Нажмите, чтобы закрасить дерево и карту",
 
-
   "__Footer__": "########################################",
   "Filter by {{filterTitle}}": "Фильтровать по {{filterTitle}}",
   "Data updated": "Данные обновлены",
-
 
   "__Map panel__": "########################################",
   "Transmissions": "Передачи",
@@ -48,7 +44,6 @@
   "Reset": "Сброс",
   "Play": "Пуск",
   "Pause": "Пауза",
-
 
   "__Tree (Phylogeny) panel__": "########################################",
   "Phylogeny": "Филогенез",
@@ -78,7 +73,6 @@
   "Authors": "Авторы",
   "Title": "Название",
   "Journal": "Журнал",
-
 
   "__Frequencies panel__": "########################################",
   "Frequencies": "Частоты",

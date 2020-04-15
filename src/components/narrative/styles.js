@@ -1,8 +1,7 @@
-import styled, {css} from 'styled-components';
+import styled, { css } from "styled-components";
 
 export const NarrativeStyles = styled.div`
-
-  top: ${(props) => props.narrativeNavBarHeight+"px"};
+  top: ${(props) => props.narrativeNavBarHeight + "px"};
   font-weight: 300;
 
   /* Use media queries to modify the font size so things look ok
@@ -14,13 +13,22 @@ export const NarrativeStyles = styled.div`
     line-height: 1.1;
   }
 
-  p, h1, h2, h3, h4, li, table {
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  li,
+  table {
     color: ${(props) => props.theme.unselectedColor};
   }
-  table, th, td {
+  table,
+  th,
+  td {
     border: 1px solid;
   }
-  td, th {
+  td,
+  th {
     padding: 3px;
   }
 
@@ -136,20 +144,21 @@ export const NarrativeStyles = styled.div`
     font-size: 65%;
     vertical-align: super;
   }
-
 `;
 
 export const OpacityFade = styled.div`
   z-index: 200;
   position: absolute;
-  background-image: ${(props) => `linear-gradient(to ${props.position}, rgba(255, 255, 255, 0), ${props.theme.background})`};
+  background-image: ${(props) =>
+    `linear-gradient(to ${props.position}, rgba(255, 255, 255, 0), ${props.theme.background})`};
   width: 100%;
   height: 30px;
   ${(props) => props.position === "top" && `top: ${props.topHeight}px`};
-  ${(props) => props.position === "bottom" && 'bottom: 0px;'};
+  ${(props) => props.position === "bottom" && "bottom: 0px;"};
 `;
 
-export const linkStyles = { // would be better to get CSS specificity working
+export const linkStyles = {
+  // would be better to get CSS specificity working
   color: "#5097BA",
   textDecoration: "none",
   cursor: "pointer",
@@ -172,7 +181,7 @@ export const ProgressButton = styled.div`
   background: #74a9cf;
   border-radius: 50%;
   cursor: pointer;
-  transition: transform .1s;
+  transition: transform 0.1s;
 
   // BEGIN: mitigate ie flexbug-15: https://github.com/philipwalton/flexbugs#flexbug-15
   align-self: center;
@@ -206,14 +215,14 @@ export const MobileBannerTop = styled.nav`
   ${baseBannerStyles}
   top: 0;
   height: ${(props) => props.height}px;
-  background-color: #E67F2C;
+  background-color: #e67f2c;
 `;
 
 export const MobileBannerBottom = styled.nav`
   ${baseBannerStyles}
   bottom: 0;
   height: ${(props) => props.height}px;
-  background-color: #65B0A4;
+  background-color: #65b0a4;
 `;
 
 export const MobileContentContainer = styled.div`

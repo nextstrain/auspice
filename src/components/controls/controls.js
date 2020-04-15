@@ -1,5 +1,5 @@
 import React from "react";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 
 import ColorBy from "./color-by";
 import DateRangeInputs from "./date-range-inputs";
@@ -17,43 +17,40 @@ import ToggleTangle from "./toggle-tangle";
 import Language from "./language";
 import { SidebarHeader, ControlsContainer } from "./styles";
 
-
-function Controls({mapOn}) {
+function Controls({ mapOn }) {
   const { t } = useTranslation();
 
   return (
     <ControlsContainer>
-      <ChooseDataset/>
+      <ChooseDataset />
 
       <SidebarHeader>{t("sidebar:Date Range")}</SidebarHeader>
-      <DateRangeInputs/>
-
+      <DateRangeInputs />
 
       <SidebarHeader>{t("sidebar:Color By")}</SidebarHeader>
-      <ColorBy/>
-
+      <ColorBy />
 
       <SidebarHeader>{t("sidebar:Tree Options")}</SidebarHeader>
-      <ChooseLayout/>
-      <ChooseMetric/>
-      <ChooseBranchLabelling/>
-      <SearchStrains/>
-      <ChooseSecondTree/>
-      <ToggleTangle/>
+      <ChooseLayout />
+      <ChooseMetric />
+      <ChooseBranchLabelling />
+      <SearchStrains />
+      <ChooseSecondTree />
+      <ToggleTangle />
 
-      { mapOn ? (
-        <span style={{marginTop: "15px"}}>
+      {mapOn ? (
+        <span style={{ marginTop: "15px" }}>
           <SidebarHeader>{t("sidebar:Map Options")}</SidebarHeader>
-          <GeoResolution/>
-          <MapAnimationControls/>
+          <GeoResolution />
+          <MapAnimationControls />
         </span>
       ) : null}
 
-      <span style={{paddingTop: "10px"}}/>
+      <span style={{ paddingTop: "10px" }} />
       <SidebarHeader>{t("sidebar:Panel Options")}</SidebarHeader>
-      <PanelLayout/>
-      <PanelToggles/>
-      <Language/>
+      <PanelLayout />
+      <PanelToggles />
+      <Language />
     </ControlsContainer>
   );
 }

@@ -7,7 +7,6 @@ import { calendarToNumeric } from "../util/dateHelpers";
 import { applyToChildren } from "../components/tree/phyloTree/helpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 
-
 export const applyInViewNodesToTree = (idx, tree) => {
   const validIdxRoot = idx !== undefined ? idx : tree.idxOfInViewRootNode;
   if (idx !== tree.idxOfInViewRootNode && tree.nodes[0].shell) {
@@ -17,18 +16,26 @@ export const applyInViewNodesToTree = (idx, tree) => {
       d.shell.update = true;
     });
     if (tree.nodes[validIdxRoot].shell.terminal) {
-      applyToChildren(tree.nodes[validIdxRoot].shell.parent, (d) => {d.inView = true;});
+      applyToChildren(tree.nodes[validIdxRoot].shell.parent, (d) => {
+        d.inView = true;
+      });
     } else {
-      applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {d.inView = true;});
+      applyToChildren(tree.nodes[validIdxRoot].shell, (d) => {
+        d.inView = true;
+      });
     }
   } else {
     tree.nodes.forEach((d) => {
       d.inView = false;
     });
     if (!tree.nodes[validIdxRoot].hasChildren) {
-      applyToChildren(tree.nodes[validIdxRoot].parent, (d) => {d.inView = true;});
+      applyToChildren(tree.nodes[validIdxRoot].parent, (d) => {
+        d.inView = true;
+      });
     } else {
-      applyToChildren(tree.nodes[validIdxRoot], (d) => {d.inView = true;});
+      applyToChildren(tree.nodes[validIdxRoot], (d) => {
+        d.inView = true;
+      });
     }
   }
 
@@ -72,9 +79,11 @@ const processSelectedTip = (d, tree, treeToo) => {
  * @param  {string | undefined} cladeSelected
  * @return {function} a function to be handled by redux (thunk)
  */
-export const updateVisibleTipsAndBranchThicknesses = (
-  {root = [undefined, undefined], tipSelected = undefined, cladeSelected = undefined} = {}
-) => {
+export const updateVisibleTipsAndBranchThicknesses = ({
+  root = [undefined, undefined],
+  tipSelected = undefined,
+  cladeSelected = undefined
+} = {}) => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
     if (root[0] === undefined && !cladeSelected && tree.selectedClade) {
@@ -82,17 +91,23 @@ export const updateVisibleTipsAndBranchThicknesses = (
       cladeSelected = tree.selectedClade; // eslint-disable-line no-param-reassign
     }
 
-    if (!tree.nodes) {return;}
+    if (!tree.nodes) {
+      return;
+    }
     // console.log("ROOT SETTING TO", root)
     /* mark nodes as "in view" as applicable */
     const rootIdxTree1 = applyInViewNodesToTree(root[0], tree);
-    const [tipIdx1, tipIdx2, tipName] = processSelectedTip(tipSelected, tree, controls.showTreeToo ? treeToo : undefined);
+    const [tipIdx1, tipIdx2, tipName] = processSelectedTip(
+      tipSelected,
+      tree,
+      controls.showTreeToo ? treeToo : undefined
+    );
 
     const data = calculateVisiblityAndBranchThickness(
       tree,
       controls,
-      {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-      {tipSelectedIdx: tipIdx1}
+      { dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric },
+      { tipSelectedIdx: tipIdx1 }
     );
     const dispatchObj = {
       type: types.UPDATE_VISIBILITY_AND_BRANCH_THICKNESS,
@@ -112,10 +127,15 @@ export const updateVisibleTipsAndBranchThicknesses = (
       const dataToo = calculateVisiblityAndBranchThickness(
         treeToo,
         controls,
-        {dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric},
-        {tipSelectedIdx: tipIdx2}
+        { dateMinNumeric: controls.dateMinNumeric, dateMaxNumeric: controls.dateMaxNumeric },
+        { tipSelectedIdx: tipIdx2 }
       );
-      dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility, dataToo.visibility);
+      dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
+        tree.nodes,
+        treeToo.nodes,
+        data.visibility,
+        dataToo.visibility
+      );
       dispatchObj.visibilityToo = dataToo.visibility;
       dispatchObj.visibilityVersionToo = dataToo.visibilityVersion;
       dispatchObj.branchThicknessToo = dataToo.branchThickness;
@@ -126,7 +146,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
 
     /* I think this fixes bug of not resizing tipradii if in URL then deselected */
     if (tipSelected) {
-      const newTipRadii = calcTipRadii({tipSelected, colorScale: controls.colorScale, tree: tree});
+      const newTipRadii = calcTipRadii({ tipSelected, colorScale: controls.colorScale, tree: tree });
       const newTipRadiiVersion = tree.tipRadiiVersion + 1;
       const dispatchRadii = {
         type: types.UPDATE_TIP_RADII,
@@ -134,7 +154,7 @@ export const updateVisibleTipsAndBranchThicknesses = (
         version: newTipRadiiVersion
       };
       if (controls.showTreeToo) {
-        dispatchRadii.dataToo = calcTipRadii({tipSelected, colorScale: controls.colorScale, tree: treeToo});
+        dispatchRadii.dataToo = calcTipRadii({ tipSelected, colorScale: controls.colorScale, tree: treeToo });
       }
       dispatch(dispatchRadii);
     }
@@ -156,10 +176,12 @@ export const updateVisibleTipsAndBranchThicknesses = (
  * @param  {string|false} newMax optional
  * @return {null} side-effects: a single action
  */
-export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = false}) => {
+export const changeDateFilter = ({ newMin = false, newMax = false, quickdraw = false }) => {
   return (dispatch, getState) => {
     const { tree, treeToo, controls, frequencies } = getState();
-    if (!tree.nodes) {return;}
+    if (!tree.nodes) {
+      return;
+    }
     const dates = {
       dateMinNumeric: newMin ? calendarToNumeric(newMin) : controls.dateMinNumeric,
       dateMaxNumeric: newMax ? calendarToNumeric(newMax) : controls.dateMaxNumeric
@@ -181,7 +203,12 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
     };
     if (controls.showTreeToo) {
       const dataToo = calculateVisiblityAndBranchThickness(treeToo, controls, dates);
-      dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(tree.nodes, treeToo.nodes, data.visibility, dataToo.visibility);
+      dispatchObj.tangleTipLookup = constructVisibleTipLookupBetweenTrees(
+        tree.nodes,
+        treeToo.nodes,
+        data.visibility,
+        dataToo.visibility
+      );
       dispatchObj.visibilityToo = dataToo.visibility;
       dispatchObj.visibilityVersionToo = dataToo.visibilityVersion;
       dispatchObj.branchThicknessToo = dataToo.branchThickness;
@@ -204,25 +231,29 @@ export const changeDateFilter = ({newMin = false, newMax = false, quickdraw = fa
  * @param  {array} geoFilter a filter to apply to the strains. Empty array or array of len 2. [0]: geoResolution, [1]: value to filter to
  * @return {null} side-effects: a single action
  */
-export const updateTipRadii = (
-  {tipSelectedIdx = false, selectedLegendItem = false, geoFilter = [], searchNodes = false} = {}
-) => {
+export const updateTipRadii = ({
+  tipSelectedIdx = false,
+  selectedLegendItem = false,
+  geoFilter = [],
+  searchNodes = false
+} = {}) => {
   return (dispatch, getState) => {
     const { controls, tree, treeToo } = getState();
     const colorScale = controls.colorScale;
     const d = {
-      type: types.UPDATE_TIP_RADII, version: tree.tipRadiiVersion + 1
+      type: types.UPDATE_TIP_RADII,
+      version: tree.tipRadiiVersion + 1
     };
     const tt = controls.showTreeToo;
     if (tipSelectedIdx) {
-      d.data = calcTipRadii({tipSelectedIdx, colorScale, tree});
+      d.data = calcTipRadii({ tipSelectedIdx, colorScale, tree });
       if (tt) {
         const idx = strainNameToIdx(treeToo.nodes, tree.nodes[tipSelectedIdx].name);
-        d.dataToo = calcTipRadii({idx, colorScale, tree: treeToo});
+        d.dataToo = calcTipRadii({ idx, colorScale, tree: treeToo });
       }
     } else {
-      d.data = calcTipRadii({selectedLegendItem, geoFilter, searchNodes, colorScale, tree});
-      if (tt) d.dataToo = calcTipRadii({selectedLegendItem, geoFilter, searchNodes, colorScale, tree: treeToo});
+      d.data = calcTipRadii({ selectedLegendItem, geoFilter, searchNodes, colorScale, tree });
+      if (tt) d.dataToo = calcTipRadii({ selectedLegendItem, geoFilter, searchNodes, colorScale, tree: treeToo });
     }
     dispatch(d);
   };
@@ -269,7 +300,7 @@ export const applyFilter = (mode, trait, values) => {
       console.error(`applyFilter called with invalid mode: ${mode}`);
       return; // don't dispatch
     }
-    dispatch({type: types.APPLY_FILTER, trait, values: newValues});
+    dispatch({ type: types.APPLY_FILTER, trait, values: newValues });
     dispatch(updateVisibleTipsAndBranchThicknesses());
   };
 };

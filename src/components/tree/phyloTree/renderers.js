@@ -18,7 +18,22 @@ import { getEmphasizedColor } from "../../../util/colorHelpers";
  * @param {array|null} tipRadii   -- array of tip radius'
  * @return {null}
  */
-export const render = function render(svg, layout, distance, parameters, callbacks, branchThickness, visibility, drawConfidence, vaccines, branchStroke, tipStroke, tipFill, tipRadii, dateRange) {
+export const render = function render(
+  svg,
+  layout,
+  distance,
+  parameters,
+  callbacks,
+  branchThickness,
+  visibility,
+  drawConfidence,
+  vaccines,
+  branchStroke,
+  tipStroke,
+  tipFill,
+  tipRadii,
+  dateRange
+) {
   timerStart("phyloTree render()");
   this.svg = svg;
   this.params = Object.assign(this.params, parameters);
@@ -86,7 +101,6 @@ export const drawVaccines = function drawVaccines() {
     .on("click", this.callbacks.onTipClick);
 };
 
-
 /**
  * adds all the tip circles to the svg, they have class tip
  * @return {null}
@@ -112,7 +126,7 @@ export const drawTips = function drawTips() {
     .on("mouseout", this.callbacks.onTipLeave)
     .on("click", this.callbacks.onTipClick)
     .style("pointer-events", "auto")
-    .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden")
+    .style("visibility", (d) => (d.visibility === NODE_VISIBLE ? "visible" : "hidden"))
     .style("fill", (d) => d.fill || params.tipFill)
     .style("stroke", (d) => d.tipStroke || params.tipStroke)
     .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
@@ -129,12 +143,11 @@ export const drawTips = function drawTips() {
  */
 export const getBranchVisibility = (d) => {
   const hiddenSetting = d.n.node_attrs && d.n.node_attrs.hidden;
-  if (hiddenSetting &&
-    (
-      hiddenSetting === "always" ||
+  if (
+    hiddenSetting &&
+    (hiddenSetting === "always" ||
       (hiddenSetting === "timetree" && d.that.distance === "num_date") ||
-      (hiddenSetting === "divtree" && d.that.distance === "div")
-    )
+      (hiddenSetting === "divtree" && d.that.distance === "div"))
   ) {
     return "hidden";
   }
@@ -146,7 +159,8 @@ export const getBranchVisibility = (d) => {
  * @param {obj} d node
  * @param {string} b branch type -- either "T" (tee) or "S" (stem)
  */
-export const strokeForBranch = (d, b) => { // eslint-disable-line
+export const strokeForBranch = (d, b) => {
+  // eslint-disable-line
   /* Due to errors rendering gradients on SVG branches on some browsers/OSs which would
   cause the branches to not appear, we're falling back to the previous solution which
   doesn't use gradients. The commented code remains & hopefully a solution can be
@@ -176,7 +190,7 @@ export const drawBranches = function drawBranches() {
     this.groups.branchTee.selectAll("*").remove();
   } else {
     this.groups.branchTee
-      .selectAll('.branch')
+      .selectAll(".branch")
       .data(this.nodes.filter((d) => !d.terminal))
       .enter()
       .append("path")
@@ -184,7 +198,7 @@ export const drawBranches = function drawBranches() {
       .attr("id", (d) => getDomId("branchT", d.n.name))
       .attr("d", (d) => d.branch[1])
       .style("stroke", (d) => d.branchStroke || params.branchStroke)
-      .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+      .style("stroke-width", (d) => d["stroke-width"] || params.branchStrokeWidth)
       .style("fill", "none")
       .style("pointer-events", "auto")
       .on("mouseover", this.callbacks.onBranchHover)
@@ -207,7 +221,7 @@ export const drawBranches = function drawBranches() {
     this.groups.branchStem = this.svg.append("g").attr("id", "branchStem");
   }
   this.groups.branchStem
-    .selectAll('.branch')
+    .selectAll(".branch")
     .data(this.nodes)
     .enter()
     .append("path")
@@ -219,9 +233,9 @@ export const drawBranches = function drawBranches() {
       return strokeForBranch(d, "S");
     })
     .style("stroke-linecap", "round")
-    .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+    .style("stroke-width", (d) => d["stroke-width"] || params.branchStrokeWidth)
     .style("visibility", getBranchVisibility)
-    .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
+    .style("cursor", (d) => (d.visibility === NODE_VISIBLE ? "pointer" : "default"))
     .style("pointer-events", "auto")
     .on("mouseover", this.callbacks.onBranchHover)
     .on("mouseout", this.callbacks.onBranchLeave)
@@ -229,7 +243,6 @@ export const drawBranches = function drawBranches() {
 
   timerEnd("drawBranches");
 };
-
 
 /**
  * draws the regression line in the svg and adds a text with the rate estimate
@@ -239,8 +252,15 @@ export const drawRegression = function drawRegression() {
   const leftY = this.yScale(this.regression.intercept + this.xScale.domain()[0] * this.regression.slope);
   const rightY = this.yScale(this.regression.intercept + this.xScale.domain()[1] * this.regression.slope);
 
-  const path = "M " + this.xScale.range()[0].toString() + " " + leftY.toString() +
-    " L " + this.xScale.range()[1].toString() + " " + rightY.toString();
+  const path =
+    "M " +
+    this.xScale.range()[0].toString() +
+    " " +
+    leftY.toString() +
+    " L " +
+    this.xScale.range()[1].toString() +
+    " " +
+    rightY.toString();
 
   if (!("clockRegression" in this.groups)) {
     this.groups.clockRegression = this.svg.append("g").attr("id", "clockRegression");
@@ -278,7 +298,6 @@ export const removeRegression = function removeRegression() {
 export const clearSVG = function clearSVG() {
   this.svg.selectAll("*").remove();
 };
-
 
 /* Due to errors rendering gradients on SVG branches on some browsers/OSs which would
 cause the branches to not appear, we're falling back to the previous solution which
@@ -319,7 +338,6 @@ export const updateColorBy = function updateColorBy() {};
 //   });
 // };
 
-
 /** given a node `d` which is being hovered, update it's colour to emphasize
  * that it's being hovered. This updates the SVG element stroke style in-place
  * _or_ updates the SVG gradient def in place.
@@ -328,14 +346,17 @@ export const updateColorBy = function updateColorBy() {};
  * @param {string} c2 colour of the node (end of the branch)
  */
 const handleBranchHoverColor = (d, c1, c2) => {
-  if (!d) { return; }
+  if (!d) {
+    return;
+  }
 
   const id = `T${d.that.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
 
   /* We want to emphasize the colour of the branch. How we do this depends on how the branch was rendered in the first place! */
   const tel = d.that.svg.select(getDomId("#branchT", d.n.name));
 
-  if (!tel.empty()) { // Some displays don't have S & T parts of the branch
+  if (!tel.empty()) {
+    // Some displays don't have S & T parts of the branch
     tel.style("stroke", c2);
   }
   const sel = d.that.svg.select(getDomId("#branchS", d.n.name));
@@ -357,15 +378,18 @@ const handleBranchHoverColor = (d, c1, c2) => {
 };
 
 export const branchStrokeForLeave = function branchStrokeForLeave(d) {
-  if (!d) { return; }
+  if (!d) {
+    return;
+  }
   handleBranchHoverColor(d, d.parent.branchStroke, d.branchStroke);
 };
 
 export const branchStrokeForHover = function branchStrokeForHover(d) {
-  if (!d) { return; }
+  if (!d) {
+    return;
+  }
   handleBranchHoverColor(d, getEmphasizedColor(d.parent.branchStroke), getEmphasizedColor(d.branchStroke));
 };
-
 
 function getRateEstimate(regression, maxDivergence) {
   /* Prior to Jan 2020, the divergence measure was always "subs per site per year"

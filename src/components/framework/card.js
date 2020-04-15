@@ -67,7 +67,7 @@ class Card extends React.Component {
         </div>
         <div
           id="CardContentContainer"
-          style={{display: "flex", justifyContent: this.props.center ? "center" : "flex-start"}}
+          style={{ display: "flex", justifyContent: this.props.center ? "center" : "flex-start" }}
         >
           {this.props.children}
         </div>

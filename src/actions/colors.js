@@ -6,7 +6,8 @@ import { updateFrequencyDataDebounced } from "./frequencies";
 import * as types from "./types";
 
 /* providedColorBy: undefined | string */
-export const changeColorBy = (providedColorBy = undefined) => { // eslint-disable-line import/prefer-default-export
+export const changeColorBy = (providedColorBy = undefined) => {
+  // eslint-disable-line import/prefer-default-export
   return (dispatch, getState) => {
     timerStart("changeColorBy calculations");
     const { controls, tree, treeToo, metadata, frequencies } = getState();

@@ -9,8 +9,12 @@ import { updateTipRadii } from "../../actions/tree";
 /* util */
 
 export const pathStringGenerator = line()
-  .x((d) => { return d.x; })
-  .y((d) => { return d.y; })
+  .x((d) => {
+    return d.x;
+  })
+  .y((d) => {
+    return d.y;
+  })
   .curve(curveBasis);
 
 const extractLineSegmentForAnimationEffect = (
@@ -24,7 +28,6 @@ const extractLineSegmentForAnimationEffect = (
   bezierCurve,
   bezierDates
 ) => {
-
   if (visible === "hidden") {
     return [];
   }
@@ -60,10 +63,14 @@ const extractLineSegmentForAnimationEffect = (
   // endIndex is 4 in scenario D
 
   // find start walking forwards from left of array
-  const startIndex = _findIndex(bezierDates, (d) => { return d > numDateMin; });
+  const startIndex = _findIndex(bezierDates, (d) => {
+    return d > numDateMin;
+  });
 
   // find end walking backwards from right of array
-  const endIndex = _findLastIndex(bezierDates, (d) => { return d < numDateMax; });
+  const endIndex = _findLastIndex(bezierDates, (d) => {
+    return d < numDateMax;
+  });
 
   // startIndex and endIndex is -1 if not found
   // this indicates a slice of time that lies outside the bounds of BCurve
@@ -86,8 +93,8 @@ const extractLineSegmentForAnimationEffect = (
     const weightLeft = (bezierDates[startIndex] - numDateMin) / dateDiff;
     // construct interpolated new start
     newStart = {
-      x: (weightLeft * bezierCurve[startIndex - 1].x) + (weightRight * bezierCurve[startIndex].x),
-      y: (weightLeft * bezierCurve[startIndex - 1].y) + (weightRight * bezierCurve[startIndex].y)
+      x: weightLeft * bezierCurve[startIndex - 1].x + weightRight * bezierCurve[startIndex].x,
+      y: weightLeft * bezierCurve[startIndex - 1].y + weightRight * bezierCurve[startIndex].y
     };
     // will break indexing, so wait to prepend
   }
@@ -101,8 +108,8 @@ const extractLineSegmentForAnimationEffect = (
     const weightLeft = (bezierDates[endIndex + 1] - numDateMax) / dateDiff;
     // construct interpolated new end
     newEnd = {
-      x: (weightLeft * bezierCurve[endIndex].x) + (weightRight * bezierCurve[endIndex + 1].x),
-      y: (weightLeft * bezierCurve[endIndex].y) + (weightRight * bezierCurve[endIndex + 1].y)
+      x: weightLeft * bezierCurve[endIndex].x + weightRight * bezierCurve[endIndex + 1].x,
+      y: weightLeft * bezierCurve[endIndex].y + weightRight * bezierCurve[endIndex + 1].y
     };
     // will break indexing, so wait to append
   }
@@ -135,16 +142,18 @@ export const drawDemesAndTransmissions = (
   nodes,
   numDateMin,
   numDateMax,
-  pieChart, /* bool */
+  pieChart /* bool */,
   geoResolution,
   dispatch
 ) => {
-
   // add transmission lines
-  const transmissions = g.selectAll("transmissions")
+  const transmissions = g
+    .selectAll("transmissions")
     .data(transmissionData)
     .enter()
-    .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
+    .append(
+      "path"
+    ) /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
     .attr("d", (d) => {
       return pathStringGenerator(
         extractLineSegmentForAnimationEffect(
@@ -163,7 +172,9 @@ export const drawDemesAndTransmissions = (
     .attr("fill", "none")
     .attr("stroke-opacity", 0.6)
     .attr("stroke-linecap", "round")
-    .attr("stroke", (d) => { return d.color; })
+    .attr("stroke", (d) => {
+      return d.color;
+    })
     .attr("stroke-width", 1);
 
   const demeMultiplier = demeCountMultiplier / Math.sqrt(_max([nodes.length, demeCountMinimum]));
@@ -178,101 +189,113 @@ export const drawDemesAndTransmissions = (
     /* add `outerRadius` to all slices */
     // TODO - move this to initial arc creation in setupDemeData as it's only ever done once
     individualArcs.forEach((a) => {
-      a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count)*demeMultiplier;
+      a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count) * demeMultiplier;
     });
 
-    demes = g.selectAll('demes') // add individual arcs ("slices") to this selection
+    demes = g
+      .selectAll("demes") // add individual arcs ("slices") to this selection
       .data(individualArcs)
-      .enter().append("path")
+      .enter()
+      .append("path")
       .attr("d", (d) => arc()(d))
       /* following calls are (almost) the same for pie charts & circles */
       .style("stroke", "none")
       .style("fill-opacity", 0.65)
-      .style("fill", (d) => { return d.color; })
+      .style("fill", (d) => {
+        return d.color;
+      })
       .style("stroke-opacity", 0.85)
-      .style("stroke", (d) => { return d.color; })
+      .style("stroke", (d) => {
+        return d.color;
+      })
       .style("pointer-events", "all")
-      .attr("transform", (d) =>
-        "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
+      .attr(
+        "transform",
+        (d) => "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
       )
-      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, demeData[d.demeDataIdx].name]})); })
-      .on("mouseout", () => { dispatch(updateTipRadii()); });
+      .on("mouseover", (d) => {
+        dispatch(updateTipRadii({ geoFilter: [geoResolution, demeData[d.demeDataIdx].name] }));
+      })
+      .on("mouseout", () => {
+        dispatch(updateTipRadii());
+      });
   } else {
-    demes = g.selectAll("demes") // add deme circles to this selection
+    demes = g
+      .selectAll("demes") // add deme circles to this selection
       .data(demeData)
-      .enter().append("circle")
-      .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); })
+      .enter()
+      .append("circle")
+      .attr("r", (d) => {
+        return demeMultiplier * Math.sqrt(d.count);
+      })
       /* following calls are (almost) the same for pie charts & circles */
       .style("stroke", "none")
       .style("fill-opacity", 0.65)
-      .style("fill", (d) => { return d.color; })
+      .style("fill", (d) => {
+        return d.color;
+      })
       .style("stroke-opacity", 0.85)
-      .style("stroke", (d) => { return d.color; })
+      .style("stroke", (d) => {
+        return d.color;
+      })
       .style("pointer-events", "all")
       .attr("transform", (d) => "translate(" + d.coords.x + "," + d.coords.y + ")")
-      .on("mouseover", (d) => { dispatch(updateTipRadii({geoFilter: [geoResolution, d.name]})); })
-      .on("mouseout", () => { dispatch(updateTipRadii()); });
+      .on("mouseover", (d) => {
+        dispatch(updateTipRadii({ geoFilter: [geoResolution, d.name] }));
+      })
+      .on("mouseout", () => {
+        dispatch(updateTipRadii());
+      });
   }
 
   return {
     demes,
     transmissions
   };
-
 };
 
 export const updateOnMoveEnd = (demeData, transmissionData, d3elems, numDateMin, numDateMax, pieChart) => {
   /* map has moved or rescaled, make demes and transmissions line up */
-  if (!d3elems) { return; }
+  if (!d3elems) {
+    return;
+  }
 
   /* move the pie charts differently to the color-blended circles */
   if (pieChart) {
     const individualArcs = createArcsFromDemes(demeData);
-    d3elems.demes
-      .data(individualArcs)
-      .attr("transform", (d) =>
+    d3elems.demes.data(individualArcs).attr(
+      "transform",
+      (d) =>
         /* copied from above. TODO. */
         "translate(" + demeData[d.demeDataIdx].coords.x + "," + demeData[d.demeDataIdx].coords.y + ")"
-      );
+    );
   } else {
-    d3elems.demes
-      .data(demeData)
-      .attr("transform", (d) =>
+    d3elems.demes.data(demeData).attr(
+      "transform",
+      (d) =>
         /* copied from above. TODO. */
         "translate(" + d.coords.x + "," + d.coords.y + ")"
-      );
+    );
   }
 
-  d3elems.transmissions
-    .data(transmissionData)
-    .attr("d", (d) => {
-      return pathStringGenerator(
-        extractLineSegmentForAnimationEffect(
-          numDateMin,
-          numDateMax,
-          d.originCoords,
-          d.destinationCoords,
-          d.originNumDate,
-          d.destinationNumDate,
-          d.visible,
-          d.bezierCurve,
-          d.bezierDates
-        )
-      );
-    }); // other attrs remain the same as they were
+  d3elems.transmissions.data(transmissionData).attr("d", (d) => {
+    return pathStringGenerator(
+      extractLineSegmentForAnimationEffect(
+        numDateMin,
+        numDateMax,
+        d.originCoords,
+        d.destinationCoords,
+        d.originNumDate,
+        d.destinationNumDate,
+        d.visible,
+        d.bezierCurve,
+        d.bezierDates
+      )
+    );
+  }); // other attrs remain the same as they were
 };
 
-export const updateVisibility = (
-  demeData,
-  transmissionData,
-  d3elems,
-  map,
-  nodes,
-  numDateMin,
-  numDateMax,
-  pieChart
-) => {
-
+export const updateVisibility = (demeData, transmissionData, d3elems, map, nodes, numDateMin, numDateMax, pieChart) => {
   if (!d3elems) {
     console.error("d3elems is not defined!");
     return;
@@ -284,13 +307,17 @@ export const updateVisibility = (
     /* add `outerRadius` to all slices */
     // TODO - move this to initial arc creation in setupDemeData as it's only ever done once
     individualArcs.forEach((a) => {
-      a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count)*demeMultiplier;
+      a.outerRadius = Math.sqrt(demeData[a.demeDataIdx].count) * demeMultiplier;
     });
     d3elems.demes
       .data(individualArcs)
       .attr("d", (d) => arc()(d))
-      .style("fill", (d) => { return d.color; })
-      .style("stroke", (d) => { return d.color; });
+      .style("fill", (d) => {
+        return d.color;
+      })
+      .style("stroke", (d) => {
+        return d.color;
+      });
   } else {
     /* for colour blended circles we just have to update the colours & size (radius) */
     d3elems.demes
@@ -298,9 +325,15 @@ export const updateVisibility = (
       .transition()
       .duration(200)
       .ease(easeLinear)
-      .style("stroke", (d) => { return d.count > 0 ? d.color : "white"; })
-      .style("fill", (d) => { return d.count > 0 ? d.color : "white"; })
-      .attr("r", (d) => { return demeMultiplier * Math.sqrt(d.count); });
+      .style("stroke", (d) => {
+        return d.count > 0 ? d.color : "white";
+      })
+      .style("fill", (d) => {
+        return d.count > 0 ? d.color : "white";
+      })
+      .attr("r", (d) => {
+        return demeMultiplier * Math.sqrt(d.count);
+      });
   }
 
   /* update the path and stroke colour of transmission lines */
@@ -321,16 +354,16 @@ export const updateVisibility = (
         )
       );
     }) /* with the interpolation in the function above pathStringGenerator */
-    .attr("stroke", (d) => { return d.color; });
+    .attr("stroke", (d) => {
+      return d.color;
+    });
 };
 
 /* template for an update helper */
 export const updateFoo = (d3elems, latLongs) => {
-  d3elems.demes
-    .data(latLongs.demes);
+  d3elems.demes.data(latLongs.demes);
 
-  d3elems.transmissions
-    .data(latLongs.transmissions);
+  d3elems.transmissions.data(latLongs.transmissions);
 };
 
 /*

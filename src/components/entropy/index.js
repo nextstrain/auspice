@@ -1,9 +1,9 @@
 import React from "react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import { connect } from "react-redux";
 import { select } from "d3-selection";
 import { withTranslation } from "react-i18next";
-import 'd3-transition';
+import "d3-transition";
 import Card from "../framework/card";
 import { changeColorBy } from "../../actions/colors";
 import { tabGroup, tabGroupMember, tabGroupMemberSelected } from "../../globalStyles";
@@ -49,11 +49,7 @@ const getStyles = (width) => {
 };
 
 const constructEncodedGenotype = (mutType, d) => {
-  return encodeColorByGenotype(
-    mutType === "aa"
-      ? { gene: d.prot, positions: [d.codon] }
-      : { positions: [d.x] }
-  );
+  return encodeColorByGenotype(mutType === "aa" ? { gene: d.prot, positions: [d.codon] } : { positions: [d.x] });
 };
 
 @connect((state) => {
@@ -89,22 +85,22 @@ class Entropy extends React.Component {
     colorBy: PropTypes.string.isRequired,
     defaultColorBy: PropTypes.string.isRequired,
     mutType: PropTypes.string.isRequired
-  }
+  };
 
   /* CALLBACKS */
   onHover(d, x, y) {
     // console.log("hovering @", x, y, this.state.chartGeom);
-    this.setState({hovered: {d, type: ".tip", x, y}});
+    this.setState({ hovered: { d, type: ".tip", x, y } });
   }
   onLeave() {
-    this.setState({hovered: false});
+    this.setState({ hovered: false });
   }
   onClick(d) {
     if (this.props.narrativeMode) return;
     const colorBy = constructEncodedGenotype(this.props.mutType, d);
     analyticsControlsEvent("color-by-genotype");
     this.props.dispatch(changeColorBy(colorBy));
-    this.setState({hovered: false});
+    this.setState({ hovered: false });
   }
 
   changeMutTypeCallback(newMutType) {
@@ -119,7 +115,7 @@ class Entropy extends React.Component {
   aaNtSwitch(styles) {
     if (this.props.narrativeMode) return null;
     return (
-      <div style={{...tabGroup, ...styles.aaNtSwitch}}>
+      <div style={{ ...tabGroup, ...styles.aaNtSwitch }}>
         <button
           key={1}
           style={this.props.mutType === "aa" ? tabGroupMemberSelected : tabGroupMember}
@@ -141,7 +137,7 @@ class Entropy extends React.Component {
     const { t } = this.props;
     if (this.props.narrativeMode) return null;
     return (
-      <div style={{...tabGroup, ...styles.entropyCountSwitch}}>
+      <div style={{ ...tabGroup, ...styles.entropyCountSwitch }}>
         <button
           key={1}
           style={this.props.showCounts ? tabGroupMember : tabGroupMemberSelected}
@@ -165,8 +161,8 @@ class Entropy extends React.Component {
       props.annotations,
       props.geneMap,
       props.geneLength[nucleotide_gene],
-      { /* callbacks */
-        onHover: this.onHover.bind(this),
+      {
+        /* callbacks */ onHover: this.onHover.bind(this),
         onLeave: this.onLeave.bind(this),
         onClick: this.onClick.bind(this)
       }
@@ -175,7 +171,7 @@ class Entropy extends React.Component {
     if (props.narrativeMode) {
       select(this.d3entropy).selectAll(".handle--custom").style("visibility", "hidden");
     }
-    this.setState({chart});
+    this.setState({ chart });
   }
   componentDidMount() {
     if (this.props.loaded) {
@@ -184,7 +180,7 @@ class Entropy extends React.Component {
   }
   componentWillReceiveProps(nextProps) {
     if (!nextProps.loaded) {
-      this.setState({chart: false});
+      this.setState({ chart: false });
     }
     if (!this.state.chart) {
       if (nextProps.loaded) {
@@ -197,26 +193,33 @@ class Entropy extends React.Component {
       timerStart("entropy initial render");
       this.state.chart.render(nextProps);
       timerEnd("entropy initial render");
-    } else { /* props changed, but a new render probably isn't required */
+    } else {
+      /* props changed, but a new render probably isn't required */
       timerStart("entropy D3 update");
       const updateParams = {};
       if (this.props.zoomMax !== nextProps.zoomMax || this.props.zoomMin !== nextProps.zoomMin) {
         updateParams.zoomMax = nextProps.zoomMax;
         updateParams.zoomMin = nextProps.zoomMin;
       }
-      if (this.props.bars !== nextProps.bars) { /* will always be true if mutType has changed */
+      if (this.props.bars !== nextProps.bars) {
+        /* will always be true if mutType has changed */
         updateParams.aa = nextProps.mutType === "aa";
         updateParams.newBars = nextProps.bars;
         updateParams.maxYVal = nextProps.maxYVal;
       }
-      if (this.props.colorBy !== nextProps.colorBy && (isColorByGenotype(this.props.colorBy) || isColorByGenotype(nextProps.colorBy))) {
+      if (
+        this.props.colorBy !== nextProps.colorBy &&
+        (isColorByGenotype(this.props.colorBy) || isColorByGenotype(nextProps.colorBy))
+      ) {
         if (isColorByGenotype(nextProps.colorBy)) {
           const colorByGenotype = decodeColorByGenotype(nextProps.colorBy, nextProps.geneLength);
-          if (colorByGenotype.aa) {  /* if it is a gene, zoom to it */
+          if (colorByGenotype.aa) {
+            /* if it is a gene, zoom to it */
             updateParams.gene = colorByGenotype.gene;
             updateParams.start = nextProps.geneMap[updateParams.gene].start;
             updateParams.end = nextProps.geneMap[updateParams.gene].end;
-          } else { /* if a nuc, want to do different things if 1 or multiple */
+          } else {
+            /* if a nuc, want to do different things if 1 or multiple */
             const positions = colorByGenotype.positions;
             const zoomCoord = this.state.chart.zoomCoordinates;
             const maxNt = this.state.chart.maxNt;
@@ -225,20 +228,26 @@ class Entropy extends React.Component {
             if (positions.length > 1) {
               const start = Math.min.apply(null, positions);
               const end = Math.max.apply(null, positions);
-              startUpdate = start - (end-start)*0.05;
-              endUpdate = end + (end-start)*0.05;
+              startUpdate = start - (end - start) * 0.05;
+              endUpdate = end + (end - start) * 0.05;
             } else {
               const pos = positions[0];
-              const eitherSide = maxNt*0.05;
-              const newStartEnd = (pos-eitherSide) <= 0 ? [0, pos+eitherSide] :
-                (pos+eitherSide) >= maxNt ? [pos-eitherSide, maxNt] : [pos-eitherSide, pos+eitherSide];
+              const eitherSide = maxNt * 0.05;
+              const newStartEnd =
+                pos - eitherSide <= 0
+                  ? [0, pos + eitherSide]
+                  : pos + eitherSide >= maxNt
+                  ? [pos - eitherSide, maxNt]
+                  : [pos - eitherSide, pos + eitherSide];
               startUpdate = newStartEnd[0];
               endUpdate = newStartEnd[1];
             }
             /* if the zoom would be different enough, change it */
-            if (!(startUpdate > zoomCoord[0]-maxNt*0.4 && startUpdate < zoomCoord[0]+maxNt*0.4) ||
-              !(endUpdate > zoomCoord[1]-maxNt*0.4 && endUpdate < zoomCoord[1]+maxNt*0.4) ||
-              !(positions.every((x) => x > zoomCoord[0]) && positions.every((x) => x < zoomCoord[1]))) {
+            if (
+              !(startUpdate > zoomCoord[0] - maxNt * 0.4 && startUpdate < zoomCoord[0] + maxNt * 0.4) ||
+              !(endUpdate > zoomCoord[1] - maxNt * 0.4 && endUpdate < zoomCoord[1] + maxNt * 0.4) ||
+              !(positions.every((x) => x > zoomCoord[0]) && positions.every((x) => x < zoomCoord[1]))
+            ) {
               updateParams.gene = colorByGenotype.gene;
               updateParams.start = startUpdate;
               updateParams.end = endUpdate;
@@ -278,13 +287,13 @@ class Entropy extends React.Component {
           geneMap={this.props.geneMap}
           t={t}
         />
-        <svg
-          id="d3entropyParent"
-          style={{pointerEvents: "auto"}}
-          width={this.props.width}
-          height={this.props.height}
-        >
-          <g ref={(c) => { this.d3entropy = c; }} id="d3entropy"/>
+        <svg id="d3entropyParent" style={{ pointerEvents: "auto" }} width={this.props.width} height={this.props.height}>
+          <g
+            ref={(c) => {
+              this.d3entropy = c;
+            }}
+            id="d3entropy"
+          />
         </svg>
         {this.aaNtSwitch(styles)}
         {this.entropyCountSwitch(styles)}
