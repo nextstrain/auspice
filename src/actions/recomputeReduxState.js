@@ -44,7 +44,6 @@ export const getMaxCalDateViaTree = (nodes) => {
 
 /* need a (better) way to keep the queryParams all in "sync" */
 const modifyStateViaURLQuery = (state, query) => {
-  // console.log("Query incoming: ", query);
   if (query.l) {
     state["layout"] = query.l;
   }
@@ -60,7 +59,9 @@ const modifyStateViaURLQuery = (state, query) => {
   if (query.c) {
     state["colorBy"] = query.c;
   }
-  if (query.ci !== undefined) {
+  if (query.ci === undefined) {
+    state["temporalConfidence"]["on"] = false;
+  } else {
     state["temporalConfidence"]["on"] = true;
   }
   if (query.r) {
@@ -463,7 +464,9 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
   }
 
   /* temporalConfidence */
-  if (!shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout)) {
+  if (shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout)) {
+    state.temporalConfidence.display = true;
+  } else {
     state.temporalConfidence.display = false;
     state.temporalConfidence.on = false;
     delete query.ci; // rm ci from the query if it doesn't apply
