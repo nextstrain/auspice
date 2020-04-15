@@ -1,4 +1,5 @@
 import React from "react";
+import { FaChevronLeft } from "react-icons/fa";
 
 const SidebarChevron = ({navHeight, navWidth, display, onClick}) => {
   const chevronStyle = {
@@ -19,7 +20,7 @@ const SidebarChevron = ({navHeight, navWidth, display, onClick}) => {
 
   return (
     <div style={chevronStyle} onClick={onClick}>
-      <i className="fa fa-chevron-left" aria-hidden="true"/>
+      <FaChevronLeft />
     </div>
   );
 };
