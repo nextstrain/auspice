@@ -41,9 +41,10 @@ const styliseDateRange = (date) => {
   return dateStr;
 };
 
-const getNumSelectedTips = (nodes, visibility) => {
+export const getNumSelectedTips = (nodes, visibility) => {
   let count = 0;
   nodes.forEach((d, idx) => {
+    // todo: should this include nodes which are not inView?
     if (!d.hasChildren && visibility[idx] === NODE_VISIBLE) count += 1;
   });
   return count;

@@ -4,7 +4,6 @@ import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
 import { NODE_VISIBLE } from "../../util/globals";
-import { calcVisiblity } from "../../util/treeVisibilityHelpers";
 
 export const isPaperURLValid = (d) => {
   return (
