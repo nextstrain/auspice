@@ -4,6 +4,7 @@ import React from "react";
 import { connect } from "react-redux";
 import queryString from "query-string";
 import Mousetrap from "mousetrap";
+import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 import {
   NarrativeStyles,
   linkStyles,
@@ -16,7 +17,6 @@ import ReactPageScroller from "./ReactPageScroller";
 import { changePage, EXPERIMENTAL_showMainDisplayMarkdown } from "../../actions/navigation";
 import { CHANGE_URL_QUERY_BUT_NOT_REDUX_STATE } from "../../actions/types";
 import { narrativeNavBarHeight } from "../../util/globals";
-import { FaChevronUp, FaChevronDown } from "react-icons/fa";
 
 /* regarding refs: https://reactjs.org/docs/refs-and-the-dom.html#exposing-dom-refs-to-parent-components */
 const progressHeight = 25;

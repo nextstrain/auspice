@@ -80,7 +80,6 @@
     "express-naked-redirect": "^0.1.2",
     "express-static-gzip": "^0.2.2",
     "file-loader": "^1.1.11",
-    "font-awesome": "^4.7.0",
     "react-icons": "^3.9.0",
     "i18next": "^19.3.2",
     "i18next-resource-store-loader": "^0.1.2",
