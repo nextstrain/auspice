@@ -1,4 +1,5 @@
 import React from "react";
+import { FaTimes, FaChevronRight, FaChevronLeft, FaSlidersH } from "react-icons/fa";
 import { goColor, sidebarColor } from "../../globalStyles";
 
 /*
@@ -44,20 +45,20 @@ const SidebarToggle = ({sidebarOpen, mobileDisplay, handler}) => {
     fontSize: mobileDisplay ? 26 : 12
   };
 
-  let iconClass = "fa fa-close";
+  let icon = <FaTimes />;
   if (sidebarOpen && !mobileDisplay) {
-    iconClass = "fa fa-chevron-left";
+    icon = <FaChevronLeft />;
   } else if (!sidebarOpen && !mobileDisplay) {
-    iconClass = "fa fa-chevron-right";
+    icon = <FaChevronRight />;
   } else if (sidebarOpen && mobileDisplay) {
-    iconClass = "fa fa-close";
+    icon = <FaTimes />;
   } else if (!sidebarOpen && mobileDisplay) {
-    iconClass = "fa fa-sliders";
+    icon = <FaSlidersH />;
   }
 
   return (
     <div style={containerStyle} onClick={handler}>
-      <div style={iconStyle}><i className={iconClass} aria-hidden="true"/></div>
+      <div style={iconStyle}>{icon}</div>
     </div>
   );
 };

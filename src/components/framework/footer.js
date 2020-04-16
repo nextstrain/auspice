@@ -4,6 +4,7 @@ import marked from "marked";
 import dompurify from "dompurify";
 import styled from 'styled-components';
 import { withTranslation } from "react-i18next";
+import { FaDownload } from "react-icons/fa";
 import { dataFont, medGrey, materialButton } from "../../globalStyles";
 import { TRIGGER_DOWNLOAD_MODAL } from "../../actions/types";
 import Flex from "./flex";
@@ -325,7 +326,7 @@ class Footer extends React.Component {
         style={Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", color: medGrey, margin: 0, padding: 0})}
         onClick={() => { this.props.dispatch({ type: TRIGGER_DOWNLOAD_MODAL }); }}
       >
-        <i className="fa fa-download" aria-hidden="true"/>
+        <FaDownload />
         <span style={{position: "relative"}}>{" "+t("Download data")}</span>
       </button>
     );
