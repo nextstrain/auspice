@@ -10,6 +10,8 @@ expect.extend({ toMatchImageSnapshot });
 jest.setTimeout(30 * 1000);
 setDefaultOptions({ timeout: 3 * 1000 });
 
+jest.retryTimes(4);
+
 beforeEach(async () => {
   await jestPuppeteer.resetBrowser();
   const userAgent = await browser.userAgent();
