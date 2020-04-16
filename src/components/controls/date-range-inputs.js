@@ -52,15 +52,6 @@ class DateRangeInputs extends React.Component {
     /* debounce: boolean. TRUE: both debounce and quickdraw. */
     this.maybeClearMapAnimationInterval();
 
-    if (debounce) {
-      // simple debounce @ 100ms
-      const currentTime = Date.now();
-      if (currentTime < this.state.lastSliderUpdateTime + 100) {
-        return null;
-      }
-      // console.log("UPDATING", currentTime, this.state.lastSliderUpdateTime)
-      this.setState({lastSliderUpdateTime: currentTime});
-    }
     // {numDateValues} is an array of numDates received from Slider
     // [numDateStart, numDateEnd]
     const newRange = {min: numericToCalendar(numDateValues[0]),
