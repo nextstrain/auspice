@@ -71,12 +71,19 @@ async function toMatchImageSnapshot(option, selectOptionTest) {
   const image = await page.screenshot();
 
   /**
-   * (tihuan): Apply `blur` to ignore minor noises.
-   * Also `` is needed, since we use `jest.retryTimes()`
+   * (tihuan): Apply `blur` and `failureThreshold` to ignore minor noises.
+   * Also `customSnapshotIdentifier` is needed, since we use `jest.retryTimes()`
    * https://github.com/americanexpress/jest-image-snapshot/pull/122/files
    * https://github.com/americanexpress/jest-image-snapshot#%EF%B8%8F-api
    */
-  expect(image).toMatchImageSnapshot({ blur: 2, customSnapshotIdentifier: `Color by: ${option}` });
+  const SNAPSHOT_CONFIG = {
+    failureThreshold: 5,
+    failureThresholdType: 'percent',
+    blur: 2,
+    customSnapshotIdentifier: `Color by: ${option}`
+  };
+
+  expect(image).toMatchImageSnapshot(SNAPSHOT_CONFIG);
 }
 
 async function goToZikaPage() {
