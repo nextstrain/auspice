@@ -1,4 +1,7 @@
 import { setDefaultOptions } from 'expect-puppeteer';
+import { toMatchImageSnapshot } from 'jest-image-snapshot';
+
+expect.extend({ toMatchImageSnapshot });
 
 // (tihuan): This is the max time a test can take to run.
 // Since when debugging, we run slowMo and !headless, this means
