@@ -1,6 +1,6 @@
 const WAIT_BETWEEN_SCREENSHOTS_MS = 100;
 
-export async function waitUntilScreenSteady() {
+export async function waitUntilScreenStable() {
   const RETRY_TIMES = 5;
   let attempt = 0;
 
