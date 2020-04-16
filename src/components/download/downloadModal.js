@@ -185,36 +185,31 @@ class DownloadModal extends React.Component {
           this.props.metadata.colorings, true, this.props.tree.visibility)]
     ];
     if (helpers.areAuthorsPresent(this.props.tree)) {
-      buttons.push(["Author Metadata (TSV)", `Metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}) grouped by the ${uniqueAuthorCount} authors.`,
+      buttons.push(["Author Metadata (TSV)", `Metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}) grouped by their ${uniqueAuthorCount} authors.`,
         (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)]);
     }
     buttons.push(
       ["Screenshot (SVG)", "Screenshot of the current nextstrain display in SVG format.",
         (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
     );
-    const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white"});
-    // const buttonLabelStyle = Object.assign({}, )
+    const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white", minWidth: "300px", textAlign: "left" });
+    const buttonLabelStyle = { fontStyle: "italic", fontSize: "14px", color: "lightgray" };
     return (
-      <div style={{display: "block", justifyContent: "space-around", marginLeft: "25px"}}>
-        <div style={{float: "left", width: "25%"}}>
+      <div style={{display: "block", justifyContent: "space-around", marginLeft: "25px", width: "100%" }}>
+        <div style={{ width: "100%" }}>
           {buttons.map((data) => (
-            <div key={data[0]} onClick={data[3]} style={{cursor: 'pointer'}}>
+            <div key={data[0]} onClick={data[3]} style={{cursor: 'pointer' }}>
               {data[2]}
               <button style={buttonTextStyle}>
                 {data[0]}
               </button>
+              <div style={{ display: "inline-block", height: "30px", verticalAlign: "top", paddingTop: "6px" }}>
+                <label style={buttonLabelStyle}>{data[1]}</label>
+              </div>
             </div>
           ))}        
         </div>
-        <div style={{float: "right", width: "75%"}}>
-          {buttons.map((data) => ( // todo: multiple keys?
-            <div key={data[0]}>
-              <label>{data[1]}</label>
-            </div>
-          ))} 
-        </div>
       </div>
-
     );
   }
   dismissModal() {
