@@ -24,14 +24,16 @@
     "build": "node auspice.js build --verbose",
     "prepare": "npm run build",
     "lint": "eslint src",
+    "lint:fix": "eslint --fix src",
     "get-data": "env bash ./scripts/get-data.sh",
     "get-narratives": "env bash ./scripts/get-narratives.sh",
     "heroku-postbuild": "npm run build && npm run get-data && npm run get-narratives",
     "rebuild-docker-image": "env bash ./scripts/rebuild-docker-image.sh",
     "gzip-and-upload": "env bash ./scripts/gzip-and-upload.sh",
     "build-docs": "echo 'see ./docs-src/README.md'",
-    "test": "jest",
+    "test": "jest test/*.js",
     "integration-test": "NODE_ENV=test ENV=dev jest --config puppeteer.config.js",
+    "integration-test:ci": "start-server-and-test server http://localhost:4000 integration-test",
     "diff-lang": "./scripts/diff-lang.js"
   },
   "dependencies": {
@@ -135,6 +137,7 @@
     "jest": "^25.1.0",
     "jest-puppeteer": "^4.4.0",
     "puppeteer": "^2.1.1",
+    "start-server-and-test": "^1.11.0",
     "webpack-bundle-analyzer": "^3.3.2"
   }
 }
