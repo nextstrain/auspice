@@ -1,3 +1,6 @@
+/* eslint-disable react/jsx-no-bind */
+/* ^^^ We can get away with this because <ChooseLayout> doesn't rerender frequently, but fixes are welcome */
+
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
@@ -34,13 +37,13 @@ class ChooseLayout extends React.Component {
     const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
     if (!loopRunning) {
       if (userSelectedLayout === "rect") {
-        analyticsControlsEvent("change-layout-rectangular"); 
+        analyticsControlsEvent("change-layout-rectangular");
       } else if (userSelectedLayout === "radial") {
         analyticsControlsEvent("change-layout-radial");
       } else if (userSelectedLayout === "unrooted") {
         analyticsControlsEvent("change-layout-unrooted");
       } else if (userSelectedLayout === "clock") {
-        analyticsControlsEvent("change-layout-clock"); 
+        analyticsControlsEvent("change-layout-clock");
       } else {
         console.warn("Odd... controls/choose-layout.js tried to set a layout we don't offer...");
       }
