@@ -102,7 +102,8 @@ class Narrative extends React.Component {
       position: "absolute",
       cursor: "pointer",
       left: `${this.props.width/2 - width/2}px`,
-      fontSize: `${width}px`
+      fontSize: `${width}px`,
+      height: `${width}px`
     };
     if (pointUp) style.top = narrativeNavBarHeight + progressHeight;
     if (!pointUp) style.bottom = "5px";
