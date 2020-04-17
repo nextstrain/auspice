@@ -44,7 +44,8 @@ const styliseDateRange = (date) => {
 export const getNumSelectedTips = (nodes, visibility) => {
   let count = 0;
   nodes.forEach((d, idx) => {
-    // todo: should this include nodes which are not inView?
+    // nodes which are not inView have a visibility of NODE_NOT_VISIBLE
+    // so this check accounts for them as well
     if (!d.hasChildren && visibility[idx] === NODE_VISIBLE) count += 1;
   });
   return count;
