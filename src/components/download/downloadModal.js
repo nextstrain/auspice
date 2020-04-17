@@ -158,11 +158,11 @@ class DownloadModal extends React.Component {
     return x;
   }
   getNumUniqueAuthors(nodes) {
-    const authors = nodes.map(n => getFullAuthorInfoFromNode(n))
-      .filter(a => a && a.value);
-    const uniqueAuthors = new Set(authors.map(a => a.value));
+    const authors = nodes.map((n) => getFullAuthorInfoFromNode(n))
+      .filter((a) => a && a.value);
+    const uniqueAuthors = new Set(authors.map((a) => a.value));
     return uniqueAuthors.size;
-  }  
+  }
   downloadButtons() {
     // getNumSelectedTips() is redundant work with createSummaryWrapper() below,
     // and with the check done to make sure the node is visible in strainTSV(),
@@ -179,11 +179,13 @@ class DownloadModal extends React.Component {
       ["TimeTree", "Phylogenetic tree in Newick format with branch lengths measured in years.",
         (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
       ["All Metadata (TSV)", `Per-sample metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}).`,
-        (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.metadata.colorings, false, null)],
-      ["Selected Metadata (TSV)", `Per-sample metadata for strains which are currently displayed (n = ${selectedTipsCount}/${this.props.metadata.mainTreeNumTips}).`, 
-        (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, 
-          this.props.metadata.colorings, true, this.props.tree.visibility)]
+        (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.metadata.colorings, false, null)]
     ];
+    if (selectedTipsCount > 0) {
+      buttons.push(["Selected Metadata (TSV)", `Per-sample metadata for strains which are currently displayed (n = ${selectedTipsCount}/${this.props.metadata.mainTreeNumTips}).`,
+        (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes,
+          this.props.metadata.colorings, true, this.props.tree.visibility)]);
+    }
     if (helpers.areAuthorsPresent(this.props.tree)) {
       buttons.push(["Author Metadata (TSV)", `Metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}) grouped by their ${uniqueAuthorCount} authors.`,
         (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)]);
@@ -207,7 +209,7 @@ class DownloadModal extends React.Component {
                 <label style={buttonLabelStyle}>{data[1]}</label>
               </div>
             </div>
-          ))}        
+          ))}
         </div>
       </div>
     );

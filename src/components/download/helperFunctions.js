@@ -116,9 +116,8 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesO
   for (const [i, node] of nodes.entries()) {
     if (node.hasChildren) continue; /* we only consider tips */
 
-    if (selectedNodesOnly && nodeVisibilities
-      && (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView)) 
-        continue; /* skip unselected nodes if requested */
+    if (selectedNodesOnly && nodeVisibilities &&
+      (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView)) {continue;} /* skip unselected nodes if requested */
 
     tipTraitValues[node.name] = {Strain: node.name};
     if (!node.node_attrs) continue; /* if this is not set then we don't have any node info! */
