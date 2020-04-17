@@ -1,4 +1,4 @@
-import { waitUntilScreenStable } from "./helpers";
+import { toMatchImageSnapshot } from './helpers';
 
 describe("Zika", () => {
   it("displays the title on the page", async () => {
@@ -17,7 +17,7 @@ describe("Zika", () => {
   describe("Color by", () => {
     describe("author", () => {
       it("matches the screenshot", async () => {
-        await toMatchImageSnapshot("author", async () => {
+        await matchSelectOptionScreenshot("author", async () => {
           await page.keyboard.press("ArrowUp");
           await page.keyboard.press("Enter");
         });
@@ -26,13 +26,13 @@ describe("Zika", () => {
 
     describe("country", () => {
       it("matches the screenshot", async () => {
-        await toMatchImageSnapshot("country", () => {});
+        await matchSelectOptionScreenshot("country", () => {});
       });
     });
 
     describe("date", () => {
       it("matches the screenshot", async () => {
-        await toMatchImageSnapshot("date", async () => {
+        await matchSelectOptionScreenshot("date", async () => {
           await page.keyboard.press("ArrowUp");
           await page.keyboard.press("ArrowUp");
           await page.keyboard.press("Enter");
@@ -42,7 +42,7 @@ describe("Zika", () => {
 
     describe("region", () => {
       it("matches the screenshot", async () => {
-        await toMatchImageSnapshot("region", async () => {
+        await matchSelectOptionScreenshot("region", async () => {
           await page.keyboard.press("ArrowDown");
           await page.keyboard.press("Enter");
         });
@@ -51,7 +51,7 @@ describe("Zika", () => {
   });
 });
 
-async function toMatchImageSnapshot(option, selectOptionTest) {
+async function matchSelectOptionScreenshot(option, selectOptionTest) {
   await goToZikaPage();
 
   const colorBySelector = await expect(page).toMatchElement("#selectColorBy");
@@ -66,24 +66,24 @@ async function toMatchImageSnapshot(option, selectOptionTest) {
 
   await expect(treeTitle).toMatch(option);
 
-  await waitUntilScreenStable();
+  await toMatchImageSnapshot(async () => {
+    const image = await page.screenshot();
 
-  const image = await page.screenshot();
+    /**
+     * (tihuan): Apply `blur` and `failureThreshold` to ignore minor noises.
+     * Also `customSnapshotIdentifier` is needed, since we use `jest.retryTimes()`
+     * https://github.com/americanexpress/jest-image-snapshot/pull/122/files
+     * https://github.com/americanexpress/jest-image-snapshot#%EF%B8%8F-api
+     */
+    const SNAPSHOT_CONFIG = {
+      failureThreshold: 5,
+      failureThresholdType: "percent",
+      blur: 2,
+      customSnapshotIdentifier: `Color by: ${option}`
+    };
 
-  /**
-   * (tihuan): Apply `blur` and `failureThreshold` to ignore minor noises.
-   * Also `customSnapshotIdentifier` is needed, since we use `jest.retryTimes()`
-   * https://github.com/americanexpress/jest-image-snapshot/pull/122/files
-   * https://github.com/americanexpress/jest-image-snapshot#%EF%B8%8F-api
-   */
-  const SNAPSHOT_CONFIG = {
-    failureThreshold: 5,
-    failureThresholdType: 'percent',
-    blur: 2,
-    customSnapshotIdentifier: `Color by: ${option}`
-  };
-
-  expect(image).toMatchImageSnapshot(SNAPSHOT_CONFIG);
+    expect(image).toMatchImageSnapshot(SNAPSHOT_CONFIG);
+  });
 }
 
 async function goToZikaPage() {
