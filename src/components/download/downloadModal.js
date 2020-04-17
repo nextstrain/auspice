@@ -202,11 +202,11 @@ class DownloadModal extends React.Component {
           {buttons.map((data) => (
             <div key={data[0]} onClick={data[3]} style={{cursor: 'pointer' }}>
               {data[2]}
-              <button style={buttonTextStyle}>
+              <button style={buttonTextStyle} name={data[0]}>
                 {data[0]}
               </button>
               <div style={{ display: "inline-block", height: "30px", verticalAlign: "top", paddingTop: "6px" }}>
-                <label style={buttonLabelStyle}>{data[1]}</label>
+                <label style={buttonLabelStyle} htmlFor={data[0]}>{data[1]}</label>
               </div>
             </div>
           ))}
