@@ -16,11 +16,33 @@ Code contributions are welcomed! [Please see the main auspice docs](https://next
 Please comment on an open issue if you are working on it.
 For changes unrelated to an open issue, please make an issue outlining what you would like to change/add.
 
-Please ensure there are no **linting** errors by running `npm run lint` (which uses [eslint](https://eslint.org/)).
-In the future we will make this a requirement for PRs or commits. 
-
 Where possible, **please rebase** your work onto master rather than merging changes from master into your PR.
 
+### Make sure tests are passing
+
+When you submit a pull request to the auspice repository, a variety of integration and unit tests will need to pass before it can be merged.
+
+You will likely want to run these tests locally before submitting:
+
+First, install the dependencies with `npm i`, then:
+
+#### For unit tests:
+
+Run `npm test`.
+
+#### For linting:
+
+Run `npm run lint`. If there are issues run `npm run lint:fix`.
+
+#### For integration tests:
+
+1. Fetch the datasets with `npm run get-data` and `npm run get-narratives`.
+2. Ensure you are **not** currently running the site locally, then run `npm run integration-test:ci`.
+
+#### For smoke tests:
+
+1. Fetch the datasets with `npm run get-data` and `npm run get-narratives`.
+2. Ensure you are **not** currently running the site locally, then run `npm run smoke-test:ci`.
 
 ## Contributing to Documentation
 

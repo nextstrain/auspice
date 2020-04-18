@@ -32,8 +32,10 @@
     "gzip-and-upload": "env bash ./scripts/gzip-and-upload.sh",
     "build-docs": "echo 'see ./docs-src/README.md'",
     "test": "jest test/*.js",
-    "integration-test": "NODE_ENV=test ENV=dev jest --config puppeteer.config.js",
+    "integration-test": "NODE_ENV=test ENV=dev jest ./test/integration/*.js --config puppeteer.config.js",
     "integration-test:ci": "start-server-and-test server http://localhost:4000 integration-test",
+    "smoke-test": "NODE_ENV=test ENV=dev jest ./test/smoke-test/urls.test.js --config puppeteer.config.js",
+    "smoke-test:ci": "start-server-and-test server http://localhost:4000 smoke-test",
     "diff-lang": "./scripts/diff-lang.js"
   },
   "dependencies": {
@@ -41,9 +43,9 @@
     "@babel/plugin-proposal-class-properties": "^7.3.4",
     "@babel/plugin-proposal-decorators": "^7.3.0",
     "@babel/plugin-transform-runtime": "^7.8.3",
-    "@babel/runtime": "^7.8.7",
     "@babel/preset-env": "^7.3.4",
     "@babel/preset-react": "^7.0.0",
+    "@babel/runtime": "^7.8.7",
     "argparse": "^1.0.10",
     "awesomplete": "^1.1.2",
     "babel-eslint": "^10.0.1",
@@ -137,6 +139,7 @@
     "jest": "^25.1.0",
     "jest-puppeteer": "^4.4.0",
     "puppeteer": "^2.1.1",
+    "quoted-printable": "^1.0.1",
     "start-server-and-test": "^1.11.0",
     "webpack-bundle-analyzer": "^3.3.2"
   }
