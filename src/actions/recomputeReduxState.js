@@ -703,6 +703,7 @@ export const createStateFromQueryOrJSONs = ({
   only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
   URL query this page defines via this information */
   if (narrativeBlocks) {
+    addEndOfNarrativeBlock(narrativeBlocks);
     narrative = narrativeBlocks;
     let n = parseInt(query.n, 10) || 0;
     /* If the query has defined a block which doesn't exist then default to n=0 */
@@ -830,3 +831,12 @@ export const createTreeTooState = ({
   // }
   return {tree, treeToo, controls};
 };
+
+function addEndOfNarrativeBlock(narrativeBlocks) {
+  const lastContentSlide = narrativeBlocks[narrativeBlocks.length-1];
+  const endOfNarrativeSlide = Object.assign({}, lastContentSlide, {
+    __html: undefined,
+    isEndOfNarrativeSlide: true
+  });
+  narrativeBlocks.push(endOfNarrativeSlide);
+}
