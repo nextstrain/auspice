@@ -131,7 +131,7 @@ FILTERS:
  - filters (in this code) is a list of filters to apply
    e.g. [{trait: "country", values: [...]}, ...]
 */
-const calcVisibility = (tree, controls, dates) => {
+export const calcVisibility = (tree, controls, dates) => {
   if (tree.nodes) {
     /* inView represents nodes that are within the current view window (i.e. not off the screen) */
     let inView;

@@ -3,6 +3,7 @@ import { infoNotification, warningNotification } from "../../actions/notificatio
 import { spaceBetweenTrees } from "../tree/tree";
 import { getTraitFromNode, getDivFromNode, getFullAuthorInfoFromNode, getVaccineFromNode, getAccessionFromNode } from "../../util/treeMiscHelpers";
 import { numericToCalendar } from "../../util/dateHelpers";
+import { NODE_VISIBLE } from "../../util/globals";
 
 export const isPaperURLValid = (d) => {
   return (
@@ -105,15 +106,19 @@ export const authorTSV = (dispatch, filePrefix, tree) => {
  * Create & write a TSV file where each row is a strain in the tree,
  * with the relevent information (accession, traits, etcetera)
  */
-export const strainTSV = (dispatch, filePrefix, nodes, colorings) => {
+export const strainTSV = (dispatch, filePrefix, nodes, colorings, selectedNodesOnly, nodeVisibilities) => {
 
   /* traverse the tree & store tip information. We cannot write this out as we go as we don't know
   exactly which header fields we want until the tree has been traversed. */
   const tipTraitValues = {};
   const headerFields = ["Strain"];
 
-  for (const node of nodes) {
+  for (const [i, node] of nodes.entries()) {
     if (node.hasChildren) continue; /* we only consider tips */
+
+    if (selectedNodesOnly && nodeVisibilities &&
+      (nodeVisibilities[i] !== NODE_VISIBLE || !node.inView)) {continue;} /* skip unselected nodes if requested */
+
     tipTraitValues[node.name] = {Strain: node.name};
     if (!node.node_attrs) continue; /* if this is not set then we don't have any node info! */
 
@@ -189,7 +194,7 @@ export const strainTSV = (dispatch, filePrefix, nodes, colorings) => {
   }
 
   /* write out information we've collected */
-  const filename = `${filePrefix}_metadata.tsv`;
+  const filename = `${filePrefix}${selectedNodesOnly ? "_selected_" : "_"}metadata.tsv`;
   write(filename, MIME.tsv, linesToWrite.join("\n"));
   dispatch(infoNotification({message: `Metadata exported to ${filename}`}));
 };
