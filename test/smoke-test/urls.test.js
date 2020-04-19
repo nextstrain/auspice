@@ -39,7 +39,7 @@ describe("smoke test rendering of paths in urls.txt", () => {
       const snapshotText = decode((await client.send('Page.captureSnapshot')).data);
       for (const assertion of testCase.assertions) {
         try {
-          expect(snapshotText).toEqual(expect.stringContaining(assertion), 'the erro');
+          expect(snapshotText).toEqual(expect.stringContaining(assertion));
         } catch (_err) {
           throw Error(`could not find text "${assertion}" on page ${testCase.path}`);
         }
