@@ -18,10 +18,9 @@
   "last updated": "son güncelleme",
   "A full list of sequence authors is available via the TSV files below": "Dizinin tüm yazarlarının listesi aşağıdaki TSV dosyasında bulunmaktadır",
   "Data usage policy": "Veri kullanım politikası",
-  "Please cite the authors who contributed genomic data (where relevant), as well as": "Please cite the authors who contributed genomic data (where relevant), as well as",
-  "Download data": "Veriyi indir",
-  "Data usage part 1": "The data presented here is intended to rapidly disseminate analysis of important pathogens. Unpublished data is included with permission of the data generators, and does not impact their right to publish. ",
-  "Data usage part 2": "Please contact the respective authors (available via the TSV files below) if you intend to carry out further research using their data. Derived data, such as phylogenies, can be downloaded below - please contact the relevant authors where appropriate.",
+  "Please cite the authors who contributed genomic data (where relevant), as well as": "Lütfen (ilgili olduğunda) genomik verilere katkıda bulunan yazarları anın ve ayrıca anılacaklar ",
+  "Data usage part 1": "Burada sunulan veriler, önemli patojenlerin analizini hızla yaymayı amaçlamaktadır. Yayınlanmamış verilerin kullanımı, veri üreticilerinin iznine dahildir ve onların yayınlama haklarını etkilemez. ",
+  "Data usage part 2": "Verileri kullanarak daha fazla araştırma yapmak istiyorsanız, lütfen ilgili yazarlara başvurun (liste aşağıdaki TSV dosyalarından edinilebilir). Filogeni gibi türetilmiş veriler aşağıdan indirilebilir - lütfen uygun olan yerlerde ilgili yazarlara başvurun.",
 
   "__Entropy Panel__": "########################################",
   "Diversity": "Çeşitlilik",
@@ -32,7 +31,7 @@
   "Nuc positions {{a}} to {{b}}": "{{a}} - {{b}} arasi nükteotit pozisyonları",
   "Num mutations": "Mutasyon sayısı",
   "Negative strand": "Negatif zincir",
-  "Positive strand": "Positif zincir",
+  "Positive strand": "Pozitif zincir",
   "Click to color tree & map": "Ağaç ve haritayı renklendirmek için tıklayın",
 
 
@@ -51,7 +50,7 @@
 
 
   "__Tree (Phylogeny) panel__": "########################################",
-  "Phylogeny": "Filojeni",
+  "Phylogeny": "Filogeni",
   "Reset Layout": "Görünümü Sıfırla",
   "Click on tip to display more info": "Daha çok bilgi göstermek için uca tıklayın",
   "Click to zoom into clade": "Dala yaklaşmak için tıklayın",
@@ -60,7 +59,7 @@
   "Number of descendants": "Soyundan gelenlerin sayısı",
   "Nucleotide mutations": "Nükleotit mutasyonları",
   "AA mutations": "AA mutasyonları",
-  "protein mutations truncated": "protein mutasyonları truncated",
+  "protein mutations truncated": "kesilmiş protein mutasyonları",
   "Gaps": "Boşluklar",
   "{{x}} more": "{{x}} daha",
   "No nucleotide mutations": "Hiç nükleotit mutasyonu yok",
