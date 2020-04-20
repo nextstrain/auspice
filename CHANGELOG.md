@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.13.0 - 2020/04/20
+
+
 
 #### Testing
 * Add smoke-testing to check that certain URLs render by checking the presence of strings in the DOM.
