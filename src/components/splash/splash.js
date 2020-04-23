@@ -57,7 +57,7 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
   const Intro = () => (
     <p style={{maxWidth: 600, marginTop: 0, marginRight: "auto", marginBottom: 20, marginLeft: "auto", textAlign: "left", fontSize: 16, fontWeight: 300, lineHeight: 1.42857143}}>
       {`
-        Phylogénie des données du LSPQ combinée à celles de GISAID (www.gisaid.org). Cette site est déployé grace à la platforme nextrain (www.nextstrain.org)s
+        Phylogénie des données du LSPQ combinée à celles de GISAID (www.gisaid.org). Ce site est déployé grace à la platforme nextrain (www.nextstrain.org)
       `}
     </p>
   );
