@@ -1,7 +1,9 @@
 /* eslint-disable space-infix-ops */
 import { min, max } from "d3-array";
+import { transition } from "d3-transition";
+import { easeLinear } from "d3-ease";
 import { timerStart, timerEnd } from "../../../util/perf";
-import { months } from "../../../util/globals";
+import { months, animationInterpolationDuration } from "../../../util/globals";
 import { numericToCalendar } from "../../../util/dateHelpers";
 
 export const hideGrid = function hideGrid() {
@@ -22,6 +24,12 @@ export const hideGrid = function hideGrid() {
 const addSVGGroupsIfNeeded = (groups, svg) => {
   if (!("temporalWindow" in groups)) {
     groups.temporalWindow = svg.append("g").attr("id", "temporalWindow");
+
+    // Technically rects aren't groups, but store them to avoid searching for them on each "showTemporalSlice" render.
+    groups.temporalWindowStart = groups.temporalWindow.append('rect')
+      .attr('class', 'temporalWindowStart');
+    groups.temporalWindowEnd = groups.temporalWindow.append('rect')
+      .attr('class', 'temporalWindowEnd');
   }
   if (!("majorGrid" in groups)) {
     groups.majorGrid = svg.append("g").attr("id", "majorGrid");
@@ -380,17 +388,24 @@ export const addGrid = function addGrid() {
   timerEnd("addGrid");
 };
 
-
-export const removeTemporalSlice = function removeTemporalSlice() {
-  this.groups.temporalWindow.selectAll("*").remove();
+export const hideTemporalSlice = function hideTemporalSlice() {
+  this.groups.temporalWindowStart.attr('opacity', 0);
+  this.groups.temporalWindowEnd.attr('opacity', 0);
 };
+
+// d3-transition to ensure both rectangles move at the same rate
+export const temporalWindowTransition = transition('temporalWindowTransition')
+  .duration(animationInterpolationDuration)
+  .ease(easeLinear); // the underlying animation uses linear interpolation, let's override the default easeCubic
 
 /**
  * add background grey rectangles to demarcate the temporal slice
  */
-export const addTemporalSlice = function addTemporalSlice() {
-  this.removeTemporalSlice();
-  if (this.layout !== "rect" || this.distance !== "num_date") return;
+export const showTemporalSlice = function showTemporalSlice() {
+  if (this.layout !== "rect" || this.distance !== "num_date") {
+    this.hideTemporalSlice();
+    return;
+  }
 
   const xWindow = [this.xScale(this.dateRange[0]), this.xScale(this.dateRange[1])];
   const height = this.yScale.range()[1];
@@ -403,25 +418,72 @@ export const addTemporalSlice = function addTemporalSlice() {
 
   /* the gray region between the root (ish) and the minimum date */
   if (Math.abs(xWindow[0]-rootXPos) > minPxThreshold) { /* don't render anything less than this num of px */
-    this.groups.temporalWindow.append("rect")
-      .attr("x", rightHandTree ? xWindow[0] : 0)
-      .attr("width", rightHandTree ? totalWidth-xWindow[0]: xWindow[0])
-      .attr("y", 0)
+    let width_startRegion = xWindow[0];
+    let translateX_startRegion = 0;
+
+    // With right hand tree, the coordinate system flips (right to left)
+    if (rightHandTree) {
+      width_startRegion = totalWidth - xWindow[0];
+      translateX_startRegion = xWindow[0];
+    }
+
+    const wasStartRegionVisible = this.groups.temporalWindowStart.attr('opacity') === '1';
+
+    this.groups.temporalWindowStart
+      .attr('opacity', 1)
       .attr("height", height)
+      .attr("transform", `translate(${translateX_startRegion},0)`)
       .attr("fill", fill);
+
+    // Only apply animation if rectangle was already visible in the previous frame.
+    if (wasStartRegionVisible) {
+      this.groups.temporalWindowStart.transition('temporalWindowTransition')
+        .attr("width", width_startRegion);
+    } else {
+      this.groups.temporalWindowStart
+        .attr("width", width_startRegion);
+    }
+  } else {
+    this.groups.temporalWindowStart.attr('opacity', 0);
   }
 
   /* the gray region between the maximum selected date and the last tip */
-  const startingX = rightHandTree ? this.params.margins.right : xWindow[1];
-  const rectWidth = rightHandTree ?
-    xWindow[1]-this.params.margins.right :
-    totalWidth-this.params.margins.right-xWindow[1];
-  if (rectWidth > minPxThreshold) {
-    this.groups.temporalWindow.append("rect")
-      .attr("x", startingX)
-      .attr("width", rectWidth)
-      .attr("y", 0)
+  let xStart_endRegion = xWindow[1]; // starting X coordinate of the "end" rectangle
+  let width_endRegion = totalWidth - this.params.margins.right - xWindow[1];
+
+  let transform_endRegion = `translate(${totalWidth - this.params.margins.right},0) scale(-1,1)`;
+  // With a right hand tree, the coordinate system flips (right to left)
+  if (rightHandTree) {
+    xStart_endRegion = this.params.margins.right;
+    width_endRegion = xWindow[1] - this.params.margins.right;
+    transform_endRegion = `translate(${xStart_endRegion},0)`;
+  }
+
+  if (width_endRegion > minPxThreshold) {
+    const wasEndRegionVisible = this.groups.temporalWindowEnd.attr('opacity') === '1';
+
+    this.groups.temporalWindowEnd
+      .attr('opacity', 1)
       .attr("height", height)
-      .attr("fill", fill);
+      .attr("fill", fill)
+      .attr("transform", transform_endRegion);
+
+
+    // Only apply animation if rectangle was already visible in the previous frame.
+    // Unlike the startingRegion, this panel cannot depend
+    // on letting the SVG boundaries clip part of the rectangle.
+    // As a result, we'll have to animate width instead of position
+    // If performance becomes an issue, try add a custom clip-path with
+    // a fixed-width region instead.
+    if (wasEndRegionVisible) {
+      this.groups.temporalWindowEnd
+        .transition('temporalWindowTransition')
+        .attr("width", width_endRegion);
+    } else {
+      this.groups.temporalWindowEnd
+        .attr("width", width_endRegion);
+    }
+  } else {
+    this.groups.temporalWindowEnd.attr('opacity', 0);
   }
 };

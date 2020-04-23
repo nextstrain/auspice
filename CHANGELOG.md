@@ -2,9 +2,22 @@
 title: Changelog
 ---
 
+## version 2.12.0 - 2020/04/08
+
+
+* Add a legend to the map! [See PR 935](https://github.com/nextstrain/auspice/pull/935)
+* Improve the animation smoothness, especially for datasets with limited temporal range. [See PR 920](https://github.com/nextstrain/auspice/pull/920)
+* Add Japanese translation [See PR 1045](https://github.com/nextstrain/auspice/pull/1045)
+* Reinstate the `lang` URL query to allow the URL to choose the language.
+* Remove unnecessary lodash code from the bundles. [See PR 1018](https://github.com/nextstrain/auspice/pull/1018)
+* Update how the `Root` component is imported. [See PR 1029](https://github.com/nextstrain/auspice/pull/1029)
+* Fix errors in the sizing of the map buttons. [See PR 1040](https://github.com/nextstrain/auspice/pull/1040)
+* Improve rendering of tree tip labels by only counting the selected (visible) tips. [See PR 1043](https://github.com/nextstrain/auspice/pull/1043)
+
+## version 2.11.4 - 2020/04/04
+* Temporarily remove SVG gradients in the tree due to bugs in multiple browsers. [See PR 1042](https://github.com/nextstrain/auspice/pull/1042)
+
 ## version 2.11.3 - 2020/04/02
-
-
 * Add Portuguese translation. [See PR 1017](https://github.com/nextstrain/auspice/pull/1017)
 * Fig bug where some branches would not display on certain browsers. [See PR 1022](https://github.com/nextstrain/auspice/pull/1022)
 * Fix bug with selected dates shown when no genomes were selected. [See PR 1011](https://github.com/nextstrain/auspice/pull/1011)

@@ -11,24 +11,28 @@ export const updateTipLabels = function updateTipLabels(dt) {
   const tLFunc = this.callbacks.tipLabel;
   const xPad = this.params.tipLabelPadX;
   const yPad = this.params.tipLabelPadY;
-  const inViewTerminalNodes = this.nodes
+
+  const inViewTips = this.nodes
     .filter((d) => d.terminal)
     .filter((d) => d.inView);
-  // console.log(`there are ${inViewTerminalNodes.length} nodes in view`)
-  if (inViewTerminalNodes.length < this.params.tipLabelBreakL1) {
 
+  const inViewVisibleTips = inViewTips.filter((d) => d.visibility === NODE_VISIBLE);
+
+  /* We show tip labels by checking the number of "inView & visible" tips */
+  if (inViewVisibleTips.length < this.params.tipLabelBreakL1) {
+
+    /* We calculate font size based on the total number of in view tips (both visible & non-visible) */
     let fontSize = this.params.tipLabelFontSizeL1;
-    if (inViewTerminalNodes.length < this.params.tipLabelBreakL2) {
-      fontSize = this.params.tipLabelFontSizeL2;
-    }
-    if (inViewTerminalNodes.length < this.params.tipLabelBreakL3) {
+    if (inViewTips.length < this.params.tipLabelBreakL3) {
       fontSize = this.params.tipLabelFontSizeL3;
+    } else if (inViewTips.length < this.params.tipLabelBreakL2) {
+      fontSize = this.params.tipLabelFontSizeL2;
     }
 
     window.setTimeout(() => {
       this.groups.tipLabels
         .selectAll('.tipLabel')
-        .data(inViewTerminalNodes)
+        .data(inViewVisibleTips)
         .enter()
         .append("text")
         .attr("x", (d) => d.xTip + xPad)

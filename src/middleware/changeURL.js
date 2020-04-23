@@ -64,12 +64,10 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
       query.r = action.data === state.controls.defaults.geoResolution ? undefined : action.data;
       break;
     }
-    /* The following has been commented out to give us time to check whether a `lang` query is
-    the appropriate way to set the language. This can be tracked via https://github.com/nextstrain/nextstrain.org/issues/130 */
-    // case types.CHANGE_LANGUAGE: {
-    //   query.lang = action.data === state.general.defaults.language ? undefined : action.data;
-    //   break;
-    // }
+    case types.CHANGE_LANGUAGE: {
+      query.lang = action.data === state.general.defaults.language ? undefined : action.data;
+      break;
+    }
     case types.CHANGE_DISTANCE_MEASURE: {
       query.m = action.data === state.controls.defaults.distanceMeasure ? undefined : action.data;
       break;

@@ -44,7 +44,7 @@ export const render = function render(svg, layout, distance, parameters, callbac
   /* draw functions */
   if (this.params.showGrid) {
     this.addGrid();
-    this.addTemporalSlice();
+    this.showTemporalSlice();
   }
   this.drawBranches();
   this.drawTips();
@@ -146,12 +146,17 @@ export const getBranchVisibility = (d) => {
  * @param {obj} d node
  * @param {string} b branch type -- either "T" (tee) or "S" (stem)
  */
-export const strokeForBranch = (d, b) => {
-  const id = `T${d.that.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
-  if (d.branchStroke === d.parent.branchStroke || b === "T") {
-    return d.branchStroke;
-  }
-  return `url(#${id})`;
+export const strokeForBranch = (d, b) => { // eslint-disable-line
+  /* Due to errors rendering gradients on SVG branches on some browsers/OSs which would
+  cause the branches to not appear, we're falling back to the previous solution which
+  doesn't use gradients. The commented code remains & hopefully a solution can be
+  found which reinstates gradients!                            James, April 4 2020. */
+  return d.branchStroke;
+  // const id = `T${d.that.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
+  // if (d.branchStroke === d.parent.branchStroke || b === "T") {
+  //   return d.branchStroke;
+  // }
+  // return `url(#${id})`;
 };
 
 /**
@@ -275,39 +280,44 @@ export const clearSVG = function clearSVG() {
 };
 
 
-export const updateColorBy = function updateColorBy() {
-  // console.log("updating colorBy")
-  this.nodes.forEach((d) => {
-    const a = d.parent.branchStroke;
-    const b = d.branchStroke;
-    const id = `T${this.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
-    if (a === b) { // not a gradient // color can be computed from d alone
-      this.svg.select(`#${id}`).remove(); // remove an existing gradient for this node
-      return;
-    }
-    if (!this.svg.select(`#${id}`).empty()) { // there an existing gradient // update its colors
-      // console.log("adjusting " + id + " " + d.parent.branchStroke + "=>" + d.branchStroke);
-      this.svg.select(`#${id}_begin`).attr("stop-color", d.parent.branchStroke);
-      this.svg.select(`#${id}_end`).attr("stop-color", d.branchStroke);
+/* Due to errors rendering gradients on SVG branches on some browsers/OSs which would
+cause the branches to not appear, we're falling back to the previous solution which
+doesn't use gradients. Calls to `updateColorBy` are therefore unnecessary.
+                                                                James, April 4 2020. */
+export const updateColorBy = function updateColorBy() {};
+// export const updateColorBy = function updateColorBy() {
+//   // console.log("updating colorBy")
+//   this.nodes.forEach((d) => {
+//     const a = d.parent.branchStroke;
+//     const b = d.branchStroke;
+//     const id = `T${this.id}_${d.parent.n.arrayIdx}_${d.n.arrayIdx}`;
+//     if (a === b) { // not a gradient // color can be computed from d alone
+//       this.svg.select(`#${id}`).remove(); // remove an existing gradient for this node
+//       return;
+//     }
+//     if (!this.svg.select(`#${id}`).empty()) { // there an existing gradient // update its colors
+//       // console.log("adjusting " + id + " " + d.parent.branchStroke + "=>" + d.branchStroke);
+//       this.svg.select(`#${id}_begin`).attr("stop-color", d.parent.branchStroke);
+//       this.svg.select(`#${id}_end`).attr("stop-color", d.branchStroke);
 
-    } else { // otherwise create a new gradient
-      //  console.log("new gradient " + id + " " + d.parent.branchStroke + "=>" + d.branchStroke);
-      const linearGradient = this.svg.select("defs").append("linearGradient")
-        .attr("id", id);
-      if (d.rot && typeof d.rot === "number") {
-        linearGradient.attr("gradientTransform", "translate(.5,.5) rotate(" + d.rot + ") translate(-.5,-.5)");
-      }
-      linearGradient.append("stop")
-        .attr("id", id + "_begin")
-        .attr("offset", "0")
-        .attr("stop-color", d.parent.branchStroke);
-      linearGradient.append("stop")
-        .attr("id", id + "_end")
-        .attr("offset", "1")
-        .attr("stop-color", d.branchStroke);
-    }
-  });
-};
+//     } else { // otherwise create a new gradient
+//       //  console.log("new gradient " + id + " " + d.parent.branchStroke + "=>" + d.branchStroke);
+//       const linearGradient = this.svg.select("defs").append("linearGradient")
+//         .attr("id", id);
+//       if (d.rot && typeof d.rot === "number") {
+//         linearGradient.attr("gradientTransform", "translate(.5,.5) rotate(" + d.rot + ") translate(-.5,-.5)");
+//       }
+//       linearGradient.append("stop")
+//         .attr("id", id + "_begin")
+//         .attr("offset", "0")
+//         .attr("stop-color", d.parent.branchStroke);
+//       linearGradient.append("stop")
+//         .attr("id", id + "_end")
+//         .attr("offset", "1")
+//         .attr("stop-color", d.branchStroke);
+//     }
+//   });
+// };
 
 
 /** given a node `d` which is being hovered, update it's colour to emphasize

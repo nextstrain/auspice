@@ -22,8 +22,7 @@ const progressHeight = 25;
 
 const explanationParagraph=`
   <p class="explanation">
-  Explore the content by scrolling the left hand side (or click on the arrows), and the data visualizations will change accordingly.
-  Clicking "explore the data yourself" (top right of page) will replace this narrative with a set of controls so that you may interact with the data.
+  Explore the narrative by scrolling on the left panel, or click "explore the data yourself" in the top right to interact with the data.
   </p>
 `;
 
@@ -152,7 +151,8 @@ class Narrative extends React.Component {
           style={{
             padding: "10px 20px",
             height: "inherit",
-            overflow: "hidden"
+            overflowX: "hidden",
+            overflowY: "auto"
           }}
           dangerouslySetInnerHTML={{__html}}
         />
