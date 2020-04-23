@@ -36,18 +36,18 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
     <>
       <Flex justifyContent="center">
         <div style={{paddingRight: "40px"}}>
-          <h1 style={{textAlign: "center", marginTop: "20px", marginLeft: "20px", fontSize: "72px", letterSpacing: "4rem"}}>
-            {"auspice"}
+          <h1 style={{textAlign: "center", marginTop: "20px", marginLeft: "20px", fontSize: "40px", letterSpacing: "2rem"}}>
+            {"SarCoSeQ"}
           </h1>
           <h1 style={{textAlign: "center", marginTop: "0px", fontSize: "29px"}}>
-            {"Interactive Visualisation of Phylogenomic data"}
+            {"Visualisation Interactive des données Phylogenomique du Laboratoire de santé publique du Québec"}
           </h1>
         </div>
         <img
           alt="logo"
-          width="102"
+          width="u02"
           src={
-            require("../../images/logo-light.svg") // eslint-disable-line global-require
+            require("../../images/VisuelCoronavirus-ms.jpg") // eslint-disable-line global-require
           }
         />
       </Flex>
@@ -55,10 +55,9 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
   );
 
   const Intro = () => (
-    <p style={{maxWidth: 600, marginTop: 0, marginRight: "auto", marginBottom: 20, marginLeft: "auto", textAlign: "center", fontSize: 16, fontWeight: 300, lineHeight: 1.42857143}}>
+    <p style={{maxWidth: 600, marginTop: 0, marginRight: "auto", marginBottom: 20, marginLeft: "auto", textAlign: "left", fontSize: 16, fontWeight: 300, lineHeight: 1.42857143}}>
       {`
-        Auspice is a locally run interactive viewer for phylogeographic and other datasets.
-        Auspice can be easily turned into an online web-app, such as nextstrain.org & auspice.us
+        Phylogénie des données du LSPQ combinée à celles de GISAID (www.gisaid.org). Cette site est déployé grace à la platforme nextrain (www.nextstrain.org)s
       `}
     </p>
   );
@@ -83,7 +82,7 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
   const ListAvailable = ({type, data}) => (
     <>
       <div style={{fontSize: "26px"}}>
-        {`Available ${type}:`}
+        {`${type} Disponibles:`}
       </div>
       {
         data ? (
@@ -115,8 +114,7 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
       <div className="static container">
         <Header/>
         {errorMessage ? <ErrorMessage/> : <Intro/>}
-        <ListAvailable type="datasets" data={available.datasets}/>
-        <ListAvailable type="narratives" data={available.narratives}/>
+        <ListAvailable type="Vues" data={available.datasets}/>
         <Footer/>
       </div>
     </>

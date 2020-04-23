@@ -1,7 +1,7 @@
 import React from "react";
 import styled from 'styled-components';
 
-const logoPNG = require("../../images/logo-light.svg");
+const logoPNG = require("../../images/VisuelCoronavirus-ms.jpg");
 
 const AuspiceNavBarContainer = styled.div`
   display: flex;

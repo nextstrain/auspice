@@ -12,7 +12,7 @@ when a solution to https://github.com/nextstrain/nextstrain.org/issues/130 has b
 // const query = queryString.parse(window.location.search);
 
 const defaults = {
-  language: "en"
+  language: "fr"
 };
 
 const getFirstPageToDisplay = () => {
