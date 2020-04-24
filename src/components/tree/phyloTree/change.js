@@ -219,8 +219,8 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
     this.drawBranches();
     if (this.params.showGrid) this.addGrid();
     this.svg.selectAll(".tip").remove();
-    this.drawTips();
     this.updateTipLabels();
+    this.drawTips();
     if (this.vaccines) this.drawVaccines();
     this.showTemporalSlice();
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
