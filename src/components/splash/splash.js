@@ -37,10 +37,11 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
       <Flex justifyContent="center">
         <div style={{paddingRight: "40px"}}>
           <h1 style={{textAlign: "center", marginTop: "20px", marginLeft: "20px", fontSize: "40px", letterSpacing: "2rem"}}>
-            {"SarCoSeQ"}
+            {"CoVSeQ"}
           </h1>
           <h1 style={{textAlign: "center", marginTop: "0px", fontSize: "29px"}}>
-            {"Visualisation Interactive des données Phylogenomique du Laboratoire de santé publique du Québec"}
+            {"Visualisation interactive des differentes souche de la Covid-19 Séquencées au" +
+            " Québec (CovSeQ)"}
           </h1>
         </div>
         <img
@@ -57,7 +58,7 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
   const Intro = () => (
     <p style={{maxWidth: 600, marginTop: 0, marginRight: "auto", marginBottom: 20, marginLeft: "auto", textAlign: "left", fontSize: 16, fontWeight: 300, lineHeight: 1.42857143}}>
       {`
-        Phylogénie des données du LSPQ combinée à celles de GISAID (www.gisaid.org). Ce site est déployé grace à la platforme nextrain (www.nextstrain.org)
+        Phylogénie des données du virus Covid-19 du LSPQ combinée à celles de GISAID (www.gisaid.org). Ce site est déployé grace à la platforme nextrain (www.nextstrain.org)
       `}
     </p>
   );
