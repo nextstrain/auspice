@@ -47,13 +47,13 @@ export const render = function render(svg, layout, distance, parameters, callbac
     this.showTemporalSlice();
   }
   this.drawBranches();
+  this.updateTipLabels();
   this.drawTips();
   if (this.params.branchLabelKey) this.drawBranchLabels(this.params.branchLabelKey);
   if (this.vaccines) this.drawVaccines();
   if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
   this.confidencesInSVG = false;
   if (drawConfidence) this.drawConfidence();
-  this.updateTipLabels();
 
   this.timeLastRenderRequested = Date.now();
   timerEnd("phyloTree render()");
