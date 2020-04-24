@@ -14,10 +14,13 @@ export const logos = [
   <a key={4} href="http://www.mcgillgenomecentre.org/" target="_blank" rel="noreferrer noopener">
     <img alt="logo" width="165" src={require("../../images/Genome_logo.png")}/>
   </a>,
-  <a key={5} href="https://www.calculquebec.ca" target="_blank" rel="noreferrer noopener">
+  <a key={5} href="https://www.calculquebec.ca/" target="_blank" rel="noreferrer noopener">
     <img alt="logo" width="165" src={require("../../images/CalculQuebec_logo_medium.png")}/>
   </a>,
   <a key={6} href="https://www.mcgill.ca/" target="_blank" rel="noreferrer noopener">
     <img alt="logo" width="165" src={require("../../images/Mcgill_Logo.png")}/>
+  </a>,
+  <a key={7} href="https://www.umontreal.ca/" target="_blank" rel="noreferrer noopener">
+    <img alt="logo" width="165" src={require("../../images/UdeM-officiel-RVB.png")}/>
   </a>
 ];
