@@ -8,6 +8,7 @@ import ChooseLayout from "./choose-layout";
 import ChooseDataset from "./choose-dataset";
 import ChooseSecondTree from "./choose-second-tree";
 import ChooseMetric from "./choose-metric";
+import ChooseTreeSplit from "./choose-tree-split";
 import PanelLayout from "./panel-layout";
 import GeoResolution from "./geo-resolution";
 import MapAnimationControls from "./map-animation";
@@ -36,6 +37,7 @@ function Controls({mapOn}) {
       <SidebarHeader>{t("sidebar:Tree Options")}</SidebarHeader>
       <ChooseLayout/>
       <ChooseMetric/>
+      <ChooseTreeSplit/>
       <ChooseBranchLabelling/>
       <SearchStrains/>
       <ChooseSecondTree/>
