@@ -36,6 +36,8 @@ Run `npm run lint`. If there are issues run `npm run lint:fix`.
 
 #### For integration tests:
 
+> For integration tests to work, you'll need to have `git-lfs` installed (see below) as it stores the images that the snapshot tests will use.
+
 1. Fetch the datasets with `npm run get-data` and `npm run get-narratives`.
 2. Ensure you are **not** currently running the site locally, then run `npm run integration-test:ci`.
 
@@ -43,6 +45,20 @@ Run `npm run lint`. If there are issues run `npm run lint:fix`.
 
 1. Fetch the datasets with `npm run get-data` and `npm run get-narratives`.
 2. Ensure you are **not** currently running the site locally, then run `npm run smoke-test:ci`.
+
+## git-lfs
+
+We use [Git Large File Storage](https://github.com/git-lfs/git-lfs) to manage certain assets.
+Currently these are limited to images within the `./test` directory (which we use for snapshot integration testing) but this may change in the future.
+If you are not using these images, you don't need to have `git-lfs` installed; however **will not be able to run integration tests without it**.
+See [here](https://git-lfs.github.com/) for installation instructions.
+
+Helpful commands:
+```bash
+git lfs status
+git lfs ls-files # list LFS tracked tiles
+```
+
 
 ## Contributing to Documentation
 
