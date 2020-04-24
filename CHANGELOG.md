@@ -2,9 +2,26 @@
 title: Changelog
 ---
 
+#### Testing
+* Add screenshot integration testing using puppeteer and jest-image-snapshot, and run this through the GitHub CI.
+[See PR 1068](https://github.com/nextstrain/auspice/pull/1068) & [PR 1084](https://github.com/nextstrain/auspice/pull/1084)
+
+#### Features
+* Turkish translation. [See PR 1079](https://github.com/nextstrain/auspice/pull/1079)
+
+#### Bug fixes
+* Tip labels are now rendered below tips. [See PR 1069](https://github.com/nextstrain/auspice/pull/1069)
+* The included server now uses the appropriate content-type for datasets returned from the `getDataset` API.
+[See PR 1080](https://github.com/nextstrain/auspice/pull/1080)
+
+#### Other
+* We now use `git-lfs` for storing large objects.
+Currently this is only the screenshot images used for testing.
+[See PR 1083](https://github.com/nextstrain/auspice/pull/1083)
+* Update the datasets fetched by `npm run get-data`. [See PR 1088](https://github.com/nextstrain/auspice/pull/1088)
+
+
 ## version 2.13.0 - 2020/04/20
-
-
 
 #### Testing
 * Add smoke-testing to check that certain URLs render by checking the presence of strings in the DOM.
