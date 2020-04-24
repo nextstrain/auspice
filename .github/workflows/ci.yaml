@@ -25,6 +25,8 @@ jobs:
         node: [10]
     steps:
       - uses: actions/checkout@v2
+        with:
+          lfs: true
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
