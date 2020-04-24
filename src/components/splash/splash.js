@@ -41,7 +41,7 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
           </h1>
           <h1 style={{textAlign: "center", marginTop: "0px", fontSize: "29px"}}>
             {"Visualisation interactive des differentes souche de la Covid-19 Séquencées au" +
-            " Québec (CovSeQ)"}
+            " Québec (CoVSeQ)"}
           </h1>
         </div>
         <img
