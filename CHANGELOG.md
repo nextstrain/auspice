@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.14.0 - 2020/04/24
+
+
 #### Testing
 * Add screenshot integration testing using puppeteer and jest-image-snapshot, and run this through the GitHub CI.
 [See PR 1068](https://github.com/nextstrain/auspice/pull/1068) & [PR 1084](https://github.com/nextstrain/auspice/pull/1084)
