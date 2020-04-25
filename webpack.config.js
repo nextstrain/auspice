@@ -49,20 +49,6 @@ const generateConfig = ({ extensionPath, devMode = false, customOutputPath, anal
     threshold: 10240,
     minRatio: 0.8
   });
-  /* Cache busting; plugin to automatically insert the script tag of content hashed JS file(auspice.bundle.js) dynamically into HTML files */
-
-  // function generateHTMLplugins(fileName,absolutefilePath) {
-  //   return new HtmlWebpackPlugin({
-  //     filename: fileName,
-  //     template: `${absolutefilePath}`
-  // }
-
-  const HTMLdependentOnHash = [
-    new HtmlWebpackPlugin({
-      filename: 'index.html',
-      template: './index.html'
-    })
-  ];
 
   const plugins = devMode
     ? [new webpack.HotModuleReplacementPlugin(), pluginProcessEnvData, new webpack.NoEmitOnErrorsPlugin()]
@@ -71,7 +57,11 @@ const generateConfig = ({ extensionPath, devMode = false, customOutputPath, anal
       new webpack.optimize.AggressiveMergingPlugin(), // merge chunks - https://github.com/webpack/docs/wiki/list-of-plugins#aggressivemergingplugin
       pluginCompress,
       new CleanWebpackPlugin(), // remove duplicte hash files (created during changes)
-      ...HTMLdependentOnHash
+      /* Cache busting; plugin to automatically insert the script tag of content hashed JS file(auspice.bundle.js) dynamically into HTML files */
+      new HtmlWebpackPlugin({
+        filename: 'index.html',
+        template: './index.html'
+      })
     ];
 
   if (analyzeBundle) {
@@ -99,8 +89,8 @@ const generateConfig = ({ extensionPath, devMode = false, customOutputPath, anal
     entry,
     output: {
       path: outputPath,
-      filename: 'auspice.[contenthash].bundle.js',
-      chunkFilename: 'auspice.[contenthash].chunk.[name].bundle.js',
+      filename: 'auspice.[hash].bundle.js',
+      chunkFilename: 'auspice.[hash].chunk.[name].bundle.js',
       publicPath: '/dist/'
     },
     resolve: {
