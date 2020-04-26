@@ -240,7 +240,6 @@ export default class ReactPageScroller extends React.Component {
 
             const componentsLength = componentsToRender.length;
 
-            // all 1-5 of the scroll pages
             for (let i = componentsLength; i <= number; i++) {
                 componentsToRender.push(
                     <div key={i}
@@ -250,7 +249,6 @@ export default class ReactPageScroller extends React.Component {
                     </div>
                 );
             }
-            // the sixth scroll page (the remaining pages after this are not done
             if (!_.isNil(children[number + 1])) {
                 componentsToRender.push(
                     <div key={number + 1}
