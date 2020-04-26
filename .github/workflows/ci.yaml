@@ -16,9 +16,25 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: node --version
-      - run: npm install
+      - run: npm ci
       - run: npm test
   integration-test:
+    runs-on: macos-10.15
+    strategy:
+      matrix:
+        node: [10]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm ci
+      - run: npm run get-data
+      - run: npm run get-narratives
+      - run: npm run integration-test:ci
+  smoke-test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -28,10 +44,10 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node }}
-      - run: npm install
+      - run: npm ci
       - run: npm run get-data
       - run: npm run get-narratives
-      - run: npm run integration-test:ci
+      - run: npm run smoke-test:ci
   lint:
     runs-on: ubuntu-latest
     strategy:

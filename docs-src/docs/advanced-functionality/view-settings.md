@@ -75,6 +75,7 @@ All URL queries modify the view away from the default settings -- if you change 
 | `sidebar`  | Force the sidebar into a certain state | `sidebar=closed` or `sidebar=open` |
 | `legend`  | Force the legend into a certain state | `legend=closed` or `legend=open` |
 | `onlyPanels` | Do not display the footer / header. Useful for iframes. | `onlyPanels` |
+| `ci`       | Display confidence intervals on the tree. | `ci` |
 
 **See this in action:**
 

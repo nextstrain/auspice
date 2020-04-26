@@ -56,10 +56,16 @@ data_files=(
   "tb_global_meta.json" "tb_global_tree.json" \
   "enterovirus_d68_genome_meta.json" "enterovirus_d68_genome_tree.json" \
   "enterovirus_d68_vp1_meta.json" "enterovirus_d68_vp1_tree.json" \
-  "ncov.json" \
+  # The ncov datasets. It's not worth downloading them all, just grab the latest
+  "ncov_global.json" "ncov_africa.json" "ncov_oceania.json" "ncov_asia.json" \
+  "ncov_europe.json" "ncov_north-america.json" "ncov_south-america.json" \
+  "ncov_non-subsampled.json" \
   # Adding the ncov datasets which are required by the narratives so they can be viewed locally
-  "ncov_2020-01-23.json" "ncov_2020-01-25.json" "ncov_2020-01-30.json" \
-  "ncov_2020-03-05.json" "ncov_2020-03-13.json" \
+  # (Note that these all include the date of upload in the filename)
+  "ncov_2020-01-23.json" "ncov_2020-01-25.json" "ncov_2020-01-26.json" "ncov_2020-01-30.json" \
+  "ncov_2020-03-04.json" "ncov_2020-03-05.json" "ncov_2020-03-11.json" "ncov_2020-03-13.json" \
+  "ncov_2020-03-20.json" "ncov_2020-03-27.json" "ncov_2020-04-03.json" \
+  "ncov_global_2020-04-09.json" "ncov_north-america_2020-04-17.json" \
 )
 
 rm -rf data/

@@ -169,7 +169,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
       const allInteger = legendValues.every((x) => Number.isInteger(x));
 
       if (allInteger) {
-        minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorings[colorBy]);
+        minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy);
         if (minMax[1]-minMax[0]<=colors.length) {
           continuous = false;
           legendValues = [];
@@ -208,7 +208,7 @@ export const calcColorScale = (colorBy, controls, tree, treeToo, metadata) => {
         case "num_date":
           break; /* minMax not needed for num_date */
         default:
-          minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy, colorings[colorBy]);
+          minMax = getMinMaxFromTree(tree.nodes, treeTooNodes, colorBy);
       }
 
       /* make the continuous scale */

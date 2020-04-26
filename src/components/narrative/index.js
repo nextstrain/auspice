@@ -39,20 +39,11 @@ const explanationParagraph=`
 class Narrative extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {showingEndOfNarrativePage: false};
     this.exitNarrativeMode = () => {
       this.props.dispatch(changePage({ path: this.props.blocks[0].dataset, query: true }));
     };
     this.changeAppStateViaBlock = (reactPageScrollerIdx) => {
-      const idx = reactPageScrollerIdx-1;
-      if (idx === this.props.blocks.length) {
-        this.setState({showingEndOfNarrativePage: true});
-        return;
-      }
-
-      if (this.state.showingEndOfNarrativePage) {
-        this.setState({showingEndOfNarrativePage: false});
-      }
+      const idx = reactPageScrollerIdx-1; // now same coords as `blockIdx`
 
       if (this.props.blocks[idx].mainDisplayMarkdown) {
         this.props.dispatch(EXPERIMENTAL_showMainDisplayMarkdown({
@@ -72,7 +63,7 @@ class Narrative extends React.Component {
 
     };
     this.goToNextSlide = () => {
-      if (this.state.showingEndOfNarrativePage) return; // no-op
+      if (this.props.currentInFocusBlockIdx === this.props.blocks.length-1) return; // no-op
       this.reactPageScroller.goToPage(this.props.currentInFocusBlockIdx+1);
     };
     this.goToPreviousSlide = () => {
@@ -102,7 +93,8 @@ class Narrative extends React.Component {
       position: "absolute",
       cursor: "pointer",
       left: `${this.props.width/2 - width/2}px`,
-      fontSize: `${width}px`
+      fontSize: `${width}px`,
+      height: `${width}px`
     };
     if (pointUp) style.top = narrativeNavBarHeight + progressHeight;
     if (!pointUp) style.bottom = "5px";
@@ -123,8 +115,7 @@ class Narrative extends React.Component {
         role="navigation"
       >
         {this.props.blocks.map((b, i) => {
-          const d = (!this.state.showingEndOfNarrativePage) &&
-            this.props.currentInFocusBlockIdx === i ?
+          const d = this.props.currentInFocusBlockIdx === i ?
             "14px" : "6px";
           return (<ProgressButton
             key={i}
@@ -136,7 +127,26 @@ class Narrative extends React.Component {
     );
   }
   renderBlocks() {
-    const ret = this.props.blocks.map((b, i) => {
+    return this.props.blocks.map((b, i) => {
+
+      if (b.isEndOfNarrativeSlide) {
+        return (
+          <EndOfNarrative key="EON" id="EndOfNarrative">
+            <h1>END OF NARRATIVE</h1>
+            <a style={{...linkStyles}}
+              onClick={() => this.reactPageScroller.goToPage(0)}
+            >
+              Scroll back to the beginning
+            </a>
+            <br />
+            <a style={{...linkStyles}}
+              onClick={this.exitNarrativeMode}
+            >
+              Leave the narrative & explore the data yourself
+            </a>
+          </EndOfNarrative>
+        );
+      }
 
       const __html = i === 0 ?
         explanationParagraph + b.__html : // inject explanation to opening block
@@ -157,23 +167,6 @@ class Narrative extends React.Component {
         />
       );
     });
-    ret.push((
-      <EndOfNarrative key="EON" id="EndOfNarrative">
-        <h1>END OF NARRATIVE</h1>
-        <a style={{...linkStyles}}
-          onClick={() => this.reactPageScroller.goToPage(0)}
-        >
-          Scroll back to the beginning
-        </a>
-        <br />
-        <a style={{...linkStyles}}
-          onClick={this.exitNarrativeMode}
-        >
-          Leave the narrative & explore the data yourself
-        </a>
-      </EndOfNarrative>
-    ));
-    return ret;
   }
   render() {
     if (!this.props.loaded) {return null;}
@@ -186,7 +179,7 @@ class Narrative extends React.Component {
         <OpacityFade position="top" topHeight={narrativeNavBarHeight + progressHeight}/>
         <OpacityFade position="bottom"/>
         {this.props.currentInFocusBlockIdx !== 0 ? this.renderChevron(true) : null}
-        {!this.state.showingEndOfNarrativePage ? this.renderChevron(false) : null}
+        {this.props.currentInFocusBlockIdx !== this.props.blocks.length-1 ? this.renderChevron(false) : null}
         <ReactPageScroller
           ref={(c) => {this.reactPageScroller = c;}}
           containerHeight={this.props.height-progressHeight}

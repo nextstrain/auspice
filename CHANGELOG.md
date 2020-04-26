@@ -2,9 +2,68 @@
 title: Changelog
 ---
 
+## version 2.14.0 - 2020/04/24
+
+
+#### Testing
+* Add screenshot integration testing using puppeteer and jest-image-snapshot, and run this through the GitHub CI.
+[See PR 1068](https://github.com/nextstrain/auspice/pull/1068) & [PR 1084](https://github.com/nextstrain/auspice/pull/1084)
+
+#### Features
+* Turkish translation. [See PR 1079](https://github.com/nextstrain/auspice/pull/1079)
+
+#### Bug fixes
+* Tip labels are now rendered below tips. [See PR 1069](https://github.com/nextstrain/auspice/pull/1069)
+* The included server now uses the appropriate content-type for datasets returned from the `getDataset` API.
+[See PR 1080](https://github.com/nextstrain/auspice/pull/1080)
+
+#### Other
+* We now use `git-lfs` for storing large objects.
+Currently this is only the screenshot images used for testing.
+[See PR 1083](https://github.com/nextstrain/auspice/pull/1083)
+* Update the datasets fetched by `npm run get-data`. [See PR 1088](https://github.com/nextstrain/auspice/pull/1088)
+
+
+## version 2.13.0 - 2020/04/20
+
+#### Testing
+* Add smoke-testing to check that certain URLs render by checking the presence of strings in the DOM.
+This is a big step towards a comprehensive testing suite in Auspice.
+[See PR 1057](https://github.com/nextstrain/auspice/pull/1057)
+* Add GitHub CI workflow to run tests etc automatically on PRs.
+[See PR 1046](https://github.com/nextstrain/auspice/pull/1059)
+* Add bundle size checks to the CI.
+[See PR 1069](https://github.com/nextstrain/auspice/pull/1069)
+
+#### Features
+* Allow the display of URL confidences to be set by a URL query (`?ci`).
+This will allow narratives to render slides with the CI displayed.
+[See PR 1046](https://github.com/nextstrain/auspice/pull/1046)
+* Add the ability to export per-strain metadata of only those strains currently being displayed.
+[See PR 1067](https://github.com/nextstrain/auspice/pull/1067)
+* Move to using `react-icons` which allows the removal of the font-awesome CSS. 
+This improves ease-of-use and reduces the bundle size.
+[See PR 1065](https://github.com/nextstrain/auspice/pull/1065), [PR 1041](https://github.com/nextstrain/auspice/pull/1041)
+& [PR 1073](https://github.com/nextstrain/auspice/pull/1073)
+* Improve rendering of the narrative cover slide and add a license field.
+[See PR 1060](https://github.com/nextstrain/auspice/pull/1060) & [PR 1061](https://github.com/nextstrain/auspice/pull/1061)
+* Improve error handling in the parsing of markdown in the footer.
+[See PR 1058](https://github.com/nextstrain/auspice/pull/1058)
+* Add a dot in the progress bar & a URL query for the end-of-narrative slide.
+[See PR 1063](https://github.com/nextstrain/auspice/pull/1063)
+
+
+#### Bug Fixes
+* Fix a bug where the layout couldn't be changed after the animation had been paused.
+[See PR 1062](https://github.com/nextstrain/auspice/pull/1062)
+* Reduce unnecessary (and expensive) react updates while changing the coloring.
+[See PR 1075](https://github.com/nextstrain/auspice/pull/1075)
+* Fix a couple of cases where functions were being called with extra (unused) arguments.
+[See PR 1078](https://github.com/nextstrain/auspice/pull/1078) & [PR 1077](https://github.com/nextstrain/auspice/pull/1077)
+
+
+
 ## version 2.12.0 - 2020/04/08
-
-
 * Add a legend to the map! [See PR 935](https://github.com/nextstrain/auspice/pull/935)
 * Improve the animation smoothness, especially for datasets with limited temporal range. [See PR 920](https://github.com/nextstrain/auspice/pull/920)
 * Add Japanese translation [See PR 1045](https://github.com/nextstrain/auspice/pull/1045)

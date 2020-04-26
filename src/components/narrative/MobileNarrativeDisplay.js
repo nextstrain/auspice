@@ -55,7 +55,6 @@ class MobileNarrativeDisplay extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showingEndOfNarrativePage: false,
       bannerHeight: BANNER_HEIGHT,
       contentHeight: window.innerHeight - 2*BANNER_HEIGHT
     };
@@ -65,11 +64,8 @@ class MobileNarrativeDisplay extends React.Component {
     };
 
     this.goToNextPage = () => {
-      if (this.state.showingEndOfNarrativePage) return; // no-op
-
       if (this.props.currentInFocusBlockIdx+1 === this.props.blocks.length) {
-        this.setState({showingEndOfNarrativePage: true});
-        return;
+        return; // no-op
       }
 
       this._goToPage(this.props.currentInFocusBlockIdx+1);
@@ -81,7 +77,6 @@ class MobileNarrativeDisplay extends React.Component {
     };
 
     this._goToPage = (idx) => {
-      this.setState({ showingEndOfNarrativePage: false });
 
       // TODO: this `if` statement should be moved to the `changePage` function or similar
       if (this.props.blocks[idx] && this.props.blocks[idx].mainDisplayMarkdown) {
@@ -237,8 +232,7 @@ class MobileNarrativeDisplay extends React.Component {
         style={{height: `${progressHeight}px`}}
       >
         {this.props.blocks.map((b, i) => {
-          const d = (!this.state.showingEndOfNarrativePage) &&
-            this.props.currentInFocusBlockIdx === i ?
+          const d = this.props.currentInFocusBlockIdx === i ?
             "14px" : "6px";
           return (
             <ProgressButton
@@ -253,14 +247,12 @@ class MobileNarrativeDisplay extends React.Component {
 
   render() {
 
-    if (this.state.showingEndOfNarrativePage) {
-      return this.renderEndOfNarrative();
-
-    } else if (this.props.currentInFocusBlockIdx === 0) {
+    if (this.props.currentInFocusBlockIdx === 0) {
       return this.renderStartOfNarrative();
+    } else if (this.props.currentInFocusBlockIdx !== this.props.blocks.length-1) {
+      return this.renderMiddleOfNarrative();
     }
-
-    return this.renderMiddleOfNarrative();
+    return this.renderEndOfNarrative();
   }
 }
 

@@ -10,7 +10,8 @@ import { stopProp } from "../tree/infoPanels/click";
 import * as helpers from "./helperFunctions";
 import * as icons from "../framework/svg-icons";
 import { getAcknowledgments} from "../framework/footer";
-import { createSummary } from "../info/info";
+import { createSummary, getNumSelectedTips } from "../info/info";
+import { getFullAuthorInfoFromNode } from "../../util/treeMiscHelpers";
 
 const RectangularTreeIcon = withTheme(icons.RectangularTree);
 const PanelsGridIcon = withTheme(icons.PanelsGrid);
@@ -156,32 +157,60 @@ class DownloadModal extends React.Component {
     });
     return x;
   }
-
+  getNumUniqueAuthors(nodes) {
+    const authors = nodes.map((n) => getFullAuthorInfoFromNode(n))
+      .filter((a) => a && a.value);
+    const uniqueAuthors = new Set(authors.map((a) => a.value));
+    return uniqueAuthors.size;
+  }
   downloadButtons() {
+    // getNumSelectedTips() is redundant work with createSummaryWrapper() below,
+    // and with the check done to make sure the node is visible in strainTSV(),
+    // so if speed becomes a concern, could alter this to just generate the list of selected nodes once,
+    // on modal creation, and add it as a property on the modal
+    const selectedTipsCount = getNumSelectedTips(this.props.nodes, this.props.tree.visibility);
+    // likewise, this is somewhat redundant with authorTSV()
+    const uniqueAuthorCount = this.getNumUniqueAuthors(this.props.nodes);
     const filePrefix = this.getFilePrefix();
     const iconWidth = 25;
     const buttons = [
-      ["Tree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
-      ["TimeTree (newick)", (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
-      ["Strain Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.metadata.colorings)]
+      ["Tree", "Phylogenetic tree in Newick format with branch lengths in units of divergence.",
+        (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], false)],
+      ["TimeTree", "Phylogenetic tree in Newick format with branch lengths measured in years.",
+        (<RectangularTreeIcon width={iconWidth} selected />), () => helpers.newick(this.props.dispatch, filePrefix, this.props.nodes[0], true)],
+      ["All Metadata (TSV)", `Per-sample metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}).`,
+        (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes, this.props.metadata.colorings, false, null)]
     ];
+    if (selectedTipsCount > 0) {
+      buttons.push(["Selected Metadata (TSV)", `Per-sample metadata for strains which are currently displayed (n = ${selectedTipsCount}/${this.props.metadata.mainTreeNumTips}).`,
+        (<MetaIcon width={iconWidth} selected />), () => helpers.strainTSV(this.props.dispatch, filePrefix, this.props.nodes,
+          this.props.metadata.colorings, true, this.props.tree.visibility)]);
+    }
     if (helpers.areAuthorsPresent(this.props.tree)) {
-      buttons.push(["Author Metadata (TSV)", (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)]);
+      buttons.push(["Author Metadata (TSV)", `Metadata for all samples in the dataset (n = ${this.props.metadata.mainTreeNumTips}) grouped by their ${uniqueAuthorCount} authors.`,
+        (<MetaIcon width={iconWidth} selected />), () => helpers.authorTSV(this.props.dispatch, filePrefix, this.props.tree)]);
     }
     buttons.push(
-      ["Screenshot (SVG)", (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
+      ["Screenshot (SVG)", "Screenshot of the current nextstrain display in SVG format.",
+        (<PanelsGridIcon width={iconWidth} selected />), () => helpers.SVG(this.props.dispatch, filePrefix, this.props.panelsToDisplay, this.props.panelLayout, this.makeTextStringsForSVGExport())]
     );
-    const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white"});
+    const buttonTextStyle = Object.assign({}, materialButton, {backgroundColor: "rgba(0,0,0,0)", paddingLeft: "10px", color: "white", minWidth: "300px", textAlign: "left" });
+    const buttonLabelStyle = { fontStyle: "italic", fontSize: "14px", color: "lightgray" };
     return (
-      <div style={{display: "flex", flexWrap: "wrap", justifyContent: "space-around"}}>
-        {buttons.map((data) => (
-          <div key={data[0]} onClick={data[2]} style={{cursor: 'pointer'}}>
-            {data[1]}
-            <button style={buttonTextStyle}>
-              {data[0]}
-            </button>
-          </div>
-        ))}
+      <div style={{display: "block", justifyContent: "space-around", marginLeft: "25px", width: "100%" }}>
+        <div style={{ width: "100%" }}>
+          {buttons.map((data) => (
+            <div key={data[0]} onClick={data[3]} style={{cursor: 'pointer' }}>
+              {data[2]}
+              <button style={buttonTextStyle} name={data[0]}>
+                {data[0]}
+              </button>
+              <div style={{ display: "inline-block", height: "30px", verticalAlign: "top", paddingTop: "6px" }}>
+                <label style={buttonLabelStyle} htmlFor={data[0]}>{data[1]}</label>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
