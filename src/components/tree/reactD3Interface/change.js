@@ -92,6 +92,10 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
     args.svgHasChangedDimensions = true;
   }
 
+  /* split tree by colored-by trait */
+  /* just copies into tree; will be null/empty string/not defined if no trait */
+  args.splitTreeByTrait = newProps.splitTreeByTrait;
+
   const change = Object.keys(args).length;
   if (change) {
     args.animationInProgress = newProps.animationPlayPauseButton === "Pause";

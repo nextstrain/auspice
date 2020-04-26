@@ -24,7 +24,8 @@ export const getDefaultTreeState = () => {
     totalStateCounts: {},
     availableBranchLabels: [],
     selectedStrain: undefined,
-    selectedClade: undefined
+    selectedClade: undefined,
+    splitByTrait: undefined
   };
 };
 
@@ -75,6 +76,13 @@ const Tree = (state = getDefaultTreeState(), action) => {
         }
       });
       return state;
+    case types.TOGGLE_SPLIT_TREE:
+      // todo: what if nothing is colored-by? can that happen?
+      // note that there's no reason technically not to split by a state that isn't the colored-by
+      // state, it just doesn't make as much UI sense  
+      return Object.assign({}, state, {
+        splitByTrait: action.splitByTrait
+      });
     default:
       return state;
   }
