@@ -81,7 +81,8 @@ export const getDefaultControlsState = () => {
     sidebarOpen: initialSidebarState.sidebarOpen,
     treeLegendOpen: undefined,
     mapLegendOpen: undefined,
-    showOnlyPanels: false
+    showOnlyPanels: false,
+    splitTreeByTrait: undefined
   };
 };
 
