@@ -61,7 +61,7 @@
   "AA mutations": "Мутации Аминокислот",
   "protein mutations truncated": "мутации белков отображены неполностью",
   "Gaps": "Пробелы",
-  "more": "больше",
+  "{{x}} more": "{{x}} больше",
   "No nucleotide mutations": "Нет мутаций нуклеотидов",
   "No amino acid mutations": "Нет мутаций аминокислот",
   "Divergence": "Дивергенция",

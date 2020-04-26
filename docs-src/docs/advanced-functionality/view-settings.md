@@ -58,6 +58,7 @@ All URL queries modify the view away from the default settings -- if you change 
 | `r`        | Geographic resolution | `r=region` |
 | `m`        | Phylogeny x-axis measure | `m=div` |
 | `l`        | Phylogeny layout | `l=clock` |
+| `lang`     | Language | `lang=ja` (Japanese) |
 | `dmin`     | Temporal range (minimum) | `dmin=2008-05-13` |
 | `dmax`     | Temporal range (maximum) | `dmax=2010-05-13` |
 | `f_<name>` | Data filter. Multiple values per key are `,` separated. | `f_region=Oceania` |
@@ -74,6 +75,7 @@ All URL queries modify the view away from the default settings -- if you change 
 | `sidebar`  | Force the sidebar into a certain state | `sidebar=closed` or `sidebar=open` |
 | `legend`  | Force the legend into a certain state | `legend=closed` or `legend=open` |
 | `onlyPanels` | Do not display the footer / header. Useful for iframes. | `onlyPanels` |
+| `ci`       | Display confidence intervals on the tree. | `ci` |
 
 **See this in action:**
 

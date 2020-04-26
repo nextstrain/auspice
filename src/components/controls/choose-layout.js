@@ -1,3 +1,6 @@
+/* eslint-disable react/jsx-no-bind */
+/* ^^^ We can get away with this because <ChooseLayout> doesn't rerender frequently, but fixes are welcome */
+
 import React from "react";
 import PropTypes from 'prop-types';
 import { connect } from "react-redux";
@@ -29,11 +32,33 @@ class ChooseLayout extends React.Component {
     layout: PropTypes.string.isRequired,
     dispatch: PropTypes.func.isRequired
   }
+
+  handleChangeLayoutClicked(userSelectedLayout) {
+    const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
+    if (!loopRunning) {
+      if (userSelectedLayout === "rect") {
+        analyticsControlsEvent("change-layout-rectangular");
+      } else if (userSelectedLayout === "radial") {
+        analyticsControlsEvent("change-layout-radial");
+      } else if (userSelectedLayout === "unrooted") {
+        analyticsControlsEvent("change-layout-unrooted");
+      } else if (userSelectedLayout === "clock") {
+        analyticsControlsEvent("change-layout-clock");
+      } else {
+        console.warn("Odd... controls/choose-layout.js tried to set a layout we don't offer...");
+      }
+
+      this.props.dispatch({
+        type: CHANGE_LAYOUT,
+        data: userSelectedLayout
+      });
+    }
+  }
+
   render() {
     const { t } = this.props;
     if (this.props.showTreeToo) return null;
     const selected = this.props.layout;
-    const loopRunning = window.NEXTSTRAIN && window.NEXTSTRAIN.animationTickReference;
     return (
       <div style={{marginBottom: 15}}>
         <SidebarSubtitle>
@@ -43,7 +68,7 @@ class ChooseLayout extends React.Component {
           <RectangularTreeIcon width={25} selected={selected === "rect"}/>
           <SidebarButton
             selected={selected === "rect"}
-            onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-rectangular"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "rect" });}}}
+            onClick={this.handleChangeLayoutClicked.bind(this, "rect")}
           >
             {t("sidebar:rectangular")}
           </SidebarButton>
@@ -52,7 +77,7 @@ class ChooseLayout extends React.Component {
           <RadialTreeIcon width={25} selected={selected === "radial"}/>
           <SidebarButton
             selected={selected === "radial"}
-            onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-radial"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "radial" });}}}
+            onClick={this.handleChangeLayoutClicked.bind(this, "radial")}
           >
             {t("sidebar:radial")}
           </SidebarButton>
@@ -61,7 +86,7 @@ class ChooseLayout extends React.Component {
           <UnrootedTreeIcon width={25} selected={selected === "unrooted"}/>
           <SidebarButton
             selected={selected === "unrooted"}
-            onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-unrooted"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "unrooted" });}}}
+            onClick={this.handleChangeLayoutClicked.bind(this, "unrooted")}
           >
             {t("sidebar:unrooted")}
           </SidebarButton>
@@ -73,7 +98,7 @@ class ChooseLayout extends React.Component {
                 <ClockIcon width={25} selected={selected === "clock"}/>
                 <SidebarButton
                   selected={selected === "clock"}
-                  onClick={() => {if (!loopRunning) {analyticsControlsEvent("change-layout-clock"); this.props.dispatch({ type: CHANGE_LAYOUT, data: "clock" });}}}
+                  onClick={this.handleChangeLayoutClicked.bind(this, "clock")}
                 >
                   {t("sidebar:clock")}
                 </SidebarButton>

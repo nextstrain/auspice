@@ -1,0 +1,10 @@
+# First token represents the path to access, remaining tokens are a
+# comma separated list of text assertions (text we expect to find in the
+# rendered page):
+/ncov/global, novel coronavirus, Phylogeny, Diversity, Filter by Location
+
+/zika, Zika virus evolution, rectangular
+/zika?c=region&l=clock&legend=open&m=div&r=region, Zika virus evolution, rectangular
+
+# any page that doesn't exist will do:
+/page-does-not-exist, an error has occured

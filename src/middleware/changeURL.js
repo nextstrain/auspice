@@ -1,7 +1,7 @@
 import queryString from "query-string";
 import * as types from "../actions/types";
 import { numericToCalendar } from "../util/dateHelpers";
-
+import { shouldDisplayTemporalConfidence } from "../reducers/controls";
 
 /**
  * This middleware acts to keep the app state and the URL query state in sync by
@@ -52,26 +52,38 @@ export const changeURLMiddleware = (store) => (next) => (action) => {
     case types.NEW_COLORS:
       query.c = action.colorBy === state.controls.defaults.colorBy ? undefined : action.colorBy;
       break;
+    case types.TOGGLE_TEMPORAL_CONF:
+      if ("ci" in query) {
+        query.ci = undefined;
+      } else {
+        // We have to use null here to put "ci" in the query without an "=" after it and a value, i.e. to treat it as a boolean without having "=true"
+        query.ci = null;
+      }
+      break;
     case types.APPLY_FILTER: {
       query[`f_${action.trait}`] = action.values.join(',');
       break;
     }
     case types.CHANGE_LAYOUT: {
       query.l = action.data === state.controls.defaults.layout ? undefined : action.data;
+      if (!shouldDisplayTemporalConfidence(state.controls.temporalConfidence.exists, state.controls.distanceMeasure, query.l)) {
+        query.ci = undefined;
+      }
       break;
     }
     case types.CHANGE_GEO_RESOLUTION: {
       query.r = action.data === state.controls.defaults.geoResolution ? undefined : action.data;
       break;
     }
-    /* The following has been commented out to give us time to check whether a `lang` query is
-    the appropriate way to set the language. This can be tracked via https://github.com/nextstrain/nextstrain.org/issues/130 */
-    // case types.CHANGE_LANGUAGE: {
-    //   query.lang = action.data === state.general.defaults.language ? undefined : action.data;
-    //   break;
-    // }
+    case types.CHANGE_LANGUAGE: {
+      query.lang = action.data === state.general.defaults.language ? undefined : action.data;
+      break;
+    }
     case types.CHANGE_DISTANCE_MEASURE: {
       query.m = action.data === state.controls.defaults.distanceMeasure ? undefined : action.data;
+      if (!shouldDisplayTemporalConfidence(state.controls.temporalConfidence.exists, query.m, state.controls.layout)) {
+        query.ci = undefined;
+      }
       break;
     }
     case types.CHANGE_PANEL_LAYOUT: {

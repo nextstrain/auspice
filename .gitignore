@@ -8,6 +8,7 @@ s3/
 /local_narratives/
 /narratives/
 /datasets/
+**/__diff_output__
 
 ### OSX ###
 .DS_Store
@@ -16,3 +17,6 @@ s3/
 node_modules/
 npm-debug.log
 *tgz
+
+### IDE ###
+.vscode/*

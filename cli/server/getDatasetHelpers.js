@@ -96,6 +96,7 @@ const sendJson = async (res, info) => {
     stream the response */
     const readStream = fs.createReadStream(info.address);
     readStream.on('open', () => {
+      res.set('Content-Type', 'application/json');
       readStream.pipe(res);
     });
     readStream.on('error', (err) => {

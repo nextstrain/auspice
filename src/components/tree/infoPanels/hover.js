@@ -160,7 +160,9 @@ const Mutations = ({node, t}) => {
     const nucLen = nucs.length; // number of mutations that exist without N/-
 
     let m = nucs.slice(0, Math.min(nDisplay, nucLen)).join(", ");
-    m += nucLen > nDisplay ? " + " + (nucLen - nDisplay) + " " + t("more") : "";
+    if (nucLen > nDisplay) {
+      m += " + " + t("{{x}} more", {x: nucLen - nDisplay});
+    }
 
     if (nucLen !== 0) {
       elements.push(<InfoLine name={t("Nucleotide mutations")+":"} value={m} key="nuc"/>);
@@ -201,7 +203,7 @@ const Mutations = ({node, t}) => {
       if (idx < nProtsToDisplay) {
         let x = prot + ":\u00A0\u00A0" + mutationsToDisplay[prot].slice(0, Math.min(nDisplay, mutationsToDisplay[prot].length)).join(", ");
         if (mutationsToDisplay[prot].length > nDisplay) {
-          x += " + " + (mutationsToDisplay[prot].length - nDisplay) + " " + t("more");
+          x += " + " + t("{{x}} more", {x: mutationsToDisplay[prot].length - nDisplay});
         }
         mutationsToRender.push(x);
       } else if (idx === nProtsToDisplay) {

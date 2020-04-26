@@ -385,7 +385,7 @@ export const mapToScreen = function mapToScreen() {
       // So we add a tiny amount of jitter (e.g 1/1000px) to the horizontal line (d.branch[0])
       // see https://stackoverflow.com/questions/13223636/svg-gradient-for-perfectly-horizontal-path
       d.branch =[
-        [` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip+0.001}`],
+        [` M ${d.xBase - stem_offset},${d.yBase} L ${d.xTip},${d.yTip+0.01}`],
         [` M ${d.xTip},${childrenY[0]} L ${d.xTip},${childrenY[1]}`]
       ];
       if (this.params.confidence) {

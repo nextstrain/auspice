@@ -23,8 +23,9 @@ const addParser = (parser) => {
   subparser.addArgument('--handlers', {action: "store", metavar: "JS", help: "Overwrite the provided server handlers for client requests. See documentation for more details."});
   subparser.addArgument('--datasetDir', {metavar: "PATH", help: "Directory where datasets (JSONs) are sourced. This is ignored if you define custom handlers."});
   subparser.addArgument('--narrativeDir', {metavar: "PATH", help: "Directory where narratives (Markdown files) are sourced. This is ignored if you define custom handlers."});
+  subparser.addArgument('--includeTiming', {action: "storeTrue", help: "Do not strip timing functions. With these included the browser console will print timing measurements for a number of functions."});
+
   /* there are some options which we deliberately do not document via `--help`. See build.js for explanations. */
-  subparser.addArgument('--includeTiming', {action: "storeTrue", help: SUPPRESS});
   subparser.addArgument('--gh-pages', {action: "store", help: SUPPRESS});
 };
 

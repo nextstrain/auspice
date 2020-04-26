@@ -28,86 +28,92 @@ const makeFrontMatterBlock = (frontMatter) => {
   }
   /* create markdown to represent the title page */
   const markdown = [];
-  markdown.push(`# ${frontMatter.title}`);
+  markdown.push(`## ${frontMatter.title}`);
   if (frontMatter.authors) {
-    const authors = parseContributors(frontMatter, "authors", "authorLinks");
+    const authors = parseAttributions(frontMatter, "authors", "authorLinks");
     if (authors) {
       markdown.push(`### Author: ${authors}`);
       if (frontMatter.affiliations && typeof frontMatter.affiliations === "string") {
         markdown[markdown.length-1] += " <sup> 1 </sup>";
-        markdown.push(`<sup> 1 </sup> ${frontMatter.affiliations}`);
+        markdown.push(`<sub><sup> 1 </sup> ${frontMatter.affiliations}</sub>`);
       }
     }
   }
   if (frontMatter.translators) {
-    const translators = parseContributors(frontMatter, "translators", "translatorLinks");
+    const translators = parseAttributions(frontMatter, "translators", "translatorLinks");
     if (translators) {
       markdown.push(`### Translators: ${translators}`);
     }
   }
+  if (frontMatter.abstract && typeof frontMatter.abstract === "string") {
+    markdown.push(`### ${frontMatter.abstract}`);
+  }
   if (frontMatter.date && typeof frontMatter.date === "string") {
-    markdown.push(`### Created: ${frontMatter.date}`);
+    markdown.push(`#### Created: ${frontMatter.date}`);
   }
   if (frontMatter.updated && typeof frontMatter.updated === "string") {
-    markdown.push(`### Updated: ${frontMatter.updated}`);
+    markdown.push(`#### Updated: ${frontMatter.updated}`);
   }
-  if (frontMatter.abstract && typeof frontMatter.abstract === "string") {
-    markdown.push(`#### ${frontMatter.abstract}`);
+  if (frontMatter.license) {
+    const license = parseAttributions(frontMatter, "license", "licenseLink");
+    if (license) {
+      markdown.push(`#### License: ${license}`);
+    }
   }
-
+  
   const block = new Proxy({}, blockProxyHandler);
   block.url = frontMatter.dataset;
   block.contents = markdown.join("\n");
   return block;
 };
 
-function parseContributors(frontMatter, contributorsKey, contributorLinksKey) {
-  const contributors = frontMatter[contributorsKey];
-  const contributorLinks = frontMatter[contributorLinksKey];
+function parseAttributions(frontMatter, attributionsKey, attributionLinksKey) {
+  const attributions = frontMatter[attributionsKey];
+  const attributionLinks = frontMatter[attributionLinksKey];
 
-  if (Array.isArray(contributors)) {
-    return parseContributorsArray(contributors, contributorLinks, contributorsKey, contributorLinksKey);
-  } else if (typeof contributors === 'string') {
-    return parseContributorsString(contributors, contributorLinks, contributorsKey, contributorLinksKey);
+  if (Array.isArray(attributions)) {
+    return parseAttributionsArray(attributions, attributionLinks, attributionsKey, attributionLinksKey);
+  } else if (typeof attributions === 'string') {
+    return parseAttributionsString(attributions, attributionLinks, attributionsKey, attributionLinksKey);
   }
   return undefined;
 }
 
-function parseContributorsArray(contributors, contributorLinks, contributorsKey, contributorLinksKey) {
+function parseAttributionsArray(attributions, attributionLinks, attributionsKey, attributionLinksKey) {
   // validate links
-  if (contributorLinks) {
-    if (!Array.isArray(contributorLinks)) {
-      utils.warn(`Narrative parsing - if ${contributorsKey} is an array, then ${contributorLinksKey} must also be an array. Skipping links.`);
-      contributorLinks = undefined;
-    } else if (contributorLinks.length !== contributors.length) {
-      utils.warn(`Narrative parsing - the length of ${contributorsKey} and ${contributorLinksKey} did not match. Skipping links.`);
-      contributorLinks = undefined;
+  if (attributionLinks) {
+    if (!Array.isArray(attributionLinks)) {
+      utils.warn(`Narrative parsing - if ${attributionsKey} is an array, then ${attributionLinksKey} must also be an array. Skipping links.`);
+      attributionLinks = undefined;
+    } else if (attributionLinks.length !== attributions.length) {
+      utils.warn(`Narrative parsing - the length of ${attributionsKey} and ${attributionLinksKey} did not match. Skipping links.`);
+      attributionLinks = undefined;
     }
   }
-  if (contributorLinks) {
-    contributors = contributors.map((contributor, idx) => {
-      return contributorLink(contributor, contributorLinks[idx]);
+  if (attributionLinks) {
+    attributions = attributions.map((attribution, idx) => {
+      return attributionLink(attribution, attributionLinks[idx]);
     });
   }
-  return contributors.join(", ");
+  return attributions.join(", ");
 }
 
-function parseContributorsString(contributors, contributorLinks, contributorsKey, contributorLinksKey) {
+function parseAttributionsString(attributions, attributionLinks, attributionsKey, attributionLinksKey) {
   // validate links
-  if (contributorLinks) {
-    if (typeof contributorLinks !== "string") {
-      utils.warn(`Narrative parsing - if ${contributorsKey} is a string, then ${contributorLinksKey} must also be a string. Skipping links.`);
-      contributorLinks = undefined;
+  if (attributionLinks) {
+    if (typeof attributionLinks !== "string") {
+      utils.warn(`Narrative parsing - if ${attributionsKey} is a string, then ${attributionLinksKey} must also be a string. Skipping links.`);
+      attributionLinks = undefined;
     }
   }
-  return contributorLink(contributors, contributorLinks);
+  return attributionLink(attributions, attributionLinks);
 }
 
-function contributorLink(contributor, contributorLinkValue) {
-  if (contributorLink) {
-    return `[${contributor}](${contributorLinkValue})`;
+function attributionLink(attribution, attributionLinkValue) {
+  if (attributionLink) {
+    return `[${attribution}](${attributionLinkValue})`;
   }
-  return contributor;
+  return attribution;
 }
 
 /**

@@ -24,7 +24,7 @@
   "Data usage part 2": "Prašome susisiekti su atitinkamais autoriais (jų sąrašą rasite TSV failuose apačioje) jei ketinate atlikti savo tyrimus naudodamiesi jų duomenimis. Išvestinius duomenis, tokius kaip filogenetinia medžiai, gali atsisiųsti apačioje - prašome susisiekti su atitinkamais autoriais jei reikia.",
 
   "__Entropy Panel__": "########################################",
-  "Diversity": "Diversity",
+  "Diversity": "Įvairovė",
   "entropy": "entropija",
   "events": "įvykiai",
   "Codon {{codon}} in protein {{protein}}": "Kodonas {{codon}} iš {{protein}} baltymo",
@@ -62,7 +62,7 @@
   "AA mutations": "Amino rūgščių mutacijos",
   "protein mutations truncated": "baltymo mutacijos sutrumpintos",
   "Gaps": "Tarpai",
-  "more": "daugiau",
+  "{{x}} more": "{{x}} daugiau",
   "No nucleotide mutations": "Nėra nukelotidų mutacijų",
   "No amino acid mutations": "Nėra amino rūgščių mutacijų",
   "Divergence": "Skirtumas",

@@ -4,7 +4,7 @@ import Awesomplete from 'awesomplete'; /* https://leaverou.github.io/awesomplete
 import { withTranslation } from "react-i18next";
 import styled from 'styled-components';
 import { updateVisibleTipsAndBranchThicknesses, updateTipRadii } from "../../actions/tree";
-import { NODE_VISIBLE } from "../../util/globals";
+import { NODE_VISIBLE, controlsWidth } from "../../util/globals";
 import { SidebarSubtitle } from "./styles";
 import "../../css/awesomplete.css";
 
@@ -37,7 +37,7 @@ const Container = styled.div`
 `;
 
 const InputContainer = styled.div`
-  width: 80%;
+  width: ${controlsWidth-10}px; /* awesomplete includes 10px of padding & border */
   display: inline-block;
 `;
 

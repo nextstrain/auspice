@@ -41,9 +41,11 @@ const styliseDateRange = (date) => {
   return dateStr;
 };
 
-const getNumSelectedTips = (nodes, visibility) => {
+export const getNumSelectedTips = (nodes, visibility) => {
   let count = 0;
   nodes.forEach((d, idx) => {
+    // nodes which are not inView have a visibility of NODE_NOT_VISIBLE
+    // so this check accounts for them as well
     if (!d.hasChildren && visibility[idx] === NODE_VISIBLE) count += 1;
   });
   return count;
@@ -70,7 +72,7 @@ export const createSummary = (mainTreeNumTips, nodes, filters, visibility, visib
   let summary = ""; /* text returned from this function */
 
   /* Number of genomes & their date range */
-  if (branchLengthsToDisplay !== "divOnly") {
+  if (branchLengthsToDisplay !== "divOnly" && nSelectedSamples > 0) {
     summary += t(
       "Showing {{x}} of {{y}} genomes sampled between {{from}} and {{to}}",
       {

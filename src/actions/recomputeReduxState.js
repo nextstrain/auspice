@@ -5,7 +5,7 @@ import { calcBrowserDimensionsInitialState } from "../reducers/browserDimensions
 import { strainNameToIdx, getIdxMatchingLabel, calculateVisiblityAndBranchThickness } from "../util/treeVisibilityHelpers";
 import { constructVisibleTipLookupBetweenTrees } from "../util/treeTangleHelpers";
 import { calcTipRadii } from "../util/tipRadiusHelpers";
-import { getDefaultControlsState } from "../reducers/controls";
+import { getDefaultControlsState, shouldDisplayTemporalConfidence } from "../reducers/controls";
 import { countTraitsAcrossTree, calcTotalTipsInTree } from "../util/treeCountingHelpers";
 import { calcEntropyInView } from "../util/entropy";
 import { treeJsonToState } from "../util/treeJsonProcessing";
@@ -44,7 +44,6 @@ export const getMaxCalDateViaTree = (nodes) => {
 
 /* need a (better) way to keep the queryParams all in "sync" */
 const modifyStateViaURLQuery = (state, query) => {
-  // console.log("Query incoming: ", query);
   if (query.l) {
     state["layout"] = query.l;
   }
@@ -59,6 +58,11 @@ const modifyStateViaURLQuery = (state, query) => {
   }
   if (query.c) {
     state["colorBy"] = query.c;
+  }
+  if (query.ci === undefined) {
+    state["temporalConfidence"]["on"] = false;
+  } else {
+    state["temporalConfidence"]["on"] = true;
   }
   if (query.r) {
     state["geoResolution"] = query.r;
@@ -460,14 +464,12 @@ const checkAndCorrectErrorsInState = (state, metadata, query, tree, viewingNarra
   }
 
   /* temporalConfidence */
-  if (state.temporalConfidence.exists) {
-    if (state.layout !== "rect") {
-      state.temporalConfidence.display = false;
-      state.temporalConfidence.on = false;
-    } else if (state.distanceMeasure === "div") {
-      state.temporalConfidence.display = false;
-      state.temporalConfidence.on = false;
-    }
+  if (shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, state.layout)) {
+    state.temporalConfidence.display = true;
+  } else {
+    state.temporalConfidence.display = false;
+    state.temporalConfidence.on = false;
+    delete query.ci; // rm ci from the query if it doesn't apply
   }
 
   /* if colorBy is a genotype then we need to set mutType */
@@ -703,6 +705,7 @@ export const createStateFromQueryOrJSONs = ({
   only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
   URL query this page defines via this information */
   if (narrativeBlocks) {
+    addEndOfNarrativeBlock(narrativeBlocks);
     narrative = narrativeBlocks;
     let n = parseInt(query.n, 10) || 0;
     /* If the query has defined a block which doesn't exist then default to n=0 */
@@ -830,3 +833,12 @@ export const createTreeTooState = ({
   // }
   return {tree, treeToo, controls};
 };
+
+function addEndOfNarrativeBlock(narrativeBlocks) {
+  const lastContentSlide = narrativeBlocks[narrativeBlocks.length-1];
+  const endOfNarrativeSlide = Object.assign({}, lastContentSlide, {
+    __html: undefined,
+    isEndOfNarrativeSlide: true
+  });
+  narrativeBlocks.push(endOfNarrativeSlide);
+}
