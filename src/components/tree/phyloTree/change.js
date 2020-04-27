@@ -350,6 +350,10 @@ export const change = function change({
     this.nodes.forEach((d) => {d.update = true;});
   }
 
+  /* always update splitTreeByTrait, as null disables */
+  /* must be updated before setLayout */
+  this.params.splitTreeByTrait = splitTreeByTrait;
+
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
   /* distance */
   if (newDistance) this.setDistance(newDistance);

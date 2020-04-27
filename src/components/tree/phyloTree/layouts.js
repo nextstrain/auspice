@@ -34,14 +34,24 @@ export const setLayout = function setLayout(layout) {
   timerEnd("setLayout");
 };
 
+const calculateTraitSplitYOffset = function calculateTraitSplitYOffset(node) {
+  // todo: see if node has trait
+  // get trait data from node
+  // retrieve existing offset 
+  // insert new offset if none
+  // apply offset to node yvalue
+}
 
 /**
  * assigns x,y coordinates for a rectangular layout
  * @return {null}
  */
 export const rectangularLayout = function rectangularLayout() {
+  if (this.params.splitTreeByTrait) this.traitOffsets = new Object();
   this.nodes.forEach((d) => {
-    d.y = d.n.yvalue; // precomputed y-values
+    d.y = this.params.splitTreeByTrait 
+      ? calculateTraitSplitYOffset(d) 
+      : d.n.yvalue; // precomputed y-values
     d.x = d.depth;    // depth according to current distance
     d.px = d.pDepth;  // parent positions
     d.py = d.y;
