@@ -105,7 +105,6 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
 
   const Footer = () => (
     <CenterContent>
-<span>
   <a key={3} href="https://www.inspq.qc.ca/" target="_blank" rel="noreferrer noopener">
     <img alt="logo" width="200" src={require("../../images/inspq.jpg")}/>
   </a>
@@ -115,7 +114,6 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
   <a key={1} href="https://c3g.ca/" target="_blank" rel="noreferrer noopener">
     <img alt="logo" width="200" src={require("../../images/c3g_source.png")}/>
   </a>
-</span>
 <span>
   <a key={2} href="https://www.inspq.qc.ca/lspq" target="_blank" rel="noreferrer noopener">
     <img alt="logo" width="165" src={require("../../images/lspq.jpeg")}/>
