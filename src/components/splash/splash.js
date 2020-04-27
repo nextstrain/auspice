@@ -111,7 +111,7 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
   <a key={4} href="http://www.mcgillgenomecentre.org/" target="_blank" rel="noreferrer noopener">
     <img alt="logo" width="200" src={require("../../images/Genome_logo.png")}/>
   </a>
-  <a key={1} href="https://c3g.ca/" target="_blank" rel="noreferrer noopener">
+  <a key={1} href="http://www.computationalgenomics.ca/" target="_blank" rel="noreferrer noopener">
     <img alt="logo" width="200" src={require("../../images/c3g_source.png")}/>
   </a>
 <span>
