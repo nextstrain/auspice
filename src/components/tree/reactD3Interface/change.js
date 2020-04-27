@@ -94,7 +94,8 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
 
   /* split tree by colored-by trait */
   /* just copies into tree; will be null/empty string/not defined if no trait */
-  args.splitTreeByTrait = newProps.splitTreeByTrait;
+  if (newProps.tree.splitTreeByTrait !== oldProps.tree.splitTreeByTrait)
+    args.splitTreeByTrait = newProps.tree.splitTreeByTrait;
 
   const change = Object.keys(args).length;
   if (change) {

@@ -8,7 +8,7 @@ import { TOGGLE_SPLIT_TREE } from "../../actions/types";
 @connect((state) => {
     return {
         colorBy: state.controls.colorBy,
-        splitByTrait: state.tree.splitByTrait
+        splitTreeByTrait: state.tree.splitTreeByTrait
     };
 })  
 /* Implements a button which splits the tree into visual trees per strain. */
@@ -19,11 +19,11 @@ class ChooseTreeSplit extends React.Component {
             <div style={{margin: 5}}>
                 <Toggle
                   display={true}
-                  on={this.props.splitByTrait}
+                  on={this.props.splitTreeByTrait !== null}
                   callback={() => 
                         this.props.dispatch({type: TOGGLE_SPLIT_TREE, 
                             // the presence of splitByTrait means it should be toggled off
-                            splitByTrait: this.props.splitByTrait ? null : this.props.colorBy
+                            splitTreeByTrait: this.props.splitTreeByTrait !== null ? null : this.props.colorBy
                         })}
                   label={t("sidebar:Split tree by colored-by trait")}
                 />
