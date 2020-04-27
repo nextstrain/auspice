@@ -275,7 +275,8 @@ export const change = function change({
   fill = undefined,
   visibility = undefined,
   tipRadii = undefined,
-  branchThickness = undefined
+  branchThickness = undefined,
+  splitTreeByTrait = null
 }) {
   // console.log("\n** phylotree.change() (time since last run:", Date.now() - this.timeLastRenderRequested, "ms) **\n\n");
   timerStart("phylotree.change()");
@@ -352,11 +353,16 @@ export const change = function change({
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
   /* distance */
   if (newDistance) this.setDistance(newDistance);
+  
   /* layout (must run after distance) */
-  if (newDistance || newLayout || updateLayout) this.setLayout(newLayout || this.layout);
-  /* show confidences - set this param which actually adds the svg paths for
+  /* also used to split by traits */
+  if (newDistance || newLayout || updateLayout || splitTreeByTrait) 
+    this.setLayout(newLayout || this.layout);
+  
+    /* show confidences - set this param which actually adds the svg paths for
      confidence intervals when mapToScreen() gets called below */
   if (showConfidences) this.params.confidence = true;
+  
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||
@@ -365,7 +371,8 @@ export const change = function change({
     updateLayout ||
     zoomIntoClade ||
     svgHasChangedDimensions ||
-    showConfidences
+    showConfidences ||
+    splitTreeByTrait
   ) {
     this.mapToScreen();
   }

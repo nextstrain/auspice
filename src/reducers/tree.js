@@ -25,7 +25,7 @@ export const getDefaultTreeState = () => {
     availableBranchLabels: [],
     selectedStrain: undefined,
     selectedClade: undefined,
-    splitByTrait: undefined
+    splitTreeByTrait: null
   };
 };
 
@@ -81,7 +81,7 @@ const Tree = (state = getDefaultTreeState(), action) => {
       // note that there's no reason technically not to split by a state that isn't the colored-by
       // state, it just doesn't make as much UI sense  
       return Object.assign({}, state, {
-        splitByTrait: action.splitByTrait
+        splitTreeByTrait: action.splitTreeByTrait
       });
     default:
       return state;
