@@ -1,7 +1,5 @@
 import React from "react";
 import { connect } from "react-redux";
-import marked from "marked";
-import dompurify from "dompurify";
 import styled from 'styled-components';
 import { withTranslation } from "react-i18next";
 import { FaDownload } from "react-icons/fa";
@@ -13,6 +11,7 @@ import { version } from "../../version";
 import { publications } from "../download/downloadModal";
 import { isValueValid } from "../../util/globals";
 import hardCodedFooters from "./footer-descriptions";
+import { parseMarkdown } from "../../util/parseMarkdown";
 
 const dot = (
   <span style={{marginLeft: 10, marginRight: 10}}>
@@ -138,36 +137,9 @@ export const getAcknowledgments = (metadata, dispatch) => {
    * Jover. December 2019.
   */
   if (metadata.description) {
-    dompurify.addHook("afterSanitizeAttributes", (node) => {
-      // Set external links to open in a new tab
-      if ('href' in node && location.hostname !== node.hostname) {
-        node.setAttribute('target', '_blank');
-        node.setAttribute('rel', 'noreferrer nofollow');
-      }
-      // Find nodes that contain images and add imageContainer class to update styling
-      const nodeContainsImg = ([...node.childNodes].filter((child) => child.localName === 'img')).length > 0;
-      if (nodeContainsImg) {
-        // For special case of image links, set imageContainer on outer parent
-        if (node.localName === 'a') {
-          node.parentNode.className += ' imageContainer';
-        } else {
-          node.className += ' imageContainer';
-        }
-      }
-    });
-
-    const sanitizer = dompurify.sanitize;
-    const sanitizerConfig = {
-      ALLOWED_TAGS: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'em', 'strong', 'del', 'ol', 'ul', 'li', 'a', 'img', '#text', 'code', 'pre', 'hr'],
-      ALLOWED_ATTR: ['href', 'src', 'width', 'height', 'alt'],
-      KEEP_CONTENT: false,
-      ALLOW_DATA_ATTR: false
-    };
-
     let cleanDescription;
     try {
-      const rawDescription = marked(metadata.description);
-      cleanDescription = sanitizer(rawDescription, sanitizerConfig);
+      cleanDescription = parseMarkdown(metadata.description);
     } catch (error) {
       console.error(`Error parsing footer description: ${error}`);
       cleanDescription = '<p>There was an error parsing the footer description.</p>';

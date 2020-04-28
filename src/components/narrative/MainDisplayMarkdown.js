@@ -1,10 +1,8 @@
 import React from "react";
 import { connect } from "react-redux";
-import marked from "marked";
 import styled from 'styled-components';
-import dompurify from "dompurify";
 import { dataFont } from "../../globalStyles";
-
+import { parseMarkdown } from "../../util/parseMarkdown";
 
 /**
  * The following code borrows heavily from the Footer
@@ -105,7 +103,7 @@ const Container = styled.div`
 `;
 
 const EXPERIMENTAL_MainDisplayMarkdown = ({narrativeBlock, width, mobile}) => {
-  const cleanHTML = mdToHtml(narrativeBlock.mainDisplayMarkdown);
+  const cleanHTML = parseMarkdown(narrativeBlock.mainDisplayMarkdown);
   return (
     <Container width={width} mobile={mobile}>
       <div
@@ -120,36 +118,3 @@ const EXPERIMENTAL_MainDisplayMarkdown = ({narrativeBlock, width, mobile}) => {
 export default connect((state) => ({
   narrativeBlock: state.narrative.blocks[state.narrative.blockIdx]
 }))(EXPERIMENTAL_MainDisplayMarkdown);
-
-function mdToHtml(md) {
-  /* this is copy & pasted from `../framework/footer.js` and should be abstracted
-  into a function */
-  dompurify.addHook("afterSanitizeAttributes", (node) => {
-    // Set external links to open in a new tab
-    if ('href' in node && location.hostname !== node.hostname) {
-      node.setAttribute('target', '_blank');
-      node.setAttribute('rel', 'noreferrer nofollow');
-    }
-    // Find nodes that contain images and add imageContainer class to update styling
-    const nodeContainsImg = ([...node.childNodes].filter((child) => child.localName === 'img')).length > 0;
-    if (nodeContainsImg) {
-      // For special case of image links, set imageContainer on outer parent
-      if (node.localName === 'a') {
-        node.parentNode.className += ' imageContainer';
-      } else {
-        node.className += ' imageContainer';
-      }
-    }
-  });
-
-  const sanitizer = dompurify.sanitize;
-  const sanitizerConfig = {
-    ALLOWED_TAGS: ['div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'em', 'strong', 'del', 'ol', 'ul', 'li', 'a', 'img', '#text', 'pre', 'hr', 'table', 'thead', 'tbody', 'th', 'tr', 'td'],
-    ALLOWED_ATTR: ['href', 'src', 'width', 'height', 'alt'],
-    KEEP_CONTENT: false,
-    ALLOW_DATA_ATTR: false
-  };
-  const rawDescription = marked(md);
-  const cleanDescription = sanitizer(rawDescription, sanitizerConfig);
-  return cleanDescription;
-}
