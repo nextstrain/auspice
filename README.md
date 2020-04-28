@@ -30,31 +30,11 @@ The following are helpful when beginning to use Auspice:
 
 ### Installation
 
-Install auspice for use as a global command.
-This requires nodejs 10+. We recommend using a conda environment, but this is not the only way.
-(See [here](https://nextstrain.github.io/auspice/introduction/install) for more installation methods & help).
-
-#### Install with conda (Recommended)
-
-Create and activate a [conda](https://docs.conda.io) environment:
 
 ```bash
-conda create --name auspice nodejs=10
-conda activate auspice
-```
-
-Now that the conda environment is activated, install auspice:
-
-```bash
-npm install --global auspice
-```
-
-#### Install from source
-
-```bash
-git clone https://github.com/nextstrain/auspice.git
+git clone https://github.com/c3g/auspice.git
 cd auspice
-npm install --global .
+npm install .
 ```
 
 ### Obtain datasets to display
@@ -68,30 +48,18 @@ If you've installed auspice from `npm` you may get datasets to display via:
 mkdir data
 curl http://data.nextstrain.org/zika.json --compressed -o data/zika.json
 curl http://data.nextstrain.org/ncov.json --compressed -o data/ncov.json
-...
 ```
 
-If you've installed auspice from source, we have helper scripts to make all the datasets & narratives you see on nextstrain.org available locally:
+### Run auspice in dev mode
 
 ```bash
-# from the auspice src directory
-npm run get-data
-npm run get-narratives
-```
-
-### Run auspice
-
-```bash
-auspice view --datasetDir data
+./auspicejs develop --datasetDir data
 ```
 
 And view auspice in the browser at [localhost:4000](http://localhost:4000)
 
-If you are editing source code, running the following command will allow hot-reloading.
+If you can edit the source code and the site will allow hot-reloading.
 
-```bash
-auspice develop --datasetDir data
-```
 
 ### CLI (Command Line Interface)
 
