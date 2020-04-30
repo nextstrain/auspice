@@ -1,14 +1,16 @@
 import styled from 'styled-components';
+import { normalNavBarHeight } from "../../util/globals";
 import { hasExtension, getExtension } from "../../util/extensions";
 
+export const MainContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+`;
+
 export const PanelsContainer = styled.div`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
   transition: left 0.3s ease-out;
   background-color: #fff;
-  height: ${(props) => props.height+"px"};
+  height: ${(props) => (props.height - normalNavBarHeight)+"px"};
   width: ${(props) => props.width+"px"};
   overflow-x: hidden;
   overflow-y: scroll;
@@ -16,14 +18,10 @@ export const PanelsContainer = styled.div`
 `;
 
 export const SidebarContainer = styled.div`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
   transition: left 0.3s ease-out;
   left: ${(props) => props.left+"px"};
   background-color: ${(props) => props.theme.background};
-  height: ${(props) => props.height+"px"};
+  height: ${(props) => (props.height - normalNavBarHeight)+"px"};
   width: ${(props) => props.width+"px"};
   max-width: ${(props) => props.width+"px"};
   overflow-y: auto;

@@ -17,7 +17,7 @@ import { calcUsableWidth } from "../../util/computeResponsive";
 import { renderNarrativeToggle } from "../narrative/renderNarrativeToggle";
 import { Sidebar } from "./sidebar";
 import { calcPanelDims, calcStyles } from "./utils";
-import { PanelsContainer, sidebarTheme } from "./styles";
+import { MainContainer, PanelsContainer, sidebarTheme } from "./styles";
 import ErrorBoundary from "../../util/errorBoundry";
 import Spinner from "../framework/spinner";
 import MainDisplayMarkdown from "../narrative/MainDisplayMarkdown";
@@ -113,7 +113,7 @@ class Main extends React.Component {
     const {big, chart} =
       calcPanelDims(this.props.panelLayout === "grid", this.props.panelsToDisplay, this.props.displayNarrative, availableWidth, availableHeight);
     return (
-      <span>
+      <MainContainer>
         <AnimationController/>
         <ErrorBoundary showNothing>
           <ThemeProvider theme={sidebarTheme}>
@@ -165,7 +165,7 @@ class Main extends React.Component {
           <div style={overlayStyles} onClick={overlayHandler} onTouchStart={overlayHandler}/> :
           null
         }
-      </span>
+      </MainContainer>
     );
   }
 }

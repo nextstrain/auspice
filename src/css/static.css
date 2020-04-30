@@ -41,7 +41,7 @@ the content, the padding and border, but not the margin.
   font-size: 28;
 }
 
-.static div {
+.static .content {
   text-align: justify;
   font-size: 16px;
   margin-top: 5px;
@@ -55,7 +55,7 @@ the content, the padding and border, but not the margin.
   text-align: left;
   font-size: 38px;
   line-height: 32px;
-  font-weight: 300;
+  font-weight: 500;
   color: var(--darkGrey);
   min-width: 240px;
   margin-top: 40px;
@@ -68,7 +68,7 @@ the content, the padding and border, but not the margin.
   line-height: 28px;
   margin-top: 15px;
   margin-bottom: 5px;
-  font-weight: 500;
+  font-weight: 300;
   color: var(--darkGrey);
   border-bottom: 10px;
   min-width: 240px;
@@ -84,6 +84,13 @@ the content, the padding and border, but not the margin.
   color: var(--darkGrey);
   border-bottom: 0px;
   min-width: 240px;
+}
+
+.static .paragraph {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.4;
+  margin-top: 12px;
 }
 
 .static .bigspacer {

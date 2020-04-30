@@ -9,6 +9,9 @@ import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
  */
 export const chooseDisplayComponentFromURL = (url) => {
   const parts = url.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
+  if (parts[0] === "contact") {
+    return "contact";
+  }
   if (
     !parts.length ||
     (parts.length === 1 && parts[0] === "") ||
@@ -18,7 +21,8 @@ export const chooseDisplayComponentFromURL = (url) => {
     (parts.length === 2 && parts[0] === "groups")
   ) {
     return "splash";
-  } else if (parts[0] === "status") {
+  }
+  if (parts[0] === "status") {
     return "status";
   }
   return "datasetLoader"; // fallthrough
