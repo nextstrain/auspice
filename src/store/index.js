@@ -3,7 +3,6 @@ import thunk from "redux-thunk";
 import logger from "redux-logger";
 import { changeURLMiddleware } from "../middleware/changeURL";
 import rootReducer from "../reducers";
-import { loggingMiddleware } from "../middleware/logActions"; // eslint-disable-line no-unused-vars
 
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
