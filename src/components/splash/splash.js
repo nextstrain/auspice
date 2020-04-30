@@ -105,32 +105,30 @@ const SplashContent = ({available, browserDimensions, dispatch, errorMessage, ch
 
   const Footer = () => (
     <CenterContent>
-  <a key={3} href="https://www.inspq.qc.ca/" target="_blank" rel="noreferrer noopener">
-    <img alt="logo" width="200" src={require("../../images/inspq.jpg")}/>
-  </a>
-  <a key={4} href="http://www.mcgillgenomecentre.org/" target="_blank" rel="noreferrer noopener">
-    <img alt="logo" width="200" src={require("../../images/Genome_logo.png")}/>
-  </a>
-  <a key={1} href="http://www.computationalgenomics.ca/" target="_blank" rel="noreferrer noopener">
-    <img alt="logo" width="200" src={require("../../images/c3g_source.png")}/>
-  </a>
-<span>
-  <a key={2} href="https://www.inspq.qc.ca/lspq" target="_blank" rel="noreferrer noopener">
-    <img alt="logo" width="165" src={require("../../images/lspq.jpeg")}/>
-  </a>
-  <a key={5} href="https://www.calculquebec.ca/" target="_blank" rel="noreferrer noopener">
-    <img alt="logo" width="165" src={require("../../images/CalculQuebec_logo_medium.png")}/>
-  </a>
-  <a key={6} href="https://www.mcgill.ca/" target="_blank" rel="noreferrer noopener">
-    <img alt="logo" width="165" src={require("../../images/Mcgill_Logo.png")}/>
-  </a>
-  <a key={7} href="https://www.umontreal.ca/" target="_blank" rel="noreferrer noopener">
-    <img alt="logo" width="165" src={require("../../images/UdeM-officiel-RVB.png")}/>
-  </a>
-</span>
+      <a href="https://www.inspq.qc.ca/" target="_blank" rel="noreferrer noopener">
+        <img alt="logo" width="200" src={require("../../images/inspq.jpg")}/>
+      </a>
+      <a href="http://www.mcgillgenomecentre.org/" target="_blank" rel="noreferrer noopener">
+        <img alt="logo" width="200" src={require("../../images/Genome_logo.png")}/>
+      </a>
+      <a href="http://www.computationalgenomics.ca/" target="_blank" rel="noreferrer noopener">
+        <img alt="logo" width="200" src={require("../../images/c3g_source.png")}/>
+      </a>
+      <div>
+        <a href="https://www.inspq.qc.ca/lspq" target="_blank" rel="noreferrer noopener">
+          <img alt="logo" width="165" src={require("../../images/lspq.jpeg")}/>
+        </a>
+        <a href="https://www.calculquebec.ca/" target="_blank" rel="noreferrer noopener">
+          <img alt="logo" width="165" src={require("../../images/CalculQuebec_logo_medium.png")}/>
+        </a>
+        <a href="https://www.mcgill.ca/" target="_blank" rel="noreferrer noopener">
+          <img alt="logo" width="165" src={require("../../images/Mcgill_Logo.png")}/>
+        </a>
+        <a href="https://www.umontreal.ca/" target="_blank" rel="noreferrer noopener">
+          <img alt="logo" width="165" src={require("../../images/UdeM-officiel-RVB.png")}/>
+        </a>
+      </div>
     </CenterContent>
-
-
   );
 
 
