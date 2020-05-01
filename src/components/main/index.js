@@ -67,13 +67,27 @@ class Main extends React.Component {
       this.setState({showSpinner: false});
     }
   }
+  componentPreventDefault(e){
+    e.preventDefault();
+  }
   componentDidMount() {
-    document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
+    document.addEventListener("dragover", this.componentPreventDefault, false);
+    //document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
     document.addEventListener("drop", (e) => {
       e.preventDefault();
       return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
     }, false);
   }
+//zzz
+   // componentDidMount() {
+     //   document.addEventListener("click", this.closeMenu);
+    //}
+  componentWillUnmount() {
+//        document.removeEventListener("click", this.closeMenu);
+    document.removeEventListener("dragover", this.componentPreventDefault);
+    document.removeEventListener("drop", this.closeMenu);
+  }
+
   toggleSidebar() {
     this.props.dispatch({type: TOGGLE_SIDEBAR, value: !this.props.sidebarOpen});
   }
