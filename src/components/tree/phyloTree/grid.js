@@ -130,7 +130,7 @@ const calculateMajorGridSeperationForTime = (timeRange, pxAvailable) => {
  * @param {numeric} numDate date in decimal format
  * @returns {string} date to be displayed below major gridline
  */
-const createDisplayDate = (step, numDate) => {
+export const createDisplayDate = (step, numDate) => {
   if (step >= 1) {
     return numDate.toFixed(Math.max(0, -Math.floor(Math.log10(step))));
   }

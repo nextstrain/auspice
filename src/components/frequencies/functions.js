@@ -6,8 +6,10 @@ import { rgb } from "d3-color";
 import { area } from "d3-shape";
 import { format } from "d3-format";
 import { dataFont } from "../../globalStyles";
-import { unassigned_label } from "../../util/processFrequencies";
+import { unassigned_label, frequenciesTickStep } from "../../util/processFrequencies";
 import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype";
+import { numericToCalendar } from "../../util/dateHelpers";
+import { createDisplayDate } from "../tree/phyloTree/grid";
 
 /* C O N S T A N T S */
 const opacity = 0.85;
@@ -79,14 +81,18 @@ const removeProjectionInfo = (svg) => {
   svg.selectAll(".projection-text").remove();
 };
 
-export const drawXAxis = (svg, chartGeom, scales) => {
+export const drawXAxis = (svg, chartGeom, scales, pivots) => {
+  const customDate = (date) => {
+    return createDisplayDate(
+      frequenciesTickStep(pivots), date);
+  };
   removeXAxis(svg);
   svg.append("g")
     .attr("class", "x axis")
     .attr("transform", `translate(0,${chartGeom.height - chartGeom.spaceBottom})`)
     .style("font-family", dataFont)
     .style("font-size", "12px")
-    .call(axisBottom(scales.x).ticks(scales.numTicksX, ".1f"));
+    .call(axisBottom(scales.x).ticks(scales.numTicksX).tickFormat(customDate));
 };
 
 export const drawYAxis = (svg, chartGeom, scales) => {
@@ -296,7 +302,7 @@ export const drawStream = (
       .style("font-weight", 300)
       .html(
         `<p>${parseColorBy(colorBy, colorOptions)}: ${labels[i]}</p>
-        <p>${t("Time point")}: ${pivots[pivotIdx]}</p>
+        <p>${t("Time point")}: ${numericToCalendar(pivots[pivotIdx])}</p>
         <p>${frequencyText}: ${freqVal}</p>`
       );
   }

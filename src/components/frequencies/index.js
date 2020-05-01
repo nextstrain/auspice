@@ -39,7 +39,7 @@ class Frequencies extends React.Component {
     const scalesX = calcXScale(chartGeom, props.pivots, props.ticks);
     const scalesY = calcYScale(chartGeom, data.maxY);
     newState.scales = {...scalesX, ...scalesY};
-    drawXAxis(newState.svg, chartGeom, scalesX);
+    drawXAxis(newState.svg, chartGeom, scalesX, props.pivots);
     drawYAxis(newState.svg, chartGeom, scalesY);
     drawStream(newState.svgStreamGroup, newState.scales, data, {...props});
     drawProjectionInfo(newState.svg, newState.scales, props.projection_pivot, props.t);
