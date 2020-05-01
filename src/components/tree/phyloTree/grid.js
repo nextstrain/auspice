@@ -70,7 +70,7 @@ const calculateMajorGridSeperationForDivergence = (range, minorTicks) => {
   }
   const minorStep = step / numMinorTicks;
 
-  return [step, minorStep];
+  return {step, minorStep};
 };
 
 /**
@@ -80,8 +80,7 @@ const calculateMajorGridSeperationForDivergence = (range, minorTicks) => {
  * @returns {array} [0] {numeric} space between major x-axis gridlines (measure of time)
  *                  [1] {numeric} space between minor x-axis gridlines (measure of time)
  */
-const calculateMajorGridSeperationForTime = (timeRange, pxAvailable) => {
-
+export const calculateMajorGridSeperationForTime = (timeRange, pxAvailable) => {
   const rountToNearest = (n, p) => Math.ceil(n/p)*p;
 
   const getMinorSpacing = (majorTimeStep) => {
@@ -121,7 +120,7 @@ const calculateMajorGridSeperationForTime = (timeRange, pxAvailable) => {
     majorTimeStep = 1/365.25;
   }
   const minorTimeStep = getMinorSpacing(majorTimeStep);
-  return [majorTimeStep, minorTimeStep];
+  return {majorTimeStep, minorTimeStep, nSteps};
 };
 
 /**
@@ -147,7 +146,7 @@ const computeXGridPoints = (xmin, xmax, layout, distanceMeasure, minorTicks, pxA
   const minorGridPoints = [];
 
   /* step is the amount (same units of xmax, xmin) of seperation between major grid lines */
-  const [step, minorStep] = distanceMeasure === "num_date" ?
+  const {step, minorStep} = distanceMeasure === "num_date" ?
     calculateMajorGridSeperationForTime(xmax-xmin, Math.abs(pxAvailable)) :
     calculateMajorGridSeperationForDivergence(xmax-xmin, minorTicks);
   const gridMin = Math.floor(xmin/step)*step;
@@ -179,7 +178,7 @@ const computeXGridPoints = (xmin, xmax, layout, distanceMeasure, minorTicks, pxA
 const computeYGridPoints = (ymin, ymax) => {
   const majorGridPoints = [];
   let yStep = 0;
-  yStep = calculateMajorGridSeperationForDivergence(ymax-ymin)[0];
+  yStep = calculateMajorGridSeperationForDivergence(ymax-ymin).majorTimeStep;
   const precisionY = Math.max(0, -Math.floor(Math.log10(yStep)));
   const gridYMin = Math.floor(ymin/yStep)*yStep;
   const maxYVis = ymax;

@@ -36,10 +36,10 @@ class Frequencies extends React.Component {
     const data = processMatrix({...props});
     newState.maxY = data.maxY;
     newState.categories = data.categories;
-    const scalesX = calcXScale(chartGeom, props.pivots, props.ticks);
+    const scalesX = calcXScale(chartGeom, props.pivots);
     const scalesY = calcYScale(chartGeom, data.maxY);
     newState.scales = {...scalesX, ...scalesY};
-    drawXAxis(newState.svg, chartGeom, scalesX, props.pivots);
+    drawXAxis(newState.svg, chartGeom, scalesX);
     drawYAxis(newState.svg, chartGeom, scalesY);
     drawStream(newState.svgStreamGroup, newState.scales, data, {...props});
     drawProjectionInfo(newState.svg, newState.scales, props.projection_pivot, props.t);

@@ -5,11 +5,12 @@ import { axisBottom, axisLeft } from "d3-axis";
 import { rgb } from "d3-color";
 import { area } from "d3-shape";
 import { format } from "d3-format";
+import _range from "lodash/range";
 import { dataFont } from "../../globalStyles";
-import { unassigned_label, frequenciesTickStep } from "../../util/processFrequencies";
+import { unassigned_label } from "../../util/processFrequencies";
 import { isColorByGenotype, decodeColorByGenotype } from "../../util/getGenotype";
 import { numericToCalendar } from "../../util/dateHelpers";
-import { createDisplayDate } from "../tree/phyloTree/grid";
+import { createDisplayDate, calculateMajorGridSeperationForTime } from "../tree/phyloTree/grid";
 
 /* C O N S T A N T S */
 const opacity = 0.85;
@@ -54,11 +55,11 @@ const getOrderedCategories = (matrixCategories, colorScale) => {
   return orderedCategories;
 };
 
-export const calcXScale = (chartGeom, pivots, ticks) => {
+export const calcXScale = (chartGeom, pivots) => {
   const x = scaleLinear()
     .domain([pivots[0], pivots[pivots.length - 1]])
     .range([chartGeom.spaceLeft, chartGeom.width - chartGeom.spaceRight]);
-  return {x, numTicksX: ticks.length};
+  return {x};
 };
 
 export const calcYScale = (chartGeom, maxY) => {
@@ -81,18 +82,23 @@ const removeProjectionInfo = (svg) => {
   svg.selectAll(".projection-text").remove();
 };
 
-export const drawXAxis = (svg, chartGeom, scales, pivots) => {
-  const customDate = (date) => {
-    return createDisplayDate(
-      frequenciesTickStep(pivots), date);
-  };
+export const drawXAxis = (svg, chartGeom, scales) => {
+  const domain = scales.x.domain(),
+    range = scales.x.range();
+  const {majorTimeStep} = calculateMajorGridSeperationForTime(
+    domain[1] - domain[0],
+    range[1] - range[0]
+  );
+  const customDate = (date) => createDisplayDate(majorTimeStep, date);
   removeXAxis(svg);
   svg.append("g")
     .attr("class", "x axis")
     .attr("transform", `translate(0,${chartGeom.height - chartGeom.spaceBottom})`)
     .style("font-family", dataFont)
     .style("font-size", "12px")
-    .call(axisBottom(scales.x).ticks(scales.numTicksX).tickFormat(customDate));
+    .call(axisBottom(scales.x)
+      .tickValues(_range(domain[0], domain[1], majorTimeStep))
+      .tickFormat(customDate));
 };
 
 export const drawYAxis = (svg, chartGeom, scales) => {
