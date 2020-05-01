@@ -12,7 +12,6 @@ import "../../css/entropy.css";
   return {
     data: state.frequencies.data,
     pivots: state.frequencies.pivots,
-    ticks: state.frequencies.ticks,
     matrix: state.frequencies.matrix,
     projection_pivot: state.frequencies.projection_pivot,
     version: state.frequencies.version,
