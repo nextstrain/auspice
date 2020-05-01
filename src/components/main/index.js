@@ -70,22 +70,17 @@ class Main extends React.Component {
   componentPreventDefault(e){
     e.preventDefault();
   }
+  componentPreventDefaultFilesDropped(e){
+    e.preventDefault();
+    return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
+  }
   componentDidMount() {
     document.addEventListener("dragover", this.componentPreventDefault, false);
-    //document.addEventListener("dragover", (e) => {e.preventDefault();}, false);
-    document.addEventListener("drop", (e) => {
-      e.preventDefault();
-      return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
-    }, false);
+    document.addEventListener("drop", this.componentPreventDefaultFilesDropped, false);
   }
-//zzz
-   // componentDidMount() {
-     //   document.addEventListener("click", this.closeMenu);
-    //}
   componentWillUnmount() {
-//        document.removeEventListener("click", this.closeMenu);
     document.removeEventListener("dragover", this.componentPreventDefault);
-    document.removeEventListener("drop", this.closeMenu);
+    document.removeEventListener("drop", this.componentPreventDefaultFilesDropped);
   }
 
   toggleSidebar() {
