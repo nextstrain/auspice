@@ -66,7 +66,6 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
   return matrix;
 };
 
-
 export const processFrequenciesJSON = (rawJSON, tree, controls) => {
   /* this function can throw */
   const pivots = rawJSON.pivots.map((d) => Math.round(parseFloat(d) * 100) / 100);
