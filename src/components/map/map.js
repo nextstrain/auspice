@@ -58,7 +58,7 @@ import "../../css/mapbox.css";
       state.controls.geoResolution !== state.controls.colorScale.colorBy // geo circles match colorby == no pie chart
     ),
     legendValues: state.controls.colorScale.legendValues,
-    showTransmissionLines: state.controls.showTransmissionLines,
+    showTransmissionLines: state.controls.showTransmissionLines
   };
 })
 

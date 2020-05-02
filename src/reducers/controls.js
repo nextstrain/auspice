@@ -82,7 +82,7 @@ export const getDefaultControlsState = () => {
     treeLegendOpen: undefined,
     mapLegendOpen: undefined,
     showOnlyPanels: false,
-    showTransmissionLines: true,
+    showTransmissionLines: true
   };
 };
 
@@ -248,7 +248,7 @@ const Controls = (state = getDefaultControlsState(), action) => {
       }
       return Object.assign({}, state, {coloringsPresentOnTree: state.coloringsPresentOnTree});
     case types.TOGGLE_TRANSMISSION_LINES:
-        return Object.assign({}, state, {showTransmissionLines: action.data});
+      return Object.assign({}, state, {showTransmissionLines: action.data});
     default:
       return state;
   }
