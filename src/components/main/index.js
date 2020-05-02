@@ -67,10 +67,10 @@ class Main extends React.Component {
       this.setState({showSpinner: false});
     }
   }
-  componentPreventDefault(e){
+  componentPreventDefault(e) {
     e.preventDefault();
   }
-  componentPreventDefaultFilesDropped(e){
+  componentPreventDefaultFilesDropped(e) {
     e.preventDefault();
     return this.props.dispatch(handleFilesDropped(e.dataTransfer.files));
   }

@@ -18,11 +18,11 @@ class Monitor extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired
   }
-  throttleHandleByResize(){
+  throttleHandleByResize() {
     _throttle(this.handleResizeByDispatching.bind(this), 500, {
       leading: true,
       trailing: true
-    })
+    });
   }
   componentDidMount() {
     /* don't need initial dimensions - they're in the redux store on load */
@@ -39,7 +39,7 @@ class Monitor extends React.Component {
     // this.onURLChanged();
   }
   componentWillUnmount() {
-    window.removeEventListener( "resize", this.throttleHandleByResize)  // need to actually remove the _throttle
+    window.removeEventListener("resize", this.throttleHandleByResize);  // need to actually remove the _throttle
     window.removeEventListener('popstate', this.onURLChanged);
   }
 
