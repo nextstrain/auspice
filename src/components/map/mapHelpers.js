@@ -148,7 +148,7 @@ export const drawDemesAndTransmissions = (
     .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
     .attr("d", (d) => {
       return pathStringGenerator(
-          extractLineSegmentForAnimationEffect(
+        extractLineSegmentForAnimationEffect(
           numDateMin,
           numDateMax,
           d.originCoords,
@@ -158,7 +158,7 @@ export const drawDemesAndTransmissions = (
           d.visible,
           d.bezierCurve,
           d.bezierDates
-          )
+        )
       );
     })
     .attr("fill", "none")
