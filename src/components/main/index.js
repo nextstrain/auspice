@@ -82,7 +82,6 @@ class Main extends React.Component {
     document.removeEventListener("dragover", this.componentPreventDefault);
     document.removeEventListener("drop", this.componentPreventDefaultFilesDropped);
   }
-
   toggleSidebar() {
     this.props.dispatch({type: TOGGLE_SIDEBAR, value: !this.props.sidebarOpen});
   }

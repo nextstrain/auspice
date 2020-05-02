@@ -18,23 +18,29 @@ class Monitor extends React.Component {
   static propTypes = {
     dispatch: PropTypes.func.isRequired
   }
+  throttleHandleByResize(){
+      _throttle(this.handleResizeByDispatching.bind(this), 500, {
+          leading: true,
+          trailing: true
+      })
+  }
   componentDidMount() {
     /* don't need initial dimensions - they're in the redux store on load */
     window.addEventListener( // future resizes
       "resize",
       /* lodash throttle invokes resize event at most twice per second
-      to let redraws catch up. Could also use debounce for 'wait until resize stops' */
-      _throttle(this.handleResizeByDispatching.bind(this), 500, {
-        leading: true,
-        trailing: true
-      })
+         to let redraws catch up. Could also use debounce for 'wait until resize stops' */
+      this.throttleHandleByResize
     );
-
     /* Note that just calling history.pushState() or history.replaceState() won't trigger a popstate event.
     The popstate event will be triggered by doing a browser action such as a click on the back or forward button
     (or calling history.back() or history.forward() in JavaScript). */
     window.addEventListener('popstate', this.onURLChanged);
     // this.onURLChanged();
+  }
+  componentWillUnmount() {
+      window.removeEventListener( "resize", this.throttleHandleByResize)
+      window.removeEventListener('popstate', this.onURLChanged);
   }
 
   onURLChanged = () => this.props.dispatch(changePage());
