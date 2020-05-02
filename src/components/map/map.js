@@ -396,7 +396,7 @@ class Map extends React.Component {
         nextProps.pieChart,
         nextProps.geoResolution,
         nextProps.dispatch,
-        nextProps.showTransmissionLines,
+        nextProps.showTransmissionLines
       );
       this.setState({
         d3elems,

@@ -27,7 +27,7 @@ class TransmissionLines extends React.Component {
             callback={() => {
               this.props.dispatch({ type: TOGGLE_TRANSMISSION_LINES, data: !this.props.showTransmissionLines });
             }}
-            label={t("sidebar:Transmission lines")}
+            label={t("sidebar:Show transmission lines")}
           />
         </div>
       </>
