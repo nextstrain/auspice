@@ -137,34 +137,38 @@ export const drawDemesAndTransmissions = (
   numDateMax,
   pieChart, /* bool */
   geoResolution,
-  dispatch
+  dispatch,
+  showTransmissionLines
 ) => {
-
   // add transmission lines
-  const transmissions = g.selectAll("transmissions")
-    .data(transmissionData)
-    .enter()
-    .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
-    .attr("d", (d) => {
-      return pathStringGenerator(
-        extractLineSegmentForAnimationEffect(
-          numDateMin,
-          numDateMax,
-          d.originCoords,
-          d.destinationCoords,
-          d.originNumDate,
-          d.destinationNumDate,
-          d.visible,
-          d.bezierCurve,
-          d.bezierDates
-        )
-      );
-    })
-    .attr("fill", "none")
-    .attr("stroke-opacity", 0.6)
-    .attr("stroke-linecap", "round")
-    .attr("stroke", (d) => { return d.color; })
-    .attr("stroke-width", 1);
+  const transmissions = g.selectAll("transmissions");
+
+  if (showTransmissionLines) {
+    transmissions
+        .data(transmissionData)
+        .enter()
+        .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
+        .attr("d", (d) => {
+            return pathStringGenerator(
+                extractLineSegmentForAnimationEffect(
+                numDateMin,
+                numDateMax,
+                d.originCoords,
+                d.destinationCoords,
+                d.originNumDate,
+                d.destinationNumDate,
+                d.visible,
+                d.bezierCurve,
+                d.bezierDates
+                )
+            );
+        })
+        .attr("fill", "none")
+        .attr("stroke-opacity", 0.6)
+        .attr("stroke-linecap", "round")
+        .attr("stroke", (d) => { return d.color; })
+        .attr("stroke-width", 1);
+  }
 
   const visibleTips = nodes[0].tipCount;
   const demeMultiplier =
