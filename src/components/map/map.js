@@ -55,7 +55,8 @@ import "../../css/mapbox.css";
       !state.controls.colorScale.continuous &&                           // continuous color scale = no pie chart
       state.controls.geoResolution !== state.controls.colorScale.colorBy // geo circles match colorby == no pie chart
     ),
-    legendValues: state.controls.colorScale.legendValues
+    legendValues: state.controls.colorScale.legendValues,
+    showTransmissionLines: state.controls.showTransmissionLines,
   };
 })
 
@@ -239,7 +240,8 @@ class Map extends React.Component {
         this.props.dateMaxNumeric,
         this.props.pieChart,
         this.props.geoResolution,
-        this.props.dispatch
+        this.props.dispatch,
+        this.props.showTransmissionLines,
       );
 
       // don't redraw on every rerender - need to seperately handle virus change redraw
@@ -268,9 +270,10 @@ class Map extends React.Component {
   maybeRemoveAllDemesAndTransmissions(nextProps) {
     const mapIsDrawn = !!this.state.map;
     const geoResolutionChanged = this.props.geoResolution !== nextProps.geoResolution;
+    const transmissionLinesToggleChanged = this.props.showTransmissionLines !== nextProps.showTransmissionLines;
     const dataChanged = (!nextProps.treeLoaded || this.props.treeVersion !== nextProps.treeVersion);
     const colorByChanged = (nextProps.colorScaleVersion !== this.props.colorScaleVersion);
-    if (mapIsDrawn && (geoResolutionChanged || dataChanged || colorByChanged)) {
+    if (mapIsDrawn && (geoResolutionChanged || dataChanged || colorByChanged || transmissionLinesToggleChanged)) {
       this.state.d3DOMNode.selectAll("*").remove();
       this.setState({
         d3elems: null,
@@ -392,7 +395,8 @@ class Map extends React.Component {
         nextProps.dateMaxNumeric,
         nextProps.pieChart,
         nextProps.geoResolution,
-        nextProps.dispatch
+        nextProps.dispatch,
+        nextProps.showTransmissionLines,
       );
       this.setState({
         d3elems,
