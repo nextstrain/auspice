@@ -1,15 +1,15 @@
 import React from "react";
-import Toggle from "./toggle";
 import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
 
+import Toggle from "./toggle";
 import { controlsWidth } from "../../util/globals";
 import { TOGGLE_TRANSMISSION_LINES } from "../../actions/types";
 import { SidebarSubtitle } from "./styles";
 
 @connect((state) => {
   return {
-    showTransmissionLines: state.controls.showTransmissionLines,
+    showTransmissionLines: state.controls.showTransmissionLines
   };
 })
 class TransmissionLines extends React.Component {
@@ -18,7 +18,7 @@ class TransmissionLines extends React.Component {
     return (
       <>
         <SidebarSubtitle spaceAbove>
-        {t("sidebar:Transmission lines")}
+          {t("sidebar:Transmission lines")}
         </SidebarSubtitle>
         <div style={{marginBottom: 10, width: controlsWidth, fontSize: 14}}>
           <Toggle
