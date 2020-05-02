@@ -140,25 +140,26 @@ export const drawDemesAndTransmissions = (
   dispatch,
   showTransmissionLines
 ) => {
+
   // add transmission lines
   const transmissions = g.selectAll("transmissions")
     .data(transmissionData)
     .enter()
     .append("path") /* instead of appending a geodesic path from the leaflet plugin data, we now draw a line directly between two points */
     .attr("d", (d) => {
-        return pathStringGenerator(
-            extractLineSegmentForAnimationEffect(
-            numDateMin,
-            numDateMax,
-            d.originCoords,
-            d.destinationCoords,
-            d.originNumDate,
-            d.destinationNumDate,
-            d.visible,
-            d.bezierCurve,
-            d.bezierDates
-            )
-        );
+      return pathStringGenerator(
+          extractLineSegmentForAnimationEffect(
+          numDateMin,
+          numDateMax,
+          d.originCoords,
+          d.destinationCoords,
+          d.originNumDate,
+          d.destinationNumDate,
+          d.visible,
+          d.bezierCurve,
+          d.bezierDates
+          )
+      );
     })
     .attr("fill", "none")
     .attr("stroke-opacity", 0.6)
