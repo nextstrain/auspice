@@ -95,7 +95,14 @@ export const changePhyloTreeViaPropsComparison = (mainTree, phylotree, oldProps,
   /* split tree by colored-by trait */
   /* just copies into tree; will be null/empty string/not defined if no trait */
   if (newProps.tree.splitTreeByTrait !== oldProps.tree.splitTreeByTrait)
+  {
     args.splitTreeByTrait = newProps.tree.splitTreeByTrait;
+    if (args.splitTreeByTrait == null) {// if the split is being unset, reset the layout
+    // todo: could use updateLayout instead?
+      args.newLayout = newProps.layout;
+      args.resetTreeYValues = true;
+    }
+  }
 
   const change = Object.keys(args).length;
   if (change) {
