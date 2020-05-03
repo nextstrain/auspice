@@ -101,28 +101,32 @@ export const setYValuesRecursively = (node, yCounter) => {
  */
 export const setYValues = (nodes) => setYValuesRecursively(nodes[0], 0);
 
-const setSplitTreeYValuesRecursively = (startNode, yCounter, trait, currentTraitValue, subtreeStack) => {
-  if (startNode.children) {
-    for (let i = startNode.children.length-1; i >= 0; i--) {
-      let currentNode = startNode.children[i];
-      let thisNodeTraitValue = getTraitFromNode(currentNode.n, trait);
-      // todo: nodes with no trait value? should they be grouped together?
-      if (thisNodeTraitValue !== currentTraitValue) {
-        subtreeStack.push({ lowest: currentNode, traitValue: thisNodeTraitValue });
+// sorts all child nodes from a subtree into their subtrees
+const collectSubtrees = (startNode, subtree, trait, currentTraitValue, subtreeStack) => {
+  if (!startNode.children) return;
+
+  for (let i = startNode.children.length-1; i >= 0; i--) {
+    let currentNode = startNode.children[i];
+    let thisNodeTraitValue = getTraitFromNode(currentNode.n, trait);
+    // todo: nodes with no trait value? should they be grouped together?
+    if (thisNodeTraitValue !== currentTraitValue) { // doesn't belong on this subtree
+      let matchingSubtree = subtreeStack.find(s => s.traitValue === thisNodeTraitValue);
+      if (!matchingSubtree) {
+        subtreeStack.push({ subtreeNodes: [currentNode], traitValue: thisNodeTraitValue });
+        matchingSubtree = subtreeStack[subtreeStack.length-1];
       }
       else {
-        yCounter = setSplitTreeYValuesRecursively(currentNode, yCounter, trait, currentTraitValue, subtreeStack);
+        matchingSubtree.subtreeNodes.push(currentNode);
       }
+      collectSubtrees(currentNode, matchingSubtree, trait, thisNodeTraitValue, subtreeStack);
     }
+    else
+    {
+      // add this node to the subtree list, and continue
+      subtree.subtreeNodes.push(currentNode);
+      collectSubtrees(currentNode, subtree, trait, currentTraitValue, subtreeStack);
+    }    
   }
-  else {
-    startNode.n.yvalue = ++yCounter;
-    startNode.yRange = [yCounter, yCounter];
-    return yCounter;
-  }
-  startNode.n.yvalue = startNode.children.reduce((acc, d) => acc + d.n.yvalue, 0) / startNode.children.length;
-  startNode.n.yRange = [startNode.n.children[0].yvalue, startNode.n.children[startNode.n.children.length - 1].yvalue];
-  return yCounter;
 }
 
 /**
@@ -133,12 +137,23 @@ const setSplitTreeYValuesRecursively = (startNode, yCounter, trait, currentTrait
  * todo: is 0 guaranteed to be root node?
  */
 export const setSplitTreeYValues = (nodes, trait) => {
-  const subtreeStack = [{lowest: nodes[0], traitValue: getTraitFromNode(nodes[0].n, trait)}];
+  const subtreeStack = [{subtreeNodes: [nodes[0]], traitValue: getTraitFromNode(nodes[0].n, trait)}];  
+
+  // collect all the subtrees for a given trait, and group them together
+  collectSubtrees(nodes[0], subtreeStack[0], trait, subtreeStack[0].traitValue, subtreeStack);  
+  subtreeStack.sort((a, b) => {
+    if (a.traitValue < b.traitValue) return -1;
+    if (a.traitValue > b.traitValue) return 1;
+    return 0;
+  });
+
+  // todo: sort the subtrees by num_date
+
+  // set the y-values in each subtree
   let currentMaxY = 0;
   while (subtreeStack.length) {
-    subtreeStack.sort((a, b) => new Date(getTraitFromNode(a.lowest.n, "num_date")) >= new Date(getTraitFromNode(b.lowest.n, "num_date")) ? 1 : -1);
     const nextSubtree = subtreeStack.pop();
-    currentMaxY = setSplitTreeYValuesRecursively(nextSubtree.lowest, currentMaxY, trait, nextSubtree.traitValue, subtreeStack);
+    nextSubtree.subtreeNodes.forEach(node => node.n.yvalue = currentMaxY++)
   }
 }
 
