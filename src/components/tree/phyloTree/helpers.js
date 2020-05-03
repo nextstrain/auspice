@@ -148,6 +148,16 @@ export const setSplitTreeYValues = (nodes, trait) => {
   });
 
   // todo: sort the subtrees by num_date
+  subtreeStack.sort((a, b) => {
+    if (a.traitValue == b.traitValue)
+      return 0;
+
+    let aDate = new Date(getTraitFromNode(a.subtreeNodes[0].n, "num_date"));
+    let bDate = new Date(getTraitFromNode(b.subtreeNodes[0].n, "num_date"));
+    if (aDate < bDate) return -1;
+    if (bDate > aDate) return 1;
+    return 0;
+  });
 
   // set the y-values in each subtree
   let currentMaxY = 0;
