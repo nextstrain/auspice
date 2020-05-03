@@ -34,37 +34,13 @@ export const setLayout = function setLayout(layout) {
   timerEnd("setLayout");
 };
 
-const insertNewTraitOffset = function insertNewTraitOffset(traitValue, traitOffsets) {
-  let arr = Object.values(traitOffsets);
-  if (arr.length === 0)
-    traitOffsets[traitValue] = 0;
-  else {
-    let max = Math.max(...arr, 0);
-    traitOffsets[traitValue] = max + 100; // todo: const value - what should it be?  
-  }
-}
-
-const calculateTraitSplitYOffset = function calculateTraitSplitYOffset(d, trait, traitOffsets) {
-  let offset = 0;
-  let traitValue = getTraitFromNode(d.n, trait);
-  if (traitValue) {
-    if (traitOffsets[traitValue] === undefined) insertNewTraitOffset(traitValue, traitOffsets);  
-    offset = traitOffsets[traitValue];
-  }
-  return d.n.yvalue + offset;
-}
-
 /**
  * assigns x,y coordinates for a rectangular layout
  * @return {null}
  */
 export const rectangularLayout = function rectangularLayout() {
-  if (this.params.splitTreeByTrait) this.traitOffsets = new Object();
-  let splitTrait = this.params.splitTreeByTrait;
   this.nodes.forEach((d) => {
-    d.y = splitTrait 
-      ? calculateTraitSplitYOffset(d, splitTrait, this.traitOffsets) 
-      : d.n.yvalue; // precomputed y-values
+    d.y = d.n.yvalue; // precomputed y-values
     d.x = d.depth;    // depth according to current distance
     d.px = d.pDepth;  // parent positions
     d.py = d.y;
