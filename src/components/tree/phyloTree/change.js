@@ -1,6 +1,6 @@
 import { timerFlush } from "d3-timer";
 import { calcConfidenceWidth } from "./confidence";
-import { applyToChildren } from "./helpers";
+import { applyToChildren, setSplitTreeYValues } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
@@ -283,7 +283,7 @@ export const change = function change({
   const elemsToUpdate = new Set(); /* what needs updating? E.g. ".branch", ".tip" etc */
   const nodePropsToModify = {}; /* which properties (keys) on the nodes should be updated (before the SVG) */
   const svgPropsToUpdate = new Set(); /* which SVG properties shall be changed. E.g. "fill", "stroke" */
-  const useModifySVGInStages = newLayout; /* use modifySVGInStages rather than modifySVG. Not used often. */
+  const useModifySVGInStages = newLayout || splitTreeByTrait !== null; /* use modifySVGInStages rather than modifySVG. Not used often. */
 
   /* calculate dt */
   const idealTransitionTime = 500;
@@ -319,7 +319,7 @@ export const change = function change({
     svgPropsToUpdate.add("stroke-width");
     nodePropsToModify["stroke-width"] = branchThickness;
   }
-  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions) {
+  if (newDistance || newLayout || updateLayout || zoomIntoClade || svgHasChangedDimensions || splitTreeByTrait) {
     elemsToUpdate.add(".tip").add(".branch.S").add(".branch.T").add(".branch");
     elemsToUpdate.add(".vaccineCross").add(".vaccineDottedLine").add(".conf");
     elemsToUpdate.add('.branchLabel').add('.tipLabel');
@@ -350,9 +350,17 @@ export const change = function change({
     this.nodes.forEach((d) => {d.update = true;});
   }
 
-  /* always update splitTreeByTrait, as null disables */
-  /* must be updated before setLayout */
-  this.params.splitTreeByTrait = splitTreeByTrait;
+  /* if the tree is being split by colored-by trait, update y values */
+  // todo: this is fairly slow: show something to show recalculating? or, get the d3 transition working?
+  let splitTreeByTraitUpdate = false;
+  if (splitTreeByTrait) {
+    setSplitTreeYValues(this.nodes, splitTreeByTrait);
+    this.params.isSplitByTrait = true; // todo: add to default params
+    splitTreeByTraitUpdate = true;
+  }
+  else if (this.params.isSplitByTrait)
+    splitTreeByTraitUpdate = true; // unset split by trait
+
 
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
   /* distance */
@@ -360,7 +368,7 @@ export const change = function change({
   
   /* layout (must run after distance) */
   /* also used to split by traits */
-  if (newDistance || newLayout || updateLayout || splitTreeByTrait) 
+  if (newDistance || newLayout || updateLayout || splitTreeByTraitUpdate) 
     this.setLayout(newLayout || this.layout);
   
     /* show confidences - set this param which actually adds the svg paths for

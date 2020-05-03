@@ -101,6 +101,47 @@ export const setYValuesRecursively = (node, yCounter) => {
  */
 export const setYValues = (nodes) => setYValuesRecursively(nodes[0], 0);
 
+const setSplitTreeYValuesRecursively = (startNode, yCounter, trait, currentTraitValue, subtreeStack) => {
+  if (startNode.children) {
+    for (let i = startNode.children.length-1; i >= 0; i--) {
+      let currentNode = startNode.children[i];
+      let thisNodeTraitValue = getTraitFromNode(currentNode.n, trait);
+      // todo: nodes with no trait value? should they be grouped together?
+      if (thisNodeTraitValue !== currentTraitValue) {
+        subtreeStack.push({ lowest: currentNode, traitValue: thisNodeTraitValue });
+      }
+      else {
+        yCounter = setSplitTreeYValuesRecursively(currentNode, yCounter, trait, currentTraitValue, subtreeStack);
+      }
+    }
+  }
+  else {
+    startNode.n.yvalue = ++yCounter;
+    startNode.yRange = [yCounter, yCounter];
+    return yCounter;
+  }
+  startNode.n.yvalue = startNode.children.reduce((acc, d) => acc + d.n.yvalue, 0) / startNode.children.length;
+  startNode.n.yRange = [startNode.n.children[0].yvalue, startNode.n.children[startNode.n.children.length - 1].yvalue];
+  return yCounter;
+}
+
+/**
+ * setSplitTreeYValues - works similarly to setYValues above,
+ * but splits the tree by the given trait, grouping nodes with the
+ * same trait value together
+ * 
+ * todo: is 0 guaranteed to be root node?
+ */
+export const setSplitTreeYValues = (nodes, trait) => {
+  const subtreeStack = [{lowest: nodes[0], traitValue: getTraitFromNode(nodes[0].n, trait)}];
+  let currentMaxY = 0;
+  while (subtreeStack.length) {
+    subtreeStack.sort((a, b) => new Date(getTraitFromNode(a.lowest.n, "num_date")) >= new Date(getTraitFromNode(b.lowest.n, "num_date")) ? 1 : -1);
+    const nextSubtree = subtreeStack.pop();
+    currentMaxY = setSplitTreeYValuesRecursively(nextSubtree.lowest, currentMaxY, trait, nextSubtree.traitValue, subtreeStack);
+  }
+}
+
 
 export const formatDivergence = (divergence) => {
   return divergence > 1 ?

@@ -41,7 +41,5 @@ export const createDefaultParams = () => ({
   tipLabelFontSizeL3: 12,
   tipLabelBreakL1: 75,
   tipLabelBreakL2: 50,
-  tipLabelBreakL3: 25,
-  confidence: false,
-  splitTreeByTrait: null
+  tipLabelBreakL3: 25
 });
