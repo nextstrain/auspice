@@ -85,11 +85,11 @@ const removeProjectionInfo = (svg) => {
 export const drawXAxis = (svg, chartGeom, scales) => {
   const domain = scales.x.domain(),
     range = scales.x.range();
-  const {majorTimeStep} = calculateMajorGridSeperationForTime(
+  const {majorStep} = calculateMajorGridSeperationForTime(
     domain[1] - domain[0],
     range[1] - range[0]
   );
-  const customDate = (date) => createDisplayDate(majorTimeStep, date);
+  const customDate = (date) => createDisplayDate(majorStep, date);
   removeXAxis(svg);
   svg.append("g")
     .attr("class", "x axis")
@@ -97,7 +97,7 @@ export const drawXAxis = (svg, chartGeom, scales) => {
     .style("font-family", dataFont)
     .style("font-size", "12px")
     .call(axisBottom(scales.x)
-      .tickValues(_range(domain[0], domain[1], majorTimeStep))
+      .tickValues(_range(domain[0], domain[1], majorStep))
       .tickFormat(customDate));
 };
 
