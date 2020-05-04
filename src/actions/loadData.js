@@ -240,6 +240,44 @@ export const loadSecondTree = (secondTreeUrl, firstTreeUrl) => async (dispatch, 
 };
 
 
+const loadMultipleBlocks = (blocks) => async (dispatch) => {
+  const jsons = {};
+  const namesMainTree = [];
+  const namesTreeToo = [];
+
+  for (let i = 0; i < blocks.length; i++) {
+    [namesMainTree[i], namesTreeToo[i]] = collectDatasetFetchUrls(blocks[i].dataset);
+    if (namesMainTree[i]) {
+      // eslint-disable-next-line no-await-in-loop
+      if (!jsons[namesMainTree[i]]) {jsons[namesMainTree[i]] = await (await getDataset(namesMainTree[i])).json();}
+    }
+    if (namesTreeToo[i]) {
+      // eslint-disable-next-line no-await-in-loop
+      if (!jsons[namesTreeToo[i]]) {jsons[namesTreeToo[i]] = await (await getDataset(namesTreeToo[i])).json();}
+    }
+
+    const state = createStateFromQueryOrJSONs({
+      json: jsons[namesMainTree[i]],
+      secondTreeDataset: jsons[namesTreeToo[i]] || false,
+      mainTreeName: namesMainTree[i],
+      secondTreeName: namesTreeToo[i] || false,
+      narrativeBlocks: blocks,
+      query: { n: i },
+      dispatch
+    });
+
+    if (i === 0) {
+      dispatch({
+        type: types.CLEAN_START,
+        pathnameShouldBe: window.location.pathname,
+        ...state
+      });
+    }
+  }
+
+};
+
+
 export const loadJSONs = ({url = window.location.pathname, search = window.location.search} = {}) => {
   return (dispatch, getState) => {
     const { tree } = getState();
@@ -256,10 +294,12 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       getDatasetFromCharon(url, {narrative: true})
         .then((res) => res.json())
         .then((blocks) => {
-          const firstURL = blocks[0].dataset;
-          const firstQuery = queryString.parse(blocks[0].query);
-          if (query.n) firstQuery.n = query.n;
-          fetchDataAndDispatch(dispatch, firstURL, firstQuery, blocks);
+          if (blocks.every((b) => b.dataset === blocks[0].dataset)) {
+            const firstURL = blocks[0].dataset;
+            const firstQuery = queryString.parse(blocks[0].query);
+            if (query.n) firstQuery.n = query.n;
+            return fetchDataAndDispatch(dispatch, firstURL, firstQuery, blocks);
+          } return dispatch(loadMultipleBlocks(blocks)).catch(console.warn);
         })
         .catch((err) => {
           console.error("Error obtaining narratives", err.message);

@@ -583,7 +583,7 @@ const modifyControlsViaTreeToo = (controls, name) => {
 const convertColoringsListToDict = (coloringsList) => {
   const colorings = {};
   coloringsList.forEach((coloring) => {
-    colorings[coloring.key] = coloring;
+    colorings[coloring.key] = { ...coloring };
     delete colorings[coloring.key].key;
   });
   return colorings;
@@ -657,6 +657,7 @@ export const createStateFromQueryOrJSONs = ({
   oldState = false, /* existing redux state (instead of jsons) */
   narrativeBlocks = false,
   mainTreeName = false,
+  changePage = false,
   secondTreeName = false,
   query,
   dispatch
@@ -688,6 +689,12 @@ export const createStateFromQueryOrJSONs = ({
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
   } else if (oldState) {
+    if (changePage) { // Reload Saved State if you can
+      const baseState = window[`allBaseStates.${query.n || 0}`];
+      if (baseState) {
+        return baseState;
+      }
+    }
     /* revisit this - but it helps prevent bugs */
     controls = {...oldState.controls};
     entropy = {...oldState.entropy};
@@ -705,7 +712,7 @@ export const createStateFromQueryOrJSONs = ({
   only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
   URL query this page defines via this information */
   if (narrativeBlocks) {
-    addEndOfNarrativeBlock(narrativeBlocks);
+    if (!query.n) addEndOfNarrativeBlock(narrativeBlocks);
     narrative = narrativeBlocks;
     let n = parseInt(query.n, 10) || 0;
     /* If the query has defined a block which doesn't exist then default to n=0 */
@@ -788,6 +795,10 @@ export const createStateFromQueryOrJSONs = ({
       controls.colorScale,
       controls.colorBy
     );
+  }
+
+  if (narrativeBlocks) { // Save state if it's a created-from-scratch state
+    window[`allBaseStates.${query.n}`] = { tree, treeToo, metadata, entropy, controls, narrative, frequencies, query };
   }
 
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
