@@ -172,7 +172,7 @@ export default class ReactPageScroller extends React.Component {
           <div
             key={this.state.componentIndex}
             ref={c => this["container_" + this.state.componentIndex] = c}
-            style={{height: "calc(100% - 20px)", width: "100%", "padding-bottom": "20px"}}
+            style={{height: "calc(100% - 20px)", width: "100%", "paddingBottom": "20px"}}
           >
             {this.props.children[this.state.componentIndex]}
           </div>
@@ -181,7 +181,7 @@ export default class ReactPageScroller extends React.Component {
         componentsToRender.push(
           <div
             ref={c => this["container_" + this.state.componentIndex] = c}
-            style={{height: "calc(100% - 20px)", width: "100%", "padding-bottom": "20px"}}
+            style={{height: "calc(100% - 20px)", width: "100%", "paddingBottom": "20px"}}
           >
             {this.props.children}
           </div>
@@ -224,7 +224,7 @@ export default class ReactPageScroller extends React.Component {
                 componentsToRender.push(
                     <div key={number + 1}
                             ref={c => this["container_" + (number + 1)] = c}
-                            style={{height: "calc(100% - 20px)", width: "100%", "padding-bottom": "20px"}}>
+                            style={{height: "calc(100% - 20px)", width: "100%", "paddingBottom": "20px"}}>
                         {children[number + 1]}
                     </div>
                 );
@@ -244,17 +244,16 @@ export default class ReactPageScroller extends React.Component {
                 componentsToRender.push(
                     <div key={i}
                             ref={c => this["container_" + i] = c}
-                            style={{height: "calc(100% - 20px)", width: "100%", "padding-bottom": "20px"}}>
+                            style={{height: "calc(100% - 20px)", width: "100%", "paddingBottom": "20px"}}>
                         {children[i]}
                     </div>
                 );
             }
-
             if (!_.isNil(children[number + 1])) {
                 componentsToRender.push(
                     <div key={number + 1}
                             ref={c => this["container_" + (number + 1)] = c}
-                            style={{height: "calc(100% - 20px)", width: "100%", "padding-bottom": "20px"}}>
+                            style={{height: "calc(100% - 20px)", width: "100%", "paddingBottom": "20px"}}>
                         {children[number + 1]}
                     </div>
                 );
