@@ -160,9 +160,10 @@ export const setSplitTreeYValues = (nodes, trait) => {
   });
 
   // set the y-values in each subtree
+  // such that oldest subtrees are at the top
   let currentMaxY = 0;
   while (subtreeStack.length) {
-    const nextSubtree = subtreeStack.pop();
+    const nextSubtree = subtreeStack.shift();
     nextSubtree.subtreeNodes.forEach(node => node.n.yvalue = currentMaxY++)
   }
 }
