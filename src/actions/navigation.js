@@ -70,7 +70,7 @@ export const changePage = ({
   }
 
   /* the path (dataset) remains the same... but the state may be modulated by the query */
-  const newState = createStateFromQueryOrJSONs({oldState, query, dispatch});
+  const newState = createStateFromQueryOrJSONs({ oldState, query: { ...queryToDisplay, ...query }, dispatch, changePage: true });
   dispatch({
     type: URL_QUERY_CHANGE_WITH_COMPUTED_STATE,
     ...newState,

@@ -583,7 +583,7 @@ const modifyControlsViaTreeToo = (controls, name) => {
 const convertColoringsListToDict = (coloringsList) => {
   const colorings = {};
   coloringsList.forEach((coloring) => {
-    colorings[coloring.key] = coloring;
+    colorings[coloring.key] = { ...coloring };
     delete colorings[coloring.key].key;
   });
   return colorings;
@@ -658,6 +658,7 @@ export const createStateFromQueryOrJSONs = ({
   oldState = false, /* existing redux state (instead of jsons) */
   narrativeBlocks = false,
   mainTreeName = false,
+  changePage = false,
   secondTreeName = false,
   query,
   dispatch
@@ -689,6 +690,12 @@ export const createStateFromQueryOrJSONs = ({
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
   } else if (oldState) {
+    if (changePage) {
+      const baseState = window[`allBaseStates.${query.n || 0}`];
+      if (baseState) {
+        return baseState;
+      }
+    }
     /* revisit this - but it helps prevent bugs */
     controls = {...oldState.controls};
     entropy = {...oldState.entropy};
