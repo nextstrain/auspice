@@ -357,10 +357,12 @@ export const change = function change({
   // todo: this is fairly slow: show something to show recalculating? or, get the d3 transition working?
   if (splitTreeByTrait) {
     setSplitTreeYValues(this.nodes, splitTreeByTrait);
+    this.params.isTreeSplitByTrait = true;
   }
   else if (resetTreeYValues)
   {
     setYValues(this.nodes);
+    this.params.isTreeSplitByTrait = false;
   }
 
   /* run calculations as needed - these update properties on the phylotreeNodes (similar to updateNodesWithNewData) */
