@@ -713,7 +713,7 @@ export const createStateFromQueryOrJSONs = ({
   only displaying the page number (e.g. ?n=3), but we can look up what (hidden)
   URL query this page defines via this information */
   if (narrativeBlocks) {
-    if (query.n === 0) addEndOfNarrativeBlock(narrativeBlocks);
+    if (!query.n) addEndOfNarrativeBlock(narrativeBlocks);
     narrative = narrativeBlocks;
     let n = parseInt(query.n, 10) || 0;
     /* If the query has defined a block which doesn't exist then default to n=0 */
