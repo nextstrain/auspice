@@ -181,7 +181,7 @@ const modifyStateViaMetadata = (state, metadata) => {
     }
   }
   if (metadata.analysisSlider) {
-    state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
+    state["analysisSlider"] = { key: metadata.analysisSlider, valid: false };
   }
   if (metadata.filters) {
     metadata.filters.forEach((v) => {
@@ -690,8 +690,8 @@ export const createStateFromQueryOrJSONs = ({
     controls["absoluteZoomMin"] = 0;
     controls["absoluteZoomMax"] = entropy.lengthSequence;
   } else if (oldState) {
-    if (changePage) {
-      const baseState = window[`allBaseStates.${query.n || 0}`];
+    if (changePage) { // Reload Saved State if you can
+      const baseState = window[`allBaseStates.${query.n || 0}`]; 
       if (baseState) {
         return baseState;
       }
@@ -798,6 +798,9 @@ export const createStateFromQueryOrJSONs = ({
       controls.normalizeFrequencies
     );
   }
+
+  if (narrativeBlocks) // Save state if it's a created-from-scratch state
+    window[`allBaseStates.${query.n}`] = { tree, treeToo, metadata, entropy, controls, narrative, frequencies, query };
 
   return {tree, treeToo, metadata, entropy, controls, narrative, frequencies, query};
 };

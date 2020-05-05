@@ -251,7 +251,6 @@ const loadMultipleBlocks = (blocks) => async (dispatch) => {
       // eslint-disable-next-line no-await-in-loop
       if (!jsons[namesMainTree[i]]) {jsons[namesMainTree[i]] = await (await getDataset(namesMainTree[i])).json();}
     }
-    namesTreeToo[i] = blocks[i].dataset.split(":")[1];
     if (namesTreeToo[i]) {
       // eslint-disable-next-line no-await-in-loop
       if (!jsons[namesTreeToo[i]]) {jsons[namesTreeToo[i]] = await (await getDataset(namesTreeToo[i])).json();}
@@ -274,8 +273,6 @@ const loadMultipleBlocks = (blocks) => async (dispatch) => {
         ...state
       });
     }
-
-    window[`allBaseStates.${i}`] = state;
   }
 
 };
