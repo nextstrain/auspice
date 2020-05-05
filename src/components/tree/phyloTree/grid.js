@@ -49,8 +49,9 @@ const addSVGGroupsIfNeeded = (groups, svg) => {
  * Create the major-grid-line separation for divergence scales.
  * @param {numeric} range num years or amount of divergence present in current view
  * @param {numeric} minorTicks num of minor ticks desired between each major step
- * @returns {array} [0] {numeric} space between major x-axis gridlines (measure of divergence)
- *                  [1] {numeric} space between minor x-axis gridlines (measure of divergence)
+ * @returns {object}
+ *  - property `majorStep` {numeric}: space between major x-axis gridlines (measure of divergence)
+ *  - property `minorStep` {numeric}: space between minor x-axis gridlines (measure of divergence)
  */
 const calculateMajorGridSeperationForDivergence = (range, minorTicks) => {
   /* make an informed guess of the step size to start with.
@@ -77,8 +78,9 @@ const calculateMajorGridSeperationForDivergence = (range, minorTicks) => {
  * Create the major-grid-line separation for temporal view.
  * @param {numeric} timeRange num years in current view
  * @param {numeric} pxAvailable number of pixels available for the x axis
- * @returns {array} [0] {numeric} space between major x-axis gridlines (measure of time)
- *                  [1] {numeric} space between minor x-axis gridlines (measure of time)
+ * @returns {object}
+ *  - property `majorStep` {numeric}: space between major x-axis gridlines (measure of time)
+ *  - property `minorStep` {numeric}: space between minor x-axis gridlines (measure of time)
  */
 export const calculateMajorGridSeperationForTime = (timeRange, pxAvailable) => {
   const rountToNearest = (n, p) => Math.ceil(n/p)*p;
