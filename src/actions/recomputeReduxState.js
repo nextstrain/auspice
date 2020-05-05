@@ -181,7 +181,7 @@ const modifyStateViaMetadata = (state, metadata) => {
     }
   }
   if (metadata.analysisSlider) {
-    state["analysisSlider"] = { key: metadata.analysisSlider, valid: false };
+    state["analysisSlider"] = {key: metadata.analysisSlider, valid: false};
   }
   if (metadata.filters) {
     metadata.filters.forEach((v) => {
