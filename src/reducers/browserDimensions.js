@@ -1,9 +1,11 @@
 import * as types from "../actions/types";
+import { controlsHiddenWidth } from "../util/globals";
 
 export const calcBrowserDimensionsInitialState = () => ({
   width: window.innerWidth,
   height: window.innerHeight,
-  docHeight: window.document.body.clientHeight
+  docHeight: window.document.body.clientHeight,
+  mobileDisplay: window.innerWidth < controlsHiddenWidth
 });
 
 const BrowserDimensions = (state = {
@@ -12,7 +14,10 @@ const BrowserDimensions = (state = {
   switch (action.type) {
     case types.BROWSER_DIMENSIONS:
       return Object.assign({}, state, {
-        browserDimensions: action.data
+        browserDimensions: Object.assign({},
+          action.data,
+          { mobileDisplay: action.data.innerWidth < controlsHiddenWidth }
+        )
       });
     default:
       return state;
