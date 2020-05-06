@@ -2,6 +2,9 @@
 title: Changelog
 ---
 
+## version 2.15.0 - 2020/05/06
+
+
 ## version 2.14.0 - 2020/04/24
 
 
