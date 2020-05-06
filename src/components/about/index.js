@@ -1,10 +1,10 @@
 import React from "react";
 import styled from 'styled-components';
 
-function Contact() {
+function About() {
   return (
     <div className="static container">
-      <h1>Contact</h1>
+      <h1>About</h1>
 
       <p className="paragraph">
         Contenu
@@ -13,4 +13,4 @@ function Contact() {
   )
 }
 
-export default Contact;
+export default About;

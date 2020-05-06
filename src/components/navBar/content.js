@@ -57,6 +57,14 @@ const PageLink = styled.a`
   }
 `
 
+const links = [
+  { name: "Accueil", path: "/" },
+  { name: "Contact", path: "/contact" },
+  { name: "À propos", path: "/about" },
+  { name: "Données", path: "/data" },
+  { name: "Méthodes", path: "/methods" },
+]
+
 export const AuspiceNavBar = ({narrativeTitle, width, changePage}) => {
   return (
     <AuspiceNavBarContainer>
@@ -77,12 +85,17 @@ export const AuspiceNavBar = ({narrativeTitle, width, changePage}) => {
         )
       }
 
-      <PageLink href="/" onClick={preventDefault(changePage, { path: "/" })}>
-        Accueil
-      </PageLink>
-      <PageLink href="/contact" onClick={preventDefault(changePage, { path: "/contact" })}>
-        Contact
-      </PageLink>
+      {
+        links.map(link =>
+          <PageLink
+            key={link.path}
+            href={link.path}
+            onClick={preventDefault(changePage, { path: link.path })}
+          >
+            {link.name}
+          </PageLink>
+        )
+      }
 
     </AuspiceNavBarContainer>
   );

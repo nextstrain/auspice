@@ -9,9 +9,14 @@ import { PAGE_CHANGE, URL_QUERY_CHANGE_WITH_COMPUTED_STATE } from "./types";
  */
 export const chooseDisplayComponentFromURL = (url) => {
   const parts = url.toLowerCase().replace(/^\/+/, "").replace(/\/+$/, "").split("/");
-  if (parts[0] === "contact") {
-    return "contact";
+
+  switch (parts[0]) {
+    case "contact": return "contact";
+    case "about":   return "about";
+    case "data":    return "data";
+    case "methods": return "methods";
   }
+
   if (
     !parts.length ||
     (parts.length === 1 && parts[0] === "") ||
