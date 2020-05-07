@@ -1,20 +1,23 @@
 import React from "react";
 import styled from 'styled-components';
-
 function About() {
   return (
     <div className="static container">
       <h1>CoVSeQ</h1>
-      <p className="paragraph">
-      CoVSeQ est le regroupement pour le séquançage du SARS-CoV-2 au Québec.
-      Nous sommes financé par l initiative RCanGéCO de Génome Canada et par le
-      Ministere de la sante et des services sociaux du Québec.
-      <br/> --- <br/>
-      CoVSeQ is the partnership for Québec SARS-CoV-2 sequencing.
-      We receive founding from the CanCOGeN initiative through Genome Canada
-      and from the Ministere de la sante et des services sociaux du Québec.
+        <p className="paragraph">
+         CoVSeQ est le regroupement pour le séquençage du SARS-CoV-2 au Québec.
+          Nous sommes financé par l'initiative RCanGéCO de Génome Canada et par
+          le Ministère de la santé et des services sociaux du Québec.
 
-      <h2>Institutions</h2>
+          <br/> --- <br/>
+          CoVSeQ is the partnership for Québec SARS-CoV-2 sequencing. We receive
+           funding from the CanCOGeN initiative through Genome Canada and from
+            the Ministere de la santé et des services sociaux du Québec.
+
+        </p>
+
+      <p className="paragraph">
+      Institutions
       <ul>
       <li> <a href="https://www.inspq.qc.ca/">INSPQ</a></li>
       <li> <a href="http://www.mcgillgenomecentre.org/">McGill Genome Center</a></li>
@@ -24,23 +27,35 @@ function About() {
       <li> <a href="https://www.mcgill.ca/">U. McGill</a></li>
       <li> <a href="https://www.umontreal.ca/">UdeM</a></li>
       </ul>
-      <h2>Équipe/Team</h2>
+      Équipe/Team
+    <h2>LNSP</h2>
     <ul>
-    <li>  Michel Roger, medical director LNSP </li>
-    <li>  Sandrine Moreira, head of genomics and bioinformatics LNSP </li>
-    <li>  Hugues Charest, head of respiratory viruses LNSP </li>
-    <li>  Réjean Dion, medical epidemiologist LNSP </li>
-    <li>  Eric Fournier LNSP </li>
-    <li>  Prof. Ioannis Ragoussis McGill Genome Center </li>
-    <li>  Sarah Reiling  McGill Genome Center </li>
-    <li>  Jesse Shapiro Assoc. Prof, McGill Genome Center </li>
-    <li>  Carmen Lia Murall CNRS </li>
-    <li>  Prof. Guillaume Bourque McGill Genome Center & C3G </li>
-    <li>  Mathieu Bourguey C3G </li>
-    <li>  Paul Stretenowich C3G </li>
-    <li>  José-Hector Galvez C3G </li>
-    <li>  Pierre-Olivier Quirion C3G & Calcul Québec </li>
-      </ul>
+      <li>  Michel Roger, Medical director  </li>
+      <li>  Sandrine Moreira, Head of genomics and bioinformatics</li>
+      <li>  Hugues Charest, Head of respiratory viruses</li>
+      <li>  Réjean Dion, Medical epidemiologist</li>
+      <li>  Eric Fournier </li>
+    </ul>
+    <h2>McGIll Genome Center</h2>
+    <ul>
+      <li>  Prof. Ioannis Ragoussis, Head of Genome Science </li>
+      <li>  Sarah Reiling, Research associate </li>
+      <li>  Jesse Shapiro, Assoc. Prof </li>
+      <li>  Carmen Lia Murall Post Doc </li>
+      <li>  Prof. Guillaume Bourque, Head of Bioinformatics </li>
+    </ul>
+    <h2>C3G</h2>
+    <ul>
+      <li>  Prof. Guillaume Bourque, Director </li>
+      <li>  Mathieu Bourgey, Bioinformatics manager - Technological development team </li>
+      <li>  Paul Stretenowich, Bioinformatics consultant </li>
+      <li>  José-Hector Galvez, Bioinformatics specialist </li>
+      <li>  Pierre-Olivier Quirion, HPC specialist  </li>
+    </ul>
+    <h2>Calcul Québec</h2>
+    <ul>
+      <li>  Pierre-Olivier Quirion, HPC analyst </li>
+    </ul>
       </p>
     </div>
 

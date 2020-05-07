@@ -76,7 +76,7 @@ export const AuspiceNavBar = ({narrativeTitle, width, changePage}) => {
           style={{ borderRadius: '50%' }}
         />
       </LogoLink>
-      <Title>COVSEQ</Title>
+      <Title>CoVSeQ</Title>
       {
         narrativeTitle && (
           <NarrativeTitle width={width} href="/">
