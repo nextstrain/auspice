@@ -7,7 +7,9 @@ function Contact() {
       <h1>Contact</h1>
 
       <p className="paragraph">
-        Contenu
+      Pour toute questions: / You have questions? Write us at:
+      <p><a href="mailto:contact@covseq.ca">contact@covseq.ca</a></p>.
+
       </p>
     </div>
   )

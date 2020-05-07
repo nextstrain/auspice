@@ -9,10 +9,10 @@ import Head from "./components/framework/head";
 import NavBar from "./components/navBar";
 
 const Main = lazy(() => import("./components/main"));
-const Contact = lazy(() => import("./components/contact"));
 const About = lazy(() => import("./components/about"));
 const Data = lazy(() => import("./components/data"));
 const Methods = lazy(() => import("./components/methods"));
+const Contact = lazy(() => import("./components/contact"));
 const Splash = lazy(() => import("./components/splash"));
 const Status = lazy(() => import("./components/status"));
 const Notifications = lazy(() => import("./components/notifications/notifications"));

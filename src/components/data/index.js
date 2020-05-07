@@ -7,7 +7,7 @@ function Data() {
       <h1>Data</h1>
 
       <p className="paragraph">
-        Contenu
+        Under Construction
       </p>
     </div>
   )

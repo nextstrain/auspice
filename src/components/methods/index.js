@@ -7,7 +7,7 @@ function Methods() {
       <h1>Methods</h1>
 
       <p className="paragraph">
-        Contenu
+        Under Construction
       </p>
     </div>
   )
