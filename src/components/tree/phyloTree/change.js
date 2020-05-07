@@ -4,6 +4,7 @@ import { applyToChildren } from "./helpers";
 import { timerStart, timerEnd } from "../../../util/perf";
 import { NODE_VISIBLE } from "../../../util/globals";
 import { getBranchVisibility, strokeForBranch } from "./renderers";
+import { shouldDisplayTemporalConfidence } from "../../../reducers/controls";
 
 /* loop through the nodes and update each provided prop with the new value
  * additionally, set d.update -> whether or not the node props changed
@@ -182,7 +183,7 @@ export const modifySVG = function modifySVG(elemsToUpdate, svgPropsToUpdate, tra
   } else if (extras.showConfidences && !this.confidencesInSVG) {
     this.drawConfidence(); /* see comment above */
   } else if (elemsToUpdate.has(".conf") && this.confidencesInSVG) {
-    if (this.layout === "rect" && this.distance === "num_date") {
+    if (shouldDisplayTemporalConfidence(true, this.distance, this.layout)) {
       updateCall = createUpdateCall(".conf", svgPropsToUpdate);
       genericSelectAndModify(this.svg, ".conf", updateCall, transitionTime);
     } else {
@@ -218,8 +219,8 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
     this.drawBranches();
     if (this.params.showGrid) this.addGrid();
     this.svg.selectAll(".tip").remove();
-    this.drawTips();
     this.updateTipLabels();
+    this.drawTips();
     if (this.vaccines) this.drawVaccines();
     this.showTemporalSlice();
     if (this.layout === "clock" && this.distance === "num_date") this.drawRegression();
@@ -353,6 +354,9 @@ export const change = function change({
   if (newDistance) this.setDistance(newDistance);
   /* layout (must run after distance) */
   if (newDistance || newLayout || updateLayout) this.setLayout(newLayout || this.layout);
+  /* show confidences - set this param which actually adds the svg paths for
+     confidence intervals when mapToScreen() gets called below */
+  if (showConfidences) this.params.confidence = true;
   /* mapToScreen */
   if (
     svgPropsToUpdate.has(["stroke-width"]) ||
@@ -360,7 +364,8 @@ export const change = function change({
     newLayout ||
     updateLayout ||
     zoomIntoClade ||
-    svgHasChangedDimensions
+    svgHasChangedDimensions ||
+    showConfidences
   ) {
     this.mapToScreen();
   }

@@ -37,7 +37,7 @@ export const setGenotype = (nodes, prot, positions) => {
       }
     }
   };
-  recurse(nodes[0], positions.map(() => undefined), positions);
+  recurse(nodes[0], positions.map(() => undefined));
   for (let j = 0; j < nPositions; j++) {
     for (const node of ancNodes[j]) {
       node.currentGt[j] = ancState[j];

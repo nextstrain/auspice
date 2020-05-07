@@ -10,16 +10,97 @@ This project strictly adheres to the [Contributor Covenant Code of Conduct](http
 
 Please see the [project boards](https://github.com/orgs/nextstrain/projects) for currently available issues.
 
-## Contributing code  
-Code contributions are welcomed! [Please see the main auspice docs](https://nextstrain.github.io/auspice/introduction/install) for details on how to install and run auspice from source. 
+## Contributing code
+
+Code contributions are welcomed! [Please see the main auspice docs](https://nextstrain.github.io/auspice/introduction/install) for details on how to install and run auspice from source.
 
 Please comment on an open issue if you are working on it.
 For changes unrelated to an open issue, please make an issue outlining what you would like to change/add.
 
-Please ensure there are no **linting** errors by running `npm run lint` (which uses [eslint](https://eslint.org/)).
-In the future we will make this a requirement for PRs or commits. 
-
 Where possible, **please rebase** your work onto master rather than merging changes from master into your PR.
+
+From a fork: `git pull --rebase upstream master`
+
+### Make sure tests are passing
+
+We use the following libraries for all kinds of testing, so it'd help to read the docs to get familiar with their APIs and features:
+
+1. [`Jest`](https://github.com/facebook/jest)
+2. [`Puppeteer`](https://github.com/puppeteer/puppeteer/)
+3. [`Jest-Puppeteer`](https://github.com/smooth-code/jest-puppeteer)
+4. [`Jest-Image-Snapshot`](https://github.com/americanexpress/jest-image-snapshot)
+
+When you submit a pull request to the auspice repository, a variety of integration and unit tests will need to pass before it can be merged.
+
+You will likely want to run these tests locally before submitting:
+
+First, install the dependencies with `npm i`, then:
+
+#### For unit tests
+
+Run `npm test`.
+
+#### For linting
+
+Run `npm run lint`. If there are issues run `npm run lint:fix`.
+
+#### For integration tests
+
+> For integration tests to work, you'll need to have `git-lfs` installed (see below) as it stores the images that the snapshot tests will use.
+
+1. Fetch the datasets with `npm run get-data` and `npm run get-narratives`.
+2. Ensure you are **not** currently running the site locally, then run `npm run integration-test:ci`.
+
+
+#### How to update test snapshots
+
+1. Unit tests: `npm run test -- -u`
+2. Integration tests `npm run integration-test -- -u`
+
+
+#### For smoke tests
+
+1. Fetch the datasets with `npm run get-data` and `npm run get-narratives`.
+2. Ensure you are **not** currently running the site locally, then run `npm run smoke-test:ci`.
+
+
+#### Test Tips
+
+1. Run a single `describe()`, `it()`, or `test()` **within a file**, add `.only()`:
+
+    E.g., `describe.only()`, `it.only()`, or `test.only()`
+
+2. Run a single test file, append the following to your test command `-- relative_or_absolute_path/to/file`:
+
+    E.g., `npm run integration-test -- test/integration/zika.test.js`
+
+3. Run integration tests in headful mode, prepend `HEADLESS=false` to your command:
+
+    E.g., `HEADLESS=false npm run integration-test`
+
+4. For integration tests, please try to use [`expect-puppeteer`](https://github.com/smooth-code/jest-puppeteer/blob/master/packages/expect-puppeteer/README.md#api) as much as possible, and only resort to `puppeteer`'s native API when we can't do it with `expect-puppeteer`. The reason is because `expect-puppeteer` has better DX, as explained [here](https://github.com/smooth-code/jest-puppeteer/blob/master/packages/expect-puppeteer/README.md#why-do-i-need-it)
+
+5. How to add a new integration image test:
+
+    1. Wrap your image test with helper function `toMatchImageSnapshot()` from `test/integration/helpers.js`, and it will take a screenshot every `100ms` until it matches the expected snapshot or timeout (default: `10s`)
+
+    2. Temporarily add `page.waitFor(__ENOUGH__MS__)` before taking the new snapshot to give the browser enough time to render a complete image
+
+    3. Example: `test/integration/zika.test.js`
+
+
+## git-lfs
+
+We use [Git Large File Storage](https://github.com/git-lfs/git-lfs) to manage certain assets.
+Currently these are limited to images within the `./test` directory (which we use for snapshot integration testing) but this may change in the future.
+If you are not using these images, you don't need to have `git-lfs` installed; however **will not be able to run integration tests without it**.
+See [here](https://git-lfs.github.com/) for installation instructions.
+
+Helpful commands:
+```bash
+git lfs status
+git lfs ls-files # list LFS tracked tiles
+```
 
 
 ## Contributing to Documentation
@@ -30,49 +111,49 @@ This documentation is built from files contained within the Auspice GitHub repo 
 
 Note that currently the documentation must be rebuilt & pushed to GitHub _after_ a new version is released in order for the changelog to correctly appear at [nextstrain.github.io/auspice/releases/changelog](https://nextstrain.github.io/auspice/releases/changelog).
 
-
 ## Contributing to Internationalization and Localization (i18n/l18n)
 
 If you can assist in efforts to translate the Auspice interface to more languages your assistance would be very much appreciated.
 The currently available languages are displayed via a drop-down at the bottom of the sidebar.
 
-#### Adding a new language:
+## Adding a new language
 
   1) Add the language to the `getlanguageOptions` function in [this file](https://github.com/nextstrain/auspice/blob/master/src/components/controls/language.js#L24)
   2) If this is a new language, copy the folder (and the JSONs within it) `src/locales/en` and name it to match the language code for the new translation -- e.g. for Spanish this would be `src/locales/es`
   3) For each key-value in the JSONs, translate the english phrase to the new locale. (Do not modify the strings within `{{...}}` sections.)
-  
-  
+
 For example, a spanish translation would change the English:
+
 ```json
   "sampled between {{from}} and {{to}}": "sampled between {{from}} and {{to}}",
   "and comprising": "and comprising",
 ```
-to 
+
+to
+
 ```json
   "sampled between {{from}} and {{to}}": "aislados entre {{from}} y {{to}}",
   "and comprising": "y compuesto de",
 ```
 
-#### Helper script to check what parts of a translation are out-of-date or missing:
+## Helper script to check what parts of a translation are out-of-date or missing
 
 Run `npm run diff-lang -- X`, where `X` is the language you wish to check, for instance `es`.
 This will display the strings which:
+
 * need to be added to the translation
 * are present but should be removed as they are no longer used
 * are present but are simply a copy of the English version & need to be translated
 
-
 > Running `npm run diff-lang` will check all available languages.
 
-#### Improving an existing translation:
+## Improving an existing translation
 
 If a translation of a particular string is not yet available, then auspice will fall-back to the english version.
 
   1) Find the relevant key in the (EN) JSONs [in this directory](https://github.com/nextstrain/auspice/tree/master/src/locales/en)
   2) Add the key to the JSON with the same name, but in the directory corresponding to the language you are translating into (see above for an example).
 
-
-
 ## Releases & versioning
+
 New versions are released via the `./releaseNewVersion.sh` script from an up-to-date `master` branch. It will prompt you for the version number increase, push changes to the `release` branch and, as long as Travis-CI is successful then a new version will be automatically published to [npm](https://www.npmjs.com/package/auspice).

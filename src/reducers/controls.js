@@ -85,6 +85,9 @@ export const getDefaultControlsState = () => {
   };
 };
 
+/* while this may change, div currently doesn't have CIs, so they shouldn't be displayed. */
+export const shouldDisplayTemporalConfidence = (exists, distMeasure, layout) => exists && distMeasure === "num_date" && layout === "rect";
+
 const Controls = (state = getDefaultControlsState(), action) => {
   switch (action.type) {
     case types.URL_QUERY_CHANGE_WITH_COMPUTED_STATE: /* fallthrough */
@@ -110,41 +113,25 @@ const Controls = (state = getDefaultControlsState(), action) => {
       });
     case types.CHANGE_BRANCH_LABEL:
       return Object.assign({}, state, {selectedBranchLabel: action.value});
-    case types.CHANGE_LAYOUT: {
-      const layout = action.data;
-      /* temporal confidence can only be displayed for rectangular trees */
-      const temporalConfidence = {
-        exists: state.temporalConfidence.exists,
-        display: state.temporalConfidence.exists && layout === "rect",
-        on: false
-      };
+    case types.CHANGE_LAYOUT:
       return Object.assign({}, state, {
-        layout,
-        temporalConfidence
+        layout: action.data,
+        /* temporal confidence can only be displayed for rectangular trees */
+        temporalConfidence: Object.assign({}, state.temporalConfidence, {
+          display: shouldDisplayTemporalConfidence(state.temporalConfidence.exists, state.distanceMeasure, action.data),
+          on: false})
       });
-    }
     case types.CHANGE_DISTANCE_MEASURE:
-      /* while this may change, div currently doesn't have CIs,
-      so they shouldn't be displayed. */
-      if (state.temporalConfidence.exists) {
-        if (state.temporalConfidence.display && action.data === "div") {
-          return Object.assign({}, state, {
-            distanceMeasure: action.data,
-            branchLengthsToDisplay: state.branchLengthsToDisplay,
-            temporalConfidence: Object.assign({}, state.temporalConfidence, {display: false, on: false})
-          });
-        } else if (state.layout === "rect" && action.data === "num_date") {
-          return Object.assign({}, state, {
-            distanceMeasure: action.data,
-            branchLengthsToDisplay: state.branchLengthsToDisplay,
-            temporalConfidence: Object.assign({}, state.temporalConfidence, {display: true})
-          });
-        }
-      }
-      return Object.assign({}, state, {
+      const updatesToState = {
         distanceMeasure: action.data,
         branchLengthsToDisplay: state.branchLengthsToDisplay
-      });
+      };
+      if (shouldDisplayTemporalConfidence(state.temporalConfidence.exists, action.data, state.layout)) {
+        updatesToState.temporalConfidence = Object.assign({}, state.temporalConfidence, {display: true});
+      } else {
+        updatesToState.temporalConfidence = Object.assign({}, state.temporalConfidence, {display: false, on: false});
+      }
+      return Object.assign({}, state, updatesToState);
     case types.CHANGE_DATES_VISIBILITY_THICKNESS: {
       const newDates = {quickdraw: action.quickdraw};
       if (action.dateMin) {

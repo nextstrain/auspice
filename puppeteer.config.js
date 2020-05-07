@@ -1,4 +1,5 @@
 module.exports = {
+  testRunner: "jest-circus/runner",
   preset: "jest-puppeteer",
   globals: {
     BASE_URL:

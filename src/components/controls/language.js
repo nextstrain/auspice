@@ -24,13 +24,15 @@ class Language extends React.Component {
   getlanguageOptions() {
     const languages = [
       {value: "fr", label: "Français"},
-      {value: "de", label: "Deutsch"},
       {value: "en", label: "English"},
+      {value: "de", label: "Deutsch"},
       {value: "es", label: "Español"},
       {value: "ru", label: "Русский"},
       {value: "lt", label: "Lietuvių"},
       {value: "pt", label: "Português"},
-      {value: "ja", label: "日本語"}
+      {value: "ja", label: "日本語"},
+      {value: "tr", label: "Türkçe"},
+      {value: "ar", label: "العربية"}
     ];
     return languages;
   }
