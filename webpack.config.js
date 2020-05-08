@@ -8,11 +8,18 @@ const utils = require('./cli/utils');
 
 /* Webpack config generator */
 
-const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyzeBundle=false}) => {
+const generateConfig = ({
+  extensionPath,
+  devMode=false,
+  customOutputPath,
+  analyzeBundle=false,
+  extraTransformDirs=[],
+  entryPath="./src/index.js"
+}) => {
   utils.verbose(`Generating webpack config. Extensions? ${!!extensionPath}. devMode: ${devMode}`);
 
   /* which directories should be parsed by babel and other loaders? */
-  const directoriesToTransform = [path.join(__dirname, 'src')];
+  const directoriesToTransform = [path.join(__dirname, 'src'), ...extraTransformDirs];
 
   /* webpack alias' used in code import / require statements */
   const aliasesToResolve = {
@@ -65,7 +72,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
 
   const entry = [
     "babel-polyfill",
-    "./src/index"
+    entryPath
   ];
   if (devMode) {
     entry.splice(1, 0, "webpack-hot-middleware/client");

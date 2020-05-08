@@ -38,6 +38,8 @@ const narrative = (state = {
       }
       console.warn("Attempted to toggle narrative that was not loaded");
       return state;
+    case "DEVELOPMENT_ONLY_REPLACE_NARRATIVE_BLOCKS":
+      return {...state, blocks: action.blocks};
     default:
       return state;
   }

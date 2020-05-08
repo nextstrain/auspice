@@ -21,7 +21,7 @@ import { hasExtension, getExtension } from "../util/extensions";
  * @param {Object} additionalQueries: additional information to be parsed as a
  *  query string such as `type` (`String`) or `narrative` (`Boolean`).
  */
-const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
+export const getDatasetFromCharon = (prefix, {type, narrative=false}={}) => {
   let path = `${getServerAddress()}/${narrative?"getNarrative":"getDataset"}`;
   path += `?prefix=${prefix}`;
   if (type) path += `&type=${type}`;
@@ -121,7 +121,7 @@ const collectDatasetFetchUrlsDeprecatedSyntax = (url) => {
   return [url, secondTreeUrl, treeName.concat(":", secondTreeName)];
 };
 
-const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
+export const fetchDataAndDispatch = async (dispatch, url, query, narrativeBlocks) => {
   /* Once upon a time one could specify a second tree via a `?tt=tree_name`.
   This is no longer supported, however we still display an error message. */
   if (query.tt) {
@@ -247,7 +247,6 @@ export const loadJSONs = ({url = window.location.pathname, search = window.locat
       dispatch({type: types.DATA_INVALID});
     }
     const query = queryString.parse(search);
-
     if (url.indexOf("narratives") === -1) {
       fetchDataAndDispatch(dispatch, url, query);
     } else {

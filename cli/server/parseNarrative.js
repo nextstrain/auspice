@@ -14,11 +14,9 @@ const blockProxyHandler = {
     } else if (key === "contents") {
       target.__html = marked(value, {sanitize: false, gfm: true});
       return true;
-    } else if (key === "mainDisplayMarkdown") {
-      target[key] = value;
-      return true;
     }
-    return false;
+    target[key] = value;
+    return true;
   }
 };
 
@@ -184,5 +182,8 @@ const parseNarrativeFile = (fileContents) => {
 
 
 module.exports = {
-  default: parseNarrativeFile
+  default: parseNarrativeFile,
+  makeFrontMatterBlock,
+  blockProxyHandler,
+  extractAuspiceMainDisplayMarkdown
 };
