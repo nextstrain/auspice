@@ -89,80 +89,78 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
 const calcEntropy = (nodes, visibility, geneMap, isAA) => {
   const arrayOfProts = isAA ? Object.keys(geneMap) : [nucleotide_gene];
   const initialState = {};
-  const anc_state = {};
   const counts = {}; // same struct as state, but with counts not chars
+  const root = nodes[0];
+  const anc_state = root.anc_state || {};
   arrayOfProts.forEach((p) => {
     initialState[p] = {};
     counts[p] = {};
-    anc_state[p] = {};
+    if (!root.anc_state) anc_state[p] = {};
   });
-  const root = nodes[0];
   let visibleTips = 0;
 
-  /* assignFn is called by forEach to parse and assign the mutations at each node.
-  It cannot use fat arrow as we need to access "this"
-  "this" is bound to [prot, state] */
-  const assignFn = function assignFn(m) {
-    const prot = this[0];
-    const state = this[1];
-    const pos = parseInt(m.slice(1, m.length - 1), 10);
-    const A = m.slice(0, 1);
-    const B = m.slice(m.length - 1, m.length);
-    // console.log("mut @ ", pos, ":", A, " -> ", B)
-    if (isAA) {
-      if (A === "X" || B === "X") return;
-    } else if (A === "N" || A === "-" || B === "N" || B === "-") return;
-    if (!anc_state[prot][pos]) {
-      // if we don't know the ancestral state, set it via the first encountered state
-      anc_state[prot][pos] = A;
+  const mutationArrToObj = (prot, mutations) => {
+    const obj = {};
+    for (const m of mutations) {
+      const A = m.charAt(0);
+      const B = m.charAt(m.length - 1);
+      if (isAA) {
+        if (A === "X" || B === "X") continue;
+      } else if (A === "N" || A === "-" || B === "N" || B === "-") continue;
+      const pos = +m.slice(1, -1);
+      if (!anc_state[prot][pos]) {
+        // if we don't know the ancestral state, set it via the first encountered state
+        anc_state[prot][pos] = A;
+      }
+      obj[pos] = B;
     }
-    state[prot][pos] = B;
+    return obj;
   };
 
   const recurse = (node, state) => {
-    // if mutation observed - do something
-    const mutations = getNodeMutations(node);
-    if (mutations) {
-      if (isAA) {
-        for (const prot of Object.keys(mutations).filter((p) => p !== "nuc")) {
-          if (arrayOfProts.includes(prot)) {
-            mutations[prot].forEach(assignFn, [prot, state]);
+    if (!node.state) {
+      // if mutation observed - do something
+      const mutations = getNodeMutations(node);
+      if (mutations) {
+        if (isAA) {
+          for (const prot of Object.keys(mutations).filter((p) => p !== "nuc")) {
+            if (prot === "nuc") continue;
+            state[prot] = Object.assign({}, state[prot], mutationArrToObj(prot, mutations[prot]));
           }
+        } else if (mutations.nuc) {
+          state[nucleotide_gene] = Object.assign({}, state[nucleotide_gene], mutationArrToObj(nucleotide_gene, mutations.nuc));
         }
-      } else if (mutations.nuc) {
-        mutations.nuc.forEach(assignFn, [nucleotide_gene, state]);
       }
+      node.state = state;
     }
+
+    const nodeState = node.state;
+
 
     if (node.hasChildren) {
       for (const child of node.children) {
-        /* if there were no changes to the state (i.e. no mutations )
-        at the node, then we don't need to deep clone the state Object
-        (i.e. can just use references). This will be much quicker,
-        but increase programmatic complexity. (TODO) */
-        const newState = {};
-        arrayOfProts.forEach((p) => {
-          newState[p] = Object.assign({}, state[p]);
-        });
+        const newState = child.state || Object.assign({}, state);
         recurse(child, newState);
       }
     } else if (visibility[node.arrayIdx] === NODE_VISIBLE) {
       visibleTips++;
       for (const prot of arrayOfProts) {
-        for (const pos of Object.keys(state[prot])) {
+        for (const pos of Object.keys(nodeState[prot])) {
           if (!counts[prot][pos]) {
             counts[prot][pos] = {};
-            counts[prot][pos][state[prot][pos]] = 1;
+            counts[prot][pos][nodeState[prot][pos]] = 1;
           } else if (!counts[prot][pos][state[prot][pos]]) {
-            counts[prot][pos][state[prot][pos]] = 1;
+            counts[prot][pos][nodeState[prot][pos]] = 1;
           } else {
-            counts[prot][pos][state[prot][pos]]++;
+            counts[prot][pos][nodeState[prot][pos]]++;
           }
         }
       }
     }
   };
   recurse(root, initialState);
+
+  root.anc_state = anc_state;
 
   let m = 0;
   let i = 0;
