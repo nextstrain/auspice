@@ -86,7 +86,7 @@ const calcMutationCounts = (nodes, visibility, geneMap, isAA) => {
   return [counts, m];
 };
 
-const calcEntropy = (nodes, visibility, geneMap, isAA) => {
+const calcEntropy = async (nodes, visibility, geneMap, isAA) => {
   const arrayOfProts = isAA ? Object.keys(geneMap) : [nucleotide_gene];
   const initialState = {};
   const counts = {}; // same struct as state, but with counts not chars
@@ -117,7 +117,7 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
     return obj;
   };
 
-  const recurse = (node, state) => {
+  const recurse = async (node, state) => {
     if (!node.state) {
       // if mutation observed - do something
       const mutations = getNodeMutations(node);
@@ -138,10 +138,12 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
 
 
     if (node.hasChildren) {
+      const promises = [];
       for (const child of node.children) {
         const newState = child.state || Object.assign({}, state);
-        recurse(child, newState);
+        promises.push(new Promise((resolve) => setImmediate(async () => resolve(await recurse(child, newState)))));
       }
+      await Promise.all(promises);
     } else if (visibility[node.arrayIdx] === NODE_VISIBLE) {
       visibleTips++;
       for (const prot of arrayOfProts) {
@@ -158,7 +160,7 @@ const calcEntropy = (nodes, visibility, geneMap, isAA) => {
       }
     }
   };
-  recurse(root, initialState);
+  await recurse(root, initialState);
 
   root.anc_state = anc_state;
 

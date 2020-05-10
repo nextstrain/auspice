@@ -86,37 +86,45 @@ export const drawVaccines = function drawVaccines() {
     .on("click", this.callbacks.onTipClick);
 };
 
+const BATCH_SIZE = 100;
+
 
 /**
  * adds all the tip circles to the svg, they have class tip
  * @return {null}
  */
-export const drawTips = function drawTips() {
+export const drawTips = async function drawTips() {
   timerStart("drawTips");
   const params = this.params;
 
   if (!("tips" in this.groups)) {
-    this.groups.tips = this.svg.append("g").attr("id", "tips");
+    this.groups.tips = [];
   }
-  this.groups.tips
-    .selectAll(".tip")
-    .data(this.nodes.filter((d) => d.terminal))
-    .enter()
-    .append("circle")
-    .attr("class", "tip")
-    .attr("id", (d) => getDomId("tip", d.n.name))
-    .attr("cx", (d) => d.xTip)
-    .attr("cy", (d) => d.yTip)
-    .attr("r", (d) => d.r)
-    .on("mouseover", this.callbacks.onTipHover)
-    .on("mouseout", this.callbacks.onTipLeave)
-    .on("click", this.callbacks.onTipClick)
-    .style("pointer-events", "auto")
-    .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden")
-    .style("fill", (d) => d.fill || params.tipFill)
-    .style("stroke", (d) => d.tipStroke || params.tipStroke)
-    .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
-    .style("cursor", "pointer");
+
+  for (let i = 0, j = 0; i < this.nodes.length; i += BATCH_SIZE, j++) {
+    this.groups.tips[j] = this.groups.tips[j] || this.svg.append("g").attr("id", "tips");
+    this.groups.tips[j]
+      .selectAll(".tip")
+      .data(this.nodes.slice(i, i + BATCH_SIZE).filter((d) => d.terminal))
+      .enter()
+      .append("circle")
+      .attr("class", "tip")
+      .attr("id", (d) => getDomId("tip", d.n.name))
+      .attr("cx", (d) => d.xTip)
+      .attr("cy", (d) => d.yTip)
+      .attr("r", (d) => d.r)
+      .on("mouseover", this.callbacks.onTipHover)
+      .on("mouseout", this.callbacks.onTipLeave)
+      .on("click", this.callbacks.onTipClick)
+      .style("pointer-events", "auto")
+      .style("visibility", (d) => d.visibility === NODE_VISIBLE ? "visible" : "hidden")
+      .style("fill", (d) => d.fill || params.tipFill)
+      .style("stroke", (d) => d.tipStroke || params.tipStroke)
+      .style("stroke-width", () => params.tipStrokeWidth) /* don't want branch thicknesses applied */
+      .style("cursor", "pointer");
+    await new Promise((resolve) => setImmediate(resolve)); // eslint-disable-line no-await-in-loop
+    // break;
+  }
 
   timerEnd("drawTips");
 };
@@ -163,69 +171,78 @@ export const strokeForBranch = (d, b) => { // eslint-disable-line
  * adds all branches to the svg, these are paths with class branch, which comprise two groups
  * @return {null}
  */
-export const drawBranches = function drawBranches() {
+export const drawBranches = async function drawBranches() {
   timerStart("drawBranches");
   const params = this.params;
-
-  /* PART 1: draw the branch Ts (i.e. the bit connecting nodes parent branch ends to child branch beginnings)
-  Only rectangular & radial trees have this, so we remove it for clock / unrooted layouts */
-  if (!("branchTee" in this.groups)) {
-    this.groups.branchTee = this.svg.append("g").attr("id", "branchTee");
-  }
-  if (this.layout === "clock" || this.layout === "unrooted") {
-    this.groups.branchTee.selectAll("*").remove();
-  } else {
-    this.groups.branchTee
-      .selectAll('.branch')
-      .data(this.nodes.filter((d) => !d.terminal))
-      .enter()
-      .append("path")
-      .attr("class", "branch T")
-      .attr("id", (d) => getDomId("branchT", d.n.name))
-      .attr("d", (d) => d.branch[1])
-      .style("stroke", (d) => d.branchStroke || params.branchStroke)
-      .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
-      .style("fill", "none")
-      .style("pointer-events", "auto")
-      .on("mouseover", this.callbacks.onBranchHover)
-      .on("mouseout", this.callbacks.onBranchLeave)
-      .on("click", this.callbacks.onBranchClick);
-  }
 
   /* PART 2: draw the branch stems (i.e. the actual branches) */
 
   /* PART 2a: Create linear gradient definitions which can be applied to branch stems for which
   the start & end stroke colour is different */
-  if (!this.groups.branchGradientDefs) {
+  if (!("branchGradientDefs" in this.groups)) {
     this.groups.branchGradientDefs = this.svg.append("defs");
   }
   this.groups.branchGradientDefs.selectAll("*").remove();
   // TODO -- explore if duplicate <def> elements (e.g. same colours on each end) slow things down
   this.updateColorBy();
-  /* PART 2b: Draw the stems */
-  if (!("branchStem" in this.groups)) {
-    this.groups.branchStem = this.svg.append("g").attr("id", "branchStem");
+
+  if (!("branchTee" in this.groups)) {
+    this.groups.branchTee = [];
   }
-  this.groups.branchStem
-    .selectAll('.branch')
-    .data(this.nodes)
-    .enter()
-    .append("path")
-    .attr("class", "branch S")
-    .attr("id", (d) => getDomId("branchS", d.n.name))
-    .attr("d", (d) => d.branch[0])
-    .style("stroke", (d) => {
-      if (!d.branchStroke) return params.branchStroke;
-      return strokeForBranch(d, "S");
-    })
-    .style("stroke-linecap", "round")
-    .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
-    .style("visibility", getBranchVisibility)
-    .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
-    .style("pointer-events", "auto")
-    .on("mouseover", this.callbacks.onBranchHover)
-    .on("mouseout", this.callbacks.onBranchLeave)
-    .on("click", this.callbacks.onBranchClick);
+  if (!("branchStem" in this.groups)) {
+    this.groups.branchStem = [];
+  }
+  if (this.layout === "clock" || this.layout === "unrooted") {
+    this.groups.branchTee.forEach((bt) => bt.selectAll("*").remove());
+  }
+
+  for (let i = 0, j = 0; i < this.nodes.length; i += BATCH_SIZE, j++) {
+    if (this.layout !== "clock" && this.layout !== "unrooted") {
+      /* PART 1: draw the branch Ts (i.e. the bit connecting nodes parent branch ends to child branch beginnings)
+          Only rectangular & radial trees have this, so we remove it for clock / unrooted layouts */
+
+      this.groups.branchTee[j] = this.groups.branchTee[j] || this.svg.append("g").attr("id", "branchTee");
+      this.groups.branchTee[j]
+        .selectAll('.branch')
+        .data(this.nodes.slice(i, i + BATCH_SIZE).filter((d) => !d.terminal))
+        .enter()
+        .append("path")
+        .attr("class", "branch T")
+        .attr("id", (d) => getDomId("branchT", d.n.name))
+        .attr("d", (d) => d.branch[1])
+        .style("stroke", (d) => d.branchStroke || params.branchStroke)
+        .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+        .style("fill", "none")
+        .style("pointer-events", "auto")
+        .on("mouseover", this.callbacks.onBranchHover)
+        .on("mouseout", this.callbacks.onBranchLeave);
+    }
+
+    /* PART 2b: Draw the stems */
+    this.groups.branchStem[j] = this.groups.branchStem[j] || this.svg.append("g").attr("id", "branchStem");
+    this.groups.branchStem[j]
+      .selectAll('.branch')
+      .data(this.nodes.slice(i, i + BATCH_SIZE))
+      .enter()
+      .append("path")
+      .attr("class", "branch S")
+      .attr("id", (d) => getDomId("branchS", d.n.name))
+      .attr("d", (d) => d.branch[0])
+      .style("stroke", (d) => {
+        if (!d.branchStroke) return params.branchStroke;
+        return strokeForBranch(d, "S");
+      })
+      .style("stroke-linecap", "round")
+      .style("stroke-width", (d) => d['stroke-width'] || params.branchStrokeWidth)
+      .style("visibility", getBranchVisibility)
+      .style("cursor", (d) => d.visibility === NODE_VISIBLE ? "pointer" : "default")
+      .style("pointer-events", "auto")
+      .on("mouseover", this.callbacks.onBranchHover)
+      .on("mouseout", this.callbacks.onBranchLeave)
+      .on("click", this.callbacks.onBranchClick);
+
+    await new Promise((resolve) => setImmediate(resolve)); // eslint-disable-line no-await-in-loop
+  }
 
   timerEnd("drawBranches");
 };
