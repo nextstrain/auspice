@@ -18,7 +18,11 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   const aliasesToResolve = {
     "@extensions": '.', /* must provide a default, else it won't compile */
     "@auspice": path.join(__dirname, 'src'),
-    "@libraries": path.join(__dirname, 'node_modules')
+    "@libraries": path.join(__dirname, 'node_modules'),
+    // Pins all react stuff to auspice dir, and uses hot loader's dom (can be used safely in production)
+    "react": path.join(__dirname, 'node_modules/react'), // eslint-disable-line quote-props
+    "react-hot-loader": path.join(__dirname, 'node_modules/react-hot-loader'),
+    'react-dom': path.join(__dirname, 'node_modules/@hot-loader/react-dom')
   };
 
   let extensionData;
@@ -63,13 +67,9 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     plugins.push(new BundleAnalyzerPlugin());
   }
 
-  const entry = [
-    "babel-polyfill",
-    "./src/index"
-  ];
-  if (devMode) {
-    entry.splice(1, 0, "webpack-hot-middleware/client");
-  }
+  const entry =
+    (devMode ? ["react-hot-loader/patch", "webpack-hot-middleware/client"] : [])
+      .concat(["babel-polyfill", "./src/index"]);
 
   /* Where do we want the output to be saved?
    * For development we use the (virtual) "devel" directory
@@ -85,6 +85,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   const config = {
     mode: devMode ? 'development' : 'production',
     context: __dirname,
+    // Better to get a proper full source map in dev mode, this one is pretty fast on rebuild
+    devtool: !devMode ? undefined : "eval-source-map",
     entry,
     output: {
       path: outputPath,
@@ -93,6 +95,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
       publicPath: "/dist/"
     },
     resolve: {
+      mainFields: ['browser', 'main', 'module'],
       alias: aliasesToResolve
     },
     node: {
@@ -123,8 +126,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
       ]
     }
   };
-
-  config.devtool = 'cheap-module-source-map';
 
   return config;
 };
