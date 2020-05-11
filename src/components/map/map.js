@@ -4,6 +4,8 @@ import { connect } from "react-redux";
 import { withTranslation } from "react-i18next";
 import leaflet from "leaflet";
 import { GestureHandling } from "leaflet-gesture-handling";
+import "leaflet/dist/leaflet.css";
+import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css";
 import _min from "lodash/min";
 import _max from "lodash/max";
 import domtoimage from "dom-to-image";

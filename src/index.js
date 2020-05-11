@@ -12,8 +12,6 @@ import configureStore from "./store";
 import { initialiseGoogleAnalyticsIfRequired } from "./util/googleAnalytics";
 import Root from "./root";
 /* S T Y L E S H E E T S */
-import "leaflet/dist/leaflet.css";
-import "leaflet-gesture-handling/dist/leaflet-gesture-handling.css";
 import "./css/global.css";
 import "./css/browserCompatability.css";
 import "./css/bootstrapCustomized.css";
