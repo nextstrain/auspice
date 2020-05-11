@@ -1,6 +1,6 @@
 import { select, mouse } from "d3-selection";
 import 'd3-transition';
-import { scaleLinear } from "d3-scale";
+import scaleLinear from "d3-scale/src/linear";
 import { axisBottom, axisLeft } from "d3-axis";
 import { rgb } from "d3-color";
 import { area } from "d3-shape";

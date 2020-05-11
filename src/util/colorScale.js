@@ -1,4 +1,5 @@
-import { scaleLinear, scaleOrdinal } from "d3-scale";
+import scaleOrdinal from "d3-scale/src/ordinal";
+import scaleLinear from "d3-scale/src/linear";
 import { min, max, range as d3Range } from "d3-array";
 import { rgb } from "d3-color";
 import { interpolateHcl } from "d3-interpolate";
