@@ -1,5 +1,5 @@
 import React from "react";
-import Select from "react-select";
+import Select from "react-select/lib/Select";
 import { analyticsControlsEvent } from "../../util/googleAnalytics";
 import { MAP_ANIMATION_PLAY_PAUSE_BUTTON } from "../../actions/types";
 import { changePage } from "../../actions/navigation";
