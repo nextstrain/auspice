@@ -98,11 +98,11 @@ export const drawTips = async function drawTips() {
   const params = this.params;
 
   if (!("tips" in this.groups)) {
-    this.groups.tips = [];
+    this.groups.tips = this.svg.append("g").attr("id", "tips");
   }
 
   for (let i = 0, j = 0; i < this.nodes.length; i += BATCH_SIZE, j++) {
-    this.groups.tips[j] = this.groups.tips[j] || this.svg.append("g").attr("id", "tips");
+    this.groups.tips[j] = this.groups.tips[j] || this.groups.tips.append("g").attr("id", `tips-${i}`);
     this.groups.tips[j]
       .selectAll(".tip")
       .data(this.nodes.slice(i, i + BATCH_SIZE).filter((d) => d.terminal))
@@ -187,13 +187,13 @@ export const drawBranches = async function drawBranches() {
   this.updateColorBy();
 
   if (!("branchTee" in this.groups)) {
-    this.groups.branchTee = [];
+    this.groups.branchTee = this.svg.append("g").attr("id", "branchTee");
   }
   if (!("branchStem" in this.groups)) {
-    this.groups.branchStem = [];
+    this.groups.branchStem = this.svg.append("g").attr("id", "branchStem");
   }
   if (this.layout === "clock" || this.layout === "unrooted") {
-    this.groups.branchTee.forEach((bt) => bt.selectAll("*").remove());
+    this.groups.branchTee.selectAll(".branch").remove();
   }
 
   for (let i = 0, j = 0; i < this.nodes.length; i += BATCH_SIZE, j++) {
@@ -201,7 +201,7 @@ export const drawBranches = async function drawBranches() {
       /* PART 1: draw the branch Ts (i.e. the bit connecting nodes parent branch ends to child branch beginnings)
           Only rectangular & radial trees have this, so we remove it for clock / unrooted layouts */
 
-      this.groups.branchTee[j] = this.groups.branchTee[j] || this.svg.append("g").attr("id", "branchTee");
+      this.groups.branchTee[j] = this.groups.branchTee[j] || this.groups.branchTee.append("g").attr("id", `branchTee-${j}`);
       this.groups.branchTee[j]
         .selectAll('.branch')
         .data(this.nodes.slice(i, i + BATCH_SIZE).filter((d) => !d.terminal))
@@ -219,7 +219,7 @@ export const drawBranches = async function drawBranches() {
     }
 
     /* PART 2b: Draw the stems */
-    this.groups.branchStem[j] = this.groups.branchStem[j] || this.svg.append("g").attr("id", "branchStem");
+    this.groups.branchStem[j] = this.groups.branchStem[j] || this.groups.branchStem.append("g").attr("id", `branchStem-${j}`);
     this.groups.branchStem[j]
       .selectAll('.branch')
       .data(this.nodes.slice(i, i + BATCH_SIZE))
