@@ -9,15 +9,21 @@ const utils = require('./cli/utils');
 module.exports = function babelConfig(api) {
   utils.verbose(`Generating Babel Config`);
   const presets = [
-    "@babel/env",
+    [
+      "@babel/preset-env",
+      {
+        useBuiltIns: "usage",
+        targets: "cover 95%",
+        corejs: 3
+      }
+    ],
     "@babel/preset-react"
   ];
   const plugins = [
     ["@babel/plugin-proposal-decorators", { legacy: true }],
     "@babel/plugin-proposal-class-properties",
     "babel-plugin-styled-components",
-    "babel-plugin-syntax-dynamic-import",
-    "@babel/plugin-transform-runtime",
+    "@babel/plugin-syntax-dynamic-import",
     "lodash"
   ];
   if (api.env("development")) {

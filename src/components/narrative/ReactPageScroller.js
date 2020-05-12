@@ -2,7 +2,6 @@
 /* PLEASE SEE https://github.com/VikLiegostaiev/react-page-scroller */
 
 import React from "react";
-import "babel-polyfill";
 import PropTypes from "prop-types"
 import _ from "lodash";
 

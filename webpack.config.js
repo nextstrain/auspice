@@ -58,7 +58,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     new webpack.NoEmitOnErrorsPlugin()
   ] : [
     pluginProcessEnvData,
-    new webpack.optimize.AggressiveMergingPlugin(), // merge chunks - https://github.com/webpack/docs/wiki/list-of-plugins#aggressivemergingplugin
+    new webpack.optimize.AggressiveMergingPlugin({minSizeReduce: 1.2}), // merge chunks - https://github.com/webpack/docs/wiki/list-of-plugins#aggressivemergingplugin
     pluginCompress
   ];
 
@@ -67,9 +67,9 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     plugins.push(new BundleAnalyzerPlugin());
   }
 
-  const entry =
-    (devMode ? ["react-hot-loader/patch", "webpack-hot-middleware/client"] : [])
-      .concat(["babel-polyfill", "./src/index"]);
+  const entry = devMode
+    ? ["react-hot-loader/patch", "webpack-hot-middleware/client", "./src/index"]
+    : ["./src/index"];
 
   /* Where do we want the output to be saved?
    * For development we use the (virtual) "devel" directory

@@ -1,7 +1,7 @@
 /* eslint-disable import/first */
 
 /* P O L Y F I L L S */
-import "./util/polyfills"; // eslint-disable-line
+import "whatwg-fetch"; // eslint-disable-line
 /* L I B R A R I E S */
 import React from "react";
 import ReactDOM from "react-dom";
