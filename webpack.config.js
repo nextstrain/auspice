@@ -22,7 +22,9 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     // Pins all react stuff to auspice dir, and uses hot loader's dom (can be used safely in production)
     "react": path.join(__dirname, 'node_modules/react'), // eslint-disable-line quote-props
     "react-hot-loader": path.join(__dirname, 'node_modules/react-hot-loader'),
-    'react-dom': path.join(__dirname, 'node_modules/@hot-loader/react-dom')
+    'react-dom': path.join(__dirname, 'node_modules/@hot-loader/react-dom'),
+    'regenerator-runtime': path.join(__dirname, 'node_modules/regenerator-runtime'),
+    'core-js': path.join(__dirname, 'node_modules/core-js')
   };
 
   let extensionData;
@@ -68,7 +70,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   }
 
   const entry = devMode
-    ? ["react-hot-loader/patch", "webpack-hot-middleware/client", "./src/index"]
+    ? ["webpack-hot-middleware/client", "./src/index"]
     : ["./src/index"];
 
   /* Where do we want the output to be saved?
@@ -95,7 +97,6 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
       publicPath: "/dist/"
     },
     resolve: {
-      mainFields: ['browser', 'main', 'module'],
       alias: aliasesToResolve
     },
     node: {
@@ -110,7 +111,9 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
         {
           test: /\.js$/,
           loader: 'babel-loader',
-          include: directoriesToTransform,
+          exclude: [
+            /node_modules\/(core-js|regenerator-runtime)/
+          ],
           options: {
             cwd: path.resolve(__dirname)
           }

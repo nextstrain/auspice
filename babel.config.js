@@ -12,8 +12,9 @@ module.exports = function babelConfig(api) {
     [
       "@babel/preset-env",
       {
-        useBuiltIns: "usage",
+        useBuiltIns: "entry",
         targets: "cover 95%",
+        bugfixes: true,
         corejs: 3
       }
     ],

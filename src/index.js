@@ -2,7 +2,10 @@
 
 /* P O L Y F I L L S */
 import "whatwg-fetch"; // eslint-disable-line
+import "core-js";
+import "regenerator-runtime";
 /* L I B R A R I E S */
+import "react-hot-loader";
 import React from "react";
 import ReactDOM from "react-dom";
 import Select from "react-select/lib/Select"; 
@@ -33,9 +36,6 @@ if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
 
 /* google analytics */
 initialiseGoogleAnalyticsIfRequired();
-
-/* Using React Hot Loader 4 https://github.com/gaearon/react-hot-loader */
-
 
 i18n
 .use(initReactI18next)
