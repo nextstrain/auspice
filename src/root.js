@@ -1,6 +1,7 @@
 import React, { lazy, Suspense } from 'react';
 import { connect } from "react-redux";
 import { hot } from 'react-hot-loader/root';
+import i18n from "i18next";
 import Monitor from "./components/framework/monitor";
 import DatasetLoader from "./components/datasetLoader";
 import Spinner from "./components/framework/spinner";
@@ -10,6 +11,11 @@ const Main = lazy(() => import("./components/main"));
 const Splash = lazy(() => import("./components/splash"));
 const Status = lazy(() => import("./components/status"));
 const Notifications = lazy(() => import("./components/notifications/notifications"));
+
+/* Hot reload components decorated with i18n */
+if (module.hot) {
+  setTimeout(() => i18n.changeLanguage(i18n.language), 500);
+}
 
 @connect((state) => ({displayComponent: state.general.displayComponent}))
 class MainComponentSwitch extends React.Component {

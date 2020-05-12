@@ -11,6 +11,9 @@ import { Provider } from "react-redux";
 import configureStore from "./store";
 import { initialiseGoogleAnalyticsIfRequired } from "./util/googleAnalytics";
 import Root from "./root";
+/* I N T E R N A T I O N A L I Z A T I O N */
+import i18n from "i18next";
+import { initReactI18next } from "react-i18next";
 /* S T Y L E S H E E T S */
 import "./css/global.css";
 import "./css/browserCompatability.css";
@@ -32,6 +35,22 @@ if (!window.NEXTSTRAIN) {window.NEXTSTRAIN = {};}
 initialiseGoogleAnalyticsIfRequired();
 
 /* Using React Hot Loader 4 https://github.com/gaearon/react-hot-loader */
+
+
+i18n
+.use(initReactI18next)
+.init({
+  resources: {}, // eslint-disable-line
+  lng: "en",
+  fallbackLng: "en",
+  /* To debug any errors w.r.t. i18n, swith the second `false` to `true`
+  (and this can be kept even after deployment if needed) */
+  debug: process.env.NODE_ENV === 'production' ? false : false, // eslint-disable-line
+  interpolation: {
+    escapeValue: false
+  },
+  defaultNS: 'translation'
+});
 
 const renderApp = () => {
   ReactDOM.render(

@@ -1,28 +1,10 @@
 import React from 'react';
 import { connect } from "react-redux";
 import { Helmet } from "react-helmet";
-import i18n from "i18next";
-import { initReactI18next } from "react-i18next";
+
 import { hasExtension, getExtension } from "../../util/extensions";
 
-const Head = ({metadata, general}) => {
-  const lang = general.language;
-
-  i18n
-  .use(initReactI18next)
-  .init({
-    resources: require("i18next-resource-store-loader!../../locales/index.js"), // eslint-disable-line
-    lng: lang,
-    fallbackLng: "en",
-    /* To debug any errors w.r.t. i18n, swith the second `false` to `true`
-    (and this can be kept even after deployment if needed) */
-    debug: process.env.NODE_ENV === 'production' ? false : false, // eslint-disable-line
-    interpolation: {
-      escapeValue: false
-    },
-    defaultNS: 'translation'
-  });
-
+const Head = ({metadata}) => {
   let pageTitle = "auspice";
   if (hasExtension("browserTitle")) {
     pageTitle = getExtension("browserTitle");

@@ -16,8 +16,18 @@ import { CHANGE_LANGUAGE } from "../../actions/types";
   };
 })
 class Language extends React.Component {
+  async ensureLanguageResources(lang) {
+    for (const ns of ["language", "sidebar", "translation"]) {
+      if (!i18n.hasResourceBundle(lang, ns)) {
+        const res = await import(/* webpackMode: "lazy-once" */ `../../locales/${lang}/${ns}.json`); // eslint-disable-line
+        i18n.addResourceBundle(lang, ns, res.default);
+      }
+    }
+  }
 
-  componentWillMount() {
+  async componentWillMount() {
+    if (!this.props.language || this.props.language === "en") return;
+    await this.ensureLanguageResources(this.props.language);
     i18n.changeLanguage(this.props.language);
   }
 
@@ -37,8 +47,10 @@ class Language extends React.Component {
     return languages;
   }
 
-  changeLanguage(language) {
+  async changeLanguage(language) {
+    if (!language || language === this.props.language) return;
     analyticsControlsEvent("change-language");
+    await this.ensureLanguageResources(language);
     i18n.changeLanguage(language);
     this.props.dispatch({ type: CHANGE_LANGUAGE, data: language });
   }
