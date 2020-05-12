@@ -4,7 +4,9 @@ const webpack = require("webpack");
 const CompressionPlugin = require('compression-webpack-plugin');
 const fs = require('fs');
 const utils = require('./cli/utils');
-
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const WebpackChunkHash = require('webpack-chunk-hash');
 
 /* Webpack config generator */
 
@@ -16,7 +18,7 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
 
   /* webpack alias' used in code import / require statements */
   const aliasesToResolve = {
-    "@extensions": '.', /* must provide a default, else it won't compile */
+    "@extensions": path.join(__dirname, '.null'), /* must provide a default, else it won't compile */
     "@auspice": path.join(__dirname, 'src'),
     "@libraries": path.join(__dirname, 'node_modules'),
     // Pins all react stuff to auspice dir, and uses hot loader's dom (can be used safely in production)
@@ -24,7 +26,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     "react-hot-loader": path.join(__dirname, 'node_modules/react-hot-loader'),
     'react-dom': path.join(__dirname, 'node_modules/@hot-loader/react-dom'),
     'regenerator-runtime': path.join(__dirname, 'node_modules/regenerator-runtime'),
-    'core-js': path.join(__dirname, 'node_modules/core-js')
+    'core-js': path.join(__dirname, 'node_modules/core-js'),
+    'styled-components': path.join(__dirname, 'node_modules/styled-components')
   };
 
   let extensionData;
@@ -50,18 +53,29 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
   const pluginCompress = new CompressionPlugin({
     filename: "[path].gz[query]",
     algorithm: "gzip",
-    test: /\.js$|\.css$|\.html$/,
-    threshold: 10240,
-    minRatio: 0.8
+    test: /\.(js|css|html)$/,
+    threshold: 4096
+  });
+  const pluginHtml = new HtmlWebpackPlugin({
+    filename: 'index.html',
+    template: './index.html'
+  });
+  const cleanWebpackPlugin = new CleanWebpackPlugin({
+    cleanStaleWebpackAssets: true
   });
   const plugins = devMode ? [
     new webpack.HotModuleReplacementPlugin(),
     pluginProcessEnvData,
-    new webpack.NoEmitOnErrorsPlugin()
+    new webpack.NoEmitOnErrorsPlugin(),
+    pluginHtml,
+    cleanWebpackPlugin
   ] : [
     pluginProcessEnvData,
-    new webpack.optimize.AggressiveMergingPlugin({minSizeReduce: 1.2}), // merge chunks - https://github.com/webpack/docs/wiki/list-of-plugins#aggressivemergingplugin
-    pluginCompress
+    new webpack.HashedModuleIdsPlugin({}),
+    new WebpackChunkHash({algorithm: 'md5'}),
+    pluginCompress,
+    pluginHtml,
+    cleanWebpackPlugin
   ];
 
   if (analyzeBundle) {
@@ -84,6 +98,60 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
       path.resolve(__dirname, "dist");
   utils.verbose(`Webpack writing output to: ${outputPath}`);
 
+  /**
+   * Here we put the libraries that are unlikely to change for a long time.
+   * Every change or update of any of these libraries will change the hash
+   * of the big vendor bundle, so we must be sure they're stable both internally
+   * and with respect to the implementation.
+   * The hashes of the bundles are hardcoded in bundlesize so it will trigger
+   * a check error if it is unadvertently changed.
+   */
+  const coreVendors = [
+    "@babel/runtime",
+    "core-js",
+    "regenerator-runtime",
+    "whatwg-fetch",
+    "style-loader",
+    "@hot-loader/react-dom",
+    "react(-(redux|select|helmet|i18next))?",
+    "leaflet",
+    "redux",
+    "leaflet(-gesture-handling)?",
+    "i18next",
+    "lodash",
+    "styled-components",
+    "stylis",
+    "@emotion"
+  ]; // <= needs some review from somebody with more knowledge of the whole codebase to decide what goes in
+
+  /**
+   * Here we put the (big) libraries that are more prone to change/update.
+   * For example d3-.* is here even if it's a core library, because if we
+   * include some new d3 feature, the whole bundle will change.
+   * The hashes of the bundles are hardcoded in bundlesize so it will trigger
+   * a check error if it is unadvertently changed.
+   */
+  const bigVendors = [
+    "d3-.*",
+    "awesomplete",
+    "react-transition-group",
+    "react-icons",
+    "create-react-class",
+    "mousetrap",
+    "react-input-autosize",
+    "typeface-lato",
+    // "papaparse", <= This is only for the drag-and-drop of files and can be separated
+    "dom-to-image"
+    // "marked",
+    // "dompurify", <= These two are only for MD display and can be separated
+  ];
+
+  /**
+   * It's better to keep small libraries out of the vendor bundles because
+   * the more libraries we include, the more small changes or updates
+   * of a single small library will cause the hash to change.
+   */
+
   const config = {
     mode: devMode ? 'development' : 'production',
     context: __dirname,
@@ -92,8 +160,8 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     entry,
     output: {
       path: outputPath,
-      filename: "auspice.bundle.js",
-      chunkFilename: 'auspice.chunk.[name].bundle.js',
+      filename: `auspice.bundle${!devMode ? ".[chunkhash]" : ""}.js`,
+      chunkFilename: `auspice.chunk.[name].bundle${!devMode ? ".[chunkhash]" : ""}.js`,
       publicPath: "/dist/"
     },
     resolve: {
@@ -104,7 +172,41 @@ const generateConfig = ({extensionPath, devMode=false, customOutputPath, analyze
     },
     plugins,
     optimization: {
-      minimize: !devMode
+      minimize: !devMode,
+      splitChunks: {
+        minChunks: 3,
+        minSize: 8192,
+        cacheGroups: {
+          coreVendors: {
+            test: new RegExp("\\/node_modules\\/(" + coreVendors.join("|") + ")\\/"),
+            name: "core-vendors",
+            enforce: true,
+            chunks: "all"
+          },
+          otherVendors: {
+            test: new RegExp("\\/node_modules\\/(" + bigVendors.join("|") + ")\\/"),
+            name: "other-vendors",
+            enforce: true,
+            chunks: "all"
+          },
+          /**
+           * ATM the package size is <15kB and so not worth splitting,
+           * but it can be split further if it becomes huge
+           */
+          locales: {
+            test: /\/src\/locales\//,
+            name: "locales",
+            enforce: true,
+            chunks: "all"
+          },
+          default: {
+            minChunks: 3,
+            minSize: 8192,
+            reuseExistingChunk: false
+          },
+          defaultVendors: false
+        }
+      }
     },
     module: {
       rules: [

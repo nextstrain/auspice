@@ -8,7 +8,6 @@ import "regenerator-runtime";
 import "react-hot-loader";
 import React from "react";
 import ReactDOM from "react-dom";
-import Select from "react-select/lib/Select"; 
 import { Provider } from "react-redux";
 /* A U S P I C E   I M P O R T S */
 import configureStore from "./store";

@@ -12,10 +12,9 @@ module.exports = function babelConfig(api) {
     [
       "@babel/preset-env",
       {
-        useBuiltIns: "entry",
+        useBuiltIns: false, // use the full lib to make sure vendor bundle stays stable
         targets: "cover 95%",
-        bugfixes: true,
-        corejs: 3
+        bugfixes: true
       }
     ],
     "@babel/preset-react"

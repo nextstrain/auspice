@@ -6,11 +6,11 @@ import Monitor from "./components/framework/monitor";
 import DatasetLoader from "./components/datasetLoader";
 import Spinner from "./components/framework/spinner";
 import Head from "./components/framework/head";
+import Notifications from "./components/notifications/notifications";
 
 const Main = lazy(() => import("./components/main"));
 const Splash = lazy(() => import("./components/splash"));
 const Status = lazy(() => import("./components/status"));
-const Notifications = lazy(() => import("./components/notifications/notifications"));
 
 /* Hot reload components decorated with i18n */
 if (module.hot) {
@@ -54,9 +54,7 @@ const Root = () => {
     <div>
       <Head/>
       <Monitor/>
-      <Suspense fallback={null}>
-        <Notifications/>
-      </Suspense>
+      <Notifications/>
       <MainComponentSwitch/>
     </div>
   );
