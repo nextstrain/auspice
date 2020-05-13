@@ -77,7 +77,7 @@ async function matchSelectOptionScreenshot(option, selectOptionTest) {
      */
     const SNAPSHOT_CONFIG = {
       blur: 2,
-      customSnapshotIdentifier: `Color-by:${option}`
+      customSnapshotIdentifier: `Color-by-${option}`
     };
 
     expect(image).toMatchImageSnapshot(SNAPSHOT_CONFIG);
