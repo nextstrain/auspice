@@ -1,5 +1,5 @@
 import { timerStart, timerEnd } from "../../../util/perf";
-import { NODE_VISIBLE } from "../../../util/globals";
+import { NODE_VISIBLE, chartUpdateBatchSize } from "../../../util/globals";
 import { getDomId, formatDivergence } from "./helpers";
 import { getEmphasizedColor } from "../../../util/colorHelpers";
 /**
@@ -86,8 +86,6 @@ export const drawVaccines = function drawVaccines() {
     .on("click", this.callbacks.onTipClick);
 };
 
-const BATCH_SIZE = 100;
-
 
 /**
  * adds all the tip circles to the svg, they have class tip
@@ -101,12 +99,12 @@ export const drawTips = async function drawTips() {
     this.groups.tips = this.svg.append("g").attr("id", "tips");
   }
 
-  for (let i = 0, j = 0; i < this.nodes.length; i += BATCH_SIZE, j++) {
+  for (let i = 0, j = 0; i < this.nodes.length; i += chartUpdateBatchSize, j++) {
     this.groups.tips[j] = this.groups.tips[j] || this.groups.tips.append("g").attr("id", `tips-${i}`);
     this.groups.tips[j].selectAll(".tip").remove();
     this.groups.tips[j]
       .selectAll(".tip")
-      .data(this.nodes.slice(i, i + BATCH_SIZE).filter((d) => d.terminal))
+      .data(this.nodes.slice(i, i + chartUpdateBatchSize).filter((d) => d.terminal))
       .enter()
       .append("circle")
       .attr("class", "tip")
@@ -197,7 +195,7 @@ export const drawBranches = async function drawBranches() {
     this.groups.branchTee.selectAll(".branch").remove();
   }
 
-  for (let i = 0, j = 0; i < this.nodes.length; i += BATCH_SIZE, j++) {
+  for (let i = 0, j = 0; i < this.nodes.length; i += chartUpdateBatchSize, j++) {
     if (this.layout !== "clock" && this.layout !== "unrooted") {
       /* PART 1: draw the branch Ts (i.e. the bit connecting nodes parent branch ends to child branch beginnings)
           Only rectangular & radial trees have this, so we remove it for clock / unrooted layouts */
@@ -205,7 +203,7 @@ export const drawBranches = async function drawBranches() {
       this.groups.branchTee[j] = this.groups.branchTee[j] || this.groups.branchTee.append("g").attr("id", `branchTee-${j}`);
       this.groups.branchTee[j]
         .selectAll('.branch')
-        .data(this.nodes.slice(i, i + BATCH_SIZE).filter((d) => !d.terminal))
+        .data(this.nodes.slice(i, i + chartUpdateBatchSize).filter((d) => !d.terminal))
         .enter()
         .append("path")
         .attr("class", "branch T")
@@ -223,7 +221,7 @@ export const drawBranches = async function drawBranches() {
     this.groups.branchStem[j] = this.groups.branchStem[j] || this.groups.branchStem.append("g").attr("id", `branchStem-${j}`);
     this.groups.branchStem[j]
       .selectAll('.branch')
-      .data(this.nodes.slice(i, i + BATCH_SIZE))
+      .data(this.nodes.slice(i, i + chartUpdateBatchSize))
       .enter()
       .append("path")
       .attr("class", "branch S")

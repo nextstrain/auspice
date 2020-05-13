@@ -64,6 +64,7 @@ export const animationWindowWidth = 0.075; // width of animation window relative
 export const minDistanceDateSlider = 0.075;
 export const animationTick = 50; // animation tick in milliseconds
 export const animationInterpolationDuration = 10; // how long d3 temporalWindow transitions last in milliseconds. Must be shorter than animationTick.
+export const chartUpdateBatchSize = 100; // How many branches/tips to draw in a single thread-blocking step
 export const HIColorDomain = genericDomain.map((d) => {
   return Math.round(100 * (d * 3.6)) / 100;
 });
