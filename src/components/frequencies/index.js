@@ -12,7 +12,6 @@ import "../../css/entropy.css";
   return {
     data: state.frequencies.data,
     pivots: state.frequencies.pivots,
-    ticks: state.frequencies.ticks,
     matrix: state.frequencies.matrix,
     projection_pivot: state.frequencies.projection_pivot,
     version: state.frequencies.version,
@@ -36,7 +35,7 @@ class Frequencies extends React.Component {
     const data = processMatrix({...props});
     newState.maxY = data.maxY;
     newState.categories = data.categories;
-    const scalesX = calcXScale(chartGeom, props.pivots, props.ticks);
+    const scalesX = calcXScale(chartGeom, props.pivots);
     const scalesY = calcYScale(chartGeom, data.maxY);
     newState.scales = {...scalesX, ...scalesY};
     drawXAxis(newState.svg, chartGeom, scalesX);

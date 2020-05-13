@@ -69,11 +69,6 @@ export const computeMatrixFromRawData = (data, pivots, nodes, visibility, colorS
 export const processFrequenciesJSON = (rawJSON, tree, controls) => {
   /* this function can throw */
   const pivots = rawJSON.pivots.map((d) => Math.round(parseFloat(d) * 100) / 100);
-  const ticks = [pivots[0]];
-  const tick_step = (pivots[pivots.length - 1] - pivots[0]) / 6 * 10 / 10;
-  while (ticks[ticks.length - 1] < pivots[pivots.length - 1]) {
-    ticks.push((ticks[ticks.length - 1] + tick_step) * 10 / 10);
-  }
   let projection_pivot = null;
   if ("projection_pivot" in rawJSON) {
     projection_pivot = Math.round(parseFloat(rawJSON.projection_pivot) * 100) / 100;
@@ -104,7 +99,6 @@ export const processFrequenciesJSON = (rawJSON, tree, controls) => {
   return {
     data,
     pivots,
-    ticks,
     matrix,
     projection_pivot
   };
