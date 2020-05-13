@@ -218,7 +218,6 @@ export const modifySVGInStages = function modifySVGInStages(elemsToUpdate, svgPr
   const step3 = () => {
     this.drawBranches();
     if (this.params.showGrid) this.addGrid();
-    // this.svg.selectAll(".tip").remove();
     this.updateTipLabels();
     this.drawTips();
     if (this.vaccines) this.drawVaccines();

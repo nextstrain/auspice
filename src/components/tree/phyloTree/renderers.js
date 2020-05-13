@@ -103,6 +103,7 @@ export const drawTips = async function drawTips() {
 
   for (let i = 0, j = 0; i < this.nodes.length; i += BATCH_SIZE, j++) {
     this.groups.tips[j] = this.groups.tips[j] || this.groups.tips.append("g").attr("id", `tips-${i}`);
+    this.groups.tips[j].selectAll(".tip").remove();
     this.groups.tips[j]
       .selectAll(".tip")
       .data(this.nodes.slice(i, i + BATCH_SIZE).filter((d) => d.terminal))
