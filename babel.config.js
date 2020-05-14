@@ -13,7 +13,7 @@ module.exports = function babelConfig(api) {
       "@babel/preset-env",
       {
         useBuiltIns: false, // use the full lib to make sure vendor bundle stays stable
-        targets: "cover 95%",
+        targets: !api.env('test') ? "cover 95%" : { node: 'current' },
         bugfixes: true
       }
     ],
