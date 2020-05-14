@@ -112,19 +112,16 @@ const collectSubtrees = (startNode, subtree, trait, currentTraitValue, subtreeSt
     if (thisNodeTraitValue !== currentTraitValue) { // doesn't belong on this subtree
       let matchingSubtree = subtreeStack.find(s => s.traitValue === thisNodeTraitValue);
       if (!matchingSubtree) {
-        subtreeStack.push({ subtreeNodes: [currentNode], traitValue: thisNodeTraitValue });
-        matchingSubtree = subtreeStack[subtreeStack.length-1];
-      }
-      else {
-        matchingSubtree.subtreeNodes.push(currentNode);
+        matchingSubtree = { subtreeNodes: [], traitValue: thisNodeTraitValue };
+        subtreeStack.push(matchingSubtree);
       }
       collectSubtrees(currentNode, matchingSubtree, trait, thisNodeTraitValue, subtreeStack);
+      matchingSubtree.subtreeNodes.push(currentNode);
     }
     else
     {
-      // add this node to the subtree list, and continue
-      subtree.subtreeNodes.push(currentNode);
       collectSubtrees(currentNode, subtree, trait, currentTraitValue, subtreeStack);
+      subtree.subtreeNodes.push(currentNode);
     }    
   }
 }
@@ -132,11 +129,10 @@ const collectSubtrees = (startNode, subtree, trait, currentTraitValue, subtreeSt
 /**
  * setSplitTreeYValues - works similarly to setYValues above,
  * but splits the tree by the given trait, grouping nodes with the
- * same trait value together
- * 
- * todo: is 0 guaranteed to be root node?
+ * same trait value together 
  */
 export const setSplitTreeYValues = (nodes, trait) => {
+  // todo: this could just be a dictionary with the traitvalue as the key
   const subtreeStack = [{subtreeNodes: [nodes[0]], traitValue: getTraitFromNode(nodes[0].n, trait)}];  
 
   // collect all the subtrees for a given trait, and group them together
@@ -152,8 +148,8 @@ export const setSplitTreeYValues = (nodes, trait) => {
     if (a.traitValue == b.traitValue)
       return 0;
 
-    let aDate = new Date(getTraitFromNode(a.subtreeNodes[0].n, "num_date"));
-    let bDate = new Date(getTraitFromNode(b.subtreeNodes[0].n, "num_date"));
+    let aDate = getTraitFromNode(a.subtreeNodes[0].n, "num_date");
+    let bDate = getTraitFromNode(b.subtreeNodes[0].n, "num_date");
     if (aDate < bDate) return -1;
     if (bDate > aDate) return 1;
     return 0;
